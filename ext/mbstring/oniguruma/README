@@ -1,7 +1,8 @@
-README  2004/02/25
+README  2005/02/04
 
-Oniguruma  ----   (C) K.Kosako <kosako@sofnec.co.jp>
+Oniguruma  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
 
+http://www.geocities.jp/kosako3/oniguruma/
 http://www.ruby-lang.org/cgi-bin/cvsweb.cgi/oniguruma/
 http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
@@ -11,45 +12,38 @@ for every regular expression object can be specified.
 
 Supported character encodings:
 
-  ASCII, UTF-8,
+  ASCII, UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE,
   EUC-JP, EUC-TW, EUC-KR, EUC-CN,
-  Shift_JIS, Big5, KOI8, KOI8-R,
+  Shift_JIS, Big5, KOI8-R, KOI8 (*),
   ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5,
   ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10,
   ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 
-
-There are two ways of using of it in this program.
-
-  * Built-in regular expression engine of Ruby
-  * C library (supported APIs: GNU regex, POSIX, Oniguruma native)
-
+* KOI8 is not included in library archive by default setup.
+  (need to edit Makefile if you want to use it.)
 ------------------------------------------------------------
 
 Install
 
-(A) Install into Ruby
-
-   See INSTALL-RUBY.
-
-   (character encodings:  ASCII, UTF-8, EUC-JP, Shift_JIS)
-
-
-(B) Install C library
-
- (B-1) Unix and Cygwin platform
+ Case 1: Unix and Cygwin platform
 
    1. ./configure
    2. make
    3. make install
 
-   (* uninstall:  make uninstall)
+     library file: libonig.a
 
-  * test (ASCII/EUC-JP)
-   4. make ctest
+   test (ASCII/EUC-JP)
+
+     make ctest
+
+   uninstall
+
+     make uninstall
 
 
- (B-2) Win32 platform (VC++)
+
+ Case 2: Win32 platform (VC++)
 
    1. copy win32\Makefile Makefile
    2. copy win32\config.h config.h
@@ -77,6 +71,16 @@ Regular Expressions
   See doc/RE (or doc/RE.ja for Japanese).
 
 
+Usage
+
+  Include oniguruma.h in your program. (native API)
+  See doc/API for native API.
+
+  If you want to use static link library(onig_s.lib) in Win32,
+  add option -DONIG_EXTERN=extern to C compiler.
+
+
+
 Sample Programs
 
   sample/simple.c    example of the minimum (native API)
@@ -86,14 +90,12 @@ Sample Programs
   sample/posix.c     POSIX API sample.
   sample/sql.c       example of the variable meta characters.
                      (SQL-like pattern matching)
+  sample/syntax.c    Perl and Java syntax test.
 
 
 Source Files
 
   oniguruma.h        Oniguruma API header file. (public)
-  oniggnu.h          GNU regex API header file. (public)
-  onigcmpt200.h      Oniguruma API backward compatibility header file. (public)
-                     (for 2.0.0 or more older version)
 
   regenc.h           character encodings framework header file.
   regint.h           internal definitions
@@ -101,17 +103,31 @@ Source Files
   regcomp.c          compiling and optimization functions
   regenc.c           character encodings framework.
   regerror.c         error message function
-  regex.c            source files wrapper for Ruby
+  regext.c           extended API functions. (deluxe version API)
   regexec.c          search and match functions
   regparse.c         parsing functions.
+  regsyntax.c        pattern syntax functions and built-in syntax definitions.
+  regtrav.c          capture history tree data traverse functions.
+  regversion.c       version info function.
+  st.h               hash table functions header file
+  st.c               hash table functions
+
+  oniggnu.h          GNU regex API header file. (public)
   reggnu.c           GNU regex API functions
 
   onigposix.h        POSIX API header file. (public)
   regposerr.c        POSIX error message function.
-  regposix.c         POSIX functions.
+  regposix.c         POSIX API functions.
 
   enc/mktable.c      character type table generator.
   enc/ascii.c        ASCII encoding.
+  enc/euc_jp.c       EUC-JP encoding.
+  enc/euc_tw.c       EUC-TW encoding.
+  enc/euc_kr.c       EUC-KR, EUC-CN encoding.
+  enc/sjis.c         Shift_JIS encoding.
+  enc/big5.c         Big5   encoding.
+  enc/koi8.c         KOI8   encoding.
+  enc/koi8_r.c       KOI8-R encoding.
   enc/iso8859_1.c    ISO-8859-1  encoding. (Latin-1)
   enc/iso8859_2.c    ISO-8859-2  encoding. (Latin-2)
   enc/iso8859_3.c    ISO-8859-3  encoding. (Latin-3)
@@ -128,18 +144,19 @@ Source Files
   enc/iso8859_15.c   ISO-8859-15 encoding. (Latin-9 or West European with Euro)
   enc/iso8859_16.c   ISO-8859-16 encoding.
                      (Latin-10 or South-Eastern European with Euro)
-  enc/utf8.c         UTF-8  encoding.
-  enc/euc_jp.c       EUC-JP encoding.
-  enc/euc_tw.c       EUC-TW encoding.
-  enc/euc_kr.c       EUC-KR, EUC-CN encoding.
-  enc/sjis.c         Shift_JIS encoding.
-  enc/koi8.c         KOI8   encoding.
-  enc/koi8_r.c       KOI8-R encoding.
-  enc/big5.c         Big5   encoding.
+  enc/utf8.c         UTF-8    encoding.
+  enc/utf16_be.c     UTF-16BE encoding.
+  enc/utf16_le.c     UTF-16LE encoding.
+  enc/utf32_be.c     UTF-32BE encoding.
+  enc/utf32_le.c     UTF-32LE encoding.
+  enc/unicode.c      Unicode information data.
+
+  win32/Makefile     Makefile for Win32 (VC++)
+  win32/config.h     config.h for Win32
 
 
 
-API differences with Japanized GNU regex(version 0.12) of Ruby
+API differences with Japanized GNU regex(version 0.12) of Ruby 1.8/1.6
 
    + re_compile_fastmap() is removed.
    + re_recompile_pattern() is added.
@@ -148,18 +165,17 @@ API differences with Japanized GNU regex(version 0.12) of Ruby
 
 ToDo
 
-  1 support 16-bit encodings. (UTF-16)
-  2 different encoding pattern with target.
-    (ex. ASCII/UTF-16, UTF-16 BE and UTF-16 LE)
-  3 add enc/name.c (onigenc_get_enc_by_name(name))
-
-  ? transmission stopper. (return ONIG_STOP from match_at())
-  ? implement syntax behavior ONIG_SYN_CONTEXT_INDEP_ANCHORS.
-  ? better acess to hash table (st.c).
-    non null-terminated key version st_lookup().
-  ? grep-like tool 'onigrep'.
-  ? return parse tree of regexp pattern to application.
- ?? /a{n}?/ should be interpreted as /(?:a{n})?/.
- ?? \h hexadecimal digit char ([0-9a-fA-F]), \H not \h.
+  ? ignore case in full code point range of Unicode.
+  ? Unicode Property.
+  ? ambig-flag Katakana <-> Hiragana.
+  ? add ONIG_OPTION_NOTBOS/NOTEOS. (\A, \z, \Z)
+  ? add ONIG_SYNTAX_ASIS.
+ ?? \X (== \PM\pM*)
+ ?? implement syntax behavior ONIG_SYN_CONTEXT_INDEP_ANCHORS.
+ ?? variable line separator.
+ ?? transmission stopper. (return ONIG_STOP from match_at())
 
 and I'm thankful to Akinori MUSHA.
+
+
+Mail Address: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>

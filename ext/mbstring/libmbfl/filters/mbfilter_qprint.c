@@ -155,11 +155,30 @@ int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
  */
 int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 {
-	int n;
+	int n, m;
+
+	static int hex2code_map[] = {
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
+		-1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
 
 	switch (filter->status) {
 	case 1:
-		if ((c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x46)) {	/* 0 - 9 or A - F */
+		if (hex2code_map[c & 0xff] >= 0) {
 			filter->cache = c;
 			filter->status = 2;
 		} else if (c == 0x0d) {	/* soft line feed */
@@ -173,21 +192,13 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 		}
 		break;
 	case 2:
-		n = filter->cache;
-		if (n >= 0x30 && n <= 0x39) {		/* '0' - '9' */
-			n -= 48;		/* 48 = '0' */
-		} else {
-			n -= 55;		/* 55 = 'A' - 10 */
-		}
-		n <<= 4;
-		if (c >= 0x30 && c <= 0x39) {		/* '0' - '9' */
-			n += (c - 48);
-		} else if (c >= 0x41 && c <= 0x46) {	/* 'A' - 'F' */
-			n += (c - 55);
-		} else {
+		m = hex2code_map[c & 0xff];
+		if (m < 0) {
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 			CK((*filter->output_function)(filter->cache, filter->data));
 			n = c;
+		} else {
+			n = hex2code_map[filter->cache] << 4 | m;
 		}
 		CK((*filter->output_function)(n, filter->data));
 		filter->status = 0;

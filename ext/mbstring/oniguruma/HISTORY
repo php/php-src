@@ -1,18 +1,479 @@
 History
 
+2005/02/19: Version 3.7.0
+
+2005/02/19: [test] success in ruby 1.9.0 (2005-02-19) [i386-cygwin].
+2005/02/19: [new]  (thanks Minero Aoki)
+                   add onig_region_set().
+2005/02/19: [API]  change onig_region_init() to extern.
+2005/02/19: [dist] remove reggnu.c from MANIFEST-RUBY.
+                   remove reggnu.c from make 19.
+2005/02/19: [dist] update doc/API and doc/API.ja.
+2005/02/19: [test] success in ruby 1.9.0 (2005-02-19) [i386-cygwin].
+2005/02/19: [impl] (thanks Alexey Zakhlestin)
+                   change UChar* to const UChar* in oniguruma.h,
+                   regenc.h and regparse.h.
+2005/02/13: [impl] change UChar* to const UChar* in oniguruma.h and
+                   onigposix.h and st.h.
+2005/02/12: [test] success in ruby 1.9.0 (2005-02-11) [i386-cygwin].
+2005/02/12: [bug]  (thanks nobu) [ruby-dev:25676]
+                   type_cclass_hash() fix overrun.
+2005/02/09: [test] success in ruby 1.9.0 (2005-02-09) [i686-linux].
+2005/02/09: [spec] add RE_OPTION_FIND_NOT_EMPTY etc.. to oniggnu.h.
+2005/02/09: [dist] remove hash.c.patch.
+2005/02/07: [impl] remove re_mbctab, mbctab_ascii etc...
+                   (USE_COMPATIBILITY_FOR_RUBY_EXTENSION_LIBRARY)
+
+2005/02/04: Version 3.6.0
+
+2005/02/04: [test] success in ruby 1.9.0 (2005-02-04) [i686-linux].
+2005/02/01: [bug]  add key_free() call to st_free_table().
+2005/02/01: [new]  add onig_get_default_ambig_flag() and
+                   onig_set_default_ambig_flag().
+2005/02/01: [dist] update MANIFEST-RUBY.
+2005/01/31: [test] success in ruby 1.9.0 (2005-01-29) [i686-linux].
+2005/01/31: [spec] remove ONIGENC_AMBIGUOUS_MATCH_COMPOUND
+                   from ONIGENC_AMBIGUOUS_MATCH_DEFAULT.
+2005/01/31: [dist] update Makefile.in (make 19).
+2005/01/29: [memo] (thanks Kazuo Saito)
+                   Oniguruma 3.5.4 was merged to Ruby 1.9.0.
+2005/01/28: [impl] (thanks UK-taniyama)
+                   add extern "C" { } directive to oniguruma.h, oniggnu.h
+                   and onigposix.h for C++.
+2005/01/25: [impl] remove nested function call for xxx_code_to_mbclen().
+                   (euc_kr.c, euc_tw.c, big5.c)
+
+2005/01/19: Version 3.5.4
+
+2005/01/19: [test] success in ruby 1.9.0 (2005-01-05) [i686-linux].
+2005/01/19: [bug]  (thanks Isao Sonobe)
+                   callback function argument name_end of onig_foreach_name()
+                   was wrong.
+                   name key of name table should be null terminated for 
+                   character encoding length.
+                   add strdup_with_null(), rename onig_strdup() to k_strdup().
+                   use e->name_len in i_names().
+2005/01/17: [impl] (thanks UK-taniyama)
+                   add HAVE_SYS_TYPES_H to config.h.in.
+
+2005/01/13: Version 3.5.3
+
+2005/01/13: [test] success in ruby 1.9.0 (2005-01-05) [i686-linux].
+2005/01/13: [bug]  ignore case match bug.
+                   ex. /s+/iu.match("SSSSS") ==> [4..5]
+                   fix OP_EXACT1_IC, OP_EXACTN_IC process.
+2005/01/13: [bug]  (thanks Isao Sonobe)
+                   ignore case match bug.
+                   ex. /is/iu.match("ss") fail.
+                   fix str_lower_case_match() etc.
+
+2005/01/05: Version 3.5.2
+
+2005/01/05: [test] success in ruby 1.9.0 (2005-01-05) [i686-linux].
+2005/01/05: [test] success in ruby 1.9.0 (2004-12-16) [i686-linux].
+2005/01/05: [bug]  (thanks Isao Sonobe)
+                   ignore case match bug.
+                   ex. /s+/iu.match("sssss") ==> [4..5]
+                   fix OP_EXACT1_IC, OP_EXACTN_IC process.
+2005/01/05: [bug]  (thanks Isao Sonobe)
+                   group name table should be renumbered.
+                   add onig_renumber_name_table().
+2004/12/24: [dist] remove file onigcmpt200.h.
+
+2004/12/17: Version 3.5.1
+
+2004/12/17: [dist] add INSTALL-RUBY to archive.
+2004/12/16: [test] success in ruby 1.9.0 (2004-12-16) [i686-linux].
+2004/12/16: [dist] update hash.c.patch.
+2004/12/15: [bug]  (thanks matz)
+                   char > 127 should be casted to unsigned char. (utf8.c)
+2004/12/13: [impl] add HAVE_PROTOTYPES and HAVE_STDARG_PROTOTYPES definition
+                   to oniguruma.h in the case __cplusplus.
+2004/12/06: [dist] update doc/RE and doc/RE.ja.
+2004/12/03: [impl] (thanks nobu)
+                   st.h fix prototype for C++.
+
+2004/12/03: Version 3.5.0
+
+2004/12/02: [test] success in ruby 1.9.0 (2004-12-02) [i686-linux].
+2004/12/01: [test] success in ruby 1.9.0 (2004-12-01) [i386-mswin32].
+2004/12/01: [dist] add make targets 19 and 19up to win32/Makefile.
+2004/12/01: [test] success in ruby 1.9.0 (2004-12-01) [i386-cygwin].
+2004/12/01: [test] success in ruby 1.9.0 (2004-12-01) [i686-linux].
+2004/12/01: [impl] double cast for escape warning in Cygwin.
+                  (HashDataType* )((void* )(&e)) in regparse.c
+2004/12/01: [test] success in ruby 1.9.0 (2004-11-30) [i686-linux].
+2004/12/01: [tune] change implementation of clear_opt_map_info().
+                   (which was 10-16% cost in gprof result for my test program)
+2004/12/01: [dist] remove regex.c from distribution files.
+2004/11/30: [memo] remove targets 16 and 18 from Makefile.in.
+2004/11/30: [test] success in ruby 1.9.0 (2004-11-30) [i686-linux].
+2004/11/30: [inst] add "cp -p st.[ch] st.[ch].ruby_orig" to "make 19".
+2004/11/30: [tune] map_position_value() return 20 if code is 0
+                   and minimum enclen > 1.
+2004/11/30: [test] success in ruby 1.9.0 (2004-11-29) [i686-linux].
+2004/11/30: [impl] minor changes for multi-thread in regexec.c and regcomp.c.
+2004/11/30: [impl] change THREAD_PASS_LIMIT_COUNT value from 10 to 8.
+2004/11/30: [impl] add THREAD_ATOMIC_XXX to FreeNodeList access in regparse.c
+2004/11/29: [impl] add USE_MULTI_THREAD_SYSTEM.
+2004/11/29: [memo] add hash.c.patch to CVS.
+2004/11/29: [dist] change mail address to 'sndgk393 AT ...'
+2004/11/29: [dist] add -s option (silent mode) to test.rb.
+2004/11/29: [tune] change THRESHOLD_RANGE_NUM_FOR_SHARE_CCLASS value
+                   from 20 to 8.
+2004/11/29: [inst] add make target "19up".
+2004/11/29: [dist] change Oniguruma Home Page URL.
+2004/11/29: [impl] remove onig_is_in_code_range_array().
+2004/11/29: [dist] fix doc/RE and RE.ja (character types).
+2004/11/26: [dist] fix win32/Makefile.
+2004/11/26: [dist] fix doc/RE and RE.ja (multibyte character types).
+2004/11/26: [impl] add onig_free_shared_cclass_table().
+2004/11/26: [impl] move definition USE_UNICODE_FULL_RANGE_CTYPE to regenc.h.
+2004/11/26: [impl] add opcode OP_CCLASS_NODE.
+2004/11/26: [impl] move definition of CClassNode to regint.h.
+2004/11/26: [impl] add type PointerType in regint.h.
+2004/11/25: [impl] remove ONIGENC_CTYPE_MOD_NOT.
+2004/11/25: [impl] rename onig_node_new_cclass_by_codepoint_range to
+                   node_new_cclass_by_codepoint_range.
+2004/11/25: [impl] remove get_type_cc_node method from OnigEncodingType.
+2004/11/25: [impl] move implementation of shared char-class from enc/*.c
+                   to regparse.c.
+2004/11/25: [dist] add hash.c.patch for Ruby 1.9 hash.c change.
+2004/11/22: [impl] change utf8_get_type_node().
+2004/11/22: [impl] add ONIGENC_CTYPE_MOD_NOT.
+2004/11/22: [bug]  (thanks MIYAMUKO Katsuyuki)
+                   ruby make test fail in HP-UX B.11.23 ia64.
+                   should use tok->u.code instead of tok->u.c in
+                   the case of TK_CODE_POINT.
+2004/11/19: [bug]  (thanks Yoshida Masato)
+                   invalid multibyte code causes segmentation fault.
+                   ex.  /[\xFF-\xFF]/u
+2004/11/19: [bug]  (thanks Yoshida Masato)
+                   illegal check in char-class range in UTF-8.
+                   ex.  s = "[\xC2\xA0-\xC3\xBE]"
+                        p(Regexp.new(s, nil, "u") =~ "\xC3\xBE")
+2004/11/18: [impl] add onig_node_new_cclass_by_codepoint_range().
+2004/11/18: [impl] remove OnigCodePointRange type. (use OnigCodePoint[].)
+2004/11/17: [bug]  (thanks nobu)
+                   abort in "a".gsub(/a\Z/, "")
+                   fix ONIGENC_STEP_BACK() argument in onig_search().
+2004/11/16: [impl] add key2 member to st_table_entry in st.[ch].
+                   change API of st for non-null terminated string key.
+2004/11/16: [impl] add get_type_cc_node method to OnigEncodingType.
+2004/11/15: [impl] add st.h and st.c from Ruby 1.9.
+                   use st-hash always.
+2004/11/12: [impl] change menber 'not' of CClassNode to 'flags'.
+                   add flags FLAG_CCLASS_NOT and FLAG_CCLASS_SHARE.
+2004/11/12: [impl] add onig_is_in_code_range_array() to enc/unicode.c.
+2004/11/12: [impl] fix CRWord in enc/unicode.c and MBWord in enc/utf8.c.
+2004/11/11: [bug]  fix enc/utf8.c.
+                   size 0 array initializer was compile error in VC++.
+2004/11/09: [inst] (thanks Hiroki YAGITA)
+                   change installed file mode to 0644.
+2004/11/09: [bug]  (thanks UK-taniyama)
+                   wrong definitions GET_RELADDR_INC(), GET_ABSADDR_INC()
+                   etc... (NOT PLATFORM_UNALIGNED_WORD_ACCESS)
+2004/11/09: [impl] type cast in regexec() for remove compile time warning.
+                   (WIN32, regposix.c)
+2004/11/08: [spec] fix Unicode character types.
+                   0x00ad (soft hyphen) should be [:cntrl:] and [:space:] type.
+                   [0x0009..0x000d], 0x0085 should be [:print:] type.
+                   0x00ad should not be [:punct:] type.
+2004/11/08: [inst] fix Makefile.in. (for make ctest/ptest/testcu)
+2004/11/06: [impl] (thanks Kazuo Saito)
+                   too many alternatives pattern causes core dump.
+                   change implementation of onig_node_free().
+2004/11/05: [spec] rename ONIGERR_END_PATTERN_AT_BACKSLASH to
+                   ONIGERR_END_PATTERN_AT_ESCAPE.
+2004/11/05: [impl] (thanks matz)
+                   escape compile time warnings for x86-64 Linux.
+                   StackIndex type int -> long
+2004/11/05: [memo] (thanks Kazuo Saito)
+                   Oniguruma 3.4.0 was merged to Ruby 1.9.0.
+
+2004/10/30: Version 3.4.0
+
+2004/10/30: [test] success in ruby 1.9.0 (2004-09-24) [i686-linux].
+2004/10/30: [new]  add hexadecimal digit char type. (\h, \H)
+                   syntax: ONIG_SYN_OP2_ESC_H_XDIGIT
+2004/10/30: [bug]  (thanks Guy Decoux)
+                   reluctant infinite repeat bug.
+                   ex. /^[a-z]{2,}?$/.match("aaa") fail.
+                   fix OP_REPEAT_INC_NG process in match_at().
+
+2004/10/18: Version 3.3.1
+
+2004/10/18: [test] success in ruby 1.9.0 (2004-09-24) [i686-linux].
+2004/10/18: [impl] (thanks Imai Yasumasa)
+                   enclose #include <sys/types.h> by #ifndef __BORLANDC__.
+2004/10/18: [bug]  (thanks Imai Yasumasa)
+                   memory acess violation in select_opt_exact_info().
+2004/09/25: [dist] fix doc/API and doc/API.ja.
+2004/09/25: [bug]  fix OP_SEMI_END_BUF process in match_at() for
+                   the case USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE
+                   is not defined.
+
+2004/09/17: Version 3.3.0
+
+2004/09/17: [dist] add COPYING to program source files.
+2004/09/17: [test] success in ruby 1.9.0 (2004-07-23) [i686-linux].
+2004/09/17: [bug]  (thanks Isao Sonobe)
+                   memory access violations in xxx_mbc_enc_len(),
+                   and xxx_mbc_to_normalize() and
+                   xxx_left_adjust_char_head().
+                   add string range check in match_at() and onig_search().
+2004/09/08: [dist] change mail address format.(kosako AT sofnec ...)
+
+2004/09/04: Version 3.2.9
+
+2004/09/04: [test] success in ruby 1.9.0 (2004-07-23) [i686-linux].
+2004/09/04: [bug]  (thanks Bob Kerstetter and Richard Koch)
+                   search fail in ignore case mode.
+                   fix str_lower_case_match().
+2004/09/04: [inst] (thanks Isao Sonobe)
+                   clear sample directory in 'make clean'.
+2004/09/04: [bug]  fix ONIGENC_AMBIGUOUS_MATCH_COMPOUND/ASCII/NONASCII
+                   meanings in XXXXX_mbc_to_normalize() and
+                   XXXXX_is_mbc_ambiguous().
+2004/08/28: [bug]  fix ONIGENC_AMBIGUOUS_MATCH_COMPOUND/ASCII/NONASCII
+                   meanings in iso_8859_XX_mbc_to_normalize() and
+                   iso_8859_XX_is_mbc_ambiguous().
+
+2004/08/24: Version 3.2.8
+
+2004/08/24: [test] success in ruby 1.9.0 (2004-07-23) [i686-linux].
+2004/08/24: [spec] add ONIG_SYN_FIXED_INTERVAL_IS_GREEDY_ONLY.
+                   /a{n}?/ == /(?:a{n})?/
+2004/08/24: [dist] fix doc/RE and doc/RE.ja.
+2004/08/24: [bug]  (thanks starfish)
+                   memory leak in set_optimize_exact_info().
+
+2004/08/21: Version 3.2.7
+
+2004/08/21: [test] success in ruby 1.8.2 (2004-07-28) [i686-linux].
+                   (1.8.2 preview2)
+2004/08/21: [test] success in ruby 1.9.0 (2004-07-23) [i686-linux].
+2004/08/21: [bug]  (thanks Isao Sonobe) (thanks kage)
+                   memory access violation in bm_search_notrev().
+                   (forgotten to merge from 2.X)
+
+2004/07/24: Version 3.2.6
+
+2004/07/24: [test] success in ruby 1.9.0 (2004-07-23) [i686-linux].
+2004/07/24: [test] success in ruby 1.8.2 (2004-07-16) [i686-linux].
+2004/07/24: [bug]  fix warnings for regexec.c. (gcc 2.91.66)
+2004/07/24: [memo] change version control system from Subversion
+                   to CVS 1.11.17.
+2004/07/20: [bug]  (thanks Isao Sonobe)
+                   illegal result in negative character class in ignore case
+                   mode. fix pair-ambig-codes process in parse_exp().
+                   ex. /[^a]/i.match("A")
+2004/07/20: [bug]  (thanks Isao Sonobe)
+                   undefined bytecode error happens in UTF-16BE etc..
+                   compile_length_cclass_node() was not consistent with
+                   compile_cclass_node().
+
+2004/07/01: Version 3.2.5
+
+2004/07/01: [test] success in ruby 1.8.2 (2004-06-23) [i686-linux].
+2004/07/01: [new]  add onig_get_syntax_{op,op2,behavior,options}.
+2004/07/01: [bug]  (thanks Isao Sonobe)
+                   invalid result in onig_capture_tree_traverse().
+                   fix make_capture_history_tree().
+
+2004/06/29: Version 3.2.4
+
+2004/06/29: [test] success in ruby 1.8.2 (2004-06-23) [i686-linux].
+2004/06/29: [new]  (thanks Isao Sonobe)
+                   add onig_number_of_captures().
+
+2004/06/25: Version 3.2.3
+
+2004/06/25: [test] success in ruby 1.8.2 (2004-06-23) [i686-linux].
+2004/06/25: [bug]  (thanks Isao Sonobe)
+                   invalid result in onig_capture_tree_traverse().
+                   fix make_capture_history_tree().
+
+2004/06/24: Version 3.2.2
+
+2004/06/24: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/06/24: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2004/06/24: [test] success in ruby 1.8.2 (2004-06-23) [i686-linux].
+2004/06/24: [new]  (thanks Isao Sonobe)
+                   add onig_number_of_capture_histories().
+2004/06/24: [bug]  (thanks Isao Sonobe)
+                   invalid char position match in UTF-16 and UTF-32.
+                   add onigenc_always_false_is_allowed_reverse_match().
+
+2004/06/17: Version 3.2.1
+
+2004/06/17: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/06/17: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2004/06/17: [test] success in ruby 1.8.2 (2004-05-18) [i686-linux].
+2004/06/17: [impl] should not use OP_REPEAT for (...)? even if target size
+                   is long.
+2004/06/17: [bug]  (thanks nobu) [ruby-dev:23703]
+                   should use STACK_AT() instead of stkp in OP_REPEAT_INC.
+                   add IN_VAR_REPEAT flag in setup_tree().
+2004/06/16: [impl] change select_opt_exact_info() to use ByteValTable[].
+2004/06/16: [impl] change map_position_value() table values.
+2004/06/14: [impl] (thanks John Carter)
+                   RelAddrType, AbsAddrType and LengthType change
+                   from short int to int type for the very long string match.
+2004/06/14: [bug]  (thanks Greg A. Woods)
+                   fix nmatch argument of regexec() is smaller than 
+                   reg->num_mem + 1 case. (POSIX API)
+2004/06/14: [spec] (thanks Greg A. Woods)
+                   set pmatch to NULL if nmatch is 0 in regexec(). (POSIX API)
+
+2004/06/10: Version 3.2.0
+
+2004/06/10: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/06/10: [test] success in ruby 1.9.0 (2004-05-27) [i386-mswin32].
+2004/06/10: [test] success in ruby 1.8.2 (2004-05-18) [i686-linux].
+2004/06/10: [dist] add README.ja.
+2004/06/10: [new]  add onig_copy_encoding().
+2004/06/10: [API]  add encoding argument to onig_set_meta_char().
+                   add meta_char_table member to OnigEncodingType.
+2004/06/08: [dist] add doc/API.ja.
+2004/06/07: [API]  add num_of_elements member to OnigCompileInfo.
+2004/05/29: [memo] (thanks Kazuo Saito)
+                   Oniguruma 3.1.0 was merged to Ruby 1.9.0.
+2004/05/26: [impl] rename NST_SIMPLE_REPEAT to NST_STOP_BT_SIMPLE_REPEAT.
+2004/05/26: [impl] doesn't need to check that target's simple repeat-ness
+                   for EFFECT_MEMORY type node in setup_tree().
+
+2004/05/25: Version 3.1.0
+
+2004/05/25: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2004/05/25: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/05/25: [test] success in ruby 1.9.0 (2004-05-23) [i686-linux].
+2004/05/25: [test] success in ruby 1.8.2 (2004-05-18) [i686-linux].
+2004/05/25: [bug]  (thanks Masahiro Sakai) [ruby-dev:23560]
+                   ruby -ruri -ve 'URI::ABS_URI =~
+                                    "http://example.org/Andr\xC3\xA9"'
+                   nested STK_REPEAT type stack can't backtrack repeat_stk[].
+                   add OP_REPEAT_INC_SG and OP_REPEAT_INC_NG_SG.
+2004/05/25: [new]  support UTF-32LE. (ONIG_ENCODING_UTF32_LE)
+2004/05/25: [new]  support UTF-32BE. (ONIG_ENCODING_UTF32_BE)
+2004/05/24: [impl] divide enc/utf16.c to utf16_be.c and utf16_le.c.
+2004/05/24: [impl] add enc/unicode.c.
+2004/05/24: [API]  change calling sequences of onig_new_deluxe() and
+                   onig_recompile_deluxe().
+                   define OnigCompileInfo type.
+2004/05/21: [impl] perform ensure process for rb_trap_exec() in match_at().
+                   add onig_exec_trap() and CHECK_INTERRUPT_IN_MATCH_AT.
+2004/05/21: [impl] add regex status check to onig_match().
+2004/05/21: [new]  add onig_get_capture_tree() and
+                   onig_capture_tree_traverse().
+2004/05/20: [spec] (thanks Isao Sonobe)
+                   capture history return capture data tree.
+                   (see sample/listcap.c)
+2004/05/19: [bug]  (thanks Simon Strandgaard)
+                   Control-C does not work in matching process on Ruby.
+                   add calling of CHECK_INTERRUPT into match_at().
+                   ex. /<(?:[^">]+|"[^"]*")+>/.match('<META http-equiv= \
+                       "Content-Type content="text/html; charset=iso-8859-1">')
+2004/05/19: [bug]  (thanks Simon Strandgaard)
+                   define virtual codepoint values for invalid encoding
+                   byte 0xfe and 0xff in UTF-8.
+                   ex. /\w+/u.match("%a\xffb\xfec%") ==> "a"
+2004/05/19: [spec] (thanks Simon Strandgaard)
+                   too big backref number should be treated as a sequence of
+                   an octal char and number digits.
+                   ex. /b\3777\c/.match("b\3777\c")
+2004/05/17: [spec] rename encoding names "UTF-16 BE" and "UTF-16 LE"
+                   to "UTF-16BE" and "UTF-16LE".
+2004/05/17: [impl] move ismbchar() and mbclen() from oniguruma.h to oniggnu.h.
+2004/05/17: [impl] rename onigenc_single_byte_is_allowed_reverse_match() to
+                   onigenc_always_true_is_allowed_reverse_match().
+
+2004/05/14: Version 3.0.0
+
+2004/05/14: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/05/14: [test] success in ruby 1.9.0 (2004-05-14) [i686-linux].
+2004/05/14: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+                   (* need to edit parse.y:
+                       register int c; ---> int c; in yylex())
+2004/05/14: [impl] add regext.c.
+2004/05/14: [spec] KOI8 is not included in library archive by default setup.
+2004/05/14: [impl] implementation changes are completed for all encoding files.
+2004/05/12: [impl] add divide_ambig_string_node().
+                   ambiguous string is divided and normalized before
+                   optimization and compilation process.
+2004/05/11: [dist] remove INSTALL-RUBY from distribution.
+2004/04/28: [memo] (thanks Kazuo Saito)
+                   Oniguruma 2.2.8 was merged to Ruby 1.9.0.
+2004/04/26: [spec] change value DEFAULT_MATCH_STACK_LIMIT_SIZE = 0 : unlimited
+2004/04/26: [new]  add onig_get_match_stack_limit_size() and
+                   onig_set_match_stack_limit_size().
+2004/04/26: [bug]  add error check to re.c.181.patch and re.c.168.patch.
+2004/04/23: [impl] remove ctype_support_level from OnigEncodingType.
+2004/04/22: [spec] allow the range from single byte char to multibyte char in
+                   character class for implementation reason.
+                   ex. /[a-\xbb\xcc]/ in EUC-JP encoding.
+2004/04/21: [impl] remove max_enc_len_by_first_byte() from OnigEncodingType.
+2004/04/20: [new]  add onig_copyright().
+2004/04/20: [impl] add regversion.c.
+2004/04/15: [new]  add onig_get_ambig_flag().
+2004/04/14: [bug]  (thanks Isao Sonobe)
+                   undefined bytecode error happens if ONIG_OPTION_FIND_LONGEST
+                   is setted.
+                   should finish matching process if find-condition
+                   is fail at OP_END in match_at().
+2004/04/12: [impl] add ambig_flag to regex_t.
+2004/04/09: [impl] move onig_set_meta_char() to regsyntax.c.
+2004/04/09: [bug]  (thanks HIROSE Masaaki) fix onig_version().
+2004/04/08: [impl] add regsyntax.c.
+2004/04/07: [new]  support UTF-16 LE. (ONIG_ENCODING_UTF16_LE)
+2004/04/05: [impl] add ONIGENC_CTYPE_NEWLINE.
+2004/04/05: [memo] (thanks Kazuo Saito)
+                   Oniguruma 2.2.6 was merged to Ruby 1.9.0.
+2004/04/02: [memo] Version 2.2.6 was released.
+2004/03/26: [new]  support UTF-16 BE. (ONIG_ENCODING_UTF16_BE)
+2004/03/25: [spec] support non 8-bit encodings.
+2004/03/16: [memo] 2.X branch for 8-bit encodings only.
+
+2004/03/16: Version 2.2.5
+
+2004/03/16: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2004/03/16: [test] success in ruby 1.9.0 (2004-02-24) [i686-linux].
+2004/03/16: [impl] add property name to error message of
+                   ONIGERR_INVALID_CHAR_PROPERTY_NAME.
+2004/03/16: [spec] allow prefix 'Is' for \p{...} in ONIG_SYNTAX_PERL.
+                   add syntax op. ONIG_SYN_OP2_CHAR_PROPERTY_PREFIX_IS.
+2004/03/15: [dist] add sample/syntax.c.
+2004/03/15: [spec] support NOT op. in char property. \p{^...}, \P{^...}.
+                   add syntax op. ONIG_SYN_OP2_ESC_P_BRACE_CIRCUMFLEX_NOT.
+2004/03/15: [spec] rename ONIG_SYN_OP2_ESC_P_CHAR_PROPERTY to
+                   ONIG_SYN_OP2_ESC_P_BRACE_CHAR_PROPERTY.
+2004/03/10: [impl] move ONIGERR_XXX from regenc.h to oniguruma.h,
+                   rename ONIGERR_XXX to ONIGENCERR_XXX in regenc.h.
+2004/03/08: [impl] (thanks eban)
+                   replace defined(__CYGWIN__) to defined(__GNUC__).
+2004/03/08: [bug]  (thanks eban) [ruby-dev:23172]
+                   need to separate initialization for bcc32.
+2004/03/06: [memo] (thanks Kazuo Saito)
+                   Oniguruma 2.2.4 was merged to Ruby 1.9.0.
+2004/03/05: [API]  change second argument type of onig_set_meta_char()
+                   from unsigned int to OnigCodePoint.
+2004/03/05: [dist] (thanks Kazuo Saito)
+                   add MANIFEST-RUBY.
+
 2004/03/04: Version 2.2.4
 
 2004/03/04: [impl] (thanks Moriyoshi Koizumi)
-                   fix many warning in Win32 VC++ with /W3 option.
+                   fix many warnings in Win32 VC++ with /W3 option.
 
 2004/03/02: Version 2.2.3
 
 2004/03/02: [bug]  (thanks Isao Sonobe)
                    return invalid capture region value if capture history
                    is used. (OP_MEMORY_END_PUSH_REC bug)
-                   ex. /\\g<p>(?@<p>\\(\\g<s>\\)){0}(?<s>(?:\\g<p>)*|){0}/
+                   ex. /\g<p>(?@<p>\(\g<s>\)){0}(?<s>(?:\g<p>)*|){0}/
                        .match("((())())")
-2004/03/02: [impl] add :nodoc: to onig_stat_print() for RDoc.
+2004/03/02: [impl] (thanks Kazuo Saito)
+                   add :nodoc: to onig_stat_print() for RDoc.
 2004/03/02: [impl] don't use ONIG_SOURCE_IS_WRAPPED.
 
 2004/02/27: Version 2.2.2
@@ -91,14 +552,14 @@ History
                    (0x80 - 0xff is not ASCII)
 2004/01/23: [new]  support ISO-8859-2. (ONIG_ENCODING_ISO_8859_2)
 2004/01/23: [dist] add enc/isotable.c.
-2004/01/22; [new]  support EUC-TW. (ONIG_ENCODING_EUC_TW)
+2004/01/22: [new]  support EUC-TW. (ONIG_ENCODING_EUC_TW)
 2004/01/22: [bug]  definition of GET_ALIGNMENT_PAD_SIZE() and
                    ALIGNMENT_RIGHT() was wrong.
                    type casting should be unsigned int, not int.
 2004/01/22: [impl] add defined(__x86_64) || defined(__x86_64__)
                    to unaligned word access condition. (AMD64 ?)
 2004/01/21: [dist] rename enc/eucjp.c to enc/euc_jp.c.
-2004/01/21; [new]  support EUC-KR. (ONIG_ENCODING_EUC_KR)
+2004/01/21: [new]  support EUC-KR. (ONIG_ENCODING_EUC_KR)
 2004/01/20: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
 2004/01/20: [dist] change Makefile.in.
 2004/01/20: [spec] add \p{...}, \P{...} in char class.
@@ -883,5 +1344,16 @@ History
 [test: test]
 [memo: memo]
 --
+<branch>
+svn mkdir http://localhost/repos/branches -m ""
+svn mkdir http://localhost/repos/branches/oniguruma -m ""
+svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/branches/oniguruma/2.X -m "branch for 8-bit encodings only"
+
 <create tag>
 svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/tags/oniguruma/X.X.X -m "onigdXXXXXXXX"
+
+<show all tags>
+cvs history -T
+
+<add tag>
+cvs rtag "VERSION_X_X_X" oniguruma

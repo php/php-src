@@ -199,6 +199,10 @@ SOURCE=.\filters\mbfilter_iso8859_15.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\filters\mbfilter_iso8859_16.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\filters\mbfilter_iso8859_2.c
 # End Source File
 # Begin Source File
@@ -500,6 +504,10 @@ SOURCE=.\filters\mbfilter_iso8859_15.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\filters\mbfilter_iso8859_16.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\filters\mbfilter_iso8859_2.h
 # End Source File
 # Begin Source File
@@ -705,6 +713,10 @@ SOURCE=.\filters\unicode_table_iso8859_14.h
 # Begin Source File
 
 SOURCE=.\filters\unicode_table_iso8859_15.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\filters\unicode_table_iso8859_16.h
 # End Source File
 # Begin Source File
 

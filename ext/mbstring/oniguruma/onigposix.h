@@ -1,12 +1,38 @@
-/**********************************************************************
-
-  onigposix.h - Oniguruma (regular expression library)
-
-  Copyright (C) 2003-2004  K.Kosako (kosako@sofnec.co.jp)
-
-**********************************************************************/
 #ifndef ONIGPOSIX_H
 #define ONIGPOSIX_H
+/**********************************************************************
+  onigposix.h - Oniguruma (regular expression library)
+**********************************************************************/
+/*-
+ * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+#include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* options */
 #define REG_ICASE          (1<<0)
@@ -38,12 +64,12 @@
 #define REG_EONIG_THREAD    17
 
 /* character encodings (for reg_set_encoding()) */
-#define REG_POSIX_ENCODING_ASCII   0
-#define REG_POSIX_ENCODING_EUC_JP  1
-#define REG_POSIX_ENCODING_SJIS    2
-#define REG_POSIX_ENCODING_UTF8    3
-
-#include <stdlib.h>
+#define REG_POSIX_ENCODING_ASCII     0
+#define REG_POSIX_ENCODING_EUC_JP    1
+#define REG_POSIX_ENCODING_SJIS      2
+#define REG_POSIX_ENCODING_UTF8      3
+#define REG_POSIX_ENCODING_UTF16_BE  4
+#define REG_POSIX_ENCODING_UTF16_LE  5
 
 
 typedef int regoff_t;
@@ -70,7 +96,7 @@ typedef struct {
 #endif
 
 #ifndef ONIG_EXTERN
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__GNUC__)
 #if defined(EXPORT) || defined(RUBY_EXPORT)
 #define ONIG_EXTERN   extern __declspec(dllexport)
 #else
@@ -103,7 +129,7 @@ ONIG_EXTERN OnigSyntaxType OnigSyntaxJava;
 ONIG_EXTERN OnigSyntaxType OnigSyntaxPerl;
 ONIG_EXTERN OnigSyntaxType OnigSyntaxRuby;
 
-/* predefined syntaxes (see regparse.c) */
+/* predefined syntaxes (see regsyntax.c) */
 #define ONIG_SYNTAX_POSIX_BASIC        (&OnigSyntaxPosixBasic)
 #define ONIG_SYNTAX_POSIX_EXTENDED     (&OnigSyntaxPosixExtended)
 #define ONIG_SYNTAX_EMACS              (&OnigSyntaxEmacs)
@@ -119,6 +145,9 @@ ONIG_EXTERN OnigSyntaxType*  OnigDefaultSyntax;
 
 ONIG_EXTERN int  onig_set_default_syntax P_((OnigSyntaxType* syntax));
 ONIG_EXTERN void onig_copy_syntax P_((OnigSyntaxType* to, OnigSyntaxType* from));
+ONIG_EXTERN const char* onig_version P_((void));
+ONIG_EXTERN const char* onig_copyright P_((void));
+
 #endif /* ONIGURUMA_H */
 
 
@@ -129,8 +158,12 @@ ONIG_EXTERN size_t regerror P_((int code, const regex_t* reg, char* buf, size_t 
 
 /* extended API */
 ONIG_EXTERN void reg_set_encoding P_((int enc));
-ONIG_EXTERN int  reg_name_to_group_numbers P_((regex_t* reg, unsigned char* name, unsigned char* name_end, int** nums));
-ONIG_EXTERN int  reg_foreach_name P_((regex_t* reg, int (*func)(unsigned char*,unsigned char*,int,int*,regex_t*,void*), void* arg));
+ONIG_EXTERN int  reg_name_to_group_numbers P_((regex_t* reg, const unsigned char* name, const unsigned char* name_end, int** nums));
+ONIG_EXTERN int  reg_foreach_name P_((regex_t* reg, int (*func)(const unsigned char*, const unsigned char*,int,int*,regex_t*,void*), void* arg));
 ONIG_EXTERN int  reg_number_of_names P_((regex_t* reg));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ONIGPOSIX_H */

@@ -1,12 +1,33 @@
-/**********************************************************************
-
-  regparse.h -  Oniguruma (regular expression library)
-
-  Copyright (C) 2003-2004  K.Kosako (kosako@sofnec.co.jp)
-
-**********************************************************************/
 #ifndef REGPARSE_H
 #define REGPARSE_H
+/**********************************************************************
+  regparse.h -  Oniguruma (regular expression library)
+**********************************************************************/
+/*-
+ * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
 
 #include "regint.h"
 
@@ -43,7 +64,8 @@
 #define CTYPE_NOT_WHITE_SPACE   (1<<3)
 #define CTYPE_DIGIT             (1<<4)
 #define CTYPE_NOT_DIGIT         (1<<5)
-
+#define CTYPE_XDIGIT            (1<<6)
+#define CTYPE_NOT_XDIGIT        (1<<7)
 
 #define ANCHOR_ANYCHAR_STAR_MASK (ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_PL)
 #define ANCHOR_END_BUF_MASK      (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF)
@@ -52,28 +74,26 @@
 #define EFFECT_OPTION           (1<<1)
 #define EFFECT_STOP_BACKTRACK   (1<<2)
 
-#define REPEAT_INFINITE         -1
-#define IS_REPEAT_INFINITE(n)   ((n) == REPEAT_INFINITE)
-
 #define NODE_STR_MARGIN         16
 #define NODE_STR_BUF_SIZE       24  /* sizeof(CClassNode) - sizeof(int)*4 */
 #define NODE_BACKREFS_SIZE       7
 
 #define NSTR_RAW                (1<<0) /* by backslashed number */
-#define NSTR_CASE_AMBIG         (1<<1)
+#define NSTR_AMBIG              (1<<1)
+#define NSTR_AMBIG_REDUCE       (1<<2)
 
-#define NSTRING_LEN(node)            ((node)->u.str.end - (node)->u.str.s)
-#define NSTRING_SET_RAW(node)        (node)->u.str.flag |= NSTR_RAW
-#define NSTRING_CLEAR_RAW(node)      (node)->u.str.flag &= ~NSTR_RAW
-#define NSTRING_SET_CASE_AMBIG(node) (node)->u.str.flag |= NSTR_CASE_AMBIG
-#define NSTRING_IS_RAW(node)         (((node)->u.str.flag & NSTR_RAW) != 0)
-#define NSTRING_IS_CASE_AMBIG(node)  \
-       (((node)->u.str.flag & NSTR_CASE_AMBIG) != 0)
+#define NSTRING_LEN(node)             ((node)->u.str.end - (node)->u.str.s)
+#define NSTRING_SET_RAW(node)          (node)->u.str.flag |= NSTR_RAW
+#define NSTRING_CLEAR_RAW(node)        (node)->u.str.flag &= ~NSTR_RAW
+#define NSTRING_SET_AMBIG(node)        (node)->u.str.flag |= NSTR_AMBIG
+#define NSTRING_SET_AMBIG_REDUCE(node) (node)->u.str.flag |= NSTR_AMBIG_REDUCE
+#define NSTRING_IS_RAW(node)          (((node)->u.str.flag & NSTR_RAW)   != 0)
+#define NSTRING_IS_AMBIG(node)        (((node)->u.str.flag & NSTR_AMBIG) != 0)
+#define NSTRING_IS_AMBIG_REDUCE(node) \
+  (((node)->u.str.flag & NSTR_AMBIG_REDUCE) != 0)
 
 #define BACKREFS_P(br) \
   (IS_NOT_NULL((br)->back_dynamic) ? (br)->back_dynamic : (br)->back_static);
-
-#define CCLASS_SET_NOT(cc)      (cc)->not = 1
 
 #define NQ_TARGET_ISNOT_EMPTY     0
 #define NQ_TARGET_IS_EMPTY        1
@@ -89,13 +109,17 @@ typedef struct {
   UChar  buf[NODE_STR_BUF_SIZE];
 } StrNode;
 
+/* move to regint.h */
+#if 0
 typedef struct {
-  int    not;
+  int    flags;
   BitSet bs;
   BBuf*  mbuf;     /* multi-byte info or NULL */
 } CClassNode;
+#endif
 
 typedef struct {
+  int state;
   struct _Node* target;
   int lower;
   int upper;
@@ -108,19 +132,19 @@ typedef struct {
 } QualifierNode;
 
 /* status bits */
-#define NST_MIN_FIXED        (1<<0)
-#define NST_MAX_FIXED        (1<<1)
-#define NST_CLEN_FIXED       (1<<2)
-#define NST_MARK1            (1<<3)
-#define NST_MARK2            (1<<4)
-#define NST_MEM_BACKREFED    (1<<5)
-#define NST_SIMPLE_REPEAT    (1<<6)  /* for stop backtrack optimization */
-
-#define NST_RECURSION        (1<<7)
-#define NST_CALLED           (1<<8)
-#define NST_ADDR_FIXED       (1<<9)
-#define NST_NAMED_GROUP      (1<<10)
-#define NST_NAME_REF         (1<<11)
+#define NST_MIN_FIXED             (1<<0)
+#define NST_MAX_FIXED             (1<<1)
+#define NST_CLEN_FIXED            (1<<2)
+#define NST_MARK1                 (1<<3)
+#define NST_MARK2                 (1<<4)
+#define NST_MEM_BACKREFED         (1<<5)
+#define NST_STOP_BT_SIMPLE_REPEAT (1<<6)
+#define NST_RECURSION             (1<<7)
+#define NST_CALLED                (1<<8)
+#define NST_ADDR_FIXED            (1<<9)
+#define NST_NAMED_GROUP           (1<<10)
+#define NST_NAME_REF              (1<<11)
+#define NST_IN_REPEAT             (1<<12) /* STK_REPEAT is nested in stack. */
 
 #define SET_EFFECT_STATUS(node,f)      (node)->u.effect.state |=  (f)
 #define CLEAR_EFFECT_STATUS(node,f)    (node)->u.effect.state &= ~(f)
@@ -133,13 +157,15 @@ typedef struct {
 #define IS_EFFECT_MIN_FIXED(en)        (((en)->state & NST_MIN_FIXED)     != 0)
 #define IS_EFFECT_MAX_FIXED(en)        (((en)->state & NST_MAX_FIXED)     != 0)
 #define IS_EFFECT_CLEN_FIXED(en)       (((en)->state & NST_CLEN_FIXED)    != 0)
-#define IS_EFFECT_SIMPLE_REPEAT(en)    (((en)->state & NST_SIMPLE_REPEAT) != 0)
+#define IS_EFFECT_STOP_BT_SIMPLE_REPEAT(en) \
+    (((en)->state & NST_STOP_BT_SIMPLE_REPEAT) != 0)
 #define IS_EFFECT_NAMED_GROUP(en)      (((en)->state & NST_NAMED_GROUP)   != 0)
 
 #define SET_CALL_RECURSION(node)       (node)->u.call.state |= NST_RECURSION
 #define IS_CALL_RECURSION(cn)          (((cn)->state & NST_RECURSION)  != 0)
 #define IS_CALL_NAME_REF(cn)           (((cn)->state & NST_NAME_REF)   != 0)
 #define IS_BACKREF_NAME_REF(bn)        (((bn)->state & NST_NAME_REF)   != 0)
+#define IS_QUALIFIER_IN_REPEAT(qn)     (((qn)->state & NST_IN_REPEAT)  != 0)
 
 typedef struct {
   int state;
@@ -224,9 +250,10 @@ typedef struct _Node {
     (senv)->mem_nodes_dynamic : (senv)->mem_nodes_static)
 
 typedef struct {
-  OnigOptionType   option;
-  OnigEncoding enc;
-  OnigSyntaxType*  syntax;
+  OnigOptionType  option;
+  OnigAmbigType   ambig_flag;
+  OnigEncoding    enc;
+  OnigSyntaxType* syntax;
   BitStatusType   capture_history;
   BitStatusType   bt_mem_start;
   BitStatusType   bt_mem_end;
@@ -254,19 +281,31 @@ typedef struct {
 #define IS_SYNTAX_OP2(syn, opm)   (((syn)->op2 & (opm)) != 0)
 #define IS_SYNTAX_BV(syn, bvm)    (((syn)->behavior & (bvm)) != 0)
 
+
+#ifdef USE_NAMED_GROUP
+typedef struct {
+  int new_val;
+} GroupNumRemap;
+
+extern int    onig_renumber_name_table P_((regex_t* reg, GroupNumRemap* map));
+#endif
+
 extern int    onig_is_code_in_cc P_((OnigEncoding enc, OnigCodePoint code, CClassNode* cc));
-extern int    onig_strncmp P_((UChar* s1, UChar* s2, int n));
+extern int    onig_strncmp P_((const UChar* s1, const UChar* s2, int n));
 extern void   onig_scan_env_set_error_string P_((ScanEnv* env, int ecode, UChar* arg, UChar* arg_end));
-extern int    onig_scan_unsigned_number P_((UChar** src, UChar* end, OnigEncoding enc));
+extern int    onig_scan_unsigned_number P_((UChar** src, const UChar* end, OnigEncoding enc));
 extern void   onig_reduce_nested_qualifier P_((Node* pnode, Node* cnode));
 extern void   onig_node_conv_to_str_node P_((Node* node, int raw));
-extern int    onig_node_str_cat P_((Node* node, UChar* s, UChar* end));
+extern int    onig_node_str_cat P_((Node* node, const UChar* s, const UChar* end));
 extern void   onig_node_free P_((Node* node));
 extern Node*  onig_node_new_effect P_((int type));
 extern Node*  onig_node_new_anchor P_((int type));
+extern Node*  onig_node_new_str P_((const UChar* s, const UChar* end));
+extern Node*  onig_node_new_list P_((Node* left, Node* right));
+extern void   onig_node_str_clear P_((Node* node));
 extern int    onig_free_node_list();
 extern int    onig_names_free P_((regex_t* reg));
-extern int    onig_parse_make_tree P_((Node** root, UChar* pattern, UChar* end, regex_t* reg, ScanEnv* env));
+extern int    onig_parse_make_tree P_((Node** root, const UChar* pattern, const UChar* end, regex_t* reg, ScanEnv* env));
 
 #ifdef ONIG_DEBUG
 #ifdef USE_NAMED_GROUP
