@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Enhanced WDDX functions to call __sleep() and __wakeup() when working on
+  objects. (Andrei)
+- Changed WDDX to serialize arrays as structs only if needed. (Thies)
+- Implemented max_execution_time under Win32 (Zeev)
 - Updated strtotime() to handle many more formats. It now has complete
   feature parity with GNU date command. (Andrei)
 - Add support for multiple arguments in unset(). (Faisal, Zend Engine)
