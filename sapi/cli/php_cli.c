@@ -77,6 +77,10 @@
 
 #include "php_getopt.h"
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #define PHP_MODE_STANDARD      1
 #define PHP_MODE_HIGHLIGHT     2
 #define PHP_MODE_INDENT        3
