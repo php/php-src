@@ -6,7 +6,7 @@
  *
  * SPL - Standard PHP Library
  *
- * (c) Marcus Boerger, 2003 - 2004
+ * (c) Marcus Boerger, 2003 - 2005
  */
 
 /** @mainpage SPL - Standard PHP Library
@@ -69,7 +69,7 @@
  *
  * 5) Counting
  *
- * - interface Counable allows to hook into the standard array function count().
+ * - interface Countable allows to hook into the standard array function count().
  *
  * 6) Exceptions
  *
@@ -98,7 +98,7 @@
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
  *
- * (c) Marcus Boerger, 2003 - 2004
+ * (c) Marcus Boerger, 2003 - 2005
  */
 
 /** @defgroup ZendEngine Zend engine classes
