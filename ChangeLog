@@ -1,3 +1,147 @@
+2002-04-10  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/iconv/iconv.c: fix warning
+
+    * main/user_streams.c
+      main/php_streams.h
+      main/streams.c
+      main/main.c
+      main/network.c
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/zlib/zlib.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/zlib/php_zlib.h
+      ext/standard/file.h
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/file.c
+      ext/standard/Makefile.frag
+      ext/standard/basic_functions.c
+      ext/bz2/php_bz2.h
+      ext/bz2/bz2.c: Implement stream context and status notification system.
+    Bump the BC for zlib notice to a warning
+
+2002-04-10  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: - Added __FUNCTION__ and __CLASS__ constants.
+
+2002-04-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-pear.xml: * add download command to description
+
+2002-04-10  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Remote.php: Implemented "pear download <pakage>"
+
+    * pear/PEAR/Packager.php: Do not show the "tag it!" message when verbose=0
+
+    * pear/PEAR/Frontend/CLI.php: Added single display()
+
+2002-04-10  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hwapi/CREDITS
+      ext/hwapi/config.m4
+      ext/hwapi/hwapi.cpp:
+    - extension to access a Hyperwave Server based on the official
+      Hypwerwave SDK. The function of this module is similar to the
+    	existing hyperwave extension but the api is very different.
+
+2002-04-10  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/snprintf.c
+      main/spprintf.c: fix a warnig and an error (found by Sebastioan)
+
+2002-04-10  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter_ja.c
+      ext/mbstring/mbfilter_ja.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/CREDITS
+      ext/mbstring/mbfilter.c: changed mbstring to make thread safe.
+
+2002-04-10  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Registry.php: Help for command "shell-test"
+
+    * pear/PEAR/Command/Package.php:
+    Added "pear package -n" (only output the created package file name)
+
+2002-04-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dba/dba_db2.c: ws changes
+
+    * ext/dba/dba_db2.c: Replace all memsets with variable initializations
+
+    Change flow of code in functions to end in the "positive" branch.
+
+    Changes verified using the original php3 dba tests.
+
+    * ext/dba/dba_db2.c: too quick. full speed back.
+
+    * ext/dba/dba_db2.c:
+    Please test patches which are merged into the release branch.
+
+    db2 has a standard UNIX API which in turn means that
+    it returns non-zero in error conditions.
+
+2002-04-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Fix Win32 build.
+
+2002-04-10  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Note about Apache2 support being experimental.
+
+    * sapi/apache2filter/config.m4: MFH
+
+    * sapi/apache2filter/config.m4:
+    Let people know this stuff is experimental.
+
+2002-04-10  Edin Kadribasic  <edink@proventum.net>
+
+    * pear/DB/pgsql.php:
+    Fixed postgres connect string generation when no host is specified.
+
+2002-04-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in: * add missing continuation
+
+    * pear/Makefile.in: * tabify instead of untabify :-P
+
+    * pear/Makefile.in: * remove pear-get if installed
+
+    * pear/Makefile.in: * keep installing the bundled files in 4.2 too
+
+2002-04-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/exif/exif.c: - Reverse patch
+
+    * ext/posix/posix.c: MFH
+
+    * ext/posix/posix.c: - Fix defines
+
+2002-04-10  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c
+      main/php_globals.h
+      php.ini-dist
+      php.ini-recommended: new ini setting log_errors_max_len
+
+    * ext/exif/exif.c: fix exif using vspprintf
+
+    * configure.in
+      main/php.h: make (v)spprintf available
+
+    * main/spprintf.c
+      main/spprintf.h: introducing spprintf and vspprintf
+
+    * main/snprintf.c
+      main/snprintf.h: -preface for new vpprintf
+
 2002-04-09  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Common.php:

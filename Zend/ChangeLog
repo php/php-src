@@ -1,3 +1,8 @@
+2002-04-10  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_language_scanner.l
+      zend_language_parser.y: MFZE1
+
 2002-04-07  Stanislav Malyshev  <stas@zend.com>
 
     * zend.h: make compatible with current PHP
