@@ -70,11 +70,11 @@ PHP_FUNCTION(xslt_backend_name);
 
 
 struct scheme_handlers {
-	zval *get_all;
-	zval *open;
-	zval *get;
-	zval *put;
-	zval *close;
+	zval *sh_get_all;
+	zval *sh_open;
+	zval *sh_get;
+	zval *sh_put;
+	zval *sh_close;
 };
 
 struct sax_handlers {

@@ -349,23 +349,23 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 		/* Open the URI and return the whole string */
 		if (strcasecmp(string_key, "get_all") == 0) {
-			assign_handle = &XSLT_SCHEME(handle).get_all;
+			assign_handle = &XSLT_SCHEME(handle).sh_get_all;
 		}
 		/* Open the URI and return a handle */
 		else if (strcasecmp(string_key, "open") == 0) {
-			assign_handle = &XSLT_SCHEME(handle).open;
+			assign_handle = &XSLT_SCHEME(handle).sh_open;
 		}
 		/* Retrieve data from the URI */
 		else if (strcasecmp(string_key, "get") == 0) {
-			assign_handle = &XSLT_SCHEME(handle).get;
+			assign_handle = &XSLT_SCHEME(handle).sh_get;
 		}
 		/* Save data to the URI */
 		else if (strcasecmp(string_key, "put") == 0) {
-			assign_handle = &XSLT_SCHEME(handle).put;
+			assign_handle = &XSLT_SCHEME(handle).sh_put;
 		}
 		/* Close the URI */
 		else if (strcasecmp(string_key, "close") == 0) {
-			assign_handle = &XSLT_SCHEME(handle).close;
+			assign_handle = &XSLT_SCHEME(handle).sh_close;
 		}
 		/* Invalid handler name */
 		else {
@@ -751,11 +751,11 @@ static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 
 	/* Free Scheme handlers */
-	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).get_all);
-	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).open);
-	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).get);
-	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).put);
-	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).close);
+	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).sh_get_all);
+	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).sh_open);
+	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).sh_get);
+	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).sh_put);
+	XSLT_FUNCH_FREE(XSLT_SCHEME(handle).sh_close);
 	/* Free SAX handlers */
 	XSLT_FUNCH_FREE(XSLT_SAX(handle).doc_start);
 	XSLT_FUNCH_FREE(XSLT_SAX(handle).element_start);
@@ -830,7 +830,7 @@ static int scheme_getall(void *user_data, SablotHandle proc, const char *scheme,
     
 	/* If the scheme handler get all function doesn't
 	   exist, exit out */
-	if (!XSLT_SCHEME(handle).get_all) {
+	if (!XSLT_SCHEME(handle).sh_get_all) {
 		return 0;
 	}
 
@@ -848,7 +848,7 @@ static int scheme_getall(void *user_data, SablotHandle proc, const char *scheme,
 	ZVAL_STRING(argv[1], (char *) scheme, 1);
 	ZVAL_STRING(argv[2], (char *) rest, 1);
 
-	xslt_call_function("scheme get all", XSLT_SCHEME(handle).get_all, handle->object, 
+	xslt_call_function("scheme get all", XSLT_SCHEME(handle).sh_get_all, handle->object, 
 	                   3, argv, &retval);
 
 	if (!retval) {
@@ -874,11 +874,11 @@ static int scheme_handler_is_registered(php_xslt *handle)
 {
 	/* If one of the functions is exists, then scheme
 	   handlers are registered */
-	if (XSLT_SCHEME(handle).get_all  ||
-	    XSLT_SCHEME(handle).open     ||
-	    XSLT_SCHEME(handle).get      ||
-	    XSLT_SCHEME(handle).put      ||
-	    XSLT_SCHEME(handle).close)
+	if (XSLT_SCHEME(handle).sh_get_all  ||
+	    XSLT_SCHEME(handle).sh_open     ||
+	    XSLT_SCHEME(handle).sh_get      ||
+	    XSLT_SCHEME(handle).sh_put      ||
+	    XSLT_SCHEME(handle).sh_close)
 	 	return 1;
 	/* otherwise, no cigar */
 	else
@@ -913,7 +913,7 @@ static int  scheme_open(void *user_data, SablotHandle proc, const char *scheme, 
     TSRMLS_FETCH();
     
 	/* If no open handler exists, let's exit */
-	if (!XSLT_SCHEME(handle).open) {
+	if (!XSLT_SCHEME(handle).sh_open) {
 		return 0;
 	}
 
@@ -932,7 +932,7 @@ static int  scheme_open(void *user_data, SablotHandle proc, const char *scheme, 
 	ZVAL_STRING(argv[2], (char *) rest, 1);
 	
 	/* Call the function */
-	xslt_call_function("scheme open", XSLT_SCHEME(handle).open, handle->object,
+	xslt_call_function("scheme open", XSLT_SCHEME(handle).sh_open, handle->object,
 	                   3, argv, &retval);
 
 	if (!retval) {
@@ -966,7 +966,7 @@ static int  scheme_get(void *user_data, SablotHandle proc, int fd, char *buffer,
     TSRMLS_FETCH();
     
 	/* If no get handler exists, let's exit */
-	if (!XSLT_SCHEME(handle).get) {
+	if (!XSLT_SCHEME(handle).sh_get) {
 		return 0;
 	}
 
@@ -986,7 +986,7 @@ static int  scheme_get(void *user_data, SablotHandle proc, int fd, char *buffer,
 	ZVAL_STRINGL(argv[2], buffer, *byte_count, 0);
 	
 	/* Call the function */
-	xslt_call_function("scheme get", XSLT_SCHEME(handle).get, handle->object,
+	xslt_call_function("scheme get", XSLT_SCHEME(handle).sh_get, handle->object,
 	                   3, argv, &retval);
 	
 	if (!retval) {
@@ -1015,7 +1015,7 @@ static int  scheme_put(void *user_data, SablotHandle proc, int fd, const char *b
     TSRMLS_FETCH();
     
 	/* If no put handler exists, let's exit */
-	if (!XSLT_SCHEME(handle).put) {
+	if (!XSLT_SCHEME(handle).sh_put) {
 		return 0;
 	}
 	
@@ -1035,7 +1035,7 @@ static int  scheme_put(void *user_data, SablotHandle proc, int fd, const char *b
 	ZVAL_STRINGL(argv[2], (char *) buffer, *byte_count, 1);
 	
 	/* Call the scheme put function already */
-	xslt_call_function("scheme put", XSLT_SCHEME(handle).put, handle->object,
+	xslt_call_function("scheme put", XSLT_SCHEME(handle).sh_put, handle->object,
 	                   3, argv, &retval);
 
 	if (!retval) {
@@ -1064,7 +1064,7 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
     TSRMLS_FETCH();
     
 	/* if no close handler exists, exit */
-	if (!XSLT_SCHEME(handle).close) {
+	if (!XSLT_SCHEME(handle).sh_close) {
 		return 0;
 	}
 
@@ -1081,7 +1081,7 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 	zend_list_addref(fd);
 	
 	/* Call the scheme handler close function */
-	xslt_call_function("scheme close", XSLT_SCHEME(handle).close, handle->object,
+	xslt_call_function("scheme close", XSLT_SCHEME(handle).sh_close, handle->object,
 	                   2, argv, &retval);
 
 	if (!retval) {
