@@ -2412,7 +2412,7 @@ PHP_FUNCTION(odbc_columns)
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
 /* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column)
-    Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
+   Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
 {
 	pval **pv_conn, **pv_cat, **pv_schema, **pv_table, **pv_column;
@@ -2590,7 +2590,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-/* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type ])
+/* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type])
    Returns a result identifier containing information about data types supported by the data source */
 PHP_FUNCTION(odbc_gettypeinfo)
 {
@@ -2903,7 +2903,7 @@ PHP_FUNCTION(odbc_procedures)
 #endif /* HAVE_SOLID */
 
 /* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable)
-   Returns a result identifier containing either The optimal set of columns that uniquely identifies a row in the table or Columns that are automatically updated when any value in the row is updated by a transaction */
+   Returns a result identifier containing either the optimal set of columns that uniquely identifies a row in the table or columns that are automatically updated when any value in the row is updated by a transaction */
 PHP_FUNCTION(odbc_specialcolumns)
 {
 	pval **pv_conn, **pv_type, **pv_cat, **pv_schema, **pv_name;
