@@ -18,7 +18,8 @@ $supported_hash_al = array(
 "MHASH_HAVAL160"  => "Æ³o‡uWi¼´ò\"q”{ùË",
 "MHASH_RIPEMD160" => "lGCZ¡ÓYÄ·Æ¯F4Ÿ\x0C>XX=",
 "MHASH_GOST"      => "\x0A%RÎ½õ|­ñQGòU¶C)5»œ,Çâ‹-ž",
-"MHASH_TIGER"     => "•:Ãyš\x01¹ýë‘®«— ~g9\\»T0à\x0D",
+"MHASH_TIGER"     => "ý¹šyÃ:•g~ —«®‘ë
+à0T»\9",
 "MHASH_CRC32"     => "ƒ¸",
 "MHASH_CRC32B"    => "¤·Zß"
 );

@@ -17,7 +17,7 @@ $supported_hash_al = array(
 "MHASH_HAVAL160"  => "Öåðï\x07óúÌídní¶6GXìÞmÆû\x06\x1E\x00¤–õÎ·#÷Ž¡5ˆM–‚\"míiÁ\x1D„1\$\x0Eù|­X<O)Y;¿=ÓÊ°¸y.³Ø`\"Ê`\x02ëÐÙ´B™	Ô¯…¾Òµ©k>G¹¸ÊÉ\x19Á\x17~Ä\x0D~",
 "MHASH_RIPEMD160" => "äÕÛFšòŸxâ¹\x0DÇ5ÉÏ\x02\x0a\x1D[\x19¦gDXgw”ÔÜ¡DÔ&Åb¯ùŽ†jŠ’B™ëö°êš7ù‡¡û]é¶GíÃ[\x14G`^\x1B«Ã\x08Kç “\x11\x17ë3C-ABâ%ß\x04K\x03??öK´¡†‚¤ù",
 "MHASH_GOST"      => "ÀDöi½~†C•=wÆ‚ý\x17’BÙß\x15}­øs¾M–\x01äd|\x01‚4h“Yç\"\x0A°I*b@Ñ„Äxc@sÞ¨y¾†ýN%d÷×\x09¶ŠFD\x0a\x12\x12Pà\x0FÇÕ}E©À~â:pOôŒ\x0D­pwìR{\x19M‡",
-"MHASH_TIGER"     => "Âó!Êåñ¥p+#’Á­#ýžéf6y©ÛÂó!Êåñ¥p+#’Á­#ýžéf6y©ÛÂó!Êåñ¥p+#’Á­#ýžéf6y©ÛÂó!Êåñ¥p+#’Á­#ýžéf6y©ÛÂó!Ê",
+"MHASH_TIGER"     => "gêÉ{Ê\nG±ö&/3däÎ#7`þ2UöBQ/Óy)ºÌñçX#k'h¤ÂÀÀn‹ä/¥÷E‚¸©›ÛÀ˜p*M1 VÄÉKÚyºO`Õ	×ø•M¨¢——6Ô|\"ª",
 "MHASH_CRC32"     => "H@Œ&_šYïèoQÅÒÐ1[Fq\"®\x08ÁÌÝfŸéVÈ8\x08ã¥EöîE<¤™M¼:Èº…¥r„ðk*±HœÚu±è/}›ßÛh3iW»ñžJ?vu
 i…¥=ÕW\"üó",
 "MHASH_CRC32B"    => "µl«e¦>}û*©]¶F×›6\x13ŠbCÍË.	I¯\x0F–jœÎ¥0ÐÛ\x0D\x1F<˜Æ.Qyç–¾¶tiý°xbØ\$}ƒ\x0Bõ˜È´“	×Ï¬ÈŒDÅDK…\x13é1uLðÝ6§¡`÷æÉ|Ecñ\x04°",
