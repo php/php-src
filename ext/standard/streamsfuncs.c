@@ -380,6 +380,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		}
 	}
 
+	efree(read_buf);
 	RETURN_FALSE;
 }
 /* }}} */
