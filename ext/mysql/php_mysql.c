@@ -31,7 +31,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <winsock.h>
 #else
 #include "build-defs.h"
@@ -208,7 +208,7 @@ static PHP_INI_MH(OnMySQLPort)
 	MySLS_FETCH();
 	
 	if (new_value==NULL) { /* default port */
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 		struct servent *serv_ptr;
 		char *env;
 		
@@ -301,7 +301,7 @@ PHP_MINFO_FUNCTION(mysql)
 	sprintf(buf, "%ld", MySG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
 	php_info_print_table_row(2, "MYSQL_LFLAGS", PHP_MYSQL_LFLAGS);
 	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
