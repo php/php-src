@@ -86,13 +86,31 @@ extern int ap_php_optind;
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
-	return fwrite(str, 1, str_length, stdout);
+	int ret;
+	PLS_FETCH();
+
+	ret = fwrite(str, 1, str_length, stdout);
+	if (ret != str_length) {
+		PG(connection_status) = PHP_CONNECTION_ABORTED;
+		if (!PG(ignore_user_abort)) {
+			zend_bailout();
+		}
+	}
+
+	return ret;
 }
 
 
 static void sapi_cgibin_flush(void *server_context)
 {
-	fflush(stdout);
+	PLS_FETCH();
+
+	if (fflush(stdout)) {
+		PG(connection_status) = PHP_CONNECTION_ABORTED;
+		if (!PG(ignore_user_abort)) {
+			zend_bailout();
+		}
+	}
 }
 
 
