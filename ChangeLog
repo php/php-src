@@ -1,3 +1,16 @@
+2005-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re:
+      MFH: Fix handling of INF/NAN in unserialize().
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Fix handling of INF/NAN in unserialize().
+
 2005-01-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute_API.c:
