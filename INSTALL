@@ -10,11 +10,11 @@ QUICK INSTALL
 
 gunzip apache_1.3.x.tar.gz
 tar xvf apache_1.3.x.tar
-gunzip php-3.0.x.tar.gz
-tar xvf php-3.0.x.tar
+gunzip php-4.0.x.tar.gz
+tar xvf php-4.0.x.tar
 cd apache_1.3.x
 ./configure --prefix=/www
-cd ../php-3.0.x
+cd ../php-4.0.x
 ./configure --with-mysql --with-apache=../apache_1.3.x --enable-track-vars
 make
 make install
@@ -24,7 +24,7 @@ cd ../apache_1.3.x
   stage.  It isn't supposed to.  It will be created.)
 make
  (you should now have an httpd binary which you can copy to your Apache bin dir)
-cd ../php-3.0.x
+cd ../php-4.0.x
 cp php.ini-dist /usr/local/lib/php.ini
 You can edit /usr/local/lib/php.ini file to set PHP options.
 Edit your httpd.conf or srm.conf file and add:
@@ -42,7 +42,7 @@ Installing PHP can be done in four simple steps:
 
    Next you have to untar it with: tar -xvf php4xn.tar
 
-   This will create a php-3.0.x directory.  cd into this new directory.
+   This will create a php-4.0.x directory.  cd into this new directory.
 
 2. Configure PHP.
 

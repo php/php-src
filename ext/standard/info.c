@@ -234,7 +234,7 @@ PHPAPI void php_print_info(int flag)
 	if (flag & PHP_INFO_LICENSE) {
 		SECTION("PHP License");
 		PUTS("<PRE>This program is free software; you can redistribute it and/or modify\n");
-		PUTS("it under the terms of the PHP License as published by the PHP Development Team\n");
+		PUTS("it under the terms of the PHP License as published by the PHP Group\n");
 		PUTS("and included in the distribution in the file:  LICENSE\n");
 		PUTS("\n");
 		PUTS("This program is distributed in the hope that it will be useful,\n");
@@ -262,12 +262,12 @@ void php_print_credits(int flag)
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("UNIX Build and Modularization", "Stig Sather Bakken");
+		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken");
 		CREDIT_LINE("Win32 Port", "Shane Caraveo, Zeev Suraski");
 		CREDIT_LINE("Server API (SAPI) Abstraction Layer", "Andi Gutmans, Shane Caraveo, Zeev Suraski");
 		CREDIT_LINE("Apache SAPI Module", "Rasmus Lerdorf, Zeev Suraski");
 		CREDIT_LINE("ISAPI SAPI Module", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("CGI SAPI Module", "Rasmus Lerdorf, Stig Sather Bakken");
+		CREDIT_LINE("CGI SAPI Module", "Rasmus Lerdorf, Stig Bakken");
 		CREDIT_LINE("Overall Work", "Thies C. Arntzen, Stig Bakken, Shane Caraveo, \
 					Rasmus Lerdorf, Sascha Schumann, Zeev Suraski, Andrey Zmievski, \
 					and others");
@@ -279,16 +279,16 @@ void php_print_credits(int flag)
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">Module Authors</th></tr>\n");
 		php_info_print_table_header(2, "Module", "Authors");
-		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Sather Bakken, David Sklar");
+		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
 		CREDIT_LINE("BC Math", "Andi Gutmans");
 		CREDIT_LINE("Win32 COM", "Zeev Suraski");
-		CREDIT_LINE("DAV", "Stig Sather Bakken");
+		CREDIT_LINE("DAV", "Stig Bakken");
 		CREDIT_LINE("DBA", "Sascha Schumann");
 		CREDIT_LINE("DBM", "Rasmus Lerdorf, Jim Winstead");
 		CREDIT_LINE("dBase", "Jim Winstead");
 		CREDIT_LINE("FDF", "Uwe Steinmann");
 		CREDIT_LINE("FilePro", "Chad Robinson");
-		CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Sather Bakken, Jim Winstead");
+		CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead");
 		CREDIT_LINE("GetText", "Alex Plotnick");
 		CREDIT_LINE("HyperWave", "Uwe Steinmann");
 		CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf");
@@ -299,9 +299,9 @@ void php_print_credits(int flag)
 		CREDIT_LINE("mhash", "Sascha Schumann");
 		CREDIT_LINE("mSQL", "Zeev Suraski");
 		CREDIT_LINE("MySQL", "Zeev Suraski");
-		CREDIT_LINE("OCI8", "Stig Sather Bakken, Thies C. Arntzen");
-		CREDIT_LINE("ODBC", "Stig Sather Bakken, Andreas Karajannis, Frank M. Kromann");
-		CREDIT_LINE("Oracle", "Stig Sather Bakken, Mitch Golden, Rasmus Lerdorf, Andreas Karajannis, Thies C. Arntzen");
+		CREDIT_LINE("OCI8", "Stig Bakken, Thies C. Arntzen");
+		CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann");
+		CREDIT_LINE("Oracle", "Stig Bakken, Mitch Golden, Rasmus Lerdorf, Andreas Karajannis, Thies C. Arntzen");
 		CREDIT_LINE("Perl Compatible Regexps", "Andrey Zmievski");
 		CREDIT_LINE("PDF", "Uwe Steinmann");
 		CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski");
@@ -310,7 +310,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Sybase", "Zeev Suraski");
 		CREDIT_LINE("System V Shared Memory", "Christian Cartus");
 		CREDIT_LINE("System V Semaphores", "Tom May");
-		CREDIT_LINE("XML", "Stig Sather Bakken");
+		CREDIT_LINE("XML", "Stig Bakken");
 		CREDIT_LINE("Yellow Pages", "Stephanie Wehner");
 		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Ruhrich");
 		PUTS("</table>\n");
