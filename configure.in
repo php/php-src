@@ -843,7 +843,7 @@ if true; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
     echo "|                                                                    |"
-    echo "| Please go read http://www.php.net/FAQ.php3#6.11 and make the       |"
+    echo "| Please go read http://www.php.net/FAQ.php#6.11 and make the        |"
     echo "| changes described there and try again.                             |"
   fi
 
