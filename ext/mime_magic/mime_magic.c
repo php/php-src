@@ -349,7 +349,7 @@ PHP_FUNCTION(mime_content_type)
 
 	if (conf->magic == (struct magic *)-1) {
 		if(MIME_MAGIC_G(debug))
-			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_ERROR, "mime_magic could not be initialized, magic file %s is not avaliable", conf->magicfile);
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_ERROR, "mime_magic could not be initialized, magic file %s is not available", conf->magicfile);
 		RETURN_FALSE;
 	} 
 

@@ -7995,13 +7995,13 @@
 2003-02-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:
-      The string.h is already avaliable through zend.h, so the manual inclusion
+      The string.h is already available through zend.h, so the manual inclusion
       is not necessary.
 
 2003-02-07  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:
-      Added a check to ensure that string.h is avaliable before trying to use it.
+      Added a check to ensure that string.h is available before trying to use it.
       
       Thanks Andi.
 

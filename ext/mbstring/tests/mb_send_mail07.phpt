@@ -6,7 +6,7 @@ if (@mb_send_mail() === false || !mb_language("Korean")) {
 	die("skip mb_send_mail() not available");
 }
 if (!@mb_internal_encoding('ISO-2022-KR')) {
-	die("skip ISO-2022-KR encoding is not avaliable on this platform");
+	die("skip ISO-2022-KR encoding is not available on this platform");
 }
 ?>
 --INI--
