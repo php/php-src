@@ -1,7 +1,0 @@
-dbx (database abstraction)
-
-core routines: Marc Boeren (Guidance Rotterdam bv)
-mysql support: Marc Boeren
-odbc support:  Marc Boeren
-pgsql support: Rui Hirokawa
-mssql support: Marc Boeren

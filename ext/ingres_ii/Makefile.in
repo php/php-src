@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libingres_ii.la
-LTLIBRARY_SOURCES     = ii.c
-LTLIBRARY_SHARED_NAME = ingres_ii.la
-LTLIBRARY_SHARED_LIBADD  = $(II_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

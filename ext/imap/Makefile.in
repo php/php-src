@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libimap.la
-LTLIBRARY_SOURCES = php_imap.c
-LTLIBRARY_SHARED_NAME = imap.la
-LTLIBRARY_SHARED_LIBADD = $(IMAP_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

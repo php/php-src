@@ -1,6 +1,0 @@
-LTLIBRARY_NAME    		= liboci8.la
-LTLIBRARY_SOURCES 		= oci8.c
-LTLIBRARY_SHARED_NAME   = oci8.la
-LTLIBRARY_SHARED_LIBADD = $(OCI8_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
