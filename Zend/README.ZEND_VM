@@ -3,11 +3,11 @@ ZEND_VM
 
 ZEND_VM architecture allows specializing opcode handlers according to op_type
 fields and using different execution methods (call threading, switch threading
-and direct threading). As a result ZE2 got more then 20% speedup on raw PHP
+and direct threading). As a result ZE2 got more than 20% speedup on raw PHP
 code execution (with specialized executor and direct threading execution
-method). As most in most PHP applications raw execution speed isn't the
-limiting factor but system calls and database callls are, your mileage with
-this patch will vary.
+method). As in most PHP applications raw execution speed isn't the limiting
+factor but system calls and database callls are, your mileage with this patch
+will vary.
 
 Most parts of the old zend_execute.c go into zend_vm_def.h. Here you can
 find opcode handlers and helpers. The typical opcode handler template looks
@@ -40,7 +40,7 @@ ZEND_VM_DISPATCH_TO_HELPER_EX(<NAME>,<PARAM>,<VAL>)
 	return <NAME>(<VAL>, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)
 ZEND_VM_CONTINUE()
 	return 0
-ZEND_VM_NEXT_OPCOD()
+ZEND_VM_NEXT_OPCODE()
 	NEXT_OPCODE()
 ZEND_VM_SET_OPCODE(<TARGET>
 	SET_OPCODE(<TARGET>
