@@ -149,15 +149,16 @@ class PEAR_Autoloader extends PEAR
      * @return mixed  The return value from the aggregated method, or a PEAR
      *                error if the called method was unknown.
      */
-    function __call($method, $args)
+    function __call($method, $args, &$retval)
     {
         if (empty($this->_method_map[$method]) && isset($this->_autoload_map[$method])) {
             $this->addAggregateObject($this->_autoload_map[$method]);
         }
         if (isset($this->_method_map[$method])) {
-            return call_user_func_array(array($this->_method_map[$method], $method), $args);
+            $retval = call_user_func_array(array($this->_method_map[$method], $method), $args);
+            return true;
         }
-        return $this->raiseError("undefined method: $method");
+        return false;
     }
 }
 
