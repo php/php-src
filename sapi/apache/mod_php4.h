@@ -33,6 +33,7 @@ typedef struct {
 	long xbithack;
 } php_apache_info_struct;
 
+extern zend_module_entry apache_module_entry;
 extern php_apache_info_struct php_apache_info;
 
 #if MSVC5
