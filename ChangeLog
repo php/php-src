@@ -1,3 +1,83 @@
+2002-06-09  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Makefile.frag: Commented out old unused stuff
+
+
+    * pear/scripts/phptar.in: Moved to pear/Archive_Tar/scripts
+
+    * pear/PEAR/Frontend/Gtk.php:
+    if (!dl(php_gtk)) die("Unable to load the php_gtk extension\n");
+
+    * pear/PEAR/Frontend/CLI.php:
+    Beautify config-show output, some wrap changes and fix small
+    issue with _tableRow() with line counting
+
+2002-06-09  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: cleanup
+
+2002-06-09  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/install-pear.php: displayLine() -> outputData()
+
+    * pear/PEAR/Frontend/CLI.php: - outputData($data, $command)
+    + outputData($data, $command = '_default')
+
+2002-06-09  Harald Radi  <harald.radi@nme.at>
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/com.h: reflect the new abstraction changes in the demo layer
+
+    * ext/rpc/handler.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h
+      ext/rpc/rpc_proxy.c: - using stas' abstraction now
+    - layer can add individual ini settings now
+    - classentries for the loaded rpc object are created dynamically now
+      class hirarchy looks like: rpc<-[layer]<-[object]  (e.g. rpc<-com<-adodb),
+      thus the whole class tree is reflected into php
+    - added user-functions to mark an object as a singleton and as poolable
+
+
+    * main/config.w32.h.in:
+    pg_escape_* functions were not available on win32 due to a missing define
+
+
+2002-06-09  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/dio/dio.c
+      ext/gmp/gmp.c:
+    Don't use headers if the module contains only one phpinfo() entry, just
+    stick to ordinary rows.
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+    Made phpinfo() show if we're using the bundled version of GD
+
+2002-06-09  James Cox  <james@blog.at>
+
+    * ext/mysql/config.m4:
+    dont test for the socket -- enables installs over NFS etc.
+
+2002-06-09  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/gd/config.m4:
+    Fixed detection of JPEG support in bundled version of GD.
+
+    * ext/mysql/config.m4: Fixed configure stuff
+
+2002-06-09  Andrei Zmievski  <andrei@php.net>
+
+    * ext/standard/php_rand.h
+      ext/standard/rand.c: Make RAND_RANGE() an API macro.
+
+2002-06-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/hwapi/config.m4: De-messify
+
+    * ext/mysql/config.m4: Cleaned up the mess. Now it actually works too.
+
 2002-06-08  Christian Dickmann  <chrisdicki@gmx.de>
 
     * pear/PEAR/Command/Config.php
