@@ -1,3 +1,24 @@
+2003-06-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/zend2.php:
+      No nested classes
+
+    * tests/bug20240.phpt
+      tests/bug20242.phpt
+      tests/bug21478.phpt
+      tests/bug21888.phpt
+      tests/bug22725.phpt:
+      Add some ZE2 bug tests
+
+    * zend_opcode.c:
+      Bugfix #23670: implements and extends cause Apache 2 crash
+
+    * zend_constants.c:
+      Do it correct always
+
+    * zend_compile.h:
+      Defining it once is enough
+
 2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c:
