@@ -37,7 +37,7 @@ ZEND_API void zend_html_putc(char c)
 {
 	switch (c) {
 		case '\n':
-			ZEND_PUTS("<br>");
+			ZEND_PUTS("<br />");
 			break;
 		case '<':
 			ZEND_PUTS("&lt;");
