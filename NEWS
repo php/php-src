@@ -8,11 +8,11 @@ PHP 4.0                                                                    NEWS
   Now you need not provide a path to the file containing the typelib, you can
   also provide the GUID of the TypeLib - entry or an IID for preloading
   type - information. (phanto)
-- rewrite of domxml. It's now mostly DOM Level 2 conform (Uwe)
+- Rewrite of domxml. It's now mostly DOM Level 2 conform (Uwe)
 - Added array_map() function that applies a callback to the elements
   of given arrays and returns the result. It can also be used with a
   null callback to transpose arrays. (Andrei)
-- New FastCGI server module
+- New FastCGI server module. (Ben Mansell)
 - Added array_filter(), which allows filtering of array elements via
   the specified callback. (Andrei)
 - Fixed all relevant array functions to avoid moving the internal array
