@@ -110,6 +110,7 @@ PHP_FUNCTION(session_start);
 PHP_FUNCTION(session_destroy);
 PHP_FUNCTION(session_unset);
 PHP_FUNCTION(session_set_save_handler);
+PHP_FUNCTION(session_cache_expire);
 PHP_FUNCTION(session_cache_limiter);
 PHP_FUNCTION(session_set_cookie_params);
 PHP_FUNCTION(session_get_cookie_params);
