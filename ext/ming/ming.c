@@ -3888,6 +3888,7 @@ PHP_MINIT_FUNCTION(ming)
 	action_class_entry_ptr = zend_register_internal_class(&action_class_entry TSRMLS_CC);
 	morph_class_entry_ptr = zend_register_internal_class(&morph_class_entry TSRMLS_CC);
 	sprite_class_entry_ptr = zend_register_internal_class(&sprite_class_entry TSRMLS_CC);
+	sound_class_entry_ptr = zend_register_internal_class(&sound_class_entry TSRMLS_CC);
 #ifdef HAVE_NEW_MING
 	fontchar_class_entry_ptr = zend_register_internal_class(&fontchar_class_entry TSRMLS_CC);
 	soundinstance_class_entry_ptr = zend_register_internal_class(&soundinstance_class_entry TSRMLS_CC);
