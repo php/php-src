@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed the dbase_create function. (Sterling)
 - Fixed a problem under some versions of Windows that could cause PHP to hang
   on startup if errors occured, e.g. in the php.ini file (Zeev)
 - Fixed opendir() again.  It should actually work well continuously now (Zeev)
