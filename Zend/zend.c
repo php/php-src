@@ -84,7 +84,6 @@ ZEND_INI_END()
 ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_API int alloc_globals_id;
-zend_class_entry global_main_class;
 HashTable *global_function_table;
 HashTable *global_class_table;
 HashTable *global_constants_table;
