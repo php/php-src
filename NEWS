@@ -5,14 +5,11 @@ PHP 4                                                                      NEWS
   when dealing with built-in extensions. (Sebastian)
 - Added optional 3rd parameter to mysql_select_db() which makes it return
   the previously selected database name. (Jani)
-- Set Content-Length header whenever possible. (thies, Yasuo)
-- Major update of domxml. New functions and better DOM compliance. (Uwe)
+- Set Content-Length header whenever possible. (Thies, Yasuo)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
 - Made the mbstring extension enabled by default. (Yasuo)
-- Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (thies)
-- Changed the old $node->append_child() to $node->append_sibling() since
-  the new append_child() behaves correctly (= W3C standard). (chregu, uwe)
+- Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (Thies)
 - Added php.ini options for EXIF extension to encode and decode Unicode/JIS
   user comments. (Marcus)
 - Changed the "-c" CLI/CGI option to allow both 'filename' and
@@ -38,8 +35,8 @@ PHP 4                                                                      NEWS
   available at http://www.jtatesoftware.com/cracklib/. (jtate)
 - Added mysql_info() function. (Jan)
 - Added mysql_list_processes() and mysql_stat() functions. (Georg)
-- Added file_get_contents($filename), which returns the contents of a file
-  as a string. It also supports URL wrappers. (Wez)
+- Added file_get_contents() which returns the contents of a file as a string. 
+  This function also supports the URL wrappers. (Wez)
 - Changed 'zlib:' fopen wrapper to 'compress.zlib://' to avoid ambiguities
   when filenames have ':' characters. (Wez)
 - Added URL-wrapper support to exif. (Marcus)
@@ -59,20 +56,24 @@ PHP 4                                                                      NEWS
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo)
 - Added exif_imagetype() function. (Marcus)
-- Added domxml functions:
-    domxml_elem_get_elements_by_tagname() 
-    domxml_doc_get_elements_by_tagname()
-    domxml_doc_get_element_by_id()
-    domxml_elem_remove_attribute()
-    domxml_elem_get_attribute_node() (Chregu)
-- Fixed a segfault in domxml_unlink(). (jtate)
-- Added formatting option to domxml_dump_mem(). (Chregu)
 - New improved build system. Among other improvements, replaces the slow 
   recursive make with one global Makefile and eases the integration of proper
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
 
 03 May 2002, Version 4.2.1
+- Major update of domxml. New functions, better DOM compliance and bug fixes:
+  * Changed the old $node->append_child() to $node->append_sibling() since
+    the new append_child() behaves correctly (= W3C standard).
+  * Added domxml functions:
+    . domxml_elem_get_elements_by_tagname() 
+    . domxml_doc_get_elements_by_tagname()
+    . domxml_doc_get_element_by_id()
+    . domxml_elem_remove_attribute()
+    . domxml_elem_get_attribute_node()
+  * Fixed a segfault in domxml_unlink(). 
+  * Added formatting option to domxml_dump_mem(). 
+  (Uwe, jtate, Chregu)
 - Fixed a bug in socket_select() that could cause unexpected behavior when
   using a statement like $w = $e = array($sock); This change unfortunately
   prevents the use of constant values (e.g. NULL) for the socket array
