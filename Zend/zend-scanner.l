@@ -40,15 +40,6 @@
 
 #include <errno.h>
 
-#ifdef ZTS
-#include <fstream.h>
-# if WIN32||WINNT
-# include <strstrea.h>
-# else
-# include <strstream.h>
-# endif
-#endif
-
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_compile.h"
@@ -57,6 +48,15 @@
 #include "zend_constants.h"
 #include "zend_variables.h"
 #include "zend_operators.h"
+
+#ifdef ZTS
+# include <fstream.h>
+# if WIN32||WINNT
+#  include <strstrea.h>
+# else
+#  include <strstream.h>
+# endif
+#endif
 
 #if HAVE_STDARG_H
 #include <stdarg.h>
