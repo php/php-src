@@ -193,9 +193,30 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 	return fstat(sock->socket, &ssb->sb);
 }
 
+static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
+		char **textaddr, long *textaddrlen,
+		struct sockaddr **addr, socklen_t *addrlen
+		TSRMLS_DC)
+{
+	php_sockaddr_storage sa;
+	socklen_t sl = sizeof(sa);
+	int ret;
+	int want_addr = textaddr || addr;
+
+	if (want_addr) {
+		ret = recvfrom(sock->socket, buf, buflen, flags, (struct sockaddr*)&sa, &sl);
+		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
+			textaddr, textaddrlen, addr, addrlen TSRMLS_CC);
+	} else {
+		ret = recv(sock->socket, buf, buflen, flags);
+	}
+
+	return ret;
+}
+
 static int php_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
 {
-	int oldmode;
+	int oldmode, flags;
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	php_stream_xport_param *xparam;
 	
@@ -273,6 +294,42 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 				case STREAM_XPORT_OP_GET_PEER_NAME:
 					xparam->outputs.returncode = php_network_get_peer_name(sock->socket,
+							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
+							xparam->want_textaddr ? &xparam->outputs.textaddrlen : NULL,
+							xparam->want_addr ? &xparam->outputs.addr : NULL,
+							xparam->want_addr ? &xparam->outputs.addrlen : NULL
+							TSRMLS_CC);
+					return PHP_STREAM_OPTION_RETURN_OK;
+
+				case STREAM_XPORT_OP_SEND:
+					flags = 0;
+					if ((xparam->inputs.flags & STREAM_OOB) == STREAM_OOB) {
+						flags |= MSG_OOB;
+					}
+					xparam->outputs.returncode = sendto(sock->socket,
+							xparam->inputs.buf, xparam->inputs.buflen,
+							flags,
+							xparam->inputs.addr,
+							xparam->inputs.addrlen);
+					if (xparam->outputs.returncode == -1) {
+						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,
+						   	"%s\n", err);
+						efree(err);
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
+
+				case STREAM_XPORT_OP_RECV:
+					flags = 0;
+					if ((xparam->inputs.flags & STREAM_OOB) == STREAM_OOB) {
+						flags |= MSG_OOB;
+					}
+					if ((xparam->inputs.flags & STREAM_PEEK) == STREAM_PEEK) {
+						flags |= MSG_PEEK;
+					}
+					xparam->outputs.returncode = sock_recvfrom(sock,
+							xparam->inputs.buf, xparam->inputs.buflen,
+							flags,
 							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 							xparam->want_textaddr ? &xparam->outputs.textaddrlen : NULL,
 							xparam->want_addr ? &xparam->outputs.addr : NULL,

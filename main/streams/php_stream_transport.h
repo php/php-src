@@ -88,6 +88,22 @@ PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 		void **addr, socklen_t *addrlen
 		TSRMLS_DC);
 
+enum php_stream_xport_send_recv_flags {
+	STREAM_OOB = 1,
+	STREAM_PEEK = 2
+};
+
+/* Similar to recv() system call; read data from the stream, optionally
+ * peeking, optionally retrieving OOB data */
+PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
+		long flags, void **addr, socklen_t *addrlen,
+		char **textaddr, int *textaddrlen TSRMLS_DC);
+
+/* Similar to send() system call; send data to the stream, optionally
+ * sending it as OOB data */
+PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
+		long flags, void *addr, socklen_t addrlen TSRMLS_DC);
+
 /* Structure definition for the set_option interface that the above functions wrap */
 
 typedef struct _php_stream_xport_param {
@@ -96,7 +112,9 @@ typedef struct _php_stream_xport_param {
 		STREAM_XPORT_OP_LISTEN, STREAM_XPORT_OP_ACCEPT,
 		STREAM_XPORT_OP_CONNECT_ASYNC,
 		STREAM_XPORT_OP_GET_NAME,
-		STREAM_XPORT_OP_GET_PEER_NAME
+		STREAM_XPORT_OP_GET_PEER_NAME,
+		STREAM_XPORT_OP_RECV,
+		STREAM_XPORT_OP_SEND
 	} op;
 	unsigned int want_addr:1;
 	unsigned int want_textaddr:1;
@@ -107,6 +125,11 @@ typedef struct _php_stream_xport_param {
 		long namelen;
 		int backlog;
 		struct timeval *timeout;
+		struct sockaddr *addr;
+		socklen_t addrlen;
+		char *buf;
+		size_t buflen;
+		long flags;
 	} inputs;
 	struct {
 		php_stream *client;

@@ -77,6 +77,10 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 				if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)) {
 					return stream;
 				}
+				/* dead - kill it */
+				php_stream_close(stream);
+				stream = NULL;
+
 				/* fall through */
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
@@ -364,6 +368,112 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 	php_error_docref("streams.crypto" TSRMLS_CC, E_WARNING, "this stream does not support SSL/crypto");
 	
 	return ret;
+}
+
+/* Similar to recv() system call; read data from the stream, optionally
+ * peeking, optionally retrieving OOB data */
+PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
+		long flags, void **addr, socklen_t *addrlen, char **textaddr, int *textaddrlen
+		TSRMLS_DC)
+{
+	php_stream_xport_param param;
+	int ret = 0;
+	int recvd_len = 0;
+	int oob;
+
+	if (flags == 0 && addr == NULL) {
+		return php_stream_read(stream, buf, buflen);
+	}
+
+	if (stream->readfilters.head) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot peek or fetch OOB data from a filtered stream");
+		return -1;
+	}
+	
+	oob = (flags & STREAM_OOB) == STREAM_OOB;
+
+	if (!oob && addr == NULL) {
+		/* must be peeking at regular data; copy content from the buffer
+		 * first, then adjust the pointer/len before handing off to the
+		 * stream */
+		recvd_len = stream->writepos - stream->readpos;
+		if (recvd_len > buflen) {
+			recvd_len = buflen;
+		}
+		if (recvd_len) {
+			memcpy(buf, stream->readbuf, recvd_len);
+			buf += recvd_len;
+			buflen -= recvd_len;
+		}
+		/* if we filled their buffer, return */
+		if (buflen == 0) {
+			return recvd_len;
+		}
+	}
+
+	/* otherwise, we are going to bypass the buffer */
+	
+	memset(&param, 0, sizeof(param));
+
+	param.op = STREAM_XPORT_OP_RECV;
+	param.want_addr = addr ? 1 : 0;
+	param.want_textaddr = textaddr ? 1 : 0;
+	param.inputs.buf = buf;
+	param.inputs.buflen = buflen;
+	param.inputs.flags = flags;
+	
+	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_XPORT_API, 0, &param);
+
+	if (ret == PHP_STREAM_OPTION_RETURN_OK) {
+		if (addr) {
+			*addr = param.outputs.addr;
+			*addrlen = param.outputs.addrlen;
+		}
+		if (textaddr) {
+			*textaddr = param.outputs.textaddr;
+			*textaddrlen = param.outputs.textaddrlen;
+		}
+		return recvd_len + param.outputs.returncode;
+	}
+	return recvd_len ? recvd_len : -1;
+}
+
+/* Similar to send() system call; send data to the stream, optionally
+ * sending it as OOB data */
+PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
+		long flags, void *addr, socklen_t addrlen TSRMLS_DC)
+{
+	php_stream_xport_param param;
+	int ret = 0;
+	int oob;
+
+	if (flags == 0 && addr == NULL) {
+		return php_stream_write(stream, buf, buflen);
+	}
+	
+	oob = (flags & STREAM_OOB) == STREAM_OOB;
+
+	if ((oob || addr) && stream->writefilters.head) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write OOB data, or data to a targeted address on a filtered stream");
+		return -1;
+	}
+	
+	memset(&param, 0, sizeof(param));
+
+	param.op = STREAM_XPORT_OP_SEND;
+	param.want_addr = addr ? 1 : 0;
+	param.inputs.buf = (char*)buf;
+	param.inputs.buflen = buflen;
+	param.inputs.flags = flags;
+	param.inputs.addr = addr;
+	param.inputs.addrlen = addrlen;
+	
+	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_XPORT_API, 0, &param);
+
+	if (ret == PHP_STREAM_OPTION_RETURN_OK) {
+		return param.outputs.returncode;
+	}
+	return -1;
 }
 
 

@@ -54,7 +54,7 @@ PHP_FUNCTION(stream_socket_client)
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
 	int err;
-	long flags = 0;
+	long flags = PHP_STREAM_CLIENT_CONNECT;
 	char *errstr = NULL;
 	php_stream_context *context = NULL;
 
@@ -85,7 +85,7 @@ PHP_FUNCTION(stream_socket_client)
 	}
 
 	stream = php_stream_xport_create(host, host_len, ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT |
+			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
 			hashkey, &tv, context, &errstr, &err);
 
@@ -136,7 +136,7 @@ PHP_FUNCTION(stream_socket_server)
 	long host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	php_stream *stream = NULL;
-	int err;
+	int err = 0;
 	long flags = STREAM_XPORT_BIND | STREAM_XPORT_LISTEN;
 	char *errstr = NULL;
 	php_stream_context *context = NULL;
@@ -263,6 +263,85 @@ PHP_FUNCTION(stream_socket_get_name)
 				TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto long stream_socket_sendto(resouce stream, string data [, long flags [, string target_addr]])
+   Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
+PHP_FUNCTION(stream_socket_sendto)
+{
+	php_stream *stream;
+	zval *zstream;
+	long flags = 0;
+	char *data, *target_addr = NULL;
+	long datalen, target_addr_len = 0;
+	php_sockaddr_storage sa;
+	socklen_t sl = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ls", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	php_stream_from_zval(stream, &zstream);
+
+	if (target_addr) {
+		/* parse the address */
+		if (FAILURE == php_network_parse_network_address_with_port(target_addr, target_addr_len, (struct sockaddr*)&sa, &sl TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse `%s' into a valid network address", target_addr);
+			RETURN_FALSE;
+		}
+	}
+
+	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, flags, target_addr ? &sa : NULL, sl TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto string stream_socket_recvfrom(resource stream, long amount [, long flags [, string &remote_addr]])
+   Receives data from a socket stream */
+PHP_FUNCTION(stream_socket_recvfrom)
+{
+	php_stream *stream;
+	zval *zstream, *zremote = NULL;
+	long to_read = 0;
+	char *read_buf;
+	long flags = 0;
+	int recvd;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|lz", &zstream, &to_read, &flags, &zremote) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, &zstream);
+
+	if (zremote) {
+		zval_dtor(zremote);
+		ZVAL_NULL(zremote);
+		Z_STRLEN_P(zremote) = 0;
+	}
+	
+	read_buf = emalloc(to_read + 1);
+	
+	recvd = php_stream_xport_recvfrom(stream, read_buf, to_read, flags, NULL, NULL,
+			zremote ? &Z_STRVAL_P(zremote) : NULL,
+			zremote ? &Z_STRLEN_P(zremote) : NULL
+			TSRMLS_CC);
+
+	if (recvd >= 0) {
+		if (zremote && Z_STRLEN_P(zremote)) {
+			Z_TYPE_P(zremote) = IS_STRING;
+		}
+		read_buf[recvd] = '\0';
+
+		if (PG(magic_quotes_runtime)) {
+			Z_TYPE_P(return_value) = IS_STRING;
+			Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value),
+					Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+			return;
+		} else {
+			RETURN_STRINGL(read_buf, recvd, 0);
+		}
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 

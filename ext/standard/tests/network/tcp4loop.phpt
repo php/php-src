@@ -1,7 +1,7 @@
 --TEST--
 Streams Based IPv4 TCP Loopback test
 --FILE--
-<?php
+<?php # vim:ft=php:
 	/* Setup socket server */
 	$server = stream_socket_server('tcp://127.0.0.1:31337');
 	if (!$server) {

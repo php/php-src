@@ -21,11 +21,14 @@
 /* Flags for stream_socket_client */
 #define PHP_STREAM_CLIENT_PERSISTENT	1
 #define PHP_STREAM_CLIENT_ASYNC_CONNECT	2
+#define PHP_STREAM_CLIENT_CONNECT		4
 
 PHP_FUNCTION(stream_socket_client);
 PHP_FUNCTION(stream_socket_server);
 PHP_FUNCTION(stream_socket_accept);
 PHP_FUNCTION(stream_socket_get_name);
+PHP_FUNCTION(stream_socket_recvfrom);
+PHP_FUNCTION(stream_socket_sendto);
 
 PHP_FUNCTION(stream_copy_to_stream);
 PHP_FUNCTION(stream_get_contents);
