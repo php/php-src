@@ -3078,11 +3078,11 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
 	}
 	ctxp->node = contextnodep;
-	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
+	str = (char*) emalloc((name_len+23) * sizeof(char)) ;
 	if (str == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate memory for string");
 	}
-	sprintf(str ,"//%s",name);
+	sprintf(str ,"//*[local-name() = '%s']", name);
 
 	xpathobjp = xmlXPathEval(str, ctxp);
 	efree(str);
