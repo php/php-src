@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- added zend_execute_internal which is called like zend_execute but for
+  internal functions. (Thies)
+- Changed pg_connection_info()/pg_connection_reset()/pg_connection_busy()/pg_result_status()/pg_result_error() silently return FALSE when resource is not passed to them. (Yasuo)
 - Fixed some mysql compile failures on 64 bit-OS. (Georg)
 - Added warnings for deprecated mysql functions:
   . mysql_create_db() 
