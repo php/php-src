@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: John Coggeshall  <john@php.net>                              |
+  |         Ilia Alshanetsky <ilia@php.net>				 |
   +----------------------------------------------------------------------+
 */
 
@@ -39,9 +40,9 @@ extern zend_module_entry tidy_module_entry;
 #include "buffio.h"
 
 #ifdef ZTS
-#define TIDY_G(v) TSRMG(tidy_globals_id, zend_tidy_globals *, v)
+#define TG(v) TSRMG(tidy_globals_id, zend_tidy_globals *, v)
 #else
-#define TIDY_G(v) (tidy_globals.v)
+#define TG(v) (tidy_globals.v)
 #endif
 
 #ifndef TRUE
@@ -77,7 +78,6 @@ struct _PHPTidyObj {
     zend_object         obj;
     TidyNode            node;
     TidyAttr            attr;
-    PHPTidyDoc          *tdoc;
     unsigned int        type;
     PHPTidyObj          *parent;
     unsigned int        refcount;
@@ -90,7 +90,6 @@ PHP_RINIT_FUNCTION(tidy);
 PHP_RSHUTDOWN_FUNCTION(tidy);
 PHP_MINFO_FUNCTION(tidy);
 
-PHP_FUNCTION(tidy_create);
 PHP_FUNCTION(tidy_setopt);
 PHP_FUNCTION(tidy_getopt);
 PHP_FUNCTION(tidy_parse_string);
@@ -100,6 +99,8 @@ PHP_FUNCTION(tidy_diagnose);
 PHP_FUNCTION(tidy_get_output);
 PHP_FUNCTION(tidy_get_error_buffer);
 PHP_FUNCTION(tidy_get_release);
+PHP_FUNCTION(tidy_reset_config);
+PHP_FUNCTION(tidy_get_config);
 PHP_FUNCTION(tidy_get_status);
 PHP_FUNCTION(tidy_get_html_ver);
 PHP_FUNCTION(tidy_is_xhtml);
@@ -167,19 +168,17 @@ void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
 void _php_tidy_register_tags(INIT_FUNC_ARGS);
 void _php_tidy_register_attributes(INIT_FUNC_ARGS);
 
-/* Callbacks for hooking Tidy Memory alloc into e*alloc */
-void * _php_tidy_mem_alloc(size_t size);
-void * _php_tidy_mem_realloc(void *mem, size_t newsize);
-void _php_tidy_mem_free(void *mem);
-void _php_tidy_mem_panic(ctmbstr errmsg);
-
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
+	PHPTidyDoc *tdoc;
+	zend_bool used;
+	char *default_config;
 ZEND_END_MODULE_GLOBALS(tidy)
 
-
-
-
-
+#ifdef ZTS
+#define TG(v) TSRMG(tidy_globals_id, zend_tidy_globals *, v)
+#else
+#define TG(v) (tidy_globals.v)
+#endif
 
 #endif
 
