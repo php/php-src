@@ -428,7 +428,9 @@ php_apache_server_shutdown(void *tmp)
 {
 	apache2_sapi_module.shutdown(&apache2_sapi_module);
 	sapi_shutdown();
+#ifdef ZTS
 	tsrm_shutdown();
+#endif
 	return APR_SUCCESS;
 }
 
@@ -473,8 +475,9 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	if (apache2_php_ini_path_override) {
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
-
+#ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
+#endif
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);

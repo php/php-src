@@ -34,6 +34,7 @@ AC_ARG_WITH(apxs2,
   APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
   APXS_CFLAGS=`$APXS -q CFLAGS`
+  APXS_MPM=`$APXS -q MPM_NAME`
 
   for flag in $APXS_CFLAGS; do
     case $flag in
@@ -81,7 +82,9 @@ AC_ARG_WITH(apxs2,
   esac
 
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
-  PHP_BUILD_THREAD_SAFE
+  if test "$APXS_MPM" != "prefork"; then
+    PHP_BUILD_THREAD_SAFE
+  fi
   AC_MSG_RESULT(yes)
 ],[
   AC_MSG_RESULT(no)
