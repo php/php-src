@@ -25,6 +25,7 @@
    +----------------------------------------------------------------------+
    | Authors: Jim Winstead (jimw@php.net)                                 |
    |          Stig Sæther Bakken <ssb@guardian.no>                        |
+   |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
 
@@ -602,6 +603,10 @@ char *_php3_number_format(double d,int dec,char dec_point,char thousand_sep)
 	tmpbuf = (char *) emalloc(32+dec);
 	
 	tmplen=_php3_sprintf(tmpbuf,"%.*f",dec,d);
+
+	if (!isdigit(tmpbuf[0])) {
+		return tmpbuf;
+	}
 
 	for (t=tmpbuf; *t; t++) {
 		if (*t=='.') {
