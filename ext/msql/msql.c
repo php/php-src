@@ -165,7 +165,7 @@ typedef struct {
 	convert_to_long((res)); \
 	msql_query = (m_query *) php3_list_find((res)->value.lval,&type); \
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_query) { \
-		php3_error(E_WARNING,"%d is not a mSQL query index", \
+		php_error(E_WARNING,"%d is not a mSQL query index", \
 				res->value.lval); \
 		RETURN_FALSE; \
 	} \
@@ -297,7 +297,7 @@ DLEXPORT PHP_MINFO_FUNCTION(msql)
 		snprintf(maxl,15,"%ld",MSQL_GLOBAL(php3_msql_module).max_links);
 		maxl[15]=0;
 	}
-	php3_printf("<table>"
+	php_printf("<table>"
 				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
 				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
 				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
@@ -347,18 +347,18 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 		
 		if (MSQL_GLOBAL(php3_msql_module).max_links!=-1 && MSQL_GLOBAL(php3_msql_module).num_links>=MSQL_GLOBAL(php3_msql_module).max_links) {
-			php3_error(E_WARNING,"mSQL:  Too many open links (%d)",MSQL_GLOBAL(php3_msql_module).num_links);
+			php_error(E_WARNING,"mSQL:  Too many open links (%d)",MSQL_GLOBAL(php3_msql_module).num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		if (MSQL_GLOBAL(php3_msql_module).max_persistent!=-1 && MSQL_GLOBAL(php3_msql_module).num_persistent>=MSQL_GLOBAL(php3_msql_module).max_persistent) {
-			php3_error(E_WARNING,"mSQL:  Too many open persistent links (%d)",MSQL_GLOBAL(php3_msql_module).num_persistent);
+			php_error(E_WARNING,"mSQL:  Too many open persistent links (%d)",MSQL_GLOBAL(php3_msql_module).num_persistent);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		
 		/* try to find if we already have this link in our persistent list */
-		if (_php3_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 			
 			/* create the link */
@@ -370,7 +370,7 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* hash it up */
 			new_le.type = MSQL_GLOBAL(php3_msql_module).le_plink;
 			new_le.ptr = (void *) msql;
-			if (_php3_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -386,8 +386,8 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* still have to find a way to do this nicely with mSQL */
 			if (msql_stat(le->ptr)==NULL) { /* the link died */
 				if (msql_connect(le->ptr,host,user,passwd)==NULL) {
-					php3_error(E_WARNING,"mSQL link lost, unable to reconnect");
-					_php3_hash_del(plist,hashed_details,hashed_details_length+1);
+					php_error(E_WARNING,"mSQL link lost, unable to reconnect");
+					zend_hash_del(plist,hashed_details,hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -405,7 +405,7 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new msql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (_php3_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -420,11 +420,11 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				_php3_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
 		if (MSQL_GLOBAL(php3_msql_module).max_links!=-1 && MSQL_GLOBAL(php3_msql_module).num_links>=MSQL_GLOBAL(php3_msql_module).max_links) {
-			php3_error(E_WARNING,"mSQL:  Too many open links (%d)",MSQL_GLOBAL(php3_msql_module).num_links);
+			php_error(E_WARNING,"mSQL:  Too many open links (%d)",MSQL_GLOBAL(php3_msql_module).num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -440,7 +440,7 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (_php3_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -503,7 +503,7 @@ DLEXPORT PHP_FUNCTION(msql_close)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -542,7 +542,7 @@ DLEXPORT PHP_FUNCTION(msql_select_db)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -586,7 +586,7 @@ DLEXPORT PHP_FUNCTION(msql_create_db)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -629,7 +629,7 @@ DLEXPORT PHP_FUNCTION(msql_drop_db)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -673,7 +673,7 @@ DLEXPORT PHP_FUNCTION(msql_query)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -716,7 +716,7 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -761,11 +761,11 @@ DLEXPORT PHP_FUNCTION(msql_list_dbs)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	if ((msql_result=msqlListDBs(msql))==NULL) {
-		php3_error(E_WARNING,"Unable to save mSQL query result");
+		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(_new_query(msql_result, 0));
@@ -803,7 +803,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -812,7 +812,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 		RETURN_FALSE;
 	}
 	if ((msql_result=msqlListTables(msql))==NULL) {
-		php3_error(E_WARNING,"Unable to save mSQL query result");
+		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(_new_query(msql_result, 0));
@@ -850,7 +850,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 	
 	msql = (int) php3_list_find(id,&type);
 	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php3_error(E_WARNING,"%d is not a mSQL link index",id);
+		php_error(E_WARNING,"%d is not a mSQL link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -860,7 +860,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 	}
 	convert_to_string(table);
 	if ((msql_result=msqlListFields(msql,table->value.str.val))==NULL) {
-		php3_error(E_WARNING,"Unable to save mSQL query result");
+		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(_new_query(msql_result, 0));
@@ -910,7 +910,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 	
 	convert_to_long(row);
 	if (row->value.lval<0 || row->value.lval>=msqlNumRows(msql_result)) {
-		php3_error(E_WARNING,"Unable to jump to row %d on mSQL query index %d",row->value.lval,result->value.lval);
+		php_error(E_WARNING,"Unable to jump to row %d on mSQL query index %d",row->value.lval,result->value.lval);
 		RETURN_FALSE;
 	}
 	msqlDataSeek(msql_result,row->value.lval);
@@ -942,7 +942,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php3_error(E_WARNING,"%s%s%s not found in mSQL query index %d",
+						php_error(E_WARNING,"%s%s%s not found in mSQL query index %d",
 									(table_name?table_name:""), (table_name?".":""), field_name, result->value.lval);
 						efree(field_name);
 						if (table_name) {
@@ -960,7 +960,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 				convert_to_long(field);
 				field_offset = field->value.lval;
 				if (field_offset<0 || field_offset>=msqlNumFields(msql_result)) {
-					php3_error(E_WARNING,"Bad column offset specified");
+					php_error(E_WARNING,"Bad column offset specified");
 					RETURN_FALSE;
 				}
 				break;
@@ -1146,7 +1146,7 @@ DLEXPORT PHP_FUNCTION(msql_data_seek)
 	if (!msql_result ||
 			offset->value.lval<0 || 
 			offset->value.lval>=msqlNumRows(msql_result)) {
-		php3_error(E_WARNING,"Offset %d is invalid for mSQL query index %d",offset->value.lval,result->value.lval);
+		php_error(E_WARNING,"Offset %d is invalid for mSQL query index %d",offset->value.lval,result->value.lval);
 		RETURN_FALSE;
 	}
 	msqlDataSeek(msql_result,offset->value.lval);
@@ -1222,7 +1222,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_field)
 	
 	if (field) {
 		if (field->value.lval<0 || field->value.lval>=msqlNumRows(msql_result)) {
-			php3_error(E_NOTICE,"mSQL:  Bad field offset specified");
+			php_error(E_NOTICE,"mSQL:  Bad field offset specified");
 			RETURN_FALSE;
 		}
 		msqlFieldSeek(msql_result,field->value.lval);
@@ -1267,7 +1267,7 @@ DLEXPORT PHP_FUNCTION(msql_field_seek)
 		RETURN_FALSE;
 	}
 	if (offset->value.lval<0 || offset->value.lval>=msqlNumFields(msql_result)) {
-		php3_error(E_WARNING,"Field %d is invalid for mSQL query index %d",
+		php_error(E_WARNING,"Field %d is invalid for mSQL query index %d",
 				offset->value.lval,result->value.lval);
 		RETURN_FALSE;
 	}
@@ -1301,7 +1301,7 @@ static void php3_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	convert_to_long(field);
 	if (field->value.lval<0 || field->value.lval>=msqlNumFields(msql_result)) {
-		php3_error(E_WARNING,"Field %d is invalid for mSQL query index %d",field->value.lval,result->value.lval);
+		php_error(E_WARNING,"Field %d is invalid for mSQL query index %d",field->value.lval,result->value.lval);
 		RETURN_FALSE;
 	}
 	msqlFieldSeek(msql_result,field->value.lval);

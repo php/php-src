@@ -274,9 +274,9 @@ extern char **environ;
 #endif
 
 extern void phperror(char *error);
-extern PHPAPI void php3_error(int type, const char *format,...);
+extern PHPAPI void php_error(int type, const char *format,...);
 extern PHPAPI int php3_write(void *buf, int size);
-extern PHPAPI int php3_printf(const char *format,...);
+extern PHPAPI int php_printf(const char *format,...);
 extern void php3_log_err(char *log_message);
 extern int Debug(char *format,...);
 extern int cfgparse(void);
@@ -297,7 +297,7 @@ extern int module_startup_modules(void);
 extern PHPAPI int php3i_get_le_fp(void);
 
 /*from basic functions*/
-extern PHPAPI int _php3_error_log(int opt_err,char *message,char *opt,char *headers);
+extern PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
 
 PHPAPI int cfg_get_long(char *varname, long *result);
 PHPAPI int cfg_get_double(char *varname, double *result);

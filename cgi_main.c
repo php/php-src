@@ -136,7 +136,7 @@ static sapi_module_struct sapi_module = {
 
 	zend_cgibin_ub_write,			/* unbuffered write */
 
-	php3_error,						/* error handler */
+	php_error,						/* error handler */
 
 	NULL,							/* header handler */
 	NULL,							/* send headers handler */
@@ -158,7 +158,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php3_printf("Usage: %s [-q] [-h]"
+	php_printf("Usage: %s [-q] [-h]"
 				" [-s]"
 				" [-v] [-i] [-f <file>] | "
 				"{<file> [args...]}\n"
@@ -316,7 +316,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					if (no_headers) {
 						SG(headers_sent) = 1;
 					}
-					php3_printf("%s\n", PHP_VERSION);
+					php_printf("%s\n", PHP_VERSION);
 					exit(1);
 					break;
 				case 'i':
@@ -420,9 +420,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #if 0	/* this is here for debuging under windows */
 		if (argc) {
 			i = 0;
-			php3_printf("\nargc %d\n",argc); 
+			php_printf("\nargc %d\n",argc); 
 			while (i <= argc) {
-				php3_printf("%s\n",argv[i]); 
+				php_printf("%s\n",argv[i]); 
 				i++;
 			}
 		}

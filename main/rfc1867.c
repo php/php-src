@@ -81,7 +81,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					if (rem < 31) {
 						SAFE_RETURN;
 					}
-					php3_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+					php_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
 					SAFE_RETURN;
 				}
 				loc = memchr(ptr, '\n', rem);
@@ -90,7 +90,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					name += 7;
 					s = memchr(name, '\"', loc - name);
 					if (!s) {
-						php3_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
+						php_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
 						SAFE_RETURN;
 					}
 					if (namebuf) {
@@ -106,7 +106,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					rem -= (loc2 - ptr) + 1;
 					ptr = loc2 + 1;
 				} else {
-					php3_error(E_WARNING, "File upload error - no name component in content disposition");
+					php_error(E_WARNING, "File upload error - no name component in content disposition");
 					SAFE_RETURN;
 				}
 				filename = strstr(s, " filename=\"");
@@ -114,7 +114,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					filename += 11;
 					s = memchr(filename, '\"', loc - filename);
 					if (!s) {
-						php3_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *filename, *(filename + 1), *(filename + 2), *(filename + 3), *(filename + 4));
+						php_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *filename, *(filename + 1), *(filename + 2), *(filename + 3), *(filename + 4));
 						SAFE_RETURN;
 					}
 					if (filenamebuf) {
@@ -153,7 +153,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					loc = memchr(u, *boundary, urem);
 				}
 				if (!loc) {
-					php3_error(E_WARNING, "File Upload Field Data garbled");
+					php_error(E_WARNING, "File Upload Field Data garbled");
 					SAFE_RETURN;
 				}
 				*(loc - 4) = '\0';
@@ -197,16 +197,16 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 					loc = memchr(u, *boundary, urem);
 				}
 				if (!loc) {
-					php3_error(E_WARNING, "File Upload Error - No Mime boundary found after start of file header");
+					php_error(E_WARNING, "File Upload Error - No Mime boundary found after start of file header");
 					SAFE_RETURN;
 				}
 				fn = tempnam(PG(upload_tmp_dir), "php");
 				if ((loc - ptr - 4) > PG(upload_max_filesize)) {
-					php3_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize),namebuf);
+					php_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize),namebuf);
 					bytes=0;	
 					SET_VAR_STRING(namebuf, estrdup("none"));
 				} else if (max_file_size && ((loc - ptr - 4) > max_file_size)) {
-					php3_error(E_WARNING, "Max file size exceeded - file [%s] not saved", namebuf);
+					php_error(E_WARNING, "Max file size exceeded - file [%s] not saved", namebuf);
 					bytes = 0;
 					SET_VAR_STRING(namebuf, estrdup("none"));
 				} else if ((loc - ptr - 4) <= 0) {
@@ -215,14 +215,14 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 				} else {
 					fp = fopen(fn, "w");
 					if (!fp) {
-						php3_error(E_WARNING, "File Upload Error - Unable to open temporary file [%s]", fn);
+						php_error(E_WARNING, "File Upload Error - Unable to open temporary file [%s]", fn);
 						SAFE_RETURN;
 					}
 					bytes = fwrite(ptr, 1, loc - ptr - 4, fp);
 					fclose(fp);
 					php3_list_insert(fn,le_uploads);  /* Tell PHP about the file so the destructor can unlink it later */
 					if (bytes < (loc - ptr - 4)) {
-						php3_error(E_WARNING, "Only %d bytes were written, expected to write %ld", bytes, loc - ptr - 4);
+						php_error(E_WARNING, "Only %d bytes were written, expected to write %ld", bytes, loc - ptr - 4);
 					}
 					SET_VAR_STRING(namebuf, estrdup(fn));
 				}

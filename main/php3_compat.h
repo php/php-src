@@ -58,6 +58,11 @@
 #define _php3_hash_apply_with_argument zend_hash_apply_with_argument
 
 
+#define php3_error php_error
+
+#define php3_printf php_printf
+#define _php3_sprintf php_sprintf
+
 
 
 #define php3_module_entry zend_module_entry

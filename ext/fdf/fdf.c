@@ -102,7 +102,7 @@ PHP_MINIT_FUNCTION(fdf)
 PHP_MINFO_FUNCTION(fdf)
 {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php3_printf("FdfTk Version %s", FDFGetVersion());
+	php_printf("FdfTk Version %s", FDFGetVersion());
 }
 
 PHP_MSHUTDOWN_FUNCTION(fdf)
@@ -156,7 +156,7 @@ PHP_FUNCTION(fdf_close) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -205,7 +205,7 @@ PHP_FUNCTION(fdf_get_value) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -241,7 +241,7 @@ PHP_FUNCTION(fdf_set_value) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -282,7 +282,7 @@ PHP_FUNCTION(fdf_next_field_name) {
 	id=argv[0]->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -323,7 +323,7 @@ PHP_FUNCTION(fdf_set_ap) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -368,7 +368,7 @@ PHP_FUNCTION(fdf_set_status) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -399,7 +399,7 @@ PHP_FUNCTION(fdf_get_status) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -435,7 +435,7 @@ PHP_FUNCTION(fdf_set_file) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -466,7 +466,7 @@ PHP_FUNCTION(fdf_get_file) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -502,7 +502,7 @@ PHP_FUNCTION(fdf_save) {
 	id=arg1->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 

@@ -241,7 +241,7 @@ static int _php_ibase_attach_db(char *server, char *uname, int uname_len, char *
 	isc_attach_database(status, strlen(server), server, db, db_parbuf_len, dpb);
 
 	if (status[0] == 1 && status[1]) {
-		php3_error(E_WARNING,"Unable to connect to InterBase server:  %s", "XXX");
+		php_error(E_WARNING,"Unable to connect to InterBase server:  %s", "XXX");
 		return 1;
 	}
 	return 0;
@@ -322,16 +322,16 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (persistent) {
 		list_entry *le;
 		
-		if (_php3_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
+		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
 			list_entry new_le;
 			
 			if (IBASE_GLOBAL(php3_ibase_module).max_links!=-1 && IBASE_GLOBAL(php3_ibase_module).num_links>=IBASE_GLOBAL(php3_ibase_module).max_links) {
-				php3_error(E_WARNING,"InterBase: Too many open links (%d)", IBASE_GLOBAL(php3_ibase_module).num_links);
+				php_error(E_WARNING,"InterBase: Too many open links (%d)", IBASE_GLOBAL(php3_ibase_module).num_links);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (IBASE_GLOBAL(php3_ibase_module).max_persistent!=-1 && IBASE_GLOBAL(php3_ibase_module).num_persistent>=IBASE_GLOBAL(php3_ibase_module).max_persistent) {
-				php3_error(E_WARNING,"InterBase: Too many open persistent links (%d)", IBASE_GLOBAL(php3_ibase_module).num_persistent);
+				php_error(E_WARNING,"InterBase: Too many open persistent links (%d)", IBASE_GLOBAL(php3_ibase_module).num_persistent);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -346,7 +346,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* hash it up */
 			new_le.type = php3_ibase_module.le_plink;
 			new_le.ptr = db_handle;
-			if (_php3_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -370,7 +370,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new pgsql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (_php3_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -385,11 +385,11 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				_php3_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
 		if (IBASE_GLOBAL(php3_ibase_module).max_links!=-1 && IBASE_GLOBAL(php3_ibase_module).num_links>=IBASE_GLOBAL(php3_ibase_module).max_links) {
-			php3_error(E_WARNING,"InterBase:  Too many open links (%d)", IBASE_GLOBAL(php3_ibase_module).num_links);
+			php_error(E_WARNING,"InterBase:  Too many open links (%d)", IBASE_GLOBAL(php3_ibase_module).num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -407,7 +407,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (_php3_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -461,7 +461,7 @@ PHP_FUNCTION(ibase_close)
 	
 	db_handle = (isc_db_handle) php3_list_find(id, &type);
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
-		php3_error(E_WARNING, "%d is not an InterBase link index",id);
+		php_error(E_WARNING, "%d is not an InterBase link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -481,12 +481,12 @@ static XSQLDA *_php3_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_
     isqlda->version = SQLDA_VERSION1;
 
 	if (isc_dsql_allocate_statement(status, &db, query_handle)) {
-		php3_error(E_WARNING, "InterBase: couldn't allocate space for query");
+		php_error(E_WARNING, "InterBase: couldn't allocate space for query");
 		return NULL;
 	}
 
 	if (isc_dsql_prepare(status, &tr, query_handle, 0, query, 1, isqlda)) {
-		php3_error(E_WARNING, "InterBase: couldn't prepare query");
+		php_error(E_WARNING, "InterBase: couldn't prepare query");
 		return NULL;
 	}
 	
@@ -497,7 +497,7 @@ static XSQLDA *_php3_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_
 
 
 	if (isc_dsql_describe_bind(status, query_handle, 1, isqlda)) {
-		php3_error(E_WARNING, "InterBase: couldn't describe placeholders in query");
+		php_error(E_WARNING, "InterBase: couldn't describe placeholders in query");
 	}
 	
 	if (isqlda->sqld > 1) {
@@ -505,7 +505,7 @@ static XSQLDA *_php3_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_
 		isqlda->sqln = isqlda->sqld;
 		isqlda->version = SQLDA_VERSION1;
 		if (isc_dsql_describe(status, query_handle, 1, isqlda)) {
-			php3_error(E_WARNING, "InterBase: couldn't describe query");
+			php_error(E_WARNING, "InterBase: couldn't describe query");
 		}
 		return isqlda;
 	} else if (isqlda->sqld == 1) {
@@ -546,7 +546,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 		osqlda->version = SQLDA_VERSION1;
 
 		if (isc_dsql_describe(status, &query_handle, 1, osqlda)) {
-			php3_error(E_WARNING, "InterBase: couldn't describe query");
+			php_error(E_WARNING, "InterBase: couldn't describe query");
 		}
 
 		if (osqlda->sqld) {
@@ -554,7 +554,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 			osqlda->sqln = osqlda->sqld;
 			osqlda->version = SQLDA_VERSION1;
 			if (isc_dsql_describe(status, &query_handle, 1, osqlda)) {
-				php3_error(E_WARNING, "InterBase: couldn't describe query");
+				php_error(E_WARNING, "InterBase: couldn't describe query");
 			}
 		}
 		for (i = 0; i < osqlda->sqld; i++) {
@@ -593,7 +593,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 		}
 		if (isqlda == NULL) {
 			if (isc_dsql_execute(status, &tr_handle, &query_handle, 1, NULL)) {
-				php3_error(E_WARNING, "InterBase: couldn't execute query");
+				php_error(E_WARNING, "InterBase: couldn't execute query");
 				return NULL;
 			} else {
 				return osqlda;
@@ -601,7 +601,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 	
 		} else {
 			if (isc_dsql_execute2(status, &tr_handle, &query_handle, 1, isqlda, osqlda)) {
-				php3_error(E_WARNING, "InterBase: couldn't execute query");
+				php_error(E_WARNING, "InterBase: couldn't execute query");
 				return NULL;
 			} else {
 				return osqlda;
@@ -611,7 +611,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 	} else {
 		/* Not select */
 		if (isc_dsql_execute(status, &tr_handle, &query_handle, 1, isqlda)) {
-			php3_error(E_WARNING, "InterBase: couldn't execute query");
+			php_error(E_WARNING, "InterBase: couldn't execute query");
 		}
 		/*
 		if (!php3_ibase_module.manualtransactions) {
@@ -663,7 +663,7 @@ PHP_FUNCTION(ibase_query)
 	
 	db_handle = (isc_db_handle) php3_list_find(id, &type);
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
-		php3_error(E_WARNING, "%d is not an InterBase link index", id);
+		php_error(E_WARNING, "%d is not an InterBase link index", id);
 		RETURN_FALSE;
 	}
 	
@@ -671,7 +671,7 @@ PHP_FUNCTION(ibase_query)
 
 	if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions) {
 		if (isc_start_transaction(status, &tr_handle, 1, &db_handle, 0, NULL)) {
-			php3_error(E_WARNING, "InterBase: couldn't start transaction");
+			php_error(E_WARNING, "InterBase: couldn't start transaction");
 			RETURN_FALSE;
 		}
 	}
@@ -680,7 +680,7 @@ PHP_FUNCTION(ibase_query)
 	if (isqlda != NULL) {
 		isc_rollback_transaction(status, &tr_handle);
 		isc_dsql_free_statement(status, &query_handle, DSQL_drop);
-		php3_error(E_WARNING, "InterBase: ibase_query doesn't support parameter placeholders in query");
+		php_error(E_WARNING, "InterBase: ibase_query doesn't support parameter placeholders in query");
 		RETURN_FALSE;
 	}
 
@@ -740,12 +740,12 @@ PHP_FUNCTION(ibase_fetch_row)
 	ibase_result = (ibase_result_handle *) php3_list_find(result->value.lval, &type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_result) {
-		php3_error(E_WARNING,"%d is not an InterBase result index", result->value.lval);
+		php_error(E_WARNING,"%d is not an InterBase result index", result->value.lval);
 		RETURN_FALSE;
 	}
 
 	if (ibase_result->sqlda == NULL) {
-		php3_error(E_WARNING,"InterBase: trying to fetch results from a non-select query");
+		php_error(E_WARNING,"InterBase: trying to fetch results from a non-select query");
 		RETURN_FALSE;
 	}
 
@@ -762,7 +762,7 @@ PHP_FUNCTION(ibase_fetch_row)
 			if (*var[i].sqlind < 0) {
 				/* XXX. Column is NULL. This is not the best idea to do, think something... */
 				add_get_index_stringl(return_value, i, NULL, 0, (void **) &pval_ptr, 1);
-				_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+				zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 				continue;
 			}
 			coltype = var[i].sqltype & ~1;
@@ -779,7 +779,7 @@ PHP_FUNCTION(ibase_fetch_row)
 						} else {
 							add_get_index_stringl(return_value, i, char_data, collen, (void **) &pval_ptr, 1);
 						}
-						_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+						zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 						efree(char_data);
 					}
 					break;
@@ -795,14 +795,14 @@ PHP_FUNCTION(ibase_fetch_row)
 						} else {
 							add_get_index_stringl(return_value, i, char_data, collen, (void **) &pval_ptr, 1);
 						}
-						_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+						zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 						efree(char_data);
 					}
 					break;
 				case SQL_SHORT:
 					collen = sprintf(string_data, "%d", *(short *)(var[i].sqldata));
 					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 					break;
 				case SQL_LONG:
 					if (var[i].sqlscale) {
@@ -818,12 +818,12 @@ PHP_FUNCTION(ibase_fetch_row)
 						collen = sprintf(string_data, "%ld", *(long *)(var[i].sqldata));
 					}
 					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 					break;
 				case SQL_FLOAT:
 					collen = sprintf(string_data, "%f", *(float *)(var[i].sqldata));
 					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 					break;
 				case SQL_DOUBLE:
 					if (ibase_result->sqlda->sqlvar[i].sqlscale) {
@@ -832,7 +832,7 @@ PHP_FUNCTION(ibase_fetch_row)
 						collen = sprintf(string_data, "%f", *(double *)(var[i].sqldata));
 					}
 					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 					break;
 				case SQL_DATE: {
 					struct tm *t;
@@ -847,7 +847,7 @@ PHP_FUNCTION(ibase_fetch_row)
 					collen = sprintf(string_data, "%4d-%02d-%02d %02d:%02d:%02d", t->tm_year+1900, t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
 					/* #endif */
 					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 					efree(t);
 					}
 					break;
@@ -859,7 +859,7 @@ PHP_FUNCTION(ibase_fetch_row)
 						bid = *(ISC_QUAD ISC_FAR *) var[i].sqldata;
 						sprintf(string_data, "%lx:%lx", bid.isc_quad_high, bid.isc_quad_low);
 						add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-						_php3_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+						zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
 					}
 					break;
 				default:
@@ -893,7 +893,7 @@ PHP_FUNCTION(ibase_free_result)
 	ibase_result = (ibase_result_handle *) php3_list_find(result->value.lval,&type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_result) {
-		php3_error(E_WARNING,"%d is not an InterBase result index",result->value.lval);
+		php_error(E_WARNING,"%d is not an InterBase result index",result->value.lval);
 		RETURN_FALSE;
 	}
 	php3_list_delete(result->value.lval);
@@ -936,7 +936,7 @@ PHP_FUNCTION(ibase_prepare)
 	
 	db_handle = (isc_db_handle) php3_list_find(id, &type);
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
-		php3_error(E_WARNING, "%d is not an InterBase link index", id);
+		php_error(E_WARNING, "%d is not an InterBase link index", id);
 		RETURN_FALSE;
 	}
 	
@@ -944,7 +944,7 @@ PHP_FUNCTION(ibase_prepare)
 
 	if (!IBASE_GLOBAL(php3_ibase_module).manualtransactions) {
 		if (isc_start_transaction(status, &tr_handle, 1, &db_handle, 0, NULL)) {
-			php3_error(E_WARNING, "InterBase: couldn't start transaction");
+			php_error(E_WARNING, "InterBase: couldn't start transaction");
 			RETURN_FALSE;
 		}
 	}
@@ -981,12 +981,12 @@ PHP_FUNCTION(ibase_bind)
 	ibase_query = (ibase_query_handle *) php3_list_find(query->value.lval,&type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
-		php3_error(E_WARNING,"%d is not an InterBase query index",query->value.lval);
+		php_error(E_WARNING,"%d is not an InterBase query index",query->value.lval);
 		RETURN_FALSE;
 	}
 
 	if (ibase_query->sqlda == NULL) {
-		php3_error(E_WARNING,"InterBase: trying to bind a query having no parameter placeholders");
+		php_error(E_WARNING,"InterBase: trying to bind a query having no parameter placeholders");
 		RETURN_FALSE;
 	}
 
@@ -1044,7 +1044,7 @@ PHP_FUNCTION(ibase_execute)
 	ibase_query = (ibase_query_handle *) php3_list_find(query->value.lval,&type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
-		php3_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
+		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -1078,7 +1078,7 @@ PHP_FUNCTION(ibase_free_query)
 	ibase_query = (ibase_query_handle *) php3_list_find(query->value.lval, &type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
-		php3_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
+		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
 		RETURN_FALSE;
 	}
 	php3_list_delete(query->value.lval);
@@ -1101,7 +1101,7 @@ PHP_FUNCTION(ibase_timefmt)
 
 	RETURN_TRUE;
 #else
-	php3_error(E_WARNING,"InterBase: ibase_timefmt not supported on this platform");
+	php_error(E_WARNING,"InterBase: ibase_timefmt not supported on this platform");
 	RETURN_FALSE;
 #endif
 }

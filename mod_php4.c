@@ -179,7 +179,7 @@ sapi_module_struct sapi_module = {
 
 	zend_apache_ub_write,			/* unbuffered write */
 
-	php3_error,						/* error handler */
+	php_error,						/* error handler */
 
 	sapi_apache_header_handler,		/* header handler */
 	sapi_apache_send_headers,		/* send headers handler */

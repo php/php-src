@@ -90,7 +90,7 @@ THREAD_LS sybase_module php3_sybase_module;
 THREAD_LS static HashTable *resource_list, *resource_plist;
 
 
-#define CHECK_LINK(link) { if (link==-1) { php3_error(E_WARNING,"Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"Sybase:  A link to the server could not be established"); RETURN_FALSE; } }
 
 
 static void php3_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pval *result, int column_type);
@@ -100,7 +100,7 @@ static int php3_sybase_error_handler(DBPROCESS *dbproc,int severity,int dberr,
 										int oserr,char *dberrstr,char *oserrstr)
 {
 	if (severity >= php3_sybase_module.min_error_severity) {
-		php3_error(E_WARNING,"Sybase error:  %s (severity %d)",dberrstr,severity);
+		php_error(E_WARNING,"Sybase error:  %s (severity %d)",dberrstr,severity);
 	}
 	return INT_CANCEL;  
 }
@@ -111,7 +111,7 @@ static int php3_sybase_message_handler(DBPROCESS *dbproc,DBINT msgno,int msgstat
 										char *procname,DBUSMALLINT line)
 {
 	if (severity >= php3_sybase_module.min_message_severity) {
-		php3_error(E_WARNING,"Sybase message:  %s (severity %d)",msgtext,severity);
+		php_error(E_WARNING,"Sybase message:  %s (severity %d)",msgtext,severity);
 	}
 	STR_FREE(php3_sybase_module.server_message);
 	php3_sybase_module.server_message = estrdup(msgtext);
@@ -160,7 +160,7 @@ static void _free_sybase_result(sybase_result *result)
 static void _close_sybase_link(sybase_link *sybase_ptr)
 {
 	sybase_ptr->valid = 0;
-	_php3_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
+	zend_hash_apply(resource_list,(int (*)(void *))_clean_invalid_results);
 	dbclose(sybase_ptr->link);
 	dbloginfree(sybase_ptr->login);
 	efree(sybase_ptr);
@@ -315,7 +315,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 
 	/* set a DBLOGIN record */	
 	if ((sybase.login=dblogin())==NULL) {
-		php3_error(E_WARNING,"Sybase:  Unable to allocate login record");
+		php_error(E_WARNING,"Sybase:  Unable to allocate login record");
 		RETURN_FALSE;
 	}
 	
@@ -335,24 +335,24 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (_php3_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (php3_sybase_module.max_links!=-1 && php3_sybase_module.num_links>=php3_sybase_module.max_links) {
-				php3_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybase_module.num_links);
+				php_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybase_module.num_links);
 				efree(hashed_details);
 				dbloginfree(sybase.login);
 				RETURN_FALSE;
 			}
 			if (php3_sybase_module.max_persistent!=-1 && php3_sybase_module.num_persistent>=php3_sybase_module.max_persistent) {
-				php3_error(E_WARNING,"Sybase:  Too many open persistent links (%d)",php3_sybase_module.num_persistent);
+				php_error(E_WARNING,"Sybase:  Too many open persistent links (%d)",php3_sybase_module.num_persistent);
 				efree(hashed_details);
 				dbloginfree(sybase.login);
 				RETURN_FALSE;
 			}
 			/* create the link */
 			if ((sybase.link=dbopen(sybase.login,host))==FAIL) {
-				/*php3_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
+				/*php_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
 				efree(hashed_details);
 				dbloginfree(sybase.login);
 				RETURN_FALSE;
@@ -370,7 +370,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			memcpy(sybase_ptr,&sybase,sizeof(sybase_link));
 			new_le.type = php3_sybase_module.le_plink;
 			new_le.ptr = sybase_ptr;
-			if (_php3_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
+			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry),NULL)==FAILURE) {
 				free(sybase_ptr);
 				efree(hashed_details);
 				dbloginfree(sybase.login);
@@ -380,7 +380,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			php3_sybase_module.num_links++;
 		} else {  /* we do */
 			if (le->type != php3_sybase_module.le_plink) {
-				php3_error(E_WARNING,"Sybase:  Hashed persistent link is not a Sybase link!");
+				php_error(E_WARNING,"Sybase:  Hashed persistent link is not a Sybase link!");
 				RETURN_FALSE;
 			}
 			
@@ -388,13 +388,13 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* test that the link hasn't died */
 			if (DBDEAD(sybase_ptr->link)==TRUE) {
 				if ((sybase_ptr->link=dbopen(sybase_ptr->login,host))==FAIL) {
-					/*php3_error(E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
-					_php3_hash_del(plist, hashed_details, hashed_details_length+1);
+					/*php_error(E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
+					zend_hash_del(plist, hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
 				if (dbsetopt(sybase_ptr->link,DBBUFFER,"2",-1)==FAIL) {
-					_php3_hash_del(plist, hashed_details, hashed_details_length+1);
+					zend_hash_del(plist, hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -410,7 +410,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new sybase link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (_php3_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -425,17 +425,17 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				_php3_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
 		if (php3_sybase_module.max_links!=-1 && php3_sybase_module.num_links>=php3_sybase_module.max_links) {
-			php3_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybase_module.num_links);
+			php_error(E_WARNING,"Sybase:  Too many open links (%d)",php3_sybase_module.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
 		
 		if ((sybase.link=dbopen(sybase.login,host))==NULL) {
-			/*php3_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
+			/*php_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -456,7 +456,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (_php3_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
+		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -511,7 +511,7 @@ PHP_FUNCTION(sybase_close)
 	
 	php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_link && type!=php3_sybase_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
@@ -549,14 +549,14 @@ PHP_FUNCTION(sybase_select_db)
 	
 	sybase_ptr = (sybase_link *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_link && type!=php3_sybase_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
 	convert_to_string(db);
 	
 	if (dbuse(sybase_ptr->link,db->value.str.val)==FAIL) {
-		/*php3_error(E_WARNING,"Sybase:  Unable to select database:  %s",sybase_error(sybase));*/
+		/*php_error(E_WARNING,"Sybase:  Unable to select database:  %s",sybase_error(sybase));*/
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -634,7 +634,7 @@ static void php3_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pv
 				result->value.str.val = res_buf;
 				result->type = IS_STRING;
 			} else {
-				php3_error(E_WARNING,"Sybase:  column %d has unknown data type (%d)", offset, coltype(offset));
+				php_error(E_WARNING,"Sybase:  column %d has unknown data type (%d)", offset, coltype(offset));
 				var_reset(result);
 			}
 		}
@@ -674,17 +674,17 @@ PHP_FUNCTION(sybase_query)
 	
 	sybase_ptr = (sybase_link *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_link && type!=php3_sybase_module.le_plink) {
-		php3_error(E_WARNING,"%d is not a Sybase link index",id);
+		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
 	convert_to_string(query);
 	if (dbcmd(sybase_ptr->link,query->value.str.val)==FAIL) {
-		/*php3_error(E_WARNING,"Sybase:  Unable to set query");*/
+		/*php_error(E_WARNING,"Sybase:  Unable to set query");*/
 		RETURN_FALSE;
 	}
 	if (dbsqlexec(sybase_ptr->link)==FAIL || dbresults(sybase_ptr->link)==FAIL) {
-		/*php3_error(E_WARNING,"Sybase:  Query failed");*/
+		/*php_error(E_WARNING,"Sybase:  Query failed");*/
 		RETURN_FALSE;
 	}
 	
@@ -796,7 +796,7 @@ PHP_FUNCTION(sybase_free_result)
 	result = (sybase_result *) php3_list_find(sybase_result_index->value.lval,&type);
 	
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",sybase_result_index->value.lval);
+		php_error(E_WARNING,"%d is not a Sybase result index",sybase_result_index->value.lval);
 		RETURN_FALSE;
 	}
 	php3_list_delete(sybase_result_index->value.lval);
@@ -825,7 +825,7 @@ PHP_FUNCTION(sybase_num_rows)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}	
 	
@@ -849,7 +849,7 @@ PHP_FUNCTION(sybase_num_fields)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}	
 	
@@ -874,7 +874,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
@@ -887,7 +887,7 @@ PHP_FUNCTION(sybase_fetch_row)
 		MAKE_STD_ZVAL(field_content);
 		*field_content = result->data[result->cur_row][i];
 		pval_copy_constructor(field_content);
-		_php3_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval *), NULL);
+		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(pval *), NULL);
 	}
 	result->cur_row++;
 }
@@ -909,7 +909,7 @@ static PHP_FUNCTION(sybase_fetch_hash)
 	result = (sybase_result *) php3_list_find(sybase_result_index->value.lval,&type);
 	
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",sybase_result_index->value.lval);
+		php_error(E_WARNING,"%d is not a Sybase result index",sybase_result_index->value.lval);
 		RETURN_FALSE;
 	}
 	
@@ -928,9 +928,9 @@ static PHP_FUNCTION(sybase_fetch_hash)
 		if (PG(magic_quotes_runtime) && tmp->type == IS_STRING) {
 			tmp->value.str.val = _php3_addslashes(tmp->value.str.val,tmp->value.str.len,&tmp->value.str.len,1);
 		}
-		_php3_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
+		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval *), NULL);
 		tmp->refcount++;
-		_php3_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval  *), NULL);
+		zend_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(pval  *), NULL);
 	}
 	result->cur_row++;
 }
@@ -967,13 +967,13 @@ PHP_FUNCTION(sybase_data_seek)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 
 	convert_to_long(offset);
 	if (offset->value.lval<0 || offset->value.lval>=result->num_rows) {
-		php3_error(E_WARNING,"Sybase:  Bad row offset");
+		php_error(E_WARNING,"Sybase:  Bad row offset");
 		RETURN_FALSE;
 	}
 	
@@ -1059,7 +1059,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
-			php3_error(E_WARNING,"Sybase:  Bad column offset");
+			php_error(E_WARNING,"Sybase:  Bad column offset");
 		}
 		RETURN_FALSE;
 	}
@@ -1100,7 +1100,7 @@ PHP_FUNCTION(sybase_field_seek)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(sybase_field_seek)
 	field_offset = offset->value.lval;
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		php3_error(E_WARNING,"Sybase:  Bad column offset");
+		php_error(E_WARNING,"Sybase:  Bad column offset");
 		RETURN_FALSE;
 	}
 
@@ -1133,13 +1133,13 @@ PHP_FUNCTION(sybase_result)
 	
 	result = (sybase_result *) php3_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
-		php3_error(E_WARNING,"%d is not a Sybase result index",id);
+		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
 	}
 	
 	convert_to_long(row);
 	if (row->value.lval<0 || row->value.lval>=result->num_rows) {
-		php3_error(E_WARNING,"Sybase:  Bad row offset (%d)",row->value.lval);
+		php_error(E_WARNING,"Sybase:  Bad row offset (%d)",row->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -1154,7 +1154,7 @@ PHP_FUNCTION(sybase_result)
 				}
 			}
 			if (i>=result->num_fields) { /* no match found */
-				php3_error(E_WARNING,"Sybase:  %s field not found in result",field->value.str.val);
+				php_error(E_WARNING,"Sybase:  %s field not found in result",field->value.str.val);
 				RETURN_FALSE;
 			}
 			break;
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(sybase_result)
 			convert_to_long(field);
 			field_offset = field->value.lval;
 			if (field_offset<0 || field_offset>=result->num_fields) {
-				php3_error(E_WARNING,"Sybase:  Bad column offset specified");
+				php_error(E_WARNING,"Sybase:  Bad column offset specified");
 				RETURN_FALSE;
 			}
 			break;
@@ -1190,7 +1190,7 @@ void php3_info_sybase(ZEND_MODULE_INFO_FUNC_ARGS)
 		snprintf(maxl,15,"%ld",php3_sybase_module.max_links);
 		maxl[15]=0;
 	}
-	php3_printf("<table cellpadding=5>"
+	php_printf("<table cellpadding=5>"
 				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
 				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
 				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"

@@ -77,7 +77,7 @@ void php4i_add_header_information(char *header_information, uint header_length)
 
 	if (php3_HeaderPrinted == 1) {
 #if DEBUG
-		php3_error(E_WARNING, "Cannot add more header information - the header was already sent "
+		php_error(E_WARNING, "Cannot add more header information - the header was already sent "
 							  "(header information may be added only before any output is generated from the script - "
 							  "check for text or whitespace outside PHP tags, or calls to functions that output text)");
 #endif
@@ -436,7 +436,7 @@ PHP_FUNCTION(setcookie)
 		WRONG_PARAM_COUNT;
 	}
 	if (php3_HeaderPrinted == 1) {
-		php3_error(E_WARNING, "Oops, php3_SetCookie called after header has been sent\n");
+		php_error(E_WARNING, "Oops, php3_SetCookie called after header has been sent\n");
 		return;
 	}
 	switch (arg_count) {

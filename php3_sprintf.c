@@ -25,7 +25,7 @@
 #if BROKEN_SPRINTF
 
 int
-_php3_sprintf (char*s, const char* format, ...)
+php_sprintf (char*s, const char* format, ...)
 {
   va_list args;
   char *ret;

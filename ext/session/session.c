@@ -242,7 +242,7 @@ static void _php_session_initialize(PSLS_D)
 	int vallen;
 	
 	if(PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
-		php3_error(E_ERROR, "failed to initialize session module");
+		php_error(E_ERROR, "failed to initialize session module");
 		return;
 	}
 	if(PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen) == SUCCESS) {
@@ -460,7 +460,7 @@ PHP_FUNCTION(session_module_name)
 			PS(mod_data) = tempmod;
 		} else {
 			efree(old);
-			php3_error(E_ERROR, "Cannot find named PHP session module (%s)",
+			php_error(E_ERROR, "Cannot find named PHP session module (%s)",
 					p_name->value.str.val);
 			RETURN_FALSE;
 		}

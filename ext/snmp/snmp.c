@@ -94,7 +94,7 @@ int php3i_snmp_init(INIT_FUNC_ARGS) {
 }
 
 void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS) {
-	php3_printf("ucd-snmp");
+	php_printf("ucd-snmp");
 }
 
 
@@ -144,7 +144,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 			if (read_objid(objid, root, &rootlen)) {
 				gotroot = 1;
 			} else {
-				php3_error(E_WARNING,"Invalid object identifier: %s\n", objid);
+				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
 			}
 		}
     	if (gotroot == 0) {
@@ -177,7 +177,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	snmp_synch_setup(&session);
 	ss = snmp_open(&session);
 	if (ss == NULL){
-		php3_error(E_WARNING,"Couldn't open snmp\n");
+		php_error(E_WARNING,"Couldn't open snmp\n");
 		RETURN_FALSE;
 	}
 	if (st>=2) {
@@ -195,7 +195,7 @@ void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		if (st==1) {
 			name_length = MAX_NAME_LEN;
 			if (!read_objid(objid, name, &name_length)) {
-				php3_error(E_WARNING,"Invalid object identifier: %s\n", objid);
+				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
 				RETURN_FALSE;
 			}
 		}
@@ -232,12 +232,12 @@ retry:
 				}	
 			} else {
 				if (st!=2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
-					php3_error(E_WARNING,"Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
+					php_error(E_WARNING,"Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
 					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
 						for(count=1, vars = response->variables; vars && count != response->errindex;
 							vars = vars->next_variable, count++);
 						if (vars) sprint_objid(buf,vars->name, vars->name_length);
-						php3_error(E_WARNING,"This name does not exist: %s\n",buf);
+						php_error(E_WARNING,"This name does not exist: %s\n",buf);
 					}
 					if (st==1) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) goto retry;
@@ -248,10 +248,10 @@ retry:
 				}
 			}
 		} else if (status == STAT_TIMEOUT) {
-			php3_error(E_WARNING,"No Response from %s\n", a1->value.str.val);
+			php_error(E_WARNING,"No Response from %s\n", a1->value.str.val);
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
-			php3_error(E_WARNING,"An error occurred, Quitting\n");
+			php_error(E_WARNING,"An error occurred, Quitting\n");
 			RETURN_FALSE;
 		}
 		if (response) snmp_free_pdu(response);

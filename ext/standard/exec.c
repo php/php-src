@@ -50,7 +50,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 
 	buf = (char*) emalloc(EXEC_INPUT_BUF);
     if (!buf) {
-		php3_error(E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
+		php_error(E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
 		return -1;
     }
 	buflen = EXEC_INPUT_BUF;
@@ -63,7 +63,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		c = strchr(cmd, ' ');
 		if (c) *c = '\0';
 		if (strstr(cmd, "..")) {
-			php3_error(E_WARNING, "No '..' components allowed in path");
+			php_error(E_WARNING, "No '..' components allowed in path");
 			efree(buf);
 			return -1;
 		}
@@ -92,7 +92,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		fp = popen(d, "r");
 #endif
 		if (!fp) {
-			php3_error(E_WARNING, "Unable to fork [%s]", d);
+			php_error(E_WARNING, "Unable to fork [%s]", d);
 			efree(d);
 			efree(buf);
 			return -1;
@@ -104,7 +104,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		fp = popen(cmd, "r");
 #endif
 		if (!fp) {
-			php3_error(E_WARNING, "Unable to fork [%s]", cmd);
+			php_error(E_WARNING, "Unable to fork [%s]", cmd);
 			efree(buf);
 			return -1;
 		}
@@ -125,7 +125,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 				if ( buflen <= (l+1) ) {
 					buf = erealloc(buf, buflen + EXEC_INPUT_BUF);
 					if ( buf == NULL ) {
-						php3_error(E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
+						php_error(E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
 								buflen + EXEC_INPUT_BUF);
 						return -1;
 					}
@@ -231,16 +231,16 @@ PHP_FUNCTION(exec)
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
-				php3_error(E_WARNING,"Array argument to exec() not passed by reference");
+				php_error(E_WARNING,"Array argument to exec() not passed by reference");
 			}
 			ret = _Exec(2, arg1->value.str.val, arg2, return_value);
 			break;
 		case 3:
 			if (!ParameterPassedByReference(ht,2)) {
-				php3_error(E_WARNING,"Array argument to exec() not passed by reference");
+				php_error(E_WARNING,"Array argument to exec() not passed by reference");
 			}
 			if (!ParameterPassedByReference(ht,3)) {
-				php3_error(E_WARNING,"return_status argument to exec() not passed by reference");
+				php_error(E_WARNING,"return_status argument to exec() not passed by reference");
 			}
 			ret = _Exec(2, arg1->value.str.val, arg2, return_value);
 			arg3->type = IS_LONG;
@@ -267,7 +267,7 @@ PHP_FUNCTION(system)
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
-				php3_error(E_WARNING,"return_status argument to system() not passed by reference");
+				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
 			ret = _Exec(1, arg1->value.str.val, NULL, return_value);
 			arg2->type = IS_LONG;
@@ -294,7 +294,7 @@ PHP_FUNCTION(passthru)
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
-				php3_error(E_WARNING,"return_status argument to system() not passed by reference");
+				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
 			ret = _Exec(3, arg1->value.str.val, NULL, return_value);
 			arg2->type = IS_LONG;
@@ -372,7 +372,7 @@ PHP_FUNCTION(shell_exec)
 	}
 	
 	if (PG(safe_mode)) {
-		php3_error(E_WARNING,"Cannot execute using backquotes in safe mode");
+		php_error(E_WARNING,"Cannot execute using backquotes in safe mode");
 		RETURN_FALSE;
 	}
 
@@ -382,7 +382,7 @@ PHP_FUNCTION(shell_exec)
 #else
 	if ((in=popen(cmd->value.str.val,"r"))==NULL) {
 #endif
-		php3_error(E_WARNING,"Unable to execute '%s'",cmd->value.str.val);
+		php_error(E_WARNING,"Unable to execute '%s'",cmd->value.str.val);
 	}
 	allocated_space = EXEC_INPUT_BUF;
 	return_value->value.str.val = (char *) emalloc(allocated_space);

@@ -409,7 +409,7 @@ PHP_RINIT_FUNCTION(basic)
 {
 	strtok_string = NULL;
 #ifdef HAVE_PUTENV
-	if (_php3_hash_init(&putenv_ht, 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
+	if (zend_hash_init(&putenv_ht, 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
 	}
 #endif
@@ -423,7 +423,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 {
 	STR_FREE(strtok_string);
 #ifdef HAVE_PUTENV
-	_php3_hash_destroy(&putenv_ht);
+	zend_hash_destroy(&putenv_ht);
 #endif
 
 	return SUCCESS;
@@ -509,7 +509,7 @@ PHP_FUNCTION(putenv)
 		pe.key_len = strlen(pe.key);
 		pe.key = estrndup(pe.key,pe.key_len);
 		
-		_php3_hash_del(&putenv_ht,pe.key,pe.key_len+1);
+		zend_hash_del(&putenv_ht,pe.key,pe.key_len+1);
 		
 		/* find previous value */
 		pe.previous_value = NULL;
@@ -521,7 +521,7 @@ PHP_FUNCTION(putenv)
 		}
 
 		if ((ret=putenv(pe.putenv_string))==0) { /* success */
-			_php3_hash_add(&putenv_ht,pe.key,pe.key_len+1,(void **) &pe,sizeof(putenv_entry),NULL);
+			zend_hash_add(&putenv_ht,pe.key,pe.key_len+1,(void **) &pe,sizeof(putenv_entry),NULL);
 			RETURN_TRUE;
 		} else {
 			efree(pe.putenv_string);
@@ -667,14 +667,14 @@ PHP_FUNCTION(ksort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in ksort() call");
+		php_error(E_WARNING, "Wrong datatype in ksort() call");
 		return;
 	}
 	if (!ParameterPassedByReference(ht,1)) {
-		php3_error(E_WARNING, "Array not passed by reference in call to ksort()");
+		php_error(E_WARNING, "Array not passed by reference in call to ksort()");
 		return;
 	}
-	if (_php3_hash_sort(target_hash, array_key_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_key_compare,0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -698,7 +698,7 @@ PHP_FUNCTION(count)
 		}
 	}
 
-	RETURN_LONG(_php3_hash_num_elements(target_hash));
+	RETURN_LONG(zend_hash_num_elements(target_hash));
 }
 
 
@@ -768,14 +768,14 @@ PHP_FUNCTION(asort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in asort() call");
+		php_error(E_WARNING, "Wrong datatype in asort() call");
 		return;
 	}
     if (!ParameterPassedByReference(ht,1)) {
-        php3_error(E_WARNING, "Array not passed by reference in call to asort()");
+        php_error(E_WARNING, "Array not passed by reference in call to asort()");
 		return;
     }
-	if (_php3_hash_sort(target_hash, array_data_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_data_compare,0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -791,14 +791,14 @@ PHP_FUNCTION(arsort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in arsort() call");
+		php_error(E_WARNING, "Wrong datatype in arsort() call");
 		return;
 	}
     if (!ParameterPassedByReference(ht,1)) {
-        php3_error(E_WARNING, "Array not passed by reference in call to arsort()");
+        php_error(E_WARNING, "Array not passed by reference in call to arsort()");
 		return;
     }
-	if (_php3_hash_sort(target_hash, array_reverse_data_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_reverse_data_compare,0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -814,14 +814,14 @@ PHP_FUNCTION(sort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in sort() call");
+		php_error(E_WARNING, "Wrong datatype in sort() call");
 		return;
 	}
     if (!ParameterPassedByReference(ht,1)) {
-        php3_error(E_WARNING, "Array not passed by reference in call to sort()");
+        php_error(E_WARNING, "Array not passed by reference in call to sort()");
 		return;
     }
-	if (_php3_hash_sort(target_hash, array_data_compare,1) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_data_compare,1) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -837,14 +837,14 @@ PHP_FUNCTION(rsort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in rsort() call");
+		php_error(E_WARNING, "Wrong datatype in rsort() call");
 		return;
 	}
     if (!ParameterPassedByReference(ht,1)) {
-        php3_error(E_WARNING, "Array not passed by reference in call to rsort()");
+        php_error(E_WARNING, "Array not passed by reference in call to rsort()");
 		return;
     }
-	if (_php3_hash_sort(target_hash, array_reverse_data_compare,1) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_reverse_data_compare,1) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -887,12 +887,12 @@ PHP_FUNCTION(usort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in usort() call");
+		php_error(E_WARNING, "Wrong datatype in usort() call");
 		user_compare_func_name = old_compare_func;
 		return;
 	}
 	convert_to_string(user_compare_func_name);
-	if (_php3_hash_sort(target_hash, array_user_compare, 1) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_user_compare, 1) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
 	}
@@ -913,12 +913,12 @@ PHP_FUNCTION(uasort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in uasort() call");
+		php_error(E_WARNING, "Wrong datatype in uasort() call");
 		user_compare_func_name = old_compare_func;
 		return;
 	}
 	convert_to_string(user_compare_func_name);
-	if (_php3_hash_sort(target_hash, array_user_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_user_compare, 0) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
 	}
@@ -987,12 +987,12 @@ PHP_FUNCTION(uksort)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in uksort() call");
+		php_error(E_WARNING, "Wrong datatype in uksort() call");
 		user_compare_func_name = old_compare_func;
 		return;
 	}
 	convert_to_string(user_compare_func_name);
-	if (_php3_hash_sort(target_hash, array_user_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, array_user_key_compare, 0) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
 	}
@@ -1011,14 +1011,14 @@ PHP_FUNCTION(end)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Variable passed to end() is not an array or object");
+		php_error(E_WARNING, "Variable passed to end() is not an array or object");
 		return;
 	}
     if (!ParameterPassedByReference(ht,1)) {
-        php3_error(E_WARNING, "Array not passed by reference in call to end()");
+        php_error(E_WARNING, "Array not passed by reference in call to end()");
     }
-	_php3_hash_internal_pointer_end(target_hash);
-	if (_php3_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+	zend_hash_internal_pointer_end(target_hash);
+	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
 	*return_value = **entry;
@@ -1036,11 +1036,11 @@ PHP_FUNCTION(prev)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Variable passed to prev() is not an array or object");
+		php_error(E_WARNING, "Variable passed to prev() is not an array or object");
 		RETURN_FALSE;
 	}
-	_php3_hash_move_backwards(target_hash);
-	if (_php3_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+	zend_hash_move_backwards(target_hash);
+	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -1059,11 +1059,11 @@ PHP_FUNCTION(next)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Variable passed to next() is not an array or object");
+		php_error(E_WARNING, "Variable passed to next() is not an array or object");
 		RETURN_FALSE;
 	}
-	_php3_hash_move_forward(target_hash);
-	if (_php3_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+	zend_hash_move_forward(target_hash);
+	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -1085,10 +1085,10 @@ PHP_FUNCTION(each)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING,"Variable passed to each() is not an array or object");
+		php_error(E_WARNING,"Variable passed to each() is not an array or object");
 		return;
 	}
-	if (_php3_hash_get_current_data(target_hash, (void **) &entry_ptr)==FAILURE) {
+	if (zend_hash_get_current_data(target_hash, (void **) &entry_ptr)==FAILURE) {
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -1104,13 +1104,13 @@ PHP_FUNCTION(each)
 		tmp->refcount=0;
 		entry=tmp;
 	}
-	_php3_hash_index_update(return_value->value.ht, 1, &entry, sizeof(pval *), NULL);
+	zend_hash_index_update(return_value->value.ht, 1, &entry, sizeof(pval *), NULL);
 	entry->refcount++;
-	_php3_hash_update_ptr(return_value->value.ht, "value", sizeof("value"), entry, sizeof(pval *), NULL);
+	zend_hash_update_ptr(return_value->value.ht, "value", sizeof("value"), entry, sizeof(pval *), NULL);
 	entry->refcount++;
 
 	/* add the key elements */
-	switch (_php3_hash_get_current_key(target_hash, &string_key, &num_key)) {
+	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 		case HASH_KEY_IS_STRING:
 			add_get_index_string(return_value,0,string_key,(void **) &inserted_pointer,0);
 			break;
@@ -1118,9 +1118,9 @@ PHP_FUNCTION(each)
 			add_get_index_long(return_value,0,num_key, (void **) &inserted_pointer);
 			break;
 	}
-	_php3_hash_update(return_value->value.ht, "key", sizeof("key"), inserted_pointer, sizeof(pval *), NULL);
+	zend_hash_update(return_value->value.ht, "key", sizeof("key"), inserted_pointer, sizeof(pval *), NULL);
 	(*inserted_pointer)->refcount++;
-	_php3_hash_move_forward(target_hash);
+	zend_hash_move_forward(target_hash);
 }
 
 	
@@ -1134,11 +1134,11 @@ PHP_FUNCTION(reset)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Variable passed to reset() is not an array or object");
+		php_error(E_WARNING, "Variable passed to reset() is not an array or object");
 		return;
 	}
-	_php3_hash_internal_pointer_reset(target_hash);
-	if (_php3_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+	zend_hash_internal_pointer_reset(target_hash);
+	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		return;
 	}
 		
@@ -1157,10 +1157,10 @@ PHP_FUNCTION(current)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Variable passed to current() is not an array or object");
+		php_error(E_WARNING, "Variable passed to current() is not an array or object");
 		return;
 	}
-	if (_php3_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		return;
 	}
 	*return_value = **entry;
@@ -1180,13 +1180,13 @@ PHP_FUNCTION(key)
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Variable passed to key() is not an array or object");
+		php_error(E_WARNING, "Variable passed to key() is not an array or object");
 		return;
 	}
     if (!ParameterPassedByReference(ht,1)) {
-        php3_error(E_WARNING, "Array not passed by reference in call to key()");
+        php_error(E_WARNING, "Array not passed by reference in call to key()");
     }
-	switch (_php3_hash_get_current_key(target_hash, &string_key, &num_key)) {
+	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 		case HASH_KEY_IS_STRING:
 			return_value->value.str.val = string_key;
 			return_value->value.str.len = strlen(string_key);
@@ -1324,10 +1324,10 @@ PHP_FUNCTION(settype)
 	} else if (!strcasecmp(new_type, "boolean")) {
 		convert_to_boolean(var);
 	} else if (!strcasecmp(new_type, "resource")) {
-		php3_error(E_WARNING, "settype: cannot convert to resource type");
+		php_error(E_WARNING, "settype: cannot convert to resource type");
 		RETURN_FALSE;
 	} else {
-		php3_error(E_WARNING, "settype: invalid type");
+		php_error(E_WARNING, "settype: invalid type");
 		RETURN_FALSE;
 	}
 	RETVAL_TRUE;
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(min)
 	pval **result;
 
 	if (argc<=0) {
-		php3_error(E_WARNING, "min: must be passed at least 1 value");
+		php_error(E_WARNING, "min: must be passed at least 1 value");
 		var_uninit(return_value);
 		return;
 	}
@@ -1351,11 +1351,11 @@ PHP_FUNCTION(min)
 			arr->type != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (_php3_hash_minmax(arr->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax(arr->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
 			*return_value = **result;
 			pval_copy_constructor(return_value);
 		} else {
-			php3_error(E_WARNING, "min: array must contain at least 1 element");
+			php_error(E_WARNING, "min: array must contain at least 1 element");
 			var_uninit(return_value);
 		}
 	} else {
@@ -1391,7 +1391,7 @@ PHP_FUNCTION(max)
 	pval **result;
 
 	if (argc<=0) {
-		php3_error(E_WARNING, "max: must be passed at least 1 value");
+		php_error(E_WARNING, "max: must be passed at least 1 value");
 		var_uninit(return_value);
 		return;
 	}
@@ -1402,11 +1402,11 @@ PHP_FUNCTION(max)
 			arr->type != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (_php3_hash_minmax(arr->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax(arr->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
 			*return_value = **result;
 			pval_copy_constructor(return_value);
 		} else {
-			php3_error(E_WARNING, "max: array must contain at least 1 element");
+			php_error(E_WARNING, "max: array must contain at least 1 element");
 			var_uninit(return_value);
 		}
 	} else {
@@ -1460,12 +1460,12 @@ PHP_FUNCTION(array_walk) {
 	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
-		php3_error(E_WARNING, "Wrong datatype in array_walk() call");
+		php_error(E_WARNING, "Wrong datatype in array_walk() call");
 		php3_array_walk_func_name = old_walk_func_name;
 		return;
 	}
 	convert_to_string(php3_array_walk_func_name);
-	_php3_hash_apply(target_hash, (int (*)(void *))_php3_array_walk);
+	zend_hash_apply(target_hash, (int (*)(void *))_php3_array_walk);
 	php3_array_walk_func_name = old_walk_func_name;
 	RETURN_TRUE;
 }
@@ -1488,13 +1488,13 @@ PHP_FUNCTION(max)
 			WRONG_PARAM_COUNT;
 		}
 		if (argv[0]->value.ht->nNumOfElements < 2) {
-			php3_error(E_WARNING,
+			php_error(E_WARNING,
 					   "min: array must contain at least 2 elements");
 			RETURN_FALSE;
 		}
 		/* replace the function parameters with the array */
 		ht = argv[0]->value.ht;
-		argc = _php3_hash_num_elements(ht);
+		argc = zend_hash_num_elements(ht);
 		efree(argv);
 	} else if (argc < 2) {
 		WRONG_PARAM_COUNT;
@@ -1708,7 +1708,7 @@ PHP_FUNCTION(leak)
 	4th arg = used for additional headers if email
 
   error options
-    0 = send to php3_error_log (uses syslog or file depending on ini setting)
+    0 = send to php_error_log (uses syslog or file depending on ini setting)
 	1 = send via email to 3rd parameter 4th option = additional headers
 	2 = send via tcp/ip to 3rd parameter (name or ip:port)
 	3 = save to file in 3rd parameter
@@ -1723,13 +1723,13 @@ PHP_FUNCTION(error_log)
 	switch(ARG_COUNT(ht)) {
 	case 1:
 		if (getParameters(ht,1,&string) == FAILURE) {
-			php3_error(E_WARNING,"Invalid argument 1 in error_log");
+			php_error(E_WARNING,"Invalid argument 1 in error_log");
 			RETURN_FALSE;
 		}
 		break;
 	case 2:
 		if (getParameters(ht,2,&string,&erropt) == FAILURE) {
-			php3_error(E_WARNING,"Invalid arguments in error_log");
+			php_error(E_WARNING,"Invalid arguments in error_log");
 			RETURN_FALSE;
 		}
 		convert_to_long(erropt);
@@ -1737,7 +1737,7 @@ PHP_FUNCTION(error_log)
 		break;
 	case 3:
 		if (getParameters(ht,3,&string,&erropt,&option) == FAILURE){
-			php3_error(E_WARNING,"Invalid arguments in error_log");
+			php_error(E_WARNING,"Invalid arguments in error_log");
 			RETURN_FALSE;
 		}
 		convert_to_long(erropt);
@@ -1747,7 +1747,7 @@ PHP_FUNCTION(error_log)
 		break;
 	case 4:
 		if (getParameters(ht,4,&string,&erropt,&option,&emailhead) == FAILURE){
-			php3_error(E_WARNING,"Invalid arguments in error_log");
+			php_error(E_WARNING,"Invalid arguments in error_log");
 			RETURN_FALSE;
 		}
 		break;
@@ -1770,14 +1770,14 @@ PHP_FUNCTION(error_log)
 		headers=emailhead->value.str.val;
 	}
 
-	if (_php3_error_log(opt_err,message,opt,headers)==FAILURE) {
+	if (_php_error_log(opt_err,message,opt,headers)==FAILURE) {
 		RETURN_FALSE;
 	}
 
 	RETURN_TRUE;
 }
 
-PHPAPI int _php3_error_log(int opt_err,char *message,char *opt,char *headers){
+PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 	FILE *logfile;
 	int issock=0, socketd=0;;
 
@@ -1789,19 +1789,19 @@ PHPAPI int _php3_error_log(int opt_err,char *message,char *opt,char *headers){
 			return FAILURE;
 		}
 #else
-		php3_error(E_WARNING,"Mail option not available!");
+		php_error(E_WARNING,"Mail option not available!");
 		return FAILURE;
 #endif
 		}
 		break;
 	case 2: /*send to an address */
-		php3_error(E_WARNING,"TCP/IP option not available!");
+		php_error(E_WARNING,"TCP/IP option not available!");
 		return FAILURE;
 		break;
 	case 3: /*save to a file*/
 		logfile=php3_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd);
 		if(!logfile) {
-			php3_error(E_WARNING,"error_log: Unable to write to %s",opt);
+			php_error(E_WARNING,"error_log: Unable to write to %s",opt);
 			return FAILURE;
 		}
 		fwrite(message,strlen(message),1,logfile);
@@ -1835,7 +1835,7 @@ PHP_FUNCTION(call_user_func)
 	if (call_user_function(CG(function_table), NULL, params[0], &retval, arg_count-1, params+1)==SUCCESS) {
 		*return_value = retval;
 	} else {
-		php3_error(E_WARNING,"Unable to call %s() - function does not exist", params[0]->value.str.val);
+		php_error(E_WARNING,"Unable to call %s() - function does not exist", params[0]->value.str.val);
 	}
 	efree(params);
 }
@@ -1858,7 +1858,7 @@ PHP_FUNCTION(call_user_method)
 		RETURN_FALSE;
 	}
 	if (params[1]->type != IS_OBJECT) {
-		php3_error(E_WARNING,"2nd argument is not an object\n");
+		php_error(E_WARNING,"2nd argument is not an object\n");
 		efree(params);
 		RETURN_FALSE;
 	}
@@ -1866,7 +1866,7 @@ PHP_FUNCTION(call_user_method)
 	if (call_user_function(CG(function_table), params[1], params[0], &retval, arg_count-2, params+2)==SUCCESS) {
 		*return_value = retval;
 	} else {
-		php3_error(E_WARNING,"Unable to call %s() - function does not exist", params[0]->value.str.val);
+		php_error(E_WARNING,"Unable to call %s() - function does not exist", params[0]->value.str.val);
 	}
 	efree(params);
 }
@@ -1888,7 +1888,7 @@ int user_shutdown_function_dtor(pval *user_shutdown_function_name)
 void php3_call_shutdown_functions(void)
 {
 	if (user_shutdown_function_names) {
-		_php3_hash_destroy(user_shutdown_function_names);
+		zend_hash_destroy(user_shutdown_function_names);
 		efree(user_shutdown_function_names);
 	}
 }
@@ -1906,13 +1906,13 @@ PHP_FUNCTION(register_shutdown_function)
 	convert_to_string(arg);
 	if (!user_shutdown_function_names) {
 		user_shutdown_function_names = (HashTable *) emalloc(sizeof(HashTable));
-		_php3_hash_init(user_shutdown_function_names, 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
+		zend_hash_init(user_shutdown_function_names, 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
 	}
 	
 	shutdown_function_name = *arg;
 	pval_copy_constructor(&shutdown_function_name);
 	
-	_php3_hash_next_index_insert(user_shutdown_function_names, &shutdown_function_name, sizeof(pval), NULL);
+	zend_hash_next_index_insert(user_shutdown_function_names, &shutdown_function_name, sizeof(pval), NULL);
 }
 /* }}} */
 
@@ -2232,7 +2232,7 @@ PHP_FUNCTION(define)
 		case IS_STRING:
 			break;
 		default:
-			php3_error(E_WARNING,"Constants may only evaluate to scalar values");
+			php_error(E_WARNING,"Constants may only evaluate to scalar values");
 			RETURN_FALSE;
 			break;
 	}

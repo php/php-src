@@ -342,7 +342,7 @@ xml_get_parser(int parser_ind, const char *func, HashTable *list)
 
 	parser = (xml_parser *)php3_list_find(parser_ind, &type);
 	if (!parser || type != XML_GLOBAL(php3_xml_module).le_xml_parser) {
-		php3_error(E_WARNING, "%s: invalid XML parser %d", func, parser_ind);
+		php_error(E_WARNING, "%s: invalid XML parser %d", func, parser_ind);
 		return (xml_parser *)NULL;
 	}
 	return parser;
@@ -664,16 +664,16 @@ static void php3i_add_to_info(xml_parser *parser,char *name)
 		return;
 	}
 
-	if (_php3_hash_find(parser->info->value.ht,name,strlen(name) + 1,(void **) &element) == FAILURE) {
+	if (zend_hash_find(parser->info->value.ht,name,strlen(name) + 1,(void **) &element) == FAILURE) {
 		values = emalloc(sizeof(pval));
 		if (array_init(values) == FAILURE) {
-			php3_error(E_ERROR, "Unable to initialize array");
+			php_error(E_ERROR, "Unable to initialize array");
 			return;
 		}
 
 		INIT_PZVAL(values);
 		
-		_php3_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(pval*), (void **) &element);
+		zend_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(pval*), (void **) &element);
 	} 
 			
 	add_next_index_long(*element,parser->curtag);
@@ -774,13 +774,13 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			}
 
 			if (atcnt) {
-				_php3_hash_add(tag->value.ht,"attributes",sizeof("attributes"),&atr,sizeof(pval*),NULL);
+				zend_hash_add(tag->value.ht,"attributes",sizeof("attributes"),&atr,sizeof(pval*),NULL);
 			} else {
 				php3tls_pval_destructor(atr);
 				efree(atr);
 			}
 
-			_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),(void *) &parser->ctag);
+			zend_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),(void *) &parser->ctag);
 		}
 
 		if (parser->case_folding) {
@@ -831,7 +831,7 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 				add_assoc_string(tag,"type","close",1);
 				add_assoc_long(tag,"level",parser->level);
 				  
-				_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),NULL);
+				zend_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),NULL);
 			}
 
 			parser->lastwasopen = 0;
@@ -906,7 +906,7 @@ void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					add_assoc_string(tag,"type","cdata",1);
 					add_assoc_long(tag,"level",parser->level);
 					
-					_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),NULL);
+					zend_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),NULL);
 				}
 			} else {
 				efree(decoded_value);
@@ -1086,7 +1086,7 @@ PHP_FUNCTION(xml_parser_create)
 						encodingArg->value.str.len) == 0) {
 			encoding = "US-ASCII";
 		} else { /* UTF-16 not supported */
-			php3_error(E_WARNING, "%s: unsupported source encoding \"%s\"",
+			php_error(E_WARNING, "%s: unsupported source encoding \"%s\"",
 					   thisfunc, encodingArg->value.str.val);
 			RETURN_FALSE;
 		}
@@ -1315,7 +1315,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	argc = ARG_COUNT(ht);
 	if (getParameters(ht, 4, &pind, &data, &xdata,&info) == SUCCESS) {
 		if (!ParameterPassedByReference(ht, 4)) {
-			php3_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
             RETURN_FALSE;
 		}
 		array_init(info);
@@ -1324,7 +1324,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	}
 
 	if (!ParameterPassedByReference(ht, 3)) {
-		php3_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+		php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
 		RETURN_FALSE;
 	}
 
@@ -1504,7 +1504,7 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP3_XML_OPTION_TARGET_ENCODING: {
 			xml_encoding *enc = xml_get_encoding(val->value.str.val);
 			if (enc == NULL) {
-				php3_error(E_WARNING, "%s: unsupported target encoding \"%s\"",
+				php_error(E_WARNING, "%s: unsupported target encoding \"%s\"",
 						   thisfunc, val->value.str.val);
 				RETURN_FALSE;
 			}
@@ -1512,7 +1512,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			break;
 		}
 		default:
-			php3_error(E_WARNING, "%s: unknown option", thisfunc);
+			php_error(E_WARNING, "%s: unknown option", thisfunc);
 			RETURN_FALSE;
 			break;
 	}
@@ -1546,7 +1546,7 @@ PHP_FUNCTION(xml_parser_get_option)
 			RETURN_STRING(parser->target_encoding, 1);
 			break;
 		default:
-			php3_error(E_WARNING, "%s: unknown option", thisfunc);
+			php_error(E_WARNING, "%s: unknown option", thisfunc);
 			RETURN_FALSE;
 			break;
 	}

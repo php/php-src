@@ -145,7 +145,7 @@ int _php3_is_persistent_sock(int sock)
 	char *key;
 	PLS_FETCH();
 
-	if (_php3_hash_find(&PG(ht_fsock_socks), (char *) &sock, sizeof(sock),
+	if (zend_hash_find(&PG(ht_fsock_socks), (char *) &sock, sizeof(sock),
 				(void **) &key) == SUCCESS) {
 		return 1;
 	}
@@ -254,7 +254,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			/* fall-through */
 		case 4:
 			if(!ParameterPassedByReference(ht,4)) {
-				php3_error(E_WARNING,"error string argument to fsockopen not passed by reference");
+				php_error(E_WARNING,"error string argument to fsockopen not passed by reference");
 			}
 			pval_copy_constructor(args[3]);
 			args[3]->value.str.val = empty_string;
@@ -263,7 +263,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			/* fall-through */
 		case 3:
 			if(!ParameterPassedByReference(ht,3)) {
-				php3_error(E_WARNING,"error argument to fsockopen not passed by reference");
+				php_error(E_WARNING,"error argument to fsockopen not passed by reference");
 			}
 			args[2]->type = IS_LONG;
 			args[2]->value.lval = 0;
@@ -276,7 +276,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	key = emalloc(args[0]->value.str.len + 10);
 	sprintf(key, "%s:%d", args[0]->value.str.val, portno);
 
-	if (persistent && _php3_hash_find(&PG(ht_fsock_keys), key, strlen(key) + 1,
+	if (persistent && zend_hash_find(&PG(ht_fsock_keys), key, strlen(key) + 1,
 				(void *) &sockp) == SUCCESS) {
 		FREE_SOCK;
 		*sock = *sockp;
@@ -351,9 +351,9 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 	*sock=socketd;
 	if (persistent) {
-		_php3_hash_update(&PG(ht_fsock_keys), key, strlen(key) + 1, 
+		zend_hash_update(&PG(ht_fsock_keys), key, strlen(key) + 1, 
 				sock, sizeof(*sock), NULL);
-		_php3_hash_update(&PG(ht_fsock_socks), (char *) sock, sizeof(*sock),
+		zend_hash_update(&PG(ht_fsock_socks), (char *) sock, sizeof(*sock),
 				key, strlen(key) + 1, NULL);
 	}
 	if(key) efree(key);
@@ -704,8 +704,8 @@ static int _php3_msock_destroy(int *data)
 PHP_MINIT_FUNCTION(fsock)
 {
 #ifndef ZTS
-	_php3_hash_init(&PG(ht_fsock_keys), 0, NULL, NULL, 1);
-	_php3_hash_init(&PG(ht_fsock_socks), 0, NULL, (int (*)(void *))_php3_msock_destroy, 1);
+	zend_hash_init(&PG(ht_fsock_keys), 0, NULL, NULL, 1);
+	zend_hash_init(&PG(ht_fsock_socks), 0, NULL, (int (*)(void *))_php3_msock_destroy, 1);
 #endif
 	return SUCCESS;
 }
@@ -715,8 +715,8 @@ PHP_MINIT_FUNCTION(fsock)
 PHP_MSHUTDOWN_FUNCTION(fsock)
 {
 #ifndef ZTS
-	_php3_hash_destroy(&PG(ht_fsock_socks));
-	_php3_hash_destroy(&PG(ht_fsock_keys));
+	zend_hash_destroy(&PG(ht_fsock_socks));
+	zend_hash_destroy(&PG(ht_fsock_keys));
 #endif
 	php_cleanup_sockbuf(1);
 	return SUCCESS;

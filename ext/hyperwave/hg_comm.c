@@ -1151,38 +1151,38 @@ hg_msg *recv_hg_msg(int sockfd)
 	hg_msg *msg;
 
 	if ( (msg = (hg_msg *)emalloc(sizeof(hg_msg))) == NULL )  {
-/*		php3_printf("recv_hg_msg"); */
+/*		php_printf("recv_hg_msg"); */
 		lowerror = LE_MALLOC;
 		return(NULL);
 	}
 
 	if ( hg_read_exact(sockfd, (char *)&(msg->length), 4) == -1 )  {
-/*		php3_printf("recv_hg_msg: hg_read (1) returned -1\n"); */
+/*		php_printf("recv_hg_msg: hg_read (1) returned -1\n"); */
 		efree(msg);
 		return(NULL);
 	}
 
 	if ( hg_read_exact(sockfd, (char *)&(msg->version_msgid), 4) == -1 )  {
-/*		php3_printf("recv_hg_msg: hg_read (2) returned -1\n"); */
+/*		php_printf("recv_hg_msg: hg_read (2) returned -1\n"); */
 		efree(msg);
 		return(NULL);
 	}
 
 	if ( hg_read_exact(sockfd, (char *)&(msg->msg_type), 4) == -1 )  {
-/*		php3_printf("recv_hg_msg: hg_read (3) returned -1\n"); */
+/*		php_printf("recv_hg_msg: hg_read (3) returned -1\n"); */
 		efree(msg);
 		return(NULL);
 	}
 
 	if ( msg->length > HEADER_LENGTH )  {
 		if ( (msg->buf = (char *) emalloc(msg->length-HEADER_LENGTH)) == NULL )  {
-/*			php3_printf("recv_hg_msg"); */
+/*			php_printf("recv_hg_msg"); */
 			lowerror = LE_MALLOC;
 			efree(msg);
 			return(NULL);
 		}
 		if ( hg_read_exact(sockfd, msg->buf, msg->length-HEADER_LENGTH) == -1 )  {
-/*			php3_printf("recv_hg_msg: hg_read (4) returned -1\n"); */
+/*			php_printf("recv_hg_msg: hg_read (4) returned -1\n"); */
 			efree(msg->buf);
 			efree(msg);
 			return(NULL);
@@ -1192,7 +1192,7 @@ hg_msg *recv_hg_msg(int sockfd)
 		msg->buf = NULL;  
 
 #ifdef HW_DEBUG
-	php3_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
 #endif
 	return(msg);
 }
@@ -1203,11 +1203,11 @@ hg_msg *recv_ready(int sockfd)
 	hg_msg *ready_msg;
 
 	if ( (ready_msg = recv_hg_msg(sockfd)) == NULL )  {
-/*		php3_printf("recv_ready: recv_hg_msg returned NULL\n"); */
+/*		php_printf("recv_ready: recv_hg_msg returned NULL\n"); */
 		return(NULL);
 	}    
 	if ( ready_msg->msg_type != READY_MESSAGE )  {
-/*		php3_printf("recv_ready: recv_hg_msg returned wrong message: %d, %d  \n", ready_msg->length, ready_msg->msg_type); */
+/*		php_printf("recv_ready: recv_hg_msg returned wrong message: %d, %d  \n", ready_msg->length, ready_msg->msg_type); */
 		efree(ready_msg);
 		return(NULL);
 	}
@@ -3933,7 +3933,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php3_error(E_WARNING, "gethostbyname failed for %s", host);
+			php_error(E_WARNING, "gethostbyname failed for %s", host);
 			close(fd);
 			return(-1);
 		}
@@ -4015,7 +4015,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
         */
 	len = sizeof(serv_addr);
 	if((newfd = accept(fd, (struct sockaddr *) &serv_addr, &len)) < 0) {
-/*		php3_printf("client: can't open data connection to server\n"); */
+/*		php_printf("client: can't open data connection to server\n"); */
 		if(attributes) efree(attributes);
 		close(fd);
 		return(-1);
@@ -4110,7 +4110,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php3_error(E_WARNING, "gethostbyname failed for %s", host);
+			php_error(E_WARNING, "gethostbyname failed for %s", host);
 			close(fd);
 			return(-1);
 		}
@@ -4128,7 +4128,7 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 			hostip = inet_ntoa(*ptr1);
 			break;
 		default:
-/*			php3_printf(stderr, "unknown address type\n"); */
+/*			php_printf(stderr, "unknown address type\n"); */
 			break;
 	}
 	 
@@ -4293,7 +4293,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php3_error(E_WARNING, "gethostbyname failed for %s", host);
+			php_error(E_WARNING, "gethostbyname failed for %s", host);
 			/* close(fd); fd is not set yet */
 			return(-1);
 		}
@@ -4532,7 +4532,7 @@ static int send_hg_msg(int sockfd, hg_msg *msg, int length)
      char *buf, *tmp;
 
 #ifdef HW_DEBUG
-	php3_printf("<B>Sending msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+	php_printf("<B>Sending msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
 #endif
      if ( length < HEADER_LENGTH )  {
 /*          fprintf(stderr, "send_hg_msg: bad msg\n"); */
@@ -4644,7 +4644,7 @@ static char *build_msg_int(char *buf, int val) {
 	int tmp;
 
 #ifdef HW_DEBUG
-	php3_printf("   Added int to header: <B>%d</B><BR>\n", val);
+	php_printf("   Added int to header: <B>%d</B><BR>\n", val);
 #endif
 	tmp = swap_on ? swap(val) : val;
 	memcpy(buf, (char *)&tmp, 4);
@@ -4658,7 +4658,7 @@ static char *build_msg_str(char *buf, char *str)
      int len = strlen(str)+1;
 
 #ifdef HW_DEBUG
-	php3_printf("   Added str to header: <B>%s</B> (%d)<BR>\n", str, strlen(str));
+	php_printf("   Added str to header: <B>%s</B> (%d)<BR>\n", str, strlen(str));
 #endif
 
      memcpy(buf, str, len);

@@ -49,7 +49,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 	
 	ctype = request_info.content_type;
 	if (!ctype) {
-		php3_error(E_WARNING, "POST Error: content-type missing");
+		php_error(E_WARNING, "POST Error: content-type missing");
 		return NULL;
 	}
 	if (strncasecmp(ctype, "application/x-www-form-urlencoded", 33) && strncasecmp(ctype, "multipart/form-data", 19)
@@ -57,7 +57,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
  && strncasecmp(ctype, "application/vnd.fdf", 19)
 #endif
       ) {
-		php3_error(E_WARNING, "Unsupported content-type: %s", ctype);
+		php_error(E_WARNING, "Unsupported content-type: %s", ctype);
 		return NULL;
 	}
 	if (!strncasecmp(ctype, "multipart/form-data", 19)) {
@@ -66,9 +66,9 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 		if (mb) {
 			strncpy(boundary, mb + 1, sizeof(boundary));
 		} else {
-			php3_error(E_WARNING, "File Upload Error: No MIME boundary found");
-			php3_error(E_WARNING, "There should have been a \"boundary=something\" in the Content-Type string");
-			php3_error(E_WARNING, "The Content-Type string was: \"%s\"", ctype);
+			php_error(E_WARNING, "File Upload Error: No MIME boundary found");
+			php_error(E_WARNING, "There should have been a \"boundary=something\" in the Content-Type string");
+			php_error(E_WARNING, "The Content-Type string was: \"%s\"", ctype);
 			return NULL;
 		}
 	}
@@ -76,7 +76,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 	cnt = length;
 	buf = (char *) emalloc((length + 1) * sizeof(char));
 	if (!buf) {
-		php3_error(E_WARNING, "Unable to allocate memory in php3_getpost()");
+		php_error(E_WARNING, "Unable to allocate memory in php3_getpost()");
 		return NULL;
 	}
 #if FHTTPD
@@ -133,7 +133,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 		postdata_ptr->value.str.val = (char *) estrdup(buf);
 		postdata_ptr->value.str.len = cnt;
 		INIT_PZVAL(postdata_ptr);
-		_php3_hash_add(&symbol_table, "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
+		zend_hash_add(&symbol_table, "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
 	}
 #endif
 	return (buf);
@@ -210,20 +210,20 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		pval **arr_ptr;
 
 		/* If the array doesn't exist, create it */
-		if (_php3_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr) == FAILURE) {
+		if (zend_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr) == FAILURE) {
 			arr1 = (pval *) emalloc(sizeof(pval));
 			INIT_PZVAL(arr1);
 			if (array_init(arr1)==FAILURE) {
 				return;
 			}
-			_php3_hash_update(EG(active_symbol_table), var, var_len+1, &arr1, sizeof(pval *), NULL);
+			zend_hash_update(EG(active_symbol_table), var, var_len+1, &arr1, sizeof(pval *), NULL);
 			if (track_vars_array) {
 				arr2 = (pval *) emalloc(sizeof(pval));
 				INIT_PZVAL(arr2);
 				if (array_init(arr2)==FAILURE) {
 					return;
 				}
-				_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
+				zend_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
 			}
 		} else {
 			if ((*arr_ptr)->type!=IS_ARRAY) {
@@ -242,11 +242,11 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 					if (array_init(arr2)==FAILURE) {
 						return;
 					}
-					_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
+					zend_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
 				}
 			}
 			arr1 = *arr_ptr;
-			if (track_vars_array && _php3_hash_find(track_vars_array->value.ht, var, var_len+1, (void **) &arr_ptr) == FAILURE) {
+			if (track_vars_array && zend_hash_find(track_vars_array->value.ht, var, var_len+1, (void **) &arr_ptr) == FAILURE) {
 				return;
 			}
 			arr2 = *arr_ptr;
@@ -261,24 +261,24 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		/* And then insert it */
 		if (ret) {		/* array */
 			if (php3_check_type(ret) == IS_LONG) { /* numeric index */
-				_php3_hash_index_update(arr1->value.ht, atol(ret), &entry, sizeof(pval *),NULL);	/* s[ret]=tmp */
+				zend_hash_index_update(arr1->value.ht, atol(ret), &entry, sizeof(pval *),NULL);	/* s[ret]=tmp */
 				if (track_vars_array) {
-					_php3_hash_index_update(arr2->value.ht, atol(ret), &entry, sizeof(pval *),NULL);
+					zend_hash_index_update(arr2->value.ht, atol(ret), &entry, sizeof(pval *),NULL);
 					entry->refcount++;
 				}
 			} else { /* associative index */
-				_php3_hash_update(arr1->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);	/* s["ret"]=tmp */
+				zend_hash_update(arr1->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);	/* s["ret"]=tmp */
 				if (track_vars_array) {
-					_php3_hash_update(arr2->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);
+					zend_hash_update(arr2->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);
 					entry->refcount++;
 				}
 			}
 			efree(ret);
 			ret = NULL;
 		} else {		/* non-indexed array */
-			_php3_hash_next_index_insert(arr1->value.ht, &entry, sizeof(pval *),NULL);
+			zend_hash_next_index_insert(arr1->value.ht, &entry, sizeof(pval *),NULL);
 			if (track_vars_array) {
-				_php3_hash_next_index_insert(arr2->value.ht, &entry, sizeof(pval *),NULL);
+				zend_hash_next_index_insert(arr2->value.ht, &entry, sizeof(pval *),NULL);
 				entry->refcount++;
 			}
 		}
@@ -289,10 +289,10 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 		INIT_PZVAL(entry);
 		entry->value.str.val = val;
 		entry->value.str.len = val_len;
-		_php3_hash_update(EG(active_symbol_table), var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
+		zend_hash_update(EG(active_symbol_table), var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
 		if (track_vars_array) {
 			entry->refcount++;
-			_php3_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &entry, sizeof(pval *), NULL);
+			zend_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &entry, sizeof(pval *), NULL);
 		}
 	}
 }
@@ -317,13 +317,13 @@ void php3_treat_data(int arg, char *str)
 				INIT_PZVAL(array_ptr);
 				switch (arg) {
 					case PARSE_POST:
-						_php3_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &array_ptr, sizeof(pval *),NULL);
+						zend_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &array_ptr, sizeof(pval *),NULL);
 						break;
 					case PARSE_GET:
-						_php3_hash_add(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), &array_ptr, sizeof(pval *),NULL);
+						zend_hash_add(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), &array_ptr, sizeof(pval *),NULL);
 						break;
 					case PARSE_COOKIE:
-						_php3_hash_add(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), &array_ptr, sizeof(pval *),NULL);
+						zend_hash_add(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), &array_ptr, sizeof(pval *),NULL);
 						break;
 				}
 			} else {
@@ -420,12 +420,12 @@ PHPAPI void php3_TreatHeaders(void)
 	/* Check to make sure that this URL isn't authenticated
 	   using a traditional auth module mechanism */
 	if (auth_type(r)) {
-		/*php3_error(E_WARNING, "Authentication done by server module\n");*/
+		/*php_error(E_WARNING, "Authentication done by server module\n");*/
 		return;
 	}
 	if (strcmp(t=getword(r->pool, &s, ' '), "Basic")) {
 		/* Client tried to authenticate using wrong auth scheme */
-		php3_error(E_WARNING, "client used wrong authentication scheme (%s)", t);
+		php_error(E_WARNING, "client used wrong authentication scheme (%s)", t);
 		return;
 	}
 	t = uudecode(r->pool, s);

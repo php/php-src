@@ -101,7 +101,7 @@ PHP_RINIT_FUNCTION(velocis)
 
 PHP_MINFO_FUNCTION(velocis)
 {
-	php3_printf("RAIMA Velocis Support Active");
+	php_printf("RAIMA Velocis Support Active");
 }
 
 PHP_MSHUTDOWN_FUNCTION(velocis)
@@ -188,7 +188,7 @@ PHP_FUNCTION(velocis_connect)
 	long ind;
 
 	if ( php3_velocis_module.max_links != -1 && php3_velocis_module.num_links == php3_velocis_module.max_links ) {
-		php3_error(E_WARNING,"Velocis: Too many open connections (%d)",php3_velocis_module.num_links);
+		php_error(E_WARNING,"Velocis: Too many open connections (%d)",php3_velocis_module.num_links);
 		RETURN_FALSE;
 	}
 	if ( ARG_COUNT(ht) != 3 ||
@@ -203,18 +203,18 @@ PHP_FUNCTION(velocis_connect)
 	Pass = pass->value.str.val;
 	stat = SQLAllocConnect(henv,&hdbc);
 	if ( stat != SQL_SUCCESS ) {
-		php3_error(E_WARNING,"Velocis: Could not allocate connection handle");
+		php_error(E_WARNING,"Velocis: Could not allocate connection handle");
 		RETURN_FALSE;
 	}
 	stat = SQLConnect(hdbc,Serv,SQL_NTS,User,SQL_NTS,Pass,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php3_error(E_WARNING,"Velocis: Could not connect to server \"%s\" for %s",Serv,User);
+		php_error(E_WARNING,"Velocis: Could not connect to server \"%s\" for %s",Serv,User);
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
 	new = (VConn *)emalloc(sizeof(VConn));
 	if ( new == NULL ) {
-		php3_error(E_WARNING,"Velocis: Out of memory for store connection");
+		php_error(E_WARNING,"Velocis: Out of memory for store connection");
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
@@ -234,7 +234,7 @@ PHP_FUNCTION(velocis_close)
 	convert_to_long(id);
 	conn = velocis_find_conn(list,id->value.lval);
 	if ( !conn ) {
-		php3_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
 		RETURN_FALSE;
 	}
 	SQLDisconnect(conn->hdbc);
@@ -261,7 +261,7 @@ PHP_FUNCTION(velocis_exec)
 	convert_to_long(ind);
 	conn = velocis_find_conn(list,ind->value.lval);
 	if ( !conn ) {
-		php3_error(E_WARNING,"Velocis: Not connection index (%d)",ind->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",ind->value.lval);
 		RETURN_FALSE;
 	}
 	convert_to_string(exec_str);
@@ -269,18 +269,18 @@ PHP_FUNCTION(velocis_exec)
 
 	res = (Vresult *)emalloc(sizeof(Vresult));
 	if ( res == NULL ) {
-		php3_error(E_WARNING,"Velocis: Out of memory for result");
+		php_error(E_WARNING,"Velocis: Out of memory for result");
 		RETURN_FALSE;
 	}
 	stat = SQLAllocStmt(conn->hdbc,&res->hstmt);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php3_error(E_WARNING,"Velocis: SQLAllocStmt return %d",stat);
+		php_error(E_WARNING,"Velocis: SQLAllocStmt return %d",stat);
 		efree(res);
 		RETURN_FALSE;
 	}
 	stat = SQLExecDirect(res->hstmt,query,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php3_error(E_WARNING,"Velocis: Can not execute \"%s\" query",query);
+		php_error(E_WARNING,"Velocis: Can not execute \"%s\" query",query);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -288,7 +288,7 @@ PHP_FUNCTION(velocis_exec)
 	/* Success query */
 	stat = SQLNumResultCols(res->hstmt,&cols);
 	if ( stat != SQL_SUCCESS ) {
-		php3_error(E_WARNING,"Velocis: SQLNumResultCols return %d",stat);
+		php_error(E_WARNING,"Velocis: SQLNumResultCols return %d",stat);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -296,7 +296,7 @@ PHP_FUNCTION(velocis_exec)
 	if ( !cols ) { /* Was INSERT, UPDATE, DELETE, etc. query */
 		stat = SQLRowCount(res->hstmt,&rows);
 		if ( stat != SQL_SUCCESS ) {
-			php3_error(E_WARNING,"Velocis: SQLNumResultCols return %d",stat);
+			php_error(E_WARNING,"Velocis: SQLNumResultCols return %d",stat);
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			efree(res);
 			RETURN_FALSE;
@@ -307,7 +307,7 @@ PHP_FUNCTION(velocis_exec)
 	} else {  /* Was SELECT query */
 		res->values = (VResVal *)emalloc(sizeof(VResVal)*cols);
 		if ( res->values == NULL ) {
-			php3_error(E_WARNING,"Velocis: Out of memory for result columns");
+			php_error(E_WARNING,"Velocis: Out of memory for result columns");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			efree(res);
 			RETURN_FALSE;
@@ -356,7 +356,7 @@ PHP_FUNCTION(velocis_fetch)
 	convert_to_long(ind);
 	res = velocis_find_result(list,ind->value.lval);
 	if ( !res ) {
-		php3_error(E_WARNING,"Velocis: Not result index (%d)",ind->value.lval);
+		php_error(E_WARNING,"Velocis: Not result index (%d)",ind->value.lval);
 		RETURN_FALSE;
 	}
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
@@ -366,7 +366,7 @@ PHP_FUNCTION(velocis_fetch)
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php3_error(E_WARNING,"Velocis: SQLFetch return error");
+		php_error(E_WARNING,"Velocis: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		velocis_del_result(list,ind->value.lval);
 		RETURN_FALSE;
@@ -392,7 +392,7 @@ PHP_FUNCTION(velocis_result)
 	convert_to_long(ind);
 	res = velocis_find_result(list,ind->value.lval);
 	if ( !res ) {
-		php3_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
+		php_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
 		RETURN_FALSE;
 	}
 	if ( col->type == IS_STRING ) {
@@ -409,12 +409,12 @@ PHP_FUNCTION(velocis_result)
 			}
 		}
 		if ( indx < 0 ) {
-			php3_error(E_WARNING, "Field %s not found",field);
+			php_error(E_WARNING, "Field %s not found",field);
 			RETURN_FALSE;
 		}
 	} else {
 		if ( indx < 0 || indx >= res->numcols ) {
-			php3_error(E_WARNING,"Velocis: Field index not in range");
+			php_error(E_WARNING,"Velocis: Field index not in range");
 			RETURN_FALSE;
 		}
 	}
@@ -426,7 +426,7 @@ PHP_FUNCTION(velocis_result)
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-			php3_error(E_WARNING,"Velocis: SQLFetch return error");
+			php_error(E_WARNING,"Velocis: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			velocis_del_result(list,ind->value.lval);
 			RETURN_FALSE;
@@ -443,7 +443,7 @@ l1:
 			if ( !res->values[indx].value ) {
 				res->values[indx].value = emalloc(4096);
 				if ( !res->values[indx].value ) {
-					php3_error(E_WARNING,"Out of memory");
+					php_error(E_WARNING,"Out of memory");
 					RETURN_FALSE;
 				}
 			}
@@ -455,7 +455,7 @@ l1:
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-				php3_error(E_WARNING,"Velocis: SQLGetData return error");
+				php_error(E_WARNING,"Velocis: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
 				velocis_del_result(list,ind->value.lval);
 				RETURN_FALSE;
@@ -483,7 +483,7 @@ PHP_FUNCTION(velocis_freeresult)
 	convert_to_long(ind);
 	res = velocis_find_result(list,ind->value.lval);
 	if ( !res ) {
-		php3_error(E_WARNING,"Velocis: Not result index (%d)",ind->value.lval);
+		php_error(E_WARNING,"Velocis: Not result index (%d)",ind->value.lval);
 		RETURN_FALSE;
 	}
 	SQLFreeStmt(res->hstmt,SQL_DROP);
@@ -503,12 +503,12 @@ PHP_FUNCTION(velocis_autocommit)
 	convert_to_long(id);
 	conn = velocis_find_conn(list,id->value.lval);
 	if ( !conn ) {
-		php3_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_ON);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php3_error(E_WARNING,"Velocis: Set autocommit_on option failure");
+		php_error(E_WARNING,"Velocis: Set autocommit_on option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -526,12 +526,12 @@ PHP_FUNCTION(velocis_off_autocommit)
 	convert_to_long(id);
 	conn = velocis_find_conn(list,id->value.lval);
 	if ( !conn ) {
-		php3_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_OFF);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php3_error(E_WARNING,"Velocis: Set autocommit_off option failure");
+		php_error(E_WARNING,"Velocis: Set autocommit_off option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -549,12 +549,12 @@ PHP_FUNCTION(velocis_commit)
 	convert_to_long(id);
 	conn = velocis_find_conn(list,id->value.lval);
 	if ( !conn ) {
-		php3_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_COMMIT);
 	if ( stat != SQL_SUCCESS ) {
-		php3_error(E_WARNING,"Velocis: Commit failure");
+		php_error(E_WARNING,"Velocis: Commit failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -572,12 +572,12 @@ PHP_FUNCTION(velocis_rollback)
 	convert_to_long(id);
 	conn = velocis_find_conn(list,id->value.lval);
 	if ( !conn ) {
-		php3_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
+		php_error(E_WARNING,"Velocis: Not connection index (%d)",id->value.lval);
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_ROLLBACK);
 	if ( stat != SQL_SUCCESS ) {
-		php3_error(E_WARNING,"Velocis: Rollback failure");
+		php_error(E_WARNING,"Velocis: Rollback failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -595,13 +595,13 @@ PHP_FUNCTION(velocis_fieldname)
 	convert_to_long(ind);
 	res = velocis_find_result(list,ind->value.lval);
 	if ( !res ) {
-		php3_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
+		php_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
 		RETURN_FALSE;
 	}
 	convert_to_long(col);
 	indx = col->value.lval;
 	if ( indx < 0 || indx >= res->numcols ) {
-		php3_error(E_WARNING,"Velocis: Field index not in range");
+		php_error(E_WARNING,"Velocis: Field index not in range");
 		RETURN_FALSE;
 	}
 	RETURN_STRING(res->values[indx].name,TRUE);
@@ -618,7 +618,7 @@ PHP_FUNCTION(velocis_fieldnum)
 	convert_to_long(ind);
 	res = velocis_find_result(list,ind->value.lval);
 	if ( !res ) {
-		php3_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
+		php_error(E_WARNING,"Velocis: Not result index (%d),ind->value.lval");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(res->numcols);

@@ -175,6 +175,6 @@ void init_cfg_scanner()
 
 <INITIAL>. {
 #if DEBUG
-	php3_error(E_NOTICE,"Unexpected character on line %d:  '%s' (ASCII %d)\n",yylineno,yytext,yytext[0]);
+	php_error(E_NOTICE,"Unexpected character on line %d:  '%s' (ASCII %d)\n",yylineno,yytext,yytext[0]);
 #endif
 }

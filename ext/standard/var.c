@@ -64,25 +64,25 @@ void php3api_var_dump(pval **struc, int level)
 			break;
 
 		case IS_ARRAY:
-			i = sprintf(buf, "%*carray(%d) {\n", level, ' ', _php3_hash_num_elements((*struc)->value.ht));
+			i = sprintf(buf, "%*carray(%d) {\n", level, ' ', zend_hash_num_elements((*struc)->value.ht));
 			PHPWRITE(&buf[1], i - 1);
 			goto head_done;
 
 		case IS_OBJECT:
-			i = sprintf(buf, "%*cobject(%d) {\n", level, ' ', _php3_hash_num_elements((*struc)->value.ht));
+			i = sprintf(buf, "%*cobject(%d) {\n", level, ' ', zend_hash_num_elements((*struc)->value.ht));
 			PHPWRITE(&buf[1], i - 1);
 		  head_done:
 
-			_php3_hash_internal_pointer_reset((*struc)->value.ht);
-			for (;; _php3_hash_move_forward((*struc)->value.ht)) {
-				if ((i = _php3_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT)
+			zend_hash_internal_pointer_reset((*struc)->value.ht);
+			for (;; zend_hash_move_forward((*struc)->value.ht)) {
+				if ((i = zend_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT)
 					break;
 				if (c > 0) {
 					strcpy(buf, "\n");
 					PHPWRITE(buf, strlen(buf));
 				}
 				c++;
-				if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == struc))
+				if (zend_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == struc))
 					continue;
 				switch (i) {
 					case HASH_KEY_IS_LONG:{
@@ -193,7 +193,7 @@ void php3api_var_serialize(pval *buf, pval **struc)
 
 		case IS_ARRAY:
 			ch = 'a';
-			i = _php3_hash_num_elements((*struc)->value.ht);
+			i = zend_hash_num_elements((*struc)->value.ht);
 			slen = sprintf(s, "%c:%d:{", ch, i);
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
@@ -201,12 +201,12 @@ void php3api_var_serialize(pval *buf, pval **struc)
 				pval **data,*d;
 				ulong index;
 				
-				_php3_hash_internal_pointer_reset((*struc)->value.ht);
-				for (;; _php3_hash_move_forward((*struc)->value.ht)) {
-					if ((i = _php3_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
+				zend_hash_internal_pointer_reset((*struc)->value.ht);
+				for (;; zend_hash_move_forward((*struc)->value.ht)) {
+					if ((i = zend_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) !=
+					if (zend_hash_get_current_data((*struc)->value.ht, (void **) (&data)) !=
 							SUCCESS || !data || ((*data) == (*struc))) {
 						continue;
 					}
@@ -245,11 +245,11 @@ void php3api_var_serialize(pval *buf, pval **struc)
 				ulong index;
 
 				zend_hash_internal_pointer_reset((*struc)->value.obj.properties);
-				for (;; _php3_hash_move_forward((*struc)->value.obj.properties)) {
-					if ((i = _php3_hash_get_current_key((*struc)->value.obj.properties, &key, &index)) == HASH_KEY_NON_EXISTANT) {
+				for (;; zend_hash_move_forward((*struc)->value.obj.properties)) {
+					if ((i = zend_hash_get_current_key((*struc)->value.obj.properties, &key, &index)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (_php3_hash_get_current_data((*struc)->value.obj.properties, (void **)
+					if (zend_hash_get_current_data((*struc)->value.obj.properties, (void **)
 							(&data)) != SUCCESS || !data || ((*data) == (*struc))) {
 						continue;
 					}
@@ -371,7 +371,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_PTR_DTOR, 0);
+			zend_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_PTR_DTOR, 0);
 			while (**p && **p != ':') {
 				(*p)++;
 			}
@@ -395,10 +395,10 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 				}
 				switch (key->type) {
 					case IS_LONG:
-						_php3_hash_index_update((*rval)->value.ht, key->value.lval, &data, sizeof(data), NULL);
+						zend_hash_index_update((*rval)->value.ht, key->value.lval, &data, sizeof(data), NULL);
 						break;
 					case IS_STRING:
-						_php3_hash_add((*rval)->value.ht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
+						zend_hash_add((*rval)->value.ht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
 						break;
 				}
 				pval_destructor(key);
@@ -412,7 +412,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-			_php3_hash_init((*rval)->value.obj.properties, i + 1, NULL, PVAL_PTR_DTOR, 0);
+			zend_hash_init((*rval)->value.obj.properties, i + 1, NULL, PVAL_PTR_DTOR, 0);
 			while (**p && **p != ':') {
 				(*p)++;
 			}
@@ -436,10 +436,10 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 				}
 				switch (key->type) {
 					case IS_LONG:
-						_php3_hash_index_update((*rval)->value.obj.properties, key->value.lval, &data, sizeof(data), NULL);
+						zend_hash_index_update((*rval)->value.obj.properties, key->value.lval, &data, sizeof(data), NULL);
 						break;
 					case IS_STRING:
-						_php3_hash_add((*rval)->value.obj.properties, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
+						zend_hash_add((*rval)->value.obj.properties, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
 						break;
 				}
 				pval_destructor(key);

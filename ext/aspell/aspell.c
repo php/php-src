@@ -115,7 +115,7 @@ PHP_FUNCTION(aspell_suggest)
 	sc= (aspell *) php3_list_find(scin->value.lval, &type);
 	if(!sc)
 	  {
-		php3_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
+		php_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
 		RETURN_FALSE;
 	  }
 
@@ -149,7 +149,7 @@ PHP_FUNCTION(aspell_check)
     sc= (aspell *) php3_list_find(scin->value.lval, &type);
     if(!sc)
       {
-        php3_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
+        php_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
         RETURN_FALSE;
       }
     if (aspell_check(sc, word->value.str.val)) 
@@ -181,7 +181,7 @@ PHP_FUNCTION(aspell_check_raw)
     sc= (aspell *) php3_list_find(scin->value.lval, &type);
     if(!sc)
       {
-        php3_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
+        php_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
         RETURN_FALSE;
       }
 	if (aspell_check_raw(sc, word->value.str.val)) 
@@ -197,7 +197,7 @@ PHP_FUNCTION(aspell_check_raw)
 
 PHP_MINFO_FUNCTION(aspell)
 {
-	php3_printf("ASpell support enabled");
+	php_printf("ASpell support enabled");
 
 }
 

@@ -179,7 +179,7 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 
 	if (!ta) {			/* that really shouldn't happen... */
-		php3_error(E_WARNING, "unexpected error in date()");
+		php_error(E_WARNING, "unexpected error in date()");
 		RETURN_FALSE;
 	}
 	for (i = 0; i < format->value.str.len; i++) {
@@ -417,11 +417,11 @@ PHP_FUNCTION(getdate)
 
 	ta = localtime(&timestamp);
 	if (!ta) {
-		php3_error(E_WARNING, "Cannot perform date calculation");
+		php_error(E_WARNING, "Cannot perform date calculation");
 		return;
 	}
 	if (array_init(return_value) == FAILURE) {
-		php3_error(E_ERROR, "Unable to initialize array");
+		php_error(E_ERROR, "Unable to initialize array");
 		return;
 	}
 	add_assoc_long(return_value, "seconds", ta->tm_sec);

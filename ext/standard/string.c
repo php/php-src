@@ -282,7 +282,7 @@ PHP_FUNCTION(explode)
 
 	if (strlen(delim->value.str.val)==0) {
 		/* the delimiter must be a valid C string that's at least 1 character long */
-		php3_error(E_WARNING,"Empty delimiter");
+		php_error(E_WARNING,"Empty delimiter");
 		RETURN_FALSE;
 	}
 	if (array_init(return_value) == FAILURE) {
@@ -302,8 +302,8 @@ void _php3_implode(pval *delim, pval *arr, pval *return_value)
 	int len = 0, count = 0;
 
 	/* convert everything to strings, and calculate length */
-	_php3_hash_internal_pointer_reset(arr->value.ht);
-	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+	zend_hash_internal_pointer_reset(arr->value.ht);
+	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
 		SEPARATE_ZVAL(tmp);
 		convert_to_string(*tmp);
 		if ((*tmp)->type == IS_STRING && (*tmp)->value.str.val != undefined_variable_string) {
@@ -313,15 +313,15 @@ void _php3_implode(pval *delim, pval *arr, pval *return_value)
 			}
 			count++;
 		}
-		_php3_hash_move_forward(arr->value.ht);
+		zend_hash_move_forward(arr->value.ht);
 	}
 
 	/* do it */
 	return_value->value.str.val = (char *) emalloc(len + 1);
 	return_value->value.str.val[0] = '\0';
 	return_value->value.str.val[len] = '\0';
-	_php3_hash_internal_pointer_reset(arr->value.ht);
-	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+	zend_hash_internal_pointer_reset(arr->value.ht);
+	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
 		if ((*tmp)->type == IS_STRING && (*tmp)->value.str.val != undefined_variable_string) {
 			count--;
 			strcat(return_value->value.str.val, (*tmp)->value.str.val);
@@ -329,7 +329,7 @@ void _php3_implode(pval *delim, pval *arr, pval *return_value)
 				strcat(return_value->value.str.val, delim->value.str.val);
 			}
 		}
-		_php3_hash_move_forward(arr->value.ht);
+		zend_hash_move_forward(arr->value.ht);
 	}
 	return_value->type = IS_STRING;
 	return_value->value.str.len = len;
@@ -354,7 +354,7 @@ PHP_FUNCTION(implode)
 		arr = arg2;
 		delim = arg1;
 	} else {
-		php3_error(E_WARNING, "Bad arguments to %s()",
+		php_error(E_WARNING, "Bad arguments to %s()",
 				   get_active_function_name());
 		return;
 	}
@@ -590,7 +590,7 @@ PHP_FUNCTION(stristr)
 	convert_to_string(needle);
 
 	if (strlen(needle->value.str.val)==0) {
-		php3_error(E_WARNING,"Empty delimiter");
+		php_error(E_WARNING,"Empty delimiter");
 		RETURN_FALSE;
 	}
 	found = php3i_stristr(haystack->value.str.val, needle->value.str.val);
@@ -618,7 +618,7 @@ PHP_FUNCTION(strstr)
 
 	if (needle->type == IS_STRING) {
 		if (strlen(needle->value.str.val)==0) {
-			php3_error(E_WARNING,"Empty delimiter");
+			php_error(E_WARNING,"Empty delimiter");
 			RETURN_FALSE;
 		}
 		found = strstr(haystack->value.str.val, needle->value.str.val);
@@ -662,13 +662,13 @@ PHP_FUNCTION(strpos)
 	}
 	convert_to_string(haystack);
 	if (offset > haystack->value.str.len) {
-		php3_error(E_WARNING,"offset not contained in string");
+		php_error(E_WARNING,"offset not contained in string");
 		RETURN_FALSE;
 	}
 
 	if (needle->type == IS_STRING) {
 		if (needle->value.str.len==0) {
-			php3_error(E_WARNING,"Empty delimiter");
+			php_error(E_WARNING,"Empty delimiter");
 			RETURN_FALSE;
 		}
 		found = strstr(haystack->value.str.val+offset, needle->value.str.val);
@@ -811,7 +811,7 @@ PHP_FUNCTION(chunk_split)
 	}
 			
 	if(chunklen == 0) {
-		php3_error(E_WARNING, "chunk length is 0");
+		php_error(E_WARNING, "chunk length is 0");
 		RETURN_FALSE;
 	}
 	
@@ -1443,7 +1443,7 @@ PHP_FUNCTION(str_replace)
 	}
 
 	if(needle->value.str.len == 0) {
-		php3_error(E_WARNING, "The length of the needle must not be 0");
+		php_error(E_WARNING, "The length of the needle must not be 0");
 		RETURN_FALSE;
 	}
 
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(setlocale)
 	else if (!strcasecmp ("LC_TIME", category->value.str.val))
 		cat = LC_TIME;
 	else {
-		php3_error(E_WARNING,"Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC or LC_TIME", category->value.str.val);
+		php_error(E_WARNING,"Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC or LC_TIME", category->value.str.val);
 		RETURN_FALSE;
 	}
 	if (!strcmp ("0", locale->value.str.val))

@@ -182,9 +182,9 @@ dbm_info *_php3_finddbm(pval *id,HashTable *list)
 	DBM_TLS_VARS;
 
 	if (id->type == IS_STRING) {
-		numitems = _php3_hash_num_elements(list);
+		numitems = zend_hash_num_elements(list);
 		for (i=1; i<=numitems; i++) {
-			if (_php3_hash_index_find(list, i, (void **) &le)==FAILURE) {
+			if (zend_hash_index_find(list, i, (void **) &le)==FAILURE) {
 				continue;
 			}
 			if (le->type == DBM_GLOBAL(le_db)) {
@@ -242,7 +242,7 @@ static char *php3_get_info_db(void)
 
 PHP_MINFO_FUNCTION(db)
 {
-	php3_printf(php3_get_info_db());
+	php_printf(php3_get_info_db());
 }
 
 PHP_FUNCTION(dblist)
@@ -290,7 +290,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 	DBM_MODE_TYPE imode;
 
 	if (filename == NULL) {
-		php3_error(E_WARNING, "NULL filename passed to _php3_dbmopen()");
+		php_error(E_WARNING, "NULL filename passed to _php3_dbmopen()");
 		return NULL;
 	}
 
@@ -336,7 +336,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 			lockfd = open(lockfn,O_RDWR|O_CREAT,0644);
 			close(lockfd);
 		} else {
-			php3_error(E_WARNING, "File appears to be locked [%s]\n",lockfn);
+			php_error(E_WARNING, "File appears to be locked [%s]\n",lockfn);
 			return -1;
 		}
 #else /* NFS_HACK */
@@ -347,7 +347,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 			flock(lockfd,LOCK_EX);
 			close(lockfd);
 		} else {
-			php3_error(E_WARNING, "Unable to establish lock: %s",filename);
+			php_error(E_WARNING, "Unable to establish lock: %s",filename);
 		}
 #endif /* else NFS_HACK */
 
@@ -364,7 +364,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 	if (dbf) {
 		info = (dbm_info *)emalloc(sizeof(dbm_info));
 		if (!info) {
-			php3_error(E_ERROR, "problem allocating memory!");
+			php_error(E_ERROR, "problem allocating memory!");
 			return NULL;
 		}
 
@@ -376,7 +376,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 		return info;
 	} else {
 #if GDBM 
-		php3_error(E_WARNING, "dbmopen_gdbm(%s): %d [%s], %d [%s]",filename,gdbm_errno,gdbm_strerror(gdbm_errno),errno,strerror(errno));
+		php_error(E_WARNING, "dbmopen_gdbm(%s): %d [%s], %d [%s]",filename,gdbm_errno,gdbm_strerror(gdbm_errno),errno,strerror(errno));
 		if (gdbm_errno)
 			ret = gdbm_errno;
 		else if (errno)
@@ -386,13 +386,13 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 #else 
 #if NDBM 
 #if DEBUG
-		php3_error(E_WARNING, "dbmopen_ndbm(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
+		php_error(E_WARNING, "dbmopen_ndbm(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
 #else
 #if DEBUG
-		php3_error(E_WARNING, "dbmopen_flatfile(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
+		php_error(E_WARNING, "dbmopen_flatfile(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
@@ -472,7 +472,7 @@ PHP_FUNCTION(dbminsert)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 	
@@ -499,7 +499,7 @@ int _php3_dbminsert(dbm_info *info, char *key, char *value) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return 1;
 	}
 
@@ -525,7 +525,7 @@ PHP_FUNCTION(dbmreplace)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 	
@@ -555,7 +555,7 @@ int _php3_dbmreplace(dbm_info *info, char *key, char *value) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return 1;
 	}
 
@@ -579,7 +579,7 @@ PHP_FUNCTION(dbmfetch)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -608,7 +608,7 @@ char *_php3_dbmfetch(dbm_info *info, char *key) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return(NULL);
 	}
 
@@ -651,7 +651,7 @@ PHP_FUNCTION(dbmexists)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -672,7 +672,7 @@ int _php3_dbmexists(dbm_info *info, char *key) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return(0);
 	}
 
@@ -694,7 +694,7 @@ PHP_FUNCTION(dbmdelete)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -715,7 +715,7 @@ int _php3_dbmdelete(dbm_info *info, char *key) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return(0);
 	}
 
@@ -735,7 +735,7 @@ PHP_FUNCTION(dbmfirstkey)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -756,7 +756,7 @@ char *_php3_dbmfirstkey(dbm_info *info) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return(NULL);
 	}
 
@@ -793,7 +793,7 @@ PHP_FUNCTION(dbmnextkey)
 
 	info = _php3_finddbm(id,list);
 	if (!info) {
-		php3_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
+		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -821,7 +821,7 @@ char *_php3_dbmnextkey(dbm_info *info, char *key) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php3_error(E_WARNING, "Unable to locate dbm file");
+		php_error(E_WARNING, "Unable to locate dbm file");
 		return(NULL);
 	}
 

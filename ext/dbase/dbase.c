@@ -132,7 +132,7 @@ PHP_FUNCTION(dbase_open) {
 
 	dbh = dbf_open(dbf_name->value.str.val, options->value.lval);
 	if (dbh == NULL) {
-		php3_error(E_WARNING, "unable to open database %s", dbf_name->value.str.val);
+		php_error(E_WARNING, "unable to open database %s", dbf_name->value.str.val);
 		RETURN_FALSE;
 	}
 
@@ -155,7 +155,7 @@ PHP_FUNCTION(dbase_close) {
 	convert_to_long(dbh_id);
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -178,7 +178,7 @@ PHP_FUNCTION(dbase_numrecords) {
 	convert_to_long(dbh_id);
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -200,7 +200,7 @@ PHP_FUNCTION(dbase_numfields) {
 	convert_to_long(dbh_id);
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -222,7 +222,7 @@ PHP_FUNCTION(dbase_pack) {
 	convert_to_long(dbh_id);
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -250,34 +250,34 @@ PHP_FUNCTION(dbase_add_record) {
 	}
 	convert_to_long(dbh_id);
 	if (fields->type != IS_ARRAY) {
-		php3_error(E_WARNING, "Expected array as second parameter");
+		php_error(E_WARNING, "Expected array as second parameter");
 		RETURN_FALSE;
 	}
 
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
-	num_fields = _php3_hash_num_elements(fields->value.ht);
+	num_fields = zend_hash_num_elements(fields->value.ht);
 
 	if (num_fields != dbh->db_nfields) {
-		php3_error(E_WARNING, "Wrong number of fields specified");
+		php_error(E_WARNING, "Wrong number of fields specified");
 		RETURN_FALSE;
 	}
 
 	cp = t_cp = (char *)emalloc(dbh->db_rlen + 1);
 	if (!cp) {
-		php3_error(E_WARNING, "unable to allocate memory");
+		php_error(E_WARNING, "unable to allocate memory");
 		RETURN_FALSE;
 	}
 	*t_cp++ = VALID_RECORD;
 
 	dbf = dbh->db_fields;
 	for (i = 0, cur_f = dbf; cur_f < &dbf[num_fields]; i++, cur_f++) {
-		if (_php3_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
-			php3_error(E_WARNING, "unexpected error");
+		if (zend_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
+			php_error(E_WARNING, "unexpected error");
 			efree(cp);
 			RETURN_FALSE;
 		}
@@ -288,7 +288,7 @@ PHP_FUNCTION(dbase_add_record) {
 
 	dbh->db_records++;
 	if (put_dbf_record(dbh, dbh->db_records, cp) < 0) {
-		php3_error(E_WARNING, "unable to put record at %ld", dbh->db_records);
+		php_error(E_WARNING, "unable to put record at %ld", dbh->db_records);
 		efree(cp);
 		RETURN_FALSE;
 	}
@@ -319,34 +319,34 @@ void php3_dbase_replace_record(INTERNAL_FUNCTION_PARAMETERS) {
 	convert_to_long(dbh_id);
 	convert_to_long(recnum);
 	if (fields->type != IS_ARRAY) {
-		php3_error(E_WARNING, "Expected array as second parameter");
+		php_error(E_WARNING, "Expected array as second parameter");
 		RETURN_FALSE;
 	}
 
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
-	num_fields = _php3_hash_num_elements(fields->value.ht);
+	num_fields = zend_hash_num_elements(fields->value.ht);
 
 	if (num_fields != dbh->db_nfields) {
-		php3_error(E_WARNING, "Wrong number of fields specified");
+		php_error(E_WARNING, "Wrong number of fields specified");
 		RETURN_FALSE;
 	}
 
 	cp = t_cp = (char *)emalloc(dbh->db_rlen + 1);
 	if (!cp) {
-		php3_error(E_WARNING, "unable to allocate memory");
+		php_error(E_WARNING, "unable to allocate memory");
 		RETURN_FALSE;
 	}
 	*t_cp++ = VALID_RECORD;
 
 	dbf = dbh->db_fields;
 	for (i = 0, cur_f = dbf; cur_f < &dbf[num_fields]; i++, cur_f++) {
-		if (_php3_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
-			php3_error(E_WARNING, "unexpected error");
+		if (zend_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
+			php_error(E_WARNING, "unexpected error");
 			efree(cp);
 			RETURN_FALSE;
 		}
@@ -356,7 +356,7 @@ void php3_dbase_replace_record(INTERNAL_FUNCTION_PARAMETERS) {
 	}
 
 	if (put_dbf_record(dbh, recnum->value.lval, cp) < 0) {
-		php3_error(E_WARNING, "unable to put record at %ld", dbh->db_records);
+		php_error(E_WARNING, "unable to put record at %ld", dbh->db_records);
 		efree(cp);
 		RETURN_FALSE;
 	}
@@ -384,15 +384,15 @@ PHP_FUNCTION(dbase_delete_record) {
 
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
 	if (del_dbf_record(dbh, record->value.lval) < 0) {
 		if (record->value.lval > dbh->db_records) {
-			php3_error(E_WARNING, "record %d out of bounds", record->value.lval);
+			php_error(E_WARNING, "record %d out of bounds", record->value.lval);
 		} else {
-			php3_error(E_WARNING, "unable to delete record %d", record->value.lval);
+			php_error(E_WARNING, "unable to delete record %d", record->value.lval);
 		}
 		RETURN_FALSE;
 	}
@@ -421,12 +421,12 @@ PHP_FUNCTION(dbase_get_record) {
 
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
 	if ((data = get_dbf_record(dbh, record->value.lval)) == NULL) {
-		php3_error(E_WARNING, "Tried to read bad record %d", record->value.lval);
+		php_error(E_WARNING, "Tried to read bad record %d", record->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -504,12 +504,12 @@ PHP_FUNCTION(dbase_get_record_with_names) {
 
 	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php3_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
+		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
 	if ((data = get_dbf_record(dbh, record->value.lval)) == NULL) {
-		php3_error(E_WARNING, "Tried to read bad record %d", record->value.lval);
+		php_error(E_WARNING, "Tried to read bad record %d", record->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -579,7 +579,7 @@ PHP_FUNCTION(dbase_create) {
 	convert_to_string(filename);
 
 	if (fields->type != IS_ARRAY) {
-		php3_error(E_WARNING, "Expected array as second parameter");
+		php_error(E_WARNING, "Expected array as second parameter");
 		RETURN_FALSE;
 	}
 
@@ -592,18 +592,18 @@ PHP_FUNCTION(dbase_create) {
 	}
 
 	if ((fd = open(filename->value.str.val, O_BINARY|O_RDWR|O_CREAT, 0644)) < 0) {
-		php3_error(E_WARNING, "Unable to create database (%d): %s", errno, strerror(errno));
+		php_error(E_WARNING, "Unable to create database (%d): %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 
-	num_fields = _php3_hash_num_elements(fields->value.ht);
+	num_fields = zend_hash_num_elements(fields->value.ht);
 
 	/* have to use regular malloc() because this gets free()d by
 	   code in the dbase library */
 	dbh = (dbhead_t *)malloc(sizeof(dbhead_t));
 	dbf = (dbfield_t *)malloc(sizeof(dbfield_t) * num_fields);
 	if (!dbh || !dbf) {
-		php3_error(E_WARNING, "Unable to allocate memory for header info");
+		php_error(E_WARNING, "Unable to allocate memory for header info");
 		RETURN_FALSE;
 	}
 	
@@ -620,35 +620,35 @@ PHP_FUNCTION(dbase_create) {
 	
 	for (i = 0, cur_f = dbf; i < num_fields; i++, cur_f++) {
 		/* look up the first field */
-		if (_php3_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
-			php3_error(E_WARNING, "unable to find field %d", i);
+		if (zend_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
+			php_error(E_WARNING, "unable to find field %d", i);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
 
 		if (field->type != IS_ARRAY) {
-			php3_error(E_WARNING, "second parameter must be array of arrays");
+			php_error(E_WARNING, "second parameter must be array of arrays");
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
 
 		/* field name */
-		if (_php3_hash_index_find(field->value.ht, 0, (void **)&value) == FAILURE) {
-			php3_error(E_WARNING, "expected field name as first element of list in field %d", i);
+		if (zend_hash_index_find(field->value.ht, 0, (void **)&value) == FAILURE) {
+			php_error(E_WARNING, "expected field name as first element of list in field %d", i);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
 		convert_to_string(value);
 		if (value->value.str.len > 10 || value->value.str.len == 0) {
-			php3_error(E_WARNING, "invalid field name '%s' (must be non-empty and less than or equal to 10 characters)", value->value.str.val);
+			php_error(E_WARNING, "invalid field name '%s' (must be non-empty and less than or equal to 10 characters)", value->value.str.val);
 			free_dbf_head(dbh);
 			RETURN_FALSE;
 		}
 		copy_crimp(cur_f->db_fname, value->value.str.val, value->value.str.len);
 
 		/* field type */
-		if (_php3_hash_index_find(field->value.ht,1,(void **)&value) == FAILURE) {
-			php3_error(E_WARNING, "expected field type as sececond element of list in field %d", i);
+		if (zend_hash_index_find(field->value.ht,1,(void **)&value) == FAILURE) {
+			php_error(E_WARNING, "expected field type as sececond element of list in field %d", i);
 			RETURN_FALSE;
 		}
 		convert_to_string(value);
@@ -672,8 +672,8 @@ PHP_FUNCTION(dbase_create) {
 		case 'N':
 		case 'C':
 			/* field length */
-			if (_php3_hash_index_find(field->value.ht,2,(void **)&value) == FAILURE) {
-				php3_error(E_WARNING, "expected field length as third element of list in field %d", i);
+			if (zend_hash_index_find(field->value.ht,2,(void **)&value) == FAILURE) {
+				php_error(E_WARNING, "expected field length as third element of list in field %d", i);
 				free_dbf_head(dbh);
 				RETURN_FALSE;
 			}
@@ -681,8 +681,8 @@ PHP_FUNCTION(dbase_create) {
 			cur_f->db_flen = value->value.lval;
 
 			if (cur_f->db_type == 'N') {
-				if (_php3_hash_index_find(field->value.ht,3,(void **)&value) == FAILURE) {
-					php3_error(E_WARNING, "expected field precision as fourth element of list in field %d", i);
+				if (zend_hash_index_find(field->value.ht,3,(void **)&value) == FAILURE) {
+					php_error(E_WARNING, "expected field precision as fourth element of list in field %d", i);
 					free_dbf_head(dbh);
 					RETURN_FALSE;
 				}
@@ -691,7 +691,7 @@ PHP_FUNCTION(dbase_create) {
 			}
 			break;
 		default:
-			php3_error(E_WARNING, "unknown field type '%c'", cur_f->db_type);
+			php_error(E_WARNING, "unknown field type '%c'", cur_f->db_type);
 		}
 		cur_f->db_foffset = rlen;
 		rlen += cur_f->db_flen;

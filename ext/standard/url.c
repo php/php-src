@@ -67,7 +67,7 @@ url *url_parse(char *string)
 
 	url *ret = (url *) emalloc(sizeof(url));
 	if (!ret) {
-		/*php3_error(E_WARNING,"Unable to allocate memory\n");*/
+		/*php_error(E_WARNING,"Unable to allocate memory\n");*/
 		return NULL;
 	}
 	memset(ret, 0, sizeof(url));
@@ -76,13 +76,13 @@ url *url_parse(char *string)
 	   http://www.ics.uci.edu/~fielding/url/url.txt */
 	err = regcomp(&re, "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?", REG_EXTENDED);
 	if (err) {
-		/*php3_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
+		/*php_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
 		efree(ret);
 		return NULL;
 	}
 	err = regexec(&re, string, 10, subs, 0);
 	if (err) {
-		/*php3_error(E_WARNING,"Error with regex\n");*/
+		/*php_error(E_WARNING,"Error with regex\n");*/
 		efree(ret);
 		return NULL;
 	}
@@ -122,7 +122,7 @@ url *url_parse(char *string)
 			STR_FREE(ret->fragment);
 			efree(ret);
 			efree(result);
-			/*php3_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
+			/*php_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
 			return NULL;
 		}
 		/* now deal with all of the results */
@@ -159,7 +159,7 @@ PHP_FUNCTION(parse_url)
 	resource = url_parse(string->value.str.val);
 
 	if (resource == NULL) {
-		php3_error(E_WARNING, "unable to parse url (%s)", string->value.str.val);
+		php_error(E_WARNING, "unable to parse url (%s)", string->value.str.val);
 		RETURN_FALSE;
 	}
 	/* allocate an array for return */

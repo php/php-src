@@ -30,9 +30,9 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list ap);
 #endif
 
 #if BROKEN_SPRINTF
-int _php3_sprintf (char* s, const char* format, ...);
+int php_sprintf (char* s, const char* format, ...);
 #else
-#define _php3_sprintf sprintf
+#define php_sprintf sprintf
 #endif
 
 #endif /* _PHP3_SNPRINTF_H */

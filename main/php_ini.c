@@ -309,7 +309,7 @@ PHP_INI_DISP(php_ini_color_displayer_cb)
 		value = NULL;
 	}
 	if (value) {
-		php3_printf("<font color=\"%s\">%s</font>", value, value);
+		php_printf("<font color=\"%s\">%s</font>", value, value);
 	} else {
 		PUTS("<i>no value</i>;");
 	}

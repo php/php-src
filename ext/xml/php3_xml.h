@@ -93,7 +93,7 @@ enum php3_xml_option {
 };
 
 # define RETURN_OUT_OF_MEMORY \
-	php3_error(E_WARNING, "Out of memory");\
+	php_error(E_WARNING, "Out of memory");\
 	RETURN_FALSE
 
 /* for xml_parse_into_struct */

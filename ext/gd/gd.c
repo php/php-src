@@ -171,12 +171,12 @@ PHP_MINFO_FUNCTION(gd)
 {
 	/* need to use a PHPAPI function here because it is external module in windows */
 #if HAVE_LIBGD13
-	php3_printf("Version 1.3");
+	php_printf("Version 1.3");
 #else
-	php3_printf("Version 1.2");
+	php_printf("Version 1.2");
 #endif
 #ifdef ENABLE_GD_TTF
-	php3_printf(" with FreeType support");
+	php_printf(" with FreeType support");
 #endif
 }
 
@@ -280,7 +280,7 @@ PHP_FUNCTION(imageloadfont) {
 	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd);
 #endif
 	if (fp == NULL) {
-		php3_error(E_WARNING, "ImageFontLoad: unable to open file");
+		php_error(E_WARNING, "ImageFontLoad: unable to open file");
 		RETURN_FALSE;
 	}
 
@@ -304,9 +304,9 @@ PHP_FUNCTION(imageloadfont) {
 		fclose(fp);
 		efree(font);
 		if (feof(fp)) {
-			php3_error(E_WARNING, "ImageFontLoad: end of file while reading header");
+			php_error(E_WARNING, "ImageFontLoad: end of file while reading header");
 		} else {
-			php3_error(E_WARNING, "ImageFontLoad: error while reading header");
+			php_error(E_WARNING, "ImageFontLoad: error while reading header");
 		}
 		RETURN_FALSE;
 	}
@@ -320,9 +320,9 @@ PHP_FUNCTION(imageloadfont) {
 		efree(font->data);
 		efree(font);
 		if (feof(fp)) {
-			php3_error(E_WARNING, "ImageFontLoad: end of file while reading body");
+			php_error(E_WARNING, "ImageFontLoad: end of file while reading body");
 		} else {
-			php3_error(E_WARNING, "ImageFontLoad: error while reading body");
+			php_error(E_WARNING, "ImageFontLoad: error while reading body");
 		}
 		RETURN_FALSE;
 	}
@@ -388,7 +388,7 @@ PHP_FUNCTION(imagecreatefromgif )
 #endif
 	if (!fp) {
 		php3_strip_url_passwd(fn);
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"ImageCreateFromGif: Unable to open %s for reading", fn);
 		RETURN_FALSE;
 	}
@@ -450,7 +450,7 @@ PHP_FUNCTION(imagecolorallocate)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorAllocate: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorAllocate: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 	col = gdImageColorAllocate(im, r, g, b);
@@ -480,7 +480,7 @@ PHP_FUNCTION(imagecolorat)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorAt: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorAt: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 	if (gdImageBoundsSafe(im, x->value.lval, y->value.lval)) {
@@ -524,7 +524,7 @@ PHP_FUNCTION(imagecolorclosest)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorClosest: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorClosest: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 	col = gdImageColorClosest(im, r, g, b);
@@ -552,7 +552,7 @@ PHP_FUNCTION(imagecolordeallocate)
 
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorDeallocate: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorDeallocate: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -561,7 +561,7 @@ PHP_FUNCTION(imagecolordeallocate)
 		RETURN_TRUE;
         }
         else {
-                php3_error(E_WARNING, "Color index out of range");
+                php_error(E_WARNING, "Color index out of range");
                 RETURN_FALSE;
         }
 }
@@ -595,7 +595,7 @@ PHP_FUNCTION(imagecolorresolve)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorResolve: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorResolve: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 	col = gdImageColorResolve(im, r, g, b);
@@ -631,7 +631,7 @@ PHP_FUNCTION(imagecolorexact)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorExact: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorExact: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 	col = gdImageColorExact(im, r, g, b);
@@ -668,7 +668,7 @@ PHP_FUNCTION(imagecolorset)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorSet: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorSet: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
@@ -702,7 +702,7 @@ PHP_FUNCTION(imagecolorsforindex)
 	
 	im = php3_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageColorsForIndex: Unable to find image pointer");
+		php_error(E_WARNING, "ImageColorsForIndex: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -715,7 +715,7 @@ PHP_FUNCTION(imagecolorsforindex)
 		add_assoc_long(return_value,"blue",im->blue[col]);
 	}
 	else {
-		php3_error(E_WARNING, "Color index out of range");
+		php_error(E_WARNING, "Color index out of range");
 		RETURN_FALSE;
 	}
 }
@@ -745,21 +745,21 @@ PHP_FUNCTION(imagegif )
 		convert_to_string(file);
 		fn = file->value.str.val;
 		if (!fn || fn == empty_string || _php3_check_open_basedir(fn)) {
-			php3_error(E_WARNING, "ImageGif: Invalid filename");
+			php_error(E_WARNING, "ImageGif: Invalid filename");
 			RETURN_FALSE;
 		}
 	}
 
 	im = php3_list_find(imgind->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "ImageGif: unable to find image pointer");
+		php_error(E_WARNING, "ImageGif: unable to find image pointer");
 		RETURN_FALSE;
 	}
 
 	if (argc == 2) {
 		fp = fopen(fn, "wb");
 		if (!fp) {
-			php3_error(E_WARNING, "ImageGif: unable to open %s for writing", fn);
+			php_error(E_WARNING, "ImageGif: unable to open %s for writing", fn);
 			RETURN_FALSE;
 		}
 		gdImageGif (im,fp);
@@ -773,7 +773,7 @@ PHP_FUNCTION(imagegif )
 
 		tmp = tmpfile();
 		if (tmp == NULL) {
-			php3_error(E_WARNING, "Unable to open temporary file");
+			php_error(E_WARNING, "Unable to open temporary file");
 			RETURN_FALSE;
 		}
 
@@ -828,7 +828,7 @@ PHP_FUNCTION(imagesetpixel)
 
 	im = php3_list_find(imarg->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -870,7 +870,7 @@ PHP_FUNCTION(imageline)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -909,7 +909,7 @@ PHP_FUNCTION(imagedashedline)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -950,7 +950,7 @@ PHP_FUNCTION(imagerectangle)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -991,7 +991,7 @@ PHP_FUNCTION(imagefilledrectangle)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1042,7 +1042,7 @@ PHP_FUNCTION(imagearc)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(imagefilltoborder)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1118,7 +1118,7 @@ PHP_FUNCTION(imagefill)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(imagecolorstotal)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(imagecolortransparent)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1224,7 +1224,7 @@ PHP_FUNCTION(imageinterlace)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1263,12 +1263,12 @@ static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
 	if (POINTS->type != IS_ARRAY) {
-		php3_error(E_WARNING, "2nd argument to imagepolygon not an array");
+		php_error(E_WARNING, "2nd argument to imagepolygon not an array");
 		RETURN_FALSE;
 	}
 
@@ -1276,37 +1276,37 @@ static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
     ** we shouldn't need this check, should we? **
 
     if (!ParameterPassedByReference(ht, 2)) {
-        php3_error(E_WARNING, "2nd argument to imagepolygon not passed by reference");
+        php_error(E_WARNING, "2nd argument to imagepolygon not passed by reference");
 		RETURN_FALSE;
     }
 */
 
-	nelem = _php3_hash_num_elements(POINTS->value.ht);
+	nelem = zend_hash_num_elements(POINTS->value.ht);
 	if (nelem < 6) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"you must have at least 3 points in your array");
 		RETURN_FALSE;
 	}
 
 	if (nelem < npoints * 2) {
-		php3_error(E_WARNING,
+		php_error(E_WARNING,
 					"trying to use %d points in array with only %d points",
 					npoints, nelem/2);
 		RETURN_FALSE;
 	}
 
 	if (npoints > PolyMaxPoints) {
-		php3_error(E_WARNING, "maximum %d points", PolyMaxPoints);
+		php_error(E_WARNING, "maximum %d points", PolyMaxPoints);
 		RETURN_FALSE;
 	}
 
 	for (i = 0; i < npoints; i++) {
-		if (_php3_hash_index_find(POINTS->value.ht, (i * 2), (void **)&var) == SUCCESS) {
+		if (zend_hash_index_find(POINTS->value.ht, (i * 2), (void **)&var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_long(*var);
 			points[i].x = (*var)->value.lval;
 		}
-		if (_php3_hash_index_find(POINTS->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
+		if (zend_hash_index_find(POINTS->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_long(*var);
 			points[i].y = (*var)->value.lval;
@@ -1479,7 +1479,7 @@ static void _php3_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		if (string) {
 			efree(string);
 		}
@@ -1580,13 +1580,13 @@ PHP_FUNCTION(imagecopy)
 
 	im_src = php3_list_find(SIM->value.lval, &ind_type);
 	if (!im_src || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
 	im_dst = php3_list_find(DIM->value.lval, &ind_type);
 	if (!im_dst || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1634,13 +1634,13 @@ PHP_FUNCTION(imagecopyresized)
 
 	im_src = php3_list_find(SIM->value.lval, &ind_type);
 	if (!im_src || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
 	im_dst = php3_list_find(DIM->value.lval, &ind_type);
 	if (!im_dst || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1665,7 +1665,7 @@ PHP_FUNCTION(imagesx)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1688,7 +1688,7 @@ PHP_FUNCTION(imagesy)
 
 	im = php3_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -1758,7 +1758,7 @@ void php3_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		x = X->value.lval;
               im = php3_list_find(IM->value.lval, &ind_type);
               if (!im || ind_type != GD_GLOBAL(le_gd)) {
-                      php3_error(E_WARNING, "Unable to find image pointer");
+                      php_error(E_WARNING, "Unable to find image pointer");
                       RETURN_FALSE;
               }
 	}
@@ -1773,7 +1773,7 @@ void php3_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, string);
 
 	if (error) {
-		php3_error(E_WARNING, error);
+		php_error(E_WARNING, error);
 		RETURN_FALSE;
 	}
 

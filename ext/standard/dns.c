@@ -76,14 +76,14 @@ char *_php3_gethostbyaddr(char *ip)
 
 	if ((int) (addr = inet_addr(ip)) == -1) {
 #if DEBUG
-		php3_error(E_WARNING, "address not in a.b.c.d form");
+		php_error(E_WARNING, "address not in a.b.c.d form");
 #endif
 		return estrdup(ip);
 	}
 	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
 	if (!hp) {
 #if DEBUG
-		php3_error(E_WARNING, "Unable to resolve %s\n", ip);
+		php_error(E_WARNING, "Unable to resolve %s\n", ip);
 #endif
 		return estrdup(ip);
 	}
@@ -128,7 +128,7 @@ PHP_FUNCTION(gethostbynamel)
 	hp = gethostbyname(arg->value.str.val);
 	if (hp == NULL || hp->h_addr_list == NULL) {
 #if DEBUG
-		php3_error(E_WARNING, "Unable to resolve %s\n", arg->value.str.val);
+		php_error(E_WARNING, "Unable to resolve %s\n", arg->value.str.val);
 #endif
 		return;
 	}
@@ -150,7 +150,7 @@ char *_php3_gethostbyname(char *name)
 	hp = gethostbyname(name);
 	if (!hp || !hp->h_addr_list) {
 #if DEBUG
-		php3_error(E_WARNING, "Unable to resolve %s\n", name);
+		php_error(E_WARNING, "Unable to resolve %s\n", name);
 #endif
 		return estrdup(name);
 	}
@@ -193,7 +193,7 @@ PHP_FUNCTION(checkdnsrr)
 		else if ( !strcasecmp("SOA",arg2->value.str.val) ) type = T_SOA;
 		else if ( !strcasecmp("CNAME",arg2->value.str.val) ) type = T_CNAME;
 		else {
-			php3_error(E_WARNING,"Type '%s' not supported",arg2->value.str.val);
+			php_error(E_WARNING,"Type '%s' not supported",arg2->value.str.val);
 			RETURN_FALSE;
 		}
 		break;
@@ -240,7 +240,7 @@ PHP_FUNCTION(getmxrr)
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2)) {
-			php3_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
 			RETURN_FALSE;
 		}
         break;
@@ -249,7 +249,7 @@ PHP_FUNCTION(getmxrr)
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2) || !ParameterPassedByReference(ht, 3)) {
-			php3_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
 			RETURN_FALSE;
 		}
         need_weight = 1;

@@ -199,7 +199,7 @@ PHP_FUNCTION(iptcembed)
 		RETURN_FALSE;
 
     if ((fp = fopen(jpeg_file->value.str.val,"rb")) == 0) {
-        php3_error(E_WARNING, "Unable to open %s", jpeg_file->value.str.val);
+        php_error(E_WARNING, "Unable to open %s", jpeg_file->value.str.val);
         RETURN_FALSE;
     }
 
@@ -350,20 +350,20 @@ PHP_FUNCTION(iptcparse)
 
 		if (tagsfound == 0) { /* found the 1st tag - initialize the return array */
 			if (array_init(return_value) == FAILURE) {
-				php3_error(E_ERROR, "Unable to initialize array");
+				php_error(E_ERROR, "Unable to initialize array");
 				RETURN_FALSE;
 	  		}
 		}
 
-		if (_php3_hash_find(return_value->value.ht,key,strlen(key) + 1,(void **) &element) == FAILURE) {
+		if (zend_hash_find(return_value->value.ht,key,strlen(key) + 1,(void **) &element) == FAILURE) {
 			values = emalloc(sizeof(pval));
 			INIT_PZVAL(values);
 			if (array_init(values) == FAILURE) {
-				php3_error(E_ERROR, "Unable to initialize array");
+				php_error(E_ERROR, "Unable to initialize array");
 				RETURN_FALSE;
 			}
 			
-			_php3_hash_update(return_value->value.ht, key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
+			zend_hash_update(return_value->value.ht, key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
 		} 
 			
 		add_next_index_stringl(*element,buffer+inx,len,1);
