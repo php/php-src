@@ -708,7 +708,7 @@ PHP_FUNCTION(imagejpeg)
 		}
 	}
 
-	if (argc > 1 && strlen(fn)) {
+	if (argc > 1 && fn && strlen(fn)) {
 		fp = fopen(fn, "wb");
 		if (!fp) {
 			php_error(E_WARNING, "ImageJpeg: unable to open %s for writing", fn);
