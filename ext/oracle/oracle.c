@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -23,10 +23,11 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@guardian.no>                        |
+   | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Mitch Golden <mgolden@interport.net>                        |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
+   |          Thies C. Arntzen <thies@digicol.de>                         |
    +----------------------------------------------------------------------+
  */
 #if defined(COMPILE_DL)
@@ -40,14 +41,26 @@
 # endif
 #endif
 #include "php.h"
-#include "oracle.h"
+
+#if PHP_API_VERSION < 19990421 
+  #include "internal_functions.h"
+  #include "php3_list.h"
+  #include "head.h"
+#else
+  #include "zend_globals.h"
+#endif
 
 #if HAVE_ORACLE
-#if !(WIN32|WINNT)
-#include "build-defs.h"
+
+#include "oracle.h"
+#ifdef WIN32
+# include "variables.h"
+#else
+# include "build-defs.h"
 #endif
+
+
 #include "snprintf.h"
-#include "zend_globals.h"
 
 #ifndef min
 #define min(a, b) ((a) > (b) ? (b) : (a))
@@ -78,6 +91,9 @@ oracle_module php3_oracle_module;
 
 #define DB_SIZE 65536
 
+#define ORA_FETCHINTO_ASSOC (1<<0)
+#define ORA_FETCHINTO_NULLS (1<<1)
+
 static oraConnection *ora_get_conn(HashTable *, int);
 static int ora_add_cursor(HashTable *, oraCursor *);
 static oraCursor *ora_get_cursor(HashTable *, int);
@@ -85,9 +101,9 @@ static void ora_del_cursor(HashTable *, int);
 static char *ora_error(Cda_Def *);
 static int ora_describe_define(oraCursor *);
 static int _cursors_cleanup(list_entry *le);
-static void _close_oraconn(oraConnection *conn);
-static void _close_orapconn(oraConnection *conn);
-static void _close_oracur(oraCursor *cur);
+static int _close_oraconn(oraConnection *conn);
+static int _close_orapconn(oraConnection *conn);
+static int _close_oracur(oraCursor *cur);
 static int _ora_ping(oraConnection *conn);
 int ora_set_param_values(oraCursor *cursor, int isout);
 
@@ -126,7 +142,7 @@ php3_module_entry oracle_module_entry = {
 	php3_minit_oracle,
 	php3_mshutdown_oracle,
 	php3_rinit_oracle,
-	NULL,
+	php3_rshutdown_oracle,
 	php3_info_oracle,
     STANDARD_MODULE_PROPERTIES
 };
@@ -170,6 +186,7 @@ static const text *ora_func_tab[] =
 DLEXPORT php3_module_entry *get_module() { return &oracle_module_entry; };
 #endif
 
+#if 0
 static int _cursors_cleanup(list_entry *le)
 {
   ORACLE_TLS_VARS;
@@ -178,42 +195,75 @@ static int _cursors_cleanup(list_entry *le)
     oraCursor *curs = ((oraCursor *) le->ptr);
     oraConnection *conn = curs->conn_ptr;
 
+	if (! conn->open) 
+		return 1;
+
+	/*
     if ((!(conn->open)) && (curs->open > 0)){
       oclose(&curs->cda);
       curs->open = 0;
     }
+	*/
+
+	return 1;
   }
+
   return 0;
 }
+#endif
 
-static void _close_oraconn(oraConnection *conn)
+static int _close_oraconn(oraConnection *conn)
 {
-  ORACLE_TLS_VARS;
-  
-  conn->open = 0;
-  _php3_hash_apply(ORACLE_GLOBAL(php3_oracle_module).resource_list,
-	     (int (*)(void *))_cursors_cleanup);
-  
-  ologof(&conn->lda);
-  ORACLE_GLOBAL(php3_oracle_module).num_links--;
-  efree(conn);
+	ORACLE_TLS_VARS;
+	
+	conn->open = 0;
+
+	/* zeev says, this is a no-no (thies 990430) 
+	_php3_hash_apply(ORACLE_GLOBAL(php3_oracle_module).resource_list,
+					 (int (*)(void *))_cursors_cleanup);
+	*/
+	
+	ologof(&conn->lda);
+	ORACLE_GLOBAL(php3_oracle_module).num_links--;
+	efree(conn);
+
+	return 1;
 }
 
-static void _close_orapconn(oraConnection *conn)
+static int _close_orapconn(oraConnection *conn)
 {
-  ORACLE_TLS_VARS;
+	ORACLE_TLS_VARS;
   
-  conn->open = 0;
-  _php3_hash_apply(ORACLE_GLOBAL(php3_oracle_module).resource_plist,
-	     (int (*)(void *))_cursors_cleanup);
-  
-  ologof(&conn->lda);
-  free(conn);
-  ORACLE_GLOBAL(php3_oracle_module).num_links--;
-  ORACLE_GLOBAL(php3_oracle_module).num_persistent--;
+	conn->open = 0;
+
+	/* zeev says, this is a no-no (thies 990430) 
+	_php3_hash_apply(ORACLE_GLOBAL(php3_oracle_module).resource_plist,
+					 (int (*)(void *))_cursors_cleanup);
+	*/
+	
+	ologof(&conn->lda);
+	free(conn);
+	ORACLE_GLOBAL(php3_oracle_module).num_links--;
+	ORACLE_GLOBAL(php3_oracle_module).num_persistent--;
+
+	return 1;
 }
 
-static void _close_oracur(oraCursor *cur)
+static int
+pval_ora_param_destructor(oraParam *param)
+{
+	if (! param) {
+		return 0;
+	}
+
+	if (param->progv) {
+		efree(param->progv);
+	}
+	return 0;
+}
+
+
+static int _close_oracur(oraCursor *cur)
 {
 	int i;
 
@@ -238,8 +288,10 @@ static void _close_oracur(oraCursor *cur)
 			oclose(&cur->cda);
 			cur->open = 0;
 		}
-		efree(cur);
+	   	efree(cur);
 	}
+	
+	return 1;
 }
 
 int php3_minit_oracle(INIT_FUNC_ARGS)
@@ -262,11 +314,6 @@ int php3_minit_oracle(INIT_FUNC_ARGS)
 		return FAILURE;
 	}
 #endif
-
-	ORACLE_GLOBAL(php3_oracle_module).le_conn =
-		register_list_destructors(_close_oraconn,NULL);
-	ORACLE_GLOBAL(php3_oracle_module).le_cursor =
-		register_list_destructors(_close_oracur,NULL);
 
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORACLE_GLOBAL(php3_oracle_module).allow_persistent)
@@ -297,6 +344,14 @@ int php3_minit_oracle(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("ORA_BIND_IN",    1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_OUT",   2, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("ORA_FETCHINTO_ASSOC",ORA_FETCHINTO_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ORA_FETCHINTO_NULLS",ORA_FETCHINTO_NULLS, CONST_CS | CONST_PERSISTENT);
+
+#if NEEDED
+	opinit(OCI_EV_TSF); /* initialize threaded environment - must match the threaded mode 
+						   of the oci8 driver if both are used at the same time!! */
+#endif
+
 	return SUCCESS;
 }
 
@@ -318,6 +373,7 @@ int php3_rinit_oracle(INIT_FUNC_ARGS)
 int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS)
 {
 	ORACLE_TLS_VARS;
+
 #ifdef THREAD_SAFE
 	PHP3_TLS_THREAD_FREE(oracle_globals);
 	PHP3_MUTEX_LOCK(oracle_mutex);
@@ -330,6 +386,14 @@ int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS)
 	}
 	PHP3_MUTEX_UNLOCK(oracle_mutex);
 #endif
+	return SUCCESS;
+
+}
+
+int php3_rshutdown_oracle(SHUTDOWN_FUNC_ARGS)
+{
+	ORACLE_TLS_VARS;
+
 	return SUCCESS;
 
 }
@@ -447,9 +511,11 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			php3_error(E_WARNING, "Out of memory");
 			RETURN_FALSE;
 		}
+		
+		memset((void *) db_conn,0,sizeof(oraConnection));	
 
-		if (orlon(&db_conn->lda, db_conn->hda, user,
-				 strlen(user), pwd, strlen(pwd), 0)) {
+		if (olog(&db_conn->lda, db_conn->hda, user,
+				 strlen(user), pwd, strlen(pwd), 0, -1, OCI_LM_DEF)) {
 			php3_error(E_WARNING, "Unable to connect to ORACLE (%s)",
 					   ora_error(&db_conn->lda));
 			if (persistent)
@@ -509,8 +575,8 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					type == ORACLE_GLOBAL(php3_oracle_module).le_pconn)){
 			if(!_ora_ping(db_conn)) {
 				/* XXX Reinitialize lda, hda ? */
-				if(orlon(&db_conn->lda, db_conn->hda, user,
-						 strlen(user), pwd, strlen(pwd), 0)) {
+				if(olog(&db_conn->lda, db_conn->hda, user,
+						 strlen(user), pwd, strlen(pwd), 0, -1, OCI_LM_DEF)) {
 					php3_error(E_WARNING, "Unable to reconnect to ORACLE (%s)",
 							   ora_error(&db_conn->lda));
 					/* Delete list entry for this connection */
@@ -794,9 +860,7 @@ void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS)
 		cursor->params = (HashTable *)emalloc(sizeof(HashTable));
 		if (!cursor->params ||
 			_php3_hash_init(cursor->params, 19, NULL,
-			NULL, 0) ==
-		/*	(void (*)(void *))pval_ora_param_destructor, 0) == */
-			FAILURE){
+							(void (*)(void *))pval_ora_param_destructor, 0) == FAILURE) {
 			php3_error(E_ERROR, "Unable to initialize parameter list");
 			RETURN_FALSE;
 		}
@@ -826,9 +890,9 @@ void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS)
 	paramptr->progvl = argv[3]->value.lval + 1;
 	if(argc > 4){
 		convert_to_long(argv[4]);
-		paramptr->type = (short)argv[4]->value.lval;
+		paramptr->inout = (short)argv[4]->value.lval;
 	}else{
-		paramptr->type = 0;
+		paramptr->inout = 0;
 	}
 
 	if((paramptr->progv = (text *)emalloc(paramptr->progvl)) == NULL){		
@@ -838,9 +902,22 @@ void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS)
 
 /* XXX Maximum for progvl */
 	paramptr->alen = paramptr->progvl;
-	if(obndra(&cursor->cda, argv[2]->value.str.val, -1,
-		(ub1 *)paramptr->progv, paramptr->progvl, SQLT_STR,
-		-1, 0, &paramptr->alen, 0, 0, 0, 0, -1, -1)){
+
+	if (obndra(&cursor->cda,              
+			   argv[2]->value.str.val,
+			   -1,
+			   (ub1 *)paramptr->progv,
+			   paramptr->progvl,
+			   SQLT_STR, /* ftype */
+			   -1, /* scale */
+			   0/*&paramptr->ind*/, /* ind */
+			   &paramptr->alen, /* alen */
+			   0 /*&paramptr->arcode*/,
+			   0, /* maxsize */
+			   0,
+			   0,
+			   -1,
+			   -1)) {
 		php3_error(E_WARNING, "Ora_Bind failed (%s)",
 				   ora_error(&cursor->cda));
 		RETURN_FALSE;
@@ -1056,17 +1133,34 @@ void php3_Ora_Fetch(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto int ora_fetchinto(int cursor, array result)
+/* {{{ proto int ora_fetch_into(int cursor, array result [ , int flags ])
    Fetch a row into the specified result array */
 void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
-{								/* cursor_index, array ref */
-	pval     *arg1, *arr, tmp;
+{
+	pval     *arg1, *arr, *flg, *tmp;
 	oraCursor *cursor;
 	ub4 ret_len;
 	int i;
+	int flags = 0;
 
-	if (getParameters(ht, 2, &arg1, &arr) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch(ARG_COUNT(ht)){
+		case 2:
+			if (getParameters(ht, 2, &arg1, &arr) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+
+		case 3:
+			if (getParameters(ht, 3, &arg1, &arr, &flg) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long(flg);
+			flags = flg->value.lval;
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 
 	if (!ParameterPassedByReference(ht, 2)){
@@ -1102,12 +1196,19 @@ void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	cursor->fetched++;
 
+#if PHP_API_VERSION < 19990421
+	tmp = emalloc(sizeof(pval));
+#endif
+
 	for (i = 0; i < cursor->ncols; i++) {
-		tmp.type = IS_STRING;
-		tmp.value.str.len = 0;
        
 		if (cursor->columns[i].col_retcode == 1405) {
-			continue; /* don't add anything for NULL columns */
+			if (!(flags&ORA_FETCHINTO_NULLS)){
+				continue; /* don't add anything for NULL columns, unless the calles wants it */
+			} else {
+				tmp->value.str.val = empty_string;
+				tmp->value.str.len = 0;
+			}
 		} else if (cursor->columns[i].col_retcode != 0 &&
 				   cursor->columns[i].col_retcode != 1406) {
 			/* So error fetching column.  The most common is 1405, a NULL */
@@ -1118,24 +1219,52 @@ void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
 			/* return what we did get, in that case */
 			RETURN_FALSE;
 		} else {
+#if PHP_API_VERSION >= 19990421
+			tmp = emalloc(sizeof(pval));
+			tmp->is_ref = 0;
+			tmp->refcount = 1;
+#endif
+
+			tmp->type = IS_STRING;
+			tmp->value.str.len = 0;
+
 			switch(cursor->columns[i].dbtype) {
 				case SQLT_LNG:
 				case SQLT_LBI:
 					/* XXX 64k max for LONG and LONG RAW */
 					oflng(&cursor->cda, (sword)(i + 1), cursor->columns[i].buf, DB_SIZE, 1,
 						  &ret_len, 0);
-					tmp.value.str.len = ret_len;
+
+					tmp->value.str.len = ret_len;
 					break;
 				default:
-					tmp.value.str.len = min(cursor->columns[i].col_retlen,
-											cursor->columns[i].dsize);
+					tmp->value.str.len = min(cursor->columns[i].col_retlen,
+											 cursor->columns[i].dsize);
 					break;
 			}
-			tmp.value.str.val = estrndup(cursor->columns[i].buf,
-										 tmp.value.str.len);
+			tmp->value.str.val = estrndup(cursor->columns[i].buf,
+										  tmp->value.str.len);
 		}
-		_php3_hash_index_update(arr->value.ht, i, (void *) &tmp, sizeof(pval), NULL);
+
+		if (flags&ORA_FETCHINTO_ASSOC){
+#if PHP_API_VERSION >= 19990421
+			_php3_hash_update(arr->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) &tmp, sizeof(pval), NULL);
+#else
+			_php3_hash_update(arr->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) tmp, sizeof(pval), NULL);
+#endif
+		} else {
+#if PHP_API_VERSION >= 19990421
+			_php3_hash_index_update(arr->value.ht, i, (void *) &tmp, sizeof(pval), NULL);
+#else
+			_php3_hash_index_update(arr->value.ht, i, (void *) tmp, sizeof(pval), NULL);
+#endif
+		}
+
 	}
+
+#if PHP_API_VERSION < 19990421
+	efree(tmp); 
+#endif
 
 	RETURN_LONG(cursor->ncols); 
 }
@@ -1404,11 +1533,11 @@ void php3_Ora_Error(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(arg);
 	if ((cursor = ora_get_cursor(list, arg->value.lval)) != NULL) {
 		return_value->type = IS_STRING;
-		return_value->value.str.val = ora_error(&cursor->cda);
+		return_value->value.str.val = estrdup(ora_error(&cursor->cda));
 		return_value->value.str.len = strlen(return_value->value.str.val);
 	} else if ((conn = ora_get_conn(list, arg->value.lval)) != NULL) {
 		return_value->type = IS_STRING;
-		return_value->value.str.val = ora_error(&conn->lda);
+		return_value->value.str.val = estrdup(ora_error(&conn->lda));
 		return_value->value.str.len = strlen(return_value->value.str.val);
 	}
 }
@@ -1511,9 +1640,8 @@ static char *
 ora_error(Cda_Def * cda)
 {
 	sword n, l;
-	text *errmsg;
+	static text errmsg[ 512 ];
 
-	errmsg = (text *) emalloc(512);
 	n = oerhms(cda, cda->rc, errmsg, 400);
 
 	/* remove the last newline */
@@ -1620,9 +1748,6 @@ ora_describe_define(oraCursor * cursor)
 	return 1;
 }
 
-/* see oracle_hack.c */
-extern PHPAPI HashTable *php3i_get_symbol_table(void);
-
 int ora_set_param_values(oraCursor *cursor, int isout)
 {
 	char *paramname;
@@ -1630,7 +1755,7 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 	pval *pdata;
 	int i, len;
 #if (WIN32|WINNT)
-	/* see oracle_hack.c */
+	/* see variables.c */
 	HashTable *symbol_table=php3i_get_symbol_table();
 #endif
 	_php3_hash_internal_pointer_reset(cursor->params);
@@ -1645,6 +1770,7 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 			php3_error(E_WARNING, "Can't get parameter name");
 			return 0;
 		}
+
 		if(_php3_hash_get_current_data(cursor->params, (void **)&param) == FAILURE){
 			php3_error(E_WARNING, "Can't get parameter data");
 			efree(paramname);
@@ -1652,29 +1778,25 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 		}
 
 		if(isout){
-			/* XXX param->alen + 1 ?? */
-			if(param->type != 1 && param->alen > 0){
 #if (WIN32|WINNT)
 			/* see oracle_hack.c */
-               { 
-                   pval var; 
-                   char *name=(paramname); 
-                   var.value.str.val = (param->progv); 
-                   var.value.str.len = (param->alen); 
-                   var.type = IS_STRING; 
-                   _php3_hash_update(symbol_table, name, strlen(name)+1, &var, sizeof(pval),NULL); 
-               } 
+			{ 
+				pval var; 
+				char *name=(paramname); 
+				var.value.str.val = estrdup(param->progv);
+				var.value.str.len = strlen(param->progv);
+				var.type = IS_STRING; 
+				_php3_hash_update(symbol_table, name, strlen(name)+1, &var, sizeof(pval),NULL); 
+			} 
 #else
-				SET_VAR_STRINGL(paramname, param->progv, param->alen);
+			SET_VAR_STRINGL(paramname, estrdup(param->progv), strlen(param->progv));
 #endif
-			}
-			efree(paramname);
-			continue;
-		}else if(param->type == 2){
 			efree(paramname);
 			continue;
 		}
 		
+		/* doing the in-loop */
+
 		/* FIXME Globals don't work in extensions on windows, have to do something
 			else here.  See oracle_hack.c */
 #if (WIN32|WINNT)
@@ -1684,7 +1806,12 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 			return 0;
 		}
 #else
+
+#if PHP_API_VERSION < 19990421 
+		if(_php3_hash_find(&GLOBAL(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
+#else
 		if(_php3_hash_find(&EG(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
+#endif
 			php3_error(E_WARNING, "Can't find variable for parameter");
 			efree(paramname);
 			return 0;
@@ -1696,6 +1823,7 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 		}
 
 		len = min(param->progvl - 1, pdata->value.str.len);
+
 		strncpy(param->progv, pdata->value.str.val, len);
 
 		param->progv[len] = '\0';
