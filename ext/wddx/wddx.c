@@ -548,6 +548,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	char tmp_buf[WDDX_BUF_LEN];
 	ulong ind = 0;
 	int type;
+	TSRMLS_FETCH();
 
 	target_hash = HASH_OF(arr);
 
