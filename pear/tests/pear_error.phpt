@@ -89,16 +89,16 @@ mode=print: test error[pear_error: message="test error" code=-42 mode=print leve
 mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" prepend="" append="" debug=""]
 mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" prepend="" append="" debug=""]
 mode=print&trigger: test error<br>
-<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>206</b><br>
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append="" debug=""]
 mode=trigger: <br>
-<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>206</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" debug=""]
 mode=trigger,level=notice: <br>
-<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>206</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" debug=""]
 mode=trigger,level=warning: <br>
-<b>Warning</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+<b>Warning</b>:  test error in <b>PEAR.php</b> on line <b>206</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append="" debug=""]
 mode=trigger,level=error: <br>
-<b>Fatal error</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+<b>Fatal error</b>:  test error in <b>PEAR.php</b> on line <b>206</b><br>
