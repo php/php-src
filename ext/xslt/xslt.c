@@ -92,8 +92,7 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 
 	arr = HASH_OF(*zarr);
 	if (! arr) {
-		php_error(E_WARNING, "Invalid argument or parameter array to %s",
-		          get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument or parameter array");
 		return;
 	}
 
@@ -111,8 +110,7 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 
 		type = zend_hash_get_current_key(arr, &string_key, &num_key, 0);
 		if (type == HASH_KEY_IS_LONG) {
-			php_error(E_WARNING, "Invalid key value for argument or parameter array to %s",
-			          get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid key value for argument or parameter array");
 			/* Make the next index NULL, so it signals the end of the array
 				this will protect against invalid arrays, like:
 				array('foo'=>'bar', 'foobarred', 'oops') */
@@ -252,7 +250,7 @@ extern void xslt_call_function(char *name,
 	}
 
 	if (error == FAILURE) {
-		php_error(E_WARNING, "Cannot call the %s handler: %s", 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the %s handler: %s", 
 		          name, Z_STRVAL_P(function));
 	}
 
