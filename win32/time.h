@@ -13,8 +13,8 @@
 #define _DH_TIME_H
 
 /* Include stuff ************************************************************ */
-#include <winsock.h>
-#include <time.h>
+#include <winsock2.h>
+//#include <time.h>
 
 /* Struct stuff ************************************************************* */
 struct timezone {
