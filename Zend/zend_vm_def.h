@@ -1011,7 +1011,7 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, VAR|CV, CONST|TMP|VAR|CV)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_IS TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_IS), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_IS TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
