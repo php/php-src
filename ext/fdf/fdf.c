@@ -125,10 +125,19 @@ static sapi_post_entry php_fdf_post_entry =	{
 	fdf_post_handler
 };
 
+static void php_fdf_init_globals(zend_fdf_globals *fdf_globals)
+{
+	memset(fdf_globals, 0, sizeof(*fdf_globals));
+}
+
+
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(fdf)
 {
+	ZEND_INIT_MODULE_GLOBALS(fdf, php_fdf_init_globals, NULL);
+
 	le_fdf = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
  	/* add handler for Acrobat FDF form post requests */
@@ -160,6 +169,7 @@ PHP_MINIT_FUNCTION(fdf)
 	REGISTER_LONG_CONSTANT("FDFUp", FDFUp, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFFormat", FDFFormat, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFValidate", FDFValidate, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FDFKeystroke", FDFKeystroke, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFCalculate", FDFCalculate, CONST_CS | CONST_PERSISTENT);
 
@@ -167,7 +177,7 @@ PHP_MINIT_FUNCTION(fdf)
 	REGISTER_LONG_CONSTANT("FDFNormalAP", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFRolloverAP", 2, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFDownAP", 3, CONST_CS | CONST_PERSISTENT);
-	
+
 #ifdef PHP_WIN32
 	return SUCCESS;
 #else
@@ -179,6 +189,7 @@ PHP_MINIT_FUNCTION(fdf)
 /* {{{ RINIT */
 PHP_RINIT_FUNCTION(fdf)
 {
+	FDF_G(error) = FDFErcOK;
 	return SUCCESS;
 }
 /* }}} */
