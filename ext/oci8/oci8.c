@@ -5666,7 +5666,7 @@ PHP_FUNCTION(oci_fetch_all)
 				}
 			}
 
-			zend_hash_next_index_insert(Z_ARRVAL_PP(array), &row, sizeof(zval*), NULL),
+			zend_hash_next_index_insert(Z_ARRVAL_PP(array), &row, sizeof(zval*), NULL);
 
 			rows++;
 
