@@ -1,3 +1,95 @@
+2002-01-06  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h: Added IPv6 support
+
+    * main/network.c
+      main/php_network.h:
+    hostconnect now divides the timeout with no. of addresses. If a connection
+    attempt times out, it goes on to the next. Unless each timeout would be
+    <5s. Added php_any_addr() that fills out the any address for IPv6 and IPv4.
+
+2002-01-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear-get.in
+      pear/scripts/pear.in:
+    use the new Console_Getopt::readPHPArgv() function to read args
+
+    * pear/Console/Getopt.php:
+    Added readPHPArgv() function that will safely read the $argv PHP array
+    across different PHP configurations. Will take care on register_globals
+    and register_argc_argv ini directives and the new $_SERVER vars
+
+2002-01-06  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/.cvsignore
+      sapi/cli/CREDITS
+      sapi/cli/Makefile.in
+      sapi/cli/config.m4
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_getopt.h:    Added CLI (command line intrerface) sapi.
+
+    * main/SAPI.h
+      main/main.c:
+    Added argc and argv in request_info needed for the new cli sapi.
+    Modified registering $argc and $argv to support cli sapi.
+
+2002-01-06  Stig Venaas  <venaas@uninett.no>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c
+      main/network.c
+      main/php_network.h
+      configure.in:
+    Added some consts for arguments in network.c declarations. Moved
+    php_sockaddr_storage to php_network.h and added check for struct
+    sockaddr_storage
+
+2002-01-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/driver/setup.inc: pgsql->mysql
+
+2002-01-06  Stig Bakken  <ssb@fast.no>
+
+    * ChangeLog.2001.gz: * archive the 2001 changelog
+
+2002-01-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/pgsql/09numrows.phpt
+      pear/DB/tests/mysql/09numrows.phpt: this test is no longer here
+
+    * pear/DB/tests/driver/01connect.phpt
+      pear/DB/tests/driver/02fetch.phpt
+      pear/DB/tests/driver/03simplequery.phpt
+      pear/DB/tests/driver/04numcols.phpt
+      pear/DB/tests/driver/05sequences.phpt
+      pear/DB/tests/driver/06prepexec.phpt
+      pear/DB/tests/driver/08affectedrows.phpt
+      pear/DB/tests/driver/09numrows.phpt
+      pear/DB/tests/driver/10errormap.phpt
+      pear/DB/tests/driver/13limit.phpt
+      pear/DB/tests/driver/14fetchmode_object.phpt
+      pear/DB/tests/driver/README
+      pear/DB/tests/driver/connect.inc
+      pear/DB/tests/driver/mktable.inc
+      pear/DB/tests/driver/setup.inc
+      pear/DB/tests/driver/skipif.inc: Multi-Driver portability test
+
+    * pear/DB/tests/errors.inc
+      pear/DB/tests/limit.inc
+      pear/DB/tests/numrows.inc
+      pear/DB/tests/tableinfo.inc: test updates
+
+    * pear/DB/oci8.php: - use count(*) instead of count(a, b)
+    - preserve the error handler when testing the sequence
+    - missing E_ALL fixes
+
+    * pear/DB/oci8.php: - change the case of column names to lower case when
+      "optimize=portability" (use a slow php array_change_key_case() until
+      PHP get its C native version avaible. Please do it!)
+    - Improved error reporting in connection
+
 2002-01-05  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/domxml/php_domxml.c:
