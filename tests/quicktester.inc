@@ -8,7 +8,7 @@
    4                     === 2*2
    FALSE                 === @ fopen('non_existent_file')
 TESTS;
-  include( '../../../(../)tests/quicktester.inc' );
+  include( 'tests/quicktester.inc' );
 
   Expect: OK
 
