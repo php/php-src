@@ -1221,13 +1221,6 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC)
 	EG(current_execute_data)->opline = &EG(active_op_array)->opcodes[EG(active_op_array)->last-1-1];
 }
 
-ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
-{
-	if (exception == NULL) {
-		zend_error(E_ERROR, "Need to supply object when throwing exception");
-	}
-	zend_throw_exception_internal(exception TSRMLS_CC);
-}
 
 
 
