@@ -1748,7 +1748,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 */
 PHP_FUNCTION(mysqli_stmt_init)
 {
-	MYSQL			*mysql;
+	MY_MYSQL		*mysql;
 	MY_STMT 		*stmt;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE *mysqli_resource; 
@@ -1756,11 +1756,11 @@ PHP_FUNCTION(mysqli_stmt_init)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",&mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
 	stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
-	if (!(stmt->stmt = mysql_stmt_init(mysql))) {
+	if (!(stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		efree(stmt);
 		RETURN_FALSE;
 	}
