@@ -11,7 +11,7 @@ Check for exif_read_data
   test2.jpg is the same image but contains Exif/Comment information and a
             copy of test1.jpg as a thumbnail.
 */
-$image  = exif_read_data('test2.jpg','',true,false);
+$image  = exif_read_data('./ext/exif/tests/test2.jpg','',true,false);
 $accept = '';
 foreach($image as $idx=>$section) {
 	$accept .= $section;
