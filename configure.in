@@ -386,49 +386,6 @@ AC_ARG_ENABLE(versioning,
 ])
 AC_MSG_RESULT($RESULT)
 
-AC_MSG_CHECKING(whether to use bundled regex library)
-AC_ARG_WITH(system-regex,
-[  --with-system-regex     Do not use the bundled regex library],
-[
-    if test -n "$APXS"; then
-        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
-            HSREGEX=yes
-        else
-            HSREGEX=no
-        fi
-    else
-        if test "$withval" = "no"; then
-            HSREGEX=yes
-        else
-            HSREGEX=no
-        fi
-    fi
-],[
-    if test -n "$APXS"; then
-        if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
-            HSREGEX=yes
-        else
-            HSREGEX=no
-        fi
-    else
-        HSREGEX=yes
-    fi
-])
-AC_MSG_RESULT($HSREGEX)
-
-if test "$HSREGEX" = "yes"; then
-  REGEX_LIB=regex/libregex.la
-  AC_DEFINE(HSREGEX)
-  AC_DEFINE(REGEX,1)
-else
-  REGEX_LIB=
-  AC_DEFINE(REGEX,0)
-fi
-
-AC_SUBST(REGEX_LIB)
-AC_SUBST(HSREGEX)
-
-
 AC_MSG_CHECKING(whether to use a configuration file)
 AC_ARG_WITH(config-file-path,
 [  --with-config-file-path=PATH  
@@ -671,6 +628,8 @@ AM_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
 fi
+
+PHP_HSREGEX
 
 dnl If we are using gcc and the user has not specified CFLAGS, add -O2.
 test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
