@@ -30,7 +30,7 @@
 /*
 * class domcharacterdata extends domnode 
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-FF21A306
+* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
 * Since: 
 */
 
@@ -45,7 +45,7 @@ zend_function_entry php_dom_characterdata_class_functions[] = {
 
 /* {{{ proto data	string	
 readonly=no 
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-72AB8359
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
 Since: 
 */
 int dom_characterdata_data_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -95,7 +95,7 @@ long dom_utf16Length (xmlChar *utf8str) {
 
 /* {{{ proto length	unsigned long	
 readonly=yes 
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-7D61178C
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
 Since: 
 */
 int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -122,18 +122,57 @@ int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 /* {{{ proto domstring dom_characterdata_substring_data(unsigned long offset, unsigned long count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-6531BCCF
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since: 
 */
 PHP_FUNCTION(dom_characterdata_substring_data)
 {
- DOM_NOT_IMPLEMENTED();
+	xmlChar    *cur;
+	xmlChar    *substring;
+	xmlNodePtr  node;
+	long        offset, count;
+	int         length;
+	dom_object	*intern;
+
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &offset, &count) == FAILURE) {
+		return;
+	}
+
+	cur = xmlNodeListGetString(node->doc, node, 1);
+	if (cur == NULL) {
+		RETURN_FALSE;
+	}
+
+	length = xmlStrlen(cur);
+
+	if (offset < 0 || count < 0 || offset > length) {
+		xmlFree(cur);
+		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		RETURN_FALSE;
+	}
+
+	if ((offset + count) > length) {
+		count = length - offset;
+	}
+
+	substring = xmlStrsub(cur, offset, count);
+	xmlFree(cur);
+
+	if (substring) {
+		RETVAL_STRING(substring, 1);
+		xmlFree(substring);
+	} else {
+		RETVAL_EMPTY_STRING();
+	}
 }
 /* }}} end dom_characterdata_substring_data */
 
 
 /* {{{ proto dom_void dom_characterdata_append_data(string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-32791A2F
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since: 
 */
 PHP_FUNCTION(dom_characterdata_append_data)
@@ -159,33 +198,168 @@ PHP_FUNCTION(dom_characterdata_append_data)
 
 
 /* {{{ proto dom_void dom_characterdata_insert_data(unsigned long offset, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-3EDB695F
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since: 
 */
 PHP_FUNCTION(dom_characterdata_insert_data)
 {
- DOM_NOT_IMPLEMENTED();
+	xmlChar		*cur, *first, *second;
+	xmlNodePtr  node;
+	char		*arg;
+	long        offset;
+	int         length, arg_len;
+	dom_object	*intern;
+
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &offset, &arg, &arg_len) == FAILURE) {
+		return;
+	}
+
+	cur = xmlNodeGetContent(node);
+	if (cur == NULL) {
+		RETURN_FALSE;
+	}
+
+	length = xmlStrlen(cur);
+
+	if (offset < 0 || offset > length) {
+		xmlFree(cur);
+		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		RETURN_FALSE;
+	}
+
+	first = xmlStrndup(cur, offset);
+	second = xmlStrdup(cur + offset);
+	xmlFree(cur);
+
+	xmlNodeSetContent(node, first);
+	xmlNodeAddContent(node, arg);
+	xmlNodeAddContent(node, second);
+	
+	xmlFree(first);
+	xmlFree(second);
+
+	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_insert_data */
 
 
 /* {{{ proto dom_void dom_characterdata_delete_data(unsigned long offset, unsigned long count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-7C603781
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since: 
 */
 PHP_FUNCTION(dom_characterdata_delete_data)
 {
- DOM_NOT_IMPLEMENTED();
+	xmlChar    *cur, *substring, *second;
+	xmlNodePtr  node;
+	long        offset, count;
+	int         length;
+	dom_object	*intern;
+
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &offset, &count) == FAILURE) {
+		return;
+	}
+
+	cur = xmlNodeListGetString(node->doc, node, 1);
+	if (cur == NULL) {
+		RETURN_FALSE;
+	}
+
+	length = xmlStrlen(cur);
+
+	if (offset < 0 || count < 0 || offset > length) {
+		xmlFree(cur);
+		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		RETURN_FALSE;
+	}
+
+	if (offset > 0) {
+		substring = xmlStrsub(cur, 0, offset);
+	} else {
+		substring = NULL;
+	}
+
+	if ((offset + count) > length) {
+		count = length - offset;
+	}
+
+	second = xmlStrdup(cur + offset + count);
+	substring = xmlStrcat(substring, second);
+
+	xmlNodeSetContent(node, substring);
+
+	xmlFree(cur);
+	xmlFree(second);
+	xmlFree(substring);
+
+	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_delete_data */
 
 
 /* {{{ proto dom_void dom_characterdata_replace_data(unsigned long offset, unsigned long count, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-E5CBA7FB
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since: 
 */
 PHP_FUNCTION(dom_characterdata_replace_data)
 {
- DOM_NOT_IMPLEMENTED();
+	xmlChar		*cur, *substring, *second = NULL;
+	xmlNodePtr  node;
+	char		*arg;
+	long        offset, count;
+	int         length, arg_len;
+	dom_object	*intern;
+
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
+		return;
+	}
+
+	cur = xmlNodeListGetString(node->doc, node, 1);
+	if (cur == NULL) {
+		RETURN_FALSE;
+	}
+
+	length = xmlStrlen(cur);
+
+	if (offset < 0 || count < 0 || offset > length) {
+		xmlFree(cur);
+		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		RETURN_FALSE;
+	}
+
+	if (offset > 0) {
+		substring = xmlStrsub(cur, 0, offset);
+	} else {
+		substring = NULL;
+	}
+
+	if ((offset + count) > length) {
+		count = 0;
+	}
+
+	if (offset < length) {
+		second = xmlStrdup(cur + offset + count);
+	}
+
+	substring = xmlStrcat(substring, arg);
+	substring = xmlStrcat(substring, second);
+
+	xmlNodeSetContent(node, substring);
+
+	xmlFree(cur);
+	if (second) {
+		xmlFree(second);
+	}
+	xmlFree(substring);
+
+	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_replace_data */
