@@ -1,3 +1,14 @@
+2002-09-13  Andrei Zmievski  <andrei@php.net>
+
+    * pear/package-Console_Getopt.xml:
+    Let's take Console_Getopt to stable release.
+
+2002-09-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+    Do not create the destination file, if opening of the source file failed
+    during copy().
+
 2002-09-12  Stefan Esser  <s.esser@e-matters.de>
 
     * ext/standard/fsock.c
