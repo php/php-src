@@ -72,8 +72,7 @@ enum pdo_fetch_orientation {
 
 enum pdo_attribute_type {
 	PDO_ATTR_AUTOCOMMIT,	/* use to turn on or off auto-commit mode */
-	PDO_ATTR_SCROLL,		/* ask for a scrollable cursor (when you prepare()) */
-	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it */
+	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it. Size is in KB */
 	PDO_ATTR_TIMEOUT,		/* connection timeout in seconds */
 	PDO_ATTR_ERRMODE,		/* control how errors are handled */
 	PDO_ATTR_SERVER_VERSION,	/* database server version */
