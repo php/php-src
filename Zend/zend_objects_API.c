@@ -271,22 +271,24 @@ ZEND_API zend_object_handlers *zend_get_std_object_handlers()
 static zend_object_handlers zend_object_proxy_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	
-	NULL,                  /* read_property */
-	NULL,                 /* write_property */
-	NULL,               /* get_property_ptr */
-	NULL,               /* get_property_zval_ptr */
-	zend_object_proxy_get,                   /* get */
-	zend_object_proxy_set,                   /* set */
-	NULL,                   /* has_property */
-	NULL,                   /* unset_property */
-	NULL,                   /* get_properties */
-	NULL,                   /* get_method */
-	NULL,                   /* call_method */
-	NULL,                /* get_constructor */
-	NULL,                /* get_class_entry */
-	NULL,                /* get_class_name */
-	NULL                 /* compare_objects */
+	NULL,						/* read_property */
+	NULL,						/* write_property */
+	NULL,						/* write_dimension */
+	NULL,						/* get_property_ptr */
+	NULL,						/* get_property_zval_ptr */
+	zend_object_proxy_get,		/* get */
+	zend_object_proxy_set,		/* set */
+	NULL,						/* has_property */
+	NULL,						/* unset_property */
+	NULL,						/* get_properties */
+	NULL,						/* get_method */
+	NULL,						/* call_method */
+	NULL,						/* get_constructor */
+	NULL,						/* get_class_entry */
+	NULL,						/* get_class_name */
+	NULL						/* compare_objects */
 };
+
 
 /*
  * Local variables:
