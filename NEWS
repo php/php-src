@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added possibility to prevent PHP from registering variables when
   input filter support is used. (Derick)
+- Added iconv stream filter (convert.iconv.*). (Moriyoshi)
 - Added EXSLT support in ext/xsl. (Christian)
 - Added proxy support to http wrapper. (Sara)
 - Added new functions:
