@@ -11,8 +11,6 @@ PHP                                                                        NEWS
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled oniguruma library (used for multibyte regular expression)
   to 3.7.0. (Moriyoshi)
-- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
-  file). (Tony)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
   Fixed bugs:
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
@@ -32,6 +30,8 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)   
+- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
+  file). (Tony)
 - Fixed bug #32326 (Check values of Connection/Transfer-Encoding 
   case-incentively in SOAP extension). (Ilia)
 - Fixed bug #32290 (call_user_func_array() calls wrong class method within 
