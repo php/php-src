@@ -34,9 +34,9 @@ class PEAR_Registry
 
     // {{{ PEAR_Registry
 
-    function PEAR_Registry()
+    function PEAR_Registry($pear_install_dir = PEAR_INSTALL_DIR)
     {
-        $this->statedir = PEAR_INSTALL_DIR . "/.registry";
+        $this->statedir = $pear_install_dir . "/.registry";
     }
 
     // }}}
