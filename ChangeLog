@@ -1,3 +1,109 @@
+2004-03-15  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/browscap.c:
+      MFH: Fixed bug #27291 (get_browser matches browscap.ini patterns
+      incorrectly).
+
+    * NEWS
+      ext/standard/browscap.c:
+      Fixed bug #27291 (get_browser matches browscap.ini patterns incorrectly).
+
+2004-03-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/22pg_fetch_object.phpt:
+      Keep BC of pg_fetch_object
+
+    * NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/tests/80_bug27597.phpt:
+      Bugfix #27597 pg_fetch_array not returning false .
+
+2004-03-15  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      MFH: Fix for #27594. Comuted columns does not return a column source
+
+    * ext/mssql/php_mssql.c:
+      Fix for #27594. Comuted columns does not return a column source
+
+2004-03-15  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS:
+      Missing NEWS entries
+
+    * (PHP_4_3)
+      NEWS:
+      Forgot to add NEWS entries for these
+
+2004-03-15  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      - Restore E_NOTICE for longs and doubles.
+
+2004-03-15  Jon Parise  <jon@csh.rit.edu>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/info.c:
+      MFH 1.243:
+      
+      Fixed crash in php_ini_scanned_files() when no additional INI files were
+      actually parsed.
+
+2004-03-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      MFH: - Fixed bug #24582 (extensions can not be loaded dynamically in
+      Solaris/iPlanet)
+
+    * ZendEngine2/zend.h:
+      - Fixed bug #24582 (extensions can not be loaded dynamically in
+      Solaris/iPlanet)
+
+    * ext/xml/tests/bug26614.phpt:
+      - Fix test (wrong expected result..)
+
+2004-03-15  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      - Nuke E_NOTICE. This caused a notice when doing if ($obj == NULL)
+
+2004-03-15  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      win32/php4dllts.dsp:
+      Add misisng library path
+
+2004-03-15  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+      Use MAKE_STD_ZVAL instead of ALLOC_ZVAL
+
+2004-03-15  Jon Parise  <jon@csh.rit.edu>
+
+    * NEWS
+      ext/standard/info.c:
+      Fixed crash in php_ini_scanned_files() when no additional INI files were
+      actually parsed.
+      
+      I'll merge this into the PHP_4_3 branch as soon as I receive permission
+      from the release master.
+
+2004-03-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (php_5_0_0RC1RC1)
+      NEWS:
+      Fugbix typo.
+
 2004-03-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/main.c
