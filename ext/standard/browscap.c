@@ -40,7 +40,7 @@ zend_module_entry browscap_module_entry = {
 };
 
 
-static int browser_reg_compare(pval *browser)
+static int browser_reg_compare(zval **browser)
 {
 	pval *browser_name;
 	regex_t r;
@@ -48,7 +48,7 @@ static int browser_reg_compare(pval *browser)
 	if (found_browser_entry) { /* already found */
 		return 0;
 	}
-	zend_hash_find(browser->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
+	zend_hash_find((*browser)->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
 	if (!strchr(browser_name->value.str.val,'*')) {
 		return 0;
 	}
@@ -56,7 +56,7 @@ static int browser_reg_compare(pval *browser)
 		return 0;
 	}
 	if (regexec(&r,lookup_browser_name,0,NULL,0)==0) {
-		found_browser_entry = browser;
+		found_browser_entry = *browser;
 	}
 	regfree(&r);
 	return 0;
