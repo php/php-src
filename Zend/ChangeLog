@@ -1,3 +1,21 @@
+2004-06-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_scanner.l:
+      - Require a single white-space char after /** to start a doc comment that
+        way we prevent /*** from becoming a doc comment (as requested Derick).
+
+    * zend_API.h:
+      Add missing declaration
+
+    * zend_reflection_api.c:
+      Small code layout change
+
+    * zend_language_scanner.l:
+      Do not require NEWLINE at start of doccomment
+
+    * zend_reflection_api.c:
+      Bugfix #28699: Reflection api bugs
+
 2004-06-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
