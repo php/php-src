@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Added the call_user_func_array() function which gives you the ability to
+  call a user function by passing an array of parameters as the second
+  argument.
+  Added the constant() function which returns the value of a constant given
+  the constant's name.
 - Implemented support for Perl-style matching regexp delimiters in PCRE.
   You can use <{[( and )]}> to delimit your expressions now. (Andrei)
 - Introduced new 'F' modifier in PCRE that lets you specify a function
