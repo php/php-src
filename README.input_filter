@@ -155,7 +155,7 @@ PHP_FUNCTION(my_get_raw)
     HashTable *hash_ptr;
     char *raw_var;
 
-    if(zend_parse_parameters(2 TSRMLS_CC, "ls|l", &arg, &var, &var_len) == FAILURE) {
+    if(zend_parse_parameters(2 TSRMLS_CC, "ls", &arg, &var, &var_len) == FAILURE) {
         return;
     }
 
