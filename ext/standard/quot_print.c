@@ -44,6 +44,10 @@ static char php_hex2int(int c)
 	{
 		return c - 'A' + 10;
 	}
+    else if ( c >= 'a' && c <= 'f' )
+    {
+        return c - 'a' + 10;
+    }
 	else
 	{
 		return -1;
@@ -102,7 +106,7 @@ PHP_FUNCTION(quoted_printable_decode)
                     /* End of line reached */
                     i += k;
                 }
-                else if ( (str_in[i+k] == 10) && (str_in[i+k+1] == 13))
+                else if ( (str_in[i+k] == 13) && (str_in[i+k+1] == 10))
                 {
                     /* CRLF */
                     i += k+2;
