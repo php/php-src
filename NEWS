@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added md5_file(), which calculaties the MD5 sum of a file.
+  (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
 - Fixed a bug in WDDX deserialization that would sometimes corrupt the root
   element if it was a scalar one. (Andrei)
 - Added support for parsing recordsets contained in WDDX packets. (Andrei)
