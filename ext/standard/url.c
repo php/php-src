@@ -253,7 +253,8 @@ char *php_url_encode(char *s, int len)
 			str[y] = hexchars[(unsigned char) s[x] & 15];
 		}
 #else /*CHARSET_EBCDIC*/
-		} else if (!isalnum(str[y]) && strchr("_-.", str[y]) != NULL) {
+		} else if (!isalnum(str[y]) && strchr("_-.", str[y]) == NULL) {
+			/* Allow only alphanumeric chars and '_', '-', '.'; escape the rest */
 			str[y++] = '%';
 			str[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
 			str[y] = hexchars[os_toascii[(unsigned char) s[x]] & 0x0F];
