@@ -46,7 +46,7 @@ if test "$PHP_MYSQLI" != "no"; then
     AC_DEFINE(HAVE_MYSQLILIB,1,[ ])
     PHP_CHECK_LIBRARY(mysqlclient, mysql_stmt_field_count,
     [ ],[
-		AC_MSG_ERROR([MySQLI doesn't support versions < 4.1.3 anymore. Please update your libraries.])
+		AC_MSG_ERROR([MySQLI doesn't support versions < 4.1.3 (for MySQL 4.1.x) and < 5.0.1 for (MySQL 5.0.x) anymore. Please update your libraries.])
 	],[])
   ],[
     AC_MSG_ERROR([wrong mysql library version or lib not found. Check config.log for more information.])
