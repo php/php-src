@@ -514,7 +514,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 }
 
 
-static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
+ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval ***args;
 	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
