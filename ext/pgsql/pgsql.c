@@ -356,7 +356,7 @@ int php3_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 		HashTable tmp;
 		
 		_php3_hash_init(&tmp,0,NULL,NULL,0);
-		php3_pgsql_do_connect(&tmp,return_value,list,plist,0);
+		php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 		_php3_hash_destroy(&tmp);
 	}
 	return php3_pgsql_module.default_link;
