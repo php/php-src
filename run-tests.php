@@ -434,10 +434,12 @@ TEST $file
 			$output = `$php $tmp_skipif`;
 			@unlink($tmp_skipif);
 			if (ereg("^skip", trim($output))){
-				echo "SKIP $tested\n";
+				echo "SKIP $tested";
 				$reason = (ereg("^skip\s*(.+)$", trim($output))) ? ereg_replace("^skip\s*(.+)$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
-					echo "\treason: $reason\n";
+					echo " (reason: $reason)\n";
+				} else {
+					echo "\n";
 				}
 				return 'SKIPPED';
 			}
