@@ -26,7 +26,7 @@
 
 BEGIN_EXTERN_C()
 
-void zend_throw_exception_internal(zval *exception TSRMLS_DC);
+ZEND_API void zend_throw_exception_internal(zval *exception TSRMLS_DC);
 
 void zend_register_default_exception(TSRMLS_D);
 
