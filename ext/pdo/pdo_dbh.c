@@ -378,14 +378,14 @@ static PHP_METHOD(PDO, beginTransaction)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (dbh->in_txn) {
-		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "There is already an active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_ALREADY_EXISTS TSRMLS_CC, "There is already an active transaction");
 		RETURN_FALSE;
 	}
 	
 	if (!dbh->methods->begin) {
 		/* TODO: this should be an exception; see the auto-commit mode
 		 * comments below */
-		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "This driver doesn't support transactions");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NOT_IMPLEMENTED TSRMLS_CC, "This driver doesn't support transactions");
 		RETURN_FALSE;
 	}
 
@@ -427,7 +427,7 @@ static PHP_METHOD(PDO, rollBack)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!dbh->in_txn) {
-		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "There is no active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NOT_FOUND TSRMLS_CC, "There is no active transaction");
 		RETURN_FALSE;
 	}
 
