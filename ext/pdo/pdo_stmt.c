@@ -324,6 +324,7 @@ static PHP_METHOD(PDOStatement, execute)
 			RETURN_FALSE;
 		}
 	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
 	if (stmt->methods->executer(stmt TSRMLS_CC)) {
