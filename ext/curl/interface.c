@@ -500,8 +500,12 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
 				length = -1;
 			} else {
-				memcpy(data, Z_STRVAL_P(retval_ptr), size * nmemb);
-				length = Z_STRLEN_P(retval_ptr);
+				if(Z_STRVAL_P(retval_ptr)) {
+					memcpy(data, Z_STRVAL_P(retval_ptr), size * nmemb);
+					length = Z_STRLEN_P(retval_ptr);
+				} else {
+					data = strdup("");
+				}
 			}
 
 			zval_ptr_dtor(argv[0]);
