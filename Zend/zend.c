@@ -94,10 +94,9 @@ static void print_hash(HashTable *ht, int indent)
 			ZEND_PUTS(" ");
 		}
 		ZEND_PUTS("[");
-		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, &iterator)) {
+		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator)) {
 			case HASH_KEY_IS_STRING:
 				ZEND_PUTS(string_key);
-				efree(string_key);
 				break;
 			case HASH_KEY_IS_LONG:
 				zend_printf("%ld",num_key);
