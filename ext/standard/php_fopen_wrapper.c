@@ -75,22 +75,24 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 {
 	size_t read_bytes = 0;
 	if(!stream->eof) {
-		if(SG(request_info).post_data) { /* data has already been read by a post handler */
-			read_bytes = SG(request_info).post_data_length - stream->position;
+		if(SG(request_info).raw_post_data) { /* data has already been read by a post handler */
+			read_bytes = SG(request_info).raw_post_data_length - stream->position;
 			if(read_bytes <= count) {
 				stream->eof = 1;
 			} else {
 				read_bytes = count;
 			}
 			if(read_bytes) {
-				memcpy(buf, SG(request_info).post_data + stream->position, read_bytes);
+				memcpy(buf, SG(request_info).raw_post_data + stream->position, read_bytes);
 			}
-		} else {
+		} else if(sapi_module.read_post) {
 			read_bytes = sapi_module.read_post(buf, count TSRMLS_CC);
 			if(read_bytes <= 0){
 				stream->eof = 1;
 				read_bytes = 0;
 			}
+		} else {
+			stream->eof = 1;
 		}
 	}
 
@@ -133,7 +135,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	
 	if (!strcasecmp(path, "input")) {
 		return php_stream_alloc(&php_stream_input_ops, NULL, 0, "rb");
-	}
+	}  
 	
 	if (!strcasecmp(path, "stdin")) {
 		fp = fdopen(dup(STDIN_FILENO), mode);

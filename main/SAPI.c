@@ -174,7 +174,7 @@ static void sapi_read_post_data(TSRMLS_D)
 		post_reader_func(TSRMLS_C);
 	}
 
-	if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
+	if(sapi_module.default_post_reader) {
 		sapi_module.default_post_reader(TSRMLS_C);
 	}
 }
@@ -294,6 +294,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
+	SG(request_info).raw_post_data = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
@@ -355,13 +356,16 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 		efree(SG(request_info).post_data);
 	}  else 	if (SG(server_context)) {
 		if(sapi_module.read_post) { 
-			// make sure we've consumed all request input data
+			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
 			while(sapi_module.read_post(dummy, sizeof(dummy)-1 TSRMLS_CC) > 0) {
 				/* empty loop body */
 			}
 		}
 	}
+	if (SG(request_info).raw_post_data) {
+		efree(SG(request_info).raw_post_data);
+	} 
 	if (SG(request_info).auth_user) {
 		efree(SG(request_info).auth_user);
 	}
