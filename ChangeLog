@@ -1,3 +1,142 @@
+2002-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ncurses/ncurses_functions.c:
+      MFH
+
+    * ext/ncurses/ncurses_functions.c:
+      Fixed various memory leaks.
+      
+
+2002-12-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/ncurses/ncurses_functions.c:
+      Removed "%s" from format strings
+
+2002-12-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h:
+      MFH (fix for bug #21146).
+      
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h:
+      Fixed bug #21146.
+
+2002-12-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/ncurses/ncurses_functions.c:
+      MFH: php_error => php_error_docref
+
+    * ext/ncurses/ncurses_functions.c:
+      php_error => php_error_docref
+
+    * ext/ncurses/ncurses.c:
+      MFH: WS fix
+
+    * ext/ncurses/ncurses.c:
+      WS fix
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h:
+      MFH
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h:
+      Fixed bug #21144
+
+2002-12-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/bug21131.phpt
+      ext/standard/tests/file/userstreams.phpt
+      main/streams.c:
+      MFH fix for Bug #21131
+
+    * ext/standard/tests/file/bug21131.phpt:
+      
+      Forgot to include this in my previous commit for #21131 fix.
+
+    * ext/standard/tests/file/userstreams.phpt
+      main/streams.c:
+      Fix for Bug #21131: fopen($file, 'a+') would incorrectly assume that
+      the stream position was at offset 0.
+      This corrects that assumption by querying the stream for it's position
+      when it detects the 'a' "flag" in the mode parameter to fopen.
+      Also added a test for plain files and amended the userstreams test to
+      take this into account.
+
+2002-12-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/exif/exif.c:
+      (char *) vptr += expr; is refused by the IRIX compiler, so we use
+      vptr = (char *) vptr + expr; instead.
+
+    * ext/exif/exif.c:
+      'index' is a function name in the C library, do not use it as variable
+      name.
+      
+      also, cast the 'void *' correctly to a 'char *' for manipulation
+      instead of an 'int'.
+
+2002-12-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c:
+      MFH:
+      
+      A Simple fix for Bug #12360 (fsockopen timeout doesn't work).
+      
+      Analysis:
+      On systems with HAVE_GETADDRINFO and IPV6 support, php_hostconnect would
+      attempt to connect to each possible address that matched the requested IP.
+      
+      If the remote host:port combination are dropping packets this would cause
+      the
+      first connection to timeout (after waiting for the full timeout duration).
+      
+      PHP would then attempt the second address and wait the full duration
+      again.
+      
+      Solution:
+      If the first connection attempt times out, abort the connection loop.
+
+    * main/network.c:
+      A Simple fix for Bug #12360 (fsockopen timeout doesn't work).
+      
+      Analysis:
+      On systems with HAVE_GETADDRINFO and IPV6 support, php_hostconnect would
+      attempt to connect to each possible address that matched the requested IP.
+      
+      If the remote host:port combination are dropping packets this would cause
+      the
+      first connection to timeout (after waiting for the full timeout duration).
+      
+      PHP would then attempt the second address and wait the full duration
+      again.
+      
+      Solution:
+      If the first connection attempt times out, abort the connection loop.
+
+2002-12-22  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * run-tests.php:
+      Delete some security related env variables
+
+2002-12-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/System.php
+      pear/PEAR/Config.php:
+      MFH
+
+    * pear/System.php:
+      - Windows fix from Edin
+
+    * pear/PEAR/Config.php:
+      - set default xml-rpc cache ttl to 1 hour
+
 2002-12-21  Frank M. Kromann  <frank@kromann.info>
 
     * win32/php4ts_cli.dsp:
