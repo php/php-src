@@ -87,13 +87,13 @@ PHP_FUNCTION(cybercash_encr)
 	macbuff = (unsigned char *)emalloc(sizeof(unsigned char) * 20);
 
 	errcode = mck_encr(Z_STRVAL_PP(wmk),
-                       Z_STRVAL_PP(sk),
-                       Z_STRLEN_PP(inbuff) + 1,
-                       Z_STRVAL_PP(inbuff),
-                       outAlloc,
-                       outbuff,
-                       &outLth,
-                       macbuff);
+	                   Z_STRVAL_PP(sk),
+	                   Z_STRLEN_PP(inbuff) + 1,
+	                   Z_STRVAL_PP(inbuff),
+	                   outAlloc,
+	                   outbuff,
+	                   &outLth,
+	                   macbuff);
 
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_WARNING, "Return value from cybercash_encr could not be initialized");
@@ -135,13 +135,13 @@ PHP_FUNCTION(cybercash_decr)
 	macbuff = (unsigned char *)emalloc(sizeof(unsigned char) * 20);
 
 	errcode = mck_decr(Z_STRVAL_PP(wmk),
-                       Z_STRVAL_PP(sk),
-                       Z_STRLEN_PP(inbuff),
-                       Z_STRLEN_PP(inbuff),
-                       outAlloc,
-                       outbuff,
-                       &outLth,
-                       macbuff);
+	                   Z_STRVAL_PP(sk),
+	                   Z_STRLEN_PP(inbuff),
+	                   Z_STRLEN_PP(inbuff),
+	                   outAlloc,
+	                   outbuff,
+	                   &outLth,
+	                   macbuff);
 
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_WARNING, "Could not initialize Return value from cybercash_decr")
@@ -175,8 +175,8 @@ PHP_FUNCTION(cybercash_base64_encode)
 	outbuff = (char *)emalloc(base64_enc_size((unsigned int)Z_STRLEN_PP(inbuff)));
   
 	ret_length = base64_encode(outbuff, 
-		                       Z_STRVAL_PP(inbuff),
-							   Z_STRLEN_PP(inbuff));
+	                           Z_STRVAL_PP(inbuff),
+	                           Z_STRLEN_PP(inbuff));
 
 	RETURN_STRINGL(outbuff, ret_length, 0);
 }
