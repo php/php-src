@@ -3206,6 +3206,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
 	char *cafile = NULL;
 	char *capath = NULL;
 	char *certfile = NULL;
+	char *cipherlist = NULL;
 	int ok = 1;
 
 
@@ -3239,6 +3240,12 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
 		SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
 		SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
 	}
+
+	GET_VER_OPT_STRING("ciphers", cipherlist);
+	if (!cipherlist) {
+		cipherlist = "DEFAULT";
+	}
+	SSL_CTX_set_cipher_list(ctx, cipherlist);
 
 	GET_VER_OPT_STRING("local_cert", certfile);
 	if (certfile) {
