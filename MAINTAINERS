@@ -18,6 +18,15 @@ EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           oci8
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           oracle
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
+STATUS:              Maintained
+COMMENT:			 Using the new OCI8 driver is encouraged where possible.
+--------------------------------------------------------------------------------
 EXTENSION:           pcre
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
 STATUS:              Maintained
@@ -28,5 +37,9 @@ STATUS:              Maintained
 --------------------------------------------------------------------------------
 EXTENSION:           wddx
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           xml
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
