@@ -28,14 +28,6 @@
 extern zend_module_entry ibase_module_entry;
 #define phpext_interbase_ptr &ibase_module_entry
 
-#ifndef ISC_INT64_FORMAT
-#ifdef PHP_WIN32
-#define ISC_INT64_FORMAT "I64"
-#else
-#define ISC_INT64_FORMAT "ll"
-#endif
-#endif
-
 PHP_MINIT_FUNCTION(ibase);
 PHP_RINIT_FUNCTION(ibase);
 PHP_MSHUTDOWN_FUNCTION(ibase);
@@ -97,6 +89,8 @@ PHP_FUNCTION(ibase_free_event_handler);
 
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
+
+/* this value should never be > USHRT_MAX */
 #define IBASE_BLOB_SEG 4096
 
 ZEND_BEGIN_MODULE_GLOBALS(ibase)
@@ -114,7 +108,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	char *cfg_timeformat;
 	char errmsg[MAX_ERRMSG];
 	long sql_code;
-	HashTable blob_table;
 ZEND_END_MODULE_GLOBALS(ibase)
 
 typedef struct {
@@ -143,11 +136,10 @@ typedef struct {
 } ibase_array;
 
 typedef struct {
-	ibase_db_link *link;
 	isc_blob_handle bl_handle;
 	ISC_QUAD bl_qd;
 	unsigned short type;
-} ibase_blob_handle;
+} ibase_blob;
 
 typedef struct {
 	ibase_db_link *link;
@@ -185,11 +177,6 @@ typedef struct {
 	zval *callback;
 	void **thread_ctx;
 } ibase_event;
-
-typedef struct _php_ibase_varchar {
-	short var_len;
-	char var_str[1];
-} IBASE_VCHAR;
 
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
