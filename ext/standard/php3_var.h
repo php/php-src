@@ -35,7 +35,7 @@ PHP_FUNCTION(var_dump);
 PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 
-void php3api_var_dump(pval *struc, int level);
+void php3api_var_dump(pval **struc, int level);
 void php3api_var_serialize(pval *buf, pval *struc);
 int php3api_var_unserialize(pval *rval, char **p, char *max);
 
