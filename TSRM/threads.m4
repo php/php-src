@@ -60,6 +60,7 @@ dnl
 AC_DEFUN(PTHREADS_CHECK_COMPILE, [
 AC_TRY_RUN( [
 #include <pthread.h>
+#include <stddef.h>
 
 void *thread_routine(void *data) {
     return data;
@@ -67,7 +68,9 @@ void *thread_routine(void *data) {
 
 int main() {
     pthread_t thd;
+    pthread_mutexattr_t mattr;
     int data = 1;
+    pthread_mutexattr_init(&mattr);
     return pthread_create(&thd, NULL, thread_routine, &data);
 } ], [ 
   pthreads_working="yes"
@@ -96,7 +99,7 @@ if test "$pthreads_working" != "yes"; then
   for flag in -pthreads -pthread -mthreads; do 
     ac_save="$CFLAGS"
     CFLAGS="$CFLAGS $flag"
-	PTHREADS_CHECK_COMPILE
+    PTHREADS_CHECK_COMPILE
     if test "$pthreads_working" = "yes"; then
       ac_cv_pthreads_cflags="$flag"
       break
