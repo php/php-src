@@ -118,4 +118,28 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 		convert_scalar_to_number(*ppzv);							\
 	}
 
+
+
+#define ZLVAL(zval)		(zval).value.lval
+#define ZDVAL(zval)		(zval).value.dval
+#define ZSTRVAL(zval)	(zval).value.str.val
+#define ZSTRLEN(zval)	(zval).value.str.len
+#define ZARRVAL(zval)	(zval).value.ht
+
+#define ZLVAL_P(zval_p)		ZLVAL(*zval_p)
+#define ZDVAL_P(zval_p)		ZDVAL(*zval_p)
+#define ZSTRVAL_P(zval_p)	ZSTRVAL(*zval_p)
+#define ZSTRLEN_P(zval_p)	ZSTRLEN(*zval_p)
+#define ZARRVA_PL(zval_p)	ZARRVAL(*zval_p)
+
+#define ZLVAL_PP(zval_pp)	ZLVAL(**zval_pp)
+#define ZDVAL_PP(zval_pp)	ZDVAL(**zval_pp)
+#define ZSTRVAL_PP(zval_pp)	ZSTRVAL(**zval_pp)
+#define ZSTRLEN_PP(zval_pp)	ZSTRLEN(**zval_pp)
+#define ZARRVAL_PP(zval_pp)	ZARRVAL(**zval_pp)
+
+#define ZTYPE(zval)			(zval).type
+#define ZTYPE_P(zval_p)		ZTYPE(*zval_p)
+#define ZTYPE_PP(zval_pp)	ZTYPE(**zval_pp)
+
 #endif
