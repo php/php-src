@@ -418,8 +418,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				continue;
 			}
 			
-			if(const_value.type == IS_STRING &&
-			   const_value.value.str.len == str_index_len-1 &&
+			if (const_value.type == IS_STRING && const_value.value.str.len == str_index_len-1 &&
 			   !strncmp(const_value.value.str.val, str_index, str_index_len)) {
 				/* constant value is the same as its name */
 				zval_dtor(&const_value);
