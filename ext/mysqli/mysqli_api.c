@@ -1241,7 +1241,7 @@ PHP_FUNCTION(mysqli_prepare)
 
 	stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
-	if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
+    if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		if (mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 			mysql_stmt_close(stmt->stmt);
 			stmt->stmt = NULL;
@@ -1580,7 +1580,7 @@ PHP_FUNCTION(mysqli_stmt_param_count)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_reset(object stmt)
+/* {{{ proto void mysqli_stmt_reset(object stmt)
    reset a prepared statement */
 PHP_FUNCTION(mysqli_stmt_reset) 
 {
@@ -1593,10 +1593,9 @@ PHP_FUNCTION(mysqli_stmt_reset)
 
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt");
 
-	if (mysql_stmt_reset(stmt->stmt)) {
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	mysql_stmt_reset(stmt->stmt);
+
+	return;
 }
 /* }}} */
 
@@ -1781,7 +1780,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_stmt_init(object link)
+/* {{{ proto object mysqli_stmt_init(object link)
    Initialize statement object
 */
 PHP_FUNCTION(mysqli_stmt_init)
@@ -1809,7 +1808,7 @@ PHP_FUNCTION(mysqli_stmt_init)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_stmt_prepare(object stmt, string query)
+/* {{{ proto bool mysqli_stmt_prepare(object link, string query)
    prepare server side statement with query
 */
 PHP_FUNCTION(mysqli_stmt_prepare)

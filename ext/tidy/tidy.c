@@ -37,7 +37,7 @@
 #include "tidy.h"
 #include "buffio.h"
 
-#define PHP_TIDY_MODULE_VERSION	"2.0"
+#define PHP_TIDY_MODULE_VERSION	"2.0-dev"
 
 /* {{{ ext/tidy macros
 */

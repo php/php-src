@@ -27,7 +27,7 @@ set_error_handler('Error2Exception');
 
 try
 {
-	$con = fopen('/tmp/a_file_that_does_not_exist','r');
+	$con = pg_connect('host=localhost dbname=xtest');
 }
 catch (Catchable $e)
 {

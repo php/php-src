@@ -549,7 +549,6 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 							case 0x50:	/* 6, 2nd */
 								utf |= ((this_char & 0x3f) << 24);
 								stat++;
-								break;
 							default:
 								/* invalid */
 								more = 0;
