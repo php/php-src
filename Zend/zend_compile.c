@@ -571,7 +571,7 @@ static zend_bool is_method_call(CLS_D)
 	}
 	cur_opline = (zend_op *)cur->data;
 	if (cur_opline->opcode == ZEND_FETCH_OBJ_W) {
-			return 1;
+		return 1;
 	}
 	return 0;
 }
