@@ -165,6 +165,7 @@ static Yaz_Association yaz_association_mk ()
 	p->zoom_set = 0;
 	p->zoom_scan = 0;
     p->zoom_package = 0;
+	ZOOM_connection_option_set(p->zoom_conn, "implementationName", "PHP");
 #else
 	p->host_port = 0;
 	p->num_databaseNames = 0;
