@@ -34,10 +34,10 @@ static char *ob_buffer;
 static uint ob_buffer_size;
 static uint ob_block_size;
 static uint ob_text_length;
-void zend_ob_init(uint initial_size, uint block_size);
-void zend_ob_destroy();
-void zend_ob_append(const char *text, uint text_length);
-void zend_ob_prepend(const char *text, uint text_length);
+static void zend_ob_init(uint initial_size, uint block_size);
+static void zend_ob_destroy();
+static void zend_ob_append(const char *text, uint text_length);
+static void zend_ob_prepend(const char *text, uint text_length);
 static inline void zend_ob_send();
 
 
