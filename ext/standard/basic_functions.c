@@ -321,6 +321,10 @@ function_entry basic_functions[] = {
 	PHP_FE(strcoll,															NULL)
 #endif
 
+#ifdef HAVE_STRFMON
+	PHP_FE(money_format,                                                    NULL)
+#endif
+
 	PHP_FE(substr,															NULL)
 	PHP_FE(substr_replace,													NULL)
 	PHP_FE(quotemeta,														NULL)
