@@ -1937,9 +1937,9 @@ AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME")
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
-AC_OUTPUT(Makefile build-defs.h stamp-h libphp3.module doc/Makefile
-          doc/version.ent doc/checkdoc extra/gd/bdf2gdfont regex/Makefile
-          dbase/Makefile, [
+AC_OUTPUT(Makefile build-defs.h stamp-h libphp3.module
+dnl doc/Makefile doc/version.ent doc/checkdoc extra/gd/bdf2gdfont
+	  regex/Makefile dbase/Makefile, [
   chmod +x doc/checkdoc extra/gd/bdf2gdfont
 ], [
 
