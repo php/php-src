@@ -84,6 +84,7 @@ static sapi_post_entry mbstr_post_entries[] = {
 #endif
 
 function_entry mbstring_functions[] = {
+	PHP_FE(mb_language,					NULL)
 	PHP_FE(mb_internal_encoding,		NULL)
 	PHP_FE(mb_http_input,				NULL)
 	PHP_FE(mb_http_output,			NULL)
@@ -506,6 +507,40 @@ PHP_MINFO_FUNCTION(mbstring)
 
 	DISPLAY_INI_ENTRIES();
 }
+
+
+
+/* {{{ proto string mb_language([string language])
+   Sets the current language or Returns the current language as a string. */
+PHP_FUNCTION(mb_language)
+{
+	pval **arg1;
+	char *name;
+	enum mbfl_no_language no_language;
+	MBSTRLS_FETCH();
+
+	if (ZEND_NUM_ARGS() == 0) {
+		name = (char *)mbfl_no_language2name(MBSTRG(current_language));
+		if (name != NULL) {
+			RETURN_STRING(name, 1);
+		} else {
+			RETURN_FALSE;
+		}
+	} else if (ZEND_NUM_ARGS() == 1 && zend_get_parameters_ex(1, &arg1) != FAILURE) {
+		convert_to_string_ex(arg1);
+		no_language = mbfl_name2no_language(Z_STRVAL_PP(arg1));
+		if (no_language == mbfl_no_language_invalid) {
+			php_error(E_WARNING, "unknown language \"%s\"", Z_STRVAL_PP(arg1));
+			RETURN_FALSE;
+		} else {
+			MBSTRG(current_language) = no_language;
+			RETURN_TRUE;
+		}
+	} else {
+		WRONG_PARAM_COUNT;
+	}
+}
+/* }}} */
 
 
 
