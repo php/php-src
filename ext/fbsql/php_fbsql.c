@@ -108,6 +108,10 @@ void         fbcInitialize();
 void         fbaRelease();
 unsigned int fbaCount();
 
+struct FBCAutoStartInfo {
+   FBArray* infoLines;
+};
+
 
 
 struct PHPFBResult
@@ -205,6 +209,9 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_username,		NULL)
 	PHP_FE(fbsql_password,		NULL)
 	PHP_FE(fbsql_warnings,		NULL)
+
+	PHP_FE(fbsql_get_autostart_info,	NULL)
+//	PHP_FE(fbsql_set_autostart_info,	NULL)
 
 /*	Aliases:  */
 	PHP_FALIAS(fbsql, fbsql_db_query, NULL)
@@ -1538,7 +1545,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 			return_value->type       = IS_LONG;
 			if (sR == 1 && md) fbcmdRelease(md);
 		}
-		else if (tp[0] == 'I' || tp[0] == 'U')
+		else if (tp[0] == 'I' || tp[0] == 'U' || tp[0] == 'A')
 		{
 			if (tp[0] == 'I') link->insert_id = fbcmdRowIndex(md);
 			return_value->value.lval = 1;
@@ -3019,6 +3026,60 @@ PHP_FUNCTION(fbsql_free_result)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto array fbsql_get_autostart_info([resource link_identifier])
+	*/
+PHP_FUNCTION(fbsql_get_autostart_info)
+{
+	PHPFBLink* phpLink = NULL;
+	zval	**fbsql_link_index = NULL;
+	int id;
+	FBCAutoStartInfo* asInfo;
+	FBSQLLS_FETCH();
+
+	switch (ZEND_NUM_ARGS()) {
+		case 0:
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			CHECK_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &fbsql_link_index)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
+
+	if (phpLink->execHandler == NULL) {
+		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "No valid Exec handler available for this connection");
+		RETURN_FALSE;
+	}
+	else {
+		array_init(return_value);
+		asInfo = fbcehGetAutoStartInfo(phpLink->execHandler);
+		if (asInfo != NULL) {
+			unsigned i;
+
+			for (i=0; i<fbaCount(asInfo->infoLines); i++) {
+				FBArray* infoLine = fbaObjectAtIndex(asInfo->infoLines, i);
+//				if (fbaCount(infoLine) == 2) {
+//					fbaObjectAtIndex(infoLine, 0);
+//					fbaObjectAtIndex(infoLine, 1);
+//				}
+//				else {
+					add_index_string(return_value, i, fbaObjectAtIndex(infoLine, 0), 1);
+//				}
+
+			}
+		}
+	}
+}
+/* }}} */
+
 
 #endif
 
