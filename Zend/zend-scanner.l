@@ -585,6 +585,7 @@ int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC)
 				pfh->type = ZEND_HANDLE_FILENAME;
 				if (pfh->filename) {
 					pfh->filename = estrdup(pfh->filename);
+					pfh->free_filename = 1;
 				}
 				if (pfh->opened_path) {
 					pfh->opened_path = strdup(pfh->opened_path);
