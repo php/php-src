@@ -1,3 +1,13 @@
+2003-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_language_scanner.l:
+      Fixed bug #23093 (highlight_string() crashed with __FUNCTION__)
+
+2003-04-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_compile.h:
+      add markers that make this file easy to parse for external sources
+
 2003-04-04  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.h:
