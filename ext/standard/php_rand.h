@@ -33,7 +33,7 @@
 #define RAND_MAX (1<<15)
 #endif
 
-#if HAVE_LRAND48
+#if HAVE_LRAND48 && !defined(__sun)
 #define PHP_RAND_MAX 2147483647
 #else
 #define PHP_RAND_MAX RAND_MAX
