@@ -166,7 +166,6 @@ PHP_FUNCTION(assert)
 	char *myeval = NULL;
 	char *cbfunc;
 	CLS_FETCH();
-	ELS_FETCH();
 	ASSERTLS_FETCH();
 	
 	if (! ASSERT(active)) {

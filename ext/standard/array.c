@@ -949,7 +949,6 @@ PHP_FUNCTION(extract)
 	char *varname, *finalname;
 	ulong lkey;
 	int res, extype;
-	ELS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -1086,7 +1085,6 @@ PHP_FUNCTION(compact)
 {
 	zval ***args;			/* function arguments array */
 	int i;
-	ELS_FETCH();
 	
 	args = (zval ***)emalloc(ARG_COUNT(ht) * sizeof(zval **));
 	

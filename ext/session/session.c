@@ -1161,7 +1161,6 @@ PHP_FUNCTION(session_unset)
 	zval	**tmp;
 	char	 *variable;
 	ulong     num_key;
-	ELS_FETCH();
 	PSLS_FETCH();
 	
 	for(zend_hash_internal_pointer_reset(&PS(vars));

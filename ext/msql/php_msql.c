@@ -217,7 +217,6 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	char *hashed_details;
 	int hashed_details_length;
 	int msql;
-	ELS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0: /* defaults */

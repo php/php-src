@@ -2121,7 +2121,6 @@ PHP_FUNCTION(parse_str)
 {
 	zval **arg;
 	char *res = NULL;
-	ELS_FETCH();
 	PLS_FETCH();
 	SLS_FETCH();
 
