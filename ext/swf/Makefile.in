@@ -1,0 +1,5 @@
+
+LTLIBRARY_NAME    = libswf.la
+LTLIBRARY_SOURCES = swf.c
+
+include $(top_srcdir)/build/ltlib.mk
