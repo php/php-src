@@ -33,14 +33,9 @@ extern zend_module_entry xml_module_entry;
 
 #endif
 
-#if defined(HAVE_LIBEXPAT) && defined(PHP_XML_INTERNAL)
+#if defined(PHP_XML_INTERNAL)
 
-#ifdef HAVE_LIBEXPAT2
 #include <expat.h>
-#else
-#include <xmltok.h>
-#include <xmlparse.h>
-#endif
 
 #ifdef PHP_WIN32
 #define PHP_XML_API __declspec(dllexport)
@@ -71,10 +66,8 @@ typedef struct {
 	zval *notationDeclHandler;
 	zval *externalEntityRefHandler;
 	zval *unknownEncodingHandler;
-#ifdef HAVE_LIBEXPAT2
 	zval *startNamespaceDeclHandler;
 	zval *endNamespaceDeclHandler;
-#endif
 	zval *object;
 
 	zval *data;
@@ -114,9 +107,7 @@ enum php_xml_option {
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */
 	
 PHP_FUNCTION(xml_parser_create);
-#ifdef HAVE_LIBEXPAT2
 PHP_FUNCTION(xml_parser_create_ns);
-#endif
 PHP_FUNCTION(xml_set_object);
 PHP_FUNCTION(xml_set_element_handler);
 PHP_FUNCTION(xml_set_character_data_handler);
@@ -125,10 +116,8 @@ PHP_FUNCTION(xml_set_default_handler);
 PHP_FUNCTION(xml_set_unparsed_entity_decl_handler);
 PHP_FUNCTION(xml_set_notation_decl_handler);
 PHP_FUNCTION(xml_set_external_entity_ref_handler);
-#ifdef HAVE_LIBEXPAT2
 PHP_FUNCTION(xml_set_start_namespace_decl_handler);
 PHP_FUNCTION(xml_set_end_namespace_decl_handler);
-#endif
 PHP_FUNCTION(xml_parse);
 PHP_FUNCTION(xml_get_error_code);
 PHP_FUNCTION(xml_error_string);
