@@ -198,14 +198,9 @@ xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style);
 void encode_reset_ns();
 smart_str *encode_new_ns();
 
-void set_ns_and_type(xmlNodePtr node, encodeType type);
-void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
 encodePtr get_conversion_ex(HashTable *encoding, int encode);
 encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, const char *type);
 encodePtr get_conversion_from_href_type_ex(HashTable *encoding, const char *type, int len);
-
-int is_map(zval *array);
-void get_array_type(zval *array, smart_str *out_type TSRMLS_DC);
 
 void delete_encoder(void *handle);
 
