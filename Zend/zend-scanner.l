@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski                  |
+   | Copyright (c) 1998-2000 Andi Gutmans, Zeev Suraski                   |
    +----------------------------------------------------------------------+
    | This source file is subject to version 0.91 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
