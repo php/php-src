@@ -25,6 +25,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 #include "zend_API.h"
+#include "zend_default_classes.h"
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 
@@ -609,6 +610,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	if (start_builtin_functions) {
 		zend_startup_builtin_functions(TSRMLS_C);
 	}
+	zend_register_default_classes(TSRMLS_C);
 
 	zend_ini_startup(TSRMLS_C);
 
