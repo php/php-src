@@ -19,7 +19,7 @@
 
 /* $Id$ */
 #define IS_EXT_MODULE
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_DB)
 # include "dl/phpdl.h"
 #endif
 
@@ -1140,7 +1140,7 @@ zend_module_entry dbm_module_entry = {
 	"db", dbm_functions, PHP_MINIT(db), PHP_MSHUTDOWN(db), PHP_RINIT(db), NULL, PHP_MINFO(db), STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_DB)
 ZEND_GET_MODULE(dbm)
 #endif
 

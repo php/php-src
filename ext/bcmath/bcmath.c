@@ -40,7 +40,7 @@ zend_module_entry bcmath_module_entry = {
 	"bcmath", bcmath_functions, NULL, NULL, PHP_RINIT(bcmath), PHP_RSHUTDOWN(bcmath), NULL, STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_BCMATH)
 ZEND_GET_MODULE(bcmath)
 #endif
 

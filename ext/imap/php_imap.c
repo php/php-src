@@ -157,7 +157,7 @@ zend_module_entry imap_module_entry = {
 };
 
 
-#ifdef COMPILE_DL_IMAP
+#if defined(COMPILE_DL) || defined(COMPILE_DL_IMAP)
 ZEND_GET_MODULE(imap)
 #endif
 

@@ -100,7 +100,7 @@ zend_module_entry ldap_module_entry = {
 
 
 
-#ifdef COMPILE_DL_LDAP
+#if defined(COMPILE_DL) || defined(COMPILE_DL_LDAP)
 ZEND_GET_MODULE(ldap)
 #endif
 

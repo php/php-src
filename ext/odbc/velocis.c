@@ -66,7 +66,7 @@ zend_module_entry velocis_module_entry = {
 };
 
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_ODBC)
 ZEND_GET_MODULE(velocis)
 #endif
 

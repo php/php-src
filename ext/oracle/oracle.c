@@ -25,7 +25,7 @@
  
 #define HAS_OLOG 1
 
-#if defined(COMPILE_DL)
+#if defined(COMPILE_DL) || defined(COMPILE_DL_ORACLE)
 # include "dl/phpdl.h"
 #endif
 
@@ -181,7 +181,7 @@ static const text *ora_func_tab[] =
 /* 61, 62 */ (text *) "unused", (text *) "OBNDRA"
 };
 
-#if COMPILE_DL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_ORACLE)
 ZEND_GET_MODULE(oracle)
 #endif
 

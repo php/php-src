@@ -151,7 +151,7 @@ zend_module_entry mysql_module_entry = {
 
 ZEND_DECLARE_MODULE_GLOBALS(mysql)
 
-#ifdef COMPILE_DL_MYSQL
+#if defined(COMPILE_DL) || defined(COMPILE_DL_MYSQL)
 ZEND_GET_MODULE(mysql)
 #endif
 
