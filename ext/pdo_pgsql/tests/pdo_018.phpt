@@ -3,6 +3,7 @@ PDO_PGSQL: PDO Unserializing
 --SKIPIF--
 <?php # vim:ft=php
 require_once('skipif.inc');
+if (!interface_exists('Serializeable')) die ('skip Interface Serializeable does not exist');
 ?>
 --FILE--
 <?php

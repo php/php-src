@@ -4,6 +4,7 @@ PDO_MySQL: PDOStatement and SPL Iterators
 <?php # vim:ft=php
 require_once('skipif.inc');
 if (!extension_loaded('SPL')) die('skip SPL not available');
+if (!class_exists('IteratorIterator')) die ('skip Class IteratorIterator does not exist');
 ?>
 --FILE--
 <?php
