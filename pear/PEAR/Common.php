@@ -180,6 +180,14 @@ class PEAR_Common extends PEAR
                     $this->current_release =& $this->pkginfo['changelog'][$this->c_i];
                 }
                 break;
+            case 'deps':
+                $this->pkginfo['release_deps'] = array();
+                break;
+            case 'dep':
+                // dependencies array index
+                $this->d_i = (isset($this->d_i)) ? $this->d_i + 1 : 0;
+                $this->pkginfo['release_deps'][$this->d_i] = $attribs;
+                break;
         }
     }
 
@@ -317,6 +325,11 @@ class PEAR_Common extends PEAR
                 break;
             case 'sources':
                 $this->lib_sources[] = trim($data);
+                break;
+            case 'dep':
+                if ($data = trim($data)) {
+                    $this->pkginfo['release_deps'][$this->d_i]['name'] = $data;
+                }
                 break;
         }
     }
