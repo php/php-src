@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-? ? ??? 200?, Version 4.3.1
+?? ??? 2003, Version 4.3.2
 - Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
   (Sebastian, Edin)
 - Improved dba extension (Marcus)
@@ -97,6 +97,9 @@ PHP 4                                                                      NEWS
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
 
+17 Feb 2003, Version 4.3.1
+- Fixed serious security vulnerability in CGI SAPI. (Shane)
+
 27 Dec 2002, Version 4.3.0
 - If you don't specify building any other SAPI "make install" will install the
   CGI SAPI binary in {PREFIX}/bin/php. If you want to install CLI SAPI in that
@@ -115,7 +118,7 @@ PHP 4                                                                      NEWS
   . ext/cybercash
 - Make PHP_AUTH_* variables not available in safe mode under Apache when an
   external basic auth mechanism is used. (Philip)
-- Aliased dba_popen() to dba_open() until 4.3.1 when persistent STDIO streams
+- Aliased dba_popen() to dba_open() until 4.3.2 when persistent STDIO streams
   are introduced. (Andrei)
 - Fixed a security bug in the bundled MySQL library. (Georg, Stefan)
 - ZLIB extension is now built-in in the Windows distribution.
