@@ -6,14 +6,14 @@ HTML input/output
 	include('skipif.inc'); 
 ?>
 --INI--
-output_handler = mb_output_handler
-zlib.output_compression = Off
+output_handler=mb_output_handler
+zlib.output_compression=
 arg_separator.input="x"
 error_reporting=0
 mbstring.http_input=HTML-ENTITIES
 mbstring.internal_encoding=UTF8
 mbstring.http_output=HTML-ENTITIES
-mbstring.encoding_translation=On
+mbstring.encoding_translation=1
 --FILE--
 <?php
 // enable output encoding through output handler
