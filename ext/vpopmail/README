@@ -1,0 +1,63 @@
+Minimum Survial Readme
+
+1) select a uid and gid apache to run under
+   or if this is already fixed take it into account
+
+2) install vpopmail with EXACTLY the same uid gid
+   in case you already have installed vpopmail
+   you have two choices - to change apache's 
+   uid/gid but be careful - this may break some 
+   existing scripts or worse your server's security
+
+   changing existing vpopmail uid/gid is possible
+   but not easy - take these into account:
+
+   #1 - backup your setup!
+
+   stop qmail-send before doing any changes
+   else your mail in process may get bounced or 
+   deleted or delivered to a default destination or...
+
+   stop pop3/imap remote users - while changing uids
+   users cannot check their mail
+
+   you may leave smtp - qmail-inject will take care
+   no matter vpopmail setup is broken (if and only
+   if you have stopped qmail-send)
+
+   rc.d scrips tcpserver uid/gid may need to be changed
+
+   remember to
+       ./configure ....opts....
+       make clean all install
+   in vpopmail src tree
+
+   after these steps change the uid/gid in
+   /var/qmail/users/assign
+   compile the assign file. the dummies way is to
+   vadddomain mydummy.domain aaaa
+   vdeldomain mydummy.domain
+
+   suid root vadddomain, vdeldomain and vaddaliasdomain
+       cd ~vpopmail/bin
+       chown 0.0 vadddomain vdeldomain vaddaliasdomain
+       chmod +s vadddomain vdeldomain vaddaliasdomain
+   beware these programs may be exploitable and if
+   neccessary chmod 700 ~vpopmail/bin
+
+   run qmail-send (/bin/csh -cf '/var/qmail/rc &')
+   run pop3 tcpserver or what you are using
+
+   verify your setup
+
+3) check that vpopmail support is compiled into apache
+   throug a simple phpinfo. there some more info helpful
+   for debugging will appear
+
+4) happy vpopmail-ing :-)
+
+your comments, fixes and stuff are welcome
+Boian Bonev <boian@bonev.com>
+
+$Id$
+
