@@ -29,12 +29,22 @@
 
 typedef int ts_rsrc_id;
 
+#if WIN32||WINNT
+#	ifdef TSRM_EXPORTS
+#	define TSRM_API __declspec(dllexport)
+#	else
+#	define TSRM_API __declspec(dllimport)
+#	endif
+#else
+#	define TSRM_API
+#endif
+
 
 /* Define TSRM_FUNC */
 #ifdef __cplusplus
-#define TSRM_FUNC	extern "C"
+#define TSRM_FUNC	extern "C" TSRM_API
 #else
-#define TSRM_FUNC
+#define TSRM_FUNC	TSRM_API
 #endif
 
 

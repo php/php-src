@@ -56,7 +56,7 @@ static int tsrm_debug_status;
 
 
 /* Startup TSRM (call once for the entire process) */
-int tsrm_startup(int expected_threads, int expected_resources, int debug_status)
+TSRM_FUNC int tsrm_startup(int expected_threads, int expected_resources, int debug_status)
 {
 	tsrm_tls_table_size = expected_threads;
 	tsrm_tls_table = (tsrm_tls_entry **) calloc(tsrm_tls_table_size, sizeof(tsrm_tls_entry *));
@@ -82,7 +82,7 @@ int tsrm_startup(int expected_threads, int expected_resources, int debug_status)
 
 
 /* Shutdown TSRM (call once for the entire process) */
-void tsrm_shutdown()
+TSRM_FUNC void tsrm_shutdown()
 {
 	int i;
 
