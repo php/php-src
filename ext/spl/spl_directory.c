@@ -237,11 +237,8 @@ SPL_CLASS_FUNCTION(dir, next)
 	zval *object = getThis();
 	spl_dir_object *intern = (spl_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (intern->dirp && php_stream_readdir(intern->dirp, &intern->entry)) {
-		RETURN_TRUE;
-	} else {
+	if (!intern->dirp || !php_stream_readdir(intern->dirp, &intern->entry)) {
 		intern->entry.d_name[0] = '\0';
-		RETURN_FALSE;
 	}
 }
 /* }}} */
