@@ -1070,7 +1070,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 		/* try to make sure that the OS sends all data before we close the connection.
 		 * Essentially, we are waiting for the socket to become writeable, which means
-		 * that all pending data has been sent.
+		 * that some (not all) pending data has been sent.
 		 * We use a small timeout which should encourage the OS to send the data,
 		 * but at the same time avoid hanging indefintely.
 		 * */
