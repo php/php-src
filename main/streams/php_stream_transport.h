@@ -98,9 +98,9 @@ typedef struct _php_stream_xport_param {
 		STREAM_XPORT_OP_GET_NAME,
 		STREAM_XPORT_OP_GET_PEER_NAME
 	} op;
-	int want_addr:1;
-	int want_textaddr:1;
-	int want_errortext:1;
+	unsigned int want_addr:1;
+	unsigned int want_textaddr:1;
+	unsigned int want_errortext:1;
 
 	struct {
 		char *name;

@@ -228,8 +228,8 @@ typedef struct _zend_class_entry zend_class_entry;
 typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
-	int in_get:1;
-	int in_set:1;
+	unsigned int in_get:1;
+	unsigned int in_set:1;
 } zend_object;
 
 typedef unsigned int zend_object_handle;
