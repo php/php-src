@@ -1164,7 +1164,7 @@ PHP_FUNCTION(mb_parse_str)
 			len_list[n] = 0;
 		}
 		n++;
-		var = php_strtok_r(NULL, "&", &strtok_buf);
+		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
 	num = n;
 
@@ -1267,6 +1267,8 @@ PHP_FUNCTION(mb_output_handler)
 {
 	pval **arg_string, **arg_status;
 	mbfl_string string, result, *ret;
+ 	const char *mimetype, *charset;
+ 	mbfl_memory_device device;
 	SLS_FETCH();
 	MBSTRLS_FETCH();
 
@@ -1277,13 +1279,35 @@ PHP_FUNCTION(mb_output_handler)
 	convert_to_string_ex(arg_string);
 	convert_to_long_ex(arg_status);
 
+ 	if ( SG(sapi_headers).send_default_content_type && ! SG(headers_sent) &&
+ 	     MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass &&
+ 	     (Z_LVAL_PP(arg_status) & PHP_OUTPUT_HANDLER_START) != 0) {
+ 		mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+ 		charset = mbfl_no2preferred_mime_name(MBSTRG(current_http_output_encoding));
+ 		if ( charset != NULL && (*mimetype == '\0' || strncasecmp(mimetype, "text/", 5) == 0) ) {
+ 			mbfl_memory_device_init(&device, 0, 0);
+ 			mbfl_memory_device_strcat(&device, "Content-Type: ");
+ 			if (*mimetype == '\0') {
+ 				mbfl_memory_device_strcat(&device, "text/html");
+ 			} else {
+ 				mbfl_memory_device_strcat(&device, mimetype);
+ 			}
+ 			mbfl_memory_device_strcat(&device, ";charset=");
+ 			mbfl_memory_device_strcat(&device, charset);
+ 			ret = mbfl_memory_device_result(&device, &result);
+ 			if (ret != NULL) {
+ 				if (sapi_add_header(ret->val, ret->len, 0) != FAILURE) {
+ 					SG(sapi_headers).send_default_content_type = 0;
+ 				}
+ 			}
+ 		}
+ 	}
+ 
 	ret = NULL;
-	if (SG(sapi_headers).send_default_content_type && 
-		MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && 
-		MBSTRG(outconv) == NULL) {
+ 	if (MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && MBSTRG(outconv) == NULL) {
 		MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), MBSTRG(current_http_output_encoding), 0);
 	}
-	if (SG(sapi_headers).send_default_content_type && MBSTRG(outconv) != NULL) {
+ 	if (MBSTRG(current_http_output_encoding) != mbfl_no_encoding_pass && MBSTRG(outconv) != NULL) {
 		mbfl_buffer_converter_illegal_mode(MBSTRG(outconv), MBSTRG(current_filter_illegal_mode));
 		mbfl_buffer_converter_illegal_substchar(MBSTRG(outconv), MBSTRG(current_filter_illegal_substchar));
 		mbfl_string_init(&string);
@@ -2256,7 +2280,7 @@ PHP_FUNCTION(mb_convert_variables)
 								if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 									if (stack_level >= stack_max) {
 										stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-										ptmp = erealloc(stack, stack_max);
+										ptmp = erealloc(stack, sizeof(pval **)*stack_max);
 										if (ptmp == NULL) {
 											php_error(E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
 											continue;
@@ -2347,7 +2371,7 @@ detect_end:
 							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 								if (stack_level >= stack_max) {
 									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-									ptmp = erealloc(stack, stack_max);
+									ptmp = erealloc(stack, sizeof(pval **)*stack_max);
 									if (ptmp == NULL) {
 										php_error(E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
 										continue;
@@ -2497,13 +2521,13 @@ PHP_FUNCTION(mb_decode_numericentity)
 
 
 #if HAVE_SENDMAIL
-/* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers])
+/* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Sends an email message with MIME scheme */
 PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
 	pval **argv[4];
-	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL;
+	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	char *message_buf=NULL, *subject_buf=NULL, *p;
 	mbfl_string orig_str, conv_str;
 	mbfl_string *pstr;	/* pointer to mbfl string for return value */
@@ -2537,7 +2561,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	argc = ZEND_NUM_ARGS();
-	if (argc < 3 || argc > 4 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
+	if (argc < 3 || argc > 5 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2621,7 +2645,12 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device_output('\0', &device);
 	headers = device.buffer;
 
-	if (!err && php_mail(to, subject, message, headers, NULL)){
+ 	if (argc == 5) {	/* extra options that get passed to the mailer */
+ 		convert_to_string_ex(argv[4]);
+ 		extra_cmd = (*argv[4])->value.str.val;
+ 	}
+ 
+ 	if (!err && php_mail(to, subject, message, headers, extra_cmd)){
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
