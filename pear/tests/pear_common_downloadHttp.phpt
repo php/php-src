@@ -51,6 +51,8 @@ $firstone = implode('', file(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testdown
 $secondone = implode('', file($temp_path . DIRECTORY_SEPARATOR . 'testdownload.tgz'));
 echo ($firstone == $secondone) ? "passed\n" : "failed\n";
 cleanall($temp_path);
+echo "Simple fail:\n";
+PEAR_Common::downloadHttp('http://test.poop.php.net/stuff.tgz', $ui, $temp_path);
 
 // ------------------------------------------------------------------------- //
 
@@ -76,3 +78,5 @@ function cleanall($dir)
 --EXPECT--
 Test static:
 Simple: passed
+Simple fail:
+Caught error: Connection to `test.poop.php.net:80' failed: The operation completed successfully.
