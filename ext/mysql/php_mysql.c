@@ -166,6 +166,8 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_get_proto_info,						NULL)
 	PHP_FE(mysql_get_server_info,						NULL)
 #endif
+
+    PHP_FE(mysql_info,		            				NULL)
 	 
 	/* for downwards compatability */
 	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
@@ -906,6 +908,34 @@ PHP_FUNCTION(mysql_get_server_info)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	RETURN_STRING(mysql_get_server_info(&mysql->conn),1);
+}
+/* }}} */
+
+/* {{{ proto string mysql_info([int link_identifier])
+   Returns a string containing information about the most recent query */
+PHP_FUNCTION(mysql_info)
+{
+	zval **mysql_link;
+	int id;
+    char *str;
+	php_mysql_conn *mysql;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link) == FAILURE) {
+		return;
+	}
+	
+    if (ZEND_NUM_ARGS() == 0) {
+		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		CHECK_LINK(id);
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+    
+	if (str = mysql_info(&mysql->conn)) {
+		RETURN_STRING(str,1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

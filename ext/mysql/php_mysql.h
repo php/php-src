@@ -86,6 +86,7 @@ PHP_FUNCTION(mysql_get_client_info);
 PHP_FUNCTION(mysql_get_host_info);
 PHP_FUNCTION(mysql_get_proto_info);
 PHP_FUNCTION(mysql_get_server_info);
+PHP_FUNCTION(mysql_info);
 PHP_FUNCTION(mysql_stat);
 PHP_FUNCTION(mysql_thread_id);
 PHP_FUNCTION(mysql_character_set_name);
