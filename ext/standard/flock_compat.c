@@ -41,7 +41,7 @@
 #endif
 
 #ifndef HAVE_FLOCK
-int flock(int fd, int operation)
+PHPAPI int flock(int fd, int operation)
 #if HAVE_STRUCT_FLOCK
 {
 	struct flock flck;
