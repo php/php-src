@@ -49,8 +49,8 @@ typedef struct _zend_function_entry {
 #define ZEND_NAMED_FE(zend_name, name, arg_info)	{ #zend_name, name, arg_info, (zend_uint) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), 0 },
 #define ZEND_FE(name, arg_info)						ZEND_NAMED_FE(name, ZEND_FN(name), arg_info)
 #define ZEND_FALIAS(name, alias, arg_info)			ZEND_NAMED_FE(name, ZEND_FN(alias), arg_info)
-#define ZEND_ME(classname, name, arg_info, flags)	{ #name, ZEND_FN(classname##_##name), arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, flags },
-#define ZEND_ABSTRACT_ME(classname, name, arg_info)	{ #name, NULL, arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT },
+#define ZEND_ME(classname, name, arg_info, flags)	{ #name, ZEND_FN(classname##_##name), arg_info, (zend_uint) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZEND_ABSTRACT_ME(classname, name, arg_info)	{ #name, NULL, arg_info, (zend_uint) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT },
 
 #define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref },
 #define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, pass_by_ref },
