@@ -1,23 +1,26 @@
+/* 
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Novell, Inc.                                                |
+   +----------------------------------------------------------------------+
+*/
+
+
 #ifndef __sys_stat_h__
 #define __sys_stat_h__
-/*============================================================================
-=  Novell Software Development Kit
-=
-=  Copyright (C) 1999-2002 Novell, Inc. All Rights Reserved.
-=
-=  This work is subject to U.S. and international copyright laws and treaties.
-=  Use and redistribution of this work is subject  to  the  license  agreement
-=  accompanying  the  software  development kit (SDK) that contains this work.
-=  However, no part of this work may be revised and/or  modified  without  the
-=  prior  written consent of Novell, Inc. Any use or exploitation of this work
-=  without authorization could subject the perpetrator to criminal  and  civil
-=  liability.
-=
-=  Source(s): ISO/IEC (POSIX) 9845:1996
-=
-=  sys/stat.h
-==============================================================================
-*/
+
+
 #include <time.h>
 #include <stddef.h>
 #include <sys/mode.h>
@@ -25,18 +28,18 @@
 
 #include <pshpack1.h>
 
-#ifdef CLIB_STAT_PATCH  /* Venkat (7/2/02) */
+#ifdef CLIB_STAT_PATCH
 /***************** stat structure taken from CLib and modified ***************/
 struct stat 
 {
-   long           st_dev;        /* volume number                         */    /* dev_t replaced by long : Venkat (19/3/02) */
-   MACHINE_WORD   st_ino;        /* directory entry number of the st_name */    /* ino_t replaced by MACHINE_WORD : Venkat (19/3/02) */
+   long           st_dev;        /* volume number                         */    /* dev_t replaced by long */
+   MACHINE_WORD   st_ino;        /* directory entry number of the st_name */    /* ino_t replaced by MACHINE_WORD */
    unsigned short st_mode;       /* emulated file mode                    */
    unsigned short st_pad1;       /* reserved for alignment                */
    unsigned long  st_nlink;      /* count of hard links (always 1)        */
    unsigned long  st_uid;        /* object id of owner                    */
    unsigned long  st_gid;        /* group-id (always 0)                   */
-   long           st_rdev;       /* device type (always 0)                */    /* dev_t replaced by long : Venkat (19/3/02) */
+   long           st_rdev;       /* device type (always 0)                */    /* dev_t replaced by long */
    off_t          st_size;       /* total file size--files only           */
    time_t         st_atime;      /* last access date--files only          */
    time_t         st_mtime;      /* last modify date and time             */
@@ -84,7 +87,8 @@ struct stat_libc
    uint64_t   st_spare4[44];
 };                         /* sizeof(struct dirent) == 0x200 (512.) */
 
-#else
+#else	/* CLIB_STAT_PATCH */
+
 struct stat
 {
    uint32_t   st_userspec; /* untouched by stat()                   */
@@ -111,7 +115,9 @@ struct stat
    timespec_t st_btime;    /* last archived date and time           */
    uint64_t   st_spare4[44];
 };                         /* sizeof(struct dirent) == 0x200 (512.) */
-#endif
+
+#endif	/* CLIB_STAT_PATCH */
+
 
 #include <poppack.h>
 
@@ -135,4 +141,5 @@ mode_t umask (                       mode_t cmask       );
 #define stat64  stat       /* same structure and function do both   */
 #define fstat64 fstat      /* same function does both               */
 
-#endif
+
+#endif	/* __sys_stat_h__ */
