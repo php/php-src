@@ -311,7 +311,11 @@ PHP_FUNCTION(disk_free_space)
 	}
 #elif (defined(HAVE_SYS_STATFS_H) || defined(HAVE_SYS_MOUNT_H)) && defined(HAVE_STATFS)
 	if (statfs(Z_STRVAL_PP(path), &buf)) RETURN_FALSE;
+#ifdef NETWARE
+	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
+#else
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
+#endif
 #endif
 #endif /* WINDOWS */
 
