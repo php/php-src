@@ -105,6 +105,7 @@ PHP_FUNCTION(symlink)
 #if HAVE_SYMLINK
 	pval *topath, *frompath;
 	int ret;
+	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -133,6 +134,7 @@ PHP_FUNCTION(link)
 #if HAVE_LINK
 	pval *topath, *frompath;
 	int ret;
+	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;

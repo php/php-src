@@ -107,6 +107,7 @@ PHP_FUNCTION(chgrp)
 	gid_t gid;
 	struct group *gr=NULL;
 	int ret;
+	PLS_FETCH();
 
 	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&group)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -151,6 +152,7 @@ PHP_FUNCTION(chown)
 	int ret;
 	uid_t uid;
 	struct passwd *pw = NULL;
+	PLS_FETCH();
 
 	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&user)==FAILURE) {
 		WRONG_PARAM_COUNT;
