@@ -1,3 +1,14 @@
+2003-01-27  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      Replace MAKE_VAR opcode with special 'data' opcode
+      This opcode is not executeable but only holds data for opcodes
+      that need more than two arguments (presently only ASSIGN_OBJ and the ilk
+      but
+      in the future also ASSIGN_DIM)
+
 2003-01-26  Sascha Schumann  <sascha@schumann.cx>
 
     * zend_API.c:
