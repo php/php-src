@@ -234,7 +234,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
 	}
-	Z_TYPE_P(module_entry) = type;
+	module_entry->type = type;
 	module_entry->module_number = zend_next_free_module();
 	zend_register_module_ex(module_entry TSRMLS_CC);
 
