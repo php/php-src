@@ -2,11 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
-- Support for pdflib 3.01
-- FDF Data is handled properly and can be accessed by reading HTTP_RAW_POST_DATA
+- Support for pdflib 3.01. (Uwe)
+- FDF Data is handled properly and can be accessed by reading
+  HTTP_RAW_POST_DATA. (Uwe)
 - Added new 'O' format modifier that will output the GMT offset as "[+-]HHMM"
   (eg: Pacific time is -0700).  This is useful for things such as Date: mail
-  headers.
+  headers. (Mike W)
 - Fixed crash on OCI?Logon() failure. (thies)
 - Make the special Header("http/...") response be case insensitive like 3.0 (Rasmus)
 - Allow cybercash to compile as a DL module. (Sterling)
