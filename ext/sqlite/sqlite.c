@@ -1455,6 +1455,9 @@ void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_le
 	if (ret != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 		sqlite_freemem(errtext);
+		goto terminate;
+	} else if (!res.vm) { /* empty query */
+terminate:
 		if (return_value) {
 			RETURN_FALSE;
 		} else {

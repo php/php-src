@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed problems with longlong values in mysqli. (Georg)
 - Fixed class name case preserving of user defined classes. (Marcus)
+- Fixed bug #26911 (crash in sqlite extension when fetching data from empty 
+  queries). (Ilia)
 - Fixed bug #26819 (http_build_query() crashes on NULL output). (Ilia)
 - Fixed bug #26817 (http_build_query() does not handle private & protected 
   object properties correctly). (Ilia)
