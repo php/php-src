@@ -2765,7 +2765,7 @@ PHP_FUNCTION(array_rand)
 
 	
 
-	randval = php_drand();
+	randval = php_drand(TSRMLS_C);
 		if (randval < (double)num_req_val/(double)num_avail) {
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
