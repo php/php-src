@@ -1464,16 +1464,14 @@ overloaded_function_call_cont:
 do_fcall_common:
 				{
 					zval *original_return_value;
+					int return_value_not_used = (opline->result.u.EA.type & EXT_TYPE_UNUSED);
 
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
-						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr, (opline->result.u.EA.type ^ EXT_TYPE_UNUSED));
+						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr, !return_value_not_used);
 						if (object.ptr) {
 							object.ptr->refcount--;
-						}
-						if (opline->result.u.EA.type & EXT_TYPE_UNUSED) {
-							zendi_zval_dtor(Ts[opline->result.u.var].tmp_var);
 						}
 					} else if (function_state.function->type==ZEND_USER_FUNCTION) {
 						HashTable *calling_symbol_table;
@@ -1519,6 +1517,9 @@ do_fcall_common:
 					} else { /* ZEND_OVERLOADED_FUNCTION */
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(fbc);
+					}
+					if (return_value_not_used) {
+							zendi_zval_dtor(Ts[opline->result.u.var].tmp_var);
 					}
 					object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
