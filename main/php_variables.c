@@ -344,7 +344,11 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
-	char **env, *p, *t;
+	char buf[128];
+	char **env, *p, *t = buf;
+	size_t alloc_size = sizeof(buf);
+	unsigned int nlen; /* ptrdiff_t is not portable */
+
 	/* turn off magic_quotes while importing environment variables */
 	int magic_quotes_gpc = PG(magic_quotes_gpc);
 	PG(magic_quotes_gpc) = 0;
@@ -354,8 +358,16 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		if (!p) {				/* malformed entry? */
 			continue;
 		}
-		t = estrndup(*env, p - *env);
+		nlen = p - *env;
+		if (nlen >= alloc_size) {
+			alloc_size = nlen + 64;
+			t = (t == buf ? emalloc(alloc_size): erealloc(t, alloc_size));
+		}
+		memcpy(t, *env, nlen);
+		t[nlen] = '\0';
 		php_register_variable(t, p+1, array_ptr TSRMLS_CC);
+	}
+	if (t != buf && t != NULL) {
 		efree(t);
 	}
 	PG(magic_quotes_gpc) = magic_quotes_gpc;
