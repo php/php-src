@@ -132,8 +132,7 @@ static CORBA_StructMemberSeq * orbit_create_member_sequence(IDL_tree member_list
 
 		if (type_code == NULL)
 		{
-/*			printf("unknown type for member %s\n", 
-					IDL_IDENT(IDL_LIST(declaration).data).str);*/
+			zend_error(E_WARNING, "(Satellite) unknown type for member %s", IDL_IDENT(IDL_LIST(declaration).data).str);
 			goto error;
 		}
 		
