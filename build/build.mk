@@ -27,17 +27,17 @@ STAMP = buildmk.stamp
 ALWAYS = generated_lists
 
 all: $(STAMP) $(ALWAYS)
-	@$(MAKE) AMFLAGS=$(AMFLAGS) -s -f build/build2.mk
+	$(MAKE) AMFLAGS=$(AMFLAGS) -f build/build2.mk
 
 generated_lists:
-	@echo makefile_am_files = Zend/Makefile.am \
+	echo makefile_am_files = Zend/Makefile.am \
 		TSRM/Makefile.am > $@
-	@echo config_h_files = Zend/acconfig.h TSRM/acconfig.h >> $@
-	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 \
+	echo config_h_files = Zend/acconfig.h TSRM/acconfig.h >> $@
+	echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 \
 		Zend/acinclude.m4 ext/*/config.m4 sapi/*/config.m4 >> $@
 
 $(STAMP): build/buildcheck.sh
-	@build/buildcheck.sh && touch $(STAMP)
+	build/buildcheck.sh && touch $(STAMP)
 
 snapshot:
 	distname='$(DISTNAME)'; \
@@ -63,9 +63,9 @@ snapshot:
 	bzip2 -t $$distname.tar.bz2
 
 cvsclean:
-	@for i in `find . -name .cvsignore`; do \
+	for i in `find . -name .cvsignore`; do \
 		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore` *.o *.a || true); \
 	done
-	@rm -f $(SUBDIRS) 2>/dev/null || true
+	rm -f $(SUBDIRS) 2>/dev/null || true
 
 .PHONY: $(ALWAYS) snapshot cvsclean

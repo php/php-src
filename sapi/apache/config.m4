@@ -49,7 +49,7 @@ AC_ARG_WITH(apxs,
 	done
 	PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
 	PHP_SAPI=apache
-	APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
+	APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php4 $SAPI_SHARED"
 	PHP_BUILD_SHARED
 	if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
 		PHP_APXS_BROKEN=yes

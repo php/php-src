@@ -32,7 +32,7 @@ include $(top_srcdir)/build/program.mk
 
 install-sapi:
 	@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
-	-@$(mkinstalldirs) $(bindir)
+	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	-@if test ! -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME); then \
 		for i in 0.0.0 0.0 0; do \
 			if test -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME).$$i; then \
@@ -45,10 +45,10 @@ install-sapi:
 
 install-modules:
 	@test -d modules && \
-	$(mkinstalldirs) $(moduledir) && \
+	$(mkinstalldirs) $(INSTALL_ROOT)$(moduledir) && \
 	echo "installing shared modules into $(moduledir)" && \
 	rm -f modules/*.la && \
-	cp modules/* $(moduledir) >/dev/null 2>&1 || true
+	cp modules/* $(INSTALL_ROOT)$(moduledir) >/dev/null 2>&1 || true
 
 install-su: install-modules
 	(cd pear && $(MAKE) install)

@@ -24,7 +24,7 @@ if test "$PHP_AOLSERVER" != "no"; then
   AC_DEFINE(HAVE_AOLSERVER,1,[Whether you have AOLserver])
   PHP_SAPI=aolserver
   PHP_BUILD_SHARED
-  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PHP_AOLSERVER/bin/"
+  INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PHP_AOLSERVER/bin/"
 fi
 
 dnl ## Local Variables:

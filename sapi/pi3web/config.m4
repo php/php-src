@@ -16,7 +16,7 @@ if test "$PHP_PI3WEB" != "no"; then
 	PHP_ADD_INCLUDE($PI3PATH/PHP4)
 	PHP_SAPI=pi3web
 	PHP_BUILD_SHARED
-	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $PI3PATH/bin/"
+	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PI3PATH/bin/"
 fi
 
 dnl ## Local Variables:
