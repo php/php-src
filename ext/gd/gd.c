@@ -30,6 +30,7 @@
 #include <math.h>
 #include "SAPI.h"
 #include "php_gd.h"
+#include "ext/standard/fsock.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -62,6 +63,19 @@
 
 #ifdef ENABLE_GD_TTF
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
+#endif
+
+#ifdef GD2_VERS
+/* it's >= 1.5, i.e. has IOCtx */
+#define USE_GD_IOCTX 1
+#else
+#undef USE_GD_IOCTX
+#endif
+
+#ifndef USE_GD_IOCTX
+#define gdImageCreateFromJpegCtx NULL
+#define gdImageCreateFromPngCtx  NULL
+#define gdImageCreateFromWBMPCtx NULL
 #endif
 
 #ifdef THREAD_SAFE
@@ -455,7 +469,7 @@ PHP_FUNCTION(imagetypes)
 	RETURN_LONG(ret);
 }
 
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)()) {
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)()) {
 	zval **file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -473,16 +487,54 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #else
 	fp = php_fopen_wrapper(Z_STRVAL_PP(file), "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
-	if (!fp) {
+	if (!fp && !socketd) {
 		php_strip_url_passwd(fn);
 		php_error(E_WARNING, "%s: Unable to open '%s' for reading", get_active_function_name(), fn);
 		RETURN_FALSE;
 	}
 
-	im = (*func_p)(fp);
+#ifndef USE_GD_IOCTX
+	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
+#endif
 
-	fflush(fp);
-	fclose(fp);
+	if(issock && !ioctx_func_p) {
+		php_error(E_WARNING, "%s: Sockets are not supported for image type '%s'",get_active_function_name(),tn);
+		RETURN_FALSE;
+	}
+
+	if(issock && socketd) {
+#ifdef USE_GD_IOCTX
+		gdIOCtx* io_ctx;
+#define  CHUNK_SIZE 8192
+		int read_len=0,buff_len=0,buff_size=5*CHUNK_SIZE;
+		char *buff,*buff_cur;
+
+		buff = malloc(buff_size); /* Should be malloc! GD uses free */
+		buff_cur = buff;
+
+		do {
+			if(buff_len > buff_size - CHUNK_SIZE) {
+				buff_size += CHUNK_SIZE;
+				buff = realloc(buff, buff_size);
+			}
+			read_len = SOCK_FREAD(buff_cur, CHUNK_SIZE, socketd);
+			buff_len += read_len;
+			buff_cur += read_len;
+		} while(read_len>0);
+
+		io_ctx = gdNewDynamicCtx(buff_len,buff);
+		if(!io_ctx) {
+			php_error(E_WARNING,"%s: Cannot allocate GD IO context",get_active_function_name());
+		}
+		im = (*ioctx_func_p)(io_ctx);
+		io_ctx->free(io_ctx);
+#endif
+	} else {
+		im = (*func_p)(fp);
+
+		fflush(fp);
+		fclose(fp);
+	}
 
 	if (!im) {
 		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name(), fn, tn);
@@ -497,7 +549,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 PHP_FUNCTION(imagecreatefromgif)
 {
 #ifdef HAVE_GD_GIF
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif,NULL);
 #else /* HAVE_GD_GIF */
 	php_error(E_WARNING, "ImageCreateFromGif: No GIF support in this PHP build");
 	RETURN_FALSE;
@@ -510,7 +562,7 @@ PHP_FUNCTION(imagecreatefromgif)
 PHP_FUNCTION(imagecreatefromjpeg)
 {
 #ifdef HAVE_GD_JPG
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageCreateFromJpeg);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageCreateFromJpeg,gdImageCreateFromJpegCtx);
 #else /* HAVE_GD_JPG */
 	php_error(E_WARNING, "ImageCreateFromJpeg: No JPEG support in this PHP build");
 	RETURN_FALSE;
@@ -523,7 +575,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
 PHP_FUNCTION(imagecreatefrompng)
 {
 #ifdef HAVE_GD_PNG
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImageCreateFromPng);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImageCreateFromPng,gdImageCreateFromPngCtx);
 #else /* HAVE_GD_PNG */
 	php_error(E_WARNING, "ImageCreateFromPng: No PNG support in this PHP build");
 	RETURN_FALSE;
@@ -536,7 +588,7 @@ PHP_FUNCTION(imagecreatefrompng)
 PHP_FUNCTION(imagecreatefromxbm)
 {
 #ifdef HAVE_GD_XBM
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageCreateFromXbm);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageCreateFromXbm,NULL);
 #else /* HAVE_GD_XBM */
 	php_error(E_WARNING, "ImageCreateFromXbm: No XBM support in this PHP build");
 	RETURN_FALSE;
@@ -550,7 +602,7 @@ PHP_FUNCTION(imagecreatefromxpm)
 {
 	/*
 #ifdef HAVE_GD_XPM
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM, "XPM", gdImageCreateFromXpm);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM, "XPM", gdImageCreateFromXpm,NULL);
 #else
 	*/
 	php_error(E_WARNING, "ImageCreateFromXpm: No XPM support in this PHP build");
@@ -566,7 +618,7 @@ PHP_FUNCTION(imagecreatefromxpm)
 PHP_FUNCTION(imagecreatefromwbmp)
 {
 #ifdef HAVE_GD_WBMP
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageCreateFromWBMP);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageCreateFromWBMP,gdImageCreateFromWBMPCtx);
 #else /* HAVE_GD_WBMP */
 	php_error(E_WARNING, "ImageCreateFromWBMP: No WBMP support in this PHP build");
 	RETURN_FALSE;
