@@ -220,9 +220,14 @@ static PHP_MINFO_FUNCTION(dba)
 
 	php_info_print_table_start();
  	php_info_print_table_row(2, "DBA support", "enabled");
-	php_info_print_table_row(2, "Supported handlers", handlers.c);
+	if (handlers.c) {
+		smart_str_0(&handlers);
+		php_info_print_table_row(2, "Supported handlers", handlers.c);
+		smart_str_free(&handlers);
+	} else {
+		php_info_print_table_row(2, "Supported handlers", "none");
+	}
 	php_info_print_table_end();
-	smart_str_free(&handlers);
 }
                                 
 
