@@ -26,10 +26,10 @@
 
 #include "php_compat.h"
 
-#include <libxml/hash.h>
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
+#include <libxml/hash.h>
 
 typedef xmlChar XML_Char;
 
