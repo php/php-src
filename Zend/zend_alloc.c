@@ -386,9 +386,11 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 
 ZEND_API void start_memory_manager(ALS_D)
 {
+#if 0
 #ifndef ZTS
 	int i, j;
 	void *cached_entries[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
+#endif
 #endif
 
 	AG(phead) = AG(head) = NULL;
@@ -454,6 +456,9 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 
 		for (i=1; i<MAX_CACHED_MEMORY; i++) {
 			for (j=0; j<AG(cache_count)[i]; j++) {
+#if MEMORY_LIMIT
+				AG(allocated_memory) -= REAL_SIZE(ptr->size);
+#endif
 				ptr = (zend_mem_header *) AG(cache)[i][j];
 				REMOVE_POINTER_FROM_LIST(ptr);
 				free(ptr);
