@@ -44,7 +44,7 @@ BuildRoot: /tmp/php3-root
 Requires: webserver
 
 %description
-PHP3 is a powerful apache module that adds scripting and database connection
+PHP4 is a powerful apache module that adds scripting and database connection
 capabilities to the apache server. This version includes the "php" binary
 for suExec and stand alone php scripts too.
 
@@ -127,6 +127,9 @@ install -m 755 php $RPM_BUILD_ROOT/usr/bin
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Apr 30 2000 Joey Smith <joey@samaritan.com>
+- Small fix: Description still referred to package as PHP3.
+
 * Wed Jul 21 1999 Sam Liddicott <sam@campbellsci.co.uk>
 - added php4b1 and modified cgi building rules so it doesn't break module
 
