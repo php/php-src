@@ -680,7 +680,7 @@ static PHP_METHOD(PDOStatement, rowCount)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::errorCode()
+/* {{{ proto string PDOStatement::errorCode()
    Fetch the error code associated with the last operation on the statement handle */
 static PHP_METHOD(PDOStatement, errorCode)
 {
