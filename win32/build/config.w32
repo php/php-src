@@ -21,10 +21,11 @@ ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('zts', 'Thread safety', 'yes');
 
 // Configures the hard-coded installation dir
-if (PHP_DEBUG == "yes") {
-	ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5\\debug');
-} else {
-	ARG_ENABLE('prefix', 'where PHP will be installed', 'C:\\php5');
+ARG_ENABLE('prefix', 'where PHP will be installed', '');
+if (PHP_PREFIX == '') {
+	PHP_PREFIX = "C:\\php" + PHP_VERSION;
+	if (PHP_DEBUG == "yes")
+		PHP_PREFIX += "\\debug";
 }
 DEFINE('PHP_PREFIX', PHP_PREFIX);
 
