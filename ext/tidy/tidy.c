@@ -318,7 +318,7 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 
 			TIDY_SET_DEFAULT_CONFIG(intern->ptdoc->doc);
 
-			tidy_add_default_properities(intern, is_doc TSRMLS_CC);
+			tidy_add_default_properties(intern, is_doc TSRMLS_CC);
 			break;
 
 		default:
@@ -476,13 +476,11 @@ static void tidy_globals_ctor(zend_tidy_globals *g TSRMLS_DC)
 {
 }
 
-/*
 static void tidy_globals_dtor(zend_tidy_globals *g TSRMLS_DC)
 {
 }
-*/
 
-static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSRMLS_DC)
+static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type TSRMLS_DC)
 {
 
 	TidyBuffer buf;
@@ -498,11 +496,11 @@ static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSR
 			memset(&buf, 0, sizeof(buf));
 			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 			buf.bp[buf.size-1] = '\0';
-			ADD_PROPERITY_STRING(obj->std.properties, value, buf.bp);
+			ADD_PROPERTY_STRING(obj->std.properties, value, buf.bp);
 			tidyBufFree(&buf);
 
-			ADD_PROPERITY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
-			ADD_PROPERITY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
+			ADD_PROPERTY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
+			ADD_PROPERTY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
 
 			switch(tidyNodeGetType(obj->node)) {
 				case TidyNode_Root:
@@ -512,7 +510,7 @@ static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSR
 					break;
 	
 				default:
-					ADD_PROPERITY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
+					ADD_PROPERTY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
 			}
 
 			tempattr = tidyAttrFirst(obj->node);
@@ -549,7 +547,7 @@ static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSR
 					newobj->ptdoc = obj->ptdoc;
 					newobj->ptdoc->ref_count++;
 
-					tidy_add_default_properities(newobj, is_node TSRMLS_DC);
+					tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 					add_next_index_zval(children, temp);
 
 				} while((tempnode = tidyGetNext(tempnode)));
@@ -563,14 +561,14 @@ static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSR
 			break;
 
 		case is_attr:
-			ADD_PROPERITY_STRING(obj->std.properties, name, tidyAttrName(obj->attr));
-			ADD_PROPERITY_STRING(obj->std.properties, value, tidyAttrValue(obj->attr));
-			ADD_PROPERITY_LONG(obj->std.properties, id, tidyAttrGetId(obj->attr));
+			ADD_PROPERTY_STRING(obj->std.properties, name, tidyAttrName(obj->attr));
+			ADD_PROPERTY_STRING(obj->std.properties, value, tidyAttrValue(obj->attr));
+			ADD_PROPERTY_LONG(obj->std.properties, id, tidyAttrGetId(obj->attr));
 			break;
 
 		case is_doc:
-			ADD_PROPERITY_NULL(obj->std.properties, error_buf);
-			ADD_PROPERITY_NULL(obj->std.properties, value);
+			ADD_PROPERTY_NULL(obj->std.properties, error_buf);
+			ADD_PROPERTY_NULL(obj->std.properties, value);
 			break;
 
 		case is_exception:
@@ -637,7 +635,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 			break;
 	}
 
-	tidy_add_default_properities(newobj, is_node TSRMLS_CC);
+	tidy_add_default_properties(newobj, is_node TSRMLS_CC);
 }
 
 static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
@@ -678,7 +676,7 @@ static void php_tidy_parse_file(INTERNAL_FUNCTION_PARAMETERS)
 		RETVAL_FALSE;
 	} else {
 		obj->ptdoc->parsed = TRUE;
-		tidy_doc_update_properties(obj TSRMLS_DC);
+		tidy_doc_update_properties(obj TSRMLS_CC);
 
 		if (is_object) {
 			RETVAL_TRUE;
@@ -833,7 +831,7 @@ PHP_FUNCTION(tidy_parse_string)
 
 	obj->ptdoc->parsed = TRUE;
 
-	tidy_doc_update_properties(obj TSRMLS_DC);
+	tidy_doc_update_properties(obj TSRMLS_CC);
 
 	if (is_object) {
 		RETURN_TRUE;
@@ -882,7 +880,7 @@ PHP_FUNCTION(tidy_clean_repair)
 
 	if (tidyCleanAndRepair(obj->ptdoc->doc) >= 0) {
 		obj->ptdoc->repaired = TRUE;
-		tidy_doc_update_properties(obj TSRMLS_DC);
+		tidy_doc_update_properties(obj TSRMLS_CC);
 		RETURN_TRUE;
 	}
 
@@ -915,7 +913,7 @@ PHP_FUNCTION(tidy_diagnose)
 	TIDY_PARSED_REPAIR_CHECK(obj);
 
 	if (tidyRunDiagnostics(obj->ptdoc->doc) >= 0) {
-		tidy_doc_update_properties(obj TSRMLS_DC);
+		tidy_doc_update_properties(obj TSRMLS_CC);
 		RETURN_TRUE;
 	}
 
