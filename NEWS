@@ -1,14 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Fixed a bug in socket_select() that could cause unexpected behavior when using a statement
-  like $w=$e=array($sock);
-  This change unfortunately prevents the use of constant values(NULL) for the socket array paramaters.
-  Instead use a temporary variable or an expression with the leftmost member being a temporary variable.
-  ex. socket_select($w, $r, $e=NULL, 10);
 - Added optional 3rd parameter to mysql_select_db() which makes it return
   the previously selected database name. (Jani)
-- Set Content-Length header whenenver it's possible. (thies, Yasuo)
+- Set Content-Length header whenever possible. (thies, Yasuo)
 - Major update of domxml. New functions and better DOM compliance. (Uwe)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
@@ -76,6 +71,13 @@ PHP 4                                                                      NEWS
   process is now more portable and less resource-consuming. (Sascha)
 
 03 May 2002, Version 4.2.1
+- Fixed a bug in socket_select() that could cause unexpected behavior when
+  using a statement like $w = $e = array($sock); This change unfortunately
+  prevents the use of constant values (e.g. NULL) for the socket array
+  paramaters. Instead, use a temporary variable or an expression with the
+  leftmost member being a temporary variable. ex.:
+  socket_select($w, $r, $e = NULL, 10); (Jason)
+- Fixed crashes in the session serializer. (Stas)
 - Fixed malformed atime/mtime with touch(). (Yasuo)
 - Fixed a couple of bugs in array_sum() and array_merge(). (Andrei)
 - Fixed SJIS directory name handling under Windows. (Rui)
