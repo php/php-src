@@ -243,6 +243,7 @@ class PEAR_Installer extends PEAR
             $downloaddir = "/tmp/pearinstall";
             $this->mkDirHier($downloaddir);
             $downloadfile = "$downloaddir/$file";
+            $this->log(1, "downloading $pkgfile...");
             $fp = @fopen($pkgfile, "r");
             if (!$fp) {
                 return $this->raiseError("$pkgfile: failed to download ($php_errormsg)");
@@ -251,7 +252,9 @@ class PEAR_Installer extends PEAR
             if (!$wp) {
                 return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
             }
+            $bytes = 0;
             while ($data = @fread($fp, 16384)) {
+                $bytes += strlen($data);
                 if (!@fwrite($wp, $data)) {
                     return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
                 }
@@ -259,6 +262,7 @@ class PEAR_Installer extends PEAR
             $pkgfile = $downloadfile;
             fclose($fp);
             fclose($wp);
+            $this->log(1, "...done, $bytes bytes");
             $_PEAR_Installer_tempfiles[] = $downloadfile;
         }
 	$fp = popen("gzip -dc $pkgfile | tar -tf -", "r");
