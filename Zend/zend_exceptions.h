@@ -13,6 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Sterling Hughes <sterling@php.net>                          |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -24,10 +25,15 @@
 BEGIN_EXTERN_C()
 
 ZEND_API zend_class_entry *zend_exception_get_default(void);
-ZEND_API void zend_throw_exception(char *message, long code TSRMLS_DC);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
+
+/* exception_ce   NULL or zend_exception_get_default() or a derived class 
+ * message        NULL or the message of the exception */
+ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
+
+/* show an exception using zend_error(E_ERROR,...) */
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
-	
+
 END_EXTERN_C()
 
 #endif
