@@ -956,6 +956,49 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 	return 1;
 }
 
+static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
+{
+	char *p;
+	int ret;
+
+	if (!url_from || !url_to) {
+		return 0;
+	}
+
+	if ((p = strstr(url_from, "://")) != NULL) {
+		url_from = p + 3;
+	}
+
+	if ((p = strstr(url_to, "://")) != NULL) {
+		url_to = p + 3;
+	}
+
+	if (PG(safe_mode) &&(!php_checkuid(url_from, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return 0;
+	}
+
+	if (php_check_open_basedir(url_from TSRMLS_CC)) {
+		return 0;
+	}
+
+	ret = VCWD_RENAME(url_from, url_to);
+
+	if (ret == -1) {
+#ifdef EXDEV
+		if (errno == EXDEV) {
+			if (php_copy_file(url_from, url_to TSRMLS_CC) == SUCCESS) {
+				VCWD_UNLINK(url_from);
+				return 1;
+			}
+		}
+#endif
+		php_error_docref2(NULL TSRMLS_CC, url_from, url_to, E_WARNING, "%s", strerror(errno));
+        return 0;
+	}
+
+	return 1;
+}
+
 static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
 	NULL,
@@ -963,7 +1006,8 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_url_stater,
 	php_plain_files_dir_opener,
 	"plainfile",
-	php_plain_files_unlink
+	php_plain_files_unlink,
+	php_plain_files_rename
 };
 
 php_stream_wrapper php_plain_files_wrapper = {

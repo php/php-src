@@ -1437,48 +1437,40 @@ PHPAPI PHP_FUNCTION(fpassthru)
 }
 /* }}} */
 
-/* {{{ proto bool rename(string old_name, string new_name)
+/* {{{ proto bool rename(string old_name, string new_name[, resource context])
    Rename a file */
 PHP_FUNCTION(rename)
 {
-	zval **old_arg, **new_arg;
 	char *old_name, *new_name;
-	int ret;
+	int old_name_len, new_name_len;
+	zval *zcontext = NULL;
+	php_stream_wrapper *wrapper;
+	php_stream_context *context;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &old_arg, &new_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(old_arg);
-	convert_to_string_ex(new_arg);
-
-	old_name = Z_STRVAL_PP(old_arg);
-	new_name = Z_STRVAL_PP(new_arg);
-
-	if (PG(safe_mode) &&(!php_checkuid(old_name, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &old_name, &old_name_len, &new_name, &new_name_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(old_name TSRMLS_CC)) {
+	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0 TSRMLS_CC);
+
+	if (!wrapper || !wrapper->wops) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper.");
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_RENAME(old_name, new_name);
-
-	if (ret == -1) {
-#ifdef EXDEV
-		if (errno == EXDEV) {
-			if (php_copy_file(old_name, new_name TSRMLS_CC)	== SUCCESS) {
-				VCWD_UNLINK(old_name);
-				RETURN_TRUE;
-			}
-		}
-#endif	
-		php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
+	if (!wrapper->wops->rename) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s wrapper does not support renaming.", wrapper->wops->label ? wrapper->wops->label : "Source");
 		RETURN_FALSE;
 	}
 
-	RETURN_TRUE;
+	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0 TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rename a file across wrapper types.");
+		RETURN_FALSE;
+	}
+
+	context = php_stream_context_from_zval(zcontext, 0);
+
+	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
 }
 /* }}} */
 

@@ -842,6 +842,89 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, char *url, int opt
 }
 /* }}} */
 
+/* {{{ php_stream_ftp_rename
+ */
+static int php_stream_ftp_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
+{
+	php_stream *stream = NULL;
+	php_url *resource_from = NULL, *resource_to = NULL;
+	int result;
+	char tmp_line[512];
+
+	resource_from = php_url_parse(url_from);
+	resource_to = php_url_parse(url_to);
+	/* Must be same scheme (ftp/ftp or ftps/ftps), same host, and same port 
+		(or a 21/0 0/21 combination which is also "same") 
+	   Also require paths to/from */
+	if (!resource_from ||
+		!resource_to ||
+		!resource_from->scheme ||
+		!resource_to->scheme ||
+		strcmp(resource_from->scheme, resource_to->scheme) ||
+		!resource_from->host ||
+		!resource_to->host ||
+		strcmp(resource_from->host, resource_to->host) ||
+		(resource_from->port != resource_to->port && 
+		 resource_from->port * resource_to->port != 0 && 
+		 resource_from->port + resource_to->port != 21) ||
+		!resource_from->path ||
+		!resource_to->path) {
+		goto rename_errexit;
+	}
+
+	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, NULL, NULL, NULL, NULL, NULL TSRMLS_CC);
+	if (!stream) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect to %s", resource_from->host);
+		}
+		goto rename_errexit;
+	}
+
+	/* Rename FROM */
+	php_stream_write_string(stream, "RNFR ");
+	php_stream_write_string(stream, resource_from->path);
+	php_stream_write_string(stream, "\r\n");
+
+	result = GET_FTP_RESULT(stream);
+	if (result < 300 || result > 399) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error Renaming file: %s", tmp_line);
+		}
+		goto rename_errexit;
+	}
+
+	/* Rename TO */
+	php_stream_write_string(stream, "RNTO ");
+	php_stream_write_string(stream, resource_to->path);
+	php_stream_write_string(stream, "\r\n");
+
+	result = GET_FTP_RESULT(stream);
+	if (result < 200 || result > 299) {
+		if (options & REPORT_ERRORS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error Renaming file: %s", tmp_line);
+		}
+		goto rename_errexit;
+	}
+
+	php_url_free(resource_from);
+	php_url_free(resource_to);
+	php_stream_close(stream);
+	return 1;
+
+ rename_errexit:
+	if (resource_from) {
+		php_url_free(resource_from);
+	}
+	if (resource_to) {
+		php_url_free(resource_to);
+	}
+	if (stream) {
+		php_stream_close(stream);
+	}
+	return 0;
+}
+/* }}} */
+
 static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
 	php_stream_ftp_stream_close, /* stream_close */
@@ -849,7 +932,8 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_url_stat, /* stat_url */
 	php_stream_ftp_opendir, /* opendir */
 	"FTP",
-	php_stream_ftp_unlink /* unlink */
+	php_stream_ftp_unlink, /* unlink */
+	php_stream_ftp_rename  /* rename */
 };
 
 PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{
