@@ -1,3 +1,10 @@
+2002-06-15  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects.h
+      zend_objects_API.c:
+    - Fix copy&paste problem where we allocated according to an old structure
+    - decleration and not the new one.
+
 2002-06-11  Andi Gutmans  <andi@zend.com>
 
     * zend_builtin_functions.c:
