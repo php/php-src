@@ -1484,6 +1484,85 @@ static php_stream_filter_status_t strfilter_convert_filter(
 	char *pd;
 	size_t ocnt;
 
+	/* Always wind buckets_in whether this is a flush op or not */
+	while (buckets_in->head != NULL) {
+		const char *ps;
+		size_t icnt;
+
+		bucket = buckets_in->head;
+
+		php_stream_bucket_unlink(bucket TSRMLS_CC);
+		icnt = bucket->buflen;
+		ps = bucket->buf;
+
+		out_buf_size = bucket->buflen;
+		out_buf = pemalloc(out_buf_size, inst->persistent);
+		ocnt = out_buf_size;
+		pd = out_buf;
+
+		/* trying hard to reduce the number of buckets to hand to the
+		 * next filter */ 
+
+		while (icnt > 0) {
+			err = php_conv_convert(inst->cd, &ps, &icnt, &pd, &ocnt);
+
+			switch (err) {
+				case PHP_CONV_ERR_UNKNOWN:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
+					goto out_failure;
+
+				case PHP_CONV_ERR_INVALID_SEQ:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername);
+					goto out_failure;
+
+				case PHP_CONV_ERR_UNEXPECTED_EOS:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername);
+					goto out_failure;
+
+				default:
+					break;
+			}
+
+			if (err == PHP_CONV_ERR_TOO_BIG) {
+				char *new_out_buf;
+				size_t new_out_buf_size;
+
+				new_out_buf_size = out_buf_size << 1;
+
+				if (new_out_buf_size < out_buf_size) {
+					/* whoa! no bigger buckets are sold anywhere... */
+					new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
+
+					php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+
+					out_buf_size = bucket->buflen;
+					out_buf = pemalloc(out_buf_size, inst->persistent);
+					ocnt = out_buf_size;
+					pd = out_buf;
+				} else {
+					new_out_buf = perealloc(out_buf, new_out_buf_size, inst->persistent);
+					pd = new_out_buf + (pd - out_buf);
+					ocnt += (new_out_buf_size - out_buf_size);
+					out_buf = new_out_buf;
+					out_buf_size = new_out_buf_size;
+				}
+			}
+		}
+
+		/* update consumed by the number of bytes just used */
+		consumed += bucket->buflen - icnt;
+
+		/* give output bucket to next in chain */
+		if (out_buf_size - ocnt > 0) {
+			new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
+			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+		} else {
+			pefree(out_buf, inst->persistent);
+		}
+
+		php_stream_bucket_delref(bucket TSRMLS_CC);
+	}
+
 	if (flags != PSFS_FLAG_NORMAL) {
 		/* flush operation */
 
@@ -1549,85 +1628,8 @@ static php_stream_filter_status_t strfilter_convert_filter(
 		} else {
 			pefree(out_buf, inst->persistent);
 		}
-	} else {
-		while (buckets_in->head != NULL) {
-			const char *ps;
-			size_t icnt;
-
-			bucket = buckets_in->head;
-
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			icnt = bucket->buflen;
-			ps = bucket->buf;
-
-			out_buf_size = bucket->buflen;
-			out_buf = pemalloc(out_buf_size, inst->persistent);
-			ocnt = out_buf_size;
-			pd = out_buf;
-
-			/* trying hard to reduce the number of buckets to hand to the
-			 * next filter */ 
-
-			while (icnt > 0) {
-				err = php_conv_convert(inst->cd, &ps, &icnt, &pd, &ocnt);
-
-				switch (err) {
-					case PHP_CONV_ERR_UNKNOWN:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
-						goto out_failure;
-
-					case PHP_CONV_ERR_INVALID_SEQ:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername);
-						goto out_failure;
-
-					case PHP_CONV_ERR_UNEXPECTED_EOS:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername);
-						goto out_failure;
-
-					default:
-						break;
-				}
-
-				if (err == PHP_CONV_ERR_TOO_BIG) {
-					char *new_out_buf;
-					size_t new_out_buf_size;
-
-					new_out_buf_size = out_buf_size << 1;
-
-					if (new_out_buf_size < out_buf_size) {
-						/* whoa! no bigger buckets are sold anywhere... */
-						new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
-
-						php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
-
-						out_buf_size = bucket->buflen;
-						out_buf = pemalloc(out_buf_size, inst->persistent);
-						ocnt = out_buf_size;
-						pd = out_buf;
-					} else {
-						new_out_buf = perealloc(out_buf, new_out_buf_size, inst->persistent);
-						pd = new_out_buf + (pd - out_buf);
-						ocnt += (new_out_buf_size - out_buf_size);
-						out_buf = new_out_buf;
-						out_buf_size = new_out_buf_size;
-					}
-				}
-			}
-
-			/* update consumed by the number of bytes just used */
-			consumed += bucket->buflen - icnt;
-
-			/* give output bucket to next in chain */
-			if (out_buf_size - ocnt > 0) {
-				new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
-			} else {
-				pefree(out_buf, inst->persistent);
-			}
-
-			php_stream_bucket_delref(bucket TSRMLS_CC);
-		}
 	}
+
 
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
