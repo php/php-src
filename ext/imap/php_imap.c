@@ -5,8 +5,7 @@
    | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.01 of the PHP license,      |
-   | that is
-   bundled with this package in the file LICENSE, and is        |
+   | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
    | http://www.php.net/license/2_01.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
@@ -602,10 +601,10 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length = 0;
 #endif
 	int ind;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	IMAPLS_FETCH();
 	
-	if (myargc <3 || myargc >4 || zend_get_parameters_ex(ht, myargc, &mailbox, &user, &passwd, &options) == FAILURE) {
+	if (myargc <3 || myargc >4 || zend_get_parameters_ex(myargc, &mailbox, &user, &passwd, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -812,9 +811,9 @@ PHP_FUNCTION(imap_reopen)
 	int ind, ind_type;
 	long flags=NIL;
 	long cl_flags=NIL;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 
-	if (myargc<2 || myargc>3 || zend_get_parameters_ex(ht, myargc, &streamind, &mailbox, &options) == FAILURE) {
+	if (myargc<2 || myargc>3 || zend_get_parameters_ex(myargc, &streamind, &mailbox, &options) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
@@ -854,9 +853,9 @@ PHP_FUNCTION(imap_append)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 	STRING st;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
   
-	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(ht, myargc, &streamind, &folder, &message,&flags) == FAILURE) {
+	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &folder, &message,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
   
@@ -891,7 +890,7 @@ PHP_FUNCTION(imap_num_msg)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -918,7 +917,7 @@ PHP_FUNCTION(imap_ping)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -941,7 +940,7 @@ PHP_FUNCTION(imap_num_recent)
 	pval *streamind;
 	int ind, ind_type;
 	pils *imap_le_struct; 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(streamind);
@@ -963,7 +962,7 @@ PHP_FUNCTION(imap_expunge)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -991,7 +990,7 @@ PHP_FUNCTION(imap_close)
 	pval *options, *streamind;
 	int ind, ind_type;
 	pils *imap_le_struct=NULL; 
-	int myargcount=ARG_COUNT(ht);
+	int myargcount=ZEND_NUM_ARGS();
 	long flags = NIL;
 
 	if (myargcount < 1 || myargcount > 2 || zend_get_parameters(ht, myargcount, &streamind, &options) == FAILURE) {
@@ -1031,7 +1030,7 @@ PHP_FUNCTION(imap_headers)
 	pils *imap_le_struct; 
 	char tmp[MAILTMPLEN];
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1086,7 +1085,7 @@ PHP_FUNCTION(imap_body)
 	pval *streamind, * msgno, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc <2 || myargc > 3 || zend_get_parameters(ht,myargc,&streamind,&msgno,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1114,7 +1113,7 @@ PHP_FUNCTION(imap_fetchtext_full)
 	pval *streamind, * msgno, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct; 
-	int myargcount = ARG_COUNT(ht);
+	int myargcount = ZEND_NUM_ARGS();
 	if (myargcount >3 || myargcount <2 || zend_get_parameters(ht,myargcount,&streamind,&msgno,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1140,7 +1139,7 @@ PHP_FUNCTION(imap_mail_copy)
 	pval *streamind,*seq, *folder, *options;
 	int ind, ind_type;
 	pils *imap_le_struct; 
-	int myargcount = ARG_COUNT(ht);
+	int myargcount = ZEND_NUM_ARGS();
 	if (myargcount > 4 || myargcount < 3 
 		|| zend_get_parameters(ht,myargcount,&streamind,&seq,&folder,&options) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1174,7 +1173,7 @@ PHP_FUNCTION(imap_mail_move)
 	pval *streamind, *seq, *folder, *options;
 	int ind, ind_type;
 	pils *imap_le_struct; 
-	int myargcount = ARG_COUNT(ht);
+	int myargcount = ZEND_NUM_ARGS();
 	if (myargcount > 4 || myargcount < 3 
 		|| zend_get_parameters(ht,myargcount,&streamind,&seq,&folder,&options) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1210,7 +1209,7 @@ PHP_FUNCTION(imap_createmailbox)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht,2,&streamind,&folder) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht,2,&streamind,&folder) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1240,7 +1239,7 @@ PHP_FUNCTION(imap_renamemailbox)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht)!=3 || zend_get_parameters(ht, 3, &streamind, &old_mailbox, &new_mailbox)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_get_parameters(ht, 3, &streamind, &old_mailbox, &new_mailbox)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1271,7 +1270,7 @@ PHP_FUNCTION(imap_deletemailbox)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht,2,&streamind,&folder) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht,2,&streamind,&folder) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1306,7 +1305,7 @@ PHP_FUNCTION(imap_list)
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
 	
-	if (ARG_COUNT(ht)!=3 
+	if (ZEND_NUM_ARGS()!=3 
 		|| zend_get_parameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1353,7 +1352,7 @@ PHP_FUNCTION(imap_list_full)
 	/* set flag for new, improved array of objects mailbox list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
-	if (ARG_COUNT(ht)!=3 
+	if (ZEND_NUM_ARGS()!=3 
 		|| zend_get_parameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1409,7 +1408,7 @@ PHP_FUNCTION(imap_listscan)
 	STRINGLIST *cur=NIL;
 	IMAPLS_FETCH();
 
-	if (ARG_COUNT(ht)!=4 || zend_get_parameters(ht,4,&streamind,&ref,&pat,&content) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=4 || zend_get_parameters(ht,4,&streamind,&ref,&pat,&content) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1450,7 +1449,7 @@ PHP_FUNCTION(imap_check)
 	pils *imap_le_struct;
 	char date[100];
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters(ht,1,&streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters(ht,1,&streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1488,7 +1487,7 @@ PHP_FUNCTION(imap_delete)
 	pval *streamind, *sequence, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	
 	if (myargc < 2 || myargc > 3 || zend_get_parameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1520,7 +1519,7 @@ PHP_FUNCTION(imap_undelete)
 	pval *streamind, *sequence, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 
 	if (myargc < 2 || myargc > 3 || zend_get_parameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1559,7 +1558,7 @@ PHP_FUNCTION(imap_headerinfo)
 	ENVELOPE *en;
 	char fulladdress[MAILTMPLEN];
 	
-	int myargc = ARG_COUNT(ht);
+	int myargc = ZEND_NUM_ARGS();
 	if (myargc < 2 || myargc > 5 || zend_get_parameters(ht,myargc,&streamind,&msgno,&fromlength,&subjectlength,&defaulthost)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1650,7 +1649,7 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 	zval **headers, **defaulthost;
 	ENVELOPE *en;
 	
-	int myargc = ARG_COUNT(ht);
+	int myargc = ZEND_NUM_ARGS();
 	if (myargc < 1 || myargc > 2 || zend_get_parameters_ex(myargc, &headers, &defaulthost) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1688,7 +1687,7 @@ PHP_FUNCTION(imap_lsub)
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
 	
-	if (ARG_COUNT(ht)!=3 || zend_get_parameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_get_parameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1735,7 +1734,7 @@ PHP_FUNCTION(imap_lsub_full)
 	/* set flag for new, improved array of objects list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
-	if (ARG_COUNT(ht)!=3 || zend_get_parameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_get_parameters(ht,3,&streamind,&ref,&pat) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1787,7 +1786,7 @@ PHP_FUNCTION(imap_subscribe)
 	int ind, ind_type;
 	pils *imap_le_struct;
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht,2,&streamind,&folder) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht,2,&streamind,&folder) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1816,7 +1815,7 @@ PHP_FUNCTION(imap_unsubscribe)
 	pval *streamind, *folder;
 	int ind, ind_type;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc !=2 || zend_get_parameters(ht,myargc,&streamind,&folder) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1846,7 +1845,7 @@ PHP_FUNCTION(imap_fetchstructure)
 	int ind, ind_type;
 	pils *imap_le_struct;
 	BODY *body;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc < 2  || myargc > 3 || zend_get_parameters(ht, myargc, &streamind, &msgno ,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1890,7 +1889,7 @@ PHP_FUNCTION(imap_fetchbody)
 	pils *imap_le_struct;
 	char *body;
 	unsigned long len;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 
 	if (myargc < 3 || myargc >4 || zend_get_parameters(ht, myargc, &streamind, &msgno, &sec, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1930,7 +1929,7 @@ PHP_FUNCTION(imap_base64)
 	char *decode;
 	unsigned long newlength;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1951,7 +1950,7 @@ PHP_FUNCTION(imap_qprint)
 	char *decode;
 	unsigned long newlength;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1972,7 +1971,7 @@ PHP_FUNCTION(imap_8bit)
 	char *decode;
 	unsigned long newlength;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1993,7 +1992,7 @@ PHP_FUNCTION(imap_binary)
 	unsigned long len;
 	char *decode;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(text);
@@ -2014,7 +2013,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	pils *imap_le_struct;
 	unsigned unreadmsg,msize;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2062,7 +2061,7 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	ADDRESS *addr;
 	char string[MAILTMPLEN];
 	int argc;
-	argc=ARG_COUNT(ht);
+	argc=ZEND_NUM_ARGS();
 	if (argc != 3 || zend_get_parameters(ht, argc, &mailbox,&host,&personal) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2099,7 +2098,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 	int argc;
 
 	env=mail_newenvelope();
-	argc=ARG_COUNT(ht);
+	argc=ZEND_NUM_ARGS();
 	if (argc != 2 || zend_get_parameters(ht, argc, &str,&defaulthost) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2143,7 +2142,7 @@ PHP_FUNCTION(imap_utf8)
 	dest.data = NULL;
 	dest.size = 0;
 	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc != 1 || zend_get_parameters(ht, argc, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2188,7 +2187,7 @@ PHP_FUNCTION(imap_utf7_decode)
 	} state;
 	
 	/* collect arguments */
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc != 1 || zend_get_parameters(ht, argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2347,7 +2346,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	}			state;
 
 	/* collect arguments */
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc != 1 || zend_get_parameters(ht, argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2486,7 +2485,7 @@ PHP_FUNCTION(imap_setflag_full)
 	pval *flags;
 	int ind,ind_type;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 
 	if (myargc < 3 || myargc > 4 || zend_get_parameters(ht, myargc, &streamind,&sequence,&flag,&flags) ==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2519,7 +2518,7 @@ PHP_FUNCTION(imap_clearflag_full)
 	pval *flags;
 	int ind,ind_type;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc < 3 || myargc > 4 || zend_get_parameters(ht, myargc, &streamind,&sequence,&flag,&flags) ==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2553,7 +2552,7 @@ PHP_FUNCTION(imap_sort)
 	SORTPGM *mypgm=NIL;
 	SEARCHPGM *spg=NIL;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc < 3 || myargc > 4 || zend_get_parameters(ht, myargc, &streamind,&pgm,&rev,&flags) ==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2595,7 +2594,7 @@ PHP_FUNCTION(imap_fetchheader)
 	pval *streamind, *msgno, *flags;
 	int ind, ind_type, msgindex;
 	pils *imap_le_struct;
-	int myargc = ARG_COUNT(ht);
+	int myargc = ZEND_NUM_ARGS();
 	if (myargc < 2 || myargc > 3 || zend_get_parameters(ht,myargc,&streamind,&msgno,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2636,7 +2635,7 @@ PHP_FUNCTION(imap_uid)
  	int ind, ind_type;
 	pils *imap_le_struct;
  
- 	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht,2,&streamind,&msgno) == FAILURE) {
+ 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters(ht,2,&streamind,&msgno) == FAILURE) {
  		WRONG_PARAM_COUNT;
  	}
  	
@@ -2664,7 +2663,7 @@ PHP_FUNCTION(imap_msgno)
  	int ind, ind_type;
 	pils *imap_le_struct;
  
- 	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht,2,&streamind,&msgno) == FAILURE) {
+ 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters(ht,2,&streamind,&msgno) == FAILURE) {
  		WRONG_PARAM_COUNT;
  	}
  	
@@ -2691,7 +2690,7 @@ PHP_FUNCTION(imap_status)
  	pval *streamind, *mbx, *flags;
  	int ind, ind_type;
 	pils *imap_le_struct;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	IMAPLS_FETCH();
 
  	if (myargc != 3 || zend_get_parameters(ht,myargc,&streamind,&mbx,&flags) == FAILURE) {
@@ -2756,7 +2755,7 @@ PHP_FUNCTION(imap_bodystruct)
 	pval *parametres, *param, *dparametres, *dparam;
 	PARAMETER *par, *dpar;
 	BODY *body;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 
 	if (myargc != 3 || zend_get_parameters(ht,myargc,&streamind,&msg,&section) == FAILURE) {
  		WRONG_PARAM_COUNT;
@@ -2972,7 +2971,7 @@ PHP_FUNCTION(imap_mail_compose)
 	PARAMETER *param;
 	char tmp[8*MAILTMPLEN], *mystring=NULL, *t, *tempstring;
 	
-	int myargc = ARG_COUNT(ht);
+	int myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters(ht,myargc,&envelope,&body) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -3250,7 +3249,7 @@ PHP_FUNCTION(imap_mail)
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc;
 	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc < 3 || argc > 7 || zend_get_parameters_array(ht, argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -3326,7 +3325,7 @@ PHP_FUNCTION(imap_search)
 	MESSAGELIST *cur;
 	IMAPLS_FETCH();
     
-	args = ARG_COUNT(ht);
+	args = ZEND_NUM_ARGS();
 	if (args < 2 || args > 3 || zend_get_parameters(ht, args, &streamind, &criteria, &search_flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -3370,7 +3369,7 @@ PHP_FUNCTION(imap_search)
 PHP_FUNCTION(imap_alerts)
 {
 	STRINGLIST *cur=NIL;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 	IMAPLS_FETCH();
     
 	if (arg_count > 0) {
@@ -3398,7 +3397,7 @@ PHP_FUNCTION(imap_alerts)
 PHP_FUNCTION(imap_errors)
 {
 	ERRORLIST *cur=NIL;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 	IMAPLS_FETCH();
     
 	if (arg_count > 0) {
@@ -3426,7 +3425,7 @@ PHP_FUNCTION(imap_errors)
 PHP_FUNCTION(imap_last_error)
 {
 	ERRORLIST *cur=NIL;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 	IMAPLS_FETCH();
     
 	if (arg_count > 0) {
@@ -3456,7 +3455,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 	long charset_token,encoding_token,end_token,end,offset=0,i;
 	unsigned long newlength;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
