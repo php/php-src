@@ -95,8 +95,8 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 			stream->eof = 1;
 		}
 	}
-
-    return read_bytes;
+	SG(read_post_bytes) += read_bytes;
+	return read_bytes;
 }
 
 static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC)
