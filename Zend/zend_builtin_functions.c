@@ -716,12 +716,19 @@ static int copy_import_use_file(zend_file_handle *fh, zval *array)
    Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
 {
+	char *entry;
 	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_argument(&EG(included_files), (apply_func_arg_t) copy_import_use_file, return_value);
+	zend_hash_internal_pointer_reset(&EG(included_files));
+	while(zend_hash_get_current_key(&EG(included_files), &entry,NULL) == HASH_KEY_IS_STRING) {
+		add_next_index_string(return_value,entry,0);
+		zend_hash_move_forward(&EG(included_files));
+	}
+
+	/*	zend_hash_apply_with_argument(&EG(included_files), (apply_func_arg_t) copy_import_use_file, return_value); */
 }
 /* }}} */
 
