@@ -236,7 +236,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 		out_buf = tmp_buf;
 		out_p = tmp_buf;
 		out_p += out_size;
-		out_left = in_len;
+		out_left = bsz;
 		result = iconv(cd, (char **)&in_p, &in_left, &out_p, &out_left);
 		out_size += bsz - out_left;
 	}
