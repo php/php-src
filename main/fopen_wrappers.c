@@ -110,9 +110,8 @@ PHPAPI int php_unregister_url_wrapper(char *protocol)
 
 int php_init_fopen_wrappers(void) 
 {
-	PLS_FETCH();
-
 	int status = SUCCESS;
+	PLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
 		if (zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1)==FAILURE) {
