@@ -42,9 +42,6 @@ static int numthreads=0;
 void *ldap_mutex;
 #endif
 
-#if !(WIN32|WINNT)
-#include "config.h"
-#endif
 #include "php.h"
 
 #if HAVE_LDAP
