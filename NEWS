@@ -3,9 +3,13 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+
+- Fixed a bug that caused PHP not to properly flush its output buffer, if more
+  than one output buffer was used. (Zeev)
 - Fixed a bug that could draw the shutdown sequence of the PHP Apache module
   into an endless loop, under certain circumstances.  It could cause Apache
-  processes under Solaris to get stuck, especially when using output buffering.
+  processes under Solaris to get stuck, especially when using output
+  buffering. (Zeev)
 - Add support for serializing references (Stas)
 - Fixed conflict with OpenLDAP and Oracle 8.1.x (Jani)
 - parse_ini_file() supports a new optional 2nd argument that instructs it

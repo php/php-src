@@ -31,7 +31,6 @@ static int php_ub_body_write_no_header(const char *str, uint str_length);
 static int php_b_body_write(const char *str, uint str_length);
 
 static void php_ob_init(uint initial_size, uint block_size, zval *output_handler);
-static void php_ob_destroy(void);
 static void php_ob_append(const char *text, uint text_length);
 #if 0
 static void php_ob_prepend(const char *text, uint text_length);
@@ -108,6 +107,7 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 	char *final_buffer=NULL;
 	int final_buffer_length=0;
 	zval *alternate_buffer=NULL;
+	char *to_be_destroyed_buffer;
 	SLS_FETCH();
 	OLS_FETCH();
 
@@ -146,6 +146,7 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 		final_buffer = OG(active_ob_buffer).buffer;
 		final_buffer_length = OG(active_ob_buffer).text_length;
 	}
+
 	if (OG(nesting_level)==1) { /* end buffering */
 		if (SG(headers_sent) && !SG(request_info).headers_only) {
 			OG(php_body_write) = php_ub_body_write_no_header;
@@ -153,13 +154,31 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 			OG(php_body_write) = php_ub_body_write;
 		}
 	}
+
+	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
+
+	if (OG(nesting_level)>1) { /* restore previous buffer */
+		php_ob_buffer *ob_buffer_p;
+
+		zend_stack_top(&OG(ob_buffers), (void **) &ob_buffer_p);
+		OG(active_ob_buffer) = *ob_buffer_p;
+		zend_stack_del_top(&OG(ob_buffers));
+		if (OG(nesting_level)==2) { /* destroy the stack */
+			zend_stack_destroy(&OG(ob_buffers));
+		}
+	} 
+
 	if (send_buffer) {
 		OG(php_body_write)(final_buffer, final_buffer_length);
 	}
+
 	if (alternate_buffer) {
 		zval_ptr_dtor(&alternate_buffer);
 	}
-	php_ob_destroy();
+
+	efree(to_be_destroyed_buffer);
+
+	OG(nesting_level)--;
 }
 
 
@@ -225,27 +244,6 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	OG(active_ob_buffer).buffer = (char *) emalloc(initial_size+1);
 	OG(active_ob_buffer).text_length = 0;
 	OG(active_ob_buffer).output_handler = output_handler;
-}
-
-
-static void php_ob_destroy()
-{
-	OLS_FETCH();
-
-	if (OG(nesting_level)>0) {
-		efree(OG(active_ob_buffer).buffer);
-		if (OG(nesting_level)>1) { /* restore previous buffer */
-			php_ob_buffer *ob_buffer_p;
-
-			zend_stack_top(&OG(ob_buffers), (void **) &ob_buffer_p);
-			OG(active_ob_buffer) = *ob_buffer_p;
-			zend_stack_del_top(&OG(ob_buffers));
-			if (OG(nesting_level)==2) { /* destroy the stack */
-				zend_stack_destroy(&OG(ob_buffers));
-			}
-		} 
-	}
-	OG(nesting_level)--;
 }
 
 
