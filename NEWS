@@ -18,7 +18,7 @@ PHP 4                                                                      NEWS
    . imagepolygon antialias support
 
 
-? ? ??? 2002, Version 4.3.0
+27 Dec 2002, Version 4.3.0
 - Make PHP_AUTH_* variables not available in safe mode under Apache when an
   external basic auth mechanism is used. (Philip)
 - Aliased dba_popen() to dba_open() until 4.3.1 when persistent STDIO streams
