@@ -400,12 +400,14 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			break;
 		case T_TXT:
 			add_assoc_string(*subarray, "type", "TXT", 1);
-			n = cp[0]; 
-			for(i=1; i<=n; i++)
-				name[i-1] = cp[i];
-			name[i-1] = '\0';
+			n = cp[0];
+			tp = emalloc(n + 1);
+			for(i=1; i<=n; i++) {
+				tp[i-1] = cp[i];
+			}
+			tp[i-1] = '\0';
 			cp += dlen;
-			add_assoc_string(*subarray, "txt", name, 1);
+			add_assoc_stringl(*subarray, "txt", tp, n, 0);
 			break;
 		case T_SOA:
 			add_assoc_string(*subarray, "type", "SOA", 1);
