@@ -208,7 +208,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 			ZEND_PUTS("Array\n");
 			if (++expr->value.ht->nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
-				expr->value.ht->nApplyCount=0;
+				expr->value.ht->nApplyCount--;
 				return;
 			}
 			print_hash(expr->value.ht, indent);
@@ -220,7 +220,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 
 				if (++object->properties->nApplyCount>1) {
 					ZEND_PUTS(" *RECURSION*");
-					object->properties->nApplyCount=0;
+					object->properties->nApplyCount--;
 					return;
 				}
 				zend_printf("%s Object\n", object->ce->name);
