@@ -307,9 +307,14 @@ function_entry basic_functions[] = {
 };
 
 
+static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
+{
+	return SUCCESS;
+}
+
+
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY1("highlight.string",	"#foobar",	PHP_INI_ALL,		NULL,		NULL)
-	PHP_INI_ENTRY1("test2",				"testing",	PHP_INI_SYSTEM,		NULL,		NULL)
+	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
 PHP_INI_END()
 
 
