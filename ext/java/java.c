@@ -85,10 +85,12 @@ static PHP_INI_MH(OnIniUpdate) {
 PHP_INI_BEGIN()
   PHP_INI_ENTRY1("java.class.path",
     NULL, PHP_INI_ALL, OnIniUpdate, &classpath)
+#ifndef JNI_11
   PHP_INI_ENTRY1("java.home",
     NULL, PHP_INI_ALL, OnIniUpdate, &javahome)
   PHP_INI_ENTRY1("java.library.path",
     NULL, PHP_INI_ALL, OnIniUpdate, &libpath)
+#endif
 PHP_INI_END()
 
 /***************************************************************************/
@@ -143,12 +145,6 @@ static int jvm_create() {
 
   iniUpdated=0;
 
-  if (!classpath) classpath = getenv("CLASSPATH");
-
-#ifndef PHP_WIN32
-  if (!libpath)   libpath   = getenv("LD_LIBRARY_PATH");
-#endif
-
 #ifdef JNI_12
 
   vm_args.version = JNI_VERSION_1_2;
@@ -185,14 +181,19 @@ static int jvm_create() {
   local_php_reflect = (*jenv)->FindClass(jenv, "net/php/reflect");
   error = (*jenv)->ExceptionOccurred(jenv);
   if (error) {
-    jclass errClass = (*jenv)->GetObjectClass(jenv, error);
-    jmethodID toString = (*jenv)->GetMethodID(jenv, errClass, "toString",
-      "()Ljava/lang/String;");
-    jobject errString = (*jenv)->CallObjectMethod(jenv, error, toString);
-    const char *errAsUTF = (*jenv)->GetStringUTFChars(jenv, errString, 0);
-    php_error(E_ERROR, "%s", errAsUTF);
-    (*jenv)->ReleaseStringUTFChars(jenv, error, errAsUTF);
+    jclass errClass;
+    jmethodID toString;
+    jobject errString;
+    const char *errAsUTF;
+    jboolean isCopy;
     (*jenv)->ExceptionClear(jenv);
+    errClass = (*jenv)->GetObjectClass(jenv, error);
+    toString = (*jenv)->GetMethodID(jenv, errClass, "toString",
+      "()Ljava/lang/String;");
+    errString = (*jenv)->CallObjectMethod(jenv, error, toString);
+    errAsUTF = (*jenv)->GetStringUTFChars(jenv, errString, &isCopy);
+    php_error(E_ERROR, "%s", errAsUTF);
+    if (isCopy) (*jenv)->ReleaseStringUTFChars(jenv, error, errAsUTF);
     jvm_destroy();
     return -1;
   }
@@ -407,6 +408,14 @@ PHP_MINIT_FUNCTION(java) {
   le_jobject = register_list_destructors(_php_java_destructor,NULL);
 
   REGISTER_INI_ENTRIES();
+
+  if (!classpath) classpath = getenv("CLASSPATH");
+
+  if (!libpath) {
+    PLS_FETCH();
+    libpath=PG(extension_dir);
+  }
+
   return SUCCESS;
 }
 
@@ -444,13 +453,14 @@ DLEXPORT zend_module_entry *get_module(void) { return &java_module_entry; }
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromString
   (JNIEnv *jenv, jclass self, jlong result, jstring value)
 {
-  const char *valueAsUTF = (*jenv)->GetStringUTFChars(jenv, value, 0);
+  jboolean isCopy;
+  const char *valueAsUTF = (*jenv)->GetStringUTFChars(jenv, value, &isCopy);
   pval *presult = (pval*)(long)result;
   presult->type=IS_STRING;
   presult->value.str.len=strlen(valueAsUTF);
   presult->value.str.val=emalloc(presult->value.str.len+1);
   strcpy(presult->value.str.val, valueAsUTF);
-  (*jenv)->ReleaseStringUTFChars(jenv, value, valueAsUTF);
+  if (isCopy) (*jenv)->ReleaseStringUTFChars(jenv, value, valueAsUTF);
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromLong
