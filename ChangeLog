@@ -1,3 +1,86 @@
+2001-09-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ncurses/config.m4
+      ext/ncurses/ncurses_functions.c: yet another ncurses 4.x fix
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h: editor hints added
+
+    * ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h
+      ext/ncurses/config.m4
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c: whitespace
+
+    * ext/ncurses/ncurses.c: some keyboard constants
+
+    * ext/ncurses/c-prototypes
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h: some more function implementations
+
+2001-09-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * main/mergesort.c
+      main/php.h
+      ext/standard/php_array.h
+      ext/standard/array.c
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hg_comm.c: Merge in qsort changes
+
+2001-09-17  David Benson  <dbenson@mancala.com>
+
+    * ext/oci8/oci8.c:
+    Change duration of temporary lobs to avoid leakage of temporary lob
+    space (dbenson).
+
+2001-09-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/dbplus/php_dbplus.c: some proto fixes (not all done yet)
+
+    * ext/dbplus/php_dbplus.c: got rid of strtok and added some comments
+
+    * ext/ncurses/config.m4
+      ext/ncurses/ncurses_functions.c:
+    will now configure out functions not available in ncurses 4.2
+
+2001-09-17  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/XML/Parser.php:
+    - Fix a security hole when the xml tag name is equal to a defined method
+      (i.e. <funcStartHandler>). From now, prefix the "xmltag_" string to the
+      function names when using the 'func' mode. See @notes for more info.
+    - Use call_user_func() when php >= 4.0.7 instead of the deprecated
+      call_user_method().
+
+2001-09-17  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pfpro/php_pfpro.h
+      ext/shmop/php_shmop.h
+      ext/vpopmail/php_vpopmail.h: MFH
+
+    * ext/vpopmail/php_vpopmail.h
+      ext/shmop/php_shmop.h
+      ext/pfpro/php_pfpro.h: fix macros
+
+    * ext/sockets/php_sockets_win.c: MFH
+
+    * ext/sockets/php_sockets_win.c: fix fcntl
+
+2001-09-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/oracle/oracle.c:
+    fixed a warning regarding incompatible function pointer types
+
+2001-09-17  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/mod_php4.h: MFH
+
+    * sapi/apache/mod_php4.h: fix macro + nuke warning
+
 2001-09-16  Andy Sautins  <asautins@veripost.net>
 
     * ext/oci8/oci8.c:
