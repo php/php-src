@@ -2326,10 +2326,7 @@ send_by_ref:
 		}
 	}
 #if SUPPORT_INTERACTIVE
-	ALLOC_ZVAL(*(EG(return_value_ptr_ptr)));
-	**EG(return_value_ptr_ptr) = *retval_ptr;
-	(*EG(return_value_ptr_ptr))->refcount = 1;
-	(*EG(return_value_ptr_ptr))->is_ref = 0;
+	ALLOC_INIT_ZVAL(*(EG(return_value_ptr_ptr)));
 	op_array->last_executed_op_number = opline-op_array->opcodes;
 	EG(in_execution) = original_in_execution;
 	free_alloca(Ts);
