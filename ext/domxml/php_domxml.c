@@ -97,13 +97,13 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_new_xmldoc,	NULL)
 	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
 #if defined(LIBXML_XPATH_ENABLED)
-	PHP_FE(xpath_new_context, NULL)
+/*	PHP_FE(xpath_new_context, NULL)
 	PHP_FE(xpath_eval, NULL)
-	PHP_FE(xpath_eval_expression, NULL)
+	PHP_FE(xpath_eval_expression, NULL) */
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
-	PHP_FE(xptr_new_context, NULL)
-	PHP_FE(xptr_eval, NULL)
+/*	PHP_FE(xptr_new_context, NULL)
+	PHP_FE(xptr_eval, NULL) */
 #endif
 	{NULL, NULL, NULL}
 };
@@ -296,24 +296,29 @@ ZEND_GET_MODULE(domxml)
 static void php_free_xml_doc(zend_rsrc_list_entry *rsrc)
 {
 	xmlDoc *doc = (xmlDoc *)rsrc->ptr;
-	xmlFreeDoc(doc);
+/*	fprintf(stderr, "Freeing document: %s\n", doc->name); */
+	if(doc)
+		xmlFreeDoc(doc);
 }
 
-void _free_node(zend_rsrc_list_entry *rsrc) {
-/*fprintf(stderr, "Freeing node: %s\n", tmp->name);*/
+void php_free_xml_node(zend_rsrc_list_entry *rsrc) {
+	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
+/*	fprintf(stderr, "Freeing node: %s\n", node->name); */
 }
 
 #if defined(LIBXML_XPATH_ENABLED)
 static void php_free_xpath_context(zend_rsrc_list_entry *rsrc)
 {
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr)rsrc->ptr;
-	xmlXPathFreeContext(ctx);
+	if(ctx)
+		xmlXPathFreeContext(ctx);
 }
 
 static void php_free_xpath_object(zend_rsrc_list_entry *rsrc)
 {
 	xmlXPathObjectPtr obj = (xmlXPathObjectPtr)rsrc->ptr;
-	xmlXPathFreeObject(obj);
+	if(obj)
+		xmlXPathFreeObject(obj);
 }
 #endif
 
@@ -390,7 +395,7 @@ static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found) {
 	MAKE_STD_ZVAL(wrapper);
 /*	fprintf(stderr, "Adding new XPath Object\n"); */
 	object_init_ex(wrapper, xpathobject_class_entry);
-	rsrc_type = le_xpathctxp;
+	rsrc_type = le_xpathobjectp;
 	php_xpath_set_object(wrapper, (void *) obj, rsrc_type);
 
 	return(wrapper);
@@ -674,7 +679,7 @@ PHP_RINIT_FUNCTION(domxml)
 	/* Freeing the document contains freeing the complete tree.
 	   Therefore nodes, attributes etc. may not be freed seperately.
 	*/
-	le_domxmlnodep = zend_register_list_destructors_ex(_free_node, NULL, "domnode", module_number);
+	le_domxmlnodep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domnode", module_number);
 	le_domxmlattrp = zend_register_list_destructors_ex(NULL, NULL, "domattribute", module_number);
 #if defined(LIBXML_XPATH_ENABLED)
 	le_xpathctxp = zend_register_list_destructors_ex(php_free_xpath_context, NULL, "xpathcontext", module_number);
@@ -2117,7 +2122,7 @@ PHP_FUNCTION(domxml_add_root)
 	if (!nodep) {
 		RETURN_FALSE;
 	}
-	xmlDocSetRootElement(docp, nodep);
+//	xmlDocSetRootElement(docp, nodep);
 	rv = php_domobject_new(nodep, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
@@ -2398,9 +2403,8 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 	rv = php_xpathobject_new(xpathobjp, &ret);
 	SEPARATE_ZVAL(&rv);
-	*return_value = *rv;
 
-	add_property_long(return_value, "type", xpathobjp->type);
+	add_property_long(rv, "type", xpathobjp->type);
 	switch(xpathobjp->type) {
 		case XPATH_UNDEFINED:
 			break;
@@ -2411,11 +2415,11 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 			MAKE_STD_ZVAL(arr);
 			if (array_init(arr) == FAILURE) {
-				xmlXPathFreeObject(xpathobjp);
+				zval_dtor(rv);
 				RETURN_FALSE;
 			}
 			if(NULL == (nodesetp = xpathobjp->nodesetval)) {
-				xmlXPathFreeObject(xpathobjp);
+				zval_dtor(rv);
 				RETURN_FALSE;
 			}
 
@@ -2428,17 +2432,17 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				child = php_domobject_new(node, &retnode);
 				zend_hash_next_index_insert(arr->value.ht, &child, sizeof(zval *), NULL);
 			}
-			zend_hash_update(return_value->value.obj.properties, "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
+			zend_hash_update(rv->value.obj.properties, "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
 			break;
 		}
 		case XPATH_BOOLEAN:
-			add_property_bool(return_value, "value", xpathobjp->boolval);
+			add_property_bool(rv, "value", xpathobjp->boolval);
 			break;
 		case XPATH_NUMBER:
-			add_property_double(return_value, "value", xpathobjp->floatval);
+			add_property_double(rv, "value", xpathobjp->floatval);
 			break;
 		case XPATH_STRING:
-			add_property_string(return_value, "value", xpathobjp->stringval, 1);
+			add_property_string(rv, "value", xpathobjp->stringval, 1);
 			break;
 		case XPATH_POINT:
 			break;
@@ -2449,6 +2453,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		case XPATH_USERS:
 			break;
 	}
+	*return_value = *rv;
 }
 /* }}} */
 
