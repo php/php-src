@@ -88,17 +88,17 @@ public class reflect {
     }
   }
 
-  static Throwable lastException = null;
+  Throwable lastException = null;
 
-  static void lastException(long result) {
+  void lastException(long result) {
     setResult(result, lastException);
   }
 
-  static void clearException() {
+  void clearException() {
     lastException = null;
   }
 
-  static void setException(long result, Throwable e) {
+  void setException(long result, Throwable e) {
     if (e instanceof InvocationTargetException) {
       Throwable t = ((InvocationTargetException)e).getTargetException();
       if (t!=null) e=t;
@@ -111,7 +111,7 @@ public class reflect {
   //
   // Create an new instance of a given class
   //
-  public static void CreateObject(String name, Object args[], long result) {
+  public void CreateObject(String name, Object args[], long result) {
     try {
       Vector matches = new Vector();
 
@@ -233,7 +233,7 @@ public class reflect {
   //
   // Invoke a method on a given object
   //
-  public static void Invoke
+  public void Invoke
     (Object object, String method, Object args[], long result)
   {
 
@@ -281,9 +281,10 @@ public class reflect {
   //
   // Get or Set a property
   //
-  public static void GetSetProp
+  public void GetSetProp
     (Object object, String prop, Object args[], long result)
   {
+System.out.println(object + "." + prop);
     try {
 
       for (Class jclass = object.getClass();;jclass=(Class)object) {
@@ -340,7 +341,7 @@ public class reflect {
   //
   // Helper routines for the C implementation
   //
-  public static Object MakeArg(boolean b) { return new Boolean(b); }
-  public static Object MakeArg(long l)    { return new Long(l); }
-  public static Object MakeArg(double d)  { return new Double(d); }
+  public Object MakeArg(boolean b) { return new Boolean(b); }
+  public Object MakeArg(long l)    { return new Long(l); }
+  public Object MakeArg(double d)  { return new Double(d); }
 }

@@ -22,13 +22,11 @@ What is PHP4 ext/java?
 
      4) Exceptions raised result in PHP warnings, and null results.  The
         warnings may be eliminated by prefixing the method call with an
-        "@" sign.  The following experimental APIs may be used to retrieve
-        and reset the last error:
+        "@" sign.  The following APIs may be used to retrieve and reset
+        the last error:
 
           java_last_exception_get()
           java_last_exception_clear()
-
-        These APIs are not currently implemented in a reentrant fashion.
 
      5) Overload resolution is in general a hard problem given the
         differences in types between the two languages.  The PHP Java
