@@ -235,8 +235,8 @@ static int inifile_key_cmp(const key_type *k1, const key_type *k2 TSRMLS_DC)
 {
 	assert(k1->group && k1->name && k2->group && k2->name);
 	
-	if (!strcmp(k1->group, k2->group)) {
-		if (!strcmp(k1->name, k2->name)) {
+	if (!strcasecmp(k1->group, k2->group)) {
+		if (!strcasecmp(k1->name, k2->name)) {
 			return 0;
 		} else {
 			return 1;
