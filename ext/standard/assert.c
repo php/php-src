@@ -65,7 +65,7 @@ static PHP_INI_MH(OnChangeCallback)
 	ASSERTLS_FETCH();
 		 
 	if (ASSERT(callback)) {
-		zval_dtor(ASSERT(callback));
+		zval_ptr_dtor(&ASSERT(callback));
 	} else {
 		MAKE_STD_ZVAL(ASSERT(callback));
 	}
@@ -109,6 +109,15 @@ PHP_MINIT_FUNCTION(assert)
 	REGISTER_LONG_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(assert)
+{
+	ASSERTLS_FETCH();
+
+	if (ASSERT(callback)) {
+		zval_ptr_dtor(&ASSERT(callback));
+	}
 }
 
 PHP_RSHUTDOWN_FUNCTION(assert)
