@@ -318,21 +318,21 @@ retry:
 }
 
 /* {{{ proto string snmpget(string host, string community, string object_id [, int timeout [, int retries]]) 
-Fetch an SNMP object */
+   Fetch an SNMP object */
 PHP_FUNCTION(snmpget) {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
 /* {{{ proto string snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
-Return all objects under the specified object id */
+   Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk) {
 	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
 }
 /* }}} */
 
 /* {{{ proto string snmprealwalk(string host, string community, string object_id [, int timeout [, int retries]])
-Return all objects including their respective object id withing the specified one */
+   Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmprealwalk)
 {
 	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
@@ -340,7 +340,7 @@ PHP_FUNCTION(snmprealwalk)
 /* }}} */
 
 /* {{{ proto string snmprealoid(string host, string community, string object_id [, int timeout [, int retries]])
-Return all objects including their respective object id withing the specified one */
+   Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmpwalkoid)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4);
@@ -348,7 +348,7 @@ PHP_FUNCTION(snmpwalkoid)
 /* }}} */
 
 /* {{{ proto int snmp_get_quick_print(void)
-Return the current status of quick_print */
+   Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,9);
@@ -356,7 +356,7 @@ PHP_FUNCTION(snmp_get_quick_print)
 /* }}} */
 
 /* {{{ proto void snmp_set_quick_print(int quick_print)
-Return all objects including their respective object id withing the specified one */
+   Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,10);
@@ -364,7 +364,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 /* }}} */
 
 /* {{{ proto int snmpset(string host, string community, string object_id, string type, mixed value [, int timeout [, int retries]]) 
-Set the value of a SNMP object */
+   Set the value of a SNMP object */
 PHP_FUNCTION(snmpset) {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
 }
