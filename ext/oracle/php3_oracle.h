@@ -26,8 +26,23 @@
 #endif
 
 extern php3_module_entry oracle_module_entry;
-#define oracle_module_ptr &oracle_module_entry
 #define phpext_oracle_ptr &oracle_module_entry
+
+#ifdef ZTS
+#define ORALS_D php_ora_globals *ora_globals
+#define ORALS_DC , PSLS_D
+#define ORALS_C ora_globals
+#define ORALS_CC , ORALS_C
+#define ORA(v) (ora_globals->v)
+#define ORALS_FETCH() php_ora_globals *ora_globals = ts_resource(ora_globals_id)
+#else
+#define ORALS_D
+#define ORALS_DC
+#define ORALS_C
+#define ORALS_CC
+#define ORA(v) (ora_globals.v)
+#define ORALS_FETCH()
+#endif
 
 /* oparse flags */
 #define  DEFER_PARSE        1
@@ -52,7 +67,7 @@ extern php3_module_entry oracle_module_entry;
 #define NO_DATA_FOUND			1403
 #define NULL_VALUE_RETURNED		1405
 
-/* Some SQL and OCI function codes */
+/* Some SQL and ORA function codes */
 #define FT_INSERT			3
 #define FT_SELECT			4
 #define FT_UPDATE			5
@@ -111,37 +126,7 @@ typedef struct {
 	long num_links;
 	int le_conn, le_pconn, le_cursor;
 	HashTable *conns;
-} oracle_module;
-
-extern PHP_FUNCTION(ora_bind);
-extern PHP_FUNCTION(ora_close);
-extern PHP_FUNCTION(ora_commit);
-extern PHP_FUNCTION(ora_commitoff);
-extern PHP_FUNCTION(ora_commiton);
-extern PHP_FUNCTION(ora_do);
-extern PHP_FUNCTION(ora_error);
-extern PHP_FUNCTION(ora_errorcode);
-extern PHP_FUNCTION(ora_exec);
-extern PHP_FUNCTION(ora_fetch);
-extern PHP_FUNCTION(ora_fetch_into);
-extern PHP_FUNCTION(ora_columntype);
-extern PHP_FUNCTION(ora_columnname);
-extern PHP_FUNCTION(ora_columnsize);
-extern PHP_FUNCTION(ora_getcolumn);
-extern PHP_FUNCTION(ora_numcols);
-extern PHP_FUNCTION(ora_numrows);
-extern PHP_FUNCTION(ora_logoff);
-extern PHP_FUNCTION(ora_logon);
-extern PHP_FUNCTION(ora_plogon);
-extern PHP_FUNCTION(ora_open);
-extern PHP_FUNCTION(ora_parse);
-extern PHP_FUNCTION(ora_rollback);
-
-extern PHP_MINIT_FUNCTION(oracle);
-extern PHP_RINIT_FUNCTION(oracle);
-extern PHP_MSHUTDOWN_FUNCTION(oracle);
-extern PHP_RSHUTDOWN_FUNCTION(oracle);
-extern PHP_MINFO_FUNCTION(oracle);
+} php_ora_globals;
 
 #else
 
