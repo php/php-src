@@ -2197,7 +2197,7 @@ static int oci_lobgetlen(oci_connection *connection, oci_descriptor *mydescr, ub
 		}
 	}
 	
-	oci_debug("OCILobGetLen: len=%d",*loblen);
+	oci_debug("oci_lobgetlen: len=%d",*loblen);
 
 	return 0;
 }
@@ -2309,7 +2309,7 @@ static int oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char
 	*buffer = buf;
 	*loblen = siz;
 
-	oci_debug("OCIloadlob: size=%d",siz);
+	oci_debug("oci_loadlob: size=%d",siz);
 
 	return 0;
 }
@@ -2442,7 +2442,7 @@ static int oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char
 	*buffer = buf;
 	*len = bytes;
 
-	oci_debug("OCIreadlob: size=%d",bytes);
+	oci_debug("oci_readlob: size=%d",bytes);
 
 	return 0;
 }
@@ -3400,7 +3400,7 @@ static int oci_lob_flush(oci_descriptor* descr, int flush_flag TSRMLS_DC)
 		)
 	);
 
-	oci_debug("OCILobFlushBuffer: flush_flag=%d",flush_flag);
+	oci_debug("oci_lob_flush: flush_flag=%d",flush_flag);
 
 	if (connection->error) {
 		oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
@@ -3786,7 +3786,7 @@ PHP_FUNCTION(oci_free_descriptor)
 	if ((id = getThis()) != 0) {
 		inx = _oci_get_ocidesc(id,&descriptor TSRMLS_CC);
 		if (inx) {
-			oci_debug("OCIfreedesc: descr=%d",inx);
+			oci_debug("oci_free_descriptor: descr=%d",inx);
 			zend_list_delete(inx);
 			RETURN_TRUE;
 		}
@@ -3838,7 +3838,7 @@ PHP_FUNCTION(oci_lob_save)
 				)
 			);
 
-			oci_debug("OCIsavedesc: curloblen=%d",curloblen);
+			oci_debug("oci_lob_save: curloblen=%d",curloblen);
 
 			if (offparam == -1) {
 				offset = curloblen;
@@ -3877,7 +3877,7 @@ PHP_FUNCTION(oci_lob_save)
 			)
 		);
 
-		oci_debug("OCIsavedesc: size=%d offset=%d",loblen,offset);
+		oci_debug("oci_lob_save: size=%d offset=%d",loblen,offset);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobWrite", connection->error);
@@ -3954,7 +3954,7 @@ PHP_FUNCTION(oci_lob_import)
 				)
 			);
 
-			oci_debug("OCIsavelob: size=%d",loblen);
+			oci_debug("oci_lob_import: size=%d",loblen);
 
 			if (connection->error) {
 				oci_error(connection->pError, "OCILobWrite", connection->error);
@@ -4254,7 +4254,7 @@ PHP_FUNCTION(oci_lob_write)
 			)
 		);
 
-		oci_debug("OCILobWrite: size=%d offset=%d",loblen,descr->lob_current_position);
+		oci_debug("oci_lob_write: size=%d offset=%d",loblen,descr->lob_current_position);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobWrite", connection->error);
@@ -4408,7 +4408,7 @@ PHP_FUNCTION(oci_lob_truncate)
 			)
 		);
 
-		oci_debug("OCILobTrim: trim_length=%d",trim_length);
+		oci_debug("oci_lob_truncate: trim_length=%d",trim_length);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobTrim", connection->error);
@@ -4486,7 +4486,7 @@ PHP_FUNCTION(oci_lob_erase)
 			)
 		);
 
-		oci_debug("OCILobErase: erase_length=%d, erase_offset=%d",erase_length,erase_offset);
+		oci_debug("oci_lob_erase: erase_length=%d, erase_offset=%d",erase_length,erase_offset);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobErase", connection->error);
@@ -4615,7 +4615,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 			break;
 		}
 		
-		oci_debug("OCIsavedesc: buffering_flag=%d",buffering_flag);
+		oci_debug("oci_lob_set_buffering: buffering_flag=%d",buffering_flag);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
@@ -4904,7 +4904,7 @@ PHP_FUNCTION(oci_lob_export)
 
 		coffs = start;
 
-		oci_debug("ociwritelobtofile(start = %d, length = %d, loblen = %d",start,length,loblen);
+		oci_debug("oci_lob_export(start = %d, length = %d, loblen = %d",start,length,loblen);
 
 		while (length > 0) {
 			ub4 toread;
@@ -4915,7 +4915,7 @@ PHP_FUNCTION(oci_lob_export)
 				toread = length;
 			}
 
-			oci_debug("OCILobRead(coffs = %d, toread = %d",coffs,toread);
+			oci_debug("oci_lob_read(coffs = %d, toread = %d",coffs,toread);
 
 			CALL_OCI_RETURN(connection->error,
 				OCILobRead(
@@ -4933,7 +4933,7 @@ PHP_FUNCTION(oci_lob_export)
 				)
 			);
 
-			oci_debug("OCILobRead(read - %d",toread);
+			oci_debug("oci_lob_read(read - %d",toread);
 
 			if (connection->error) {
 				oci_error(connection->pError, "OCILobRead", connection->error);
@@ -5322,7 +5322,7 @@ PHP_FUNCTION(oci_field_size)
 		RETURN_FALSE;
 	}
 
-	oci_debug("ocicolumnsize: %16s, retlen = %4d, retlen4 = %d, data_size = %4d, storage_size4 = %4d, indicator %4d, retcode = %4d",
+	oci_debug("oci_field_size: %16s, retlen = %4d, retlen4 = %d, data_size = %4d, storage_size4 = %4d, indicator %4d, retcode = %4d",
 				  outcol->name,outcol->retlen,outcol->retlen4,outcol->data_size,outcol->storage_size4,outcol->indicator,outcol->retcode);
 		
 	/* Handle data type of LONG */
@@ -6252,7 +6252,7 @@ PHP_FUNCTION(oci_free_collection)
 			 * 
 			 */
 			connection = coll->conn;
-			oci_debug("OCIfreecollection: coll=%d",inx);
+			oci_debug("oci_free_collection: coll=%d",inx);
 
 			CALL_OCI_RETURN(connection->error,
 				OCIObjectFree(
