@@ -155,7 +155,23 @@ class PEAR_Registry extends PEAR
      */
     function _packageFileName($package)
     {
-        return "{$this->statedir}/{$package}.reg";
+        if (is_file("{$this->statedir}/{$package}.reg")) {
+            return "{$this->statedir}/{$package}.reg";
+        }
+        /**
+         * Iterate through the directory to find the matching
+         * registry file, even if it has been provided in
+         * another case (foobar vs. FooBar)
+         */
+        $package = strtolower($package);
+        if ($handle = opendir($this->statedir)) {
+            while (false !== ($file = readdir($handle))) {
+               if (strtolower($file) == $package . ".reg") {
+                   return "{$this->statedir}/{$file}";
+               }
+            }
+            closedir($handle);
+        }
     }
 
     // }}}
