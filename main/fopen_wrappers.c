@@ -186,6 +186,10 @@ PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock
 	int cm=2;  /* checkuid mode: 2 = if file does not exist, check directory */
 	PLS_FETCH();
 
+	if (opened_path) {
+		*opened_path = NULL;
+	}
+
 	/* FIXME  Lets not get in the habit of doing stuff like this.  This should
 	   be runtime enabled, NOT compile time. */
 #if PHP3_URL_FOPEN
@@ -320,10 +324,11 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 	int cm=2;
 	PLS_FETCH();
 
-	if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
 	if (opened_path) {
 		*opened_path = NULL;
 	}
+
+	if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
 	/* Relative path open */
 	if (*filename == '.') {
 		if (PG(safe_mode) && (!_php3_checkuid(filename, cm))) {
