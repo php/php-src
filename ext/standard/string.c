@@ -228,7 +228,7 @@ PHP_FUNCTION(ltrim)
 
 
 /* {{{ proto string wordwrap(string str [, int width [, string break]])
- * Wrap buffer to selected number of characters using string break char */
+   Wrap buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
 	pval **ptext, **plinelength, **pbreakchar;
@@ -1634,7 +1634,7 @@ PHPAPI void php_stripslashes(char *str, int *len)
 }
 
 /* {{{ proto string addcslashes(string str, string charlist)
-   Escape all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...). */
+   Escape all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...) */
 PHP_FUNCTION(addcslashes)
 {
 	zval **str, **what;
@@ -2687,7 +2687,7 @@ PHP_FUNCTION(strnatcasecmp)
 
 
 /* {{{ proto int substr_count(string haystack, string needle)
-   Returns the number of times a substring occurs in the string. */
+   Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
 {
 	zval **haystack, **needle;	
