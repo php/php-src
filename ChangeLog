@@ -1,3 +1,128 @@
+2000-02-24  Stig Bakken  <ssb@fast.no>
+
+    * SAPI.c
+      SAPI.h
+      main.c
+      php_globals.h
+      php_ini.c
+      php_version.h
+      sapi/apache/mod_php4.c:
+    started implementing directives for default mimetype/charset
+
+2000-02-24  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/libmysql/libmysql.dsp: Update .dsp
+
+2000-02-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/readline/readline.c: Thies I will give up until tomorrow.
+
+    * ext/mcal/php_mcal.c
+      ext/icap/php_icap.c
+      ext/dba/dba.c: More protos.
+
+    * ext/wddx/wddx.c: Is it ok, Andrei.
+
+2000-02-24  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/mysql.dsp
+      php4ts.dsp
+      sapi/isapi/php4isapi.dsp: - Fix Win32 build in Release_TS* modes
+
+2000-02-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/wddx/wddx.c
+      ext/aspell/aspell.c: More protos.
+
+2000-02-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * main.c
+      php.ini-dist: Revert the y2k ini patches.
+
+
+    * main.c: Turn on y2k_compliance by default.
+
+2000-02-24  Kristian Köhntopp  <kk@shonline.de>
+
+    * php.ini-dist:
+    Set y2k_compliance to "On" by default, as we do have y2k now.
+
+2000-02-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/session/session.c: More protos.
+
+    * ext/standard/array.c: There are more '|' and should be mixed.
+
+    * ext/zlib/zlib.c
+      ext/yp/yp.c: More protos.
+
+2000-02-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/pcre/php_pcre.c: Fix bug #3599.
+
+2000-02-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/xml/xml.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/standard/assert.c: More protos.
+
+2000-02-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Fix proto.
+
+2000-02-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4: - Fixed -DEAPI inheritance from APXS. 
+
+    * sapi/apache/config.m4: Improve APXS_CFLAGS checks
+
+2000-02-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * configuration-parser.y:    (pvalue_config_destructor) gets a zval* not a zval**
+
+2000-02-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4: Define EAPI, if Apache uses EAPI
+
+    * sapi/apache/config.m4:
+    Remove XML_INCLUDE, we use the embedded expat always
+
+    * ext/cybercash/cybercash.c:
+    Revert last commit (cybercash has its own version of base64.h)
+
+2000-02-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/string.c: Will watch the diffs as much as I can.
+
+2000-02-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/dir.c: zorro does a Z - egon does an e?
+
+2000-02-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/array.c
+      ext/standard/iptc.c
+      ext/standard/math.c
+      ext/standard/microtime.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/info.c
+      ext/standard/lcg.c
+      ext/standard/dir.c: More protos.
+
+    * ext/standard/basic_functions.c: Most functions don't have protos.
+
+    * ext/snmp/snmp.c
+      ext/pgsql/pgsql.c: More protos.
+
+2000-02-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/ltlib.mk: WTF?
+
 2000-02-23  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/basic_functions.c
