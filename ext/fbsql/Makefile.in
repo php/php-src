@@ -1,0 +1,10 @@
+
+LTLIBRARY_NAME    = libfbsql.la
+LTLIBRARY_SOURCES = php_fbsql.c
+LTLIBRARY_LIBADD  = $(FBSQL_LIBADD)
+LTLIBRARY_SHARED_NAME    = fbsql.la
+LTLIBRARY_SHARED_LIBADD  = $(FBSQL_SHARED_LIBADD)
+
+SUBDIRS = $(FBSQL_SUBDIRS)
+
+include $(top_srcdir)/build/dynlib.mk
