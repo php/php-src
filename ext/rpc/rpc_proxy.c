@@ -107,7 +107,7 @@ static void rpc_proxy_set(zval **property, zval *value TSRMLS_DC)
 
 static int rpc_proxy_has_property(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
-	return NULL;
+	return FAILURE;
 }
 
 static void rpc_proxy_unset_property(zval *object, zval *member TSRMLS_DC)
@@ -136,12 +136,12 @@ static zend_class_entry* rpc_proxy_get_class_entry(zval *object TSRMLS_DC)
 
 static int rpc_proxy_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
-	return NULL;
+	return FAILURE;
 }
 
 static int rpc_proxy_compare(zval *object1, zval *object2 TSRMLS_DC)
 {
-	return NULL;
+	return FAILURE;
 }
 
 /*
