@@ -22,6 +22,7 @@
 #endif
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include "php.h"
 #include "php_globals.h"
@@ -274,17 +275,20 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 */
 int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	char *attrname, *str, *temp, language[3], *title;
-	int iTitle, iDesc, iKeyword;
+	int iTitle, iDesc, iKeyword, iGroup;
 	zval *title_arr;
 	zval *desc_arr;
 	zval *keyword_arr;
+	zval *group_arr;
 	int hasTitle = 0;
 	int hasDescription = 0;
 	int hasKeyword = 0;
+	int hasGroup = 0;
 
 	MAKE_STD_ZVAL(title_arr);
 	MAKE_STD_ZVAL(desc_arr);
 	MAKE_STD_ZVAL(keyword_arr);
+	MAKE_STD_ZVAL(group_arr);
 
 	if (array_init(*return_value) == FAILURE) {
 		(*return_value)->type = IS_STRING;
@@ -301,6 +305,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		iTitle = 0;
 		iDesc = 0;
 		iKeyword = 0;
+		iGroup = 0;
 		if(0 == strncmp(attrname, "Title=", 6)) {
 			if ((hasTitle == 0) && (array_init(title_arr) == FAILURE)) {
 				return -1;
@@ -322,6 +327,13 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 			hasKeyword = 1;
 			str += 8;
 			iKeyword = 1;
+		} else if(0 == strncmp(attrname, "Group=", 6)) {
+			if ((hasGroup == 0) && (array_init(group_arr) == FAILURE)) {
+				return -1;
+			}
+			hasGroup = 1;
+			str += 6;
+			iGroup = 1;
 		} 
 		if(iTitle || iDesc || iKeyword) {	/* Poor error check if end of string */
 			if(str[2] == ':') {
@@ -338,6 +350,9 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 				add_assoc_string(desc_arr, language, title, 1);
 			else if(iKeyword)
 				add_assoc_string(keyword_arr, language, title, 1);
+		} else if(iGroup) {
+			if(iGroup)
+				add_next_index_string(group_arr, str, 1);
 		}
 		attrname = strtok(NULL, "\n");
 	}
@@ -368,6 +383,14 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		efree(keyword_arr);
 	}
 
+	if(hasGroup) {
+	/* Add the Group array, if we have one */
+		zend_hash_update((*return_value)->value.ht, "Group", 6, &group_arr, sizeof(zval *), NULL);
+
+	} else {
+		efree(group_arr);
+	}
+
 	/* All other attributes. Make a another copy first */
 	temp = estrdup(objrec);
 	attrname = strtok(temp, "\n");
@@ -376,6 +399,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 		/* We don't want to insert titles, descr., keywords a second time */
 		if((0 != strncmp(attrname, "Title=", 6)) &&
 		   (0 != strncmp(attrname, "Description=", 12)) &&
+		   (0 != strncmp(attrname, "Group=", 6)) &&
 		   (0 != strncmp(attrname, "Keyword=", 8))) {
 			while((*str != '=') && (*str != '\0'))
 				str++;
@@ -408,15 +432,21 @@ static char * make_objrec_from_array(HashTable *lht) {
 	*objrec = '\0';
 	for(i=0; i<count; i++) {
 		keytype = zend_hash_get_current_key(lht, &key, &length);
-		if(HASH_KEY_IS_STRING == keytype) {
+//		if(HASH_KEY_IS_STRING == keytype) {
 			zend_hash_get_current_data(lht, (void **) &keydataptr);
 			keydata = *keydataptr;
 			switch(keydata->type) {
 				case IS_STRING:
-					snprintf(str, BUFFERLEN, "%s=%s\n", key, keydata->value.str.val);
+					if(HASH_KEY_IS_STRING == keytype)
+						snprintf(str, BUFFERLEN, "%s=%s\n", key, keydata->value.str.val);
+					else
+						snprintf(str, BUFFERLEN, "%s\n", keydata->value.str.val);
 					break;
 				case IS_LONG:
-					snprintf(str, BUFFERLEN, "%s=0x%lX\n", key, keydata->value.lval);
+					if(HASH_KEY_IS_STRING == keytype)
+						snprintf(str, BUFFERLEN, "%s=0x%lX\n", key, keydata->value.lval);
+					else
+						snprintf(str, BUFFERLEN, "0x%lX\n", keydata->value.lval);
 					break;
 				case IS_ARRAY: {
 					int i, len, keylen, count;
@@ -451,10 +481,10 @@ static char * make_objrec_from_array(HashTable *lht) {
 					break;
 				}
 			}
-			efree(key);
+			if(HASH_KEY_IS_STRING == keytype) efree(key);
 			objrec = realloc(objrec, strlen(objrec)+strlen(str)+1);
 			strcat(objrec, str);
-		}
+//		}
 		zend_hash_move_forward(lht);
 	}
 	return objrec;
@@ -576,7 +606,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			if ( (sockfd = open_hg_connection(host, port)) < 0 )  {
-				php_error(E_ERROR, "Could not open connection to %s, Port: %d (retval=%d)", host, port, sockfd);
+				php_error(E_ERROR, "Could not open connection to %s, Port: %d (retval=%d, errno=%d)", host, port, sockfd, errno);
 				if(host) efree(host);
 				if(username) efree(username);
 				if(password) efree(password);
@@ -1624,7 +1654,7 @@ PHP_FUNCTION(hw_modifyobject) {
 		free(modification);
 		RETURN_TRUE;
 	}
-/*	fprintf(stderr, "modifyobject: %s\n", modification);*/
+/*	fprintf(stderr, "modifyobject: %s\n", modification); */
 	switch(mode) {
 		case 0:
 			if (0 == (ptr->lasterror = send_lock(ptr->socket, id))) {
