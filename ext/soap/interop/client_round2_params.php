@@ -279,9 +279,9 @@ $soap_tests['base'][] = new SOAP_Test('echoDecimal', array('inputDecimal' =>
 // Base echoDate
 
 # php-soap doesn't handle datetime types properly yet
-$soap_tests['base'][] = new SOAP_Test('echoDate', array('inputDate' => '2001-05-24T17:31:41Z'));
+$soap_tests['base'][] = new SOAP_Test('echoDate', array('inputDate' => '2001-05-24T17:31:41Z'), null, 'date_compare');
 $soap_tests['base'][] = new SOAP_Test('echoDate', array('inputDate' =>
-        soap_value('inputDate','2001-05-24T17:31:41Z',XSD_DATETIME)));#'2001-04-25T13:31:41-0700'
+        soap_value('inputDate','2001-05-24T17:31:41Z',XSD_DATETIME)), null, 'date_compare');
 
 //***********************************************************
 // Base echoBoolean
