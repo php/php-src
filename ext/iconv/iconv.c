@@ -367,35 +367,28 @@ PHP_FUNCTION(iconv_set_encoding)
    Get internal encoding and output encoding for ob_iconv_handler() */
 PHP_FUNCTION(iconv_get_encoding)
 {
-	zval **type;
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc < 0 || argc > 1 || zend_get_parameters_ex(1, &type) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(type);
-
-	if (argc == 0 || !strcasecmp("all", Z_STRVAL_PP(type))) {
+	char *type = "all";
+	int type_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &type, &type_len) == FAILURE)
+		return;
+	
+	if (!strcasecmp("all", type)) {
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-		add_assoc_string(return_value, "input_encoding", 
-						 ICONVG(input_encoding), 1);
-		add_assoc_string(return_value, "output_encoding", 
-						 ICONVG(output_encoding), 1);
-		add_assoc_string(return_value, "internal_encoding", 
-						 ICONVG(internal_encoding), 1);
-	} else if (!strcasecmp("input_encoding", Z_STRVAL_PP(type))) {
+		add_assoc_string(return_value, "input_encoding",    ICONVG(input_encoding), 1);
+		add_assoc_string(return_value, "output_encoding",   ICONVG(output_encoding), 1);
+		add_assoc_string(return_value, "internal_encoding", ICONVG(internal_encoding), 1);
+	} else if (!strcasecmp("input_encoding", type)) {
 		RETVAL_STRING(ICONVG(input_encoding), 1);
-	} else if (!strcasecmp("output_encoding", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("output_encoding", type)) {
 		RETVAL_STRING(ICONVG(output_encoding), 1);
-	} else if (!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
+	} else if (!strcasecmp("internal_encoding", type)) {
 		RETVAL_STRING(ICONVG(internal_encoding), 1);
 	} else {
 		RETURN_FALSE;
 	}
-
 }
 /* }}} */
 
