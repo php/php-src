@@ -633,8 +633,8 @@ PHP_FUNCTION(mysql_pconnect)
    Close a MySQL connection */
 PHP_FUNCTION(mysql_close)
 {
-	pval *mysql_link;
-	int id,type;
+	pval *mysql_link=NULL;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 
@@ -646,19 +646,15 @@ PHP_FUNCTION(mysql_close)
 			if (getParameters(ht, 1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	php3_list_delete(id);
 	RETURN_TRUE;
@@ -671,7 +667,7 @@ PHP_FUNCTION(mysql_close)
 PHP_FUNCTION(mysql_select_db)
 {
 	pval *db,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
@@ -681,26 +677,22 @@ PHP_FUNCTION(mysql_select_db)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	CHECK_LINK(id);
 	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(db);
 	
@@ -718,7 +710,7 @@ PHP_FUNCTION(mysql_select_db)
 PHP_FUNCTION(mysql_create_db)
 {
 	pval *db,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
@@ -728,26 +720,21 @@ PHP_FUNCTION(mysql_create_db)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	CHECK_LINK(id);
-	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(db);
 	if (mysql_create_db(mysql,db->value.str.val)==0) {
@@ -764,7 +751,7 @@ PHP_FUNCTION(mysql_create_db)
 PHP_FUNCTION(mysql_drop_db)
 {
 	pval *db,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
@@ -774,26 +761,22 @@ PHP_FUNCTION(mysql_drop_db)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	CHECK_LINK(id);
 	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(db);
 	if (mysql_drop_db(mysql,db->value.str.val)==0) {
@@ -810,7 +793,7 @@ PHP_FUNCTION(mysql_drop_db)
 PHP_FUNCTION(mysql_query)
 {
 	pval *query,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -821,24 +804,21 @@ PHP_FUNCTION(mysql_query)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &query, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(query);
 	/* mysql_query binary unsafe, use mysql_real_query */
@@ -868,7 +848,7 @@ PHP_FUNCTION(mysql_query)
 PHP_FUNCTION(mysql_db_query)
 {
 	pval *db,*query,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -879,26 +859,21 @@ PHP_FUNCTION(mysql_db_query)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 3:
 			if (getParameters(ht, 3, &db, &query, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	CHECK_LINK(id);
-	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(db);
 	if (mysql_select_db(mysql,db->value.str.val)!=0) {
@@ -934,7 +909,7 @@ PHP_FUNCTION(mysql_db_query)
 PHP_FUNCTION(mysql_list_dbs)
 {
 	pval *mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -942,26 +917,22 @@ PHP_FUNCTION(mysql_list_dbs)
 	switch(ARG_COUNT(ht)) {
 		case 0:
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 1:
 			if (getParameters(ht, 1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	CHECK_LINK(id);
-	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
+
 	if ((mysql_result=mysql_list_dbs(mysql,NULL))==NULL) {
 		php_error(E_WARNING,"Unable to save MySQL query result");
 		RETURN_FALSE;
@@ -977,7 +948,7 @@ PHP_FUNCTION(mysql_list_dbs)
 PHP_FUNCTION(mysql_list_tables)
 {
 	pval *db,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -988,26 +959,21 @@ PHP_FUNCTION(mysql_list_tables)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
-	CHECK_LINK(id);
-	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+		
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(db);
 	if (mysql_select_db(mysql,db->value.str.val)!=0) {
@@ -1028,7 +994,7 @@ PHP_FUNCTION(mysql_list_tables)
 PHP_FUNCTION(mysql_list_fields)
 {
 	pval *db,*table,*mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
@@ -1039,26 +1005,21 @@ PHP_FUNCTION(mysql_list_fields)
 				RETURN_FALSE;
 			}
 			id = php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
 			break;
 		case 3:
 			if (getParameters(ht, 3, &db, &table, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	
-	CHECK_LINK(id);
-	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+		
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	convert_to_string(db);
 	if (mysql_select_db(mysql,db->value.str.val)!=0) {
@@ -1080,34 +1041,30 @@ PHP_FUNCTION(mysql_list_fields)
 PHP_FUNCTION(mysql_error)
 {
 	pval *mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
 			id = MySG(default_link);
+			if (id==-1) {
+				RETURN_FALSE;
+			}
 			break;
 		case 1:
 			if (getParameters(ht, 1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	if (id==-1) {
-		RETURN_FALSE;
-	}
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	RETURN_STRING(mysql_error(mysql),1);
 }
@@ -1120,34 +1077,30 @@ PHP_FUNCTION(mysql_error)
 PHP_FUNCTION(mysql_errno)
 {
 	pval *mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
 			id = MySG(default_link);
+			if (id==-1) {
+				RETURN_FALSE;
+			}
 			break;
 		case 1:
 			if (getParameters(ht, 1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	if (id==-1) {
-		RETURN_FALSE;
-	}
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	RETURN_LONG(mysql_errno(mysql));
 }
@@ -1160,31 +1113,28 @@ PHP_FUNCTION(mysql_errno)
 PHP_FUNCTION(mysql_affected_rows)
 {
 	pval *mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
 			id = MySG(default_link);
+			CHECK_LINK(id);
 			break;
 		case 1:
 			if (getParameters(ht, 1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	/* conversion from int64 to long happing here */
 	return_value->value.lval = (long)mysql_affected_rows(mysql);
@@ -1198,31 +1148,28 @@ PHP_FUNCTION(mysql_affected_rows)
 PHP_FUNCTION(mysql_insert_id)
 {
 	pval *mysql_link;
-	int id,type;
+	int id;
 	MYSQL *mysql;
 	MySLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
 			id = MySG(default_link);
+			CHECK_LINK(id);
 			break;
 		case 1:
 			if (getParameters(ht, 1, &mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(mysql_link);
-			id = mysql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	mysql = (MYSQL *) php3_list_find(id,&type);
-	if (type!=le_link && type!=le_plink) {
-		php_error(E_WARNING,"%d is not a MySQL link index",id);
-		RETURN_FALSE;
-	}
+	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
+	ZEND_VERIFY_RESOURCE(mysql);
 	
 	/* conversion from int64 to long happing here */
 	return_value->value.lval = (long)mysql_insert_id(mysql);
@@ -1239,7 +1186,7 @@ PHP_FUNCTION(mysql_result)
 	MYSQL_RES *mysql_result;
 	MYSQL_ROW sql_row;
 	mysql_row_length_type *sql_row_lengths;
-	int type,field_offset=0;
+	int field_offset=0;
 	PLS_FETCH();
 
 	switch (ARG_COUNT(ht)) {
@@ -1258,14 +1205,8 @@ PHP_FUNCTION(mysql_result)
 			break;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
-	
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+		
 	convert_to_long(row);
 	if (row->value.lval<0 || row->value.lval>=(int)mysql_num_rows(mysql_result)) {
 		php_error(E_WARNING,"Unable to jump to row %d on MySQL result index %d",row->value.lval,result->value.lval);
@@ -1350,20 +1291,12 @@ PHP_FUNCTION(mysql_num_rows)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
-	int type;
-
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 	
 	/* conversion from int64 to long happing here */
 	return_value->value.lval = (long)mysql_num_rows(mysql_result);
@@ -1377,20 +1310,12 @@ PHP_FUNCTION(mysql_num_fields)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
-	int type;
-
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 	
 	return_value->value.lval = mysql_num_fields(mysql_result);
 	return_value->type = IS_LONG;
@@ -1405,7 +1330,6 @@ static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	MYSQL_ROW mysql_row;
 	MYSQL_FIELD *mysql_field;
 	mysql_row_length_type *mysql_row_lengths;
-	int type;
 	int num_fields;
 	int i;
 	PLS_FETCH();
@@ -1431,13 +1355,8 @@ static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			break;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+
 	if ((mysql_row=mysql_fetch_row(mysql_result))==NULL 
 		|| (mysql_row_lengths=mysql_fetch_lengths(mysql_result))==NULL) {
 		RETURN_FALSE;
@@ -1519,20 +1438,13 @@ PHP_FUNCTION(mysql_data_seek)
 {
 	pval *result,*offset;
 	MYSQL_RES *mysql_result;
-	int type;
-
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+
 	convert_to_long(offset);
 	if (offset->value.lval<0 || offset->value.lval>=(int)mysql_num_rows(mysql_result)) {
 		php_error(E_WARNING,"Offset %d is invalid for MySQL result index %d",offset->value.lval,result->value.lval);
@@ -1551,7 +1463,6 @@ PHP_FUNCTION(mysql_fetch_lengths)
 	pval *result;
 	MYSQL_RES *mysql_result;
 	mysql_row_length_type *lengths;
-	int type;
 	int num_fields;
 	int i;
 
@@ -1560,13 +1471,8 @@ PHP_FUNCTION(mysql_fetch_lengths)
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+
 	if ((lengths=mysql_fetch_lengths(mysql_result))==NULL) {
 		RETURN_FALSE;
 	}
@@ -1638,8 +1544,6 @@ PHP_FUNCTION(mysql_fetch_field)
 	pval *result,*field=NULL;
 	MYSQL_RES *mysql_result;
 	MYSQL_FIELD *mysql_field;
-	int type;
-
 	
 	switch (ARG_COUNT(ht)) {
 		case 1:
@@ -1657,13 +1561,8 @@ PHP_FUNCTION(mysql_fetch_field)
 			WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+
 	if (field) {
 		if (field->value.lval<0 || field->value.lval>=(int)mysql_num_fields(mysql_result)) {
 			php_error(E_WARNING,"MySQL:  Bad field offset");
@@ -1701,20 +1600,13 @@ PHP_FUNCTION(mysql_field_seek)
 {
 	pval *result, *offset;
 	MYSQL_RES *mysql_result;
-	int type;
-
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+
 	convert_to_long(offset);
 	if (offset->value.lval<0 || offset->value.lval>=(int)mysql_num_fields(mysql_result)) {
 		php_error(E_WARNING,"Field %d is invalid for MySQL result index %d",offset->value.lval,result->value.lval);
@@ -1738,7 +1630,6 @@ static void php3_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	pval *result, *field;
 	MYSQL_RES *mysql_result;
 	MYSQL_FIELD *mysql_field;
-	int type;
 	char buf[512];
 	int  len;
 
@@ -1746,13 +1637,7 @@ static void php3_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 	
 	convert_to_long(field);
 	if (field->value.lval<0 || field->value.lval>=(int)mysql_num_fields(mysql_result)) {
@@ -1911,23 +1796,17 @@ PHP_FUNCTION(mysql_free_result)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
-	int type;
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	if (result->value.lval==0) {
+	if (result->type==IS_RESOURCE && result->value.lval==0) {
 		RETURN_FALSE;
 	}
 	
-	mysql_result = (MYSQL_RES *) php3_list_find(result->value.lval,&type);
-	
-	if (type!=le_result) {
-		php_error(E_WARNING,"%d is not a MySQL result index",result->value.lval);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
+
 	php3_list_delete(result->value.lval);
 	RETURN_TRUE;
 }

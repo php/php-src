@@ -2,15 +2,14 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Improved the resource mechanism - resources were not getting freed as soon
+  as they could (Zeev)
 - Added shared memory module for session data storage (Sascha)
 - Fixed session.auto_start (Sascha)
 - Fixed several problems with output buffering and HEAD requests (Zeev)
 - Fixed HTTP Status code issue with ISAPI module (Zeev)
 - Fixed a problem that prevented $GLOBALS from working properly (Zeev, Zend
   library)
-- Fixed the a problem in the resource reference counting mechanism, that
-  caused resources to be freed much later than they were supposed to (Zeev,
-  Zend library)
 - Ported newest GetImageSize (Thies)
 - Added session compile support in Win32 (Andi)
 - Added -d switch to the CGI binary that allows overriding php.ini values
