@@ -382,6 +382,7 @@ sys/ipc.h \
 ])
 
 PHP_FOPENCOOKIE
+PHP_BROKEN_GLIBC_FOPEN_APPEND
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl -------------------------------------------------------------------------
