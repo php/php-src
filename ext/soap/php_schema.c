@@ -1301,9 +1301,44 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTy
 	return TRUE;
 }
 
-static int schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model)
+/*
+<any 
+  id = ID 
+  maxOccurs = (nonNegativeInteger | unbounded)  : 1
+  minOccurs = nonNegativeInteger : 1
+  namespace = ((##any | ##other) | List of (anyURI | (##targetNamespace | ##local)) )  : ##any
+  processContents = (lax | skip | strict) : strict
+  {any attributes with non-schema namespace . . .}>
+  Content: (annotation?)
+</any>
+*/
+static int schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr anyType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
-	/* TODO: <any> support */
+	if (model != NULL) {
+		sdlContentModelPtr newModel;
+		xmlAttrPtr attr;
+
+		newModel = emalloc(sizeof(sdlContentModel));
+		newModel->kind = XSD_CONTENT_ANY;
+		newModel->min_occurs = 1;
+		newModel->max_occurs = 1;
+
+		attr = get_attribute(anyType->properties, "minOccurs");
+		if (attr) {
+			newModel->min_occurs = atoi(attr->children->content);
+		}
+
+		attr = get_attribute(anyType->properties, "maxOccurs");
+		if (attr) {
+			if (!strncmp(attr->children->content, "unbounded", sizeof("unbounded"))) {
+				newModel->max_occurs = -1;
+			} else {
+				newModel->max_occurs = atoi(attr->children->content);
+			}
+		}
+
+		zend_hash_next_index_insert(model->u.content, &newModel, sizeof(sdlContentModelPtr), NULL);
+	}
 	return TRUE;
 }
 
@@ -2156,6 +2191,8 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 				if ((*tmp)->def) {
 				  type->def = estrdup((*tmp)->def);
 				}
+			} else if (strcmp(type->ref, SCHEMA_NAMESPACE ":schema") == 0) {
+				type->encode = get_conversion(XSD_ANYXML);
 			} else {
 				soap_error0(E_ERROR, "Parsing Schema: unresolved element 'ref' attribute");
 			}
@@ -2256,6 +2293,8 @@ void delete_model(void *handle)
 			break;
 		case XSD_CONTENT_GROUP_REF:
 			efree(tmp->u.group_ref);
+			break;
+		default:
 			break;
 	}
 	efree(tmp);
