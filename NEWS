@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added xpath_register_ns() function.
+  It makes possible to issue XPath queries with namespaces
+  like for example: "//namespace:sampletag" (Chris Jarecki)
 - Added multi-byte enabled regex functions. (Rui)
 - Added second parameter to count() that can be used to specify either normal
   or recursive counting. (patch by Vlad Bosinceanu <glipy@fx.ro>)
