@@ -23,6 +23,6 @@
 #define PHP_SIGNAL_H
 
 typedef void Sigfunc(int);
-Sigfunc *php_signal(int signo, Sigfunc *func);
+Sigfunc *php_signal(int signo, Sigfunc *func, int restart);
 
 #endif
