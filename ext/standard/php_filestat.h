@@ -36,7 +36,9 @@ PHP_FUNCTION(filesize);
 PHP_FUNCTION(filetype);
 PHP_FUNCTION(is_writable);
 PHP_FUNCTION(is_readable);
+#ifndef PHP_WIN32
 PHP_FUNCTION(is_executable);
+#endif
 PHP_FUNCTION(is_file);
 PHP_FUNCTION(is_dir);
 PHP_FUNCTION(is_link);

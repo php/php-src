@@ -110,6 +110,12 @@
 #define FS_LSTAT   16
 #define FS_STAT    17
 
+/* From: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vccore98/html/_crt__access.2c_._waccess.asp */
+#ifdef PHP_WIN32
+#define F_OK  0
+#define W_OK  2
+#define R_OK  4
+#endif
 
 PHP_RINIT_FUNCTION(filestat)
 {
@@ -831,6 +837,7 @@ PHP_FUNCTION(is_readable)
 }
 /* }}} */
 
+#ifndef PHP_WIN32
 /* {{{ proto bool is_executable(string filename)
    Returns true if file is executable */
 PHP_FUNCTION(is_executable) 
@@ -845,6 +852,7 @@ PHP_FUNCTION(is_executable)
 	RETURN_BOOL(!access (filename, X_OK));
 }
 /* }}} */
+#endif
 
 /* {{{ proto bool is_file(string filename)
    Returns true if file is a regular file */
