@@ -874,7 +874,7 @@ static void function_add_ref(zend_function *function)
 }
 
 
-ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table)
+ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int allow_failure)
 {
 	switch (opline->extended_value) {
 		case ZEND_DECLARE_FUNCTION: {
@@ -883,7 +883,12 @@ ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_tab
 				zend_hash_index_find(function_table, opline->op1.u.constant.value.lval, (void **) &function);
 				(*function->op_array.refcount)++;
 				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
-					zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
+					if (!allow_failure) {
+						zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
+					}
+					return FAILURE;
+				} else {
+					return SUCCESS;
 				}
 			}
 			break;
@@ -893,7 +898,12 @@ ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_tab
 				zend_hash_index_find(class_table, opline->op1.u.constant.value.lval, (void **) &ce);
 				(*ce->refcount)++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
-					zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+					if (!allow_failure) {
+						zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+					}
+					return FAILURE;
+				} else {
+					return SUCCESS;
 				}
 			}
 			break;
@@ -916,7 +926,12 @@ ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_tab
 
 				/* Obtain parent class */
 				if (zend_hash_find(class_table, parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
-					zend_error(E_COMPILE_ERROR, "Class %s:  Cannot inherit from undefined class %s", class_name, parent_name);
+					if (!allow_failure) {
+						zend_error(E_COMPILE_ERROR, "Class %s:  Cannot inherit from undefined class %s", class_name, parent_name);
+					}
+					(*ce->refcount)--;
+					*(class_name-1) = ':';
+					return FAILURE;
 				}
 
 				/* Perform inheritence */
@@ -925,8 +940,15 @@ ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_tab
 
 				/* Register the derived class */
 				if (zend_hash_add(class_table, class_name, strlen(class_name)+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
-					zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+					if (allow_failure) {
+						zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+					}
+					(*ce->refcount)--;
+					zend_hash_destroy(&ce->function_table);
+					zend_hash_destroy(&ce->default_properties);
+					return FAILURE;
 				}
+				return SUCCESS;
 			}
 			break;
 	}
@@ -937,7 +959,9 @@ void do_early_binding(CLS_D)
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
-	do_bind_function_or_class(opline, CG(function_table), CG(class_table));
+	if (do_bind_function_or_class(opline, CG(function_table), CG(class_table), 1)==FAILURE) {
+		return;
+	}
 	switch (opline->extended_value) {
 		case ZEND_DECLARE_FUNCTION:
 			zend_hash_index_del(CG(function_table), opline->op1.u.constant.value.lval);

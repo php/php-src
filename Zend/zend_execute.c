@@ -2026,7 +2026,7 @@ send_by_ref:
 				}
 				break;
 			case ZEND_DECLARE_FUNCTION_OR_CLASS:
-				do_bind_function_or_class(opline, EG(function_table), EG(class_table));
+				do_bind_function_or_class(opline, EG(function_table), EG(class_table), 0);
 				break;
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
