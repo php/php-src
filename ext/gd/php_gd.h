@@ -139,6 +139,11 @@ static int _php_image_type ( char data[8] );
 
 PHPAPI int phpi_get_le_gd(void);
 
+/* This is missing from gd.h */
+#if HAVE_COLORCLOSESTHWB
+int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
+#endif
+
 #ifdef ZTS
 #define GDLS_D php_gd_globals *gd_globals
 #define GDG(v) (gd_globals->v)
