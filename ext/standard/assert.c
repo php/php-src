@@ -24,20 +24,20 @@
 #include "php_assert.h"
 #include "php_ini.h"
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(assert)
 	long active;
 	long bail;
 	long warning;
 	long quiet_eval;
 	zval *callback;
-} php_assert_globals;
+ZEND_END_MODULE_GLOBALS(assert)
+
+ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 #ifdef ZTS
-#define ASSERTG(v) TSRMG(assert_globals_id, php_assert_globals *, v)
-int assert_globals_id;
+#define ASSERTG(v) TSRMG(assert_globals_id, zend_assert_globals *, v)
 #else
 #define ASSERTG(v) (assert_globals.v)
-php_assert_globals assert_globals;
 #endif
 
 #define SAFE_STRING(s) ((s)?(s):"")
@@ -68,25 +68,21 @@ static PHP_INI_MH(OnChangeCallback)
 }
 
 PHP_INI_BEGIN()
-	 STD_PHP_INI_ENTRY("assert.active",	    "1",	PHP_INI_ALL,	OnUpdateLong,		active,	 			php_assert_globals,		assert_globals)
-	 STD_PHP_INI_ENTRY("assert.bail",	    "0",	PHP_INI_ALL,	OnUpdateLong,		bail,	 			php_assert_globals,		assert_globals)
-	 STD_PHP_INI_ENTRY("assert.warning",	"1",	PHP_INI_ALL,	OnUpdateLong,		warning, 			php_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.active",	    "1",	PHP_INI_ALL,	OnUpdateLong,		active,	 			zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.bail",	    "0",	PHP_INI_ALL,	OnUpdateLong,		bail,	 			zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.warning",	"1",	PHP_INI_ALL,	OnUpdateLong,		warning, 			zend_assert_globals,		assert_globals)
 	 PHP_INI_ENTRY    ("assert.callback",   NULL,   PHP_INI_ALL,    OnChangeCallback)
-	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateLong,		quiet_eval,		 	php_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateLong,		quiet_eval,		 	zend_assert_globals,		assert_globals)
 PHP_INI_END()
 
-static void php_assert_init_globals(php_assert_globals *assert_globals_p TSRMLS_DC)
+static void php_assert_init_globals(zend_assert_globals *assert_globals_p TSRMLS_DC)
 {
 	ASSERTG(callback) = NULL;
 }
 
 PHP_MINIT_FUNCTION(assert)
 {
-#ifdef ZTS
-	ts_allocate_id(&assert_globals_id, sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
-#else
-	php_assert_init_globals(&assert_globals TSRMLS_CC);
-#endif
+	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
 
@@ -103,6 +99,7 @@ PHP_MSHUTDOWN_FUNCTION(assert)
 {
 	if (ASSERTG(callback)) {
 		zval_ptr_dtor(&ASSERTG(callback));
+		ASSERTG(callback) = NULL;
 	}
 	return SUCCESS;
 }
