@@ -521,6 +521,10 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 
 				zval_dtor(fname);
 				FREE_ZVAL(fname);
+				if (retval_ptr) {
+					zval_dtor(retval_ptr);
+					FREE_ZVAL(retval_ptr);
+				}
 			}
 
 			return *((*p)++) == '}';
