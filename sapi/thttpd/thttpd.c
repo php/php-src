@@ -1,3 +1,4 @@
+#define bytes_sent bytes
 /*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
@@ -34,14 +35,24 @@ typedef struct {
 	void (*on_close)(int);
 } php_thttpd_globals;
 
-static php_thttpd_globals thttpd_globals;
 
+#ifdef ZTS
+static int thttpd_globals_id;
+#define TLS_D php_thttpd_globals *thttpd_context
+#define TLS_DC , TLS_D
+#define TLS_C thttpd_context
+#define TLS_CC , thttpd_context
+#define TG(v) (thttpd_context->v)
+#define TLS_FETCH() TLS_D = ts_resource(thttpd_globals_id)
+#else
+static php_thttpd_globals thttpd_globals;
 #define TLS_D
 #define TLS_DC
 #define TLS_C
 #define TLS_CC
 #define TG(v) (thttpd_globals.v)
 #define TLS_FETCH()
+#endif
 
 static int sapi_thttpd_ub_write(const char *str, uint str_length)
 {
@@ -78,6 +89,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	zend_llist_position pos;
 	sapi_header_struct *h;
 	size_t len;
+	TLS_FETCH();
 	
 	if (!SG(sapi_headers).http_status_line) {
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
@@ -194,7 +206,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 
 #define CONDADD(name, field) 							\
 	if (TG(hc)->field[0]) {								\
-		php_register_variable(#name, TG(hc)->field, track_vars_array ELS_CC PLS_C); \
+		php_register_variable(#name, TG(hc)->field, track_vars_array ELS_CC PLS_CC); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -212,7 +224,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	}
 
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_CC PLS_C);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_CC PLS_CC);
 }
 
 static sapi_module_struct thttpd_sapi_module = {
@@ -313,11 +325,187 @@ static void thttpd_request_dtor(TLS_D SLS_DC)
 	free(SG(request_info).path_translated);
 }
 
-off_t thttpd_php_request(httpd_conn *hc)
+#ifdef ZTS
+
+#ifdef TSRM_ST
+#define thread_create_simple_detached(n) st_thread_create(n, NULL, 0, 0)
+#define thread_usleep(n) st_usleep(n)
+#define thread_exit() st_thread_exit(NULL)
+/* No preemption, simple operations are safe */
+#define thread_atomic_inc(n) (++n)
+#define thread_atomic_dec(n) (--n)
+#else
+#error No thread primitives available
+#endif
+
+/* We might want to replace this with a STAILQ */
+typedef struct qreq {
+	httpd_conn *hc;
+	struct qreq *next;
+} qreq_t;
+
+static MUTEX_T qr_lock;
+static qreq_t *queued_requests;
+static qreq_t *last_qr;
+static int nr_free_threads;
+static int nr_threads;
+static int max_threads = 50;
+
+#define HANDLE_STRINGS() { \
+	HANDLE_STR(encodedurl); \
+	HANDLE_STR(decodedurl); \
+	HANDLE_STR(origfilename); \
+	HANDLE_STR(expnfilename); \
+	HANDLE_STR(pathinfo); \
+	HANDLE_STR(query); \
+	HANDLE_STR(referer); \
+	HANDLE_STR(useragent); \
+	HANDLE_STR(accept); \
+	HANDLE_STR(accepte); \
+	HANDLE_STR(acceptl); \
+	HANDLE_STR(cookie); \
+	HANDLE_STR(contenttype); \
+	HANDLE_STR(authorization); \
+	HANDLE_STR(remoteuser); \
+	}
+
+static httpd_conn *duplicate_conn(httpd_conn *hc, httpd_conn *nhc)
 {
+	memcpy(nhc, hc, sizeof(*nhc));
+
+#define HANDLE_STR(m) nhc->m = nhc->m ? strdup(nhc->m) : NULL
+	HANDLE_STRINGS();
+#undef HANDLE_STR
+	
+	return nhc;
+}
+
+static void destroy_conn(httpd_conn *hc)
+{
+#define HANDLE_STR(m) if (hc->m) free(hc->m)
+	HANDLE_STRINGS();
+#undef HANDLE_STR
+}
+
+static httpd_conn *dequeue_request(void)
+{
+	httpd_conn *ret = NULL;
+	qreq_t *m;
+	
+	tsrm_mutex_lock(qr_lock);
+	if (queued_requests) {
+		m = queued_requests;
+		ret = m->hc;
+		if (!(queued_requests = m->next))
+			last_qr = NULL;
+		free(m);
+	}
+	tsrm_mutex_unlock(qr_lock);
+	
+	return ret;
+}
+
+static void *worker_thread(void *);
+
+static void queue_request(httpd_conn *hc)
+{
+	qreq_t *m;
+	httpd_conn *nhc;
+	
+	/* Mark as long-running request */
+	hc->file_address = (char *) 1;
+
+	/*
+     * We cannot synchronously revoke accesses to hc in the worker
+	 * thread, so we need to pass a copy of hc to the worker thread.
+	 */
+	nhc = malloc(sizeof *nhc);
+	duplicate_conn(hc, nhc);
+	
+	/* Allocate request queue container */
+	m = malloc(sizeof *m);
+	m->hc = nhc;
+	m->next = NULL;
+	
+	tsrm_mutex_lock(qr_lock);
+	/* Create new threads when reaching a certain threshhold */
+	if (nr_threads < max_threads && nr_free_threads < 2) {
+		nr_threads++; /* protected by qr_lock */
+		
+		thread_atomic_inc(nr_free_threads);
+		thread_create_simple_detached(worker_thread);
+	}
+	/* Insert container into request queue */
+	if (queued_requests)
+		last_qr->next = m;
+	else
+		queued_requests = m;
+	last_qr = m;
+	tsrm_mutex_unlock(qr_lock);
+}
+
+static off_t thttpd_real_php_request(httpd_conn *hc TLS_DC SLS_DC);
+
+static void *worker_thread(void *dummy)
+{
+	int do_work = 50;
+	httpd_conn *hc;
 	SLS_FETCH();
 	TLS_FETCH();
 
+	while (do_work) {
+		hc = dequeue_request();
+
+		if (!hc) {
+/*			do_work--; */
+			thread_usleep(500000);
+			continue;
+		}
+/*		do_work = 50; */
+
+		thread_atomic_dec(nr_free_threads);
+
+		thttpd_real_php_request(hc TLS_CC SLS_CC);
+		shutdown(hc->conn_fd, 0);
+		destroy_conn(hc);
+		free(hc);
+
+		thread_atomic_inc(nr_free_threads);
+	}
+	thread_atomic_dec(nr_free_threads);
+	thread_atomic_dec(nr_threads);
+	thread_exit();
+}
+
+static void remove_dead_conn(int fd)
+{
+	qreq_t *m, *prev = NULL;
+
+	tsrm_mutex_lock(qr_lock);
+	m = queued_requests;
+	while (m) {
+		if (m->hc->conn_fd == fd) {
+			if (prev)
+				if (!(prev->next = m->next))
+					last_qr = prev;
+			else
+				if (!(queued_requests = m->next))
+					last_qr = NULL;
+			destroy_conn(m->hc);
+			free(m->hc);
+			free(m);
+			break;
+		}
+		prev = m;
+		m = m->next;
+	}
+	tsrm_mutex_unlock(qr_lock);
+}
+
+#endif
+
+static off_t thttpd_real_php_request(httpd_conn *hc TLS_DC SLS_DC)
+{
 	TG(hc) = hc;
 	hc->bytes_sent = 0;
 	
@@ -330,37 +518,67 @@ off_t thttpd_php_request(httpd_conn *hc)
 	return 0;
 }
 
+off_t thttpd_php_request(httpd_conn *hc)
+{
+#ifdef ZTS
+	queue_request(hc);
+#else
+	SLS_FETCH();
+	TLS_FETCH();
+	return thttpd_real_php_request(hc TLS_CC SLS_CC);
+#endif
+}
+
 void thttpd_register_on_close(void (*arg)(int)) 
 {
+	TLS_FETCH();
 	TG(on_close) = arg;
 }
 
 void thttpd_closed_conn(int fd)
 {
+	TLS_FETCH();
 	if (TG(on_close)) TG(on_close)(fd);
 }
 
 int thttpd_get_fd(void)
 {
+	TLS_FETCH();
 	return TG(hc)->conn_fd;
 }
 
 void thttpd_set_dont_close(void)
 {
+	TLS_FETCH();
 	TG(hc)->file_address = (char *) 1;
 }
 
+
 void thttpd_php_init(void)
 {
+#ifdef ZTS
+	tsrm_startup(1, 1, 0, NULL);
+	thttpd_globals_id = ts_allocate_id(sizeof(php_thttpd_globals), NULL, NULL);
+	qr_lock = tsrm_mutex_alloc();
+	thttpd_register_on_close(remove_dead_conn);
+#endif
 	sapi_startup(&thttpd_sapi_module);
 	thttpd_sapi_module.startup(&thttpd_sapi_module);
-	SG(server_context) = (void *) 1;
+	{
+		SLS_FETCH();
+		SG(server_context) = (void *) 1;
+	}
 }
 
 void thttpd_php_shutdown(void)
 {
+	SLS_FETCH();
+
 	if (SG(server_context) != NULL) {
 		thttpd_sapi_module.shutdown(&thttpd_sapi_module);
 		sapi_shutdown();
+#ifdef ZTS
+		tsrm_shutdown();
+#endif
 	}
 }
