@@ -43,7 +43,7 @@
 
 /* {{{ php_statpage
  */
-static void php_statpage(TSRMLS_D)
+PHPAPI void php_statpage(TSRMLS_D)
 {
 	struct stat *pstat;
 
@@ -137,15 +137,21 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
+PHPAPI long php_getlastmod(TSRMLS_D)
+{
+	php_statpage(TSRMLS_C);
+	return BG(page_mtime);
+}
+
 /* {{{ proto int getlastmod(void)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
-	php_statpage(TSRMLS_C);
-	if (BG(page_mtime) < 0) {
+	long lm = php_getlastmod(TSRMLS_C);
+	if (lm < 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(BG(page_mtime));
+		RETURN_LONG(lm);
 	}
 }
 /* }}} */
