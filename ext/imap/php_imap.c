@@ -286,15 +286,21 @@ FOBJECTLIST *mail_newfolderobjectlist(void)
  * Accepts: pointer to FOBJECTLIST pointer
  * Author: CJH
  */
-void mail_free_foblist(FOBJECTLIST **foblist)
+void mail_free_foblist(FOBJECTLIST **foblist, FOBJECTLIST **tail)
 {
-	if (*foblist) {		/* only free if exists */
-		if ((*foblist)->text.data) {
-			fs_give ((void **) &(*foblist)->text.data);
-		}
-		mail_free_foblist (&(*foblist)->next);
-		fs_give ((void **) foblist);	/* return string to free storage */
-	}
+    FOBJECTLIST *cur, *next;
+    
+    for(cur=*foblist, next=cur->next; cur; cur=next) {
+	next = cur->next;
+
+	if(cur->text.data)
+	    fs_give((void **)&(cur->text.data));
+
+	fs_give((void **)&cur);
+    }
+
+    *tail = NIL;
+    *foblist = NIL;
 }
 /* }}} */
 
@@ -387,14 +393,21 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 {
 	imap_globals->imap_user = NIL;
 	imap_globals->imap_password = NIL;
-	imap_globals->imap_folders = NIL;
-	imap_globals->imap_sfolders = NIL;
+
 	imap_globals->imap_alertstack = NIL;
 	imap_globals->imap_errorstack = NIL;
+
+	imap_globals->imap_folders = NIL;
+	imap_globals->imap_folders_tail = NIL;
+	imap_globals->imap_sfolders = NIL;
+	imap_globals->imap_sfolders_tail = NIL;
 	imap_globals->imap_messages = NIL;
 	imap_globals->imap_messages_tail = NIL;
 	imap_globals->imap_folder_objects = NIL;
+	imap_globals->imap_folder_objects_tail = NIL;
 	imap_globals->imap_sfolder_objects = NIL;
+	imap_globals->imap_sfolder_objects_tail = NIL;
+
 	imap_globals->folderlist_style = FLIST_ARRAY;
 }
 /* }}} */
@@ -636,6 +649,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 			acur = acur->next;
 		}
 		mail_free_stringlist(&IMAPG(imap_alertstack));
+		IMAPG(imap_alertstack) = NIL;
 	}
 	return SUCCESS;
 }
@@ -1377,7 +1391,7 @@ PHP_FUNCTION(imap_list)
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
 	
-	IMAPG(imap_folders) = NIL;
+	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 	mail_list(imap_le_struct->imap_stream, Z_STRVAL_PP(ref), Z_STRVAL_PP(pat));
 	if (IMAPG(imap_folders) == NIL) {
 		RETURN_FALSE;
@@ -1390,6 +1404,7 @@ PHP_FUNCTION(imap_list)
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_folders));
+	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 }
 
 /* }}} */
@@ -1416,7 +1431,7 @@ PHP_FUNCTION(imap_list_full)
 	/* set flag for new, improved array of objects mailbox list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
-	IMAPG(imap_folder_objects) = NIL;
+	IMAPG(imap_folder_objects) = IMAPG(imap_folder_objects_tail) = NIL;
 	mail_list(imap_le_struct->imap_stream, Z_STRVAL_PP(ref), Z_STRVAL_PP(pat));
 	if (IMAPG(imap_folder_objects) == NIL) {
 		RETURN_FALSE;
@@ -1440,7 +1455,7 @@ PHP_FUNCTION(imap_list_full)
 		add_next_index_object(return_value, mboxob);
 		cur=cur->next;
 	}
-	mail_free_foblist(&IMAPG(imap_folder_objects));
+	mail_free_foblist(&IMAPG(imap_folder_objects), &IMAPG(imap_folder_objects_tail));
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY;		/* reset to default */
 }
@@ -1477,6 +1492,7 @@ PHP_FUNCTION(imap_listscan)
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_folders));
+	IMAPG(imap_folders) = IMAPG(imap_folders_tail) = NIL;
 }
 
 /* }}} */
@@ -1715,6 +1731,7 @@ PHP_FUNCTION(imap_lsub)
 		cur=cur->next;
 	}
 	mail_free_stringlist (&IMAPG(imap_sfolders));
+	IMAPG(imap_sfolders) = IMAPG(imap_sfolders_tail) = NIL;
 }
 /* }}} */
 
@@ -1742,7 +1759,7 @@ PHP_FUNCTION(imap_lsub_full)
 	/* set flag for new, improved array of objects list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
-	IMAPG(imap_sfolder_objects) = NIL;
+	IMAPG(imap_sfolder_objects) = IMAPG(imap_sfolder_objects_tail) = NIL;
 	mail_lsub(imap_le_struct->imap_stream, Z_STRVAL_PP(ref), Z_STRVAL_PP(pat));
 	if (IMAPG(imap_sfolder_objects) == NIL) {
 		RETURN_FALSE;
@@ -1765,7 +1782,7 @@ PHP_FUNCTION(imap_lsub_full)
 		add_next_index_object(return_value, mboxob);
 		cur=cur->next;
 	}
-	mail_free_foblist (&IMAPG(imap_sfolder_objects));
+	mail_free_foblist (&IMAPG(imap_sfolder_objects), &IMAPG(imap_sfolder_objects_tail));
 	efree(delim);
 	IMAPG(folderlist_style) = FLIST_ARRAY; /* reset to default */
 }
@@ -3972,17 +3989,16 @@ void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 			IMAPG(imap_folder_objects)->delimiter = delimiter;
 			IMAPG(imap_folder_objects)->attributes = attributes;
 			IMAPG(imap_folder_objects)->next = NIL;
+			IMAPG(imap_folder_objects_tail) = IMAPG(imap_folder_objects);
 		} else {
-			ocur=IMAPG(imap_folder_objects);
-			while (ocur->next != NIL) {
-				ocur=ocur->next;
-			}
+			ocur=IMAPG(imap_folder_objects_tail);
 			ocur->next=mail_newfolderobjectlist();
 			ocur=ocur->next;
 			ocur->LSIZE = strlen(ocur->LTEXT = cpystr(mailbox));
 			ocur->delimiter = delimiter;
 			ocur->attributes = attributes;
 			ocur->next = NIL;
+			IMAPG(imap_folder_objects_tail) = ocur;
 		}
 		
 	} else {
@@ -3992,15 +4008,14 @@ void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 				IMAPG(imap_folders)=mail_newstringlist();
 				IMAPG(imap_folders)->LSIZE=strlen(IMAPG(imap_folders)->LTEXT=cpystr(mailbox));
 				IMAPG(imap_folders)->next=NIL; 
+				IMAPG(imap_folders_tail) = IMAPG(imap_folders);
 			} else {
-				cur=IMAPG(imap_folders);
-				while (cur->next != NIL) {
-					cur=cur->next;
-				}
+				cur=IMAPG(imap_folders_tail);
 				cur->next=mail_newstringlist ();
 				cur=cur->next;
 				cur->LSIZE = strlen (cur->LTEXT = cpystr (mailbox));
 				cur->next = NIL;
+				IMAPG(imap_folders_tail) = cur;
 			}
 		}
 	}
@@ -4021,17 +4036,16 @@ void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 			IMAPG(imap_sfolder_objects)->delimiter = delimiter;
 			IMAPG(imap_sfolder_objects)->attributes = attributes;
 			IMAPG(imap_sfolder_objects)->next = NIL;
+			IMAPG(imap_sfolder_objects_tail) = IMAPG(imap_sfolder_objects);
 		} else {
-			ocur=IMAPG(imap_sfolder_objects);
-			while (ocur->next != NIL) {
-				ocur=ocur->next;
-			}
+			ocur=IMAPG(imap_sfolder_objects_tail);
 			ocur->next=mail_newfolderobjectlist();
 			ocur=ocur->next;
 			ocur->LSIZE=strlen(ocur->LTEXT = cpystr(mailbox));
 			ocur->delimiter = delimiter;
 			ocur->attributes = attributes;
 			ocur->next = NIL;
+			IMAPG(imap_sfolder_objects_tail) = ocur;
 		}
 	} else {
 		/* build the old simple array for imap_listsubscribed() */
@@ -4039,15 +4053,14 @@ void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox, long attributes
 			IMAPG(imap_sfolders)=mail_newstringlist();
 			IMAPG(imap_sfolders)->LSIZE=strlen(IMAPG(imap_sfolders)->LTEXT=cpystr(mailbox));
 			IMAPG(imap_sfolders)->next=NIL; 
+			IMAPG(imap_sfolders_tail) = IMAPG(imap_sfolders);
 		} else {
-			cur=IMAPG(imap_sfolders);
-			while (cur->next != NIL) {
-				cur=cur->next;
-			}
+			cur=IMAPG(imap_sfolders_tail);
 			cur->next=mail_newstringlist ();
 			cur=cur->next;
 			cur->LSIZE = strlen (cur->LTEXT = cpystr (mailbox));
 			cur->next = NIL;
+			IMAPG(imap_sfolders_tail) = cur;
 		}
 	}
 }
