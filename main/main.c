@@ -63,6 +63,7 @@
 #endif
 #include "zend.h"
 #include "php_ini.h"
+#include "php_globals.h"
 #include "main.h"
 #include "control_structures.h"
 #include "fopen-wrappers.h"
@@ -104,6 +105,10 @@ int compiler_globals_id;
 int executor_globals_id;
 #endif
 
+#ifndef ZTS
+php_core_globals core_globals;
+#endif
+
 void *gLock;					/*mutex variable */
 
 
@@ -114,6 +119,34 @@ void *gLock;					/*mutex variable */
 /* True globals (no need for thread safety) */
 HashTable configuration_hash;
 char *php3_ini_path = NULL;
+
+PHP_INI_MH(OnSetPrecision)
+{
+	ELS_FETCH();
+
+	EG(precision) = atoi(new_value);
+	return SUCCESS;
+}
+
+
+PHP_INI_BEGIN()
+	PHP_INI_ENTRY("short_open_tag",		"1",		PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("asp_tags",			"0",		PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("precision",			"14",		PHP_INI_ALL,		OnSetPrecision,	NULL)
+
+	PHP_INI_ENTRY("highlight.comment",	HL_COMMENT_COLOR,	PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("highlight.default",	HL_DEFAULT_COLOR,	PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("highlight.html",		HL_HTML_COLOR,		PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("highlight.string",	HL_STRING_COLOR,	PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("highlight.bg",		HL_BG_COLOR,		PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("highlight.keyword",	HL_KEYWORD_COLOR,	PHP_INI_ALL,		NULL,			NULL)
+
+	PHP_INI_ENTRY("magic_quotes_gpc",		"1",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_gpc))
+	PHP_INI_ENTRY("magic_quotes_runtime",	"0",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_runtime))
+	PHP_INI_ENTRY("magic_quotes_sybase",	"0",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_sybase))
+PHP_INI_END()
+
+
 
 #ifndef THREAD_SAFE
 /*
@@ -534,7 +567,6 @@ int php3_request_startup(CLS_D ELS_DC)
 		EG(error_reporting) = php3_ini.errors;
 		GLOBAL(header_is_being_sent) = 0;
 		GLOBAL(php3_track_vars) = php3_ini.track_vars;
-		EG(precision) = php3_ini.precision;
 	}
 
 	if (php3_init_request_info((void *) &php3_ini)) {
@@ -696,9 +728,6 @@ static int php3_config_ini_startup(ELS_D)
 		if (cfg_get_long("memory_limit", &php3_ini.memory_limit) == FAILURE) {
 			php3_ini.memory_limit = 1<<23;  /* 8MB */
 		}
-		if (cfg_get_long("precision", &php3_ini.precision) == FAILURE) {
-			php3_ini.precision = 14;
-		}
 		if (cfg_get_string("SMTP", &php3_ini.smtp) == FAILURE) {
 			php3_ini.smtp = "localhost";
 		}
@@ -732,15 +761,6 @@ static int php3_config_ini_startup(ELS_D)
 		}
 		if (cfg_get_long("warn_plus_overloading", &php3_ini.warn_plus_overloading) == FAILURE) {
 			php3_ini.warn_plus_overloading = 0;
-		}
-		if (cfg_get_long("magic_quotes_gpc", &php3_ini.magic_quotes_gpc) == FAILURE) {
-			php3_ini.magic_quotes_gpc = MAGIC_QUOTES;
-		}
-		if (cfg_get_long("magic_quotes_runtime", &php3_ini.magic_quotes_runtime) == FAILURE) {
-			php3_ini.magic_quotes_runtime = MAGIC_QUOTES;
-		}
-		if (cfg_get_long("magic_quotes_sybase", &php3_ini.magic_quotes_sybase) == FAILURE) {
-			php3_ini.magic_quotes_sybase = 0;
 		}
 		if (cfg_get_long("y2k_compliance", &php3_ini.y2k_compliance) == FAILURE) {
 			php3_ini.y2k_compliance = 0;
@@ -815,25 +835,6 @@ static int php3_config_ini_startup(ELS_D)
 		if (cfg_get_long("sql.safe_mode", &php3_ini.sql_safe_mode) == FAILURE) {
 			php3_ini.sql_safe_mode = 0;
 		}
-		/* Syntax highlighting */
-		if (cfg_get_string("highlight.comment", &php3_ini.highlight_comment) == FAILURE) {
-			php3_ini.highlight_comment = HL_COMMENT_COLOR;
-		}
-		if (cfg_get_string("highlight.default", &php3_ini.highlight_default) == FAILURE) {
-			php3_ini.highlight_default = HL_DEFAULT_COLOR;
-		}
-		if (cfg_get_string("highlight.html", &php3_ini.highlight_html) == FAILURE) {
-			php3_ini.highlight_html = HL_HTML_COLOR;
-		}
-		if (cfg_get_string("highlight.string", &php3_ini.highlight_string) == FAILURE) {
-			php3_ini.highlight_string = HL_STRING_COLOR;
-		}
-		if (cfg_get_string("highlight.bg", &php3_ini.highlight_bg) == FAILURE) {
-			php3_ini.highlight_bg = HL_BG_COLOR;
-		}
-		if (cfg_get_string("highlight.keyword", &php3_ini.highlight_keyword) == FAILURE) {
-			php3_ini.highlight_keyword = HL_KEYWORD_COLOR;
-		}
 		if (cfg_get_long("engine", &php3_ini.engine) == FAILURE) {
 			php3_ini.engine = 1;
 		}
@@ -890,6 +891,7 @@ int php3_module_startup(CLS_D ELS_DC)
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
+	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
 
 #if (WIN32|WINNT) && !(USE_SAPI)
 	WORD wVersionRequested;
@@ -916,8 +918,6 @@ int php3_module_startup(CLS_D ELS_DC)
 	zuv.asp_tags = 0;
 
 	zend_startup(&zuf, &zuv, NULL);
-
-	php_ini_mstartup();
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -948,6 +948,9 @@ int php3_module_startup(CLS_D ELS_DC)
 	}
 #endif	
 
+	php_ini_mstartup();
+	REGISTER_INI_ENTRIES();
+
 	if (module_startup_modules() == FAILURE) {
 		php3_printf("Unable to start modules\n");
 		return FAILURE;
@@ -964,6 +967,7 @@ void php3_module_shutdown_for_exec(void)
 
 void php3_module_shutdown()
 {
+	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
 	CLS_FETCH();
 	ELS_FETCH();
 
@@ -991,6 +995,7 @@ void php3_module_shutdown()
 #endif
 
 	zend_shutdown();
+	UNREGISTER_INI_ENTRIES();
 	php_ini_mshutdown();
 	shutdown_memory_manager(0, 1);
 }

@@ -41,11 +41,7 @@ typedef struct {
     char *smtp; /*win 32 only*/
     char *sendmail_path;
     char *sendmail_from; /*win 32 only*/
-    long precision;
     long errors;
-    long magic_quotes_gpc;
-    long magic_quotes_runtime;
-    long magic_quotes_sybase;
     long track_errors;
     long display_errors;
     long log_errors;
@@ -66,15 +62,7 @@ typedef struct {
     char *extension_dir;
     long  short_open_tag;
     long asp_tags;
-    char *debugger_host;
-    long  debugger_port;
     char *error_log;
-    char *highlight_comment;
-    char *highlight_default;
-    char *highlight_html;
-    char *highlight_string;
-    char *highlight_bg;
-    char *highlight_keyword;
     long sql_safe_mode;
     long xbithack;
     long engine;
