@@ -30,7 +30,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22103 (Added gdImageEllipse and replaced old gdImageFilledEllipse
   with a better implementation). (Pierre)
 - Fixed bug #22088 (array_shift() left next index to be +1 too much). (Jani)
-- Fixed buf #22059 (ftp_chdir() causes segfault). (Sara)
+- Fixed bug #22059 (ftp_chdir() causes segfault). (Sara)
 - Fixed bug #22048 (crash in imap_header() when the e-mail contains an 
   abnormally large number of special characters). (Ilia)
 - Fixed bug #22042 (pg_result_seek() would never seek to the 1st row in the
