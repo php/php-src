@@ -1574,26 +1574,6 @@ void zend_do_try(znode *try_token TSRMLS_DC)
 	try_token->u.opline_num = zend_add_try_element(get_next_op_number(CG(active_op_array)) TSRMLS_CC);
 }
 
-static void throw_list_applier(long *opline_num, long *catch_opline)
-{
-	zend_op *opline;
-	TSRMLS_FETCH(); /* Pass this by argument */
-
-	opline = &CG(active_op_array)->opcodes[*opline_num];
-
-	/* Backpatch the opline of the catch statement */
-	switch (opline->opcode) {
-		case ZEND_DO_FCALL:
-		case ZEND_DO_FCALL_BY_NAME:
-		case ZEND_THROW:
-		case ZEND_CLONE:
-			opline->op2.u.opline_num = *catch_opline;
-			break;
-		default:
-			zend_error(E_COMPILE_ERROR, "Bad opcode in throw list");
-			break;
-	}
-}
 
 void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC)
 {
