@@ -617,7 +617,20 @@ PHP_FUNCTION(dbase_create) {
 	dbh->db_hlen = sizeof(struct dbf_dhead) + 2 + num_fields * sizeof(struct dbf_dfield);
 
 	rlen = 1;
-	
+	/**
+	 * Patch by greg@darkphoton.com
+	 **/
+	/* make sure that the db_format entries for all fields are set to NULL to ensure we
+       don't seg fault if there's an error and we need to call free_dbf_head() before all
+       fields have been defined. */
+	for (i = 0, cur_f = dbf; i < num_fields; i++, cur_f++) {
+		cur_f->db_format = NULL;
+	}
+	/**
+	 * end patch
+	 */
+
+
 	for (i = 0, cur_f = dbf; i < num_fields; i++, cur_f++) {
 		/* look up the first field */
 		if (zend_hash_index_find(fields->value.ht, i, (void **)&value) == FAILURE) {
