@@ -40,6 +40,36 @@
 #define FETCH_ARRAY		2
 
 typedef struct {
+	ISC_ARRAY_DESC ar_desc;
+	ISC_LONG ar_size; /* size of entire array in bytes */
+	unsigned short el_type, el_size;
+} ibase_array;
+
+typedef struct {
+	ibase_db_link *link;
+	ibase_trans *trans;
+	isc_stmt_handle stmt;
+	unsigned short type;
+	unsigned char has_more_rows, statement_type;
+	XSQLDA *out_sqlda;
+	ibase_array out_array[1]; /* last member */
+} ibase_result;
+
+typedef struct {
+	ibase_db_link *link;
+	ibase_trans *trans;
+	int result_res_id;
+	isc_stmt_handle stmt;
+	XSQLDA *in_sqlda, *out_sqlda;
+	ibase_array *in_array, *out_array;
+	unsigned short in_array_cnt, out_array_cnt;
+	unsigned short dialect;
+	char statement_type;
+	char *query;
+	long trans_res_id;
+} ibase_query;
+
+typedef struct {
 	unsigned short vary_length;
 	char vary_string[1];
 } IBVARY;
@@ -53,11 +83,9 @@ typedef struct {
 		float fval;
 		ISC_LONG lval;
 		ISC_QUAD qval;
-#ifdef SQL_TIMESTAMP
 		ISC_TIMESTAMP tsval;
 		ISC_DATE dtval;
 		ISC_TIME tmval;
-#endif
 	} val;
 	short sqlind;
 } BIND_BUF;
@@ -207,18 +235,10 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 					a->el_type = SQL_DOUBLE;
 					a->el_size = sizeof(double);
 					break;
-#ifdef blr_int64
 				case blr_int64:
 					a->el_type = SQL_INT64;
 					a->el_size = sizeof(ISC_INT64);
 					break;
-#endif
-#ifndef blr_timestamp
-				case blr_date:
-					a->el_type = SQL_DATE;
-					a->el_size = sizeof(ISC_QUAD);
-					break;
-#else
 				case blr_timestamp:
 					a->el_type = SQL_TIMESTAMP;
 					a->el_size = sizeof(ISC_TIMESTAMP);
@@ -231,7 +251,6 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 					a->el_type = SQL_TYPE_TIME;
 					a->el_size = sizeof(ISC_TIME);
 					break;
-#endif						
 				case blr_varying:
 				case blr_varying2:
 					/**
@@ -456,7 +475,6 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					}
 					*(ISC_LONG*) buf = (ISC_LONG) l;
 					break;
-#ifdef SQL_INT64
 				case SQL_INT64:
 					{
 						long double l;
@@ -478,13 +496,13 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 						}
 					}
 					break;
-#endif
 			}			
 		} else {
 			struct tm t = { 0, 0, 0, 0, 0, 0 };
 
 			switch (array->el_type) {
 				unsigned short n;
+				ISC_INT64 l;
 
 				case SQL_SHORT:
 					convert_to_long(val);
@@ -504,27 +522,21 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 #endif
 					*(ISC_LONG *) buf = (ISC_LONG) Z_LVAL_P(val);
 					break;
-#ifdef SQL_INT64
 				case SQL_INT64:
 #if (SIZEOF_LONG >= 8)
 					convert_to_long(val);
 					*(long *) buf = Z_LVAL_P(val);
 #else
-					{
-						ISC_INT64 l;
-
-						convert_to_string(val);
-						if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "d", &l)) {
-							_php_ibase_module_error("Cannot convert '%s' to long integer"
-								TSRMLS_CC, Z_STRVAL_P(val));
-							return FAILURE;
-						} else {
-							*(ISC_INT64 *) buf = l;
-						}
+					convert_to_string(val);
+					if (!sscanf(Z_STRVAL_P(val), "%" LL_MASK "d", &l)) {
+						_php_ibase_module_error("Cannot convert '%s' to long integer"
+							TSRMLS_CC, Z_STRVAL_P(val));
+						return FAILURE;
+					} else {
+						*(ISC_INT64 *) buf = l;
 					}
 #endif
 					break;
-#endif
 				case SQL_FLOAT:
 					convert_to_double(val);
 					*(float*) buf = (float) Z_DVAL_P(val);
@@ -533,11 +545,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					convert_to_double(val);
 					*(double*) buf = Z_DVAL_P(val);
 					break;
-#ifndef SQL_TIMESTAMP
-				case SQL_DATE:
-#else
 				case SQL_TIMESTAMP:
-#endif
 					convert_to_string(val);
 #ifdef HAVE_STRPTIME
 					strptime(Z_STRVAL_P(val), IBG(timestampformat), &t);
@@ -553,10 +561,6 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 					t.tm_year -= 1900;
 					t.tm_mon--;
 #endif
-#ifndef SQL_TIMESTAMP
-					isc_encode_date(&t, (ISC_QUAD *) buf);
-					break;
-#else
 					isc_encode_timestamp(&t, (ISC_TIMESTAMP * ) buf);
 					break;
 				case SQL_TYPE_DATE:
@@ -591,7 +595,6 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 #endif
 					isc_encode_sql_time(&t, (ISC_TIME *) buf);
 					break;
-#endif
 				default:
 					convert_to_string(val);
 					strncpy(buf, Z_STRVAL_P(val), array->el_size);
@@ -652,7 +655,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 #endif
 					buf[i].val.lval = (ISC_LONG) Z_LVAL_P(b_var);
 					break;
-#if defined(SQL_INT64) && (SIZEOF_LONG == 8)
+#if (SIZEOF_LONG == 8)
 				case SQL_INT64:
 					convert_to_long(b_var);
 					var->sqldata = (void *) &Z_LVAL_P(b_var);
@@ -667,36 +670,15 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 					var->sqldata = (void *) &Z_DVAL_P(b_var);
 					break;
 
-				case SQL_DATE: /* == SQL_TIMESTAMP: */
-#ifdef SQL_TIMESTAMP
+				case SQL_TIMESTAMP:
 				case SQL_TYPE_DATE:
 				case SQL_TYPE_TIME:
-#endif
 					if (Z_TYPE_P(b_var) == IS_LONG) {
 						/* insert timestamp directly */
 						t = *gmtime(&Z_LVAL_P(b_var));
 					} else {
 #ifndef HAVE_STRPTIME
-#ifndef SQL_TIMESTAMP
-						int n;
-
-						t.tm_year = t.tm_mon = t.tm_mday = t.tm_hour = t.tm_min = t.tm_sec = 0;
-
-						n = sscanf(Z_STRVAL_P(b_var), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
-							&t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec);
-
-						if (n != 3 && n != 6) {
-							_php_ibase_module_error("Parameter %d: invalid date/time format "
-								"(expected 3 or 6 fields, got %d. Use format m/d/Y H:i:s. You gave '%s')"
-								TSRMLS_CC, i+1, n, Z_STRVAL_P(b_var));
-							rv = FAILURE;
-							break;
-						}
-						t.tm_year -= 1900;
-						t.tm_mon--;
-#else
 						goto php_ibase_bind_default; /* let IB string handling take over */
-#endif
 #else
 						convert_to_string(b_var);
 
@@ -714,9 +696,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 #endif
 					}
 
-#ifndef SQL_TIMESTAMP
-					isc_encode_date(&t, &buf[i].val.qval);
-#else
 					switch (var->sqltype & ~1) {
 						default: /* == case SQL_TIMESTAMP */
 							isc_encode_timestamp(&t, &buf[i].val.tsval);
@@ -727,7 +706,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval ***b_vars, BIND_BUF *buf, /* {{{ 
 						case SQL_TYPE_TIME:
 							isc_encode_sql_time(&t, &buf[i].val.tmval);
 							break;
-#endif
 					}
 					break;
 				case SQL_BLOB:
@@ -847,12 +825,9 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda) /* {{{ */
 			case SQL_DOUBLE:
 				var->sqldata = emalloc(sizeof(double));
 				break;
-#ifdef SQL_INT64
 			case SQL_INT64:
 				var->sqldata = emalloc(sizeof(ISC_INT64));
 				break;
-#endif
-#ifdef SQL_TIMESTAMP
 			case SQL_TIMESTAMP:
 				var->sqldata = emalloc(sizeof(ISC_TIMESTAMP));
 				break;
@@ -862,9 +837,6 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda) /* {{{ */
 			case SQL_TYPE_TIME:
 				var->sqldata = emalloc(sizeof(ISC_TIME));
 				break;
-#else
-			case SQL_DATE:
-#endif
 			case SQL_BLOB:
 			case SQL_ARRAY:
 				var->sqldata = emalloc(sizeof(ISC_QUAD));
@@ -1331,14 +1303,9 @@ PHP_FUNCTION(ibase_num_rows)
 static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ */
 	int scale, int flag TSRMLS_DC)
 {
-#ifdef SQL_INT64
 	static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 100000000, 1000000000, 
 		1000000000, LL_LIT(10000000000),LL_LIT(100000000000),LL_LIT(10000000000000),LL_LIT(100000000000000),
 		LL_LIT(1000000000000000),LL_LIT(1000000000000000),LL_LIT(1000000000000000000) };
-#else 
-	static long const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 100000000, 1000000000,
-		1000000000 };
-#endif		
 
 	switch (type & ~1) {
 		unsigned short l;
@@ -1362,7 +1329,6 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 		case SQL_SHORT:
 			n = *(short *) data;
 			goto _sql_long;
-#ifdef SQL_INT64
 		case SQL_INT64:
 #if (SIZEOF_LONG >= 8)
 			n = *(long *) data;
@@ -1384,7 +1350,6 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 				ZVAL_STRINGL(val,string_data,l,1);
 			}
 			break;
-#endif
 #endif
 		case SQL_LONG:
 			n = *(ISC_LONG *) data; 
@@ -1412,9 +1377,6 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			break;
 		case SQL_DATE: /* == case SQL_TIMESTAMP: */
 			format = IBG(timestampformat);
-#ifndef SQL_TIMESTAMP
-			isc_decode_date((ISC_QUAD *) data, &t);
-#else
 			isc_decode_timestamp((ISC_TIMESTAMP *) data, &t);
 			goto format_date_time;
 		case SQL_TYPE_DATE:
@@ -1426,7 +1388,6 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			isc_decode_sql_time((ISC_TIME *) data, &t);
 
 format_date_time:
-#endif
 			/*
 			  XXX - Might have to remove this later - seems that isc_decode_date()
 			   always sets tm_isdst to 0, sometimes incorrectly (InterBase 6 bug?)
@@ -1446,14 +1407,12 @@ format_date_time:
 						l = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, 
 							t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
 						break;
-#ifdef SQL_TIMESTAMP
 					case SQL_TYPE_DATE:
 						l = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year+1900);
 						break;
 					case SQL_TYPE_TIME:
 						l = sprintf(string_data, "%02d:%02d:%02d", t.tm_hour, t.tm_min, t.tm_sec);
 						break;
-#endif
 				}
 #endif
 				ZVAL_STRINGL(val,string_data,l,1);
@@ -1973,11 +1932,9 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 			case SQL_LONG:
 				precision = 9;
 				break;
-#ifdef SQL_INT64
 			case SQL_INT64:
 				precision = 18;
 				break;
-#endif
 		}
 		len = sprintf(buf, "NUMERIC(%d,%d)", precision, -var->sqlscale);
 		add_index_stringl(return_value, 4, s, len, 1);
@@ -2001,12 +1958,9 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 			case SQL_DOUBLE:
 			case SQL_D_FLOAT:
 				s = "DOUBLE PRECISION"; break;
-#ifdef SQL_INT64
 			case SQL_INT64: 
 				s = "BIGINT"; 
 				break;
-#endif
-#ifdef SQL_TIMESTAMP
 			case SQL_TIMESTAMP:	
 				s = "TIMESTAMP"; 
 				break;
@@ -2016,11 +1970,6 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 			case SQL_TYPE_TIME:
 				s = "TIME"; 
 				break;
-#else
-			case SQL_DATE:
-				s = "DATE"; 
-				break;
-#endif
 			case SQL_BLOB:
 				s = "BLOB"; 
 				break;

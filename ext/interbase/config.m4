@@ -38,18 +38,6 @@ if test "$PHP_INTERBASE" != "no"; then
     -L$IBASE_LIBDIR
   ])
   
-  if test " $IBASE_LIBNAME" != " "; then
-    PHP_CHECK_LIBRARY($IBASE_LIBNAME, isc_service_attach,
-    [
-      AC_DEFINE(HAVE_IBASE6_API,1,[ ])
-      AC_MSG_RESULT([Interbase version 6 API has been enabled.])
-    ], [
-      AC_MSG_RESULT([Interbase version 6 API has NOT been enabled.])
-    ], [
-      -L$IBASE_LIBDIR
-    ])
-  fi
-
   PHP_ADD_LIBRARY_WITH_PATH($IBASE_LIBNAME, $IBASE_LIBDIR, INTERBASE_SHARED_LIBADD)
   PHP_ADD_INCLUDE($IBASE_INCDIR)
   AC_DEFINE(HAVE_IBASE,1,[ ])
