@@ -46,9 +46,6 @@ php_curl_globals curl_globals;
 #endif
 
 #ifdef PHP_WIN32
-static void win32_cleanup();
-static void win32_init();
-
 static void win32_cleanup()
 {
 	WSACleanup();
