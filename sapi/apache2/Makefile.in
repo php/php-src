@@ -1,0 +1,7 @@
+
+LTLIBRARY_NAME    = libsapi.la
+LTLIBRARY_SOURCES = sapi_apache.c mod_php4.c php_apache.c
+
+EXTRA_INCLUDES = $(APACHE_INCLUDE)
+
+include $(top_srcdir)/build/ltlib.mk
