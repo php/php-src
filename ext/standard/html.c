@@ -291,10 +291,10 @@ static const struct {
 	{ "BIG5",			cs_big5 },
 	{ "GB2312",			cs_gb2312 },
 	{ "BIG5-HKSCS",		cs_big5hkscs },
- 	{ "Shift_JIS",		cs_sjis },
- 	{ "SJIS",   		cs_sjis },
- 	{ "EUCJP",   		cs_eucjp },
- 	{ "EUC-JP",   		cs_eucjp },
+	{ "Shift_JIS",		cs_sjis },
+	{ "SJIS",   		cs_sjis },
+	{ "EUCJP",   		cs_eucjp },
+	{ "EUC-JP",   		cs_eucjp },
 	{ NULL }
 };
 
