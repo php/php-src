@@ -9,3 +9,11 @@
 - protos
   - object type specification (as in resources)
   - pass by reference
+- more licenses
+  - GPL (with exception to allow linking against PHP)
+  - QPL
+  - MPL?
+  - Artistic
+  - ...
+  - dual/multiple licensing?
+- generate CREDITS and EXPERIMENTAL (for alpha, beta, gamma versions)
