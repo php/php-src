@@ -7,12 +7,13 @@ givup() {
 
 usage() {
 echo "$0 --extname=module [--proto=file] [--stubs=file] [--xml[=file]]"
-echo "           [--full-xml] [--no-help]"
+echo "           [--skel=dir] [--full-xml] [--no-help]"
 echo ""
 echo "  --extname=module   module is the name of your extension"
 echo "  --proto=file       file contains prototypes of functions to create"
 echo "  --stubs=file       generate only function stubs in file"
 echo "  --xml              generate xml documentation to be added to phpdoc-cvs"
+echo "  --skel=dir         path to the skeleton directory"
 echo "  --full-xml         generate xml documentation for a self-contained extension"
 echo "                     (not yet implemented)"
 echo "  --no-help          don't try to be nice and create comments in the code"
@@ -33,7 +34,7 @@ while test $# -gt 0; do
   case $1 in
     --extname=?*)
 	extname=$optarg
-	EXTNAME=`echo $extname | tr [a-z] [A-Z]`
+	EXTNAME=`echo $extname | tr "[:lower:]" "[:upper:]"`
 	;;
     --proto=?*)
 	proto=$optarg
@@ -54,6 +55,9 @@ while test $# -gt 0; do
     --no-help)
 	no_help="yes"
 	;;
+    --skel=?*)
+	skel_dir=$optarg
+	;;
     *)
 	usage
 	;;
@@ -65,8 +69,14 @@ if test -d "$extname" ; then
   givup "Directory $extname already exists."
 fi
 
-test -f ext_skel || givup "ext_skel must be in the current directory"
-test -d skeleton || givup "subdirectory skeleton does not exist or is not directory"
+if test -z "$skel_dir"; then
+  skel_dir="skeleton"
+fi
+
+## convert skel_dir to full path
+skel_dir=`cd $skel_dir && pwd`
+
+test -d $skel_dir || givup "directory $skel_dir does not exist or is not directory"
 
 if echo '\c' | grep -s c >/dev/null 2>&1
 then
@@ -84,7 +94,7 @@ if test -z "$stubs"; then
 fi
 
 if test -n "$proto"; then
-  cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -f ./skeleton/create_stubs
+  cat $proto | awk -v extname=$extname -v stubs=$stubs -v stubfile=$stubfile -v xml=$xml -v full_xml=$full_xml -v i_know_what_to_do_shut_up_i_dont_need_your_help_mode=$no_help -f $skel_dir/create_stubs
 fi
 
 if test -z "$stubs"; then
@@ -187,7 +197,7 @@ if [ ! -z "$no_help" ]; then
     echo '/^[[:space:]]*\/\*/,/^[[:space:]]*\*\//D' >> sedscript
 fi
 
-sed -f sedscript <../skeleton/skeleton.c > $extname.c
+sed -f sedscript < $skel_dir/skeleton.c > $extname.c
 
 
 $ECHO_N " php_$extname.h$ECHO_C"
@@ -205,26 +215,26 @@ if [ ! -z "$no_help" ]; then
     echo 's/^\/\*.*\*\/$//' >> sedscript
     echo '/^[[:space:]]*\/\*/,/^[[:space:]]*\*\//D' >> sedscript
 fi
-sed -f sedscript <../skeleton/php_skeleton.h > php_$extname.h
+sed -f sedscript <$skel_dir/php_skeleton.h > php_$extname.h
 
 $ECHO_N " CREDITS$ECHO_C"
 echo "s/extname/$extname/g" > sedscript
-sed -f sedscript <../skeleton/CREDITS > CREDITS
+sed -f sedscript <$skel_dir/CREDITS > CREDITS
 
 $ECHO_N " EXPERIMENTAL$ECHO_C"
 echo "s/extname/$extname/g" > sedscript
-sed -f sedscript <../skeleton/EXPERIMENTAL > EXPERIMENTAL
+sed -f sedscript <$skel_dir/EXPERIMENTAL > EXPERIMENTAL
 
 $ECHO_N " tests/001.phpt$ECHO_C"
 mkdir tests || givup "Cannot create tests directory"
 chmod 755 tests
-sed -f sedscript <../skeleton/tests/001.phpt > tests/001.phpt
+sed -f sedscript <$skel_dir/tests/001.phpt > tests/001.phpt
 
 if test -z "$stubs" && test -z "$no_help"; then
   $ECHO_N " $extname.php$ECHO_C"
   sed \
     -e "s/extname/$extname/g" \
-    <../skeleton/skeleton.php \
+    <$skel_dir/skeleton.php \
     > $extname.php
 fi
 
