@@ -55,7 +55,7 @@
 #ifdef PHP_WIN32
 
 #define _WIN32_DCOM
-
+#define COBJMACROS
 #include <iostream.h>
 #include <math.h>
 #include <ocidl.h>
@@ -2224,7 +2224,6 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC)
 
 PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 {
-	ITypeComp *TypeComp;
 	int i;
 	int interfaces;
 
@@ -2232,40 +2231,33 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 		return FAILURE;
 	}
 
-	interfaces = TypeLib->lpVtbl->GetTypeInfoCount(TypeLib);
+	interfaces = ITypeLib_GetTypeInfoCount(TypeLib);
 
-	TypeLib->lpVtbl->GetTypeComp(TypeLib, &TypeComp);
 	for (i=0; i<interfaces; i++) {
 		TYPEKIND pTKind;
 
-		TypeLib->lpVtbl->GetTypeInfoType(TypeLib, i, &pTKind);
-		if (pTKind==TKIND_ENUM) {
+		ITypeLib_GetTypeInfoType(TypeLib, i, &pTKind);
+		if (pTKind == TKIND_ENUM) {
 			ITypeInfo *TypeInfo;
 			VARDESC *pVarDesc;
 			UINT NameCount;
 			int j;
-#if 0
-			BSTR bstr_EnumId;
-			char *EnumId;
 
-			TypeLib->lpVtbl->GetDocumentation(TypeLib, i, &bstr_EnumId, NULL, NULL, NULL);
-			EnumId = php_OLECHAR_to_char(bstr_EnumId, NULL, codepage);
-			printf("Enumeration %d - %s:\n", i, EnumId);
-			efree(EnumId);
-#endif
+			ITypeLib_GetTypeInfo(TypeLib, i, &TypeInfo);
 
-			TypeLib->lpVtbl->GetTypeInfo(TypeLib, i, &TypeInfo);
-
-			j=0;
-			while (SUCCEEDED(TypeInfo->lpVtbl->GetVarDesc(TypeInfo, j, &pVarDesc))) {
+			for (j = 0; ; j++) {
 				BSTR bstr_ids;
 				zend_constant c;
 				zval exists, results, value;
 				char *const_name;
 
-				TypeInfo->lpVtbl->GetNames(TypeInfo, pVarDesc->memid, &bstr_ids, 1, &NameCount);
-				if (NameCount!=1) {
-					j++;
+				if (FAILED(ITypeInfo_GetVarDesc(TypeInfo, j, &pVarDesc))) {
+					break;
+				}
+				
+				ITypeInfo_GetNames(TypeInfo, pVarDesc->memid, &bstr_ids, 1, &NameCount);
+				if (NameCount != 1) {
+					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}
 				const_name = php_OLECHAR_to_char(bstr_ids, &c.name_len, codepage TSRMLS_CC);
@@ -2282,7 +2274,7 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 						php_error(E_WARNING, "%s(): Type library value %s is already defined and has a different value", get_active_function_name(TSRMLS_C), c.name);
 					}
 					free(c.name);
-					j++;
+					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}
 
@@ -2296,10 +2288,9 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 
 					zend_register_constant(&c TSRMLS_CC);
 				}
-
-				j++;
+				ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 			}
-			TypeInfo->lpVtbl->Release(TypeInfo);
+			ITypeInfo_Release(TypeInfo);
 		}
 	}
 
