@@ -146,7 +146,11 @@ PHP_FUNCTION(symlink)
 		RETURN_FALSE;
 	}
 
+#ifndef ZTS
 	ret = symlink(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+#else 
+	ret = symlink(dest_p, source_p);
+#endif	
 	if (ret == -1) {
 		php_error(E_WARNING, "Symlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -197,7 +201,11 @@ PHP_FUNCTION(link)
 		RETURN_FALSE;
 	}
 
+#ifndef ZTS
 	ret = link(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+#else 
+	ret = link(dest_p, source_p);	
+#endif	
 	if (ret == -1) {
 		php_error(E_WARNING, "Link failed (%s)", strerror(errno));
 		RETURN_FALSE;
