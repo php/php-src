@@ -100,7 +100,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 		SG(request_info).path_translated &&
 		*SG(request_info).path_translated
 		) {
-		strcpy(local_open_basedir, SG(request_info).path_translated);
+		strlcpy(local_open_basedir, SG(request_info).path_translated, sizeof(local_open_basedir));
 		local_open_basedir_pos = strlen(local_open_basedir) - 1;
 
 		/* Strip filename */
@@ -116,7 +116,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 		}
 	} else {
 		/* Else use the unmodified path */
-		strcpy(local_open_basedir, basedir);
+		strlcpy(local_open_basedir, basedir, sizeof(local_open_basedir));
 	}
 
 	/* Resolve the real path into resolved_name */
@@ -578,7 +578,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 				}
 
 				if (!strncasecmp(tmp_line, "Location: ", 10)) {
-					strcpy(location, tmp_line + 10);
+					strlcpy(location, tmp_line + 10, sizeof(location));
 				}
 
 				if (tmp_line[0] == '\0') {
