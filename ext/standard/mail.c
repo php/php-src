@@ -198,21 +198,25 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	/* make sure that sendmail_path contains a valid executable, failure to do
 	 * would make PHP abruptly exit without a useful error message. */
 	{
-		char *s=NULL, p;
+		char *s=NULL, *p;
 	
 		if ((s = strchr(sendmail_path, ' '))) {
-			p = *s;
-			*s = '\0'; 
+			p = estrndup(sendmail_path, s - sendmail_path);
+		} else {
+			p = sendmail_path;
 		}
-		if (access(sendmail_path, X_OK)) {
+		if (access(p, X_OK)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
+			if (extra_cmd != NULL) {
+				efree(sendmail_cmd);
+			}
 			if (s) {
-				*s = p;
+				efree(p);
 			}
 			return 0;
 		}
 		if (s) {
-			*s = p;
+			efree(p);
 		}
 	}
 
