@@ -30,7 +30,7 @@ static pval *found_browser_entry;
 #endif
 
 function_entry browscap_functions[] = {
-	{"get_browser",		php3_get_browser,		NULL},
+	PHP_FE(get_browser,								NULL)
 	{NULL, NULL, NULL}
 };
 

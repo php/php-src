@@ -45,11 +45,11 @@ static int le_dirp;
 static zend_class_entry *dir_class_entry_ptr;
 
 static zend_function_entry php_dir_functions[] = {
-	PHP_FE(opendir,		NULL)
-	PHP_FE(closedir,	NULL)
-	PHP_FE(chdir,		NULL)
-	PHP_FE(rewinddir,	NULL)
-	PHP_FE(readdir,		NULL)
+	PHP_FE(opendir,				NULL)
+	PHP_FE(closedir,			NULL)
+	PHP_FE(chdir,				NULL)
+	PHP_FE(rewinddir,			NULL)
+	PHP_FE(readdir,				NULL)
 	PHP_FALIAS(dir,		getdir,	NULL)
 	{NULL, NULL, NULL}
 };

@@ -418,8 +418,8 @@ CookieList *php3_PopCookieList(void)
 	return (ret);
 }
 
-/* php3_SetCookie(name,value,expires,path,domain,secure) */
-PHP_FUNCTION(SetCookie)
+/* php3_setcookie(name,value,expires,path,domain,secure) */
+PHP_FUNCTION(setcookie)
 {
 	char *cookie;
 	int len=sizeof("Set-Cookie: ");

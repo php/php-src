@@ -40,7 +40,7 @@
 #endif
 
 function_entry mail_functions[] = {
-	{"mail",		php3_mail,		NULL},
+	PHP_FE(mail,									NULL)
 	{NULL, NULL, NULL}
 };
 

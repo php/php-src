@@ -28,13 +28,13 @@
 unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 function_entry reg_functions[] = {
-	{"ereg",			php3_ereg,			third_argument_force_ref },
-	{"ereg_replace",	php3_eregreplace,	NULL },
-	{"eregi",			php3_eregi,			third_argument_force_ref },
-	{"eregi_replace",	php3_eregireplace,	NULL },
-	{"split",			php3_split,			NULL},
-	{"join",			php3_implode,		NULL},
-	{"sql_regcase",		php3_sql_regcase,	NULL},
+	PHP_FE(ereg,									third_argument_force_ref)
+	PHP_FE(ereg_replace,							NULL)
+	PHP_FE(eregi,									third_argument_force_ref)
+	PHP_FE(eregi_replace,							NULL)
+	PHP_FE(split,									NULL)
+	PHP_FALIAS(join,			implode,			NULL)
+	PHP_FE(sql_regcase,								NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -491,7 +491,7 @@ static void _php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 /* {{{ proto string ereg_replace(string pattern, string string [, array registers])
    Replace regular expression */
-PHP_FUNCTION(eregreplace)
+PHP_FUNCTION(ereg_replace)
 {
 	_php3_eregreplace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -499,7 +499,7 @@ PHP_FUNCTION(eregreplace)
 
 /* {{{ proto string eregi_replace(string pattern, string string [, array registers])
    Case insensitive replace regular expression */
-PHP_FUNCTION(eregireplace)
+PHP_FUNCTION(eregi_replace)
 {
 	_php3_eregreplace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }

@@ -26,7 +26,7 @@
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
 /* {{{ proto string soundex(string str)
    Calculate the soundex key of a string */
-void soundex(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(soundex)
 {
 	char l, u;
 	char *somestring;
