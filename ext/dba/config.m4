@@ -13,8 +13,8 @@ AC_DEFUN(PHP_TEMP_LDFLAGS,[
 dnl Assign INCLUDE/LFLAGS from PREFIX
 AC_DEFUN(PHP_DBA_STD_ASSIGN,[
   if test -n "$THIS_PREFIX" && test "$THIS_PREFIX" != "/usr"; then
-    THIS_INCLUDE="$THIS_PREFIX/include"
-    THIS_LFLAGS="$THIS_PREFIX/lib"
+    THIS_INCLUDE=$THIS_PREFIX/include
+    THIS_LFLAGS=$THIS_PREFIX/lib
   fi
 ])
 
@@ -33,11 +33,7 @@ dnl Attach THIS_x to DBA_x
 AC_DEFUN(PHP_DBA_STD_ATTACH,[
   PHP_ADD_INCLUDE($THIS_INCLUDE)
   PHP_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS, DBA_SHARED_LIBADD)
-
-  THIS_INCLUDE=""
-  THIS_LIBS=""
-  THIS_LFLAGS=""
-  THIS_PREFIX=""
+  unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX
 ])
 
 dnl Print the result message
@@ -48,7 +44,7 @@ AC_DEFUN(AC_DBA_STD_RESULT,[
   else
     AC_MSG_RESULT(no)
   fi
-  THIS_RESULT=""
+  unset THIS_RESULT
 ])
 
 PHP_ARG_ENABLE(dba,whether to enable DBA,
@@ -65,7 +61,7 @@ AC_ARG_WITH(gdbm,
 
     unset ac_cv_lib_gdbm_gdbm_open
     PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-    AC_CHECK_LIB(gdbm, gdbm_open, [AC_DEFINE(DBA_GDBM, 1, [ ]) THIS_LIBS="gdbm"])
+    AC_CHECK_LIB(gdbm, gdbm_open, [AC_DEFINE(DBA_GDBM, 1, [ ]) THIS_LIBS=gdbm])
     ])
     
     PHP_DBA_STD_ASSIGN
@@ -81,11 +77,11 @@ AC_ARG_WITH(ndbm,
   if test "$withval" != "no"; then
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/db1/ndbm.h" ; then
-        THIS_PREFIX="$i"
-        NDBM_EXTRA="db1/ndbm.h"
+        THIS_PREFIX=$i
+        NDBM_EXTRA=db1/ndbm.h
       elif test -f "$i/include/ndbm.h" ; then
-        THIS_PREFIX="$i"
-        NDBM_EXTRA="ndbm.h"
+        THIS_PREFIX=$i
+        NDBM_EXTRA=ndbm.h
       fi
 	done
     
@@ -95,7 +91,7 @@ AC_ARG_WITH(ndbm,
 
     for LIB in db1 ndbm c; do
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, dbm_open, [AC_DEFINE(DBA_NDBM,1, [ ]) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, dbm_open, [AC_DEFINE(DBA_NDBM,1, [ ]) THIS_LIBS=$LIB])
       ])
     done
     
@@ -112,26 +108,26 @@ AC_ARG_WITH(db2,
   if test "$withval" != "no"; then
     for i in /usr/local /usr /usr/BerkeleyDB $withval; do
       if test -f "$i/db2/db.h"; then
-        THIS_PREFIX="$i"
-        DB2_EXTRA="db2"
+        THIS_PREFIX=$i
+        DB2_EXTRA=db2
       elif test -f "$i/include/db2/db.h"; then
-        THIS_PREFIX="$i"
-        DB2_EXTRA="db2/db.h"
+        THIS_PREFIX=$i
+        DB2_EXTRA=db2/db.h
       elif test -f "$i/include/db/db2.h"; then
-        THIS_PREFIX="$i"
-        DB2_EXTRA="db/db2.h"
+        THIS_PREFIX=$i
+        DB2_EXTRA=db/db2.h
       elif test -f "$i/include/db2.h"; then
-        THIS_PREFIX="$i"
-        DB2_EXTRA="db2.h"
+        THIS_PREFIX=$i
+        DB2_EXTRA=db2.h
       elif test -f "$i/include/db.h" ; then
-        THIS_PREFIX="$i"
-        DB2_EXTRA="db.h"
+        THIS_PREFIX=$i
+        DB2_EXTRA=db.h
       fi
 	done
 
     if test "$DB2_EXTRA" = "db2" ; then
       DBA_INCLUDE="$DBA_INCLUDE -I$THIS_PREFIX/db2"
-      DB2_EXTRA="db.h"
+      DB2_EXTRA=db.h
     fi
     
     if test -n "$DB2_EXTRA"; then
@@ -140,7 +136,7 @@ AC_ARG_WITH(db2,
 
     for LIB in db db2 c; do
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, db_appinit, [AC_DEFINE(DBA_DB2,1,[ ]) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, db_appinit, [AC_DEFINE(DBA_DB2,1,[ ]) THIS_LIBS=$LIB])
       ])
     done
     
@@ -157,8 +153,8 @@ AC_ARG_WITH(db3,
   if test "$withval" != "no"; then
     for i in /usr/local /usr /usr/local/BerkeleyDB.3.0 $withval; do
       if test -f "$i/include/db.h" ; then
-        THIS_PREFIX="$i"
-        DB3_EXTRA="db.h"
+        THIS_PREFIX=$i
+        DB3_EXTRA=db.h
       fi
     done
 
@@ -168,7 +164,7 @@ AC_ARG_WITH(db3,
 
     for LIB in db db-3; do
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, db_create, [AC_DEFINE(DBA_DB3,1,[ ]) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, db_create, [AC_DEFINE(DBA_DB3,1,[ ]) THIS_LIBS=$LIB])
       ])
     done
     
@@ -185,13 +181,13 @@ AC_ARG_WITH(dbm,
   if test "$withval" != "no"; then
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/dbm.h" ; then
-        THIS_PREFIX="$i"
+        THIS_PREFIX=$i
       fi
 	done
 
     for LIB in db1 dbm c; do
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, dbminit, [AC_DEFINE(DBA_DBM,1,[ ]) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, dbminit, [AC_DEFINE(DBA_DBM,1,[ ]) THIS_LIBS=$LIB])
       ])
     done
     
@@ -208,13 +204,13 @@ AC_ARG_WITH(cdb,
   if test "$withval" != "no"; then
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/cdb.h" ; then
-        THIS_PREFIX="$i"
+        THIS_PREFIX=$i
       fi
 	done
 
     for LIB in cdb c; do
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, cdb_bread, [AC_DEFINE(DBA_CDB,1,[ ]) THIS_LIBS="$LIB"])
+      AC_CHECK_LIB($LIB, cdb_bread, [AC_DEFINE(DBA_CDB,1,[ ]) THIS_LIBS=$LIB])
       ])
     done
     
