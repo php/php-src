@@ -37,9 +37,10 @@ PHPAPI int php_stream_close(php_stream * stream);
 PHPAPI int php_stream_flush(php_stream * stream);
 PHPAPI int php_stream_seek(php_stream * stream, off_t offset, int whence);
 PHPAPI off_t php_stream_tell(php_stream * stream);
+PHPAPI int php_stream_lock(php_stream * stream, int mode);
 
 These (should) behave in the same way as the ANSI stdio functions with similar
-names: fread, fwrite, fprintf, feof, fgetc, fgets, fclose, fflush, fseek, ftell.
+names: fread, fwrite, fprintf, feof, fgetc, fgets, fclose, fflush, fseek, ftell, flock.
 
 Opening Streams
 ===============
@@ -156,6 +157,11 @@ can lead to a crash when the resource is later used/released.
 
 NOTE: If you are opening a stream and need it to be seekable, use the
 STREAM_MUST_SEEK option to php_stream_open_wrapper();
+
+PHPAPI int php_stream_supports_lock(php_stream * stream);
+
+This function will return either 1 (success) or 0 (failure) indicating whether or
+not a lock can be set on this stream. Typically you can only set locks on stdio streams.
 
 Casting Streams
 ===============
