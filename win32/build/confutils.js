@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.7 2003-12-03 17:04:30 wez Exp $
+// $Id: confutils.js,v 1.8 2003-12-03 18:31:04 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -352,7 +352,7 @@ function CHECK_LIB(libname, target, path_to_check)
 		path_to_check += ";" + php_usual_lib_suspects;
 	}
 	
-	var p = search_paths(libname, path_to_check, "LIBS");
+	var p = search_paths(libname, path_to_check, "LIB");
 	var have = 0;
 
 	if (typeof(p) == "string") {
@@ -605,6 +605,11 @@ function generate_files()
 	dir = get_define("BUILD_DIR");
 	build_dirs.sort();
 	last = null;
+
+	if (!FSO.FolderExists(dir)) {
+		FSO.CreateFolder(dir);
+	}
+	
 	for (i = 0; i < build_dirs.length; i++) {
 		bd = FSO.BuildPath(dir, build_dirs[i]);
 		if (bd == last) {
