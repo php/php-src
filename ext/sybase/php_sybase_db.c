@@ -748,6 +748,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				Z_STRVAL_P(result) = res_buf;
 				Z_TYPE_P(result) = IS_STRING;
 			} else {
+				TSRMLS_FETCH();
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  column %d has unknown data type (%d)", offset, coltype(offset));
 				ZVAL_FALSE(result);
 			}
