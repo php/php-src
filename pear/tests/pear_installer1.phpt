@@ -10,16 +10,6 @@ require_once "PEAR/Installer.php";
 // no UI is needed for these tests
 $ui = false;
 $installer = new PEAR_Installer($ui);
-$temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
-if (!is_dir($temp_path)) {
-    mkdir($temp_path);
-}
-// make the fake configuration
-$config = serialize(array('master_server' => 'pear.php.net', 'php_dir' => $temp_path));
-touch($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
-$fp = fopen($temp_path . DIRECTORY_SEPARATOR . 'user.conf', 'w');
-fwrite($fp, $config);
-fclose($fp);
 echo "test extractDownloadFileName:\n";
 echo 'existing file: ';
 echo $installer->extractDownloadFileName($temp_path . DIRECTORY_SEPARATOR . 'user.conf',
@@ -74,8 +64,7 @@ array(
 echo "\ntest checkDeps 2:\n";
 $res = '';
 var_dump($installer->checkDeps($fakerel, $res));
-var_dump($res);unlink ($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
-rmdir($temp_path);
+var_dump($res);
 ?>
 --GET--
 --POST--
