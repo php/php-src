@@ -51,7 +51,7 @@
         echo $string;
     }
     
-    function dump_tree(tidy_node $node, $indent = 0) {
+    function dump_tree(tidyNode $node, $indent = 0) {
         
         /* Put something there if the node name is empty */
         $nodename = trim(strtoupper($node->name));
@@ -80,7 +80,7 @@
         }
         
         /* Recurse along the children to generate the remaining nodes */
-        if($node->has_children()) {
+        if($node->hasChildren()) {
             foreach($node->child as $child) {
                 dump_tree($child, $indent + 3);
             }
