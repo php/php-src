@@ -58,4 +58,12 @@ echo "           to build PHP from CVS."
 exit 1
 fi
 
+am_prefix=`which automake | sed -e 's#/[^/]*/[^/]*$##'`
+lt_prefix=`which libtool | sed -e 's#/[^/]*/[^/]*$##'`
+if test "$am_prefix" != "$lt_prefix"; then
+    echo "WARNING: automake and libtool are installed in different"
+    echo "         directories.  This may cause aclocal to fail."
+    echo "         continuing anyway"
+fi
+
 exit 0
