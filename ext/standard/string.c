@@ -487,6 +487,7 @@ PHP_FUNCTION(implode)
 	if ((*arg1)->type == IS_ARRAY && (*arg2)->type == IS_STRING) {
 		SEPARATE_ZVAL(arg1);
 		arr = *arg1;
+		convert_to_string_ex(arg2);
 		delim = *arg2;
 	} else if ((*arg2)->type == IS_ARRAY) {
 		SEPARATE_ZVAL(arg2)
