@@ -243,10 +243,7 @@ ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC)
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
-  char *file_path = file_handle->opened_path;
-  if(!file_path) {
-	file_path = file_handle->filename;
-  }
+	char *file_path;
 
 #ifndef ZTS
 	switch (file_handle->type) {
@@ -255,10 +252,12 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 		    file_path = file_handle->opened_path; 
 			break;
 		case ZEND_HANDLE_FD:
+			file_path = file_handle->filename;
 			file_handle->opened_path = NULL;
 			file_handle->handle.fp = fdopen(file_handle->handle.fd, "r");
 			break;
 		case ZEND_HANDLE_FP:
+			file_path = file_handle->filename;
 			file_handle->opened_path = NULL;
 			file_handle->handle.fp = file_handle->handle.fp;
 			break;
@@ -304,6 +303,9 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 			}	
 			break;
 	}
+
+	file_path = file_handle->filename;
+
 	if (file_handle->handle.is->fail()) {
 		delete file_handle->handle.is;
 		return FAILURE;

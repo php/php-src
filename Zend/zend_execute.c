@@ -2039,9 +2039,13 @@ send_by_ref:
 
 								file_handle.handle.fp = zend_fopen(inc_filename->value.str.val, &opened_path);
 								file_handle.type = ZEND_HANDLE_FP;
-								file_handle.filename = inc_filename->value.str.val;
-								file_handle.opened_path = opened_path;
-								file_handle.free_filename = 0;
+								if (opened_path) {
+									file_handle.filename = estrdup(opened_path);
+									file_handle.free_filename = 1;
+								} else {
+									file_handle.filename = inc_filename->value.str.val;
+									file_handle.free_filename = 0;
+								}
 								
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
@@ -2054,11 +2058,11 @@ send_by_ref:
 									} else {
 										fclose(file_handle.handle.fp);
 									}
-									if (opened_path) {
-										free(opened_path);
-									}
 								} else {
 									zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle.filename);
+								}
+								if (opened_path) {
+									free (opened_path);
 								}
 								break;
 							}
