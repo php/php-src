@@ -362,16 +362,19 @@ PHPAPI int php_printf(const char *format, ...)
 {
 	va_list args;
 	int ret;
-	char buffer[PRINTF_BUFFER_SIZE];
+	char *buffer;
 	int size;
 	TSRMLS_FETCH();
 
 	va_start(args, format);
-	size = vsnprintf(buffer, sizeof(buffer), format, args);
-	if(size > sizeof(buffer) - 1) {
-		size = sizeof(buffer) - 1;
+	size = vspprintf(&buffer, 0, format, args);
+	if (buffer) {
+		ret = PHPWRITE(buffer, size);
+		efree(buffer);
+	} else {
+		php_error(E_ERROR, "Out of memory");
+		ret = 0;
 	}
-	ret = PHPWRITE(buffer, size);
 	va_end(args);
 	
 	return ret;
