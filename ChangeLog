@@ -1,3 +1,51 @@
+2000-09-02  Andi Gutmans  <andi@zend.com>
+
+    * main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: - Remove another TSRM->Zend dependency
+
+2000-09-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h
+      main/main.c:
+    - Added support for an optional output handler function for output
+      buffering.  This enables transparent rendering of XML through XSL,
+      transparent compression, etc. 
+
+2000-09-02  Andi Gutmans  <andi@zend.com>
+
+    * sapi/nsapi/php4nsapi.dsp
+      win32/php4dllts.dsp
+      win32/php4ts.dsp
+      sapi/aolserver/php4aolserver.dsp
+      sapi/apache/php4apache.dsp
+      sapi/isapi/php4isapi.dsp:
+    - Defining TSRM_WIN32 in each and every dsp sucked. Revert this change
+
+    * main/php_virtual_cwd.c:
+    - Get rid of unused code and stop including PHP's win95nt.h
+
+    * sapi/aolserver/php4aolserver.dsp
+      sapi/apache/php4apache.dsp
+      sapi/isapi/php4isapi.dsp
+      sapi/nsapi/php4nsapi.dsp
+      win32/php4ts.dsp: - More Windows build fixes
+
+    * win32/php4dllts.dsp: - Fix windows build
+
+2000-09-02  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/basic_functions.c:
+    Unitialized variable causes trap on Windows
+
+2000-09-02  Andi Gutmans  <andi@zend.com>
+
+    * configure.in: - indent before someone shoots me
+
+    * configure.in:
+    - Change TSRM_OTHER macro to TSRM_THREADS as it should be only to check
+      for threads
+
 2000-09-01  David Eriksson  <david@2good.com>
 
     * ext/satellite/Makefile.in
