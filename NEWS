@@ -26,6 +26,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22224 (implode() changes object references in array). (Moriyoshi)
 - Fixed bug #22207 (e notation in *printf would be missing a 0 when there is
   no exponent). (Ilia)
+- Fixed bug #22220 ("php_admin_value open_basedir none" does not work). (Jani)
 - Fixed bug #22191 (frontbase build broken with old version of frontbase). (Ilia)
 - Fixed bug #22187 (spprintf function did not handle floats correctly). (Ilia)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
