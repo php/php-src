@@ -337,7 +337,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mysql.default_port",				NULL,	PHP_INI_ALL,		OnMySQLPort)
 	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY_EX("mysql.connect_timeout",	"0",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals, display_link_numbers)
-	STD_PHP_INI_BOOLEAN("mysql.load_infile",		"0",	PHP_INI_SYSTEM,		OnUpdateInt,		load_infile,		zend_mysql_globals, 	mysql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -353,7 +352,6 @@ static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 	mysql_globals->connect_errno = 0;
 	mysql_globals->connect_error = NULL;
 	mysql_globals->connect_timeout = 0;
-	mysql_globals->load_infile = 0;
 }
 /* }}} */
 
@@ -478,11 +476,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL, **z_client_flags=NULL;
 	zend_bool free_host=0, new_link=0;
 	long connect_timeout;
-	long load_infile;
 
 
 	connect_timeout = MySG(connect_timeout);
-	load_infile = MySG(load_infile);
 
 	socket = MySG(default_socket);
 
@@ -639,7 +635,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			if (connect_timeout != -1)
 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
-			mysql_options(&mysql->conn, MYSQL_OPT_LOCAL_INFILE, (const char *)&load_infile);
 
 			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
