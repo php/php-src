@@ -1642,7 +1642,7 @@ PHP_FUNCTION(ncurses_longname)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_mousemask(int newmask, int oldmask)
+/* {{{ proto int ncurses_mousemask(int newmask, int &oldmask)
    Returns and sets mouse options */
 PHP_FUNCTION(ncurses_mousemask)
 {
@@ -1669,13 +1669,13 @@ PHP_FUNCTION(ncurses_mousemask)
    Reads mouse event from queue */
 PHP_FUNCTION(ncurses_getmouse)
 {
-  zval **arg;
+	zval **arg;
 	MEVENT mevent;
 	ulong retval;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE){
 		WRONG_PARAM_COUNT;
-  }
+	}
 
 	pval_destructor(*arg);
 	array_init(*arg);
@@ -1688,7 +1688,7 @@ PHP_FUNCTION(ncurses_getmouse)
 	add_assoc_long(*arg, "z", mevent.z);
 	add_assoc_long(*arg, "mmask", mevent.bstate);
 
-	RETURN_BOOL(retval);
+	RETURN_BOOL(retval == 0);
 }
 /* }}} */
 
@@ -1775,9 +1775,9 @@ PHP_FUNCTION(ncurses_wmouse_trafo)
 	int nx, ny, retval;
 	WINDOW **win;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &y, &x, &toscreen) == FAILURE){
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &handle, &y, &x, &toscreen) == FAILURE){
 		WRONG_PARAM_COUNT;
-  }
+	}
 
 	FETCH_WINRES(win, handle);
 
@@ -1788,10 +1788,10 @@ PHP_FUNCTION(ncurses_wmouse_trafo)
 	ny = Z_LVAL_PP(y);
 	nx = Z_LVAL_PP(x);
 
- retval = wmouse_trafo (*win, &ny, &nx, Z_LVAL_PP(toscreen));
+	retval = wmouse_trafo (*win, &ny, &nx, Z_LVAL_PP(toscreen));
 
- Z_LVAL_PP(y) = ny;
- Z_LVAL_PP(x) = nx;
+	Z_LVAL_PP(y) = ny;
+	Z_LVAL_PP(x) = nx;
 
 	RETURN_BOOL(retval);
 }
