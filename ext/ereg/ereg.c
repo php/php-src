@@ -510,7 +510,7 @@ PHP_FUNCTION(eregi_replace)
 /* ("root", "passwd", "uid", "gid", "other:stuff:like:/bin/sh")
    = split(":", $passwd_file, 5); */
 /* {{{ proto array split(string pattern, string string [, int limit])
-   split string into array by regular expression */
+   Split string into array by regular expression */
 PHP_FUNCTION(split)
 {
 	pval **spliton, **str, **arg_count = NULL;
