@@ -83,7 +83,7 @@ PHP_FUNCTION(substr_count);
 PHP_FUNCTION(str_pad);
 PHP_FUNCTION(sscanf);
 PHP_FUNCTION(str_shuffle);
-PHP_FUNCTION(word_count);
+PHP_FUNCTION(str_word_count);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
