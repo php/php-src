@@ -68,6 +68,9 @@ AC_SUBST(PHP_VERSION)
 AM_CONFIG_HEADER(php_config.h)
 AM_MAINTAINER_MODE
 
+phplibdir=$libdir/php
+AC_SUBST(phplibdir)
+
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
@@ -965,7 +968,6 @@ AC_SUBST(EXTRA_LIBS)
 
 # reading config stubs
 esyscmd(./scripts/config-stubs)
-
 
 divert(4)
 
