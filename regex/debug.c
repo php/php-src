@@ -124,9 +124,9 @@ FILE *d;
 			break;
 		case OCHAR:
 			if (strchr("\\|()^$.[+*?{}!<> ", (char)opnd) != NULL)
-				fprintf(d, "\\%c", (char)opnd);
+				fprintf(d, "\\%c", (unsigned char)opnd);
 			else
-				fprintf(d, "%s", regchar((char)opnd));
+				fprintf(d, "%s", regchar((unsigned char)opnd));
 			break;
 		case OBOL:
 			fprintf(d, "^");
@@ -228,11 +228,11 @@ FILE *d;
  - regchar - make a character printable
  == static char *regchar(int ch);
  */
-static char *			/* -> representation */
+static unsigned char *			/* -> representation */
 regchar(ch)
 int ch;
 {
-	static char buf[10];
+	static unsigned char buf[10];
 
 	if (isprint(ch) || ch == ' ')
 		sprintf(buf, "%c", ch);

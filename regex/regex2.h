@@ -10,7 +10,7 @@
  = typedef struct {
  = 	int re_magic;
  = 	size_t re_nsub;		// number of parenthesized subexpressions
- = 	const char *re_endp;	// end pointer for REG_PEND
+ = 	const unsigned char *re_endp;	// end pointer for REG_PEND
  = 	struct re_guts *re_g;	// none of your business :-)
  = } regex_t;
  = typedef struct {
@@ -90,7 +90,7 @@ typedef struct {
 	uch mask;		/* bit within array */
 	uch hash;		/* hash code */
 	size_t smultis;
-	char *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
+	unsigned char *multis;		/* -> char[smulti]  ab\0cd\0ef\0\0 */
 } cset;
 /* note that CHadd and CHsub are unsafe, and CHIN doesn't yield 0/1 */
 #define	CHadd(cs, c)	((cs)->ptr[(uch)(c)] |= (cs)->mask, (cs)->hash += (c))
@@ -125,8 +125,8 @@ struct re_guts {
 	int nbol;		/* number of ^ used */
 	int neol;		/* number of $ used */
 	int ncategories;	/* how many character categories */
-	cat_t *categories;	/* ->catspace[-CHAR_MIN] */
-	char *must;		/* match must contain this string */
+	cat_t *categories;	/* ->catspace[-UCHAR_MIN] */
+	unsigned char *must;		/* match must contain this string */
 	int mlen;		/* length of must */
 	size_t nsub;		/* copy of re_nsub */
 	int backrefs;		/* does it use back references? */
@@ -136,5 +136,5 @@ struct re_guts {
 };
 
 /* misc utilities */
-#define	OUT	(CHAR_MAX+1)	/* a non-character value */
+#define	OUT	(UCHAR_MAX+1)	/* a non-character value */
 #define	ISWORD(c)	(isalnum(c) || (c) == '_')
