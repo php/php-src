@@ -458,6 +458,7 @@ allow_url_fopen = On
 ;extension=php_snmp.dll
 ;extension=php_sockets.dll
 ;extension=php_sybase_ct.dll
+;extension=php_w32api.dll
 ;extension=php_xslt.dll
 ;extension=php_yaz.dll
 ;extension=php_zlib.dll
