@@ -135,28 +135,42 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return FAILURE;
 	}
-	if (OG(ob_nesting_level)==0 && PG(double_buffering) && chunk_size) {		
+	if (OG(ob_nesting_level)==0 && PG(double_buffering)) {		
 		initial_chunk_size = php_ob_default_buffer_size(TSRMLS_C);
 		initial_size = 4*initial_chunk_size;
 		block_size = initial_chunk_size;
 		php_ob_init(initial_size, block_size, NULL, initial_chunk_size, erase TSRMLS_CC);
 	}
-	if (chunk_size==0) {
-		initial_size = 40*1024;
-		block_size = 10*1024;
-	} else {
-		if (chunk_size==1) {
-			chunk_size = php_ob_default_buffer_size(TSRMLS_C);
-		}
-		initial_size = chunk_size;
-		block_size = chunk_size;
+	if (chunk_size<2) {
+		chunk_size = php_ob_default_buffer_size(TSRMLS_C);
 	}
-	initial_size = chunk_size;
 	block_size = chunk_size;
+	initial_size = block_size;
 	return php_ob_init(initial_size, block_size, output_handler, chunk_size, erase TSRMLS_CC);
 }
 /* }}} */
 
+/* {{{ php_start_ob_buffer_nc
+ * Start output buffering */
+PHPAPI int php_start_ob_buffer_ibc(zval *output_handler, uint initial_size, uint block_size, uint chunk_size, zend_bool erase TSRMLS_DC)
+{
+	if (OG(ob_lock)) {
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
+		return FAILURE;
+	}
+	if (chunk_size==0) {
+		block_size = 10*1024;
+		initial_size = 4*block_size;
+	} else if (chunk_size==1) {
+		chunk_size = php_ob_default_buffer_size(TSRMLS_C);
+	}
+	if (!block_size)
+		block_size = chunk_size;
+	if (!initial_size)
+		initial_size = block_size;
+	return php_ob_init(initial_size, block_size, output_handler, chunk_size, erase TSRMLS_CC);
+}
+/* }}} */
 
 /* {{{ php_start_ob_buffer_named
  * Start output buffering */
@@ -360,6 +374,7 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
 	OG(active_ob_buffer).internal_output_handler = internal_output_handler;
 	OG(active_ob_buffer).internal_output_handler_buffer = (char *) emalloc(buffer_size);
 	OG(active_ob_buffer).internal_output_handler_buffer_size = buffer_size;
+	OG(active_ob_buffer).chunk_size = buffer_size;
  	if (OG(active_ob_buffer).handler_name)
 		efree(OG(active_ob_buffer).handler_name);
 	OG(active_ob_buffer).handler_name = estrdup(handler_name);
@@ -733,7 +748,7 @@ PHP_FUNCTION(ob_start)
 							  &chunk_size, &erase) == FAILURE)
 		RETURN_FALSE;
 
-	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
+	if (php_start_ob_buffer_ibc(output_handler, 0, 0, chunk_size, erase TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
