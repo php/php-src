@@ -40,12 +40,6 @@
 
 #include "ext/standard/info.h"
 
-#ifdef WIN32
-# include "variables.h"
-#else
-# include "build-defs.h"
-#endif
-
 
 #ifndef min
 #define min(a, b) ((a) > (b) ? (b) : (a))
@@ -280,8 +274,6 @@ static void php_ora_init_globals(ORALS_D)
 
 PHP_MINIT_FUNCTION(oracle)
 {
-
-	ELS_FETCH();
 
 #ifdef ZTS
 	ora_globals_id = ts_allocate_id(sizeof(php_ora_globals), (ts_allocate_ctor) php_ora_init_globals, NULL);
