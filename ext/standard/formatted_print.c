@@ -758,6 +758,7 @@ PHP_FUNCTION(user_printf)
 	}
 	PHPWRITE(result, len);
 	efree(result);
+	RETURN_LONG(len);
 }
 /* }}} */
 
@@ -773,6 +774,7 @@ PHP_FUNCTION(vprintf)
 	}
 	PHPWRITE(result, len);
 	efree(result);
+	RETURN_LONG(len);
 }
 /* }}} */
 
