@@ -1488,7 +1488,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_post_startup(TSRMLS_C);
 #endif
 
-	/* */
 	module_initialized = 1;
 	sapi_deactivate(TSRMLS_C);
 	module_startup = 0;
