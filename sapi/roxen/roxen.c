@@ -43,7 +43,6 @@
  */
 #define NO_PIKE_SHORTHAND
 
-
 #include <fdlib.h>
 #include <program.h>
 #include <pike_types.h>
