@@ -54,6 +54,7 @@ extern zend_module_entry dom_module_entry;
 #endif
 
 #include "xml_common.h"
+#include "ext/libxml/php_libxml.h"
 #include "zend_default_classes.h"
 /* DOM API_VERSION, please bump it up, if you change anything in the API
     therefore it's easier for the script-programmers to check, what's working how
@@ -63,21 +64,16 @@ extern zend_module_entry dom_module_entry;
 
 #include "dom_fe.h"
 
-void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC);
 dom_object *dom_object_get_data(xmlNodePtr obj);
 xmlNodePtr dom_object_get_node(dom_object *obj);
-dom_doc_propsptr dom_get_doc_props(dom_ref_obj *document);
+dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #if defined(LIBXML_XPATH_ENABLED)
 zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #endif
-int dom_get_strict_error(dom_ref_obj *document);
+int dom_get_strict_error(php_libxml_ref_obj *document);
 void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC);
-void node_free_resource(xmlNodePtr node TSRMLS_DC);
 void node_list_unlink(xmlNodePtr node TSRMLS_DC);
-int decrement_node_ptr(dom_object *object TSRMLS_DC);
-int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC);
-int decrement_document_reference(dom_object *object TSRMLS_DC);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
@@ -97,7 +93,7 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \
-	if (__intern->ptr == NULL || !(__ptr = (__prtype)((node_ptr *)__intern->ptr)->node)) { \
+	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
   		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
   	} \

@@ -780,7 +780,7 @@ PHP_FUNCTION(dom_node_insert_before)
 
 	if (child->doc == NULL && parentp->doc != NULL) {
 		childobj->document = intern->document;
-		increment_document_reference(childobj, NULL TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL TSRMLS_CC);
 	}
 
 	if (ref != NULL) {
@@ -802,14 +802,14 @@ PHP_FUNCTION(dom_node_insert_before)
 				tmp = xmlStrcat(tmp, refp->content);
 				xmlNodeSetContent(refp, tmp);
 				xmlFree(tmp);
-				node_free_resource(child TSRMLS_CC);
+				php_libxml_node_free_resource(child TSRMLS_CC);
 				DOM_RET_OBJ(rv, refp, &ret, intern);
 				return;
 			}
 			if ((refp->prev != NULL) && (refp->prev->type == XML_TEXT_NODE)
 				&& (refp->name == refp->prev->name)) {
 				xmlNodeAddContent(refp->prev, child->content);
-				node_free_resource(child TSRMLS_CC);
+				php_libxml_node_free_resource(child TSRMLS_CC);
 				DOM_RET_OBJ(rv, refp->prev, &ret, intern);
 				return;
 			}
@@ -823,9 +823,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			if (lastattr != NULL) {
 				if (lastattr != (xmlAttrPtr) child) {
 					xmlUnlinkNode((xmlNodePtr) lastattr);
-					node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
-					/* Freed above
-					xmlFreeProp(lastattr); */
+					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 				} else {
 					DOM_RET_OBJ(rv, child, &ret, intern);
 					return;
@@ -843,7 +841,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			(parentp->content != NULL) &&
 			(parentp != child)) {
 				xmlNodeAddContent(parentp, child->content);
-				node_free_resource(child TSRMLS_CC);
+				php_libxml_node_free_resource(child TSRMLS_CC);
 				DOM_RET_OBJ(rv, parentp, &ret, intern);
 				return;
 			}
@@ -851,7 +849,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			(parentp->last->name == child->name) &&
 			(parentp->last != child)) {
 				xmlNodeAddContent(parentp->last, child->content);
-				node_free_resource(child TSRMLS_CC);
+				php_libxml_node_free_resource(child TSRMLS_CC);
 				DOM_RET_OBJ(rv, parentp->last, &ret, intern);
 				return;
 			}
@@ -865,9 +863,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			if (lastattr != NULL) {
 				if (lastattr != (xmlAttrPtr) child) {
 					xmlUnlinkNode((xmlNodePtr) lastattr);
-					node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
-					/* Freed above
-					xmlFreeProp(lastattr); */
+					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 				} else {
 					DOM_RET_OBJ(rv, child, &ret, intern);
 					return;
@@ -960,7 +956,7 @@ PHP_FUNCTION(dom_node_replace_child)
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
 				newchildobj->document = intern->document;
-				increment_document_reference(newchildobj, NULL TSRMLS_CC);
+				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL TSRMLS_CC);
 			}
 			node = xmlReplaceNode(oldchild, newchild);
 		}
@@ -1072,7 +1068,7 @@ PHP_FUNCTION(dom_node_append_child)
 
 	if (child->doc == NULL && nodep->doc != NULL) {
 		childobj->document = intern->document;
-		increment_document_reference(childobj, NULL TSRMLS_CC);
+		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL TSRMLS_CC);
 	}
 
 	if (child->parent != NULL){
@@ -1083,14 +1079,14 @@ PHP_FUNCTION(dom_node_append_child)
 		if ((nodep->type == XML_TEXT_NODE) &&
 		(nodep->content != NULL)) {
 			xmlNodeAddContent(nodep, child->content);
-			node_free_resource(child TSRMLS_CC);
+			php_libxml_node_free_resource(child TSRMLS_CC);
 			DOM_RET_OBJ(rv, nodep, &ret, intern);
 			return;
 		}
 		if ((nodep->last != NULL) && (nodep->last->type == XML_TEXT_NODE) &&
 		(nodep->last->name == child->name)) {
 			xmlNodeAddContent(nodep->last, child->content);
-			node_free_resource(child TSRMLS_CC);
+			php_libxml_node_free_resource(child TSRMLS_CC);
 			DOM_RET_OBJ(rv, nodep->last, &ret, intern);
 			return;
 		}
@@ -1104,9 +1100,7 @@ PHP_FUNCTION(dom_node_append_child)
 		if (lastattr != NULL) {
 			if (lastattr != (xmlAttrPtr) child) {
 				xmlUnlinkNode((xmlNodePtr) lastattr);
-				node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
-				/* Freed above
-				xmlFreeProp(lastattr); */
+				php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 			}
 		}
 	} else 	if (child->type == XML_DOCUMENT_FRAG_NODE) {
@@ -1186,6 +1180,35 @@ PHP_FUNCTION(dom_node_clone_node)
 	}
 
 	node = xmlDocCopyNode(n, n->doc, recursive);
+
+	/* When deep is false Element nodes still require the attributes 
+	Following taken from libxml as xmlDocCopyNode doesnt do this */
+	if (node && n->type == XML_ELEMENT_NODE && recursive == 0) {
+		if (n->nsDef != NULL) {
+			node->nsDef = xmlCopyNamespaceList(n->nsDef);
+		}
+		if (n->ns != NULL) {
+			xmlNsPtr ns;
+			ns = xmlSearchNs(n->doc, node, n->ns->prefix);
+			if (ns == NULL) {
+				ns = xmlSearchNs(n->doc, n, n->ns->prefix);
+				if (ns != NULL) {
+					xmlNodePtr root = node;
+
+					while (root->parent != NULL) {
+						root = root->parent;
+					}
+					node->ns = xmlNewNs(root, ns->href, ns->prefix);
+				}
+			} else {
+				node->ns = ns;
+			}
+		}
+		if (n->properties != NULL) {
+			node->properties = xmlCopyPropList(node, n->properties);
+		}
+	}
+
 	if (!node) {
 		RETURN_FALSE;
 	}
