@@ -188,7 +188,7 @@ class DB {
 	 * @return object a newly created DB object, or a DB error code on
 	 * error
 	 */
-	function &connect($dsn, $persistent = false) {
+	function &connect(&$dsn, $persistent = false) {
 		global $USED_PACKAGES;
 
 		$dsninfo = DB::parseDSN($dsn);
@@ -199,7 +199,7 @@ class DB {
 		if (!$obj) {
 			return new DB_Error(DB_ERROR_NOT_FOUND);
 		}
-		$err = $obj->connect(&$dsninfo, $persistent);
+		$err = $obj->connect($dsninfo, $persistent);
 		if (DB::isError($err)) {
 			return $err;
 		}
@@ -349,11 +349,11 @@ class DB {
 			'username' => false,
 			'password' => false
 		);
-		if (preg_match('|^([^:]+)://|', $dsn, &$arr)) {
+		if (preg_match('|^([^:]+)://|', $dsn, $arr)) {
 			$dbtype = $arr[1];
 			$dsn = preg_replace('|^[^:]+://|', '', $dsn);
 			// match "phptype(dbsyntax)"
-			if (preg_match('|^([^\(]+)\((.+)\)$|', $dbtype, &$arr)) {
+			if (preg_match('|^([^\(]+)\((.+)\)$|', $dbtype, $arr)) {
 				$parsed['phptype'] = $arr[1];
 				$parsed['dbsyntax'] = $arr[2];
 			} else {
@@ -361,7 +361,7 @@ class DB {
 			}
 		} else {
 			// match "phptype(dbsyntax)"
-			if (preg_match('|^([^\(]+)\((.+)\)$|', $dsn, &$arr)) {
+			if (preg_match('|^([^\(]+)\((.+)\)$|', $dsn, $arr)) {
 				$parsed['phptype'] = $arr[1];
 				$parsed['dbsyntax'] = $arr[2];
 			} else {
@@ -370,21 +370,21 @@ class DB {
 			return $parsed;
 		}
 
-		if (preg_match('|^(.*)/([^/]+)/?$|', $dsn, &$arr)) {
+		if (preg_match('|^(.*)/([^/]+)/?$|', $dsn, $arr)) {
 			$parsed['database'] = $arr[2];
 			$dsn = $arr[1];
 		}
 
-		if (preg_match('|^([^:]+):([^@]+)@?(.*)$|', $dsn, &$arr)) {
+		if (preg_match('|^([^:]+):([^@]+)@?(.*)$|', $dsn, $arr)) {
 			$parsed['username'] = $arr[1];
 			$parsed['password'] = $arr[2];
 			$dsn = $arr[3];
-		} elseif (preg_match('|^([^:]+)@(.*)$|', $dsn, &$arr)) {
+		} elseif (preg_match('|^([^:]+)@(.*)$|', $dsn, $arr)) {
 			$parsed['username'] = $arr[1];
 			$dsn = $arr[3];
 		}
-
-		if (preg_match('|^([^\+]+)\+(.*)$|', $dsn, &$arr)) {
+		
+		if (preg_match('|^([^\+]+)\+(.*)$|', $dsn, $arr)) {
 			$parsed['protocol'] = $arr[1];
 			$dsn = $arr[2];
 		}
@@ -451,7 +451,7 @@ class DB_result {
 	 * @return  int     error code
 	 */
     function fetchInto(&$arr, $getmode = DB_GETMODE_DEFAULT) {
-		return $this->dbh->fetchInto($this->result, &$arr, $getmode);
+		return $this->dbh->fetchInto($this->result, $arr, $getmode);
     }
 
     // }}}
