@@ -50,26 +50,29 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	apr_bucket_brigade *bb;
 	apr_bucket_alloc_t *ba;
 	php_struct *ctx;
-	uint now;
 
 	ctx = SG(server_context);
 
 	if (str_length == 0) return 0;
 	
-	ba = ctx->f->r->connection->bucket_alloc;
+	ba = ctx->f->c->bucket_alloc;
 	bb = apr_brigade_create(ctx->f->r->pool, ba);
-	while (str_length > 0) {
-		now = MIN(str_length, 4096);
-		b = apr_bucket_transient_create(str, now, ba);
-		APR_BRIGADE_INSERT_TAIL(bb, b);
-		str += now;
-		str_length -= now;
-	}
+
+	b = apr_bucket_transient_create(str, str_length, ba);
+	APR_BRIGADE_INSERT_TAIL(bb, b);
+
+	/* Add a Flush bucket to the end of this brigade, so that
+	 * the transient buckets above are more likely to make it out
+	 * the end of the filter instead of having to be copied into
+	 * someone's setaside. */
+	b = apr_bucket_flush_create(ba);
+	APR_BRIGADE_INSERT_TAIL(bb, b);
+
 	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
 	
-	return str_length;
+	return 0; /* we wrote everything, we promise! */
 }
 
 static int
@@ -234,13 +237,6 @@ static sapi_module_struct apache2_sapi_module = {
 
 AP_MODULE_DECLARE_DATA module php4_module;
 
-#define INIT_CTX \
-	if (ctx == NULL) { \
-		/* Initialize filter context */ \
-		SG(server_context) = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));  \
-		ctx->bb = apr_brigade_create(f->c->pool, f->c->bucket_alloc); \
-	}
-
 static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb, 
 		ap_input_mode_t mode, apr_read_type_e block, apr_off_t readbytes)
 {
@@ -258,7 +254,10 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 
 	ctx = SG(server_context);
 
-	INIT_CTX;
+	if (ctx == NULL) {
+		/* Initialize filter context */
+		SG(server_context) = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
+	}
 
 	if ((rv = ap_get_brigade(f->next, bb, mode, block, readbytes)) != APR_SUCCESS) {
 		return rv;
@@ -331,79 +330,67 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	ap_add_common_vars(f->r);
 	ap_add_cgi_vars(f->r);
 
-	ctx = SG(server_context);
-	INIT_CTX;
-
-	ctx->f = f;
-
-	/* states:
-	 * 0: request startup
-	 * 1: collecting data
-	 * 2: script execution and request shutdown
-	 */
-	if (ctx->state == 0) {
-	
-		apply_config(conf);
-		
-		ctx->state++;
-
-		php_apache_request_ctor(f, ctx TSRMLS_CC);
+	if (f->ctx == NULL) {
+		/* Initialize filter context */
+		f->ctx = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
+		ctx->f = f;
 	}
 
-	/* moves all buckets from bb to ctx->bb */
-	ap_save_brigade(f, &ctx->bb, &bb, f->r->pool);
-
-	/* If we have received all data from the previous filters,
-	 * we "flatten" the buckets by creating a single string buffer.
-	 */
-	if (ctx->state == 1 && APR_BUCKET_IS_EOS(APR_BRIGADE_LAST(ctx->bb))) {
-		zend_file_handle zfd;
-		apr_bucket *eos;
-
-		/* We want to execute only one script per request.
-		 * A bug in Apache or other filters could cause us
-		 * to reenter php_filter during script execution, so
-		 * we protect ourselves here.
-		 */
-		ctx->state = 2;
-
-		/* Handle phpinfo/phpcredits/built-in images */
-		if (!php_handle_special_queries(TSRMLS_C)) {
-
-			b = APR_BRIGADE_FIRST(ctx->bb);
-			
-			if (APR_BUCKET_IS_FILE(b)) {
-				const char *path;
-
-				apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
-				
-				zfd.type = ZEND_HANDLE_FILENAME;
-				zfd.filename = (char *) path;
-				zfd.free_filename = 0;
-				zfd.opened_path = NULL;
-
-				php_execute_script(&zfd TSRMLS_CC);
-			} else {
-				
-#define PHP_NO_DATA "The PHP Filter did not receive suitable input data"
-				
-				eos = apr_bucket_transient_create(PHP_NO_DATA, sizeof(PHP_NO_DATA)-1, f->c->bucket_alloc);
-				APR_BRIGADE_INSERT_HEAD(bb, eos);
-			}
-		}
-		
-		php_apache_request_dtor(f TSRMLS_CC);
-
-		SG(server_context) = 0;
-		/* Pass EOS bucket to next filter to signal end of request */
-		eos = apr_bucket_eos_create(f->c->bucket_alloc);
-		APR_BRIGADE_INSERT_TAIL(bb, eos);
-		
+	if (ctx->request_processed) {
 		return ap_pass_brigade(f->next, bb);
-	} else
-		apr_brigade_destroy(bb);
+	}
 
-	return APR_SUCCESS;
+	APR_BRIGADE_FOREACH(b, bb) {
+		zend_file_handle zfd;
+
+		if (!ctx->request_processed && APR_BUCKET_IS_FILE(b)) {
+			const char *path;
+			apr_bucket_brigade *prebb = bb;
+
+			/* Split the brigade into two brigades before and after
+			 * the file bucket. Leave the "after the FILE" brigade
+			 * in the original bb, so it gets passed outside of this
+			 * loop. */
+			bb = apr_brigade_split(prebb, b);
+
+			/* Pass the "before the FILE" brigade here
+			 * (if it's non-empty). */
+			if (!APR_BRIGADE_EMPTY(prebb)) {
+				apr_status_t rv;
+				rv = ap_pass_brigade(f->next, prebb);
+				/* XXX: destroy the prebb, since we know we're
+				 * done with it? */
+				if (rv != APR_SUCCESS) {
+					php_handle_aborted_connection();
+				}
+			}
+
+			SG(server_context) = ctx;
+			apply_config(conf);
+			php_apache_request_ctor(f, ctx TSRMLS_CC);
+
+			apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
+			zfd.type = ZEND_HANDLE_FILENAME;
+			zfd.filename = (char *) path;
+			zfd.free_filename = 0;
+			zfd.opened_path = NULL;
+
+			php_execute_script(&zfd TSRMLS_CC);
+			php_apache_request_dtor(f TSRMLS_CC);
+			
+			ctx->request_processed = 1;
+
+			/* Delete the FILE bucket from the brigade. */
+			apr_bucket_delete(b);
+
+			/* We won't handle any more buckets in this brigade, so
+			 * it's ok to break out now. */
+			break;
+		}
+	}
+
+	/* Pass whatever is left on the brigade. */
+	return ap_pass_brigade(f->next, bb);
 }
 
 static apr_status_t
@@ -496,3 +483,5 @@ AP_MODULE_DECLARE_DATA module php4_module = {
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+
+
