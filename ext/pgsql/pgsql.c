@@ -3806,13 +3806,13 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 		}
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
-				values_len += Z_STRLEN_PP(val);
+				values_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				values_len += MAX_LENGTH_OF_LONG;
+				values_len += MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				values_len += MAX_LENGTH_OF_DOUBLE;
+				values_len += MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				if (convert) {
@@ -3922,7 +3922,6 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 		*fields_pos = ',';
 		fields_pos++;
 	}
-/* php_log_err(values); */
  	values_pos--; 
 	*values_pos = '\0';
 	fields_pos--;
@@ -3931,11 +3930,9 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 		zval_dtor(converted);			
 		FREE_ZVAL(converted);
 	}
-
 	sprintf(query, query_tpl, table, fields, values);
 	efree(fields);
 	efree(values);
-/* php_log_err(query); */
 	if (async) {
 		if (!PQsendQuery(pg_link, query)) {
 			ret = FAILURE;
@@ -4041,13 +4038,13 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 		}
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
-				values_len += Z_STRLEN_PP(val);
+				values_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				values_len += 30;
+				values_len += MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				values_len += 60;
+				values_len += MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
@@ -4086,13 +4083,13 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 		}
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
-				idsv_len += Z_STRLEN_PP(val);
+				idsv_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				idsv_len += 30;
+				idsv_len += MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				idsv_len += 60;
+				idsv_len += MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
@@ -4357,13 +4354,13 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 		}
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
-				idsv_len += Z_STRLEN_PP(val);
+				idsv_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				idsv_len += 30;
+				idsv_len += MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				idsv_len += 60;
+				idsv_len += MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
@@ -4595,13 +4592,13 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 		}
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
-				idsv_len += Z_STRLEN_PP(val);
+				idsv_len += Z_STRLEN_PP(val)+1;
 				break;
 			case IS_LONG:
-				idsv_len += 30;
+				idsv_len += MAX_LENGTH_OF_LONG+1;
 				break;
 			case IS_DOUBLE:
-				idsv_len += 60;
+				idsv_len += MAX_LENGTH_OF_DOUBLE+1;
 				break;
 			default:
 				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
