@@ -803,8 +803,9 @@ ZEND_FUNCTION(class_exists)
 ZEND_FUNCTION(function_exists)
 {
 	zval **function_name;
+	zend_function *func;
 	char *lcname;
-	int retval;
+	zend_bool retval;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -813,8 +814,17 @@ ZEND_FUNCTION(function_exists)
 	lcname = estrndup((*function_name)->value.str.val, (*function_name)->value.str.len);
 	zend_str_tolower(lcname, (*function_name)->value.str.len);
 
-	retval = zend_hash_exists(EG(function_table), lcname, (*function_name)->value.str.len+1);
+	retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
 	efree(lcname);
+
+	/*
+	 * A bit of a hack, but not a bad one: we see if the handler of the function
+	 * is actually one that displays "function is disabled" message.
+	 */
+	if (retval &&
+		func->internal_function.handler == zif_display_disabled_function) {
+		retval = 0;
+	}
 
 	RETURN_BOOL(retval);
 }
