@@ -1,3 +1,42 @@
+2002-01-08  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/HTML/Form.php
+      pear/HTML/Page.php:
+    fix two warnings, thanks to  Erik Hjortsberg <erik@hysteriskt.nu>
+
+2002-01-08  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: A
+    Changed names of functions:
+    - htmldoc() to html_doc(),
+    - htmldocfile() to html_doc_file(),
+    - domxml_htmldumpmem() to domxml_html_dump_mem(),
+    - htmldumpmem() to html_dump_mem().
+
+2002-01-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ext_skel:
+    Some whitespace fixes (naugthy me :) and make use of PHP_CHECK_LIBRARY
+    macro instead of AC_CHECK_LIB.
+
+
+2002-01-08  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sockets/sockets.c: Changed proto via Georg Richter's request.
+
+2002-01-08  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c
+      ext/domxml/config.m4:
+    - Added functions: htmldoc(), htmldocfile(), domxml_htmldumpmem().
+    - Added error handling for the libxml library.
+    - Added preliminary DOM XSLT support:
+    -- uses the libxslt library,
+    -- operates on DOM objects, not strings,
+    -- functions: domxml_xslt_process(), domxml_xslt_version().
+
 2002-01-07  James Cox  <james@awpimajes.com>
 
     * win32/install.txt:
