@@ -5,14 +5,14 @@ InterBase: misc sql types (may take a while)
 --POST--
 --GET--
 --FILE--
-<?php
+<?php /* $Id$ */
 
     require("interbase.inc");
     ibase_connect($test_base);
     
     ibase_query(
     	"create table test3 (
-            iter		integer,
+            iter		integer not null,
             v_char		char(1000),
             v_date      timestamp,
    	 		v_decimal4_2  		decimal(4,2),
@@ -28,6 +28,9 @@ InterBase: misc sql types (may take a while)
             v_varchar   varchar(10000)
             )");
     ibase_commit();
+
+	/* should fail, but gracefully */
+	@ibase_query("insert into test3 (iter) values (?)", null);
 
     /* if timefmt is not supported, suppress error here */
     @ibase_timefmt("%m/%d/%Y %H:%M:%S");
