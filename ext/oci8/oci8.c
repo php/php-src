@@ -2982,7 +2982,7 @@ break;
 	}
 
 	memset((void*)&bind,0,sizeof(oci_bind));
-	zend_hash_next_index_insert(statement->binds,&bind,sizeof(oci_bind),(void **)&bindp);
+	zend_hash_update(statement->binds, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, &bind, sizeof(oci_bind), (void **)&bindp);
 
 	bindp->descr = mydescr;
 	bindp->pStmt = mystmt;
