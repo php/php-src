@@ -1,7 +1,4 @@
-What is PHP extension YAZ?
-
-This extension implements a Z39.50 client and is build on top of
-the YAZ toolkit.
+This extension implements a Z39.50 client for PHP using the YAZ toolkit.
 
 Find more information at:
   http://www.indexdata.dk/phpyaz/
