@@ -94,8 +94,6 @@ php_sockets_globals sockets_globals;
 
 static int le_iov;
 #define le_iov_name "Socket I/O vector"
-static int le_destroy; 
-#define le_destroy_name "Socket file descriptor set"
 static int le_socket;
 #define le_socket_name "Socket"
 
@@ -111,12 +109,6 @@ static unsigned char third_through_seventh_args_force_ref[] =
 /* {{{ sockets_functions[]
  */
 function_entry sockets_functions[] = {
-	PHP_FE(socket_fd_alloc, 		NULL)
-	PHP_FE(socket_fd_free, 			NULL)
-	PHP_FE(socket_fd_set, 			NULL)
-	PHP_FE(socket_fd_isset, 		NULL)
-	PHP_FE(socket_fd_clear, 		NULL)
-	PHP_FE(socket_fd_zero,	 		NULL)
 	PHP_FE(socket_iovec_alloc,		NULL)
 	PHP_FE(socket_iovec_free,		NULL)
 	PHP_FE(socket_iovec_set,		NULL)
@@ -176,13 +168,6 @@ ZEND_GET_MODULE(sockets)
 
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
-
-static void destroy_fd_sets(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	php_fd_set *php_fd = (php_fd_set*)rsrc->ptr;
-
-	efree(php_fd);
-}
 
 static void destroy_iovec(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -393,7 +378,6 @@ PHP_MINIT_FUNCTION(sockets)
 	struct protoent *pe;
 
 	le_socket	= zend_register_list_destructors_ex(destroy_socket,	NULL, le_socket_name, module_number);
-	le_destroy	= zend_register_list_destructors_ex(destroy_fd_sets, NULL, le_destroy_name, module_number);
 	le_iov		= zend_register_list_destructors_ex(destroy_iovec,	NULL, le_iov_name, module_number);
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
@@ -448,193 +432,96 @@ PHP_MINFO_FUNCTION(sockets)
 }
 /* }}} */
 
-/* {{{ proto resource socket_fd_alloc(void)
-   Allocates a new file descriptor set */
-PHP_FUNCTION(socket_fd_alloc)
-{
-	php_fd_set	*php_fd = (php_fd_set*)emalloc(sizeof(php_fd_set));
-
-	FD_ZERO(&(php_fd->set));
-
-	php_fd->max_fd = 0;
-	
-	ZEND_REGISTER_RESOURCE(return_value, php_fd, le_destroy);
-}
-/* }}} */
-
-/* {{{ proto bool socket_fd_free(resource set)
-   Deallocates a file descriptor set */
-PHP_FUNCTION(socket_fd_free)
-{
-	zval		*arg1;
-	php_fd_set	*php_fd;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
-		return;
-	
-	ZEND_FETCH_RESOURCE(php_fd, php_fd_set*, &arg1, -1, le_destroy_name, le_destroy);
-	
-	zend_list_delete(Z_RESVAL_P(arg1));
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool socket_fd_set(resource set, mixed socket)
-   Adds (a) file descriptor(s) to a set */
-PHP_FUNCTION(socket_fd_set)
-{
-	zval		*arg1, *arg2, **tmp;
-	php_fd_set	*php_fd;
+int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, int *max_fd TSRMLS_DC) {
+	zval		**element;
 	php_socket	*php_sock;
-	SOCKET		max_fd = 0;
+	
+	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
+   
+	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(sock_array));
+	     zend_hash_get_current_data(Z_ARRVAL_P(sock_array), (void **) &element) == SUCCESS;
+	     zend_hash_move_forward(Z_ARRVAL_P(sock_array))) {
+	   
+		php_sock = (php_socket*) zend_fetch_resource(element TSRMLS_CC, -1, le_socket_name, NULL, 1, le_socket);
+ 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &arg1, &arg2) == FAILURE)
-		return;
+		FD_SET(php_sock->bsd_socket, fds);
+  	        if (php_sock->bsd_socket > *max_fd) *max_fd=php_sock->bsd_socket;
+	}
+   
+	return 1;
+}
 
-	ZEND_FETCH_RESOURCE(php_fd, php_fd_set*, &arg1, -1, le_destroy_name, le_destroy);
-
-	if (Z_TYPE_P(arg2) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(arg2));
-		while (zend_hash_get_current_data(Z_ARRVAL_P(arg2), (void**)&tmp) == SUCCESS) {
-			ZEND_FETCH_RESOURCE(php_sock, php_socket*, tmp, -1, le_socket_name, le_socket);
-			FD_SET(php_sock->bsd_socket, &(php_fd->set));
-			max_fd = (php_sock->bsd_socket > max_fd) ? php_sock->bsd_socket : max_fd;
-			zend_hash_move_forward(Z_ARRVAL_P(arg2));
+int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) {
+	zval		**element;
+	zval		**dest_element;
+	php_socket	*php_sock;
+	HashTable	*new_hash;
+	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
+   
+	ALLOC_HASHTABLE(new_hash);
+	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
+	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(sock_array));
+	     zend_hash_get_current_data(Z_ARRVAL_P(sock_array), (void **) &element) == SUCCESS;
+	     zend_hash_move_forward(Z_ARRVAL_P(sock_array))) {
+	   
+		php_sock = (php_socket*) zend_fetch_resource(element TSRMLS_CC, -1, le_socket_name, NULL, 1, le_socket);
+ 		if (!php_sock) continue; /* If element is not a resource, skip it */
+	   
+		if (FD_ISSET(php_sock->bsd_socket, fds)) {
+		       /* Add fd to new array */	
+		       zend_hash_next_index_insert(new_hash, (void *)element, sizeof(zval *), (void **)&dest_element);
+		       if (dest_element) zval_add_ref(dest_element);
 		}
-	} else if (Z_TYPE_P(arg2) == IS_RESOURCE) {
-		ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg2, -1, le_socket_name, le_socket);
-		FD_SET(php_sock->bsd_socket, &(php_fd->set));
-		max_fd = php_sock->bsd_socket;
-	} else {
-		php_error(E_ERROR, "%s() expecting argument 2 of type resource or array of resources", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
 	}
 
-	php_fd->max_fd = max_fd;
-	RETURN_TRUE;
+	/* Destroy old array, add new one */
+	zend_hash_destroy(Z_ARRVAL_P(sock_array));
+   
+	zend_hash_internal_pointer_reset(new_hash);
+	Z_ARRVAL_P(sock_array) = new_hash;
+   
+	return 1;
 }
-/* }}} */
-
-/* {{{ proto bool socket_fd_clear(resource set, mixed socket)
-   Clears (a) file descriptor(s) from a set */
-PHP_FUNCTION(socket_fd_clear)
-{
-	zval		*arg1, *arg2, **tmp;
-	php_fd_set	*php_fd;
-	php_socket	*php_sock;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &arg1, &arg2) == FAILURE)
-		return;
-
-	ZEND_FETCH_RESOURCE(php_fd, php_fd_set*, &arg1, -1, le_destroy_name, le_destroy);
-
-	if (Z_TYPE_P(arg2) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(arg2));
-		while (zend_hash_get_current_data(Z_ARRVAL_P(arg2), (void**)&tmp) == SUCCESS) {
-			ZEND_FETCH_RESOURCE(php_sock, php_socket*, tmp, -1, le_socket_name, le_socket);
-			FD_CLR(php_sock->bsd_socket, &(php_fd->set));
-			zend_hash_move_forward(Z_ARRVAL_P(arg2));
-		}
-	} else if (Z_TYPE_P(arg2) == IS_RESOURCE) {
-		ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg2, -1, le_socket_name, le_socket);
-		FD_CLR(php_sock->bsd_socket, &(php_fd->set));
-	} else {
-		php_error(E_ERROR, "%s() expecting argument 2 of type resource or array of resources", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-	
-	php_fd->max_fd = 0;
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool socket_fd_isset(resource set, resource socket)
-   Checks to see if a file descriptor is set within the file descrirptor set */
-PHP_FUNCTION(socket_fd_isset)
-{
-	zval		*arg1, *arg2;
-	php_fd_set	*php_fd;
-	php_socket	*php_sock;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr", &arg1, &arg2) == FAILURE)
-		return;
-
-	ZEND_FETCH_RESOURCE(php_fd, php_fd_set*, &arg1, -1, le_destroy_name, le_destroy);
-	ZEND_FETCH_RESOURCE(php_sock, php_socket*, &arg2, -1, le_socket_name, le_socket);
-
-	if (FD_ISSET(php_sock->bsd_socket, &(php_fd->set))) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto bool socket_fd_zero(resource set)
-   Clears a file descriptor set */
-PHP_FUNCTION(socket_fd_zero)
-{
-	zval		*arg1;
-	php_fd_set	*php_fd;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE)
-		return;
-
-	ZEND_FETCH_RESOURCE(php_fd, php_fd_set*, &arg1, -1, le_destroy_name, le_destroy);
-
-	FD_ZERO(&(php_fd->set));
-
-	php_fd->max_fd = 0;
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto int socket_select(resource read_fd, resource write_fd, resource except_fd, int tv_sec[, int tv_usec])
+   
+   
+/* {{{ proto int socket_select(array &read_fds, array &write_fds, &array except_fds, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
 {
-	zval			*arg1, *arg2, *arg3, *arg4;
+	zval			*r_array, *w_array, *e_array;
 	struct timeval	tv;
-	php_fd_set		*rfds = NULL, *wfds = NULL, *xfds = NULL;
+	fd_set			rfds, wfds, efds;
 	SOCKET			max_fd = 0;
-	int				sets = 0, usec = 0;
+	int			retval, sets = 0, usec = 0, sec=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r!r!r!z|l", &arg1, &arg2, &arg3, &arg4, &usec) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!l|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
 	
-	if (arg1 != NULL) {
-		ZEND_FETCH_RESOURCE(rfds, php_fd_set*, &arg1, -1, le_destroy_name, le_destroy);
-		max_fd = rfds->max_fd;
-		sets++;
-	}
-
-	if (arg2 != NULL) {
-		ZEND_FETCH_RESOURCE(wfds, php_fd_set*, &arg2, -1, le_destroy_name, le_destroy);
-		max_fd = (max_fd > wfds->max_fd) ? max_fd : wfds->max_fd;
-		sets++;
-	}
-
-	if (arg3 != NULL) {
-		ZEND_FETCH_RESOURCE(xfds, php_fd_set*, &arg3, -1, le_destroy_name, le_destroy);
-		max_fd = (max_fd > xfds->max_fd) ? max_fd : xfds->max_fd;
-		sets++;
-	}
-
+ 	FD_ZERO(&rfds);  
+ 	FD_ZERO(&wfds);  
+   	FD_ZERO(&efds);  
+   
+	if (r_array != NULL) sets += php_sock_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
+	if (w_array != NULL) sets += php_sock_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
+   	if (e_array != NULL) sets += php_sock_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
+   
 	if (!sets) {
-		php_error(E_ERROR, "%s() expecting at least one %s", get_active_function_name(TSRMLS_C), le_destroy_name);
+		php_error(E_WARNING, "%s() no resource arrays were passed to select", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_P(arg4) != IS_NULL) {
-		tv.tv_sec  = Z_LVAL_P(arg4);
-		tv.tv_usec = usec;
-	}
+	tv.tv_sec = sec;
+	tv.tv_usec = usec;
+	
+   	retval = select(max_fd+1, &rfds, &wfds, &efds, &tv);
+	
+	if (r_array != NULL) php_sock_array_from_fd_set(r_array, &rfds TSRMLS_CC);
+	if (w_array != NULL) php_sock_array_from_fd_set(w_array, &wfds TSRMLS_CC);
+	if (e_array != NULL) php_sock_array_from_fd_set(e_array, &efds TSRMLS_CC);   
+   
+	RETURN_LONG(retval); 
 
-	RETURN_LONG(select(max_fd+1, rfds ? &(rfds->set) : NULL,
-				wfds ? &(wfds->set) : NULL,
-				xfds ? &(xfds->set) : NULL,
-				(Z_TYPE_P(arg4) != IS_NULL) ? &tv : NULL));
 }
 /* }}} */
 
