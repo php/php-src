@@ -65,7 +65,7 @@ bc_str2num (num, str, scale)
   while (isdigit((int)*ptr)) ptr++, strscale++;	/* digits */
   if ((*ptr != '\0') || (digits+strscale == 0))
     {
-      *num = bc_copy_num (BCG(_zero_));
+      *num = bc_copy_num (_zero_);
       return;
     }
 

@@ -57,7 +57,7 @@ bc_raisemod (base, expo, mod, result, scale)
   /* Set initial values.  */
   power = bc_copy_num (base);
   exponent = bc_copy_num (expo);
-  temp = bc_copy_num (BCG(_one_));
+  temp = bc_copy_num (_one_);
   bc_init_num(&parity);
 
   /* Check the base for scale digits. */
@@ -68,7 +68,7 @@ bc_raisemod (base, expo, mod, result, scale)
   if (exponent->n_scale != 0)
     {
       bc_rt_warn ("non-zero scale in exponent");
-      bc_divide (exponent, BCG(_one_), &exponent, 0); /*truncate */
+      bc_divide (exponent, _one_, &exponent, 0); /*truncate */
     }
 
   /* Check the modulus for scale digits. */
@@ -79,7 +79,7 @@ bc_raisemod (base, expo, mod, result, scale)
   rscale = MAX(scale, base->n_scale);
   while ( !bc_is_zero(exponent) )
     {
-      (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
+      (void) bc_divmod (exponent, _two_, &exponent, &parity, 0);
       if ( !bc_is_zero(parity) )
 	{
 	  bc_multiply (temp, power, &temp, rscale);

@@ -197,14 +197,14 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
 
   /* Split u and v. */
   if (ulen < n) {
-    u1 = bc_copy_num (BCG(_zero_));
+    u1 = bc_copy_num (_zero_);
     u0 = new_sub_num (ulen,0, u->n_value);
   } else {
     u1 = new_sub_num (ulen-n, 0, u->n_value);
     u0 = new_sub_num (n, 0, u->n_value+ulen-n);
   }
   if (vlen < n) {
-    v1 = bc_copy_num (BCG(_zero_));
+    v1 = bc_copy_num (_zero_);
     v0 = new_sub_num (vlen,0, v->n_value);
   } else {
     v1 = new_sub_num (vlen-n, 0, v->n_value);
@@ -231,17 +231,17 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
 
   /* Do recursive multiplies and shifted adds. */
   if (m1zero)
-    m1 = bc_copy_num (BCG(_zero_));
+    m1 = bc_copy_num (_zero_);
   else
     _bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0);
 
   if (bc_is_zero(d1) || bc_is_zero(d2))
-    m2 = bc_copy_num (BCG(_zero_));
+    m2 = bc_copy_num (_zero_);
   else
     _bc_rec_mul (d1, d1len, d2, d2len, &m2, 0);
 
   if (bc_is_zero(u0) || bc_is_zero(v0))
-    m3 = bc_copy_num (BCG(_zero_));
+    m3 = bc_copy_num (_zero_);
   else
     _bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3, 0);
 
