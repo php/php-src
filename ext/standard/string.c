@@ -3397,10 +3397,8 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 						break;
 						
 					case 3: /* JavaScript/CSS/etc... */
-						if (*(p-1) == '-' && *(p-2) == '-') {
-							state = 0;
-							tp = tbuf;
-						}
+						state = 0;
+						tp = tbuf;
 						break;
 					
 					default:
