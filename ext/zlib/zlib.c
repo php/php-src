@@ -330,7 +330,6 @@ PHP_FUNCTION(gzopen)
 {
 	pval **arg1, **arg2, **arg3;
 	php_stream *stream;
-	char *p;
 	int use_include_path = 0;
 	
 	switch(ZEND_NUM_ARGS()) {
