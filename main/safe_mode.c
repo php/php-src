@@ -82,8 +82,8 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 			if (mode == CHECKUID_DISALLOW_FILE_NOT_EXISTS) {
 				php_error(E_WARNING, "Unable to access %s", filename);
 				return 0;
-			} else if (mode == CHECKUID_ALLOW_FILE_NOT_EXISTS)
-				php_error(E_WARNING, "Unable to access %s", filename);{
+			} else if (mode == CHECKUID_ALLOW_FILE_NOT_EXISTS) {
+				php_error(E_WARNING, "Unable to access %s", filename);
 				return 1;
 			}
 		} else {
