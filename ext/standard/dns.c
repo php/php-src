@@ -90,9 +90,7 @@ PHP_FUNCTION(gethostbyaddr)
 	addr = php_gethostbyaddr(Z_STRVAL_PP(arg));
 
 	if(addr == NULL) {
-#if HAVE_IPV6 && !defined(__MacOSX__)
-/* MacOSX at this time has support for IPv6, but not inet_pton()
- * so disabling IPv6 until further notice.  MacOSX 10.1.2 (kalowsky) */
+#if HAVE_IPV6 && HAVE_INET_PTON
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not in a.b.c.d form");
@@ -107,17 +105,13 @@ PHP_FUNCTION(gethostbyaddr)
 /* {{{ php_gethostbyaddr */
 static char *php_gethostbyaddr(char *ip)
 {
-#if HAVE_IPV6 && !defined(__MacOSX__)
-/* MacOSX at this time has support for IPv6, but not inet_pton()
- * so disabling IPv6 until further notice.  MacOSX 10.1.2 (kalowsky) */
+#if HAVE_IPV6 && HAVE_INET_PTON
 	struct in6_addr addr6;
 #endif
 	struct in_addr addr;
 	struct hostent *hp;
 
-#if HAVE_IPV6 && !defined(__MacOSX__)
-/* MacOSX at this time has support for IPv6, but not inet_pton()
- * so disabling IPv6 until further notice.  MacOSX 10.1.2 (kalowsky) */
+#if HAVE_IPV6 && HAVE_INET_PTON
 	if (inet_pton(AF_INET6, ip, &addr6)) {
 		hp = gethostbyaddr((char *) &addr6, sizeof(addr6), AF_INET6);
 	} else if (inet_pton(AF_INET, ip, &addr)) {
