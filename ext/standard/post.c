@@ -295,6 +295,7 @@ void php_parse_gpc_data2(char *val, char *var, pval *track_vars_array ELS_DC PLS
 
 	if (symtable2 && top_gpc_p) {
 		zend_hash_update(symtable2, var, var_len+1, top_gpc_p, sizeof(zval *), NULL);
+		(*top_gpc_p)->refcount++;
 	}	
 }
 

@@ -36,6 +36,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "php_globals.h"
 #include "SAPI.h"
 #include "main.h"
 
@@ -241,6 +242,7 @@ static void init_request_info(SLS_D)
 static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
 {
 	php_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length+1, per_dir_entry->type);
+	return 0;
 }
 
 
@@ -488,7 +490,7 @@ void php_init_handler(server_rec *s, pool *p)
 		apache_php_initialized = 1;
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
-	if (INI_INT(PG(expose_php)) {
+	if (PG(expose_php)) {
 		ap_add_version_component("PHP/" PHP_VERSION);
 	}
 #endif
