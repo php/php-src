@@ -255,7 +255,7 @@ int gdImageColorClosestAlpha (gdImagePtr im, int r, int g, int b, int a)
 		gd = im->green[i] - g;
 		bd = im->blue[i] - b;
 		/* gd 2.02: whoops, was - b (thanks to David Marwood) */
-		ad = im->blue[i] - a;
+		ad = im->alpha[i] - a;
 		dist = rd * rd + gd * gd + bd * bd + ad * ad;
 		if (first || (dist < mindist)) {
 			mindist = dist;
