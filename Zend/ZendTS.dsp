@@ -537,8 +537,8 @@ SOURCE=.\zend_ini_scanner.l
 # Begin Custom Build
 InputPath=.\zend_ini_scanner.l
 
-"zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.cpp zend_ini_scanner.l
+"zend_ini_scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.c zend_ini_scanner.l
 
 # End Custom Build
 
@@ -557,8 +557,8 @@ InputPath=.\zend_ini_scanner.l
 # Begin Custom Build
 InputPath=.\zend_ini_scanner.l
 
-"zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.cpp zend_ini_scanner.l
+"zend_ini_scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.c zend_ini_scanner.l
 
 # End Custom Build
 
@@ -567,8 +567,8 @@ InputPath=.\zend_ini_scanner.l
 # Begin Custom Build
 InputPath=.\zend_ini_scanner.l
 
-"zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.cpp zend_ini_scanner.l
+"zend_ini_scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -B -i -Sflex.skl -Pini_ -ozend_ini_scanner.c zend_ini_scanner.l
 
 # End Custom Build
 
@@ -584,8 +584,8 @@ SOURCE=".\zend_language_scanner.l"
 # Begin Custom Build
 InputPath=".\zend_language_scanner.l"
 
-"zend_language_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pzend -ozend_language_scanner.cpp zend_language_scanner.l
+"zend_language_scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -B -i -Sflex.skl -Pzend -ozend_language_scanner.c zend_language_scanner.l
 
 # End Custom Build
 
@@ -604,8 +604,8 @@ InputPath=".\zend_language_scanner.l"
 # Begin Custom Build
 InputPath=".\zend_language_scanner.l"
 
-"zend_language_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pzend -ozend_language_scanner.cpp zend_language_scanner.l
+"zend_language_scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -B -i -Sflex.skl -Pzend -ozend_language_scanner.c zend_language_scanner.l
 
 # End Custom Build
 
@@ -614,8 +614,8 @@ InputPath=".\zend_language_scanner.l"
 # Begin Custom Build
 InputPath=".\zend_language_scanner.l"
 
-"zend_language_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -B -i -Sflex.skl -Pzend -ozend_language_scanner.cpp zend_language_scanner.l
+"zend_language_scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -B -i -Sflex.skl -Pzend -ozend_language_scanner.c zend_language_scanner.l
 
 # End Custom Build
 
