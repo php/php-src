@@ -1,6 +1,6 @@
 #! /bin/sh
 
-STD='make -f Makefile.am LEX=flex YACC="bison -y" srcdir=.'
+STD='make -f Makefile.am LEX="flex -L" YACC="bison -y -l" srcdir=.'
 
 (cd Zend && eval "$STD zend-parser.c zend-scanner.c zend-scanner-cc.cc")
 
