@@ -1157,6 +1157,8 @@ PHP_FUNCTION(array_walk_recursive)
 
 	argc = ZEND_NUM_ARGS();
 	old_walk_func_name = BG(array_walk_func_name);
+	BG(array_walk_fci_cache) = empty_fcall_info_cache;
+
 	if (argc < 2 || argc > 3 ||
 		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
 		BG(array_walk_func_name) = old_walk_func_name;
