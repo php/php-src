@@ -30,9 +30,9 @@
 
 
 #define PHP_CONF_LONG(directive,value1,value2) \
-	php_printf("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">%s</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">%ld</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">%ld</td></tr>\n",directive,value1,value2);
+	php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\"><TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\">%s<BR></TD><TD>%ld<BR></TD><TD>%ld<BR></TD></TR>\n",directive,value1,value2);
 
-#define SECTION(name)  PUTS("<hr><h2>" name "</h2>\n")
+#define SECTION(name)  PUTS("<H2>" name "</H2>\n")
 
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 
@@ -42,12 +42,13 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 	int show_info_func = *((int *) arg);
 
 	if (show_info_func && module->info_func) {
-		php_printf("<hr><a name=\"module_%s\"><h2>%s</h2>\n", module->name, module->name);
+		php_printf("<A NAME=\"module_%s\"><H2>%s</H2>\n", module->name, module->name);
 		module->info_func(module);
 	} else if (!show_info_func && !module->info_func) {
-		php_printf("<tr><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+		php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
+		php_printf("<TD>");
 		php_printf(module->name);
-		php_printf("</td><tr>\n");
+		php_printf("</TD></TR>\n");
 	}
 	return 0;
 }
@@ -73,7 +74,8 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 			} else {
 				value_ptr = *tmp;
 			}
-			PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
+			PUTS("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
+			PUTS("<TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\"><B>");
 			PUTS(name);
 			PUTS("[\"");
 			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
@@ -85,15 +87,15 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 					php_printf("%ld",num_key);
 					break;
 			}
-			PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+			PUTS("\"]</B></TD><TD>");
 			if ((*tmp)->type == IS_ARRAY) {
-				PUTS("<pre>");
+				PUTS("<PRE>");
 				zend_print_zval_r(*tmp, 0);
-				PUTS("</pre>");
+				PUTS("</PRE>");
 			} else {
 				PUTS(value_ptr->value.str.val);
 			}
-			PUTS("</td></tr>\n");
+			PUTS("</TD></TR>\n");
 			zend_hash_move_forward((*data)->value.ht);
 			if (value_ptr==&tmp2) {
 				zval_dtor(value_ptr);
@@ -102,12 +104,25 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 	}
 }
 
+void php_info_print_style()
+{
+	php_printf("<STYLE TYPE=\"text/css\"><!--\n");
+	php_printf("A { text-decoration: none; }\n");
+	php_printf("A:hover { text-decoration: underline; }\n");
+	php_printf("H1 { font-family: arial,helvetica,sans-serif; font-size: 18pt; font-weight: bold;}\n");
+	php_printf("H2 { font-family: arial,helvetica,sans-serif; font-size: 14pt; font-weight: bold;}\n");
+	php_printf("BODY,TD { font-family: arial,helvetica,sans-serif; font-size: 10pt; }\n");
+	php_printf("TH { font-family: arial,helvetica,sans-serif; font-size: 11pt; font-weight: bold; }\n");
+	php_printf("//--></STYLE>\n");
+}
+
 
 PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
+
 #ifdef PHP_WIN32
 	char php_windows_uname[256];
 	DWORD dwBuild=0;
@@ -133,32 +148,40 @@ PHPAPI void php_print_info(int flag)
 		php_uname=PHP_UNAME;
 #endif
 
+		php_info_print_style();
 
-		php_printf("<center><h1>PHP Version %s</h1></center>\n", PHP_VERSION);
-
-		PUTS("<hr>");
+		php_info_print_box_start(1);
 		if (expose_php) {
 			PUTS("<a href=\"http://www.php.net/\"><img src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
-			PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
+			PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\"></a>");
 		}
-		php_printf("System: %s<br>Build Date: %s\n<br>", php_uname, __DATE__);
+		php_printf("<H1>PHP Version %s</H1>\n", PHP_VERSION);
+		php_info_print_box_end();
+
+		php_info_print_table_start();
+		php_info_print_table_row(2, "System", php_uname );
+		php_info_print_table_row(2, "Build Date", __DATE__ );
 #ifdef CONFIGURE_COMMAND
-		php_printf("Configure command: %s<br>\n", CONFIGURE_COMMAND);
+		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
-		php_printf("php.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
-		php_printf("ZEND_DEBUG=%d<br>\n", ZEND_DEBUG);
+		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
+/* why does this cause seg faults?
+		php_info_print_table_row(2, "ZEND_DEBUG", ZEND_DEBUG );
+*/
 		if (sapi_module.name)
-			php_printf("SAPI=%s<br>\n", sapi_module.name);
+			php_info_print_table_row(2, "SAPI", sapi_module.name );
 #ifdef ZTS
-		php_printf("ZTS is defined");
+		php_info_print_table_row(2, "ZTS", "defined" );
 #else
-		php_printf("ZTS is undefined");
+		php_info_print_table_row(2, "ZTS", "undefined" );
 #endif
+		php_info_print_table_end();
+
 		/* Zend Engine */
-		PUTS("<hr>");
+		php_info_print_box_start(0);
 		if (expose_php) {
 			PUTS("<a href=\"http://www.zend.com/\"><img src=\"");
 			if (SG(request_info).request_uri) {
@@ -167,25 +190,25 @@ PHPAPI void php_print_info(int flag)
 			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		}
 		php_printf("This program makes use of the Zend scripting language engine:<br><pre>%s</pre>", get_zend_version());
+		php_info_print_box_end();
 	}
 
-	PUTS("<center>");
-
 	if ((flag & PHP_INFO_CREDITS) && expose_php) {	
-		PUTS("<hr>");
+		php_info_print_hr();
 		PUTS("<a href=\"");
 		if (SG(request_info).request_uri) {
 			PUTS(SG(request_info).request_uri);
 		}
 		PUTS("?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000\">");
-		PUTS("<h1>PHP 4.0 Credits</h1>\n");
+		PUTS("<h1>PHP 4.0 Credits</h1>");
 		PUTS("</a>\n");
 	}
 
 
 	if (flag & PHP_INFO_CONFIGURATION) {
-		PUTS("<hr><h1>Configuration</h1>\n");
-		PUTS("<h2>PHP Core</h2>\n");
+		php_info_print_hr();
+		PUTS("<h1>Configuration</h1>\n");
+		SECTION("PHP Core\n");
 		display_ini_entries(NULL);
 	}
 
@@ -196,15 +219,15 @@ PHPAPI void php_print_info(int flag)
 		zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _display_module_info, &show_info_func);
 
 		SECTION("Additional Modules");
-		PUTS("<table border=5 width=\"600\">\n");
+		php_info_print_table_start();
 		show_info_func = 0;
 		zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _display_module_info, &show_info_func);
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_INFO_ENVIRONMENT) {
 		SECTION("Environment");
-		PUTS("<table border=5 width=\"600\">\n");
+		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
 		for (env=environ; env!=NULL && *env !=NULL; env++) {
 			tmp1 = estrdup(*env);
@@ -217,7 +240,7 @@ PHPAPI void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_INFO_VARIABLES) {
@@ -225,7 +248,7 @@ PHPAPI void php_print_info(int flag)
 
 		SECTION("PHP Variables");
 
-		PUTS("<table border=5 width=\"600\">\n");
+		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
 		if (zend_hash_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_SELF", (*data)->value.str.val);
@@ -245,7 +268,7 @@ PHPAPI void php_print_info(int flag)
 		php_print_gpcse_array("HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1 ELS_CC);
 		php_print_gpcse_array("HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1 ELS_CC);
 		php_print_gpcse_array("HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1 ELS_CC);
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	PUTS("</center>");
@@ -253,16 +276,22 @@ PHPAPI void php_print_info(int flag)
 
 	if (flag & PHP_INFO_LICENSE) {
 		SECTION("PHP License");
-		PUTS("<PRE>This program is free software; you can redistribute it and/or modify\n");
-		PUTS("it under the terms of the PHP License as published by the PHP Group\n");
+		php_info_print_box_start(0);
+		PUTS("<P>\n");
+		PUTS("This program is free software; you can redistribute it and/or modify ");
+		PUTS("it under the terms of the PHP License as published by the PHP Group ");
 		PUTS("and included in the distribution in the file:  LICENSE\n");
-		PUTS("\n");
-		PUTS("This program is distributed in the hope that it will be useful,\n");
-		PUTS("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
+		PUTS("</P>\n");
+		PUTS("<P>");
+		PUTS("This program is distributed in the hope that it will be useful, ");
+		PUTS("but WITHOUT ANY WARRANTY; without even the implied warranty of ");
 		PUTS("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
-		PUTS("\n");
-		PUTS("If you did not receive a copy of the PHP license, or have any questions about\n");
-		PUTS("PHP licensing, please contact license@php.net.</PRE>\n");
+		PUTS("</P>\n");
+		PUTS("<P>");
+		PUTS("If you did not receive a copy of the PHP license, or have any questions about ");
+		PUTS("PHP licensing, please contact license@php.net.\n");
+		PUTS("</P>\n");
+		php_info_print_box_end();
 	}
 }
 
@@ -273,37 +302,41 @@ void php_print_credits(int flag)
 		PUTS("<html><head><title>PHP Credits</title></head><body><center>\n");
 	}
 
+	php_info_print_style();
+
 	PUTS("<h1>PHP 4.0 Credits</h1>\n");
 
 	if (flag & PHP_CREDITS_GROUP) {
 		/* Group */
 
-		PUTS("<table border=5 width=\"600\">\n");
+		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP Group");
 		php_info_print_table_row(1, "Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, \
 					Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski");
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_CREDITS_GENERAL) {
 		/* Language */
 
-		PUTS("<table border=5 width=\"600\">\n");
-		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">PHP 4.0 Authors</th></tr>\n");
+		php_info_print_table_start();
+		PUTS("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
+		PUTS("<TH COLSPAN=2>PHP 4.0 Authors<BR></TH></TR>\n");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken, Sascha Schumann");
 		CREDIT_LINE("Win32 Port", "Shane Caraveo, Zeev Suraski");
 		CREDIT_LINE("Server API (SAPI) Abstraction Layer", "Andi Gutmans, Shane Caraveo, Zeev Suraski");
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_CREDITS_GENERAL) {
 		/* SAPI Modules */
 
-		PUTS("<table border=5 width=\"600\">\n");
-		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">SAPI Modules</th></tr>\n");
+		php_info_print_table_start();
+		PUTS("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
+		PUTS("<TH COLSPAN=2>SAPI Module<BR></TH></TR>\n");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Zeev Suraski");
 		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
@@ -312,14 +345,15 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Java Servlet", "Sam Ruby");
 		CREDIT_LINE("Roxen", "David Hedbor");
 		CREDIT_LINE("thttpd", "Sascha Schumann");
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_CREDITS_MODULES) {
 		/* Modules */
 
-		PUTS("<table border=5 width=\"600\">\n");
-		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">Module Authors</th></tr>\n");
+		php_info_print_table_start();
+		PUTS("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
+		PUTS("<TH COLSPAN=2>Module Authors<BR></TH></TR>\n");
 		php_info_print_table_header(2, "Module", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
 		CREDIT_LINE("Assert", "Thies C. Arntzen");
@@ -363,7 +397,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen");
 		CREDIT_LINE("Yellow Pages", "Stephanie Wehner");
 		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Roehrich");
-		PUTS("</table>\n");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_CREDITS_DOCS) {
@@ -375,6 +409,41 @@ void php_print_credits(int flag)
 	}
 }
 
+PHPAPI void php_info_print_table_start()
+{
+	php_printf("<CENTER>\n");
+	php_printf("<TABLE BORDER=0 CELLPADDING=3 CELLSPACING=1 WIDTH=600 BGCOLOR=\"#000000\">\n");
+}
+
+PHPAPI void php_info_print_table_end()
+{
+	php_printf("</TABLE><BR>\n");
+	php_printf("<CENTER>\n");
+
+}
+
+PHPAPI void php_info_print_box_start(int flag)
+{
+	php_info_print_table_start();
+	if (flag) {
+		php_printf("<TR VALIGN=\"middle\" BGCOLOR=\"" PHP_HEADER_COLOR "\"><TD ALIGN=\"left\">\n");
+	} else {
+		php_printf("<TR VALIGN=\"top\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\"><TD ALIGN=\"left\">\n");
+	}
+}
+
+PHPAPI void php_info_print_box_end()
+{
+	php_printf("</TD></TR>\n");
+	php_info_print_table_end();
+}
+
+PHPAPI void php_info_print_hr()
+{
+	php_printf("<HR NOSHADE SIZE=1 WIDTH=600>\n");
+}
+
+
 
 PHPAPI void php_info_print_table_header(int num_cols, ...)
 {
@@ -384,15 +453,15 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 
 	va_start(row_elements, num_cols);
 
-	php_printf("<tr>");
+	php_printf("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
 	for (i=0; i<num_cols; i++) {
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
 			row_element = "&nbsp;";
 		}
-		php_printf("<th bgcolor=\"" PHP_HEADER_COLOR "\" valign=\"top\">%s</th>", row_element);
+		php_printf("<TH>%s</TH>", row_element);
 	}
-	php_printf("</tr>\n");
+	php_printf("</TR>\n");
 
 	va_end(row_elements);
 }
@@ -402,22 +471,23 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 {
 	int i;
 	va_list row_elements;
-	char *color = PHP_ENTRY_NAME_COLOR;
 	char *row_element;
 
 	va_start(row_elements, num_cols);
 
-	php_printf("<tr>");
+	php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
 	for (i=0; i<num_cols; i++) {
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
 			row_element = "&nbsp;";
 		}
-		php_printf("<td bgcolor=\"%s\" valign=\"top\">%s%s%s</td>", 
-			color, (i==0?"<b>":""), row_element, (i==0?"</b>":""));
-		color = PHP_CONTENTS_COLOR;
+		php_printf("<TD%s>%s%s%s</td>", 
+			(i==0?" BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\" ":""),
+			(i==0?"<B>":""), 
+			row_element,
+			(i==0?"</B>":""));
 	}
-	php_printf("</tr>\n");
+	php_printf("</TR>\n");
 
 	va_end(row_elements);
 }

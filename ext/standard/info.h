@@ -32,9 +32,9 @@
 #ifndef _INFO_H
 #define _INFO_H
 
-#define PHP_ENTRY_NAME_COLOR "#FFFFFF"
-#define PHP_CONTENTS_COLOR "#DDDDDD"
-#define PHP_HEADER_COLOR "#FFFF99"
+#define PHP_ENTRY_NAME_COLOR "#CCCCFF"
+#define PHP_CONTENTS_COLOR "#CCCCCC"
+#define PHP_HEADER_COLOR "#9999CC"
 
 #define PHP_INFO_GENERAL			(1<<0)
 #define PHP_INFO_CREDITS			(1<<1)
@@ -64,10 +64,14 @@ PHP_FUNCTION(php_logo_guid);
 PHP_FUNCTION(zend_logo_guid);
 PHPAPI void php_print_info(int flag);
 PHPAPI void php_print_credits(int flag);
-
-
+PHPAPI void php_print_style(void);
 PHPAPI void php_info_print_table_header(int num_cols, ...);
 PHPAPI void php_info_print_table_row(int num_cols, ...);
+PHPAPI void php_info_print_table_start(void);
+PHPAPI void php_info_print_table_end(void);
+PHPAPI void php_info_print_box_start(int bg);
+PHPAPI void php_info_print_box_end(void);
+PHPAPI void php_info_print_hr(void);
 
 void register_phpinfo_constants(INIT_FUNC_ARGS);
 

@@ -359,13 +359,14 @@ static int php_ini_displayer(php_ini_entry *ini_entry, int module_number)
 		return 0;
 	}
 
-	PUTS("<tr><td align=\"center\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
+	PUTS("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
+	PUTS("<TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\"><B>");
 	PHPWRITE(ini_entry->name, ini_entry->name_length-1);
-	PUTS("</b></td><td align=\"center\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+	PUTS("</B><BR></TD><TD ALIGN=\"center\">");
 	php_ini_displayer_cb(ini_entry, PHP_INI_DISPLAY_ACTIVE);
-	PUTS("</td><td align=\"center\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+	PUTS("</TD><TD ALIGN=\"center\">");
 	php_ini_displayer_cb(ini_entry, PHP_INI_DISPLAY_ORIG);
-	PUTS("</td></tr>\n");
+	PUTS("</TD></TR>\n");
 	return 0;
 }
 
@@ -379,10 +380,10 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 	} else {
 		module_number = 0;
 	}
-	PUTS("<table border=5 width=\"600\">\n");
+	php_info_print_table_start();
 	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
 	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_ini_displayer, (void *) (long) module_number);
-	PUTS("</table>\n");
+	php_info_print_table_end();
 }
 
 
