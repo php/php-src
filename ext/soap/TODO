@@ -55,8 +55,7 @@ WSDL
 - support for portType operation parameterOrder attribute
 - support for binding operation input/output name attribute (part of overloading)
 - support for <opperation> <fault>
-- support for style "rpc"/"document" encoding (server part)
-  How to get function name from request? May be SoapAction HTTP header?
+? support for style "document" encoding (server part)
 - function/method overloading/redeclaration (test(int); test(string))
 - wsdl caching
 - wsdl auto generation
