@@ -83,7 +83,7 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	key_t shm_key;
+	key_t shm_key = (key_t) 0;
 	long shm_id,list_id;
 	int ac = ARG_COUNT(ht);
 
