@@ -296,13 +296,13 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		if (copy_amount) {
 			if (is_absolute) {
 				memcpy(state->cwd, path_copy, copy_amount);
+				path_copy += copy_amount;
 			} else {
 				memcpy(state->cwd, old_state->cwd, copy_amount);
 			}
 		}
 		state->cwd[copy_amount] = '\0';
 		state->cwd_length = copy_amount;
-		path_copy += copy_amount;
 	}
 
 
