@@ -44,7 +44,7 @@ ssize_t readv(SOCKET sock, const struct iovec *iov, int iovcnt) {
 	}
 
 	retval = recv(sock, buffer, bytes, 0);
-	SleepEx(1, TRUE);
+
 	if(retval < 0) {
 		efree(buffer);
 		return retval;
