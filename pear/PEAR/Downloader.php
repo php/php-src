@@ -521,12 +521,12 @@ class PEAR_Downloader extends PEAR_Common
             $savestate = array_shift($get);
             $this->pushError( "Release for $package dependency $info[name] " .
                 "has state '$savestate', requires $state");
-            continue;
+            return false;
         }
         if (in_array(strtolower($info['name']), $this->_toDownload) ||
               isset($mywillinstall[strtolower($info['name'])])) {
             // skip upgrade check for packages we will install
-            continue;
+            return false;
         }
         if (!isset($this->_installed[strtolower($info['name'])])) {
             // check to see if we can install the specific version required
