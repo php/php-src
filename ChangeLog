@@ -1,3 +1,59 @@
+2001-10-23  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/SAPI.c: Ok, now actually make it work - maybe...
+
+    * README.PARAMETER_PARSING_API: Minor tweaks
+
+    * main/SAPI.c:    $HTTP_RAW_POST_DATA was not populated on a missing content-type even when
+    always_populate_raw_post_data was on - fixed. (Rasmus)
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      NEWS:
+    As suggested on php-dev, array_fill() is probably a better name for this
+    function.
+
+2001-10-23  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h: Patch for correct handling of DATETIME values.
+    The patch is implemented with a parameter in php.ini controling if
+    datetime values are converted with the new or the old method.
+    Thanks to Michael Bretterklieber <mbretter@jawa.at>
+
+2001-10-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      configure.in
+      ext/standard/basic_functions.c: MFH
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h: Check that realpath is available. Bug: #9469
+
+    * run-tests.php
+      tests/basic/011.phpt:
+    Fix these to give correct results even if register_globals=off or
+    register_argc_argv=off.
+
+    * ext/sybase_ct/config.m4: Fixed bug: #13782
+
+    * ext/gd/config.m4:
+    Support also --with-gd (without path). Please test this!
+
+    * ext/gd/config.m4:
+    This patch should reduce the amount of 'bogus' bug reports when people
+    have two or more different versions of GD library installed.
+
+2001-10-23  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/dl.c: MFH
+
+    * ext/standard/dl.c: Prolong the death of dl() for a little while longer.
+
 2001-10-22  Richard Heyes  <richard.heyes@heyes-computing.net>
 
     * pear/Mail/mimeDecode.php:
