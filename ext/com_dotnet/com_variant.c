@@ -99,9 +99,6 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 {
 	OLECHAR *olestring = NULL;
 	int ret = SUCCESS;
-	SYSTEMTIME systime;
-	struct tm tmv;
-	php_com_dotnet_object *obj;
 
 	switch (V_VT(v)) {
 		case VT_EMPTY:
@@ -578,7 +575,6 @@ PHP_FUNCTION(variant_round)
 	VARIANT *vleft = NULL;
 	zval *zleft = NULL;
 	php_com_dotnet_object *obj;
-	HRESULT result;
 	int codepage = CP_ACP;
 	long decimals = 0;
 
@@ -614,7 +610,6 @@ PHP_FUNCTION(variant_cmp)
 	VARIANT *vleft = NULL, *vright = NULL;
 	zval *zleft = NULL, *zright = NULL;
 	php_com_dotnet_object *obj;
-	HRESULT result;
 	int codepage = CP_ACP;
 	long lcid = LOCALE_SYSTEM_DEFAULT;
 	long flags = 0;
@@ -832,8 +827,6 @@ PHP_FUNCTION(variant_index_get)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	VARIANT vres;
-	HRESULT res;
 
 	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC,
 		"O", &zobj, php_com_variant_class_entry)) {
