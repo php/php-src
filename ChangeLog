@@ -1,3 +1,74 @@
+2000-05-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/levenshtein.c:  Fixed min()/max() segfault. 
+
+2000-05-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Add -traditional-cpp for Rhapsody and -D_BSD_TIMEOFDAY_FLAVOR for DG/UX.
+
+    Also fix the search path for sendmail.
+
+2000-05-24  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/sybase/sybase.c: proto takeover from php3
+
+2000-05-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * reentrancy.c
+      win32/readdir.c:
+    The behaviour for result == NULL || entry == NULL is undefined.
+
+    * reentrancy.c:
+    If no further directory exists, php_readdir_r() returns success and sets
+    *result to NULL.
+
+2000-05-24  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/exif/exif.dsp:
+    Adding PHP_EXIF directive to actually include the functions
+
+    * php_modules.dsw: Updating workspace with the latest modules
+
+    * ext/exif/exif.c
+      ext/exif/exif.dsp: Adding project for new exif module
+
+2000-05-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in
+      reentrancy.c: Support old-style readdir_r()
+
+    * reentrancy.c:
+    Avoid building two versions of the time-related reentrant functions.
+
+2000-05-24  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/.cvsignore
+      ext/exif/Makefile.in
+      ext/exif/config.m4
+      ext/exif/exif.c
+      ext/exif/php_exif.h:    exif module
+
+    * ext/gd/gd.c
+      ext/ldap/ldap.c:    num_links is a long there
+
+2000-05-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/array.c: remove gremlin
+
+2000-05-24  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    Added PostgreSQL module info function.
+
+2000-05-24  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/php_string.h:
+    php_basename() prototype changed according to latest changes in string.c
+
 2000-05-23  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/snmp/Makefile.in
