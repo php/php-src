@@ -504,7 +504,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 
 	currarg = 1;
 
-	while (inpos<Z_STRLEN_PP(args[format_offset])) {
+	while (inpos < (int)Z_STRLEN_PP(args[format_offset])) {
 		int expprec = 0;
 
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));
