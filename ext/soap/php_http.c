@@ -151,21 +151,12 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 			old_error_reporting = EG(error_reporting);
 			EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
-#ifdef ZTS
 			stream = php_stream_xport_create(res, reslen,
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 				NULL  /*persistent_id*/,
 				NULL /*timeout*/,
 				NULL, NULL, NULL);
-#else
-			stream = php_stream_xport_create(res, reslen,
-				ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
-				res  /*persistent_id*/,
-				NULL /*timeout*/,
-				NULL, NULL, NULL);
-#endif
 			EG(error_reporting) = old_error_reporting;
 
 			efree(res);
@@ -183,13 +174,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
 			    Z_TYPE_PP(proxy_port) == IS_LONG) {
 			  use_proxy = 1;
-#ifdef ZTS
 				stream = php_stream_sock_open_host(Z_STRVAL_PP(proxy_host), Z_LVAL_PP(proxy_port), SOCK_STREAM, NULL, NULL);
-#else
-    		spprintf(&res, 0, "tcp://%s:%ld", Z_STRVAL_PP(proxy_host), Z_LVAL_PP(proxy_port));
-				stream = php_stream_sock_open_host(Z_STRVAL_PP(proxy_host), Z_LVAL_PP(proxy_port), SOCK_STREAM, NULL, res);
-				efree(res);
-#endif
 			} else {
 #ifdef ZTS
 				stream = php_stream_sock_open_host(phpurl->host, (unsigned short)phpurl->port, SOCK_STREAM, NULL, NULL);
