@@ -839,7 +839,7 @@ PHP_FUNCTION(key)
 }
 /* }}} */
 
-/* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, ...]])
+/* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
    Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)
 {
@@ -891,7 +891,7 @@ PHP_FUNCTION(min)
 }
 /* }}} */
 
-/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, ...]])
+/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
    Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
 {
@@ -1238,7 +1238,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto array compact(mixed var_names [, ... ])
+/* {{{ proto array compact(mixed var_names [, mixed ... ])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -1417,7 +1417,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 /* }}} */
 
 
-/* {{{ proto int array_push(array stack, mixed var [, ...])
+/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
@@ -1521,7 +1521,7 @@ PHP_FUNCTION(array_shift)
 /* }}} */
 
 
-/* {{{ proto int array_unshift(array stack, mixed var [, ...])
+/* {{{ proto int array_unshift(array stack, mixed var [, mixed ...])
    Pushes elements onto the beginning of the array */
 PHP_FUNCTION(array_unshift)
 {
@@ -1806,7 +1806,7 @@ static void php_array_merge(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 }
 
 
-/* {{{ proto array array_merge(array arr1, array arr2 [, ...])
+/* {{{ proto array array_merge(array arr1, array arr2 [, mixed ...])
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
@@ -1815,7 +1815,7 @@ PHP_FUNCTION(array_merge)
 /* }}} */
 
 
-/* {{{ proto array array_merge(array arr1, array arr2 [, ...])
+/* {{{ proto array array_merge_recursive(array arr1, array arr2 [, mixed ...])
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
@@ -2196,9 +2196,8 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
-/* {{{ proto array array_intersect(array arr1, array arr2 [, ...])
-   Returns the entries of arr1 that have values which are present in
-   all the others arguments */
+/* {{{ proto array array_intersect(array arr1, array arr2 [, mixed ...])
+   Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
         zval ***args = NULL;
@@ -2294,7 +2293,7 @@ out:
 }
 /* }}} */
 
-/* {{{ proto array array_diff(array arr1, array arr2 [, ...])
+/* {{{ proto array array_diff(array arr1, array arr2 [, mixed ...])
    Returns the entries of arr1 that have values which are not present in
    any of the others arguments */
 PHP_FUNCTION(array_diff)
@@ -2583,7 +2582,7 @@ PHP_FUNCTION(array_multisort)
 /* }}} */
 
 
-/* {{{ proto mixed array_rand(array input [, int num_req ])
+/* {{{ proto mixed array_rand(array input [, int num_req])
    Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
 {
