@@ -435,12 +435,12 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 PHP_FUNCTION(readline_completion_function)
 {
 	zval *arg = NULL;
+	char *name = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg)) {
 		RETURN_FALSE;
 	}
 
-	char *name = NULL;
 	if (!zend_is_callable(arg, 0, &name)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
 		RETURN_FALSE;
