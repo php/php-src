@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,31 +29,17 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_default_classes.h"
 
-zval *php_com_throw_exception(char *message TSRMLS_DC)
+void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 {
-	zval *e, *tmp;
-	
-	ALLOC_ZVAL(e);
-	Z_TYPE_P(e) = IS_OBJECT;
-	object_init_ex(e, zend_exception_get_default());
-	e->refcount = 1;
-	e->is_ref = 1;
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_STRING(tmp, message, 1);
-	zend_hash_update(Z_OBJPROP_P(e), "message", sizeof("message"), (void**)&tmp, sizeof(zval*), NULL);
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);
-	zend_hash_update(Z_OBJPROP_P(e), "file", sizeof("file"), (void**)&tmp, sizeof(zval*), NULL);
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));
-	zend_hash_update(Z_OBJPROP_P(e), "line", sizeof("line"), (void**)&tmp, sizeof(zval*), NULL);
-
-	EG(exception) = e;
-
-	return e;
+	int free_msg = 0;
+	if (message == NULL) {
+		message = php_win_err(code);
+		free_msg = 1;
+	}
+	zend_throw_exception(php_com_exception_class_entry, message, (long)code TSRMLS_CC);
+	if (free_msg) {
+		efree(message);
+	}
 }
 
 PHPAPI void php_com_wrap_dispatch(zval *z, IDispatch *disp,
@@ -89,7 +75,7 @@ PHPAPI void php_com_wrap_variant(zval *z, VARIANT *v,
 	obj->ce = php_com_variant_class_entry;
 
 	VariantInit(&obj->v);
-	VariantCopy(&obj->v, v);
+	VariantCopyInd(&obj->v, v);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
@@ -99,4 +85,57 @@ PHPAPI void php_com_wrap_variant(zval *z, VARIANT *v,
 	
 	z->value.obj.handle = zend_objects_store_put(obj, php_com_object_dtor, php_com_object_clone TSRMLS_CC);
 	z->value.obj.handlers = &php_com_object_handlers;
+}
+
+/* this is a convenience function for fetching a particular
+ * element from a (possibly multi-dimensional) safe array */
+PHPAPI int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 TSRMLS_DC)
+{
+	UINT dims;
+	LONG lbound, ubound;
+	LONG indices[1];
+	VARTYPE vt;
+	
+	if (!V_ISARRAY(array)) {
+		return 0;
+	}
+	
+	dims = SafeArrayGetDim(V_ARRAY(array));
+
+	if (dims != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			   "Can only handle single dimension variant arrays (this array has %d)", dims);
+		return 0;
+	}
+	
+	if (FAILED(SafeArrayGetVartype(V_ARRAY(array), &vt)) || vt == VT_EMPTY) {
+		vt = V_VT(array) & ~VT_ARRAY;
+	}
+
+	/* determine the bounds */
+	SafeArrayGetLBound(V_ARRAY(array), 1, &lbound);
+	SafeArrayGetUBound(V_ARRAY(array), 1, &ubound);
+	
+	/* check bounds */
+	if (dim1 < lbound || dim1 > ubound) {
+		php_com_throw_exception(E_INVALIDARG, "index out of bounds" TSRMLS_CC);
+		return 0;
+	}
+	
+	/* now fetch that element */
+	VariantInit(dest);
+		
+	indices[0] = dim1;
+
+	if (vt == VT_VARIANT) {
+		SafeArrayGetElement(V_ARRAY(array), indices, dest);
+	} else {
+		V_VT(dest) = vt;
+		/* store the value into "lVal" member of the variant.
+		 * This works because it is a union; since we know the variant
+		 * type, we end up with a working variant */
+		SafeArrayGetElement(V_ARRAY(array), indices, &dest->lVal);
+	}
+
+	return 1;	
 }

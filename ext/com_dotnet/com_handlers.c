@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -51,7 +51,7 @@ static zval *com_property_read(zval *object, zval *member, zend_bool silent TSRM
 		}
 	} else {
 		if (!silent) {
-			php_com_throw_exception("this variant has no properties" TSRMLS_CC);
+			php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
 		}
 	}
 
@@ -74,7 +74,7 @@ static void com_property_write(zval *object, zval *member, zval *value TSRMLS_DC
 			VariantClear(&v);
 		}
 	} else {
-		php_com_throw_exception("this variant has no properties" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
 	}
 }
 
@@ -115,7 +115,7 @@ static zval *com_read_dimension(zval *object, zval *offset TSRMLS_DC)
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
-			php_com_throw_exception("this COM object has no default property" TSRMLS_CC);
+			php_com_throw_exception(E_INVALIDARG, "this COM object has no default property" TSRMLS_CC);
 			return return_value;
 		}
 
@@ -127,49 +127,19 @@ static zval *com_read_dimension(zval *object, zval *offset TSRMLS_DC)
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
-		SAFEARRAY *sa = V_ARRAY(&obj->v);
-		UINT dims;
-		VARTYPE vt;
-		LONG bound_low = 0, bound_high = 0;
-		LONG indices[1];
-
-		dims = SafeArrayGetDim(sa);
-
-		if (dims != 1) {
-			php_com_throw_exception("can only handle single dimension arrays" TSRMLS_CC);
-			return return_value;
-		}
-
-		if (FAILED(SafeArrayGetVartype(sa, &vt)) || vt == VT_EMPTY) {
-			vt = V_VT(&obj->v) & ~VT_ARRAY;
-		}
-		SafeArrayGetUBound(sa, 1, &bound_high);
-		SafeArrayGetLBound(sa, 1, &bound_low);
-
 		convert_to_long(offset);
 
-		/* check bounds */
-		if (Z_LVAL_P(offset) < bound_low || Z_LVAL_P(offset) > bound_high) {
-			php_com_throw_exception("index out of bounds" TSRMLS_CC);
-			return return_value;
+		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
+			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
+				php_com_wrap_variant(return_value, &v, obj->code_page TSRMLS_CC);
+				VariantClear(&v);
+			}
+		} else {
+			php_com_saproxy_create(object, return_value, Z_LVAL_P(offset) TSRMLS_CC);
 		}
 
-		indices[0] = Z_LVAL_P(offset);
-
-		VariantInit(&v);
-		V_VT(&v) = vt;
-		/* store the value into "lVal" member of the variant.
-		 * This works because it is a union; since we know the variant
-		 * type, we end up with a working variant */
-		SafeArrayGetElement(sa, indices, &v.lVal);
-
-		/* now we can set the return value from that element */
-		php_com_wrap_variant(return_value, &v, obj->code_page TSRMLS_CC);
-
-		VariantClear(&v);
-
 	} else {
-		php_com_throw_exception("this variant is not an array type" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type" TSRMLS_CC);
 	}
 
 	return return_value;
@@ -185,7 +155,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
-			php_com_throw_exception("this COM object has no default property" TSRMLS_CC);
+			php_com_throw_exception(E_INVALIDARG, "this COM object has no default property" TSRMLS_CC);
 			return;
 		}
 
@@ -200,7 +170,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 		}
 	} else {
 		/* TODO: check for safearray */
-		php_com_throw_exception("this variant is not an array type" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type" TSRMLS_CC);
 	}
 }
 
@@ -345,7 +315,6 @@ static int com_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	obj = CDNO_FETCH(getThis());
 
 	if (V_VT(&obj->v) != VT_DISPATCH) {
-		//php_com_throw_exception("call to member function of non-object");
 		return FAILURE;
 	}
 	
@@ -529,6 +498,30 @@ zend_object_handlers php_com_object_handlers = {
 	com_object_cast
 };
 
+void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSRMLS_DC)
+{
+	if (obj->sink_dispatch) {
+		IConnectionPointContainer *cont;
+		IConnectionPoint *point;
+		
+		if (SUCCEEDED(IDispatch_QueryInterface(V_DISPATCH(&obj->v),
+				&IID_IConnectionPointContainer, (void**)&cont))) {
+			
+			if (SUCCEEDED(IConnectionPointContainer_FindConnectionPoint(cont,
+					&obj->sink_id, &point))) {
+
+				if (enable) {
+					IConnectionPoint_Advise(point, (IUnknown*)obj->sink_dispatch, &obj->sink_cookie);
+				} else {
+					IConnectionPoint_Unadvise(point, obj->sink_cookie);
+				}
+				IConnectionPoint_Release(point);
+			}
+			IConnectionPointContainer_Release(cont);
+		}
+	}
+}
+
 void php_com_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object*)object;
@@ -538,8 +531,13 @@ void php_com_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 		obj->typeinfo = NULL;
 	}
 
-	VariantClear(&obj->v);
+	if (obj->sink_dispatch) {
+		php_com_object_enable_event_sink(obj, FALSE TSRMLS_CC);
+		IDispatch_Release(obj->sink_dispatch);
+		obj->sink_dispatch = NULL;
+	}
 
+	VariantClear(&obj->v);
 	efree(obj);
 }
 

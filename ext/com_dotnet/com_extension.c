@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,7 +31,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)
 TsHashTable php_com_typelibraries;
-zend_class_entry *php_com_variant_class_entry;
+zend_class_entry
+	*php_com_variant_class_entry,
+   	*php_com_exception_class_entry,
+	*php_com_saproxy_class_entry;
 
 function_entry com_dotnet_functions[] = {
 	PHP_FE(variant_set, NULL)
@@ -60,7 +63,12 @@ function_entry com_dotnet_functions[] = {
 	PHP_FE(variant_get_type, NULL)
 	PHP_FE(variant_set_type, NULL)
 	PHP_FE(variant_cast, NULL)
+	/* com_com.c */
 	PHP_FE(com_create_guid, NULL)
+	PHP_FE(com_event_sink, NULL)
+	PHP_FE(com_print_typeinfo, NULL)
+	PHP_FE(com_message_pump, NULL)
+	PHP_FE(com_load_typelib, NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -86,11 +94,77 @@ ZEND_GET_MODULE(com_dotnet)
 
 /* {{{ PHP_INI
  */
+
+/* com.typelib_file is the path to a file containing a
+ * list of typelibraries to register *persistently*.
+ * lines starting with ; are comments
+ * append #cis to end of typelib name to cause its constants
+ * to be loaded case insensitively */
+static PHP_INI_MH(OnTypeLibFileUpdate)
+{
+	FILE *typelib_file;
+	char *typelib_name_buffer;
+	char *strtok_buf = NULL;
+	int cached;
+
+	if (!new_value || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL) {
+		return FAILURE;
+	}
+
+	typelib_name_buffer = (char *) emalloc(sizeof(char)*1024);
+
+	while (fgets(typelib_name_buffer, 1024, typelib_file)) {
+		ITypeLib *pTL;
+		char *typelib_name;
+		char *modifier, *ptr;
+		int mode = CONST_CS | CONST_PERSISTENT;	/* CONST_PERSISTENT is ok here */
+
+		if (typelib_name_buffer[0]==';') {
+			continue;
+		}
+		typelib_name = php_strtok_r(typelib_name_buffer, "\r\n", &strtok_buf); /* get rid of newlines */
+		if (typelib_name == NULL) {
+			continue;
+		}
+		typelib_name = php_strtok_r(typelib_name, "#", &strtok_buf);
+		modifier = php_strtok_r(NULL, "#", &strtok_buf);
+		if (modifier != NULL) {
+			if (!strcmp(modifier, "cis") || !strcmp(modifier, "case_insensitive")) {
+				mode &= ~CONST_CS;
+			}
+		}
+
+		/* Remove leading/training white spaces on search_string */
+		while (isspace(*typelib_name)) {/* Ends on '\0' in worst case */
+			typelib_name ++;
+		}
+		ptr = typelib_name + strlen(typelib_name) - 1;
+		while ((ptr != typelib_name) && isspace(*ptr)) {
+			*ptr = '\0';
+			ptr--;
+		}
+
+		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page), &cached TSRMLS_CC)) != NULL) {
+			if (!cached) {
+				php_com_import_typelib(pTL, mode, COMG(code_page) TSRMLS_CC);
+			}
+			ITypeLib_Release(pTL);
+		}
+	}
+
+	efree(typelib_name_buffer);
+	fclose(typelib_file);
+
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
     STD_PHP_INI_ENTRY("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
     STD_PHP_INI_ENTRY("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
+    STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnUpdateBool, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
+	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
 PHP_INI_END()
 /* }}} */
 
@@ -99,6 +173,7 @@ PHP_INI_END()
 static void php_com_dotnet_init_globals(zend_com_dotnet_globals *com_dotnet_globals)
 {
 	memset(com_dotnet_globals, 0, sizeof(*com_dotnet_globals));
+	com_dotnet_globals->code_page = CP_ACP;
 }
 /* }}} */
 
@@ -106,28 +181,44 @@ static void php_com_dotnet_init_globals(zend_com_dotnet_globals *com_dotnet_glob
  */
 PHP_MINIT_FUNCTION(com_dotnet)
 {
-	zend_class_entry ce;
+	zend_class_entry ce, *tmp;
 
 	ZEND_INIT_MODULE_GLOBALS(com_dotnet, php_com_dotnet_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
+	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);	
+
+	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
+	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
+	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
+	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
+
+	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
+	php_com_saproxy_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
+//	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
+	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
+	
 	INIT_CLASS_ENTRY(ce, "variant", NULL);
 	ce.create_object = php_com_object_new;
-	ce.get_iterator = php_com_iter_get;
+//	ce.get_iterator = php_com_iter_get;
 	php_com_variant_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 
 	INIT_CLASS_ENTRY(ce, "com", NULL);
 	ce.create_object = php_com_object_new;
-	ce.get_iterator = php_com_iter_get;
-	zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
+//	ce.get_iterator = php_com_iter_get;
+	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
+	tmp->get_iterator = php_com_iter_get;
 
 	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
 
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
 	ce.create_object = php_com_object_new;
-	ce.get_iterator = php_com_iter_get;
-	zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
+//	ce.get_iterator = php_com_iter_get;
+	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
+	tmp->get_iterator = php_com_iter_get;
 #endif
 
 #define COM_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
