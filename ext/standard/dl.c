@@ -84,7 +84,7 @@ void php_dl(pval *file,int type,pval *return_value)
 		&& PG(extension_dir)[0]){
 		int extension_dir_len = strlen(PG(extension_dir));
 
-		libpath = emalloc(extension_dir_len+strlen(file->value.str.val)+1);
+		libpath = emalloc(extension_dir_len+file->value.str.len+1);
 
 		if (PG(extension_dir)[extension_dir_len-1]=='/' || PG(extension_dir)[extension_dir_len-1]=='\\') {
 			sprintf(libpath,"%s%s",PG(extension_dir),file->value.str.val);
@@ -92,7 +92,7 @@ void php_dl(pval *file,int type,pval *return_value)
 			sprintf(libpath,"%s/%s",PG(extension_dir),file->value.str.val);
 		}
 	} else {
-		libpath = estrdup(file->value.str.val);
+		libpath = estrndup(file->value.str.val, file->value.str.len);
 	}
 
 	/* load dynamic symbol */
