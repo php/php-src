@@ -586,9 +586,6 @@ PHP_FUNCTION(xslt_error)
 }
 /* }}} */
 
-<<<<<<< sablot.c
-
-=======
 /* {{{ proto void xslt_free(resource processor)
    Free the xslt processor up */
 PHP_FUNCTION(xslt_free)
@@ -607,7 +604,6 @@ PHP_FUNCTION(xslt_free)
 }
 /* }}} */
 
->>>>>>> 1.48
 /* {{{ free_processor()
    Free an XSLT processor */
 static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
