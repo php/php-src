@@ -103,7 +103,8 @@ case $host_alias in
 *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR";;
 *darwin*|*rhapsody*)
-    CPPFLAGS="$CPPFLAGS -no-cpp-precomp";;
+    CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
+    php_multiple_shlib_versions_ok=yes;;
 *bsdi*)
     BSD_MAKEFILE=yes;;
 *beos*)
@@ -1242,7 +1243,7 @@ cat <<X
 X
   fi
 
-  if test "$MYSQL_MODULE_TYPE" = "builtin" && test "$PHP_SAPI" != "cgi" && test "$PHP_SAPI" != "cli"; then
+  if test "$MYSQL_MODULE_TYPE" = "builtin" && test "$PHP_SAPI" != "cgi" && test "$PHP_SAPI" != "cli" && test $php_multiple_shlib_versions_ok != "yes"; then
 cat <<X
 +--------------------------------------------------------------------+
 |                        *** WARNING ***                             |
