@@ -4,7 +4,8 @@ Passing configuration file through tidy_parse_file()
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
-        $tidy = tidy_parse_file("ext/tidy/tests/016.html", "ext/tidy/tests/016.tcfg");
+	$path = dirname(__FILE__);
+        $tidy = tidy_parse_file("{$path}/016.html", "{$path}/016.tcfg");
     	tidy_clean_repair($tidy);
         echo tidy_get_output($tidy);
 ?>
