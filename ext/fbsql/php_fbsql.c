@@ -1119,7 +1119,7 @@ static void php_fbsql_lob_size(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	RETURN_LONG(fbcbhBlobSize((FBCBlobHandle *)Z_STRVAL_PP(lob_handle)));
 }
 
-/* {{{ proto string fbsql_read_blob(string blob_handle [, resource link_identifier])
+/* {{{ proto string fbsql_blob_size(string blob_handle [, resource link_identifier])
    Get the size of a BLOB identified by blob_handle */
 PHP_FUNCTION(fbsql_blob_size)
 {
@@ -1127,7 +1127,7 @@ PHP_FUNCTION(fbsql_blob_size)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_read_clob(string clob_handle [, resource link_identifier])
+/* {{{ proto string fbsql_clob_size(string clob_handle [, resource link_identifier])
    Get the size of a CLOB identified by clob_handle */
 PHP_FUNCTION(fbsql_clob_size)
 {
