@@ -35,7 +35,6 @@
  * - remove all XXXs
  * - clean up and documentation
  * - make OCIInternalDebug accept a mask of flags....
- * - add some flags to OCIFetchStatement (maxrows etc...)
  * - have one ocifree() call.
  * - make it possible to have persistent statements?
  * - implement connection pooling in ZTS mode.
@@ -50,6 +49,7 @@
  * - add Collection iterator object for INDEX BY tables
  * - make auto-rollback only happen if we have an outstanding transaction
  * - implement ocidisconnect
+ * - add OCI9-specific functions and separate them from OCI8 with ifdefs
  */
 
 /* {{{ includes & stuff */
@@ -190,7 +190,9 @@ static int _oci_make_zval(zval *, oci_statement *, oci_out_column *, char *, int
 static oci_statement *oci_parse(oci_connection *, char *, int);
 static int oci_execute(oci_statement *, char *, ub4 mode);
 static int oci_fetch(oci_statement *, ub4, char * TSRMLS_DC);
+static int oci_lobgetlen(oci_connection *, oci_descriptor *, ub4 *length);
 static int oci_loadlob(oci_connection *, oci_descriptor *, char **, ub4 *length);
+static int oci_readlob(oci_connection *, oci_descriptor *, char **, ub4 *len);
 static int oci_setprefetch(oci_statement *statement, int size);
 
 static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclusive);
@@ -236,6 +238,21 @@ PHP_FUNCTION(ocifreedesc);
 PHP_FUNCTION(ocisavelob);
 PHP_FUNCTION(ocisavelobfile);
 PHP_FUNCTION(ociloadlob);
+PHP_FUNCTION(ocitelllob);
+PHP_FUNCTION(ociwritelob);
+PHP_FUNCTION(ociappendlob);
+PHP_FUNCTION(ocicopylob);
+PHP_FUNCTION(ocitruncatelob);
+PHP_FUNCTION(ocieraselob);
+PHP_FUNCTION(ociflushlob);
+PHP_FUNCTION(ocisetbufferinglob);
+PHP_FUNCTION(ocigetbufferinglob);
+PHP_FUNCTION(ociisequallob);
+PHP_FUNCTION(ocirewindlob);
+PHP_FUNCTION(ocireadlob);
+PHP_FUNCTION(ocieoflob);
+PHP_FUNCTION(ociseeklob);
+PHP_FUNCTION(ocilobgetlength);
 PHP_FUNCTION(ociwritelobtofile);
 PHP_FUNCTION(ocicommit);
 PHP_FUNCTION(ocirollback);
@@ -291,6 +308,22 @@ PHP_FUNCTION(ocicolltrim);
 	}
 #endif
 
+#define IS_LOB_INTERNAL(lob) \
+	if (lob->type != OCI_DTYPE_LOB) { \
+		switch (lob->type) { \
+			case OCI_DTYPE_FILE: \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, FILE locator is given"); \
+				break; \
+			case OCI_DTYPE_ROWID: \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, ROWID locator is given"); \
+				break; \
+			default: \
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "internal LOB was expected, locator of unknown type is given"); \
+				break; \
+		} \
+		RETURN_FALSE; \
+	}
+
 /* }}} */
 /* {{{ extension definition structures */
 
@@ -337,7 +370,21 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(ocifreedesc,            NULL)
 	PHP_FE(ocisavelob,             NULL)
 	PHP_FE(ocisavelobfile,         NULL)
+	PHP_FE(ocilobgetlength,        NULL)	
 	PHP_FE(ociloadlob,             NULL)
+	PHP_FE(ocireadlob,             NULL)
+	PHP_FE(ocieoflob,              NULL)	
+	PHP_FE(ocitelllob,             NULL)
+	PHP_FE(ocitruncatelob,         NULL)
+	PHP_FE(ocieraselob,            NULL)
+	PHP_FE(ociflushlob,            NULL)
+	PHP_FE(ocisetbufferinglob,     NULL)
+	PHP_FE(ocigetbufferinglob,     NULL)
+	PHP_FE(ociisequallob,		   NULL)
+	PHP_FE(ocirewindlob,           NULL)
+	PHP_FE(ociwritelob,            NULL)
+	PHP_FE(ociappendlob,           NULL)
+	PHP_FE(ocicopylob,             NULL)
 	PHP_FE(ociwritelobtofile,      NULL)
 	PHP_FE(ocicommit,              NULL)
 	PHP_FE(ocirollback,            NULL)
@@ -363,6 +410,19 @@ static zend_function_entry php_oci_functions[] = {
 
 static zend_function_entry php_oci_lob_class_functions[] = {
 	PHP_FALIAS(load,        ociloadlob,             NULL)
+	PHP_FALIAS(tell,        ocitelllob,             NULL)
+	PHP_FALIAS(truncate,    ocitruncatelob,         NULL)
+	PHP_FALIAS(erase,       ocieraselob,            NULL)
+	PHP_FALIAS(flush,       ociflushlob,            NULL)
+	PHP_FALIAS(setbuffering,ocisetbufferinglob,     NULL)
+	PHP_FALIAS(getbuffering,ocigetbufferinglob,     NULL)
+	PHP_FALIAS(rewind,      ocirewindlob,			NULL)
+	PHP_FALIAS(read,        ocireadlob,             NULL)
+	PHP_FALIAS(eof,         ocieoflob,              NULL)
+	PHP_FALIAS(seek,        ociseeklob,             NULL)	
+	PHP_FALIAS(write,       ociwritelob,            NULL)
+	PHP_FALIAS(append,      ociappendlob,           NULL)
+	PHP_FALIAS(getlength,   ocilobgetlength,        NULL)
 	PHP_FALIAS(writetofile, ociwritelobtofile,      NULL)
 #ifdef HAVE_OCI8_TEMP_LOB
 	PHP_FALIAS(writetemporary, ociwritetemporarylob,NULL)
@@ -520,6 +580,14 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_COMMIT_ON_SUCCESS",OCI_COMMIT_ON_SUCCESS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_EXACT_FETCH",OCI_EXACT_FETCH, CONST_CS | CONST_PERSISTENT);
 
+/* for $LOB->seek() */
+	REGISTER_LONG_CONSTANT("OCI_SEEK_SET",OCI_SEEK_SET, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_SEEK_CUR",OCI_SEEK_CUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_SEEK_END",OCI_SEEK_END, CONST_CS | CONST_PERSISTENT);
+
+/*	for $LOB->flush() */
+	REGISTER_LONG_CONSTANT("OCI_LOB_BUFFER_FREE",OCI_LOB_BUFFER_FREE, CONST_CS | CONST_PERSISTENT);
+	
 /* for OCIBindByName (real "oci" names + short "php" names*/
 	REGISTER_LONG_CONSTANT("SQLT_BFILEE",SQLT_BFILEE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_CFILEE",SQLT_CFILEE, CONST_CS | CONST_PERSISTENT);
@@ -1201,6 +1269,9 @@ oci_new_desc(int type,oci_connection *connection)
 
 	descr->id = zend_list_insert(descr,le_desc);
 	descr->conn = connection;
+	descr->lob_current_position = 0;
+	descr->lob_size = -1;				/* we should set it to -1 to know, that it's just not initialized */
+	descr->buffering = 0;				/* buffering is off by default */
 	zend_list_addref(connection->id);
 
 	oci_debug("oci_new_desc %d",descr->id);
@@ -1881,10 +1952,70 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 }
 
 /* }}} */
+/* {{{ oci_lobgetlen() */
+
+static int
+oci_lobgetlen(oci_connection *connection, oci_descriptor *mydescr, ub4 *loblen)
+{
+	TSRMLS_FETCH();
+
+	*loblen = 0;
+	
+	/* do we need to ask oracle about LOB's length, if we do already know it? I think no. */
+	if (mydescr->lob_size >= 0) {
+		*loblen = mydescr->lob_size;
+	}
+	else {
+
+		if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+			CALL_OCI_RETURN(connection->error, OCILobFileOpen(
+						connection->pServiceContext, 
+						connection->pError, 
+						mydescr->ocidescr,
+						OCI_FILE_READONLY));
+
+			if (connection->error) {
+				oci_error(connection->pError, "OCILobFileOpen",connection->error);
+				oci_handle_error(connection, connection->error);
+				return -1;
+			}
+		}
+		
+		CALL_OCI_RETURN(connection->error, OCILobGetLength(
+					connection->pServiceContext, 
+					connection->pError, 
+					mydescr->ocidescr, 
+					loblen));
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobGetLength",connection->error);
+			oci_handle_error(connection, connection->error);
+			return -1;
+		}
+		mydescr->lob_size = *loblen;
+
+		if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+			CALL_OCI_RETURN(connection->error, OCILobFileClose(
+						connection->pServiceContext, 
+						connection->pError, 
+						mydescr->ocidescr));
+
+			if (connection->error) {
+				oci_error(connection->pError, "OCILobFileClose", connection->error);
+				oci_handle_error(connection, connection->error);
+				return -1;
+			}
+		}
+	}
+	
+	oci_debug("OCILobGetLen: len=%d",loblen);
+
+	return 0;
+}
+/* }}} */
 /* {{{ oci_loadlob() */
 
 #define LOBREADSIZE 1048576l /* 1MB */
-
 static int
 oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,ub4 *loblen)
 {
@@ -1955,6 +2086,8 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 		return -1;
 	}
 
+	mydescr->lob_size = *loblen;
+	
 	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
 		CALL_OCI_RETURN(connection->error, OCILobFileClose(
 					connection->pServiceContext, 
@@ -1976,6 +2109,132 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 	*loblen = siz;
 
 	oci_debug("OCIloadlob: size=%d",siz);
+
+	return 0;
+}
+/* }}} */
+/* {{{ oci_readlob() */
+static int
+oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer, ub4 *len)
+{
+	ub4 siz = 0;
+	ub4 readlen = 0;
+	ub4 loblen = 0;
+	int bytes = 0;
+	char *buf;
+	TSRMLS_FETCH();
+
+	/* we're not going to read LOB, if length is not known */
+	if (!len || (int)*len <= 0) {
+		return -1;
+	}
+
+	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+		CALL_OCI_RETURN(connection->error, OCILobFileOpen(
+					connection->pServiceContext, 
+					connection->pError, 
+					mydescr->ocidescr,
+					OCI_FILE_READONLY));
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobFileOpen",connection->error);
+			oci_handle_error(connection, connection->error);
+			return -1;
+		}
+	}
+	
+	if (oci_lobgetlen(connection, mydescr, &loblen) != 0) {
+		*len = 0;
+		return -1;
+	}
+	
+	/* check if we're in LOB's borders */
+	if ((mydescr->lob_current_position + *len) > loblen) {
+		*len = loblen - mydescr->lob_current_position;
+	}
+
+	if ((int)*len > 0) {
+		buf = emalloc(*len + 1);
+
+		/* set offset to current LOB's position */
+		siz = mydescr->lob_current_position;
+
+		/* check if len is smaller, if not - using LOBREADSIZE' sized buffer */
+		if (*len > LOBREADSIZE) {
+			readlen = LOBREADSIZE;
+		}
+		else {
+			readlen = *len;
+		}
+	}
+	else {
+		*len = 0;
+		return -1;
+	}
+
+	while (readlen > 0 && bytes < *len && siz < loblen) {  //paranoia
+		CALL_OCI_RETURN(connection->error, OCILobRead(
+					connection->pServiceContext, 
+					connection->pError, 
+					mydescr->ocidescr, 
+					&readlen,					/* IN/OUT bytes toread/read */ 
+					siz + 1,					/* offset (starts with 1) */ 
+					(dvoid *) ((char *) buf + bytes),	
+					readlen,		 			/* size of buffer */ 
+					(dvoid *)0, 
+					(OCICallbackLobRead) 0, 	/* callback... */ 
+					(ub2) connection->session->charsetId, /* The character set ID of the buffer data. */ 
+					(ub1) SQLCS_IMPLICIT));		/* The character set form of the buffer data. */
+
+		siz += readlen;
+		bytes += readlen;
+
+		if ((*len - bytes) > LOBREADSIZE) {
+			readlen = LOBREADSIZE;
+		}
+		else {
+			readlen = *len - bytes;
+		}
+
+		if (connection->error == OCI_NEED_DATA) {
+			buf = erealloc(buf,bytes + LOBREADSIZE + 1);	
+			continue;
+		} else {
+			break;
+		}
+	}
+
+	/* moving current position */
+	mydescr->lob_current_position = siz;
+
+	if (connection->error) {
+		oci_error(connection->pError, "OCILobRead", connection->error);
+		oci_handle_error(connection, connection->error);
+		efree(buf);
+		return -1;
+	}
+
+	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+		CALL_OCI_RETURN(connection->error, OCILobFileClose(
+					connection->pServiceContext, 
+					connection->pError, 
+					mydescr->ocidescr));
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobFileClose", connection->error);
+			oci_handle_error(connection, connection->error);
+			efree(buf);
+			return -1;
+		}
+	}
+
+	buf = erealloc(buf,bytes+1);
+	buf[ bytes ] = 0;
+
+	*buffer = buf;
+	*len = bytes;
+
+	oci_debug("OCIreadlob: size=%d",bytes);
 
 	return 0;
 }
@@ -3272,14 +3531,853 @@ PHP_FUNCTION(ociloadlob)
 		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
-
+		
 		if (!oci_loadlob(descr->conn,descr,&buffer,&loblen)) {
-	 		RETURN_STRINGL(buffer,loblen,0);
+			RETURN_STRINGL(buffer,loblen,0);
+		}
+		else {
+			RETURN_FALSE;
 		}
 	}
 
-  RETURN_FALSE;
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCILoadLob() should not be called like this. Use $somelob->load() to load a LOB");
+
+	RETURN_FALSE;
 }
+/* }}} */
+
+/* {{{ proto string ocireadlob()
+   Reads particular part of a large object */
+
+PHP_FUNCTION(ocireadlob)
+{
+	zval *id;
+	zval **len;
+	oci_descriptor *descr;
+	char *buffer;
+	int inx;
+	ub4 loblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		if (zend_get_parameters_ex(1, &len) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+
+		loblen = Z_LVAL_PP(len);
+		if (oci_readlob(descr->conn,descr,&buffer,&loblen) == 0) {
+			RETURN_STRINGL(buffer,loblen,0);
+		}
+		else {
+			RETURN_FALSE;
+		}
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIReadLob() should not be called like this. Use $somelob->read($len) to read a LOB");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool ocieoflob()
+   Checks if EOF is reached */
+
+PHP_FUNCTION(ocieoflob)
+{
+	zval *id;
+	oci_descriptor *descr;
+	int inx;
+	int len;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		if (oci_lobgetlen(descr->conn,descr,&len) == 0 && descr->lob_size >= 0) {
+			if (descr->lob_size == descr->lob_current_position) {
+				RETURN_TRUE;
+			}
+			else {
+				RETURN_FALSE;
+			}
+		}
+	    RETURN_FALSE;
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIEofLob() should not be called like this. Use $somelob->eof() to check if end of LOB is reached");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto int ocitelllob()
+   Tells LOB pointer position */
+
+PHP_FUNCTION(ocitelllob)
+{
+	zval *id;
+	oci_descriptor *descr;
+	int inx;
+	int len;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		RETURN_LONG(descr->lob_current_position);	
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCITellLob() should not be called like this. Use $somelob->tell() to get current position of LOB pointer");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool ocirewindlob()
+   Rewind pointer of a LOB */
+
+PHP_FUNCTION(ocirewindlob)
+{
+	zval *id;
+	oci_descriptor *descr;
+	int inx;
+	int len;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		descr->lob_current_position = 0;
+		RETURN_TRUE;
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIRewindLob() should not be called like this. Use $somelob->rewind() to set current position of LOB pointer to beginning");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool ociseeklob()
+   Moves the pointer of a LOB */
+
+PHP_FUNCTION(ociseeklob)
+{
+	zval *id;
+	zval **arg1, **arg2;
+	int argcount = ZEND_NUM_ARGS(), whence = OCI_SEEK_SET;
+	oci_descriptor *descr;
+	int inx, len;
+    
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+
+        if (argcount < 1 || argcount > 2 || zend_get_parameters_ex(argcount, &arg1, &arg2) == FAILURE) {
+                WRONG_PARAM_COUNT;
+        }
+		
+		convert_to_long_ex(arg1);
+		
+		if (oci_lobgetlen(descr->conn,descr,&len) == 0 && descr->lob_size >= 0) {
+	        if (argcount > 1) {
+	            convert_to_long_ex(arg2);
+	            whence = Z_LVAL_PP(arg2);
+				switch (whence) {
+					case OCI_SEEK_CUR:
+						descr->lob_current_position += Z_LVAL_PP(arg1);
+						break;
+					
+					case OCI_SEEK_END:
+						if (descr->lob_size + Z_LVAL_PP(arg1) >= 0) {
+							descr->lob_current_position = descr->lob_size + Z_LVAL_PP(arg1);
+						}
+						else {
+							descr->lob_current_position = 0;
+						}
+						break;
+					
+					case OCI_SEEK_SET:
+					default:
+						descr->lob_current_position = Z_LVAL_PP(arg1);
+						break;
+				}
+	        }
+			else {
+				//OCI_SEEK_SET by default
+				descr->lob_current_position = Z_LVAL_PP(arg1);
+			}
+			RETURN_TRUE;
+		}
+		else {
+			RETURN_FALSE;
+		}
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCISeekLob() should not be called like this. Use $somelob->seek($offset) to move pointer");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto int ocilobgetlength()
+   Returns size of a large object */
+
+PHP_FUNCTION(ocilobgetlength)
+{
+	zval *id;
+	oci_descriptor *descr;
+	int inx;
+	ub4 loblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+
+		if (!oci_lobgetlen(descr->conn,descr,&loblen)) {
+	 		RETURN_LONG(loblen);
+		}
+		else {
+			RETURN_FALSE;
+		}
+	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCILobGetLength() should not be called like this. Use $somelob->getLength() to get size of a LOB");
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto int ociwritelob()
+   Writes data to current position of a LOB */
+
+PHP_FUNCTION(ociwritelob)
+{
+	zval *id, **data,**length;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	int write_length,inx;
+	ub4 loblen;
+	ub4 curloblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		IS_LOB_INTERNAL(descr);
+			
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+	    if (oci_lobgetlen(descr->conn,descr,&curloblen) != 0) {
+	        RETURN_FALSE;
+	    }
+		
+		if (zend_get_parameters_ex(2, &data, &length) == SUCCESS) {
+			convert_to_long_ex(length);
+			write_length = Z_LVAL_PP(length);
+		}
+		else if (zend_get_parameters_ex(1, &data) == SUCCESS) {
+			convert_to_string_ex(data);	
+			write_length = Z_STRLEN_PP(data);
+		} 
+		else {
+			WRONG_PARAM_COUNT;
+		}
+
+		if (write_length < 1) {
+			RETURN_LONG(0);
+		}
+		
+		loblen = write_length;
+		
+		CALL_OCI_RETURN(connection->error, OCILobWrite(
+					connection->pServiceContext, 
+					connection->pError,
+					mylob,
+					&loblen,
+					(ub4) descr->lob_current_position+1,
+					(dvoid *) Z_STRVAL_PP(data),
+					(ub4) loblen,
+					OCI_ONE_PIECE,
+					(dvoid *)0,
+					(OCICallbackLobWrite) 0,
+					(ub2) 0,
+					(ub1) SQLCS_IMPLICIT));
+
+		oci_debug("OCIsavedesc: size=%d offset=%d",loblen,descr->lob_current_position);
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobWrite", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+		descr->lob_current_position += loblen;
+	
+		if (descr->lob_current_position > descr->lob_size) {
+			descr->lob_size = descr->lob_current_position;
+		}
+		
+		//marking buffer as used
+		if (descr->buffering == 1) {
+			descr->buffering = 2;
+		}
+		RETURN_LONG(loblen);
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIWriteLob() should not be called like this. Use $somelob->write($data,$len) to write to a LOB");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ociappendlob()
+   Appends data from a LOB to another LOB */
+
+PHP_FUNCTION(ociappendlob)
+{
+	zval *id, **arg;
+	OCILobLocator *mylob,*my_fromlob;
+	oci_connection *connection;
+	oci_descriptor *descr,*from_descr;
+	int inx;
+	ub4 curloblen,from_curloblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+	
+		IS_LOB_INTERNAL(descr);
+		
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+	    if (oci_lobgetlen(descr->conn,descr,&curloblen) != 0) {
+	        RETURN_FALSE;
+	    }
+		
+		if (zend_get_parameters_ex(1, &arg) == SUCCESS) {
+			if ((inx = _oci_get_ocidesc(*arg,&from_descr TSRMLS_CC)) == 0) {
+				RETURN_FALSE;
+			}
+			
+			my_fromlob = (OCILobLocator *) from_descr->ocidescr;
+
+			if (! my_fromlob) {
+				RETURN_FALSE;
+			}
+			
+			if (oci_lobgetlen(from_descr->conn,from_descr,&from_curloblen) != 0) {
+		        RETURN_FALSE;
+		    }
+		} 
+		else {
+			WRONG_PARAM_COUNT;
+		}
+
+		if (from_descr->lob_size == 0) {
+			RETURN_LONG(0);
+		}
+
+		CALL_OCI_RETURN(connection->error, OCILobAppend(
+					connection->pServiceContext, 
+					connection->pError,
+					mylob,
+					my_fromlob));
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobAppend", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+	 	RETURN_TRUE;
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIAppendLob() should not be called like this. Use $somelob->append($LOB_from) to append data from a LOB to another LOB");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ocitruncatelob()
+   Truncates a LOB */
+
+PHP_FUNCTION(ocitruncatelob)
+{
+	zval *id, **length;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	int inx;
+	ub4 trim_length;
+	ub4 curloblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		IS_LOB_INTERNAL(descr);
+
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+	    if (oci_lobgetlen(descr->conn,descr,&curloblen) != 0) {
+	        RETURN_FALSE;
+	    }
+		
+		if (zend_get_parameters_ex(1, &length) == SUCCESS) {
+			convert_to_long_ex(length);	
+			trim_length = Z_LVAL_PP(length);
+		} 
+		else {
+			WRONG_PARAM_COUNT;
+		}
+
+		if (trim_length < 0) {
+			//negative length is not allowed
+			RETURN_FALSE;
+		}
+		
+		CALL_OCI_RETURN(connection->error, OCILobTrim(
+					connection->pServiceContext, 
+					connection->pError,
+					mylob,
+					trim_length));
+
+		oci_debug("OCIsavedesc: trim_length=%d",trim_length);
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobTrim", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+		descr->lob_size = trim_length;
+		RETURN_TRUE;
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCITruncateLob() should not be called like this. Use $somelob->truncate($length) to truncate a LOB to a specified length");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto int ocieraselob()
+   Erases a specified portion of the internal LOB, starting at a specified offset */
+
+PHP_FUNCTION(ocieraselob)
+{
+	zval *id, **length, **offset;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	int inx;
+	ub4 erase_length, erase_offset;
+	ub4 curloblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		IS_LOB_INTERNAL(descr);
+
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+	    if (oci_lobgetlen(descr->conn,descr,&curloblen) != 0) {
+	        RETURN_FALSE;
+	    }
+		
+		if (zend_get_parameters_ex(2, &offset, &length) == SUCCESS) {
+			convert_to_long_ex(offset);
+			convert_to_long_ex(length);	
+			
+			erase_offset = Z_LVAL_PP(offset);
+			erase_length = Z_LVAL_PP(length);
+		}
+		else if (zend_get_parameters_ex(1, &offset) == SUCCESS) {
+			convert_to_long_ex(offset);
+			
+			erase_offset = Z_LVAL_PP(offset);
+			erase_length = descr->lob_size - erase_offset;
+		}
+		else {
+			erase_offset = 0;
+			erase_length = descr->lob_size;
+		}
+
+		if (erase_length < 1) {
+			RETURN_LONG(0);
+		}
+		
+		CALL_OCI_RETURN(connection->error, OCILobErase(
+					connection->pServiceContext, 
+					connection->pError,
+					mylob,
+					&erase_length,
+					erase_offset+1));
+
+		oci_debug("OCIsavedesc: erase_length=%d, erase_offset=%d",erase_length,erase_offset);
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobErase", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+		RETURN_LONG(erase_length);
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIEraseLob() should not be called like this. Use $somelob->erase($offset, $length) to erase specified part of LOB");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ociflushlob()
+   Flushes the LOB buffer */
+
+PHP_FUNCTION(ociflushlob)
+{
+	zval *id, **flag;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	int inx, flush_flag;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		IS_LOB_INTERNAL(descr);
+			
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+		if (zend_get_parameters_ex(1, &flag) == SUCCESS) {
+			convert_to_long_ex(flag);	
+			flush_flag = Z_LVAL_PP(flag);
+		} 
+		else {
+			flush_flag = 0;
+		}
+
+		if (descr->buffering == 0) {
+			//buffering wasn't enabled, there is nothing to flush
+			RETURN_FALSE;
+		}
+		else if (descr->buffering == 1) {
+			//buffering is enabled, but not used yet
+			//dunno why, but OCI returns error in this case, so I think we should suppress it
+			RETURN_TRUE;
+		}
+		
+		CALL_OCI_RETURN(connection->error, OCILobFlushBuffer(
+					connection->pServiceContext, 
+					connection->pError,
+					mylob,
+					flush_flag));
+
+		oci_debug("OCIsavedesc: flush_flag=%d",flush_flag);
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+		RETURN_TRUE;
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIFlushLob() should not be called like this. Use $somelob->flush() to flush LOB buffer");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ocisetbufferinglob()
+   Enables/disables buffering for a LOB */
+
+PHP_FUNCTION(ocisetbufferinglob)
+{
+	zval *id, **flag;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	int inx, buffering_flag;
+	ub4 curloblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		IS_LOB_INTERNAL(descr);
+			
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+	    if (oci_lobgetlen(descr->conn,descr,&curloblen) != 0) {
+	        RETURN_FALSE;
+	    }
+		
+		if (zend_get_parameters_ex(1, &flag) == SUCCESS) {
+			convert_to_boolean_ex(flag);
+			buffering_flag = Z_LVAL_PP(flag);
+		} 
+		else {
+			WRONG_PARAM_COUNT;
+		}
+
+		/* we'll return true if function was called twice with the same parameter */
+		if (buffering_flag == 0 && descr->buffering == 0) {
+			RETURN_TRUE;
+		}
+		else if (buffering_flag == 1 && descr->buffering > 0) {
+			RETURN_TRUE;
+		}
+		
+		switch (buffering_flag) {
+			case 0:
+				CALL_OCI_RETURN(connection->error, OCILobDisableBuffering(
+							connection->pServiceContext, 
+							connection->pError,
+							mylob));
+				break;
+			case 1:
+				CALL_OCI_RETURN(connection->error, OCILobEnableBuffering(
+                            connection->pServiceContext,
+                            connection->pError,
+                            mylob));
+			break;
+		}
+		
+		oci_debug("OCIsavedesc: buffering_flag=%d",buffering_flag);
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+		descr->buffering = buffering_flag;
+		RETURN_TRUE;
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCISetBufferingLob() should not be called like this. Use $somelob->setBuffering($flag) to set buffering on/off for a LOB");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ocigetbufferinglob()
+   Returns current state of buffering for a LOB */
+
+PHP_FUNCTION(ocigetbufferinglob)
+{
+	zval *id, **flag;
+	OCILobLocator *mylob;
+	oci_descriptor *descr;
+	int inx;
+	ub4 curloblen;
+
+	if ((id = getThis()) != 0) {
+		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		IS_LOB_INTERNAL(descr);
+			
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+		switch (descr->buffering) {
+			case 1:
+			case 2:
+				RETURN_TRUE;
+				break;
+
+			case 0:
+			default:
+				RETURN_FALSE;
+				break;
+		}
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIGetBufferingLob() should not be called like this. Use $somelob->getBuffering() to get current state of buffering for a LOB");
+	RETURN_FALSE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ocicopylob()
+   Copies data from a LOB to another LOB */
+
+PHP_FUNCTION(ocicopylob)
+{
+	zval **arg1, **arg2, **arg3;
+	OCILobLocator *mylob,*my_fromlob;
+	oci_connection *connection;
+	oci_descriptor *descr,*from_descr;
+	int inx, ac = ZEND_NUM_ARGS();
+	ub4 curloblen,from_curloblen, copylen;
+
+		if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &arg1, &arg2, &arg3) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+
+		if ((*arg1)->type != IS_OBJECT || (*arg2)->type != IS_OBJECT) {
+	        RETURN_FALSE;
+		}
+		
+		if ((inx = _oci_get_ocidesc(*arg1,&descr TSRMLS_CC)) == 0 || (inx = _oci_get_ocidesc(*arg2,&from_descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+
+		IS_LOB_INTERNAL(descr);
+		IS_LOB_INTERNAL(from_descr);
+
+		mylob = (OCILobLocator *) descr->ocidescr;
+		my_fromlob = (OCILobLocator *) from_descr->ocidescr;
+			
+		if (!mylob || !my_fromlob) {
+			RETURN_FALSE;
+		}
+			
+		if (oci_lobgetlen(descr->conn,descr,&curloblen) != 0 || oci_lobgetlen(from_descr->conn,from_descr,&from_curloblen) != 0) {
+			RETURN_FALSE;
+		}
+
+		if (ac == 3) {
+			convert_to_long_ex(arg3);
+			copylen = Z_LVAL_PP(arg3);
+		}
+		else {
+			copylen = from_descr->lob_size - from_descr->lob_current_position;
+		}
+
+		if ((int)copylen <= 0) {
+			RETURN_FALSE;
+		}
+
+		connection = descr->conn;
+
+		CALL_OCI_RETURN(connection->error, OCILobCopy(
+					connection->pServiceContext, 
+					connection->pError,
+					mylob,
+					my_fromlob,
+					copylen,
+					descr->lob_current_position+1,
+					from_descr->lob_current_position+1
+					));
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobCopy", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+	 	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ociisequallob()
+    Tests to see if two LOB/FILE locators are equal */
+
+PHP_FUNCTION(ociisequallob)
+{
+	zval **arg1, **arg2;
+	OCILobLocator *first_lob,*second_lob;
+	oci_connection *connection;
+	oci_descriptor *first_descr,*second_descr;
+	int inx;
+	ub4 first_curloblen,second_curloblen;
+	boolean is_equal;
+
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+
+		if ((*arg1)->type != IS_OBJECT || (*arg2)->type != IS_OBJECT) {
+	        RETURN_FALSE;
+		}
+
+		if ((inx = _oci_get_ocidesc(*arg1,&first_descr TSRMLS_CC)) == 0 || (inx = _oci_get_ocidesc(*arg2,&second_descr TSRMLS_CC)) == 0) {
+			RETURN_FALSE;
+		}
+		
+		first_lob = (OCILobLocator *) first_descr->ocidescr;
+		second_lob = (OCILobLocator *) second_descr->ocidescr;
+			
+		if (!first_lob || !second_lob) {
+			RETURN_FALSE;
+		}
+			
+		connection = first_descr->conn;
+
+		CALL_OCI_RETURN(connection->error, OCILobIsEqual(
+					connection->session->pEnv, 
+					first_lob,
+					second_lob,
+					&is_equal
+					));
+
+		if (connection->error) {
+			oci_error(connection->pError, "OCILobIsEqual", connection->error);
+			oci_handle_error(connection, connection->error);
+			RETURN_FALSE;
+		}
+
+		if (is_equal == TRUE) {
+			RETURN_TRUE;
+		}
+		else {
+			RETURN_FALSE;
+		}
+}
+
 /* }}} */
 
 /* {{{ proto bool ociwritelobtofile([string filename [, int start [, int length]]])
