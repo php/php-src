@@ -5,7 +5,9 @@ PHP 4.0                                                                    NEWS
 - Added create_function(), which gives the ability to create functions
   on-the-fly (Zeev, Zend Engine)
 - Added support for comparisons of arrays (with arrays) and objects (with
-  objects) (Zeev, Zend Engine)
+  objects);  The equality operator (==) performs an unordered comparison,
+  whereas the identity operator (===) performs an ordered comparison (Zeev,
+  Zend Engine)
 - Allow all functions that receive user-defined function callbacks to accept
   an array that contains an object and a method name, in place of a function
   name, e.g. usort($array, array($obj, "ObjSort")) (Zeev, Zend Engine)

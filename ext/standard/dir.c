@@ -37,7 +37,6 @@
 #include <errno.h>
 
 #ifdef PHP_WIN32
-#define NEEDRDH 1
 #include "win32/readdir.h"
 #endif
 
