@@ -1122,7 +1122,6 @@ consult the installation file that came with this distribution, or visit \n\
 	/* for windows, socket listening is broken in the fastcgi library itself
 	   so dissabling this feature on windows till time is available to fix it */
 	if (bindpath) {
-		int port = 0;
 		/* this must be done to make FCGX_OpenSocket work correctly 
 		   bug 23664 */
 		close(0);
@@ -1130,11 +1129,16 @@ consult the installation file that came with this distribution, or visit \n\
 		 * If just a port is specified, then we prepend a ':' onto the
 		 * path (it's what the fastcgi library expects)
 		 */
-		port = atoi(bindpath);
-		if (port) {
-			char bindport[32];
-			snprintf(bindport, 32, ":%s", bindpath);
-			fcgi_fd = FCGX_OpenSocket(bindport, 128);
+		
+		if (strchr(bindpath, ':') == NULL) {
+			char *tmp;
+
+			tmp = malloc(strlen(bindpath) + 2);
+			tmp[0] = ':';
+			memcpy(tmp + 1, bindpath, strlen(bindpath) + 1);
+
+			fcgi_fd = FCGX_OpenSocket(tmp, 128);
+			free(tmp);
 		} else {
 			fcgi_fd = FCGX_OpenSocket(bindpath, 128);
 		}
