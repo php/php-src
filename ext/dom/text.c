@@ -25,7 +25,7 @@
 
 #include "php.h"
 #include "php_dom.h"
-
+#include "dom_ce.h"
 
 /*
 * class domtext extends domcharacterdata 
@@ -97,7 +97,49 @@ Since:
 */
 PHP_FUNCTION(dom_text_split_text)
 {
- DOM_NOT_IMPLEMENTED();
+	zval       *id;
+	xmlChar    *cur;
+	xmlChar    *first;
+	xmlChar    *second;
+	xmlNodePtr  node;
+	xmlNodePtr  nnode;
+	long        offset;
+	int         ret;
+	int         length;
+
+	DOM_GET_THIS_OBJ(node, getThis(), xmlNodePtr);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &offset) == FAILURE) {
+		return;
+	}
+
+	if (node->type != XML_TEXT_NODE) {
+		RETURN_FALSE;
+	}
+
+	cur = xmlNodeListGetString(node->doc, node, 1);
+	if (cur == NULL) {
+		RETURN_FALSE;
+	}
+	length = xmlStrlen(cur);
+
+	if (offset > length || offset < 0) {
+		RETURN_FALSE;
+	}
+
+	first = xmlStrndup(cur, offset);
+	second = xmlStrdup(cur + offset);
+	
+	xmlFree(cur);
+
+	xmlNodeSetContentLen(node, first, offset);
+	nnode = xmlNewText(second);
+
+	nnode->type = XML_ELEMENT_NODE;
+	xmlAddNextSibling(node, nnode);
+	nnode->type = XML_TEXT_NODE;
+	
+	return_value = php_dom_create_object(nnode, &ret, NULL, return_value TSRMLS_CC);
 }
 /* }}} end dom_text_split_text */
 
