@@ -561,7 +561,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 				return 0;
 			}
 
-			if (!php_flock(fd, value) || (errno == EWOULDBLOCK && value & LOCK_NB)) {
+			if (!flock(fd, value) || (errno == EWOULDBLOCK && value & LOCK_NB)) {
 				data->lock_flag = value;
 				return 0;
 			} else {
