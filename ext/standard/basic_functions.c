@@ -1783,6 +1783,7 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
 {
 	zval retval;
+	ELS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
 		zval_dtor(&retval);
@@ -1797,6 +1798,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe)
 {
 	zval retval;
 	zval *function = tick_fe->arguments[0];
+	ELS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, function, &retval,
 						   tick_fe->arg_count - 1, tick_fe->arguments + 1) == SUCCESS) {
