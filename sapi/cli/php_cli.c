@@ -312,8 +312,8 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
-    char *exec_direct=NULL;
-    char *param_error=NULL;
+	char *exec_direct=NULL;
+	char *param_error=NULL;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
 
         /* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
-        zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 		zend_alter_ini_entry("implicit_flush", 15, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 		zend_alter_ini_entry("max_execution_time", 19, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 
@@ -661,9 +661,9 @@ int main(int argc, char *argv[])
 			break;
 #endif
 		case PHP_MODE_CLI_DIRECT:
-        if (zend_eval_string(exec_direct, NULL, "Command line code" TSRMLS_CC) == FAILURE) {
-            exit_status=254;
-        }
+			if (zend_eval_string(exec_direct, NULL, "Command line code" TSRMLS_CC) == FAILURE) {
+				exit_status=254;
+			}
 		}
 
 		php_request_shutdown((void *) 0);
@@ -671,7 +671,6 @@ int main(int argc, char *argv[])
 		if (cli_sapi_module.php_ini_path_override) {
 			free(cli_sapi_module.php_ini_path_override);
 		}
-
 
 	} zend_catch {
 		exit_status = 255;
