@@ -180,7 +180,7 @@ unticked_statement:
 				for_expr
 			';' { do_free(&$3 CLS_CC); $4.u.opline_num = get_next_op_number(CG(active_op_array)); }
 				for_expr
-			';' { do_for_cond(&$6, &$7 CLS_CC); }
+			';' { do_extended_info(CLS_C); do_for_cond(&$6, &$7 CLS_CC); }
 				for_expr
 			')' { do_free(&$9 CLS_CC); do_for_before_statement(&$4, &$7 CLS_CC); }
 			for_statement { do_for_end(&$7 CLS_CC); }
@@ -276,8 +276,8 @@ switch_case_list:
 
 case_list:
 		/* empty */	{ $$.op_type = IS_UNUSED; }
-	|	case_list T_CASE expr case_separator { do_case_before_statement(&$1, &$2, &$3 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); $$.op_type = IS_CONST }
-	|	case_list T_DEFAULT case_separator { do_default_before_statement(&$1, &$2 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); $$.op_type = IS_CONST; }
+	|	case_list T_CASE expr case_separator { do_extended_info(CLS_C);  do_case_before_statement(&$1, &$2, &$3 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); $$.op_type = IS_CONST }
+	|	case_list T_DEFAULT case_separator { do_extended_info(CLS_C);  do_default_before_statement(&$1, &$2 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); $$.op_type = IS_CONST; }
 ;
 
 
