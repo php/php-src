@@ -241,7 +241,7 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ;
 ;error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR
 ;
-;   - Show all errors except for notices
+;   - Show all errors
 ;
 error_reporting  =  E_ALL
 
