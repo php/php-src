@@ -1532,7 +1532,7 @@ void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
 #else
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     request_info.request_method,
-	                     request_info.path_info,
+	                     SG(request_info).request_uri,
 	                     SG(request_info).query_string);
 #endif
 	/* !!!! memory for object and attributes is allocated with malloc !!!! */
@@ -1784,7 +1784,7 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 #else
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     request_info.request_method,
-	                     request_info.path_info,
+	                     SG(request_info).request_uri,
 	                     SG(request_info).query_string);
 #endif
 	/* !!!! memory for object, bodytag and attributes is allocated with malloc !!!! */
