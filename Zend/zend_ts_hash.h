@@ -32,6 +32,8 @@ typedef struct _zend_ts_hashtable {
 
 BEGIN_EXTERN_C()
 
+#define TS_HASH(table) (&(table->hash))
+
 /* startup/shutdown */
 ZEND_API int zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent);
 ZEND_API int zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection);
