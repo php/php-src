@@ -1977,7 +1977,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link,
 		tp = fbcmdStatementType(md);
 		if (tp == NULL) {
 			fbcmdRelease(meta);
-			ZVAL_BOOL(return_value, 0)
+			ZVAL_BOOL(return_value, 1)
 		}
 		else if ((tp[0] == 'C') || (tp[0] == 'R'))
 		{
