@@ -43,6 +43,8 @@ function_entry mssql_functions[] = {
 	PHP_FE(mssql_close,					NULL)
 	PHP_FE(mssql_select_db,				NULL)
 	PHP_FE(mssql_query,					NULL)
+	PHP_FE(mssql_fetch_batch,			NULL)
+	PHP_FE(mssql_rows_affected,			NULL)
 	PHP_FE(mssql_free_result,			NULL)
 	PHP_FE(mssql_get_last_message,		NULL)
 	PHP_FE(mssql_num_rows,				NULL)
@@ -96,6 +98,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mssql.connect_timeout",    	"5",	PHP_INI_ALL,	OnUpdateInt,	connect_timeout,			php_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mssql.textsize",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textsize,					php_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mssql.textlimit",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textlimit,					php_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mssql.batchsize",   			"0",	PHP_INI_ALL,	OnUpdateInt,	batchsize,					php_mssql_globals,		mssql_globals,	display_link_numbers)
 PHP_INI_END()
 
 /* error handler */
@@ -140,10 +143,12 @@ static void _free_mssql_result(zend_rsrc_list_entry *rsrc)
 
 	if (result->data) {
 		for (i=0; i<result->num_rows; i++) {
-			for (j=0; j<result->num_fields; j++) {
-				zval_dtor(&result->data[i][j]);
+			if (result->data[i]) {
+				for (j=0; j<result->num_fields; j++) {
+					zval_dtor(&result->data[i][j]);
+				}
+				efree(result->data[i]);
 			}
-			efree(result->data[i]);
 		}
 		efree(result->data);
 	}
@@ -758,22 +763,91 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	}
 }
 
-/* {{{ proto int mssql_query(string query [, int conn_id])
+int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue, int *column_types) {
+	int i, j;
+	int blocks_initialized=1;
+	MSSQLLS_FETCH();
+
+	i=0;
+	while (retvalue!=FAIL && retvalue!=NO_MORE_ROWS) {
+		result->num_rows++;
+		if (result->num_rows > blocks_initialized*MSSQL_ROWS_BLOCK) {
+			result->data = (zval **) erealloc(result->data,sizeof(zval *)*MSSQL_ROWS_BLOCK*(++blocks_initialized));
+		}
+		result->data[i] = (zval *) emalloc(sizeof(zval)*result->num_fields);
+		for (j=1; j<=result->num_fields; j++) {
+			INIT_PZVAL(&result->data[i][j-1]);
+			MS_SQL_G(get_column_content(mssql_ptr, j, &result->data[i][j-1], column_types[j-1]));
+		}
+		if (i<result->batchsize || result->batchsize==0) {
+			i++;
+			retvalue=dbnextrow(mssql_ptr->link);
+			dbclrbuf(mssql_ptr->link,DBLASTROW(mssql_ptr->link)-1); 
+		}
+		else
+			break;
+		result->lastresult = retvalue;
+	}
+	return i;
+}
+
+/* {{{ proto int mssql_fetch_batch(string result_index)
+	returns the next batch of records*/
+PHP_FUNCTION(mssql_fetch_batch) {
+	zval **mssql_result_index;
+	mssql_result *result;
+	mssql_link *mssql_ptr;
+	int i,j;
+	int *column_types;
+	MSSQLLS_FETCH();
+
+	
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if ((*mssql_result_index)->type==IS_RESOURCE && (*mssql_result_index)->value.lval==0) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);
+	mssql_ptr = result->mssql_ptr;
+	if (result->data) {
+		for (i=0; i<result->num_rows; i++) {
+			for (j=0; j<result->num_fields; j++) {
+				zval_dtor(&result->data[i][j]);
+			}
+			efree(result->data[i]);
+			result->data[i] = NULL;
+		}
+	}
+	column_types = (int *) emalloc(sizeof(int) * result->num_fields);
+	for (i=0; i<result->num_fields; i++) {
+		column_types[i] = coltype(i+1);
+	}
+	result->cur_row=result->num_rows=0;
+	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, result->lastresult, column_types);
+	efree(column_types);
+	RETURN_LONG(result->num_rows);
+}
+/* }}} */
+
+/* {{{ proto int mssql_query(string query [, int conn_id [, int batch_size = 0]])
    Perform an SQL query on a MS-SQL server database */
 PHP_FUNCTION(mssql_query)
 {
-	zval **query, **mssql_link_index;
+	zval **query, **mssql_link_index, **zbatchsize;
 	int retvalue;
 	mssql_link *mssql_ptr;
 	mssql_result *result;
 	int id;
 	int num_fields;
-	int blocks_initialized=1;
 	int i,j;
 	int *column_types;
+	int batchsize;
 	MSSQLLS_FETCH();
 
-
+	batchsize = MS_SQL_G(batchsize);
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
@@ -787,6 +861,14 @@ PHP_FUNCTION(mssql_query)
 				RETURN_FALSE;
 			}
 			id = -1;
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &query, &mssql_link_index, &zbatchsize)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			convert_to_long_ex(zbatchsize);
+			batchsize = (*zbatchsize)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -817,38 +899,24 @@ PHP_FUNCTION(mssql_query)
 		RETURN_FALSE;
 	}
 
+	result = (mssql_result *) emalloc(sizeof(mssql_result));
 	num_fields = dbnumcols(mssql_ptr->link);
 	if (num_fields <= 0) {
 		RETURN_TRUE;
 	}
-	
+
 	column_types = (int *) emalloc(sizeof(int) * num_fields);
 	for (i=0; i<num_fields; i++) {
 		column_types[i] = coltype(i+1);
 	}
 	
-	result = (mssql_result *) emalloc(sizeof(mssql_result));
+	result->batchsize = batchsize;
 	result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
 	result->mssql_ptr = mssql_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
 	result->num_fields = num_fields;
 
-	i=0;
-	while (retvalue!=FAIL && retvalue!=NO_MORE_ROWS) {
-		result->num_rows++;
-		if (result->num_rows > blocks_initialized*MSSQL_ROWS_BLOCK) {
-			result->data = (zval **) erealloc(result->data,sizeof(zval *)*MSSQL_ROWS_BLOCK*(++blocks_initialized));
-		}
-		result->data[i] = (zval *) emalloc(sizeof(zval)*num_fields);
-		for (j=1; j<=num_fields; j++) {
-			INIT_PZVAL(&result->data[i][j-1]);
-			MS_SQL_G(get_column_content(mssql_ptr, j, &result->data[i][j-1], column_types[j-1]));
-		}
-		retvalue=dbnextrow(mssql_ptr->link);
-		dbclrbuf(mssql_ptr->link,DBLASTROW(mssql_ptr->link)-1); 
-		i++;
-	}
-	result->num_rows = DBCOUNT(mssql_ptr->link);
+	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue, column_types);
 	
 	result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
 	j=0;
@@ -892,11 +960,27 @@ PHP_FUNCTION(mssql_query)
 		}
 	}
 	efree(column_types);
-
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	RETURN_TRUE;
 }
-
 /* }}} */
+
+/* {{{ proto int mssql_rows_affected(int conn_id)
+	returns the number of records affected by the query*/
+PHP_FUNCTION(mssql_rows_affected) {
+	zval **mssql_link_index;
+	mssql_link *mssql_ptr;
+	MSSQLLS_FETCH();
+
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_link_index)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE2(mssql_ptr, mssql_link *, mssql_link_index, -1, "MS SQL-Link", le_link, le_plink);
+	RETURN_LONG(DBCOUNT(mssql_ptr->link));
+}
+/* }}} */
+
 
 /* {{{ proto int mssql_free_result(string result_index)
    Free a MS-SQL result index */
