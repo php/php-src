@@ -669,16 +669,18 @@ void php_request_shutdown(void *dummy)
 	
 	php_ini_rshutdown();
 
+
 	shutdown_scanner(CLS_C);
 	shutdown_compiler(CLS_C);
 	shutdown_executor(ELS_C);
+
+	sapi_deactivate(SLS_C);
 
 	php3_destroy_request_info(NULL);
 	shutdown_memory_manager(PG(unclean_shutdown), 0);
 	php3_unset_timeout();
 
 
-	sapi_deactivate(SLS_C);
 
 #if CGI_BINARY
 	fflush(stdout);

@@ -48,6 +48,9 @@ SAPI_API void sapi_activate(SLS_D)
 SAPI_API void sapi_deactivate(SLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
+	if (SG(sapi_headers).content_type.header) {
+		efree(SG(sapi_headers).content_type.header);
+	}
 }
 
 
