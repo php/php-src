@@ -435,8 +435,10 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
     function doRunTests($command, $options, $params)
     {
         $cwd = getcwd();
-        $php = PHP_BINDIR . '/php' . (OS_WINDOWS ? '.exe' : '');
+        $php = $this->config->get('php_bin');
         putenv("TEST_PHP_EXECUTABLE=$php");
+        // all core PEAR tests use this constant to determine whether they should be run or not
+        putenv("PHP_PEAR_RUNTESTS=1");
         $ip = ini_get("include_path");
         $ps = OS_WINDOWS ? ';' : ':';
         $run_tests = $rtsts = $this->config->get('php_dir') . DIRECTORY_SEPARATOR . 'run-tests.php';
@@ -447,9 +449,19 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
                                                 "file from the sources of your PHP distribution to $rtsts");
             }
         }
-        $plist = implode(" ", $params);
-        $cmd = "$php -C -d include_path=$cwd$ps$ip -f $run_tests -- $plist";
-        system($cmd);
+        if (OS_WINDOWS) {
+            // note, this requires a slightly modified version of run-tests.php
+            // for some setups
+            // unofficial download location is in the pear-dev archives
+            $argv = $params;
+            array_unshift($argv, $run_tests);
+            $argc = count($argv);
+            include $run_tests;
+        } else {
+            $plist = implode(' ', $params);
+            $cmd = "$php -d include_path=$cwd$ps$ip -f $run_tests -- $plist";
+            system($cmd);
+        }
         return true;
     }
 
