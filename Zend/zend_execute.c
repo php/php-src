@@ -447,7 +447,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	FREE_OP(Ts, op2, EG(free_op2));
 	if (result) {
 		T(result->u.var).var.ptr = value;
-		T(result->u.var).var.ptr_ptr = NULL; /* see if we can remove this */
+		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr; /* this is so that we could use it in FETCH_DIM_R, etc. - see bug #27876 */
 		SELECTIVE_PZVAL_LOCK(value, result);
 	}
 	zval_ptr_dtor(&value);
