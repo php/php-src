@@ -918,6 +918,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.scope = CG(active_class_entry);
 
 	if (is_method) {
+		char *foo;
+
+		foo = CG(active_class_entry)->name;
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
@@ -2046,7 +2049,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->handle_property_get = NULL;
 	
 	/* code for inheritance from parent class */
-	if (parent_class_name) {
+	if (parent_class_name->op_type == IS_CONST) {
 		zend_class_entry *parent_class, **parent_class_p;
 		zend_function tmp_zend_function;
 		zval *tmp;
