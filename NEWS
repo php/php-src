@@ -9,8 +9,8 @@ PHP 4.0                                                                    NEWS
   (Zeev, Zend Engine)
 - Fixed a problem in long2ip() that occasionally returned incorrect IP address.
   (Evan, Andrei)
-- Fix many memory leaks in the IMAP module (Stanislav, Andi, Zeev)
-- Fix bug in number_format (Jon Forsberg)
+- Fixed many memory leaks in the IMAP module (Stanislav, Andi, Zeev)
+- Fixed bug in number_format (Jon Forsberg)
 - Make error_prepend_string and error_append_string work (Rasmus)
 - array_walk() now automatically resets the array. (Andrei)
 - Added natural comparison/sorting routines strnatcmp(), strnatcasecmp(),
@@ -28,11 +28,11 @@ PHP 4.0                                                                    NEWS
 - Ported ldap_errno(), ldap_err2str() and ldap_error() from PHP3 to PHP4.
   (Sterling)
 - WDDX now defaults to ISO-8859-1. (Thies)
-- Fix crash resulting from IMAP's error handling (Stanislav)
-- Add $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
+- Fixed crash resulting from IMAP's error handling (Stanislav)
+- Added $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
   retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[] (Zeev)
 - Made the IMAP and LDAP modules compilable under Windows and thread-safe (Zeev)
-- Fix a problem when dealing with large POST blocks in CGI mode (Zeev)
+- Fixed a problem when dealing with large POST blocks in CGI mode (Zeev)
 - Added session_get_cookie_params() function. (Sterling)
 - Fixed return of stristr() to no longer always be lowercased. (Andrei)
 - Changed the Windows version of PHP so that a php.ini file is no
@@ -70,7 +70,7 @@ PHP 4.0                                                                    NEWS
   when used as function arguments (Andi, Zend Engine)
 - Added get_class_methods(string classname) function. (Andrei)
 - Added 'I' switch to test whether or not DST is active. (Sterling)
-- Fix a data corruption bug in mysql_result(), if used in table.fieldname mode (Zeev)
+- Fixed a data corruption bug in mysql_result(), if used in table.fieldname mode (Zeev)
 - Modified the registry INI entry reader (Win32) to work with drive letters.  For
   example, if you wish to wish to specify INI entries for C:\foo\bar, you should
   create HKLM\PHP\Per Directory Values\C\foo\bar in the registry, and add
@@ -95,7 +95,7 @@ PHP 4.0                                                                    NEWS
   corrupted. (Thies)
 - Changed $HTTP_STATE_VARS to $HTTP_SESSION_VARS. Use only the latter
   version now! (Andrei)
-- Add GD-JPEG Support (Rasmus)
+- Added GD-JPEG Support (Rasmus)
 - Prevent from loading dynamic PHP modules which were compiled with different
   debug and thread safety modes than PHP, which resulted in a crash (Andi)
 - connection_aborted() and friends work again (Thies)
@@ -118,7 +118,7 @@ PHP 4.0                                                                    NEWS
   of PHP, and currently lacks section support (Zeev)
 - "none" is now equivalent with "" in Apache config directives (Stig)
 - OCINLogon no longer crashes. (Thies)
-- Fix comparisons of (string) "nan" with (string) "nan". (Thies, Zend Engine)
+- Fixed comparisons of (string) "nan" with (string) "nan". (Thies, Zend Engine)
 - Switched back to the old $HTTP_*_VARS[] behavior - $HTTP_GET_VARS["foo"]
   and $foo are no longer references to each other, but separate variables
   like they were prior to PHP 4.0 Beta 4 (Zeev)
@@ -132,7 +132,7 @@ PHP 4.0                                                                    NEWS
   can be used to denote an empty string (Zeev)
 - Added get_class_vars(string class_name) and get_object_vars(object obj)
   functions. (Andrei, Zend Engine)
-- Add pdf_set_parameter(), pdf_skew(), pdf_show_boxed() (Uwe)
+- Added pdf_set_parameter(), pdf_skew(), pdf_show_boxed() (Uwe)
 - Fixed comparison of (string) "inf" with (string) "inf", which was erroneously
   returning false (Zeev)
 - Implemented default_charset and default_mimetype config directives (Stig)
@@ -155,7 +155,7 @@ PHP 4.0                                                                    NEWS
 - Made multipart/form-data content obey to the variables_order directive (Zeev)
 - Updated the browscap module to work with PHP 4.0 (Zeev)
 - Recover gracefully in ISAPI after the client prematurely presses STOP (Andi)
-- Fix bug in unset() on array offsets which are referenced more than once
+- Fixed bug in unset() on array offsets which are referenced more than once
   (Andi, Zend Engine)
 - Improved ISAPI module - it should no longer be necessary to set PHP as
   an ISAPI filter, only as an ISAPI extension, unless you wish to perform
@@ -167,7 +167,7 @@ PHP 4.0                                                                    NEWS
 - Re-introduced "none" for disabling auto_prepend/append_file (Stig)
 - Added DB/storage (Stig, PEAR)
 - Introduced DB warnings (Stig, PEAR)
-- Fix overrun in strip_tags (Stas)
+- Fixed overrun in strip_tags (Stas)
 - Fixed crash in strip_tags() and related functions. (Thies)
 - Workaround for bogus POST-Data from IE/Mac. (Thies)
   Patch by Alain Malek <alain@virtua.ch>
@@ -267,7 +267,7 @@ PHP 4.0                                                                    NEWS
 - Made implode() binary-safe (Andrei)
 - Made strstr(), stristr(), and ucwords() binary-safe() (Andrei)
 - Made strtoupper(), strtolower(), substr_replace() binary-safe. (Andrei)
-- Fix a crash in the Apache syntax highlighting mode (Zeev)
+- Fixed a crash in the Apache syntax highlighting mode (Zeev)
 - Report all ODBC error's not just the one on the top of the stack (lurcher)
 - OCI8 now returns NULL values in LONG columns correct. (Thies)
 - Added support for a C-like assert() function. (Thies)
@@ -326,7 +326,7 @@ November 16 1999, Version 4.0 Beta 3
 - Upgraded regex library to alpha3.8 (Sascha)
 - Fixed selecting nested-tables in OCI8. (Thies)
 - RFC-854 fix for internal FTP-Code. Commands have to end in "\r\n" (Thies)
-- Fix OpenLink ODBC support (Stig)
+- Fixed OpenLink ODBC support (Stig)
 - min(),max(),a[r]sort(),[r]sort(),k[r]sort() now work consistent with the 
   language-core. (Thies)
 - tempnam() now uses mkstemp() if available (Stig)
@@ -419,8 +419,8 @@ November 16 1999, Version 4.0 Beta 3
 - Updated Oracle to use the new high-performance Zend function API. (Thies)
 - Improved the performance of the MySQL module significantly by using the new
   high-performance Zend function API. (Zeev)
-- Add support for the Easysoft ODBC-ODCB Bridge (martin@easysoft.com)
-- Fix bug in odbc_setoption, getParameter call incorrect (martin@easysoft.com)
+- Added support for the Easysoft ODBC-ODCB Bridge (martin@easysoft.com)
+- Fixed bug in odbc_setoption, getParameter call incorrect (martin@easysoft.com)
 - Ora_Fetch_Into now resets the returned array in all cases (Thies) 
 - Fixed NULL-Column problem in Oracle-Driver (Thies)
 - Added extra metadata functions to ODBC, SQLTables etc (nick@easysoft.com)
