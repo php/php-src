@@ -59,7 +59,9 @@ double php_combined_lcg(void)
 	return z * 4.656613e-10;
 }
 
-static void init_globals(LCGLS_D)
+static void lcg_init_globals(LCGLS_D);
+
+static void lcg_init_globals(LCGLS_D)
 {
 	LCG(s1) = 1;
 #ifdef ZTS
@@ -72,9 +74,9 @@ static void init_globals(LCGLS_D)
 static int php_minit_lcg(INIT_FUNC_ARGS)
 {
 #ifdef ZTS
-	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), init_globals, NULL);
+	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), lcg_init_globals, NULL);
 #else
-	init_globals();
+	lcg_init_globals();
 #endif
 	return SUCCESS;
 }
