@@ -1448,6 +1448,10 @@ SOURCE=..\ext\com\conversion.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\com\dispatch.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\com\VARIANT.c
 # End Source File
 # End Group
