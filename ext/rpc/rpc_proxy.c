@@ -52,8 +52,6 @@ zend_object_handlers rpc_proxy_handlers = {
 	NULL,
 	rpc_proxy_get,
 	rpc_proxy_set,
-	NULL,
-	NULL,
 	rpc_proxy_has_property,
 	rpc_proxy_unset_property,
 	rpc_proxy_get_properties,

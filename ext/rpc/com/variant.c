@@ -62,8 +62,6 @@ static zend_object_handlers variant_handlers = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
-	NULL,
 	variant_get_constructor,
 	variant_get_class_entry,
 	NULL,

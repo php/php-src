@@ -66,8 +66,6 @@ static zend_object_handlers rpc_handlers = {
 	NULL,
 	rpc_get,
 	rpc_set,
-	NULL,
-	NULL,
 	rpc_has_property,
 	rpc_unset_property,
 	rpc_get_properties,
@@ -139,6 +137,24 @@ ZEND_MINIT_FUNCTION(rpc)
 	zend_llist_init(classes_list, sizeof(rpc_class_hash **), rpc_class_dtor, TRUE);
 
 	FOREACH_HANDLER {
+		/*
+			handle = DL_LOAD(path);
+	if (!handle) {
+#ifndef ZEND_WIN32
+		fprintf(stderr, "Failed loading %s:  %s\n", path, DL_ERROR());
+#else
+		fprintf(stderr, "Failed loading %s\n", path);
+#endif
+		return FAILURE;
+	}
+
+	extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
+	new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
+	if (!extension_version_info || !new_extension) {
+		fprintf(stderr, "%s doesn't appear to be a valid Zend extension\n", path);
+		return FAILURE;
+	}
+*/
 		zend_class_entry ce;
 
 		HANDLER.rpc_handler_init(module_number TSRMLS_CC);
@@ -155,7 +171,7 @@ ZEND_MINIT_FUNCTION(rpc)
 
 		/* register classes and functions */
 		*HANDLER.ce = zend_register_internal_class_ex(&ce, rpc_entry, NULL TSRMLS_CC);
-		zend_register_functions(HANDLER.functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
+		zend_register_functions(NULLHANDLER.functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 		zend_register_ini_entries(HANDLER.ini, module_number TSRMLS_CC);
 	}
 
