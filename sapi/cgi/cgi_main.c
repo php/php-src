@@ -453,7 +453,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		php_module_shutdown();
 		return FAILURE;
 	} else if (file_handle.handle.fp && file_handle.handle.fp!=stdin) {
-#if !(WIN32|WINNT)
 		/* #!php support */
 		c = fgetc(file_handle.handle.fp);
 		if (c == '#') {
@@ -464,7 +463,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		} else {
 			rewind(file_handle.handle.fp);
 		}
-#endif
 	}
 
 	switch (behavior) {
