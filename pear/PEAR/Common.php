@@ -130,6 +130,7 @@ class PEAR_Common extends PEAR
     {
         parent::PEAR();
         $this->config = &PEAR_Config::singleton();
+        $this->debug = $this->config->get('verbose');
     }
 
     // }}}
@@ -210,7 +211,7 @@ class PEAR_Common extends PEAR
         if ($this->debug >= $level) {
             if (is_object($this->ui)) {
                 // XXX convert to new Frontend API?
-                $this->ui->displayLine($msg);
+                $this->ui->outputData($msg, 'unknown');
             } else {
                 print "$msg\n";
             }
