@@ -151,17 +151,17 @@ typedef union _date_ll {
 static int yylex (YYSTYPE *lvalp, void *parm);
 %}
 
-/* This grammar has 22 shift/reduce conflicts. */
-%expect 22
+/* This grammar has 24 shift/reduce conflicts. */
+%expect 36
 %pure_parser
 
-%token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tZZONE 
+%token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tWZONE tZZONE
 %token	tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
 %token	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE
 
 %type	<Number>	tDAY tDAY_UNIT tDAYZONE tHOUR_UNIT tMINUTE_UNIT
 %type	<Number>	tMONTH tMONTH_UNIT
-%type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE tTZONE tZZONE 
+%type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE tTZONE tWZONE tZZONE 
 %type	<Meridian>	tMERIDIAN 
 
 %%
@@ -195,70 +195,65 @@ time	: tUNUMBER tMERIDIAN {
 	    ((struct date_yy *)parm)->yySeconds = 0;
 	    ((struct date_yy *)parm)->yyMeridian = $2;
 	}
-	| tUNUMBER ':' tUNUMBER {
-	    ((struct date_yy *)parm)->yyHour = $1;
-	    ((struct date_yy *)parm)->yyMinutes = $3;
-	    ((struct date_yy *)parm)->yySeconds = 0;
-	}
-	| tUNUMBER ':' tUNUMBER tSNUMBER {
-	    ((struct date_yy *)parm)->yyHour = $1;
-	    ((struct date_yy *)parm)->yyMinutes = $3;
-	    ((struct date_yy *)parm)->yyMeridian = MER24;
-	    ((struct date_yy *)parm)->yyHaveZone++;
-	    ((struct date_yy *)parm)->yyTimezone = ($4 < 0
-			  ? -$4 % 100 + (-$4 / 100) * 60
-			  : - ($4 % 100 + ($4 / 100) * 60));
-	}
-	| tUNUMBER ':' tUNUMBER ':' tUNUMBER {
-	    ((struct date_yy *)parm)->yyHour = $1;
-	    ((struct date_yy *)parm)->yyMinutes = $3;
-	    ((struct date_yy *)parm)->yySeconds = $5;
-	}
-	| tUNUMBER ':' tUNUMBER ':' tUNUMBER tSNUMBER {
-	    /* ISO 8601 format.  hh:mm:ss[+-][0-9]{2}([0-9]{2})?.  */
-	    ((struct date_yy *)parm)->yyHour = $1;
-	    ((struct date_yy *)parm)->yyMinutes = $3;
-	    ((struct date_yy *)parm)->yySeconds = $5;
-	    ((struct date_yy *)parm)->yyMeridian = MER24;
-	    ((struct date_yy *)parm)->yyHaveZone++;
-		if ($6 <= -100 || $6 >= 100) {
-			((struct date_yy *)parm)->yyTimezone =  
-				-$6 % 100 + (-$6 / 100) * 60;
-		} else {
-			((struct date_yy *)parm)->yyTimezone =  -$6 * 60;
-		}
-    }
-    | tUNUMBER ':' tUNUMBER ':' tUNUMBER '.' tUNUMBER pgsqlzonepart {
-	    ((struct date_yy *)parm)->yyHour = $1;
-	    ((struct date_yy *)parm)->yyMinutes = $3;
-	    ((struct date_yy *)parm)->yySeconds = $5;
-	    ((struct date_yy *)parm)->yyMeridian = MER24;
-	}
+	| iso8601time_colon
+	/* | pgsqltime  ... shares a common spec with ISO8601 */
 	;
 
-iso8601time: tUNUMBER ':' tUNUMBER ':' tUNUMBER  {
-	    ((struct date_yy *)parm)->yyHour = $1;
-	    ((struct date_yy *)parm)->yyMinutes = $3;
-	    ((struct date_yy *)parm)->yySeconds = $5;
+iso8601time_colon: HMStime_with_colon sec_fraction_part iso8601zonepart {
 	    ((struct date_yy *)parm)->yyMeridian = MER24;
-	}  
+	}
+	|  HMtime_with_colon sec_fraction_part iso8601zonepart {
+	    ((struct date_yy *)parm)->yySeconds = 0;
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	}
     ;
 
-
-pgsqlzonepart : tSNUMBER {
-	    ((struct date_yy *)parm)->yyHaveZone++;
-		if ($1 <= -100 || $1 >= 100) {
-			((struct date_yy *)parm)->yyTimezone =  
-				-$1 % 100 + (-$1 / 100) * 60;
-		} else {
-			((struct date_yy *)parm)->yyTimezone =  -$1 * 60;
-		}
+iso8601zonepart: zonepart_numeric_without_colon {
+		((struct date_yy *)parm)->yyHaveZone++;
+	}
+	| zonepart_numeric_with_colon {
+		((struct date_yy *)parm)->yyHaveZone++;
 	}
 	| zone {
-	    ((struct date_yy *)parm)->yyHaveZone++;
+		((struct date_yy *)parm)->yyHaveZone++;
 	}
 	| /* empty */
 	;
+
+sec_fraction_part: '.' tUNUMBER {
+	}
+	| /* empty */
+	;
+
+zonepart_numeric_without_colon: tSNUMBER {
+		/* format: [+-]hhmm */
+		if ($1 <= -100 || $1 >= 100) {
+			((struct date_yy *)parm)->yyTimezone = (-$1 / 100) * 60 + (-$1 % 100);
+		} else if ($1 >= -99 || $1 <= 99) {
+			((struct date_yy *)parm)->yyTimezone = -$1 * 60;
+		}
+	}
+	;
+
+zonepart_numeric_with_colon: tSNUMBER ':' tUNUMBER {
+		/* format: [+-]hh:mm */
+		((struct date_yy *)parm)->yyTimezone = -$1 * 60 + ($1 > 0 ? -$3: $3);
+	}
+	;
+
+HMStime_with_colon: HMtime_with_colon ':' tUNUMBER {
+		/* format: hh:mm:ss */
+	    ((struct date_yy *)parm)->yySeconds = $3;
+	}
+	;
+
+HMtime_with_colon: tUNUMBER ':' tUNUMBER {
+		/* format: hh:mm */
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	}
+	;
+
 
 	/* we have to deal with a special case for the datetime format 
 	   of XML Schema here: '2003-11-18T22:40:00Z'
@@ -271,6 +266,9 @@ pgsqlzonepart : tSNUMBER {
 zone	: tTZONE {
 	    ((struct date_yy *)parm)->yyTimezone = $1;
 	}
+	| tWZONE {
+	    ((struct date_yy *)parm)->yyTimezone = $1;
+	}
 	| tZZONE {
 	    ((struct date_yy *)parm)->yyTimezone = $1;
 	}
@@ -280,8 +278,7 @@ zone	: tTZONE {
 	| tDAYZONE {
 	    ((struct date_yy *)parm)->yyTimezone = $1 - 60;
 	}
-	|
-	  tZONE tDST {
+	| tZONE tDST {
 	    ((struct date_yy *)parm)->yyTimezone = $1 - 60;
 	}
 	;
@@ -335,13 +332,6 @@ date	: tUNUMBER '/' tUNUMBER {
 	}
 	| iso8601date
 	| iso8601datetime {
-	        ((struct date_yy *)parm)->yyTimezone = 0;
-	        ((struct date_yy *)parm)->yyHaveZone++;
-			((struct date_yy *)parm)->yyHaveTime++;
-    }
-	| iso8601datetime tZZONE {
-	        ((struct date_yy *)parm)->yyTimezone = 0;
-	        ((struct date_yy *)parm)->yyHaveZone++;
 			((struct date_yy *)parm)->yyHaveTime++;
     }
 	| tUNUMBER tMONTH tSNUMBER {
@@ -384,7 +374,23 @@ date	: tUNUMBER '/' tUNUMBER {
 	;
 
 iso8601datetime: iso8601date tTZONE iso8601time
-	;
+	| tUNUMBER tTZONE iso8601time {
+		int i = $1;
+
+		if (i >= 10000) {
+			/* format: yyyymmdd */
+			((struct date_yy *)parm)->yyYear = i / 10000;
+			i %= 10000;
+			((struct date_yy *)parm)->yyMonth = i / 100;
+			i %= 100;
+			((struct date_yy *)parm)->yyDay = i;
+		} else if (i >= 1000 && i <= 9999) {
+			/* format: yyyy */
+			((struct date_yy *)parm)->yyYear = i;
+			((struct date_yy *)parm)->yyDay= 1;
+			((struct date_yy *)parm)->yyMonth = 1;
+		}
+	}
 
 iso8601date: tUNUMBER tSNUMBER tSNUMBER {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
@@ -392,7 +398,58 @@ iso8601date: tUNUMBER tSNUMBER tSNUMBER {
 	    ((struct date_yy *)parm)->yyMonth = -$2;
 	    ((struct date_yy *)parm)->yyDay = -$3;
 	}
+	| tUNUMBER tSNUMBER {
+		/* ISO 8601 format   yyyy-mm */
+	    ((struct date_yy *)parm)->yyYear = $1;
+	    ((struct date_yy *)parm)->yyMonth = -$2;
+	    ((struct date_yy *)parm)->yyDay = 1;
+	}
+	| tUNUMBER iso8601weekspec {
+		const int om = (1 + 9) % 12; /* offset month */
+		const int oy = $1 - 1; /* offset year */
+
+		((struct date_yy *)parm)->yyYear = $1;
+		((struct date_yy *)parm)->yyMonth = 1;
+		/* Zeller's formula */
+		((struct date_yy *)parm)->yyDay -= ((13 * om + 12) / 5 +
+					oy + oy / 4 + oy / 400 - oy / 100) % 7 - 1;
+	}
     ;
+
+iso8601weekspec: tWZONE tUNUMBER {
+		((struct date_yy *)parm)->yyDay = ($2 / 10) * 7 + ($2 % 10) - 8;
+	}
+	| tWZONE tUNUMBER tSNUMBER {
+		((struct date_yy *)parm)->yyDay = $2 * 7 - $3 - 8;
+	}
+	;
+
+iso8601time:
+	iso8601time_colon
+	| tUNUMBER sec_fraction_part iso8601zonepart {
+		int i = $1;
+
+		if (i <= -100000 || i >= 100000) {
+			((struct date_yy *)parm)->yyHour = i / 10000;
+			i %= 10000;
+			((struct date_yy *)parm)->yyMinutes = i / 100;
+			i %= 100;
+	    	((struct date_yy *)parm)->yySeconds = i;
+		} else if (i <= -1000 || i >= 1000) {
+			((struct date_yy *)parm)->yyHour = i / 100;
+			i %= 100;
+			((struct date_yy *)parm)->yyMinutes = i;
+	    	((struct date_yy *)parm)->yySeconds = 0;
+		} else if (i >= -99 || i <= 99) {
+			((struct date_yy *)parm)->yyHour = $1;
+			((struct date_yy *)parm)->yyMinutes = 0;
+	    	((struct date_yy *)parm)->yySeconds = 0;
+		} else {
+			((struct date_yy *)parm)->yyHaveTime = 0;
+		}
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	}
+	;
 
 rel	: relunit tAGO {
 	    ((struct date_yy *)parm)->yyRelSeconds =
@@ -697,7 +754,7 @@ static TABLE const MilitaryTable[] = {
     { "t",	tTZONE,	HOUR (  7) },
     { "u",	tZONE,	HOUR (  8) },
     { "v",	tZONE,	HOUR (  9) },
-    { "w",	tZONE,	HOUR ( 10) },
+    { "w",	tWZONE,	HOUR ( 10) },
     { "x",	tZONE,	HOUR ( 11) },
     { "y",	tZONE,	HOUR ( 12) },
     { "z",	tZZONE,	HOUR (  0) },
