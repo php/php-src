@@ -1,3 +1,46 @@
+2002-09-12  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      main/network.c
+      main/php_network.h: made new ssl activate function the default.
+
+2002-09-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: ws fix
+
+2002-09-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Meaningful Custom Build Step information.
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Fix logic.
+
+2002-09-12  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.TESTING: Update info and synch example test.
+
+2002-09-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    - Fixed linker error when HAVE_STRFTIME was not set
+
+2002-09-12  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/php_oci8.h
+      ext/oci8/oci8.c:
+    - OCIResult() could return garbage if called on empty result-sets. (thies)
+
+2002-09-12  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/array.c: Fixing my zts fix.
+
+    * ext/standard/array.c:
+    Removed magic numbers about the behavior of php_array_diff - proposed by
+    Andi and Jon Parise.
+
 2002-09-11  Edin Kadribasic  <edink@proventum.net>
 
     * ext/standard/filestat.c: My compiler likes it like this.
