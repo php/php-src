@@ -28,6 +28,7 @@
 #define MCRYPT2
 #include "mcrypt.h"
 #include "php_ini.h"
+#include "php_globals.h"
 #include "ext/standard/info.h"
 
 
@@ -94,11 +95,7 @@ zend_module_entry mcrypt_module_entry = {
 };
 
 #if HAVE_LIBMCRYPT24
-#ifdef ZTS
 ZEND_DECLARE_MODULE_GLOBALS(mcrypt)
-#else
-static mcrypt_global_struct mcrypt_globals;
-#endif
 #endif
 
 #ifdef COMPILE_DL_MCRYPT
@@ -169,8 +166,8 @@ ZEND_GET_MODULE(mcrypt)
 #define MCRYPT_DECRYPT 1
 
 #define MCRYPT_GET_INI											\
-	cipher_dir_string = INI_STR("mcrypt.algorithms_dir"); 		\
-	module_dir_string = INI_STR("mcrypt.modes_dir");
+	cipher_dir_string = MCG(algorithms_dir); 					\
+	module_dir_string = MCG(modes_dir);
 
 #define MCRYPT_CHECK_PARAM_COUNT(a,b)							\
 	if (argc < (a) || argc > (b)) {								\
@@ -212,7 +209,7 @@ ZEND_GET_MODULE(mcrypt)
 			convert_to_string_ex (lib_dir);								\
 			break;														\
 		case 1:															\
-			lib_dir_s = INI_STR(DIRECTORY);								\
+			lib_dir_s = MCG(DIRECTORY);									\
 			if (zend_get_parameters_ex(1, &arg1) == FAILURE)			\
 			{															\
 				WRONG_PARAM_COUNT;										\
@@ -241,8 +238,8 @@ ZEND_GET_MODULE(mcrypt)
 #endif
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("mcrypt.algorithms_dir",	NULL, PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("mcrypt.modes_dir",	NULL, PHP_INI_ALL, NULL)
+	STD_PHP_INI_ENTRY("mcrypt.algorithms_dir",	NULL, PHP_INI_ALL, OnUpdateString, algorithms_dir, zend_mcrypt_globals, mcrypt_globals)
+	STD_PHP_INI_ENTRY("mcrypt.modes_dir",	NULL, PHP_INI_ALL, OnUpdateString, modes_dir, zend_mcrypt_globals, mcrypt_globals)
 PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(mcrypt)
@@ -345,6 +342,7 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt)
 
 PHP_MINFO_FUNCTION(mcrypt)
 {
+	MCLS_FETCH();
 #if HAVE_LIBMCRYPT24
 	char **modules;
 	int i, count;
@@ -352,7 +350,7 @@ PHP_MINFO_FUNCTION(mcrypt)
 
 	tmp = emalloc (2048);
 	memset (tmp, 0, sizeof(tmp));
-	modules = mcrypt_list_algorithms (INI_STR("mcrypt.algorithms_dir"), &count);
+	modules = mcrypt_list_algorithms (MCG(algorithms_dir), &count);
 	if (count == 0) {
 		strcpy (tmp, "none");
 	}
@@ -364,7 +362,7 @@ PHP_MINFO_FUNCTION(mcrypt)
 
 	tmp2 = emalloc (2048);
 	memset (tmp2, 0, sizeof(tmp2));
-	modules = mcrypt_list_modes (INI_STR("mcrypt.modes_dir"), &count);
+	modules = mcrypt_list_modes (MCG(modes_dir), &count);
 	if (count == 0) {
 		strcpy (tmp2, "none");
 	}
@@ -416,9 +414,9 @@ PHP_FUNCTION(mcrypt_module_open)
 	convert_to_string_ex(mode_directory);
 	
 	td = mcrypt_module_open ((*cipher)->value.str.val,
-		(*cipher_directory)->value.str.len > 0 ? (*cipher_directory)->value.str.val : INI_STR("mcrypt.algorithms_dir"),
+		(*cipher_directory)->value.str.len > 0 ? (*cipher_directory)->value.str.val : MCG(algorithms_dir),
 		(*mode)->value.str.val, 
-		(*mode_directory)->value.str.len > 0 ? (*mode_directory)->value.str.val : INI_STR("mcrypt.modes_dir"));
+		(*mode_directory)->value.str.len > 0 ? (*mode_directory)->value.str.val : MCG(modes_dir));
 
 	if (td == MCRYPT_FAILED) {
 		php_error (E_WARNING, "could not open encryption module");
@@ -437,6 +435,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	zval **key, **iv;
 	zval **mcryptind;
 	char *key_s, *iv_s;
+	char dummy[256];
 	int key_size, iv_size;
 	MCRYPT td;
 	int argc;
@@ -459,12 +458,16 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memset (iv_s, 0, iv_size + 1);
 
 	if ((*key)->value.str.len != key_size) {
-		php_error (E_WARNING, "key size is incorrect");
+		sprintf (dummy, "key size incorrect; supplied length: %d, needed: %d", 
+			(*key)->value.str.len, key_size);
+		php_error (E_NOTICE, dummy);
 	}
 	strncpy (key_s, (*key)->value.str.val, key_size);
 
 	if ((*iv)->value.str.len != iv_size) {
-		php_error (E_WARNING, "iv size is incorrect");
+		sprintf (dummy, "iv size incorrect; supplied length: %d, needed: %d", 
+			(*iv)->value.str.len, iv_size);
+		php_error (E_WARNING, dummy);
 	}
 	strncpy (iv_s, (*iv)->value.str.val, iv_size);
 
@@ -604,7 +607,6 @@ PHP_FUNCTION(mcrypt_enc_self_test)
 PHP_FUNCTION(mcrypt_module_close)
 {
 	zval **mcryptind;
-    int id;
 	MCRYPT td;
     MCLS_FETCH();
 	
@@ -781,10 +783,11 @@ PHP_FUNCTION(mcrypt_module_self_test)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.algorithms_dir");
+	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
 	if (mcrypt_module_self_test ((*arg1)->value.str.val, lib_dir_s) == 0) {
 		RETURN_TRUE;
@@ -803,10 +806,11 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.modes_dir")
+	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
 	
 	if (mcrypt_module_is_block_algorithm_mode ((*arg1)->value.str.val, lib_dir_s) == 0) {
 		RETURN_TRUE;
@@ -825,10 +829,11 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.algorithms_dir")
+	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
 	if (mcrypt_module_is_block_algorithm ((*arg1)->value.str.val, lib_dir_s) == 0) {
 		RETURN_TRUE;
@@ -847,10 +852,11 @@ PHP_FUNCTION(mcrypt_module_is_block_mode)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.modes_dir")
+	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
 	
 	if (mcrypt_module_is_block_mode ((*arg1)->value.str.val, lib_dir_s) == 0) {
 		RETURN_TRUE;
@@ -869,10 +875,11 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.algorithms_dir")
+	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
 	RETURN_LONG(mcrypt_module_get_algo_block_size ((*arg1)->value.str.val, lib_dir_s))
 }
@@ -886,10 +893,11 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.algorithms_dir");
+	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
 	RETURN_LONG(mcrypt_module_get_algo_key_size ((*arg1)->value.str.val, lib_dir_s))
 }
@@ -904,10 +912,11 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	char *lib_dir_s;
 	int argc, i, count;
 	int *key_sizes;
+    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
-	MCRYPT_GET_MODE_DIR_ARGS("mcrypt.algorithms_dir")
+	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 
 	key_sizes = mcrypt_module_get_algo_supported_key_sizes ((*arg1)->value.str.val, lib_dir_s, &count);
 
@@ -977,6 +986,7 @@ PHP_FUNCTION(mcrypt_list_modes)
 	char **modules;
 	char *lib_dir_s;
 	int i, count, argc;
+    MCLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (0,1)
@@ -990,7 +1000,7 @@ PHP_FUNCTION(mcrypt_list_modes)
 			lib_dir_s = (*lib_dir)->value.str.val;
 			break;
 		case 0:
-			lib_dir_s = INI_STR("mcrypt.modes_dir");
+			lib_dir_s = MCG(modes_dir);
 			break;
 		default:
 			WRONG_PARAM_COUNT
@@ -1023,6 +1033,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	char *module_dir_string;
 	long key_size;
 	MCRYPT td;
+    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1063,6 +1074,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	char *module_dir_string;
 	long key_size;
 	MCRYPT td;
+    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1103,6 +1115,7 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 	char *module_dir_string;
 	long key_size;
 	MCRYPT td;
+    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1142,6 +1155,7 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 	char *module_dir_string;
 	char *cipher_name;
 	MCRYPT td;
+    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1198,6 +1212,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	char *key_s, *iv_s;
 	char *data_s;
 	MCRYPT td;
+    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1430,7 +1445,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	i = (*size)->value.lval;
 	
 	if(i <= 0) {
-		php_error(E_WARNING, "illegal size input parameter");
+		php_error(E_WARNING, "can not create an IV with size 0 or smaller");
 		RETURN_FALSE;
 	}
 	
