@@ -187,7 +187,12 @@ PHPAPI int php_checkuid_ex(const char *filename, char *fopen_mode, int mode, int
 }
 
 PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode) {
+#ifdef NETWARE
+/* NetWare don't have uid*/
+	return 1;
+#else
 	return php_checkuid_ex(filename, fopen_mode, mode, 0);
+#endif
 }
 
 PHPAPI char *php_get_current_user()
