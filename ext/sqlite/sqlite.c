@@ -41,12 +41,12 @@
 
 #include <sqlite.h>
 
+#include "zend_default_classes.h"
+
 #ifdef HAVE_SPL
-#include "ext/spl/php_spl.h"
+#include "ext/spl/spl.h"
 #include "ext/spl/spl_functions.h"
 #endif
-
-#include "zend_default_classes.h"
 
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
@@ -1028,8 +1028,8 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	return db;
 }
 
-/* {{{ proto resource sqlite_popen(string filename [, int mode, string &errmessage])
-   Opens a persistent handle to an SQLite database.  Will create the database if it does not exist */
+/* {{{ proto resource sqlite_popen(string filename [, int mode [, string &error_message]])
+   Opens a persistent handle to a SQLite database. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_popen)
 {
 	int mode = 0666;
@@ -1095,8 +1095,8 @@ PHP_FUNCTION(sqlite_popen)
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_open(string filename [, int mode, string &errmessage])
-   Opens an SQLite database.  Will create the database if it does not exist */
+/* {{{ proto resource sqlite_open(string filename [, int mode [, string &error_message]])
+   Opens a SQLite database. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_open)
 {
 	int mode = 0666;
@@ -1141,8 +1141,8 @@ PHP_FUNCTION(sqlite_open)
 }
 /* }}} */
 
-/* {{{ proto object factory(string filename [, int mode, string &errmessage])
-   Opens a SQLite database and create an object for it. Will create the database if it does not exist */
+/* {{{ proto object sqlite_factory(string filename [, int mode [, string &error_message]])
+   Opens a SQLite database and creates an object for it. Will create the database if it does not exist. */
 PHP_FUNCTION(sqlite_factory)
 {
 	int mode = 0666;
@@ -1177,7 +1177,7 @@ PHP_FUNCTION(sqlite_factory)
 /* }}} */
 
 /* {{{ proto void sqlite_busy_timeout(resource db, int ms)
-   Set busy timeout duration. If ms <= 0, all busy handlers are disabled */
+   Set busy timeout duration. If ms <= 0, all busy handlers are disabled. */
 PHP_FUNCTION(sqlite_busy_timeout)
 {
 	zval *zdb;
@@ -1202,7 +1202,7 @@ PHP_FUNCTION(sqlite_busy_timeout)
 /* }}} */
 
 /* {{{ proto void sqlite_close(resource db)
-   Closes an open sqlite database */
+   Closes an open sqlite database. */
 PHP_FUNCTION(sqlite_close)
 {
 	zval *zdb;
@@ -1373,7 +1373,7 @@ void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_le
 /* }}} */
 
 /* {{{ proto resource sqlite_unbuffered_query(string query, resource db [ , int result_type ])
-   Execute a query that does not prefetch and buffer all data */
+   Executes a query that does not prefetch and buffer all data. */
 PHP_FUNCTION(sqlite_unbuffered_query)
 {
 	zval *zdb;
@@ -1413,8 +1413,8 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_query(string query, resource db [ , int result_type ])
-   Executes a query against a given database and returns a result handle */
+/* {{{ proto resource sqlite_query(string query, resource db [, int result_type ])
+   Executes a query against a given database and returns a result handle. */
 PHP_FUNCTION(sqlite_query)
 {
 	zval *zdb;
@@ -1576,8 +1576,8 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_all(resource result [, int result_type, bool decode_binary])
-   Fetches all rows from a result set as an array */
+/* {{{ proto array sqlite_fetch_all(resource result [, int result_type [, bool decode_binary]])
+   Fetches all rows from a result set as an array of arrays. */
 PHP_FUNCTION(sqlite_fetch_all)
 {
 	zval *zres, *ent;
@@ -1622,8 +1622,8 @@ PHP_FUNCTION(sqlite_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
-   Fetches the next row from a result set as an array */
+/* {{{ proto array sqlite_fetch_array(resource result [, int result_type [, bool decode_binary]])
+   Fetches the next row from a result set as an array. */
 PHP_FUNCTION(sqlite_fetch_array)
 {
 	zval *zres;
@@ -1654,8 +1654,8 @@ PHP_FUNCTION(sqlite_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_array_query(resource db, string query [ , int result_type, bool decode_binary ])
-   Executes a query against a given database and returns an array */
+/* {{{ proto array sqlite_array_query(resource db, string query [ , int result_type [, bool decode_binary]])
+   Executes a query against a given database and returns an array of arrays. */
 PHP_FUNCTION(sqlite_array_query)
 {
 	zval *zdb, *ent;
@@ -1766,8 +1766,8 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 /* }}} */
 
 
-/* {{{ proto array sqlite_single_query(resource db, string query [ , bool single_row, bool decode_binary ])
-   Executes a query against a given database and returns an array */
+/* {{{ proto array sqlite_single_query(resource db, string query [, bool first_row_only [, bool decode_binary]])
+   Executes a query and returns either an array for one single column or the value of the first row. */
 PHP_FUNCTION(sqlite_single_query)
 {
 	zval *zdb, *ent;
@@ -1841,8 +1841,8 @@ PHP_FUNCTION(sqlite_single_query)
 /* }}} */
 
 
-/* {{{ proto string sqlite_fetch_array(resource result [, bool decode_binary])
-   Fetches first column of a result set as a string */
+/* {{{ proto string sqlite_fetch_single(resource result [, bool decode_binary])
+   Fetches the first column of a result set as a string. */
 PHP_FUNCTION(sqlite_fetch_single)
 {
 	zval *zres;
@@ -1866,8 +1866,8 @@ PHP_FUNCTION(sqlite_fetch_single)
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
-   Fetches the current row from a result set as an array */
+/* {{{ proto array sqlite_current(resource result [, int result_type [, bool decode_binary]])
+   Fetches the current row from a result set as an array. */
 PHP_FUNCTION(sqlite_current)
 {
 	zval *zres;
@@ -1899,7 +1899,7 @@ PHP_FUNCTION(sqlite_current)
 /* }}} */
 
 /* {{{ proto mixed sqlite_column(resource result, mixed index_or_name [, bool decode_binary])
-   Fetches a column from the current row of a result set */
+   Fetches a column from the current row of a result set. */
 PHP_FUNCTION(sqlite_column)
 {
 	zval *zres;
@@ -1925,7 +1925,7 @@ PHP_FUNCTION(sqlite_column)
 /* }}} */
 
 /* {{{ proto string sqlite_libversion()
-   Returns the version of the linked SQLite library */
+   Returns the version of the linked SQLite library. */
 PHP_FUNCTION(sqlite_libversion)
 {
 	if (ZEND_NUM_ARGS() != 0) {
@@ -1936,7 +1936,7 @@ PHP_FUNCTION(sqlite_libversion)
 /* }}} */
 
 /* {{{ proto string sqlite_libencoding()
-   Returns the encoding (iso8859 or UTF-8) of the linked SQLite library */
+   Returns the encoding (iso8859 or UTF-8) of the linked SQLite library. */
 PHP_FUNCTION(sqlite_libencoding)
 {
 	if (ZEND_NUM_ARGS() != 0) {
@@ -1947,7 +1947,7 @@ PHP_FUNCTION(sqlite_libencoding)
 /* }}} */
 
 /* {{{ proto int sqlite_changes(resource db)
-   Returns the number of rows that were changed by the most recent SQL statement */
+   Returns the number of rows that were changed by the most recent SQL statement. */
 PHP_FUNCTION(sqlite_changes)
 {
 	zval *zdb;
@@ -1971,7 +1971,7 @@ PHP_FUNCTION(sqlite_changes)
 /* }}} */
 
 /* {{{ proto int sqlite_last_insert_rowid(resource db)
-   Returns the rowid of the most recently inserted row */
+   Returns the rowid of the most recently inserted row. */
 PHP_FUNCTION(sqlite_last_insert_rowid)
 {
 	zval *zdb;
@@ -1995,7 +1995,7 @@ PHP_FUNCTION(sqlite_last_insert_rowid)
 /* }}} */
 
 /* {{{ proto int sqlite_num_rows(resource result)
-   Returns the number of rows in a result set */
+   Returns the number of rows in a buffered result set. */
 PHP_FUNCTION(sqlite_num_rows)
 {
 	zval *zres;
@@ -2024,7 +2024,7 @@ PHP_FUNCTION(sqlite_num_rows)
 /* }}} */
 
 /* {{{ proto bool sqlite_has_more(resource result)
-   Returns whether or not more rows are available */
+   Returns whether more rows are available. */
 PHP_FUNCTION(sqlite_has_more)
 {
 	zval *zres;
@@ -2048,7 +2048,7 @@ PHP_FUNCTION(sqlite_has_more)
 /* }}} */
 
 /* {{{ proto int sqlite_num_fields(resource result)
-   Returns the number of fields in a result set */
+   Returns the number of fields in a result set. */
 PHP_FUNCTION(sqlite_num_fields)
 {
 	zval *zres;
@@ -2071,8 +2071,8 @@ PHP_FUNCTION(sqlite_num_fields)
 }
 /* }}} */
 
-/* {{{ proto string sqlite_field_name(resource result, int field)
-   Returns the name of a particular field */
+/* {{{ proto string sqlite_field_name(resource result, int field_index)
+   Returns the name of a particular field of a result set. */
 PHP_FUNCTION(sqlite_field_name)
 {
 	zval *zres;
@@ -2081,12 +2081,12 @@ PHP_FUNCTION(sqlite_field_name)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &field)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &field)) {
 			return;
 		}
 		RES_FROM_OBJECT(res, object);
 	} else {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zres, &field)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zres, &field)) {
 			return;
 		}
 		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
@@ -2102,7 +2102,7 @@ PHP_FUNCTION(sqlite_field_name)
 /* }}} */
 
 /* {{{ proto bool sqlite_seek(resource result, int row)
-   Seek to a particular row number */
+   Seek to a particular row number of a buffered result set. */
 PHP_FUNCTION(sqlite_seek)
 {
 	zval *zres;
@@ -2138,7 +2138,7 @@ PHP_FUNCTION(sqlite_seek)
 /* }}} */
 
 /* {{{ proto bool sqlite_rewind(resource result)
-   Seek to first row number */
+   Seek to the first row number of a buffered result set. */
 PHP_FUNCTION(sqlite_rewind)
 {
 	zval *zres;
@@ -2173,7 +2173,7 @@ PHP_FUNCTION(sqlite_rewind)
 /* }}} */
 
 /* {{{ proto bool sqlite_next(resource result)
-   Seek to next row number */
+   Seek to the next row number of a result set. */
 PHP_FUNCTION(sqlite_next)
 {
 	zval *zres;
@@ -2208,7 +2208,7 @@ PHP_FUNCTION(sqlite_next)
 /* }}} */
 
 /* {{{ proto string sqlite_escape_string(string item)
-   Escapes a string for use as a query parameter */
+   Escapes a string for use as a query parameter. */
 PHP_FUNCTION(sqlite_escape_string)
 {
 	char *string = NULL;
@@ -2239,7 +2239,7 @@ PHP_FUNCTION(sqlite_escape_string)
 /* }}} */
 
 /* {{{ proto int sqlite_last_error(resource db)
-   Returns the error code of the last error for a database */
+   Returns the error code of the last error for a database. */
 PHP_FUNCTION(sqlite_last_error)
 {
 	zval *zdb;
@@ -2263,7 +2263,7 @@ PHP_FUNCTION(sqlite_last_error)
 /* }}} */
 
 /* {{{ proto string sqlite_error_string(int error_code)
-   Returns the textual description of an error code */
+   Returns the textual description of an error code. */
 PHP_FUNCTION(sqlite_error_string)
 {
 	long code;
@@ -2346,7 +2346,7 @@ static enum callback_prep_t prep_callback_struct(struct php_sqlite_db *db, int i
 
 
 /* {{{ proto bool sqlite_create_aggregate(resource db, string funcname, mixed step_func, mixed finalize_func[, long num_args])
-    Registers an aggregated function for queries*/
+    Registers an aggregate function for queries. */
 PHP_FUNCTION(sqlite_create_aggregate)
 {
 	char *funcname = NULL;
@@ -2396,7 +2396,7 @@ PHP_FUNCTION(sqlite_create_aggregate)
 /* }}} */
 
 /* {{{ proto bool sqlite_create_function(resource db, string funcname, mixed callback[, long num_args])
-    Registers a "regular" function for queries */
+    Registers a "regular" function for queries. */
 PHP_FUNCTION(sqlite_create_function)
 {
 	char *funcname = NULL;
@@ -2435,7 +2435,7 @@ PHP_FUNCTION(sqlite_create_function)
 /* }}} */
 
 /* {{{ proto string sqlite_udf_encode_binary(string data)
-   Apply binary encoding (if required) to a string to return from an UDF */
+   Apply binary encoding (if required) to a string to return from an UDF. */
 PHP_FUNCTION(sqlite_udf_encode_binary)
 {
 	char *data = NULL;
@@ -2464,7 +2464,7 @@ PHP_FUNCTION(sqlite_udf_encode_binary)
 /* }}} */
 
 /* {{{ proto string sqlite_udf_decode_binary(string data)
-   Decode binary encoding on a string parameter passed to an UDF */
+   Decode binary encoding on a string parameter passed to an UDF. */
 PHP_FUNCTION(sqlite_udf_decode_binary)
 {
 	char *data = NULL;
