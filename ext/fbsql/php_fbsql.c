@@ -607,7 +607,7 @@ void phpfbDoConnect(INTERNAL_FUNCTION_PARAMETERS,int persistant)
 	return_value->type       = IS_LONG;
 }
 
-/* {{{ proto int fbsql_connect([string hostname [, string username [, string [password]]]);
+/* {{{ proto int fbsql_connect([string hostname [, string username [, string password]]]);
 	*/
 PHP_FUNCTION(fbsql_connect)
 {
@@ -616,7 +616,7 @@ PHP_FUNCTION(fbsql_connect)
 /* }}} */
 
 
-/* {{{ proto int fbsql_pconnect([string hostname [, string username [, string [password]]]);
+/* {{{ proto int fbsql_pconnect([string hostname [, string username [, string password]]]);
 	*/
 PHP_FUNCTION(fbsql_pconnect)
 {
@@ -860,16 +860,14 @@ PHP_FUNCTION(fbsql_autocommit)
 	{
 		convert_to_boolean_ex(argv[1]);
 		OnOff = Z_BVAL_PP(argv[1]);
+		phpLink->autoCommit = OnOff;
 		if (OnOff)
 			md = fbcdcExecuteDirectSQL(phpLink->currentDatabase->connection, "SET COMMIT TRUE;");
 		else
 			md = fbcdcExecuteDirectSQL(phpLink->currentDatabase->connection, "SET COMMIT FALSE;");
 		fbcmdRelease(md);
-		RETURN_TRUE;
 	}
-	else {
-		RETURN_BOOL(phpLink->autoCommit);
-	}
+	RETURN_BOOL(phpLink->autoCommit);
 }
 /* }}} */
 
@@ -1184,7 +1182,7 @@ PHP_FUNCTION(fbsql_change_user)
 /* }}} */
 
 
-/* {{{ proto int fbsql_create_db([string database_name [, int link_identifier]])
+/* {{{ proto int fbsql_create_db(string database_name [, int link_identifier])
 	*/
 PHP_FUNCTION(fbsql_create_db)
 {
@@ -1982,7 +1980,7 @@ PHP_FUNCTION(fbsql_errno)
 /* }}} */
 
 
-/* {{{ proto int fbsql_generate_warnings([int flag]);
+/* {{{ proto bool fbsql_generate_warnings([int flag]);
 	*/
 PHP_FUNCTION(fbsql_warnings)
 {
@@ -1992,13 +1990,12 @@ PHP_FUNCTION(fbsql_warnings)
 
 	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(argc,&argv[0])==FAILURE) RETURN_FALSE;
-	return_value->value.lval = FB_SQL_G(generateWarnings);
-	return_value->type       = IS_LONG;
 	if (argc >= 1)
 	{
 		convert_to_long_ex(argv[0]);
 		FB_SQL_G(generateWarnings) = (*argv[0])->value.lval != 0;
 	}
+	RETURN_BOOL(FB_SQL_G(generateWarnings));
 }
 /* }}} */
 
@@ -2697,7 +2694,7 @@ PHP_FUNCTION(fbsql_data_seek)
 /* }}} */
 
 
-/* {{{ proto array fbsql_fetch_lengths(int result)
+/* {{{ proto array fbsql_fetch_lengths([int result])
 	*/
 PHP_FUNCTION(fbsql_fetch_lengths)
 {
