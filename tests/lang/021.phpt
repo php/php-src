@@ -33,7 +33,6 @@ for ($i=0; $i<=5; $i++)
 echo "hi\n";
 ?>
 --EXPECT--
-
 i=0
 In branch 0
 i=1

@@ -33,7 +33,6 @@ for ($i=0; $i<3; $i++) {
 }
 ?>
 --EXPECT--
-
 zero
 one
 2

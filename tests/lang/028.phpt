@@ -55,7 +55,6 @@ print $name=call_user_method("GetMyName", $dafna);
 print "\n";
 
 ?>
-
 --EXPECT--
 0
 Dafna!

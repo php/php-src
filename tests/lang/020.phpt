@@ -46,7 +46,6 @@ switch (1) {
 }
 ?>
 --EXPECT--
-
 In branch 1
 Inner default...
 blah=100

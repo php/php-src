@@ -23,8 +23,6 @@ if ($time_left>0) {
 } else {
   echo "Limor Ullmann is now Limor Baruch :I\n";
 }
-
-
 ?>
 --EXPECT--
 PHP Regression Test
@@ -154,7 +152,6 @@ ${test21}[2] = 5<br>
 ${test22}[0] = 4<br>
 ${test22}[1] = 5<br>
 ${test22}[2] = 6<br>
-
 *********************<br>
 
 *** hash test... ***<br>
