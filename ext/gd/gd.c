@@ -602,7 +602,7 @@ PHP_FUNCTION (imagecreatefromstring)
 
 	ZEND_REGISTER_RESOURCE(return_value, im, GDG (le_gd));
 #else
-	php_error(E_WARNING, "ImageCreateFromString: Only available with GD 1.5+");
+	php_error(E_ERROR, "ImageCreateFromString: Only available with GD 1.5+");
 #endif
 }
 /* }}} */
