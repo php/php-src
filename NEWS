@@ -41,6 +41,7 @@ PHP                                                                        NEWS
   (Patch by Novicky Marek <novicky@aarongroup.cz>). (Thies)
 - Added reflection API. (Andrei, George, Timm)
 - Changed length parameter in fgetcsv() to be optional. (Moriyoshi)
+- Fixed IPv6 support in MacOSX Panther. (Dan, Marko)
 - Fixed fgetcsv() to correctly handle international (non-ascii) characters.
   (Moriyoshi)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
@@ -172,4 +173,3 @@ PHP                                                                        NEWS
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
 - Fixed bug #21600 (Assign by reference function call changes variable 
   contents). (Zeev)
-- Added IPv6 support for Panther. (kalowsky, markonen)
