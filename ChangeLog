@@ -1,3 +1,54 @@
+2000-07-11  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec: - typo
+
+    * ext/informix/ifx.ec:
+    - Work-around for ESQL/C bug with BLOBs and NULL values (Danny).
+
+2000-07-11  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4:
+    Fix for problem noted by Jay Greenspan on TurboLinux machines
+
+2000-07-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Updated comments.
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+    - Improved array_multisort() to be able to specify sort type as well sort
+      order. Incidentally, it can be used to sort multi-dimensional arrays
+      as well. 
+
+2000-07-11  Zeev Suraski  <zeev@php.net>
+
+    * ext/exif/exif.dsp
+      main/SAPI.c
+      main/php_ini.c:
+    Disable the hash_apply() protection on hashes that persist across requests - it's unsafe
+    because we may be aborted at any point
+
+2000-07-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Thies, finish your news entries next time. :)
+
+2000-07-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c:
+    The official product name is PostgreSQL, so s/PostgresSQL/PostgreSQL/
+
+    * ext/session/mod_files.c:
+    Always use the current DIR_DELIMITER to create the session file path
+
+2000-07-11  Thies C. Arntzen  <thies@digicol.de>
+
+    * win32/sendmail.c: fix warning in VC6
+
+2000-07-11  Andi Gutmans  <andi@php.net>
+
+    * ext/zlib/php_zlib.h: - Don't need extern for functions
+
 2000-07-10  Vlad Krupin  <phpdevel@echospace.com>
 
     * ext/pspell/pspell.c: - PS_* constants changed to PSPELL_*
