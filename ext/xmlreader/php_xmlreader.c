@@ -27,7 +27,9 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xmlreader.h"
+#ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
+#endif
 #include <libxml/uri.h>
 
 zend_class_entry *xmlreader_class_entry;
@@ -959,6 +961,7 @@ PHP_METHOD(xmlreader, XML)
 Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, expand)
 {
+#ifdef HAVE_DOM
 	zval *id, *rv = NULL;
 	int ret;
 	xmlreader_object *intern;
@@ -966,7 +969,7 @@ PHP_METHOD(xmlreader, expand)
 
 	id = getThis();
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
-	//nodeobj = (php_libxml_node_object *) zend_object_store_get_object(id TSRMLS_CC);
+
 	if (intern && intern->ptr) {
 		node = xmlTextReaderExpand(intern->ptr);
 		
@@ -981,7 +984,10 @@ PHP_METHOD(xmlreader, expand)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Load Data before trying to expand");
 		RETURN_FALSE;
 	}
-	
+#else
+	php_error(E_WARNING, "DOM support is not enabled");
+	return;
+#endif
 }
 /* }}} */
 
