@@ -318,7 +318,9 @@ sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_DC)
 	}
 	sprintf(buf, "%d", conf_getglobals()->Vport);
 	php_register_variable("SERVER_PORT", buf, track_vars_array TSRMLS_CC );
-	php_register_variable("SERVER_NAME", util_hostname(), track_vars_array TSRMLS_CC );
+	if ((value = util_hostname())) {
+		php_register_variable("SERVER_NAME", value, track_vars_array TSRMLS_CC );
+	}	
 	php_register_variable("SERVER_URL", http_uri2url("", ""), track_vars_array TSRMLS_CC );
 	php_register_variable("HTTPS", (security_active ? "ON" : "OFF"), track_vars_array TSRMLS_CC );
 /*	php_register_variable("SERVER_SOFTWARE", MAGNUS_VERSION_STRING, track_vars_array TSRMLS_CC ); */
