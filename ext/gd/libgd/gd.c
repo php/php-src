@@ -1077,6 +1077,11 @@ gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 	}
 }
 
+
+/*
+ * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
+ * (c) 2003 Pierre-Alain Joye
+ * */
 #define BLEND_COLOR(a, nc, c, cc) \
 nc = (cc) + (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
 
@@ -1098,6 +1103,10 @@ inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color
 	im->tpixels[y][x]=gdTrueColorAlpha(dr, dg, db,  gdAlphaOpaque);
 }  
 
+/*
+ * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
+ * (c) 2003 Pierre-Alain Joye
+ **/
 void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 {
 	/* keep them as 32bits */
@@ -2331,6 +2340,13 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 	}
 }
 
+
+/*
+ * Rotate function Added on 2003/12 
+ * by Pierre-Alain Joye (pajoye@pearfr.org)
+ * (c) 2003 Pierre-Alain Joye
+ **/
+/* Begin rotate function */
 #ifdef ROTATE_PI
 #undef ROTATE_PI
 #endif /* ROTATE_PI */
@@ -2762,6 +2778,7 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
 	
 	return rotatedImg;
 }
+/* End Rotate function */
 
 gdImagePtr
 gdImageCreateFromXbm (FILE * fd)
@@ -3293,6 +3310,12 @@ gdAlphaOverlayColor( int src, int dst, int max )
 	}
 }
 
+
+/* Filters function added on 2003/12 
+ * by Pierre-Alain Joye (pajoye@pearfr.org)
+ * (c) 2003 Pierre-Alain Joye
+ **/
+/* Begin filters function */
 #ifndef HAVE_GET_TRUE_COLOR
 #define GET_PIXEL_FUNCTION(src)(src->trueColor?gdImageGetTrueColorPixel:gdImageGetPixel)
 #endif
@@ -3745,3 +3768,4 @@ int gdImageSmooth(gdImagePtr im, float weight)
 	
 	return gdImageConvolution(im, filter, weight+8, 0);
 }
+/* End filters function */
