@@ -71,8 +71,8 @@ zend_class_entry *xpathobject_class_entry;
 #endif
 
 
-static int node_attributes(zval **attributes, xmlNode *nodep);
-static int node_children(zval **children, xmlNode *nodep);
+static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC);
+static int node_children(zval **children, xmlNode *nodep TSRMLS_DC);
 
 static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_version,	NULL)
