@@ -22,6 +22,8 @@
 # define PHP_STREAMS
 #endif
 
+#define SOAP_DEBUG 1
+
 #ifdef PHP_WIN32
 # ifdef PHP_STREAMS
 #  define SOAP_STREAM php_stream *
