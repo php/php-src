@@ -203,9 +203,9 @@ string(3) "123"
 ==== end of /ext/standard/tests/strings/str_shuffle.phpt ===
 
 /ext/standard/tests/strings/strings001.phpt is a good example for using 
-EXPECTREGEX instead of EXPECT. This test also shows that in both EXPECTF
-and EXPECTREGEX some characters need to be escaped since otherwise they
-would be interpreted as a regular expression.
+EXPECTREGEX instead of EXPECT. This test also shows that in EXPECTREGEX 
+some characters need to be escaped since otherwise they would be 
+interpreted as a regular expression.
 
 ==== /ext/standard/tests/strings/strings001.phpt ===
 --TEST--
