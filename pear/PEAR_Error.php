@@ -25,38 +25,49 @@
 // This class is based on ideas from Ulf Wendel
 //
 
-class PEAR_ERROR
+class PEAR_Error
 {
-	var $CLASSNAME            = '';
-	var $ERROR_MESSAGE_PREFIX = '';
-	var $ERROR_PREPEND        = '';
-	var $ERROR_APPEND         = '';
+	var $classname            = '';
+	var $error_message_prefix = '';
+	var $error_prepend        = '';
+	var $error_append         = '';
 	
-	var $DIE_ON_ERROR         = '';
-	var $AUTO_PRINT_ERROR     = '';
+	var $die_on_error         = false;
+	var $auto_print_error     = false;
 	
-	var $LEVEL         = 0;
-	var $TRIGGER_ERROR = false;
+	var $level         = 0;
+	var $trigger_error = false;
 	
 	var $message = '';
 	var $file    = '';
 	var $line    = 0;
 	
-	function PEAR_ERROR ($message, $file = __FILE__, $line = __LINE__)
+	/*
+	 * constructor, set the basics...
+	 */
+	function PEAR_Error ($message, $file = __FILE__, $line = __LINE__)
 	{
 		$this->message = $message;
 		$this->file    = $file;
 		$this->line    = $line;
 	}
 	
+	/*
+	 *  string getMessage (void)
+	 *    Get the error message from an exception object.
+	 */
 	function getMessage ()
 	{
-		return ($this->ERROR_PREPEND . $this->ERROR_MESSAGE_PREFIX .
-		        $this->message       . $this->ERROR_APPEND);
+		return ($this->error_prepend . $this->error_message_prefix .
+		        $this->message       . $this->error_append);
 	}
 	
+	/*
+	 * string getType (void)
+	 *  Get the name of the exception.
+	 */
 	function getType ()
 	{
-		return ($this->CLASSNAME);
+		return ($this->classname);
 	}
 }
