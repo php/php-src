@@ -33,6 +33,9 @@
 #endif
 #include "zend_globals.h"		/* needs ELS */
 #include "zend_highlight.h"
+#ifdef HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+#endif
 
 #define SECTION(name)  PUTS("<h2 align=\"center\">" name "</h2>\n")
 
@@ -119,26 +122,76 @@ void php_info_print_style(void)
 
 /* {{{ php_get_uname
  */
-PHPAPI char *php_get_uname()
+PHPAPI char *php_get_uname(char mode)
 {
 	char *php_uname;
+	char tmp_uname[256];
 #ifdef PHP_WIN32
-	char php_windows_uname[256];
 	DWORD dwBuild=0;
 	DWORD dwVersion = GetVersion();
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 
-	/* Get build numbers for Windows NT or Win95 */
-	if (dwVersion < 0x80000000){
-		dwBuild = (DWORD)(HIWORD(dwVersion));
-		snprintf(php_windows_uname, 255, "%s %d.%d build %d", "Windows NT", dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
-	} else {
-		snprintf(php_windows_uname, 255, "%s %d.%d", "Windows 95/98", dwWindowsMajorVersion, dwWindowsMinorVersion);
-	}
-	php_uname = php_windows_uname;
+    if (mode == 's') {
+        if (dwVersion < 0x80000000) {
+            php_uname = "Windows NT";
+        } else {
+            php_uname = "Windows 9x";
+        }
+    } else if (mode == 'r') {
+        snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d",
+                 dwWindowsMajorVersion, dwWindowsMinorVersion);
+        php_uname = tmp_uname;
+    } else if (mode == 'n') {
+        // XXX HOW TO GET THIS ON WINDOWS?
+        php_uname = "localhost";
+    } else if (mode == 'v') {
+        dwBuild = (DWORD)(HIWORD(dwVersion));
+        snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
+        php_uname = tmp_uname;
+    } else if (mode == 'm') {
+        // XXX HOW TO GET THIS ON WINDOWS?
+        php_uname = "i386";
+    } else { // assume mode == 'a'
+        /* Get build numbers for Windows NT or Win95 */
+        if (dwVersion < 0x80000000){
+            dwBuild = (DWORD)(HIWORD(dwVersion));
+            snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d",
+                     "Windows NT", "localhost",
+                     dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild);
+        } else {
+            snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d",
+                     "Windows 9x", "localhost",
+                     dwWindowsMajorVersion, dwWindowsMinorVersion);
+        }
+        php_uname = tmp_uname;
+    }
 #else
-	php_uname=PHP_UNAME;
+#ifdef HAVE_SYS_UTSNAME_H
+    struct utsname buf;
+    if (uname((struct utsname *)&buf) == -1) {
+        php_uname = PHP_UNAME;
+    } else {
+        if (mode == 's') {
+            php_uname = buf.sysname;
+        } else if (mode == 'r') {
+            php_uname = buf.release;
+        } else if (mode == 'n') {
+            php_uname = buf.nodename;
+        } else if (mode == 'v') {
+            php_uname = buf.version;
+        } else if (mode == 'm') {
+            php_uname = buf.machine;
+        } else { // assume mode == 'a'
+            snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
+                     buf.sysname, buf.nodename, buf.release, buf.version,
+                     buf.machine);
+            php_uname = tmp_uname;
+        }
+    }
+#else
+    php_uname = PHP_UNAME;
+#endif
 #endif
 	return estrdup(php_uname);
 }
@@ -162,7 +215,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 
-		php_uname = php_get_uname();
+		php_uname = php_get_uname('a');
 		PUTS("<head>");
 		php_info_print_style();
 		PUTS("<title>phpinfo()</title></head><body>");
@@ -573,11 +626,12 @@ PHP_FUNCTION(php_sapi_name)
    Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
-    if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+    char *mode = "a";
+    int modelen;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
+		return;
 	}
-
-	RETURN_STRING(php_get_uname(), 0);
+	RETURN_STRING(php_get_uname(*mode), 0);
 }
 
 /* }}} */
