@@ -145,7 +145,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreatefrompng,						NULL)
 	PHP_FE(imagecreatefromgif,						NULL)
 	PHP_FE(imagecreatefromjpeg,						NULL)
-	PHP_FE(imagecreatefromwbmp,                     NULL)
+	PHP_FE(imagecreatefromwbmp,						NULL)
 	PHP_FE(imagecreatefromxbm,						NULL)
 	PHP_FE(imagecreatefromxpm,						NULL)
 	PHP_FE(imagecreatefromgd,						NULL)
@@ -493,7 +493,7 @@ PHP_FUNCTION(imagesetstyle)
 	int index;
 	HashPosition pos;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &styles) == FAILURE) 
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &styles) == FAILURE) 
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -555,7 +555,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 	zval **IM, **dither, **ncolors;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 3 ||	zend_get_parameters_ex(3, &IM, &dither, &ncolors) == FAILURE) 
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &dither, &ncolors) == FAILURE) 
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -582,7 +582,7 @@ PHP_FUNCTION(imagesetthickness)
 	zval **IM, **thick;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &thick) == FAILURE) 
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &thick) == FAILURE) 
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -669,7 +669,7 @@ PHP_FUNCTION(imagefilledarc)
 	gdImagePtr im;
 	int e,st;
 
-	if (ZEND_NUM_ARGS() != 9 ||	zend_get_parameters_ex(9, &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE)
+	if (ZEND_NUM_ARGS() != 9 || zend_get_parameters_ex(9, &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1559,7 +1559,6 @@ PHP_FUNCTION(imagepalettecopy)
 }
 /* }}} */
 
-/* im, x, y */
 /* {{{ proto int imagecolorat(int im, int x, int y)
    Get the index of the color of a pixel */
 PHP_FUNCTION(imagecolorat)
@@ -1583,8 +1582,7 @@ PHP_FUNCTION(imagecolorat)
 #else
 		RETURN_LONG(im->pixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
 #endif
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -1838,7 +1836,7 @@ PHP_FUNCTION(imageline)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1863,7 +1861,7 @@ PHP_FUNCTION(imagedashedline)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1881,7 +1879,6 @@ PHP_FUNCTION(imagedashedline)
 }
 /* }}} */
 
-/* im, x1, y1, x2, y2, col */
 /* {{{ proto int imagerectangle(int im, int x1, int y1, int x2, int y2, int col)
    Draw a rectangle */
 PHP_FUNCTION(imagerectangle)
@@ -1889,7 +1886,7 @@ PHP_FUNCTION(imagerectangle)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1907,7 +1904,6 @@ PHP_FUNCTION(imagerectangle)
 }
 /* }}} */	
 
-/* im, x1, y1, x2, y2, col */
 /* {{{ proto int imagefilledrectangle(int im, int x1, int y1, int x2, int y2, int col)
    Draw a filled rectangle */
 PHP_FUNCTION(imagefilledrectangle)
@@ -1967,7 +1963,6 @@ PHP_FUNCTION(imagearc)
 }
 /* }}} */	
 
-/* im, x, y, border, col */
 /* {{{ proto int imagefilltoborder(int im, int x, int y, int border, int col)
    Flood fill to specific color */
 PHP_FUNCTION(imagefilltoborder)
@@ -1992,7 +1987,6 @@ PHP_FUNCTION(imagefilltoborder)
 }
 /* }}} */	
 
-/* im, x, y, col */
 /* {{{ proto int imagefill(int im, int x, int y, int col)
    Flood fill */
 PHP_FUNCTION(imagefill)
@@ -2034,7 +2028,6 @@ PHP_FUNCTION(imagecolorstotal)
 }
 /* }}} */	
 
-/* im, col */
 /* {{{ proto int imagecolortransparent(int im [, int col])
    Define a color as transparent */
 PHP_FUNCTION(imagecolortransparent)
@@ -2068,7 +2061,6 @@ PHP_FUNCTION(imagecolortransparent)
 }
 /* }}} */	
 
-/* im, interlace */
 /* {{{ proto int imageinterlace(int im [, int interlace])
    Enable or disable interlace */
 PHP_FUNCTION(imageinterlace)
@@ -2106,7 +2098,8 @@ PHP_FUNCTION(imageinterlace)
    arg = 0  normal polygon
    arg = 1  filled polygon */
 /* im, points, num_points, col */
-static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
+static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) 
+{
 	zval **IM, **POINTS, **NPOINTS, **COL;
 	pval **var = NULL;
 	gdImagePtr im;
@@ -2262,8 +2255,7 @@ PHP_FUNCTION(imagefontheight)
 
 /* {{{ php_gdimagecharup
  * workaround for a bug in gd 1.2 */
-void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
-						 int color)
+void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 {
 	int cx, cy, px, py, fline;
 	cx = 0;
@@ -3299,7 +3291,8 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 
 /* {{{ _php_image_convert
  * _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
-static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
+static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) 
+{
 	zval **f_org, **f_dest, **height, **width, **threshold;
 	gdImagePtr im_org, im_dest, im_tmp;
 	char *fn_org = NULL;
