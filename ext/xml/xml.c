@@ -642,7 +642,7 @@ void _xml_startElementHandler(void *userData, const char *name,
 				char *decoded_value;
 				int decoded_len;
 				if (parser->case_folding) {
-					key = php_strtoupper(estrdup(key));
+					key = php_strtoupper(estrdup(key), strlen(key));
 				}
 				decoded_value = xml_utf8_decode(value, strlen(value),
 												&decoded_len,
@@ -687,7 +687,7 @@ void _xml_startElementHandler(void *userData, const char *name,
 				char *decoded_value;
 				int decoded_len;
 				if (parser->case_folding) {
-					key = php_strtoupper(estrdup(key));
+					key = php_strtoupper(estrdup(key), strlen(key));
 				}
 				decoded_value = xml_utf8_decode(value, strlen(value),
 												&decoded_len,
@@ -728,7 +728,7 @@ void _xml_endElementHandler(void *userData, const char *name)
 		zval *retval, *args[2];
 
 		if (parser->case_folding) {
-			name = php_strtoupper(estrdup(name));
+			name = php_strtoupper(estrdup(name), strlen(name));
 		}
 
 		if (parser->endElementHandler) {
