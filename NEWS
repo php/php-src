@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
-- Fixed a bug in ldap_get_entries() and ldap_get_attributes. (Jani)
+- Fixed a bug in ldap_get_entries() and ldap_get_attributes(). (Jani)
 - Ported DB to new error reporting scheme. (Stig)
 - Added sybase and ibase DB backends. (Sterling)
 - New PEAR package Payment_Verisign for use with the Payflow Pro
