@@ -186,6 +186,10 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_open_file_dtor(zend_file_handle *fh)
 {
 	switch (fh->type) {
+		case ZEND_HANDLE_FILENAME:
+			fclose(fh->handle.fp);
+			break;
+
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
@@ -384,6 +388,7 @@ zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC)
 	}
 	file_handle.filename = filename->value.str.val;
 	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.opened_path = NULL;
 	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
 	if (file_handle.opened_path) {
 		free(file_handle.opened_path);
