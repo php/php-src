@@ -611,6 +611,27 @@ ZEND_API inline int add_property_long(zval *arg, char *key, long n)
 	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API inline int add_property_bool(zval *arg, char *key, int b)
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	tmp->type = IS_BOOL;
+	tmp->value.lval = b;
+	INIT_PZVAL(tmp);
+	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+ZEND_API inline int add_property_unset(zval *arg, char *key)
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	tmp->type = IS_NULL;
+	INIT_PZVAL(tmp);
+	return zend_hash_update(arg->value.obj.properties, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 ZEND_API inline int add_property_resource(zval *arg, char *key, long n)
 {
 	zval *tmp;
