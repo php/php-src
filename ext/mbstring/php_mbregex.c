@@ -685,7 +685,8 @@ PHP_FUNCTION(mb_split)
    Regular expression match for multibyte string */
 PHP_FUNCTION(mb_ereg_match)
 {
-	zval *arg_pattern;
+	char *arg_pattern;
+	int arg_pattern_len;
 
 	char *string;
 	int string_len;
@@ -698,8 +699,8 @@ PHP_FUNCTION(mb_ereg_match)
 		char *option_str = NULL;
 		int option_str_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|s",
-		                          &arg_pattern, &string, &string_len,
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s",
+		                          &arg_pattern, &arg_pattern_len, &string, &string_len,
 		                          &option_str, &option_str_len)==FAILURE) {
 			RETURN_FALSE;
 		}
@@ -710,12 +711,11 @@ PHP_FUNCTION(mb_ereg_match)
 			option |= MBSTRG(regex_default_options);
 		}
 	}
-	convert_to_string_ex(&arg_pattern);
 
 	err = php_mbregex_compile_pattern(
 	    &re,
-	    Z_STRVAL_P(arg_pattern),
-	    Z_STRLEN_P(arg_pattern),
+	    arg_pattern,
+		arg_pattern_len,
 	    option, MBSTRG(current_mbctype) TSRMLS_CC);
 
 	if (err) {
