@@ -1131,10 +1131,10 @@ pval test_class_get_property(zend_property_reference *property_reference)
 	for (element=property_reference->elements_list.head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
-			case IS_ARRAY:
+			case OE_IS_ARRAY:
 				printf("Array offset:  ");
 				break;
-			case IS_OBJECT:
+			case OE_IS_OBJECT:
 				printf("Object property:  ");
 				break;
 		}
@@ -1169,10 +1169,10 @@ int test_class_set_property(zend_property_reference *property_reference, pval *v
 	for (element=property_reference->elements_list.head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
-			case IS_ARRAY:
+			case OE_IS_ARRAY:
 				printf("Array offset:  ");
 				break;
-			case IS_OBJECT:
+			case OE_IS_OBJECT:
 				printf("Object property:  ");
 				break;
 		}
@@ -1203,13 +1203,13 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 	for (element=property_reference->elements_list.head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
-			case IS_ARRAY:
+			case OE_IS_ARRAY:
 				printf("Array offset:  ");
 				break;
-			case IS_OBJECT:
+			case OE_IS_OBJECT:
 				printf("Object property:  ");
 				break;
-			case IS_METHOD:
+			case OE_IS_METHOD:
 				printf("Overloaded method:  ");
 		}
 		switch (overloaded_property->element.type) {
