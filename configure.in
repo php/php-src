@@ -1316,11 +1316,10 @@ cat <<X
 | about the implications of having register_globals set to on, and   |
 | avoid using it if possible.                                        |
 +--------------------------------------------------------------------+
-X
 
-PHP_CONFIGURE_PART(
 Thank you for using PHP.
-)
+
+X
 
 fi
 ])
