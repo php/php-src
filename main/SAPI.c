@@ -521,7 +521,9 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					efree(result);
 					efree(Z_STRVAL_P(repl_temp));
 					efree(repl_temp);
-				} else efree(header_line);
+				} else {
+					efree(header_line);
+				}
 #else
 				if(PG(safe_mode)) {
 					myuid = php_getuid();
@@ -532,7 +534,9 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					sapi_header.header = newheader;
 					sapi_header.header_len = newlen;
 					efree(result);
-				} else efree(header_line);
+				} else {
+					efree(header_line);
+				}
 #endif
 			}
 		}
