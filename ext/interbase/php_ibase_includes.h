@@ -47,6 +47,10 @@
 
 extern int le_link, le_plink, le_trans;
 
+#define LE_LINK "Firebird/InterBase link"
+#define LE_PLINK "Firebird/InterBase persistent link"
+#define LE_TRANS "Firebird/InterBase transaction"
+
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
 
