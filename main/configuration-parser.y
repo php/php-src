@@ -124,12 +124,11 @@ static void yyerror(char *str)
 }
 
 
-static void pvalue_config_destructor(zval **pvalue)
+static void pvalue_config_destructor(zval *pvalue)
 {
-	if ((*pvalue)->type == IS_STRING && (*pvalue)->value.str.val != empty_string) {
-		free((*pvalue)->value.str.val);
+	if (pvalue->type == IS_STRING && pvalue->value.str.val != empty_string) {
+		free(pvalue->value.str.val);
 	}
-	free(*pvalue);
 }
 
 
