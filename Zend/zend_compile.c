@@ -903,8 +903,10 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	if ((class_name->u.constant.value.str.len == sizeof("parent")-1)
-		&& !memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent")-1)
-		&& CG(active_ce_parent_class_name).value.str.val) {
+		&& !memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent")-1)) {
+		if (!CG(active_ce_parent_class_name).value.str.val) {
+			zend_error(E_COMPILE_ERROR, "No parent class available");
+		}
 		efree(class_name->u.constant.value.str.val);
 		class_name->u.constant.value.str.len = CG(active_ce_parent_class_name).value.str.len;
 		class_name->u.constant.value.str.val = estrndup(CG(active_ce_parent_class_name).value.str.val, class_name->u.constant.value.str.len);
