@@ -711,6 +711,10 @@ PHP_FUNCTION(gzwrite) {
 }	
 /* }}} */
 
+/* {{{ proto int gzputs(int zp, string str [, int length])
+   An alias for gzwrite */
+/* }}} */
+
 /* {{{ proto int gzrewind(int zp)
 Rewind the position of a .gz-file pointer */
 PHP_FUNCTION(gzrewind) {
