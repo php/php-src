@@ -488,7 +488,9 @@ void php_init_handler(server_rec *s, pool *p)
 		apache_php_initialized = 1;
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
-	ap_add_version_component("PHP/" PHP_VERSION);
+	if (INI_INT("expose_php")) {
+		ap_add_version_component("PHP/" PHP_VERSION);
+	}
 #endif
 }
 
