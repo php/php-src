@@ -228,7 +228,7 @@ module MODULE_VAR_EXPORT php4_module;
 #define INIT_CTX \
 	if (ctx == NULL) { \
 		/* Initialize filter context */ \
-		SG(server_context) = f->ctx = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));  \
+		SG(server_context) = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));  \
 		ctx->bb = ap_brigade_create(f->c->pool); \
 	}
 
