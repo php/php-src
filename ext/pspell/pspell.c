@@ -805,21 +805,21 @@ PHP_FUNCTION(pspell_config_ignore)
 }
 /* }}} */
 
-static int pspell_config_path( INTERNAL_FUNCTION_PARAMETERS, char *option ) {
+static int pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
+{
 	int type;
 	zval **sccin, **value;
 	int argc;
-
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
-	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&value) == FAILURE) {
+	if (argc != 2 || zend_get_parameters_ex(argc, &sccin, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_long_ex(sccin);
 	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	if (!config) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a PSPELL config index", Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
@@ -843,25 +843,23 @@ static int pspell_config_path( INTERNAL_FUNCTION_PARAMETERS, char *option ) {
    Use a personal dictionary for this config */
 PHP_FUNCTION(pspell_config_personal)
 {
-	pspell_config_path( INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
+	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "personal");
 }
 /* }}} */
 
 /* {{{ proto bool pspell_config_dict_dir(int conf, string directory)
-
    location of the main word list */
 PHP_FUNCTION(pspell_config_dict_dir)
 {
-	pspell_config_path( INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
+	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "dict-dir");
 }
-
 /* }}} */
 
 /* {{{ proto bool pspell_config_data_dir(int conf, string directory)
     location of language data files */
 PHP_FUNCTION(pspell_config_data_dir)
 {
-	pspell_config_path( INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
+	pspell_config_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, "data-dir");
 }
 /* }}} */
 
