@@ -41,6 +41,7 @@ class PEAR_Frontend_CLI extends PEAR
         parent::PEAR();
 
         if (isset($_ENV['TERM'])) {
+            // XXX can use ncurses extension here, if available
             if (preg_match('/^(xterm|vt220)/', $_ENV['TERM'])) {
                 $this->term['bold'] = sprintf("%c%c%c%c", 27, 91, 49, 109);
                 $this->term['normal']=sprintf("%c%c%c", 27, 91, 109);
