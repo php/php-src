@@ -43,5 +43,6 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC);
 int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC);
 datum flatfile_firstkey(flatfile *dba TSRMLS_DC);
 datum flatfile_nextkey(flatfile *dba TSRMLS_DC);
+char *flatfile_version();
 
 #endif

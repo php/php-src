@@ -92,21 +92,6 @@ zend_module_entry dba_module_entry = {
 ZEND_GET_MODULE(dba)
 #endif
 
-typedef struct dba_handler {
-	char *name; /* handler name */
-	int flags; /* whether and how dba does locking and other flags*/
-	int (*open)(dba_info *, char **error TSRMLS_DC);
-	void (*close)(dba_info * TSRMLS_DC);
-	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
-	int (*update)(dba_info *, char *, int, char *, int, int TSRMLS_DC);
-	int (*exists)(dba_info *, char *, int TSRMLS_DC);
-	int (*delete)(dba_info *, char *, int TSRMLS_DC);
-	char* (*firstkey)(dba_info *, int * TSRMLS_DC);
-	char* (*nextkey)(dba_info *, int * TSRMLS_DC);
-	int (*optimize)(dba_info * TSRMLS_DC);
-	int (*sync)(dba_info * TSRMLS_DC);
-} dba_handler;
-
 /* {{{ macromania */
 
 #define DBA_ID_PARS 											\
@@ -163,7 +148,7 @@ typedef struct dba_handler {
 {\
 	#alias, flags, dba_open_##name, dba_close_##name, dba_fetch_##name, dba_update_##name, \
 	dba_exists_##name, dba_delete_##name, dba_firstkey_##name, dba_nextkey_##name, \
-	dba_optimize_##name, dba_sync_##name \
+	dba_optimize_##name, dba_sync_##name, dba_info_##name \
 },
 
 #define DBA_HND(name, flags) DBA_NAMED_HND(name, name, flags)
@@ -207,7 +192,7 @@ static dba_handler handler[] = {
 #if DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
-	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
+	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
 #if DBA_FLATFILE
@@ -844,13 +829,14 @@ PHP_FUNCTION(dba_sync)
 }
 /* }}} */
 
-/* {{{ proto array dba_handlers()
+/* {{{ proto array dba_handlers([bool full_info])
    List configured databases */
 PHP_FUNCTION(dba_handlers)
 {
 	dba_handler *hptr;
+	zend_bool full_info = 0;
 
-	if (ZEND_NUM_ARGS()!=0) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_info) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 		RETURN_FALSE;
 	}
@@ -860,7 +846,11 @@ PHP_FUNCTION(dba_handlers)
 		RETURN_FALSE;
 	}
 	for(hptr = handler; hptr->name; hptr++) {
-		add_next_index_string(return_value, hptr->name, 1);
+		if (full_info) {
+			add_assoc_string(return_value, hptr->name, hptr->info(hptr, NULL TSRMLS_CC), 0);
+		} else {
+			add_next_index_string(return_value, hptr->name, 1);
+		}
  	}
 }
 /* }}} */

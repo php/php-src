@@ -238,3 +238,9 @@ int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
 	return php_stream_flush(c->fp);
 }
 /* }}} */
+
+/* {{{ cdb_make_version */
+char *cdb_make_version() 
+{
+	return "0.75, $Revision$";
+}

@@ -218,6 +218,11 @@ DBA_SYNC_FUNC(db3)
 	return dba->dbp->sync(dba->dbp, 0) ? FAILURE : SUCCESS;
 }
 
+DBA_INFO_FUNC(db3)
+{
+	return estrdup(DB_VERSION_STRING);
+}
+
 #endif
 
 /*
