@@ -669,6 +669,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_INCLUDE;
 }
 
+<ST_IN_SCRIPTING>"import" {
+	return T_IMPORT;
+}
+
+<ST_IN_SCRIPTING>"from" {
+	return T_FROM;
+}
+
 <ST_IN_SCRIPTING>"include_once" {
 	return T_INCLUDE_ONCE;
 }

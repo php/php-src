@@ -119,6 +119,8 @@ struct _zend_compiler_globals {
 	int interactive;
 
 	zend_bool increment_lineno;
+
+	zend_llist import_commands;
 };
 
 
