@@ -119,10 +119,10 @@ function_entry finfo_class_functions[] = {
 
 #else 
 
-#define FINFO_REGISTER_OBJECT(_object, _ptr) {}
-#define FINFO_FROM_OBJECT(socket_id, object) {}
+#define FILEINFO_REGISTER_OBJECT(_object, _ptr) {}
+#define FILEINFO_FROM_OBJECT(socket_id, object) {}
 
-#define FINFO_DECLARE_INIT_OBJECT(object)
+#define FILEINFO_DECLARE_INIT_OBJECT(object)
 #define object 0
 
 #endif
@@ -351,7 +351,11 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		char *tmp2;
 		php_stream_wrapper *wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_DC);
 		if (wrap && wrap->is_url) {
+#ifdef ZEND_ENGINE_2
 			php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+#else 
+			php_stream_context *context = NULL;
+#endif			
 			php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", 
 					ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 			if (!stream) {
