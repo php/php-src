@@ -290,9 +290,9 @@ PHP_MINIT_FUNCTION(oracle)
 	php_ora_init_globals(ORALS_C);
 #endif
 
-	le_cursor = register_list_destructors(php_close_ora_cursor, NULL, "oracle cursor");
-	le_conn = register_list_destructors(_close_oraconn, NULL, "oracle link");
-	le_pconn = register_list_destructors(NULL, _close_oraconn, "oracle link persistent");
+	le_cursor = zend_register_list_destructors_ex(php_close_ora_cursor, NULL, "oracle cursor", module_number);
+	le_conn = zend_register_list_destructors_ex(_close_oraconn, NULL, "oracle link", module_number);
+	le_pconn = zend_register_list_destructors_ex(NULL, _close_oraconn, "oracle link persistent", module_number);
 
 	REGISTER_LONG_CONSTANT("ORA_BIND_INOUT", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_IN",    1, CONST_CS | CONST_PERSISTENT);

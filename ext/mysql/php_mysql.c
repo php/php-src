@@ -261,9 +261,9 @@ PHP_MINIT_FUNCTION(mysql)
 	ZEND_INIT_MODULE_GLOBALS(mysql, php_mysql_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
-	le_result = register_list_destructors(_free_mysql_result,NULL,"mysql result");
-	le_link = register_list_destructors(_close_mysql_link,NULL, "mysql link");
-	le_plink = register_list_destructors(NULL,_close_mysql_plink, "mysql link persistent");
+	le_result = zend_register_list_destructors_ex(_free_mysql_result, NULL, "mysql result", module_number);
+	le_link = zend_register_list_destructors_ex(_close_mysql_link, NULL, "mysql link", module_number);
+	le_plink = zend_register_list_destructors_ex(NULL, _close_mysql_plink, "mysql link persistent", module_number);
 	mysql_module_entry.type = type;
 	
 	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);

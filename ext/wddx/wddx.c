@@ -242,7 +242,7 @@ void php_wddx_destructor(wddx_packet *packet)
 /* {{{ php_minit_wddx */
 PHP_MINIT_FUNCTION(wddx)
 {
-	le_wddx = register_list_destructors(php_free_wddx_packet, NULL, "wddx");
+	le_wddx = zend_register_list_destructors_ex(php_free_wddx_packet, NULL, "wddx", module_number);
 	
 	return SUCCESS;
 }

@@ -227,7 +227,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
-	le_idispatch = register_list_destructors(php_idispatch_destructor, NULL,"COM");
+	le_idispatch = zend_register_list_destructors_ex(php_idispatch_destructor, NULL, "COM", module_number);
 	php_register_COM_class();
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;

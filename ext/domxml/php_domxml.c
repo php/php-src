@@ -133,12 +133,12 @@ PHP_MINIT_FUNCTION(domxml)
   domxmltestnode_class_startup();
 #endif
 
-	le_domxmldocp = register_list_destructors(xmlFreeDoc, NULL, "domxml document");
+	le_domxmldocp = zend_register_list_destructors_ex(xmlFreeDoc, NULL, "domxml document", module_number);
 	/* Freeing the document contains freeing the complete tree.
 	   Therefore nodes, attributes etc. may not be freed seperately.
 	*/
-	le_domxmlnodep = register_list_destructors(_free_node, NULL, "domxml node");
-	le_domxmlattrp = register_list_destructors(NULL, NULL, "domxml attribute");
+	le_domxmlnodep = zend_register_list_destructors_ex(_free_node, NULL, "domxml node", module_number);
+	le_domxmlattrp = zend_register_list_destructors_ex(NULL, NULL, "domxml attribute", module_number);
 /*	le_domxmlnsp = register_list_destructors(NULL, NULL); */
 
 	INIT_CLASS_ENTRY(domxmldoc_class_entry, "DomDocument", php_domxmldoc_class_functions);

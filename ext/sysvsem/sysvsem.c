@@ -117,7 +117,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	php_sysvsem_module.le_sem = register_list_destructors(release_sysvsem_sem, NULL, "sysvsem");
+	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
 
 	return SUCCESS;
 }

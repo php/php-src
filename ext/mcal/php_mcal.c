@@ -152,7 +152,7 @@ PHP_MINFO_FUNCTION(mcal)
 
 PHP_MINIT_FUNCTION(mcal)
 {
-    le_mcal = register_list_destructors(cal_close_it,NULL,"mcal");
+    le_mcal = zend_register_list_destructors_ex(cal_close_it, NULL, "mcal", module_number);
 
     REGISTER_MAIN_LONG_CONSTANT("MCAL_SUNDAY",SUNDAY, CONST_PERSISTENT | CONST_CS);
     REGISTER_MAIN_LONG_CONSTANT("MCAL_MONDAY",MONDAY, CONST_PERSISTENT | CONST_CS);

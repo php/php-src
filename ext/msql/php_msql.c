@@ -162,9 +162,9 @@ DLEXPORT PHP_MINIT_FUNCTION(msql)
 		msql_globals.max_links=-1;
 	}
 	msql_globals.num_persistent=0;
-	msql_globals.le_query = register_list_destructors(_delete_query,NULL,"msql query");
-	msql_globals.le_link = register_list_destructors(_close_msql_link,NULL,"msql link");
-	msql_globals.le_plink = register_list_destructors(NULL,_close_msql_plink, "msql link persistent");
+	msql_globals.le_query = zend_register_list_destructors_ex(_delete_query, NULL, "msql query", module_number);
+	msql_globals.le_link = zend_register_list_destructors_ex(_close_msql_link, NULL, "msql link", module_number);
+	msql_globals.le_plink = zend_register_list_destructors_ex(NULL, _close_msql_plink, "msql link persistent", module_number);
 	
 	msql_module_entry.type = type;
 

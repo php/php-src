@@ -194,9 +194,9 @@ PHP_MINIT_FUNCTION(hw) {
 	ZEND_INIT_MODULE_GLOBALS(hw, php_hw_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
-	HwSG(le_socketp) = register_list_destructors(_close_hw_link,NULL, "hyperwave link");
-	HwSG(le_psocketp) = register_list_destructors(NULL,_close_hw_plink, "hyperwave link persistent");
-	HwSG(le_document) = register_list_destructors(_free_hw_document,NULL, "hyperwave document");
+	HwSG(le_socketp) = zend_register_list_destructors_ex(_close_hw_link, NULL, "hyperwave link", module_number);
+	HwSG(le_psocketp) = zend_register_list_destructors_ex(NULL, _close_hw_plink, "hyperwave link persistent", module_number);
+	HwSG(le_document) = zend_register_list_destructors_ex(_free_hw_document, NULL, "hyperwave document", module_number);
 	hw_module_entry.type = type;
 
 	REGISTER_LONG_CONSTANT("HW_ATTR_LANG", HW_ATTR_LANG, CONST_CS | CONST_PERSISTENT);

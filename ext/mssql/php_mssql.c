@@ -220,9 +220,9 @@ PHP_MINIT_FUNCTION(mssql)
 #endif
 
 	REGISTER_INI_ENTRIES();
-	le_result = register_list_destructors(_free_mssql_result, NULL, "mssql result");
-	le_link = register_list_destructors(_close_mssql_link, NULL, "mssql link");
-	le_plink = register_list_destructors(NULL, _close_mssql_plink, "mssql link persistent");
+	le_result = zend_register_list_destructors_ex(_free_mssql_result, NULL, "mssql result", module_number);
+	le_link = zend_register_list_destructors_ex(_close_mssql_link, NULL, "mssql link", module_number);
+	le_plink = zend_register_list_destructors_ex(NULL, _close_mssql_plink, "mssql link persistent", module_number);
 	mssql_module_entry.type = type;
 
 	if (dbinit()==FAIL) {

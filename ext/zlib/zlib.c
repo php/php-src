@@ -147,7 +147,7 @@ PHP_MINIT_FUNCTION(zlib)
 #else
         ZLIBG(gzgetss_state)=0;
 #endif
-	le_zp = register_list_destructors(phpi_destructor_gzclose,NULL,"zlib");
+	le_zp = zend_register_list_destructors_ex(phpi_destructor_gzclose, NULL, "zlib", module_number);
 
 #if HAVE_FOPENCOOKIE
 

@@ -225,14 +225,14 @@ PHP_MINIT_FUNCTION(gd)
 		return FAILURE;
 	}
 #endif
-	GDG(le_gd) = register_list_destructors(php_free_gd_image, NULL, "gd");
-	GDG(le_gd_font) = register_list_destructors(php_free_gd_font, NULL, "gd font");
+	GDG(le_gd) = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
+	GDG(le_gd_font) = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
 #if HAVE_LIBT1
 	T1_SetBitmapPad(8);
 	T1_InitLib(NO_LOGFILE|IGNORE_CONFIGFILE|IGNORE_FONTDATABASE);
 	T1_SetLogLevel(T1LOG_DEBUG);
-	GDG(le_ps_font) = register_list_destructors(php_free_ps_font, NULL, "gd PS font");
-	GDG(le_ps_enc) = register_list_destructors(php_free_ps_enc, NULL, "gd PS encoding");
+	GDG(le_ps_font) = zend_register_list_destructors_ex(php_free_ps_font, NULL, "gd PS font", module_number);
+	GDG(le_ps_enc) = zend_register_list_destructors_ex(php_free_ps_enc, NULL, "gd PS encoding", module_number);
 #endif
 	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);

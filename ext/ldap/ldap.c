@@ -181,8 +181,8 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 #endif
 
-	le_result = register_list_destructors(_free_ldap_result, NULL, "ldap result");
-	le_link = register_list_destructors(_close_ldap_link, NULL, "ldap link");
+	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
+	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
 
 	ldap_module_entry.type = type;
 
