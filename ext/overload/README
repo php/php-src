@@ -1,8 +1,3 @@
-This extension is experimental.
-
-That's all I'm required to say, as you should know the consequences, but
-I'll go ahead and add a few more notes.
-
 The purpose of this extension is to allow user-space overloading of object
 property access and method calls. It has only one function, overload() which
 takes the name of the class that should have this functionality enabled. But
@@ -93,20 +88,7 @@ var_dump($o->COUNT);
 
 ?>
 
-What works
-----------
-Whatever you can get it to do.
-
-
 What doesn't work
 -----------------
 Invoking original overloading handlers, if the class had any.
-__set() only works to one level of property access, no chains yet
-Whatever else I am forgetting about here.
-
-
-What might change
------------------
-Hell, anything, even the name of extension and its only function.
-
-Feedback, please.
+__set() only works to one level of property access, no chains yet.
