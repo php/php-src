@@ -29,7 +29,7 @@ developers to write dynamically generated pages quickly.
 set -x
 ./buildconf
 ./configure --prefix=/usr --with-apxs \
-	--enable-track-vars --disable-debug \
+	--disable-debug \
 	--with-xml=shared \
 
 # figure out configure options options based on what packages are installed
