@@ -147,12 +147,12 @@ struct _encode
 
 smart_str *build_soap_action(zval *this_ptr, char *soapaction);
 
-// Master functions all encode/decode should be called thur these functions
+/* Master functions all encode/decode should be called thur these functions */
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style);
 zval *master_to_zval(encodePtr encode, xmlNodePtr data);
 
 #ifdef HAVE_PHP_DOMXML
-//user defined mapping
+/* user defined mapping */
 zval *to_xml_before_user(encodeType type, zval *data);
 xmlNodePtr to_xml_user(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_after_user(encodeType type, xmlNodePtr node, int style);
@@ -161,7 +161,7 @@ zval *to_zval_user(encodeType type, xmlNodePtr node);
 zval *to_zval_after_user(encodeType type, zval *data);
 #endif
 
-//zval type decode
+/* zval type decode */
 zval *to_zval_double(encodeType type, xmlNodePtr data);
 zval *to_zval_long(encodeType type, xmlNodePtr data);
 zval *to_zval_bool(encodeType type, xmlNodePtr data);
@@ -175,25 +175,25 @@ zval *guess_zval_convert(encodeType type, xmlNodePtr data);
 xmlNodePtr to_xml_long(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_bool(encodeType type, zval *data, int style);
 
-//String encode
+/* String encode */
 xmlNodePtr to_xml_string(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style);
 
-//Null encode
+/* Null encode */
 xmlNodePtr to_xml_null(encodeType type, zval *data, int style);
 
-//Struct encode
+/* Struct encode */
 xmlNodePtr to_xml_object(encodeType type, zval *data, int style);
 
-//Array encode
+/* Array encode */
 xmlNodePtr guess_array_map(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_array(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_map(encodeType type, zval *data, int style);
 
-//Try and guess for non-wsdl clients and servers
+/* Try and guess for non-wsdl clients and servers */
 xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style);
 
-//Datetime encode/decode
+/* Datetime encode/decode */
 xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style);
 xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style);
 xmlNodePtr to_xml_time(encodeType type, zval *data, int style);

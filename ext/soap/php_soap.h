@@ -16,8 +16,10 @@
 # include "ext/domxml/php_domxml.h"
 #endif
 
-// PHP_STREAMS were introduced php-4.2.0.. i think
-//  Make this part of configure
+/*
+ PHP_STREAMS were introduced php-4.2.0.. i think
+ Make this part of configure
+*/
 #ifdef STREAMS_DC
 # define PHP_STREAMS
 #endif
@@ -179,8 +181,10 @@ PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
 PHP_MINFO_FUNCTION(soap);
 
-//Registry Functions
-//TODO: this!
+/*
+  Registry Functions
+  TODO: this!
+*/
 PHP_FUNCTION(load_sdl);
 PHP_FUNCTION(unload_sdl);
 PHP_FUNCTION(unload_all_sdls);
@@ -191,7 +195,7 @@ PHP_FUNCTION(soap_encode_to_xml);
 PHP_FUNCTION(soap_encode_to_zval);
 
 
-//Server Functions
+/* Server Functions */
 PHP_FUNCTION(soapserver);
 PHP_FUNCTION(setclass);
 PHP_FUNCTION(addfunction);
@@ -203,7 +207,7 @@ PHP_FUNCTION(bind);
 PHP_FUNCTION(map);
 #endif
 
-//Client Functions
+/* Client Functions */
 PHP_FUNCTION(soapobject);
 PHP_FUNCTION(__use);
 PHP_FUNCTION(__style);
@@ -220,13 +224,13 @@ PHP_FUNCTION(__getlastrequest);
 PHP_FUNCTION(__headerclass);
 PHP_FUNCTION(__headerfunction);
 
-//SoapVar Functions
+/* SoapVar Functions */
 PHP_FUNCTION(soapvar);
 
-//SoapFault Functions
+/* SoapFault Functions */
 PHP_FUNCTION(soapfault);
 
-//SoapParam Functions
+/* SoapParam Functions */
 PHP_FUNCTION(soapparam);
 
 
