@@ -2,6 +2,8 @@
 implode() function
 --POST--
 --GET--
+--INI--
+error_reporting=2047
 --FILE--
 <?php
 echo implode(array())."\n";
@@ -10,9 +12,11 @@ echo implode(array('foo', 'bar', 'baz'))."\n";
 echo implode(':', array('foo', 'bar', 'baz'))."\n";
 echo implode(':', array('foo', array('bar', 'baz'), 'burp'))."\n";
 ?>
---EXPECT--
+--EXPECTF--
 
 
 foobarbaz
 foo:bar:baz
+
+Notice: Array to string conversion in %s on line 6
 foo:Array:burp
