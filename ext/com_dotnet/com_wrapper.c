@@ -90,7 +90,7 @@ static inline void trace(char *fmt, ...)
 	php_dispatchex *disp = (php_dispatchex*)This; \
 	trace(" PHP:%s %s\n", Z_OBJCE_P(disp->object)->name, methname); \
 	if (tsrm_thread_id() != disp->engine_thread) \
-		return E_UNEXPECTED;
+		return RPC_E_WRONG_THREAD;
 
 
 static HRESULT STDMETHODCALLTYPE disp_queryinterface( 
@@ -287,7 +287,8 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 
 				ALLOC_INIT_ZVAL(zarg);
 				php_com_wrap_variant(zarg, arg, COMG(code_page) TSRMLS_CC);
-				params[i] = &zarg;
+				params[i] = (zval**)emalloc(sizeof(zval**));
+				*params[i] = zarg;
 			}
 		}
 
@@ -320,8 +321,10 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 	
 		/* release arguments */
 		if (params) {
-			for (i = 0; i < pdp->cArgs; i++)
+			for (i = 0; i < pdp->cArgs; i++) {
 				zval_ptr_dtor(params[i]);
+				efree(params[i]);
+			}
 			efree(params);
 		}
 		
@@ -625,8 +628,9 @@ PHPAPI IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC)
 {
 	php_dispatchex *disp = NULL;
 
-	if (Z_TYPE_P(val) != IS_OBJECT)
+	if (Z_TYPE_P(val) != IS_OBJECT) {
 		return NULL;
+	}
 
 	if (php_com_is_valid_object(val TSRMLS_CC)) {
 		/* pass back its IDispatch directly */

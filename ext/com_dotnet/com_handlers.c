@@ -321,7 +321,7 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
-		
+	
 		if (obj->typeinfo) {
 			/* look for byref params */
 			ITypeComp *comp;
@@ -524,7 +524,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	php_com_dotnet_object *obj;
 	VARIANT v;
 	VARTYPE vt = VT_EMPTY;
-
+	
 	if (should_free) {
 		zval_dtor(writeobj);
 	}
@@ -535,7 +535,6 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	VariantInit(&v);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-
 		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
 			return FAILURE;
 		}
@@ -561,9 +560,11 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 		case IS_STRING:
 			vt = VT_BSTR;
 			break;
+		default:
+			;
 	}
 
-	if (vt != VT_EMPTY) {
+	if (vt != VT_EMPTY && vt != V_VT(&v)) {
 		VariantChangeType(&v, &v, 0, vt);
 	}
 
