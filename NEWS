@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- fbsql_num_rows now return the correct value on all select statements
 - Fixed HTTP file upload support to handle big files better. (Jani)
 - Added array_chunk() function that splits an array into chunks of specified
   size. (Andrei)
