@@ -2331,14 +2331,9 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 					l--;
 				}
 				*s++ = *t++;
-			} else if (*t == '\\' && l > 0) {
-				if(t[1] == '0') {
-					*s++='\0';
-					t++;
-				} else {
-					*s++=*(++t);
-				}
-				t++;
+			} else if (*t == '\\' && t[1] == '0' && l > 0) {
+				*s++='\0';
+				t+=2;
 				if (len != NULL) {
 					(*len)--;
 				}
@@ -2632,10 +2627,6 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 				case '\'':
 					*target++ = '\'';
 					*target++ = '\'';
-					break;
-				case '\\':
-					*target++ = '\\';
-					*target++ = '\\';
 					break;
 				default:
 					*target++ = *source;
