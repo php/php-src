@@ -915,7 +915,7 @@ SOURCE=..\ext\xml\expat\xmltok\xmltok_ns.c
 # PROP Default_Filter ""
 # Begin Group "Source Files No. 6"
 
-# PROP Default_Filter "*.c"
+# PROP Default_Filter ".c"
 # Begin Source File
 
 SOURCE=..\ext\ftp\ftp.c
@@ -927,7 +927,7 @@ SOURCE=..\ext\ftp\php_ftp.c
 # End Group
 # Begin Group "Header Files No. 6"
 
-# PROP Default_Filter "*.h"
+# PROP Default_Filter ".h"
 # Begin Source File
 
 SOURCE=..\ext\ftp\ftp.h
@@ -935,6 +935,58 @@ SOURCE=..\ext\ftp\ftp.h
 # Begin Source File
 
 SOURCE=..\ext\ftp\php_ftp.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Calendar"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 7"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\calendar\cal_unix.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\calendar.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\dow.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\easter.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\french.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\gregor.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\jewish.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\julian.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 7"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\calendar\php_calendar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\sdncal.h
 # End Source File
 # End Group
 # End Group
