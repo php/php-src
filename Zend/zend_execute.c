@@ -1806,6 +1806,8 @@ send_by_ref:
 						if (!Ts[opline->op1.u.var].var.ptr_ptr) {
 							get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 							FREE_OP(&opline->op1, EG(free_op1));
+						} else {
+							zval_ptr_dtor(&Ts[opline->op1.u.var].var.ptr);
 						}
 						break;
 					case IS_TMP_VAR:
