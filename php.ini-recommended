@@ -619,7 +619,8 @@ msql.max_links = -1
 ; Allow or prevent persistent links.
 pgsql.allow_persistent = On
 
-; Detect broken persistent links always with pg_pconnect(). Need a little overhead.
+; Detect broken persistent links always with pg_pconnect(). 
+; Auto reset feature requires a little overheads.
 pgsql.auto_reset_persistent = Off
 
 ; Maximum number of persistent links.  -1 means no limit.
@@ -627,6 +628,14 @@ pgsql.max_persistent = -1
 
 ; Maximum number of links (persistent+non persistent).  -1 means no limit.
 pgsql.max_links = -1
+
+; Ignore PostgreSQL backends Notice message or not.
+; Notice message logging require a little overheads.
+pgsql.ignore_notice = 0
+
+; Log PostgreSQL backends Noitce message or not.
+; Unless pgsql.ignore_notice=0, module cannot log notice message.
+pgsql.log_notice = 0
 
 [Sybase]
 ; Allow or prevent persistent links.
