@@ -3,7 +3,7 @@ AC_DEFUN(PHP_GD_JPEG,[
         AC_ARG_WITH(jpeg-dir,
         [  --with-jpeg-dir[=DIR]   jpeg dir for gd-1.8+],[
           AC_MSG_RESULT(yes)
-          if test -z $withval; then
+          if test "$withval" = "yes"; then
             withval="/usr/local"
           fi
           old_LIBS=$LIBS
