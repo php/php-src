@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: cvsclean.js,v 1.3 2004-04-07 18:48:23 fmk Exp $ */
+/* $Id: cvsclean.js,v 1.4 2004-04-08 19:08:37 fmk Exp $ */
 // Cleans up files that do not belong in CVS
 
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
@@ -30,7 +30,6 @@ function find_cvsignore(dirname)
 	var fc = new Enumerator(f.SubFolders);
 	
 	for (; !fc.atEnd(); fc.moveNext()) {
-		WScript.StdOut.WriteLine(fc.item());
 		find_cvsignore(fc.item());	
 	}
 
