@@ -103,7 +103,6 @@ PHP_MINIT_FUNCTION(assert)
 {
 
 #ifdef ZTS
-	ELS_FETCH();
 	assert_globals_id = ts_allocate_id(sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
 #else
 	php_assert_init_globals(ASSERTLS_C);

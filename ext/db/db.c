@@ -151,41 +151,31 @@ datum flatfile_nextkey(FILE *dbf);
 #include "php_db.h"
 #include "ext/standard/php_string.h"
 
+static int le_db;
+
 #if THREAD_SAFE
 DWORD DbmTls;
 static int numthreads=0;
-
-typedef struct dbm_global_struct{
-	int le_db;
-}dbm_global_struct;
-
-#define DBM_GLOBAL(a) dbm_globals->a
-#define DBM_TLS_VARS dbm_global_struct *dbm_globals = TlsGetValue(DbmTls); 
-
-#else
-static int le_db;
-#define DBM_GLOBAL(a) a
-#define DBM_TLS_VARS
 #endif
 
 /*needed for blocking calls in windows*/
 void *dbm_mutex;
 
-dbm_info *php_find_dbm(pval *id,HashTable *list)
+dbm_info *php_find_dbm(pval *id)
 {
 	list_entry *le;
 	dbm_info *info;
 	int numitems, i;
 	int info_type;
-	DBM_TLS_VARS;
+	ELS_FETCH();
 
 	if (id->type == IS_STRING) {
-		numitems = zend_hash_num_elements(list);
+		numitems = zend_hash_num_elements(&EG(regular_list));
 		for (i=1; i<=numitems; i++) {
-			if (zend_hash_index_find(list, i, (void **) &le)==FAILURE) {
+			if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
 				continue;
 			}
-			if (le->type == DBM_GLOBAL(le_db)) {
+			if (le->type == le_db) {
 				info = (dbm_info *)(le->ptr);
 				if (!strcmp(info->filename, id->value.str.val)) {
 					return (dbm_info *)(le->ptr);
@@ -197,7 +187,7 @@ dbm_info *php_find_dbm(pval *id,HashTable *list)
 	/* didn't find it as a database filename, try as a number */
 	convert_to_long(id);
 	info = zend_list_find(id->value.lval, &info_type);
-	if (info_type != DBM_GLOBAL(le_db))
+	if (info_type != le_db)
 		return NULL;
 	return info;
 }
@@ -254,7 +244,6 @@ PHP_FUNCTION(dbmopen) {
 	pval *filename, *mode;
 	dbm_info *info=NULL;
 	int ret;
-	DBM_TLS_VARS;
 
 	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht,2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -265,7 +254,7 @@ PHP_FUNCTION(dbmopen) {
 	
 	info = php_dbm_open(filename->value.str.val, mode->value.str.val);
 	if (info) {
-		ret = zend_list_insert(info, DBM_GLOBAL(le_db));
+		ret = zend_list_insert(info, le_db);
 		RETURN_LONG(ret);
 	} else {
 		RETURN_FALSE;
@@ -469,7 +458,7 @@ PHP_FUNCTION(dbminsert)
 	convert_to_string(key);
 	convert_to_string(value);
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -522,7 +511,7 @@ PHP_FUNCTION(dbmreplace)
 	convert_to_string(key);
 	convert_to_string(value);
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -576,7 +565,7 @@ PHP_FUNCTION(dbmfetch)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -648,7 +637,7 @@ PHP_FUNCTION(dbmexists)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -691,7 +680,7 @@ PHP_FUNCTION(dbmdelete)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -732,7 +721,7 @@ PHP_FUNCTION(dbmfirstkey)
 		WRONG_PARAM_COUNT;
 	}
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -790,7 +779,7 @@ PHP_FUNCTION(dbmnextkey)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id,list);
+	info = php_find_dbm(id);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -1099,13 +1088,12 @@ PHP_MINIT_FUNCTION(db)
 	}
 #endif
 
-	DBM_GLOBAL(le_db) = register_list_destructors(php_dbm_close,NULL);
+	le_db = register_list_destructors(php_dbm_close,NULL);
 	return SUCCESS;
 }
 
 static PHP_MSHUTDOWN_FUNCTION(db)
 {
-	DBM_TLS_VARS;
 #ifdef THREAD_SAFE
 	PHP3_TLS_THREAD_FREE(dbm_globals);
 	PHP3_MUTEX_LOCK(dbm_mutex);

@@ -298,8 +298,6 @@ static void php_mysql_init_globals(php_mysql_globals *mysql_globals)
 
 PHP_MINIT_FUNCTION(mysql)
 {
-	ELS_FETCH();
-
 #ifdef ZTS
 	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), (ts_allocate_ctor) php_mysql_init_globals, NULL);
 #else
@@ -371,6 +369,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	MYSQL *mysql;
 	MySLS_FETCH();
 	PLS_FETCH();
+	ELS_FETCH();
 
 	if (PG(sql_safe_mode)) {
 		if (ARG_COUNT(ht)>0) {
@@ -460,7 +459,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
@@ -490,7 +489,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			/* hash it up */
 			new_le.type = le_plink;
 			new_le.ptr = mysql;
-			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(mysql);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -520,7 +519,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				if (mysql_connect(le->ptr,host,user,passwd)==NULL) {
 #endif
 					php_error(E_WARNING,"MySQL:  Link to server lost, unable to reconnect");
-					zend_hash_del(plist, hashed_details, hashed_details_length+1);
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -539,7 +538,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		 * if it doesn't, open a new mysql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -556,7 +555,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
 			}
 		}
 		if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
@@ -584,7 +583,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}

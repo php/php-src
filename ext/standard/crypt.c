@@ -92,8 +92,6 @@ zend_module_entry crypt_module_entry = {
 
 PHP_MINIT_FUNCTION(crypt)
 {
-	ELS_FETCH();
-
 #if PHP3_STD_DES_CRYPT
     REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", 2, CONST_CS | CONST_PERSISTENT);
 #else

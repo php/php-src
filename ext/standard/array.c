@@ -112,8 +112,6 @@ zend_module_entry array_module_entry = {
 
 PHP_MINIT_FUNCTION(array)
 {
-	ELS_FETCH();
-
 #ifdef ZTS
     array_globals_id = ts_allocate_id(sizeof(php_array_globals), NULL, NULL);
 #endif

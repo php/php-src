@@ -720,7 +720,6 @@ void php_request_shutdown(void *dummy)
 	CLS_FETCH();
 	ELS_FETCH();
 	SLS_FETCH();
-	PLS_FETCH();
 
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);

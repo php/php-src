@@ -44,8 +44,6 @@ static void start_syslog(void);
 
 PHP_MINIT_FUNCTION(syslog)
 {
-	ELS_FETCH();
-	
 	/* error levels */
 	REGISTER_LONG_CONSTANT("LOG_EMERG", LOG_EMERG, CONST_CS | CONST_PERSISTENT); /* system unusable */
 	REGISTER_LONG_CONSTANT("LOG_ALERT", LOG_ALERT, CONST_CS | CONST_PERSISTENT); /* immediate action required */
