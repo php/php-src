@@ -1858,7 +1858,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 			}
 			ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 		}
-		else if (tp[0] == 'I' || tp[0] == 'I')
+		else if (tp[0] == 'I' || tp[0] == 'U')
 		{
 			if (tp[0] == 'I') link->insert_id = fbcmdRowIndex(md);
 			if (sR == 1 && md) fbcmdRelease(md);
