@@ -1279,7 +1279,7 @@ SXE_METHOD(__construct)
 	php_std_error_handling();
 	docp = xmlParseMemory(data, data_len);
 	if (!docp) {
-		(php_libxml_node_object *)sxe->document = NULL;
+		((php_libxml_node_object *)sxe)->document = NULL;
 		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0 TSRMLS_CC);
 		return;
 	}
