@@ -34,7 +34,6 @@
 #ifdef PHP_WIN32
 # define zend_finite(x) _finite(x)
 # define zend_isnan(x) _isnan(x)
-# define zend_isinf(x) _isnan(x)
 #endif
 
 /* {{{ proto int abs(int number)
