@@ -83,7 +83,7 @@
 #ifdef PHP_WIN32
 extern int OS_SetImpersonate(void);
 #else
-/* XXX this will need to change later when threaded fastcgi is 
+/* XXX this will need to change later when threaded fastcgi is
    implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
 #endif
@@ -270,7 +270,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	}
 	/* Check wheater to send RFC2616 style headers compatible with
 	 * PHP versions 4.2.3 and earlier compatible with web servers
-	 * such as IIS. Default is informal CGI RFC header compatible 
+	 * such as IIS. Default is informal CGI RFC header compatible
 	 * with Apache.
 	 */
 	if (cfg_get_long("cgi.rfc2616_headers", &rfc2616_headers) == FAILURE) {
@@ -279,9 +279,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 	if (SG(sapi_headers).http_response_code != 200) {
 		int len;
-		
+
 		if (rfc2616_headers) {
-			len = snprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, 
+			len = snprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH,
 						   "%s\r\n", SG(sapi_headers).http_status_line);
 
 			if (len > SAPI_CGI_MAX_HEADER_LENGTH) {
@@ -304,7 +304,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		PHPWRITE_H("\r\n", 2);
 		efree(hd);
 	}
-	
+
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
     while (h) {
 		PHPWRITE_H(h->header, h->header_len);
@@ -468,7 +468,7 @@ static sapi_module_struct cgi_sapi_module = {
 	"cgi",							/* name */
 	"CGI",							/* pretty name */
 #endif
-	
+
 	php_cgi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
@@ -544,7 +544,7 @@ static void init_request_info(TSRMLS_D)
 	char *env_path_translated;
 
 	SG(request_info).path_translated = NULL;
-	/* 
+	/*
 	 * If for some reason the CGI interface is not setting the
 	 * PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
 	 * We still call php_fopen_primary_script, because if you set doc_root
@@ -552,32 +552,32 @@ static void init_request_info(TSRMLS_D)
 	 * the filename as a side effect of php_fopen_primary_script.
 	 *
 	 * Fixup path stuff to conform to CGI spec
-	 * 
-	 * http://localhost/info.php/test?a=b 
-	 * 
+	 *
+	 * http://localhost/info.php/test?a=b
+	 *
 	 * should produce, which btw is the same as if
 	 * we were running under mod_cgi on apache (ie. not
 	 * using ScriptAlias directives):
-	 * 
+	 *
 	 * PATH_INFO=/test
 	 * PATH_TRANSLATED=/docroot/test
 	 * SCRIPT_NAME=/info.php
 	 * REQUEST_URI=/info.php/test?a=b
 	 * SCRIPT_FILENAME=/docroot/info.php
 	 * QUERY_STRING=a=b
-	 * 
+	 *
 	 * cgi/mod_fastcgi under apache produce:
-	 * 
+	 *
 	 * PATH_INFO=/info.php/test
 	 * PATH_TRANSLATED=/docroot/info.php/test
 	 * SCRIPT_NAME=/php/php-cgi  (from the Action setting I suppose)
 	 * REQUEST_URI=/info.php/test?a=b
 	 * SCRIPT_FILENAME=/path/to/php/bin/php-cgi  (Action setting translated)
 	 * QUERY_STRING=a=b
-	 * 
+	 *
 	 * Comments in the code below refer to using the above URL in a request
-	 * 		
-	 */		
+	 *
+	 */
 
 	env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
 
@@ -587,7 +587,7 @@ static void init_request_info(TSRMLS_D)
 		__riscosify_control|=__RISCOSIFY_DONT_CHECK_DIR;
 		env_path_translated=__unixify(env_path_translated,0,NULL,1,0);
 #endif
-		
+
 #if ENABLE_PATHINFO_CHECK
 		/*
 		 * if the file doesn't exist, try to extract PATH_INFO out
@@ -635,7 +635,7 @@ static void init_request_info(TSRMLS_D)
 						 * then we can modify PATH_INFO
 						 * accordingly
 						 *
-						 * we now have the makings of 
+						 * we now have the makings of
 						 * PATH_INFO=/test
 						 * SCRIPT_FILENAME=/docroot/info.php
 						 *
@@ -671,7 +671,7 @@ static void init_request_info(TSRMLS_D)
 							 */
 							_sapi_cgibin_putenv("SCRIPT_NAME",pt+l TSRMLS_CC);
 
-							/* 
+							/*
 							 * PATH_TRANSATED = DOCUMENT_ROOT + PATH_INFO
 							 */
 							path_translated_len = l + strlen(path_info) + 2;
@@ -683,7 +683,7 @@ static void init_request_info(TSRMLS_D)
 							efree(path_translated);
 						} else if (env_script_name &&
 							strstr(pt,env_script_name)) {
-							/* 
+							/*
 							 * PATH_TRANSATED = PATH_TRANSATED - SCRIPT_NAME + PATH_INFO
 							 */
 							int ptlen = strlen(pt)-strlen(env_script_name);
@@ -734,7 +734,7 @@ static void init_request_info(TSRMLS_D)
 		/* this is old logic, and completely incorrect by CGI spec
 		 * this is used to generate PHP_SELF, which should actually
 		 * match SCRIPT_NAME.  This is being left so PHP will be as broken
-		 * as it was before if a server does not set SCRIPT_NAME. 
+		 * as it was before if a server does not set SCRIPT_NAME.
 		 */
 		SG(request_info).request_uri = sapi_cgibin_getenv("PATH_INFO",0 TSRMLS_CC);
 	}
@@ -746,12 +746,12 @@ static void init_request_info(TSRMLS_D)
 		/* server didn't set script_filename, default to path_translated */
 		SG(request_info).path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
 	}
-	if (SG(request_info).path_translated) 
+	if (SG(request_info).path_translated)
 		SG(request_info).path_translated = estrdup(SG(request_info).path_translated);
 	SG(request_info).content_type = (content_type ? content_type : "" );
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
 	SG(sapi_headers).http_response_code = 200;
-	
+
 	/* The CGI RFC allows servers to pass on unvalidated Authorization data */
 	auth = sapi_cgibin_getenv("HTTP_AUTHORIZATION",0 TSRMLS_CC);
 	php_handle_auth_data(auth TSRMLS_CC);
@@ -974,7 +974,7 @@ int main(int argc, char *argv[])
 		 * http://www.koehntopp.de/php.
 		 *   -- kk@netuse.de
 		 */
-		if (!getenv("REDIRECT_STATUS") 
+		if (!getenv("REDIRECT_STATUS")
 			&& !getenv ("HTTP_REDIRECT_STATUS")
 			/* this is to allow a different env var to be configured
 			    in case some server does something different than above */
@@ -1186,14 +1186,14 @@ consult the installation file that came with this distribution, or visit \n\
 #if PHP_FASTCGI
 			&& !fastcgi
 #endif
-			) { /* never execute the arguments if you are a CGI */	
+			) { /* never execute the arguments if you are a CGI */
 			if (SG(request_info).argv0) {
 				free(SG(request_info).argv0);
 				SG(request_info).argv0 = NULL;
 			}
 
 			if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
-				no_headers = 1;  
+				no_headers = 1;
 				php_output_startup();
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
@@ -1201,22 +1201,22 @@ consult the installation file that came with this distribution, or visit \n\
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
 			}
-		
+
 			while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
 				switch (c) {
-					
+
   				case 'a':	/* interactive mode */
 						printf("Interactive mode enabled\n\n");
 						interactive=1;
 						break;
-					
+
 				case 'C': /* don't chdir to the script directory */
 						SG(options) |= SAPI_OPTION_NO_CHDIR;
 						break;
 				case 'd': /* define ini entries on command line */
 						define_command_line_ini_entry(ap_php_optarg);
 						break;
-						
+
   				case 'e': /* enable extended info output */
 						CG(extended_info) = 1;
 						break;
@@ -1236,7 +1236,7 @@ consult the installation file that came with this distribution, or visit \n\
 
   				case 'h': /* help & quit */
 					case '?':
-						no_headers = 1;  
+						no_headers = 1;
 						php_output_startup();
 						php_output_activate(TSRMLS_C);
 						SG(headers_sent) = 1;
@@ -1278,7 +1278,7 @@ consult the installation file that came with this distribution, or visit \n\
 					break;
 
 #if 0 /* not yet operational, see also below ... */
-  				case '': /* generate indented source mode*/ 
+  				case '': /* generate indented source mode*/
 						behavior=PHP_MODE_INDENT;
 						break;
 #endif
@@ -1306,7 +1306,7 @@ consult the installation file that came with this distribution, or visit \n\
 						exit(1);
 						break;
 
-  				case 'w': 
+  				case 'w':
 						behavior=PHP_MODE_STRIP;
 						break;
 
@@ -1390,7 +1390,7 @@ consult the installation file that came with this distribution, or visit \n\
 		/* This actually destructs the elements of the list - ugly hack */
 		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
 		zend_llist_destroy(&global_vars);
-		
+
 		if (cgi || SG(request_info).path_translated) {
 			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		}
@@ -1404,7 +1404,7 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 			file_handle.filename = argv0;
 			file_handle.opened_path = expand_filepath(argv0, NULL TSRMLS_CC);
-		} 
+		}
 
 		if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 			/* #!php support */
@@ -1465,7 +1465,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 		{
 			char *path_translated;
-		
+
 			/*	Go through this trouble so that the memory manager doesn't warn
 			 *	about SG(request_info).path_translated leaking
 			 */
@@ -1474,7 +1474,7 @@ consult the installation file that came with this distribution, or visit \n\
 				STR_FREE(SG(request_info).path_translated);
 				SG(request_info).path_translated = path_translated;
 			}
-			
+
 			php_request_shutdown((void *) 0);
 
 			if (SG(request_info).path_translated) {
@@ -1504,6 +1504,7 @@ consult the installation file that came with this distribution, or visit \n\
 	} zend_end_try();
 
 	php_module_shutdown(TSRMLS_C);
+	sapi_shutdown();
 
 #ifdef ZTS
 	tsrm_shutdown();
