@@ -86,7 +86,7 @@ PHP_MINIT_FUNCTION(ncurses)
 	PHP_NCURSES_CONST(COLOR_CYAN);
 	PHP_NCURSES_CONST(COLOR_WHITE);
 	
-	le_ncurses = zend_register_list_destructors_ex(ncurses_destruct, NULL, "ncurses_hanlde", module_number);	
+	le_ncurses = zend_register_list_destructors_ex(ncurses_destruct, NULL, "ncurses_handle", module_number);	
 
 	return SUCCESS;
 }
