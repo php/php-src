@@ -117,4 +117,6 @@ extern pgsql_module php3_pgsql_module;
 
 #endif
 
+#define phpext_pgsql_ptr pgsql_module_ptr
+
 #endif /* _PHP3_PGSQL_H */
