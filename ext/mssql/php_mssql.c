@@ -899,12 +899,12 @@ PHP_FUNCTION(mssql_query)
 		RETURN_FALSE;
 	}
 
-	result = (mssql_result *) emalloc(sizeof(mssql_result));
 	num_fields = dbnumcols(mssql_ptr->link);
 	if (num_fields <= 0) {
-		RETURN_TRUE;
+		RETURN_FALSE;
 	}
 
+	result = (mssql_result *) emalloc(sizeof(mssql_result));
 	column_types = (int *) emalloc(sizeof(int) * num_fields);
 	for (i=0; i<num_fields; i++) {
 		column_types[i] = coltype(i+1);
@@ -961,7 +961,6 @@ PHP_FUNCTION(mssql_query)
 	}
 	efree(column_types);
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
-	RETURN_TRUE;
 }
 /* }}} */
 
