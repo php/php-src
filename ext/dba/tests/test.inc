@@ -1,8 +1,9 @@
 <?php
 	$db_filename = $db_file = dirname(__FILE__).'/test0.dbm';
 	$handler = dba_handlers(); 
-	// CDB currently supports only reading 
-	if ($handler[0]=='cdb') {
+	if (in_array('flatfile', $handler)) {
+		$handler = 'flatfile';
+	} elseif ($handler[0]=='cdb') { // CDB currently supports only reading 
 		if (count($handler)==1) {
 			die('CDB currently supports only reading ');
 		}
