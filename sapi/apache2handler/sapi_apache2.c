@@ -50,11 +50,13 @@
 #include "ap_mpm.h"
 
 #include "php_apache.h"
- 
-#ifdef NETWARE
-#undef shutdown /* To avoid Winsock confusion */
-#endif
 
+/* UnixWare and Netware define shutdown to _shutdown, which causes problems later
+ * on when using a structure member named shutdown. Since this source
+ * file does not use the system call shutdown, it is safe to #undef it.
+ */
+#undef shutdown
+ 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
 #define PHP_SCRIPT "php-script"
