@@ -150,8 +150,8 @@ typedef union _date_ll {
 
 %}
 
-/* This grammar has 21 shift/reduce conflicts. */
-/* %expect 21 */
+/* This grammar has 22 shift/reduce conflicts. */
+%expect 22
 %pure_parser
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID tTZONE tZZONE 
@@ -161,7 +161,7 @@ typedef union _date_ll {
 %type	<Number>	tDAY tDAY_UNIT tDAYZONE tHOUR_UNIT tMINUTE_UNIT
 %type	<Number>	tMONTH tMONTH_UNIT
 %type	<Number>	tSEC_UNIT tSNUMBER tUNUMBER tYEAR_UNIT tZONE tTZONE tZZONE 
-%type	<Meridian>	tMERIDIAN o_merid
+%type	<Meridian>	tMERIDIAN 
 
 %%
 
@@ -185,6 +185,7 @@ item	: time {
 	    ((struct date_yy *)parm)->yyHaveRel++;
 	}
 	| number
+    | o_merid
 	;
 
 time	: tUNUMBER tMERIDIAN {
@@ -193,11 +194,10 @@ time	: tUNUMBER tMERIDIAN {
 	    ((struct date_yy *)parm)->yySeconds = 0;
 	    ((struct date_yy *)parm)->yyMeridian = $2;
 	}
-	| tUNUMBER ':' tUNUMBER o_merid {
+	| tUNUMBER ':' tUNUMBER {
 	    ((struct date_yy *)parm)->yyHour = $1;
 	    ((struct date_yy *)parm)->yyMinutes = $3;
 	    ((struct date_yy *)parm)->yySeconds = 0;
-	    ((struct date_yy *)parm)->yyMeridian = $4;
 	}
 	| tUNUMBER ':' tUNUMBER tSNUMBER {
 	    ((struct date_yy *)parm)->yyHour = $1;
@@ -208,11 +208,10 @@ time	: tUNUMBER tMERIDIAN {
 			  ? -$4 % 100 + (-$4 / 100) * 60
 			  : - ($4 % 100 + ($4 / 100) * 60));
 	}
-	| tUNUMBER ':' tUNUMBER ':' tUNUMBER o_merid {
+	| tUNUMBER ':' tUNUMBER ':' tUNUMBER {
 	    ((struct date_yy *)parm)->yyHour = $1;
 	    ((struct date_yy *)parm)->yyMinutes = $3;
 	    ((struct date_yy *)parm)->yySeconds = $5;
-	    ((struct date_yy *)parm)->yyMeridian = $6;
 	}
 	| tUNUMBER ':' tUNUMBER ':' tUNUMBER tSNUMBER {
 	    /* ISO 8601 format.  hh:mm:ss[+-][0-9]{2}([0-9]{2})?.  */
@@ -234,7 +233,6 @@ time	: tUNUMBER tMERIDIAN {
 	    ((struct date_yy *)parm)->yySeconds = $5;
 	    ((struct date_yy *)parm)->yyMeridian = MER24;
 	}
-	| iso8601time
 	;
 
 iso8601time: tUNUMBER ':' tUNUMBER ':' tUNUMBER  {
@@ -335,12 +333,12 @@ date	: tUNUMBER '/' tUNUMBER {
 	    }
 	}
 	| iso8601date
-    | iso8601date tTZONE iso8601time {
+	| iso8601datetime {
 	        ((struct date_yy *)parm)->yyTimezone = 0;
 	        ((struct date_yy *)parm)->yyHaveZone++;
 			((struct date_yy *)parm)->yyHaveTime++;
     }
-    | iso8601date tTZONE iso8601time tZZONE {
+	| iso8601datetime tZZONE {
 	        ((struct date_yy *)parm)->yyTimezone = 0;
 	        ((struct date_yy *)parm)->yyHaveZone++;
 			((struct date_yy *)parm)->yyHaveTime++;
@@ -382,6 +380,9 @@ date	: tUNUMBER '/' tUNUMBER {
 	    ((struct date_yy *)parm)->yyDay = $1;
 	    ((struct date_yy *)parm)->yyYear = $3;
 	}
+	;
+
+iso8601datetime: iso8601date tTZONE iso8601time
 	;
 
 iso8601date: tUNUMBER tSNUMBER tSNUMBER {
@@ -500,14 +501,10 @@ number	: tUNUMBER
 	  }
 	;
 
-o_merid	: /* NULL */
-	  {
-	    $$ = MER24;
-	  }
-	| tMERIDIAN
-	  {
-	    $$ = $1;
-	  }
+o_merid : tMERIDIAN 
+          {
+			 ((struct date_yy *)parm)->yyMeridian = $1;
+		  }
 	;
 
 %%
