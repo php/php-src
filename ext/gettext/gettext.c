@@ -27,7 +27,6 @@
 #if HAVE_LIBINTL
 
 #include <stdio.h>
-#include <libintl.h>
 #include "ext/standard/info.h"
 #include "php_gettext.h"
 
@@ -56,6 +55,8 @@ function_entry php_gettext_functions[] = {
     {NULL, NULL, NULL}
 };
 /* }}} */
+
+#include <libintl.h>
 
 zend_module_entry php_gettext_module_entry = {
 	STANDARD_MODULE_HEADER,
