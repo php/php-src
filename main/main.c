@@ -659,11 +659,11 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				break;
 			case E_NOTICE:
 			case E_USER_NOTICE:
-				/* notices are no errors and are not treated as such like E_WARNIGNS */
+				/* notices are no errors and are not treated as such like E_WARNINGS */
 				break;
 			default:
 				/* throw an exception if we are in EH_THROW mode
-				 * but DO NOT overwrite a pending excepption
+				 * but DO NOT overwrite a pending exception
 				 */
 				if (PG(error_handling) == EH_THROW && !EG(exception)) {
 					zend_throw_error_exception(PG(exception_class), buffer, 0, type TSRMLS_CC);
