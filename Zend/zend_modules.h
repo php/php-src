@@ -43,10 +43,14 @@ ZEND_API extern unsigned char third_arg_force_ref[];
 #define USING_ZTS 0
 #endif
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0, ZEND_DEBUG, USING_ZTS, ZEND_MODULE_API_NO
+#define STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS
+
+#define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
 
 #define STANDARD_MODULE_PROPERTIES \
 	NULL, NULL, STANDARD_MODULE_PROPERTIES_EX
+
+#define NO_VERSION_YET NULL
 
 #define MODULE_PERSISTENT 1
 #define MODULE_TEMPORARY 2
@@ -54,6 +58,10 @@ ZEND_API extern unsigned char third_arg_force_ref[];
 typedef struct _zend_module_entry zend_module_entry;
 
 struct _zend_module_entry {
+    unsigned short size;
+	unsigned int zend_api;
+	unsigned char zend_debug;
+	unsigned char zts;
 	char *name;
 	zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
@@ -61,6 +69,7 @@ struct _zend_module_entry {
 	int (*request_startup_func)(INIT_FUNC_ARGS);
 	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+	char *version;
 	int (*global_startup_func)(void);
 	int (*global_shutdown_func)(void);
 	int globals_id;
@@ -68,9 +77,6 @@ struct _zend_module_entry {
 	unsigned char type;
 	void *handle;
 	int module_number;
-	unsigned char zend_debug;
-	unsigned char zts;
-	unsigned int zend_api;
 };
 
 

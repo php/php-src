@@ -1384,3 +1384,14 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 
 	return retval;
 }
+
+ZEND_API char *zend_get_module_version(char *module_name)
+{
+	zend_module_entry *module;
+
+	if (zend_hash_find(&module_registry, module_name, strlen(module_name) + 1,
+                       (void**)&module) == FAILURE) {
+		return NULL;
+	}
+    return module->version;
+}
