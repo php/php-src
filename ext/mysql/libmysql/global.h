@@ -250,8 +250,12 @@ int	__void__;
 #endif
 
 #if defined(__EMX__) || !defined(HAVE_UINT)
+#undef uint
+#undef ushort
+#undef ulong
 typedef unsigned int uint;
 typedef unsigned short ushort;
+typedef unsigned long ulong;
 #endif
 
 #define sgn(a)		(((a) < 0) ? -1 : ((a) > 0) ? 1 : 0)
