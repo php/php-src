@@ -138,7 +138,7 @@ void orbit_save_data(zval * php_object, int type, void * data)
 	INIT_PZVAL(orbit_data_handle);	/* set reference count */
 
 	zend_hash_index_update(
-			php_object->value.obj.properties, /* hashtable */
+			Z_OBJPROP_P(php_object), 					/* hashtable */
 			0, 																/* hash??? */
 			&orbit_data_handle,								/* data */
 			sizeof(pval *),										/* data size */
@@ -160,7 +160,7 @@ void * orbit_retrieve_data(const zval * php_object, int wanted_type)
 	
 	/* get handle to corba data */
 	zend_hash_index_find(										
-			php_object->value.obj.properties,		/* hash table */	
+			Z_OBJPROP_P(php_object),						/* hash table */	
 			0, 																	/* hash??? */
 			(void **)&orbit_data_handle					/* data */
 			);
