@@ -141,7 +141,7 @@ zend_module_entry odbc_module_entry = {
 	PHP_RINIT(odbc), 
 	PHP_RSHUTDOWN(odbc), 
 	PHP_MINFO(odbc), 
-	1.0,
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
