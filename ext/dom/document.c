@@ -1720,12 +1720,21 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		return;
 	}
 
+	if (!source_len) {
+		RETURN_FALSE;
+	}
+
 	if (mode == DOM_LOAD_FILE) {
 		ctxt = htmlCreateFileParserCtxt(source, NULL);
 	} else {
 		source_len = xmlStrlen(source);
 		ctxt = htmlCreateMemoryParserCtxt(source, source_len);
 	}
+
+	if (!ctxt) {
+		RETURN_FALSE;
+	}
+
 	ctxt->vctxt.error = php_libxml_ctx_error;
 	ctxt->vctxt.warning = php_libxml_ctx_warning;
 	if (ctxt->sax != NULL) {
