@@ -54,6 +54,7 @@ static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(user_error);
 static ZEND_FUNCTION(set_user_error_handler);
+static ZEND_FUNCTION(get_declared_classes);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -90,6 +91,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_class_methods,	NULL)
 	ZEND_FE(user_error,			NULL)
 	ZEND_FE(set_user_error_handler,		NULL)
+	ZEND_FE(get_declared_classes, NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -682,8 +684,12 @@ ZEND_FUNCTION(get_required_files)
 {
 	CLS_FETCH();
 
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
 	array_init(return_value);
-	zend_hash_apply_with_argument(&CG(used_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
+	zend_hash_apply_with_argument(&CG(used_files), (apply_func_arg_t) copy_import_use_file, return_value);
 }
 /* }}} */
 
@@ -692,8 +698,12 @@ ZEND_FUNCTION(get_required_files)
    Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
 {
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
 	array_init(return_value);
-	zend_hash_apply_with_argument(&EG(included_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
+	zend_hash_apply_with_argument(&EG(included_files), (apply_func_arg_t) copy_import_use_file, return_value);
 }
 /* }}} */
 
@@ -756,3 +766,24 @@ ZEND_FUNCTION(set_user_error_handler)
 
 	RETURN_TRUE;
 }
+
+static int copy_class_name(zend_class_entry *ce, zval *array)
+{
+	add_next_index_stringl(array, ce->name, ce->name_length, 1);
+	return 0;
+}
+
+/* {{{ proto array get_declared_classes(void)
+   Returns an array of all declared classes. */
+ZEND_FUNCTION(get_declared_classes)
+{
+	CLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(CG(class_table), (apply_func_arg_t)copy_class_name, return_value);
+}
+/* }}} */
