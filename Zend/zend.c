@@ -500,7 +500,7 @@ void zend_shutdown(TSRMLS_D)
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #endif
 	zend_destroy_rsrc_list_dtors();
-	zend_hash_destroy(&module_registry);
+	zend_hash_graceful_reverse_destroy(&module_registry);
 
 #ifndef ZTS
 	/* In ZTS mode these are freed by compiler_globals_dtor() */
