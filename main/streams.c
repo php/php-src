@@ -29,6 +29,7 @@
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
 #include "ext/standard/basic_functions.h" /* for BG(mmap_file) (not strictly required) */
+#include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -2607,6 +2608,40 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash()
 {
 	return &url_stream_wrappers_hash;
+}
+
+PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC)
+{
+	char *e, *buf;
+	size_t toread;
+
+	php_stream_fill_read_buffer(stream, maxlen TSRMLS_CC);
+
+	if (delim_len == 0) {
+		toread = maxlen;
+	} else {
+		if (delim_len == 1) {
+			e = memchr(stream->readbuf, *delim, stream->readbuflen);
+		} else {
+			e = php_memnstr(stream->readbuf, delim, delim_len, (stream->readbuf + stream->readbuflen));
+		}
+
+		if (!e) {
+			toread = maxlen;
+		} else {
+			toread = e - (char *) stream->readbuf;
+		}
+	}
+
+	buf = emalloc(toread + 1);
+	*returned_len = php_stream_read(stream, buf, toread);
+	                
+	if (*returned_len >= 0) {
+		return buf;
+	} else {
+		efree(buf);
+		return NULL;
+	}
 }
 
 /*
