@@ -1739,7 +1739,7 @@ PHP_FUNCTION(domxml_node_attributes)
 }
 /* }}} */
 
-/* {{{ proto object domxml_new_child(string name, string content)
+/* {{{ proto object domxml_node_new_child(string name, string content)
    Adds child node to parent node */
 PHP_FUNCTION(domxml_node_new_child)
 {
