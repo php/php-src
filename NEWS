@@ -2,6 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
+- Added checks for negative values to gmp_sqrt(), gmp_powm(), gmp_sqrtrem()
+  and gmp_fact() to prevent SIGFPE. (Tony)
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
 - Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
