@@ -54,6 +54,69 @@ package.xml).
             'doc' => '
 ',
             ),
+        'cvsdiff' => array(
+            'summary' => 'Run a "cvs diff" for all files in a package',
+            'function' => 'doCvsDiff',
+            'shortcut' => 'cd',
+            'options' => array(
+                'quiet' => array(
+                    'shortopt' => 'q',
+                    'doc' => 'Be quiet',
+                    ),
+                'reallyquiet' => array(
+                    'shortopt' => 'Q',
+                    'doc' => 'Be really quiet',
+                    ),
+                'date' => array(
+                    'shortopt' => 'D',
+                    'doc' => 'Diff against revision of DATE',
+                    'arg' => 'DATE',
+                    ),
+                'release' => array(
+                    'shortopt' => 'R',
+                    'doc' => 'Diff against tag for package release REL',
+                    'arg' => 'REL',
+                    ),
+                'revision' => array(
+                    'shortopt' => 'r',
+                    'doc' => 'Diff against revision REV',
+                    'arg' => 'REV',
+                    ),
+                'context' => array(
+                    'shortopt' => 'c',
+                    'doc' => 'Generate context diff',
+                    ),
+                'unified' => array(
+                    'shortopt' => 'u',
+                    'doc' => 'Generate unified diff',
+                    ),
+                'ignore-case' => array(
+                    'shortopt' => 'i',
+                    'doc' => 'Ignore case, consider upper- and lower-case letters equivalent',
+                    ),
+                'ignore-whitespace' => array(
+                    'shortopt' => 'b',
+                    'doc' => 'Ignore changes in amount of white space',
+                    ),
+                'ignore-blank-lines' => array(
+                    'shortopt' => 'B',
+                    'doc' => 'Ignore changes that insert or delete blank lines',
+                    ),
+                'brief' => array(
+                    'doc' => 'Report only whether the files differ, no details',
+                    ),
+                'dry-run' => array(
+                    'shortopt' => 'n',
+                    'doc' => 'Don\'t do anything, just pretend',
+                    ),
+                ),
+            'doc' => '<package.xml>
+Compares all the files in a package.  Without any options, this
+command will compare the current code with the last checked-in code.
+Using the -r or -R option you may compare the current code with that
+of a specific release.
+',
+            ),
         'cvstag' => array(
             'summary' => 'Set CVS Release Tag',
             'function' => 'doCvsTag',
@@ -75,8 +138,12 @@ package.xml).
                     'shortopt' => 'd',
                     'doc' => 'Remove tag',
                     ),
+                'dry-run' => array(
+                    'shortopt' => 'n',
+                    'doc' => 'Don\'t do anything, just pretend',
+                    ),
                 ),
-            'doc' => '
+            'doc' => '<package.xml>
 Sets a CVS tag on all files in a package.  Use this command after you have
 packaged a distribution tarball with the "package" command to tag what
 revisions of what files were in that release.  If need to fix something
@@ -295,8 +362,68 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
             $command .= ' ' . escapeshellarg($file);
         }
         $this->output .= "+ $command\n";
-        if (empty($options['n'])) {
+        if (empty($options['dry-run'])) {
             $fp = popen($command, "r");
+            while ($line = fgets($fp, 1024)) {
+                $this->output .= rtrim($line)."\n";
+            }
+            pclose($fp);
+        }
+        $this->ui->outputData($this->output, $_cmd);
+        return true;
+    }
+
+    // }}}
+    // {{{ doCvsDiff()
+
+    function doCvsDiff($command, $options, $params)
+    {
+        $this->output = '';
+        $_cmd = $command;
+        if (sizeof($params) < 1) {
+            $help = $this->getHelp($command);
+            return $this->raiseError("$command: missing parameter: $help[0]");
+        }
+        $obj = new PEAR_Common;
+        $info = $obj->infoFromDescriptionFile($params[0]);
+        if (PEAR::isError($info)) {
+            return $this->raiseError($info);
+        }
+        $files = array_keys($info['filelist']);
+        $cmd = "cvs";
+        if (isset($options['quiet'])) {
+            $cmd .= ' -q';
+            unset($options['quiet']);
+        }
+        if (isset($options['reallyquiet'])) {
+            $cmd .= ' -Q';
+            unset($options['reallyquiet']);
+        }
+        if (isset($options['release'])) {
+            $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $options['release']);
+            $cvstag = "RELEASE_$cvsversion";
+            $options['revision'] = $cvstag;
+            unset($options['release']);
+        }
+        $execute = true;
+        if (isset($options['dry-run'])) {
+            $execute = false;
+        }
+        $cmd .= ' diff';
+        foreach ($options as $option => $optarg) {
+            $arg = @$this->commands[$command]['options'][$option]['arg'];
+            $short = @$this->commands[$command]['options'][$option]['shortopt'];
+            $cmd .= $short ? " -$short" : " --$option";
+            if ($arg && $optarg) {
+                $cmd .= ($short ? '' : '=') . escapeshellarg($optarg);
+            }
+        }
+        foreach ($files as $file) {
+            $cmd .= ' ' . escapeshellarg($file);
+        }
+        $this->output .= "+ $cmd\n";
+        if ($execute) {
+            $fp = popen($cmd, "r");
             while ($line = fgets($fp, 1024)) {
                 $this->output .= rtrim($line)."\n";
             }
