@@ -64,6 +64,12 @@ struct php_sqlite_db {
 	int rsrc_id;
 };
 
+struct php_sqlite_agg_functions {
+	zval *step;
+	zval *final;
+};
+
+
 enum { PHPSQLITE_ASSOC = 1, PHPSQLITE_NUM = 2, PHPSQLITE_BOTH = PHPSQLITE_ASSOC|PHPSQLITE_NUM };
 
 function_entry sqlite_functions[] = {
@@ -85,6 +91,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_last_error, NULL)
 	PHP_FE(sqlite_error_string, NULL)
 	PHP_FE(sqlite_unbuffered_query, NULL)
+	PHP_FE(sqlite_create_aggregate, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -278,6 +285,118 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 	}
 }
 /* }}} */
+
+static void php_sqlite_agg_step_function_callback(sqlite_func *func, int argc, const char **argv)
+{
+	zval *retval = NULL;
+	zval ***zargs;
+	zval **context_p;
+	int i, res, zargc;
+	struct php_sqlite_agg_functions *funcs = sqlite_user_data(func);
+	TSRMLS_FETCH();
+
+	/* sanity check the args */
+	if (argc < 1) {
+		return;
+	}
+	
+	zargc = argc + 1;
+	zargs = (zval ***)emalloc(zargc * sizeof(zval **));
+		
+	/* first arg is always the context zval */
+	context_p = (zval **)sqlite_aggregate_context(func, sizeof(*context_p));
+	if (*context_p == NULL) {
+		MAKE_STD_ZVAL(*context_p);
+	}
+
+	zargs[0] = context_p;
+
+	/* copy the other args */
+	for (i = 0; i < argc; i++) {
+		zargs[i+1] = emalloc(sizeof(zval *));
+		MAKE_STD_ZVAL(*zargs[i+1]);
+		ZVAL_STRING(*zargs[i+1], (char*)argv[i], 1);
+	}
+
+	res = call_user_function_ex(EG(function_table),
+			NULL,
+			funcs->step,
+			&retval,
+			zargc,
+			zargs,
+			0, NULL TSRMLS_CC);
+
+	if (res != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "call_user_function_ex failed");
+	}
+
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+
+	if (zargs) {
+		for (i = 1; i < zargc; i++) {
+			zval_ptr_dtor(zargs[i]);
+			efree(zargs[i]);
+		}
+		efree(zargs);
+	}
+}
+
+static void php_sqlite_agg_fini_function_callback(sqlite_func *func)
+{
+	zval *retval = NULL;
+	zval ***zargs;
+	zval funcname;
+	int i, res;
+	char *callable = NULL, *errbuf=NULL;
+	struct php_sqlite_agg_functions *funcs = sqlite_user_data(func);
+	zval **context_p;
+	TSRMLS_FETCH();
+
+	context_p = (zval **)sqlite_aggregate_context(func, sizeof(*context_p));
+	
+	res = call_user_function_ex(EG(function_table),
+			NULL,
+			funcs->final,
+			&retval,
+			1,
+			&context_p,
+			0, NULL TSRMLS_CC);
+
+	if (res == SUCCESS) {
+		if (retval == NULL) {
+			sqlite_set_result_string(func, NULL, 0);
+		} else {
+			switch (Z_TYPE_P(retval)) {
+				case IS_STRING:
+					/* TODO: for binary results, need to encode the string */
+					sqlite_set_result_string(func, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+					break;
+				case IS_LONG:
+				case IS_BOOL:
+					sqlite_set_result_int(func, Z_LVAL_P(retval));
+					break;
+				case IS_DOUBLE:
+					sqlite_set_result_double(func, Z_DVAL_P(retval));
+					break;
+				case IS_NULL:
+				default:
+					sqlite_set_result_string(func, NULL, 0);
+			}
+		}
+	} else {
+		sqlite_set_result_error(func, "call_user_function_ex failed", -1);
+	}
+
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+
+	zval_ptr_dtor(context_p);
+}
+
+
 
 /* {{{ Authorization Callback */
 static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4)
@@ -1018,5 +1137,52 @@ PHP_FUNCTION(sqlite_error_string)
 	} else {
 		RETURN_NULL();
 	}
+}
+/* }}} */
+
+/* {{{ proto bool sqlite_create_aggregate(string funcname, string step_f, string finalize_f[, long num_args])
+    Registers an aggregated function for queries*/
+PHP_FUNCTION(sqlite_create_aggregate)
+{
+	char *funcname = NULL;
+	long funcname_len;
+	zval *zstep, *zfinal, *zdb;
+	struct php_sqlite_db *db;
+	struct php_sqlite_agg_functions *funcs;
+	char *callable = NULL;
+	long num_args = -1;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rszz|l", &zdb, &funcname, &funcname_len, &zstep, &zfinal, &num_args) == FAILURE) {
+		return;
+	}
+
+	if (!zend_is_callable(zstep, 0, &callable)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "step function `%s' is not callable", callable);
+		efree(callable);
+		return;
+	}
+	efree(callable);
+	
+	if (!zend_is_callable(zfinal, 0, &callable)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "finalize function `%s' is not callable", callable);
+		efree(callable);
+		return;
+	}
+	efree(callable);
+
+	
+	DB_FROM_ZVAL(db, &zdb);
+
+	/* TODO: this needs to be cleaned up */
+	funcs = (struct php_sqlite_agg_functions *)emalloc(sizeof(*funcs));
+	
+	MAKE_STD_ZVAL(funcs->step);
+	MAKE_STD_ZVAL(funcs->final);
+	*(funcs->step)  = *zstep;
+	*(funcs->final) = *zfinal;
+	zval_copy_ctor(funcs->step);
+	zval_copy_ctor(funcs->final);
+
+	sqlite_create_aggregate(db->db, funcname, num_args, php_sqlite_agg_step_function_callback, php_sqlite_agg_fini_function_callback, funcs);
 }
 /* }}} */
