@@ -1215,7 +1215,7 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 			rsrc_type = le_domxmltextp;
 			content = xmlNodeGetContent(nodep);
 			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
-			add_property_stringl(wrapper, "name", "#text", sizeof("#text"), 1);
+			add_property_stringl(wrapper, "name", "#text", 5, 1);
 			if (content)
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
 			xmlFree(content);
@@ -1231,7 +1231,7 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 			content = xmlNodeGetContent(nodep);
 			if (content) {
 				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
-				add_property_stringl(wrapper, "name", "#comment", sizeof("#comment"), 1);
+				add_property_stringl(wrapper, "name", "#comment", 8, 1);
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
 				xmlFree(content);
 			}
@@ -1309,7 +1309,7 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 			if (docp->name)
 				add_property_stringl(wrapper, "name", (char *) docp->name, strlen(docp->name), 1);
 			else
-				add_property_stringl(wrapper, "name", "#document", sizeof("#document"), 1);
+				add_property_stringl(wrapper, "name", "#document", 9, 1);
 			if (docp->URL)
 				add_property_stringl(wrapper, "url", (char *) docp->URL, strlen(docp->URL), 1);
 			else
