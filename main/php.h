@@ -212,7 +212,11 @@ char *strerror(int);
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-#define MAXPATHLEN 256    /* Should be safe for any weird systems that do not define it */
+# ifdef PATH_MAX
+#  define MAXPATHLEN PATH_MAX
+# else
+#  define MAXPATHLEN 256    /* Should be safe for any weird systems that do not define it */
+# endif
 #endif
 
 #define PHP_FN(name) php_if_##name
