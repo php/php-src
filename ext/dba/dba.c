@@ -47,6 +47,7 @@
 #include "php_db3.h"
 #include "php_db4.h"
 #include "php_flatfile.h"
+#include "php_inifile.h"
 
 /* {{{ dba_functions[]
  */
@@ -189,6 +190,9 @@ static dba_handler handler[] = {
 #if DBA_DB4
 	DBA_HND(db4, DBA_LOCK_ALL) /* No lock in lib */
 #endif
+#if DBA_INIFILE
+	DBA_HND(inifile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
+#endif
 #if DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
@@ -212,6 +216,7 @@ static dba_handler handler[] = {
 #else
 #define DBA_DEFAULT ""
 #endif
+/* cdb/cdb_make and ini are no option here */
 
 ZEND_BEGIN_MODULE_GLOBALS(dba)
 	char *default_handler;
@@ -729,8 +734,29 @@ PHP_FUNCTION(dba_fetch)
 	int len = 0;
 	DBA_ID_GET2_3;
 
-	if (ac==3 && strcmp(info->hnd->name, "cdb")) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter", info->hnd->name);
+	if (ac==3) {
+		if (!strcmp(info->hnd->name, "cdb")) {
+			if (skip < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
+				skip = 0;
+			}
+		} else if (!strcmp(info->hnd->name, "inifile")) {
+			/* "-1" is compareable to 0 but allows a non restrictive 
+			 * access which is fater. For example 'inifile' uses this
+			 * to allow faster access when the key was already found
+			 * using firstkey/nextkey. However explicitly setting the
+			 * value to 0 ensures the first value. 
+			 */
+			if (skip < -1) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
+				skip = 0;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
+			skip = 0;			
+		}
+	} else {
+		skip = 0; 
 	}
 	if((val = info->hnd->fetch(info, VALLEN(key), skip, &len TSRMLS_CC)) != NULL) {
 		if (val && PG(magic_quotes_runtime)) {
@@ -773,7 +799,8 @@ PHP_FUNCTION(dba_nextkey)
 /* }}} */
 
 /* {{{ proto bool dba_delete(string key, int handle)
-   Deletes the entry associated with key */
+   Deletes the entry associated with key
+   If inifile: remove all other key lines */
 PHP_FUNCTION(dba_delete)
 {
 	DBA_ID_GET2;
@@ -787,7 +814,8 @@ PHP_FUNCTION(dba_delete)
 /* }}} */
 
 /* {{{ proto bool dba_insert(string key, string value, int handle)
-   Inserts value as key, returns false, if key exists already */
+   If not inifile: Insert value as key, return false, if key exists already 
+   If inifile: Add vakue as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -795,7 +823,8 @@ PHP_FUNCTION(dba_insert)
 /* }}} */
 
 /* {{{ proto bool dba_replace(string key, string value, int handle)
-   Inserts value as key, replaces key, if key exists already */
+   Inserts value as key, replaces key, if key exists already
+   If inifile: remove all other key lines */
 PHP_FUNCTION(dba_replace)
 {
 	php_dba_update(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
