@@ -1261,8 +1261,6 @@ PHP_FUNCTION(mysqli_prepare)
 		RETURN_FALSE;
 	}
 
-	if (stmt->stmt->fields) printf("**********\n");
-
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
