@@ -930,8 +930,18 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				short_class_name_length = strlen(short_class_name);
 			}
 		}
-		
-		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
+		if (zend_hash_add(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
+			zend_op_array *child_op_array, *parent_op_array;
+			if (CG(active_class_entry)->parent
+					&& (zend_hash_find(&CG(active_class_entry)->function_table, name, name_len+1, (void **) &child_op_array) == SUCCESS)
+					&& (zend_hash_find(&CG(active_class_entry)->parent->function_table, name, name_len+1, (void **) &parent_op_array) == SUCCESS)
+					&& (child_op_array == parent_op_array)) {
+				zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
+			} else {
+				zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", name);
+			}
+		}
+
 		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
