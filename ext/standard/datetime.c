@@ -182,10 +182,9 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #else
 	    /*
 	    ** If correcting for daylight savings time, we set the adjustment to
-		** the value of timezone - 3600 seconds. Otherwise, we need to overcorrect and
-		** set the adjustment to the main timezone + 3600 seconds.
+		** the value of timezone - 3600 seconds.
 	    */
-	    gmadjust = -(is_dst ? timezone - 3600 : timezone + 3600);
+	    gmadjust = -(is_dst ? timezone - 3600 : timezone);
 #endif
 		seconds += gmadjust;
 	}
