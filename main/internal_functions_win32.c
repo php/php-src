@@ -51,6 +51,7 @@
 #include "ext/standard/php_assert.h"
 #include "ext/calendar/php_calendar.h"
 #include "ext/com/php_COM.h"
+#include "ext/com/php_typedef_VARIANT.h"
 #include "ext/ftp/php_ftp.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
@@ -70,6 +71,7 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 	phpext_calendar_ptr,
 	COM_module_ptr,
+	VARIANT_module_ptr,
 	phpext_ftp_ptr,
 	phpext_mysql_ptr,
 	phpext_odbc_ptr,

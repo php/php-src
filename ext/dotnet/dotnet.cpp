@@ -21,6 +21,13 @@
  * This module implements support for Microsoft .Net components.
  */
 
+/*
+ * 28.1.2001
+ * use external unicode conversion functions
+ *
+ * harald radi <h.radi@nme.at>
+ */
+
 #ifdef PHP_WIN32
 
 #include <iostream.h>
@@ -31,21 +38,16 @@ extern "C" {
 #include "php.h"
 #include "php_ini.h"
 
-pval php_COM_get_property_handler(zend_property_reference *property_reference);
-
-
-int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value);
-
-char *php_COM_error_message(HRESULT hr);
-
-void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
-
-int php_COM_get_le_idispatch();
+OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen);
 }
 
+pval php_COM_get_property_handler(zend_property_reference *property_reference);
+int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value);
+char *php_COM_error_message(HRESULT hr);
+void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+int php_COM_get_le_idispatch();
 
-#include <stdio.h>
-
+#include "../com/conversion.h"
 #include "Mscoree.h"
 #include "mscorlib.h"
 
@@ -55,19 +57,6 @@ static ICorRuntimeHost *pHost;
 static mscorlib::_AppDomain *pDomain;
 
 static zend_class_entry dotnet_class_entry;
-
-static OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
-{
-	OLECHAR *unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR)*(strlen+1));
-	OLECHAR *unicode_ptr = unicode_str;
-
-	while (*C_str) {
-		*unicode_ptr++ = (unsigned short) *C_str++;
-	}
-	*unicode_ptr = 0;
-
-	return unicode_str;
-}
 
 HRESULT dotnet_init() {
   HRESULT hr;
@@ -156,7 +145,6 @@ PHP_FUNCTION(DOTNET_load)
 /* }}} */
 
 
-
 void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	pval *object = property_reference->object;
@@ -181,7 +169,6 @@ void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_propert
 		php_COM_call_function_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_reference);
 	}
 }
-
 
 void php_register_DOTNET_class()
 {
@@ -236,8 +223,5 @@ zend_module_entry dotnet_module_entry = {
 extern "C" {
 	ZEND_GET_MODULE(dotnet)
 }
-
-void php_register_DOTNET_class();
-
 
 #endif
