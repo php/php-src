@@ -52,7 +52,7 @@
 #define SEC_IN_MIN 60
 
 #ifdef HAVE_GETTIMEOFDAY
-/* {{{ proto string microtime([bool get_as_float])
+/* {{{ proto mixed microtime([bool get_as_float])
    Returns either a string or a float containing the current time in seconds and microseconds */
 PHP_FUNCTION(microtime)
 {
