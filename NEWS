@@ -45,6 +45,7 @@ PHP                                                                        NEWS
 - Added support of parameter=>value arrays to xsl_xsltprocessor_set_parameter() 
   (Tony)
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
+- Fixed a problem with SPL iterators aggregating the innner iterator. (Marcus)
 - Fixed bug with raw_post_data not getting set. (Brian)
 - Fixed bug in mysql::client_version(). (Georg)
 - Fixed ZTS destruction. (Marcus)
