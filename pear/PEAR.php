@@ -223,6 +223,8 @@ class PEAR
      * Tell whether a value is a PEAR error.
      *
      * @param   mixed $data   the value to test
+     * @param   int   $code   if $data is an error object, return true
+     *                        only if $obj->getCode() == $code
      * @access  public
      * @return  bool    true if parameter is an error
      */
