@@ -122,10 +122,36 @@ php_stream_ops php_stream_input_ops = {
 	NULL  /* set_option */
 };
 
+static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain TSRMLS_DC) {
+	char *p, *token;
+	php_stream_filter *temp_filter;
+
+	p = php_strtok_r(filterlist, "|", &token);
+	while (p) {
+		if (read_chain) {
+			if (temp_filter = php_stream_filter_create(p, "", 0, php_stream_is_persistent(stream) TSRMLS_CC)) {
+				php_stream_filter_append(&stream->readfilters, temp_filter);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create filter (%s)\n", p);
+			}
+		}
+		if (write_chain) {
+			if (temp_filter = php_stream_filter_create(p, "", 0, php_stream_is_persistent(stream) TSRMLS_CC)) {
+				php_stream_filter_append(&stream->writefilters, temp_filter);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create filter (%s)\n", p);
+			}
+		}
+		p = php_strtok_r(NULL, "|", &token);
+	}
+}
+
+
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	int fd = -1;
 	php_stream * stream = NULL;
+	char *p, *token, *pathdup;
 
 	if (!strncasecmp(path, "php://", 6))
 		path += 6;
@@ -151,6 +177,36 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		if (stream == NULL)
 			close(fd);
 	}
+
+	if (!strncasecmp(path, "filter/", 7)) {
+		pathdup = estrndup(path + 6, strlen(path + 6));
+		p = strstr(pathdup, "/resource=");
+		if (!p) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No URL resource specified.");
+			efree(pathdup);
+			return NULL;
+		}
+		if (!(stream = php_stream_open_wrapper(p + 10, mode, options, opened_path))) {
+			efree(pathdup);
+			return NULL;
+		}
+
+		*p = '\0';
+
+		p = php_strtok_r(pathdup + 1, "/", &token);
+		while (p) {
+			if (!strncasecmp(p, "read=", 5)) {
+				php_stream_apply_filter_list(stream, p + 5, 1, 0 TSRMLS_CC);
+			} else if (!strncasecmp(p, "write=", 6)) {
+				php_stream_apply_filter_list(stream, p + 6, 0, 1 TSRMLS_CC);
+			} else {
+				php_stream_apply_filter_list(stream, p, 1, 1 TSRMLS_CC);
+			}
+			p = php_strtok_r(NULL, "/", &token);
+		}
+		efree(pathdup);
+ 	}
+ 
 	return stream;
 }
 
