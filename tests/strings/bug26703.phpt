@@ -12,7 +12,7 @@ highlight.html=#000000
 	highlight_string('<?php echo "foo[] $a \n"; ?>');
 ?>
 --EXPECT--
-<code><font color="#000000">
-<font color="#0000BB">&lt;?php </font><font color="#007700">echo </font><font color="#DD0000">"foo[] $a \n"</font><font color="#007700">; </font><font color="#0000BB">?&gt;</font>
-</font>
+<code><span style="color: #000000">
+<span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"foo[] $a \n"</span><span style="color: #007700">; </span><span style="color: #0000BB">?&gt;</span>
+</span>
 </code>
