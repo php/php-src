@@ -49,7 +49,9 @@ error_reporting(E_ALL & ~E_NOTICE);
 PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 // {{{ config file and option parsing
-
+if (!isset($argv)) {
+    die("Could not read cmd args (register_argc_argv=Off?)\n");
+}
 $options = Console_Getopt::getopt($argv, "c:C:d:D:h?qu:v");
 if (PEAR::isError($options)) {
     usage($options);
