@@ -41,6 +41,8 @@
     <date>2003-08-??</date>
     <state>stable</state>
     <notes>
+* Fixed #25131 - OS_Guess warnings on empty lines from
+  popen(&quot;/usr/bin/cpp $tmpfile&quot;, &quot;r&quot;);
 * Fixed #25117 - MD5 checksum should be case-insensitive
 * Fixed static calls to PEAR error-handling methods in classes (Greg)
 * Added ability to use a static method callback for error-handling, and removed

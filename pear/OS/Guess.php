@@ -167,7 +167,7 @@ class OS_Guess
         $cpp = popen("/usr/bin/cpp $tmpfile", "r");
         $major = $minor = 0;
         while ($line = fgets($cpp, 1024)) {
-            if ($line{0} == '#') {
+            if ($line{0} == '#' || trim($line) == '') {
                 continue;
             }
             if (list($major, $minor) = explode(' ', trim($line))) {
