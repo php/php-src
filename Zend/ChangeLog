@@ -1,3 +1,28 @@
+2004-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      tests/bug26802.phpt:
+      Fixed bug #26802
+
+    * tests/bug26802.phpt:
+      Fix test
+
+    * tests/bug26801.phpt
+      tests/bug26802.phpt:
+      Add new test
+
+    * tests/bug26696.phpt:
+      Update test
+
+2004-01-05  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c:
+      Fix bug #26543 - check parent:: and self:: in class names
+
+    * zend_execute.c
+      zend_object_handlers.c:
+      Bug #24608 - fix interaction between __accessors and get_property_ptr
+
 2004-01-03  Derick Rethans  <php@derickrethans.nl>
 
     * zend.c

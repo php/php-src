@@ -1,3 +1,47 @@
+2004-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug26802.phpt:
+      Fixed bug #26802
+
+    * ZendEngine2/tests/bug26802.phpt:
+      Fix test
+
+    * ZendEngine2/tests/bug26801.phpt
+      ZendEngine2/tests/bug26802.phpt:
+      Add new test
+
+2004-01-05  Georg Richter  <phpinfo@t-online.de>
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+      s/2003/2004 :)
+
+2004-01-05  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      BFN
+
+2004-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug26696.phpt:
+      Update test
+
+2004-01-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      Fix bug #26543 - check parent:: and self:: in class names
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c:
+      Bug #24608 - fix interaction between __accessors and get_property_ptr
+
+2004-01-05  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      another example
+
 2004-01-04  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
