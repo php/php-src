@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Added CURL support. (Sterling)
 - Catch users trying to set "compatibility" parameter in PDF, which is not
   supported from user-land. (Joey)
 - Fixed dbase_add_record. (Sterling)
