@@ -2754,9 +2754,15 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 
 	str = (unsigned char *) Z_STRVAL_PP(C);
 	l = strlen(str);
-	fontname = (unsigned char *) Z_STRVAL_PP(FONTNAME);
 
-	
+#ifdef VIRTUAL_DIR
+	if(virtual_filepath(Z_STRVAL_PP(FONTNAME), &fontname)) {
+		fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
+	}
+#else
+	fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
+#endif
+
 #ifdef USE_GD_IMGSTRTTF
 # if HAVE_LIBFREETYPE
 
