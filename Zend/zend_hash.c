@@ -1029,8 +1029,10 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong
 
 	if (p) {
 		if (p->nKeyLength) {
-			*str_index = (char *) pemalloc(p->nKeyLength, ht->persistent);
-			memcpy(*str_index, p->arKey, p->nKeyLength);
+			*str_index = (char *) estrndup(p->arKey, p->nKeyLength);
+			if (ht->persistent) {
+				persist_alloc(*str_index);
+			}
 			if (str_length) {
 				*str_length = p->nKeyLength;
 			}
