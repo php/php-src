@@ -4,7 +4,10 @@
 #ifdef PHP_WIN32
 #include "win32/syslog.h"
 #else
+#include "php_config.h"
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
+#endif
 #endif
 
 /* 

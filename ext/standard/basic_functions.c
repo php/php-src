@@ -507,10 +507,12 @@ function_entry basic_functions[] = {
 	PHP_FE(ezmlm_hash,				NULL)
 
 	/* functions from syslog.c */
+#ifdef HAVE_SYSLOG_H
 	PHP_FE(openlog,					NULL)
 	PHP_FE(syslog,					NULL)
 	PHP_FE(closelog,				NULL)
 	PHP_FE(define_syslog_variables,	NULL)
+#endif
 
 	/* functions from lcg.c */
 	PHP_FE(lcg_value, NULL)
