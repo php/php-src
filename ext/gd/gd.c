@@ -3198,21 +3198,7 @@ PHP_FUNCTION(imagepsloadfont)
 	f_ind = T1_AddFont(Z_STRVAL_PP(file));
 
 	if (f_ind < 0) {
-		switch (f_ind) {
-			case -1:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't find the font file");
-				RETURN_FALSE;
-				break;
-			case -2:
-			case -3:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Memory allocation fault in t1lib");
-				RETURN_FALSE;
-				break;
-			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occurred in t1lib");
-				RETURN_FALSE;
-				break;
-		}
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error: %s", T1_StrError(f_ind));
 	}
 
 	if (T1_LoadFont(f_ind)) {
@@ -3349,6 +3335,12 @@ PHP_FUNCTION(imagepsextendfont)
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
 	T1_DeleteAllSizes(*f_ind);
+
+	if (Z_DVAL_PP(ext) <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Second parameter %f out of range (must be > 0)", Z_DVAL_PP(ext));
+		RETURN_FALSE;
+	}
+
 	if (T1_ExtendFont(*f_ind, Z_DVAL_PP(ext)) != 0) {
 		RETURN_FALSE;
 	}
@@ -3486,7 +3478,7 @@ PHP_FUNCTION(imagepstext)
 
 	if (!str_path) {
 		if (T1_errno) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "libt1 returned error %d", T1_errno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error: %s", T1_StrError(T1_errno));
 		}
 		RETURN_FALSE;
 	}
@@ -3505,7 +3497,7 @@ PHP_FUNCTION(imagepstext)
 	str_img = T1_AAFillOutline(str_path, 0);
 
 	if (T1_errno) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "libt1 returned error %d", T1_errno);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "T1Lib Error: %s", T1_StrError(T1_errno));
 		RETURN_FALSE;
 	}
 
