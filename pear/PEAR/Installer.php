@@ -406,8 +406,8 @@ class PEAR_Installer extends PEAR_Common
                     break;
                 case 'chmod':
                     // check that file is writable
-                    if (!is_writable($data[1])) {
-                        $errors[] = "permission denied ($type): $data[1]";
+                    if (!is_writable($data[0])) {
+                        $errors[] = "permission denied ($type): $data[0] $data[1]";
                     }
                     break;
                 case 'delete':
