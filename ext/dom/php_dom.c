@@ -277,6 +277,20 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
+
+void *php_dom_export_node(zval *object TSRMLS_DC)
+{
+	php_libxml_node_object *intern;
+	xmlNodePtr nodep = NULL;
+
+	intern = (php_libxml_node_object *)zend_object_store_get_object(object TSRMLS_CC);
+	if (intern && intern->node) {
+  		nodep = intern->node->node;
+	}
+
+	return nodep;	
+}
+
 /* {{{ proto somNode dom_import_simplexml(sxeobject node)
    Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(dom_import_simplexml)
@@ -284,7 +298,7 @@ PHP_FUNCTION(dom_import_simplexml)
 #ifdef HAVE_SIMPLEXML
 	zval *rv = NULL;
 	zval *node;
-	xmlNodePtr nodep;
+	xmlNodePtr nodep = NULL;
 	php_libxml_node_object *nodeobj;
 	int ret;
 
@@ -292,9 +306,10 @@ PHP_FUNCTION(dom_import_simplexml)
 		return;
 	}
 
-	NODE_GET_OBJ(nodep, node, xmlNodePtr, nodeobj);
+	nodeobj = (php_libxml_node_object *)zend_object_store_get_object(node TSRMLS_CC);
+	nodep = php_libxml_import_node(node TSRMLS_CC);
 
-	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
+	if (nodep && nodeobj && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {
 		DOM_RET_OBJ(rv, (xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
 	} else {
 		php_error(E_WARNING, "Invalid Nodetype to import");
@@ -626,6 +641,8 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("DOM_NAMESPACE_ERR",			NAMESPACE_ERR,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOM_INVALID_ACCESS_ERR",	INVALID_ACCESS_ERR,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOM_VALIDATION_ERR",		VALIDATION_ERR,			CONST_CS | CONST_PERSISTENT);
+
+	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 
 	return SUCCESS;
 }
