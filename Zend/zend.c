@@ -497,6 +497,21 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 }
 
 
+#ifdef ZTS
+/* Unlink the global (r/o) copies of the class, function and constant tables,
+ * and use a fresh r/w copy for the startup thread
+ */
+void zend_post_startup(TSRMLS_D)
+{
+	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
+
+	compiler_globals_ctor(compiler_globals, tsrm_ls);
+	zend_startup_constants(TSRMLS_C);
+	zend_copy_constants(EG(zend_constants), global_constants_table);
+}
+#endif
+
+
 void zend_shutdown(TSRMLS_D)
 {
 #ifdef ZEND_WIN32
