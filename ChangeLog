@@ -1,3 +1,36 @@
+2004-08-09  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      - Update NEWS
+
+    * (PHP_5_0)
+      ext/standard/credits.c:
+       Update credits for php docs
+
+    * (PHP_4_3)
+      ext/standard/credits.c:
+      - Update credits for PHP docs
+
+2004-08-09  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed speling and some reordering
+
+2004-08-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Included ext/soap fixes from CVS HEAD.
+
+2004-08-09  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      fixed bug #29577 (MYSQLI_CLIENT_FOUND_ROWS undefined)
+
 2004-08-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * pear/tests/pear_config.phpt
