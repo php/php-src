@@ -26,23 +26,24 @@ PHP_FUNCTION(confirm_extname_compiled);	/* For testing, remove later. */
 	and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(extname)
-	int global_variable;
+	int   global_value;
+	char *global_string;
 ZEND_END_MODULE_GLOBALS(extname)
 */
 
 /* In every function that needs to use variables in php_extname_globals,
-   do call EXTNAMELS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as EXTNAMEG(variable).
+   do call EXTNAME_LS_FETCH(); after declaring other variables used by
+   that function, and always refer to them as EXTNAME_G(variable).
    You are encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
 
 #ifdef ZTS
-#define EXTNAMEG(v) (extname_globals->v)
-#define EXTNAMELS_FETCH() php_extname_globals *extname_globals = ts_resource(extname_globals_id)
+#define EXTNAME_G(v) (extname_globals->v)
+#define EXTNAME_LS_FETCH() zend_extname_globals *extname_globals = ts_resource(extname_globals_id)
 #else
-#define EXTNAMEG(v) (extname_globals.v)
-#define EXTNAMELS_FETCH()
+#define EXTNAME_G(v) (extname_globals.v)
+#define EXTNAME_LS_FETCH()
 #endif
 
 #endif	/* PHP_EXTNAME_H */
