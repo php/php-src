@@ -33,13 +33,15 @@
 
 /* {{{ incomplete_class_message
  */
-static void incomplete_class_message(zend_property_reference *ref, int error_type)
+static void incomplete_class_message(int error_type)
 {
 	char buf[1024];
-	char *class_name;
+	char *class_name = NULL;
 	TSRMLS_FETCH();
 
-	class_name = php_lookup_class_name(ref->object, NULL, 0);
+	if(EG(This)) {
+		class_name = php_lookup_class_name(EG(This), NULL, 0);
+	}
 	
 	if (!class_name)
 		class_name = estrdup("unknown");
@@ -54,47 +56,58 @@ static void incomplete_class_message(zend_property_reference *ref, int error_typ
 
 /* {{{ incomplete_class_call_func
  */
-static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
+static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS)
 {
-	incomplete_class_message(property_reference, E_ERROR);
+	incomplete_class_message(E_ERROR);
 }
 /* }}} */
 
 /* {{{ incomplete_class_set_property
  */
-static int incomplete_class_set_property(zend_property_reference *property_reference, zval *value)
+static void incomplete_class_set_property(INTERNAL_FUNCTION_PARAMETERS)
 {
-	incomplete_class_message(property_reference, E_NOTICE);
-	
-	/* does not reach this point */
-	return (0);
+	incomplete_class_message(E_NOTICE);
 }
 /* }}} */
 
 /* {{{ incomplete_class_get_property
  */
-static zval incomplete_class_get_property(zend_property_reference *property_reference)
+static void incomplete_class_get_property(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval foo;
-	
-	incomplete_class_message(property_reference, E_NOTICE);
-
-	/* does not reach this point */
-	memset(&foo, 0, sizeof(zval)); /* shut warnings up */
-	return (foo);
+	incomplete_class_message(E_NOTICE);
 }
 /* }}} */
 
 /* {{{ php_create_incomplete_class
  */
+zend_internal_function incomplete_class_call_func_fe;
+zend_internal_function incomplete_class_get_property_fe;
+zend_internal_function incomplete_class_set_property_fe;
+
+static void php_incomplete_class_init_func(zend_internal_function *fe, void (*handler)(INTERNAL_FUNCTION_PARAMETERS)) {
+	fe->type = ZEND_INTERNAL_FUNCTION;
+	fe->handler = handler;
+	fe->function_name = NULL;
+	fe->scope = NULL;
+	fe->fn_flags = 0;
+	fe->prototype = NULL;
+	fe->num_args = 2;
+	fe->arg_info = NULL;
+	fe->pass_rest_by_reference = 0;
+}
+
 zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 {
 	zend_class_entry incomplete_class;
 
+	php_incomplete_class_init_func(&incomplete_class_call_func_fe, incomplete_class_call_func);
+	php_incomplete_class_init_func(&incomplete_class_get_property_fe, incomplete_class_get_property);
+	php_incomplete_class_init_func(&incomplete_class_set_property_fe, incomplete_class_set_property);
+
 	INIT_OVERLOADED_CLASS_ENTRY(incomplete_class, INCOMPLETE_CLASS, NULL,
-			incomplete_class_call_func,
-			incomplete_class_get_property,
-			incomplete_class_set_property);
+			(zend_function *)&incomplete_class_call_func_fe,
+			(zend_function *)&incomplete_class_get_property_fe,
+			(zend_function *)&incomplete_class_set_property_fe);
 
 	return zend_register_internal_class(&incomplete_class TSRMLS_CC);
 }
