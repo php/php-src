@@ -1,3 +1,48 @@
+2000-02-15  Zeev Suraski  <zeev@php.net>
+
+    * SAPI.c
+      sapi/isapi/php4isapi.c
+      sapi/servlet/servlet.c:
+    - Improved ISAPI module - it should no longer be necessary to set PHP as
+      an ISAPI filter, only as an ISAPI extension, unless you wish to perform
+      authentication using PHP.  This didn't yet get enough testing, but it
+      should work 
+    - Fixed auth_user/auth_password memory leak (I didn't have time to test it under
+      Apache, feedback welcome!)
+
+2000-02-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/config.m4: Fix enable again.
+
+2000-02-15  Zeev Suraski  <zeev@php.net>
+
+    * php_variables.c
+      rfc1867.c:    Fixed a memory leak
+
+2000-02-15  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c: adding a missing PHP_FALIAS to imap_listsubscribed()
+
+2000-02-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/config.m4: Changed --with-wddx to --enable-wddx.
+
+    * ext/wddx/config.m4: Test for --enable-xml.
+
+    * ext/pcre/php_pcre.h: Changing the header.
+
+    * NEWS: Little correction.
+
+2000-02-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h
+      NEWS: - initial support for pdflib 2.20, little testing till now
+
+2000-02-15  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Get rid of mistake
+
 2000-02-14  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/pgsql.php:    Added PostgreSQL support for DB submitted by Rui Hirokawa
