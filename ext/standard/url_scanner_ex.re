@@ -127,7 +127,7 @@ enum {
 };
 
 #define YYFILL(n) goto stop
-#define YYCTYPE char
+#define YYCTYPE unsigned char
 #define YYCURSOR xp
 #define YYLIMIT end
 #define YYMARKER q
@@ -215,7 +215,7 @@ alpha = [a-zA-Z];
 		case STATE_TAG:
 /*!re2c
   alpha+	{ HANDLE_TAG() /* Sets STATE */; PASSTHRU(); continue; }
-  any		{ PASSTHRU(); continue; }
+  any		{ PASSTHRU(); STATE = STATE_PLAIN; continue; }
 */
   			break;
 			
