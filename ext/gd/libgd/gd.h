@@ -256,7 +256,6 @@ void gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 void gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 /* Solid bar. Upper left corner first, lower right corner second. */
 void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-int gdImageBoundsSafe(gdImagePtr im, int x, int y);
 void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
@@ -585,5 +584,7 @@ int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
 #ifdef __cplusplus
 }
 #endif
+
+#define gdImageBoundsSafe(im, x, y) (!(y < 0 || y >= (im)->sy || x < 0 || x >= (im)->sx))
 
 #endif /* GD_H */

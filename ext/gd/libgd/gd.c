@@ -81,6 +81,9 @@ static const unsigned char gd_toascii[256] =
 };
 #endif /*CHARSET_EBCDIC */
 
+/* 2.0.10: cast instead of floor() yields 35% performance improvement. Thanks to John Buckman. */
+#define floor_cast(exp) ((long) exp)
+
 extern int gdCosT[];
 extern int gdSinT[];
 
@@ -661,6 +664,76 @@ gdImagePaletteCopy (gdImagePtr to, gdImagePtr from)
 
 }
 
+/* 2.0.10: before the drawing routines, some code to clip points that are
+ * outside the drawing window.  Nick Atty (nick@canalplan.org.uk)
+ *
+ * This is the Sutherland Hodgman Algorithm, as implemented by
+ * Duvanenko, Robbins and Gyurcsik - SH(DRG) for short.  See Dr Dobb's
+ * Journal, January 1996, pp107-110 and 116-117
+ *
+ * Given the end points of a line, and a bounding rectangle (which we
+ * know to be from (0,0) to (SX,SY)), adjust the endpoints to be on
+ * the edges of the rectangle if the line should be drawn at all,
+ * otherwise return a failure code 
+ */
+
+/* this does "one-dimensional" clipping: note that the second time it
+ *  is called, all the x parameters refer to height and the y to width
+ *  - the comments ignore this (if you can understand it when it's
+ *  looking at the X parameters, it should become clear what happens on
+ *  the second call!)  The code is simplified from that in the article,
+ *  as we know that gd images always start at (0,0) 
+ */
+
+static int clip_1d(int *x0, int *y0, int *x1, int *y1, int maxdim) {
+	double m;      /* gradient of line */
+
+	if (*x0 < 0) {  /* start of line is left of window */
+		if(*x1 < 0) { /* as is the end, so the line never cuts the window */
+			return 0;
+		}
+		m = (*y1 - *y0)/(double)(*x1 - *x0); /* calculate the slope of the line */
+		/* adjust x0 to be on the left boundary (ie to be zero), and y0 to match */
+		*y0 -= m * *x0;
+		*x0 = 0;
+		/* now, perhaps, adjust the far end of the line as well */
+		if (*x1 > maxdim) {
+			*y1 += m * (maxdim - *x1);
+			*x1 = maxdim;
+		}
+		return 1;
+	}
+	if (*x0 > maxdim) { /* start of line is right of window - complement of above */
+		if (*x1 > maxdim) { /* as is the end, so the line misses the window */
+			return 0;
+		}
+		m = (*y1 - *y0)/(double)(*x1 - *x0);  /* calculate the slope of the line */
+		*y0 += m * (maxdim - *x0); /* adjust so point is on the right boundary */
+		*x0 = maxdim;                  
+		/* now, perhaps, adjust the end of the line */
+		if (*x1 < 0) {
+			*y1 -= m * *x1;
+			*x1 = 0;
+		}
+		return 1;
+	}
+	/* the final case - the start of the line is inside the window */
+	if (*x1 > maxdim) { /* other end is outside to the right */
+		m = (*y1 - *y0)/(double)(*x1 - *x0);  /* calculate the slope of the line */
+		*y1 += m * (maxdim - *x1);
+		*x1 = maxdim;
+		return 1;
+	}
+	if (*x1 < 0) { /* other end is outside to the left */
+		m = (*y1 - *y0)/(double)(*x1 - *x0);  /* calculate the slope of the line */
+		*y1 -= m * *x1;
+		*x1 = 0;
+		return 1;
+	}
+	/* only get here if both points are inside the window */
+	return 1;
+}
+
 void
 gdImageSetPixel (gdImagePtr im, int x, int y, int color)
 {
@@ -871,157 +944,138 @@ gdImageGetPixel (gdImagePtr im, int x, int y)
 void
 gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
-  int dx, dy, incr1, incr2, d, x, y, xend, yend, xdirflag, ydirflag;
-  int wid;
-  int w, wstart;
-  int thick = im->thick;
-  dx = abs (x2 - x1);
-  dy = abs (y2 - y1);
-  if (dy <= dx)
-    {
-      /* More-or-less horizontal. use wid for vertical stroke */
-      /* Doug Claar: watch out for NaN in atan2 (2.0.5) */
-      if ((dx == 0) && (dy == 0)) {
-        wid = 1;
-      } else {
-        wid = (int)(thick * cos (atan2 (dy, dx)));
-        if (wid == 0) {
-          wid = 1;
-        }
-      }
-      d = 2 * dy - dx;
-      incr1 = 2 * dy;
-      incr2 = 2 * (dy - dx);
-      if (x1 > x2)
-	{
-	  x = x2;
-	  y = y2;
-	  ydirflag = (-1);
-	  xend = x1;
-	}
-      else
-	{
-	  x = x1;
-	  y = y1;
-	  ydirflag = 1;
-	  xend = x2;
-	}
+	int dx, dy, incr1, incr2, d, x, y, xend, yend, xdirflag, ydirflag;
+	int wid;
+	int w, wstart;
+	int thick = im->thick;
 
-      /* Set up line thickness */
-      wstart = y - wid / 2;
-      for (w = wstart; w < wstart + wid; w++)
-	gdImageSetPixel (im, x, w, color);
+	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
+	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im))) {
+		return;
+	}
+	
+	dx = abs(x2 - x1);
+	dy = abs(y2 - y1);
+	if (dy <= dx) {
+		/* More-or-less horizontal. use wid for vertical stroke */
+		/* Doug Claar: watch out for NaN in atan2 (2.0.5) */
+		if ((dx == 0) && (dy == 0)) {
+			wid = 1;
+		} else {
+			wid = (int)(thick * cos (atan2 (dy, dx)));
+			if (wid == 0) {
+				wid = 1;
+			}
+		}
+		d = 2 * dy - dx;
+		incr1 = 2 * dy;
+		incr2 = 2 * (dy - dx);
+		if (x1 > x2) {
+			x = x2;
+			y = y2;
+			ydirflag = (-1);
+			xend = x1;
+		} else {
+			x = x1;
+			y = y1;
+			ydirflag = 1;
+			xend = x2;
+		}
 
-      if (((y2 - y1) * ydirflag) > 0)
-	{
-	  while (x < xend)
-	    {
-	      x++;
-	      if (d < 0)
-		{
-		  d += incr1;
+		/* Set up line thickness */
+		wstart = y - wid / 2;
+		for (w = wstart; w < wstart + wid; w++) {
+			gdImageSetPixel(im, x, w, color);
 		}
-	      else
-		{
-		  y++;
-		  d += incr2;
-		}
-	      wstart = y - wid / 2;
-	      for (w = wstart; w < wstart + wid; w++)
-		gdImageSetPixel (im, x, w, color);
-	    }
-	}
-      else
-	{
-	  while (x < xend)
-	    {
-	      x++;
-	      if (d < 0)
-		{
-		  d += incr1;
-		}
-	      else
-		{
-		  y--;
-		  d += incr2;
-		}
-	      wstart = y - wid / 2;
-	      for (w = wstart; w < wstart + wid; w++)
-		gdImageSetPixel (im, x, w, color);
-	    }
-	}
-    }
-  else
-    {
-      /* More-or-less vertical. use wid for horizontal stroke */
-      wid = (int)(thick * sin (atan2 (dy, dx)));
-      if (wid == 0)
-	wid = 1;
 
-      d = 2 * dx - dy;
-      incr1 = 2 * dx;
-      incr2 = 2 * (dx - dy);
-      if (y1 > y2)
-	{
-	  y = y2;
-	  x = x2;
-	  yend = y1;
-	  xdirflag = (-1);
-	}
-      else
-	{
-	  y = y1;
-	  x = x1;
-	  yend = y2;
-	  xdirflag = 1;
-	}
+		if (((y2 - y1) * ydirflag) > 0) {
+			while (x < xend) {
+				x++;
+				if (d < 0) {
+					d += incr1;
+				} else {
+					y++;
+					d += incr2;
+				}
+				wstart = y - wid / 2;
+				for (w = wstart; w < wstart + wid; w++) {
+					gdImageSetPixel (im, x, w, color);
+				}
+			}
+		} else {
+			while (x < xend) {
+				x++;
+				if (d < 0) {
+					d += incr1;
+				} else {
+					y--;
+					d += incr2;
+				}
+				wstart = y - wid / 2;
+				for (w = wstart; w < wstart + wid; w++) {
+					gdImageSetPixel (im, x, w, color);
+				}
+			}
+		}
+	} else {
+		/* More-or-less vertical. use wid for horizontal stroke */
+		wid = (int)(thick * sin (atan2 (dy, dx)));
+		if (wid == 0) {
+			wid = 1;
+		}
 
-      /* Set up line thickness */
-      wstart = x - wid / 2;
-      for (w = wstart; w < wstart + wid; w++)
-	gdImageSetPixel (im, w, y, color);
+		d = 2 * dx - dy;
+		incr1 = 2 * dx;
+		incr2 = 2 * (dx - dy);
+		if (y1 > y2) {
+			y = y2;
+			x = x2;
+			yend = y1;
+			xdirflag = (-1);
+		} else {
+			y = y1;
+			x = x1;
+			yend = y2;
+			xdirflag = 1;
+		}
 
-      if (((x2 - x1) * xdirflag) > 0)
-	{
-	  while (y < yend)
-	    {
-	      y++;
-	      if (d < 0)
-		{
-		  d += incr1;
+		/* Set up line thickness */
+		wstart = x - wid / 2;
+		for (w = wstart; w < wstart + wid; w++) {
+			gdImageSetPixel (im, w, y, color);
 		}
-	      else
-		{
-		  x++;
-		  d += incr2;
+
+		if (((x2 - x1) * xdirflag) > 0) {
+			while (y < yend) {
+				y++;
+				if (d < 0) {
+					d += incr1;
+				} else {
+					x++;
+					d += incr2;
+				}
+				wstart = x - wid / 2;
+				for (w = wstart; w < wstart + wid; w++) {
+					gdImageSetPixel (im, w, y, color);
+				}
+			}
+		} else {
+			while (y < yend) {
+				y++;
+				if (d < 0) {
+					d += incr1;
+				} else {
+					x--;
+					d += incr2;
+				}
+				wstart = x - wid / 2;
+				for (w = wstart; w < wstart + wid; w++) {
+					gdImageSetPixel (im, w, y, color);
+				}
+			}
 		}
-	      wstart = x - wid / 2;
-	      for (w = wstart; w < wstart + wid; w++)
-		gdImageSetPixel (im, w, y, color);
-	    }
 	}
-      else
-	{
-	  while (y < yend)
-	    {
-	      y++;
-	      if (d < 0)
-		{
-		  d += incr1;
-		}
-	      else
-		{
-		  x--;
-		  d += incr2;
-		}
-	      wstart = x - wid / 2;
-	      for (w = wstart; w < wstart + wid; w++)
-		gdImageSetPixel (im, w, y, color);
-	    }
-	}
-    }
 }
-
 
 #define BLEND_COLOR(a, nc, c, cc) \
 nc = (cc) + (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
@@ -1315,13 +1369,6 @@ dashedSet (gdImagePtr im, int x, int y, int color,
     }
   *dashStepP = dashStep;
   *onP = on;
-}
-
-int
-gdImageBoundsSafe (gdImagePtr im, int x, int y)
-{
-  return (!(((y < 0) || (y >= im->sy)) ||
-	    ((x < 0) || (x >= im->sx))));
 }
 
 void
@@ -1831,154 +1878,127 @@ gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 void
 gdImageFilledRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
-  int x, y;
-  for (y = y1; (y <= y2); y++)
-    {
-      for (x = x1; (x <= x2); x++)
-	{
-	  gdImageSetPixel (im, x, y, color);
+	int x, y;
+  
+	/* Nick Atty: limit the points at the edge.  Note that this also
+	 * nicely kills any plotting for rectangles completely outside the
+	 * window as it makes the tests in the for loops fail 
+	 */
+	if (x1 < 0) {
+		x1 = 0;
 	}
-    }
+	if (x1 > gdImageSX(im)) {
+		x1 = gdImageSX(im);
+	}
+	if(y1 < 0) {
+		y1 = 0;
+	}
+	if (y1 > gdImageSY(im)) {
+		y1 = gdImageSY(im);
+	}
+
+	for (y = y1; (y <= y2); y++) {
+		for (x = x1; (x <= x2); x++) {
+			gdImageSetPixel (im, x, y, color);
+		}
+	}
 }
 
 void
 gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h)
 {
-  int c;
-  int x, y;
-  int tox, toy;
-  int i;
-  int colorMap[gdMaxColors];
-  if (dst->trueColor)
-    {
-      /* 2.0: much easier when the destination is truecolor. */
+	int c;
+	int x, y;
+	int tox, toy;
+	int i;
+	int colorMap[gdMaxColors];
+	if (dst->trueColor) {
+		/* 2.0: much easier when the destination is truecolor. */
+		/* 2.0.10: needs a transparent-index check that is still valid if
+		 * the source is not truecolor. Thanks to Frank Warmerdam. 
+		 */
 		
-		if (src->trueColor)	{
-      for (y = 0; (y < h); y++)
-	{
-	  for (x = 0; (x < w); x++)
-	    {
-	      int c = gdImageGetTrueColorPixel (src, srcX + x,
-						srcY + y);
-					gdImageSetPixel (dst,
-							dstX + x,
-							dstY + y,
-							c);
+		if (src->trueColor) {
+			for (y = 0; (y < h); y++) {
+				for (x = 0; (x < w); x++) {
+					int c = gdImageGetTrueColorPixel (src, srcX + x, srcY + y);
+					gdImageSetPixel (dst, dstX + x, dstY + y, c);
 				}
 			}
-
-		}
-		else	{
+		} else {
 			/* source is palette based */
-			for (y = 0; (y < h); y++)
-			{
-				for (x = 0; (x < w); x++)
-				{
-					int c = gdImageGetPixel (src, srcX + x,
-							srcY + y);
-	      if (c != src->transparent)
-		{
-		  gdImageSetPixel (dst,
-				   dstX + x,
-				   dstY + y,
-								gdTrueColor(src->red[c], src->green[c], src->blue[c]));
+			for (y = 0; (y < h); y++) {
+				for (x = 0; (x < w); x++) {
+					int c = gdImageGetPixel (src, srcX + x, srcY + y);
+					if (c != src->transparent) {
+						gdImageSetPixel (dst, dstX + x, dstY + y, gdTrueColor(src->red[c], src->green[c], src->blue[c]));
 					}
+				}
+			}
 		}
-	    }
+		return;
 	}
-      return;
-    }
 
-	  /* Destination is palette based */
+	/* Destination is palette based */
+	if (src->trueColor) { /* But source is truecolor (Ouch!) */
+		toy = dstY;
+		for (y = srcY; (y < (srcY + h)); y++) {
+			tox = dstX;
+			for (x = srcX; (x < (srcX + w)); x++) {
+				int nc;
+				c = gdImageGetPixel (src, x, y);
 
-    if (src->trueColor) {  /* But source is truecolor (Ouch!) */
-        toy = dstY;
-        for (y = srcY; (y < (srcY + h)); y++)
-        {
-            tox = dstX;
-            for (x = srcX; (x < (srcX + w)); x++)
-            {
-                int nc;
-                c = gdImageGetPixel (src, x, y);
+				/* Get best match possible. */
+				nc = gdImageColorResolveAlpha (dst, gdTrueColorGetRed(c), gdTrueColorGetGreen(c), gdTrueColorGetBlue(c), gdTrueColorGetAlpha(c));
 
-                /* Get best match possible. */
-                nc = gdImageColorResolveAlpha (
-                         dst,
-                         gdTrueColorGetRed(c),
-                         gdTrueColorGetGreen(c),
-                         gdTrueColorGetBlue(c),
-                         gdTrueColorGetAlpha(c));
-
-                gdImageSetPixel (dst, tox, toy, nc);
-                tox++;
-            }
-            toy++;
-        }
-        return;
-    }
+				gdImageSetPixel (dst, tox, toy, nc);
+				tox++;
+			}
+			toy++;
+		}
+		return;
+	}
 
 	/* Palette based to palette based */
-
-  for (i = 0; (i < gdMaxColors); i++)
-    {
-      colorMap[i] = (-1);
-    }
-  toy = dstY;
-  for (y = srcY; (y < (srcY + h)); y++)
-    {
-      tox = dstX;
-      for (x = srcX; (x < (srcX + w)); x++)
-	{
-	  int nc;
-          int mapTo;
-	  c = gdImageGetPixel (src, x, y);
-	  /* Added 7/24/95: support transparent copies */
-	  if (gdImageGetTransparent (src) == c)
-	    {
-	      tox++;
-	      continue;
-	    }
-	  /* Have we established a mapping for this color? */
-	  if (src->trueColor)
-	    {
-	      /* 2.05: remap to the palette available in the
-	         destination image. This is slow and
-	         works badly, but it beats crashing! Thanks 
-                 to Padhrig McCarthy. */
-	      mapTo = gdImageColorResolveAlpha (dst,
-					      gdTrueColorGetRed (c),
-					    gdTrueColorGetGreen (c),
-					     gdTrueColorGetBlue (c),
-					   gdTrueColorGetAlpha (c));
-	    }
-	  else if (colorMap[c] == (-1))
-	    {
-	      /* If it's the same image, mapping is trivial */
-	      if (dst == src)
-		{
-		  nc = c;
-		}
-	      else
-		{
-		  /* Get best match possible. This
-		     function never returns error. */
-		  nc = gdImageColorResolveAlpha (
-						  dst,
-						  src->red[c], src->green[c],
-					       src->blue[c], src->alpha[c]);
-		}
-	      colorMap[c] = nc;
-              mapTo = colorMap[c];  
-	    }
-          else
-            {
-              mapTo = colorMap[c];  
-            }
-	  gdImageSetPixel (dst, tox, toy, mapTo);
-	  tox++;
+	for (i = 0; (i < gdMaxColors); i++) {
+		colorMap[i] = (-1);
 	}
-      toy++;
-    }
+	toy = dstY;
+	for (y = srcY; (y < (srcY + h)); y++) {
+		tox = dstX;
+		for (x = srcX; (x < (srcX + w)); x++) {
+			int nc;
+			int mapTo;
+			c = gdImageGetPixel (src, x, y);
+			/* Added 7/24/95: support transparent copies */
+			if (gdImageGetTransparent (src) == c) {
+				tox++;
+				continue;
+			}
+			/* Have we established a mapping for this color? */
+			if (src->trueColor) {
+				/* 2.05: remap to the palette available in the destination image. This is slow and
+				 * works badly, but it beats crashing! Thanks to Padhrig McCarthy. 
+				 */
+				mapTo = gdImageColorResolveAlpha (dst, gdTrueColorGetRed (c), gdTrueColorGetGreen (c), gdTrueColorGetBlue (c), gdTrueColorGetAlpha (c));
+			} else if (colorMap[c] == (-1)) {
+				/* If it's the same image, mapping is trivial */
+				if (dst == src) {
+					nc = c;
+				} else {
+					/* Get best match possible. This function never returns error. */
+					nc = gdImageColorResolveAlpha (dst, src->red[c], src->green[c], src->blue[c], src->alpha[c]);
+				}
+				colorMap[c] = nc;
+				mapTo = colorMap[c];  
+			} else {
+				mapTo = colorMap[c];  
+			}
+			gdImageSetPixel (dst, tox, toy, mapTo);
+			tox++;
+		}
+		toy++;
+	}
 }
 
 /* This function is a substitute for real alpha channel operations,
@@ -2230,14 +2250,14 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 			sy = sy1;
 			do {
 				float yportion;
-				if (floorf(sy) == floorf(sy1)) {
-					yportion = 1.0f - (sy - floorf(sy));
+				if (floor_cast(sy) == floor_cast(sy1)) {
+					yportion = 1.0f - (sy - floor_cast(sy));
 					if (yportion > sy2 - sy1) {
 						yportion = sy2 - sy1;
 					}
-					sy = floorf(sy);
+					sy = floor_cast(sy);
 				} else if (sy == floorf(sy2)) {
-					yportion = sy2 - floorf(sy2);
+					yportion = sy2 - floor_cast(sy2);
 				} else {
 					yportion = 1.0f;
 				}
@@ -2248,14 +2268,14 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 					float xportion;
 					float pcontribution;
 					int p;
-					if (floorf(sx) == floorf(sx1)) {
-						xportion = 1.0f - (sx - floorf(sx));
+					if (floorf(sx) == floor_cast(sx1)) {
+						xportion = 1.0f - (sx - floor_cast(sx));
 						if (xportion > sx2 - sx1) {
 							xportion = sx2 - sx1;
 						}
-						sx = floorf(sx);
+						sx = floor_cast(sx);
 					} else if (sx == floorf(sx2)) {
-						xportion = sx2 - floorf(sx2);
+						xportion = sx2 - floor_cast(sx2);
 					} else {
 						xportion = 1.0f;
 					}
