@@ -6,6 +6,11 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <fcntl.h>
+
+#ifdef ZEND_WIN32
+#include "win95nt.h"
+#endif
 
 #include "php_virtual_cwd.h"
 
@@ -387,6 +392,49 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	CWD_STATE_FREE(&new_state);
 	return f;
 }
+
+CWD_API int virtual_open(const char *path, int flags)
+{
+	cwd_state new_state;
+	int f;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+
+	virtual_file_ex(&new_state, path, NULL);
+
+	if (flags & O_CREAT) {
+		mode_t mode;
+		va_list arg;
+
+		va_start(arg, flags);
+		mode = va_arg(arg, mode_t);
+		va_end(arg);
+
+		f = open(new_state.cwd, flags, mode);
+	} else {
+		f = open(new_state.cwd, flags);
+	}	
+	CWD_STATE_FREE(&new_state);
+	return f;
+}
+
+CWD_API int virtual_creat(const char *path, mode_t mode)
+{
+	cwd_state new_state;
+	int f;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+
+	virtual_file_ex(&new_state, path, NULL);
+
+	f = open(new_state.cwd, O_CREAT | O_TRUNC, mode);
+
+	CWD_STATE_FREE(&new_state);
+	return f;
+}
+
 
 CWD_API int virtual_stat(const char *path, struct stat *buf)
 {
