@@ -1,3 +1,7 @@
+2002-06-28  Andi Gutmans  <andi@zend.com>
+
+    * zend_operators.c: - WS fix
+
 2002-06-26  Andi Gutmans  <andi@zend.com>
 
     * zend_execute_API.c:
