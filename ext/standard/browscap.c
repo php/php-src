@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #include "php.h"
 #include "php_regex.h"
 #include "php_browscap.h"

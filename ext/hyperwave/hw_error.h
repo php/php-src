@@ -1,29 +1,23 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP HTML Embedded Scripting Language Version 3.0                     |
+   | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
    +----------------------------------------------------------------------+
-   | This program is free software; you can redistribute it and/or modify |
-   | it under the terms of the GNU General Public License as published by |
-   | the Free Software Foundation; either version 2 of the License, or    |
-   | (at your option) any later version.                                  |
-   |                                                                      |
-   | This program is distributed in the hope that it will be useful,      |
-   | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
-   | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
-   | GNU General Public License for more details.                         |
-   |                                                                      |
-   | You should have received a copy of the GNU General Public License    |
-   | along with this program; if not, write to the Free Software          |
-   | Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.            |
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    +----------------------------------------------------------------------+
- */
-
+*/
 
 /* $Id$ */
+
 #ifndef HW_ERROR_H
 #define HW_ERROR_H
 

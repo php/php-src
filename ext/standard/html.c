@@ -15,7 +15,9 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Jaakko Hyvätti <jaakko.hyvatti@iki.fi>                      |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 #include "php.h"
 #include "reg.h"

@@ -16,7 +16,9 @@
    |          Shane Caraveo <shane@caraveo.com>                           |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 #include "php.h"
 #include "dl.h"

@@ -17,7 +17,9 @@
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Andrei Zmievski <andrei@ispi.net>                           |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 #include "php.h"
 #include "php_ini.h"

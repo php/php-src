@@ -16,7 +16,9 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 #ifndef PHP_CRYPT_H
 #define PHP_CRYPT_H

@@ -15,7 +15,9 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 #include "php.h"
 #include "php_ini.h"
