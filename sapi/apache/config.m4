@@ -3,7 +3,7 @@ dnl ## -*- sh -*-
 AC_DEFUN(PHP_APACHE_CHECK_RDYNAMIC,[
   if test -n "$GCC"; then
     dnl we should use a PHP-specific macro here
-    TSRM_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic)
+    TSRM_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic=yes)
     if test "$gcc_rdynamic" = "yes"; then
       PHP_LDFLAGS="$PHP_LDFLAGS -rdynamic"
     fi
