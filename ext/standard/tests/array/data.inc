@@ -1,4 +1,5 @@
 <?php
+ini_set('precision',14);
 $tmp = pow(2,64);
 $data = array( 
 	'PHP',
