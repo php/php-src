@@ -1834,6 +1834,9 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error(E_ERROR, "Interface %s may not inherit from class (%s)", ce->name, parent_ce->name);
 	}
+	if (parent_ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+		zend_error(E_ERROR, "Class %s may not inherit from final class (%s)", ce->name, parent_ce->name);
+	}
 
 	ce->parent = parent_ce;
 	/* Inherit interfaces */
