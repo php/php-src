@@ -195,7 +195,7 @@ void sqlite_free_table(
     int i, n;
     azResult--;
     if( azResult==0 ) return;
-    n = (int)azResult[0];
+    n = (int)(long)azResult[0];
     for(i=1; i<n; i++){ if( azResult[i] ) free(azResult[i]); }
     free(azResult);
   }
