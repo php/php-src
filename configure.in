@@ -127,7 +127,7 @@ PHP_SHLIB_SUFFIX_NAME
 
 PHP_SAPI=cgi
 PHP_BUILD_PROGRAM
-dnl paths to the targets relative to the build directory
+dnl paths to the targets are relative to the build directory
 SAPI_PROGRAM=php
 SAPI_SHARED=libs/libphp4.$SHLIB_SUFFIX_NAME
 SAPI_STATIC=libs/libphp4.a
