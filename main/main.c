@@ -453,7 +453,7 @@ static void php_timeout(int dummy)
 
 static void php_set_timeout(long seconds)
 {
-#if WIN32|WINNT
+#if PHP_WIN32
 #else
 #	ifdef HAVE_SETITIMER
 	struct itimerval t_r;		/* timeout requested */
@@ -471,7 +471,7 @@ static void php_set_timeout(long seconds)
 
 static void php_unset_timeout(void)
 {
-#if WIN32|WINNT
+#if PHP_WIN32
 #else
 #	ifdef HAVE_SETITIMER
 	struct itimerval no_timeout;
@@ -591,7 +591,7 @@ static void php_message_handler_for_zend(long message, void *data)
 
 						snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
 					}
-#	if WIN32||WINNT
+#	if PHP_WIN32
 					OutputDebugString(memory_leak_buf);
 #	else
 					fprintf(stderr, memory_leak_buf);
@@ -778,11 +778,11 @@ int php_module_startup(sapi_module_struct *sf)
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
-#if (WIN32|WINNT) && !(USE_SAPI)
+#if (PHP_WIN32) && !(USE_SAPI)
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
 #endif
-#if WIN32|WINNT
+#if PHP_WIN32
 	{
 		DWORD dwVersion = GetVersion();
 
@@ -837,7 +837,7 @@ int php_module_startup(sapi_module_struct *sf)
 	setlocale(LC_CTYPE, "");
 #endif
 
-#if (WIN32|WINNT) && !(USE_SAPI)
+#if (PHP_WIN32) && !(USE_SAPI)
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
@@ -902,7 +902,7 @@ void php_module_shutdown()
 	/* close down the ini config */
 	php_config_ini_shutdown();
 
-#if (WIN32|WINNT)
+#if (PHP_WIN32)
 	/*close winsock */
 	WSACleanup();
 #endif
@@ -1107,7 +1107,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		return;
 	}
 
-#if WIN32||WINNT
+#if PHP_WIN32
 	UpdateIniFromRegistry(primary_file->filename);
 #endif
 
@@ -1134,7 +1134,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}
 }
 
-#if WIN32||WINNT
+#if PHP_WIN32
 /* just so that this symbol gets exported... */
 PHPAPI void dummy_indent()
 {
