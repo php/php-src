@@ -185,7 +185,7 @@ PHP_FUNCTION(ibase_errmsg)
 }
 /* }}} */
 
-/* {{{ proto string ibase_errcode(void) 
+/* {{{ proto int ibase_errcode(void) 
    Return error code */
 PHP_FUNCTION(ibase_errcode)
 {
@@ -2033,7 +2033,7 @@ PHP_FUNCTION(ibase_rollback_ret)
 }
 /* }}} */
 
-/* {{{ proto resource ibase_query([resource link_identifier [, resource link_identifier ] ,] string query [, int bind_args])
+/* {{{ proto mixed ibase_query([resource link_identifier, [ resource link_identifier, ]] string query [, mixed bind_arg [, mixed bind_arg [, ...]]])
    Execute a query */
 PHP_FUNCTION(ibase_query)
 {
@@ -2188,7 +2188,7 @@ PHP_FUNCTION(ibase_query)
 }
 /* }}} */
 
-/* {{{ proto ibase_affected_rows( [ resource link_identifier ] )
+/* {{{ proto int ibase_affected_rows( [ resource link_identifier ] )
    Returns the number of rows affected by the previous INSERT, UPDATE or DELETE statement */
 PHP_FUNCTION(ibase_affected_rows)
 {
@@ -2847,7 +2847,7 @@ PHP_FUNCTION(ibase_prepare)
 }
 /* }}} */
 
-/* {{{ proto resource ibase_execute(resource query [, int bind_args [, int ...]])
+/* {{{ proto mixed ibase_execute(resource query [, mixed bind_arg [, mixed bind_arg [, ...]]])
    Execute a previously prepared query */
 PHP_FUNCTION(ibase_execute)
 {
@@ -2927,7 +2927,7 @@ PHP_FUNCTION(ibase_free_query)
 /* }}} */
 
 #if HAVE_STRFTIME
-/* {{{ proto int ibase_timefmt(string format)
+/* {{{ proto bool ibase_timefmt(string format)
    Sets the format of timestamp, date and time columns returned from queries */
 PHP_FUNCTION(ibase_timefmt)
 {
@@ -3254,7 +3254,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle, IBASE_BLOBINFO *bl_in
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_create([resource link_identifier])
+/* {{{ proto resource ibase_blob_create([resource link_identifier])
    Create blob for adding data */
 PHP_FUNCTION(ibase_blob_create)
 {
@@ -3299,7 +3299,7 @@ PHP_FUNCTION(ibase_blob_create)
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_open([ resource link_identifier, ] string blob_id)
+/* {{{ proto resource ibase_blob_open([ resource link_identifier, ] string blob_id)
    Open blob for retrieving data parts */
 PHP_FUNCTION(ibase_blob_open)
 {
@@ -3356,7 +3356,7 @@ PHP_FUNCTION(ibase_blob_open)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_blob_add(int blob_id, string data)
+/* {{{ proto bool ibase_blob_add(resource blob_handle, string data)
    Add data into created blob */
 PHP_FUNCTION(ibase_blob_add)
 {
@@ -3382,7 +3382,7 @@ PHP_FUNCTION(ibase_blob_add)
 }
 /* }}} */
 
-/* {{{ proto string ibase_blob_get(int blob_id, int len)
+/* {{{ proto string ibase_blob_get(resource blob_handle, int len)
    Get len bytes data from open blob */
 PHP_FUNCTION(ibase_blob_get)
 {
@@ -3448,7 +3448,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_blob_close(int blob_id)
+/* {{{ proto string ibase_blob_close(resource blob_handle)
    Close blob */
 PHP_FUNCTION(ibase_blob_close)
 {
@@ -3456,7 +3456,7 @@ PHP_FUNCTION(ibase_blob_close)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_blob_cancel(int blob_id)
+/* {{{ proto bool ibase_blob_cancel(resource blob_handle)
    Cancel creating blob */
 PHP_FUNCTION(ibase_blob_cancel)
 {
@@ -3464,7 +3464,7 @@ PHP_FUNCTION(ibase_blob_cancel)
 }
 /* }}} */
 
-/* {{{ proto object ibase_blob_info([ resource link_identifier, ] string blob_id_str)
+/* {{{ proto array ibase_blob_info([ resource link_identifier, ] string blob_id)
    Return blob length and other useful info */
 PHP_FUNCTION(ibase_blob_info)
 {
@@ -3545,7 +3545,7 @@ PHP_FUNCTION(ibase_blob_info)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_blob_echo([ resource link_identifier, ] string blob_id_str)
+/* {{{ proto bool ibase_blob_echo([ resource link_identifier, ] string blob_id)
    Output blob contents to browser */
 PHP_FUNCTION(ibase_blob_echo)
 {
@@ -3884,7 +3884,7 @@ static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count,
 }
 /* }}} */
 
-/* {{{ proto string ibase_wait_event([resource link,] string event [, string event [, ...]])
+/* {{{ proto string ibase_wait_event([resource link_identifier,] string event [, string event [, ...]])
    Waits for any one of the passed Interbase events to be posted by the database, and returns its name */
 PHP_FUNCTION(ibase_wait_event)
 {
@@ -4015,7 +4015,7 @@ static isc_callback _php_ibase_callback(ibase_event *event, unsigned short buffe
 }
 /* }}} */
 
-/* {{{ proto resource ibase_set_event_handler([resource link,] callback handler, string event [, string event [, ...]])
+/* {{{ proto resource ibase_set_event_handler([resource link_identifier,] callback handler, string event [, string event [, ...]])
    Register the callback for handling each of the named events */
 PHP_FUNCTION(ibase_set_event_handler)
 {
