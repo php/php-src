@@ -2,7 +2,7 @@
 // TODO: Add more tests
 //$debug = true; // Uncomment this line to view error/warning/notice message in *.out file
 ini_set('include_path','.');
-include_once('common.php');
+include_once('common.inc');
 
 // SJIS string (BASE64 encoded)
 $sjis = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==');
