@@ -32,6 +32,10 @@
 #include "ext/session/php_session.h"
 #include "zend_operators.h"
 
+#ifdef PHP_WIN32
+#include "win32/php_win32_globals.h"
+#endif
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
