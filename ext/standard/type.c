@@ -115,10 +115,10 @@ PHP_FUNCTION(settype)
 	} else if (!strcasecmp(new_type, "null")) {
 		convert_to_null(*var);
 	} else if (!strcasecmp(new_type, "resource")) {
-		php_error(E_WARNING, "settype: cannot convert to resource type");
+		php_error(E_WARNING, "%s(): Cannot convert to resource type", get_active_function_name (TSRMLS_C));
 		RETURN_FALSE;
 	} else {
-		php_error(E_WARNING, "settype: invalid type");
+		php_error(E_WARNING, "%s(): Invalid type", get_active_function_name (TSRMLS_C));
 		RETURN_FALSE;
 	}
 	RETVAL_TRUE;
