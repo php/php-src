@@ -221,6 +221,11 @@ MAINTENANCE:         Unknown
 STATUS:              Experimental
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
+EXTENSION:           ctype
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           curl
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
