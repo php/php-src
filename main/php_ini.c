@@ -10,7 +10,7 @@ static HashTable known_directives;
 /*
  * hash_apply functions
  */
-static int zend_remove_ini_entries(zend_ini_entry *ini_entry, int *module_number)
+static int php_remove_ini_entries(php_ini_entry *ini_entry, int *module_number)
 {
 	if (ini_entry->module_number == *module_number) {
 		return 1;
@@ -20,7 +20,7 @@ static int zend_remove_ini_entries(zend_ini_entry *ini_entry, int *module_number
 }
 
 
-static int zend_restore_ini_entry(zend_ini_entry *ini_entry)
+static int php_restore_ini_entry(php_ini_entry *ini_entry)
 {
 	if (ini_entry->modified) {
 		efree(ini_entry->value);
@@ -34,7 +34,7 @@ static int zend_restore_ini_entry(zend_ini_entry *ini_entry)
 /*
  * Startup / shutdown
  */
-int zend_ini_mstartup()
+int php_ini_mstartup()
 {
 	if (_php3_hash_init(&known_directives, 100, NULL, NULL, 1)==FAILURE) {
 		return FAILURE;
@@ -43,16 +43,16 @@ int zend_ini_mstartup()
 }
 
 
-int zend_ini_mshutdown()
+int php_ini_mshutdown()
 {
 	_php3_hash_destroy(&known_directives);
 	return SUCCESS;
 }
 
 
-int zend_ini_rshutdown()
+int php_ini_rshutdown()
 {
-	_php3_hash_apply(&known_directives, (int (*)(void *)) zend_restore_ini_entry);
+	_php3_hash_apply(&known_directives, (int (*)(void *)) php_restore_ini_entry);
 	return SUCCESS;
 }
 
@@ -60,16 +60,16 @@ int zend_ini_rshutdown()
  * Registration / unregistration
  */
 
-int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number)
+int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 {
-	zend_ini_entry *p = ini_entry;
-	zend_ini_entry *hashed_ini_entry;
+	php_ini_entry *p = ini_entry;
+	php_ini_entry *hashed_ini_entry;
 	pval *default_value;
 
 	while (p->name) {
 		p->module_number = module_number;
-		if (_php3_hash_add(&known_directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
-			zend_unregister_ini_entries(module_number);
+		if (_php3_hash_add(&known_directives, p->name, p->name_length, p, sizeof(php_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
+			php_unregister_ini_entries(module_number);
 			return FAILURE;
 		}
 		if ((default_value=cfg_get_entry(p->name, p->name_length))) {
@@ -83,14 +83,14 @@ int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number)
 }
 
 
-void zend_unregister_ini_entries(int module_number)
+void php_unregister_ini_entries(int module_number)
 {
-	_php3_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) zend_remove_ini_entries, (void *) &module_number);
+	_php3_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) php_remove_ini_entries, (void *) &module_number);
 }
 
-int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
+int php_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type)
 {
-	zend_ini_entry *ini_entry;
+	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==FAILURE) {
 		return FAILURE;
@@ -112,9 +112,9 @@ int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new
  * Data retrieval
  */
 
-long zend_ini_long(char *name, uint name_length)
+long php_ini_long(char *name, uint name_length)
 {
-	zend_ini_entry *ini_entry;
+	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		return (long) atoi(ini_entry->value);
@@ -124,9 +124,9 @@ long zend_ini_long(char *name, uint name_length)
 }
 
 
-double zend_ini_double(char *name, uint name_length)
+double php_ini_double(char *name, uint name_length)
 {
-	zend_ini_entry *ini_entry;
+	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		return (double) strtod(ini_entry->value, NULL);
@@ -136,9 +136,9 @@ double zend_ini_double(char *name, uint name_length)
 }
 
 
-char *zend_ini_string(char *name, uint name_length)
+char *php_ini_string(char *name, uint name_length)
 {
-	zend_ini_entry *ini_entry;
+	php_ini_entry *ini_entry;
 
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		return ini_entry->value;

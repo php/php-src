@@ -594,7 +594,7 @@ void php3_request_shutdown(void *dummy INLINE_TLS)
 	
 	GLOBAL(initialized) &= ~INIT_ENVIRONMENT;	/* does not require any special shutdown */
 
-	zend_ini_rshutdown();
+	php_ini_rshutdown();
 
 	shutdown_scanner(CLS_C);
 
@@ -917,7 +917,7 @@ int php3_module_startup(CLS_D ELS_DC)
 
 	zend_startup(&zuf, &zuv, NULL);
 
-	zend_ini_mstartup();
+	php_ini_mstartup();
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -967,8 +967,6 @@ void php3_module_shutdown()
 	CLS_FETCH();
 	ELS_FETCH();
 
-	zend_ini_mshutdown();
-
 #if !USE_SAPI
 	/* close down the ini config */
 	php3_config_ini_shutdown(_INLINE_TLS_VOID);
@@ -993,6 +991,7 @@ void php3_module_shutdown()
 #endif
 
 	zend_shutdown();
+	php_ini_mshutdown();
 	shutdown_memory_manager(0, 1);
 }
 
