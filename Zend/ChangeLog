@@ -1,3 +1,17 @@
+2004-04-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h:
+      Fix order of macro parameter (synch with other macros)
+
+2004-04-12  Andi Gutmans  <andi@zend.com>
+
+    * OBJECTS2_HOWTO
+      zend_extensions.h
+      zend_ini.c
+      zend_ini.h
+      zend_modules.h:
+      - modifyable -> modifiable
+
 2004-04-09  Andi Gutmans  <andi@zend.com>
 
     * zend_object_handlers.c:

@@ -1,3 +1,27 @@
+2004-04-12  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.h:
+      - MFH: Add default fontpath for win98/xp
+
+    * ext/gd/libgd/gd.h:
+      - Add fontpath for win98/XP (Patch by Friedhelm Betz)
+
+2004-04-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h:
+      Fix order of macro parameter (synch with other macros)
+
+2004-04-12  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/OBJECTS2_HOWTO
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_modules.h
+      ext/standard/basic_functions.c:
+      - modifyable -> modifiable
+
 2004-04-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PECL_4_3)
