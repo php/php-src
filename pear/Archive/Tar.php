@@ -72,9 +72,9 @@ class Archive_Tar extends PEAR
                 @dl($extname . $dlext);
             }
             if (!extension_loaded($extname)) {
-                die("The extension '$extname' couldn't be loaded. ".
-                    'Probably you don\'t have support in your PHP '.
-                    'to this extension');
+                die("The extension '$extname' couldn't be found.\n".
+                    "Please make sure your version of PHP was built".
+                    "with '$extname' support.\n");
                 return false;
             }
         }
