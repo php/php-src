@@ -83,6 +83,10 @@ PHP_FUNCTION(ldap_mod_add);
 PHP_FUNCTION(ldap_mod_replace);
 PHP_FUNCTION(ldap_mod_del);
 
+PHP_FUNCTION(ldap_errno);
+PHP_FUNCTION(ldap_err2str);
+PHP_FUNCTION(ldap_error);
+
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
 	long default_link;
 	long num_links, max_links;
