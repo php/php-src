@@ -71,15 +71,15 @@ Methodology
 
         echo dbase_open | php do_crash.txt
 
-(5) integer overflow inside php_imagepolygon and possible subsequent 
+(4) integer overflow inside php_imagepolygon and possible subsequent 
     integer overflows inside gdlib's gdImageFilledPolygon().
 
-(6) integer overflow if the number of elements in the array passed as
+(5) integer overflow if the number of elements in the array passed as
     second argument * sizeof(int) result in an overflow.
     gdImageSetStyle function called by this php wrapper can die for the
     same reason.  
 
-(7) multiple integer overflows that can occur when trying to allocate a buffer
+(6) multiple integer overflows that can occur when trying to allocate a buffer
     for a new image. Affected functions:
     gdImageCreateFromJpegCtx
     readwbmp
