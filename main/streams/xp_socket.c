@@ -52,13 +52,49 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 		return 0;
 	}
 
+retry:
 	didwrite = send(sock->socket, buf, count, 0);
 
 	if (didwrite <= 0) {
-		char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
+		long err = php_socket_errno();
+		char *estr;
 
+		if (sock->is_blocked && err == EWOULDBLOCK) {
+			fd_set fdw, tfdw;
+			int retval;
+			struct timeval timeout, *ptimeout;
+
+			FD_ZERO(&fdw);
+			FD_SET(sock->socket, &fdw);
+			sock->timeout_event = 0;
+
+			if (sock->timeout.tv_sec == -1)
+				ptimeout = NULL;
+			else
+				ptimeout = &timeout;
+
+			do {
+				tfdw = fdw;
+				timeout = sock->timeout;
+
+				retval = select(sock->socket + 1, NULL, &tfdw, NULL, ptimeout);
+
+				if (retval == 0) {
+					sock->timeout_event = 1;
+					break;
+				}
+
+				if (retval > 0) {
+					/* writable now; retry */
+					goto retry;
+				}
+
+				err = php_socket_errno();
+			} while (err == EINTR);
+		}
+		estr = php_socket_strerror(err, NULL, 0);
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %ld bytes failed with errno=%d %s",
-				(long)count, php_socket_errno(), estr);
+				(long)count, err, estr);
 		efree(estr);
 	}
 
