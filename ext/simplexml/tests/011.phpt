@@ -3,7 +3,6 @@ SimpleXML and echo/print
 --SKIPIF--
 <?php 
 	if (!extension_loaded('simplexml')) print 'skip';
-	if (!class_exists('RecursiveIteratorIterator')) print 'skip RecursiveIteratorIterator not available';
 ?>
 --FILE--
 <?php 
