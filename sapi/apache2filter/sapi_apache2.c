@@ -376,6 +376,7 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 {
 	char *content_type;
+	char *content_length;
 	const char *auth;
 	
 	PG(during_request_startup) = 0;
@@ -393,6 +394,10 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	SG(request_info).post_data = ctx->post_data;
 	SG(request_info).post_data_length = ctx->post_len;
 	efree(content_type);
+
+	content_length = (char *) apr_table_get(f->r->headers_in, "Content-Length");
+	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
+	
 	apr_table_unset(f->r->headers_out, "Content-Length");
 	apr_table_unset(f->r->headers_out, "Last-Modified");
 	apr_table_unset(f->r->headers_out, "Expires");

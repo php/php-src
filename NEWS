@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2004, Version 4.3.5
+- Fixed bug #27196 (Missing content_length initialization in apache 2 sapis).
+  (Ilia, pdoru at kappa dot ro)
 - Fixed bug #27175 (tzset() is not being called by PHP on startup).
   (Ilia, sagawa at sohgoh dot net)
 - Fixed bug #27172 (Possible floating point exception in gmp_powm()). (Ilia)

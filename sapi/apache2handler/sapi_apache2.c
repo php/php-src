@@ -414,6 +414,7 @@ static apr_status_t php_server_context_cleanup(void *data_)
 static void php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 {
 	char *content_type;
+	char *content_length;
 	const char *auth;
 
 	SG(sapi_headers).http_response_code = !r->status ? HTTP_OK : r->status;
@@ -427,6 +428,9 @@ static void php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	content_type = sapi_get_default_content_type(TSRMLS_C);
 	ap_set_content_type(r, apr_pstrdup(r->pool, content_type));
 	efree(content_type);
+
+	content_length = (char *) apr_table_get(f->r->headers_in, "Content-Length");
+	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 
 	apr_table_unset(r->headers_out, "Content-Length");
 	apr_table_unset(r->headers_out, "Last-Modified");
