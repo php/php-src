@@ -61,36 +61,36 @@ static int le_link;
 
 function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,							NULL)
-	PHP_FALIAS(ldap_close,		ldap_unbind,		NULL)
-	PHP_FE(ldap_bind,								NULL)
-	PHP_FE(ldap_unbind,								NULL)
-	PHP_FE(ldap_read,								NULL)
-	PHP_FE(ldap_list,								NULL)
-	PHP_FE(ldap_search,								NULL)
+	PHP_FALIAS(ldap_close,		ldap_unbind,				NULL)
+	PHP_FE(ldap_bind,							NULL)
+	PHP_FE(ldap_unbind,							NULL)
+	PHP_FE(ldap_read,							NULL)
+	PHP_FE(ldap_list,							NULL)
+	PHP_FE(ldap_search,							NULL)
 	PHP_FE(ldap_free_result,						NULL)
 	PHP_FE(ldap_count_entries,						NULL)
 	PHP_FE(ldap_first_entry,						NULL)
 	PHP_FE(ldap_next_entry,							NULL)
 	PHP_FE(ldap_get_entries,						NULL)
 	PHP_FE(ldap_first_attribute,					third_argument_force_ref)
-	PHP_FE(ldap_next_attribute,						third_argument_force_ref)
+	PHP_FE(ldap_next_attribute,					third_argument_force_ref)
 	PHP_FE(ldap_get_attributes,						NULL)
 	PHP_FE(ldap_get_values,							NULL)
 	PHP_FE(ldap_get_values_len,						NULL)
-	PHP_FE(ldap_get_dn,								NULL)
+	PHP_FE(ldap_get_dn,							NULL)
 	PHP_FE(ldap_explode_dn,							NULL)
-	PHP_FE(ldap_dn2ufn,								NULL)
-	PHP_FE(ldap_add,								NULL)
-	PHP_FE(ldap_delete,								NULL)
-	PHP_FE(ldap_modify,								NULL)
+	PHP_FE(ldap_dn2ufn,							NULL)
+	PHP_FE(ldap_add,							NULL)
+	PHP_FE(ldap_delete,							NULL)
+	PHP_FE(ldap_modify,							NULL)
 /* additional functions for attribute based modifications, Gerrit Thomson */
 	PHP_FE(ldap_mod_add,							NULL)
 	PHP_FE(ldap_mod_replace,						NULL)
 	PHP_FE(ldap_mod_del,							NULL)
 /* end gjt mod */
-	PHP_FE(ldap_errno,								NULL)
+	PHP_FE(ldap_errno,							NULL)
 	PHP_FE(ldap_err2str,							NULL)
-	PHP_FE(ldap_error,								NULL)
+	PHP_FE(ldap_error,							NULL)
 	PHP_FE(ldap_compare,							NULL)
 
 #ifdef STR_TRANSLATION
@@ -518,8 +518,6 @@ PHP_FUNCTION(ldap_unbind)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &link) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long_ex(link);
 
 	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
@@ -1381,7 +1379,6 @@ PHP_FUNCTION(ldap_errno) {
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ht, &ldap_link) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(ldap_link);
 
 	ldap = _get_ldap_link(ldap_link);
 	if (ldap == NULL) {
@@ -1442,7 +1439,6 @@ PHP_FUNCTION(ldap_compare) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string_ex(link);
 	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_LONG(-1);
 
@@ -1471,7 +1467,7 @@ PHP_FUNCTION(ldap_compare) {
 
 }
 /* }}} */
-  
+
 
 #ifdef STR_TRANSLATION
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way) {
