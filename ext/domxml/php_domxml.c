@@ -2115,7 +2115,8 @@ PHP_FUNCTION(domxml_node_next_sibling)
 
 	first = nodep->next;
 	if (!first) {
-		RETURN_FALSE;
+		rv = NULL;
+		return;
 	}
 
 	DOMXML_RET_OBJ(rv, first, &ret);
@@ -2136,7 +2137,8 @@ PHP_FUNCTION(domxml_node_previous_sibling)
 
 	first = nodep->prev;
 	if (!first) {
-		RETURN_FALSE;
+		rv = NULL;
+		return;
 	}
 
 	DOMXML_RET_OBJ(rv, first, &ret);
@@ -2357,15 +2359,11 @@ PHP_FUNCTION(domxml_node_replace_node)
 PHP_FUNCTION(domxml_node_append_child)
 {
 	zval *id, *rv = NULL, *node;
-	xmlNodePtr child, nodep, new_child;
+	xmlNodePtr child, parent, new_child;
 	int ret;
 
-	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
-		return;
-	}
-
+	DOMXML_PARAM_ONE(parent, id, le_domxmlnodep, "o", &node);
+	
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 
 	if (child->type == XML_ATTRIBUTE_NODE) {
@@ -2373,29 +2371,18 @@ PHP_FUNCTION(domxml_node_append_child)
 		RETURN_FALSE;
 	}
 
-	if (NULL == (new_child = xmlCopyNode(child, 1))) {
-		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
+	/* first unlink node, if child is already a child of parent */
+	if (child->parent == parent){
+		xmlUnlinkNode(child);
 	}
+	new_child = xmlAddChild(parent, child);
 
-	/* copy namespace if one is there */
-	if (child->ns) {
-		new_child->ns = child->ns;
-	}
-
-	/* FIXME reverted xmlAddChildList; crashes
-	 * Uwe: must have been a temporary problem. It works for me with both
-	 * xmlAddChildList and xmlAddChild
-	 */
-
-	child = xmlAddChild(nodep, new_child);
-
-	if (NULL == child) {
+	if (NULL == new_child) {
 		php_error(E_WARNING, "%s(): couldn't append node", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	DOMXML_RET_OBJ(rv, child, &ret);
+	DOMXML_RET_OBJ(rv, new_child, &ret);
 }
 /* }}} */
 
@@ -2442,19 +2429,26 @@ PHP_FUNCTION(domxml_node_append_sibling)
 PHP_FUNCTION(domxml_node_insert_before)
 {
 	zval *id, *rv = NULL, *node, *ref;
-	xmlNodePtr child, new_child, nodep, refp;
+	xmlNodePtr child, new_child, parent, refp;
 	int ret;
 
-	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo", &node, &ref) == FAILURE) {
-		return;
-	}
+	DOMXML_PARAM_TWO(parent, id, le_domxmlnodep, "oo!", &node, &ref);
 
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
-	DOMXML_GET_OBJ(refp, ref, le_domxmlnodep);
 
-	new_child = xmlAddPrevSibling(refp, child);
+	if (ref != NULL) {
+		DOMXML_GET_OBJ(refp, ref, le_domxmlnodep);
+		new_child = xmlAddPrevSibling(refp, child);
+	} else {
+		/* first unlink node, if child is already a child of parent
+			for some strange reason, this is needed
+		 */
+		if (child->parent == parent){
+			xmlUnlinkNode(child);
+		}
+		new_child = xmlAddChild(parent, child);
+	}
+		
 
 	if (NULL == new_child) {
 		php_error(E_WARNING, "%s(): couldn't add newnode as the previous sibling of refnode", get_active_function_name(TSRMLS_C));
