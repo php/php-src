@@ -1080,13 +1080,12 @@ ZEND_FUNCTION(get_declared_classes)
 		} else {
 			global_ns = 0;
 			convert_to_string_ex(namespace_name);
+		    if(Z_STRVAL_PP(namespace_name) || !Z_STRLEN_PP(namespace_name)) {
+				global_ns = 1;
+		    }
 		}
 	}
 
-	if(!Z_STRVAL_PP(namespace_name) || !Z_STRLEN_PP(namespace_name)) {
-		global_ns = 1;
-	}
-	
 	if(!global_ns) {
 		zend_str_tolower(Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name));
 		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name)+1, (void **)&pns) == FAILURE) {
