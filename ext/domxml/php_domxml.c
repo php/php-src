@@ -2612,10 +2612,7 @@ PHP_FUNCTION(domxml_node_insert_before)
 		if (new_child == NULL)
 			new_child = xmlAddPrevSibling(refp, child);
 	} else {
-		/* first unlink node, if child is already a child of parent
-			for some strange reason, this is needed
-		 */
-		if (child->parent == parent){
+		if (child->parent != NULL){
 			xmlUnlinkNode(child);
 		}
 		new_child = xmlAddChild(parent, child);
