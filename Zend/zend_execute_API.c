@@ -275,9 +275,9 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 {
 	zval *p = *pp;
 	zend_bool inline_change = (zend_bool) (unsigned long) arg;
+	zval const_value;
 
 	if (p->type == IS_CONSTANT) {
-		zval c;
 		int refcount;
 
 		SEPARATE_ZVAL(pp);
@@ -285,7 +285,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 
 		refcount = p->refcount;
 
-		if (!zend_get_constant(p->value.str.val, p->value.str.len, &c)) {
+		if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						p->value.str.val,
 						p->value.str.val);
@@ -297,14 +297,48 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 			if (inline_change) {
 				STR_FREE(p->value.str.val);
 			}
-			*p = c;
+			*p = const_value;
 		}
 		INIT_PZVAL(p);
 		p->refcount = refcount;
 	} else if (p->type == IS_CONSTANT_ARRAY) {
+		zval **element;
+		char *str_index;
+		ulong str_index_len, num_index;
+
 		SEPARATE_ZVAL(pp);
 		p = *pp;
 		p->type = IS_ARRAY;
+		
+		/* First go over the array and see if there are any constant indices */
+		zend_hash_internal_pointer_reset(p->value.ht);
+		while (zend_hash_get_current_data(p->value.ht, (void **) &element)==SUCCESS) {
+			if (!(Z_TYPE_PP(element) & IS_CONSTANT_INDEX)) {
+				zend_hash_move_forward(p->value.ht);
+				continue;
+			}
+			Z_TYPE_PP(element) &= ~IS_CONSTANT_INDEX;
+			if (zend_hash_get_current_key_ex(p->value.ht, &str_index, &str_index_len, &num_index, 0, NULL)!=HASH_KEY_IS_STRING) {
+				zend_hash_move_forward(p->value.ht);
+				continue;
+			}
+			if (!zend_get_constant(str_index, str_index_len-1, &const_value)) {
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
+				zend_hash_move_forward(p->value.ht);
+				continue;
+			}
+			switch (const_value.type) {
+				case IS_STRING:
+					zend_hash_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, element, sizeof(zval *), NULL);
+					(*element)->refcount++;
+					break;
+				case IS_LONG:
+					zend_hash_index_update(p->value.ht, const_value.value.lval, element, sizeof(zval *), NULL);
+					(*element)->refcount++;
+					break;
+			}
+			zend_hash_del(p->value.ht, str_index, str_index_len);
+		}
 		zend_hash_apply_with_argument(p->value.ht, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
 	}
 	return 0;

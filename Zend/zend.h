@@ -285,6 +285,10 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 /* Special data type to temporarily mark large numbers */
 #define FLAG_IS_BC	10 /* for parser internal use only */
 
+/* Ugly hack to support constants as static array indices */
+#define IS_CONSTANT_INDEX	0x80
+
+
 /* overloaded elements data types */
 #define OE_IS_ARRAY	(1<<0)
 #define OE_IS_OBJECT	(1<<1)
