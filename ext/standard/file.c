@@ -1713,6 +1713,7 @@ PHP_FUNCTION(fd_set)
                 FD_SET(fd, &readfd);
                 if(fd > max_fd) max_fd = fd;
 		}
+	efree(args);
 	}
 	RETURN_LONG(1);
 }
