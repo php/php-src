@@ -29,6 +29,7 @@ PHP_FUNCTION(passthru);
 PHP_FUNCTION(shell_exec);
 
 char *php_escape_shell_cmd(char *);
+char *php_escape_shell_arg(char *);
 int php_Exec(int type, char *cmd, pval *array, pval *return_value);
 
 #endif /* EXEC_H */
