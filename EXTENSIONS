@@ -189,8 +189,9 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
 EXTENSION:           com
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Harald Radi <h.radi@nme.at>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           cpdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
