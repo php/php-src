@@ -452,9 +452,9 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *
  */
 static char *
-php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
+php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC)
 {
-	zval ***args, **z_format, **array;
+	zval ***args, **z_format;
 	int argc, size = 240, inpos = 0, outpos = 0, temppos;
 	int alignment, width, precision, currarg, adjusting, argnum;
 	char *format, *result, padding;
@@ -462,39 +462,49 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 
 	argc = ZEND_NUM_ARGS();
 
+	/* verify the number of args */
+	if ((use_array && argc != (2 + format_offset)) 
+			|| (!use_array && argc < (1 + format_offset))) {
+		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+	}
+	args = (zval ***)emalloc(argc * sizeof(zval *));
+
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
+	}
+	
 	if (use_array) {
 		int i = 1;
+		zval ***newargs;
+		zval **array;
 
-		if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(argc, &z_format, &array) == FAILURE) {
-			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
-		}
+		z_format = args[format_offset];
+		array = args[1 + format_offset];
+		
 		SEPARATE_ZVAL(array);
 		convert_to_array_ex(array);
+		
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_PP(array));
-		args = (zval ***)emalloc(argc * sizeof(zval *));
-		args[0] = z_format;
+		newargs = (zval ***)emalloc(argc * sizeof(zval *));
+		newargs[0] = z_format;
+		
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(array));
-			 zend_hash_get_current_data(Z_ARRVAL_PP(array), (void **)&args[i++]) == SUCCESS;
+			 zend_hash_get_current_data(Z_ARRVAL_PP(array), (void **)&newargs[i++]) == SUCCESS;
 			 zend_hash_move_forward(Z_ARRVAL_PP(array)));
-	} else {
-		if (argc < 1) {
-			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
-		}
 
-		args = (zval ***)emalloc(argc * sizeof(zval *));
-
-		if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-			efree(args);
-			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
-		}
+		efree(args);
+		args = newargs;
+		format_offset = 0;
 	}
-	convert_to_string_ex(args[0]);
-	format = Z_STRVAL_PP(args[0]);
+	
+	convert_to_string_ex(args[format_offset]);
+	format = Z_STRVAL_PP(args[format_offset]);
 	result = emalloc(size);
 
 	currarg = 1;
 
-	while (inpos<Z_STRLEN_PP(args[0])) {
+	while (inpos<Z_STRLEN_PP(args[format_offset])) {
 		int expprec = 0;
 
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));
@@ -538,6 +548,9 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				} else {
 					argnum = currarg++;
 				}
+
+				argnum += format_offset;
+				
 				if (argnum >= argc) {
 					efree(result);
 					efree(args);
@@ -596,7 +609,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				PRINTF_DEBUG(("sprintf: precision=%d\n", precision));
 			} else {
 				width = precision = 0;
-				argnum = currarg++;
+				argnum = currarg++ + format_offset;
 			}
 
 			if (format[inpos] == 'l') {
@@ -708,11 +721,10 @@ PHP_FUNCTION(user_sprintf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht, &len, 0 TSRMLS_CC))==NULL) {
+	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(result, len, 1);
-	efree(result);
+	RETVAL_STRINGL(result, len, 0);
 }
 /* }}} */
 
@@ -723,11 +735,10 @@ PHP_FUNCTION(vsprintf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht, &len, 1 TSRMLS_CC))==NULL) {
+	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(result, len, 1);
-	efree(result);
+	RETVAL_STRINGL(result, len, 0);
 }
 /* }}} */
 
@@ -738,7 +749,7 @@ PHP_FUNCTION(user_printf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht, &len, 0 TSRMLS_CC))==NULL) {
+	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
 	PHPWRITE(result, len);
@@ -753,13 +764,75 @@ PHP_FUNCTION(vprintf)
 	char *result;
 	int len;
 	
-	if ((result=php_formatted_print(ht, &len, 1 TSRMLS_CC))==NULL) {
+	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
 	}
 	PHPWRITE(result, len);
 	efree(result);
 }
 /* }}} */
+
+/* {{{ proto int fprintf(resource stream, string format [, mixed arg1 [, mixed ...]])
+   Output a formatted string into a stream */
+PHP_FUNCTION(fprintf)
+{
+	php_stream *stream;
+	zval **arg1;
+	char *result;
+	int len;
+	
+	if (ZEND_NUM_ARGS() < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (zend_get_parameters_ex(1, &arg1)==FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, arg1);
+
+	if ((result=php_formatted_print(ht, &len, 0, 1 TSRMLS_CC))==NULL) {
+		RETURN_FALSE;
+	}
+
+	php_stream_write(stream, result, len);
+
+	efree(result);
+
+	RETVAL_LONG(len - 1);
+}
+
+/* {{{ proto int vfprintf(resource stream, string format, array args)
+   Output a formatted string into a stream */
+PHP_FUNCTION(vfprintf)
+{
+	php_stream *stream;
+	zval **arg1;
+	char *result;
+	int len;
+	
+	if (ZEND_NUM_ARGS() != 3) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (zend_get_parameters_ex(1, &arg1)==FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, arg1);
+
+	if ((result=php_formatted_print(ht, &len, 1, 1 TSRMLS_CC))==NULL) {
+		RETURN_FALSE;
+	}
+
+	php_stream_write(stream, result, len);
+
+	efree(result);
+
+	RETVAL_LONG(len - 1);
+}
+
+
 
 /*
  * Local variables:
