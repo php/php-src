@@ -2391,19 +2391,15 @@ PHP_FUNCTION(pg_copy_from)
 PHP_FUNCTION(pg_escape_string)
 {
 	char *from = NULL, *to = NULL;
-	int len;
+	size_t from_len, to_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &from, &len) == FAILURE) {
+							  &from, &from_len) == FAILURE) {
 		return;
 	}
 
-	to = (char *)emalloc(len*2+1);
-	len = (int)PQescapeString(to, from, strlen(from));
-	if (len < 0) {
-		efree(to);
-		RETURN_FALSE;
-	}
-	RETURN_STRINGL(to, len, 0);
+	to = (char *)emalloc(from_len*2+1);
+	to_len = (int)PQescapeString(to, from, from_len);
+	RETURN_STRINGL(to, to_len, 0);
 }
 /* }}} */
 
@@ -2412,18 +2408,14 @@ PHP_FUNCTION(pg_escape_string)
 PHP_FUNCTION(pg_escape_bytea)
 {
 	char *from = NULL, *to = NULL;
-	int len;
+	size_t from_len, to_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
-							  &from, &len) == FAILURE) {
+							  &from, &from_len) == FAILURE) {
 		return;
 	}
 
-	to = (char *)PQescapeBytea((unsigned char*)from, strlen(from), (size_t *)&len);
-	if (len < 0) {
-		/* Don't need to free "to" here*/
-		RETURN_FALSE;
-	}
-	RETURN_STRINGL(to, len, 1);
+	to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
+	RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
 	free(to);
 }
 /* }}} */
