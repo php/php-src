@@ -327,6 +327,10 @@ SOURCE=.\ext\standard\iptc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\lcg.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\link.c
 # End Source File
 # Begin Source File
@@ -344,6 +348,10 @@ SOURCE=.\ext\standard\md5.c
 # Begin Source File
 
 SOURCE=.\ext\standard\microtime.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\session\mod_files.c
 # End Source File
 # Begin Source File
 
@@ -380,6 +388,10 @@ SOURCE=.\ext\standard\rand.c
 # Begin Source File
 
 SOURCE=.\ext\standard\reg.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\session\session.c
 # End Source File
 # Begin Source File
 

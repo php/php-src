@@ -1629,9 +1629,9 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &new_setting)==FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_long(new_setting);
+	convert_to_boolean(new_setting);
 	
-	PG(magic_quotes_runtime)=new_setting->value.lval;
+	PG(magic_quotes_runtime) = (zend_bool) new_setting->value.lval;
 	RETURN_TRUE;
 }
 	
@@ -2346,6 +2346,8 @@ PHP_FUNCTION(defined)
    Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
 {
+	PLS_FETCH();
+
     RETURN_LONG(PG(connection_status)&PHP_CONNECTION_ABORTED);
 }
 /* }}} */
@@ -2354,6 +2356,7 @@ PHP_FUNCTION(connection_aborted)
    Returns true if script timed out */
 PHP_FUNCTION(connection_timeout)
 {
+	PLS_FETCH();
 
     RETURN_LONG(PG(connection_status)&PHP_CONNECTION_TIMEOUT);
 }
@@ -2363,6 +2366,7 @@ PHP_FUNCTION(connection_timeout)
    Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
 {
+	PLS_FETCH();
 
     RETURN_LONG(PG(connection_status));
 }
@@ -2374,6 +2378,7 @@ PHP_FUNCTION(ignore_user_abort)
 {
     pval *arg;
     int old_setting;
+	PLS_FETCH();
 
     old_setting = PG(ignore_user_abort);
     switch (ARG_COUNT(ht)) {
@@ -2383,8 +2388,8 @@ PHP_FUNCTION(ignore_user_abort)
             if (getParameters(ht,1,&arg) == FAILURE) {
                 RETURN_FALSE;
             }
-            convert_to_long(arg);
-            PG(ignore_user_abort)=arg->value.lval;
+            convert_to_boolean(arg);
+            PG(ignore_user_abort) = (zend_bool) arg->value.lval;
             break;
         default:
             WRONG_PARAM_COUNT;

@@ -33,10 +33,8 @@
 
 #include <errno.h>
 
-#if MSVC5
-#if !(APACHE)
+#if WIN32||WINNT
 #define NEEDRDH 1
-#endif
 #include "win32/readdir.h"
 #endif
 
