@@ -594,10 +594,6 @@ else
 fi
 
 
-PHP_ARG_ENABLE(pic,whether to enable PIC for shared objects,
-[  --disable-pic           Disable PIC for shared objects], yes)
-
-
 PHP_ARG_ENABLE(dmalloc,whether to enable dmalloc,
 [  --enable-dmalloc        Enable dmalloc])
 
@@ -652,17 +648,21 @@ divert(6)
 
 enable_shared=yes
 enable_static=yes
+unset with_pic
 
 case $php_build_target in
-program)
-    enable_shared=no
+program|static)
+    standard_libtool_flag='-prefer-non-pic -static'
+    if test "$lib_build_shared" != "yes"; then
+        enable_shared=no
+    fi
+    PHP_COMPILE='$(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) -c $< && touch $@'
+    CXX_PHP_COMPILE='$(CXX) $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c $< && touch $@'
 ;;
 shared)
     enable_static=no
+    standard_libtool_flag=-prefer-pic
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version"
-;;
-static)
-    enable_shared=no
 ;;
 esac
 
@@ -822,11 +822,13 @@ PHP_SUBST(sysconfdir)
 PHP_SUBST(AWK)
 PHP_SUBST(CC)
 PHP_SUBST(CFLAGS)
+PHP_SUBST(CFLAGS_CLEAN)
 PHP_SUBST_OLD(CONFIGURE_COMMAND)
 PHP_SUBST(CPP)
 PHP_SUBST(CPPFLAGS)
 PHP_SUBST(CXX)
 PHP_SUBST(CXXFLAGS)
+PHP_SUBST(CXXFLAGS_CLEAN)
 PHP_SUBST(CXX_PHP_COMPILE)
 PHP_SUBST_OLD(DEBUG_CFLAGS)
 PHP_SUBST(DEFS)
@@ -886,38 +888,20 @@ if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
 fi
 
-PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
-CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
 
-if test "$enable_shared" = "yes"; then
-  SHARED_LIBTOOL='$(LIBTOOL)'
-else
-  if test "$lib_build_shared" = "yes"; then
-    PHP_CONFIGURE_PART(Configuring shared libtool)
-dnl XXX This needs to be fixed
-#    $SHELL $srcdir/ltconfig --output=shlibtool --disable-static --srcdir=$srcdir --cache-file=./config.cache $srcdir/ltmain.sh
-    SHARED_LIBTOOL='$(SHELL) $(top_builddir)/shlibtool'
-  else
-    PHP_COMPILE='$(COMPILE) -c $< && touch $@'
-    CXX_PHP_COMPILE='$(CXX_COMPILE) -c $< && touch $@'
-  fi
-fi
+test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
+test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
+SHARED_LIBTOOL='$(LIBTOOL)'
 
 CC=$old_CC
 
-changequote({,})
-if test "$PHP_PIC" = "no"; then
-  cat >meta_cc<<EOF
-#! /bin/sh
-cmd="$CC \`echo \$@|sed s/-[fFD]PIC//g\`"
-exec \$cmd
-EOF
-  chmod +x meta_cc
-  CC="$abs_builddir/meta_cc"
-fi
-changequote([,])
-
 PHP_CONFIGURE_PART(Generating files)
+
+CXXFLAGS_CLEAN=$CXXFLAGS
+CFLAGS_CLEAN=$CFLAGS
+CFLAGS="$CFLAGS $standard_libtool_flag"
+INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
+CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
 PHP_GEN_CONFIG_VARS
 
