@@ -238,10 +238,14 @@ PHP_FUNCTION(get_meta_tags)
 		return;
 	}
 
+	php_stream_open_wrapper(filename, "rb", 0, NULL);
+
 	md.stream = php_stream_open_wrapper(filename, "rb",
 			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL TSRMLS_CC);
+			NULL);
 	
+
+
 	if (!md.stream)	{
 		RETURN_FALSE;
 	}
@@ -385,7 +389,7 @@ PHP_FUNCTION(file_get_contents)
 
 	stream = php_stream_open_wrapper(filename, "rb", 
 			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL TSRMLS_CC);
+			NULL);
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -432,7 +436,7 @@ PHP_FUNCTION(file)
 
 	stream = php_stream_open_wrapper(filename, "rb", 
 			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL TSRMLS_CC);
+			NULL);
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -583,7 +587,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), Z_STRVAL_PP(arg2),
 				use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				NULL TSRMLS_CC);
+				NULL);
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
@@ -1400,7 +1404,7 @@ PHP_FUNCTION(readfile)
 
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb",
 			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL TSRMLS_CC);
+			NULL);
 	if (stream)	{
 		size = php_passthru_stream(stream TSRMLS_CC);
 		php_stream_close(stream);
@@ -1694,11 +1698,11 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 
 	srcstream = php_stream_open_wrapper(src, "rb", 
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				NULL TSRMLS_CC);
+				NULL);
 
 	deststream = php_stream_open_wrapper(dest, "wb", 
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				NULL TSRMLS_CC);
+				NULL);
 
 	if (srcstream && deststream)
 		ret = php_stream_copy_to_stream(srcstream, deststream, PHP_STREAM_COPY_ALL) == 0 ? FAILURE : SUCCESS;
