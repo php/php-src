@@ -121,6 +121,21 @@ PHP_FUNCTION(pg_escape_string);
 PHP_FUNCTION(pg_escape_bytea);
 #endif
 
+/* misc functions */
+PHP_FUNCTION(pg_metadata);
+PHP_FUNCTION(pg_convert);
+PHP_FUNCTION(pg_insert);
+PHP_FUNCTION(pg_update);
+PHP_FUNCTION(pg_delete);
+PHP_FUNCTION(pg_select);
+
+PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
+PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result TSRMLS_DC);
+PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, zend_bool convert, zend_bool async TSRMLS_DC);
+PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, zend_bool convert, zend_bool async TSRMLS_DC);
+PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids, zend_bool convert, zend_bool async TSRMLS_DC);
+PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids, zval *ret_array, zend_bool convert TSRMLS_DC);
+
 static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 /* static int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS); */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
@@ -130,8 +145,53 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
 
+typedef enum _php_pgsql_data_type {
+	/* boolean */
+	PG_BOOL,
+	/* number */
+	PG_OID,
+	PG_INT2,
+	PG_INT4,
+	PG_INT8,
+	PG_FLOAT4,
+	PG_FLOAT8,
+	PG_NUMERIC,
+	PG_MONEY,
+	/* character */
+	PG_TEXT,
+	PG_CHAR,
+	PG_VARCHAR,
+	/* time and interval */
+	PG_UNIX_TIME,
+	PG_UNIX_TIME_INTERVAL,
+	PG_DATE,
+	PG_TIME,
+	PG_TIME_WITH_TIMEZONE,
+	PG_TIMESTAMP_WITH_TIMEZONE,
+	PG_INTERVAL,
+	/* binary */
+	PG_BYTEA,
+	/* network */
+	PG_CIDR,
+	PG_INET,
+	PG_MACADDR,
+	/* bit */
+	PG_BIT,
+	PG_VARBIT,
+	/* geometoric */
+	PG_LINE,
+	PG_LSEG,
+	PG_POINT,
+	PG_BOX,
+	PG_PATH,
+	PG_POLYGON,
+	PG_CIRCLE,
+	/* unkown and system */
+	PG_UNKNOWN
+} php_pgsql_data_type;
+
 typedef struct pgLofp {
-        PGconn *conn;
+	PGconn *conn;
 	int lofd;
 } pgLofp;
 
@@ -147,14 +207,14 @@ typedef struct _php_pgsql_notice {
 } php_pgsql_notice;
 
 typedef struct {
-	long default_link;
+	long default_link; /* default link when connection is omitted */
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
 	long auto_reset_persistent;
 	int le_lofp,le_string;
 	int ignore_notices,log_notices;
-	HashTable notices;
+	HashTable notices;  /* notice message for each connection */
 } php_pgsql_globals;
 
 
