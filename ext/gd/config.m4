@@ -15,6 +15,9 @@ PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
 PHP_ARG_WITH(png-dir, for the location of libpng,
 [  --with-png-dir=DIR        GD: Set the path to libpng install prefix.], no, no)
 
+PHP_ARG_WITH(zlib-dir,if the location of ZLIB install directory is defined,
+[  --with-zlib-dir=<DIR>     GD: Set the path to zlib install prefix.], no, no)
+
 PHP_ARG_WITH(xpm-dir, for the location of libXpm,
 [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.], no, no)
 
