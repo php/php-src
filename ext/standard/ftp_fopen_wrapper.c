@@ -90,9 +90,10 @@ static int php_stream_ftp_stream_stat(php_stream_wrapper *wrapper,
 
 static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
-	NULL,
+	NULL, /* stream_close */
 	php_stream_ftp_stream_stat,
-	NULL
+	NULL, /* stat_url */
+	NULL  /* opendir */
 };
 
 php_stream_wrapper php_stream_ftp_wrapper =	{
@@ -117,7 +118,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	size_t file_size = 0;
 
 	if (strchr(mode, 'a') || strchr(mode, '+')) {
-		php_stream_wrapper_log_error(wrapper, options, "FTP does not support simultaneous read/write connections.");
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP does not support simultaneous read/write connections.");
 		return NULL;
 	}
 	
@@ -319,7 +320,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		php_stream_close(stream);
 	}
 	if (tmp_line[0] != '\0')
-		php_stream_wrapper_log_error(wrapper, options, "FTP server reports %s", tmp_line);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP server reports %s", tmp_line);
 	return NULL;
 }
 /* }}} */
