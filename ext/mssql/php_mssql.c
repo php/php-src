@@ -1286,7 +1286,7 @@ PHP_FUNCTION(mssql_fetch_array)
 
 /* }}} */
 
-/* {{{ proto array mssql_fetch_array(int result_id [, int result_type])
+/* {{{ proto array mssql_fetch_assoc(int result_id [, int result_type])
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_assoc)
 {

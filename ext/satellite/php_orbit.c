@@ -136,7 +136,8 @@ PHP_MINFO_FUNCTION(satellite)
 	DISPLAY_INI_ENTRIES();
 }
 
-/* instruct the type manager to load an IDL file if not already loaded */
+/* {{{ proto bool satellite_load_idl(string file)
+	 Instruct the type manager to load an IDL file if not already loaded */
 PHP_FUNCTION(satellite_load_idl)
 {
 	zval * p_parameter;
@@ -156,7 +157,10 @@ PHP_FUNCTION(satellite_load_idl)
 
 	RETURN_BOOL(TypeManager_LoadFile(Z_STRVAL_P(p_parameter)));
 }
+/* }}} */
 
+/* {{{ proto int satellite_get_repository_id(object obj)
+	 NOT IMPLEMENTED */
 /* 
  * NOT IMPLEMENTED
  *
@@ -165,6 +169,7 @@ PHP_FUNCTION(satellite_load_idl)
 PHP_FUNCTION(satellite_get_repository_id)
 {
 }
+/* }}} */
 
 /* {{{ proto bool satellite_caught_exception(void)
 	 See if an exception was caught from the previous function */
@@ -172,7 +177,10 @@ PHP_FUNCTION(satellite_caught_exception)
 {
 	RETURN_BOOL(orbit_caught_exception());
 }
+/* }}} */
 
+/* {{{ proto string satellite_exception_id(void)
+	 Get exception caught from the previous function */
 PHP_FUNCTION(satellite_exception_id)
 {
 	CORBA_char * p_id = CORBA_exception_id(orbit_get_environment());
@@ -181,6 +189,8 @@ PHP_FUNCTION(satellite_exception_id)
 }
 /* }}} */
 
+/* {{{ proto object satellite_exception_value(void)
+	 Get the exception struct for the latest exception */
 /* real name: php_if_orbit_exception_value */
 PHP_FUNCTION(satellite_exception_value)
 {
@@ -201,4 +211,4 @@ PHP_FUNCTION(satellite_exception_value)
 	/* create structure with exception data */
 	orbit_namedvalue_to_zval(&source, return_value);
 }
-
+/* }}} */

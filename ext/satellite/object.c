@@ -853,6 +853,8 @@ OrbitObject_GetProperty_exit:
 	return success;
 }
 
+/* {{{ proto string satellite_object_to_string(object obj)
+	 Convert an object to its string representation */
 PHP_FUNCTION(satellite_object_to_string)
 {
 	zval **arg = NULL;
@@ -892,4 +894,4 @@ PHP_FUNCTION(satellite_object_to_string)
 error:
 	RETURN_NULL();
 }
-
+/* }}} */

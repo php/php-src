@@ -562,7 +562,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 }
 /* }}} */
 
-/* {{{ void ImageTrueColorToPalette(resource im, bool ditherFlag, int colorsWanted)
+/* {{{ void imagetruecolortopalette(resource im, bool ditherFlag, int colorsWanted)
    Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
 {
@@ -1247,7 +1247,7 @@ PHP_FUNCTION(imagecreatefromxbm)
 }
 /* }}} */
 
-/* {{{ todo int imagecreatefromxpm(string filename)
+/* {{{ proto int imagecreatefromxpm(string filename)
    Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
 {
@@ -2631,8 +2631,8 @@ PHP_FUNCTION(imageftbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagettftext(int im, int size, int angle, int x, int y, int col, string font_file, string text, [array extrainfo])
-   Write text to the image using a TrueType font */
+/* {{{ proto array imagefttext(int im, int size, int angle, int x, int y, int col, string font_file, string text, [array extrainfo])
+   Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
 #if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
