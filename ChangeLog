@@ -1,3 +1,134 @@
+2001-05-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/domxml/php_domxml.c: Open season on memory leaks, shoot all you can.
+
+2001-05-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * scripts/config-stubs
+      build/build.mk
+      ext/zlib/config.m4
+      ext/zlib/config0.m4
+      ext/zlib/zlib.m4
+      configure.in:
+    Fix special treatment of zlib by introducing the Apache concept
+    of config.m4 hierarchies.
+
+2001-05-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/php_filestat.h
+      ext/standard/file.c
+      ext/standard/filestat.c:
+    Rewrote stat() and fstat() to be memory efficient, due to a recent
+    thread on php-dev.
+
+    Note: I added a macro that might have use in other instances, but for now
+    is included in php_filestat.h
+
+2001-05-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: MFH
+
+    * NEWS: Compress several entries into one.
+
+2001-05-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: merge news
+
+    * NEWS: update and some late additions
+
+2001-05-11  Thies C. Arntzen  <thies@thieso.net>
+
+    * sapi/apache/mod_php4.c:
+    - Added --enable-memory-usage-info. This creates a new Apache 1.x logging
+      directive "{mod_php_memory_usage}n" which will log the peak amount of
+      memory used by the script. 
+
+    * NEWS: .
+
+    * configure.in
+      main/php_version.h: 4.0.6 is tagged, HEAD is now 4.0.7-dev
+
+    * ext/xml/expat/xmltok/Makefile.in
+      ext/xml/expat/xmltok/asciitab.h
+      ext/xml/expat/xmltok/iasciitab.h
+      ext/xml/expat/xmltok/latin1tab.h
+      ext/xml/expat/xmltok/nametab.h
+      ext/xml/expat/xmltok/utf8tab.h
+      ext/xml/expat/xmltok/xmldef.h
+      ext/xml/expat/xmltok/xmlrole.c
+      ext/xml/expat/xmltok/xmlrole.h
+      ext/xml/expat/xmltok/xmltok.c
+      ext/xml/expat/xmltok/xmltok.dsp
+      ext/xml/expat/xmltok/xmltok.h
+      ext/xml/expat/xmltok/xmltok_impl.c
+      ext/xml/expat/xmltok/xmltok_impl.h
+      ext/xml/expat/xmltok/xmltok_ns.c
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmlparse/expat_hashtable.h
+      ext/xml/expat/xmlparse/hashtable.c
+      ext/xml/expat/xmlparse/xmlparse.c
+      ext/xml/expat/xmlparse/xmlparse.dsp
+      ext/xml/expat/xmlparse/xmlparse.h
+      ext/xml/config.m4
+      ext/xml/expat/Changes
+      ext/xml/expat/Makefile.in
+      ext/xml/expat/README
+      ext/xml/expat/README.php
+      ext/xml/expat/ascii.h
+      ext/xml/expat/asciitab.h
+      ext/xml/expat/expat.html
+      ext/xml/expat/iasciitab.h
+      ext/xml/expat/latin1tab.h
+      ext/xml/expat/nametab.h
+      ext/xml/expat/utf8tab.h
+      ext/xml/expat/xmlparse.c
+      ext/xml/expat/xmlrole.c
+      ext/xml/expat/xmlrole.h
+      ext/xml/expat/xmltok.c
+      ext/xml/expat/xmltok.h
+      ext/xml/expat/xmltok_impl.c
+      ext/xml/expat/xmltok_impl.h
+      ext/xml/expat/xmltok_ns.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      main/php_compat.h: bump bundled expat to 1.95.1
+    win32 project _needs_ updating and i don't have windows
+
+2001-05-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/config.m4
+      ext/session/mod_files.c: Save a couple of syscalls per session
+
+    Fix apparent new-session-files-were-not-locked bug
+
+    Replace %m with portable "%s", strerror(errno)
+
+2001-05-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/domxml/php_domxml.c:
+    Start cleaning up domxml memory leaks. Still much stuff to do.
+
+2001-05-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/info.c: Tabs please...
+
+2001-05-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/info.c: Fix for bug #10815.
+
+2001-05-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4:
+    Fixed problems which were caused by the previous patches.
+
+2001-05-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/tests/file/001.phpt: Fix is_executable test.
+
+    * ext/standard/file.c
+      ext/standard/filestat.c:
+    (Andrei's suggestion to still allow backwords compatibility.)
+
 2001-05-10  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gd/config.m4: default to /usr/local
