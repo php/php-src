@@ -177,6 +177,7 @@ static void _free_pdf_doc(PDF *pdf)
 
 static void _free_outline(int *outline)
 {
+	if(outline) efree(outline);
 }
 
 PHP_MINIT_FUNCTION(pdf)
@@ -1829,7 +1830,7 @@ PHP_FUNCTION(pdf_add_outline) {
 	}
 
 	outline=emalloc(sizeof(int));
-	*outline = PDF_add_bookmark(pdf, estrdup(arg2->value.str.val), parentid, open);
+	*outline = PDF_add_bookmark(pdf, arg2->value.str.val, parentid, open);
 	id = php3_list_insert(outline,PDF_GLOBAL(le_outline));
 	RETURN_LONG(id);
 }
@@ -2038,9 +2039,11 @@ PHP_FUNCTION(pdf_open_memory_image) {
 #else
 		pdf_image = PDF_open_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
 #endif
+	efree(buffer);
 
 	if(-1 == pdf_image) {
 		php3_error(E_WARNING, "Could not open image");
+		efree(buffer);
 		RETURN_FALSE;
 	}
 
