@@ -650,7 +650,7 @@ _oci_bind_post_exec(void *data)
 		zval_dtor(val);
 		ZVAL_NULL(val);
 	} else if (bind->zval->type == IS_STRING) {
-		bind->zval->value.str.val = realloc(bind->zval->value.str.val, bind->zval->value.str.len+1);
+		bind->zval->value.str.val = erealloc(bind->zval->value.str.val, bind->zval->value.str.len+1);
 		bind->zval->value.str.val[ bind->zval->value.str.len ] = '\0';
 	}
 
