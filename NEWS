@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Implemented getprotoby{name,number} (Evan)
 - Added array_pad() function. (Andrei)
 - Added new getservby{name,port} functions. (Evan)
 - Added session.cookie_path and session.cookie_domain (Sascha)
