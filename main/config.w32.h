@@ -265,9 +265,6 @@
 /* Define if you have the <grp.h> header file.  */
 #define HAVE_GRP_H 0
 
-/* Define if you have the <memory.h> header file.  */
-#define HAVE_MEMORY_H 1
-
 /* Define if you have the <ndir.h> header file.  */
 /* #undef HAVE_NDIR_H */
 
@@ -299,7 +296,7 @@
 #undef HAVE_UNISTD_H
 
 /* Define if you have the crypt library (-lcrypt).  */
-/* #undef HAVE_LIBCRYPT 0 */
+/* #undef HAVE_LIBCRYPT */
 
 /* Define if you have the dl library (-ldl).  */
 #define HAVE_LIBDL 1
