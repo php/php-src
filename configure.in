@@ -12,6 +12,7 @@ dnl we create the libs subdirectory as the user who configures PHP.
 dnl Otherwise, the current user will not be able to delete libs
 dnl or the contents of libs.
 test -d libs || mkdir libs
+rm -f libs/*
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
   AC_MSG_ERROR(--with-shared-apache is not supported. Please refer to the documentation for using APXS)
@@ -117,7 +118,7 @@ PHP_BUILD_PROGRAM
 dnl paths to the targets relative to the build directory
 SAPI_PROGRAM=php
 dnl on HP-UX, the extension is .sl. Need to improve this
-SAPI_SHARED=libs/libphp4.so
+SAPI_SHARED=libs/libphp4.s*
 SAPI_STATIC=libs/libphp4.a
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
