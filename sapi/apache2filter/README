@@ -37,6 +37,10 @@ HOW TO INSTALL
 
         AddType application/x-httpd-php .php
 
+    If you would like to enable source code highlighting functionality add:
+    
+        AddType application/x-httpd-php-source .phps
+    
     That's it. Now start bin/httpd.
 
 HOW TO CONFIGURE
