@@ -223,12 +223,14 @@ void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
-/* {{{ _rollback_mysql_transactions
+/* {{{ _restore_connection_defaults
  */
-static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link;
 	char	query[128];
+	char	user[128];
+	char 	passwd[128];
 
 	/* check if its a persistent link */
 	if (Z_TYPE_P(rsrc) != le_plink) 
@@ -239,6 +241,17 @@ static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	/* rollback possible transactions */
 	strcpy (query, "ROLLBACK");
 	mysql_real_query(&link->conn, query, strlen(query));
+
+	/* restore session variable "autocommit" to default (=1) */
+	strcpy (query, "SET AUTOCOMMIT=1");
+	mysql_real_query(&link->conn, query, strlen(query));
+
+	/* unset the current selected db */
+#if MYSQL_VERSION_ID > 32329
+	strcpy (user, (char *)(&link->conn)->user);
+	strcpy (passwd, (char *)(&link->conn)->passwd);
+	mysql_change_user(&link->conn, user, passwd, "");
+#endif
 
 	return 0;	
 }
@@ -420,7 +433,7 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
-	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_mysql_transactions TSRMLS_CC);
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) _restore_connection_defaults TSRMLS_CC);
 
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
