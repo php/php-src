@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   (Christian, Rob)
 - Fixed bug #29656 (segfault on result and statement properties). (Georg)
 - Fixed bug #29447 (Reflection API issues). (Marcus)
+- Fixed bug #26737 (private/protected properties not serialized when user
+  declared method __sleep() exists). E_NOTICE thrown when __sleep() returns
+  name of non-existing member. (Andrey, Curt)
 
 12 Aug 2004, PHP 5.0.1
 - Changed destructor mechanism so that destructors are called prior to request
