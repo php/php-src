@@ -95,7 +95,7 @@ ZEND_DECLARE_MODULE_GLOBALS(tokenizer)
 */
 
 /* True global resources - no need for thread safety here */
-static int le_tokenizer;
+/* static int le_tokenizer; */
 
 /* {{{ tokenizer_functions[]
  *
