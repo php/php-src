@@ -1152,7 +1152,7 @@ fi
 
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
 
-PHP_ADD_BUILD_DIR(main)
+PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(regex)
 PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
 PHP_ADD_BUILD_DIR(TSRM)
