@@ -147,10 +147,9 @@ PHP_FUNCTION(zip_read)
 	php_zzip_dirent  *entry = NULL;
 	int               ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_dp) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zzip_dp) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-
 	ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *, zzip_dp, -1, le_zip_dir_name, le_zip_dir);
 
 	entry = emalloc(sizeof(php_zzip_dirent));
@@ -172,8 +171,8 @@ PHP_FUNCTION(zip_close)
 	zval     **zzip_dp;
 	ZZIP_DIR  *archive_p = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_dp) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zzip_dp) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *, zzip_dp, -1, le_zip_dir_name, le_zip_dir);
@@ -189,25 +188,24 @@ static void php_zzip_get_entry(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	zval            **zzip_ent;
 	php_zzip_dirent  *entry = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_ent) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zzip_ent) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-
 	ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
 	switch (opt) {
-		case 0:
-			RETURN_STRING(entry->dirent.d_name, 1);
-			break;
-		case 1:
-			RETURN_LONG(entry->dirent.d_csize);
-			break;
-		case 2:
-			RETURN_LONG(entry->dirent.st_size);
-			break;
-		case 3:
-			RETURN_STRING((char *) zzip_compr_str(entry->dirent.d_compr), 1);
-			break;
+	case 0:
+		RETURN_STRING(entry->dirent.d_name, 1);
+		break;
+	case 1:
+		RETURN_LONG(entry->dirent.d_csize);
+		break;
+	case 2:
+		RETURN_LONG(entry->dirent.st_size);
+		break;
+	case 3:
+		RETURN_STRING((char *) zzip_compr_str(entry->dirent.d_compr), 1);
+		break;
 	}
 }
 /* }}} */
@@ -244,43 +242,50 @@ PHP_FUNCTION(zip_entry_compressionmethod)
 }
 /* }}} */
 
-/* {{{ proto bool zip_entry_open(resource zip_dp, resource zip_entry, string mode)
+/* {{{ proto bool zip_entry_open(resource zip_dp, resource zip_entry[, string mode])
    Open a Zip File, pointed by the resource entry */
 PHP_FUNCTION(zip_entry_open)
 {
 	zval            **zzip_dp;
 	zval            **zzip_ent;
+	zval            **z_mode;
 	ZZIP_DIR         *archive_p = NULL;
 	php_zzip_dirent  *entry = NULL;
-	int               mode;
+	int               argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zzip_dp, &zzip_ent, &mode) == FAILURE)
-		return;
-
+	if (argc < 2 || argc > 3 ||
+		zend_get_parameters_ex(argc, &zzip_dp, &zzip_ent, &mode) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 	ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *,        zzip_dp,  -1, le_zip_dir_name,   le_zip_dir);
 	ZEND_FETCH_RESOURCE(entry,     php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
 	entry->fp = zzip_file_open(archive_p, entry->dirent.d_name, O_RDONLY | O_BINARY);
-
 	RETURN_BOOL(entry->fp);
 }
 /* }}} */
 
-/* {{{ proto string zip_read(resource zip_ent)
+/* {{{ proto string zip_read(resource zip_ent[, int len])
    Read X bytes from an opened zip entry */
 PHP_FUNCTION(zip_entry_read)
 {
-	zval            **zzip_ent;
-	php_zzip_dirent  *entry = NULL;
-	char             *buf   = NULL;
-	int               len   = 1024;
-	int               ret   = 0;
+	zval             **zzip_ent;
+	zval             **z_len;
+	php_zzip_dirent   *entry = NULL;
+	char              *buf   = NULL;
+	int                len   = 1024;
+	int                ret   = 0;
+	int                argc  = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zzip_ent, &len) == FAILURE) {
-		return;
+	if (argc < 1 || argc > 2 ||
+		zend_get_parameters_ex(argc, &zzip_ent, &z_len) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-	
 	ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
+
+	if (argc > 1) {
+		len = Z_LVAL_PP(z_len);
+	}
 
 	buf = emalloc(len + 1);
 	ret = zzip_read(entry->fp, buf, len);
@@ -299,10 +304,10 @@ PHP_FUNCTION(zip_entry_close)
 	zval            **zzip_ent;
 	php_zzip_dirent  *entry = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zzip_ent) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 ||
+		zend_get_parameters_ex(1, &zzip_ent) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-
 	ZEND_FETCH_RESOURCE(entry, php_zzip_dirent *, zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
 	zend_list_delete(Z_LVAL_PP(zzip_ent));
