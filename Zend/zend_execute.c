@@ -1563,10 +1563,133 @@ binary_assign_op_addr: {
 					EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
 					NEXT_OPCODE();
 				}
-			case ZEND_INIT_FCALL_BY_NAME: {
+			case ZEND_INIT_METHOD_CALL:
+				{
 					zval *function_name;
 					zend_function *function;
 					HashTable *active_function_table;
+					zval tmp;
+					zend_bool is_const;
+					char *function_name_strval;
+					int function_name_strlen;
+
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+
+					is_const = (EX(opline)->op2.op_type == IS_CONST);
+
+					if (is_const) {
+						function_name_strval = EX(opline)->op2.u.constant.value.str.val;
+						function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+					} else {
+						function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+
+						tmp = *function_name;
+						zval_copy_ctor(&tmp);
+						convert_to_string(&tmp);
+						function_name = &tmp;
+						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
+
+						function_name_strval = tmp.value.str.val;
+						function_name_strlen = tmp.value.str.len;
+					}
+					
+					EX(calling_namespace) = EG(namespace);
+
+					EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+							
+					/* Nuked overloaded method code. This will be redone differently */
+
+					if (EX(object).ptr && EX(object).ptr->type == IS_OBJECT) {
+						active_function_table = &Z_OBJCE_P(EX(object).ptr)->function_table;	
+					} else {
+						zend_error(E_ERROR, "Call to a member function on a non-object");
+					}
+					if (!PZVAL_IS_REF(EX(object).ptr)) {
+						EX(object).ptr->refcount++; /* For $this pointer */
+					} else {
+						zval *this_ptr;
+						ALLOC_ZVAL(this_ptr);
+						*this_ptr = *EX(object).ptr;
+						INIT_PZVAL(this_ptr);
+						zval_copy_ctor(this_ptr);
+						EX(object).ptr = this_ptr;
+					}
+
+					EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
+
+					if (zend_hash_find(active_function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
+						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
+					}
+
+					if (!is_const) {
+						zval_dtor(&tmp);
+						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
+					}
+
+					EX(fbc) = function;
+					NEXT_OPCODE();
+				}
+			case ZEND_INIT_STATIC_METHOD_CALL:
+				{
+					zval *function_name;
+					zend_function *function;
+					zval tmp;
+					zval **object_ptr_ptr;
+					zend_class_entry *ce;
+					zend_bool is_const;
+					char *function_name_strval;
+					int function_name_strlen;
+
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+
+					is_const = (EX(opline)->op2.op_type == IS_CONST);
+
+					if (is_const) {
+						function_name_strval = EX(opline)->op2.u.constant.value.str.val;
+						function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+					} else {
+						function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+
+						tmp = *function_name;
+						zval_copy_ctor(&tmp);
+						convert_to_string(&tmp);
+						function_name = &tmp;
+						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
+
+						function_name_strval = tmp.value.str.val;
+						function_name_strlen = tmp.value.str.len;
+					}
+					
+					EX(calling_namespace) = EG(namespace);
+					
+					if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {
+						EX(object).ptr=NULL;
+					} else {
+						/* We assume that "this" is already is_ref and pointing to the object.
+						   If it isn't then tough */
+						EX(object).ptr = *object_ptr_ptr;
+						EX(object).ptr->refcount++; /* For this pointer */
+					}
+					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+
+					EX(calling_namespace) = ce;
+
+					if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
+						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
+					}
+
+					if (!is_const) {
+						zval_dtor(&tmp);
+					}
+
+					EX(fbc) = function;
+
+					NEXT_OPCODE();
+				}
+			case ZEND_INIT_FCALL_BY_NAME:
+				{
+					zval *function_name;
+					zend_function *function;
 					zval tmp;
 
 					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
@@ -1581,90 +1704,25 @@ binary_assign_op_addr: {
 					
 					EX(calling_namespace) = EG(namespace);
 
-					if (EX(opline)->op1.op_type != IS_UNUSED) {
-						if (EX(opline)->op1 .op_type==IS_CONST) { /* used for class::function() */
-							zval **object_ptr_ptr;
+					EX(object).ptr = NULL;
 
-							if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {
-								EX(object).ptr=NULL;
-							} else {
-								/* We assume that "this" is already is_ref and pointing to the object.
-								   If it isn't then tough */
-								EX(object).ptr = *object_ptr_ptr;
-								EX(object).ptr->refcount++; /* For this pointer */
+					do {
+						if (EG(namespace)) {
+							if (zend_hash_find(&EG(namespace)->function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function) == SUCCESS) {
+								break;
 							}
-
-							{
-								zend_class_entry *ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
-								active_function_table = &ce->function_table;
-								EX(calling_namespace) = ce;
-							}
-						} else { /* used for member function calls */
-							EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-							
-							if ((!EX(object).ptr && EX(Ts)[EX(opline)->op1.u.var].EA.type==IS_OVERLOADED_OBJECT)								
-								|| ((EX(object).ptr && EX(object).ptr->type==IS_OBJECT) && Z_OBJCE_P(EX(object).ptr)->handle_function_call)) { /* overloaded function call */
-								zend_overloaded_element overloaded_element;
-
-								overloaded_element.element = *function_name;
-								overloaded_element.type = OE_IS_METHOD;
-
-								if (EX(object).ptr) {
-									EX(Ts)[EX(opline)->op1.u.var].EA.data.overloaded_element.object = EX(object).ptr;
-									EX(Ts)[EX(opline)->op1.u.var].EA.data.overloaded_element.type = BP_VAR_NA;
-									EX(Ts)[EX(opline)->op1.u.var].EA.data.overloaded_element.elements_list = (zend_llist *) emalloc(sizeof(zend_llist));
-									zend_llist_init(EX(Ts)[EX(opline)->op1.u.var].EA.data.overloaded_element.elements_list, sizeof(zend_overloaded_element), NULL, 0);
-								}
-								zend_llist_add_element(EX(Ts)[EX(opline)->op1.u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
-								EX(fbc) = (zend_function *) emalloc(sizeof(zend_function));
-								EX(fbc)->type = ZEND_OVERLOADED_FUNCTION;
-								EX(fbc)->common.arg_types = NULL;
-								EX(fbc)->overloaded_function.var = EX(opline)->op1.u.var;
-								goto overloaded_function_call_cont;
-							}
-
-							if (EX(object).ptr && EX(object).ptr->type == IS_OBJECT) {
-								active_function_table = &Z_OBJCE_P(EX(object).ptr)->function_table;	
-							} else {
-								zend_error(E_ERROR, "Call to a member function on a non-object");
-							}
-							if (!PZVAL_IS_REF(EX(object).ptr)) {
-								EX(object).ptr->refcount++; /* For $this pointer */
-							} else {
-								zval *this_ptr;
-								ALLOC_ZVAL(this_ptr);
-								*this_ptr = *EX(object).ptr;
-								INIT_PZVAL(this_ptr);
-								zval_copy_ctor(this_ptr);
-								EX(object).ptr = this_ptr;
-							}
-							//active_function_table = &Z_OBJCE_P(EX(object).ptr)->function_table;
-							EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
 						}
-						if (zend_hash_find(active_function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
+						if (zend_hash_find(EG(function_table), function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
 							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
 						}
-					} else { /* function pointer */
-						EX(object).ptr = NULL;
-						do {
-							if (EG(namespace)) {
-								if (zend_hash_find(&EG(namespace)->function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function) == SUCCESS) {
-									break;
-								}
-							}
-							if (zend_hash_find(EG(function_table), function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
-								zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
-							}
-							EX(calling_namespace) = NULL;
-						} while (0);
-					}
+						EX(calling_namespace) = NULL;
+					} while (0);
 					
 					zval_dtor(&tmp);
 					EX(fbc) = function;
-overloaded_function_call_cont:
-					FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
+
+					NEXT_OPCODE();
 				}
-				NEXT_OPCODE();
 			case ZEND_DO_FCALL_BY_NAME:
 				EX(function_state).function = EX(fbc);
 				goto do_fcall_common;

@@ -693,7 +693,13 @@ void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 	*result = opline->result;
 }
 
-	
+static void zend_lowercase_znode_if_const(znode *z)
+{
+	if (z->op_type == IS_CONST) {
+		zend_str_tolower(z->u.constant.value.str.val, z->u.constant.value.str.len);
+	}
+}
+
 void zend_do_free(znode *op1 TSRMLS_DC)
 {
 	if (op1->op_type==IS_TMP_VAR) {
@@ -909,8 +915,9 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 		zend_do_extended_fcall_begin(TSRMLS_C); 
 		return;
 	}
-	last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
-	last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
+	last_op->opcode = ZEND_INIT_METHOD_CALL;
+	zend_lowercase_znode_if_const(&last_op->op2);
+	// last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
 	left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
 
 	/*opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1011,10 +1018,11 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 	unsigned char *ptr = NULL;
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 	opline->op1 = *class_name;
+	zend_lowercase_znode_if_const(function_name);
 	opline->op2 = *function_name;
-	opline->extended_value = ZEND_MEMBER_FUNC_CALL;
+	//opline->extended_value = ZEND_MEMBER_FUNC_CALL;
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
 
