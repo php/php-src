@@ -275,7 +275,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 /* {{{ SWFAction
 */
 static zend_function_entry swfaction_functions[] = {
-	PHP_FALIAS(swfaction,              swfaction_init,         NULL)
+	PHP_FALIAS(__construct,              swfaction_init,         NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -324,9 +324,9 @@ static SWFAction getAction(zval *id TSRMLS_DC)
 /* {{{ SWFBitmap 
 */
 static zend_function_entry swfbitmap_functions[] = {
-	PHP_FALIAS(swfbitmap,           swfbitmap_init,                NULL)
-	PHP_FALIAS(getwidth,            swfbitmap_getWidth,            NULL)
-	PHP_FALIAS(getheight,           swfbitmap_getHeight,           NULL)
+	PHP_FALIAS(__construct,         swfbitmap_init,                NULL)
+	PHP_FALIAS(getWidth,            swfbitmap_getWidth,            NULL)
+	PHP_FALIAS(getHeight,           swfbitmap_getHeight,           NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -418,19 +418,19 @@ PHP_FUNCTION(swfbitmap_getHeight)
 /* {{{ SWFButton
 */
 static zend_function_entry swfbutton_functions[] = {
-	PHP_FALIAS(swfbutton,              swfbutton_init,            NULL)
-	PHP_FALIAS(sethit,                 swfbutton_setHit,          NULL)
-	PHP_FALIAS(setover,                swfbutton_setOver,         NULL)
-	PHP_FALIAS(setup,                  swfbutton_setUp,           NULL)
-	PHP_FALIAS(setdown,                swfbutton_setDown,         NULL)
-	PHP_FALIAS(setaction,              swfbutton_setAction,       NULL)
-	PHP_FALIAS(addshape,               swfbutton_addShape,        NULL)
+	PHP_FALIAS(__construct,            swfbutton_init,            NULL)
+	PHP_FALIAS(setHit,                 swfbutton_setHit,          NULL)
+	PHP_FALIAS(setOver,                swfbutton_setOver,         NULL)
+	PHP_FALIAS(setUp,                  swfbutton_setUp,           NULL)
+	PHP_FALIAS(setDown,                swfbutton_setDown,         NULL)
+	PHP_FALIAS(setAction,              swfbutton_setAction,       NULL)
+	PHP_FALIAS(addShape,               swfbutton_addShape,        NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(setmenu,                swfbutton_setMenu,         NULL)
+	PHP_FALIAS(setMenu,                swfbutton_setMenu,         NULL)
 #endif
-	PHP_FALIAS(addaction,              swfbutton_addAction,       NULL)
+	PHP_FALIAS(addAction,              swfbutton_addAction,       NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(addsound,               swfbutton_addSound,        NULL)
+	PHP_FALIAS(addSound,               swfbutton_addSound,        NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -670,34 +670,34 @@ PHP_FUNCTION(swfbutton_keypress)
 /* {{{ SWFDisplayitem
 */
 static zend_function_entry swfdisplayitem_functions[] = {
-	PHP_FALIAS(moveto,       swfdisplayitem_moveTo,      NULL)
+	PHP_FALIAS(__construct,  swfdisplayitem_moveTo,      NULL)
 	PHP_FALIAS(move,         swfdisplayitem_move,        NULL)
-	PHP_FALIAS(scaleto,      swfdisplayitem_scaleTo,     NULL)
+	PHP_FALIAS(scaleTo,      swfdisplayitem_scaleTo,     NULL)
 	PHP_FALIAS(scale,        swfdisplayitem_scale,       NULL)
-	PHP_FALIAS(rotateto,     swfdisplayitem_rotateTo,    NULL)
+	PHP_FALIAS(rotateTo,     swfdisplayitem_rotateTo,    NULL)
 	PHP_FALIAS(rotate,       swfdisplayitem_rotate,      NULL)
-	PHP_FALIAS(skewxto,      swfdisplayitem_skewXTo,     NULL)
-	PHP_FALIAS(skewx,        swfdisplayitem_skewX,       NULL)
-	PHP_FALIAS(skewyto,      swfdisplayitem_skewYTo,     NULL)
-	PHP_FALIAS(skewy,        swfdisplayitem_skewY,       NULL)
-	PHP_FALIAS(setmatrix,    swfdisplayitem_setMatrix,   NULL)
-	PHP_FALIAS(setdepth,     swfdisplayitem_setDepth,    NULL)
-	PHP_FALIAS(setratio,     swfdisplayitem_setRatio,    NULL)
-	PHP_FALIAS(addcolor,     swfdisplayitem_addColor,    NULL)
-	PHP_FALIAS(multcolor,    swfdisplayitem_multColor,   NULL)
-	PHP_FALIAS(setname,      swfdisplayitem_setName,     NULL)
-	PHP_FALIAS(addaction,    swfdisplayitem_addAction,   NULL)
+	PHP_FALIAS(skewXTo,      swfdisplayitem_skewXTo,     NULL)
+	PHP_FALIAS(skewX,        swfdisplayitem_skewX,       NULL)
+	PHP_FALIAS(skewYTo,      swfdisplayitem_skewYTo,     NULL)
+	PHP_FALIAS(skewY,        swfdisplayitem_skewY,       NULL)
+	PHP_FALIAS(setMatrix,    swfdisplayitem_setMatrix,   NULL)
+	PHP_FALIAS(setDepth,     swfdisplayitem_setDepth,    NULL)
+	PHP_FALIAS(setRatio,     swfdisplayitem_setRatio,    NULL)
+	PHP_FALIAS(addColor,     swfdisplayitem_addColor,    NULL)
+	PHP_FALIAS(multColor,    swfdisplayitem_multColor,   NULL)
+	PHP_FALIAS(setName,      swfdisplayitem_setName,     NULL)
+	PHP_FALIAS(addAction,    swfdisplayitem_addAction,   NULL)
 #ifdef HAVE_NEW_MING
 	PHP_FALIAS(remove,       swfdisplayitem_remove,      NULL)
-	PHP_FALIAS(setmasklevel, swfdisplayitem_setMaskLevel,NULL)
-	PHP_FALIAS(endmask,      swfdisplayitem_endMask,     NULL)
-	PHP_FALIAS(get_x,        swfdisplayitem_getX,        NULL)
-	PHP_FALIAS(get_y,        swfdisplayitem_getY,        NULL)
-	PHP_FALIAS(get_xscale,   swfdisplayitem_getXScale,   NULL)
-	PHP_FALIAS(get_yscale,   swfdisplayitem_getYScale,   NULL)
-	PHP_FALIAS(get_xskew,    swfdisplayitem_getXSkew,    NULL)
-	PHP_FALIAS(get_yskew,    swfdisplayitem_getYSkew,    NULL)
-	PHP_FALIAS(get_rot,      swfdisplayitem_getRot,      NULL)
+	PHP_FALIAS(setMaskLevel, swfdisplayitem_setMaskLevel,NULL)
+	PHP_FALIAS(endMask,      swfdisplayitem_endMask,     NULL)
+	PHP_FALIAS(getX,         swfdisplayitem_getX,        NULL)
+	PHP_FALIAS(getY,         swfdisplayitem_getY,        NULL)
+	PHP_FALIAS(getXScale,    swfdisplayitem_getXScale,   NULL)
+	PHP_FALIAS(getYScale,    swfdisplayitem_getYScale,   NULL)
+	PHP_FALIAS(getXSkew,     swfdisplayitem_getXSkew,    NULL)
+	PHP_FALIAS(getYSkew,     swfdisplayitem_getYSkew,    NULL)
+	PHP_FALIAS(getRot,       swfdisplayitem_getRot,      NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -1180,12 +1180,12 @@ PHP_FUNCTION(swfdisplayitem_getRot)
 /* {{{ SWFFill
 */
 static zend_function_entry swffill_functions[] = {
-	PHP_FALIAS(swffill,      swffill_init,        NULL)
-	PHP_FALIAS(moveto,       swffill_moveTo,      NULL)
-	PHP_FALIAS(scaleto,      swffill_scaleTo,     NULL)
-	PHP_FALIAS(rotateto,     swffill_rotateTo,    NULL)
-	PHP_FALIAS(skewxto,      swffill_skewXTo,     NULL)
-	PHP_FALIAS(skewyto,      swffill_skewYTo,     NULL)
+	PHP_FALIAS(__construct,  swffill_init,        NULL)
+	PHP_FALIAS(moveTo,       swffill_moveTo,      NULL)
+	PHP_FALIAS(scaleTo,      swffill_scaleTo,     NULL)
+	PHP_FALIAS(rotateTo,     swffill_rotateTo,    NULL)
+	PHP_FALIAS(skewXTo,      swffill_skewXTo,     NULL)
+	PHP_FALIAS(skewYTo,      swffill_skewYTo,     NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -1306,8 +1306,8 @@ PHP_FUNCTION(swffill_skewYTo)
 /* {{{ SWFFontCharacter */
 
 static zend_function_entry swffontchar_functions[] = {
-	PHP_FALIAS(addchars,         swffontchar_addChars,      NULL)
-	PHP_FALIAS(addutf8chars,     swffontchar_addUTF8Chars,  NULL)
+	PHP_FALIAS(__construct,      swffontchar_addChars,      NULL)
+	PHP_FALIAS(addUTF8Chars,     swffontchar_addUTF8Chars,  NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -1366,18 +1366,18 @@ PHP_FUNCTION(swffontchar_addUTF8Chars)
 /* {{{ SWFFont
 */
 static zend_function_entry swffont_functions[] = {
-	PHP_FALIAS(swffont,          swffont_init,              NULL)
-	PHP_FALIAS(getwidth,         swffont_getWidth,          NULL)
+	PHP_FALIAS(__construct,      swffont_init,              NULL)
+	PHP_FALIAS(getWidth,         swffont_getWidth,          NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(getutf8width,     swffont_getUTF8Width,      NULL)
+	PHP_FALIAS(getUTF8Width,     swffont_getUTF8Width,      NULL)
 /*	PHP_FALIAS(getwidewidth,     swffont_getWideWidth,      NULL)*/
 #endif
-	PHP_FALIAS(getascent,        swffont_getAscent,         NULL)
-	PHP_FALIAS(getdescent,       swffont_getDescent,        NULL)
-	PHP_FALIAS(getleading,       swffont_getLeading,        NULL)
+	PHP_FALIAS(getAscent,        swffont_getAscent,         NULL)
+	PHP_FALIAS(getDescent,       swffont_getDescent,        NULL)
+	PHP_FALIAS(getLeading,       swffont_getLeading,        NULL)
 #ifdef HAVE_NEW_MING
 /*	PHP_FALIAS(addchars,         swffont_addChars,          NULL)*/
-	PHP_FALIAS(getshape,         swffont_getShape,          NULL)
+	PHP_FALIAS(getShape,         swffont_getShape,          NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -1570,8 +1570,8 @@ PHP_FUNCTION(swffont_getShape)
 /* {{{ SWFGradient
 */
 static zend_function_entry swfgradient_functions[] = {
-	PHP_FALIAS(swfgradient,  swfgradient_init,      NULL)
-	PHP_FALIAS(addentry,     swfgradient_addEntry,  NULL)
+	PHP_FALIAS(__construct,  swfgradient_init,      NULL)
+	PHP_FALIAS(addEntry,     swfgradient_addEntry,  NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -1644,9 +1644,9 @@ PHP_FUNCTION(swfgradient_addEntry)
 /* {{{ SWFMorph 
 */
 static zend_function_entry swfmorph_functions[] = {
-	PHP_FALIAS(swfmorph,              swfmorph_init,            NULL)
-	PHP_FALIAS(getshape1,             swfmorph_getShape1,       NULL)
-	PHP_FALIAS(getshape2,             swfmorph_getShape2,       NULL)
+	PHP_FALIAS(__construct,           swfmorph_init,            NULL)
+	PHP_FALIAS(getShape1,             swfmorph_getShape1,       NULL)
+	PHP_FALIAS(getShape2,             swfmorph_getShape2,       NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -1713,7 +1713,7 @@ PHP_FUNCTION(swfmorph_getShape2)
 /* {{{ SWFSound */
 
 static zend_function_entry swfsound_functions[] = {
-	PHP_FALIAS(swfsound,         swfsound_init,             NULL)
+	PHP_FALIAS(__construct,      swfsound_init,             NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -1792,10 +1792,10 @@ static void destroy_SWFSound_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 /* {{{ SWFSoundInstance */
 
 static zend_function_entry swfsoundinstance_functions[] = {
-	PHP_FALIAS(nomultiple,     swfsoundinstance_noMultiple,    NULL)
-	PHP_FALIAS(loopinpoint,    swfsoundinstance_loopInPoint,   NULL)
-	PHP_FALIAS(loopoutpoint,   swfsoundinstance_loopOutPoint,  NULL)
-	PHP_FALIAS(loopcount,      swfsoundinstance_loopCount,     NULL)
+	PHP_FALIAS(__construct,    swfsoundinstance_noMultiple,    NULL)
+	PHP_FALIAS(loopInPoint,    swfsoundinstance_loopInPoint,   NULL)
+	PHP_FALIAS(loopOutPoint,   swfsoundinstance_loopOutPoint,  NULL)
+	PHP_FALIAS(loopCount,      swfsoundinstance_loopCount,     NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -1879,27 +1879,27 @@ PHP_FUNCTION(swfsoundinstance_loopCount)
 /* {{{ SWFMovie
 */
 static zend_function_entry swfmovie_functions[] = {
-	PHP_FALIAS(swfmovie,          swfmovie_init,              NULL)
-	PHP_FALIAS(nextframe,         swfmovie_nextFrame,         NULL)
-	PHP_FALIAS(labelframe,        swfmovie_labelFrame,        NULL)
+	PHP_FALIAS(__construct,       swfmovie_init,              NULL)
+	PHP_FALIAS(nextFrame,         swfmovie_nextFrame,         NULL)
+	PHP_FALIAS(labelFrame,        swfmovie_labelFrame,        NULL)
 	PHP_FALIAS(add,               swfmovie_add,               NULL)
 	PHP_FALIAS(remove,            swfmovie_remove,            NULL)
 	PHP_FALIAS(output,            swfmovie_output,            NULL)
 	PHP_FALIAS(save,              swfmovie_save,              NULL)
-	PHP_FALIAS(savetofile,        swfmovie_saveToFile,        NULL)
-	PHP_FALIAS(setbackground,     swfmovie_setBackground,     NULL)
-	PHP_FALIAS(setrate,           swfmovie_setRate,           NULL)
-	PHP_FALIAS(setdimension,      swfmovie_setDimension,      NULL)
-	PHP_FALIAS(setframes,         swfmovie_setFrames,         NULL)
+	PHP_FALIAS(saveToFile,        swfmovie_saveToFile,        NULL)
+	PHP_FALIAS(setBackground,     swfmovie_setBackground,     NULL)
+	PHP_FALIAS(setRate,           swfmovie_setRate,           NULL)
+	PHP_FALIAS(setDimension,      swfmovie_setDimension,      NULL)
+	PHP_FALIAS(setFrames,         swfmovie_setFrames,         NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(streammp3,         swfmovie_streamMp3,         NULL)
-	PHP_FALIAS(addexport,         swfmovie_addExport,         NULL)
-	PHP_FALIAS(writeexports,      swfmovie_writeExports,      NULL)
-	PHP_FALIAS(startsound,        swfmovie_startSound,        NULL)
-	PHP_FALIAS(stopsound,         swfmovie_stopSound,         NULL)
-	PHP_FALIAS(importchar,        swfmovie_importChar,        NULL)
-	PHP_FALIAS(importfont,        swfmovie_importFont,        NULL)
-	PHP_FALIAS(addfont,           swfmovie_addFont,           NULL)
+	PHP_FALIAS(streamMP3,         swfmovie_streamMp3,         NULL)
+	PHP_FALIAS(addExport,         swfmovie_addExport,         NULL)
+	PHP_FALIAS(writeExports,      swfmovie_writeExports,      NULL)
+	PHP_FALIAS(startSound,        swfmovie_startSound,        NULL)
+	PHP_FALIAS(stopSound,         swfmovie_stopSound,         NULL)
+	PHP_FALIAS(importChar,        swfmovie_importChar,        NULL)
+	PHP_FALIAS(importFont,        swfmovie_importFont,        NULL)
+	PHP_FALIAS(addFont,           swfmovie_addFont,           NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -2427,22 +2427,22 @@ PHP_FUNCTION(swfmovie_addFont)
 /* {{{ SWFShape
 */
 static zend_function_entry swfshape_functions[] = {
-	PHP_FALIAS(swfshape,          swfshape_init,               NULL)
-	PHP_FALIAS(setline,           swfshape_setline,            NULL)
-	PHP_FALIAS(addfill,           swfshape_addfill,            NULL)
-	PHP_FALIAS(setleftfill,       swfshape_setleftfill,        NULL)
-	PHP_FALIAS(setrightfill,      swfshape_setrightfill,       NULL)
-	PHP_FALIAS(movepento,         swfshape_movepento,          NULL)
-	PHP_FALIAS(movepen,           swfshape_movepen,            NULL)
-	PHP_FALIAS(drawlineto,        swfshape_drawlineto,         NULL)
-	PHP_FALIAS(drawline,          swfshape_drawline,           NULL)
-	PHP_FALIAS(drawcurveto,       swfshape_drawcurveto,        NULL)
-	PHP_FALIAS(drawcurve,         swfshape_drawcurve,          NULL)
-	PHP_FALIAS(drawglyph,         swfshape_drawglyph,          NULL)
-	PHP_FALIAS(drawcircle,        swfshape_drawcircle,         NULL)
-	PHP_FALIAS(drawarc,           swfshape_drawarc,            NULL)
-	PHP_FALIAS(drawcubic,         swfshape_drawcubic,          NULL)
-	PHP_FALIAS(drawcubicto,       swfshape_drawcubicto,        NULL)
+	PHP_FALIAS(__construct,       swfshape_init,               NULL)
+	PHP_FALIAS(setLine,           swfshape_setline,            NULL)
+	PHP_FALIAS(addFill,           swfshape_addfill,            NULL)
+	PHP_FALIAS(setLeftFill,       swfshape_setleftfill,        NULL)
+	PHP_FALIAS(setRightFill,      swfshape_setrightfill,       NULL)
+	PHP_FALIAS(movePenTo,         swfshape_movepento,          NULL)
+	PHP_FALIAS(movePen,           swfshape_movepen,            NULL)
+	PHP_FALIAS(drawLineTo,        swfshape_drawlineto,         NULL)
+	PHP_FALIAS(drawLine,          swfshape_drawline,           NULL)
+	PHP_FALIAS(drawCurveTo,       swfshape_drawcurveto,        NULL)
+	PHP_FALIAS(drawCurve,         swfshape_drawcurve,          NULL)
+	PHP_FALIAS(drawGlyph,         swfshape_drawglyph,          NULL)
+	PHP_FALIAS(drawCircle,        swfshape_drawcircle,         NULL)
+	PHP_FALIAS(drawArc,           swfshape_drawarc,            NULL)
+	PHP_FALIAS(drawCubic,         swfshape_drawcubic,          NULL)
+	PHP_FALIAS(drawCubicTo,       swfshape_drawcubicto,        NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -2946,15 +2946,15 @@ PHP_FUNCTION(swfshape_drawcubicto)
 /* {{{ SWFSprite
 */
 static zend_function_entry swfsprite_functions[] = {
-	PHP_FALIAS(swfsprite,			swfsprite_init,				NULL)
+	PHP_FALIAS(__construct,			swfsprite_init,				NULL)
 	PHP_FALIAS(add,					swfsprite_add,				NULL)
 	PHP_FALIAS(remove,				swfsprite_remove,			NULL)
-	PHP_FALIAS(nextframe,			swfsprite_nextFrame,		NULL)
-	PHP_FALIAS(labelframe,			swfsprite_labelFrame,		NULL)
-	PHP_FALIAS(setframes,			swfsprite_setFrames,		NULL)
+	PHP_FALIAS(nextFrame,			swfsprite_nextFrame,		NULL)
+	PHP_FALIAS(labelFrame,			swfsprite_labelFrame,		NULL)
+	PHP_FALIAS(setFrames,			swfsprite_setFrames,		NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(startsound,			swfsprite_startSound,		NULL)
-	PHP_FALIAS(stopsound,			swfsprite_stopSound,		NULL)
+	PHP_FALIAS(startSound,			swfsprite_startSound,		NULL)
+	PHP_FALIAS(stopSound,			swfsprite_stopSound,		NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -3128,25 +3128,25 @@ PHP_FUNCTION(swfsprite_stopSound)
 /* {{{ SWFText
 */
 static zend_function_entry swftext_functions[] = {
-	PHP_FALIAS(swftext,                swftext_init,              NULL)
-	PHP_FALIAS(setfont,                swftext_setFont,           NULL)
-	PHP_FALIAS(setheight,              swftext_setHeight,         NULL)
-	PHP_FALIAS(setspacing,             swftext_setSpacing,        NULL)
-	PHP_FALIAS(setcolor,               swftext_setColor,          NULL)
-	PHP_FALIAS(moveto,                 swftext_moveTo,            NULL)
-	PHP_FALIAS(addstring,              swftext_addString,         NULL)
+	PHP_FALIAS(__construct,            swftext_init,              NULL)
+	PHP_FALIAS(setFont,                swftext_setFont,           NULL)
+	PHP_FALIAS(setHeight,              swftext_setHeight,         NULL)
+	PHP_FALIAS(setSpacing,             swftext_setSpacing,        NULL)
+	PHP_FALIAS(setColor,               swftext_setColor,          NULL)
+	PHP_FALIAS(moveTo,                 swftext_moveTo,            NULL)
+	PHP_FALIAS(addString,              swftext_addString,         NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(addutf8string,          swftext_addUTF8String,     NULL)
+	PHP_FALIAS(addUTF8String,          swftext_addUTF8String,     NULL)
 /*	PHP_FALIAS(addwidestring,          swftext_addWideString,     NULL)*/
 #endif
-	PHP_FALIAS(getwidth,               swftext_getWidth,          NULL)
+	PHP_FALIAS(getWidth,               swftext_getWidth,          NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(getutf8width,           swftext_getUTF8Width,      NULL)
+	PHP_FALIAS(getUTF8Width,           swftext_getUTF8Width,      NULL)
 /*	PHP_FALIAS(getwidewidth,           swftext_getWideWidth,      NULL)*/
 #endif
-	PHP_FALIAS(getascent,              swftext_getAscent,         NULL)
-	PHP_FALIAS(getdescent,             swftext_getDescent,        NULL)
-	PHP_FALIAS(getleading,             swftext_getLeading,        NULL)
+	PHP_FALIAS(getAscent,              swftext_getAscent,         NULL)
+	PHP_FALIAS(getDescent,             swftext_getDescent,        NULL)
+	PHP_FALIAS(getLeading,             swftext_getLeading,        NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -3413,22 +3413,22 @@ PHP_FUNCTION(swftext_getLeading)
 /* {{{ SWFTextField
 */
 static zend_function_entry swftextfield_functions[] = {
-	PHP_FALIAS(swftextfield,      swftextfield_init,            NULL)
-	PHP_FALIAS(setfont,           swftextfield_setFont,         NULL)
-	PHP_FALIAS(setbounds,         swftextfield_setBounds,       NULL)
+	PHP_FALIAS(__construct,       swftextfield_init,            NULL)
+	PHP_FALIAS(setFont,           swftextfield_setFont,         NULL)
+	PHP_FALIAS(setBounds,         swftextfield_setBounds,       NULL)
 	PHP_FALIAS(align,             swftextfield_align,           NULL)
-	PHP_FALIAS(setheight,         swftextfield_setHeight,       NULL)
-	PHP_FALIAS(setleftmargin,     swftextfield_setLeftMargin,   NULL)
-	PHP_FALIAS(setrightmargin,    swftextfield_setRightMargin,  NULL)
-	PHP_FALIAS(setmargins,        swftextfield_setMargins,      NULL)
-	PHP_FALIAS(setindentation,    swftextfield_setIndentation,  NULL)
-	PHP_FALIAS(setlinespacing,    swftextfield_setLineSpacing,  NULL)
-	PHP_FALIAS(setcolor,          swftextfield_setColor,        NULL)
-	PHP_FALIAS(setname,           swftextfield_setName,         NULL)
-	PHP_FALIAS(addstring,         swftextfield_addString,       NULL)
+	PHP_FALIAS(setHeight,         swftextfield_setHeight,       NULL)
+	PHP_FALIAS(setLeftMargin,     swftextfield_setLeftMargin,   NULL)
+	PHP_FALIAS(setRightMargin,    swftextfield_setRightMargin,  NULL)
+	PHP_FALIAS(setMargins,        swftextfield_setMargins,      NULL)
+	PHP_FALIAS(setIndentation,    swftextfield_setIndentation,  NULL)
+	PHP_FALIAS(setLineSpacing,    swftextfield_setLineSpacing,  NULL)
+	PHP_FALIAS(setColor,          swftextfield_setColor,        NULL)
+	PHP_FALIAS(setName,           swftextfield_setName,         NULL)
+	PHP_FALIAS(addString,         swftextfield_addString,       NULL)
 #ifdef HAVE_NEW_MING
-	PHP_FALIAS(setpadding,        swftextfield_setPadding,      NULL)
-	PHP_FALIAS(addchars,          swftextfield_addChars,        NULL)
+	PHP_FALIAS(setPadding,        swftextfield_setPadding,      NULL)
+	PHP_FALIAS(addChars,          swftextfield_addChars,        NULL)
 #endif
 	{ NULL, NULL, NULL }
 };
