@@ -1,3 +1,40 @@
+2004-03-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      Fix bug #27467: domDocument::load() called from class method crashes
+      the methods can be called statically only from within classes which
+        are not extending DomDocument
+
+2004-03-03  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/mysqli/mysqli_fe.c:
+      Attempt at fixing win32 link errors
+
+    * ext/mysqli/config.w32:
+      Add missing source file
+
+    * ext/mysqli/config.w32:
+      Replace mysql with mysqli in paths to allow building both mysql and mysqli
+
+2004-03-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.w32:
+      - Add missing include path.
+
+2004-03-03  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects_API.c:
+      - Fix crash:
+      <?
+      class foo {
+              function __destruct() {
+                      foreach ($this->x as $x);
+              }
+      }
+      new foo();
+      echo 'OK';
+      ?>
+
 2004-03-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/config.w32:
