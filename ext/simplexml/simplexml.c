@@ -51,8 +51,7 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 
 	contents = xmlNodeListGetString(sxe->document, node->xmlChildrenNode, 1);
 	if (!xmlIsBlankNode(node->xmlChildrenNode) && contents && node->properties == NULL) {
-		ZVAL_STRING(value, contents, 1);
-		xmlFree(contents);
+		ZVAL_STRING(value, contents, 0);
 	} else {
 		php_sxe_object *subnode;
 
@@ -65,6 +64,24 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 	}
 }
 /* }}} */
+
+#define GET_NODE(__s, __n) \
+	if ((__s)->node) { \
+		(__n) = (__s)->node->xmlChildrenNode; \
+	} else { \
+		(__n) = (__s)->node = xmlDocGetRootElement((__s)->document)->xmlChildrenNode; \
+	}
+
+#define APPEND_PREV_ELEMENT(__c, __v) \
+	if ((__c) == 1) { \
+		array_init(return_value); \
+		add_next_index_zval(return_value, __v); \
+	}
+
+#define APPEND_CUR_ELEMENT(__c, __v) \
+	if (++(__c) > 1) { \
+		add_next_index_zval(return_value, __v); \
+	}
 
 /* {{{ sxe_property_read()
  */
@@ -90,57 +107,42 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	if (!strcmp(name, "__content")) {
 		contents = xmlNodeListGetString(sxe->document, sxe->node->xmlChildrenNode, 1);
 		if (contents != NULL) {
-			RETVAL_STRING(contents, 1);
-			xmlFree(contents);
+			RETVAL_STRING(contents, 0);
 		}
 
 		return return_value;
 	}
-	
-	if (sxe->node == NULL) {
-		sxe->node = node = xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
-	} else {
-		node = sxe->node->xmlChildrenNode;
-	}
+
+	GET_NODE(sxe, node);
 
 	attr = sxe->node->properties;
 	while (attr) {
 		if (!xmlStrcmp(attr->name, name)) {
-			if (counter == 1) {
-				array_init(return_value);
-				add_next_index_zval(return_value, value);
-			}
-
+			APPEND_PREV_ELEMENT(counter, value);
+			
 			MAKE_STD_ZVAL(value);
 			contents = xmlNodeListGetString(sxe->document, attr->children, 1);
-			ZVAL_STRING(value, contents, 1);
-			xmlFree(contents);
+			ZVAL_STRING(value, contents, 0);
 
-			if (++counter > 1) {
-				add_next_index_zval(return_value, value);
-			}
+			APPEND_CUR_ELEMENT(counter, value);
 		}
 		attr = attr->next;
 	}
 
 	while (node) {
 		if (!xmlStrcmp(node->name, name)) {
-			if (counter == 1) {
-				array_init(return_value);
-				add_next_index_zval(return_value, value);
-			}
+			APPEND_PREV_ELEMENT(counter, value);
 
 			MAKE_STD_ZVAL(value);
 			_node_as_zval(sxe, node, value);
-			
-			if (++counter > 1) {
-				add_next_index_zval(return_value, value);
-			}
+
+			APPEND_CUR_ELEMENT(counter, value);
 		}
 
 		node = node->next;
 	}
 
+	/* Only one value found */
 	if (counter == 1) {
 		return_value = value;
 	}
@@ -155,6 +157,14 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 static void
 sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 {
+	php_sxe_object *sxe;
+	char           *name;
+	xmlNodePtr      node;
+	
+	name = Z_STRVAL_P(member);
+	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+
+	GET_NODE(sxe, node);
 }
 /* }}} */
 
