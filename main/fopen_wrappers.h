@@ -66,7 +66,7 @@
 #define IS_SOCKET		1
 #define BAD_URL			2
 
-extern PHPAPI FILE *php3_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd);
+extern PHPAPI FILE *php3_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd, char **opened_path);
 
 PHPAPI FILE *php3_fopen_for_parser(void);
 
