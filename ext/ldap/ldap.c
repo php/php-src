@@ -44,7 +44,7 @@
 #endif
 
 #include "ext/standard/php_string.h"
-
+#include "ext/standard/info.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(ldap)
 

@@ -50,6 +50,7 @@
 #include "cal.h"
 #include "php_icap.h"
 #include "modules.h"
+#include "ext/standard/info.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
 #endif
@@ -127,11 +128,10 @@ CALSTREAM *cal_close_it (pils *icap_le_struct)
 
 PHP_MINFO_FUNCTION(icap)
 {
-	php_printf("Icap Support enabled<br>");
-	php_printf("<table>");
-	php_printf("<tr><td>Icap Version:</td>");
-	php_printf("<td>%s</td>",CALVER);
-	php_printf("</tr></table>");
+	php_info_print_table_start();        
+	php_info_print_table_row(2, "ICAP Support", "enabled");        
+	php_info_print_table_row(2, "ICAP Version", CALVER);        
+	php_info_print_table_end();
 }
 
 PHP_MINIT_FUNCTION(icap)

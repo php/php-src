@@ -45,6 +45,7 @@ A lot... */
 #include <ibase.h>
 #include <time.h>
 #include "ext/standard/fsock.h"
+#include "ext/standard/info.h"
 /*
 #include "php_list.h"
 #include "php_string.h"
@@ -510,35 +511,41 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
  
 PHP_MINFO_FUNCTION(ibase)
 {
+
+	char tmp[128];
+	char tmp2[128];
+
 	IBLS_FETCH();
 
-    php_printf(
-                "<table>"
-                "<tr><td>Revision:</td><td>$Revision$</td></tr>\n"
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Interbase Support", "enabled");    
+	php_info_print_table_row(2, "Revision", "$Revision$");
 #ifdef COMPILE_DL
-                "<tr><td>Dynamic module:</td><td>Yes</td></tr>\n"
+	php_info_print_table_row(2, "Dynamic Module", "yes");
 #endif
-                "<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
-                "<tr><td>Persistent links:</td><td>%d/",
-                (IBG(allow_persistent)?"Yes":"No"),
-                IBG(num_persistent));
+	php_info_print_table_row(2, "Allow Persistent Links", (IBG(allow_persistent)?"Yes":"No") );
+
+	sprintf(tmp, "%d/", IBG(num_persistent) );
 	if (IBG(max_persistent) == -1) {
-        php_printf("Unlimited");
+	        strcat(tmp, "unlimited");
 	} else {
-        php_printf("%ld",IBG(max_persistent));
+        	sprintf(tmp2, "%ld", IBG(max_persistent));
+		strcat(tmp, tmp2);
 	}
-    php_printf("</td></tr>\n"
-                "<tr><td>Total links:</td><td>%d/",
-                IBG(num_links));
+	php_info_print_table_row(2, "Persistent Links", tmp );
+
+	sprintf(tmp, "%d/", IBG(num_links) );
 	if (IBG(max_links) == -1) {
-        php_printf("Unlimited");
+	        strcat(tmp, "unlimited");
 	} else {
-        php_printf("%ld",IBG(max_links));
+        	sprintf(tmp2, "%ld", IBG(max_links));
+		strcat(tmp, tmp2);
 	}
-    php_printf("</td></tr>\n"
-                "<tr><td>Time format:</td><td>\"%s\"</td></tr>\n"
-                "</table>\n",
-                IBG(timeformat));
+	php_info_print_table_row(2, "Total Links", tmp );
+
+	php_info_print_table_row(2, "Time Format", IBG(timeformat) );
+
+	php_info_print_table_end();
 }
 /* }}} */
 

@@ -50,6 +50,7 @@
 #include "mcal.h"
 #include "php_mcal.h"
 #include "modules.h"
+#include "ext/standard/info.h"
 #ifdef PHP_WIN32
 #include "winsock.h"
 #endif
@@ -149,14 +150,16 @@ CALSTREAM *cal_close_it (pils *mcal_le_struct)
 
 PHP_MINFO_FUNCTION(mcal)
 {
-	php_printf("Mcal Support enabled<br>");
-	php_printf("<table>");
-	php_printf("<tr><td>Mcal Version:</td>");
-	php_printf("<td>%s</td>", CALVER);
+	char tmp[128];
+
+        php_info_print_table_start();
+        php_info_print_table_row(2, "MCAL Support", "enabled" );
+        php_info_print_table_row(2, "MCAL Version", CALVER );
 #ifdef MCALVER
-	php_printf("<td>%d</td>", MCALVER);
+        sprintf(tmp, "%d", MCALVER );
+        php_info_print_table_row(2, "", tmp );
 #endif
-	php_printf("</tr></table>");
+        php_info_print_table_end();
 }
 
 PHP_MINIT_FUNCTION(mcal)
