@@ -30,7 +30,6 @@
  * Every user visible function must have an entry in ncurses_functions[].
  */
 function_entry ncurses_functions[] = {
-  PHP_FE(confirm_ncurses_compiled,  NULL)   /* For testing, remove later. */
   PHP_FE(ncurses_addch, NULL)
   PHP_FE(ncurses_color_set, NULL)
   PHP_FE(ncurses_delwin, NULL)
