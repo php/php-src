@@ -371,6 +371,12 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool 
 	if (duplicate) {
 		header_line = estrndup(header_line, header_line_len);
 	}
+
+	/* cut of trailing spaces, linefeeds and carriage-returns */
+	while(isspace(header_line[header_line_len-1])) 
+		  header_line[--header_line_len]='\0';
+	
+
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
 
