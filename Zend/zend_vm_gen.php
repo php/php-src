@@ -709,7 +709,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 						skip_blanks($f, $m[1], $m[3]."\n");
 					}
 					break;
-				case "INTERANL_LABELS":
+				case "INTERNAL_LABELS":
 					if ($kind == ZEND_VM_KIND_GOTO) {
 					  // Emit array of labels of opcode handlers and code for
 					  // zend_opcode_handlers initialization
