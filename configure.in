@@ -379,6 +379,7 @@ ieeefp.h \
 langinfo.h \
 limits.h \
 locale.h \
+mach-o/dyld.h \
 netinet/in.h \
 pwd.h \
 resolv.h \
