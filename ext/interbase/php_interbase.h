@@ -91,7 +91,7 @@ PHP_FUNCTION(ibase_errmsg);
 #define IBASE_BLOB_SEG 4096
 
 ZEND_BEGIN_MODULE_GLOBALS(ibase)
-	ISC_STATUS *status;
+	ISC_STATUS status[20];
 	long default_link;
 	long num_links, num_persistent;
 	long max_links, max_persistent;
