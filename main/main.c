@@ -776,7 +776,9 @@ void php_request_shutdown(void *dummy)
 		int i;
 
 		for (i=0; i<NUM_TRACK_VARS; i++) {
-			zval_ptr_dtor(&PG(http_globals)[i]);
+			if (PG(http_globals)[i]) {
+				zval_ptr_dtor(&PG(http_globals)[i]);
+			}
 		}
 	} zend_end_try();
 
