@@ -215,7 +215,7 @@ ZEND_API void zend_objects_proxy_clone(zend_proxy_object *object, zend_proxy_obj
 	zval_add_ref(&(*object_clone)->object);
 }
 
-ZEND_API zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
+ZEND_API zval *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 {
 	zend_proxy_object *pobj = emalloc(sizeof(zend_proxy_object));
 	zval *retval, **pretval;
@@ -229,10 +229,8 @@ ZEND_API zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 	retval->type = IS_OBJECT;
 	Z_OBJ_HANDLE_P(retval) = zend_objects_store_put(pobj, NULL, (zend_objects_free_object_storage_t) zend_objects_proxy_free_storage, (zend_objects_store_clone_t) zend_objects_proxy_clone TSRMLS_CC);
 	Z_OBJ_HT_P(retval) = &zend_object_proxy_handlers;
-	pretval = emalloc(sizeof(zval *));
-	*pretval = retval;
 	
-	return pretval;
+	return retval;
 }
 
 ZEND_API void zend_object_proxy_set(zval **property, zval *value TSRMLS_DC)

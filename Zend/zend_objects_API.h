@@ -71,7 +71,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 
 #define ZEND_OBJECTS_STORE_HANDLERS zend_objects_store_add_ref, zend_objects_store_del_ref, zend_objects_store_clone_obj
 
-ZEND_API zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC);
+ZEND_API zval *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC);
 
 ZEND_API zend_object_handlers *zend_get_std_object_handlers();
 END_EXTERN_C()
