@@ -1103,22 +1103,10 @@ INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
 all_targets='$(OVERALL_TARGET) $(PHP_MODULES) $(PHP_CLI_TARGET)'
-install_targets="install-modules $install_pear install-build install-headers install-programs"
-
-case $PHP_SAPI in
-  cgi)
-    dnl Install CGI only (CLI is not installed even if it's enabled)
-    install_targets="install-cgi $install_targets"
-    ;;
-  cli)
-    dnl Install CLI only (--disable-cgi used, no other SAPIs enabled)
-    install_targets="install-cli $install_targets"
-    ;;
-  *)
-    dnl Install CLI and another SAPI
-    install_targets="$PHP_INSTALL_CLI_TARGET install-sapi $install_targets"
-    ;;
-esac
+install_targets="install-sapi install-modules $install_pear install-build install-headers install-programs"
+if test "$PHP_SAPI" != "cgi"; then
+  install_targets="$PHP_INSTALL_CLI_TARGET $install_targets"
+fi
 
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
