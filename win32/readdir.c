@@ -113,29 +113,31 @@ int closedir(DIR *dp)
 	return 0;
 }
 
-void rewinddir(DIR *dir_Info)
+int rewinddir(DIR *dp)
 {
 	/* Re-set to the beginning */
 	char *filespec;
 	long handle;
 	int index;
 
-	dir_Info->handle = 0;
-	dir_Info->offset = 0;
-	dir_Info->finished = 0;
+	_findclose(dp->handle);
 
-	filespec = malloc(strlen(dir_Info->dir) + 2 + 1);
-	strcpy(filespec, dir_Info->dir);
+	dp->offset = 0;
+	dp->finished = 0;
+
+	filespec = malloc(strlen(dp->dir) + 2 + 1);
+	strcpy(filespec, dp->dir);
 	index = strlen(filespec) - 1;
 	if (index >= 0 && (filespec[index] == '/' || filespec[index] == '\\'))
 		filespec[index] = '\0';
 	strcat(filespec, "/*");
 
-	if ((handle = _findfirst(filespec, &(dir_Info->fileinfo))) < 0) {
-		if (errno == ENOENT) {
-			dir_Info->finished = 1;
+	if ((handle = _findfirst(filespec, &(dp->fileinfo))) < 0) {
+		if (errno == ENOENT)
+			dp->finished = 1;
 		}
-	}
-	dir_Info->handle = handle;
+	dp->handle = handle;
 	free(filespec);
+
+return 0;
 }
