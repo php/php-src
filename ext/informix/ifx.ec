@@ -694,8 +694,26 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                 RETURN_FALSE;
             }
             link = (int) index_ptr->ptr;
-            ptr = zend_list_find(link,&type);   /* check if the link is still there */
+            ptr = zend_list_find(link, &type);   /* check if the link is still there */
             if (ptr && (type==IFXL(le_link) || type==IFXL(le_plink))) {
+        	/* ensure that the link is not closed */
+        	ifx = ptr;
+        	EXEC SQL SET CONNECTION :ifx;
+        	if (ifx_check() == IFX_ERROR) {
+                    /* the link is closed */
+                    ifx = ptr;        /* reconnect silently */
+                    EXEC SQL CONNECT TO :host AS :ifx 
+                             USER :user USING :passwd 
+                             WITH CONCURRENT TRANSACTION;  
+
+                    if (ifx_check() == IFX_ERROR) {
+                	IFXG(sv_sqlcode) = SQLCODE;
+                	php_error(E_WARNING,"Informix:  unable to connect (%s)", ifx_error(ifx));
+                	zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length+1);
+                	efree(hashed_details);
+                	RETURN_FALSE;
+                    }
+        	}
             	zend_list_addref(link);
                 return_value->value.lval = link;
                 php3_ifx_set_default_link(link);
@@ -822,9 +840,9 @@ EXEC SQL END DECLARE SECTION;
 
     ZEND_FETCH_RESOURCE2(ifx, char *, ifx_link, id, "IFX link", IFXL(le_link), IFXL(le_plink));
     
-    /* EXEC SQL SET CONNECTION :ifx; */
-    /* EXEC SQL close database;      */
-    /* EXEC SQL DISCONNECT CURRENT;  */    
+    EXEC SQL SET CONNECTION :ifx;
+    EXEC SQL close database;    
+    EXEC SQL DISCONNECT CURRENT;    
 
     zend_list_delete(id);
     RETURN_TRUE;
