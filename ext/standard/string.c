@@ -862,7 +862,6 @@ PHP_FUNCTION(implode)
 {
 	zval **arg1 = NULL, **arg2 = NULL, *delim, *arr;
 	int argc = ZEND_NUM_ARGS();
-	int arg1_separated = 0, arg2_separated = 0, delim_needs_dtor = 0;
 
 	if (argc < 1 || argc > 2 ||
 		zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
@@ -880,19 +879,15 @@ PHP_FUNCTION(implode)
 		ZVAL_STRINGL(delim, _IMPL_EMPTY, sizeof(_IMPL_EMPTY) - 1, 0);
 
 		SEPARATE_ZVAL(arg1);
-		arg1_separated = 1;
-		delim_needs_dtor = 1;	
 		arr = *arg1;
 	} else {
 		if (Z_TYPE_PP(arg1) == IS_ARRAY) {
 			SEPARATE_ZVAL(arg1);
-			arg1_separated = 1;
 			arr = *arg1;
 			convert_to_string_ex(arg2);
 			delim = *arg2;
 		} else if (Z_TYPE_PP(arg2) == IS_ARRAY) {
 			SEPARATE_ZVAL(arg2);
-			arg2_separated = 1;
 			arr = *arg2;
 			convert_to_string_ex(arg1);
 			delim = *arg1;
@@ -904,13 +899,7 @@ PHP_FUNCTION(implode)
 
 	php_implode(delim, arr, return_value);
 
-	if (arg1 != NULL && arg1_separated) {
-		zval_ptr_dtor(arg1);
-	}
-	if (arg2 != NULL && arg2_separated) {
-		zval_ptr_dtor(arg2);
-	}
-	if (delim_needs_dtor) {
+	if (argc == 1) {
 		FREE_ZVAL(delim);
 	}
 }
