@@ -35,9 +35,6 @@ extern zend_module_entry fam_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(fam);
-PHP_MSHUTDOWN_FUNCTION(fam);
-PHP_RINIT_FUNCTION(fam);
-PHP_RSHUTDOWN_FUNCTION(fam);
 PHP_MINFO_FUNCTION(fam);
 
 PHP_FUNCTION(fam_open);

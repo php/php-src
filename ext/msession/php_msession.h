@@ -35,9 +35,6 @@ extern zend_module_entry msession_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(msession);
-PHP_MSHUTDOWN_FUNCTION(msession);
-PHP_RINIT_FUNCTION(msession);
-PHP_RSHUTDOWN_FUNCTION(msession);
 PHP_MINFO_FUNCTION(msession);
 
 PHP_FUNCTION(msession_connect);

@@ -47,8 +47,6 @@ extern function_entry ncurses_functions[];
 
 PHP_MINIT_FUNCTION(ncurses);
 PHP_MSHUTDOWN_FUNCTION(ncurses);
-PHP_RINIT_FUNCTION(ncurses);
-PHP_RSHUTDOWN_FUNCTION(ncurses);
 PHP_MINFO_FUNCTION(ncurses);
 
 ZEND_BEGIN_MODULE_GLOBALS(ncurses)

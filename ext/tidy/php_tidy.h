@@ -42,7 +42,6 @@ extern zend_module_entry tidy_module_entry;
 PHP_MINIT_FUNCTION(tidy);
 PHP_MSHUTDOWN_FUNCTION(tidy);
 PHP_RINIT_FUNCTION(tidy);
-PHP_RSHUTDOWN_FUNCTION(tidy);
 PHP_MINFO_FUNCTION(tidy);
 
 PHP_FUNCTION(tidy_getopt);
