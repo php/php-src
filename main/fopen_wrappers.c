@@ -397,27 +397,16 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		*opened_path = NULL;
 	}
 
-	/* Relative path open */
-	if (*filename == '.') {
+	filename_length = strlen(filename);
+
+	/* Absolute & relative path open */
+	if ((*filename == '.') || (IS_ABSOLUTE_PATH(filename, filename_length))) {
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, 0))) {
 			return NULL;
 		}
 		return php_fopen_and_set_opened_path(filename, mode, opened_path);
 	}
 
-	filename_length = strlen(filename);
-	/* Absolute path open - prepend document_root in safe mode */
-	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
-		if (PG(safe_mode) && PG(doc_root)) {
-			snprintf(trypath, MAXPATHLEN, "%s%s", PG(doc_root), filename);
-			if (!php_checkuid(trypath, mode, 0)) {
-				return NULL;
-			}
-			return php_fopen_and_set_opened_path(trypath, mode, opened_path);
-		} else {
-			return php_fopen_and_set_opened_path(filename, mode, opened_path);
-		}
-	}
 	if (!path || (path && !*path)) {
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, 0))) {
 			return NULL;
