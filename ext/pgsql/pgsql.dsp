@@ -100,7 +100,7 @@ SOURCE=.\pgsql.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\php3_pgsql.h
+SOURCE=.\php_pgsql.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
