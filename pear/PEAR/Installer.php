@@ -21,6 +21,7 @@
 // $Id$
 
 require_once 'PEAR/Common.php';
+require_once 'PEAR/Registry.php';
 
 /**
  * Administration class used to install PEAR packages and maintain the
@@ -90,6 +91,7 @@ class PEAR_Installer extends PEAR_Common
     {
         // XXX FIXME Add here code to manage packages database
         //$this->loadPackageList("$this->statedir/packages.lst");
+        $registry = new PEAR_Registry;
         $oldcwd = getcwd();
         $need_download = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
@@ -149,7 +151,7 @@ class PEAR_Installer extends PEAR_Common
         // Assume the decompressed dir name
         if (($pos = strrpos($file, '.')) === false) {
             chdir($oldcwd);
-            return $this->raiseError('package doesn\'t follow the package name convention');
+            return $this->raiseError("package doesn't follow the package name convention");
         }
         $pkgdir = substr($file, 0, $pos);
         $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
@@ -164,6 +166,10 @@ class PEAR_Installer extends PEAR_Common
         if (PEAR::isError($pkginfo)) {
             chdir($oldcwd);
             return $pkginfo;
+        }
+
+        if ($registry->packageExists($pkginfo['package'])) {
+            return $this->raiseError("package already installed");
         }
 
         // Copy files to dest dir ---------------------------------------
@@ -184,6 +190,7 @@ class PEAR_Installer extends PEAR_Common
             $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
             $this->_installFile($fname, $dest_dir, $atts);
         }
+        $registry->addPackage($pkginfo['package'], $pkginfo);
         chdir($oldcwd);
         return true;
     }
