@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=gd - Win32 Release_TS GD2 bundled
+CFG=gd_bundled - Win32 Release_TS GD2 bundled
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,12 +13,12 @@ CFG=gd - Win32 Release_TS GD2 bundled
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "gd_bundled.mak" CFG="gd - Win32 Release_TS GD2 bundled"
+!MESSAGE NMAKE /f "gd_bundled.mak" CFG="gd_bundled - Win32 Release_TS GD2"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "gd - Win32 Release_TS GD2 bundled" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "gd - Win32 Debug_TS GD2 bundled" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "gd_bundled - Win32 Release_TS GD2" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "gd_bundled - Win32 Debug_TS GD2" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -29,7 +29,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -58,7 +58,7 @@ LINK32=link.exe
 # ADD LINK32 php4ts.lib freetype2.lib libjpeg.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd2.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 # SUBTRACT LINK32 /pdb:none
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -91,8 +91,8 @@ LINK32=link.exe
 
 # Begin Target
 
-# Name "gd - Win32 Release_TS GD2 bundled"
-# Name "gd - Win32 Debug_TS GD2 bundled"
+# Name "gd_bundled - Win32 Release_TS GD2"
+# Name "gd_bundled - Win32 Debug_TS GD2"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -143,11 +143,11 @@ SOURCE=.\php_gd.h
 
 SOURCE=.\libgd\gd.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -158,11 +158,11 @@ SOURCE=.\libgd\gd.c
 
 SOURCE=.\libgd\gd2copypal.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -173,11 +173,11 @@ SOURCE=.\libgd\gd2copypal.c
 
 SOURCE=.\libgd\gd_arc_f_buggy.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -188,11 +188,11 @@ SOURCE=.\libgd\gd_arc_f_buggy.c
 
 SOURCE=.\libgd\gd_gd.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -203,11 +203,11 @@ SOURCE=.\libgd\gd_gd.c
 
 SOURCE=.\libgd\gd_gd2.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -218,11 +218,11 @@ SOURCE=.\libgd\gd_gd2.c
 
 SOURCE=.\libgd\gd_io.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -233,11 +233,11 @@ SOURCE=.\libgd\gd_io.c
 
 SOURCE=.\libgd\gd_io_dp.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -248,11 +248,11 @@ SOURCE=.\libgd\gd_io_dp.c
 
 SOURCE=.\libgd\gd_io_file.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -263,11 +263,11 @@ SOURCE=.\libgd\gd_io_file.c
 
 SOURCE=.\libgd\gd_io_ss.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -278,11 +278,11 @@ SOURCE=.\libgd\gd_io_ss.c
 
 SOURCE=.\libgd\gd_jpeg.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -293,11 +293,11 @@ SOURCE=.\libgd\gd_jpeg.c
 
 SOURCE=.\libgd\gd_png.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -308,11 +308,11 @@ SOURCE=.\libgd\gd_png.c
 
 SOURCE=.\libgd\gd_ss.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -323,11 +323,11 @@ SOURCE=.\libgd\gd_ss.c
 
 SOURCE=.\libgd\gd_topal.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -338,11 +338,11 @@ SOURCE=.\libgd\gd_topal.c
 
 SOURCE=.\libgd\gd_wbmp.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -353,11 +353,11 @@ SOURCE=.\libgd\gd_wbmp.c
 
 SOURCE=.\libgd\gdcache.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -368,11 +368,11 @@ SOURCE=.\libgd\gdcache.c
 
 SOURCE=.\libgd\gdfontg.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -383,11 +383,11 @@ SOURCE=.\libgd\gdfontg.c
 
 SOURCE=.\libgd\gdfontl.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -398,11 +398,11 @@ SOURCE=.\libgd\gdfontl.c
 
 SOURCE=.\libgd\gdfontmb.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -413,11 +413,11 @@ SOURCE=.\libgd\gdfontmb.c
 
 SOURCE=.\libgd\gdfonts.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -428,11 +428,11 @@ SOURCE=.\libgd\gdfonts.c
 
 SOURCE=.\libgd\gdfontt.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -443,11 +443,11 @@ SOURCE=.\libgd\gdfontt.c
 
 SOURCE=.\libgd\gdft.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -458,11 +458,11 @@ SOURCE=.\libgd\gdft.c
 
 SOURCE=.\libgd\gdhelpers.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -473,11 +473,11 @@ SOURCE=.\libgd\gdhelpers.c
 
 SOURCE=.\libgd\gdkanji.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -488,11 +488,11 @@ SOURCE=.\libgd\gdkanji.c
 
 SOURCE=.\libgd\gdtables.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -503,11 +503,11 @@ SOURCE=.\libgd\gdtables.c
 
 SOURCE=.\libgd\gdxpm.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
@@ -518,11 +518,11 @@ SOURCE=.\libgd\gdxpm.c
 
 SOURCE=.\libgd\wbmp.c
 
-!IF  "$(CFG)" == "gd - Win32 Release_TS GD2 bundled"
+!IF  "$(CFG)" == "gd_bundled - Win32 Release_TS GD2"
 
 # PROP Intermediate_Dir "Release_TS_bundled"
 
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2 bundled"
+!ELSEIF  "$(CFG)" == "gd_bundled - Win32 Debug_TS GD2"
 
 # PROP Intermediate_Dir "Debug_TS_bundled"
 
