@@ -559,7 +559,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	GetExitCodeProcess(child, &wstatus);
 	FG(pclose_ret) = wstatus;
 #else
-# if HAVE_SYS_WAIT
+# if HAVE_SYS_WAIT_H
 	int wstatus;
 	pid_t child, wait_pid;
 	
