@@ -51,6 +51,8 @@ static ZEND_FUNCTION(crash);
 static ZEND_FUNCTION(get_used_files);
 static ZEND_FUNCTION(get_imported_files);
 static ZEND_FUNCTION(is_subclass_of);
+static ZEND_FUNCTION(get_class_vars);
+static ZEND_FUNCTION(get_object_vars);
 
 extern unsigned char first_arg_force_ref[];
 
@@ -79,6 +81,8 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_used_files,		NULL)
 	ZEND_FE(get_imported_files,	NULL)
 	ZEND_FE(is_subclass_of,		NULL)
+	ZEND_FE(get_class_vars,		NULL)
+	ZEND_FE(get_object_vars,	NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -445,6 +449,55 @@ ZEND_FUNCTION(is_subclass_of)
 	}
 	efree(lcname);
 	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto array get_class_vars(string class_name)
+   Returns an array of default properties of the class */
+ZEND_FUNCTION(get_class_vars)
+{
+	zval **class_name;
+	char *lcname;
+	zend_class_entry *ce;
+	zval *tmp;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(class_name);
+	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
+	zend_str_tolower(lcname, (*class_name)->value.str.len);
+
+	if (zend_hash_find(CG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
+		efree(lcname);
+		RETURN_FALSE;
+	} else {
+		efree(lcname);
+		array_init(return_value);
+		zend_hash_copy(return_value->value.ht, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	}
+}
+/* }}} */
+
+/* {{{ proto array get_object_vars(object obj)
+   Returns an array of object properties */
+ZEND_FUNCTION(get_object_vars)
+{
+	zval **obj;
+	zval *tmp;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &obj) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if ((*obj)->type != IS_OBJECT) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	zend_hash_copy(return_value->value.ht, (*obj)->value.obj.properties,
+				   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 }
 /* }}} */
 
