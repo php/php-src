@@ -77,6 +77,11 @@ typedef unsigned char uchar;
 	#define FALSE 0
 #endif
 
+#ifndef MB_CUR_MAX
+	#define MB_CUR_MAX 8
+	/* Should be a library constant */
+#endif
+
 #define EXIT_FAILURE  1
 #define EXIT_SUCCESS  0
 
