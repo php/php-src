@@ -1488,7 +1488,7 @@ PHP_FUNCTION(xmlrpc_is_fault)
    }
 
 	if (Z_TYPE_P(arg) != IS_ARRAY) {
-		php_error(E_NOTICE, "%s() expects argument to be an array", get_active_function_name(TSRMLS_CC));
+		php_error(E_NOTICE, "%s() expects argument to be an array", get_active_function_name(TSRMLS_C));
 	}
    else {
       /* The "correct" way to do this would be to call the xmlrpc
