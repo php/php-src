@@ -97,8 +97,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
 
 		if (info) {
-			zval_dtor(info);
-			FREE_ZVAL(info);
+			zval_ptr_dtor(&info);
 		}
 	} else {
 		zval *ex;
@@ -572,15 +571,15 @@ static union _zend_function *dbh_method_get(zval *object, char *method_name, int
 	zend_function *fbc;
 	char *lc_method_name;
 
-	lc_method_name = do_alloca(method_len + 1);
+	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
 	if (zend_hash_find(&pdo_dbh_ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-		free_alloca(lc_method_name);
+		efree(lc_method_name);
 		return NULL;
 	}
 	
-	free_alloca(lc_method_name);
+	efree(lc_method_name);
 	return fbc;
 }
 
