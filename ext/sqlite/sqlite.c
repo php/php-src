@@ -44,6 +44,10 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
+#ifdef HAVE_SPL
+extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
+#endif
+
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
@@ -998,7 +1002,11 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_SQLITE_CLASS(Database,   db,        NULL);
 	REGISTER_SQLITE_CLASS(Result,     query,     NULL);
 	REGISTER_SQLITE_CLASS(Unbuffered, ub_query,  NULL);
+#ifdef HAVE_SPL
+	REGISTER_SQLITE_CLASS(Exception,  exception, spl_ce_RuntimeException);
+#else
 	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default());
+#endif 
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
 
