@@ -208,9 +208,9 @@ static mbfl_language mbfl_language_traditional_chinese = {
 	"Traditional Chinese",
 	"zh-tw",
 	NULL,
-	mbfl_no_encoding_hz,
+	mbfl_no_encoding_big5,
 	mbfl_no_encoding_base64,
-	mbfl_no_encoding_7bit
+	mbfl_no_encoding_8bit
 };
 
 static mbfl_language mbfl_language_russian = {
@@ -826,12 +826,12 @@ static mbfl_encoding mbfl_encoding_euc_tw = {
 	MBFL_ENCTYPE_MBCS
 };
 
-static const char *mbfl_encoding_big5_aliases[] = {"CN-BIG5", "BIG5", "BIG-FIVE", "BIGFIVE", "CP950", NULL};
+static const char *mbfl_encoding_big5_aliases[] = {"CN-BIG5", "BIG-FIVE", "BIGFIVE", "CP950", NULL};
 
 static mbfl_encoding mbfl_encoding_big5 = {
 	mbfl_no_encoding_big5,
 	"BIG-5",
-	"CN-BIG5",
+	"BIG5",
 	(const char *(*)[])&mbfl_encoding_big5_aliases,
 	mblen_table_big5,
 	MBFL_ENCTYPE_MBCS
