@@ -1337,6 +1337,7 @@ ZEND_FUNCTION(debug_backtrace)
 				call_type = "::";
 			} else {
 				class_name = NULL;
+				call_type = NULL;
 			}
 
 			if (class_name) {
