@@ -84,7 +84,7 @@ zend_module_entry sybase_module_entry = {
 };
 
 ZEND_DECLARE_MODULE_GLOBALS(sybase)
-static CS_CONTEXT *context;
+/* static CS_CONTEXT *context; */
 
 #ifdef COMPILE_DL_SYBASE_CT
 ZEND_GET_MODULE(sybase)
@@ -378,8 +378,10 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 }
 
 
-static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char *user, char *passwd)
+static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char *user, char *passwd, char *charset)
 {
+	CS_LOCALE *tmp_locale;
+
 	SybCtLS_FETCH();
 
 	/* set a CS_CONNECTION record */
@@ -407,6 +409,24 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 		ct_con_props(sybase->connection, CS_SET, CS_HOSTNAME, SybCtG(hostname), CS_NULLTERM, NULL);
 	}
 
+	if (charset) {
+		if (cs_loc_alloc(SybCtG(context), &tmp_locale)!=CS_SUCCEED) {
+			php_error(E_WARNING,"Sybase: Unable to allocate locale information.");
+		} else {
+			if (cs_locale(SybCtG(context), CS_SET, tmp_locale, CS_LC_ALL, NULL, CS_NULLTERM, NULL)!=CS_SUCCEED) {
+				php_error(E_WARNING,"Sybase: Unable to load default locale data.");
+			} else {
+				if (cs_locale(SybCtG(context), CS_SET, tmp_locale, CS_SYB_CHARSET, charset, CS_NULLTERM, NULL)!=CS_SUCCEED) {
+					php_error(E_WARNING,"Sybase: Unable to update character set.");
+				} else {
+					if (ct_con_props(sybase->connection, CS_SET, CS_LOC_PROP, tmp_locale, CS_UNUSED, NULL)!=CS_SUCCEED) {
+						php_error(E_WARNING,"Sybase: Unable to update connection properties.");
+					}
+				}
+			}
+		}
+	}
+
 	sybase->valid = 1;
 	sybase->dead = 0;
 
@@ -430,7 +450,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 
 static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *user,*passwd,*host;
+	char *user,*passwd,*host,*charset;
 	char *hashed_details;
 	int hashed_details_length;
 	sybase_link *sybase_ptr;
@@ -438,7 +458,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0: /* defaults */
-			host=user=passwd=NULL;
+			host=user=passwd=charset=NULL;
 			hashed_details_length=6+3;
 			hashed_details = (char *) emalloc(hashed_details_length+1);
 			strcpy(hashed_details, "sybase___");
@@ -451,10 +471,10 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 				convert_to_string(yyhost);
 				host = yyhost->value.str.val;
-				user=passwd=NULL;
-				hashed_details_length = yyhost->value.str.len+6+3;
+				user=passwd=charset=NULL;
+				hashed_details_length = yyhost->value.str.len+6+4;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "sybase_%s__", yyhost->value.str.val);
+				sprintf(hashed_details, "sybase_%s___", yyhost->value.str.val);
 			}
 			break;
 		case 2: {
@@ -467,10 +487,10 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				convert_to_string(yyuser);
 				host = yyhost->value.str.val;
 				user = yyuser->value.str.val;
-				passwd=NULL;
-				hashed_details_length = yyhost->value.str.len+yyuser->value.str.len+6+3;
+				passwd=charset=NULL;
+				hashed_details_length = yyhost->value.str.len+yyuser->value.str.len+6+4;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "sybase_%s_%s_", yyhost->value.str.val, yyuser->value.str.val);
+				sprintf(hashed_details, "sybase_%s_%s__", yyhost->value.str.val, yyuser->value.str.val);
 			}
 			break;
 		case 3: {
@@ -485,9 +505,29 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				host = yyhost->value.str.val;
 				user = yyuser->value.str.val;
 				passwd = yypasswd->value.str.val;
-				hashed_details_length = yyhost->value.str.len+yyuser->value.str.len+yypasswd->value.str.len+6+3;
+				charset=NULL;
+				hashed_details_length = yyhost->value.str.len+yyuser->value.str.len+yypasswd->value.str.len+6+4;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "sybase_%s_%s_%s", yyhost->value.str.val, yyuser->value.str.val, yypasswd->value.str.val); /* SAFE */
+				sprintf(hashed_details, "sybase_%s_%s_%s_", yyhost->value.str.val, yyuser->value.str.val, yypasswd->value.str.val);
+			}
+			break;
+		case 4: {
+				pval *yyhost,*yyuser,*yypasswd,*yycharset;
+
+				if (getParameters(ht, 4, &yyhost, &yyuser, &yypasswd, &yycharset) == FAILURE) {
+					RETURN_FALSE;
+				}
+				convert_to_string(yyhost);
+				convert_to_string(yyuser);
+				convert_to_string(yypasswd);
+				convert_to_string(yycharset);
+				host = Z_STRVAL_P(yyhost);
+				user = Z_STRVAL_P(yyuser);
+				passwd = Z_STRVAL_P(yypasswd);
+				charset = Z_STRVAL_P(yycharset);
+				hashed_details_length = Z_STRLEN_P(yyhost)+Z_STRLEN_P(yyuser)+Z_STRLEN_P(yypasswd)+Z_STRLEN_P(yycharset)+6+4;
+				hashed_details = (char *) emalloc(hashed_details_length+1);
+				sprintf(hashed_details, "sybase_%s_%s_%s_%s", Z_STRVAL_P(yyhost), Z_STRVAL_P(yyuser), Z_STRVAL_P(yypasswd), Z_STRVAL_P(yycharset));
 			}
 			break;
 		default:
@@ -518,7 +558,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			sybase_ptr = (sybase_link *) malloc(sizeof(sybase_link));
-			if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd)) {
+			if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset)) {
 				free(sybase_ptr);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -572,7 +612,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				 * NULL before trying to use it elsewhere . . .)
 				 */
 				memcpy(&sybase, sybase_ptr, sizeof(sybase_link));
-				if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd)) {
+				if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset)) {
 					memcpy(sybase_ptr, &sybase, sizeof(sybase_link));
 					efree(hashed_details);
 					RETURN_FALSE;
@@ -615,7 +655,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		sybase_ptr = (sybase_link *) emalloc(sizeof(sybase_link));
-		if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd)) {
+		if (!php_sybase_do_connect_internal(sybase_ptr, host, user, passwd, charset)) {
 			efree(sybase_ptr);
 			efree(hashed_details);
 			RETURN_FALSE;
