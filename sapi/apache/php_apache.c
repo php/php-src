@@ -89,10 +89,19 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
+
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
+{
+	apache_globals->in_request = 0;
+}
+
+
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	php_apache_info_id = ts_allocate_id(sizeof(php_apache_info_struct), NULL, NULL);
+	php_apache_info_id = ts_allocate_id(sizeof(php_apache_info_struct), ts_allocate_ctor, NULL);
+#else
+	php_apache_globals_ctor(&php_apache_info);
 #endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
