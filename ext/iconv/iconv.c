@@ -128,7 +128,7 @@ static void php_iconv_init_globals(zend_iconv_globals *iconv_globals)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(miconv)
 {
-	char *version = "";
+	char *version = "unknown";
 
 	ZEND_INIT_MODULE_GLOBALS(iconv, php_iconv_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
