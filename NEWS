@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added DBMaker support (patch by Pax Tsai <paxtsai@lion.syscom.com.tw>)
 - Renamed "PECL" to "PEAR" (PHP Extension and Add-on Repository) (Stig)
 - buildconf now uses build.mk (Stig)
 - Disable symlinks to urls (Rasmus)
