@@ -820,13 +820,11 @@ PHP_RINIT_FUNCTION(mbstring)
 		n = php_mb_default_identify_list_size;
 	}
 	entry = (int *)emalloc(n*sizeof(int));
-	if (entry != NULL) {
-		MBSTRG(current_detect_order_list) = entry;
-		MBSTRG(current_detect_order_list_size) = n;
-		while (n > 0) {
-			*entry++ = *list++;
-			n--;
-		}
+	MBSTRG(current_detect_order_list) = entry;
+	MBSTRG(current_detect_order_list_size) = n;
+	while (n > 0) {
+		*entry++ = *list++;
+		n--;
 	}
 
  	/* override original function. */
@@ -1031,9 +1029,7 @@ PHP_FUNCTION(mb_http_input)
 			break;
 		case 'I':
 		case 'i':
-			if (array_init(return_value) == FAILURE) {
-				RETURN_FALSE;
-			}
+			array_init(return_value);
 			entry = MBSTRG(http_input_list);
 			n = MBSTRG(http_input_list_size);
 			while (n > 0) {
@@ -1133,9 +1129,7 @@ PHP_FUNCTION(mb_detect_order)
 	char *name;
 
 	if (ZEND_NUM_ARGS() == 0) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		entry = MBSTRG(current_detect_order_list);
 		n = MBSTRG(current_detect_order_list_size);
 		while (n > 0) {
@@ -2463,9 +2457,6 @@ PHP_FUNCTION(mb_convert_variables)
 		WRONG_PARAM_COUNT;
 	}
 	args = (pval ***)ecalloc(argc, sizeof(pval **));
-	if (args == NULL) {
-		RETURN_FALSE;
-	}
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree((void *)args);
 		WRONG_PARAM_COUNT;
@@ -2508,70 +2499,65 @@ PHP_FUNCTION(mb_convert_variables)
 		from_encoding = mbfl_no_encoding_invalid;
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
 		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
-		if (stack != NULL) {
-			stack_level = 0;
-			identd = mbfl_encoding_detector_new(elist, elistsz TSRMLS_CC);
-			if (identd != NULL) {
-				n = 2;
-				while (n < argc || stack_level > 0) {
-					if (stack_level <= 0) {
-						var = args[n++];
-						if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
-							target_hash = HASH_OF(*var);
-							if (target_hash != NULL) {
-								zend_hash_internal_pointer_reset(target_hash);
-							}
-						}
-					} else {
-						stack_level--;
-						var = stack[stack_level];
-					}
+		stack_level = 0;
+		identd = mbfl_encoding_detector_new(elist, elistsz TSRMLS_CC);
+		if (identd != NULL) {
+			n = 2;
+			while (n < argc || stack_level > 0) {
+				if (stack_level <= 0) {
+					var = args[n++];
 					if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
 						target_hash = HASH_OF(*var);
 						if (target_hash != NULL) {
-							while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
-								zend_hash_move_forward(target_hash);
-								if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
-									if (stack_level >= stack_max) {
-										stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-										ptmp = erealloc(stack, sizeof(pval **)*stack_max);
-										if (ptmp == NULL) {
-											php_error_docref(NULL TSRMLS_CC, E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
-											continue;
-										}
-										stack = (pval ***)ptmp;
-									}
-									stack[stack_level] = var;
-									stack_level++;
-									var = hash_entry;
-									target_hash = HASH_OF(*var);
-									if (target_hash != NULL) {
-										zend_hash_internal_pointer_reset(target_hash);
-										continue;
-									}
-								} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
-									string.val = (unsigned char *)Z_STRVAL_PP(hash_entry);
-									string.len = Z_STRLEN_PP(hash_entry);
-									if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
-										goto detect_end;		/* complete detecting */
-									}
+							zend_hash_internal_pointer_reset(target_hash);
+						}
+					}
+				} else {
+					stack_level--;
+					var = stack[stack_level];
+				}
+				if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
+					target_hash = HASH_OF(*var);
+					if (target_hash != NULL) {
+						while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
+							zend_hash_move_forward(target_hash);
+							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
+								if (stack_level >= stack_max) {
+									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
+									ptmp = erealloc(stack, sizeof(pval **)*stack_max);
+									stack = (pval ***)ptmp;
+								}
+								stack[stack_level] = var;
+								stack_level++;
+								var = hash_entry;
+								target_hash = HASH_OF(*var);
+								if (target_hash != NULL) {
+									zend_hash_internal_pointer_reset(target_hash);
+									continue;
+								}
+							} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
+								string.val = (unsigned char *)Z_STRVAL_PP(hash_entry);
+								string.len = Z_STRLEN_PP(hash_entry);
+								if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
+									goto detect_end;		/* complete detecting */
 								}
 							}
 						}
-					} else if (Z_TYPE_PP(var) == IS_STRING) {
-						string.val = (unsigned char *)Z_STRVAL_PP(var);
-						string.len = Z_STRLEN_PP(var);
-						if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
-							goto detect_end;		/* complete detecting */
-						}
+					}
+				} else if (Z_TYPE_PP(var) == IS_STRING) {
+					string.val = (unsigned char *)Z_STRVAL_PP(var);
+					string.len = Z_STRLEN_PP(var);
+					if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
+						goto detect_end;		/* complete detecting */
 					}
 				}
-detect_end:
-				from_encoding = mbfl_encoding_detector_judge(identd TSRMLS_CC);
-				mbfl_encoding_detector_delete(identd TSRMLS_CC);
 			}
-			efree(stack);
+detect_end:
+			from_encoding = mbfl_encoding_detector_judge(identd TSRMLS_CC);
+			mbfl_encoding_detector_delete(identd TSRMLS_CC);
 		}
+		efree(stack);
+
 		if (from_encoding == mbfl_no_encoding_invalid) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
 			from_encoding = mbfl_no_encoding_pass;
@@ -2596,70 +2582,65 @@ detect_end:
 	if (convd != NULL) {
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
 		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
-		if (stack != NULL) {
-			stack_level = 0;
-			n = 2;
-			while (n < argc || stack_level > 0) {
-				if (stack_level <= 0) {
-					var = args[n++];
-					if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
-						target_hash = HASH_OF(*var);
-						if (target_hash != NULL) {
-							zend_hash_internal_pointer_reset(target_hash);
-						}
-					}
-				} else {
-					stack_level--;
-					var = stack[stack_level];
-				}
+		stack_level = 0;
+		n = 2;
+		while (n < argc || stack_level > 0) {
+			if (stack_level <= 0) {
+				var = args[n++];
 				if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
 					target_hash = HASH_OF(*var);
 					if (target_hash != NULL) {
-						while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
-							zend_hash_move_forward(target_hash);
-							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
-								if (stack_level >= stack_max) {
-									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-									ptmp = erealloc(stack, sizeof(pval **)*stack_max);
-									if (ptmp == NULL) {
-										php_error_docref(NULL TSRMLS_CC, E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
-										continue;
-									}
-									stack = (pval ***)ptmp;
-								}
-								stack[stack_level] = var;
-								stack_level++;
-								var = hash_entry;
-								target_hash = HASH_OF(*var);
-								if (target_hash != NULL) {
-									zend_hash_internal_pointer_reset(target_hash);
-									continue;
-								}
-							} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
-								string.val = (unsigned char *)Z_STRVAL_PP(hash_entry);
-								string.len = Z_STRLEN_PP(hash_entry);
-								ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
-								if (ret != NULL) {
-									STR_FREE(Z_STRVAL_PP(hash_entry));
-									Z_STRVAL_PP(hash_entry) = (char *)ret->val;
-									Z_STRLEN_PP(hash_entry) = ret->len;
-								}
+						zend_hash_internal_pointer_reset(target_hash);
+					}
+				}
+			} else {
+				stack_level--;
+				var = stack[stack_level];
+			}
+			if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
+				target_hash = HASH_OF(*var);
+				if (target_hash != NULL) {
+					while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
+						zend_hash_move_forward(target_hash);
+						if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
+							if (stack_level >= stack_max) {
+								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
+								ptmp = erealloc(stack, sizeof(pval **)*stack_max);
+								stack = (pval ***)ptmp;
+							}
+							stack[stack_level] = var;
+							stack_level++;
+							var = hash_entry;
+							target_hash = HASH_OF(*var);
+							if (target_hash != NULL) {
+								zend_hash_internal_pointer_reset(target_hash);
+								continue;
+							}
+						} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
+							string.val = (unsigned char *)Z_STRVAL_PP(hash_entry);
+							string.len = Z_STRLEN_PP(hash_entry);
+							ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
+							if (ret != NULL) {
+								STR_FREE(Z_STRVAL_PP(hash_entry));
+								Z_STRVAL_PP(hash_entry) = (char *)ret->val;
+								Z_STRLEN_PP(hash_entry) = ret->len;
 							}
 						}
 					}
-				} else if (Z_TYPE_PP(var) == IS_STRING) {
-					string.val = (unsigned char *)Z_STRVAL_PP(var);
-					string.len = Z_STRLEN_PP(var);
-					ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
-					if (ret != NULL) {
-						STR_FREE(Z_STRVAL_PP(var));
-						Z_STRVAL_PP(var) = (char *)ret->val;
-						Z_STRLEN_PP(var) = ret->len;
-					}
+				}
+			} else if (Z_TYPE_PP(var) == IS_STRING) {
+				string.val = (unsigned char *)Z_STRVAL_PP(var);
+				string.len = Z_STRLEN_PP(var);
+				ret = mbfl_buffer_converter_feed_result(convd, &string, &result TSRMLS_CC);
+				if (ret != NULL) {
+					STR_FREE(Z_STRVAL_PP(var));
+					Z_STRVAL_PP(var) = (char *)ret->val;
+					Z_STRLEN_PP(var) = ret->len;
 				}
 			}
-			efree(stack);
 		}
+		efree(stack);
+
 		mbfl_buffer_converter_delete(convd TSRMLS_CC);
 	}
 
@@ -2719,19 +2700,17 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 		i = zend_hash_num_elements(target_hash);
 		if (i > 0) {
 			convmap = (int *)emalloc(i*sizeof(int));
-			if (convmap != NULL) {
-				mapelm = convmap;
-				mapsize = 0;
-				while (i > 0) {
-					if (zend_hash_get_current_data(target_hash, (void **) &hash_entry) == FAILURE) {
-						break;
-					}
-					convert_to_long_ex(hash_entry);
-					*mapelm++ = Z_LVAL_PP(hash_entry);
-					mapsize++;
-					i--;
-					zend_hash_move_forward(target_hash);
+			mapelm = convmap;
+			mapsize = 0;
+			while (i > 0) {
+				if (zend_hash_get_current_data(target_hash, (void **) &hash_entry) == FAILURE) {
+					break;
 				}
+				convert_to_long_ex(hash_entry);
+				*mapelm++ = Z_LVAL_PP(hash_entry);
+				mapsize++;
+				i--;
+				zend_hash_move_forward(target_hash);
 			}
 		}
 	}
@@ -2937,9 +2916,7 @@ PHP_FUNCTION(mb_get_info)
 	convert_to_string_ex(type);
 
 	if (argc == 0 || !strcasecmp("all", Z_STRVAL_PP(type))) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			add_assoc_string(return_value, "internal_encoding", name, 1);
 		}
@@ -3083,15 +3060,9 @@ MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 			list_size += strlen(name) + 1;
 			if (!list) {
 				list = (char*)emalloc(list_size);
-				if (!list) {
-					return -1;
-				}
 				*list = (char)NULL;
 			} else {
 				list = (char*)erealloc(list, list_size);
-				if (!list) {
-					return -1;
-				}
 				strcat(list, ",");
 			}
 			strcat(list, name);
