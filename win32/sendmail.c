@@ -154,7 +154,7 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (strstr(headers_lc, "\r\nfrom:")) {
 			pos = strstr(headers_lc, "\r\nfrom:") + 7; /* Jump over the string "\r\nfrom:", hence the 7 */
 		} else if (!strncmp(headers_lc, "from:", 5)) {
-			pos = headers + 5; /* Jump over the string "from:", hence the 5 */
+			pos = headers_lc + 5; /* Jump over the string "from:", hence the 5 */
 		}
 		if (pos) {
 			char *pos_end;
