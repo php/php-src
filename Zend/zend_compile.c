@@ -856,7 +856,9 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 	} else {
 		zend_op *opline;
 
-		do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
+		if (function_name->op_type != IS_CONST) {
+			do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
+		}
 
 		opline = get_next_op(CG(active_op_array) CLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
