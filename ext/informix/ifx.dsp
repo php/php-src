@@ -89,6 +89,15 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=.\ifx.c
+
+!IF  "$(CFG)" == "ifx - Win32 Release"
+
+# ADD CPP /D ZEND_DEBUG=0
+
+!ELSEIF  "$(CFG)" == "ifx - Win32 Debug"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
