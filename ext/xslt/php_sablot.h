@@ -50,6 +50,7 @@ extern zend_module_entry xslt_module_entry;
 #define XSLT_FUNCH_FREE(__var) if (__var) zval_ptr_dtor(&(__var)); 
 #define XSLT_REG_ERRMSG(msg, handle)	if (XSLT_ERRSTR(handle)) efree(XSLT_ERRSTR(handle)); \
 					XSLT_ERRSTR(handle) = estrdup(msg);
+#define XSLT_NO_INFO   "No information available."
 
 PHP_MINIT_FUNCTION(xslt);
 PHP_MINFO_FUNCTION(xslt);
@@ -72,7 +73,7 @@ PHP_FUNCTION(xslt_getopt);
 #endif
 PHP_FUNCTION(xslt_backend_version);
 PHP_FUNCTION(xslt_backend_name);
-
+PHP_FUNCTION(xslt_backend_info);
 
 struct scheme_handlers {
 	zval *sh_get_all;

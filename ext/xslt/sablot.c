@@ -32,6 +32,9 @@
 
 #if HAVE_SABLOT_BACKEND
 
+#ifdef HAVE_SABLOT_CONFIG
+#include "php_sab_info.h"
+#endif
 #include <sablot.h>
 
 #include <string.h>
@@ -99,6 +102,7 @@ function_entry xslt_functions[] = {
 #endif
 	PHP_FE(xslt_backend_version,     NULL)
 	PHP_FE(xslt_backend_name,     	 NULL)
+    PHP_FE(xslt_backend_info,        NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -192,6 +196,9 @@ PHP_MINFO_FUNCTION(xslt)
 	php_info_print_table_row(2, "Backend", "Sablotron");
 #ifdef SAB_VERSION
 	php_info_print_table_row(2, "Sablotron Version", SAB_VERSION);
+#endif
+#ifdef HAVE_SABLOT_CONFIG
+	php_info_print_table_row(2, "Sablotron Information", SAB_INFO);
 #endif
 	php_info_print_table_end();
 }
@@ -758,7 +765,7 @@ PHP_FUNCTION(xslt_getopt)
 /* }}} */
 #endif
 
-/* {{{ proto void xslt_backend_version()
+/* {{{ proto string xslt_backend_version()
    Returns the version number of Sablotron (if available) */
 PHP_FUNCTION(xslt_backend_version)
 {
@@ -770,7 +777,7 @@ PHP_FUNCTION(xslt_backend_version)
 }
 /* }}} */
 
-/* {{{ proto void xslt_backend_name()
+/* {{{ proto string xslt_backend_name()
    Returns the name of the Backend (here "Sablotron")*/
 PHP_FUNCTION(xslt_backend_name)
 {
@@ -778,6 +785,17 @@ PHP_FUNCTION(xslt_backend_name)
 }
 /* }}} */
 
+/* {{{ proto string xslt_backend_info()
+   Returns the information on the compilation settings of the backend */
+PHP_FUNCTION(xslt_backend_info)
+{
+#ifdef HAVE_SABLOT_CONFIG
+	RETURN_STRING(SAB_INFO, strlen(SAB_INFO));
+#else
+	RETURN_STRING(XSLT_NO_INFO, strlen(XSLT_NO_INFO));
+#endif
+}
+/* }}} */
 /* {{{ free_processor()
    Free an XSLT processor */
 static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
