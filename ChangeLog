@@ -1,3 +1,42 @@
+2001-04-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Let people know what the heck I was up to.
+
+    * ext/wddx/config.m4
+      ext/wddx/setup.stub: Enabling WDDX by default.
+
+    * NEWS: That made it into 4.0.5.
+
+    * NEWS: This actually made it in.
+
+2001-04-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/image.c: ws pollution removed.
+
+2001-04-20  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php:
+    fix getRow free result
+
+2001-04-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Packager.php: * update class doc-comment
+
+    * pear/XML/RPC.php
+      pear/XML/RPC/Server.php:
+    * made XML_RPC "include-from-within-a-function" safe
+
+    * pear/Makefile.in
+      pear/XML/RPC.php
+      pear/XML/RPC/Server.php:
+    * fixed up the XML-RPC class so it's useful at least (based on usefulinc 1b8)
+
+    * pear/DB/STATUS: * added Frank's fbsql backend to status list
+
+2001-04-20  Frank M. Kromann  <frank@frontbase.com>
+
+    * pear/DB/fbsql.php: Apply coding standard. Replace tab's with 4 spaces.
+
 2001-04-19  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB.php:
