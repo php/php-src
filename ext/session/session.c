@@ -238,6 +238,43 @@ typedef struct {
 
 #define MAX_STR 512
 
+void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
+{
+	zval **sym_track = NULL;
+	
+	zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, 
+			(void *) &sym_track);
+
+	/*
+	 * Set up a proper reference between $_SESSION["x"] and $x.
+	 */
+
+	if (PG(register_globals)) {
+		zval **sym_global = NULL;
+		
+		zend_hash_find(&EG(symbol_table), name, namelen + 1, 
+				(void *) &sym_global);
+				
+		if (sym_global == NULL && sym_track == NULL) {
+			zval *empty_var;
+
+			ALLOC_INIT_ZVAL(empty_var);
+			zend_set_hash_symbol(empty_var, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
+		} else if (sym_global == NULL) {
+			zend_set_hash_symbol(*sym_track, name, namelen, 1, 1, &EG(symbol_table));
+		} else if (sym_track == NULL) {
+			zend_set_hash_symbol(*sym_global, name, namelen, 1, 1, Z_ARRVAL_P(PS(http_session_vars)));
+		}
+	} else {
+		if (sym_track == NULL) {
+			zval *empty_var;
+	
+			ALLOC_INIT_ZVAL(empty_var);
+			zend_set_hash_symbol(empty_var, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
+		}
+	}
+}
+
 void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC)
 {
 	if (PG(register_globals)) {
@@ -273,23 +310,11 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 {
-	/*
-	 * If register_globals is set, the global variable is preferred.
-	 *
-	 * If it is not set and track vars are available, track vars are used.
-	 */
-	
-	if (PG(register_globals)) {
-		return zend_hash_find(&EG(symbol_table), name, namelen+1, (void **) state_var);
+	if (PS(http_session_vars) && PS(http_session_vars)->type == IS_ARRAY) {
+		return zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
+				namelen+1, (void **) state_var);
 	}
 	
-	if (PS(http_session_vars)) {
-		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, (void **) state_var)==SUCCESS) {
-			return SUCCESS;
-		}
-	}
-	
-	/* register_globals is disabled, but we don't have http_session_vars */
 	return FAILURE;
 }
 
@@ -588,7 +613,7 @@ static void php_session_save_current_state(TSRMLS_D)
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(PS(http_session_vars)), &pos);
 				zend_hash_get_current_key_ex(Z_ARRVAL_P(PS(http_session_vars)), &variable, &variable_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
 				zend_hash_move_forward_ex(Z_ARRVAL_P(PS(http_session_vars)),&pos)) {
-			PS_ADD_VARL(variable,variable_len-1);
+			PS_ADD_VARL(variable, variable_len-1);
 		}
 	}
 

@@ -174,6 +174,7 @@ typedef struct ps_serializer_struct {
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
+void php_add_session_var(char *name, size_t namelen TSRMLS_DC);
 void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC);
 
@@ -186,22 +187,19 @@ PHPAPI int php_session_register_serializer(const char *name,
 PHPAPI void php_session_set_id(char *id TSRMLS_DC);
 PHPAPI void php_session_start(TSRMLS_D);
 
-#define PS_ADD_VARL(name,namelen)											\
+#define PS_ADD_VARL(name,namelen) do {										\
 	zend_hash_add_empty_element(&PS(vars), name, namelen + 1);				\
-	if (PS(http_session_vars)) {											\
-		zval *empty_var;													\
-																			\
-		ALLOC_INIT_ZVAL(empty_var);											\
-		zend_hash_add(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, &empty_var, sizeof(zval *), NULL);	\
-	}
+	php_add_session_var(name, namelen TSRMLS_CC);							\
+} while (0)
 
 #define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
 
-#define PS_DEL_VARL(name,namelen)											\
+#define PS_DEL_VARL(name,namelen) do {										\
 	zend_hash_del(&PS(vars), name, namelen+1);								\
 	if (PS(http_session_vars)) {											\
 		zend_hash_del(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1);	\
-	}
+	}																		\
+} while (0)
 
 
 #define PS_ENCODE_VARS 											\
