@@ -385,7 +385,7 @@ PHP_FUNCTION(gzclose) {
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 	zend_list_delete(arg1->value.lval);
 	RETURN_TRUE;
 }
@@ -400,7 +400,7 @@ PHP_FUNCTION(gzeof) {
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	if ((gzeof(zp))) {
 		RETURN_TRUE;
@@ -425,7 +425,7 @@ PHP_FUNCTION(gzgets) {
 	convert_to_long(arg2);
 	len = arg2->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
@@ -458,7 +458,7 @@ PHP_FUNCTION(gzgetc) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * 2);
 	if ((c=gzgetc(zp)) == (-1)) {
@@ -508,7 +508,7 @@ PHP_FUNCTION(gzgetss)
 
 	len = bytes->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, fd, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &fd, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
@@ -555,7 +555,7 @@ PHP_FUNCTION(gzwrite) {
 			/* NOTREACHED */
 			break;
 	}				
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	/* strip slashes only if the length wasn't specified explicitly */
 	if (!arg3 && PG(magic_quotes_runtime)) {
@@ -581,7 +581,7 @@ PHP_FUNCTION(gzrewind) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	gzrewind(zp);
 	RETURN_TRUE;
@@ -599,7 +599,7 @@ PHP_FUNCTION(gztell) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	pos = gztell(zp);
 	RETURN_LONG(pos);
@@ -620,7 +620,7 @@ PHP_FUNCTION(gzseek) {
 	convert_to_long(arg2);
 	pos = arg2->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
  	ret = gzseek(zp,pos,SEEK_SET);
 	RETURN_LONG(ret);
@@ -693,7 +693,7 @@ PHP_FUNCTION(gzpassthru) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	size = 0;
 	while((b = gzread(zp, buf, sizeof(buf))) > 0) {
@@ -721,7 +721,7 @@ PHP_FUNCTION(gzread)
 	convert_to_long(arg2);
 	len = arg2->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
 
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/

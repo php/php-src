@@ -1045,7 +1045,7 @@ PHP_FUNCTION(xml_set_element_handler)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(shdl);
 	convert_to_string(ehdl);
@@ -1068,7 +1068,7 @@ PHP_FUNCTION(xml_set_character_data_handler)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(hdl);
 
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(hdl);
 
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(xml_set_default_handler)
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(hdl);
 
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(hdl);
 
@@ -1150,7 +1150,7 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(hdl);
 
@@ -1170,7 +1170,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &hdl) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(hdl);
 
@@ -1192,7 +1192,7 @@ PHP_FUNCTION(xml_parse)
 	if (argc < 2 || argc > 3 || getParameters(ht, argc, &pind, &data, &final) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(data);
 
@@ -1233,7 +1233,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_string(data);
 	array_init(xdata);
@@ -1263,7 +1263,7 @@ PHP_FUNCTION(xml_get_error_code)
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	RETVAL_LONG((long)XML_GetErrorCode(parser->parser));
 }
@@ -1297,7 +1297,7 @@ PHP_FUNCTION(xml_get_current_line_number)
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	RETVAL_LONG(XML_GetCurrentLineNumber(parser->parser));
 }
@@ -1314,7 +1314,7 @@ PHP_FUNCTION(xml_get_current_column_number)
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	RETVAL_LONG(XML_GetCurrentColumnNumber(parser->parser));
 }
@@ -1330,7 +1330,7 @@ PHP_FUNCTION(xml_get_current_byte_index)
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &pind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	RETVAL_LONG(XML_GetCurrentByteIndex(parser->parser));
 }
@@ -1347,7 +1347,7 @@ PHP_FUNCTION(xml_parser_free)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	if (php3_list_delete(parser->index) == FAILURE) {
 		RETURN_FALSE;
@@ -1368,7 +1368,7 @@ PHP_FUNCTION(xml_parser_set_option)
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &pind, &opt, &val) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_long(opt);
 
@@ -1415,7 +1415,7 @@ PHP_FUNCTION(xml_parser_get_option)
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &pind, &opt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	convert_to_long(opt);
 
