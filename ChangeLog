@@ -1,3 +1,101 @@
+2005-02-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/image.c:
+      Additional safety checks.
+
+2005-02-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      - Slightly redesign
+
+2005-02-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      main/streams/mmap.c:
+      MFH: Increase maximum mmapable file size to 2mb from 1mb.
+
+    * main/streams/mmap.c:
+      Increase maximum mmapable file size to 2mb from 1mb.
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      pack() issues were resolved.
+
+2005-02-23  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fixed bug #31597: ibase_connect() - incorrect warning
+
+2005-02-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/dir.c:
+      Fixed compiler warning.
+
+    * (PHP_5_0)
+      ext/bz2/bz2.c:
+      MFB_4_3: Fixed bug #29521 (compress.bzip2 returns error when used with http
+      wrapper)
+
+    * ext/bz2/bz2.c:
+      MFB_4_3: Fixed bug #29521 (compress.bzip2 returns error when used with http
+      wrapper).
+
+2005-02-23  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Correcting bounds check before someone uses this code
+
+2005-02-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_reflection_api.c:
+      - MFH: fixed bug #32076 (ReflectionMethod :: isDestructor() always return
+        true).
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fixed bug #32076 (ReflectionMethod :: isDestructor() always return true)
+        (Patch by Antony Dogval)
+
+2005-02-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Custom object serializer infrastructure - PHP implementation
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_compile.c:
+      Custom object serializer infrastructure
+
+2005-02-23  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php_syslog.h:
+      NetWare can make use of Autoconf generated header file
+
+    * main/php_open_temporary_file.c:
+      NetWare LibC has mkstemp implementation
+
+    * main/php_compat.h:
+      NetWare can make use autoconf generated header file
+
+    * main/fopen_wrappers.c:
+      NetWare LibC has pwd.h
+
+2005-02-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/Zend.m4:
+      Hack the planet
+
+2005-02-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Use PHP not C semantics
+
+    * ZendEngine2/zend_interfaces.c:
+      - Allow to convert Traversable into Aggregate
+
 2005-02-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

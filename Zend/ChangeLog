@@ -1,3 +1,30 @@
+2005-02-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      - MFH: fixed bug #32076 (ReflectionMethod :: isDestructor() always return
+        true).
+
+    * zend_reflection_api.c:
+      - Fixed bug #32076 (ReflectionMethod :: isDestructor() always return true)
+        (Patch by Antony Dogval)
+
+2005-02-23  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.h
+      zend_compile.c:
+      Custom object serializer infrastructure
+
+2005-02-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * Zend.m4:
+      Hack the planet
+
+2005-02-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      - Allow to convert Traversable into Aggregate
+
 2005-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects_API.c:
