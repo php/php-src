@@ -126,7 +126,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	/* did the query make sense to me? */
 	if (query_type == (PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL)) {
 		/* they mixed both types; punt */
-		strcpy(stmt->error_code, "HY093"); /* invalid parameter number */
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "mixed named and positional parameters" TSRMLS_CC);
 		return -1;
 	}
 
@@ -140,7 +140,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	
 	/* Do we have placeholders but no bound params */
 	if (bindno && !params) {
-		strcpy(stmt->error_code, "HY093"); /* invalid parameter number */
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "no parameters were bound" TSRMLS_CC);
 		ret = -1;
 		goto clean_up;
 	}
@@ -162,17 +162,44 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 			if (ret == FAILURE) {
 				/* parameter was not defined */
 				ret = -1;
-				strcpy(stmt->error_code, "HY093"); /* invalid parameter number */
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 				goto clean_up;
 			}
 			if (stmt->dbh->methods->quoter) {
-				if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-						Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen,
-						param->param_type TSRMLS_CC)) {
-					/* bork */
-					ret = -1;
-					strcpy(stmt->error_code, stmt->dbh->error_code);
-					goto clean_up;
+				if (param->param_type == PDO_PARAM_LOB && Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+					php_stream *stm;
+
+					php_stream_from_zval_no_verify(stm, &param->parameter);
+					if (stm) {
+						size_t len;
+						char *buf = NULL;
+					
+						len = php_stream_copy_to_mem(stm, &buf, PHP_STREAM_COPY_ALL, 0);
+						if (!stmt->dbh->methods->quoter(stmt->dbh, buf, len, &plc->quoted, &plc->qlen,
+								param->param_type TSRMLS_CC)) {
+							/* bork */
+							ret = -1;
+							strcpy(stmt->error_code, stmt->dbh->error_code);
+							efree(buf);
+							goto clean_up;
+						}
+						efree(buf);
+
+					} else {
+						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
+						ret = -1;
+						goto clean_up;
+					}
+				} else {
+					convert_to_string(param->parameter);
+					if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
+								Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen,
+								param->param_type TSRMLS_CC)) {
+						/* bork */
+						ret = -1;
+						strcpy(stmt->error_code, stmt->dbh->error_code);
+						goto clean_up;
+					}
 				}
 				plc->freeq = 1;
 			} else {
@@ -235,8 +262,7 @@ rewrite:
 		/* rewrite :name to ? */
 
 		/* HARD!.  We need to remember the mapping and bind those positions. */
-		strcpy(stmt->error_code, "IM001"); /* Driver does not support this function */
-
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "cannot map :name to ? in this version" TSRMLS_CC);
 		ret = -1;
 	}
 
