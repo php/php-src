@@ -403,6 +403,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			zval *handle = NULL;
 			zval *zdata = NULL;
 			int   error;
+			zend_fcall_info fci;
 
 			MAKE_STD_ZVAL(handle);
 			ZVAL_RESOURCE(handle, ch->id);
@@ -413,7 +414,17 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			ZVAL_STRINGL(zdata, data, length, 1);
 			argv[1] = &zdata;
 
-			error = fast_call_user_function(EG(function_table), NULL, t->func_name, &retval_ptr, 2, argv, 0, NULL, &t->func_ptr TSRMLS_CC);
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.object_pp = NULL;
+			fci.function_name = t->func_name;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = 2;
+			fci.params = argv;
+			fci.no_separation = 0;
+			fci.symbol_table = NULL;
+
+			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
@@ -454,6 +465,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			zval  *retval_ptr;
 			int   length;
 			int   error;
+			zend_fcall_info fci;
 			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 			MAKE_STD_ZVAL(handle);
@@ -470,7 +482,17 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			argv[1] = &zfd;
 			argv[2] = &zlength;
 
-			error = fast_call_user_function(EG(function_table), NULL, t->func_name, &retval_ptr, 3, argv, 0, NULL, &t->func_ptr TSRMLS_CC);
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = t->func_name;
+			fci.object_pp = NULL;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = 3;
+			fci.params = argv;
+			fci.no_separation = 0;
+			fci.symbol_table = NULL;
+
+			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
 				length = -1;
@@ -518,6 +540,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			zval  *zdata = NULL;
 			zval  *retval_ptr;
 			int   error;
+			zend_fcall_info fci;
 
 			MAKE_STD_ZVAL(handle);
 			MAKE_STD_ZVAL(zdata);
@@ -528,8 +551,18 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 
 			argv[0] = &handle;
 			argv[1] = &zdata;
-			
-			error = fast_call_user_function(EG(function_table), NULL, t->func_name, &retval_ptr, 2, argv, 0, NULL, &t->func_ptr TSRMLS_CC);
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = t->func_name;
+			fci.symbol_table = NULL;
+			fci.object_pp = NULL;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = 2;
+			fci.params = argv;
+			fci.no_separation = 0;
+
+			error = zend_call_user_function(&fci, &t->fci_cache TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
@@ -894,7 +927,7 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_WRITEFUNCTION:
 			if (ch->handlers->write->func_name) {
 				zval_ptr_dtor(&ch->handlers->write->func_name);
-				ch->handlers->write->func_ptr = NULL;
+				ch->handlers->write->fci_cache = empty_fcall_info_cache;
 			}
 			zval_add_ref(zvalue);
 			ch->handlers->write->func_name = *zvalue;
@@ -903,7 +936,7 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_READFUNCTION:
 			if (ch->handlers->read->func_name) {
 				zval_ptr_dtor(&ch->handlers->read->func_name);
-				ch->handlers->write->func_ptr = NULL;
+				ch->handlers->write->fci_cache = empty_fcall_info_cache;
 			}
 			zval_add_ref(zvalue);
 			ch->handlers->read->func_name = *zvalue;
@@ -912,7 +945,7 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_HEADERFUNCTION:
 			if (ch->handlers->write_header->func_name) {
 				zval_ptr_dtor(&ch->handlers->write_header->func_name);
-				ch->handlers->write->func_ptr = NULL;
+				ch->handlers->write->fci_cache = empty_fcall_info_cache;
 			}
 			zval_add_ref(zvalue);
 			ch->handlers->write_header->func_name = *zvalue;
