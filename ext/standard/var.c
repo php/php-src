@@ -466,6 +466,9 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 				php_error(E_NOTICE, "__sleep should return an array only "
 						"containing the names of instance-variables to "
 						"serialize.");
+				/* we should still add element even if it's not OK,
+				   since we already wrote the length of the array before */
+				smart_str_appendl(buf,"s:0:\"\";N;", 9);
 				continue;
 			}
 
@@ -579,12 +582,6 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					if (i == HASH_KEY_NON_EXISTANT)
 						break;
 					
-					if (zend_hash_get_current_data_ex(myht, 
-								(void **) &data, &pos) != SUCCESS 
-							|| !data 
-							|| data == struc)
-						continue;
-
 					switch (i) {
 					  case HASH_KEY_IS_LONG:
 							php_var_serialize_long(buf, index);
@@ -593,7 +590,17 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 							php_var_serialize_string(buf, key, key_len - 1);
 							break;
 					}
-					php_var_serialize_intern(buf, data, var_hash TSRMLS_CC);
+
+					/* we should still add element even if it's not OK,
+					   since we already wrote the length of the array before */
+					if (zend_hash_get_current_data_ex(myht, 
+						(void **) &data, &pos) != SUCCESS 
+						|| !data 
+						|| data == struc) {
+						smart_str_appendl(buf, "N;", 2);
+					} else {
+						php_var_serialize_intern(buf, data, var_hash TSRMLS_CC);
+					}
 				}
 			}
 			smart_str_appendc(buf, '}');
