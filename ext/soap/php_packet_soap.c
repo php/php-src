@@ -251,8 +251,12 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					param = (*h_param);
 					if (fnb->style == SOAP_DOCUMENT) {
 						if (param->element) {
+							name = param->element->name;
+							ns = param->element->namens;
+/*
 							name = param->encode->details.type_str;
 							ns = param->encode->details.ns;
+*/
 						} else {
 							name = param->paramName;
 						}
