@@ -88,6 +88,12 @@ PHP_INI_END()
 
 static void php_assert_init_globals(php_assert_globals *assert_globals)
 {
+	assert_globals->active = 0;
+	assert_globals->bail = 0;
+	assert_globals->warning = 1;
+	assert_globals->quiet_eval = 0;
+	assert_globals->default_callback = 0;
+	assert_globals->callback = 0;
 }
 
 PHP_MINIT_FUNCTION(assert)
