@@ -21,14 +21,14 @@ WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
         if test -z "$IFX_LIBDIR"; then
           IFX_LIBDIR="-L$INFORMIXDIR/lib -L$INFORMIXDIR/lib/esql"
         else
-          IFX_LIBDIR=$IFX_LIBDIR
+          IFX_LIBDIR="$IFX_LIBDIR"
         fi
       else
         IFX_INCDIR=$withval/incl/esql
         if test -z "$IFX_LIBDIR"; then
           IFX_LIBDIR="-L$withval/lib -L$withval/lib/esql"
         else
-          IFX_LIBDIR=$IFX_LIBDIR
+          IFX_LIBDIR="$IFX_LIBDIR"
         fi
         if test "$withval" != "$INFORMIXDIR"; then
           INFORMIX_WARNING="
