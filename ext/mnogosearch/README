@@ -13,7 +13,5 @@ library. To do this you should compile php with specefying mysql-dir
   TODO
   ----
 
-1. Implement native ispell functions. 
-
-2. Implement indexing functions of the library.
-   For example retrieving, parsing, checking of the URL and so on...
+Implement indexing functions of the library.
+For example retrieving, parsing, checking of the URL and so on...
