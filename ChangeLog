@@ -1,3 +1,141 @@
+2002-04-08  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/php_msession.h
+      ext/msession/reqclient.h
+      ext/msession/msession.c: Added new features for msession beta 2
+
+2002-04-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c: ws fix
+
+    * ext/odbc/php_odbc.c: MFH
+
+    * ext/odbc/php_odbc.c: CPP directives must start on the beginning of line
+
+2002-04-08  Richard Heyes  <richard@phpguru.org>
+
+    * pear/PEAR.php: * Added getStaticProperty() for static methods.
+
+2002-04-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/config.m4
+      ext/standard/reg.c
+      acinclude.m4
+      NEWS: - Revert that change. Added a warning about this.
+
+2002-04-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysql/libmysql/strto.c
+      ext/mysql/libmysql/strtoll.c
+      ext/mysql/libmysql/strtoull.c: MFH (MS VS.Net Fix).
+
+2002-04-08  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * pear/Makefile.frag: Make pgsql header available for PECL module(s)
+
+2002-04-08  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * configure.in: remove streams option from branch
+
+2002-04-08  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/Common.php
+      pear/HTML/Select.php:
+    htmlentities > htmlspecialchars for charset compatibility as noticed by Wojciech Gdela.
+
+2002-04-08  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/install.txt
+      win32/php4ts_cli.dsp
+      win32/pws-php4cgi.reg:
+    Finished syncing win32 build and docs with the unix counterpart.
+    Renamed the cli executable to php-cli.exe so somebody doesn't overwrite
+    cgi by mistake.
+
+2002-04-08  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: upload_max_filesize can only be set in php.ini
+
+    * NEWS: and the news entry..
+
+    * ext/standard/config.m4
+      ext/standard/reg.c
+      acinclude.m4:
+    There's really no point in allowing using the system regex library.
+
+2002-04-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4.dsp
+      win32/php4ts.dsp: Rename Win32 executable to php.exe.
+
+2002-04-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/config.m4:
+    Using system regex lib seems not to work quite well when compiled with Apache.
+
+2002-04-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/dba/dba_db2.c: - MFH
+
+    * ext/dba/dba_db2.c: - Fix wrong logic (Thanks to Alan for noticing it)
+
+2002-04-08  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Remove unneeded conversions from pg_convert.
+
+2002-04-08  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-db.xml: Continue the list of features for PEAR DB
+    Release version is 2.0 (apiVersion)
+
+2002-04-08  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Make it compile with ZTS.
+
+    * ext/pgsql/README: Update README
+
+    * ext/pgsql/tests/10pg_convert.phpt
+      ext/pgsql/tests/11pg_metadata.phpt
+      ext/pgsql/tests/12pg_insert.phpt
+      ext/pgsql/tests/13pg_select.phpt
+      ext/pgsql/tests/14pg_update.phpt
+      ext/pgsql/tests/15pg_delete.phpt
+      ext/pgsql/tests/16pg_result_status.phpt
+      ext/pgsql/tests/informational.inc
+      ext/pgsql/tests/pg_convert.inc
+      ext/pgsql/tests/pg_delete.inc
+      ext/pgsql/tests/pg_insert.inc
+      ext/pgsql/tests/pg_metadata.inc
+      ext/pgsql/tests/pg_result_status.inc
+      ext/pgsql/tests/pg_select.inc
+      ext/pgsql/tests/pg_update.inc
+      ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    Added pg_metadate(), pg_convert(), pg_insert(), pg_select(), pg_update()
+    and pg_delete().
+
+2002-04-08  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-recommended: MFH
+
+2002-04-08  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Return proper result.
+
+2002-04-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ming/php_ming.h
+      ext/ming/ming.c: Some ws fixes and general cleanup.
+
+2002-04-08  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c:
+    Added 2nd parameter for pg_result_status(). PGSQL_STATUS_LONG is for LONG result status.
+    PGSQL_STATUS_STRING is for SQL command name successfully executed for this result.
+
 2002-04-07  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/exif/exif.c: correcting some more whitespace
