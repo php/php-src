@@ -93,7 +93,7 @@ PHP_FUNCTION(microtime)
 }
 /* }}} */
 
-/* {{{ proto array gettimeofday(void)
+/* {{{ proto array gettimeofday([bool get_as_float])
    Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
