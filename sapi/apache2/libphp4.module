@@ -1,7 +1,0 @@
-Name: php4_module
-ConfigStart
-	RULE_WANTHSREGEX=no
-	LIBS=" -Wl,-rpath,/home/rasmus/gd-1.8 -Wl,-rpath,/usr/local/lib/mysql -Wl,-rpath,/usr/local/lib  -rdynamic -L/home/rasmus/gd-1.8 -L/usr/local/lib/mysql -L/usr/local/lib -Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4  -lgdbm -lpam  -ldl -lpdf -ltiff -ltiff -lpng -lpng -ljpeg -ljpeg -lmysqlclient -lldap -llber -lttf -lpng -lz -lgd -lresolv -lm -ldl -lcrypt -lnsl  -lresolv -lz -ljpeg -lpng -ltiff $LIBS"
-	RULE_HIDE=yes
-	CFLAGS="$CFLAGS -I/home/rasmus/php4 -I/home/rasmus/php4/main -I/home/rasmus/php4/main -I/home/rasmus/php4/Zend -I/home/rasmus/php4/Zend -I/home/rasmus/php4"
-ConfigEnd
