@@ -1,5 +1,20 @@
-/* Copyright (C) 1996  TCX DataKonsult AB & Monty Program KB & Detron HB
-   For a more info consult the file COPYRIGHT distributed with this file */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
+
 /*
   A better inplementation of the UNIX ctype(3) library.
   Notes:   global.h should be included before ctype.h
@@ -8,41 +23,45 @@
 #ifndef _m_ctype_h
 #define _m_ctype_h
 
-#define MY_CHARSET_UNDEFINED    0
-#define MY_CHARSET_BIG5		1
-#define MY_CHARSET_CZECH	2
-#define MY_CHARSET_DEC8		3
-#define MY_CHARSET_DOS		4
-#define MY_CHARSET_GERMAN1	5
-#define MY_CHARSET_HP8		6
-#define MY_CHARSET_KOI8_RU	7
-#define MY_CHARSET_LATIN1	8
-#define MY_CHARSET_LATIN2	9
-#define MY_CHARSET_SWE7		10
-#define MY_CHARSET_USA7		11
-#define MY_CHARSET_UJIS		12
-#define MY_CHARSET_SJIS		13
-#define MY_CHARSET_CP1251	14
-#define MY_CHARSET_DANISH	15
-#define MY_CHARSET_HEBREW	16
-#define MY_CHARSET_WIN1251	17
-#define MY_CHARSET_TIS620	18
-#define MY_CHARSET_EUC_KR	19
-#define MY_CHARSET_ESTONIA	20
-#define MY_CHARSET_HUNGARIAN	21
-#define MY_CHARSET_KOI8_UKR	22
-#define MY_CHARSET_WIN1251UKR	23
-#define MY_CHARSET_GB2312	24
-#define MY_CHARSET_GREEK	25
-#define MY_CHARSET_WIN1250	26
-#define MY_CHARSET_CROAT	27
-#define MY_CHARSET_GBK		28
-
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-#ifdef __WIN32__
+#define CHARSET_DIR	"charsets/"
+
+typedef struct charset_info_st
+{
+    uint      number;
+    const char *name;
+    uchar    *ctype;
+    uchar    *to_lower;
+    uchar    *to_upper;
+    uchar    *sort_order;
+
+    uint      strxfrm_multiply;
+    int     (*strcoll)(const uchar *, const uchar *);
+    int     (*strxfrm)(uchar *, const uchar *, int);
+    int     (*strnncoll)(const uchar *, int, const uchar *, int);
+    int     (*strnxfrm)(uchar *, const uchar *, int, int);
+    my_bool (*like_range)(const char *, uint, pchar, uint,
+                          char *, char *, uint *, uint *);
+
+    uint      mbmaxlen;
+    int     (*ismbchar)(const char *, const char *);
+    my_bool (*ismbhead)(uint);
+    int     (*mbcharlen)(uint);
+} CHARSET_INFO;
+
+/* strings/ctype.c */
+extern CHARSET_INFO *default_charset_info;
+extern CHARSET_INFO *find_compiled_charset(uint cs_number);
+extern CHARSET_INFO *find_compiled_charset_by_name(const char *name);
+extern CHARSET_INFO  compiled_charsets[];
+
+#define MY_CHARSET_UNDEFINED 0
+#define MY_CHARSET_CURRENT (default_charset_info->number)
+
+#ifdef __WIN__
 #include <ctype.h>
 #endif
 /* Don't include std ctype.h when this is included */
@@ -50,14 +69,6 @@ extern "C" {
 #define _CTYPE_INCLUDED
 #define __CTYPE_INCLUDED
 #define _CTYPE_USING   /* Don't put names in global namespace. */
-
-#ifndef CTYPE_LIBRARY
-#define EXT extern
-#define D(x)
-#else
-#define EXT
-#define D(x)	= x
-#endif
 
 #define	_U	01	/* Upper case */
 #define	_L	02	/* Lower case */
@@ -68,17 +79,12 @@ extern "C" {
 #define	_B	0100	/* Blank */
 #define	_X	0200	/* heXadecimal digit */
 
-extern uchar NEAR ctype_latin1[];
-extern uchar NEAR to_upper_latin1[];
-extern uchar NEAR to_lower_latin1[];
-extern uchar NEAR sort_order_latin1[];
+#define my_ctype	(default_charset_info->ctype)
+#define my_to_upper	(default_charset_info->to_upper)
+#define my_to_lower	(default_charset_info->to_lower)
+#define my_sort_order	(default_charset_info->sort_order)
 
-#define my_ctype	ctype_latin1
-#define my_to_upper	to_upper_latin1
-#define my_to_lower	to_lower_latin1
-#define my_sort_order	sort_order_latin1
-
-#ifndef __WIN32__
+#ifndef __WIN__
 #define	_toupper(c)	(char) my_to_upper[(uchar) (c)]
 #define	_tolower(c)	(char) my_to_lower[(uchar) (c)]
 #define toupper(c)	(char) my_to_upper[(uchar) (c)]
@@ -102,7 +108,34 @@ extern uchar NEAR sort_order_latin1[];
 #undef ctype
 #endif /* ctype */
 
-#endif	/* __WIN32__ */
+#endif	/* __WIN__ */
+
+#define	my_isalpha(s, c)  (((s)->ctype+1)[(uchar) (c)] & (_U | _L))
+#define	my_isupper(s, c)  (((s)->ctype+1)[(uchar) (c)] & _U)
+#define	my_islower(s, c)  (((s)->ctype+1)[(uchar) (c)] & _L)
+#define	my_isdigit(s, c)  (((s)->ctype+1)[(uchar) (c)] & _N)
+#define	my_isxdigit(s, c) (((s)->ctype+1)[(uchar) (c)] & _X)
+#define	my_isalnum(s, c)  (((s)->ctype+1)[(uchar) (c)] & (_U | _L | _N))
+#define	my_isspace(s, c)  (((s)->ctype+1)[(uchar) (c)] & _S)
+#define	my_ispunct(s, c)  (((s)->ctype+1)[(uchar) (c)] & _P)
+#define	my_isprint(s, c)  (((s)->ctype+1)[(uchar) (c)] & (_P | _U | _L | _N | _B))
+#define	my_isgraph(s, c)  (((s)->ctype+1)[(uchar) (c)] & (_P | _U | _L | _N))
+#define	my_iscntrl(s, c)  (((s)->ctype+1)[(uchar) (c)] & _C)
+
+#define use_strcoll(s)                ((s)->strcoll != NULL)
+#define MY_STRXFRM_MULTIPLY           (default_charset_info->strxfrm_multiply)
+#define my_strnxfrm(s, a, b, c, d)    ((s)->strnxfrm((a), (b), (c), (d)))
+#define my_strnncoll(s, a, b, c, d)   ((s)->strnncoll((a), (b), (c), (d)))
+#define my_strxfrm(s, a, b, c, d)     ((s)->strnxfrm((a), (b), (c)))
+#define my_strcoll(s, a, b)           ((s)->strcoll((a), (b)))
+#define my_like_range(s, a, b, c, d, e, f, g, h) \
+                ((s)->like_range((a), (b), (c), (d), (e), (f), (g), (h)))
+
+#define use_mb(s)                     ((s)->ismbchar != NULL)
+#define MBMAXLEN                      (default_charset_info->mbmaxlen)
+#define my_ismbchar(s, a, b)          ((s)->ismbchar((a), (b)))
+#define my_ismbhead(s, a)             ((s)->ismbhead((a)))
+#define my_mbcharlen(s, a)            ((s)->mbcharlen((a)))
 
 /* Some macros that should be cleaned up a little */
 #define isvar(c)	(isalnum(c) || (c) == '_')
@@ -110,118 +143,11 @@ extern uchar NEAR sort_order_latin1[];
 #define tocntrl(c)	((c) & 31)
 #define toprint(c)	((c) | 64)
 
-/* Support for Japanese(UJIS) characters, by tommy@valley.ne.jp */
-#if MY_CHARSET_CURRENT == MY_CHARSET_UJIS
-#define USE_MB
-#define	USE_MB_IDENT
-#define isujis(c)     ((0xa1<=((c)&0xff) && ((c)&0xff)<=0xfe))
-#define iskata(c)     ((0xa1<=((c)&0xff) && ((c)&0xff)<=0xdf))
-#define isujis_ss2(c) (((c)&0xff) == 0x8e)
-#define isujis_ss3(c) (((c)&0xff) == 0x8f)
-#define ismbchar(p, end)	((*(uchar*)(p)<0x80)? 0:\
-	isujis(*(p)) && (end)-(p)>1 && isujis(*((p)+1))? 2:\
-	isujis_ss2(*(p)) && (end)-(p)>1 && iskata(*((p)+1))? 2:\
-	isujis_ss3(*(p)) && (end)-(p)>2 && isujis(*((p)+1)) && isujis(*((p)+2))? 3:\
-	0)
-#define ismbhead(c)	(isujis(c) || isujis_ss2(c) || isujis_ss3(c))
-#define mbcharlen(c)	(isujis(c)? 2: isujis_ss2(c)? 2: isujis_ss3(c)? 3: 0)
-#define MBMAXLEN	3
-#endif
-
-/* Support for Japanese(SJIS) characters, by tommy@valley.ne.jp */
-#if MY_CHARSET_CURRENT == MY_CHARSET_SJIS
-#define USE_MB
-#define USE_MB_IDENT
-#define issjishead(c) ((0x81<=((c)&0xff) && ((c)&0xff)<=0x9f) || (0xe0<=((c)&0xff) && ((c)&0xff)<=0xfc))
-#define issjistail(c) ((0x40<=((c)&0xff) && ((c)&0xff)<=0x7e) || (0x80<=((c)&0xff) && ((c)&0xff)<=0xfc))
-#define ismbchar(p, end)	(issjishead(*(p)) && (end)-(p)>1 && issjistail(*((p)+1))? 2: 0)
-#define ismbhead(c)	issjishead(c)
-#define mbcharlen(c)	(issjishead(c)? 2: 0)
-#define MBMAXLEN	2
-#endif
-
-/* Support for Chinese(BIG5) characters, by jou@nematic.ieo.nctu.edu.tw
-   modified by Wei He (hewei@mail.ied.ac.cn) */
-
-#if MY_CHARSET_CURRENT == MY_CHARSET_BIG5
-#define USE_MB
-#define USE_MB_IDENT
-#define isbig5head(c) (0xa1<=(uchar)(c) && (uchar)(c)<=0xf9)
-#define isbig5tail(c) ((0x40<=(uchar)(c) && (uchar)(c)<=0x7e) || \
-                      (0xa1<=(uchar)(c) && (uchar)(c)<=0xfe))
-#define ismbchar(p, end)  (isbig5head(*(p)) && (end)-(p)>1 && isbig5tail(*((p)+1))? 2: 0)
-#define ismbhead(c)     isbig5head(c)
-#define mbcharlen(c)    (isbig5head(c)? 2: 0)
-#define MBMAXLEN        2
-#
-#undef USE_STRCOLL
-#define USE_STRCOLL
-#endif
-
-/* Support for Chinese(GB2312) characters, by Miles Tsai (net-bull@126.com)
-  modified by Wei He (hewei@mail.ied.ac.cn) */
-
-#if MY_CHARSET_CURRENT == MY_CHARSET_GB2312
-#define USE_MB
-#define USE_MB_IDENT
-#define isgb2312head(c) (0xa1<=(uchar)(c) && (uchar)(c)<=0xf7)
-#define isgb2312tail(c) (0xa1<=(uchar)(c) && (uchar)(c)<=0xfe)
-#define ismbchar(p, end)  (isgb2312head(*(p)) && (end)-(p)>1 && isgb2312tail(*((p)+1))? 2: 0)
-#define ismbhead(c)     isgb2312head(c)
-#define mbcharlen(c)    (isgb2312head(c)? 2:0)
-#define MBMAXLEN        2
-#endif
-
-/* Support for Chinese(GBK) characters, by hewei@mail.ied.ac.cn */
-
-#if MY_CHARSET_CURRENT == MY_CHARSET_GBK
-#define USE_MB
-#define USE_MB_IDENT
-#define isgbkhead(c) (0x81<=(uchar)(c) && (uchar)(c)<=0xfe)
-#define isgbktail(c) ((0x40<=(uchar)(c) && (uchar)(c)<=0x7e) || \
-                          (0x80<=(uchar)(c) && (uchar)(c)<=0xfe))
-#define ismbchar(p, end)  (isgbkhead(*(p)) && (end)-(p)>1 && isgbktail(*((p)+1))? 2: 0)
-#define ismbhead(c)     isgbkhead(c)
-#define mbcharlen(c)    (isgbkhead(c)? 2:0)
-#define MBMAXLEN        2
-#undef USE_STRCOLL
-#define USE_STRCOLL
-#endif
-
-/* Define, how much will the string grow under strxfrm */
-#if MY_CHARSET_CURRENT == MY_CHARSET_CZECH
-#undef USE_STRCOLL
-#define USE_STRCOLL
-#endif
-#if MY_CHARSET_CURRENT == MY_CHARSET_TIS620
-#undef USE_STRCOLL
-#define USE_STRCOLL
+/* XXX: still need to take care of this one */
+#ifdef MY_CHARSET_TIS620
+#error The TIS620 charset is broken at the moment.  Tell tim to fix it.
 #define USE_TIS620
 #include "t_ctype.h"
-#endif
-
-/* Support for Korean(EUC_KR) characters, by powerm90@tinc.co.kr and mrpark@tinc.co.kr */
-#if MY_CHARSET_CURRENT == MY_CHARSET_EUC_KR
-#define USE_MB
-#define USE_MB_IDENT
-#define iseuc_kr(c)     ((0xa1<=(uchar)(c) && (uchar)(c)<=0xfe))
-#define ismbchar(p, end)        ((*(uchar*)(p)<0x80)? 0:\
-        iseuc_kr(*(p)) && (end)-(p)>1 && iseuc_kr(*((p)+1))? 2:\
-        0)
-#define ismbhead(c)     (iseuc_kr(c))
-#define mbcharlen(c)    (iseuc_kr(c) ? 2 : 0)
-#define MBMAXLEN        2
-#endif
-
-#ifdef USE_STRCOLL
-extern uint MY_STRXFRM_MULTIPLY;
-extern int my_strnxfrm(unsigned char *, unsigned char *, int, int);
-extern int my_strnncoll(const unsigned char *, int, const unsigned char *, int);
-extern int my_strxfrm(unsigned char *, unsigned char *, int);
-extern int my_strcoll(const unsigned char *, const unsigned char *);
-extern my_bool my_like_range(const char *ptr,uint ptr_length,pchar escape,
-			     uint res_length, char *min_str,char *max_str,
-			     uint *min_length,uint *max_length);
 #endif
 
 #ifdef	__cplusplus

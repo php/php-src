@@ -1,5 +1,19 @@
-/* Copyright (C) 1996  TCX DataKonsult AB & Monty Program KB & Detron HB
-   For a more info consult the file COPYRIGHT distributed with this file */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /* There may be prolems include all of theese. Try to test in
    configure with ones are needed? */
@@ -8,6 +22,9 @@
 
 #ifndef _m_string_h
 #define _m_string_h
+#ifndef __USE_GNU
+#define __USE_GNU				/* We want to use stpcpy */
+#endif
 #if defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif
@@ -52,6 +69,10 @@
 # define memmove(d, s, n)	bmove((d), (s), (n)) /* our bmove */
 #endif
 
+#if defined(HAVE_STPCPY) && !defined(HAVE_mit_thread)
+#define strmov(A,B) stpcpy((A),(B))
+#endif
+
 /* Unixware 7 */
 #if !defined(HAVE_BFILL)
 # define bfill(A,B,C)           memset((A),(C),(B))
@@ -76,6 +97,12 @@ extern char NEAR _dig_vec[];		/* Declared in int2str() */
 #else
 #define strmov_overlapp(A,B) strmov(A,B)
 #define strmake_overlapp(A,B,C) strmake(A,B,C)
+#endif
+
+#ifdef BAD_MEMCPY			/* Problem with gcc on Alpha */
+#define memcpy_fixed(A,B,C) bmove((A),(B),(C))
+#else
+#define memcpy_fixed(A,B,C) memcpy((A),(B),(C))
 #endif
 
 #ifdef MSDOS
@@ -136,7 +163,6 @@ extern	char *strmake_overlapp(char *dst,const char *src, uint length);
 #ifndef strmov
 extern	char *strmov(char *dst,const char *src);
 #endif
-extern	uint strnlen(const char *s,uint n);
 extern	char *strnmov(char *dst,const char *src,uint n);
 extern	char *strsuff(const char *src,const char *suffix);
 extern	char *strcont(const char *src,const char *set);
@@ -159,6 +185,9 @@ extern int strcmp(const char *, const char *);
 extern size_t strlen(const char *);
 #endif
 #endif
+#ifndef HAVE_STRNLEN 
+extern uint strnlen(const char *s, uint n);
+#endif
 
 #if !defined(__cplusplus)
 #ifndef HAVE_STRPBRK
@@ -168,7 +197,6 @@ extern char *strpbrk(const char *, const char *);
 extern char *strstr(const char *, const char *);
 #endif
 #endif
-extern qsort_cmp get_ptr_compare(uint);
 extern int is_prefix(const char *, const char *);
 
 /* Conversion rutins */
@@ -178,16 +206,19 @@ extern char *my_itoa(int val,char *dst,int radix);
 extern char *my_ltoa(long val,char *dst,int radix);
 #endif
 
+extern char *llstr(longlong value,char *buff);
 #ifndef HAVE_STRTOUL
 extern long strtol(const char *str, char **ptr, int base);
 extern ulong strtoul(const char *str, char **ptr, int base);
 #endif
 
 extern char *int2str(long val,char *dst,int radix);
+extern char *int10_to_str(long val,char *dst,int radix);
 extern char *str2int(const char *src,int radix,long lower,long upper,
 			 long *val);
 #if SIZEOF_LONG == SIZEOF_LONG_LONG
 #define longlong2str(A,B,C) int2str((A),(B),(C))
+#define longlong10_to_str(A,B,C) int10_to_str((A),(B),(C))
 #define strtoll(A,B,C) strtol((A),(B),(C))
 #define strtoull(A,B,C) strtoul((A),(B),(C))
 #ifndef HAVE_STRTOULL
@@ -196,6 +227,7 @@ extern char *str2int(const char *src,int radix,long lower,long upper,
 #else
 #ifdef HAVE_LONG_LONG
 extern char *longlong2str(longlong val,char *dst,int radix);
+extern char *longlong10_to_str(longlong val,char *dst,int radix);
 #if (!defined(HAVE_STRTOULL) || defined(HAVE_mit_thread)) || defined(NO_STRTOLL_PROTO)
 extern longlong strtoll(const char *str, char **ptr, int base);
 extern ulonglong strtoull(const char *str, char **ptr, int base);
