@@ -504,7 +504,7 @@ void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
 		struct sockaddr_in *sin = (struct sockaddr_in *) addr;
 		sin->sin_family = AF_INET;
 		sin->sin_port = htons(port);
-		sin->sin_addr.s_addr = INADDR_ANY;
+		sin->sin_addr.s_addr = htonl(INADDR_ANY);
 		break;
 	}
 	}
