@@ -238,7 +238,7 @@ PHP_FUNCTION(jdtogregorian)
 }
 /* }}} */
 
-/* {{{ proto mixed jddayofweek(int juliandaycount, [int mode])
+/* {{{ proto mixed jddayofweek(int juliandaycount [, int mode])
    Returns name or number of day of week from julian day count */
  PHP_FUNCTION(jddayofweek)
 {
