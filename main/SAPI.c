@@ -851,6 +851,15 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 	}
 }
 
+SAPI_API int sapi_get_fd(int *fd TSRMLS_DC)
+{
+	if (sapi_module.get_fd) {
+		return sapi_module.get_fd(fd TSRMLS_CC);
+	} else {
+		return -1;
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4

@@ -186,6 +186,8 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC);
 SAPI_API void sapi_activate_headers_only(TSRMLS_D);
 
+SAPI_API int sapi_get_fd(int *fd TSRMLS_DC);
+
 struct _sapi_module_struct {
 	char *name;
 	char *pretty_name;
@@ -217,12 +219,16 @@ struct _sapi_module_struct {
 
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
+	
 
 	void (*default_post_reader)(TSRMLS_D);
 	void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC);
 	char *executable_location;
 
 	int php_ini_ignore;
+	
+	int (*get_fd)(int *fd TSRMLS_DC);
+
 };
 
 
