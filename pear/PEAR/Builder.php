@@ -198,6 +198,7 @@ class PEAR_Builder extends PEAR_Common
         $dir = getcwd();
         $this->log(2, "building in $dir");
         $this->current_callback = $callback;
+        putenv('PATH=' . getenv('PATH') . ':' . $this->config->get('bin_dir'));
         $err = $this->_runCommand("phpize", array(&$this, 'phpizeCallback'));
         if (PEAR::isError($err)) {
             return $err;
