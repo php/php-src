@@ -41,15 +41,15 @@ PEAR_FILES = \
 install-data-local: PEAR.php
 	@if $(mkinstalldirs) $(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
-			$(mkinstalldirs) $(peardir)/$$i; \
+			(set -x;$(mkinstalldirs) $(peardir)/$$i); \
 		done; \
 		for i in $(PEAR_FILES); do \
 			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
-			$(INSTALL_DATA) $(srcdir)/$$i $(peardir)/$$dir; \
+			(set -x;$(INSTALL_DATA) $(srcdir)/$$i $(peardir)/$$dir); \
 		done; \
 		for i in PEAR.php; do \
 			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
-			$(INSTALL_DATA) $(builddir)/$$i $(peardir)/$$dir; \
+			(set -x;$(INSTALL_DATA) $(builddir)/$$i $(peardir)/$$dir); \
 		done; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
