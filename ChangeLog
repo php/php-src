@@ -1,3 +1,94 @@
+2000-07-03  Zeev Suraski  <zeev@php.net>
+
+    * ext/sybase/php_sybase_db.c: Fix logic (thanks to Dean Bennett)
+
+2000-07-03  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.dsp
+      ext/informix/ifx_custom_build.dsp:
+    - Informix driver : Changes for new "main" directory (win32 build)
+
+2000-07-03  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README: Fix typo.  Thanks to Adam Trachtenberg for noticing it!
+
+2000-07-03  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: - Fixed crash on OCI?Logon() failure. (thies)
+
+2000-07-03  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README:
+    Add suggestions for dealing with difficult installations, based on feedback
+    from multiple people.  The .bashrc suggestion was from Rael Dornfest.
+
+2000-07-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sockets/php_sockets.h:
+    Identifiers which begin with an underscore are reserved. Changed
+    _PHP_SOCKETS_H to PHP_SOCKETS_H.
+
+2000-07-03  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sockets/config.m4: Use AC_CHECK_HEADERS(unistd.h) instead
+
+2000-07-03  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/.cvsignore: * ext/sockets/.cvsignore
+    - Forgot to import into repository.
+
+    * ext/sockets/Makefile.in
+      ext/sockets/config.m4
+      ext/sockets/php_sockets.h
+      ext/sockets/sockets.c
+      ext/sockets/sockets.php: * Makefile.in
+      config.m4
+      php_sockets.h
+      sockets.c
+      sockets.php:
+      - Added files needed for Unix-style sockets support in PHP.
+
+2000-07-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * win32/syslog.h
+      main/fopen-wrappers.h
+      main/php3_compat.h
+      main/php_main.h:
+    Rename macros which begin with underscore to valid macros.
+
+    * ext/standard/md5.h
+      ext/standard/pageinfo.h
+      ext/standard/php_filestat.h
+      ext/standard/php_image.h
+      ext/standard/php_iptc.h
+      ext/standard/php_mail.h
+      ext/standard/php_math.h
+      ext/standard/php_metaphone.h
+      ext/standard/php_output.h
+      ext/standard/php_string.h
+      ext/standard/php_var.h
+      ext/standard/scanf.h
+      ext/sybase/php_sybase_db.h
+      ext/wddx/php_wddx.h
+      ext/interbase/php_interbase.h
+      ext/mcal/php_mcal.h
+      ext/skeleton/php_skeleton.h
+      ext/standard/base64.h
+      ext/icap/php_icap.h
+      ext/imap/php_imap.h
+      ext/informix/php_informix.h
+      ext/dbase/php_dbase.h
+      ext/filepro/php_filepro.h
+      ext/gettext/php_gettext.h
+      ext/hyperwave/php_hyperwave.h
+      ext/aspell/php_aspell.h
+      ext/calendar/php_calendar.h
+      ext/dba/php_dba.h:
+    Rename macros which begin with underscore to appropiate macros. The general
+    rule is:
+
+    	macro_name=`echo $filename|tr a-z A-Z|sed 's/\./_/'`
+
 2000-07-02  Sascha Schumann  <sascha@schumann.cx>
 
     * win32/php_registry.h
