@@ -1001,12 +1001,14 @@ static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC)
 
 PHPAPI double php_get_nan()
 {
-#if defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+#if HAVE_HUGE_VAL_NAN
+	return HUGE_VAL + -HUGE_VAL;
+#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val;
 	((php_uint32*)&val)[1] = PHP_DOUBLE_QUIET_NAN_HIGH;
 	((php_uint32*)&val)[0] = 0;
 	return val;
-#elif defined(HAVE_ATOF_ACCEPTS_NAN)
+#elif HAVE_ATOF_ACCEPTS_NAN
 	return atof("NAN");
 #else
 	return 0.0/0.0;
@@ -1015,12 +1017,14 @@ PHPAPI double php_get_nan()
 
 PHPAPI double php_get_inf()
 {
-#if defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
+#if HAVE_HUGE_VAL_NAN
+	return HUGE_VAL;
+#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
 	double val;
 	((php_uint32*)&val)[1] = PHP_DOUBLE_INFINITY_HIGH;
 	((php_uint32*)&val)[0] = 0;
 	return val;
-#elif defined(HAVE_ATOF_ACCEPTS_INF)
+#elif HAVE_ATOF_ACCEPTS_INF
 	return atof("INF");
 #else
 	return 1.0/0.0;
