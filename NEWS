@@ -33,6 +33,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #28649 (Proper glob() return value on Linux when there are no
   matches). (Ilia)
+- Fixed bug #28633 (sprintf incorrectly adding padding to floats). (Ilia)
 - Fixed bug #28627 (When multiple MySQL links are used default link is leaked).
   (gavin at ipalsoftware dot com, Ilia)
 - Fixed bug #28525 (gmp_powm() does not work with hexadecimal string modulo
