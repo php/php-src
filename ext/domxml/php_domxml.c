@@ -2308,8 +2308,8 @@ PHP_FUNCTION(domxml_node_append_child)
 		RETURN_FALSE;
 	}
 	
-	/* first unlink node, if child is already a child of parent */
-	if (child->parent == parent){
+	/* first unlink node, if child is already in the tree */
+	if (child->doc == parent->doc && child->parent != NULL){
 		xmlUnlinkNode(child);
 	}
 	
