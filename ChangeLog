@@ -1,3 +1,39 @@
+2000-11-04  Mathieu Kooiman  <mathieu@gginter.net>
+
+    * ext/gd/gd.c:
+    - ImageCreateFromString(): Fixed segfault that occured if an image was tried to be
+      generate while there was no support for such an image type.
+
+2000-11-04  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/dir.c: - Fix build
+
+2000-11-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/dir.c: fix #7573
+    closedir() now really close the directory - used to stay open 'cause the
+    default-directory resource was "remembered" for arg-less calls.
+
+2000-11-04  Zeev Suraski  <zeev@zend.com>
+
+    * ext/msql/php_msql.c:
+    Now make it work too (thanks for noticing that Andi :)
+
+    * ext/msql/php_msql.c: Fix build
+
+2000-11-04  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Forgot to add one note. Plus some beutifying.
+
+2000-11-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ltconfig: Should be ok to use CC here
+
+2000-11-04  Jesus M. Castagnetto  <jesusmc@scripps.edu>
+
+    * ext/standard/basic_functions.c:
+    Updated proto for highlight_file/highlight_string
+
 2000-11-03  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ldap/ldap.c:
