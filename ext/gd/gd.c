@@ -335,7 +335,7 @@ zend_module_entry gd_module_entry = {
 	"gd",
 	gd_functions,
 	PHP_MINIT(gd),
-	NULL,
+	PHP_MSHUTDOWN(gd),
 	NULL,
 #if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 	PHP_RSHUTDOWN(gd),
@@ -372,6 +372,18 @@ static void php_free_gd_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(fp);
 }
 /* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(gd)
+{
+#if HAVE_LIBT1
+	T1_CloseLib();
+#endif
+	return SUCCESS;
+}
+/* }}} */
+
 
 /* {{{ PHP_MINIT_FUNCTION
  */
