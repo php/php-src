@@ -121,22 +121,22 @@ php3_module_entry apache_module_entry = {
    Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
-	pval *arg_name,*arg_val;
+	pval **arg_name,**arg_val;
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
 	SLS_FETCH();
 
 	if (arg_count<1 || arg_count>2 ||
-		getParameters(ht,arg_count,&arg_name,&arg_val) == FAILURE ) {
+		getParametersEx(arg_count,&arg_name,&arg_val) ==FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(arg_name);
-	note_val = (char *) table_get(((request_rec *) SG(server_context))->notes,arg_name->value.str.val);
+	convert_to_string_ex(arg_name);
+	note_val = (char *) table_get(((request_rec *)SG(server_context))->notes,(*arg_name)->value.str.val);
 	
 	if (arg_count == 2) {
-		convert_to_string(arg_val);
-		table_set(((request_rec *) SG(server_context))->notes,arg_name->value.str.val,arg_val->value.str.val);
+		convert_to_string_ex(arg_val);
+		table_set(((request_rec *)SG(server_context))->notes,(*arg_name)->value.str.val,(*arg_val)->value.str.val);
 	}
 
 	if (note_val) {
@@ -274,23 +274,23 @@ PHP_MINFO_FUNCTION(apache)
    Perform an Apache sub-request */
 PHP_FUNCTION(virtual)
 {
-	pval *filename;
+	pval **filename;
 	request_rec *rr = NULL;
 	SLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 	
-	if (!(rr = sub_req_lookup_uri (filename->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", filename->value.str.val);
+	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val,((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php_error(E_WARNING, "Unable to include '%s' - error finding URI", filename->value.str.val);
+		php_error(E_WARNING, "Unable to include '%s' - error finding URI", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
@@ -299,13 +299,13 @@ PHP_FUNCTION(virtual)
 	if (rr->content_type &&
 		!strcmp(rr->content_type, PHP3_MIME_TYPE)) {
 		php_error(E_WARNING, "Cannot include a PHP file "
-			  "(use <code>&lt;?include \"%s\"&gt;</code> instead)", filename->value.str.val);
+			  "(use <code>&lt;?include \"%s\"&gt;</code> instead)", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (run_sub_req(rr)) {
-		php_error(E_WARNING, "Unable to include '%s' - request execution failed", filename->value.str.val);
+		php_error(E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	} else {
@@ -347,17 +347,17 @@ PHP_FUNCTION(getallheaders)
    Perform a partial request of the given URI to obtain information about it */
 PHP_FUNCTION(apache_lookup_uri)
 {
-	pval *filename;
+	pval **filename;
 	request_rec *rr=NULL;
 	SLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	if(!(rr = sub_req_lookup_uri(filename->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed", filename->value.str.val);
+	if(!(rr = sub_req_lookup_uri((*filename)->value.str.val,((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "URI lookup failed",(*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	object_init(return_value);
@@ -421,17 +421,17 @@ This function is most likely a bad idea.  Just playing with it for now.
 
 PHP_FUNCTION(apache_exec_uri)
 {
-	pval *filename;
+	pval **filename;
 	request_rec *rr=NULL;
 	SLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	if(!(rr = ap_sub_req_lookup_uri(filename->value.str.val, ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed", filename->value.str.val);
+	if(!(rr = ap_sub_req_lookup_uri((*filename)->value.str.val,((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "URI lookup failed",(*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(ap_run_sub_req(rr));

@@ -367,7 +367,7 @@ php_sprintf_getnumber(char *buffer, int *pos)
 static char *
 php3_formatted_print(int ht, int *len)
 {
-	pval **args;
+	pval ***args;
 	int argc, size = 240, inpos = 0, outpos = 0;
 	int alignment, width, precision, currarg, adjusting;
 	char *format, *result, padding;
@@ -377,14 +377,14 @@ php3_formatted_print(int ht, int *len)
 	if (argc < 1) {
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
-	args = emalloc(argc * sizeof(pval *));
+	args = (pval ***)emalloc(argc * sizeof(pval *));
 
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
-	convert_to_string(args[0]);
-	format = args[0]->value.str.val;
+	convert_to_string_ex(args[0]);
+	format = (*args[0])->value.str.val;
 	result = emalloc(size);
 
 	currarg = 1;
@@ -470,66 +470,66 @@ php3_formatted_print(int ht, int *len)
 			/* now we expect to find a type specifier */
 			switch (format[inpos]) {
 				case 's':
-					convert_to_string(args[currarg]);
+					convert_to_string_ex(args[currarg]);
 					php_sprintf_appendstring(&result, &outpos, &size,
-											   args[currarg]->value.str.val,
+										(*args[currarg])->value.str.val,
 											   width, precision, padding,
 											   alignment,
-											   args[currarg]->value.str.len,0);
+										(*args[currarg])->value.str.len,0);
 					break;
 
 				case 'd':
-					convert_to_long(args[currarg]);
+					convert_to_long_ex(args[currarg]);
 					php_sprintf_appendint(&result, &outpos, &size,
-											args[currarg]->value.lval,
+										(*args[currarg])->value.lval,
 											width, padding, alignment);
 					break;
 
 				case 'e':
 				case 'f':
 					/* XXX not done */
-					convert_to_double(args[currarg]);
+					convert_to_double_ex(args[currarg]);
 					php_sprintf_appenddouble(&result, &outpos, &size,
-											   args[currarg]->value.dval,
+										(*args[currarg])->value.dval,
 											   width, padding, alignment,
 											   precision, adjusting,
 											   format[inpos]);
 					break;
 
 				case 'c':
-					convert_to_long(args[currarg]);
+					convert_to_long_ex(args[currarg]);
 					php_sprintf_appendchar(&result, &outpos, &size,
-									   (char) args[currarg]->value.lval);
+										(char) (*args[currarg])->value.lval);
 					break;
 
 				case 'o':
-					convert_to_long(args[currarg]);
+					convert_to_long_ex(args[currarg]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										   args[currarg]->value.lval,
+										(*args[currarg])->value.lval,
 										   width, padding, alignment, 3,
 										   hexchars);
 					break;
 
 				case 'x':
-					convert_to_long(args[currarg]);
+					convert_to_long_ex(args[currarg]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										   args[currarg]->value.lval,
+										(*args[currarg])->value.lval,
 										   width, padding, alignment, 4,
 										   hexchars);
 					break;
 
 				case 'X':
-					convert_to_long(args[currarg]);
+					convert_to_long_ex(args[currarg]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										   args[currarg]->value.lval,
+										(*args[currarg])->value.lval,
 										   width, padding, alignment, 4,
 										   HEXCHARS);
 					break;
 
 				case 'b':
-					convert_to_long(args[currarg]);
+					convert_to_long_ex(args[currarg]);
 					php_sprintf_append2n(&result, &outpos, &size,
-										   args[currarg]->value.lval,
+										(*args[currarg])->value.lval,
 										   width, padding, alignment, 1,
 										   hexchars);
 					break;
