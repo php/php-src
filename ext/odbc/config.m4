@@ -291,7 +291,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Birdstep support)
 AC_ARG_WITH(birdstep,
-[  --with-birdstep[=DIR]    Include Birdstep support.  DIR is the Birdstep base
+[  --with-birdstep[=DIR]   Include Birdstep support.  DIR is the Birdstep base
                           install directory, defaults to /usr/local/birdstep.],
 [
   PHP_WITH_SHARED
