@@ -160,9 +160,9 @@ void apply_config(void *dummy)
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, (void **) &data);
 		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
-		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len + 1, 
-				data->status, PHP_INI_STAGE_RUNTIME) == FAILURE)
+		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len, data->status, PHP_INI_STAGE_RUNTIME) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
+		}	
 	}
 }
 
