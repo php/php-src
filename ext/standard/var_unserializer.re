@@ -233,6 +233,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	
 	
 /*!re2c
+
 "R:" iv ";"		{
 	int id;
 
@@ -392,6 +393,12 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
+}
+
+"}" {
+	/* this is the case where we have less data than planned */
+	zend_error(E_NOTICE, "Unexpected end of serialized data");
+	return 0; /* not sure if it should be 0 or 1 here? */
 }
 
 any	{ return 0; }
