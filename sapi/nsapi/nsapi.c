@@ -337,7 +337,7 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	} else {
 		php_end_ob_buffers(1 TSRMLS_CC);
-		php_header();
+		php_header(TSRMLS_C);
 
 		/* do the sub-request */
 		/* thanks to Chris Elving from Sun for this code sniplet */
@@ -422,7 +422,7 @@ PHP_FUNCTION(nsapi_response_headers)
 		RETURN_FALSE;
 	}
 
-	php_header();
+	php_header(TSRMLS_C);
 
 	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
 		entry=rc->rq->srvhdrs->ht[i];
