@@ -73,28 +73,27 @@ class PEAR_Command_Auth extends PEAR_Command_Common
      */
     function run($command, $options, $params)
     {
-        $cf = $this->config;
         $failmsg = '';
-        $server = $cf->get('master_server');
+        $server = $this->config->get('master_server');
         switch ($command) {
             case 'login': {
-                $remote = new PEAR_Remote($cf);
-                $username = $cf->get('username');
+                $remote = new PEAR_Remote($this->config);
+                $username = $this->config->get('username');
                 if (empty($username)) {
                     $username = @$_ENV['USER'];
                 }
                 $this->ui->displayLine("Logging in to $server.");
                 $username = trim($this->ui->userDialog('Username', 'text', $username));
 
-                $cf->set('username', $username);
+                $this->config->set('username', $username);
                 $password = trim($this->ui->userDialog('Password', 'password'));
-                $cf->set('password', $password);
+                $this->config->set('password', $password);
                 $remote->expectError(401);
                 $ok = $remote->call('logintest');
                 $remote->popExpect();
                 if ($ok === true) {
                     $this->ui->displayLine("Logged in.");
-                    $cf->store();
+                    $this->config->store();
                 } else {
                     $this->ui->displayLine("Login failed!");
                 }
@@ -102,9 +101,9 @@ class PEAR_Command_Auth extends PEAR_Command_Common
             }
             case 'logout': {
                 $this->ui->displayLine("Logging out from $server.");
-                $cf->remove('username');
-                $cf->remove('password');
-                $cf->store();
+                $this->config->remove('username');
+                $this->config->remove('password');
+                $this->config->store();
                 break;
             }
             default: {
