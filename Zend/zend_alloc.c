@@ -397,6 +397,10 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		zval display_memory_cache_stats;
 		int i, j;
 
+		if (clean_cache) {
+			/* we're shutting down completely, don't even touch the INI subsystem */
+			break;
+		}
 		if (zend_get_ini_entry("display_memory_cache_stats", sizeof("display_memory_cache_stats"), &display_memory_cache_stats)==FAILURE) {
 			break;
 		}
