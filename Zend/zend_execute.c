@@ -3056,7 +3056,7 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zval *obj = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	zval *obj = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R TSRMLS_CC);
 	zend_class_entry *ce;
 	zend_function *clone;
 	zend_object_clone_obj_t clone_call;
