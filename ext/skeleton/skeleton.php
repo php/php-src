@@ -1,6 +1,6 @@
 <?
 if(!extension_loaded('extname')) {
-	dl('extname.so');
+	dl('extname.' . PHP_SHLIB_SUFFIX);
 }
 $module = 'extname';
 $functions = get_extension_funcs($module);
