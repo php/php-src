@@ -48,15 +48,14 @@ static inline void zend_objects_destroy_object(zend_object *object, zend_object_
 }
 
 zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type)
-{
-	zend_object_handle handle;
+{	
 	zend_object_value retval;
 
 	TSRMLS_FETCH();
 
 	*object = emalloc(sizeof(zend_object));
 	(*object)->ce = class_type;
-	retval.handle = zend_objects_store_put(*object, (zend_objects_store_dtor_t) zend_objects_destroy_object, NULL TSRMLS_DC);
+	retval.handle = zend_objects_store_put(*object, (zend_objects_store_dtor_t) zend_objects_destroy_object, NULL TSRMLS_CC);
 	retval.handlers = &std_object_handlers;
 	return retval;
 }
@@ -64,7 +63,7 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 zend_object *zend_objects_get_address(zval *zobject)
 {
 	TSRMLS_FETCH();
-	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_DC);
+	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
 
 zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
