@@ -366,6 +366,10 @@ SOURCE=..\ext\standard\credits.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\crypt.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\datetime.c
 # End Source File
 # Begin Source File
@@ -648,6 +652,10 @@ SOURCE=..\ext\standard\php_array.h
 # Begin Source File
 
 SOURCE=..\ext\bcmath\php_bcmath.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_crypt.h
 # End Source File
 # Begin Source File
 
