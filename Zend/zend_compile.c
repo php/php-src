@@ -3848,6 +3848,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->module = NULL;
 		ce->serialize = NULL;
 		ce->unserialize = NULL;
+		ce->serialize_func = NULL;
+		ce->unserialize_func = NULL;
 	}
 }
 

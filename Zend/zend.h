@@ -331,6 +331,8 @@ struct _zend_class_entry {
 	union _zend_function *__get;
 	union _zend_function *__set;
 	union _zend_function *__call;
+	union _zend_function *serialize_func;
+	union _zend_function *unserialize_func;
 
 	zend_class_iterator_funcs iterator_funcs;
 
@@ -341,7 +343,7 @@ struct _zend_class_entry {
 
 	/* serializer callbacks */
 	int (*serialize)(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
-	int (*unserialize)(zval **object, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
+	int (*unserialize)(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC);
 
 	zend_class_entry **interfaces;
 	zend_uint num_interfaces;
