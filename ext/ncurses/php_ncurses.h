@@ -66,7 +66,7 @@ ZEND_END_MODULE_GLOBALS(ncurses)
 #define NCURSES_LS_FETCH()
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(ncurses);
+ZEND_EXTERN_MODULE_GLOBALS(ncurses)
 	
 #endif  /* PHP_NCURSES_H */
 

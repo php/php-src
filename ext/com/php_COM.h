@@ -58,7 +58,7 @@ ZEND_BEGIN_MODULE_GLOBALS(com)
 	int nothing;
 ZEND_END_MODULE_GLOBALS(com)
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(com);
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(com)
 	
 #ifdef ZTS
 #define COMG(v)	TSRMG(com_globals_id, zend_com_globals *, v)

@@ -211,8 +211,7 @@ PHPAPI void php_session_start(TSRMLS_D);
 	ulong num_key;												\
 	zval **struc;
 
-#define PS_ENCODE_LOOP(code)										\
-	{																\
+#define PS_ENCODE_LOOP(code) do {										\
 		HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars)); \
 																	\
 		for (zend_hash_internal_pointer_reset(_ht);			\
@@ -223,9 +222,9 @@ PHPAPI void php_session_start(TSRMLS_D);
 				code;		 										\
 			} 														\
 		}															\
-	}
+	} while(0)
 
-ZEND_EXTERN_MODULE_GLOBALS(ps);
+ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
 void php_session_shutdown(void *data);
