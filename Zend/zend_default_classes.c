@@ -506,6 +506,7 @@ ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_default_exception(TSRMLS_C);
 	zend_register_reflection_api(TSRMLS_C);
+	zend_register_iterator_wrapper(TSRMLS_C);
 }
 
 /*

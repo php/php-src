@@ -3534,11 +3534,20 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array_ptr, **array_ptr_ptr;
 	HashTable *fe_ht;
+	zend_object_iterator *iter = NULL;
+	zend_class_entry *ce = NULL;
 	
 	if (EX(opline)->extended_value) {
 		array_ptr_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R);
 		if (array_ptr_ptr == NULL) {
 			MAKE_STD_ZVAL(array_ptr);
+		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
+			ce = Z_OBJCE_PP(array_ptr_ptr);
+			if (!ce || ce->get_iterator == NULL) {
+				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+				(*array_ptr_ptr)->refcount++;
+			}
+			array_ptr = *array_ptr_ptr;
 		} else {
 			SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
 			array_ptr = *array_ptr_ptr;
@@ -3553,16 +3562,32 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 			*tmp = *array_ptr;
 			INIT_PZVAL(tmp);
 			array_ptr = tmp;
+		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
+			ce = Z_OBJCE_P(array_ptr);
 		} else {
 			array_ptr->refcount++;
 		}
 	}
 
+	if (ce && ce->get_iterator) {
+		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
+
+		if (iter) {
+			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
+		} else {
+			array_ptr->refcount++;
+		}
+	}
+	
 	PZVAL_LOCK(array_ptr);
 	EX_T(EX(opline)->result.u.var).var.ptr = array_ptr;
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
 
-	if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
+	if (iter) {
+		if (iter->funcs->rewind) {
+			iter->funcs->rewind(iter TSRMLS_CC);
+		}
+	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
 		/* probably redundant */
 		zend_hash_internal_pointer_reset(fe_ht);
 	} else {
@@ -3586,20 +3611,37 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	uint str_key_len;
 	ulong int_key;
 	HashTable *fe_ht;
+	zend_object_iterator *iter = NULL;
 
 	PZVAL_LOCK(array);
 
-	fe_ht = HASH_OF(array);
-	if (!fe_ht) {
-		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
-		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
-		return 0; /* CHECK_ME */
-	} else if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
-		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
-		return 0; /* CHECK_ME */
-	}
-	array_init(result);
+	switch (zend_iterator_unwrap(array, &iter TSRMLS_CC)) {
+		case ZEND_ITER_INVALID:
+			zend_error(E_WARNING, "Invalid argument supplied for foreach()");
+			EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
+			return 0; /* CHECK_ME */
+			
+		case ZEND_ITER_PLAIN_ARRAY:
+			/* good old fashioned foreach on an array */
+			fe_ht = HASH_OF(array);
+			if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
+				/* reached end of iteration */
+				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
+				return 0; /* CHECK_ME */
+			}
+			break;
 
+		case ZEND_ITER_OBJECT:
+			if (iter->funcs->has_more(iter TSRMLS_CC) == FAILURE) {
+				/* reached end of iteration */
+				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
+				return 0; /* CHECK_ME */
+			}	
+			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
+			break;
+	}
+
+	array_init(result);
 
 	if (EX(opline)->extended_value) {
 		SEPARATE_ZVAL_IF_NOT_REF(value);
@@ -3610,7 +3652,10 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	ALLOC_ZVAL(key);
 	INIT_PZVAL(key);
-	switch (zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL)) {
+	
+	switch (iter ?
+			iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC) :
+			zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL)) {
 		case HASH_KEY_IS_STRING:
 			key->value.str.val = str_key;
 			key->value.str.len = str_key_len-1;
@@ -3623,7 +3668,12 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
-	zend_hash_move_forward(fe_ht);
+
+	if (iter) {
+		iter->funcs->move_forward(iter TSRMLS_CC);
+	} else {
+		zend_hash_move_forward(fe_ht);
+	}
 
 	NEXT_OPCODE();
 }

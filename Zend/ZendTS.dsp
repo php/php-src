@@ -200,6 +200,10 @@ SOURCE=.\zend_ini_scanner.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_iterators.c
+# End Source File
+# Begin Source File
+
 SOURCE=".\zend_language_parser.c"
 # End Source File
 # Begin Source File
@@ -365,6 +369,10 @@ SOURCE=.\zend_ini_scanner.h
 # Begin Source File
 
 SOURCE=.\zend_istdiostream.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_iterators.h
 # End Source File
 # Begin Source File
 
