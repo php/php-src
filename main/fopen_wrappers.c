@@ -449,7 +449,6 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	{
 		char *exec_fname;
 		int exec_fname_len;
-		char *filename_dir;
 		ELS_FETCH();
 
 		exec_fname = zend_get_executed_filename(ELS_C);
