@@ -61,7 +61,6 @@ ext/oci8
 
 ext/pcre
 --------
-    * have an option for preg_grep() to return keys as well.
     * update the online docs from version 3.1 man page
 
 ext/session

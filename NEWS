@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Modified preg_grep() to always return the results with keys from the original
+  array. (Andrei)
+- Modified preg_replace() to accept Perl-style $n backreferences in addition
+  to \\n ones. (Andrei)
 - Modified preg_replace() to ignore backreferences that refer to
   non-existing subpatterns. (Andrei)
 - Fixed column-title buffer-overflow in OCIFetchStatement(). (Thies)
