@@ -437,7 +437,7 @@ PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
 PHP_INI_END()
 
 
-/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage[, string typelib]]])
+/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage [, string typelib]]])
    Loads a COM module */
 PHP_FUNCTION(com_load)
 {
@@ -804,9 +804,8 @@ PHP_FUNCTION(com_invoke)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
+	RETVAL_VARIANT(var_result);
 
-	FREE_VARIANT(var_result);
 	efree(arguments);
 }
 /* }}} */
@@ -1049,9 +1048,7 @@ PHP_FUNCTION(com_propget)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
-
-	FREE_VARIANT(var_result);
+	RETVAL_VARIANT(var_result);
 }
 /* }}} */
 
@@ -1082,7 +1079,8 @@ PHP_FUNCTION(com_propput)
 /* }}} */
 
 
-/* {{{ proto bool com_load_typelib(string typelib_name[, int case_insensitiv]) */
+/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitiv]) 
+   Loads a Typelib */
 PHP_FUNCTION(com_load_typelib)
 {
 	pval *arg_typelib, *arg_cis;
