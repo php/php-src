@@ -536,9 +536,8 @@ void zend_deactivate(CLS_D ELS_DC)
 	if (setjmp(EG(bailout))==0) {
 		shutdown_scanner(CLS_C);
 	}
-	if (setjmp(EG(bailout))==0) {
-		shutdown_executor(ELS_C);
-	}
+	/* shutdown_executor() takes care of its own bailout handling */
+	shutdown_executor(ELS_C);
 	if (setjmp(EG(bailout))==0) {
 		shutdown_compiler(CLS_C);
 	}

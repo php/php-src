@@ -152,49 +152,53 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	zend_ptr_stack_destroy(&EG(arg_types_stack));
-			
-	while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
-		zend_hash_destroy(*EG(symtable_cache_ptr));
-		efree(*EG(symtable_cache_ptr));
-		EG(symtable_cache_ptr)--;
-	}
-	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_deactivator);
-
-	zend_hash_destroy(&EG(symbol_table));
-
-	while (EG(garbage_ptr)--) {
-		if (EG(garbage)[EG(garbage_ptr)]->refcount==1) {
-			zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
+	if (setjmp(EG(bailout))==0) {
+		zend_ptr_stack_destroy(&EG(arg_types_stack));
+				
+		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+			zend_hash_destroy(*EG(symtable_cache_ptr));
+			efree(*EG(symtable_cache_ptr));
+			EG(symtable_cache_ptr)--;
 		}
+		zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_deactivator);
+
+		zend_hash_destroy(&EG(symbol_table));
+
+		while (EG(garbage_ptr)--) {
+			if (EG(garbage)[EG(garbage_ptr)]->refcount==1) {
+				zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
+			}
+		}
+
+		zend_ptr_stack_destroy(&EG(argument_stack));
+
+		/* Destroy all op arrays */
+		zend_hash_apply(EG(function_table), (int (*)(void *)) is_not_internal_function);
+		zend_hash_apply(EG(class_table), (int (*)(void *)) is_not_internal_class);
 	}
-
-	zend_ptr_stack_destroy(&EG(argument_stack));
-
-	/* Destroy all op arrays */
-	zend_hash_apply(EG(function_table), (int (*)(void *)) is_not_internal_function);
-	zend_hash_apply(EG(class_table), (int (*)(void *)) is_not_internal_class);
 
 	zend_destroy_rsrc_list(ELS_C); /* must be destroyed after the main symbol table and
 									* op arrays are destroyed.
 									*/
 
-	clean_non_persistent_constants();
+	if (setjmp(EG(bailout))==0) {
+		clean_non_persistent_constants();
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
 
-	zend_hash_destroy(&EG(included_files));
+		zend_hash_destroy(&EG(included_files));
 
-	if (EG(user_error_handler)) {
-		zval_dtor(EG(user_error_handler));
-		FREE_ZVAL(EG(user_error_handler));
+		if (EG(user_error_handler)) {
+			zval_dtor(EG(user_error_handler));
+			FREE_ZVAL(EG(user_error_handler));
+		}
+
+		zend_ptr_stack_clean(&EG(user_error_handlers), ZVAL_DESTRUCTOR, 1);
+		zend_ptr_stack_destroy(&EG(user_error_handlers));
+
+		EG(error_reporting) = EG(orig_error_reporting);
 	}
-
-	zend_ptr_stack_clean(&EG(user_error_handlers), ZVAL_DESTRUCTOR, 1);
-	zend_ptr_stack_destroy(&EG(user_error_handlers));
-
-	EG(error_reporting) = EG(orig_error_reporting);
 }
 
 

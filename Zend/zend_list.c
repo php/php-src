@@ -231,8 +231,33 @@ int zend_init_rsrc_plist(ELS_D)
 
 void zend_destroy_rsrc_list(ELS_D)
 {
-	zend_hash_reverse_destroy(&EG(regular_list));
+	Bucket *p, *q;
+	HashTable *ht = &EG(regular_list);
+
+	while (1) {
+		p = ht->pListTail;
+		if (!p) {
+			break;
+		}
+		q = p->pListLast;
+		if (q) {
+			q->pListNext = NULL;
+		}
+		ht->pListTail = q;
+
+		if (ht->pDestructor) {
+			if (setjmp(EG(bailout))==0) {
+				ht->pDestructor(p->pData);
+			}
+		}
+		if (!p->pDataPtr && p->pData) {
+			pefree(p->pData, ht->persistent);
+		}
+		pefree(p, ht->persistent);
+	}
+	pefree(ht->arBuckets, ht->persistent);
 }
+
 
 
 void zend_destroy_rsrc_plist(ELS_D)
