@@ -608,7 +608,7 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 			RETVAL_FALSE;
 			break;
 		default: /* error */
-			RETVAL_TRUE;
+			RETVAL_FALSE;
 			break;
 	}
 
