@@ -67,7 +67,7 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
-static unsigned char a3_arg2_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
+static unsigned char a3_arg3_force_ref[] = { 3, BYREF_NONE, BYREF_ALLOW, BYREF_FORCE };
 
 function_entry odbc_functions[] = {
 	PHP_FE(odbc_setoption, NULL)
@@ -82,7 +82,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_prepare, NULL)
 	PHP_FE(odbc_execute, NULL)
 	PHP_FE(odbc_fetch_row, NULL)
-	PHP_FE(odbc_fetch_into, a3_arg2_force_ref)
+	PHP_FE(odbc_fetch_into, a3_arg3_force_ref)
 	PHP_FE(odbc_field_len, NULL)
 	PHP_FE(odbc_field_scale, NULL)
 	PHP_FE(odbc_field_name, NULL)
@@ -1113,7 +1113,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				WRONG_PARAM_COUNT;
 			break;
 		case 3:
-			if (zend_get_parameters_ex(3, &pv_res, &pv_res_arr, &pv_row) == FAILURE)
+			if (zend_get_parameters_ex(3, &pv_res, &pv_row, &pv_res_arr) == FAILURE)
 				WRONG_PARAM_COUNT;
 			convert_to_long_ex(pv_row);
 			rownum = (*pv_row)->value.lval;
@@ -1122,10 +1122,6 @@ PHP_FUNCTION(odbc_fetch_into)
 			WRONG_PARAM_COUNT;
 	}
 
-	if (!ParameterPassedByReference(ht, 2)) {
-		php_error(E_WARNING, "Array not passed by reference in call to odbc_fetch_into()");
-		RETURN_FALSE;
-	}
 #else
 	pval **pv_res, **pv_res_arr, *tmp;
 
@@ -1134,12 +1130,12 @@ PHP_FUNCTION(odbc_fetch_into)
 	if (numArgs != 2 || zend_get_parameters_ex(2, &pv_res, &pv_res_arr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+#endif
+	
 	if (!ParameterPassedByReference(ht, numArgs)) {
 		php_error(E_WARNING, "Array not passed by reference in call to odbc_fetch_into()");
 		RETURN_FALSE;
 	}
-#endif				
 
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
