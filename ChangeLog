@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed Apache information in phpinfo() (sam@breakfree.com)
 - Improved register_shutdown_function() - you may now supply arguments that
   will be passed to the shutdown function (Zeev)
 - Improved call_user_func() and call_user_method() - they now support passing
