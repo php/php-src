@@ -1,3 +1,109 @@
+2000-11-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h: Fix allocation
+
+2000-11-14  David Eriksson  <david@2good.com>
+
+    * ext/satellite/.cvsignore:
+2000-11-14  Stig Venaas  <venaas@uninett.no>
+
+    * ext/openssl/openssl.c:
+    Changed to use Z_LVAL_PP, Z_STRVAL_PP and Z_STRLEN_PP.
+
+2000-11-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Add kick handler
+
+    Requires ircg 0.3 or later
+
+2000-11-14  Stig Venaas  <venaas@uninett.no>
+
+    * ext/openssl/.cvsignore: Not using automake here either
+
+2000-11-14  Onn Ben-Zvi  <onn@zend.com>
+
+    * ext/fribidi/.cvsignore: initial - ONn
+
+2000-11-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Allow customization of format strings.
+
+    By using Javascript in these format strings, you can have various
+    customized front-ends to the same back-end.
+
+    * ext/standard/php_smart_str.h:
+    Add persistent memory handling to smart_str API
+
+    * ext/iisfunc/.cvsignore
+      ext/xml/.cvsignore
+      ext/xml/expat/xmltok/.cvsignore
+      ext/yp/.cvsignore
+      ext/zlib/.cvsignore
+      ext/sysvshm/.cvsignore
+      ext/wddx/.cvsignore
+      ext/xml/expat/.cvsignore
+      ext/xml/expat/xmlparse/.cvsignore
+      ext/sybase_ct/.cvsignore
+      ext/sysvsem/.cvsignore
+      ext/sybase/.cvsignore
+      ext/swf/.cvsignore
+      ext/session/.cvsignore
+      ext/snmp/.cvsignore
+      ext/standard/.cvsignore
+      ext/pspell/.cvsignore
+      ext/readline/.cvsignore
+      ext/recode/.cvsignore
+      ext/pfpro/.cvsignore
+      ext/pgsql/.cvsignore
+      ext/posix/.cvsignore
+      ext/pcre/.cvsignore
+      ext/pcre/pcrelib/testdata/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pcre/pcrelib/.cvsignore
+      ext/pcre/pcrelib/doc/.cvsignore
+      ext/oci8/.cvsignore
+      ext/odbc/.cvsignore
+      ext/oracle/.cvsignore
+      ext/msql/.cvsignore
+      ext/mssql/.cvsignore
+      ext/mysql/.cvsignore
+      ext/mcrypt/.cvsignore
+      ext/mhash/.cvsignore
+      ext/java/.cvsignore
+      ext/ldap/.cvsignore
+      ext/mcal/.cvsignore
+      ext/informix/.cvsignore
+      ext/interbase/.cvsignore
+      ext/gettext/.cvsignore
+      ext/hyperwave/.cvsignore
+      ext/icap/.cvsignore
+      ext/imap/.cvsignore
+      ext/gd/.cvsignore
+      ext/ftp/.cvsignore
+      ext/domxml/.cvsignore
+      ext/fdf/.cvsignore
+      ext/filepro/.cvsignore
+      ext/db/.cvsignore
+      ext/dba/.cvsignore
+      ext/dbase/.cvsignore
+      ext/curl/.cvsignore
+      ext/cybercash/.cvsignore
+      ext/dav/.cvsignore
+      ext/ccvs/.cvsignore
+      ext/com/.cvsignore
+      ext/cpdf/.cvsignore
+      ext/.cvsignore
+      ext/aspell/.cvsignore
+      ext/bcmath/.cvsignore:
+    Automake is gone. No need to ignore a non-existing file.
+
+2000-11-14  Stig Venaas  <venaas@uninett.no>
+
+    * ext/openssl/.cvsignore: *** empty log message ***
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h: Made API simpler
+
 2000-11-13  Daniel Beulshausen  <daniel@php4win.de>
 
     * ext/ingres_ii/ingres.dsp: fix link object
