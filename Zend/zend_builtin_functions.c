@@ -49,7 +49,7 @@ static ZEND_FUNCTION(leak);
 static ZEND_FUNCTION(crash);
 #endif
 static ZEND_FUNCTION(get_used_files);
-static ZEND_FUNCTION(get_imported_files);
+static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
@@ -79,7 +79,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(crash,				NULL)
 #endif
 	ZEND_FE(get_used_files,		NULL)
-	ZEND_FE(get_imported_files,	NULL)
+	ZEND_FE(get_included_files,	NULL)
 	ZEND_FE(is_subclass_of,		NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
@@ -628,8 +628,8 @@ ZEND_FUNCTION(get_used_files)
 }
 
 
-ZEND_FUNCTION(get_imported_files)
+ZEND_FUNCTION(get_included_files)
 {
 	array_init(return_value);
-	zend_hash_apply_with_argument(&EG(imported_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
+	zend_hash_apply_with_argument(&EG(included_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
 }

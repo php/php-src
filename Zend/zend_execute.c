@@ -2055,6 +2055,24 @@ send_by_ref:
 					return_value_used = RETURN_VALUE_USED(opline);
 
 					switch (opline->op2.u.constant.value.lval) {
+						case ZEND_INCLUDE_ONCE:
+							{
+								FILE *inc_file;
+								char *opened_path;
+								int dummy = 0;
+
+								inc_file = zend_fopen(opline->op1.u.constant.value.str.val, &opened_path);
+								
+								if (inc_file && opened_path) {
+									if (zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==FAILURE) {
+										fclose(inc_file);
+										free(opened_path);
+										break;
+									}
+									fclose(inc_file);
+									free(opened_path);
+								}
+							}
 						case ZEND_INCLUDE:
 						case ZEND_REQUIRE:
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC ELS_CC);
