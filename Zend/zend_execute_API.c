@@ -342,6 +342,9 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
+    int orig_free_op1, orig_free_op2;
+    int (*orig_unary_op)(zval *result, zval *op1);
+    int (*orig_binary_op)(zval *result, zval *op1, zval *op2);
 	ELS_FETCH();
 
 	*retval_ptr_ptr = NULL;
@@ -448,6 +451,10 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		EG(return_value_ptr_ptr) = retval_ptr_ptr;
 		EG(active_op_array) = (zend_op_array *) function_state.function;
 		original_opline_ptr = EG(opline_ptr);
+		orig_free_op1 = EG(free_op1);
+		orig_free_op2 = EG(free_op2);
+		orig_unary_op = EG(unary_op);
+		orig_binary_op = EG(binary_op);
 		zend_execute(EG(active_op_array) ELS_CC);
 		if (!symbol_table) {
 			zend_hash_destroy(EG(active_symbol_table));
@@ -457,6 +464,10 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		EG(active_op_array) = original_op_array;
 		EG(return_value_ptr_ptr)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
+		EG(free_op1) = orig_free_op1;
+		EG(free_op2) = orig_free_op2;
+		EG(unary_op) = orig_unary_op;
+		EG(binary_op) = orig_binary_op;
 	} else {
 		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
 		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 ELS_CC);
