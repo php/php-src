@@ -34,7 +34,35 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 
-#include "zend_arg_defs.c"
+/* {{{ content from zend_arg_defs.c:
+ * since it is a .c file, it won't be installed for use by PECL extensions, so we include it here. */
+ZEND_BEGIN_ARG_INFO(first_arg_force_ref, 0)
+	ZEND_ARG_PASS_INFO(1)
+ZEND_END_ARG_INFO();
+
+
+ZEND_BEGIN_ARG_INFO(second_arg_force_ref, 0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(1)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(third_arg_force_ref, 0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(1)
+ZEND_END_ARG_INFO();
+
+
+ZEND_BEGIN_ARG_INFO(fourth_arg_force_ref, 0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(1)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO(all_args_by_ref, 1)
+ZEND_END_ARG_INFO();
+/* }}} */
 
 static PHP_FUNCTION(dbstmt_constructor) /* {{{ */
 {
