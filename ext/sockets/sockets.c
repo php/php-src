@@ -1392,12 +1392,13 @@ PHP_FUNCTION(socket_recvfrom)
 			zval_dtor(arg2);
 			zval_dtor(arg5);
 
-			ZVAL_STRING(arg2, recv_buf, 0);
+			ZVAL_STRINGL(arg2, recv_buf, retval, 0);
 			ZVAL_STRING(arg5, s_un.sun_path, 1);
 			break;
 
 		case AF_INET:
 			slen = sizeof(sin);
+			memset(&sin, 0, slen);
 			sin.sin_family = AF_INET;
 		
 			if (arg6 == NULL) {
@@ -1418,7 +1419,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			address = inet_ntoa(sin.sin_addr);
 
-			ZVAL_STRING(arg2, recv_buf, 0); 
+			ZVAL_STRINGL(arg2, recv_buf, retval, 0); 
 			ZVAL_STRING(arg5, address ? address : "0.0.0.0", 1);
 			ZVAL_LONG(arg6, ntohs(sin.sin_port));
 			break;
