@@ -107,9 +107,11 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 {
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
+		BG(CurrentStatFile) = NULL;
 	}
 	if (BG(CurrentLStatFile)) {
 		efree (BG(CurrentLStatFile));
+		BG(CurrentLStatFile) = NULL;
 	}
 	return SUCCESS;
 }
