@@ -24,8 +24,9 @@
 
 #include "php.h"
 
-#if WITH_BCMATH
+#if HAVE_BCMATH
 
+#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
@@ -50,14 +51,10 @@ zend_module_entry bcmath_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"bcmath",
 	bcmath_functions,
-#if ZTS
-	PHP_MODULE_STARTUP_N(bcmath),
-#else
+	PHP_MINIT(bcmath),
+	PHP_MSHUTDOWN(bcmath),
 	NULL,
-#endif
 	NULL,
-	PHP_RINIT(bcmath),
-	PHP_RSHUTDOWN(bcmath),
 	PHP_MINFO(bcmath),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -67,53 +64,55 @@ zend_module_entry bcmath_module_entry = {
 ZEND_GET_MODULE(bcmath)
 #endif
 
-#ifndef THREAD_SAFE
-static long bc_precision;
-#endif
+/* {{{ PHP_INI */
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("bcmath.scale", "0", PHP_INI_ALL, OnUpdateLong, bc_precision, zend_bcmath_globals, bcmath_globals)
+PHP_INI_END()
+/* }}} */
 
-#if ZTS
-PHP_MODULE_STARTUP_D(bcmath)
+/* {{{ php_bcmath_init_globals
+ */
+static void php_bcmath_init_globals(zend_bcmath_globals *bcmath_globals)
 {
-	zend_bcmath_globals *bcmath_globals;
-
-	ts_allocate_id(&bcmath_globals_id, sizeof(zend_bcmath_globals), NULL, NULL);
-	bcmath_globals = ts_resource(bcmath_globals_id);
-	return SUCCESS;
+	bcmath_globals->bc_precision = 0;
 }
-#endif
+/* }}} */
 
-PHP_RSHUTDOWN_FUNCTION(bcmath)
+/* {{{ PHP_MINIT_FUNCTION
+ */
+PHP_MINIT_FUNCTION(bcmath)
 {
-	bc_free_num(&BCG(_zero_));
-	bc_free_num(&BCG(_one_));
-	bc_free_num(&BCG(_two_));
+	ZEND_INIT_MODULE_GLOBALS(bcmath, php_bcmath_init_globals, NULL);
 
-	return SUCCESS;
-}
+	REGISTER_INI_ENTRIES();
 
-
-PHP_RINIT_FUNCTION(bcmath)
-{
-	if (cfg_get_long("bcmath.scale", &bc_precision) == FAILURE) {
-		bc_precision = 0;
-	}
-
-	if (bc_precision < 0) {
-		bc_precision = 0;
-	}
-	
 	bc_init_numbers(TSRMLS_C);
-	
+
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(bcmath)
+{
+	_bc_free_num_ex(&BCG(_zero_), 1);
+	_bc_free_num_ex(&BCG(_one_), 1);
+	_bc_free_num_ex(&BCG(_two_), 1);
 
+	return SUCCESS;
+}
+/* }}} */
+         
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(bcmath)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "BCMath support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
 /* {{{ php_str2num
    Convert to bc_num detecting scale */
@@ -136,7 +135,7 @@ PHP_FUNCTION(bcadd)
 {
 	zval **left, **right, **scale_param;
 	bc_num first, second, result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -182,7 +181,7 @@ PHP_FUNCTION(bcsub)
 {
 	zval **left, **right, **scale_param;
 	bc_num first, second, result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -228,7 +227,7 @@ PHP_FUNCTION(bcmul)
 {
 	zval **left, **right, **scale_param;
 	bc_num first, second, result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -274,7 +273,7 @@ PHP_FUNCTION(bcdiv)
 {
 	zval **left, **right, **scale_param;
 	bc_num first, second, result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -368,7 +367,7 @@ PHP_FUNCTION(bcpowmod)
 	char *left, *right, *modulous;
 	int left_len, right_len, modulous_len;
 	bc_num first, second, mod, result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -402,7 +401,7 @@ PHP_FUNCTION(bcpow)
 {
 	zval **left, **right, **scale_param;
 	bc_num first, second, result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -448,7 +447,7 @@ PHP_FUNCTION(bcsqrt)
 {
 	zval **left, **scale_param;
 	bc_num result;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -491,7 +490,7 @@ PHP_FUNCTION(bccomp)
 {
 	zval **left, **right, **scale_param;
 	bc_num first, second;
-	int scale = bc_precision;
+	int scale = BCG(bc_precision);
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -538,7 +537,7 @@ PHP_FUNCTION(bcscale)
 	}
 	
 	convert_to_long_ex(new_scale);
-	bc_precision = (Z_LVAL_PP(new_scale) < 0) ? 0 : Z_LVAL_PP(new_scale);
+	BCG(bc_precision) = (Z_LVAL_PP(new_scale) < 0) ? 0 : Z_LVAL_PP(new_scale);
 
 	RETURN_TRUE;
 }

@@ -45,19 +45,19 @@
 /* new_num allocates a number and sets fields to known values. */
 
 bc_num
-bc_new_num (length, scale)
-     int length, scale;
+_bc_new_num_ex (length, scale, persistent)
+     int length, scale, persistent;
 {
   bc_num temp;
 
-  /* PHP Change:  malloc() -> emalloc(), removed free_list code */
-  temp = (bc_num) emalloc (sizeof(bc_struct)+length+scale);
+  /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
+  temp = (bc_num) pemalloc (sizeof(bc_struct)+length+scale, persistent);
 #if 0
   if (_bc_Free_list != NULL) {
     temp = _bc_Free_list;
     _bc_Free_list = temp->n_next;
   } else {
-    temp = (bc_num) emalloc (sizeof(bc_struct));
+    temp = (bc_num) pemalloc (sizeof(bc_struct), persistent);
     if (temp == NULL) bc_out_of_memory ();
   }
 #endif
@@ -65,8 +65,8 @@ bc_new_num (length, scale)
   temp->n_len = length;
   temp->n_scale = scale;
   temp->n_refs = 1;
-  /* PHP Change:  malloc() -> emalloc() */
-  temp->n_ptr = (char *) emalloc (length+scale);
+  /* PHP Change:  malloc() -> pemalloc() */
+  temp->n_ptr = (char *) pemalloc (length+scale, persistent);
   if (temp->n_ptr == NULL) bc_out_of_memory();
   temp->n_value = temp->n_ptr;
   memset (temp->n_ptr, 0, length+scale);
@@ -78,16 +78,17 @@ bc_new_num (length, scale)
    frees the storage if reference count is zero. */
 
 void
-bc_free_num (num)
+_bc_free_num_ex (num, persistent)
     bc_num *num;
+    int persistent;
 {
   if (*num == NULL) return;
   (*num)->n_refs--;
   if ((*num)->n_refs == 0) {
     if ((*num)->n_ptr)
-		/* PHP Change:  free() -> efree(), removed free_list code */
-      efree ((*num)->n_ptr);
-	efree(*num);
+		/* PHP Change:  free() -> pefree(), removed free_list code */
+      pefree ((*num)->n_ptr, persistent);
+	pefree(*num, persistent);
 #if 0
     (*num)->n_next = _bc_Free_list;
     _bc_Free_list = *num;
@@ -102,10 +103,10 @@ bc_free_num (num)
 void
 bc_init_numbers (TSRMLS_D)
 {
-  BCG(_zero_) = bc_new_num (1,0);
-  BCG(_one_)  = bc_new_num (1,0);
+  BCG(_zero_) = _bc_new_num_ex (1,0,1);
+  BCG(_one_)  = _bc_new_num_ex (1,0,1);
   BCG(_one_)->n_value[0] = 1;
-  BCG(_two_)  = bc_new_num (1,0);
+  BCG(_two_)  = _bc_new_num_ex (1,0,1);
   BCG(_two_)->n_value[0] = 2;
 }
 

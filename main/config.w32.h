@@ -20,7 +20,7 @@
 #define PHP_SYSCONFDIR "c:\\php5"
 
 /* Enable / Disable BCMATH extension (default: enabled) */
-#define WITH_BCMATH 1
+#define HAVE_BCMATH 1
 
 /* Enable / Disable crypt() function (default: enabled) */
 #define HAVE_CRYPT 1
