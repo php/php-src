@@ -41,6 +41,8 @@ typedef struct {
 	long async_send;
 
 	smart_str sbuf;
+	int seen_cl;
+	int seen_cn;
 } php_thttpd_globals;
 
 
@@ -69,12 +71,13 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 	while (str_length > 0) {
 		n = send(TG(hc)->conn_fd, str, str_length, 0);
 
-		if (n == -1 && errno == EPIPE)
-			php_handle_aborted_connection();
-		if (n == -1 && errno == EAGAIN) {
-			smart_str_appendl_ex(&TG(sbuf), str, str_length, 1);
+		if (n == -1) {
+			if (errno == EAGAIN) {
+				smart_str_appendl_ex(&TG(sbuf), str, str_length, 1);
 
-			return sent + str_length;
+				return sent + str_length;
+			} else
+				php_handle_aborted_connection();
 		}
 
 		TG(hc)->bytes_sent += n;
@@ -143,6 +146,12 @@ static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 	return 0;
 }
 
+#define CL_TOKEN "Content-length: "
+#define CN_TOKEN "Connection: "
+#define KA_DO "Connection: keep-alive\r\n"
+#define KA_NO "Connection: close\r\n"
+#define DEF_CT "Content-Type: text/html\r\n"
+
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[1024];
@@ -153,7 +162,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	size_t len = 0;
 	
 	if (!SG(sapi_headers).http_status_line) {
-		sprintf(buf, "HTTP/1.0 %d Code\r\n",  /* SAFE */
+		sprintf(buf, "HTTP/1.1 %d Code\r\n",  /* SAFE */
 				SG(sapi_headers).http_response_code);
 		ADD_VEC(buf, strlen(buf));
 	} else {
@@ -163,14 +172,22 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	}
 	TG(hc)->status = SG(sapi_headers).http_response_code;
 
-#define DEF_CT "Content-Type: text/html\r\n"
-
 	if (SG(sapi_headers).send_default_content_type) {
 		ADD_VEC(DEF_CT, strlen(DEF_CT));
 	}
 
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
+		
+		switch (h->header[0]) {
+			case 'c': case 'C':
+				if (!TG(seen_cl) && strncasecmp(h->header, CL_TOKEN, sizeof(CL_TOKEN)-1) == 0) {
+					TG(seen_cl) = 1;
+				} else if (!TG(seen_cn) && strncasecmp(h->header, CN_TOKEN, sizeof(CN_TOKEN)-1) == 0) {
+					TG(seen_cn) = 1;
+				}
+		}
+
 		ADD_VEC(h->header, h->header_len);
 		if (n >= COMBINE_HEADERS - 1) {
 			len = do_writev(vec, n, len TSRMLS_CC);
@@ -179,6 +196,12 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		ADD_VEC("\r\n", 2);
 		
 		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
+	}
+
+	if (TG(seen_cl) && !TG(seen_cn) && TG(hc)->do_keep_alive) {
+		ADD_VEC(KA_DO, sizeof(KA_DO)-1);
+	} else {
+		ADD_VEC(KA_NO, sizeof(KA_NO)-1);
 	}
 		
 	ADD_VEC("\r\n", 2);
@@ -392,6 +415,8 @@ static void thttpd_request_ctor(TSRMLS_D)
 {
 	smart_str s = {0};
 
+	TG(seen_cl) = 0;
+	TG(seen_cn) = 0;
 	TG(sbuf).c = 0;
 	SG(request_info).query_string = TG(hc)->query?strdup(TG(hc)->query):NULL;
 
@@ -612,8 +637,14 @@ static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 
 	thttpd_module_main(TSRMLS_C);
 
+	/* disable kl, if no content-length was seen or Connection: was set */
+	if (TG(seen_cl) == 0 || TG(seen_cn) == 1) {
+		TG(hc)->do_keep_alive = TG(hc)->keep_alive = 0;
+	}
+	
 	if (TG(sbuf).c != 0) {
-		free(TG(hc)->response);
+		if (TG(hc)->response)
+			free(TG(hc)->response);
 		
 		TG(hc)->response = TG(sbuf).c;
 		TG(hc)->responselen = TG(sbuf).len;
