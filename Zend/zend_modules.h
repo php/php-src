@@ -48,7 +48,7 @@ ZEND_API extern unsigned char third_arg_force_ref[];
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
 
 #define STANDARD_MODULE_PROPERTIES \
-	NULL, NULL, STANDARD_MODULE_PROPERTIES_EX
+	NULL, STANDARD_MODULE_PROPERTIES_EX
 
 #define NO_VERSION_YET NULL
 
@@ -72,8 +72,7 @@ struct _zend_module_entry {
 	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	char *version;
-	int (*global_startup_func)(void);
-	int (*global_shutdown_func)(void);
+	int (*exec_finished_func)(void);
 	int globals_id;
 	int module_started;
 	unsigned char type;

@@ -1274,8 +1274,9 @@ void module_destructor(zend_module_entry *module)
 	if (module->type == MODULE_TEMPORARY) {
 		zend_clean_module_rsrc_dtors(module->module_number TSRMLS_CC);
 		clean_module_constants(module->module_number TSRMLS_CC);
-		if (module->request_shutdown_func)
+		if (module->request_shutdown_func) {
 			module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
+		}
 	}
 
 	if (module->module_started && module->module_shutdown_func) {

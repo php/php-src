@@ -48,6 +48,7 @@ BEGIN_EXTERN_C()
 #define ZEND_MODULE_SHUTDOWN_N(module)		zm_shutdown_##module
 #define ZEND_MODULE_ACTIVATE_N(module)		zm_activate_##module
 #define ZEND_MODULE_DEACTIVATE_N(module)	zm_deactivate_##module
+#define ZEND_MODULE_EXEC_FINISHED_N(module)	zm_exec_finished_##module
 #define ZEND_MODULE_INFO_N(module)			zm_info_##module
 
 /* Declaration macros */
@@ -55,6 +56,7 @@ BEGIN_EXTERN_C()
 #define ZEND_MODULE_SHUTDOWN_D(module)		int ZEND_MODULE_SHUTDOWN_N(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MODULE_ACTIVATE_D(module)		int ZEND_MODULE_ACTIVATE_N(module)(INIT_FUNC_ARGS)
 #define ZEND_MODULE_DEACTIVATE_D(module)	int ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)
+#define ZEND_MODULE_EXEC_FINISHED_D(module)	int ZEND_MODULE_EXEC_FINISHED_N(module)(void)
 #define ZEND_MODULE_INFO_D(module)			void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 
 #define ZEND_GET_MODULE(name) \
