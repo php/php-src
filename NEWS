@@ -97,6 +97,8 @@ PHP 4                                                                      NEWS
   (eggert at gnu dot org)
 - Fixed bug #28804 (ini-file section parsing pattern is buggy). 
   (wendland at scan-plus dot de)
+- Fixed bug #28803 (enabled debug causes bailout errors with CLI on AIX 
+  because of fflush() called on already closed filedescriptor). (Tony)
 - Fixed bug #28451 (corupt EXIF headers have unlimited recursive IFD directory
   entries). (Andrei)
 - Fixed bug #28086 (crash inside overload() function). (Tony) 
