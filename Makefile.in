@@ -1,9 +1,4 @@
 
-DEPTH     = .
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 ZEND_DIR = $(srcdir)/Zend
 SUBDIRS = Zend ext sapi $(TSRM_DIR) $(REGEX_DIR) . $(PEAR_DIR)
 
@@ -36,9 +31,9 @@ targets = $(LTLIBRARY_NAME) $(PROGRAM_NAME)
 
 install_targets = install-local install-modules
 
-include $(topsrcdir)/build/rules.mk
-include $(topsrcdir)/build/library.mk
-include $(topsrcdir)/build/program.mk
+include $(top_srcdir)/build/rules.mk
+include $(top_srcdir)/build/library.mk
+include $(top_srcdir)/build/program.mk
 
 install-local:
 	@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1

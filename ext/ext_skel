@@ -64,15 +64,10 @@ $ECHO_N " Makefile.in$ECHO_C"
 cat >Makefile.in <<eof
 # \$Id\$
 
-DEPTH     = ../..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 LTLIBRARY_NAME    = lib$extname.la
 LTLIBRARY_SOURCES = $extname.c
 
-include \$(topsrcdir)/build/ltlib.mk
+include \$(top_srcdir)/build/ltlib.mk
 eof
 
 
