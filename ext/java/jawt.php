@@ -1,7 +1,6 @@
 <?
 
-  // this example makes about as much sense from a web server perspective as,
-  // say, launching and interacting with Microsoft word.  <grin>
+  // This example is only intented to be run as a CGI.
 
   $frame = new Java("java.awt.Frame", "Zend");
   $button = new Java("java.awt.Button", "Hello Java world!");
