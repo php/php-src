@@ -1,3 +1,183 @@
+2001-02-17  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/eventmember.c
+      ext/midgard/file.c
+      ext/midgard/group.c
+      ext/midgard/host.c
+      ext/midgard/image.c
+      ext/midgard/mail.c
+      ext/midgard/member.c
+      ext/midgard/mgd_access.h
+      ext/midgard/mgd_article.h
+      ext/midgard/mgd_attachment.h
+      ext/midgard/mgd_calendar.h
+      ext/midgard/mgd_element.h
+      ext/midgard/mgd_errno.pl
+      ext/midgard/mgd_event.h
+      ext/midgard/mgd_eventmember.h
+      ext/midgard/mgd_file.h
+      ext/midgard/mgd_group.h
+      ext/midgard/mgd_host.h
+      ext/midgard/mgd_image.h
+      ext/midgard/mgd_internal.h
+      ext/midgard/mgd_mail.h
+      ext/midgard/mgd_member.h
+      ext/midgard/mgd_midgard.h
+      ext/midgard/mgd_oop.h
+      ext/midgard/mgd_page.h
+      ext/midgard/mgd_pageelement.h
+      ext/midgard/mgd_pagelink.h
+      ext/midgard/mgd_person.h
+      ext/midgard/mgd_preferences.h
+      ext/midgard/mgd_preparser.h
+      ext/midgard/mgd_sitegroup.h
+      ext/midgard/mgd_snippet.h
+      ext/midgard/mgd_snippetdir.h
+      ext/midgard/mgd_style.h
+      ext/midgard/mgd_topic.h
+      ext/midgard/midgard.c
+      ext/midgard/mkall
+      ext/midgard/oop.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/pagelink.c
+      ext/midgard/parameter.c
+      ext/midgard/person.c
+      ext/midgard/php_midgard.h
+      ext/midgard/preferences.c
+      ext/midgard/preparser-parser.y
+      ext/midgard/preparser-scanner.l
+      ext/midgard/preparser.c
+      ext/midgard/sitegroup.c
+      ext/midgard/snippet.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c
+      ext/midgard/.cvsignore
+      ext/midgard/ChangeLog
+      ext/midgard/INSTALL
+      ext/midgard/Makefile.in
+      ext/midgard/article.c
+      ext/midgard/attachment.c
+      ext/midgard/calendar.c
+      ext/midgard/config.m4
+      ext/midgard/element.c
+      ext/midgard/event.c:
+    Remove/Add appearantly doesn't cancel the remove... add separately.
+
+    * ext/midgard/ChangeLog
+      ext/midgard/INSTALL
+      ext/midgard/LICENSE
+      ext/midgard/Makefile.in
+      ext/midgard/access.c
+      ext/midgard/article.c
+      ext/midgard/attachment.c
+      ext/midgard/calendar.c
+      ext/midgard/config.m4
+      ext/midgard/element.c
+      ext/midgard/event.c
+      ext/midgard/eventmember.c
+      ext/midgard/file.c
+      ext/midgard/fudge
+      ext/midgard/genentry.pl
+      ext/midgard/group.c
+      ext/midgard/host.c
+      ext/midgard/image.c
+      ext/midgard/mail.c
+      ext/midgard/member.c
+      ext/midgard/mgd_access.h
+      ext/midgard/mgd_article.h
+      ext/midgard/mgd_attachment.h
+      ext/midgard/mgd_calendar.h
+      ext/midgard/mgd_element.h
+      ext/midgard/mgd_errno.c
+      ext/midgard/mgd_errno.h
+      ext/midgard/mgd_errno.pl
+      ext/midgard/mgd_event.h
+      ext/midgard/mgd_eventmember.h
+      ext/midgard/mgd_file.h
+      ext/midgard/mgd_group.h
+      ext/midgard/mgd_host.h
+      ext/midgard/mgd_image.h
+      ext/midgard/mgd_internal.h
+      ext/midgard/mgd_mail.h
+      ext/midgard/mgd_member.h
+      ext/midgard/mgd_midgard.h
+      ext/midgard/mgd_oop.h
+      ext/midgard/mgd_page.h
+      ext/midgard/mgd_pageelement.h
+      ext/midgard/mgd_pagelink.h
+      ext/midgard/mgd_person.h
+      ext/midgard/mgd_preferences.h
+      ext/midgard/mgd_preparser.h
+      ext/midgard/mgd_sitegroup.h
+      ext/midgard/mgd_snippet.h
+      ext/midgard/mgd_snippetdir.h
+      ext/midgard/mgd_style.h
+      ext/midgard/mgd_topic.h
+      ext/midgard/midgard-root.php
+      ext/midgard/midgard.c
+      ext/midgard/mkall
+      ext/midgard/oop.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/pagelink.c
+      ext/midgard/parameter.c
+      ext/midgard/person.c
+      ext/midgard/php4_porting.txt
+      ext/midgard/php_midgard.h
+      ext/midgard/preferences.c
+      ext/midgard/preparser-parser.y
+      ext/midgard/preparser-scanner.l
+      ext/midgard/preparser.c
+      ext/midgard/sitegroup.c
+      ext/midgard/snippet.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c:
+    Trimming, license change (said GPL, actually is LGPL) removed warnings during
+    compilation, removed configure bug.
+
+    * ext/midgard/.cvsignore: Added generated files
+
+2001-02-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Also format CTCP correctly when sending it to the server.
+
+    This is still quite ugly but works already quite well.
+
+    * ext/ircg/ircg.c:
+    Add initial CTCP handling and fix a possible segfault in ircg_msg()
+
+2001-02-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/mysql.php
+      pear/DB/pgsql.php:
+    consistently supress error messages from $connect_function
+    in mysql and pgsql.
+
+2001-02-17  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: make oci work again.
+
+2001-02-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: Convert to the new hooks-based callback system.
+
+    Also add a facility to change our own nick as well as tracking other
+    nick changes.
+
+2001-02-17  Harald Radi  <h.radi@nme.at>
+
+    * ext/dotnet/dotnet.cpp
+      ext/com/COM.cpp
+      ext/com/conversion.c
+      ext/com/conversion.h
+      ext/com/typedef_VARIANT.c: multiple codepage support
+    export global constants
+
 2001-02-16  Sascha Schumann  <sascha@schumann.cx>
 
     * NEWS: Add some old and some recent news
