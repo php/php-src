@@ -16,16 +16,16 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.15 2003/06/10 20:03:44 imajes Exp $
+REM  $Id: pear.bat,v 1.16 2003/08/29 05:40:50 cellog Exp $
 
 REM change this lines to match the paths of your system
 REM -------------------
 
 @ECHO OFF
 :: Check PEAR global ENV, set them if they do not exist
-IF "%PHP_PEAR_INSTALL_DIR%"=="" SET PHP_PEAR_INSTALL_DIR="@include_path@"
-IF "%PHP_PEAR_BIN_DIR%"=="" SET PHP_PEAR_BIN_DIR="@bin_dir@"
-IF "%PHP_PEAR_PHP_BIN%"=="" SET  PHP_PEAR_PHP_BIN="@php_bin@"
+IF "%PHP_PEAR_INSTALL_DIR%"=="" SET "PHP_PEAR_INSTALL_DIR=@include_path@"
+IF "%PHP_PEAR_BIN_DIR%"=="" SET "PHP_PEAR_BIN_DIR=@bin_dir@"
+IF "%PHP_PEAR_PHP_BIN%"=="" SET "PHP_PEAR_PHP_BIN=@php_bin@"
  
 :: Check Folders and files
 IF NOT EXIST "%PHP_PEAR_INSTALL_DIR%" GOTO PEAR_INSTALL_ERROR
