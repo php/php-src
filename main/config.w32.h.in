@@ -7,16 +7,17 @@
 
 /* Default PHP / PEAR directories */
 #define CONFIGURATION_FILE_PATH "php.ini"
+#define PEAR_INSTALLDIR "c:\\php4\\pear"
 #define PHP_BINDIR "c:\\php4"
-#define PHP_PREFIX "c:\\php4"
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
+#define PHP_CONFIG_FILE_SCAN_DIR ""
 #define PHP_DATADIR "c:\\php4"
 #define PHP_EXTENSION_DIR "c:\\php4"
 #define PHP_INCLUDE_PATH	".;c:\\php4\\pear"
 #define PHP_LIBDIR "c:\\php4"
 #define PHP_LOCALSTATEDIR "c:\\php4"
+#define PHP_PREFIX "c:\\php4"
 #define PHP_SYSCONFDIR "c:\\php4"
-#define PEAR_INSTALLDIR "c:\\php4\\pear"
 
 /* Enable / Disable BCMATH extension (default: enabled) */
 #define WITH_BCMATH 1
