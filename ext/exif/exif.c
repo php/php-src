@@ -64,7 +64,7 @@
 #define EXIF_USE_MBSTRING 0
 #endif
 
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 #endif
 
@@ -132,7 +132,7 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 ZEND_API ZEND_INI_MH(OnUpdateEncode)
 {
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 	if (new_value && strlen(new_value) && !php_mb_check_encoding_list(new_value TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
 		return FAILURE;
@@ -143,7 +143,7 @@ ZEND_API ZEND_INI_MH(OnUpdateEncode)
 
 ZEND_API ZEND_INI_MH(OnUpdateDecode)
 {
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 	if (!php_mb_check_encoding_list(new_value TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
 		return FAILURE;
@@ -2582,7 +2582,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 {
 	int   a;
 
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 	char  *decode;
 	size_t len;;
 #endif
@@ -2594,7 +2594,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 			/* First try to detect BOM: ZERO WIDTH NOBREAK SPACE (FEFF 16) 
 			 * since we have no encoding support for the BOM yet we skip that.
 			 */
@@ -2627,7 +2627,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 			if (ImageInfo->motorola_intel) {
 				*pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_jis, ImageInfo->decode_jis_be, &len TSRMLS_CC);
 			} else {
@@ -2666,7 +2666,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 	xp_field->tag = tag;	
 
 	/* Copy the comment */
-#ifdef EXIF_USE_MBSTRING
+#if EXIF_USE_MBSTRING
 /*  What if MS supports big-endian with XP? */
 /*	if (ImageInfo->motorola_intel) {
 		xp_field->value = php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode, ImageInfo->decode_unicode_be, &xp_field->size TSRMLS_CC);
