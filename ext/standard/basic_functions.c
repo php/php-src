@@ -303,6 +303,7 @@ function_entry basic_functions[] = {
 	PHP_FE(unshift,						first_arg_force_ref)
 	PHP_FE(splice,						first_arg_force_ref)
 	PHP_FE(slice,						NULL)
+	PHP_FE(array_merge,					NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -2823,6 +2824,63 @@ PHP_FUNCTION(slice)
 		pos++;
 		zend_hash_move_forward(input->value.ht);
 	}
+}
+/* }}} */
+
+
+/* {{{ proto array array_merge(array arr1 [, array arr2, ...])
+   Merges elements from passed arrays into one array */
+PHP_FUNCTION(array_merge)
+{
+	zval	   **args = NULL,
+			   **entry;
+	HashTable	*hash;
+	int			 argc,
+				 i;
+	char		*string_key;
+	ulong		 num_key;
+
+	/* Get the argument count and check it */	
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval **)emalloc(argc * sizeof(zval *));
+	if (getParametersArray(ht, argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	array_init(return_value);
+	
+	for (i=0; i<argc; i++) {
+		convert_to_array(args[i]);
+		hash = args[i]->value.ht;
+		
+		zend_hash_internal_pointer_reset(hash);
+		while(zend_hash_get_current_data(hash, (void **)&entry) == SUCCESS) {
+			(*entry)->refcount++;
+			
+			switch (zend_hash_get_current_key(hash, &string_key, &num_key)) {
+				case HASH_KEY_IS_STRING:
+					zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
+									 entry, sizeof(zval *), NULL);
+					efree(string_key);
+					break;
+
+				case HASH_KEY_IS_LONG:
+					zend_hash_next_index_insert(return_value->value.ht,
+												entry, sizeof(zval *), NULL);
+					break;
+			}
+
+			zend_hash_move_forward(hash);
+		}
+	}
+	
+	efree(args);
 }
 /* }}} */
 
