@@ -30,6 +30,7 @@
 #endif
 
 #include "php.h"
+#include "ext/standard/php_string.h"
 
 #define DBX_PERSISTENT         (1<<0)
 

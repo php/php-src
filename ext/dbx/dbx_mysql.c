@@ -255,6 +255,43 @@ int dbx_mysql_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	return 1;
 }
 
+int dbx_mysql_esc(zval **rv, zval **dbx_handle, zval **string, INTERNAL_FUNCTION_PARAMETERS)
+{
+	/* returns escaped string */
+	int number_of_arguments=2;
+	zval **arguments[2];
+	zval *returned_zval=NULL;
+	char * str;
+	int len;
+	char * tmpstr;
+	int tmplen;
+
+	arguments[0]=string;
+	arguments[1]=dbx_handle;
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_real_escape_string", &returned_zval, number_of_arguments, arguments);
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
+		if (returned_zval) zval_ptr_dtor(&returned_zval);
+		/* mysql_real_escape_string failed, just do my own escaping then */
+		/* replace \ with \\ */
+		/*         ' with '' */
+
+		tmpstr = estrdup(Z_STRVAL_PP(string));
+		tmplen = Z_STRLEN_PP(string);
+		/* php_str_to_str uses a smart_str that allocates memory */
+		/* this memory must be freed or passed on to rv */
+		str = php_str_to_str(tmpstr, tmplen, "\\", 1, "\\\\", 2, &len);
+		efree(tmpstr);
+		tmpstr=str; tmplen=len;
+		str = php_str_to_str(tmpstr, tmplen, "'", 1, "''", 2, &len);
+		efree(tmpstr);
+
+		ZVAL_STRINGL(*rv, str, len, 0);
+		return 1;
+	}
+	MOVE_RETURNED_TO_RV(rv, returned_zval);
+	return 1;
+}
+
 /*
  * Local variables:
  * tab-width: 4
