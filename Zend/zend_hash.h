@@ -49,6 +49,7 @@ typedef struct bucket {
 	struct bucket *pListNext;
 	struct bucket *pListLast;
 	struct bucket *pNext;
+	struct bucket *pLast;
 	char arKey[1]; /* Must be last element */
 } Bucket;
 
