@@ -412,7 +412,7 @@ void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
-/* {{{ proto int imagepng(int im, string filename)
+/* {{{ proto int imagepng(int im [, string filename])
 Output image to browser or file */
 void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
       pval *imgind, *file;
@@ -524,7 +524,7 @@ PHP_FUNCTION(imagecreatefromgif )
 }
 /* }}} */
 
-/* {{{ proto int imagegif(int im, string filename)
+/* {{{ proto int imagegif(int im [, string filename])
 Output image to browser or file */
 PHP_FUNCTION(imagegif )
 {
