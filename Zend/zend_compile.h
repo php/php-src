@@ -790,6 +790,9 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
 
+
+#define ZEND_RETURNS_FUNCTION 1<<0
+
 END_EXTERN_C()
 
 #define ZEND_CLONE_FUNC_NAME		"__clone"

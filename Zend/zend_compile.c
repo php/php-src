@@ -739,7 +739,7 @@ void zend_check_writable_variable(znode *variable)
 	}
 }
 
-zend_bool zend_is_function_or_method_call(znode *variable)
+static inline zend_bool zend_is_function_or_method_call(znode *variable)
 {
 	zend_uint type = variable->u.EA.type;
 
@@ -1475,10 +1475,6 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 		} else {
 			zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);
 		}
-#if 0
-	} else if (expr && CG(active_op_array)->return_reference) {
-		zend_error(E_COMPILE_ERROR, "Only variables may be returned by reference");
-#endif
 	}
 
 #ifdef ZTS
@@ -1499,6 +1495,15 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 		opline->op1.op_type = IS_CONST;
 		INIT_ZVAL(opline->op1.u.constant);
 	}
+
+	if (do_end_vparse) {
+		if (zend_is_function_or_method_call(expr)) {
+			opline->extended_value = ZEND_RETURNS_FUNCTION;	
+		} else {
+			opline->extended_value = 0;
+		}
+	}
+
 	SET_UNUSED(opline->op2);
 }
 
