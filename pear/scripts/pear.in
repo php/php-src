@@ -25,7 +25,7 @@ require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$options = Console_Getopt::getopt($argv, "hv:e:p:d:");
+$options = Console_Getopt::getopt($argv, "h?v:e:p:d:");
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -38,19 +38,19 @@ foreach ($opts as $opt) {
             $verbose = $param;
             break;
         case 'e':
-            if ($param[0] != DIRECTORY_SEPARATOR) {
+            if ($param{0} != DIRECTORY_SEPARATOR) {
                 usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
             }
             $ext_dir = $param;
             break;
         case 'p':
-            if ($param[0] != DIRECTORY_SEPARATOR) {
+            if ($param{0} != DIRECTORY_SEPARATOR) {
                 usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
             }
             $script_dir = $param;
             break;
         case 'd':
-            if ($param[0] != DIRECTORY_SEPARATOR) {
+            if ($param{0} != DIRECTORY_SEPARATOR) {
                 usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
             }
             $doc_dir = $param;
@@ -104,7 +104,7 @@ function usage($obj = null)
           "     -p <dir>  set script install dir (absolute path)\n".
           "     -e <dir>  set extension install dir (absolute path)\n".
           "     -d <dir>  set documentation dest dir (absolute path)\n".
-          "     -h        display help/usage (this message)\n".
+          "     -h, -?    display help/usage (this message)\n".
           "Commands:\n".
           "   install <package file>\n".
           "   package [package info file]\n".
