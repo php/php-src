@@ -9,7 +9,7 @@ function test: mysqli_character_set_name
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect("localhost", $user, $passwd);
 
-	$cset = mysqli_character_set_name($link);
+	$cset = substr(mysqli_character_set_name($link),0,6);
 
 	var_dump($cset);
 

@@ -42,8 +42,8 @@ mysqli_fetch_object
 
 	mysqli_close($link);
 ?>
---EXPECT--
-object(stdClass)(7) {
+--EXPECTF--
+object(stdClass)#%d (7) {
   ["c1"]=>
   string(1) "0"
   ["c2"]=>
