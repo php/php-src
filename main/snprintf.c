@@ -390,8 +390,10 @@ ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 		*p2++ = decpt % 10 + '0';
 	} else {
 		if (decpt <= 0) {
-			if (*p1 != '0')
+			if (*p1 != '0') {
+				*p2++ = '0';
 				*p2++ = '.';
+			}
 			while (decpt < 0) {
 				decpt++;
 				*p2++ = '0';
@@ -444,14 +446,14 @@ typedef struct buf_area buffy;
  *
  * NOTE: Evaluation of the c argument should not have any side-effects
  */
-#define INS_CHAR( c, sp, bep, cc )	\
-	    {				\
-		if ( sp < bep )		\
-		{			\
-		    *sp++ = c ;		\
-		    cc++ ;		\
-		}			\
-	    }
+#define INS_CHAR(c, sp, bep, cc) \
+	{                            \
+		if (sp < bep)            \
+		{                        \
+			*sp++ = c;           \
+		}                        \
+		cc++;                    \
+	}
 
 #define NUM( c )			( c - '0' )
 
@@ -885,14 +887,19 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format,
 	 * Notice that if no length is given, we initialize buf_end to the
 	 * highest possible address.
 	 */
-	od.buf_end = len ? &buf[len] : (char *) ~0;
-	od.nextb = buf;
+	if (len == 0) {
+		od.buf_end = (char *) ~0;
+		od.nextb   = (char *) ~0;
+	} else {
+		od.buf_end = &buf[len-1];
+		od.nextb   = buf;
+	}
 
 	/*
 	 * Do the conversion
 	 */
 	cc = format_converter(&od, format, ap);
-	if (len == 0 || od.nextb <= od.buf_end)
+	if (len != 0 && od.nextb <= od.buf_end)
 		*(od.nextb) = '\0';
 	if (ccp)
 		*ccp = cc;
@@ -905,7 +912,7 @@ int ap_php_snprintf(char *buf, size_t len, const char *format,...)
 	va_list ap;
 
 	va_start(ap, format);
-	strx_printv(&cc, buf, (len - 1), format, ap);
+	strx_printv(&cc, buf, len, format, ap);
 	va_end(ap);
 	return (cc);
 }
@@ -915,7 +922,7 @@ int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
 {
 	int cc;
 
-	strx_printv(&cc, buf, (len - 1), format, ap);
+	strx_printv(&cc, buf, len, format, ap);
 	return (cc);
 }
 
