@@ -215,6 +215,7 @@ struct _zend_alloc_globals {
 #if MEMORY_LIMIT
 	unsigned int memory_limit;
 	unsigned int allocated_memory;
+	unsigned int allocated_memory_peak;
 	unsigned char memory_exhausted;
 #endif
 };
