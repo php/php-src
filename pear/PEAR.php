@@ -40,6 +40,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $GLOBALS['_PEAR_default_error_mode']     = PEAR_ERROR_RETURN;
 $GLOBALS['_PEAR_default_error_options']  = E_USER_NOTICE;
 $GLOBALS['_PEAR_destructor_object_list'] = array();
+$GLOBALS['_PEAR_shutdown_funcs']         = array();
 $GLOBALS['_PEAR_error_handler_stack']    = array();
 
 /**
@@ -170,6 +171,23 @@ class PEAR
         if ($this->_debug) {
             printf("PEAR destructor called, class=%s\n", get_class($this));
         }
+    }
+
+    // }}}
+    // {{{ registerShutdownFunc()
+
+    /**
+    * Use this function to register a shutdown method for static
+    * classes.
+    *
+    * @access public
+    * @param  mixed  $func The function name (or array of class/method) to call
+    * @param  mixed  $args The arguments to pass to the function
+    * @return void
+    */
+    function registerShutdownFunc($func, $args = array())
+    {
+        $GLOBALS['_PEAR_shutdown_funcs'][] = array($func, $args);
     }
 
     // }}}
@@ -485,6 +503,13 @@ function _PEAR_call_destructors()
         // Empty the object list to ensure that destructors are
         // not called more than once.
         $_PEAR_destructor_object_list = array();
+    }
+    
+    // Now call the shutdown functions
+    if (is_array($GLOBALS['_PEAR_shutdown_funcs']) AND !empty($GLOBALS['_PEAR_shutdown_funcs'])) {
+        foreach ($GLOBALS['_PEAR_shutdown_funcs'] as $value) {
+            call_user_func_array($value[0], $value[1]);
+        }
     }
 }
 
