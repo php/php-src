@@ -1,3 +1,142 @@
+2002-12-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_variables.c
+      main/rfc1867.c:
+      Fixed bug #21149 (fixed handling of unterminated '[').
+
+    * ext/standard/http_fopen_wrapper.c:
+      Fixed bug #21267 (opening URLs that result in redirection to a relative
+      path was failing).
+
+    * ext/session/session.c:
+      Fixed bug #21268 (session_decode() returned FALSE on success).
+
+2002-12-29  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4dllts.dsp:
+      Remove bogus ignores
+
+    * win32/php4dllts.dsp:
+      Update .dsp's
+
+2002-12-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_db3.c
+      ext/dba/dba_db4.c:
+      Added support for db3/db4 error handling/information
+
+    * ext/dba/dba.c:
+      Add a default handler that makes handler parameter to open functions
+      optional.
+
+2002-12-28  Sara Golemon  <php@alphaweb.net>
+
+    * win32/sendmail.c:
+      Typo.
+
+    * win32/sendmail.c:
+      When scanning for cc: headers, make sure the header is JUST cc: and not
+      bcc: or original-cc: or <anything-printable>cc:
+      See Bugs # 21036 and # 20707
+
+2002-12-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/config.m4:
+      Fix order of library additions, so that the imap extension now builds
+      successfully with static imap/ssl libs.  configure was already failing
+      before.
+
+2002-12-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/roxen/roxen.c:
+      Fixed bug #21229 (missing 3rd argument to php_module_startup).
+
+2002-12-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c:
+      Make the version code get the version from the current Apache, rather then
+      the Apache PHP was compiled against.
+
+    * sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache_hooks/php_apache.c:
+      Added apache_get_version() & apache_get_modules() to Apache 1.X & Apache
+      Hooks sapis.
+      Made the module listing in Apache 2 not show the '.c' portion, to be
+      consistent with Apache 1.X.
+
+2002-12-27  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Live goes on :)
+
+2002-12-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/php_functions.c:
+      Added MINFO() to Apache 2, which displays the Apache version & all of the
+      loaded Apache modules.
+      Added apache_get_version() & apache_get_modules() functions.
+
+    * NEWS
+      NEWS:
+      Bug fixing news.
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Fixed bug #17098 (make Apache aware that PHP scripts represent dynamic data
+      and should not be cached). Fix suggested by daniel.eckl@gmx.de.
+
+2002-12-27  Stig Bakken  <ssb@fast.no>
+
+    * (RELEASE_1_0)
+      pear/package-PEAR.xml:
+      - 1.0 release notes
+
+    * (RELEASE_1_0)
+      pear/PEAR/Command/Remote.php:
+      - added "clear-cache" command
+
+    * pear/package-PEAR.xml:
+      - 1.0 release
+
+    * (RELEASE_1_0)
+      pear/package.dtd:
+      - 1.0 version
+
+2002-12-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dba/tests/dba_handler.inc:
+      Made DBA tests not dependant on error reporting settings.
+
+2002-12-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with 4.3.0.
+
+2002-12-27  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      MFB:
+      Mention the fact that zlib extension is now built-in in win32 distro.
+
+    * NEWS:
+      Mention the fact that zlib extension is now built-in in win32 distro.
+
+    * NEWS:
+      Resolved apperent cvs commit confict.
+
+2002-12-27  Georg Richter  <georg.richter@phpev.de>
+
+    * (PHP_4_3)
+      NEWS:
+      ISO-8601 bug, typo
+
 2002-12-26  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/ftp/CREDITS
