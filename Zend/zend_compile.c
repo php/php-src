@@ -2251,8 +2251,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len); 
 
-	if (!(strcmp(class_name->u.constant.value.str.val, "main") && strcmp(class_name->u.constant.value.str.val, "self") &&
-			strcmp(class_name->u.constant.value.str.val, "parent"))) {
+	if (!(strcmp(class_name->u.constant.value.str.val, "self") && strcmp(class_name->u.constant.value.str.val, "parent"))) {
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
 	}
 
