@@ -470,7 +470,7 @@ PHP_FUNCTION(imagecreate)
 /* }}} */
 
 /* {{{ proto int imagetypes(void)
-   Return the types of images supported in a bitfield - 1=gif, 2=jpeg, 4=png, 8=wbmp */
+   Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP */
 PHP_FUNCTION(imagetypes)
 {
 	int ret=0;	
@@ -2660,7 +2660,7 @@ PHP_FUNCTION(image2wbmp)
 
 
 /* {{{ proto void jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width)
-   Convert Jpeg image to Wbmp image */
+   Convert JPEG image to WBMP image */
 PHP_FUNCTION(jpeg2wbmp)
 {
 #ifdef HAVE_GD_JPG
@@ -2678,7 +2678,7 @@ PHP_FUNCTION(jpeg2wbmp)
 /* }}} */
 
 /* {{{ proto void png2wbmp (string f_org, string f_dest, int d_height, int d_width)
-   Convert Png image to Wbmp image */
+   Convert PNG image to WBMP image */
 PHP_FUNCTION(png2wbmp)
 {
 #ifdef HAVE_GD_PNG
@@ -2815,14 +2815,14 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 			case PHP_GDIMG_TYPE_JPG:
 				im_org = gdImageCreateFromJpeg (org);
 				if (im_org == NULL) {
-					php_error (E_WARNING, "%s: unable to open '%s' Not a valid jpeg file", get_active_function_name(), fn_dest);
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid JPEG file", get_active_function_name(), fn_dest);
 					RETURN_FALSE;
 				}
 				break;
 			case PHP_GDIMG_TYPE_PNG:
 				im_org = gdImageCreateFromPng(org);
 				if (im_org == NULL) {
-					php_error (E_WARNING, "%s: unable to open '%s' Not a valid png file", get_active_function_name(), fn_dest);
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid PNG file", get_active_function_name(), fn_dest);
 					RETURN_FALSE;
 				}
 				break;
