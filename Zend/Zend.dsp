@@ -79,8 +79,8 @@ LIB32=link.exe -lib
 # PROP BASE Intermediate_Dir "Zend___Win32_Release_inline"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Output_Dir "Zend___Win32_Release_inline"
-# PROP Intermediate_Dir "Zend___Win32_Release_inline"
+# PROP Output_Dir "Release_inline"
+# PROP Intermediate_Dir "Release_inline"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "Zend_EXPORTS" /D ZEND_DEBUG=0 /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /FR /FD /c
 # SUBTRACT BASE CPP /YX
