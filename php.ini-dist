@@ -896,6 +896,11 @@ session.cache_expire = 180
 ;   always using URL stored in browser's history or bookmarks.
 session.use_trans_sid = 0
 
+; Select a hash function
+; 0: MD5   (128 bits, 32 characters, [0-9a-f])
+; 1: SHA-1 (160 bits, 32 characters, [0-9a-z])
+session.hash_function = 0
+
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
 ; form/fieldset are special; if you include them here, the rewriter will
 ; add a hidden <input> field with the info which is otherwise appended
