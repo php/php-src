@@ -2442,9 +2442,7 @@ PHP_FUNCTION(pg_copy_to)
 		case PGRES_COPY_OUT:
 			if (pgsql_result) {
 				PQclear(pgsql_result);
-				if (array_init(return_value) == FAILURE) {
-					RETURN_FALSE;
-				}
+				array_init(return_value);
 				while (!copydone)
 				{
 					if ((ret = PQgetline(pgsql, copybuf, COPYBUFSIZ))) {
@@ -3259,11 +3257,7 @@ static int php_pgsql_convert_match(const char *str, const char *regex , int icas
 		return FAILURE;
 	}
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t), re.re_nsub+1);
-	if (!subs) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate memory.");
-		regfree(&re);
-		return FAILURE;
-	}
+
 	regerr = regexec(&re, str, re.re_nsub+1, subs, 0);
 	if (regerr == REG_NOMATCH) {
 #ifdef PHP_DEBUG		
@@ -3343,11 +3337,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 		return FAILURE;
 	}
 	MAKE_STD_ZVAL(meta);
-	if (array_init(meta) == FAILURE) {
-		zval_dtor(meta);
-		FREE_ZVAL(meta);
-		return FAILURE;
-	}
+	array_init(meta);
 	if (php_pgsql_meta_data(pg_link, table_name, meta TSRMLS_CC) == FAILURE) {
 		zval_dtor(meta);
 		FREE_ZVAL(meta);

@@ -98,10 +98,6 @@ enum php_xml_option {
     PHP_XML_OPTION_SKIP_WHITE
 };
 
-#define RETURN_OUT_OF_MEMORY \
-	php_error(E_WARNING, "Out of memory");\
-	RETURN_FALSE
-
 /* for xml_parse_into_struct */
 	
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */

@@ -102,7 +102,6 @@ PHP_FUNCTION(ovrimos_connect)
 	}
 	
 	state = ecalloc( 1, sizeof(CON_STATE));
-	if (state==NULL) RETURN_FALSE;
 
 	state->connection = conn;
 	state->statements = NULL;
@@ -185,10 +184,7 @@ int index, ret;
 	if (!ret) return ret;
 
 	state->nstatements++;
-	state->statements = erealloc( state->statements,
-		state->nstatements*sizeof( STATEMENT));
-
-	if (state->statements==NULL) return 0;
+	state->statements = erealloc(state->statements, state->nstatements*sizeof( STATEMENT));
 
 	index = state->nstatements - 1;
 	state->statements[ index].statement = (*stmt);
@@ -216,7 +212,6 @@ PCON_STATE state = statement->con_state;
 	}
 	
 	new_statements = emalloc( (state->nstatements-1) * sizeof(STATEMENT));
-	if (new_statements==NULL) return 0;
 	
 	for (i=j=0;i<state->nstatements;i++) {
 		if (state->statements->statement != stmt) {
@@ -700,11 +695,7 @@ PHP_FUNCTION(ovrimos_fetch_into)
 	}
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
-		if (array_init(arr) == FAILURE) {
-			php_error(E_WARNING,
-				  "Can't convert to type Array");
-			RETURN_FALSE;
-		}
+		array_init(arr);
 	}
 	switch (how) {
 	case h_absolute:

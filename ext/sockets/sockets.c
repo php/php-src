@@ -473,10 +473,9 @@ PHP_MINFO_FUNCTION(sockets)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(sockets)
 {
-	if ((SOCKETS_G(strerror_buf) = emalloc(16384))) 
-		return SUCCESS;
-	
-	return FAILURE;
+	SOCKETS_G(strerror_buf) = emalloc(16384);
+
+	return SUCCESS;
 }
 /* }}} */
 

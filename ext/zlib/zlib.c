@@ -303,9 +303,7 @@ PHP_FUNCTION(gzfile)
 	}
 
 	/* Initialize return array */
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf,0,sizeof(buf));
@@ -495,7 +493,6 @@ PHP_FUNCTION(gzuncompress)
 	do {
 		length=plength?plength:Z_STRLEN_PP(data)*(1<<factor++);
 		s2 = (char *) erealloc(s1,length);
-		if(! s2) { if(s1) efree(s1); RETURN_FALSE; }
 		status = uncompress(s2, &length ,Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 		s1=s2;
 	} while((status==Z_BUF_ERROR)&&(!plength)&&(factor<maxfactor));
@@ -820,8 +817,6 @@ PHP_FUNCTION(gzencode)
 
 	stream.avail_out = stream.avail_in + (stream.avail_in/1000) + 15 + 1; /* room for \0 */
 	s2 = (char *) emalloc(stream.avail_out+GZIP_HEADER_LENGTH+(coding==CODING_GZIP?GZIP_FOOTER_LENGTH:0));
-	if(!s2)
-		RETURN_FALSE;
 
 	/* add gzip file header */
 	s2[0] = gz_magic[0];

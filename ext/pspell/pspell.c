@@ -355,9 +355,7 @@ PHP_FUNCTION(pspell_suggest)
 	RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE){
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	wl = pspell_manager_suggest(manager, Z_STRVAL_PP(word));
 	if(wl){
