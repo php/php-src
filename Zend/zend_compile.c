@@ -3031,7 +3031,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *fore
 		result_key = opline->result;
 	}
 
-	if (1 && assign_by_ref) {
+	if (assign_by_ref) {
 		zend_do_assign_ref(&dummy, value, &result_value TSRMLS_CC);
 	} else {
 		zend_do_assign(&dummy, value, &result_value TSRMLS_CC);
