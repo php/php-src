@@ -252,6 +252,7 @@ struct _zend_scanner_globals {
 	char *c_buf_p;
 	int init;
 	int start;
+	int lineno;
 	char _yy_hold_char;
 	int yy_n_chars;
 	int _yy_did_buffer_switch_on_eof;
