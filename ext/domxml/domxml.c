@@ -959,6 +959,7 @@ PHP_FUNCTION(xmldoc)
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_resource(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	add_property_long(return_value, "type", docp->type);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -1282,6 +1283,7 @@ PHP_FUNCTION(xmltree)
 	/* construct the document is a php object for return */
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	add_property_long(return_value, "type", docp->type);
 
 	/* get the root and add as a property to the document */
 	root = docp->root;
