@@ -23,7 +23,8 @@
     <version>0.5</version>
     <date>2003-04-17</date>
 	<notes>
-		Initial release
+		Initial release.
+		Should be quite stable.
     </notes>
     <filelist>
       <file role="src" name="config.m4"/>
