@@ -625,7 +625,6 @@ struct XML_ParserStruct {
 
 #define parsing (processor != prologInitProcessor)
 
-#include "php_compat.h"
 
 XML_Parser
 XML_ParserCreate(const XML_Char *encodingName)
