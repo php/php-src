@@ -561,6 +561,19 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
+#ifndef PHP_WIN32
+    switch (type) {
+        case FS_IS_W:
+            RETURN_BOOL (!access (filename, W_OK));
+        case FS_IS_R:
+            RETURN_BOOL (!access (filename, R_OK));
+        case FS_IS_X:
+            RETURN_BOOL (!access (filename, X_OK));
+        case FS_EXISTS:
+            RETURN_BOOL (!access (filename, F_OK));
+    }
+#endif
+
 	stat_sb = &BG(sb);
 
 	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
