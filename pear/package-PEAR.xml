@@ -33,6 +33,7 @@
 </notes>
     <filelist>
       <file role="php" name="PEAR.php"/>
+      <file role="php" name="System.php"/>
       <dir name="PEAR">
         <file role="php" name="Autoloader.php"/>
         <file role="php" name="Command.php"/>

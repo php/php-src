@@ -28,7 +28,9 @@ short and long options.</description>
     <notes>Initial release</notes>
     <state>beta</state>
     <filelist>
-      <file role="php" baseinstalldir="Console" name="Console/Getopt.php"/>
+     <dir name="Console">
+      <file role="php" name="Getopt.php"/>
+     </dir>
     </filelist>
   </release>
 </package>
