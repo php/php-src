@@ -84,6 +84,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
 #endif	
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -786,6 +787,78 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_get_wbmp
+ * int WBMP file format type
+ * byte Header Type
+ *	byte Extended Header
+ *		byte Header Data (type 00 = multibyte)
+ *		byte Header Data (type 11 = name/pairs)
+ * int Number of columns
+ * int Number of rows
+ */
+static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check TSRMLS_DC)
+{
+	int i, width = 0, height = 0;
+
+	if (php_stream_rewind(stream)) {
+		return 0;
+	}
+
+	/* get type */
+	if (php_stream_getc(stream) != 0) {
+		return 0;
+	}
+
+	/* skip header */
+	do {
+		i = php_stream_getc(stream);
+		if (i < 0) {
+			return 0;
+		}
+	} while (i & 0x80);
+
+	/* get width */
+	do {
+		i = php_stream_getc(stream);
+		if (i < 0) {
+			return 0;
+		}
+		width = (width << 7) | (i & 0x7f);
+	} while (i & 0x80);
+	
+	/* get height */
+	do {
+		i = php_stream_getc(stream);
+		if (i < 0) {
+			return 0;
+		}
+		height = (height << 7) | (i & 0x7f);
+	} while (i & 0x80);
+	
+	if (!check) {
+		(*result)->width = width;
+		(*result)->height = height;
+	}
+
+	return IMAGE_FILETYPE_WBMP;
+}
+/* }}} */
+
+/* {{{ php_handle_wbmp
+*/
+static struct gfxinfo *php_handle_wbmp(php_stream * stream TSRMLS_DC)
+{
+	struct gfxinfo *result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+
+	if (!php_get_wbmp(stream, &result, 0 TSRMLS_CC)) {
+		efree(result);
+		return NULL;
+	}
+
+	return result;
+}
+/* }}} */
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI const char * php_image_type_to_mime_type(int image_type)
@@ -810,6 +883,8 @@ PHPAPI const char * php_image_type_to_mime_type(int image_type)
 			return "image/tiff";
 		case IMAGE_FILETYPE_IFF:
 			return "image/iff";
+		case IMAGE_FILETYPE_WBMP:
+			return "image/vnd.wap.wbmp";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -877,6 +952,9 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	}
 	if (!memcmp(filetype, php_sig_iff, 4)) {
 		return IMAGE_FILETYPE_IFF;
+	}
+	if (php_get_wbmp(stream, NULL, 1 TSRMLS_DC)) {
+		return IMAGE_FILETYPE_WBMP;
 	}
     
 	return IMAGE_FILETYPE_UNKNOWN;
@@ -966,6 +1044,10 @@ PHP_FUNCTION(getimagesize)
 			break;
 		case IMAGE_FILETYPE_IFF:
   			result = php_handle_iff(stream TSRMLS_CC);
+  			break;
+  		case IMAGE_FILETYPE_WBMP:
+			result = php_handle_wbmp(stream TSRMLS_CC);
+			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			break;
