@@ -25,7 +25,12 @@ int zend_next_free_module(void);
 
 int getParameters(int ht, int param_count,...);
 int getParametersArray(int ht, int param_count, zval **argument_array);
+int getParametersEx(int param_count,...);
+int getParametersArrayEx(int param_count, zval ***argument_array);
+
 int getThis(zval **this);
+
+
 int ParameterPassedByReference(int ht, uint n);
 int register_functions(function_entry *functions);
 void unregister_functions(function_entry *functions, int count);

@@ -96,7 +96,7 @@ void init_op_array(zend_op_array *op_array, int initial_ops_size)
 }
 
 
-void destroy_zend_function(zend_function *function)
+ZEND_API void destroy_zend_function(zend_function *function)
 {
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:
@@ -108,7 +108,8 @@ void destroy_zend_function(zend_function *function)
 	}
 }
 
-void destroy_zend_class(zend_class_entry *ce)
+
+ZEND_API void destroy_zend_class(zend_class_entry *ce)
 {
 	switch (ce->type) {
 		case ZEND_USER_CLASS:

@@ -103,6 +103,51 @@ int getParametersArray(int ht, int param_count, zval **argument_array)
 }
 
 
+
+
+/* Zend-optimized Extended functions */
+/* this function doesn't check for too many parameters */
+int getParametersEx(int param_count,...)
+{
+	void **p = EG(argument_stack).top_element-1;
+	int arg_count = (ulong) *p;
+	va_list ptr;
+	zval ***param;
+	ELS_FETCH();
+
+	if (param_count>arg_count) {
+		return FAILURE;
+	}
+
+	va_start(ptr, param_count);
+	while (param_count>0) {
+		param = va_arg(ptr, zval ***);
+		*param = (zval **) p-(param_count--);
+	}
+	va_end(ptr);
+
+	return SUCCESS;
+}
+
+
+int getParametersArrayEx(int param_count, zval ***argument_array)
+{
+	void **p = EG(argument_stack).top_element-1;
+	int arg_count = (ulong) *p;
+	ELS_FETCH();
+
+	if (param_count>arg_count) {
+		return FAILURE;
+	}
+
+	while (param_count>0) {
+		*(argument_array++) = (zval **) p-(param_count--);
+	}
+
+	return SUCCESS;
+}
+
+
 int getThis(zval **this)
 {
 	/* NEEDS TO BE IMPLEMENTED FOR ZEND */
