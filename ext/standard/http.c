@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
@@ -28,7 +28,8 @@
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, int num_prefix_len,
 				const char *key_prefix, int key_prefix_len,
-				const char *key_suffix, int key_suffix_len TSRMLS_DC)
+				const char *key_suffix, int key_suffix_len,
+				zval *type TSRMLS_DC)
 {
 	char *arg_sep = NULL, *key = NULL, *ekey, *newprefix, *p;
 	int arg_sep_len, key_len, ekey_len, key_type, newprefix_len;
@@ -57,6 +58,18 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		if (key_len && key[key_len-1] == '\0') {
 			/* We don't want that trailing NULL */
 			key_len -= 1;
+		}
+	
+		/* handling for private & protected object properties */
+		if (*key == '\0' && type != NULL) {
+			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
+			if (zend_check_property_access(zobj, key TSRMLS_CC) != SUCCESS) {
+				/* private or protected property access outside of the class */
+				continue;
+			}
+			char *tmp;
+			zend_unmangle_property_name(key, &tmp, &key);
+			key_len = strlen(key);		
 		}
 
 		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata || !(*zdata)) {
@@ -113,7 +126,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*p = '\0';
 			}
 			ht->nApplyCount++;
-			php_url_encode_hash_ex(HASH_OF(*zdata), formstr, NULL, 0, newprefix, newprefix_len, "]", 1 TSRMLS_CC);
+			php_url_encode_hash_ex(HASH_OF(*zdata), formstr, NULL, 0, newprefix, newprefix_len, "]", 1, (Z_TYPE_PP(zdata) == IS_OBJECT ? *zdata : NULL) TSRMLS_CC);
 			ht->nApplyCount--;
 			efree(newprefix);
 		} else if (Z_TYPE_PP(zdata) == IS_NULL || Z_TYPE_PP(zdata) == IS_RESOURCE) {
@@ -134,7 +147,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				if (num_prefix) {
 					smart_str_appendl(formstr, num_prefix, num_prefix_len);
 				}
-				ekey_len = spprintf(&ekey, 12, "%ld", idx); 
+				ekey_len = spprintf(&ekey, 12, "%ld", idx);
 				smart_str_appendl(formstr, ekey, ekey_len);
 				efree(ekey);
 			}
@@ -163,7 +176,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			smart_str_appendl(formstr, ekey, ekey_len);
 			efree(ekey);
 		}
-	} 	
+	}
 
 	return SUCCESS;
 }
@@ -187,17 +200,23 @@ PHP_FUNCTION(http_build_query)
 		RETURN_FALSE;
 	}
 
-	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0 TSRMLS_CC) == FAILURE) {
+	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL) TSRMLS_CC) == FAILURE) {
 		if (formstr.c) {
 			efree(formstr.c);
 		}
 		RETURN_FALSE;
 	}
+
+	if (!formstr.c) {
+		RETURN_NULL();
+	}
+
 	smart_str_0(&formstr);
+	
 	RETURN_STRINGL(formstr.c, formstr.len, 0);
 }
 /* }}} */
- 
+
 /*
  * Local variables:
  * tab-width: 4

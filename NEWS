@@ -5,6 +5,9 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed problems with longlong values in mysqli. (Georg)
 - Fixed class name case preserving of user defined classes. (Marcus)
+- Fixed bug #26819 (http_build_query() crashes on NULL output). (Ilia)
+- Fixed bug #26817 (http_build_query() does not handle private & protected 
+  object properties correctly). (Ilia)
 - Fixed bug #26762 (unserialize() produces lowercase classnames). (Marcus)
 - Fixed bug #26743 (getElementsByTagName doesn't work properly). (Rob)
 - Fixed bug #26736 (__autoload not invoked for parent classes). (Marcus)
