@@ -759,7 +759,7 @@ PHP_RINIT_FUNCTION(mbstring)
 
 	MBSTRG(current_language) = MBSTRG(language);
 
-	{
+	if (MBSTRG(internal_encoding) == mbfl_no_encoding_invalid) {
 		char *default_enc = NULL;
 		switch (MBSTRG(current_language)) {
 			case mbfl_no_language_uni:
@@ -788,8 +788,7 @@ PHP_RINIT_FUNCTION(mbstring)
 				default_enc = "ISO-8859-1";
 				break;
 		}
-		MBSTRG(current_language) = MBSTRG(language);
-		if (default_enc && MBSTRG(internal_encoding) == mbfl_no_encoding_invalid) {
+		if (default_enc) {
 			zend_alter_ini_entry("mbstring.internal_encoding",
 			                     sizeof("mbstring.internal_encoding"),
 			                     default_enc, strlen(default_enc),
