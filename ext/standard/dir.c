@@ -109,7 +109,7 @@ PHP_MINIT_FUNCTION(dir)
 	le_dirp = register_list_destructors(_dir_dtor,NULL);
 
 	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
-	dir_class_entry_ptr = register_internal_class(&dir_class_entry);
+	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
 
 #ifdef ZTS
 	dir_globals_id = ts_allocate_id(sizeof(php_dir_globals), (ts_allocate_ctor) php_dir_init_globals, NULL);

@@ -134,11 +134,11 @@ PHP_MINIT_FUNCTION(domxml)
 	INIT_CLASS_ENTRY(domxmlattr_class_entry, "DomAttribute", php_domxmlattr_class_functions);
 	INIT_CLASS_ENTRY(domxmlns_class_entry, "DomNamespace", php_domxmlns_class_functions);
 
-	domxmldoc_class_entry_ptr = register_internal_class(&domxmldoc_class_entry);
-	domxmldtd_class_entry_ptr = register_internal_class(&domxmldtd_class_entry);
-	domxmlnode_class_entry_ptr = register_internal_class(&domxmlnode_class_entry);
-	domxmlattr_class_entry_ptr = register_internal_class(&domxmlattr_class_entry);
-	domxmlns_class_entry_ptr = register_internal_class(&domxmlns_class_entry);
+	domxmldoc_class_entry_ptr = zend_register_internal_class(&domxmldoc_class_entry);
+	domxmldtd_class_entry_ptr = zend_register_internal_class(&domxmldtd_class_entry);
+	domxmlnode_class_entry_ptr = zend_register_internal_class(&domxmlnode_class_entry);
+	domxmlattr_class_entry_ptr = zend_register_internal_class(&domxmlattr_class_entry);
+	domxmlns_class_entry_ptr = zend_register_internal_class(&domxmlns_class_entry);
 
 	REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE", XML_ELEMENT_NODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NODE", XML_ATTRIBUTE_NODE, CONST_CS | CONST_PERSISTENT);
@@ -292,7 +292,7 @@ void domxmltestnode_class_startup()
 								domxmltestnode_class_get_property,
 								domxmltestnode_class_set_property);
 
-	domxmltestnode_class_entry_ptr = register_internal_class(&domxmltestnode_class_entry);
+	domxmltestnode_class_entry_ptr = zend_register_internal_class(&domxmltestnode_class_entry);
 }
 #endif 
 
