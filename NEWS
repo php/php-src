@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Jun 2004, Version 4.3.7
 - Changed user error handler mechanism to relay to built-in error handler if it
   returns false. (Andrei)
+- Fixed bug #28597 (xmlrpc_encode_request() incorrectly encodes chars in
+  200-210 range). (fernando dot nemec at folha dot com dot br, Ilia)
 - Fixed bug #28569 (informix connection id is not thread safe).
   (novicky at aarongroup dot cz, Ard)
 - Fixed bug #28564 (Problem building informix as a shared extension). 
