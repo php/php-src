@@ -1513,25 +1513,32 @@ PHP_FUNCTION(range)
 		low = (unsigned char *)Z_STRVAL_P(zlow);
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
-		if (*low > *high) {		/* Negative steps */
-			if (*low - *high < lstep || lstep <= 0) {
+		if (*low > *high) {		/* Negative Steps */
+			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; *low >= *high; (*low) -= (unsigned int)step) {
+			for (; *low >= *high; (*low) -= (unsigned int)lstep) {
 				add_next_index_stringl(return_value, low, 1, 1);
+				if (((signed int)*low - lstep) < 0) {
+					break;
+				}
 			}
-		} else if (*high > *low) {	/* Positive steps */
-			if (*high - *low < lstep || lstep <= 0) {
+		} else if (*high > *low) {	/* Positive Steps */
+			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
 			for (; *low <= *high; (*low) += (unsigned int)lstep) {
 				add_next_index_stringl(return_value, low, 1, 1);
+				if (((signed int)*low + lstep) > 255) {
+					break;
+				}
 			}
 		} else {
 			add_next_index_stringl(return_value, low, 1, 1);
 		}
+
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high;
 double_str:		
