@@ -224,8 +224,8 @@ PHP_FUNCTION(diskfreespace)
 }
 /* }}} */
 
-/* {{{ proto bool chown(string filename, mixed user)
-   Change file owner */
+/* {{{ proto bool chgrp(string filename, mixed group)
+   Change file group */
 PHP_FUNCTION(chgrp)
 {
 #ifndef WINDOWS
