@@ -1145,6 +1145,7 @@ PHP_FUNCTION(basename)
 PHPAPI size_t php_dirname(char *path, size_t len)
 {
 	register char *end = path + len - 1;
+	unsigned int len_adjust = 0;
 
 #ifdef PHP_WIN32
 	/* Note that on Win32 CWD is per drive (heritage from CP/M).
@@ -1153,6 +1154,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
 		/* Skip over the drive spec (if any) so as not to change */
 		path += 2;
+		len_adjust += 2;
 		if (2 == len) {
 			/* Return "c:" on Win32 for dirname("c:").
 			 * It would be more consistent to return "c:." 
@@ -1176,7 +1178,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 		/* The path only contained slashes */
 		path[0] = DEFAULT_SLASH;
 		path[1] = '\0';
-		return 1;
+		return 1 + len_adjust;
 	}
 
 	/* Strip filename */
@@ -1187,7 +1189,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 		/* No slash found, therefore return '.' */
 		path[0] = '.';
 		path[1] = '\0';
-		return 1;
+		return 1 + len_adjust;
 	}
 
 	/* Strip slashes which came before the file name */
@@ -1197,11 +1199,11 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 	if (end < path) {
 		path[0] = DEFAULT_SLASH;
 		path[1] = '\0';
-		return 1;
+		return 1 + len_adjust;
 	}
 	*(end+1) = '\0';
 
-	return (size_t)(end + 1 - path);
+	return (size_t)(end + 1 - path) + len_adjust;
 }
 /* }}} */
 
