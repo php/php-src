@@ -143,11 +143,11 @@ define ____printzv
 		printf "*uninitialized* "
 	end
 
-	set $zcontents = *(zval *) $zcontents
+	set $zcontents = *(struct _zval_struct *) $zvalue
 	if $arg1
 		____printzv_contents $zcontents $arg1
 	else
-		____printzv_contents $zcontents
+		____printzv_contents $zcontents 0 
 	end
 end
 
