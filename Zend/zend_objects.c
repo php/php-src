@@ -111,6 +111,10 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	retval = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
 
+	ALLOC_HASHTABLE(new_object->properties);
+	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
+
 	if (old_object->ce->clone) {
 		zval *old_obj;
 		zval *new_obj;
@@ -135,9 +139,6 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 		clone_func_name->value.str.val = estrndup("__clone", sizeof("__clone")-1);
 		clone_func_name->value.str.len = sizeof("__clone")-1;
 
-		ALLOC_HASHTABLE(new_object->properties);
-		zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
 		ZEND_INIT_SYMTABLE(&symbol_table);
 		ZEND_SET_SYMBOL(&symbol_table, "that", old_obj);
 		
@@ -147,10 +148,6 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 		zval_ptr_dtor(&new_obj);
 		zval_ptr_dtor(&clone_func_name);
 		zval_ptr_dtor(&retval_ptr);
-	} else {
-		ALLOC_HASHTABLE(new_object->properties);
-		zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	}
 
 	return retval;
