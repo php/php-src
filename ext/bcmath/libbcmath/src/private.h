@@ -32,7 +32,7 @@
 /* "Private" routines to bcmath. */
 
 /* variables */
-bc_num _bc_Free_list;
+extern bc_num _bc_Free_list;
 
 /* routines */
 int _bc_do_compare (bc_num n1, bc_num n2, int use_sign, int ignore_last);
