@@ -47,6 +47,7 @@
 #include "php_session.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/php3_var.h"
+#include "ext/standard/datetime.h"
 
 
 #ifdef ZTS
@@ -79,6 +80,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session_auto_start", "0", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_gc_probability", "1", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session_lifetime", "60", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 
@@ -252,16 +254,29 @@ static void _php_session_save_current_state(PSLS_D)
 	PS(nr_open_sessions)--;
 }
 
-#define COOKIE_FMT "Set-cookie: %s=%s"
+#define COOKIE_FMT 		"Set-cookie: %s=%s"
+#define COOKIE_EXPIRES	"; expires="
 
 static void _php_session_send_cookie(PSLS_D)
 {
-	int len;
+	int   len;
 	char *cookie;
+	char *date_fmt = NULL;
+	PSLS_FETCH();
 
 	len = strlen(PS(session_name)) + strlen(PS(id)) + sizeof(COOKIE_FMT);
+	if (PS(lifetime) > 0) {
+		date_fmt = php3_std_date(time(NULL) + PS(lifetime));
+		len += sizeof(COOKIE_EXPIRES) + strlen(date_fmt);
+	}
 	cookie = emalloc(len + 1);
+	
 	snprintf(cookie, len, COOKIE_FMT, PS(session_name), PS(id));
+	if (PS(lifetime) > 0) {
+		strcat(cookie, COOKIE_EXPIRES);
+		strcat(cookie, date_fmt);
+		efree(date_fmt);
+	}
 
 	sapi_add_header(cookie, len);
 }
@@ -555,9 +570,10 @@ static void php_rinit_session_globals(PSLS_D)
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(save_path) = estrdup(INI_STR("session_save_path"));
 	PS(session_name) = estrdup(INI_STR("session_name"));
-	PS(gc_probability) = INI_INT("gc_probability");
-	PS(gc_maxlifetime) = INI_INT("gc_maxlifetime");
+	PS(gc_probability) = INI_INT("session_gc_probability");
+	PS(gc_maxlifetime) = INI_INT("session_gc_maxlifetime");
 	PS(id) = NULL;
+	PS(lifetime) = INI_INT("session_lifetime");
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
 }
