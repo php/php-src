@@ -510,6 +510,7 @@ BEGIN_EXTERN_C()
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
 PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
+PHPAPI int php_unregister_url_stream_wrapper_volatile(char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC);
 PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC);
@@ -541,6 +542,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
 PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(TSRMLS_D);
 #define php_stream_get_url_stream_wrappers_hash()	_php_stream_get_url_stream_wrappers_hash(TSRMLS_C)
+PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash(TSRMLS_C)
 PHPAPI HashTable *php_get_stream_filters_hash_global();

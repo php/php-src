@@ -437,6 +437,62 @@ PHP_FUNCTION(stream_wrapper_register)
 }
 /* }}} */
 
+/* {{{ bool stream_wrapper_unregister(string protocol)
+	Unregister a wrapper for the life of the current request. */
+PHP_FUNCTION(stream_wrapper_unregister)
+{
+	char *protocol;
+	int protocol_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (php_unregister_url_stream_wrapper_volatile(protocol TSRMLS_CC) == FAILURE) {
+		/* We failed */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to unregister protocol %s://", protocol);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ bool stream_wrapper_restore(string protocol)
+	Restore the original protocol handler, overriding if necessary */
+PHP_FUNCTION(stream_wrapper_restore)
+{
+	char *protocol;
+	int protocol_len;
+	php_stream_wrapper *wrapper = NULL;
+	HashTable *global_wrapper_hash;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	global_wrapper_hash = php_stream_get_url_stream_wrappers_hash_global();
+	if (php_stream_get_url_stream_wrappers_hash() == global_wrapper_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s:// was never changed, nothing to restore", protocol);
+		RETURN_TRUE;
+	}
+
+	if ((zend_hash_find(global_wrapper_hash, protocol, protocol_len, (void**)&wrapper) == FAILURE) || !wrapper) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:// never existed, nothing to restore", protocol);
+		RETURN_FALSE;
+	}
+
+	/* A failure here could be okay given that the protocol might have been merely unregistered */
+	php_unregister_url_stream_wrapper_volatile(protocol TSRMLS_CC);
+
+	if (php_register_url_stream_wrapper_volatile(protocol, wrapper TSRMLS_CC) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to restore original %s:// wrapper", protocol);
+		RETURN_FALSE;
+	}	
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {

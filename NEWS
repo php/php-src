@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . array_intersect_ukey() (Christiano Duarte)
   . stream_context_get_default() (Wez)
   . stream_socket_enable_crypto() (Wez)
+  . stream_wrapper_unregister() (Sara)
+  . stream_wrapper_restore() (Sara)
   . DomDocumentFragment->appendXML() (Christian)
   . SimpleXMLElement->registerXPathNamespace() (Christian)
   . mysqli->client_info property (Georg)
