@@ -333,6 +333,10 @@ SOURCE=..\ext\standard\crc32.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\credits.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\datetime.c
 # End Source File
 # Begin Source File
