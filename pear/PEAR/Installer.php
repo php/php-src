@@ -165,7 +165,14 @@ class PEAR_Installer extends PEAR_Downloader
                 include_once "OS/Guess.php";
                 $os = new OS_Guess();
             }
-            if (!$os->matchSignature($atts['platform'])) {
+            if (strlen($atts['platform']) && $atts['platform']{0} == '!') {
+                $negate = true;
+                $platform = substr($atts['platform'], 1);
+            } else {
+                $negate = false;
+                $platform = $atts['platform'];
+            }
+            if ((bool) $os->matchSignature($platform) === $negate) {
                 $this->log(3, "skipped $file (meant for $atts[platform], we are ".$os->getSignature().")");
                 return PEAR_INSTALLER_SKIPPED;
             }
@@ -791,25 +798,24 @@ class PEAR_Installer extends PEAR_Downloader
                 foreach ($built as $ext) {
                     $bn = basename($ext['file']);
                     list($_ext_name, $_ext_suff) = explode('.', $bn);
-
-					if ($_ext_suff == '.so' || $_ext_suff == '.dll' /* || something more portable */) {
-                        /* it is an extension */
+                    if ($_ext_suff == '.so' || $_ext_suff == '.dll') {
                         if (extension_loaded($_ext_name)) {
-                            $this->raiseError(
-                                "Extension '$_ext_name' already loaded. Please unload it ".
-                                "from your php.ini file prior to install or upgrade it.");
+                            $this->raiseError("Extension '$_ext_name' already loaded. " .
+                                              'Please unload it in your php.ini file ' .
+                                              'prior to install or upgrade');
                         }
                         $role = 'ext';
                     } else {
                         $role = 'src';
                     }
-                
-                    $this->log(1, "Installing $ext[file]\n");
-                    $copyto = $this->_prependPath($ext['dest'], $this->installroot);
+                    $dest = $ext['dest'];
+                    $this->log(1, "Installing '$ext[file]'");
+                    $copyto = $this->_prependPath($dest, $this->installroot);
                     $copydir = dirname($copyto);
                     if (!@is_dir($copydir)) {
                         if (!$this->mkDirHier($copydir)) {
-                            return $this->raiseError("failed to mkdir $copydir", PEAR_INSTALLER_FAILED);
+                            return $this->raiseError("failed to mkdir $copydir",
+                                PEAR_INSTALLER_FAILED);
                         }
                         $this->log(3, "+ mkdir $copydir");
                     }
@@ -821,15 +827,15 @@ class PEAR_Installer extends PEAR_Downloader
                         $mode = 0666 & ~(int)octdec($this->config->get('umask'));
                         $this->addFileOperation('chmod', array($mode, $copyto));
                         if (!@chmod($copyto, $mode)) {
-                            $this->log(0, "failed to chamge mode of $copyto");
+                            $this->log(0, "failed to change mode of $copyto");
                         }
                     }
                     $this->addFileOperation('rename', array($ext['file'], $copyto));
-                            
+
                     $pkginfo['filelist'][$bn] = array(
                         'role' => $role,
-                        'installed_as' => $ext['dest'],
-                        'php_api'      => $ext['php_api'],
+                        'installed_as' => $dest,
+                        'php_api' => $ext['php_api'],
                         'zend_mod_api' => $ext['zend_mod_api'],
                         'zend_ext_api' => $ext['zend_ext_api'],
                         );

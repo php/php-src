@@ -155,7 +155,21 @@ use the "slide" option to move the release tag.
             'summary' => 'Run Regression Tests',
             'function' => 'doRunTests',
             'shortcut' => 'rt',
-            'options' => array(),
+            'options' => array(
+                'recur' => array(
+                    'shortopt' => 'r',
+                    'doc' => 'Run tests in child directories, recursively.  4 dirs deep maximum',
+                ),
+                'ini' => array(
+                    'shortopt' => 'i',
+                    'doc' => 'actual string of settings to pass to php in format " -d setting=blah"',
+                    'arg' => 'SETTINGS'
+                ),
+                'realtimelog' => array(
+                    'shortopt' => 'l',
+                    'doc' => 'Log test runs/results as they are run',
+                ),
+            ),
             'doc' => '[testfile|dir ...]
 Run regression tests with PHP\'s regression testing script (run-tests.php).',
             ),
@@ -250,6 +264,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
     {
         $this->output = '';
         include_once 'PEAR/Packager.php';
+        if (sizeof($params) < 1) {
+            $params[0] = "package.xml";
+        }
         $pkginfofile = isset($params[0]) ? $params[0] : 'package.xml';
         $packager =& new PEAR_Packager();
         $err = $warn = array();
@@ -264,12 +281,6 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         if (isset($options['showname'])) {
             $this->output = $result;
         }
-        /* (cox) What is supposed to do that code?
-        $lines = explode("\n", $this->output);
-        foreach ($lines as $line) {
-            $this->output .= $line."n";
-        }
-        */
         if (PEAR::isError($result)) {
             $this->output .= "Package failed: ".$result->getMessage();
         }
@@ -434,34 +445,118 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
 
     function doRunTests($command, $options, $params)
     {
-        $cwd = getcwd();
-        $php = $this->config->get('php_bin');
-        putenv("TEST_PHP_EXECUTABLE=$php");
-        // all core PEAR tests use this constant to determine whether they should be run or not
-        putenv("PHP_PEAR_RUNTESTS=1");
-        $ip = ini_get("include_path");
-        $ps = OS_WINDOWS ? ';' : ':';
-        $run_tests = $rtsts = $this->config->get('php_dir') . DIRECTORY_SEPARATOR . 'run-tests.php';
-        if (!file_exists($run_tests)) {
-            $run_tests = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . 'run-tests.php';
-            if (!file_exists($run_tests)) {
-                return $this->raiseError("No run-tests.php file found. Please copy this ".
-                                                "file from the sources of your PHP distribution to $rtsts");
+        include_once 'PEAR/RunTest.php';
+        $log = new PEAR_Common;
+        $log->ui = &$this->ui; // slightly hacky, but it will work
+        $run = new PEAR_RunTest($log);
+        $tests = array();
+        if (isset($options['recur'])) {
+            $depth = 4;
+        } else {
+            $depth = 1;
+        }
+        if (!count($params)) {
+            $params[] = '.';
+        }
+        foreach ($params as $p) {
+            if (is_dir($p)) {
+                $dir = System::find(array($p, '-type', 'f',
+                                            '-maxdepth', $depth,
+                                            '-name', '*.phpt'));
+                $tests = array_merge($tests, $dir);
+            } else {
+                if (!@file_exists($p)) {
+                    if (!preg_match('/\.phpt$/', $p)) {
+                        $p .= '.phpt';
+                    }
+                    $dir = System::find(array(dirname($p), '-type', 'f',
+                                                '-maxdepth', $depth,
+                                                '-name', $p));
+                    $tests = array_merge($tests, $dir);
+                } else {
+                    $tests[] = $p;
+                }
             }
         }
-        if (OS_WINDOWS) {
-            // note, this requires a slightly modified version of run-tests.php
-            // for some setups
-            // unofficial download location is in the pear-dev archives
-            $argv = $params;
-            array_unshift($argv, $run_tests);
-            $argc = count($argv);
-            include $run_tests;
-        } else {
-            $plist = implode(' ', $params);
-            $cmd = "$php -d include_path=$cwd$ps$ip -f $run_tests -- $plist";
-            system($cmd);
+        $ini_settings = '';
+        if (isset($options['ini'])) {
+            $ini_settings .= $options['ini'];
         }
+        if (isset($_ENV['TEST_PHP_INCLUDE_PATH'])) {
+            $ini_settings .= " -d include_path={$_ENV['TEST_PHP_INCLUDE_PATH']}";
+        }
+        if ($ini_settings) {
+            $this->ui->outputData('Using INI settings: "' . $ini_settings . '"');
+        }
+        $skipped = $passed = $failed = array();
+        $this->ui->outputData('Running ' . count($tests) . ' tests', $command);
+        $start = time();
+        if (isset($options['realtimelog'])) {
+            @unlink('run-tests.log');
+        }
+        foreach ($tests as $t) {
+            if (isset($options['realtimelog'])) {
+                $fp = @fopen('run-tests.log', 'a');
+                if ($fp) {
+                    fwrite($fp, "Running test $t...");
+                    fclose($fp);
+                }
+            }
+            $result = $run->run($t, $ini_settings);
+            if (OS_WINDOWS) {
+                for($i=0;$i<2000;$i++) {
+                    $i = $i; // delay - race conditions on windows
+                }
+            }
+            if (isset($options['realtimelog'])) {
+                $fp = @fopen('run-tests.log', 'a');
+                if ($fp) {
+                    fwrite($fp, "$result\n");
+                    fclose($fp);
+                }
+            }
+            if ($result == 'FAILED') {
+            	$failed[] = $t;
+            }
+            if ($result == 'PASSED') {
+            	$passed[] = $t;
+            }
+            if ($result == 'SKIPPED') {
+            	$skipped[] = $t;
+            }
+        }
+        $total = date('i:s', time() - $start);
+        if (count($failed)) {
+            $output = "TOTAL TIME: $total\n";
+            $output .= count($passed) . " PASSED TESTS\n";
+            $output .= count($skipped) . " SKIPPED TESTS\n";
+    		$output .= count($failed) . " FAILED TESTS:\n";
+        	foreach ($failed as $failure) {
+        		$output .= $failure . "\n";
+        	}
+            if (isset($options['realtimelog'])) {
+                $fp = @fopen('run-tests.log', 'a');
+            } else {
+                $fp = @fopen('run-tests.log', 'w');
+            }
+            if ($fp) {
+                fwrite($fp, $output, strlen($output));
+                fclose($fp);
+                $this->ui->outputData('wrote log to "' . realpath('run-tests.log') . '"', $command);
+            }
+        } elseif (@file_exists('run-tests.log') && !@is_dir('run-tests.log')) {
+            @unlink('run-tests.log');
+        }
+        $this->ui->outputData('TOTAL TIME: ' . $total);
+        $this->ui->outputData(count($passed) . ' PASSED TESTS', $command);
+        $this->ui->outputData(count($skipped) . ' SKIPPED TESTS', $command);
+        if (count($failed)) {
+    		$this->ui->outputData(count($failed) . ' FAILED TESTS:', $command);
+        	foreach ($failed as $failure) {
+        		$this->ui->outputData($failure, $command);
+        	}
+        }
+
         return true;
     }
 
@@ -642,6 +737,7 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
             if (!isset($attr['role'])) {
                 continue;
             }
+            $name = preg_replace('![/:\\\\]!', '/', $name);
             if ($attr['role'] == 'doc') {
                 $info['doc_files'] .= " $name";
 

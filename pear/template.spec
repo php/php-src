@@ -30,25 +30,29 @@ pear -v -c %{buildroot}/pearrc \
 %build
 echo BuildRoot=%{buildroot}
 
+%clean
+[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
+
 %postun
 pear uninstall --nodeps -r @package@
-rm @rpm_xml_dir@/@package@.xml
 
 %post
 pear install --nodeps -r @rpm_xml_dir@/@package@.xml
 
 %install
-pear -c %{buildroot}/pearrc install --nodeps -R %{buildroot} \
-        $RPM_SOURCE_DIR/@package@-%{version}.tgz
+pear -c "%{buildroot}/pearrc" install --nodeps -R "%{buildroot}" \
+        "$RPM_SOURCE_DIR/@package@-%{version}.tgz"
 rm %{buildroot}/pearrc
 rm %{buildroot}/%{_libdir}/php/pear/.filemap
 rm %{buildroot}/%{_libdir}/php/pear/.lock
 rm -rf %{buildroot}/%{_libdir}/php/pear/.registry
-if [ -d "%{buildroot}/docs/@package@/doc" ]; then
-    rm -rf $RPM_BUILD_DIR/doc
-    mv %{buildroot}/docs/@package@/doc $RPM_BUILD_DIR
-    rm -rf %{buildroot}/docs
-fi
+for DOCDIR in docs doc examples; do
+    if [ -d "%{buildroot}/docs/@package@/$DOCDIR" ]; then
+        rm -rf $RPM_BUILD_DIR/$DOCDIR
+        mv %{buildroot}/docs/@package@/$DOCDIR $RPM_BUILD_DIR
+        rm -rf %{buildroot}/docs
+    fi
+done
 mkdir -p %{buildroot}@rpm_xml_dir@
 tar -xzf $RPM_SOURCE_DIR/@package@-%{version}.tgz package.xml
 cp -p package.xml %{buildroot}@rpm_xml_dir@/@package@.xml

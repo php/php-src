@@ -286,7 +286,9 @@ class PEAR_Registry extends PEAR
                 $open_mode = 'r';
             }
 
-            $this->lock_fp = @fopen($this->lockfile, $open_mode);
+            if (!is_resource($this->lock_fp)) {
+                $this->lock_fp = @fopen($this->lockfile, $open_mode);
+            }
 
             if (!is_resource($this->lock_fp)) {
                 return $this->raiseError("could not create lock file" .
@@ -312,6 +314,9 @@ class PEAR_Registry extends PEAR
     function _unlock()
     {
         $ret = $this->_lock(LOCK_UN);
+        if (is_resource($this->lock_fp)) {
+            fclose($this->lock_fp);
+        }
         $this->lock_fp = null;
         return $ret;
     }
