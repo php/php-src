@@ -8,6 +8,7 @@ PHP 4.0                                                                    NEWS
 - Added mailparse_uudecode_all() which extracts all uuencoded attachments
 - Add support for chinese encodings to htmlentities() and htmlspecialchars()
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
+- Improved support for autoconf-2.50+/libtool 1.4b+ (Jan Kneschke, Sascha)
 
 ?? ??? 200?, Version 4.0.7
 - Fixed a crash bug in array_map() if the input arrays had string or
