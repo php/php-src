@@ -280,7 +280,7 @@ static char *sapi_pi3web_read_cookies(SLS_D)
 }
 
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct pi3web_sapi_module = {
 	"pi3web",				/* name */
 	"PI3WEB",				/* pretty name */
 
@@ -428,17 +428,17 @@ DWORD fnWrapperProc(LPCONTROL_BLOCK lpCB)
 
 BOOL PHP4_startup() {
 	tsrm_startup(1, 1, 0, NULL);
-	sapi_startup(&sapi_module);
-	if (sapi_module.startup) {
-		sapi_module.startup(&sapi_module);
+	sapi_startup(&pi3web_sapi_module);
+	if (pi3web_sapi_module.startup) {
+		pi3web_sapi_module.startup(&pi3web_sapi_module);
 	};
 	IWasLoaded = 1;
 	return IWasLoaded;
 };
 
 BOOL PHP4_shutdown() {
-	if (sapi_module.shutdown) {
-		sapi_module.shutdown(&sapi_module);
+	if (pi3web_sapi_module.shutdown) {
+		pi3web_sapi_module.shutdown(&pi3web_sapi_module);
 	};
 	sapi_shutdown();
 	tsrm_shutdown();

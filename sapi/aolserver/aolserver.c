@@ -368,7 +368,7 @@ php_ns_sapi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 
 /* this structure is static (as in "it does not change") */
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct aolserver_sapi_module = {
 	"aolserver",
 	"AOLserver",
 
@@ -606,15 +606,15 @@ int Ns_ModuleInit(char *server, char *module)
 	php_ns_context *ctx;
 	
 	tsrm_startup(1, 1, 0, NULL);
-	sapi_startup(&sapi_module);
-	sapi_module.startup(&sapi_module);
+	sapi_startup(&aolserver_sapi_module);
+	sapi_module.startup(&aolserver_sapi_module);
 	
 	/* TSRM is used to allocate a per-thread structure */
 	ns_globals_id = ts_allocate_id(sizeof(ns_globals_struct), NULL, NULL);
 	
 	/* the context contains data valid for all threads */
 	ctx = malloc(sizeof *ctx);
-	ctx->sapi_module = &sapi_module;
+	ctx->sapi_module = &aolserver_sapi_module;
 	ctx->ns_server = strdup(server);
 	ctx->ns_module = strdup(module);
 	

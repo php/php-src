@@ -39,7 +39,7 @@
 
 #define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
 
-PHPAPI extern char *php_ini_path;
+PHPAPI extern char *php_ini_opened_path;
 
 static int _display_module_info(zend_module_entry *module, void *arg)
 {
@@ -197,7 +197,7 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_table_row(2, "Virtual Directory Support", "disabled" );
 #endif
 
-		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_path?php_ini_path:CONFIGURATION_FILE_PATH );
+		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:CONFIGURATION_FILE_PATH);
 
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "ZEND_DEBUG", "enabled" );

@@ -163,7 +163,7 @@ php_phttpd_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 	return 0;
 }
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct phttpd_sapi_module = {
     "phttpd",
     "PHTTPD",
  
@@ -284,8 +284,8 @@ int php_doit(PHLS_D SLS_DC)
 int pm_init(const char **argv)
 {
 	tsrm_startup(1, 1, 0, NULL);
-	sapi_startup(&sapi_module);
-    sapi_module.startup(&sapi_module);
+	sapi_startup(&phttpd_sapi_module);
+    phttpd_sapi_module.startup(&phttpd_sapi_module);
 
 	ph_globals_id = ts_allocate_id(sizeof(phttpd_globals_struct), NULL, NULL);
 

@@ -320,7 +320,7 @@ sapi_nsapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC
 	}
 }
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct nsapi_sapi_module = {
 	"nsapi",				/* name */
 	"NSAPI",				/* pretty name */
 
@@ -531,8 +531,8 @@ nsapi_module_main(NSLS_D SLS_DC)
 void NSAPI_PUBLIC 
 php4_close(void *vparam)
 {
-	if (sapi_module.shutdown) {
-		sapi_module.shutdown(&sapi_module);
+	if (nsapi_sapi_module.shutdown) {
+		nsapi_sapi_module.shutdown(&nsapi_sapi_module);
 	}
 	tsrm_shutdown();
 }
@@ -545,8 +545,8 @@ php4_init(pblock *pb, Session *sn, Request *rq)
 	tsrm_startup(1, 1, 0, NULL);
 	core_globals = ts_resource(core_globals_id);
 
-	sapi_startup(&sapi_module);
-	sapi_module.startup(&sapi_module);
+	sapi_startup(&nsapi_sapi_module);
+	nsapi_sapi_module.startup(&nsapi_sapi_module);
 
 	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module\n");
 	return REQ_PROCEED;
