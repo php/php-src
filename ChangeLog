@@ -1,3 +1,81 @@
+2000-11-21  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: fixed bug in getCalendarMonth
+
+2000-11-21  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    Major rework of the basic api which provides:
+
+            - All Sablotron errors are now caught meaning nothing is
+              ever outputted directly to the screen allowing you to
+              catch all errors.
+            - A mechanism is provided for you to have an error function
+              which recieves all sablotron errors.
+            - All of the basic functions re-use a single processor increasing
+              performance (especially with high loads).
+            - Added a bunch of comments, more to come (this way other people
+              can easily modify my source).
+
+
+
+2000-11-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4: Fix bug #7034
+
+2000-11-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/zlib/config.m4
+      acinclude.m4:
+    make HAVE_FOPENCOOKIE available for other extensions besides zlib
+
+    * tests/.cvsignore
+      tests/lang/.cvsignore
+      tests/strings/.cvsignore
+      tests/classes/.cvsignore
+      tests/func/.cvsignore
+      pear/DB/tests/.cvsignore
+      pear/XML/tests/.cvsignore
+      pear/tests/.cvsignore
+      tests/basic/.cvsignore
+      ext/skeleton/tests/.cvsignore
+      pear/DB/tests/mysql/.cvsignore
+      ext/standard/tests/.cvsignore
+      ext/xml/tests/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/standard/tests/general_functions/.cvsignore
+      ext/standard/tests/math/.cvsignore
+      ext/standard/tests/reg/.cvsignore
+      ext/db/tests/.cvsignore
+      ext/interbase/tests/.cvsignore:
+    added .cvsignore files for tests directories
+
+2000-11-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pdf/pdf.c: fix PDF image open under Win32
+
+2000-11-21  Frank M. Kromann  <fmk@swwwing.com>
+
+    * php.ini-dist
+      php.ini-optimized:
+    Adding php.ini value to set default batch size for mssql extension
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+    Adding new functions, mssql_affected_rows and mssql_fetch_batch.
+    Added optional paramter to mssql_query, batchsize used minimize the memery usage during select of large datasats.
+
+2000-11-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/zlib/zlib_fopen_wrapper.c:
+    * ext/zlib/zlib_fopen_wrapper.c
+      ext/zlib/Makefile.in
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c:
+    all the _GNU_SOURCE dependant stuff is now in zlib_fopen_wrapper.c
+    so all the #define/#include workarounds in zlib.c are no longer needed
+
 2000-11-20  Frank M. Kromann  <fmk@swwwing.com>
 
     * win32/php4dllts.dsp: Adding credits.c to project to allow compilation.
