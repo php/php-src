@@ -41,11 +41,19 @@
 static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 {
 	FILE *fp;
-	char buf[EXEC_INPUT_BUF], *tmp=NULL;
+	char *buf, *tmp=NULL;
+	int buflen = 0;
 	int t, l, ret, output=1;
 	int overflow_limit, lcmd, ldir;
 	char *b, *c, *d=NULL;
 	PLS_FETCH();
+
+	buf = (char*) emalloc(EXEC_INPUT_BUF);
+    if (!buf) {
+		php3_error(E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
+		return -1;
+    }
+	buflen = EXEC_INPUT_BUF;
 
 	if (PG(safe_mode)) {
 		lcmd = strlen(cmd);
@@ -56,6 +64,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		if (c) *c = '\0';
 		if (strstr(cmd, "..")) {
 			php3_error(E_WARNING, "No '..' components allowed in path");
+			efree(buf);
 			return -1;
 		}
 		d = emalloc(l);
@@ -85,6 +94,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		if (!fp) {
 			php3_error(E_WARNING, "Unable to fork [%s]", d);
 			efree(d);
+			efree(buf);
 			return -1;
 		}
 	} else { /* not safe_mode */
@@ -95,6 +105,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 #endif
 		if (!fp) {
 			php3_error(E_WARNING, "Unable to fork [%s]", cmd);
+			efree(buf);
 			return -1;
 		}
 	}
@@ -106,7 +117,33 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		}
 	}
 	if (type != 3) {
-		while (fgets(buf, EXEC_INPUT_BUF - 1, fp)) {
+		l=0;
+		while ( !feof(fp) || l != 0 ) {
+			l = 0;
+			/* Read a line or fill the buffer, whichever comes first */
+			do {
+				if ( buflen <= (l+1) ) {
+					buf = erealloc(buf, buflen + EXEC_INPUT_BUF);
+					if ( buf == NULL ) {
+						php3_error(E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
+								buflen + EXEC_INPUT_BUF);
+						return -1;
+					}
+					buflen += EXEC_INPUT_BUF;
+				}
+
+				if ( fgets(&(buf[l]), buflen - l, fp) == NULL ) {
+					/* eof */
+					break;
+				}
+				l += strlen(&(buf[l]));
+			} while ( (l > 0) && (buf[l-1] != '\n') );
+
+			if ( feof(fp) && (l == 0) ) {
+				break;
+			}
+
+		
 			if (type == 1) {
 				SLS_FETCH();
 				
@@ -132,7 +169,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 				/* strip trailing whitespaces */	
 				l = strlen(buf);
 				t = l;
-				while (l && isspace((int)buf[--l]));
+				while (l-- && isspace((int)buf[l]));
 				if (l < t) {
 					buf[l + 1] = '\0';
 				}
@@ -173,6 +210,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 #endif
 
 	if (d) efree(d);
+	efree(buf);
 	return ret;
 }
 
