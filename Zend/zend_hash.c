@@ -137,6 +137,7 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	uint i = 3;
+	Bucket **tmp;
 
 	SET_INCONSISTENT(HT_OK);
 
@@ -146,18 +147,8 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunctio
 
 	ht->nTableSize = 1 << i;
 	ht->nTableMask = ht->nTableSize - 1;
-	
-	/* Uses ecalloc() so that Bucket* == NULL */
-	if (persistent) {
-		ht->arBuckets = (Bucket **) calloc(ht->nTableSize, sizeof(Bucket *));
-		if (!ht->arBuckets) {
-			return FAILURE;
-		}
-	} else {
-		ht->arBuckets = (Bucket **) ecalloc_rel(ht->nTableSize, sizeof(Bucket *));
-	}
-	
 	ht->pDestructor = pDestructor;
+	ht->arBuckets = NULL;
 	ht->pListHead = NULL;
 	ht->pListTail = NULL;
 	ht->nNumOfElements = 0;
@@ -166,6 +157,21 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunctio
 	ht->persistent = persistent;
 	ht->nApplyCount = 0;
 	ht->bApplyProtection = 1;
+	
+	/* Uses ecalloc() so that Bucket* == NULL */
+	if (persistent) {
+		tmp = (Bucket **) calloc(ht->nTableSize, sizeof(Bucket *));
+		if (!tmp) {
+			return FAILURE;
+		}
+		ht->arBuckets = tmp;
+	} else {
+		tmp = (Bucket **) ecalloc_rel(ht->nTableSize, sizeof(Bucket *));
+		if (tmp) {
+			ht->arBuckets = tmp;
+		}
+	}
+	
 	return SUCCESS;
 }
 

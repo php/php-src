@@ -765,7 +765,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
 	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0;
 	int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
-	zval *http_post_files=NULL;
+	zval *http_post_files=NULL; HashTable *uploaded_files=NULL;
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
 	char **val_list = NULL;
@@ -816,8 +816,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	/* Initialize $_FILES[] */
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
-	ALLOC_HASHTABLE(SG(rfc1867_uploaded_files));
-	zend_hash_init(SG(rfc1867_uploaded_files), 5, NULL, (dtor_func_t) free_estring, 0);
+	ALLOC_HASHTABLE(uploaded_files);
+	zend_hash_init(uploaded_files, 5, NULL, (dtor_func_t) free_estring, 0);
+	SG(rfc1867_uploaded_files) = uploaded_files;
 
 	ALLOC_ZVAL(http_post_files);
 	array_init(http_post_files);
