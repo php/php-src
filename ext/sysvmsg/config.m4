@@ -9,9 +9,9 @@ if test "$PHP_SYSVMSG" != "no"; then
    [#include <sys/types.h>
     #include <sys/ipc.h>
     #include <sys/msg.h>],
-   [struct msgbuf *foo;
+   [size_t i;
 
-    foo = (struct msgbuf *) malloc(sizeof(struct msgbuf*) +1);
+     i = sizeof(struct msgbuf);
     return 1;],
    [AC_MSG_RESULT(msgbuf)],
    [AC_TRY_COMPILE(
@@ -19,9 +19,9 @@ if test "$PHP_SYSVMSG" != "no"; then
       #include <sys/ipc.h>
       #include <sys/msg.h>
      ],
-     [struct mymsg *foo;
+     [size_t i;
 
-      foo = (struct mymsg *) malloc(sizeof(struct mymsg*) +1);
+     i = sizeof(struct mymsg);
       return 1;
      ],
      [AC_DEFINE(msgbuf, mymsg, [msgbuf is called mymsg])
