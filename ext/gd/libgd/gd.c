@@ -1651,18 +1651,37 @@ gdImageCopy (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int s
   if (dst->trueColor)
     {
       /* 2.0: much easier when the destination is truecolor. */
+		
+		if (src->trueColor)	{
       for (y = 0; (y < h); y++)
 	{
 	  for (x = 0; (x < w); x++)
 	    {
 	      int c = gdImageGetTrueColorPixel (src, srcX + x,
 						srcY + y);
+					gdImageSetPixel (dst,
+							dstX + x,
+							dstY + y,
+							c);
+				}
+			}
+
+		}
+		else	{
+			/* source is palette based */
+			for (y = 0; (y < h); y++)
+			{
+				for (x = 0; (x < w); x++)
+				{
+					int c = gdImageGetPixel (src, srcX + x,
+							srcY + y);
 	      if (c != src->transparent)
 		{
 		  gdImageSetPixel (dst,
 				   dstX + x,
 				   dstY + y,
-				   c);
+								gdTrueColor(src->red[c], src->green[c], src->blue[c]));
+					}
 		}
 	    }
 	}

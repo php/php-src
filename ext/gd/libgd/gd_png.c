@@ -225,7 +225,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 	      im->alpha[i] = gdAlphaMax - (trans[i] >> 1);
 	      if ((trans[i] == 0) && (firstZero))
 		{
-		  im->transparent = i;
+					  transparent = i;
 		  firstZero = 0;
 		}
 	    }

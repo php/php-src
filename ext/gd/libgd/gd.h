@@ -251,6 +251,19 @@ char *gdImageStringTTF(gdImage *im, int *brect, int fg, char *fontlist,
 char *gdImageStringFT(gdImage *im, int *brect, int fg, char *fontlist,
                 double ptsize, double angle, int x, int y, char *string);
 
+typedef struct {
+	int flags; /* for future expansion logical OR of gdFTEX_ values */
+	double linespacing; /* fine tune line spacing for '\n' */
+} gdFTStringExtra, *gdFTStringExtraPtr;
+#define gdFTEX_LINESPACE 1
+
+/* FreeType 2 text output with fine tuning */
+char *
+gdImageStringFTEx(gdImage * im, int *brect, int fg, char * fontlist,
+		double ptsize, double angle, int x, int y, char * string,
+		gdFTStringExtraPtr strex);
+
+
 /* Point type for use in polygon drawing. */
 typedef struct {
 	int x, y;
