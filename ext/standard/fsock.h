@@ -40,6 +40,7 @@
 # endif
 # undef FD_SETSIZE
 # include "arpa/inet.h"
+# define socklen_t unsigned int
 #endif
 
 #ifdef HAVE_NETINET_IN_H
