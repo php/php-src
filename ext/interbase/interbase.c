@@ -421,9 +421,9 @@ static void _php_ibase_close_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	ibase_db_link *link = (ibase_db_link *) rsrc->ptr;
 
 	_php_ibase_commit_link(link TSRMLS_CC);
-	if (link->link != NULL) {
+	if (link->handle != NULL) {
 		IBDEBUG("Closing normal link...");
-		isc_detach_database(IB_STATUS, &link->link);
+		isc_detach_database(IB_STATUS, &link->handle);
 	}
 	IBG(num_links)--;
 	efree(link);
@@ -438,8 +438,8 @@ static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	_php_ibase_commit_link(link TSRMLS_CC);
 	IBDEBUG("Closing permanent link...");
-	if (link->link != NULL) {
-		isc_detach_database(IB_STATUS, &link->link);
+	if (link->handle != NULL) {
+		isc_detach_database(IB_STATUS, &link->handle);
 	}
 	IBG(num_persistent)--;
 	IBG(num_links)--;
@@ -502,6 +502,9 @@ static void _php_ibase_free_query(ibase_query *ib_query TSRMLS_DC)
 		if (ib_query->out_array) {
 			efree(ib_query->out_array);
 		}
+		if (ib_query->query) {
+			efree(ib_query->query);
+		}
 		efree(ib_query);
 	}
 }
@@ -529,6 +532,9 @@ static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		}
 		if (ib_query->out_array) {
 			efree(ib_query->out_array);
+		}
+		if (ib_query->query) {
+			efree(ib_query->query);
 		}
 		efree(ib_query);
 	}
@@ -865,7 +871,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			/* Check if connection has timed out */
 			ib_link = (ibase_db_link *) le->ptr;
-			if (!isc_database_info(IB_STATUS, &ib_link->link, sizeof(tmp_1), tmp_1, sizeof(tmp_2), tmp_2)) {
+			if (!isc_database_info(IB_STATUS, &ib_link->handle, sizeof(tmp_1), tmp_1, sizeof(tmp_2), tmp_2)) {
 				open_new_connection = 0;
 			}
 		}
@@ -895,7 +901,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
-			ib_link->link = db_handle;
+			ib_link->handle = db_handle;
 			ib_link->dialect = (ib_dialect ? (unsigned short) strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
 			ib_link->tr_list = NULL;
 
@@ -955,7 +961,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
-		ib_link->link = db_handle;
+		ib_link->handle = db_handle;
 		ib_link->dialect = (ib_dialect ? (unsigned short) strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
 		ib_link->tr_list = NULL;
 		
@@ -1054,7 +1060,7 @@ PHP_FUNCTION(ibase_drop_db)
 	}
 	
 	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, "InterBase link", le_link, le_plink);
-	if (isc_drop_database(IB_STATUS, &ib_link->link)) {
+	if (isc_drop_database(IB_STATUS, &ib_link->handle)) {
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	}
@@ -1162,9 +1168,10 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQL
 
 /* {{{ _php_ibase_alloc_query() */
 /* allocate and prepare query */
-static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query, unsigned short dialect TSRMLS_DC)
+static int _php_ibase_alloc_query(ibase_query **ib_queryp, ibase_db_link *link, ibase_trans *trans, char *query, unsigned short dialect, int trans_res_id TSRMLS_DC)
 {
 #define IB_QUERY (*ib_queryp)
+	char info_type[] = {isc_info_sql_stmt_type}, result[8];
 	
 	IB_QUERY = emalloc(sizeof(ibase_query));
 	IB_QUERY->link = link;
@@ -1177,8 +1184,11 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 	IB_QUERY->out_array = NULL;
 	IB_QUERY->out_array_cnt = 0;
 	IB_QUERY->dialect = dialect;
+	IB_QUERY->statement_type = '\0';
+	IB_QUERY->query = estrdup(query);
+	IB_QUERY->trans_res_id = trans_res_id;
 	
-	if (isc_dsql_allocate_statement(IB_STATUS, &link, &IB_QUERY->stmt)) {
+	if (isc_dsql_allocate_statement(IB_STATUS, &link->handle, &IB_QUERY->stmt)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
@@ -1187,10 +1197,17 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 	IB_QUERY->out_sqlda->sqln = 1;
 	IB_QUERY->out_sqlda->version = SQLDA_CURRENT_VERSION;
 
-	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans, &IB_QUERY->stmt, 0, query, dialect, IB_QUERY->out_sqlda)) {
+	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans->handle, &IB_QUERY->stmt, 0, query, dialect, IB_QUERY->out_sqlda)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
+
+	/* find out what kind of statement was prepared */
+	if (isc_dsql_sql_info(IB_STATUS, &IB_QUERY->stmt, sizeof(info_type), info_type, sizeof(result), result)) {
+		_php_ibase_error(TSRMLS_C);
+		goto _php_ibase_alloc_query_error;
+	}
+	IB_QUERY->statement_type = result[3];	
 	
 	/* not enough output variables ? */
 	if (IB_QUERY->out_sqlda->sqld > IB_QUERY->out_sqlda->sqln) {
@@ -1256,6 +1273,9 @@ _php_ibase_alloc_query_error:
 	if (IB_QUERY->out_array) {
 		efree(IB_QUERY->out_array);
 	}
+	if (IB_QUERY->query) {
+		efree(IB_QUERY->query);
+	}
 	efree(IB_QUERY);
 	IB_QUERY = NULL;
 	
@@ -1273,7 +1293,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 	int i;
 
 	var = sqlda->sqlvar;
-	for (i = 0; i < sqlda->sqld; var++, i++) { /* binded vars */
+	for (i = 0; i < sqlda->sqld; var++, i++) { /* bound vars */
 		
 		buf[i].sqlind = 0;
 		var->sqlind = &buf[i].sqlind;
@@ -1527,25 +1547,85 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 /* }}} */
 
 /* {{{ _php_ibase_exec() */
-static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int argc, zval **args TSRMLS_DC)
+static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resultp, ibase_query *ib_query, int argc, zval **args)
 {
 #define IB_RESULT (*ib_resultp)
 	XSQLDA *in_sqlda = NULL, *out_sqlda = NULL;
 	BIND_BUF *bind_buf = NULL;
 	int rv = FAILURE;
-	
-	IB_RESULT = NULL;
+	char info_count[] = {isc_info_sql_records}, result[64];
+
+	RESET_ERRMSG;
 
 	if (argc > 0 && args != NULL) {
 		SEPARATE_ZVAL(args);
 	}
 	
+	switch (ib_query->statement_type) {
+		isc_tr_handle tr;
+		ibase_tr_list **l;
+		ibase_trans *trans;
+		
+		case isc_info_sql_stmt_start_trans:
+		
+			/* a SET TRANSACTION statement should be executed with a NULL trans handle */
+			tr = NULL;
+			
+			if (isc_dsql_execute_immediate(IB_STATUS, &ib_query->link->handle, &tr, 0, ib_query->query, ib_query->dialect, NULL)) {
+				_php_ibase_error(TSRMLS_C);
+				goto _php_ibase_exec_error;
+			}
+			
+			trans = (ibase_trans *) emalloc(sizeof(ibase_trans));
+			trans->handle = tr;
+			trans->link_cnt = 1;
+			trans->affected_rows = 0;
+			trans->db_link[0] = ib_query->link;
+	
+			if (ib_query->link->tr_list == NULL) {
+				ib_query->link->tr_list = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
+				ib_query->link->tr_list->trans = NULL;
+				ib_query->link->tr_list->next = NULL;
+			}
+			
+			/* link the transaction into the connection-transaction list */
+			for (l = &ib_query->link->tr_list; *l != NULL; l = &(*l)->next);
+			*l = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
+			(*l)->trans = trans;
+			(*l)->next = NULL;
+	
+			ZEND_REGISTER_RESOURCE(return_value, trans, le_trans);
+
+			return SUCCESS;
+
+		case isc_info_sql_stmt_commit:
+		case isc_info_sql_stmt_rollback:
+		
+			if (isc_dsql_execute_immediate(IB_STATUS, &ib_query->link->handle, &ib_query->trans->handle, 0, ib_query->query, ib_query->dialect, NULL)) {
+				_php_ibase_error(TSRMLS_C);
+				goto _php_ibase_exec_error;
+			}
+
+			if (ib_query->trans->handle == NULL && ib_query->trans_res_id != 0) {
+				/* transaction was released by the query and was a registered resource, 
+				   so we have to release it */
+				zend_list_delete(ib_query->trans_res_id);
+			}
+
+			return SUCCESS;
+		
+		default:
+			
+			Z_BVAL_P(return_value) = 1;
+			Z_TYPE_P(return_value) = IS_BOOL;
+	}
+
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
 		IBDEBUG("Query wants XSQLDA for output");
 		IB_RESULT = emalloc(sizeof(ibase_result));
-		IB_RESULT->link = ib_query->link;
-		IB_RESULT->trans = ib_query->trans;
+		IB_RESULT->link = ib_query->link->handle;
+		IB_RESULT->trans = ib_query->trans->handle;
 		IB_RESULT->stmt = ib_query->stmt; 
 		IB_RESULT->drop_stmt = 0; /* when free result close but not drop!*/
 
@@ -1576,10 +1656,37 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 		}
 	}
 
-	if (isc_dsql_execute(IB_STATUS, &ib_query->trans, &ib_query->stmt, ib_query->dialect, in_sqlda)) {
+	if (isc_dsql_execute(IB_STATUS, &ib_query->trans->handle, &ib_query->stmt, ib_query->dialect, in_sqlda)) {
 		IBDEBUG("Could not execute query");
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_exec_error;
+	}
+
+	ib_query->trans->affected_rows = 0;
+	
+	switch (ib_query->statement_type) {
+
+		case isc_info_sql_stmt_insert:
+		case isc_info_sql_stmt_update:
+		case isc_info_sql_stmt_delete:
+		case isc_info_sql_stmt_exec_procedure:
+		
+			if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(info_count), info_count, sizeof(result), result)) {
+				_php_ibase_error(TSRMLS_C);
+				goto _php_ibase_exec_error;
+			}
+			
+			if (result[0] == isc_info_sql_records) {
+				unsigned i = 3, result_size = isc_vax_integer(&result[1],2);
+	
+				while (result[i] != isc_info_end && i < result_size) {
+					short len = (short)isc_vax_integer(&result[i+1],2);
+					if (result[i] != isc_info_req_select_count) {
+						ib_query->trans->affected_rows += isc_vax_integer(&result[i+3],len);
+					}
+					i += len+3;
+				}
+			}					
 	}
 
 	rv = SUCCESS;
@@ -1655,7 +1762,7 @@ PHP_FUNCTION(ibase_trans)
 				memcpy(&tpb[TPB_MAX_SIZE * link_cnt], last_tpb, TPB_MAX_SIZE);
 
 				/* add a database handle to the TEB with the most recently specified set of modifiers */
-				teb[link_cnt].db_ptr = &ib_link[link_cnt]->link;
+				teb[link_cnt].db_ptr = &ib_link[link_cnt]->handle;
 				teb[link_cnt].tpb_len = tpb_len;
 				teb[link_cnt].tpb_ptr = &tpb[TPB_MAX_SIZE * link_cnt];
 				
@@ -1714,7 +1821,7 @@ PHP_FUNCTION(ibase_trans)
 	if (link_cnt == 0) {
 		link_cnt = 1;
 		ZEND_FETCH_RESOURCE2(ib_link[0], ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
-		result = isc_start_transaction(IB_STATUS, &tr_handle, 1, &ib_link[0]->link, tpb_len, last_tpb);
+		result = isc_start_transaction(IB_STATUS, &tr_handle, 1, &ib_link[0]->handle, tpb_len, last_tpb);
 	}
 	
 	/* start the transaction */
@@ -1779,7 +1886,7 @@ static int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRM
 			ib_link->tr_list->trans = tr;
 		}
 		if (tr->handle == NULL) {
-			if (isc_start_transaction(IB_STATUS, &tr->handle, 1, &ib_link->link, 0, NULL)) {
+			if (isc_start_transaction(IB_STATUS, &tr->handle, 1, &ib_link->handle, 0, NULL)) {
 				_php_ibase_error(TSRMLS_C);
 				return FAILURE;
 			}
@@ -1911,12 +2018,12 @@ PHP_FUNCTION(ibase_rollback_ret)
 PHP_FUNCTION(ibase_query)
 {
 	zval ***args, **bind_args = NULL;
-	int i, bind_n = 0, trans_id = 0;
-	char *query, info_type[] = {isc_info_sql_stmt_type}, info_count[] = {'\0'}, result[64];
+	int i, bind_n = 0, trans_res_id = 0;
 	ibase_db_link *ib_link = NULL;
 	ibase_trans *trans = NULL;
 	ibase_query *ib_query;
 	ibase_result *ib_result = NULL;
+	char *query;
 
 	RESET_ERRMSG;
 
@@ -1976,7 +2083,7 @@ PHP_FUNCTION(ibase_query)
 						/* register the link as a resource; unfortunately, we cannot register 
 						   it in the hash table, because we don't know the connection params */
 						ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
-						ib_link->link = db;
+						ib_link->handle = db;
 						ib_link->dialect = SQL_DIALECT_CURRENT;
 						ib_link->tr_list = NULL;
 						
@@ -2001,7 +2108,7 @@ PHP_FUNCTION(ibase_query)
 			if (trans != NULL) {
 				/* argument was a trans id */
 				convert_to_long_ex(args[0]);
-				trans_id = Z_LVAL_PP(args[0]);
+				trans_res_id = Z_LVAL_PP(args[0]);
 			}
 			break;	
 		case 3:
@@ -2010,7 +2117,7 @@ PHP_FUNCTION(ibase_query)
 			ZEND_FETCH_RESOURCE(trans, ibase_trans*, args[1], -1, "InterBase transaction", le_trans);
 
 			convert_to_long_ex(args[1]);
-			trans_id = Z_LVAL_PP(args[1]);
+			trans_res_id = Z_LVAL_PP(args[1]);
 
 			break;
 		default:
@@ -2035,111 +2142,15 @@ PHP_FUNCTION(ibase_query)
 		RETURN_FALSE;
 	}
 
-	if (_php_ibase_alloc_query(&ib_query, ib_link->link, trans->handle, query, ib_link->dialect TSRMLS_CC) == FAILURE) {
-		free_alloca(args);
-		RETURN_FALSE;
-	}
-	
-	/* find out what kind of statement was prepared */
-	if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(info_type), info_type, sizeof(result), result)) {
-		_php_ibase_error(TSRMLS_C);
+	if (_php_ibase_alloc_query(&ib_query, ib_link, trans, query, ib_link->dialect, trans_res_id TSRMLS_CC) == FAILURE) {
 		free_alloca(args);
 		RETURN_FALSE;
 	}
 
-	switch (result[3]) {
-		isc_tr_handle tr;
-		ibase_tr_list **l;
-		
-		case isc_info_sql_stmt_start_trans:
-		
-			/* a SET TRANSACTION statement should be executed with a NULL trans handle */
-			tr = NULL;
-			
-			if (isc_dsql_execute_immediate(IB_STATUS, &ib_link->link, &tr, 0, query, ib_link->dialect, NULL)) {
-				_php_ibase_error(TSRMLS_C);
-				_php_ibase_free_query(ib_query TSRMLS_CC);
-				free_alloca(args);
-				RETURN_FALSE;
-			}
-			
-			trans = (ibase_trans *) emalloc(sizeof(ibase_trans));
-			trans->handle = tr;
-			trans->link_cnt = 1;
-			trans->affected_rows = 0;
-			trans->db_link[0] = ib_link;
-	
-			if (ib_link->tr_list == NULL) {
-				ib_link->tr_list = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
-				ib_link->tr_list->trans = NULL;
-				ib_link->tr_list->next = NULL;
-			}
-			
-			/* link the transaction into the connection-transaction list */
-			for (l = &ib_link->tr_list; *l != NULL; l = &(*l)->next);
-			*l = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
-			(*l)->trans = trans;
-			(*l)->next = NULL;
-	
-			ZEND_REGISTER_RESOURCE(return_value, trans, le_trans);
-	
-			_php_ibase_free_query(ib_query TSRMLS_CC);
-			free_alloca(args);
-			return;
-
-		case isc_info_sql_stmt_commit:
-		case isc_info_sql_stmt_rollback:
-		
-			if (isc_dsql_execute_immediate(IB_STATUS, &ib_link->link, &trans->handle, 0, query, ib_link->dialect, NULL)) {
-				_php_ibase_error(TSRMLS_C);
-				_php_ibase_free_query(ib_query TSRMLS_CC);
-				free_alloca(args);
-				RETURN_FALSE;
-			}
-
-			if (trans->handle == NULL && trans_id != 0) {
-				/* transaction was a registered resource, so we have to release it */
-				zend_list_delete(trans_id);
-			}
-			break;
-
-		case isc_info_sql_stmt_insert:
-		case isc_info_sql_stmt_update:
-		case isc_info_sql_stmt_delete:
-			/* in these cases, we will want to know the number of affected rows */
-			info_count[0] = isc_info_sql_records;
-
-		default:
-
-			if (_php_ibase_exec(&ib_result, ib_query, bind_n, bind_args TSRMLS_CC) == FAILURE) {
-				_php_ibase_free_query(ib_query TSRMLS_CC);
-				free_alloca(args);
-				RETURN_FALSE;
-			}
-			
-			trans->affected_rows = 0;
-			
-			if (info_count[0]) {
-				
-				if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(info_count), info_count, sizeof(result), result)) {
-					_php_ibase_error(TSRMLS_C);
-					_php_ibase_free_query(ib_query TSRMLS_CC);
-					free_alloca(args);
-					RETURN_FALSE;
-				}
-				
-				if (result[0] == isc_info_sql_records) {
-					unsigned i = 3, result_size = isc_vax_integer(&result[1],2);
-
-					while (result[i] != isc_info_end && i < result_size) {
-						short len = (short)isc_vax_integer(&result[i+1],2);
-						if (result[i] != isc_info_req_select_count) {
-							trans->affected_rows += isc_vax_integer(&result[i+3],len);
-						}
-						i += len+3;
-					}
-				}					
-			}
+	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_result, ib_query, bind_n, bind_args) == FAILURE) {
+		_php_ibase_free_query(ib_query TSRMLS_CC);
+		free_alloca(args);
+		RETURN_FALSE;
 	}
 
 	free_alloca(args);
@@ -2152,7 +2163,6 @@ PHP_FUNCTION(ibase_query)
 		ZEND_REGISTER_RESOURCE(return_value, ib_result, le_result);
 	} else {
 		_php_ibase_free_query(ib_query TSRMLS_CC);
-		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -2756,6 +2766,7 @@ PHP_FUNCTION(ibase_prepare)
 	zval **link_arg, **trans_arg, **query_arg;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
+	int trans_res_id = 0;
 	ibase_query *ib_query;
 	char *query;
 
@@ -2773,6 +2784,12 @@ PHP_FUNCTION(ibase_prepare)
 				RETURN_FALSE;
 			}
 			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, link_arg, &ib_link, &trans);
+			
+			if (trans != NULL) {
+				convert_to_long_ex(link_arg);
+				trans_res_id = Z_LVAL_PP(link_arg);
+			}
+				
 			break;
 		case 3:
 			if (zend_get_parameters_ex(3, &link_arg, &trans_arg, &query_arg) == FAILURE) {
@@ -2780,6 +2797,10 @@ PHP_FUNCTION(ibase_prepare)
 			}
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link*, link_arg, -1, "InterBase link", le_link, le_plink);
 			ZEND_FETCH_RESOURCE(trans, ibase_trans*, trans_arg, -1, "InterBase transaction", le_trans);
+			
+			convert_to_long_ex(trans_arg);
+			trans_res_id = Z_LVAL_PP(trans_arg);
+			
 			break;			
 		default:
 			WRONG_PARAM_COUNT;
@@ -2794,12 +2815,10 @@ PHP_FUNCTION(ibase_prepare)
 		RETURN_FALSE;
 	}
 	
-	if (_php_ibase_alloc_query(&ib_query, ib_link->link, trans->handle, query, ib_link->dialect TSRMLS_CC) == FAILURE) {
+	if (_php_ibase_alloc_query(&ib_query, ib_link, trans, query, ib_link->dialect, trans_res_id TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	ib_query->cursor_open = 0;
-
-	/* zend_list_addref(link_id); */
 
 	ZEND_REGISTER_RESOURCE(return_value, ib_query, le_query);
 }
@@ -2811,7 +2830,7 @@ PHP_FUNCTION(ibase_execute)
 {
 	zval ***args, **bind_args = NULL;
 	ibase_query *ib_query;
-	ibase_result *ib_result;
+	ibase_result *ib_result = NULL;
 
 	RESET_ERRMSG;
 
@@ -2840,9 +2859,14 @@ PHP_FUNCTION(ibase_execute)
 		}
 	}
 
-	if (_php_ibase_exec(&ib_result, ib_query, ZEND_NUM_ARGS() - 1, bind_args TSRMLS_CC) == FAILURE) {
+	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_result, ib_query, ZEND_NUM_ARGS() - 1, bind_args) == FAILURE) {
 		free_alloca(args);
 		RETURN_FALSE;
+	}
+	
+	/* free the query if trans handle was released */
+	if (ib_query->trans->handle == NULL) {
+		zend_list_delete(Z_LVAL_PP(args[0]));
 	}
 
 	free_alloca(args);
@@ -2853,7 +2877,6 @@ PHP_FUNCTION(ibase_execute)
 		ZEND_REGISTER_RESOURCE(return_value, ib_result, le_result);
 	} else {
 		ib_query->cursor_open = 0;
-		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -3228,7 +3251,7 @@ PHP_FUNCTION(ibase_blob_create)
 	
 	ib_blob = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
 	ib_blob->trans_handle = trans->handle;
-	ib_blob->link = ib_link->link;
+	ib_blob->link = ib_link->handle;
 	ib_blob->bl_handle = NULL;
 	
 	if (isc_create_blob(IB_STATUS, &ib_blob->link, &ib_blob->trans_handle, &ib_blob->bl_handle, &ib_blob->bl_qd)) {
@@ -3242,7 +3265,7 @@ PHP_FUNCTION(ibase_blob_create)
 /* }}} */
 
 /* {{{ proto int ibase_blob_open(string blob_id)
-   Open blob for retriving data parts */
+   Open blob for retrieving data parts */
 PHP_FUNCTION(ibase_blob_open)
 {
 	zval **blob_arg;
@@ -3558,7 +3581,7 @@ PHP_FUNCTION(ibase_blob_import)
 
 	php_stream_from_zval(stream, file_arg);
 	
-	ib_blob.link = ib_link->link;
+	ib_blob.link = ib_link->handle;
 	ib_blob.trans_handle = trans->handle;
 	ib_blob.bl_handle = NULL;
 	ib_blob.bl_qd.gds_quad_high = 0;
