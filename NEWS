@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- Fixed conflict with OpenLDAP and Oracle 8.1.x (Jani)
 - parse_ini_file() supports a new optional 2nd argument that instructs it
   to divide the directives to arrays according to the sections in which they
   reside (Zeev)
