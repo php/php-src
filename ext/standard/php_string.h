@@ -78,6 +78,7 @@ PHP_FUNCTION(strnatcasecmp);
 PHP_FUNCTION(substr_count);
 PHP_FUNCTION(str_pad);
 PHP_FUNCTION(sscanf);
+PHP_FUNCTION(iconv);
 
 #define strnatcmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)

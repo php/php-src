@@ -162,5 +162,13 @@ AC_ARG_WITH(system-regex,
   fi
 ])
 
-PHP_EXTENSION(standard)
+AC_CHECK_LIB(c, iconv_open, [
+  AC_DEFINE(HAVE_ICONV, 1, [ ])
+], [
+  AC_CHECK_LIB(iconv, iconv_open, [
+    EXTRA_LIBS="$EXTRA_LIBS -liconv"
+    AC_DEFINE(HAVE_ICONV, 1, [ ])
+  ])
+])
 
+PHP_EXTENSION(standard)
