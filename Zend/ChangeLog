@@ -1,3 +1,22 @@
+2003-10-07  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * Zend.m4:
+      MFB bison configure test fix
+
+2003-10-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix bug #17997 (Warning when switch & reference are combined)
+
+    * zend_ini_parser.y:
+      Fix the fix :)
+      Not thoroughly tested, but appears to work fine
+
+2003-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_ini_parser.y:
+      Bugfix #25770 Segfault with PHP and bison 1.875
+
 2003-10-05  Zeev Suraski  <zeev@zend.com>
 
     * zend_object_handlers.c:

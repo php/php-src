@@ -1,3 +1,94 @@
+2003-10-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      Zend/Zend.m4:
+      typo fix
+
+2003-10-07  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ZendEngine2/Zend.m4:
+      MFB bison configure test fix
+
+    * (PHP_4_3)
+      Zend/Zend.m4:
+      Fix bison check
+
+2003-10-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c:
+      A much better fix for moniker based COM object creation.
+      We now support binding monikers to remote machines.
+      However, MSDN docs indicate that this isn't yet implemented
+      as of Win2000.
+
+2003-10-07  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix bug #17997 (Warning when switch & reference are combined)
+
+    * ext/com_dotnet/com_handlers.c
+      ext/mono/php_mono.c
+      ext/simplexml/simplexml.c:
+      Fix cast callbacks
+
+    * ZendEngine2/zend_ini_parser.y:
+      Fix the fix :)
+      Not thoroughly tested, but appears to work fine
+
+2003-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      Zend/zend_ini_parser.y:
+      MFH: Bugfix #25770 Segfault with PHP and bison 1.875
+
+2003-10-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      Fix version test
+
+2003-10-07  Corne' Cornelius  <cornec@reach.co.za>
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      MFH: - Fixed bug #18534 (ifx_close() leaves open session)
+      MFH: - (ifx_do_close) Added
+
+2003-10-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in
+      ZendEngine2/zend_ini_parser.y:
+      Bugfix #25770 Segfault with PHP and bison 1.875
+
+2003-10-07  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      - Fixed bug #18534 (ifx_close() leaves open session)
+      - (ifx_do_close) Added
+
+2003-10-07  Stanislav Malyshev  <stas@zend.com>
+
+    * main/php_variables.c:
+      Fix $_SERVER['argv'] and $_SERVER['argc']
+
+2003-10-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ldap/ldap.c:
+      Cleaned up previous patch.
+
+2003-10-07  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      Fix typo
+
 2003-10-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
