@@ -2,7 +2,7 @@
 bug compatibility: global is used albeit register_globals=0
 --SKIPIF--
 <?php include('skipif.inc'); 
- if (version_compare(PHP_VERSION,"4.2.3-dev", ">=")) die("skip this is for PHP < 4.2.3");
+ if (version_compare(PHP_VERSION,"4.2.3-dev", "<")) die("skip this is for PHP >= 4.2.3");
 ?>
 --INI--
 session.use_cookies=0
@@ -48,7 +48,8 @@ var_dump($HTTP_SESSION_VARS);
 
 session_destroy();
 ?>
---EXPECT--
+--EXPECTF--
+%s(%d) : Warning - Your script possibly relies on a session side-effect which existed until PHP 4.2.3. Please be advised that the session extension does not consider global variables as a source of data, unless register_globals is enabled. You can disable this functionality and this warning by setting session.bug_compat_42 or session.bug_compat_warn to off, respectively.
 NULL
 array(1) {
   ["c"]=>
