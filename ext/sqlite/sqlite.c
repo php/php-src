@@ -42,7 +42,7 @@
 #define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
 
-#ifndef OnUpdateLong
+#ifndef ZEND_ENGINE_2
 # define OnUpdateLong OnUpdateInt
 #endif
 
