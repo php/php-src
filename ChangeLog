@@ -1,3 +1,53 @@
+2000-10-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/basic_functions.c: Aha, Sascha made a mistake!  ;)
+    Make this thing compile again without trans-sid
+
+2000-10-16  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: make compile again
+
+2000-10-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      php.ini-dist: Enable users to set the HTML tags to rewrite
+    through a configuration directive
+
+2000-10-16  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php:
+    changed function names to studlyCaps for PEAR code consistancy
+
+2000-10-16  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gd/gdttf.c: include php.h to have VIRTUAL_DIR defined this
+    should fix bugs where the ttf functions won't
+    find the font in the actual working dir
+
+2000-10-16  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/gdttf.c:
+    added a option to use the truetype string handling function in gd.\n it is useful for japanese because the truetype string function in gd supports some japanese encodings.
+
+2000-10-16  Thomas Weinert  <subjective@subjective.de>
+
+    * pear/PHPDoc/core/PhpdocSetupHandler.php:
+    Small change to allow empty file extensions
+
+2000-10-16  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/session/mod_files.c: fixes bug 7055 & 7235
+
+2000-10-16  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: fixed bug in N_weekday_of_month()
+
 2000-10-15  Jani Taskinen  <sniper@iki.fi>
 
     * ext/ldap/config.m4:
