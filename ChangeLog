@@ -1,3 +1,38 @@
+2001-09-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Add QUERY_STRING, HTTP_HOST, HTTP_ACCEPT_LANGUAGE to the script
+    environment.
+
+    Also support setting the INI path from the outside.
+
+2001-09-30  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/msession/.cvsignore: Ignore generated files.
+
+    * ext/msession/config.m4:
+    Allow the location of the Phoenix library to be specified on the configure
+    commandline.
+
+2001-09-30  Stig Venaas  <venaas@uninett.no>
+
+    * ext/openssl/openssl.c:
+    Didn't compile, replaced some TSRMLS_C with TSRMLS_CC
+
+2001-09-30  Jason Greene  <jason@inetgurus.net>
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h:
+    Added new function pcntl_exec, which behaves similar to execve.
+
+2001-09-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: MFH
+
+    * ext/gd/gd.c:
+    I could have sworn I test compiled this when I committed it a couple of
+    days ago.  Must have been hallucinating.
+
 2001-09-29  Jon Parise  <jon@csh.rit.edu>
 
     * configure.in: Build pear/scripts/phptar in the configure run.
