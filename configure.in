@@ -30,9 +30,6 @@ dnl -------------------------------------------------------------------------
 AC_PREREQ(2.13)
 AC_INIT(README.CVS-RULES)
 
-dnl check for working sed
-PHP_PROG_SED
-
 PHP_CONFIG_NICE(config.nice)
 for arg in $0 "$@"; do
   CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
