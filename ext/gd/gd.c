@@ -3143,6 +3143,9 @@ PHP_FUNCTION(imagepstext)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
+	convert_to_string_ex(str);
+	convert_to_long_ex(sz);
+
 	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", le_gd);
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
