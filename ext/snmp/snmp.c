@@ -102,14 +102,14 @@ static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 /* {{{ snmp_functions[]
  */
 function_entry snmp_functions[] = {
-		PHP_FE(snmpget, NULL)
-		PHP_FE(snmpwalk, NULL)
-		PHP_FE(snmprealwalk, NULL)
-		PHP_FALIAS(snmpwalkoid, snmprealwalk, NULL)
-		PHP_FE(snmp_get_quick_print, NULL)
-		PHP_FE(snmp_set_quick_print, NULL)
-		PHP_FE(snmpset, NULL)
-    {NULL,NULL,NULL}
+	PHP_FE(snmpget, NULL)
+	PHP_FE(snmpwalk, NULL)
+	PHP_FE(snmprealwalk, NULL)
+	PHP_FALIAS(snmpwalkoid, snmprealwalk, NULL)
+	PHP_FE(snmp_get_quick_print, NULL)
+	PHP_FE(snmp_set_quick_print, NULL)
+	PHP_FE(snmpset, NULL)
+	{NULL,NULL,NULL}
 };
 /* }}} */
 
@@ -124,7 +124,7 @@ zend_module_entry snmp_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(snmp),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -159,13 +159,13 @@ PHP_MINFO_FUNCTION(snmp)
 *
 * Generic SNMP object fetcher
 *
-* st=1   snmpget() - query an agent and return a single value.
+* st=1   snmpget()  - query an agent and return a single value.
 * st=2   snmpwalk() - walk the mib and return a single dimensional array 
-*          containing the values.
-* st=3 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
-*          array of oid,value pairs.
+*                     containing the values.
+* st=3   snmprealwalk() and snmpwalkoid() - walk the mib and return an 
+*                                           array of oid,value pairs.
 * st=5-8 ** Reserved **
-* st=11  snmpset() - query an agent and set a single value
+* st=11  snmpset()  - query an agent and set a single value
 *
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) 
@@ -174,10 +174,10 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 	struct snmp_session session, *ss;
 	struct snmp_pdu *pdu=NULL, *response;
 	struct variable_list *vars;
-    char *objid;
-    oid name[MAX_NAME_LEN];
-    int name_length;
-    int status, count,rootlen=0,gotroot=0;
+	char *objid;
+	oid name[MAX_NAME_LEN];
+	int name_length;
+	int status, count,rootlen=0,gotroot=0;
 	oid root[MAX_NAME_LEN];
 	char buf[2048];
 	char buf2[2048];
@@ -185,8 +185,8 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 	long timeout=SNMP_DEFAULT_TIMEOUT;
 	long retries=SNMP_DEFAULT_RETRIES;
 	int myargc = ZEND_NUM_ARGS();
-    char type = (char) 0;
-    char *value = (char *) 0;
+	char type = (char) 0;
+	char *value = (char *) 0;
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
 	char *pptr, *err;
