@@ -316,7 +316,7 @@ ary2constr(relf * r, zval** constr)
 
 
 /* {{{ proto int dbplus_add(int relation, array tuple)
-   Add a tuple to a relation */
+   Adds a tuple to a relation */
 PHP_FUNCTION(dbplus_add)
 {
   zval **relation, **data;
@@ -345,7 +345,7 @@ PHP_FUNCTION(dbplus_add)
 /* }}} */
 
 /* {{{ proto resource dbplus_aql(string query [, string server [, string dbpath]])
-   Perform AQL query */
+   Performs AQL query */
 PHP_FUNCTION(dbplus_aql)
 {
   int argc;
@@ -385,7 +385,7 @@ PHP_FUNCTION(dbplus_aql)
 /* }}} */
 
 /* {{{ proto string dbplus_chdir([string newdir])
-   Get/Set database virtual current directory */
+   Gets/Sets database virtual current directory */
 PHP_FUNCTION(dbplus_chdir)
 {
   int argc;
@@ -417,7 +417,7 @@ PHP_FUNCTION(dbplus_chdir)
 /* }}} */
 
 /* {{{ proto int dbplus_close(int relation)
-   Close a relation */
+   Closes a relation */
 PHP_FUNCTION(dbplus_close)
 {
   relf *r;
@@ -435,7 +435,7 @@ PHP_FUNCTION(dbplus_close)
 /* }}} */
 
 /* {{{ proto int dbplus_curr(int relation, array tuple)
-   Get current tuple from relation */
+   Gets current tuple from relation */
 PHP_FUNCTION(dbplus_curr)
 {
   zval **relation, **tname;
@@ -459,7 +459,7 @@ PHP_FUNCTION(dbplus_curr)
 /* }}} */
 
 /* {{{ proto string dbplus_errcode(int err)
-   Get error string for given errorcode or last error */
+   Gets error string for given errorcode or last error */
 PHP_FUNCTION(dbplus_errcode)
 {
   zval **err;
@@ -484,7 +484,7 @@ PHP_FUNCTION(dbplus_errcode)
 /* }}} */
 
 /* {{{ proto int dbplus_errno(void)
-   Get error code for last operation */
+   Gets error code for last operation */
 PHP_FUNCTION(dbplus_errno)
 {
   RETURN_LONG(Acc_error);
@@ -492,7 +492,7 @@ PHP_FUNCTION(dbplus_errno)
 /* }}} */
 
 /* {{{ proto int dbplus_find(int relation, array constr, mixed tuple)
-   Set a constraint on a relation*/
+   Sets a constraint on a relation */
 PHP_FUNCTION(dbplus_find)
 {
   relf *r;
@@ -530,7 +530,7 @@ PHP_FUNCTION(dbplus_find)
 /* }}} */
 
 /* {{{ proto int dbplus_first(int relation, array tuple)
-   Get first tuple from relation */
+   Gets first tuple from relation */
 PHP_FUNCTION(dbplus_first)
 {
   zval **relation, **tname;
@@ -570,7 +570,7 @@ PHP_FUNCTION(dbplus_flush)
 /* }}} */
 
 /* {{{ proto int dbplus_freealllocks(void)
-   Free all locks held by this client */
+   Frees all locks held by this client */
 PHP_FUNCTION(dbplus_freealllocks)
 {
   RETURN_LONG(cdbFreeAllLocks());
@@ -579,7 +579,7 @@ PHP_FUNCTION(dbplus_freealllocks)
 
 
 /* {{{ proto int dbplus_freelock(int relation, array tuple)
-   Release write lock on tuple */
+   Releases write lock on tuple */
 PHP_FUNCTION(dbplus_freelock)
 {
   zval **relation, **data;
@@ -605,7 +605,7 @@ PHP_FUNCTION(dbplus_freelock)
 /* }}} */
 
 /* {{{ proto int dbplus_freerlocks(int relation)
-   Free all locks on given relation */
+   Frees all locks on given relation */
 PHP_FUNCTION(dbplus_freerlocks)
 {
   relf *r;
@@ -621,7 +621,7 @@ PHP_FUNCTION(dbplus_freerlocks)
 /* }}} */
 
 /* {{{ proto int dbplus_getlock(int relation, array tuple)
-   Request locking of tuple */
+   Requests locking of tuple */
 PHP_FUNCTION(dbplus_getlock)
 {
   zval **relation, **data;
@@ -647,7 +647,7 @@ PHP_FUNCTION(dbplus_getlock)
 /* }}} */
 
 /* {{{ proto int dbplus_getunique(int handle, int uniqueid)
-   Get a id number unique to a relation */
+   Gets a id number unique to a relation */
 PHP_FUNCTION(dbplus_getunique)
 {
   relf *r;
@@ -715,7 +715,7 @@ PHP_FUNCTION(dbplus_info)
 /* }}} */
 
 /* {{{ proto int dbplus_last(int relation, array tuple)
-   Get last tuple from relation */
+   Gets last tuple from relation */
 PHP_FUNCTION(dbplus_last)
 {
   zval **relation, **tname;
@@ -740,7 +740,7 @@ PHP_FUNCTION(dbplus_last)
 
 
 /* {{{ proto int dbplus_lockrel(int relation)
-   Request write lock on relation */
+   Requests write lock on relation */
 PHP_FUNCTION(dbplus_lockrel)
 {
   relf *r;
@@ -756,7 +756,7 @@ PHP_FUNCTION(dbplus_lockrel)
 /* }}} */
 
 /* {{{ proto int dbplus_next(int relation, array &tname)
-   Get next tuple from relation */
+   Gets next tuple from relation */
 PHP_FUNCTION(dbplus_next)
 {
   zval **relation, **tname;
@@ -786,7 +786,7 @@ PHP_FUNCTION(dbplus_next)
 /* }}} */
 
 /* {{{ proto resource dbplus_open(string name)
-   Open a relation file */
+   Opens a relation file */
 PHP_FUNCTION(dbplus_open)
 {
   relf *r;
@@ -808,7 +808,7 @@ PHP_FUNCTION(dbplus_open)
 /* }}} */
 
 /* {{{ proto int dbplus_prev(int relation, array tuple)
-   Get previous tuple from relation */
+   Gets previous tuple from relation */
 PHP_FUNCTION(dbplus_prev)
 {
   zval **relation, **tname;
@@ -832,7 +832,7 @@ PHP_FUNCTION(dbplus_prev)
 /* }}} */
 
 /* {{{ proto int dbplus_rchperm(int relation, int mask, string user, string group)
-    */
+   ??? */
 PHP_FUNCTION(dbplus_rchperm)
 {
   relf *r;
@@ -852,8 +852,7 @@ PHP_FUNCTION(dbplus_rchperm)
 /* }}} */
 
 /* {{{ proto resource dbplus_rcreate(string name, mixed domlist [, int overwrite])
-	 Create a new db++ reslation
-*/
+   Creates a new DB++ relation */
 PHP_FUNCTION(dbplus_rcreate)
 {
   zval **name, **domlist, **overwrite;
@@ -913,8 +912,7 @@ PHP_FUNCTION(dbplus_rcreate)
 /* }}} */
 
 /* {{{ proto resource dbplus_rcrtexact(string name, resource relation [, boolean overwrite])
-	 Create an exact but empty copy of a relation including indices
- */
+   Creates an exact but empty copy of a relation including indices */
 PHP_FUNCTION(dbplus_rcrtexact)
 {
   zval **name, **relation, **overwrite;
@@ -954,8 +952,7 @@ PHP_FUNCTION(dbplus_rcrtexact)
 /* }}} */
 
 /* {{{ proto resource dbplus_rcrtlike(string name, int handle [, int overwrite])
-	 Create an empty copy of a relation with default indices
-*/
+   Creates an empty copy of a relation with default indices */
 PHP_FUNCTION(dbplus_rcrtlike)
 {
   zval **name, **relation, **overwrite;
@@ -995,7 +992,7 @@ PHP_FUNCTION(dbplus_rcrtlike)
 /* }}} */
 
 /* {{{ proto int dbplus_resolve(string name)
-   Resolve host information for relation */
+   Resolves host information for relation */
 PHP_FUNCTION(dbplus_resolve)
 {
   zval **name, *element;
@@ -1059,7 +1056,7 @@ PHP_FUNCTION(dbplus_restorepos)
 /* }}} */
 
 /* {{{ proto resource dbplus_rkeys(resource relation, mixed domlist)
-	 Define primary key for relation
+   Defines primary key for relation
 */
 PHP_FUNCTION(dbplus_rkeys)
 {
@@ -1119,7 +1116,7 @@ PHP_FUNCTION(dbplus_rkeys)
 /* }}} */
 
 /* {{{ proto resource dbplus_ropen(string name)
-   Open relation file local */
+   Opens relation file local */
 PHP_FUNCTION(dbplus_ropen)
 {
   relf *r;
@@ -1142,8 +1139,8 @@ PHP_FUNCTION(dbplus_ropen)
 }
 /* }}} */
 
-/* {{{ proto resceour dbplus_rquery(string name, string dbpath)
-    */
+/* {{{ proto resource dbplus_rquery(string name, string dbpath)
+   ??? */
 PHP_FUNCTION(dbplus_rquery)
 {
   relf *r;
@@ -1168,7 +1165,7 @@ PHP_FUNCTION(dbplus_rquery)
 /* }}} */
 
 /* {{{ proto int dbplus_rrename(int relation, string name)
-    */
+   ??? */
 PHP_FUNCTION(dbplus_rrename)
 {
   relf *r;
@@ -1186,8 +1183,7 @@ PHP_FUNCTION(dbplus_rrename)
 /* }}} */
 
 /* {{{ proto resource dbplus_rsecindex(resource relation, mixed domlist, int compact)
-	 Create an additional index on relation
-*/
+   Creates an additional index on relation */
 PHP_FUNCTION(dbplus_rsecindex)
 {
   relf *r, *rnew;
@@ -1247,7 +1243,7 @@ PHP_FUNCTION(dbplus_rsecindex)
 /* }}} */
 
 /* {{{ proto int dbplus_runlink(int relation)
-   Remove relation from filesystem */
+   Removes relation from filesystem */
 PHP_FUNCTION(dbplus_runlink)
 {
   relf *r;
@@ -1263,7 +1259,7 @@ PHP_FUNCTION(dbplus_runlink)
 /* }}} */
 
 /* {{{ proto int dbplus_rzap(int relation, int truncate)
-   Remove all tuples from relation */
+   Removes all tuples from relation */
 PHP_FUNCTION(dbplus_rzap)
 {
 
@@ -1297,7 +1293,7 @@ PHP_FUNCTION(dbplus_savepos)
 /* }}} */
 
 /* {{{ proto int dbplus_setindex(int relation, string idx_name)
-   ???? */
+   ??? */
 PHP_FUNCTION(dbplus_setindex)
 {
   relf *r;
@@ -1333,7 +1329,7 @@ PHP_FUNCTION(dbplus_setindexbynumber)
 /* }}} */
 
 /* {{{ proto resource dbplus_sql(string query, string server, string dbpath)
-   Perform SQL query */
+   Performs SQL query */
 PHP_FUNCTION(dbplus_sql)
 {
   int argc;
@@ -1373,8 +1369,7 @@ PHP_FUNCTION(dbplus_sql)
 /* }}} */
 
 /* {{{ proto string dbplus_tcl(int sid, string script)
-	 Execute server side TCL code
-    */
+   Executes server side TCL code */
 PHP_FUNCTION(dbplus_tcl)
 {
   zval **sid, **script;
@@ -1399,7 +1394,7 @@ PHP_FUNCTION(dbplus_tcl)
 /* }}} */
 
 /* {{{ proto int dbplus_tremove(int relation, array old [, array current])
-   Remove tuple and return new current tuple */
+   Removes tuple and return new current tuple */
 PHP_FUNCTION(dbplus_tremove)
 {
   zval **relation, **old, **current;
@@ -1462,7 +1457,7 @@ PHP_FUNCTION(dbplus_undoprepare)
 /* }}} */
 
 /* {{{ proto int dbplus_unlockrel(int relation)
-   Give up write lock on relation */
+   Gives up write lock on relation */
 PHP_FUNCTION(dbplus_unlockrel)
 {
   relf *r;
@@ -1478,7 +1473,7 @@ PHP_FUNCTION(dbplus_unlockrel)
 /* }}} */
 
 /* {{{ proto int dbplus_unselect(int relation)
-   Remove constraint from relation */
+   Removes constraint from relation */
 PHP_FUNCTION(dbplus_unselect)
 {
   relf *r;
@@ -1494,7 +1489,7 @@ PHP_FUNCTION(dbplus_unselect)
 /* }}} */
 
 /* {{{ proto int dbplus_update(int relation, array old, array new)
-   Update specified tuple in relation */
+   Updates specified tuple in relation */
 PHP_FUNCTION(dbplus_update)
 {
   zval **relation, **old, **new;
@@ -1524,7 +1519,7 @@ PHP_FUNCTION(dbplus_update)
 /* }}} */
 
 /* {{{ proto int dbplus_xlockrel(int relation)
-   Request exclusive lock on relation */
+   Requests exclusive lock on relation */
 PHP_FUNCTION(dbplus_xlockrel)
 {
   relf *r;
@@ -1540,7 +1535,7 @@ PHP_FUNCTION(dbplus_xlockrel)
 /* }}} */
 
 /* {{{ proto int dbplus_xunlockrel(int relation)
-   Free exclusive lock on relation */
+   Frees exclusive lock on relation */
 PHP_FUNCTION(dbplus_xunlockrel)
 {
   relf *r;
