@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   byte in multipart/form-data. (Rui)
 - Fixed possible crash in imagerotate() when an invalid color index
   is used for background color. (Pierre-Alain Joye)
+- Fixed bug #24519 (aggregate_methods_by_list() does not increment refcount).
 - Fixed bug #24313 (file_exist() warning on non-existent files
   when open_basedir is used). (Ilia)
 - Fixed bug #24312 (base64_decode() does not skip 0xF0-0xFF characters).
@@ -22,7 +23,9 @@ PHP 4                                                                      NEWS
   will always return true color image from now on). (Pierre-Alain Joye)
 - Fixed bug #23664 (FastCGI socket listenting). (Shane)
 - Fixed bug #21074 (Apache2: "ErrorDocument xxx /error.php" broken). (Jani)
-
+- Fixed bug #11924 (ibase_query(), ibase_execute() mangled passed parameters).
+  (Jani)
+  
 19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
 - Improved the engine to use POSIX/socket IO where feasible. (Sascha)
