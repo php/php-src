@@ -27,7 +27,11 @@
 #define UNIX_DEV
 #endif
 
-#include <fdftk.h>
+#if HAVE_FDFTK_H_LOWER
+# include <fdftk.h>
+#else
+# include <FdfTk.h>
+#endif
 
 extern zend_module_entry fdf_module_entry;
 #define fdf_module_ptr &fdf_module_entry
