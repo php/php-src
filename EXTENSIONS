@@ -136,7 +136,7 @@ STATUS:              Experimental
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           interbase
-PRIMARY MAINTAINER:  Jouni Ahto <jouni.ahto@exdec.fi>
+PRIMARY MAINTAINER:  Jouni Ahto <jouni.ahto@exdec.fi>, Ard Biesheuvel <ard@ard.nu>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
