@@ -7,11 +7,13 @@ tidy_parse_file()
 --INI--
 --FILE--
 <?php 
-
-    tidy_parse_file("ext/tidy/tests/005.html");
-    
-    echo tidy_get_output();
-
+	if (class_exists("tidy_doc")) {
+		$a = tidy_parse_file("ext/tidy/tests/005.html");
+		echo tidy_get_output($a);
+	} else {
+		tidy_parse_file("ext/tidy/tests/005.html");
+		echo tidy_get_output();
+	}
 ?>
 --EXPECT--
 <html>
