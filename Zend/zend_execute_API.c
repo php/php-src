@@ -189,8 +189,7 @@ void init_executor(TSRMLS_D)
 void shutdown_executor(TSRMLS_D)
 {
 	zend_try {
-		zend_ptr_stack_destroy(&EG(arg_types_stack));
-
+		zend_ptr_stack_clean(&EG(arg_types_stack), do_nothing, 1);
 /* Removed because this can not be safely done, e.g. in this situation:
    Object 1 creates object 2
    Object 3 holds reference to object 2.
@@ -286,6 +285,7 @@ void shutdown_executor(TSRMLS_D)
 
 		zend_hash_destroy(&EG(included_files));
 
+		zend_ptr_stack_destroy(&EG(arg_types_stack));
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
 		zend_ptr_stack_destroy(&EG(user_exception_handlers));
 		zend_objects_store_destroy(&EG(objects_store));
