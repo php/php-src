@@ -282,7 +282,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-	int sa_len;
+	int xsa_len;
 
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC);
@@ -299,12 +299,12 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 
 #ifdef HAVE_GETNAMEINFO
 	switch (TG(hc)->client_addr.sa.sa_family) {
-		case AF_INET: sa_len = sizeof(struct sockaddr_in); break;
-		case AF_INET6: sa_len = sizeof(struct sockaddr_in6); break;
-		default: sa_len = 0;
+		case AF_INET: xsa_len = sizeof(struct sockaddr_in); break;
+		case AF_INET6: xsa_len = sizeof(struct sockaddr_in6); break;
+		default: xsa_len = 0;
 	}
 
-	if (getnameinfo(&TG(hc)->client_addr.sa, sa_len, buf, sizeof(buf), 0, 0, NI_NUMERICHOST) == 0) {
+	if (getnameinfo(&TG(hc)->client_addr.sa, xsa_len, buf, sizeof(buf), 0, 0, NI_NUMERICHOST) == 0) {
 #else
 	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
 		
