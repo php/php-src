@@ -50,7 +50,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
         return array('package',
                      'package-info',
                      'package-list',
-                     'package-verify');
+                     'package-validate');
     }
 
     // }}}
@@ -70,7 +70,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
             case 'packge-info':
                 return array('<pear package>',
                              'Shows information about a PEAR package');
-            case 'package-verify':
+            case 'package-validate':
                 return array('<package.(tgz|tar|xml)>',
                              'Verifies a package or description file');
         }
@@ -262,9 +262,9 @@ class PEAR_Command_Package extends PEAR_Command_Common
             }
 
             // }}}
-            // {{{ package-verify
+            // {{{ package-validate
 
-            case 'package-verify': {
+            case 'package-validate': {
                 if (sizeof($params) < 1) {
                     $help = $this->getHelp($command);
                     return $this->raiseError("$command: missing parameter: $help[0]");
