@@ -300,10 +300,7 @@ int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, (void **) state_var)==SUCCESS) {
 			return SUCCESS;
 		}
-	} else if (!PG(register_globals)) {
-		/* register_globals is disabled, but we don't have http_session_vars */
-		return HASH_KEY_NON_EXISTANT;
-	}	
+	}
 	return zend_hash_find(&EG(symbol_table), name, namelen+1, (void **) state_var);
 }
 
@@ -592,10 +589,10 @@ static void php_session_save_current_state(TSRMLS_D)
 	if (PS(mod_data)) {
 		val = php_session_encode(&vallen TSRMLS_CC);
 		if (val) {
-			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
+			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
 			efree(val);
 		} else {
-			ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0);
+			ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
 		}
 	}
 	
@@ -608,7 +605,7 @@ static void php_session_save_current_state(TSRMLS_D)
 	
 	
 	if (PS(mod_data))
-		PS(mod)->close(&PS(mod_data));
+		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
 }
 
 static char *month_names[] = {
@@ -955,7 +952,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 		
 		nrand = (int) (100.0*php_combined_lcg(TSRMLS_C));
 		if (nrand < PS(gc_probability)) {
-			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
 #if 0
 			if (nrdels != -1)
 				php_error(E_NOTICE, "purged %d expired session objects\n", nrdels);
@@ -1049,18 +1046,22 @@ PHP_FUNCTION(session_name)
 {
 	zval **p_name;
 	int ac = ZEND_NUM_ARGS();
-	char *old;
-
-	old = estrdup(PS(session_name));
+	char *old = NULL;
 
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (ac == 1) {
+		if (PS(session_status) ==  php_session_active) {
+			php_error(E_NOTICE, "%s() cannot set session name once session is started.",
+					  get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
 		convert_to_string_ex(p_name);
 		zend_alter_ini_entry("session.name", sizeof("session.name"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
-	
+
+	old = estrdup(PS(session_name));
 	RETVAL_STRING(old, 0);
 }
 /* }}} */
@@ -1468,7 +1469,7 @@ static void php_rinit_session_globals(TSRMLS_D)
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
 	if (PS(mod_data)) {
-		PS(mod)->close(&PS(mod_data));
+		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
 	}
 	if (PS(id)) {
 		efree(PS(id));
