@@ -113,6 +113,11 @@ class PEAR_Command
         return PEAR::raiseError("unknown command `$command'");
     }
 
+    /**
+     * Get instance of frontend object.
+     *
+     * @return object
+     */
     function &getFrontendObject()
     {
         global $_PEAR_Command_uiclass, $_PEAR_Command_uiobject;
@@ -122,6 +127,13 @@ class PEAR_Command
         return $_PEAR_Command_uiobject;
     }
 
+    /**
+     * Load current frontend class.
+     *
+     * @param  string  Name of the frontend
+     *
+     * @return boolean TRUE if the frontend exists, otherwise FALSE.
+     */
     function setFrontendClass($uiclass)
     {
         $GLOBALS['_PEAR_Command_uiclass'] = $uiclass;
@@ -130,6 +142,13 @@ class PEAR_Command
         return class_exists(strtolower($uiclass));
     }
 
+    /**
+     * Set current frontend.
+     *
+     * @param  string  Name of the frontend type
+     *
+     * @return boolean TRUE if the frontend exists, otherwise FALSE.
+     */
     function setFrontendType($uitype)
     {
         $uiclass = 'PEAR_Frontend_' . $uitype;
@@ -204,6 +223,14 @@ class PEAR_Command
         return $GLOBALS['_PEAR_Command_commandlist'];
     }
 
+    /**
+     * Get the list of currently supported options, and what
+     * classes implement them.
+     *
+     * @return array array option => implementing class
+     *
+     * @access public
+     */
     function getOptions()
     {
         if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
@@ -212,6 +239,14 @@ class PEAR_Command
         return $GLOBALS['_PEAR_Command_commandopts'];
     }
 
+    /**
+     * Get help for command.
+     *
+     * @param  string Name of the command for which help should be
+     *                called.
+     *
+     * @access public
+     */
     function getHelp($command)
     {
         $cmds = PEAR_Command::getCommands();
