@@ -12,6 +12,7 @@ peardir=$(PEAR_INSTALLDIR)
 PEAR_SUBDIRS = \
 	Benchmark \
 	Cache \
+	Cache/Container \
 	Console \
 	Crypt \
 	Date \
@@ -33,7 +34,11 @@ PEAR_SUBDIRS = \
 PEAR_FILES = \
 	Benchmark/Iterate.php \
 	Benchmark/Timer.php \
-	Cache/Function_Cache.php \
+	Cache.php
+	Cache/Container.php \
+	Cache/Container/file.php \
+	Cache/Container/phplib.php \
+	Cache/Container/shm.php \
 	Console/Getopt.php \
 	Crypt/CBC.php \
 	Crypt/HCEMD5.php \
