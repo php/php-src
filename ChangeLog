@@ -1,3 +1,11 @@
+2002-08-31  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/info.c:  - cosmetics
+
+2002-08-31  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Fix it back..(what was that commit????)
+
 2002-08-30  George Schlossnagle  <george@omniti.com>
 
     * sapi/apache/mod_php4.c
