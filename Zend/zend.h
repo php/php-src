@@ -364,6 +364,11 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 #define ZMSG_MEMORY_LEAK_REPEATED		5L
 #define ZMSG_LOG_SCRIPT_NAME			6L
 
+
+#define ZVAL_ADDREF(pz)		(++(pz)->refcount)
+#define ZVAL_DELREF(pz)		(--(pz)->refcount)
+#define ZVAL_REFCOUNT(pz)	((pz)->refcount)
+
 #define INIT_PZVAL(z)		\
 	(z)->refcount = 1;		\
 	(z)->is_ref = 0;	
