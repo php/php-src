@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
-- new function cpdf_set_document_limits()
+- new function cpdf_set_document_limits() (Uwe)
 - Applied safe-mode patch to popen(). (Patch by Kristian Köhntopp)
 - str_repeat() now returns correct length. (Thies)
 - Don't assume libz and libpng are installed for the GD checks (Rasmus)
