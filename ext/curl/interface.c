@@ -55,8 +55,6 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) v, 1);
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
-static const unsigned char second_args_force_ref[]    = { 2, BYREF_NONE, BYREF_FORCE };
-
 /* {{{ curl_functions[]
  */
 function_entry curl_functions[] = {
@@ -72,7 +70,7 @@ function_entry curl_functions[] = {
 	PHP_FE(curl_multi_add_handle,    NULL)
 	PHP_FE(curl_multi_remove_handle, NULL)
 	PHP_FE(curl_multi_select,        NULL)
-	PHP_FE(curl_multi_exec,          second_args_force_ref)
+	PHP_FE(curl_multi_exec,          second_arg_force_ref)
 	PHP_FE(curl_multi_getcontent,    NULL)
 	PHP_FE(curl_multi_info_read,     NULL)
 	PHP_FE(curl_multi_close,         NULL)

@@ -93,7 +93,10 @@ typedef unsigned char uchar;
 
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
-static unsigned char exif_thumbnail_force_ref[] = {2, BYREF_NONE, BYREF_FORCE_REST};
+static
+ZEND_BEGIN_ARG_INFO(exif_thumbnail_force_ref, 1)
+ZEND_END_ARG_INFO();
+
 
 /* {{{ exif_functions[]
  */

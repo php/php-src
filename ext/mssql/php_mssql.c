@@ -46,7 +46,6 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type TSRMLS_DC);
 
 static void _mssql_bind_hash_dtor(void *data);
-static unsigned char a3_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 function_entry mssql_functions[] = {
 	PHP_FE(mssql_connect,				NULL)
@@ -75,7 +74,7 @@ function_entry mssql_functions[] = {
 	PHP_FE(mssql_min_error_severity,	NULL)
 	PHP_FE(mssql_min_message_severity,	NULL)
  	PHP_FE(mssql_init,					NULL)
- 	PHP_FE(mssql_bind,					a3_arg_force_ref)
+ 	PHP_FE(mssql_bind,					third_arg_force_ref)
  	PHP_FE(mssql_execute,				NULL)
 	PHP_FE(mssql_free_statement,		NULL)
  	PHP_FE(mssql_guid_string,			NULL)

@@ -99,14 +99,40 @@ php_basic_globals basic_globals;
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
 
-static unsigned char first_and_second__args_force_ref[] = { 2, BYREF_FORCE, BYREF_FORCE };
-static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
-static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
-static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
-static unsigned char first_through_third_args_force_ref[] = {3, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
-static unsigned char fourth_arg_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static
+	ZEND_BEGIN_ARG_INFO(first_and_second__args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
+static
+	ZEND_BEGIN_ARG_INFO(second_and_third_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+static 
+	ZEND_BEGIN_ARG_INFO(third_and_fourth_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+static
+	ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+static
+	ZEND_BEGIN_ARG_INFO(first_through_third_args_force_ref, 0)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 typedef struct _php_shutdown_function_entry {
 	zval **arguments;
@@ -304,7 +330,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(iptcparse,														NULL)															
 	PHP_FE(iptcembed,														NULL)
-	PHP_FE(getimagesize,			second_args_force_ref)
+	PHP_FE(getimagesize,			second_arg_force_ref)
 	PHP_FE(image_type_to_mime_type,											NULL)
 
 	PHP_FE(phpinfo,															NULL)

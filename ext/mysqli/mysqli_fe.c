@@ -30,9 +30,16 @@
 #include "php_mysqli.h"
 
 
-static char all_arg_force_by_ref_rest[] = {1, BYREF_FORCE_REST};
-static char second_arg_force_by_ref_rest[] = {2, BYREF_NONE, BYREF_FORCE_REST};
-static char third_arg_force_by_ref_rest[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST};
+static
+	ZEND_BEGIN_ARG_INFO(second_arg_force_by_ref_rest, 1)
+		ZEND_ARG_PASS_INFO(0)
+	ZEND_END_ARG_INFO();
+
+static
+	ZEND_BEGIN_ARG_INFO(third_arg_force_by_ref_rest, 1)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+	ZEND_END_ARG_INFO();
 
 /* {{{ mysqli_functions[]
  *
@@ -230,7 +237,7 @@ function_entry mysqli_result_methods[] = {
 function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(affected_rows,mysqli_stmt_affected_rows,NULL)
 	PHP_FALIAS(bind_param,mysqli_bind_param,second_arg_force_by_ref_rest)
-	PHP_FALIAS(bind_result,mysqli_bind_result,all_arg_force_by_ref_rest)
+	PHP_FALIAS(bind_result,mysqli_bind_result, all_args_force_ref)
 	PHP_FALIAS(execute,mysqli_execute,NULL)
 	PHP_FALIAS(fetch,mysqli_fetch,NULL)
 	PHP_FALIAS(param_count,mysqli_param_count,NULL)
