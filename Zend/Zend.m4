@@ -129,6 +129,13 @@ AC_ARG_ENABLE(memory-limit,
   ZEND_MEMORY_LIMIT=no
 ])
 
+AC_ARG_ENABLE(zend-multibyte,
+[  --enable-zend-multibyte   Compile with zend multibyte support. ], [
+  ZEND_MULTIBYTE=$enableval
+],[
+  ZEND_MULTIBYTE=no
+])
+
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
 
@@ -140,6 +147,9 @@ AC_MSG_RESULT($ZEND_MEMORY_LIMIT)
 
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
+
+AC_MSG_CHECKING(whether to enable Zend multibyte)
+AC_MSG_RESULT($ZEND_MULTIBYTE)
 	
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])
@@ -168,6 +178,9 @@ else
   AC_DEFINE(MEMORY_LIMIT, 0, [Memory limit])
 fi
 
+if test "$ZEND_MULTIBYTE" = "yes"; then
+  AC_DEFINE(ZEND_MULTIBYTE, 1, [ ])
+fi
 
 changequote({,})
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then

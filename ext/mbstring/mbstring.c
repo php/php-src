@@ -848,6 +848,9 @@ PHP_RINIT_FUNCTION(mbstring)
 #if HAVE_MBREGEX
 	PHP_RINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
+#ifdef ZEND_MULTIBYTE
+	php_mb_set_zend_encoding(TSRMLS_C);
+#endif /* ZEND_MULTIBYTE */
 
 	return SUCCESS;
 }
@@ -982,7 +985,10 @@ PHP_FUNCTION(mb_internal_encoding)
 		} else {
 			MBSTRG(current_internal_encoding) = no_encoding;
 #ifdef ZEND_MULTIBYTE
-			zend_multibyte_set_internal_encoding(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1) TSRMLS_CC);
+			/* TODO: make independent from mbstring.encoding_translation? */
+			if (MBSTRG(encoding_translation)) {
+				zend_multibyte_set_internal_encoding(name, name_len TSRMLS_CC);
+			}
 #endif /* ZEND_MULTIBYTE */
 			RETURN_TRUE;
 		}
@@ -3366,7 +3372,7 @@ MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 	int n, *entry, list_size = 0;
 	zend_encoding_detector encoding_detector;
 	zend_encoding_converter encoding_converter;
-	zend_multibyte_oddlen multibyte_oddlen;
+	zend_encoding_oddlen encoding_oddlen;
 
 	/* notify script encoding to Zend Engine */
 	entry = MBSTRG(script_encoding_list);
@@ -3392,19 +3398,17 @@ MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 		efree(list);
 	}
 	encoding_detector = php_mb_encoding_detector;
-	encoding_converter = NULL;
-	multibyte_oddlen = php_mb_oddlen;
+	encoding_converter = php_mb_encoding_converter;
+	encoding_oddlen = php_mb_oddlen;
 
+	/* TODO: make independent from mbstring.encoding_translation? */
 	if (MBSTRG(encoding_translation)) {
 		/* notify internal encoding to Zend Engine */
 		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
 		zend_multibyte_set_internal_encoding(name, strlen(name) TSRMLS_CC);
-
-		encoding_converter = php_mb_encoding_converter;
 	}
 
-	zend_multibyte_set_functions(encoding_detector, encoding_converter,
-			multibyte_oddlen TSRMLS_CC);
+	zend_multibyte_set_functions(encoding_detector, encoding_converter, encoding_oddlen TSRMLS_CC);
 
 	return 0;
 }

@@ -27,6 +27,10 @@
 #include "zend_API.h"
 #include "zend_fast_cache.h"
 
+#ifdef ZEND_MULTIBYTE
+#include "zend_multibyte.h"
+#endif /* ZEND_MULTIBYTE */
+
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 
@@ -51,7 +55,14 @@ static void build_runtime_defined_function_key(zval *result, char *name, int nam
 	/* NULL, name length, filename length, line number length */
 	result->value.str.len = 1+name_length+strlen(filename)+lineno_len;
 	result->value.str.val = (char *) emalloc(result->value.str.len+1);
+#ifdef ZEND_MULTIBYTE
+	/* must be binary safe */
+	result->value.str.val[0] = '\0';
+	memcpy(result->value.str.val+1, name, name_length);
+	sprintf(result->value.str.val+1+name_length, "%s%s", filename, lineno_buf);
+#else
 	sprintf(result->value.str.val, "%c%s%s%s", '\0', name, filename, lineno_buf);
+#endif /* ZEND_MULTIBYTE */
 	result->type = IS_STRING;
 	result->refcount = 1;
 }
@@ -90,6 +101,15 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
+
+#ifdef ZEND_MULTIBYTE
+	CG(script_encoding_list) = NULL;
+	CG(script_encoding_list_size) = 0;
+	CG(internal_encoding) = NULL;
+	CG(encoding_detector) = NULL;
+	CG(encoding_converter) = NULL;
+	CG(encoding_oddlen) = NULL;
+#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -114,6 +134,12 @@ void shutdown_compiler(TSRMLS_D)
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
+
+#ifdef ZEND_MULTIBYTE
+	if (CG(script_encoding_list)) {
+		efree(CG(script_encoding_list));
+	}
+#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -3064,6 +3090,32 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 	if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "ticks", sizeof("ticks")-1)) {
 		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
+#ifdef ZEND_MULTIBYTE
+	} else if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "encoding", sizeof("encoding")-1)) {
+		zend_encoding *new_encoding, *old_encoding;
+		zend_encoding_filter old_input_filter;
+
+		if (val->u.constant.type == IS_CONSTANT) {
+			zend_error(E_COMPILE_ERROR, "Cannot use constants as encoding");
+		}
+		convert_to_string(&val->u.constant);
+		new_encoding = zend_multibyte_fetch_encoding(val->u.constant.value.str.val);
+		if (!new_encoding) {
+			zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", val->u.constant.value.str.val);
+		} else {
+			old_input_filter = LANG_SCNG(input_filter);
+			old_encoding = LANG_SCNG(script_encoding);
+			zend_multibyte_set_filter(new_encoding TSRMLS_CC);
+
+			/* need to re-scan if input filter changed */
+			if (old_input_filter != LANG_SCNG(input_filter) ||
+				((old_input_filter == zend_multibyte_script_encoding_filter) &&
+				 (new_encoding != old_encoding))) {
+				zend_multibyte_yyinput_again(old_input_filter, old_encoding TSRMLS_CC);
+			}
+		}
+		efree(val->u.constant.value.str.val);
+#endif /* ZEND_MULTIBYTE */
 	}
 	zval_dtor(&var->u.constant);
 }
