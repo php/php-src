@@ -56,15 +56,14 @@
 #include <fcntl.h>
 #include <process.h>
 
-#ifndef THREAD_SAFE
-static char *loghdr;			/* log file header string */
-static HANDLE loghdl = NULL;	/* handle of event source */
-#endif
+#include "php_win32_globals.h"
 
 void closelog(void)
 {
-	DeregisterEventSource(loghdl);
-	efree(loghdr);
+	TSRMLS_FETCH();
+	DeregisterEventSource(PW32G(log_source));
+	STR_FREE(PW32G(log_header));
+	PW32G(log_header) = NULL;
 }
 
 /* Emulator for BSD syslog() routine
@@ -77,12 +76,14 @@ void syslog(int priority, const char *message, ...)
 {
 	va_list args;
 	LPTSTR strs[2];
-	char tmp[1024];				/* callers must be careful not to pop this */
 	unsigned short etype;
-	
+	char *tmp = NULL;
+	TSRMLS_FETCH();
+
 	/* default event source */
-		if (!loghdl)
-		openlog("c-client", LOG_PID, LOG_MAIL);
+	if (!PW32G(log_source))
+		openlog("php", LOG_PID, LOG_SYSLOG);
+
 	switch (priority) {			/* translate UNIX type into NT type */
 		case LOG_ALERT:
 			etype = EVENTLOG_ERROR_TYPE;
@@ -94,12 +95,13 @@ void syslog(int priority, const char *message, ...)
 			etype = EVENTLOG_WARNING_TYPE;
 	}
 	va_start(args, message);	/* initialize vararg mechanism */
-	vsprintf(tmp, message, args);	/* build message */
-	strs[0] = loghdr;	/* write header */
+	vspprintf(&tmp, 0, message, args);	/* build message */
+	strs[0] = PW32G(log_header);	/* write header */
 	strs[1] = tmp;				/* then the message */
 	/* report the event */
-	ReportEvent(loghdl, etype, (unsigned short) priority, 2000, NULL, 2, 0, strs, NULL);
+	ReportEvent(PW32G(log_source), etype, (unsigned short) priority, 2000, NULL, 2, 0, strs, NULL);
 	va_end(args);
+	efree(tmp);
 }
 
 
@@ -111,12 +113,14 @@ void syslog(int priority, const char *message, ...)
 
 void openlog(const char *ident, int logopt, int facility)
 {
-	char tmp[1024];
+	TSRMLS_FETCH();
 
-	if (loghdl) {
+	if (PW32G(log_source)) {
 		closelog();
 	}
-	loghdl = RegisterEventSource(NULL, ident);
-	sprintf(tmp, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
-	loghdr = estrdup(tmp);	/* save header for later */
+
+	STR_FREE(PW32G(log_header));
+
+	PW32G(log_source) = RegisterEventSource(NULL, ident);
+	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }

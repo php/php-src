@@ -12,55 +12,39 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Sterling Hughes <sterling@php.net>                           |
+   | Author: Wez Furlong <wez@php.net>                                    |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "php.h"				/*php specific */
-#include <lmaccess.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <lmapibuf.h>
-#include "pwd.h"
-#include "grp.h"
+#include "php.h"
 #include "php_win32_globals.h"
 
-static char *home_dir = ".";
-static char *login_shell = "not command.com!";
+#ifdef ZTS
+PHPAPI int php_win32_core_globals_id;
+#else
+php_win32_core_globals php_win32_core_globals;
+#endif
 
-struct passwd *
-getpwnam(char *name)
+void php_win32_core_globals_ctor(void *vg TSRMLS_DC)
 {
-	return (struct passwd *) 0;
+	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
+	memset(wg, 0, sizeof(*wg));
 }
 
-
-char *
-getlogin()
+PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 {
-	char name[256];
-	DWORD max_len = 256;
-	TSRMLS_FETCH();
+	php_win32_core_globals *wg =
+#ifdef ZTS
+		ts_resource(php_win32_core_globals_id)
+#else
+		&php_win32_core_globals
+#endif
+		;
 
-	STR_FREE(PW32G(login_name));	
-	GetUserName(name, &max_len);
-	name[max_len] = '\0';
-	PW32G(login_name) = strdup(name);
-	return PW32G(login_name);
-}
-
-struct passwd *
-getpwuid(int user_id)
-{
-	TSRMLS_FETCH();
-	PW32G(pwd).pw_name = getlogin();
-	PW32G(pwd).pw_dir = home_dir;
-	PW32G(pwd).pw_shell = login_shell;
-	PW32G(pwd).pw_uid = 0;
-
-	return &PW32G(pwd);
+	STR_FREE(wg->login_name);
+	
+	memset(wg, 0, sizeof(*wg));
 }
 
