@@ -876,11 +876,11 @@ PHP_FUNCTION(set_socket_blocking)
 }
 
 /* }}} */
-/* {{{ proto int set_socket_timeout(int socket descriptor, int timeout )
-   NYI */
 
+
+/* {{{ proto bool set_socket_timeout(int socket descriptor, int seconds, int microseconds)
+   Set timeout on socket read to seconds + microseonds */
 #if HAVE_SYS_TIME_H
-/* this doesn't work, as it appears those properties are read-only :( */
 PHP_FUNCTION(set_socket_timeout)
 {
 	zval **socket, **seconds, **microseconds;
