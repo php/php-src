@@ -59,17 +59,17 @@ static char php_hex2int(int c)
    Convert a quoted-printable string to an 8 bit string */
 PHP_FUNCTION(quoted_printable_decode)
 {
-	pval *arg1;
+	pval **arg1;
 	char *str;
 	int i = 0, j = 0;
 	
-    if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&arg1)==FAILURE) 
+    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&arg1)==FAILURE) 
     {
     	WRONG_PARAM_COUNT;
     }
-    convert_to_string(arg1);
+    convert_to_string_ex(arg1);
     
-    str = arg1->value.str.val;
+    str = (*arg1)->value.str.val;
     while ( str[i] )
     {
     	if ( (str[i] == '=') && str[i+1] && str[i+2] &&

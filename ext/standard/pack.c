@@ -80,13 +80,13 @@ static int big_endian_long_map[4];
 static int little_endian_long_map[4];
 
 
-static void php_pack(pval *val, int size, int *map, char *output)
+static void php_pack(pval **val, int size, int *map, char *output)
 {
 	int i;
 	char *v;
 
-	convert_to_long(val);
-	v = (char *)&val->value.lval;
+	convert_to_long_ex(val);
+	v = (char *)&(*val)->value.lval;
 
 	for (i = 0; i < size; i++) {
 		*(output++) = v[map[i]];
@@ -101,7 +101,7 @@ static void php_pack(pval *val, int size, int *map, char *output)
    Takes 1 or more arguments and packs them into a binary string according to the format argument */
 PHP_FUNCTION(pack)
 {
-	pval **argv;
+	pval ***argv;
 	int argc, i;
 	int currentarg;
 	char *format;
@@ -118,16 +118,16 @@ PHP_FUNCTION(pack)
 		WRONG_PARAM_COUNT;
 	}
 
-	argv = emalloc(argc * sizeof(pval *));
+	argv = emalloc(argc * sizeof(pval **));
 
-	if (getParametersArray(ht, argc, argv) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		efree(argv);
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(argv[0]);
-	format = argv[0]->value.str.val;
-	formatlen = argv[0]->value.str.len;
+	convert_to_string_ex(argv[0]);
+	format = (*argv[0])->value.str.val;
+	formatlen = (*argv[0])->value.str.len;
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = emalloc(formatlen * sizeof(*formatcodes));
@@ -178,7 +178,7 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
-					arg = argv[currentarg]->value.str.len;
+					arg = (*argv[currentarg])->value.str.len;
 				}
 
 				currentarg++;
@@ -291,15 +291,15 @@ PHP_FUNCTION(pack)
 	for (i = 0; i < formatcount; i++) {
 	    int code = (int)formatcodes[i];
 		int arg = formatargs[i];
-		pval *val;
+		pval **val;
 
 		switch ((int)code) {
 			case 'a': case 'A': {
 				memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
 				val = argv[currentarg++];
-				convert_to_string(val);
-				memcpy(&output[outputpos], val->value.str.val,
-					   (val->value.str.len < arg) ? val->value.str.len : arg);
+				convert_to_string_ex(val);
+				memcpy(&output[outputpos],(*val)->value.str.val,
+					   ((*val)->value.str.len < arg) ? (*val)->value.str.len : arg);
 				outputpos += arg;
 				break;
 			}
@@ -310,8 +310,8 @@ PHP_FUNCTION(pack)
 				char *v;
 
 				val = argv[currentarg++];
-				convert_to_string(val);
-				v = val->value.str.val;
+				convert_to_string_ex(val);
+				v = (*val)->value.str.val;
 				outputpos--;
 
 				while (arg-- > 0) {
@@ -395,8 +395,8 @@ PHP_FUNCTION(pack)
 
 				while (arg-- > 0) {
 					val = argv[currentarg++];
-					convert_to_double(val);
-					v = (float)val->value.dval;
+					convert_to_double_ex(val);
+					v = (float)(*val)->value.dval;
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -408,8 +408,8 @@ PHP_FUNCTION(pack)
 
 				while (arg-- > 0) {
 					val = argv[currentarg++];
-					convert_to_double(val);
-					v = (double)val->value.dval;
+					convert_to_double_ex(val);
+					v = (double)(*val)->value.dval;
 					memcpy(&output[outputpos], &v, sizeof(v));
 					outputpos += sizeof(v);
 				}
@@ -483,25 +483,25 @@ static long php_unpack(char *data, int size, int issigned, int *map)
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {
-	pval *formatarg;
-	pval *inputarg;
+	pval **formatarg;
+	pval **inputarg;
 	char *format;
 	char *input;
 	int formatlen;
 	int inputpos, inputlen;
 	int i;
 
-	if ((ARG_COUNT(ht) != 2) || getParameters(ht, 2, &formatarg, &inputarg) == FAILURE) {
+	if ((ARG_COUNT(ht) != 2) || zend_get_parameters_ex(2,&formatarg,&inputarg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(formatarg);
-	convert_to_string(inputarg);
+	convert_to_string_ex(formatarg);
+	convert_to_string_ex(inputarg);
 
-	format = formatarg->value.str.val;
-	formatlen = formatarg->value.str.len;
-	input = inputarg->value.str.val;
-	inputlen = inputarg->value.str.len;
+	format = (*formatarg)->value.str.val;
+	formatlen = (*formatarg)->value.str.len;
+	input = (*inputarg)->value.str.val;
+	inputlen = (*inputarg)->value.str.len;
 	inputpos = 0;
 
 	if (array_init(return_value) == FAILURE)

@@ -127,7 +127,7 @@ PHP_FUNCTION(diskfreespace)
 	DWORD TotalNumberOfClusters;
 
 #else /* not - WINDOWS */
-	pval *path;
+	pval **path;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
 	struct statvfs buf;
 #elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
@@ -136,13 +136,13 @@ PHP_FUNCTION(diskfreespace)
 	double bytesfree = 0;
 #endif /* WINDOWS */
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&path)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&path)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(path);
+	convert_to_string_ex(path);
 
-	if (php_check_open_basedir(path->value.str.val)) RETURN_FALSE;
+	if (php_check_open_basedir((*path)->value.str.val)) RETURN_FALSE;
 
 #ifdef WINDOWS
 	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
@@ -187,14 +187,14 @@ PHP_FUNCTION(diskfreespace)
 	}
 #else /* WINDOWS, OS/2 */
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
-	if (statvfs(path->value.str.val,&buf)) RETURN_FALSE;
+	if (statvfs((*path)->value.str.val,&buf)) RETURN_FALSE;
 	if (buf.f_frsize) {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_frsize));
 	} else {
 		bytesfree = (((double)buf.f_bavail) * ((double)buf.f_bsize));
 	}
 #elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
-	if (statfs(path->value.str.val,&buf)) RETURN_FALSE;
+	if (statfs((*path)->value.str.val,&buf)) RETURN_FALSE;
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
 #endif
 #endif /* WINDOWS */
@@ -205,37 +205,38 @@ PHP_FUNCTION(diskfreespace)
 PHP_FUNCTION(chgrp)
 {
 #ifndef WINDOWS
-	pval *filename, *group;
+	pval **filename, **group;
 	gid_t gid;
 	struct group *gr=NULL;
 	int ret;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&group)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2,&filename,&group)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
-	if (group->type == IS_STRING) {
-		gr = getgrnam(group->value.str.val);
+	convert_to_string_ex(filename);
+	if ((*group)->type == IS_STRING) {
+		gr = getgrnam((*group)->value.str.val);
 		if (!gr) {
 			php_error(E_WARNING, "unable to find gid for %s",
-					   group->value.str.val);
+					   (*group)->value.str.val);
 			RETURN_FALSE;
 		}
 		gid = gr->gr_gid;
 	} else {
-		convert_to_long(group);
-		gid = group->value.lval;
+		convert_to_long_ex(group);
+		gid = (*group)->value.lval;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(filename->value.str.val, 1))) {
+	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val,1))) {
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(filename->value.str.val)) RETURN_FALSE;
+	if (php_check_open_basedir((*filename)->value.str.val))
+		RETURN_FALSE;
 
-	ret = chown(filename->value.str.val, -1, gid);
+	ret = chown((*filename)->value.str.val, -1, gid);
 	if (ret == -1) {
 		php_error(E_WARNING, "chgrp failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -250,37 +251,38 @@ PHP_FUNCTION(chgrp)
 PHP_FUNCTION(chown)
 {
 #ifndef WINDOWS
-	pval *filename, *user;
+	pval **filename, **user;
 	int ret;
 	uid_t uid;
 	struct passwd *pw = NULL;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&user)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2,&filename,&user)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
-	if (user->type == IS_STRING) {
-		pw = getpwnam(user->value.str.val);
+	convert_to_string_ex(filename);
+	if ((*user)->type == IS_STRING) {
+		pw = getpwnam((*user)->value.str.val);
 		if (!pw) {
 			php_error(E_WARNING, "unable to find uid for %s",
-					   user->value.str.val);
+					   (*user)->value.str.val);
 			RETURN_FALSE;
 		}
 		uid = pw->pw_uid;
 	} else {
-		convert_to_long(user);
-		uid = user->value.lval;
+		convert_to_long_ex(user);
+		uid = (*user)->value.lval;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(filename->value.str.val, 1))) {
+	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val,1))) {
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(filename->value.str.val)) RETURN_FALSE;
+	if (php_check_open_basedir((*filename)->value.str.val))
+		RETURN_FALSE;
 
-	ret = chown(filename->value.str.val, uid, -1);
+	ret = chown((*filename)->value.str.val, uid, -1);
 	if (ret == -1) {
 		php_error(E_WARNING, "chown failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -292,24 +294,25 @@ PHP_FUNCTION(chown)
 
 PHP_FUNCTION(chmod)
 {
-	pval *filename, *mode;
+	pval **filename, **mode;
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&mode)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
-	convert_to_long(mode);
+	convert_to_string_ex(filename);
+	convert_to_long_ex(mode);
 
-	if (PG(safe_mode) &&(!php_checkuid(filename->value.str.val, 1))) {
+	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val,1))) {
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(filename->value.str.val)) RETURN_FALSE;
+	if (php_check_open_basedir((*filename)->value.str.val))
+		RETURN_FALSE;
 
-	ret = chmod(filename->value.str.val, mode->value.lval);
+	ret = chmod((*filename)->value.str.val, (*mode)->value.lval);
 	if (ret == -1) {
 		php_error(E_WARNING, "chmod failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -321,7 +324,7 @@ PHP_FUNCTION(chmod)
 PHP_FUNCTION(touch)
 {
 #if HAVE_UTIME
-	pval *filename, *filetime;
+	pval **filename, **filetime;
 	int ret;
 	struct stat sb;
 	FILE *file;
@@ -329,7 +332,7 @@ PHP_FUNCTION(touch)
 	int ac = ARG_COUNT(ht);
 	PLS_FETCH();
 	
-	if (ac == 1 && getParameters(ht,1,&filename) != FAILURE) {
+	if (ac == 1 && zend_get_parameters_ex(1,&filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
 		if (!newtime) {
@@ -339,41 +342,42 @@ PHP_FUNCTION(touch)
 		newtime->actime = time(NULL);
 		newtime->modtime = newtime->actime;
 #endif
-	} else if (ac == 2 && getParameters(ht,2,&filename,&filetime) != FAILURE) {
+	} else if (ac == 2 && zend_get_parameters_ex(2,&filename,&filetime) != FAILURE) {
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
 		if (!newtime) {
 			php_error(E_WARNING, "unable to emalloc memory for changing time");
 			return;
 		}
-		convert_to_long(filetime);
-		newtime->actime = filetime->value.lval;
-		newtime->modtime = filetime->value.lval;
+		convert_to_long_ex(filetime);
+		newtime->actime = (*filetime)->value.lval;
+		newtime->modtime = (*filetime)->value.lval;
 	} else {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) &&(!php_checkuid(filename->value.str.val, 1))) {
+	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val,1))) {
 		if (newtime) efree(newtime);
 		RETURN_FALSE;
 	}
 
 	/* Check the basedir */
-	if (php_check_open_basedir(filename->value.str.val)) RETURN_FALSE;
+	if (php_check_open_basedir((*filename)->value.str.val))
+		RETURN_FALSE;
 
 	/* create the file if it doesn't exist already */
-	ret = stat(filename->value.str.val, &sb);
+	ret = stat((*filename)->value.str.val, &sb);
 	if (ret == -1) {
-		file = fopen(filename->value.str.val, "w");
+		file = fopen((*filename)->value.str.val, "w");
 		if (file == NULL) {
-			php_error(E_WARNING, "unable to create file %s because %s", filename->value.str.val, strerror(errno));
+			php_error(E_WARNING, "unable to create file %s because %s", (*filename)->value.str.val, strerror(errno));
 			if (newtime) efree(newtime);
 			RETURN_FALSE;
 		}
 		fclose(file);
 	}
 
-	ret = utime(filename->value.str.val, newtime);
+	ret = utime((*filename)->value.str.val, newtime);
 	if (newtime) efree(newtime);
 	if (ret == -1) {
 		php_error(E_WARNING, "utime failed: %s", strerror(errno));
@@ -534,12 +538,12 @@ static void php_stat(const char *filename, int type, pval *return_value)
 /* another quickie macro to make defining similar functions easier */
 #define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
-	pval *filename; \
-	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&filename) == FAILURE) { \
+	pval **filename; \
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&filename) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
 	} \
-	convert_to_string(filename); \
-	php_stat(filename->value.str.val, funcnum, return_value); \
+	convert_to_string_ex(filename); \
+	php_stat((*filename)->value.str.val, funcnum, return_value); \
 }
 
 FileFunction(PHP_FN(fileperms),0)
