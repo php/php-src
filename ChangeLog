@@ -1,3 +1,69 @@
+2001-11-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pdf/pdf.c: - oops :)
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h: - Let it also work with pdflib 3 again
+
+2001-11-08  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    fixed a bug in http input processing patched by Yasuo Ohgaki.
+
+2001-11-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/pcntl/pcntl.c: Some protos fixed.
+
+2001-11-08  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimePart.php: Compatibility with broken mailers
+
+2001-11-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mysql/php_mysql.c: More protos fixed.
+
+    * ext/mailparse/mailparse.c:
+    Fixed some protos and many more will follow the next hour.
+
+2001-11-08  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/config.m4:
+    Use PHP_ADD_LIBRARY_DEFER and PHP_ADD_LIBPATH instead of
+    PHP_EVAL_LIBLINE to prevent configure error.
+
+2001-11-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/dbx/dbx.c: There are some rules.
+
+2001-11-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c
+      ext/pcntl/pcntl.c
+      ext/dbx/dbx.c
+      ext/mailparse/mailparse.c: - prototypes
+
+    * ext/posix/posix.c: - Prototypes
+
+2001-11-08  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/mysql/14fetchmode_object.phpt
+      pear/DB/tests/fetchmode_object.inc
+      pear/DB/tests/pgsql/14fetchmode_object.phpt:
+    Added tests for DB_FETCHMODE_OBJECT
+
+    * pear/DB.php
+      pear/DB/common.php:
+    - By default DB_FETCHMODE_OBJECT will do a cast to object from the row
+      array (twice fast than with DB_Row)
+    - API Doc updates/fixs
+
+2001-11-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-recommended
+      php.ini-dist: Add php_w32api.dll
+
+    * win32/php_modules.dsw: Add ext/w32api
+
 2001-11-07  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/HTML/ITX.php: * Remove evil tabs caused by a previous patch
