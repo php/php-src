@@ -110,8 +110,8 @@ static ub4 oci_error(OCIError *err_p, char *what, sword status);
 /* static int oci_ping(oci_connection *conn); XXX NYI */
 static void oci_debug(const char *format,...);
 
-static void _oci_close_conn(oci_connection *connection);
-static void _oci_free_stmt(oci_statement *statement);
+static void _oci_connection_dtor(oci_connection *connection);
+static void _oci_statement_dtor(oci_statement *statement);
 
 static int _oci_column_dtor(void *data);
 static int _oci_descr_dtor(void *data);
@@ -332,8 +332,8 @@ PHP_MINIT_FUNCTION(oci)
 	
 #endif
 
-	le_conn = register_list_destructors(_oci_close_conn, NULL);
-	le_stmt = register_list_destructors(_oci_free_stmt, NULL);
+	le_conn = register_list_destructors(_oci_connection_dtor, NULL);
+	le_stmt = register_list_destructors(_oci_statement_dtor, NULL);
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
 
@@ -529,9 +529,7 @@ _oci_column_dtor(void *data)
 {	
 	oci_out_column *column = (oci_out_column *) data;
 
-	/*
 	oci_debug("_oci_column_dtor: %s",column->name);
-	*/
 
 	if (column->data) {
 		if (column->is_descr) {
@@ -551,16 +549,16 @@ _oci_column_dtor(void *data)
 }
 
 /* }}} */
-/* {{{ _oci_free_stmt() */
+/* {{{ _oci_statement_dtor() */
 
 static void
-_oci_free_stmt(oci_statement *statement)
+_oci_statement_dtor(oci_statement *statement)
 {
 	if (! statement) {
 		return;
 	}
 
-	oci_debug("_oci_free_stmt: id=%d last_query=\"%s\"",statement->id,SAFE_STRING(statement->last_query));
+	oci_debug("_oci_statement_dtor: id=%d last_query=\"%s\"",statement->id,SAFE_STRING(statement->last_query));
 
  	if (statement->pStmt) {
 		OCIHandleFree(statement->pStmt, OCI_HTYPE_STMT);
@@ -595,10 +593,10 @@ _oci_free_stmt(oci_statement *statement)
 }
 
 /* }}} */
-/* {{{ _oci_close_conn() */
+/* {{{ _oci_connection_dtor() */
 
 static void
-_oci_close_conn(oci_connection *connection)
+_oci_connection_dtor(oci_connection *connection)
 {
 	if (! connection) {
 		return;
@@ -608,7 +606,7 @@ _oci_close_conn(oci_connection *connection)
 	   as the connection is "only" a in memory service context we do not disconnect from oracle.
 	*/
 
-	oci_debug("_oci_close_conn: id=%d",connection->id);
+	oci_debug("_oci_connection_dtor: id=%d",connection->id);
 
 	if (connection->descriptors) {
 		zend_hash_destroy(connection->descriptors);
@@ -721,7 +719,7 @@ oci_get_conn(int conn_ind, const char *func, HashTable *list)
 	if (connection->open) {
 		return connection;
 	} else {
-		/* _oci_close_conn(connection); be careful with this!! */
+		/* _oci_connection_dtor(connection); be careful with this!! */
 		return (oci_connection *)NULL;
 	}
 }
@@ -744,7 +742,7 @@ oci_get_stmt(int stmt_ind, const char *func, HashTable *list)
 	if (statement->conn->open) {
 		return statement;
 	} else {
-		/* _oci_free_stmt(statement); be careful with this!! */
+		/* _oci_statement_dtor(statement); be careful with this!! */
 		return (oci_statement *)NULL;
 	}
 }
@@ -1849,7 +1847,7 @@ _oci_descr_dtor(void *data)
 {
 	oci_descriptor *descr = (oci_descriptor *) data;
 
-    oci_debug("oci_free_descr: %x",descr->ocidescr);
+    oci_debug("_oci_descr_dtor: %x",descr->ocidescr);
 
     OCIDescriptorFree(descr->ocidescr, descr->type);
 
@@ -2153,7 +2151,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 	if (connection->id) {
 		php3_list_delete(connection->id);
 	} else {
-		_oci_close_conn(connection);
+		_oci_connection_dtor(connection);
 	}
 
 	RETURN_FALSE;
