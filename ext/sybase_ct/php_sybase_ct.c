@@ -996,7 +996,7 @@ PHP_FUNCTION(sybase_query)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 	
 	convert_to_string_ex(query);
 	
