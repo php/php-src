@@ -106,6 +106,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DomainException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(EmptyIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(File, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(InfiniteIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(InvalidArgumentException, z_list, sub, allow, ce_flags); \
@@ -148,9 +149,7 @@ int spl_autoload(const char *class_name, const char * lc_name, int class_name_le
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
-	
-	;
-	
+
 	class_file_len = spprintf(&class_file, 0, "%s%s", lc_name, file_extension);
 
 	if (zend_stream_open(class_file, &file_handle TSRMLS_CC) == SUCCESS) {
@@ -281,7 +280,7 @@ PHP_FUNCTION(spl_autoload_call)
 	if (SPL_G(autoload_functions)) {
 		lc_name = zend_str_tolower_dup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
-		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
+		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS && !EG(exception)) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &func_name_len, &dummy, 0, &function_pos);
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &func_ptr_ptr, &function_pos);
 			zend_call_method(NULL, NULL, func_ptr_ptr, func_name, func_name_len, &retval, 1, *class_name, NULL TSRMLS_CC);
