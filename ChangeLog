@@ -1,3 +1,127 @@
+2001-10-29  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c:
+    Reset the error (or message) from the server when calling fetch_row functions.
+    If the user conected and changed the database the message from the change was reported
+    when the user checked the error function after a failed fetch.
+    This cased problems in PEAR/DB.
+    If the fetch fails for other resons than a fetch after the last row, the message from the server will still be reported.
+
+    * pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php
+      pear/DB.php:
+    Adding nextResult() function allowing batches of sql statements to be
+    executed with one call to the query function.
+
+    * ext/fbsql/php_fbsql.c:
+    A more acurate fix to the fbsql_num_rows function returning
+    x7fffffff when the server is unable to tell the number of rows.
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Fixing spelling of persistent
+
+    * pear/Makefile.in: Adding fbsql.php to PEAR install
+
+2001-10-29  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c:
+    After discussing with Rasmus, this line should be enough. Speak up if it is not.
+
+    * main/rfc1867.c: - Added myself to authors.
+    - Modified the clause about Apache to say what exactly was borrowed.
+
+      Should there be the Apache license included in this file?
+
+2001-10-29  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing wrong count on fbsql_num_rows.
+
+2001-10-29  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_open_temporary_file.c: MFH
+
+2001-10-29  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/RFC822.php:
+    Altered so that if no "personal" is supplied, comments are *not* used as
+    personal instead.
+
+    * pear/Mail/RFC822.php: Minor style fix
+
+2001-10-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in
+      pear/PEAR/Registry.php
+      pear/PEAR/Installer.php: * started working on "pear list" command
+
+2001-10-29  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/RFC822.php: Prefixed private methods with _
+
+    * pear/Mail/RFC822.php: Added description and usage example.
+
+    * pear/Mail/RFC822.php: Whitespace
+
+    * pear/Mail/RFC822.php:
+    Fixed comment parsing. Comments property is now an array of comments.
+
+2001-10-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php
+      pear/tests/pear_config.phpt
+      pear/tests/pear_registry.phpt
+      pear/tests/system.input
+      pear/tests/user.input:
+    * PEAR_Registry: renamed "upgradePackage" to "updatePackage"
+    * added tests for PEAR_Config and PEAR_Registry
+
+    * pear/Experimental/System.php
+      pear/PEAR/Common.php
+      pear/Makefile.in
+      pear/System.php: * moved System.php out of Experimental/
+
+2001-10-29  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: more ws
+
+2001-10-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php: * typo
+
+2001-10-29  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/bz2/bz2.c: Fix performance of bz(de)compress:
+    - don't copy possibly large strings if it's not necessary
+    - no slow linear incremental buffering until it succeeds on bzdecompress, but
+      exponential and with smart starting value.
+    - nuke some unnecessary vars
+    - Performance gain of bzdecompress: about 50% in case of 100kB uncompressed
+      data, 95% incase of 500kB uncompressed data. Memory gain (both compress and
+      decompress): at least 50% of the size of the returned data in case of
+      decompress, the size of the returned data in case of compress.
+
+    And:
+    - Output FALSE & warning in case of error, and not a positive integer
+
+    This fixes bug 13860
+
+2001-10-29  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c:
+    Fixing parsing of list's returned by extract database, extract license and other extract commands
+
+2001-10-29  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_open_temporary_file.c: Fix pointer mess
+
 2001-10-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * sapi/servlet/servlet.java: Leftover.
