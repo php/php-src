@@ -63,14 +63,14 @@ SAFE_MODE_WARNING;
 // Require the explicit specification.
 // Otherwise we could end up testing the wrong file!
 
-if (isset($_ENV['TEST_PHP_EXECUTABLE'])) {
-	$php = $_ENV['TEST_PHP_EXECUTABLE'];
+if (getenv('TEST_PHP_EXECUTABLE')) {
+	$php = getenv('TEST_PHP_EXECUTABLE');
 } else {
 	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
 }
 
-if (isset($_ENV['TEST_PHP_LOG_FORMAT'])) {
-	$log_format = strtoupper($_ENV['TEST_PHP_LOG_FORMAT']);
+if (getenv('TEST_PHP_LOG_FORMAT')) {
+	$log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
 } else {
 	$log_format = 'LEOD';
 }
@@ -81,8 +81,8 @@ if (function_exists('is_executable') && !@is_executable($php)) {
 
 // Check whether a detailed log is wanted.
 
-if (isset($_ENV['TEST_PHP_DETAILED'])) {
-	define('DETAILED', $_ENV['TEST_PHP_DETAILED']);
+if (getenv('TEST_PHP_DETAILED')) {
+	define('DETAILED', getenv('TEST_PHP_DETAILED'));
 } else {
 	define('DETAILED', 0);
 }
