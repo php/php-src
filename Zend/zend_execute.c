@@ -727,6 +727,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 	zval **retval;
 	char *offset_key;
 	int offset_key_length;
+	long index;
 
 	switch (dim->type) {
 		case IS_NULL:
@@ -734,9 +735,13 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 			offset_key_length = 0;
 			goto fetch_string_dim;
 		case IS_STRING:
+			if (zend_is_numeric_key(dim, &index)) {
+				goto fetch_int_dim;
+			} 
+			
 			offset_key = dim->value.str.val;
 			offset_key_length = dim->value.str.len;
-
+			
 fetch_string_dim:
 			if (zend_hash_find(ht, offset_key, offset_key_length+1, (void **) &retval) == FAILURE) {
 				switch (type) {
@@ -762,33 +767,31 @@ fetch_string_dim:
 		case IS_DOUBLE:
 		case IS_RESOURCE:
 		case IS_BOOL: 
-		case IS_LONG: {
-				long index;
+		case IS_LONG: 
+			if (dim->type == IS_DOUBLE) {
+				index = (long)dim->value.dval;
+			} else {
+				index = dim->value.lval;
+			}
+fetch_int_dim:
+			if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
+				switch (type) {
+					case BP_VAR_R: 
+						zend_error(E_NOTICE,"Undefined offset:  %d", index);
+						/* break missing intentionally */
+					case BP_VAR_IS:
+						retval = &EG(uninitialized_zval_ptr);
+						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined offset:  %d", index);
+						/* break missing intentionally */
+					case BP_VAR_W: {
+						zval *new_zval = &EG(uninitialized_zval);
 
-				if (dim->type == IS_DOUBLE) {
-					index = (long)dim->value.dval;
-				} else {
-					index = dim->value.lval;
-				}
-				if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
-					switch (type) {
-						case BP_VAR_R: 
-							zend_error(E_NOTICE,"Undefined offset:  %d", index);
-							/* break missing intentionally */
-						case BP_VAR_IS:
-							retval = &EG(uninitialized_zval_ptr);
-							break;
-						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined offset:  %d", index);
-							/* break missing intentionally */
-						case BP_VAR_W: {
-								zval *new_zval = &EG(uninitialized_zval);
-
-								new_zval->refcount++;
-								zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
-							}
-							break;
+						new_zval->refcount++;
+						zend_hash_index_update(ht, index, &new_zval, sizeof(zval *), (void **) &retval);
 					}
+					break;
 				}
 			}
 			break;
@@ -3286,9 +3289,16 @@ inline int zend_init_add_array_helper(ZEND_OPCODE_HANDLER_ARGS)
 			case IS_BOOL:
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
-			case IS_STRING:
-				zend_hash_update(array_ptr->value.ht, offset->value.str.val, offset->value.str.len+1, &expr_ptr, sizeof(zval *), NULL);
+			case IS_STRING: {
+				long idx;
+
+				if (zend_is_numeric_key(offset, &idx)) {
+					zend_hash_index_update(array_ptr->value.ht, idx, &expr_ptr, sizeof(zval *), NULL);
+				} else {
+					zend_hash_update(array_ptr->value.ht, offset->value.str.val, offset->value.str.len+1, &expr_ptr, sizeof(zval *), NULL);
+				}
 				break;
+			}
 			case IS_NULL:
 				zend_hash_update(array_ptr->value.ht, "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3508,6 +3518,7 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **container = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *offset = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+	long index;
 	
 	if (container) {
 		HashTable *ht;
@@ -3526,20 +3537,20 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 				case IS_RESOURCE:
 				case IS_BOOL: 
 				case IS_LONG:
-					{
-						long index;
-
-						if (offset->type == IS_DOUBLE) {
-							index = (long) offset->value.lval;
-						} else {
-							index = offset->value.lval;
-						}
-	
-						zend_hash_index_del(ht, index);
-						break;
+					if (offset->type == IS_DOUBLE) {
+						index = (long) offset->value.lval;
+					} else {
+						index = offset->value.lval;
 					}
+	
+					zend_hash_index_del(ht, index);
+					break;
 				case IS_STRING:
-					zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
+					if (zend_is_numeric_key(offset, &index)) {
+						zend_hash_index_del(ht, index);
+					} else {
+						zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
+					}
 					break;
 				case IS_NULL:
 					zend_hash_del(ht, "", sizeof(""));
@@ -3730,6 +3741,7 @@ int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval *offset = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 	zval **value = NULL;
 	int result = 0;
+	long index;
 
 	if (container) {
 		if ((*container)->type == IS_ARRAY) {
@@ -3743,21 +3755,21 @@ int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 				case IS_RESOURCE:
 				case IS_BOOL: 
 				case IS_LONG:
-					{
-						long index;
-
-						if (offset->type == IS_DOUBLE) {
-							index = (long) offset->value.lval;
-						} else {
-							index = offset->value.lval;
-						}
+					if (offset->type == IS_DOUBLE) {
+						index = (long) offset->value.lval;
+					} else {
+						index = offset->value.lval;
+					}
+					if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
+						isset = 1;
+					}
+					break;
+				case IS_STRING:
+					if (zend_is_numeric_key(offset, &index)) {
 						if (zend_hash_index_find(ht, index, (void **) &value) == SUCCESS) {
 							isset = 1;
 						}
-						break;
-					}
-				case IS_STRING:
-					if (zend_hash_find(ht, offset->value.str.val, offset->value.str.len+1, (void **) &value) == SUCCESS) {
+					} else if (zend_hash_find(ht, offset->value.str.val, offset->value.str.len+1, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
 					break;
