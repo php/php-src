@@ -12,8 +12,4 @@ echo 'OK';
 ?>
 --EXPECTF--
 Warning: Invalid argument supplied for foreach() in %sbug27468.php on line 4
-
-Call Stack:
-    %f      %d   1. {main}() %sbug27468.php:0
-    %f      %d   2. foo::__destruct() %sbug27468.php:7
 OK
