@@ -23,6 +23,8 @@ require_once 'PEAR.php';
 require_once 'Archive/Tar.php';
 require_once 'System.php';
 
+// {{{ globals
+
 /**
  * List of temporary files and directories registered by
  * PEAR_Common::addTempFile().
@@ -30,12 +32,43 @@ require_once 'System.php';
  */
 $GLOBALS['_PEAR_Common_tempfiles'] = array();
 
-/*
- * TODO:
- *   - check in inforFromDescFile that the minimal data needed is present
- *     (pack name, version, files, others?)
- *   - inherance of dir attribs to files may fail under certain circumstances
+/**
+ * Valid maintainer roles
+ * @var array
  */
+$GLOBALS['_PEAR_Common_maintainer_roles'] = array('lead','developer','contributor','helper');
+
+/**
+ * Valid release states
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_release_states'] = array('alpha','beta','stable','snapshot','devel');
+
+/**
+ * Valid dependency types
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_dependency_types'] = array('pkg','ext','php','prog','ldlib','rtlib','os','websrv','sapi');
+
+/**
+ * Valid dependency relations
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_dependency_relations'] = array('has','eq','lt','le','gt','ge');
+
+/**
+ * Valid file roles
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_file_roles'] = array('php','ext','test','doc','data','extsrc','script');
+
+/**
+ * Valid replacement types
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_replacement_types'] = array('php-const', 'pear-config');
+
+// }}}
 
 /**
  * Class providing common functionality for PEAR adminsitration classes.
@@ -60,37 +93,37 @@ class PEAR_Common extends PEAR
      * Valid maintainer roles
      * @var array
      */
-    var $maintainer_roles = array('lead','developer','contributor','helper');
+    var $maintainer_roles = null;
 
     /**
      * Valid release states
      * @var array
      */
-    var $release_states  = array('alpha','beta','stable','snapshot','devel');
+    var $release_states = null;
 
     /**
      * Valid dependency types
      * @var array
      */
-    var $dependency_types  = array('pkg','ext','php','prog','ldlib','rtlib','os','websrv','sapi');
+    var $dependency_types = null;
 
     /**
      * Valid dependency relations
      * @var array
      */
-    var $dependency_relations  = array('has','eq','lt','le','gt','ge');
+    var $dependency_relations = null;
 
     /**
      * Valid file roles
      * @var array
      */
-    var $file_roles  = array('php','ext','test','doc','data','extsrc','script');
+    var $file_roles = null;
 
     /**
      * Valid replacement types
      * @var array
      */
-    var $replacement_types  = array('php-const', 'pear-config');
+    var $replacement_types = null;
 
     /**
      * User Interface object (PEAR_Frontend_* class).  If null,
@@ -113,6 +146,12 @@ class PEAR_Common extends PEAR
     function PEAR_Common()
     {
         $this->PEAR();
+        $this->maintainer_roles = $GLOBALS['_PEAR_Common_maintainer_roles'];
+        $this->release_states = $GLOBALS['_PEAR_Common_release_states'];
+        $this->dependency_types = $GLOBALS['_PEAR_Common_dependency_types'];
+        $this->dependency_relations = $GLOBALS['_PEAR_Common_dependency_relations'];
+        $this->file_roles = $GLOBALS['_PEAR_Common_file_roles'];
+        $this->replacement_types = $GLOBALS['_PEAR_Common_replacement_types'];
     }
 
     // }}}
@@ -145,7 +184,7 @@ class PEAR_Common extends PEAR
      * executed, all registered temporary files and directories are
      * removed.
      *
-     * @param string   name of file or directory
+     * @param string  $file  name of file or directory
      *
      * @return void
      *
@@ -163,7 +202,7 @@ class PEAR_Common extends PEAR
      * Wrapper to System::mkDir(), creates a directory as well as
      * any necessary parent directories.
      *
-     * @param string  directory name
+     * @param string  $dir  directory name
      *
      * @return bool TRUE on success, or a PEAR error
      *
@@ -181,9 +220,8 @@ class PEAR_Common extends PEAR
     /**
      * Logging method.
      *
-     * @param int    log level (0 is quiet, higher is noisier)
-     *
-     * @param string message to write to the log
+     * @param int    $level  log level (0 is quiet, higher is noisier)
+     * @param string $msg    message to write to the log
      *
      * @return void
      *
@@ -206,9 +244,9 @@ class PEAR_Common extends PEAR
     /**
      * Create and register a temporary directory.
      *
-     * @param string (optional) Directory to use as tmpdir.  Will use
-     * system defaults (for example /tmp or c:\windows\temp) if not
-     * specified
+     * @param string $tmpdir (optional) Directory to use as tmpdir.
+     *                       Will use system defaults (for example
+     *                       /tmp or c:\windows\temp) if not specified
      *
      * @return string name of created directory
      *
@@ -244,9 +282,9 @@ class PEAR_Common extends PEAR
      * XML parser callback for starting elements.  Used while package
      * format version is not yet known.
      *
-     * @param resource  XML parser resource
-     * @param string    name of starting element
-     * @param array     element attributes, name => value
+     * @param resource  $xp       XML parser resource
+     * @param string    $name     name of starting element
+     * @param array     $attribs  element attributes, name => value
      *
      * @return void
      *
@@ -283,8 +321,8 @@ class PEAR_Common extends PEAR
      * XML parser callback for ending elements.  Used while package
      * format version is not yet known.
      *
-     * @param resource  XML parser resource
-     * @param string    name of ending element
+     * @param resource  $xp    XML parser resource
+     * @param string    $name  name of ending element
      *
      * @return void
      *
@@ -303,8 +341,8 @@ class PEAR_Common extends PEAR
      * XML parser callback for ending elements.  Used for version 1.0
      * packages.
      *
-     * @param resource  XML parser resource
-     * @param string    name of ending element
+     * @param resource  $xp    XML parser resource
+     * @param string    $name  name of ending element
      *
      * @return void
      *
@@ -420,8 +458,8 @@ class PEAR_Common extends PEAR
      * XML parser callback for ending elements.  Used for version 1.0
      * packages.
      *
-     * @param resource  XML parser resource
-     * @param string    name of ending element
+     * @param resource  $xp    XML parser resource
+     * @param string    $name  name of ending element
      *
      * @return void
      *
@@ -588,8 +626,8 @@ class PEAR_Common extends PEAR
      * XML parser callback for character data.  Used for version 1.0
      * packages.
      *
-     * @param resource  XML parser resource
-     * @param string    character data
+     * @param resource  $xp    XML parser resource
+     * @param string    $name  character data
      *
      * @return void
      *
@@ -610,9 +648,9 @@ class PEAR_Common extends PEAR
      * Returns information about a package file.  Expects the name of
      * a gzipped tar file as input.
      *
-     * @param string   name of .tgz file
+     * @param string  $file  name of .tgz file
      *
-     * @return array   array with package information
+     * @return array  array with package information
      *
      * @access public
      *
@@ -656,9 +694,9 @@ class PEAR_Common extends PEAR
      * Returns information about a package file.  Expects the name of
      * a package xml file as input.
      *
-     * @param string   name of package xml file
+     * @param string  $descfile  name of package xml file
      *
-     * @return array   array with package information
+     * @return array  array with package information
      *
      * @access public
      *
@@ -683,7 +721,7 @@ class PEAR_Common extends PEAR
      * Returns information about a package file.  Expects the contents
      * of a package xml file as input.
      *
-     * @param string   name of package xml file
+     * @param string  $data  name of package xml file
      *
      * @return array   array with package information
      *
@@ -735,7 +773,7 @@ class PEAR_Common extends PEAR
      * Return an XML document based on the package info (as returned
      * by the PEAR_Common::infoFrom* methods).
      *
-     * @param array package info
+     * @param array  $pkginfo  package info
      *
      * @return string XML data
      *
@@ -785,8 +823,8 @@ class PEAR_Common extends PEAR
     /**
      * Generate part of an XML description with release information.
      *
-     * @param array  array with release information
-     * @param bool   whether the result will be in a changelog element
+     * @param array  $pkginfo    array with release information
+     * @param bool   $changelog  whether the result will be in a changelog element
      *
      * @return string XML data
      *
@@ -1114,21 +1152,30 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ detectDependencies()
 
-    function detectDependencies($info)
+    function detectDependencies($any, $status_callback = null)
     {
         if (!function_exists("token_get_all")) {
             return false;
         }
-        if (PEAR::isError($info = $this->_infoFromAny($info))) {
+        if (PEAR::isError($info = $this->_infoFromAny($any))) {
             return $this->raiseError($info);
         }
         if (!is_array($info)) {
             return false;
         }
         $deps = array();
+        $used_c = $decl_c = array();
         foreach ($info['filelist'] as $file => $fa) {
-
+            $tmp = $this->analyzeSourceCode($file);
+            $used_c = @array_merge($used_c, $tmp['used_classes']);
+            $decl_c = @array_merge($decl_c, $tmp['declared_classes']);
         }
+        $used_c = array_unique($used_c);
+        $decl_c = array_unique($decl_c);
+        $undecl_c = array_diff($used_c, $decl_c);
+        return array('used_classes' => $used_c,
+                     'declared_classes' => $decl_c,
+                     'undeclared_classes' => $undecl_c);
     }
 
     // }}}
@@ -1137,14 +1184,218 @@ class PEAR_Common extends PEAR
     /**
      * Get the valid roles for a PEAR package maintainer
      *
+     * @return array
      * @static
      */
     function getUserRoles()
     {
-        $common = &new PEAR_Common;
-        return $common->maintainer_roles;
+        return $GLOBALS['_PEAR_Common_maintainer_roles'];
+    }
+
+    // }}}
+    // {{{ getReleaseStates()
+
+    /**
+     * Get the valid package release states of packages
+     *
+     * @return array
+     * @static
+     */
+    function getReleaseStates()
+    {
+        return $GLOBALS['_PEAR_Common_release_states'];
+    }
+
+    // }}}
+    // {{{ getDependencyTypes()
+
+    /**
+     * Get the implemented dependency types (php, ext, pkg etc.)
+     *
+     * @return array
+     * @static
+     */
+    function getDependencyTypes()
+    {
+        return $GLOBALS['_PEAR_Common_dependency_types'];
+    }
+
+    // }}}
+    // {{{ getDependencyRelations()
+
+    /**
+     * Get the implemented dependency relations (has, lt, ge etc.)
+     *
+     * @return array
+     * @static
+     */
+    function getDependencyRelations()
+    {
+        return $GLOBALS['_PEAR_Common_dependency_relations'];
+    }
+
+    // }}}
+    // {{{ getFileRoles()
+
+    /**
+     * Get the implemented file roles
+     *
+     * @return array
+     * @static
+     */
+    function getFileRoles()
+    {
+        return $GLOBALS['_PEAR_Common_file_roles'];
+    }
+
+    // }}}
+    // {{{ getReplacementTypes()
+
+    /**
+     * Get the implemented file replacement types in
+     *
+     * @return array
+     * @static
+     */
+    function getReplacementTypes()
+    {
+        return $GLOBALS['_PEAR_Common_replacement_types'];
+    }
+
+    // }}}
+
+    // {{{ downloadHttp()
+
+    /**
+     * Download a file through HTTP.  Considers suggested file name in
+     * Content-disposition: header and can run a callback function for
+     * different events.  The callback will be called with two
+     * parameters: the callback type, and parameters.  The implemented
+     * callback types are:
+     *
+     *  'message'   the parameter is a string with an informational message
+     *  'saveas'    may be used to save with a different file name, the
+     *              parameter is array($ui, $filaneme) where $ui is the
+     *              user interface object used (instance of PEAR_Frontend_*)
+     *              and $filename is the filename that is about to be used.
+     *              If a 'saveas' callback returns a non-empty string,
+     *              that file name will be used instead.  Note that
+     *              $save_dir will not be affected by this, only the
+     *              basename of the file. 
+     *  'start'     download is starting, parameter is number of bytes
+     *              that are expected, or -1 if unknown
+     *  'bytesread' parameter is the number of bytes read so far
+     *  'done'      download is complete, no parameter
+     *
+     * If an HTTP proxy has been configured (http_proxy PEAR_Config
+     * setting), the proxy will be used.
+     *
+     * @param string  $url       the URL to download
+     * @param object  $ui        PEAR_Frontend_* instance
+     * @param object  $config    PEAR_Config instance
+     * @param string  $save_dir  directory to save file in
+     * @param mixed   $callback  function/method to call for status
+     *                           updates
+     *
+     * @return string  Returns the full path of the downloaded file or a PEAR
+     *                 error on failure.  If the error is caused by
+     *                 socket-related errors, the error object will
+     *                 have the fsockopen error code available through
+     *                 getCode().
+     *
+     * @access public
+     */
+    function downloadHttp($url, &$ui, &$config, $save_dir = '.',
+                          $callback = null)
+    {
+        if (preg_match('!^http://([^/:?#]*)(:(\d+))?(/.*)!', $url, $matches)) {
+            list(,$host,,$port,$path) = $matches;
+        }
+        $proxy_host = $proxy_port = null;
+        if ($proxy = $config->get('http_proxy')) {
+            list($proxy_host, $proxy_port) = explode(':', $proxy);
+            if (empty($proxy_port)) {
+                $proxy_port = 8080;
+            }
+            if ($callback) {
+                call_user_func($callback, 'message', "Using HTTP proxy $host:$port");
+            }
+        }
+        if (empty($port)) {
+            $port = 80;
+        }
+        if (!extension_loaded("zlib")) {
+            $pkgfile .= '?uncompress=yes';
+        }
+        if ($proxy_host) {
+            $fp = @fsockopen($proxy_host, $proxy_port, $errno, $errstr);
+            if (!$fp) {
+                return PEAR::raiseError("Connection to `$proxy_host:$proxy_port' failed: $errstr", $errno);
+            }
+            $request = "GET $url HTTP/1.0\r\n";
+        } else {
+            $fp = @fsockopen($host, $port, $errno, $errstr);
+            if (!$fp) {
+                return PEAR::raiseError("Connection to `$host:$port' failed: $errstr", $errno);
+            }
+            $request = "GET $path HTTP/1.0\r\n";
+        }
+        $request .= "Host: $host:$port\r\n".
+            "User-Agent: ".PHP_VERSION."\r\n".
+            "\r\n";
+        fwrite($fp, $request);
+        $headers = array();
+        while (trim($line = fgets($fp, 1024))) {
+            if (preg_match('/^([^:]+):\s+(.*)\s*$/', $line, $matches)) {
+                $headers[strtolower($matches[1])] = trim($matches[2]);
+            }
+        }
+        if (isset($headers['content-disposition']) &&
+            preg_match('/\sfilename=\"([^;]*\S)\"\s*(;|$)/', $headers['content-disposition'], $matches)) {
+            $save_as = basename($matches[1]);
+        } else {
+            $save_as = basename($url);
+        }
+        if ($callback) {
+            $tmp = call_user_func($callback, 'saveas', array(&$ui, $save_as));
+            if ($tmp) {
+                $save_as = $tmp;
+            }
+        }
+        $dest_file = $save_dir . DIRECTORY_SEPARATOR . $save_as;
+        if (!$wp = @fopen($dest_file, 'wb')) {
+            fclose($fp);
+            return PEAR::raiseError("could not open $dest_file for writing");
+        }
+        if (isset($headers['content-length'])) {
+            $length = $headers['content-length'];
+        } else {
+            $length = -1;
+        }
+        $bytes = 0;
+        if ($callback) {
+            call_user_func($callback, 'start', $length);
+        }
+        while ($data = @fread($fp, 1024)) {
+            $bytes += strlen($data);
+            if ($callback) {
+                call_user_func($callback, 'bytesread', $bytes);
+            }
+            if (!@fwrite($wp, $data)) {
+                fclose($fp);
+                return PEAR::raiseError("$pkgfile: write failed ($php_errormsg)");
+            }
+        }
+        fclose($fp);
+        fclose($wp);
+        if ($callback) {
+            call_user_func($callback, 'done');
+        }
+        // callback: done!
+        return $dest_file;
     }
 
     // }}}
 }
+
 ?>
