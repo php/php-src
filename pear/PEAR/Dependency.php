@@ -117,6 +117,7 @@ class PEAR_Dependency
                     return "requires package `$name' " .
                            $this->signOperator($relation) . " $req";
                 }
+                return false;
         }
         return "Relation '$relation' with requirement '$req' is not supported (name=$name)";
     }
