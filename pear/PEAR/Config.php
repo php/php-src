@@ -201,11 +201,11 @@ class PEAR_Config extends PEAR
             $obj =& new PEAR_Config($user_file, $system_file);
             $GLOBALS['_PEAR_Config_last_instance'] = &$obj;
         }
-        return $obj;
+        return $GLOBALS['_PEAR_Config_last_instance'];
     }
 
     // }}}
-    // {{{ readConfigFile([file], [defaults])
+    // {{{ readConfigFile([file], [layer])
 
     /**
      * Reads configuration data from a file.  All existing values in
@@ -241,7 +241,7 @@ class PEAR_Config extends PEAR
     }
 
     // }}}
-    // {{{ mergeConfigFile(file, [override], [defaults])
+    // {{{ mergeConfigFile(file, [override], [layer])
 
     /**
      * Merges data into a config layer from a file.  Does the same
@@ -282,7 +282,7 @@ class PEAR_Config extends PEAR
     }
 
     // }}}
-    // {{{ writeConfigFile([file], [what_keys])
+    // {{{ writeConfigFile([file], [layer])
 
     /**
      * Writes data into a config layer from a file.
@@ -325,8 +325,9 @@ class PEAR_Config extends PEAR
         if (!$fp) {
             return $this->raiseError("PEAR_Config::writeConfigFile fopen('$file','w') failed");
         }
-        if (!@fwrite($fp, serialize($data))) {
-            return $this->raiseError("PEAR_Config::writeConfigFile serialize failed");
+        $contents = "#PEAR_Config 0.9\n" . serialize($data);
+        if (!@fwrite($fp, $contents)) {
+            return $this->raiseError("PEAR_Config::writeConfigFile: fwrite failed");
         }
         return true;
     }
@@ -372,7 +373,7 @@ class PEAR_Config extends PEAR
             }
         // add parsing of newer formats here...
         } else {
-            return $this->raiseError("unknown format version $version");
+            return $this->raiseError("$file: unknown version `$version'");
         }
         return $data;
     }
@@ -468,7 +469,7 @@ class PEAR_Config extends PEAR
     }
 
     // }}}
-    // {{{ set(key, value, [default])
+    // {{{ set(key, value, [layer])
 
     /**
      * Set a config value in a specific layer (defaults to 'user').
@@ -555,6 +556,37 @@ class PEAR_Config extends PEAR
     {
         if (isset($this->configuration_info[$key])) {
             return $this->configuration_info[$key]['doc'];
+        }
+        return false;
+    }
+
+    // }}}
+    // {{{ getSetValues(key)
+
+    /**
+     * Get the list of allowed set values for a config value.  Returns
+     * NULL for config values that are not sets.
+     *
+     * @param string  config key
+     *
+     * @return array enumerated array of set values, or NULL if the
+     *               config key is unknown or not a set
+     *
+     * @access public
+     *
+     */
+    function getSetValues($key)
+    {
+        if (isset($this->configuration_info[$key]) &&
+            isset($this->configuration_info[$key]['type']) &&
+            $this->configuration_info[$key]['type'] == 'set')
+        {
+            $valid_set = $this->configuration_info[$key]['valid_set'];
+            reset($valid_set);
+            if (key($valid_set) === 0) {
+                return $valid_set;
+            }
+            return array_keys($valid_set);
         }
         return false;
     }
