@@ -261,6 +261,17 @@ static void php_apache_sapi_log_message(char *msg)
 	}
 }
 
+static int
+php_apache_disable_caching(ap_filter_t *f)
+{
+	/* Identify PHP scripts as non-cacheable, thus preventing 
+	 * Apache from sending a 304 status when the browser sends
+	 * If-Modified-Since header.
+	 */
+	f->r->no_local_copy = 1;
+	
+	return OK;
+}
 
 extern zend_module_entry php_apache_module;
 
@@ -654,8 +665,8 @@ static void php_register_hook(apr_pool_t *p)
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_register_output_filter("PHP", php_output_filter, NULL, AP_FTYPE_RESOURCE);
-	ap_register_input_filter("PHP", php_input_filter, NULL, AP_FTYPE_RESOURCE);
+	ap_register_output_filter("PHP", php_output_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
+	ap_register_input_filter("PHP", php_input_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
 }
 
 AP_MODULE_DECLARE_DATA module php4_module = {
