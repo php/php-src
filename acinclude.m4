@@ -4,6 +4,34 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
+AC_DEFUN(PHP_DEBUG_MACRO,[
+  DEBUG_LOG="$1"
+  cat >$1 <<X
+CONFIGURE:  $CONFIGURE_COMMAND
+CC:         $CC
+CFLAGS:     $CFLAGS
+CPPFLAGS:   $CPPFLAGS
+CXX:        $CXX
+CXXFLAGS:   $CXXFLAGS
+INCLUDES:   $INCLUDES
+LDFLAGS:    $LDFLAGS
+LIBS:       $LIBS
+DLIBS:      $DLIBS
+SAPI:       $PHP_SAPI
+PHP_RPATHS: $PHP_RPATHS
+uname -a:   `uname -a`
+
+X
+    cat >conftest.$ac_ext <<X
+main()
+{
+  exit(0);
+}
+X
+    (eval echo \"$ac_link\"; eval $ac_link && ./conftest) >>$1 2>&1
+    rm -fr conftest*
+])
+	
 AC_DEFUN(PHP_MISSING_TIME_R_DECL,[
   AC_MSG_CHECKING(for missing declarations of reentrant functions)
   AC_TRY_COMPILE([#include <time.h>],[struct tm *(*func)() = localtime_r],[
