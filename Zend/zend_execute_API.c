@@ -360,12 +360,30 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 
 	*retval_ptr_ptr = NULL;
 
+	if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
+		zval **tmp_object_ptr, **tmp_real_function_name;
+
+		if (zend_hash_index_find(function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
+			return FAILURE;
+		}
+		if (zend_hash_index_find(function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
+			return FAILURE;
+		}
+		function_name = *tmp_real_function_name;
+		object = *tmp_object_ptr;
+	}
+
 	if (object) {
 		if (object->type != IS_OBJECT) {
 			return FAILURE;
 		}
 		function_table = &object->value.obj.ce->function_table;
 	}
+
+	if (function_name->type!=IS_STRING) {
+		return FAILURE;
+	}
+
 	original_function_state_ptr = EG(function_state_ptr);
 	zend_str_tolower(function_name->value.str.val, function_name->value.str.len);
 	if (zend_hash_find(function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function_state.function)==FAILURE) {
