@@ -1035,7 +1035,7 @@ PHP_FUNCTION(socket_bind)
 	php_socket				*php_sock;
 	char					*addr;
 	int						addr_len;
-	int						port = 0;
+	long						port = 0;
 	long					retval = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE)
