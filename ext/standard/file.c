@@ -1242,7 +1242,8 @@ PHP_FUNCTION(pclose)
 
 	php_stream_from_zval(stream, arg1);
 
-	RETURN_LONG(php_stream_close(stream));
+	zend_list_delete(stream->rsrc_id);
+	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
 
