@@ -87,27 +87,27 @@ php_url *url_parse(char *str)
 		return NULL;
 	}
 	/* no processing necessary on the scheme */
-	if (subs[2].rm_so != -1 && subs[2].rm_so < length) {
+	if (subs[2].rm_so != -1 && subs[2].rm_so <= length) {
 		ret->scheme = estrndup(str + subs[2].rm_so, subs[2].rm_eo - subs[2].rm_so);
 	}
 
 	/* the path to the resource */
-	if (subs[5].rm_so != -1 && subs[5].rm_so < length) {
+	if (subs[5].rm_so != -1 && subs[5].rm_so <= length) {
 		ret->path = estrndup(str + subs[5].rm_so, subs[5].rm_eo - subs[5].rm_so);
 	}
 
 	/* the query part */
-	if (subs[7].rm_so != -1 && subs[7].rm_so < length) {
+	if (subs[7].rm_so != -1 && subs[7].rm_so <= length) {
 		ret->query = estrndup(str + subs[7].rm_so, subs[7].rm_eo - subs[7].rm_so);
 	}
 
 	/* the fragment */
-	if (subs[9].rm_so != -1 && subs[9].rm_so < length) {
+	if (subs[9].rm_so != -1 && subs[9].rm_so <= length) {
 		ret->fragment = estrndup(str + subs[9].rm_so, subs[9].rm_eo - subs[9].rm_so);
 	}
 
 	/* extract the username, pass, and port from the hostname */
-	if (subs[4].rm_so != -1 && subs[4].rm_so < length) {
+	if (subs[4].rm_so != -1 && subs[4].rm_so <= length) {
 
 		int cerr;
 		/* extract username:pass@host:port from regex results */
