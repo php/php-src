@@ -186,8 +186,10 @@ $php_info = `$php $info_params $info_file`;
 define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
 // Write test context information.
-function write_information() {
+function write_information()
+{
 	global $cwd, $php, $php_info, $user_tests;
+
 echo "
 =====================================================================
 CWD         : $cwd
@@ -362,7 +364,8 @@ function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
 	closedir($o);
 }
 
-function test_sort($a, $b) {
+function test_sort($a, $b)
+{
 	global $cwd;
 
 	$ta = strpos($a, "{$cwd}/tests")===0 ? 1 + (strpos($a, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
@@ -943,7 +946,8 @@ $output
 	return $warn ? 'WARNED' : 'FAILED';
 }
 
-function comp_line($l1,$l2,$is_reg) {
+function comp_line($l1,$l2,$is_reg)
+{
 	if ($is_reg) {
 		return preg_match('/^'.$l1.'$/s', $l2);
 	} else {
@@ -951,7 +955,8 @@ function comp_line($l1,$l2,$is_reg) {
 	}
 }
 
-function count_array_diff($ar1,$ar2,$is_reg,$w,$idx1,$idx2,$cnt1,$cnt2,$steps) {
+function count_array_diff($ar1,$ar2,$is_reg,$w,$idx1,$idx2,$cnt1,$cnt2,$steps)
+{
 	$equal = 0;
 	while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
 		$idx1++;
@@ -985,7 +990,8 @@ function count_array_diff($ar1,$ar2,$is_reg,$w,$idx1,$idx2,$cnt1,$cnt2,$steps) {
 	return $equal;
 }
 
-function generate_array_diff($ar1,$ar2,$is_reg,$w) {
+function generate_array_diff($ar1,$ar2,$is_reg,$w)
+{
 	$idx1 = 0; $ofs1 = 0; $cnt1 = count($ar1);
 	$idx2 = 0; $ofs2 = 0; $cnt2 = count($ar2);
 	$diff = array();
