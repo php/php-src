@@ -174,7 +174,7 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch)
 }
 
 
-/* {{{ proto int mnogosearch_alloc_agent(string dbaddr [, string dbmode])
+/* {{{ proto int udm_alloc_agent(string dbaddr [, string dbmode])
    Allocate mnoGoSearch session */
 DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 {
@@ -233,7 +233,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 /* }}} */
 
 
-/* {{{ proto int udm_set_agent_param(string agent, int var, string val)
+/* {{{ proto int udm_set_agent_param(int agent, int var, string val)
    Set mnoGoSearch agent session parameters */
 DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 {
@@ -363,7 +363,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 /* }}} */
 
 
-/* {{{ proto int udm_find(int agent_identifier, string query)
+/* {{{ proto int udm_find(int agent, string query)
    Perform search */
 DLEXPORT PHP_FUNCTION(udm_find)
 {
@@ -385,13 +385,17 @@ DLEXPORT PHP_FUNCTION(udm_find)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 	convert_to_string_ex(yyquery);
-	Res=UdmFind(Agent,(*yyquery)->value.str.val);
-	ZEND_REGISTER_RESOURCE(return_value,Res,le_res);
+	
+	if (Res=UdmFind(Agent,UdmTolower((*yyquery)->value.str.val,Agent->charset))) {
+	    ZEND_REGISTER_RESOURCE(return_value,Res,le_res);
+	} else {
+	    RETURN_FALSE;
+	}	
 }
 /* }}} */
 
 
-/* {{{ proto int udm_get_res_field(int res_identifier, int row_num, int field_name)
+/* {{{ proto int udm_get_res_field(int res, int row, int field)
    Fetch mnoGoSearch result field */
 DLEXPORT PHP_FUNCTION(udm_get_res_field){
 	pval **yyres, **yyrow_num, **yyfield_name;
@@ -440,8 +444,8 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field){
 /* }}} */
 
 
-/* {{{ proto int udm_get_res_param(int res_identifier, int param_id)
-   mnoGoSearch result parameters */
+/* {{{ proto int udm_get_res_param(int res, int param)
+   Get mnoGoSearch result parameters */
 DLEXPORT PHP_FUNCTION(udm_get_res_param)
 {
 	pval ** yyres, ** yyparam;
@@ -473,7 +477,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 /* }}} */
 
 
-/* {{{ proto int udm_free_res(int res_identifier)
+/* {{{ proto int udm_free_res(int res)
    mnoGoSearch free result */
 DLEXPORT PHP_FUNCTION(udm_free_res)
 {
@@ -492,12 +496,13 @@ DLEXPORT PHP_FUNCTION(udm_free_res)
 	}
 	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
 	zend_list_delete((*yyres)->value.lval);
-
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
 
-/* {{{ proto int udm_errno(int agent_identifier)
+/* {{{ proto int udm_errno(int agent)
    mnoGoSearch error number */
 DLEXPORT PHP_FUNCTION(udm_errno)
 {
@@ -520,7 +525,7 @@ DLEXPORT PHP_FUNCTION(udm_errno)
 /* }}} */
 
 
-/* {{{ proto int udm_error(int agent_identifier)
+/* {{{ proto string udm_error(int agent)
    mnoGoSearch error message */
 DLEXPORT PHP_FUNCTION(udm_error)
 {
@@ -544,7 +549,7 @@ DLEXPORT PHP_FUNCTION(udm_error)
 /* }}} */
 
 
-/* {{{ proto int udm_free_agent(int agent_identifier)
+/* {{{ proto int udm_free_agent(int agent)
    Free mnoGoSearch session */
 DLEXPORT PHP_FUNCTION(udm_free_agent)
 {
@@ -563,6 +568,8 @@ DLEXPORT PHP_FUNCTION(udm_free_agent)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_RESULT *, yyagent, -1, "mnoGoSearch-agent", le_link);
 	zend_list_delete((*yyagent)->value.lval);
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
