@@ -746,6 +746,84 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
       return ret;
 }
 
+#if HAVE_OPENSSL_EXT
+static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
+{
+	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+	int err = SSL_get_error(sock->ssl_handle, nr_bytes);
+	char esbuf[512];
+	char *ebuf = NULL, *wptr = NULL;
+	size_t ebuf_size = 0;
+	unsigned long code;
+	int retry = 1;
+
+	switch(err) {
+		case SSL_ERROR_ZERO_RETURN:
+			/* SSL terminated (but socket may still be active) */
+			retry = 0;
+			break;
+		case SSL_ERROR_WANT_READ:
+		case SSL_ERROR_WANT_WRITE:
+			/* re-negotiation, or perhaps the SSL layer needs more
+			 * packets: retry in next iteration */
+			break;
+		case SSL_ERROR_SYSCALL:
+			if (ERR_peek_error() == 0) {
+				if (nr_bytes == 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"SSL: fatal protocol error");
+					stream->eof = 1;
+					retry = 0;
+				} else {
+					char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
+
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"SSL: %s", estr);
+
+					efree(estr);
+					retry = 0;
+				}
+				break;
+			}
+			/* fall through */
+		default:
+			/* some other error */
+			while ((code = ERR_get_error()) != 0) {
+				/* allow room for a NUL and an optional \n */
+				if (ebuf) {
+					esbuf[0] = '\n';
+					esbuf[1] = '\0';
+					ERR_error_string_n(code, esbuf + 1, sizeof(esbuf) - 2);
+				} else {
+					esbuf[0] = '\0';
+					ERR_error_string_n(code, esbuf, sizeof(esbuf) - 1);
+				}
+				code = strlen(esbuf);
+				esbuf[code] = '\0';
+
+				ebuf = erealloc(ebuf, ebuf_size + code + 1);
+				if (wptr = NULL)
+					wptr = ebuf;
+
+				/* also copies the NUL */
+				memcpy(wptr, esbuf, code + 1);
+				wptr += code;
+			}
+
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"SSL operation failed with code %d.%s%s",
+					err,
+					ebuf ? "OpenSSL Error messages:\n" : "",
+					ebuf ? ebuf : "");
+				
+			retry = 0;
+	}
+	return retry;
+}
+#endif
+
+
+
 static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -753,7 +831,18 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 	
 #if HAVE_OPENSSL_EXT
 	if (sock->ssl_active) {
-		didwrite = SSL_write(sock->ssl_handle, buf, count);
+		int retry = 1;
+
+		do {
+			didwrite = SSL_write(sock->ssl_handle, buf, count);
+
+			if (didwrite <= 0) {
+				retry = handle_ssl_error(stream, didwrite TSRMLS_CC);
+			} else {
+				break;
+			}
+		} while(retry);
+		
 	} else
 #endif
 	{
@@ -768,7 +857,8 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 		}
 	}
 	
-	php_stream_notify_progress_increment(stream->context, didwrite, 0);
+	if (didwrite > 0)
+		php_stream_notify_progress_increment(stream->context, didwrite, 0);
 
 	return didwrite;
 }
@@ -821,26 +911,42 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	size_t nr_bytes = 0;
 
-	if(sock->is_blocked) {
-		php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
-		if (sock->timeout_event)
-			return 0;
-	}
-
 #if HAVE_OPENSSL_EXT
-	/* XXX: Where is the complex OpenSSL error handling? */
-	if (sock->ssl_active)
-		nr_bytes = SSL_read(sock->ssl_handle, buf, count);
+	if (sock->ssl_active) {
+		int retry = 1;
+
+		do {
+			nr_bytes = SSL_read(sock->ssl_handle, buf, count);
+
+			if (nr_bytes <= 0) {
+				retry = handle_ssl_error(stream, nr_bytes TSRMLS_CC);
+				if (retry == 0 && !SSL_pending(sock->ssl_handle)) {
+					stream->eof = 1;
+				}
+			} else {
+				/* we got the data */
+				break;
+			}
+		} while (retry);
+	}
 	else
 #endif
+	{
+		if (sock->is_blocked) {
+			php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
+			if (sock->timeout_event)
+				return 0;
+		}
 
-	nr_bytes = recv(sock->socket, buf, count, 0);
+		nr_bytes = recv(sock->socket, buf, count, 0);
 
-	php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
-
-	if(nr_bytes == 0 || (nr_bytes < 0 && php_socket_errno() != EWOULDBLOCK)) {
-		stream->eof = 1;
+		if (nr_bytes == 0 || (nr_bytes < 0 && php_socket_errno() != EWOULDBLOCK)) {
+			stream->eof = 1;
+		}
 	}
+
+	if (nr_bytes > 0)
+		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 
 	return nr_bytes;
 }
