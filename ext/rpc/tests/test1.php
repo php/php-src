@@ -1,39 +1,14 @@
 <?php
-print "huhuhdsa";
 
-$rpc = new com("class", true, "huh");
-$rpc2 = new com("class", true, "hehe", 1);
-$rpc->call("blah");
-$rpc->call("heh");
-$rpc->call("blah");
-com_call($rpc, 1, "1");
-com_call($rpc, 1, "1");
-$rpc->call("blah");
-$rpc->call("blah");
-$rpc->call("blah");
-$rpc2->call("hehe");
-$rpc2->call("hehe");
-$rpc2->call("hehe");
-$rpc2->call("hehe");
-$rpc2->call("hehe");
-com_call($rpc, "call", 1);
-com_call($rpc, 1, "1");
-com_call($rpc, "call", 1);
-com_call($rpc2, "call", 1);
-com_call($rpc2, "call", 1);
-//$rpc->addref();
+$rpc = new com("class");
 
-//$clone = $rpc->__clone();
+/* class hirarchy test */
+echo "is class .. " . (get_class($rpc) == "class" ? "passed" : "faiure");
+echo "\n";
+echo "is com   .. " . (is_subclass_of($rpc, "com") ? "passed" : "failure");
+echo "\n";
+echo "is rpc   .. " . (is_subclass_of($rpc, "rpc") ? "passed" : "failure");
 
-//$rpc->prop = 1;
-//$a = $rpc->prop;
-
-//$a = &$rpc->prop;
-
-//delete $rpc;
-//delete $clone;
-
-$heh = com_load("heh", 1);
-$heh->knorp();
-/*delete $heh;*/
+/* uncloneable */
+//$rpc->__clone(); // issues a fatal
 ?>
