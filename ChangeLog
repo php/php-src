@@ -1,3 +1,121 @@
+2000-06-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * makedist: Fix Bison version check
+
+2000-06-25  Zeev Suraski  <zeev@php.net>
+
+    * win32/Win32_Package.txt: Update
+
+    * ext/zlib/zlib.dsp: Make the zlib DLL work with the stock zlib library
+
+    * ext/pgsql/pgsql.dsp
+      win32/Win32_Package.txt: - Update .dsp
+    - Add Win32 'spec' file
+
+2000-06-25  Jouni Ahto  <jah@mork.net>
+
+    * NEWS:
+    Another late one.
+
+2000-06-25  Sterling Hughes  <stirling@bestweb.net>
+
+    * NEWS: Add it manually for the release.
+
+2000-06-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/imap.dsp:
+    imap_sendmail.[ch] are missing... Whomever added them, please cvs add them and then
+    readd them to the project...
+
+2000-06-25  Andi Gutmans  <andi@php.net>
+
+    * win32/README.txt:
+    - Line breaks at 80 chars and change php4ts.dll -> php4isapi.dll
+
+    * makedist:
+    - The check for bison nukes $1 and $2 which are used later on in the script
+    - This needs to be fixed sometime. I have 1.28 on my system :)
+
+    * NEWS: - Get ready to package
+
+2000-06-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c
+      ext/standard/datetime.c: Now its a todo.
+
+2000-06-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/exif/exif.c: Get rid of a warning
+
+    * ext/exif/exif.c: PHPAPI is invalid here...
+
+2000-06-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c
+      ext/standard/formatted_print.c:
+    It was Jouni: Prevent Hartmut finding this until it is actually implemented...
+
+2000-06-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/zlib/zlib.c
+      main/fopen-wrappers.c
+      main/main.c
+      main/safe_mode.c
+      main/safe_mode.h
+      ext/posix/posix.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/link.c
+      ext/db/db.c
+      ext/dbase/dbase.c
+      ext/filepro/filepro.c
+      ext/pgsql/pgsql.c:
+    - I wrote a long msg but the commit didn't go through.
+    - So here is the short version:
+    - a) Start moving to binary opens in Windows
+    - b) Give checkuid_mode() a small face lift including the fopen-wrappers.c
+    - The mode to this function should at least be a #define but that is for
+    - another day. Anyway this whole stuff should be given more face lifts in
+    - the future.
+
+    * win32/README.txt: Add Win32 README file
+
+2000-06-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: better description for recent serializer change
+
+2000-06-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/array.c:
+    The second array_merge() is now array_merge_recursive().
+
+    * ext/gd/gd.c: A droto is not a proto.
+
+2000-06-25  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/gd/gd.c: Add version checking.
+
+2000-06-25  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c:
+
+2000-06-25  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/gd/gd.c: Proto.
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    -Added the ImageCopyMerge, ImagePaletteCopy and ImageColorClosestHWB functions
+
+2000-06-25  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    - Added imagecreatefromwbmp().
+    - Fixed missing parenthesis when calling function get_active_function_name.
+    - Added function imagecreatefromwbmp(). 
+
 2000-06-24  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/standard/basic_functions.c:
