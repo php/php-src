@@ -115,12 +115,20 @@ ZEND_METHOD(exception, getcode)
 	_default_exception_get_entry(getThis(), "code", sizeof("code")-1, return_value TSRMLS_CC);
 }
 
+ZEND_METHOD(exception, gettrace)
+{
+	DEFAULT_0_PARAMS;
+
+	_default_exception_get_entry(getThis(), "trace", sizeof("trace")-1, return_value TSRMLS_CC);
+}
+
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __construct, NULL, 0)
 	ZEND_ME(exception, getmessage, NULL, 0)
 	ZEND_ME(exception, getcode, NULL, 0)
 	ZEND_ME(exception, getfile, NULL, 0)
 	ZEND_ME(exception, getline, NULL, 0)
+	ZEND_ME(exception, gettrace, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
