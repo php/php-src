@@ -15,6 +15,7 @@
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@php.net>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
+// |          Martin Jansen <mj@php.net>                                  |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -40,6 +41,7 @@ define('PEAR_INSTALLER_SKIPPED', -1);
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@php.net>
+ * @author Martin Jansen <mj@php.net>
  */
 class PEAR_Installer extends PEAR_Common
 {
@@ -599,12 +601,18 @@ class PEAR_Installer extends PEAR_Common
 
         // Check dependencies -------------------------------------------
         if (isset($pkginfo['release_deps']) && empty($options['nodeps'])) {
-            $error = $this->checkDeps($pkginfo);
-            if ($error) {
+            $dep_errors = '';
+            $error = $this->checkDeps($pkginfo, $dep_errors);
+            if ($error == true) {
                 if (empty($options['soft'])) {
-                    $this->log(0, $error);
+                    $this->log(0, substr($dep_errors, 1));
                 }
-                return $this->raiseError("$pkgname: dependencies failed");
+                return $this->raiseError("$pkgname: Dependencies failed");
+            } else if (!empty($dep_errors)) {
+                // Print optional dependencies
+                if (empty($options['soft'])) {
+                    $this->log(0, $dep_errors);
+                }
             }
         }
 
@@ -784,22 +792,35 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ checkDeps()
 
-    function checkDeps(&$pkginfo)
+    /**
+     * Check if the package meets all dependencies
+     *
+     * @param  array   Package information (passed by reference)
+     * @param  string  Error message (passed by reference)
+     * @return boolean False when no error occured, otherwise true
+     */
+    function checkDeps(&$pkginfo, &$errors)
     {
         $depchecker = &new PEAR_Dependency($this->registry);
         $error = $errors = '';
-        $failed_deps = array();
+        $failed_deps = $optional_deps = array();
         if (is_array($pkginfo['release_deps'])) {
             foreach($pkginfo['release_deps'] as $dep) {
                 $code = $depchecker->callCheckMethod($error, $dep);
                 if ($code) {
-                    $failed_deps[] = array($dep, $code, $error);
+                    if (isset($dep['optional']) && $dep['optional'] == 'yes') {
+                        // Ugly hack to adjust the error messages
+                        $error = str_replace('requires ', '', $error);
+                        $error = ucfirst($error);
+                        $error = $error . ' is recommended to utilize some features.';
+                        $optional_deps[] = array($dep, $code, $error);
+                    } else {
+                        $failed_deps[] = array($dep, $code, $error);
+                    }
                 }
             }
             $n = count($failed_deps);
             if ($n > 0) {
-                $depinstaller =& new PEAR_Installer($this->ui);
-                $to_install = array();
                 for ($i = 0; $i < $n; $i++) {
                     if (isset($failed_deps[$i]['type'])) {
                         $type = $failed_deps[$i]['type'];
@@ -824,7 +845,28 @@ class PEAR_Installer extends PEAR_Common
                             break;
                     }
                 }
-                return substr($errors, 1);
+                return true;
+            }
+
+            $count_optional = count($optional_deps);
+            if ($count_optional > 0) {
+                $errors = "Optional dependencies:";
+
+                for ($i = 0; $i < $count_optional; $i++) {
+                    if (isset($optional_deps[$i]['type'])) {
+                        $type = $optional_deps[$i]['type'];
+                    } else {
+                        $type = 'pkg';
+                    }
+                    switch ($optional_deps[$i][1]) {
+                        case PEAR_DEPENDENCY_MISSING:
+                        case PEAR_DEPENDENCY_UPGRADE_MINOR:
+                        default:
+                            $errors .= "\n" . $optional_deps[$i][2];
+                            break;
+                    }
+                }
+                return false;
             }
         }
         return false;
