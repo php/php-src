@@ -21,9 +21,6 @@
 
 #include "php.h"
 #include <stdio.h>
-#if defined(NETWARE) && !defined(NEW_LIBC)
-#include <sys/socket.h>
-#endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
