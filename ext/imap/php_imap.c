@@ -154,6 +154,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_utf7_encode,	NULL)
 	PHP_FE(imap_utf8,       	NULL)
 	PHP_FE(imap_mime_header_decode,	NULL)
+	PHP_FE(imap_thread,		NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -4348,3 +4349,103 @@ long mm_diskerror(MAILSTREAM *stream, long errcode, long serious)
 void mm_fatal(char *str)
 {
 }
+
+/* Added imap_thread functionality */
+/* stealing this from header cclient -rjs3 */
+THREADNODE *imap_thread (MAILSTREAM *stream,char *type,char *charset,
+   SEARCHPGM *spg,long flags);
+
+void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes, char *buf) {
+	unsigned long thisNode = *numNodes;
+
+	/* define "#.num" */
+	snprintf(buf,25,"%ld.num", thisNode);
+
+	add_assoc_long(tree,buf,cur->num);
+
+	snprintf(buf,25,"%ld.next", thisNode);
+	if(cur->next) {
+	    (*numNodes)++;
+	    add_assoc_long(tree,buf,*numNodes);
+	    build_thread_tree_helper(cur->next, tree, numNodes, buf);
+	} else { /* "null pointer" */
+	    add_assoc_long(tree,buf,0);
+	}
+
+	snprintf(buf,25,"%ld.branch", thisNode);
+	if(cur->branch) {
+	    (*numNodes)++;
+	    add_assoc_long(tree,buf,*numNodes);
+	    build_thread_tree_helper(cur->branch, tree, numNodes, buf);	    
+	} else { /* "null pointer" */
+	    add_assoc_long(tree,buf,0);
+	}
+}
+
+int build_thread_tree(THREADNODE *top, zval **tree) {
+	long numNodes = 0;
+	char buf[25];
+
+	if(array_init(*tree) != SUCCESS) return FAILURE;
+	
+	build_thread_tree_helper(top, *tree, &numNodes, buf);
+
+	return SUCCESS;
+}
+
+/* {{{ proto int imap_thread(int stream_id)
+   Return threaded by REFERENCES tree */
+PHP_FUNCTION (imap_thread)
+{
+	pval *streamind, *search_flags;
+	int ind, ind_type, args;
+	pils *imap_le_struct;
+	long flags;
+	char criteria[] = "ALL";
+        THREADNODE *top;
+
+	if(!return_value_used) {
+		php_error(E_WARNING, "imap_thread does not make use of return value");
+		RETURN_FALSE;
+	}
+
+	args = ARG_COUNT(ht);
+	if (  args < 1 || args > 2
+	   || getParameters(ht, args, &streamind, &search_flags) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_long(streamind);
+	
+	if (args == 1) {
+		flags = SE_FREE;
+	} else {
+		convert_to_long(search_flags);
+		flags = search_flags->value.lval;
+	}
+	
+	ind = streamind->value.lval;
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
+	}
+	
+	top = mail_thread(imap_le_struct->imap_stream,
+		"REFERENCES", NIL, mail_criteria(criteria), flags);
+
+	if(top == NIL) {
+		php_error(E_WARNING, "imap_thread returned an empty tree");
+		RETURN_FALSE;
+	}
+
+	/* Populate our return value data structure here. */
+	if(build_thread_tree(top, &return_value) == FAILURE){
+	    mail_free_threadnode(&top);
+	    RETURN_FALSE;
+	}
+	
+	mail_free_threadnode(&top);
+}
+/* }}} */
+/* end IMAP_THREAD functionality */
