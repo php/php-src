@@ -331,12 +331,12 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 		if (strchr(p->value.str.val, ':')) {
 			char *cur, *temp;
 			char *last;
-			zend_class_entry *ce;
+			zend_class_entry **ce;
 			zval **value;
 
 			last = tsrm_strtok_r(p->value.str.val, ":", &temp);
 
-			if (zend_hash_find(EG(class_table), last, strlen(last)+1, (void **)&ce) == FAILURE) {
+			if (zend_lookup_class(last, strlen(last), &ce TSRMLS_CC) == FAILURE) {
 				zend_error(E_ERROR, "Invalid class! Improve this error message");
 			}
 			
@@ -347,12 +347,12 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				if (!cur) {
 					break;
 				}
-				if (zend_hash_find(&ce->class_table, last, strlen(last)+1, (void **)&ce) == FAILURE) {
+				if (zend_hash_find(&(*ce)->class_table, last, strlen(last)+1, (void **)&ce) == FAILURE) {
 					zend_error(E_ERROR, "Invalid class! Improve this error message");
 				}
 				last = cur;
 			}
-			if (zend_hash_find(&ce->constants_table, last, strlen(last)+1, (void **) &value) == FAILURE) {
+			if (zend_hash_find(&(*ce)->constants_table, last, strlen(last)+1, (void **) &value) == FAILURE) {
 				zend_error(E_ERROR, "Invalid class! Improve this error message");
 			}
 			const_value = **value;
@@ -500,7 +500,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 			lc_class = estrndup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
 			zend_str_tolower(lc_class, Z_STRLEN_PP(object_pp));
-			found = zend_hash_find(EG(class_table), lc_class, Z_STRLEN_PP(object_pp) + 1, (void **) &ce);
+			found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
 			efree(lc_class);
 			if (found == FAILURE)
 				return FAILURE;
@@ -635,6 +635,11 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	EG(This) = current_this;
 	
 	return SUCCESS;
+}
+
+ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
+{
+	return zend_hash_find(EG(class_table), name, name_length+1, (void **) ce);
 }
 
 
