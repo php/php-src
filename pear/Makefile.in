@@ -150,6 +150,7 @@ HEADER_DIRS = \
 	/ \
 	Zend \
 	TSRM \
+	ext/mbstring \
 	ext/standard \
 	ext/session \
 	ext/xml \
