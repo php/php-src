@@ -1,3 +1,19 @@
+2000-12-17  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/odbc/config.m4:
+    No need to link main binary with ODBC libs if we use shared module
+
+2000-12-17  Thies C. Arntzen  <thies@thieso.net>
+
+    * TODO: add a reminder about #3149
+
+2000-12-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/string.c:
+    Don't do anything, if the input string has a length of 0.
+
+    PR: #7686
+
 2000-12-16  Andi Gutmans  <andi@zend.com>
 
     * ext/dba/dba.c:
