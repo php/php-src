@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.3 2000-08-20 05:39:37 sas Exp $ 
+# $Id: buildcheck.sh,v 1.4 2001-04-03 19:07:32 wsanchez Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -58,7 +58,8 @@ echo "buildconf: automake version $am_version (ok)"
 fi
 
 # libtool 1.3.3 or newer
-lt_pversion=`libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
+if ! libtool=`which glibtool`; then libtool=`which libtool`; fi
+lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.3 or newer installed"
