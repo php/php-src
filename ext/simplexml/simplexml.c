@@ -179,8 +179,6 @@ next_iter:
 		zval_dtor(return_value);
 		FREE_ZVAL(return_value); 
 		return_value = value;
-	} else {
-		PZVAL_UNLOCK(return_value);
 	}
 
 	return return_value;
