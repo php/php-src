@@ -253,7 +253,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   						char *p;
 
 						for (p = start; isalpha(*p); p++);
-						smart_str_setl(&ctx->arg, start, p - start);
+						smart_str_copyl(&ctx->arg, start, p - start);
 #ifdef SCANNER_DEBUG
 						printf("ARG(%s)\n", ctx->arg.c);
 #endif
@@ -274,7 +274,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   ["] (all\[^>"])* ["] [ >]		{
   						YYCURSOR--;
 						para_start = NULL;
-						smart_str_setl(&ctx->para, start + 1, YYCURSOR - start - 2);
+						smart_str_copyl(&ctx->para, start + 1, YYCURSOR - start - 2);
 #ifdef SCANNER_DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
@@ -286,7 +286,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   (all\[^> ])+ [ >]		{
   						YYCURSOR--;
 						para_start = NULL;
-						smart_str_setl(&ctx->para, start, YYCURSOR - start);
+						smart_str_copyl(&ctx->para, start, YYCURSOR - start);
 #ifdef SCANNER_DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
@@ -377,6 +377,9 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 
 	smart_str_free(&BG(url_adapt_state).result);
 	smart_str_free(&BG(url_adapt_state).work);
+	smart_str_free(&BG(url_adapt_state).tag);
+	smart_str_free(&BG(url_adapt_state).arg);
+	smart_str_free(&BG(url_adapt_state).para);
 
 	return SUCCESS;
 }
