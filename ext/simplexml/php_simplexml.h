@@ -65,14 +65,20 @@ typedef struct {
 	simplexml_nsmap *nsmapptr;
 	xmlXPathContextPtr xpath;
 	struct {
-		xmlNodePtr            node;
+		php_libxml_node_ptr   *node;
+		int                   itertype;
 		char                  *name;
-		int                   namelen;
+		char                  *nsprefix;
+		int                   type;
 		zval                  *data;
 	} iter;
 } php_sxe_object;
 
-
+#define SXE_ITER_NONE 0
+#define SXE_ITER_ELEMENT 1
+#define SXE_ITER_ATTR 2
+#define SXE_ITER_CHILD 3
+#define SXE_ITER_ATTRLIST 4
 
 #ifdef ZTS
 #define SIMPLEXML_G(v) TSRMG(simplexml_globals_id, zend_simplexml_globals *, v)

@@ -34,11 +34,23 @@ var_dump($people->person[0]['name']);
 $people = simplexml_load_string($xml2);
 var_dump($people->person[0]['name']);
 var_dump($people->person[1]['name']);
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
-string(3) "Joe"
-string(3) "Joe"
-string(3) "Joe"
-string(3) "Boe"
----Done---
+object(simplexml_element)#4 (1) {
+  [0]=>
+  string(3) "Joe"
+}
+object(simplexml_element)#3 (1) {
+  [0]=>
+  string(3) "Joe"
+}
+object(simplexml_element)#2 (1) {
+  [0]=>
+  string(3) "Joe"
+}
+object(simplexml_element)#2 (1) {
+  [0]=>
+  string(3) "Boe"
+}
+===DONE===

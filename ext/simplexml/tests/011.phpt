@@ -39,7 +39,7 @@ echo "\n";
 ===BAR===
 bar
 ===BAZ===
-Array
+baz1
 ===BAZ0===
 baz1
 ===BAZ1===

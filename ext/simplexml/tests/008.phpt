@@ -5,8 +5,8 @@ SimpleXML and XPath
 --FILE--
 <?php 
 $sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml');
-var_dump($sxe->xsearch("elem1/elem2/elem3/elem4"));
-var_dump($sxe->xsearch("***"));
+var_dump($sxe->xpath("elem1/elem2/elem3/elem4"));
+var_dump($sxe->xpath("***"));
 ?>
 --EXPECTF--
 array(1) {

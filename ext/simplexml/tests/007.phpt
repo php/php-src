@@ -49,11 +49,23 @@ object(simplexml_element)#%d (2) {
   }
 }
 ===Array===
-string(5) "elem1"
-string(5) "first"
+object(simplexml_element)#2 (1) {
+  [0]=>
+  string(5) "elem1"
+}
+object(simplexml_element)#6 (1) {
+  [0]=>
+  string(5) "first"
+}
 ===Set===
-string(8) "Changed1"
-string(2) "12"
+object(simplexml_element)#6 (1) {
+  [0]=>
+  string(8) "Changed1"
+}
+object(simplexml_element)#5 (1) {
+  [0]=>
+  string(2) "12"
+}
 ===Unset===
 NULL
 NULL

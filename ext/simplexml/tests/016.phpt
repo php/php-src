@@ -26,14 +26,32 @@ var_dump($people->person[0]['name']);
 $people->person[0]['name'] .= 'Bar';
 var_dump($people->person[0]['name']);
 
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
-string(3) "Joe"
-string(6) "JoeFoo"
-string(9) "JoeFooBar"
+object(simplexml_element)#4 (1) {
+  [0]=>
+  string(3) "Joe"
+}
+object(simplexml_element)#2 (1) {
+  [0]=>
+  string(6) "JoeFoo"
+}
+object(simplexml_element)#5 (1) {
+  [0]=>
+  string(9) "JoeFooBar"
+}
 ---[0]---
-string(3) "Joe"
-string(6) "JoeFoo"
-string(9) "JoeFooBar"
----Done---
+object(simplexml_element)#3 (1) {
+  [0]=>
+  string(3) "Joe"
+}
+object(simplexml_element)#2 (1) {
+  [0]=>
+  string(6) "JoeFoo"
+}
+object(simplexml_element)#5 (1) {
+  [0]=>
+  string(9) "JoeFooBar"
+}
+===Done===
