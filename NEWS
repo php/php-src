@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added support for SO_RCVTIMEO and SO_SNDTIMEO to ext/sockets (Jason)
 - Added ob_get_level, which returns the nesting level of the output buffering
   mechanism. (Yasuo, Derick)
 - Added ob_flush and ob_clean functions, which flush and clean an
