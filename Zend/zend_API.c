@@ -910,40 +910,81 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 	return zend_register_functions(disabled_function, CG(function_table), MODULE_PERSISTENT);
 }
 
-ZEND_API zend_bool zend_is_callable(zval *function)
+zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
 {
 	char *lcname;
-	zend_bool retval = 0;
+	int retval = 0;
 	ELS_FETCH();
 
-	switch (Z_TYPE_P(function)) {
+	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
-			lcname = estrndup(Z_STRVAL_P(function), Z_STRLEN_P(function));
-			zend_str_tolower(lcname, Z_STRLEN_P(function));
-			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(function)+1)) 
+			if (syntax_only)
+				return 1;
+
+			lcname = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
+			zend_str_tolower(lcname, Z_STRLEN_P(callable));
+			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) 
 				retval = 1;
 			efree(lcname);
+			if (!retval && callable_name)
+				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
 			break;
 
 		case IS_ARRAY:
 			{
 				zval **method;
 				zval **obj;
+				zend_class_entry *ce;
+				char name_buf[1024];
+				char callable_name_len;
 				
-				if (zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS &&
-					zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS &&
-					Z_TYPE_PP(obj) == IS_OBJECT &&
+				if (zend_hash_index_find(Z_ARRVAL_P(callable), 0, (void **) &obj) == SUCCESS &&
+					zend_hash_index_find(Z_ARRVAL_P(callable), 1, (void **) &method) == SUCCESS &&
+					(Z_TYPE_PP(obj) == IS_OBJECT || Z_TYPE_PP(obj) == IS_STRING) &&
 					Z_TYPE_PP(method) == IS_STRING) {
+
+					if (syntax_only)
+						return 1;
+
+					if (Z_TYPE_PP(obj) == IS_STRING) {
+						int found;
+
+						lcname = estrndup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
+						zend_str_tolower(lcname, Z_STRLEN_PP(obj));
+						found = zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&ce);
+						efree(lcname);
+						if (found == FAILURE) {
+							if (callable_name) {
+								callable_name_len = snprintf(name_buf, 1024, "%s::%s", Z_STRVAL_PP(obj), Z_STRVAL_PP(method));
+								*callable_name = estrndup(name_buf, callable_name_len);
+							}
+							break;
+						}
+					} else
+						ce = Z_OBJCE_PP(obj);
 					lcname = estrndup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
 					zend_str_tolower(lcname, Z_STRLEN_PP(method));
-					if (zend_hash_exists(&Z_OBJCE_PP(obj)->function_table, lcname, Z_STRLEN_PP(method)+1))
+					if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1))
 						retval = 1;
+					if (!retval && callable_name) {
+						callable_name_len = snprintf(name_buf, 1024, "%s::%s", ce->name, Z_STRVAL_PP(method));
+						*callable_name = estrndup(name_buf, callable_name_len);
+					}
 					efree(lcname);
-				}
+				} else if (callable_name)
+					*callable_name = estrndup("Array", sizeof("Array")-1);
 			}
 			break;
 
 		default:
+			if (callable_name) {
+				zval expr_copy;
+				int use_copy;
+
+				zend_make_printable_zval(callable, &expr_copy, &use_copy);
+				*callable_name = estrndup(Z_STRVAL(expr_copy), Z_STRLEN(expr_copy));
+				zval_dtor(&expr_copy);
+			}
 			break;
 	}
 
