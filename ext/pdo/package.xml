@@ -30,12 +30,6 @@
   </maintainer>
  </maintainers>
 
-<!-- pear is still broken -->
-<configureoptions>
-  <configureoption name="with-broken-pear-install" default="yes" prompt="the pear installer has a bug; press enter to find out more"/>
-</configureoptions>
-
- 
  <description>
   PDO provides a uniform data access interface, sporting advanced features such
   as prepared statements and bound parameters.  PDO drivers are dynamically
