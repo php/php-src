@@ -1,3 +1,46 @@
+2001-09-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/swf/swf.c
+      ext/standard/filestat.c
+      ext/standard/fsock.c
+      ext/standard/lcg.c
+      ext/standard/math.c
+      ext/standard/string.c
+      ext/gd/gd.c
+      ext/gd/gdt1.c
+      ext/ming/ming.c
+      ext/pdf/pdf.c
+      ext/standard/basic_functions.c
+      ext/cpdf/cpdf.c: proto fixes "double" -> "float"
+
+    * ext/dbplus/php_dbplus.c: local resource fix
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    renamed doubleval to floatval and made doubleval an alias to floatval
+    made is_float the function entry and is_double the alias
+
+2001-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/lcg.c: Fix warning on Win32 (thanks to Sebastian)
+
+    * ext/standard/string.c: don't use boyer_str_to_str.  It is experimental
+
+    * ext/session/session.c
+      ext/standard/basic_functions.c
+      ext/standard/lcg.c
+      ext/standard/php_lcg.h:
+    Always seed the LCG from the request-init hook, otherwise the seed
+    would be shared among the threads which is quite pointless.  Also
+    use a function of the current time as one factor.
+
+    Use gettimeofday() instead of time(), because it is faster on some
+    operating systems.
+
+    * ext/cyrus/config.m4
+      ext/dbplus/config.m4
+      ext/zip/config.m4: indentation fix
+
 2001-09-20  Richard Heyes  <richard.heyes@heyes-computing.net>
 
     * pear/Mail/mime.php:
