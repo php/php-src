@@ -151,14 +151,14 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 		return FAILURE;
 	}
 	if (chunk_size > 0) {
-		if (chunk_size==1) {
+		if (chunk_size == 1) {
 			chunk_size = 4096;
 		}
-		initial_size = (chunk_size*3/2);
-		block_size = chunk_size/2;
+		initial_size = (chunk_size * 3 / 2);
+		block_size = chunk_size / 2;
 	} else {
-		initial_size = 40*1024;
-		block_size = 10*1024;
+		initial_size = 40 * 1024;
+		block_size = 10 * 1024;
 	}
 	return php_ob_init(initial_size, block_size, output_handler, chunk_size, erase TSRMLS_CC);
 }
@@ -195,9 +195,10 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	php_ob_buffer *prev_ob_buffer_p=NULL;
 	php_ob_buffer orig_ob_buffer;
 
-	if (OG(ob_nesting_level)==0) {
+	if (OG(ob_nesting_level) == 0) {
 		return;
 	}
+
 	status = 0;
 	if (!OG(active_ob_buffer).status & PHP_OUTPUT_HANDLER_START) {
 		/* our first call */
@@ -229,8 +230,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 
 		ALLOC_INIT_ZVAL(orig_buffer);
 		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
-		orig_buffer->refcount=2;	/* don't let call_user_function() destroy our buffer */
-		orig_buffer->is_ref=1;
+		orig_buffer->refcount = 2;	/* don't let call_user_function() destroy our buffer */
+		orig_buffer->is_ref = 1;
 
 		ALLOC_INIT_ZVAL(z_status);
 		ZVAL_LONG(z_status, status);
@@ -238,8 +239,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		params[0] = &orig_buffer;
 		params[1] = &z_status;
 		OG(ob_lock) = 1;
-		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL TSRMLS_CC)==SUCCESS) {
-			if (!(Z_TYPE_P(alternate_buffer)==IS_BOOL && Z_BVAL_P(alternate_buffer)==0)) {
+		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL TSRMLS_CC) == SUCCESS) {
+			if (!(Z_TYPE_P(alternate_buffer) == IS_BOOL && Z_BVAL_P(alternate_buffer) == 0)) {
 				convert_to_string_ex(&alternate_buffer);
 				final_buffer = Z_STRVAL_P(alternate_buffer);
 				final_buffer_length = Z_STRLEN_P(alternate_buffer);
@@ -247,7 +248,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		}
 		OG(ob_lock) = 0;
 		zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
-		orig_buffer->refcount -=2;
+		orig_buffer->refcount -= 2;
 		if (orig_buffer->refcount <= 0) { /* free the zval */
 			zval_dtor(orig_buffer);
 			FREE_ZVAL(orig_buffer);
@@ -260,7 +261,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		final_buffer_length = OG(active_ob_buffer).text_length;
 	}
 
-	if (OG(ob_nesting_level)==1) { /* end buffering */
+	if (OG(ob_nesting_level) == 1) { /* end buffering */
 		if (SG(headers_sent) && !SG(request_info).headers_only) {
 			OG(php_body_write) = php_ub_body_write_no_header;
 		} else {
@@ -281,12 +282,12 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 			to_be_destroyed_handled_output[1] = OG(active_ob_buffer).internal_output_handler_buffer;
 		}
 	}
-	if (OG(ob_nesting_level)>1) { /* restore previous buffer */
+	if (OG(ob_nesting_level) > 1) { /* restore previous buffer */
 		zend_stack_top(&OG(ob_buffers), (void **) &prev_ob_buffer_p);
 		orig_ob_buffer = OG(active_ob_buffer);
 		OG(active_ob_buffer) = *prev_ob_buffer_p;
 		zend_stack_del_top(&OG(ob_buffers));
-		if (!just_flush && OG(ob_nesting_level)==2) { /* destroy the stack */
+		if (!just_flush && OG(ob_nesting_level) == 2) { /* destroy the stack */
 			zend_stack_destroy(&OG(ob_buffers));
 		}
 	}
@@ -331,7 +332,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
  * End output buffering (all buffers) */
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC)
 {
-	while (OG(ob_nesting_level)!=0) {
+	while (OG(ob_nesting_level) != 0) {
 		php_end_ob_buffer(send_buffer, 0 TSRMLS_CC);
 	}
 }
@@ -341,7 +342,7 @@ PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC)
  */
 PHPAPI void php_start_implicit_flush(TSRMLS_D)
 {
-	OG(implicit_flush)=1;
+	OG(implicit_flush) = 1;
 }
 /* }}} */
 
@@ -349,7 +350,7 @@ PHPAPI void php_start_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_end_implicit_flush(TSRMLS_D)
 {
-	OG(implicit_flush)=0;
+	OG(implicit_flush) = 0;
 }
 /* }}} */
 
@@ -357,7 +358,7 @@ PHPAPI void php_end_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC)
 {
-	if (OG(ob_nesting_level)==0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
+	if (OG(ob_nesting_level) == 0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
 		php_start_ob_buffer(NULL, buffer_size, erase TSRMLS_CC);
 	}
 
@@ -382,10 +383,10 @@ static inline void php_ob_allocate(TSRMLS_D)
 {
 	if (OG(active_ob_buffer).size<OG(active_ob_buffer).text_length) {
 		while (OG(active_ob_buffer).size <= OG(active_ob_buffer).text_length) {
-			OG(active_ob_buffer).size+=OG(active_ob_buffer).block_size;
+			OG(active_ob_buffer).size += OG(active_ob_buffer).block_size;
 		}
 			
-		OG(active_ob_buffer).buffer = (char *) erealloc(OG(active_ob_buffer).buffer, OG(active_ob_buffer).size+1);
+		OG(active_ob_buffer).buffer = (char *) erealloc(OG(active_ob_buffer).buffer, OG(active_ob_buffer).size + 1);
 	}
 }
 /* }}} */
@@ -407,13 +408,13 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
  */
 static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
-	if (OG(ob_nesting_level)>0) {
+	if (OG(ob_nesting_level) > 0) {
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_C)) {
 			return FAILURE;
 		}
 #endif
-		if (OG(ob_nesting_level)==1) { /* initialize stack */
+		if (OG(ob_nesting_level) == 1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
 		}
 		zend_stack_push(&OG(ob_buffers), &OG(active_ob_buffer), sizeof(php_ob_buffer));
@@ -421,13 +422,13 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	OG(ob_nesting_level)++;
 	OG(active_ob_buffer).block_size = block_size;
 	OG(active_ob_buffer).size = initial_size;
-	OG(active_ob_buffer).buffer = (char *) emalloc(initial_size+1);
+	OG(active_ob_buffer).buffer = (char *) emalloc(initial_size + 1);
 	OG(active_ob_buffer).text_length = 0;
 	OG(active_ob_buffer).output_handler = output_handler;
 	OG(active_ob_buffer).chunk_size = chunk_size;
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
-	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:OB_DEFAULT_HANDLER_NAME);
+	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0] ? handler_name : OB_DEFAULT_HANDLER_NAME);
 	OG(active_ob_buffer).erase = erase;
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
@@ -470,7 +471,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 				zval_dtor(handler_zval);
 				FREE_ZVAL(handler_zval);
 			}
-			handler_name += len+1;
+			handler_name += len + 1;
 			efree(next_handler_name);
 		}
 		handler_zval = php_ob_handler_from_string(handler_name TSRMLS_CC);
@@ -489,7 +490,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			efree(handler_name);
 			/* init all array elements recursively */
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
-			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {
+			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **) &tmp, &pos) == SUCCESS) {
 				result = php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
 				zend_hash_move_forward_ex(Z_ARRVAL_P(output_handler), &pos);
 			}
@@ -518,14 +519,14 @@ static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array)
  */
 PHP_FUNCTION(ob_list_handlers)
 {
-	if (ZEND_NUM_ARGS()!=0) {
+	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 	if (OG(ob_nesting_level)) {
-		if (OG(ob_nesting_level)>1) {
+		if (OG(ob_nesting_level) > 1) {
 			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_ob_list_each, return_value);
 		}
 		php_ob_list_each(&OG(active_ob_buffer), return_value);
@@ -557,7 +558,7 @@ PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC)
 		if (!strcmp(OG(active_ob_buffer).handler_name, handler_name)) {
 			return 1;
 		}
-		if (OG(ob_nesting_level)>1) {
+		if (OG(ob_nesting_level) > 1) {
 			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_ob_handler_used_each, &tmp);
 		}
 	}
@@ -572,17 +573,16 @@ static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 	char *target;
 	int original_ob_text_length;
 
-	original_ob_text_length=OG(active_ob_buffer).text_length;
+	original_ob_text_length = OG(active_ob_buffer).text_length;
 	OG(active_ob_buffer).text_length = OG(active_ob_buffer).text_length + text_length;
 
 	php_ob_allocate(TSRMLS_C);
 	target = OG(active_ob_buffer).buffer+original_ob_text_length;
 	memcpy(target, text, text_length);
-	target[text_length]=0;
+	target[text_length] = 0;
 
  	/* If implicit_flush is On or chunked buffering, send contents to next buffer and return. */
-	if (OG(active_ob_buffer).chunk_size
-		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
+	if (OG(active_ob_buffer).chunk_size && OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
 		zval *output_handler = OG(active_ob_buffer).output_handler;
 		
 		if (output_handler) {
@@ -620,7 +620,7 @@ static inline void php_ob_prepend(const char *text, uint text_length)
  * Return the current output buffer */
 PHPAPI int php_ob_get_buffer(zval *p TSRMLS_DC)
 {
-	if (OG(ob_nesting_level)==0) {
+	if (OG(ob_nesting_level) == 0) {
 		return FAILURE;
 	}
 	ZVAL_STRINGL(p, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
@@ -716,12 +716,14 @@ PHP_FUNCTION(ob_start)
 		RETURN_FALSE;
 	}
 
-	if (chunk_size < 0)
+	if (chunk_size < 0) {
 		chunk_size = 0;
+	}
 	
-	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
+	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -821,9 +823,10 @@ PHP_FUNCTION(ob_get_flush)
 	}
 
 	/* get contents */
-	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
+	if (php_ob_get_buffer(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	/* error checks */
 	if (!OG(ob_nesting_level)) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete and flush buffer. No buffer to delete or flush.");
@@ -833,6 +836,7 @@ PHP_FUNCTION(ob_get_flush)
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
+
 	/* flush */
 	php_end_ob_buffer(1, 0 TSRMLS_CC);
 }
@@ -846,9 +850,10 @@ PHP_FUNCTION(ob_get_clean)
 			ZEND_WRONG_PARAM_COUNT();
 		
 	/* get contents */
-	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
+	if (php_ob_get_buffer(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
+
 	/* error checks */
 	if (!OG(ob_nesting_level)) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer. No buffer to delete.");
@@ -858,6 +863,7 @@ PHP_FUNCTION(ob_get_clean)
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_NOTICE, "failed to delete buffer %s.", OG(active_ob_buffer).handler_name);
 		RETURN_FALSE;
 	}
+
 	/* delete buffer */
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
 }
@@ -871,7 +877,7 @@ PHP_FUNCTION(ob_get_contents)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 		
-	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
+	if (php_ob_get_buffer(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -885,7 +891,7 @@ PHP_FUNCTION(ob_get_level)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 		
-	RETURN_LONG (OG(ob_nesting_level));
+	RETURN_LONG(OG(ob_nesting_level));
 }
 /* }}} */
 
@@ -897,7 +903,7 @@ PHP_FUNCTION(ob_get_length)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 		
-	if (php_ob_get_length(return_value TSRMLS_CC)==FAILURE) {
+	if (php_ob_get_length(return_value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -940,19 +946,20 @@ PHP_FUNCTION(ob_get_status)
 	int argc = ZEND_NUM_ARGS();
 	zend_bool full_status = 0;
 	
-	if (zend_parse_parameters(argc TSRMLS_CC, "|b", &full_status) == FAILURE )
+	if (zend_parse_parameters(argc TSRMLS_CC, "|b", &full_status) == FAILURE) {
 		RETURN_FALSE;
+	}
 	
 	array_init(return_value);
 
 	if (full_status) {
-		if (OG(ob_nesting_level)>1) {
+		if (OG(ob_nesting_level) > 1) {
 			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *elem, void *))php_ob_buffer_status, return_value);
 		}
-		if (OG(ob_nesting_level)>0 && php_ob_buffer_status(&OG(active_ob_buffer), return_value)==FAILURE) {
+		if (OG(ob_nesting_level) > 0 && php_ob_buffer_status(&OG(active_ob_buffer), return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-	} else if (OG(ob_nesting_level)>0) {
+	} else if (OG(ob_nesting_level) > 0) {
 		add_assoc_long(return_value, "level", OG(ob_nesting_level));
 		if (OG(active_ob_buffer).internal_output_handler) {
 			add_assoc_long(return_value, "type", PHP_OUTPUT_HANDLER_INTERNAL);
@@ -974,12 +981,12 @@ PHP_FUNCTION(ob_implicit_flush)
 	zval **zv_flag;
 	int flag;
 
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			flag = 1;
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1, &zv_flag)==FAILURE) {
+			if (zend_get_parameters_ex(1, &zv_flag) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(zv_flag);
