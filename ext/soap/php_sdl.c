@@ -954,10 +954,10 @@ static sdlPtr load_wsdl(char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 06
+#define WSDL_CACHE_VERSION 07
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
-#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((int)(*buf)[0])|((int)(*buf)[1]<<8)|((int)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
+#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
 #define WSDL_CACHE_GET_1(ret,type,buf) ret = (type)(**buf); (*buf)++;
 #define WSDL_CACHE_GET_N(ret,n,buf)    memcpy(ret,*buf,n); *buf += n;
 #define WSDL_CACHE_SKIP(n,buf)         *buf += n;
@@ -975,7 +975,7 @@ static char* sdl_deserialize_string(char **in)
 	int len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (len == 0) {
+	if (len == 0x7fffffff) {
 		return NULL;
 	} else {
 		s = emalloc(len+1);
@@ -1487,7 +1487,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 			int function_num;
 
 			WSDL_CACHE_GET_INT(function_num, &in);
-			sdl_deserialize_key(sdl->requests, functions[function_num], &in);
+			sdl_deserialize_key(sdl->requests, functions[function_num-1], &in);
 			i--;
 		}
 	}
@@ -1506,12 +1506,12 @@ static void sdl_serialize_string(const char *str, smart_str *out)
 
 	if (str) {
 		i = strlen(str);
+		WSDL_CACHE_PUT_INT(i, out);
+		if (i > 0) {
+			WSDL_CACHE_PUT_N(str, i, out);
+		}
 	} else {
-		i = 0;
-	}
-	WSDL_CACHE_PUT_INT(i, out);
-	if (i > 0) {
-		WSDL_CACHE_PUT_N(str, i, out);
+		WSDL_CACHE_PUT_INT(0x7fffffff, out);
 	}
 }
 
