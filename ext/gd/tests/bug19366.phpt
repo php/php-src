@@ -1,5 +1,5 @@
 --TEST--
-gdimagefill() function (Bug #19366 (fixed in bundled libgd))
+Bug #19366 (gdimagefill() function crashes (fixed in bundled libgd))
 --SKIPIF--
 <?php 
 	if (!extension_loaded('gd')) die("skip gd extension not available\n"); 
