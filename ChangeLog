@@ -90,7 +90,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Fixed a problem with define() and boolean values (Zeev)
 - Fixed inclusion of gd/freetype functions (Sascha)
 - Fixed persistency of MHASH_* constants (Sascha)
-- Oracle is now ZTS-Save (Thies)
+- Oracle is now ZTS-Safe (Thies)
 - Fixed flushing of cached information to disk in DBA's DB2 module (Sascha)
 - OCI8 is now ZTS-Safe (Thies)
 - Fixed is_writeable/is_writable problem; they are both defined now (Andrey)
