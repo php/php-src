@@ -74,6 +74,7 @@ enum pdo_error_type {
 	PDO_ERR_NOT_IMPLEMENTED,
 	PDO_ERR_MISMATCH,
 	PDO_ERR_TRUNCATED,
+	PDO_ERR_DISCONNECTED,
 };
 
 /* {{{ utils for reading attributes set as driver_options */
@@ -104,6 +105,7 @@ typedef struct {
 	 * the dbh.  dbh contains the data source string and flags for this
 	 * instance */
 	int (*db_handle_factory)(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC);
+
 } pdo_driver_t;
 
 /* {{{ methods for a database handle */
@@ -129,6 +131,14 @@ typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS
 /* return last insert id */
 typedef long (*pdo_dbh_last_id_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
+/* fetch error information.  if stmt is not null, fetch information pertaining
+ * to the statement, otherwise fetch global error information.  The driver
+ * should add the following information to the array "info" in this order:
+ * - native error code
+ * - string representation of the error code ... any other optional driver
+ *   specific data ...  */
+typedef	int (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC);
+
 struct pdo_dbh_methods {
 	pdo_dbh_close_func		closer;
 	pdo_dbh_prepare_func	preparer;
@@ -139,6 +149,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_txn_func		rollback;
 	pdo_dbh_set_attr_func	set_attribute;
 	pdo_dbh_last_id_func		last_id;
+	pdo_dbh_fetch_error_func	fetch_err;
 };
 
 /* }}} */
@@ -334,6 +345,9 @@ struct pdo_data_src_parser {
 PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
+
+PDO_API zend_class_entry *php_pdo_get_exception(void);
+
 #endif /* PHP_PDO_DRIVER_H */
 /*
  * Local variables:

@@ -34,6 +34,70 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 
+void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
+{
+	enum pdo_error_type *pdo_err = &dbh->error_code;
+	const char *msg = "<<Unknown>>";
+	char *supp = NULL;
+	long native_code = 0;
+
+	/* TODO: if the dbh->error_mode is set to "silent" mode, just return */
+	
+	if (stmt) {
+		pdo_err = &stmt->error_code;
+	}
+
+	switch (*pdo_err) {
+		case PDO_ERR_NONE:		msg = "No erro"; break;
+		case PDO_ERR_CANT_MAP:	msg = "Consult errorInfo() for more details"; break;
+		case PDO_ERR_SYNTAX:	msg = "Syntax Error"; break;
+		case PDO_ERR_CONSTRAINT:msg = "Constraint violation"; break;
+		case PDO_ERR_NOT_FOUND:	msg = "Not found"; break;
+		case PDO_ERR_ALREADY_EXISTS:	msg = "Already exists"; break;
+		case PDO_ERR_NOT_IMPLEMENTED:	msg = "Not Implemented"; break;
+		case PDO_ERR_MISMATCH:			msg = "Mismatch"; break;
+		case PDO_ERR_TRUNCATED:			msg = "Truncated"; break;
+		case PDO_ERR_DISCONNECTED:		msg = "Disconnected"; break;
+		default:	msg = "<<Invalid>>";
+	}
+
+	if (dbh->methods->fetch_err) {
+		zval *info;
+		
+		MAKE_STD_ZVAL(info);
+		array_init(info);
+
+		if (dbh->methods->fetch_err(dbh, stmt, info TSRMLS_CC)) {
+			zval **item;
+
+			if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(info), 0, (void**)&item)) {
+				native_code = Z_LVAL_PP(item);
+			}
+			
+			if (SUCCESS == zend_hash_index_find(Z_ARRVAL_P(info), 1, (void**)&item)) {
+				supp = estrndup(Z_STRVAL_PP(item), Z_STRLEN_PP(item));
+			}
+
+		}
+		FREE_ZVAL(info);
+	}
+
+	/* TODO: if the dbh->error_mode is set to exception mode, set up an
+	 * exception instead */
+	
+	if (supp && *pdo_err == PDO_ERR_CANT_MAP) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d %s", native_code, supp);
+	} else if (supp) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: %d %s", msg, native_code, supp);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", msg);
+	}
+
+	if (supp) {
+		efree(supp);
+	}
+}
+
 /* {{{ proto object PDO::__construct(string dsn, string username, string passwd [, array driver_opts])
    */
 static PHP_FUNCTION(dbh_constructor)
@@ -60,7 +124,7 @@ static PHP_FUNCTION(dbh_constructor)
 	colon = strchr(data_source, ':');
 
 	if (!colon) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid data source name");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "invalid data source name");
 		ZVAL_NULL(object);
 		return;
 	}
@@ -70,7 +134,7 @@ static PHP_FUNCTION(dbh_constructor)
 	if (!driver) {
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not find driver");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NOT_FOUND TSRMLS_CC, "could not find driver");
 		ZVAL_NULL(object);
 		return;
 	}
@@ -79,7 +143,7 @@ static PHP_FUNCTION(dbh_constructor)
 
 	if (dbh == NULL) {
 		/* need this check for persistent allocations */
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "out of memory!?");
 	}
 	
 	memset(dbh, 0, sizeof(*dbh));
@@ -137,6 +201,7 @@ static PHP_METHOD(PDO, prepare)
 		RETURN_FALSE;
 	}
 	
+	PDO_DBH_CLEAR_ERR();
 	stmt = ecalloc(1, sizeof(*stmt));
 	/* unconditionally keep this for later reference */
 	stmt->query_string = estrndup(statement, statement_len);
@@ -154,6 +219,7 @@ static PHP_METHOD(PDO, prepare)
 		return;
 	}
 	efree(stmt);
+	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
 
@@ -164,14 +230,14 @@ static PHP_METHOD(PDO, beginTransaction)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (dbh->in_txn) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "There is already an active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "There is already an active transaction");
 		RETURN_FALSE;
 	}
 	
 	if (!dbh->methods->begin) {
 		/* TODO: this should be an exception; see the auto-commit mode
 		 * comments below */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support transactions");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "This driver doesn't support transactions");
 		RETURN_FALSE;
 	}
 
@@ -180,6 +246,7 @@ static PHP_METHOD(PDO, beginTransaction)
 		RETURN_TRUE;
 	}
 
+	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
 /* }}} */
@@ -191,7 +258,7 @@ static PHP_METHOD(PDO, commit)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!dbh->in_txn) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "There is no active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "There is no active transaction");
 		RETURN_FALSE;
 	}
 
@@ -200,6 +267,7 @@ static PHP_METHOD(PDO, commit)
 		RETURN_TRUE;
 	}
 	
+	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
 /* }}} */
@@ -211,7 +279,7 @@ static PHP_METHOD(PDO, rollBack)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!dbh->in_txn) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "There is no active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "There is no active transaction");
 		RETURN_FALSE;
 	}
 
@@ -220,6 +288,7 @@ static PHP_METHOD(PDO, rollBack)
 		RETURN_TRUE;
 	}
 		
+	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
 /* }}} */
@@ -240,16 +309,14 @@ static PHP_METHOD(PDO, setAttribute)
 		goto fail;
 	}
 
+	PDO_DBH_CLEAR_ERR();
 	if (dbh->methods->set_attribute(dbh, attr, value TSRMLS_CC)) {
 		RETURN_TRUE;
 	}
 
 fail:
 	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		/* Feature: if the auto-commit mode cannot be changed, throw an
-		 * exception.  Until I've added the code for that, raise an
-		 * E_ERROR */
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The auto commit mode cannot be changed for this driver");
+		zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_NONE TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
 	} else if (!dbh->methods->set_attribute) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver doesn't support setting attributes");
 	}
@@ -273,11 +340,12 @@ static PHP_METHOD(PDO, exec)
 	if (!statement_len) {
 		RETURN_FALSE;
 	}
+	PDO_DBH_CLEAR_ERR();
 	ret = dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC);
 	if(ret == -1) {
+		PDO_HANDLE_DBH_ERR();
 		RETURN_FALSE;
-	}
-    else {
+	} else {
 		RETURN_LONG(ret);
 	}
 }
@@ -294,6 +362,7 @@ static PHP_METHOD(PDO, lastInsertId)
 		RETURN_FALSE;
 	}
 
+	PDO_DBH_CLEAR_ERR();
 	if (!dbh->methods->last_id) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver last inserted id retrieval.");
 	} else {
