@@ -150,7 +150,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return FAILURE;
 	}
-	if (chunk_size) {
+	if (chunk_size > 0) {
 		if (chunk_size==1) {
 			chunk_size = 4096;
 		}
@@ -498,10 +498,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No method name given: use ob_start(array($object,'method')) to specify instance $object and the name of a method of class %s to use as output handler", Z_OBJCE_P(output_handler)->name);
 		result = FAILURE;
 	} else {
-		if (output_handler) {
-			SEPARATE_ZVAL(&output_handler);
-		}
-		result = php_ob_init_named(initial_size, block_size, OB_DEFAULT_HANDLER_NAME, output_handler, chunk_size, erase TSRMLS_CC);
+		result = php_ob_init_named(initial_size, block_size, OB_DEFAULT_HANDLER_NAME, NULL, chunk_size, erase TSRMLS_CC);
 	}
 	return result;
 }
@@ -722,6 +719,9 @@ PHP_FUNCTION(ob_start)
 		RETURN_FALSE;
 	}
 
+	if (chunk_size < 0)
+		chunk_size = 0;
+	
 	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
