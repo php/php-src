@@ -405,7 +405,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				: "\n%s: %s in %s on line %d\n";
 			if (PG(xmlrpc_errors)) {
 				error_format = do_alloca(1024);
-				snprintf(error_format, 1023 , "<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%d</int></value></member><member><name>faultString</name><value><string>%%s:%%s in %%s on line %%d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number));
+				snprintf(error_format, 1023, "<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%%s:%%s in %%s on line %%d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number));
 			}
 
 			if (prepend_string) {
