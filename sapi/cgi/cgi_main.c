@@ -83,9 +83,15 @@ PHPAPI extern char *optarg;
 PHPAPI extern int optind;
 
 
-static int zend_cgibin_ub_write(const char *str, uint str_length)
+static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
 	return fwrite(str, 1, str_length, stdout);
+}
+
+
+static void sapi_cgibin_flush(void *server_context)
+{
+	fflush(stdout);
 }
 
 
@@ -126,7 +132,8 @@ static sapi_module_struct sapi_module = {
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
-	zend_cgibin_ub_write,			/* unbuffered write */
+	sapi_cgibin_ub_write,			/* unbuffered write */
+	sapi_cgibin_flush,				/* flush */
 
 	php_error,						/* error handler */
 

@@ -130,7 +130,7 @@ static zend_module_entry php_isapi_module = {
 };
 
 
-static int zend_isapi_ub_write(const char *str, uint str_length)
+static int sapi_isapi_ub_write(const char *str, uint str_length)
 {
 	DWORD num_bytes = str_length;
 	LPEXTENSION_CONTROL_BLOCK ecb;
@@ -296,7 +296,8 @@ static sapi_module_struct sapi_module = {
 	php_isapi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
-	zend_isapi_ub_write,			/* unbuffered write */
+	sapi_isapi_ub_write,			/* unbuffered write */
+	NULL,							/* flush */
 
 	php_error,						/* error handler */
 

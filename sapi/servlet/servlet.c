@@ -122,7 +122,7 @@ void ThrowServletException (JNIEnv *jenv, char *msg) {
  * sapi callbacks
  */
 
-static int zend_servlet_ub_write(const char *str, uint str_length)
+static int sapi_servlet_ub_write(const char *str, uint str_length)
 {
 	SLS_FETCH();
 	if (!SG(server_context)) {
@@ -215,7 +215,8 @@ static sapi_module_struct sapi_module = {
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
-	zend_servlet_ub_write,			/* unbuffered write */
+	sapi_servlet_ub_write,			/* unbuffered write */
+	NULL,							/* flush */
 
 	php_error,						/* error handler */
 

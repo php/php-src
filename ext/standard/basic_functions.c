@@ -595,28 +595,10 @@ PHP_FUNCTION(strval)
 	convert_to_string(return_value);
 }
 
+
 PHP_FUNCTION(flush)
 {
-#if APACHE 
-	SLS_FETCH();
-#endif
-	
-#if APACHE
-#  if MODULE_MAGIC_NUMBER > 19970110
-	rflush(((request_rec *) SG(server_context)));
-#  else
-	bflush(((request_rec *) SG(server_context))->connection->client);
-#  endif
-#endif
-#if FHTTPD
-       /*FIXME -- what does it flush really? the whole response?*/
-#endif
-#if CGI_BINARY
-	fflush(stdout);
-#endif
-#if USE_SAPI
-	sapi_rqst->flush(sapi_rqst->scid);
-#endif
+	sapi_flush();
 }
 
 

@@ -168,6 +168,7 @@ static sapi_module_struct sapi_module = {
     php_module_shutdown_wrapper,            /* shutdown */
  
     php_phttpd_sapi_ub_write,               /* unbuffered write */
+	NULL,									/* flush */
  
     php_error,                              /* error handler */
  

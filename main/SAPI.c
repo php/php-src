@@ -357,3 +357,15 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(char 
 	return SUCCESS;
 }
 
+
+SAPI_API int sapi_flush()
+{
+	if (sapi_module.flush) {
+		SLS_FETCH();
+
+		sapi_module.flush(SG(server_context));
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
