@@ -41,11 +41,16 @@
 extern "C" {
 #endif
 
+/* allow version to be specified via compile line define */
+#ifndef XMLRPC_LIB_VERSION
+ #define XMLRPC_LIB_VERSION "0.41"
+#endif
+
 /* this number, representing the date, must be increased each time the API changes */
 #define XMLRPC_API_NO 20010721
 
 /* this string should be changed with each packaged release */
-#define XMLRPC_VERSION_STR "xmlrpc-epi v. " VERSION
+#define XMLRPC_VERSION_STR "xmlrpc-epi v. " XMLRPC_LIB_VERSION
 
 /* where to find more info. shouldn't need to change much */
 #define XMLRPC_HOME_PAGE_STR "http://xmlprc-epi.sourceforge.net/"
