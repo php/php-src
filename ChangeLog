@@ -1,3 +1,35 @@
+2000-04-29  Andi Gutmans  <andi@php.net>
+
+    * php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Implement V_OPEN() V_OPEN_CREAT() and V_CREAT().
+      Next step is to substitute all open()'s and creat()'s in the PHP tree
+
+2000-04-29  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/strnatcmp.c:
+
+    Martin Pool updated the natural comparison/sort algorithm so that fractions
+    compare more "naturally", e.g. 1.002 < 1.1.
+
+2000-04-29  Zeev Suraski  <zeev@php.net>
+
+    * php.h:
+    - Never mind. Seems like we're still missing the open() functionality
+
+    * php.h:
+    - Give VIRTUAL_DIR another try after testing it extensively on our web site
+
+2000-04-29  Rasmus Lerdorf  <rasmus@php.net>
+
+    * build/build2.mk: Oops, wrong path
+
+    * build/build2.mk: An empty .deps was not getting generated here
+
+2000-04-29  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: .
+
 2000-04-28  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/imap/config.m4: Improve imap-lib check
