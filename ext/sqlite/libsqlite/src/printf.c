@@ -139,9 +139,9 @@ static et_info fmtinfo[] = {
 ** 16 (the number of significant digits in a 64-bit float) '0' is
 ** always returned.
 */
-static int et_getdigit(double *val, int *cnt){
+static int et_getdigit(LONGDOUBLE_TYPE *val, int *cnt){
   int digit;
-  double d;
+  LONGDOUBLE_TYPE d;
   if( (*cnt)++ >= 16 ) return '0';
   digit = (int)*val;
   d = digit;
@@ -202,7 +202,7 @@ static int vxprintf(
   int flag_long;            /* True if "l" flag is present */
   int flag_center;          /* True if "=" flag is present */
   unsigned long longvalue;  /* Value for integer types */
-  double realvalue;         /* Value for real types */
+  LONGDOUBLE_TYPE realvalue; /* Value for real types */
   et_info *infop;           /* Pointer to the appropriate info structure */
   char buf[etBUFSIZE];      /* Conversion buffer */
   char prefix;              /* Prefix character.  "+" or "-" or " " or '\0'. */

@@ -120,6 +120,15 @@ typedef INTPTR_TYPE ptr;           /* Big enough to hold a pointer */
 typedef unsigned INTPTR_TYPE uptr; /* Big enough to hold a pointer */
 
 /*
+** Most C compilers these days recognize "long double", don't they?
+** Just in case we encounter one that does not, we will create a macro
+** for long double so that it can be easily changed to just "double".
+*/
+#ifndef LONGDOUBLE_TYPE
+# define LONGDOUBLE_TYPE long double
+#endif
+
+/*
 ** This macro casts a pointer to an integer.  Useful for doing
 ** pointer arithmetic.
 */
