@@ -24,6 +24,7 @@
 #include "php.h"
 
 PHPAPI void php_output_startup(void);
+void php_output_register_constants(void);
 PHPAPI int  php_body_write(const char *str, uint str_length);
 PHPAPI int  php_header_write(const char *str, uint str_length);
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size);
