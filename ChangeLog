@@ -1,3 +1,204 @@
+2002-10-04  David Viner  <dviner@yahoo-inc.com>
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/php_xslt.h
+      ext/xslt/sablot.c
+      ext/xslt/xslt.c:
+    adding the xslt_set_object function (as per discussion on php-dev and
+    the newly created sab-php@gingerall.cz)
+    --dviner
+
+    * ext/xslt/sablot.c
+      ext/xslt/xslt.dsp:
+    adding segfault detection as proposed by Lenar Lõhmus [lenar@vision.ee]
+    --dviner
+
+2002-10-04  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/ftp/ftp.c: some FTP servers return 32bit port numbers.
+
+2002-10-04  Brian France  <list@firehawksystems.com>
+
+    * main/fopen_wrappers.c:
+            Fixed a problem where opendir with <path>/ and having <path>/ in
+            open_basedir ini option didn't work.  It was removing the trailing
+            slashes and then addeding it back to only one of the string,
+            now it adds it back to to both if needed.
+
+2002-10-04  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+    some broken ftp servers return 32bit port numbers.
+
+2002-10-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/sapi_apache2.c: A slightly better content-type check.
+
+    * sapi/apache2filter/README: Added a note on how to enable .phps support.
+
+2002-10-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+    Return to old counting where every test is counted (even those of skipped
+    extensions). Inform about the number of extensions tested and skipped.
+    This makes the test summary more compareable.
+
+    Maybe i'll add a parameter/env-var to skip extension tests. That way we
+    could fasten tests for changes in the core. But it has to wait some days.
+
+2002-10-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Added .phps support to Apache 2. It can be enabled by adding
+    AddType application/x-httpd-php-source .phps
+    to httpd.conf
+
+2002-10-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/string.c:
+    have implode use the smart_str_*() functions, this should speed things up
+    quite a bit...
+
+2002-10-04  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Registry.php: * Nuke warning when $php_errormsg is not set.
+
+2002-10-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/streams.c: Fix EOF cases
+
+    Noticed by: Ilia
+
+    * main/streams.c: Interrupt loop, if the stream op fails.
+
+    * main/main.c: Nuke warning
+
+    * main/network.c
+      main/streams.c: Add a few notes
+
+2002-10-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mime_magic/mime_magic.c:
+    Make that error message more meaningful for systems like my SuSE 7.0 with
+    an apparently broken magic file.
+
+    * main/network.c
+      main/php_streams.h
+      main/streams.c: replace dont_block with a flag.
+
+2002-10-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c: Fixed bug #19746
+
+2002-10-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/network.c
+      main/php_streams.h
+      main/streams.c:
+    Improve the general behaviour of stream_gets and fix its semantics
+    with regard to sockets. The behaviour should be aligned with PHP 4.2 now.
+    This has been verified to some degree.
+
+    If the underlying stream operations block when no new data is readable,
+    we need to take extra precautions.
+
+    If there is buffered data available, we check for a EOL. If it exists,
+    we pass the data immediately back to the caller. This saves a call
+    to the read implementation and will not block where blocking
+    is not necessary at all.
+
+    If the stream buffer contains more data than the caller requested,
+    we can also avoid that costly step and simply return that data.
+
+2002-10-04  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/dir.c: Kill a few more warnings
+
+    * ext/sockets/sockets.c: Kill warning
+
+2002-10-04  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: combine those ob_* entries and keep the attention line on top
+
+2002-10-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c: return FALSE on error
+
+    * main/output.c: suggest paranthesis around || and &&
+
+2002-10-04  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/string.c:
+    Fixed a bug in the new implementation of str_repeat()
+
+2002-10-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - dot :)
+
+2002-10-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/string.c: fix a memory leak in implode()
+
+
+    * ext/standard/string.c:
+     Make the glue argument to implode() optional, if it is not specified
+     default to using "". 
+
+2002-10-04  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: that was reverted for now
+
+2002-10-04  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/002.phpt
+      ext/xslt/tests/003.phpt
+      ext/xslt/tests/skipif.inc
+      ext/xslt/tests/xslt_set_error_handler.php: Improve testkit for xslt.
+     002.phpt and 003.phpt are regression tests for reported bugs.
+     004.phpt has been known to cause problems in some Sab/PHP combinations.
+     No known reports in bug db for that one.
+     Added skip mechanism
+
+    * ext/xslt/sablot.c:
+    (xslt_set_error_handler) Fixes array 'fields' argument to contain correct
+                             information.
+                             Patch by Lenar Lohmus.
+
+2002-10-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in: Add PHP_CONFIG_FILE_SCAN_DIR.
+
+2002-10-04  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * main/php_ini.c
+      ext/standard/info.c
+      main/build-defs.h.in
+      main/main.c
+      NEWS
+      configure.in:
+    As discussed, add --with-config-file-scan-dir compile-time switch defining
+    a directory which will be scanned for *.ini files after the main php.ini
+    file has been parsed.  This makes it much easier to automatically deploy
+    a modular PHP since adding extensions which have their own ini switches can
+    now be done by simply dropping a foo.ini file in the right directory and
+    restarting.  A list of parsed ini files is maintained and shown on the
+    phpinfo page.
+
+2002-10-04  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/tests/math/hexdec.phpt: Add missing ?>
+
+2002-10-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/math.c: peek at freebsd's libc and fix _php_math_basetozval
+
+    PR: #19733
+
+    * ext/standard/tests/math/hexdec.phpt:
+    overflow check for _php_math_basetozval
+
+    * ext/standard/filestat.c: Fix php_stat brokenness.
+
 2002-10-03  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/tests/019.phpt: remove trans_sid=1
