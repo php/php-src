@@ -54,22 +54,6 @@ static int sapi_webjames_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return bytes;
 }
 
-static int sapi_webjames_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
-/*send the HTTP response line*/
-{
-	char buf[256];
-
-	if (WG(conn)->flags.outputheaders) {
-		if (!SG(sapi_headers).http_status_line) {
-			int code=SG(sapi_headers).http_response_code;
-			snprintf(buf, 255, "HTTP/1.0 %d %s\r\n", code, code==200 ? "OK" : code==302 ? "Moved temporarily" : "Something");
-			webjames_writestring(WG(conn), buf);
-		}
-	}
-	
-	return SAPI_HEADER_DO_SEND;
-}
-
 static void sapi_webjames_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 /*send an HTTP header*/
 {
@@ -286,7 +270,7 @@ static sapi_module_struct sapi_module = {
 	php_error,                              /* error handler */
 
 	NULL,                                   /* header handler */
-	sapi_webjames_send_headers,             /* send headers handler */
+	NULL,             						/* send headers handler */
 	sapi_webjames_send_header,              /* send header handler */
 	sapi_webjames_read_post,                /* read POST data */
 	sapi_webjames_read_cookies,             /* read Cookies */

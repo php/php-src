@@ -422,9 +422,14 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 					};
 				};
 				break;
-			case PHP_MODE_INDENT:
-				header_line = (char *)estrdup("Content-Type: text/plain");
-				sapi_add_header_ex(header_line, strlen(header_line), 1, 1, 0 TSRMLS_CC);
+			case PHP_MODE_INDENT: {
+				sapi_header_line ctr = {0};
+
+				ctr.line = "Content-Type: text/plain";
+				ctr.line_len = strlen(ctr.line);
+				
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+			  }
 				if ( open_file_for_scanning( &file_handle TSRMLS_CC ) == SUCCESS )
 					{
 					zend_indent();
@@ -433,7 +438,6 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 					{
 					iRet = PIAPI_ERROR;
 					};
-				efree(header_line);
 				break;
 			case PHP_MODE_LINT:
 				iRet = (php_lint_script(&file_handle TSRMLS_CC) == SUCCESS) ?

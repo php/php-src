@@ -192,10 +192,12 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-
+	sapi_header_line ctr = {0};
 	
-	sprintf(buf, "Server: %s", TUXAPI_version);
-	sapi_add_header_ex(buf, strlen(buf), 1, 0, 0 TSRMLS_CC);
+	ctr.line = buf;
+	ctr.line_len = sprintf(buf, "Server: %s", TUXAPI_version);
+	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+	
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_CC);
 	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC);
