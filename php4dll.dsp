@@ -131,6 +131,10 @@ SOURCE=.\php3_realpath.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_content_types.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_ini.c
 # End Source File
 # Begin Source File
@@ -212,6 +216,10 @@ SOURCE=.\php3_compat.h
 # Begin Source File
 
 SOURCE=.\php3_realpath.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_content_types.h
 # End Source File
 # Begin Source File
 
@@ -363,6 +371,10 @@ SOURCE=.\ext\session\mod_files.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\session\mod_user.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
@@ -497,6 +509,10 @@ SOURCE=.\ext\standard\md5.h
 # Begin Source File
 
 SOURCE=.\ext\standard\mime.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\session\mod_user.h
 # End Source File
 # Begin Source File
 
