@@ -216,6 +216,10 @@ PS_OPEN_FUNC(mm)
 {
 	ps_mm_debug("open: ps_mm_instance=%x\n", ps_mm_instance);
 	
+	if(!ps_mm_instance) {
+		return FAILURE;
+	}
+	
 	PS_SET_MOD_DATA(ps_mm_instance);
 	
 	return SUCCESS;
