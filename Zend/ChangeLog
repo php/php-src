@@ -1,3 +1,8 @@
+2003-08-25  Jani Taskinen  <sniper@iki.fi>
+
+    * zend.h:
+      - Fixed bug #25240 (spaces before pre-processor directives)
+
 2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:

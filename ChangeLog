@@ -1,3 +1,67 @@
+2003-08-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      zero-size BLOB fetch fix went into 4.3.3
+
+2003-08-25  Jani Taskinen  <sniper@iki.fi>
+
+    * TSRM/tsrm_config_common.h
+      ZendEngine2/zend.h:
+      - Fixed bug #25240 (spaces before pre-processor directives)
+
+2003-08-25  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/ftp_fopen_wrapper.c:
+      MFH(r-1.61) Bugfix#25239 Closing control stream while data stream is open
+      violates RFC959 section 2.3
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Bugfix#25239 Closing control stream while data stream is open violates
+      RFC959 section 2.3
+
+2003-08-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * EXTENSIONS:
+      Update
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      - Fix compile
+      - Building still not possible
+
+    * ext/sqlite/sqlite.c:
+      Update exception code
+
+    * main/main.c:
+      - Simplify php_error_cb()
+      - Make errors show the class where possible
+
+2003-08-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * win32/php4dllts.dsp:
+      fix debug build. use libxml dynamic linking until it can re-export symbols
+
+2003-08-25  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      adding me as helper, adding dependency on XML_RPC 1.0.4 and optional
+      dependency on xmlrpc extension - this will change to dependency on XML_RPC
+      1.0.5 if all of Marshall's ideas are implemented
+
+    * pear/package-PEAR.xml:
+      my fault - forgot to fix this
+
+2003-08-25  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mbstring/config.m4:
+      Some minor fixes so that this works with autoconf 2.13 too
+
 2003-08-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/config.m4
