@@ -1,3 +1,30 @@
+2000-09-27  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: complementary PHP patch
+
+2000-09-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * genfiles: Don't convert to BSD-style Makefiles
+
+    * ext/standard/file.c:
+    Automatic conversion might cause interpretation of 0xff as EOF, so we store
+    the result in an object of type int first.
+
+    Submitted by: melchers@cis.fu-berlin.de
+
+    * ext/standard/php_smart_str.h
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Recognize single quotes around cdata.
+
+    Move smart_str functions to an extra file.
+
+    * ext/session/session.c: Clean up STR_CAT macro (it is still ugly)
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    Move php_memnstr to the header file, so that the function body is available
+    in all compilation units (note the static linkage).
+
 2000-09-21  Sascha Schumann  <sascha@schumann.cx>
 
     * acinclude.m4: Revert controversial patch
