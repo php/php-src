@@ -1,3 +1,52 @@
+2000-12-05  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/mcal/php_mcal.c: spaces after commas. all whitespace.
+
+2000-12-05  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: - Update 4.0.4 branches NEWS file
+
+2000-12-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/DB/error.php
+      pear/DB/result.php
+      pear/DB/warning.php: Removed obsolete files.
+
+2000-12-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/gmp.c: Make GMP use Zend's memory functions
+
+    * ext/gmp/gmp.c: Fix prototypes
+
+    * ext/gmp/gmp.c: Add check for conversion base
+
+2000-12-05  Stig Bakken  <ssb@fast.no>
+
+    * ext/mcal/config.m4:
+    * applied patch by Stig-Ørjan Smelror <Stig.Orjan.Smelror@lincom.no>
+
+    * ext/odbc/php_odbc.c:
+    Applied IBM DB2 patch by Walter Franzini <walter@sys-net.it>
+
+    * pear/DB/tests/mysql/005.phpt: * added test for DB_mysql::nextId()
+
+2000-12-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Merge from HEAD
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Pass core_globals to new inline functions
+
+    Submitted by: Sebastian Bergmann
+
+2000-12-05  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/mysql.php: * MySQL sequence emulation using auto_increment
+    * fixed indentation
+
 2000-12-04  David Hedbor  <david@hedbor.org>
 
     * sapi/caudium/caudium.c:
