@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Removed support of print $obj automatically calling the __string_value()
+  method. Instead define yourself a method such as toString() and use
+  print $obj->toString() (Andi, Zend Engine)
 - Added PHP API for Zend's ticks. (Stig)
 
 29 Aug 2000, Version 4.0.2 
