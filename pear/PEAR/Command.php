@@ -280,6 +280,7 @@ class PEAR_Command
                 $GLOBALS['_PEAR_Command_shortcuts'][$shortcut] = $command;
             }
         }
+        @closedir($dp);
         return true;
     }
 
