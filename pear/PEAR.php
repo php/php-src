@@ -289,7 +289,8 @@ class PEAR
 
     function setErrorHandling($mode = null, $options = null)
     {
-        if (isset($this)) {
+        if (isset($this) &&
+            (get_class($this) == 'pear' || is_subclass_of($this, 'pear'))) {
             $setmode     = &$this->_default_error_mode;
             $setoptions  = &$this->_default_error_options;
         } else {
@@ -310,9 +311,35 @@ class PEAR
 
             case PEAR_ERROR_CALLBACK:
                 $setmode = $mode;
-                if ((is_string($options) && function_exists($options)) ||
-                    (is_array($options) && method_exists(@$options[0], @$options[1])))
-                {
+                $doSet = false;
+                // function callback
+                if (is_string($options) && function_exists($options)) {
+                    $doSet = true;
+                }
+                // class/object method callback
+                if (is_array($options)) {
+                    if (isset($options[0]) && isset($options[1])) {
+                        $options = array(&$options[0], $options[1]);
+                        if (is_string($options[1])) {
+                            // static method callback
+                            if (is_string($options[0])) {
+                                if (class_exists($options[0]) && 
+                                    in_array(strtolower($options[1]),
+                                     get_class_methods($options[0])))
+                                {
+                                    $doSet = true;
+                                }
+                            }
+                            // object method callback
+                            if (is_object($options[0])) {
+                                if (method_exists($options[0], $options[1])) {
+                                    $doSet = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($doSet) {
                     $setoptions = $options;
                 } else {
                     trigger_error("invalid error callback", E_USER_WARNING);
@@ -566,7 +593,8 @@ class PEAR
     function pushErrorHandling($mode, $options = null)
     {
         $stack = &$GLOBALS['_PEAR_error_handler_stack'];
-        if (isset($this)) {
+        if (isset($this) &&
+            (get_class($this) == 'pear' || is_subclass_of($this, 'pear'))) {
             $def_mode    = &$this->_default_error_mode;
             $def_options = &$this->_default_error_options;
         } else {
@@ -575,7 +603,8 @@ class PEAR
         }
         $stack[] = array($def_mode, $def_options);
 
-        if (isset($this)) {
+        if (isset($this) &&
+            (get_class($this) == 'pear' || is_subclass_of($this, 'pear'))) {
             $this->setErrorHandling($mode, $options);
         } else {
             PEAR::setErrorHandling($mode, $options);
@@ -600,7 +629,8 @@ class PEAR
         array_pop($stack);
         list($mode, $options) = $stack[sizeof($stack) - 1];
         array_pop($stack);
-        if (isset($this)) {
+        if (isset($this) &&
+            (get_class($this) == 'pear' || is_subclass_of($this, 'pear'))) {
             $this->setErrorHandling($mode, $options);
         } else {
             PEAR::setErrorHandling($mode, $options);
