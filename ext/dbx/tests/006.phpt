@@ -25,12 +25,12 @@ if (!$dlo) {
 	}
 else {
     @dbx_query($dlo, "select nonexistingfield from tbl");
-    if (($module==DBX_MSSQL && dbx_error($dlo)!="Changed database context to '".$database."'.")
+    if ((($module==DBX_MSSQL || $module==DBX_SYBASECT) && dbx_error($dlo)!="Changed database context to '".$database."'.".($module==DBX_SYBASECT?"\n":""))
         || strlen(dbx_error($dlo))) {
         print('query generated an error: dbx_error works ok'."\n");
         }
     dbx_query($dlo, "select description from tbl");
-    if (!strlen(dbx_error($dlo)) || ($module==DBX_MSSQL && dbx_error($dlo)=="Changed database context to '".$database."'.")) {
+    if (!strlen(dbx_error($dlo)) || (($module==DBX_MSSQL || $module==DBX_SYBASECT) && dbx_error($dlo)=="Changed database context to '".$database."'.".($module==DBX_SYBASECT?"\n":""))) {
         print('query is valid: dbx_error works ok'."\n");
         }
     if (!@dbx_error(0)) {

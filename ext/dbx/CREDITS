@@ -7,3 +7,4 @@ pgsql support: Rui Hirokawa (hirokawa@php.net)
 mssql support: Marc Boeren
 fbsql support: Frank M. Kromann (frank@frontbase.com)
 initial oci8 support: Marc Boeren
+sybase-ct support: Marc Boeren

@@ -1,6 +1,6 @@
 
 LTLIBRARY_NAME = libdbx.la
-LTLIBRARY_SOURCES = dbx.c dbx_mysql.c dbx_odbc.c dbx_pgsql.c dbx_mssql.c dbx_fbsql.c dbx_oci8.c
+LTLIBRARY_SOURCES = dbx.c dbx_mysql.c dbx_odbc.c dbx_pgsql.c dbx_mssql.c dbx_fbsql.c dbx_oci8.c dbx_sybasect.c
 LTLIBRARY_SHARED_NAME = dbx.la
 
 include $(top_srcdir)/build/dynlib.mk

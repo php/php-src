@@ -18,6 +18,9 @@ if (!$dlo) {
     print('this won\'t work'."\n");
 	}
 else {
+    // especially for sybase I need to set the textsize to >64 k, as one of the test-fields 
+    // requires this (shouldn't this be a php.ini-entry??)
+    if ($connection === DBX_SYBASECT) @dbx_query($dlo, "set textsize 100000");
     // select query
     if ($dro=dbx_query($dlo, $sql_statement)) {
         for ($i=0; $i<$dro->rows; ++$i) {

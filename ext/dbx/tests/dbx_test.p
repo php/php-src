@@ -1,5 +1,5 @@
 <?php
-$connection = DBX_MYSQL;
+$connection = DBX_SYBASECT;
 switch ($connection) {
     case DBX_MYSQL:
         $module=DBX_MYSQL;
@@ -48,6 +48,14 @@ switch ($connection) {
         $username="dbx_testuser";
         $password="dbx_testpassword";
         $module_name="oci8";
+        break;
+    case DBX_SYBASECT:
+        $module=DBX_SYBASECT;
+        $host="threesyb";
+        $database="dbx_test";
+        $username="dbx_testuser";
+        $password="dbx_testpassword";
+        $module_name="sybase_ct";
         break;
     }
 
