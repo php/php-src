@@ -40,7 +40,6 @@ int php3_init_request_info(void *conf)
 	char *buf;	/* temporary buffers */
 	SLS_FETCH();
 
-	request_info.path_info = getenv("PATH_INFO");
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 	request_info.request_method = getenv("REQUEST_METHOD");
@@ -120,27 +119,6 @@ int php3_init_request_info(void *conf)
 	return SUCCESS;
 }
 
-#endif
-
-#if USE_SAPI
-/* temporary until I figure a beter way to do it */
-int php3_init_request_info(void *conf)
-{
-	if (sapi_rqst->filename)
-		request_info.filename = estrdup(sapi_rqst->filename);
-	else
-		request_info.filename = NULL;
-	request_info.path_info = sapi_rqst->path_info;
-	request_info.current_user = sapi_rqst->current_user;
-	request_info.current_user_length = sapi_rqst->current_user_length;
-	request_info.request_method = sapi_rqst->request_method;
-	request_info.script_name = sapi_rqst->script_name;
-	request_info.content_length = sapi_rqst->content_length;
-	request_info.content_type = sapi_rqst->content_type;
-	request_info.cookies = sapi_rqst->cookies;
-
-	return SUCCESS;
-}
 #endif
 
 #if !CGI_BINARY

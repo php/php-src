@@ -88,6 +88,7 @@ PHPAPI void _php3_info(void)
 #endif
 	ELS_FETCH();
 	PLS_FETCH();
+	SLS_FETCH();
 	
 #if WIN32|WINNT
 	// Get build numbers for Windows NT or Win95
@@ -104,7 +105,9 @@ PHPAPI void _php3_info(void)
 
 
 	PUTS("<img src=\"");
-	/*PUTS(r->uri);*/
+	if (SG(request_info).request_uri) {
+		PUTS(SG(request_info).request_uri);
+	}
 	PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"56\" align=\"right\">\n");
 	php3_printf("<center><h1>PHP Version %s</h1></center>\n", PHP_VERSION);
 	PUTS("<p>by <a href=\"mailto:rasmus@lerdorf.on.ca\">Rasmus Lerdorf</a>,\n");
@@ -392,7 +395,9 @@ PHPAPI void _php3_info(void)
 	PUTS("<table width=\"100%%\"><tr>\n");
 	php3_printf("<td><h2>Zend</h2>This program makes use of the Zend scripting language engine:<br><pre>%s</pre></td>", get_zend_version());
 	PUTS("<td width=\"100\"><a href=\"http://www.zend.com/\"><img src=\"");
-	/*PUTS(r->uri);*/
+	if (SG(request_info).request_uri) {
+		PUTS(SG(request_info).request_uri);
+	}
 	PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"89\"></a></td>\n");
 	PUTS("</tr></table>\n");
 

@@ -1024,7 +1024,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		/* Build the special-case PHP_SELF variable for the CGI version */
 		char *pi;
 #if FORCE_CGI_REDIRECT
-		pi = request_info.path_info;
+		pi = SG(request_info).request_uri;
 		tmp = (pval *) emalloc(sizeof(pval));
 		tmp->value.str.val = emalloc(((pi)?strlen(pi):0) + 1);
 		tmp->value.str.len = _php3_sprintf(tmp->value.str.val, "%s", (pi ? pi : ""));	/* SAFE */
@@ -1035,7 +1035,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 		int l = 0;
 		char *sn;
 		sn = request_info.script_name;
-		pi = request_info.path_info;
+		pi = SG(request_info).request_uri;
 		if (sn)
 			l += strlen(sn);
 		if (pi)

@@ -115,6 +115,13 @@ static void php_cgi_usage(char *argv0)
 }
 
 
+static void init_request_info(SLS_D)
+{
+	SG(request_info).query_string = getenv("QUERY_STRING");
+	SG(request_info).request_uri = getenv("PATH_INFO");
+}
+
+
 int main(int argc, char *argv[])
 {
 	int cgi = 0, c, i, len;
@@ -293,7 +300,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	php3_TreatHeaders();
 
-	SG(request_info).query_string = getenv("QUERY_STRING");
+	init_request_info(SLS_C);
 
 	if (!cgi) {
 		if (!SG(request_info).query_string) {
