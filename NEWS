@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0 Release
+- Added the localtime function. (Sterling)
+- Added the 'I' format option for the date function, this option will return
+  true or false depending on whether or not daylight savings time is in effect.
+  (Sterling)
+- Added the gmstrftime.(Sterling)
+- snmp_walkoid is now an alias for snmp_realwalk. (Sterling)
 - Fixed a bug that could cause a crash when using 'global' inside large include
   files (Stanislav, Zend Engine)
 - Fixed dynamic loading where extension_dir had no trailing slash (Sascha)
