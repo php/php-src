@@ -57,8 +57,6 @@ typedef struct _XML_Parser {
 	void *user;
 	xmlParserCtxtPtr parser;
 
-	char *last_error_msg;
-	
 	XML_Memory_Handling_Suite        mem_hdlrs;
 
 	XML_StartElementHandler          h_start_element;
@@ -127,7 +125,7 @@ void XML_SetExternalEntityRefHandler(XML_Parser, XML_ExternalEntityRefHandler);
 void XML_SetStartNamespaceDeclHandler(XML_Parser, XML_StartNamespaceDeclHandler);
 void XML_SetEndNamespaceDeclHandler(XML_Parser, XML_EndNamespaceDeclHandler);
 int  XML_Parse(XML_Parser, const XML_Char *, int data_len, int is_final);
-int XML_GetErrorCode(XML_Parser);
+int  XML_GetErrorCode(XML_Parser);
 const XML_Char *XML_ErrorString(int);
 int  XML_GetCurrentLineNumber(XML_Parser);
 int  XML_GetCurrentColumnNumber(XML_Parser);
