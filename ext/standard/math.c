@@ -664,7 +664,7 @@ PHP_FUNCTION(rad2deg)
  */
 PHPAPI long
 _php_math_basetolong(zval *arg, int base) {
-	long mult = 1, num = 0, digit;
+	long num = 0, digit, onum;
 	int i;
 	char c, *s;
 
@@ -674,23 +674,25 @@ _php_math_basetolong(zval *arg, int base) {
 
 	s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg) - 1; i >= 0; i--, mult *= base) {
-		c = toupper(s[i]);
-		if (c >= '0' && c <= '9') {
-			digit = (c - '0');
-		} else if (c >= 'A' && c <= 'Z') {
-			digit = (c - 'A' + 10);
-		} else {
-			continue;
-		}
+	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+		c = *s++;
+		
+		digit = (c >= '0' && c <= '9') ? c - '0'
+			: (c >= 'A' && c <= 'Z') ? c - 'A' + 10
+			: (c >= 'a' && c <= 'z') ? c - 'a' + 10
+			: base;
+		
 		if (digit >= base) {
 			continue;
 		}
-		if(!mult || digit > LONG_MAX/mult || num > LONG_MAX-mult*digit) {
-			php_error(E_WARNING, "base_to_long: number '%s' is too big to fit in long", s);
-			return LONG_MAX;
-		}
-		num += mult * digit;
+
+		onum = num;
+		num = num * base + digit;
+		if (num > onum)
+			continue;
+
+		php_error(E_WARNING, "base_to_long: number '%s' is too big to fit in long", s);
+		return LONG_MAX;
 	}
 
 	return num;
@@ -764,8 +766,8 @@ PHPAPI char *
 _php_math_longtobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char *result, *ptr, *ret;
-	int len, digit;
+	char buf[(sizeof(unsigned long) << 3) + 1];
+	char *ptr, *end;
 	unsigned long value;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
@@ -774,25 +776,16 @@ _php_math_longtobase(zval *arg, int base)
 
 	value = Z_LVAL_P(arg);
 
-	/* allocates space for the longest possible result with the lowest base */
-	len = (sizeof(Z_LVAL_P(arg)) * 8) + 1;
-	result = emalloc((sizeof(Z_LVAL_P(arg)) * 8) + 1);
-
-	ptr = result + len - 1;
-	*ptr-- = '\0';
+	end = ptr = buf + sizeof(buf) - 1;
+	*ptr = '\0';
 
 	do {
-		digit = value % base;
-		*ptr = digits[digit];
+		*--ptr = digits[value % base];
 		value /= base;
-	}
-	while (ptr-- > result && value);
-	ptr++;
-	ret = estrdup(ptr);
-	efree(result);
+	} while (ptr > buf && value);
 
-	return ret;
-}	
+	return estrndup(ptr, end - ptr);
+}
 
 /* }}} */
 /* {{{ _php_math_zvaltobase */
@@ -805,49 +798,28 @@ PHPAPI char *
 _php_math_zvaltobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char *result, *ptr, *ret;
-	int len, digit;
-	unsigned long value;
-	double fvalue;
-	int f_mode;
 
 	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
 		return empty_string;
 	}
 
-	f_mode = (Z_TYPE_P(arg) == IS_DOUBLE);
+	if (Z_TYPE_P(arg) == IS_DOUBLE) {
+		double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
+		char *ptr, *end;
+		char buf[(sizeof(double) << 3) + 1];
 
-	if(f_mode) {
-		fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
-	} else {
-		value = Z_LVAL_P(arg);
+		end = ptr = buf + sizeof(buf) - 1;
+		*ptr = '\0';
+
+		do {
+			*--ptr = digits[(int) fmod(fvalue, base)];
+			fvalue /= base;
+		} while (ptr > buf && fabs(fvalue) >= 1);
+
+		return estrndup(ptr, end - ptr);
 	}
-
-	/* allocates space for the longest possible result with the lowest base */
-	len = (sizeof(Z_DVAL_P(arg)) * 8) + 1;
-	result = emalloc((sizeof(Z_DVAL_P(arg)) * 8) + 1);
-
-	ptr = result + len - 1;
-	*ptr-- = '\0';
-
-	do {
-		if(f_mode) {
-			double d = floor(fvalue/base);
-			digit = (int)ceil(fvalue - d*base);
-			*ptr = digits[digit];
-			fvalue = d;
-		} else {
-			digit = value % base;
-			*ptr = digits[digit];
-			value /= base;
-		}
-	}
-	while (ptr-- > result && (f_mode?(fabs(fvalue)>=1):value));
-	ptr++;
-	ret = estrdup(ptr);
-	efree(result);
-
-	return ret;
+	
+	return _php_math_longtobase(arg, base);
 }	
 
 /* }}} */
