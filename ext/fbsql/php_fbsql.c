@@ -648,16 +648,16 @@ int phpfbFetchRow(PHPFBResult* result, int row)
 }
 
 
-/* {{{ proto resource fbsql_connect([string hostname [, string username [, string password]]]);
-	*/
+/* {{{ proto resource fbsql_connect([string hostname [, string username [, string password]]])
+   ??? */
 PHP_FUNCTION(fbsql_connect)
 {
 	php_fbsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto resource fbsql_pconnect([string hostname [, string username [, string password]]]);
-	*/
+/* {{{ proto resource fbsql_pconnect([string hostname [, string username [, string password]]])
+   ??? */
 PHP_FUNCTION(fbsql_pconnect)
 {
 	php_fbsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -665,7 +665,7 @@ PHP_FUNCTION(fbsql_pconnect)
 /* }}} */
 
 /* {{{ proto int fbsql_close([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_close)
 {
 	PHPFBLink* phpLink = NULL;
@@ -783,8 +783,8 @@ void phpfbestrdup(const char * s, int* length, char** value)
 	*length = l;
 }
 
-/* {{{ proto void fbsql_set_transaction(resource link_identifier, int Locking, int Isolation)
-   Set the transaction locking and isolation */
+/* {{{ proto void fbsql_set_transaction(resource link_identifier, int locking, int isolation)
+   Sets the transaction locking and isolation */
 PHP_FUNCTION(fbsql_set_transaction)
 {
 	PHPFBLink* phpLink = NULL;
@@ -814,7 +814,7 @@ PHP_FUNCTION(fbsql_set_transaction)
 /* }}} */
 
 /* {{{ proto bool fbsql_autocommit(resource link_identifier [, bool OnOff])
-   Turn on auto-commit */
+   Turns on auto-commit */
 PHP_FUNCTION(fbsql_autocommit)
 {
 	PHPFBLink* phpLink = NULL;
@@ -855,7 +855,7 @@ PHP_FUNCTION(fbsql_autocommit)
 /* }}} */
 
 /* {{{ proto bool fbsql_commit([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_commit)
 {
 	PHPFBLink* phpLink = NULL;
@@ -892,7 +892,7 @@ PHP_FUNCTION(fbsql_commit)
 /* }}} */
 
 /* {{{ proto int fbsql_rollback([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_rollback)
 {
 	PHPFBLink* phpLink = NULL;
@@ -974,7 +974,7 @@ static void php_fbsql_create_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 }
 
 /* {{{ proto string fbsql_create_blob(string blob_data [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_create_blob)
 {
 	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -982,7 +982,7 @@ PHP_FUNCTION(fbsql_create_blob)
 /* }}} */
 
 /* {{{ proto string fbsql_create_clob(string clob_data [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_create_clob)
 {
 	php_fbsql_create_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -990,7 +990,7 @@ PHP_FUNCTION(fbsql_create_clob)
 /* }}} */
 
 /* {{{ proto bool fbsql_set_lob_mode(resource result, int lob_mode)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_set_lob_mode)
 {
 
@@ -1064,7 +1064,7 @@ static void php_fbsql_read_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	}
 }
 /* {{{ proto string fbsql_read_blob(string blob_handle [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_read_blob)
 {
 	php_fbsql_read_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -1072,7 +1072,7 @@ PHP_FUNCTION(fbsql_read_blob)
 /* }}} */
 
 /* {{{ proto string fbsql_read_clob(string clob_handle [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_read_clob)
 {
 	php_fbsql_read_lob(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -1080,7 +1080,7 @@ PHP_FUNCTION(fbsql_read_clob)
 /* }}} */
 
 /* {{{ proto string fbsql_hostname(resource link_identifier [, string host_name])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_hostname)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1113,8 +1113,8 @@ PHP_FUNCTION(fbsql_hostname)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_database(resource link_identifier [, string database])
-	*/
+/* {{{ proto string fbsql_database(resource link_identifier [, string database]) 
+   ??? */
 PHP_FUNCTION(fbsql_database)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(fbsql_database)
 /* }}} */
 
 /* {{{ proto string fbsql_database_password(resource link_identifier [, string database_password])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_database_password)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(fbsql_database_password)
 /* }}} */
 
 /* {{{ proto string fbsql_username(resource link_identifier [, string username])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_username)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1216,7 +1216,7 @@ PHP_FUNCTION(fbsql_username)
 /* }}} */
 
 /* {{{ proto string fbsql_password(resource link_identifier [, string password])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_password)
 {   
 	PHPFBLink* phpLink = NULL;
@@ -1249,8 +1249,8 @@ PHP_FUNCTION(fbsql_password)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_select_db([string database_name [, resource link_identifier]])   
-	*/
+/* {{{ proto bool fbsql_select_db([string database_name [, resource link_identifier]])
+   ??? */
 PHP_FUNCTION(fbsql_select_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1306,8 +1306,8 @@ PHP_FUNCTION(fbsql_select_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_change_user(string user, string password [, string database [, resource link_identifier]]);
-	*/
+/* {{{ proto int fbsql_change_user(string user, string password [, string database [, resource link_identifier]])
+   ??? */
 PHP_FUNCTION(fbsql_change_user)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1366,7 +1366,7 @@ PHP_FUNCTION(fbsql_change_user)
 /* }}} */
 
 /* {{{ proto bool fbsql_create_db(string database_name [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_create_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1439,7 +1439,7 @@ PHP_FUNCTION(fbsql_create_db)
 /* }}} */
 
 /* {{{ proto int fbsql_drop_db(string database_name [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_drop_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1513,7 +1513,7 @@ PHP_FUNCTION(fbsql_drop_db)
 /* }}} */
 
 /* {{{ proto bool fbsql_start_db(string database_name [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_start_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1591,7 +1591,7 @@ PHP_FUNCTION(fbsql_start_db)
 /* }}} */
 
 /* {{{ proto bool fbsql_stop_db(string database_name [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_stop_db)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1650,7 +1650,7 @@ PHP_FUNCTION(fbsql_stop_db)
 /* }}} */
 
 /* {{{ proto int fbsql_db_status(string database_name [, resource link_identifier])
-	Get the status (Stoped, Starting, Running, Stopping) for a given database*/
+   Gets the status (Stopped, Starting, Running, Stopping) for a given database */
 PHP_FUNCTION(fbsql_db_status)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1815,7 +1815,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 }
 
 /* {{{ proto resource fbsql_query(string query [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_query)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1849,7 +1849,7 @@ PHP_FUNCTION(fbsql_query)
 /* }}} */
 
 /* {{{ proto resource fbsql_db_query(string database_name, string query [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_db_query)
 {
 	PHPFBLink* phpLink = NULL;
@@ -1888,7 +1888,7 @@ PHP_FUNCTION(fbsql_db_query)
 /* }}} */
 
 /* {{{ proto resource fbsql_list_dbs([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_list_dbs)
 {
 	PHPFBResult*    phpResult;
@@ -1932,8 +1932,8 @@ PHP_FUNCTION(fbsql_list_dbs)
 }
 /* }}} */
 
-/* {{{ proto resource fbsql_list_tables(string database, int [link_identifier]);
-	*/
+/* {{{ proto resource fbsql_list_tables(string database [, int link_identifier])
+   ??? */
 PHP_FUNCTION(fbsql_list_tables)
 {
 	char* sql = "select t0.\"table_name\"from information_schema.tables t0, information_schema.SCHEMATA t1 where t0.schema_pk = t1.schema_pk and t1.\"schema_name\" = current_schema;";
@@ -1976,7 +1976,7 @@ PHP_FUNCTION(fbsql_list_tables)
 /* }}} */
 
 /* {{{ proto resource fbsql_list_fields(string database_name, string table_name [, resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_list_fields)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2021,7 +2021,7 @@ PHP_FUNCTION(fbsql_list_fields)
 /* }}} */
 
 /* {{{ proto string fbsql_error([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_error)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2055,7 +2055,7 @@ PHP_FUNCTION(fbsql_error)
 /* }}} */
 
 /* {{{ proto int fbsql_errno([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_errno)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2083,8 +2083,8 @@ PHP_FUNCTION(fbsql_errno)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_warnings([int flag]);
-	*/
+/* {{{ proto bool fbsql_warnings([int flag])
+   ??? */
 PHP_FUNCTION(fbsql_warnings)
 {
 	int   argc     = ARG_COUNT(ht);
@@ -2102,7 +2102,7 @@ PHP_FUNCTION(fbsql_warnings)
 /* }}} */
 
 /* {{{ proto int fbsql_affected_rows([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_affected_rows)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2131,7 +2131,7 @@ PHP_FUNCTION(fbsql_affected_rows)
 /* }}} */
 
 /* {{{ proto int fbsql_insert_id([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_insert_id)
 {
 	PHPFBLink* phpLink = NULL;
@@ -2427,7 +2427,7 @@ void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIn
 /* }}} */
                        
 /* {{{ proto mixed fbsql_result(int result [, int row [, mixed field]])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_result)
 {
 	PHPFBResult* result = NULL;
@@ -2502,7 +2502,7 @@ PHP_FUNCTION(fbsql_result)
 /* }}} */
 
 /* {{{ proto int fbsql_next_result(int result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_next_result)
 {
 	PHPFBResult* result = NULL;
@@ -2550,7 +2550,7 @@ PHP_FUNCTION(fbsql_next_result)
 /* }}} */
 
 /* {{{ proto int fbsql_num_rows(int result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_num_rows)
 {
 	PHPFBResult* result = NULL;
@@ -2584,7 +2584,7 @@ PHP_FUNCTION(fbsql_num_rows)
 /* }}} */
 
 /* {{{ proto int fbsql_num_fields(int result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_num_fields)
 {
 	PHPFBResult* result = NULL;
@@ -2607,7 +2607,7 @@ PHP_FUNCTION(fbsql_num_fields)
 /* }}} */
 
 /* {{{ proto array fbsql_fetch_row(resource result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_fetch_row)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM);
@@ -2615,7 +2615,7 @@ PHP_FUNCTION(fbsql_fetch_row)
 /* }}} */
 
 /* {{{ proto object fbsql_fetch_assoc(resource result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_fetch_assoc)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
@@ -2623,7 +2623,7 @@ PHP_FUNCTION(fbsql_fetch_assoc)
 /* }}} */
 
 /* {{{ proto object fbsql_fetch_object(resource result [, int result_type])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_fetch_object)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
@@ -2634,7 +2634,7 @@ PHP_FUNCTION(fbsql_fetch_object)
 /* }}} */
 
 /* {{{ proto array fbsql_fetch_array(resource result [, int result_type])
-   Fetch a result row as an array (associative, numeric or both)*/
+   Fetches a result row as an array (associative, numeric or both)*/
 PHP_FUNCTION(fbsql_fetch_array)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_BOTH);
@@ -2861,7 +2861,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 
 /* {{{ proto int fbsql_data_seek(int result, int row_number)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_data_seek)
 {
 	PHPFBResult* result = NULL;
@@ -2899,7 +2899,7 @@ PHP_FUNCTION(fbsql_data_seek)
 /* }}} */
 
 /* {{{ proto array fbsql_fetch_lengths(int result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_fetch_lengths)
 {
 	PHPFBResult* result = NULL;
@@ -2930,7 +2930,7 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 /* }}} */
 
 /* {{{ proto object fbsql_fetch_field(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_fetch_field)
 {
 	PHPFBResult* result = NULL;
@@ -2987,7 +2987,7 @@ PHP_FUNCTION(fbsql_fetch_field)
 /* }}} */
 
 /* {{{ proto bool fbsql_field_seek(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_field_seek)
 {
 	PHPFBResult* result = NULL;
@@ -3030,7 +3030,7 @@ PHP_FUNCTION(fbsql_field_seek)
 /* }}} */
 
 /* {{{ proto string fbsql_field_name(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_field_name)
 {
 	PHPFBResult* result = NULL;
@@ -3079,7 +3079,7 @@ PHP_FUNCTION(fbsql_field_name)
 /* }}} */
 
 /* {{{ proto string fbsql_field_table(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_field_table)
 {
 	PHPFBResult* result = NULL;
@@ -3120,7 +3120,7 @@ PHP_FUNCTION(fbsql_field_table)
 /* }}} */
 
 /* {{{ proto string fbsql_field_len(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_field_len)
 {
 	PHPFBResult* result = NULL;
@@ -3172,7 +3172,7 @@ PHP_FUNCTION(fbsql_field_len)
 /* }}} */
 
 /* {{{ proto string fbsql_field_type(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_field_type)
 {
 	PHPFBResult* result = NULL;
@@ -3224,7 +3224,7 @@ PHP_FUNCTION(fbsql_field_type)
 /* }}} */
 
 /* {{{ proto string fbsql_field_flags(int result [, int field_index])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_field_flags)
 {
 	PHPFBResult* result = NULL;
@@ -3309,7 +3309,7 @@ PHP_FUNCTION(fbsql_field_flags)
 /* }}} */
 
 /* {{{ proto bool fbsql_free_result(int result)
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_free_result)
 {
 	PHPFBResult* result = NULL;
@@ -3333,7 +3333,7 @@ PHP_FUNCTION(fbsql_free_result)
 /* }}} */
 
 /* {{{ proto array fbsql_get_autostart_info([resource link_identifier])
-	*/
+   ??? */
 PHP_FUNCTION(fbsql_get_autostart_info)
 {
 	PHPFBLink* phpLink = NULL;
