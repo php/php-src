@@ -33,3 +33,19 @@ I expect the libraries to be in /usr/local (that's the default when you
 cofigure pspell and aspell with their 'configure' scripts woth no parameters).
 If that location is different, please specify it in --with-pspell=PATH, where
 PATH is the path you specified for pspell libraries.
+
+Notes on personalized dictionaries
+----------------------------------
+
+It is now possible to have personalized dictionaries with pspell. This is
+acheived by openeing a dictionary with pspell_new_personal() rather than
+pspell_new() and secifying the custom dictionary as the first parameter.
+The parameter probably should begin with '/' because otherwise it will
+refer to $HOME, which is probably set to "/root", which is probably not
+what you want because you need write access for nobody to be able to write
+to a dictionary. Once the dictionary is open, you can use 
+pspell_add_to_personal() to add words to the wordlist and finally 
+pspell_save_wordlist() to save it. 
+
+Note that at this moment pspell_save_wordlist() will return TRUE, even if
+there was an error. This will be changed once pspell library is fixed.
