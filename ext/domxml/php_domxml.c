@@ -420,6 +420,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(get_content,				domxml_node_get_content,		NULL)
 	PHP_FALIAS(text_concat,				domxml_node_text_concat,		NULL)
 	PHP_FALIAS(set_name,				domxml_node_set_name,			NULL)
+	PHP_FALIAS(get_path,				domxml_node_get_path,			NULL)
 	PHP_FALIAS(is_blank_node,			domxml_is_blank_node,			NULL)
 	PHP_FALIAS(dump_node,				domxml_dump_node,				NULL)
 	{NULL, NULL, NULL}
@@ -2190,6 +2191,25 @@ PHP_FUNCTION(domxml_node_namespace_uri)
 }
 /* }}} */
 
+/* {{{ proto string domxml_node_get_path(void)
+   Returns the path of the node in the document */
+PHP_FUNCTION(domxml_node_get_path)
+{
+	zval *id;
+	xmlNodePtr nodep;
+	xmlChar *path;
+
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	DOMXML_NO_ARGS();
+
+	path = xmlGetNodePath(nodep);
+	if (!path) {
+		RETURN_FALSE;
+	}
+	RETVAL_STRING((char *)path, 1);
+	xmlFree(path);
+}
 
 /* {{{ proto object domxml_node_parent(void)
    Returns parent of node */
@@ -2300,6 +2320,12 @@ PHP_FUNCTION(domxml_node_append_child)
 
 	if (child->type == XML_ATTRIBUTE_NODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append attribute node");
+		RETURN_FALSE;
+	}
+
+	/* XXX:ls */
+	if (child == parent) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node to itself");
 		RETURN_FALSE;
 	}
 	
