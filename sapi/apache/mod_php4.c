@@ -277,7 +277,7 @@ static void php_apache_log_message(char *message)
 
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
-		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, message);
+		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, "%s", message);
 #else
 		log_error(message, ((requset_rec *) SG(server_context))->server);
 #endif
