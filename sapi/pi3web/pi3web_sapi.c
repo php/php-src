@@ -315,8 +315,8 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPCONTROL_BLOCK
 	SG(request_info).request_uri     = lpCB->lpszUri;
 	SG(request_info).content_type    = lpCB->lpszContentType;
 	SG(request_info).content_length  = lpCB->cbTotalBytes;
-	SG(request_info).auth_user       = lpCB->lpszUser;
-	SG(request_info).auth_password   = lpCB->lpszPassword;
+	SG(request_info).auth_user       = (lpCB->lpszUser) ? (char *)estrdup((const char *)(lpCB->lpszUser)) : 0;
+	SG(request_info).auth_password   = (lpCB->lpszPassword) ? (char *)estrdup((const char *)(lpCB->lpszPassword)) : 0;
 	SG(sapi_headers).http_response_code = 200;
 }
 
