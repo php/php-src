@@ -55,6 +55,9 @@ char *day_short_names[] =
 };
 
 #if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE) && !defined(HAVE_DECLARED_TIMEZONE)
+#if defined(NETWARE) && (NEW_LIBC)
+#define timezone    _timezone   /* Do not know why this is called '_timezone' in new version of LibC */
+#endif
 extern time_t timezone;
 extern int daylight;
 #endif

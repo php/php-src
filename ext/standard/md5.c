@@ -56,7 +56,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
-	PHP_MD5Update(&context, Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+	PHP_MD5Update(&context, (const unsigned char*)Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));	/* Type-casting done due to NetWare */
 	PHP_MD5Final(digest, &context);
 	make_digest(md5str, digest);
 	RETVAL_STRING(md5str, 1);

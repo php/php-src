@@ -18,6 +18,11 @@
 /* $Id$ */
 
 #include <stdio.h>
+
+#if defined(NETWARE) && !defined(NEW_LIBC)
+#include <sys/socket.h>
+#endif
+
 #include "php.h"
 #include "ext/standard/php_standard.h"
 #include "SAPI.h"

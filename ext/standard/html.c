@@ -451,8 +451,8 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 			if (matches_map)	{
 				new[len++] = '&';
-				strcpy(new + len, rep);
-				len += strlen(rep);
+				strcpy(new + len, (const char*)rep);	/* Type-casting done due to NetWare */
+				len += strlen((const char*)rep);	/* Type-casting done due to NetWare */
 				new[len++] = ';';
 			}
 		}
@@ -503,7 +503,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		return;
 	}
 
-	new = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset);
+	new = php_escape_html_entities((unsigned char*)str, str_len, &len, all, quote_style, hint_charset);		/* Type-casting done due to NetWare */
 	RETVAL_STRINGL(new, len, 0);
 }
 /* }}} */

@@ -47,11 +47,19 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
+#elif defined(NETWARE) && !defined(NEW_LIBC)
+/*#include <ws2nlm.h>*/
+#include <sys/socket.h>
+#include "netware/param.h"
 #else
 #include <sys/param.h>
+#if defined(NETWARE) && defined(USE_WINSOCK)
+#include <novsock2.h>
+#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -63,6 +71,8 @@
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
+#elif defined(NETWARE)
+#include "netware/pwd.h"
 #else
 #include <pwd.h>
 #endif
@@ -802,7 +812,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block)
       int flags;
       int myflag = 0;
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
       /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	  flags = !block;
 	  if (ioctlsocket(socketd, FIONBIO, &flags)==SOCKET_ERROR){
@@ -2187,7 +2197,7 @@ PHP_FUNCTION(fgetcsv)
 /* }}} */
 
 
-#if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(PHP_WIN32) && !defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
 /* {{{ proto string realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)

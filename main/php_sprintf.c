@@ -20,7 +20,11 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#ifndef NETWARE
 #include "php_config.h"
+#else
+#include "config.nw.h"
+#endif
 
 #if PHP_BROKEN_SPRINTF
 

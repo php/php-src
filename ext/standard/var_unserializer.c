@@ -217,7 +217,12 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, int elements)
 
 PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 {
+#ifndef NETWARE
 	const unsigned char *cursor, *limit, *marker, *start;
+#else
+	const char *cursor, *start;
+	const char *limit=NULL, *marker=NULL;
+#endif	/* NETWARE */
 	zval **rval_ref;
 
 	cursor = *p;

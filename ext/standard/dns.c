@@ -42,7 +42,7 @@
 #endif
 #endif
 #include <winsock.h>
-#else
+#else	/* This holds good for NetWare too, both for Winsock and Berkeley sockets */
 #include <netinet/in.h>
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -58,6 +58,11 @@
 #if HAVE_RESOLV_H
 #include <resolv.h>
 #endif
+#endif
+
+/* Borrowed from SYS/SOCKET.H */
+#if defined(NETWARE) && defined(USE_WINSOCK)
+#define AF_INET 2   /* internetwork: UDP, TCP, etc. */
 #endif
 
 #include "dns.h"
@@ -201,7 +206,7 @@ static char *php_gethostbyname(char *name)
 }
 /* }}} */
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32))
+#if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
 
 /* {{{ proto int checkdnsrr(string host [, string type])
    Check DNS records corresponding to a given Internet host name or IP address */

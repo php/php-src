@@ -160,9 +160,9 @@ PHP_FUNCTION(base64_encode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
-	result = php_base64_encode(str, str_len, &ret_length);
+	result = php_base64_encode((const unsigned char*)str, str_len, &ret_length);	/* type-casting done due to NetWare */
 	if (result != NULL) {
-		RETVAL_STRINGL(result, ret_length, 0);
+		RETVAL_STRINGL((char*)result, ret_length, 0);	/* type-casting done due to NetWare */
 	} else {
 		RETURN_FALSE;
 	}
@@ -181,9 +181,9 @@ PHP_FUNCTION(base64_decode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
-	result = php_base64_decode(str, str_len, &ret_length);
+	result = php_base64_decode((const unsigned char*)str, str_len, &ret_length);	/* type-casting done due to NetWare */
 	if (result != NULL) {
-		RETVAL_STRINGL(result, ret_length, 0);
+		RETVAL_STRINGL((char*)result, ret_length, 0);	/* type-casting done due to NetWare */
 	} else {
 		RETURN_FALSE;
 	}

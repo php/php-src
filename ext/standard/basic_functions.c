@@ -38,6 +38,20 @@
 #include <stdio.h>
 #include <netdb.h>
 
+/* Additional headers for NetWare */
+#ifdef NETWARE
+/*#include "netware/env.h"*/    /* Temporary */
+#ifdef NEW_LIBC /* Same headers hold good for Winsock and Berkeley sockets */
+#include <netinet/in.h>
+/*#include <arpa/inet.h>*/
+#include <netdb.h>
+#else
+#include <sys/socket.h>
+#endif
+#else
+#include <netdb.h>
+#endif
+
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
@@ -415,7 +429,7 @@ function_entry basic_functions[] = {
 	PHP_FE(gethostbyname,													NULL)
 	PHP_FE(gethostbynamel,													NULL)
 
-#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32))
+#if HAVE_RES_SEARCH && !(defined(__BEOS__) || defined(PHP_WIN32) || defined(NETWARE))
 	PHP_FE(checkdnsrr,														NULL)
 	PHP_FE(getmxrr,second_and_third_args_force_ref)
 #else
@@ -447,7 +461,7 @@ function_entry basic_functions[] = {
 	PHP_FE(cosh,															NULL)
 	PHP_FE(tanh,															NULL)
 
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 	PHP_FE(asinh,															NULL)
 	PHP_FE(acosh,															NULL)
 	PHP_FE(atanh,															NULL)
@@ -634,7 +648,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(socket_get_status,												NULL)
 
-#if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH && !defined(NETWARE)) || defined(ZTS)
 	PHP_FE(realpath,														NULL)
 #else
 	PHP_FALIAS(realpath,			warn_not_available,						NULL)
@@ -1001,7 +1015,9 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(lcg) (INIT_FUNC_ARGS_PASSTHRU);
 
 	PHP_MINIT(dir) (INIT_FUNC_ARGS_PASSTHRU);
+#ifdef HAVE_SYSLOG_H
 	PHP_MINIT(syslog) (INIT_FUNC_ARGS_PASSTHRU);
+#endif
 	PHP_MINIT(array) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(assert) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(url_scanner_ex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1082,7 +1098,9 @@ PHP_RINIT_FUNCTION(basic)
 	PHP_RINIT(lcg) (INIT_FUNC_ARGS_PASSTHRU);
 
 	PHP_RINIT(filestat) (INIT_FUNC_ARGS_PASSTHRU);
+#ifdef HAVE_SYSLOG_H
 	PHP_RINIT(syslog) (INIT_FUNC_ARGS_PASSTHRU);
+#endif
 	PHP_RINIT(dir) (INIT_FUNC_ARGS_PASSTHRU);
 
 	/* Reset magic_quotes_runtime */
@@ -1113,7 +1131,9 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 
 	PHP_RSHUTDOWN(fsock) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(filestat) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
+#ifdef HAVE_SYSLOG_H
 	PHP_RSHUTDOWN(syslog) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
+#endif
 	PHP_RSHUTDOWN(assert) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	if (BG(user_tick_functions)) {

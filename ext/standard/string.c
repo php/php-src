@@ -105,9 +105,9 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (char *) emalloc(oldlen * 2 * sizeof(char) + 1);
+	result = (unsigned char*) emalloc(oldlen * 2 * sizeof(char) + 1);	/* Type-casting done due to NetWare */
 	if(!result) {
-		return result;
+		return (char*)result;	/* Type-casting done due to NetWare */
 	}
 	
 	for(i = j = 0; i < oldlen; i++) {
@@ -119,7 +119,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	if (newlen) 
 		*newlen = oldlen * 2 * sizeof(char);
 
-	return result;
+	return (char *)result;	/* Type-casting done due to NetWare */
 }
 /* }}} */
 
@@ -183,7 +183,7 @@ PHP_FUNCTION(bin2hex)
 	}
 	convert_to_string_ex(data);
 
-	result = php_bin2hex(Z_STRVAL_PP(data), Z_STRLEN_PP(data), &newlen);
+	result = php_bin2hex((const unsigned char*)Z_STRVAL_PP(data), Z_STRLEN_PP(data), &newlen);	/* Type-casting done due to NetWare */
 	
 	if (!result) {
 		RETURN_FALSE;
@@ -514,9 +514,9 @@ PHPAPI void php_trim2(zval **str, zval **what, zval *return_value, int mode TSRM
 	char mask[256];
 
 	if (what) {
-		php_charmask(Z_STRVAL_PP(what), Z_STRLEN_PP(what), mask TSRMLS_CC);
+		php_charmask((unsigned char*)Z_STRVAL_PP(what), Z_STRLEN_PP(what), mask TSRMLS_CC);	/* Type-casting done due to NetWare */
 	} else {
-		php_charmask(" \n\r\t\v\0", 6, mask TSRMLS_CC);
+		php_charmask((unsigned char*)" \n\r\t\v\0", 6, mask TSRMLS_CC);	/* Type-casting done due to NetWare */
 	}
 
 	if (mode & 1) {
@@ -1238,9 +1238,9 @@ PHP_FUNCTION(pathinfo)
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t,
                          size_t s_len, size_t t_len)
 {
-	php_strtolower(s, s_len);
-	php_strtolower(t, t_len);
-	return php_memnstr(s, t, t_len, s + s_len);
+	php_strtolower((char*)s, s_len);	/* Type-casting done due to NetWare */
+	php_strtolower((char*)t, t_len);	/* Type-casting done due to NetWare */
+	return php_memnstr((char*)s, (char*)t, t_len, (char*)(s + s_len));	/* Type-casting done due to NetWare */
 }
 /* }}} */
 
@@ -1313,7 +1313,7 @@ PHP_FUNCTION(stristr)
 			RETURN_FALSE;
 		}
 
-		found = php_stristr(Z_STRVAL_PP(haystack), Z_STRVAL_PP(needle),
+		found = php_stristr((unsigned char*)Z_STRVAL_PP(haystack), (unsigned char*)Z_STRVAL_PP(needle),	/* Type-casting done due to NetWare */
 		                    Z_STRLEN_PP(haystack), Z_STRLEN_PP(needle));
 	}
 	else {
@@ -1321,7 +1321,7 @@ PHP_FUNCTION(stristr)
 		needle_char[0] = (char) Z_LVAL_PP(needle);
 		needle_char[1] = 0;
 
-		found = php_stristr(Z_STRVAL_PP(haystack), needle_char, 
+		found = php_stristr((unsigned char*)Z_STRVAL_PP(haystack), (unsigned char*)needle_char,	/* Type-casting done due to NetWare */
 		                    Z_STRLEN_PP(haystack), 1);
 	}
 		
@@ -2367,7 +2367,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 		length = strlen(str);
 	}
 
-	php_charmask(what, wlength, flags TSRMLS_CC);
+	php_charmask((unsigned char*)what, wlength, flags TSRMLS_CC);	/* Type-casting done due to NetWare */
 
 	for (source=str, end=source+length, target=new_str; (c=*source) || source<end; source++) {
 		if (flags[(unsigned char)c]) {

@@ -39,6 +39,11 @@
 
 #include "php.h"
 #include <stdio.h>
+
+#if defined(NETWARE) && !defined(NEW_LIBC)
+#include <sys/socket.h>
+#endif
+
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -82,10 +87,10 @@ static struct gfxinfo *php_handle_gif (int socketd, FILE *fp, int issock)
 
 	FP_FREAD(temp, 3, socketd, fp, issock);  /*	fseek(fp, 6L, SEEK_SET); */
 
-	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */
+	FP_FREAD((char*)a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */	/* Type-casting done due to NetWare */
 	result->width = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
 
-	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */
+	FP_FREAD((char *)a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */	/* Type-casting done due to NetWare */
 	result->height = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
 
 	return result;
@@ -104,7 +109,7 @@ static struct gfxinfo *php_handle_psd (int socketd, FILE *fp, int issock)
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 	FP_FREAD(temp, sizeof(temp), socketd, fp, issock);
 
-	if((FP_FREAD(a, sizeof(a), socketd, fp, issock)) <= 0) {
+	if((FP_FREAD((char *)a, sizeof(a), socketd, fp, issock)) <= 0) {	/* Type-casting done due to NetWare */
 		in_height = 0;
 		in_width  = 0;
 	} else {
@@ -169,7 +174,7 @@ static struct gfxinfo *php_handle_swf (int socketd, FILE *fp, int issock)
 	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
 	FP_FREAD(temp, 5, socketd, fp, issock);	/*	fseek(fp, 8L, SEEK_SET); */
 
-	FP_FREAD(a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */
+	FP_FREAD((char *)a, sizeof(a), socketd, fp, issock); /*	fread(a, sizeof(a), 1, fp); */	/* Type-casting done due to NetWare */
 	bits = php_swf_get_bits (a, 0, 5);
 	result->width = (php_swf_get_bits (a, 5 + bits, bits) -
 		php_swf_get_bits (a, 5, bits)) / 20;
@@ -192,7 +197,7 @@ static struct gfxinfo *php_handle_png (int socketd, FILE *fp, int issock)
 
 	FP_FREAD(temp, sizeof(temp), socketd, fp, issock);	/* fseek(fp, 16L, SEEK_SET); */
 
-	if((FP_FREAD(a, sizeof(a), socketd, fp, issock)) <= 0) {
+	if((FP_FREAD((char *)a, sizeof(a), socketd, fp, issock)) <= 0) {	/* Type-casting done due to NetWare */
 		in_width  = 0;
 		in_height = 0;
 	} else {
@@ -249,8 +254,7 @@ static unsigned short php_read2(int socketd, FILE *fp, int issock)
 	unsigned char a[2];
 
 	/* just return 0 if we hit the end-of-file */
-	if((FP_FREAD(a, sizeof(a), socketd, fp, issock)) <= 0) return 0;
-
+	if((FP_FREAD((char *)a, sizeof(a), socketd, fp, issock)) <= 0) return 0;	/* Type-casting done due to NetWare */
 	return (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
 }
 /* }}} */
@@ -316,16 +320,16 @@ static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker,
 	buffer = emalloc(length);
 	if ( !buffer) return;
 
- 	if (FP_FREAD(buffer, (long) length, socketd, fp, issock) <= 0) {
+ 	if (FP_FREAD((char *)buffer, (long) length, socketd, fp, issock) <= 0) {	/* Type-casting done due to NetWare */
 		efree(buffer);
 		return;
 	}
 
-	sprintf(markername, "APP%d", marker - M_APP0);
+	sprintf((char *)markername, "APP%d", marker - M_APP0);	/* Type-casting done due to NetWare */
 
-	if (zend_hash_find(Z_ARRVAL_P(info), markername, strlen(markername)+1, (void **) &tmp) == FAILURE) {
+	if (zend_hash_find(Z_ARRVAL_P(info), (char *)markername, strlen((char *)markername)+1, (void **) &tmp) == FAILURE) {	/* Type-casting done due to NetWare */
 		/* XXX we onyl catch the 1st tag of it's kind! */
-		add_assoc_stringl(info, markername, buffer, length, 1);
+		add_assoc_stringl(info, (char *)markername, (char *)buffer, length, 1);	/* Type-casting done due to NetWare */
 	}
 
 	efree(buffer);
@@ -362,7 +366,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 					length = php_read2(socketd, fp, issock);
 					result->bits   = FP_FGETC(socketd, fp, issock);
-					FP_FREAD(a, sizeof(a), socketd, fp, issock);
+					FP_FREAD((char *)a, sizeof(a), socketd, fp, issock);	/* Type-casting done due to NetWare */
 					result->height = (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
 					result->width  = (((unsigned short) a[ 2 ]) << 8) + ((unsigned short) a[ 3 ]);
 					result->channels = FP_FGETC(socketd, fp, issock);
@@ -507,7 +511,7 @@ static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval 
 	/* now we have the directory we can look how long it should be */
 	ifd_size = dir_size;
 	for(i=0;i<num_entries;i++) {
-		dir_entry 	 = ifd_data+2+i*12;
+		dir_entry 	 = (unsigned char *)ifd_data+2+i*12;	/* Type-casting done due to NetWare */
 		entry_tag    = php_ifd_get16u(dir_entry+0, motorola_intel);
 		entry_type   = php_ifd_get16u(dir_entry+2, motorola_intel);
 		entry_length = php_ifd_get32u(dir_entry+4, motorola_intel) * php_tiff_bytes_per_format[entry_type];

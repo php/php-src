@@ -111,7 +111,11 @@ typedef struct _sapi_globals_struct {
 	sapi_headers_struct sapi_headers;
 	int read_post_bytes;
 	unsigned char headers_sent;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc global_stat;
+#else
 	struct stat global_stat;
+#endif
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
@@ -147,7 +151,11 @@ SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D));
 
 SAPI_API int sapi_flush(TSRMLS_D);
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+SAPI_API struct stat_libc *sapi_get_stat(TSRMLS_D);
+#else
 SAPI_API struct stat *sapi_get_stat(TSRMLS_D);
+#endif
 SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC);
 
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D);

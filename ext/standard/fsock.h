@@ -25,6 +25,14 @@
 #ifndef FSOCK_H
 #define FSOCK_H
 
+#ifdef NETWARE
+#ifdef NEW_LIBC
+#include "sys/timeval.h"
+#else
+#include "netware/time_nw.h"    /* For 'timeval' */
+#endif
+#endif
+
 #include "file.h"
 
 #define PHP_FSOCK_CHUNK_SIZE 8192

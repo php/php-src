@@ -28,11 +28,15 @@
 #include "SAPI.h"
 #include <time.h>
 #include "php_main.h"
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 #include "build-defs.h"
 #endif
 #include "zend_globals.h"		/* needs ELS */
 #include "zend_highlight.h"
+
+/*#ifdef NETWARE*/
+/*#include "netware/env.h"*/	/* Temporary */
+/*#endif*/
 
 #define SECTION(name)  PUTS("<h2 align=\"center\">" name "</h2>\n")
 

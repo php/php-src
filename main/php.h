@@ -61,6 +61,13 @@
 #define PHP_DIR_SEPARATOR '/'
 #endif
 
+#ifdef NETWARE
+/*#include <utsname.h>*/
+#define PHP_UNAME  "NetWare"    /* For php_get_uname() function */
+#define PHP_OS      PHP_UNAME  /* This is obtained using 'uname' on Unix and assigned in the case of Windows.
+								  For NetWare, we'll do it this way atleast for now */
+#endif
+
 #include "php_regex.h"
 
 
@@ -171,6 +178,13 @@ char *strerror(int);
 # ifdef PHP_WIN32
 #include "win32/pwd.h"
 #include "win32/param.h"
+#elif defined(NETWARE)
+#ifdef NEW_LIBC
+#include <sys/param.h>
+#else
+#include "NetWare/param.h"
+#endif
+#include "NetWare/pwd.h"
 # else
 #include <pwd.h>
 #include <sys/param.h>
@@ -212,7 +226,17 @@ char *strerror(int);
 extern pval *data;
 #if !defined(PHP_WIN32)
 extern char **environ;
+#ifdef NETWARE
+#ifdef NEW_LIBC
+/*#undef environ*/  /* For now, so that our 'environ' implementation is used */
 #define php_sleep sleep
+#else
+#define php_sleep   delay   /* sleep() and usleep() are not available */
+#define usleep      delay
+#endif
+#else
+#define php_sleep sleep
+#endif
 #endif
 
 #ifdef PHP_PWRITE_64
@@ -291,7 +315,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #include "main/php_output.h"
 #define PHPWRITE(str, str_len)		php_body_write((str), (str_len) TSRMLS_CC)
 #define PUTS(str)					php_body_write((str), strlen((str)) TSRMLS_CC)
-#define PUTC(c)						(php_body_write(&(c), 1 TSRMLS_CC), (c))
+#define PUTC(c)						(php_body_write((const char*)(&(c)), 1 TSRMLS_CC), (c))	/* Type-casting done due to NetWare */
 #define PHPWRITE_H(str, str_len)	php_header_write((str), (str_len) TSRMLS_CC)
 #define PUTS_H(str)					php_header_write((str), strlen((str)) TSRMLS_CC)
 #define PUTC_H(c)					(php_header_write(&(c), 1 TSRMLS_CC), (c))

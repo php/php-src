@@ -25,6 +25,18 @@
 #include <stddef.h>
 #endif
 
+#ifdef NETWARE
+#define SIGPIPE SIGINT
+#ifdef NEW_LIBC /* Works fine for both Winsock and Berkeley sockets */
+#include <netinet/in.h>
+#else	/* NEW_LIBC */
+#include <sys/socket.h>
+#endif	/* NEW_LIBC */
+/* Security related functions: Using the dynamically exported functions */
+extern int NWSECInitializeSession(unsigned int ScriptLangType, unsigned int ExecutionMode, char *pszPublicDocDir);
+extern int NWSECTerminateSession();
+#endif	/* NETWARE */
+
 #include "zend.h"
 #include "php.h"
 #include "php_variables.h"
@@ -127,13 +139,20 @@ void php_save_umask(void)
 static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int ret=0;
-		
+
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
+
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
 	}
 	if (ret != str_length) {
 		php_handle_aborted_connection();
 	}
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return ret;
 }
 /* }}} */
@@ -142,6 +161,9 @@ static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
  */
 static void sapi_apache_flush(void *server_context)
 {
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (server_context) {
 #if MODULE_MAGIC_NUMBER > 19970110
 		rflush((request_rec *) server_context);
@@ -149,6 +171,9 @@ static void sapi_apache_flush(void *server_context)
 		bflush((request_rec *) server_context->connection->client);
 #endif
 	}
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -160,7 +185,13 @@ int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	request_rec *r = (request_rec *) SG(server_context);
 	void (*handler)(int);
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
+
+#ifndef NETWARE
 	handler = signal(SIGPIPE, SIG_IGN);
+#endif
 	while (total_read_bytes<count_bytes) {
 		hard_timeout("Read POST information", r); /* start timeout timer */
 		read_bytes = get_client_block(r, buffer+total_read_bytes, count_bytes-total_read_bytes);
@@ -170,7 +201,12 @@ int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		}
 		total_read_bytes += read_bytes;
 	}
-	signal(SIGPIPE, handler);	
+#ifndef NETWARE
+	signal(SIGPIPE, handler);
+#endif
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return total_read_bytes;
 }
 /* }}} */
@@ -179,7 +215,17 @@ int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
  */
 char *sapi_apache_read_cookies(TSRMLS_D)
 {
+#if !(defined(NETWARE) && defined(NETWARE_CLIB_BROKER))
 	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, "HTTP_COOKIE");
+#else
+    char *temp;
+
+    EnterClib();
+    temp = (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, "HTTP_COOKIE");
+    ExitClib();
+
+    return temp;
+#endif
 }
 /* }}} */
 
@@ -202,6 +248,9 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 		header_content++;
 	} while (*header_content==' ');
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (!strcasecmp(header_name, "Content-Type")) {
 		r->content_type = pstrdup(r->pool, header_content);
 	} else if (!strcasecmp(header_name, "Set-Cookie")) {
@@ -214,6 +263,9 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 	efree(sapi_header->header);
 	
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return 0;  /* don't use the default SAPI mechanism, Apache duplicates this functionality */
 }
 /* }}} */
@@ -226,8 +278,14 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		return SAPI_HEADER_SEND_FAILED;
 	}
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	((request_rec *) SG(server_context))->status = SG(sapi_headers).http_response_code;
 	send_http_header((request_rec *) SG(server_context));
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 /* }}} */
@@ -242,6 +300,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	zval **path_translated;
 	HashTable *symbol_table;
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	for (i = 0; i < arr->nelts; i++) {
 		char *val;
 
@@ -269,6 +330,9 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	}
 
 	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array TSRMLS_CC);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -291,6 +355,9 @@ static void php_apache_log_message(char *message)
 {
 	TSRMLS_FETCH();
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
 		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, "%s", message);
@@ -301,6 +368,9 @@ static void php_apache_log_message(char *message)
 		fprintf(stderr, "%s", message);
 		fprintf(stderr, "\n");
 	}
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -310,12 +380,18 @@ static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	php_output_set_status(0 TSRMLS_CC);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	if (AP(in_request)) {
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);
 	}
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -325,6 +401,9 @@ static int php_apache_sapi_activate(TSRMLS_D)
 {
 	request_rec *r = (request_rec *) SG(server_context); 
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
 	 * function that gets triggered when our request pool is destroyed.
@@ -342,6 +421,9 @@ static int php_apache_sapi_activate(TSRMLS_D)
 	 * send headers.
 	 */
 	SG(request_info).headers_only = r->header_only;
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -422,6 +504,9 @@ static void init_request_info(TSRMLS_D)
 	const char *authorization=NULL;
 	char *tmp;
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	SG(request_info).query_string = r->args;
 	SG(request_info).path_translated = r->filename;
 	SG(request_info).request_uri = r->uri;
@@ -451,6 +536,9 @@ static void init_request_info(TSRMLS_D)
 		SG(request_info).auth_user = NULL;
 		SG(request_info).auth_password = NULL;
 	}
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 }
 /* }}} */
 
@@ -491,6 +579,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	HashTable *per_dir_conf;
 	TSRMLS_FETCH();
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	if (AP(in_request)) {
 		zend_file_handle fh;
 
@@ -499,9 +590,15 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		fh.free_filename = 0;
 		fh.type = ZEND_HANDLE_FILENAME;
 		zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &fh);
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		ExitClib();
+#endif
 		return OK;
 	}
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	zend_first_try {
 		/* We don't accept OPTIONS requests, but take everything else */
 		if (r->method_number == M_OPTIONS) {
@@ -514,6 +611,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			return DECLINED;
 		}
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+		EnterClib();
+#endif
 		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
 		if (per_dir_conf) {
 			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
@@ -528,6 +628,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			zend_try {
 				zend_ini_deactivate(TSRMLS_C);
 			} zend_end_try();
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+			ExitClib();
+#endif
 			return DECLINED;
 		}
 		if (filename == NULL) {
@@ -540,6 +643,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			zend_try {
 				zend_ini_deactivate(TSRMLS_C);
 			} zend_end_try();
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+			ExitClib();
+#endif
 			return retval;
 		}
 #endif
@@ -550,6 +656,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 				zend_try {
 					zend_ini_deactivate(TSRMLS_C);
 				} zend_end_try();
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+				ExitClib();
+#endif
 				return retval;
 			}
 #else
@@ -579,6 +688,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		kill_timeout(r);
 	} zend_end_try();
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return OK;
 }
 /* }}} */
@@ -587,8 +699,24 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
  */
 static int send_parsed_php(request_rec * r)
 {
+#ifndef NETWARE
 	int result = send_php(r, 0, NULL);
+#else
+	int result;
 
+	/* Security changes */
+	/* 102 is used for PHP Scripts */
+	NWSECInitializeSession(102, 1, NULL);
+
+	result = send_php(r, 0, NULL);
+
+	/* Security changes */
+	NWSECTerminateSession();
+#endif
+
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 #if MEMORY_LIMIT
 	{
 		char *mem_usage;
@@ -600,6 +728,9 @@ static int send_parsed_php(request_rec * r)
 	}
 #endif
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return result;
 }
 /* }}} */
@@ -665,10 +796,16 @@ static void *php_create_dir(pool *p, char *dummy)
 {
 	HashTable *per_dir_info;
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	EnterClib();
+#endif
 	per_dir_info = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1, 0);
 	register_cleanup(p, (void *) per_dir_info, (void (*)(void *)) php_destroy_per_dir_info, (void (*)(void *)) zend_hash_destroy);
 
+#if defined(NETWARE) && defined(NETWARE_CLIB_BROKER)
+	ExitClib();
+#endif
 	return per_dir_info;
 }
 /* }}} */

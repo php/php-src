@@ -184,7 +184,11 @@ PHP_FUNCTION(iptcembed)
 	unsigned int marker;
 	unsigned int spool = 0, done = 0, inx, len;	
 	unsigned char *spoolbuf=0, *poi=0;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc sb;
+#else
 	struct stat sb;
+#endif
 
     switch(ZEND_NUM_ARGS()){
     case 3:
@@ -222,9 +226,15 @@ PHP_FUNCTION(iptcembed)
 	len = Z_STRLEN_PP(iptcdata);
 
 	if (spool < 2) {
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+		fstat(fileno(fp), ((struct stat*)&sb));
+
+		poi = spoolbuf = emalloc(len + sizeof(psheader) + ((struct stat*)&sb)->st_size + 1024);
+#else
 		fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = emalloc(len + sizeof(psheader) + sb.st_size + 1024);
+#endif
 
 		if (! spoolbuf) {
 			fclose(fp);
@@ -293,7 +303,7 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
+		RETVAL_STRINGL((char*)spoolbuf, poi - spoolbuf, 0);		/* Type-casting done due to NetWare */
 	} else {
 		RETURN_TRUE;
 	}
@@ -317,7 +327,7 @@ PHP_FUNCTION(iptcparse)
 
 	inx = 0;
 	length = Z_STRLEN_PP(str);
-	buffer = Z_STRVAL_PP(str);
+	buffer = (unsigned char *)Z_STRVAL_PP(str);	/* Type-casting done due to NetWare */
 
 	inheader = 0; /* have we already found the IPTC-Header??? */
 	tagsfound = 0; /* number of tags already found */
@@ -350,7 +360,7 @@ PHP_FUNCTION(iptcparse)
 			inx += 2;
 		}
 
-		sprintf(key, "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
+		sprintf((char*)key, "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);	/* Type-casting done due to NetWare */
 
 		if ((len > length) || (inx + len) > length)
 			break;
@@ -362,7 +372,7 @@ PHP_FUNCTION(iptcparse)
 	  		}
 		}
 
-		if (zend_hash_find(Z_ARRVAL_P(return_value), key, strlen(key) + 1, (void **) &element) == FAILURE) {
+		if (zend_hash_find(Z_ARRVAL_P(return_value), (char*)key, strlen((char*)key) + 1, (void **) &element) == FAILURE) {	/* Type-casting done due to NetWare */
 			ALLOC_ZVAL(values);
 			INIT_PZVAL(values);
 			if (array_init(values) == FAILURE) {
@@ -370,10 +380,10 @@ PHP_FUNCTION(iptcparse)
 				RETURN_FALSE;
 			}
 			
-			zend_hash_update(Z_ARRVAL_P(return_value), key, strlen(key)+1, (void *) &values, sizeof(pval*), (void **) &element);
-		} 
-			
-		add_next_index_stringl(*element, buffer+inx, len, 1);
+			zend_hash_update(Z_ARRVAL_P(return_value), (char*)key, strlen((char*)key)+1, (void *) &values, sizeof(pval*), (void **) &element);	/* Type-casting done due to NetWare */
+		}
+
+		add_next_index_stringl(*element, (char*)(buffer+inx), len, 1);	/* Type-casting done due to NetWare */
 
 		inx += len;
 

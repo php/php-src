@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 #include "build-defs.h"
 #endif
 #include "ext/standard/info.h"

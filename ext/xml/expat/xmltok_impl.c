@@ -3,6 +3,11 @@ Copyright (c) 1998, 1999 Thai Open Source Software Center Ltd
 See the file COPYING for copying permission.
 */
 
+#ifdef NETWARE  /* Check whether these two files are really required for NetWare */
+#include "xmltok.h"
+#include "xmltok_impl.h"
+#endif
+
 #include "php_compat.h"
 
 #ifndef IS_INVALID_CHAR

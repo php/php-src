@@ -45,7 +45,11 @@
 
 PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 {
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc sb;
+#else
 	struct stat sb;
+#endif
 	int ret, nofile=0;
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char path[MAXPATHLEN];
@@ -170,7 +174,11 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 PHPAPI char *php_get_current_user()
 {
 	struct passwd *pwd;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+	struct stat_libc *pstat;
+#else
 	struct stat *pstat;
+#endif
 	TSRMLS_FETCH();
 
 	if (SG(request_info).current_user) {
@@ -181,7 +189,11 @@ PHPAPI char *php_get_current_user()
 	USE_SAPI is defined, because cgi will also be
 	interfaced in USE_SAPI */
 
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+	pstat = (struct stat_libc *)sapi_get_stat(TSRMLS_C);
+#else
 	pstat = sapi_get_stat(TSRMLS_C);
+#endif
 
 	if (!pstat) {
 		return empty_string;

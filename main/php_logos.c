@@ -84,7 +84,7 @@ int php_info_logos(const char *logo_string TSRMLS_DC)
 	sapi_add_header(content_header, len, 1);
 	free(content_header);
 
-	PHPWRITE(logo_image->data, logo_image->size);
+	PHPWRITE((const char*)logo_image->data, logo_image->size);	/* Type-casting done due to NetWare */
 	return 1;
 }
 

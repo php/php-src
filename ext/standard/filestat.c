@@ -54,6 +54,8 @@
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
 #  include "win32/pwd.h"
+# elif defined(NETWARE)
+#  include "netware/pwd.h"
 # else
 #  include <pwd.h>
 # endif
@@ -335,7 +337,7 @@ PHP_FUNCTION(disk_free_space)
    Change file group */
 PHP_FUNCTION(chgrp)
 {
-#ifndef WINDOWS
+#if !defined(WINDOWS) && !defined(NETWARE)	/* 'chgrp' is not available on NetWare also */
 	pval **filename, **group;
 	gid_t gid;
 	struct group *gr=NULL;
@@ -383,7 +385,7 @@ PHP_FUNCTION(chgrp)
    Change file owner */
 PHP_FUNCTION(chown)
 {
-#ifndef WINDOWS
+#if !defined(WINDOWS) && !defined(NETWARE)	/* 'chown' is not available on NetWare also */
 	pval **filename, **user;
 	int ret;
 	uid_t uid;
@@ -472,7 +474,12 @@ PHP_FUNCTION(touch)
 {
 	pval **filename, **filetime, **fileatime;
 	int ret;
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+    struct stat_libc sb;
+#else
 	struct stat sb;
+#endif
+
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = NULL;
@@ -546,7 +553,11 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc *stat_sb;
+#else
 	struct stat *stat_sb;
+#endif
 	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
@@ -559,7 +570,11 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+	stat_sb = (struct stat_libc *)&BG(sb);
+#else
 	stat_sb = &BG(sb);
+#endif
 
 	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
 		if (!BG(CurrentStatFile) || filename_length > BG(CurrentStatLength)) {
@@ -574,7 +589,12 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #if HAVE_SYMLINK
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
+
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+		if (VCWD_STAT(BG(CurrentStatFile), (struct stat_libc *)&BG(sb)) == -1) {
+#else
 		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
+#endif
 			if (!IS_LINK_OPERATION(type) && (!IS_EXISTS_CHECK(type) || errno != ENOENT)) { /* fileexists() test must print no error */
 				php_error(E_WARNING, "stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
@@ -599,6 +619,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 
 
+#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(BG(sb).st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -628,6 +649,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 		}
 	}
+#endif	/* NETWARE */
 
 	switch (type) {
 	case FS_PERMS:
@@ -641,11 +663,23 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_GROUP:
 		RETURN_LONG((long)BG(sb).st_gid);
 	case FS_ATIME:
+#if defined(NETWARE) && defined(NEW_LIBC)
+		RETURN_LONG((long)((((struct stat_libc *)stat_sb)->st_atime).tv_sec));
+#else
 		RETURN_LONG((long)BG(sb).st_atime);
+#endif
 	case FS_MTIME:
+#if defined(NETWARE) && defined(NEW_LIBC)
+		RETURN_LONG((long)((((struct stat_libc *)stat_sb)->st_mtime).tv_sec));
+#else
 		RETURN_LONG((long)BG(sb).st_mtime);
+#endif
 	case FS_CTIME:
+#if defined(NETWARE) && defined(NEW_LIBC)
+		RETURN_LONG((long)((((struct stat_libc *)stat_sb)->st_ctime).tv_sec));
+#else
 		RETURN_LONG((long)BG(sb).st_ctime);
+#endif
 	case FS_TYPE:
 #if HAVE_SYMLINK
 		if (S_ISLNK(BG(lsb).st_mode)) {
@@ -665,19 +699,25 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		php_error(E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
+	#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
+	#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
 	case FS_IS_R:
+	#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
+	#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
 	case FS_IS_X:
+	#ifndef NETWARE	/* getuid is not available on NetWare */
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
+	#endif	/* NETWARE */
 		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
@@ -700,7 +740,42 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-	
+
+#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
+		MAKE_LONG_ZVAL_INCREF(stat_dev, ((struct stat_libc*)stat_sb)->st_dev);
+		MAKE_LONG_ZVAL_INCREF(stat_ino, ((struct stat_libc*)stat_sb)->st_ino);
+		MAKE_LONG_ZVAL_INCREF(stat_mode, ((struct stat_libc*)stat_sb)->st_mode);
+		MAKE_LONG_ZVAL_INCREF(stat_nlink, ((struct stat_libc*)stat_sb)->st_nlink);
+		MAKE_LONG_ZVAL_INCREF(stat_uid, ((struct stat_libc*)stat_sb)->st_uid);
+		MAKE_LONG_ZVAL_INCREF(stat_gid, ((struct stat_libc*)stat_sb)->st_gid);
+#ifdef HAVE_ST_RDEV
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, ((struct stat_libc*)stat_sb)->st_rdev); 
+#else
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1); 
+#endif
+		MAKE_LONG_ZVAL_INCREF(stat_size, ((struct stat_libc*)stat_sb)->st_size);
+#ifdef NEW_LIBC
+		MAKE_LONG_ZVAL_INCREF(stat_atime, (((struct stat_libc*)stat_sb)->st_atime).tv_sec);
+		MAKE_LONG_ZVAL_INCREF(stat_mtime, (((struct stat_libc*)stat_sb)->st_mtime).tv_sec);
+		MAKE_LONG_ZVAL_INCREF(stat_ctime, (((struct stat_libc*)stat_sb)->st_ctime).tv_sec);
+#else
+		MAKE_LONG_ZVAL_INCREF(stat_atime, ((struct stat_libc*)stat_sb)->st_atime);
+		MAKE_LONG_ZVAL_INCREF(stat_mtime, ((struct stat_libc*)stat_sb)->st_mtime);
+		MAKE_LONG_ZVAL_INCREF(stat_ctime, ((struct stat_libc*)stat_sb)->st_ctime);
+#endif
+#ifdef HAVE_ST_BLKSIZE
+		MAKE_LONG_ZVAL_INCREF(stat_blksize, ((struct stat_libc*)stat_sb)->st_blksize); 
+#else
+		MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
+#endif
+#ifdef HAVE_ST_BLOCKS
+		MAKE_LONG_ZVAL_INCREF(stat_blocks, ((struct stat_libc*)stat_sb)->st_blocks);
+#else
+		MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
+#endif
+
+#else	/* NETWARE && CLIB_STAT_PATCH */
+
 		MAKE_LONG_ZVAL_INCREF(stat_dev, stat_sb->st_dev);
 		MAKE_LONG_ZVAL_INCREF(stat_ino, stat_sb->st_ino);
 		MAKE_LONG_ZVAL_INCREF(stat_mode, stat_sb->st_mode);
@@ -726,6 +801,9 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #else
 		MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
 #endif
+
+#endif	/* NETWARE && CLIB_STAT_PATCH */
+
 		/* Store numeric indexes in propper order */
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ino, sizeof(zval *), NULL);
