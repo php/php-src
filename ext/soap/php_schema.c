@@ -83,7 +83,7 @@ int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTyp
 	if(name != NULL)
 	{
 		HashTable *ht;
-		char *key;
+		smart_str key = {0};
 		sdlTypePtr newType, *ptr;
 
 		newType = malloc(sizeof(sdlType));
@@ -94,8 +94,10 @@ int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTyp
 		if(cur_type == NULL)
 		{
 			ht = (*sdl)->types;
-			key = emalloc(strlen(newType->namens) + strlen(newType->name) + 2);
-			sprintf(key, "%s:%s", newType->namens, newType->name);
+			smart_str_appends(&key, newType->namens);
+			smart_str_appendc(&key, ':');
+			smart_str_appends(&key, newType->name);
+			smart_str_0(&key);
 		}
 		else
 		{
@@ -104,13 +106,13 @@ int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTyp
 				cur_type->elements = malloc(sizeof(HashTable));
 				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
 			}
-			key = strdup(newType->name);
 			ht = cur_type->elements;
+			smart_str_appends(&key, cur_type->name);
 		}
 
-		zend_hash_add(ht, key, strlen(key), &newType, sizeof(sdlTypePtr), (void **)&ptr);
+		zend_hash_add(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
 		cur_type = (*ptr);
-		efree(key);
+		smart_str_free(&key);
 	}
 
 	content = get_node(simpleType->children, "restriction");
@@ -749,7 +751,7 @@ int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlType
 	{
 		HashTable *ht;
 		sdlTypePtr newType, *ptr;
-		char *key;
+		smart_str key = {0};
 
 		newType = malloc(sizeof(sdlType));
 		memset(newType, 0, sizeof(sdlType));
@@ -759,8 +761,10 @@ int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlType
 		if(cur_type == NULL)
 		{
 			ht = (*sdl)->types;
-			key = emalloc(strlen(newType->namens) + strlen(newType->name) + 2);
-			sprintf(key, "%s:%s", newType->namens, newType->name);
+			smart_str_appends(&key, newType->namens);
+			smart_str_appendc(&key, ':');
+			smart_str_appends(&key, newType->name);
+			smart_str_0(&key);
 		}
 		else
 		{
@@ -770,13 +774,13 @@ int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlType
 				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
 			}
 			ht = cur_type->elements;
-			key = estrdup(cur_type->name);
+			smart_str_appends(&key, newType->name);
 		}
 
-		zend_hash_add(ht, key, strlen(key), &newType, sizeof(sdlTypePtr), (void **)&ptr);
+		zend_hash_add(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
 		cur_type = (*ptr);
 		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
-		efree(key);
+		smart_str_free(&key);
 	}
 
 	content = get_node(compType->children, "simpleContent");
@@ -859,6 +863,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 	{
 		HashTable *addHash;
 		sdlTypePtr newType, *tmp;
+		smart_str key = {0};
 
 		newType = malloc(sizeof(sdlType));
 
@@ -870,7 +875,12 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 		newType->max_occurs = 1;
 
 		if(cur_type == NULL)
+		{
 			addHash = (*sdl)->types;
+			smart_str_appends(&key, newType->namens);
+			smart_str_appendc(&key, ':');
+			smart_str_appends(&key, newType->name);
+		}
 		else
 		{
 			if(cur_type->elements == NULL)
@@ -879,16 +889,33 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 				zend_hash_init(cur_type->elements, 0, NULL, delete_type, 1);
 			}
 			addHash = cur_type->elements;
+			smart_str_appends(&key, newType->name);
 		}
 
-		zend_hash_add(addHash, newType->name, strlen(newType->name), &newType, sizeof(sdlTypePtr), (void **)&tmp);
+		smart_str_0(&key);
+		zend_hash_add(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 		cur_type = (*tmp);
+		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
+		smart_str_free(&key);
 	}
+
+	curattr = get_attribute(attrs, "maxOccurs");
+	if(curattr)
+	{
+		if(!strcmp(curattr->children->content, "unbounded"))
+			cur_type->max_occurs = -1;
+		else
+			cur_type->max_occurs = atoi(curattr->children->content);
+	}
+
+	curattr = get_attribute(attrs, "minOccurs");
+	if(curattr)
+		cur_type->min_occurs = atoi(curattr->children->content);
 
 	//nillable = boolean : false
 	attrs = element->properties;
 	curattr = get_attribute(attrs, "nillable");
-	if(curattr != NULL)
+	if(curattr)
 	{
 		if(!stricmp(curattr->children->content, "true") ||
 			!stricmp(curattr->children->content, "1"))
@@ -918,6 +945,9 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 		if(str_ns) efree(str_ns);
 		if(cptype) efree(cptype);
 	}
+
+	if(cur_type->max_occurs == -1 || cur_type->max_occurs > 1)
+		cur_type->encode = get_conversion(SOAP_ENC_ARRAY);
 
 	content = get_node(element->children, "simpleType");
 	if(content)
