@@ -114,7 +114,6 @@ static void screw_url(lexdata *state)
 	
 	/* copy old URI */
 	len = MIN(q - p, sizeof(buf) - 1);
-		php_error(E_WARNING,"%p - %p - %p - %p - %d - %d",state->start,state->crs,p,q,q-p,len);
 
 	memcpy(url, p, len);
 	url[len] = '\0';
