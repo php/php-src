@@ -78,6 +78,18 @@ static void zend_extension_deactivator(zend_extension *extension)
 }
 
 
+static int is_not_internal_function(zend_function *function)
+{
+	return(function->type != ZEND_INTERNAL_FUNCTION);
+}
+
+
+static int is_not_internal_class(zend_class_entry *ce)
+{
+	return(ce->type != ZEND_INTERNAL_CLASS);
+}
+
+
 void init_executor(CLS_D ELS_DC)
 {
 	INIT_ZVAL(EG(uninitialized_zval));
@@ -144,13 +156,21 @@ void shutdown_executor(ELS_D)
 		}
 	}
 
-	zend_destroy_rsrc_list(ELS_C); /* must be destroyed after the main symbol table is destroyed */
 
 	zend_ptr_stack_destroy(&EG(argument_stack));
+
+	/* Destroy all op arrays */
 	if (EG(main_op_array)) {
 		destroy_op_array(EG(main_op_array));
 		efree(EG(main_op_array));
 	}
+	zend_hash_apply(EG(function_table), (int (*)(void *)) is_not_internal_function);
+	zend_hash_apply(EG(class_table), (int (*)(void *)) is_not_internal_class);
+
+	zend_destroy_rsrc_list(ELS_C); /* must be destroyed after the main symbol table and
+									* op arrays are destroyed.
+									*/
+
 	clean_non_persistent_constants();
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
