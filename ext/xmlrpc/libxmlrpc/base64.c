@@ -104,13 +104,13 @@ void base64_encode(struct buffer_st *b, const char *source, int length)
       for (i = 0; i < 4; i++) {
 	buffer_add(b, ogroup[i]);
 	if (!(b->offset % 72)) {
-	  // buffer_add(b, '\r');
+	  /* buffer_add(b, '\r'); */
 	  buffer_add(b, '\n');
 	}
       }
     }
   }
-  // buffer_add(b, '\r');
+  /* buffer_add(b, '\r'); */
   buffer_add(b, '\n');
 }
 
