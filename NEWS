@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
   . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
   . bug #30573 (compiler warnings in libmbfl due to invalid type cast)
+  . Bug #30549 (incorrect character translations for some ISO8859 charsets).
 - Fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows when the
   api function returns -1 (Georg)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
@@ -108,8 +109,6 @@ PHP                                                                        NEWS
 - Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
 - Fixed bug #30725 (PHP segfaults when an exception is thrown in getIterator() 
   within foreach). (Marcus)
-- Fixed bug #30549 (incorrect character translations for some ISO8859
-  charsets). (Moriyoshi)
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
 - Fixed bug #30430 (odbc_next_result() doesn't bind values and that results 
   in segfault). (pdan-php at esync dot org, Tony)
