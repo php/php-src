@@ -467,7 +467,7 @@ static char *get_active_class_name(char **space TSRMLS_DC)
  */
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
-	char *buffer = NULL, *docref_buf = NULL, *ref = NULL, *target = NULL;
+	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
 	int buffer_len = 0;
@@ -514,6 +514,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		docref_target = strchr(docref, '#');
 		docref = NULL;
 	}
+
+	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
 		spprintf(&docref_buf, 0, "function.%s", function);
 		while((p = strchr(docref_buf, '_')) != NULL) {
@@ -521,16 +523,25 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		}
 		docref = docref_buf;
 	}
+
+	/* we have a docref for a function AND
+	 * - we show erroes in html mode OR
+	 * - the user wants to see the links anyway
+	 */
 	if (docref && is_function && (PG(html_errors) || strlen(PG(docref_root)))) {
 		if (strncmp(docref, "http://", 7)) {
+			/* We don't have 'http://' so we use docref_root */
+
+			char *ref;  /* temp copy for duplicated docref */
+
 			docref_root = PG(docref_root);
-			/* now check copy of extension */
+
 			ref = estrdup(docref);
 			if (docref_buf) {
 				efree(docref_buf);
 			}
 			docref_buf = ref;
-			docref = docref_buf;
+			/* strip of the target if any */
 			p = strrchr(ref, '#');
 			if (p) {
 				target = estrdup(p);
@@ -539,12 +550,14 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 					*p = '\0';
 				}
 			}
-			if ((!p || target) && PG(docref_ext) && strlen(PG(docref_ext))) {
+			/* add the extension if it is set in ini */
+			if (PG(docref_ext) && strlen(PG(docref_ext))) {
 				spprintf(&docref_buf, 0, "%s%s", ref, PG(docref_ext));
 				efree(ref);
-				docref = docref_buf;
 			}
+			docref = docref_buf;
 		}
+		/* display html formatted or only show the additional links */
 		if (PG(html_errors)) {
 			spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
 		} else {
