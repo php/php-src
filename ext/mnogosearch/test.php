@@ -63,10 +63,10 @@
 //		exit;
 //	}
 
-	if (! Udm_Load_Ispell_Data($udm,UDM_ISPELL_TYPE_SERVER,'','',1)) {
-		printf("Error loading ispell data from server<br>\n");
-		exit;
-	}
+//	if (! Udm_Load_Ispell_Data($udm,UDM_ISPELL_TYPE_SERVER,'','',1)) {
+//		printf("Error loading ispell data from server<br>\n");
+//		exit;
+//	}
 
 // Stage 3: add search limits
 //	Udm_Add_Search_Limit($udm,UDM_LIMIT_URL,"http://www.mydomain.com/%");
