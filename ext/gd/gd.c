@@ -67,6 +67,13 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #include "libgd/wbmp.h"
 #endif
 #ifdef ENABLE_GD_TTF
+# ifdef HAVE_LIBFREETYPE
+#  include <freetype/freetype.h>
+# else
+#  ifdef HAVE_LIBTTF
+#   include <freetype.h>
+#  endif
+# endif
 # include "gdttf.h"
 #endif
 
@@ -467,8 +474,18 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "FreeType Support", "enabled");
 #if HAVE_LIBFREETYPE
 	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
+	{
+		char tmp[256];
+		snprintf(tmp, sizeof(tmp), "%d.%d.%d", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
+		php_info_print_table_row(2, "FreeType Version", tmp);
+	}
 #elif HAVE_LIBTTF
 	php_info_print_table_row(2, "FreeType Linkage", "with TTF library");
+	{
+		char tmp[256];
+		snprintf(tmp, sizeof(tmp), "%d.%d", TT_FREETYPE_MAJOR, TT_FREETYPE_MINOR);
+		php_info_print_table_row(2, "FreeType Version", tmp);
+	}
 #else
 	php_info_print_table_row(2, "FreeType Linkage", "with unknown library");
 #endif
