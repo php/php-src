@@ -84,11 +84,11 @@ static int le_pdf;
 
 function_entry pdf_functions[] = {
 	PHP_FE(pdf_set_info, NULL)
-	PHP_FE(pdf_set_info_creator, NULL)   // deprecated
-	PHP_FE(pdf_set_info_title, NULL)   // deprecated
-	PHP_FE(pdf_set_info_subject, NULL)   // deprecated
-	PHP_FE(pdf_set_info_author, NULL)   // deprecated
-	PHP_FE(pdf_set_info_keywords, NULL)   // deprecated
+	PHP_FE(pdf_set_info_creator, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_title, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_subject, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_author, NULL)	/* deprecated */
+	PHP_FE(pdf_set_info_keywords, NULL)	/* deprecated /*
 	PHP_FE(pdf_open, NULL)
 	PHP_FE(pdf_close, NULL)
 	PHP_FE(pdf_begin_page, NULL)
@@ -98,13 +98,13 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_show_boxed, NULL)
 	PHP_FE(pdf_skew, NULL)
 	PHP_FE(pdf_set_font, NULL)
-	PHP_FE(pdf_set_leading, NULL)   // deprecated
-	PHP_FE(pdf_set_text_rendering, NULL)   // deprecated
-	PHP_FE(pdf_set_horiz_scaling, NULL)   // deprecated
-	PHP_FE(pdf_set_text_rise, NULL)   // deprecated
+	PHP_FE(pdf_set_leading, NULL)   		/* deprecated */
+	PHP_FE(pdf_set_text_rendering, NULL)	/* deprecated */
+	PHP_FE(pdf_set_horiz_scaling, NULL)		/* deprecated */
+	PHP_FE(pdf_set_text_rise, NULL)			/* deprecated */
 	PHP_FE(pdf_set_text_pos, NULL)
-	PHP_FE(pdf_set_char_spacing, NULL)   // deprecated
-	PHP_FE(pdf_set_word_spacing, NULL)   // deprecated
+	PHP_FE(pdf_set_char_spacing, NULL)		/* deprecated */
+	PHP_FE(pdf_set_word_spacing, NULL)		/* deprecated */
 	PHP_FE(pdf_get_font, NULL)
 	PHP_FE(pdf_get_fontname, NULL)
 	PHP_FE(pdf_get_fontsize, NULL)
@@ -147,15 +147,15 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_setrgbcolor, NULL)
 	PHP_FE(pdf_add_outline, NULL)
 	PHP_FALIAS(pdf_add_bookmark, pdf_add_outline, NULL)
-	PHP_FE(pdf_set_transition, NULL)   // deprecated
-	PHP_FE(pdf_set_duration, NULL)   // deprecated
-	PHP_FE(pdf_open_jpeg, NULL)   // deprecated
-	PHP_FE(pdf_open_tiff, NULL)   // deprecated
-	PHP_FE(pdf_open_png, NULL)   // deprecated
+	PHP_FE(pdf_set_transition, NULL)	/* deprecated */
+	PHP_FE(pdf_set_duration, NULL)		/* deprecated */
+	PHP_FE(pdf_open_jpeg, NULL)			/* deprecated */
+	PHP_FE(pdf_open_tiff, NULL)			/* deprecated */
+	PHP_FE(pdf_open_png, NULL)			/* deprecated */
 #if HAVE_LIBGD13
 	PHP_FE(pdf_open_memory_image, NULL)
 #endif
-	PHP_FE(pdf_open_gif, NULL)   // deprecated
+	PHP_FE(pdf_open_gif, NULL)			/* deprecated */
 	PHP_FE(pdf_open_image_file, NULL)
 	PHP_FE(pdf_close_image, NULL)
 	PHP_FE(pdf_place_image, NULL)
