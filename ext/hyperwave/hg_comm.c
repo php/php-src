@@ -599,11 +599,12 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 		
 				}
 		
-				efree(anchors[i]);
-				if(docofanchorrec[i]) efree(docofanchorrec[i]);
-				if(reldestrec)
-					if(reldestrec[i]) efree(reldestrec[i]);
 			}
+			/* free memory even if it is an invisible anchor */
+			efree(anchors[i]);
+			if(docofanchorrec[i]) efree(docofanchorrec[i]);
+			if(reldestrec)
+				if(reldestrec[i]) efree(reldestrec[i]);
 		}
 	}
 	return pAnchorList;
@@ -802,7 +803,8 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	}
 	snprintf(istr, BUFFERLEN, "<BODY %s>", bgstr);
 	*bodytag = estrdup(istr);
-	if(scriptname != urlprefix) efree(scriptname);
+//	if(scriptname != urlprefix) efree(scriptname);
+	if(scriptname != NULL) efree(scriptname);
 	return(newtext);
 }
 #undef BUFFERLEN
@@ -2221,7 +2223,6 @@ int send_insertanchors(char **text, int *count, char **anchors, char **destrec, 
 #endif
 		*bodytag = strdup(body);
 		if(body) efree(body);
-fprintf(stderr, "bodytag = %s\n", *bodytag);
 		*text = newtext;
 		*count = strlen(newtext);
 	}
