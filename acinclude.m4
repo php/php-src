@@ -1788,7 +1788,20 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
       LIBXML_INCS=`$XML2_CONFIG --cflags`
       PHP_EVAL_LIBLINE($LIBXML_LIBS, $1)
       PHP_EVAL_INCLINE($LIBXML_INCS)
-      AC_DEFINE(HAVE_LIBXML, 1, [ ])
+
+      dnl Check that build works with given libs
+      AC_CACHE_CHECK(whether libxml build works, php_cv_libxml_build_works, [
+        PHP_TEST_BUILD(xmlInitParser,
+        [
+          php_cv_libxml_build_works=yes
+          AC_DEFINE(HAVE_LIBXML, 1, [ ])
+        ], [
+          AC_MSG_RESULT(no)
+          AC_MSG_ERROR([build test failed.  Please check the config.log for details.])
+        ], [
+          [$]$1
+        ])
+      ])
       $2
     else
       AC_MSG_ERROR([libxml2 version 2.5.10 or greater required.])
@@ -1879,4 +1892,29 @@ IFS="- /.
   IFS=$ac_IFS
 
   APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
+])
+
+dnl
+dnl PHP_TEST_BUILD(function, action-if-ok, action-if-not-ok [, extra-libs [, extra-source]])
+dnl This macro checks whether build works and given function exists.
+dnl
+AC_DEFUN(PHP_TEST_BUILD, [
+  old_LIBS=$LIBS
+  LIBS="$4 $LIBS"
+  AC_TRY_RUN([
+    $5
+    char $1();
+    int main() {
+      $1();
+      return 0;
+    }
+  ], [
+    LIBS=$old_LIBS
+    $2
+  ],[
+    LIBS=$old_LIBS
+    $3
+  ],[
+    LIBS=$old_LIBS
+  ])
 ])
