@@ -1823,6 +1823,8 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	} else if (!key_len) {
 		Z_ARRVAL_PP(stack)->nNextFreeElement = Z_ARRVAL_PP(stack)->nNextFreeElement - 1;
 	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(stack));
 }
 /* }}} */
 
