@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Harald Radi <phanto@php.net                                  |
+   | Author: Harald Radi <phanto@php.net>                                 |
    |         Parts based on CGI SAPI Module by                            |
    |         Rasmus Lerdorf, Stig Bakken and Zeev Suraski                 |
    +----------------------------------------------------------------------+
@@ -260,7 +260,7 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	ALLOC_ZVAL(param[0]);
 	INIT_PZVAL(param[0]);
 
-	ZVAL_STRING(&function_name, "milter_envelope_from", 0);
+	ZVAL_STRING(&function_name, "milter_envfrom", 0);
 	array_init(param[0]);
 
 	while (*argv) {
@@ -300,7 +300,7 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	ALLOC_ZVAL(param[0]);
 	INIT_PZVAL(param[0]);
 
-	ZVAL_STRING(&function_name, "milter_envelope_recipient", 0);
+	ZVAL_STRING(&function_name, "milter_envrcpt", 0);
 	array_init(param[0]);
 
 	while (*argv) {
