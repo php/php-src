@@ -78,6 +78,10 @@ PHP_FUNCTION(yp_get_default_domain)
 {
 	char *outdomain;
 
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
 	if((YP(error) = yp_get_default_domain(&outdomain))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
