@@ -44,7 +44,7 @@ int zend_load_extension(char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
-	zend_extension extension, *new_extension;
+	zend_extension *new_extension;
 	zend_extension_version_info *extension_version_info;
 
 	handle = DL_LOAD(path);
@@ -106,20 +106,29 @@ int zend_load_extension(char *path)
 			return FAILURE;
 		}
 	}
-	extension = *new_extension;
-	extension.handle = handle;
-
-	zend_llist_add_element(&zend_extensions, &extension);
-
-	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
-
-	zend_append_version_info(&extension);
-	return SUCCESS;
+	return zend_register_extension(new_extension, handle);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
 	return FAILURE;
 #endif
 }
+
+
+int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
+{
+	zend_extension extension;
+
+	extension = *new_extension;
+	extension.handle = handle;
+
+	zend_llist_add_element(&zend_extensions, &extension);
+
+	zend_append_version_info(&extension);
+	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
+
+	return SUCCESS;
+}
+
 
 static void zend_extension_shutdown(zend_extension *extension)
 {
@@ -141,7 +150,9 @@ void zend_shutdown_extensions()
 void zend_extension_dtor(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
-	DL_UNLOAD(extension->handle);
+	if (extension->handle) {
+		DL_UNLOAD(extension->handle);
+	}
 #endif
 }
 
