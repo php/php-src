@@ -158,7 +158,7 @@ if (isset($argc) && $argc > 1) {
 
 	// Run selected tests.
 	if (count($test_files)) {
-		asort($test_files);
+		usort($test_files, "test_sort");
 		echo "Running selected tests.\n";
 		foreach($test_files AS $name) {
 			$test_results[$name] = run_test($php,$name);
@@ -220,7 +220,19 @@ function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
 	closedir($o);
 }
 
-sort($test_files);
+function test_sort($a, $b) {
+	global $cwd;
+
+	$ta = strpos($a, "{$cwd}/tests/run-test")===0 ? 1 : 0;
+	$tb = strpos($b, "{$cwd}/tests/run-test")===0 ? 1 : 0;
+	if ($ta == $tb) {
+		return strcmp($a, $b);
+	} else {
+		return $ta ? -1 : +1;
+	}
+}
+
+usort($test_files, "test_sort");
 
 $start_time = time();
 
