@@ -46,6 +46,8 @@ HEADER_DIRS = \
 	ext/xml/ \
 	ext/xml/expat/ \
 	ext/mbstring/ \
+	ext/mbstring/libmbfl/ \
+    ext/mbstring/libmbfl/mbfl/ \
 	ext/sqlite/libsqlite/src/sqlite.h
 
 install-headers:
