@@ -1,5 +1,7 @@
 
 LTLIBRARY_NAME    = libldap.la
 LTLIBRARY_SOURCES = ldap.c
+LTLIBRARY_SHARED_NAME = ldap.la
+LTLIBRARY_SHARED_LIBADD = $(LDAP_SHARED_LIBADD)
 
 include $(top_srcdir)/build/dynlib.mk
