@@ -45,8 +45,12 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
-#include "ftp.h"
 
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+#include "ftp.h"
 
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
