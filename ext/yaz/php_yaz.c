@@ -48,7 +48,7 @@
 #include <yaz/yaz-ccl.h>
 #include <yaz/zoom.h>
 
-#define MAX_ASSOC 100
+#define MAX_ASSOC 200
 
 typedef struct Yaz_AssociationInfo *Yaz_Association;
 
@@ -63,6 +63,7 @@ struct Yaz_AssociationInfo {
 	int in_use;
 	int order;
 	int zval_resource;
+	long time_stamp;
 };
 
 static Yaz_Association yaz_association_mk()
@@ -81,6 +82,7 @@ static Yaz_Association yaz_association_mk()
 	p->persistent = 0;
 	p->ccl_parser = ccl_parser_create();
 	p->ccl_parser->bibset = 0;
+	p->time_stamp = 0;
 	return p;
 }
 
@@ -374,7 +376,7 @@ PHP_FUNCTION(yaz_connect)
 	as->in_use = 1;
 	as->persistent = persistent;
 	as->order = YAZSG(assoc_seq);
-
+	as->time_stamp = time(0);
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
@@ -1484,6 +1486,11 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL, OnUpdateInt, max_links, zend_yaz_globals, yaz_globals)
 #endif
+#if PHP_MAJOR_VERSION >= 5
+	STD_PHP_INI_ENTRY("yaz.keepalive", "120", PHP_INI_ALL, OnUpdateLong, keepalive, zend_yaz_globals, yaz_globals)
+#else
+	STD_PHP_INI_ENTRY("yaz.keepalive", "120", PHP_INI_ALL, OnUpdateInt, keepalive, zend_yaz_globals, yaz_globals)
+#endif
 	STD_PHP_INI_ENTRY("yaz.log_file", NULL, PHP_INI_ALL, OnUpdateString, log_file, zend_yaz_globals, yaz_globals)
 PHP_INI_END()
 /* }}} */
@@ -1566,6 +1573,31 @@ PHP_MINFO_FUNCTION(yaz)
 
 PHP_RSHUTDOWN_FUNCTION(yaz)
 {
+	long now = time(0);
+	int i;
+
+	yaz_log(LOG_LOG, "rshutdown keepalive=%ld", YAZSG(keepalive));
+#ifdef ZTS
+	tsrm_mutex_lock(yaz_mutex);
+#endif
+	for (i = 0; i < YAZSG(max_links); i++) {
+		Yaz_Association *as = shared_associations + i;
+		if (*as)
+		{
+			if (now - (*as)->time_stamp > YAZSG(keepalive))
+			{
+				const char *host = option_get(*as, "host");
+				if (host)
+					yaz_log(LOG_LOG, "shutdown of %s", host);
+				
+				yaz_association_destroy(*as);
+				*as = 0;
+			}
+		}
+	}
+#ifdef ZTS
+	tsrm_mutex_unlock(yaz_mutex);
+#endif
 	return SUCCESS;
 }
 
