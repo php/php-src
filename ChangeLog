@@ -1,3 +1,56 @@
+2001-04-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/fdf.c
+      ext/fdf/php_fdf.h: Fixed some bugs.
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h: Killed some compile warnings.
+
+2001-04-06  Sean Bright  <elixer@erols.com>
+
+    * ext/skeleton/skeleton.c: Fixed possible overflow again.
+
+2001-04-06  Jon Parise  <jon@csh.rit.edu>
+
+    * php.ini-dist: Comment out the 'include_path' variable by default.
+
+
+    * ext/skeleton/skeleton.c: Make this message more grammatically correct.
+
+    * configure.in: Fix expansion of PEAR_INSTALLDIR.
+
+2001-04-06  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: Support also old arg_separator directive.
+
+2001-04-06  Sean Bright  <elixer@erols.com>
+
+    * ext/skeleton/skeleton.c: Fixed possible overflow.
+
+2001-04-06  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/sql2xml.php:
+    - Row and result Tag names are now configurable
+    - some errorchecking
+
+2001-04-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/URL.php: Initial checkin of URL Cache.
+
+2001-04-06  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      main/main.c
+      main/php_globals.h
+      main/php_variables.c
+      php.ini-dist
+      php.ini-optimized: MFH
+
+    * main/php_variables.c: fixed typo in CVS id
+
 2001-04-05  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/crypt.c: spaces to tabs
