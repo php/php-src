@@ -486,7 +486,6 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 
 		case UDM_PARAM_WORD_MATCH:
-#if UDM_VERSION_ID < 30200						
 			switch (atoi(val)){
 					case UDM_MATCH_WORD:					
 						Agent->word_match=UDM_MATCH_WORD;
@@ -511,7 +510,6 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 						RETURN_FALSE;
 						break;
 			}
-#endif			
 			break;
 		case UDM_PARAM_CACHE_MODE: 
 			switch (atoi(val)){
@@ -640,12 +638,10 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 
 		case UDM_PARAM_STOPFILE: 
-#if UDM_VERSION_ID < 30200								
 			if (UdmFileLoadStopList(Agent->Conf,val)) {
 				php_error(E_WARNING,Agent->Conf->errstr);
 				RETURN_FALSE;
 			}
-#endif			    
 			break;
 			
 		case UDM_PARAM_WEIGHT_FACTOR: 
