@@ -1,3 +1,25 @@
+2003-09-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Pointer size fix
+
+2003-09-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/swf/swf.c:
+      When opening file for write, it may not exist.
+
+2003-09-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      MFH: - Fixed bug #25504 (pcre_match_all() crashes when passed only 2
+      parameters)
+
+    * ext/pcre/php_pcre.c:
+      - Fixed bug #25504 (pcre_match_all() crashes when passed only 2 parameters)
+
 2003-09-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
