@@ -1,0 +1,36 @@
+// $Id$
+// vim:ft=javascript ts=4 sw=4
+
+ARG_WITH("ingres", "Ingres support", "no");
+
+if (PHP_INGRES != "no") {
+    if (PHP_INGRES == "yes") { 
+		// no path was supplied to --with-ingres
+		// Find Ingres header files and libaries through %II_SYSTEM%
+		var ii_system=WshShell.Environment("Process").Item("II_SYSTEM");
+
+		if (ii_system != "") {
+			if (CHECK_HEADER_ADD_INCLUDE("iiapi.h", "CFLAGS_INGRES", ii_system + "\\ingres\\files;" + PHP_INGRES) &&
+				CHECK_LIB("iilibapi.lib", "ingres", ii_system + "\\ingres\\lib;" + PHP_INGRES)) {
+				AC_DEFINE('HAVE_II', 1);
+				EXTENSION("ingres_ii","ii.c");
+			} else {
+				// ingres is missing files
+				WARNING("Ingres not enabled; libraries and headers not found in " + ii_system);
+			}
+		} else {
+			// %II_SYSTEM% is not set
+			WARNING("Ingres not enabled; %II_SYSTEM% has not been defined");
+		}
+	} else { 
+		// path supplied to  --with-ingres
+		if (CHECK_HEADER_ADD_INCLUDE("iiapi.h", "CFLAGS_INGRES", PHP_INGRES + "\\ingres\\files;") &&
+			CHECK_LIB("iilibapi.lib", "ingres", PHP_INGRES + "\\ingres\\lib;"))  {
+			AC_DEFINE('HAVE_II', 1);
+			EXTENSION("ingres","ii.c");
+		} else {
+			// cannot find files in supplied path
+			WARNING("Ingres not enabled; libraries and headers not found");
+		}
+	} 
+}
