@@ -400,7 +400,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		tmp++;
 		if (tmp[0] != '/') {
 			port = atoi(tmp);
-			if(tmp=strchr(tmp,':')) {
+			if ((tmp=strchr(tmp, ':'))) {
 				*tmp=0;
 				tmp++;
 				socket=tmp;
@@ -1163,8 +1163,7 @@ PHP_FUNCTION(mysql_result)
 					char *table_name, *field_name, *tmp;
 
 					if ((tmp=strchr((*field)->value.str.val,'.'))) {
-						*tmp = 0;
-						table_name = estrdup((*field)->value.str.val);
+						table_name = estrndup((*field)->value.str.val, tmp-(*field)->value.str.val);
 						field_name = estrdup(tmp+1);
 					} else {
 						table_name = NULL;
