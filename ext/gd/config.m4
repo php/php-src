@@ -239,13 +239,12 @@ dnl
 
 if test "$PHP_GD" = "php"; then
   GD_MODULE_TYPE=builtin
-  sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
+  extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
         libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_png.c libgd/gd_jpeg.c \
 		libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c libgd/gdfontmb.c libgd/gdfontl.c \
 		libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
 
-  PHP_NEW_EXTENSION(gd, gd.c gdttf.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
 dnl check for fabsf and floorf which are available since C99
@@ -275,11 +274,10 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_WBMP,             1, [ ])
   AC_DEFINE(HAVE_GD_GD2,              1, [ ])
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
-
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
 
 dnl Make sure the libgd/ is first in the include path
-  GDLIB_CFLAGS="-I$ext_srcdir/libgd -DHAVE_LIBPNG"
+  GDLIB_CFLAGS="-DHAVE_LIBPNG"
 
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
@@ -304,14 +302,11 @@ dnl enable the support in bundled GD library
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBTTF"
   fi
 
-  PHP_SUBST(GDLIB_CFLAGS)
-
 else
 
  if test "$PHP_GD" != "no"; then
-
-  PHP_NEW_EXTENSION(gd, gd.c gdcache.c gdttf.c, $ext_shared)
-  PHP_SUBST(GD_SHARED_LIBADD)
+  GD_MODULE_TYPE=external
+  extra_sources="gdcache.c"
 
 dnl Various checks for GD features
   PHP_GD_TTSTR
@@ -359,7 +354,19 @@ dnl SuSE 6.x package structure
   fi 
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
-  PHP_ADD_INCLUDE($GD_INCLUDE)
-
  fi
+fi
+
+if test "$PHP_GD" != "no"; then
+  PHP_NEW_EXTENSION(gd, gd.c gdttf.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
+
+  if test "$GD_MODULE_TYPE" = "builtin"; then
+    GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
+  else
+    GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_FCLAGS"
+    PHP_ADD_INCLUDE($GD_INCLUDE)
+  fi
+
+  PHP_SUBST(GDLIB_CFLAGS)
+  PHP_SUBST(GD_SHARED_LIBADD)
 fi
