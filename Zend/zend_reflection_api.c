@@ -71,7 +71,7 @@ typedef struct _string {
 
 void string_init(string *str)
 {
-	str->string = (char *) emalloc(1042);
+	str->string = (char *) emalloc(1024);
 	str->len = 1;
 	str->alloced = 1024;
 	*str->string = '\0';
