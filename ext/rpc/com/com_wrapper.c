@@ -60,8 +60,8 @@
 
 zend_class_entry com_class_entry;
 
-PHP_FUNCTION(COM_load);
-PHP_FUNCTION(COM_invoke);
+PHP_FUNCTION(com_load);
+PHP_FUNCTION(com_invoke);
 PHP_FUNCTION(com_propget);
 PHP_FUNCTION(com_propput);
 
@@ -69,8 +69,8 @@ static int le_idispatch;
 static int codepage;
 
 function_entry COM_functions[] = {
-	PHP_FE(COM_load,								NULL)
-	PHP_FE(COM_invoke,								NULL)
+	PHP_FE(com_load,								NULL)
+	PHP_FE(com_invoke,								NULL)
 
 	PHP_FE(com_propget,								NULL)
 	PHP_FE(com_propput,								NULL)
@@ -273,7 +273,7 @@ PHP_INI_END()
 
 /* {{{ proto int com_load(string module_name [, string remote_host [, int codepage]])
    Loads a COM module */
-PHP_FUNCTION(COM_load)
+PHP_FUNCTION(com_load)
 {
 	pval *module_name, *server_name=NULL, *code_page;
 	CLSID clsid;
@@ -427,7 +427,7 @@ int do_COM_invoke(i_dispatch *obj, pval *function_name, VARIANTARG *var_result, 
 
 /* {{{ proto mixed com_invoke(int module, string handler_name [, mixed arg [, ...]])
    Invokes a COM module */
-PHP_FUNCTION(COM_invoke)
+PHP_FUNCTION(com_invoke)
 {
 	pval **arguments;
 	pval *object, *function_name;
@@ -823,7 +823,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		&& !strcmp(function_name->element.value.str.val, "com")) { /* constructor */
 		pval *object_handle;
 
-		PHP_FN(COM_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		if (!zend_is_true(return_value)) {
 			var_reset(object);
 			return;
