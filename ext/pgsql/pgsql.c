@@ -2947,7 +2947,7 @@ PHP_FUNCTION(pg_send_query)
 /* }}} */
 
 
-/* {{{ proto resource pg_get_result([resource connection])
+/* {{{ proto resource pg_get_result(resource connection)
    Get asynchronous query result */
 PHP_FUNCTION(pg_get_result)
 {
