@@ -77,6 +77,7 @@ typedef struct _php_per_dir_config {
 
 typedef struct _php_per_server_config {
     sapi_stack uri_handlers;
+    sapi_stack uri_handlers_code;
     sapi_stack requires;
 } php_per_server_config;
 
@@ -800,6 +801,7 @@ static void php_destroy_per_server_info(php_per_server_config *conf)
 {
     sapi_stack_destroy(&conf->requires);
     sapi_stack_destroy(&conf->uri_handlers);
+    sapi_stack_destroy(&conf->uri_handlers_code);
 }
 /* }}} */
 
@@ -830,6 +832,7 @@ static void *php_create_server(pool *p, char *dummy)
     
     sapi_stack_init_ex(&conf->requires, 1);
     sapi_stack_init_ex(&conf->uri_handlers, 1);
+    sapi_stack_init_ex(&conf->uri_handlers_code, 1);
     return conf;
 }
     
@@ -914,6 +917,16 @@ static CONST_PREFIX char *php_set_uri_handler(cmd_parms *cmd, void *dummy, char 
     php_per_server_config *conf;
     conf = get_module_config(cmd->server->module_config, &php4_module);
     sapi_stack_push(&conf->uri_handlers, arg1, strlen(arg1) + 1);
+    return NULL;
+}
+/* }}} */
+
+/* {{{ php_set_uri_handler_code */
+static CONST_PREFIX char *php_set_uri_handler_code(cmd_parms *cmd, void *dummy, char *arg1)
+{
+    php_per_server_config *conf;
+    conf = get_module_config(cmd->server->module_config, &php4_module);
+    sapi_stack_push(&conf->uri_handlers_code, arg1, strlen(arg1) + 1);
     return NULL;
 }
 /* }}} */
@@ -1179,6 +1192,40 @@ static int php_run_hook(char *handler, request_rec *r)
 }
  
 
+static int php_run_hook_code(char *handler, request_rec *r)
+{
+	zval *ret = NULL;
+    php_per_dir_config *conf;
+
+	TSRMLS_FETCH();
+    fprintf(stderr, "php_run_hook_code\n");
+    if(!AP(apache_config_loaded)) {
+	    conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+		if (conf)
+		       zend_hash_apply((HashTable *)conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+        AP(apache_config_loaded) = 1;
+    }
+	if (!handler)
+	        return DECLINED;
+    fprintf(stderr, "\trunning code: %s\n", handler);
+	hard_timeout("send", r);
+	SG(server_context) = r;
+	php_save_umask();
+	if (!AP(setup_env)) {
+		add_common_vars(r);
+		add_cgi_vars(r);
+		AP(setup_env) = 1;
+	}
+	init_request_info(TSRMLS_C);
+	apache_php_module_hook_code(r, handler, &ret TSRMLS_CC);
+	php_restore_umask();
+	kill_timeout(r);
+	if (ret) {
+		convert_to_long(ret);
+		return Z_LVAL_P(ret);
+	}
+	return HTTP_INTERNAL_SERVER_ERROR;
+}
 
 static int php_uri_translation(request_rec *r)
 {    
@@ -1186,6 +1233,9 @@ static int php_uri_translation(request_rec *r)
     fprintf(stderr,"HOOK: uri_translation\n");
     AP(current_hook) = AP_URI_TRANS;
     conf = (php_per_server_config *) get_module_config(r->server->module_config, &php4_module);
+    if(sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers_code, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook_code, r, OK) == OK) {
+        return OK;
+    }
     return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r, OK);
 }
 
@@ -1269,7 +1319,9 @@ static int php_post_read_hook(request_rec *r)
     fprintf(stderr,"HOOK: post-read\n");
     AP(current_hook) = AP_POST_READ;
     svr = get_module_config(r->server->module_config, &php4_module);
-    sapi_stack_apply_with_argument_all(&svr->requires, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
+    if(ap_is_initial_req(r)) {
+        sapi_stack_apply_with_argument_all(&svr->requires, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
+    }
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_http_error(&conf->post_read_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
@@ -1302,6 +1354,7 @@ command_rec php_commands[] =
 {
 	{"php_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
 	{"phpUriHandler",		php_set_uri_handler, NULL, RSRC_CONF, TAKE1, "PHP Value Modifier"},
+	{"phpUriHandlerCodeRef",		php_set_uri_handler_code, NULL, RSRC_CONF, TAKE1, "PHP Value Modifier"},
 #if MODULE_MAGIC_NUMBER >= 19970103
 	{"phpHeaderHandler",		php_set_header_handler, NULL, OR_OPTIONS, TAKE1, "PHP Value Modifier"},
 #endif

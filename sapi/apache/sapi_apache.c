@@ -104,6 +104,61 @@ int apache_php_module_hook(request_rec *r, char *filename, zval **ret TSRMLS_DC)
 /* }}} */
 
 
+/* {{{ apache_php_module_hook_code
+ */
+int apache_php_module_hook_code(request_rec *r, char *filename, zval **ret TSRMLS_DC)
+{
+	zend_file_handle file_handle;
+	zval *req;
+    char *tmp;
+
+#if PHP_SIGCHILD
+	signal(SIGCHLD, sigchld_handler);
+#endif
+    if(AP(current_hook) == AP_RESPONSE) {
+        fprintf(stderr, "in Response\n");
+        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+            return FAILURE;
+    }
+    else {
+        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+            return FAILURE;
+    }
+
+	/* Add PHP_SELF_HOOK - Absolute path */
+	php_register_variable("PHP_SELF_HOOK", filename, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+
+	req = php_apache_request_new(r);
+    if(PG(register_globals)) {
+        php_register_variable_ex("request", req, NULL TSRMLS_CC);
+    }
+    else {
+        php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+    }
+    if( (tmp = strstr(filename, "::")) != NULL &&  *(tmp+2) != '\0' ) {
+        zval *class;
+        zval *method;
+        *tmp = '\0';
+        ALLOC_ZVAL(class);
+        ZVAL_STRING(class, filename, 1);
+        ALLOC_ZVAL(method);
+        ZVAL_STRING(method, tmp +2, 1);
+        fprintf(stderr, "calling coderef %s::%s\n", filename, tmp +2);
+        *tmp = ':';
+        call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
+        zval_dtor(&class);
+        zval_dtor(&method);
+    }
+    else {
+        /* not a class::method */
+    }
+	zval_dtor(&req);
+	AP(in_request) = 0;
+
+	return OK;
+}
+
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4
