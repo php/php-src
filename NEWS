@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed bug #31107 (Compile failure on Solaris 9 (Intel) and gcc 3.4.3). (Derick)
 - Fixed bug #31103 (Better error message when c-client cannot be found). (Ilia)
 - Fixed bug #31101 (missing kerberos header file path with --with-openssl). (Jani)
+- Fixed bug #31098 (isset() / empty() incorrectly return false in dereference of a string type). (Moriyoshi)
 - Fixed bug #31087 (broken php_url_encode_hash macro). (Ilia)
 - Fixed bug #31072 (var_export() does not output an array element with an empty
   string key). (Derick)
