@@ -301,12 +301,12 @@ PHP_FUNCTION(assert_options)
 		RETVAL_STRING(SAFE_STRING(oldstr),1);
 
 		if (ac == 2) {
+			if (oldstr) {
+				efree(oldstr);
+			} 
 			convert_to_string_ex(value);
 			ASSERT(callback) = estrndup((*value)->value.str.val,(*value)->value.str.len);
 		}
-		if (oldstr) {
-			efree(oldstr);
-		} 
 		return;
 		break;
 
