@@ -97,6 +97,7 @@ struct xslt_processor {
 struct xslt_log {
 	char *path;
 	int   fd;
+	int   do_log;
 };
 
 struct xslt_error {
