@@ -41,6 +41,9 @@ extern zend_module_entry xmlwriter_module_entry;
 typedef struct _xmlwriter_object {
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr output;
+#ifndef ZEND_ENGINE_2
+	xmlOutputBufferPtr uri_output;
+#endif
 } xmlwriter_object;
 
 #if LIBXML_VERSION >= 20605

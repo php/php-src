@@ -126,6 +126,32 @@ char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, int reso
 	return file_dest;
 }
 
+#ifndef ZEND_ENGINE_2
+/* Channel libxml file io layer through the PHP streams subsystem.
+ * This allows use of ftps:// and https:// urls */
+
+static void *php_xmlwriter_streams_IO_open_write_wrapper(const char *filename TSRMLS_DC)
+{
+	php_stream_wrapper *wrapper = NULL;
+	void *ret_val = NULL;
+
+	ret_val = php_stream_open_wrapper_ex((char *)filename, "wb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, NULL);
+	return ret_val;
+}
+
+int php_xmlwriter_streams_IO_write(void *context, const char *buffer, int len)
+{
+	TSRMLS_FETCH();
+	return php_stream_write((php_stream*)context, buffer, len);
+}
+
+int php_xmlwriter_streams_IO_close(void *context)
+{
+	TSRMLS_FETCH();
+	return php_stream_close((php_stream*)context);
+}
+#endif
+
 /* {{{ xmlwriter_module_entry
  */
 zend_module_entry xmlwriter_module_entry = {
@@ -1294,18 +1320,38 @@ PHP_FUNCTION(xmlwriter_open_uri)
 	char *source;
 	char resolved_path[MAXPATHLEN + 1];
 	int source_len;
+#ifndef ZEND_ENGINE_2
+	xmlOutputBufferPtr out_buffer;
+	void *ioctx;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		WRONG_PARAM_COUNT;
 		return;
 	}
 
-	valid_file = _xmlwriter_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+	valid_file = _xmlwriter_get_valid_file_path(source, resolved_path, MAXPATHLEN TSRMLS_CC);
 	if (!valid_file) {
 		RETURN_FALSE;
 	}
 
+#ifndef ZEND_ENGINE_2
+	ioctx = php_xmlwriter_streams_IO_open_write_wrapper(valid_file TSRMLS_CC);
+	if (ioctx == NULL) {
+		RETURN_FALSE;
+	}
+
+	out_buffer = xmlOutputBufferCreateIO(php_xmlwriter_streams_IO_write, 
+		php_xmlwriter_streams_IO_close, ioctx, NULL);
+
+	if (out_buffer == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create output buffer");
+		RETURN_FALSE;
+	}
+	ptr = xmlNewTextWriter(out_buffer);
+#else
 	ptr = xmlNewTextWriterFilename(valid_file, 0);
+#endif
 	if (! ptr) {
 		RETURN_FALSE;
 	}
@@ -1313,6 +1359,9 @@ PHP_FUNCTION(xmlwriter_open_uri)
 	intern = emalloc(sizeof(xmlwriter_object));
 	intern->ptr = ptr;
 	intern->output = NULL;
+#ifndef ZEND_ENGINE_2
+	intern->uri_output = out_buffer;
+#endif
 
 	ZEND_REGISTER_RESOURCE(return_value,intern,le_xmlwriter);
 
@@ -1343,6 +1392,9 @@ PHP_FUNCTION(xmlwriter_open_memory)
 	intern = emalloc(sizeof(xmlwriter_object));
 	intern->ptr = ptr;
 	intern->output = buffer;
+#ifndef ZEND_ENGINE_2
+	intern->uri_output = NULL;
+#endif
 
 	ZEND_REGISTER_RESOURCE(return_value,intern,le_xmlwriter);
 
