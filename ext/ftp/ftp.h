@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Andrew Skalski <askalski@chek.com>                          |
+   |          Stefan Esser <sesser@php.net> (resume functions)            |
    +----------------------------------------------------------------------+
  */
 
@@ -29,6 +30,7 @@
 #endif
 
 #define	FTP_DEFAULT_TIMEOUT	90
+#define FTP_DEFAULT_AUTOSEEK 1
 
 /* XXX this should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
@@ -53,6 +55,7 @@ typedef struct ftpbuf
 	int		pasv;			/* 0=off; 1=pasv; 2=ready */
 	php_sockaddr_storage	pasvaddr;	/* passive mode address */
 	long	timeout_sec;	/* User configureable timeout (seconds) */
+	int			autoseek;	/* User configureable autoseek flag */
 } ftpbuf_t;
 
 typedef struct databuf
@@ -131,12 +134,12 @@ int		ftp_pasv(ftpbuf_t *ftp, int pasv);
  * returns true on success, false on error
  */
 int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path,
-			ftptype_t type);
+			ftptype_t type, int resumepos);
 
 /* stores the data from a file, socket, or process as a file on the remote server
  * returns true on success, false on error
  */
-int		ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type);
+int		ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos);
 
 /* returns the size of the given file, or -1 on error */
 int		ftp_size(ftpbuf_t *ftp, const char *path);

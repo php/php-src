@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Andrew Skalski <askalski@chek.com>                           |
+   | Authors: Andrew Skalski <askalski@chek.com>                          |
+   |          Stefan Esser <sesser@php.net> (resume functions)            |
    +----------------------------------------------------------------------+
  */
 
@@ -114,7 +115,7 @@ ftp_open(const char *host, short port, long timeout_sec)
 		perror("calloc");
 		return NULL;
 	}
-	
+
 	tv.tv_sec = timeout_sec;
 	tv.tv_usec = 0;
 
@@ -545,12 +546,13 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 /* {{{ ftp_get
  */
 int
-ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type)
+ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
 {
 	databuf_t		*data = NULL;
 	char			*ptr;
 	int			lastch;
 	int			rcvd;
+	char			arg[11];
 	TSRMLS_FETCH();
 
 	if (ftp == NULL)
@@ -562,6 +564,16 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type)
 
 	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
+	}
+
+	if (resumepos>0) {
+		sprintf(arg, "%u", resumepos);
+		if (!ftp_putcmd(ftp, "REST", arg)) {
+			goto bail;
+		}
+		if (!ftp_getresp(ftp) || (ftp->resp != 350)) {
+			goto bail;
+		}
 	}
 
 	if (!ftp_putcmd(ftp, "RETR", path)) {
@@ -618,12 +630,13 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
 {
 	databuf_t		*data = NULL;
 	int			size;
 	char			*ptr;
 	int			ch;
+	char			arg[11];
 	TSRMLS_FETCH();
 
 	if (ftp == NULL)
@@ -634,6 +647,16 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type)
 
 	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
+
+	if (startpos>0) {
+		sprintf(arg, "%u", startpos);
+		if (!ftp_putcmd(ftp, "REST", arg)) {
+			goto bail;
+		}
+		if (!ftp_getresp(ftp) || (ftp->resp != 350)) {
+			goto bail;
+		}
+	}
 
 	if (!ftp_putcmd(ftp, "STOR", path))
 		goto bail;
@@ -902,9 +925,9 @@ ftp_getresp(ftpbuf_t *ftp)
 		}
 
 		/* Break out when the end-tag is found */
-		if (isdigit(ftp->inbuf[0]) && 
-			isdigit(ftp->inbuf[1]) && 
-			isdigit(ftp->inbuf[2]) && 
+		if (isdigit(ftp->inbuf[0]) &&
+			isdigit(ftp->inbuf[1]) &&
+			isdigit(ftp->inbuf[2]) &&
 			ftp->inbuf[3] == ' ') {
 			break;
 		}

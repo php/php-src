@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Andrew Skalski <askalski@chek.com>                           |
+   | Authors: Andrew Skalski <askalski@chek.com>                          |
+   |          Stefan Esser <sesser@php.net> (resume functions)            |
    +----------------------------------------------------------------------+
  */
 
@@ -27,6 +28,8 @@ extern zend_module_entry php_ftp_module_entry;
 #define php_ftp_module_ptr &php_ftp_module_entry
 
 #define PHP_FTP_OPT_TIMEOUT_SEC	0
+#define PHP_FTP_OPT_AUTOSEEK	1
+#define PHP_FTP_AUTORESUME		-1
 
 PHP_MINIT_FUNCTION(ftp);
 PHP_MINFO_FUNCTION(ftp);
