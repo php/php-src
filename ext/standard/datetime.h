@@ -26,6 +26,7 @@ PHP_FUNCTION(time);
 PHP_FUNCTION(mktime);
 PHP_FUNCTION(gmmktime);
 PHP_FUNCTION(date);
+PHP_FUNCTION(idate);
 PHP_FUNCTION(gmdate);
 PHP_FUNCTION(localtime);
 PHP_FUNCTION(getdate);
@@ -36,6 +37,7 @@ PHP_FUNCTION(gmstrftime);
 #endif
 PHP_FUNCTION(strtotime);
 
+int idate(char format, int timestamp, int gm);
 extern char *php_std_date(time_t t);
 void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #if HAVE_STRFTIME

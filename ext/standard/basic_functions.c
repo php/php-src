@@ -285,6 +285,7 @@ function_entry basic_functions[] = {
 
 	PHP_FE(strtotime,														NULL)
 	PHP_FE(date,															NULL)
+	PHP_FE(idate,															NULL)
 	PHP_FE(gmdate,															NULL)
 	PHP_FE(getdate,															NULL)
 	PHP_FE(localtime,														NULL)
@@ -899,6 +900,8 @@ function_entry basic_functions[] = {
 
 	PHP_FE(output_add_rewrite_var,											NULL)
 	PHP_FE(output_reset_rewrite_vars,										NULL)
+	PHP_FE(date_sunrise,														NULL)
+	PHP_FE(date_sunset,															NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -936,6 +939,10 @@ static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars", SAFE_MODE_PROTECTED_ENV_VARS, PHP_INI_SYSTEM, OnUpdateSafeModeProtectedEnvVars, NULL)
 	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",   SAFE_MODE_ALLOWED_ENV_VARS,   PHP_INI_SYSTEM, OnUpdateSafeModeAllowedEnvVars,   NULL)
+	PHP_INI_ENTRY("date.default_latitude",  DATE_DEFAULT_LATITUDE, PHP_INI_ALL, NULL)
+    PHP_INI_ENTRY("date.default_longitude",  DATE_DEFAULT_LONGITUDE, PHP_INI_ALL, NULL)
+    PHP_INI_ENTRY("date.sunset_zenith",DATE_SUNSET_ZENITH, PHP_INI_ALL, NULL)
+    PHP_INI_ENTRY("date.sunrise_zenith",DATE_SUNRISE_ZENITH, PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 
@@ -1020,6 +1027,10 @@ PHP_MINIT_FUNCTION(basic)
 	REGISTER_LONG_CONSTANT("INI_PERDIR", ZEND_INI_PERDIR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INI_SYSTEM", ZEND_INI_SYSTEM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INI_ALL",    ZEND_INI_ALL,    CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
 	REGISTER_MATH_CONSTANT(M_E);
