@@ -1663,7 +1663,7 @@ PHP_FUNCTION(pg_loimport)
 			break;
 	}
 	
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(file_in), NULL, 2))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(file_in), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
