@@ -227,8 +227,8 @@ PHP_FUNCTION(ltrim)
 /* }}} */
 
 
-/* {{{ proto string wordwrap(string str[, int width[, string break]])
- * wrap buffer to selected number of characters using string break char */
+/* {{{ proto string wordwrap(string str [, int width [, string break]])
+ * Wrap buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
 	pval **ptext, **plinelength, **pbreakchar;
@@ -2322,7 +2322,7 @@ PHP_FUNCTION(setlocale)
 /* }}} */
 
 /* {{{ proto void parse_str(string encoded_string)
-   Parses GET/POST/COOKIE data and sets global variables. */
+   Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
 {
 	zval **arg;
