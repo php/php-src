@@ -49,6 +49,7 @@ END_EXTERN_C()
 
 
 void zval_add_ref(zval **p);
+void zval_del_ref(zval **p);
 
 #define PVAL_DESTRUCTOR (int (*)(void *)) zval_dtor_wrapper
 #define PVAL_PTR_DTOR (int (*)(void *)) zval_ptr_dtor_wrapper
