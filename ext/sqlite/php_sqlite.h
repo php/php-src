@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
   |          Tal Peer <tal@php.net>                                      |
+  |          Marcus Boerger <helly@php.net>                              |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -47,11 +48,15 @@ PHP_FUNCTION(sqlite_close);
 PHP_FUNCTION(sqlite_query);
 PHP_FUNCTION(sqlite_unbuffered_query);
 PHP_FUNCTION(sqlite_fetch_array);
+PHP_FUNCTION(sqlite_current);
 
 PHP_FUNCTION(sqlite_num_rows);
 PHP_FUNCTION(sqlite_num_fields);
 PHP_FUNCTION(sqlite_field_name);
 PHP_FUNCTION(sqlite_seek);
+PHP_FUNCTION(sqlite_rewind);
+PHP_FUNCTION(sqlite_next);
+PHP_FUNCTION(sqlite_has_more);
 
 PHP_FUNCTION(sqlite_libversion);
 PHP_FUNCTION(sqlite_libencoding);

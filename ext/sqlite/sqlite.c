@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
   |          Tal Peer <tal@php.net>                                      |
+  |          Marcus Boerger <helly@php.net>                              |
   +----------------------------------------------------------------------+
 
   $Id$ 
@@ -77,6 +78,7 @@ PHP_INI_END()
 #define DB_FROM_ZVAL(db, zv)	ZEND_FETCH_RESOURCE2(db, struct php_sqlite_db *, zv, -1, "sqlite database", le_sqlite_db, le_sqlite_pdb)
 
 struct php_sqlite_result {
+	struct php_sqlite_db *db;
 	sqlite_vm *vm;
 	int buffered;
 	int ncolumns;
@@ -113,6 +115,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_close, NULL)
 	PHP_FE(sqlite_query, NULL)
 	PHP_FE(sqlite_fetch_array, NULL)
+	PHP_FE(sqlite_current, NULL)
 	PHP_FE(sqlite_libversion, NULL)
 	PHP_FE(sqlite_libencoding, NULL)
 	PHP_FE(sqlite_changes, NULL)
@@ -121,6 +124,9 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_num_fields, NULL)
 	PHP_FE(sqlite_field_name, NULL)
 	PHP_FE(sqlite_seek, NULL)
+	PHP_FE(sqlite_rewind, NULL)
+	PHP_FE(sqlite_next, NULL)
+	PHP_FE(sqlite_has_more, NULL)
 	PHP_FE(sqlite_escape_string, NULL)
 	PHP_FE(sqlite_busy_timeout, NULL)
 	PHP_FE(sqlite_last_error, NULL)
@@ -201,7 +207,7 @@ static ZEND_RSRC_DTOR_FUNC(php_sqlite_db_dtor)
 	}
 }
 
-static void real_result_dtor(struct php_sqlite_result *res)
+static void real_result_dtor(struct php_sqlite_result *res TSRMLS_DC)
 {
 	int i, j, base;
 
@@ -209,7 +215,8 @@ static void real_result_dtor(struct php_sqlite_result *res)
 		sqlite_finalize(res->vm, NULL);
 	}
 
-	if (!res->buffered) {
+	if (res->table) {
+		if (!res->buffered && res->nrows) {
 		res->nrows = 1; /* only one row is stored */
 	}
 	for (i = 0; i < res->nrows; i++) {
@@ -220,7 +227,6 @@ static void real_result_dtor(struct php_sqlite_result *res)
 			}
 		}
 	}
-	if (res->table) {
 		efree(res->table);
 	}
 	if (res->col_names) {
@@ -230,13 +236,14 @@ static void real_result_dtor(struct php_sqlite_result *res)
 		efree(res->col_names);
 	}
 
+	zend_list_delete(res->db->rsrc_id);
 	efree(res);
 }
 
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
 {
 	struct php_sqlite_result *res = (struct php_sqlite_result *)rsrc->ptr;
-	real_result_dtor(res);
+	real_result_dtor(res TSRMLS_CC);
 }
 
 static int php_sqlite_forget_persistent_id_numbers(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -629,7 +636,7 @@ PHP_MINFO_FUNCTION(sqlite)
 	DISPLAY_INI_ENTRIES();
 }
 
-static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *persistent_id, zval *return_value, zval *errmsg)
+static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *persistent_id, zval *return_value, zval *errmsg TSRMLS_DC)
 {
 	char *errtext = NULL;
 	sqlite *sdb = NULL;
@@ -638,7 +645,6 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	sdb = sqlite_open(filename, mode, &errtext);
 
 	if (sdb == NULL) {
-		TSRMLS_FETCH();
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 
@@ -673,7 +679,6 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 
 	if (persistent_id) {
 		list_entry le;
-		TSRMLS_FETCH();
 
 		Z_TYPE(le) = le_sqlite_pdb;
 		le.ptr = db;
@@ -741,7 +746,7 @@ PHP_FUNCTION(sqlite_popen)
 	}
 
 	/* now we need to open the database */
-	php_sqlite_open(fullpath, mode, hashkey, return_value, errmsg);
+	php_sqlite_open(fullpath, mode, hashkey, return_value, errmsg TSRMLS_CC);
 
 	efree(fullpath);
 	efree(hashkey);
@@ -770,7 +775,7 @@ PHP_FUNCTION(sqlite_open)
 		RETURN_FALSE;
 	}
 	
-	php_sqlite_open(filename, mode, NULL, return_value, errmsg);
+	php_sqlite_open(filename, mode, NULL, return_value, errmsg TSRMLS_CC);
 }
 /* }}} */
 
@@ -798,6 +803,11 @@ PHP_FUNCTION(sqlite_close)
 {
 	zval *zdb;
 	struct php_sqlite_db *db;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zdb)) {
+		return;
+	}
+	DB_FROM_ZVAL(db, &zdb);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zdb)) {
 		return;
@@ -892,11 +902,53 @@ next_row:
 			}
 			break;
 	}
+	rres->db->last_err_code = ret;
+
 	return ret;
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_unbuffered_query(string query, resource db)
+/* {{{ sqlite_query */
+void sqlite_query(struct php_sqlite_db *db, char *sql, long sql_len, int mode, int buffered, zval *return_value TSRMLS_DC)
+{
+	struct php_sqlite_result res, *rres;
+	int ret;
+	char *errtext = NULL;
+	const char *tail;
+
+	memset(&res, 0, sizeof(res));
+	res.buffered = buffered;
+	res.mode = mode;
+
+	ret = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
+	db->last_err_code = ret;
+
+	if (ret != SQLITE_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		sqlite_freemem(errtext);
+		
+		RETURN_FALSE;
+	}
+
+	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
+	memcpy(rres, &res, sizeof(*rres));
+	rres->db = db;
+	zend_list_addref(db->rsrc_id);
+	
+
+	/* now the result set is ready for stepping: get first row */
+	if (php_sqlite_fetch(rres TSRMLS_CC) != SQLITE_OK) {
+		real_result_dtor(rres TSRMLS_CC);
+		RETURN_FALSE;
+	}
+	
+	rres->curr_row = 0;
+
+	ZEND_REGISTER_RESOURCE(return_value, rres, le_sqlite_result);
+}
+/* }}} */
+
+/* {{{ proto resource sqlite_unbuffered_query(string query, resource db [ , int result_type ])
    Execute a query that does not prefetch and buffer all data */
 PHP_FUNCTION(sqlite_unbuffered_query)
 {
@@ -904,11 +956,8 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 	struct php_sqlite_db *db;
 	char *sql;
 	long sql_len;
-	struct php_sqlite_result res, *rres;
-	int ret;
+	int mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
-	const char *tail;
-	int mode;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 				ZEND_NUM_ARGS() TSRMLS_CC, "sr|l", &sql, &sql_len, &zdb, &mode) && 
@@ -928,40 +977,12 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 		}
 		return;
 	}
-
-	memset(&res, 0, sizeof(res));
-	res.mode = mode;
-
-	ret = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
-	db->last_err_code = ret;
-
-	if (ret != SQLITE_OK) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
-		sqlite_freemem(errtext);
-		
-		RETURN_FALSE;
-	}
-
-	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
-	memcpy(rres, &res, sizeof(*rres));
-
-	/* now the result set is ready for stepping: get first row */
-	ret = php_sqlite_fetch(rres TSRMLS_CC);
-
-	db->last_err_code = ret;
-
-	if (ret != SQLITE_OK) {
-		real_result_dtor(rres);
-		RETURN_FALSE;
-	}
 	
-	rres->curr_row = 0;
-
-	ZEND_REGISTER_RESOURCE(return_value, rres, le_sqlite_result);
+	sqlite_query(db, sql, sql_len, mode, 0, return_value TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_query(string query, resource db)
+/* {{{ proto resource sqlite_query(string query, resource db [ , int result_type ])
    Executes a query against a given database and returns a result handle */
 PHP_FUNCTION(sqlite_query)
 {
@@ -969,18 +990,14 @@ PHP_FUNCTION(sqlite_query)
 	struct php_sqlite_db *db;
 	char *sql;
 	long sql_len;
-	struct php_sqlite_result res, *rres;
-	int ret;
-	char *errtext = NULL;
-	const char *tail;
 	int mode = PHPSQLITE_BOTH;
+	char *errtext = NULL;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr|l", &sql, &sql_len, &zdb, &mode) && 
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &zdb, &sql, &sql_len, &mode)) {
+			ZEND_NUM_ARGS() TSRMLS_CC, "sr|l", &sql, &sql_len, &zdb, &mode) && 
+		FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &zdb, &sql, &sql_len, &mode)) {
 		return;
 	}
-
 	DB_FROM_ZVAL(db, &zdb);
 
 	/* avoid doing work if we can */
@@ -988,64 +1005,21 @@ PHP_FUNCTION(sqlite_query)
 		db->last_err_code = sqlite_exec(db->db, sql, NULL, NULL, &errtext);
 
 		if (db->last_err_code != SQLITE_OK) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
-			sqlite_freemem(errtext);
-		}
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		sqlite_freemem(errtext);
+	}
 		return;
 	}
 	
-	memset(&res, 0, sizeof(res));
-	res.buffered = 1;
-	res.mode = mode;
-
-	ret = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
-	db->last_err_code = ret;
-
-	if (ret != SQLITE_OK) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
-		sqlite_freemem(errtext);
-		
-		RETURN_FALSE;
-	}
-
-	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
-	memcpy(rres, &res, sizeof(*rres));
-
-	ret = php_sqlite_fetch(rres TSRMLS_CC);
-
-	db->last_err_code = ret;
-
-	if (ret != SQLITE_OK) {
-		real_result_dtor(rres);
-		RETURN_FALSE;
-	}
-	
-	rres->curr_row = 0;
-
-	ZEND_REGISTER_RESOURCE(return_value, rres, le_sqlite_result);
+	sqlite_query(db, sql, sql_len, mode, 1, return_value TSRMLS_CC);
 }
 /* }}} */
 
-/* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
-   Fetches the next row from a result set as an array */
-PHP_FUNCTION(sqlite_fetch_array)
+/* {{{ php_sqlite_fetch_array */
+static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend_bool decode_binary, int move_next, zval *return_value TSRMLS_DC)
 {
-	zval *zres;
-	struct php_sqlite_result *res;
-	int mode;
 	int j;
 	const char **rowdata, **colnames;
-	zend_bool decode_binary = 1;
-
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lb", &zres, &mode, &decode_binary)) {
-		return;
-	}
-
-	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
-	
-	if (ZEND_NUM_ARGS() < 2) {
-		mode = res->mode;
-	}
 	
 	/* check range of the row */
 	if (res->curr_row >= res->nrows) {
@@ -1100,12 +1074,56 @@ PHP_FUNCTION(sqlite_fetch_array)
 		}
 	}
 
+	if (move_next) {
 	if (!res->buffered) {
 		/* non buffered: fetch next row */
 		php_sqlite_fetch(res TSRMLS_CC);
 	}
 	/* advance the row pointer */
 	res->curr_row++;
+}
+}
+/* }}} */
+
+/* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
+   Fetches the next row from a result set as an array */
+PHP_FUNCTION(sqlite_fetch_array)
+{
+	zval *zres;
+	int mode = PHPSQLITE_BOTH;
+	zend_bool decode_binary = 1;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lb", &zres, &mode, &decode_binary)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+	if (ZEND_NUM_ARGS() < 2) {
+		mode = res->mode;
+	}
+
+	php_sqlite_fetch_array(res, mode, decode_binary, 1, return_value TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto array sqlite_fetch_array(resource result [, int result_type, bool decode_binary])
+   Fetches the next row from a result set as an array */
+PHP_FUNCTION(sqlite_current)
+{
+	zval *zres;
+	int mode = PHPSQLITE_BOTH;
+	zend_bool decode_binary = 1;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lb", &zres, &mode, &decode_binary)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+	if (ZEND_NUM_ARGS() < 2) {
+		mode = res->mode;
+	}
+
+	php_sqlite_fetch_array(res, mode, decode_binary, 0, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1187,6 +1205,22 @@ PHP_FUNCTION(sqlite_num_rows)
 }
 /* }}} */
 
+/* {{{ proto bool sqlite_has_more(resource result)
+   Returns whether or not more rows are available */
+PHP_FUNCTION(sqlite_has_more)
+{
+	zval *zres;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zres)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+
+	RETURN_BOOL(res->nrows && res->curr_row < res->nrows); /* curr_row may be -1 */
+}
+/* }}} */
+
 /* {{{ proto int sqlite_num_fields(resource result)
    Returns the number of fields in a result set */
 PHP_FUNCTION(sqlite_num_fields)
@@ -1251,7 +1285,61 @@ PHP_FUNCTION(sqlite_seek)
 		RETURN_FALSE;
 	}
 
-	res->curr_row = row - 1;
+	res->curr_row = row;
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool sqlite_rewind(resource result)
+   Seek to first row number */
+PHP_FUNCTION(sqlite_rewind)
+{
+	zval *zres;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zres)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+
+	if (!res->buffered) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot seek an unbuffered result set");
+		RETURN_FALSE;
+	}
+	
+	if (!res->nrows) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no rows received");
+		RETURN_FALSE;
+	}
+
+	res->curr_row = 0;
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool sqlite_next(resource result)
+   Seek to next row number */
+PHP_FUNCTION(sqlite_next)
+{
+	zval *zres;
+	struct php_sqlite_result *res;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zres)) {
+		return;
+	}
+	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+
+	if (!res->buffered && res->vm) {
+		php_sqlite_fetch(res TSRMLS_CC);
+	}
+
+	if (res->curr_row >= res->nrows) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no more rows available");
+		RETURN_FALSE;
+	}
+
+	res->curr_row++;
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1399,9 +1487,10 @@ PHP_FUNCTION(sqlite_create_aggregate)
 	char *callable = NULL;
 	long num_args = -1;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rszz|l", &zdb, &funcname, &funcname_len, &zstep, &zfinal, &num_args) == FAILURE) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rszz|l", &zdb, &funcname, &funcname_len, &zstep, &zfinal, &num_args)) {
 		return;
 	}
+	DB_FROM_ZVAL(db, &zdb);
 
 	if (!zend_is_callable(zstep, 0, &callable)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "step function `%s' is not callable", callable);
@@ -1416,9 +1505,6 @@ PHP_FUNCTION(sqlite_create_aggregate)
 		return;
 	}
 	efree(callable);
-
-	
-	DB_FROM_ZVAL(db, &zdb);
 
 	if (prep_callback_struct(db, 1, funcname, zstep, zfinal, &funcs) == DO_REG) {
 		sqlite_create_aggregate(db->db, funcname, num_args,
@@ -1442,9 +1528,10 @@ PHP_FUNCTION(sqlite_create_function)
 	char *callable = NULL;
 	long num_args = -1;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz|l", &zdb, &funcname, &funcname_len, &zcall, &num_args) == FAILURE) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz|l", &zdb, &funcname, &funcname_len, &zcall, &num_args)) {
 		return;
 	}
+	DB_FROM_ZVAL(db, &zdb);
 
 	if (!zend_is_callable(zcall, 0, &callable)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function `%s' is not callable", callable);
@@ -1453,8 +1540,6 @@ PHP_FUNCTION(sqlite_create_function)
 	}
 	efree(callable);
 	
-	DB_FROM_ZVAL(db, &zdb);
-
 	if (prep_callback_struct(db, 0, funcname, zcall, NULL, &funcs) == DO_REG) {
 		sqlite_create_function(db->db, funcname, num_args, php_sqlite_function_callback, funcs);
 	}
