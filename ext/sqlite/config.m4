@@ -6,7 +6,10 @@ PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: 
 [  --enable-sqlite-utf8    Enable UTF-8 support for SQLite], no, no)
 
 PHP_ARG_WITH(sqlite, for sqlite support,
-[  --with-sqlite           Include sqlite support], yes)
+[  --without-sqlite      Do not include sqlite support.
+                          Use --with-sqlite=DIR to specify DIR where
+                          Sqlite include and library files are located,
+                          if not using bundled library.], yes)
 
 if test "$PHP_SQLITE" != "no"; then
 
