@@ -1,3 +1,8 @@
+2004-05-11  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Don't allow passing NULL to type hinted parameter.
+
 2004-05-10  Zeev Suraski  <zeev@zend.com>
 
     * zend_operators.c:

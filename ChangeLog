@@ -1,3 +1,36 @@
+2004-05-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/formatted_print.c:
+      MFH: Make vprintf() and printf() return the length of the string printed.
+
+    * ext/standard/formatted_print.c:
+      Make vprintf() and printf() return the length of the string printed.
+      Make fprintf() and vfprints() return the correct length of the string
+      printed.
+
+2004-05-11  Derick Rethans  <php@derickrethans.nl>
+
+    * main/rfc1867.c:
+      - Fixed defines
+
+2004-05-11  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Don't allow passing NULL to type hinted parameter.
+
+2004-05-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/dir.c:
+      MFH: Fixed bug #28355 (glob() does not return error on Linux when it does
+      not have permission to open the directory).
+
+    * ext/standard/dir.c:
+      Fixed bug #28355 (glob() does not return error on Linux when it does not
+      have permission to open the directory).
+
 2004-05-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
