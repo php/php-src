@@ -357,6 +357,7 @@ function_entry basic_functions[] = {
 	PHP_FE(parse_ini_file,				NULL)
 
 	PHP_FE(is_uploaded_file,			NULL)
+	PHP_FE(move_uploaded_file,			NULL)
 
 	/* functions from reg.c */
 	PHP_FE(ereg,									third_argument_force_ref)
@@ -2232,6 +2233,7 @@ PHP_FUNCTION(is_uploaded_file)
 PHP_FUNCTION(move_uploaded_file)
 {
 	zval **path, **new_path;
+	zend_bool successful=0;
 	SLS_FETCH();
 
 	if (!SG(rfc1867_uploaded_files)) {
@@ -2248,18 +2250,20 @@ PHP_FUNCTION(move_uploaded_file)
 		RETURN_FALSE;
 	}
 
+	V_UNLINK(Z_STRVAL_PP(new_path));
 	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==0) {
-		RETURN_TRUE;
+		successful=1;
+	} else if (php_copy_file(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==SUCCESS) {
+		V_UNLINK(Z_STRVAL_PP(path));
+		successful=1;
 	}
 
-	if (php_copy_file(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==SUCCESS) {
-		unlink(Z_STRVAL_PP(path));
-		RETURN_TRUE;
+	if (successful) {
+		zend_hash_del(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1);
+	} else {
+		php_error(E_WARNING, "Unable to move '%s' to '%s'", Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
 	}
-
-	php_error(E_WARNING, "Unable to move '%s' to '%s'", Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
-
-	RETURN_FALSE;
+	RETURN_BOOL(successful);
 }
 
 

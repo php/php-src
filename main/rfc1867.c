@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/file.h" /* for php_file_le_uploads() */
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -83,12 +82,32 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 
 
+static void free_filename(char **filename)
+{
+	efree(*filename);
+}
+
+
+static int unlink_filename(char **filename)
+{
+	V_UNLINK(*filename);
+	return 0;
+}
+
+
+void destroy_uploaded_files_hash(SLS_D)
+{
+	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename);
+	zend_hash_destroy(SG(rfc1867_uploaded_files));
+	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
+}
+
 /*
  * Split raw mime stream up into appropriate components
  */
 static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr SLS_DC)
 {
-	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *fn;
+	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *temp_filename;
 	int len, state = 0, Done = 0, rem, urem;
 	int eolsize;
 	long bytes, max_file_size = 0;
@@ -97,13 +116,15 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 	FILE *fp;
 	int itype, is_arr_upload=0, arr_len=0;
 	zval *http_post_files=NULL;
+	zend_bool upload_successful;
+	zend_bool magic_quotes_gpc;
 	ELS_FETCH();
 	PLS_FETCH();
 
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
 	ALLOC_HASHTABLE(SG(rfc1867_uploaded_files));
-	zend_hash_init(SG(rfc1867_uploaded_files), 5, NULL, NULL, 0);
+	zend_hash_init(SG(rfc1867_uploaded_files), 5, NULL, (dtor_func_t) free_filename, 0);
 
 	ALLOC_ZVAL(http_post_files);
 	array_init(http_post_files);
@@ -327,36 +348,39 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					SAFE_RETURN;
 				}
 				bytes = 0;
-				fn = tempnam(PG(upload_tmp_dir), "php");
+
+				fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename);
+				if (!fp) {
+					php_error(E_WARNING, "File upload error - unable to create a temporary file");
+					SAFE_RETURN;
+				}
 				if ((loc - ptr - 4) > PG(upload_max_filesize)) {
 					php_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize),namebuf);
-					fn = "none";
+					upload_successful = 0;
 				} else if (max_file_size && ((loc - ptr - 4) > max_file_size)) {
 					php_error(E_WARNING, "Max file size exceeded - file [%s] not saved", namebuf);
-					fn = "none";
+					upload_successful = 0;
 				} else if ((loc - ptr - 4) <= 0) {
-					fn = "none";
+					upload_successful = 0;
 				} else {
-					fp = V_FOPEN(fn, "wb");
-					if (!fp) {
-						php_error(E_WARNING, "File Upload Error - Unable to open temporary file [%s]", fn);
-						SAFE_RETURN;
-					}
 					bytes = fwrite(ptr, 1, loc - ptr - 4, fp);
-					fclose(fp);
-					zend_list_insert(fn,php_file_le_uploads());  /* Tell PHP about the file so the destructor can unlink it later */
 					if (bytes < (loc - ptr - 4)) {
 						php_error(E_WARNING, "Only %d bytes were written, expected to write %ld", bytes, loc - ptr - 4);
 					}
+					upload_successful = 1;
 				}
+				fclose(fp);
 				add_protected_variable(namebuf PLS_CC);
-				safe_php_register_variable(namebuf, fn, NULL, 1 ELS_CC PLS_CC);
-				{
-					int dummy=1;
-
-					zend_hash_add(SG(rfc1867_uploaded_files), namebuf, strlen(namebuf)+1, &dummy, sizeof(int), NULL);
+				if (!upload_successful) {
+					efree(temp_filename);
+					temp_filename = "none";
+				} else {
+					zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename)+1, &temp_filename, sizeof(char *), NULL);
 				}
 
+				magic_quotes_gpc = PG(magic_quotes_gpc);
+				PG(magic_quotes_gpc) = 0;
+				safe_php_register_variable(namebuf, temp_filename, NULL, 1 ELS_CC PLS_CC);
 				/* Add $foo[tmp_name] */
 				if(is_arr_upload) {
 					sprintf(lbuf, "%s[tmp_name][%s]", abuf, arr_index);
@@ -364,7 +388,9 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					sprintf(lbuf, "%s[tmp_name]", namebuf);
 				}
 				add_protected_variable(lbuf PLS_CC);
-				register_http_post_files_variable(lbuf, fn, http_post_files, 1 ELS_CC PLS_CC);
+				register_http_post_files_variable(lbuf, temp_filename, http_post_files, 1 ELS_CC PLS_CC);
+				PG(magic_quotes_gpc) = magic_quotes_gpc;
+
 				{
 					zval file_size;
 

@@ -164,6 +164,7 @@ PHP_FUNCTION(swf_openfile)
 {
 	zval **name, **sizeX, **sizeY, **frameRate, **r, **g, **b;
 	char *na, *tmpna;
+	zend_bool free_na;
 	SWFLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 7 ||
@@ -183,9 +184,16 @@ PHP_FUNCTION(swf_openfile)
 	tmpna = Z_STRVAL_PP(name);
 
 	if (strcasecmp("php://stdout", tmpna) == 0) {
-		na = tempnam(NULL, "php_swf_stdout");
+		FILE *fp;
+
+		fp = php_open_temporary_file(NULL, "php_swf_stdout", &na);
+		if (!fp) {
+			free_na = 0;
+			RETURN_FALSE;
+		}
 		unlink((const char *)na);
-	
+		fclose(fp);
+		free_na = 1;
 		SWFG(use_file) = 0;
 	} else {
 		na = tmpna;
@@ -193,9 +201,16 @@ PHP_FUNCTION(swf_openfile)
 	}
 
 #ifdef VIRTUAL_DIR
-	if (virtual_filepath(na, &na)) {
+	if (virtual_filepath(na, &tmpna)) {
+		if (free_na) {
+			efree(na);
+		}
 		return;
 	}
+	if (free_na) {
+		efree(na);
+	}
+	na = tmpna;
 #endif
 	if (!SWFG(use_file))
 		SWFG(tmpfile_name) = na;

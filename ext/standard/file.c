@@ -13,6 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   |          Stig Bakken <ssb@fast.no>                                   |
+   |          Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
    | PHP 4.0 patches by Thies C. Arntzen (thies@digicol.de)               |
    +----------------------------------------------------------------------+
  */
@@ -107,16 +110,16 @@ php_file_globals file_globals;
 static void _file_fopen_dtor(FILE *pipe);
 static void _file_popen_dtor(FILE *pipe);
 static void _file_socket_dtor(int *sock);
-static void _file_upload_dtor(char *file);
 
 /* sharing globals is *evil* */
-static int le_fopen,le_popen, le_socket, le_uploads; 
+static int le_fopen, le_popen, le_socket; 
 
 
 /* }}} */
-/* {{{ tempnam */
+/* {{{ php_open_temporary_file */
 
-#ifndef HAVE_TEMPNAM
+/* Loosely based on a tempnam() implementation by UCLA */
+
 /*
  * Copyright (c) 1988, 1993
  *      The Regents of the University of California.  All rights reserved.
@@ -162,51 +165,106 @@ static int le_fopen,le_popen, le_socket, le_uploads;
 # endif
 #endif
 
-char *tempnam(const char *dir, const char *pfx)
+static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **opened_path_p)
 {
-	int save_errno;
-	char *f, *name;
-	static char path_tmp[] = "/tmp";
-	
-	if (!(name = emalloc(MAXPATHLEN))) {
-		return(NULL);
+	char *trailing_slash;
+	FILE *fp;
+	char *opened_path;
+
+	if (!path) {
+		return NULL;
 	}
+
+	if (!(opened_path = emalloc(MAXPATHLEN))) {
+		return NULL;
+	}
+
+	if (*path+strlen(path)-1 == '/') {
+		trailing_slash = "";
+	} else {
+		trailing_slash = "/";
+	}
+
+	(void)snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", path, trailing_slash, pfx);
+
+#ifdef PHP_WIN32
+	if (GetTempFileName(path, pfx, 0, opened_path)) {
+		fp = V_FOPEN(opened_path, "wb");
+	} else {
+		fp = NULL;
+	}
+#elif defined(HAVE_MKSTEMP)
+	fd = mkstemp(opened_path);
+	if (fd==-1) {
+		fp = NULL;
+	} else {
+		fp = fdopen(fd, "wb");
+	}
+#else
+	if (mktemp(opened_path)) {
+		fp = V_FOPEN(opened_path, "wb");
+	} else {
+		fp = NULL;
+	}
+#endif
+	if (!fp || !opened_path_p) {
+		efree(opened_path);
+	} else {
+		*opened_path_p = opened_path;
+	}
+	return fp;
+}
+
+/* Unlike tempnam(), the supplied dir argument takes precedence
+ * over the TMPDIR environment variable
+ * This function should do its best to return a file pointer to a newly created
+ * unique file, on every platform.
+ */
+FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p)
+{
+	static char path_tmp[] = "/tmp";
+	FILE *fp;
+	
 	
 	if (!pfx) {
 		pfx = "tmp.";
 	}
-	
-	if (f = getenv("TMPDIR")) {
-		(void)snprintf(name, MAXPATHLEN, "%s%s%sXXXXXX", f,
-					   *(f + strlen(f) - 1) == '/'? "": "/", pfx);
-		if (f = mktemp(name))
-			return(f);
-	}
-	
-	if (f = (char *)dir) {
-		(void)snprintf(name, MAXPATHLEN, "%s%s%sXXXXXX", f,
-					   *(f + strlen(f) - 1) == '/'? "": "/", pfx);
-		if (f = mktemp(name))
-			return(f);
+
+	if (opened_path_p) {
+		*opened_path_p = NULL;
 	}
 
-	f = P_tmpdir;
-	(void)snprintf(name, MAXPATHLEN, "%s%sXXXXXX", f, pfx);
-	if (f = mktemp(name))
-		return(f);
+	if ((fp=php_do_open_temporary_file((char *) dir, pfx, opened_path_p))) {
+		return fp;
+	}
 
-	f = path_tmp;
-	(void)snprintf(name, MAXPATHLEN, "%s%sXXXXXX", f, pfx);
-	if (f = mktemp(name))
-		return(f);
+	if ((fp=php_do_open_temporary_file(getenv("TMPDIR"), pfx, opened_path_p))) {
+		return fp;
+	}
+#if PHP_WIN32
+	{
+		char *TempPath;
 
-	save_errno = errno;
-	efree(name);
-	errno = save_errno;
-	return(NULL);
+		TempPath = (char *) emalloc(MAXPATHLEN);
+		if (GetTempPath(MAXPATHLEN, TempPath)) {
+			fp = php_do_open_temporary_file(TempPath, pfx, opened_path_p);
+		}
+		efree(TempPath);
+		return fp;
+	}
+#else
+	if ((fp=php_do_open_temporary_file(P_tmpdir, pfx, opened_path_p))) {
+		return fp;
+	}
+
+	if ((fp=php_do_open_temporary_file(path_tmp, pfx, opened_path_p))) {
+		return fp;
+	}
+#endif
+
+	return NULL;
 }
 
-#endif
 
 /* }}} */
 /* {{{ Module-Stuff */
@@ -225,12 +283,6 @@ static void _file_socket_dtor(int *sock)
 	shutdown(*sock, 0);
 #endif
 	efree(sock);
-}
-
-
-static void _file_upload_dtor(char *file)
-{
-	V_UNLINK(file);
 }
 
 
@@ -257,12 +309,6 @@ PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
 }
 
 
-PHPAPI int php_file_le_uploads(void) /* XXX doe we really want this???? */
-{
-	return le_uploads;
-}
-
-
 #ifdef ZTS
 static void php_file_init_globals(php_file_globals *file_globals)
 {
@@ -276,7 +322,6 @@ PHP_MINIT_FUNCTION(file)
 	le_fopen = register_list_destructors(_file_fopen_dtor, NULL);
 	le_popen = register_list_destructors(_file_popen_dtor, NULL);
 	le_socket = register_list_destructors(_file_socket_dtor, NULL);
-	le_uploads = register_list_destructors(_file_upload_dtor, NULL);
 
 #ifdef ZTS
 	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) php_file_init_globals, NULL);
@@ -581,8 +626,9 @@ PHP_FUNCTION(tempnam)
 {
 	pval **arg1, **arg2;
 	char *d;
-	char *t;
+	char *opened_path;
 	char p[64];
+	FILE *fp;
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -592,12 +638,14 @@ PHP_FUNCTION(tempnam)
 	d = estrndup((*arg1)->value.str.val,(*arg1)->value.str.len);
 	strlcpy(p,(*arg2)->value.str.val,sizeof(p));
 
-	t = tempnam(d,p);
-	efree(d);
-	if(!t) {
-		RETURN_FALSE;
+
+	if ((fp = php_open_temporary_file(d, p, &opened_path))) {
+		fclose(fp);
+		RETVAL_STRING(opened_path, 0);
+	} else {
+		RETVAL_FALSE;
 	}
-	RETURN_STRING(t,1);
+	efree(d);
 }
 
 /* }}} */

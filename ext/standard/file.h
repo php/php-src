@@ -70,7 +70,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block);
 PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_popen(void);
 PHPAPI int php_file_le_socket(void);
-PHPAPI int php_file_le_uploads(void);
 PHPAPI int php_copy_file(char *src, char *dest);
+PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p);
 
 #endif /* FILE_H */
