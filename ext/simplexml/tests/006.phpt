@@ -40,7 +40,7 @@ foreach($sxe as $name => $data) {
 
 echo "===CLONE===\n";
 
-foreach($sxe->__clone() as $name => $data) {
+foreach(clone $sxe as $name => $data) {
 	var_dump($name);
 	var_dump(trim($data));
 }

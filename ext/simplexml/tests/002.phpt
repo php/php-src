@@ -24,7 +24,7 @@ EOF;
 
 $sxe = simplexml_load_string($xml);
 
-$copy = $sxe->__clone();
+$copy = clone $sxe;
 
 print_r($copy);
 

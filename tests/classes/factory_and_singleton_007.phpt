@@ -11,7 +11,7 @@ class test {
 }
 
 $obj = new test;
-$clone = $obj->__clone();
+$clone = clone $obj;
 $obj = NULL;
 
 echo "Done\n";
