@@ -59,11 +59,13 @@ int		 inet_aton(const char *, struct in_addr *);
 # define SOCK_CONN_ERR -1
 #endif
 
+#ifdef HAVE_GETADDRINFO
 #ifdef HAVE_GAI_STRERROR
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
 #else
 #  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
-static char *php_gai_strerror(int code) {
+static char *php_gai_strerror(int code)
+{
         static struct {
                 int code;
                 const char *msg;
@@ -95,6 +97,7 @@ static char *php_gai_strerror(int code) {
         
         return "Unknown error";
 }
+#endif
 #endif
 
 static void php_network_freeaddresses(struct sockaddr **sal)

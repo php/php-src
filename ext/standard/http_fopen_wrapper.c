@@ -270,9 +270,9 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 		free_url(resource);
 		if (location[0] != '\0') {
 			zval **response_header_new, *entry, **entryp;
+			ELS_FETCH();
 
 			fp = php_fopen_url_wrap_http(location, mode, options, issock, socketd, opened_path);
-			ELS_FETCH();
 			if (zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header_new) == SUCCESS) {
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);
