@@ -11,7 +11,7 @@ if (php_sapi_name() != "cli") {
 	1) Make sure you have CygWin installed
 	2) Adjust the $cygwin_path to match your installation
 	3) Change the environment cariable PATHEXT to include .PHP
-	4) run ext_skel --ext_name=...
+	4) run ext_skel --extname=...
 		the first time you run this script you will be asked to 
 		associate it with a program. chooses the CLI version of php.
 */
