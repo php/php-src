@@ -2059,7 +2059,7 @@ _oci_close_server(oci_server *server)
 			}
 		}
 	} else {
-		oci_debug("_oci_close_server: closind DEAD server");
+		oci_debug("_oci_close_server: closing DEAD server");
 	}
 
 	if (server->pServer) {
