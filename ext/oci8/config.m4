@@ -67,7 +67,8 @@ if test "$PHP_OCI8" != "no"; then
 	  ;;
 
 	8.1)
-  	  AC_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+  	  AC_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
+  	  AC_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
 	  ;;
 	*)
       AC_MSG_ERROR(Unsupported Oracle version!)
