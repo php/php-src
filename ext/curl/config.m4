@@ -68,9 +68,9 @@ if test "$PHP_CURL" != "no"; then
     $CURL_LIBS -L$CURL_DIR/lib
   ])
 
-  if test "$PHP_CURLWRAPPERS" != "no" ; then
-	AC_DEFINE(PHP_CURL_URL_WRAPPERS,1,[ ])
-  fi
+dnl  if test "$PHP_CURLWRAPPERS" != "no" ; then
+dnl    AC_DEFINE(PHP_CURL_URL_WRAPPERS,1,[ ])
+dnl  fi
 
   PHP_NEW_EXTENSION(curl, curl.c curlstreams.c, $ext_shared)
   PHP_SUBST(CURL_SHARED_LIBADD)
