@@ -103,7 +103,6 @@ PHP_FUNCTION(mysqli_embedded_connect)
 	zval  				*object = getThis();
 	char				*dbname = NULL;
 	int					dblen = 0;
-	struct timeval		starttime;
 
 	if (!MyG(embedded)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Embedded server was not initialized.");
@@ -128,7 +127,6 @@ PHP_FUNCTION(mysqli_embedded_connect)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
-	mysqli_resource->prinfo = prmysql;
 
 	if (!object) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
