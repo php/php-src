@@ -1,3 +1,4 @@
+/* $Id$ */
 
 #ifndef _PHP3_ORACLE_H
 #define _PHP3_ORACLE_H
@@ -79,7 +80,7 @@ typedef struct oraColumn {
 typedef struct oraParam {
 	text *progv;
 	sword progvl;
-	sb2 type;
+	sb2 inout;
 	ub2 alen;
 } oraParam;
 
@@ -134,6 +135,7 @@ extern void php3_Ora_Parse(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS);
 extern int php3_minit_oracle(INIT_FUNC_ARGS);
 extern int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS);
+extern int php3_rshutdown_oracle(SHUTDOWN_FUNC_ARGS);
 extern void php3_info_oracle(void);
 extern int php3_rinit_oracle(INIT_FUNC_ARGS);
 
