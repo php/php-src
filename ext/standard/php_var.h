@@ -25,11 +25,13 @@
 
 PHP_FUNCTION(var_dump);
 PHP_FUNCTION(var_export);
+PHP_FUNCTION(zval_debug_dump);
 PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 
 void php_var_dump(zval **struc, int level TSRMLS_DC);
 void php_var_export(zval **struc, int level TSRMLS_DC);
+void php_zval_debug_dump(zval **struc, int level TSRMLS_DC);
 
 /* typdef HashTable php_serialize_data_t; */
 #define php_serialize_data_t HashTable

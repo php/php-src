@@ -36,6 +36,7 @@
 #include "php_incomplete_class.h"
 
 #define COMMON ((*struc)->is_ref ? "&" : "")
+#define Z_REFCOUNT_PP(a) ((*a)->refcount)
 
 /* }}} */
 /* {{{ php_var_dump */
@@ -112,6 +113,7 @@ head_done:
 /* }}} */
 
 
+
 /* {{{ proto void var_dump(mixed var)
    Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
@@ -130,6 +132,102 @@ PHP_FUNCTION(var_dump)
 	
 	for (i=0; i<argc; i++)
 		php_var_dump(args[i], 1 TSRMLS_CC);
+	
+	efree(args);
+}
+/* }}} */
+
+/* {{{ zval_debug_dump */
+
+static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+
+	if (hash_key->nKeyLength==0) { /* numeric key */
+		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+	} else { /* string key */
+		php_printf("%*c[\"%s\"]=>\n", level + 1, ' ', hash_key->arKey);
+	}
+	php_zval_debug_dump(zv, level + 2 TSRMLS_CC);
+	return 0;
+}
+
+void php_zval_debug_dump(zval **struc, int level TSRMLS_DC)
+{
+	HashTable *myht;
+
+	if (level > 1) {
+		php_printf("%*c", level - 1, ' ');
+	}
+
+	switch (Z_TYPE_PP(struc)) {
+	case IS_BOOL:
+		php_printf("%sbool(%s) refcount(%u)\n", COMMON, Z_LVAL_PP(struc)?"true":"false", Z_REFCOUNT_PP(struc));
+		break;
+	case IS_NULL:
+		php_printf("%sNULL refcount(%u)\n", COMMON, Z_REFCOUNT_PP(struc));
+		break;
+	case IS_LONG:
+		php_printf("%slong(%ld) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), Z_REFCOUNT_PP(struc));
+		break;
+	case IS_DOUBLE:
+		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc), Z_REFCOUNT_PP(struc));
+		break;
+	case IS_STRING:
+		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_PP(struc));
+		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
+		php_printf("\" refcount(%u)\n", Z_REFCOUNT_PP(struc));
+		break;
+	case IS_ARRAY:
+		myht = Z_ARRVAL_PP(struc);
+		php_printf("%sarray(%d) refcount(%u){\n", COMMON, zend_hash_num_elements(myht), Z_REFCOUNT_PP(struc));
+		goto head_done;
+	case IS_OBJECT:
+		myht = Z_OBJPROP_PP(struc);
+		php_printf("%sobject(%s)(%d) refcount(%u){\n", COMMON, Z_OBJCE_PP(struc)->name, zend_hash_num_elements(myht), Z_REFCOUNT_PP(struc));
+head_done:
+		zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_array_element_dump, 1, level);
+		if (level > 1) {
+			php_printf("%*c", level-1, ' ');
+		}
+		PUTS("}\n");
+		break;
+	case IS_RESOURCE: {
+		char *type_name;
+
+		type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+		php_printf("%sresource(%ld) of type (%s) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown", Z_REFCOUNT_PP(struc));
+		break;
+	}
+	default:
+		php_printf("%sUNKNOWN:0\n", COMMON);
+		break;
+	}
+}
+
+/* }}} */
+
+/* {{{ proto void zval_debug_dump(mixed var)
+   Dumps a string representation of an internal zend value to output. */
+PHP_FUNCTION(zval_debug_dump)
+{
+	zval ***args;
+	int argc;
+	int	i;
+	
+	argc = ZEND_NUM_ARGS();
+	
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	for (i=0; i<argc; i++)
+		php_zval_debug_dump(args[i], 1 TSRMLS_CC);
 	
 	efree(args);
 }
