@@ -63,10 +63,10 @@ fi
 MY_OLDPWD=`pwd`
 
 # the destination .tar.gz file
-ARCHIVE=$MY_OLDPWD/$PKG-$VER-ZendEngine2.tar
+ARCHIVE=$MY_OLDPWD/$PKG-$VER.tar
 
 # temporary directory used to check out files from CVS
-DIR=$PKG-$VER-ZendEngine2
+DIR=$PKG-$VER
 DIRPATH=$MY_OLDPWD/$DIR
 
 if test -d "$DIRPATH"; then
@@ -138,7 +138,7 @@ done
 
 cd $MY_OLDPWD
 $ECHO_N "makedist: making gzipped tar archive...$ECHO_C"
-tar cf $ARCHIVE $PKG-$VER-ZendEngine2 || exit 8
+tar cf $ARCHIVE $PKG-$VER || exit 8
 gzip -9 $ARCHIVE || exit 9
 echo ""
 
