@@ -231,10 +231,8 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 			scope = CG(active_class_entry);
 		}
 	
-		class_name = do_alloca(class_name_len+1);
-		memcpy(class_name, name, class_name_len);
-		class_name[class_name_len] = '\0';
-	
+		class_name = estrndup(name, class_name_len);
+
 		if (class_name_len == sizeof("self")-1 && strcmp(class_name, "self") == 0) {
 			if (scope) {
 				ce = &scope;
@@ -255,7 +253,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 				retval = 0;
 			}
 		}
-		free_alloca(class_name);
+		efree(class_name);
 
 		if (retval && ce) {
 			if (zend_hash_find(&((*ce)->constants_table), constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
@@ -275,9 +273,8 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	}
 	
 	if (zend_hash_find(EG(zend_constants), name, name_len+1, (void **) &c) == FAILURE) {
-		lookup_name = do_alloca(name_len+1);
-		zend_str_tolower_copy(lookup_name, name, name_len);
-		lookup_name[name_len] = '\0';
+		lookup_name = estrndup(name, name_len);
+		zend_str_tolower(lookup_name, name_len);
 		 
 		if (zend_hash_find(EG(zend_constants), lookup_name, name_len+1, (void **) &c)==SUCCESS) {
 			if ((c->flags & CONST_CS) && memcmp(c->name, name, name_len)!=0) {
@@ -286,7 +283,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 		} else {
 			retval=0;
 		}
-		free_alloca(lookup_name);
+		efree(lookup_name);
 	}
 
 	if (retval) {
@@ -312,8 +309,8 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 
 	if (!(c->flags & CONST_CS)) {
 		/* keep in mind that c->name_len already contains the '\0' */
-		lowercase_name = do_alloca(c->name_len);
-		zend_str_tolower_copy(lowercase_name, c->name, c->name_len - 1);
+		lowercase_name = estrndup(c->name, c->name_len);
+		zend_str_tolower(lowercase_name, c->name_len);
 		name = lowercase_name;
 	} else {
 		name = c->name;
@@ -328,7 +325,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		ret = FAILURE;
 	}
 	if (lowercase_name) {
-		free_alloca(lowercase_name);
+		efree(lowercase_name);
 	}
 	return ret;
 }
