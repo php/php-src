@@ -259,6 +259,7 @@ package if needed.
             $installed = array_flip($reg->listPackages());
             $params = array();
             foreach ($latest as $package => $info) {
+                $package = strtolower($package);
                 if (!isset($installed[$package])) {
                     // skip packages we don't have installed
                     continue;
@@ -269,7 +270,7 @@ package if needed.
                     continue;
                 }
                 $params[] = $package;
-                $this->ui->outputData("will upgrade $package", $command);
+                $this->ui->outputData(array('data' => "Will upgrade $package"), $command);
             }
         }
         foreach ($params as $pkg) {
