@@ -2054,7 +2054,7 @@ PHP_FUNCTION(get_extension_funcs)
 
 
 /* This function is not directly accessible to end users */
-PHP_FUNCTION(warn_not_available)
+PHPAPI PHP_FUNCTION(warn_not_available)
 {
 	php_error(E_WARNING, "%s() is  not supported in this PHP build", get_active_function_name());
     RETURN_FALSE;

@@ -106,7 +106,6 @@ PHP_FUNCTION(get_loaded_extensions);
 PHP_FUNCTION(extension_loaded);
 PHP_FUNCTION(get_extension_funcs);
 
-PHP_FUNCTION(warn_not_available);
 
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);
