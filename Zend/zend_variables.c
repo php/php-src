@@ -32,12 +32,6 @@ ZEND_API char *empty_string = "";	/* in order to save emalloc() and efree() time
 									 */
 
 
-ZEND_API inline void var_uninit(zval *var)
-{
-	var->type = IS_NULL;
-}
-		
-
 ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type==IS_LONG) {
