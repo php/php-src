@@ -74,6 +74,10 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_loreadall,	NULL)
 	PHP_FE(pg_loimport,		NULL)
 	PHP_FE(pg_loexport,		NULL)
+#if HAVE_PQCLIENTENCODING
+	PHP_FE(pg_clientencoding,	NULL)
+	PHP_FE(pg_setclientencoding,	NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -1598,6 +1602,76 @@ PHP_FUNCTION(pg_loexport)
 }
 /* }}} */
 
+#if HAVE_PQCLIENTENCODING
+
+/* {{{ proto int pg_setclientencoding([int connection,] string encoding)
+   Set client encoding */
+PHP_FUNCTION(pg_setclientencoding)
+{
+	zval **encoding, **pgsql_link;
+	int id = -1;
+	PGconn *pgsql;
+	PGLS_FETCH();
+
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &encoding)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &pgsql_link, &encoding)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(encoding);
+	return_value->value.lval = PQsetClientEncoding(pgsql, Z_STRVAL_PP(encoding));
+	return_value->type = IS_LONG;
+
+}
+/* }}} */
+
+/* {{{ proto string pg_clientencoding([int connection])
+   Get the current client encoding */
+PHP_FUNCTION(pg_clientencoding)
+{
+	zval **pgsql_link;
+	int id = -1;
+	PGconn *pgsql;
+	PGLS_FETCH();
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	return_value->value.str.val 
+		= (char *) pg_encoding_to_char(PQclientEncoding(pgsql));
+	return_value->value.str.len = strlen(return_value->value.str.val);
+	return_value->value.str.val = (char *) estrdup(return_value->value.str.val);
+	return_value->type = IS_STRING;
+}
+/* }}} */
+#endif
 	
 #endif
 
