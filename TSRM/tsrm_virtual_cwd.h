@@ -52,7 +52,11 @@ typedef unsigned short mode_t;
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define IS_SLASH_P(c)	(*(c) == '/' || \
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
-#define COPY_WHEN_ABSOLUTE 2
+
+/* COPY_WHEN_ABSOLUTE also takes path as argument because netware needs it
+/* to account for volume name that is unique to NetWare absolute paths
+ */
+#define COPY_WHEN_ABSOLUTE(path) 2
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && isalpha(path[0]) && path[1] == ':')
 #define IS_UNC_PATH(path, len) \
@@ -91,7 +95,7 @@ typedef unsigned short mode_t;
 
 
 #ifndef COPY_WHEN_ABSOLUTE
-#define COPY_WHEN_ABSOLUTE 0
+#define COPY_WHEN_ABSOLUTE(path) 0
 #endif
 
 #ifndef IS_ABSOLUTE_PATH	
