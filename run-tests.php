@@ -188,10 +188,10 @@ if (extension_loaded('xdebug')) {
 	$ini_overwrites[] = 'xdebug.default_enable=0';
 }
 if (extension_loaded('zlib')) {
-	$ini_overwrites[] =	'zlib.output_compression=Off':
+	$ini_overwrites[] =	'zlib.output_compression=Off';
 }
 if (extension_loaded('session')) {
-	$ini_overwrites[] = 'session.auto_start=0'
+	$ini_overwrites[] = 'session.auto_start=0';
 }
 
 $info_params = array();
