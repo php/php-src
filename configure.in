@@ -312,6 +312,7 @@ memmove \
 mmap \
 putenv \
 random \
+rand_r \
 regcomp \
 rint \
 setitimer \
@@ -330,6 +331,7 @@ strdup \
 strerror \
 strftime \
 strstr \
+strtok_r \
 symlink \
 tempnam \
 tzset \
@@ -339,7 +341,7 @@ utime \
 vsnprintf \
 )
 
-AC_REPLACE_FUNCS(strlcat strlcpy strtok_r getopt)
+AC_REPLACE_FUNCS(strlcat strlcpy getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl## OLDLIBS=$LIBS; LIBS=""
