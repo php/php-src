@@ -157,7 +157,7 @@ char *db_cur_date(char *cp)
 	time_t	  c_time;
 
 	c_time = time((time_t *)NULL);
-	ctm = localtime_r(&c_time, &tmbuf);
+	ctm = php_localtime_r(&c_time, &tmbuf);
 	if (cp == NULL)
 		cp = (char *)malloc(9);
 
