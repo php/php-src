@@ -100,7 +100,7 @@ ext/session
 
 ext/sockets
 -----------
-    * Make the extension work on windows
+    * Make the extension work on windows (Daniel Beulshausen)
     * Make the extension work with Solaris and the Sun GCC
 
 ext/standard
