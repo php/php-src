@@ -200,12 +200,20 @@ unticked_statement:
 	|	T_REQUIRE expr ';'			{ do_require(&$2, 0 CLS_CC); }
 	|	T_REQUIRE_ONCE use_filename ';'			{ do_require(&$2, 1 CLS_CC); }
 	|	T_USE use_filename ';'		{ use_filename($2.u.constant.value.str.val, $2.u.constant.value.str.len CLS_CC); zval_dtor(&$2.u.constant); }
-	|	T_UNSET '(' cvar ')' ';' { do_end_variable_parse(BP_VAR_UNSET, 0 CLS_CC); do_unset(&$3 CLS_CC); }
+	|	T_UNSET '(' unset_variables ')' ';'
 	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
 	|	T_DECLARE { do_declare_begin(CLS_C); } '(' declare_list ')' declare_statement { do_declare_end(CLS_C); }
 	|	';'		/* empty statement */
 ;
 
+unset_variables:
+		unset_variable
+	|	unset_variables ',' unset_variable
+;
+
+unset_variable:
+		cvar	{ do_end_variable_parse(BP_VAR_UNSET, 0 CLS_CC); do_unset(&$1 CLS_CC); }
+;
 
 use_filename:
 		T_CONSTANT_ENCAPSED_STRING			{ $$ = $1; }
