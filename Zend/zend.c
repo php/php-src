@@ -147,8 +147,13 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			expr_copy->value.str.val = estrndup("Array", expr_copy->value.str.len);
 			break;
 		case IS_OBJECT:
+			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
+			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", expr->value.obj.handle);
+#if 0
+			/* FIXME: This might break BC for some people */
 			expr_copy->value.str.len = sizeof("Object")-1;
 			expr_copy->value.str.val = estrndup("Object", expr_copy->value.str.len);
+#endif
 			break;
 		default:
 			*expr_copy = *expr;
