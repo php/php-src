@@ -18,9 +18,7 @@ PHP                                                                        NEWS
   . ext/xml can now use both libxml2 and expat to parse XML (Sterling)
   . Removed bundled expat (Jani)
 
-- Due to a license change, we are longer bundling the MySQL client library.  
-  If you previously relied on this library in your own product, make sure to 
-  check with MySQL AB for the new licensing terms. (Sterling)
+- Removed the bundled MySQL client library. (Sterling)
 
 - New php.ini options:
   . "session.hash_function" and "session.hash_bits_per_character". (Sascha)
