@@ -444,6 +444,12 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...);
 
+void zend_activate(TSRMLS_D);
+void zend_deactivate(TSRMLS_D);
+void zend_activate_modules(TSRMLS_D);
+void zend_deactivate_modules(TSRMLS_D);
+void zend_exec_finished(TSRMLS_D);
+
 #if ZEND_DEBUG
 #define Z_DBG(expr)		(expr)
 #else
