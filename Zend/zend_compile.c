@@ -1083,7 +1083,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					return FAILURE;
 				}
 
-				/* Perform inheritence */
+				/* Perform inheritance */
 				zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 				zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 				ce->parent = parent_ce;
@@ -1407,7 +1407,7 @@ void do_default_before_statement(znode *case_list, znode *default_token CLS_DC)
 void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
-	int runtime_inheritence = 0;
+	int runtime_inheritance = 0;
 
 	if (CG(active_class_entry)) {
 		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
@@ -1444,7 +1444,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 
 			zval_dtor(&parent_class_name->u.constant);
 		} else {
-			runtime_inheritence = 1;
+			runtime_inheritance = 1;
 			CG(class_entry).parent = NULL;
 		}
 	} else {
@@ -1461,7 +1461,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
 	opline->op2.u.constant.refcount = 1;
-	if (runtime_inheritence) {
+	if (runtime_inheritance) {
 		char *full_class_name;
 
 		opline->op2.u.constant.value.str.len = parent_class_name->u.constant.value.str.len+1+CG(class_entry).name_length;
