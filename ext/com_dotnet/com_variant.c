@@ -37,18 +37,24 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	SAFEARRAY *sa = NULL;
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
+	int keytype;
 	char *strindex;
 	int strindexlen;
 	long intindex;
 	long max_index = 0;
 	VARIANT *va;
 	zval **item;
-
+		
 	/* find the largest array index, and assert that all keys are integers */
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
-		if (HASH_KEY_IS_LONG != zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos)) {
+
+		keytype = zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos);
+
+		if (HASH_KEY_IS_STRING == keytype) {
 			goto bogus;
+		} else if (HASH_KEY_NON_EXISTANT == keytype) {
+			break;
 		}
 		if (intindex > max_index) {
 			max_index = intindex;
@@ -57,25 +63,25 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 
 	/* allocate the structure */	
 	bound.lLbound = 0;
-	bound.cElements = intindex;
+	bound.cElements = intindex + 1;
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
-	SafeArrayLock(sa);
+	SafeArrayAccessData(sa, &va);
 	va = (VARIANT*)sa->pvData;
 	
 	/* now fill it in */
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
 		if (FAILURE == zend_hash_get_current_data_ex(HASH_OF(z), (void**)&item, &pos)) {
-			goto bogus;
+			break;
 		}
 		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos);
 		php_com_variant_from_zval(&va[intindex], *item, codepage TSRMLS_CC);		
 	}
 
 	/* Unlock it and stuff it into our variant */
-	SafeArrayUnlock(sa);
+	SafeArrayUnaccessData(sa);
 	V_VT(v) = VT_ARRAY|VT_VARIANT;
 	V_ARRAY(v) = sa;
 
@@ -278,7 +284,9 @@ PHP_FUNCTION(com_variant_create_instance)
 		obj->code_page = codepage;
 	}
 
-	php_com_variant_from_zval(&obj->v, zvalue, obj->code_page TSRMLS_CC);
+	if (zvalue) {
+		php_com_variant_from_zval(&obj->v, zvalue, obj->code_page TSRMLS_CC);
+	}
 
 	if (ZEND_NUM_ARGS() >= 2) {
 
@@ -818,7 +826,7 @@ PHP_FUNCTION(variant_get_type)
 		return;
 	}
 	obj = CDNO_FETCH(zobj);
-
+		
 	RETURN_LONG(V_VT(&obj->v));
 }
 /* }}} */
