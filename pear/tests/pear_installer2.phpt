@@ -232,6 +232,25 @@ if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
 }
 $installer->rollbackFileTransaction();
 
+echo "\ntest baseinstalldir:\n";
+var_dump($installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script',
+    'baseinstalldir' => 'Foo/Mine'),
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp', array()));
+echo "==>test baseinstalldir = 'Foo/Mine'.  file exists? ";
+if (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    'Foo' . DIRECTORY_SEPARATOR . 'Mine' . DIRECTORY_SEPARATOR . '.tmpinstaller2.phpt.testfile.php'))
+{
+    echo "yes\n";
+} else {
+    echo "no\n";
+}
+$installer->rollbackFileTransaction();
+
+rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    'Foo' . DIRECTORY_SEPARATOR . 'Mine');
+rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
+    'Foo');
+
 unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php');
 
 //cleanup
@@ -306,4 +325,8 @@ int(1)
 test install-as:
 int(1)
 ==>test install as 'foobar.php'.  file exists? yes
+
+test baseinstalldir:
+int(1)
+==>test baseinstalldir = 'Foo/Mine'.  file exists? yes
 
