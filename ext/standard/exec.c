@@ -125,7 +125,7 @@ int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 				}
 				continue;
 			} else if (b != buf) {
-				bufl += buflen - EXEC_INPUT_BUF;
+				bufl += b - buf;
 			}
 
 			if (type == 1) {
