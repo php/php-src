@@ -251,6 +251,10 @@ SOURCE=.\zend_execute.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_execute_locks.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_extensions.h
 # End Source File
 # Begin Source File
