@@ -33,8 +33,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #30281 (Prevent non-wbmp images from being detected as such).
   (Ilia)
 - Fixed bug #30276 (Possible crash in ctype_digit on large numbers). (Ilia)
-- Fixed bug #30232 (session_start() sends Set-Cookie header only if the 
-  cookie isn't set). (Tony)
 - Fixed bug #30229 (imagerectangle and imagefilledrectangle do work well
   with alpha channel, corners are drawn twice). (Pierre)
 - Fixed bug #30224 (Sybase date strings are sometimes not null terminated).
