@@ -89,6 +89,8 @@
 #include "php.h"
 #include "php_globals.h"
 
+#ifdef HAVE_MBSTRING
+
 #include <stdlib.h>
 #include "mbfilter.h"
 
@@ -9556,6 +9558,8 @@ mbfl_html_numeric_entity(
 
 	return result;
 }
+
+#endif	/* HAVE_MBSTRING */
 
 /*
  * Local variables:
