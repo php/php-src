@@ -19,4 +19,4 @@ echo "Done\n"; // Shouldn't be displayed
 ?>
 --EXPECTF--
 
-Fatal error: Cannot make non abstract method pass::show() abstract in class fail in %s on line %d
+Fatal error: Class fail contains 1 abstract methods and must therefore be declared abstract (fail::show) in %sabstract_redeclare.php on line %d
