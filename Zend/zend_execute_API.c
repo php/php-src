@@ -113,6 +113,8 @@ static int is_not_internal_class(zend_class_entry **ce TSRMLS_DC)
 void init_executor(TSRMLS_D)
 {
 	INIT_ZVAL(EG(uninitialized_zval));
+/* trick to make uninitialized_zval never be modified, passed by ref, etc.  */
+	EG(uninitialized_zval).refcount++;
 	INIT_ZVAL(EG(error_zval));
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval_ptr)=&EG(error_zval);
