@@ -2299,6 +2299,8 @@ PHP_FUNCTION(define)
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
+		case IS_BOOL:
+		case IS_RESOURCE:
 			break;
 		default:
 			php_error(E_WARNING,"Constants may only evaluate to scalar values");
