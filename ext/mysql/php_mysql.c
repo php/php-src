@@ -1515,35 +1515,28 @@ PHP_FUNCTION(mysql_real_escape_string)
 {
 	zval *mysql_link = NULL;
 	char *str;
-	int id = -1, str_len;
+	char *new_str;
+	int id = -1, str_len, new_str_len;
 	php_mysql_conn *mysql;
-	switch(ZEND_NUM_ARGS())
-	{
-		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str, &str_len)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			CHECK_LINK(id);
-			break;
-		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr",&str, &str_len, &mysql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &str, &str_len, &mysql_link) == FAILURE) {
+		return;
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
-	
-	/* the maximum size of the new string is 2x the length of the 
-	 * original string (every chas to be scaped)
-	 */
-	Z_STRVAL_P(return_value) = (char *)emalloc(str_len * 2 + 1);  // one extra byte for '\0'
-	Z_STRLEN_P(return_value) = mysql_real_escape_string(&mysql->conn, Z_STRVAL_P(return_value), str, str_len);
-	Z_TYPE_P(return_value) = IS_STRING;
+	if (mysql_link == NULL) {
+		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		CHECK_LINK(id);
+	}
+	else {
+		ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+	}
+
+	new_str = emalloc(str_len * 2 + 1);
+	new_str_len = mysql_real_escape_string(&mysql->conn, new_str, str, str_len);
+	new_str = erealloc(new_str, new_str_len);
+
+	RETURN_STRINGL(new_str, new_str_len, 0);
 }
 /* }}} */
 
