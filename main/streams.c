@@ -1280,7 +1280,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	if (data->fd >= 0) {
 		ret = read(data->fd, buf, count);
 		
-		if (ret == 0 || (ret < 0 && errno != EWOULDBLOCK))
+		if (ret == 0 || (ret < count && errno != EWOULDBLOCK))
 			stream->eof = 1;
 				
 	} else {
@@ -1673,7 +1673,7 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 static int stream_cookie_seeker(void *cookie, fpos_t *position, int whence)
 {
 	TSRMLS_FETCH();
-	
+
 	*position = php_stream_seek((php_stream *)cookie, *position, whence);
 
 	if (*position == -1)
@@ -1684,7 +1684,6 @@ static int stream_cookie_seeker(void *cookie, fpos_t *position, int whence)
 static int stream_cookie_seeker(void *cookie, off_t position, int whence)
 {
 	TSRMLS_FETCH();
-
 	return php_stream_seek((php_stream *)cookie, position, whence);
 }
 #endif
