@@ -1579,7 +1579,7 @@ PHP_FUNCTION(domxml_node_children)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_nlink_node(void)
+/* {{{ proto object domxml_node_unlink_node(void)
    Deletes node */
 PHP_FUNCTION(domxml_node_unlink_node)
 {
