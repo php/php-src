@@ -5,7 +5,7 @@
     $Id$ 
 */
 
-/*   mnoGoSearch-php-lite v.1.3
+/*   mnoGoSearch-php-lite v.1.4
  *   for mnoGoSearch ( formely known as UdmSearch ) free web search engine
  *   (C) 2001-2002 by Sergey Kartashoff <gluke@mail.ru>,
  *               mnoGoSearch Developers Team <devel@mnogosearch.org>
@@ -105,7 +105,8 @@ $de=urldecode($de);
 if ($db=="") $db='01/01/1970';
 if ($de=="") $de='31/12/2020';
 
-$storedaddr="localhost";
+// define this to enable stored support
+// $storedaddr="localhost";
 $storedocurl='/cgi-bin/storedoc.cgi';
 
 if (isset($q)) {
@@ -652,6 +653,7 @@ function make_nav($query_orig){
 
    if (Udm_Api_Version() >= 30204) {   	
 	if ($have_query_flag)Udm_Set_Agent_Param($udm_agent,UDM_PARAM_QUERY,$query_orig);
+	if ($storedaddr != '') Udm_Set_Agent_Param($udm_agent,UDM_PARAM_STORED,$storedaddr);
    }
 
    if  ($m=='any') {

@@ -78,6 +78,7 @@
 #define UDM_PARAM_QSTRING		23
 #define UDM_PARAM_REMOTE_ADDR		24
 #define UDM_PARAM_QUERY			25
+#define UDM_PARAM_STORED		26
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -293,6 +294,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SYNONYM",	UDM_PARAM_SYNONYM,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCHD",	UDM_PARAM_SEARCHD,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_STORED",	UDM_PARAM_STORED,CONST_CS | CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_QSTRING",	UDM_PARAM_QSTRING,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_REMOTE_ADDR",	UDM_PARAM_REMOTE_ADDR,CONST_CS | CONST_PERSISTENT);
@@ -975,6 +977,11 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			UdmVarListReplaceStr(&Agent->Conf->Vars,"q",val);
 
 			break;
+
+		case UDM_PARAM_STORED:
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"StoredAddr",val);
+
+			break;
 #endif
 
 #endif
@@ -1540,13 +1547,14 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 		if (Excerpt != NULL) {
 			char *HlExcerpt = UdmHlConvert(&Res->WWList, Excerpt, Agent->Conf->lcs, Agent->Conf->bcs);
 			UdmVarListReplaceInt(&(Res->Doc[row].Sections),"ST",1);
-			UdmVarListReplaceStr(&(Res->Doc[row].Sections),"body",HlExcerpt);
+			UdmVarListReplaceStr(&(Res->Doc[row].Sections),"Body",HlExcerpt);
 			UDM_FREE(HlExcerpt);
 			UDM_FREE(Excerpt);
 		} else {
 		        UdmVarListReplaceInt(&(Res->Doc[row].Sections),"ST",0);
 			RETURN_FALSE;
 		}
+
 	}else{
 		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
