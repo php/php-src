@@ -1107,7 +1107,7 @@ PHP_FUNCTION(mysql_create_db)
 			break;
 	}
 
-	zend_error(E_NOTICE, "%s is deprecated; use mysql_query() to issue a SQL CREATE DATABASE statement instead.", get_active_function_name(TSRMLS_C));
+	zend_error(E_NOTICE, "%s(): This function is deprecated, please use mysql_query() to issue a SQL CREATE DATABASE statement instead.", get_active_function_name(TSRMLS_C));
 
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(mysql_drop_db)
 			break;
 	}
 
-	zend_error(E_NOTICE, "%s is deprecated; use mysql_query() to issue a SQL DROP DATABASE statement instead.", get_active_function_name(TSRMLS_C));
+	zend_error(E_NOTICE, "%s(): This function is deprecated, please use mysql_query() to issue a SQL DROP DATABASE statement instead.", get_active_function_name(TSRMLS_C));
 
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
@@ -1303,7 +1303,7 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	zend_error(E_NOTICE, "%s is deprecated; use mysql_select_db() and mysql_query() instead", get_active_function_name(TSRMLS_C));
+	zend_error(E_NOTICE, "%s(): This function is deprecated; use mysql_select_db() and mysql_query() instead", get_active_function_name(TSRMLS_C));
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
 }
@@ -1587,7 +1587,7 @@ PHP_FUNCTION(mysql_escape_string)
 	 * be worth it
 	 */
 
-	zend_error(E_NOTICE, "%s is deprecated; use mysql_real_escape_string() instead", get_active_function_name(TSRMLS_C));
+	zend_error(E_NOTICE, "%s(): This function is deprecated, please use mysql_real_escape_string() instead", get_active_function_name(TSRMLS_C));
 
 	Z_STRVAL_P(return_value) = (char *) emalloc(Z_STRLEN_PP(str)*2+1);
 	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), Z_STRVAL_PP(str), Z_STRLEN_PP(str));
