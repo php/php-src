@@ -2414,10 +2414,10 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 	FuncPtr f;
 
 	if (src->trueColor) {
-		dst = gdImageCreateTrueColor ( src->sx,src->sy);
+		dst = gdImageCreateTrueColor(src->sy, src->sx);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst = gdImageCreate (src->sx, src->sy);
+		dst = gdImageCreate (src->sy, src->sx);
 		f = gdImageGetPixel;
 	}
 
