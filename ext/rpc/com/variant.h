@@ -36,7 +36,7 @@
 		comval *obj;															\
 		ALLOC_COM(obj);															\
 		php_COM_set(obj, &V_DISPATCH(v), TRUE);									\
-		rpc_object_from_data(z, com, obj, NULL);								\
+		rpc_object_from_data_ex(z, com, obj, NULL);								\
 	} else {																	\
 		php_variant_to_zval((v), (z), cp);										\
 		VariantClear(v);														\

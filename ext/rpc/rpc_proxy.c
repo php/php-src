@@ -26,7 +26,7 @@ static void rpc_proxy_add_ref(zval * TSRMLS_DC);
 static void rpc_proxy_del_ref(zval * TSRMLS_DC);
 static void rpc_proxy_delete(zval * TSRMLS_DC);
 static zend_object_value rpc_proxy_clone(zval * TSRMLS_DC);
-static zval* rpc_proxy_read(zval *, zval *, int  TSRMLS_DC);
+static zval* rpc_proxy_read(zval *, zval * TSRMLS_DC);
 static void rpc_proxy_write(zval *, zval *, zval * TSRMLS_DC);
 static zval** rpc_proxy_get_property(zval *, zval * TSRMLS_DC);
 static zval* rpc_proxy_get(zval * TSRMLS_DC);
@@ -82,7 +82,7 @@ static zend_object_value rpc_proxy_clone(zval *object TSRMLS_DC)
 {
 }
 
-static zval* rpc_proxy_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval* rpc_proxy_read(zval *object, zval *member TSRMLS_DC)
 {
 	return NULL;
 }

@@ -123,4 +123,15 @@
 						efree(arg_types);																			\
 						efree(hash_val.str);
 
+#define ALLOC_CLASS_HASH(_class_hash, _handlers) \
+		if (_class_hash = pemalloc(sizeof(rpc_class_hash), TRUE)) { \
+			/* set up the cache */ \
+			zend_ts_hash_init(&(_class_hash->methods), 0, NULL, rpc_string_dtor, TRUE); \
+			zend_ts_hash_init(&(_class_hash->properties), 0, NULL, rpc_string_dtor, TRUE); \
+			_class_hash->singleton = FALSE; \
+			_class_hash->poolable = FALSE; \
+			_class_hash->data = NULL; \
+			_class_hash->handlers = _handlers; \
+		}
+
 #endif

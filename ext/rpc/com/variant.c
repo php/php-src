@@ -39,7 +39,7 @@ static zend_object_value variant_objects_new(zend_class_entry * TSRMLS_DC);
 static void variant_objects_delete(void *, zend_object_handle TSRMLS_DC);
 
 /* object handler */
-static zval* variant_read(zval *, zval *, int  TSRMLS_DC);
+static zval* variant_read(zval *, zval * TSRMLS_DC);
 static void variant_write(zval *, zval *, zval * TSRMLS_DC);
 static union _zend_function* variant_get_constructor(zval * TSRMLS_DC);
 static zend_class_entry* variant_get_class_entry(zval * TSRMLS_DC);
@@ -242,7 +242,7 @@ static void variant_objects_delete(void *object, zend_object_handle handle TSRML
 	FREE_VARIANT((variantval *)object);
 }
 
-static zval* variant_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval* variant_read(zval *object, zval *member TSRMLS_DC)
 {
 	variantval *var;
 	zval *result;
@@ -260,7 +260,7 @@ static zval* variant_read(zval *object, zval *member, int type TSRMLS_DC)
 		ZVAL_LONG(result, V_VT(var->var));
 	} else {
 		ZVAL_FALSE(result);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown member.");
+		rpc_error(NULL TSRMLS_CC, E_WARNING, "Unknown member.");
 	}
 
 	return result;
@@ -280,7 +280,7 @@ static void variant_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	} else if (zend_hash_find(&types, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, (void **) &type) == SUCCESS) {
 		php_zval_to_variant_ex(value, var->var, *type, var->codepage);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown member.");
+		rpc_error(NULL TSRMLS_CC, E_WARNING, "Unknown member.");
 	}
 }
 
