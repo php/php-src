@@ -1060,7 +1060,7 @@ PHP_FUNCTION(read_exif_data) {
     pval **p_name;
     int ac = ZEND_NUM_ARGS(), ret;
 	ImageInfoType ImageInfo;
-	char tmp[64];
+	char tmp[64], *file;
 
 	/*ImageInfo.Thumbnail = NULL;
 	ImageInfo.ThumbnailSize = 0;
@@ -1070,7 +1070,14 @@ PHP_FUNCTION(read_exif_data) {
 		WRONG_PARAM_COUNT;
 
 	convert_to_string_ex(p_name);
-	ret = php_read_jpeg_exif(&ImageInfo, (*p_name)->value.str.val,1);
+
+#ifdef VIRTUAL_DIR
+	virtual_filepath(Z_STRVAL_PP(p_name), &file);
+	ret = php_read_jpeg_exif(&ImageInfo, file,1);
+#else
+	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name),1);
+#endif
+
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
