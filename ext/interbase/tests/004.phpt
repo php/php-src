@@ -5,116 +5,118 @@ InterBase: BLOB test
 --POST--
 --GET--
 --FILE--
-<?php
+<?php /* $Id$ */
 
-    require("interbase.inc");
-    
-    ibase_connect($test_base);
+require("interbase.inc");
 
-    ibase_query(
-    	"create table test4 (
-    		v_integer   integer,
-            v_blob		blob)");
-    ibase_commit();
+ibase_connect($test_base);
 
-    /* create 100k blob file  */
-    $blob_str = rand_binstr(100*1024);
+ibase_query(
+	"CREATE TABLE test4 (
+		v_integer	integer,
+		v_blob		blob)");
+ibase_commit();
 
-    $name = tempnam(dirname(__FILE__),"blob.tmp");
-    $ftmp = fopen($name,"w");
-    fwrite($ftmp,$blob_str);
-    fclose($ftmp);
+/* create 100k blob file */
+$blob_str = rand_binstr(100*1024);
 
-    echo "import blob 1\n";
-    $ftmp = fopen($name,"r");
-    $bl_s = ibase_blob_import($ftmp);
-    ibase_query("insert into test4 (v_integer, v_blob) values (1, ?)", $bl_s);
+$name = tempnam(dirname(__FILE__),"blob.tmp");
+$ftmp = fopen($name,"w");
+fwrite($ftmp,$blob_str);
+fclose($ftmp);
 
-    echo "test blob 1\n";
-    $q = ibase_query("select v_blob from test4 where v_integer = 1");
-    $row = ibase_fetch_object($q);
-    $bl_h = ibase_blob_open($row->V_BLOB);
+echo "import blob 1\n";
 
-	$blob = '';    
-    while($piece = ibase_blob_get($bl_h, 1 + rand() % 1024))
-        $blob .= $piece;
-    if($blob != $blob_str)
-		echo " BLOB 1 fail (1)\n";
-    ibase_blob_close($bl_h);
+$ftmp = fopen($name,"r");
+$bl_s = ibase_blob_import($ftmp);
+ibase_query("INSERT INTO test4 (v_integer, v_blob) VALUES (1, ?)", $bl_s);
 
-    $bl_h = ibase_blob_open($row->V_BLOB);
+echo "test blob 1\n";
 
-	$blob = '';    
-    while($piece = ibase_blob_get($bl_h, 100 * 1024))
-        $blob .= $piece;
-    if($blob != $blob_str)
-		echo " BLOB 1 fail (2)\n";
-    ibase_blob_close($bl_h);
-    ibase_free_result($q);
-    unset($blob);
+$q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 1");
+$row = ibase_fetch_object($q);
+$bl_h = ibase_blob_open($row->V_BLOB);
 
-    echo "create blob 2\n";
+$blob = '';
+while ($piece = ibase_blob_get($bl_h, 1 + rand() % 1024))
+	$blob .= $piece;
+if ($blob != $blob_str)
+	echo " BLOB 1 fail (1)\n";
+ibase_blob_close($bl_h);
 
-    ibase_query("insert into test4 (v_integer, v_blob) values (2, ?)", $blob_str);
+$bl_h = ibase_blob_open($row->V_BLOB);
 
-    echo "test blob 2\n";
+$blob = '';
+while ($piece = ibase_blob_get($bl_h, 100 * 1024))
+	$blob .= $piece;
+if ($blob != $blob_str)
+	echo " BLOB 1 fail (2)\n";
+ibase_blob_close($bl_h);
+ibase_free_result($q);
+unset($blob);
 
-    $q = ibase_query("select v_blob from test4 where v_integer = 2");
-    $row = ibase_fetch_object($q,IBASE_TEXT);
+echo "create blob 2\n";
 
-    if($row->V_BLOB != $blob_str)
-		echo " BLOB 2 fail\n";
-    ibase_free_result($q);
-    unset($blob);
+ibase_query("INSERT INTO test4 (v_integer, v_blob) VALUES (2, ?)", $blob_str);
 
+echo "test blob 2\n";
 
-    echo "create blob 3\n";
+$q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 2");
+$row = ibase_fetch_object($q,IBASE_TEXT);
 
-    $bl_h = ibase_blob_create();
+if ($row->V_BLOB != $blob_str)
+	echo " BLOB 2 fail\n";
+ibase_free_result($q);
+unset($blob);
 
-    ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
-    ibase_blob_add($bl_h, "| PHP HTML Embedded Scripting Language Version 3.0                     |\n");
-    ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
-    ibase_blob_add($bl_h, "| Copyright (c) 1997-2000 PHP Development Team (See Credits file)      |\n");
-    ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
-    ibase_blob_add($bl_h, "| This program is free software; you can redistribute it and/or modify |\n");
-    ibase_blob_add($bl_h, "| it under the terms of one of the following licenses:                 |\n");
-    ibase_blob_add($bl_h, "|                                                                      |\n");
-    ibase_blob_add($bl_h, "|  A) the GNU General Public License as published by the Free Software |\n");
-    ibase_blob_add($bl_h, "|     Foundation; either version 2 of the License, or (at your option) |\n");
-    ibase_blob_add($bl_h, "|     any later version.                                               |\n");
-    ibase_blob_add($bl_h, "|                                                                      |\n");
-    ibase_blob_add($bl_h, "|  B) the PHP License as published by the PHP Development Team and     |\n");
-    ibase_blob_add($bl_h, "|     included in the distribution in the file: LICENSE                |\n");
-    ibase_blob_add($bl_h, "|                                                                      |\n");
-    ibase_blob_add($bl_h, "| This program is distributed in the hope that it will be useful,      |\n");
-    ibase_blob_add($bl_h, "| but WITHOUT ANY WARRANTY; without even the implied warranty of       |\n");
-    ibase_blob_add($bl_h, "| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |\n");
-    ibase_blob_add($bl_h, "| GNU General Public License for more details.                         |\n");
-    ibase_blob_add($bl_h, "|                                                                      |\n");
-    ibase_blob_add($bl_h, "| You should have received a copy of both licenses referred to here.   |\n");
-    ibase_blob_add($bl_h, "| If you did not, or have any questions about PHP licensing, please    |\n");
-    ibase_blob_add($bl_h, "| contact core@php.net.                                                |\n");
-    ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
-    $bl_s = ibase_blob_close($bl_h);
-    ibase_query("insert into test4 (v_integer, v_blob) values (3, ?)", $bl_s);
+echo "create blob 3\n";
 
-    echo "echo blob 3\n";
+$bl_h = ibase_blob_create();
+ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
+ibase_blob_add($bl_h, "| PHP HTML Embedded Scripting Language Version 3.0                     |\n");
+ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
+ibase_blob_add($bl_h, "| Copyright (c) 1997-2000 PHP Development Team (See Credits file)      |\n");
+ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
+ibase_blob_add($bl_h, "| This program is free software; you can redistribute it and/or modify |\n");
+ibase_blob_add($bl_h, "| it under the terms of one of the following licenses:                 |\n");
+ibase_blob_add($bl_h, "|                                                                      |\n");
+ibase_blob_add($bl_h, "|  A) the GNU General Public License as published by the Free Software |\n");
+ibase_blob_add($bl_h, "|     Foundation; either version 2 of the License, or (at your option) |\n");
+ibase_blob_add($bl_h, "|     any later version.                                               |\n");
+ibase_blob_add($bl_h, "|                                                                      |\n");
+ibase_blob_add($bl_h, "|  B) the PHP License as published by the PHP Development Team and     |\n");
+ibase_blob_add($bl_h, "|     included in the distribution in the file: LICENSE                |\n");
+ibase_blob_add($bl_h, "|                                                                      |\n");
+ibase_blob_add($bl_h, "| This program is distributed in the hope that it will be useful,      |\n");
+ibase_blob_add($bl_h, "| but WITHOUT ANY WARRANTY; without even the implied warranty of       |\n");
+ibase_blob_add($bl_h, "| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |\n");
+ibase_blob_add($bl_h, "| GNU General Public License for more details.                         |\n");
+ibase_blob_add($bl_h, "|                                                                      |\n");
+ibase_blob_add($bl_h, "| You should have received a copy of both licenses referred to here.   |\n");
+ibase_blob_add($bl_h, "| If you did not, or have any questions about PHP licensing, please    |\n");
+ibase_blob_add($bl_h, "| contact core@php.net.                                                |\n");
+ibase_blob_add($bl_h, "+----------------------------------------------------------------------+\n");
+$bl_s = ibase_blob_close($bl_h);
+ibase_query("INSERT INTO test4 (v_integer, v_blob) VALUES (3, ?)", $bl_s);
 
-    $q = ibase_query("select v_blob from test4 where v_integer = 3");
-    $row = ibase_fetch_object($q);
-    ibase_blob_echo($row->V_BLOB);
-    ibase_free_result($q);
-    
-    echo "fetch blob 3\n";
-    $q = ibase_query("select v_blob from test4 where v_integer = 3");
-    $row = ibase_fetch_object($q,IBASE_TEXT);
-    echo $row->V_BLOB;
-    ibase_free_result($q);
+echo "echo blob 3\n";
 
-    ibase_close();
-    unlink($name);
-    echo "end of test\n";
+$q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 3");
+$row = ibase_fetch_object($q);
+ibase_blob_echo($row->V_BLOB);
+ibase_free_result($q);
+
+echo "fetch blob 3\n";
+
+$q = ibase_query("SELECT v_blob FROM test4 WHERE v_integer = 3");
+$row = ibase_fetch_object($q,IBASE_TEXT);
+echo $row->V_BLOB;
+ibase_free_result($q);
+
+ibase_close();
+unlink($name);
+
+echo "end of test\n";
 ?>
 --EXPECT--
 import blob 1
