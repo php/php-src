@@ -115,9 +115,10 @@ class PEAR_Dependency
     /**
      * Package dependencies check method
      *
+     * @param string $errmsg    Empty string, it will be populated with an error message, if any
      * @param string $name      Name of the package to test
-     * @param string $version   The package version required
-     * @param string $relation  How to compare versions with eachother
+     * @param string $req       The package version required
+     * @param string $relation  How to compare versions with each other
      * @param bool   $opt       Whether the relationship is optional
      *
      * @return mixed bool false if no error or the error string
