@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added Console_Getopt class for parsing command-line args. (Andrei, PEAR)
+- Add an experimental version of the ZZipLib extension which provides the
+  ability to read zip files. (Sterling)
 - Allow access to uploaded files in safe_mode. Beware that you can only
   read the file. If you copy it to new location the copy will not have the
   right UID and you script won't be able to access that copy. (Thies)
