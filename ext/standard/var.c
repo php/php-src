@@ -182,10 +182,9 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
 	smart_str_appendl(buf, "\";", 2);
 }
 
-static inline void php_var_serialize_class_name(smart_str *buf, zval **struc)
+static inline void php_var_serialize_class_name(smart_str *buf, zval **struc TSRMLS_DC)
 {
 	PHP_CLASS_ATTRIBUTES;
-	TSRMLS_FETCH();
 
 	PHP_SET_CLASS_ATTRIBUTES(*struc);
 	smart_str_appendl(buf, "O:", 2);
@@ -200,7 +199,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 {
 	int count = zend_hash_num_elements(HASH_OF(retval_ptr));
 
-	php_var_serialize_class_name(buf, struc);
+	php_var_serialize_class_name(buf, struc TSRMLS_CC);
 
 	if (count > 0) {
 		char *key;
@@ -314,7 +313,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 			if (Z_TYPE_PP(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
 			} else {
-				php_var_serialize_class_name(buf, struc);
+				php_var_serialize_class_name(buf, struc TSRMLS_CC);
 			}
 			smart_str_append_long(buf, i);
 			smart_str_appendl(buf, ":{", 2);
