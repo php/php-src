@@ -286,11 +286,19 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$failed_tests_data = '';
 		$sep = "\n" . str_repeat('=', 80) . "\n";
 		
-		$failed_tests_data .= "Automake:\n". shell_exec('automake --version'). "\n";
-		$failed_tests_data .= "Autoconf:\n". shell_exec('autoconf --version'). "\n";
-		$failed_tests_data .= "Libtool:\n". shell_exec('libtool --version'). "\n";
-		$failed_tests_data .= "Bison:\n". shell_exec('bison --version'). "\n";
-		$failed_tests_data .= "Compiler:\n". shell_exec(getenv('CC').' -v 2>&1'). "\n";
+		$failed_tests_data .= "OS:\n". PHP_OS. "\n";
+		$automake = $autoconf = $libtool = $compiler = 'N/A';
+		if (substr(PHP_OS, 0, 3) != "WIN") {
+			$automake = shell_exec('automake --version');
+			$autoconf = shell_exec('autoconf --version');
+			$libtool = shell_exec('libtool --version');
+			$compiler = shell_exec(getenv('CC').' -v 2>&1');
+		}
+		$failed_tests_data .= "Automake:\n$automake\n";
+		$failed_tests_data .= "Autoconf:\n$autoconf\n";
+		$failed_tests_data .= "Libtool:\n$libtool\n";
+		$failed_tests_data .= "Compiler:\n$compiler\n";
+		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
 		$failed_tests_data .= "\n\n";
 		
 		$failed_tests_data .= $failed_test_summary . "\n";
