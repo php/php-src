@@ -40,7 +40,7 @@ typedef enum {
 #define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen
 #define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen
 #define PS_DELETE_ARGS void **mod_data, const char *key
-#define PS_GC_ARGS void **mod_data
+#define PS_GC_ARGS void **mod_data, int maxlifetime
 
 typedef struct ps_module_struct {
 	char *name;
@@ -82,6 +82,8 @@ typedef struct {
 	void *mod_data;
 	HashTable vars;
 	int nr_open_sessions;
+	int gc_probability;
+	int gc_maxlifetime;
 } php_ps_globals;
 
 extern zend_module_entry session_module_entry;
@@ -96,8 +98,7 @@ PHP_FUNCTION(session_register);
 PHP_FUNCTION(session_unregister);
 PHP_FUNCTION(session_encode);
 PHP_FUNCTION(session_start);
-
-PS_FUNCS(files);
+PHP_FUNCTION(session_destroy);
 
 #ifdef ZTS
 #define PSLS_D php_ps_globals *ps_globals

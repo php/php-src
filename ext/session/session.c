@@ -69,6 +69,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_unregister, NULL)
 	PHP_FE(session_encode, NULL)
 	PHP_FE(session_start, NULL)
+	PHP_FE(session_destroy, NULL)
 	{0}
 };
 
@@ -77,6 +78,8 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session_name", "PHPSESSID", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_module_name", "files", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_auto_start", "0", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session_gc_probability", "1", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session_gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 
@@ -85,6 +88,7 @@ static int php_rinit_session(INIT_FUNC_ARGS);
 static int php_mshutdown_session(SHUTDOWN_FUNC_ARGS);
 static int php_rshutdown_session(SHUTDOWN_FUNC_ARGS);
 static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS);
+static void php_rshutdown_globals(PSLS_D);
 
 zend_module_entry session_module_entry = {
 	"session",
@@ -175,17 +179,16 @@ static void _php_session_decode(char *val, int vallen PSLS_DC)
 		} else
 			has_value = 1;
 		
-		name = estrndup(p, q - p);
 		namelen = q - p;
+		name = estrndup(p, namelen);
 		q++;
 		
 		if(has_value) {
 			current = (pval *) ecalloc(sizeof(pval), 1);
 
-			if(php3api_var_unserialize(&current, &q, val + vallen)) {
-				zend_hash_update(&EG(symbol_table), name, strlen(name) + 1,
+			if(php3api_var_unserialize(&current, &q, endptr)) {
+				zend_hash_update(&EG(symbol_table), name, namelen + 1,
 						&current, sizeof(current), NULL);
-				PS_ADD_VAR(name);
 			} else {
 				efree(current);
 			}
@@ -283,6 +286,7 @@ static void _php_session_start(PSLS_D)
 {
 	pval **ppid;
 	int send_cookie = 1;
+	int nrand;
 	ELS_FETCH();
 
 	if(!PS(id) &&
@@ -303,6 +307,23 @@ static void _php_session_start(PSLS_D)
 	PS(nr_open_sessions)++;
 
 	_php_session_initialize(PSLS_C);
+
+	if(PS(mod_data) && PS(gc_probability) > 0) {
+		srand(time(NULL));
+		nrand = (100.0*rand()/RAND_MAX);
+		if(nrand >= PS(gc_probability)) 
+			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime));
+	}
+}
+
+static void _php_session_destroy(PSLS_D)
+{
+	if(PS(nr_open_sessions) == 0)
+		return;
+
+	PS(mod)->delete(&PS(mod_data), &PS(id));
+	php_rshutdown_globals(PSLS_C);
+	PS(nr_open_sessions)--;
 }
 
 /* {{{ proto string session_name([string newname])
@@ -492,6 +513,16 @@ PHP_FUNCTION(session_start)
 }
 /* }}} */
 
+/* {{{ proto session_destroy()
+   Destroy the current session and all data associated with it */
+PHP_FUNCTION(session_destroy)
+{
+	PSLS_FETCH();
+	
+	_php_session_destroy(PSLS_C);
+}
+/* }}} */
+
 void php_rinit_globals(PSLS_D)
 {
 	PS(mod) = _php_find_ps_module(INI_STR("session_module_name") PSLS_CC);
@@ -499,6 +530,8 @@ void php_rinit_globals(PSLS_D)
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(save_path) = estrdup(INI_STR("session_save_path"));
 	PS(session_name) = estrdup(INI_STR("session_name"));
+	PS(gc_probability) = INI_INT("gc_probability");
+	PS(gc_maxlifetime) = INI_INT("gc_maxlifetime");
 	PS(id) = NULL;
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
@@ -535,6 +568,7 @@ int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 
 	if(PS(nr_open_sessions) > 0) {
 		_php_session_save_current_state(PSLS_C);
+		PS(nr_open_sessions)--;
 	}
 	php_rshutdown_globals(PSLS_C);
 	return SUCCESS;
