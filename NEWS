@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - Added sqlite_fetch_column_types() 3rd argument for arrays. (Ilia)
 - Added optional offset parameter to stream_get_contents() and
   file_get_contents(). (Ilia)
+- Added optional maxlen parameter to file_get_contents(). (Ilia)
 - Added SAPI hook to get the current request time. (Rasmus)
 - Added new functions:
   . array_diff_key() (Andrey)
