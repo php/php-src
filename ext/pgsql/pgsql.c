@@ -980,7 +980,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 
 
-/* {{{ proto array pg_fetchrow(int result, int row)
+/* {{{ proto array pg_fetch_row(int result, int row)
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pg_fetch_row)
 {
