@@ -87,6 +87,7 @@ static unsigned char arg1and2_force_ref[] =
 function_entry COM_functions[] = {
 	PHP_FE(com_load,                                NULL)
 	PHP_FE(com_invoke,                              NULL)
+	PHP_FE(com_invoke_ex,                           NULL)
 	PHP_FE(com_addref,                              NULL)
 	PHP_FE(com_release,                             NULL)
 	PHP_FE(com_propget,                             NULL)
@@ -133,6 +134,7 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 
 					C_TYPEINFO_VT(obj)->Release(C_TYPEINFO(obj));
 					C_HASTLIB(obj) = FALSE;
+					C_TYPEINFO(obj) = NULL;
 				}
 			}
 		} else {
@@ -143,22 +145,25 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 			switch (hr) {
 				case DISP_E_EXCEPTION: {
 						
-						char *src=estrdup("Unavailable");
-						int srclen=strlen(src);
-						char *desc=estrdup("Unavailable");
-						int desclen=strlen(desc);
+						char *src = NULL;
+						int srclen = 0;
+						char *desc = NULL;
+						int desclen = 0;
 
-						if (ExceptInfo.bstrSource)
-						{
-							efree(src);
+						if (ExceptInfo.bstrSource) {
 							src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, codepage TSRMLS_CC);
 							SysFreeString(ExceptInfo.bstrSource);
+						} else {
+							src = estrdup("Unavailable");
+							srclen = strlen(src);
 						}
-						if (ExceptInfo.bstrDescription)
-						{
-							efree(desc);
+
+						if (ExceptInfo.bstrDescription) {
 							desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, codepage TSRMLS_CC);
 							SysFreeString(ExceptInfo.bstrDescription);
+						} else {
+							desc = estrdup("Unavailable");
+							desclen = strlen(desc);
 						}
 						
 						*ErrString = pemalloc(srclen+desclen+50, 1);
@@ -211,6 +216,7 @@ PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames
 
 					C_TYPEINFO_VT(obj)->Release(C_TYPEINFO(obj));
 					C_HASTLIB(obj) = FALSE;
+					C_TYPEINFO(obj) = NULL;
 				}
 			}
 		} else {
@@ -233,12 +239,17 @@ PHPAPI HRESULT php_COM_release(comval *obj TSRMLS_DC)
 	} else if (obj->refcount == 1) {
 		if (C_HASTLIB(obj)) {
 			C_TYPEINFO_VT(obj)->Release(C_TYPEINFO(obj));
+			C_TYPEINFO(obj) = NULL;
+			C_HASTLIB(obj) = FALSE;
 		}
 		if (C_HASENUM(obj)) {
 			hr = C_ENUMVARIANT_VT(obj)->Release(C_ENUMVARIANT(obj));
+			C_ENUMVARIANT(obj) = NULL;
+			C_HASENUM(obj) = FALSE;
 		}
 		hr = C_DISPATCH_VT(obj)->Release(C_DISPATCH(obj));
 		C_RELEASE(obj);
+		C_DISPATCH(obj) = NULL;
 	}
 
 	return obj->refcount;
@@ -250,7 +261,6 @@ PHPAPI HRESULT php_COM_addref(comval *obj TSRMLS_DC)
 	if (C_ISREFD(obj)) {
 		C_ADDREF(obj);
 	}
-
 	return obj->refcount;
 }
 
@@ -723,9 +733,9 @@ PHP_FUNCTION(com_load)
 /* }}} */
 
 
-int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **arguments, int arg_count TSRMLS_DC)
+static int do_COM_invoke(comval *obj, WORD dispflags, pval *function_name, VARIANT *var_result, pval **arguments, int arg_count TSRMLS_DC)
 {
-	DISPID dispid;
+	DISPID dispid, altdispid;
 	DISPPARAMS dispparams;
 	HRESULT hr;
 	OLECHAR *funcname;
@@ -876,7 +886,14 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		dispparams.cArgs = arg_count;
 		dispparams.cNamedArgs = 0;
 
-		hr = php_COM_invoke(obj, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
+		if (dispflags & DISPATCH_PROPERTYPUT) {
+			/* Make this work for property set-ing */
+			altdispid = DISPID_PROPERTYPUT;
+			dispparams.rgdispidNamedArgs = &altdispid;
+			dispparams.cNamedArgs = 1;
+		}
+
+		hr = php_COM_invoke(obj, dispid, dispflags, &dispparams, var_result, &ErrString TSRMLS_CC);
 
 		efree(funcname);
 		for (current_arg=0;current_arg<arg_count;current_arg++) {
@@ -902,6 +919,62 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 	}
 	return SUCCESS;
 }
+
+/* {{{ proto mixed com_invoke_ex(int module, int invokeflags, string handler_name [, mixed arg [, mixed ...]])
+   Invokes a COM module */
+PHP_FUNCTION(com_invoke_ex)
+{
+	pval **arguments;
+	pval *object, *function_name, *invokeflags;
+	comval *obj = NULL;
+	WORD dispflags = 0;
+	int arg_count = ZEND_NUM_ARGS();
+	VARIANT *var_result;
+
+	if (arg_count<3) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
+	if (zend_get_parameters_array(ht, arg_count, arguments) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	object = arguments[0];
+	function_name = arguments[2];
+	invokeflags = arguments[1];
+
+	/* obtain property/method handler */
+	convert_to_string_ex(&function_name);
+	convert_to_long(invokeflags);
+	dispflags = (WORD)Z_LVAL_P(invokeflags);
+
+	/* obtain IDispatch interface */
+	if (Z_TYPE_P(object) == IS_OBJECT && (Z_OBJCE_P(object) == &COM_class_entry || !strcmp(Z_OBJCE_P(object)->name, "COM"))) {
+		zval **tmp;
+		zend_hash_index_find(Z_OBJPROP_P(object), 0, (void**)&tmp);
+		ZEND_FETCH_RESOURCE(obj, comval*, tmp, -1, "comval", IS_COM);
+	} else if (Z_TYPE_P(object) == IS_RESOURCE) {
+		ZEND_FETCH_RESOURCE(obj, comval*, &object, -1, "comval", IS_COM);
+	}
+	if (obj == NULL) {
+		php_error(E_WARNING, "%d is not a COM object handler", Z_LVAL_P(object));
+		RETURN_NULL();
+	}
+
+	ALLOC_VARIANT(var_result);
+
+	if (do_COM_invoke(obj, dispflags, function_name, var_result, arguments+3, arg_count-3 TSRMLS_CC)==FAILURE) {
+		FREE_VARIANT(var_result);
+		efree(arguments);
+
+		RETURN_NULL();
+	}
+
+	RETVAL_VARIANT(var_result);
+
+	efree(arguments);
+}
+/* }}} */
 
 
 /* {{{ proto mixed com_invoke(int module, string handler_name [, mixed arg [, mixed ...]])
@@ -930,7 +1003,7 @@ PHP_FUNCTION(com_invoke)
 	convert_to_long(object);
 	obj = (comval *)zend_list_find(Z_LVAL_P(object), &type);
 	if (!obj || (type != IS_COM)) {
-		php_error(E_WARNING,"%s(): %d is not a COM object handler", get_active_function_name(TSRMLS_C), Z_STRVAL_P(function_name));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a COM object handler", Z_STRVAL_P(function_name));
 		RETURN_NULL();
 	}
 
@@ -939,7 +1012,7 @@ PHP_FUNCTION(com_invoke)
 
 	ALLOC_VARIANT(var_result);
 
-	if (do_COM_invoke(obj, function_name, var_result, arguments+2, arg_count-2 TSRMLS_CC)==FAILURE) {
+	if (do_COM_invoke(obj, DISPATCH_METHOD|DISPATCH_PROPERTYGET, function_name, var_result, arguments+2, arg_count-2 TSRMLS_CC)==FAILURE) {
 		FREE_VARIANT(var_result);
 		efree(arguments);
 
@@ -1475,7 +1548,7 @@ static int do_COM_offget(VARIANT *result, comval *array, pval *property, int cle
 	int retval;
 
 	ZVAL_STRINGL(&function_name, "Item", 4, 0);
-	retval = do_COM_invoke(array, &function_name, result, &property, 1 TSRMLS_CC);
+	retval = do_COM_invoke(array, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &function_name, result, &property, 1 TSRMLS_CC);
 	if (cleanup) {
 		php_COM_destruct(array TSRMLS_CC);
 	}
@@ -1629,63 +1702,105 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 }
 
 
-/* {{{ proto mixed com_propget(int module, string property_name)
+/* {{{ proto mixed com_propget(int module, string property_name [, mixed arg ... ])
    Gets properties from a COM module */
 PHP_FUNCTION(com_propget)
 {
-	pval *arg_comval, *arg_property;
-	int type;
-	comval *obj;
+	zval **arguments;
+	zval *object, *function_name;
+	comval *obj = NULL;
+	int arg_count = ZEND_NUM_ARGS();
 	VARIANT *var_result;
 
-	if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters(ht, 2, &arg_comval, &arg_property) == FAILURE)) {
+	if (arg_count<3) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-
-	/* obtain IDispatch interface */
-	convert_to_long(arg_comval);
-	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
-	if (!obj || (type != IS_COM)) {
-		php_error(E_WARNING, "%s(): %d is not a COM object handler", get_active_function_name(TSRMLS_C), Z_LVAL_P(arg_comval));
+	arguments = (zval **) emalloc(sizeof(pval *)*arg_count);
+	if (zend_get_parameters_array(ht, arg_count, arguments) == FAILURE) {
 		RETURN_NULL();
 	}
-	convert_to_string_ex(&arg_property);
+
+	object = arguments[0];
+	function_name = arguments[1];
+
+	if (Z_TYPE_P(object) == IS_OBJECT && (Z_OBJCE_P(object) == &COM_class_entry || !strcmp(Z_OBJCE_P(object)->name, "COM"))) {
+		zval **tmp;
+		zend_hash_index_find(Z_OBJPROP_P(object), 0, (void**)&tmp);
+		ZEND_FETCH_RESOURCE(obj, comval*, tmp, -1, "comval", IS_COM);
+	} else if (Z_TYPE_P(object) == IS_RESOURCE) {
+		ZEND_FETCH_RESOURCE(obj, comval*, &object, -1, "comval", IS_COM);
+	}
+	if (obj == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 1 is not a COM object handler");
+		RETURN_NULL();
+	}
+
+	/* obtain property/method handler */
+	convert_to_string_ex(&function_name);
 
 	ALLOC_VARIANT(var_result);
 
-	if (do_COM_propget(var_result, obj, arg_property, FALSE TSRMLS_CC) == FAILURE) {
+	if (do_COM_invoke(obj, DISPATCH_PROPERTYGET, function_name, var_result, arguments+2, arg_count-2 TSRMLS_CC)==FAILURE) {
 		FREE_VARIANT(var_result);
+		efree(arguments);
+
 		RETURN_NULL();
 	}
 
 	RETVAL_VARIANT(var_result);
+
+	efree(arguments);
 }
 /* }}} */
 
 
-/* {{{ proto bool com_propput(int module, string property_name, mixed value)
+/* {{{ proto bool com_propput(int module, string property_name, mixed value, ...)
    Puts the properties for a module */
 PHP_FUNCTION(com_propput)
 {
-	pval *arg_comval, *arg_property, *arg_value;
-	int type;
+	zval **arguments;
+	zval *object, *function_name;
 	comval *obj;
+	int arg_count = ZEND_NUM_ARGS();
+	VARIANT *var_result;
 
-	if (ZEND_NUM_ARGS()!=3 || zend_get_parameters(ht, 3, &arg_comval, &arg_property, &arg_value)==FAILURE) {
+	if (arg_count<3) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-
-	/* obtain comval interface */
-	convert_to_long(arg_comval);
-	/* obtain comval interface */
-	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
-	if (!obj || (type != IS_COM)) {
-		php_error(E_WARNING, "%s(): %d is not a COM object handler", get_active_function_name(TSRMLS_C), Z_LVAL_P(arg_comval));
+	arguments = (zval **) emalloc(sizeof(pval *)*arg_count);
+	if (zend_get_parameters_array(ht, arg_count, arguments) == FAILURE) {
 		RETURN_NULL();
 	}
-	convert_to_string_ex(&arg_property);
 
-	do_COM_propput(return_value, obj, arg_property, arg_value TSRMLS_CC);
+	object = arguments[0];
+	function_name = arguments[1];
+
+	if (Z_TYPE_P(object) == IS_OBJECT && (Z_OBJCE_P(object) == &COM_class_entry || !strcmp(Z_OBJCE_P(object)->name, "COM"))) {
+		zval **tmp;
+		zend_hash_index_find(Z_OBJPROP_P(object), 0, (void**)&tmp);
+		ZEND_FETCH_RESOURCE(obj, comval*, tmp, -1, "comval", IS_COM);
+	} else if (Z_TYPE_P(object) == IS_RESOURCE) {
+		ZEND_FETCH_RESOURCE(obj, comval*, &object, -1, "comval", IS_COM);
+	}
+	if (obj == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 1 is not a COM object handler");
+		RETURN_NULL();
+	}
+
+	/* obtain property/method handler */
+	convert_to_string_ex(&function_name);
+
+	ALLOC_VARIANT(var_result);
+
+	if (do_COM_invoke(obj, DISPATCH_PROPERTYPUT, function_name, var_result, arguments+2, arg_count-2 TSRMLS_CC)==FAILURE) {
+		FREE_VARIANT(var_result);
+		efree(arguments);
+		RETURN_NULL();
+	}
+
+	RETVAL_VARIANT(var_result);
+
+	efree(arguments);
 }
 /* }}} */
 
@@ -1979,7 +2094,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
 		zend_get_parameters_array(ht, arg_count, arguments);
 
-		if (do_COM_invoke(obj , &function_name->element, var_result, arguments, arg_count TSRMLS_CC) == SUCCESS) {
+		if (do_COM_invoke(obj , DISPATCH_METHOD|DISPATCH_PROPERTYGET, &function_name->element, var_result, arguments, arg_count TSRMLS_CC) == SUCCESS) {
 			php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
 		}
 
@@ -2313,7 +2428,9 @@ PHP_MINIT_FUNCTION(COM)
 	REGISTER_LONG_CONSTANT("CLSCTX_REMOTE_SERVER",  CLSCTX_REMOTE_SERVER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CLSCTX_SERVER",         CLSCTX_SERVER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CLSCTX_ALL",            CLSCTX_ALL, CONST_CS | CONST_PERSISTENT);
-
+	REGISTER_LONG_CONSTANT("DISPATCH_METHOD",		DISPATCH_METHOD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DISPATCH_PROPERTYGET",	DISPATCH_PROPERTYGET, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DISPATCH_PROPERTYPUT",	DISPATCH_PROPERTYPUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
