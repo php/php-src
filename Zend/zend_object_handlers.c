@@ -269,9 +269,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zval *rv = NULL;
 	zend_property_info *property_info;
 	int silent;
+	zend_bool use_get;
 
 	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
+	use_get = (zobj->ce->__get && !zobj->in_get);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -284,10 +286,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	property_info = zend_get_property_info(zobj, member, 0 TSRMLS_CC);
+	/* make zend_get_property_info silent if we have getter - we may want to use it */
+	property_info = zend_get_property_info(zobj, member, use_get TSRMLS_CC);
 
-	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
-		if (zobj->ce->__get && !zobj->in_get) {
+	if (!property_info || zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
+		if (use_get) {
 			/* have getter - try with it! */
 			zobj->in_get = 1; /* prevent circular getting */
 			rv = zend_std_call_getter(object, member TSRMLS_CC);
@@ -319,8 +322,10 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	zval **variable_ptr;
 	int setter_done = 0;
 	zend_property_info *property_info;
-	
+	zend_bool use_set;
+
 	zobj = Z_OBJ_P(object);
+	use_set = (zobj->ce->__set && !zobj->in_set);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -329,9 +334,9 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		member = &tmp_member;
 	}
 
-	property_info = zend_get_property_info(zobj, member, 0 TSRMLS_CC);
+	property_info = zend_get_property_info(zobj, member, use_set TSRMLS_CC);
 
-	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS) {
+	if (property_info && zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &variable_ptr) == SUCCESS) {
 		if (*variable_ptr == value) {
 			/* if we already have this value there, we don't actually need to do anything */
 			setter_done = 1;
@@ -350,7 +355,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 			}
 		}
 	} else {
-		if (zobj->ce->__set && !zobj->in_set) {
+		if (use_set) {
 			zobj->in_set = 1; /* prevent circular setting */
 			if (zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
 				/* for now, just ignore it - __set should take care of warnings, etc. */
