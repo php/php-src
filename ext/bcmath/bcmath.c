@@ -113,7 +113,8 @@ PHP_MINFO_FUNCTION(bcmath)
 
 /* {{{ php_str2num
    Convert to bc_num detecting scale */
-static void php_str2num(bc_num *num, char *str TSRMLS_DC) {
+static void php_str2num(bc_num *num, char *str TSRMLS_DC)
+{
 	char *p;
 
 	if (!(p = strchr(str, '.'))) {
