@@ -4015,6 +4015,7 @@ static xmlDocPtr domxml_document_parser(int mode, int loadtype, char *source, vo
 	ctxt->replaceEntities = substitute_ent;
 
 	if (data != NULL) {
+		ctxt->_private = data;
  		errorCtxt.valid = &ctxt->vctxt;
 		errorCtxt.errors = data;
 		errorCtxt.parser = ctxt;   
