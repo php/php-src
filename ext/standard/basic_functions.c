@@ -122,6 +122,7 @@ function_entry basic_functions[] = {
 	
 	PHP_FE(strnatcmp,								NULL)
 	PHP_FE(strnatcasecmp,							NULL)
+	PHP_FE(substr_count, 							NULL)
 	PHP_FE(strspn,									NULL)
 	PHP_FE(strcspn,									NULL)
 	PHP_FE(strtok,									NULL)
