@@ -1,3 +1,23 @@
+2004-06-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/levenshtein.c:
+      Removed unneeded checks around Zend allocation macros.
+
+2004-06-20  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Exception.php:
+      First release of the PEAR_Exception class
+                       (dedicated to otherbird)
+
+2004-06-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ext/standard/basic_functions.c:
+      Bugfix #28851: call_user_func_array has typo in error message
+
 2004-06-19  Jan Lehnardt  <jan@dasmoped.net>
 
     * scripts/phpize.in:
