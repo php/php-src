@@ -180,6 +180,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #20256 (snprintf() not defined on some systems). (Jani)
 - Fixed bug #19919 (crash in sapi_apache_header_handler under heavy load).
   (George)
+- Fixed bug #19795 (Problems with strnatcmp() / strnatcasecmp()). (Moriyoshi)
 - Fixed bug #17868 (multiple <!--include--> used to include PHP files crashes).
   (Ilia)
 - Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
