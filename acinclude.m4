@@ -370,7 +370,9 @@ if test "$php_always_shared" = "yes"; then
   test "[$]$1" = "no" && $1=yes
 fi
 
-AC_MSG_RESULT([$ext_output])
+if test -n "$2"; then
+  AC_MSG_RESULT([$ext_output])
+fi
 ])
 
 dnl
@@ -384,9 +386,11 @@ PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_WITH,[
-AC_MSG_CHECKING([$2])
+if test -n "$2"; then
+  AC_MSG_CHECKING([$2])
+fi
 AC_ARG_WITH($1,[$3],$5=[$]withval,$5=ifelse($4,,no,$4))
-PHP_ARG_ANALYZE($5)
+PHP_ARG_ANALYZE($5,[$2])
 ])
 
 dnl
@@ -400,9 +404,11 @@ PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_ENABLE,[
-AC_MSG_CHECKING([$2])
+if test -n "$2"; then
+  AC_MSG_CHECKING([$2])
+fi
 AC_ARG_ENABLE($1,[$3],$5=[$]enableval,$5=ifelse($4,,no,$4))
-PHP_ARG_ANALYZE($5)
+PHP_ARG_ANALYZE($5,[$2])
 ])
 
 AC_DEFUN(PHP_MODULE_PTR,[
