@@ -41,7 +41,7 @@ if test "$PHP_PDO_ODBC" != "no" && test "$PHP_PDO_ODBC" != "yes" ; then
 
   case $pdo_odbc_flavour in
     ibm-db2)
-        pdo_odbc_def_libdir=/home/db2inst/sqllib/lib
+        pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
         pdo_odbc_def_incdir=/home/db2inst1/sqllib/include
         pdo_odbc_def_lib=-ldb2
         ;;
