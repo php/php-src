@@ -391,6 +391,7 @@ iso8601datetime: iso8601date tTZONE iso8601time
 			((struct date_yy *)parm)->yyMonth = 1;
 		}
 	}
+	;
 
 iso8601date: tUNUMBER tSNUMBER tSNUMBER {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
