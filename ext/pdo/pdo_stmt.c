@@ -530,7 +530,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC)
 {
 	int flags = how & PDO_FETCH_FLAGS;
-	zend_class_entry * ce;
+	zend_class_entry * ce = NULL;
 
 	how = how & ~PDO_FETCH_FLAGS;
 	if (how == PDO_FETCH_USE_DEFAULT) {
@@ -690,7 +690,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				case PDO_FETCH_OBJ:
 				case PDO_FETCH_INTO:
 				case PDO_FETCH_CLASS:
-					zend_update_property(NULL, return_value,
+					zend_update_property(ce, return_value,
 						stmt->columns[i].name, stmt->columns[i].namelen,
 						val TSRMLS_CC);
 					break;
