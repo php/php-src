@@ -1068,7 +1068,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 	XSQLVAR *var;
 	pval *b_var;
 	int i;
-	
 
 	var = sqlda->sqlvar;
 	for (i = 0; i < sqlda->sqld; var++, i++) { /* binded vars */
@@ -1094,9 +1093,21 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				buf[i].val.sval = (short)b_var->value.lval;
 				var->sqldata = (void ISC_FAR *)(&buf[i].val.sval);
 				break;
-			case SQL_LONG:	/* direct to variable */
-				convert_to_long(b_var);
-				var->sqldata = (void ISC_FAR *)(&b_var->value.lval);
+			case SQL_LONG:
+				if (var->sqlscale < 0) {
+					/*
+					  DECIMAL or NUMERIC field stored internally as scaled integer.
+					  Coerce it to string and let InterBase's internal routines
+					  handle it.
+					*/
+					convert_to_string(b_var);
+					var->sqldata = (void ISC_FAR *)b_var->value.str.val;
+					var->sqllen	 = b_var->value.str.len;
+					var->sqltype = SQL_TEXT;
+				} else {
+					convert_to_long(b_var);
+					var->sqldata = (void ISC_FAR *)(&b_var->value.lval);
+				}
 				break;
 			case SQL_FLOAT:
 				convert_to_double(b_var);
@@ -1107,8 +1118,18 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				convert_to_double(b_var);
 				var->sqldata = (void ISC_FAR *)(&b_var->value.dval);
 				break;
-				/* FIX THESE
 			case SQL_INT64:
+				/*
+				  Just let InterBase's internal routines handle it.
+				  Besides, it might even have originally been a string
+				  to avoid rounding errors...
+				*/
+				convert_to_string(b_var);
+				var->sqldata = (void ISC_FAR *)b_var->value.str.val;
+				var->sqllen	 = b_var->value.str.len;
+				var->sqltype = SQL_TEXT;
+				break;
+				/* FIX THESE
 			case SQL_TIMESTAMP:
 			case SQL_TYPE_DATE:
 			case SQL_TYPE_TIME:
@@ -1632,14 +1653,6 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 										 (ISC_INT64) abs((*(ISC_INT64 *)data % (int) pow(10.0, (double) -scale))));
 			val->value.str.val = estrdup(string_data);
 			break;
-			/*
-			sprintf(buf, "%Ld.%Ld",
-					(ISC_INT64) (q / (int)
-								 pow(10.0, (double) -ovar->sqlscale)),
-					(ISC_INT64) (q % (int)
-								 pow(10.0, (double) -ovar->sqlscale)));
-			*/
-                            
 #endif
 #ifndef SQL_TIMESTAMP
 		case SQL_DATE:
