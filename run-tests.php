@@ -36,6 +36,27 @@
  * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
+
+/* Sanity check to ensure that pcre extension needed by this script is avaliable.
+ * In the event it is not, print a nice error message indicating that this script will
+ * not run without it.
+ */
+
+if (!extension_loaded("pcre")) {
+	echo <<<NO_PCRE_ERROR
+
++-----------------------------------------------------------+
+|                       ! ERROR !                           |
+| The test-suite requires that you have pcre extension      |
+| enabled. To enable this extension either compile your PHP |
+| with --with-pcre-regex or if you've compiled pcre as a    |
+| shared module load it via php.ini.                        |
++-----------------------------------------------------------+
+
+NO_PCRE_ERROR;
+exit;
+}
+
 // change into the PHP source directory.
 
 if (getenv('TEST_PHP_SRCDIR')) {
