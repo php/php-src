@@ -1,3 +1,99 @@
+2005-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_nonapi.c:
+      MFH: Fixed bug #32081 (default socket value is not being used).
+
+    * ext/mysqli/mysqli_nonapi.c:
+      Fixed bug #32081 (default socket value is not being used).
+
+2005-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      - Little speed up
+
+    * ext/standard/image.c:
+      - This must be == 1
+
+2005-02-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4
+      configure.in
+      ext/iconv/config.m4:
+      - Fixed all buildconf warnings + cross-compiling issues
+
+2005-02-24  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Make one line comments work the same with <script ...> </script> as with
+      - other tags. This will break scripts that have whitespace at the end
+      - of the closing tag </script    > but this is barely used as it is
+      - and I doubt ppl used whitespace. (patch by Jani)
+
+2005-02-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * TSRM/threads.m4:
+      - cross-compile fix
+
+2005-02-24  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects_API.h:
+      - This part of the patch was right
+
+2005-02-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4
+      configure.in
+      scripts/phpize.m4:
+      - Restructured and added a few comments here and there.
+      - Made macros of couple of tests previously littering configure.in
+        (e.g. PHP_PROG_AWK, PHP_PROG_LEX, PHP_PROG_BISON..)
+      - Moved all PHP_SUBST() calls into their respective macros.
+        (no point adding empty entries in Makefile if macro is not used)
+
+    * ext/standard/var_unserializer.c:
+      - Generated with re2c 0.9.4
+
+2005-02-24  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      fix typo
+
+2005-02-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed bug in ZEND_POST_INC/ZEND_POST_DEC handlers.
+      These opcodes assume IS_TMP_VAR as result.
+
+2005-02-24  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_modules.h:
+      - Need zend_Compile.h for struct _zend_arg_info  definiton (thanks to Joe
+      Orton)
+
+    * main/streams/mmap.c:
+      - Fix comment
+
+    * ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.h:
+      - Revert following patch until we decide what is the right way to handle
+      - this:
+       - Fix signatures they are all meant to be able to deal with any type in
+      any
+          object storage (though we are still missing several parts)
+
+2005-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      - Prevent superflous memory allocation
+
 2005-02-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/image.c:

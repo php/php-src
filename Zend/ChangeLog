@@ -1,3 +1,39 @@
+2005-02-24  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_scanner.l:
+      - Make one line comments work the same with <script ...> </script> as with
+      - other tags. This will break scripts that have whitespace at the end
+      - of the closing tag </script    > but this is barely used as it is
+      - and I doubt ppl used whitespace. (patch by Jani)
+
+    * zend_objects_API.h:
+      - This part of the patch was right
+
+2005-02-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed bug in ZEND_POST_INC/ZEND_POST_DEC handlers.
+      These opcodes assume IS_TMP_VAR as result.
+
+2005-02-24  Andi Gutmans  <andi@zend.com>
+
+    * zend_modules.h:
+      - Need zend_Compile.h for struct _zend_arg_info  definiton (thanks to Joe
+      Orton)
+
+    * zend_objects.c
+      zend_objects.h
+      zend_objects_API.h:
+      - Revert following patch until we decide what is the right way to handle
+      - this:
+       - Fix signatures they are all meant to be able to deal with any type in
+      any
+          object storage (though we are still missing several parts)
+
 2005-02-23  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
