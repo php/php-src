@@ -1,3 +1,132 @@
+2002-10-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.TESTING: Only in EXPECTREGEX
+
+2002-10-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/README: s/-//
+
+    * sapi/thttpd/thttpd_patch:
+    add phppat/phpspat configuration file support and
+    fix some indention
+
+    * sapi/thttpd/README: update and extend
+
+2002-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/formatted_print.c: Better fix for bug #20108.
+
+    * sapi/nsapi/nsapi.c:
+    Added a sanity check (hopefuly will fix bug #20109). According to
+    http://developer.netscape.com/docs/manuals/enterprise/40/nsapi/05_nsapi.htm#551539
+    util_hostname() can return a NULL value.
+
+2002-10-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Define HAVE_LIBDL, if dlopen() was found.
+
+    It was tempting to do a complete s/HAVE_LIBDL/HAVE_DLOPEN/ over the
+    whole code base.  I defer that to a later point in time for now.
+
+    * sapi/thttpd/thttpd.c: Fix build and .phps support
+
+2002-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/bug20108.phpt: Added expected output.
+
+2002-10-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/php_thttpd.h
+      sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch: experimental .phps support
+
+    * sapi/thttpd/thttpd.c:
+    not sure what this async_send is doing in here, so relieve it from its duty.
+
+2002-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/formatted_print.c: Fixed bug #20108.
+
+2002-10-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/strings/bug20108.phpt: - Fix typoes
+
+    * ext/standard/tests/strings/strings001.phpt: - fix type
+
+2002-10-26  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/strings/bug20108.phpt: Test for bug in sprintf
+
+
+2002-10-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Donate "Fast Accept Loop" from Premium thttpd which speeds up processing
+    new connections when the connection table contains lots of entries.
+
+2002-10-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php_cli.c: Fixed memory leaks.
+
+2002-10-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Donate "Periodic Connection Expiring" from Premium thttpd, because
+    it is simple and gives a +40% improvement in terms of requests/s
+    when serving static files.
+
+2002-10-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/strings/002.phpt: remove original version
+
+    * ext/standard/tests/strings/strings001.phpt:
+    change to use EXPECTREGEX and rename
+
+    * README.TESTING
+      run-tests.php: -introduce EXPECTREGEX
+    -add %c for EXPECTF
+
+    * ext/standard/tests/strings/001.phpt
+      ext/standard/tests/strings/strcspn.phpt
+      ext/standard/tests/strings/strspn.phpt: split tests
+
+    * ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt
+      ext/standard/tests/strings/htmlentities10.phpt
+      ext/standard/tests/strings/htmlentities11.phpt
+      ext/standard/tests/strings/htmlentities12.phpt
+      ext/standard/tests/strings/htmlentities13.phpt
+      ext/standard/tests/strings/htmlentities14.phpt: fine tune
+
+2002-10-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: some system headers (irix) define sa_len
+
+    prefix sa_len with x
+
+2002-10-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c: Clean-ups
+
+    * ext/iconv/tests/001.phpt
+      ext/iconv/tests/002.inc
+      ext/iconv/tests/002.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.inc
+      ext/iconv/tests/iconv002.phpt: Renamed the test
+
+    * ext/iconv/tests/ob_iconv_handler.phpt:
+    Added a test case for ob_iconv_handler()
+
+    * ext/iconv/iconv.c: Fixed typo... what did this "#" sign mean?
+
+    * ext/mbstring/mbstring.c: MFH (in real sense :) )
+
+2002-10-26  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/mbstring/mbstring.c: Remove useless check.
+
 2002-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/tests/strings/htmlentities2.phpt
