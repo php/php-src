@@ -36,7 +36,7 @@ PHP_FUNCTION(ovrimos_connect) {
  convert_to_string(arg3);
  convert_to_string(arg4);
  if(!sqlConnect(arg1->value.str.val,arg2->value.str.val,arg3->value.str.val,
-     arg4->value.str.val,&conn)) {
+     arg4->value.str.val,&conn, 0)) {
      RETURN_LONG(0);
  }
  RETURN_LONG((int)conn+1);
