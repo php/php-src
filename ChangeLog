@@ -1,3 +1,46 @@
+2002-12-24  Stefan Esser  <s.esser@e-matters.de>
+
+    * sapi/cgi/cgi_main.c:
+      fix compile warning
+
+    * ext/mime_magic/mime_magic.c
+      sapi/cgi/cgi_main.c:
+      MFH
+
+    * ext/mime_magic/mime_magic.c:
+      do correct casting
+
+2002-12-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ncurses/ncurses_functions.c:
+      Removed pointless assignment.
+
+    * ext/ncurses/ncurses_functions.c:
+      The -1 is no longer needed, since it is done automatically by strlcpy().
+
+    * ext/ncurses/ncurses_functions.c:
+      Changed strncpy() to strlcpy().
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c:
+      A variety of CS style fixes, which include:
+       * Changed all argument parsing to use the new zend_parse_parameters()
+       * If a function is unavailable due to lack of support for a certain
+      feature,
+         do not make the function avaliable, rather then making it print an
+      error
+         saying that the functionality offered by the function is not avaliable.
+       * Lots of WS fixes all over the file.
+       * Change strcpy() to strncpy() to prevent possible buffer overflows.
+      Fixed a bug in ncurses_pair_content(), 1st parameter was wrong.
+      Fixed several function prototypes that failed to indicate that functions
+      accepted arguments by reference.
+
+2002-12-24  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/dir.c:
+      MFH: crash fix in glob() with no results
+
 2002-12-23  Melvyn Sopacua  <msopacua@idg.nl>
 
     * ext/standard/dir.c:
