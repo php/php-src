@@ -629,7 +629,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 								ZVAL_LONG(stmt->result.vars[i], llval);
 							}
 						} else {
-							ZVAL_STRING(stmt->result.vars[i], stmt->result.buf[i].val, 1); 
+							ZVAL_STRINGL(stmt->result.vars[i], stmt->result.buf[i].val, stmt->result.buf[i].buflen, 1); 
 						}
 						break;
 					default:
