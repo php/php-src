@@ -1,0 +1,57 @@
+WHAT IS THIS?
+
+    It is an output filter for Apache 2.0.
+
+HOW DOES IT WORK?
+    
+    In Apache 2.0, you have handlers which generate content (like
+    reading a script from disk). The content goes then through
+    a chain of filters. PHP can be such a filter, so that it processes
+    your script and hands the output to the next filter (which will
+    usually cause a write to the network).
+
+DOES IT WORK?
+
+    It is experimental as interfaces in Apache 2.0 might change in the
+    future.
+
+HOW TO INSTALL
+
+    Get the latest Apache 2.0 alpha or the CVS code and install it.
+
+        $ cd apache-2.x
+        $ cd src
+        $ ./configure --enable-so
+        $ make install
+
+    For testing purposes, you might want to use --with-mpm=prefork.
+    (Albeit PHP also works with threaded MPMs.)
+
+    Configure PHP 4:
+
+        $ cd php-4.x
+        $ ./configure --with-apxs2=/path/to/apache-2.0/bin/apxs
+        $ make install
+   
+    APXS is currently still flaky, so edit conf/httpd.conf and change
+    the LoadModule entry from libphp4.la to libphp4.so.
+
+    At the end of conf/httpd.conf, add:
+
+        <Files *.php>
+        AddOutputFilter PHP
+        </Files>
+
+    That's it. Now start bin/httpd.
+
+    If you want to debug Apache, set ONE_PROCESS in your environment 
+    (comparable to -X in Apache 1.3). We recommened the prefork MPM 
+    for debugging purposes.
+        
+TODO
+
+    POST requests
+    php_*flag config directives
+    PHP functions like apache_sub_req (see php_functions.c)
+    Protocol handlers
+    Passing script data to engine without temporary file
