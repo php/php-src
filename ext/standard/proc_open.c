@@ -413,6 +413,8 @@ PHP_FUNCTION(proc_get_status)
 			stopped = 1;
 			stopsig = WSTOPSIG(wstatus);
 		}
+	} else {
+		running = 0;
 	}
 #endif
 
