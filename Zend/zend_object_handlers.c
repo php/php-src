@@ -152,12 +152,19 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 {
 	zend_object *zobj;
 	zend_function *func_method;
-	
+	char *lc_method_name;
+
+	lc_method_name = do_alloca(method_len+1);
+	/* Create a zend_copy_str_tolower(dest, src, src_length); */
+	memcpy(lc_method_name, method_name, method_len+1);
+	zend_str_tolower(lc_method_name, method_len);
+		
 	zobj = Z_OBJ_P(object);
-	if(zend_hash_find(&zobj->ce->function_table, method_name, method_len+1, (void **)&func_method) == FAILURE) {
+	if(zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&func_method) == FAILURE) {
 		zend_error(E_ERROR, "Call to undefined function %s()", method_name);
 	}
-	
+
+	free_alloca(lc_method_name);
 	return func_method;
 }
 

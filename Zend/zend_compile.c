@@ -1081,8 +1081,6 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 		last_op->extended_value = ZEND_FETCH_FROM_THIS;
 	}
 
-	zend_lowercase_znode_if_const(&last_op->op2);
-
 	left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));

@@ -1892,30 +1892,15 @@ binary_assign_op_addr_obj:
 				{
 					zval *function_name;
 					zval tmp;
-					zend_bool is_const;
 					char *function_name_strval;
 					int function_name_strlen;
 					
 					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object));
 
-					is_const = (EX(opline)->op2.op_type == IS_CONST);
+					function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+					function_name_strval = function_name->value.str.val;
+					function_name_strlen = function_name->value.str.len;
 
-					if (is_const) {
-						function_name_strval = EX(opline)->op2.u.constant.value.str.val;
-						function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
-					} else {
-						function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
-
-						tmp = *function_name;
-						zval_copy_ctor(&tmp);
-						convert_to_string(&tmp);
-						function_name = &tmp;
-						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
-
-						function_name_strval = tmp.value.str.val;
-						function_name_strlen = tmp.value.str.len;
-					}
-					
 					EX(calling_scope) = EG(scope);
 
 					if (EX(opline)->extended_value == ZEND_FETCH_FROM_THIS) {
@@ -1953,10 +1938,7 @@ binary_assign_op_addr_obj:
 						EX(calling_scope) = NULL;
 					}
 
-					if (!is_const) {
-						zval_dtor(&tmp);
-						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
-					}
+					FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 					
 					NEXT_OPCODE();
 				}
