@@ -1,3 +1,103 @@
+2001-10-05  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.c
+      ext/standard/php_standard.h
+      ext/standard/php_versioning.h
+      ext/standard/versioning.c:
+    * prototype of version_compare, doesn't work yet
+
+2001-10-05  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/tests/math/pow.phpt
+      tests/quicktester.inc: Fix the pow-test, it now succeeds on my machine
+
+2001-10-05  Stig Bakken  <ssb@fast.no>
+
+    * ext/xmlrpc/libxmlrpc/.cvsignore: cvsignore file
+
+2001-10-05  Morgan Christiansson  <mog@linux.nu>
+
+    * pear/Forum/lib/classes/Forum.php
+      pear/Forum/lib/classes/ForumIndex.php
+      pear/Forum/lib/classes/ForumList.php
+      pear/Forum/lib/classes/ForumPost.php
+      pear/Forum/lib/classes/ForumRead.php
+      pear/Forum/lib/classes/db/Mysql.php
+      pear/Forum/lib/classes/db/MysqlStandard.php
+      pear/Forum/lib/config.php
+      pear/Forum/lib/forum.php
+      pear/Forum/lib/plugins/plugin.php
+      pear/Forum/frontend/forum.php
+      pear/Forum/frontend/index.php
+      pear/Forum/frontend/list.php
+      pear/Forum/frontend/post.php
+      pear/Forum/frontend/read.php: Initial PEAR/Forum checkin
+
+2001-10-05  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/tests/array/array_search.phpt:
+    Add test for array_search and in_array
+
+    (should be expanded though)
+
+    * ext/standard/array.c:
+    Fix array_search and in_array. Now binary safe, and faster (returns when
+    found, and doesn't duplicate the key each time, but only when necessary)
+
+    Patch also by Edin Kadribasic
+
+    * ext/standard/array.c:
+    Fix bug 13567 and don't depend on a boolean int-value to be either 1 or 0
+
+2001-10-05  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/php_array.h
+      ext/standard/basic_functions.c
+      ext/standard/array.c:
+    Added array_change_key_case() function that returns array with
+    with all string keys lowercased or uppercased
+
+2001-10-05  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/XML/Parser.php:
+    use the new PEAR::phpVersionIs() for better version checking
+
+2001-10-05  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/openssl/openssl.c:
+    nuke unnecessary force-by-ref declarations + name the needed in a proper way
+
+2001-10-05  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php: version compat fix in fetchInto
+
+    * pear/tests/pear_versioncmp.phpt:
+    added tests for PHP version comparing functions
+
+    * pear/PEAR.php: changed the logic of version comparation
+
+2001-10-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/com/VARIANT.c
+      ext/com/php_VARIANT.h: fix declaration
+
+2001-10-05  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c
+      ext/com/conversion.h: MFH
+    fixed boolean -1 vs. 1 conflict
+
+2001-10-05  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sockets/sockets.c: make this work under OSX
+
+2001-10-05  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Console/Getopt.php: E_ALL fixes
+
+    * pear/PEAR.php: get rid of the RC part of php versions
+
 2001-10-04  Richard Heyes  <richard.heyes@heyes-computing.net>
 
     * pear/Mail/mimeDecode.php: Minor bugfix
