@@ -8,12 +8,10 @@ PHP 4                                                                      NEWS
 - Changed get_extension_funcs() to return list of the built-in Zend Engine 
   functions if "zend" is specified as the module name. (Ilia)
 - Changed is_executable() to be available also on Windows. (Shane)
-- Changed array_search() to accept objects also as a needle. (Moriyoshi)
+- Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length.
   (Marcus)
-- Added zlib_get_coding_type() function, which returns one of coding types
-  used for output compression. (Moriyoshi)
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added stream_get_line() function. This function will read either 
   the specified number of bytes or until the ending string is found. (Ilia)
