@@ -14,7 +14,7 @@
    <user>iliaa</user>
    <name>Ilia Alshanetsky</name>
    <email>ilia@php.net</email>
-   <role>developer</role>
+   <role>lead</role>
   </maintainer>
  </maintainers>
  <description>Enchant is a binder for libenchant. Libenchant provides a common
@@ -29,10 +29,13 @@ see www.abisource.com/enchant/</description>
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2.1</version>
-  <date>2004-03-11</date>
-  <notes>- Fix possible leak in suggestions result
-- Move to beta status</notes>
+  <version>1.0</version>
+  <date>2004-08-11</date>
+  <notes>- Fixed leak inside MINFO function.
+- Fixed crash inside enchant_dict_suggest() when there are no suggestions.
+- Added missing safe_mode/open_basedir check inside enchant_broker_request_pwl_dict().
+- Fixed various function prototypes.
+- Fixed possible leak in suggestions result.</notes>
   <filelist>
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
@@ -53,6 +56,13 @@ see www.abisource.com/enchant/</description>
   </deps>
  </release>
  <changelog>
+  <release>
+   <state>beta</state>
+   <version>0.2.1</version>
+   <date>2004-03-11</date>
+   <notes>- Fix possible leak in suggestions result
+- Move to beta status</notes>
+  </release>
   <release>
    <state>alpha</state>
    <version>0.2.0</version>
