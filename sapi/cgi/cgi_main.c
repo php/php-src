@@ -398,11 +398,6 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-#ifndef ZTS
-	if (setjmp(EG(bailout))!=0) {
-		return -1;
-	}
-#endif
 
 #ifdef ZTS
 	tsrm_startup(1,1,0, NULL);
@@ -487,307 +482,308 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	executor_globals = ts_resource(executor_globals_id);
 	core_globals = ts_resource(core_globals_id);
 	sapi_globals = ts_resource(sapi_globals_id);
-	if (setjmp(EG(bailout))!=0) {
-		return -1;
-	}
 #endif
 
-	if (!cgi) {
-		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
-			switch (c) {
-				case '?':
-					no_headers = 1;
-					php_output_startup();
-					php_output_activate();
-					SG(headers_sent) = 1;
-					php_cgi_usage(argv[0]);
-					php_end_ob_buffers(1);
-					exit(1);
-					break;
-			}
-		}
-		ap_php_optind = orig_optind;
-		ap_php_optarg = orig_optarg;
-	}
-
-	init_request_info(SLS_C);
-	SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
-	CG(extended_info) = 0;
-
-	SG(request_info).argv0 = argv0;
-
-	zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
-
-	if (!cgi) {					/* never execute the arguments if you are a CGI */
-		if (SG(request_info).argv0) {
-			free(SG(request_info).argv0);
-			SG(request_info).argv0 = NULL;
-		}
-		while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
-			switch (c) {
-				
-  			case 'a':	/* interactive mode */
-					printf("Interactive mode enabled\n\n");
-					interactive=1;
-					break;
-				
-			case 'C': /* don't chdir to the script directory */
-					SG(options) |= SAPI_OPTION_NO_CHDIR;
-					break;
-			case 'd': /* define ini entries on command line */
-					define_command_line_ini_entry(ap_php_optarg);
-					break;
-					
-  			case 'e': /* enable extended info output */
-					CG(extended_info) = 1;
-					break;
-
-  			case 'f': /* parse file */
-					script_file = estrdup(ap_php_optarg);
-					no_headers = 1;
-					break;
-
-  			case 'g': /* define global variables on command line */
-					{
-						char *arg = estrdup(ap_php_optarg);
-
-						zend_llist_add_element(&global_vars, &arg);
-					}
-					break;
-
-  			case 'h': /* help & quit */
-				case '?':
-					no_headers = 1;  
-					php_output_startup();
-					php_output_activate();
-					SG(headers_sent) = 1;
-					php_cgi_usage(argv[0]);
-					php_end_ob_buffers(1);
-					exit(1);
-					break;
-
-			case 'i': /* php info & quit */
-					if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-						php_module_shutdown();
-						return FAILURE;
-					}
-					if (no_headers) {
+	zend_try {
+		if (!cgi) {
+			while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
+				switch (c) {
+					case '?':
+						no_headers = 1;
+						php_output_startup();
+						php_output_activate();
 						SG(headers_sent) = 1;
-						SG(request_info).no_headers = 1;
-					}
-					php_print_info(0xFFFFFFFF);
+						php_cgi_usage(argv[0]);
+						php_end_ob_buffers(1);
+						exit(1);
+						break;
+				}
+			}
+			ap_php_optind = orig_optind;
+			ap_php_optarg = orig_optarg;
+		}
+
+		init_request_info(SLS_C);
+		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
+		CG(extended_info) = 0;
+
+		SG(request_info).argv0 = argv0;
+
+		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
+
+		if (!cgi) {					/* never execute the arguments if you are a CGI */
+			if (SG(request_info).argv0) {
+				free(SG(request_info).argv0);
+				SG(request_info).argv0 = NULL;
+			}
+			while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
+				switch (c) {
+					
+  				case 'a':	/* interactive mode */
+						printf("Interactive mode enabled\n\n");
+						interactive=1;
+						break;
+					
+				case 'C': /* don't chdir to the script directory */
+						SG(options) |= SAPI_OPTION_NO_CHDIR;
+						break;
+				case 'd': /* define ini entries on command line */
+						define_command_line_ini_entry(ap_php_optarg);
+						break;
+						
+  				case 'e': /* enable extended info output */
+						CG(extended_info) = 1;
+						break;
+
+  				case 'f': /* parse file */
+						script_file = estrdup(ap_php_optarg);
+						no_headers = 1;
+						break;
+
+  				case 'g': /* define global variables on command line */
+						{
+							char *arg = estrdup(ap_php_optarg);
+
+							zend_llist_add_element(&global_vars, &arg);
+						}
+						break;
+
+  				case 'h': /* help & quit */
+					case '?':
+						no_headers = 1;  
+						php_output_startup();
+						php_output_activate();
+						SG(headers_sent) = 1;
+						php_cgi_usage(argv[0]);
+						php_end_ob_buffers(1);
+						exit(1);
+						break;
+
+				case 'i': /* php info & quit */
+						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+							php_module_shutdown();
+							return FAILURE;
+						}
+						if (no_headers) {
+							SG(headers_sent) = 1;
+							SG(request_info).no_headers = 1;
+						}
+						php_print_info(0xFFFFFFFF);
+						exit(1);
+						break;
+
+  				case 'l': /* syntax check mode */
+						no_headers = 1;
+						behavior=PHP_MODE_LINT;
+						break;
+
+				case 'm': /* list compiled in modules */
+					php_output_startup();
+					php_output_activate();
+					SG(headers_sent) = 1;
+					php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
+					php_printf("[PHP Modules]\n");
+					zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _print_module_info, NULL);
+					php_printf("\n[Zend Modules]\n");			
+					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) _print_module_info, NULL);
+					php_printf("\n");
+					php_end_ob_buffers(1);
 					exit(1);
 					break;
-
-  			case 'l': /* syntax check mode */
-					no_headers = 1;
-					behavior=PHP_MODE_LINT;
-					break;
-
-			case 'm': /* list compiled in modules */
-		        php_output_startup();
-				php_output_activate();
-                SG(headers_sent) = 1;
-				php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
-				php_printf("[PHP Modules]\n");
-				zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _print_module_info, NULL);
-				php_printf("\n[Zend Modules]\n");			
-				zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) _print_module_info, NULL);
-				php_printf("\n");
-                php_end_ob_buffers(1);
-                exit(1);
-				break;
 
 #if 0 /* not yet operational, see also below ... */
-  			case 'n': /* generate indented source mode*/ 
-					behavior=PHP_MODE_INDENT;
-					break;
+  				case 'n': /* generate indented source mode*/ 
+						behavior=PHP_MODE_INDENT;
+						break;
 #endif
 
-  			case 'q': /* do not generate HTTP headers */
-					no_headers = 1;
-					break;
+  				case 'q': /* do not generate HTTP headers */
+						no_headers = 1;
+						break;
 
-  			case 's': /* generate highlighted HTML from source */
-					behavior=PHP_MODE_HIGHLIGHT;
-					break;
+  				case 's': /* generate highlighted HTML from source */
+						behavior=PHP_MODE_HIGHLIGHT;
+						break;
 
-			case 'v': /* show php version & quit */
-					no_headers = 1;
-					if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-						php_module_shutdown();
-						return FAILURE;
-					}
-					if (no_headers) {
-						SG(headers_sent) = 1;
-						SG(request_info).no_headers = 1;
-					}
-					php_printf("%s\n", PHP_VERSION);
-					php_end_ob_buffers(1);
-					exit(1);
-					break;
+				case 'v': /* show php version & quit */
+						no_headers = 1;
+						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+							php_module_shutdown();
+							return FAILURE;
+						}
+						if (no_headers) {
+							SG(headers_sent) = 1;
+							SG(request_info).no_headers = 1;
+						}
+						php_printf("%s\n", PHP_VERSION);
+						php_end_ob_buffers(1);
+						exit(1);
+						break;
 
-			case 'z': /* load extension file */
-					zend_load_extension(ap_php_optarg);
-					break;
+				case 'z': /* load extension file */
+						zend_load_extension(ap_php_optarg);
+						break;
 
-				default:
-					break;
-			}
-		}
-	}							/* not cgi */
-
-	CG(interactive) = interactive;
-
-	if (!cgi) {
-		if (!SG(request_info).query_string) {
-			len = 0;
-			if (script_file) {
-				len += strlen(script_file) + 1;
-			}
-			for (i = ap_php_optind; i < argc; i++) {
-				len += strlen(argv[i]) + 1;
-			}
-
-			s = malloc(len + 1);	/* leak - but only for command line version, so ok */
-			*s = '\0';			/* we are pretending it came from the environment  */
-			if (script_file) {
-				strcpy(s, script_file);
-				if (ap_php_optind<argc) {
-					strcat(s, "+");
+					default:
+						break;
 				}
 			}
-			for (i = ap_php_optind, len = 0; i < argc; i++) {
-				strcat(s, argv[i]);
-				if (i < (argc - 1)) {
-					strcat(s, "+");
+		}							/* not cgi */
+
+		CG(interactive) = interactive;
+
+		if (!cgi) {
+			if (!SG(request_info).query_string) {
+				len = 0;
+				if (script_file) {
+					len += strlen(script_file) + 1;
 				}
+				for (i = ap_php_optind; i < argc; i++) {
+					len += strlen(argv[i]) + 1;
+				}
+
+				s = malloc(len + 1);	/* leak - but only for command line version, so ok */
+				*s = '\0';			/* we are pretending it came from the environment  */
+				if (script_file) {
+					strcpy(s, script_file);
+					if (ap_php_optind<argc) {
+						strcat(s, "+");
+					}
+				}
+				for (i = ap_php_optind, len = 0; i < argc; i++) {
+					strcat(s, argv[i]);
+					if (i < (argc - 1)) {
+						strcat(s, "+");
+					}
+				}
+				SG(request_info).query_string = s;
 			}
-			SG(request_info).query_string = s;
 		}
-	}
 
-	if (script_file) {
-		SG(request_info).path_translated = script_file;
-	}
-
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-		php_module_shutdown();
-		return FAILURE;
-	}
-	if (no_headers) {
-		SG(headers_sent) = 1;
-		SG(request_info).no_headers = 1;
-	}
-	file_handle.filename = "-";
-	file_handle.type = ZEND_HANDLE_FP;
-	file_handle.handle.fp = stdin;
-	file_handle.opened_path = NULL;
-
-	/* This actually destructs the elements of the list - ugly hack */
-	zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars);
-	zend_llist_destroy(&global_vars);
-
-	if (!cgi) {
-		if (!SG(request_info).path_translated && argc > ap_php_optind) {
-			SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
+		if (script_file) {
+			SG(request_info).path_translated = script_file;
 		}
-	} else {
-	/* If for some reason the CGI interface is not setting the
-	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
-	   We still call php_fopen_primary_script, because if you set doc_root
-	   or user_dir configuration directives, PATH_INFO is used to construct
-	   the filename as a side effect of php_fopen_primary_script.
-	 */
-		char *env_path_translated=NULL;
-#if DISCARD_PATH
-		env_path_translated = getenv("SCRIPT_FILENAME");
-#else
-		env_path_translated = getenv("PATH_TRANSLATED");
-#endif
-		if(env_path_translated) {
-			SG(request_info).path_translated = estrdup(env_path_translated);
-		}
-	}
-	if (cgi || SG(request_info).path_translated) {
-		file_handle.handle.fp = php_fopen_primary_script();
-		file_handle.filename = SG(request_info).path_translated;
-	}
 
-	if (cgi && !file_handle.handle.fp) {
-		if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
-			PUTS("No input file specified.\n");
-			php_request_shutdown((void *) 0);
+		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 			php_module_shutdown();
 			return FAILURE;
 		}
-		file_handle.filename = argv0;
-	} else if (file_handle.handle.fp && file_handle.handle.fp!=stdin) {
-		/* #!php support */
-		c = fgetc(file_handle.handle.fp);
-		if (c == '#') {
-			while (c != 10 && c != 13) {
-				c = fgetc(file_handle.handle.fp);	/* skip to end of line */
-			}
-			CG(zend_lineno)++;
-		} else {
-			rewind(file_handle.handle.fp);
+		if (no_headers) {
+			SG(headers_sent) = 1;
+			SG(request_info).no_headers = 1;
 		}
-	}
+		file_handle.filename = "-";
+		file_handle.type = ZEND_HANDLE_FP;
+		file_handle.handle.fp = stdin;
+		file_handle.opened_path = NULL;
 
-	file_handle.free_filename = 0;
-	switch (behavior) {
-		case PHP_MODE_STANDARD:
-			exit_status = php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
-			break;
-		case PHP_MODE_LINT:
-			PG(during_request_startup) = 0;
-			exit_status = php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC);
-			if (exit_status==SUCCESS) {
-				zend_printf("No syntax errors detected in %s\n", file_handle.filename);
-			} else {
-				zend_printf("Errors parsing %s\n", file_handle.filename);
+		/* This actually destructs the elements of the list - ugly hack */
+		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars);
+		zend_llist_destroy(&global_vars);
+
+		if (!cgi) {
+			if (!SG(request_info).path_translated && argc > ap_php_optind) {
+				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
 			}
-			break;
-		case PHP_MODE_HIGHLIGHT:
-			{
-				zend_syntax_highlighter_ini syntax_highlighter_ini;
+		} else {
+		/* If for some reason the CGI interface is not setting the
+		   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
+		   We still call php_fopen_primary_script, because if you set doc_root
+		   or user_dir configuration directives, PATH_INFO is used to construct
+		   the filename as a side effect of php_fopen_primary_script.
+		 */
+			char *env_path_translated=NULL;
+#if DISCARD_PATH
+			env_path_translated = getenv("SCRIPT_FILENAME");
+#else
+			env_path_translated = getenv("PATH_TRANSLATED");
+#endif
+			if(env_path_translated) {
+				SG(request_info).path_translated = estrdup(env_path_translated);
+			}
+		}
+		if (cgi || SG(request_info).path_translated) {
+			file_handle.handle.fp = php_fopen_primary_script();
+			file_handle.filename = SG(request_info).path_translated;
+		}
 
-				if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
-					php_get_highlight_struct(&syntax_highlighter_ini);
-					zend_highlight(&syntax_highlighter_ini);
-					fclose(file_handle.handle.fp);
+		if (cgi && !file_handle.handle.fp) {
+			if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
+				PUTS("No input file specified.\n");
+				php_request_shutdown((void *) 0);
+				php_module_shutdown();
+				return FAILURE;
+			}
+			file_handle.filename = argv0;
+		} else if (file_handle.handle.fp && file_handle.handle.fp!=stdin) {
+			/* #!php support */
+			c = fgetc(file_handle.handle.fp);
+			if (c == '#') {
+				while (c != 10 && c != 13) {
+					c = fgetc(file_handle.handle.fp);	/* skip to end of line */
 				}
-				return SUCCESS;
+				CG(zend_lineno)++;
+			} else {
+				rewind(file_handle.handle.fp);
 			}
-			break;
+		}
+
+		file_handle.free_filename = 0;
+		switch (behavior) {
+			case PHP_MODE_STANDARD:
+				exit_status = php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+				break;
+			case PHP_MODE_LINT:
+				PG(during_request_startup) = 0;
+				exit_status = php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC);
+				if (exit_status==SUCCESS) {
+					zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+				} else {
+					zend_printf("Errors parsing %s\n", file_handle.filename);
+				}
+				break;
+			case PHP_MODE_HIGHLIGHT:
+				{
+					zend_syntax_highlighter_ini syntax_highlighter_ini;
+
+					if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
+						php_get_highlight_struct(&syntax_highlighter_ini);
+						zend_highlight(&syntax_highlighter_ini);
+						fclose(file_handle.handle.fp);
+					}
+					return SUCCESS;
+				}
+				break;
 #if 0
-		/* Zeev might want to do something with this one day */
-		case PHP_MODE_INDENT:
-			open_file_for_scanning(&file_handle CLS_CC);
-			zend_indent();
-			fclose(file_handle.handle.fp);
-			return SUCCESS;
-			break;
+			/* Zeev might want to do something with this one day */
+			case PHP_MODE_INDENT:
+				open_file_for_scanning(&file_handle CLS_CC);
+				zend_indent();
+				fclose(file_handle.handle.fp);
+				return SUCCESS;
+				break;
 #endif
-	}
+		}
 
 
-	if (SG(request_info).path_translated) {
-		persist_alloc(SG(request_info).path_translated);
-	}
+		if (SG(request_info).path_translated) {
+			persist_alloc(SG(request_info).path_translated);
+		}
 
-	php_request_shutdown((void *) 0);
-	php_module_shutdown();
+		php_request_shutdown((void *) 0);
+		php_module_shutdown();
 
-	STR_FREE(SG(request_info).path_translated);
+		STR_FREE(SG(request_info).path_translated);
 
-	if (cgi_sapi_module.php_ini_path_override) {
-		free(cgi_sapi_module.php_ini_path_override);
-	}
+		if (cgi_sapi_module.php_ini_path_override) {
+			free(cgi_sapi_module.php_ini_path_override);
+		}
 #ifdef ZTS
-	tsrm_shutdown();
+		tsrm_shutdown();
 #endif
+	} zend_catch {
+		exit_status = -1;
+	} zend_end_try();
 
 	return exit_status;
 }
