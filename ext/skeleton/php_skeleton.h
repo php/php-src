@@ -78,7 +78,7 @@ typedef struct {
 
 #else
 
-#define php_extname_ptr NULL
+#define phpext_extname_ptr NULL
 
 #endif
 
