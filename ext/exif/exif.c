@@ -2997,7 +2997,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 /* {{{ exif_process_IFD_in_JPEG
  * Process one of the nested IFDs directories. */
-static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, unsigned IFDlength, size_t displacement, int section_index TSRMLS_DC)
+static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index TSRMLS_DC)
 {
 	int de;
 	int NumDirEntries;
