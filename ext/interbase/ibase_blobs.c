@@ -55,7 +55,7 @@ void php_ibase_blobs_minit(INIT_FUNC_ARGS) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
+int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
 {
 	/* shortcut for most common case */
 	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
@@ -72,7 +72,7 @@ PHPAPI int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd) /* {{{ */
 }
 /* }}} */
 
-PHPAPI char *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
+char *_php_ibase_quad_to_string(ISC_QUAD const qd) /* {{{ */
 {
 	char *result = (char *) emalloc(BLOB_ID_LEN+1);
 
@@ -96,7 +96,7 @@ typedef struct { /* {{{ */
 /* }}} */
 } IBASE_BLOBINFO;
 
-PHPAPI int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC) /* {{{ */
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC) /* {{{ */
 {
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 
@@ -129,7 +129,7 @@ PHPAPI int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned
 }
 /* }}} */
 
-PHPAPI int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC) /* {{{ */
+int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC) /* {{{ */
 {
 	unsigned long put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;

@@ -38,7 +38,7 @@ static void _php_ibase_event_free(char *event_buf, char *result_buf) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void _php_ibase_free_event(ibase_event *event TSRMLS_DC) /* {{{ */
+void _php_ibase_free_event(ibase_event *event TSRMLS_DC) /* {{{ */
 {
 	unsigned short i;
 
