@@ -2067,28 +2067,31 @@ PHP_FUNCTION(mb_convert_kana)
 }
 /* }}} */
 
-
+#define PHP_MBSTR_STACK_BLOCK_SIZE 32
 
 /* {{{ proto string mb_convert_variables(string to-encoding, mixed from-encoding, mixed ...)
   Convert the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
-	pval ***args, **hash_entry;
+	pval ***args, ***stack, **var, **hash_entry;
 	HashTable *target_hash;
-	zend_uchar arg_type;
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
-	int n, i, f, argc, *elist, elistsz;
+	int n, argc, stack_level, stack_max, *elist, elistsz;
 	char *name;
+	void *ptmp;
 	MBSTRLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
 	if (argc < 3) {
 		WRONG_PARAM_COUNT;
 	}
-	args = (pval ***)ecalloc(argc, sizeof(pval *));
+	args = (pval ***)ecalloc(argc, sizeof(pval **));
+	if (args == NULL) {
+		RETURN_FALSE;
+	}
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree((void *)args);
 		WRONG_PARAM_COUNT;
@@ -2099,6 +2102,7 @@ PHP_FUNCTION(mb_convert_variables)
 	to_encoding = mbfl_name2no_encoding(Z_STRVAL_PP(args[0]));
 	if (to_encoding == mbfl_no_encoding_invalid) {
 		php_error(E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(args[0]));
+		efree((void *)args);
 		RETURN_FALSE;
 	}
 
@@ -2128,47 +2132,71 @@ PHP_FUNCTION(mb_convert_variables)
 	} else {
 		/* auto detect */
 		from_encoding = mbfl_no_encoding_invalid;
-		identd = mbfl_encoding_detector_new(elist, elistsz);
-		if (identd != NULL) {
-			f = 0;
-			n = 2;
-			while (n < argc) {
-				arg_type = Z_TYPE_PP(args[n]);
-				if (arg_type == IS_ARRAY || arg_type == IS_OBJECT) {
-					target_hash = HASH_OF(*args[n]);
-					if (target_hash != NULL) {
-						zend_hash_internal_pointer_reset(target_hash);
-						i = zend_hash_num_elements(target_hash);
-						while (i > 0) {
-							if (zend_hash_get_current_data(target_hash, (void **) &hash_entry) == FAILURE) {
-								break;
+		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
+		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
+		if (stack != NULL) {
+			stack_level = 0;
+			identd = mbfl_encoding_detector_new(elist, elistsz);
+			if (identd != NULL) {
+				n = 2;
+				while (n < argc || stack_level > 0) {
+					if (stack_level <= 0) {
+						var = args[n++];
+						if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
+							target_hash = HASH_OF(*var);
+							if (target_hash != NULL) {
+								zend_hash_internal_pointer_reset(target_hash);
 							}
-							if (Z_TYPE_PP(hash_entry) == IS_STRING) {
-								string.val = Z_STRVAL_PP(hash_entry);
-								string.len = Z_STRLEN_PP(hash_entry);
-								if (mbfl_encoding_detector_feed(identd, &string)) {
-									f = 1;
-									break;
+						}
+					} else {
+						stack_level--;
+						var = stack[stack_level];
+					}
+					if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
+						target_hash = HASH_OF(*var);
+						if (target_hash != NULL) {
+							while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
+								zend_hash_move_forward(target_hash);
+								if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
+									if (stack_level >= stack_max) {
+										stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
+										ptmp = erealloc(stack, stack_max);
+										if (ptmp == NULL) {
+											php_error(E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
+											continue;
+										}
+										stack = (pval ***)ptmp;
+									}
+									stack[stack_level] = var;
+									stack_level++;
+									var = hash_entry;
+									target_hash = HASH_OF(*var);
+									if (target_hash != NULL) {
+										zend_hash_internal_pointer_reset(target_hash);
+										continue;
+									}
+								} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
+									string.val = Z_STRVAL_PP(hash_entry);
+									string.len = Z_STRLEN_PP(hash_entry);
+									if (mbfl_encoding_detector_feed(identd, &string)) {
+										goto detect_end;		/* complete detecting */
+									}
 								}
 							}
-							zend_hash_move_forward(target_hash);
-							i--;
+						}
+					} else if (Z_TYPE_PP(var) == IS_STRING) {
+						string.val = Z_STRVAL_PP(args[n]);
+						string.len = Z_STRLEN_PP(args[n]);
+						if (mbfl_encoding_detector_feed(identd, &string)) {
+							goto detect_end;		/* complete detecting */
 						}
 					}
-				} else if (arg_type == IS_STRING) {
-					string.val = Z_STRVAL_PP(args[n]);
-					string.len = Z_STRLEN_PP(args[n]);
-					if (mbfl_encoding_detector_feed(identd, &string)) {
-						f = 1;
-					}
 				}
-				if (f != 0) {
-					break;
-				}
-				n++;
+detect_end:
+				from_encoding = mbfl_encoding_detector_judge(identd);
+				mbfl_encoding_detector_delete(identd);
 			}
-			from_encoding = mbfl_encoding_detector_judge(identd);
-			mbfl_encoding_detector_delete(identd);
+			efree(stack);
 		}
 		if (from_encoding == mbfl_no_encoding_invalid) {
 			php_error(E_WARNING, "Unable to detect encoding in mb_convert_variables()");
@@ -2192,20 +2220,53 @@ PHP_FUNCTION(mb_convert_variables)
 
 	/* convert */
 	if (convd != NULL) {
-		n = 2;
-		while (n < argc) {
-			if (ParameterPassedByReference(ht, n + 1)) {
-				arg_type = Z_TYPE_PP(args[n]);
-				if (arg_type == IS_ARRAY || arg_type == IS_OBJECT) {
-					target_hash = HASH_OF(*args[n]);
-					if (target_hash) {
-						zend_hash_internal_pointer_reset(target_hash);
-						i = zend_hash_num_elements(target_hash);
-						while (i > 0) {
-							if (zend_hash_get_current_data(target_hash, (void **) &hash_entry) == FAILURE) {
-								break;
-							}
-							if (Z_TYPE_PP(hash_entry) == IS_STRING) {
+		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
+		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
+		if (stack != NULL) {
+			stack_level = 0;
+			n = 2;
+			while (n < argc || stack_level > 0) {
+				if (stack_level <= 0) {
+					if (!ParameterPassedByReference(ht, n + 1)) {
+						n++;
+						php_error(E_WARNING, "argument %d not passed by reference", n);
+						continue;
+					}
+					var = args[n++];
+					if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
+						target_hash = HASH_OF(*var);
+						if (target_hash != NULL) {
+							zend_hash_internal_pointer_reset(target_hash);
+						}
+					}
+				} else {
+					stack_level--;
+					var = stack[stack_level];
+				}
+				if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
+					target_hash = HASH_OF(*var);
+					if (target_hash != NULL) {
+						while (zend_hash_get_current_data(target_hash, (void **) &hash_entry) != FAILURE) {
+							zend_hash_move_forward(target_hash);
+							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
+								if (stack_level >= stack_max) {
+									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
+									ptmp = erealloc(stack, stack_max);
+									if (ptmp == NULL) {
+										php_error(E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
+										continue;
+									}
+									stack = (pval ***)ptmp;
+								}
+								stack[stack_level] = var;
+								stack_level++;
+								var = hash_entry;
+								target_hash = HASH_OF(*var);
+								if (target_hash != NULL) {
+									zend_hash_internal_pointer_reset(target_hash);
+									continue;
+								}
+							} else if (Z_TYPE_PP(hash_entry) == IS_STRING) {
 								string.val = Z_STRVAL_PP(hash_entry);
 								string.len = Z_STRLEN_PP(hash_entry);
 								ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
@@ -2215,28 +2276,24 @@ PHP_FUNCTION(mb_convert_variables)
 									Z_STRLEN_PP(hash_entry) = ret->len;
 								}
 							}
-							zend_hash_move_forward(target_hash);
-							i--;
 						}
 					}
-				} else if (arg_type == IS_STRING) {
-					string.val = Z_STRVAL_PP(args[n]);
-					string.len = Z_STRLEN_PP(args[n]);
+				} else if (Z_TYPE_PP(var) == IS_STRING) {
+					string.val = Z_STRVAL_PP(var);
+					string.len = Z_STRLEN_PP(var);
 					ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 					if (ret != NULL) {
-						STR_FREE(Z_STRVAL_PP(args[n]));
-						Z_STRVAL_PP(args[n]) = ret->val;
-						Z_STRLEN_PP(args[n]) = ret->len;
+						STR_FREE(Z_STRVAL_PP(var));
+						Z_STRVAL_PP(var) = ret->val;
+						Z_STRLEN_PP(var) = ret->len;
 					}
 				}
-			} else {
-				php_error(E_WARNING, "argument %d not passed by reference", n + 1);
 			}
-			n++;
+			efree(stack);
 		}
+		mbfl_buffer_converter_delete(convd);
 	}
 
-	mbfl_buffer_converter_delete(convd);
 	efree((void *)args);
 
 	name = (char *)mbfl_no_encoding2name(from_encoding);
