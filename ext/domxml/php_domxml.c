@@ -4716,9 +4716,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 /* }}} */
 #endif
 
-/* We don't have a type zval. **attributes is also very unusual. */
-
-/* {{{ proto int node_attributes(zval **attributes, int node)
+/* {{{ int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 {
