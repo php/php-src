@@ -135,6 +135,9 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_endpath, NULL)
 	PHP_FE(pdf_clip, NULL)
 	PHP_FE(pdf_set_parameter, NULL)
+	PHP_FE(pdf_get_parameter, NULL)
+	PHP_FE(pdf_set_value, NULL)
+	PHP_FE(pdf_get_value, NULL)
 	PHP_FE(pdf_setgray_fill, NULL)
 	PHP_FE(pdf_setgray_stroke, NULL)
 	PHP_FE(pdf_setgray, NULL)
@@ -142,6 +145,7 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_setrgbcolor_stroke, NULL)
 	PHP_FE(pdf_setrgbcolor, NULL)
 	PHP_FE(pdf_add_outline, NULL)
+	PHP_FALIAS(pdf_add_bookmark, pdf_add_outline, NULL)
 	PHP_FE(pdf_set_transition, NULL)
 	PHP_FE(pdf_set_duration, NULL)
 	PHP_FE(pdf_open_jpeg, NULL)
@@ -159,6 +163,7 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_add_annotation, NULL)
 	PHP_FE(pdf_set_border_style, NULL)
 	PHP_FE(pdf_set_border_color, NULL)
+	PHP_FE(pdf_set_border_dash, NULL)
 	PHP_FE(pdf_get_image_height, NULL)
 	PHP_FE(pdf_get_image_width, NULL)
 	{NULL, NULL, NULL}
@@ -260,8 +265,8 @@ PHP_MSHUTDOWN_FUNCTION(pdf){
 	return SUCCESS;
 }
 
-/* {{{ proto bool pdf_set_info_creator(int info, string creator)
-   Fills the creator field of the info structure */
+/* {{{ proto bool pdf_set_info_creator(int pdfdoc, string creator)
+   Fills the creator field of the document */
 PHP_FUNCTION(pdf_set_info_creator) {
 	pval *arg1, *arg2;
 	int id, type;
@@ -289,8 +294,8 @@ PHP_FUNCTION(pdf_set_info_creator) {
 
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_title(int info, string title)
-   Fills the title field of the info structure */
+/* {{{ proto bool pdf_set_info_title(int pdfdoc, string title)
+   Fills the title field of the document */
 PHP_FUNCTION(pdf_set_info_title) {
 	pval *arg1, *arg2;
 	int id, type;
@@ -318,8 +323,8 @@ PHP_FUNCTION(pdf_set_info_title) {
 
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_subject(int info, string subject)
-   Fills the subject field of the info structure */
+/* {{{ proto bool pdf_set_info_subject(int pdfdoc, string subject)
+   Fills the subject field of the document */
 PHP_FUNCTION(pdf_set_info_subject) {
 	pval *arg1, *arg2;
 	int id, type;
@@ -347,8 +352,8 @@ PHP_FUNCTION(pdf_set_info_subject) {
 
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_author(int info, string author)
-   Fills the author field of the info structure */
+/* {{{ proto bool pdf_set_info_author(int pdfdoc, string author)
+   Fills the author field of the document */
 PHP_FUNCTION(pdf_set_info_author) {
 	pval *arg1, *arg2;
 	int id, type;
@@ -376,8 +381,8 @@ PHP_FUNCTION(pdf_set_info_author) {
 
 /* }}} */
 
-/* {{{ proto bool pdf_set_info_keywords(int info, string keywords)
-   Fills the keywords field of the info structure */
+/* {{{ proto bool pdf_set_info_keywords(int pdfdoc, string keywords)
+   Fills the keywords field of the document */
 PHP_FUNCTION(pdf_set_info_keywords) {
 	pval *arg1, *arg2;
 	int id, type;
@@ -666,7 +671,7 @@ PHP_FUNCTION(pdf_set_font) {
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_font(int pdfdoc)
+/* {{{ proto int pdf_get_font(int pdfdoc)
    Gets the current font */
 PHP_FUNCTION(pdf_get_font) {
 	pval *arg1;
@@ -719,7 +724,7 @@ PHP_FUNCTION(pdf_get_fontname) {
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_fontsize(int pdfdoc)
+/* {{{ proto double pdf_get_fontsize(int pdfdoc)
    Gets the current font size */
 PHP_FUNCTION(pdf_get_fontsize) {
 	pval *arg1;
@@ -1785,7 +1790,7 @@ PHP_FUNCTION(pdf_clip) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_parameter(int pdfdoc, string parameter, string value)
+/* {{{ proto void pdf_set_parameter(int pdfdoc, string key, string value)
    Sets arbitrary parameters */
 PHP_FUNCTION(pdf_set_parameter) {
 	pval *arg1, *arg2, *arg3;
@@ -1810,6 +1815,92 @@ PHP_FUNCTION(pdf_set_parameter) {
 	PDF_set_parameter(pdf, arg2->value.str.val, arg3->value.str.val);
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto string pdf_get_parameter(int pdfdoc, string key, double modifier)
+   Gets arbitrary parameters */
+PHP_FUNCTION(pdf_get_parameter) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	char *value;
+	PDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_double(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	value = PDF_get_parameter(pdf, arg2->value.str.val, arg3->value.dval);
+
+	RETURN_STRING(value, 1);
+}
+/* }}} */
+
+/* {{{ proto void pdf_set_value(int pdfdoc, string key, double value)
+   Sets arbitrary value */
+PHP_FUNCTION(pdf_set_value) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_double(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_set_value(pdf, arg2->value.str.val, arg3->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto double pdf_get_value(int pdfdoc, string key, double modifier)
+   Gets arbitrary value */
+PHP_FUNCTION(pdf_get_value) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	double value;
+	PDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_double(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	value = PDF_get_value(pdf, arg2->value.str.val, arg3->value.dval);
+
+	RETURN_DOUBLE(value);
 }
 /* }}} */
 
@@ -2579,7 +2670,7 @@ PHP_FUNCTION(pdf_add_pdflink) {
 /* }}} */
 
 /* {{{ proto void pdf_set_border_style(int pdfdoc, string style, double width)
-   Set style of box surounded weblinks */
+   Set style of box surounding all kinds of annotations and link */
 PHP_FUNCTION(pdf_set_border_style) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
@@ -2607,7 +2698,7 @@ PHP_FUNCTION(pdf_set_border_style) {
 /* }}} */
 
 /* {{{ proto void pdf_set_border_color(int pdfdoc, double red, double green, double blue)
-   Set color of box surounded weblinks */
+   Set color of box surounded all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_color) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
@@ -2630,6 +2721,34 @@ PHP_FUNCTION(pdf_set_border_color) {
 	}
 
 	PDF_set_border_color(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_set_border_dash(int pdfdoc, double black, double white)
+   Set the border dash style of all kinds of annotations and links */
+PHP_FUNCTION(pdf_set_border_dash) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_double(arg2);
+	convert_to_double(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_set_border_dash(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
 
 	RETURN_TRUE;
 }

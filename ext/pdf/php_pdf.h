@@ -35,8 +35,8 @@
 
 /* with version 2.20 of pdflib PDF_open_mem isn't available unless
    the following define isn't there.
-   #define PDF_OPEN_MEM_SUPPORTED
 */
+#define PDF_OPEN_MEM_SUPPORTED
 #include <pdflib.h>
 
 extern int le_fp;
@@ -104,6 +104,9 @@ PHP_FUNCTION(pdf_closepath_fill_stroke);
 PHP_FUNCTION(pdf_endpath);
 PHP_FUNCTION(pdf_clip);
 PHP_FUNCTION(pdf_set_parameter);
+PHP_FUNCTION(pdf_get_parameter);
+PHP_FUNCTION(pdf_set_value);
+PHP_FUNCTION(pdf_get_value);
 PHP_FUNCTION(pdf_setgray_fill);
 PHP_FUNCTION(pdf_setgray_stroke);
 PHP_FUNCTION(pdf_setgray);
@@ -130,6 +133,7 @@ PHP_FUNCTION(pdf_add_pdflink);
 PHP_FUNCTION(pdf_add_annotation);
 PHP_FUNCTION(pdf_set_border_style);
 PHP_FUNCTION(pdf_set_border_color);
+PHP_FUNCTION(pdf_set_border_dash);
 PHP_FUNCTION(pdf_get_image_width);
 PHP_FUNCTION(pdf_get_image_height);
 #else
