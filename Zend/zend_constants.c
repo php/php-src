@@ -220,8 +220,11 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
-	char *lookup_name = estrndup(name, name_len);
+	char *lookup_name;
 	int retval;
+
+	lookup_name = do_alloca(name_len+1);
+	memcpy(lookup_name, name, name_len+1);
 
 	zend_str_tolower(lookup_name, name_len);
 
@@ -236,8 +239,9 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	} else {
 		retval=0;
 	}
-	
-	efree(lookup_name);
+
+	free_alloca(lookup_name);
+
 	return retval;
 }
 
