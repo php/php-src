@@ -317,11 +317,6 @@ fail if any packages depend on the newer version.'),
         $errors = array();
         $downloaded = array();
         $this->downloader->download($params);
-        if ($command != 'upgrade-all') {
-            for ($i = 0; $i < count($params); $i++) {
-                $params[$i] = $this->downloader->extractDownloadFileName($params[$i], $_tmp);
-            }
-        }
         $errors = $this->downloader->getErrorMsgs();
         if (count($errors)) {
             $err['data'] = array($errors);
