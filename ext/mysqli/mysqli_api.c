@@ -258,7 +258,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	for (i=start; i < var_cnt + start ; i++) {
 		ofs = i - start;
 		stmt->result.is_null[ofs] = 0;
-
+		//bind[ofs].truncated = NULL;
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
@@ -406,7 +406,7 @@ PHP_FUNCTION(mysqli_close)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
 	mysql_close(mysql->mysql);
-
+	php_clear_mysql(mysql);	
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
 	RETURN_TRUE;
 }
@@ -1036,7 +1036,6 @@ PHP_FUNCTION(mysqli_set_local_infile_default)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
-	int			i;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -1044,52 +1043,41 @@ PHP_FUNCTION(mysqli_set_local_infile_default)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	for (i=0; i < 3; i++) {
-		if (&mysql->callback_func[i]) {
-			zval_dtor(&mysql->callback_func[i]);
-		}
+	if (mysql->li_read) {
+		efree(Z_STRVAL_P(mysql->li_read));
+		zval_dtor(mysql->li_read);
+		mysql->li_read = NULL;
 	}
-
-	mysql_set_local_infile_default(mysql->mysql);	
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_set_local_infile_handler(object link, callback init_func,
-					callback read_func, callback end_func)
+/* {{{ proto bool mysqli_set_local_infile_handler(object link, callback read_func)
    Set callback functions for LOAD DATA LOCAL INFILE */
 PHP_FUNCTION(mysqli_set_local_infile_handler)
 {
 	MY_MYSQL	*mysql;
 	zval  		*mysql_link;
 	char		*callback_name;
-	zval		*callback_func[4];
-	int			i;
+	zval		*callback_func;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ozzzz", &mysql_link, mysqli_link_class_entry,
-			&callback_func[0], &callback_func[1], &callback_func[2], &callback_func[3]) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", &mysql_link, mysqli_link_class_entry,
+			&callback_func) == FAILURE) {
 		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	/* check callback functions */
-	for (i=0; i < 3; i++) {
-		if (!zend_is_callable(callback_func[i], 0, &callback_name)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %s", callback_name);
-			efree(callback_name);
-			RETURN_FALSE;		
-		}
+	/* check callback function */
+	if (!zend_is_callable(callback_func, 0, &callback_name)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %s", callback_name);
 		efree(callback_name);
+		RETURN_FALSE;		
 	}
+	efree(callback_name);
 
-	/* save callback functions */
-	for (i=0; i < 3; i++) {
-		ZVAL_STRING(&mysql->callback_func[i], callback_func[i]->value.str.val, 1);
-	}
-
-	/* register internal callback functions */
-	mysql_set_local_infile_handler(mysql->mysql, &php_local_infile_init, &php_local_infile_read,
-				&php_local_infile_end, &php_local_infile_error, (void *)mysql); 
+	/* save callback function */
+	ALLOC_ZVAL(mysql->li_read);	
+	ZVAL_STRING(mysql->li_read, callback_func->value.str.val, 1);
 }
 /* }}} */
 
@@ -1324,6 +1312,9 @@ PHP_FUNCTION(mysqli_real_connect)
 	php_mysqli_set_error(mysql_errno(mysql->mysql), (char *)mysql_error(mysql->mysql) TSRMLS_CC);
 
 	mysql->mysql->reconnect = MyG(reconnect);
+
+	/* set our own local_infile handler */
+	php_set_local_infile_handler_default(mysql);
 	
 	if (object) {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->valid = 1;
