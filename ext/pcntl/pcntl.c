@@ -203,7 +203,7 @@ PHP_MINFO_FUNCTION(pcntl)
 	php_info_print_table_end();
 }
 
-/* {{{ proto int pcntl_fork()
+/* {{{ proto int pcntl_fork(void)
    Forks the currently running process following the same behavior as the UNIX fork() system call*/
 PHP_FUNCTION(pcntl_fork)
 {
@@ -219,7 +219,7 @@ PHP_FUNCTION(pcntl_fork)
 /* }}} */
 
 /* {{{ proto int pcntl_waitpid(long pid, long status, long options)
-      Waits on or returns the status of a forked child as defined by the waitpid() system call */
+   Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
 	zval **pid, **status, **options;
@@ -264,7 +264,7 @@ PHP_FUNCTION(pcntl_wifexited)
 /* }}} */
 
 /* {{{ proto bool pcntl_wifstopped(long status) 
-    Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
+   Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
 {
 #ifdef WIFSTOPPED
@@ -348,7 +348,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 /* }}} */
 
 /* {{{ proto int pcntl_wstopsig(long status) 
-   Returns the number of the signal that caused the process to stop who's status code is passed  */
+   Returns the number of the signal that caused the process to stop who's status code is passed */
 PHP_FUNCTION(pcntl_wstopsig)
 {
 #ifdef WSTOPSIG
@@ -369,7 +369,7 @@ PHP_FUNCTION(pcntl_wstopsig)
 /* }}} */
 
 /* {{{ proto bool pcntl_exec(string path, [array args], [array envs])
-      Executes specified program in current process space as defined by exec(2)  */
+   Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
 	zval *args, *envs;
@@ -459,7 +459,7 @@ PHP_FUNCTION(pcntl_exec)
 /* }}} */
 
 /* {{{ proto bool pcntl_signal(long signo, mixed handle)
-      Assigns a system signal handler to a php function  */
+   Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
 	zval **signo, **handle;
