@@ -1,3 +1,78 @@
+2001-01-12  Sean Grimes  <metallic@noworlater.net>
+
+    * pear/XML/Render.php:
+    Adding Render.php, which helps render documents from XML files.
+
+2001-01-12  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Added parallel search when given array of link identifiers
+
+    * ext/standard/http_fopen_wrapper.c:
+    Follows redirects again, and $http_response_header now contains all headers
+    with an empty string as delimiter
+
+2001-01-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: - Fixed a possible crash bug in xmltree().
+
+2001-01-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    We never want to appand to the result string, so set len to 0 initially.
+
+    * ext/ircg/ircg.c: Encode HTML entities by default
+
+    * ext/ircg/ircg.c:
+    Add a hook for signaling "you're gone" to the client on channel part
+
+2001-01-12  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/HTTP/Compress.php
+      pear/Makefile.in:
+    Add HTTP_Compress::, which provides an easy wrapper around producing
+    gzip-compressed html. This should be ported to use the ob_gzhandler() output
+    handler, but I haven't had a chance to look into that yet.
+
+2001-01-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Add a format string which allows us to implement a transaction-like
+    JS interface for large joins (many changes, one commit).
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: Make the format-msg functions actually available.
+
+    * ext/ircg/ircg.c:
+    Make some strings static to avoid reallocating the buffers a thousand
+    times per second.
+
+    * ext/ircg/ircg.c:
+    Try to be more memory friendly by avoiding storing redundant data.
+
+2001-01-12  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: Make daniel's changes work in ZTS mode...
+
+2001-01-12  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/curl/php_curl.h: take out emtpy struct
+
+2001-01-12  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/Makefile.in:
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+    Added Image_Remote class.
+
+2001-01-12  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/mysql/php_mysql.c:
+    Fix for bug 6073 from Sean R. Bright <elixer@erols.com>
+
 2001-01-11  Colin Viebrock  <colin@easydns.com>
 
     * pear/Crypt/CBC.php: Class that emulates Perl's Crypt::CBC module
