@@ -46,6 +46,9 @@ extern zend_module_entry xsl_module_entry;
 #include "../dom/xml_common.h"
 #include "xsl_fe.h"
 
+#include <libxslt/extensions.h>
+#include <libxml/xpathInternals.h>
+
 typedef struct _xsl_object {
 	zend_object  std;
 	void *ptr;
