@@ -1993,8 +1993,8 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 }
 /* }}} */
 
-/* {{{ proto string imap_utf8(string string)
-   Convert a string to UTF-8 */
+/* {{{ proto string imap_utf8(string mime_encoded_text)
+   Convert a mime-encoded text to UTF-8 */
 PHP_FUNCTION(imap_utf8)
 {
 	zval **str;
