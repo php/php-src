@@ -899,7 +899,7 @@ PHP_FUNCTION(wddx_packet_end)
 /* }}} */
 
 
-/* {{{ proto int wddx_add_vars(int packet_id [, ...])
+/* {{{ proto int wddx_add_vars(int packet_id [, mixed var_names [, ...]])
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
