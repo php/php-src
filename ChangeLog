@@ -1,3 +1,62 @@
+1999-12-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.h
+      ext/standard/filestat.c: Make filestat.c thread-safe
+
+    * ext/standard/basic_functions.h
+      ext/standard/pageinfo.c
+      ext/standard/basic_functions.c:
+1999-12-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB.php: - Documented classes, methods and constants in the source
+    - Defined DB_ERROR_NOSUCHTABLE and DB_ERROR_NOSUCHFIELD
+    - Renamed DB_common::capableOf to DB_common::provides
+    - Cleaned up the error code mapping
+    - Added simpleQuery method in DB_mysql
+    - Changed getXxx methods in DB_common to use simpleQuery
+    - Fixed bug in DB_common::getAssoc
+
+1999-12-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Remove trailing white-spaces
+
+    * php.ini-dist:
+    Reformat ini entries and add new options (cache_limiter, cache_expire).
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Add cache_limiter and cache_expire options. Rename extern_referer_check
+    to referer_check.
+
+    * ext/zlib/zlib.c: Kill a warning
+
+    * ext/snmp/snmp.c: Initialize variables
+
+    * ext/sysvshm/sysvshm.c: Initialize value properly
+
+    * ext/gd/gd.c: Call SLS_FETCH() only, if it is needed
+
+    * ext/filepro/filepro.c: Make it compile in ZTS mode
+
+    * ext/ftp/php_ftp.c: Include header file for php_file_le_fopen()
+
+    * ext/standard/array.c: Remove unnecessary ARRAYLS_FETCH() calls
+
+    * ext/dbase/dbase.c: Make it compile in ZTS mode
+
+    * main.c:
+    Disable global lock for now. We will have to find a way to test subsystems
+    for thread-safety, and lock them appropiately, if they aren't thread-safe.
+
+1999-12-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php:
+    Renamed (doOne doRow doAssoc) to (getOne getRow getAssoc).
+
+    * INSTALL: "setup" is obsolete
+
 1999-12-11  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/array.c
