@@ -3227,8 +3227,6 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 	/* new symbol tables */
 	CG(class_table) = &ns->class_table;
 	CG(function_table) = &ns->function_table;
-	
-	fprintf(stderr, "Start namespace '%s'\n", ns->name);
 }
 
 void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
@@ -3249,8 +3247,6 @@ void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
 	/* restore symbol tables */
 	CG(class_table) = &CG(active_namespace)->class_table;
 	CG(function_table) = &CG(active_namespace)->function_table;
-	
-	fprintf(stderr, "End namespace\n");
 }
 
 void zend_do_declare_namespace_var(znode *var_name, znode *value TSRMLS_DC)
