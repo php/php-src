@@ -40,7 +40,11 @@ $(srcdir)/libsqlite/src/build.c: $(srcdir)/libsqlite/src/sqlite.h
 
 $(srcdir)/libsqlite/src/copy.c: $(srcdir)/libsqlite/src/sqlite.h
 
+$(srcdir)/libsqlite/src/date.c: $(srcdir)/libsqlite/src/sqlite.h
+
 $(srcdir)/libsqlite/src/delete.c: $(srcdir)/libsqlite/src/sqlite.h
+
+$(srcdir)/libsqlite/src/encode.c: $(srcdir)/libsqlite/src/sqlite.h
 
 $(srcdir)/libsqlite/src/expr.c: $(srcdir)/libsqlite/src/sqlite.h
 
