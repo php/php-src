@@ -22,11 +22,17 @@ if test "$PHP_GETTEXT" != "no"; then
   
   O_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS -L$GETTEXT_LIBDIR"
-  AC_CHECK_LIB(intl, bindtextdomain, GETTEXT_LIBS=intl,[
-      AC_CHECK_LIB(c, bindtextdomain, GETTEXT_LIBS= ,[
-          AC_MSG_ERROR(Unable to find required gettext library)
-      ])
-  ])
+  AC_CHECK_LIB(intl, bindtextdomain, [
+	GETTEXT_LIBS=intl
+	GETTEXT_CHECK_IN_LIB=intl
+	],
+	AC_CHECK_LIB(c, bindtextdomain, [
+		GETTEXT_LIBS=
+		GETTEXT_CHECK_IN_LIB=c
+	],[
+		AC_MSG_ERROR(Unable to find required gettext library)
+	])
+  )
   LDFLAGS=$O_LDFLAGS
 
   AC_DEFINE(HAVE_LIBINTL,1,[ ])
@@ -38,4 +44,9 @@ if test "$PHP_GETTEXT" != "no"; then
   fi
 
   PHP_ADD_INCLUDE($GETTEXT_INCDIR)
+
+  AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB, ngettext,  [AC_DEFINE(HAVE_NGETTEXT, 1, [ ])])
+  AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB, dngettext,  [AC_DEFINE(HAVE_DNGETTEXT, 1, [ ])])
+  AC_CHECK_LIB($GETTEXT_CHECK_IN_LIB, dcngettext,  [AC_DEFINE(HAVE_DCNGETTEXT, 1, [ ])])
+  
 fi

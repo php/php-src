@@ -40,9 +40,15 @@ function_entry php_gettext_functions[] = {
 	PHP_FE(dgettext,			NULL)
 	PHP_FE(dcgettext,			NULL)
 	PHP_FE(bindtextdomain,		NULL)
+#if HAVE_NGETTEXT
 	PHP_FE(ngettext,			NULL)
+#endif
+#if HAVE_DNGETTEXT
 	PHP_FE(dngettext,			NULL)
+#endif
+#if HAVE_DCNGETTEXT
 	PHP_FE(dcngettext,			NULL)
+#endif
     {NULL, NULL, NULL}
 };
 /* }}} */
@@ -177,6 +183,7 @@ PHP_FUNCTION(bindtextdomain)
 }
 /* }}} */
 
+#if HAVE_NGETTEXT
 /* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
    Plural version of gettext() */
 PHP_FUNCTION(ngettext)
@@ -200,7 +207,9 @@ PHP_FUNCTION(ngettext)
 	}
 }
 /* }}} */
+#endif
 
+#if HAVE_DNGETTEXT
 /* {{{ proto string dngettext (string domain, string msgid1, string msgid2, long count)
    Plural version of dgettext() */
 PHP_FUNCTION(dngettext)
@@ -226,7 +235,9 @@ PHP_FUNCTION(dngettext)
 	}
 }
 /* }}} */
+#endif
 
+#if HAVE_DCNGETTEXT
 /* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, long n, int category)
    Plural version of dcgettext() */								
 PHP_FUNCTION(dcngettext)
@@ -253,6 +264,8 @@ PHP_FUNCTION(dcngettext)
 		}
 	}
 }
+/* }}} */
+#endif
 
 #endif /* HAVE_LIBINTL */
 
@@ -264,3 +277,4 @@ PHP_FUNCTION(dcngettext)
  * vim600: sw=4 ts=4 tw=78 fdm=marker
  * vim<600: sw=4 ts=4 tw=78
  */
+
