@@ -134,11 +134,8 @@ class PEAR_Dependency
     function checkExtension($name, $req = null, $relation = 'has')
     {
         // XXX (ssb): could we avoid loading the extension here?
-        if (!extension_loaded($name)) {
-            $dlext = OS_WINDOWS ? '.dll' : '.so';
-            if (!@dl($name . $dlext)) {
-                return "'$name' PHP extension is not installed";
-            }
+        if (!PEAR::loadExtension($name)) {
+            return "'$name' PHP extension is not installed";
         }
         if ($relation == 'has') {
             return false;
