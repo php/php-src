@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
 	int cgi_started=0;
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
+	int free_path_translated=0;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
 #endif
@@ -320,6 +321,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					}
 					cgi_started=1;
 					SG(request_info).path_translated = estrdup(optarg);
+					free_path_translated=1;
 					/* break missing intentionally */
 				case 'q':
 					no_headers = 1;
@@ -488,6 +490,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	php3_header();			/* Make sure headers have been sent */
+	if (free_path_translated)
+		efree(SG(request_info).path_translated);
 	php_request_shutdown((void *) 0);
 	php_module_shutdown();
 #ifdef ZTS
