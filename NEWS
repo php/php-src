@@ -31,7 +31,7 @@ PHP 4                                                                      NEWS
 - Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set. (Adam)
 - Fixed a bug in bundled libmysql (mysql bug #564). (Georg)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
-- Fixed bug #24210 (not detecting assume_default_colors - typo). (sara)
+- Fixed bug #24210 (not detecting assume_default_colors - typo). (Sara)
 - Fixed bug #24198 (Invalid recursion detection in array_merge_recurcive()).
   (Ilia)
 - Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis).
