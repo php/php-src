@@ -787,7 +787,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		}
 
 		default: 
-			fprintf(stderr, "Unsupported Node type: %d\n", obj->type);
+			php_error(E_WARNING, "Unsupported Node type: %d\n", obj->type);
 			return NULL;
 	}
 
