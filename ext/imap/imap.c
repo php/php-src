@@ -1646,7 +1646,7 @@ void imap_add_body( pval *arg, BODY *body )
 
 	/* encapsulated message ? */
 
-	if ( ( body->type == TYPEMESSAGE ) && (!strncasecmp(body->subtype, "rfc822", 6))) {
+	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
 		body=body->CONTENT_MSG_BODY;
 		MAKE_STD_ZVAL(parametres);
 		array_init(parametres);
