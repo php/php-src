@@ -63,7 +63,9 @@ AC_ARG_WITH(java,
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
-    PHP_EXTENSION(java, shared)
+    if test "$PHP_SAPI" != "servlet"; then
+      PHP_EXTENSION(java, shared)
+    fi
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
