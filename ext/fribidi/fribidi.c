@@ -298,13 +298,13 @@ PHP_FUNCTION(fribidi_get_charsets)
 {
 	array_init(return_value);
 
-	add_index_string(return_value, 0, "FRIBIDI_CHARSET_UTF8", 1);
-	add_index_string(return_value, 1, "FRIBIDI_CHARSET_8859_6", 1);
-	add_index_string(return_value, 2, "FRIBIDI_CHARSET_8859_8", 1);
-	add_index_string(return_value, 3, "FRIBIDI_CHARSET_CP1255", 1);
-	add_index_string(return_value, 4, "FRIBIDI_CHARSET_CP1256", 1);
-	add_index_string(return_value, 5, "FRIBIDI_CHARSET_ISIRI_3342", 1);
-	add_index_string(return_value, 6, "FRIBIDI_CHARSET_CAP_RTL", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_UTF8, "FRIBIDI_CHARSET_UTF8", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_CAP_RTL, "FRIBIDI_CHARSET_CAP_RTL", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_ISO8859_6, "FRIBIDI_CHARSET_8859_6", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_ISO8859_8, "FRIBIDI_CHARSET_8859_8", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_CP1255, "FRIBIDI_CHARSET_CP1255", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_CP1256, "FRIBIDI_CHARSET_CP1256", 1);
+	add_index_string(return_value, FRIBIDI_CHARSET_ISIRI_3342, "FRIBIDI_CHARSET_ISIRI_3342", 1);
 }
 /* }}} */
 
