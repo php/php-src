@@ -138,7 +138,7 @@ dnl A whole whack of possible places where this might be
         ac_cv_lib_gd_gdImageLine=yes
   fi
 ])
-if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
+if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   CHECK_TTF="yes"
   AC_ARG_WITH(ttf,
   [  --with-ttf[=DIR]        Include Freetype support],[
