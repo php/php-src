@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 /* standard php include(s) */
 #include "php.h"
 #include "ext/standard/head.h"
