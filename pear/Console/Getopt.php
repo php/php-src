@@ -210,10 +210,10 @@ class Console_Getopt {
         global $argv;
         if (!is_array($argv)) {
             if (!@is_array($_SERVER['argv'])) {
-                if (!@is_array($HTTP_SERVER_VARS['argv'])) {
+                if (!@is_array($GLOBALS['HTTP_SERVER_VARS']['argv'])) {
                     return PEAR::raiseError("Console_Getopt: Could not read cmd args (register_argc_argv=Off?)");
                 }
-                return $HTTP_SERVER_VARS['argv'];
+                return $GLOBALS['HTTP_SERVER_VARS']['argv'];
             }
             return $_SERVER['argv'];
         }
