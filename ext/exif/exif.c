@@ -57,7 +57,8 @@ typedef unsigned char uchar;
     #define FALSE 0
 #endif
 
-/* 
+
+/* {{{ structs
    This structure stores Exif header image elements in a simple manner
    Used to store camera data as extracted from the various ways that it can be
    stored in a nexif header
@@ -108,17 +109,23 @@ typedef struct {
     int      Type;
     unsigned Size;
 } Section_t;
+/* }}} */
 
 #define EXIT_FAILURE  1
 #define EXIT_SUCCESS  0
 
+/* {{{ exif_functions[]
+ */
 function_entry exif_functions[] = {
     PHP_FE(read_exif_data, NULL)
     {NULL, NULL, NULL}
 };
+/* }}} */
 
 PHP_MINFO_FUNCTION(exif);
 
+/* {{{ exif_module_entry
+ */
 zend_module_entry exif_module_entry = {
     "exif",
     exif_functions,
@@ -127,18 +134,22 @@ zend_module_entry exif_module_entry = {
     PHP_MINFO(exif),
     STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_EXIF
 ZEND_GET_MODULE(exif)
 #endif
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(exif) {
 	php_info_print_table_start();
     php_info_print_table_row(2, "EXIF Support", "enabled" );
     php_info_print_table_end();
 }
+/* }}} */
 
-/* 
+/* {{{ Markers
    JPEG markers consist of one or more 0xFF bytes, followed by a marker
    code byte (which is not an FF).  Here are the marker codes of interest
    in this program.  (See jdmarker.c for a more complete list.)
@@ -166,16 +177,18 @@ PHP_MINFO_FUNCTION(exif) {
 
 #define PSEUDO_IMAGE_MARKER 0x123; /* Extra value. */
 
-/*
+/* }}} */
+
+/* {{{ Get16m
    Get 16 bits motorola order (always) for jpeg header stuff.
 */
 static int Get16m(void *Short)
 {
     return (((uchar *)Short)[0] << 8) | ((uchar *)Short)[1];
 }
+/* }}} */
 
-
-/*
+/* {{{ process_COM
    Process a COM marker.
    We want to print out the marker contents as legible text;
    we must guard against random junk and varying newline representations.
@@ -213,9 +226,10 @@ static void process_COM (ImageInfoType *ImageInfo, uchar *Data, int length)
 
     strcpy(ImageInfo->Comments,Comment);
 }
-
+/* }}} */
  
-/* Process a SOFn marker.  This is useful for the image dimensions */
+/* {{{ process_SOFn
+ * Process a SOFn marker.  This is useful for the image dimensions */
 static void process_SOFn (ImageInfoType *ImageInfo, uchar *Data, int marker)
 {
     int data_precision, num_components;
@@ -249,8 +263,9 @@ static void process_SOFn (ImageInfoType *ImageInfo, uchar *Data, int marker)
         default:      process = "Unknown";  break;
     }
 }
+/* }}} */
 
-/*
+/* {{{ format description defines
    Describes format descriptor
 */
 static int ExifBytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
@@ -318,7 +333,10 @@ static int ExifBytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
 #define TAG_FOCALPLANEXRES    0xa20E
 #define TAG_FOCALPLANEUNITS   0xa210
 #define TAG_IMAGEWIDTH        0xA002
+/* }}} */
 
+/* {{{ TabTable[]
+ */
 static const struct {
     unsigned short Tag;
     char *Desc;
@@ -408,10 +426,10 @@ static const struct {
   {	0xA301,	"SceneType"},
   {      0, NULL}
 } ;
+/* }}} */
 
-
-
-/* Convert a 16 bit unsigned value from file's native byte order */
+/* {{{ Get16u
+ * Convert a 16 bit unsigned value from file's native byte order */
 static int Get16u(void *Short, int MotorolaOrder)
 {
     if (MotorolaOrder) {
@@ -420,8 +438,10 @@ static int Get16u(void *Short, int MotorolaOrder)
         return (((uchar *)Short)[1] << 8) | ((uchar *)Short)[0];
     }
 }
+/* }}} */
 
-/* Convert a 32 bit signed value from file's native byte order */
+/* {{{ Get32s
+ * Convert a 32 bit signed value from file's native byte order */
 static int Get32s(void *Long, int MotorolaOrder)
 {
     if (MotorolaOrder) {
@@ -432,14 +452,18 @@ static int Get32s(void *Long, int MotorolaOrder)
               | (((uchar *)Long)[1] << 8 ) | (((uchar *)Long)[0] << 0 );
     }
 }
+/* }}} */
 
-/* Convert a 32 bit unsigned value from file's native byte order */
+/* {{{ Get32u
+ * Convert a 32 bit unsigned value from file's native byte order */
 static unsigned Get32u(void *Long, int MotorolaOrder)
 {
     return (unsigned)Get32s(Long, MotorolaOrder) & 0xffffffff;
 }
+/* }}} */
 
-/* Evaluate number, be it int, rational, or float from directory. */
+/* {{{ ConvertAnyFormat
+ * Evaluate number, be it int, rational, or float from directory. */
 static double ConvertAnyFormat(void *ValuePtr, int Format, int MotorolaOrder)
 {
     double Value;
@@ -475,8 +499,10 @@ static double ConvertAnyFormat(void *ValuePtr, int Format, int MotorolaOrder)
     }
     return Value;
 }
+/* }}} */
 
-/* Grab the thumbnail - by Matt Bonneau */
+/* {{{ ExtractThumbnail
+ * Grab the thumbnail - by Matt Bonneau */
 static void ExtractThumbnail(ImageInfoType *ImageInfo, char *OffsetBase, unsigned ExifLength) {
 	/* according to exif2.1, the thumbnail is not supposed to be greater than 64K */
 	if (ImageInfo->ThumbnailSize > 65536) {
@@ -495,8 +521,10 @@ static void ExtractThumbnail(ImageInfoType *ImageInfo, char *OffsetBase, unsigne
 		}
 	}
 }
+/* }}} */
 
-/* Process one of the nested EXIF directories. */
+/* {{{ ProcessExifDir
+ * Process one of the nested EXIF directories. */
 static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *OffsetBase, unsigned ExifLength, char *LastExifRefd)
 {
     int de;
@@ -767,8 +795,9 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 	    ProcessExifDir(ImageInfo, OffsetBase + NextDirOffset, OffsetBase, ExifLength, LastExifRefd);
     }
 }
+/* }}} */
 
-/* 
+/* {{{ process_EXIF
    Process an EXIF marker
    Describes all the drivel that most digital cameras include...
 */
@@ -821,8 +850,10 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
         ImageInfo->CCDWidth = (float)(ImageInfo->ExifImageWidth * ImageInfo->FocalplaneUnits / ImageInfo->FocalplaneXRes);
     }
 }
- 
-/* Parse the marker stream until SOS or EOI is seen; */
+/* }}} */
+
+/* {{{ scan_JPEG_header
+ * Parse the marker stream until SOS or EOI is seen; */
 static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *Sections, int *SectionsRead, int ReadAll, char *LastExifRefd)
 {
     int a;
@@ -953,8 +984,9 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
     }
     return TRUE;
 }
+/* }}} */
 
-/* 
+/* {{{ DiscardData
    Discard read data.
 */
 void DiscardData(Section_t *Sections, int *SectionsRead)
@@ -965,8 +997,9 @@ void DiscardData(Section_t *Sections, int *SectionsRead)
     }
     *SectionsRead = 0;
 }
+/* }}} */
 
-/* 
+/* {{{ ReadJpegFile
    Read image data.
 */
 int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections, 
@@ -1024,7 +1057,10 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
 
     return ret;
 }
+/* }}} */
 
+/* {{{ php_read_jpeg_exif
+ */
 int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
 {
 	Section_t Sections[20];
@@ -1057,6 +1093,7 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
     }
 	return(ret);
 }
+/* }}} */
 
 /* {{{ proto string read_exif_data(string filename)
    Reads the EXIF header data from a JPEG file */ 
@@ -1181,6 +1218,7 @@ PHP_FUNCTION(read_exif_data) {
 		add_assoc_string(return_value,"CameraId",ImageInfo.CameraId,1);
 	}
 }
+/* }}} */
 
 #endif
 

@@ -71,10 +71,10 @@ void php_run_ticks(int count)
 	zend_llist_apply_with_argument(&PG(tick_functions), (void(*)(void*,void*))php_tick_iterator, &count);
 }
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

@@ -46,6 +46,8 @@ static unsigned char arg2of4_force_ref[] =
 static unsigned char arg2and3of4_force_ref[] =
                        { 4, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_NONE };
 
+/* {{{ openssl_functions[]
+ */
 function_entry openssl_functions[] = {
 	PHP_FE(openssl_get_privatekey,     NULL)
 	PHP_FE(openssl_get_publickey,      NULL)
@@ -75,7 +77,10 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_error_string, NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ openssl_module_entry
+ */
 zend_module_entry openssl_module_entry = {
 	"openssl",
 	openssl_functions,
@@ -86,6 +91,7 @@ zend_module_entry openssl_module_entry = {
 	PHP_MINFO(openssl),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_OPENSSL
 ZEND_GET_MODULE(openssl)
@@ -102,7 +108,8 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 static X509_STORE 	  * setup_verify(zval * calist);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(openssl)
 {
 	le_key = zend_register_list_destructors_ex(_php_pkey_free, NULL, "OpenSSL key", module_number);
@@ -152,7 +159,10 @@ PHP_MINIT_FUNCTION(openssl)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(openssl)
 {
 	php_info_print_table_start();
@@ -160,15 +170,18 @@ PHP_MINFO_FUNCTION(openssl)
 	php_info_print_table_row(2, "OpenSSL Version", OPENSSL_VERSION_TEXT);
 	php_info_print_table_end();
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	EVP_cleanup();
 	return SUCCESS;
 }
+/* }}} */
 
-
-/*
+/* {{{ php_openssl_x509_from_zval
 	Given a zval, coerce it into an X509 object.
 	The zval can be:
 		. X509 resource created using openssl_read_x509()
@@ -236,10 +249,10 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	}
 	return cert;
 }
+/* }}} */
 
-
-
-/* Given a zval, coerce it into a EVP_PKEY object.
+/* {{{ php_openssl_evp_from_zval
+   Given a zval, coerce it into a EVP_PKEY object.
 	It can be:
 		1. private key resource from openssl_get_privatekey()
 		2. X509 resource -> public key will be extracted from it
@@ -353,6 +366,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	}
 	return key;
 }
+/* }}} */
 
 /* {{{ proto bool openssl_private_encrypt(string data, string crypted, mixed key [, int padding])
    Encrypt data with private key */
@@ -652,7 +666,6 @@ PHP_FUNCTION(openssl_public_decrypt)
 }
 /* }}} */
 
-
 /* {{{ proto int openssl_get_privatekey(string key [, string passphrase])
    Get private key */
 PHP_FUNCTION(openssl_get_privatekey)
@@ -680,7 +693,6 @@ PHP_FUNCTION(openssl_get_privatekey)
 	}
 }
 /* }}} */
-
 
 /* {{{ openssl -> PHP "bridging" */
 
@@ -998,7 +1010,6 @@ clean_exit:
 }
 /* }}} */
 
-
 /* {{{ proto int openssl_get_publickey(mixed cert)
    Get public key from X.509 certificate */
 PHP_FUNCTION(openssl_get_publickey)
@@ -1019,8 +1030,6 @@ PHP_FUNCTION(openssl_get_publickey)
 	}
 }
 /* }}} */
-
-
 
 /* {{{ proto void openssl_free_key(int key)
    Free key */
@@ -1077,7 +1086,7 @@ PHP_FUNCTION(openssl_x509_free)
 }
 /* }}} */
 
-/* 
+/* {{{ setup_verify
  * calist is an array containing file and directory names.  create a
  * certificate store and add those certs to it for use in verification.
 */
@@ -1139,6 +1148,7 @@ static X509_STORE * setup_verify(zval * calist)
 	}
 	return store;
 }
+/* }}} */
 
 /* {{{ proto mixed openssl_error_string()
 	returns a description of the last error, and alters the index of the error messages. returns false when the are no more messages. */
@@ -1864,5 +1874,5 @@ static void _php_x509_free(zend_rsrc_list_entry *rsrc)
  * tab-width: 8
  * c-basic-offset: 8
  * End:
- * vim: sw=4 ts=4 tw=78
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

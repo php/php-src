@@ -770,11 +770,14 @@ _oci_conn_list_dtor(oci_connection *connection)
 
 /* }}} */
 
+/* {{{ php_oci_free_conn_list
+ */
 static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc)
 {
 	oci_connection *conn = (oci_connection *)rsrc->ptr;
 	_oci_conn_list_dtor(conn);
 }
+/* }}} */
 
 #ifdef WITH_COLLECTIONS
 
@@ -796,7 +799,7 @@ _oci_coll_list_dtor(zend_rsrc_list_entry *rsrc)
 
 	efree(coll);
 }
-
+/* }}} */
 #endif
 
 /* {{{ _oci_descriptor_list_dtor()
@@ -847,6 +850,8 @@ _oci_session_list_dtor(zend_rsrc_list_entry *rsrc)
 
 /* }}} */
 
+/* {{{ oci_handle_error
+ */
 static ub4
 oci_handle_error(oci_connection *connection, ub4 errcode)
 {
@@ -862,6 +867,7 @@ oci_handle_error(oci_connection *connection, ub4 errcode)
 
 	return 0; /* no fatal error */
 }
+/* }}} */
 
 /* {{{ oci_error() */
 
@@ -3320,7 +3326,6 @@ PHP_FUNCTION(ocicloselob)
 }
 
 /* }}} */
-
 #endif 
 
 /* {{{ proto string ocinewdescriptor(int connection [, int type])
@@ -3636,7 +3641,6 @@ PHP_FUNCTION(ocicolumnisnull)
 }
 
 /* }}} */
-
 
 /* {{{ proto void ociinternaldebug(int onoff)
    Toggle internal debugging output for the OCI extension */
@@ -4139,7 +4143,6 @@ PHP_FUNCTION(ociresult)
 }
 
 /* }}} */
-
 
 /* {{{ proto string ociserverversion(int conn)
    Return a string containing server version information */

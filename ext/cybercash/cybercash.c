@@ -28,6 +28,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -40,6 +42,8 @@
 #include "mckcrypt.h"
 #include "base64.h"
 
+/* {{{ cybercash_functions[]
+ */
 function_entry cybercash_functions[] = {
 	PHP_FE(cybercash_encr, NULL)
 	PHP_FE(cybercash_decr, NULL)
@@ -47,7 +51,10 @@ function_entry cybercash_functions[] = {
 	PHP_FE(cybercash_base64_decode, NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ cybercash_module_entry
+ */
 zend_module_entry cybercash_module_entry = {
 	"cybercash",
 	cybercash_functions,
@@ -58,18 +65,24 @@ zend_module_entry cybercash_module_entry = {
 	PHP_MINFO(cybercash),
 	STANDARD_MODULE_PROPERTIES,
 };
+/* }}} */
 
 #ifdef COMPILE_DL_CYBERCASH
 ZEND_GET_MODULE(cybercash)
 #endif
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(cybercash)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Cybercash Support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
+/* {{{ proto cybercash_encr(string wmk, string sk, string data)
+   Cybercash encrypt */
 PHP_FUNCTION(cybercash_encr)
 {
 	zval **wmk, **sk, **inbuff;
@@ -116,7 +129,10 @@ PHP_FUNCTION(cybercash_encr)
 		efree(macbuff);
 	}
 }
+/* }}} */
 
+/* {{{ proto array cybercash_decr(string wmp, string sk, string data)
+   Cybercash decrypt */
 PHP_FUNCTION(cybercash_decr)
 {
 	zval **wmk,**sk,**inbuff;
@@ -164,7 +180,10 @@ PHP_FUNCTION(cybercash_decr)
 		efree(macbuff);
 	}
 }
+/* }}} */
 
+/* {{{ proto string cybercash_base64_encode(string data)
+   base64 encode data for cybercash */
 PHP_FUNCTION(cybercash_base64_encode)
 {
 	zval **inbuff;
@@ -185,7 +204,10 @@ PHP_FUNCTION(cybercash_base64_encode)
 
 	RETURN_STRINGL(outbuff, ret_length, 0);
 }
+/* }}} */
 
+/* {{{ proto string cybercash_base64_decode(string data)
+   base64 decode data for cybercash */
 PHP_FUNCTION(cybercash_base64_decode)
 {
 	zval **inbuff;
@@ -204,4 +226,13 @@ PHP_FUNCTION(cybercash_base64_decode)
 
 	RETURN_STRINGL(outbuff, ret_length, 0);
 }
+/* }}} */
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

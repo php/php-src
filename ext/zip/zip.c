@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #include "php.h"
 #include "php_ini.h"
 #include "php_zip.h"
@@ -34,6 +36,8 @@ static int le_zip_dir;
 static int le_zip_entry;
 #define le_zip_entry_name "Zip Entry"
 
+/* {{{ zip_functions[]
+ */
 function_entry zip_functions[] = {
 	PHP_FE(zip_open,                    NULL)
 	PHP_FE(zip_read,                    NULL)
@@ -47,7 +51,10 @@ function_entry zip_functions[] = {
 	PHP_FE(zip_entry_close,             NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ zip_module_entry
+ */
 zend_module_entry zip_module_entry = {
 	"zip",
 	zip_functions,
@@ -58,17 +65,23 @@ zend_module_entry zip_module_entry = {
 	PHP_MINFO(zip),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_ZIP
 ZEND_GET_MODULE(zip)
 #endif
 
+/* {{{ php_zip_free_dir
+ */
 static void php_zip_free_dir(zend_rsrc_list_entry *rsrc)
 {
 	ZZIP_DIR *z_dir = (ZZIP_DIR *) rsrc->ptr;
 	zzip_closedir(z_dir);
 }
+/* }}} */
 
+/* {{{ php_zip_free_entry
+ */
 static void php_zip_free_entry(zend_rsrc_list_entry *rsrc)
 {
 	php_zzip_dirent *entry = (php_zzip_dirent *) rsrc->ptr;
@@ -79,7 +92,10 @@ static void php_zip_free_entry(zend_rsrc_list_entry *rsrc)
 
 	efree(entry);
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(zip)
 {
 	le_zip_dir   = zend_register_list_destructors_ex(php_zip_free_dir, NULL, le_zip_dir_name, module_number);
@@ -87,7 +103,10 @@ PHP_MINIT_FUNCTION(zip)
 
 	return(SUCCESS);
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(zip)
 {
 	php_info_print_table_start();
@@ -95,6 +114,7 @@ PHP_MINFO_FUNCTION(zip)
 	php_info_print_table_end();
 
 }
+/* }}} */
 
 /* {{{ proto resource zip_opendir(string filename)
    Open a new zip archive for reading */
@@ -166,6 +186,8 @@ PHP_FUNCTION(zip_close)
 }
 /* }}} */
 
+/* {{{ php_zzip_get_entry
+ */
 static void php_zzip_get_entry(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **zzip_ent;
@@ -193,6 +215,7 @@ static void php_zzip_get_entry(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		break;
 	}
 }
+/* }}} */
 
 /* {{{ proto string zip_entry_name(resource zip_entry)
    Return the name given a ZZip entry */
@@ -305,10 +328,10 @@ PHP_FUNCTION(zip_entry_close)
 
 #endif	/* HAVE_ZZIPLIB */
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

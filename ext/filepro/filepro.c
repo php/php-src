@@ -78,7 +78,8 @@ static signed int fp_keysize = -1;			/* Size of key records */
 static FP_FIELD *fp_fieldlist = NULL;		/* List of fields */
 #endif
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(filepro)
 {
 #ifdef THREAD_SAFE
@@ -104,7 +105,10 @@ PHP_MINIT_FUNCTION(filepro)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(filepro)
 {
 #ifdef THREAD_SAFE
@@ -125,7 +129,7 @@ PHP_MSHUTDOWN_FUNCTION(filepro)
 #endif
 	return SUCCESS;
 }
-
+/* }}} */
 
 function_entry filepro_functions[] = {
 	PHP_FE(filepro,									NULL)
@@ -568,4 +572,5 @@ PHP_FUNCTION(filepro_retrieve)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

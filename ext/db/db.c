@@ -103,6 +103,8 @@
 #define DBM_FIRSTKEY(dbf) dbm_firstkey(dbf)
 #define DBM_NEXTKEY(dbf, key) dbm_nextkey(dbf)
 
+/* {{{ php_dbm_key_exists
+ */
 static int php_dbm_key_exists(DBM *dbf, datum key_datum) {
 	datum value_datum;
 	int ret;
@@ -114,6 +116,7 @@ static int php_dbm_key_exists(DBM *dbf, datum key_datum) {
 		ret = 0;
 	return ret;
 }
+/* }}} */
 #endif
 
 #if !NDBM && !GDBM
@@ -163,6 +166,8 @@ static int numthreads=0;
 /*needed for blocking calls in windows*/
 void *dbm_mutex;
 
+/* {{{ php_find_dbm
+ */
 dbm_info *php_find_dbm(pval *id)
 {
 	list_entry *le;
@@ -193,7 +198,10 @@ dbm_info *php_find_dbm(pval *id)
 		return NULL;
 	return info;
 }
+/* }}} */
 
+/* {{{ php_get_info_db
+ */
 static char *php_get_info_db(void)
 {
 	static char temp1[128];
@@ -228,8 +236,10 @@ static char *php_get_info_db(void)
 
 	return temp;
 }
+/* }}} */
 
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(db)
 {
 	/* this isn't pretty ... should break out the info a bit more (cmv) */
@@ -237,6 +247,7 @@ PHP_MINFO_FUNCTION(db)
 	php_printf(php_get_info_db());
 	php_info_print_box_end();
 }
+/* }}} */
 
 /* {{{ proto string dblist(void)
    Describes the dbm-compatible library being used */ 
@@ -271,7 +282,8 @@ PHP_FUNCTION(dbmopen) {
 }
 /* }}} */
 
-
+/* {{{ php_dbm_open
+ */
 dbm_info *php_dbm_open(char *filename, char *mode) {
 	dbm_info *info;
 	int ret, lock=0;
@@ -408,6 +420,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 
 	return NULL;
 }
+/* }}} */
 
 /* {{{ proto bool dbmclose(int dbm_identifier)
    Closes a dbm database */
@@ -427,6 +440,8 @@ PHP_FUNCTION(dbmclose) {
 }
 /* }}} */
 
+/* {{{ php_dbm_close
+ */
 int php_dbm_close(zend_rsrc_list_entry *rsrc) {
 	int ret = 0;
 	dbm_info *info = (dbm_info *)rsrc->ptr;
@@ -454,7 +469,8 @@ int php_dbm_close(zend_rsrc_list_entry *rsrc) {
 	efree(info);
 
 	return(ret);
-}	
+}
+/* }}} */
 
 /*
  * ret = -1 means that database was opened for read-only
@@ -487,7 +503,8 @@ PHP_FUNCTION(dbminsert)
 /* }}} */
 
 
-
+/* {{{ php_dbm_insert
+ */
 int php_dbm_insert(dbm_info *info, char *key, char *value) {
 	datum key_datum, value_datum;
 	int ret;
@@ -517,7 +534,8 @@ int php_dbm_insert(dbm_info *info, char *key, char *value) {
 	efree(key_datum.dptr); efree(value_datum.dptr);
 
 	return(ret);	
-}	
+}
+/* }}} */
 
 /* {{{ proto int dbmreplace(int dbm_identifier, string key, string value)
    Replaces the value for a key in a dbm database */
@@ -544,6 +562,8 @@ PHP_FUNCTION(dbmreplace)
 }
 /* }}} */
 
+/* {{{ php_dbm_replace
+ */
 int php_dbm_replace(dbm_info *info, char *key, char *value) {
 	DBM_TYPE dbf;
 	int ret;
@@ -576,7 +596,8 @@ int php_dbm_replace(dbm_info *info, char *key, char *value) {
 	efree(key_datum.dptr); efree(value_datum.dptr);
 
 	return(ret);	
-}	
+}
+/* }}} */
 
 /* {{{ proto string dbmfetch(int dbm_identifier, string key)
    Fetches a value for a key from a dbm database */
@@ -606,6 +627,8 @@ PHP_FUNCTION(dbmfetch)
 }
 /* }}} */
 
+/* {{{ php_dbm_fetch
+ */
 char *php_dbm_fetch(dbm_info *info, char *key) {
 	datum key_datum, value_datum;
 	char *ret;
@@ -650,6 +673,7 @@ char *php_dbm_fetch(dbm_info *info, char *key) {
 	}
 	return(ret);
 }
+/* }}} */
 
 /* {{{ proto int dbmexists(int dbm_identifier, string key)
    Tells if a value exists for a key in a dbm database */
@@ -675,6 +699,8 @@ PHP_FUNCTION(dbmexists)
 }
 /* }}} */
 
+/* {{{ php_dbm_exists
+ */
 int php_dbm_exists(dbm_info *info, char *key) {
 	datum key_datum;
 	int ret;
@@ -696,6 +722,7 @@ int php_dbm_exists(dbm_info *info, char *key) {
 
 	return(ret);
 }
+/* }}} */
 
 /* {{{ proto int dbmdelete(int dbm_identifier, string key)
    Deletes the value for a key from a dbm database */ 		
@@ -721,6 +748,8 @@ PHP_FUNCTION(dbmdelete)
 }
 /* }}} */
 
+/* {{{ php_dbm_delete
+ */
 int php_dbm_delete(dbm_info *info, char *key) {
 	datum key_datum;
 	int ret;
@@ -741,6 +770,7 @@ int php_dbm_delete(dbm_info *info, char *key) {
 	ret = DBM_DELETE(dbf, key_datum);
 	return(ret);
 }
+/* }}} */
 
 /* {{{ proto string dbmfirstkey(int dbm_identifier)
    Retrieves the first key from a dbm database */
@@ -769,6 +799,8 @@ PHP_FUNCTION(dbmfirstkey)
 }
 /* }}} */
 
+/* {{{ php_dbm_first_key
+ */
 char *php_dbm_first_key(dbm_info *info) {
 	datum ret_datum;
 	char *ret;
@@ -799,6 +831,7 @@ char *php_dbm_first_key(dbm_info *info) {
 
 	return (ret);
 }
+/* }}} */
 
 /* {{{ proto string dbmnextkey(int dbm_identifier, string key)
    Retrieves the next key from a dbm database */
@@ -828,7 +861,8 @@ PHP_FUNCTION(dbmnextkey)
 }
 /* }}} */
 
-
+/* {{{ php_dbm_nextkey
+ */
 char *php_dbm_nextkey(dbm_info *info, char *key) {
 	datum key_datum, ret_datum;
 	char *ret;
@@ -873,11 +907,12 @@ char *php_dbm_nextkey(dbm_info *info, char *key) {
 	}
 	return(ret);
 }
-
+/* }}} */
 
 #if !GDBM && !NDBM
 static long CurrentFlatFilePos = 0L;
-
+/* {{{ flatfile_store
+ */
 int flatfile_store(FILE *dbf, datum key_datum, datum value_datum, int mode) {
 	int ret;
 
@@ -905,7 +940,10 @@ int flatfile_store(FILE *dbf, datum key_datum, datum value_datum, int mode) {
 		ret=0;
 	return ret;
 }
+/* }}} */
 
+/* {{{ flatfile_fetch
+ */
 datum flatfile_fetch(FILE *dbf, datum key_datum) {
 	datum value_datum = {NULL, 0};
 	int num=0, buf_size=1024;
@@ -926,7 +964,10 @@ datum flatfile_fetch(FILE *dbf, datum key_datum) {
 	}
 	return value_datum;
 }
+/* }}} */
 
+/* {{{ flatfile_delete
+ */
 int flatfile_delete(FILE *dbf, datum key_datum) {
 	char *key = key_datum.dptr;
 	int size = key_datum.dsize;
@@ -981,7 +1022,10 @@ int flatfile_delete(FILE *dbf, datum key_datum) {
 	if (buf) efree(buf);
 	return FAILURE;
 }	
+/* }}} */
 
+/* {{{ flatfile_findkey
+ */
 int flatfile_findkey(FILE *dbf, datum key_datum) {
 	char *buf = NULL;
 	int num;
@@ -1023,8 +1067,11 @@ int flatfile_findkey(FILE *dbf, datum key_datum) {
 	}
 	if (buf) efree(buf);
 	return(ret);
-}	
+}
+/* }}} */
 
+/* {{{ flatfile_firstkey
+ */
 datum flatfile_firstkey(FILE *dbf) {
 	datum buf;
 	int num;
@@ -1060,8 +1107,11 @@ datum flatfile_firstkey(FILE *dbf) {
 	if (buf.dptr) efree(buf.dptr);
 	buf.dptr = NULL;
 	return(buf);
-}	
+}
+/* }}} */
 
+/* {{{ latfile_nextkey
+ */
 datum flatfile_nextkey(FILE *dbf) {
 	datum buf;
 	int num;
@@ -1098,9 +1148,11 @@ datum flatfile_nextkey(FILE *dbf) {
 	buf.dptr = NULL;
 	return(buf);
 }	
+/* }}} */
 #endif
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(db)
 {
 #if defined(THREAD_SAFE)
@@ -1125,7 +1177,10 @@ PHP_MINIT_FUNCTION(db)
 	le_db = zend_register_list_destructors_ex(php_dbm_close, NULL, "dbm", module_number);
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 static PHP_MSHUTDOWN_FUNCTION(db)
 {
 #ifdef THREAD_SAFE
@@ -1142,7 +1197,10 @@ static PHP_MSHUTDOWN_FUNCTION(db)
 #endif
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION
+ */
 PHP_RINIT_FUNCTION(db)
 {
 #if !GDBM && !NDBM
@@ -1150,8 +1208,10 @@ PHP_RINIT_FUNCTION(db)
 #endif
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ dbm_functions[]
+ */
 function_entry dbm_functions[] = {
 	PHP_FE(dblist,									NULL)
 	PHP_FE(dbmopen,									NULL)
@@ -1165,6 +1225,7 @@ function_entry dbm_functions[] = {
 	PHP_FE(dbmnextkey,								NULL)
 	{NULL,NULL,NULL}
 };
+/* }}} */
 
 zend_module_entry dbm_module_entry = {
 	"db", dbm_functions, PHP_MINIT(db), PHP_MSHUTDOWN(db), PHP_RINIT(db), NULL, PHP_MINFO(db), STANDARD_MODULE_PROPERTIES
@@ -1181,4 +1242,5 @@ ZEND_GET_MODULE(dbm)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

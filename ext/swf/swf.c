@@ -34,6 +34,8 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(swf)
 
+/* {{{ swf_functions[]
+ */
 function_entry swf_functions[] = {
 	PHP_FE(swf_openfile,		NULL)
 	PHP_FE(swf_closefile,		NULL)
@@ -104,7 +106,10 @@ function_entry swf_functions[] = {
 	PHP_FE(swf_posround,		NULL)
 	{NULL,NULL,NULL}
 };
+/* }}} */
 
+/* {{{ swf_module_entry
+ */
 zend_module_entry swf_module_entry = {
 	"swf",
 	swf_functions,
@@ -115,19 +120,24 @@ zend_module_entry swf_module_entry = {
 	PHP_MINFO(swf),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_SWF
 ZEND_GET_MODULE(swf)
 #endif
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(swf)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "swf support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(swf)
 {
 	REGISTER_LONG_CONSTANT("MOD_COLOR", MOD_COLOR, CONST_CS | CONST_PERSISTENT);
@@ -152,7 +162,10 @@ PHP_MINIT_FUNCTION(swf)
 	REGISTER_LONG_CONSTANT("MenuExit", MenuExit, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION
+ */
 PHP_RINIT_FUNCTION(swf)
 {
 	SWFLS_FETCH();
@@ -160,6 +173,7 @@ PHP_RINIT_FUNCTION(swf)
 
 	return SUCCESS;
 }
+/* }}} */
          
 /* {{{ proto void swf_openfile(string name, double xsize, double ysize, double framerate, double r, double g, double b)
    Create a Shockwave Flash file given by name, with width xsize and height ysize at a frame rate of framerate and a background color specified by a red value of r, green value of g and a blue value of b */
@@ -300,6 +314,8 @@ PHP_FUNCTION(swf_getframe)
 }
 /* }}} */
 
+/* {{{ col_swf
+ */
 void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 	zval **r, **g, **b, **a;
 	if (ZEND_NUM_ARGS() != 4 ||
@@ -316,6 +332,7 @@ void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 		swf_mulcolor((float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b), (float)Z_DVAL_PP(a));
 	}
 }
+/* }}} */
 
 /* {{{ proto void swf_mulcolor(double r, double g, double b, double a)
    Sets the global multiply color to the rgba value specified */
@@ -377,6 +394,7 @@ PHP_FUNCTION(swf_removeobject)
 	
 	swf_removeobject(Z_LVAL_PP(depth));
 }
+/* }}} */
 
 /* {{{ proto int swf_nextid(void)
    Returns a free objid */
@@ -519,6 +537,8 @@ PHP_FUNCTION(swf_actiongotolabel)
 }
 /* }}} */
 
+/* {{{ php_swf_define
+ */
 void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **objid, **x1, **y1, **x2, **y2, **width;
@@ -542,6 +562,7 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)Z_DVAL_PP(width));
 	}
 }
+/* }}} */
 
 /* {{{ proto void swf_defineline(int objid, double x1, double y1, double x2, double y2, double width)
    Create a line with object id, objid, starting from x1, y1 and going to x2, y2 with width, width */
@@ -660,6 +681,8 @@ PHP_FUNCTION(swf_shapefillsolid)
 }
 /* }}} */
 
+/* {{{ php_swf_fill_bitmap
+ */
 void php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **bitmapid;
@@ -675,6 +698,7 @@ void php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		swf_shapefillbitmaptile(Z_LVAL_PP(bitmapid));
 	}
 }
+/* }}} */
 
 /* {{{ proto void swf_shapefillbitmapclip(int bitmapid)
    Sets the current fill mode to clipped bitmap fill. Pixels from the previously defined bitmapid will be used to fill areas */
@@ -692,6 +716,8 @@ PHP_FUNCTION(swf_shapefillbitmaptile)
 }
 /* }}} */
 
+/* {{{ php_swf_shape
+ */
 void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **x, **y;
@@ -708,6 +734,7 @@ void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		swf_shapelineto((float)Z_DVAL_PP(x), (float)Z_DVAL_PP(y));
 	}
 }
+/* }}} */
 
 /* {{{ proto void swf_shapemoveto(double x, double y)
    swf_shapemoveto moves the current position to the given x,y. */
@@ -1032,6 +1059,8 @@ PHP_FUNCTION(swf_endbutton)
 }
 /* }}} */
 
+/* {{{ php_swf_geo_same
+ */
 void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -1058,6 +1087,7 @@ void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		             Z_DVAL_PP(arg4));
 	}
 } 
+/* }}} */
 
 /* {{{ proto void swf_viewport(double xmin, double xmax, double ymin, double ymax)
    Selects an area on the drawing surface for future drawing */
@@ -1217,3 +1247,11 @@ PHP_FUNCTION(swf_posround)
 /* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

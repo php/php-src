@@ -81,7 +81,9 @@ void mail_close_it (zend_rsrc_list_entry *rsrc);
 void mail_userlogout_it(zend_rsrc_list_entry *rsrc);
 void mail_nuke_chain(zend_rsrc_list_entry *rsrc);
 #endif
- 
+
+/* {{{ imap_functions[]
+ */
 function_entry imap_functions[] = {
 	PHP_FE(imap_open,			NULL)
 	PHP_FE(imap_popen,			NULL)
@@ -157,6 +159,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_thread,		NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 #ifdef OP_RELOGIN
 #define IS_STREAM(ind_type)     ((ind_type)==le_imap || (ind_type)==le_pimap)
@@ -424,7 +427,8 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->folderlist_style = FLIST_ARRAY;
 }
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(imap)
 {
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN |
@@ -634,7 +638,10 @@ PHP_MINIT_FUNCTION(imap)
 #endif
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ imap_do_open
+ */
 void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zval **mailbox, **user, **passwd, **options;
@@ -836,6 +843,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	RETURN_LONG(ind);
 }
+/* }}} */
 
 /* {{{ proto int imap_open(string mailbox, string user, string password [, int options])
    Open an IMAP stream to a mailbox */
@@ -4454,4 +4462,5 @@ PHP_FUNCTION (imap_thread)
 	mail_free_threadnode(&top);
 }
 /* }}} */
+
 /* end IMAP_THREAD functionality */

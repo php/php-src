@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -731,6 +733,8 @@ PHP_FUNCTION(dbase_create) {
 }
 /* }}} */
 
+/* {{{ dbase_functions[]
+ */
 function_entry dbase_functions[] = {
 	PHP_FE(dbase_open,								NULL)
 	PHP_FE(dbase_create,							NULL)
@@ -745,6 +749,7 @@ function_entry dbase_functions[] = {
 	PHP_FE(dbase_pack,								NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 zend_module_entry dbase_module_entry = {
 	"dbase", dbase_functions, PHP_MINIT(dbase), PHP_MSHUTDOWN(dbase), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
@@ -768,9 +773,11 @@ BOOL WINAPI DllMain(HANDLE hModule,
 #endif
 
 #endif
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

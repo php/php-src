@@ -119,3 +119,11 @@ void php_store_class_name(zval *object, const char *name, size_t len)
 
 	zend_hash_update(object->value.obj.properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

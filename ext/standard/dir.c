@@ -364,4 +364,5 @@ PHP_NAMED_FUNCTION(php_if_readdir)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

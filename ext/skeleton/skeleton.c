@@ -15,14 +15,18 @@ ZEND_DECLARE_MODULE_GLOBALS(extname)
 /* True global resources - no need for thread safety here */
 static int le_extname;
 
-/* Every user visible function must have an entry in extname_functions[].
-*/
+/* {{{ extname_functions[]
+ *
+ * Every user visible function must have an entry in extname_functions[].
+ */
 function_entry extname_functions[] = {
 	PHP_FE(confirm_extname_compiled,	NULL)		/* For testing, remove later. */
 	/* __function_entries_here__ */
 	{NULL, NULL, NULL}	/* Must be the last line in extname_functions[] */
 };
 
+/* {{{ extname_module_entry
+ */
 zend_module_entry extname_module_entry = {
 	"extname",
 	extname_functions,
@@ -33,18 +37,24 @@ zend_module_entry extname_module_entry = {
 	PHP_MINFO(extname),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_EXTNAME
 ZEND_GET_MODULE(extname)
 #endif
 
+/* {{{ PHP_INI
+ */
 /* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("extname.value",      "42", PHP_INI_ALL, OnUpdateInt, global_value, zend_extname_globals, extname_globals)
     STD_PHP_INI_ENTRY("extname.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_extname_globals, extname_globals)
 PHP_INI_END()
 */
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(extname)
 {
 /* Remove comments if you have entries in php.ini
@@ -52,7 +62,10 @@ PHP_MINIT_FUNCTION(extname)
 */
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(extname)
 {
 /* Remove comments if you have entries in php.ini
@@ -60,19 +73,28 @@ PHP_MSHUTDOWN_FUNCTION(extname)
 */
 	return SUCCESS;
 }
+/* }}} */
 
 /* Remove if there's nothing to do at request start */
+/* {{{ PHP_RINIT_FUNCTION
+ */
 PHP_RINIT_FUNCTION(extname)
 {
 	return SUCCESS;
 }
+/* }}} */
 
 /* Remove if there's nothing to do at request end */
+/* {{{ PHP_RSHUTDOWN_FUNCTION
+ */
 PHP_RSHUTDOWN_FUNCTION(extname)
 {
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(extname)
 {
 	php_info_print_table_start();
@@ -83,6 +105,7 @@ PHP_MINFO_FUNCTION(extname)
 	DISPLAY_INI_ENTRIES();
 	*/
 }
+/* }}} */
 
 /* Remove the following function when you have succesfully modified config.m4
    so that your module can be compiled into PHP, it exists only for testing
@@ -107,12 +130,18 @@ PHP_FUNCTION(confirm_extname_compiled)
 	RETURN_STRINGL(string, len, 1);
 }
 /* }}} */
-/* The previous line is meant for emacs, so it can correctly fold and unfold
-   functions in source code. See the corresponding marks just before function
-   definition, where the functions purpose is also documented. Please follow
-   this convention for the convenience of others editing your code.
+/* The previous line is meant for vim and emacs, so it can correctly fold and 
+   unfold functions in source code. See the corresponding marks just before 
+   function definition, where the functions purpose is also documented. Please 
+   follow this convention for the convenience of others editing your code.
 */
 
 /* __function_stubs_here__ */
 
-/* __footer_here__ */
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

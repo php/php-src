@@ -48,6 +48,8 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
+/* {{{ curl_functions[]
+ */
 function_entry curl_functions[] = {
 	PHP_FE(curl_init,     NULL)
 	PHP_FE(curl_version,  NULL)
@@ -59,7 +61,10 @@ function_entry curl_functions[] = {
 	PHP_FE(curl_close,    NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ curl_module_entry
+ */
 zend_module_entry curl_module_entry = {
 	"curl",
 	curl_functions,
@@ -70,11 +75,14 @@ zend_module_entry curl_module_entry = {
 	PHP_MINFO(curl),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_CURL
 ZEND_GET_MODULE (curl)
 #endif
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(curl)
 {
 	php_info_print_table_start();
@@ -82,9 +90,12 @@ PHP_MINFO_FUNCTION(curl)
 	php_info_print_table_row(2, "CURL Information", curl_version());
 	php_info_print_table_end();
 }
+/* }}} */
 
 #define REGISTER_CURL_CONSTANT(name, value) REGISTER_LONG_CONSTANT(name, value, CONST_CS | CONST_PERSISTENT)
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(curl)
 {
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
@@ -230,6 +241,7 @@ PHP_MINIT_FUNCTION(curl)
 
 	return SUCCESS;
 }
+/* }}} */
 
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
@@ -239,6 +251,8 @@ PHP_MINIT_FUNCTION(curl)
 #define PHP_CURL_ASCII  5
 #define PHP_CURL_BINARY 6
 
+/* {{{ curl_write
+ */
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl       *ch     = (php_curl *) ctx;
@@ -290,7 +304,10 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 
 	return length;
 }
+/* }}} */
 
+/* {{{ curl_read
+ */
 static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl       *ch = (php_curl *) ctx;
@@ -341,7 +358,10 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 	return length;
 }
+/* }}} */
 
+/* {{{ _php_curl_write_header
+ */
 static size_t _php_curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl  *ch   = (php_curl *) ctx;
@@ -377,7 +397,10 @@ static size_t _php_curl_write_header(char *data, size_t size, size_t nmemb, void
 
 	return length;
 }
+/* }}} */
 
+/* {{{ _php_curl_passwd
+ */
 static size_t _php_curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 {
 	php_curl    *ch   = (php_curl *) ctx;
@@ -419,23 +442,31 @@ static size_t _php_curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 
 	return 0;
 }
-	
-	
+/* }}} */
 
+/* {{{ curl_free_string
+ */
 static void curl_free_string(void **string)
 {
 	efree(*string);
-}
+}	
+/* }}} */
 
+/* {{{ curl_free_post
+ */
 static void curl_free_post(void **post)
 {
 	curl_formfree((struct HttpPost *) *post);
 }
+/* }}} */
 
+/* {{{ curl_free_slist
+ */
 static void curl_free_slist(void **slist)
 {
 	curl_slist_free_all((struct curl_slist *) *slist);
 }
+/* }}} */
 
 /* {{{ proto string curl_version(void)
    Return the CURL version string. */
@@ -445,6 +476,8 @@ PHP_FUNCTION(curl_version)
 }
 /* }}} */
 
+/* {{{ alloc_curl_handle
+ */
 static void alloc_curl_handle(php_curl **ch)
 {
 	*ch                    = emalloc(sizeof(php_curl));
@@ -459,6 +492,7 @@ static void alloc_curl_handle(php_curl **ch)
 	zend_llist_init(&(*ch)->to_free.post, sizeof(struct HttpPost),
 	                (void(*)(void *)) curl_free_post, 0);
 }
+/* }}} */
 
 /* {{{ proto int curl_init([string url])
    Initialize a CURL session */
@@ -939,3 +973,11 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc)
 /* }}} */
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

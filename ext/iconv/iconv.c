@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -46,8 +48,8 @@
 #endif
 
 
-/* Every user visible function must have an entry in iconv_functions[].
-*/
+/* {{{ iconv_functions[] 
+ */
 function_entry iconv_functions[] = {
     PHP_FE(iconv,									NULL)
     PHP_FE(ob_iconv_handler,						NULL)
@@ -55,7 +57,10 @@ function_entry iconv_functions[] = {
     PHP_FE(iconv_set_encoding,						NULL)
 	{NULL, NULL, NULL}	
 };
+/* }}} */
 
+/* {{{ iconv_module_entry
+ */
 zend_module_entry iconv_module_entry = {
 	"iconv",
 	iconv_functions,
@@ -66,6 +71,7 @@ zend_module_entry iconv_module_entry = {
 	PHP_MINFO(miconv),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(iconv)
 
@@ -75,11 +81,14 @@ ZEND_GET_MODULE(iconv)
 
 int php_iconv_string(char *, char **, char *, char *);
 
+/* {{{ PHP_INI
+ */
 PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("iconv.input_encoding",	  ICONV_INPUT_ENCODING,    PHP_INI_ALL, OnUpdateString,  input_encoding,	zend_iconv_globals,  iconv_globals)
 	 STD_PHP_INI_ENTRY("iconv.output_encoding",	  ICONV_OUTPUT_ENCODING,   PHP_INI_ALL, OnUpdateString,  output_encoding,	zend_iconv_globals,  iconv_globals)
 	 STD_PHP_INI_ENTRY("iconv.internal_encoding", ICONV_INTERNAL_ENCODING, PHP_INI_ALL, OnUpdateString,  internal_encoding,	zend_iconv_globals,  iconv_globals)
 PHP_INI_END()
+/* }}} */
 
 static void 
 php_iconv_init_globals(zend_iconv_globals *iconv_globals)
@@ -111,6 +120,8 @@ PHP_MINFO_FUNCTION(miconv)
 	DISPLAY_INI_ENTRIES();
 }
 
+/* {{{ php_iconv_string
+ */
 int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset)
 {
     unsigned int in_size, out_size;
@@ -147,7 +158,7 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 
     return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ proto string iconv(string in_charset, string out_charset, string str)
    Returns str converted to the out_charset character set */
@@ -277,13 +288,12 @@ PHP_FUNCTION(iconv_get_encoding)
 }
 /* }}} */
 
-
 #endif
-
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

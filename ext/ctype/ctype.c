@@ -41,8 +41,9 @@ ZEND_DECLARE_MODULE_GLOBALS(ctype)
 /* True global resources - no need for thread safety here */
 static int le_ctype;
 
-/* Every user visible function must have an entry in ctype_functions[].
-*/
+/* {{{ ctype_functions[]
+ * Every user visible function must have an entry in ctype_functions[].
+ */
 function_entry ctype_functions[] = {
 	PHP_FE(ctype_alnum,	NULL)
 	PHP_FE(ctype_alpha,	NULL)
@@ -57,7 +58,10 @@ function_entry ctype_functions[] = {
 	PHP_FE(ctype_xdigit,	NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in ctype_functions[] */
 };
+/* }}} */
 
+/* {{{ ctype_mpodule_entry
+ */
 zend_module_entry ctype_module_entry = {
 	"ctype",
 	ctype_functions,
@@ -68,6 +72,7 @@ zend_module_entry ctype_module_entry = {
 	PHP_MINFO(ctype),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
 #ifdef COMPILE_DL_CTYPE
 ZEND_GET_MODULE(ctype)
@@ -77,7 +82,8 @@ ZEND_GET_MODULE(ctype)
 #define PHP_EXPERIMENTAL(x,y)
 #endif 
 
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(ctype)
 {
 	ELS_FETCH();
@@ -87,8 +93,10 @@ PHP_MINFO_FUNCTION(ctype)
 	php_info_print_table_row(2, "ctype functions", "enabled (experimental)");
 	php_info_print_table_end();
 }
+/* }}} */
 
-
+/* {{{ ctype
+ */
 static int ctype(int (*iswhat)(int),zval **c) 
 {
 	switch ((*c)->type) {
@@ -111,6 +119,7 @@ static int ctype(int (*iswhat)(int),zval **c)
 	}
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto bool isalnum(mixed c)
     Check for alphanumeric character(s) */
@@ -310,13 +319,12 @@ PHP_FUNCTION(ctype_xdigit)
 }
 /* }}} */
 
-
 #endif	/* HAVE_CTYPE */
-
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

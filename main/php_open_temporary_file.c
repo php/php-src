@@ -50,7 +50,7 @@
 #define P_tmpdir ""
 #endif
 
-/* {{{ php_open_temporary_file */
+/* {{{ php_do_open_temporary_file */
 
 /* Loosely based on a tempnam() implementation by UCLA */
 
@@ -139,8 +139,11 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 	}
 	return fp;
 }
+/* }}} */
 
-/* Unlike tempnam(), the supplied dir argument takes precedence
+/* {{{ php_open_temporary_file
+ *
+ * Unlike tempnam(), the supplied dir argument takes precedence
  * over the TMPDIR environment variable
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
@@ -189,3 +192,12 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **op
 
 	return NULL;
 }
+/* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

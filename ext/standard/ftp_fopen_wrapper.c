@@ -311,3 +311,11 @@ FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, i
 	*socketd = 0;
 	return NULL;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
+ */

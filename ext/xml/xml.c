@@ -236,7 +236,7 @@ PHP_MINFO_FUNCTION(xml)
 		php_info_print_table_row(2, "EXPAT Version",XML_ExpatVersion());
         php_info_print_table_end();
 }
-
+/* }}} */
 
 /* {{{ extension-internal functions */
 
@@ -991,7 +991,6 @@ _xml_externalEntityRefHandler(XML_Parser parserPtr,
 }
 
 /* }}} */
-
     /* {{{ _xml_startNamespaceDeclHandler() */
 
 void _xml_startNamespaceDeclHandler(void *userData,
@@ -1014,7 +1013,6 @@ void _xml_startNamespaceDeclHandler(void *userData,
 }
 
 /* }}} */
-
     /* {{{ _xml_endNamespaceDeclHandler() */
 
 void _xml_endNamespaceDeclHandler(void *userData,
@@ -1318,7 +1316,6 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 }
 /* }}} */
 
-
 /* {{{ proto int xml_set_start_namespace_decl_handler(int pind, string hdl) 
    Set up character data handler */
 PHP_FUNCTION(xml_set_start_namespace_decl_handler)
@@ -1385,6 +1382,7 @@ PHP_FUNCTION(xml_parse)
 }
 
 /* }}} */
+
 /* {{{ proto int xml_parse_into_struct(int pind, string data, array &struct, array &index) 
    Parsing a XML document */
 
@@ -1654,4 +1652,5 @@ PHP_FUNCTION(utf8_decode)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

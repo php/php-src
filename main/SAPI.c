@@ -598,4 +598,5 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

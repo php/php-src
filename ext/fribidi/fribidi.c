@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors:                                                             |
-   |                                                                      |
    +----------------------------------------------------------------------+
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,7 +42,7 @@ ZEND_DECLARE_MODULE_GLOBALS(fribidi)
 /* Every user visible function must have an entry in fribidi_functions[].
 */
 function_entry fribidi_functions[] = {
-	ZEND_FE(fribidi_log2vis,	NULL)		
+	PHP_FE(fribidi_log2vis,	NULL)		
 	{NULL, NULL, NULL}	/* Must be the last line in fribidi_functions[] */
 };
 
@@ -50,8 +51,8 @@ zend_module_entry fribidi_module_entry = {
 	fribidi_functions,
 	PHP_MINIT(fribidi),
 	PHP_MSHUTDOWN(fribidi),
-	PHP_RINIT(fribidi),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(fribidi),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	PHP_MINFO(fribidi),
 	STANDARD_MODULE_PROPERTIES
 };
@@ -60,17 +61,10 @@ zend_module_entry fribidi_module_entry = {
 ZEND_GET_MODULE(fribidi)
 #endif
 
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-PHP_INI_END()
-*/
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(fribidi)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
-
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_UTF8",FRIBIDI_CHARSET_UTF8, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_6",FRIBIDI_CHARSET_8859_6, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FRIBIDI_CHARSET_8859_8",FRIBIDI_CHARSET_8859_8, CONST_CS | CONST_PERSISTENT);
@@ -80,38 +74,25 @@ PHP_MINIT_FUNCTION(fribidi)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(fribidi)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
+/* }}} */
 
-/* Remove if there's nothing to do at request start */
-PHP_RINIT_FUNCTION(fribidi)
-{
-	return SUCCESS;
-}
-
-/* Remove if there's nothing to do at request end */
-PHP_RSHUTDOWN_FUNCTION(fribidi)
-{
-	return SUCCESS;
-}
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(fribidi)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "fribidi support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
-
+/* }}} */
 
 /*--------------------------------------------------------------*/
 /* Name: fribidi_log2vis                                        */
@@ -138,7 +119,7 @@ PHP_MINFO_FUNCTION(fribidi)
 
 /* {{{ proto string fribidi_log2vis(string str, string direction, int charset)
    Convert a logical string to a visual one */
-ZEND_FUNCTION(fribidi_log2vis)
+PHP_FUNCTION(fribidi_log2vis)
 {
 	zval **parameter1,**parameter2, **parameter3;
 
@@ -264,10 +245,10 @@ ZEND_FUNCTION(fribidi_log2vis)
 
 #endif	/* HAVE_FRIBIDI */
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */

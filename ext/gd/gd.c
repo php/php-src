@@ -101,6 +101,8 @@ static int _php_image_type ( char data[8] );
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
+/* {{{ gd_functions[]
+ */
 function_entry gd_functions[] = {
 	PHP_FE(imagearc,								NULL)
 	PHP_FE(imagechar,								NULL)
@@ -196,6 +198,7 @@ function_entry gd_functions[] = {
 	
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 zend_module_entry gd_module_entry = {
 	"gd", gd_functions, PHP_MINIT(gd), NULL, NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
@@ -205,13 +208,16 @@ zend_module_entry gd_module_entry = {
 ZEND_GET_MODULE(gd)
 #endif
 
-
+/* {{{ php_free_gd_image
+ */
 static void php_free_gd_image(zend_rsrc_list_entry *rsrc)
 {
 	gdImageDestroy((gdImagePtr)rsrc->ptr);
 }
+/* }}} */
 
-
+/* {{{ php_free_gd_font
+ */
 static void php_free_gd_font(zend_rsrc_list_entry *rsrc)
 {
 	gdFontPtr fp = (gdFontPtr)rsrc->ptr;
@@ -220,8 +226,10 @@ static void php_free_gd_font(zend_rsrc_list_entry *rsrc)
 	}
 	efree(fp);
 }
+/* }}} */
 
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(gd)
 {
 	le_gd = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
@@ -256,7 +264,10 @@ PHP_MINIT_FUNCTION(gd)
 #endif
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(gd)
 {
 	php_info_print_table_start();
@@ -308,6 +319,7 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 	php_info_print_table_end();
 }
+/* }}} */
 
 /* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
 PHP_GD_API int phpi_get_le_gd(void)
@@ -317,6 +329,8 @@ PHP_GD_API int phpi_get_le_gd(void)
 
 #ifndef HAVE_GDIMAGECOLORRESOLVE
 
+/* {{{ gdImageColorResolve
+ */
 /********************************************************************/
 /* gdImageColorResolve is a replacement for the old fragment:       */
 /*                                                                  */
@@ -366,6 +380,7 @@ gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 	im->open [op] = 0;
 	return op;                  /* Return newly allocated color */
 }
+/* }}} */
 
 #endif
 
@@ -507,7 +522,6 @@ PHP_FUNCTION(imagesetstyle)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto int imagecreatetruecolor(int x_size, int y_size)
    Create a new true color image */
@@ -886,7 +900,6 @@ PHP_FUNCTION(imagesetbrush)
 }
 /* }}} */
 
-
 /* {{{ proto int imagecreate(int x_size, int y_size)
    Create a new image */
 PHP_FUNCTION(imagecreate)
@@ -929,7 +942,10 @@ PHP_FUNCTION(imagetypes)
 #endif
 	RETURN_LONG(ret);
 }
+/* }}} */
 
+/* {{{ _php_image_type
+ */
 static int _php_image_type (char data[8])
 {
 #ifdef HAVE_LIBGD15
@@ -962,7 +978,10 @@ static int _php_image_type (char data[8])
 	return -1;
 #endif
 }
+/* }}} */
 
+/* {{{ _php_image_create_from_string
+ */
 gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*ioctx_func_p)())
 {
 #ifdef HAVE_LIBGD15 
@@ -986,6 +1005,7 @@ gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*io
 	return NULL;
 #endif
 }
+/* }}} */
 
 /* {{{ proto int imagecreatefromstring(string image)
    Create a new image from the image stream in the string */
@@ -1062,6 +1082,9 @@ PHP_FUNCTION (imagecreatefromstring)
 /* }}} */
 
 size_t php_fread_all(char **buf, int socket, FILE *fp, int issock);
+
+/* {{{ _php_image_create_from
+ */
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)()) 
 {
 	zval **file, **srcx, **srcy, **width, **height;
@@ -1152,6 +1175,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 }
+/* }}} */
 
 /* {{{ proto int imagecreatefromgif(string filename)
    Create a new image from GIF file or URL */
@@ -1269,6 +1293,8 @@ PHP_FUNCTION(imagecreatefromgd2part)
 }
 /* }}} */
 
+/* {{{ _php_image_output
+ */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)()) 
 {
 	zval **imgind, **file, **quality;
@@ -1377,6 +1403,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
     RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int imagegif(int im [, string filename])
    Output GIF image to browser or file */
@@ -2075,7 +2102,8 @@ PHP_FUNCTION(imageinterlace)
 }
 /* }}} */	
 
-/* arg = 0  normal polygon
+/* {{{ php_imagepolygon
+   arg = 0  normal polygon
    arg = 1  filled polygon */
 /* im, points, num_points, col */
 static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
@@ -2138,7 +2166,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	efree(points);
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto int imagepolygon(int im, array point, int num_points, int col)
    Draw a polygon */
@@ -2156,7 +2184,8 @@ PHP_FUNCTION(imagefilledpolygon)
 }
 /* }}} */
 
-
+/* {{{ php_find_gd_font
+ */
 static gdFontPtr php_find_gd_font(int size)
 {
 	gdFontPtr font;
@@ -2192,9 +2221,9 @@ static gdFontPtr php_find_gd_font(int size)
 
 	return font;
 }
+/* }}} */
 
-
-/*
+/* {{{ php_imagefontsize
  * arg = 0  ImageFontWidth
  * arg = 1  ImageFontHeight
  */
@@ -2213,7 +2242,7 @@ static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 	font = php_find_gd_font(Z_LVAL_PP(SIZE));
 	RETURN_LONG(arg ? font->h : font->w);
 }
-
+/* }}} */
 
 /* {{{ proto int imagefontwidth(int font)
    Get font width */
@@ -2231,8 +2260,8 @@ PHP_FUNCTION(imagefontheight)
 }
 /* }}} */
 
-
-/* workaround for a bug in gd 1.2 */
+/* {{{ php_gdimagecharup
+ * workaround for a bug in gd 1.2 */
 void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
 						 int color)
 {
@@ -2254,8 +2283,9 @@ void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c,
 		cx++;
 	}
 }
+/* }}} */
 
-/*
+/* {{{ php_imagechar
  * arg = 0  ImageChar
  * arg = 1  ImageCharUp
  * arg = 2  ImageString
@@ -2324,7 +2354,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		efree(str);
 	}
 	RETURN_TRUE;
-}	
+}
+/* }}} */
 
 /* {{{ proto int imagechar(int im, int font, int x, int y, string c, int col)
    Draw a character */ 
@@ -2480,8 +2511,6 @@ PHP_FUNCTION(imagecopymergegray)
 }
 /* }}} */
 
-
-
 /* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
@@ -2588,6 +2617,8 @@ PHP_FUNCTION(imagettftext)
 /* }}} */
 
 #ifdef ENABLE_GD_TTF
+/* {{{ php_imagettftext_common
+ */
 static
 void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
@@ -2657,22 +2688,29 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		add_next_index_long(return_value, brect[i]);
 	}
 }
+/* }}} */
 #endif	/* ENABLE_GD_TTF */
 
 #if HAVE_LIBT1
 
+/* {{{ php_free_ps_font
+ */
 void php_free_ps_font(zend_rsrc_list_entry *rsrc)
 {
 	int *font = (int *)rsrc->ptr;
 	T1_DeleteFont(*font);
 	efree(font);
 }
+/* }}} */
 
+/* {{{ php_free_ps_enc
+ */
 void php_free_ps_enc(zend_rsrc_list_entry *rsrc)
 {
 	char **enc = (char **)rsrc->ptr;
 	T1_DeleteEncoding(enc);
 }
+/* }}} */
 
 #endif
 
@@ -3159,7 +3197,6 @@ PHP_FUNCTION(imagepsbbox)
 }
 /* }}} */
 
-
 /* {{{ proto int image2wbmp(int im [, string filename [, int threshold]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(image2wbmp)
@@ -3171,7 +3208,7 @@ PHP_FUNCTION(image2wbmp)
 	RETURN_FALSE;
 #endif /* HAVE_GD_WBMP */
 }
-
+/* }}} */
 
 /* {{{ proto void jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width)
    Convert JPEG image to WBMP image */
@@ -3209,10 +3246,9 @@ PHP_FUNCTION(png2wbmp)
 }
 /* }}} */
 
-
-
 #ifdef HAVE_GD_WBMP
-/* It converts a gd Image to bw using a threshold value */
+/* {{{ _php_image_bw_convert
+ * It converts a gd Image to bw using a threshold value */
 static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshold) 
 {
 	gdImagePtr im_dest;
@@ -3259,8 +3295,10 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 #endif
 
 }
+/* }}} */
 
-/* _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
+/* {{{ _php_image_convert
+ * _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	zval **f_org, **f_dest, **height, **width, **threshold;
 	gdImagePtr im_org, im_dest, im_tmp;
@@ -3451,8 +3489,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	}
 	WRONG_PARAM_COUNT;
 }
+/* }}} */
 #endif /* HAVE_GD_WBMP */
-
 
 #endif	/* HAVE_LIBGD */
 
@@ -3461,4 +3499,5 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78 fdm=marker
  */
