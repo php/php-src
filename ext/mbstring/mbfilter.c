@@ -507,7 +507,7 @@ static const char *mbfl_encoding_html_ent_aliases[] = {"HTML", "html", NULL};
 static const mbfl_encoding mbfl_encoding_html_ent = {
 	mbfl_no_encoding_html_ent,
 	"HTML-ENTITIES",
-	"html",
+	"US-ASCII",
 	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
 	NULL, /* mblen_table_html, Do not use table instead calulate length based on entities actually used */
 	MBFL_ENCTYPE_HTML_ENT
@@ -689,11 +689,14 @@ static const mbfl_encoding mbfl_encoding_utf7imap = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
 
+
+static const char *mbfl_encoding_ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "cp367", "csASCII", NULL};
+
 static const mbfl_encoding mbfl_encoding_ascii = {
 	mbfl_no_encoding_ascii,
 	"ASCII",
-	"US-ASCII",
-	NULL,
+	"US-ASCII", /* preferred MIME name */
+	(const char *(*)[])&mbfl_encoding_ascii_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS
 };
