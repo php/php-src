@@ -64,7 +64,6 @@ int get_module_identifier(char * module_name) {
     return DBX_UNKNOWN;
     }
 
-
 int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** pdbx_module, zval *** pdbx_database) {
     convert_to_object_ex(dbx_object);
     if (zend_hash_find((*dbx_object)->value.obj.properties, "handle", 7, (void **) pdbx_handle)==FAILURE
@@ -509,7 +508,7 @@ ZEND_FUNCTION(dbx_error)
 
     MAKE_STD_ZVAL(rv_errormsg); 
     ZVAL_LONG(rv_errormsg, 0);
-    result = switch_dbx_error(&rv_errormsg, NULL, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+    result = switch_dbx_error(&rv_errormsg, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
     if (!result) {
         FREE_ZVAL(rv_errormsg);
         RETURN_STRING("", 1); 
