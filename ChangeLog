@@ -1,3 +1,23 @@
+2002-01-14  Chris Jarecki  <zenderx@ipro.pl>
+
+    * ext/domxml/php_domxml.c: - using macro in xpath_register_ns()
+    - fixed protos in xpath functions
+
+2002-01-14  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Date/Calc.php: * Fix for bug #15032.
+
+2002-01-14  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c: MFH: fix for bug #14776
+
+    * main/SAPI.c: fix for bug #14776
+
+2002-01-14  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbregex.c:
+    fixed an error in mbstring caused by confliction with regex.
+
 2002-01-13  Edin Kadribasic  <edink@proventum.net>
 
     * acinclude.m4
