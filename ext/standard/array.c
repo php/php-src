@@ -179,59 +179,45 @@ static int array_reverse_key_compare(const void *a, const void *b TSRMLS_DC)
 	return array_key_compare(a, b TSRMLS_CC) * -1;
 }
 
-/* {{{ proto int krsort(array array_arg [, int sort_flags])
-   Sort an array reverse by key */
+/* {{{ proto bool krsort(array array_arg [, int sort_flags])
+   Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
 {
-	zval **array, **sort_type;
-	int sort_type_val = SORT_REGULAR;
+	zval *array;
+	long sort_type = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &sort_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+		RETURN_FALSE;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in krsort() call");
-		return;
-	}
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_long_ex(sort_type);
-		sort_type_val = Z_LVAL_PP(sort_type);
-	}
-	set_compare_func(sort_type_val TSRMLS_CC);
+	
+	target_hash = HASH_OF(array);
+	set_compare_func(sort_type TSRMLS_CC);
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_key_compare, 0 TSRMLS_CC) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto int ksort(array array_arg [, int sort_flags])
+/* {{{ proto bool ksort(array array_arg [, int sort_flags])
    Sort an array by key */
 PHP_FUNCTION(ksort)
 {
-	zval **array, **sort_type;
-	int sort_type_val = SORT_REGULAR;
+	zval *array;
+	long sort_type = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &sort_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+		RETURN_FALSE;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in ksort() call");
-		return;
-	}
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_long_ex(sort_type);
-		sort_type_val = Z_LVAL_PP(sort_type);
-	}
-	set_compare_func(sort_type_val TSRMLS_CC);
+
+	target_hash = HASH_OF(array);
+	set_compare_func(sort_type TSRMLS_CC);
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_key_compare, 0 TSRMLS_CC) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
@@ -402,57 +388,43 @@ PHP_FUNCTION(natcasesort)
 /* }}} */
 
 
-/* {{{ proto void asort(array array_arg [, int sort_flags])
+/* {{{ proto bool asort(array array_arg [, int sort_flags])
    Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
-	zval **array, **sort_type;
-	int sort_type_val = SORT_REGULAR;
+	zval *array;
+	long sort_type = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &sort_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+		RETURN_FALSE;
 	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in asort() call");
-		return;
-	}
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_long_ex(sort_type);
-		sort_type_val = Z_LVAL_PP(sort_type);
-	}
-	set_compare_func(sort_type_val TSRMLS_CC);
+	
+	target_hash = HASH_OF(array);
+	set_compare_func(sort_type TSRMLS_CC);
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_data_compare, 0 TSRMLS_CC) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto void arsort(array array_arg [, int sort_flags])
+/* {{{ proto bool arsort(array array_arg [, int sort_flags])
    Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
-	zval **array, **sort_type;
-	int sort_type_val = SORT_REGULAR;
+	zval *array;
+	long sort_type = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &sort_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in arsort() call");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_long_ex(sort_type);
-		sort_type_val = Z_LVAL_PP(sort_type);
-	}
-	set_compare_func(sort_type_val TSRMLS_CC);
+	
+	target_hash = HASH_OF(array);
+	set_compare_func(sort_type TSRMLS_CC);
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_data_compare, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -460,28 +432,21 @@ PHP_FUNCTION(arsort)
 }
 /* }}} */
 
-/* {{{ proto void sort(array array_arg [, int sort_flags])
+/* {{{ proto bool sort(array array_arg [, int sort_flags])
    Sort an array */
 PHP_FUNCTION(sort)
 {
-	zval **array, **sort_type;
-	int sort_type_val = SORT_REGULAR;
+	zval *array;
+	long sort_type = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &sort_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in sort() call");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_long_ex(sort_type);
-		sort_type_val = Z_LVAL_PP(sort_type);
-	}
-	set_compare_func(sort_type_val TSRMLS_CC);
+	
+	target_hash = HASH_OF(array);
+	set_compare_func(sort_type TSRMLS_CC);
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -489,28 +454,21 @@ PHP_FUNCTION(sort)
 }
 /* }}} */
 
-/* {{{ proto void rsort(array array_arg [, int sort_flags])
+/* {{{ proto bool rsort(array array_arg [, int sort_flags])
    Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
-	zval **array, **sort_type;
-	int sort_type_val = SORT_REGULAR;
+	zval *array;
+	long sort_type = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &array, &sort_type) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	target_hash = HASH_OF(*array);
-	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in rsort() call");
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (ZEND_NUM_ARGS() == 2) {
-		convert_to_long_ex(sort_type);
-		sort_type_val = Z_LVAL_PP(sort_type);
-	}
-	set_compare_func(sort_type_val TSRMLS_CC);
+	
+	target_hash = HASH_OF(array);
+	set_compare_func(sort_type TSRMLS_CC);
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_reverse_data_compare, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -544,12 +502,12 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	}
 }
 
-/* {{{ proto void usort(array array_arg, string cmp_function)
+/* {{{ proto bool usort(array array_arg, string cmp_function)
    Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
-	pval **array;
-	pval **old_compare_func;
+	zval **array;
+	zval **old_compare_func;
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
@@ -572,12 +530,12 @@ PHP_FUNCTION(usort)
 }
 /* }}} */
 
-/* {{{ proto void uasort(array array_arg, string cmp_function)
+/* {{{ proto bool uasort(array array_arg, string cmp_function)
    Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
-	pval **array;
-	pval **old_compare_func;
+	zval **array;
+	zval **old_compare_func;
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
@@ -647,12 +605,12 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 	}
 }
 
-/* {{{ proto void uksort(array array_arg, string cmp_function)
+/* {{{ proto bool uksort(array array_arg, string cmp_function)
    Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
-	pval **array;
-	pval **old_compare_func;
+	zval **array;
+	zval **old_compare_func;
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
@@ -991,7 +949,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 	return 0;
 }
 
-/* {{{ proto int array_walk(array input, string funcname [, mixed userdata])
+/* {{{ proto bool array_walk(array input, string funcname [, mixed userdata])
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
@@ -1433,20 +1391,16 @@ static int array_data_shuffle(const void *a, const void *b TSRMLS_DC)
 }
 
 
-/* {{{ proto int shuffle(array array_arg)
+/* {{{ proto bool shuffle(array array_arg)
    Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
-	zval **array;
+	zval *array;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	if (Z_TYPE_PP(array) != IS_ARRAY) {
-		php_error(E_WARNING, "Wrong datatype in shuffle() call");
+	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort(Z_ARRVAL_PP(array), (sort_func_t)php_mergesort, array_data_shuffle, 1 TSRMLS_CC) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_PP(&array), (sort_func_t)php_mergesort, array_data_shuffle, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
