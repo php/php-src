@@ -381,14 +381,14 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, int argc, zval 
 			zval **obj;
 
 			if (Z_TYPE_P(handler) == IS_STRING) {
-				php_error(E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(handler));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(handler));
 			} else if (zend_hash_index_find(Z_ARRVAL_P(handler), 0, (void **) &obj) == SUCCESS &&
 					   zend_hash_index_find(Z_ARRVAL_P(handler), 1, (void **) &method) == SUCCESS &&
 					   Z_TYPE_PP(obj) == IS_OBJECT &&
 					   Z_TYPE_PP(method) == IS_STRING) {
-				php_error(E_WARNING, "Unable to call handler %s::%s()", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s::%s()", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 			} else 
-				php_error(E_WARNING, "Unable to call handler");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler");
 
 			zval_dtor(retval);
 			efree(retval);
@@ -595,7 +595,9 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 		MAKE_STD_ZVAL(values);
 		
 		if (array_init(values) == FAILURE) {
-			php_error(E_ERROR, "Unable to initialize array");
+			TSRMLS_FETCH();
+
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
 			return;
 		}
 		
@@ -1008,7 +1010,6 @@ PHP_FUNCTION(xml_parser_create)
 	int argc;
 	zval **encodingArg;
 	XML_Char *encoding;
-	char thisfunc[] = "xml_parser_create";
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -1031,8 +1032,7 @@ PHP_FUNCTION(xml_parser_create)
 						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "US-ASCII";
 		} else { /* UTF-16 not supported */
-			php_error(E_WARNING, "%s: unsupported source encoding \"%s\"",
-					   thisfunc, Z_STRVAL_PP(encodingArg));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: unsupported source encoding \"%s\"", Z_STRVAL_PP(encodingArg));
 			RETURN_FALSE;
 		}
 	} else {
@@ -1059,7 +1059,6 @@ PHP_FUNCTION(xml_parser_create_ns)
 	int argc;
 	zval **encodingArg, **sepArg;
 	XML_Char *encoding, *sep;
-	char thisfunc[] = "xml_parser_create";
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -1082,8 +1081,7 @@ PHP_FUNCTION(xml_parser_create_ns)
 						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "US-ASCII";
 		} else { /* UTF-16 not supported */
-			php_error(E_WARNING, "%s: unsupported source encoding \"%s\"",
-					   thisfunc, Z_STRVAL_PP(encodingArg));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: unsupported source encoding \"%s\"", Z_STRVAL_PP(encodingArg));
 			RETURN_FALSE;
 		}
 	} else {
@@ -1122,7 +1120,7 @@ PHP_FUNCTION(xml_set_object)
 	}
 
 	if (Z_TYPE_PP(mythis) != IS_OBJECT) {
-		php_error(E_WARNING,"arg 2 has wrong type");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument 2 has wrong type");
 		RETURN_FALSE;
 	}
 
@@ -1493,7 +1491,6 @@ PHP_FUNCTION(xml_parser_set_option)
 {
 	xml_parser *parser;
 	zval **pind, **opt, **val;
-	char thisfunc[] = "xml_parser_set_option";
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &pind, &opt, &val) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1520,15 +1517,14 @@ PHP_FUNCTION(xml_parser_set_option)
 			convert_to_string_ex(val);
 			enc = xml_get_encoding(Z_STRVAL_PP(val));
 			if (enc == NULL) {
-				php_error(E_WARNING, "%s: unsupported target encoding \"%s\"",
-						   thisfunc, Z_STRVAL_PP(val));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported target encoding \"%s\"", Z_STRVAL_PP(val));
 				RETURN_FALSE;
 			}
 			parser->target_encoding = enc->name;
 			break;
 		}
 		default:
-			php_error(E_WARNING, "%s: unknown option", thisfunc);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option");
 			RETURN_FALSE;
 			break;
 	}
@@ -1542,7 +1538,6 @@ PHP_FUNCTION(xml_parser_get_option)
 {
 	xml_parser *parser;
 	zval **pind, **opt;
-	char thisfunc[] = "xml_parser_get_option";
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pind, &opt) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1559,7 +1554,7 @@ PHP_FUNCTION(xml_parser_get_option)
 			RETURN_STRING(parser->target_encoding, 1);
 			break;
 		default:
-			php_error(E_WARNING, "%s: unknown option", thisfunc);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option");
 			RETURN_FALSE;
 			break;
 	}

@@ -1314,10 +1314,12 @@ static void domxml_error(void *ctx, const char *msg, ...)
 {
 	char buf[1024];
 	va_list ap;
+	TSRMLS_FETCH();
+
 	va_start(ap, msg);
 	vsnprintf(buf, 1024, msg, ap);
 	va_end(ap);
-	php_error(E_WARNING, buf);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, buf);
 }
 
 static void domxml_error_ext(void *ctx, const char *msg, ...)
@@ -1326,6 +1328,7 @@ static void domxml_error_ext(void *ctx, const char *msg, ...)
 	xmlParserInputPtr input = NULL;
 	char buf[1024];
 	va_list ap;
+	TSRMLS_FETCH();
 
 	va_start(ap, msg);
 	vsnprintf(buf, 1024, msg, ap);
@@ -1353,7 +1356,7 @@ static void domxml_error_ext(void *ctx, const char *msg, ...)
 		}
 		add_next_index_zval(ctxt->_private,errormessages);
 	}
-   	php_error(E_WARNING, buf);
+   	php_error_docref(NULL TSRMLS_CC, E_WARNING, buf);
 	
 }
 
@@ -1361,8 +1364,8 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 {
 	domxml_ErrorCtxt *ctxt ;
 	char buf[1024];
-
 	va_list ap;
+	TSRMLS_FETCH();
 
 	va_start(ap, msg);
 	vsnprintf(buf, 1024, msg, ap);
@@ -1392,7 +1395,7 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 		
 		if (ctxt->valid->node != NULL)
 		{
-			/*php_error(E_WARNING,"nodename %s",(char *) ctxt->valid->name);
+			/*php_error_docref(NULL TSRMLS_CC, E_WARNING,"Nodename %s",(char *) ctxt->valid->name);
 
 			node = *ctxt->node;*/
 		}
@@ -1400,7 +1403,7 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
    		add_next_index_zval(ctxt->errors,errormessages);
 	}
 
-   	php_error(E_WARNING, buf);
+   	php_error_docref(NULL TSRMLS_CC, E_WARNING, buf);
 	
 }
 
