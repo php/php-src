@@ -2197,7 +2197,6 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	zval **param, *assignment_value;
 	zend_uint arg_num = opline->op1.u.constant.value.lval;
 	zend_free_op free_res;
-	zval **var_ptr = get_zval_ptr_ptr(&opline->result, EX(Ts), &free_res, BP_VAR_W);
 
 	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
 		if (opline->op2.u.constant.type == IS_CONSTANT || opline->op2.u.constant.type==IS_CONSTANT_ARRAY) {
@@ -2219,8 +2218,10 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 			assignment_value = &opline->op2.u.constant;
 		}
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
-		zend_receive(var_ptr, assignment_value TSRMLS_CC);
+		zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 	} else {
+		zval **var_ptr = get_zval_ptr_ptr(&opline->result, EX(Ts), &free_res, BP_VAR_W);
+
 		assignment_value = *param;
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
 		if (PZVAL_IS_REF(assignment_value)) {
