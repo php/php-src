@@ -18,6 +18,9 @@
 
 /* $Id$ */
 
+#ifndef ZEND_INTERFACES_H
+#define ZEND_INTERFACES_H
+
 #include "zend.h"
 #include "zend_API.h"
 
@@ -25,6 +28,14 @@ ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
+
+typedef struct _zend_user_iterator {
+	zend_object_iterator     it;
+	zend_class_entry         *ce;
+	zval                     *value;
+} zend_user_iterator;
+
+ZEND_API void zend_user_it_free_current(zend_object_iterator *_iter TSRMLS_DC);
 
 ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
@@ -38,6 +49,8 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2 TSRMLS_CC)
 
 ZEND_API void zend_register_interfaces(TSRMLS_D);
+
+#endif /* ZEND_INTERFACES_H */
 
 /*
  * Local variables:
