@@ -35,19 +35,20 @@
 
 
 /* Implementation of the language Header() function */
-/* {{{ proto void header(string header [, bool replace])
+/* {{{ proto void header(string header [, bool replace, [int http_response_code]])
    Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
 	char *header;
 	int header_len;
 	zend_bool replace = 1;
+	int http_code = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &header,
-							  &header_len, &replace) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &header,
+							  &header_len, &replace, &http_code) == FAILURE) {
 		return;
 	}
-	sapi_add_header_ex(header, header_len, 1, replace TSRMLS_CC);
+	sapi_add_header_ex(header, header_len, 1, replace, http_code TSRMLS_CC);
 }
 /* }}} */
 
@@ -121,7 +122,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		strcat(cookie, "; secure");
 	}
 
-	return sapi_add_header_ex(cookie, strlen(cookie), 0, 0 TSRMLS_CC);
+	return sapi_add_header_ex(cookie, strlen(cookie), 0, 0, 0 TSRMLS_CC);
 }
 
 

@@ -424,7 +424,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 				break;
 			case PHP_MODE_INDENT:
 				header_line = (char *)estrdup("Content-Type: text/plain");
-				sapi_add_header_ex(header_line, strlen(header_line), 1, 1 TSRMLS_CC);
+				sapi_add_header_ex(header_line, strlen(header_line), 1, 1, 0 TSRMLS_CC);
 				if ( open_file_for_scanning( &file_handle TSRMLS_CC ) == SUCCESS )
 					{
 					zend_indent();
