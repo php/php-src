@@ -16,6 +16,7 @@
    |          Nikos Mavroyanopoulos <nmav@hellug.gr> (HMAC, KEYGEN)       |
    +----------------------------------------------------------------------+
  */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
