@@ -1991,8 +1991,14 @@ PHP_FUNCTION(fgetcsv)
 		while(isspace((int) *bptr) && (*bptr!=delimiter)) bptr++;
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (enclosure && *bptr == enclosure) {
+			bptr++;	/* move on to first character in field */
+			
+			/* Check if there is an end to the enclosure */
+			if( !strchr(bptr, enclosure) ) {
+				continue;
+			}
+		
 			/* 2A. handle enclosure delimited field */
-			bptr++;		/* move on to first character in field */
 			while (*bptr) {
 				if (*bptr == enclosure) {
 					/* handle the enclosure */
