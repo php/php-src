@@ -317,6 +317,9 @@ PHPAPI int php_printf(const char *format, ...)
 
 	va_start(args, format);
 	size = vsnprintf(buffer, sizeof(buffer), format, args);
+	if(size > sizeof(buffer) - 1) {
+		size = sizeof(buffer) - 1;
+	}
 	ret = PHPWRITE(buffer, size);
 	va_end(args);
 	
