@@ -100,6 +100,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	char *http_header_line = NULL;
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
+	int eol_detect;
 
 	if (strchr(mode, 'a') || strchr(mode, '+') || strchr(mode, 'w')) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
@@ -127,6 +128,11 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	   we'll accept the unexpected behavior of filtered http streams in favor of improved performance. */
 	if (options & STREAM_WILL_CAST)
 		chunk_size = php_stream_set_chunk_size(stream, 1);
+
+	/* avoid problems with auto-detecting when reading the headers -> the headers
+	 * are always in canonical \r\n format */
+   	eol_detect = stream->flags & (PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
+	stream->flags &= ~(PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
 	
 	php_stream_context_set(stream, context);
 
@@ -405,6 +411,10 @@ out:
 		/* Restore original chunk size now that we're done with headers (if applicable) */
 		if (options & STREAM_WILL_CAST)
 			php_stream_set_chunk_size(stream, chunk_size);
+
+		/* restore the users auto-detect-line-endings setting */
+		stream->flags |= eol_detect;
+
 		/* as far as streams are concerned, we are now at the start of
 		 * the stream */
 		stream->position = 0;
