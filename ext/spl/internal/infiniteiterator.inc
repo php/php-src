@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   An infinite Iterator
  * @author  Marcus Boerger
  * @version 1.1

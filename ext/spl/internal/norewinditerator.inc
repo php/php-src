@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   An Iterator wrapper that doesn't call rewind
  * @author  Marcus Boerger
  * @version 1.1
