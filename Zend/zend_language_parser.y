@@ -652,15 +652,6 @@ common_scalar:
 ;
 
 
-const_scalar:
-		common_scalar { $$ = $1; }
-	|	T_STRING { zend_do_fold_constant(&$$, &$1 TSRMLS_CC); }
-	|	'+' const_scalar { $$ = $2; }
-	|	'-' const_scalar { zval minus_one; minus_one.type = IS_LONG; minus_one.value.lval = -1; mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC); $$ = $2; }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
-	|	static_class_constant { $$ = $1; }
-;
-
 static_scalar: /* compile-time evaluated scalars */
 		common_scalar		{ $$ = $1; }
 	|	T_STRING 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT TSRMLS_CC); }
