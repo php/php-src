@@ -93,7 +93,7 @@ void spl_register_property( zend_class_entry * class_entry, char *prop_name, zva
 		prop_val->type = IS_NULL;
 	}
 
-	zend_declare_property(class_entry, prop_name, strlen(prop_name), prop_val, prop_flags);
+	zend_declare_property(class_entry, prop_name, strlen(prop_name), prop_val, prop_flags TSRMLS_CC);
 }
 /* }}} */
 
