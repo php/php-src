@@ -455,8 +455,8 @@ static int array_user_key_compare(const void *a, const void *b)
 
 	status = call_user_function(CG(function_table), NULL, *user_compare_func_name, &retval, 2, args);
 	
-	pval_destructor(&key1);
-	pval_destructor(&key2);
+	zval_dtor(&key1);
+	zval_dtor(&key2);
 	
 	if (status==SUCCESS) {
 		convert_to_long(&retval);
@@ -507,11 +507,15 @@ PHP_FUNCTION(end)
 		return;
 	}
 	zend_hash_internal_pointer_end(target_hash);
-	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
-		RETURN_FALSE;
+
+	if (return_value_used) {	
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+			RETURN_FALSE;
+		}
+
+		*return_value = **entry;
+		zval_copy_ctor(return_value);
 	}
-	*return_value = **entry;
-	pval_copy_constructor(return_value);
 }
 
 
@@ -529,12 +533,15 @@ PHP_FUNCTION(prev)
 		RETURN_FALSE;
 	}
 	zend_hash_move_backwards(target_hash);
-	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
-		RETURN_FALSE;
-	}
+
+	if (return_value_used) {	
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+			RETURN_FALSE;
+		}
 	
-	*return_value = **entry;
-	pval_copy_constructor(return_value);
+		*return_value = **entry;
+		zval_copy_ctor(return_value);
+	}
 }
 
 
@@ -552,12 +559,15 @@ PHP_FUNCTION(next)
 		RETURN_FALSE;
 	}
 	zend_hash_move_forward(target_hash);
-	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
-		RETURN_FALSE;
+
+	if (return_value_used) {
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+			RETURN_FALSE;
+		}
+	  
+		*return_value = **entry;
+		zval_copy_ctor(return_value);
 	}
-	
-	*return_value = **entry;
-	pval_copy_constructor(return_value);
 }
 
 	
@@ -575,14 +585,14 @@ PHP_FUNCTION(reset)
 		return;
 	}
 	zend_hash_internal_pointer_reset(target_hash);
-	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
-		return;
-	}
 
 	if (return_value_used) {	
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
+			RETURN_FALSE;
+		}
+
 		*return_value = **entry;
-		pval_copy_constructor(return_value);
-	/*	INIT_PZVAL(return_value);  XXX is this needed? - No! :) */
+		zval_copy_ctor(return_value);
 	}
 }
 
@@ -603,7 +613,7 @@ PHP_FUNCTION(current)
 		return;
 	}
 	*return_value = **entry;
-	pval_copy_constructor(return_value);
+	zval_copy_ctor(return_value);
 }
 
 
@@ -656,7 +666,7 @@ PHP_FUNCTION(min)
 		}
 		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
 			*return_value = **result;
-			pval_copy_constructor(return_value);
+			zval_copy_ctor(return_value);
 		} else {
 			php_error(E_WARNING, "min: array must contain at least 1 element");
 			RETURN_FALSE;
@@ -681,7 +691,7 @@ PHP_FUNCTION(min)
 		}
 
 		*return_value = **min;
-		pval_copy_constructor(return_value);
+		zval_copy_ctor(return_value);
 
 		efree(args);
 	}
@@ -706,7 +716,7 @@ PHP_FUNCTION(max)
 		}
 		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
 			*return_value = **result;
-			pval_copy_constructor(return_value);
+			zval_copy_ctor(return_value);
 		} else {
 			php_error(E_WARNING, "max: array must contain at least 1 element");
 			RETURN_FALSE;
@@ -731,7 +741,7 @@ PHP_FUNCTION(max)
 		}
 
 		*return_value = **max;
-		pval_copy_constructor(return_value);
+		zval_copy_ctor(return_value);
 
 		efree(args);
 	}
