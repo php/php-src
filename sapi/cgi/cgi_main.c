@@ -472,11 +472,7 @@ static void sapi_cgi_log_message(char *message)
 
 static int sapi_cgi_deactivate(TSRMLS_D)
 {
-	fflush(stdout);
-	if(SG(request_info).argv0) {
-		free(SG(request_info).argv0);
-		SG(request_info).argv0 = NULL;
-	}
+	sapi_cgibin_flush(SG(server_context));
 	return SUCCESS;
 }
 
@@ -940,6 +936,18 @@ int main(int argc, char *argv[])
 #endif
 #endif /* PHP_FASTCGI */
 
+#if 0 && defined(PHP_DEBUG)
+	/* IIS is always making things more difficult.  This allows
+	   us to stop PHP and attach a debugger before much gets started */
+	{
+		char szMessage [256];
+		wsprintf (szMessage, "Please attach a debugger to the process 0x%X [%d] (%s) and click OK",
+			  GetCurrentProcessId(),GetCurrentProcessId(), argv[0]);
+		MessageBox(NULL, szMessage, "CGI Debug Time!",
+			  MB_OK|MB_SERVICE_NOTIFICATION);
+	}
+#endif
+
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
@@ -1013,6 +1021,7 @@ int main(int argc, char *argv[])
 	core_globals = ts_resource(core_globals_id);
 	sapi_globals = ts_resource(sapi_globals_id);
 	tsrm_ls = ts_resource(0);
+	SG(request_info).path_translated = NULL;
 #endif
 
 	cgi_sapi_module.executable_location = argv[0];
@@ -1056,7 +1065,13 @@ manual page for CGI security</a>.</p>\n\
 consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
 
-#ifdef ZTS
+#if defined(ZTS) && !defined(PHP_DEBUG)
+	        /* XXX we're crashing here in msvc6 debug builds at
+	           php_message_handler_for_zend:839 because
+	           SG(request_info).path_translated is an invalid pointer.
+	           It still happens even though I set it to null, so something
+	           weird is going on.
+	        */
 	        tsrm_shutdown();
 #endif
 
