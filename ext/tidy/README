@@ -7,6 +7,15 @@ Tidy is an extension based on Libtidy (http://tidy.sf.net/) and allows a PHP dev
 to clean, repair, and traverse HTML, XHTML, and XML documents -- including ones with
 embedded scripting languages such as PHP or ASP within them using OO constructs.
 
+---------------------------------------------------------------------------------------
+!! Important Note !!
+---------------------------------------------------------------------------------------
+At this time libtidy has a small memory leak inside the ParseConfigFileEnc() function
+used to load configuration from a file. If you intend to use this functionality apply
+the "libtidy.txt" patch (cd tidy/src/; patch -p0 < libtidy.txt) to libtidy sources and
+then recompile libtidy.
+---------------------------------------------------------------------------------------
+
 The Tidy extension has two separate APIs, one for general parsing, cleaning, and
 repairing and another for document traversal. The general API is provided below:
 
