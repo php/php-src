@@ -159,7 +159,6 @@ enum php_interbase_option {
 };
 
 #ifdef ZTS
-#define IBG(v) (ibase_globals->v)
 #define IBG(v) TSRMG(ibase_globals_id, zend_ibase_globals *, v)
 #else
 #define IBG(v) (ibase_globals.v)
