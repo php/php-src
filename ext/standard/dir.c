@@ -40,7 +40,11 @@
 #endif
 
 #ifdef HAVE_GLOB
+#ifndef PHP_WIN32
 #include <glob.h>
+#else
+#include "win32/glob.h"
+#endif
 #endif
 
 typedef struct {

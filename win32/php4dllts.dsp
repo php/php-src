@@ -1920,6 +1920,10 @@ SOURCE=.\crypt_win32.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\glob.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\md5crypt.c
 # End Source File
 # Begin Source File
@@ -1965,6 +1969,10 @@ SOURCE=..\win32\wsyslog.c
 # Begin Source File
 
 SOURCE=.\crypt_win32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\glob.h
 # End Source File
 # Begin Source File
 
