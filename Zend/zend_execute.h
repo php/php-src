@@ -67,7 +67,7 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 ;
 #endif
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC);
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC ELS_DC);
 ZEND_API inline int i_zend_is_true(zval *op)
 #if defined(C9X_INLINE_SEMANTICS)
 {

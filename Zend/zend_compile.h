@@ -376,7 +376,7 @@ ZEND_API void function_add_ref(zend_function *function);
 
 /* helper functions in zend-scanner.l */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS_DC);
-ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
+ZEND_API zend_op_array *compile_string(zval *source_string, char *filename CLS_DC);	
 ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC);
 ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
@@ -400,6 +400,7 @@ void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
+ZEND_API char *zend_make_compiled_string_description(char *name);
 
 int zendlex(znode *zendlval CLS_DC);
 

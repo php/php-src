@@ -457,7 +457,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 }
 
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC)
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC ELS_DC)
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -482,7 +482,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC)
 
 	original_handle_op_arrays = CG(handle_op_arrays);
 	CG(handle_op_arrays) = 0;
-	new_op_array = compile_string(&pv CLS_CC);
+	new_op_array = compile_string(&pv, string_name CLS_CC);
 	CG(handle_op_arrays) = original_handle_op_arrays;
 
 	if (new_op_array) {

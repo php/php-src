@@ -2007,12 +2007,14 @@ send_by_ref:
 							break;
 						case ZEND_INCLUDE:
 						case ZEND_REQUIRE:
-						{
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename CLS_CC ELS_CC);
 							break;
-						}
-						case ZEND_EVAL:
-							new_op_array = compile_string(inc_filename CLS_CC);
+						case ZEND_EVAL: {
+								char *eval_desc = zend_make_compiled_string_description("eval()'d code");
+
+								new_op_array = compile_string(inc_filename, eval_desc CLS_CC);
+								efree(eval_desc);
+							}
 							break;
 						EMPTY_SWITCH_DEFAULT_CASE()
 					}
