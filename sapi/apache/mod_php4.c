@@ -261,7 +261,7 @@ static int
 php_apache_startup(sapi_module_struct *sapi_module)
 {
     if(php_module_startup(sapi_module) == FAILURE
-            || zend_register_module(&apache_module_entry) == FAILURE) {
+            || zend_startup_module(&apache_module_entry) == FAILURE) {
         return FAILURE;
     } else {
         return SUCCESS;
@@ -581,7 +581,7 @@ void php_init_handler(server_rec *s, pool *p)
 	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, (void (*)(void *))php_module_shutdown_for_exec);
 	if (!apache_php_initialized) {
 		sapi_startup(&sapi_module);
-		php_module_startup(&sapi_module);
+		php_apache_startup(&sapi_module);
 		apache_php_initialized = 1;
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
