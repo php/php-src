@@ -95,7 +95,7 @@ function_entry icap_functions[] = {
 
 
 php3_module_entry php3_icap_module_entry = {
-	CALVER, icap_functions, icap_init, NULL, NULL, NULL, icap_info, 0, 0, 0, NULL
+	CALVER, icap_functions, PHP_MINIT(icap), NULL, NULL, NULL, PHP_MINFO(icap), 0, 0, 0, NULL
 };
 
 
@@ -125,7 +125,7 @@ CALSTREAM *cal_close_it (pils *icap_le_struct)
 }
 
 
-void icap_info(void)
+PHP_MINFO_FUNCTION(icap)
 {
 	php3_printf("Icap Support enabled<br>");
 	php3_printf("<table>");
@@ -134,7 +134,7 @@ void icap_info(void)
 	php3_printf("</tr></table>");
 }
 
-int icap_init(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(icap)
 {
 
     le_icap = register_list_destructors(cal_close_it,NULL);
@@ -460,7 +460,7 @@ if(myargc == 3)
  
 
 g_cal_list=NULL;
- cal_search_range(icap_le_struct->icap_stream,&begincal,(myargc == 3) ? NULL : &endcal);
+ cal_search_range(icap_le_struct->icap_stream,&begincal,&endcal);
  my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
    {
@@ -924,15 +924,6 @@ void cc_fetched(const CALEVENT *event)
 
 }
 
-void cc_log(const char *fmt, ...)
-{
-
-}
-
-void cc_dlog(const char *fmt, ...)
-{
-
-}
 
 void cc_login(const char **user, const char **pwd)
 {
@@ -940,7 +931,17 @@ void cc_login(const char **user, const char **pwd)
 *user=icap_user;
 *pwd=icap_password; 
 }
+
+
+void cc_vlog(const char *fmt,va_list ap)
+{
+}
+void cc_vdlog(const char *fmt,va_list ap)
+{
+}
+
 #endif
+
 
 /*
  * Local_ variables:
