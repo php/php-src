@@ -40,6 +40,7 @@ HOW TO INSTALL
 
         <Files *.php>
         AddOutputFilter PHP
+        AddRequestBodyFilter PHP
         </Files>
 
     That's it. Now start bin/httpd.
