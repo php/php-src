@@ -41,12 +41,15 @@
 
 #include "php_version.h"
 #include "zend.h"
+
+/* automake defines PACKAGE and VERSION for Zend too */
 #ifdef PACKAGE
 # undef PACKAGE
 #endif
 #ifdef VERSION
 # undef VERSION
 #endif
+
 #include "zend_API.h"
 
 

@@ -351,10 +351,6 @@ define_option enable-debugger 'Enable PHP remote debugger?' yesno no \
 "    Whether to enable PHP remote debugging support.  This feature\n
     is still under development."
 
-define_option enable-bcmath 'Enable bc style precision math functions' yesno \
-    no \
-'    Enables bc style arbitrary precision math functions.'
-
 # configure.in only checks these if it's a cgi so setup does the same
 if test "$option_value_with_apache" = "no"; then
 # outputing the bank line isn't really possible, but it would be nice

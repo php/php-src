@@ -710,26 +710,6 @@ dnl   AC_DEFINE(PHP_RPC, 0)
 dnl   AC_MSG_RESULT(no)
 dnl ])
 
-AC_MSG_CHECKING(whether to enable bc style precision math functions)
-AC_ARG_ENABLE(bcmath,
-[  --disable-bcmath        Compile without bc style precision math functions. ],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(WITH_BCMATH, 1)
-    AC_MSG_RESULT(yes)
-    BCMATH_SRC="functions/bcmath.c functions/number.c"
-  else
-    AC_DEFINE(WITH_BCMATH, 0)
-    AC_MSG_RESULT(no)
-    BCMATH_SRC=""
-  fi
-],[
-  AC_DEFINE(WITH_BCMATH, 1)
-  AC_MSG_RESULT(yes)
-  BCMATH_SRC="functions/bcmath.c functions/number.c"
-]) 
-AC_SUBST(BCMATH_SRC)
-
 if test "$BINNAME" = "php"; then
 AC_MSG_CHECKING(whether to force Apache CGI redirect)
 AC_ARG_ENABLE(force-cgi-redirect,
