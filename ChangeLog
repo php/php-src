@@ -1,3 +1,56 @@
+2002-07-13  sander  <sander@pb1.pair.com>
+
+    * ext/standard/fsock.c: Fixed win32 build
+
+2002-07-13  sniper  <sniper@pb1.pair.com>
+
+    * ext/iconv/iconv.c: Kill compiler warning
+
+    * ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/translit.phpt: Fix SKIPs for these tests.
+
+    * ext/standard/fsock.c: nuke unused variable warning
+
+    * ext/domxml/php_domxml.c: Fixed some unused variable warnings
+
+    * ext/yaz/php_yaz.c: Nuke unused variable
+
+    * ext/snmp/snmp.c: Kill compile warning
+
+    * ext/gd/config.m4: Really fix it this time..
+
+    * ext/standard/file.c: Fixed bug: #16638.
+
+    * sapi/cli/php_cli.c:
+    Needed this to be able to test safe-mode stuff on cmd-line
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    - Made the trim functions use same base function. (less code :)
+    - Renamed php_trim2 -> php_trim (not used anyplace else, yet)
+    - Made php_trim abit more usable for external use. (not necessary to use
+      zvals with it anymore)
+
+    * ext/gd/config.m4:
+    Fixed the undefined reference to 'gdttf' errors when using bundled GD lib.
+
+
+2002-07-13  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2utf8.phpt:
+    Fixed tests. Patch by Yoshimori Koizumi <readjust@deneb.freemail.ne.jp>
+
+2002-07-13  sniper  <sniper@pb1.pair.com>
+
+    * main/safe_mode.c:
+    Fix bug: #18285, php_checkuid() mangled the passed path.
+
+    * main/SAPI.c:
+    - Fixed bug: #18268. If pcre is build as shared extension, we can't use
+      php_pcre_replace() here.
+    - Cleaned up a bit.
+
 2002-07-12  Jani Taskinen  <sniper@iki.fi>
 
     * ext/mysql/php_mysql.c: Partially reverted the netware related commit.
