@@ -1682,6 +1682,9 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 	zend_class_entry *parent_ce = ce->parent;
 
 	if (parent_info->flags & ZEND_ACC_PRIVATE) {
+		if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
+				child_info->flags |= ZEND_ACC_CHANGED;
+		}
 		return 0; /* don't copy access information to child */
 	}
 
