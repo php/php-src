@@ -1,3 +1,38 @@
+2001-11-05  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h: - Added Udm_Check_Charset function (gluke)
+    - Added Udm_Check_Charset function (gluke)
+
+2001-11-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+    Support requesting a resource upon the irc connection end
+
+2001-11-05  Alex Waugh  <alex@alexwaugh.com>
+
+    * EXTENSIONS
+      sapi/webjames/.cvsignore
+      sapi/webjames/CREDITS
+      sapi/webjames/Makefile.in
+      sapi/webjames/README
+      sapi/webjames/config.m4
+      sapi/webjames/php_webjames.h
+      sapi/webjames/webjames.c:
+    New SAPI module for the WebJames server on RISC OS
+
+2001-11-05  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Fixed seg fault when using ldap_add (or modify) with value array not
+    indexed as 0, 1, ... In some cases it didn't give seg fault, but used
+    previously added value. Now gives warning.
+
+2001-11-05  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/ITX.php: * Fix bug #13926
+
 2001-11-04  Alex Waugh  <alex@alexwaugh.com>
 
     * sapi/cgi/cgi_main.c: Convert PATH_TRANSLATED for RISC OS
