@@ -64,7 +64,9 @@ AC_FUNC_MEMCMP
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite)
 AC_ZEND_BROKEN_SPRINTF
-	
+
+AC_CHECK_FUNCS(finite isfinite isinf isnan)
+
 AC_SUBST(ZEND_SCANNER)
 
 ])
@@ -83,9 +85,6 @@ AC_ARG_ENABLE(debug,
 ])  
 
 ])
-
-
-
 
 
 
