@@ -317,8 +317,7 @@ CONST void ocifree(dvoid *ctx, dvoid *ptr)
 
 static void php_oci_init_globals(OCILS_D)
 { 
-   	OCI(user_num)   = 1000;
-	OCI(server_num) = 2000;
+	OCI(shutdown)	= 0;
 
 	OCI(user) = malloc(sizeof(HashTable));
 	zend_hash_init(OCI(user), 13, NULL, NULL, 1);
@@ -468,8 +467,6 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 
 PHP_RSHUTDOWN_FUNCTION(oci)
 {
-	OCILS_FETCH();
-
     oci_debug("START php_rshutdown_oci");
 
 #if 0 
@@ -700,8 +697,6 @@ _oci_descriptor_list_dtor(oci_descriptor *descr)
 static void 
 _oci_server_list_dtor(oci_server *server)
 {
-	ELS_FETCH();
-
 	if (server->persistent)
 		return;
 
@@ -2955,8 +2950,6 @@ PHP_FUNCTION(ocinewdescriptor)
 	oci_connection *connection;
 	oci_descriptor *descr;
 	int dtype;
-
-	OCILS_FETCH();
 
     dtype = OCI_DTYPE_LOB;
 
