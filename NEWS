@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed some mysql compile failures (64 bit-OS)
+- Added warnings for deprecated mysql functions:
+    mysql_create_db, mysql_drop_db, mysql_db_query, mysql_escape_string
 - Added XsltObject->dump_file($result,$filename[,$compression]) for dumping
   xslt-result directly into a file. (chregu)
 - Added XsltObject->dump_mem($result) for returning xslt-result directly
