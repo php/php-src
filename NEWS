@@ -1,10 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Added function fribidi_get_charsets() (Tal)
-- Added function fribidi_charset_info() (Tal)
-- fixes bugs #19156 and #19544 (memleak)
-- Added Oracle TIMESTAMP type to oci8 extension. (thies)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -15,6 +11,8 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Added fribidi_get_charsets() and fribidi_charset_info() functions. (Tal)
+- Added Oracle TIMESTAMP type to oci8 extension. (Thies)
 - Fixed fgets($fp) to read until EOL when length parameter is not set. (Wez)
 - Changed registry entries under "HKLM\SOFTWARE\PHP\Per Directory Values" to
   work also with administrative directives such as safe_mode, open_basedir,
