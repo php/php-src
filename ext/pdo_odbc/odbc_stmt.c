@@ -69,12 +69,65 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	RETCODE rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
+	char *buf = NULL;
 
 	if (stmt->executed) {
 		SQLCancel(S->stmt);
 	}
 	
 	rc = SQLExecute(S->stmt);	
+
+	while (rc == SQL_NEED_DATA) {
+		int param_no;
+		struct pdo_bound_param_data *param;
+
+		rc = SQLParamData(S->stmt, (SQLPOINTER*)&param_no);
+		if (rc == SQL_NEED_DATA) {
+			php_stream *stm;
+			int len;
+
+			if (FAILURE == zend_hash_index_find(stmt->bound_params, param_no, (void **)&param)) {
+				/* shouldn't happen! */
+				pdo_odbc_stmt_error("while looking up LOB for input");
+clean_out:
+				SQLCancel(S->stmt);
+				if (buf) {
+					efree(buf);
+				}
+				return 0;
+			}
+
+			if (Z_TYPE_P(param->parameter) != IS_RESOURCE) {
+				/* they passed in a string */
+				SQLPutData(S->stmt, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
+				continue;
+			}
+
+			php_stream_from_zval_no_verify(stm, &param->parameter);
+			if (!stm) {
+				/* shouldn't happen either */
+				pdo_odbc_stmt_error("input LOB is no longer a stream");
+				goto clean_out;
+			}
+
+			/* now suck data from the stream and stick it into the database */
+			if (buf == NULL) {
+				buf = emalloc(8192);
+			}
+
+			do {
+				len = php_stream_read(stm, buf, 8192);
+				if (len == 0) {
+					break;
+				}
+				SQLPutData(S->stmt, buf, len);
+			} while (1);
+		}
+	}
+
+	if (buf) {
+		efree(buf);
+	}
 
 	switch (rc) {
 		case SQL_SUCCESS:
@@ -111,16 +164,27 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 	RETCODE rc;
 	SWORD sqltype, ctype, scale, nullable;
 	UDWORD precision;
+	pdo_odbc_param *P;
 	
 	/* we're only interested in parameters for prepared SQL right now */
 	if (param->is_param) {
 
 		switch (event_type) {
+			case PDO_PARAM_EVT_FREE:
+				P = param->driver_data;
+				if (P) {
+					efree(P);
+				}
+				break;
+
 			case PDO_PARAM_EVT_ALLOC:
-			
+			{
+
 				/* figure out what we're doing */
 				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_LOB:
+						break;
+
 					case PDO_PARAM_STMT:
 						return 0;
 
@@ -135,16 +199,33 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				} else {
 					ctype = SQL_C_CHAR;
 				}
+
+				P = emalloc(sizeof(*P));
+				param->driver_data = P;
+
+				P->len = 0; /* is re-populated each EXEC_PRE */
+
+				if ((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
+					P->paramtype = SQL_PARAM_INPUT_OUTPUT;
+				} else if (param->max_value_len <= 0) {
+					P->paramtype = SQL_PARAM_INPUT;
+				} else {
+					P->paramtype = SQL_PARAM_OUTPUT;
+				}
+
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->paramtype != SQL_PARAM_INPUT) {
+					pdo_odbc_stmt_error("Can bind a lob for output");
+					return 0;
+				}
+
 				rc = SQLBindParameter(S->stmt, param->paramno+1,
-						((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) ?
-							SQL_PARAM_INPUT_OUTPUT :
-							param->max_value_len <= 0 ? 
-								SQL_PARAM_INPUT : SQL_PARAM_OUTPUT,
-						ctype, sqltype, precision, scale,
-						Z_STRVAL_P(param->parameter),
+						P->paramtype, ctype, sqltype, precision, scale,
+						P->paramtype == SQL_PARAM_INPUT && 
+							PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
+								(SQLPOINTER)param :
+								Z_STRVAL_P(param->parameter),
 						param->max_value_len <= 0 ? 0 : param->max_value_len,
-						/* XXX: this has the wrong type for DB2 (should be SQLINTEGER*) */
-						&Z_STRLEN_P(param->parameter)
+						&P->len
 						);
 	
 				if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
@@ -152,6 +233,37 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				}
 				pdo_odbc_stmt_error("SQLBindParameter");
 				return 0;
+			}
+
+			case PDO_PARAM_EVT_EXEC_PRE:
+				P = param->driver_data;
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
+					if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+						php_stream *stm;
+						php_stream_statbuf sb;
+
+						php_stream_from_zval_no_verify(stm, &param->parameter);
+
+						if (!stm) {
+							return 0;
+						}
+
+						if (0 == php_stream_stat(stm, &sb)) {
+							P->len = SQL_LEN_DATA_AT_EXEC(sb.sb.st_size);
+						} else {
+							P->len = SQL_LEN_DATA_AT_EXEC(0);
+						}
+					} else {
+						convert_to_string(param->parameter);
+						P->len = Z_STRLEN_P(param->parameter);
+					}
+				} else {
+					P->len = Z_STRLEN_P(param->parameter);
+				}
+				return 1;
+			
+			case PDO_PARAM_EVT_EXEC_POST:
+				break;
 		}
 	}
 	return 1;
