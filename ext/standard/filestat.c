@@ -806,8 +806,9 @@ FileFunction(PHP_FN(filetype), FS_TYPE)
 PHP_FUNCTION(is_writable)
 {
 	char *filename;
+	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -820,8 +821,9 @@ PHP_FUNCTION(is_writable)
 PHP_FUNCTION(is_readable)
 {
 	char *filename;
+	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -834,8 +836,9 @@ PHP_FUNCTION(is_readable)
 PHP_FUNCTION(is_executable) 
 {
 	char *filename;
+	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -863,8 +866,9 @@ FileFunction(PHP_FN(is_link), FS_IS_LINK)
 PHP_FUNCTION(file_exists)
 {
 	char *filename;
+	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 	
