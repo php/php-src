@@ -1,3 +1,53 @@
+2004-03-10  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/zlib/php_zlib.def:
+      More ZLIB exports needed by the ming extension
+
+2004-03-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      - MFH (r-1.212): Revert ini setting patch as I notified in...
+
+    * ext/mbstring/mbstring.c:
+      - Revert ini setting patch, as I notified in
+        http://news.php.net/article.php?group=php.internals&article=8451
+
+2004-03-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/standard/basic_functions.c:
+      getopt() doesn't work if variables_order does not include "S" because it
+      only looks in $_SERVER for argv.  So, if we don't find argv in $_SERVER
+      fall back to looking in the global symbol table where register_argc_argv
+      would have put it.
+
+2004-03-10  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/zlib/config.w32
+      ext/zlib/php_zlib.def:
+      Reexport some zlib symbols so we can avoid linking with zlib.lib in shared
+      extensions (on win32)
+
+2004-03-10  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/standard/math.c:
+      Nuke unused vars
+
+    * ext/standard/math.c:
+      Don't use fp arithmetic for int results
+
+2004-03-10  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/sqlite/tests/sqlite_oo_003.phpt:
+      Typo
+
+2004-03-10  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      added new function mysql_stmt_free_result
+
 2004-03-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_4_3)
