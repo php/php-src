@@ -135,12 +135,12 @@ static PHP_FUNCTION(dbh_constructor)
 	char *data_source;
 	long data_source_len;
 	char *colon;
-	char *username, *password;
+	char *username=NULL, *password=NULL;
 	long usernamelen, passwordlen;
 	pdo_driver_t *driver = NULL;
 	zval *driver_options = NULL;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|a!", &data_source, &data_source_len,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ssa!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &driver_options)) {
 		ZVAL_NULL(object);
 		return;
@@ -179,8 +179,8 @@ static PHP_FUNCTION(dbh_constructor)
 	/* when persistent stuff is done, we should check the return values here
 	 * too */
 	dbh->data_source = (const char*)pestrdup(colon + 1, is_persistent);
-	dbh->username = pestrdup(username, is_persistent);
-	dbh->password = pestrdup(password, is_persistent);
+	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
+	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
 
 	if (driver_options) {
 		dbh->auto_commit = pdo_attr_lval(driver_options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
