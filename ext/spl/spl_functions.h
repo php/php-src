@@ -63,9 +63,14 @@ void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * p
 void spl_register_functions(zend_class_entry * class_entry, function_entry * function_list TSRMLS_DC);
 void spl_register_property( zend_class_entry * class_entry, char *prop_name, zval *prop_val, int prop_flags TSRMLS_DC);
 
-void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC);
-void spl_add_interfaces(zval * list, zend_class_entry * pce TSRMLS_DC);
-int spl_add_classes(zend_class_entry ** ppce, zval *list TSRMLS_DC);
+/* sub: whether to allow subclasses/interfaces
+   allow = 0: allow all classes and interfaces
+   allow > 0: allow all that match and mask ce_flags
+   allow < 0: disallow all that match and mask ce_flags
+ */
+void spl_add_class_name(zval * list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC);
+void spl_add_interfaces(zval * list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC);
+int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC);
 
 #define SPL_ME(class_name, function_name, arg_info, flags) \
 	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)
