@@ -1,3 +1,75 @@
+2004-02-02  Andrey Hristov  <php@hristov.com>
+
+    * ext/skeleton/php_skeleton.h
+      ext/skeleton/php_skeleton.h:
+      typo fix
+
+2004-02-02  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * NEWS:
+      Interbase news
+
+    * ext/interbase/ibase_service.c
+      ext/interbase/interbase.c:
+      Use correct flag for repair options
+
+    * ext/interbase/ibase_service.c:
+      Fix Win32 build
+
+    * ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Use php_ prefix for header files
+      Added nearly complete implementation of service API
+
+    * ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_events.c
+      ext/interbase/interbase.h
+      ext/interbase/php_ibase_includes.h:
+      Use php_ prefix for header files.
+
+2004-02-02  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_objects.c:
+      Redesign the clone() feature to fix some fundamental flaws in the previous
+      implementation.
+      
+      Using clone directly is now done using
+      $replica = clone $src;
+      
+      Clone methods must now be declared as follows:
+      function __clone($that)
+      {
+      }
+      
+      Clone methods in derived classes can call the __clone method of their
+      parent
+      classes using parent::__clone($that)
+
+2004-02-02  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      add missing alias for ocifreecursor()
+
+2004-02-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/simplexml/simplexml.c:
+      CS fix (functions should not be available if they are not available :)
+
+2004-02-02  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      fix yet another possible segfault
+
+2004-02-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/calendar/calendar.c:
+      Fixed possible overflows.
+
 2004-02-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_4_3)
