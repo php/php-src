@@ -469,6 +469,7 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 
 	if (wrapper)
 		zval_ptr_dtor(&wrapper);
+
 }
 
 
@@ -2197,21 +2198,19 @@ PHP_FUNCTION(domxml_elem_set_attribute)
    Removes given attribute */
 PHP_FUNCTION(domxml_elem_remove_attribute)
 {
-	zval *id, *arg1;
+	zval *id;
 	xmlNode *nodep;
-
-	DOMXML_NOT_IMPLEMENTED();
-
-	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
-		id = getThis();
-		nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
-	} else {
-		WRONG_PARAM_COUNT;
+	xmlAttr *attrp;
+	int name_len;
+	char *name;
+    
+	DOMXML_PARAM_TWO(nodep, id, le_domxmlelementp, "s", &name, &name_len);
+	attrp = xmlHasProp(nodep,name);
+	if (attrp == NULL)
+	{
+		RETURN_FALSE;
 	}
-
-	convert_to_string(arg1);
-
-	/* FIXME: not implemented */
+	xmlUnlinkNode((xmlNodePtr)attrp);
 	RETURN_TRUE;
 }
 /* }}} */
