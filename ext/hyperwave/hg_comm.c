@@ -950,7 +950,7 @@ int open_hg_connection(char *server_name, int port)
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 #endif /* SUN */
 
-	if (connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
+	if (connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
 		HWSOCK_FCLOSE(sockfd);
 		return(-3);
 	} 
@@ -1377,6 +1377,8 @@ static int uh_send_changeobject(int sockfd) {
 	}
 
 	error = *((int *) retmsg->buf);
+	efree(retmsg->buf);
+	efree(retmsg);
 	return(error);
 }
 
@@ -1720,6 +1722,8 @@ int send_inscoll(int sockfd, hw_objectID objectID, char *objrec, hw_objectID *ne
 
 	ptr++;
 	*new_objectID = *ptr;
+	efree(retmsg->buf);
+	efree(retmsg);
 	return 0;
 }
 
@@ -1769,6 +1773,8 @@ int send_insdoc(int sockfd, hw_objectID objectID, char *objrec, char *text, hw_o
 
 	ptr++;
 	*new_objectID = *ptr;
+	efree(retmsg->buf); 
+	efree(retmsg);
 	return 0;
 }
 
@@ -4124,6 +4130,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	build_msg_header(&msg, length, msgid++, PIPEDOCUMENT_MESSAGE);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL ) {
+		if(attributes) efree(attributes);
 		lowerror = LE_MALLOC;
 		return(-5);
 	}
@@ -4615,6 +4622,7 @@ int send_getsrcbydest(int sockfd, hw_objectID objectID, char ***childrec, int *c
 
 		if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
 /*			perror("send_command"); */
+			efree(childIDs);
 			lowerror = LE_MALLOC;
 			return(-1);
 		}
@@ -4622,12 +4630,14 @@ int send_getsrcbydest(int sockfd, hw_objectID objectID, char ***childrec, int *c
 		tmp = build_msg_int(msg.buf, childIDs[i]);
 
 		if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
+			efree(childIDs);
 			efree(msg.buf);
 			return(-1);
 			}
 
 		efree(msg.buf);
 	}
+	efree(childIDs);
 
 	if(NULL == (objptr = (char **) emalloc(*count * sizeof(hw_objrec *)))) {
 		/* if emalloc fails, get at least all remaining  messages from server */
