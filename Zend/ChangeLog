@@ -1,3 +1,10 @@
+2005-03-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - If an exception is pending we don't bail out but show the unhandled
+      exception
+
 2005-03-11  Anantha Kesari H Y  <hyanantha@novell.com>
 
     * (PHP_5_0)
