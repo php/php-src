@@ -58,6 +58,7 @@
 #include "php_versioning.h"
 #include "php_ftok.h"
 #include "php_type.h"
+#include "aggregation.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 
