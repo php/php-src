@@ -1,3 +1,123 @@
+2000-04-20  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/php_imap.c: Compile fixes
+
+    * ext/ldap/ldap.dsp
+      ext/imap/imap.dsp: Add .txt files to .dsp's
+
+    * NEWS: Another consistency fix
+
+    * NEWS: Consistency fix
+
+    * ext/ftp/ftp.dsp
+      ext/mssql/mssql.dsp
+      ext/zlib/zlib.dsp
+      fopen-wrappers.c: A few .dsp fixes
+
+2000-04-20  Andi Gutmans  <andi@php.net>
+
+    * fopen-wrappers.c: - Change a getcwd()
+
+2000-04-20  Frank M. Kromann  <fmk@swwwing.com>
+
+    * php_modules.dsw: Adding Java project to modules workspace
+
+    * php_modules.dsw: Adding ftp project to modules workspace
+
+2000-04-20  Andi Gutmans  <andi@php.net>
+
+    * php.h: - virtual_lstat() doesn't exist on Windows.
+
+2000-04-20  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/ftp/ftp.dsp: Adding project file for ftp module on Win32
+
+2000-04-20  Zeev Suraski  <zeev@php.net>
+
+    * ext/zlib/zlib.dsp: Remove strlcpy from the zlib project
+
+    * NEWS
+      ext/imap/php_imap.c
+      ext/zlib/zlib.dsp
+      php_modules.dsw:
+    - Add the zlib project to the php_modules workspace, and fix it's C-runtime definitions
+    - Move IMAP to the high performance API
+
+2000-04-20  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/zlib/zlib.dsp: Adding strlcpy to makefile
+
+2000-04-20  Andi Gutmans  <andi@php.net>
+
+    * php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h
+      strlcat.c
+      strlcpy.c: - Export strlcat()/strcpy() for Frank.
+    - Windows doesn't have lstat().
+
+2000-04-20  Zeev Suraski  <zeev@php.net>
+
+    * ext/zlib/zlib.c
+      ext/session/mod_files.c
+      ext/session/session.c
+      ext/standard/filestat.c
+      ext/standard/link.c
+      dl/log/log_db.c
+      ext/db/db.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h: - Fix virtual cwd bug
+    - Add more V_STAT() V_LSTAT() changes
+
+2000-04-20  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/zlib/zlib.c
+      ext/zlib/zlib.dsp: Making zlib compile under Win32 and fixing a typo
+
+2000-04-20  Andi Gutmans  <andi@php.net>
+
+    * SAPI.c
+      fopen-wrappers.c
+      php.h
+      php_realpath.c
+      php_virtual_cwd.c
+      php_virtual_cwd.h
+      safe_mode.c: - Add missing V_STAT()
+
+2000-04-20  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/php_mssql.c: Fixing init problem for Zval's in mssql_query
+
+2000-04-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/calendar/config.m4: New style
+
+    * ext/gd/config.m4: Do not enable GD, if --without-gd was used
+
+2000-04-20  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/php_imap.c: - CHange macro names from Z to Z_
+
+    * ext/imap/php_imap.c:
+    Fix, beautify and convert the IMAP module to the high performance API
+
+2000-04-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * configure.in: Check for ieeefp.h.
+
+2000-04-20  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c: - Another PHP_WIN32 patch
+
+    * sapi/cgi/cgi_main.c: - Change to PHP_WIN32
+
+2000-04-20  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/cgi/cgi_main.c: improve fix
+
 2000-04-19  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/info.c: Fix Win32 compilation.  Hillarious April 1st joke!
