@@ -67,7 +67,7 @@ PHP_ORA_API php_ora_globals ora_globals;
 #define ORA_FETCHINTO_ASSOC (1<<0)
 #define ORA_FETCHINTO_NULLS (1<<1)
 
-static oraCursor *ora_get_cursor(HashTable *, pval *);
+static oraCursor *ora_get_cursor(HashTable *, pval **);
 static void ora_del_cursor(HashTable *, int);
 static char *ora_error(Cda_Def *);
 static int ora_describe_define(oraCursor *);
@@ -404,22 +404,22 @@ PHP_FUNCTION(ora_plogon)
 void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user,*passwd;
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	char *hashed_details;
 	int hashed_details_length;
 	oraConnection *db_conn;
 	ORALS_FETCH();
 	PLS_FETCH();
 
-	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
   
-	convert_to_string(arg1);
-	convert_to_string(arg2);
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
   
-	user = arg1->value.str.val;
-	passwd = arg2->value.str.val;
+	user = (*arg1)->value.str.val;
+	passwd = (*arg2)->value.str.val;
 
 	hashed_details_length = sizeof("oracle__")-1+strlen(user)+strlen(passwd);
 	hashed_details = (char *) emalloc(hashed_details_length+1);
@@ -577,17 +577,17 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 PHP_FUNCTION(ora_logoff)
 {								/* conn_index */
 	oraConnection *conn;
-	pval *arg;
+	pval **arg;
 	ORALS_FETCH();
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
 	ZEND_VERIFY_RESOURCE(conn);
 
-	php3_list_delete(arg->value.lval);
+	php3_list_delete((*arg)->value.lval);
 }
 /* }}} */
 
@@ -596,11 +596,11 @@ PHP_FUNCTION(ora_logoff)
    Open an Oracle cursor */
 PHP_FUNCTION(ora_open)
 {								/* conn_index */
-	pval *arg;
+	pval **arg;
 	oraConnection *conn = NULL;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -630,15 +630,16 @@ PHP_FUNCTION(ora_open)
    Close an Oracle cursor */
 PHP_FUNCTION(ora_close)
 {								/* conn_index */
-	pval *arg;
+	pval **arg;
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg);
+	convert_to_long_ex(arg);
 
-	ora_del_cursor(list, arg->value.lval);
+	ora_del_cursor(list, (*arg)->value.lval);
+
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -647,10 +648,10 @@ PHP_FUNCTION(ora_close)
    Disable automatic commit */
 PHP_FUNCTION(ora_commitoff)
 {								/* conn_index */
-	pval *arg;
+	pval **arg;
 	oraConnection *conn;
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -670,10 +671,10 @@ PHP_FUNCTION(ora_commitoff)
    Enable automatic commit */
 PHP_FUNCTION(ora_commiton)
 {								/* conn_index */
-	pval *arg;
+	pval **arg;
 	oraConnection *conn;
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
@@ -692,10 +693,10 @@ PHP_FUNCTION(ora_commiton)
    Commit an Oracle transaction */
 PHP_FUNCTION(ora_commit)
 {								/* conn_index */
-	pval *arg;
+	pval **arg;
 	oraConnection *conn;
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
@@ -714,10 +715,10 @@ PHP_FUNCTION(ora_commit)
    Roll back an Oracle transaction */
 PHP_FUNCTION(ora_rollback)
 {								/* conn_index */
-	pval *arg;
+	pval **arg;
 	oraConnection *conn;
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
@@ -736,33 +737,35 @@ PHP_FUNCTION(ora_rollback)
    Parse an Oracle SQL statement */
 PHP_FUNCTION(ora_parse)
 {	
-     /* cursor_ind, sql_statement [, defer] */
-	int argc;
-	pval *argv[3];
+    pval **curs, **sql, **def;
 	oraCursor *cursor;
 	sword defer = 0;
 	text *query;
 
-	argc = ARG_COUNT(ht);
-	if ((argc != 2 && argc != 3) || getParametersArray(ht, argc, argv) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string(argv[1]);
-
-	if (argc == 3) {
-		convert_to_long(argv[2]);
-		if (argv[2]->value.lval != 0) {
+	switch (ARG_COUNT(ht)) {
+	case 3:
+		getParametersEx(3,&curs,&sql,&def);
+		convert_to_long_ex(def);
+		if ((*def)->value.lval) {
 			defer = DEFER_PARSE;
 		}
+		break;
+	case 2:
+		getParametersEx(2,&curs,&sql);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
 	}
 
- 	query = (text *) estrndup(argv[1]->value.str.val,argv[1]->value.str.len);
+	convert_to_string_ex(sql);
+ 	query = (text *) estrndup((*sql)->value.str.val,(*sql)->value.str.len);
 
 	if (query == NULL) {
 		php_error(E_WARNING, "Invalid query");
 		RETURN_FALSE;
 	}
-	if (!(cursor = ora_get_cursor(list, argv[0]))){
+
+	if (!(cursor = ora_get_cursor(list,curs))){
 		efree(query);
 		RETURN_FALSE;
 	}
@@ -770,18 +773,19 @@ PHP_FUNCTION(ora_parse)
 	if (cursor->query) {
 		efree(cursor->query);
 	}
+
 	cursor->query = query;
 	cursor->fetched = 0;
-	if(cursor->params && cursor->nparams > 0){
+
+	if (cursor->params && cursor->nparams > 0){
 		zend_hash_destroy(cursor->params);
 		efree(cursor->params);
 		cursor->params = NULL;
 		cursor->nparams = 0;
 	}
-
+	
 	if (oparse(&cursor->cda, query, (sb4) - 1, defer, VERSION_7)) {
-		php_error(E_WARNING, "Ora_Parse failed (%s)",
-				   ora_error(&cursor->cda));
+		php_error(E_WARNING, "Ora_Parse failed (%s)",ora_error(&cursor->cda));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -791,50 +795,57 @@ PHP_FUNCTION(ora_parse)
 /* {{{ proto int ora_bind(int cursor, string php_variable_name, string sql_parameter_name, int length [, int type])
    Bind a PHP variable to an Oracle parameter */
 PHP_FUNCTION(ora_bind)
-{ /* cursor_ind, php_var_name, sql_var_name, data_len [, inout]*/
-	/* inout: 0 = in/out, 1 = in, 2 = out */
-	int argc;
-	pval *argv[5];
+{ 
+	pval **curs, **pvar, **svar, **plen, **ptyp;
+	int inout = 0;
 	oraParam *newparam, *paramptr;
 	oraCursor *cursor;
 	char *paramname;
 
-	argc = ARG_COUNT(ht);
-	if (argc < 4 || argc > 5 || getParametersArray(ht, argc, argv) == FAILURE){
+	switch (ARG_COUNT(ht)) {
+	case 5:
+		getParametersEx(5,&curs,&pvar,&svar,&plen,&ptyp);
+		convert_to_long_ex(ptyp);
+		inout = (*ptyp)->value.lval;
+		break;
+	case 4:
+		getParametersEx(4,&curs,&pvar,&svar,&plen);
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(argv[1]);
-	convert_to_string(argv[2]);
-	convert_to_long(argv[3]);
-		
-	cursor = ora_get_cursor(list, argv[0]);
+
+	cursor = ora_get_cursor(list, curs);
 	if (cursor == NULL) {
-		php_error(E_WARNING, "Invalid cursor index %d",
-				   argv[0]->value.lval);
 		RETURN_FALSE;
 	}
 
-	if(cursor->params == NULL){
+	convert_to_string_ex(pvar);
+	convert_to_string_ex(svar);
+	convert_to_long_ex(plen);
+
+	if (cursor->params == NULL) {
 		cursor->params = (HashTable *)emalloc(sizeof(HashTable));
 		if (!cursor->params ||
 			zend_hash_init(cursor->params, 19, NULL,
-							HASH_DTOR pval_ora_param_destructor, 0) == FAILURE) {
+						   HASH_DTOR pval_ora_param_destructor, 0) == FAILURE) {
 			php_error(E_ERROR, "Unable to initialize parameter list");
 			RETURN_FALSE;
 		}
 	}
-	if((newparam = (oraParam *)emalloc(sizeof(oraParam))) == NULL){
+	if ((newparam = (oraParam *)emalloc(sizeof(oraParam))) == NULL) {
 		php_error(E_WARNING, "Out of memory for parameter");
 		RETURN_FALSE;
 	}
 
-	if((paramname = estrndup(argv[1]->value.str.val, argv[1]->value.str.len)) == NULL){
+	if ((paramname = estrndup((*pvar)->value.str.val, (*pvar)->value.str.len)) == NULL) {
 		php_error(E_WARNING, "Out of memory for parametername");
 		efree(newparam);
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_add(cursor->params, paramname, argv[1]->value.str.len + 1, newparam, sizeof(oraParam), (void **)&paramptr) == FAILURE) {
+	if (zend_hash_add(cursor->params, paramname, (*pvar)->value.str.len + 1, 
+					  newparam, sizeof(oraParam), (void **)&paramptr) == FAILURE) {
 		/* XXX zend_hash_destroy */
 		efree(paramname);
 		efree(newparam);
@@ -844,16 +855,11 @@ PHP_FUNCTION(ora_bind)
 
 	efree(newparam);
 	efree(paramname);
+	
+	paramptr->progvl = (*plen)->value.lval + 1;
+	paramptr->inout = inout;
 
-	paramptr->progvl = argv[3]->value.lval + 1;
-	if(argc > 4){
-		convert_to_long(argv[4]);
-		paramptr->inout = (short)argv[4]->value.lval;
-	}else{
-		paramptr->inout = 0;
-	}
-
-	if((paramptr->progv = (text *)emalloc(paramptr->progvl)) == NULL){		
+	if ((paramptr->progv = (text *)emalloc(paramptr->progvl)) == NULL) {
 		php_error(E_WARNING, "Out of memory for parameter value");
 		RETURN_FALSE;
 	}
@@ -862,7 +868,7 @@ PHP_FUNCTION(ora_bind)
 	paramptr->alen = paramptr->progvl;
 
 	if (obndra(&cursor->cda,              
-			   argv[2]->value.str.val,
+			   (*svar)->value.str.val,
 			   -1,
 			   (ub1 *)paramptr->progv,
 			   paramptr->progvl,
@@ -893,10 +899,10 @@ PHP_FUNCTION(ora_bind)
    Execute a parsed statement */
 PHP_FUNCTION(ora_exec)
 {								/* cursor_index */
-	pval *arg;
+	pval **arg;
 	oraCursor *cursor = NULL;
 
-	if (getParameters(ht, 1, &arg) == FAILURE)
+	if (getParametersEx(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
@@ -935,10 +941,10 @@ PHP_FUNCTION(ora_exec)
    Returns the numbers of columns in a result */
 PHP_FUNCTION(ora_numcols)
 {								/* cursor_index */
-	pval *arg;
+	pval **arg;
 	oraCursor *cursor = NULL;
 
-	if (getParameters(ht, 1, &arg) == FAILURE)
+	if (getParametersEx(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
@@ -953,10 +959,10 @@ PHP_FUNCTION(ora_numcols)
    Returns the number of rows in a result */
 PHP_FUNCTION(ora_numrows)
 {								/* cursor_index */
-	pval *arg;
+	pval **arg;
 	oraCursor *cursor = NULL;
 
-	if(getParameters(ht, 1, &arg) == FAILURE)
+	if(getParametersEx(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if((cursor = ora_get_cursor(list, arg)) == NULL) {
@@ -972,19 +978,19 @@ PHP_FUNCTION(ora_numrows)
    Parse and execute a statement and fetch first result row */ 
 PHP_FUNCTION(ora_do)
 {
-	pval *argv[2];
+	pval **con,**sql;
 	oraConnection *conn = NULL;
 	oraCursor *cursor = NULL;
 	text *query;
 
-	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &con,&sql) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (oraConnection *) zend_fetch_resource_ex(argv[0], -1, "Oracle-Connection", 2, le_conn, le_pconn);
+	conn = (oraConnection *) zend_fetch_resource_ex(con, -1, "Oracle-Connection", 2, le_conn, le_pconn);
 	ZEND_VERIFY_RESOURCE(conn);
 
-	convert_to_string(argv[1]);
+	convert_to_string_ex(sql);
 
 	if ((cursor = (oraCursor *)emalloc(sizeof(oraCursor))) == NULL){
 		php_error(E_WARNING, "Out of memory");
@@ -993,34 +999,34 @@ PHP_FUNCTION(ora_do)
 
 	memset(cursor, 0, sizeof(oraCursor));
 
-        query = (text *) estrndup(argv[1]->value.str.val,argv[1]->value.str.len);
+	query = (text *) estrndup((*sql)->value.str.val,(*sql)->value.str.len);
 
-        if (query == NULL) {
-                php_error(E_WARNING, "Invalid query in Ora_Do");
-                RETURN_FALSE;
-        }
-
-        cursor->query = query;
-
+	if (query == NULL) {
+		php_error(E_WARNING, "Invalid query in Ora_Do");
+		RETURN_FALSE;
+	}
+	
+	cursor->query = query;
+	
 	if (oopen(&cursor->cda, &conn->lda, (text *) 0, -1, -1, (text *) 0, -1)) {
 		php_error(E_WARNING, "Unable to open new cursor (%s)",
-				   ora_error(&cursor->cda));
+				  ora_error(&cursor->cda));
 		efree(cursor);
 		RETURN_FALSE;
 	}
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
-	cursor->conn_id = argv[0]->value.lval;	
+	cursor->conn_id = (*con)->value.lval;	
 	
 	/* Prepare stmt */
 
 	if (oparse(&cursor->cda, query, (sb4) - 1, 1, VERSION_7)){
 		php_error(E_WARNING, "Ora_Do failed (%s)",
-				   ora_error(&cursor->cda));
+				  ora_error(&cursor->cda));
 		_close_oracur(cursor);
 		RETURN_FALSE;
 	}
-
+	
 	/* Execute stmt (and fetch 1st row for selects) */
 	if (cursor->cda.ft == FT_SELECT) {
 		if (ora_describe_define(cursor) < 0){
@@ -1030,7 +1036,7 @@ PHP_FUNCTION(ora_do)
 		}
 		if (oexfet(&cursor->cda, 1, 0, 0)) {
 			php_error(E_WARNING, "Ora_Do failed (%s)",
-					   ora_error(&cursor->cda));
+					  ora_error(&cursor->cda));
 			_close_oracur(cursor);
 			RETURN_FALSE;
 		}
@@ -1038,12 +1044,12 @@ PHP_FUNCTION(ora_do)
 	} else {
 		if (oexec(&cursor->cda)) {
 			php_error(E_WARNING, "Ora_Do failed (%s)",
-					   ora_error(&cursor->cda));
+					  ora_error(&cursor->cda));
 			_close_oracur(cursor);
 			RETURN_FALSE;
 		}
 	}
-
+	
 	ZEND_REGISTER_RESOURCE(return_value, cursor, le_cursor);
 }
 /* }}} */
@@ -1052,10 +1058,10 @@ PHP_FUNCTION(ora_do)
    Fetch a row of result data from a cursor */
 PHP_FUNCTION(ora_fetch)
 {								/* cursor_index */
-	pval *arg;
+	pval **arg;
 	oraCursor *cursor;
 
-	if (getParameters(ht, 1, &arg) == FAILURE) {
+	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1085,38 +1091,34 @@ PHP_FUNCTION(ora_fetch)
    Fetch a row into the specified result array */
 PHP_FUNCTION(ora_fetch_into)
 {
-	pval     *arg1, *arr, *flg, *tmp;
+	pval **curs, **arr, **flg, *tmp;
 	oraCursor *cursor;
 	int i;
 	int flags = 0;
 
 	switch(ARG_COUNT(ht)){
-		case 2:
-			if (getParameters(ht, 2, &arg1, &arr) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-
-		case 3:
-			if (getParameters(ht, 3, &arg1, &arr, &flg) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long(flg);
-			flags = flg->value.lval;
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	case 2:
+		getParametersEx(2, &curs, &arr);
+		break;
+		
+	case 3:
+		getParametersEx(3, &curs, &arr, &flg);
+		convert_to_long_ex(flg);
+		flags = (*flg)->value.lval;
+		break;
+		
+	default:
+		WRONG_PARAM_COUNT;
+		break;
 	}
-
-	if (!ParameterPassedByReference(ht, 2)){
+	
+	if (! ParameterPassedByReference(ht, 2)){
 		php_error(E_WARNING, "Array not passed by reference in call to ora_fetch_into()");
 		RETURN_FALSE;
 	}
-
+	
 	/* Find the cursor */
-	if ((cursor = ora_get_cursor(list, arg1)) == NULL) {
+	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1133,17 +1135,16 @@ PHP_FUNCTION(ora_fetch_into)
 	}
 	cursor->fetched++;
 
-	if (arr->type != IS_ARRAY){
-		pval_destructor(arr);
-	    if (array_init(arr) == FAILURE){
+	if ((*arr)->type != IS_ARRAY){
+		pval_destructor(*arr);
+	    if (array_init(*arr) == FAILURE){
 			php_error(E_WARNING, "Can't convert to type Array");
 			RETURN_FALSE;
 		}
 	}
-	zend_hash_internal_pointer_reset(arr->value.ht);
+	zend_hash_internal_pointer_reset((*arr)->value.ht);
 
 	for (i = 0; i < cursor->ncols; i++) {
-       
 		if (cursor->columns[i].col_retcode == 1405) {
 			if (!(flags&ORA_FETCHINTO_NULLS)){
 				continue; /* don't add anything for NULL columns, unless the calles wants it */
@@ -1219,9 +1220,9 @@ PHP_FUNCTION(ora_fetch_into)
 		}
 
 		if (flags&ORA_FETCHINTO_ASSOC){
-			zend_hash_update(arr->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) &tmp, sizeof(pval*), NULL);
+			zend_hash_update((*arr)->value.ht, cursor->columns[i].cbuf, cursor->columns[i].cbufl+1, (void *) &tmp, sizeof(pval*), NULL);
 		} else {
-			zend_hash_index_update(arr->value.ht, i, (void *) &tmp, sizeof(pval*), NULL);
+			zend_hash_index_update((*arr)->value.ht, i, (void *) &tmp, sizeof(pval*), NULL);
 		}
 
 	}
@@ -1234,36 +1235,36 @@ PHP_FUNCTION(ora_fetch_into)
    Get the name of an Oracle result column */
 PHP_FUNCTION(ora_columnname)
 {								/* cursor_index, column_index */
-	pval *argv[2];
+	pval **curs, **col;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, argv[0])) == NULL) {
+	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	convert_to_long(argv[1]);
+	convert_to_long_ex(col);
 	
 	if (cursor->ncols == 0){
 		php_error(E_WARNING, "No tuples available at this cursor index");
 		RETURN_FALSE;
 	}
         
-	if (argv[1]->value.lval >= cursor->ncols){
+	if ((*col)->value.lval >= cursor->ncols){
 		php_error(E_WARNING, "Column index larger than number of columns");
 		RETURN_FALSE;
 	}
 
-	if (argv[1]->value.lval < 0){
+	if ((*col)->value.lval < 0){
 		php_error(E_WARNING, "Column numbering starts at 0");
 		RETURN_FALSE;
 	}
         
-	RETURN_STRINGL(cursor->columns[argv[1]->value.lval].cbuf,
-				   cursor->columns[argv[1]->value.lval].cbufl,1);
+	RETURN_STRINGL(cursor->columns[(*col)->value.lval].cbuf,
+				   cursor->columns[(*col)->value.lval].cbufl,1);
 }
 /* }}} */
 
@@ -1271,20 +1272,20 @@ PHP_FUNCTION(ora_columnname)
    Get the type of an Oracle result column */
 PHP_FUNCTION(ora_columntype)
 {								/* cursor_index, column_index */
-	pval *argv[2];
+	pval **curs, **col;
 	int colno;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, argv[0])) == NULL) {
+	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	convert_to_long(argv[1]);
-	colno = argv[1]->value.lval;
+	convert_to_long_ex(col);
+	colno = (*col)->value.lval;
 
 	if (cursor->ncols == 0){
 		php_error(E_WARNING, "No tuples available at this cursor index");
@@ -1340,35 +1341,35 @@ PHP_FUNCTION(ora_columntype)
    Return the size of the column */
 PHP_FUNCTION(ora_columnsize)
 {								/* cursor_index, column_index */
-	pval *argv[2];
+	pval **curs, **col;
 	oraCursor *cursor = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	/* Find the cursor */
-	if ((cursor = ora_get_cursor(list, argv[0])) == NULL) {
+	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	convert_to_long(argv[1]);
+	convert_to_long_ex(col);
 	
 	if (cursor->ncols == 0){
 		php_error(E_WARNING, "No tuples available at this cursor index");
 		RETURN_FALSE;
 	}
         
-	if (argv[1]->value.lval >= cursor->ncols){
+	if ((*col)->value.lval >= cursor->ncols){
 		php_error(E_WARNING, "Column index larger than number of columns");
 		RETURN_FALSE;
 	}
 
-	if (argv[1]->value.lval < 0){
+	if ((*col)->value.lval < 0){
 		php_error(E_WARNING, "Column numbering starts at 0");
 		RETURN_FALSE;
 	}
         
-	RETURN_LONG(cursor->columns[argv[1]->value.lval].dbsize);
+	RETURN_LONG(cursor->columns[(*col)->value.lval].dbsize);
 }
 /* }}} */
 
@@ -1376,18 +1377,18 @@ PHP_FUNCTION(ora_columnsize)
    Get data from a fetched row */
 PHP_FUNCTION(ora_getcolumn)
 {								/* cursor_index, column_index */
-	pval *argv[2];
+	pval **curs,**col;
 	int colno;
 	oraCursor *cursor = NULL;
 	oraColumn *column = NULL;
 	int len;
 	sb2 type;
 
-	if (ARG_COUNT(ht) != 2 || getParametersArray(ht, 2, argv) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &curs, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, argv[0])) == NULL) {
+	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1396,8 +1397,8 @@ PHP_FUNCTION(ora_getcolumn)
 		RETURN_FALSE;
 	}
 
-	convert_to_long(argv[1]);
-	colno = argv[1]->value.lval;        
+	convert_to_long_ex(col);
+	colno = (*col)->value.lval;        
 
 	if (colno >= cursor->ncols){
 		php_error(E_WARNING, "Column index larger than number of columns");
@@ -1499,11 +1500,11 @@ PHP_FUNCTION(ora_getcolumn)
    Get an Oracle error message */
 PHP_FUNCTION(ora_error)
 {
-	pval *arg;
+	pval **arg;
 	oraCursor *cursor;
 	oraConnection *conn;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1524,11 +1525,11 @@ PHP_FUNCTION(ora_error)
    Get an Oracle error code */
 PHP_FUNCTION(ora_errorcode)
 {
-	pval *arg;
+	pval **arg;
 	oraCursor *cursor;
 	oraConnection *conn;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1561,7 +1562,7 @@ PHP_MINFO_FUNCTION(oracle)
 */
 
 static oraCursor *
-ora_get_cursor(HashTable *list, pval *ind)
+ora_get_cursor(HashTable *list, pval **ind)
 {
 	oraCursor *cursor;
 	oraConnection *db_conn;
