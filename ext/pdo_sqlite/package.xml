@@ -24,14 +24,17 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2</version>
-  <date>2005-02-09</date>
+  <version>0.2.1</version>
+  <date>2005-02-XX</date>
 
   <notes>
-   You need to install the PDO core module before you can make use of this one.
-   This package includes a bundled SQLite 3 library.
+    You need to install the PDO core module before you can make use of this one.
+    This package includes a bundled SQLite 3 library.
 
-	 Windows binary: http://snaps.php.net/win32/PECL_5_0/php_pdo_sqlite.dll
+    Windows binary: http://snaps.php.net/win32/PECL_5_0/php_pdo_sqlite.dll
+
+    - setting PDO_ATTR_TIMEOUT controls the busy timeout
+    - Fixed PECL Bug #3391; cannot bind NULL parameters	
   </notes>
 
   <filelist>
@@ -154,3 +157,4 @@
   </deps>
  </release>
 </package>
+<!-- vim: se ts=2 sw=2 et: -->
