@@ -10,4 +10,5 @@
 	} else {
 		$handler = $handler[0];
 	}
+	$lock_flag = 'l';
 ?>
