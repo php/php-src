@@ -37,7 +37,9 @@ void free_zend_constant(zend_constant *c)
 void copy_zend_constant(zend_constant *c)
 {
 	c->name = zend_strndup(c->name, c->name_len);
-	zval_copy_ctor(&c->value);
+	if (!(c->flags & CONST_PERSISTENT)) {
+		zval_copy_ctor(&c->value);
+	}
 }
 
 
