@@ -21,5 +21,8 @@ PROGRAM_DEPENDENCIES = $(PROGRAM_LDADD)
 targets = $(LTLIBRARY_NAME) $(PROGRAM_NAME)
 
 include $(top_srcdir)/build/rules.mk
+CFLAGS          = $(CFLAGS_CLEAN) -prefer-non-pic -static
+PHP_COMPILE     = $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) -c $< && touch $@
+CXX_PHP_COMPILE = $(CXX) $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c $< && touch $@
 include $(top_srcdir)/build/library.mk
 include $(top_srcdir)/build/program.mk
