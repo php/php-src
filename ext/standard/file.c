@@ -604,7 +604,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 
 /* {{{ proto bool fclose(resource fp)
    Close an open file pointer */
-PHP_FUNCTION(fclose)
+PHPAPI PHP_FUNCTION(fclose)
 {
 	zval **arg1;
 	int type;
@@ -710,7 +710,7 @@ PHP_FUNCTION(pclose)
 
 /* {{{ proto bool feof(resource fp)
    Test for end-of-file on a file pointer */
-PHP_FUNCTION(feof)
+PHPAPI PHP_FUNCTION(feof)
 {
 	zval **arg1;
 	int type;
@@ -887,7 +887,7 @@ PHP_FUNCTION(socket_get_status)
 
 /* {{{ proto string fgets(resource fp[, int length])
    Get a line from file pointer */
-PHP_FUNCTION(fgets)
+PHPAPI PHP_FUNCTION(fgets)
 {
 	zval **arg1, **arg2;
 	int len = 1024, type;
@@ -939,7 +939,7 @@ exit_failed:
 
 /* {{{ proto string fgetc(resource fp)
    Get a character from file pointer */
-PHP_FUNCTION(fgetc)
+PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval **arg1;
 	int type;
@@ -972,7 +972,7 @@ PHP_FUNCTION(fgetc)
 
 /* {{{ proto string fgetss(resource fp, int length [, string allowable_tags])
    Get a line from file pointer and strip HTML tags */
-PHP_FUNCTION(fgetss)
+PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval **fd, **bytes, **allow=NULL;
 	int len, type;
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(fscanf)
 
 /* {{{ proto int fwrite(resource fp, string str [, int length])
    Binary-safe file write */
-PHP_FUNCTION(fwrite)
+PHPAPI PHP_FUNCTION(fwrite)
 {
 	zval **arg1, **arg2, **arg3=NULL;
 	int ret, type;
@@ -1136,7 +1136,7 @@ PHP_FUNCTION(fwrite)
 
 /* {{{ proto bool fflush(resource fp)
    Flushes output */
-PHP_FUNCTION(fflush)
+PHPAPI PHP_FUNCTION(fflush)
 {
 	zval **arg1;
 	int ret, type;
@@ -1200,7 +1200,7 @@ PHP_FUNCTION(set_file_buffer)
 
 /* {{{ proto bool rewind(resource fp)
    Rewind the position of a file pointer */
-PHP_FUNCTION(rewind)
+PHPAPI PHP_FUNCTION(rewind)
 {
 	zval **arg1;
 	void *what;
@@ -1222,7 +1222,7 @@ PHP_FUNCTION(rewind)
 
 /* {{{ proto int ftell(resource fp)
    Get file pointer's read/write position */
-PHP_FUNCTION(ftell)
+PHPAPI PHP_FUNCTION(ftell)
 {
 	zval **arg1;
 	void *what;
@@ -1246,7 +1246,7 @@ PHP_FUNCTION(ftell)
 
 /* {{{ proto int fseek(resource fp, int offset [, int whence])
    Seek on a file pointer */
-PHP_FUNCTION(fseek)
+PHPAPI PHP_FUNCTION(fseek)
 {
 	zval **arg1, **arg2, **arg3;
 	int argcount = ZEND_NUM_ARGS(), whence = SEEK_SET;
@@ -1404,7 +1404,7 @@ PHP_FUNCTION(umask)
 /* {{{ proto int fpassthru(resource fp)
    Output all remaining data from a file pointer */
 
-PHP_FUNCTION(fpassthru)
+PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval **arg1;
 	int size, type;
@@ -1671,7 +1671,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 
 /* {{{ proto string fread(resource fp, int length)
    Binary-safe file read */
-PHP_FUNCTION(fread)
+PHPAPI PHP_FUNCTION(fread)
 {
 	zval **arg1, **arg2;
 	int len, type;
