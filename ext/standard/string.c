@@ -696,8 +696,10 @@ PHP_FUNCTION(wordwrap)
 				lastspace = current;
 			}
 			/* if we are cutting, and we've accumulated enough
-			 * characters, copy and insert a break. */
-			else if (current - laststart >= linelength && docut) {
+			 * characters, and we haven't see a space for this line,
+			 * copy and insert a break. */
+			else if (current - laststart >= linelength
+					&& docut && laststart >= lastspace) {
 				memcpy(newtext+newtextlen, text+laststart, current-laststart);
 				newtextlen += current - laststart;
 				memcpy(newtext+newtextlen, breakchar, breakcharlen);
