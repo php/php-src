@@ -75,8 +75,8 @@ A lot... */
 #endif
 
 #ifdef ZEND_DEBUG
-#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
-/* #define IBDEBUG(a)*/
+/* #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__); */
+#define IBDEBUG(a)
 #else
 #define IBDEBUG(a)
 #endif
@@ -94,6 +94,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_fetch_assoc, NULL)
 	PHP_FE(ibase_fetch_object, NULL)
 	PHP_FE(ibase_free_result, NULL)
+	PHP_FE(ibase_name_result, NULL)
 	PHP_FE(ibase_prepare, NULL)
 	PHP_FE(ibase_execute, NULL)
 	PHP_FE(ibase_free_query, NULL)
@@ -107,6 +108,8 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_trans, NULL)
 	PHP_FE(ibase_commit, NULL)
 	PHP_FE(ibase_rollback, NULL)
+	PHP_FE(ibase_commit_ret, NULL)
+	PHP_FE(ibase_rollback_ret, NULL)
 
 	PHP_FE(ibase_blob_info, NULL)
 	PHP_FE(ibase_blob_create, NULL)
@@ -1767,12 +1770,15 @@ static int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRM
 /* }}} */
 
 /* {{{ _php_ibase_trans_end() */
+#define RETAIN 2
 #define COMMIT 1
 #define ROLLBACK 0
+
 static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 {
 	ibase_trans *trans = NULL;
 	int res_id = 0;
+	ISC_STATUS result;
 
 	RESET_ERRMSG;
 
@@ -1802,20 +1808,29 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 			break;
 	}
 
-	if (commit) {
-		if (isc_commit_transaction(IB_STATUS, &trans->handle)) {
-			_php_ibase_error(TSRMLS_C);
-			RETURN_FALSE;
-		}
-	} else {
-		if (isc_rollback_transaction(IB_STATUS, &trans->handle)) {
-			_php_ibase_error(TSRMLS_C);
-			RETURN_FALSE;
-		}
+	switch (commit) {
+		
+		case ROLLBACK:
+			result = isc_rollback_transaction(IB_STATUS, &trans->handle);
+			break;
+		case COMMIT:
+			result = isc_commit_transaction(IB_STATUS, &trans->handle);
+			break;
+		case (ROLLBACK | RETAIN):
+			result = isc_rollback_retaining(IB_STATUS, &trans->handle);
+			break;
+		case (COMMIT | RETAIN):
+			result = isc_commit_retaining(IB_STATUS, &trans->handle);
+			break;
 	}
 	
+	if (result) {
+		_php_ibase_error(TSRMLS_C);
+		RETURN_FALSE;
+	}
+
 	/* Don't try to destroy implicitly opened transaction from list... */
-	if (res_id != 0) {
+	if ( (commit & RETAIN) == 0 && res_id != 0) {
 		zend_list_delete(res_id);
 	}
 	RETURN_TRUE;
@@ -1835,6 +1850,22 @@ PHP_FUNCTION(ibase_commit)
 PHP_FUNCTION(ibase_rollback)
 {
 	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK);
+}
+/* }}} */
+
+/* {{{ proto bool ibase_commit_ret( resource link_identifier )
+   Commit transaction and retain the transaction context */
+PHP_FUNCTION(ibase_commit_ret)
+{
+	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, COMMIT | RETAIN);
+}
+/* }}} */
+
+/* {{{ proto bool ibase_rollback_ret( resource link_identifier )
+   Rollback transaction and retain the transaction context */
+PHP_FUNCTION(ibase_rollback_ret)
+{
+	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK | RETAIN);
 }
 /* }}} */
 
@@ -2437,6 +2468,32 @@ PHP_FUNCTION(ibase_fetch_object)
 }
 /* }}} */
 
+
+/* {{{ proto bool ibase_name_result(resource result, string name)
+   Assign a name to a result for use with ... WHERE CURRENT OF <name> statements */
+PHP_FUNCTION(ibase_name_result)
+{
+	zval **result_arg, **name_arg;
+	ibase_result *ib_result;
+
+	RESET_ERRMSG;
+	
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &result_arg, &name_arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, "InterBase result", le_result);
+	convert_to_string_ex(name_arg);
+	
+	if (isc_dsql_set_cursor_name(IB_STATUS, &ib_result->stmt, Z_STRVAL_PP(name_arg), 0)) {
+		_php_ibase_error(TSRMLS_C);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 /* {{{ proto bool ibase_free_result(resource result)
    Free the memory used by a result */
 PHP_FUNCTION(ibase_free_result)
@@ -2548,8 +2605,11 @@ PHP_FUNCTION(ibase_execute)
 	}
 
 	if (_php_ibase_exec(&ib_result, ib_query, ZEND_NUM_ARGS() - 1, bind_args TSRMLS_CC) == FAILURE) {
+		free_alloca(args);
 		RETURN_FALSE;
 	}
+
+	free_alloca(args);
 	
 	if (ib_result) { /* select statement */
 		ib_query->cursor_open = 1;
