@@ -122,20 +122,7 @@ AC_DEFUN(PHP_IMAP_SSL_CHK, [
     PHP_ADD_LIBRARY_DEFER(crypto, 1, IMAP_SHARED_LIBADD)
     PHP_ADD_LIBPATH($PHP_IMAP_SSL/lib, IMAP_SHARED_LIBADD)
   else
-    TST_LIBS="-L$IMAP_LIBDIR -l$IMAP_LIB"
-    if test $PHP_KERBEROS != "no"; then
-      TST_LIBS="$TST_LIBS -L$PHP_KERBEROS/lib -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err"
-    fi
-
-    PHP_IMAP_TEST_BUILD(ssl_onceonlyinit, [
-      AC_MSG_RESULT(no)
-    ], [
-      AC_MSG_RESULT(yes)
-      AC_MSG_ERROR([This c-client library is built with SSL support. 
-     
-      Add --with-imap-ssl=<DIR> to your configure line. Check config.log for details.
-      ])
-    ], $TST_LIBS)
+    AC_MSG_RESULT(no)
   fi
 ])
 
