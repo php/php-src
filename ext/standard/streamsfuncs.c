@@ -954,7 +954,8 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	zval *zstream;
 	php_stream *stream;
 	char *filtername;
-	int filternamelen, read_write = 0;
+	int filternamelen;
+	long read_write = 0;
 	zval *filterparams = NULL;
 	php_stream_filter *filter;
 
