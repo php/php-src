@@ -92,7 +92,7 @@ static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *si
 		while (p1 < &cvt_buf[NDIG])
 			*p++ = *p1++;
 	} else if (arg > 0) {
-		while ((fj = arg * 10) < 1) {
+		while ((fj = arg * 10.0) < 0.9999999) {
 			arg = fj;
 			r2--;
 		}
