@@ -40,11 +40,53 @@
 	int regex_default_options;
 /* }}} */
 
+/* {{{ PHP_MBREGEX_FUNCTION_ENTRIES */
+#define PHP_MBREGEX_FUNCTION_ENTRIES \
+	PHP_FE(mb_regex_encoding,	NULL) \
+	PHP_FE(mb_regex_set_options,	NULL) \
+	PHP_FE(mb_ereg,			(unsigned char *)third_argument_force_ref) \
+	PHP_FE(mb_eregi,			(unsigned char *)third_argument_force_ref) \
+	PHP_FE(mb_ereg_replace,			NULL) \
+	PHP_FE(mb_eregi_replace,			NULL) \
+	PHP_FE(mb_split,					NULL) \
+	PHP_FE(mb_ereg_match,			NULL) \
+	PHP_FE(mb_ereg_search,			NULL) \
+	PHP_FE(mb_ereg_search_pos,		NULL) \
+	PHP_FE(mb_ereg_search_regs,		NULL) \
+	PHP_FE(mb_ereg_search_init,		NULL) \
+	PHP_FE(mb_ereg_search_getregs,	NULL) \
+	PHP_FE(mb_ereg_search_getpos,	NULL) \
+	PHP_FE(mb_ereg_search_setpos,	NULL) \
+	PHP_FALIAS(mbregex_encoding,	mb_regex_encoding,	NULL) \
+	PHP_FALIAS(mbereg,	mb_ereg,	NULL) \
+	PHP_FALIAS(mberegi,	mb_eregi,	NULL) \
+	PHP_FALIAS(mbereg_replace,	mb_ereg_replace,	NULL) \
+	PHP_FALIAS(mberegi_replace,	mb_eregi_replace,	NULL) \
+	PHP_FALIAS(mbsplit,	mb_split,	NULL) \
+	PHP_FALIAS(mbereg_match,	mb_ereg_match,	NULL) \
+	PHP_FALIAS(mbereg_search,	mb_ereg_search,	NULL) \
+	PHP_FALIAS(mbereg_search_pos,	mb_ereg_search_pos,	NULL) \
+	PHP_FALIAS(mbereg_search_regs,	mb_ereg_search_regs,	NULL) \
+	PHP_FALIAS(mbereg_search_init,	mb_ereg_search_init,	NULL) \
+	PHP_FALIAS(mbereg_search_getregs,	mb_ereg_search_getregs,	NULL) \
+	PHP_FALIAS(mbereg_search_getpos,	mb_ereg_search_getpos,	NULL) \
+	PHP_FALIAS(mbereg_search_setpos,	mb_ereg_search_setpos,	NULL)
+/* }}} */
+
+typedef struct _zend_mbstring_globals * zend_mbstring_globals_ptr;
+
 #define PHP_MBREGEX_MAXCACHE 50
 
 int php_mb_regex_name2mbctype(const char *pname);
 int php_mb_regex_set_options(int options TSRMLS_DC);
 int php_mb_regex_set_options_by_string(const char *optstr, int len TSRMLS_DC);
+
+PHP_MINIT_FUNCTION(mb_regex);
+PHP_MSHUTDOWN_FUNCTION(mb_regex);
+PHP_RINIT_FUNCTION(mb_regex);
+PHP_RSHUTDOWN_FUNCTION(mb_regex);
+void php_mb_regex_globals_ctor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
+void php_mb_regex_globals_dtor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
 
 PHP_FUNCTION(mb_regex_encoding);
 PHP_FUNCTION(mb_ereg);
