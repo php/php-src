@@ -1,3 +1,51 @@
+2001-07-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/session/tests/005.phpt
+      ext/session/tests/006.phpt:
+    these tow fail with "Constant sid already defined" i
+    too if E_NOTICE error reporting is active
+
+2001-07-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/exec.c:
+    While researching a crash-bug in mail(), I found these two goldies.
+
+    Replace php_escape_shell_(arg|cmd) with straight-forward implementations.
+
+2001-07-22  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php: handle error handlers properly in nextId()
+
+2001-07-22  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/File/SearchReplace.php:
+    * Made File_SearchReplace more PEAR-conforming
+
+2001-07-22  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php: commit the new version of the patch from Oleg
+
+2001-07-22  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/config.w32.h: fix date('T')
+
+2001-07-22  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/DB/TESTERS: *  added missing database interface to TESTERS
+
+    * pear/XML/RPC.php:
+    * Patch for RPC.php by Matt Allen <matt@investigationmarketplace.com>
+
+2001-07-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/prepexe.inc
+      pear/DB/tests/tableinfo.inc: * fixed some DB tests
+
+    * pear/DB/mysql.php:
+    (PEAR DB) mysql sequence emulation "terse table" patch from Oleg Rekutin
+
+    * pear/DB/mysql.php: *doh*
+
 2001-07-21  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/mysql.php
