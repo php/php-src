@@ -293,6 +293,7 @@ sys/varargs.h \
 sys/wait.h \
 unistd.h \
 unix.h \
+utime.h \
 )
 
 dnl Checks for typedefs, structures, and compiler characteristics.
