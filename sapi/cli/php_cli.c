@@ -683,6 +683,8 @@ int main(int argc, char *argv[])
 		INI_HARDCODED("implicit_flush", "1");
 		INI_HARDCODED("max_execution_time", "0");
 
+		optind = orig_optind;
+		optarg = orig_optarg;
 		while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
 			switch (c) {
 
