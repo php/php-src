@@ -246,6 +246,7 @@ PHP_FUNCTION(dom_string_extend_find_offset32);
 #if defined(LIBXML_XPATH_ENABLED)
 /* xpath methods */
 PHP_FUNCTION(dom_xpath_xpath);
+PHP_FUNCTION(dom_xpath_register_ns);
 PHP_FUNCTION(dom_xpath_query);
 #endif
 

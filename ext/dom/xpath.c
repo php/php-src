@@ -36,6 +36,7 @@
 
 zend_function_entry php_dom_xpath_class_functions[] = {
 	PHP_FALIAS(domxpath, dom_xpath_xpath, NULL)
+	PHP_FALIAS(register_namespace, dom_xpath_register_ns, NULL)
 	PHP_FALIAS(query, dom_xpath_query, NULL)
 	{NULL, NULL, NULL}
 };
@@ -98,16 +99,14 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	return SUCCESS;
 }
 
-/* {{{ proto domnodelist dom_xpath_query(string expr [,domNode context]); */
-PHP_FUNCTION(dom_xpath_query)
+/* {{{ proto boolean dom_xpath_register_ns(string prefix, string uri); */
+PHP_FUNCTION(dom_xpath_register_ns)
 {
-	zval *id, *context = NULL;
+	zval *id;
 	xmlXPathContextPtr ctxp;
-	xmlNodePtr nodep = NULL;
-	xmlXPathObjectPtr xpathobjp;
-	int expr_len, ret;
-	dom_object *intern, *nodeobj;
-	char *expr;
+	int prefix_len, ns_uri_len;
+	dom_object *intern;
+	unsigned char *prefix, *ns_uri;
 
 	DOM_GET_THIS(id);
 
@@ -119,21 +118,83 @@ PHP_FUNCTION(dom_xpath_query)
 		RETURN_FALSE;
 	}
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	fprintf(stderr,"register %s=%s\n",prefix, ns_uri);
+	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
+		RETURN_FALSE
+	}
+	RETURN_TRUE;
+}
+
+/* {{{ proto domnodelist dom_xpath_query(string expr [,domNode context]); */
+PHP_FUNCTION(dom_xpath_query)
+{
+	zval *id, *context = NULL;
+	xmlXPathContextPtr ctxp;
+	xmlNodePtr nodep = NULL;
+	xmlXPathObjectPtr xpathobjp;
+	int expr_len, ret, nsnbr = 0;
+	dom_object *intern, *nodeobj;
+	char *expr;
+	xmlDoc *docp = NULL;
+	xmlNsPtr *ns;
+
+	DOM_GET_THIS(id);
+
+	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+
+	ctxp = (xmlXPathContextPtr) intern->ptr;
+	if (ctxp == NULL) {
+		php_error(E_WARNING, "Invalid XPath Context");
+		RETURN_FALSE;
+	}
+
+	docp = (xmlDocPtr) ctxp->doc;
+	if (docp == NULL) {
+		php_error(E_WARNING, "Invalid XPath Document Pointer");
+		RETURN_FALSE;
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|o", &expr, &expr_len, &context) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (context != NULL) {
 		DOM_GET_OBJ(nodep, context, xmlNodePtr, nodeobj);
 	}
 
+	if (!nodep) {
+		nodep = xmlDocGetRootElement(docp);
+	}
+
+	if (docp != nodep->doc) {
+		php_error(E_WARNING, "Node From Wrong Document");
+		RETURN_FALSE;
+	}
+
 	ctxp->node = nodep;
+
+	/* Register namespaces in the node */
+	ns = xmlGetNsList(docp, nodep);
+
+    if (ns != NULL) {
+        while (ns[nsnbr] != NULL)
+	    nsnbr++;
+    }
+
+
+    ctxp->namespaces = ns;
+    ctxp->nsNr = nsnbr;
 
 	xpathobjp = xmlXPathEvalExpression(expr, ctxp);
 	ctxp->node = NULL;
 
-	if (!xpathobjp) {
-		RETURN_FALSE;
+	if (ns != NULL) {
+		xmlFree(ns);
+		ctxp->namespaces = NULL;
+		ctxp->nsNr = 0;
 	}
 
 	if (xpathobjp->type ==  XPATH_NODESET) {
@@ -155,8 +216,6 @@ PHP_FUNCTION(dom_xpath_query)
 			child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
 			add_next_index_zval(return_value, child);
 		}
-	} else {
-		printf("Type: %d", xpathobjp->type);
 	}
 
 	xmlXPathFreeObject(xpathobjp);
