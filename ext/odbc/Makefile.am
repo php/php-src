@@ -1,3 +1,2 @@
-## Process this file with automake to produce Makefile.in
 noinst_LTLIBRARIES=libphpext_odbc.la
 libphpext_odbc_la_SOURCES=php_odbc.c velocis.c

@@ -1,4 +1,3 @@
-## Process this file with automake to produce Makefile.in
 
 peardir=$(prefix)/lib/php
 pear_DBdir=$(prefix)/lib/php/DB

@@ -74,7 +74,6 @@
 #define PHP_PGSQL_LIBS		""
 #define PHP_PROG_SENDMAIL	"@PROG_SENDMAIL@"
 #define PHP_REGEX_LIB		""
-#define PHP_SAPI			"@PHP_SAPI@"
 #define PHP_SOLID_INCLUDE	""
 #define PHP_SOLID_LIBS		""
 #define PHP_EMPRESS_INCLUDE	""
