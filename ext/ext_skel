@@ -16,6 +16,15 @@ if test -d "$extname" ; then
 	givup "Directory $extname already exists."
 fi
 
+if echo '\c' | grep -s c >/dev/null 2>&1
+then
+    ECHO_N="echo -n"
+    ECHO_C=""
+else
+    ECHO_N="echo"
+    ECHO_C='\c'
+fi
+
 echo "Creating directory"
 
 mkdir $extname || givup "Cannot create directory $extname"
@@ -23,9 +32,9 @@ mkdir $extname || givup "Cannot create directory $extname"
 cd $extname
 chmod 755 .
 
-echo "Creating basic files:\c"
+$ECHO_N "Creating basic files:$ECHO_C"
 
-echo " config.m4\c"
+$ECHO_N " config.m4$ECHO_C"
 cat >config.m4 <<eof
 dnl \$Id\$
 dnl config.m4 for extension $extname
@@ -33,7 +42,7 @@ dnl don't forget to call PHP_EXTENSION($extname)
 
 eof
 
-echo " Makefile.am\c"
+$ECHO_N " Makefile.am$ECHO_C"
 cat >Makefile.am <<eof
 # \$Id\$
 
@@ -44,14 +53,14 @@ libphpext_${extname}_a_SOURCES=$extname.c
 eof
 
 
-echo " .cvsignore\c"
+$ECHO_N " .cvsignore$ECHO_C"
 cat >.cvsignore <<eof
 .deps
 Makefile.in
 Makefile
 eof
 
-echo " config.h.stub\c"
+$ECHO_N " config.h.stub$ECHO_C"
 cat >config.h.stub<<eof
 /* define if you want to use the $extname extension */
 /* #undef HAVE_LIB$EXTNAME */
