@@ -637,11 +637,13 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 {
 	zval *elem;
 
-#define STAT_PROP_ENTRY(name)                        \
+#define STAT_PROP_ENTRY_EX(name, name2)                        \
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
 		convert_to_long(elem);                                                                   \
-		ssb->sb.st_##name = Z_LVAL_P(elem);                                                      \
+		ssb->sb.st_##name2 = Z_LVAL_P(elem);                                                      \
 	}
+
+#define STAT_PROP_ENTRY(name) STAT_PROP_ENTRY_EX(name,name)
 
 	STAT_PROP_ENTRY(dev);
 	STAT_PROP_ENTRY(ino);
@@ -654,9 +656,9 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 #endif
 	STAT_PROP_ENTRY(size);
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	STAT_PROP_ENTRY(atime.tv_sec);
-	STAT_PROP_ENTRY(mtime.tv_sec);
-	STAT_PROP_ENTRY(ctime.tv_sec);
+	STAT_PROP_ENTRY_EX(atime, atime.tv_sec);
+	STAT_PROP_ENTRY_EX(mtime, mtime.tv_sec);
+	STAT_PROP_ENTRY_EX(ctime, ctime.tv_sec);
 #else
 	STAT_PROP_ENTRY(atime);
 	STAT_PROP_ENTRY(mtime);
@@ -670,6 +672,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
 #endif
 
 #undef STAT_PROP_ENTRY	
+#undef STAT_PROP_ENTRY_EX	
 	return SUCCESS;
 }
 
