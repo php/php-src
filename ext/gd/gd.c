@@ -2055,7 +2055,7 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 #endif
 
 	if (error) {
-		php_error(E_WARNING, error);
+		php_error(E_WARNING, "%s", error);
 		RETURN_FALSE;
 	}
 
