@@ -747,6 +747,15 @@ PHP_FUNCTION(pdf_get_value)
 	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "resy"))) {
 		if(argc < 3) WRONG_PARAM_COUNT;
 		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), (float)Z_DVAL_PP(argv[2])-PDFLIB_IMAGE_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "capheight"))) {
+		if(argc < 3) WRONG_PARAM_COUNT;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), (float)Z_DVAL_PP(argv[2])-PDFLIB_FONT_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "ascender"))) {
+		if(argc < 3) WRONG_PARAM_COUNT;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), (float)Z_DVAL_PP(argv[2])-PDFLIB_FONT_OFFSET);
+	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "descender"))) {
+		if(argc < 3) WRONG_PARAM_COUNT;
+		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), (float)Z_DVAL_PP(argv[2])-PDFLIB_FONT_OFFSET);
 	} else if(0 == (strcmp(Z_STRVAL_PP(argv[1]), "font"))) {
 		value = PDF_get_value(pdf, Z_STRVAL_PP(argv[1]), 0.0)+PDFLIB_FONT_OFFSET;
 	} else {
