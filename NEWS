@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Fixed bug #29109 (SoapFault exception: [WSDL] Out of memory). (Dmitry)
 - Fixed bug #29061 (soap extension segfaults). (Dmitry)
 - Added zlib stream filter suport. (Sara)
+- Added bz2 stream filter support. (Sara)
 - Changed the implementation of TRUE, FALSE, and NULL from constants to
   keywords. (Marcus)
 - Fixed ZTS destruction. (Marcus)
