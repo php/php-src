@@ -1,3 +1,25 @@
+2002-07-14  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      ZEND_CHANGES:
+    - Nuke delete(). It was a big mistake to introduce it and I finally
+    - understand why Java didn't do so.
+    - If you still want to control destruction of your object then either make
+    - sure you kill all references or create a destruction method which you
+    - call yourself.
+
+    * zend_execute.c: - Nuke some unused code
+
+2002-07-14  derick  <derick@pb1.pair.com>
+
+    * zend_operators.c: MFZE1
+
+    * zend_operators.c: - MFZE1
+
 2002-07-07  Andi Gutmans  <andi@zend.com>
 
     * zend_objects_API.c: - Path which should improve previous fix.
