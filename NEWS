@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-14 Aug 2003, Version 4.3.3RC4
+18 Aug 2003, Version 4.3.3RC4
 - Fixed bug #25093 (ext/pgsql: Various leaks due to non-freed queries). (Ilia)
 - Fixed bug #25084 (ext/session: Fixed session.referer_check to be independent
   on register_globals). (Ilia)
