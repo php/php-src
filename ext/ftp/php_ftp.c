@@ -40,6 +40,8 @@
 #define php_error php3_error
 #endif
 
+#include "ext/standard/file.h"
+
 #include "php_ftp.h"
 #include "ftp.h"
 
