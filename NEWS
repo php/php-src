@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)   
+- Fixed bug #32326 (Check values of Connection/Transfer-Encoding 
+  case-incentively in SOAP extension). (Ilia)
 - Fixed bug #32290 (call_user_func_array() calls wrong class method within 
   child class). (Marcus)
 - Fixed bug #32238 (spl_array.c: void function cannot return value). (Johannes)
