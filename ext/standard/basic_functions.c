@@ -611,16 +611,17 @@ function_entry basic_functions[] = {
 static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 {
 	char *protected_vars, *protected_var;
+	char *token_buf;
 	int dummy=1;
 	BLS_FETCH();
 
 	protected_vars = estrndup(new_value, new_value_length);
 	zend_hash_clean(&BG(sm_protected_env_vars));
 
-	protected_var=strtok(protected_vars, ", ");
+	protected_var= php_strtok_r(protected_vars, ", ", &token_buf);
 	while (protected_var) {
 		zend_hash_update(&BG(sm_protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
-		protected_var=strtok(NULL, ", ");
+		protected_var=php_strtok_r(NULL, ", ", &token_buf);
 	}
 	efree(protected_vars);
 	return SUCCESS;
