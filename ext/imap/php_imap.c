@@ -338,8 +338,11 @@ void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
  */
 void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 {
-	zval *t_map;
+	zval *t_map, *return_value;
 	TSRMLS_FETCH();
+	
+	return_value = *IMAPG(quota_return);
+
 /* put parsing code here */
 	for(; qlist; qlist = qlist->next) {
 		MAKE_STD_ZVAL(t_map);
@@ -347,13 +350,13 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 		if (strncmp(qlist->name, "STORAGE", 7) == 0)
 		{
 			/* this is to add backwards compatibility */
-			add_assoc_long_ex(IMAPG(quota_return), "usage", sizeof("usage"), qlist->usage);
-			add_assoc_long_ex(IMAPG(quota_return), "limit", sizeof("limit"), qlist->limit);
+			add_assoc_long_ex(return_value, "usage", sizeof("usage"), qlist->usage);
+			add_assoc_long_ex(return_value, "limit", sizeof("limit"), qlist->limit);
 		}
 
 		add_assoc_long_ex(t_map, "usage", sizeof("usage"), qlist->usage);
 		add_assoc_long_ex(t_map, "limit", sizeof("limit"), qlist->limit);
-		add_assoc_zval_ex(IMAPG(quota_return), qlist->name, strlen(qlist->name)+1, t_map);
+		add_assoc_zval_ex(return_value, qlist->name, strlen(qlist->name)+1, t_map);
 	}
 }
 /* }}} */
@@ -858,7 +861,7 @@ PHP_FUNCTION(imap_get_quota)
 	convert_to_string_ex(qroot);
 
 	array_init(return_value);
-	*IMAPG(quota_return) = *return_value;
+	IMAPG(quota_return) = &return_value;
 
 	/* set the callback for the GET_QUOTA function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
@@ -886,7 +889,7 @@ PHP_FUNCTION(imap_get_quotaroot)
 	convert_to_string_ex(mbox);
 
 	array_init(return_value);
-	*IMAPG(quota_return) = *return_value;
+	IMAPG(quota_return) = &return_value;
 
 	/* set the callback for the GET_QUOTAROOT function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
