@@ -70,7 +70,9 @@ static ZEND_FUNCTION(get_defined_constants);
 static ZEND_FUNCTION(debug_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
+#if ZEND_ZTS
 static ZEND_FUNCTION(zend_thread_id);
+#endif
 #endif
 
 ZEND_API unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
@@ -125,7 +127,9 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(debug_backtrace, NULL)
 #if ZEND_DEBUG
 	ZEND_FE(zend_test_func,		NULL)
+#if ZTS
 	ZEND_FE(zend_thread_id,		NULL)
+#endif
 #endif
 	{ NULL, NULL, NULL }
 };
@@ -1184,10 +1188,12 @@ ZEND_FUNCTION(zend_test_func)
 }
 
 
+#ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
 	RETURN_LONG(tsrm_thread_id());
 }
+#endif
 #endif
 
 /* {{{ proto string get_resource_type(resource res)
