@@ -375,12 +375,20 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 					zend_error(E_WARNING, "'unserialize_callback_func' (%s) hasn't defined the class it was called for", user_func->value.str.val);
 					incomplete_class = 1;
 					ce = PHP_IC_ENTRY;
-				} else
+				} else {
+#ifdef ZEND_ENGINE_2
+					ce = *(zend_class_entry **)ce; /* Bad hack, TBF! */
+#endif	
 					efree(class_name);
+				}
 			}
 		}
-	} else 
+	} else {
+#ifdef ZEND_ENGINE_2
+		ce = *(zend_class_entry **)ce; /* Bad hack, TBF! */
+#endif	
 		efree(class_name);
+	}
 
 	*p = YYCURSOR;
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);

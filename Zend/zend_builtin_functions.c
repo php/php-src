@@ -1247,6 +1247,26 @@ ZEND_FUNCTION(get_defined_constants)
 /* }}} */
 
 
+static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) {
+	void **p = *curpos - 2;
+	zval *arg_array, **arg;
+	int arg_count = (ulong) *p;
+
+	*curpos -= (arg_count+2); 
+
+	MAKE_STD_ZVAL(arg_array);
+	array_init(arg_array);
+	p -= arg_count;
+
+	while (--arg_count >= 0) {
+		arg = (zval **) p++;
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+		(*arg)->refcount++;
+		add_next_index_zval(arg_array, *arg);
+	}
+	return arg_array;
+}
+
 /* {{{ proto void debug_backtrace(void)
    Prints out a backtrace */
 ZEND_FUNCTION(debug_backtrace)
@@ -1256,42 +1276,129 @@ ZEND_FUNCTION(debug_backtrace)
 	char *function_name;
 	char *filename;
 	char *class_name;
+	char *call_type;
+	char *include_filename = NULL;
 	zval *stack_frame;
+	void **cur_arg_pos = EG(argument_stack).top_element;
+	void **args = cur_arg_pos;
+	int arg_stack_consistent = 0;
+
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	while (--args >= EG(argument_stack).elements) {
+		if (*args--) {
+			break;
+		}
+		args -= *(ulong*)args;
+
+		if (args == EG(argument_stack).elements) {
+			arg_stack_consistent = 1;
+			break;
+		}
+	}
 
 	ptr = EG(current_execute_data);
 
-	/* Skip debug_backtrace() itself */
+	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
-	
+	cur_arg_pos -= 2;
+
 	array_init(return_value);
 
 	while (ptr) {
 		MAKE_STD_ZVAL(stack_frame);
 		array_init(stack_frame);
 
-		class_name = NULL;
+		if (ptr->op_array) {
+			filename = ptr->op_array->filename;
+			lineno = ptr->opline->lineno;
+			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
 
-		if (ptr->object) {
-			class_name = Z_OBJCE(*ptr->object)->name;
+			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
+			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
+			 * want to pop anything of the argument-stack */
+		} else {
+			filename = NULL;
 		}
-		if (ptr->function_state.function->common.scope) {
-			class_name = ptr->function_state.function->common.scope->name;
-		}
+
 		function_name = ptr->function_state.function->common.function_name;
-		
-		filename = ptr->op_array->filename;
-		lineno = ptr->opline->lineno;
 
 		if (function_name) {
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+
+			if (ptr->object) {
+				class_name = Z_OBJCE(*ptr->object)->name;
+				call_type = "->";
+			} else if (ptr->function_state.function->common.scope) {
+				class_name = ptr->function_state.function->common.scope->name;
+				call_type = "::";
+			} else {
+				class_name = NULL;
+				call_type = NULL;
+			}
+
+			if (class_name) {
+				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+				add_assoc_string_ex(stack_frame, "type", sizeof("type"), call_type, 1);
+			}
+
+			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
+				if (arg_stack_consistent) {
+					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+				}
+			}	
+		} else {
+			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
+			zend_bool build_filename_arg = 1;
+
+			switch (ptr->opline->op2.u.constant.value.lval) {
+				case ZEND_EVAL:
+					function_name = "eval";
+					build_filename_arg = 0;
+					break;
+				case ZEND_INCLUDE:
+					function_name = "include";
+					break;
+				case ZEND_REQUIRE:
+					function_name = "require";
+					break;
+				case ZEND_INCLUDE_ONCE:
+					function_name = "include_once";
+					break;
+				case ZEND_REQUIRE_ONCE:
+					function_name = "require_once";
+					break;
+				default:
+					/* this can actually happen if you use debug_backtrace() in your error_handler and 
+					 * you're in the top-scope */
+					function_name = "unknown"; 
+					build_filename_arg = 0;
+					break;
+			}
+
+			if (build_filename_arg && include_filename) {
+				zval *arg_array;
+
+				MAKE_STD_ZVAL(arg_array);
+				array_init(arg_array);
+				
+				/* include_filename always points to the last filename of the last last called-fuction.
+				   if we have called include in the frame above - this is the file we have included.
+				 */
+
+				add_next_index_string(arg_array, include_filename, 1);
+				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
+			}
+
+			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
 		}
-		if (class_name) {
-			add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
-		}
-		add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
-		add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
-		/* add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1); */
+
 		add_next_index_zval(return_value, stack_frame);
+
+		include_filename = filename; 
 
 		ptr = ptr->prev_execute_data;
 	}

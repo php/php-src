@@ -65,7 +65,7 @@ zend_class_entry global_main_class;
 HashTable *global_auto_globals_table;
 #endif
 
-zend_utility_values zend_uv;
+ZEND_API zend_utility_values zend_uv;
 
 ZEND_API zval zval_used_for_init; /* True global variable */
 
@@ -208,7 +208,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 			ZEND_PUTS("Array\n");
 			if (++expr->value.ht->nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
-				expr->value.ht->nApplyCount=0;
+				expr->value.ht->nApplyCount--;
 				return;
 			}
 			print_hash(expr->value.ht, indent);
@@ -220,7 +220,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 
 				if (++object->properties->nApplyCount>1) {
 					ZEND_PUTS(" *RECURSION*");
-					object->properties->nApplyCount=0;
+					object->properties->nApplyCount--;
 					return;
 				}
 				zend_printf("%s Object\n", object->ce->name);
@@ -549,6 +549,7 @@ ZEND_API void _zend_bailout(char *filename, uint lineno)
 	}
 	CG(unclean_shutdown) = 1;
 	CG(in_compilation) = EG(in_execution) = 0;
+	EG(current_execute_data) = NULL;
 	longjmp(EG(bailout), FAILURE);
 }
 END_EXTERN_C()

@@ -1,3 +1,205 @@
+2002-09-05  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c: quick-n-dirty inheritance support for __handlers
+
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Whitespace fixes.
+
+2002-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: remove dead code
+
+    * ZEND_CHANGES
+      zend_object_handlers.c: Fix __call and add some docs
+
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_object_handlers.c: Fix ZTS build.
+
+    * ZEND_CHANGES: TBD: __call(), __get(), __set().
+
+2002-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_extensions.h
+      zend_object_handlers.c
+      zend_objects.c: Support for __get, __set and __call in classes.
+    This should work as follows: if class hasn't member with given name,
+    __get/__set is called. If class has no method with given name, __call is called.
+    __get/__set are not recursive, __call can be.
+
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Workaround for superfluous comma in var_export() result.
+
+    * ZEND_CHANGES:
+    Let debug_backtrace() example print out the class name, if applicable, and the function/method arguments.
+
+2002-09-03  Thies C. Arntzen  <thies@thieso.net>
+
+    * zend_builtin_functions.c: nuke warning
+
+    * zend_builtin_functions.c: nuke unneeded stuff
+
+2002-09-03  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend.h
+      zend_ini.c: MFZE1
+
+2002-09-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_ini.c: - Revert
+
+    * zend_ini.c:
+    - MFH for: Apply rest of html errors fix (Patch by Jan Lehnardt <jan@php.net>)
+
+2002-09-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.h:
+    Add html_errors to zend_utility_values. Patch by Jan Lehnardt <jan@php.net>.
+
+2002-09-03  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c: - Fix typo
+
+2002-09-02  Thies C. Arntzen  <thies@thieso.net>
+
+    * zend_builtin_functions.c:
+    refine last patch. if the argument-stack is not consistent don't try to show
+    arguments. no call to zend_error is made as we might end up in an infinite
+    recursion if called from an error_handler.
+    so: if the arguments to functions aren't shown in debug_backtrace this is 'cause
+    the arument stack was not consistent when debug_backtrace was called.
+
+    * zend_builtin_functions.c:
+    debug_backtrace() now checks the complete argument-stack for consistency.
+
+2002-09-02  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c: MFZE1
+
+2002-09-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_llist.c: - Fix leak reported by "l0t3k" <cshmoove@hotmail.com>
+
+2002-09-01  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_operators.c: MFZE1
+
+2002-08-28  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c
+      zend_execute_API.c: debug_backtrace()
+    - make args passed to functions called vy call_user_function available again.
+
+    * zend_builtin_functions.c: debug_backtrace():
+    - make args work if called from the error_handler
+    - fix refcount for args
+
+    * zend.c:
+    clear current_execute_data on bailout as it would point into some freed area
+    on the stack.
+
+2002-08-28  derick  <derick@pb1.pair.com>
+
+    * zend.c: - MFZE1
+
+2002-08-26  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c:
+    debug_backtrace(): show name of included file for include and require calls
+    plus some small fixes suggested by andi.
+
+2002-08-24  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_builtin_functions.c: - Whitespace
+
+    * zend_builtin_functions.c: - Whitespace and better variable name
+
+2002-08-24  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c: fix warning
+
+2002-08-23  Andi Gutmans  <andi@pb1.pair.com>
+
+    * Zend.m4: - Add \n to configure fprintf
+
+    * zend_extensions.c: - dlerror -> DL_ERROR
+
+2002-08-23  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c:
+    debug_backtrace: show include/require/eval as normal functions on the stack
+
+2002-08-23  derick  <derick@pb1.pair.com>
+
+    * zend_builtin_functions.c: - No spaces :)
+
+2002-08-23  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c:
+    - debug_backtrace now also returns an array containing the arguments of the
+      called function.
+
+    zeev, andi - is knowing the structure of the stack considered a bad thing in
+    zend_builtin_function? if yes i would have to create a new function in
+    zend_ptr_stack.c (but i think we are save this way)
+
+    * zend_builtin_functions.c
+      zend_execute_API.c: - debug_backtrace:
+    	added "type" ('->' or '::') for object calls.
+    	made calls done thru call_user_func show-up correct in backtraces.
+
+    andi,
+    does this look correct to you?
+
+    * zend_execute.c: those are set by RETURN_FROM_EXECUTE
+
+2002-08-21  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_execute.c:
+    zend_execute: make sure that current_execute_data points to the right thing
+    after coming back from recursion.
+
+2002-08-19  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * zend_operators.c: MFZE1
+
+2002-08-17  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_execute.c: MFZE1
+
+2002-08-17  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * zend_execute.c
+      zend_hash.c: MFZE1
+
+2002-08-16  Stig Bakken  <ssb@pb1.pair.com>
+
+    * zend.c: * append emacs footer
+
+    * zend.c: * remove builtin exception class
+
+2002-08-16  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend.c: - Fix whitespace
+
+2002-08-16  Stig Bakken  <ssb@pb1.pair.com>
+
+    * zend_execute_API.c
+      zend_globals.h
+      zend.c
+      zend_builtin_functions.c:
+    - Added set_exception_handler() function for registering a global,
+      catch-all exception handling function 
+    - Added set_exception_handler() function for registering a global,
+      catch-all exception handling function (Stig)
+
 2002-08-15  Zeev Suraski  <zeev@pb1.pair.com>
 
     * flex.skl

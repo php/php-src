@@ -710,4 +710,11 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 END_EXTERN_C()
 
+#define ZEND_CLONE_FUNC_NAME		"__clone"
+#define ZEND_CONSTRUCTOR_FUNC_NAME	"__construct"
+#define ZEND_DESTRUCTOR_FUNC_NAME	"__destruct"
+#define ZEND_GET_FUNC_NAME          "__get"
+#define ZEND_SET_FUNC_NAME          "__set"
+#define ZEND_CALL_FUNC_NAME         "__call"
+
 #endif /* ZEND_COMPILE_H */

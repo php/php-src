@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.0.0-alpha2"
+#define ZEND_VERSION "2.0.0-alpha3"
 
 #define ZEND_ENGINE_2
 
@@ -226,6 +226,8 @@ typedef struct _zend_class_entry zend_class_entry;
 typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
+	int in_get:1;
+	int in_set:1;
 } zend_object;
 
 typedef unsigned int zend_object_handle;
@@ -311,9 +313,14 @@ struct _zend_class_entry {
 	union _zend_function *constructor;
 	union _zend_function *destructor;
 	union _zend_function *clone;
+	union _zend_function *__get;
+	union _zend_function *__set;
+	union _zend_function *__call;
 
 	/* handlers */
 	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
+
+	/* old handlers */
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 	zval (*handle_property_get)(zend_property_reference *property_reference);
 	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
@@ -336,6 +343,7 @@ typedef struct _zend_utility_functions {
 typedef struct _zend_utility_values {
 	char *import_use_extension;
 	uint import_use_extension_length;
+	zend_bool html_errors;
 } zend_utility_values;
 
 
@@ -462,7 +470,7 @@ void zenderror(char *error);
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
 extern ZEND_API zend_class_entry *zend_standard_class_def;
-extern zend_utility_values zend_uv;
+extern ZEND_API zend_utility_values zend_uv;
 extern ZEND_API zval zval_used_for_init;
 
 END_EXTERN_C()
