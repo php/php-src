@@ -253,7 +253,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		}
 	} else
 #endif
-#if WIN32
+#ifdef PHP_WIN32
 	if (PG(doc_root) && path_info && ('/' == *PG(doc_root) ||
 		'\\' == *PG(doc_root) || strstr(PG(doc_root),":\\") ||
 		strstr(PG(doc_root),":/"))) {
