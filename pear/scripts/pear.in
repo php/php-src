@@ -29,9 +29,7 @@ command structure:
 ** list not-installed packages
 ** list upgrades
 
-** list packages by author
-** list packages by category
-** list packages by state
+** list packages (by author/category/state)
 
 * operations on package files:
 
@@ -153,8 +151,9 @@ $rest = array_slice($options[1], 2);
 
 $command_options = array(
     "list-installed" => "v",
-    "install"        => "r",
-    "uninstall"      => "r",
+    "install"        => "fr",
+    "uninstall"      => "fr",
+    "upgrade"        => "fr",
 );
 
 if (isset($command_options[$command])) {
@@ -175,7 +174,7 @@ if (isset($command_options[$command])) {
 switch ($command) {
     // {{{ install
 
-    case 'install': {
+    case 'install': case 'upgrade': {
         include_once 'PEAR/Installer.php';
         $pkgfile = $cmdargs[0];
         $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
@@ -183,17 +182,28 @@ switch ($command) {
                                      basename($pkgfile) . ": %s\n");
         $installer->debug = $verbose;
         $install_options = array();
+        if ($command == 'upgrade') {
+            $install_options['upgrade'] = true;
+        }
         foreach ($cmdopts as $opt) {
-            if ($opt[0] == 'r') {
-                // This option is for use by rpm and other package
-                // tools that can install files etc. by itself, but
-                // still needs to register the package as installed in
-                // PEAR's local registry.
-                $install_options['register_only'] = true;
+            switch ($opt[0]) {
+                case 'r':
+                    // This option is for use by rpm and other package
+                    // tools that can install files etc. by itself, but
+                    // still needs to register the package as installed in
+                    // PEAR's local registry.
+                    $install_options['register_only'] = true;
+                    break;
+                case 'f':
+                    $install_options['force'] = true;
+                    break;
             }
         }
-        $installer->install($pkgfile, $install_options);
-        print "install ok\n";
+        if ($installer->install($pkgfile, $install_options)) {
+            print "install ok\n";
+        } else {
+            print "install failed\n";
+        }
         break;
     }
 
@@ -208,12 +218,20 @@ switch ($command) {
         $installer->debug = $verbose;
         $uninstall_options = array();
         foreach ($cmdopts as $opt) {
-            if ($opt[0] == 'r') {
-                $uninstall_options['register_only'] = true;
+            switch ($opt[0]) {
+                case 'r':
+                    $uninstall_options['register_only'] = true;
+                    break;
+                case 'f':
+                    $uninstall_options['force'] = true;
+                    break;
             }
         }
-        $installer->uninstall($pkgfile, $uninstall_options);
-        print "uninstall ok\n";
+        if ($installer->uninstall($pkgfile, $uninstall_options)) {
+            print "uninstall ok\n";
+        } else {
+            print "uninstall failed\n";
+        }
         break;
     }
     // }}}
@@ -396,4 +414,5 @@ function heading($text)
  * indent-tabs-mode: nil
  * End:
  */
+
 ?>
