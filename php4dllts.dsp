@@ -219,10 +219,6 @@ SOURCE=.\php3_compat.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php3_realpath.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\php_content_types.h
 # End Source File
 # Begin Source File
@@ -232,6 +228,10 @@ SOURCE=.\php_globals.h
 # Begin Source File
 
 SOURCE=.\php_ini.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_realpath.h
 # End Source File
 # Begin Source File
 
@@ -536,43 +536,35 @@ SOURCE=.\ext\standard\pageinfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ext\bcmath\php3_bcmath.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\php3_dir.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\php3_filestat.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\php3_ldap.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\php3_mail.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\mcal\php3_mcal.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\php3_string.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\php3_syslog.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\standard\php_array.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\bcmath\php_bcmath.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_dir.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_filestat.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\php_lcg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\ldap\php_ldap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_mail.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\mcal\php_mcal.h
 # End Source File
 # Begin Source File
 
@@ -585,6 +577,14 @@ SOURCE=.\ext\pcre\php_pcre.h
 # Begin Source File
 
 SOURCE=.\ext\session\php_session.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_string.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php_syslog.h
 # End Source File
 # Begin Source File
 
