@@ -14,7 +14,7 @@ PHP 4.0                                                                    NEWS
   strings that contain numbers. Based on the code from Martin Pool
   <mbp@humbug.org.au>. See http://www.linuxcare.com.au/projects/natsort/
   for more info on natural sorting. (Andrei)
-- Zeus Webserver support (version 3.3.6+) for ISAPI
+- Zeus Webserver support (version 3.3.6+) for ISAPI (Ben Mansell)
 - Fixed several problems with the PATH_TRANSLATED and PHP_SELF under Apache
   (Paul Gregg & Zeev)
 - Ported ldap_get_values_len() function from PHP3 to PHP4. (Sterling)
