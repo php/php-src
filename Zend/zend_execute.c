@@ -1130,8 +1130,6 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	EG(current_execute_data) = EX(prev_execute_data);						\
 	return;
 
-#define EX(element) execute_data.element
-
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_execute_data execute_data;
@@ -2805,7 +2803,7 @@ send_by_ref:
 							zend_error(E_ERROR, "Cannot delete non-existing object");
 						}
 						if (Z_TYPE_PP(object) != IS_OBJECT) {
-						zend_error(E_ERROR, "Cannot call delete on non-object type");
+							zend_error(E_ERROR, "Cannot call delete on non-object type");
 						}
 						Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
 					}
