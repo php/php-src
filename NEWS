@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
   using remote files). (Marcus)
 - Fixed bug #26201 (crash in ibase_trans() on invalid link handle). (Ilia)
 - Fixed bug #26198 (strtotime() handling of M/F Y date format). (Ilia)
+- Fixed bug #26194 (iconv() not properly defined with libiconv).
+  (Steph, Frank, Moriyoshi)
 - Fixed bug #26176 (Fixed handling of numeric keys in INI files). (Ilia)
 - Fixed bug #26168 (shtool availability check in phpize). 
   (robbat2 at gentoo dot org, Ilia)
