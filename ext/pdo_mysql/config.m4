@@ -2,6 +2,8 @@ dnl
 dnl $Id$
 dnl
 
+if test "$PHP_PDO" != "no"; then
+
 AC_DEFUN([PDO_MYSQL_LIB_CHK], [
   str="$PDO_MYSQL_DIR/$1/libmysqlclient.*"
   for j in `echo $str`; do
@@ -80,4 +82,6 @@ Note that the MySQL client library is not bundled anymore.])
   PHP_SUBST_OLD(PDO_MYSQL_MODULE_TYPE)
   PHP_SUBST_OLD(PDO_MYSQL_LIBS)
   PHP_SUBST_OLD(PDO_MYSQL_INCLUDE)
+fi
+
 fi

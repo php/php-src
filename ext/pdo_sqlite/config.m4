@@ -2,6 +2,8 @@ dnl $Id$
 dnl config.m4 for extension pdo_sqlite
 dnl vim:et:sw=2:ts=2:
 
+if test "$PHP_PDO" != "no"; then
+
 PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
 [  --with-pdo-sqlite             Include PDO sqlite 3 support],yes)
 
@@ -115,4 +117,6 @@ EOF
     
   fi
   PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+fi
+
 fi

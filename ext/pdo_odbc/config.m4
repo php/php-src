@@ -2,6 +2,8 @@ dnl $Id$
 dnl config.m4 for extension pdo_odbc
 dnl vim:et:sw=2:ts=2:
 
+if test "$PHP_PDO" != "no"; then
+
 AC_DEFUN([PDO_ODBC_HELP_TEXT], [[
  --with-pdo-odbc=flavour,dir  Add support for "flavour" ODBC drivers,
                               looking for include and lib dirs under "dir"
@@ -147,3 +149,4 @@ functions required for PDO support.
   PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
 fi
 
+fi

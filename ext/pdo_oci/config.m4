@@ -1,5 +1,7 @@
 dnl $Id$
 
+if test "$PHP_PDO" != "no"; then
+
 AC_DEFUN([AC_PDO_OCI_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   if test -s "$PDO_OCI_DIR/orainst/unix.rgs"; then
@@ -179,4 +181,6 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
   PHP_SUBST_OLD(PDO_OCI_VERSION)
   PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
   
+fi
+
 fi
