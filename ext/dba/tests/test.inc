@@ -11,4 +11,6 @@
 		$handler = $handler[0];
 	}
 	$lock_flag = 'l';
+	@unlink($db_filename);
+	@unlink($db_filename.'.lck');
 ?>
