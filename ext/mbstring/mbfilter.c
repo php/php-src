@@ -174,7 +174,7 @@ static const mbfl_language mbfl_language_english = {
 static const char *mbfl_language_german_aliases[] = {"Deutsch", NULL};
 
 static const mbfl_language mbfl_language_german = {
-	mbfl_no_language_english,
+	mbfl_no_language_german,
 	"German",
 	"de",
 	(const char *(*)[])&mbfl_language_german_aliases,
