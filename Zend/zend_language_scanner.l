@@ -305,7 +305,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 #endif
 
 	if(file_handle->opened_path) {
-	    file_path = file_handle->opened_path; 
+		file_path = file_handle->opened_path; 
 	} else {
 		file_path = file_handle->filename;
 	}
