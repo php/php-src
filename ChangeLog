@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Small fix in deserializing objects (Thies)
+- PHP4 now serialized Objects as 'O' (not understood by PHP3), but deserializes
+  PHP3 serialized objects as expected. (Thies)
 - Made serialize/unserialize work on classes. If the class is known at 
   unserialize() time, you'll get back a fully working object! (Thies)
 - Reworked preg_* functions according to the new PCRE API, which also made

@@ -205,7 +205,7 @@ void php3api_var_serialize(pval *buf, pval **struc)
 			if ((*struc)->type == IS_ARRAY) {
 				slen = sprintf(s, "a:%d:{", i);
 			} else {
-				slen = sprintf(s, "o:%d:\"%s\":%d:{",(*struc)->value.obj.ce->name_length,(*struc)->value.obj.ce->name, i);
+				slen = sprintf(s, "O:%d:\"%s\":%d:{",(*struc)->value.obj.ce->name_length,(*struc)->value.obj.ce->name, i);
 			}
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
@@ -337,6 +337,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 
 		case 'a':
 		case 'o':
+		case 'O':
 			INIT_PZVAL(*rval);
 
 			if (cur == 'a') {
@@ -345,38 +346,43 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 				myht = (*rval)->value.ht;
 			} else {
 				zend_class_entry *ce;
-				char *class_name;
 
-				if (*((*p) + 1) != ':') {
-					return 0;
-				}
-				(*p) += 2;
-				q = *p;
-				while (**p && **p != ':') {
-					(*p)++;
-				}
-				if (**p != ':') {
-					return 0;
-				}
-				i = atoi(q);
-				if (i < 0 || (*p + 3 + i) > max || *((*p) + 1) != '\"' ||
-					*((*p) + 2 + i) != '\"' || *((*p) + 3 + i) != ':') {
-					return 0;
-				}
-				(*p) += 2;
-				class_name = emalloc(i + 1);
-				if (i > 0) {
-					memcpy(class_name, *p, i);
-				}
-				class_name[i] = 0;
-				(*p) += i;
+				if (cur == 'O') { /* php4 serialized - we get the class-name */
+					char *class_name;
 
-				if (zend_hash_find(EG(class_table), class_name, i+1, (void **) &ce)==FAILURE) {
-					php_error(E_NOTICE, "Unserializing non-existant class: %s! No methods will be available!", class_name);
+					if (*((*p) + 1) != ':') {
+						return 0;
+					}
+					(*p) += 2;
+					q = *p;
+					while (**p && **p != ':') {
+						(*p)++;
+					}
+					if (**p != ':') {
+						return 0;
+					}
+					i = atoi(q);
+					if (i < 0 || (*p + 3 + i) > max || *((*p) + 1) != '\"' ||
+						*((*p) + 2 + i) != '\"' || *((*p) + 3 + i) != ':') {
+						return 0;
+					}
+					(*p) += 2;
+					class_name = emalloc(i + 1);
+					if (i > 0) {
+						memcpy(class_name, *p, i);
+					}
+					class_name[i] = 0;
+					(*p) += i;
+					
+					if (zend_hash_find(EG(class_table), class_name, i+1, (void **) &ce)==FAILURE) {
+						php_error(E_NOTICE, "Unserializing non-existant class: %s! No methods will be available!", class_name);
+						ce = &zend_standard_class_def;
+					}
+
+					efree(class_name);
+				} else { /* old php3 data 'o' */
 					ce = &zend_standard_class_def;
 				}
-
-				efree(class_name);
 
 				object_init_ex(*rval,ce);
 				myht = (*rval)->value.obj.properties;
@@ -415,7 +421,7 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 						zend_hash_index_update(myht, key->value.lval, &data, sizeof(data), NULL);
 						break;
 					case IS_STRING:
-						zend_hash_add(myht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
+						zend_hash_update(myht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
 						break;
 				}
 				pval_destructor(key);
