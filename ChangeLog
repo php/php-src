@@ -1,3 +1,65 @@
+2001-09-27  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/phptar.in: tab vs ws
+
+    * pear/PEAR/Packager.php: don't want "-" in package names
+
+2001-09-27  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/satellite/README: Typo
+
+    * sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/fastcgi/fastcgi.c
+      sapi/isapi/php4isapi.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      ext/yaz/php_yaz.c: Undo Z_ subst for sapi and ext/yaz
+
+    * ext/wddx/wddx.c: Undo Z_ subst
+
+2001-09-27  David Eriksson  <david@2good.com>
+
+    * ext/satellite/typemanager.c:
+    Patch from Sander Steffann <sander@steffann.nl> to prevent crash.
+
+2001-09-27  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/DB/ibase.php
+      pear/DB/oci8.php:
+    Made execute methods return a DB_result object instead of a native result for non manip queries
+
+    * pear/DB/oci8.php:
+    Allow for out parameters of stored procedures to be returned
+
+2001-09-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: MFH
+
+    * ext/gd/gd.c: Fix segfault and check for truecolor image in ImageColorAt
+
+2001-09-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - Fix crashbug in php_chunk_split()
+
+2001-09-27  Dan Libby  <dan@libby.com>
+
+    * ext/xml/expat/expat.h:
+    include php_compat.h, so that we use php_XML_* if necessary. Better to do it in expat.h, so that other libs, eg xmlrpc, inherit this behavior and we can link
+
+2001-09-27  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/string.c: Another leak bites the dust?
+
 2001-09-26  Harald Radi  <h.radi@nme.at>
 
     * ext/com/COM.c: fixed Z_* conversion errors
