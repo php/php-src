@@ -322,6 +322,7 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
 	echo "Some tests have failed, would you like to send the\nreport to PHP's QA team\n";
 	echo "(choose \"s\" to just save the results to a file)? [Yns]: ";
+	flush();
 	$user_input = fgets($fp, 10);
 	$just_save_results = (strtolower($user_input[0]) == 's');
 	
