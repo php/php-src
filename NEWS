@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - Changed doc comments to require a single white space after '/**'. (Marcus)
 - Fixed bug #29019 (Database not closing). (Marcus)
+- Fixed bug #29008 (array_combine() does not handle non-numeric/string keys).
+  (Ilia)
 - Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28868 (Internal filter registry not thread safe). (Sara)
 - Fixed bug #28851 (call_user_func_array has typo in error message). (Marcus)

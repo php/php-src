@@ -4246,6 +4246,17 @@ PHP_FUNCTION(array_combine)
 		} else if (Z_TYPE_PP(entry_keys) == IS_LONG) {
 			zval_add_ref(entry_values);
 			add_index_zval(return_value, Z_LVAL_PP(entry_keys), *entry_values);
+		} else {
+			zval key;
+
+			key = **entry_keys;
+			zval_copy_ctor(&key);
+			convert_to_string(&key);
+
+			zval_add_ref(entry_values);
+			add_assoc_zval(return_value, Z_STRVAL(key), *entry_values);
+
+			zval_dtor(&key);
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(keys), &pos_keys);
 		zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos_values);
