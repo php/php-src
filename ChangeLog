@@ -1,3 +1,19 @@
+2003-12-20  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      main/php_version.h:
+      - Make the world a better place.
+      - Will roll b3 tomorrow.
+
+2003-12-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/transports.c:
+      MFB fix for #25597
+
+    * (PHP_4_3)
+      ext/standard/fsock.c:
+      Fix Bug #25597 pfsockopen crashes when recycling a persistent list entry.
+
 2003-12-19  Wez Furlong  <wez.php@thebrainroom.net>
 
     * sapi/embed/config.w32:
