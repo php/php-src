@@ -1,3 +1,36 @@
+1999-11-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_globals.h:
+    Add post request startup handlers. These are called at the end of the
+    request startup function, and can use the initialized structures like
+    the symbol table.
+
+    * ext/session/session.c (php_rinit_session):
+    use post request startups to reenable session.auto_start
+
+    * main.c
+      php.h:
+    Add post request startup handlers. These are called at the end of the
+    request startup function, and can use the initialized structures like
+    the symbol table.
+
+    * configure.in:
+    Remove --enable-thread-safety. There is no reason people should be able
+    to set this manually; most likely, they will burn themselves by using it.
+
+1999-11-17  Stig Bakken  <ssb@fast.no>
+
+    * NEWS
+      php_version.h: Bump version to 4.0b4-dev.
+
+1999-11-17  Thies C. Arntzen  <thies@digicol.de>
+
+    * configure.in: b3 is already tagged in CVS
+
+1999-11-17  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-16  Andrei Zmievski  <zmievski@ispi.net>
 
     * ext/standard/basic_functions.c
