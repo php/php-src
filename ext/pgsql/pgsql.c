@@ -239,8 +239,8 @@ PHP_RINIT_FUNCTION(pgsql)
 
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
+	ELS_FETCH();
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
-
 	return SUCCESS;
 }
 
