@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Re-instated safe-mode realm mangling (Rasmus)
 - Fixed a bug in preg_replace() that would change the type of the replacement
   array entries to string. (Andrei)
 - Added user-space object overloading extension. (Andrei)
