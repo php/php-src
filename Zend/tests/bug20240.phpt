@@ -15,7 +15,11 @@ class test
     }
 
     function destructor() {
-        print $this->member;
+        print __METHOD__ . "\n";
+    }
+
+    function __destruct() {
+        print __METHOD__ . "\n";
     }
 
     function add() {
@@ -35,4 +39,5 @@ echo "Done\n";
 2
 3
 Done
-3
+test::destructor
+test::__destruct
