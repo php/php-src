@@ -4,7 +4,6 @@ htmlentities() test 13 (default_charset / EUC-JP)
 output_handler=
 mbstring.internal_encoding=pass
 default_charset=EUC-JP
---SKIPIF--
 --FILE--
 <?php
 	print ini_get('default_charset')."\n";

@@ -1,7 +1,7 @@
 --TEST--
 htmlentities() test 3 (setlocale / de_DE.ISO-8859-1)
 --SKIPIF--
-<?php setlocale( LC_CTYPE, "de_DE.ISO-8859-1" ) or die("skip\n"); ?>
+<?php setlocale(LC_CTYPE, "de_DE.ISO-8859-1") or die("skip setlocale() failed\n"); ?>
 --INI--
 mbstring.internal_encoding=pass
 --FILE--

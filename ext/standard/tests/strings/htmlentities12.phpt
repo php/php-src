@@ -4,7 +4,6 @@ htmlentities() test 12 (default_charset / ISO-8859-1)
 output_handler=
 mbstring.internal_encoding=pass
 default_charset=ISO-8859-1
---SKIPIF--
 --FILE--
 <?php
 	print ini_get('default_charset')."\n";
