@@ -24,16 +24,21 @@
 #include "php_thttpd.h"
 #include "php_variables.h"
 #include "version.h"
+#include "php_ini.h"
 
 #include "ext/standard/php_smart_str.h"
 
+#include <sys/time.h>
+#include <sys/types.h>
 #include <sys/uio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef struct {
 	httpd_conn *hc;
 	int read_post_data;	
 	void (*on_close)(int);
+	long async_send;
 } php_thttpd_globals;
 
 
@@ -45,6 +50,10 @@ static php_thttpd_globals thttpd_globals;
 #define TG(v) (thttpd_globals.v)
 #endif
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("async_send", "0", PHP_INI_ALL, OnUpdateInt, async_send, php_thttpd_globals, thttpd_globals)
+PHP_INI_END()
+
 static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
@@ -55,8 +64,17 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 		if (n == -1 && errno == EPIPE)
 			php_handle_aborted_connection();
-		if (n == -1 && errno == EAGAIN)
+		if (n == -1 && errno == EAGAIN) {
+			fd_set fdw;
+
+			FD_ZERO(&fdw);
+			FD_SET(TG(hc)->conn_fd, &fdw);
+			n = select(TG(hc)->conn_fd + 1, NULL, &fdw, NULL, NULL);
+			if (n <= 0)
+				php_handle_aborted_connection();
+
 			continue;
+		}
 		if (n <= 0) 
 			return n;
 
@@ -109,6 +127,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		vec[n].iov_base = h->header;
 		vec[n++].iov_len = h->header_len;
 		if (n >= COMBINE_HEADERS - 1) {
+			/* XXX: partial writevs are not handled */
 			if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
 				php_handle_aborted_connection();
 			n = 0;
@@ -123,6 +142,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	vec[n++].iov_len = 2;
 
 	if (n) {
+		/* XXX: partial writevs are not handled */
 		if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
 			php_handle_aborted_connection();
 	}
@@ -134,6 +154,7 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0, tmp;
 	int c;
+	int n;
 
 	/* to understand this, read cgi_interpose_input() in libhttpd.c */
 	c = TG(hc)->read_idx - TG(hc)->checked_idx;
@@ -155,6 +176,18 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 		/* A simple "tmp > 0" produced broken code on Solaris/GCC */
 		if (tmp != 0 && tmp != -1)
 			read_bytes += tmp;
+
+		if (tmp == -1 && errno == EAGAIN) {
+			fd_set fdr;
+
+			FD_ZERO(&fdr);
+			FD_SET(TG(hc)->conn_fd, &fdr);
+			n = select(TG(hc)->conn_fd + 1, &fdr, NULL, NULL, NULL);
+			if (n <= 0)
+				php_handle_aborted_connection();
+
+			continue;
+		}
 	}
 
 	TG(read_post_data) += read_bytes;
@@ -240,11 +273,39 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC);
 }
 
+static PHP_MINIT_FUNCTION(thttpd)
+{
+	REGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
+static zend_module_entry php_thttpd_module = {
+	STANDARD_MODULE_HEADER,
+	"thttpd",
+	NULL,
+	PHP_MINIT(thttpd),
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* info */
+	NULL,
+	STANDARD_MODULE_PROPERTIES
+};
+
+static int php_thttpd_startup(sapi_module_struct *sapi_module)
+{
+	if (php_module_startup(sapi_module) == FAILURE
+			|| zend_startup_module(&php_thttpd_module) == FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static sapi_module_struct thttpd_sapi_module = {
 	"thttpd",
 	"thttpd",
 	
-	php_module_startup,
+	php_thttpd_startup,
 	php_module_shutdown_wrapper,
 	
 	NULL,									/* activate */
