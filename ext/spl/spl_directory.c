@@ -292,18 +292,11 @@ SPL_METHOD(DirectoryIterator, key)
 }
 /* }}} */
 
-/* {{{ proto string|false DirectoryIterator::current()
+/* {{{ proto DirectoryIterator DirectoryIterator::current()
    Return this (needed for Iterator interface) */
 SPL_METHOD(DirectoryIterator, current)
 {
-	zval *object = getThis();
-	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
-
-	if (intern->entry.d_name[0]) {
-		RETURN_STRING(intern->entry.d_name, 1);
-	} else {
-		RETURN_FALSE;
-	}
+	REPLACE_ZVAL_VALUE(&return_value, getThis(), 1);
 }
 /* }}} */
 
@@ -518,7 +511,8 @@ zend_object_iterator *spl_ce_dir_get_iterator(zend_class_entry *ce, zval *object
 	object->refcount++;
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_ce_dir_it_funcs;
-	MAKE_STD_ZVAL(iterator->current);
+	iterator->current = object;
+	object->refcount++;
 	iterator->object = dir_object;
 	
 	return (zend_object_iterator*)iterator;
@@ -580,12 +574,8 @@ static void spl_ce_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	spl_ce_dir_object   *object   = iterator->object;
 	
 	object->index++;
-	zval_dtor(iterator->current);
 	if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
 		object->entry.d_name[0] = '\0';
-		ZVAL_NULL(iterator->current);
-	} else {
-		ZVAL_STRING(iterator->current, object->entry.d_name, 1);
 	}
 }
 /* }}} */
@@ -601,12 +591,8 @@ static void spl_ce_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 	if (object->dirp) {
 		php_stream_rewinddir(object->dirp);
 	}
-	zval_dtor(iterator->current);
 	if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
 		object->entry.d_name[0] = '\0';
-		ZVAL_NULL(iterator->current);
-	} else {
-		ZVAL_STRING(iterator->current, object->entry.d_name, 1);
 	}
 }
 /* }}} */
@@ -684,6 +670,25 @@ zend_object_iterator *spl_ce_dir_tree_get_iterator(zend_class_entry *ce, zval *o
 }
 /* }}} */
 
+/* {{{ spl_ce_dir_cast */
+static int spl_ce_dir_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+{
+	zval free_obj;
+	spl_ce_dir_object   *dir_object = (spl_ce_dir_object*)zend_object_store_get_object(readobj TSRMLS_CC);
+
+	if (type ==IS_STRING && *dir_object->entry.d_name) {
+		if (should_free) {
+			free_obj = *writeobj;
+		}
+		ZVAL_STRING(writeobj, dir_object->entry.d_name, 1);
+		if (should_free) {
+			zval_dtor(&free_obj);
+		}
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION(spl_directory)
  */
@@ -693,6 +698,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	zend_class_implements(spl_ce_DirectoryIterator TSRMLS_CC, 1, zend_ce_iterator);
 	memcpy(&spl_ce_dir_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	spl_ce_dir_handlers.clone_obj = spl_ce_dir_object_clone;
+	spl_ce_dir_handlers.cast_object = spl_ce_dir_cast;
 
 	spl_ce_DirectoryIterator->get_iterator = spl_ce_dir_get_iterator;
 
