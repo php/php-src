@@ -46,6 +46,7 @@ typedef unsigned int uint;
 #define HAVE_SNPRINTF	1
 #define HAVE_VSNPRINTF	1
 
+#define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #define zend_isinf(a)	0
 #define zend_finite(x)	_finite(x)
