@@ -363,7 +363,7 @@ php_sxe_object_new(TSRMLS_D)
 {
 	php_sxe_object *intern;
 
-	intern = emalloc(sizeof(php_sxe_object));
+	intern = ecalloc(1, sizeof(php_sxe_object));
 	intern->zo.ce = sxe_class_entry;
 	intern->zo.in_get = 0;
 	intern->zo.in_set = 0;
