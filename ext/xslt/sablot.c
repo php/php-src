@@ -38,7 +38,7 @@
 #include <fcntl.h>
 
 /* functions relating to handlers */
-static void register_sax_handler_pair(zval **, zval **, zval **);
+static void register_sax_handler_pair(zval **, zval **, zval ** TSRMLS_DC);
 
 /* Free processor */
 static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -248,7 +248,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 	/* Convert the sax_handlers_p zval ** to a hash table we can process */
 	sax_handlers = HASH_OF(*sax_handlers_p);
 	if (!sax_handlers) {
-		php_error(E_WARNING, "Expecting an array as the second argument to xslt_set_sax_handlers()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expecting an array as the second argument");
 		return;
 	}
 
@@ -260,7 +260,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		key_type = zend_hash_get_current_key(sax_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
 			convert_to_string_ex(handler);
-			php_error(E_NOTICE, "Skipping numerical index %d (with value %s) in xslt_set_sax_handlers()",
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numerical index %d (with value %s)",
 			          num_key, Z_STRVAL_PP(handler));
 			continue;
 		}
@@ -270,21 +270,21 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).doc_start, 
 			                          &XSLT_SAX(handle).doc_end, 
-			                          handler);
+			                          handler TSRMLS_CC);
 		}
 		/* Element handlers, start of an element, and end of an element */
 		else if (strcasecmp(string_key, "element") == 0) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).element_start, 
 			                          &XSLT_SAX(handle).element_end, 
-			                          handler);
+			                          handler TSRMLS_CC);
 		}
 		/* Namespace handlers, start of a namespace, end of a namespace */
 		else if (strcasecmp(string_key, "namespace") == 0) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).namespace_start, 
 			                          &XSLT_SAX(handle).namespace_end, 
-			                          handler);
+			                          handler TSRMLS_CC);
 		}
 		/* Comment handlers, called when a comment is reached */
 		else if (strcasecmp(string_key, "comment") == 0) {
@@ -304,7 +304,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		}
 		/* Invalid handler name, tsk, tsk, tsk :) */
 		else {
-			php_error(E_WARNING, "Invalid option to xslt_set_sax_handlers(): %s", string_key);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option: %s", string_key);
 		}
 	}
 }
@@ -332,7 +332,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 	scheme_handlers = HASH_OF(*scheme_handlers_p);
 	if (!scheme_handlers) {
-		php_error(E_WARNING, "2nd argument to xslt_set_scheme_handlers() must be an array");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "2nd argument must be an array");
 		return;
 	}
 
@@ -344,7 +344,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 		key_type = zend_hash_get_current_key(scheme_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
-			php_error(E_NOTICE, "Numerical key %d (with value %s) being ignored in xslt_set_scheme_handlers()",
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Numerical key %d (with value %s) being ignored",
 					  num_key, Z_STRVAL_PP(handler));
 			continue;
 		}
@@ -371,7 +371,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 		}
 		/* Invalid handler name */
 		else {
-			php_error(E_WARNING, "%s() invalid option '%s', skipping", get_active_function_name(TSRMLS_C), string_key);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid option '%s', skipping", string_key);
 			continue;
 		}
 
@@ -795,7 +795,7 @@ static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* {{{ register_sax_handler_pair()
    Register a pair of sax handlers */
-static void register_sax_handler_pair(zval **handler1, zval **handler2, zval **handler)
+static void register_sax_handler_pair(zval **handler1, zval **handler2, zval **handler TSRMLS_DC)
 {
 	zval **current;   /* The current handler we're grabbing */
 	
@@ -805,7 +805,7 @@ static void register_sax_handler_pair(zval **handler1, zval **handler2, zval **h
 		zval_add_ref(handler1);
 	}
 	else {
-		php_error(E_WARNING, "Wrong format of arguments to xslt_set_sax_handlers()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong format of arguments");
 		return;
 	}
 	
@@ -815,7 +815,7 @@ static void register_sax_handler_pair(zval **handler1, zval **handler2, zval **h
 		zval_add_ref(handler2);
 	}
 	else {
-		php_error(E_WARNING, "Wrong format of arguments to xslt_set_sax_handlers()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong format of arguments");
 		return;
 	}
 }
@@ -1452,6 +1452,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 	char     *msgbuf  = NULL;                                                           /* Message buffer */
 	char      msgformat[] = "Sablotron Message on line %s, level %s: %s\n"; /* Message format */
 	int       error = 0;                                                                /* Error container */
+    TSRMLS_FETCH();
 
 	if (!XSLT_LOG(handle).do_log)
 		return 0;
@@ -1495,7 +1496,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 			/* Haven't seen this yet, but turning it on during dev, to see
 				what we can encounter -- MRS
 			else {
-				php_error(E_WARNING, "Got key %s with val %s", key, val);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Got key %s with val %s", key, val);
 			}
 			*/
 			
@@ -1548,7 +1549,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 			                           O_WRONLY|O_CREAT|O_APPEND,
 			                           S_IRUSR|S_IRGRP|S_IROTH|S_IWUSR);
 			if (XSLT_LOG(handle).fd == -1) {
-				php_error(E_WARNING, "Cannot open log file, %s [%d]: %s",
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open log file, %s [%d]: %s",
 				          XSLT_LOG(handle).path, errno, strerror(errno));
 				XSLT_LOG(handle).fd = 0;
 			}
@@ -1563,7 +1564,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 	/* Write the error to the file */
 	error = write(XSLT_LOG(handle).fd, msgbuf, strlen(msgbuf));
 	if (error == -1) {
-		php_error(E_WARNING, "Cannot write data to log file, %s, with fd, %d [%d]: %s",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write data to log file, %s, with fd, %d [%d]: %s",
 		          (XSLT_LOG(handle).path ? XSLT_LOG(handle).path : "stderr"),
 		          XSLT_LOG(handle).fd,
 		          errno,
