@@ -12,6 +12,7 @@ The main differences between the two:
   (-C switch kept for compatibility)
 * Plain text error message
 * $argc and $argv registered irrespective of register_globals
+  and register_argc_argv php.ini settings.
 * implicit_flush always on
 * -r option which allows execution of PHP code directly from
   the command line (e.g. php -r 'echo md5("test");' )
