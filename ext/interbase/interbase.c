@@ -12,37 +12,81 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Jouni Ahto <jah@cultnet.fi>                                 |
+   | Authors: Jouni Ahto <jah@mork.net>                                   |
+   |		  Andrew Avdeev <andy@rsc.mv.ru>                              |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
 
-/* TODO: A lot... */
+
+/* TODO: Arrays, roles?
+A lot... */
+
+/*
+	Changes:
+		1999-09-21:	Ivo Panacek <ivop@regionet.cz>
+			- added COMPILE_DL section
+			- more verbose php_info_ibase function
+			  mostly stolen from pgsql.c for now
+		1999-10-05:	Ivo Panacek <ivop@regionet.cz>
+			- safe rinit/rfinish: check for NULL so
+			  rfinish could be called repeatedly
+			  emalloc & co. replaced with malloc & co.
+*/
 
 #include "php.h"
-#include "php_config.h"
+#include "php_ini.h"
+#include "ext/standard/php_standard.h"
+#include "php_globals.h"
 #include "php_interbase.h"
 
 #if HAVE_IBASE
 #include <ibase.h>
 #include <time.h>
+#include "ext/standard/fsock.h"
+/*
+#include "php_list.h"
 #include "php_string.h"
-#include "php_globals.h"
+#include "fsock.h"
+#include "head.h"
+*/
 
 /* {{{ extension definition structures */
 function_entry ibase_functions[] = {
-	PHP_FE(ibase_connect,							NULL)
-	PHP_FE(ibase_pconnect,							NULL)
-	PHP_FE(ibase_close,								NULL)
-	PHP_FE(ibase_query,								NULL)
-	PHP_FE(ibase_fetch_row,							NULL)
-	PHP_FE(ibase_free_result,						NULL)
-	PHP_FE(ibase_prepare,							NULL)
-	PHP_FE(ibase_bind,								NULL)
-	PHP_FE(ibase_execute,							NULL)
-	PHP_FE(ibase_free_query,						NULL)
-	PHP_FE(ibase_timefmt,							NULL)
+	PHP_FE(ibase_connect, NULL)
+	PHP_FE(ibase_pconnect, NULL)
+	PHP_FE(ibase_close, NULL)
+	PHP_FE(ibase_query, NULL)
+	PHP_FE(ibase_fetch_row, NULL)
+	PHP_FE(ibase_fetch_object, NULL)
+	PHP_FE(ibase_free_result, NULL)
+	PHP_FE(ibase_prepare, NULL)
+	PHP_FE(ibase_execute, NULL)
+	PHP_FE(ibase_free_query, NULL)
+	PHP_FE(ibase_timefmt, NULL)
+
+	PHP_FE(ibase_num_fields, NULL)
+	PHP_FE(ibase_field_info, NULL)
+
+	PHP_FE(ibase_trans, NULL)
+	PHP_FE(ibase_commit, NULL)
+	PHP_FE(ibase_rollback, NULL)
+
+	PHP_FE(ibase_blob_info, NULL)
+	PHP_FE(ibase_blob_create, NULL)
+	PHP_FE(ibase_blob_add, NULL)
+	PHP_FE(ibase_blob_cancel, NULL)
+	PHP_FE(ibase_blob_close, NULL)
+	PHP_FE(ibase_blob_open, NULL)
+	PHP_FE(ibase_blob_get, NULL)
+	PHP_FE(ibase_blob_echo, NULL)
+#ifndef PHP_WIN32
+#if 0
+	PHP_FE(ibase_blob_import, NULL)
+#endif
+#endif
+	PHP_FE(ibase_errmsg, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -51,1061 +95,2559 @@ zend_module_entry ibase_module_entry =
 	"interbase",
 	ibase_functions,
 	PHP_MINIT(ibase),
-	NULL,
+	PHP_MSHUTDOWN(ibase),
 	PHP_RINIT(ibase),
-	NULL,
+	PHP_MSHUTDOWN(ibase),
 	PHP_MINFO(ibase),
 	STANDARD_MODULE_PROPERTIES
 };
-/* }}} */
 
-/* {{{ thread safety stuff */
-#if defined(THREAD_SAFE)
-typedef ibase_global_struct{
-        ibase_module php_ibase_module;
-} ibase_global_struct;
+#if COMPILE_DL
+#include "dl/phpdl.h"
+DLEXPORT php_module_entry *get_module() { return &ibase_module_entry; }
 
-#define IBASE_GLOBAL(a) ibase_globals->a
-
-#define IBASE_TLS_VARS \
-        ibase_global_struct *ibase_globals; \
-        ibase_globals=TlsGetValue(IBASETls); 
+#define DL_MALLOC(size) malloc(size)
+#define DL_STRDUP(str) strdup(str)
+#define DL_FREE(ptr) free(ptr)
 
 #else
+
+#define DL_MALLOC(size) emalloc(size)
+#define DL_STRDUP(str) estrdup(str)
+#define DL_FREE(ptr) efree(ptr)
+
+#endif
+
+#ifdef ZTS
+int ibase_globals_id;
+#else
+PHP_IBASE_API php_ibase_globals ibase_globals;
+#endif
+
+
+/* }}} */
+
+
+/* {{{ internal macros and structures */
+
+#define IB_STATUS (IBG(status))
+
+/* db_handle and transaction handle keep in one variable
+  link = db_handle * IBASE_TRANS_ON_LINK + trans_handle
+*/
+
+/* get link and transaction from long argument
+ */
+#define GET_LINK_TRANS(link_id, ib_link, trans_n) { \
+	int type; \
+	trans_n = link_id % IBASE_TRANS_ON_LINK; \
+	link_id /= IBASE_TRANS_ON_LINK; \
+	ib_link = (ibase_db_link *) zend_list_find(link_id, &type); \
+	if (type!=IBG(le_link) && type!=IBG(le_plink)) { \
+		_php_ibase_module_error("%d is not link or transaction index",link_id); \
+		RETURN_FALSE; \
+	}}
+
+
+/* get query  */
+#define GET_QUERY(query_id, ib_query) { \
+	int type; \
+	ib_query = (ibase_query *) zend_list_find(query_id, &type); \
+	if (type!=IBG(le_query)) { \
+		_php_ibase_module_error("%d is not query index",query_id); \
+		RETURN_FALSE; \
+	}}
+
+/* get result  */
+#define GET_RESULT(result_id, ib_result) { \
+	int type; \
+	ib_result = (ibase_result *) zend_list_find(result_id, &type); \
+	if (type!=IBG(le_result)) { \
+		_php_ibase_module_error("%d is not result index",result_id); \
+		RETURN_FALSE; \
+	}}
+
+
+#define RESET_ERRMSG { IBG(errmsg)[0] = '\0';}
+
+#define TEST_ERRMSG ( IBG(errmsg)[0] != '\0')
+
+/* sql variables union
+used for convert and binding input variables
+*/
+typedef struct {
+	union {
+		short sval;
+		float fval;
+		ISC_QUAD qval;
+	} val;
+	short sqlind;
+} BIND_BUF;
+
+
+/* get blob identifier from argument
+ on empty unset argument ib_blob set to NULL
+ */
+#define GET_BLOB_ID_ARG(blob_arg, ib_blob)\
+{\
+	if (blob_arg->type == IS_STRING && blob_arg->value.str.len == 0) {\
+		ib_blob = NULL;\
+	} else if (blob_arg->type != IS_STRING\
+			 || blob_arg->value.str.len != sizeof(ibase_blob_handle)\
+			 || ((ibase_blob_handle *)(blob_arg->value.str.val))->bl_handle != 0){\
+		_php_ibase_module_error("invalid blob id");\
+		RETURN_FALSE;\
+	} else {\
+		ib_blob = (ibase_blob_handle *)blob_arg->value.str.val;\
+	}\
+}
+
+
+/* get blob handle from argument
+ note: blob already open when handle active
+ */
+#define GET_BLOB_HANDLE_ARG(blob_arg, blob_ptr) \
+{ \
+	int type; \
+	convert_to_long(blob_arg); \
+	blob_ptr = (ibase_blob_handle *) zend_list_find(blob_arg->value.lval, &type); \
+	if (type!=IBG(le_blob)) { \
+		_php_ibase_module_error("%d is not blob handle",blob_arg->value.lval); \
+		RETURN_FALSE; \
+	} \
+}
+
+/* blob information struct */
+typedef struct {
+	ISC_LONG  max_segment;		/* Length of longest segment */
+	ISC_LONG  num_segments;		/* Total number of segments */
+	ISC_LONG  total_length;		/* Total length of blob */
+	int		  bl_stream;		/* blob is stream ? */
+} IBASE_BLOBINFO;
+
+/* }}} */
+
+/*
 #define IBASE_GLOBAL(a) a
 #define IBASE_TLS_VARS
 ibase_module php_ibase_module;
-#endif
-/* }}} */
+*/
 
-/* {{{ php_ibase_close_link() */
-static void php_ibase_close_link(isc_db_handle db)
+/* error handling ---------------------------- */
+
+/* {{{ proto string ibase_errmsg(void) 
+   Return error message */
+PHP_FUNCTION(ibase_errmsg)
 {
-	ISC_STATUS status[20];
-	IBASE_TLS_VARS;
-
-	isc_detach_database(status, &db);
-	IBASE_GLOBAL(php_ibase_module).num_links--;
+	char *errmsg = IBG(errmsg);
+	IBLS_FETCH();
+	
+	if(errmsg[0]){
+		RETURN_STRING(errmsg,1);
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ php_ibase_close_plink() */
-static void php_ibase_close_plink(isc_db_handle db)
-{
-	ISC_STATUS status[20];
-	IBASE_TLS_VARS;
 
-	isc_detach_database(status, &db);
-	php_ibase_module.num_persistent--;
-	php_ibase_module.num_links--;
+/* {{{ _php_ibase_error() 
+    print interbase error and save it for ibase_errmsg() */
+static void _php_ibase_error(void)
+{
+	char *s, *errmsg = IBG(errmsg);
+	ISC_STATUS *statusp = IB_STATUS;
+
+	s = errmsg;
+	while((s - errmsg) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && isc_interprete(s, &statusp)){
+		strcat(errmsg, " ");
+		s = errmsg + strlen(errmsg);
+	}
+	php_error(E_WARNING, "InterBase: %s",errmsg);
 }
 /* }}} */
 
-/* {{{ php_ibase_free_result() */
-static void php_ibase_free_result(ibase_result_handle *result)
+
+/* {{{ _php_ibase_module_error()
+	print php interbase module error	 and save it for ibase_errmsg() */
+static void _php_ibase_module_error(char *msg, ...)
+{
+	char *errmsg = IBG(errmsg);
+	va_list ap;
+	int len;
+
+	va_start(ap, msg);
+	len = vsnprintf(errmsg, MAX_ERRMSG - 1, msg, ap);
+	va_end(ap);
+	errmsg[len] = '\0';
+	
+	php_error(E_WARNING, "InterBase module: %s",errmsg);
+}
+/* }}} */
+
+
+/* destructors ---------------------- */
+
+
+/* {{{ _php_ibase_free_xsqlda() */
+/* not actual destructor ... */
+static void _php_ibase_free_xsqlda(XSQLDA *sqlda)
 {
 	int i;
-	ISC_STATUS status[20];
-	IBASE_TLS_VARS;
+	XSQLVAR *var;
 
-	if (!IBASE_GLOBAL(php_ibase_module).manualtransactions && result->commitok) {
-		isc_commit_transaction(status, &result->trans);
-	}
-	if (result->sqlda != NULL) {
-		for (i = 0; i < result->sqlda->sqld; i++) {
-			efree(result->sqlda->sqlvar[i].sqldata);
-			efree(result->sqlda->sqlvar[i].sqlind);
+	if(sqlda){
+		var = sqlda->sqlvar;
+		for (i = 0; i < sqlda->sqld; i++, var++) {
+			efree(var->sqldata);
+			if(var->sqlind)
+				efree(var->sqlind);
 		}
-		efree(result->sqlda);
+		efree(sqlda);
 	}
-	isc_dsql_free_statement(status, &result->result, DSQL_drop);
-	efree(result);
 }
 /* }}} */
 
-/* {{{ php_ibase_free_query() */
-static void php_ibase_free_query(ibase_query_handle *query)
+
+/* {{{ _php_ibase_commit_link() */
+static void _php_ibase_commit_link(ibase_db_link *link)
 {
 	int i;
-	ISC_STATUS status[20];
 
-	if (query->sqlda != NULL) {
-		if (query->alloced) {
-			for (i = 0; i < query->sqlda->sqld; i++) {
-				efree(query->sqlda->sqlvar[i].sqldata);
-				efree(query->sqlda->sqlvar[i].sqlind);
+	if (link->trans[0] != NULL) { /* commit default */
+		if (isc_commit_transaction(IB_STATUS, &link->trans[0])) {
+			_php_ibase_error();
+		}
+		link->trans[0] = NULL;
+	}
+	for (i = 1; i < IBASE_TRANS_ON_LINK; i++) {
+		if (link->trans[i] != NULL) {
+			if (isc_rollback_transaction(IB_STATUS, &link->trans[i])) {
+				_php_ibase_error();
+			}
+			link->trans[i] = NULL;
+		}
+	}
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_close_link() */
+static void _php_ibase_close_link(ibase_db_link *link)
+{
+	_php_ibase_commit_link(link);
+	isc_detach_database(IB_STATUS, &link->link);
+	IBG(num_links)--;
+	efree(link);
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_close_plink() */
+static void _php_ibase_close_plink(ibase_db_link *link)
+{
+	_php_ibase_commit_link(link);
+	isc_detach_database(IB_STATUS, &link->link);
+	IBG(num_persistent)--;
+	IBG(num_links)--;
+	free(link);
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_free_result() */
+static void _php_ibase_free_result(ibase_result *ib_result)
+{
+	if (ib_result){
+		_php_ibase_free_xsqlda(ib_result->out_sqlda);
+		if (ib_result->drop_stmt && ib_result->stmt) {
+			if(isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_drop)){
+				_php_ibase_error();
+			}
+		} else {
+			if(isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_close)){
+				_php_ibase_error();
 			}
 		}
-		efree(query->sqlda);
+		if (ib_result->out_array) {
+			efree(ib_result->out_array);
+		}
+		efree(ib_result);
 	}
-	isc_dsql_free_statement(status, &query->query, DSQL_drop);
-	efree(query);
 }
 /* }}} */
+
+
+/* {{{ _php_ibase_free_query() */
+static void _php_ibase_free_query(ibase_query *ib_query)
+{
+	
+	if(ib_query){
+		if (ib_query->in_sqlda) {
+			efree(ib_query->in_sqlda);
+		}
+		if (ib_query->out_sqlda) {
+			efree(ib_query->out_sqlda);
+		}
+		if (ib_query->stmt) {
+			if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop)){
+				_php_ibase_error();
+			}
+		}
+		if (ib_query->in_array) {
+			efree(ib_query->in_array);
+		}
+		if (ib_query->out_array) {
+			efree(ib_query->out_array);
+		}
+		efree(ib_query);
+	}
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_free_blob()	*/
+static void _php_ibase_free_blob(ibase_blob_handle *ib_blob)
+{
+	
+	if (ib_blob->bl_handle != NULL) { /* blob open*/
+		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
+			_php_ibase_error();
+		}
+	}
+	efree(ib_blob);
+}
+/* }}} */
+
 
 /* {{{ startup, shutdown and info functions */
 PHP_MINIT_FUNCTION(ibase)
 {
-	IBASE_TLS_VARS;
+	IBLS_FETCH();
 
-	if (cfg_get_long("ibase.allow_persistent", &IBASE_GLOBAL(php_ibase_module).allow_persistent) == FAILURE) {
-		IBASE_GLOBAL(php_ibase_module).allow_persistent = 1;
+	if (cfg_get_long("ibase.allow_persistent", &IBG(allow_persistent)) == FAILURE) {
+		IBG(allow_persistent) = 1;
 	}
-	if (cfg_get_long("ibase.max_persistent", &IBASE_GLOBAL(php_ibase_module).max_persistent) == FAILURE) {
-		IBASE_GLOBAL(php_ibase_module).max_persistent = -1;
+	if (cfg_get_long("ibase.max_persistent", &IBG(max_persistent)) == FAILURE) {
+		IBG(max_persistent) = -1;
 	}
-	if (cfg_get_long("ibase.max_links", &IBASE_GLOBAL(php_ibase_module).max_links) == FAILURE) {
-		IBASE_GLOBAL(php_ibase_module).max_links = -1;
+	if (cfg_get_long("ibase.max_links", &IBG(max_links)) == FAILURE) {
+		IBG(max_links) = -1;
 	}
-	/*
-	if (cfg_get_long("ibase.manualtransactions", &IBASE_GLOBAL(php_ibase_module).manualtransactions) == FAILURE) {
-		IBASE_GLOBAL(php_ibase_module).manualtransactions = 0;
+	if (cfg_get_string("ibase.default_user", &IBG(default_user)) == FAILURE
+		|| IBG(default_user)[0] == 0) {
+		IBG(default_user) = "";
 	}
-	*/
-	IBASE_GLOBAL(php_ibase_module).manualtransactions = 0;
-	if (cfg_get_string("ibase.default_user", &IBASE_GLOBAL(php_ibase_module).default_user) == FAILURE
-		|| IBASE_GLOBAL(php_ibase_module).default_user[0] == 0) {
-		IBASE_GLOBAL(php_ibase_module).default_user = "";
+	if (cfg_get_string("ibase.default_password", &IBG(default_password)) == FAILURE
+		|| IBG(default_password)[0] == 0) {	
+		IBG(default_password) = "";
 	}
-	if (cfg_get_string("ibase.default_password", &IBASE_GLOBAL(php_ibase_module).default_password) == FAILURE
-		|| IBASE_GLOBAL(php_ibase_module).default_password[0] == 0) {	
-		IBASE_GLOBAL(php_ibase_module).default_password = "";
+	if (cfg_get_string("ibase.timeformat", &IBG(timeformat)) == FAILURE) {
+		IBG(cfg_timeformat) = "%m/%d/%Y %H:%M:%S";
 	}
-	if (cfg_get_string("ibase.timeformat", &IBASE_GLOBAL(php_ibase_module).timeformat) == FAILURE) {
-		IBASE_GLOBAL(php_ibase_module).timeformat = "%Y-%m-%d %H:%M:%S";
-	}
-	IBASE_GLOBAL(php_ibase_module).num_persistent=0;
-	IBASE_GLOBAL(php_ibase_module).le_result = register_list_destructors(php_ibase_free_result, NULL);
-	IBASE_GLOBAL(php_ibase_module).le_query = register_list_destructors(php_ibase_free_query, NULL);
-	IBASE_GLOBAL(php_ibase_module).le_link = register_list_destructors(php_ibase_close_link, NULL);
-	IBASE_GLOBAL(php_ibase_module).le_plink = register_list_destructors(NULL, php_ibase_close_plink);
+
+	IBG(timeformat) = NULL;
+	IBG(errmsg) = NULL;
+
+	IBG(num_persistent) = 0;
+	IBG(le_result) = register_list_destructors(_php_ibase_free_result, NULL);
+	IBG(le_query) = register_list_destructors(_php_ibase_free_query, NULL);
+	IBG(le_blob) = register_list_destructors(_php_ibase_free_blob, NULL);
+	IBG(le_link) = register_list_destructors(_php_ibase_close_link, NULL);
+	IBG(le_plink) = register_list_destructors(_php_ibase_commit_link, _php_ibase_close_plink);
+
+	REGISTER_LONG_CONSTANT("IBASE_DEFAULT", PHP_IBASE_DEFAULT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_TEXT", PHP_IBASE_TEXT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_TIMESTAMP", PHP_IBASE_TIMESTAMP, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_READ", PHP_IBASE_READ, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_COMMITED", PHP_IBASE_COMMITTED, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_CONSISTENCY", PHP_IBASE_CONSISTENCY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_NOWAIT", PHP_IBASE_NOWAIT, CONST_PERSISTENT);
+	
 	return SUCCESS;
 }
+
 
 PHP_RINIT_FUNCTION(ibase)
 {
-	IBASE_TLS_VARS;
+	IBLS_FETCH();
 
-	IBASE_GLOBAL(php_ibase_module).default_link=-1;
-	IBASE_GLOBAL(php_ibase_module).num_links = php_ibase_module.num_persistent;
+    IBG(default_link)= -1;
+	IBG(num_links) = IBG(num_persistent);
+
+	if(IBG(timeformat))
+        DL_FREE(IBG(timeformat));
+	IBG(timeformat) = DL_STRDUP(IBG(cfg_timeformat));
+
+	if(IBG(errmsg))
+	    DL_FREE(IBG(errmsg));
+	IBG(errmsg) = DL_MALLOC(sizeof(char)*MAX_ERRMSG+1);
+
 	return SUCCESS;
 }
 
-/* TODO IF NEEDED
 
-int php_mfinish_ibase(void)
+PHP_MSHUTDOWN_FUNCTION(ibase)
 {
+	return SUCCESS;
 }
 
-int php_rfinish_ibase(void)
-{
-}
-*/
 
+PHP_RSHUTDOWN_FUNCTION(ibase)
+{
+    IBLS_FETCH();
+
+	if(IBG(timeformat))
+	    DL_FREE(IBG(timeformat));
+    IBG(timeformat) = NULL;
+    
+	if(IBG(errmsg))
+	    DL_FREE(IBG(errmsg));
+	IBG(errmsg) = NULL;
+
+    return SUCCESS;
+} 
+
+ 
 PHP_MINFO_FUNCTION(ibase)
 {
-	/* TODO */
+	IBLS_FETCH();
+
+    php_printf(
+                "<table>"
+                "<tr><td>Revision:</td><td>$Revision$</td></tr>\n"
+#ifdef COMPILE_DL
+                "<tr><td>Dynamic module:</td><td>Yes</td></tr>\n"
+#endif
+                "<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
+                "<tr><td>Persistent links:</td><td>%d/",
+                (IBG(allow_persistent)?"Yes":"No"),
+                IBG(num_persistent));
+	if (IBG(max_persistent) == -1) {
+        php_printf("Unlimited");
+	} else {
+        php_printf("%ld",IBG(max_persistent));
+	}
+    php_printf("</td></tr>\n"
+                "<tr><td>Total links:</td><td>%d/",
+                IBG(num_links));
+	if (IBG(max_links) == -1) {
+        php_printf("Unlimited");
+	} else {
+        php_printf("%ld",IBG(max_links));
+	}
+    php_printf("</td></tr>\n"
+                "<tr><td>Time format:</td><td>\"%s\"</td></tr>\n"
+                "</table>\n",
+                IBG(timeformat));
 }
 /* }}} */
+
 
 /* {{{ _php_ibase_attach_db() */
-static int _php_ibase_attach_db(char *server, char *uname, int uname_len, char *passwd, int passwd_len, isc_db_handle *db)
+static int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *charset, int buffers, char *role, isc_db_handle *db)
 {
-	ISC_STATUS status[20];
-	int db_parbuf_len = 4;
-	short foo = 4;
-	char dpb[255], *db_parbuf;
+	char dpb_buffer[256], *dpb, *p;
+	int dpb_length, len;
 
-	if (uname_len) {
-		db_parbuf_len += uname_len + 2;
-	}
+	dpb = dpb_buffer;
 
-	if (passwd_len) {
-		db_parbuf_len += passwd_len + 2;
-	}
+	*dpb++ = isc_dpb_version1;
 
-	db_parbuf = dpb;
-	*db_parbuf++ = isc_dpb_version1;
-	*db_parbuf++ = isc_dpb_num_buffers;
-	*db_parbuf++ = 1;
-	*db_parbuf++ = 90;
-
-	if (uname_len) {
-		if (passwd_len) {
-			isc_expand_dpb(&db_parbuf, &foo, isc_dpb_user_name, uname, isc_dpb_password, passwd, NULL);
-		} else {
-			isc_expand_dpb(&db_parbuf, &foo, isc_dpb_user_name, uname, NULL);
+	if (uname != NULL && (len = strlen(uname))) {
+		*dpb++ = isc_dpb_user_name;
+		*dpb++ = len;
+		for (p = uname; *p;) {
+			*dpb++ = *p++;
 		}
 	}
 
-	isc_attach_database(status, strlen(server), server, db, db_parbuf_len, dpb);
-
-	if (status[0] == 1 && status[1]) {
-		php_error(E_WARNING,"Unable to connect to InterBase server:  %s", "XXX");
-		return 1;
+	if (passwd != NULL && (len = strlen(passwd))) {
+		*dpb++ = isc_dpb_password;
+		*dpb++ = strlen(passwd);
+		for (p = passwd; *p;) {
+			*dpb++ = *p++;
+		}
 	}
-	return 0;
+
+	if (charset != NULL && (len = strlen(charset))) {
+		*dpb++ = isc_dpb_lc_ctype;
+		*dpb++ = strlen(charset);
+		for (p = charset; *p;) {
+			*dpb++ = *p++;
+		}
+	}
+
+	if (buffers) {
+		*dpb++ = isc_dpb_num_buffers;
+		*dpb++ = 1;
+		*dpb++ = buffers;
+	}
+
+#ifdef isc_dpb_sql_role_name
+	if (role != NULL && (len = strlen(role))) {
+		*dpb++ = isc_dpb_sql_role_name;
+		*dpb++ = strlen(role);
+		for (p = role; *p;) {
+			*dpb++ = *p++;
+		}
+	}
+#endif
+
+	dpb_length = dpb - dpb_buffer;
+
+	if (isc_attach_database(IB_STATUS, strlen(server), server, db, dpb_length, dpb_buffer)) {
+		_php_ibase_error();
+		return FAILURE;
+	}
+	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ php_ibase_connect() */
-static void php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
-{
-	pval *server, *uname, *passwd;
 
-	char *ib_server, *ib_uname, *ib_passwd;
-	int ib_server_len, ib_uname_len, ib_passwd_len;
+/* {{{ _php_ibase_connect() */
+static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+{
+	pval **args;
+	char *ib_server = NULL, *ib_uname, *ib_passwd, *ib_charset = NULL;
+	int i, ib_uname_len, ib_passwd_len;
 	isc_db_handle db_handle = NULL;
 	char *hashed_details;
-	int hashed_details_length;
-	IBASE_TLS_VARS;
-
-	ib_uname = IBASE_GLOBAL(php_ibase_module).default_user;
-	ib_passwd = IBASE_GLOBAL(php_ibase_module).default_password;
+	int hashed_details_length = 0;
+	ibase_db_link *ib_link;
+	IBLS_FETCH();
+	
+	RESET_ERRMSG;
+		
+	ib_uname = IBG(default_user);
+	ib_passwd = IBG(default_password);
 	ib_uname_len = ib_uname ? strlen(ib_uname) : 0;
 	ib_passwd_len = ib_passwd ? strlen(ib_passwd) : 0;
+	
+	if(ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 4){
+		WRONG_PARAM_COUNT;
+	}
+	
+	args = emalloc(sizeof(pval*) * ARG_COUNT(ht));
+	if (getParametersArray(ht, ARG_COUNT(ht), args) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
 
 	switch(ARG_COUNT(ht)) {
-	case 1:
-		{
-			if (getParameters(ht, 1, &server) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string(server);
-			ib_server = server->value.str.val;
-			ib_server_len = server->value.str.len;
-			hashed_details_length = server->value.str.len+ib_uname_len+ib_passwd_len+5+3;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "ibase_%s_%s_%s", ib_server, ib_uname, ib_passwd);
-		}
-		break;
-	case 2:
-		{
-			if (getParameters(ht, 2, &server, &uname) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string(server);
-			convert_to_string(uname);
-			ib_server = server->value.str.val;
-			ib_uname = uname->value.str.val;
-			ib_server_len = server->value.str.len;
-			ib_uname_len = uname->value.str.len;
-			hashed_details_length = server->value.str.len+uname->value.str.len+ib_passwd_len+5+3;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "ibase_%s_%s_%s", ib_server, ib_uname, ib_passwd);
-		}
-		break;
-	case 3:
-		{
-			if (getParameters(ht, 3, &server, &uname, &passwd) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string(server);
-			convert_to_string(uname);
-			convert_to_string(passwd);
-			ib_server = server->value.str.val;
-			ib_uname = uname->value.str.val;
-			ib_passwd = passwd->value.str.val;
-			ib_server_len = server->value.str.len;
-			ib_uname_len = uname->value.str.len;
-			ib_passwd_len = passwd->value.str.len;
-			hashed_details_length = server->value.str.len+uname->value.str.len+passwd->value.str.len+5+3;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
-			sprintf(hashed_details, "ibase_%s_%s_%s", ib_server, ib_uname, ib_passwd);
-		}
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		break;
-	}
+		case 4:
+			convert_to_string(args[3]);
+			ib_charset = args[3]->value.str.val;
+			hashed_details_length += args[3]->value.str.len;
+			/* fallout */
+		case 3:
+			convert_to_string(args[2]);
+			ib_passwd = args[2]->value.str.val;
+			hashed_details_length += args[2]->value.str.len;
+			/* fallout */
+		case 2:
+			convert_to_string(args[1]);
+			ib_uname = args[1]->value.str.val;
+			hashed_details_length += args[1]->value.str.len;
+			/* fallout */
+		case 1:
+			convert_to_string(args[0]);
+			ib_server = args[0]->value.str.val;
+			hashed_details_length += args[0]->value.str.len;
+	}/* case */
+	
+	efree(args);
+	
+	hashed_details = (char *) emalloc(hashed_details_length+strlen("ibase_%s_%s_%s_%s")+1);
+	sprintf(hashed_details, "ibase_%s_%s_%s_%s", ib_server, ib_uname, ib_passwd, ib_charset);
 
 	if (persistent) {
 		list_entry *le;
 		
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
 			list_entry new_le;
 			
-			if (IBASE_GLOBAL(php_ibase_module).max_links!=-1 && IBASE_GLOBAL(php_ibase_module).num_links>=IBASE_GLOBAL(php_ibase_module).max_links) {
-				php_error(E_WARNING,"InterBase: Too many open links (%d)", IBASE_GLOBAL(php_ibase_module).num_links);
+			if (IBG(max_links)!=-1 && IBG(num_links)>=IBG(max_links)) {
+				_php_ibase_module_error("Too many open links (%d)", IBG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			if (IBASE_GLOBAL(php_ibase_module).max_persistent!=-1 && IBASE_GLOBAL(php_ibase_module).num_persistent>=IBASE_GLOBAL(php_ibase_module).max_persistent) {
-				php_error(E_WARNING,"InterBase: Too many open persistent links (%d)", IBASE_GLOBAL(php_ibase_module).num_persistent);
-				efree(hashed_details);
-				RETURN_FALSE;
-			}
-
-			/* create the link */
-
-			if (_php_ibase_attach_db(ib_server, ib_uname, ib_uname_len, ib_passwd, ib_passwd_len, &db_handle)) {
+			if (IBG(max_persistent)!=-1 && IBG(num_persistent)>=IBG(max_persistent)) {
+				_php_ibase_module_error("Too many open persistent links (%d)", IBG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 
+			/* create the ib_link */
+
+			if (_php_ibase_attach_db(ib_server, ib_uname, ib_passwd, ib_charset, 0, NULL, &db_handle) == FAILURE) {
+				efree(hashed_details);
+				RETURN_FALSE;
+			}
+
+			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
+			ib_link->link = db_handle;
+			for(i = 0; i < IBASE_TRANS_ON_LINK; i++)
+				ib_link->trans[i] = NULL;
+			
 			/* hash it up */
-			new_le.type = php_ibase_module.le_plink;
-			new_le.ptr = db_handle;
-			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			new_le.type = IBG(le_plink);
+			new_le.ptr = ib_link;
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
+				free(ib_link);
 				RETURN_FALSE;
 			}
-			IBASE_GLOBAL(php_ibase_module).num_links++;
-			IBASE_GLOBAL(php_ibase_module).num_persistent++;
+			IBG(num_links)++;
+			IBG(num_persistent)++;
 		} else {
-			if (le->type != IBASE_GLOBAL(php_ibase_module).le_plink) {
+			if (le->type != IBG(le_plink)) {
 				RETURN_FALSE;
 			}
-			/* TODO: ensure that the link did not die */
-
-			db_handle = (isc_db_handle) le->ptr;
+			/* TODO: ensure that the ib_link did not die */
+			ib_link = (ibase_db_link *) le->ptr;
 		}
-		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php_ibase_module).le_plink);
+		return_value->value.lval = IBASE_TRANS_ON_LINK *
+			zend_list_insert(ib_link, IBG(le_plink));
 		return_value->type = IS_LONG;
 	} else {
 		list_entry *index_ptr, new_index_ptr;
 		
-		/* first we check the hash for the hashed_details key.  if it exists,
-		 * it should point us to the right offset where the actual pgsql link sits.
-		 * if it doesn't, open a new pgsql link, add it to the resource list,
+		/* first we check the hash for the hashed_details key.	if it exists,
+		 * it should point us to the right offset where the actual ib_link sits.
+		 * if it doesn't, open a new ib_link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
-			int type,link;
+		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1, (void **) &index_ptr)==SUCCESS) {
+			int type,xlink;
 			void *ptr;
-
 			if (index_ptr->type != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			link = (int) index_ptr->ptr;
-			ptr = zend_list_find(link,&type);   /* check if the link is still there */
-			if (ptr && (type==IBASE_GLOBAL(php_ibase_module).le_link || type==IBASE_GLOBAL(php_ibase_module).le_plink)) {
-				return_value->value.lval = IBASE_GLOBAL(php_ibase_module).default_link = link;
+			xlink = (int) index_ptr->ptr;
+			ptr = zend_list_find(xlink, &type);	 /* check if the xlink is still there */
+			if (ptr && (type==IBG(le_link) || type==IBG(le_plink))) {
+				return_value->value.lval = IBG(default_link) = xlink;
 				return_value->type = IS_LONG;
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length+1);
 			}
 		}
-		if (IBASE_GLOBAL(php_ibase_module).max_links!=-1 && IBASE_GLOBAL(php_ibase_module).num_links>=IBASE_GLOBAL(php_ibase_module).max_links) {
-			php_error(E_WARNING,"InterBase:  Too many open links (%d)", IBASE_GLOBAL(php_ibase_module).num_links);
+		if (IBG(max_links)!=-1 && IBG(num_links)>=IBG(max_links)) {
+			_php_ibase_module_error("Too many open links (%d)", IBG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		/* create the link */
+		/* create the ib_link */
 
-		if (_php_ibase_attach_db(ib_server, ib_uname, ib_uname_len, ib_passwd, ib_passwd_len, &db_handle)) {
+		if (_php_ibase_attach_db(ib_server, ib_uname, ib_passwd, ib_charset, 0, NULL, &db_handle) == FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
+
+		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
+		ib_link->link = db_handle;
+		for(i = 0; i < IBASE_TRANS_ON_LINK; i++)
+			ib_link->trans[i] = NULL;
 
 		/* add it to the list */
-		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php_ibase_module).le_link);
+		return_value->value.lval = IBASE_TRANS_ON_LINK *
+			zend_list_insert(ib_link, IBG(le_link));
 		return_value->type = IS_LONG;
 
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1, (void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		IBASE_GLOBAL(php_ibase_module).num_links++;
+		IBG(num_links)++;
 	}
 	efree(hashed_details);
-	IBASE_GLOBAL(php_ibase_module).default_link=return_value->value.lval;
+	IBG(default_link) = return_value->value.lval;
 }
 /* }}} */
 
-/* {{{ proto int ibase_connect(string database [, string username] [, string password])
+
+/* {{{ proto int ibase_connect(string database [, string username] [, string password] [, string charset])
    Open a connection to an InterBase database */
 PHP_FUNCTION(ibase_connect)
 {
-	php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
-/* {{{ proto int ibase_pconnect(string database [, string username] [, string password])
+
+/* {{{ proto int ibase_pconnect(string database [, string username] [, string password] [, string charset])
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
-	php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+
 
 /* {{{ proto int ibase_close([int link_identifier])
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
-	pval *ibase_link;
-	int id, type;
-	isc_db_handle db_handle;
-	IBASE_TLS_VARS;
+	pval *link_arg;
+	ibase_db_link *ib_link;
+	int link_id, trans_n;
+	IBLS_FETCH();
+	
+	
+	RESET_ERRMSG;
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
-			id = IBASE_GLOBAL(php_ibase_module).default_link;
+			link_id = IBG(default_link);
 			break;
 		case 1:
-			if (getParameters(ht, 1, &ibase_link) == FAILURE) {
+			if (getParameters(ht, 1, &link_arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(ibase_link);
-			id = ibase_link->value.lval;
+			convert_to_long(link_arg);
+			link_id = link_arg->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	db_handle = (isc_db_handle) zend_list_find(id, &type);
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_link && type!=IBASE_GLOBAL(php_ibase_module).le_plink) {
-		php_error(E_WARNING, "%d is not an InterBase link index",id);
-		RETURN_FALSE;
-	}
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
 	
-	zend_list_delete(ibase_link->value.lval);
+	zend_list_delete(link_id);
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ php_ibase_prepare() */
-static XSQLDA *php_ibase_prepare(isc_db_handle db, isc_tr_handle tr, isc_stmt_handle *query_handle, char *query)
+/* {{{ _php_ibase_alloc_array() */
+static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp,
+								  XSQLDA *sqlda, isc_db_handle link, isc_tr_handle trans)
 {
-	ISC_STATUS status[20];
-	XSQLDA *isqlda;
-
-	isqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(0));
-    isqlda->sqln = 0;
-    isqlda->version = SQLDA_VERSION1;
-
-	if (isc_dsql_allocate_statement(status, &db, query_handle)) {
-		php_error(E_WARNING, "InterBase: couldn't allocate space for query");
-		return NULL;
-	}
-
-	if (isc_dsql_prepare(status, &tr, query_handle, 0, query, 1, isqlda)) {
-		php_error(E_WARNING, "InterBase: couldn't prepare query");
-		return NULL;
-	}
+#define IB_ARRAY (*ib_arrayp)
 	
-	/*
-	 * Check if query has placeholders and needs binding. If it has, allocate
-	 * input sqlda big enough and return it.
-	 */
-
-
-	if (isc_dsql_describe_bind(status, query_handle, 1, isqlda)) {
-		php_error(E_WARNING, "InterBase: couldn't describe placeholders in query");
-	}
+	int i, dim, ar_cnt, ar_length;
+	XSQLVAR *var;
 	
-	if (isqlda->sqld > 1) {
-		isqlda = (XSQLDA *) erealloc(isqlda, XSQLDA_LENGTH(isqlda->sqld));
-		isqlda->sqln = isqlda->sqld;
-		isqlda->version = SQLDA_VERSION1;
-		if (isc_dsql_describe(status, query_handle, 1, isqlda)) {
-			php_error(E_WARNING, "InterBase: couldn't describe query");
-		}
-		return isqlda;
-	} else if (isqlda->sqld == 1) {
-		return isqlda;
-	} else {
-		efree(isqlda);
-		return NULL;
-	}
-}
-/* }}} */
 
-/* {{{ php_ibase_execute() */
-static XSQLDA *php_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle query_handle, XSQLDA *isqlda, ISC_STATUS *status)
-{
-	int i, coltype;
-	static char query_info[] = { isc_info_sql_stmt_type };
-	char info_buffer[18];
-    short l;
-    long query_type;
-	XSQLDA *osqlda;
-
-	/*
-	 * Find out what kind of query is to be executed.
-	 */
+	IB_ARRAY = NULL;
 	
-	if (!isc_dsql_sql_info(status, &query_handle, sizeof(query_info), query_info, sizeof(info_buffer), info_buffer)) {
-		l = (short) isc_vax_integer((char ISC_FAR *) info_buffer + 1, 2);
-		query_type = isc_vax_integer((char ISC_FAR *) info_buffer + 3, l);
+	ar_cnt = 0; /* find arrays */
+	var = sqlda->sqlvar;
+	for(i = 0; i < sqlda->sqld; i++, var++){
+		if((var->sqltype & ~1) == SQL_ARRAY)
+			ar_cnt++;
 	}
 
-	if (query_type == isc_info_sql_stmt_select || query_type == isc_info_sql_stmt_select_for_upd) {
-		/*
-		 * Select, need to allocate output sqlda and and prepare it for use.
-		 */
+	if(ar_cnt){	  /* have  arrays ? */
 
-		osqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(0));
-		osqlda->sqln = 0;
-		osqlda->version = SQLDA_VERSION1;
-
-		if (isc_dsql_describe(status, &query_handle, 1, osqlda)) {
-			php_error(E_WARNING, "InterBase: couldn't describe query");
-		}
-
-		if (osqlda->sqld) {
-			osqlda = (XSQLDA *) erealloc(osqlda, XSQLDA_LENGTH(osqlda->sqld));
-			osqlda->sqln = osqlda->sqld;
-			osqlda->version = SQLDA_VERSION1;
-			if (isc_dsql_describe(status, &query_handle, 1, osqlda)) {
-				php_error(E_WARNING, "InterBase: couldn't describe query");
-			}
-		}
-		for (i = 0; i < osqlda->sqld; i++) {
-			osqlda->sqlvar[i].sqlind = (short *) emalloc(sizeof(short));
-			coltype = osqlda->sqlvar[i].sqltype & ~1;
-			switch(coltype)
-				{
-				case SQL_TEXT:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(char)*(osqlda->sqlvar[i].sqllen));
-					break;
-				case SQL_VARYING:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(char)*(osqlda->sqlvar[i].sqllen+2));
-					break;
-				case SQL_SHORT:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(short));
-					break;
-				case SQL_LONG:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(long));
-					break;
-				case SQL_FLOAT:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(float));
-					break;
-				case SQL_DOUBLE:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(double));
-					break;
-				case SQL_DATE:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(ISC_QUAD));
-					break;
-				case SQL_BLOB:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(ISC_QUAD));
-					break;
-				case SQL_ARRAY:
-					osqlda->sqlvar[i].sqldata = (char *) emalloc(sizeof(ISC_QUAD));
-					break;
+		*array_cntp = ar_cnt;
+		IB_ARRAY = emalloc(sizeof(ibase_array)*ar_cnt);
+		ar_cnt = 0;
+		var = sqlda->sqlvar;
+		for(i = 0; i < sqlda->sqld; i++, var++){
+			if((var->sqltype & ~1) == SQL_ARRAY){
+				
+				ISC_ARRAY_DESC *ar_desc = &IB_ARRAY[ar_cnt].ar_desc;
+				
+				if (isc_array_lookup_bounds(IB_STATUS, &link, &trans,
+											var->relname, var->sqlname, ar_desc)) {
+					_php_ibase_error();
+					efree(IB_ARRAY);
+					IB_ARRAY = NULL;
+					return FAILURE;
 				}
-		}
-		if (isqlda == NULL) {
-			if (isc_dsql_execute(status, &tr_handle, &query_handle, 1, NULL)) {
-				php_error(E_WARNING, "InterBase: couldn't execute query");
-				return NULL;
-			} else {
-				return osqlda;
-			}
-	
-		} else {
-			if (isc_dsql_execute2(status, &tr_handle, &query_handle, 1, isqlda, osqlda)) {
-				php_error(E_WARNING, "InterBase: couldn't execute query");
-				return NULL;
-			} else {
-				return osqlda;
-			}
-	
-		}
-	} else {
-		/* Not select */
-		if (isc_dsql_execute(status, &tr_handle, &query_handle, 1, isqlda)) {
-			php_error(E_WARNING, "InterBase: couldn't execute query");
-		}
-		/*
-		if (!php_ibase_module.manualtransactions) {
-			if(0) {
-				isc_commit_transaction(status, tr_handle);
-			} else {
-				isc_rollback_transaction(status, tr_handle);
-			}
-		}
-		*/
-	}
 
-	return NULL;
+				switch (ar_desc->array_desc_dtype) {
+					case blr_text:
+					case blr_text2:
+						IB_ARRAY[ar_cnt].el_type = SQL_TEXT;
+						IB_ARRAY[ar_cnt].el_size = ar_desc->array_desc_length+1;
+						break;
+					case blr_short:
+						IB_ARRAY[ar_cnt].el_type = SQL_SHORT;
+						IB_ARRAY[ar_cnt].el_size = sizeof(short);
+						break;
+					case blr_long:
+						IB_ARRAY[ar_cnt].el_type = SQL_LONG;
+						IB_ARRAY[ar_cnt].el_size = sizeof(long);
+						break;
+					case blr_float:
+						IB_ARRAY[ar_cnt].el_type = SQL_FLOAT;
+						IB_ARRAY[ar_cnt].el_size = sizeof(float);
+						break;
+					case blr_double:
+						IB_ARRAY[ar_cnt].el_type = SQL_DOUBLE;
+						IB_ARRAY[ar_cnt].el_size = sizeof(double);
+						break;
+					case blr_date:
+						IB_ARRAY[ar_cnt].el_type = SQL_DATE;
+						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_QUAD);
+						break;
+					case blr_varying:
+					case blr_varying2:	/* changed to SQL_TEXT ? */
+						/* sql_type = SQL_VARYING; Why? FIXME: ??? */
+						IB_ARRAY[ar_cnt].el_type = SQL_TEXT;
+						IB_ARRAY[ar_cnt].el_size = ar_desc->array_desc_length+sizeof(short);
+						break;
+					default:
+						_php_ibase_module_error("unexpected array type %d in relation '%s' column '%s')",
+										   ar_desc->array_desc_dtype,var->relname, var->sqlname);
+						efree(IB_ARRAY);
+						IB_ARRAY = NULL;
+						return FAILURE;
+				}/* switch array_desc_type */
+				
+				ar_length = 0; /* calculate elements count */
+				for (dim = 0; dim < ar_desc->array_desc_dimensions; dim++) {
+					ar_length += 1 + ar_desc->array_desc_bounds[dim].array_bound_upper
+						- ar_desc->array_desc_bounds[dim].array_bound_lower;
+				}
+				IB_ARRAY[ar_cnt].ar_size = IB_ARRAY[ar_cnt].el_size * ar_length;
+				
+				ar_cnt++;
+				
+			}/* if SQL_ARRAY */
+		}/* for column */
+	}/* if array_cnt */
+	
+	return SUCCESS;
+#undef IB_ARRAY
 }
 /* }}} */
 
-/* {{{ proto int ibase_query([int link_identifier], string query)
-   Execute a query (without parameter placeholders) */
-PHP_FUNCTION(ibase_query)
+
+/* {{{ _php_ibase_alloc_query() */
+/* allocate and prepare query */
+static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query)
 {
-	pval *query, *ibase_link;
-	int id, type;
-	isc_db_handle db_handle;
-	isc_tr_handle tr_handle = NULL;
-	isc_stmt_handle query_handle = NULL;
-	ISC_STATUS status[20];
-	XSQLDA *isqlda, *osqlda;
-	ibase_result_handle *ibase_result;
-	IBASE_TLS_VARS;
+#define IB_QUERY (*ib_queryp)
+	
+	IB_QUERY = emalloc(sizeof(ibase_query));
+	IB_QUERY->link = link;
+	IB_QUERY->trans = trans;
+	IB_QUERY->stmt = NULL;
+	IB_QUERY->out_sqlda = NULL;
+	IB_QUERY->in_sqlda = NULL;
+	IB_QUERY->in_array = NULL;
+	IB_QUERY->in_array_cnt = 0;
+	IB_QUERY->out_array = NULL;
+	IB_QUERY->out_array_cnt = 0;
+	
+	if (isc_dsql_allocate_statement(IB_STATUS, &link, &IB_QUERY->stmt)) {
+		_php_ibase_error();
+		goto _php_ibase_alloc_query_error;
+	}
+
+	IB_QUERY->out_sqlda = emalloc(XSQLDA_LENGTH(0));
+	IB_QUERY->out_sqlda->sqln = 0;
+	IB_QUERY->out_sqlda->version = SQLDA_VERSION1;
+
+	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans, &IB_QUERY->stmt, 0, query, SQLDA_VERSION1, IB_QUERY->out_sqlda)) {
+		_php_ibase_error();
+		goto _php_ibase_alloc_query_error;
+	}
+	
+	/* not enough output variables ? */
+	if (IB_QUERY->out_sqlda->sqld > IB_QUERY->out_sqlda->sqln) {
+		IB_QUERY->out_sqlda = erealloc(IB_QUERY->out_sqlda,XSQLDA_LENGTH(IB_QUERY->out_sqlda->sqld));
+		IB_QUERY->out_sqlda->sqln = IB_QUERY->out_sqlda->sqld;
+		IB_QUERY->out_sqlda->version = SQLDA_VERSION1;
+		if (isc_dsql_describe(IB_STATUS, &IB_QUERY->stmt, SQLDA_VERSION1, IB_QUERY->out_sqlda)) {
+			_php_ibase_error();
+			goto _php_ibase_alloc_query_error;
+		}
+	}
+
+	/* maybe have input placeholders? */
+	IB_QUERY->in_sqlda = emalloc(XSQLDA_LENGTH(0));
+	IB_QUERY->in_sqlda->sqln = 0;
+	IB_QUERY->in_sqlda->version = SQLDA_VERSION1;
+	if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_VERSION1, IB_QUERY->in_sqlda)) {
+		_php_ibase_error();
+		goto _php_ibase_alloc_query_error;
+	}
+	
+	/* not enough input variables ? */
+	if (IB_QUERY->in_sqlda->sqln < IB_QUERY->in_sqlda->sqld) {
+		IB_QUERY->in_sqlda = erealloc(IB_QUERY->in_sqlda,XSQLDA_LENGTH(IB_QUERY->in_sqlda->sqld));
+		IB_QUERY->in_sqlda->sqln = IB_QUERY->in_sqlda->sqld;
+		IB_QUERY->in_sqlda->version = SQLDA_VERSION1;
+		if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_VERSION1, IB_QUERY->in_sqlda)) {
+			_php_ibase_error();
+			goto _php_ibase_alloc_query_error;
+		}
+	}
+	
+	/* allocate arrays... */
+	if (_php_ibase_alloc_array(&IB_QUERY->in_array, &IB_QUERY->in_array_cnt,
+								IB_QUERY->in_sqlda, link, trans) == FAILURE){
+		goto _php_ibase_alloc_query_error; /* error report already done */
+	}
+	
+	if (_php_ibase_alloc_array(&IB_QUERY->out_array, &IB_QUERY->out_array_cnt,
+								IB_QUERY->out_sqlda, link, trans) == FAILURE){
+		goto _php_ibase_alloc_query_error;
+	}
+
+	/* no, haven't placeholders at all */
+	if(IB_QUERY->in_sqlda->sqld == 0){
+		efree(IB_QUERY->in_sqlda);
+		IB_QUERY->in_sqlda = NULL;
+	}
+
+	if(IB_QUERY->out_sqlda->sqld == 0){
+		efree(IB_QUERY->out_sqlda);
+		IB_QUERY->out_sqlda = NULL;
+	}
+
+	return SUCCESS;
+	
+_php_ibase_alloc_query_error:
+	
+	if (IB_QUERY->out_sqlda)
+		efree(IB_QUERY->out_sqlda);
+	if (IB_QUERY->in_sqlda)
+		efree(IB_QUERY->in_sqlda);
+	if (IB_QUERY->out_array)
+		efree(IB_QUERY->out_array);
+	efree(IB_QUERY);
+	IB_QUERY = NULL;
+	
+	return FAILURE;
+#undef IB_QUERY
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_bind(int query)
+   Bind parameter placeholders in a previously prepared query */
+static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
+{
+	XSQLVAR *var;
+	pval *b_var;
+	int i;
+	
+
+	var = sqlda->sqlvar;
+	for(i = 0; i < sqlda->sqld; var++, i++) { /* binded vars */
+		
+		buf[i].sqlind = 0;
+		var->sqlind	 = &buf[i].sqlind;
+		b_var = b_vars[i];
+		
+		switch(var->sqltype & ~1) {
+			case SQL_TEXT:			   /* direct to variable */
+			case SQL_VARYING:
+				convert_to_string(b_var);
+				var->sqldata = (void ISC_FAR *)b_var->value.str.val;
+				var->sqllen	 = b_var->value.str.len;
+				var->sqltype = SQL_TEXT + (var->sqltype & 1);
+				break;
+			case SQL_SHORT:
+				convert_to_long(b_var);
+				if(b_var->value.lval > SHRT_MAX || b_var->value.lval < SHRT_MIN){
+					_php_ibase_module_error("field %*s overflow", var->aliasname_length, var->aliasname);
+					return FAILURE;
+				}
+				buf[i].val.sval = (short)b_var->value.lval;
+				var->sqldata = (void ISC_FAR *)(&buf[i].val.sval);
+				break;
+			case SQL_LONG:	/* direct to variable */
+				convert_to_long(b_var);
+				var->sqldata = (void ISC_FAR *)(&b_var->value.lval);
+				break;
+			case SQL_FLOAT:
+				convert_to_double(b_var);
+				buf[i].val.fval = (float)b_var->value.dval;
+				var->sqldata = (void ISC_FAR *)(&buf[i].val.fval);
+				break;
+			case SQL_DOUBLE:  /* direct to variable */
+				convert_to_double(b_var);
+				var->sqldata = (void ISC_FAR *)(&b_var->value.dval);
+				break;
+			case SQL_DATE:
+				{
+					struct tm t;
+					
+					t.tm_year = t.tm_mon = t.tm_mday = t.tm_hour =
+						t.tm_min = t.tm_sec = 0;
+					
+					convert_to_string(b_var);
+					
+#if HAVE_STRPTIME /*FIXME: HAVE_STRPTIME ?*/
+					
+					strptime(b_var->value.str.val, IBG(timeformat), &t);
+#else
+					{
+						int n = sscanf(b_var->value.str.val,"%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
+									   &t.tm_mon, &t.tm_mday, &t.tm_year,  &t.tm_hour, &t.tm_min, &t.tm_sec);
+						if (n != 3 && n != 6) {
+							_php_ibase_module_error("invalid date/time format");
+							return FAILURE;
+						}
+					
+						t.tm_year -= 1900;
+						t.tm_mon--;
+					}
+#endif
+					isc_encode_date(&t, &buf[i].val.qval);
+					var->sqldata = (void ISC_FAR *)(&buf[i].val.qval);
+				}
+				break;
+			case SQL_BLOB:
+				{
+					ibase_blob_handle *ib_blob_id;
+					if(b_var->type != IS_STRING
+					   || b_var->value.str.len != sizeof(ibase_blob_handle)
+					   || ((ibase_blob_handle *)(b_var->value.str.val))->bl_handle != 0){
+						_php_ibase_module_error("invalid blob id string");
+						return FAILURE;
+					}
+					ib_blob_id = (ibase_blob_handle *)b_var->value.str.val;
+					
+					var->sqldata = (void ISC_FAR *)&ib_blob_id->bl_qd;
+				}
+			break;
+			case SQL_ARRAY:
+				_php_ibase_module_error("binding arrays not supported yet");
+				return FAILURE;
+			break;
+		}/*switch*/
+	}/*for*/
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_alloc_xsqlda() */
+static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
+{
+	int i;
+	XSQLVAR *var = sqlda->sqlvar;
+	
+	
+	for (i = 0; i < sqlda->sqld; i++, var++) {
+		switch(var->sqltype & ~1) {
+			case SQL_TEXT:
+				var->sqldata = emalloc(sizeof(char)*(var->sqllen));
+				break;
+			case SQL_VARYING:
+				var->sqldata = emalloc(sizeof(char)*(var->sqllen+sizeof(short)));
+				break;
+			case SQL_SHORT:
+				var->sqldata = emalloc(sizeof(short));
+				break;
+			case SQL_LONG:
+				var->sqldata = emalloc(sizeof(long));
+				break;
+			case SQL_FLOAT:
+				var->sqldata = emalloc(sizeof(float));
+					break;
+			case SQL_DOUBLE:
+				var->sqldata = emalloc(sizeof(double));
+				break;
+			case SQL_DATE:
+			case SQL_BLOB:
+			case SQL_ARRAY:
+				var->sqldata = emalloc(sizeof(ISC_QUAD));
+				break;
+		} /*switch*/
+		if (var->sqltype & 1) /* sql NULL flag */
+			var->sqlind = emalloc(sizeof(short));
+		else
+			var->sqlind = NULL;
+	} /* for*/
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_exec() */
+static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int argc, pval **args)
+{
+#define IB_RESULT (*ib_resultp)
+	XSQLDA *in_sqlda = NULL, *out_sqlda = NULL;
+	BIND_BUF *bind_buf = NULL;
+	int rv = FAILURE;
+	
+
+	IB_RESULT = NULL;
+	
+	/* allocate sqlda and output buffers */
+	if (ib_query->out_sqlda) { /* output variables in select, select for update */
+		IB_RESULT = emalloc(sizeof(ibase_result));
+		IB_RESULT->link = ib_query->link;
+		IB_RESULT->trans = ib_query->trans;
+		IB_RESULT->stmt = ib_query->stmt; 
+		IB_RESULT->drop_stmt = 0; /* when free result close but not drop!*/
+		out_sqlda = IB_RESULT->out_sqlda = emalloc(XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
+		memcpy(out_sqlda,ib_query->out_sqlda,XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
+		_php_ibase_alloc_xsqlda(out_sqlda);
+
+		if (ib_query->out_array) {
+			IB_RESULT->out_array = emalloc(sizeof(ibase_array)*ib_query->out_array_cnt);
+			memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array)*ib_query->out_array_cnt);
+		} else {
+			IB_RESULT->out_array = NULL;
+		}
+	}
+
+	if (ib_query->in_sqlda) { /* has placeholders */
+		if (ib_query->in_sqlda->sqld != argc) {
+			_php_ibase_module_error("placeholders (%d) and variables (%d) mismatch",ib_query->in_sqlda->sqld, argc);
+			goto _php_ibase_exec_error;  /* yes mommy, goto! */
+		}
+		in_sqlda = emalloc(XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
+		memcpy(in_sqlda,ib_query->in_sqlda,XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
+		bind_buf = emalloc(sizeof(BIND_BUF) * ib_query->in_sqlda->sqld);
+		if(_php_ibase_bind(in_sqlda, args, bind_buf) == FAILURE){
+			goto _php_ibase_exec_error;
+		}
+	}
+
+	if (isc_dsql_execute(IB_STATUS, &ib_query->trans, &ib_query->stmt, 1, in_sqlda)) {
+		_php_ibase_error();
+		goto _php_ibase_exec_error;
+	}
+
+	rv = SUCCESS;
+	
+_php_ibase_exec_error:		 /* I'm a bad boy... */
+	
+	if (in_sqlda)
+		efree(in_sqlda);
+	if (bind_buf)
+		efree(bind_buf);
+
+	if (rv == FAILURE) {
+		if (IB_RESULT) {
+			efree(IB_RESULT);
+			IB_RESULT = NULL;
+		}
+		if (out_sqlda)
+			efree(out_sqlda);
+	}
+	
+	return rv;
+#undef IB_RESULT
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_trans([int trans_args [, int link_identifier]])
+   Start transaction */
+PHP_FUNCTION(ibase_trans)
+{
+	pval **args;
+	char tpb[20], *tpbp = NULL;
+	long trans_argl = 0;
+	int tpb_len = 0, argn, link_id, trans_n;
+	ibase_db_link *ib_link;
+	IBLS_FETCH();
+	
+	
+	RESET_ERRMSG;
+
+	link_id = IBG(default_link);
+
+	/* TODO: multi-databases trans */
+	argn = ARG_COUNT(ht);
+	if (argn < 0 || argn > 2) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (argn) {
+		args = emalloc(sizeof(pval*) * argn);
+		if (getParametersArray(ht, argn, args) == FAILURE) {
+			efree(args);
+			RETURN_FALSE;
+		}
+
+		argn--;
+		convert_to_long(args[argn]); /* last arg - trans_args */
+		trans_argl = args[argn]->value.lval;
+
+		/* TODO: multi
+		 do {
+			 link_id[argn] = args[argn];
+			 convert_to_long(args[argn]);
+			 GET_LINK_TRANS(args[argn].value.lval, ib_link[argn], trans_n);
+		 } while(argn--); */
+
+		if (argn) {
+			argn--;
+			convert_to_long(args[argn]);
+			link_id = args[argn]->value.lval;
+		}
+	
+		efree(args);
+	}
+
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
+	
+	if (trans_argl ){
+		tpb[tpb_len++] = isc_tpb_version3;
+		tpbp = tpb;
+		/* access mode */
+		if(trans_argl & PHP_IBASE_READ) /* READ ONLY TRANSACTION */
+			tpb[tpb_len++] = isc_tpb_read;
+		else
+			tpb[tpb_len++] = isc_tpb_write;
+		/* isolation level */
+		if(trans_argl & PHP_IBASE_COMMITTED){
+			tpb[tpb_len++] = isc_tpb_read_committed;
+		}else if (trans_argl & PHP_IBASE_CONSISTENCY)
+			tpb[tpb_len++] = isc_tpb_consistency;
+		else 
+			tpb[tpb_len++] = isc_tpb_concurrency;
+		/* lock resolution */
+		if(trans_argl & PHP_IBASE_NOWAIT)
+			tpb[tpb_len++] = isc_tpb_nowait;
+		else 
+			tpb[tpb_len++] = isc_tpb_wait;
+
+	}
+
+	/* find empty transaction slot */
+	for (trans_n = 0; trans_n < IBASE_TRANS_ON_LINK
+		&& ib_link->trans[trans_n]; trans_n++)
+		;
+	if (trans_n == IBASE_TRANS_ON_LINK) {
+		_php_ibase_module_error("too many transactions on link");
+		RETURN_FALSE;
+	}
+	
+	if (isc_start_transaction(IB_STATUS, &ib_link->trans[trans_n], 1, &ib_link->link, tpb_len, tpbp)) {
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(link_id * IBASE_TRANS_ON_LINK + trans_n);
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_def_trans() */
+/* open default transaction */
+static int _php_ibase_def_trans(ibase_db_link * ib_link, int trans_n)
+{
+	
+	if (trans_n == 0 && ib_link->trans[0] == NULL) { 
+		if (isc_start_transaction(IB_STATUS, &ib_link->trans[0], 1, &ib_link->link, 0, NULL)) {
+			_php_ibase_error();
+			return FAILURE;
+		}
+	}
+	return SUCCESS;
+}
+/*}}}*/
+
+
+/* {{{ _php_ibase_trans_end() */
+#define COMMIT 1
+#define ROLLBACK 0
+static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
+{
+	pval *link_trans_arg;
+	int link_id = 0, trans_n = 0;
+	ibase_db_link *ib_link;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
 
 	switch (ARG_COUNT(ht)) {
-		case 1:
-			if (getParameters(ht, 1, &query) == FAILURE) {
+		case 0:
+			link_id = IBG(default_link);
+			break;
+		case 1: 
+			if (getParameters(ht, 1, &link_trans_arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			id = IBASE_GLOBAL(php_ibase_module).default_link;
+			convert_to_long(link_trans_arg);
+			link_id = link_trans_arg->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
+
+	if (commit) {
+		if (isc_commit_transaction(IB_STATUS, &ib_link->trans[trans_n])) {
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+	} else {
+		if (isc_rollback_transaction(IB_STATUS, &ib_link->trans[trans_n])) {
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+	}
+	ib_link->trans[trans_n] = NULL;
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_commit([int link_identifier,] int trans_number)
+   Commit transaction */
+PHP_FUNCTION(ibase_commit)
+{
+	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, COMMIT);
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_rollback([int link_identifier,] int trans_number)
+   Roolback transaction */
+PHP_FUNCTION(ibase_rollback)
+{
+	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK);
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_query([int link_identifier,] string query [, int bind_args])
+   Execute a query */
+PHP_FUNCTION(ibase_query)
+{
+	pval **args, **bind_args = NULL;
+	int i, link_id = 0, trans_n = 0, bind_n = 0;
+	char *query;
+	ibase_db_link *ib_link;
+	ibase_query *ib_query;
+	ibase_result *ib_result;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
+
+	if(ARG_COUNT(ht) < 1){
+		WRONG_PARAM_COUNT;
+	}
+
+	args = emalloc(sizeof(pval*) * ARG_COUNT(ht));
+	if (getParametersArray(ht, ARG_COUNT(ht), args) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	i = 0;
+	if (args[i]->type == IS_LONG) { /* link or transaction argument */
+		link_id = args[i]->value.lval;
+		i++; /* next arg */
+	} else {
+		link_id = IBG(default_link);
+	}
+
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
+
+	if (args[i]->type == IS_STRING) { /* query argument */
+		query = args[i]->value.str.val;
+		i++; /* next arg */
+	} else {
+		_php_ibase_module_error("query argument missed");
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	if (ARG_COUNT(ht) > i) { /* have variables to bind */
+		bind_n = ARG_COUNT(ht) - i;
+		bind_args = &args[i];
+	}
+	
+	/* open default transaction */
+	if (_php_ibase_def_trans(ib_link, trans_n) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	if (_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n],  query) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	if (_php_ibase_exec(&ib_result, ib_query, bind_n, bind_args) == FAILURE) {
+		_php_ibase_free_query(ib_query);
+		efree(args);
+		RETURN_FALSE;
+	}
+	
+	efree(args);
+	
+	if (ib_result) { /* select statement */
+		ib_result->drop_stmt = 1; /* drop stmt when free result */
+		ib_query->stmt = NULL; /* keep stmt when free query */
+		_php_ibase_free_query(ib_query);
+		RETURN_LONG(zend_list_insert(ib_result, IBG(le_result)));
+	} else {
+		_php_ibase_free_query(ib_query);
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
+
+/* {{{ _php_ibase_var_pval() */
+static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int scale, int flag)
+{
+	char string_data[255];
+	
+
+	switch(type & ~1) {
+		case SQL_VARYING:
+			len = ((IBASE_VCHAR *) data)->var_len;
+			data = ((IBASE_VCHAR *) data)->var_str;
+			/* fallout */
+		case SQL_TEXT:
+			val->value.str.val = (char *)emalloc(sizeof(char)*(len+1));
+            strncpy(val->value.str.val, data, len);
+			if (PG(magic_quotes_runtime)) {
+				char *tmp = val->value.str.val;
+				val->value.str.val = php_addslashes(val->value.str.val, len, &len, 0);
+				efree(tmp);
+            }
+			val->type = IS_STRING;
+			val->value.str.len = len;
+			break;
+		case SQL_LONG:
+			if (scale) {
+				int j, f = 1;
+				float n = *(long *)(data);
+				
+				for (j = 0; j < -scale; j++)
+					f *= 10;
+				val->type = IS_STRING;
+				val->value.str.len = sprintf(string_data, "%.*f", -scale, n / f);
+				val->value.str.val = estrdup(string_data);
+			}else{
+				val->type = IS_LONG;
+				val->value.lval = *(long *)(data);
+			}
+			break;
+		case SQL_SHORT:
+			val->type = IS_LONG;
+			val->value.lval = *(short *)(data);
+			break;
+		case SQL_FLOAT:
+			val->type = IS_DOUBLE;
+			val->value.dval = *(float *)(data);
+			break;
+		case SQL_DOUBLE:
+			if (scale) {
+				val->type = IS_STRING;
+				val->value.str.len = sprintf(string_data, "%.*f", -scale, *(double *)data);
+				val->value.str.val = estrdup(string_data);
+			}else{
+				val->type = IS_DOUBLE;
+				val->value.dval = *(double *)data;
+			}
+			break;
+		case SQL_DATE:{
+			struct tm t;
+			long timestamp = -1;
+					 
+			isc_decode_date((ISC_QUAD *) data, &t);
+			timestamp = mktime(&t);
+#if HAVE_TM_ZONE
+			t.tm_zone = tzname[0];
+#endif
+			if (flag & PHP_IBASE_TIMESTAMP) {
+				val->type = IS_LONG;
+				val->value.lval = timestamp;
+			} else {
+				val->type = IS_STRING;
+#if HAVE_STRFTIME
+				val->value.str.len = strftime(string_data, sizeof(string_data), IBG(timeformat), &t);
+#else
+				if (!t.tm_hour && !t.tm_min && !t.tm_sec)
+					val->value.str.len = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon+1, t.tm_mday, t.tm_year+1900);
+				else
+					val->value.str.len = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d",
+									 t.tm_mon+1, t.tm_mday, t.tm_year+1900, t.tm_hour, t.tm_min, t.tm_sec);
+#endif
+				val->value.str.val = estrdup(string_data);
+				break;
+			}
+		}
+		default:
+			return FAILURE;
+	}/* switch (type) */
+	return SUCCESS;
+}
+/* }}}	*/
+
+/* {{{ _php_ibase_arr_pval() */
+/* create multidimension array - resursion function
+ (*datap) argument changed */
+static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_array, int dim, int flag)
+{
+	pval tmp;
+	int i, dim_len, l_bound, u_bound;
+	
+
+	if (dim > 16){ /* InterBase limit */
+		_php_ibase_module_error("php module internal error in %s %d",__FILE__,__LINE__);
+		return FAILURE;
+	}
+
+	u_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_upper;
+	l_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_lower;
+	dim_len = 1 + u_bound - l_bound;
+		
+	if (dim < ib_array->ar_desc.array_desc_dimensions - 1) { /* array again */
+		for (i = 0; i < dim_len; i++) {
+			/* recursion here */
+			if (_php_ibase_arr_pval(ar_pval, datap, ib_array, dim+1, flag) == FAILURE) {
+				return FAILURE;
+			}
+		}
+	}else{ /* data at last */
+		
+		array_init(ar_pval);
+
+		for (i = 0; i < dim_len; i++) {
+			if (_php_ibase_var_pval(&tmp, *datap, ib_array->el_type,
+									ib_array->ar_desc.array_desc_length,
+									ib_array->ar_desc.array_desc_scale,
+									flag) == FAILURE){
+				return FAILURE;
+			}
+			/* FIXME */
+			zend_hash_index_update(ar_pval->value.ht,
+									l_bound + i,
+									(void *) &tmp, sizeof(pval),NULL);
+			*datap += ib_array->el_size;
+		}
+	}
+	return SUCCESS;
+}
+
+
+/* {{{ _php_ibase_fetch_hash() */
+
+#define FETCH_ARRAY 1
+#define FETCH_OBJECT 2
+
+static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
+{
+	pval *result_arg, *flag_arg;
+	long flag = 0;
+	int i, arr_cnt;
+	ibase_result *ib_result;
+	XSQLVAR *var;
+	IBLS_FETCH();
+	
+	RESET_ERRMSG;
+	
+	switch(ARG_COUNT(ht)) {
+		case 1:
+			if (ARG_COUNT(ht)==1 && getParameters(ht, 1, &result_arg)==FAILURE) {
+				RETURN_FALSE;
+			}
 			break;
 		case 2:
-			if (getParameters(ht, 2, &ibase_link, &query) == FAILURE) {
+			if (ARG_COUNT(ht)==2 && getParameters(ht, 2, &result_arg, &flag_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(ibase_link);
-			id = ibase_link->value.lval;
+			convert_to_long(flag_arg);
+			flag = flag_arg->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	db_handle = (isc_db_handle) zend_list_find(id, &type);
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_link && type!=IBASE_GLOBAL(php_ibase_module).le_plink) {
-		php_error(E_WARNING, "%d is not an InterBase link index", id);
+	convert_to_long(result_arg);
+	
+	GET_RESULT(result_arg->value.lval, ib_result);
+	
+	if (ib_result->out_sqlda == NULL) {
+		_php_ibase_module_error("trying to fetch results from a non-select query");
 		RETURN_FALSE;
 	}
 	
-	convert_to_string(query);
-
-	if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
-		if (isc_start_transaction(status, &tr_handle, 1, &db_handle, 0, NULL)) {
-			php_error(E_WARNING, "InterBase: couldn't start transaction");
-			RETURN_FALSE;
-		}
-	}
-
-	isqlda = php_ibase_prepare(db_handle, tr_handle, &query_handle, query->value.str.val);
-	if (isqlda != NULL) {
-		isc_rollback_transaction(status, &tr_handle);
-		isc_dsql_free_statement(status, &query_handle, DSQL_drop);
-		php_error(E_WARNING, "InterBase: ibase_query doesn't support parameter placeholders in query");
-		RETURN_FALSE;
-	}
-
-	osqlda = php_ibase_execute(tr_handle, query_handle, isqlda, status);
-	if (osqlda != NULL) {
-		ibase_result = (ibase_result_handle *) emalloc(sizeof(ibase_result_handle));
-		ibase_result->result = query_handle;
-		ibase_result->sqlda = osqlda;
-		ibase_result->trans = tr_handle;
-		ibase_result->commitok = 1;
-		return_value->value.lval = zend_list_insert(ibase_result, php_ibase_module.le_result);
-		return_value->type = IS_LONG;
-	} else {
-		if (status[0] == 1 && status[1]) {
-			if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
-				isc_rollback_transaction(status, &tr_handle);
-				isc_dsql_free_statement(status, &query_handle, DSQL_drop);
-				RETURN_FALSE;
-			}
-		} else {
-			if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
-				isc_commit_transaction(status, &tr_handle);
-				isc_dsql_free_statement(status, &query_handle, DSQL_drop);
-				RETURN_FALSE;
-			}
-		}
-	}
-}
-/* }}} */
-
-/* {{{ proto int ibase_fetch_row(int result)
-   Fetch a row from the results of a query */
-PHP_FUNCTION(ibase_fetch_row)
-{
-	pval *result;
-	pval *pval_ptr;
-	int type;
-	int i, coltype, collen;
-	char string_data[255];
-	char *fieldname;
-	char *char_data;
-	/*
-	struct tm t;
-	*/
-	ibase_result_handle *ibase_result;
-	ISC_STATUS status[20];
-	XSQLVAR *var;
-	IBASE_VCHAR *vchar;
-	IBASE_TLS_VARS;
-	PLS_FETCH();
-
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda) == 100L) {
+		RETURN_FALSE;  /* end of cursor */
 	}
 	
-	convert_to_long(result);
-	ibase_result = (ibase_result_handle *) zend_list_find(result->value.lval, &type);
+	if (IB_STATUS[0] && IB_STATUS[1]) { /* error in fetch */
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
 	
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_result) {
-		php_error(E_WARNING,"%d is not an InterBase result index", result->value.lval);
-		RETURN_FALSE;
-	}
-
-	if (ibase_result->sqlda == NULL) {
-		php_error(E_WARNING,"InterBase: trying to fetch results from a non-select query");
-		RETURN_FALSE;
-	}
-
-	var = ibase_result->sqlda->sqlvar;
-
-	if (isc_dsql_fetch(status, &ibase_result->result, 1, ibase_result->sqlda) != 100L) {
+	if (fetch_type == FETCH_ARRAY) {
 		if (array_init(return_value)==FAILURE) {
 			RETURN_FALSE;
 		}
-
-		for (i = 0; i < ibase_result->sqlda->sqld; i++) {
-			var[i].sqlname[var[i].sqlname_length] = '\0';
-			fieldname = var[i].sqlname;
-			if (*var[i].sqlind < 0) {
-				/* XXX. Column is NULL. This is not the best idea to do, think something... */
-				add_get_index_stringl(return_value, i, NULL, 0, (void **) &pval_ptr, 1);
-				zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-				continue;
-			}
-			coltype = var[i].sqltype & ~1;
-			switch(coltype) {
-				case SQL_TEXT:
-					{
-						int len = var[i].sqllen;
-						char_data = (char *)emalloc(sizeof(char)*(var[i].sqllen));
-						collen = sprintf(char_data, "%*.*s", len, len, ibase_result->sqlda->sqlvar[i].sqldata);
-						if (PG(magic_quotes_runtime)) {
-							int newlen;
-							char *tmp = php_addslashes(char_data, collen, &newlen, 0);
-							add_get_index_stringl(return_value, i, tmp, newlen, (void **) &pval_ptr, 0);
-						} else {
-							add_get_index_stringl(return_value, i, char_data, collen, (void **) &pval_ptr, 1);
-						}
-						zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-						efree(char_data);
-					}
-					break;
+	} else if(fetch_type == FETCH_OBJECT) {
+		if (object_init(return_value)==FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+	
+	arr_cnt = 0;
+	var = ib_result->out_sqlda->sqlvar;
+	for (i = 0; i < ib_result->out_sqlda->sqld; i++, var++) {
+		pval tmp;
+		if (((var->sqltype & 1) == 0) || *var->sqlind != -1){
+			switch(var->sqltype & ~1) {
 				case SQL_VARYING:
-					{
-						vchar = (IBASE_VCHAR *) var[i].sqldata;
-						char_data = (char *)emalloc(sizeof(char)*(vchar->var_len));
-						collen = sprintf(char_data, "%*.*s", vchar->var_len, vchar->var_len, vchar->var_str);
-						if (PG(magic_quotes_runtime)) {
-							int newlen;
-							char *tmp = php_addslashes(char_data, collen, &newlen, 0);
-							add_get_index_stringl(return_value, i, tmp, newlen, (void **) &pval_ptr, 0);
-						} else {
-							add_get_index_stringl(return_value, i, char_data, collen, (void **) &pval_ptr, 1);
-						}
-						zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-						efree(char_data);
-					}
-					break;
+				case SQL_TEXT:
 				case SQL_SHORT:
-					collen = sprintf(string_data, "%d", *(short *)(var[i].sqldata));
-					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-					break;
 				case SQL_LONG:
-					if (var[i].sqlscale) {
-						int j, f = 1;
-						float n;
-						n = *(long *)(var[i].sqldata);
-						for (j = 0; j < -var[i].sqlscale; j++)
-							f *= 10;
-						n /= f;
-						collen = sprintf(string_data, "%.*f", -var[i].sqlscale, n);
-
-					} else {
-						collen = sprintf(string_data, "%ld", *(long *)(var[i].sqldata));
-					}
-					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-					break;
 				case SQL_FLOAT:
-					collen = sprintf(string_data, "%f", *(float *)(var[i].sqldata));
-					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-					break;
 				case SQL_DOUBLE:
-					if (ibase_result->sqlda->sqlvar[i].sqlscale) {
-						collen = sprintf(string_data, "%.*f", -var[i].sqlscale, *(double *)(var[i].sqldata));
-					} else {
-						collen = sprintf(string_data, "%f", *(double *)(var[i].sqldata));
-					}
-					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-					break;
-				case SQL_DATE: {
-					struct tm *t;
-					t = emalloc(sizeof(struct tm));
-
-					isc_decode_date((ISC_QUAD *) var[i].sqldata, t);
-					/*
-#if HAVE_STRFTIME
-					collen = (int) strftime(string_data, 255, IBASE_GLOBAL(php_ibase_module).timeformat, t);
-#else
-					*/
-					collen = sprintf(string_data, "%4d-%02d-%02d %02d:%02d:%02d", t->tm_year+1900, t->tm_mon+1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
-					/* #endif */
-					add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-					zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
-					efree(t);
-					}
+				case SQL_DATE:
+					_php_ibase_var_pval(&tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag);
 					break;
 				case SQL_BLOB:
-				case SQL_ARRAY:
-					{
-						/* TODO, currently just show the id */
-						ISC_QUAD bid;
-						bid = *(ISC_QUAD ISC_FAR *) var[i].sqldata;
-						sprintf(string_data, "%lx:%lx", bid.isc_quad_high, bid.isc_quad_low);
-						add_get_index_stringl(return_value, i, string_data, collen, (void **) &pval_ptr, 1);
-						zend_hash_pointer_update(return_value->value.ht, fieldname, var[i].sqlname_length+1, pval_ptr);
+					if (flag & PHP_IBASE_TEXT) { /* text ? */
+						int stat;
+						isc_blob_handle bl_handle = NULL;
+						ISC_LONG max_len = 0, cur_len = 0;
+						char bl_items[1], *bl_data, bl_info[20], *p;
+						
+						if (isc_open_blob(IB_STATUS, &ib_result->link, &ib_result->trans, &bl_handle, (ISC_QUAD ISC_FAR *) var->sqldata)) {
+							_php_ibase_error();
+							RETURN_FALSE;
+						}
+						
+						bl_items[0] = isc_info_blob_total_length;
+						if (isc_blob_info(IB_STATUS,&bl_handle,sizeof(bl_items),bl_items,sizeof(bl_info),bl_info)) {
+							_php_ibase_error();
+							RETURN_FALSE;
+						}
+						
+						/* find total length of blob's data */
+						for (p = bl_info; *p != isc_info_end && p < bl_info+sizeof(bl_info);) {
+							int item_len, item = *p++;
+							item_len = (short)isc_vax_integer(p, 2);
+							p += 2;
+							if (item == isc_info_blob_total_length)
+								max_len = isc_vax_integer(p, item_len);
+							p += item_len;
+						}
+						
+						bl_data = emalloc(max_len+1);
+						
+						for (cur_len = stat = 0; stat == 0 && cur_len < max_len; ) {
+							unsigned short seg_len, max_seg = max_len-cur_len > USHRT_MAX ? USHRT_MAX : max_len-cur_len;
+							stat = isc_get_segment(IB_STATUS, &bl_handle, &seg_len, max_seg, &bl_data[cur_len]);
+							cur_len += seg_len;
+							if(cur_len > max_len){ /* never!*/
+								efree(bl_data);
+								_php_ibase_module_error("php module internal error in %s %d",__FILE__,__LINE__);
+								RETURN_FALSE;
+							}
+						}
+						
+						if (IB_STATUS[0] && IB_STATUS[1] && (IB_STATUS[1] != isc_segstr_eof)) {
+							efree(bl_data);
+							_php_ibase_error();
+							RETURN_FALSE;
+						}
+						bl_data[cur_len] = '\0';
+						if (isc_close_blob(IB_STATUS, &bl_handle)) {
+							efree(bl_data);
+							_php_ibase_error();
+							RETURN_FALSE;
+						}
+						tmp.type = IS_STRING;
+						tmp.value.str.len = cur_len;
+						tmp.value.str.val = bl_data;
+					} else { /* blob id only */
+						ISC_QUAD *bl_qd = (ISC_QUAD ISC_FAR *) var->sqldata;
+						ibase_blob_handle *ib_blob_id;
+						
+						ib_blob_id = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
+						
+						ib_blob_id->link = ib_result->link;
+						ib_blob_id->trans_handle = ib_result->trans;
+						ib_blob_id->bl_qd.gds_quad_high = bl_qd->gds_quad_high;
+						ib_blob_id->bl_qd.gds_quad_low = bl_qd->gds_quad_low;
+						ib_blob_id->bl_handle = NULL;
+						
+						tmp.type = IS_STRING;
+						tmp.value.str.len = sizeof(ibase_blob_handle);
+						tmp.value.str.val = (char *)ib_blob_id;
 					}
 					break;
+				case SQL_ARRAY:{
+					ISC_QUAD ar_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
+					ibase_array *ib_array = &ib_result->out_array[arr_cnt];
+					void *ar_data;
+					char *tmp_ptr;
+					
+					ar_data = emalloc(ib_array->ar_size);
+					
+					if (isc_array_get_slice(IB_STATUS, &ib_result->link, &ib_result->trans,
+											&ar_qd, &ib_array->ar_desc, ar_data, &ib_array->ar_size)){
+						_php_ibase_error();
+						RETURN_FALSE;
+					}
+					
+					tmp_ptr = ar_data; /* avoid changes in _arr_pval */
+					if(_php_ibase_arr_pval(&tmp, &tmp_ptr, ib_array, 0, flag) == FAILURE){
+						RETURN_FALSE;
+					}
+					efree(ar_data);
+				}
+				break;
 				default:
 					break;
+			}/*switch*/
+			if (fetch_type & FETCH_ARRAY) {
+				/* FIXME */
+				zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(pval),NULL);
+			} else {
+				zend_hash_update(return_value->value.ht, var->aliasname, var->aliasname_length+1, (void *) &tmp, sizeof(pval), NULL);
 			}
+		}/* if not null */
+		if ((var->sqltype & ~1) == SQL_ARRAY) {
+			arr_cnt++;
 		}
-	} else {
-		RETURN_FALSE;
-	}
+	}/*for field*/
 }
 /* }}} */
+
+
+/* {{{ proto array ibase_fetch_row(int result [, int blob_flag])
+   Fetch a row  from the results of a query */
+PHP_FUNCTION(ibase_fetch_row)
+{
+	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_ARRAY);
+}
+/* }}} */
+
+
+/* {{{ proto object ibase_fetch_object(int result [, int blob_flag])
+   Fetch a object from the results of a query */
+PHP_FUNCTION(ibase_fetch_object)
+{
+	_php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FETCH_OBJECT);
+}
+/* }}} */
+
 
 /* {{{ proto int ibase_free_result(int result)
    Free the memory used by a result */
 PHP_FUNCTION(ibase_free_result)
 {
-	pval *result;
-	ibase_result_handle *ibase_result;
-	int type;
-	IBASE_TLS_VARS;
+	pval *result_arg;
+	ibase_result *ib_result;
+	IBLS_FETCH();
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(result);
-	if (result->value.lval==0) {
+	convert_to_long(result_arg);
+	if (result_arg->value.lval==0) {
 		RETURN_FALSE;
 	}
 	
-	ibase_result = (ibase_result_handle *) zend_list_find(result->value.lval,&type);
+	GET_RESULT(result_arg->value.lval, ib_result);
 	
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_result) {
-		php_error(E_WARNING,"%d is not an InterBase result index",result->value.lval);
-		RETURN_FALSE;
-	}
-	zend_list_delete(result->value.lval);
+	zend_list_delete(result_arg->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto int ibase_prepare([int link_identifier], string query)
-   Prepare a query for later binding of parameter placeholders and execution */
+
+/* {{{ proto int ibase_prepare([int link_identifier,] string query)
+   Prepare a query for later execution */
 PHP_FUNCTION(ibase_prepare)
 {
-	pval *query, *ibase_link;
-	int id, type;
-	isc_db_handle db_handle;
-	isc_tr_handle tr_handle = NULL;
-	isc_stmt_handle query_handle = NULL;
-	ISC_STATUS status[20];
-	XSQLDA *isqlda;
-	ibase_query_handle *ibase_query;
-	IBASE_TLS_VARS;
+	pval *link_arg, *query_arg;
+	int link_id, trans_n = 0;
+	ibase_db_link *ib_link;
+	ibase_query *ib_query;
+	char *query;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &query) == FAILURE) {
+			if (getParameters(ht, 1, &query_arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			id = IBASE_GLOBAL(php_ibase_module).default_link;
+			link_id = IBG(default_link);
 			break;
 		case 2:
-			if (getParameters(ht, 2, &ibase_link, &query) == FAILURE) {
+			if (getParameters(ht, 2, &link_arg, &query_arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(ibase_link);
-			id = ibase_link->value.lval;
+			convert_to_long(link_arg);
+			link_id = link_arg->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	db_handle = (isc_db_handle) zend_list_find(id, &type);
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_link && type!=IBASE_GLOBAL(php_ibase_module).le_plink) {
-		php_error(E_WARNING, "%d is not an InterBase link index", id);
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
+	
+	convert_to_string(query_arg);
+	query = query_arg->value.str.val;
+
+	/* open default transaction */
+	if(_php_ibase_def_trans(ib_link, trans_n) == FAILURE){
 		RETURN_FALSE;
 	}
 	
-	convert_to_string(query);
-
-	if (!IBASE_GLOBAL(php_ibase_module).manualtransactions) {
-		if (isc_start_transaction(status, &tr_handle, 1, &db_handle, 0, NULL)) {
-			php_error(E_WARNING, "InterBase: couldn't start transaction");
-			RETURN_FALSE;
-		}
+	if(_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n],  query) == FAILURE){
+		RETURN_FALSE;
 	}
 
-	isqlda = php_ibase_prepare(db_handle, tr_handle, &query_handle, query->value.str.val);
-	ibase_query = (ibase_query_handle *) emalloc(sizeof(ibase_query_handle));
-	ibase_query->query = query_handle;
-	ibase_query->sqlda = isqlda;
-	ibase_query->trans = tr_handle;
-	ibase_query->alloced = 0;
-	return_value->value.lval = zend_list_insert(ibase_query, php_ibase_module.le_query);
-	return_value->type = IS_LONG;
+	RETURN_LONG(zend_list_insert(ib_query, IBG(le_query)));
 }
 /* }}} */
 
-/* {{{ proto int ibase_bind(int query)
-   Bind parameter placeholders in a previously prepared query. Still nonfunctional. */
-PHP_FUNCTION(ibase_bind)
-{
-	pval *query;
-	ibase_query_handle *ibase_query;
-	int type;
-	IBASE_TLS_VARS;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &query)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long(query);
-	if (query->value.lval==0) {
-		RETURN_FALSE;
-	}
-	
-	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval,&type);
-	
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_query) {
-		php_error(E_WARNING,"%d is not an InterBase query index",query->value.lval);
-		RETURN_FALSE;
-	}
-
-	if (ibase_query->sqlda == NULL) {
-		php_error(E_WARNING,"InterBase: trying to bind a query having no parameter placeholders");
-		RETURN_FALSE;
-	}
-
-	/* TODO 
-	for (i = 0; i < ibase_query->sqlda->sqld; i++) {
-		ibase_query->sqlda->sqlvar[i].sqlind = (short *) emalloc(sizeof(short));
-		coltype = ibase_query->sqlda->sqlvar[i].sqltype & ~1;
-		switch(coltype)
-			{
-			case SQL_TEXT:
-				break;
-			case SQL_VARYING:
-				break;
-			case SQL_SHORT:
-				break;
-			case SQL_LONG:
-				break;
-			case SQL_FLOAT:
-				break;
-			case SQL_DOUBLE:
-				break;
-			case SQL_DATE:
-				break;
-			case SQL_BLOB:
-				break;
-			case SQL_ARRAY:
-				break;
-			}
-	}
-	*/
-}
-/* }}} */
-
-/* {{{ proto int ibase_execute(int query)
-   Execute a previously prepared (and possibly binded) query */
+/* {{{ proto int ibase_execute(int query [, int bind_args [, int ...])
+   Execute a previously prepared query */
 PHP_FUNCTION(ibase_execute)
 {
-	pval *query;
-	ibase_query_handle *ibase_query;
-	ibase_result_handle *ibase_result;
-	int type;
-	ISC_STATUS status[20];
-	XSQLDA *osqlda;
-	IBASE_TLS_VARS;
+	pval **args, **bind_args = NULL;
+	ibase_query *ib_query;
+	ibase_result *ib_result;
+	IBLS_FETCH();
+	
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &query)==FAILURE) {
+	RESET_ERRMSG;
+
+	if(ARG_COUNT(ht) < 1){
 		WRONG_PARAM_COUNT;
 	}
-	
-	convert_to_long(query);
-	if (query->value.lval==0) {
-		RETURN_FALSE;
-	}
-	
-	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval,&type);
-	
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_query) {
-		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
+
+	args = emalloc(sizeof(pval*) * ARG_COUNT(ht));
+	if (getParametersArray(ht, ARG_COUNT(ht), args) == FAILURE) {
+		efree(args);
 		RETURN_FALSE;
 	}
 
-	osqlda = php_ibase_execute(ibase_query->trans, ibase_query->query, ibase_query->sqlda, status);
-	ibase_result = (ibase_result_handle *) emalloc(sizeof(ibase_result_handle));
-	ibase_result->result = ibase_query->query;
-	ibase_result->sqlda = osqlda;
-	return_value->value.lval = zend_list_insert(ibase_result, IBASE_GLOBAL(php_ibase_module).le_result);
-	return_value->type = IS_LONG;
+	GET_QUERY(args[0]->value.lval, ib_query);
+	
+	if(ARG_COUNT(ht) > 1){ /* have variables to bind */
+		bind_args = &args[1];
+	}
+	
+	if( _php_ibase_exec(&ib_result, ib_query, ARG_COUNT(ht)-1, bind_args) == FAILURE){;
+		efree(args);
+		RETURN_FALSE;
+	}
+	
+	efree(args);
+	
+	if (ib_result) { /* select statement */
+		RETURN_LONG(zend_list_insert(ib_result, IBG(le_result)));
+	}
+	
+	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto int ibase_free_query(int query)
    Free memory used by a query */
 PHP_FUNCTION(ibase_free_query)
 {
-	pval *query;
-	ibase_query_handle *ibase_query;
-	int type;
-	IBASE_TLS_VARS;
+	pval *query_arg;
+	ibase_query *ib_query;
+	IBLS_FETCH();
+	
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &query)==FAILURE) {
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &query_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(query);
-	if (query->value.lval==0) {
-		RETURN_FALSE;
-	}
+	convert_to_long(query_arg);
+
+	GET_QUERY(query_arg->value.lval, ib_query);
 	
-	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval, &type);
-	
-	if (type!=IBASE_GLOBAL(php_ibase_module).le_query) {
-		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
-		RETURN_FALSE;
-	}
-	zend_list_delete(query->value.lval);
+	zend_list_delete(query_arg->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
 
+
 /* {{{ proto int ibase_timefmt(string format)
-   Sets the format of datetime columns returned from queries. Still nonfunctional. */
+   Sets the format of datetime columns returned from queries. Still nonfunctional */
 PHP_FUNCTION(ibase_timefmt)
 {
-	pval *pmode;
-	IBASE_TLS_VARS;
+	pval *fmt;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
 
 #if HAVE_STRFTIME
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &fmt)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(pmode);
-
+    convert_to_string(fmt);
+    
+	if(IBG(timeformat))
+	  DL_FREE(IBG(timeformat));
+    IBG(timeformat) = DL_STRDUP(fmt->value.str.val);
+    
 	RETURN_TRUE;
 #else
-	php_error(E_WARNING,"InterBase: ibase_timefmt not supported on this platform");
+	_php_ibase_module_error("ibase_timefmt not supported on this platform");
 	RETURN_FALSE;
 #endif
 }
 /* }}} */
+
+
+/* {{{ proto int ibase_num_fields(int result)
+   Get the number of fields in result */
+PHP_FUNCTION(ibase_num_fields)
+{
+	pval *result;
+	int type;
+	ibase_result *ib_result;
+	
+
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_long(result);
+	ib_result = (ibase_result *) zend_list_find(result->value.lval, &type);
+	
+	if (type!=IBG(le_result)) {
+		_php_ibase_module_error("%d is not result index", result->value.lval);
+		RETURN_FALSE;
+	}
+
+	if (ib_result->out_sqlda == NULL) {
+		_php_ibase_module_error("trying to get num fields from a non-select query");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ib_result->out_sqlda->sqld);
+}
+/* }}} */
+
+
+/* {{{ proto array ibase_field_info(int result, int field_number)
+   Get information about a field */
+PHP_FUNCTION(ibase_field_info)
+{
+	pval *ret_val, *result_arg, *field_arg;
+	ibase_result *ib_result;
+	char buf[30], *s;
+	int len;
+	XSQLVAR *var;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result_arg, &field_arg)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_long(result_arg);
+
+	GET_RESULT(result_arg->value.lval, ib_result);
+	
+	if (ib_result->out_sqlda == NULL) {
+		_php_ibase_module_error("trying to get field info from a non-select query");
+		RETURN_FALSE;
+	}
+
+	convert_to_long(field_arg);
+
+	if (field_arg->value.lval<0 || field_arg->value.lval>=ib_result->out_sqlda->sqld)
+		RETURN_FALSE;
+
+	if (array_init(return_value)==FAILURE)
+		RETURN_FALSE;
+
+	var = ib_result->out_sqlda->sqlvar + field_arg->value.lval;
+
+	/* FIXME */
+	add_get_index_stringl(return_value, 0, var->sqlname, var->sqlname_length, (void **) &ret_val, 1);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "name", sizeof(char)*5, ret_val);
+	*/
+
+	add_get_index_stringl(return_value, 1, var->aliasname, var->aliasname_length, (void **) &ret_val, 1);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "alias", sizeof(char)*6, ret_val);
+	*/
+
+	add_get_index_stringl(return_value, 2, var->relname, var->relname_length, (void **) &ret_val, 1);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "relation", sizeof(char)*9, ret_val);
+	*/
+
+	len = sprintf(buf, "%d", var->sqllen);
+	add_get_index_stringl(return_value, 3, buf, len, (void **) &ret_val, 1);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "length", sizeof(char)*7, ret_val);
+	*/
+
+	switch (var->sqltype & ~1){
+		case SQL_TEXT:	   s = "TEXT"; break;
+		case SQL_VARYING:  s = "VARYING"; break;
+		case SQL_SHORT:	   s = "SHORT"; break;
+		case SQL_LONG:	   s = "LONG"; break;
+		case SQL_FLOAT:	   s = "FLOAT"; break;
+		case SQL_DOUBLE:   s = "DOUBLE"; break;
+		case SQL_D_FLOAT:  s = "D_FLOAT"; break;
+		case SQL_DATE:	   s = "DATE"; break;
+		case SQL_BLOB:	   s = "BLOB"; break;
+		case SQL_ARRAY:	   s = "ARRAY"; break;
+		case SQL_QUAD:	   s = "QUAD"; break;
+	default:
+		sprintf(buf,"unknown (%d)", var->sqltype & ~1);
+		s = buf;
+		break;
+	}
+	add_get_index_stringl(return_value, 4, s, strlen(s), (void **) &ret_val, 1);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "type", sizeof(char)*5, ret_val);
+	*/
+
+}
+/* }}} */
+
+
+/* blobs ----------------------------------- */
+
+
+/* {{{ _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_info) */
+static int _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_info)
+{
+	
+	static char bl_items[] = {
+		isc_info_blob_num_segments,
+		isc_info_blob_max_segment,
+		isc_info_blob_total_length,
+		isc_info_blob_type
+	};
+	
+	char bl_inf[sizeof(long)*8], *p;
+	
+
+	bl_info->max_segment = 0;
+	bl_info->num_segments = 0;
+	bl_info->total_length = 0;
+	bl_info->bl_stream = 0;
+
+	if (isc_blob_info(IB_STATUS,&bl_handle,sizeof(bl_items),bl_items,sizeof(bl_inf),bl_inf)) {
+		_php_ibase_error();
+		return FAILURE;
+	}
+
+	for (p = bl_inf; *p != isc_info_end && p < bl_inf+sizeof(bl_inf);) {
+		int item_len, item = *p++;
+		item_len = (short)isc_vax_integer(p, 2);
+		p += 2;
+		switch(item){
+			case isc_info_blob_num_segments:
+				bl_info->num_segments = isc_vax_integer(p, item_len);
+				break;
+			case isc_info_blob_max_segment:
+				bl_info->max_segment = isc_vax_integer(p, item_len);
+				break;
+			case isc_info_blob_total_length:
+				bl_info->total_length = isc_vax_integer(p, item_len);
+				break;
+			case isc_info_blob_type:
+				bl_info->bl_stream = isc_vax_integer(p, item_len);
+				break;
+			case isc_info_end:
+				break;
+			case isc_info_truncated:
+			case isc_info_error:  /* hmm. don't think so...*/
+				_php_ibase_module_error("php module internal error in %s %d",__FILE__,__LINE__);
+				return FAILURE;
+		}/*switch*/
+		p += item_len;
+	}/*for*/
+	return SUCCESS;
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_blob_create([int link_identifier])
+   Create blob for adding data */
+PHP_FUNCTION(ibase_blob_create)
+{
+	pval *link_arg;
+	int trans_n, link_id = 0;
+	ibase_db_link *ib_link;
+	ibase_blob_handle *ib_blob;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
+
+	switch (ARG_COUNT(ht)) {
+		case 0:
+			link_id = IBG(default_link);
+			break;
+		case 1:
+			if (getParameters(ht, 1, &link_arg) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long(link_arg);
+			link_id = link_arg->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
+
+	/* open default transaction */
+	if(_php_ibase_def_trans(ib_link, trans_n) == FAILURE){
+		RETURN_FALSE;
+	}
+	
+	ib_blob = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
+	ib_blob->trans_handle = ib_link->trans[trans_n];
+	ib_blob->link = ib_link->link;
+	ib_blob->bl_handle = NULL;
+	
+	if (isc_create_blob(IB_STATUS, &ib_blob->link, &ib_blob->trans_handle, &ib_blob->bl_handle,&ib_blob->bl_qd)){
+		efree(ib_blob);
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
+	
+	RETURN_LONG(zend_list_insert(ib_blob, IBG(le_blob)));
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_blob_open(string blob_id)
+   Open blob for retriving data parts */
+PHP_FUNCTION(ibase_blob_open)
+{
+	pval *blob_arg;
+	ibase_blob_handle *ib_blob, *ib_blob_id;
+	IBLS_FETCH();
+	
+
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	ib_blob = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
+
+	GET_BLOB_ID_ARG(blob_arg,ib_blob_id);
+
+	if(ib_blob_id == NULL){ /* blob IS NULL or argument unset */
+		RETURN_FALSE;
+	}
+	
+	ib_blob->link = ib_blob_id->link;
+	ib_blob->trans_handle = ib_blob_id->trans_handle;
+	ib_blob->bl_qd.gds_quad_high = ib_blob_id->bl_qd.gds_quad_high;
+	ib_blob->bl_qd.gds_quad_low = ib_blob_id->bl_qd.gds_quad_low;
+	ib_blob->bl_handle = NULL;
+	if (isc_open_blob(IB_STATUS, &ib_blob->link, &ib_blob->trans_handle, &ib_blob->bl_handle, &ib_blob->bl_qd)){
+		efree(ib_blob);
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
+	
+	RETURN_LONG(zend_list_insert(ib_blob, IBG(le_blob)));
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_blob_add(int blob_id, string data)
+   Add data into created blob */
+PHP_FUNCTION(ibase_blob_add)
+{
+	pval *blob_arg,*string_arg;
+	ibase_blob_handle *ib_blob;
+	IBLS_FETCH();
+
+
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &blob_arg, &string_arg)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
+	
+	convert_to_string(string_arg);
+
+	if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, string_arg->value.str.len, string_arg->value.str.val)){
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto string ibase_blob_get(int blob_id, int len)
+   Get len bytes data from open blob */
+PHP_FUNCTION(ibase_blob_get)
+{
+	pval *blob_arg, *len_arg;
+	int stat;
+	char *bl_data;
+	unsigned short max_len = 0, cur_len, seg_len;
+	ibase_blob_handle *ib_blob;
+	IBLS_FETCH();
+
+
+	RESET_ERRMSG;
+
+	if(ARG_COUNT(ht) != 2 || getParameters(ht, 2, &blob_arg, &len_arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(len_arg);
+	max_len = len_arg->value.lval;
+
+	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
+
+	if(ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low){ /*not null ?*/
+		
+		bl_data = emalloc(max_len+1);
+
+		for(cur_len = stat = 0; stat == 0; ){
+			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, max_len-cur_len, &bl_data[cur_len]);
+			cur_len += seg_len;
+			if(cur_len > max_len){ /* never!*/
+				efree(bl_data);
+				_php_ibase_module_error("php module internal error in %s %d",__FILE__,__LINE__);
+				RETURN_FALSE;
+			}
+		}
+
+		bl_data[cur_len] = '\0';
+		if (IB_STATUS[0] && (IB_STATUS[1] != isc_segstr_eof && IB_STATUS[1] != isc_segment)){
+			efree(bl_data);
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+		RETURN_STRINGL(bl_data,cur_len,0);
+	}else{ /* null blob */
+		RETURN_STRING("",1); /* empty string */
+	}
+}
+/* }}} */
+
+
+#define BLOB_CLOSE 1
+#define BLOB_CANCEL 2
+
+/* {{{ _php_ibase_blob_end() */
+/* Close or Cancel created or Close open blob */
+static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
+{
+	pval *blob_arg;
+	ibase_blob_handle *ib_blob;
+	IBLS_FETCH();
+
+
+	RESET_ERRMSG;
+	
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
+
+	if(bl_end == BLOB_CLOSE){ /* return id here */
+		if(ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low){ /*not null ?*/
+			if (isc_close_blob(IB_STATUS, &ib_blob->bl_handle)){
+				_php_ibase_error();
+				RETURN_FALSE;
+			}
+		}
+		ib_blob->bl_handle = NULL;
+		RETVAL_STRINGL((char *)ib_blob, sizeof(ibase_blob_handle), 1);
+		zend_list_delete(blob_arg->value.lval);
+	} else { /* discard created blob */
+		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)){
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+		ib_blob->bl_handle = NULL;
+		zend_list_delete(blob_arg->value.lval);
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_blob_close(int blob_id)
+   Close blob */
+PHP_FUNCTION(ibase_blob_close)
+{
+	_php_ibase_blob_end(INTERNAL_FUNCTION_PARAM_PASSTHRU,BLOB_CLOSE);
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_blob_cancel(int blob_id)
+   Cancel creating blob */
+PHP_FUNCTION(ibase_blob_cancel)
+{
+	_php_ibase_blob_end(INTERNAL_FUNCTION_PARAM_PASSTHRU,BLOB_CANCEL);
+}
+/* }}} */
+
+
+/* {{{ proto object ibase_blob_info(string blob_id_str)
+   Return blob length and other useful info */
+PHP_FUNCTION(ibase_blob_info)
+{
+	pval *blob_arg, *result_var;
+	ibase_blob_handle *ib_blob_id;
+	IBASE_BLOBINFO bl_info;
+	IBLS_FETCH();
+
+
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	GET_BLOB_ID_ARG(blob_arg, ib_blob_id);
+
+	if (array_init(return_value)==FAILURE){
+		RETURN_FALSE;
+	}
+	
+	if(ib_blob_id->bl_qd.gds_quad_high || ib_blob_id->bl_qd.gds_quad_low){ /*not null ?*/
+		if (isc_open_blob(IB_STATUS, &ib_blob_id->link, &ib_blob_id->trans_handle,
+						  &ib_blob_id->bl_handle, &ib_blob_id->bl_qd)){
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+
+		if(_php_ibase_blob_info(ib_blob_id->bl_handle,&bl_info)){
+			RETURN_FALSE;
+		}
+		if(isc_close_blob(IB_STATUS, &ib_blob_id->bl_handle)){
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+		ib_blob_id->bl_handle = NULL;
+	}else{ /* null blob, all values to zero	 */
+		bl_info.max_segment = 0;
+		bl_info.num_segments = 0;
+		bl_info.total_length = 0;
+		bl_info.bl_stream = 0;
+	}
+
+	/* FIXME */
+	add_get_index_long(return_value, 0, bl_info.total_length, (void **)&result_var);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "length", sizeof("length"), result_var);
+	*/
+
+	add_get_index_long(return_value, 1, bl_info.num_segments, (void **)&result_var);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "numseg", sizeof("numseg"), result_var);
+	*/
+
+	add_get_index_long(return_value, 2, bl_info.max_segment, (void **)&result_var);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "maxseg", sizeof("maxseg"), result_var);
+	*/
+
+	add_get_index_long(return_value, 3, bl_info.bl_stream, (void **)&result_var);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "stream", sizeof("stream"), result_var);
+	*/
+	
+	add_get_index_long(return_value, 4,
+					   (!ib_blob_id->bl_qd.gds_quad_high
+						&& !ib_blob_id->bl_qd.gds_quad_low),
+					   (void **)&result_var);
+	/*
+	zend_hash_pointer_update(return_value->value.ht, "isnull", sizeof("isnull"), result_var);
+	*/
+}
+/* }}} */
+
+
+/* {{{ proto int ibase_blob_echo(string blob_id_str)
+   Output blob contents to browser */
+PHP_FUNCTION(ibase_blob_echo)
+{
+	pval *blob_arg;
+	char bl_data[IBASE_BLOB_SEG];
+	unsigned short seg_len;
+	ibase_blob_handle *ib_blob_id;
+	
+
+	IBLS_FETCH();
+
+	RESET_ERRMSG;
+
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	GET_BLOB_ID_ARG(blob_arg, ib_blob_id);
+	
+	if (!php_header()) {
+		RETURN_FALSE;
+	}
+
+	if(ib_blob_id){ /*not null ?*/
+		
+		if (isc_open_blob(IB_STATUS, &ib_blob_id->link, &ib_blob_id->trans_handle,
+						  &ib_blob_id->bl_handle,&ib_blob_id->bl_qd)){
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+
+		while(!isc_get_segment(IB_STATUS, &ib_blob_id->bl_handle, &seg_len, sizeof(bl_data), bl_data)
+			  || IB_STATUS[1] == isc_segment){
+			PHPWRITE(bl_data,seg_len);
+		}
+	
+		if (IB_STATUS[0] && (IB_STATUS[1] != isc_segstr_eof)){
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+
+		if (isc_close_blob(IB_STATUS, &ib_blob_id->bl_handle)){
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+		ib_blob_id->bl_handle = NULL;
+	}/* not null ? */
+
+	RETURN_TRUE;
+}
+/* }}} */
+#ifndef PHP_WIN32
+#if 0
+
+extern int le_fp, le_pp;
+extern int wsa_fp; /*to handle reading and writing to windows sockets*/
+
+/* {{{ proto string ibase_blob_import([link_identifier,] file_id)
+   Create blob, copy file in it, and close it */
+
+
+PHP_FUNCTION(ibase_blob_import)
+{
+	pval *link_arg, *file_arg;
+	int trans_n, type,	link_id = 0, file_id, size, b;
+	int issock=0, socketd=0, *sock;
+	ibase_blob_handle ib_blob;
+	ibase_db_link *ib_link;
+	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
+	FILE *fp;
+	IBLS_FETCH();
+
+
+	RESET_ERRMSG;
+
+	switch (ARG_COUNT(ht)) {
+		case 1:
+			if (getParameters(ht, 1, &file_arg) == FAILURE) {
+				RETURN_FALSE;
+			}
+			link_id = IBG(default_link);
+			break;
+		case 2:
+			if (getParameters(ht, 2, &link_arg, &file_arg) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long(link_arg);
+			link_id = link_arg->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	GET_LINK_TRANS(link_id, ib_link, trans_n);
+	
+	/* open default transaction */
+	if(_php_ibase_def_trans(ib_link, trans_n) == FAILURE){
+		RETURN_FALSE;
+	}
+
+	convert_to_long(file_arg);
+	file_id = file_arg->value.lval;
+    fp = zend_list_find(file_id, &type);
+	if (type == wsa_fp){
+		issock = 1;
+		sock = zend_list_find(file_id, &type);
+		socketd =* sock;
+    }
+    
+    if ((!fp || (type!= le_fp) && type!=le_pp
+         && (!socketd || type != wsa_fp))) {
+        _php_ibase_module_error("Unable to find file identifier %d",file_id);
+        RETURN_FALSE;
+    }
+
+	ib_blob.link = ib_link->link;
+	ib_blob.trans_handle = ib_link->trans[trans_n];
+	ib_blob.bl_handle = NULL;
+	ib_blob.bl_qd.gds_quad_high = 0;
+	ib_blob.bl_qd.gds_quad_low = 0;
+	
+	if (isc_create_blob(IB_STATUS, &ib_blob.link, &ib_blob.trans_handle, &ib_blob.bl_handle,&ib_blob.bl_qd)){
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
+
+	size = 0;
+	while (issock?(b=SOCK_FREAD(bl_data,sizeof(bl_data),socketd)):(b = fread(bl_data, 1, sizeof(bl_data), fp)) > 0) {
+		if (isc_put_segment(IB_STATUS, &ib_blob.bl_handle, b, bl_data)) {
+			_php_ibase_error();
+			RETURN_FALSE;
+		}
+		size += b;
+	}
+	
+	if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)){
+		_php_ibase_error();
+		RETURN_FALSE;
+	}
+
+	zend_list_delete(file_id);
+
+	ib_blob.bl_handle = NULL;
+	RETVAL_STRINGL((char *)&ib_blob, sizeof(ibase_blob_handle), 1);
+}
+/* }}} */
+#endif
+#endif
+
 
 #endif
 
@@ -1115,3 +2657,4 @@ PHP_FUNCTION(ibase_timefmt)
  * c-basic-offset: 4
  * End:
  */
+
