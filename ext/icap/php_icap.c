@@ -47,7 +47,7 @@
 #include "php_icap.h"
 #include "modules.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_global.h"
+#include "ext/standard/basic_functions.h"
 #ifdef PHP_WIN32
 #include "winsock.h"
 #endif
@@ -64,7 +64,7 @@ typedef struct php_icap_le_struct {
 
 typedef struct cal_list
 {
-UINT4 uid;
+php_uint32 uid;
 struct cal_list *next;
 } cal_list_t;
 
@@ -904,7 +904,7 @@ void cc_searched (unsigned long cal_uid)
 }
 
 
-void cc_appended(UINT4 uid)
+void cc_appended(php_uint32 uid)
 {
 
 }
