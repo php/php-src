@@ -67,6 +67,9 @@ PHP_FUNCTION(xmlwriter_text);
 PHP_FUNCTION(xmlwriter_start_document);
 PHP_FUNCTION(xmlwriter_end_document);
 PHP_FUNCTION(xmlwriter_write_comment);
+PHP_FUNCTION(xmlwriter_start_comment);
+PHP_FUNCTION(xmlwriter_end_comment);
+
 PHP_FUNCTION(xmlwriter_start_dtd);
 PHP_FUNCTION(xmlwriter_end_dtd);
 PHP_FUNCTION(xmlwriter_write_dtd);
