@@ -1622,13 +1622,11 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 						if (syntax_only)
 							return 1;
 
-						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-
 						if (EG(active_op_array) && strcmp(lcname, "self") == 0) {
 							ce = EG(active_op_array)->scope;
 						} else if (strcmp(lcname, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
 							ce = EG(active_op_array)->scope->parent;
-						} else if (zend_lookup_class(lcname, Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
+						} else if (zend_lookup_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
 						}
 						

@@ -2272,7 +2272,6 @@ int zend_add_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	char *class_name_strval;
 	zval *class_name;
 	
 
@@ -2288,13 +2287,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(EX(opline)->result.u.var).EA.class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			if (EX(opline)->op2.op_type != IS_CONST) {
-				class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
-				EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(class_name_strval, Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
-				efree(class_name_strval);
-			} else {
-				EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
-			}
+			EX_T(EX(opline)->result.u.var).EA.class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 			break;
 		default:
 			zend_error(E_ERROR, "Class name must be a valid object or a string");

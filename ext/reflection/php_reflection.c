@@ -2386,7 +2386,6 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	reflection_object *intern, *argument;
 	zend_class_entry *ce, **pce, *class_ce;
 	zval *class_name;
-	char *class_name_lc;
 
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -2397,15 +2396,11 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	
 	switch(class_name->type) {
 		case IS_STRING:
-			class_name_lc = do_alloca(Z_STRLEN_P(class_name) + 1);
-			zend_str_tolower_copy(class_name_lc, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name)+ 1);
-			if (zend_lookup_class(class_name_lc, Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
-				free_alloca(class_name_lc);
+			if (zend_lookup_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 						"Interface %s doesn't exist", Z_STRVAL_P(class_name));
 				return;
 			}
-			free_alloca(class_name_lc);
 			class_ce = *pce;
 			break;			
 		case IS_OBJECT:
@@ -2437,7 +2432,6 @@ ZEND_METHOD(reflection_class, implementsInterface)
 	reflection_object *intern, *argument;
 	zend_class_entry *ce, *interface_ce, **pce;
 	zval *interface;
-	char *interface_lc;
 
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -2448,15 +2442,11 @@ ZEND_METHOD(reflection_class, implementsInterface)
 	
 	switch(interface->type) {
 		case IS_STRING:
-			interface_lc = do_alloca(Z_STRLEN_P(interface) + 1);
-			zend_str_tolower_copy(interface_lc, Z_STRVAL_P(interface), Z_STRLEN_P(interface));
-			if (zend_lookup_class(interface_lc, Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
-				free_alloca(interface_lc);
+			if (zend_lookup_class(Z_STRVAL_P(interface), Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 						"Interface %s doesn't exist", Z_STRVAL_P(interface));
 				return;
 			}
-			free_alloca(interface_lc);
 			interface_ce = *pce;
 			break;			
 		case IS_OBJECT:

@@ -212,8 +212,8 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
-	char *lookup_name;
 	int retval = 1;
+	char *lookup_name;
 	char *colon;
 
 	if ((colon = memchr(name, ':', name_len)) && colon[1] == ':') {
@@ -230,17 +230,14 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 			scope = CG(active_class_entry);
 		}
 		
-		lookup_name = do_alloca(class_name_len+1);
-		zend_str_tolower_copy(lookup_name, name, class_name_len);
-		lookup_name[class_name_len] = '\0';
-		if (class_name_len == sizeof("self")-1 && strcmp(lookup_name, "self") == 0) {
+		if (class_name_len == sizeof("self")-1 && strcmp(name, "self") == 0) {
 			if (scope) {
 				ce = &scope;
 			} else {
 				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 				retval = 0;
 			}
-		} else if (class_name_len == sizeof("parent")-1 && strcmp(lookup_name, "parent") == 0) {
+		} else if (class_name_len == sizeof("parent")-1 && strcmp(name, "parent") == 0) {
 			if (!scope) {   	 
 				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 			} else if (!scope->parent) { 	 
@@ -249,7 +246,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 				ce = &scope->parent;
 			}
 		} else {
-			if (zend_lookup_class(lookup_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+			if (zend_lookup_class(name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
 				retval = 0;
 			}
 		}
@@ -267,7 +264,6 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 			zval_copy_ctor(result);
 		}
 		
-		free_alloca(lookup_name);
 		return retval;
 	}
 	

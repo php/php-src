@@ -1128,7 +1128,6 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->class_name = class_type->u.constant.value.str.val;
 		cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
-		zend_str_tolower(cur_arg_info->class_name, cur_arg_info->class_name_len);
 	} else {
 		cur_arg_info->class_name = NULL;
 		cur_arg_info->class_name_len = 0;
@@ -1236,7 +1235,6 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
 	if (class_name->op_type == IS_CONST) {
 		int fetch_type;
 
-		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 		fetch_type = zend_get_class_fetch_type(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 		switch (fetch_type) {
 			case ZEND_FETCH_CLASS_SELF:
@@ -1258,7 +1256,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
 }
 
 
-void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC)
+void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name TSRMLS_DC)
 {
 	zend_uint length;
 
@@ -1266,9 +1264,6 @@ void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *cla
 		result = class_name_entry;
 	} else {
 		*result = *class_name_entry;
-	}
-	if (!case_sensitive) {
-		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	}
 
 	length = sizeof("::")-1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
@@ -2665,8 +2660,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
-				zend_str_tolower(constant_container->u.constant.value.str.val, constant_container->u.constant.value.str.len);
-				zend_do_fetch_class_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
+				zend_do_fetch_class_name(NULL, constant_container, constant_name TSRMLS_CC);
 				*result = *constant_container;
 			} else {
 				*result = *constant_name;
