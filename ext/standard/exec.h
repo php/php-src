@@ -35,4 +35,6 @@ char *php_escape_shell_cmd(char *);
 char *php_escape_shell_arg(char *);
 int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC);
 
+#define PHP_EMPTY_EXEC_PARAM { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute a blank command"); RETURN_FALSE; }
+
 #endif /* EXEC_H */

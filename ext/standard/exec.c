@@ -309,9 +309,14 @@ PHP_FUNCTION(exec)
 	int arg_count = ZEND_NUM_ARGS();
 	int ret;
 
-	if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
+	if (arg_count < 1 || arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	
+	if (!Z_STRLEN_PP(arg1)) {
+		PHP_EMPTY_EXEC_PARAM;
+	}
+	
 	switch (arg_count) {
 		case 1:
 			ret = php_Exec(0, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
@@ -337,9 +342,14 @@ PHP_FUNCTION(system)
 	int arg_count = ZEND_NUM_ARGS();
 	int ret;
 
-	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
+	if (arg_count < 1 || arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	
+	if (!Z_STRLEN_PP(arg1)) {
+		PHP_EMPTY_EXEC_PARAM;
+	}
+	
 	switch (arg_count) {
 		case 1:
 			ret = php_Exec(1, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
@@ -361,9 +371,14 @@ PHP_FUNCTION(passthru)
 	int arg_count = ZEND_NUM_ARGS();
 	int ret;
 
-	if (arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
+	if (arg_count < 1 || arg_count > 2 || zend_get_parameters_ex(arg_count, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	
+	if (!Z_STRLEN_PP(arg1)) {
+		PHP_EMPTY_EXEC_PARAM;
+	}
+	
 	switch (arg_count) {
 		case 1:
 			ret = php_Exec(3, Z_STRVAL_PP(arg1), NULL, return_value TSRMLS_CC);
