@@ -389,13 +389,14 @@ PHP_FUNCTION(strtok)
 }
 /* }}} */
 
-PHPAPI char *php_strtoupper(char *s)
+PHPAPI char *php_strtoupper(char *s, size_t len)
 {
 	char *c;
 	int ch;
+	int i;
 
 	c = s;
-	while (*c) {
+	for (i=0; i<len; i++) {
 		ch = toupper((unsigned char)*c);
 		*c++ = ch;
 	}
@@ -415,18 +416,18 @@ PHP_FUNCTION(strtoupper)
 
 	*return_value = **arg;
 	zval_copy_ctor(return_value);
-	php_strtoupper(return_value->value.str.val);
+	php_strtoupper(return_value->value.str.val, return_value->value.str.len);
 }
 /* }}} */
 
 
-PHPAPI char *php_strtolower(char *s)
+PHPAPI char *php_strtolower(char *s, size_t len)
 {
 	register int ch;
 	char *c;
 
 	c = s;
-	while (*c) {
+	for (i=0; i<len; i++) {
 		ch = tolower((unsigned char)*c);
 		*c++ = ch;
 	}
@@ -447,7 +448,7 @@ PHP_FUNCTION(strtolower)
 
 	*return_value = **str;
 	zval_copy_ctor(return_value);
-	ret = php_strtolower(return_value->value.str.val);
+	ret = php_strtolower(return_value->value.str.val, return_value->value.str.len);
 }
 /* }}} */
 
@@ -933,11 +934,12 @@ PHP_FUNCTION(substr_replace)
 	result_len = (*string)->value.str.len - l + (*repl)->value.str.len;
 	result = (char *)ecalloc(result_len + 1, sizeof(char *));
 
-	strncat(result, (*string)->value.str.val, f);
-	strcat(result, (*repl)->value.str.val);
-	strcat(result, (*string)->value.str.val + f + l);
+	memcpy(result, (*string)->value.str.val, f);
+	memcpy(&result[f], (*repl)->value.str.val, (*repl)->value.str.len);
+	memcpy(&result[f + (*repl)->value.str.len], (*string)->value.str.val + f + l,
+          (*string)->value.str.len - f - l);
 
-	RETVAL_STRING(result, 0);
+	RETVAL_STRINGL(result, result_len, 0);
 }
 /* }}} */
 

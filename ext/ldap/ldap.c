@@ -774,6 +774,7 @@ PHP_FUNCTION(ldap_get_entries)
 	int attr_count, entry_count;
 	BerElement *ber;
 	char *attribute;
+	size_t attr_len;
 	char **ldap_value;
 	char *dn;
 
@@ -826,7 +827,8 @@ PHP_FUNCTION(ldap_get_entries)
 			}	
 			ldap_value_free(ldap_value);
 
-			zend_hash_update(tmp1->value.ht, php_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval *), NULL);
+			attr_len = strlen(attribute);
+			zend_hash_update(tmp1->value.ht, php_strtolower(attribute, attr_len), attr_len+1, (void *) &tmp2, sizeof(pval *), NULL);
 			add_index_string(tmp1, attr_count, attribute, 1);
 
 			attr_count++;
