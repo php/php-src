@@ -25,7 +25,7 @@
 # if ZEND_DEBUG
 # define ZEND_ENABLE_FAST_CACHE 0
 # else
-# define ZEND_ENABLE_FAST_CACHE 1
+# define ZEND_ENABLE_FAST_CACHE 0
 # endif
 #endif
 
