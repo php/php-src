@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added func_num_args(), func_get_arg() and func_get_args() for standard
+  access to variable number of arguments functions (Zeev)
 - Added FTP support (Andrew Skalski)
 - Added optional allowable_tags arguments to strip_tags() and fgetss() to
   allow you to specify a string of tags that are not to be stripped  (Rasmus)
