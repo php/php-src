@@ -66,10 +66,6 @@ static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 	
 	ctx = SG(server_context);
 
-	/* Ensure that the ap_r* layer is flushed, to work around 2.0 bug:
-	 * http://issues.apache.org/bugzilla/show_bug.cgi?id=17629 */
-	ap_rflush(ctx->r);
-
 	return ap_sub_req_lookup_uri(filename, ctx->r, ctx->r->output_filters);
 }
 
@@ -101,6 +97,10 @@ PHP_FUNCTION(virtual)
 	/* Flush everything. */
 	php_end_ob_buffers(1 TSRMLS_CC);
 	php_header(TSRMLS_C);
+
+	/* Ensure that the ap_r* layer for the main request is flushed, to
+	 * work around http://issues.apache.org/bugzilla/show_bug.cgi?id=17629 */
+	ap_rflush(rr->main);
 
 	if (ap_run_sub_req(rr)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", Z_STRVAL_PP(filename));
