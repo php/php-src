@@ -1073,14 +1073,16 @@ PHP_FUNCTION(strtolower)
  */
 PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 {
-	char *ret=NULL, *c, *p=NULL, buf='\0';
+	char *ret=NULL, *c, *p=NULL, buf='\0', *p2=NULL, buf2='\0';
 	c = s + len - 1;	
 
 	/* do suffix removal as the unix command does */
 	if(suffix && (len > sufflen)) {
 		if(!strncmp(suffix, c-sufflen+1, sufflen)) {
 			c -= sufflen; 
-			*(c + 1) = '\0';
+			buf2 = *(c + 1); /* Save overwritten char */
+			*(c + 1) = '\0'; /* overwrite char */
+			p2 = c + 1;      /* Save pointer to overwritten char */
 		}
 	}
 
@@ -1108,6 +1110,7 @@ PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 		ret = estrdup(s);
 	}
 	if(buf) *p = buf;
+	if(buf2) *p2 = buf2;
 	return (ret);
 }
 /* }}} */
