@@ -27,12 +27,10 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
 
 PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
 [
-  --with-pdo-oci[=DIR]         Include Oracle-OCI support. Default DIR is ORACLE_HOME.
-
-      You may also use --with-pdo-oci=instantclient,prefix,version to use
-      the InstantClient SDK.  For Linux with 10.1.0.3 rpms (for example) use:
-
-      --with-pdo-oci=instantclient,/usr,10.1.0.3
+  --with-pdo-oci[=DIR]    Include Oracle-OCI support. Default DIR is ORACLE_HOME.
+                          You may also use --with-pdo-oci=instantclient,prefix,version to use
+                          the InstantClient SDK. For Linux with 10.1.0.3 rpms (for example) use:
+                          --with-pdo-oci=instantclient,/usr,10.1.0.3
 ])
 
 if test "$PHP_PDO_OCI" != "no"; then
@@ -162,7 +160,17 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
   ])
 
-  PHP_NEW_EXTENSION(pdo_oci, pdo_oci.c oci_driver.c oci_statement.c, $ext_shared,,-I\$prefix/include/php/ext)
+  if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$prefix/include/php/ext
+  elif test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=ext
+  else
+   AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+  fi
+
+  PHP_NEW_EXTENSION(pdo_oci, pdo_oci.c oci_driver.c oci_statement.c, $ext_shared,,-I$pdo_inc_path)
 
   PHP_SUBST_OLD(PDO_OCI_SHARED_LIBADD)
   PHP_SUBST_OLD(PDO_OCI_DIR)
