@@ -144,6 +144,11 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 void pdo_odbc_init_error_table(void);
 void pdo_odbc_fini_error_table(void);
 
+#ifdef SQL_ATTR_CONNECTION_POOLING
+extern SQLUINTEGER pdo_odbc_pool_on;
+extern SQLUINTEGER pdo_odbc_pool_mode;
+#endif
+
 /*
  * Local variables:
  * tab-width: 4

@@ -300,6 +300,17 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		odbc_handle_closer(dbh TSRMLS_CC);
 		return 0;
 	}
+
+#ifdef SQL_ATTR_CONNECTION_POOLING
+	if (pdo_odbc_pool_on != SQL_CP_OFF) {
+		rc = SQLSetEnvAttr(H->env, SQL_ATTR_CP_MATCH, (void*)pdo_odbc_pool_mode, 0);
+		if (rc != SQL_SUCCESS) {
+			pdo_odbc_drv_error("SQLSetEnvAttr: SQL_ATTR_CP_MATCH");
+			odbc_handle_closer(dbh TSRMLS_CC);
+			return 0;
+		}
+	}
+#endif
 	
 	rc = SQLAllocHandle(SQL_HANDLE_DBC, H->env, &H->dbc);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {

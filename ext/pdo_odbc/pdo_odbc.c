@@ -64,11 +64,51 @@ zend_module_entry pdo_odbc_module_entry = {
 ZEND_GET_MODULE(pdo_odbc)
 #endif
 
+#ifdef SQL_ATTR_CONNECTION_POOLING
+SQLUINTEGER pdo_odbc_pool_on = SQL_CP_OFF;
+SQLUINTEGER pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
+#endif
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_odbc)
 {
-	php_pdo_register_driver(&pdo_odbc_driver);
+#ifdef SQL_ATTR_CONNECTION_POOLING
+	char *pooling_val = NULL;
+#endif
+
+	if (FAILURE == php_pdo_register_driver(&pdo_odbc_driver)) {
+		return FAILURE;
+	}
+
 	pdo_odbc_init_error_table();
+
+#ifdef SQL_ATTR_CONNECTION_POOLING
+	/* ugh, we don't really .ini stuff in PDO, but since ODBC connection
+	 * pooling is process wide, we can't set it from within the scope of a
+	 * request without affecting others, which goes against our isolated request
+	 * policy.  So, we use cfg_get_string here to check it this once.
+	 * */
+	if (FAILURE == cfg_get_string("pdo_odbc.connection_pooling", &pooling_val) || pooling_val == NULL) {
+		pooling_val = "strict";
+	}
+	if (strcasecmp(pooling_val, "strict") == 0 || strcmp(pooling_val, "1") == 0) {
+		pdo_odbc_pool_on = SQL_CP_ONE_PER_HENV;
+		pdo_odbc_pool_mode = SQL_CP_STRICT_MATCH;
+	} else if (strcasecmp(pooling_val, "relaxed") == 0) {
+		pdo_odbc_pool_on = SQL_CP_ONE_PER_HENV;
+		pdo_odbc_pool_mode = SQL_CP_RELAXED_MATCH;
+	} else if (*pooling_val == '\0' || strcasecmp(pooling_val, "off") == 0) {
+		pdo_odbc_pool_on = SQL_CP_OFF;
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
+		return FAILURE;
+	}
+
+	if (pdo_odbc_pool_on != SQL_CP_OFF) {
+		SQLSetEnvAttr(SQL_NULL_HANDLE, SQL_ATTR_CONNECTION_POOLING, (void*)pdo_odbc_pool_on, 0);
+	}
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -89,6 +129,10 @@ PHP_MINFO_FUNCTION(pdo_odbc)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO Driver for ODBC (" PDO_ODBC_TYPE ")" , "enabled");
+#ifdef SQL_ATTR_CONNECTION_POOLING
+	php_info_print_table_row(2, "ODBC Connection Pooling",	pdo_odbc_pool_on == SQL_CP_OFF ?
+			"Disabled" : (pdo_odbc_pool_mode == SQL_CP_STRICT_MATCH ? "Enabled, strict matching" : "Enabled, relaxed matching"));
+#endif
 	php_info_print_table_end();
 
 }
