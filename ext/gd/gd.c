@@ -1723,6 +1723,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			case PHP_GDIMG_CONVERT_WBM:
 				if (q < 0 || q > 255) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
+					q = 0;
 				}
 				gdImageWBMP(im, q, fp);
 				break;
