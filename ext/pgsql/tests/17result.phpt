@@ -37,4 +37,13 @@ array(3) {
   [2]=>
   NULL
 }
+array(3) {
+  ["num"]=>
+  string(1) "2"
+  ["str"]=>
+  string(3) "ABC"
+  ["bin"]=>
+  NULL
+}
+bool(true)
 Ok
