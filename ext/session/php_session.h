@@ -122,6 +122,7 @@ typedef struct _php_ps_globals {
 	long hash_func;
 	long hash_bits_per_character;
 	int send_cookie;
+	int define_sid;
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;

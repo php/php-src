@@ -1018,18 +1018,46 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC)
 		convert_to_string((*ppid)); \
 		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
 
+static void php_session_reset_id(TSRMLS_D)
+{
+	int module_number = PS(module_number);
+	
+	if (PS(send_cookie)) {
+		php_session_send_cookie(TSRMLS_C);
+	}
+
+	/* if the SID constant exists, destroy it. */
+	zend_hash_del(EG(zend_constants), "sid", sizeof("sid"));
+	
+	if (PS(define_sid)) {
+		smart_str var = {0};
+
+		smart_str_appends(&var, PS(session_name));
+		smart_str_appendc(&var, '=');
+		smart_str_appends(&var, PS(id));
+		smart_str_0(&var);
+		REGISTER_STRINGL_CONSTANT("SID", var.c, var.len, 0);
+	} else {
+		REGISTER_STRINGL_CONSTANT("SID", empty_string, 0, 0);
+	}
+
+	if (PS(apply_trans_sid)) {
+		php_url_scanner_reset_vars(TSRMLS_C);
+		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id), strlen(PS(id)), 0 TSRMLS_CC);
+	}
+}
+	
 PHPAPI void php_session_start(TSRMLS_D)
 {
 	zval **ppid;
 	zval **data;
 	char *p;
-	int define_sid = 1;
-	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
 
 	PS(apply_trans_sid) = PS(use_trans_sid);
 
+	PS(define_sid) = 1;
 	PS(send_cookie) = 1;
 	if (PS(session_status) != php_session_none) 
 		return;
@@ -1051,7 +1079,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 			PPID2SID;
 			PS(apply_trans_sid) = 0;
 			PS(send_cookie) = 0;
-			define_sid = 0;
+			PS(define_sid) = 0;
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
@@ -1116,30 +1144,10 @@ PHPAPI void php_session_start(TSRMLS_D)
 			PS(apply_trans_sid) = 1;
 		PS(send_cookie) = 0;
 	}
+
+	php_session_reset_id(TSRMLS_C);
 	
-	if (PS(send_cookie)) {
-		php_session_send_cookie(TSRMLS_C);
-	}
-
-	/* if the SID constant exists, destroy it. */
-	zend_hash_del(EG(zend_constants), "sid", sizeof("sid"));
-	
-	if (define_sid) {
-		smart_str var = {0};
-
-		smart_str_appendl(&var, PS(session_name), lensess);
-		smart_str_appendc(&var, '=');
-		smart_str_appends(&var, PS(id));
-		smart_str_0(&var);
-		REGISTER_STRINGL_CONSTANT("SID", var.c, var.len, 0);
-	} else {
-		REGISTER_STRINGL_CONSTANT("SID", empty_string, 0, 0);
-	}
-
 	PS(session_status) = php_session_active;
-	if (PS(apply_trans_sid)) {
-		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id), strlen(PS(id)), 0 TSRMLS_CC);
-	}
 
 	php_session_cache_limiter(TSRMLS_C);
 
@@ -1368,10 +1376,8 @@ PHP_FUNCTION(session_regenerate_id)
 	
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 
-		if (PS(send_cookie)) {
-			php_session_send_cookie(TSRMLS_C);
-		}
-
+		php_session_reset_id(TSRMLS_C);
+		
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
