@@ -2257,7 +2257,7 @@ PHP_FUNCTION(fd_set)
 
 	if(ARG_COUNT(ht) <= 0) {
 			php_error(E_WARNING, "fd_set: Must be passed at least one value" );
-			var_uninit(return_value);
+			return_value->type = IS_NULL;
 			return;
 	}
 	else if(ARG_COUNT(ht) == 1) {
