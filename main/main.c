@@ -113,9 +113,6 @@ typedef struct {
 
 static last_error_type last_error;
 
-static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC);
-
-
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
 /* {{{ PHP_INI_MH
