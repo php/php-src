@@ -135,13 +135,6 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
 	char *ini_value;
 
-	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0); 
-	if (ini_value != NULL && strlen(ini_value) != 0 && 
-		new_value != NULL && strlen(new_value) != 0 ) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
-		return FAILURE;
-	}
-
 	if(new_value == NULL)
 		return FAILURE;
 
@@ -151,6 +144,13 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	} else if(!strncasecmp(new_value, "on", sizeof("on"))) {
 		new_value = "1";
 		new_value_length = sizeof("1");
+	}
+
+	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0); 
+	if (ini_value != NULL && strlen(ini_value) != 0 && 
+		zend_atoi(new_value, new_value_length) != 0) {
+		php_error_docref("ref.outcontrol" TSRMLS_CC, E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
+		return FAILURE;
 	}
 
 	if (stage == PHP_INI_STAGE_RUNTIME && SG(headers_sent) && !SG(request_info).no_headers) {
