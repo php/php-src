@@ -1750,7 +1750,7 @@ quit_loop:
 	return ptr - cnt;
 }
 
-/* {{{ proto array fgetcsv(resource fp, int length [, string delimiter [, string enclosure]])
+/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure]]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
@@ -1760,75 +1760,69 @@ PHP_FUNCTION(fgetcsv)
 	const char escape_char = '\\';
 	/* first section exactly as php_fgetss */
 
-	zval **fd, **bytes, **p_delim, **p_enclosure;
-	long len;
+	long len = 0;
 	size_t buf_len, temp_len, line_end_len;
 	char *buf;
 	php_stream *stream;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
-				WRONG_PARAM_COUNT;
+	{
+		zval *fd, **len_zv = NULL;
+		char *delimiter_str = NULL;
+		int delimiter_str_len = 0;
+		char *enclosure_str = NULL;
+		int enclosure_str_len = 0;
+
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|Zss",
+					&fd, &len_zv, &delimiter_str, &delimiter_str_len,
+					&enclosure_str, &enclosure_str_len) == FAILURE) {
+			return;
+		}	
+
+		if (delimiter_str != NULL) {
+			/* Make sure that there is at least one character in string */
+			if (delimiter_str_len < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+				RETURN_FALSE;
 			}
-			break;
 
-		case 3:
-			if (zend_get_parameters_ex(3, &fd, &bytes, &p_delim) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-
-		case 4:
-			if (zend_get_parameters_ex(4, &fd, &bytes, &p_delim, &p_enclosure) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
-	}
-
-	if (ZEND_NUM_ARGS() >= 3) {
-		convert_to_string_ex(p_delim);
-		/* Make sure that there is at least one character in string */
-		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
-			RETURN_FALSE;
+			/* use first character from string */
+			delimiter = delimiter_str[0];
 		}
-		/* use first character from string */
-		delimiter = Z_STRVAL_PP(p_delim)[0];
-	}
-
-	if (ZEND_NUM_ARGS() >= 4) {
-		convert_to_string_ex(p_enclosure);
-		/* Make sure that there is at least one character in string */
-		if (Z_STRLEN_PP(p_enclosure) < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
-			RETURN_FALSE;
+	
+		if (enclosure_str != NULL) {
+			if (enclosure_str_len < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+				RETURN_FALSE;
+			}
+			/* use first character from string */
+			enclosure = enclosure_str[0];
 		}
-		/* use first character from string */
-		enclosure = Z_STRVAL_PP(p_enclosure)[0];
+
+		if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
+			convert_to_long_ex(len_zv);
+			len = Z_LVAL_PP(len_zv);
+			if (len < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+				RETURN_FALSE;
+			}
+		} else {
+			len = -1;
+		}
+
+		php_stream_from_zval(stream, &fd);
 	}
 
-	php_stream_from_zval(stream, fd);
-
-	convert_to_long_ex(bytes);
-	len = Z_LVAL_PP(bytes);
 	if (len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
-		RETURN_FALSE;
+		if ((buf = php_stream_get_line(stream, NULL, 0, &buf_len)) == NULL) {
+			RETURN_FALSE;
+		}
+	} else {
+		buf = emalloc(len + 1);
+		if (php_stream_get_line(stream, buf, len, &buf_len) == NULL) {
+			efree(buf);
+			RETURN_FALSE;
+		}
 	}
-
-	buf = emalloc(len + 1);
-
-	if (php_stream_get_line(stream, buf, len, &buf_len) == NULL) {
-		efree(buf);
-		RETURN_FALSE;
-	}
-
 	/* initialize internal state */
 	_php_mblen(NULL, 0);
 
