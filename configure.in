@@ -199,6 +199,10 @@ case $host_alias in
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
     fi
     ;;
+*netware*)
+    PHP_BUILD_PROGRAM
+    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS,php)
+    ;;
 esac
 
 # Disable PIC mode by default where it is known to be safe to do so,
