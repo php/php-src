@@ -3068,17 +3068,20 @@ PHP_FUNCTION(imagepstext)
 			RETURN_FALSE;
 		}
 		convert_to_long_ex(sp);
-		convert_to_long_ex(aas);
 		convert_to_long_ex(wd);
 		convert_to_double_ex(ang);
+		convert_to_long_ex(aas);
 		space = Z_LVAL_PP(sp);
-		aa_steps = Z_LVAL_PP(aas);
 		width = Z_LVAL_PP(wd);
 		angle = Z_DVAL_PP(ang);
+		aa_steps = Z_LVAL_PP(aas);
 		break;
 	default:
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
+	convert_to_string_ex(str);
+	convert_to_long_ex(sz);
 
 	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", le_gd);
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
