@@ -630,7 +630,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			*s = '\0';			/* we are pretending it came from the environment  */
 			if (script_file) {
 				strcpy(s, script_file);
-				strcat(s, "+");
+				if (ap_php_optind<argc) {
+					strcat(s, "+");
+				}
 			}
 			for (i = ap_php_optind, len = 0; i < argc; i++) {
 				strcat(s, argv[i]);
