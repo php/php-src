@@ -73,6 +73,7 @@ PHP                                                                        NEWS
   . str_split() - Breaks down a string into an array of elements based on 
     length. (Ilia)
   . array_walk_recursive(). (Ilia)
+  . array_combine(). (Andrey)
 
 - Added optional parameter to get_browser() to make it return an array. (Jay)
 - Added optional parameter to openssl_sign() to specify the hashing algorithm.
