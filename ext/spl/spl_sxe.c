@@ -57,6 +57,10 @@ SPL_METHOD(SimpleXMLIterator, current) /* {{{ */
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
+	if (!sxe->iter.data) {
+		return; /* return NULL */
+	}
+
 	RETURN_ZVAL(sxe->iter.data, 1, 0);
 }
 /* }}} */
@@ -64,11 +68,16 @@ SPL_METHOD(SimpleXMLIterator, current) /* {{{ */
 SPL_METHOD(SimpleXMLIterator, key) /* {{{ */
 {
 	xmlNodePtr curnode;
-
+	php_sxe_object *intern;
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
-	if (sxe->node != NULL) {
-		curnode = (xmlNodePtr)((php_libxml_node_ptr *)sxe->node)->node;
+	if (!sxe->iter.data) {
+		RETURN_FALSE;
+	}
+
+	intern = (php_sxe_object *)zend_object_store_get_object(sxe->iter.data TSRMLS_CC);
+	if (intern != NULL && intern->node != NULL) {
+		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
 		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name), 1);
 	}
     
@@ -89,8 +98,13 @@ SPL_METHOD(SimpleXMLIterator, next) /* {{{ */
 SPL_METHOD(SimpleXMLIterator, hasChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
-	php_sxe_object *child = php_sxe_fetch_object(sxe->iter.data TSRMLS_CC);
+	php_sxe_object *child;
 	xmlNodePtr      node;
+
+	if (!sxe->iter.data) {
+		RETURN_FALSE;
+	}
+	child = php_sxe_fetch_object(sxe->iter.data TSRMLS_CC);
 
 	GET_NODE(child, node);
 	if (node) {
@@ -109,6 +123,9 @@ SPL_METHOD(SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
+	if (!sxe->iter.data) {
+		return; /* return NULL */
+	}
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
 }
