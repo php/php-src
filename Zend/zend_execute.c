@@ -63,10 +63,10 @@
 static zval get_overloaded_property(ELS_D);
 static void set_overloaded_property(zval *value ELS_DC);
 static void call_overloaded_function(int arg_count, zval *return_value ELS_DC);
-static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
-static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
-static inline void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
-static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts ELS_DC);
+static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
+static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
+static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
+static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts ELS_DC);
 static void zend_extension_statement_handler(zend_extension *extension, zend_op_array *op_array);
 static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array);
 static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
@@ -464,7 +464,7 @@ static void print_refcount(zval *p, char *str)
 }
 
 
-static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
+static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
 	int free_op1;
 	zval *varname = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
@@ -620,7 +620,7 @@ fetch_string_dim:
 }
 
 
-static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
+static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
 	int free_op2;
 	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
@@ -764,7 +764,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 }
 
 
-static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts ELS_DC)
+static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1, znode *op2, temp_variable *Ts ELS_DC)
 {
 	int free_op1;
 	zval *container = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
@@ -780,7 +780,7 @@ static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znod
 }
 
 
-static inline void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
+static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
 	int free_op2;
 	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
