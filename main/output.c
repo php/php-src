@@ -690,7 +690,7 @@ static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
  * HEAD support
  */
 
-/* {{{ proto boolean ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
+/* {{{ proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
    Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {

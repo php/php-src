@@ -953,7 +953,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data)
    zend_hash_clean(Z_ARRVAL_P(pData->server->introspection_map));
 }
 
-/* {{{ proto boolean xmlrpc_server_register_method(handle server, string method_name, string function)
+/* {{{ proto bool xmlrpc_server_register_method(handle server, string method_name, string function)
    Register a PHP function to handle method matching method_name */
 PHP_FUNCTION(xmlrpc_server_register_method)
 {
@@ -988,7 +988,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 }
 
 
-/* {{{ proto boolean xmlrpc_server_register_introspection_callback(handle server, string function)
+/* {{{ proto bool xmlrpc_server_register_introspection_callback(handle server, string function)
    Register a PHP function to generate documentation */
 PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 {
