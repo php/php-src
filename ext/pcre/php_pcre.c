@@ -282,7 +282,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 					  tables);
 
 	if (re == NULL) {
-		zend_error(E_WARNING, "Compilation failed: %s at offset %d\n", error, erroffset);
+		zend_error(E_WARNING, "Compilation failed: %s at offset %d", error, erroffset);
 		efree(pattern);
 		return NULL;
 	}
@@ -441,7 +441,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 
 		/* Check for too many substrings condition. */	
 		if (count == 0) {
-			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			zend_error(E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
 		}
 
@@ -715,7 +715,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	/* Run the code */
 	if (zend_eval_string(code.c, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(compiled_string_description);
-		zend_error(E_ERROR, "Failed evaluating code:\n%s\n", code);
+		zend_error(E_ERROR, "Failed evaluating code:\n%s", code);
 		/* zend_error() does not return in this case */
 	}
 	efree(compiled_string_description);
@@ -804,7 +804,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 		
 		/* Check for too many substrings condition. */
 		if (count == 0) {
-			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			zend_error(E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
 		}
 
@@ -1196,7 +1196,7 @@ PHP_FUNCTION(preg_split)
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
-			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			zend_error(E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
 		}
 				

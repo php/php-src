@@ -262,19 +262,19 @@ ZEND_FUNCTION(dbx_connect)
 
 	if (Z_TYPE_PP(arguments[0]) == IS_LONG) {
 		if (!module_identifier_exists(Z_LVAL_PP(arguments[0]))) {
-			zend_error(E_WARNING, "dbx: module '%ld' not loaded or not supported.\n", Z_LVAL_PP(arguments[0]));
+			zend_error(E_WARNING, "dbx: module '%ld' not loaded or not supported.", Z_LVAL_PP(arguments[0]));
 			return;
 		}
 		module_identifier = Z_LVAL_PP(arguments[0]);
 	} else {
 		convert_to_string_ex(arguments[0]);
 		if (!module_exists(Z_STRVAL_PP(arguments[0]))) {
-			zend_error(E_WARNING, "dbx: module '%s' not loaded.\n", Z_STRVAL_PP(arguments[0]));
+			zend_error(E_WARNING, "dbx: module '%s' not loaded.", Z_STRVAL_PP(arguments[0]));
 			return;
 		}
 		module_identifier=get_module_identifier(Z_STRVAL_PP(arguments[0]));
 		if (!module_identifier) {
-			zend_error(E_WARNING, "dbx: unsupported module '%s'.\n", Z_STRVAL_PP(arguments[0]));
+			zend_error(E_WARNING, "dbx: unsupported module '%s'.", Z_STRVAL_PP(arguments[0]));
 			return;
 		}
 	}
