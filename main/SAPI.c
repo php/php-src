@@ -259,3 +259,9 @@ SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_conte
 {
 	return zend_hash_add(&known_post_content_types, post_content_type_reader->content_type, post_content_type_reader->content_type_len+1, (void *) post_content_type_reader, sizeof(sapi_post_content_type_reader), NULL);
 }
+
+
+SAPI_API void sapi_unregister_post_reader(sapi_post_content_type_reader *post_content_type_reader)
+{
+	zend_hash_del(&known_post_content_types, post_content_type_reader->content_type, post_content_type_reader->content_type_len+1);
+}
