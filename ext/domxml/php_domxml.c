@@ -3251,7 +3251,7 @@ PHP_FUNCTION(domxml_dump_mem)
 		} else {
 			xmlDocDumpFormatMemory(docp, &mem, &size, format);
 		}
-        xmlKeepBlanksDefault(keepblanks);
+		xmlKeepBlanksDefault(keepblanks);
 	} else {
 		if (encoding_len) {
 			xmlDocDumpMemoryEnc(docp, &mem, &size, encoding);
