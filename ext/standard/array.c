@@ -1238,7 +1238,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto array compact(mixed var_names [, mixed ... ])
+/* {{{ proto array compact(mixed var_names [, mixed ...])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -1806,7 +1806,7 @@ static void php_array_merge(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 }
 
 
-/* {{{ proto array array_merge(array arr1, array arr2 [, mixed ...])
+/* {{{ proto array array_merge(array arr1, array arr2 [, array ...])
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
@@ -1815,7 +1815,7 @@ PHP_FUNCTION(array_merge)
 /* }}} */
 
 
-/* {{{ proto array array_merge_recursive(array arr1, array arr2 [, mixed ...])
+/* {{{ proto array array_merge_recursive(array arr1, array arr2 [, array ...])
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
@@ -2196,7 +2196,7 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
-/* {{{ proto array array_intersect(array arr1, array arr2 [, mixed ...])
+/* {{{ proto array array_intersect(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are present in all the other arguments */
 PHP_FUNCTION(array_intersect)
 {
@@ -2293,7 +2293,7 @@ out:
 }
 /* }}} */
 
-/* {{{ proto array array_diff(array arr1, array arr2 [, mixed ...])
+/* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are not present in any of the others arguments */
 PHP_FUNCTION(array_diff)
 {
