@@ -111,7 +111,7 @@ ZEND_API int ParameterPassedByReference(int ht, uint n);
 int zend_register_functions(zend_function_entry *functions, HashTable *function_table);
 void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
-ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry);
+ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry);
 ZEND_API zend_module_entry *zend_get_module(int module_number);
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length);
 

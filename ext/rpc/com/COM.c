@@ -972,7 +972,7 @@ void php_register_COM_class()
 								php_COM_get_property_handler,
 								php_COM_set_property_handler);
 
-	register_internal_class(&com_class_entry);
+	zend_register_internal_class(&com_class_entry);
 }
 
 

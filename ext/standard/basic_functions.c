@@ -1702,7 +1702,7 @@ void test_class_startup()
 								test_class_get_property,
 								test_class_set_property);
 
-	register_internal_class(&test_class_entry);
+	zend_register_internal_class(&test_class_entry);
 }
 
 /* {{{ proto string ini_get(string varname)

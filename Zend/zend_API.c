@@ -868,7 +868,7 @@ int zend_next_free_module(void)
 }
 
 
-ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry)
+ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry)
 {
 	zend_class_entry *register_class;
 	char *lowercase_name = zend_strndup(class_entry->name, class_entry->name_length);

@@ -452,7 +452,7 @@ PHP_MINIT_FUNCTION(java) {
     java_get_property_handler,
     java_set_property_handler);
 
-  register_internal_class(&java_class_entry);
+  zend_register_internal_class(&java_class_entry);
 
   le_jobject = register_list_destructors(_php_java_destructor,NULL);
 
