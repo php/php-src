@@ -57,6 +57,9 @@ PHP_FUNCTION(ftok)
 	}
 
     k = ftok(Z_STRVAL_PP(pathname),Z_STRVAL_PP(proj)[0]);
+	if (k == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftok() failed - %s", strerror(errno));
+	}
 
     RETURN_LONG(k);
 }
