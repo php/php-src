@@ -10,7 +10,7 @@ interface Throwable {
 	public function getErrno();
 }
 
-class Exception implements Throwable {
+class Exception_foo implements Throwable {
 	public $foo = "foo";
 
 	public function getMessage() {
@@ -19,11 +19,11 @@ class Exception implements Throwable {
 }
 
 // this should die -- Exception class must be abstract...
-$foo = new Exception;
+$foo = new Exception_foo;
 echo $foo->getMessage() . "\n";
 
 ?>
 --EXPECTF--
 
-Fatal error: Class exception contains abstract methods and must be declared abstract in %s on line %d
+Fatal error: Class exception_foo contains abstract methods and must be declared abstract in %s on line %d
 

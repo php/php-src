@@ -9,7 +9,7 @@ interface Throwable {
 	public function getMessage();
 }
 
-class Exception implements Throwable {
+class Exception_foo implements Throwable {
 	public $foo = "foo";
 
 	public function getMessage() {
@@ -17,7 +17,7 @@ class Exception implements Throwable {
 	}
 }
 
-$foo = new Exception;
+$foo = new Exception_foo;
 echo $foo->getMessage() . "\n";
 
 ?>
