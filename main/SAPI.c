@@ -94,7 +94,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 SAPI_API void sapi_shutdown(void)
 {
 #ifdef ZTS
-	ts_free_id(&sapi_globals_id);
+	ts_free_id(sapi_globals_id);
 #else
 	sapi_globals_dtor(&sapi_globals);
 #endif
