@@ -68,7 +68,9 @@ static SWFAction getAction(zval *id TSRMLS_DC);
 static SWFMorph getMorph(zval *id TSRMLS_DC);
 static SWFMovieClip getSprite(zval *id TSRMLS_DC);
 static SWFSound getSound(zval *id TSRMLS_DC);
+#ifdef HAVE_NEW_MING
 static SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC);
+#endif
 
 #define PHP_MING_FILE_CHK(file) \
 	if ((PG(safe_mode) && !php_checkuid((file), NULL, CHECKUID_CHECK_FILE_AND_DIR)) || php_check_open_basedir((file) TSRMLS_CC)) {	\
@@ -140,7 +142,6 @@ static int le_swffillp;
 static int le_swfgradientp;
 static int le_swfbitmapp;
 static int le_swffontp;
-static int le_swffontcharp;
 static int le_swftextp;
 static int le_swftextfieldp;
 static int le_swfdisplayitemp;
@@ -150,7 +151,10 @@ static int le_swfmorphp;
 static int le_swfspritep;
 static int le_swfinputp;
 static int le_swfsoundp;
+#ifdef HAVE_NEW_MING
+static int le_swffontcharp;
 static int le_swfsoundinstancep;
+#endif
 
 static zend_class_entry *movie_class_entry_ptr;
 static zend_class_entry *shape_class_entry_ptr;
@@ -158,7 +162,6 @@ static zend_class_entry *fill_class_entry_ptr;
 static zend_class_entry *gradient_class_entry_ptr;
 static zend_class_entry *bitmap_class_entry_ptr;
 static zend_class_entry *font_class_entry_ptr;
-static zend_class_entry *fontchar_class_entry_ptr;
 static zend_class_entry *text_class_entry_ptr;
 static zend_class_entry *textfield_class_entry_ptr;
 static zend_class_entry *displayitem_class_entry_ptr;
@@ -167,7 +170,10 @@ static zend_class_entry *action_class_entry_ptr;
 static zend_class_entry *morph_class_entry_ptr;
 static zend_class_entry *sprite_class_entry_ptr;
 static zend_class_entry *sound_class_entry_ptr;
+#ifdef HAVE_NEW_MING
+static zend_class_entry *fontchar_class_entry_ptr;
 static zend_class_entry *soundinstance_class_entry_ptr;
+#endif
  
 /* {{{ internal function SWFgetProperty
 */
@@ -1294,6 +1300,7 @@ PHP_FUNCTION(swffill_skewYTo)
 /* }}} */
 /* }}} */
 
+#ifdef HAVE_NEW_MING
 /* {{{ SWFFontCharacter */
 
 static zend_function_entry swffontchar_functions[] = {
@@ -1351,8 +1358,9 @@ PHP_FUNCTION(swffontchar_addUTF8Chars)
 	SWFFontCharacter_addUTF8Chars(getFontCharacter(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
 }
 /* }}} */
-
 /* }}} */
+#endif
+
 /* {{{ SWFFont
 */
 static zend_function_entry swffont_functions[] = {
@@ -1552,6 +1560,7 @@ PHP_FUNCTION(swffont_getShape)
 	free(result);
 }
 /* }}} */
+/* }}} */
 #endif
 
 /* }}} */
@@ -1722,7 +1731,6 @@ SWFSound getSound(zval *id TSRMLS_DC)
 /* }}} */
 /* {{{ proto class swfsound_init(string filename, int flags)
    Returns a new SWFSound object from given file */
-
 PHP_FUNCTION(swfsound_init)
 {
 	zval **zfile, **zflags;
@@ -1757,7 +1765,11 @@ PHP_FUNCTION(swfsound_init)
 	else
 		input = getInput(zfile TSRMLS_CC);
 
+#ifdef HAVE_NEW_MING
 	sound = newSWFSound_fromInput(input, flags);
+#else
+	sound = newSWFSound_fromInput(input);
+#endif
 
 	ret = zend_list_insert(sound, le_swfsoundp);
 
@@ -3412,8 +3424,10 @@ static zend_function_entry swftextfield_functions[] = {
 	PHP_FALIAS(setcolor,          swftextfield_setColor,        NULL)
 	PHP_FALIAS(setname,           swftextfield_setName,         NULL)
 	PHP_FALIAS(addstring,         swftextfield_addString,       NULL)
+#ifdef HAVE_NEW_MING
 	PHP_FALIAS(setpadding,        swftextfield_setPadding,      NULL)
 	PHP_FALIAS(addchars,          swftextfield_addChars,        NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -3653,6 +3667,7 @@ PHP_FUNCTION(swftextfield_addString)
 }
 /* }}} */
 
+#ifdef HAVE_NEW_MING
 /* {{{ proto void swftextfield_setPadding(float padding)
    Sets the padding of this textfield */
 PHP_FUNCTION(swftextfield_setPadding)
@@ -3685,7 +3700,7 @@ PHP_FUNCTION(swftextfield_addChars)
 
 }
 /* }}} */
-/* }}} */
+#endif
 
 zend_module_entry ming_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -3754,7 +3769,6 @@ PHP_MINIT_FUNCTION(ming)
 	zend_class_entry text_class_entry;
 	zend_class_entry textfield_class_entry;
 	zend_class_entry font_class_entry;
-	zend_class_entry fontchar_class_entry;
 	zend_class_entry displayitem_class_entry;
 	zend_class_entry movie_class_entry;
 	zend_class_entry button_class_entry;
@@ -3762,7 +3776,10 @@ PHP_MINIT_FUNCTION(ming)
 	zend_class_entry morph_class_entry;
 	zend_class_entry sprite_class_entry;
 	zend_class_entry sound_class_entry;
+#ifdef HAVE_NEW_MING
+	zend_class_entry fontchar_class_entry;
 	zend_class_entry soundinstance_class_entry;
+#endif
 
 	Ming_setErrorFunction((void *) php_ming_error);
 
@@ -3823,7 +3840,6 @@ PHP_MINIT_FUNCTION(ming)
 	le_swftextp = zend_register_list_destructors_ex(destroy_SWFText_resource, NULL, "SWFText", module_number);
 	le_swftextfieldp = zend_register_list_destructors_ex(destroy_SWFTextField_resource, NULL, "SWFTextField", module_number);
 	le_swffontp = zend_register_list_destructors_ex(destroy_SWFFont_resource, NULL, "SWFFont", module_number);
-	le_swffontcharp = zend_register_list_destructors_ex(destroy_SWFFontCharacter_resource, NULL, "SWFFontCharacter", module_number);
 	le_swfdisplayitemp = zend_register_list_destructors_ex(NULL, NULL, "SWFDisplayItem", module_number);
 	le_swfmoviep = zend_register_list_destructors_ex(destroy_SWFMovie_resource, NULL, "SWFMovie", module_number);
 	le_swfbuttonp = zend_register_list_destructors_ex(destroy_SWFButton_resource, NULL, "SWFButton", module_number);
@@ -3833,7 +3849,10 @@ PHP_MINIT_FUNCTION(ming)
 	le_swfinputp = zend_register_list_destructors_ex(destroy_SWFInput_resource, NULL, "SWFInput", module_number);
 
 	le_swfsoundp = zend_register_list_destructors_ex(destroy_SWFSound_resource, NULL, "SWFSound", module_number);
+#ifdef HAVE_NEW_MING
+	le_swffontcharp = zend_register_list_destructors_ex(destroy_SWFFontCharacter_resource, NULL, "SWFFontCharacter", module_number);
 	le_swfsoundinstancep = zend_register_list_destructors_ex(NULL, NULL, "SWFSoundInstance", module_number);
+#endif
 
 	INIT_CLASS_ENTRY(shape_class_entry, "swfshape", swfshape_functions);
 	INIT_CLASS_ENTRY(fill_class_entry, "swffill", swffill_functions);
