@@ -26,16 +26,16 @@ require_once "PEAR/Config.php";
  * PEAR commands for managing configuration data.
  *
  */
-class PEAR_Command_Login extends PEAR_Command_Common
+class PEAR_Command_Auth extends PEAR_Command_Common
 {
     // {{{ constructor
 
     /**
-     * PEAR_Command_Login constructor.
+     * PEAR_Command_Auth constructor.
      *
      * @access public
      */
-    function PEAR_Command_Login(&$ui, &$config)
+    function PEAR_Command_Auth(&$ui, &$config)
     {
         parent::PEAR_Command_Common($ui, $config);
     }
