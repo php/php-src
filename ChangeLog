@@ -1,3 +1,56 @@
+2001-12-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: - Removed is_array_multidimensional
+
+    * ext/standard/tests/array/count_recursive.phpt:
+    - Added test for recursive counting
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    - Added extra parameter to count() that recursively counts elements in an
+      array and added is_array_multidimensional(). (patch by Vlad Bosinceanu
+      <glipy@fx.ro>)
+
+2001-12-29  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/array.c:
+     Fix bug in krsort() where an extra character was being compared 
+    - Fix bug in krsort() where an extra character was being compared (Andi)
+
+    * ext/xml/xml.c:
+    - Fix bug in XML extension which exists due to a not perfect work around
+    - with ZE1. In ZE2 the correct code seems to work well.
+
+2001-12-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/credits.c
+      ext/standard/info.c:
+    PHP 4.0 -> PHP 4. Patch by Martin Jansen <mail@martin-jansen.de>.
+
+2001-12-29  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h:
+    1) fixed bugs in soft label key functions
+    2) insert new slk-functions
+    3) defined new key-constants
+
+2001-12-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php: * added grouping parameter to getAssoc
+
+    * pear/Makefile.in: * install PEAR/Dependency.php
+
+2001-12-29  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c:
+    fixed bug preventing pspell from building when pspell header files are
+    located in an unusual (e.g. /usr/local/include/pspell) location.
+
 2001-12-28  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Common.php:
