@@ -1,3 +1,30 @@
+2005-02-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Fixed bug introduced with foreach() optimization patch
+
+    * zend_compile.c:
+      Fixed FE_RESET/FE_FETCH bug.
+      Now FE_RESET instruction takes jump-address from itself, not from the
+      following FE_FETCH instruction.
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      foreash($a as $key => $val) optimization
+      Removed temorary array creation on each iteration.
+
+2005-02-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      - Remove part of the cleanup which causes a problem with unnormal code
+        like tests/lang/040.phpt
+
 2005-02-06  Zeev Suraski  <zeev@zend.com>
 
     * (PHP_5_0)
