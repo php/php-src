@@ -140,17 +140,14 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 #endif
 			}
 			else if (type == 2) {
-				pval tmp;
-			
 				/* strip trailing whitespaces */	
 				l = strlen(buf);
 				t = l;
 				while (l && isspace((int)buf[--l]));
-				if (l < t) buf[l + 1] = '\0';
-				tmp.value.str.len = strlen(buf);
-				tmp.value.str.val = estrndup(buf,tmp.value.str.len);
-				tmp.type = IS_STRING;
-				_php3_hash_next_index_insert(array->value.ht,(void *) &tmp, sizeof(pval), NULL);
+				if (l < t) {
+					buf[l + 1] = '\0';
+				}
+				add_next_index_string(array, buf, 1);
 			}
 		}
 
