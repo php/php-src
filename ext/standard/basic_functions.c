@@ -189,14 +189,13 @@ function_entry basic_functions[] = {
 	PHP_FE(linkinfo,								NULL)
 	PHP_FE(symlink,									NULL)
 	PHP_FE(link,									NULL)
-	PHP_FE(unlink,									NULL)
 #else
 	PHP_FALIAS(readlink, warn_not_available,		NULL)
 	PHP_FALIAS(linkinfo, warn_not_available,		NULL)
 	PHP_FALIAS(symlink, warn_not_available,			NULL)
 	PHP_FALIAS(link, warn_not_available,			NULL)
-	PHP_FALIAS(unlink, warn_not_available,			NULL)
 #endif
+	PHP_FE(unlink,									NULL)
 	
 	PHP_FE(exec, 									second_and_third_args_force_ref)
 	PHP_FE(system, 									second_arg_force_ref)
