@@ -1,3 +1,25 @@
+2005-01-03  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_0)
+      zend_language_scanner.l:
+      MFH:
+      Fix the following nasty bug:
+      - if compile bails out from the middle of compiling, current_buffer is not
+      restored
+      - if current_buffer is not null, yy_switch_to_buffer will do: *yy_c_buf_p
+      = yy_hold_char; on
+      the next request
+      - which would lead to memory corruption on next request
+
+    * zend_language_scanner.l:
+      Fix the following nasty bug:
+      - if compile bails out from the middle of compiling, current_buffer is not
+      restored
+      - if current_buffer is not null, yy_switch_to_buffer will do: *yy_c_buf_p
+      = yy_hold_char; on
+      the next request
+      - which would lead to memory corruption on next request
+
 2005-01-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
