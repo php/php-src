@@ -303,7 +303,7 @@ function mail_qa_team($data, $compression)
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 	if (empty($url_bits['port'])) $url_bits['port'] = 80;
 	
-	$data = urlencode(base64_encode(preg_replace("/[\\x00]/", "[0x0]", $data)));
+	$data = "php_test_data=" . urlencode(base64_encode(preg_replace("/[\\x00]/", "[0x0]", $data)));
 	$data_length = strlen($data);
 	
 	$fs = fsockopen($url_bits['host'], $url_bits['port'], $errno, $errstr, 10);
@@ -317,9 +317,8 @@ function mail_qa_team($data, $compression)
 	fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
 	fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
 	fwrite($fs, "Content-Length: ".$data_length."\r\n\r\n");
-	fwrite($fs, "php_test_data=".$data);
+	fwrite($fs, $data);
 	fwrite($fs, "\r\n\r\n");
-	fflush($fs);
 	fclose($fs);
 
 	return 1;
