@@ -373,6 +373,7 @@ AC_ARG_WITH(iodbc,
     ODBC_LFLAGS=-L$withval/lib
     ODBC_LIBS=-liodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
+    AC_DEFINE(HAVE_ODBC2,1,[ ])
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
