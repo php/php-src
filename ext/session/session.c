@@ -930,7 +930,8 @@ PHPAPI void php_session_start(TSRMLS_D)
 	}
 
 
-	if (PS(apply_trans_sid)) {
+	/* define SID always, if the client did not send a cookie */
+	if (send_cookie) {
 		smart_str var = {0};
 
 		smart_str_appends(&var, PS(session_name));
