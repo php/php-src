@@ -6,6 +6,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <global.h>
 #ifdef HAVE_COMPRESS
 #include <my_sys.h>
+#include <m_string.h>
 #include <zlib.h>
 
 /*

@@ -10,7 +10,7 @@ uint dirname_length(const char *name)
 {
   register my_string pos,gpos;
 #ifdef FN_DEVCHAR
-  if ((pos=strrchr(name,FN_DEVCHAR)) == 0)
+  if ((pos=(char*)strrchr(name,FN_DEVCHAR)) == 0)
 #endif
     pos=(char*) name-1;
 

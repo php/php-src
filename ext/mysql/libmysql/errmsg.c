@@ -34,6 +34,34 @@ const char *client_errors[]=
   "Got packet bigger than 'max_allowed_packet'"
 };
 
+/* Start of code added by Roberto M. Serqueira - martinsc@uol.com.br - 05.24.2001 */
+
+#elif defined PORTUGUESE
+const char *client_errors[]=
+{
+  "Erro desconhecido do MySQL",
+  "Não pode criar 'UNIX socket' (%d)",
+  "Não pode se conectar ao servidor MySQL local através do 'socket' '%-.64s' (%d)", 
+  "Não pode se conectar ao servidor MySQL em '%-.64s' (%d)",
+  "Não pode criar 'socket TCP/IP' (%d)",
+  "'Host' servidor MySQL '%-.64s' (%d) desconhecido", 
+  "Servidor MySQL desapareceu",
+  "Incompatibilidade de protocolos. Versão do Servidor: %d - Versão do Cliente: %d",
+  "Cliente do MySQL com falta de memória",
+  "Informação inválida de 'host'",
+  "Localhost via 'UNIX socket'",
+  "%-.64s via 'TCP/IP'",
+  "Erro na negociação de acesso ao servidor",
+  "Conexão perdida com servidor MySQL durante 'query'",
+  "Comandos fora de sincronismo. Você não pode executar este comando agora",
+  "%-.64s via 'named pipe'",
+  "Não pode esperar pelo 'named pipe' para o 'host' %-.64s - 'pipe' %-.32s (%lu)",
+  "Não pode abrir 'named pipe' para o 'host' %-.64s - 'pipe' %-.32s (%lu)",
+  "Não pode estabelecer o estado do 'named pipe' para o 'host' %-.64s - 'pipe' %-.32s (%lu)",
+  "Não pode inicializar conjunto de caracteres %-.64s (caminho %-.64s)",
+  "Obteve pacote maior do que 'max_allowed_packet'"
+};
+
 #else /* ENGLISH */
 const char *client_errors[]=
 {

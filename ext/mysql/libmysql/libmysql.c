@@ -1,7 +1,6 @@
 /* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
 This file is public domain and comes with NO WARRANTY of any kind */
 
-#define DONT_USE_RAID
 #include <global.h>
 #if defined(__WIN__) || defined(_WIN32) || defined(_WIN64)
 #include <winsock.h>
@@ -25,9 +24,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #if !defined(MSDOS) && !defined(__WIN__)
 #include <sys/socket.h>
 #include <netinet/in.h>
-#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#endif
 #include <netdb.h>
 #ifdef HAVE_SELECT_H
 #  include <select.h>
@@ -50,7 +47,7 @@ static my_bool	mysql_client_init=0;
 uint		mysql_port=0;
 my_string	mysql_unix_port=0;
 
-#define CLIENT_CAPABILITIES	(CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_LOCAL_FILES | CLIENT_TRANSACTIONS)
+#define CLIENT_CAPABILITIES	(CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS)
 
 #ifdef __WIN__
 #define CONNECT_TIMEOUT 20
@@ -59,14 +56,12 @@ my_string	mysql_unix_port=0;
 #endif
 
 #if defined(MSDOS) || defined(__WIN__)
-#define ERRNO WSAGetLastError()
+// socket_errno is defined in global.h for all platforms
 #define perror(A)
 #else
 #include <errno.h>
-#define ERRNO errno
 #define SOCKET_ERROR -1
-#define closesocket(A) close(A)
-#endif
+#endif /* __WIN__ */
 
 static void mysql_once_init(void);
 static MYSQL_DATA *read_rows (MYSQL *mysql,MYSQL_FIELD *fields,
@@ -109,7 +104,7 @@ static ulong mysql_sub_escape_string(CHARSET_INFO *charset_info, char *to,
 static int connect2(my_socket s, const struct sockaddr *name, uint namelen,
 		    uint timeout)
 {
-#if defined(__WIN__)
+#if defined(__WIN__) || defined(OS2)
   return connect(s, (struct sockaddr*) name, namelen);
 #else
   int flags, res, s_err;
@@ -275,7 +270,7 @@ HANDLE create_named_pipe(NET *net, uint connect_timeout, char **arg_host,
 ** or packet is an error message
 *****************************************************************************/
 
-static uint
+uint
 net_safe_read(MYSQL *mysql)
 {
   NET *net= &mysql->net;
@@ -405,7 +400,7 @@ static void free_rows(MYSQL_DATA *cur)
 }
 
 
-static int
+int
 simple_command(MYSQL *mysql,enum enum_server_command command, const char *arg,
 	       uint length, my_bool skipp_check)
 {
@@ -441,7 +436,7 @@ simple_command(MYSQL *mysql,enum enum_server_command command, const char *arg,
   if (net_write_command(net,(uchar) command,arg,
 			length ? length : (ulong) strlen(arg)))
   {
-    DBUG_PRINT("error",("Can't send command to server. Error: %d",errno));
+    DBUG_PRINT("error",("Can't send command to server. Error: %d",socket_errno));
     end_server(mysql);
     if (mysql_reconnect(mysql) ||
 	net_write_command(net,(uchar) command,arg,
@@ -478,7 +473,7 @@ struct passwd *getpwuid(uid_t);
 char* getlogin(void);
 #endif
 
-#if !defined(MSDOS) && ! defined(VMS) && !defined(__WIN__)
+#if !defined(MSDOS) && ! defined(VMS) && !defined(__WIN__) && !defined(OS2)
 static void read_user_name(char *name)
 {
   DBUG_ENTER("read_user_name");
@@ -662,11 +657,12 @@ mysql_free_result(MYSQL_RES *result)
 ****************************************************************************/
 
 static const char *default_options[]=
-{"port","socket","compress","password","pipe", "timeout", "user",
- "init-command", "host", "database", "debug", "return-found-rows",
- "ssl-key" ,"ssl-cert" ,"ssl-ca" ,"ssl-capath",
- "character-set-dir", "default-character-set", "interactive-timeout",
- "connect_timeout",
+{
+  "port","socket","compress","password","pipe", "timeout", "user",
+  "init-command", "host", "database", "debug", "return-found-rows",
+  "ssl-key" ,"ssl-cert" ,"ssl-ca" ,"ssl-capath",
+  "character-set-dir", "default-character-set", "interactive-timeout",
+  "connect-timeout", "local-infile", "disable-local-infile",
  NullS
 };
 
@@ -701,6 +697,9 @@ static void mysql_read_default_options(struct st_mysql_options *options,
 	  opt_arg=end+1;
 	  *end=0;				/* Remove '=' */
 	}
+	/* Change all '_' in variable name to '-' */
+	for (end= *option ; (end= strcend(end,'_')) ; )
+	  *end= '-';
 	switch (find_type(*option+2,&option_types,2)) {
 	case 1:				/* port */
 	  if (opt_arg)
@@ -798,7 +797,16 @@ static void mysql_read_default_options(struct st_mysql_options *options,
           options->charset_name = my_strdup(opt_arg, MYF(MY_WME));
 	  break;
 	case 19:				/* Interactive-timeout */
-	  options->client_flag|=CLIENT_INTERACTIVE;
+	  options->client_flag|= CLIENT_INTERACTIVE;
+	  break;
+	case 21:
+	  if (!opt_arg || atoi(opt_arg) != 0)
+	    options->client_flag|= CLIENT_LOCAL_FILES;
+	  else
+	    options->client_flag&= ~CLIENT_LOCAL_FILES;
+	  break;
+	case 22:
+	  options->client_flag&= CLIENT_LOCAL_FILES;
 	  break;
 	default:
 	  DBUG_PRINT("warning",("unknown option: %s",option[0]));
@@ -993,9 +1001,17 @@ mysql_init(MYSQL *mysql)
   else
     bzero((char*) (mysql),sizeof(*(mysql)));
   mysql->options.connect_timeout=CONNECT_TIMEOUT;
-#if defined(SIGPIPE) && defined(THREAD)
+#if defined(SIGPIPE) && defined(THREAD) && !defined(__WIN__)
   if (!((mysql)->client_flag & CLIENT_IGNORE_SIGPIPE))
     (void) signal(SIGPIPE,pipe_sig_handler);
+#endif
+
+/*
+  Only enable LOAD DATA INFILE by default if configured with
+  --with-enabled-local-inflile
+*/
+#ifdef ENABLED_LOCAL_INFILE
+  mysql->options.client_flag|= CLIENT_LOCAL_FILES;
 #endif
   return mysql;
 }
@@ -1034,7 +1050,7 @@ static void mysql_once_init()
 	mysql_unix_port = env;
     }
     mysql_debug(NullS);
-#if defined(SIGPIPE) && !defined(THREAD)
+#if defined(SIGPIPE) && !defined(THREAD) && !defined(__WIN__)
     (void) signal(SIGPIPE,SIG_IGN);
 #endif
   }
@@ -1203,7 +1219,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     if ((sock = socket(AF_UNIX,SOCK_STREAM,0)) == SOCKET_ERROR)
     {
       net->last_errno=CR_SOCKET_CREATE_ERROR;
-      sprintf(net->last_error,ER(net->last_errno),ERRNO);
+      sprintf(net->last_error,ER(net->last_errno),socket_errno);
       goto error;
     }
     net->vio = vio_new(sock, VIO_TYPE_SOCKET, TRUE);
@@ -1213,9 +1229,9 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     if (connect2(sock,(struct sockaddr *) &UNIXaddr, sizeof(UNIXaddr),
 		 mysql->options.connect_timeout) <0)
     {
-      DBUG_PRINT("error",("Got error %d on connect to local server",ERRNO));
+      DBUG_PRINT("error",("Got error %d on connect to local server",socket_errno));
       net->last_errno=CR_CONNECTION_ERROR;
-      sprintf(net->last_error,ER(net->last_errno),unix_socket,ERRNO);
+      sprintf(net->last_error,ER(net->last_errno),unix_socket,socket_errno);
       goto error;
     }
   }
@@ -1266,7 +1282,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     if ((sock = (my_socket) socket(AF_INET,SOCK_STREAM,0)) == SOCKET_ERROR)
     {
       net->last_errno=CR_IPSOCK_ERROR;
-      sprintf(net->last_error,ER(net->last_errno),ERRNO);
+      sprintf(net->last_error,ER(net->last_errno),socket_errno);
       goto error;
     }
     net->vio = vio_new(sock,VIO_TYPE_TCPIP,FALSE);
@@ -1303,7 +1319,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
       if (!(hp=gethostbyname(host)))
       {
 	net->last_errno=CR_UNKNOWN_HOST;
-	sprintf(net->last_error, ER(CR_UNKNOWN_HOST), host, errno);
+	sprintf(net->last_error, ER(CR_UNKNOWN_HOST), host, socket_errno);
 	goto error;
       }
       memcpy(&sock_addr.sin_addr,hp->h_addr, (size_t) hp->h_length);
@@ -1313,9 +1329,9 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     if (connect2(sock,(struct sockaddr *) &sock_addr, sizeof(sock_addr),
 		 mysql->options.connect_timeout) <0)
     {
-      DBUG_PRINT("error",("Got error %d on connect to '%s'",ERRNO,host));
+      DBUG_PRINT("error",("Got error %d on connect to '%s'",socket_errno,host));
       net->last_errno= CR_CONN_HOST_ERROR;
-      sprintf(net->last_error ,ER(CR_CONN_HOST_ERROR), host, ERRNO);
+      sprintf(net->last_error ,ER(CR_CONN_HOST_ERROR), host, socket_errno);
       goto error;
     }
   }
@@ -1385,7 +1401,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     charset_name=charset_name_buff;
     sprintf(charset_name,"%d",mysql->server_language);	/* In case of errors */
     if (!(mysql->charset =
-	  get_charset((uint8) mysql->server_language, MYF(0))))
+	  get_charset((uint8) mysql->server_language, MYF(MY_WME))))
       mysql->charset = default_charset_info; /* shouldn't be fatal */
 
   }
@@ -1444,7 +1460,6 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   if (mysql->options.use_ssl)
     client_flag|=CLIENT_SSL;
 #endif /* HAVE_OPENSSL */
-
   if (db)
     client_flag|=CLIENT_CONNECT_WITH_DB;
 #ifdef HAVE_COMPRESS
@@ -1563,13 +1578,13 @@ static my_bool mysql_reconnect(MYSQL *mysql)
   }
   mysql_init(&tmp_mysql);
   tmp_mysql.options=mysql->options;
+  bzero((char*) &mysql->options,sizeof(mysql->options));
   if (!mysql_real_connect(&tmp_mysql,mysql->host,mysql->user,mysql->passwd,
 			  mysql->db, mysql->port, mysql->unix_socket,
 			  mysql->client_flag))
     DBUG_RETURN(1);
   tmp_mysql.free_me=mysql->free_me;
   mysql->free_me=0;
-  bzero((char*) &mysql->options,sizeof(mysql->options));
   mysql_close(mysql);
   *mysql=tmp_mysql;
   net_clear(&mysql->net);
@@ -1800,7 +1815,7 @@ send_file_to_server(MYSQL *mysql, const char *filename)
   if (my_net_write(&mysql->net,"",0) || net_flush(&mysql->net))
   {
     mysql->net.last_errno=CR_SERVER_LOST;
-    sprintf(mysql->net.last_error,ER(mysql->net.last_errno),errno);
+    sprintf(mysql->net.last_error,ER(mysql->net.last_errno),socket_errno);
     my_free(tmp_name,MYF(0));
     DBUG_RETURN(-1);
   }
@@ -1946,6 +1961,8 @@ mysql_fetch_row(MYSQL_RES *res)
 	DBUG_PRINT("info",("end of data"));
 	res->eof=1;
 	res->handle->status=MYSQL_STATUS_READY;
+	/* Don't clear handle in mysql_free_results */
+	res->handle=0;
       }
     }
     DBUG_RETURN((MYSQL_ROW) NULL);
@@ -2256,10 +2273,16 @@ mysql_options(MYSQL *mysql,enum mysql_option option, const char *arg)
     mysql->options.connect_timeout= *(uint*) arg;
     break;
   case MYSQL_OPT_COMPRESS:
-    mysql->options.compress=1;			/* Remember for connect */
+    mysql->options.compress= 1;			/* Remember for connect */
     break;
   case MYSQL_OPT_NAMED_PIPE:
     mysql->options.named_pipe=1;		/* Force named pipe */
+    break;
+  case MYSQL_OPT_LOCAL_INFILE:			/* Allow LOAD DATA LOCAL ?*/
+    if (!arg || test(*(uint*) arg))
+      mysql->options.client_flag|= CLIENT_LOCAL_FILES;
+    else
+      mysql->options.client_flag&= ~CLIENT_LOCAL_FILES;
     break;
   case MYSQL_INIT_COMMAND:
     my_free(mysql->options.init_command,MYF(MY_ALLOW_ZERO_PTR));

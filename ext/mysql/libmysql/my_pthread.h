@@ -11,9 +11,23 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define ETIME ETIMEDOUT				/* For FreeBSD */
 #endif
 
-#if defined(__WIN__)
+#ifdef  __cplusplus
+extern "C" {
+#endif /* __cplusplus */ 
 
+#if defined(__WIN__) || defined(OS2)
+
+#ifdef OS2
+typedef ULONG     HANDLE;
+typedef ULONG     DWORD;
+typedef int sigset_t;
+#endif
+
+#ifdef OS2
+typedef HMTX             pthread_mutex_t;
+#else
 typedef CRITICAL_SECTION pthread_mutex_t;
+#endif
 typedef HANDLE		 pthread_t;
 typedef struct thread_attr {
     DWORD dwStackSize ;
@@ -32,19 +46,30 @@ typedef struct st_pthread_link {
 
 typedef struct {
   uint32 waiting;
+#ifdef OS2
+  HEV    semaphore;
+#else
   HANDLE semaphore;
+#endif
 } pthread_cond_t;
 
 
+#ifndef OS2
 struct timespec {		/* For pthread_cond_timedwait() */
     time_t tv_sec;
     long tv_nsec;
 };
+#endif
 
 typedef int pthread_mutexattr_t;
 #define win_pthread_self my_thread_var->pthread_self
+#ifdef OS2
+#define pthread_handler_decl(A,B) void * _Optlink A(void *B)
+typedef void * (_Optlink *pthread_handler)(void *);
+#else
 #define pthread_handler_decl(A,B) void * __cdecl A(void *B)
 typedef void * (__cdecl *pthread_handler)(void *);
+#endif
 
 void win_pthread_init(void);
 int win_pthread_setspecific(void *A,void *B,uint length);
@@ -64,12 +89,14 @@ struct tm *localtime_r(const time_t *timep,struct tm *tmp);
 
 void pthread_exit(void *a);	 /* was #define pthread_exit(A) ExitThread(A)*/
 
+#ifndef OS2
 #define ETIMEDOUT 145		    /* Win32 doesn't have this */
 #define getpid() GetCurrentThreadId()
+#endif
 #define pthread_self() win_pthread_self
-#define HAVE_LOCALTIME_R
-#define _REENTRANT
-#define HAVE_PTHREAD_ATTR_SETSTACKSIZE
+#define HAVE_LOCALTIME_R		1
+#define _REENTRANT			1
+#define HAVE_PTHREAD_ATTR_SETSTACKSIZE	1
 
 #ifdef USE_TLS					/* For LIBMYSQL.DLL */
 #undef SAFE_MUTEX				/* This will cause conflicts */
@@ -91,13 +118,24 @@ void pthread_exit(void *a);	 /* was #define pthread_exit(A) ExitThread(A)*/
 #endif /* USE_TLS */
 
 #define pthread_equal(A,B) ((A) == (B))
+#ifdef OS2
+int pthread_mutex_init (pthread_mutex_t *, const pthread_mutexattr_t *);
+int pthread_mutex_lock (pthread_mutex_t *);
+int pthread_mutex_unlock (pthread_mutex_t *);
+int pthread_mutex_destroy (pthread_mutex_t *);
+#define my_pthread_setprio(A,B)  DosSetPriority(PRTYS_THREAD,PRTYC_NOCHANGE, B, A)
+#define pthread_kill(A,B) raise(B)
+#define pthread_exit(A) pthread_dummy()
+#else
 #define pthread_mutex_init(A,B)  InitializeCriticalSection(A)
 #define pthread_mutex_lock(A)	 (EnterCriticalSection(A),0)
 #define pthread_mutex_unlock(A)  LeaveCriticalSection(A)
 #define pthread_mutex_destroy(A) DeleteCriticalSection(A)
 #define my_pthread_setprio(A,B)  SetThreadPriority(GetCurrentThread(), (B))
-/* Dummy defines for easier code */
 #define pthread_kill(A,B) pthread_dummy(0)
+#endif /* OS2 */
+
+/* Dummy defines for easier code */
 #define pthread_attr_setdetachstate(A,B) pthread_dummy(0)
 #define my_pthread_attr_setprio(A,B) pthread_attr_setprio(A,B)
 #define pthread_attr_setscope(A,B)
@@ -297,12 +335,15 @@ extern void my_pthread_attr_setprio(pthread_attr_t *attr, int priority);
 #undef	HAVE_GETHOSTBYADDR_R			/* No definition */
 #endif
 
-#ifndef HAVE_NONPOSIX_PTHREAD_GETSPECIFIC
+#if defined(OS2)
+#define my_pthread_getspecific(T,A) ((T) &(A))
+#define pthread_setspecific(A,B) win_pthread_setspecific(&(A),(B),sizeof(A))
+#elif !defined( HAVE_NONPOSIX_PTHREAD_GETSPECIFIC)
 #define my_pthread_getspecific(A,B) ((A) pthread_getspecific(B))
 #else
 #define my_pthread_getspecific(A,B) ((A) my_pthread_getspecific_imp(B))
 void *my_pthread_getspecific_imp(pthread_key_t key);
-#endif
+#endif /* OS2 */
 
 #ifndef HAVE_LOCALTIME_R
 struct tm *localtime_r(const time_t *clock, struct tm *res);
@@ -521,12 +562,14 @@ extern int pthread_dummy(int);
 struct st_my_thread_var
 {
   int thr_errno;
-  pthread_cond_t suspend, *current_cond;
-  pthread_mutex_t mutex,  *current_mutex;
+  pthread_cond_t suspend;
+  pthread_mutex_t mutex;
+  pthread_mutex_t * volatile current_mutex;
+  pthread_cond_t * volatile current_cond;
   pthread_t pthread_self;
   long id;
   int cmp_length;
-  volatile int abort;
+  int volatile abort;
 #ifndef DBUG_OFF
   gptr dbug;
   char name[THREAD_NAME_SIZE+1];
@@ -562,4 +605,9 @@ extern struct st_my_thread_var *_my_thread_var(void) __attribute__ ((const));
 #endif /* SAFE_STATISTICS */
 #endif /* HAVE_ATOMIC_ADD */
 #endif /* thread_safe_increment */
+
+#ifdef  __cplusplus
+}
+#endif
+
 #endif /* _my_ptread_h */

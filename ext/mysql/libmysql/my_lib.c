@@ -13,7 +13,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
 #else
+#ifndef OS2
 # define dirent direct
+#endif
 # define NAMLEN(dirent) (dirent)->d_namlen
 # if defined(HAVE_SYS_NDIR_H)
 #  include <sys/ndir.h>
@@ -36,6 +38,11 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <iodef.h>
 #include <descrip.h>
 #endif
+
+#ifdef OS2
+#include "my_os2dirsrch.h"
+#endif
+
 #if defined(THREAD) && defined(HAVE_READDIR_R)
 #define READDIR(A,B,C) ((errno=readdir_r(A,B,&C)) != 0 || !C)
 #else
@@ -323,9 +330,7 @@ my_string directory_file_name (my_string dst, const char *src)
 *****************************************************************************
 */
 
-MY_DIR	*my_dir(path, MyFlags)
-const char	*path;
-myf	MyFlags;
+MY_DIR	*my_dir(const char *path, myf MyFlags)
 {
   struct fileinfo *fnames;
   char	       *buffer, *obuffer, *tempptr;
@@ -461,9 +466,7 @@ error:
 ** At MSDOS you always get stat of files, but time is in packed MSDOS-format
 ******************************************************************************/
 
-MY_DIR	*my_dir(path, MyFlags)
-const char	*path;
-myf	MyFlags;
+MY_DIR	*my_dir(const char* path, myf MyFlags)
 {
   struct fileinfo *fnames;
   char	       *buffer, *obuffer, *tempptr;

@@ -14,6 +14,9 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <dos.h>
 #include <direct.h>
 #endif
+#if defined(OS2)
+#include <direct.h>
+#endif
 
 #ifdef __EMX__
 // chdir2 support also drive change
@@ -79,16 +82,16 @@ int my_setwd(const char *dir, myf MyFlags)
   int res;
   size_s length;
   my_string start,pos;
-#if defined(VMS) || defined(MSDOS)
+#if defined(VMS) || defined(MSDOS) || defined(OS2)
   char buff[FN_REFLEN];
 #endif
   DBUG_ENTER("my_setwd");
   DBUG_PRINT("my",("dir: '%s'  MyFlags %d", dir, MyFlags));
 
   start=(my_string) dir;
-#if defined(MSDOS)		/* MSDOS chdir can't change drive */
+#if defined(MSDOS) || defined(OS2) /* OS2/MSDOS chdir can't change drive */
 #if !defined(_DDL) && !defined(WIN32)
-  if ((pos=strchr(dir,FN_DEVCHAR)) != 0)
+  if ((pos=(char*) strchr(dir,FN_DEVCHAR)) != 0)
   {
     uint drive,drives;
 
@@ -96,8 +99,13 @@ int my_setwd(const char *dir, myf MyFlags)
     drive=(uint) (toupper(dir[0])-'A'+1); drives= (uint) -1;
     if ((pos-(byte*) dir) == 2 && drive > 0 && drive < 32)
     {
+#ifdef OS2
+      _chdrive(drive);
+      drives = _getdrive();
+#else
       _dos_setdrive(drive,&drives);
       _dos_getdrive(&drives);
+#endif
     }
     if (drive != drives)
     {

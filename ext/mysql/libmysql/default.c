@@ -132,7 +132,7 @@ void load_defaults(const char *conf_file, const char **groups,
 			    &group))
       goto err;
 #endif
-#ifdef __EMX__
+#if defined(__EMX__) || defined(OS2)
     if (getenv("ETC") &&
         search_default_file(&args, &alloc, getenv("ETC"), conf_file, 
                             default_ext, &group))
@@ -208,7 +208,7 @@ static my_bool search_default_file(DYNAMIC_ARRAY *args, MEM_ROOT *alloc,
 				   const char *dir, const char *config_file,
 				   const char *ext, TYPELIB *group)
 {
-  char name[FN_REFLEN+10],buff[FN_REFLEN+1],*ptr,*end,*value,*tmp;
+  char name[FN_REFLEN+10],buff[4096],*ptr,*end,*value,*tmp;
   FILE *fp;
   uint line=0;
   my_bool read_values=0,found_group=0;
@@ -349,7 +349,7 @@ void print_defaults(const char *conf_file, const char **groups)
     GetWindowsDirectory(name,sizeof(name));
     printf("%s\\%s%s ",name,conf_file,have_ext ? "" : windows_ext);
 #endif
-#ifdef __EMX__
+#if defined(__EMX__) || defined(OS2)
     if (getenv("ETC"))
       printf("%s\\%s%s ", getenv("ETC"), conf_file, default_ext);
 #endif

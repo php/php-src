@@ -6,7 +6,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
   a shared library
 */
 
-#ifndef stdin
+#if !defined(stdin) || defined(OS2)
 #include "mysys_priv.h"
 #include "my_static.h"
 #include "my_alarm.h"
@@ -83,4 +83,5 @@ int (*fatal_error_handler_hook)(uint error,const char *str,myf MyFlags)=
 my_bool NEAR my_disable_locking=0;
 my_bool NEAR my_disable_async_io=0;
 my_bool NEAR my_disable_flush_key_blocks=0;
+my_bool NEAR my_disable_symlinks=0;
 my_bool NEAR mysys_uses_curses=0;
