@@ -976,7 +976,7 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry CLS_DC)
 {
 	zend_op *opline;
 	
-	if (switch_entry->cond.op_type == IS_UNUSED) {
+	if (switch_entry->cond.op_type!=IS_VAR && switch_entry->cond.op_type!=IS_TMP_VAR) {
 		return 1;
 	}
 	
@@ -993,7 +993,7 @@ static int generate_free_foreach_copy(znode *foreach_copy CLS_DC)
 {
 	zend_op *opline;
 	
-	if (foreach_copy->op_type == IS_UNUSED) {
+	if (foreach_copy->op_type!=IS_VAR && foreach_copy->op_type!=IS_TMP_VAR) {
 		return 1;
 	}
 
@@ -1018,11 +1018,11 @@ void do_return(znode *expr, int do_end_vparse CLS_DC)
 		}
 	}
 #ifdef ZTS
-	zend_stack_apply_with_argument(&CG(switch_cond_stack), (int (*)(void *element, void *)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
-	zend_stack_apply_with_argument(&CG(foreach_copy_stack), (int (*)(void *element, void *)) generate_free_foreach_copy, ZEND_STACK_APPLY_TOPDOWN CLS_CC);
+	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr CLS_CC);
+	zend_stack_apply_with_argument(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_foreach_copy CLS_CC);
 #else
-	zend_stack_apply(&CG(switch_cond_stack), (int (*)(void *element)) generate_free_switch_expr, ZEND_STACK_APPLY_TOPDOWN);
-	zend_stack_apply(&CG(foreach_copy_stack), (int (*)(void *element)) generate_free_foreach_copy, ZEND_STACK_APPLY_TOPDOWN);
+	zend_stack_apply(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_switch_expr);
+	zend_stack_apply(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_foreach_copy);
 #endif
 
 	opline = get_next_op(CG(active_op_array) CLS_CC);
@@ -1340,11 +1340,13 @@ void do_switch_end(znode *case_list CLS_DC)
 	CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].cont = CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].brk = get_next_op_number(CG(active_op_array));
 	CG(active_op_array)->current_brk_cont = CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].parent;
 
-	/* emit free for the switch condition*/
-	opline = get_next_op(CG(active_op_array) CLS_CC);
-	opline->opcode = ZEND_SWITCH_FREE;
-	opline->op1 = switch_entry_ptr->cond;
-	SET_UNUSED(opline->op2);
+	if (switch_entry_ptr->cond.op_type==IS_VAR || switch_entry_ptr->cond.op_type==IS_TMP_VAR) {
+		/* emit free for the switch condition*/
+		opline = get_next_op(CG(active_op_array) CLS_CC);
+		opline->opcode = ZEND_SWITCH_FREE;
+		opline->op1 = switch_entry_ptr->cond;
+		SET_UNUSED(opline->op2);
+	}
 	if (switch_entry_ptr->cond.op_type == IS_CONST) {
 		zval_dtor(&switch_entry_ptr->cond.u.constant);
 	}
