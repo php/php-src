@@ -181,7 +181,8 @@ static int sapi_servlet_read_post(char *buffer, uint count_bytes SLS_DC)
 	uint read_bytes=(*jenv)->GetStringLength(jenv, post);
 	if (read_bytes>count_bytes) read_bytes=count_bytes;
 
-	memcpy(buffer, postAsUTF, count_bytes);
+	memcpy(buffer, postAsUTF, read_bytes);
+	if (read_bytes<count_bytes) buffer[read_bytes]=0;
 
 	(*jenv)->ReleaseStringUTFChars(jenv, post, postAsUTF);
 
