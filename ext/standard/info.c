@@ -483,8 +483,8 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 		if (!row_element || !*row_element) {
 			row_element = "&nbsp;";
 		}
-		php_printf("<TD%s>%s%s%s</td>", 
-			(i==0?" BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\" ":""),
+		php_printf("<TD %s>%s%s%s</td>", 
+			(i==0?"BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\" ":"ALIGN=\"center\""),
 			(i==0?"<B>":""), 
 			row_element,
 			(i==0?"</B>":""));
