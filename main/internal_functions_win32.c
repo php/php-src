@@ -61,9 +61,6 @@
 #include "ext/wddx/php_wddx.h"
 #include "ext/mysql/php_mysql.h"
 
-/* SNMP has to be moved to ext */
-/* #include "dl/snmp/php_snmp.h" */
-
 zend_module_entry *php_builtin_extensions[] = {
 	phpext_standard_ptr,
 #if WITH_BCMATH
