@@ -439,7 +439,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 		INIT_PZVAL(p);
 		p->refcount = refcount;
 	} else if (p->type == IS_CONSTANT_ARRAY) {
-		zval **element;
+		zval **element, *new_val;
 		char *str_index;
 		uint str_index_len;
 		ulong num_index;
@@ -474,14 +474,21 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				continue;
 			}
 
+			ALLOC_ZVAL(new_val);
+			*new_val = **element;
+			zval_copy_ctor(new_val);
+			new_val->refcount = 1;
+			new_val->is_ref = 0;
+			
+			/* preserve this bit for inheritance */
+			Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
+			
 			switch (const_value.type) {
 				case IS_STRING:
-					zend_hash_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, element, sizeof(zval *), NULL);
-					(*element)->refcount++;
+					zend_hash_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, &new_val, sizeof(zval *), NULL);
 					break;
 				case IS_LONG:
-					zend_hash_index_update(p->value.ht, const_value.value.lval, element, sizeof(zval *), NULL);
-					(*element)->refcount++;
+					zend_hash_index_update(p->value.ht, const_value.value.lval, &new_val, sizeof(zval *), NULL);
 					break;
 			}
 			zend_hash_del(p->value.ht, str_index, str_index_len);
