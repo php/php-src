@@ -25,12 +25,6 @@
 
 #include "php.h"
 
-#ifdef PHP_ATOM_INC
-#include "php_have_iconv.h"
-#include "php_have_libiconv.h"
-#include "php_iconv_supports_errno.h"
-#endif
-
 #if HAVE_ICONV
 
 #ifdef HAVE_GICONV_H
