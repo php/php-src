@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added XBM support for GetImageSize(). (helly)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
