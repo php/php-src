@@ -1,3 +1,193 @@
+2003-08-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.h:
+      Allow usage of external libmbfl
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      Add missing check
+
+2003-08-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbfl_allocators.c:
+      Integrate allocator code into mbstring.c
+
+2003-08-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Added place-holder for 4.3.4
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      No RC1 just yet :)
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev
+
+    * (PHP_4_3)
+      NEWS:
+      Fixed typo.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Set 4.3.3 version bit.
+
+    * (PHP_4_3)
+      NEWS:
+      Prepare NEWS file for 4.3.3 release.
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      Fix memory source of string duplication for non internal properties
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h:
+      - Provide appropriate way to destroy internal zval's.
+      - Allow internal zval's of type string and disallow complex types.
+      - Define the default string for extensions at class level instead of ctor.
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_reflection_api.c:
+      Don't identify alias'ed functions
+
+2003-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      Use ""'s if you want empty strings.  We want to crash on errors.
+
+    * ZendEngine2/zend_compile.c:
+      Use pemalloc()
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      Allow NULL, too
+
+2003-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_API.c:
+      Get rid of more ^M's - Marcus, please check your CVS client!
+
+    * ZendEngine2/zend_default_classes.c:
+      Get rid of more ^M's
+
+    * ZendEngine2/zend_compile.c:
+      line endings fix
+
+    * ZendEngine2/zend_execute.c:
+      Never, ever, overwrite the refcount element of a connected zval!
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add dedicated reflection_exception
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h:
+      Allow to throw instances of classes derived from exception
+
+2003-08-24  Stefan Roehrich  <stefan@roehri.ch>
+
+    * NEWS
+      ext/zlib/zlib.c:
+      Fixed bug #25218 ("deflate" compressed pages had a gzip header, which
+      should only be sent with "gzip" compressed pages).
+
+    * ext/zlib/zlib.c:
+      Fixed zlib.output_compression without register_long_vars set.
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      sapi/cli/php_cli.c:
+      - Provide a unified way to display uncaught exceptions, which shows
+        file/line/message info if possible.
+      - Add zend_eval_string_ex() to be able to handle exceptions in eval'd
+      code.
+      - Use above function to fix memleaks in CLI.
+
+    * ZendEngine2/zend_reflection_api.c:
+      Make invoke() work
+
+    * ZendEngine2/zend_reflection_api.c:
+      zend_parse_parameters 'O' works the way we need here
+
+    * ZendEngine2/zend_reflection_api.c:
+      Not needed
+
+    * ZendEngine2/zend_default_classes.c:
+      Make use method macros
+
+    * ZendEngine2/zend_API.h:
+      One of PPP is needed, too
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add Reflection_Function::isAlias
+      - Use ZEND_ME/ZEND_METHOD
+      - Fix static entries
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.h:
+      - Add fn_flag ZEND_ACC_ALIAS
+      - Unify way of function_entry generation by new macro ZEND_FENTRY
+
+    * ZendEngine2/zend_API.c:
+      Fix fn_flags handling
+
+2003-08-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.h
+      ext/dom/xml_common.h
+      ext/dom/xpath.c:
+      implement stricterrorcheck
+      fix clonenode
+      cleanup error routines
+      forgot these files
+
+    * ext/dom/attr.c
+      ext/dom/characterdata.c
+      ext/dom/document.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c:
+      implement stricterrorcheck
+      fix clonenode
+      cleanup error routines
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      remove document pointer references as doc is now copied
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_default_classes.c:
+      Add property read code and use that in default exception class
+
 2003-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_default_classes.c
