@@ -50,14 +50,6 @@
 #include "php_globals.h"
 #include "SAPI.h"
 
-#if APACHE 
-/* 
-  	ap_compat.h does a 
-  	#define md5 ap_md5
-  	which "kills" out md5 function.
-*/
-#undef md5
-#endif
 
 #ifdef ZTS
 int basic_globals_id;
@@ -114,7 +106,7 @@ function_entry basic_functions[] = {
 	PHP_FE(htmlentities,							NULL)
 	PHP_FE(get_html_translation_table,				NULL)
 	
-	PHP_FE(md5,										NULL)
+	PHP_NAMED_FE(md5,		php_if_md5,				NULL)
 
 	PHP_FE(iptcparse,								NULL)
 	PHP_FE(iptcembed,								NULL)
