@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added ability to capture string offsets in preg_match_*() results.
+  (David Brown, Andrei)
 - Fixed set_error_handler() to accept methods as callbacks and also report
   invalid callbacks. (Andrei)
 - Fixed a memory corruption bug in overload extension. (Andrei)
