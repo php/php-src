@@ -1,3 +1,19 @@
+2004-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c:
+      Fixed bug #26814 (On parse error include included file, terminate
+      execution script).
+
+2004-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_iterators.c
+      zend_iterators.h:
+      Respect proeprty visibility in foreach
+
+    * tests/bug26696.phpt:
+      Update test
+
 2004-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
