@@ -236,6 +236,8 @@ PHP_MSHUTDOWN_FUNCTION(COM)
 }
 
 
+/* {{{ proto int com_load(string module_name)
+   Loads a COM module */
 PHP_FUNCTION(COM_load)
 {
 	pval *module_name, *server_name=NULL;
@@ -309,6 +311,7 @@ PHP_FUNCTION(COM_load)
 
 	RETURN_LONG(zend_list_insert(i_dispatch,le_idispatch));
 }
+/* }}} */
 
 
 static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persistent)
@@ -535,6 +538,8 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 }
 
 
+/* {{{ proto mixed com_invoke(int module, string handler_name [, mixed arg [, ...]])
+   Invokes a COM module */
 PHP_FUNCTION(COM_invoke)
 {
 	pval **arguments;
@@ -573,6 +578,7 @@ PHP_FUNCTION(COM_invoke)
 
 	php_variant_to_pval(&var_result, return_value, 0);
 }
+/* }}} */
 
 
 
