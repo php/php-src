@@ -78,11 +78,7 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 					w = 0;
 				}
 			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
-				if (c1 < 0xc9){
-					w = (c1 - 0xc7)*94 + c - 0xa1;
-				} else {
-					w = (c1 - 0xc8)*94 + c - 0xa1;
-				}
+				w = (c1 - 0xc7)*94 + (c - 0xa1);
 				if (w >= 0 && w < uhc3_ucs_table_size) {
 					w = uhc3_ucs_table[w];
 				} else {
@@ -226,11 +222,7 @@ retry:
 					w = 0;
 				}
 			} else {
-				if (c1 < 0x49){
-					w = (c1 - 0x47)*94 + c - 0x21;
-				} else {
-					w = (c1 - 0x48)*94 + c - 0x21;
-				}
+				w = (c1 - 0x47)*94 + (c - 0x21);
 				if (w >= 0 && w < uhc3_ucs_table_size) {
 					w = uhc3_ucs_table[w];
 				} else {
@@ -382,8 +374,6 @@ int
 mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
 	int c1, w, flag;
-	const short ofst1[] = { 0x41, 0x61, 0x81, 0xa1}; 
-	const short ofst2[] = { 0x0,  0x1a, 0x34, 0x54}; 
 
 	switch (filter->status) {
 	case 0:
@@ -403,36 +393,22 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		filter->status = 0;
 		c1 = filter->cache;
 
-		flag = 0;
-		if ( c >= 0x41 && c <= 0x5a){
-			flag = 1;
-		} else if (c >= 0x61 && c <= 0x7a){
-			flag = 2;
-		} else if (c >= 0x81 && c <= 0xa0){
-			flag = 3;
-		} else if (c >= 0xa1 && c <= 0xfe){
-			flag = 4;
-		}
-		if ( c1 >= 0x81 && c1 <= 0xa0 && flag > 0){
-			w = (c1 - 0x81)*178 + (c - ofst1[flag-1] + ofst2[flag-1]);
+		if ( c1 >= 0x81 && c1 <= 0xa0){
+			w = (c1 - 0x81)*190 + (c - 0x41);
 			if (w >= 0 && w < uhc1_ucs_table_size) {
 				w = uhc1_ucs_table[w];
 			} else {
 				w = 0;
 			}			
-		} else if ( c1 >= 0xa1 && c1 <= 0xc6 && flag > 0){
-			w = (c1 - 0xa1)*190 + (c - ofst1[flag-1] + ofst2[flag-1]);			
+		} else if ( c1 >= 0xa1 && c1 <= 0xc6){
+			w = (c1 - 0xa1)*190 + (c - 0x41);			
 			if (w >= 0 && w < uhc2_ucs_table_size) {
 				w = uhc2_ucs_table[w];
 			} else {
 				w = 0;
 			}			
-		} else if ( c1 >= 0xc7 && c1 <= 0xfe && flag == 4){
-			if (c1 < 0xc9){
-				w = (c1 - 0xc7)*94 + (c - ofst1[flag-1]);		
-			} else {
-				w = (c1 - 0xc8)*94 + (c - ofst1[flag-1]);		
-			}
+		} else if ( c1 >= 0xc7 && c1 <= 0xfe){
+			w = (c1 - 0xc7)*94 + (c - 0xa1);		
 			if (w >= 0 && w < uhc3_ucs_table_size) {
 				w = uhc3_ucs_table[w];
 			} else {
