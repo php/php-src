@@ -9,6 +9,7 @@ if (ini_set("mbstring.script_encoding","SJIS") != "SJIS") {
 ?>
 --INI--
 mbstring.script_encoding=Shift_JIS
+mbstring.internal_encoding=Shift_JIS
 --FILE--
 <?php
 	function —\Ž\”\($ˆø”)
