@@ -85,8 +85,10 @@ PHP_FUNCTION(pg_lowrite);
 PHP_FUNCTION(pg_loreadall);
 PHP_FUNCTION(pg_loimport);
 PHP_FUNCTION(pg_loexport);
+#if HAVE_PQCLIENTENCODING
 PHP_FUNCTION(pg_clientencoding);
 PHP_FUNCTION(pg_setclientencoding);
+#endif
 
 void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS);

@@ -1665,6 +1665,12 @@ PHP_FUNCTION(pg_clientencoding)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
+	/* Just do the same as found in PostgreSQL sources... */
+
+#ifndef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
+#define pg_encoding_to_char(x) "SQL_ASCII"
+#endif
+
 	return_value->value.str.val 
 		= (char *) pg_encoding_to_char(PQclientEncoding(pgsql));
 	return_value->value.str.len = strlen(return_value->value.str.val);
