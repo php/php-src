@@ -71,36 +71,6 @@ DLEXPORT zend_module_entry *get_module(void) { return &xml_module_entry; }
 /* }}} */
 /* {{{ function prototypes */
 
-/* {{{ _xml_resource_zval() */
-
-static zval *_xml_resource_zval(long value)
-{
-	zval *ret;
-	MAKE_STD_ZVAL(ret);
-
-	ret->type = IS_RESOURCE;
-	ret->value.lval = value;
-
-	return ret;
-}
-
-/* }}} */
-
-/* {{{ _xml_string_zval() */
-
-static zval *_xml_string_zval(const char *str)
-{
-	zval *ret;
-	int len = strlen(str);
-	MAKE_STD_ZVAL(ret);
-
-	ret->type = IS_STRING;
-	ret->value.str.len = len;
-	ret->value.str.val = estrndup(str, len);
-	return ret;
-}
-
-/* }}} */
 
 PHP_MINIT_FUNCTION(xml);
 PHP_RINIT_FUNCTION(xml);
@@ -117,19 +87,19 @@ inline static char xml_decode_us_ascii(unsigned short);
 static XML_Char *xml_utf8_encode(const char *, int, int *, const XML_Char *);
 static char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
 static zval *xml_call_handler(xml_parser *, char *, int, zval **);
-static zval *php3i_xmlcharzval(const XML_Char *, int, const XML_Char *);
-static int php3i_xmlcharlen(const XML_Char *);
-static void php3i_add_to_info(xml_parser *parser,char *name);
+static zval *_xml_xmlchar_zval(const XML_Char *, int, const XML_Char *);
+static int _xml_xmlcharlen(const XML_Char *);
+static void _xml_add_to_info(xml_parser *parser,char *name);
 
 
-void php3i_xml_startElementHandler(void *, const char *, const char **);
-void php3i_xml_endElementHandler(void *, const char *);
-void php3i_xml_characterDataHandler(void *, const XML_Char *, int);
-void php3i_xml_processingInstructionHandler(void *, const XML_Char *, const XML_Char *);
-void php3i_xml_defaultHandler(void *, const XML_Char *, int);
-void php3i_xml_unparsedEntityDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
-void php3i_xml_notationDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
-int  php3i_xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+void _xml_startElementHandler(void *, const char *, const char **);
+void _xml_endElementHandler(void *, const char *);
+void _xml_characterDataHandler(void *, const XML_Char *, int);
+void _xml_processingInstructionHandler(void *, const XML_Char *, const XML_Char *);
+void _xml_defaultHandler(void *, const XML_Char *, int);
+void _xml_unparsedEntityDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+void _xml_notationDeclHandler(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+int  _xml_externalEntityRefHandler(XML_Parser, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 
 /* }}} */
 /* {{{ extension definition structures */
@@ -273,8 +243,49 @@ PHP_MINFO_FUNCTION(xml)
 
 /* }}} */
 
-/* }}} */
 /* {{{ extension-internal functions */
+
+static zval *_xml_resource_zval(long value)
+{
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+
+	ret->type = IS_RESOURCE;
+	ret->value.lval = value;
+
+	return ret;
+}
+
+static zval *_xml_string_zval(const char *str)
+{
+	zval *ret;
+	int len = strlen(str);
+	MAKE_STD_ZVAL(ret);
+
+	ret->type = IS_STRING;
+	ret->value.str.len = len;
+	ret->value.str.val = estrndup(str, len);
+	return ret;
+}
+
+static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encoding)
+{
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+	
+	if (s == NULL) {
+		var_reset(ret);
+		return ret;
+	}
+	if (len == 0) {
+		len = _xml_xmlcharlen(s);
+	}
+	ret->type = IS_STRING;
+	ret->value.str.val = xml_utf8_decode(s, len, &ret->value.str.len, encoding);
+	return ret;
+}
+
+/* }}} */
 
 /* {{{ xml_destroy_parser() */
 
@@ -549,28 +560,9 @@ xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_Char *encodin
 	return newbuf;
 }
 /* }}} */
-    /* {{{ php3i_xmlcharzval() */
+    /* {{{ _xml_xmlcharlen() */
 
-static zval *php3i_xmlcharzval(const XML_Char *s, int len, const XML_Char *encoding)
-{
-	zval *ret = emalloc(sizeof(zval));
-
-	if (s == NULL) {
-		var_reset(ret);
-		return ret;
-	}
-	if (len == 0) {
-		len = php3i_xmlcharlen(s);
-	}
-	ret->type = IS_STRING;
-	ret->value.str.val = xml_utf8_decode(s, len, &ret->value.str.len, encoding);
-	return ret;
-}
-
-/* }}} */
-    /* {{{ php3i_xmlcharlen() */
-
-static int php3i_xmlcharlen(const XML_Char *s)
+static int _xml_xmlcharlen(const XML_Char *s)
 {
 	int len = 0;
 
@@ -582,9 +574,9 @@ static int php3i_xmlcharlen(const XML_Char *s)
 }
 
 /* }}} */
-    /* {{{ php3i_zval_strdup() */
+    /* {{{ _xml_zval_strdup() */
 
-PHPAPI char *php3i_zval_strdup(zval *val)
+PHPAPI char *_xml_zval_strdup(zval *val)
 {
 	if (val->type == IS_STRING) {
 		char *buf = emalloc(val->value.str.len + 1);
@@ -596,8 +588,8 @@ PHPAPI char *php3i_zval_strdup(zval *val)
 }
 
 /* }}} */
-    /* {{{ php3i_add_to_info */
-static void php3i_add_to_info(xml_parser *parser,char *name)
+    /* {{{ _xml_add_to_info */
+static void _xml_add_to_info(xml_parser *parser,char *name)
 {
 	zval **element, *values;
 
@@ -606,13 +598,12 @@ static void php3i_add_to_info(xml_parser *parser,char *name)
 	}
 
 	if (zend_hash_find(parser->info->value.ht,name,strlen(name) + 1,(void **) &element) == FAILURE) {
-		values = emalloc(sizeof(zval));
+		MAKE_STD_ZVAL(values);
+		
 		if (array_init(values) == FAILURE) {
 			php_error(E_ERROR, "Unable to initialize array");
 			return;
 		}
-
-		INIT_PZVAL(values);
 		
 		zend_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(zval*), (void **) &element);
 	} 
@@ -623,9 +614,9 @@ static void php3i_add_to_info(xml_parser *parser,char *name)
 }
 
 /* }}} */
-    /* {{{ php3i_xml_startElementHandler() */
+    /* {{{ _xml_startElementHandler() */
 
-void php3i_xml_startElementHandler(void *userData, const char *name,
+void _xml_startElementHandler(void *userData, const char *name,
 								   const char **attributes)
 {
 	xml_parser *parser = (xml_parser *)userData;
@@ -674,16 +665,13 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			zval *tag, *atr;
 			int atcnt = 0;
 
-			tag = emalloc(sizeof(zval));
-			INIT_PZVAL(tag);
-
-			atr = emalloc(sizeof(zval));
-			INIT_PZVAL(atr);
+			MAKE_STD_ZVAL(tag);
+			MAKE_STD_ZVAL(atr);
 
 			array_init(tag);
 			array_init(atr);
 
-			php3i_add_to_info(parser,((char *) name) + parser->toffset);
+			_xml_add_to_info(parser,((char *) name) + parser->toffset);
 
 			add_assoc_string(tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
 			add_assoc_string(tag,"type","open",1);
@@ -730,9 +718,9 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 }
 
 /* }}} */
-    /* {{{ php3i_xml_endElementHandler() */
+    /* {{{ _xml_endElementHandler() */
 
-void php3i_xml_endElementHandler(void *userData, const char *name)
+void _xml_endElementHandler(void *userData, const char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -759,12 +747,11 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 			if (parser->lastwasopen) {
 				add_assoc_string(*(parser->ctag),"type","complete",1);
 			} else {
-				tag = emalloc(sizeof(zval));
+				MAKE_STD_ZVAL(tag);
 
 				array_init(tag);
-				INIT_PZVAL(tag);
 				  
-				php3i_add_to_info(parser,((char *) name) + parser->toffset);
+				_xml_add_to_info(parser,((char *) name) + parser->toffset);
 
 				add_assoc_string(tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
 				add_assoc_string(tag,"type","close",1);
@@ -787,9 +774,9 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 }
 
 /* }}} */
-    /* {{{ php3i_xml_characterDataHandler() */
+    /* {{{ _xml_characterDataHandler() */
 
-void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
+void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -798,7 +785,7 @@ void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 		if (parser->characterDataHandler) {
 			args[0] = _xml_resource_zval(parser->index);
-			args[1] = php3i_xmlcharzval(s, len, parser->target_encoding);
+			args[1] = _xml_xmlchar_zval(s, len, parser->target_encoding);
 			if ((retval = xml_call_handler(parser, parser->characterDataHandler, 2, args))) {
 				zval_dtor(retval);
 				efree(retval);
@@ -833,11 +820,11 @@ void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 				} else {
 					zval *tag;
 
-					tag = emalloc(sizeof(zval));
+					MAKE_STD_ZVAL(tag);
 					
 					array_init(tag);
 					
-					php3i_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
+					_xml_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
 
 					add_assoc_string(tag,"tag",parser->ltags[parser->level-1] + parser->toffset,1);
 					add_assoc_string(tag,"value",decoded_value,0);
@@ -854,9 +841,9 @@ void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 }
 
 /* }}} */
-    /* {{{ php3i_xml_processingInstructionHandler() */
+    /* {{{ _xml_processingInstructionHandler() */
 
-void php3i_xml_processingInstructionHandler(void *userData,
+void _xml_processingInstructionHandler(void *userData,
 											const XML_Char *target,
 											const XML_Char *data)
 {
@@ -866,8 +853,8 @@ void php3i_xml_processingInstructionHandler(void *userData,
 		zval *retval, *args[3];
 
 		args[0] = _xml_resource_zval(parser->index);
-		args[1] = php3i_xmlcharzval(target, 0, parser->target_encoding);
-		args[2] = php3i_xmlcharzval(data, 0, parser->target_encoding);
+		args[1] = _xml_xmlchar_zval(target, 0, parser->target_encoding);
+		args[2] = _xml_xmlchar_zval(data, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->processingInstructionHandler, 3, args))) {
 			zval_dtor(retval);
 			efree(retval);
@@ -876,9 +863,9 @@ void php3i_xml_processingInstructionHandler(void *userData,
 }
 
 /* }}} */
-    /* {{{ php3i_xml_defaultHandler() */
+    /* {{{ _xml_defaultHandler() */
 
-void php3i_xml_defaultHandler(void *userData, const XML_Char *s, int len)
+void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
 {
 	xml_parser *parser = (xml_parser *)userData;
 
@@ -886,7 +873,7 @@ void php3i_xml_defaultHandler(void *userData, const XML_Char *s, int len)
 		zval *retval, *args[2];
 
 		args[0] = _xml_resource_zval(parser->index);
-		args[1] = php3i_xmlcharzval(s, len, parser->target_encoding);
+		args[1] = _xml_xmlchar_zval(s, len, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->defaultHandler, 2, args))) {
 			zval_dtor(retval);
 			efree(retval);
@@ -895,9 +882,9 @@ void php3i_xml_defaultHandler(void *userData, const XML_Char *s, int len)
 }
 
 /* }}} */
-    /* {{{ php3i_xml_unparsedEntityDeclHandler() */
+    /* {{{ _xml_unparsedEntityDeclHandler() */
 
-void php3i_xml_unparsedEntityDeclHandler(void *userData,
+void _xml_unparsedEntityDeclHandler(void *userData,
 										 const XML_Char *entityName,
 										 const XML_Char *base,
 										 const XML_Char *systemId,
@@ -910,11 +897,11 @@ void php3i_xml_unparsedEntityDeclHandler(void *userData,
 		zval *retval, *args[5];
 
 		args[0] = _xml_resource_zval(parser->index);
-		args[1] = php3i_xmlcharzval(entityName, 0, parser->target_encoding);
-		args[2] = php3i_xmlcharzval(base, 0, parser->target_encoding);
-		args[3] = php3i_xmlcharzval(systemId, 0, parser->target_encoding);
-		args[4] = php3i_xmlcharzval(publicId, 0, parser->target_encoding);
-		args[5] = php3i_xmlcharzval(notationName, 0, parser->target_encoding);
+		args[1] = _xml_xmlchar_zval(entityName, 0, parser->target_encoding);
+		args[2] = _xml_xmlchar_zval(base, 0, parser->target_encoding);
+		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
+		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
+		args[5] = _xml_xmlchar_zval(notationName, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->unparsedEntityDeclHandler, 6, args))) {
 			zval_dtor(retval);
 			efree(retval);
@@ -923,10 +910,10 @@ void php3i_xml_unparsedEntityDeclHandler(void *userData,
 }
 
 /* }}} */
-    /* {{{ php3i_xml_notationDeclHandler() */
+    /* {{{ _xml_notationDeclHandler() */
 
 void
-php3i_xml_notationDeclHandler(void *userData,
+_xml_notationDeclHandler(void *userData,
 							  const XML_Char *notationName,
 							  const XML_Char *base,
 							  const XML_Char *systemId,
@@ -938,10 +925,10 @@ php3i_xml_notationDeclHandler(void *userData,
 		zval *retval, *args[5];
 
 		args[0] = _xml_resource_zval(parser->index);
-		args[1] = php3i_xmlcharzval(notationName, 0, parser->target_encoding);
-		args[2] = php3i_xmlcharzval(base, 0, parser->target_encoding);
-		args[3] = php3i_xmlcharzval(systemId, 0, parser->target_encoding);
-		args[4] = php3i_xmlcharzval(publicId, 0, parser->target_encoding);
+		args[1] = _xml_xmlchar_zval(notationName, 0, parser->target_encoding);
+		args[2] = _xml_xmlchar_zval(base, 0, parser->target_encoding);
+		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
+		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->notationDeclHandler, 5, args))) {
 			zval_dtor(retval);
 			efree(retval);
@@ -950,10 +937,10 @@ php3i_xml_notationDeclHandler(void *userData,
 }
 
 /* }}} */
-    /* {{{ php3i_xml_externalEntityRefHandler() */
+    /* {{{ _xml_externalEntityRefHandler() */
 
 int
-php3i_xml_externalEntityRefHandler(XML_Parser parserPtr,
+_xml_externalEntityRefHandler(XML_Parser parserPtr,
 								   const XML_Char *openEntityNames,
 								   const XML_Char *base,
 								   const XML_Char *systemId,
@@ -966,10 +953,10 @@ php3i_xml_externalEntityRefHandler(XML_Parser parserPtr,
 		zval *retval, *args[5];
 
 		args[0] = _xml_resource_zval(parser->index);
-		args[1] = php3i_xmlcharzval(openEntityNames, 0, parser->target_encoding);
-		args[2] = php3i_xmlcharzval(base, 0, parser->target_encoding);
-		args[3] = php3i_xmlcharzval(systemId, 0, parser->target_encoding);
-		args[4] = php3i_xmlcharzval(publicId, 0, parser->target_encoding);
+		args[1] = _xml_xmlchar_zval(openEntityNames, 0, parser->target_encoding);
+		args[2] = _xml_xmlchar_zval(base, 0, parser->target_encoding);
+		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
+		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->externalEntityRefHandler, 5, args))) {
 			convert_to_long(retval);
 			ret = retval->value.lval;
@@ -1054,7 +1041,7 @@ PHP_FUNCTION(xml_set_element_handler)
 
 	xml_set_handler(&parser->startElementHandler, shdl);
 	xml_set_handler(&parser->endElementHandler, ehdl);
-	XML_SetElementHandler(parser->parser, php3i_xml_startElementHandler, php3i_xml_endElementHandler);
+	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1073,7 +1060,7 @@ PHP_FUNCTION(xml_set_character_data_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->characterDataHandler, hdl);
-	XML_SetCharacterDataHandler(parser->parser, php3i_xml_characterDataHandler);
+	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1092,7 +1079,7 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->processingInstructionHandler, hdl);
-	XML_SetProcessingInstructionHandler(parser->parser, php3i_xml_processingInstructionHandler);
+	XML_SetProcessingInstructionHandler(parser->parser, _xml_processingInstructionHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1110,7 +1097,7 @@ PHP_FUNCTION(xml_set_default_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->defaultHandler, hdl);
-	XML_SetDefaultHandler(parser->parser, php3i_xml_defaultHandler);
+	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1129,7 +1116,7 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->unparsedEntityDeclHandler, hdl);
-	XML_SetUnparsedEntityDeclHandler(parser->parser, php3i_xml_unparsedEntityDeclHandler);
+	XML_SetUnparsedEntityDeclHandler(parser->parser, _xml_unparsedEntityDeclHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1147,7 +1134,7 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->notationDeclHandler, hdl);
-	XML_SetNotationDeclHandler(parser->parser, php3i_xml_notationDeclHandler);
+	XML_SetNotationDeclHandler(parser->parser, _xml_notationDeclHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1165,7 +1152,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->externalEntityRefHandler, hdl);
-	XML_SetExternalEntityRefHandler(parser->parser, php3i_xml_externalEntityRefHandler);
+	XML_SetExternalEntityRefHandler(parser->parser, _xml_externalEntityRefHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1236,9 +1223,9 @@ PHP_FUNCTION(xml_parse_into_struct)
 	parser->level = 0;
 	parser->ltags = emalloc(XML_MAXLEVEL * sizeof(char *));
 
-	XML_SetDefaultHandler(parser->parser, php3i_xml_defaultHandler);
-	XML_SetElementHandler(parser->parser, php3i_xml_startElementHandler, php3i_xml_endElementHandler);
-	XML_SetCharacterDataHandler(parser->parser, php3i_xml_characterDataHandler);
+	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
+	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
+	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
 	ret = XML_Parse(parser->parser, (*data)->value.str.val, (*data)->value.str.len, 1);
 
