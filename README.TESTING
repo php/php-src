@@ -119,7 +119,7 @@ export MAKE=gmake
 export CC=gcc
 
 # Set test environment
-export NO_INTERACTIVITY=1
+export NO_INTERACTION=1
 export REPORT_EXIT_STATUS=1
 
 cd $CO_DIR
