@@ -46,6 +46,7 @@
 #include "php_session.h"
 #include "mod_files.h"
 #include "ext/standard/flock_compat.h"
+#include "php_open_temporary_file.h"
 
 #define FILE_PREFIX "sess_"
 
@@ -239,6 +240,11 @@ PS_OPEN_FUNC(files)
 	size_t dirdepth = 0;
 	int filemode = 0600;
 
+	if (*save_path == '\0') {
+		/* if save path is an empty string, determine the temporary dir */
+		save_path = php_get_temporary_directory();
+	}
+	
 	/* split up input parameter */
 	last = save_path;
 	p = strchr(save_path, ';');
