@@ -593,7 +593,7 @@ static void php3_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 static int php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
 {
 	if (MySG(default_link)==-1) { /* no link opened yet, implicitly open one */
-		php3_mysql_do_connect(0, return_value,list,plist,0);
+		php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	}
 	return MySG(default_link);
 }
@@ -602,7 +602,7 @@ static int php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
    Open a connection to a MySQL Server */
 PHP_FUNCTION(mysql_connect)
 {
-	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -610,7 +610,7 @@ PHP_FUNCTION(mysql_connect)
    Open a persistent connection to a MySQL Server */
 PHP_FUNCTION(mysql_pconnect)
 {
-	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
