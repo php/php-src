@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Make dbase_pack() truncate the file to the right size. (Vlad)
+- Fixed bug 6852 #2. Mem fields are now 10 bytesin size, not 9. (Vlad)
+- Fixed bug 6852 #1. No more null byte after terminating 0x0D. (Vlad)
 - Fix bug in krsort() where an extra character was being compared (Andi)
 - fixed bug that made pspell include pspell.h from a wrong location. (Vlad)
 - added function overload in mbstring to add multibyte support for 
