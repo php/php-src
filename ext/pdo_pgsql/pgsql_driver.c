@@ -31,6 +31,7 @@
 #include "pg_config.h" /* needed for PG_VERSION */
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
+#include "zend_exceptions.h"
 
 int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *file, int line TSRMLS_DC) /* {{{ */
 {
@@ -62,6 +63,11 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 		einfo->errmsg = estrdup(errmsg);
 	}
 
+	if (!dbh->methods) {
+		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "[%d] %s",
+				einfo->errcode, einfo->errmsg);
+	}
+	
 	return errcode;
 }
 /* }}} */
@@ -93,7 +99,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 			H->einfo.errmsg = NULL;
 		}
 		pefree(H, dbh->is_persistent);
-		H = NULL;
+		dbh->driver_data = NULL;
 	}
 	return 0;
 }

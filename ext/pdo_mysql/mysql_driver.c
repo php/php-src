@@ -153,7 +153,7 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 			H->einfo.errmsg = NULL;
 		}
 		efree(H);
-		H = NULL;
+		dbh->driver_data = NULL;
 	}
 	return 0;
 }
