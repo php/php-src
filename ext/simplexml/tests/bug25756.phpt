@@ -41,7 +41,7 @@ object(simplexml_element)#%d (1) {
 }
 bool(true)
 
-Warning: Unknown: Malformed XML Schema in %s on line %d
+Warning: simplexml_element::validate_schema_file(): Malformed XML Schema in %sbug25756.php on line %d
 bool(false)
 object(simplexml_element)#%d (1) {
   ["items"]=>
