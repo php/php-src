@@ -336,7 +336,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 	
 	MB_WRITE((unsigned char)this_char);
 	
-	switch(charset)	{
+	switch (charset)	{
 		case cs_utf_8:
 			{
 				unsigned long utf = 0;
@@ -350,9 +350,8 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					if (this_char < 0x80) {
 						more = 0;
 						break;
-					}
-					else if (this_char < 0xc0) {
-						switch(stat)	{
+					} else if (this_char < 0xc0) {
+						switch (stat) {
 							case 0x10:	/* 2, 2nd */
 							case 0x21:	/* 3, 3rd */
 							case 0x32:	/* 4, 4th */
@@ -416,7 +415,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 						this_char = str[pos++];
 						MB_WRITE((unsigned char)this_char);
 					}
-				} while(more);
+				} while (more);
 			}
 			break;
 		case cs_big5:
@@ -428,8 +427,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					/* peek at the next char */
 					unsigned char next_char = str[pos];
 					if ((next_char >= 0x40 && next_char <= 0x73) ||
-							(next_char >= 0xa1 && next_char <= 0xfe))
-					{
+							(next_char >= 0xa1 && next_char <= 0xfe)) {
 						/* yes, this a wide char */
 						this_char <<= 8;
 						MB_WRITE(next_char);
@@ -467,8 +465,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				if (this_char >= 0xa1 && this_char <= 0xfe) {
 					/* peek at the next char */
 					unsigned char next_char = str[pos];
-					if (next_char >= 0xa1 && next_char <= 0xfe)
-					{
+					if (next_char >= 0xa1 && next_char <= 0xfe) {
 						/* yes, this a jis kanji char */
 						this_char <<= 8;
 						MB_WRITE(next_char);
@@ -479,8 +476,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				} else if (this_char == 0x8e) {
 					/* peek at the next char */
 					unsigned char next_char = str[pos];
-					if (next_char >= 0xa1 && next_char <= 0xdf)
-					{
+					if (next_char >= 0xa1 && next_char <= 0xdf) {
 						/* JIS X 0201 kana */
 						this_char <<= 8;
 						MB_WRITE(next_char);
@@ -493,8 +489,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 					unsigned char next_char = str[pos];
 					unsigned char next2_char = str[pos+1];
 					if ((next_char >= 0xa1 && next_char <= 0xfe) &&
-						(next2_char >= 0xa1 && next2_char <= 0xfe))
-					{
+						(next2_char >= 0xa1 && next2_char <= 0xfe)) {
 						/* JIS X 0212 hojo-kanji */
 						this_char <<= 8;
 						MB_WRITE(next_char);
@@ -510,9 +505,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 				break;
 			}
 		default:
-			{
-				break;
-			}
+			break;
 	}
 	MB_RETURN;
 }
@@ -537,8 +530,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 		charset_hint = nl_langinfo(CODESET);
 #endif
 #if HAVE_LOCALE_H
-		if (charset_hint == NULL)
-		{
+		if (charset_hint == NULL) {
 			/* try to figure out the charset from the locale */
 			char *localename;
 			char *dot, *at;
@@ -547,7 +539,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 			localename = setlocale(LC_CTYPE, NULL);
 
 			dot = strchr(localename, '.');
-			if (dot)	{
+			if (dot) {
 				dot++;
 				/* locale specifies a codeset */
 				at = strchr(dot, '@');
@@ -556,22 +548,20 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 				else
 					len = strlen(dot);
 				charset_hint = dot;
-			}
-			else	{
+			} else {
 				/* no explicit name; see if the name itself
 				 * is the charset */
 				charset_hint = localename;
 				len = strlen(charset_hint);
 			}
-		}
-		else
+		} else
 			len = strlen(charset_hint);
 #else
 		if (charset_hint)
 			len = strlen(charset_hint);
 #endif
 	}
-	if (charset_hint)	{
+	if (charset_hint) {
 		int found = 0;
 		if (!len)
 			len = strlen(charset_hint);
@@ -606,13 +596,13 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 	ret = estrdup(old);
 	retlen = oldlen;
 	
-	if (all)	{
+	if (all) {
 		/* look for a match in the maps for this charset */
-		for (j=0; entity_map[j].charset != cs_terminator; j++)	{
+		for (j = 0; entity_map[j].charset != cs_terminator; j++)	{
 			if (entity_map[j].charset != charset)
 				continue;
 
-			for (k = entity_map[j].basechar; k <= entity_map[j].endchar; k++)	{
+			for (k = entity_map[j].basechar; k <= entity_map[j].endchar; k++) {
 				unsigned char entity[32];
 				int entity_length = 0;
 
@@ -628,8 +618,9 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				entity_length += 2;
 
 				/* When we have MBCS entities in the tables above, this will need to handle it */
-				if (k > 0xff)	
+				if (k > 0xff) {
 					zend_error(E_WARNING, "cannot yet handle MBCS in html_entity_decode()!");
+				}
 				replacement[0] = k;
 				replacement[1] = '\0';
 
@@ -692,7 +683,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 			unsigned char *rep;
 
 
-			for (j=0; entity_map[j].charset != cs_terminator; j++) {
+			for (j = 0; entity_map[j].charset != cs_terminator; j++) {
 				if (entity_map[j].charset == charset
 						&& this_char >= entity_map[j].basechar
 						&& this_char <= entity_map[j].endchar)
@@ -840,11 +831,10 @@ PHP_FUNCTION(get_html_translation_table)
 
 	switch (which) {
 		case HTML_ENTITIES:
-			for (j=0; entity_map[j].charset != cs_terminator; j++)	{
+			for (j=0; entity_map[j].charset != cs_terminator; j++) {
 				if (entity_map[j].charset != charset)
 					continue;
-				for (i = 0; i <= entity_map[j].endchar - entity_map[j].basechar; i++)
-				{
+				for (i = 0; i <= entity_map[j].endchar - entity_map[j].basechar; i++) {
 					char buffer[16];
 
 					if (entity_map[j].table[i] == NULL)
@@ -859,7 +849,7 @@ PHP_FUNCTION(get_html_translation_table)
 			/* break thru */
 
 		case HTML_SPECIALCHARS:
-			for (j = 0; basic_entities[j].charcode != 0; j++)	{
+			for (j = 0; basic_entities[j].charcode != 0; j++) {
 
 				if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
 					continue;
