@@ -93,19 +93,19 @@ PEAR INSTALLER:
       <dir name="OS">
         <file role="php" name="Guess.php"/>
       </dir>
-      <dir name="scripts">
-        <file baseinstalldir="/" role="script" install-as="pear" name="pear.sh">
+      <dir name="scripts" baseinstalldir="/">
+        <file role="script" install-as="pear" name="pear.sh">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
           <replace from="@php_dir@" to="php_dir" type="pear-config"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
-        <file baseinstalldir="/" role="script" platform="windows" name="pear.bat">
+        <file role="script" platform="windows" install-as="pear.bat" name="pear.bat">
 	  <replace from="@bin_dir@" to="bin_dir" type="pear-config"/>
 	  <replace from="@php_bin@" to="php_bin" type="pear-config"/>
 	  <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
-        <file baseinstalldir="/" role="php" name="pearcmd.php">
+        <file role="php" install-as="pearcmd.php" name="pearcmd.php">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
           <replace from="@php_dir@" to="php_dir" type="pear-config"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
