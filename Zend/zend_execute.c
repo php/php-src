@@ -3227,7 +3227,7 @@ int zend_unset_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zval **container = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R);
+	zval **container = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zval *offset = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 	
 	if (container) {
