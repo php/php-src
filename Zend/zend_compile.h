@@ -504,6 +504,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_EXT_FCALL_END			98
 #define ZEND_EXT_NOP				99
 
+#define ZEND_IS_IDENTICAL				100
 /* end of block */
 
 

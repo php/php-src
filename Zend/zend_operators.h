@@ -42,6 +42,7 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2);
 ZEND_API int concat_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
