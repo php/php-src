@@ -395,22 +395,12 @@ char *a_result_id;
 
 int php3_minit_ifx(INIT_FUNC_ARGS)
 {
-#if defined(THREAD_SAFE)
-    ifx_global_struct *ifx_globals;
-    CREATE_MUTEX(ifx_mutex,"Informix_TLS");
-    SET_MUTEX(ifx_mutex);
-    numthreads++;
-    if (numthreads==1){
-        if ((InformixTls=TlsAlloc())==0xFFFFFFFF){
-            FREE_MUTEX(ifx_mutex);
-            return 0;
-        }
-    }
-    FREE_MUTEX(ifx_mutex);
-    ifx_globals = (ifx_global_struct *) 
-                           LocalAlloc(LPTR, sizeof(ifx_global_struct)); 
-    TlsSetValue(InformixTls, (void *) ifx_globals);
+#ifdef ZTS
+	ifx_globals_id = ts_allocate_id(sizeof(php_ifx_globals), php_ifx_init_globals, NULL);
+#else
+	IFXG(num_persistent)=0;
 #endif
+
 
     if (cfg_get_long("ifx.blobinfile",
                       &IFXG(blobinfile))==FAILURE) {
@@ -470,16 +460,14 @@ int php3_minit_ifx(INIT_FUNC_ARGS)
               || IFXG(default_password)[0]==0) {    
         IFXG(default_password)=NULL;
     }
+
     IFXG(num_persistent)=0;
     IFXG(sv_sqlcode)=0;
-    IFXG(le_result) = 
-            register_list_destructors(ifx_free_result,NULL);
-    IFXG(le_idresult) = 
-            register_list_destructors(ifx_free_result,NULL);
-    IFXG(le_link) =  
-            register_list_destructors(_close_ifx_link,NULL);
-    IFXG(le_plink) = 
-            register_list_destructors(NULL,_close_ifx_plink);
+
+    IFXG(le_result)   = register_list_destructors(ifx_free_result,NULL);
+    IFXG(le_idresult) = register_list_destructors(ifx_free_result,NULL);
+    IFXG(le_link)     = register_list_destructors(_close_ifx_link,NULL);
+    IFXG(le_plink)    = register_list_destructors(NULL,_close_ifx_plink);
 
 #if 0
     printf("Registered:  %d,%d,%d\n",
@@ -505,21 +493,9 @@ $endif;
 
 
 int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS){
-#if defined(THREAD_SAFE)
-    IFXLS_FETCH();
-    if (ifx_globals != 0) 
-        LocalFree((HLOCAL) ifx_globals); 
-    SET_MUTEX(ifx_mutex);
-    numthreads--;
-    if (!numthreads){
-        if (!TlsFree(InformixTls)){
-            FREE_MUTEX(ifx_mutex);
-            return 0;
-        }
-    }
-    FREE_MUTEX(ifx_mutex);
-#endif
+
     return SUCCESS;
+    
 }
 
 int php3_rinit_ifx(INIT_FUNC_ARGS)
@@ -756,8 +732,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             }
             ifx = le->ptr;
         }
-        return_value->value.lval = php3_list_insert(ifx,
-                               IFXG(le_plink));
+        return_value->value.lval = php3_list_insert(ifx, IFXG(le_plink));
         return_value->type = IS_LONG;
     } else { /* non persistent */
         list_entry *index_ptr,new_index_ptr;
@@ -996,10 +971,23 @@ EXEC SQL END DECLARE SECTION;
 
     IFXG(sv_sqlcode) = 0;
 
-    /* get the first 2 parameters */
-    if (getParameters(ht, 2, &query, &ifx_link)==FAILURE) {
-       RETURN_FALSE;
+    /* get the first 2 parameters, 
+      php4 insists on the correct number of arguments */
+    switch(ARG_COUNT(ht)) {
+      case 2:
+        if (getParameters(ht, 2, &query, &ifx_link)==FAILURE)  
+	  RETURN_FALSE;
+        break;
+      case 3:
+        if (getParameters(ht, 3, &query, &ifx_link, &dummy)==FAILURE)  
+	  RETURN_FALSE;
+        break;
+      case 4:
+        if (getParameters(ht, 4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
+	  RETURN_FALSE;
+        break;
     }
+
     convert_to_long(ifx_link);
     id = ifx_link->value.lval;
 
@@ -1378,10 +1366,23 @@ EXEC SQL END DECLARE SECTION;
 
     IFXG(sv_sqlcode) = 0;
 
-    /* get the first 2 parameters */
-    if (getParameters(ht, 2, &query, &ifx_link)==FAILURE) {
-       RETURN_FALSE;
+    /* get the first 2 parameters, 
+      php4 insists on the correct number of arguments */
+    switch(ARG_COUNT(ht)) {
+      case 2:
+        if (getParameters(ht, 2, &query, &ifx_link)==FAILURE)  
+	  RETURN_FALSE;
+        break;
+      case 3:
+        if (getParameters(ht, 3, &query, &ifx_link, &dummy)==FAILURE)  
+	  RETURN_FALSE;
+        break;
+      case 4:
+        if (getParameters(ht, 4, &query, &ifx_link, &dummy, &dummy)==FAILURE)  
+	  RETURN_FALSE;
+        break;
     }
+
     convert_to_long(ifx_link);
     id = ifx_link->value.lval;
     
