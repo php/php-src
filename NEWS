@@ -3,7 +3,6 @@ PHP 4                                                                      NEWS
 ? ? ??? 2002, Version 4.3.0
 - Added --with-config-file-scan-dir compile-time switch which specifies a
   directory which will be scanned for *.ini files.
-- Added wddx_serialize_type(). Allows users to cast values to WDDX types (jan)
 - Added ob_flush_all() that flushes all buffers. (Yasuo)
 - Added ob_get_clean() and og_get_flush(). (Yasuo)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
