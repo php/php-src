@@ -3301,15 +3301,15 @@ PHP_FUNCTION(imagepstext)
 	GLYPH *str_img;
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
-	char *_str;
-	int _str_len;
+	char *str;
+	int str_len;
 	int argc = ZEND_NUM_ARGS();
 	
 	if (argc != 8 && argc != 12) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsrlllll|lldl", &img, &_str, &_str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrlllll|lldl", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
 		return;
 	}
 
@@ -3383,7 +3383,7 @@ PHP_FUNCTION(imagepstext)
 	}
 
 	extend = T1_GetExtend(*f_ind);
-	str_path = T1_GetCharOutline(*f_ind, _str[0], size, transform);
+	str_path = T1_GetCharOutline(*f_ind, str[0], size, transform);
 
 	if (!str_path) {
 		if (T1_errno) {
@@ -3392,15 +3392,15 @@ PHP_FUNCTION(imagepstext)
 		RETURN_FALSE;
 	}
 
-	for (i = 1; i < _str_len; i++) {
-		amount_kern = (int) T1_GetKerning(*f_ind, _str[i-1], _str[i]);
-		amount_kern += _str[i-1] == ' ' ? space : 0;
+	for (i = 1; i < str_len; i++) {
+		amount_kern = (int) T1_GetKerning(*f_ind, str[i-1], str[i]);
+		amount_kern += str[i-1] == ' ' ? space : 0;
 		add_width = (int) (amount_kern+width)/extend;
 
 		char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, size, transform);
 		str_path = T1_ConcatOutlines(str_path, char_path);
 
-		char_path = T1_GetCharOutline(*f_ind, _str[i], size, transform);
+		char_path = T1_GetCharOutline(*f_ind, str[i], size, transform);
 		str_path = T1_ConcatOutlines(str_path, char_path);
 	}
 	str_img = T1_AAFillOutline(str_path, 0);
