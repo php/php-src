@@ -33,6 +33,7 @@
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
+#include "php_memory_streams.h"
 
 #if COMPILE_DL_PDO
 /* {{{ content from zend_arg_defs.c:
@@ -369,13 +370,14 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 	struct pdo_column_data *col;
 	char *value = NULL;
 	unsigned long value_len = 0;
+	int caller_frees = 0;
 
 	col = &stmt->columns[colno];
 
 	value = NULL;
 	value_len = 0;
 
-	stmt->methods->get_col(stmt, colno, &value, &value_len TSRMLS_CC);
+	stmt->methods->get_col(stmt, colno, &value, &value_len, &caller_frees TSRMLS_CC);
 
 	switch (col->param_type) {
 		case PDO_PARAM_INT:
@@ -395,13 +397,46 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 			break;
 
 		case PDO_PARAM_LOB:
+			if (value == NULL) {
+				ZVAL_NULL(dest);
+			} else if (value_len == 0) {
+				php_stream_to_zval((php_stream*)value, dest);
+			} else {
+				/* they gave us a string, but LOBs are represented as streams in PDO */
+				php_stream *stm;
+#ifdef TEMP_STREAM_TAKE_BUFFER
+				if (caller_frees) {
+					stm = php_stream_memory_open(TEMP_STREAM_TAKE_BUFFER, value, value_len);
+					if (stm) {
+						caller_frees = 0;
+					}
+				} else
+#endif
+				{
+					stm = php_stream_memory_open(TEMP_STREAM_READONLY, value, value_len);
+				}
+				if (stm) {
+					php_stream_to_zval(stm, dest);
+				} else {
+					ZVAL_NULL(dest);
+				}
+			}
+			break;
+		
 		case PDO_PARAM_STR:
 			if (value && !(value_len == 0 && stmt->dbh->oracle_nulls)) {
-				ZVAL_STRINGL(dest, value, value_len, 1);
+				ZVAL_STRINGL(dest, value, value_len, !caller_frees);
+				if (caller_frees) {
+					caller_frees = 0;
+				}
 				break;
 			}
 		default:
 			ZVAL_NULL(dest);
+	}
+
+	if (caller_frees && value) {
+		efree(value);
 	}
 }
 
