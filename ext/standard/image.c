@@ -168,15 +168,23 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 
 	struct {
 		unsigned long in_width, in_height;
+		unsigned short trash, bits;
 	} dim;
 
 	result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
 
 	php_stream_read(stream, temp, sizeof(temp));
+	
+#ifdef WORDS_BIGENDIAN
+	dim.in_width = (dim.in_width & 0x000000FF) << 24 | (dim.in_width & 0x0000FF00) << 8 | (dim.in_width & 0x00FF0000) >> 8 | (dim.in_width & 0xFF000000) >> 24;
+	dim.in_height = (dim.in_height & 0x000000FF) << 24 | (dim.in_height & 0x0000FF00) << 8 | (dim.in_height & 0x00FF0000) >> 8 | (dim.in_height & 0xFF000000) >> 24;
+	dim.bits = (dim.bits & 0x00FF) << 8 | (dim.bits & 0xFF00) >> 8;
+#endif	
+	
 	php_stream_read(stream, (char*) &dim, sizeof(dim));
 	result->width    = dim.in_width;
 	result->height   = dim.in_height;
-	result->bits     = 0;
+	result->bits     = dim.bits;
 	result->channels = 0;
 
 	return result;
@@ -836,7 +844,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 	if ((arg_c!=1) || zend_get_parameters_ex(arg_c, &p_image_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	zval_dtor(*p_image_type);
+	convert_to_long_ex(p_image_type);
 	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type)), 1);
 }
 /* }}} */
