@@ -104,6 +104,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
 CWD_API int virtual_open(const char *path, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode);
+CWD_API int virtual_rename(char *oldname, char *newname);
 CWD_API int virtual_stat(const char *path, struct stat *buf);
 #ifndef TSRM_WIN32
 CWD_API int virtual_lstat(const char *path, struct stat *buf);
@@ -159,6 +160,7 @@ typedef struct _virtual_cwd_globals {
 #define V_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
 #define V_GETWD(buf)
 #define V_REALPATH(path,real_path) virtual_realpath(path,real_path)
+#define V_RENAME(oldname,newname) virtual_rename(oldname,newname)
 #define V_STAT(path, buff) virtual_stat(path, buff)
 #ifdef TSRM_WIN32
 #define V_LSTAT(path, buff) virtual_stat(path, buff)
@@ -184,6 +186,7 @@ typedef struct _virtual_cwd_globals {
 #define V_FOPEN(path, mode)  fopen(path, mode)
 #define V_OPEN(open_args) open open_args
 #define V_CREAT(path, mode) creat(path, mode)
+#define V_RENAME(oldname,newname) rename(oldname,newname)
 #define V_CHDIR(path) chdir(path)
 #define V_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
 #define V_GETWD(buf) getwd(buf)
