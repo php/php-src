@@ -2473,10 +2473,11 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 
 /* {{{ php_char_to_str
  */
-PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result)
+PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, zval *result)
 {
-	int char_count=0;
-	char *source, *target, *tmp, *source_end=str+len, *tmp_end=NULL;
+	int char_count = 0;
+	int replaced = 0;
+	char *source, *target, *tmp, *source_end=str+len, *tmp_end = NULL;
 	
 	for (source=str; source<source_end; source++) {
 		if (*source==from) {
@@ -2486,7 +2487,7 @@ PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len
 
 	if (char_count==0) {
 		ZVAL_STRINGL(result, str, len, 1);
-		return;
+		return 0;
 	}
 	
 	Z_STRLEN_P(result) = len + (char_count * (to_len - 1));
@@ -2495,6 +2496,7 @@ PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len
 	
 	for (source = str; source < source_end; source++) {
 		if (*source == from) {
+			replaced = 1;
 			for (tmp = to, tmp_end = tmp+to_len; tmp < tmp_end; tmp++) {
 				*target = *tmp;
 				target++;
@@ -2505,6 +2507,7 @@ PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len
 		}
 	}
 	*target = 0;
+	return replaced;
 }
 /* }}} */
 
@@ -2992,13 +2995,12 @@ PHP_FUNCTION(nl2br)
 	if (new_length != (*str)->value.str.len)
 		RETURN_STRINGL (tmp, new_length, 0);
 	efree (tmp);
-	/* Mac style line-endings */	
-	tmp = boyer_str_to_str((*str)->value.str.val, (*str)->value.str.len, "\n\r", 2, "<br />\n\r", 8, &new_length);
-	if (new_length != (*str)->value.str.len)
-		RETURN_STRINGL (tmp, new_length, 0);
-	efree (tmp);
-	/* Unix style line-endings */
-	php_char_to_str((*str)->value.str.val,(*str)->value.str.len, '\n',"<br />\n", 7, return_value);
+
+	/* Mac / Unix style line-endings */	
+	if (php_char_to_str((*str)->value.str.val,(*str)->value.str.len, '\n',"<br />\n", 7, return_value))
+		return;
+	efree (Z_STRVAL_P(return_value));
+	php_char_to_str((*str)->value.str.val,(*str)->value.str.len, '\r',"<br />\r", 7, return_value);
 }
 /* }}} */
 
@@ -3786,6 +3788,6 @@ PHP_FUNCTION(sscanf)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: noet sw=4 ts=4 tw=78 fdm=marker
- * vim<600: noet sw=4 ts=4 tw=78
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */
