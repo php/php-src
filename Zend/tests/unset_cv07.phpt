@@ -12,7 +12,7 @@ $x = "1\n";
 echo $x;
 import_request_variables("g");
 echo $x;
-echo "ok\n";
+echo "\nok\n";
 ?>
 --EXPECT--
 1
