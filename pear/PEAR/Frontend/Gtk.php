@@ -48,7 +48,9 @@ class PEAR_Frontend_Gtk extends PEAR
     {
         parent::PEAR();
         if (!extension_loaded('php_gtk')) {
-            dl('php_gtk.' . (OS_WINDOWS ? 'dll' : 'so'));
+            if (!@dl('php_gtk.' . (OS_WINDOWS ? 'dll' : 'so'))) {
+                die("Unable to load the php_gtk extension\n");
+            }
         }
         $this->window = &new GtkWindow();
         $this->window->set_title('PEAR Installer');
