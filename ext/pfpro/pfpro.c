@@ -19,11 +19,17 @@
 
 /* $Id$ */
 
-/* Note: I've left the globals and ini-file handling stuff in
-   as I've yet to decide whether this is a good way to place "default"
-   stuff like hosts and proxies */
-
-/* Status: Working. */
+/* TODO:
+ *
+ * 1. Ini file entries for default host, port, proxy address, port,
+ *    proxy logon, proxy password - John
+ *
+ * 2. User-friendly wrapper functions for sale, authorise, capture
+ *    and void - David
+ *
+ * 3. Update documentation for the above.
+ *
+ */
 
 #include "php.h"
 #include "php_ini.h"
@@ -88,11 +94,21 @@ PHP_MSHUTDOWN_FUNCTION(pfpro)
 
 PHP_RINIT_FUNCTION(pfpro)
 {
+	PFPROLS_FETCH();
+
+	PFPROG(initialised) = 0;
+
     return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(pfpro)
 {
+	PFPROLS_FETCH();
+
+	if (PFPROG(initialised) == 1) {
+		PNCleanup();
+	}
+
     return SUCCESS;
 }
 
@@ -101,6 +117,7 @@ PHP_MINFO_FUNCTION(pfpro)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Verisign Payflow Pro support", "enabled");
+	php_info_print_table_row(2, "libpfpro version", PNVersion());
 	php_info_print_table_end();
 
 	/*
@@ -128,11 +145,15 @@ PHP_FUNCTION(pfpro_version)
    Initialises the Payflow Pro library */
 PHP_FUNCTION(pfpro_init)
 {
+	PFPROLS_FETCH();
+
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
 	PNInit();
+
+	PFPROG(initialised) = 1;
 
 	RETURN_TRUE;
 }
@@ -144,11 +165,15 @@ PHP_FUNCTION(pfpro_init)
    Shuts down the Payflow Pro library */
 PHP_FUNCTION(pfpro_cleanup)
 {
+	PFPROLS_FETCH();
+
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
 	PNCleanup();
+
+	PFPROG(initialised) = 0;
 
 	RETURN_TRUE;
 }
@@ -177,6 +202,8 @@ PHP_FUNCTION(pfpro_process_raw)
 	   fixed length buffer either */
 
 	char response[512] = "";
+
+	PFPROLS_FETCH();
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 8) {
 		WRONG_PARAM_COUNT;
@@ -253,6 +280,13 @@ PHP_FUNCTION(pfpro_process_raw)
 
 	memset(response, 0, sizeof(response));
 
+	/* Initialise the library if needed */
+
+	if (PFPROG(initialised) == 0) {
+		PNInit();
+		PFPROG(initialised) = 1;
+	}
+
 	/* Perform the transaction */
 
 	ProcessPNTransaction(address, port, proxyAddress, proxyPort, proxyLogon, proxyPassword, parmlist, strlen(parmlist), timeout, response);
@@ -304,6 +338,7 @@ PHP_FUNCTION(pfpro_process)
         *sp1, *sp2, *sp_end,
         *pdelim1="&", *pdelim2="=";
 
+	PFPROLS_FETCH();
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 8) {
 		WRONG_PARAM_COUNT;
@@ -496,6 +531,13 @@ PHP_FUNCTION(pfpro_process)
 
 	memset(response, 0, sizeof(response));
 
+	/* Initialise the library if needed */
+
+	if (PFPROG(initialised) == 0) {
+		PNInit();
+		PFPROG(initialised) = 1;
+	}
+
 	/* Perform the transaction */
 
 	ProcessPNTransaction(address, port, proxyAddress, proxyPort, proxyLogon, proxyPassword, parmlist, parmlength, timeout, response);
@@ -583,9 +625,7 @@ PHP_FUNCTION(pfpro_process)
 /* }}} */
 
 
-
 #endif	/* HAVE_PFPRO */
-
 
 /*
  * Local variables:
