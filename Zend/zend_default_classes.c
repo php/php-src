@@ -23,6 +23,7 @@
 #include "zend_API.h"
 #include "zend_reflection_api.h"
 #include "zend_builtin_functions.h"
+#include "zend_interfaces.h"
 
 static zend_class_entry *default_exception_ptr;
 static zend_object_handlers default_exception_handlers;
@@ -504,6 +505,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
+	zend_register_interfaces(TSRMLS_C);
 	zend_register_default_exception(TSRMLS_C);
 	zend_register_reflection_api(TSRMLS_C);
 	zend_register_iterator_wrapper(TSRMLS_C);
