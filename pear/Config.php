@@ -285,7 +285,7 @@ class Config  {
             $datasrc = $this -> datasrc ;
         }
         $this->container->data = $this->data;
-        $this->container->writeInput($datasrc,$preserve);
+        return $this->container->writeInput($datasrc,$preserve);
     }
 
 
