@@ -1,3 +1,58 @@
+2000-02-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      ext/domxml/php_domxml.h
+      tests/testdom
+      config.guess
+      config.sub
+      ltconfig
+      ltmain.sh: - removed stupid leftover in testdom
+    - added more functions to domxml
+
+2000-02-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php: forgot to remove some debug output.  sorry :-)
+
+2000-02-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/DB.php: Return by reference, where necessary.
+
+2000-02-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php:
+    Introduced an extra optional parameter to getOne, getRow and getAssoc
+    that contains a list of parameters to use with (prepare/)execute.
+    Also changed these methods into returning references.
+
+    * pear/DB.php:
+    Added three get modes: DB_GETMODE_ORDERED, DB_GETMODE_ASSOC and
+    DB_GETMODE_FLIPPED.  Docs are within.
+
+    * pear/DB/mysql.php: Fixed a few bugs, especially in prepare/execute.
+    Introduced "get modes", letting you choose how fetched array data is indexed.
+
+2000-02-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: *** empty log message ***
+
+2000-02-09  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      ext/domxml/php_domxml.h
+      tests/testdom: - new function to read and parse xml doc from file
+
+    * tests/testdom
+      NEWS
+      ext/domxml/domxml.c:
+    - fixed several bugs an did some testing. Parsing and creating simple
+      XML docs should work. See the script testdom.
+
+2000-02-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/xml/expat/xmlparse/.cvsignore
+      ext/xml/expat/xmltok/.cvsignore
+      ext/xml/expat/.cvsignore: shut-up CVS
+
 2000-02-08  Zeev Suraski  <zeev@php.net>
 
     * ext/gd/gd.c
