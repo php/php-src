@@ -1756,9 +1756,10 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			/* Explicitly copy the value from the parent */
 			zval **pvalue;
 
-			if (zend_hash_quick_find(&parent_ce->default_properties, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &pvalue)==SUCCESS) {
-				zend_hash_quick_update(&ce->default_properties, hash_key->arKey, hash_key->nKeyLength, hash_key->h, pvalue, sizeof(zval *), NULL);
+			if (zend_hash_quick_find(&parent_ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, (void **) &pvalue)==SUCCESS) {
+				zend_hash_quick_update(&ce->default_properties, parent_info->name, parent_info->name_length+1, parent_info->h, pvalue, sizeof(zval *), NULL);
 				(*pvalue)->refcount++;
+				zend_hash_del(&ce->default_properties, child_info->name, child_info->name_length+1);
 			}
 			return 1; /* Inherit from the parent */
 		}
