@@ -136,9 +136,18 @@ PHPAPI int php_uudecode(char *src, int src_len, char **dest)
 		if ((len = PHP_UU_DEC(*s++)) <= 0) {
 			break;
 		}
+		/* sanity check */
+		if (len > src_len) {
+			goto err;
+		}
+
 		total_len += len;
 
 		ee = s + (len == 45 ? 60 : (int) floor(len * 1.33));
+		/* sanity check */
+		if (ee > e) {
+			goto err;
+		}
 
 		while (s < ee) {
 			*p++ = PHP_UU_DEC(*s) << 2 | PHP_UU_DEC(*(s + 1)) >> 4;
@@ -168,6 +177,10 @@ PHPAPI int php_uudecode(char *src, int src_len, char **dest)
 	*(*dest + total_len) = '\0';
 
 	return total_len;
+
+err:
+	efree(*dest);
+	return -1;
 }
 
 /* {{{ proto string uuencode(string data) 
@@ -199,6 +212,10 @@ PHP_FUNCTION(convert_uudecode)
 	}
 
 	dst_len = php_uudecode(src, src_len, &dst);
+	if (dst_len < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string.");
+		RETURN_FALSE;
+	}
 
 	RETURN_STRINGL(dst, dst_len, 0);
 }
