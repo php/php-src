@@ -24,6 +24,7 @@
 
 
 #if HAVE_MSSQL
+#define MSDBLIB
 #ifdef PHP_WIN32
 #define PHP_MSSQL_API __declspec(dllexport)
 #else
@@ -35,14 +36,52 @@
 #include "sqlfront.h"
 #include "sqldb.h"
 
+#if HAVE_FREETDS
+#define SQLTEXT SYBTEXT
+#define SQLCHAR SYBCHAR
+#define SQLVARCHAR SYBVARCHAR
+#define SQLINT1 SYBINT1
+#define SQLINT2 SYBINT2
+#define SQLINT4 SYBINT4
+#define SQLINTN SYBINTN
+#define SQLBIT SYBBIT
+#define SQLFLT4 SYBREAL
+#define SQLFLT8 SYBFLT8
+#define SQLFLTN SYBFLTN
+#define SQLDECIMAL SYBDECIMAL
+#define SQLNUMERIC SYBNUMERIC
+#define SQLDATETIME SYBDATETIME
+#define SQLDATETIM4 SYBDATETIME4
+#define SQLDATETIMN SYBDATETIMN
+#define SQLMONEY SYBMONEY
+#define SQLMONEY4 SYBMONEY4
+#define SQLMONEYN SYBMONEYN
+#define SQLIMAGE SYBIMAGE
+#define SQLBINARY SYBBINARY
+#define SQLVARBINARY SYBVARBINARY
+#define DBERRHANDLE(a, b) dberrhandle(b)
+#define DBMSGHANDLE(a, b) dbmsghandle(b)
+#define DBSETOPT(a, b, c) dbsetopt(a, b, c, -1)
+#define NO_MORE_RPC_RESULTS 3
+#define dbfreelogin dbloginfree
+#define dbrpcexec dbrpcsend
+typedef unsigned char *LPBYTE;
+#else
+#define DBERRHANDLE(a, b) dbprocerrhandle(a, b)
+#define DBMSGHANDLE(a, b) dbprocerrhandle(a, b)
+#define EHANDLEFUNC DBERRHANDLE_PROC
+#define MHANDLEFUNC DBMSGHANDLE_PROC
+#define DBSETOPT(a, b, c) dbsetopt(a, b, c)
+#endif
+
 #define coltype(j) dbcoltype(mssql_ptr->link,j)
 #define intcol(i) ((int) *(DBINT *) dbdata(mssql_ptr->link,i))
 #define smallintcol(i) ((int) *(DBSMALLINT *) dbdata(mssql_ptr->link,i))
 #define tinyintcol(i) ((int) *(DBTINYINT *) dbdata(mssql_ptr->link,i))
 #define anyintcol(j) (coltype(j)==SQLINT4?intcol(j):(coltype(j)==SQLINT2?smallintcol(j):tinyintcol(j)))
 #define charcol(i) ((DBCHAR *) dbdata(mssql_ptr->link,i))
-#define floatcol4(i) ((float) *(DBFLT4 *) dbdata(mssql_ptr->link,i))
-#define floatcol8(i) ((float) *(DBFLT8 *) dbdata(mssql_ptr->link,i))
+#define floatcol4(i) (*(DBFLT8 *) dbdata(mssql_ptr->link,i))
+#define floatcol8(i) (*(DBFLT8 *) dbdata(mssql_ptr->link,i))
 
 #ifdef ZTS
 #include "TSRM.h"
