@@ -41,6 +41,10 @@ zend_module_entry php_gettext_module_entry = {
 	"gettext", php_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), STANDARD_MODULE_PROPERTIES
 };
 
+#ifdef COMPILE_DL_GETTEXT
+ZEND_GET_MODULE(php_gettext)
+#endif
+
 PHP_MINFO_FUNCTION(gettext)
 {
 	php_info_print_table_start();
