@@ -46,7 +46,7 @@ all: .deps Zend/Makefile.am TSRM/Makefile.am $(targets)
 	for i in `find ext sapi regex -type d \! -name \*CVS`; do \
 		list="$$list $$i/.deps"; \
 	done; \
-	touch $$list pear/.deps mysql/libmysql/.deps $@
+	touch $$list pear/.deps ext/mysql/libmysql/.deps $@
 
 Zend/Makefile.am:
 	test -d Zend || (test -d ../Zend && ln -s ../Zend Zend)
