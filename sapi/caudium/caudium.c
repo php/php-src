@@ -121,25 +121,14 @@ static int caudium_globals_id;
  */
 #define REQUEST_DATA ((struct mapping *)(THIS->request_data))
 
-
-#if 0 && defined(_REENTRANT) && !defined(CAUDIUM_USE_ZTS)
-/* Lock used to serialize the PHP execution. If CAUDIUM_USE_ZTS is defined, we
- * are using the PHP thread safe mechanism instead.
- */
-static PIKE_MUTEX_T caudium_php_execution_lock;
-# define PHP_INIT_LOCK()	mt_init(&caudium_php_execution_lock)
-# define PHP_LOCK(X)    THREADS_ALLOW();mt_lock(&caudium_php_execution_lock);THREADS_DISALLOW()
-# define PHP_UNLOCK(X)	mt_unlock(&caudium_php_execution_lock);
-# define PHP_DESTROY()	mt_destroy(&caudium_php_execution_lock)
-#else /* !_REENTRANT */
-# define PHP_INIT_LOCK()	
-# define PHP_LOCK(X)
-# define PHP_UNLOCK(X)
-# define PHP_DESTROY()	
-#endif /* _REENTRANT */
-
 extern int fd_from_object(struct object *o);
 static unsigned char caudium_php_initialized;
+
+#ifndef mt_lock_interpreter
+#define mt_lock_interpreter()     mt_lock(&interpreter_lock);
+#define mt_unlock_interpreter()   mt_unlock(&interpreter_lock);
+#endif
+
 
 /* This allows calling of pike functions from the PHP callbacks,
  * which requires the Pike interpreter to be locked.
@@ -150,23 +139,15 @@ static unsigned char caudium_php_initialized;
     if(!state->swapped) {\
       COMMAND;\
     } else {\
-      mt_lock(&interpreter_lock);\
+      mt_lock_interpreter();\
       SWAP_IN_THREAD(state);\
       COMMAND;\
       SWAP_OUT_THREAD(state);\
-      mt_unlock(&interpreter_lock);\
+      mt_unlock_interpreter();\
     }\
   }\
 } while(0)
 
-struct program *php_program;
-
-
-/* To avoid executing a PHP script from a PHP callback, which would
- * create a deadlock, a global thread id is used. If the thread calling the
- * php-script is the same as the current thread, it fails. 
- */
-//static int current_thread = -1;
 
 
 /* Low level header lookup. Basically looks for the named header in the mapping
@@ -571,27 +552,25 @@ static void php_caudium_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
 
 static void php_caudium_module_main(php_caudium_request *ureq)
 {
-  int res, len;
-  char *dir;
+  int res;
+  int cnt = 0;
   zend_file_handle file_handle;
   struct thread_state *state;
   extern struct program *thread_id_prog;
-  //  struct php_caudium_request *ureq;
   SLS_FETCH();
   CLS_FETCH();
   PLS_FETCH();
   ELS_FETCH();
   GET_THIS();
-  //  ureq = (struct php_caudium_request *)ud;
   THIS->filename = ureq->filename;
   THIS->done_cb = ureq->done_cb;
   THIS->my_fd_obj = ureq->my_fd_obj;
   THIS->my_fd = ureq->my_fd;
   THIS->request_data = ureq->request_data;
   free(ureq);
-  //  current_thread = th_self();
+
 #ifndef TEST_NO_THREADS
-  mt_lock(&interpreter_lock);
+  mt_lock_interpreter();
   init_interpreter();
 #if PIKE_MAJOR_VERSION == 7 && PIKE_MINOR_VERSION < 1
   Pike_stack_top=((char *)&state)+ (thread_stack_size-16384) * STACK_DIRECTION;
@@ -636,25 +615,22 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     SG(request_info).headers_only = 0;
   }
 
-  /* FIXME: Check for auth stuff needs to be fixed... */ 
-  SG(request_info).auth_user = NULL; 
-  SG(request_info).auth_password = NULL;
-
-  /* Swap out this thread and release the interpreter lock to allow
+  /* Let PHP4 handle the deconding of the AUTH */
+  php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), SLS_C);
+   /* Swap out this thread and release the interpreter lock to allow
    * Pike threads to run. We wait since the above would otherwise require
    * a lot of unlock/lock.
    */
 #ifndef TEST_NO_THREADS
   SWAP_OUT_CURRENT_THREAD();
-  mt_unlock(&interpreter_lock);
+  mt_unlock_interpreter();
 #endif
 
-  /* Change virtual work directory */
-  
 #ifdef VIRTUAL_DIR
   /* Change virtual directory, if the feature is enabled, which is
-   * almost a requirement for PHP in Roxen. Might want to fail if it
-   * isn't. Not a problem though, since it's on by default when using ZTS.
+   * (almost) a requirement for PHP in Caudium. Might want to fail if it
+   * isn't. Not a problem though, since it's on by default when using ZTS
+   * which we require.
    */
   V_CHDIR_FILE(THIS->filename->str);
 #endif
@@ -667,6 +643,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
 
   if(res == FAILURE) {
     THREAD_SAFE_RUN({
+      
       apply_svalue(&THIS->done_cb, 0);
       pop_stack();
       free_struct(SLS_C);
@@ -684,7 +661,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     }, "positive run response");
   }
 #ifndef TEST_NO_THREADS
-  mt_lock(&interpreter_lock);
+  mt_lock_interpreter();
   SWAP_IN_CURRENT_THREAD();
 #if PIKE_MAJOR_VERSION == 7 && PIKE_MINOR_VERSION < 1
   OBJ2THREAD(thread_id)->status=THREAD_EXITED;
@@ -701,7 +678,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
 #endif
   cleanup_interpret();
   num_threads--;
-  mt_unlock(&interpreter_lock);
+  mt_unlock_interpreter();
 #endif
 }
 
@@ -723,9 +700,6 @@ void f_php_caudium_request_handler(INT32 args)
   if(THIS == NULL)
     Pike_error("Out of memory.");
 
-  //  if(current_thread == th_self())
-  //    Pike_error("PHP4.Interpreter->run: Tried to run a PHP-script from a PHP "
-  //	  "callback!");
   get_all_args("PHP4.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
   if(done_callback->type != PIKE_T_FUNCTION) 
@@ -784,12 +758,11 @@ void pike_module_init( void )
     sapi_startup(&caudium_sapi_module);
     sapi_module.startup(&caudium_sapi_module);
     zend_startup_module(&php_caudium_module);
-    PHP_INIT_LOCK();
   }
   start_new_program(); /* Text */
   pike_add_function("run", f_php_caudium_request_handler,
 		    "function(string,mapping,object,function:void)", 0);
-  add_program_constant("Interpreter", (php_program = end_program()), 0);
+  end_class("Interpreter", 0);
 }
 
 /*
@@ -801,8 +774,6 @@ void pike_module_exit(void)
 {
   caudium_php_initialized = 0;
   sapi_module.shutdown(&caudium_sapi_module);
-  if(php_program)  free_program(php_program);
   tsrm_shutdown();
-  PHP_DESTROY();
 }
 #endif
