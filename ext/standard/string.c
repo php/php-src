@@ -37,6 +37,9 @@
 #ifdef HAVE_MONETARY_H
 # include <monetary.h>
 #endif
+#ifdef HAVE_LIBINTL
+# include <libintl.h> /* For LC_MESSAGES */
+#endif
 
 #include <math.h>
 
