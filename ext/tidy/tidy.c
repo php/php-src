@@ -330,6 +330,7 @@ void php_tidy_free(void *buf)
 
 void php_tidy_panic(ctmbstr msg)
 {
+    TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
@@ -1360,17 +1361,20 @@ TIDY_DOC_METHOD(__construct)
 	
 	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
 	
-	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
-		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
-		return;
-	}
+    if(inputfile) {
+        
+        if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
+            TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+            return;
+        }
+        
+        TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
 
-	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
-
-	php_tidy_parse_string(obj, contents, enc TSRMLS_CC);
+    	php_tidy_parse_string(obj, contents, enc TSRMLS_CC);
 	
-	efree(contents);
-
+    	efree(contents);
+    }
+	
 }
 
 TIDY_DOC_METHOD(parseFile)
