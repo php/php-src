@@ -945,7 +945,7 @@ PHP_FUNCTION(com_invoke)
 /* }}} */
 
 
-/* {{{ proto mixed com_invoke(int module)
+/* {{{ proto mixed com_release(int module)
    Releases a COM object */
 PHP_FUNCTION(com_release)
 {
