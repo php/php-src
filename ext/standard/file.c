@@ -408,67 +408,6 @@ PHP_FUNCTION(get_meta_tags)
 
 /* }}} */
 
-/* {{{ proto int file_write_content(string filename, mixed content [, char mode [, bool use_include_path]])
-   Write a string to a file. */
-PHP_FUNCTION(file_write_content)
-{
-	zval *content;
-	char *filename, *mode;
-	int filename_len, mode_len = 0;
-	zend_bool use_include_path = 0;
-	size_t written;
-	php_stream *stream;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|sb", &filename, &filename_len, &content, &mode, &mode_len, &use_include_path) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (!(stream = php_stream_open_wrapper(filename, (mode_len ? mode : "wb"), (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
-		RETURN_FALSE;
-	}
-
-	/* try to set an exclusive lock on the file to prevent access to the file while the write operation
-	 * is happening.
-	 */
-	php_stream_set_option(stream, PHP_STREAM_OPTION_LOCKING, F_SETLKW, (void *) F_WRLCK TSRMLS_CC);
-
-	if (Z_TYPE_P(content) == IS_ARRAY) {
-		HashPosition pos;
-		zval **tmp;
-		size_t cur_write; 
-		
-		written = 0;
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(content), &pos);
-		        
-		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(content), (void **) &tmp, &pos) == SUCCESS) {
-			SEPARATE_ZVAL(tmp);
-			convert_to_string(*tmp);
-			
-			if ((cur_write = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp))) < 0) {
-				RETVAL_FALSE;
-				goto done;
-			}
-			written += cur_write;
-			
-		        zend_hash_move_forward_ex(Z_ARRVAL_P(content), &pos);
-		}
-		RETVAL_LONG(written);
-	} else {
-		SEPARATE_ZVAL(&content);
-		convert_to_string(content);
-		if ((written = php_stream_write(stream, Z_STRVAL_P(content), Z_STRLEN_P(content))) < 0) {
-			RETVAL_FALSE;
-		} else {
-			RETVAL_LONG(written);
-		}
-		zval_ptr_dtor(&content);
-	}
-
-done:
-	php_stream_close(stream);
-}
-/* }}} */
-
 /* {{{ proto string file_get_contents(string filename [, bool use_include_path])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
