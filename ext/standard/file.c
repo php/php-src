@@ -180,6 +180,10 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_INFO",	PHP_STREAM_NOTIFY_SEVERITY_INFO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",	PHP_FILE_USE_INCLUDE_PATH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",	PHP_FILE_IGNORE_NEW_LINES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",	PHP_FILE_SKIP_EMPTY_LINES, CONST_CS | CONST_PERSISTENT);
 	
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
@@ -444,7 +448,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto array file(string filename [, bool use_include_path [, bool include_new_line [, bool skip_blank_lines]]])
+/* {{{ proto array file(string filename [, int flags])
    Read entire file into an array */
 
 #define PHP_FILE_BUF_SIZE	80
@@ -457,20 +461,26 @@ PHP_FUNCTION(file)
 	register int i = 0;
 	int target_len, len;
 	char eol_marker = '\n';
-	zend_bool use_include_path = 0;
-	zend_bool include_new_line = 1;
-	zend_bool skip_blank_lines = 0;
+	long flags = 0;
+	zend_bool use_include_path;
+	zend_bool include_new_line;
+	zend_bool skip_blank_lines;
 	php_stream *stream;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bbb",
-					&filename, &filename_len, &use_include_path, &include_new_line, &skip_blank_lines) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
+	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%l' flag is not supported.", flags);
+		RETURN_FALSE;
+	}
+	
+	use_include_path = flags & PHP_FILE_USE_INCLUDE_PATH;
+	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
+	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
-	stream = php_stream_open_wrapper(filename, "rb", 
-			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL);
+	stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 	if (!stream) {
 		RETURN_FALSE;
 	}

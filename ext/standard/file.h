@@ -87,6 +87,10 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC);
 
 #define META_DEF_BUFSIZE 8192
 
+#define PHP_FILE_USE_INCLUDE_PATH 1
+#define PHP_FILE_IGNORE_NEW_LINES 2
+#define PHP_FILE_SKIP_EMPTY_LINES 4
+
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
 	TOK_OPENTAG,
