@@ -841,7 +841,7 @@ Changes in the Zend Engine 2.0
                 function rewind() {
                     $this->num = 0;
                 }
-                function hasMore() {
+                function valid() {
                     return $this->num < $this->obj->max;
                 }
                 function key() {
@@ -878,7 +878,7 @@ Changes in the Zend Engine 2.0
             
             // matches the following 7 lines with the for directive.
             $it = $obj->getIterator();
-            for($it->rewind(); $it->hasMore(); $it->next()) {
+            for($it->rewind(); $it->valid(); $it->next()) {
                 $key = $it->key();
                 $val = $it->current();
                 echo "$key = $val\n";
