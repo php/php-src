@@ -391,6 +391,28 @@ PHP_FUNCTION(ncurses_clrtoeol)
 }
 /* }}} */
 
+/* {{{ proto int ncurses_reset_prog_mode(void)
+   Resets the prog mode saved by def_prog_mode */
+PHP_FUNCTION(ncurses_reset_prog_mode)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+	RETURN_LONG(reset_prog_mode());
+}
+/* }}} */
+
+/* {{{ proto int ncurses_reset_shell_mode(void)
+   Resets the shell mode saved by def_shell_mode */
+PHP_FUNCTION(ncurses_reset_shell_mode)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+	RETURN_LONG(reset_shell_mode());
+}
+/* }}} */
+
 /* {{{ proto bool ncurses_def_prog_mode(void)
    Saves terminals (program) mode */
 PHP_FUNCTION(ncurses_def_prog_mode)
@@ -1468,6 +1490,67 @@ PHP_FUNCTION(ncurses_init_color)
 	RETURN_LONG(init_color(i1,i2,i3,i4));
 }
 /* }}} */
+
+/* {{{ proto int ncurses_color_content(int color, int &r, int &g, int &b)
+   Gets the RGB value for color */
+PHP_FUNCTION(ncurses_color_content)
+{
+	zval **c, **r, **g, **b;
+	short rv, gv, bv;
+	int retval;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &c, &r, &g, &b) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(c);
+	convert_to_long_ex(r);
+	convert_to_long_ex(g);
+	convert_to_long_ex(b);
+
+	rv = Z_LVAL_PP(r);
+	gv = Z_LVAL_PP(g);
+	bv = Z_LVAL_PP(b);
+	
+	retval = color_content(Z_LVAL_PP(c), &rv, &gv, &bv);
+
+	Z_LVAL_PP(r) = rv;
+	Z_LVAL_PP(g) = gv;
+	Z_LVAL_PP(b) = bv;
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto int ncurses_pair_content(int pair, int &f, int &b)
+   Gets the RGB value for color */
+PHP_FUNCTION(ncurses_pair_content)
+{
+	zval **p, **f, **b;
+	short fv, bv;
+	int retval;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &p, &f, &b) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(p);
+	convert_to_long_ex(f);
+	convert_to_long_ex(b);
+
+	fv = Z_LVAL_PP(f);
+	bv = Z_LVAL_PP(b);
+
+	retval = pair_content(Z_LVAL_PP(f), &fv, &bv);
+
+	Z_LVAL_PP(f) = fv;
+	Z_LVAL_PP(b) = bv;
+	
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+
 
 /* {{{ proto int ncurses_border(int left, int right, int top, int bottom, int tl_corner, int tr_corner, int bl_corner, int br_corner)
    Draws a border around the screen using attributed characters */
