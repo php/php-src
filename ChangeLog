@@ -1,3 +1,31 @@
+1999-12-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c
+      TODO:
+    Made strspn() and strcspn() binary-safe.
+
+
+    * ext/standard/array.c
+      ext/standard/php_array.h
+      TODO:
+    Finished array_multisort() function. Basically it sorts multiple arrays
+    similar to ORDER BY SQL clause.
+
+1999-12-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.h
+      ext/standard/rand.c
+      ext/standard/basic_functions.c: Make rand.c thread-safe.
+
+    * sapi/aolserver/aolserver.c: Reapply configuration for each request
+
+    * sapi/aolserver/aolserver.c:
+    (php_ns_config) use 3.0's Ns_ConfigGetPath instead of Ns_ConfigPath
+
+    * ext/session/mod_files.c:
+    (_ps_files_path_create) terminate string correctly and append the whole key instead of the rest key
+
 1999-12-12  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/basic_functions.h
