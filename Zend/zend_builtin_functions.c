@@ -1437,7 +1437,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	char *call_type;
 	char *include_filename = NULL;
 	zval *arg_array = NULL;
-	void **cur_arg_pos = EG(argument_stack).top_element;
+	void **cur_arg_pos = EG(argument_stack).top_element-1;
 	void **args = cur_arg_pos;
 	int arg_stack_consistent = 0;
 	int frames_on_stack = 0;
@@ -1562,7 +1562,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 	char *call_type;
 	char *include_filename = NULL;
 	zval *stack_frame;
-	void **cur_arg_pos = EG(argument_stack).top_element;
+	void **cur_arg_pos = EG(argument_stack).top_element-1;
 	void **args = cur_arg_pos;
 	int arg_stack_consistent = 0;
 	int frames_on_stack = 0;
