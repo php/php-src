@@ -86,6 +86,27 @@
 
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
 
+/* Switches for various filestat functions: */
+#define FS_PERMS    0
+#define FS_INODE    1
+#define FS_SIZE     2
+#define FS_OWNER    3
+#define FS_GROUP    4
+#define FS_ATIME    5
+#define FS_MTIME    6
+#define FS_CTIME    7
+#define FS_TYPE     8
+#define FS_IS_W     9
+#define FS_IS_R    10
+#define FS_IS_X    11
+#define FS_IS_FILE 12
+#define FS_IS_DIR  13
+#define FS_IS_LINK 14
+#define FS_EXISTS  15
+#define FS_LSTAT   16
+#define FS_STAT    17
+
+
 PHP_RINIT_FUNCTION(filestat)
 {
 	BG(CurrentStatFile)=NULL;
@@ -93,11 +114,8 @@ PHP_RINIT_FUNCTION(filestat)
 	return SUCCESS;
 }
 
-
-PHP_RSHUTDOWN_FUNCTION(filestat)
-{
-	if (BG(CurrentStatFile)) {
-		efree (BG(CurrentStatFile));
+PHP_RSHUTDOWN_FUNCTION(filestat) {
+	if (BG(CurrentStatFile)) { efree (BG(CurrentStatFile));
 	}
 	return SUCCESS;
 }
@@ -555,7 +573,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
 		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
-			if (!IS_LINK_OPERATION() && (type != 15 || errno != ENOENT)) { /* fileexists() test must print no error */
+			if (!IS_LINK_OPERATION() && (type != FS_EXISTS || errno != ENOENT)) { /* fileexists() test must print no error */
 				php_error(E_WARNING, "stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
@@ -577,7 +595,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 
 
-	if (type >= 9 && type <= 11) {
+	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(BG(sb).st_uid==getuid()) {
 			rmask=S_IRUSR;
 			wmask=S_IWUSR;
@@ -608,23 +626,23 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 	switch (type) {
-	case 0: /* fileperms */
+	case FS_PERMS:
 		RETURN_LONG((long)BG(sb).st_mode);
-	case 1: /* fileinode */
+	case FS_INODE:
 		RETURN_LONG((long)BG(sb).st_ino);
-	case 2: /* filesize  */
+	case FS_SIZE:
 		RETURN_LONG((long)BG(sb).st_size);
-	case 3: /* fileowner */
+	case FS_OWNER:
 		RETURN_LONG((long)BG(sb).st_uid);
-	case 4: /* filegroup */
+	case FS_GROUP:
 		RETURN_LONG((long)BG(sb).st_gid);
-	case 5: /* fileatime */
+	case FS_ATIME:
 		RETURN_LONG((long)BG(sb).st_atime);
-	case 6: /* filemtime */
+	case FS_MTIME:
 		RETURN_LONG((long)BG(sb).st_mtime);
-	case 7: /* filectime */
+	case FS_CTIME:
 		RETURN_LONG((long)BG(sb).st_ctime);
-	case 8: /* filetype */
+	case FS_TYPE:
 #if HAVE_SYMLINK
 		if (S_ISLNK(BG(lsb).st_mode)) {
 			RETURN_STRING("link",1);
@@ -642,39 +660,39 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		}
 		php_error(E_WARNING,"Unknown file type (%d)",BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
-	case 9: /*is writable*/
+	case FS_IS_W:
 		if (getuid()==0) {
 			RETURN_LONG(1); /* root */
 		}
 		RETURN_LONG((BG(sb).st_mode & wmask) != 0);
-	case 10: /*is readable*/
+	case FS_IS_R:
 		if (getuid()==0) {
 			RETURN_LONG(1); /* root */
 		}
 		RETURN_LONG((BG(sb).st_mode&rmask)!=0);
-	case 11: /*is executable*/
+	case FS_IS_X:
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
 		RETURN_LONG((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
-	case 12: /*is file*/
+	case FS_IS_FILE:
 		RETURN_LONG(S_ISREG(BG(sb).st_mode));
-	case 13: /*is dir*/
+	case FS_IS_DIR:
 		RETURN_LONG(S_ISDIR(BG(sb).st_mode));
-	case 14: /*is link*/
+	case FS_IS_LINK:
 #if HAVE_SYMLINK
 		RETURN_LONG(S_ISLNK(BG(lsb).st_mode));
 #else
 		RETURN_FALSE;
 #endif
-	case 15: /*file exists*/
+	case FS_EXISTS:
 		RETURN_TRUE; /* the false case was done earlier */
-	case 16: /* lstat */
+	case FS_LSTAT:
 #if HAVE_SYMLINK
 		stat_sb = &BG(lsb);
 #endif
 		/* FALLTHROUGH */
-	case 17: /* stat */
+	case FS_STAT: /* stat */
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
@@ -754,92 +772,92 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 
 /* {{{ proto int fileperms(string filename)
    Get file permissions */
-FileFunction(PHP_FN(fileperms),0)
+FileFunction(PHP_FN(fileperms),FS_PERMS)
 /* }}} */
 
 /* {{{ proto int fileinode(string filename)
    Get file inode */
-FileFunction(PHP_FN(fileinode),1)
+FileFunction(PHP_FN(fileinode),FS_INODE)
 /* }}} */
 
 /* {{{ proto int filesize(string filename)
    Get file size */
-FileFunction(PHP_FN(filesize), 2)
+FileFunction(PHP_FN(filesize), FS_SIZE)
 /* }}} */
 
 /* {{{ proto int fileowner(string filename)
    Get file owner */
-FileFunction(PHP_FN(fileowner),3)
+FileFunction(PHP_FN(fileowner),FS_OWNER)
 /* }}} */
 
 /* {{{ proto int filegroup(string filename)
    Get file group */
-FileFunction(PHP_FN(filegroup),4)
+FileFunction(PHP_FN(filegroup),FS_GROUP)
 /* }}} */
 
 /* {{{ proto int fileatime(string filename)
    Get last access time of file */
-FileFunction(PHP_FN(fileatime),5)
+FileFunction(PHP_FN(fileatime),FS_ATIME)
 /* }}} */
 
 /* {{{ proto int filemtime(string filename)
    Get last modification time of file */
-FileFunction(PHP_FN(filemtime),6)
+FileFunction(PHP_FN(filemtime),FS_MTIME)
 /* }}} */
 
 /* {{{ proto int filectime(string filename)
    Get inode modification time of file */
-FileFunction(PHP_FN(filectime),7)
+FileFunction(PHP_FN(filectime),FS_CTIME)
 /* }}} */
 
 /* {{{ proto string filetype(string filename)
    Get file type */
-FileFunction(PHP_FN(filetype), 8)
+FileFunction(PHP_FN(filetype), FS_TYPE)
 /* }}} */
 
 /* {{{ proto int is_writable(string filename)
    Returns true if file can be written */
-FileFunction(PHP_FN(is_writable), 9)
+FileFunction(PHP_FN(is_writable), FS_IS_W)
 /* }}} */
 
 /* {{{ proto int is_readable(string filename)
    Returns true if file can be read */
-FileFunction(PHP_FN(is_readable),10)
+FileFunction(PHP_FN(is_readable),FS_IS_R)
 /* }}} */
 
 /* {{{ proto int is_executable(string filename)
    Returns true if file is executable */
-FileFunction(PHP_FN(is_executable),11)
+FileFunction(PHP_FN(is_executable),FS_IS_X)
 /* }}} */
 
 /* {{{ proto int is_file(string filename)
    Returns true if file is a regular file */
-FileFunction(PHP_FN(is_file),12)
+FileFunction(PHP_FN(is_file),FS_IS_FILE)
 /* }}} */
 
 /* {{{ proto int is_dir(string filename)
    Returns true if file is directory */
-FileFunction(PHP_FN(is_dir),13)
+FileFunction(PHP_FN(is_dir),FS_IS_DIR)
 /* }}} */
 
 /* {{{ proto int is_link(string filename)
    Returns true if file is symbolic link */
-FileFunction(PHP_FN(is_link),14)
+FileFunction(PHP_FN(is_link),FS_IS_LINK)
 /* }}} */
 
 /* {{{ proto bool file_exists(string filename)
    Returns true if filename exists */
-FileFunction(PHP_FN(file_exists),15)
+FileFunction(PHP_FN(file_exists),FS_EXISTS)
 /* }}} */
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
-FileFunction(php_if_lstat, 16)
+FileFunction(php_if_lstat, FS_LSTAT)
 /* }}} */
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(php_if_stat,17)
+FileFunction(php_if_stat,FS_SIZE)
 /* }}} */
 
 /*
