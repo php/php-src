@@ -82,8 +82,8 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			(*func_p)(im, ctx, q);
 			break;
 		case PHP_GDIMG_TYPE_WBM:
-			for(i=0; i < im->colorsTotal; i++) {
-				if(im->red[i] == 0) break;
+			for(i=0; i < gdImageColorsTotal(im); i++) {
+				if(gdImageRed(im, i) == 0) break;
 			} 
 			(*func_p)(im, i, ctx);
 			break;
