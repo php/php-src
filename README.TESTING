@@ -1,0 +1,174 @@
+[IMPORTANT NOTICE]
+------------------
+Do _not_ ask to developers why some or all tests are failed under
+your environment! Let us know if you find why it fails. Thank you.
+
+
+[Testing Basics]
+--------
+You must build CGI SAPI, then you can do "make test" to
+execute all or some test scripts saved under
+"tests" directory under source root directory.
+
+Usage:
+make test
+
+ "make test" basically executes "run-tests.php" script
+under source root. Therefore you can execute the script
+like
+
+./php -c php.ini-dist run-tests.php [ext/some_extension_name]
+
+
+
+[Which "php" executable "make test" look for]
+---------------------------------------------
+ "make test" executes "run-tests.php" script with "./sapi/cli/php".
+Although, "run-tests.php" is executed by CLI SAPI binary, test
+scripts must be executed by CGI SAPI. Therefore, you must build
+PHP with CGI SAPI to perform tests.
+
+ "run-tests.php" look for "php" executable in build top directory,
+then look for search path. Therefore, if you have "php" executable
+other than CGI SAPI in your search path or source root, tests may fail.
+
+
+
+[Which php.ini is used]
+-----------------------
+ "make test" force to use php.ini-dist as default config file. If 
+you would like to test with other configuration file, user 
+"run-tests.php" script.
+
+Example:
+./php -c ./your_php.ini ext/standard
+
+If you use php.ini other than php.ini-dist, you may see more
+failed.
+
+
+[Which test scripts are executed]
+---------------------------------
+ "run-tests.php" ("make test") executes all test scripts by default
+by looking all directory named "tests". If there are files have "phpt"
+extension, "run-tests.php" takes test php code from the file and 
+executes it.
+
+ Tester can easily executes tests selectively with as follows.
+
+Example:
+./php -c php.ini-dist run-tests.php ext/mbstring
+
+
+[Test results]
+--------------
+ Test results are printed to standard output. If there is a failed test, 
+"run-tests.php" script saves the result, expected result and code
+executed to the test script directory. For example, if 
+ext/myext/tests/myext.phpt is failed to pass, following files are 
+created:
+
+ext/myext/tests/myext.out  - output from test script
+ext/myext/tests/myext.exp  - expected output
+ext/myext/tests/myext.php  - test script executed
+
+ Tester can verify these files, if failed test is actually a bug
+or not. 
+
+
+[Creating new test files]
+-------------------------
+ Writing test file is very easy if you are used to PHP. Test file
+has following format. Here is a actual test file from iconv module.
+
+===== ext/iconv/002.phpt =======
+--TEST--
+UCS4BE to ASCII
+--SKIPIF--
+<?php include('skipif.inc'); ?>
+--POST--
+--GET--
+--FILE--
+<?php include('002.inc'); ?>
+--EXPECT--
+&#97;&#98;&#99;&#100;
+abcd
+===== end of ext/iconv/002.phpt =======
+
+"--TEST--" is title of the test.
+"--SKIPIF--" is condition when to skip this test.
+"--POST--" is POST variable passed to test script.
+"--GET--" is GET variable passed to test script.
+"--FILE--" is the test script.
+"--EXPECT--" is the expected output from the test script.
+
+ext/iconv/002.phpt uses 2 files. "skipif.inc" is used to skip
+test when test cannot be performed such as iconv module is not
+compiled or loaded. 
+
+==== ext/iconv/skipif.inc ====
+<?php
+// This script prints "skip" if condition does not meet.
+
+if (!extension_loaded("iconv") && ini_get("enable_dl")) {
+  $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
+  @dl("iconv$dlext");
+}
+if (!extension_loaded("iconv")) {
+    die("skip\n");
+}
+?>
+==== end of ext/iconv/skipif.inc ====
+
+ext/inconv/002.inc is the test script. "run-tests.php" script
+executes test script with CGI executable.
+
+==== ext/iconv/002.inc ===
+<?php
+/*
+Expected output:
+&#97;&#98;&#99;&#100;
+abcd
+*/
+
+   $s = unpack("V*", iconv("ascii","UCS-4LE", "abcd"));
+   foreach($s as $c) { print "&#$c;"; } print "\n";
+
+   $s = pack("NNNN", 97, 98, 99, 100);
+   $q = iconv("UCS-4BE", "ascii", $s);
+   print $q; print "\n";
+?>
+=== end of ext/iconv/002.inc ===
+
+Test script and skipif code may be directly write into *.phpt.
+However, it is recommended to use other files for ease of writing
+test script. For instance, you can execute test script under 
+ext/iconv as follows:
+
+./php -c /etc/php.ini-dist ext/iconv
+
+
+[How to help us]
+----------------
+ If you find bug in PHP, you can submit bug report AND test script 
+for us. You don't have to write complete script, just give us test
+script with following format. Please test the script and make sure
+you write the correct ACTUAL OUTPUT and EXPECTED OUTPUT before you
+submit.
+
+<?php
+/* 
+Bug #12345
+substr() bug. Do not return expected string.
+
+ACTUAL OUTPUT
+XYXA
+
+EXPECTED OUTPUT
+ABCD
+*/
+
+$str = "XYZABCD";
+echo substr($str,3,7);
+
+?>
