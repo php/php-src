@@ -39,6 +39,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include "php_session.h"
 #include "mod_files.h"
 #include "ext/standard/flock_compat.h"
