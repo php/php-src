@@ -623,8 +623,16 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(sizeof,			count,				NULL)
 
 	/* functions from assert.c */
-	PHP_FE(assert,          NULL)
-	PHP_FE(assert_options,	NULL)
+	PHP_FE(assert,									NULL)
+	PHP_FE(assert_options,							NULL)
+
+    /* functions from versioning.c */
+    PHP_FE(version_compare,							NULL)
+    PHP_FE(version_lt,								NULL)
+    PHP_FE(version_le,								NULL)
+    PHP_FE(version_gt,								NULL)
+    PHP_FE(version_ge,								NULL)
+    PHP_FE(version_eq,								NULL)
 
 	{NULL, NULL, NULL}
 };
