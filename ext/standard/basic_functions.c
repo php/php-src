@@ -792,6 +792,11 @@ function_entry basic_functions[] = {
 
     /* functions from versioning.c */
     PHP_FE(version_compare,													NULL)
+    PHP_FE(version_lt,														NULL)
+    PHP_FE(version_le,														NULL)
+    PHP_FE(version_gt,														NULL)
+    PHP_FE(version_ge,														NULL)
+    PHP_FE(version_eq,														NULL)
 
 	{NULL, NULL, NULL}
 };
