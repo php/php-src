@@ -1,3 +1,35 @@
+2002-09-17  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/fribidi.c:
+    * ext/fribidi/README
+      ext/fribidi/fribidi.c:
+    * The second argument of
+    fribidi_log2vis now accepts a constant.
+    The old way (using strings) is still available
+    but deprecated.
+
+2002-09-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/head.c: it should not only work for the failure case
+    but also not fail (segfault) on the working case
+
+    * ext/standard/basic_functions.c: stupid lino-typo .... :(
+
+    * ext/standard/basic_functions.c
+      ext/standard/head.c:
+    headers_sent() may now return information about where output started
+    using the optional $file and $line reference parameters
+
+2002-09-17  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: MFH
+
+    * NEWS: Update NEWS
+
+    * main/main.c:
+    Call zend_post_startup() - use local copies of the function, class and
+    constant tables in the startup thread
+
 2002-09-16  Tal Peer  <tal@kaktos.co.il>
 
     * ext/fribidi/CREDITS: oops.
