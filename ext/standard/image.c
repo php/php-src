@@ -574,6 +574,7 @@ PHP_FUNCTION(getimagesize)
 
 	case 1:
 		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+			RETVAL_FALSE;
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(arg1);
@@ -581,18 +582,20 @@ PHP_FUNCTION(getimagesize)
 
 	case 2:
 		if (zend_get_parameters_ex(2, &arg1, &info) == FAILURE) {
+			RETVAL_FALSE;
 			WRONG_PARAM_COUNT;
 		}
 		zval_dtor(*info);
 
 		if (array_init(*info) == FAILURE) {
-			return;
+			RETURN_FALSE;
 		}
 
 		convert_to_string_ex(arg1);
 		break;
 
 	default:
+		RETVAL_FALSE;
 		WRONG_PARAM_COUNT;
 		break;
 	}
@@ -667,7 +670,7 @@ PHP_FUNCTION(getimagesize)
 		if (array_init(return_value) == FAILURE) {
 			php_error(E_ERROR, "Unable to initialize array");
 			efree(result);
-			return;
+			RETURN_FALSE;
 		}
 		add_index_long(return_value, 0, result->width);
 		add_index_long(return_value, 1, result->height);
@@ -682,6 +685,8 @@ PHP_FUNCTION(getimagesize)
 			add_assoc_long(return_value, "channels", result->channels);
 		}
 		efree(result);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
