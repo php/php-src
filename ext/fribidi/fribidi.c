@@ -99,12 +99,12 @@ PHP_MINFO_FUNCTION(fribidi)
 /* Input: 1) The logical string.                                */
 /*        2) Base direction -                                   */
 /*             Possible values:                                 */
-/*                   a) "L" - base language is left to right.   */
-/*                   b) "R" - base language is right  to left.  */
-/*                   c) empty - base language is determined     */
-/*                      automatically by the FriBiDi algorithm  */
+/*             a) FRIBIDI_LTR  - left to right.                 */
+/*             b) FRIBIDI_RTL  - right to left.                 */
+/*             c) FRIBIDI_AUTO - autodetected by the BiDi       */
+/*                               BiDi algorithm.                */
 /*        3) Character code being used -                        */
-/*             Possible values (i.e., char sets supported)      */
+/*             Possible values (i.e., charsets supported)      */
 /*              FRIBIDI_CHARSET_UTF8                            */
 /*              FRIBIDI_CHARSET_8859_6                          */  
 /*				FRIBIDI_CHARSET_8859_8                          */
@@ -116,7 +116,7 @@ PHP_MINFO_FUNCTION(fribidi)
 /*         on failure: FALSE                                    */ 
 /*--------------------------------------------------------------*/           
 
-/* {{{ proto string fribidi_log2vis(string str, string direction, int charset)
+/* {{{ proto string fribidi_log2vis(string str, long direction, int charset)
    Convert a logical string to a visual one */
 PHP_FUNCTION(fribidi_log2vis)
 {
