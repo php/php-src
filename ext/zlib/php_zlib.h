@@ -52,6 +52,7 @@ PHP_FUNCTION(gzdeflate);
 PHP_FUNCTION(gzinflate);
 PHP_FUNCTION(gzencode);
 PHP_FUNCTION(ob_gzhandler);
+PHP_FUNCTION(zlib_get_coding_type);
 
 int php_enable_output_compression(int buffer_size TSRMLS_DC);
 int php_ob_gzhandler_check(TSRMLS_D);
