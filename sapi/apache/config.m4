@@ -217,6 +217,7 @@ AC_ARG_WITH(mod_charset,
 
 if test -n "$APACHE_MODULE"; then
   PHP_APACHE_CHECK_RDYNAMIC
+  $php_shtool mkdir -p sapi/apache
   PHP_OUTPUT(sapi/apache/libphp4.module)
   PHP_BUILD_STATIC
 fi
