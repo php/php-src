@@ -354,6 +354,7 @@ static void register_standard_class(void)
 	zend_standard_class_def->handle_property_set = NULL;
 	zend_standard_class_def->refcount = 1;
 	zend_standard_class_def->constants_updated = 0;
+	zend_standard_class_def->ce_flags = 0;
 
 	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }

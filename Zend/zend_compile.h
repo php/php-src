@@ -88,9 +88,21 @@ typedef struct _zend_brk_cont_element {
 } zend_brk_cont_element;
 
 
-#define FN_STATIC 0x01
+#define ZEND_ACC_STATIC		0x01
+#define ZEND_ACC_ABSTRACT	0x02
 
-#define FN_ABSTRACT  0x02
+/* No visibility is the same as public visibility.
+ * For inheritance no visibility means inheriting the visibility.
+ */
+#define ZEND_ACC_PUBLIC    0x10
+#define ZEND_ACC_PROTECTED 0x20
+#define ZEND_ACC_PRIVATE   0x40
+
+/* AND mask for accessing only public/protected/private of fn_flags
+ */
+#define ZEND_FN_PPP_MASK  0xF0
+
+char *zend_visibility_string(zend_uint fn_flags);
 
 struct _zend_op_array {
 	zend_uchar type;			/* MUST be the first element of this struct! */
@@ -138,7 +150,7 @@ typedef struct _zend_internal_function {
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_internal_function;
 
-#define FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
 
 typedef union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
@@ -295,6 +307,7 @@ void zend_do_add_char(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 
+int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags TSRMLS_DC);
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, zend_uchar pass_type TSRMLS_DC);
@@ -337,7 +350,8 @@ void zend_do_default_before_statement(znode *case_list, znode *default_token TSR
 
 void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(znode *class_token TSRMLS_DC);
-void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC);
+void zend_do_declare_property(znode *var_name, znode *value TSRMLS_DC);
+void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
 void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC);
 

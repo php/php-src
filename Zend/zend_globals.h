@@ -123,6 +123,8 @@ struct _zend_compiler_globals {
 	zend_bool increment_lineno;
 
 	zend_llist import_commands;
+
+	int access_type;
 };
 
 
