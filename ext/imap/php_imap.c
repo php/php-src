@@ -38,6 +38,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -130,6 +131,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_utf7_encode,						NULL)
 	PHP_FE(imap_mime_header_decode,					NULL)
 	PHP_FE(imap_thread,								NULL)
+	PHP_FE(imap_timeout,								NULL)
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	PHP_FE(imap_get_quota,							NULL)
@@ -337,6 +339,7 @@ void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
  * Called via the mail_parameter function in c-client:src/c-client/mail.c
  * Author DRK
  */
+
 void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 {
 	zval *t_map, *return_value;
@@ -450,6 +453,17 @@ PHP_MINIT_FUNCTION(imap)
 	/* lets allow NIL */
 	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
 
+	/* set default timeout values */
+	mail_parameters(NIL, SET_OPENTIMEOUT, (void *) FG(default_socket_timeout));
+	mail_parameters(NIL, SET_READTIMEOUT, (void *) FG(default_socket_timeout));
+	mail_parameters(NIL, SET_WRITETIMEOUT, (void *) FG(default_socket_timeout));
+	mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) FG(default_socket_timeout));
+
+	/* timeout constants */
+	REGISTER_LONG_CONSTANT("IMAP_OPENTIMEOUT", 1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_READTIMEOUT", 2, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_WRITETIMEOUT", 3, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("IMAP_CLOSETIMEOUT", 4, CONST_PERSISTENT | CONST_CS);
 
 	/* Open Options */
 
@@ -717,7 +731,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	IMAPG(imap_user)     = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
 	IMAPG(imap_password) = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
-	
+
 	imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
 
 	if (imap_stream == NIL) {
@@ -4009,6 +4023,61 @@ PHP_FUNCTION (imap_thread)
 }
 /* }}} */
 
+PHP_FUNCTION (imap_timeout)
+{
+	long ttype, timeout=-1;
+	int timeout_type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &ttype, &timeout) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (timeout == -1) {
+		switch (ttype) {
+			case 1:
+				timeout_type = GET_OPENTIMEOUT;
+				break;
+			case 2:
+				timeout_type = GET_READTIMEOUT;
+				break;
+			case 3:
+				timeout_type = GET_WRITETIMEOUT;
+				break;
+			case 4:
+				timeout_type = GET_CLOSETIMEOUT;
+				break;
+			default:
+				RETURN_FALSE;
+				break;
+		}
+
+		timeout = (long) mail_parameters(NIL, timeout_type, NIL);
+		RETURN_LONG(timeout);
+	} else if (timeout >= 0) {
+		switch (ttype) {
+			case 1:
+				timeout_type = SET_OPENTIMEOUT;
+				break;
+			case 2:
+				timeout_type = SET_READTIMEOUT;
+				break;
+			case 3:
+				timeout_type = SET_WRITETIMEOUT;
+				break;
+			case 4:
+				timeout_type = SET_CLOSETIMEOUT;
+				break;
+			default:
+				RETURN_FALSE;
+				break;
+		}
+
+		timeout = (long) mail_parameters(NIL, timeout_type, (void *) timeout);
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
 
 /* {{{ Interfaces to C-client 
  */
