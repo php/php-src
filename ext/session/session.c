@@ -71,12 +71,9 @@ function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
 	PHP_FE(session_write_close, NULL)
-	PHP_FE(session_set_userdata, NULL)
 	{NULL, NULL, NULL} 
 };
 /* }}} */
-
-#define SAFE_STRING(s) ((s)?(s):"")
 
 ZEND_DECLARE_MODULE_GLOBALS(ps);
 
@@ -87,7 +84,7 @@ static void php_session_end_output_handler(TSRMLS_D);
 static void php_session_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
 {
 	if ((PS(session_status) == php_session_active)) {
-		*handled_output = url_adapt_ext_ex(output, output_len, PS(session_name), PS(id), SAFE_STRING(PS(udata_name)), SAFE_STRING(PS(udata_value)), handled_output_len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
+		*handled_output = url_adapt_ext_ex(output, output_len, PS(session_name), PS(id), handled_output_len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
 	} else {
 		*handled_output = NULL;
 	}
@@ -1406,32 +1403,11 @@ PHP_FUNCTION(session_unset)
 }
 /* }}} */
 
-/* {{{ proto bool session_set_userdata(string var, string value)
-   sets one additional variable that will be added by in trans-SID mode */
-PHP_FUNCTION(session_set_userdata)
-{
-	zval **str;
-	zval **val;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &str, &val) == FAILURE)
-		WRONG_PARAM_COUNT;
-	
-	if ((Z_TYPE_PP(str) != IS_STRING) || (Z_TYPE_PP(val) != IS_STRING)) {
-		php_error(E_ERROR,"session_set_userdata expects both parameters to be strings");
-		RETURN_FALSE;
-	}
-
-	PS(udata_name) = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-	PS(udata_value) = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-
-	RETURN_TRUE;
-}
-/* }}} */
 
 PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC)
 {
 	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
-		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), PS(udata_name), PS(udata_value), newlen TSRMLS_CC);
+		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
 	}
 }
 
@@ -1454,17 +1430,6 @@ static void php_rshutdown_session_globals(TSRMLS_D)
 	if (PS(id)) {
 		efree(PS(id));
 	}
-
-	if (PS(udata_name)) {
-		efree(PS(udata_name));
-		PS(udata_name) = NULL;
-	}
-
-	if (PS(udata_value)) {
-		efree(PS(udata_value));
-		PS(udata_value) = NULL;
-	}
-
 	zend_hash_destroy(&PS(vars));
 }
 
