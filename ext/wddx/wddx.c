@@ -442,7 +442,7 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name)
 			php_wddx_serialize_boolean(packet, var);
 			break;
 
-		case IS_UNSET:
+		case IS_NULL:
 			php_wddx_serialize_unset(packet);
 			break;
 		
@@ -548,7 +548,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 
 		ALLOC_ZVAL(ent.data);
 		INIT_PZVAL(ent.data);
-		ent.data->type = IS_UNSET;
+		ZVAL_NULL(ent.data);
 		
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_ARRAY)) {
