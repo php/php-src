@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2001 The PHP Group                                |
+   | Copyright (c) 1997-2001 The PHP Group		                  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Tom May <tom@go2net.com>                                    |
+   | Authors: Tom May <tom@go2net.com>					  |
+   |          Gavin Sherry <gavin@linuxworld.com.au>                      |
    +----------------------------------------------------------------------+
  */
  
 /* $Id$ */
 
-/* This has been built and tested on Solaris 2.6 and Linux 2.1.122.
+/* Latest update build anc tested on Linux 2.2.14
+ *
+ * This has been built and tested on Solaris 2.6 and Linux 2.1.122.
  * It may not compile or execute correctly on other systems.
  *
  * sas: Works for me on Linux 2.0.36 and FreeBSD 3.0-current
@@ -53,6 +56,7 @@ function_entry sysvsem_functions[] = {
 	PHP_FE(sem_get,			NULL)
 	PHP_FE(sem_acquire,		NULL)
 	PHP_FE(sem_release,		NULL)
+	PHP_FE(sem_remove,		NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -92,6 +96,14 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc)
 	sysvsem_sem *sem_ptr = (sysvsem_sem *)rsrc->ptr;
 	struct sembuf sop[2];
 
+/*
+ * if count == -1, semaphore has been removed
+ * Need better way to handle this
+ */
+
+	if(sem_ptr->count == -1) {
+		return;
+	}
 	/* Decrement the usage count. */
 
 	sop[0].sem_num = SYSVSEM_USAGE;
@@ -343,6 +355,63 @@ PHP_FUNCTION(sem_release)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
+
+
+
+
+/* {{{ proto int sem_remove(int id)
+   Removes semaphore from Unix systems */
+
+/*
+ * contributed by Gavin Sherry gavin@linuxworld.com.au
+ * Fri Mar 16 00:50:13 EST 2001
+ */
+
+PHP_FUNCTION(sem_remove)
+{
+        pval **arg_id;
+        int id,type;
+	sysvsem_sem *sem_ptr;
+#if HAVE_SEMUN
+	union semun un;
+#endif
+        if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
+                WRONG_PARAM_COUNT;
+        }
+        convert_to_long_ex(arg_id);
+
+        id = (*arg_id)->value.lval;
+
+        sem_ptr = (sysvsem_sem *) zend_list_find(id, &type);
+
+        if (type!=php_sysvsem_module.le_sem) {
+                php_error(E_WARNING, "%d is not a SysV semaphore index", id);
+                RETURN_FALSE;
+        }
+
+#if HAVE_SEMUN
+        if(semctl(sem_ptr->semid,NULL,IPC_STAT,un)<0) {
+#else
+	if(semctl(sem_ptr->semid,NULL,IPC_STAT,NULL)<0) {
+#endif
+                php_error(E_WARNING, "%d is not a existing SysV Semaphore Id", id);
+                RETURN_FALSE;
+        }
+
+	if(semctl(sem_ptr->semid,NULL,IPC_RMID,NULL)<0) {
+                php_error(E_WARNING, "sem_remove() failed for id %d: %s", id, strerror(errno));
+                RETURN_FALSE;
+        }
+	
+	/* let release_sysvsem_sem know we have removed
+	 * the semaphore to avoid issues with releasing.
+	 */ 
+
+	sem_ptr->count = -1;
+        RETURN_TRUE;
+}
+
 /* }}} */
 
 #endif /* HAVE_SYSVSEM */
