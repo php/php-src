@@ -405,6 +405,7 @@ allow_url_fopen = On
 ;extension=php_interbase.dll
 ;extension=php_java.dll
 ;extension=php_ldap.dll
+;extension=php_mbstring.dll
 ;extension=php_mcrypt.dll
 ;extension=php_mhash.dll
 ;extension=php_ming.dll
@@ -418,6 +419,7 @@ allow_url_fopen = On
 ;extension=php_sablot.dll
 ;extension=php_snmp.dll
 ;extension=php_sybase_ct.dll
+;extension=php_xslt.dll
 ;extension=php_yaz.dll
 ;extension=php_zlib.dll
 
