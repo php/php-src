@@ -916,17 +916,17 @@ int flatfile_store(FILE *dbf, datum key_datum, datum value_datum, int mode) {
 		fseek(dbf, 0L, SEEK_END);
 		fprintf(dbf, "%d\n", key_datum.dsize);
 		fflush(dbf);
-		ret = write(fileno(dbf), key_datum.dptr, key_datum.dsize);
+		ret = fwrite(key_datum.dptr, sizeof(char), key_datum.dsize, dbf);
 		fprintf(dbf, "%d\n", value_datum.dsize);
 		fflush(dbf);
-		ret = write(fileno(dbf), value_datum.dptr, value_datum.dsize);
+		ret = fwrite(value_datum.dptr, sizeof(char), value_datum.dsize, dbf);
 	} else { /* DBM_REPLACE */
 		flatfile_delete(dbf, key_datum);
 		fprintf(dbf, "%d\n", key_datum.dsize);
 		fflush(dbf);
-		ret = write(fileno(dbf), key_datum.dptr, key_datum.dsize);
+		ret = fwrite(key_datum.dptr, sizeof(char), key_datum.dsize, dbf);
 		fprintf(dbf, "%d\n", value_datum.dsize);
-		ret = write(fileno(dbf), value_datum.dptr, value_datum.dsize);
+		ret = fwrite(value_datum.dptr, sizeof(char), value_datum.dsize, dbf);
 	}
 
 	if (ret>0)
@@ -950,7 +950,7 @@ datum flatfile_fetch(FILE *dbf, datum key_datum) {
 				buf_size+=num;
 				buf = erealloc(buf, (buf_size+1)*sizeof(char));
 			}
-			read(fileno(dbf), buf, num);
+			fread(buf, sizeof(char), num, dbf);
 			value_datum.dptr = buf;
 			value_datum.dsize = num;
 		}
@@ -1079,7 +1079,7 @@ datum flatfile_firstkey(FILE *dbf) {
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf), buf.dptr, num);
+		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
 		buf.dsize = num;
 		if (*(buf.dptr)!=0) {
@@ -1093,7 +1093,7 @@ datum flatfile_firstkey(FILE *dbf) {
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf), buf.dptr, num);
+		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
 	}
 	if (buf.dptr) efree(buf.dptr);
@@ -1119,7 +1119,7 @@ datum flatfile_nextkey(FILE *dbf) {
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf), buf.dptr, num);
+		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
 		if (!fgets(buf.dptr, 15, dbf)) break;
 		num = atoi(buf.dptr);
@@ -1128,7 +1128,7 @@ datum flatfile_nextkey(FILE *dbf) {
 			if (buf.dptr) efree(buf.dptr);
 			buf.dptr = emalloc((buf_size+1)*sizeof(char));
 		}
-		num=read(fileno(dbf), buf.dptr, num);
+		num = fread(buf.dptr, sizeof(char), num, dbf);
 		if (num<0) break;
 		buf.dsize = num;
 		if (*(buf.dptr)!=0) {
