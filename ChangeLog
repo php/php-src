@@ -1,3 +1,127 @@
+1999-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/DB.php: Oops.
+
+    * pear/DB.php:
+    (DB::parseDSN) check for an extra / at the end purely to guard against
+                   user error
+
+    * pear/DB/mysql.php: MySQL is capable of pconnect, I think.
+
+    * pear/DB.php:
+    (DB::parseDSN) Remove extraneous / at the end of the spec if no database
+                   is specified.
+
+1999-12-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/assert.c:
+    Fill in empty constructor in order to appease Sascha ;-)
+    More seriously, uninitialized values cause MSHUTDOWN to trap.
+    Only an issue because assert was added to internal_functions.
+
+    * SAPI.c
+      internal_functions.c.in
+      internal_functions_win32.c
+      main.c
+      main.h
+      php.h:
+    Provide basis for shared libraries/dlls to contain internal extensions
+
+1999-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Apparently already implemented by Thies.
+
+    * configure.in: Revert the patch.
+
+1999-12-07  Rasmus Lerdorf  <rasmus@php.net>
+
+    * configure.in: Add check for broken apxs script
+
+1999-12-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/assert.c
+      php.ini-dist:
+    added assert.quiet_eval plus a bit of cleaning (docs to follow!)
+
+1999-12-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/assert.c
+      php4dllts.dsp:
+    fixed just enough to enable assert to build on win32 and Linux/ZTS
+
+1999-12-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c
+      configure.in: Need to check for __inet_aton on Solaris.
+
+1999-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Move it to the right place
+
+1999-12-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/assert.c: fixed NPR
+
+    * ext/readline/config.m4: the order *does* matter!
+
+    * ext/standard/assert.c
+      php.ini-dist:
+    * ext/standard/assert.c: getting there
+
+1999-12-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/cybercash/.cvsignore: Ignore generated files
+
+1999-12-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/Makefile.am
+      ext/standard/assert.c
+      ext/standard/php_assert.h
+      internal_functions.c.in
+      internal_functions_win32.c: new assert() module. (Not yet finished!)
+
+1999-12-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/config.m4
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      ext/fdf/config.m4
+      ext/domxml/domxml.c: - Several small corrections, typos, ...
+
+1999-12-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c:
+    (explode) fixed newly introduced bug (them shall check twice *before* committing!)
+
+1999-12-07  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/info.c
+      MAINTAINERS: Mention CyberCash.
+
+1999-12-07  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/parsedate.y:
+    -kludges -warning +reentrancy(more) +compiles(Unix)
+
+1999-12-07  Evan Klinger  <evan715@sirius.com>
+
+    * ext/cybercash/cyberlib.php
+      ext/cybercash/test.php: More clean up.
+
+    * ext/cybercash/config.m4: Now it compiles - couldn't find lib before.
+
+    * ext/cybercash/cybercash.c: Eliminate some warnings.
+
+    * ext/cybercash/cyberlib.php: Minor changes and clean up.
+
+    * ext/cybercash/Makefile.am
+      ext/cybercash/config.h.stub
+      ext/cybercash/config.m4
+      ext/cybercash/cybercash.c
+      ext/cybercash/cybercash.h
+      ext/cybercash/cyberlib.php
+      ext/cybercash/test.php:    CyberCash support.
+
 1999-12-06  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/parsedate.y:
