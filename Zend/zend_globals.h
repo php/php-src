@@ -35,8 +35,8 @@ class ZendFlexLexer;
 #endif
 
 BEGIN_EXTERN_C()
-extern int compiler_globals_id;
-extern int executor_globals_id;
+ZEND_API extern int compiler_globals_id;
+ZEND_API extern int executor_globals_id;
 extern int alloc_globals_id;
 END_EXTERN_C()
 
