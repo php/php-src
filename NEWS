@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Implemented support for <boolean> and <null> types according
+  to WDDX version 1.0 (Andrei)
 - Made var_dump()/serialize()/unserialize() NULL aware. (Thies)
 - Added new NULL constant (Zeev, Zend library)
 - Fixed -c support in the standalone CGI binary (Zeev)
