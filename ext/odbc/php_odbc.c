@@ -169,17 +169,29 @@ static void _free_odbc_result(zend_rsrc_list_entry *rsrc)
 	}
 }
 
+/*
+ * disconnect, and if it fails, then issue a rollback for any pending transaction (lurcher)
+ */
+
+static void safe_odbc_disconnect( void *handle )
+{
+	int ret;
+
+	ret = SQLDisconnect( handle );
+	if ( ret == SQL_ERROR )
+	{
+		SQLTransact( NULL, handle, SQL_ROLLBACK );
+		SQLDisconnect( handle );
+	}
+}
+
 static void _close_odbc_conn(zend_rsrc_list_entry *rsrc)
 {
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
-	/* FIXME
-	 * Closing a connection will fail if there are
-	 * pending transactions. It is in the responsibility
-	 * of the user to avoid this.
-	 */
+
 	ODBCLS_FETCH();
 
-   	SQLDisconnect(conn->hdbc);
+   	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	SQLFreeEnv(conn->henv);
 	efree(conn);
@@ -191,7 +203,7 @@ static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc)
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 	ODBCLS_FETCH();
 	
-	SQLDisconnect(conn->hdbc);
+	safe_odbc_disconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
 	SQLFreeEnv(conn->henv);
 	free(conn);
@@ -2092,7 +2104,7 @@ try_and_get_another_connection:
 
 				if(ret != SQL_SUCCESS){
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_len + 1);
-					SQLDisconnect(db_conn->hdbc);
+					safe_odbc_disconnect(db_conn->hdbc);
 					SQLFreeConnect(db_conn->hdbc);
 					goto try_and_get_another_connection;
 				}
