@@ -467,11 +467,17 @@ function_entry basic_functions[] = {
 	PHP_FE(cosh,															NULL)
 	PHP_FE(tanh,															NULL)
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
+#ifdef HAVE_ASINH 
 	PHP_FE(asinh,															NULL)
+#endif
+#ifdef HAVE_ACOSH
 	PHP_FE(acosh,															NULL)
+#endif
+#ifdef HAVE_ATANH
 	PHP_FE(atanh,															NULL)
-	PHP_FE(expm1,															NULL)															
+#endif
+#if !defined(PHP_WIN32) && !defined(NETWARE)
+	PHP_FE(expm1,															NULL)
 	PHP_FE(log1p,															NULL)
 #endif
 
