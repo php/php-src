@@ -206,12 +206,12 @@ This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
 Copyright \(co 1997\-2003 The PHP Group
 .LP
-This source file is subject to version 2.02 of the PHP license,
+This source file is subject to version 3.0 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
 available at through the world-wide-web at
 .PD 0
 .P
-.B http://www.php.net/license/2_02.txt
+.B http://www.php.net/license/3_0.txt
 .PD 1
 .P
 If you did not receive a copy of the PHP license and are unable to
