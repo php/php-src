@@ -1,3 +1,121 @@
+2003-09-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/mod_files.c:
+      MFH: Fixed bug #25070 (Don't forget to unlock session files on win32 before
+      closing them).
+
+    * ext/session/mod_files.c:
+      Fixed bug #25070 (Don't forget to unlock session files on win32 before
+      closing them).
+      
+      Regions should be locked only briefly and should be unlocked before
+      closing a file or exiting the program. On Win32 locked files that are
+      closed without being explicitly unlocked will be unlocked only when
+      "system
+      resources become avaliable".
+
+    * (PHP_4_3)
+      NEWS
+      main/main.c
+      main/php.h:
+      MFH: Fixed bug #25293 (Output correct EOL to error_log)
+
+    * main/main.c
+      main/php.h:
+      Fixed bug #25293 (Output correct EOL to error_log)
+
+2003-09-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/xslt/config.m4:
+      - Fixed bug #25648 (xslt_set_encoding() being not detected correctly)
+
+    * (PHP_4_3)
+      acinclude.m4:
+      MFH: use pkg-config if available for openssl setup
+
+    * acinclude.m4:
+      ws
+
+    * acinclude.m4:
+      - Fixed some compile failures with e.g. RH9 + openssl by
+        making use of pkg-config
+
+2003-09-24  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/docs/rfc01_PEAR_subpackages.txt:
+      remove dependency on PHP 5 - it works just fine in PHP 4.3
+
+2003-09-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      fix preserveWhiteSpace on document load
+
+2003-09-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/tests/bug25614.phpt:
+      Fix
+
+2003-09-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BEFH
+
+2003-09-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/bz2/tests/with_strings.phpt
+      ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail02.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt
+      ext/standard/tests/aggregation/aggregate.phpt
+      ext/standard/tests/aggregation/aggregate_methods.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregate_properties.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregation_info.phpt
+      ext/standard/tests/aggregation/deaggregate.phpt
+      ext/standard/tests/array/001.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/math/abs.phpt
+      ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/round.phpt
+      ext/standard/tests/strings/trim.phpt
+      ext/standard/tests/strings/wordwrap.phpt:
+      MFH: Specify full path for the cat utility for mbstring e-mail tests.
+      MFH: Previously made fixes to tests that address bug #25635
+
+    * ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail02.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt:
+      Specify full path for cat utility used by the test.
+
+2003-09-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gettext/gettext.c
+      ext/gettext/php_gettext.h:
+      MFH: Fixed bug #24402 (Compile failure with gettext 0.12.x)
+
+    * ext/gettext/gettext.c
+      ext/gettext/php_gettext.h:
+      - Fixed bug #24402 (Compile failure with gettext 0.12.x)
+
 2003-09-23  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
 
     * ext/interbase/interbase.c:
