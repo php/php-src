@@ -57,7 +57,7 @@ purge:
 REGEXH=regex.h
 REGEXHSRC=regex2.h $(REGSRC)
 $(REGEXH):	$(REGEXHSRC) mkh
-	sh ./mkh $(MKHFLAGS) -i _REGEX_H_ $(REGEXHSRC) >regex.h
+	sh $(srcdir)/./mkh $(MKHFLAGS) -i _REGEX_H_ $(REGEXHSRC) >regex.h
 	#cmp -s regex.tmp regex.h 2>/dev/null || cp regex.tmp regex.h
 	#rm -f regex.tmp
 
