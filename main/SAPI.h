@@ -97,6 +97,10 @@ typedef struct {
 	/* this is necessary for Safe Mode */
 	char *current_user;
 	int current_user_length;
+
+    /* this is necessary for CLI module */
+    int argc;
+    char **argv;
 } sapi_request_info;
 
 

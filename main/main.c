@@ -861,6 +861,8 @@ int php_module_startup(sapi_module_struct *sf)
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
 	SG(request_info).argv0 = NULL;
+	SG(request_info).argc=0;
+	SG(request_info).argv=(char **)NULL;
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	PG(during_request_startup) = 0;
 
@@ -1195,7 +1197,21 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	INIT_PZVAL(arr);
 
 	/* Prepare argv */
-	if (s && *s) {
+	if (SG(request_info).argc) { /* are we in cli sapi? */
+		int i;
+		for (i=0; i<SG(request_info).argc; i++) {
+			ALLOC_ZVAL(tmp);
+			Z_TYPE_P(tmp) = IS_STRING;
+			Z_STRLEN_P(tmp) = strlen(SG(request_info).argv[i]);
+			Z_STRVAL_P(tmp) = estrndup(SG(request_info).argv[i], Z_STRLEN_P(tmp));
+			INIT_PZVAL(tmp);
+			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(pval *), NULL)==FAILURE) {
+				if (Z_TYPE_P(tmp) == IS_STRING) {
+					efree(Z_STRVAL_P(tmp));
+				}
+			}
+		}
+	} else 	if (s && *s) {
 		ss = s;
 		while (ss) {
 			space = strchr(ss, '+');
@@ -1225,7 +1241,11 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 
 	/* prepare argc */
 	ALLOC_ZVAL(argc);
-	Z_LVAL_P(argc) = count;
+	if (SG(request_info).argc) {
+		Z_LVAL_P(argc) = SG(request_info).argc;
+	} else {
+		Z_LVAL_P(argc) = count;
+	}
 	Z_TYPE_P(argc) = IS_LONG;
 	INIT_PZVAL(argc);
 
