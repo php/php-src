@@ -1,3 +1,38 @@
+2001-11-29  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/config.m4
+      ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Adding ldap_set_rebind_proc() for APIs with V3 3 arg variant, need more
+    testing.
+
+    * ext/ldap/ldap.c:
+    Making the link resource point to a structure that contains the LDAP
+    link, rather than point to it directly.
+
+2001-11-29  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/File/Passwd.php:
+    * Add function listUsers() that returns all users from passwd file.
+
+2001-11-29  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/oci8.php: patch to support columns from functions without alias
+
+2001-11-29  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Update to the latest apr api (patch by Clif Woolley)
+
+2001-11-29  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/sockets/sockets.c: i'm sure i had this compile before;-)
+
+    * ext/sockets/sockets.c:
+    fix a crash in socket_connect (if hostname was not resolvable)
+    initialize max_fd in various fdset function
+    fix error checking in _read and _write
+
 2001-11-28  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/common.php:
