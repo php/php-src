@@ -1,4 +1,3 @@
-// $Id: buildconf.js,v 1.5 2003-12-04 13:38:47 wez Exp $
 /*
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
@@ -17,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.5 2003-12-04 13:38:47 wez Exp $ */
+/* $Id: buildconf.js,v 1.6 2003-12-19 12:50:11 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -65,13 +64,15 @@ function find_config_w32(dirname)
 			WScript.StdOut.WriteLine("Skipping " + dirname + "/" + n + " -- already have a module with that name");
 			continue;
 		}
-		seen[seen.length] = n;
+
 			
 		c = FSO.BuildPath(fc.item(), "config.w32");
 		if (FSO.FileExists(c)) {
 			//WScript.StdOut.WriteLine(c);
 			modules += "configure_module_dirname = condense_path(FSO.GetParentFolderName('" + c.replace(new RegExp('(["\\\\])', "g"), '\\$1') + "'));\r\n";
 			modules += file_get_contents(c);
+		
+			seen[seen.length] = n;
 		}
 	}
 }

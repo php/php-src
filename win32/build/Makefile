@@ -20,30 +20,31 @@
 CC="$(CL)"
 LD="$(LINK)"
 
-all: $(BUILD_DIR) generated_files $(EXT_TARGETS) $(SAPI_TARGETS)
+all: $(BUILD_DIR) $(BUILD_DIRS_SUB) generated_files $(EXT_TARGETS) $(SAPI_TARGETS)
 
 generated_files: Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
+	ext\standard\parsedate.c \
 	$(PHPDEF)
 
-win32\phpts.def: $(PHP_DLL_DEF_SOURCES)
-	type $(PHP_DLL_DEF_SOURCES) > win32\phpts.def
+$(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
+	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
 
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
-	bison --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
+	$(BISON) --output=Zend/zend_ini_parser.c -v -d -p ini_ Zend/zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
-	bison --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
+	$(BISON) --output=Zend/zend_language_parser.c -v -d -p zend Zend/zend_language_parser.y
 
 Zend\zend_ini_scanner.c: Zend\flex.skl Zend\zend_ini_scanner.l
-	flex -B -i -SZend/flex.skl -Pini_ -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
+	$(FLEX) -B -i -SZend/flex.skl -Pini_ -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\flex.skl Zend\zend_language_scanner.l
-	flex -i -SZend/flex.skl -Pzend -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
+	$(FLEX) -i -SZend/flex.skl -Pzend -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 
 ext\standard\parsedate.c ext\standard\parsedate.h: ext\standard\parsedate.y
-	bison --output=ext/standard/parsedate.c -v -d ext/standard/parsedate.y 
+	$(BISON) --output=ext/standard/parsedate.c -v -d ext/standard/parsedate.y 
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 
@@ -57,17 +58,21 @@ $(BUILD_DIR)\$(PHPDLL): $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL
 	
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 	
-$(BUILD_DIR):
-	mkdir $(BUILD_DIR)
-	for %D in ($(BUILD_DIRS_SUB)) do mkdir %D
+$(BUILD_DIR) $(BUILD_DIRS_SUB):
+	@echo Recreating build dirs
+	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+	@for %D in ($(BUILD_DIRS_SUB)) do @if not exist %D @mkdir %D > NUL
 
 clean-sapi:
-	for %D in ($(EXT_TARGETS) $(SAPI_TARGETS)) do del /F /Q $(BUILD_DIR)\%D
-	del /F /Q $(BUILD_DIR)\$(PHPDLL)
+	@echo Cleaning SAPI
+	@for %D in ($(EXT_TARGETS) $(SAPI_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
+	@del /F /Q $(BUILD_DIR)\$(PHPDLL)
 
 clean: clean-sapi
-	for %D in ($(BUILD_DIRS_SUB)) do del /F /Q %D\*.*
-	del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp
+	@echo Cleaning
+	@for %D in ($(BUILD_DIRS_SUB)) do @del /F /Q %D\*.* > NUL
+	@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip > NUL
+	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING) 
 
 test:
 	<<test_suite_uses_lame_env_vars.bat
@@ -76,5 +81,13 @@ $(BUILD_DIR)\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-t
 <<NOKEEP
 
 dist: all
+	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
+	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip
 	$(BUILD_DIR)\php.exe win32/build/mkdist.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(SNAPSHOT_TEMPLATE)"
+	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
+	-$(ZIP) -9 -r ..\php-$(PHP_VERSION_STRING).zip .
+	cd ..\..
+
+msi-installer: dist
+	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)"
 

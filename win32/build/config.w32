@@ -3,10 +3,16 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
+ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
+
 PATH_PROG('cl');
 PATH_PROG('link');
 PATH_PROG('nmake');
-PATH_PROG('make');
+PATH_PROG('bison');
+PATH_PROG('flex');
+PATH_PROG('re2c');
+PATH_PROG('zip');
+PATH_PROG('lemon');
 
 // one-shot build optimizes build by asking compiler to build
 // several objects at once, reducing overhead of starting new
@@ -32,18 +38,18 @@ DEFINE("CFLAGS", "/nologo /YX /FD $(BASE_INCLUDES) /D _WINDOWS \
 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS");
 
 // General link flags
-DEFINE("LDFLAGS", "/nologo /libpath:$(PHP_BUILD)\\lib");
+DEFINE("LDFLAGS", "/nologo /libpath:$(PHP_BUILD)\\lib /version:" +
+	PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
 
 // General DLL link flags
-DEFINE("DLL_LDFLAGS", "/dll /version:" + PHP_VERSION);
+DEFINE("DLL_LDFLAGS", "/dll ");
 
 // PHP DLL link flags
 DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
 // General libs
-DEFINE("LIBS", "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib \
-advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib \
-ws2_32.lib urlmon.lib resolv.lib");
+// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib 
+DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib resolv.lib");
 
 // Set some debug/release specific options
 if (PHP_DEBUG == "yes") {
@@ -123,6 +129,8 @@ function probe_basic_headers()
 		p = p.replace(new RegExp("include$"), "lib");
 		ADD_FLAG("LDFLAGS", '/libpath:"' + p + '" ');
 		php_usual_lib_suspects += ";" + p;
+	} else if (!p) {
+		ERROR("We really need that arpa\\nameser.h file - it is part of the win32build package");
 	}
 }
 
@@ -130,20 +138,24 @@ function add_extra_dirs()
 {
 	var path, i, f;
 
-	path = PHP_EXTRA_INCLUDES.split(';');
-	for (i = 0; i < path.length; i++) {
-		f = FSO.GetAbsolutePathName(path[i]);
-		if (FSO.FolderExists(f)) {
-			ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+	if (PHP_EXTRA_INCLUDES.length) {
+		path = PHP_EXTRA_INCLUDES.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+			}
 		}
-	}	
-	path = PHP_EXTRA_LIBS.split(';');
-	for (i = 0; i < path.length; i++) {
-		f = FSO.GetAbsolutePathName(path[i]);
-		if (FSO.FolderExists(f)) {
-			ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+	}
+	if (PHP_EXTRA_LIBS.length) {
+		path = PHP_EXTRA_LIBS.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+			}
 		}
-	}	
+	}
 
 }
 
