@@ -603,7 +603,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
 			if (!IS_LINK_OPERATION(type) && (!IS_EXISTS_CHECK(type) || errno != ENOENT)) { /* fileexists() test must print no error */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
 			BG(CurrentStatFile) = NULL;
@@ -618,7 +618,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		/* do lstat if the buffer is empty */
 		if (VCWD_LSTAT(filename, &BG(lsb)) == -1) {
 			if (!IS_EXISTS_CHECK(type) || errno != ENOENT) { /* fileexists() test must print no error */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			RETURN_FALSE;
 		}
@@ -707,7 +707,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		case S_IFSOCK: RETURN_STRING("socket", 1);
 #endif
 		}
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 	#ifndef NETWARE	/* getuid is not available on NetWare */
