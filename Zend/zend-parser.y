@@ -130,7 +130,7 @@
 %% /* Rules */
 
 top_statement_list:	
-		top_statement_list  { do_extended_info(CLS_C); } top_statement { ELS_FETCH(); HANDLE_INTERACTIVE(); }
+		top_statement_list  { do_extended_info(CLS_C); } top_statement { HANDLE_INTERACTIVE(); }
 	|	/* empty */
 ;
 
@@ -142,7 +142,7 @@ top_statement:
 
 
 inner_statement_list:
-		inner_statement_list  { do_extended_info(CLS_C); } inner_statement { ELS_FETCH(); HANDLE_INTERACTIVE(); }
+		inner_statement_list  { do_extended_info(CLS_C); } inner_statement { HANDLE_INTERACTIVE(); }
 	|	/* empty */
 ;
 

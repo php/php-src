@@ -314,7 +314,6 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 	zend_function_state *original_function_state_ptr;
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
-	CLS_FETCH();
 	ELS_FETCH();
 
 	if (object) {

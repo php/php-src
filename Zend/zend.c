@@ -294,7 +294,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
 
-	alloc_globals_id = ts_allocate_id(sizeof(zend_alloc_globals), alloc_globals_ctor, NULL);
+	alloc_globals_id = ts_allocate_id(sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, NULL);
 #else
 	start_memory_manager(ALS_C);
 #endif
