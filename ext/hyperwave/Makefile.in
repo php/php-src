@@ -1,5 +1,0 @@
-
-LTLIBRARY_NAME    = libhyperwave.la
-LTLIBRARY_SOURCES = hw.c hg_comm.c
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libsysvshm.la
-LTLIBRARY_SOURCES = sysvshm.c
-LTLIBRARY_SHARED_NAME = sysvshm.la
-
-include $(top_srcdir)/build/dynlib.mk

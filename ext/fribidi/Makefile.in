@@ -1,9 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libfribidi.la
-LTLIBRARY_SOURCES     = fribidi.c
-LTLIBRARY_SHARED_NAME = fribidi.la
-LTLIBRARY_SHARED_LIBADD  = $(FRIBIDI_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
-EXTRA_INCLUDES = $(FRIBIDI_INCLUDE)
