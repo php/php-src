@@ -5,18 +5,14 @@ dnl
 AC_MSG_CHECKING(for CLI build)
 
 AC_ARG_ENABLE(cli,
-[  --disable-cli           Disable building CLI version of PHP.],
+[  --enable-cli            Enable building CLI version of PHP.],
 [
-  if test "$enable_cli" != "no"; then
-    PHP_SAPI_CLI=yes
-  else
-    PHP_SAPI_CLI=no
-  fi
-],
-[PHP_SAPI_CLI=yes]
-)
+  PHP_SAPI_CLI=$enableval
+],[
+  PHP_SAPI_CLI=no
+])
 
-if test "$PHP_SAPI_CLI" = "no"; then
+if test "$PHP_SAPI_CLI" != "yes"; then
   PHP_DISABLE_CLI
 fi
 
