@@ -2831,10 +2831,6 @@ PHP_FUNCTION(ibase_blob_echo)
 
 	GET_BLOB_ID_ARG(blob_arg, ib_blob_id);
 	
-	if (!php_header()) {
-		RETURN_FALSE;
-	}
-
 	if (ib_blob_id) { /*not null ?*/
 		
 		if (isc_open_blob(IB_STATUS, &ib_blob_id->link, &ib_blob_id->trans_handle,

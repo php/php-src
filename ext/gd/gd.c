@@ -853,33 +853,35 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			php_error(E_WARNING, "%s: unable to open temporary file", get_active_function_name());
 			RETURN_FALSE;
 		}
-		output = php_header();
-		if (output) {
-			switch(image_type) {
-				case PHP_GDIMG_TYPE_JPG:
-					(*func_p)(im, tmp, q);
-					break;
-				case PHP_GDIMG_TYPE_WBM:
-					if(q<0||q>255) {
-						php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
-					}
-					(*func_p)(im, q, tmp);
-					break;
-				default:
-					(*func_p)(im, tmp);
-					break;
-			}
 
-            fseek(tmp, 0, SEEK_SET);
+		switch(image_type) {
+			case PHP_GDIMG_TYPE_JPG:
+				(*func_p)(im, tmp, q);
+				break;
+			case PHP_GDIMG_TYPE_WBM:
+				if(q<0||q>255) {
+					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+				}
+				(*func_p)(im, q, tmp);
+				break;
+			default:
+				(*func_p)(im, tmp);
+				break;
+		}
+
+		fseek(tmp, 0, SEEK_SET);
+
 #if APACHE && defined(CHARSET_EBCDIC)
-			SLS_FETCH();
-            /* This is a binary file already: avoid EBCDIC->ASCII conversion */
-            ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
+		/* XXX this is unlikely to work any more thies@thieso.net */
+
+		SLS_FETCH();
+		/* This is a binary file already: avoid EBCDIC->ASCII conversion */
+		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
 #endif
-            while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
-                php_write(buf, b);
-            }
-        }
+		while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
+			php_write(buf, b);
+		}
+
         fclose(tmp);
         /* the temporary file is automatically deleted */
 	}
