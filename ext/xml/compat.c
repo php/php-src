@@ -86,18 +86,18 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 		xmlChar    *qualified_name_attr = NULL;
 		
 		for (i = 0; i < nb_attributes; i += 1) {
-			attrs[z] =  xmlStrdup( attributes[y]);
-			
+
 			if (attributes[y+1] != NULL) {
-				_qualify_namespace(parser, xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3])), attributes[2], &qualified_name_attr);
+				_qualify_namespace(parser, attributes[y] , attributes[2], &qualified_name_attr);
 			} else {
-				qualified_name_attr = xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3]));
+				qualified_name_attr = xmlStrdup(attributes[y]);
 			}
-			attrs[z + 1] = qualified_name_attr;
+			attrs[z] = qualified_name_attr;
+			attrs[z + 1] = xmlStrndup(attributes[y + 3] , (int) (attributes[y + 4] - attributes[y + 3]));
 			z += 2;
 			y += 5;
 		}
-		
+
 		attrs[z] = NULL;
 	}
 	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attrs);
