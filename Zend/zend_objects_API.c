@@ -48,10 +48,12 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 		if (objects->object_buckets[i].valid) {
 			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
 
-			if (obj->dtor && !objects->object_buckets[i].destructor_called) {
-				obj->dtor(obj->object, i TSRMLS_CC);
+			if (!objects->object_buckets[i].destructor_called) {
+				objects->object_buckets[i].destructor_called = 1;
+				if (obj->dtor) {
+					obj->dtor(obj->object, i TSRMLS_CC);
+				}
 			}
-			objects->object_buckets[i].destructor_called = 1;
 		}
 	}
 }
