@@ -31,6 +31,14 @@ Requirements
     http://download.microsoft.com/msdownload/dcom/95/x86/en/dcom95.exe
 
 
+Support
+-------
+
+For questions and help with PHP under Windows, your best bet would be the
+PHP-Windows mailing list (php-windows@lists.php.net).  To subscribe, send
+an empty message to php-windows-request@lists.php.net.
+
+
 Installation
 ------------
 
