@@ -38,6 +38,9 @@ static zend_class_entry *domxmlattr_class_entry_ptr;
 static zend_class_entry *domxmlns_class_entry_ptr;
 static zend_class_entry *domxmltestnode_class_entry_ptr;
 
+static int node_attributes(zval **attributes, xmlNode *nodep);
+static int node_children(zval **children, xmlNode *nodep);
+
 static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(xmldoc,	NULL)
 	PHP_FE(xmldocfile,	NULL)
@@ -710,7 +713,7 @@ PHP_FUNCTION(domxml_attributes)
 	if(0 > node_attributes(&return_value, nodep))
 		RETURN_FALSE;
 
-#ifdef nichtdefiniert
+#ifdef oldstyle_for_libxml_1_8_7
 	attr = nodep->properties;
 	if (!attr) {
 		RETURN_FALSE;
@@ -721,8 +724,13 @@ PHP_FUNCTION(domxml_attributes)
 	}
 
 	while(attr) {
-		if(attr->val->content)
-			add_assoc_string(return_value, (char *) attr->name, attr->val->content, 1);
+fprintf(stderr, "ATTRNAME = %s\n", attr->name);
+		if(attr->children) {
+			fprintf(stderr, "ATTRVALUE present\n");
+			if(attr->children->content)
+				fprintf(stderr, "ATTRVALUE = %s\n", attr->children->content);
+				add_assoc_string(return_value, (char *) attr->name, attr->children->content, 1);
+		}
 		attr = attr->next;
 	}
 #endif
@@ -1189,14 +1197,13 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 	return 0;
 }
 
-static int node_children(zval **children, xmlNode *nodep);
-
 /* {{{ proto string node_attributes([int node])
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep)
 {
 	zval *children;
 	xmlAttr *attr;
+	int count = 0;
 
 	/* Get the children of the current node */	
 	if(nodep->type != XML_ELEMENT_NODE)
@@ -1207,25 +1214,27 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	}
 
 	/* create an php array for the children */
-	MAKE_STD_ZVAL(*attributes);
+//	MAKE_STD_ZVAL(*attributes); // Don't do this if *attributes are the return_value
 	if (array_init(*attributes) == FAILURE) {
 		return -1;
 	}
 
 	while(attr) {
 		zval *pattr;
+		int n;
 		MAKE_STD_ZVAL(pattr);
 
 		/* construct an object with some methods */
 		object_init_ex(pattr, domxmlattr_class_entry_ptr);
 		add_property_stringl(pattr, "name", (char *) attr->name, strlen(attr->name), 1);
-		if(0 == node_children(&children, attr->children)) {
+		if(0 <= (n = node_children(&children, attr->children))) {
 			zend_hash_update(pattr->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 		}
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
+		count++;
 	}
-	return 0;
+	return count;
 }
 
 /* {{{ proto string domxml_children([int node])
@@ -1234,6 +1243,7 @@ static int node_children(zval **children, xmlNode *nodep)
 {
 	zval *mchildren, *attributes, *namespace;
 	xmlNode *last;
+	int count = 0;
 
 	/* Get the children of the current node */	
 	last = nodep;
@@ -1273,16 +1283,18 @@ static int node_children(zval **children, xmlNode *nodep)
 */
 
 		/* Get the attributes of the current node and add it as a property */
-		if(!node_attributes(&attributes, last))
+		MAKE_STD_ZVAL(attributes); // Because it was taken out of node_attributes()
+		if(0 <= node_attributes(&attributes, last))
 			zend_hash_update(child->value.obj.properties, "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 
 		/* Get recursively the children of the current node and add it as a property */
-		if(!node_children(&mchildren, last->children))
+		if(0 <= node_children(&mchildren, last->children))
 			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 
 		last = last->next;
+		count++;
 	}
-	return 0;
+	return count;
 }
 /* }}} */
 
@@ -1335,7 +1347,7 @@ PHP_FUNCTION(xmltree)
 	   as root, you may have a comment, pi and and element as root.
 	   Thanks to Paul DuBois for pointing me at this.
 	*/
-	if(0 == node_children(&children, root)) {
+	if(0 <= node_children(&children, root)) {
 		int i, count;
 		HashTable *lht;
 		zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
