@@ -1809,7 +1809,7 @@ PHP_FUNCTION(imap_lsub_full)
 	}
 	mail_free_foblist (&IMAPG(imap_sfolder_objects));
 	efree(delim);
-	IMAPG(folderlist_style) = FLIST_ARRAY; // reset to default
+	IMAPG(folderlist_style) = FLIST_ARRAY; /* reset to default */
 }
 /* }}} */
 
