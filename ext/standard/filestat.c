@@ -99,8 +99,6 @@ static struct stat lsb;
 
 int php3_init_filestat(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
-	
 	GLOBAL(CurrentStatFile)=NULL;
 	GLOBAL(CurrentStatLength)=0;
 	return SUCCESS;
@@ -109,10 +107,9 @@ int php3_init_filestat(INIT_FUNC_ARGS)
 
 int php3_shutdown_filestat(SHUTDOWN_FUNC_ARGS)
 {
-	TLS_VARS;
-	
-	if (GLOBAL(CurrentStatFile))
+	if (GLOBAL(CurrentStatFile)) {
 		efree (GLOBAL(CurrentStatFile));
+	}
 	return SUCCESS;
 }
 
@@ -122,11 +119,7 @@ void php3_chgrp(INTERNAL_FUNCTION_PARAMETERS)
 	pval *filename, *group;
 	gid_t gid;
 	struct group *gr=NULL;
-#endif
 	int ret;
-	TLS_VARS;
-	ret = 0;
-#ifndef WINDOWS
 
 	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&group)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -145,11 +138,9 @@ void php3_chgrp(INTERNAL_FUNCTION_PARAMETERS)
 		gid = group->value.lval;
 	}
 
-/* #if PHP_SAFE_MODE */
 	if (PG(safe_mode) &&(!_php3_checkuid(filename->value.str.val, 1))) {
 		RETURN_FALSE;
 	}
-/* #endif */
 
 	/* Check the basedir */
 	if (_php3_check_open_basedir(filename->value.str.val)) RETURN_FALSE;
@@ -159,9 +150,12 @@ void php3_chgrp(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING, "chgrp failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
-#endif
 	RETURN_TRUE;
+#else
+	RETURN_FALSE;
+#endif
 }
+
 
 void php3_chown(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -170,7 +164,6 @@ void php3_chown(INTERNAL_FUNCTION_PARAMETERS)
 	int ret;
 	uid_t uid;
 	struct passwd *pw = NULL;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&user)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -201,16 +194,16 @@ void php3_chown(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING, "chown failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
-#else
-	TLS_VARS;
 #endif
 	RETURN_TRUE;
 }
 
-void php3_chmod(INTERNAL_FUNCTION_PARAMETERS) {
+
+void php3_chmod(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *filename, *mode;
 	int ret;
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -233,7 +226,9 @@ void php3_chmod(INTERNAL_FUNCTION_PARAMETERS) {
 	RETURN_TRUE;
 }
 
-void php3_touch(INTERNAL_FUNCTION_PARAMETERS) {
+
+void php3_touch(INTERNAL_FUNCTION_PARAMETERS)
+{
 #if HAVE_UTIME
 	pval *filename, *filetime;
 	int ret;
@@ -241,7 +236,7 @@ void php3_touch(INTERNAL_FUNCTION_PARAMETERS) {
 	FILE *file;
 	struct utimbuf *newtime = NULL;
 	int ac = ARG_COUNT(ht);
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ac == 1 && getParameters(ht,1,&filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
@@ -298,19 +293,19 @@ void php3_touch(INTERNAL_FUNCTION_PARAMETERS) {
 #endif
 }
 
-void php3_clearstatcache(INTERNAL_FUNCTION_PARAMETERS) {
-	TLS_VARS;
-	
+
+void php3_clearstatcache(INTERNAL_FUNCTION_PARAMETERS)
+{
 	if (GLOBAL(CurrentStatFile)) {
 		efree(GLOBAL(CurrentStatFile));
 		GLOBAL(CurrentStatFile) = NULL;
 	}
 }
 
+
 static void _php3_stat(const char *filename, int type, pval *return_value)
 {
 	struct stat *stat_sb = &GLOBAL(sb);
-	TLS_VARS;
 
 	if (!GLOBAL(CurrentStatFile) || strcmp(filename,GLOBAL(CurrentStatFile))) {
 		if (!GLOBAL(CurrentStatFile)

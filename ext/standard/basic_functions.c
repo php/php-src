@@ -1732,6 +1732,7 @@ void php3_call_user_method(INTERNAL_FUNCTION_PARAMETERS)
 	pval **params;
 	pval retval;
 	int arg_count=ARG_COUNT(ht);
+	CLS_FETCH();
 	
 	if (arg_count<2) {
 		WRONG_PARAM_COUNT;

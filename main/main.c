@@ -97,13 +97,11 @@ struct sapi_request_info *sapi_rqst;
 #include "getopt.h"
 #endif
 
-#ifdef ZTS
-int compiler_globals_id;
-int executor_globals_id;
-#endif
 
 #ifndef ZTS
 php_core_globals core_globals;
+#else
+int core_globals_id;
 #endif
 
 void _php3_build_argv(char * ELS_DC);
@@ -381,6 +379,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 	char buffer[1024];
 	int size = 0;
 	ELS_FETCH();
+	PLS_FETCH();
 
 	if (!(type & E_CORE)) {
 		if (!GLOBAL(initialized)) {	/* don't display further errors after php3_request_shutdown() */
@@ -550,6 +549,7 @@ static void php3_unset_timeout(INLINE_TLS_VOID)
 void php3_set_time_limit(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *new_timeout;
+	PLS_FETCH();
 
 	if (PG(safe_mode)) {
 		php3_error(E_WARNING, "Cannot set time limit in safe mode");
@@ -589,8 +589,11 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename)
 static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
-		case ZMSG_ENABLE_TRACK_VARS:
-			PG(track_vars) = 1;
+		case ZMSG_ENABLE_TRACK_VARS: {
+				PLS_FETCH();
+
+				PG(track_vars) = 1;
+			}
 			break;
 		case ZMSG_FAILED_INCLUDE_FOPEN:
 			php3_error(E_WARNING, "Failed opening '%s' for inclusion", php3_strip_url_passwd((char *) data));
@@ -627,9 +630,10 @@ static void php_message_handler_for_zend(long message, void *data)
 }
 
 
-int php3_request_startup(CLS_D ELS_DC)
+int php3_request_startup(CLS_D ELS_DC PLS_DC)
 {
 	zend_output_startup();
+
 #if APACHE && defined(CRASH_DETECTION)
 	{
 		char log_message[256];
@@ -795,7 +799,7 @@ void php3_request_shutdown(void *dummy INLINE_TLS)
 }
 
 
-static int php3_config_ini_startup(ELS_D)
+static int php3_config_ini_startup()
 {
 	if (php3_init_config() == FAILURE) {
 		php3_printf("PHP:  Unable to parse configuration file.\n");
@@ -816,11 +820,15 @@ static void php3_config_ini_shutdown(INLINE_TLS_VOID)
 #endif
 }
 
-int php3_module_startup(CLS_D ELS_DC)
+
+int php3_module_startup()
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
 	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
+#ifdef ZTS
+	php_core_globals *core_globals;
+#endif
 
 #if (WIN32|WINNT) && !(USE_SAPI)
 	WORD wVersionRequested;
@@ -845,11 +853,14 @@ int php3_module_startup(CLS_D ELS_DC)
 
 	zend_startup(&zuf, NULL);
 
+#ifdef ZTS
+	core_globals_id = ts_allocate_id(sizeof(php_core_globals), NULL, NULL);
+	core_globals = ts_resource(core_globals_id);
+#endif
+
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
 #endif
-
-	EG(error_reporting) = E_ALL;
 
 #if (WIN32|WINNT) && !(USE_SAPI)
 	/* start up winsock services */
@@ -864,7 +875,7 @@ int php3_module_startup(CLS_D ELS_DC)
 	le_index_ptr = _register_list_destructors(NULL, NULL, 0);
 	FREE_MUTEX(gLock);
 
-	if (php3_config_ini_startup(ELS_C) == FAILURE) {
+	if (php3_config_ini_startup() == FAILURE) {
 		return FAILURE;
 	}
 
@@ -926,7 +937,7 @@ void php3_module_shutdown()
 
 
 /* in 3.1 some of this should move into sapi */
-int _php3_hash_environment(void)
+int _php3_hash_environment(PLS_D)
 {
 	char **env, *p, *t;
 	unsigned char _gpc_flags[3] = {0,0,0};
@@ -1162,7 +1173,7 @@ void _php3_build_argv(char *s ELS_DC)
 
 #include "logos.h"
 
-static void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC)
+static void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
@@ -1272,23 +1283,16 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
+	php_core_globals *core_globals;
 #endif
 
 
+#ifndef ZTS
 	if (setjmp(EG(bailout))!=0) {
 		return -1;
 	}
-	
-#ifdef ZTS
-	sapi_startup(1,1,0);
-	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals));
-	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals));
-
-	compiler_globals = ts_resource(compiler_globals_id);
-	executor_globals = ts_resource(executor_globals_id);
 #endif
-
-	
+		
 #if WIN32|WINNT
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
@@ -1331,6 +1335,14 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif							/* FORCE_CGI_REDIRECT */
 	}
 
+	if (php3_module_startup()==FAILURE) {
+		return FAILURE;
+	}
+#ifdef ZTS
+	compiler_globals = ts_resource(compiler_globals_id);
+	executor_globals = ts_resource(executor_globals_id);
+	core_globals = ts_resource(core_globals_id);
+#endif
 
 	CG(extended_info) = 0;
 
@@ -1340,7 +1352,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			switch (c) {
 				case 'f':
 					if (!_cgi_started){ 
-						if (php3_module_startup(CLS_C ELS_CC) == FAILURE || php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+						if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+							php3_module_shutdown();
 							return FAILURE;
 						}
 					}
@@ -1352,7 +1365,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'v':
 					if (!_cgi_started) {
-						if (php3_module_startup(CLS_C ELS_CC) == FAILURE || php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+						if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+							php3_module_shutdown();
 							return FAILURE;
 						}
 					}
@@ -1361,7 +1375,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'i':
 					if (!_cgi_started) {
-						if (php3_module_startup(CLS_C ELS_CC) == FAILURE || php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+						if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+							php3_module_shutdown();
 							return FAILURE;
 						}
 					}
@@ -1408,7 +1423,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 
 	if (!_cgi_started) {
-		if (php3_module_startup(CLS_C ELS_CC) == FAILURE || php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+		if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+			php3_module_shutdown();
 			return FAILURE;
 		}
 	}
@@ -1483,7 +1499,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	switch (behavior) {
 		case PHP_MODE_STANDARD:
-			php3_parse(&file_handle CLS_CC ELS_CC);
+			php3_parse(&file_handle CLS_CC ELS_CC PLS_CC);
 			break;
 		case PHP_MODE_HIGHLIGHT: {
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -1528,13 +1544,15 @@ PHPAPI int apache_php3_module_main(request_rec * r, int fd, int display_source_m
 #ifdef ZTS
 	zend_compiler_globals cg;
 	zend_executor_globals eg;
+	php_core_globals pcg;
 	zend_compiler_globals *compiler_globals=&cg;
 	zend_executor_globals *executor_globals=&eg;
+	php_core_globals *core_globals=&pcg;
 #endif
 
 	GLOBAL(php3_rqst) = r;
 
-	if (php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+	if (php3_request_startup(CLS_C ELS_CC PLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 	php3_TreatHeaders();
@@ -1637,7 +1655,7 @@ int main(int argc, char **argv)
 	setlocale(LC_CTYPE, "");
 #endif
 
-	if (php3_module_startup(CLS_C ELS_CC) == FAILURE) {
+	if (php3_module_startup() == FAILURE) {
 		return FAILURE;
 	}
 	signal(SIGPIPE, SIG_IGN);
@@ -1891,7 +1909,7 @@ PHPAPI int php3_sapi_main(struct sapi_request_info *sapi_info)
 		return FAILURE;
 	}*/
 
-	if (php3_request_startup(CLS_C ELS_CC) == FAILURE) {
+	if (php3_request_startup(CLS_C ELS_CC PLS_CC) == FAILURE) {
 #if DEBUG
 	snprintf(logmessage,1024,"%d:php3_sapi_main: request starup failed\n",GLOBAL(sapi_rqst)->scid);
 	OutputDebugString(logmessage);
@@ -2068,7 +2086,7 @@ BOOL WINAPI DllMain(HANDLE hModule,
 			if (php3_config_ini_startup(_INLINE_TLS_VOID) == FAILURE) {
 				return 0;
 			}
-			if (php3_module_startup(php3_globals) == FAILURE) {
+			if (php3_module_startup() == FAILURE) {
 				ErrorExit("module startup failed");
 				return 0;
 			}
@@ -2085,7 +2103,7 @@ BOOL WINAPI DllMain(HANDLE hModule,
 				return 0;
 			php3_globals = TlsGetValue(TlsIndex);
 			yy_init_tls();
-			if (php3_module_startup(php3_globals) == FAILURE) {
+			if (php3_module_startup() == FAILURE) {
 				ErrorExit("module startup failed");
 #if DEBUG
 	OutputDebugString("PHP_Core DllMain module startup failed\n");

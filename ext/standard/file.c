@@ -31,6 +31,7 @@
 #include "tls.h"
 #endif
 #include "php.h"
+#include "php_globals.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -126,8 +127,8 @@ extern int le_uploads;
 # endif
 #endif
 
-char *
-tempnam(const char *dir, const char *pfx)
+
+char *tempnam(const char *dir, const char *pfx)
 {
 	int save_errno;
 	char *f, *name;
@@ -172,6 +173,7 @@ tempnam(const char *dir, const char *pfx)
 }
 #endif
 
+
 function_entry php3_file_functions[] = {
 	{"pclose",		php3_pclose,	NULL},
 	{"popen",		php3_popen,		NULL},
@@ -208,9 +210,11 @@ php3_module_entry php3_file_module_entry = {
 	"PHP_file", php3_file_functions, php3_minit_file, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
+
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
 	Extracts all meta tag content attributes from a file and returns an array */
-void php3_get_meta_tags(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_get_meta_tags(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *filename, *arg2;
 	FILE *fp;
 	char buf[8192];
@@ -222,20 +226,20 @@ void php3_get_meta_tags(INTERNAL_FUNCTION_PARAMETERS) {
 	
 	/* check args */
 	switch (ARG_COUNT(ht)) {
-	case 1:
-		if (getParameters(ht,1,&filename) == FAILURE) {
+		case 1:
+			if (getParameters(ht,1,&filename) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 2:
+			if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long(arg2);
+			use_include_path = arg2->value.lval;
+			break;
+		default:
 			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long(arg2);
-		use_include_path = arg2->value.lval;
-		break;
-	default:
-		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
 
@@ -337,9 +341,11 @@ void php3_get_meta_tags(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto array file(string filename)
 Read entire file into an array */
-void php3_file(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_file(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *filename, *arg2;
 	FILE *fp;
 	char *slashed, buf[8192];
@@ -350,20 +356,20 @@ void php3_file(INTERNAL_FUNCTION_PARAMETERS) {
 	
 	/* check args */
 	switch (ARG_COUNT(ht)) {
-	case 1:
-		if (getParameters(ht,1,&filename) == FAILURE) {
+		case 1:
+			if (getParameters(ht,1,&filename) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 2:
+			if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long(arg2);
+			use_include_path = arg2->value.lval;
+			break;
+		default:
 			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long(arg2);
-		use_include_path = arg2->value.lval;
-		break;
-	default:
-		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
 
@@ -408,9 +414,9 @@ void php3_file(INTERNAL_FUNCTION_PARAMETERS) {
 
 static void __pclose(FILE *pipe)
 {
-TLS_VARS;
 	GLOBAL(pclose_ret) = pclose(pipe);
 }
+
 
 static void _php3_closesocket(int *sock) {
 	int socketd=*sock;
@@ -424,16 +430,17 @@ static void _php3_closesocket(int *sock) {
 	}
 }
 
-static void _php3_unlink_uploaded_file(char *file) {
+
+static void _php3_unlink_uploaded_file(char *file)
+{
 	if(file) {
 		unlink(file);
 	}
 }
 
+
 int php3_minit_file(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
-	
 	GLOBAL(le_fp) = register_list_destructors(fclose,NULL);
 	GLOBAL(le_pp) = register_list_destructors(__pclose,NULL);
 	GLOBAL(wsa_fp) = register_list_destructors(_php3_closesocket,NULL);
@@ -441,14 +448,15 @@ int php3_minit_file(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
+
 /* {{{ proto string tempnam(string dir, string prefix)
 Create a unique filename in a directory */
-void php3_tempnam(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_tempnam(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1, *arg2;
 	char *d;
 	char *t;
 	char p[64];
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -464,9 +472,11 @@ void php3_tempnam(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int fopen(string filename, string mode [, int use_include_path])
 Open a file or a URL and return a file pointer */
-void php3_fopen(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_fopen(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1, *arg2, *arg3;
 	FILE *fp;
 	char *p;
@@ -474,23 +484,22 @@ void php3_fopen(INTERNAL_FUNCTION_PARAMETERS) {
 	int id;
 	int use_include_path = 0;
 	int issock=0, socketd=0;
-	TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
-	case 2:
-		if (getParameters(ht,2,&arg1,&arg2) == FAILURE) {
+		case 2:
+			if (getParameters(ht,2,&arg1,&arg2) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 3:
+			if (getParameters(ht,3,&arg1,&arg2,&arg3) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long(arg3);
+			use_include_path = arg3->value.lval;
+			break;
+		default:
 			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 3:
-		if (getParameters(ht,3,&arg1,&arg2,&arg3) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long(arg3);
-		use_include_path = arg3->value.lval;
-		break;
-	default:
-		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg1);
 	convert_to_string(arg2);
@@ -523,13 +532,14 @@ void php3_fopen(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */	
 
+
 /* {{{ proto int fclose(int fp)
 Close an open file pointer */
-void php3_fclose(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_fclose(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	int id, type;
 	FILE *fp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -546,15 +556,17 @@ void php3_fclose(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int popen(string command, string mode)
 Execute a command and open either a read or a write pipe to it */
-void php3_popen(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_popen(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1, *arg2;
 	FILE *fp;
 	int id;
 	char *p;
 	char *b, buf[1024];
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -563,47 +575,51 @@ void php3_popen(INTERNAL_FUNCTION_PARAMETERS) {
 	convert_to_string(arg2);
 	p = estrndup(arg2->value.str.val,arg2->value.str.len);
 	if (PG(safe_mode)){
-	b = strchr(arg1->value.str.val,' ');
-	if (!b) {
-		b = strrchr(arg1->value.str.val,'/');
+		b = strchr(arg1->value.str.val,' ');
+		if (!b) {
+			b = strrchr(arg1->value.str.val,'/');
+		} else {
+			char *c;
+			c = arg1->value.str.val;
+			while((*b!='/')&&(b!=c)) {
+				b--;
+			}
+			if (b==c) {
+				b=NULL;
+			}
+		}
+		if (b) {
+			snprintf(buf,sizeof(buf),"%s%s",PG(safe_mode_exec_dir),b);
+		} else {
+			snprintf(buf,sizeof(buf),"%s/%s",PG(safe_mode_exec_dir),arg1->value.str.val);
+		}
+		fp = popen(buf,p);
+		if (!fp) {
+			php3_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",buf,p,strerror(errno));
+			RETURN_FALSE;
+		}
 	} else {
-		char *c;
-		c = arg1->value.str.val;
-		while((*b!='/')&&(b!=c)) b--;
-		if (b==c) b=NULL;
+		fp = popen(arg1->value.str.val,p);
+		if (!fp) {
+			php3_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",arg1->value.str.val,p,strerror(errno));
+			efree(p);
+			RETURN_FALSE;
+		}
 	}
-	if (b) {
-		snprintf(buf,sizeof(buf),"%s%s",PG(safe_mode_exec_dir),b);
-	} else {
-		snprintf(buf,sizeof(buf),"%s/%s",PG(safe_mode_exec_dir),arg1->value.str.val);
-	}
-	fp = popen(buf,p);
-	if (!fp) {
-		php3_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",buf,p,strerror(errno));
-		RETURN_FALSE;
-	}
-	} else {
-	fp = popen(arg1->value.str.val,p);
-	if (!fp) {
-		php3_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",arg1->value.str.val,p,strerror(errno));
-		efree(p);
-		RETURN_FALSE;
-	}
-	}
-/* #endif */
 	id = php3_list_insert(fp,GLOBAL(le_pp));
 	efree(p);
 	RETURN_LONG(id);
 }
 /* }}} */
 
+
 /* {{{ proto int pclose(int fp)
 Close a file pointer opened by popen() */
-void php3_pclose(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_pclose(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	int id,type;
 	FILE *fp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -621,16 +637,17 @@ void php3_pclose(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int feof(int fp)
 Test for end-of-file on a file pointer */
-void php3_feof(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_feof(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	FILE *fp;
 	int id, type;
 	int issock=0;
 	int socketd=0, *sock;
 	unsigned int temp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -656,6 +673,7 @@ void php3_feof(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
 Set blocking/non-blocking mode on a socket */
 void php3_set_socket_blocking(INTERNAL_FUNCTION_PARAMETERS)
@@ -664,7 +682,6 @@ void php3_set_socket_blocking(INTERNAL_FUNCTION_PARAMETERS)
 	int id, type, block;
 	int flags;
 	int socketd=0, *sock;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -746,6 +763,7 @@ void php3_set_socket_timeout(INTERNAL_FUNCTION_PARAMETERS)
 }
 #endif
 
+
 /* {{{ proto string fgets(int fp, int length)
 Get a line from file pointer */
 void php3_fgets(INTERNAL_FUNCTION_PARAMETERS)
@@ -795,6 +813,7 @@ void php3_fgets(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* {{{ proto string fgetc(int fp)
 Get a character from file pointer */
 void php3_fgetc(INTERNAL_FUNCTION_PARAMETERS) {
@@ -804,7 +823,6 @@ void php3_fgetc(INTERNAL_FUNCTION_PARAMETERS) {
 	char *buf;
 	int issock=0;
 	int *sock, socketd=0;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -836,6 +854,7 @@ void php3_fgetc(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* Strip any HTML tags while reading */
 /* {{{ proto string fgetss(int fp, int length)
 Get a line from file pointer and strip HTML tags */
@@ -847,7 +866,6 @@ void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS)
 	char *buf, *p, *rbuf, *rp, c, lc;
 	int issock=0;
 	int *sock,socketd=0;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fd, &bytes) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -961,6 +979,7 @@ void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* {{{ proto int fwrite(int fp, string str [, int length])
 Binary-safe file write */
 void php3_fwrite(INTERNAL_FUNCTION_PARAMETERS)
@@ -1022,13 +1041,14 @@ void php3_fwrite(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */	
 
+
 /* {{{ proto int rewind(int fp)
 Rewind the position of a file pointer */
-void php3_rewind(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_rewind(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	int id,type;
 	FILE *fp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1045,14 +1065,15 @@ void php3_rewind(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int ftell(int fp)
 Get file pointer's read/write position */
-void php3_ftell(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_ftell(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	int id, type;
 	long pos;
 	FILE *fp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1069,14 +1090,15 @@ void php3_ftell(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int fseek(int fp, int offset)
 Seek on a file pointer */
-void php3_fseek(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_fseek(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1, *arg2;
 	int ret,id,type;
 	long pos;
 	FILE *fp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1105,12 +1127,14 @@ void php3_fseek(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int mkdir(string pathname, int mode)
 Create a directory */
-void php3_mkdir(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_mkdir(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1, *arg2;
 	int ret,mode;
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1130,12 +1154,14 @@ void php3_mkdir(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */	
 
+
 /* {{{ proto int rmdir(string dirname)
 Remove a directory */
-void php3_rmdir(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_rmdir(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	int ret;
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1153,17 +1179,17 @@ void php3_rmdir(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */	
 
+
 /* {{{ proto int readfile(string filename [, int use_include_path])
 Output a file or a URL */
-void php3_readfile(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_readfile(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1, *arg2;
 	char buf[8192];
 	FILE *fp;
 	int b, size;
 	int use_include_path = 0;
-
 	int issock=0, socketd=0;
-	TLS_VARS;
 	
 	/* check args */
 	switch (ARG_COUNT(ht)) {
@@ -1214,13 +1240,14 @@ void php3_readfile(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int umask([int mask])
 Return or change the umask */
-void php3_fileumask(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_fileumask(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	int oldumask;
 	int arg_count = ARG_COUNT(ht);
-	TLS_VARS;
 	
 	oldumask = umask(077);
 
@@ -1238,19 +1265,20 @@ void php3_fileumask(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /*
  * Read to EOF on a file descriptor and write the output to stdout.
  */
 /* {{{ proto int fpassthru(int fp)
 Output all remaining data from a file pointer */
-void php3_fpassthru(INTERNAL_FUNCTION_PARAMETERS) {
+void php3_fpassthru(INTERNAL_FUNCTION_PARAMETERS)
+{
 	pval *arg1;
 	FILE *fp;
 	char buf[8192];
 	int id, size, b, type;
 	int issock=0;
 	int socketd=0, *sock;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1290,28 +1318,30 @@ void php3_fpassthru(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int rename(string old_name, string new_name)
 Rename a file */
-void php3_rename(INTERNAL_FUNCTION_PARAMETERS) {
-	pval *OLD, *NEW;
-	char *old, *new;
+void php3_rename(INTERNAL_FUNCTION_PARAMETERS)
+{
+	pval *old_arg, *new_arg;
+	char *old_name, *new_name;
 	int ret;
-	TLS_VARS;
+	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &OLD, &NEW) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &old_arg, &new_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(OLD);
-	convert_to_string(NEW);
+	convert_to_string(old_arg);
+	convert_to_string(new_arg);
 
-	old = OLD->value.str.val;
-	new = NEW->value.str.val;
+	old_name = old_arg->value.str.val;
+	new_name = new_arg->value.str.val;
 
-	if (PG(safe_mode) &&(!_php3_checkuid(old,2))) {
+	if (PG(safe_mode) &&(!_php3_checkuid(old_name, 2))) {
 		RETURN_FALSE;
 	}
-	ret = rename(old, new);
+	ret = rename(old_name, new_name);
 
 	if (ret == -1) {
 		php3_error(E_WARNING,
@@ -1323,6 +1353,7 @@ void php3_rename(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
+
 /* {{{ proto int copy(string source_file, string destination_file)
 Copy a file */
 void php3_file_copy(INTERNAL_FUNCTION_PARAMETERS)
@@ -1330,7 +1361,7 @@ void php3_file_copy(INTERNAL_FUNCTION_PARAMETERS)
 	pval *source, *target;
 	char buffer[8192];
 	int fd_s,fd_t,read_bytes;
-	TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &source, &target) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1377,6 +1408,7 @@ void php3_file_copy(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* {{{ proto int fread(int fp, int length)
 Binary-safe file read */
 void php3_fread(INTERNAL_FUNCTION_PARAMETERS)
@@ -1422,9 +1454,10 @@ void php3_fread(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* aparently needed for pdf to be compiled as a module under windows */
-PHPAPI int php3i_get_le_fp(void){
-	TLS_VARS;
+PHPAPI int php3i_get_le_fp(void)
+{
 	return GLOBAL(le_fp);
 }
 
