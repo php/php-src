@@ -879,15 +879,14 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 
 void php_register_COM_class()
 {
-	zend_class_entry class_entry, *registered_class;
+	zend_class_entry com_class_entry;
 
-	class_entry.name = strdup("COM");
-	class_entry.name_length = sizeof("COM")-1;
+	INIT_OVERLOADED_CLASS_ENTRY(com_class_entry, "COM", NULL,
+								php_COM_call_function_handler,
+								php_COM_get_property_handler,
+								php_COM_set_property_handler);
 
-	class_entry.handle_property_get = php_COM_get_property_handler;
-	class_entry.handle_property_set = php_COM_set_property_handler;
-	class_entry.handle_function_call = php_COM_call_function_handler;
-	registered_class = register_internal_class(&class_entry);
+	register_internal_class(&com_class_entry);
 }
 
 

@@ -51,29 +51,41 @@
 #include "win32/readdir.h"
 #endif
 
-#ifndef THREAD_SAFE
 static int dirp_id = 0;
 static int le_dirp;
-#endif
+static zend_class_entry *dir_class_entry_ptr;
 
-function_entry php3_dir_functions[] = {
-	{"opendir",		php3_opendir,	NULL},
-	{"closedir",	php3_closedir,	NULL},
-	{"chdir",		php3_chdir,		NULL},
-	{"rewinddir",	php3_rewinddir,	NULL},
-	{"readdir",		php3_readdir,	NULL},
-	{"dir",			php3_getdir,	NULL},
+static zend_function_entry php_dir_functions[] = {
+	PHP_FE(opendir,		NULL)
+	PHP_FE(closedir,	NULL)
+	PHP_FE(chdir,		NULL)
+	PHP_FE(rewinddir,	NULL)
+	PHP_FE(readdir,		NULL)
+	PHP_FALIAS(dir,		getdir,	NULL)
 	{NULL, NULL, NULL}
 };
 
+
+static zend_function_entry php_dir_class_functions[] = {
+	PHP_FALIAS(close,	closedir,	NULL)
+	PHP_FALIAS(rewind,	rewinddir,	NULL)
+	PHP_FALIAS(read,	readdir,	NULL)
+};
+
+
 php3_module_entry php3_dir_module_entry = {
-	"PHP_dir", php3_dir_functions, php3_minit_dir, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"PHP_dir", php_dir_functions, php3_minit_dir, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
 int php3_minit_dir(INIT_FUNC_ARGS)
 {
+	zend_class_entry dir_class_entry;
+
 	le_dirp = register_list_destructors(closedir,NULL);
+
+	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
+	dir_class_entry_ptr = register_internal_class(&dir_class_entry);
 	return SUCCESS;
 }
 
@@ -108,18 +120,19 @@ PHP_FUNCTION(opendir)
 Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
-	pval *id, *tmp;
+	pval *id, **tmp;
 	int id_to_find;
 	DIR *dirp;
 	int dirp_type;
 	
 	if (ARG_COUNT(ht) == 0) {
-		if (getThis(&id) == SUCCESS) {
-			if (_php3_hash_find(id->value.ht, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
+		id = getThis();
+		if (id) {
+			if (_php3_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
 				php3_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = tmp->value.lval;
+			id_to_find = (*tmp)->value.lval;
 		} else {
 			id_to_find = dirp_id;
 		}
@@ -164,18 +177,19 @@ PHP_FUNCTION(chdir)
 Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
-	pval *id, *tmp;
+	pval *id, **tmp;
 	int id_to_find;
 	DIR *dirp;
 	int dirp_type;
 	
 	if (ARG_COUNT(ht) == 0) {
-		if (getThis(&id) == SUCCESS) {
-			if (_php3_hash_find(id->value.ht, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
+		id = getThis();
+		if (id) {
+			if (_php3_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
 				php3_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = tmp->value.lval;
+			id_to_find = (*tmp)->value.lval;
 		} else {
 			id_to_find = dirp_id;
 		}
@@ -199,19 +213,20 @@ PHP_FUNCTION(rewinddir)
 Read directory entry from dir_handle */
 PHP_FUNCTION(readdir)
 {
-	pval *id, *tmp;
+	pval *id, **tmp;
 	int id_to_find;
 	DIR *dirp;
 	int dirp_type;
 	struct dirent *direntp;
 	
 	if (ARG_COUNT(ht) == 0) {
-		if (getThis(&id) == SUCCESS) {
-			if (_php3_hash_find(id->value.ht, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
+		id = getThis();
+		if (id) {
+			if (_php3_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
 				php3_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = tmp->value.lval;
+			id_to_find = (*tmp)->value.lval;
 		} else {
 			id_to_find = dirp_id;
 		}
@@ -237,7 +252,8 @@ PHP_FUNCTION(readdir)
 
 /* {{{ proto class dir(string directory)
 Directory class with properties, handle and class and methods read, rewind and close */
-PHP_FUNCTION(getdir) {
+PHP_FUNCTION(getdir)
+{
 	pval *arg;
 	DIR *dirp;
 	int ret;
@@ -259,12 +275,9 @@ PHP_FUNCTION(getdir) {
 	dirp_id = ret;
 
 	/* construct an object with some methods */
-	object_init(return_value);
+	object_init_ex(return_value, dir_class_entry_ptr);
 	add_property_long(return_value, "handle", ret);
 	add_property_stringl(return_value, "path", arg->value.str.val, arg->value.str.len, 1);
-	add_method(return_value, "read", php3_readdir);
-	add_method(return_value, "rewind", php3_rewinddir);
-	add_method(return_value, "close", php3_closedir);
 }
 /* }}} */
 
