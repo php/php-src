@@ -1602,8 +1602,6 @@ PHP_FUNCTION(mysql_escape_string)
 	 * be worth it
 	 */
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, please use mysql_real_escape_string() instead");
-
 	Z_STRVAL_P(return_value) = (char *) emalloc(Z_STRLEN_PP(str)*2+1);
 	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), Z_STRVAL_PP(str), Z_STRLEN_PP(str));
 	Z_TYPE_P(return_value) = IS_STRING;
