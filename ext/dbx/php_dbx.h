@@ -38,8 +38,8 @@ extern zend_module_entry dbx_module_entry;
 
 ZEND_MINIT_FUNCTION(dbx);
 ZEND_MSHUTDOWN_FUNCTION(dbx);
-/*/ ZEND_RINIT_FUNCTION(dbx); /*/
-/*/ ZEND_RSHUTDOWN_FUNCTION(dbx); /*/
+/* ZEND_RINIT_FUNCTION(dbx); */
+/* ZEND_RSHUTDOWN_FUNCTION(dbx); */
 
 ZEND_MINFO_FUNCTION(dbx);
 
@@ -49,8 +49,7 @@ ZEND_FUNCTION(dbx_query);
 ZEND_FUNCTION(dbx_error);
 
 ZEND_FUNCTION(dbx_sort);
-ZEND_FUNCTION(dbx_cmp_asc);
-ZEND_FUNCTION(dbx_cmp_desc);
+ZEND_FUNCTION(dbx_compare);
 
 /* 
   	Declare any global variables you may need between the BEGIN

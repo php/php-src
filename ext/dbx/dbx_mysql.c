@@ -27,7 +27,7 @@
 #define MYSQL_NUM		1<<1
 
 int dbx_mysql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns connection handle as resource on success or 0 as long on failure /*/
+    /* returns connection handle as resource on success or 0 as long on failure */
     int number_of_arguments=3;
     zval ** arguments[3];
     zval * returned_zval=NULL;
@@ -41,19 +41,30 @@ int dbx_mysql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zv
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         return 0;
         }
-    MOVE_RETURNED_TO_RV(rv, returned_zval);
 
     number_of_arguments=2;
     arguments[0]=db;
-    arguments[1]=rv;
+    arguments[1]=&returned_zval;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_select_db", &select_db_zval, number_of_arguments, arguments);
+    if (!select_db_zval || (select_db_zval->type==IS_BOOL && select_db_zval->value.lval==0) ) {
+        if (select_db_zval) zval_ptr_dtor(&select_db_zval);
+        /* also close connection */
+        number_of_arguments=1;
+        arguments[0]=&returned_zval;
+        dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_close", &select_db_zval, number_of_arguments, arguments);
+        if (select_db_zval) zval_ptr_dtor(&select_db_zval);
+        zval_ptr_dtor(&returned_zval);
+        return 0;
+        }
     zval_ptr_dtor(&select_db_zval);
+
+    MOVE_RETURNED_TO_RV(rv, returned_zval);
 
     return 1;
     }
 
 int dbx_mysql_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns persistent connection handle as resource on success or 0 as long on failure /*/
+    /* returns persistent connection handle as resource on success or 0 as long on failure */
     int number_of_arguments=3;
     zval ** arguments[3];
     zval * returned_zval=NULL;
@@ -67,19 +78,30 @@ int dbx_mysql_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, z
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         return 0;
         }
-    MOVE_RETURNED_TO_RV(rv, returned_zval);
 
     number_of_arguments=2;
     arguments[0]=db;
-    arguments[1]=rv;
+    arguments[1]=&returned_zval;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_select_db", &select_db_zval, number_of_arguments, arguments);
+    if (!select_db_zval || (select_db_zval->type==IS_BOOL && select_db_zval->value.lval==0) ) {
+        if (select_db_zval) zval_ptr_dtor(&select_db_zval);
+        /* also close connection */
+        number_of_arguments=1;
+        arguments[0]=&returned_zval;
+        dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_close", &select_db_zval, number_of_arguments, arguments);
+        if (select_db_zval) zval_ptr_dtor(&select_db_zval);
+        zval_ptr_dtor(&returned_zval);
+        return 0;
+        }
     zval_ptr_dtor(&select_db_zval);
+
+    MOVE_RETURNED_TO_RV(rv, returned_zval);
 
     return 1;
     }
 
 int dbx_mysql_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns 1 as long on success or 0 as long on failure /*/
+    /* returns 1 as long on success or 0 as long on failure */
     int number_of_arguments=1;
     zval ** arguments[1];
     zval * returned_zval=NULL;
@@ -95,7 +117,7 @@ int dbx_mysql_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS
     }
 
 int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns 1 as long or a result identifier as resource on success  or 0 as long on failure /*/
+    /* returns 1 as long or a result identifier as resource on success  or 0 as long on failure */
     int number_of_arguments=3;
     zval ** arguments[3];
     zval * returned_zval=NULL;
@@ -104,7 +126,7 @@ int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql
     arguments[1]=sql_statement;
     arguments[2]=dbx_handle;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_db_query", &returned_zval, number_of_arguments, arguments);
-    /*/ mysql_query returns a bool for success or failure, or a result_identifier for select statements /*/
+    /* mysql_query returns a bool for success or failure, or a result_identifier for select statements */
     if (!returned_zval || (returned_zval->type!=IS_BOOL && returned_zval->type!=IS_RESOURCE)) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         return 0;
@@ -114,7 +136,7 @@ int dbx_mysql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql
     }
 
 int dbx_mysql_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns column-count as long on success or 0 as long on failure /*/
+    /* returns column-count as long on success or 0 as long on failure */
     int number_of_arguments=1;
     zval ** arguments[1];
     zval * returned_zval=NULL;
@@ -130,7 +152,7 @@ int dbx_mysql_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTIO
     }
 
 int dbx_mysql_getcolumnname(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns column-name as string on success or 0 as long on failure /*/
+    /* returns column-name as string on success or 0 as long on failure */
     int number_of_arguments=2;
     zval ** arguments[2];
     zval * zval_column_index;
@@ -141,7 +163,7 @@ int dbx_mysql_getcolumnname(zval ** rv, zval ** result_handle, long column_index
     arguments[0]=result_handle;
     arguments[1]=&zval_column_index;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_field_name", &returned_zval, number_of_arguments, arguments);
-    /*/ mysql_field_name returns a string /*/
+    /* mysql_field_name returns a string */
     if (!returned_zval || returned_zval->type!=IS_STRING) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         FREE_ZVAL(zval_column_index);
@@ -153,7 +175,7 @@ int dbx_mysql_getcolumnname(zval ** rv, zval ** result_handle, long column_index
     }
 
 int dbx_mysql_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns column-type as string on success or 0 as long on failure /*/
+    /* returns column-type as string on success or 0 as long on failure */
     int number_of_arguments=2;
     zval ** arguments[2];
     zval * zval_column_index;
@@ -164,19 +186,20 @@ int dbx_mysql_getcolumntype(zval ** rv, zval ** result_handle, long column_index
     arguments[0]=result_handle;
     arguments[1]=&zval_column_index;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_field_type", &returned_zval, number_of_arguments, arguments);
-    /*/ mysql_field_name returns a string /*/
+    /* mysql_field_name returns a string */
     if (!returned_zval || returned_zval->type!=IS_STRING) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         FREE_ZVAL(zval_column_index);
         return 0;
         }
     FREE_ZVAL(zval_column_index);
+
     MOVE_RETURNED_TO_RV(rv, returned_zval);
     return 1;
     }
 
 int dbx_mysql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
+    /* returns array[0..columncount-1] as strings on success or 0 as long on failure */
     int number_of_arguments=2;
     zval ** arguments[2];
     zval * zval_resulttype=NULL;
@@ -198,7 +221,7 @@ int dbx_mysql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNA
     }
 
 int dbx_mysql_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS) {
-    /*/ returns string /*/
+    /* returns string */
     int number_of_arguments=1;
     zval ** arguments[1];
     zval * returned_zval=NULL;

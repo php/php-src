@@ -25,8 +25,7 @@
 #define PGSQL_NUM		1<<1
 
 int dbx_pgsql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS) {
-    /* returns connection handle as resource on success or 0 
-	   as long on failure */
+    /* returns connection handle as resource on success or 0 as long on failure */
     int nargs=5;
 	char *port="5432", *connstring=NULL;
     zval **args[5], *rarg = NULL;
@@ -71,8 +70,7 @@ int dbx_pgsql_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zv
 }
 
 int dbx_pgsql_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS) {
-    /* returns persistent connection handle as resource on success or 0 
-	   as long on failure */
+    /* returns persistent connection handle as resource on success or 0 as long on failure */
     int nargs=5;
 	char *port="5432", *connstring=NULL;
     zval **args[5], *rarg = NULL;
@@ -139,7 +137,7 @@ int dbx_pgsql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql
     zval **args[2];
     zval *returned_zval=NULL, *num_rows_zval=NULL;
 
-    // db_name is not used in this function
+    /* db_name is not used in this function */
     args[0]=dbx_handle;
     args[1]=sql_statement;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_exec", &returned_zval, nargs, args);
@@ -182,7 +180,7 @@ int dbx_pgsql_getcolumnname(zval ** rv, zval ** result_handle, long column_index
     arguments[0]=result_handle;
     arguments[1]=&zval_column_index;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fieldname", &returned_zval, number_of_arguments, arguments);
-    /*/ pgsql_field_name returns a string /*/
+    /* pg_fieldname returns a string */
     if (!returned_zval || returned_zval->type!=IS_STRING) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         FREE_ZVAL(zval_column_index);
@@ -205,20 +203,20 @@ int dbx_pgsql_getcolumntype(zval ** rv, zval ** result_handle, long column_index
     arguments[0]=result_handle;
     arguments[1]=&zval_column_index;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fieldtype", &returned_zval, number_of_arguments, arguments);
-    /* pgsql_field_name returns a string */
+    /* pg_fieldtype returns a string */
 	if (!returned_zval || returned_zval->type!=IS_STRING) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);
         FREE_ZVAL(zval_column_index);
         return 0;
 	}
     FREE_ZVAL(zval_column_index);
+
     MOVE_RETURNED_TO_RV(rv, returned_zval);
     return 1;
 }
 
 int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS) {
-    /* returns array[0..columncount-1] as strings on success or 0 
-	   as long on failure */
+    /* returns array[0..columncount-1] as strings on success or 0 as long on failure */
     int number_of_arguments=2;
 	int save_error_reporting=0;
     zval ** arguments[2];
