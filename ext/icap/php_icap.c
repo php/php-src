@@ -52,7 +52,7 @@
 #include "modules.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_global.h"
-#if (WIN32|WINNT)
+#ifdef PHP_WIN32
 #include "winsock.h"
 #endif
 CALSTREAM *cal_open();
