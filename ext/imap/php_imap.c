@@ -22,6 +22,7 @@
    |          Andrew Skalski      <askalski@chekinc.com>                  |
    |          Hartmut Holzgraefe  <hartmut@six.de>                        |
    |          Jani Taskinen       <sniper@iki.fi>                         |
+   |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
@@ -377,17 +378,26 @@ void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
  */
 void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 {
+	zval *t_map;
 	TSRMLS_FETCH();
+/* put parsing code here */
+	for(; qlist; qlist = qlist->next) {
+		MAKE_STD_ZVAL(t_map);
+		if (array_init(t_map) == FAILURE) {
+			php_error(E_WARNING, "Unable to allocate t_map memory");
+			FREE_ZVAL(t_map);
+			FREE_ZVAL(IMAPG(quota_return));
+		}
 
-	/* this should only be run through once */
-	for (; qlist; qlist = qlist->next)
-	{
-		IMAPG(quota_usage) = qlist->usage;
-		IMAPG(quota_limit) = qlist->limit;
+		add_assoc_long_ex(t_map, "usage", sizeof("usage"), qlist->usage);
+		add_assoc_long_ex(t_map, "limit", sizeof("usage"), qlist->limit);
+		add_assoc_zval_ex(IMAPG(quota_return), qlist->name, strlen(qlist->name), t_map);
 	}
 }
 /* }}} */
+
 #endif
+
 
 /* {{{ php_imap_init_globals
  */
@@ -411,6 +421,9 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->imap_sfolder_objects_tail = NIL;
 
 	imap_globals->folderlist_style = FLIST_ARRAY;
+#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+	imap_globals->quota_return = NULL;
+#endif
 }
 /* }}} */
 
@@ -1045,6 +1058,13 @@ PHP_FUNCTION(imap_get_quota)
 
 	convert_to_string_ex(qroot);
 
+	MAKE_STD_ZVAL(IMAPG(quota_return));
+	if (array_init(IMAPG(quota_return)) == FAILURE) {
+		php_error(E_WARNING, "Unable to allocate array memory");
+		FREE_ZVAL(IMAPG(quota_return));
+		RETURN_FALSE;
+	}
+
 	/* set the callback for the GET_QUOTA function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if(!imap_getquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot))) {
@@ -1053,12 +1073,12 @@ PHP_FUNCTION(imap_get_quota)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "Unable to allocate array memory");
 		RETURN_FALSE;
 	}
-		
-	add_assoc_long(return_value, "usage", IMAPG(quota_usage));
-	add_assoc_long(return_value, "limit", IMAPG(quota_limit));
+
+	add_next_index_zval(return_value, IMAPG(quota_return));
+
 }
 /* }}} */
 
@@ -1087,9 +1107,8 @@ PHP_FUNCTION(imap_set_quota)
 }
 /* }}} */
 
-
 /* {{{ proto int imap_setacl(int stream_id, string mailbox, string id, string rights)
-	Sets the ACL for a giving mailbox */
+	Sets the ACL for a given mailbox */
 PHP_FUNCTION(imap_setacl)
 {
 	zval **streamind, **mailbox, **id, **rights;
