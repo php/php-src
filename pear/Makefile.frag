@@ -20,9 +20,3 @@ install-pear:
 		exit 5; \
 	fi
 
-#$(builddir)/scripts/pear: $(srcdir)/scripts/pear.in $(top_builddir)/config.status
-#	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
-
-#$(builddir)/scripts/phptar: $(srcdir)/scripts/phptar.in $(top_builddir)/config.status
-#	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
-
