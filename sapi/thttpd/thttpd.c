@@ -34,6 +34,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef HAVE_GETNAMEINFO
+#include <sys/socket.h>
+#include <netdb.h>
+#endif
+
 typedef struct {
 	httpd_conn *hc;
 	int read_post_data;	
@@ -277,6 +282,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
+	int sa_len;
 
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC);
@@ -290,11 +296,22 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 	} else {
 		php_register_variable("SERVER_PROTOCOL", "HTTP/1.0", track_vars_array TSRMLS_CC);
 	}
-	
+
+#ifdef HAVE_GETNAMEINFO
+	switch (TG(hc)->client_addr.sa.sa_family) {
+		case AF_INET: sa_len = sizeof(struct sockaddr_in); break;
+		case AF_INET6: sa_len = sizeof(struct sockaddr_in6); break;
+		default: sa_len = 0;
+	}
+
+	if (getnameinfo(&TG(hc)->client_addr.sa, sa_len, buf, sizeof(buf), 0, 0, NI_NUMERICHOST) == 0) {
+#else
 	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
+		
 	/* string representation of IPs are never larger than 512 bytes */
 	if (p) {
 		memcpy(buf, p, strlen(p) + 1);
+#endif
 		ADD_STRING("REMOTE_ADDR");
 		ADD_STRING("REMOTE_HOST");
 	}
