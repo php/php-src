@@ -87,7 +87,24 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return sent;
 }
 
+#define ADD_VEC(str,l) vec[n].iov_base=str;len += (vec[n].iov_len=l); n++
 #define COMBINE_HEADERS 30
+
+static int do_writev(struct iovec *vec, int n, int len TSRMLS_DC)
+{
+	/*
+	 * XXX: partial writevs are not handled
+	 * This can only cause problems, if the user tries to send
+	 * huge headers, so I consider this a void issue right now.
+	 * The maximum size depends on SO_SNDBUF and is usually
+	 * at least 16KB from my experience.
+	 */
+	if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
+		php_handle_aborted_connection();
+	TG(hc)->bytes_sent += len;
+	
+	return 0;
+}	
 
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
@@ -96,57 +113,40 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	int n = 0;
 	zend_llist_position pos;
 	sapi_header_struct *h;
-	size_t len;
+	size_t len = 0;
 	
 	if (!SG(sapi_headers).http_status_line) {
-		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
-		len = strlen(buf);
-		vec[n].iov_base = buf;
-		vec[n].iov_len = len;
+		sprintf(buf, "HTTP/1.0 %d Code\r\n",  /* SAFE */
+				SG(sapi_headers).http_response_code);
+		ADD_VEC(buf, strlen(buf));
 	} else {
-		vec[n].iov_base = SG(sapi_headers).http_status_line;
-		len = strlen(vec[n].iov_base);
-		vec[n].iov_len = len;
-		vec[++n].iov_base = "\r\n";
-		vec[n].iov_len = 2;
-		len += 2;
+		ADD_VEC(SG(sapi_headers).http_status_line, 
+				strlen(SG(sapi_headers).http_status_line));
+		ADD_VEC("\r\n", 2);
 	}
 	TG(hc)->status = SG(sapi_headers).http_response_code;
-	TG(hc)->bytes_sent += len;
-	n++;
 
-#define DEF_CONTENT_TYPE_LINE "Content-Type: text/html\r\n"
+#define DEF_CT "Content-Type: text/html\r\n"
 	if (SG(sapi_headers).send_default_content_type) {
-		vec[n].iov_base = DEF_CONTENT_TYPE_LINE;
-		vec[n].iov_len = sizeof(DEF_CONTENT_TYPE_LINE) - 1;
-		n++;
+		ADD_VEC(DEF_CT, strlen(DEF_CT));
 	}
 
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
-		vec[n].iov_base = h->header;
-		vec[n++].iov_len = h->header_len;
+		ADD_VEC(h->header, h->header_len);
 		if (n >= COMBINE_HEADERS - 1) {
-			/* XXX: partial writevs are not handled */
-			if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
-				php_handle_aborted_connection();
+			len = do_writev(vec, n, len TSRMLS_CC);
 			n = 0;
 		}
-		vec[n].iov_base = "\r\n";
-		vec[n++].iov_len = 2;
+		ADD_VEC("\r\n", 2);
 		
 		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
+		
+	ADD_VEC("\r\n", 2);
+			
+	do_writev(vec, n, len TSRMLS_CC);
 
-	vec[n].iov_base = "\r\n";
-	vec[n++].iov_len = 2;
-
-	if (n) {
-		/* XXX: partial writevs are not handled */
-		if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
-			php_handle_aborted_connection();
-	}
-	
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -352,7 +352,6 @@ static void thttpd_module_main(TSRMLS_D)
 
 static void thttpd_request_ctor(TSRMLS_D)
 {
-	int offset;
 	smart_str s = {0};
 
 	SG(request_info).query_string = TG(hc)->query?strdup(TG(hc)->query):NULL;
