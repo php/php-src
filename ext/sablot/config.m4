@@ -32,7 +32,7 @@ if test "$PHP_SABLOT" != "no"; then
   PHP_EXTENSION(sablot, $ext_shared)
 fi
 
-AC_MSG_CHECKING(whether to enable UCD SNMP hack)
+AC_MSG_CHECKING(whether to enable descriptive error messages)
 AC_ARG_ENABLE(sablot-errors-descriptive,
 [  --enable-sablot-errors-descriptive  Enable Descriptive errors],[
   if test "$enableval" = "yes" ; then
