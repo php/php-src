@@ -614,7 +614,7 @@ encaps_list:
 	|	encaps_list T_NUM_STRING					{ do_add_string(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE		{ do_add_string(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list T_CHARACTER 					{ do_add_char(&$$, &$1, &$2 CLS_CC); }
-	|	encaps_list T_BAD_CHARACTER				{ do_add_char(&$$, &$1, &$2 CLS_CC); }
+	|	encaps_list T_BAD_CHARACTER				{ do_add_string(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list '['		{ $2.u.constant.value.chval = '['; do_add_char(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list ']'		{ $2.u.constant.value.chval = ']'; do_add_char(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list '{'		{ $2.u.constant.value.chval = '{'; do_add_char(&$$, &$1, &$2 CLS_CC); }
