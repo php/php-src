@@ -29,7 +29,6 @@
 #endif
 
 #ifdef PHP_WIN32
-#include <windows.h>
 #include <io.h>
 #endif
 

@@ -1,7 +1,6 @@
 #define NO_REGEX_EXTRA_H
 
 #ifdef WIN32
-#include <winsock2.h>
 #include <stddef.h>
 #endif
 

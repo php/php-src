@@ -22,10 +22,6 @@
 #ifndef PHP_H
 #define PHP_H
 
-#ifdef PHP_WIN32
-#include <winsock2.h>
-#endif
-
 #ifdef HAVE_DMALLOC
 #include <dmalloc.h>
 #endif

@@ -22,6 +22,9 @@
 
 /* {{{ includes
  */
+
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include <stdio.h>
 #include "php.h"
 #ifdef PHP_WIN32

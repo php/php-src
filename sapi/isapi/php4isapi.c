@@ -17,9 +17,18 @@
    +----------------------------------------------------------------------+
  */
 
+#include "php.h"
+#include <httpext.h>
+#include <httpfilt.h>
+#include <httpext.h>
+#include "php_main.h"
+#include "SAPI.h"
+#include "php_globals.h"
+#include "ext/standard/info.h"
+#include "php_variables.h"
+#include "php_ini.h"
+
 #ifdef PHP_WIN32
-# include <winsock2.h>
-# include <windows.h>
 # include <process.h>
 #else
 # define __try
@@ -27,16 +36,6 @@
 # define __declspec(foo)
 #endif
 
-#include <httpext.h>
-#include <httpfilt.h>
-#include <httpext.h>
-#include "php.h"
-#include "php_main.h"
-#include "SAPI.h"
-#include "php_globals.h"
-#include "ext/standard/info.h"
-#include "php_variables.h"
-#include "php_ini.h"
 
 #ifdef WITH_ZEUS
 # include "httpext.h"

@@ -1572,7 +1572,7 @@ consult the installation file that came with this distribution, or visit \n\
 	sapi_shutdown();
 
 #ifdef ZTS
-	tsrm_shutdown();
+	/*tsrm_shutdown();*/
 #endif
 
 #if PHP_WIN32 && ZEND_DEBUG && 0

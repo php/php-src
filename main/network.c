@@ -25,8 +25,6 @@
 #include <stddef.h>
 
 #ifdef PHP_WIN32
-#include <windows.h>
-#include <winsock2.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #elif defined(NETWARE)

@@ -209,9 +209,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define WINDOWS_LEAN_AND_MEAN
-#include <windows.h>
-
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
