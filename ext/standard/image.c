@@ -1026,7 +1026,7 @@ static struct gfxinfo *php_handle_xbm(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
-PHPAPI const char * php_image_type_to_mime_type(int image_type)
+PHPAPI char * php_image_type_to_mime_type(int image_type)
 {
 	switch( image_type) {
 		case IMAGE_FILETYPE_GIF:
