@@ -1,3 +1,19 @@
+2000-01-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_user.c: Fix namespace pollution
+
+    * Makefile.in: `cp' will do the job everywhere, even on AIX
+
+    * sapi/phttpd/phttpd.c
+      sapi/aolserver/aolserver.c
+      SAPI.c: Move reentrancy initialisation/destruction into SAPI.
+    These calls only do something, if reentrancy emulation is required.
+
+2000-01-05  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/string.c:
+    (php_setlocale) Fixed memory leak (bug #3105).
+
 2000-01-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/wddx/wddx.c
