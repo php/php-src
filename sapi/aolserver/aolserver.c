@@ -24,7 +24,7 @@
 
 /* $Id$ */
 
-/* conflict between PHP and AOLserver */
+/* conflict between PHP and AOLserver headers */
 #define Debug php_Debug
 #include "php.h"
 #undef Debug
@@ -32,7 +32,7 @@
 #ifdef HAVE_AOLSERVER
 
 #ifndef ZTS
-#error AOLserver module only useable in thread-safe mode
+#error AOLserver module is only useable in thread-safe mode
 #endif
 
 #define NS_BUF_SIZE 511
@@ -45,6 +45,8 @@
 #include "ns.h"
 
 #include "php_version.h"
+
+/* This symbol is used by AOLserver to tell the API version we expect */
 
 int Ns_ModuleVersion = 1;
 
@@ -73,8 +75,6 @@ typedef struct {
 	Ns_Conn *conn;
 	size_t data_avail;
 } ns_globals_struct;
-
-static void php_ns_config(php_ns_context *ctx);
 
 /*
  * php_ns_sapi_ub_write() writes data to the client connection.
@@ -139,7 +139,9 @@ php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	if(SG(sapi_headers).send_default_content_type) {
 		Ns_ConnSetRequiredHeaders(NSG(conn), "text/html", 0);
 	}
+	
 	Ns_ConnFlushHeaders(NSG(conn), SG(sapi_headers).http_response_code);
+	
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -264,7 +266,7 @@ php_ns_startup(sapi_module_struct *sapi_module)
 static sapi_module_struct sapi_module = {
 	"PHP Language",
 
-	php_ns_startup,						/* startup */
+	php_ns_startup,							/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
 	php_ns_sapi_ub_write,					/* unbuffered write */
