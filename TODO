@@ -97,6 +97,11 @@ ext/pcre
 --------
     * Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time, maybe
 
+ext/pcntl
+---------
+    * Change internal callback handler to use TICKS
+    * Remove all zend_extension code
+
 ext/pgsql
 ---------
     For PHP 4.3.0:
@@ -121,7 +126,8 @@ ext/session
 
 ext/sockets
 -----------
-    * Make the extension work with Solaris and the Sun GCC
+    * Implement IPv6
+    * Review/Fix vectors
 
 ext/standard
 ------------
