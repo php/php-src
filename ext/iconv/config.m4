@@ -8,8 +8,15 @@ PHP_ARG_WITH(iconv, for iconv support,
 if test "$PHP_ICONV" != "no"; then
 
   PHP_SETUP_ICONV(ICONV_SHARED_LIBADD, [
-	AC_MSG_CHECKING([if iconv supports errno])
-	AC_TRY_RUN([
+    iconv_avail="yes";
+  ],[
+    iconv_avail="no";
+  ])
+
+  if test "$iconv_avail" != "no"; then
+
+    AC_MSG_CHECKING([if iconv supports errno])
+    AC_TRY_RUN([
 #define LIBICONV_PLUG
 #include <iconv.h>
 #include <errno.h>
@@ -39,17 +46,37 @@ int main() {
 ],[
 	AC_MSG_RESULT(yes)
     PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1)
-    AC_DEFINE(ICONV_SUPPORTS_ERRNO,1,[Whether iconv supports error no or not])
+    AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
 ],[
     PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0)
-    AC_DEFINE(ICONV_SUPPORTS_ERRNO,0,[Whether iconv supports error no or not])
+    AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
 	AC_MSG_RESULT(no)
 ])
+    if test -z "$iconv_lib_name"; then
+      AC_MSG_CHECKING([if iconv is glibc's])
+      AC_TRY_COMPILE([#include <iconv.h>],[void __gconv(); int main() { __gconv(); } ],[
+      AC_MSG_RESULT(yes)
+      PHP_DEFINE([ICONV_IMPL],["glibc"])
+      AC_DEFINE([ICONV_IMPL],["glibc"],[Which iconv implementation to use])
+],[
+      AC_MSG_RESULT(no)
+])
+    else
+      case "$iconv_lib_name" in
+        iconv [)]
+          PHP_DEFINE([ICONV_IMPL],["libiconv"])
+          AC_DEFINE([ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
+          ;;
+        giconv [)]
+          PHP_DEFINE([ICONV_IMPL],["giconv"])
+          AC_DEFINE([ICONV_IMPL],["giconv"],[Which iconv implementation to use])
+          ;;
+      esac
+    fi 
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared)
     PHP_SUBST(ICONV_SHARED_LIBADD)
-  ], [
+  else
     AC_MSG_ERROR(Please reinstall the iconv library.)
-  ])
-
+  fi
 fi
