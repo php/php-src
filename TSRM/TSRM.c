@@ -65,10 +65,10 @@ void *ts_resource_read( tsrm_tls_entry *thread_resources, ts_rsrc_id id );
 static int tsrm_error_level;
 static FILE *tsrm_error_file;
 #if TSRM_DEBUG
-#define TSRM_ERROR tsrm_error
+#define TSRM_ERROR(a) tsrm_error a
 #define TSRM_SAFE_ARRAY_OFFSET(array, offset, range)	(((offset)>=0 && (offset)<(range)) ? array[offset] : NULL)
 #else
-#define TSRM_ERROR
+#define TSRM_ERROR(a)
 #define TSRM_SAFE_ARRAY_OFFSET(array, offset, range)	array[offset]
 #endif
 
@@ -98,7 +98,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 	tsrm_tls_table = (tsrm_tls_entry **) calloc(tsrm_tls_table_size, sizeof(tsrm_tls_entry *));
 	if (!tsrm_tls_table) {
-		TSRM_ERROR(TSRM_ERROR_LEVEL_ERROR, "Unable to allocate TLS table");
+		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate TLS table"));
 		return 0;
 	}
 	id_count=0;
@@ -106,7 +106,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 	resource_types_table_size = expected_resources;
 	resource_types_table = (tsrm_resource_type *) calloc(resource_types_table_size, sizeof(tsrm_resource_type));
 	if (!resource_types_table) {
-		TSRM_ERROR(TSRM_ERROR_LEVEL_ERROR, "Unable to allocate resource types table");
+		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate resource types table"));
 		free(tsrm_tls_table);
 		tsrm_tls_table = NULL;
 		return 0;
@@ -116,7 +116,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 	tsrm_new_thread_begin_handler = tsrm_new_thread_end_handler = NULL;
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Started up TSRM, %d expected threads, %d expected resources", expected_threads, expected_resources);
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Started up TSRM, %d expected threads, %d expected resources", expected_threads, expected_resources));
 	return 1;
 }
 
@@ -151,7 +151,7 @@ TSRM_API void tsrm_shutdown(void)
 	}
 	tsrm_mutex_free(tsmm_mutex);
 	tsmm_mutex = NULL;
-	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Shutdown TSRM");
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Shutdown TSRM"));
 	if (tsrm_error_file!=stderr) {
 		fclose(tsrm_error_file);
 	}
@@ -169,20 +169,20 @@ TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_alloca
 	ts_rsrc_id new_id;
 	int i;
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size);
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtaining a new resource id, %d bytes", size));
 
 	tsrm_mutex_lock(tsmm_mutex);
 
 	/* obtain a resource id */
 	new_id = id_count++;
-	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", TSRM_SHUFFLE_RSRC_ID(new_id));
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Obtained resource id %d", TSRM_SHUFFLE_RSRC_ID(new_id)));
 
 	/* store the new resource type in the resource sizes table */
 	if (resource_types_table_size < id_count) {
 		resource_types_table = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
 		if (!resource_types_table) {
 			tsrm_mutex_unlock(tsmm_mutex);
-			TSRM_ERROR(TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource");
+			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource"));
 			return 0;
 		}
 		resource_types_table_size = id_count;
@@ -213,7 +213,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_alloca
 	}
 	tsrm_mutex_unlock(tsmm_mutex);
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", TSRM_SHUFFLE_RSRC_ID(new_id));
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully allocated new resource id %d", TSRM_SHUFFLE_RSRC_ID(new_id)));
 	return TSRM_SHUFFLE_RSRC_ID(new_id);
 }
 
@@ -222,7 +222,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 {
 	int i;
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id);
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
 	(*thread_resources_ptr) = (tsrm_tls_entry *) malloc(sizeof(tsrm_tls_entry));
 	(*thread_resources_ptr)->storage = (void **) malloc(sizeof(void *)*id_count);
 	(*thread_resources_ptr)->count = id_count;
@@ -275,7 +275,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		thread_resources = NULL;
 #endif
 		if (thread_resources) {
-			TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for current thread %d", id, (long) thread_resources->thread_id );
+			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for current thread %d", id, (long) thread_resources->thread_id ));
 			return ts_resource_read( thread_resources, id );
 		}
 		thread_id = tsrm_thread_id();
@@ -283,7 +283,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		thread_id = *th_id;
 	}
 
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for thread %ld", id, (long) thread_id);
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for thread %ld", id, (long) thread_id));
 	tsrm_mutex_lock(tsmm_mutex);
 
 	hash_value = THREAD_HASH_OF(thread_id, tsrm_tls_table_size);
@@ -324,9 +324,9 @@ void *ts_resource_read( tsrm_tls_entry *thread_resources, ts_rsrc_id id )
 
 	resource = TSRM_SAFE_ARRAY_OFFSET(thread_resources->storage, TSRM_UNSHUFFLE_RSRC_ID(id), thread_resources->count);
 	if (resource) {
-		TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - %x", id, (long) thread_resources->thread_id, (long) resource);
+		TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - %x", id, (long) thread_resources->thread_id, (long) resource));
 	} else {
-		TSRM_ERROR(TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)", id, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1));
+		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)", id, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1)));
 		abort();
 	}
 	return resource;
@@ -464,7 +464,7 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 /* Lock a mutex */
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 {
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld", tsrm_thread_id());
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld", tsrm_thread_id()));
 #ifdef TSRM_WIN32
 	EnterCriticalSection(mutexp);
 	return 1;
@@ -485,7 +485,7 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 /* Unlock a mutex */
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 {
-	TSRM_ERROR(TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld", tsrm_thread_id());
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld", tsrm_thread_id()));
 #ifdef TSRM_WIN32
 	LeaveCriticalSection(mutexp);
 	return 1;
