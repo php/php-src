@@ -1300,8 +1300,6 @@ static SAX_RETURN sax_enddoc(void *ctx)
 
 /* {{{ _error_parse()
    Parse a char ** array into an _error_fields structure */
-#define MIN(__a, __b) ((__a) < (__b) ? (__a) : (__b))
-
 struct _error_fields {
 	char *message;
 	char *type;
