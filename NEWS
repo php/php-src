@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.5
+- Upgraded PCRE library to version 4.5. The bundled version now comes with
+  non-recursive matching functions which should help with some regular
+  expressions that ran into the stack limit. (Andrei)
 - Updated bundled PostgreSQL library to version 7.4 in Windows distribution.
   (Edin)
 - Added support for --program-prefix and --program-suffix configure options.

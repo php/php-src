@@ -545,8 +545,8 @@ for (i = 1; i < argc; i++)
     }
   }
 
-pattern_list = malloc(MAX_PATTERN_COUNT * sizeof(pcre *));
-hints_list = malloc(MAX_PATTERN_COUNT * sizeof(pcre_extra *));
+pattern_list = (pcre **)malloc(MAX_PATTERN_COUNT * sizeof(pcre *));
+hints_list = (pcre_extra **)malloc(MAX_PATTERN_COUNT * sizeof(pcre_extra *));
 
 if (pattern_list == NULL || hints_list == NULL)
   {
