@@ -161,13 +161,24 @@ PHP_FUNCTION(setcookie)
 /* }}} */
 
 
-/* {{{ proto int headers_sent(void)
+/* {{{ proto bool headers_sent([string &$file [, int &$line]])
    Returns true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No parameters expected, %d given", ZEND_NUM_ARGS());
+	zval *arg1, *arg2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zz", &arg1, &arg2) == FAILURE)
 		return;
+
+	
+	switch(ZEND_NUM_ARGS()) {
+	case 2:
+		zval_dtor(arg2);
+		ZVAL_LONG(arg2, php_get_output_start_lineno(TSRMLS_C));
+	case 1:
+		zval_dtor(arg1);
+		ZVAL_STRING(arg1, php_get_output_start_filename(TSRMLS_C), 1);
+		break;
 	}
 
 	if (SG(headers_sent)) {
