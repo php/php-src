@@ -43,6 +43,7 @@ CWD_API int virtual_chdir_file(char *path);
 CWD_API int virtual_filepath(char *path, char **filepath);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
 CWD_API int virtual_stat(const char *path, struct stat *buf);
+CWD_API int virtual_lstat(const char *path, struct stat *buf);
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
 
 ZEND_BEGIN_MODULE_GLOBALS(cwd)

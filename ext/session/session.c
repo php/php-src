@@ -497,7 +497,7 @@ static void last_modified(void)
 
 	path = SG(request_info).path_translated;
 	if (path) {
-		if (stat(path, &sb) == -1) {
+		if (V_STAT(path, &sb) == -1) {
 			return;
 		}
 
