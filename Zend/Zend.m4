@@ -1,3 +1,8 @@
+dnl
+dnl $Id$
+dnl
+dnl This file contains Zend specific autoconf functions.
+dnl
 
 AC_DEFUN(LIBZEND_BISON_CHECK,[
 
@@ -5,7 +10,7 @@ if test "$YACC" != "bison -y"; then
     AC_MSG_WARN(You will need bison if you want to regenerate the Zend parser.)
 else
     AC_MSG_CHECKING(bison version)
-    set `bison --version| sed -e 's/^GNU Bison version //' -e 's/\./ /'`
+    set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'`
     if test "${1}" = "1" -a "${2}" -lt "28"; then
         AC_MSG_WARN(You will need bison 1.28 if you want to regenerate the Zend parser (found ${1}.${2}).)
     fi
