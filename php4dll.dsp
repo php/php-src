@@ -153,6 +153,14 @@ SOURCE=.\safe_mode.c
 
 SOURCE=.\SAPI.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\strlcat.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\strlcpy.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

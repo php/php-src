@@ -528,7 +528,7 @@ PHP_FUNCTION(tempnam)
 	convert_to_string(arg1);
 	convert_to_string(arg2);
 	d = estrndup(arg1->value.str.val,arg1->value.str.len);
-	strncpy(p,arg2->value.str.val,sizeof(p));
+	strlcpy(p,arg2->value.str.val,sizeof(p));
 
 	t = tempnam(d,p);
 	efree(d);

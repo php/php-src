@@ -206,7 +206,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 			if(PG(doc_root)) {
 				snprintf(trypath, MAXPATHLEN, "%s%s", PG(doc_root), filename);
 			} else {
-				strncpy(trypath,filename,MAXPATHLEN);
+				strlcpy(trypath,filename,sizeof(trypath));
 			}
 			if (!_php3_checkuid(trypath,2)) {
 				return(NULL);
