@@ -2978,10 +2978,10 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	
 	body=mail_body(imap_le_struct->imap_stream, Z_LVAL_PP(msg), Z_STRVAL_PP(section));
-	if (body->type) {
+	if (body->type <= TYPEMAX) {
 		add_property_long(return_value, "type", body->type);
 	}
-	if (body->encoding) {
+	if (body->encoding <= ENCMAX) {
 		add_property_long(return_value, "encoding", body->encoding);
 	}
 	
@@ -3983,10 +3983,10 @@ void _php_imap_add_body(zval *arg, BODY *body)
 	PARAMETER *par, *dpar;
 	PART *part;
 	
-	if (body->type) {
+	if (body->type <= TYPEMAX) {
 		add_property_long(arg, "type", body->type);
 	}
-	if (body->encoding) {
+	if (body->encoding <= ENCMAX) {
 		add_property_long(arg, "encoding", body->encoding);
 	}
 
