@@ -20,7 +20,7 @@ cwd=`pwd`
 PHP_CONFIG_NICE(config.nice)
 
 for arg in $0 "$@"; do
-    CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
+  CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'\n"
 done
 
 php_shtool=$srcdir/build/shtool
@@ -969,8 +969,8 @@ dnl  fi
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
     echo "|                                                                    |"
-    echo "| Please go read http://www.php.net/FAQ.php#6.11 and make the        |"
-    echo "| changes described there and try again.                             |"
+    echo "| Please go read http://www.php.net/manual/en/faq.build.php#AEN61338 |"
+    echo "| and make the changes described there and try again.                |"
   fi
 
   # Warn about CGI version with no extra security options.
