@@ -44,6 +44,7 @@ configuration layers are "user", "system" and "default".
         'config-get' => array(
             'summary' => 'Show One Setting',
             'function' => 'doConfigGet',
+            'shortcut' => 'cg',
             'options' => array(),
             'doc' => 'Displays the value of one configuration parameter.  The
 first argument is the name of the parameter, an optional second argument
@@ -56,6 +57,7 @@ just specified.
         'config-set' => array(
             'summary' => 'Change Setting',
             'function' => 'doConfigSet',
+            'shortcut' => 'cs',
             'options' => array(),
             'doc' => 'Sets the value of one configuration parameter.  The first
 argument is the name of the parameter, the second argument is the new value.

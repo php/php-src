@@ -35,6 +35,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
         'install' => array(
             'summary' => 'Install Package',
             'function' => 'doInstall',
+            'shortcut' => 'i',
             'options' => array(
                 'force' => array(
                     'shortopt' => 'f',
@@ -80,6 +81,7 @@ four ways of specifying packages.
         'upgrade' => array(
             'summary' => 'Upgrade Package',
             'function' => 'doInstall',
+            'shortcut' => 'up',
             'options' => array(
                 'force' => array(
                     'shortopt' => 'f',
@@ -111,6 +113,7 @@ More than one package may be specified at once.
         'uninstall' => array(
             'summary' => 'Un-install Package',
             'function' => 'doUninstall',
+            'shortcut' => 'un',
             'options' => array(
                 'nodeps' => array(
                     'shortopt' => 'n',

@@ -28,9 +28,10 @@ class PEAR_Command_Remote extends PEAR_Command_Common
     // {{{ command definitions
 
     var $commands = array(
-        'info-remote' => array(
+        'remote-info' => array(
             'summary' => 'Information About Remote Packages',
-            'function' => 'doInfoRemote',
+            'function' => 'doRemoteInfo',
+            'shortcut' => 'ri',
             'options' => array(),
             'doc' => '<package>
 Get details on a package from the server.',
@@ -38,14 +39,16 @@ Get details on a package from the server.',
         'list-upgrades' => array(
             'summary' => 'List Available Upgrades',
             'function' => 'doListUpgrades',
+            'shortcut' => 'lu',
             'options' => array(),
             'doc' => '
 List releases on the server of packages you have installed where
 a newer version is available with the same release state (stable etc.).'
             ),
-        'list-remote' => array(
+        'remote-list' => array(
             'summary' => 'List Remote Packages',
-            'function' => 'doListRemote',
+            'function' => 'doRemoteList',
+            'shortcut' => 'rl',
             'options' => array(),
             'doc' => '
 Lists the packages available on the configured server along with the
@@ -54,6 +57,7 @@ latest stable release of each package.',
         'download' => array(
             'summary' => 'Download Package',
             'function' => 'doDownload',
+            'shortcut' => 'd',
             'options' => array(
                 'nocompress' => array(
                     'shortopt' => 'Z',
