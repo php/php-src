@@ -2457,7 +2457,7 @@ PHP_FUNCTION(pdf_setpolydash)
 	array = Z_ARRVAL_PP(arg2);
 	len = zend_hash_num_elements(array);
 
-	darray = emalloc(len * sizeof(double));
+	darray = safe_emalloc(len, sizeof(double), 0);
 	zend_hash_internal_pointer_reset(array);
 	for (i=0; i<len; i++) {
 	    zval *keydata, **keydataptr;
