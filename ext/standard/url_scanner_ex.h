@@ -38,10 +38,6 @@ typedef struct {
 	smart_str val; /* read only */
 	smart_str buf;
 
-	/* Dito, but they are used only for preserving data across calls */
-	smart_str c_tag;
-	smart_str c_arg;
-
 	/* The result buffer */
 	smart_str result;
 
