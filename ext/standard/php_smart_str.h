@@ -36,19 +36,33 @@
 #define SMART_STR_PREALLOC 128
 #endif
 
+#ifndef SMART_STR_START_SIZE
+#define SMART_STR_START_SIZE 78
+#endif
+
 #ifdef SMART_STR_USE_REALLOC
 #define SMART_STR_REALLOC(a,b,c) realloc((a),(b))
 #else
 #define SMART_STR_REALLOC(a,b,c) perealloc((a),(b),(c))
 #endif
 
+#define SMART_STR_DO_REALLOC(d, what) \
+	(d)->c = SMART_STR_REALLOC((d)->c, (d)->a + 1, (what))
 
 #define smart_str_alloc4(d, n, what, newlen) do {					\
-	if (!(d)->c) (d)->len = (d)->a = 0;								\
-	newlen = (d)->len + (n);										\
-	if (newlen >= (d)->a) {											\
-		(d)->a = newlen + SMART_STR_PREALLOC;						\
-		(d)->c = SMART_STR_REALLOC((d)->c, (d)->a + 1, (what));		\
+	if (!(d)->c) {													\
+		(d)->len = 0;												\
+		newlen = (n);												\
+		(d)->a = newlen < SMART_STR_START_SIZE 						\
+				? SMART_STR_START_SIZE 								\
+				: newlen + SMART_STR_PREALLOC;						\
+		SMART_STR_DO_REALLOC(d, what);								\
+	} else {														\
+		newlen = (d)->len + (n);									\
+		if (newlen >= (d)->a) {										\
+			(d)->a = newlen + SMART_STR_PREALLOC;					\
+			SMART_STR_DO_REALLOC(d, what);							\
+		}															\
 	}																\
 } while (0)
 
