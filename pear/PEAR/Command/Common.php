@@ -208,9 +208,9 @@ class PEAR_Command_Common extends PEAR
                 }
                 if (isset($v['shortopt'])) {
                     $s = $v['shortopt'];
-                    $help .= "  -$s$sapp, --$k$lapp\n";
+                    @$help .= "  -$s$sapp, --$k$lapp\n";
                 } else {
-                    $help .= "  --$k$lapp\n";
+                    @$help .= "  --$k$lapp\n";
                 }
                 $p = "        ";
                 $doc = rtrim(str_replace("\n", "\n$p", $v['doc']));
