@@ -414,6 +414,7 @@ int main(int argc, char *argv[])
 	zend_llist global_vars;
 	int interactive=0;
 	int module_started = 0;
+	int lineno = 0;
 	char *exec_direct=NULL;
 	char *param_error=NULL;
 /* end of temporary locals */
@@ -702,7 +703,7 @@ int main(int argc, char *argv[])
 						fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 					}
 				}
-				CG(start_lineno) = 2;
+				lineno = 2;
 			} else {
 				rewind(file_handle.handle.fp);
 			}
@@ -733,6 +734,7 @@ int main(int argc, char *argv[])
 			PUTS("Could not startup.\n");
 			goto err;
 		}
+		CG(start_lineno) = lineno;
 		*arg_excp = arg_free; /* reconstuct argv */
 		if (no_headers) {
 			SG(headers_sent) = 1;
