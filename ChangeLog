@@ -1,3 +1,53 @@
+2000-02-27  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/browscap.c: - Hopefully fix browscap problem
+
+    * genif.pl: - Bye bye Perl.
+
+2000-02-27  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: .
+
+2000-02-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: .
+
+2000-02-27  Thies C. Arntzen  <thies@digicol.de>
+
+    * MODULES_STATUS
+      TODO: *** empty log message ***
+
+    * ext/oci8/oci8.c: out of space in private (brain) memory;-)
+
+2000-02-27  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
+    * ext/sybase/sybase.c: Compile fix
+
+2000-02-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/HTTP.php: Avoid E_NOTICE errors in PEAR code.
+
+2000-02-27  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: just so that i don't forget
+
+2000-02-27  Andi Gutmans  <andi@php.net>
+
+    * fopen-wrappers.c: - Fix bug 3640
+
+2000-02-27  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c:
+    Some formatting, and fix the crashes in mcal_next_recurrence (finally!)
+
 2000-02-26  Zeev Suraski  <zeev@php.net>
 
     * main.c
