@@ -1,3 +1,103 @@
+2004-07-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/formatted_print.c
+      ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug22207.phpt
+      ext/standard/tests/strings/bug22207.phpt
+      ext/standard/tests/strings/bug28633.phpt
+      ext/standard/tests/strings/bug28633.phpt:
+      MFH: Fixed bug #28633 (sprintf incorrectly adding padding to floats).
+
+    * ext/standard/formatted_print.c
+      ext/standard/tests/strings/bug22207.phpt
+      ext/standard/tests/strings/bug28633.phpt:
+      Fixed bug #28633 (sprintf incorrectly adding padding to floats).
+
+2004-07-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/documentfragment.c
+      ext/dom/dom_fe.h:
+      add appendXML() to DOMFragment (chregu)
+
+2004-07-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * EXTENSIONS
+      ext/standard/credits_ext.h:
+      Update
+
+2004-07-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/zlib_filter.c:
+      not safe for persistent streams
+
+2004-07-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/config.w32:
+      MFB: enable exslt support for win32 builds
+      WS fixes for exslt tests
+
+    * (PHP_5_0)
+      ext/xsl/config.w32:
+      enable exslt support for win32 builds
+      WS fixes for exslt tests
+
+    * ext/dom/document.c:
+      MFB: add missing optional value param to createElementNS (chregu)
+
+    * (PHP_5_0)
+      ext/dom/document.c:
+      add missing optional value param to createElementNS (chregu)
+
+2004-07-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * TODO-5.1:
+      remove this entry
+
+2004-07-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * acinclude.m4
+      configure.in
+      build/genif.sh
+      build/order_by_dep.awk
+      ext/dom/config.m4
+      ext/simplexml/config.m4
+      ext/xml/config.m4
+      ext/xsl/config.m4:
+      Implement extension load-order deps.
+
+2004-07-18  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/explode.phpt:
+      Add support for negative values of limit of explode(). If limit is negative
+      then all components are returned except the last abs(limit) ones.
+
+2004-07-18  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c:
+      - A Bug #29147 was fixed. Thanks to Antony Dovgal <tony2001 at phpclub.net>
+        for his patch.
+
+2004-07-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/libsqlite/src/parse.c:
+      touch to avoid weird implicit makefile rule
+
+    * (PECL_4_3)
+      ext/sqlite/package.xml
+      ext/sqlite/sqlite.c
+      ext/sqlite/libsqlite/src/parse.c:
+      prep for release.
+      Touch parse.c to avoid weird implicit bison make rule breaking build
+
+    * ext/standard/basic_functions.c:
+      don't allocate 0 bytes here either
+
+    * ZendEngine2/zend_execute_API.c:
+      No point allocating 0 bytes
+
 2004-07-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * (PHP_5_0)
