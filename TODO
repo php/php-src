@@ -1,6 +1,14 @@
 Things to do or at least think about doing in the future. Name in
 parenthesis means that person has taken on this project.
 
+global
+------
+    * replace standard functions which work on static data with 
+      reentrant-save functions
+    * there is only one current directory per process; to make
+      chdir() etc. thread-safe, we must introduce a per-thread
+      current directory
+
 ext/standard
 ------------
 	* strpad() (Andrei)
