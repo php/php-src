@@ -941,6 +941,9 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 		}
 	}
 
+	INIT_PZVAL(&output);
+	output.refcount = 1;
+
 	/* Create object */
 	INIT_PZVAL(&reflector);
 	if (object_and_properties_init(&reflector, ce_ptr, NULL) == FAILURE) {
