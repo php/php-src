@@ -720,12 +720,12 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 
 		if (call_user_function_ex(CG(function_table), NULL, &nm_zlib_get_coding_type, &uf_result, 0, NULL, 1, NULL TSRMLS_CC) != FAILURE && uf_result != NULL && Z_TYPE_P(uf_result) == IS_STRING) {
 			char buf[128];
-			uint len;
+			int len;
 
 			assert(Z_STRVAL_P(uf_result) != NULL);
 
 			len = snprintf(buf, sizeof(buf), "Content-Encoding: %s", Z_STRVAL_P(uf_result));
-			if (sapi_add_header(buf, len, 1)==FAILURE) {
+			if (len <= 0 || sapi_add_header(buf, len, 1) == FAILURE) {
 				return FAILURE;
 			}
 			if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1) == FAILURE) {
