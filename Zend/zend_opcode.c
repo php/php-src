@@ -186,13 +186,13 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 
 void init_op(zend_op *op CLS_DC)
 {
+	memset(&op->result, 0, sizeof(znode));
 	op->lineno = CG(zend_lineno);
 	op->filename = zend_get_compiled_filename(CLS_C);
 	op->result.op_type = IS_UNUSED;
 	op->extended_value = 0;
 	memset(&op->op1, 0, sizeof(znode));
 	memset(&op->op2, 0, sizeof(znode));
-	memset(&op->result, 0, sizeof(znode));
 }
 
 zend_op *get_next_op(zend_op_array *op_array CLS_DC)
