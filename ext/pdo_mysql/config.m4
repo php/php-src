@@ -29,7 +29,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_RESULT([no])
   fi
 
-  for i in $PHP_MYSQL /usr/local /usr; do
+  for i in $PHP_PDO_MYSQL /usr/local /usr; do
     if test -r $i/include/mysql/mysql.h; then
       MYSQL_DIR=$i
       MYSQL_INC_DIR=$i/include/mysql
