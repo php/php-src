@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2005, PHP 5.0.4
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Added length and charsetnr for field array and object in mysqli. (Georg)
+- Changed phpize not to require automake and libtool. (Jani)
+- Fixed build system to always use bundled libtool files. (Jani)
 - Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values). (Georg)
 - Fixed bug #31480 (Possible infinite loop in imap_mail_compose()). (Ilia)
 - Fixed bug #31479 (Fixed crash in chunk_split(), when chunklen > strlen). (Ilia)
