@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.40 2004-04-29 00:17:09 wez Exp $
+// $Id: confutils.js,v 1.41 2004-05-18 09:58:45 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -708,6 +708,64 @@ function OLD_CHECK_LIB(libnames, target, path_to_check)
 
 }
 
+function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check)
+{
+	var c = false;
+	var sym;
+
+	STDOUT.Write("Checking for " + func_name + " in " + header_name + " ... ");
+
+	c = GREP_HEADER(header_name, func_name, path_to_check);
+
+	sym = func_name.toUpperCase();
+	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");
+
+	AC_DEFINE("HAVE_" + sym, c ? 1 : 0);
+
+	if (c) {
+		STDOUT.WriteLine("OK");
+		return c;
+	}
+	STDOUT.WriteLine("No");
+	return false;	
+}
+
+function GREP_HEADER(header_name, regex, path_to_check)
+{
+	var c = false;
+
+	if (FSO.FileExists(path_to_check + "\\" + header_name)) {
+		c = file_get_contents(path_to_check + "\\" + header_name);
+	}
+
+	if (!c) {
+		/* look in the include path */
+
+		var p = search_paths(header_name, path_to_check, "INCLUDE");
+		if (typeof(p) == "string") {
+			c = file_get_contents(p);
+		} else if (p == false) {
+			p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
+			if (typeof(p) == "string") {
+				c = file_get_contents(p);
+			}
+		} 
+		if (!c) {
+			return false;
+		}
+	}
+
+	if (typeof(regex) == "string") {
+		regex = new RegExp(regex);
+	}
+
+	if (c.match(regex)) {
+		/* caller can now use RegExp.$1 etc. to get at patterns */
+		return true;
+	}
+	return false;
+}
+
 function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part)
 {
 	var dir_part_to_add = "";
@@ -853,10 +911,15 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 function file_get_contents(filename)
 {
 	var f, c;
-	f = FSO.OpenTextFile(filename, 1);
-	c = f.ReadAll();
-	f.Close();
-	return c;
+	try {
+		f = FSO.OpenTextFile(filename, 1);
+		c = f.ReadAll();
+		f.Close();
+		return c;
+	} catch (e) {
+		STDOUT.WriteLine("Problem reading " + filename);
+		return false;
+	}
 }
 
 // Add a dependency on another extension, so that
