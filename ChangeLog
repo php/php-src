@@ -1,3 +1,25 @@
+2000-11-10  Ben Mansell  <ben@zeus.com>
+
+    * README.Zeus: Further updates to README.Zeus
+
+2000-11-10  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - new function set_content() which is a workaround for bug #6457
+
+    * NEWS: - Note about improved domxml
+
+    * tests/testdom: - add testing for xpath
+
+    * ext/domxml/php_domxml.c: - Fixed many problems to make xpath working
+    - Each function now expects an object and not a resource anymore
+      I hope this makes it more straightforward for the PHP-Programmer
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    - Fixed several error including segm fault (but still one left :-(
+
 2000-11-09  Colin Viebrock  <colin@easydns.com>
 
     * NEWS: oops, forgot to document it :)
