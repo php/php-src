@@ -6537,7 +6537,7 @@ mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC)
 }
 
 #if defined(HAVE_MBSTR_RU)
-// all of this is so ugly now!
+/* all of this is so ugly now! */
 static int
 mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC)
 {

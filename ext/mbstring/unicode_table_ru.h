@@ -1,4 +1,4 @@
-// cp1251 to Unicode table
+/* cp1251 to Unicode table */
 static const unsigned short cp1251_ucs_table[] = {
  0x0402, 0x0403, 0x201a, 0x0453, 0x201e, 0x2026, 0x2020, 0x2021, 
  0x20ac, 0x2030, 0x0409, 0x2039, 0x040a, 0x040c, 0x040b, 0x040f, 
@@ -21,7 +21,7 @@ static const int cp1251_ucs_table_min = 0x80;
 static const int cp1251_ucs_table_len = (sizeof (cp1251_ucs_table) / sizeof (unsigned short));
 static const int cp1251_ucs_table_max = 0x80 + (sizeof (cp1251_ucs_table) / sizeof (unsigned short));
 
-// cp866_DOSCyrillicRussian to Unicode table
+/* cp866_DOSCyrillicRussian to Unicode table */
 static const unsigned short cp866_ucs_table[] = {
  0x0410, 0x0411, 0x0412, 0x0413, 0x0414, 0x0415, 0x0416, 0x0417, 
  0x0418, 0x0419, 0x041a, 0x041b, 0x041c, 0x041d, 0x041e, 0x041f, 
@@ -44,7 +44,7 @@ static const int cp866_ucs_table_min = 0x80;
 static const int cp866_ucs_table_len = (sizeof (cp866_ucs_table) / sizeof (unsigned short));
 static const int cp866_ucs_table_max = 0x80 + (sizeof (cp866_ucs_table) / sizeof (unsigned short));
 
-// KOI8-R (RFC1489) to Unicode
+/* KOI8-R (RFC1489) to Unicode */
 static const unsigned short koi8r_ucs_table[] = {
  0x2500, 0x2502, 0x250c, 0x2510, 0x2514, 0x2518, 0x251c, 0x2524, 
  0x252c, 0x2534, 0x253c, 0x2580, 0x2584, 0x2588, 0x258c, 0x2590, 
