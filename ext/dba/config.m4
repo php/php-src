@@ -233,6 +233,5 @@ if test "$HAVE_DBA" = "1"; then
   PHP_SUBST(DBA_SHARED_LIBADD)
 else
   AC_MSG_RESULT(no)
-  AC_DEFINE(HAVE_DBA, 0, [ ])
 fi
 
