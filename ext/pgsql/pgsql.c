@@ -36,6 +36,7 @@
 #define PGSQL_NUM		1<<1
 #define PGSQL_BOTH		(PGSQL_ASSOC|PGSQL_NUM)
 
+#define CHECK_DEFAULT_LINK(x) if (x == -1) { php_error(E_WARNING, "%s: no PostgreSQL link opened yet", get_active_function_name()); }
 
 function_entry pgsql_functions[] = {
 	PHP_FE(pg_connect,		NULL)
@@ -443,7 +444,7 @@ PHP_FUNCTION(pg_pconnect)
    Close a PostgreSQL connection */ 
 PHP_FUNCTION(pg_close)
 {
-	zval **pgsql_link;
+	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	PGLS_FETCH();
@@ -451,6 +452,7 @@ PHP_FUNCTION(pg_close)
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 1:
 			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
@@ -478,7 +480,7 @@ PHP_FUNCTION(pg_close)
 
 void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
-	zval **pgsql_link;
+	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	PGLS_FETCH();
@@ -486,6 +488,7 @@ void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 1:
 			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
@@ -578,7 +581,7 @@ PHP_FUNCTION(pg_host)
    Execute a query */
 PHP_FUNCTION(pg_exec)
 {
-	zval **query, **pgsql_link;
+	zval **query, **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
@@ -592,6 +595,7 @@ PHP_FUNCTION(pg_exec)
 				RETURN_FALSE;
 			}
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
@@ -1114,7 +1118,7 @@ PHP_FUNCTION(pg_getlastoid)
    Enable tracing a PostgreSQL connection */
 PHP_FUNCTION(pg_trace)
 {
-	zval **z_filename, **z_mode, **z_pgsql_link;
+	zval **z_filename, **z_mode, **z_pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	char *mode = "w";
@@ -1129,11 +1133,13 @@ PHP_FUNCTION(pg_trace)
 			if (zend_get_parameters_ex(1, &z_filename)==FAILURE) {
 				RETURN_FALSE;
 			}
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &z_filename, &z_mode)==FAILURE) {
 				RETURN_FALSE;
 			}
+			CHECK_DEFAULT_LINK(id);
 			convert_to_string_ex(z_mode);
 			mode = Z_STRVAL_PP(z_mode);
 			break;
@@ -1169,7 +1175,7 @@ PHP_FUNCTION(pg_trace)
    Disable tracing of a PostgreSQL connection */
 PHP_FUNCTION(pg_untrace)
 {
-	zval **pgsql_link;
+	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	PGLS_FETCH();
@@ -1177,6 +1183,7 @@ PHP_FUNCTION(pg_untrace)
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 1:
 			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
@@ -1198,7 +1205,7 @@ PHP_FUNCTION(pg_untrace)
    Create a large object */
 PHP_FUNCTION(pg_locreate)
 {
-  	zval **pgsql_link;
+  	zval **pgsql_link = NULL;
 	PGconn *pgsql;
 	Oid pgsql_oid;
 	int id = -1;
@@ -1207,6 +1214,7 @@ PHP_FUNCTION(pg_locreate)
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 1:
 			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
@@ -1242,7 +1250,7 @@ PHP_FUNCTION(pg_locreate)
    Delete a large object */
 PHP_FUNCTION(pg_lounlink)
 {
-	zval **pgsql_link, **oid;
+	zval **pgsql_link = NULL, **oid;
 	PGconn *pgsql;
 	Oid pgsql_oid;
 	int id = -1;
@@ -1256,6 +1264,7 @@ PHP_FUNCTION(pg_lounlink)
 			convert_to_long_ex(oid);
 			pgsql_oid = Z_LVAL_PP(oid);
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &pgsql_link, &oid)==FAILURE) {
@@ -1283,7 +1292,7 @@ PHP_FUNCTION(pg_lounlink)
    Open a large object and return fd */
 PHP_FUNCTION(pg_loopen)
 {
-	zval **pgsql_link, **oid, **mode;
+	zval **pgsql_link = NULL, **oid, **mode;
 	PGconn *pgsql;
 	Oid pgsql_oid;
 	int id = -1, pgsql_mode=0, pgsql_lofd;
@@ -1302,6 +1311,7 @@ PHP_FUNCTION(pg_loopen)
 			convert_to_string_ex(mode);
 			mode_string = Z_STRVAL_PP(mode);
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 3:
 			if (zend_get_parameters_ex(3, &pgsql_link, &oid, &mode)==FAILURE) {
@@ -1519,7 +1529,7 @@ PHP_FUNCTION(pg_loreadall)
    Import large object direct from filesystem */
 PHP_FUNCTION(pg_loimport)
 {
-	zval **pgsql_link, **file_in;
+	zval **pgsql_link = NULL, **file_in;
 	int id = -1;
 	PGconn *pgsql;
 	Oid oid;
@@ -1532,6 +1542,7 @@ PHP_FUNCTION(pg_loimport)
 				RETURN_FALSE;
 			}
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &file_in, &pgsql_link) == FAILURE) {
@@ -1564,7 +1575,7 @@ PHP_FUNCTION(pg_loimport)
    Export large object direct to filesystem */
 PHP_FUNCTION(pg_loexport)
 {
-	zval **pgsql_link, **oid_id, **file_out;
+	zval **pgsql_link = NULL, **oid_id, **file_out;
 	int id = -1;
 	Oid oid;
 	PGconn *pgsql;
@@ -1578,6 +1589,7 @@ PHP_FUNCTION(pg_loexport)
 			convert_to_long_ex(oid_id);
 			convert_to_string_ex(file_out);
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 3:
 			if (zend_get_parameters_ex(3, &oid_id, &file_out, &pgsql_link) == FAILURE) {
@@ -1609,7 +1621,7 @@ PHP_FUNCTION(pg_loexport)
    Set client encoding */
 PHP_FUNCTION(pg_setclientencoding)
 {
-	zval **encoding, **pgsql_link;
+	zval **encoding, **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	PGLS_FETCH();
@@ -1620,6 +1632,7 @@ PHP_FUNCTION(pg_setclientencoding)
 				RETURN_FALSE;
 			}
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &pgsql_link, &encoding)==FAILURE) {
@@ -1644,7 +1657,7 @@ PHP_FUNCTION(pg_setclientencoding)
    Get the current client encoding */
 PHP_FUNCTION(pg_clientencoding)
 {
-	zval **pgsql_link;
+	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
 	PGLS_FETCH();
@@ -1652,6 +1665,7 @@ PHP_FUNCTION(pg_clientencoding)
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
 			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
 			break;
 		case 1:
 			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
