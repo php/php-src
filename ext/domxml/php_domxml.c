@@ -258,7 +258,6 @@ static zend_function_entry domxml_functions[] = {
 static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(doctype, 				domxml_doc_doctype, 			NULL)
 	PHP_FALIAS(implementation,			domxml_doc_implementation,		NULL)
-	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)	/* not DOM */
 	PHP_FALIAS(document_element,		domxml_doc_document_element,	NULL)
 	PHP_FALIAS(create_element,			domxml_doc_create_element,		NULL)
 	PHP_FALIAS(create_text_node,		domxml_doc_create_text_node,	NULL)
@@ -269,11 +268,14 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
 	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
+	/* Everything below this comment is none DOM compliant */
 	/* children is deprecated because it is inherited from DomNode */
 /*	PHP_FALIAS(children,				domxml_node_children,			NULL) */
+	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)
 	PHP_FALIAS(add_root,				domxml_add_root,				NULL)
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
+	PHP_FALIAS(ids,						domxml_doc_ids,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem,				domxml_dump_mem,				NULL)
 	PHP_FALIAS(dump_mem_file,			domxml_dump_mem_file,			NULL)
@@ -2007,9 +2009,18 @@ PHP_FUNCTION(domxml_node_replace_node)
 
 	DOMXML_GET_OBJ(repnode, node, le_domxmlnodep);
 
-	if (NULL == (new_repnode = xmlCopyNode(repnode, 1))) {
-		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
+	/* check if the new node is already part of the document. In such a case
+	 * we better make a copy to prevent changing identical nodes at different
+	 * positions in the document at the same time.
+	 * A node created with e.g. create_element() doesn't have parents.
+	 */
+	if(repnode->parent) {
+		if (NULL == (new_repnode = xmlCopyNode(repnode, 1))) {
+			php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+	} else {
+		new_repnode = repnode;
 	}
 
 	repnode = xmlReplaceNode(nodep, new_repnode);
@@ -2635,77 +2646,47 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 }
 /* }}} */
 
-/* {{{ proto string domxml_doc_get_element_by_id(string id [,object xpathctx_handle] )
+typedef struct _idsIterator idsIterator;
+struct _idsIterator {
+	  xmlChar *elementId;
+	    xmlNode *element;
+};
+
+static void idsHashScanner(void *payload, void *data, xmlChar *name) {
+	idsIterator *priv = (idsIterator *)data;
+
+	if (priv->element == NULL && xmlStrEqual (name, priv->elementId))
+		priv->element = ((xmlNode *)((xmlID *)payload)->attr)->parent;
+}
+
+/* {{{ proto string domxml_doc_get_element_by_id(string id)
    Returns element for given id or false if not found */
 PHP_FUNCTION(domxml_doc_get_element_by_id)
 {
-	zval *id, *rv = NULL, *contextnode = NULL, *ctxpin = NULL;
-	xmlXPathContextPtr ctxp ;
+	zval *id, *rv = NULL;
 	xmlDocPtr docp;
+	idsIterator iter;
+	xmlHashTable *ids = NULL;
+	int retnode;
 
-	xmlXPathObjectPtr xpathobjp;
-	xmlNode *contextnodep;
 	int name_len;
 	char *str, *name;
 
-	contextnode = NULL;
-	contextnodep = NULL;
+	id = getThis();
+	DOMXML_GET_OBJ(docp, id, le_domxmldocp);
 
-	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|oo", &name, &name_len,&ctxpin,&contextnodep);
-	
-	/* if no xpath_context was submitted, create a new one */
-	if (ctxpin == NULL) {
-		ctxp = xmlXPathNewContext(docp);
+	ids = (xmlHashTable *) docp->ids;
+	if(ids) {
+		iter.elementId = (xmlChar *) 
+		iter.element = NULL;
+		xmlHashScan(ids, idsHashScanner, &iter);
+		rv = php_domobject_new(iter.element, &retnode TSRMLS_CC);
+		SEPARATE_ZVAL(&rv);
+		*return_value = *rv;
+		FREE_ZVAL(rv);
 	} else {
-		DOMXML_GET_OBJ(ctxp, ctxpin, le_xpathctxp);
-	}
-	
-	if (contextnode) {
-		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
-	}
-	ctxp->node = contextnodep;
-	str = (char*) emalloc((name_len+14) * sizeof(char)) ;
-	if (str == NULL) {
-		php_error(E_WARNING, "%s(): cannot allocate memory for string", get_active_function_name(TSRMLS_C));
-	}
-	sprintf(str ,"//*[@ID = '%s']",name);
-	xpathobjp = xmlXPathEval(str, ctxp);
-	efree(str);
-	ctxp->node = NULL;
-	if (!xpathobjp) {
 		RETURN_FALSE;
 	}
-
-	switch (Z_TYPE_P(xpathobjp)) {
-
-		case XPATH_NODESET:
-		{
-			xmlNodeSetPtr nodesetp;
-
-			if (NULL == (nodesetp = xpathobjp->nodesetval)) {
-				zval_dtor(rv);
-				RETURN_FALSE;
-			}
-
-			if (nodesetp->nodeNr > 0) {
-				xmlNodePtr node = nodesetp->nodeTab[0];
-				int retnode;
-				rv = php_domobject_new(node, &retnode TSRMLS_CC);
-				SEPARATE_ZVAL(&rv);
-			}
-			else {
-				/*return false, if no nodes were found */
-				RETURN_FALSE;
-			}
-
-			break;
-		}
-		default:
-			break;
-	}
-
-	*return_value = *rv;
-	FREE_ZVAL(rv);
 }
 /* }}} */
 #endif
@@ -3273,6 +3254,40 @@ PHP_FUNCTION(domxml_dump_node)
 }
 /* }}} */
 
+static void idsHashScanner2(void *payload, void *data, xmlChar *name) {
+	zval *return_value = (zval *) data;
+	zval *child;
+	int ret;
+	xmlNode *nodep;
+
+	nodep = ((xmlNode *)((xmlID *)payload)->attr)->parent;
+	child = php_domobject_new(nodep, &ret TSRMLS_CC);
+	add_next_index_zval(return_value, child);
+}
+
+/* {{{ proto string domxml_doc_ids(object doc_handle)
+   Returns array of ids */
+PHP_FUNCTION(domxml_doc_ids)
+{
+	zval *id;
+	xmlDoc *docp;
+	xmlHashTable *ids = NULL;
+
+	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
+
+	ids = docp->ids;
+
+	if(ids) {
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+
+		xmlHashScan(ids, idsHashScanner2, return_value);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 /* {{{ proto object xmldoc(string xmldoc [, bool from_file])
    Creates DOM object of XML document */
@@ -3284,10 +3299,14 @@ PHP_FUNCTION(xmldoc)
 	char *buffer;
 	int buffer_len;
 	zend_bool from_file = 0;
+	xmlDtdPtr dtd;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &buffer, &buffer_len, &from_file) == FAILURE) {
 		return;
 	}
+/*	Either of the following line force validation */
+/*	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS; */
+/*	xmlDoValidityCheckingDefaultValue = 1; */
 
 	if (from_file) {
 		docp = xmlParseFile(buffer);
@@ -3297,6 +3316,11 @@ PHP_FUNCTION(xmldoc)
 	if (!docp)
 		RETURN_FALSE;
 
+/*	dtd = xmlGetIntSubset(docp);
+	if(dtd) {
+		xmlParseDTD(dtd->ExternalID, dtd->SystemID);
+	}
+*/
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
 }
 /* }}} */
@@ -3507,7 +3531,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 }
 /* }}} */
 
-/* {{{ proto object domxml_parer([string buf[,string filename]])
+/* {{{ proto object domxml_parser([string buf[,string filename]])
    Creates new xmlparser */
 PHP_FUNCTION(domxml_parser)
 {
@@ -3522,10 +3546,11 @@ PHP_FUNCTION(domxml_parser)
 		return;
 	}
 
-	parserp =  xmlCreatePushParserCtxt(NULL, NULL, buf, buf_len , filename);
+	parserp =  xmlCreatePushParserCtxt(NULL, NULL, buf, buf_len, filename);
 	if (!parserp) {
 		RETURN_FALSE;
 	}
+/*	parserp->loadsubset = XML_DETECT_IDS; */
 
 	rv = php_xmlparser_new(parserp, &ret TSRMLS_CC);    
 	DOMXML_RET_ZVAL(rv);
@@ -4007,7 +4032,7 @@ static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
 	zval *wrapper;
 	int rsrc_type;
 
-		*found = 0;
+	*found = 0;
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
