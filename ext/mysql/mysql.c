@@ -148,7 +148,9 @@ php3_module_entry mysql_module_entry = {
 	"MySQL", mysql_functions, php3_minit_mysql, php3_mshutdown_mysql, php3_rinit_mysql, NULL, php3_info_mysql, STANDARD_MODULE_PROPERTIES
 };
 
-#ifndef ZTS
+#ifdef ZTS
+int mysql_globals_id;
+#else
 php_mysql_globals mysql_globals;
 #endif
 
@@ -227,44 +229,6 @@ static void _close_mysql_plink(MYSQL *link)
 }
 
 
-static PHP_INI_MH(OnMySQLInt)
-{
-	long *p;
-#ifndef ZTS
-	char *base = (char *) &mysql_globals;
-#else
-	char *base;
-	MySLS_FETCH();
-
-	base = (char *) mysql_globals;
-#endif
-
-	p = (long *) (base+(size_t) mh_arg1);
-
-	*p = atoi(new_value);
-	return SUCCESS;	
-}
-
-
-static PHP_INI_MH(OnMySQLStr)
-{
-	char **p;
-#ifndef ZTS
-	char *base = (char *) &mysql_globals;
-#else
-	char *base;
-	MySLS_FETCH();
-
-	base = (char *) mysql_globals;
-#endif
-
-	p = (char **) (base+(size_t) mh_arg1);
-
-	*p = new_value;
-	return SUCCESS;
-}
-
-
 static PHP_INI_MH(OnMySQLPort)
 {
 	MySLS_FETCH();
@@ -292,13 +256,13 @@ static PHP_INI_MH(OnMySQLPort)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY1("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnMySQLInt,		(void *) XtOffsetOf(php_mysql_globals, allow_persistent))
-	PHP_INI_ENTRY1("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnMySQLInt,		(void *) XtOffsetOf(php_mysql_globals, max_persistent))
-	PHP_INI_ENTRY1("mysql.max_links",		"-1",	PHP_INI_SYSTEM,		OnMySQLInt,		(void *) XtOffsetOf(php_mysql_globals, max_links))
-	PHP_INI_ENTRY1("mysql.default_host",		NULL,	PHP_INI_ALL,		OnMySQLStr,		(void *) XtOffsetOf(php_mysql_globals, default_host))
-	PHP_INI_ENTRY1("mysql.default_user",		NULL,	PHP_INI_ALL,		OnMySQLStr,		(void *) XtOffsetOf(php_mysql_globals, default_user))
-	PHP_INI_ENTRY1("mysql.default_password",	NULL,	PHP_INI_ALL,		OnMySQLStr,		(void *) XtOffsetOf(php_mysql_globals, default_password))
-	PHP_INI_ENTRY1("mysql.default_port",		NULL,	PHP_INI_ALL,		OnMySQLPort,	NULL)
+	STD_PHP_INI_ENTRY("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.max_links",		"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_links,			php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,		OnUpdateString,		default_password,	php_mysql_globals,		mysql_globals)
+	PHP_INI_ENTRY("mysql.default_port",		NULL,	PHP_INI_ALL,		OnMySQLPort)
 PHP_INI_END()
 
 
