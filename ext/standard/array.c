@@ -1397,11 +1397,14 @@ PHP_FUNCTION(array_fill)
 	}
 	newval = *val;
 	while (i--) {
-		if (!(i%62000)) {
+#ifndef ZEND_ENGINE_2
+		if (newval->refcount >= 62000) {
 			MAKE_STD_ZVAL(newval);
 			*newval = **val;
 			zval_copy_ctor(newval);
+			newval->refcount = 0;
 		}
+#endif		
 		zval_add_ref(&newval);
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &newval, sizeof(zval *), NULL);
 	}
