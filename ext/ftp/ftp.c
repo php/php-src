@@ -34,8 +34,11 @@
 
 #if HAVE_FTP
 
+#include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -48,8 +51,8 @@ static int		ftp_getresp(ftpbuf_t *ftp);
 /* sets the ftp transfer type */
 static int		ftp_type(ftpbuf_t *ftp, ftptype_t type);
 
-/* opens up a port for ftp transfer */
-static databuf_t*	ftp_port(ftpbuf_t *ftp);
+/* opens up a data stream */
+static databuf_t*	ftp_getdata(ftpbuf_t *ftp);
 
 /* accepts the data connection, returns updated data buffer */
 static databuf_t*	data_accept(databuf_t *data);
@@ -60,6 +63,13 @@ static databuf_t*	data_close(databuf_t *data);
 /* generic file lister */
 static char**		ftp_genlist(ftpbuf_t *ftp,
 				const char *cmd, const char *path);
+
+/* IP and port conversion box */
+union ipbox {
+	unsigned long	l[2];
+	unsigned short	s[4];
+	unsigned char	c[8];
+};
 
 
 ftpbuf_t*
@@ -428,6 +438,49 @@ ftp_type(ftpbuf_t *ftp, ftptype_t type)
 
 
 int
+ftp_pasv(ftpbuf_t *ftp, int pasv)
+{
+	char			*ptr;
+	union ipbox		ipbox;
+	unsigned long		b[6];
+	int			n;
+
+	if (ftp == NULL)
+		return 0;
+
+	if (pasv && ftp->pasv == 2)
+		return 1;
+
+	ftp->pasv = 0;
+	if (!pasv)
+		return 1;
+
+	fprintf(ftp->fp, "PASV\r\n");
+	if (!ftp_getresp(ftp) || ftp->resp != 227)
+		return 0;
+
+	/* parse out the IP and port */
+	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
+	n = sscanf(ptr, "%u,%u,%u,%u,%u,%u",
+		&b[0], &b[1], &b[2], &b[3], &b[4], &b[5]);
+	if (n != 6)
+		return 0;
+
+	for (n=0; n<6; n++)
+		ipbox.c[n] = b[n];
+
+	memset(&ftp->pasvaddr, 0, sizeof(ftp->pasvaddr));
+	ftp->pasvaddr.sin_family = AF_INET;
+	ftp->pasvaddr.sin_addr.s_addr = ipbox.l[0];
+	ftp->pasvaddr.sin_port = ipbox.s[2];
+
+	ftp->pasv = 2;
+
+	return 1;
+}
+
+
+int
 ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 {
 	databuf_t		*data = NULL;
@@ -439,7 +492,7 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 	if (!ftp_type(ftp, type))
 		goto bail;
 
-	if ((data = ftp_port(ftp)) == NULL)
+	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
 
 	fprintf(ftp->fp, "RETR %s\r\n", path);
@@ -492,7 +545,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, ftptype_t type)
 	if (!ftp_type(ftp, type))
 		goto bail;
 
-	if ((data = ftp_port(ftp)) == NULL)
+	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
 
 	fprintf(ftp->fp, "STOR %s\r\n", path);
@@ -523,18 +576,77 @@ bail:
 }
 
 
+int
+ftp_size(ftpbuf_t *ftp, const char *path)
+{
+	if (ftp == NULL)
+		return -1;
+
+	fprintf(ftp->fp, "SIZE %s\r\n", path);
+	if (!ftp_getresp(ftp) || ftp->resp != 213)
+		return -1;
+
+	return atoi(ftp->inbuf);
+}
+
+
+time_t
+ftp_mdtm(ftpbuf_t *ftp, const char *path)
+{
+	time_t		stamp;
+	struct tm	*gmt;
+	struct tm	tm;
+	char		*ptr;
+	int		n;
+
+	if (ftp == NULL)
+		return -1;
+
+	fprintf(ftp->fp, "MDTM %s\r\n", path);
+	if (!ftp_getresp(ftp) || ftp->resp != 213)
+		return -1;
+
+	/* parse out the timestamp */
+	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
+	n = sscanf(ptr, "%4u%2u%2u%2u%2u%2u",
+		&tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+		&tm.tm_hour, &tm.tm_min, &tm.tm_sec);
+	if (n != 6)
+		return -1;
+	tm.tm_year -= 1900;
+	tm.tm_mon--;
+	tm.tm_isdst = -1;
+
+	/* figure out the GMT offset */
+	stamp = time(NULL);
+	gmt = gmtime(&stamp);
+	gmt->tm_isdst = -1;
+
+	/* apply the GMT offset */
+	tm.tm_sec += stamp - mktime(gmt);
+	tm.tm_isdst = gmt->tm_isdst;
+
+	stamp = mktime(&tm);
+
+	return stamp;
+}
+
+
+/* static functions */
+
 databuf_t*
-ftp_port(ftpbuf_t *ftp)
+ftp_getdata(ftpbuf_t *ftp)
 {
 	int			fd = -1;
 	databuf_t		*data;
 	struct sockaddr_in	addr;
 	int			size;
-	union {
-		unsigned long	l[1];
-		unsigned short	s[2];
-		unsigned char	c[4];
-	}			ipbox;
+	union ipbox		ipbox;
+
+
+	/* ask for a passive connection if we need one */
+	if (ftp->pasv && !ftp_pasv(ftp, 1))
+		return NULL;
 
 	/* alloc the data structure */
 	data = calloc(1, sizeof(*data));
@@ -550,6 +662,36 @@ ftp_port(ftpbuf_t *ftp)
 		perror("socket");
 		goto bail;
 	}
+
+	/* passive connection handler */
+	if (ftp->pasv) {
+		/* clear the ready status */
+		ftp->pasv = 1;
+
+		/* connect */
+		if (connect(fd, (struct sockaddr*) &ftp->pasvaddr,
+			sizeof(ftp->pasvaddr)) == -1)
+		{
+			perror("connect");
+			close(fd);
+			free(data);
+			return NULL;
+		}
+
+		/* wrap fd in a FILE stream */
+		data->fp = fdopen(fd, "r+");
+		if (data->fp == NULL) {
+			perror("fdopen");
+			close(fd);
+			free(data);
+			return NULL;
+		}
+
+		return data;
+	}
+
+
+	/* active (normal) connection */
 
 	/* bind to a local address */
 	memset(&addr, 0, sizeof(addr));
@@ -577,11 +719,10 @@ ftp_port(ftpbuf_t *ftp)
 
 	/* send the PORT */
 	ipbox.l[0] = ftp->localaddr.s_addr;
-	fprintf(ftp->fp, "PORT %u,%u,%u,%u,",
-		ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3]);
-	ipbox.s[0] = addr.sin_port;
-	fprintf(ftp->fp, "%u,%u\r\n",
-		ipbox.c[0], ipbox.c[1]);
+	ipbox.s[2] = addr.sin_port;
+	fprintf(ftp->fp, "PORT %u,%u,%u,%u,%u,%u\r\n",
+		ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3],
+		ipbox.c[4], ipbox.c[5]);
 
 	if (!ftp_getresp(ftp) || ftp->resp != 200)
 		goto bail;
@@ -602,6 +743,10 @@ data_accept(databuf_t *data)
 	struct sockaddr_in	addr;
 	int			size;
 	int			fd;
+
+
+	if (data->fp)
+		return data;
 
 	size = sizeof(addr);
 	fd = accept(data->listener, (struct sockaddr*) &addr, &size);
@@ -656,7 +801,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 	if (!ftp_type(ftp, FTPTYPE_ASCII))
 		goto bail;
 
-	if ((data = ftp_port(ftp)) == NULL)
+	if ((data = ftp_getdata(ftp)) == NULL)
 		goto bail;
 
 	if (path)

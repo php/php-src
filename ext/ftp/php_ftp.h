@@ -59,8 +59,13 @@ PHP_FUNCTION(ftp_rmdir);
 PHP_FUNCTION(ftp_nlist);
 PHP_FUNCTION(ftp_rawlist);
 PHP_FUNCTION(ftp_systype);
+PHP_FUNCTION(ftp_pasv);
 PHP_FUNCTION(ftp_get);
+PHP_FUNCTION(ftp_fget);
 PHP_FUNCTION(ftp_put);
+PHP_FUNCTION(ftp_fput);
+PHP_FUNCTION(ftp_size);
+PHP_FUNCTION(ftp_mdtm);
 PHP_FUNCTION(ftp_quit);
 
 #define phpext_ftp_ptr php3_ftp_module_ptr
