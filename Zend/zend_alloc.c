@@ -482,7 +482,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		}
 	}
 
-	if(clean_cache) {
+	if (clean_cache) {
 		for (i=1; i<MAX_CACHED_MEMORY; i++) {
 			for (j=0; j<AG(cache_count)[i]; j++) {
 				free(AG(cache)[i][j]);
