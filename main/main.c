@@ -1133,6 +1133,10 @@ int php_module_startup(sapi_module_struct *sf)
 
 	zend_startup_extensions();
 
+#ifdef ZTS
+	zend_post_startup(TSRMLS_C);
+#endif
+
 	/* */
 	module_initialized = 1;
 	sapi_deactivate(TSRMLS_C);
