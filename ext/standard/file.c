@@ -1924,16 +1924,17 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp, int length [, string delimiter])
+/* {{{ proto array fgetcsv(resource fp, int length [, string delimiter[, string enclosure]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
 	char *temp, *tptr, *bptr, *lineEnd;
 	char delimiter = ',';	/* allow this to be set as parameter */
+	char enclosure = '"';	/* allow this to be set as parameter */
 
 	/* first section exactly as php_fgetss */
 
-	zval **fd, **bytes, **p_delim;
+	zval **fd, **bytes, **p_delim, **p_enclosure;
 	int len, type;
 	char *buf;
 	php_stream *stream;
@@ -1952,10 +1953,38 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_delim);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_delim) < 1) {
+			php_error(E_WARNING, "%s() 3rd paramater must be a character",
+					  get_active_function_name(TSRMLS_C));
+			return;
+		}
+		/* use first character from string */
+		delimiter = Z_STRVAL_PP(p_delim)[0];
+		break;
+
+	case 4:
+		if (zend_get_parameters_ex(4, &fd, &bytes, &p_delim, &p_enclosure) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-			/* use first character from string */
+		convert_to_string_ex(p_delim);
+		/* Make sure that there is at least one character in string */
+		if (Z_STRLEN_PP(p_delim) < 1) {
+			php_error(E_WARNING, "%s() 3rd paramater must be a character",
+					  get_active_function_name(TSRMLS_C));
+			return;
+		}
+		/* use first character from string */
 		delimiter = Z_STRVAL_PP(p_delim)[0];
+
+		convert_to_string_ex(p_enclosure);
+		/* Make sure that there is at least one character in string */
+		if (Z_STRLEN_PP(p_enclosure) < 1) {
+			php_error(E_WARNING, "%s() 3rd paramater must be a character",
+					  get_active_function_name(TSRMLS_C));
+			return;
+		}
+		/* use first character from string */
+		enclosure = Z_STRVAL_PP(p_enclosure)[0];
+		
 		break;
 
 	default:
@@ -1983,9 +2012,9 @@ PHP_FUNCTION(fgetcsv)
 		RETURN_FALSE;
 	}
 
-	/* Now into new section that parses buf for comma/quote delimited fields */
+	/* Now into new section that parses buf for delimiter/enclosure fields */
 
-	/* Strip trailing space from buf, saving end of line in case required for quoted field */
+	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
 	lineEnd = emalloc(len + 1);
 	bptr = buf;
@@ -2013,14 +2042,14 @@ PHP_FUNCTION(fgetcsv)
 		/* 1. Strip any leading space */
 		while(isspace((int) *bptr) && (*bptr!=delimiter)) bptr++;
 		/* 2. Read field, leaving bptr pointing at start of next field */
-		if (*bptr == '"') {
-			/* 2A. handle quote delimited field */
+		if (*bptr == enclosure) {
+			/* 2A. handle enclosure delimited field */
 			bptr++;		/* move on to first character in field */
 			while (*bptr) {
-				if (*bptr == '"') {
-					/* handle the double-quote */
+				if (*bptr == enclosure) {
+					/* handle the enclosure */
 					if ( *(bptr+1) == '"') {
-					/* embedded double quotes */
+					/* embedded enclosure */
 						*tptr++ = *bptr; bptr +=2;
 					} else {
 					/* must be end of string - skip to start of next field or end */
@@ -2064,7 +2093,7 @@ PHP_FUNCTION(fgetcsv)
 				}
 			}
 		} else {
-			/* 2B. Handle non-quoted field */
+			/* 2B. Handle non-enclosure field */
 			while ((*bptr != delimiter) && *bptr) 
 				*tptr++ = *bptr++;
 			*tptr=0;	/* terminate temporary string */
