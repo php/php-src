@@ -1,3 +1,131 @@
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Add note about fhttpd removal.
+
+    * sapi/cgi/config.m4: - Removed sapi/fhttpd (this webserver is dead)
+
+2002-10-12  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/ITX.xml: No more needed here
+
+2002-10-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php: - woohooo! Automatic build test submits!
+
+2002-10-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_config.phpt: * update test
+
+2002-10-12  James Cox  <james@blog.at>
+
+    * NEWS: mention vpopmail.
+
+2002-10-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/session/tests/015.phpt: - Hardcode setting which affects the test
+
+    * ext/standard/tests/file/003.inc
+      ext/standard/tests/file/003.phpt: - Make the test do what it says
+
+2002-10-12  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/domxml/php_domxml.c: Typo
+
+2002-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.c: Fixed a bug introduced by previous patch.
+
+2002-10-12  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/tests/pear_system.phpt: Add test for single directory creation
+    this test actually fails
+
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: added cybercash to the killed exts list..
+
+2002-10-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml: * 1.0b1 is today
+
+    * pear/PEAR/Command/Package.php
+      pear/package-PEAR.xml
+      pear/template.spec:
+    * added "pear makerpm" command for wrapping PEAR packages in RPMs
+
+    * pear/System.php
+      pear/tests/pear_system.phpt: * rename System::type to System::which
+
+    * pear/PEAR/Command/Common.php: * CLI layout adjustment
+
+2002-10-12  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/url.c: I already said that this construct was wrong...
+    most probably fixes bug #19876
+
+2002-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/info.c: Fixed memory leaks.
+
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/pi3web/config.m4: Use AC_ARG_WITH instead of PHP_ARG_WITH.
+
+2002-10-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: paranoia
+
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/embed/config.m4: Fix typo
+
+2002-10-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Write in blocks of the current chunk_size for a stream.
+    Should resolve problems with network writes.
+
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cgi/config.m4: ws fix
+
+2002-10-12  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/.cvsignore
+      sapi/embed/CREDITS: Added .cvsignore and CREDITS.
+
+2002-10-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/pear.m4: * look for awk, fix for #19819
+
+2002-10-12  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    changed INI restriction to enable per-directory settings.
+
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/embed/config.m4: Add the proper install lines.
+
+    * ext/fribidi/config.m4: Made the fribidi-config search a bit better.
+
+    * NEWS: Add the removed extensions.
+
+2002-10-12  Edin Kadribasic  <edink@proventum.net>
+
+    * pear/Makefile.frag: Install sapi/embed header file as well.
+
+2002-10-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/embed/config.m4: Default to shared.
+
+2002-10-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php: * verify md5 checksums during install
+
+    * pear/PEAR/Common.php: * include platform file attribute!
+
+    * pear/package-PEAR.xml: * package updates
+
 2002-10-11  Jani Taskinen  <sniper@iki.fi>
 
     * sapi/embed/config.m4:

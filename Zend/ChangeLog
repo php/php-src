@@ -1,3 +1,11 @@
+2002-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_operators.c
+      zend_operators.h
+      zend.c
+      zend_execute_API.c
+      zend_globals.h: MFZE1 (floats & locale issue)
+
 2002-10-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES: Fugbix typo.
