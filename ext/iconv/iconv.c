@@ -311,41 +311,70 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	size_t prev_in_left = in_left;
 #endif
 
-	while (in_left > 0) {
-		out_left = buf_growth - out_left;
-		{
-			size_t newlen;
-			smart_str_alloc((d), out_left, 0);
-		}
+	if (in_p != NULL) {
+		while (in_left > 0) {
+			out_left = buf_growth - out_left;
+			{
+				size_t newlen;
+				smart_str_alloc((d), out_left, 0);
+			}
 
-		out_p = (d)->c + (d)->len;
+			out_p = (d)->c + (d)->len;
 
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+			if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
-			switch (errno) { 
-				case EINVAL:
-					return PHP_ICONV_ERR_ILLEGAL_CHAR;
+				switch (errno) { 
+					case EINVAL:
+						return PHP_ICONV_ERR_ILLEGAL_CHAR;
 
-				case EILSEQ:
-					return PHP_ICONV_ERR_ILLEGAL_SEQ;
+					case EILSEQ:
+						return PHP_ICONV_ERR_ILLEGAL_SEQ;
 
-				case E2BIG:
-					break;
+					case E2BIG:
+						break;
 
-				default:
-					return PHP_ICONV_ERR_UNKNOWN;
-			}
+					default:
+						return PHP_ICONV_ERR_UNKNOWN;
+				}
 #else
-			if (prev_in_left == in_left) {
-				return PHP_ICONV_ERR_UNKNOWN;		
+				if (prev_in_left == in_left) {
+					return PHP_ICONV_ERR_UNKNOWN;		
+				}
+#endif
 			}
-#endif
-		}
 #if !ICONV_SUPPORTS_ERRNO
-		prev_in_left = in_left;
+			prev_in_left = in_left;
 #endif
-		(d)->len += (buf_growth - out_left);
-		buf_growth <<= 1;
+			(d)->len += (buf_growth - out_left);
+			buf_growth <<= 1;
+		}
+	} else {
+		for (;;) {
+			out_left = buf_growth - out_left;
+			{
+				size_t newlen;
+				smart_str_alloc((d), out_left, 0);
+			}
+
+			out_p = (d)->c + (d)->len;
+
+			if (icv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)0) {
+				(d)->len += (buf_growth - out_left);
+				break;
+			} else {
+#if ICONV_SUPPORTS_ERRNO
+				if (errno != E2BIG) {
+					return PHP_ICONV_ERR_UNKNOWN;
+				}
+#else
+				if (out_left != 0) {
+					return PHP_ICONV_ERR_UNKNOWN;
+				}	
+#endif
+			}
+			(d)->len += (buf_growth - out_left);
+			buf_growth <<= 1;
+		}
 	}
 	return PHP_ICONV_ERR_SUCCESS;
 }
@@ -622,7 +651,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 	php_iconv_err_t err = PHP_ICONV_ERR_SUCCESS;
 
-	iconv_t cd;
+	iconv_t cd1, cd2;
 
 	const char *in_p;
 	size_t in_left;
@@ -631,8 +660,6 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	size_t out_left;
 
 	unsigned int cnt;
-
-	const char *substr_ofs;
 
 	/* normalize the offset and the length */
 	if (offset < 0 || len < 0) {
@@ -653,9 +680,9 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		}
 	}
 
-	cd = icv_open(GENERIC_SUPERSET_NAME, enc);
+	cd1 = icv_open(GENERIC_SUPERSET_NAME, enc);
 
-	if (cd == (iconv_t)(-1)) {
+	if (cd1 == (iconv_t)(-1)) {
 #if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			return PHP_ICONV_ERR_WRONG_CHARSET;
@@ -667,7 +694,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 #endif
 	}
 
-	substr_ofs = NULL;
+	cd2 = NULL;
 
 	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0 && len > 0; ++cnt) {
 		size_t prev_in_left;
@@ -676,18 +703,35 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 		prev_in_left = in_left;
 
-		if (cnt >= offset) {
-			if (substr_ofs == NULL) {
-				substr_ofs = in_p;
-			}
-			--len;
-		}
-
-		if (icv(cd, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+		if (icv(cd1, &in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
 				break;
 			}
 		}
+
+		if (cnt >= offset) {
+			if (cd2 == NULL) {
+				cd2 = icv_open(enc, GENERIC_SUPERSET_NAME);
+
+				if (cd2 == (iconv_t)(-1)) {
+					cd2 = NULL;
+#if ICONV_SUPPORTS_ERRNO
+					if (errno == EINVAL) {
+						err = PHP_ICONV_ERR_WRONG_CHARSET;
+					} else {
+						err = PHP_ICONV_ERR_CONVERTER;
+					}
+#else
+					err = PHP_ICONV_ERR_UNKNOWN;
+#endif
+					break;
+				}
+			}
+
+			_php_iconv_appendl(pretval, buf, sizeof(buf), cd2);
+			--len;
+		}
+
 	}
 
 #if ICONV_SUPPORTS_ERRNO
@@ -709,14 +753,19 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	}
 #endif
 	if (err == PHP_ICONV_ERR_SUCCESS) {
-		if (substr_ofs != NULL) {
-			smart_str_appendl(pretval, substr_ofs, (size_t)(in_p - substr_ofs));
+		if (cd2 != NULL) {
+			_php_iconv_appendl(pretval, NULL, 0, cd2);
 		}
 		smart_str_0(pretval);
 	}
 
-	icv_close(cd);
+	if (cd1 != NULL) {
+		icv_close(cd1);
+	}
 
+	if (cd2 != NULL) {
+		icv_close(cd2);
+	}	
 	return err;
 }
 
