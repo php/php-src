@@ -25,6 +25,11 @@ $per_module_deps = array();
 
 function get_depends($module)
 {
+	// skip this for now; working on a more portable solution
+	// since VC6 ships with an old version of depends.exe that
+	// doesn't have the command line options
+	return;
+
 	static $no_dist = array(
 		/* windows system dlls that should not be bundled */
 		'advapi32.dll', 'comdlg32.dll', 'gdi32.dll', 'kernel32.dll', 'ntdll.dll',
