@@ -63,6 +63,7 @@ static ZEND_FUNCTION(restore_error_handler);
 static ZEND_FUNCTION(set_exception_handler);
 static ZEND_FUNCTION(restore_exception_handler);
 static ZEND_FUNCTION(get_declared_classes);
+static ZEND_FUNCTION(get_declared_interfaces);
 static ZEND_FUNCTION(get_defined_functions);
 static ZEND_FUNCTION(get_defined_vars);
 static ZEND_FUNCTION(create_function);
@@ -122,6 +123,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(set_exception_handler,		NULL)
 	ZEND_FE(restore_exception_handler,	NULL)
 	ZEND_FE(get_declared_classes, NULL)
+	ZEND_FE(get_declared_interfaces, NULL)
 	ZEND_FE(get_defined_functions, NULL)
 	ZEND_FE(get_defined_vars,	NULL)
 	ZEND_FE(create_function,	NULL)
@@ -1046,15 +1048,19 @@ ZEND_FUNCTION(restore_exception_handler)
 /* }}} */
 
 
-static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
+static int copy_class_or_interface_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *array = va_arg(args, zval *);
+	int mask = va_arg(args, int);
+	int comply = va_arg(args, int);
+	int comply_mask = (comply)? mask:0;
 	zend_class_entry *ce  = *pce;
 
-	if (hash_key->nKeyLength==0 || hash_key->arKey[0]!=0) {
+	if ((hash_key->nKeyLength==0 || hash_key->arKey[0]!=0)
+		&& (comply_mask == (ce->ce_flags & mask))) {
 		add_next_index_stringl(array, ce->name, ce->name_length, 1);
 	}
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 
@@ -1062,11 +1068,31 @@ static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, z
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
+	int mask = ZEND_ACC_INTERFACE;
+	int comply = 0;
+
 	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_name, 1, return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_or_interface_name, 3, return_value, mask, comply);
+}
+/* }}} */
+
+/* {{{ proto array get_declared_interfaces()
+   Returns an array of all declared interfaces. */
+ZEND_FUNCTION(get_declared_interfaces)
+{
+	int mask = ZEND_ACC_INTERFACE;
+	int comply = 1;
+	
+	if (ZEND_NUM_ARGS() != 0) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	array_init(return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) zend_copy_class_or_interface_name, 3, return_value, mask, comply);
 }
 /* }}} */
 
