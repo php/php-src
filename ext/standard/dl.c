@@ -129,7 +129,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			sprintf(libpath, "%s%s", extension_dir, Z_STRVAL_P(file)); /* SAFE */
 		} else {
-			sprintf(libpath, "%s/%s", extension_dir, Z_STRVAL_P(file)); /* SAFE */
+			sprintf(libpath, "%s%c%s", extension_dir, DEFAULT_SLASH, Z_STRVAL_P(file)); /* SAFE */
 		}
 	} else {
 		libpath = estrndup(Z_STRVAL_P(file), Z_STRLEN_P(file));
