@@ -11,7 +11,7 @@
 
 require_once("sub_dir.inc");
 
-foreach(new sub_dir($argv[1], true, isset($argv[1]) ? $argv[1] : false) as $f) {
+foreach(new sub_dir($argv[1], true, isset($argv[2]) ? $argv[2] : false) as $f) {
 	echo "$f\n";
 }
 
