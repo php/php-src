@@ -1055,7 +1055,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
 #if 0
 			if (nrdels != -1)
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "purged %d expired session objects\n", nrdels);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "purged %d expired session objects", nrdels);
 #endif
 		}
 	}
