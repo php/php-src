@@ -1795,7 +1795,7 @@ PHP_FUNCTION(mb_parse_str)
 		}
 		n++;
 		/* add variable to symbol table */
-		php_register_variable_safe(var, val ? val : "", val_len, track_vars_array TSRMLS_CC);
+		php_register_variable_safe(var, val, val_len, track_vars_array TSRMLS_CC);
 		mbfl_string_clear(&resvar);
 		mbfl_string_clear(&resval);
 	}
