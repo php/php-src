@@ -57,12 +57,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_array_offsetGet, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_offsetGet, 0, 0, 1)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_array_offsetSet, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_offsetSet, 0, 0, 2)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, newval)
 ZEND_END_ARG_INFO();
