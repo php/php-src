@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added is_a() function that can be used to test whether object is of a certain
+  class or is derived from it. (Andrei, Zend Engine)
 - Added optional parameter to highlight_string and highlight_file which
   makes these functions return a highlighted string instead of dumping
   to standard output. (Derick)
