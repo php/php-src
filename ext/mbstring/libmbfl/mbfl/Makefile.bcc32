@@ -1,7 +1,0 @@
-!include ..\rules.mak.bcc32
-OBJS=mbfilter.obj mbfilter_8bit.obj mbfilter_pass.obj mbfilter_wchar.obj mbfl_allocators.obj mbfl_convert.obj mbfl_encoding.obj mbfl_filter_output.obj mbfl_ident.obj mbfl_language.obj mbfl_memory_device.obj mbfl_string.obj
-
-all: $(OBJS)
-
-clean:
-	@for %i in ($(OBJS)) do @if exist %i del %i
