@@ -576,7 +576,7 @@ function_entry basic_functions[] = {
 	PHP_FE(pclose,															NULL)
 	PHP_FE(popen,															NULL)
 	PHP_FE(readfile,														NULL)
-#if HAVE_MMAP
+#ifdef HAVE_MMAP
 	PHP_FE(mmapfile,														NULL)
 #endif
 	PHP_FE(rewind,															NULL)
