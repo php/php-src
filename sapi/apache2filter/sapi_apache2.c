@@ -42,7 +42,14 @@ php_apache_sapi_ub_write(const char *str, uint str_length)
 		str += now;
 		str_length -= now;
 	}
-	ap_pass_brigade(ctx->f->next, bb);
+	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
+		PLS_FETCH();
+		PG(connection_status) = PHP_CONNECTION_ABORTED;
+
+		if (!PG(ignore_user_abort)) {
+			zend_bailout();
+		}
+	}
 	
 	return str_length;
 }
@@ -152,7 +159,14 @@ php_apache_sapi_flush(void *server_context)
 	bb = ap_brigade_create(ctx->f->r->pool);
 	b = ap_bucket_create_flush();
 	AP_BRIGADE_INSERT_TAIL(bb, b);
-	ap_pass_brigade(ctx->f->next, bb);
+	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
+		PLS_FETCH();
+		PG(connection_status) = PHP_CONNECTION_ABORTED;
+
+		if (!PG(ignore_user_abort)) {
+			zend_bailout();
+		}
+	}
 }
 
 static void php_apache_sapi_log_message(char *msg)
