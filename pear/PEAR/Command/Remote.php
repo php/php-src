@@ -352,7 +352,7 @@ parameter.
             'border' => 1,
             'headline' => array('Package', 'Local', 'Remote', 'Size'),
             );
-        foreach ($latest as $pkg => $info) {
+        foreach ((array)$latest as $pkg => $info) {
             $package = strtolower($pkg);
             if (!isset($inst[$package])) {
                 // skip packages we don't have installed
