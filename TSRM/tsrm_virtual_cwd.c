@@ -282,6 +282,28 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC)
 	return buf;
 }
 
+CWD_API char *virtual_link(char *buf, size_t size TSRMLS_DC)
+{
+	size_t length;
+	char *p;
+	char tmp_path[MAXPATHLEN * 2];
+	char resolved_path[MAXPATHLEN];
+	
+	if (IS_ABSOLUTE_PATH(buf, size)) {
+		memcpy(resolved_path, buf, size);
+		p[size] = '\0';
+		return resolved_path;
+	} else {
+		virtual_getcwd(tmp_path, MAXPATHLEN TSRMLS_CC);
+		p = tmp_path + strlen(tmp_path);
+		*p++ = '/';
+		memcpy(p, buf, size);
+		*(p + size) = '\0';
+		
+		return tmp_path;
+	}
+}
+
 /* Resolve path relatively to state and put the real path into state */
 /* returns 0 for ok, 1 for error */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path)
@@ -703,11 +725,13 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 {
 	cwd_state new_state;
 	int retval;
+	char *p;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	virtual_file_ex(&new_state, path, NULL);
+	/* virtual_file_ex(&new_state, path, NULL); */
+	p = virtual_link(path, strlen(path) TSRMLS_CC);
 
-	retval = lstat(new_state.cwd, buf);
+	retval = lstat(p, buf);
 
 	CWD_STATE_FREE(&new_state);
 	return retval;

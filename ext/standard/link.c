@@ -57,21 +57,25 @@
 PHP_FUNCTION(readlink)
 {
 	zval **filename;
-	char buff[256];
+	char buff[MAXPATHLEN];
+	char *p;
 	int ret;
-
+	        
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 
-	ret = readlink(Z_STRVAL_PP(filename), buff, 255);
+	p = virtual_link(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename) TSRMLS_CC);
+
+	ret = readlink(p, buff, MAXPATHLEN-1);
 	if (ret == -1) {
 		php_error(E_WARNING, "readlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
+	
 	RETURN_STRING(buff, 1);
 }
 /* }}} */
@@ -109,6 +113,8 @@ PHP_FUNCTION(symlink)
 {
 	zval **topath, **frompath;
 	int ret;
+	char source_p[MAXPATHLEN];
+	char dest_p[MAXPATHLEN];
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -116,28 +122,33 @@ PHP_FUNCTION(symlink)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(topath), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
+	expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC);
+	expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC);
 
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(frompath), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(topath) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(frompath) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (!strncasecmp(Z_STRVAL_PP(topath), "http://", 7) || !strncasecmp(Z_STRVAL_PP(topath), "ftp://", 6)) {
+	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
+	{
 		php_error(E_WARNING, "Unable to symlink to a URL");
+		RETURN_FALSE;	
+	}
+
+	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 
-	ret = symlink(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	ret = symlink(dest_p, source_p);
 	if (ret == -1) {
 		php_error(E_WARNING, "Symlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -153,6 +164,8 @@ PHP_FUNCTION(link)
 {
 	zval **topath, **frompath;
 	int ret;
+	char source_p[MAXPATHLEN];
+	char dest_p[MAXPATHLEN];
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -160,28 +173,33 @@ PHP_FUNCTION(link)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(topath), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
+	expand_filepath(Z_STRVAL_PP(frompath), source_p TSRMLS_CC);
+	expand_filepath(Z_STRVAL_PP(topath), dest_p TSRMLS_CC);
 
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(frompath), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(topath) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(frompath) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (!strncasecmp(Z_STRVAL_PP(topath), "http://", 7) || !strncasecmp(Z_STRVAL_PP(topath), "ftp://", 6)) {
+	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
+	{
 		php_error(E_WARNING, "Unable to link to a URL");
+		RETURN_FALSE;	
+	}
+
+	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 
-	ret = link(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
+	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	ret = link(dest_p, source_p);
 	if (ret == -1) {
 		php_error(E_WARNING, "Link failed (%s)", strerror(errno));
 		RETURN_FALSE;
