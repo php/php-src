@@ -757,7 +757,7 @@ _php_math_longtobase(zval *arg, int base)
  * the number.
  */
 PHPAPI char *
-_php_math_zvaltobase(zval *arg, int base)
+_php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -937,7 +937,7 @@ PHP_FUNCTION(base_convert)
 	if(_php_math_basetozval(*number, Z_LVAL_PP(frombase), &temp) != SUCCESS) {
 		RETURN_FALSE;
 	}
-	result = _php_math_zvaltobase(&temp, Z_LVAL_PP(tobase));
+	result = _php_math_zvaltobase(&temp, Z_LVAL_PP(tobase) TSRMLS_CC);
 	RETVAL_STRING(result, 0);
 } 
 
