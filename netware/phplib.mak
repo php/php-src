@@ -336,6 +336,7 @@ endif
 	@echo $(wordlist 126, 130, $(OBJECTS)) >> $(basename $@).link
 	@echo $(wordlist 131, 135, $(OBJECTS)) >> $(basename $@).link
 	@echo $(wordlist 136, 140, $(OBJECTS)) >> $(basename $@).link
+	@echo $(wordlist 141, 141, $(OBJECTS)) >> $(basename $@).link
 
 	@echo $(wordlist 1, 2, $(WIN32_OBJECTS)) >> $(basename $@).link
 
