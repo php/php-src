@@ -320,6 +320,7 @@ void zenderror(char *error)
 }
 
 
+BEGIN_EXTERN_C()
 ZEND_API void zend_bailout()
 {
 	CLS_FETCH();
@@ -328,6 +329,7 @@ ZEND_API void zend_bailout()
 	CG(unclean_shutdown) = 1;
 	longjmp(EG(bailout), FAILURE);
 }
+END_EXTERN_C()
 
 
 void zend_append_version_info(zend_extension *extension)

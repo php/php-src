@@ -1304,7 +1304,7 @@ binary_assign_op_addr: {
 						active_function_table = EG(function_table);
 					}
 					if (zend_hash_find(active_function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
-						zend_error(E_ERROR, "Call to undefined function:  %s()\n", function_name->value.str.val);
+						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
 					}
 					zval_dtor(&tmp);
 					function_being_called = function;
@@ -1889,6 +1889,9 @@ send_by_ref:
 				if (!EG(no_extensions)) {
 					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_fcall_end_handler, op_array);
 				}
+				break;
+			case ZEND_DECLARE_FUNCTION_OR_CLASS:
+				do_bind_function_or_class(opline, EG(function_table), EG(class_table));
 				break;
 			case ZEND_INIT_GLOBALS: {
 					zval *globals = (zval *) emalloc(sizeof(zval));

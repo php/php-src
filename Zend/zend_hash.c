@@ -779,7 +779,7 @@ ZEND_API void zend_hash_apply(HashTable *ht,int (*destruct) (void *))
 		q = p;
 		p = p->pListNext;
 		if (destruct(q->pData)) {
-			if (q->arKey == NULL) {
+			if (q->nKeyLength==0) {
 				zend_hash_index_del(ht, q->h);
 			} else {
 				zend_hash_del(ht,q->arKey,q->nKeyLength);
@@ -798,7 +798,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht,int (*destruct) (void 
 		q = p;
 		p = p->pListNext;
 		if (destruct(q->pData, argument)) {
-			if (q->arKey == NULL) {
+			if (q->nKeyLength == 0) {
 				zend_hash_index_del(ht, q->h);
 			} else {
 				zend_hash_del(ht,q->arKey,q->nKeyLength);
@@ -837,7 +837,7 @@ ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopy
     p = source->pListHead;
 	while (p) {
 		memcpy(tmp, p->pData, size);
-		if (p->arKey) {
+		if (p->nKeyLength>0) {
 			if (zend_hash_add(target, p->arKey, p->nKeyLength, tmp, size, &t)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
