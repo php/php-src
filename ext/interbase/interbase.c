@@ -2118,7 +2118,9 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 
 						ibase_blob_handle blob_handle;
 						unsigned long max_len = 0;
-						char bl_items[] = {isc_info_blob_total_length}, bl_info[20], *p;
+						static char bl_items[] = {isc_info_blob_total_length};
+						char bl_info[20];
+						unsigned short i;
 
 						blob_handle.bl_handle = NULL;
 						blob_handle.bl_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
@@ -2134,27 +2136,32 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						}
 						
 						/* find total length of blob's data */
-						for (p = bl_info; *p != isc_info_end && p < bl_info + sizeof(bl_info);) {
-							unsigned short item_len, item = *p++;
+						for (i = 0; i < sizeof(bl_info); ) {
+							unsigned short item_len;
+							char item = bl_info[i++];
+	
+							if (item == isc_info_end || item == isc_info_truncated || 
+								item == isc_info_error || i >= sizeof(bl_info)) {
 
-							item_len = (unsigned short) isc_vax_integer(p, 2);
-							p += 2;
+								_php_ibase_module_error("Could not determine BLOB size (internal error)");
+								RETURN_FALSE;
+							}								
+
+							item_len = (unsigned short) isc_vax_integer(&bl_info[i], 2);
+
 							if (item == isc_info_blob_total_length) {
-								max_len = isc_vax_integer(p, item_len);
+								max_len = isc_vax_integer(&bl_info[i+2], item_len);
 								break;
 							}
-							p += item_len;
+							i += item_len+2;
 						}
 						
 						if (max_len == 0) {
-							_php_ibase_module_error("Could not determine BLOB size (internal error)");
+							ZVAL_STRING(&tmp, "", 1);
+						} else if (_php_ibase_blob_get(&tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
 							RETURN_FALSE;
 						}
-						
-						if (_php_ibase_blob_get(&tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
-							RETURN_FALSE;
-						}
-						
+
 						if (isc_close_blob(IB_STATUS, &blob_handle.bl_handle)) {
 							zval_dtor(&tmp);
 							_php_ibase_error(TSRMLS_C);
