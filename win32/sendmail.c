@@ -123,6 +123,7 @@ int TSendMail(char *host, int *error, char **error_message,
 {
 	int ret;
 	char *RPath = NULL;
+	char *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
 
 	WinsockStarted = FALSE;
 
@@ -139,14 +140,26 @@ int TSendMail(char *host, int *error, char **error_message,
 	/* use from address as return path (if specified in headers) */
 	if (headers) {
 		char *pos = NULL;
-		/* Try to match 'From:' only at start of the string or after following a \r\n */
-		if (strstr(headers, "\r\nFrom:")) {
-			pos = strstr(headers, "\r\nFrom:") + 7;
-		} else if (!strncmp(headers, "From:", 5)) {
-			pos = headers + 5;
+		size_t i;
+		/* Create a lowercased header for all the searches so we're finally case
+		 * insensitive when searching for a pattern. */
+		if (NULL == (headers_lc = estrdup(headers))) {
+			*error = OUT_OF_MEMORY;
+			return FAILURE;
+		}
+		for (i = 0; i < strlen(headers_lc); i++) {
+			headers_lc[i] = tolower(headers_lc[i]);
+		}
+		/* Try to match 'from:' only at start of the string or after following a \r\n */
+		if (strstr(headers_lc, "\r\nfrom:")) {
+			pos = strstr(headers_lc, "\r\nfrom:") + 7; /* Jump over the string "\r\nfrom:", hence the 7 */
+		} else if (!strncmp(headers_lc, "from:", 5)) {
+			pos = headers + 5; /* Jump over the string "from:", hence the 5 */
 		}
 		if (pos) {
 			char *pos_end;
+			/* Let pos point to the real header string */
+			pos = headers + (pos - headers_lc);
 			/* Ignore any whitespaces */
 			while (pos && ((*pos == ' ' || *pos == '\t')))
 				pos++;
@@ -164,6 +177,9 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (INI_STR("sendmail_from")) {
 			RPath = estrdup(INI_STR("sendmail_from"));
 		} else {
+			if (headers_lc) {
+				efree(headers_lc);
+			}
 			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 			return FAILURE;
 		}
@@ -175,6 +191,9 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (RPath) {
 			efree(RPath);
 		}
+		if (headers_lc) {
+			efree(headers_lc);
+		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
 			return FAILURE;
@@ -182,10 +201,13 @@ int TSendMail(char *host, int *error, char **error_message,
 		snprintf(*error_message, HOST_NAME_LEN + 128, "Failed to connect to mailserver at \"%s\", verify your \"SMTP\" setting in php.ini", MailHost);
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, data, headers, error_message);
+		ret = SendText(RPath, Subject, mailTo, data, headers, headers_lc, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
+		}
+		if (headers_lc) {
+			efree(headers_lc);
 		}
 		if (ret != SUCCESS) {
 			*error = ret;
@@ -246,12 +268,16 @@ char *GetSMErrorText(int index)
 //                                  the subject is set to "No Subject"
 //                  3) mailTo:  Destination address
 //                  4) data:        Null terminated string containing the data to be send.
+//                  5,6) headers of the message. Note that the second
+//                  parameter, headers_lc, is actually a lowercased version of
+//                  headers. The should match exactly (in terms of length),
+//                  only differ in case
 // Output:      Error code or SUCCESS
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char **error_message)
+int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char *headers_lc, char **error_message)
 {
 	int res, i;
 	char *p;
@@ -316,8 +342,11 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	efree(tempMailTo);
 
 	/* Send mail to all Cc rcpt's */
-	if (headers && (pos1 = strstr(headers, "Cc:"))) {
-		pos1 += 3; /* Jump over Cc: */
+	if (headers && (pos1 = strstr(headers_lc, "cc:"))) {
+		/* Real offset is memaddress from the original headers + difference of
+		 * string found in the lowercase headrs + 3 characters to jump over
+		 * the cc: */
+		pos1 = headers + (pos1 - headers_lc) + 3;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 
 			tempMailTo = estrndup(pos1, strlen(pos1));
@@ -345,56 +374,61 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	/* Send mail to all Bcc rcpt's
 	   This is basically a rip of the Cc code above.
 	   Just don't forget to remove the Bcc: from the header afterwards. */
-	if (headers && (pos1 = strstr(headers, "Bcc:"))) {
-		pos1 += 4; /* Jump over Bcc: */
-		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
-			int foo = strlen(pos1);
-			tempMailTo = estrndup(pos1, strlen(pos1));
-			/* Later, when we remove the Bcc: out of the
-			   header we know it was the last thing. */
-			pos2 = pos1;
+	if (headers) {
+		if (pos1 = strstr(headers_lc, "bcc:")) {
+			/* Real offset is memaddress from the original headers + difference of
+			 * string found in the lowercase headrs + 4 characters to jump over
+			 * the bcc: */
+			pos1 = headers + (pos1 - headers_lc) + 4;
+			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+				int foo = strlen(pos1);
+				tempMailTo = estrndup(pos1, strlen(pos1));
+				/* Later, when we remove the Bcc: out of the
+				   header we know it was the last thing. */
+				pos2 = pos1;
+			} else {
+				tempMailTo = estrndup(pos1, pos2 - pos1);
+			}
+
+			token = strtok(tempMailTo, ",");
+			while(token != NULL)
+			{
+				sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+				if ((res = Post(Buffer)) != SUCCESS) {
+					return (res);
+				}
+				if ((res = Ack(&server_response)) != SUCCESS) {
+					SMTP_ERROR_RESPONSE(server_response);
+					return (res);
+				}
+				token = strtok(NULL, ",");
+			}
+			efree(tempMailTo);
+
+			/* Now that we've identified that we've a Bcc list,
+			   remove it from the current header. */
+			if (NULL == (stripped_header = ecalloc(1, strlen(headers)))) {
+				return OUT_OF_MEMORY;
+			}
+			/* headers = point to string start of header
+			   pos1    = pointer IN headers where the Bcc starts
+			   '4'     = Length of the characters 'bcc:'
+			   Because we've added +4 above for parsing the Emails
+			   we've to substract them here. */
+			memcpy(stripped_header, headers, pos1 - headers - 4);
+			if (pos1 != pos2) {
+				/* if pos1 != pos2 , pos2 points to the rest of the headers.
+				   Since pos1 != pos2 if "\r\n" was found, we know those characters
+				   are there and so we jump over them (else we would generate a new header
+				   which would look like "\r\n\r\n". */
+				memcpy(stripped_header + (pos1 - headers - 4), pos2 + 2, strlen(pos2) - 2);
+			}
 		} else {
-			tempMailTo = estrndup(pos1, pos2 - pos1);
-		}
-
-		token = strtok(tempMailTo, ",");
-		while(token != NULL)
-		{
-			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
-			if ((res = Post(Buffer)) != SUCCESS) {
-				return (res);
+			/* Simplify the code that we create a copy of stripped_header no matter if
+			   we actually strip something or not. So we've a single efree() later. */
+			if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
+				return OUT_OF_MEMORY;
 			}
-			if ((res = Ack(&server_response)) != SUCCESS) {
-				SMTP_ERROR_RESPONSE(server_response);
-				return (res);
-			}
-			token = strtok(NULL, ",");
-		}
-		efree(tempMailTo);
-
-		/* Now that we've identified that we've a Bcc list,
-		   remove it from the current header. */
-		if (NULL == (stripped_header = ecalloc(1, strlen(headers)))) {
-			return OUT_OF_MEMORY;
-		}
-		/* headers = point to string start of header
-		   pos1    = pointer IN headers where the Bcc starts
-		   '4'     = Length of the characters 'Bcc:'
-		   Because we've added +4 above for parsing the Emails
-		   we've to substract them here. */
-		memcpy(stripped_header, headers, pos1 - headers - 4);
-		if (pos1 != pos2) {
-			/* if pos1 != pos2 , pos2 points to the rest of the headers.
-			   Since pos1 != pos2 if "\r\n" was found, we know those characters
-			   are there and so we jump over them (else we would generate a new header
-			   which would look like "\r\n\r\n". */
-			memcpy(stripped_header + (pos1 - headers - 4), pos2 + 2, strlen(pos2) - 2);
-		}
-	} else {
-		/* Simplify the code that we create a copy of stripped_header no matter if
-		   we actually strip something or not. So we've a single efree() later. */
-		if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
-			return OUT_OF_MEMORY;
 		}
 	}
 
@@ -415,7 +449,9 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	} else {
 		res = PostHeader(RPath, Subject, mailTo, stripped_header, NULL);
 	}
-	efree(stripped_header);
+	if (stripped_header) {
+		efree(stripped_header);
+	}
 	if (res != SUCCESS) {
 		return (res);
 	}
@@ -482,12 +518,23 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 	int zoneh = abs(_timezone);
 	int zonem, res;
 	char *p;
+	char *headers_lc = NULL;
+	size_t i;
+
+	if (xheaders) {
+		if (NULL == (headers_lc = estrdup(xheaders))) {
+			return OUT_OF_MEMORY;
+		}
+		for (i = 0; i < strlen(headers_lc); i++) {
+			headers_lc[i] = tolower(headers_lc[i]);
+		}
+	}
 
 	p = Buffer;
 	zoneh /= (60 * 60);
 	zonem = (abs(_timezone) / 60) - (zoneh * 60);
 
-	if(!xheaders || !strstr(xheaders, "Date:")){
+	if(!xheaders || !strstr(headers_lc, "date:")){
 		p += sprintf(p, "Date: %s, %02d %s %04d %02d:%02d:%02d %s%02d%02d\r\n",
 					 days[tm->tm_wday],
 					 tm->tm_mday,
@@ -501,7 +548,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 					 zonem);
 	}
 
-	if(!xheaders || !strstr(xheaders, "From:")){
+	if(!headers_lc || !strstr(headers_lc, "from:")){
 		p += sprintf(p, "From: %s\r\n", RPath);
 	}
 	p += sprintf(p, "Subject: %s\r\n", Subject);
@@ -513,11 +560,19 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		p += sprintf(p, "%s\r\n", xheaders);
 	}
 
-	if ((res = Post(Buffer)) != SUCCESS)
+	if ((res = Post(Buffer)) != SUCCESS) {
+		if (headers_lc) {
+			efree(headers_lc);
+		}
 		return (res);
+	}
 
-	if ((res = Post("\r\n")) != SUCCESS)
+	if ((res = Post("\r\n")) != SUCCESS) {
+		if (headers_lc) {
+			efree(headers_lc);
+		}
 		return (res);
+	}
 
 	return (SUCCESS);
 }
