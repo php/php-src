@@ -71,7 +71,6 @@ AC_ARG_ENABLE(gd-native-ttf,
 
 
 shared=no
-AC_MSG_CHECKING(whether to include GD support)
 AC_ARG_WITH(gd,
 [  
   --with-gd[=DIR]         Include GD support (DIR is GD's install dir).
@@ -83,6 +82,8 @@ AC_ARG_WITH(gd,
   PHP_GD_JPEG
   PHP_GD_XPM
   withval=$old_withval
+
+  AC_MSG_CHECKING(whether to include GD support)
 
   case "$withval" in
     no)
