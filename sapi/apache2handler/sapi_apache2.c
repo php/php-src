@@ -429,7 +429,7 @@ static void php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	ap_set_content_type(r, apr_pstrdup(r->pool, content_type));
 	efree(content_type);
 
-	content_length = (char *) apr_table_get(f->r->headers_in, "Content-Length");
+	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
 
 	apr_table_unset(r->headers_out, "Content-Length");
