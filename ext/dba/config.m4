@@ -198,7 +198,7 @@ AC_ARG_WITH(db4,
 [  --with-db4[=DIR]          DBA: Include Berkeley DB4 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
-    for i in $withval /usr/local/BerkeleyDB.4.1 /usr/local/BerkeleyDB.4.0 /usr/local /usr; do
+    for i in $withval /usr/local/BerkeleyDB.4.2 /usr/local/BerkeleyDB.4.1 /usr/local/BerkeleyDB.4.0 /usr/local /usr; do
       if test -f "$i/db4/db.h"; then
         THIS_PREFIX=$i
         THIS_INCLUDE=$i/db4/db.h
@@ -221,7 +221,7 @@ AC_ARG_WITH(db4,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(4, db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+    PHP_DBA_DB_CHECK(4, db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
   fi
 ])
 AC_DBA_STD_RESULT(db4,Berkeley DB4)
