@@ -18,7 +18,7 @@ if test "$PHP_MIME_MAGIC" = "yes"; then
   elif test -f /usr/share/misc/magic.mime ; then
  	PHP_MIME_MAGIC_FILE_PATH=/usr/share/misc/magic.mime
   elif test -f /etc/magic ; then
-  	PHP_MIME_MAGIC_FILE_PATH=/etc/magic
+  	PHP_MIME_MAGIC_FILE_PATH=/etc/magic.mime
   else
   	PHP_MIME_MAGIC_FILE_PATH=""	
   fi
