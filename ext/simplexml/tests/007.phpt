@@ -66,20 +66,20 @@ object(simplexml_element)#%d (2) {
   }
 }
 ===Array===
-object(simplexml_element)#2 (1) {
+object(simplexml_element)#%d (1) {
   [0]=>
   string(5) "elem1"
 }
-object(simplexml_element)#6 (1) {
+object(simplexml_element)#%d (1) {
   [0]=>
   string(5) "first"
 }
 ===Set===
-object(simplexml_element)#6 (1) {
+object(simplexml_element)#%d (1) {
   [0]=>
   string(8) "Changed1"
 }
-object(simplexml_element)#5 (1) {
+object(simplexml_element)#%d (1) {
   [0]=>
   string(2) "12"
 }
