@@ -1,3 +1,103 @@
+2001-03-21  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: setting right params to zend_get_parameters_ex
+
+2001-03-21  Rainer Schaaf  <rjs@pdflib.com>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h:
+    Beta2 of PDFlib V4.0 will introduce on new function (PDF_place_pdi_page)
+    and PDF_close_pdi_page will lose one parameter.
+    These changes are done for the phpwrapper now.
+    This has no impact on PDFlib V3.x.
+
+2001-03-21  Andi Gutmans  <andi@zend.com>
+
+    * ext/pfpro/pfpro.c
+      ext/pfpro/php_pfpro.h: - Fix spelling error
+
+2001-03-21  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: changed arg types from pval* to zval**
+
+2001-03-21  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/bz2/EXPERIMENTAL: Remove experimental status from bz2 (as of 4.0.6)
+
+    * EXTENSIONS: Remove experimental status from bz2
+
+2001-03-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fixing news.
+
+2001-03-21  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * run-tests.php:
+    I don't like to commit this over and over either, but this client definitely seems to dislike branches
+
+    * run-tests.php: synchronizing with CVS
+
+2001-03-21  Ben Mansell  <ben@zeus.com>
+
+    * ext/standard/mail.c:
+    UnixWare 7.1 does not have EX_TEMPFAIL or (as far as I can tell)
+    a concept of a temporary failure response to pclose().
+
+2001-03-21  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/article.c: Disallow duplicate article names under one parent
+
+2001-03-21  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/basic_functions.c: Fix for bug #9698.
+
+2001-03-21  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * run-tests.php:
+    fighting against the cvs client, it does not want to let the win32 binary safe change go in...
+
+    * run-tests.php: win32 fixes again
+
+    * tests/strings/001.phpt
+      tests/strings/002.phpt
+      tests/strings/003.phpt
+      tests/lang/018.phpt
+      tests/lang/019.phpt
+      tests/lang/020.phpt
+      tests/lang/021.phpt
+      tests/lang/022.phpt
+      tests/lang/023.phpt
+      tests/lang/024.phpt
+      tests/lang/025.phpt
+      tests/lang/028.phpt: more win32 fixes
+
+2001-03-21  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c: - fulltext query are working now
+
+2001-03-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * run-tests.php: Disable maximum execution time for tests.
+
+2001-03-21  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * run-tests.php: 1) fixed tests on *both* win32+linux
+    2) made tests more sophisticated (checking against compiled in modules)
+    3) minor changes
+    4) win32 improvements
+
+2001-03-21  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - added EntityReference and Notation class
+    - fixed handling of PI nodes
+    - implemented more class functions
+
+2001-03-21  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/DB.php: Style and whitespace, based mostly on a submission from
+    "Tomas V.V.Cox" <cox@idecnet.com>.
+
 2001-03-20  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * pear/Experimental/HTML/Menu_Browser.php: Warning: alpha code!
