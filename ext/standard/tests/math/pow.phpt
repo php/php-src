@@ -136,10 +136,10 @@ LONG_MAX*LONG_MAX ~== pow(LONG_MAX,2.0)
 FALSE ===@pow(LONG_MIN,2.0)
 TESTS;
 
- echo "On failure, please mail result to jeroen@php.net\n";
+ echo "On failure, please mail result to php-dev@lists.php.net\n";
  include('../../../../tests/quicktester.inc');
 
 --EXPECT--
 1,1,0,0
-On failure, please mail result to jeroen@php.net
+On failure, please mail result to php-dev@lists.php.net
 OK
