@@ -1,3 +1,17 @@
+2004-07-21  Edin Kadribasic  <edink@emini.dk>
+
+    * zend_builtin_functions.c:
+      Fixed build
+
+2004-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_builtin_functions.c:
+      MFH: Fixded #29291: get_class_vars() return names with NULLs
+
+    * zend_builtin_functions.c:
+      - Fixded #29291: get_class_vars() return names with NULLs
+
 2004-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_alloc.c

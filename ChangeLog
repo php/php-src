@@ -1,3 +1,100 @@
+2004-07-21  Edin Kadribasic  <edink@emini.dk>
+
+    * configure.in
+      main/php_version.h:
+      HEAD is 5.1.0-dev now
+
+    * sapi/isapi/php5isapi.c:
+      Fix for #28929 by Michael Sisolak
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Fixed build
+
+2004-07-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #29209 (imap_fetchbody() doesn't check message index).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #29209 (imap_fetchbody() doesn't check message index).
+      
+
+2004-07-21  Andrey Hristov  <php@hristov.com>
+
+    * NEWS
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/tests/array/array_diff_key.phpt
+      ext/standard/tests/array/array_intersect_key.phpt:
+      add array_:
+      intersect_key()
+      intersect_ukey()
+      diff_key()
+      diff_ukey()
+      The first two by a patch of Cristiano Duarte. The second two were
+      implemented in almost the same way except one small difference.
+
+2004-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_builtin_functions.c:
+      MFH: Fixded #29291: get_class_vars() return names with NULLs
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fixded #29291: get_class_vars() return names with NULLs
+
+2004-07-21  Stefan Esser  <sesser@suspekt.org>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c
+      ext/session/session.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/w32api/w32api.c
+      main/main.c
+      main/rfc1867.c
+      sapi/apache/mod_php4.c:
+      Merge all not yet merged security fixes into the 4_3 branch
+
+2004-07-21  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_5_0)
+      run-tests.php:
+      MFH. Fix for Bug 29010 "make test does not wait to email address" (by
+      Sebastian Nohn)
+
+    * run-tests.php:
+      Fix for Bug 29010 "make test does not wait to email address" (by Sebastian
+      Nohn)
+
+2004-07-21  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS:
+      MDTM added to ftp_url_stat
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Add MTDM support to ftp_fopen_wrapper::url_stat()
+
+    * ext/zlib/zlib_filter.c:
+      Oops, copy/paste typo
+
+    * ext/bz2/bz2_filter.c
+      ext/zlib/zlib_filter.c:
+      Persistent mallocs can return NULL (on failure)
+
+2004-07-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/sunfuncs.c:
+      Abort earlier on invalid format.
+
 2004-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ZendEngine2/zend_alloc.c
