@@ -1,3 +1,19 @@
+2005-02-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/exif/exif.c:
+      PHP_WIN32 is defined or not defined.
+
+2005-02-16  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/exif/exif.c:
+      Enable mbstring use on windows. We were linking against mbstring for
+      some time now, but have never actually used it on Windows.
+      Fixes #31980.
+
 2005-02-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
