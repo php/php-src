@@ -380,9 +380,24 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno TSRMLS_DC)
 {
 	char *colon;
-	char *host = NULL;
+	char *p, *host = NULL;
 
-	colon = memchr(xparam->inputs.name, ':', xparam->inputs.namelen);
+#ifdef HAVE_IPV6
+	if (*(xparam->inputs.name) == '[') {
+		/* IPV6 notation to specify raw address with port (i.e. [fe80::1]:80) */
+		p = memchr(xparam->inputs.name + 1, ']', xparam->inputs.namelen - 2);
+		if (!p || *(p + 1) != ':') {
+			if (xparam->want_errortext) {
+				spprintf(&xparam->outputs.error_text, 0, "Failed to parse IPv6 address \"%s\"", xparam->inputs.name);
+			}
+			return NULL;
+		}
+		*portno = atoi(p + 2);
+		return estrndup(xparam->inputs.name + 1, p - xparam->inputs.name - 1);
+	}
+#endif
+
+	colon = memchr(xparam->inputs.name, ':', xparam->inputs.namelen - 1);
 	if (colon) {
 		*portno = atoi(colon + 1);
 		host = estrndup(xparam->inputs.name, colon - xparam->inputs.name);
