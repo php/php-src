@@ -36,24 +36,23 @@ Open:
 (3) calling ob_start in weird ways caused a segfault in 
     php_formatted_print(). In this line:
 	
-	format = Z_STRVAL_PP(args[0]);
+	    format = Z_STRVAL_PP(args[0]);
 
 	format was zero.  The zval appeared to be fubar'ed.
 
-    I am not able to reproduce this particular issue at the moment.  I
-    was not able to create a simple test case for this initially, so
-    the lack of reproducibility likely relates to modifications in the 
-    now-extended test script.
+    The current do_crash script does not cause a segfault.  An older
+    version does however:
 
+	    <URL:http://schumann.cx/do_crash_ob_start.txt>
 
 
 Methodology
 
     1. Use a plain PHP_4_3 tree
     2. Use the config.nice from ammendment 1.
-    3. Download the test script
+    3. Download the test script from:
 
-       <URL:http://schumann.cx/do_crash.txt>
+        <URL:http://schumann.cx/do_crash.txt>
 
     4a. Use the scripts funcparse.awk/genfunclist.sh from phpdoc/scripts
         for creating a plain text function list.  Feed that list to
