@@ -93,10 +93,8 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 
 
 #define REMOVE_POINTER_FROM_LIST(p)				\
-	if (!p->persistent && p==AG(head)) {		\
+	if (p==AG(head)) {							\
 		AG(head) = p->pNext;					\
-	} else if (p->persistent && p==AG(phead)) {	\
-		AG(phead) = p->pNext;					\
 	} else {									\
 		p->pLast->pNext = p->pNext;				\
 	}											\
@@ -105,19 +103,11 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 	}
 
 #define ADD_POINTER_TO_LIST(p)		\
-	if (p->persistent) {			\
-		p->pNext = AG(phead);		\
-		if (AG(phead)) {			\
-			AG(phead)->pLast = p;	\
-		}							\
-		AG(phead) = p;				\
-	} else {						\
-		p->pNext = AG(head);		\
-		if (AG(head)) {				\
-			AG(head)->pLast = p;	\
-		}							\
-		AG(head) = p;				\
-	}								\
+	p->pNext = AG(head);		\
+	if (AG(head)) {				\
+		AG(head)->pLast = p;	\
+	}							\
+	AG(head) = p;				\
 	p->pLast = (zend_mem_header *) NULL;
 
 #define DECLARE_CACHE_VARS()	\
@@ -157,7 +147,6 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		AG(cache_stats)[CACHE_INDEX][1]++;
 		memcpy((((char *) p) + sizeof(zend_mem_header) + MEM_HEADER_PADDING + size), &mem_block_end_magic, sizeof(long));
 #endif
-		p->persistent = 0;
 		p->cached = 0;
 		p->size = size;
 		return (void *)((char *)p + sizeof(zend_mem_header) + MEM_HEADER_PADDING);
@@ -182,7 +171,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)p;
 	}
-	p->persistent = p->cached = 0;
+	p->cached = 0;
 	ADD_POINTER_TO_LIST(p);
 	p->size = size; /* Save real size for correct cache output */
 #if ZEND_DEBUG
@@ -233,7 +222,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #endif
 
 	if (!ZEND_DISABLE_MEMORY_CACHE 
-		&& !p->persistent && (CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] < MAX_CACHED_ENTRIES)) {
+		&& (CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] < MAX_CACHED_ENTRIES)) {
 		AG(cache)[CACHE_INDEX][AG(cache_count)[CACHE_INDEX]++] = p;
 		p->cached = 1;
 #if ZEND_DEBUG
@@ -408,7 +397,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 #endif
 #endif
 
-	AG(phead) = AG(head) = NULL;
+	AG(head) = NULL;
 	
 #if MEMORY_LIMIT
 	AG(memory_limit) = 1<<30;		/* ridiculous limit, effectively no limit */

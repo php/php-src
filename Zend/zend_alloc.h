@@ -45,8 +45,7 @@ typedef struct _zend_mem_header {
 #endif
     struct _zend_mem_header *pNext;
     struct _zend_mem_header *pLast;
-	unsigned int size:30;
-	unsigned int persistent:1;
+	unsigned int size:31;
 	unsigned int cached:1;
 } zend_mem_header;
 
