@@ -21,6 +21,11 @@
 #include "php_ini.h"
 #include "php_dbplus.h"
 
+#include <saccess.h>
+#include <relation.h>
+#include <dblight.h>
+
+
 
 #define _STRING(x) ((*x)->value.str.val)
 #define _INT(x)    ((*x)->value.lval)
@@ -124,6 +129,7 @@ tuple2var(relf * r, tuple * t, zval **zv)
 				break;
 
 			case  FT_LONG:  
+			case  FT_SEQUENCE:
 				ZVAL_LONG(element, AFFIX(ap, t)->f_long); 
 				break;
 
@@ -135,27 +141,12 @@ tuple2var(relf * r, tuple * t, zval **zv)
 				ZVAL_DOUBLE(element, AFFIX(ap, t)->f_double); 
 				break;
 
-	case FT_STRING: case FT_DEUTSCH: case FT_CHAR:
+			case FT_STRING: 
+			case FT_DEUTSCH: 
+			case FT_CHAR:
 				ZVAL_STRING(element, AFVAR(ap, t)->f_string, 1);
 				break;
 
-				/*				
-			case  FT_P_SHORT: return "FT_P_SHORT";           
-			case  FT_P_LONG: return "FT_P_LONG";            
-			case  FT_DATE: return "FT_DATE";              
-			case  FT_TIME: return "FT_TIME";              
-			case  FT_BINARY: return "FT_BINARY";            
-			case  FT_BLOB: return "FT_BLOB";              
-			case  FT_ANSI: return "FT_ANSI";              
-			case  FT_TIMESTAMP: return "FT_TIMESTAMP";         
-			case  FT_SEQUENCE: return "FT_SEQUENCE";          
-			case  FT_MEMO: return "FT_MEMO";              
-			case  FT_ISO: return "FT_ISO";               
-			case  FT_ISOL: return "FT_ISOL";              
-			case  FT_ANON: return "FT_ANON";              
-			case  FT_TUPID: return "FT_TUPID";  
-			case  FT_INVALID: return "FT_INVALID";
-				*/
 			}
 
 			if(element->type!=IS_NULL)
@@ -311,6 +302,9 @@ PHP_FUNCTION(dbplus_add)
 		RETURN_LONG(ERR_UNKNOWN);
 
 	stat=cdb_add(r, &t);
+	if(stat==ERR_NOERR) {
+		tuple2var(r, &t, data);
+	}
 
 	RETURN_LONG(stat);
 }
@@ -361,16 +355,30 @@ PHP_FUNCTION(dbplus_aql)
 PHP_FUNCTION(dbplus_chdir)
 {
 	int argc;
+	char *p;
 	zval **newdir;
 
 	argc = ZEND_NUM_ARGS();
-	if (argc > 1 || zend_get_parameters_ex(1, &newdir) == FAILURE){
+	switch(argc) {
+	case 0: 
+		break;
+	case 1:
+		if(zend_get_parameters_ex(1, &newdir) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		} else {
+			convert_to_string_ex(newdir);
+		}
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string_ex(newdir);
-
-	RETURN_STRING(cdb_chdir((argc==1)?_STRING(newdir):NULL), 1);
+	p = cdb_chdir((argc)?_STRING(newdir):NULL);
+	if(p) {
+		RETURN_STRING(p, 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -441,7 +449,7 @@ PHP_FUNCTION(dbplus_errcode)
 }
 /* }}} */
 
-/* {{{ proto string dbplus_errno(void)
+/* {{{ proto int dbplus_errno(void)
    Get error code for last operation */
 PHP_FUNCTION(dbplus_errno)
 {
@@ -449,8 +457,8 @@ PHP_FUNCTION(dbplus_errno)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_find(int relation, array constr, array tuple)
- */
+/* {{{ proto int dbplus_find(int relation, array constr, mixed tuple)
+   Set a constraint on a relation*/
 PHP_FUNCTION(dbplus_find)
 {
 	relf *r;
@@ -537,7 +545,7 @@ PHP_FUNCTION(dbplus_freealllocks)
 
 
 /* {{{ proto int dbplus_freelock(int relation, array tuple)
-   Give up lock on tuple */
+   Release write lock on tuple */
 PHP_FUNCTION(dbplus_freelock)
 {
 	zval **relation, **data, **element;
@@ -604,21 +612,27 @@ PHP_FUNCTION(dbplus_getlock)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_getunique(int handle, int uniqueid, int flush)
-    */
+/* {{{ proto int dbplus_getunique(int handle, int uniqueid)
+   Get a id number unique to a relation */
 PHP_FUNCTION(dbplus_getunique)
 {
 	relf *r;
-	zval **relation, **uniqueid, **flush;
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &relation, &uniqueid, &flush) == FAILURE){
+	zval **relation, **uniqueid;
+	long l;
+	int stat;
+	
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &relation, &uniqueid) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
 	
 	DBPLUS_FETCH_RESOURCE(r, relation);
-	convert_to_long_ex(uniqueid);
-	convert_to_long_ex(flush);
+	
+	stat = cdb_getunique(r, &l, 1);
+	if(!stat) {
+		ZVAL_LONG(*uniqueid,l);
+	} 
 
-	RETURN_LONG(cdb_getunique(r, &(_INT(uniqueid)), _INT(flush)));
+	RETURN_LONG(stat);
 }
 /* }}} */
 
@@ -692,7 +706,7 @@ PHP_FUNCTION(dbplus_last)
 
 
 /* {{{ proto int dbplus_lockrel(int relation)
-   Request read-lock on relation */
+   Request write lock on relation */
 PHP_FUNCTION(dbplus_lockrel)
 {
 	relf *r;
@@ -797,6 +811,172 @@ PHP_FUNCTION(dbplus_rchperm)
 }
 /* }}} */
 
+/* {{{ proto int dbplus_rcreate(string name, string domlist [, int overwrite])
+    */
+PHP_FUNCTION(dbplus_rcreate)
+{
+	zval **name, **domlist, **overwrite;
+	relf *r=NULL;
+	int flag, ndoms, argc = ZEND_NUM_ARGS();
+	attdef *at0;
+
+	switch(argc) {
+	case 3:
+		if(zend_get_parameters_ex(3, &name, &domlist, &overwrite) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}			
+		convert_to_long_ex(overwrite);
+		flag=_INT(overwrite);
+		break;
+	case 2:
+		if(zend_get_parameters_ex(3, &name, &domlist) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		flag=0;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		break;
+	}
+
+	convert_to_string_ex(name);
+	convert_to_string_ex(domlist);
+
+	at0 = create2att(_STRING(domlist), &ndoms);
+	if (at0) {
+		r = cdbRcreate(_STRING(name), 0666, 0, ndoms, at0, flag);
+		dbxfree((char *) at0);
+	}
+	if(r == NULL) {
+		/* TODO error handling */
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
+}
+/* }}} */
+
+/* {{{ proto int dbplus_rcrtexact(string name, int handle[, int overwrite])
+    */
+PHP_FUNCTION(dbplus_rcrtexact)
+{
+	zval **name, **relation, **overwrite;
+	relf *r;
+	int f,argc = ZEND_NUM_ARGS();
+
+	switch(argc) {
+	case 3:
+		if(zend_get_parameters_ex(3, &name, &relation, &overwrite) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}			
+		convert_to_long_ex(overwrite);
+		f=_INT(overwrite);
+		break;
+	case 2:
+		if(zend_get_parameters_ex(3, &name, &relation) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		f=0;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		break;
+	}
+
+	convert_to_string_ex(name);
+	DBPLUS_FETCH_RESOURCE(r, relation);
+
+	r = cdbRcrtexact(_STRING(name), 0666, r, f);
+	if(r == NULL) {
+		/* TODO error handling */
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
+}
+/* }}} */
+
+/* {{{ proto int dbplus_rcrtlike(string name, int handle [, int overwrite])
+    */
+PHP_FUNCTION(dbplus_rcrtlike)
+{
+	zval **name, **relation, **overwrite;
+	relf *r;
+	int f,argc = ZEND_NUM_ARGS();
+
+	switch(argc) {
+	case 3:
+		if(zend_get_parameters_ex(3, &name, &relation, &overwrite) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}			
+		convert_to_long_ex(overwrite);
+		f=_INT(overwrite);
+		break;
+	case 2:
+		if(zend_get_parameters_ex(3, &name, &relation) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		f=0;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+		break;
+	}
+
+	convert_to_string_ex(name);
+	DBPLUS_FETCH_RESOURCE(r, relation);
+
+	r = cdbRcrtlike(_STRING(name), 0666, 0, r, f);
+	if(r == NULL) {
+		/* TODO error handling */
+		RETURN_FALSE;
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
+}
+/* }}} */
+
+/* {{{ proto int dbplus_resolve(string name)
+   Resolve host information for relation */
+PHP_FUNCTION(dbplus_resolve)
+{
+	zval **name, *element;
+	char * host;
+	char * host_path;
+	int sid;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &name) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(name);
+
+	sid = cdb_resolve(_STRING(name), &host, &host_path);
+	if (sid <= 0)
+		RETURN_FALSE;
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+
+	MAKE_STD_ZVAL(element); element->type=IS_NULL;
+	ZVAL_LONG(element,sid);
+	zend_hash_update(Z_ARRVAL_P(return_value), "sid", 4,
+					  &element, sizeof(zval *), NULL);
+
+	MAKE_STD_ZVAL(element); element->type=IS_NULL;
+	ZVAL_STRING(element,host,1);
+	zend_hash_update(Z_ARRVAL_P(return_value), "host", 5,
+					  &element, sizeof(zval *), NULL);
+
+	MAKE_STD_ZVAL(element); element->type=IS_NULL;
+	ZVAL_STRING(element,host_path,1);
+	zend_hash_update(Z_ARRVAL_P(return_value), "host_path", 10,
+					  &element, sizeof(zval *), NULL);
+}
+/* }}} */
+
 /* {{{ proto int dbplus_restorepos(int relation, array tuple)
    ??? */
 PHP_FUNCTION(dbplus_restorepos)
@@ -851,7 +1031,7 @@ PHP_FUNCTION(dbplus_rkeys)
 	} else {
 		convert_to_string_ex(domlist);
 		name = estrdup(_STRING(domlist));
-		while (p = strtok(nkeys ? 0 : name, " 	"))
+		while (p = strtok(nkeys ? 0 : name, " \t"))
 			keys[nkeys++] = p;
 	}
 	
@@ -915,22 +1095,21 @@ PHP_FUNCTION(dbplus_rquery)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rrename(int relation, string name, int flag)
+/* {{{ proto int dbplus_rrename(int relation, string name)
     */
 PHP_FUNCTION(dbplus_rrename)
 {
 	relf *r;
-	zval **relation, **name, **flag;
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &relation, &name, &flag) == FAILURE){
+	zval **relation, **name;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &relation, &name) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
 
 	DBPLUS_FETCH_RESOURCE(r, relation);
 
 	convert_to_string_ex(name);
-	convert_to_long_ex(flag);
 
-	RETURN_LONG(cdbRrename(r, _STRING(name), (*flag)->value.lval));
+	RETURN_LONG(cdbRrename(r, _STRING(name), 0));
 }
 /* }}} */
 
@@ -1010,15 +1189,13 @@ PHP_FUNCTION(dbplus_rzap)
 	/* todo: optional argument */
 	relf *r;
 	zval **relation, **truncate;
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &relation, &truncate) == FAILURE){
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &relation) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
-
-	convert_to_long_ex(truncate);
-
+ 
 	DBPLUS_FETCH_RESOURCE(r, relation);
 
-	RETURN_LONG(cdbRzap(r, (*truncate)->value.lval));
+	RETURN_LONG(cdbRzap(r, 1));
 }
 /* }}} */
 
@@ -1114,6 +1291,31 @@ PHP_FUNCTION(dbplus_sql)
 }
 /* }}} */
 
+/* {{{ proto string dbplus_tcl(int sid, string script)
+    */
+PHP_FUNCTION(dbplus_tcl)
+{
+	zval **sid, **script;
+	char *ret;
+	int result_type;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &sid, &script) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(sid);
+	convert_to_string_ex(script);
+
+	cdb_tcl(_INT(sid),_STRING(script),&ret,&result_type);
+
+	if(ret) {
+		RETURN_STRING(ret,1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto int dbplus_tremove(int relation, array old [, array current])
    Remove tuple and return new current tuple */
 PHP_FUNCTION(dbplus_tremove)
@@ -1178,7 +1380,7 @@ PHP_FUNCTION(dbplus_undoprepare)
 /* }}} */
 
 /* {{{ proto int dbplus_unlockrel(int relation)
-   Give up read-lock on relation */
+   Give up write lock on relation */
 PHP_FUNCTION(dbplus_unlockrel)
 {
 	relf *r;
@@ -1194,7 +1396,7 @@ PHP_FUNCTION(dbplus_unlockrel)
 /* }}} */
 
 /* {{{ proto int dbplus_unselect(int relation)
-   ??? */
+   Remove constraint from relation */
 PHP_FUNCTION(dbplus_unselect)
 {
 	relf *r;
@@ -1240,7 +1442,7 @@ PHP_FUNCTION(dbplus_update)
 /* }}} */
 
 /* {{{ proto int dbplus_xlockrel(int relation)
-   Request exclusive write lock on relation */
+   Request exclusive lock on relation */
 PHP_FUNCTION(dbplus_xlockrel)
 {
 	relf *r;
@@ -1256,7 +1458,7 @@ PHP_FUNCTION(dbplus_xlockrel)
 /* }}} */
 
 /* {{{ proto int dbplus_xunlockrel(int relation)
-   Free exclusive write lock on relation */
+   Free exclusive lock on relation */
 PHP_FUNCTION(dbplus_xunlockrel)
 {
 	relf *r;
