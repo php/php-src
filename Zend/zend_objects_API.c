@@ -56,6 +56,12 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 	}
 }
 
+
+ZEND_API void zend_objects_store_nuke_objects()
+{
+}
+
+
 /* Store objects API */
 
 ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_store_dtor_t dtor, zend_objects_store_clone_t clone TSRMLS_DC)
@@ -100,28 +106,6 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #if ZEND_DEBUG_OBJECTS
 	fprintf(stderr, "Increased refcount of object id #%d\n", handle);
 #endif
-}
-
-ZEND_API void zend_objects_store_delete_obj(zval *zobject TSRMLS_DC)
-{
-	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-	struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-	
-	if (!EG(objects_store).object_buckets[handle].valid) {
-		zend_error(E_ERROR, "Trying to delete invalid object");
-	}
-
-
-	if (obj->dtor && !EG(objects_store).object_buckets[handle].destructor_called) {
-		EG(objects_store).object_buckets[handle].destructor_called = 1;
-		obj->dtor(obj->object, handle TSRMLS_CC);
-	}
-	EG(objects_store).object_buckets[handle].valid = 0;
-	
-#if ZEND_DEBUG_OBJECTS
-	fprintf(stderr, "Deleted object id #%d\n", handle);
-#endif
-
 }
 
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																\

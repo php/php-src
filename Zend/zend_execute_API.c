@@ -238,11 +238,11 @@ void shutdown_executor(TSRMLS_D)
 
 	zend_try {
 		/* Cleanup static data for functions and arrays.
-		   We need separate cleanup stage because of the following problem:
-		   Suppose we destroy class X, which destroys function table,
-		   and in function table we have function foo() that has static $bar. Now if
-		   object of class X is assigned to $bar, its destructor will be called and will
-		   fail since X's function table is in mid-destruction.
+		   We need a separate cleanup stage because of the following problem:
+		   Suppose we destroy class X, which destroys the class's function table,
+		   and in the function table we have function foo() that has static $bar.
+		   Now if an object of class X is assigned to $bar, its destructor will be
+		   called and will fail since X's function table is in mid-destruction.
 		   So we want first of all to clean up all data and then move to tables destruction.
 		   Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */

@@ -64,7 +64,7 @@ ZEND_API void zend_objects_store_delete_obj(zval *object TSRMLS_DC);
 ZEND_API zend_object_value zend_objects_store_clone_obj(zval *object TSRMLS_DC);
 ZEND_API void *zend_object_store_get_object(zval *object TSRMLS_DC);
 	
-#define ZEND_OBJECTS_STORE_HANDLERS zend_objects_store_add_ref, zend_objects_store_del_ref, zend_objects_store_delete_obj, zend_objects_store_clone_obj
+#define ZEND_OBJECTS_STORE_HANDLERS zend_objects_store_add_ref, zend_objects_store_del_ref, zend_objects_store_clone_obj
 
 ZEND_API zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC);
 
