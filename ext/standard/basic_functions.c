@@ -268,6 +268,7 @@ function_entry basic_functions[] = {
 #endif
 
 	PHP_FE(getmyuid,								NULL)
+	PHP_FE(getmygid,								NULL)
 	PHP_FE(getmypid,								NULL)
 	PHP_FE(getmyinode,								NULL)
 	PHP_FE(getlastmod,								NULL)
@@ -846,6 +847,7 @@ PHP_RINIT_FUNCTION(basic)
 	BG(mmap_file) = NULL;
 #endif
 	BG(page_uid) = -1;
+	BG(page_gid) = -1;
 	BG(page_inode) = -1;
 	BG(page_mtime) = -1;
 #ifdef HAVE_PUTENV

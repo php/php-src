@@ -155,6 +155,7 @@ typedef struct {
  
 	/* pageinfo.c */
 	long page_uid;
+	long page_gid;
 	long page_inode;
 	long page_mtime;
 
