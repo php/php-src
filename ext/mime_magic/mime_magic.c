@@ -238,7 +238,7 @@ ZEND_GET_MODULE(mime_magic)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("mime_magic.magicfile", "/usr/share/misc/magic.mime", PHP_INI_SYSTEM, OnUpdateString, magicfile, zend_mime_magic_globals, mime_magic_globals)
+STD_PHP_INI_ENTRY("mime_magic.magicfile", "/usr/share/misc/magic.mime", PHP_INI_SYSTEM, OnUpdateString, magicfile, zend_mime_magic_globals, mime_magic_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -246,7 +246,7 @@ PHP_INI_END()
  */
 static void php_mime_magic_init_globals(zend_mime_magic_globals *mime_magic_globals)
 {
-	mime_magic_globals->magicfile = NULL;
+	mime_global.magicfile = NULL;
 }
 /* }}} */
 
@@ -257,11 +257,11 @@ PHP_MINIT_FUNCTION(mime_magic)
 	ZEND_INIT_MODULE_GLOBALS(mime_magic, php_mime_magic_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
-	if(mime_magic_globals.magicfile) {
-		mime_global.magicfile = mime_magic_globals.magicfile;
+	mime_global.magicfile = MIME_MAGIC_G(magicfile);
+
+	if(mime_global.magicfile) {
 		apprentice();
 	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -330,7 +330,7 @@ PHP_FUNCTION(mime_content_type)
 		RETURN_FALSE;
 	}
 
-	magic_set_config();
+	MIME_MAGIC_G(req_dat) = magic_set_config();
 
 	if(MIME_MAGIC_OK != magic_process(filename)) {
 		RETVAL_FALSE;
@@ -877,7 +877,6 @@ static magic_req_rec *magic_set_config(void)
     magic_req_rec *req_dat = (magic_req_rec *) emalloc(sizeof(magic_req_rec));
 
     req_dat->head = req_dat->tail = (magic_rsl *) NULL;
-	MIME_MAGIC_G(req_dat) = req_dat;
     return req_dat;
 }
 
@@ -901,10 +900,13 @@ static void magic_free_config(magic_req_rec *req_dat) {
 /* it is the responsibility of the caller to allocate "str" */
 static int magic_rsl_add(char *str)
 {
-    magic_req_rec *req_dat = MIME_MAGIC_G(req_dat); 
+    magic_req_rec *req_dat;  
     magic_rsl *rsl;
+	TSRMLS_FETCH();
 
-    /* make sure we have a list to put it in */
+	req_dat = MIME_MAGIC_G(req_dat);
+	
+   /* make sure we have a list to put it in */
     if (!req_dat) {
 		php_error(E_WARNING,
 					  MODNAME ": request config should not be NULL");
@@ -975,7 +977,10 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
         cur_pos,		/* current position within fragment */
         res_pos;		/* position in result string */
     magic_rsl *frag;		/* list-traversal pointer */
-    magic_req_rec *req_dat =  MIME_MAGIC_G(req_dat);
+    magic_req_rec *req_dat;
+	TSRMLS_FETCH();
+
+    req_dat =  MIME_MAGIC_G(req_dat);
 
     /* allocate the result string */
     result = (char *) emalloc(len + 1);
@@ -1729,10 +1734,6 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
 
 static int zmagic(unsigned char *buf, int nbytes)
 {
-    unsigned char *newbuf;
-    int newsize;
-    int i;
-
 	if (buf[0] != 0x1f) return 0;
 
 	switch(buf[1]) {
@@ -1872,7 +1873,11 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
     magic_rsl *frag;		/* list-traversal pointer */
     rsl_states state;
 
-    magic_req_rec *req_dat = MIME_MAGIC_G(req_dat);
+    magic_req_rec *req_dat;
+
+	TSRMLS_FETCH();
+
+    req_dat = MIME_MAGIC_G(req_dat);
 
     /* check if we have a result */
     if (!req_dat || !req_dat->head) {
