@@ -740,8 +740,6 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-		php_request_shutdown((void *) 0);
-
 		if (cli_sapi_module.php_ini_path_override) {
 			free(cli_sapi_module.php_ini_path_override);
 		}
@@ -751,6 +749,8 @@ int main(int argc, char *argv[])
 	} zend_end_try();
 
 out:
+	php_request_shutdown((void *) 0);
+out_err:	
 	if (module_started) {
 		php_module_shutdown(TSRMLS_C);
 	}
@@ -762,8 +762,9 @@ out:
 	exit(exit_status);
 
 err:
+	zend_ini_deactivate(TSRMLS_C);
 	exit_status = 1;
-	goto out;
+	goto out_err;
 }
 /* }}} */
 
