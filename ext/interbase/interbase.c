@@ -52,6 +52,9 @@
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
+#define ISC_LONG_MIN (-ISC_LONG_MAX - 1)
+#define ISC_LONG_MAX 2147483647
+
 #ifdef PHP_WIN32
 # ifndef ISC_UINT64
 #  define ISC_UINT64 unsigned __int64
@@ -1363,7 +1366,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					convert_to_long(b_var);
 #if (SIZEOF_LONG > 4)
 					/* ISC_LONG is always 32-bit */
-					if (Z_LVAL_P(b_var) > INT_MAX || Z_LVAL_P(b_var) < INT_MIN) {
+					if (Z_LVAL_P(b_var) > ISC_LONG_MAX || Z_LVAL_P(b_var) < ISC_LONG_MIN) {
 						_php_ibase_module_error("Parameter %d exceeds field width" TSRMLS_CC, i+1);
 						rv = FAILURE;
 					}
