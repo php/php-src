@@ -8,6 +8,9 @@
 
 include("config.inc");
 
+if (!extension_loaded("pgsql")) {
+    die("skip\n");
+}
 $conn = @pg_connect($conn_str);
 if (!is_resource($conn)) {
     die("skip could not connect\n");
