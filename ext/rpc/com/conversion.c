@@ -631,14 +631,34 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 			break;
 
 		case VT_BSTR:
-			if (V_ISBYREF(var_arg)) {
-				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+			if (V_ISBYREF(var_arg)) 
+			{
+				if (*V_BSTR(var_arg)) 
+				{
+					Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+					Z_TYPE_P(pval_arg) = IS_STRING;
+				} 
+				else
+				{
+					ZVAL_NULL(pval_arg);
+					Z_TYPE_P(pval_arg) = IS_NULL;
+				}
 				efree(V_BSTRREF(var_arg));
-			} else {
-				Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+			}
+			else
+			{
+				if (V_BSTR(var_arg)) 
+				{
+					Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
+					Z_TYPE_P(pval_arg) = IS_STRING;
+				}
+				else
+				{
+					ZVAL_NULL(pval_arg);
+					Z_TYPE_P(pval_arg) = IS_NULL;
+				}
 			}
 
-			Z_TYPE_P(pval_arg) = IS_STRING;
 			break;
 
 		case VT_DATE: {
