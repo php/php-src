@@ -444,6 +444,7 @@ static inline int prepare_string_for_scanning(zval *str, istrstream **input_stre
 #endif
 	zend_set_compiled_filename(filename TSRMLS_CC);
 	CG(zend_lineno) = 1;
+	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
 
