@@ -77,6 +77,16 @@
 #include <sys/un.h>
 #endif
 
+/* The following macros are borrowed from virtual_cwd.c and should be put in
+ * a joint header file when we move virtual_cwd to TSRM */
+#ifdef ZEND_WIN32
+#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
+#define DEFAULT_SLASH '\\'
+#else
+#define IS_SLASH(c)	((c) == '/')
+#define DEFAULT_SLASH '/'
+#endif
+
 
 typedef FILE * (*php_fopen_url_wrapper_t) (const char *, char *, int, int *, int *, char **) ;
 
@@ -165,14 +175,8 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 		local_open_basedir_pos = strlen(local_open_basedir) - 1;
 
 		/* Strip filename */
-		while ((
-#ifdef PHP_WIN32
-			(local_open_basedir[local_open_basedir_pos] != '\\') ||
-#endif
-			(local_open_basedir[local_open_basedir_pos] != '/')
-			) &&
-			   (local_open_basedir_pos >= 0)
-			) {
+		while (!IS_SLASH(local_open_basedir[local_open_basedir_pos])
+				&& (local_open_basedir_pos >= 0)) {
 			local_open_basedir[local_open_basedir_pos--] = 0;
 		}
 	} else {
@@ -284,12 +288,12 @@ PHPAPI FILE *php_fopen_primary_script(void)
 {
 	FILE *fp;
 	struct stat st;
-	char *temp, *path_info, *fn;
-	int l;
+	char *temp, *path_info, *filename;
+	int length;
 	PLS_FETCH();
 	SLS_FETCH();
 
-	fn = SG(request_info).path_translated;
+	filename = SG(request_info).path_translated;
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir)
@@ -299,52 +303,48 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		struct passwd *pw;
 		char *s = strchr(path_info + 2, '/');
 
-		fn = NULL;				/* discard the original filename, it must not be used */
-		if (s) {				/* if there is no path name after the file, do not bother
-								   to try open the directory */
-			l = s - (path_info + 2);
-			if (l > sizeof(user) - 1)
-				l = sizeof(user) - 1;
-			memcpy(user, path_info + 2, l);
-			user[l] = '\0';
+		filename = NULL;	/* discard the original filename, it must not be used */
+		if (s) {			/* if there is no path name after the file, do not bother */
+							/* to try open the directory */
+			length = s - (path_info + 2);
+			if (length > sizeof(user) - 1)
+				length = sizeof(user) - 1;
+			memcpy(user, path_info + 2, length);
+			user[length] = '\0';
 
 			pw = getpwnam(user);
 			if (pw && pw->pw_dir) {
-				fn = emalloc(strlen(PG(user_dir)) + strlen(path_info) + strlen(pw->pw_dir) + 4);
-				if (fn) {
-					strcpy(fn, pw->pw_dir);		/* safe */
-					strcat(fn, "/");	/* safe */
-					strcat(fn, PG(user_dir));	/* safe */
-					strcat(fn, "/");	/* safe */
-					strcat(fn, s + 1);	/* safe (shorter than path_info) */
+				filename = emalloc(strlen(PG(user_dir)) + strlen(path_info) + strlen(pw->pw_dir) + 4);
+				if (filename) {
+					sprintf(filename, "%s%c%s%c%s", pw->pw_dir, DEFAULT_SLASH,
+								PG(user_dir), DEFAULT_SLASH, s+1); /* Safe */
 					STR_FREE(SG(request_info).path_translated);
-					SG(request_info).path_translated = fn;
+					SG(request_info).path_translated = filename;
 				}
 			}
 		}
 	} else
 #endif
 #ifdef PHP_WIN32
-	if (PG(doc_root) && path_info && ('/' == *PG(doc_root) ||
-		'\\' == *PG(doc_root) || strstr(PG(doc_root),":\\") ||
-		strstr(PG(doc_root),":/"))) {
+	if (PG(doc_root) && path_info && (IS_SLASH(*PG(doc_root))
+		|| strstr(PG(doc_root),":\\") || strstr(PG(doc_root),":/"))) {
 #else
-	if (PG(doc_root) && '/' == *PG(doc_root) && path_info) {
+	if (PG(doc_root) && path_info && IS_SLASH(*PG(doc_root))) {
 #endif
-		l = strlen(PG(doc_root));
-		fn = emalloc(l + strlen(path_info) + 2);
-		if (fn) {
-			memcpy(fn, PG(doc_root), l);
-			if ('/' != fn[l - 1] || '\\' != fn[l - 1])	/* l is never 0 */
-				fn[l++] = '/';
-			if ('/' == path_info[0])
-				l--;
-			strcpy(fn + l, path_info);
+		length = strlen(PG(doc_root));
+		filename = emalloc(length + strlen(path_info) + 2);
+		if (filename) {
+			memcpy(filename, PG(doc_root), length);
+			if (!IS_SLASH(filename[length - 1]))	/* length is never 0 */
+				filename[length++] = DEFAULT_SLASH;
+			if (IS_SLASH(path_info[0]))
+				length--;
+			strcpy(filename + length, path_info);
 			STR_FREE(SG(request_info).path_translated);
-			SG(request_info).path_translated = fn;
+			SG(request_info).path_translated = filename;
 		}
 	}							/* if doc_root && path_info */
-	if (!fn) {
+	if (!filename) {
 		/* we have to free SG(request_info).path_translated here because
 		   php_destroy_request_info assumes that it will get
 		   freed when the include_names hash is emptied, but
@@ -353,7 +353,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		SG(request_info).path_translated = NULL;
 		return NULL;
 	}
-	fp = V_FOPEN(fn, "r");
+	fp = V_FOPEN(filename, "r");
 
 	/* refuse to open anything that is not a regular file */
 	if (fp && (0 > fstat(fileno(fp), &st) || !S_ISREG(st.st_mode))) {
@@ -361,18 +361,18 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		fp = NULL;
 	}
 	if (!fp) {
-		php_error(E_ERROR, "Unable to open %s", fn);
+		php_error(E_ERROR, "Unable to open %s", filename);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		return NULL;
 	}
 	
-	temp = estrdup(fn);
+	temp = estrdup(filename);
 	php_dirname(temp, strlen(temp));
 	if (*temp) {
 		V_CHDIR(temp);
 	}
 	efree(temp);
-	SG(request_info).path_translated = fn;
+	SG(request_info).path_translated = filename;
 
 	return fp;
 }
@@ -410,9 +410,9 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	}
 	/* Absolute path open - prepend document_root in safe mode */
 #ifdef PHP_WIN32
-	if ((*filename == '\\') || (*filename == '/') || (filename[1] == ':')) {
+	if (IS_SLASH(*filename) || (filename[1] == ':')) {
 #else
-	if (*filename == '/') {
+	if (IS_SLASH(*filename) {
 #endif
 		if (PG(safe_mode)) {
 			if(PG(doc_root)) {
