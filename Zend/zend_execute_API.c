@@ -415,6 +415,16 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				zend_hash_move_forward(p->value.ht);
 				continue;
 			}
+			
+			if(const_value.type == IS_STRING &&
+			   const_value.value.str.len == str_index_len-1 &&
+			   !strncmp(const_value.value.str.val, str_index, str_index_len)) {
+				/* constant value is the same as its name */
+				zval_dtor(&const_value);
+				zend_hash_move_forward(p->value.ht);
+				continue;
+			}
+
 			switch (const_value.type) {
 				case IS_STRING:
 					zend_hash_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, element, sizeof(zval *), NULL);
@@ -426,6 +436,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 					break;
 			}
 			zend_hash_del(p->value.ht, str_index, str_index_len);
+			zval_dtor(&const_value);
 		}
 		zend_hash_apply_with_argument(p->value.ht, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 	}
