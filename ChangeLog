@@ -1,3 +1,39 @@
+1999-10-19  Andrei Zmievski  <zmievski@ispi.net>
+
+    * main.c: Revert my patches to error functions.
+
+1999-10-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: added === operator support (type *and* value match) . samples:
+    (1 == "1") is true
+    (1 === "1") is false (integer != string)
+    (0 == false) is true
+    (0 === false) is false (integer != boolean)
+
+1999-10-19  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c (PHP extract):
+    Fixed bug that would mess up global and referenced
+                   variables in certain cases.
+
+    * ext/ldap/ldap.c (PHP ldap_get_entries): Fix string function name.
+
+1999-10-19  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c:
+    - some tiny changes to possible improve link extraction/insertion of HTML-docs
+
+1999-10-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/url.c: (parse_url) fix for #2569: parse_url('-') crashes
+
+1999-10-19  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-18  Egon Schmid  <eschmid@delos.lf.net>
 
     * ext/standard/formatted_print.c: More forgotten prototypes.
