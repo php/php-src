@@ -1431,7 +1431,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	znode lval;
 
-	if (fetch_type==ZEND_FETCH_STATIC) {
+	if (fetch_type==ZEND_FETCH_STATIC && static_assignment) {
 		zval *tmp = (zval *) emalloc(sizeof(zval));
 
 		convert_to_string(&varname->u.constant);
@@ -1459,6 +1459,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 
 
 	do_assign_ref(NULL, &lval, &opline->result CLS_CC);
+	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 }
 
 

@@ -379,6 +379,10 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 			target_symbol_table = &EG(symbol_table);
 			break;
 		case ZEND_FETCH_STATIC:
+			if (!EG(active_op_array)->static_variables) {
+				EG(active_op_array)->static_variables = (HashTable *) emalloc(sizeof(HashTable));
+				zend_hash_init(EG(active_op_array)->static_variables, 2, NULL, PVAL_PTR_DTOR, 0);
+			}
 			target_symbol_table = EG(active_op_array)->static_variables;
 			break;
 	}
