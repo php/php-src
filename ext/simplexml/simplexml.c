@@ -47,21 +47,14 @@ php_sxe_fetch_object(zval *object TSRMLS_DC)
 static void
 _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 {
-	char *contents;
+	php_sxe_object *subnode;
 
-	contents = xmlNodeListGetString(sxe->document, node->xmlChildrenNode, 1);
-	if (!xmlIsBlankNode(node->xmlChildrenNode) && contents && node->properties == NULL) {
-		ZVAL_STRING(value, contents, 0);
-	} else {
-		php_sxe_object *subnode;
+	subnode = php_sxe_object_new(TSRMLS_C);
+	subnode->document = sxe->document;
+	subnode->node = node;
 
-		subnode = php_sxe_object_new(TSRMLS_C);
-		subnode->document = sxe->document;
-		subnode->node = node;
-
-		value->type = IS_OBJECT;
-		value->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
-	}
+	value->type = IS_OBJECT;
+	value->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
 }
 /* }}} */
 
@@ -98,15 +91,6 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	name = Z_STRVAL_P(member);
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
-
-	if (!strcmp(name, "__content")) {
-		contents = xmlNodeListGetString(sxe->document, sxe->node->xmlChildrenNode, 1);
-		if (contents != NULL) {
-			RETVAL_STRING(contents, 0);
-		}
-
-		return return_value;
-	}
 
 	GET_NODE(sxe, node);
 
@@ -367,6 +351,79 @@ sxe_class_name_get(zval *object, char** class_name, zend_uint *class_name_len, i
 }
 /* }}} */
 
+/* {{{ cast_empty_object()
+ */
+static inline void
+cast_empty_object(zval *object, int type TSRMLS_DC)
+{
+	object->type = IS_NULL;
+	switch (type) {
+		case IS_BOOL:
+			convert_to_boolean(object);
+			break;
+		case IS_LONG:
+			convert_to_long(object);
+			break;
+		case IS_DOUBLE:
+			convert_to_double(object);
+			break;
+		case IS_STRING:
+			convert_to_string(object);
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ cast_object_with_contents()
+ */
+static inline void
+cast_object_with_contents(zval *object, int type, char *contents TSRMLS_DC)
+{
+	int len = strlen(contents);
+	
+	object->value.str.val = estrndup(contents, len);
+	object->value.str.len = len;
+	object->type = IS_STRING;
+
+	switch (type) {
+		case IS_STRING:
+			return;
+		case IS_BOOL:
+			convert_to_boolean(object);
+			break;
+		case IS_LONG:
+			convert_to_long(object);
+			break;
+		case IS_DOUBLE:
+			convert_to_double(object);
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ sxe_object_cast()
+ */
+static void
+sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
+{
+	php_sxe_object *sxe;
+	char           *contents;
+
+    sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
+	
+	if (should_free) {
+		zval_dtor(writeobj);
+	}
+
+	contents = xmlNodeListGetString(sxe->document, sxe->node->xmlChildrenNode, 1);
+	if (!xmlIsBlankNode(sxe->node->xmlChildrenNode) && contents) {
+		cast_empty_object(writeobj, type TSRMLS_CC);
+	}
+
+	cast_object_with_contents(writeobj, type, contents);
+}
+/* }}} */
+
 
 static zend_object_handlers sxe_object_handlers[] = {
 	ZEND_OBJECTS_STORE_HANDLERS,
@@ -384,7 +441,8 @@ static zend_object_handlers sxe_object_handlers[] = {
 	sxe_constructor_get,
 	sxe_class_entry_get,
 	sxe_class_name_get,
-	sxe_objects_compare
+	sxe_objects_compare,
+	sxe_object_cast
 };
 
 /* {{{ sxe_object_clone()
