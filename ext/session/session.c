@@ -60,6 +60,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_destroy, NULL)
 	PHP_FE(session_unset, NULL)
 	PHP_FE(session_set_save_handler, NULL)
+    PHP_FE(session_set_cookie_params, NULL)
 	{0}
 };
 
@@ -797,6 +798,42 @@ static void _php_session_destroy(PSLS_D)
 	php_rshutdown_session_globals(PSLS_C);
 	php_rinit_session_globals(PSLS_C);
 }
+
+
+/* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain ]])
+   Set session cookie parameters */
+PHP_FUNCTION(session_set_cookie_params)
+{
+    zval **lifetime, **path, **domain;
+	PSLS_FETCH();
+
+	if (!PS(use_cookies))
+		return;
+
+    if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(lifetime);
+	PS(cookie_lifetime) = (*lifetime)->value.lval;
+
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_string_ex(path);
+		efree(PS(cookie_path));
+		PS(cookie_path) = estrndup((*path)->value.str.val,
+								   (*path)->value.str.len);
+
+		if (ZEND_NUM_ARGS() > 2) {
+			convert_to_string_ex(domain);
+			efree(PS(cookie_domain));
+			PS(cookie_domain) = estrndup((*domain)->value.str.val,
+										 (*domain)->value.str.len);
+		}
+	}
+}
+/* }}} */
+
 
 /* {{{ proto string session_name([string newname])
    return the current session name. if newname is given, the session name is replaced with newname */
