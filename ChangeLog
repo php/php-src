@@ -1,3 +1,78 @@
+2000-10-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/oci8/oci8.c: added missing def.
+
+2000-10-21  Andi Gutmans  <andi@zend.com>
+
+    * ext/zlib/zlib.c:
+    - including php.h automatically includes the PHP config file.
+
+2000-10-21  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/array.c:
+    Made array_unique use array_type_data_compare instead of array_data_compare
+
+    * ext/standard/array.c:
+    Added array_type_data_compare which is like array_data_compare but
+    compares type first. Also rewrote array_intersect and array_diff,
+    so that the order is not changed.
+
+2000-10-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/interbase/interbase.c: i'm sure this should be ibase_query :)
+
+    * ext/zlib/zlib.c: i can find no php_config.h on win32 :)
+
+2000-10-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * genfiles:
+    Save url_scanner_ex.c and don't require re2c to be installed on
+    the release/snapshot machine.
+
+2000-10-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php_modules.dsw
+      ext/yaz/php_yaz.c
+      ext/yaz/yaz.dsp: made yaz compile under windows
+
+2000-10-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/config.m4:
+    Fix annoying $withval interaction in GD configure stuff
+
+    * ext/dba/dba.c: Gremlins?
+
+2000-10-21  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/config.m4: Config Patch for DBMaker
+
+2000-10-21  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php_modules.dsw:
+    added bz2 and removed ZendTS (not really nedded here)
+
+    * ext/bz2/bz2.dsp: forgot to add
+
+    * ext/bz2/bz2.c: made bz2 compile under win32
+
+    * ext/mysql/libmysql/config-win.h
+      ext/mysql/libmysql/libmysql.dsp: make libmysql compile under win
+
+2000-10-21  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * ext/mysql/libmysql/libmysql.dsp:
+    Removed files from Win32 workspace that were removed in libmysql 3.23
+
+2000-10-21  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * NEWS: more news
+
+2000-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dba/config.m4:
+    Now checks that the library really exists even if path is specified as /usr
+    PR: 7358
+
 2000-10-20  Sascha Schumann  <sascha@schumann.cx>
 
     * NEWS: test commit
