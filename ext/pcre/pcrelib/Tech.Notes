@@ -1,0 +1,239 @@
+Technical Notes about PCRE
+--------------------------
+
+Many years ago I implemented some regular expression functions to an algorithm
+suggested by Martin Richards. These were not Unix-like in form, and were quite
+restricted in what they could do by comparison with Perl. The interesting part
+about the algorithm was that the amount of space required to hold the compiled
+form of an expression was known in advance. The code to apply an expression did
+not operate by backtracking, as the Henry Spencer and Perl code does, but
+instead checked all possibilities simultaneously by keeping a list of current
+states and checking all of them as it advanced through the subject string. (In
+the terminology of Jeffrey Friedl's book, it was a "DFA algorithm".) When the
+pattern was all used up, all remaining states were possible matches, and the
+one matching the longest subset of the subject string was chosen. This did not
+necessarily maximize the individual wild portions of the pattern, as is
+expected in Unix and Perl-style regular expressions.
+
+By contrast, the code originally written by Henry Spencer and subsequently
+heavily modified for Perl actually compiles the expression twice: once in a
+dummy mode in order to find out how much store will be needed, and then for
+real. The execution function operates by backtracking and maximizing (or,
+optionally, minimizing in Perl) the amount of the subject that matches
+individual wild portions of the pattern. This is an "NFA algorithm" in Friedl's
+terminology.
+
+For this set of functions that forms PCRE, I tried at first to invent an
+algorithm that used an amount of store bounded by a multiple of the number of
+characters in the pattern, to save on compiling time. However, because of the
+greater complexity in Perl regular expressions, I couldn't do this. In any
+case, a first pass through the pattern is needed, in order to find internal
+flag settings like (?i) at top level. So it works by running a very degenerate
+first pass to calculate a maximum store size, and then a second pass to do the
+real compile - which may use a bit less than the predicted amount of store. The
+idea is that this is going to turn out faster because the first pass is
+degenerate and the second can just store stuff straight into the vector. It
+does make the compiling functions bigger, of course, but they have got quite
+big anyway to handle all the Perl stuff.
+
+The compiled form of a pattern is a vector of bytes, containing items of
+variable length. The first byte in an item is an opcode, and the length of the
+item is either implicit in the opcode or contained in the data bytes which
+follow it. A list of all the opcodes follows:
+
+Opcodes with no following data
+------------------------------
+
+These items are all just one byte long
+
+  OP_END                 end of pattern
+  OP_ANY                 match any character
+  OP_SOD                 match start of data: \A
+  OP_CIRC                ^ (start of data, or after \n in multiline)
+  OP_NOT_WORD_BOUNDARY   \W
+  OP_WORD_BOUNDARY       \w
+  OP_NOT_DIGIT           \D
+  OP_DIGIT               \d
+  OP_NOT_WHITESPACE      \S
+  OP_WHITESPACE          \s
+  OP_NOT_WORDCHAR        \W
+  OP_WORDCHAR            \w
+  OP_EODN                match end of data or \n at end: \Z
+  OP_EOD                 match end of data: \z
+  OP_DOLL                $ (end of data, or before \n in multiline)
+
+
+Repeating single characters
+---------------------------
+
+The common repeats (*, +, ?) when applied to a single character appear as
+two-byte items using the following opcodes:
+
+  OP_STAR
+  OP_MINSTAR
+  OP_PLUS
+  OP_MINPLUS
+  OP_QUERY
+  OP_MINQUERY
+
+Those with "MIN" in their name are the minimizing versions. Each is followed by
+the character that is to be repeated. Other repeats make use of
+
+  OP_UPTO
+  OP_MINUPTO
+  OP_EXACT
+
+which are followed by a two-byte count (most significant first) and the
+repeated character. OP_UPTO matches from 0 to the given number. A repeat with a
+non-zero minimum and a fixed maximum is coded as an OP_EXACT followed by an
+OP_UPTO (or OP_MINUPTO).
+
+
+Repeating character types
+-------------------------
+
+Repeats of things like \d are done exactly as for single characters, except
+that instead of a character, the opcode for the type is stored in the data
+byte. The opcodes are:
+
+  OP_TYPESTAR
+  OP_TYPEMINSTAR
+  OP_TYPEPLUS
+  OP_TYPEMINPLUS
+  OP_TYPEQUERY
+  OP_TYPEMINQUERY
+  OP_TYPEUPTO
+  OP_TYPEMINUPTO
+  OP_TYPEEXACT
+
+
+Matching a character string
+---------------------------
+
+The OP_CHARS opcode is followed by a one-byte count and then that number of
+characters. If there are more than 255 characters in sequence, successive
+instances of OP_CHARS are used.
+
+
+Character classes
+-----------------
+
+OP_CLASS is used for a character class, provided there are at least two
+characters in the class. If there is only one character, OP_CHARS is used for a
+positive class, and OP_NOT for a negative one (that is, for something like
+[^a]). Another set of repeating opcodes (OP_NOTSTAR etc.) are used for a
+repeated, negated, single-character class. The normal ones (OP_STAR etc.) are
+used for a repeated positive single-character class.
+
+OP_CLASS is followed by a 32-byte bit map containing a 1
+bit for every character that is acceptable. The bits are counted from the least
+significant end of each byte.
+
+
+Back references
+---------------
+
+OP_REF is followed by a single byte containing the reference number.
+
+
+Repeating character classes and back references
+-----------------------------------------------
+
+Single-character classes are handled specially (see above). This applies to
+OP_CLASS and OP_REF. In both cases, the repeat information follows the base
+item. The matching code looks at the following opcode to see if it is one of
+
+  OP_CRSTAR
+  OP_CRMINSTAR
+  OP_CRPLUS
+  OP_CRMINPLUS
+  OP_CRQUERY
+  OP_CRMINQUERY
+  OP_CRRANGE
+  OP_CRMINRANGE
+
+All but the last two are just single-byte items. The others are followed by
+four bytes of data, comprising the minimum and maximum repeat counts.
+
+
+Brackets and alternation
+------------------------
+
+A pair of non-identifying (round) brackets is wrapped round each expression at
+compile time, so alternation always happens in the context of brackets.
+Non-identifying brackets use the opcode OP_BRA, while identifying brackets use
+OP_BRA+1, OP_BRA+2, etc. [Note for North Americans: "bracket" to some English
+speakers, including myself, can be round, square, or curly. Hence this usage.]
+
+A bracket opcode is followed by two bytes which give the offset to the next
+alternative OP_ALT or, if there aren't any branches, to the matching KET
+opcode. Each OP_ALT is followed by two bytes giving the offset to the next one,
+or to the KET opcode.
+
+OP_KET is used for subpatterns that do not repeat indefinitely, while
+OP_KETRMIN and OP_KETRMAX are used for indefinite repetitions, minimally or
+maximally respectively. All three are followed by two bytes giving (as a
+positive number) the offset back to the matching BRA opcode.
+
+If a subpattern is quantified such that it is permitted to match zero times, it
+is preceded by one of OP_BRAZERO or OP_BRAMINZERO. These are single-byte
+opcodes which tell the matcher that skipping this subpattern entirely is a
+valid branch.
+
+A subpattern with an indefinite maximum repetition is replicated in the
+compiled data its minimum number of times (or once with a BRAZERO if the
+minimum is zero), with the final copy terminating with a KETRMIN or KETRMAX as
+appropriate.
+
+A subpattern with a bounded maximum repetition is replicated in a nested
+fashion up to the maximum number of times, with BRAZERO or BRAMINZERO before
+each replication after the minimum, so that, for example, (abc){2,5} is
+compiled as (abc)(abc)((abc)((abc)(abc)?)?)?. The 200-bracket limit does not
+apply to these internally generated brackets.
+
+
+Assertions
+----------
+
+Forward assertions are just like other subpatterns, but starting with one of
+the opcodes OP_ASSERT or OP_ASSERT_NOT. Backward assertions use the opcodes
+OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
+is OP_REVERSE, followed by a two byte count of the number of characters to move
+back the pointer in the subject string. A separate count is present in each
+alternative of a lookbehind assertion, allowing them to have different fixed
+lengths.
+
+
+Once-only subpatterns
+---------------------
+
+These are also just like other subpatterns, but they start with the opcode
+OP_ONCE.
+
+
+Conditional subpatterns
+-----------------------
+
+These are like other subpatterns, but they start with the opcode OP_COND. If
+the condition is a back reference, this is stored at the start of the
+subpattern using the opcode OP_CREF followed by one byte containing the
+reference number. Otherwise, a conditional subpattern will always start with
+one of the assertions.
+
+
+Changing options
+----------------
+
+If any of the /i, /m, or /s options are changed within a parenthesized group,
+an OP_OPT opcode is compiled, followed by one byte containing the new settings
+of these flags. If there are several alternatives in a group, there is an
+occurrence of OP_OPT at the start of all those following the first options
+change, to set appropriate options for the start of the alternative.
+Immediately after the end of the group there is another such item to reset the
+flags to their previous values. Other changes of flag within the pattern can be
+handled entirely at compile time, and so do not cause anything to be put into
+the compiled data.
+
+
+Philip Hazel
+January 1999
