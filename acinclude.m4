@@ -53,7 +53,7 @@ AC_DEFUN(PHP_READDIR_R_TYPE,[
 
 main() {
 	DIR *dir;
-	char entry[sizeof(struct dirent)+257];
+	char entry[sizeof(struct dirent)+300];
 	struct dirent *pentry = (struct dirent *) &entry;
 
 	dir = opendir("/");
