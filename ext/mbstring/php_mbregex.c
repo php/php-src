@@ -855,7 +855,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	pos = MBSTRG(search_pos);
 	str = NULL;
 	len = 0;
-	if (Z_TYPE_PP(MBSTRG(search_str)) == IS_STRING){
+	if (MBSTRG(search_str) != NULL && Z_TYPE_PP(MBSTRG(search_str)) == IS_STRING){
 		str = (unsigned char *)Z_STRVAL_PP(MBSTRG(search_str));
 		len = Z_STRLEN_PP(MBSTRG(search_str));
 	}
