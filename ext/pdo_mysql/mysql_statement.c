@@ -31,7 +31,7 @@
 #include "php_pdo_mysql_int.h"
 
 
-static int mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	int i;
@@ -49,7 +49,7 @@ static int mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dbh_t *dbh = stmt->dbh;
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
@@ -79,13 +79,13 @@ static int mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
+static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
 	return 1;
 }
 
-static int mysql_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -98,7 +98,7 @@ static int mysql_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;	
 }
 
-static int mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	MYSQL_RES *R = S->result;
@@ -127,7 +127,7 @@ static int mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
+static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	if(S->current_data == NULL) {
@@ -146,12 +146,12 @@ static int mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 }
 
 struct pdo_stmt_methods mysql_stmt_methods = {
-	mysql_stmt_dtor,
-	mysql_stmt_execute,
-	mysql_stmt_fetch,
-	mysql_stmt_describe,
-	mysql_stmt_get_col,
-	mysql_stmt_param_hook
+	pdo_mysql_stmt_dtor,
+	pdo_mysql_stmt_execute,
+	pdo_mysql_stmt_fetch,
+	pdo_mysql_stmt_describe,
+	pdo_mysql_stmt_get_col,
+	pdo_mysql_stmt_param_hook
 };
 
 /*
