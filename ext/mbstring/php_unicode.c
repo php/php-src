@@ -224,55 +224,69 @@ PHPAPI unsigned long php_unicode_totitle(unsigned long code)
 
 }
 
-#ifdef WORDS_BIGENDIAN
-# define NATIVE_UNICODE_ENCODING "UCS-4BE"
-#else
-# define NATIVE_UNICODE_ENCODING "UCS-4LE"
-#endif
+
+#define BE_ARY_TO_UINT32(ptr) (\
+	((unsigned char*)(ptr))[0]<<24 |\
+	((unsigned char*)(ptr))[1]<<16 |\
+	((unsigned char*)(ptr))[2]<< 8 |\
+	((unsigned char*)(ptr))[3] )
+
+#define UINT32_TO_BE_ARY(ptr,val) { \
+	unsigned int v = val; \
+	((unsigned char*)(ptr))[0] = (v>>24) & 0xff,\
+	((unsigned char*)(ptr))[1] = (v>>16) & 0xff,\
+	((unsigned char*)(ptr))[2] = (v>> 8) & 0xff,\
+	((unsigned char*)(ptr))[3] = (v    ) & 0xff;\
+}
 
 PHPAPI char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen, size_t *ret_len,
 		char *src_encoding TSRMLS_DC)
 {
 	char *unicode, *newstr;
 	size_t unicode_len;
-	unsigned long *unicode_ptr;
+	unsigned char *unicode_ptr;
 	size_t i;
 
-	unicode = php_mb_convert_encoding(srcstr, srclen, NATIVE_UNICODE_ENCODING, src_encoding, &unicode_len TSRMLS_CC);
+	unicode = php_mb_convert_encoding(srcstr, srclen, "UCS-4BE", src_encoding, &unicode_len TSRMLS_CC);
 	if (unicode == NULL)
 		return NULL;
 	
-	unicode_ptr = (unsigned long*)unicode;
+	unicode_ptr = unicode;
 
 	switch(case_mode) {
 		case PHP_UNICODE_CASE_UPPER:
-			for (i = 0; i < unicode_len / sizeof(unsigned long); i++) {
-				unicode_ptr[i] = php_unicode_toupper(unicode_ptr[i]);
+			for (i = 0; i < unicode_len; i+=4) {
+				UINT32_TO_BE_ARY(&unicode_ptr[i],
+					php_unicode_toupper(BE_ARY_TO_UINT32(&unicode_ptr[i])));
 			}
 			break;
 
 		case PHP_UNICODE_CASE_LOWER:
-			for (i = 0; i < unicode_len / sizeof(unsigned long); i++) {
-				unicode_ptr[i] = php_unicode_tolower(unicode_ptr[i]);
+			for (i = 0; i < unicode_len; i+=4) {
+				UINT32_TO_BE_ARY(&unicode_ptr[i],
+					php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i])));
 			}
 			break;
 
 		case PHP_UNICODE_CASE_TITLE: {
 			int mode = 0; 
 
-			for (i = 0; i < unicode_len / sizeof(unsigned long); i++) {
-				int res = php_unicode_is_prop(unicode_ptr[i],
+			for (i = 0; i < unicode_len; i+=4) {
+				int res = php_unicode_is_prop(
+					BE_ARY_TO_UINT32(&unicode_ptr[i]),
 					UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT, 0);
 				if (mode) {
 					if (res) {
-						unicode_ptr[i] = php_unicode_tolower(unicode_ptr[i]);
+						UINT32_TO_BE_ARY(&unicode_ptr[i],
+							php_unicode_tolower(BE_ARY_TO_UINT32(&unicode_ptr[i])));
 					} else {
 						mode = 0;
 					}	
 				} else {
 					if (res) {
 						mode = 1;
-						unicode_ptr[i] = php_unicode_totitle(unicode_ptr[i]);
+						UINT32_TO_BE_ARY(&unicode_ptr[i],
+							php_unicode_totitle(BE_ARY_TO_UINT32(&unicode_ptr[i])));
 					}
 				}
 			}
@@ -280,7 +294,7 @@ PHPAPI char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen
 
 	}
 	
-	newstr = php_mb_convert_encoding(unicode, unicode_len, src_encoding, NATIVE_UNICODE_ENCODING, ret_len TSRMLS_CC);
+	newstr = php_mb_convert_encoding(unicode, unicode_len, src_encoding, "UCS-4BE", ret_len TSRMLS_CC);
 	efree(unicode);
 
 	return newstr;
