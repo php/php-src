@@ -48,7 +48,7 @@ bc_is_zero (num)
   char *nptr;
 
   /* Quick check. */
-  if (num == _zero_) return TRUE;
+  if (num == BCG(_zero_)) return TRUE;
 
   /* Initialize */
   count = num->n_len + num->n_scale;

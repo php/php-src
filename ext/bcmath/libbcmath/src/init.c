@@ -39,9 +39,9 @@
 #include "private.h"
 
 /* Storage used for special numbers. */
-bc_num _zero_;
-bc_num _one_;
-bc_num _two_;
+bc_num BCG(_zero_);
+bc_num BCG(_one_);
+bc_num BCG(_two_);
 
  bc_num _bc_Free_list = NULL;
 
@@ -105,11 +105,11 @@ bc_free_num (num)
 void
 bc_init_numbers ()
 {
-  _zero_ = bc_new_num (1,0);
-  _one_  = bc_new_num (1,0);
-  _one_->n_value[0] = 1;
-  _two_  = bc_new_num (1,0);
-  _two_->n_value[0] = 2;
+  BCG(_zero_) = bc_new_num (1,0);
+  BCG(_one_)  = bc_new_num (1,0);
+  BCG(_one_)->n_value[0] = 1;
+  BCG(_two_)  = bc_new_num (1,0);
+  BCG(_two_)->n_value[0] = 2;
 }
 
 
@@ -130,6 +130,6 @@ void
 bc_init_num (num)
      bc_num *num;
 {
-  *num = bc_copy_num (_zero_);
+  *num = bc_copy_num (BCG(_zero_));
 }
 
