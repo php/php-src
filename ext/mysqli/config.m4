@@ -6,12 +6,10 @@ PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]    Include MySQLi support. FILE is the optional 
                           pathname to mysql_config.])
 
-PHP_ARG_WITH(embedded_mysqli, for embedded MySQLi support,
-[  --with-embedded-mysqli[=FILE]
-                          Include embedded MySQLi support. FILE is the optional 
-                          pathname to mysql_config.])
+PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
+[  --enable-embedded-mysqli  MYSQLi: Enable embedded support.], no, no)
 
-if test "$PHP_MYSQLI" != "no" || test "$PHP_EMBEDDED_MYSQLI" != "no"; then
+if test "$PHP_MYSQLI" != "no"; then
 
   if test "$PHP_MYSQL" = "yes"; then
     AC_MSG_ERROR([--with-mysql (using bundled libs) can not be used together with --with-mysqli.])
@@ -20,18 +18,14 @@ if test "$PHP_MYSQLI" != "no" || test "$PHP_EMBEDDED_MYSQLI" != "no"; then
   if test "$PHP_MYSQLI" = "yes"; then
     MYSQL_CONFIG=`$php_shtool path mysql_config`
   else
-  	if test "$PHP_MYSQLI" != "no"; then
-      MYSQL_CONFIG=$PHP_MYSQLI
-    else
-      MYSQL_CONFIG=$PHP_EMBEDDED_MYSQLI
-    fi
+    MYSQL_CONFIG=$PHP_MYSQLI
   fi
 
-  if test "$PHP_MYSQLI" != "no"; then
-    MYSQL_LIB_CFG='--libs'
-  else
+  if test "$PHP_EMBEDDED_MYSQLI" = "yes"; then
 	AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
     MYSQL_LIB_CFG='--libmysqld-libs'
+  else
+    MYSQL_LIB_CFG='--libs'
   fi
   
   if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
@@ -56,6 +50,6 @@ if test "$PHP_MYSQLI" != "no" || test "$PHP_EMBEDDED_MYSQLI" != "no"; then
     $MYSQLI_LIBLINE
   ])
 
-  PHP_SUBST(MYSQLI_SHARED_LIBADD)
   PHP_NEW_EXTENSION(mysqli, mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c mysqli_fe.c mysqli_profiler.c mysqli_profiler_com.c, $ext_shared)
+  PHP_SUBST(MYSQLI_SHARED_LIBADD)
 fi
