@@ -231,7 +231,9 @@ next_step:
 				if (sub_iter->funcs->rewind) {
 					sub_iter->funcs->rewind(sub_iter TSRMLS_CC);
 				}
-				zend_call_method_with_0_params(&zthis, object->ce, &object->beginChildren, "beginchildren", NULL);
+				if (!object->beginChildren || object->beginChildren->common.scope != spl_ce_RecursiveIteratorIterator) {
+					zend_call_method_with_0_params(&zthis, object->ce, &object->beginChildren, "beginchildren", NULL);
+				}
 				goto next_step;
 		}
 		/* no more elements */
@@ -239,7 +241,9 @@ next_step:
 			iterator->funcs->dtor(iterator TSRMLS_CC);
 			zval_ptr_dtor(&object->iterators[object->level].zobject);
 			object->level--;
-			zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
+			if (!object->endChildren || object->endChildren->common.scope != spl_ce_RecursiveIteratorIterator) {
+				zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
+			}
 		} else {
 			return; /* done completeley */
 		}
@@ -254,7 +258,9 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 		sub_iter = object->iterators[object->level].iterator;
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
 		zval_ptr_dtor(&object->iterators[object->level--].zobject);
-		zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
+		if (!object->endChildren || object->endChildren->common.scope != spl_ce_RecursiveIteratorIterator) {
+			zend_call_method_with_0_params(&zthis, object->ce, &object->endChildren, "endchildren", NULL);
+		}
 	}
 	erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->iterators[0].state = RS_START;
