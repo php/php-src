@@ -20,3 +20,5 @@ sysvshm             Working
 odbc                Working (except for persistent connections)
 MS SQL              Working (tested on phpts and isapi versions)
 snmp                Working
+gettext             Working
+mcal                Working
