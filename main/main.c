@@ -337,8 +337,11 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* True global (no need for thread safety */
+/* True globals (no need for thread safety */
+/* But don't make them a single int bitfield */
 static int module_initialized = 0;
+static int module_startup = 1;
+static int module_shutdown = 0;
 
 /* {{{ php_log_err
  */
@@ -410,6 +413,23 @@ PHPAPI int php_printf(const char *format, ...)
 }
 /* }}} */
 
+/* {{{ php_verror helpers */
+
+/* {{{ php_during_module_startup */
+static int php_during_module_startup()
+{
+	return module_startup;
+}
+/* }}} */
+
+/* {{{ php_during_module_shutdown */
+static int php_during_module_shutdown()
+{
+	return module_shutdown;
+}
+/* }}} */
+
+/* {{{ get_active_class_name */
 static char *get_active_class_name(char **space TSRMLS_DC)
 {
 	if (!zend_is_executing(TSRMLS_C)) {
@@ -436,6 +456,8 @@ static char *get_active_class_name(char **space TSRMLS_DC)
 			return "";
 	}
 }
+/* }}} */
+/* }}} */
 
 /* {{{ php_verror */
 /* php_verror is called from php_error_docref<n> functions.
@@ -451,12 +473,14 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	int buffer_len = 0;
 	char *space;
 	char *class_name = get_active_class_name(&space TSRMLS_CC);
-	char *function = get_active_function_name(TSRMLS_C);
+	char *function;
 	char *origin;
 	char *message;
+	int is_function = 0;
 
+	/* get error text into buffer and escape for html if necessary */
 	buffer_len = vspprintf(&buffer, 0, format, args);
-	if (buffer && PG(html_errors)) {
+	if (PG(html_errors)) {
 		int len;
 		char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(buffer);
@@ -464,93 +488,87 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		buffer_len = len;
 	}
 
-	if (buffer) {
+	/* which function caused the problem if any at all */
+	if (php_during_module_startup()) {
+		function = "PHP Startup";
+	} else if (php_during_module_shutdown()) {
+		function = "PHP Shutdown";
+	} else {
+		function = get_active_function_name(TSRMLS_C);
 		if (!function || !strlen(function)) {
 			function = "Unknown";
-			spprintf(&origin, 0, "%s", function);	
 		} else {
-			spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);	
+			is_function = 1;
 		}
 	}
 
-	if (buffer && origin) {
-		if (docref && docref[0] == '#') {
-			docref_target = strchr(docref, '#');
-			docref = NULL;
-		}
-		if (!docref) {
-			if (function) {
-				spprintf(&docref_buf, 0, "function.%s", function);
-				if (docref_buf) {
-					while((p=strchr(docref_buf, '_'))!=NULL) *p = '-';
-					docref = docref_buf;
-				}
-			}
-		}
-		if (docref && (PG(html_errors) || strlen(PG(docref_root)))) {
-			if (strncmp(docref, "http://", 7)) {
-				docref_root = PG(docref_root);
-				/* now check copy of extension */
-				ref = estrdup(docref);
-				if (ref) {
-					if (docref_buf) {
-						efree(docref_buf);
-					}
-					docref_buf = ref;
-					docref = docref_buf;
-					p = strrchr(ref, '#');
-					if (p) {
-						target = estrdup(p);
-						if (target) {
-							docref_target = target;
-							*p = '\0';
-						}
-					}
-					if ((!p || target) && PG(docref_ext) && strlen(PG(docref_ext))) {
-						spprintf(&docref_buf, 0, "%s%s", ref, PG(docref_ext));
-						if (docref_buf) {
-							efree(ref);
-							docref = docref_buf;
-						}
-					}
-				}
-			}
-			if (PG(html_errors)) {
-				spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
-			} else {
-				spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
-			}
-			if (target) {
-				efree(target);
-			}
-		} else {
-			spprintf(&message, 0, "%s: %s ", origin, buffer);
-		}
-		efree(buffer);
-		efree(origin);
-		if (docref_buf) {
-			efree(docref_buf);
-		}
-		php_error(type, "%s", message);
-
-		if (PG(track_errors) && EG(active_symbol_table)) {
-			zval *tmp;
-			ALLOC_ZVAL(tmp);
-			INIT_PZVAL(tmp);
-			Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
-			Z_STRLEN_P(tmp) = buffer_len;
-			Z_TYPE_P(tmp) = IS_STRING;
-			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
-		}
-		efree(message);
+	/* if we still have memory then format the origin */
+	if (is_function) {
+		spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);	
 	} else {
-		if (buffer) {
-			efree(buffer);
+		spprintf(&origin, 0, "%s", function);	
+	}
+
+	/* origin and buffer available, so lets come up with the error message */
+	if (docref && docref[0] == '#') {
+		docref_target = strchr(docref, '#');
+		docref = NULL;
+	}
+	if (!docref && is_function) {
+		spprintf(&docref_buf, 0, "function.%s", function);
+		while((p = strchr(docref_buf, '_')) != NULL) {
+			*p = '-';
 		}
-		if (origin) {
-			efree(origin);
+		docref = docref_buf;
+	}
+	if (docref && is_function && (PG(html_errors) || strlen(PG(docref_root)))) {
+		if (strncmp(docref, "http://", 7)) {
+			docref_root = PG(docref_root);
+			/* now check copy of extension */
+			ref = estrdup(docref);
+			if (docref_buf) {
+				efree(docref_buf);
+			}
+			docref_buf = ref;
+			docref = docref_buf;
+			p = strrchr(ref, '#');
+			if (p) {
+				target = estrdup(p);
+				if (target) {
+					docref_target = target;
+					*p = '\0';
+				}
+			}
+			if ((!p || target) && PG(docref_ext) && strlen(PG(docref_ext))) {
+				spprintf(&docref_buf, 0, "%s%s", ref, PG(docref_ext));
+				efree(ref);
+				docref = docref_buf;
+			}
 		}
-		php_error(E_ERROR, "%s%s%s(%s): Out of memory", class_name, space, function, params);
+		if (PG(html_errors)) {
+			spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
+		} else {
+			spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
+		}
+		if (target) {
+			efree(target);
+		}
+	} else {
+		spprintf(&message, 0, "%s: %s ", origin, buffer);
+	}
+	efree(buffer);
+	efree(origin);
+	if (docref_buf) {
+		efree(docref_buf);
+	}
+	php_error(type, "%s", message);
+	efree(message);
+
+	if (PG(track_errors) && EG(active_symbol_table)) {
+		zval *tmp;
+		ALLOC_INIT_ZVAL(tmp);
+		ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
+		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(pval *), NULL);
 	}
 }
 /* }}} */
@@ -1454,6 +1472,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* */
 	module_initialized = 1;
 	sapi_deactivate(TSRMLS_C);
+	module_startup = 0;
 
 	/* we're done */
 	return SUCCESS;
@@ -1480,6 +1499,8 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 void php_module_shutdown(TSRMLS_D)
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
+
+	module_shutdown = 1;
 
 	if (!module_initialized) {
 		return;
