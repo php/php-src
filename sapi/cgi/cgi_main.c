@@ -338,11 +338,13 @@ int main(int argc, char *argv[])
 #endif
 
 
+#ifndef WIN32				 /* SIGPIPE is unknown on WIN32 platforms fmk@swwwing.com */
 #if HAVE_SIGNAL_H
 	signal(SIGPIPE,SIG_IGN); /* ignore SIGPIPE in standalone mode so that sockets created via
 								fsockopen() don't kill PHP if the remote site closes it. 
 								in apache|apxs mode apache does that for us! 
 								thies@digicol.de 20000419 */
+#endif
 #endif
 
 #ifndef ZTS
