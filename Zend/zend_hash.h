@@ -165,7 +165,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht);
 
 ZEND_API ulong hashpjw(char *arKey, uint nKeyLength);
 
-#if DEBUG
+#if ZEND_DEBUG
 /* debug */
 void zend_hash_display_pListTail(HashTable *ht);
 void zend_hash_display(HashTable *ht);

@@ -109,6 +109,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache);
 #if ZEND_DEBUG
 ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+void zend_debug_alloc_output(char *format, ...);
 #define mem_block_check(ptr, silent) _mem_block_check(ptr, silent ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define full_mem_check(silent) _full_mem_check(silent ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #else

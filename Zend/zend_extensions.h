@@ -44,8 +44,8 @@ struct _zend_extension {
 
 	int (*startup)(zend_extension *extension);
 	void (*shutdown)(zend_extension *extension);
-	void (*activate)();
-	void (*deactivate)();
+	void (*activate)(void);
+	void (*deactivate)(void);
 
 	void (*op_array_handler)(zend_op_array *op_array);
 	
@@ -70,7 +70,7 @@ struct _zend_extension {
 };
 
 
-ZEND_API int zend_get_resource_handle();
+ZEND_API int zend_get_resource_handle(zend_extension *extension);
 
 #ifdef ZTS
 #define ZTS_V 1
@@ -91,6 +91,6 @@ void zend_extension_dtor(zend_extension *extension);
 int zend_load_extension(char *path);
 int zend_load_extensions(char **extension_paths);
 void zend_append_version_info(zend_extension *extension);
-void zend_shutdown_extensions();
+void zend_shutdown_extensions(void);
 
 #endif /* _ZEND_EXTENSIONS_H */

@@ -21,6 +21,6 @@
 #ifndef _ZEND_BUILTIN_FUNCTIONS_H
 #define _ZEND_BUILTIN_FUNCTIONS_H
 
-int zend_startup_builtin_functions();
+int zend_startup_builtin_functions(void);
 
 #endif /* _ZEND_BUILTIN_FUNCTIONS_H */

@@ -45,8 +45,8 @@ ZEND_API int (*zend_write)(const char *str, uint str_length);
 ZEND_API void (*zend_error)(int type, const char *format, ...);
 ZEND_API void (*zend_message_dispatcher)(long message, void *data);
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
-ZEND_API void (*zend_block_interruptions)();
-ZEND_API void (*zend_unblock_interruptions)();
+ZEND_API void (*zend_block_interruptions)(void);
+ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 
 #ifdef ZTS
@@ -217,7 +217,7 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 }
 
 
-static void register_standard_class()
+static void register_standard_class(void)
 {
 	zend_standard_class_def.type = ZEND_INTERNAL_CLASS;
 	zend_standard_class_def.name_length = sizeof("stdClass") - 1;

@@ -39,14 +39,14 @@ BEGIN_EXTERN_C()
 int zendparse(void *compiler_globals);
 END_EXTERN_C()
 #else
-# define CLS_D
+# define CLS_D	void
 # define CLS_DC
 # define CLS_C
 # define CLS_CC
 # define CG(v) (compiler_globals.v)
 # define CLS_FETCH()
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
-int zendparse();
+int zendparse(void);
 #endif
 
 
@@ -59,7 +59,7 @@ int zendparse();
 # define EG(v) (executor_globals->v)
 # define ELS_FETCH()	zend_executor_globals *executor_globals = (zend_executor_globals *) ts_resource(executor_globals_id)
 #else
-# define ELS_D
+# define ELS_D	void
 # define ELS_DC
 # define ELS_C
 # define ELS_CC
@@ -78,7 +78,7 @@ extern ZEND_API zend_executor_globals executor_globals;
 # define AG(v) (((zend_alloc_globals *) alloc_globals)->v)
 # define ALS_FETCH()	zend_alloc_globals *alloc_globals = (zend_alloc_globals *) ts_resource(alloc_globals_id)
 #else
-# define ALS_D
+# define ALS_D	void
 # define ALS_DC
 # define ALS_C
 # define ALS_CC

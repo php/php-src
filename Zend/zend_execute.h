@@ -62,7 +62,7 @@ void execute_new_code(CLS_D);
 
 
 /* services */
-ZEND_API char *get_active_function_name();
+ZEND_API char *get_active_function_name(void);
 ZEND_API char *zend_get_executed_filename(ELS_D);
 ZEND_API uint zend_get_executed_lineno(ELS_D);
 

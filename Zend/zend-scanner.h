@@ -49,4 +49,8 @@ typedef struct _zend_lex_state {
 } zend_lex_state;
 #endif
 
+void zend_fatal_scanner_error(char *);
+inline void restore_lexical_state(zend_lex_state * CLS_DC);
+int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
+
 #endif
