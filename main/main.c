@@ -452,20 +452,28 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *space;
 	char *class_name = get_active_class_name(&space TSRMLS_CC);
 	char *function = get_active_function_name(TSRMLS_C);
+	char *origin;
+	char *message;
 
-	if (!function || !strlen(function)) {
-		function = "Unknown";
-	}
 	buffer_len = vspprintf(&buffer, 0, format, args);
-	if (buffer) {
-		if (PG(html_errors)) {
-			int len;
-			char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
-			efree(buffer);
-			buffer = replace;
-			buffer_len = len;
-		}
+	if (buffer && PG(html_errors)) {
+		int len;
+		char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		efree(buffer);
+		buffer = replace;
+		buffer_len = len;
+	}
 
+	if (buffer) {
+		if (!function || !strlen(function)) {
+			function = "Unknown";
+			spprintf(&origin, 0, "%s", function);	
+		} else {
+			spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);	
+		}
+	}
+
+	if (buffer && origin) {
 		if (docref && docref[0] == '#') {
 			docref_target = strchr(docref, '#');
 			docref = NULL;
@@ -509,18 +517,24 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			}
 			if (!PG(html_errors) || !strlen(PG(docref_root))) {
 				/* no docref and no html errors -> do not point to any documentation (e.g. production boxes) */
-				php_error(type, "%s%s%s(%s): %s", class_name, space, function, params, buffer);
+				spprintf(&message, 0, "%s: %s", origin, buffer);
 			} else if (PG(html_errors)) {
-				php_error(type, "%s%s%s(%s) [<a href='%s%s%s'>%s</a>]: %s", class_name, space, function, params, docref_root, docref, docref_target, docref, buffer);
+				spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
 			} else {
-				php_error(type, "%s%s%s(%s) [%s%s%s]: %s", class_name, space, function, params, docref_root, docref, docref_target, buffer);
+				spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
 			}
 			if (target) {
 				efree(target);
 			}
 		} else {
-			php_error(type, "%s%s%s(%s): %s ", class_name, space, function, params, buffer);
+			spprintf(&message, 0, "%s: %s ", origin, buffer);
 		}
+		efree(buffer);
+		efree(origin);
+		if (docref_buf) {
+			efree(docref_buf);
+		}
+		php_error(type, "%s", message);
 
 		if (PG(track_errors) && EG(active_symbol_table)) {
 			zval *tmp;
@@ -531,11 +545,14 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			Z_TYPE_P(tmp) = IS_STRING;
 			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 		}
-		efree(buffer);
-		if (docref_buf) {
-			efree(docref_buf);
-		}
+		efree(message);
 	} else {
+		if (buffer) {
+			efree(buffer);
+		}
+		if (origin) {
+			efree(origin);
+		}
 		php_error(E_ERROR, "%s%s%s(%s): Out of memory", class_name, space, function, params);
 	}
 }
