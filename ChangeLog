@@ -1,3 +1,30 @@
+2003-11-02  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      Fix tsrm build
+
+2003-11-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      back to dev.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with 4.3.4
+
+    * (PHP_4_3)
+      NEWS:
+      Prepare NEWS file for 4.3.4 release.
+
+2003-11-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Proto fix
+
 2003-11-01  Uwe Schindler  <uwe@thetaphi.de>
 
     * (PHP_4_3)
