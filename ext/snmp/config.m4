@@ -1,29 +1,5 @@
 
 
-PHP_ARG_WITH(openssl,for OpenSSL support in SNMP,
-[  --with-openssl[=DIR]    Include OpenSSL support in SNMP.])
-
-AC_DEFUN(PHP_SETUP_OPENSSL,[
-  for i in /usr/local/ssl /usr/local /usr /usr/local/openssl $PHP_OPENSSL; do
-    if test -r $i/include/openssl/evp.h; then
-      OPENSSL_DIR=$i
-      OPENSSL_INC=$i/include/openssl
-    elif test -r $i/include/evp.h; then
-      OPENSSL_DIR=$i
-      OPENSSL_INC=$i/include
-    fi
-  done
-
-  if test -z "$OPENSSL_DIR"; then
-    AC_MSG_ERROR(Cannot find OpenSSL's <evp.h>)
-  fi
-
-  AC_ADD_LIBPATH($OPENSSL_DIR/lib, SNMP_SHARED_LIBADD)
-  AC_ADD_LIBRARY(ssl, yes, SNMP_SHARED_LIBADD)
-  AC_ADD_LIBRARY(crypto, yes, SNMP_SHARED_LIBADD)
-  AC_ADD_INCLUDE($OPENSSL_INC)
-])
-
 PHP_ARG_WITH(snmp,for SNMP support,
 [  --with-snmp[=DIR]       Include SNMP support.  DIR is the SNMP base
                           install directory, defaults to searching through
