@@ -3,7 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 200?, Version 4.0.6
 - Modified get_parent_class() to accept a class name as well as a class
-  instance. (Andrei, Zend engine)
+  instance. (Andrei, Zend Engine)
 - Added support for UNC style paths (\\server\share\file & //server/share/file)
   (Daniel, TSRM)
 - Changed C++ style comments to C-style comments (Marc)
@@ -150,7 +150,7 @@ PHP 4.0                                                                    NEWS
 - Fixed date('r') overflow
 - Made the php.ini path reported in phpinfo() always point to the absolute
   path that was opened (Zeev)
-- Made the INI mechanism thread safe (Zeev, Zend engine)
+- Made the INI mechanism thread safe (Zeev, Zend Engine)
 - Changed setlocale() to use LC_* constants. (Jani)
 - ctype functions now follow the extension naming conventions (Hartmut)
 - Added iconv() function (using libc or libiconv) (Stig)
@@ -570,7 +570,7 @@ PHP 4.0                                                                    NEWS
   and currently run through a system call.  This will speed up the UdmSearch
   php frontend significantly. (Rasmus)
 - Modified in_array() to not touch array pointer. (Andrei)
-- Added restore_error_handler(). (Zeev, Zend engine)
+- Added restore_error_handler(). (Zeev, Zend Engine)
 - Fixed erroneous file names and line numbers in error situations under the
   multithreaded version of PHP - most noticeably Win32 (Zeev, Zend Engine)
 - Fixed problem with CGI crashing on certain servers especially Windows Apache
