@@ -880,6 +880,8 @@ class PEAR_Installer extends PEAR_Downloader
      * @param array Command-line options.  Possibilities include:
      *
      *              - installroot: base installation dir, if not the default
+     *              - nodeps: do not process dependencies of other packages to ensure
+     *                        uninstallation does not break things
      */
     function uninstall($package, $options = array())
     {
