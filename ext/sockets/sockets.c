@@ -685,7 +685,7 @@ PHP_FUNCTION(socket_listen)
 		backlog = Z_LVAL_PP(arg2);
 	}
 
-	if (listen(php_sock->socket, backlog) != 0) {
+	if (listen(php_sock->bsd_socket, backlog) != 0) {
 		php_error(E_WARNING, "unable to listen [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
