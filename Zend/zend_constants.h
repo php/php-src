@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_CONSTANTS_H
 #define ZEND_CONSTANTS_H
@@ -62,3 +63,11 @@ void copy_zend_constant(zend_constant *c);
 #define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

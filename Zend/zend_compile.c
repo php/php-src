@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "zend_language_parser.h"
 #include "zend.h"
@@ -3211,3 +3212,11 @@ int zendlex(znode *zendlval TSRMLS_DC)
 	zendlval->op_type = IS_CONST;
 	return retval;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "zend.h"
 #include "zend_constants.h"
@@ -269,5 +270,6 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */

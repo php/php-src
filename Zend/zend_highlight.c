@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "zend.h"
 #include "zend_language_parser.h"
@@ -239,9 +240,11 @@ ZEND_API void zend_strip(TSRMLS_D)
 		token.type = 0;
 	}
 }
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */

@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "zend_static_allocator.h"
 
@@ -73,3 +74,11 @@ void static_allocator_destroy(StaticAllocator *sa)
 	}
 	efree(sa->Blocks);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

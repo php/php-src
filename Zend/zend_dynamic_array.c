@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include "zend.h"
 
 typedef struct _dynamic_array {
@@ -60,3 +62,11 @@ ZEND_API void *zend_dynamic_array_get_element(dynamic_array *da, unsigned int in
 	}
 	return (void *)(da->array+index*da->element_size);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_INI_H
 #define ZEND_INI_H
@@ -199,3 +200,11 @@ typedef struct _zend_ini_parser_param {
 } zend_ini_parser_param;
 
 #endif /* ZEND_INI_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_EXTENSIONS_H
 #define ZEND_EXTENSIONS_H
@@ -114,3 +115,11 @@ void zend_shutdown_extensions(TSRMLS_D);
 ZEND_API zend_extension *zend_get_extension(char *extension_name);
 
 #endif /* ZEND_EXTENSIONS_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

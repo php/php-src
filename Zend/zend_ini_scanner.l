@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #define yyleng SCNG(yy_leng)
 #define yytext SCNG(yy_text)
 #define yytext_ptr SCNG(yy_text)
@@ -235,3 +237,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yy_delete_buffer(YY_CURRENT_BUFFER TSRMLS_CC);
 	yyterminate();
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

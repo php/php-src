@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 /* This indenter doesn't really work, it's here for no particular reason. */
 
@@ -145,3 +146,11 @@ dflt_printout:
 		token.type = 0;
 	}
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

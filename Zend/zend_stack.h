@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_STACK_H
 #define ZEND_STACK_H
@@ -45,3 +46,11 @@ ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*
 #define ZEND_STACK_APPLY_BOTTOMUP	2
 
 #endif /* ZEND_STACK_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -17,7 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-
 /* $Id$ */
 
 #define DEBUG_CFG_PARSER 0
@@ -236,9 +235,11 @@ expr:
 constant_string:
 		TC_STRING { zend_ini_get_constant(&$$, &$1); }
 ;
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */
