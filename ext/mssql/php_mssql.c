@@ -996,6 +996,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 
 	column_types = (int *) emalloc(sizeof(int) * result->num_fields);
 	for (i=0; i<result->num_fields; i++) {
+		char *source = NULL;
 		char *fname = (char *)dbcolname(mssql_ptr->link,i+1);
 
 		if (*fname) {
@@ -1010,8 +1011,11 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 			j++;
 		}
 		result->fields[i].max_length = dbcollen(mssql_ptr->link,i+1);
-		result->fields[i].column_source = estrdup(dbcolsource(mssql_ptr->link,i+1));
-		if (!result->fields[i].column_source) {
+		source = (char *)dbcolsource(mssql_ptr->link,i+1);
+		if (source) {
+			result->fields[i].column_source = estrdup(source);
+		}
+		else {
 			result->fields[i].column_source = empty_string;
 		}
 
