@@ -34,7 +34,7 @@
 int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
 			  char *RPath, char *Subject, char *mailTo, char *data);
 void TSMClose(void);
-int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char **error_message);
+int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char *headers_lc, char **error_message);
 char *GetSMErrorText(int index);
 
 int MailConnect();
