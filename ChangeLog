@@ -10,12 +10,6 @@
     * ext/bcmath/bcmath.c:
     (bcmath) Name of header changed from php3 to php but include forgotten.
 
-1999-12-14  Joey Smith  <joey@samaritan.com>
-
-    * ext/xml/xml.c
-      ext/bcmath/Makefile.am
-      ext/bcmath/bcmath.c:    Preliminary support for date/time stamping in error logs
-
 1999-12-14  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
     * ext/hyperwave/hw.c: always check if output is ok after php3_header()
