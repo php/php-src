@@ -652,28 +652,6 @@ common_scalar:
 ;
 
 
-const_scalar_expr: /* compile-time evaluated scalar expressions */
-		const_scalar { $$ = $1; }
-	|   const_scalar_expr_list { $$ = $1; }
-;
-
-const_scalar_expr_list:
-		const_scalar_expr T_SL const_scalar_expr { zend_do_fold_binary_op(ZEND_SL, &$$, &$1, &$3 TSRMLS_CC); }
-	|	const_scalar_expr T_SR const_scalar_expr { zend_do_fold_binary_op(ZEND_SR, &$$, &$1, &$3 TSRMLS_CC); }
-	|	const_scalar_expr T_LOGICAL_XOR  const_scalar_expr { zend_do_fold_binary_op(ZEND_BOOL_XOR, &$$, &$1, &$3 TSRMLS_CC); }
-	|   const_scalar_expr '|'  const_scalar_expr { zend_do_fold_binary_op(ZEND_BW_OR, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '&'  const_scalar_expr { zend_do_fold_binary_op(ZEND_BW_AND, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '^'  const_scalar_expr { zend_do_fold_binary_op(ZEND_BW_XOR, &$$, &$1, &$3 TSRMLS_CC); } 
-	|	const_scalar_expr '.'  const_scalar_expr { zend_do_fold_binary_op(ZEND_CONCAT, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '+'  const_scalar_expr { zend_do_fold_binary_op(ZEND_ADD, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '-'  const_scalar_expr { zend_do_fold_binary_op(ZEND_SUB, &$$, &$1, &$3 TSRMLS_CC); }
-	|   const_scalar_expr '*'  const_scalar_expr { zend_do_fold_binary_op(ZEND_MUL, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '/'  const_scalar_expr { zend_do_fold_binary_op(ZEND_DIV, &$$, &$1, &$3 TSRMLS_CC); } 
-	|   const_scalar_expr '%'  const_scalar_expr { zend_do_fold_binary_op(ZEND_MOD, &$$, &$1, &$3 TSRMLS_CC); } 
-	|                     '~'  const_scalar_expr { zend_do_fold_binary_op(ZEND_BW_NOT, &$$, &$2, NULL TSRMLS_CC); }
-	|   '(' const_scalar_expr ')' { $$ = $2; }
-;
-
 const_scalar:
 		common_scalar { $$ = $1; }
 	|	T_STRING { zend_do_fold_constant(&$$, &$1 TSRMLS_CC); }
