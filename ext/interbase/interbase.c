@@ -325,7 +325,7 @@ static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 		unsigned ISC_INT64 res;
 		if (sscanf(id, BLOB_ID_MASK, &res)) {
 			qd->gds_quad_high = (ISC_LONG) (res >> 0x20);
-			qd->gds_quad_low = (unsigned ISC_LONG) (res & 0xFFFFFFFF);
+			qd->gds_quad_low = (ISC_LONG) (res & 0xFFFFFFFF);
 			return 1;
 		}
 		return 0;
