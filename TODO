@@ -98,6 +98,16 @@ ext/oci8
     * Make allow_call_time_pass_reference=Off working.
     * For additional todo information, see oci8.c, in ext/oci8
 
+ext/odbc
+--------
+    For PHP 4.3.0:
+    * update all php_error calls to php_error_docref where valid
+    * integrate EXPERIMENTAL ODBC update for use in PHP 5.0, use for
+      testing purposes only.
+
+    For PHP 5.0.0
+    * Activate EXPERIMENTAL ODBC codebase update
+
 ext/pcre
 --------
     * Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time, maybe
