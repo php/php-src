@@ -205,8 +205,6 @@ int main(int argc, char *argv[])
 
 	sapi_startup(&sapi_module);
 
-	SG(request_info).path_translated = NULL;
-
 #if WIN32|WINNT
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
@@ -262,6 +260,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 #endif
 
+	SG(request_info).path_translated = NULL;
 	init_request_info(SLS_C);
 	SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 	CG(extended_info) = 0;

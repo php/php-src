@@ -67,9 +67,9 @@ int php3_init_request_info(void *conf)
 	   php3_destroy_request_info()! */
 #if DISCARD_PATH
 	if (request_info.script_filename) {
-		request_info.filename = estrdup(request_info.script_filename);
+		SG(request_info).path_translated = estrdup(request_info.script_filename);
 	} else {
-		request_info.filename = NULL;
+		SG(request_info).path_translated = NULL;
 	}
 #endif
 	return SUCCESS;
