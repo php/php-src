@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)
+- Fixed bug #31878 (Segmentation fault using clone keyword on nodes). (Rob)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
   (Jani)
