@@ -1106,7 +1106,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
 	char old_cwd[4096];
-	char new_path[4096] = "";
+	char new_path[4096];
 	SLS_FETCH();
 
 	old_cwd[0] = new_path[0] = '\0';
