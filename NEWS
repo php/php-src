@@ -10,6 +10,8 @@ PHP 4                                                                      NEWS
 - Added a warning when creating temp stream fails with ftp_(n)list(). (Sara)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26847 (memory leak in mail() when to/subject contain only spaces).
+  (Ilia)
 - Fixed bug #26777 (ext/interbase: Let DB handle NULL params). (Ard)
 - Fixed bug #26755 (CLI now overrides php.ini settings and switches off
   output buffering). (Edin)

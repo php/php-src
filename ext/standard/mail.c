@@ -157,10 +157,10 @@ PHP_FUNCTION(mail)
 	if (extra_cmd) {
 		efree (extra_cmd);
 	}
-	if (to_len > 0) {
+	if (to_r != to) {
 		efree(to_r);
 	}
-	if (subject_len > 0) {
+	if (subject_r != subject) {
 		efree(subject_r);
 	}
 }
