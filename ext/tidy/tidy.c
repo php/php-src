@@ -157,6 +157,22 @@ void php_tidy_panic(ctmbstr msg)
 	zend_error(E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
+/* Workaround for compilers that are not C99 complaint */
+static void _php_tidy_throw_exception(char *message, ...)
+{
+	char *msg;
+	va_list ap;
+	
+	TSRMLS_FETCH();
+	
+	va_start(ap, message);
+	vspprintf(&msg, 0, message, ap);
+	zend_throw_exception(tidy_ce_exception, msg, 0 TSRMLS_CC);
+	va_end(ap);
+	efree(msg);
+	
+}
+
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS_DC)
 {
 	TidyOption opt;
@@ -697,6 +713,10 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, char *enc TSRMLS
 }
 
 static void tidy_globals_ctor(void *global TSRMLS_DC)
+{
+}
+
+static void tidy_globals_dtor(void *global TSRMLS_DC)
 {
 }
 
