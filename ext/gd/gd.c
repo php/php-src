@@ -224,7 +224,7 @@ function_entry gd_functions[] = {
 #ifdef HAVE_GD_XBM
 	PHP_FE(imagecreatefromxbm,						NULL)
 #endif
-#ifdef HAVE_GD_XPM
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 	PHP_FE(imagecreatefromxpm,						NULL)
 #endif
 	PHP_FE(imagecreatefromgd,						NULL)
@@ -1441,7 +1441,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 			case PHP_GDIMG_TYPE_GD2PART:
 				im = (*func_p)(fp, Z_LVAL_PP(srcx), Z_LVAL_PP(srcy), Z_LVAL_PP(width), Z_LVAL_PP(height));
 				break;
-#ifdef HAVE_GD_XPM
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 			case PHP_GDIMG_TYPE_XPM:
 				im = gdImageCreateFromXpm(fn);
 				break;
@@ -1508,7 +1508,7 @@ PHP_FUNCTION(imagecreatefromxbm)
 /* }}} */
 #endif /* HAVE_GD_XBM */
 
-#ifdef HAVE_GD_XPM
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 /* {{{ proto int imagecreatefromxpm(string filename)
    Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
@@ -2130,7 +2130,6 @@ PHP_FUNCTION(imageline)
 {
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
-	int antialias=0;
 
 	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -2145,14 +2144,11 @@ PHP_FUNCTION(imageline)
 	convert_to_long_ex(col);
 
 #ifdef HAVE_GD_BUNDLED
-		antialias = im->antialias;
-#endif
-	if (antialias) {
+	if (im->antialias)
 		gdImageAALine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
-	} else {
+	else 
+#endif	
 		gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
-	}
-								 
 	
 	gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
 	RETURN_TRUE;
@@ -4074,7 +4070,7 @@ PHP_FUNCTION(imagefilter)
 	}
 }
 /* }}} */
-#endif
+/* End section: Filters */
 
 /* {{{ proto imagesetantialias(int im, bool on)
         Should antialiased functions used or not*/
@@ -4092,8 +4088,7 @@ PHP_FUNCTION(imageantialias)
 	RETURN_TRUE;
 }
 /* }}} */
-													   
-/* End section: Filters */
+#endif
 
 /*
  * Local variables:
