@@ -269,6 +269,7 @@ PHPAPI void _php3_info(void)
 				switch (_php3_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
 						PUTS(string_key);
+						efree(string_key);
 						break;
 					case HASH_KEY_IS_LONG:
 						php3_printf("%ld",num_key);
@@ -288,6 +289,7 @@ PHPAPI void _php3_info(void)
 				switch (_php3_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
 						PUTS(string_key);
+						efree(string_key);
 						break;
 					case HASH_KEY_IS_LONG:
 						php3_printf("%ld",num_key);
@@ -307,6 +309,7 @@ PHPAPI void _php3_info(void)
 				switch (_php3_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
 						PUTS(string_key);
+						efree(string_key);
 						break;
 					case HASH_KEY_IS_LONG:
 						php3_printf("%ld",num_key);
