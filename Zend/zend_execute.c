@@ -169,11 +169,7 @@ static inline void zend_fetch_property_address_inner(zval *object, znode *op2, z
 	}
 
 	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval **ptr_ptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, prop_ptr TSRMLS_CC);
-		if(NULL == ptr_ptr) {
-			zend_error(E_ERROR, "Cannot access undefined property for object with overloaded property access");
-		}
-		T(result->u.var).var.ptr_ptr = ptr_ptr;
+		T(result->u.var).var.ptr_ptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, prop_ptr TSRMLS_CC);
 	} else if (Z_OBJ_HT_P(object)->read_property) {
 		T(result->u.var).var.ptr = Z_OBJ_HT_P(object)->read_property(object, prop_ptr, 0 TSRMLS_CC);
 		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr;
@@ -2470,25 +2466,8 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		char *method;
-		zend_class_entry **pce;
-
-		if ((method = strstr(lcname, "::")) != NULL) {
-			*method = '\0';
-			method +=2;
-			if (zend_lookup_class(lcname, strlen(lcname), &pce TSRMLS_CC) == SUCCESS) {
-				if (zend_hash_find(&(*pce)->function_table, method, strlen(method)+1, (void **) &function) == FAILURE) {
-					efree(lcname);
-					zend_error(E_ERROR, "Call to undefined method %s()", function_name_strval);
-				}
-			} else {
-				efree(lcname);
-				zend_error(E_ERROR, "Call to method of undefined class %s()", function_name_strval);
-			}
-		} else {
-			efree(lcname);
-			zend_error(E_ERROR, "Call to undefined function %s()", function_name_strval);
-		}
+		efree(lcname);
+		zend_error(E_ERROR, "Call to undefined function %s()", function_name_strval);
 	}
 
 	efree(lcname);
