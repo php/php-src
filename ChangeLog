@@ -1,3 +1,45 @@
+2004-06-30  Frank M. Kromann  <frank@kromann.info>
+
+    * NEWS
+      NEWS:
+      Fix for #28512. news entry
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      MFH: Fix for #28512. Allocate enough space to store data
+
+    * ext/mssql/php_mssql.c:
+      Fix for #28512. Allocate enough space to store data
+
+2004-06-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/msession/msession.c:
+      MFH: Another instance where alloca() is not needed.
+
+    * ext/msession/msession.c:
+      Another instance where alloca() is not needed.
+
+2004-06-30  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fixed Ilia's alloca() issue/exploit
+      Removed pointless RINIT()
+      Use macros for consistent resource type names
+
+2004-06-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/pcntl/pcntl.c
+      ext/session/mod_mm.c
+      ext/wddx/wddx.c:
+      MFH: Do not use alloca() where it can be abused through user input.
+
+    * ext/pcntl/pcntl.c
+      ext/session/mod_mm.c
+      ext/wddx/wddx.c:
+      Do not use alloca() where it can be abused through user input.
+
 2004-06-29  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_4_3)
