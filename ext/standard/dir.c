@@ -370,11 +370,13 @@ PHP_FUNCTION(glob)
 		if (!result) {
 			cwd[0] = '\0';
 		}
-		cwd_skip = strlen(cwd)+1;
 #ifdef PHP_WIN32
-		if (IS_SLASH(cwd[0]) && !IS_UNC_PATH(pattern, pattern_len)) {
+		if (!IS_SLASH(cwd[0])) {
 			cwd[2] = '\0';
+			cwd_skip = 3;
 		}
+#else
+		cwd_skip = strlen(cwd)+1;
 #endif
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
