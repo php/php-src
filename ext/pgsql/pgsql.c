@@ -32,6 +32,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_pgsql.h"
 #include "php_globals.h"
 
@@ -1040,15 +1041,16 @@ PHP_FUNCTION(pg_last_notice)
 static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 {
 	PGresult *result;
-	char hashed_oid_key[32];
+	smart_str str = {0};
 	list_entry *field_type;
 	char *ret=NULL;
 
 	/* try to lookup the type in the resource list */
-	snprintf(hashed_oid_key,31,"pgsql_oid_%u", oid);
-	hashed_oid_key[31]=0;
+	smart_str_appends(&str, "pgsql_oid_");
+	smart_str_append_unsigned(&str, oid);
+	smart_str_0(&str);
 
-	if (zend_hash_find(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void **) &field_type)==SUCCESS) {
+	if (zend_hash_find(list,str.c,str.len+1,(void **) &field_type)==SUCCESS) {
 		ret = estrdup((char *)field_type->ptr);
 	} else { /* hash all oid's */
 		int i,num_rows;
@@ -1057,6 +1059,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 		list_entry new_oid_entry;
 
 		if ((result = PQexec(pgsql,"select oid,typname from pg_type")) == NULL) {
+			smart_str_free(&str);
 			return empty_string;
 		}
 		num_rows = PQntuples(result);
@@ -1067,18 +1070,25 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 			if ((tmp_oid = PQgetvalue(result,i,oid_offset))==NULL) {
 				continue;
 			}
-			snprintf(hashed_oid_key,31,"pgsql_oid_%s",tmp_oid);
+			
+			str.len = 0;
+			smart_str_appends(&str, "pgsql_oid_");
+			smart_str_appends(&str, tmp_oid);
+			smart_str_0(&str);
+	
 			if ((tmp_name = PQgetvalue(result,i,name_offset))==NULL) {
 				continue;
 			}
 			Z_TYPE(new_oid_entry) = le_string;
 			new_oid_entry.ptr = estrdup(tmp_name);
-			zend_hash_update(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void *) &new_oid_entry, sizeof(list_entry), NULL);
+			zend_hash_update(list,str.c,str.len+1,(void *) &new_oid_entry, sizeof(list_entry), NULL);
 			if (!ret && strtoul(tmp_oid, &end_ptr, 10)==oid) {
 				ret = estrdup(tmp_name);
 			}
 		}
 	}
+
+	smart_str_free(&str);
 	return ret;
 }
 /* }}} */			
@@ -1481,7 +1491,6 @@ PHP_FUNCTION(pg_last_oid)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	Oid oid;
-	char *oid_str;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1494,9 +1503,11 @@ PHP_FUNCTION(pg_last_oid)
 	if (oid == InvalidOid) {
 		RETURN_FALSE;
 	} else if (oid > LONG_MAX) {
-		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%u", oid);
-		RETURN_STRING(oid_str, 0);
+		smart_str s = {0};
+
+		smart_str_append_unsigned(&s, oid);
+		
+		RETURN_STRINGL(s.c, s.len, 0);
 	}
 	RETURN_LONG((long)oid);
 #else
@@ -1603,7 +1614,6 @@ PHP_FUNCTION(pg_lo_create)
   	zval **pgsql_link = NULL;
 	PGconn *pgsql;
 	Oid pgsql_oid;
-	char *oid_str;
 	int id = -1;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -1637,9 +1647,11 @@ PHP_FUNCTION(pg_lo_create)
 		RETURN_FALSE;
 	}
 	if (pgsql_oid > LONG_MAX) {
-		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%u", pgsql_oid);
-		RETURN_STRING(oid_str, 0);
+		smart_str s = {0};
+
+		smart_str_append_unsigned(&s, pgsql_oid);
+		
+		RETURN_STRINGL(str.c, str.len, 0);
 	}
 	RETURN_LONG((long)pgsql_oid);
 }
@@ -1985,7 +1997,7 @@ PHP_FUNCTION(pg_lo_read_all)
 PHP_FUNCTION(pg_lo_import)
 {
 	zval *pgsql_link = NULL;
-	char *file_in, *oid_str;
+	char *file_in;
 	int id = -1, name_len;
 	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
@@ -2020,9 +2032,11 @@ PHP_FUNCTION(pg_lo_import)
 		RETURN_FALSE;
 	} 
 	if (oid > LONG_MAX) {
-		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%u", oid);
-		RETURN_STRING(oid_str, 0);
+		smart_str s = {0};
+
+		smart_str_append_unsigned(&s, oid);
+		
+		RETURN_STRINGL(s.c, s.len, 0);
 	}
 	RETURN_LONG((long)oid);
 }
@@ -3875,15 +3889,38 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
+static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, zend_bool async)
+{
+	if (async) {
+		if (PQsendQuery(pg_link, querystr->c)) {
+			return 0;
+		}
+	}
+	else {
+		PGresult *pg_result;
+
+		pg_result = PQexec(pg_link, querystr->c);
+		if (PQresultStatus(pg_result) == expect) {
+			return 0;
+		} else {
+			php_error(E_NOTICE, "%s() failed to execute '%s'",
+				  get_active_function_name(TSRMLS_C), querystr->c);
+			PQclear(pg_result);
+		}
+	}
+
+	return -1;
+}
+
 /* {{{ php_pgsql_insert
  */
 PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array, zend_bool convert, zend_bool async TSRMLS_DC)
 {
 	zval **val, *converted = NULL;
-	char *query_tpl = "INSERT INTO %s (%s) VALUES (%s);";
-	char *query, *fields, *fields_pos, *values, *values_pos, *fld, buf[256];
-	size_t fields_len = 1, values_len = 1;
-	int key_type, fld_len, ret = SUCCESS;
+	char buf[256];
+	char *fld;
+	smart_str querystr = {0};
+	int key_type, fld_len, ret = FAILURE;
 	ulong num_idx;
 	HashPosition pos;
 
@@ -3898,171 +3935,71 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 		MAKE_STD_ZVAL(converted);
 		array_init(converted);
 		if (php_pgsql_convert(pg_link, table, var_array, converted TSRMLS_CC) == FAILURE) {
-			zval_dtor(converted);			
-			FREE_ZVAL(converted);
-			return FAILURE;
+			goto cleanup;
 		}
 		var_array = converted;
 	}
-	/* compute length */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos)) {
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld, &fld_len, &num_idx, 0, &pos);
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(converted);			
-				FREE_ZVAL(converted);
-			}
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				values_len += Z_STRLEN_PP(val)+1;
-				break;
-			case IS_LONG:
-				values_len += PGSQL_MAX_LENGTH_OF_LONG+1;
-				break;
-			case IS_DOUBLE:
-				values_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
-				break;
-			default:
-				if (convert) {
-					zval_dtor(converted);			
-					FREE_ZVAL(converted);
-				}
-				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-				return FAILURE;
-		}
-		fields_len += fld_len+1;
-	}
-	if (fields_len == 1 || values_len == 1) {
-		/* there aren't any fields to insert */
-		if (convert) {
-			zval_dtor(converted);			
-			FREE_ZVAL(converted);
-		}
-		return FAILURE;
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0) {
+		goto cleanup;
 	}
 	
-	fields = (char *)emalloc(fields_len+1);
-	if (fields == NULL) {
-		if (convert) {
-			zval_dtor(converted);			
-			FREE_ZVAL(converted);
+	smart_str_appends(&querystr, "INSERT INTO ");
+	smart_str_appends(&querystr, table);
+	smart_str_appends(&querystr, " (");
+	
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
+	while ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld,
+					&fld_len, &num_idx, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+		if (key_type == HASH_KEY_IS_LONG) {
+			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
+					  get_active_function_name(TSRMLS_C));
+			goto cleanup;
 		}
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
+		smart_str_appendl(&querystr, fld, fld_len);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
 	}
-	fields_pos = fields;
-	values = (char *)emalloc(values_len+1);
-	if (values == NULL) {
-		if (convert) {
-			zval_dtor(converted);			
-			FREE_ZVAL(converted);
-		}
-		efree(fields);
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	values_pos = values;
-	query = (char *)emalloc(strlen(query_tpl)+strlen(table)+fields_len+values_len+1);
-	if (query == NULL) {
-		if (convert) {
-			zval_dtor(converted);			
-			FREE_ZVAL(converted);
-		}
-		efree(fields);
-		efree(values);
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-
-	/* make fields and values string */
+	smart_str_appends(&querystr, ") VALUES (");
+	
+	/* make values string */
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos)) {
-		 key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld, &fld_len, &num_idx, 0, &pos);		
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(converted);			
-				FREE_ZVAL(converted);
-			}
-			efree(fields);
-			efree(values);
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
+		
+		/* we can avoid the key_type check here, because we tested it in the other loop */
 		switch(Z_TYPE_PP(val)) {
 			case IS_STRING:
-				memcpy(values_pos, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-				values_pos += Z_STRLEN_PP(val);
+				smart_str_appendl(&querystr, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 				break;
 			case IS_LONG:
-				sprintf(buf, "%ld", Z_LVAL_PP(val));
-				memcpy(values_pos, buf, strlen(buf));
-				values_pos += strlen(buf);
+				smart_str_append_long(&querystr, Z_LVAL_PP(val));
 				break;
 			case IS_DOUBLE:
-				sprintf(buf, "%f", Z_DVAL_PP(val));
-				memcpy(values_pos, buf, strlen(buf));
-				values_pos += strlen(buf);
+				smart_str_appendl(&querystr, buf, sprintf(buf, "%f", Z_DVAL_PP(val)));
 				break;
 			default:
 				/* should not happen */
-				if (convert) {
-					zval_dtor(converted);			
-					FREE_ZVAL(converted);
-				}
-				efree(fields);
-				efree(values);
 				php_error(E_WARNING, "%s(): Report this error to php-dev@lists.php.net",
 						  get_active_function_name(TSRMLS_C));
-				return FAILURE;
+				goto cleanup;
 				break;
 		}
-		*values_pos = ',';
-		values_pos++;
-
-		memcpy(fields_pos, fld, fld_len-1);
-		fields_pos += fld_len-1;
-		*fields_pos = ',';
-		fields_pos++;
+		smart_str_appendc(&querystr, ',');
 	}
- 	values_pos--; 
-	*values_pos = '\0';
-	fields_pos--;
-	*fields_pos = '\0';
+	/* Remove the trailing "," */
+	querystr.len--;
+	smart_str_appends(&querystr, ");");
+	smart_str_0(&querystr);
+
+	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, async) == 0)
+		ret = SUCCESS;
+
+cleanup:
 	if (convert) {
 		zval_dtor(converted);			
 		FREE_ZVAL(converted);
 	}
-	sprintf(query, query_tpl, table, fields, values);
-	efree(fields);
-	efree(values);
-	if (async) {
-		if (!PQsendQuery(pg_link, query)) {
-			ret = FAILURE;
-		}
-	}
-	else {
-		PGresult *pg_result;
-		pg_result = PQexec(pg_link, query);
-		if (PQresultStatus(pg_result) != PGRES_COMMAND_OK) {
-			ret = FAILURE;
-			php_error(E_NOTICE, "%s() failed to insert '%s'",
-				  get_active_function_name(TSRMLS_C), query);
-			PQclear(pg_result);
-		}
-	}
-	efree(query);
+	smart_str_free(&querystr);
 	return ret;
 }
 /* }}} */
@@ -4095,18 +4032,59 @@ PHP_FUNCTION(pg_insert)
 	RETURN_TRUE;
 }
 /* }}} */
-	
+
+static inline int build_assignment_string(smart_str *querystr, HashTable *ht, const char *pad, int pad_len TSRMLS_DC)
+{
+	HashPosition pos;
+	size_t fld_len;
+	int key_type;
+	ulong num_idx;
+	char *fld;
+	char buf[256];
+	zval **val;
+
+	for (zend_hash_internal_pointer_reset_ex(ht, &pos);
+		 zend_hash_get_current_data_ex(ht, (void **)&val, &pos) == SUCCESS;
+		 zend_hash_move_forward_ex(ht, &pos)) {
+		 key_type = zend_hash_get_current_key_ex(ht, &fld, &fld_len, &num_idx, 0, &pos);		
+		if (key_type == HASH_KEY_IS_LONG) {
+			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
+					  get_active_function_name(TSRMLS_C));
+			return -1;
+		}
+		smart_str_appendl(querystr, fld, fld_len);
+		smart_str_appendc(querystr, '=');
+		
+		switch(Z_TYPE_PP(val)) {
+			case IS_STRING:
+				smart_str_appendl(querystr, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+				break;
+			case IS_LONG:
+				smart_str_append_long(querystr, Z_LVAL_PP(val));
+				break;
+			case IS_DOUBLE:
+				smart_str_appendl(querystr, buf, sprintf(buf, "%f", Z_DVAL_PP(val)));
+				break;
+			default:
+				/* should not happen */
+				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
+						  get_active_function_name(TSRMLS_C));
+				return -1;
+		}
+		smart_str_appendl(querystr, pad, pad_len);
+	}
+	querystr->len -= pad_len;
+
+	return 0;
+}
+
 /* {{{ php_pgsql_update
  */
 PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array, zval *ids_array, zend_bool convert, zend_bool async TSRMLS_DC) 
 {
-	zval **val, *var_converted = NULL, *ids_converted = NULL;
-	char *query_tpl = "UPDATE %s SET %s WHERE %s;";
-	char *query, *values, *values_pos, *ids, *ids_pos, *fld, buf[256];
-	size_t fields_len = 1, values_len = 1, idsf_len = 1, idsv_len = 1, fld_len;
-	int key_type, ret = SUCCESS;
-	ulong num_idx;
-	HashPosition pos;
+	zval *var_converted = NULL, *ids_converted = NULL;
+	smart_str querystr = {0};
+	int ret = SUCCESS;
 
 	assert(pg_link != NULL);
 	assert(table != NULL);
@@ -4119,277 +4097,50 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 		MAKE_STD_ZVAL(var_converted);
 		array_init(var_converted);
 		if (php_pgsql_convert(pg_link, table, var_array, var_converted TSRMLS_CC) == FAILURE) {
-			zval_dtor(var_converted);
-			FREE_ZVAL(var_converted);
-			return FAILURE;
+			goto cleanup;
 		}
 		var_array = var_converted;
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
 		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_CC) == FAILURE) {
-			zval_dtor(var_converted);
-			FREE_ZVAL(var_converted);
-			zval_dtor(ids_converted);			
-			FREE_ZVAL(ids_converted);
-			return FAILURE;
+			goto cleanup;
 		}
 		ids_array = ids_converted;
 	}
 
-	/* compute length */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos)) {
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld, &fld_len, &num_idx, 0, &pos);
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(var_converted);			
-				FREE_ZVAL(var_converted);
-			}
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				values_len += Z_STRLEN_PP(val)+1;
-				break;
-			case IS_LONG:
-				values_len += PGSQL_MAX_LENGTH_OF_LONG+1;
-				break;
-			case IS_DOUBLE:
-				values_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
-				break;
-			default:
-				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-				if (convert) {
-					zval_dtor(var_converted);			
-					FREE_ZVAL(var_converted);
-				}
-				break;
-		}
-		fields_len += fld_len+2; /* field name + '=' + ',' */
+	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0
+			|| zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
+		goto cleanup;
 	}
 
-	if (fields_len == 1 || values_len == 1) {
-		if (convert) {
-			zval_dtor(var_converted);			
-			FREE_ZVAL(var_converted);
-		}
-		return FAILURE;
-	}
+	smart_str_appends(&querystr, "UPDATE ");
+	smart_str_appends(&querystr, table);
+	smart_str_appends(&querystr, " SET ");
+
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(var_array), ",", 1 TSRMLS_CC))
+		goto cleanup;
 	
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ids_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(ids_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(ids_array), &pos)) {
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(ids_array), &fld, &fld_len, &num_idx, 0, &pos);
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(var_converted);
-				FREE_ZVAL(var_converted);
-				zval_dtor(ids_converted);
-				FREE_ZVAL(ids_converted);
-			}
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				idsv_len += Z_STRLEN_PP(val)+1;
-				break;
-			case IS_LONG:
-				idsv_len += PGSQL_MAX_LENGTH_OF_LONG+1;
-				break;
-			case IS_DOUBLE:
-				idsv_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
-				break;
-			default:
-				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-				if (convert) {
-					zval_dtor(var_converted);
-					FREE_ZVAL(var_converted);
-					zval_dtor(ids_converted);
-					FREE_ZVAL(ids_converted);
-				}
-				return FAILURE;
-		}
-		idsf_len += fld_len+6; /* field name + '=' + ' AND ' */
-	}
-
-	if (fields_len == 1 || values_len == 1 || idsv_len == 1 || idsf_len == 1) {
-		if (convert) {
-			zval_dtor(var_converted);
-			FREE_ZVAL(var_converted);
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		return FAILURE;
-	}
+	smart_str_appends(&querystr, " WHERE ");
 	
-	values = (char *)emalloc(fields_len + values_len);
-	if (values == NULL) {
-		if (convert) {
-			zval_dtor(var_converted);			
-			FREE_ZVAL(var_converted);
-			zval_dtor(ids_converted);			
-			FREE_ZVAL(ids_converted);
-		}
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	values_pos = values;
-	ids = (char *)emalloc(idsf_len + idsv_len);
-	if (ids == NULL) {
-		if (convert) {
-			zval_dtor(var_converted);
-			FREE_ZVAL(var_converted);
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		efree(values);
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	ids_pos = ids;
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
+		goto cleanup;
 
-	query = (char *)emalloc(strlen(query_tpl) + strlen(table) + fields_len + values_len + idsf_len + idsv_len);
-	if (query == NULL) {
-		if (convert) {
-			zval_dtor(var_converted);			
-			FREE_ZVAL(var_converted);
-			zval_dtor(ids_converted);			
-			FREE_ZVAL(ids_converted);
-		}
-		efree(values);
-		efree(ids);
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	/* make values and ids string */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos)) {
-		 key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld, &fld_len, &num_idx, 0, &pos);		
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(var_converted);			
-				FREE_ZVAL(var_converted);
-				zval_dtor(ids_converted);			
-				FREE_ZVAL(ids_converted);
-			}
-			efree(ids);
-			efree(values);
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		memcpy(values_pos, fld, fld_len-1);
-		values_pos += fld_len-1;
-		*values_pos = '=';
-		values_pos++;
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				memcpy(values_pos, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-				values_pos += Z_STRLEN_PP(val);
-				break;
-			case IS_LONG:
-				sprintf(buf, "%ld", Z_LVAL_PP(val));
-				memcpy(values_pos, buf, strlen(buf));
-				values_pos += strlen(buf);
-				break;
-			case IS_DOUBLE:
-				sprintf(buf, "%f", Z_DVAL_PP(val));
-				memcpy(values_pos, buf, strlen(buf));
-				values_pos += strlen(buf);
-				break;
-			default:
-				/* should not happen */
-				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-		}
-		*values_pos = ',';
-		values_pos++;
-	}
-	values_pos--;
-	*values_pos = '\0';
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ids_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(ids_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(ids_array), &pos)) {
-		 key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(ids_array), &fld, &fld_len, &num_idx, 0, &pos);		
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(var_converted);			
-				FREE_ZVAL(var_converted);
-				zval_dtor(ids_converted);			
-				FREE_ZVAL(ids_converted);
-			}
-			efree(ids);
-			efree(values);
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		memcpy(ids_pos, fld, fld_len-1);
-		ids_pos += fld_len-1;
-		*ids_pos = '=';
-		ids_pos++;
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				memcpy(ids_pos, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-				ids_pos += Z_STRLEN_PP(val);
-				break;
-			case IS_LONG:
-				sprintf(buf, "%ld", Z_LVAL_PP(val));
-				memcpy(ids_pos, buf, strlen(buf));
-				ids_pos += strlen(buf);
-				break;
-			case IS_DOUBLE:
-				sprintf(buf, "%f", Z_DVAL_PP(val));
-				memcpy(ids_pos, buf, strlen(buf));
-				ids_pos += strlen(buf);
-				break;
-			default:
-				/* should not happen */
-				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-		}
-		memcpy(ids_pos, " AND ", 5);
-		ids_pos += 5;
-	}
-	ids_pos -= 5;
-	*ids_pos = '\0';
-	if (convert) {
-		zval_dtor(var_converted);			
+	smart_str_appendc(&querystr, ';');	
+	smart_str_0(&querystr);
+
+	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, async) == 0)
+		ret = SUCCESS;
+
+cleanup:
+	if (var_converted) {
+		zval_dtor(var_converted);
 		FREE_ZVAL(var_converted);
-		zval_dtor(ids_converted);			
+	}
+	if (ids_converted) {
+		zval_dtor(ids_converted);
 		FREE_ZVAL(ids_converted);
 	}
-
-	sprintf(query, query_tpl, table, values, ids);
-	efree(ids);
-	efree(values);
-	if (async) {
-		if (!PQsendQuery(pg_link, query)) {
-			ret = FAILURE;
-		}
-	}
-	else {
-		PGresult *pg_result;
-		pg_result = PQexec(pg_link, query);
-		if (PQresultStatus(pg_result) != PGRES_COMMAND_OK) {
-			ret = FAILURE;
-			php_error(E_NOTICE, "%s() failed to update '%s'",
-				  get_active_function_name(TSRMLS_C), query);
-			PQclear(pg_result);
-		}
-	}
-	efree(query);
+	smart_str_free(&querystr);
 	return ret;
 }
 /* }}} */
@@ -4427,13 +4178,9 @@ PHP_FUNCTION(pg_update)
  */
 PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array, zend_bool convert, zend_bool async TSRMLS_DC) 
 {
-	zval **val, *ids_converted = NULL;
-	char *query_tpl = "DELETE FROM %s WHERE %s;";
-	char *query, *ids, *ids_pos, *fld, buf[256];
-	size_t idsf_len = 1, idsv_len = 1, fld_len;
-	int key_type, ret = SUCCESS;
-	ulong num_idx;
-	HashPosition pos;
+	zval *ids_converted = NULL;
+	smart_str querystr = {0};
+	int ret = FAILURE;
 
 	assert(pg_link != NULL);
 	assert(table != NULL);
@@ -4445,147 +4192,33 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
 		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_CC) == FAILURE) {
-			zval_dtor(ids_converted);			
-			FREE_ZVAL(ids_converted);
-			return FAILURE;
+			goto cleanup;
 		}
 		ids_array = ids_converted;
 	}
 
-	/* compute length */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ids_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(ids_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(ids_array), &pos)) {
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(ids_array), &fld, &fld_len, &num_idx, 0, &pos);
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(ids_converted);
-				FREE_ZVAL(ids_converted);
-			}
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				idsv_len += Z_STRLEN_PP(val)+1;
-				break;
-			case IS_LONG:
-				idsv_len += PGSQL_MAX_LENGTH_OF_LONG+1;
-				break;
-			case IS_DOUBLE:
-				idsv_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
-				break;
-			default:
-				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-				if (convert) {
-					zval_dtor(ids_converted);
-					FREE_ZVAL(ids_converted);
-				}
-				return FAILURE;
-		}
-		idsf_len += fld_len+6; /* field name + '=' + ' AND ' */
+	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
+		goto cleanup;
 	}
 
-	if (idsv_len == 1 || idsf_len == 1) {
-		if (convert) {
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		return FAILURE;
-	}
-	
-	ids = (char *)emalloc(idsf_len + idsv_len);
-	if (ids == NULL) {
-		if (convert) {
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	ids_pos = ids;
+	smart_str_appends(&querystr, "DELETE FROM ");
+	smart_str_appends(&querystr, table);
+	smart_str_appends(&querystr, " WHERE ");
 
-	query = (char *)emalloc(strlen(query_tpl)+strlen(table)+idsf_len+idsv_len);
-	if (query == NULL) {
-		if (convert) {
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		efree(ids);
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	/* make values and ids string */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ids_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(ids_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(ids_array), &pos)) {
-		 key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(ids_array), &fld, &fld_len, &num_idx, 0, &pos);		
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(ids_converted);			
-				FREE_ZVAL(ids_converted);
-			}
-			efree(ids);
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		memcpy(ids_pos, fld, fld_len-1);
-		ids_pos += fld_len-1;
-		*ids_pos = '=';
-		ids_pos++;
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				memcpy(ids_pos, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-				ids_pos += Z_STRLEN_PP(val);
-				break;
-			case IS_LONG:
-				sprintf(buf, "%ld", Z_LVAL_PP(val));
-				memcpy(ids_pos, buf, strlen(buf));
-				ids_pos += strlen(buf);
-				break;
-			case IS_DOUBLE:
-				sprintf(buf, "%f", Z_DVAL_PP(val));
-				memcpy(ids_pos, buf, strlen(buf));
-				ids_pos += strlen(buf);
-				break;
-			default:
-				/* should not happen */
-				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-		}
-		memcpy(ids_pos, " AND ", 5);
-		ids_pos += 5;
-	}
-	ids_pos -= 5;
-	*ids_pos = '\0';
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
+		goto cleanup;
+
+	smart_str_appendc(&querystr, ';');	
+
+	if (do_exec(&querystr, PGRES_TUPLES_OK, pg_link, async) == 0)
+		ret = SUCCESS;
+
+cleanup:
 	if (convert) {
 		zval_dtor(ids_converted);			
 		FREE_ZVAL(ids_converted);
 	}
-
-	sprintf(query, query_tpl, table, ids);
-	efree(ids);
-	if (async) {
-		if (!PQsendQuery(pg_link, query)) {
-			ret = FAILURE;
-		}
-	}
-	else {
-		PGresult *pg_result;
-		pg_result = PQexec(pg_link, query);
-		if (PQresultStatus(pg_result) != PGRES_TUPLES_OK) {
-			ret = FAILURE;
-			php_error(E_NOTICE, "%s() failed to update '%s'",
-				  get_active_function_name(TSRMLS_C), query);
-			PQclear(pg_result);
-		}
-	}
-	efree(query);
+	smart_str_free(&querystr);
 	return ret;
 }
 /* }}} */
@@ -4665,14 +4298,10 @@ PHPAPI int php_pgsql_result2array(PGresult *pg_result, zval *ret_array TSRMLS_DC
  */
 PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array, zval *ret_array, zend_bool convert TSRMLS_DC) 
 {
-	zval **val, *ids_converted = NULL;
-	char *query_tpl = "SELECT * FROM %s WHERE %s;";
-	char *query, *ids, *ids_pos, *fld, buf[256];
-	size_t idsf_len = 1, idsv_len = 1, fld_len;
-	int key_type, ret = SUCCESS;
+	zval *ids_converted = NULL;
+	smart_str querystr = {0};
+	int ret = FAILURE;
 	PGresult *pg_result;
-	ulong num_idx;
-	HashPosition pos;
 
 	assert(pg_link != NULL);
 	assert(table != NULL);
@@ -4684,143 +4313,39 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
 		if (php_pgsql_convert(pg_link, table, ids_array, ids_converted TSRMLS_CC) == FAILURE) {
-			zval_dtor(ids_converted);			
-			FREE_ZVAL(ids_converted);
-			return FAILURE;
+			goto cleanup;
 		}
 		ids_array = ids_converted;
 	}
 
-	/* compute length */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ids_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(ids_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(ids_array), &pos)) {
-		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(ids_array), &fld, &fld_len, &num_idx, 0, &pos);
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(ids_converted);
-				FREE_ZVAL(ids_converted);
-			}
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				idsv_len += Z_STRLEN_PP(val)+1;
-				break;
-			case IS_LONG:
-				idsv_len += PGSQL_MAX_LENGTH_OF_LONG+1;
-				break;
-			case IS_DOUBLE:
-				idsv_len += PGSQL_MAX_LENGTH_OF_DOUBLE+1;
-				break;
-			default:
-				php_error(E_NOTICE, "%s() expects scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-				if (convert) {
-					zval_dtor(ids_converted);
-					FREE_ZVAL(ids_converted);
-				}
-				return FAILURE;
-		}
-		idsf_len += fld_len+6; /* field name + '=' + ' AND ' */
+	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
+		goto cleanup;
 	}
 
-	if (idsv_len == 1 || idsf_len == 1) {
-		if (convert) {
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		return FAILURE;
+	smart_str_appends(&querystr, "SELECT * FROM ");
+	smart_str_appends(&querystr, table);
+	smart_str_appends(&querystr, " WHERE ");
+
+	if (build_assignment_string(&querystr, Z_ARRVAL_P(ids_array), " AND ", sizeof(" AND ")-1 TSRMLS_CC))
+		goto cleanup;
+
+	smart_str_appendc(&querystr, ';');
+
+	pg_result = PQexec(pg_link, querystr.c);
+	if (PQresultStatus(pg_result) == PGRES_TUPLES_OK) {
+		ret = php_pgsql_result2array(pg_result, ret_array TSRMLS_CC);
+	} else {
+		php_error(E_NOTICE, "%s() failed to execute '%s'",
+				  get_active_function_name(TSRMLS_C), querystr.c);
+		PQclear(pg_result);
 	}
 	
-	ids = (char *)emalloc(idsf_len + idsv_len);
-	if (ids == NULL) {
-		if (convert) {
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	ids_pos = ids;
-
-	query = (char *)emalloc(strlen(query_tpl)+strlen(table)+idsf_len+idsv_len);
-	if (query == NULL) {
-		if (convert) {
-			zval_dtor(ids_converted);
-			FREE_ZVAL(ids_converted);
-		}
-		efree(ids);
-		php_error(E_WARNING, "%s() cannot allocate memory",
-				  get_active_function_name(TSRMLS_C));
-		return FAILURE;
-	}
-	/* make values and ids string */
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ids_array), &pos);
-		 zend_hash_get_current_data_ex(Z_ARRVAL_P(ids_array), (void **)&val, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(Z_ARRVAL_P(ids_array), &pos)) {
-		 key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(ids_array), &fld, &fld_len, &num_idx, 0, &pos);		
-		if (key_type == HASH_KEY_IS_LONG) {
-			if (convert) {
-				zval_dtor(ids_converted);			
-				FREE_ZVAL(ids_converted);
-			}
-			efree(ids);
-			php_error(E_NOTICE,"%s() expects associative array for values to be inserted",
-					  get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
-		memcpy(ids_pos, fld, fld_len-1);
-		ids_pos += fld_len-1;
-		*ids_pos = '=';
-		ids_pos++;
-		switch(Z_TYPE_PP(val)) {
-			case IS_STRING:
-				memcpy(ids_pos, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-				ids_pos += Z_STRLEN_PP(val);
-				break;
-			case IS_LONG:
-				sprintf(buf, "%ld", Z_LVAL_PP(val));
-				memcpy(ids_pos, buf, strlen(buf));
-				ids_pos += strlen(buf);
-				break;
-			case IS_DOUBLE:
-				sprintf(buf, "%f", Z_DVAL_PP(val));
-				memcpy(ids_pos, buf, strlen(buf));
-				ids_pos += strlen(buf);
-				break;
-			default:
-				/* should not happen */
-				php_error(E_NOTICE, "%s() expect scaler values other than null. Need to convert?",
-						  get_active_function_name(TSRMLS_C));
-		}
-		memcpy(ids_pos, " AND ", 5);
-		ids_pos += 5;
-	}
-	ids_pos -= 5;
-	*ids_pos = '\0';
+cleanup:
 	if (convert) {
 		zval_dtor(ids_converted);			
 		FREE_ZVAL(ids_converted);
 	}
-
-	sprintf(query, query_tpl, table, ids);
-	efree(ids);
-	pg_result = PQexec(pg_link, query);
-	if (PQresultStatus(pg_result) != PGRES_TUPLES_OK) {
-		ret = FAILURE;
-		php_error(E_NOTICE, "%s() failed to update '%s'",
-				  get_active_function_name(TSRMLS_C), query);
-		PQclear(pg_result);
-	}
-	efree(query);
-	
-	if (ret == SUCCESS) {
-		ret = php_pgsql_result2array(pg_result, ret_array TSRMLS_CC);
-	}
+	smart_str_free(&querystr);
 	return ret;
 }
 /* }}} */
