@@ -44,6 +44,12 @@ function catchit($err)
     echo "Caught error: " . $err->getMessage() . "\n";
 }
 
+echo "Test static:\n";
+echo "Simple: ";
+PEAR_Common::downloadHttp('http://test.pear.php.net/testdownload.tgz', $ui, $temp_path);
+$firstone = implode('', file(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testdownload.tgz'));
+$secondone = implode('', file($temp_path . DIRECTORY_SEPARATOR . 'testdownload.tgz'));
+echo ($firstone == $secondone) ? "passed\n" : "failed\n";
 cleanall($temp_path);
 
 // ------------------------------------------------------------------------- //
@@ -68,3 +74,5 @@ function cleanall($dir)
 --GET--
 --POST--
 --EXPECT--
+Test static:
+Simple: passed
