@@ -92,7 +92,14 @@ extern zend_module_entry tidy_module_entry;
     }
 
 
+/* This is necessary, as apparently some Win32 compilers aren't C99
+   compliant. When that isn't the case we can't use variable arg preprocessor
+   macros and need to instead call a wrapper function */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__  >= 199901L
 #define TIDY_THROW(...) zend_throw_exception_ex(tidy_ce_exception, 0 TSRMLS_CC, __VA_ARGS__)
+#else
+#define TIDY_THROW _php_tidy_throw_exception
+#endif
 
 #define TIDY_NODE_METHOD(name)    PHP_FUNCTION(tnm_ ##name)
 #define TIDY_NODE_ME(name, param)      TIDY_METHOD_MAP(name, tnm_ ##name, param)
