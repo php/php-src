@@ -124,9 +124,9 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 	return SUCCESS;
 }
 
-/* {{{ proto double diskfreespace(string path)
-   Get free diskspace for filesystem that path is on */
-PHP_FUNCTION(diskfreespace)
+/* {{{ proto double disk_free_space(string path)
+   Get free disk space for filesystem that path is on */
+PHP_FUNCTION(disk_free_space)
 {
 	pval **path;
 #ifdef WINDOWS

@@ -505,7 +505,8 @@ function_entry basic_functions[] = {
 	PHP_FE(chmod,					NULL)
 	PHP_FE(touch,					NULL)
 	PHP_FE(clearstatcache,			NULL)
-	PHP_FE(diskfreespace,			NULL)
+	PHP_FE(disk_free_space,			NULL)
+	PHP_FALIAS(diskfreespace,	disk_free_space,	NULL)
 
 	/* functions from mail.c */
 #ifdef HAVE_SENDMAIL
