@@ -240,8 +240,8 @@ STATUS:              Experimental
 EXTENSION:           exif
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Working/Experimental
-COMMENT:			 Thumbnails disabled, extending functionality, Core working
+STATUS:              Working
+SINCE:               4.2
 -------------------------------------------------------------------------------
 EXTENSION:           fdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
