@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# $Id$
+
+dir=$1; shift
+for stubfile in $dir/*/config0.m4 $dir/*/config.m4 $dir/*/config9.m4; do
+    echo "sinclude($stubfile)"
+done
