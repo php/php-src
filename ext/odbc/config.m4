@@ -150,6 +150,7 @@ AC_ARG_WITH(ibm-db2,
         ODBC_LIBDIR=$withval/lib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LFLAGS=-L$(ODBC_LIBDIR)
     ODBC_TYPE=db2
     ODBC_LIBS="-ldb2"
     AC_DEFINE(HAVE_IBMDB2,1,[ ])
