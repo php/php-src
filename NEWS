@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27717 (Test Failures when compiled on 64-bit mode). (Ard, Derick)
 - Fixed bug #27664 (--disable-cli doesn't force --without-pear). (Ilia)
 - Fixed bug #27663 (compile failure with cURL 7.11.1). (Ilia)
+- Fixed bug #27646 (Cannot serialize/unserialize non-finite numeric values).
+  (Marcus)
 
 26 Mar 2004, Version 4.3.5
 - Fixed possible crash using an invalid color index with a palette image in
