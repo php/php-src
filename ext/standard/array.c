@@ -1864,7 +1864,7 @@ PHP_FUNCTION(array_pad)
 /* }}} */
 
 /* {{{ proto array array_flip(array input)
-   Return array with key <-> value flipped. */
+   Return array with key <-> value flipped */
 PHP_FUNCTION(array_flip)
 {
 	zval **array, **entry, *data;
