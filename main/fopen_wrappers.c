@@ -442,8 +442,8 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	char *scratch;
 	unsigned char *tmp;
 
-	char tmp_line[256];
-	char location[256];
+	char tmp_line[513];
+	char location[513];
 	int chptr = 0;
 	char *tpath, *ttpath;
 	int body = 0;
@@ -769,7 +769,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 
 		/* set up the passive connection */
 		SOCK_WRITE("PASV\n", *socketd);
-		while (SOCK_FGETS(tmp_line, 256, *socketd) &&
+		while (SOCK_FGETS(tmp_line, sizeof(tmp_line), *socketd) &&
 			!(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
 			  isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
 
@@ -930,9 +930,9 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 
 int _php3_getftpresult(int socketd)
 {
-	char tmp_line[256];
+	char tmp_line[513];
 
-	while (SOCK_FGETS(tmp_line, 256, socketd) &&
+	while (SOCK_FGETS(tmp_line, sizeof(tmp_line), socketd) &&
 		   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
 			 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
 
