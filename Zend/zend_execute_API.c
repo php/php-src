@@ -583,20 +583,17 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				EX(object) =  *fci->object_pp;
 			} else if (Z_TYPE_PP(fci->object_pp) == IS_STRING) {
 				zend_class_entry **ce;
-				char *lc_class;
 				int found = FAILURE;
 
-				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp));
-				if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
+				if (EG(active_op_array) && strcmp(Z_STRVAL_PP(fci->object_pp), "self") == 0) {
 					ce = &(EG(active_op_array)->scope);
 					found = (*ce != NULL?SUCCESS:FAILURE);
-				} else if (strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+				} else if (strcmp(Z_STRVAL_PP(fci->object_pp), "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
 					ce = &(EG(active_op_array)->scope->parent);
 					found = (*ce != NULL?SUCCESS:FAILURE);
 				} else {
-					found = zend_lookup_class(lc_class, Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
+					found = zend_lookup_class(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
 				}
-				efree(lc_class);
 				if (found == FAILURE)
 					return FAILURE;
 
@@ -782,8 +779,13 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	zval class_name, *class_name_ptr = &class_name;
 	zval *retval_ptr;
 	int retval;
+	char *lc_name;
 
-	if (zend_hash_find(EG(class_table), name, name_length+1, (void **) ce) == SUCCESS) {
+	lc_name = do_alloca(name_length + 1);
+	zend_str_tolower_copy(lc_name, name, name_length+1);
+
+	if (zend_hash_find(EG(class_table), lc_name, name_length+1, (void **) ce) == SUCCESS) {
+		free_alloca(lc_name);
 		return SUCCESS;
 	}
 
@@ -797,17 +799,21 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
 
 	if (retval == FAILURE) {
+		free_alloca(lc_name);
 		return FAILURE;
 	}
 
 	if (EG(exception)) {
+		free_alloca(lc_name);
 		zend_error(E_ERROR, "__autoload threw an exception");
 	}
 
 	/* If an exception is thrown retval_ptr will be NULL but we bailout before we reach this point */
 	zval_ptr_dtor(&retval_ptr);
 
-	return zend_hash_find(EG(class_table), name, name_length + 1, (void **) ce);
+	retval = zend_hash_find(EG(class_table), lc_name, name_length + 1, (void **) ce);
+	free_alloca(lc_name);
+	return retval;
 }
 
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC)
