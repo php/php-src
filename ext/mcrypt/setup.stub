@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-mcrypt 'mcrypt support?' yesnodir no \
-'    Whether to build the mcrypt extension.'
-	

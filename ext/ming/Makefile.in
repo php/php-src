@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libming.la
-LTLIBRARY_SOURCES     = ming.c
-LTLIBRARY_SHARED_NAME = ming.la
-LTLIBRARY_SHARED_LIBADD	= $(MING_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libiconv.la
-LTLIBRARY_SOURCES     = iconv.c
-LTLIBRARY_SHARED_NAME = iconv.la
-LTLIBRARY_SHARED_LIBADD  = $(ICONV_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

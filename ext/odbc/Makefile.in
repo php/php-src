@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libodbc.la
-LTLIBRARY_SOURCES = php_odbc.c 
-LTLIBRARY_SHARED_NAME      = odbc.la
-LTLIBRARY_SHARED_LIBADD    = $(ODBC_LFLAGS) $(ODBC_LIBS)
-
-include $(top_srcdir)/build/dynlib.mk
