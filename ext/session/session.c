@@ -544,6 +544,9 @@ int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 
 int php_minit_session(INIT_FUNC_ARGS)
 {
+#ifdef ZTS
+	ps_globals_id = ts_allocate_id(sizeof(php_ps_globals), NULL, NULL);
+#endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
