@@ -434,6 +434,9 @@ static void php_apache_request_dtor(ap_filter_t *f TSRMLS_DC)
 	if (SG(request_info).request_uri) {
 		free(SG(request_info).request_uri);
 	}
+	if (SG(request_info).path_translated) {
+		free(SG(request_info).path_translated);
+	}
 }
 
 static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
