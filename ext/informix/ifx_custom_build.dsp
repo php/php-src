@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="ifx_custom_build" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 5.00
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -17,16 +17,16 @@ CFG=ifx_custom_build - Win32 Release
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "ifx_custom_build - Win32 Release" (based on\
- "Win32 (x86) Static Library")
-!MESSAGE "ifx_custom_build - Win32 Debug" (based on\
- "Win32 (x86) Static Library")
+!MESSAGE "ifx_custom_build - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "ifx_custom_build - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
+# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+RSC=rc.exe
 
 !IF  "$(CFG)" == "ifx_custom_build - Win32 Release"
 
@@ -40,11 +40,10 @@ CPP=cl.exe
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -64,11 +63,10 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-RSC=rc.exe
-# ADD BASE RSC /l 0x409
-# ADD RSC /l 0x409 /i "c:\include"
 # ADD BASE CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409 /i "c:\include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -92,7 +90,7 @@ SOURCE=.\ifx.ec
 InputPath=.\ifx.ec
 
 "ifx.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	esql.exe -dcmdl -p -G -subsystem:windows -thread -I..\.. ifx.ec
+	esql.exe -dcmdl -p -G -subsystem:windows -thread -I..\..\main ifx.ec
 
 # End Custom Build
 
