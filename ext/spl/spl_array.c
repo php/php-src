@@ -370,7 +370,7 @@ static zend_class_entry *spl_array_it_get_ce(zval *object TSRMLS_DC)
 /* }}} */
 
 /* {{{ spl_array_read_dimension */
-zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
+static zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	zval **retval;
@@ -408,7 +408,7 @@ zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
 /* }}} */
 
 /* {{{ spl_array_write_dimension */
-void spl_array_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
+static void spl_array_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	long index;
@@ -435,8 +435,40 @@ void spl_array_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC
 }
 /* }}} */
 
-/* {{{*/
-HashTable *spl_array_get_properties(zval *object TSRMLS_DC)
+/* {{{ spl_array_unset_dimension */
+static void spl_array_unset_dimension(zval *object, zval *offset TSRMLS_DC)
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	long index;
+
+	switch(Z_TYPE_P(offset)) {
+	case IS_STRING:
+		if (zend_symtable_del(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
+			zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+		}
+		return;
+	case IS_DOUBLE:
+	case IS_RESOURCE:
+	case IS_BOOL: 
+	case IS_LONG: 
+		if (offset->type == IS_DOUBLE) {
+			index = (long)Z_DVAL_P(offset);
+		} else {
+			index = Z_LVAL_P(offset);
+		}
+		if (zend_hash_index_del(HASH_OF(intern->array), index) == FAILURE) {
+			zend_error(E_NOTICE,"Undefined offset:  %d", Z_LVAL_P(offset));
+		}
+		return;
+	default:
+		zend_error(E_WARNING, "Illegal offset type");
+		return;
+	}
+}
+/* }}} */
+
+/* {{{ spl_array_get_properties */
+static HashTable *spl_array_get_properties(zval *object TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -454,6 +486,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_array_handlers.get_class_entry = spl_array_get_ce;
 	spl_array_handlers.read_dimension = spl_array_read_dimension;
 	spl_array_handlers.write_dimension = spl_array_write_dimension;
+	spl_array_handlers.unset_dimension = spl_array_unset_dimension;
 	spl_array_handlers.get_properties = spl_array_get_properties;
 
 	REGISTER_SPL_STD_CLASS_EX(array_it, spl_array_object_new, spl_array_it_class_functions);
