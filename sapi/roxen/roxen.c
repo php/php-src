@@ -593,19 +593,6 @@ static int php_roxen_module_main(SLS_D)
 #endif
 #endif
 
-#ifdef VIRTUAL_DIR
-  /* Change virtual directory, if the feature is enabled */
-  dir = malloc(len = strlen(THIS->filename));
-  strcpy(dir, THIS->filename);
-  while(--len >= 0 && dir[len] != '/')
-    ;
-  if(len > 0) {
-    dir[len] = '\0';
-  }
-  V_CHDIR(dir);
-  free(dir);
-#endif
-
   file_handle.type = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename;
   file_handle.free_filename = 0;

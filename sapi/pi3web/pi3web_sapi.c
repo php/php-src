@@ -24,9 +24,6 @@
 
 #if WIN32|WINNT
 #  include <windows.h>
-#  define PATH_DELIMITER '\\'
-#else
-#  define PATH_DELIMITER '/'
 #endif
 
 #include "pi3web_sapi.h"
@@ -309,8 +306,8 @@ static sapi_module_struct sapi_module = {
 
 static void init_request_info(sapi_globals_struct *sapi_globals, LPCONTROL_BLOCK lpCB)
 {
-	char *path_end = strrchr(lpCB->lpszFileName, PATH_DELIMITER);
-	if ( path_end ) *path_end = PATH_DELIMITER;
+	char *path_end = strrchr(lpCB->lpszFileName, PHP_SEPARATOR);
+	if ( path_end ) *path_end = PHP_SEPARATOR;
 
 	SG(server_context) = lpCB;
 	SG(request_info).request_method  = lpCB->lpszMethod;
@@ -384,20 +381,12 @@ static void hash_pi3web_variables(ELS_D SLS_DC)
 DWORD fnWrapperProc(LPCONTROL_BLOCK lpCB)
 {
 	zend_file_handle file_handle;
-	char *path_end;
 	SLS_FETCH();
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 
 	if (setjmp( EG(bailout)) != 0 ) return PIAPI_ERROR;
-
-	path_end = strrchr( lpCB->lpszFileName, PATH_DELIMITER );
-	if ( path_end )	{
-		*path_end = 0;
-		chdir( lpCB->lpszFileName );
-		*path_end = PATH_DELIMITER;
-	};
 
 	file_handle.filename = lpCB->lpszFileName;
 	file_handle.free_filename = 0;
