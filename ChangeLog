@@ -1,3 +1,55 @@
+2000-07-15  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/recode/php_recode.h
+      ext/recode/recode.c: Some cosmetic changes.
+
+2000-07-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h: fixed uninitilized var in ZTS mode.
+
+2000-07-15  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/posix/php_posix.h
+      ext/posix/posix.c: Some cosmetic changes.
+
+2000-07-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/php_oracle.h
+      ext/oracle/oracle.c:
+    - You can now call Ora_Error() without prameters to get the reason
+      for a failed connection attempt. (Kirill Maximov)
+
+2000-07-15  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/domxml/php_domxml.c: Some cosmetic changes.
+
+2000-07-15  David Croft  <david@infotrek.co.uk>
+
+    * ext/pfpro/.cvsignore:
+    * ext/pfpro/config.m4
+      ext/pfpro/pfpro.c
+      ext/pfpro/php_pfpro.h:
+    merged changes from Signio module by John Donagher <john@webmeta.com>
+
+    * tests/testpfpro.php
+      ext/pfpro/test.php: test file for pfpro
+
+2000-07-15  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: .
+
+2000-07-15  David Croft  <david@infotrek.co.uk>
+
+    * MAINTAINERS
+      ext/pfpro/Makefile.in
+      ext/pfpro/config.m4
+      ext/pfpro/pfpro.c
+      ext/pfpro/php_pfpro.h
+      ext/pfpro/test.output
+      ext/pfpro/test.php:    New extension pfpro to interface with Signio Payflow Pro library for
+    credit card processing etc
+
 2000-07-14  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/gd/gd.c:
