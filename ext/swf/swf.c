@@ -151,6 +151,7 @@ PHP_MINIT_FUNCTION(swf)
 
 PHP_RINIT_FUNCTION(swf)
 {
+	SWFLS_FETCH();
 	SWFG(use_file) = 0;
 
 	return SUCCESS;
