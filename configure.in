@@ -389,6 +389,7 @@ putenv \
 random \
 rand_r \
 regcomp \
+res_search \
 setitimer \
 setlocale \
 localeconv \
