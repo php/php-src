@@ -289,11 +289,6 @@ PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           crack
-MAINTENANCE:         Unknown
-STATUS:              Experimental
-SINCE:               4.0.5
--------------------------------------------------------------------------------
 EXTENSION:           ctype
 PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
 MAINTENANCE:         Maintained
@@ -353,11 +348,6 @@ STATUS:              Working
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           mcal
-PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>
-MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mcrypt
