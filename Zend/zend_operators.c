@@ -1450,6 +1450,12 @@ static void increment_string(zval *str)
 ZEND_API int increment_function(zval *op1)
 {
 	switch (op1->type) {
+		case IS_BOOL:
+			if (op1->value.lval) {
+				op1->type = IS_LONG;
+			}
+			op1->value.lval++;
+			break;
 		case IS_LONG:
 			if(op1->value.lval == LONG_MAX) {
 				/* switch to double */
@@ -1512,6 +1518,12 @@ ZEND_API int decrement_function(zval *op1)
 	double dval;
 	
 	switch (op1->type) {
+		case IS_BOOL:
+			if (!op1->value.lval) {
+				op1->type = IS_LONG;
+			}
+			op1->value.lval--;
+			break;
 		case IS_LONG:
 			if(op1->value.lval == LONG_MIN) {
 				double d = (double)op1->value.lval;
