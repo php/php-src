@@ -1,3 +1,166 @@
+2003-02-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/streams/memory.c:
+      Removed unnecessary asserts
+
+    * ext/standard/filters.c:
+      Fixed string.strip_tags filter so it reflects the change on php_strip_tags
+
+    * ext/standard/file.c:
+      Made fgetss() binary safe too
+
+    * ext/standard/string.c:
+      Fixed possible buffer overflow of php_strip_tags
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+      Made strip_tags() binary safe
+
+2003-02-24  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/user_filters.c:
+      Initial re-implementation of userfilters after filterchain redesign by wez.
+       More userspace API to come.
+
+2003-02-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams/cast.c
+      main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      MFB: Bunch of streams related fixes.
+
+2003-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      Bug fixing news.
+
+    * ext/standard/mail.c:
+      Fixed bug #22355 (PHP would remove folding from Subject & To fields).
+
+2003-02-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug22367.phpt:
+      
+      Added test case for bug #22367
+
+    * ext/standard/reg.c:
+      Forgot to fix this part
+
+    * tests/lang/bug21600.phpt:
+      Fixed the test as the result is just considered to be expected
+
+    * (PHP_4_3)
+      ext/standard/reg.c:
+      MFH(r1.74): fixed an signed / unsigned issue
+
+    * ext/standard/reg.c:
+      Fixed a signed / unsigned issue.
+      
+
+2003-02-24  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      sapi/apache/config.m4:
+      MFH: Possible fix for #22259 + part 1/2 for fixing AIX DSO bug
+
+    * sapi/apache/config.m4:
+      Possible fix for #22259 + part 1/2 for fixing one AIX bug..
+
+2003-02-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/reg.c:
+      Style fix
+
+2003-02-24  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      tests/lang/bug21600.phpt
+      tests/lang/bug22231.phpt:
+      - Removing pointless tests. (both of these will be fixed in PHP 5)
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * acinclude.m4:
+      fix quotes
+
+2003-02-24  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c:
+      (possibly) fix Win32 builds of the Apache 2 filter
+
+2003-02-24  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/yp/yp.c:
+      "key" has to be zero-delimited
+
+    * scripts/ext_skel_ng/TODO
+      scripts/ext_skel_ng/dummy.gif
+      scripts/ext_skel_ng/ext_skel_ng.php
+      scripts/ext_skel_ng/extension.dtd
+      scripts/ext_skel_ng/extension.xml
+      scripts/ext_skel_ng/extension_parser.php
+      scripts/ext_skel_ng/php_function.php:
+      - code generation: resources and phpinfo logo
+      - duplicate code elimination for prototype parsing
+      - improved phpinfo block (incl. logo)
+      - some input error checking
+      - documentation generation for ini-directives, constants
+        and resources
+
+2003-02-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/informix/ifx.ec
+      ext/informix/ifx.ec:
+      no c++ comments
+
+2003-02-24  Corne' Cornelius  <cornec@reach.co.za>
+
+    * ext/informix/ifx.ec:
+      (PHP ifx_errormsg) Fixed Informix bug where ifx_errormsg() would Segfault
+                         on an unopened connecection and with an errorcode
+      supplied
+
+2003-02-24  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4:
+      Always use the libtool which is build in the top_builddir.
+
+    * ext/mhash/mhash.c
+      ext/mhash/php_mhash.h:
+      fix compile warning
+
+2003-02-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c
+      ext/standard/tests/file/bug22382.phpt
+      ext/standard/tests/file/test2.csv:
+      Fixed bug #22382 (fgetcsv did not handle \" correctly).
+
+2003-02-24  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c:
+      ws fix
+
+    * sapi/apache/mod_php4.c:
+      hopefully a fix for 19919
+
+2003-02-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/dns.h:
+      Extra paranoia checks if dn_skipname/dn_expand exist or not
+
 2003-02-23  Jani Taskinen  <sniper@iki.fi>
 
     * main/fopen_wrappers.c:

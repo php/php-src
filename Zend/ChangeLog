@@ -1,3 +1,27 @@
+2003-02-24  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      fix exception handling
+
+2003-02-24  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+      Add 'final'
+
+2003-02-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Remove obsolete not on redeclaring protected members.
+
+    * ZEND_CHANGES:
+      Leftover.
+
+    * ZEND_CHANGES:
+      Initial documentation of namespace {}.
+
 2003-02-23  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
