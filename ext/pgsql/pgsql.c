@@ -48,6 +48,8 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_cmdtuples,	NULL)
 	PHP_FE(pg_dbname,		NULL)
 	PHP_FE(pg_errormessage,	NULL)
+	PHP_FE(pg_trace,		NULL)
+	PHP_FE(pg_untrace,		NULL)
 	PHP_FE(pg_options,		NULL)
 	PHP_FE(pg_port,			NULL)
 	PHP_FE(pg_tty,			NULL)
@@ -1102,6 +1104,91 @@ PHP_FUNCTION(pg_getlastoid)
 #endif
 }
 /* }}} */
+
+
+/* {{{ proto bool pg_trace(string filename [, string mode [, resource connection]])
+   Enable tracing a PostgresSQL connection */
+PHP_FUNCTION(pg_trace)
+{
+	zval **z_filename, **z_mode, **z_pgsql_link;
+	int id = -1;
+	PGconn *pgsql;
+	char *mode = "w";
+	int issock, socketd;
+	FILE *fp;
+	PGLS_FETCH();
+
+	id = PGG(default_link);
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &z_filename)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &z_filename, &z_mode)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(z_mode);
+			mode = Z_STRVAL_PP(z_mode);
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &z_filename, &z_mode, &z_pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(z_mode);
+			mode = Z_STRVAL_PP(z_mode);
+			break;
+		default:
+			ZEND_WRONG_PARAM_COUNT();
+			break;
+	}
+		
+    ZEND_FETCH_RESOURCE2(pgsql, PGconn *, z_pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	convert_to_string_ex(z_filename);
+
+	fp = php_fopen_wrapper(Z_STRVAL_PP(z_filename), mode, ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
+
+	if (!fp) {
+		php_error(E_WARNING, "Unable to open %s for logging", Z_STRVAL_PP(z_filename));
+		RETURN_FALSE;
+	}
+	
+	PQtrace(pgsql, fp);
+	ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
+	RETURN_TRUE;
+}
+
+
+/* {{{ proto bool pg_untrace([int connection])
+   Disable tracing of a PostgreSQL connection */
+PHP_FUNCTION(pg_untrace)
+{
+	zval **pgsql_link;
+	int id = -1;
+	PGconn *pgsql;
+	PGLS_FETCH();
+
+	switch (ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			ZEND_WRONG_PARAM_COUNT();
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	PQuntrace(pgsql);
+	RETURN_TRUE;
+}
+
 
 /* {{{ proto int pg_locreate(int connection)
    Create a large object */

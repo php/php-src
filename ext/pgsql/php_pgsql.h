@@ -69,6 +69,8 @@ PHP_FUNCTION(pg_pconnect);
 PHP_FUNCTION(pg_close);
 PHP_FUNCTION(pg_dbname);
 PHP_FUNCTION(pg_errormessage);
+PHP_FUNCTION(pg_trace);
+PHP_FUNCTION(pg_untrace);
 PHP_FUNCTION(pg_options);
 PHP_FUNCTION(pg_port);
 PHP_FUNCTION(pg_tty);
