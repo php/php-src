@@ -63,6 +63,10 @@ static int tsrm_debug_status;
 /* Startup TSRM (call once for the entire process) */
 TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_status)
 {
+#if defined(GNUPTH)
+	pth_init();
+#endif
+
 	tsrm_tls_table_size = expected_threads;
 	tsrm_tls_table = (tsrm_tls_entry **) calloc(tsrm_tls_table_size, sizeof(tsrm_tls_entry *));
 	if (!tsrm_tls_table) {
@@ -116,6 +120,9 @@ TSRM_API void tsrm_shutdown(void)
 	}
 	tsrm_mutex_free(tsmm_mutex);
 	tsrm_debug("Shutdown TSRM\n");
+#if defined(GNUPTH)
+	pth_kill();
+#endif
 }
 
 
@@ -301,6 +308,8 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 {
 #ifdef WIN32
 	return GetCurrentThreadId();
+#elif defined(GNUPTH)
+	return pth_self();
 #elif defined(PTHREADS)
 	return pthread_self();
 #elif defined(NSAPI)
@@ -318,6 +327,9 @@ TSRM_API MUTEX_T tsrm_mutex_alloc( void )
 
 #ifdef WIN32
     mutexp = CreateMutex(NULL,FALSE,NULL);
+#elif defined(GNUPTH)
+	mutexp = (MUTEX_T) malloc(sizeof(*mutexp));
+	pth_mutex_init(mutexp);
 #elif defined(PTHREADS)
 	mutexp = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(mutexp,NULL);
@@ -339,8 +351,11 @@ TSRM_API void tsrm_mutex_free( MUTEX_T mutexp )
     if (mutexp) {
 #ifdef WIN32
 		CloseHandle(mutexp);
+#elif defined(GNUPTH)
+		free(mutexp);
 #elif defined(PTHREADS)
 		pthread_mutex_destroy(mutexp);
+		free(mutexp);
 #elif defined(NSAPI)
 		crit_terminate(mutexp);
 #elif defined(PI3WEB)
@@ -361,6 +376,8 @@ TSRM_API int tsrm_mutex_lock( MUTEX_T mutexp )
 #endif
 #ifdef WIN32
     return WaitForSingleObject(mutexp,1000);
+#elif defined(GNUPTH)
+	return pth_mutex_acquire(mutexp, 0, NULL);
 #elif defined(PTHREADS)
 	return pthread_mutex_lock(mutexp);
 #elif defined(NSAPI)
@@ -379,6 +396,8 @@ TSRM_API int tsrm_mutex_unlock( MUTEX_T mutexp )
 #endif
 #ifdef WIN32
     return ReleaseMutex(mutexp);
+#elif defined(GNUPTH)
+	return pth_mutex_release(mutexp);
 #elif defined(PTHREADS)
 	return pthread_mutex_unlock(mutexp);
 #elif defined(NSAPI)

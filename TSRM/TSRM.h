@@ -27,6 +27,8 @@
 
 #if WIN32||WINNT
 # include <windows.h>
+#elif defined(GNUPTH)
+# include <pth.h>
 #elif defined(PTHREADS)
 # include <pthread.h>
 #endif
@@ -48,6 +50,9 @@ typedef int ts_rsrc_id;
 #if defined(WIN32)
 # define THREAD_T DWORD
 # define MUTEX_T void *
+#elif defined(GNUPTH)
+# define THREAD_T pth_attr_t
+# define MUTEX_T pth_mutex_t *
 #elif defined(PTHREADS)
 # define THREAD_T pthread_t
 # define MUTEX_T pthread_mutex_t *
