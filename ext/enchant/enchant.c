@@ -237,6 +237,7 @@ PHP_MINFO_FUNCTION(enchant)
 	php_info_print_table_start();
 	enchant_broker_describe(pbroker, __enumerate_providers_fn, NULL);
 	php_info_print_table_end();
+	enchant_broker_free(pbroker);
 }
 /* }}} */
 
@@ -369,7 +370,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 }
 /* }}} */
 
-/* {{{ proto resource enchant_broker_request_pwl_dict(resource dict, string tag)
+/* {{{ proto resource enchant_broker_request_pwl_dict(resource dict, string filename)
    creates a dictionary using a PWL file. A PWL file is personal word file one word per line.
    It must exist before the call.*/
 PHP_FUNCTION(enchant_broker_request_pwl_dict)
@@ -383,6 +384,10 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &broker, &pwl, &pwllen) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -500,6 +505,9 @@ PHP_FUNCTION(enchant_broker_describe)
 }
 /* }}} */
 
+/* {{{ proto bool enchant_dict_quick_check(resource dict, string word [, array &suggestions])
+    If the word is correctly spelled return true, otherwise return false, if suggestions variable
+    is provided, fill it with spelling alternatives. */
 PHP_FUNCTION(enchant_dict_quick_check)
 {
 	zval *dict, *sugg = NULL;
@@ -541,8 +549,9 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
-/* {{{ proto long enchant_dict_check(resource broker)
+/* {{{ proto bool enchant_dict_check(resource dict, string word)
     If the word is correctly spelled return true, otherwise return false */
 PHP_FUNCTION(enchant_dict_check)
 {
@@ -561,7 +570,7 @@ PHP_FUNCTION(enchant_dict_check)
 }
 /* }}} */
 
-/* {{{ proto array enchant_dict_suggest(resource broker, string word)
+/* {{{ proto array enchant_dict_suggest(resource dict, string word)
     Will return a list of values if any of those pre-conditions are not met.*/
 PHP_FUNCTION(enchant_dict_suggest)
 {
@@ -586,13 +595,14 @@ PHP_FUNCTION(enchant_dict_suggest)
 		for (i = 0; i < n_sugg; i++) {
 			add_next_index_string(return_value, suggs[i], 1);
 		}
+
+		enchant_dict_free_suggestions(pdict->pdict, suggs);
 	}
-	enchant_dict_free_suggestions(pdict->pdict, suggs);
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_add_to_personal(resource broker)
-    A list of UTF-8 encoded suggestions, or false */
+/* {{{ proto void enchant_dict_add_to_personal(resource dict, string word)
+     add 'word' to personal word list */
 PHP_FUNCTION(enchant_dict_add_to_personal)
 {
 	zval *dict;
@@ -610,7 +620,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_add_to_session(resource broker, string word)
+/* {{{ proto void enchant_dict_add_to_session(resource dict, string word)
    add 'word' to this spell-checking session */
 PHP_FUNCTION(enchant_dict_add_to_session)
 {
@@ -629,7 +639,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto bool enchant_dict_is_in_session(resource broker)
+/* {{{ proto bool enchant_dict_is_in_session(resource dict, string word)
    whether or not 'word' exists in this spelling-session */
 PHP_FUNCTION(enchant_dict_is_in_session)
 {
@@ -648,7 +658,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
 }
 /* }}} */
 
-/* {{{ proto void enchant_dict_store_replacement(resource broker, string mis, string cor)
+/* {{{ proto void enchant_dict_store_replacement(resource dict, string mis, string cor)
 	add a correction for 'mis' using 'cor'.
 	Notes that you replaced @mis with @cor, so it's possibly more likely
 	that future occurrences of @mis will be replaced with @cor. So it might
