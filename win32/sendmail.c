@@ -652,7 +652,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		
 len = strlen(header_buffer);
 		if ((len > 4)&&(header_buffer[len-4]=='\r')) {
-			header_buffer[len-2]=='\0';
+			header_buffer[len-2]='\0';
 		}
 
 	}
