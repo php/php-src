@@ -181,7 +181,7 @@ PHP_FUNCTION(recode_file)
 		RETURN_FALSE;
 	}
 
-	if (!php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
+	if (FAILURE == php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
 	
@@ -191,7 +191,7 @@ PHP_FUNCTION(recode_file)
 		php_error(E_WARNING,"Unable to find output file identifier");
 		RETURN_FALSE;
 	}
-	if (!php_stream_cast(outstream, PHP_STREAM_AS_STDIO, (void**)&out_fp, REPORT_ERRORS))	{
+	if (FAILURE == php_stream_cast(outstream, PHP_STREAM_AS_STDIO, (void**)&out_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
 	

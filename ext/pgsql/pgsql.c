@@ -1478,7 +1478,7 @@ PHP_FUNCTION(pg_trace)
 		RETURN_FALSE;
 	}
 
-	if (!php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)fp, REPORT_ERRORS))	{
+	if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)fp, REPORT_ERRORS))	{
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
