@@ -418,9 +418,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
 	
 	if (zend_hash_find(EG(class_table), uwrap->classname, classname_len + 1, (void**)&uwrap->ce) == SUCCESS) {
-#ifdef ZEND_ENGINE_2
 		uwrap->ce = *(zend_class_entry**)uwrap->ce;
-#endif
 		if (php_register_url_stream_wrapper(protocol, &uwrap->wrapper TSRMLS_CC) == SUCCESS) {
 			RETURN_TRUE;
 		}
@@ -767,16 +765,29 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 	int call_result;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	int ret = -1;
-	zval *zvalue;
+	zval *zvalue = NULL;
 	zval **args[1];
 
-	MAKE_STD_ZVAL(zvalue);
-	ZVAL_LONG(zvalue, value);
-	args[0] = &zvalue;
-
 	switch (option) {
+	case PHP_STREAM_OPTION_CHECK_LIVENESS:
+		ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1, 0);
+		call_result = call_user_function_ex(NULL, &us->object, &func_name, &retval, 0, NULL, 0, NULL TSRMLS_CC);
+		if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_BOOL) {
+			ret = Z_LVAL_P(retval) ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+		} else {
+			ret = PHP_STREAM_OPTION_RETURN_ERR;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
+					us->wrapper->classname);
+		}
+		break;
+
 	case PHP_STREAM_OPTION_LOCKING:
-		// TODO wouldblock
+		MAKE_STD_ZVAL(zvalue);
+		ZVAL_LONG(zvalue, value);
+		args[0] = &zvalue;
+		
+		/* TODO wouldblock */
 		ZVAL_STRINGL(&func_name, USERSTREAM_LOCK, sizeof(USERSTREAM_LOCK)-1, 0);
 		
 		call_result = call_user_function_ex(NULL,
@@ -789,21 +800,26 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			ret = !Z_LVAL_P(retval);
 		} else if (call_result == FAILURE) {
 			if (value == 0) { 
-				ret = 0; // lock support test (TODO: more check)
+			   	/* lock support test (TODO: more check) */
+				ret = 0;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_LOCK " is not implemented!", 
 								 us->wrapper->classname);
 			}
 		}
 
-		if (retval)
-			zval_ptr_dtor(&retval);
-  
 		break;
 	}
 
 	/* clean up */
-	zval_ptr_dtor(&zvalue);
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+  
+
+	if (zvalue) {
+		zval_ptr_dtor(&zvalue);
+	}
 
 	return ret;
 }
