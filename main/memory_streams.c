@@ -40,7 +40,10 @@ typedef struct {
 	int			mode;
 } php_stream_memory_data;
 
-static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -73,9 +76,13 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 		ms->fpos += count;
 	}
 	return count;
-} /* }}} */
+}
+/* }}} */
 
-static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{	
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -100,10 +107,13 @@ static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count
 		ms->fpos += count;
 	}
 	return count;
-} /* }}} */
+}
+/* }}} */
 
 
-static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_DC) { /* {{{ */
+/* {{{ */
+static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_DC)
+{	
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -117,16 +127,21 @@ static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_D
 	ms->fsize = 0;
 	ms->fpos = 0;
 	return 0;
-} /* }}} */
+}
+/* }}} */
 
 
-static int php_stream_memory_flush(php_stream *stream TSRMLS_DC) { /* {{{ */
+/* {{{ */
+static int php_stream_memory_flush(php_stream *stream TSRMLS_DC) { 
 	/* nothing to do here */
 	return 0;
-} /* }}} */
+}
+/* }}} */
 
 
-static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC) { /* {{{ */
+/* {{{ */
+static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+{
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -176,9 +191,13 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 			return 0;
 			/*return EINVAL;*/
 	}
-} /* }}} */
+}
+/* }}} */
 
-static char *php_stream_memory_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static char *php_stream_memory_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
+{
 	size_t n = 1;
 	char *c = buf;
 
@@ -200,11 +219,17 @@ static char *php_stream_memory_gets(php_stream *stream, char *buf, size_t maxlen
 	}
 	*c = 0;
 	return buf;
-} /* }}} */
+}
+/* }}} */
 
-static int php_stream_memory_cast(php_stream *stream, int castas, void **ret TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static int php_stream_memory_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
+{ 
 	return FAILURE;
-} /* }}} */
+}
+/* }}} */
+
 
 php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_write, php_stream_memory_read,
@@ -215,7 +240,10 @@ php_stream_ops	php_stream_memory_ops = {
 	"MEMORY"
 };
 
-PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
+{
 	php_stream_memory_data *self;
 
 	self = emalloc(sizeof(*self));
@@ -226,10 +254,13 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC) { /*
 	self->smax = -1;
 	self->mode = mode;
 	return php_stream_alloc(&php_stream_memory_ops, self, 0, "rwb");
-} /* }}} */
+}
+/* }}} */
 
-PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length STREAMS_DC TSRMLS_DC) { /* {{{ */
-	php_stream *stream;
+
+/* {{{ */
+PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length STREAMS_DC TSRMLS_DC)
+{	php_stream *stream;
 	php_stream_memory_data *ms;
 
 	if ((stream = php_stream_memory_create_rel(TEMP_STREAM_DEFAULT)) != NULL) {
@@ -240,9 +271,13 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 		ms->mode = mode;
 	}
 	return stream;
-} /* }}} */
+}
+/* }}} */
 
-PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length STREAMS_DC TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length STREAMS_DC TSRMLS_DC)
+{ 
 	php_stream_memory_data *ms;
 
 	assert(stream != NULL);
@@ -252,9 +287,9 @@ PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length ST
 
 	*length = ms->fsize;
 	return ms->data;
-} /* }}} */
-
+}
 /* }}} */
+
 
 /* {{{ ------- TEMP stream implementation -------*/
 
@@ -264,7 +299,10 @@ typedef struct {
 	int			mode;
 } php_stream_temp_data;
 
-static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{ 
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -283,9 +321,13 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 		}
 	}
 	return php_stream_write(ts->innerstream, buf, count);
-} /* }}} */
+}
+/* }}} */
 
-static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{ 
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -293,10 +335,13 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count T
 	assert(ts != NULL);
 
 	return php_stream_read(ts->innerstream, buf, count);
-} /* }}} */
+}
+/* }}} */
 
 
-static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC) { /* {{{ */
+/* {{{ */
+static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -304,10 +349,13 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 	assert(ts != NULL);
 
 	return php_stream_close(ts->innerstream);
-} /* }}} */
+}
+/* }}} */
 
 
-static int php_stream_temp_flush(php_stream *stream TSRMLS_DC) { /* {{{ */
+/* {{{ */
+static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
+{ 
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -315,10 +363,13 @@ static int php_stream_temp_flush(php_stream *stream TSRMLS_DC) { /* {{{ */
 	assert(ts != NULL);
 
 	return php_stream_flush(ts->innerstream);
-} /* }}} */
+}
+/* }}} */
 
 
-static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC) { /* {{{ */
+/* {{{ */
+static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+{ 
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -326,9 +377,13 @@ static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence TSR
 	assert(ts != NULL);
 
 	return php_stream_seek(ts->innerstream, offset, whence);
-} /* }}} */
+}
+/* }}} */
 
-char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
+{ 
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -336,9 +391,13 @@ char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_D
 	assert(ts != NULL);
 
 	return php_stream_gets(ts->innerstream, buf, maxlen);
-} /* }}} */
+}
+/* }}} */
 
-static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
+{ 
 	php_stream_temp_data *ts;
 
 	assert(stream != NULL);
@@ -346,7 +405,8 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 	assert(ts != NULL);
 
 	return php_stream_cast(ts->innerstream, castas, ret, 0);
-} /* }}} */
+}
+/* }}} */
 
 php_stream_ops	php_stream_temp_ops = {
 	php_stream_temp_write, php_stream_temp_read,
@@ -357,7 +417,10 @@ php_stream_ops	php_stream_temp_ops = {
 	"TEMP"
 };
 
-PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+{ 
 	php_stream_temp_data *self;
 	php_stream *stream;
 
@@ -369,9 +432,13 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self->innerstream = php_stream_memory_create(mode);
 	php_stream_temp_write(stream, NULL, 0 TSRMLS_CC);
 	return stream;
-} /* }}} */
+}
+/* }}} */
 
-PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC) { /* {{{ */
+
+/* {{{ */
+PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
+{ 
 	php_stream *stream;
 	php_stream_temp_data *ms;
 
@@ -385,7 +452,8 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 		ms->mode = mode;
 	}
 	return stream;
-} /* }}} */
+}
+/* }}} */
 
 /*
  * Local variables:
