@@ -38,9 +38,6 @@
 #include <sys/utsname.h>
 #endif
 
-#ifdef PHP_ATOM_INC
-#include "php_have_iconv.h"
-#endif
 #if HAVE_ICONV
 #include "ext/iconv/php_iconv.h"
 ZEND_EXTERN_MODULE_GLOBALS(iconv)
