@@ -1,3 +1,79 @@
+2002-01-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+    Adding functions to get BLOB/CLOB size from a lob_handle.
+    Added descriptions on most protos
+
+2002-01-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/standard/array.c:
+    Fix the recursive counting, it was broken for associative or non-sequential
+    arrays. Also update NEWS file.
+
+2002-01-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c:
+    - Make an E_NOTICE error type show 'Notice' instead of 'Warning'.
+
+2002-01-10  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_mm.c: Fix startup crash
+
+2002-01-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/dio/dio.c: - Unified error messages.
+    - Improved argument handling in dio_fcntl().
+
+2002-01-10  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_mm.c: Revert last commit
+
+2002-01-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_mm.c: Improved code for handling PS(save_path)
+
+    Don't MFH before further testing
+
+    * ext/session/mod_mm.c: Ws fix
+
+    * ext/standard/filestat.c:
+    (PHP touch) Operate on a stack buffer.. no need for allocating newtime
+    on the heap.
+
+    * ext/standard/filestat.c:
+    Add three-parameter touch() which enables users to set
+    mtime/atime to different values.
+
+2002-01-10  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/dropdb.inc: Fix bug in test script
+
+    * ext/session/mod_mm.c: MFH
+
+    * ext/session/mod_mm.c: Make use of save_path for mm file.
+    Patch by Henning Schmiedehausen <hps@intermeta.de>
+    Closes bug 14808
+
+2002-01-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt:
+    Make these tests succeed with non-standard settings
+
+2002-01-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.h: - Fix compilation. (Christian Stocker)
+
+2002-01-10  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * header: Year update
+
+    * EXTENSIONS: shmop got a new maintainer
+
 2002-01-09  jim winstead  <jimw@apache.org>
 
     * ext/standard/tests/math/pow.phpt
