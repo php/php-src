@@ -4,6 +4,7 @@
 #include "zend.h"
 
 ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type);
+ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC);
 ZEND_API zend_object *zend_objects_get_address(zval *object);
 ZEND_API zend_object_value zend_objects_clone_obj(zval *object TSRMLS_DC);
 
