@@ -729,6 +729,7 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	xmlDoc *doc = (xmlDoc *) rsrc->ptr;
 
 	if (doc) {
+		node_list_wrapper_dtor(doc->children, 1 TSRMLS_CC);
 		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
@@ -5383,6 +5384,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	int ret, clone = 0;
 	char *filename;
 	int filename_len = 0;
+	FILE *f;
 
 	DOMXML_GET_THIS(idxsl);
 
@@ -5393,6 +5395,10 @@ PHP_FUNCTION(domxml_xslt_process)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|a!b!s!l", &idxml, &idparams, &xpath_params, &filename, &filename_len, &clone) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (filename_len && !(f = php_stream_open_wrapper_as_file(filename, "w", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL))) {
 		RETURN_FALSE;
 	}
 
@@ -5407,8 +5413,6 @@ PHP_FUNCTION(domxml_xslt_process)
 	}
 
 	if (filename_len) {
-		FILE *f;
-		f = fopen (filename,"w");
 		docp = xsltProfileStylesheet(xsltstp, xmldocp, (const char**)params, f);
 		fclose(f);
 	} else {
