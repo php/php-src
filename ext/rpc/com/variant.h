@@ -16,7 +16,7 @@
 									comval *obj;										\
 									ALLOC_COM(obj);										\
 									php_COM_set(obj, &V_DISPATCH(v), TRUE TSRMLS_CC);	\
-									ZVAL_LONG((z), zend_list_insert(obj, IS_COM));		\
+									ZVAL_RESOURCE((z), zend_list_insert(obj, IS_COM));		\
 								} else {												\
 									php_variant_to_pval((v), (z), codepage TSRMLS_CC);	\
 									FREE_VARIANT(v);									\
