@@ -751,8 +751,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			php_log_err(log_buffer TSRMLS_CC);
 			efree(log_buffer);
 		}
-		if (module_initialized && PG(display_errors)
-			&& (!PG(during_request_startup) || PG(display_startup_errors))) {
+		if (PG(display_errors)
+			&& ((!PG(during_request_startup) && PG(display_startup_errors)) || module_initialized)) {
 
 			if (PG(xmlrpc_errors)) {
 				php_printf("<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%s:%s in %s on line %d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number), error_type_str, buffer, error_filename, error_lineno);
