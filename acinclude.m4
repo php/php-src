@@ -535,7 +535,9 @@ dnl
 dnl add a library to the link line
 dnl
 AC_DEFUN(AC_ADD_LIBRARY,[
- if test "$1" != "c"; then
+ case "$1" in
+ c|c_r|pthread*) ;;
+ *)
 ifelse($3,,[
    AC_PHP_ONCE(LIBRARY, $1, [
      PHP_X_ADD_LIBRARY($1,$2,LIBS)
@@ -547,7 +549,8 @@ ifelse($3,,[
      AC_ADD_LIBRARY($1,$2)
    fi
 ])
-  fi
+  ;;
+  esac
 ])
 
 dnl
