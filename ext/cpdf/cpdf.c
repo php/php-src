@@ -426,6 +426,11 @@ PHP_FUNCTION(cpdf_open)
 		if(strcmp(Z_STRVAL_PP(arg2), "-") == 0)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.");
 #endif
+
+		if (php_check_open_basedir(Z_STRVAL_PP(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg2), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
+
 		cpdf_setOutputFilename(cpdf, Z_STRVAL_PP(arg2));
 	}
 	cpdf_init(cpdf);
@@ -776,6 +781,10 @@ PHP_FUNCTION(cpdf_set_font_map_file)
 
 	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string_ex(arg2);
+
+	if (php_check_open_basedir(Z_STRVAL_PP(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg2), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	cpdf_setFontMapFile(pdf, Z_STRVAL_PP(arg2));
 
@@ -1923,9 +1932,13 @@ PHP_FUNCTION(cpdf_save_to_file)
 	convert_to_string_ex(arg2);
 
 #if APACHE
-	if(strcmp(Z_STRVAL_P(arg2), "-") == 0)
+	if(strcmp(Z_STRVAL_PP(arg2), "-") == 0)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Use cpdf_output_buffer() instead.");
 #endif
+
+	if (php_check_open_basedir(Z_STRVAL_PP(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg2), "wb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
 
 	cpdf_savePDFmemoryStreamToFile(pdf, Z_STRVAL_PP(arg2));
 
@@ -1948,6 +1961,11 @@ PHP_FUNCTION(cpdf_import_jpeg)
 
 	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_string_ex(argv[1]);
+
+	if (php_check_open_basedir(Z_STRVAL_PP(argv[1]) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(argv[1]), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	convert_to_double_ex(argv[2]);
 	convert_to_double_ex(argv[3]);
 	convert_to_double_ex(argv[4]);

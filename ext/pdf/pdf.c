@@ -2335,6 +2335,11 @@ PHP_FUNCTION(pdf_open_file)
 	if (argc == 2) {
 		convert_to_string_ex(arg2);
 		filename = Z_STRVAL_PP(arg2);
+
+		if (php_check_open_basedir(filename TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(filename, "wb+", CHECKUID_CHECK_MODE_PARAM))) {
+			RETURN_FALSE;
+		}
+
 		pdf_file = PDF_open_file(pdf, filename);
 	} else {
 		/* open in memory */
