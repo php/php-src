@@ -116,6 +116,12 @@ safe_mode = Off
 ; then turn on safe_mode_gid.
 safe_mode_gid = Off
 
+; When safe_mode is on, UID/GID checks are bypassed when
+; including files from this directory and its subdirectories.
+; (directory must also be in include_path or full path must
+; be used when including)
+safe_mode_include_dir =								
+
 ; When safe_mode is on, only executables located in the safe_mode_exec_dir
 ; will be allowed to be executed via the exec family of functions.
 safe_mode_exec_dir =

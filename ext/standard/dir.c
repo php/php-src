@@ -282,7 +282,7 @@ PHP_FUNCTION(chdir)
 	}
 	convert_to_string_ex(arg);
 
-	if (PG(safe_mode) && !php_checkuid((*arg)->value.str.val, NULL, CHECKUID_ALLOW_ONLY_DIR)) {
+	if (PG(safe_mode) && !php_checkuid((*arg)->value.str.val, NULL, CHECKUID_ALLOW_ONLY_FILE)) {
 		RETURN_FALSE;
 	}
 	ret = VCWD_CHDIR((*arg)->value.str.val);

@@ -48,6 +48,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	struct stat sb;
 	int ret;
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
+	char path[MAXPATHLEN];
 	char *s;
 	PLS_FETCH();
 
@@ -71,8 +72,12 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		return 1;
 	}
 		
+	/* First we see if the file is owned by the same user...
+	 * If that fails, passthrough and check directory...
+	 */
 	if (mode != CHECKUID_ALLOW_ONLY_DIR) {
-		ret = VCWD_STAT(filename, &sb);
+		VCWD_REALPATH(filename, path);
+		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
 			if (mode == CHECKUID_DISALLOW_FILE_NOT_EXISTS) {
 				php_error(E_WARNING, "Unable to access %s", filename);
@@ -83,63 +88,67 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 			}
 		} else {
 			uid = sb.st_uid;
+			gid = sb.st_gid;
 			if (uid == php_getuid()) {
 				return 1;
+ 			} else if (PG(safe_mode_gid) && gid == php_getgid()) {
+ 				return 1;
 			}
 		}
-	}
-	s = strrchr(filename,'/');
 
-	/* This loop gets rid of trailing slashes which could otherwise be
-	 * used to confuse the function.
-	 */
-	while(s && *(s+1)=='\0' && s>filename) {
-		*s='\0';
-		s = strrchr(filename,'/');
-	}
+		/* Trim off filename */
+		if (s = strrchr(path,DEFAULT_SLASH)) {
+			*s = '\0';
+		}
+	} else { /* CHECKUID_ALLOW_ONLY_DIR */
+		s = strrchr(filename,DEFAULT_SLASH);
 
-	if (s) {
-		*s='\0';
-		ret = VCWD_STAT(filename, &sb);
-		*s='/';
+		if (s) {
+			*s = '\0';
+			VCWD_REALPATH(filename, path);
+			*s = DEFAULT_SLASH;
+		} else {
+			VCWD_GETCWD(path, MAXPATHLEN);
+ 		}
+	} /* end CHECKUID_ALLOW_ONLY_DIR */
+	
+	if (mode != CHECKUID_ALLOW_ONLY_FILE) {
+		/* check directory */
+		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
 			php_error(E_WARNING, "Unable to access %s", filename);
 			return 0;
 		}
 		duid = sb.st_uid;
-	} else {
-		char cwd[MAXPATHLEN];
-		if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
-			php_error(E_WARNING, "Unable to access current working directory");
-			return 0;
-		}
-		ret = VCWD_STAT(cwd, &sb);
-		if (ret < 0) {
-			php_error(E_WARNING, "Unable to access %s", cwd);
-			return 0;
-		}
-		duid = sb.st_uid;
-	}
-	if (duid == (uid=php_getuid())) {
-		return 1;
- 	} else if (PG(safe_mode_gid) && dgid == (gid=php_getgid())) {
- 		return 1;
-	} else {
-		SLS_FETCH();
+		dgid = sb.st_gid;
+		if (duid == php_getuid()) {
+			return 1;
+ 		} else if (PG(safe_mode_gid) && dgid == php_getgid()) {
+ 			return 1;
+		} else {
+			SLS_FETCH();
 
-		if (SG(rfc1867_uploaded_files)) {
-			if (zend_hash_exists(SG(rfc1867_uploaded_files), (char *) filename, strlen(filename)+1)) {
-				return 1;
+			if (SG(rfc1867_uploaded_files)) {
+				if (zend_hash_exists(SG(rfc1867_uploaded_files), (char *) filename, strlen(filename)+1)) {
+					return 1;
+				}
 			}
 		}
-
- 		if (PG(safe_mode_gid)) {
- 			php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", uid, gid, filename, duid, dgid);
- 		} else {
- 			php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", uid, filename, duid);
- 		}			
-		return 0;
 	}
+
+	if (mode == CHECKUID_ALLOW_ONLY_DIR) {
+		uid = duid;
+		gid = dgid;
+		if (s) {
+			*s = 0;
+		}
+	}
+	if (PG(safe_mode_gid)) {
+		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", php_getuid(), php_getgid(), filename, uid, gid);
+	} else {
+		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", php_getuid(), filename, uid);
+	}			
+	return 0;
 }
 
 

@@ -84,7 +84,12 @@ safe_mode		=	Off
 safe_mode_gid	=	Off								; By default, Safe Mode does a UID compare
 													; check when opening files. If you want to
 													; relax this to a GID compare, then turn on
-													; safe_mode_gid.
+													; safe_mode_gid. (safe_mode must be On)
+safe_mode_include_dir =								; When safe_mode is on, UID/GID checks are
+													; bypassed when including files from this
+													; directory and its subdirectories. (directory
+													; must also be in include_path or full path
+													; must be used when including)
 safe_mode_exec_dir	=
 safe_mode_allowed_env_vars = PHP_					; Setting certain environment variables
 													; may be a potential security breach.
