@@ -207,6 +207,7 @@ PHP_FUNCTION(odbc_field_name);
 PHP_FUNCTION(odbc_field_type);
 PHP_FUNCTION(odbc_field_num);
 PHP_FUNCTION(odbc_free_result);
+PHP_FUNCTION(odbc_next_result);
 PHP_FUNCTION(odbc_num_fields);
 PHP_FUNCTION(odbc_num_rows);
 PHP_FUNCTION(odbc_prepare);
