@@ -61,6 +61,7 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 	HashTable *myht = NULL;
 	char *class_name;
 	zend_uint class_name_len;
+	zend_class_entry *ce;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -99,9 +100,14 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 			return;
 		}
 
+		ce = Z_OBJCE(**struc);
+
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		
-		php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name,  Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
+		php_printf("%sobject(", COMMON);
+		if (ce->ns && ce->ns != &CG(global_namespace) && ce->ns->name) {
+			php_printf("%s::", ce->ns->name);
+		}
+		php_printf("%s)#%d (%d) {\n", class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0);
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
@@ -174,6 +180,7 @@ void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 	HashTable *myht = NULL;
 	char *class_name;
 	zend_uint class_name_len;
+	zend_class_entry *ce;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -203,8 +210,13 @@ void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 		goto head_done;
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
+		ce = Z_OBJCE(**struc);
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
-		php_printf("%sobject(%s)(%d) refcount(%u){\n", COMMON, class_name, myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
+		php_printf("%sobject(", COMMON);
+		if (ce->ns && ce->ns != &CG(global_namespace) && ce->ns->name) {
+			php_printf("%s::", ce->ns->name);
+		}
+		php_printf("%s)#%d (%d) refcount(%u){\n", class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
 head_done:
 		if (myht) {
 			zend_hash_apply_with_arguments(myht, (apply_func_args_t) zval_array_element_dump, 1, level);
