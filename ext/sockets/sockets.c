@@ -766,30 +766,28 @@ PHP_FUNCTION(socket_write)
 }
 /* }}} */
 
-typedef int (*read_func)(int, void *, size_t, int);
-
 /* {{{ proto string socket_read(resource socket, int length [, int type])
    Reads a maximum of length bytes from socket */
 PHP_FUNCTION(socket_read)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	read_func	read_function = (read_func) recv;
 	char		*tmpbuf;
 	int			retval, length, type = PHP_BINARY_READ;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &length, &type) == FAILURE)
 		return;
 
+	tmpbuf = emalloc(length + 1);
+	
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
 	if (type == PHP_NORMAL_READ) {
-		read_function = (read_func) php_read;
+		retval = php_read(php_sock->bsd_socket, tmpbuf, length, 0);
+	} else {
+		retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
 	}
 
-	tmpbuf = emalloc(length + 1);
-
-	retval = (*read_function)(php_sock->bsd_socket, tmpbuf, length, 0);
 	if (retval == -1) {
 		PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
 		efree(tmpbuf);
