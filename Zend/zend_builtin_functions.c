@@ -701,6 +701,12 @@ ZEND_FUNCTION(get_class_vars)
 				zval_copy_ctor(prop_copy);
 				INIT_PZVAL(prop_copy);
 	
+				/* this is necessary to make it able to work with default array 
+				* properties, returned to user */
+				if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || Z_TYPE_P(prop_copy) == IS_CONSTANT) {
+					zval_update_constant(&prop_copy, 0 TSRMLS_CC);
+				}
+                               
 				add_assoc_zval(return_value, prop_name, prop_copy);
 			}
 		}
