@@ -141,14 +141,18 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
-
-	if (H->server) {
-		mysql_close(H->server);
-		H->server = NULL;
-	}
-	if (H->einfo.errmsg) {
-		efree(H->einfo.errmsg);
-		H->einfo.errmsg = NULL;
+	
+	if (H) {
+		if (H->server) {
+			mysql_close(H->server);
+			H->server = NULL;
+		}
+		if (H->einfo.errmsg) {
+			efree(H->einfo.errmsg);
+			H->einfo.errmsg = NULL;
+		}
+		efree(H);
+		H = NULL;
 	}
 	return 0;
 }
