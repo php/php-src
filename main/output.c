@@ -534,24 +534,8 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 		result = result ? SUCCESS : FAILURE;
 	}
 	else if (output_handler && output_handler->type == IS_OBJECT) {
-		/* use __output_handler if only an object is given */
-		zval *object_method;
-
-		MAKE_STD_ZVAL(object_method);
-		if (array_init(object_method) != FAILURE) {
-			add_next_index_zval(object_method, output_handler);
-			add_next_index_string(object_method, "__output_handler", 1);
-			if (zend_is_callable(object_method, 1, &handler_name)) {
-				object_method->refcount++;
-				result = php_ob_init_named(initial_size, block_size, handler_name, object_method, chunk_size, erase TSRMLS_CC);
-				efree(handler_name);
-				result = result ? SUCCESS : FAILURE;
-			} else {
-				result = FAILURE;
-			}
-		} else {
-			result = FAILURE;
-		}
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No method name given: use ob_start(array($object,'method')) to specify instance $object and the name of a method of class %s to use as output handler", Z_OBJCE_P(output_handler)->name);
+		result = FAILURE;
 	}
 	else {
 		if (output_handler) {
