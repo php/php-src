@@ -1273,7 +1273,11 @@ void php3_gettype(INTERNAL_FUNCTION_PARAMETERS)
 		case IS_ARRAY:
 			RETVAL_STRING("array",1);
 			break;
-		case IS_OBJECT: {
+		case IS_OBJECT:
+			RETVAL_STRING("object",1);
+			break;
+			/*
+			{
 				char *result;
 				int res_len;
 				
@@ -1282,6 +1286,7 @@ void php3_gettype(INTERNAL_FUNCTION_PARAMETERS)
 				sprintf(result, "object of type %s", arg->value.obj.ce->name);
 				RETVAL_STRINGL(result, res_len, 0);
 			}
+			*/
 			break;
 		default:
 			RETVAL_STRING("unknown type",1);
