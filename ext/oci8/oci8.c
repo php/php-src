@@ -850,9 +850,9 @@ oci_handle_error(oci_connection *connection, ub4 errcode)
     	case 22:   /* ORA-00022 Invalid session id */
        	case 1012: /* ORA-01012: */
        	case 3113: /* ORA-03113: end-of-file on communication channel */
-        	connection->open = 0;
-           	connection->session->open = 0;
-           	connection->session->server->open = 0;
+        	connection->is_open = 0;
+           	connection->session->is_open = 0;
+           	connection->session->server->is_open = 0;
 			return 1; /* fatal error */
    	}
 
@@ -953,7 +953,7 @@ static oci_connection *oci_get_conn(zval **conn)
 
 	connection = (oci_connection *) zend_fetch_resource(conn, -1, "OCI8-Connection", NULL, 1, le_conn);
 
-	if (connection && connection->open) {
+	if (connection && connection->is_open) {
 		return connection;
 	} else {
 		return (oci_connection *) NULL;
@@ -969,7 +969,7 @@ static oci_statement *oci_get_stmt(zval **stmt)
 
 	statement = (oci_statement *) zend_fetch_resource(stmt, -1, "OCI8-Statement", NULL, 1, le_stmt);
 
-	if (statement && statement->conn->open) {
+	if (statement && statement->conn->is_open) {
 		return statement;
 	} else {
 		return (oci_statement *) NULL;
@@ -2006,7 +2006,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 		zend_hash_find(OCI(user), hashed_details, strlen(hashed_details)+1, (void **) &session);
 
 		if (session) {
-			if (session->open) {
+			if (session->is_open) {
 				if (persistent) {
 					session->persistent = 1;
 				}
@@ -2119,7 +2119,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	}
 
 	psession->num = zend_list_insert(psession,le_session);
- 	psession->open = 1;
+ 	psession->is_open = 1;
 
 	oci_debug("_oci_open_session new sess=%d user=%s",psession->num,username);
 
@@ -2152,7 +2152,7 @@ _oci_close_session(oci_session *session)
 
 	oci_debug("START _oci_close_session: logging-off sess=%d",session->num);
 
-	if (session->open) {
+	if (session->is_open) {
 		/* Temporary Service Context */
 		OCI(error) = 
 			OCIHandleAlloc(OCI(pEnv), 
@@ -2241,10 +2241,10 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 		/* XXX ini-flag */
 		/*
 		if (! oci_ping(pserver)) {
-			pserver->open = 0;
+			pserver->is_open = 0;
 		}
 		*/
-		if (pserver->open) {
+		if (pserver->is_open) {
 			/* if our new users uses this connection persistent, we're keeping it! */
 			if (persistent) {
 				pserver->persistent = persistent;
@@ -2288,7 +2288,7 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 					 (void**)&pserver);
 
 	pserver->num  = zend_list_insert(pserver,le_server);
-	pserver->open = 1;
+	pserver->is_open = 1;
 
 	oci_debug("_oci_open_server new conn=%d dname=%s",server->num,server->dbname);
 
@@ -2331,7 +2331,7 @@ static int _oci_session_cleanup(void *data)
 	list_entry *le = (list_entry *) data;
 	if (le->type == le_session) {
 		oci_server *server = ((oci_session*) le->ptr)->server;
-		if (server->open == 2) 
+		if (server->is_open == 2) 
 			return 1;
 	}
 	return 0;
@@ -2346,18 +2346,18 @@ _oci_close_server(oci_server *server)
 	OCILS_FETCH();
 	ELS_FETCH();
 
-	oldopen = server->open;
-	server->open = 2;
+	oldopen = server->is_open;
+	server->is_open = 2;
 	if (! OCI(shutdown)) {
 		zend_hash_apply(&EG(regular_list),_oci_session_cleanup);
 	}
-	server->open = oldopen;
+	server->is_open = oldopen;
 
 	oci_debug("START _oci_close_server: detaching conn=%d dbname=%s",server->num,server->dbname);
 
 	/* XXX close server here */
 
-	if (server->open) {
+	if (server->is_open) {
 		if (server->pServer && OCI(pError)) {
 			OCI(error) = 
 				OCIServerDetach(server->pServer,
@@ -2508,7 +2508,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	connection->id = zend_list_insert(connection, le_conn);
 
-	connection->open = 1;
+	connection->is_open = 1;
 
 	oci_debug("oci_do_connect: id=%d",connection->id);
 
@@ -3907,7 +3907,7 @@ PHP_FUNCTION(ocilogoff)
 
 	OCI_GET_CONN(connection,conn);
 
-	connection->open = 0;
+	connection->is_open = 0;
 
 	zend_hash_apply(list,(int (*)(void *))_stmt_cleanup);
 
