@@ -1,3 +1,8 @@
+2004-07-26  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_interfaces.c:
+      quick fix for #29382
+
 2004-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
