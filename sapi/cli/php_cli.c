@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stig Bakken <ssb@fast.no>                                   |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Author: Edin Kadribasic <edink@php.net>                              |
+   |         Parts based on CGI SAPI Module by                            |
+   |         Rasmus Lerdorf, Stig Bakken and Zeev Suraski                 |
    +----------------------------------------------------------------------+
 */
 
