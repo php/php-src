@@ -298,8 +298,6 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 				zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&wsdl) == SUCCESS) {
 				
 				char *ns = NULL, *value, *end;
-				smart_str *prefix = encode_new_ns();
-				smart_str smart_ns = {0};
 				xmlNsPtr myNs;
 				zval** el;
 
@@ -319,6 +317,25 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 				}
 				if(myNs != NULL) {
 					enc = get_encoder(SOAP_GLOBAL(sdl), myNs->href, value);
+					
+					if (strcmp(myNs->href,XSD_NAMESPACE) == 0) {
+						smart_str_appendl(&array_type_and_size, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
+						smart_str_appendc(&array_type_and_size, ':');
+					} else {
+						smart_str *prefix = encode_new_ns();
+						smart_str smart_ns = {0};
+
+						smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
+						smart_str_appendl(&smart_ns, prefix->c, prefix->len);
+						smart_str_0(&smart_ns);
+						xmlSetProp(xmlParam, smart_ns.c, myNs->href);
+						smart_str_free(&smart_ns);
+
+						smart_str_appends(&array_type_and_size, prefix->c);
+						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_free(prefix);
+						efree(prefix);
+					}
 				}
 
 				dims = emalloc(sizeof(int)*dimension);
@@ -335,14 +352,6 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 					}
 				}
 
-				smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
-				smart_str_appendl(&smart_ns, prefix->c, prefix->len);
-				smart_str_0(&smart_ns);
-				xmlSetProp(xmlParam, smart_ns.c, myNs->href);
-				smart_str_free(&smart_ns);
-
-				smart_str_appends(&array_type_and_size, prefix->c);
-				smart_str_appendc(&array_type_and_size, ':');
 				smart_str_appends(&array_type_and_size, value);
 				smart_str_appendc(&array_type_and_size, '[');
 				smart_str_append_long(&array_type_and_size, dims[0]);
@@ -353,8 +362,6 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 				smart_str_appendc(&array_type_and_size, ']');
 				smart_str_0(&array_type_and_size);
 
-				smart_str_free(prefix);
-				efree(prefix);
 				efree(value);
 				if (ns) efree(ns);
 			} else {
@@ -379,8 +386,8 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 		efree(dims);
 	}
 
-	if(style == SOAP_ENCODED)
-		set_ns_and_type_ex(xmlParam, type->namens, type->name);
+//	if(style == SOAP_ENCODED)
+//		set_ns_and_type_ex(xmlParam, type->namens, type->name);
 	return xmlParam;
 }
 
