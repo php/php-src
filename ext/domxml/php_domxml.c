@@ -1485,6 +1485,10 @@ PHP_FUNCTION(domxml_node_name)
 			str = "#comment";
 			break;
 
+		case XML_DOCUMENT_NODE:
+			str = "#document";
+			break;
+
 		case XML_DOCUMENT_FRAG_NODE:
 			str = "#document-fragment";
 			break;
