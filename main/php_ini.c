@@ -241,7 +241,11 @@ int php_init_config(char *php_ini_path_override)
 #endif
 		php_ini_search_path = (char *) emalloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
 		free_ini_search_path = 1;
-		sprintf(php_ini_search_path, ".%c%s%c%s", ZEND_PATHS_SEPARATOR, env_location, ZEND_PATHS_SEPARATOR, default_location);
+		if(env_location && env_location[0]) {
+			sprintf(php_ini_search_path, ".%c%s%c%s", ZEND_PATHS_SEPARATOR, env_location, ZEND_PATHS_SEPARATOR, default_location);
+		} else {
+			sprintf(php_ini_search_path, ".%c%s", ZEND_PATHS_SEPARATOR, default_location);
+		}
 		if (free_default_location) {
 			efree(default_location);
 		}
