@@ -1651,9 +1651,13 @@ do_fcall_common:
 				}
 				NEXT_OPCODE();
 			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAR_NO_REF:
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
 					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
-						goto send_by_ref;
+					if (opline->opcode==ZEND_SEND_VAR_NO_REF) {
+						zend_error(E_ERROR, "Only variables can be passed by reference");
+					}
+					goto send_by_ref;
 				}
 				{
 					zval *varptr;

@@ -537,6 +537,8 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_TICKS					105
 
+#define ZEND_SEND_VAR_NO_REF		106
+
 /* end of block */
 
 

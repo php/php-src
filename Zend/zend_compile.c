@@ -942,20 +942,19 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 		arg_types = NULL;
 	}
 
-	if (op == ZEND_SEND_VAL) {
+	if (op==ZEND_SEND_VAL) {
 		switch (param->op_type) {
 			case IS_CONST:	/* constants behave like variables when passed to functions,
 							 * as far as reference counting is concerned.  Treat them
 							 * as if they were variables here.
 							 */
 			case IS_VAR:
-				op = ZEND_SEND_VAR;
+				op = ZEND_SEND_VAR_NO_REF;
 				break;
 		}
 	}
-
-
-	if (ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)) {
+	if (op!=ZEND_SEND_VAR_NO_REF
+		&& ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)) {
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:
@@ -969,6 +968,7 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 
 	if (original_op==ZEND_SEND_VAR) {
 		switch(op) {
+			case ZEND_SEND_VAR_NO_REF:
 			case ZEND_SEND_VAR:
 				if (function_ptr) {
 					do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
