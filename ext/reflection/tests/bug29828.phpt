@@ -8,7 +8,7 @@ interface Bla
 	function bla();
 }
 
-class BlaMore extends Bla
+class BlaMore implements Bla
 {
 	function bla()
 	{
