@@ -1,3 +1,29 @@
+2002-03-06  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+    - Add function * and class * functionality. Only constants are left.
+    <?php
+
+    	class MyOuterClass {
+    		class MyInnerClass {
+    			function func1()
+    			{
+    				print "func1()\n";
+    			}
+
+    			function func2()
+    			{
+    				print "func2()\n";
+    			}
+    		}
+    	}
+
+    	import class * from MyOuterClass;
+    	import function func2 from MyOuterClass::MyInnerClass;
+
+    	MyInnerClass::func1();
+    	func2();
+
 2002-03-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES: Consistency.

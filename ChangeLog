@@ -1,3 +1,193 @@
+2002-03-06  Dan Kalowsky  <dank@deadmime.org>
+
+    * NEWS: iconv is back
+
+2002-03-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_version.h
+      configure.in: - Bump version numbers on HEAD
+
+2002-03-06  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+    - Cleaned this abit (no such long stuff should be here if it can be found
+      in Manual...and if it's not in manual yet, ADD IT!
+    - Also moved some of the major changes in the beginning where people
+      might even notice them. We should re-arrange this better btw.
+
+2002-03-06  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt
+      ext/exif/tests/002.phpt
+      ext/exif/tests/test1.jpg
+      ext/exif/tests/test2.jpg: - standard test scripts for exif
+
+    * ext/exif/exif.c: -comments
+
+2002-03-06  James Cox  <james@awpimajes.com>
+
+    * NEWS: fixed my foobarred news entry
+
+2002-03-06  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -comments
+
+2002-03-06  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: Sockets Rework Patch 3 of 3
+    Nuked all fd code
+    Rewrote socket_select to use arrays instead of the fd code
+    (This has the side-effect of fixing quite a few bugs)
+
+2002-03-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/interbase/interbase.c:
+    - Fix for bug #12383 and #14755: 105.05$ becomes 105.5$ (Patch by: Giancarlo
+      Niccolai <giancarlo@niccolai.org>)
+
+2002-03-06  James E. Flemer  <jflemer@acm.jhu.edu>
+
+    * ext/standard/dir.c:
+    (PHP opendir) Changed CHECKUID_ALLOW_ONLY_DIR to CHECKUID_ALLOW_ONLY_FILE
+                  so that relative paths (vs absolute) work correctly.
+
+2002-03-06  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/test.txt:
+    -updated test to reflect third parameter of exif_read_data
+
+    * ext/exif/exif.c: -missing efree
+    -incorrect index/length computing: left from jhead
+
+2002-03-06  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/standard/html.c:
+    quelling a warning, and ensuring now undefined behavior
+
+    * ext/posix/posix.c:
+    When #if BLAHING a section, ensure to make it's prototype included.  Returns
+    build capability to MacOSX.
+
+2002-03-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase/php_sybase_db.c:
+    - Add 'appname' parameter to sybase_connect. (Patch by Christophe Sollet
+      <csollet@coleebris.com>)
+
+    * sapi/cgi/cgi_main.c: - Put them back (and do it right)
+
+2002-03-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Do the estrdups after checking for parameter constraints.
+
+    No real memory leaks though, because they are catched by the
+    memory manager.
+
+    * ext/session/mod_mm.c: Did not revert back enough.
+
+    This patch does not make sense, because it enforces the existence
+    of a single directory.
+
+    * ext/session/session.c:
+    SID shall be defined to name=id, if the client did not supply
+    a cookie.
+
+    * ext/session/mod_files.c
+      ext/session/mod_user.c
+      ext/session/php_session.h
+      ext/session/session.c:
+    Merge in session API changes (carry around tsrm context)
+
+    Now PHP_SESSION_API is defined to the date of the last change,
+    so that externa source-code can handle changes more gracefully.
+
+    * ext/session/session.c: Always initialize the track-vars
+
+2002-03-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cgi/cgi_main.c: - Remove unused variables
+
+    * ext/posix/posix.c: - More ZTS fixes
+
+    * ext/iconv/iconv.c: - Fix build with ZTS
+
+2002-03-06  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/test.txt: -updated test
+
+    * ext/exif/exif.c
+      ext/exif/php_exif.h: -new working thumbnail code
+    -everything uses new data structures
+    -new function exif_thumbnail
+
+2002-03-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_user.c
+      ext/session/php_session.h
+      ext/session/session.c: Weep out all recent commits of Yasuo.
+
+    I don't have time right now to leave in the good ones and remove
+    only the bad ones.
+
+    There are some semantical changes which I reject, because
+    they aim at fixing a bug which is at a completely other location.
+
+    Then SID does not gefined anymore properly. (This broken patch
+    has not been sent to me at all.)
+
+    Also, there were *so* many whitespace changes which already
+    make these commits bogus.
+
+2002-03-06  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_mm.c: Fixed typo :)
+
+    * ext/session/mod_mm.c:
+    Use static mm file save path. Now we can safely stop web server at start up when there is an error. Older mm uses static mm file path anyway.
+
+    * ext/session/mod_files.c: Fix crash bug #14232
+
+    * ext/session/mod_mm.c: Make php start even with wrong save_path.
+
+2002-03-06  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: Socket Rework Patch 2
+    Redesigned socket_recv() as outlined on php-dev
+    Modified socket_last_error() to no longer clear the error
+    Added socket_clear_error()
+    Fixed socket_set_nonblock()
+    Added socket_set_block()
+    Fixed a proto
+    Saved 1 byte of RAM : )
+
+2002-03-06  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/session.c: Oops. Fix compile failure
+
+    * ext/session/session.c:
+    Using session_save_path() after starting session is obvious error.
+    Riase E_NOTICE error instead of E_WARNING. Since it is valid if
+    user uses session_save_path() with session_module_name().
+
+    * ext/session/session.c:
+    Return FALSE when session_module_name() failed. Fix a little leak.
+
+    * ext/session/session.c:
+    Raise error when session module failed to open or read
+
+    * ext/session/mod_user.c
+      ext/session/php_session.h: More TSRM work
+
+    * ext/session/session.c
+      ext/session/mod_user.c
+      ext/session/mod_files.c: Remove TSRMLS_FETCH() and use TSRMLS_C/TSRMLS_D
+
 2002-03-05  Markus Fischer  <mfischer@guru.josefine.at>
 
     * NEWS: - Added recent changes done in ext/posix
