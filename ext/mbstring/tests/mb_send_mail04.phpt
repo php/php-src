@@ -28,7 +28,7 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
-dGVzdA==
+%s
 To: example@example.com
 Subject: =?ISO-8859-15?Q?Pr=FCfung=20German?=
 Mime-Version: 1.0

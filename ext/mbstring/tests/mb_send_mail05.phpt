@@ -31,7 +31,7 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=%s
 Content-Transfer-Encoding: %s
 
-dGVzdA==
+%s
 To: example@example.com
 Subject: =?HZ-GB-2312?B?fnsyYlFpfn0gU2ltcGxpZmllZCBD?=
  =?HZ-GB-2312?B?aGluZXNl?=
