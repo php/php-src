@@ -58,7 +58,7 @@ PHP_FUNCTION(dl)
 	pval **file;
 
 #ifdef ZTS
-	if (strcmp(sapi_module.name, "cgi")!=0) {
+	if ((strcmp(sapi_module.name, "cgi")!=0) && (strcmp(sapi_module.name, "cli")!=0)) {
 		php_error(E_ERROR, "dl() is not supported in multithreaded Web servers - use extension statements in your php.ini");
 	}
 #endif
