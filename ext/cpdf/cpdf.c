@@ -183,7 +183,7 @@ PHP_RINIT_FUNCTION(cpdf)
 
 PHP_MINFO_FUNCTION(cpdf) {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php3_printf("ClibPDF");
+	php3_printf("Version %s", cpdf_version());
 }
 
 PHP_MSHUTDOWN_FUNCTION(cpdf){
@@ -749,7 +749,7 @@ PHP_FUNCTION(cpdf_text) {
 }
 /* }}} */
 
-/* {{{ proto void cpdf_set_font(int pdfdoc, string font, double size, int encoding)
+/* {{{ proto void cpdf_set_font(int pdfdoc, string font, double size, string encoding)
    Select the current font face, size and encoding */
 PHP_FUNCTION(cpdf_set_font) {
 	pval *arg1, *arg2, *arg3, *arg4;
@@ -764,7 +764,7 @@ PHP_FUNCTION(cpdf_set_font) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	convert_to_double(arg3);
-	convert_to_long(arg4);
+	convert_to_string(arg4);
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
@@ -776,20 +776,7 @@ PHP_FUNCTION(cpdf_set_font) {
 		php3_error(E_WARNING,"Font encoding set to 5");
 		arg4->value.lval = 5;
 	}
-	switch(arg4->value.lval) {
-		case 2:
-			cpdf_setFont(pdf, arg2->value.str.val, "MacRomanEncoding", (float) arg3->value.dval);
-			break;
-		case 3:
-			cpdf_setFont(pdf, arg2->value.str.val, "MacExpertEncoding", (float) arg3->value.dval);
-			break;
-		case 4:
-			cpdf_setFont(pdf, arg2->value.str.val, "WinAnsiEncoding", (float) arg3->value.dval);
-			break;
-		default:
-			cpdf_setFont(pdf, arg2->value.str.val, NULL, (float) arg3->value.dval);
-			break;
-	}
+	cpdf_setFont(pdf, arg2->value.str.val, arg4->value.str.val, (float) arg3->value.dval);
 
 	RETURN_TRUE;
 }
