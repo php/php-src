@@ -151,7 +151,7 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 
 	/* now try to find an appropriate POST content handler */
-	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_entry)==SUCCESS) {
+	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_entry) == SUCCESS) {
 		/* found one, register it for use */
 		SG(request_info).post_entry = post_entry;
 		post_reader_func = post_entry->post_reader;
@@ -724,7 +724,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 			if (sapi_add_header(buf, len, 1)==FAILURE) {
 				return FAILURE;
 			}
-			if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
+			if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1) == FAILURE) {
 				return FAILURE;			
 			}
 		}
@@ -790,7 +790,7 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
 	sapi_post_entry *p=post_entries;
 
 	while (p->content_type) {
-		if (sapi_register_post_entry(p)==FAILURE) {
+		if (sapi_register_post_entry(p) == FAILURE) {
 			return FAILURE;
 		}
 		p++;
@@ -839,7 +839,7 @@ SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
 	if (sapi_module.get_stat) {
 		return sapi_module.get_stat(TSRMLS_C);
 	} else {
-		if (!SG(request_info).path_translated || (VCWD_STAT(SG(request_info).path_translated, &SG(global_stat))==-1)) {
+		if (!SG(request_info).path_translated || (VCWD_STAT(SG(request_info).path_translated, &SG(global_stat)) == -1)) {
 			return NULL;
 		}
 		return &SG(global_stat);
