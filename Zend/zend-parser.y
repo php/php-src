@@ -125,16 +125,34 @@
 
 %% /* Rules */
 
-statement_list:	
-		statement_list  { do_extended_info(CLS_C); } statement { ELS_FETCH(); HANDLE_INTERACTIVE(); }
+top_statement_list:	
+		top_statement_list  { do_extended_info(CLS_C); } top_statement { ELS_FETCH(); HANDLE_INTERACTIVE(); }
 	|	/* empty */
 ;
 
 
+top_statement:
+		statement
+	|	declaration_statement	{ do_early_binding(CLS_C); }
+;
+
+
+inner_statement_list:
+		inner_statement_list  { do_extended_info(CLS_C); } inner_statement { ELS_FETCH(); HANDLE_INTERACTIVE(); }
+	|	/* empty */
+;
+
+
+inner_statement:
+		statement
+	|	declaration_statement
+;
+
+
 statement:
-		'{' statement_list '}'
+		'{' inner_statement_list '}'
 	|	T_IF '(' expr ')' { do_if_cond(&$3, &$4 CLS_CC); } statement { do_if_after_statement(&$4, 1 CLS_CC); } elseif_list else_single { do_if_end(CLS_C); }
-	|	T_IF '(' expr ')' ':' { do_if_cond(&$3, &$4 CLS_CC); } statement_list { do_if_after_statement(&$4, 1 CLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { do_if_end(CLS_C); }
+	|	T_IF '(' expr ')' ':' { do_if_cond(&$3, &$4 CLS_CC); } inner_statement_list { do_if_after_statement(&$4, 1 CLS_CC); } new_elseif_list new_else_single T_ENDIF ';' { do_if_end(CLS_C); }
 	|	T_WHILE '(' { $1.u.opline_num = get_next_op_number(CG(active_op_array));  } expr  ')' { do_while_cond(&$4, &$5 CLS_CC); } while_statement { do_while_end(&$1, &$5 CLS_CC); }
 	|	T_DO { $1.u.opline_num = get_next_op_number(CG(active_op_array));  do_do_while_begin(CLS_C); } statement T_WHILE '(' expr ')' ';' { do_do_while_end(&$1, &$6 CLS_CC); }
 	|	T_FOR 
@@ -151,16 +169,10 @@ statement:
 	|	T_BREAK expr ';'		{ do_brk_cont(ZEND_BRK, &$2 CLS_CC); }
 	|	T_CONTINUE ';'		{ do_brk_cont(ZEND_CONT, NULL CLS_CC); }
 	|	T_CONTINUE expr ';'	{ do_brk_cont(ZEND_CONT, &$2 CLS_CC); }
-	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 0 CLS_CC); }
-			'(' parameter_list ')' '{' statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
-	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING  { do_begin_function_declaration(&$1, &$3, 0 CLS_CC); }
-			parameter_list '(' statement_list ')' ';' { do_end_function_declaration(&$1 CLS_CC); }
 	|	T_RETURN ';'			{ do_return(NULL CLS_CC); }
 	|	T_RETURN expr ';'		{ do_return(&$2 CLS_CC); }
 	|	T_GLOBAL global_var_list
 	|	T_STATIC static_var_list
-	|	T_CLASS T_STRING { do_begin_class_declaration(&$2, NULL CLS_CC); } '{' class_statement_list '}' { do_end_class_declaration(CLS_C); }
-	|	T_CLASS T_STRING T_EXTENDS T_STRING { do_begin_class_declaration(&$2, &$4 CLS_CC); } '{' class_statement_list '}' { do_end_class_declaration(CLS_C); }
 	|	T_ECHO echo_expr_list ';'
 	|	T_INLINE_HTML			{ do_echo(&$1 CLS_CC); }
 	|	expr ';'			{ do_free(&$1 CLS_CC); }
@@ -172,6 +184,16 @@ statement:
 ;
 
 
+declaration_statement:
+		T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 0 CLS_CC); }
+			'(' parameter_list ')' '{' inner_statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
+	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING  { do_begin_function_declaration(&$1, &$3, 0 CLS_CC); }
+			parameter_list '(' inner_statement_list ')' ';' { do_end_function_declaration(&$1 CLS_CC); }
+	|	T_CLASS T_STRING { do_begin_class_declaration(&$2, NULL CLS_CC); } '{' class_statement_list '}' { do_end_class_declaration(CLS_C); }
+	|	T_CLASS T_STRING T_EXTENDS T_STRING { do_begin_class_declaration(&$2, &$4 CLS_CC); } '{' class_statement_list '}' { do_end_class_declaration(CLS_C); }
+;
+
+
 foreach_optional_arg:
 		/* empty */		{ $$.op_type = IS_UNUSED; }
 	|	T_DOUBLE_ARROW w_cvar		{ $$ = $2; }
@@ -180,13 +202,13 @@ foreach_optional_arg:
 
 for_statement:
 		statement
-	|	':' statement_list T_ENDFOR ';'
+	|	':' inner_statement_list T_ENDFOR ';'
 ;
 
 
 foreach_statement:
 		statement
-	|	':' statement_list T_ENDFOREACH ';'
+	|	':' inner_statement_list T_ENDFOREACH ';'
 ;
 
 
@@ -200,8 +222,8 @@ switch_case_list:
 
 case_list:
 		/* empty */	{ $$.u.opline_num = -1; }
-	|	case_list T_CASE expr case_separator { do_case_before_statement(&$1, &$2, &$3 CLS_CC); } statement_list { do_case_after_statement(&$$, &$2 CLS_CC); }
-	|	case_list T_DEFAULT case_separator { do_default_before_statement(&$1, &$2 CLS_CC); } statement_list { do_case_after_statement(&$$, &$2 CLS_CC); }
+	|	case_list T_CASE expr case_separator { do_case_before_statement(&$1, &$2, &$3 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); }
+	|	case_list T_DEFAULT case_separator { do_default_before_statement(&$1, &$2 CLS_CC); } inner_statement_list { do_case_after_statement(&$$, &$2 CLS_CC); }
 ;
 
 
@@ -213,7 +235,7 @@ case_separator:
 
 while_statement:
 		statement
-	|	':' statement_list T_ENDWHILE ';'
+	|	':' inner_statement_list T_ENDWHILE ';'
 ;
 
 
@@ -226,7 +248,7 @@ elseif_list:
 
 new_elseif_list:
 		/* empty */
-	|	new_elseif_list T_ELSEIF '(' expr ')' ':' { do_if_cond(&$4, &$5 CLS_CC); } statement_list { do_if_after_statement(&$5, 0 CLS_CC); }
+	|	new_elseif_list T_ELSEIF '(' expr ')' ':' { do_if_cond(&$4, &$5 CLS_CC); } inner_statement_list { do_if_after_statement(&$5, 0 CLS_CC); }
 ;
 
 
@@ -238,7 +260,7 @@ else_single:
 
 new_else_single:
 		/* empty */
-	|	T_ELSE ':' statement_list
+	|	T_ELSE ':' inner_statement_list
 ;
 
 
@@ -310,9 +332,9 @@ class_statement_list:
 class_statement:
 		T_VAR class_variable_decleration ';'
 	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 1 CLS_CC); } '(' 
-			parameter_list ')' '{' statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
+			parameter_list ')' '{' inner_statement_list '}' { do_end_function_declaration(&$1 CLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } T_STRING { do_begin_function_declaration(&$1, &$3, 1 CLS_CC); }
-			parameter_list '(' statement_list ')' ';' { do_end_function_declaration(&$1 CLS_CC); }
+			parameter_list '(' inner_statement_list ')' ';' { do_end_function_declaration(&$1 CLS_CC); }
 
 ;
 

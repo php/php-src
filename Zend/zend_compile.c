@@ -622,7 +622,18 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 	if (is_method) {
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 	} else {
-		zend_hash_add(CG(function_table), name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
+		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+
+		opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
+		opline->op1.op_type = IS_CONST;
+		opline->op1.u.constant.type = IS_LONG;
+		opline->op1.u.constant.value.lval = zend_hash_next_free_element(CG(function_table));
+		opline->op2.op_type = IS_CONST;
+		opline->op2.u.constant.type = IS_STRING;
+		opline->op2.u.constant.value.str.val = estrndup(name, name_len);
+		opline->op2.u.constant.value.str.len = name_len;
+		opline->extended_value = ZEND_DECLARE_FUNCTION;
+		zend_hash_next_index_insert(CG(function_table), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 	}
 
 	if (CG(extended_info)) {
@@ -821,6 +832,53 @@ void do_return(znode *expr CLS_DC)
 		opline->op1.u.constant.refcount=1;
 		opline->op1.u.constant.is_ref=0;
 	}
+	SET_UNUSED(opline->op2);
+}
+
+
+void do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table)
+{
+	switch (opline->extended_value) {
+		case ZEND_DECLARE_FUNCTION: {
+				zend_function *function;
+
+				zend_hash_index_find(function_table, opline->op1.u.constant.value.lval, (void **) &function);
+				(*function->op_array.refcount)++;
+				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
+					zend_error(E_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
+				}
+			}
+			break;
+		case ZEND_DECLARE_CLASS: {
+				zend_class_entry *ce;
+
+				zend_hash_index_find(class_table, opline->op1.u.constant.value.lval, (void **) &ce);
+				(*ce->refcount)++;
+				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
+					zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+				}
+			}
+			break;
+	}
+}
+
+
+void do_early_binding(CLS_D)
+{
+	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+
+	do_bind_function_or_class(opline, CG(function_table), CG(class_table));
+	switch (opline->extended_value) {
+		case ZEND_DECLARE_FUNCTION:
+			zend_hash_index_del(CG(function_table), opline->op1.u.constant.value.lval);
+			break;
+		case ZEND_DECLARE_CLASS:
+			zend_hash_index_del(CG(class_table), opline->op1.u.constant.value.lval);
+			break;
+	}
+	zval_dtor(&opline->op2.u.constant);
+	opline->opcode = ZEND_NOP;
+	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
 
@@ -1101,6 +1159,8 @@ static void function_add_ref(zend_function *function)
 
 void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_DC)
 {
+	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+
 	if (CG(active_class_entry)) {
 		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
 		return;
@@ -1141,9 +1201,17 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	CG(class_entry).handle_property_set = NULL;
 	CG(class_entry).handle_property_get = NULL;
 
-	if (zend_hash_add(CG(class_table), CG(class_entry).name, CG(class_entry).name_length+1, &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry))==FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Class %s cannot be redeclared", CG(class_entry).name);
-	}
+	opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
+	opline->op1.op_type = IS_CONST;
+	opline->op1.u.constant.type = IS_LONG;
+	opline->op1.u.constant.value.lval = zend_hash_next_free_element(CG(function_table));
+	opline->op2.op_type = IS_CONST;
+	opline->op2.u.constant.type = IS_STRING;
+	opline->op2.u.constant.value.str.val = estrndup(CG(class_entry).name, CG(class_entry).name_length);
+	opline->op2.u.constant.value.str.len = CG(class_entry).name_length;
+	opline->extended_value = ZEND_DECLARE_CLASS;
+
+	zend_hash_next_index_insert(CG(class_table), &CG(class_entry), sizeof(zend_class_entry), (void **) &CG(active_class_entry));
 }
 
 

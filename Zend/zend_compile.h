@@ -257,6 +257,8 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC);
 void do_begin_class_member_function_call(znode *class_name, znode *function_name CLS_DC);
 void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method CLS_DC);
 void do_return(znode *expr CLS_DC);
+void do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table);
+void do_early_binding(CLS_D);
 
 void do_pass_param(znode *param, int op, int offset CLS_DC);
 
@@ -476,12 +478,14 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_FETCH_DIM_TMP_VAR		89
 #define ZEND_FETCH_CONSTANT			90
 
-#define ZEND_INIT_GLOBALS			91
+#define ZEND_DECLARE_FUNCTION_OR_CLASS	91
 
-#define ZEND_EXT_STMT				92
-#define ZEND_EXT_FCALL_BEGIN		93
-#define ZEND_EXT_FCALL_END			94
-#define ZEND_EXT_NOP				95
+#define ZEND_INIT_GLOBALS			92
+
+#define ZEND_EXT_STMT				93
+#define ZEND_EXT_FCALL_BEGIN		94
+#define ZEND_EXT_FCALL_END			95
+#define ZEND_EXT_NOP				96
 
 /* end of block */
 
@@ -523,5 +527,8 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_HANDLE_FD			1
 #define ZEND_HANDLE_FP			2
 #define ZEND_HANDLE_ISTREAM		3
+
+#define ZEND_DECLARE_CLASS		1
+#define ZEND_DECLARE_FUNCTION	2
 
 #endif /* _COMPILE_H */
