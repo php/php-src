@@ -532,8 +532,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_execute_data execute_data;
 	zval *method_name;
 	zval *params_array;
-	int call_via_handler = 0, success;
-	char *func_pos;
+	int call_via_handler = 0;
 
 	switch (fci->size) {
 		case sizeof(zend_fcall_info):
@@ -617,26 +616,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		function_name_lc = zend_str_tolower_dup(fci->function_name->value.str.val, fci->function_name->value.str.len);
 
-		success = zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function);
-		if (success==FAILURE && !fci->object_pp && (func_pos=strstr(function_name_lc, "::"))) {
-			int class_name_lc_len = (int)(func_pos - function_name_lc);
-			char *class_name_lc = estrndup(function_name_lc, class_name_lc_len);
-			zend_class_entry **ce;
-
-			success = zend_lookup_class(class_name_lc, class_name_lc_len, &ce TSRMLS_CC);
-
-			efree(class_name_lc);
-			if (success == SUCCESS) {
-				int func_len = fci->function_name->value.str.len - class_name_lc_len - 2;
-				func_pos += 2;
-				fci->function_table = &(*ce)->function_table;
-				calling_scope = *ce;
-				fci->object_pp = NULL;
-				success = zend_hash_find(fci->function_table, func_pos, func_len + 1, (void **) &EX(function_state).function);
-			}
-		}
-		
-		if (success==FAILURE) {
+		if (zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 			/* try calling __call */
 			if (calling_scope && calling_scope->__call) {
 				EX(function_state).function = calling_scope->__call;
