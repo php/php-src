@@ -135,6 +135,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	char *to_be_destroyed_buffer;
 	char *to_be_destroyed_handled_output[2] = { 0, 0 };
 	int status;
+	php_ob_buffer *prev_ob_buffer_p=NULL;
+	php_ob_buffer orig_ob_buffer;
 
 	if (OG(ob_nesting_level)==0) {
 		return;
@@ -209,21 +211,28 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		if (OG(active_ob_buffer).internal_output_handler) {
 			to_be_destroyed_handled_output[1] = OG(active_ob_buffer).internal_output_handler_buffer;
 		}
-		if (OG(ob_nesting_level)>1) { /* restore previous buffer */
-			php_ob_buffer *ob_buffer_p;
-
-			zend_stack_top(&OG(ob_buffers), (void **) &ob_buffer_p);
-			OG(active_ob_buffer) = *ob_buffer_p;
-			zend_stack_del_top(&OG(ob_buffers));
-			if (OG(ob_nesting_level)==2) { /* destroy the stack */
-				zend_stack_destroy(&OG(ob_buffers));
-			}
-		}
-		OG(ob_nesting_level)--;
 	}
+	if (OG(ob_nesting_level)>1) { /* restore previous buffer */
+		zend_stack_top(&OG(ob_buffers), (void **) &prev_ob_buffer_p);
+		orig_ob_buffer = OG(active_ob_buffer);
+		OG(active_ob_buffer) = *prev_ob_buffer_p;
+		zend_stack_del_top(&OG(ob_buffers));
+		if (!just_flush && OG(ob_nesting_level)==2) { /* destroy the stack */
+			zend_stack_destroy(&OG(ob_buffers));
+		}
+	}
+	OG(ob_nesting_level)--;
 
 	if (send_buffer) {
 		OG(php_body_write)(final_buffer, final_buffer_length TSRMLS_CC);
+	}
+
+	if (just_flush) { /* we restored the previous ob, return to the current */
+		if (prev_ob_buffer_p) {
+			zend_stack_push(&OG(ob_buffers), &OG(active_ob_buffer), sizeof(php_ob_buffer));
+			OG(active_ob_buffer) = orig_ob_buffer;
+		}
+		OG(ob_nesting_level)++;
 	}
 
 	if (alternate_buffer) {
