@@ -1244,7 +1244,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <INITIAL>"<?php_track_vars?>"([\n]|"\r\n")? {
-	zend_error(E_WARNING, "<?php_track_vars?> is no longer supported - please use the track_vars INI directive instead");
+	zend_error(E_WARNING, "&lt;?php_track_vars?&gt; is no longer supported - please use the track_vars INI directive instead");
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
