@@ -87,6 +87,7 @@
 		class_container.name = strdup(class_name);					\
 		class_container.name_length = sizeof(class_name)-1;			\
 		class_container.builtin_functions = functions;				\
+		class_container.constructor = NULL;							\
 		class_container.handle_function_call = NULL;				\
 		class_container.handle_property_get = NULL;					\
 		class_container.handle_property_set = NULL;					\
@@ -97,6 +98,7 @@
 		class_container.name = strdup(class_name);				\
 		class_container.name_length = sizeof(class_name)-1;		\
 		class_container.builtin_functions = functions;			\
+		class_container.constructor = NULL;						\
 		class_container.handle_function_call = handle_fcall;	\
 		class_container.handle_property_get = handle_propget;	\
 		class_container.handle_property_set = handle_propset;	\

@@ -1683,6 +1683,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 
+	new_class_entry.constructor = NULL;
+
 	new_class_entry.handle_function_call = NULL;
 	new_class_entry.handle_property_set = NULL;
 	new_class_entry.handle_property_get = NULL;
