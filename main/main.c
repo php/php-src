@@ -921,7 +921,6 @@ int _php3_hash_environment(PLS_D ELS_DC)
 			case 'g':
 			case 'G':
 				if (!_gpc_flags[2]) {
-					printf("Parsing GET data:  '%s'\n", SG(request_info).query_string);
 					php3_treat_data(PARSE_GET, NULL);	/* GET Data */
 					_gpc_flags[2]=1;
 				}

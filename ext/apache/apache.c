@@ -36,6 +36,7 @@
 #include "php_ini.h"
 #include "SAPI.h"
 #include "mod_php3.h"
+#include "ext/standard/info.h"
 
 #include <stdlib.h>
 #if HAVE_UNISTD_H
@@ -157,6 +158,7 @@ void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS)
 void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	module *modp = NULL;
+	char output_buf[128];
 #if !defined(WIN32) && !defined(WINNT)
 	char name[64];
 	char *p;
@@ -171,27 +173,36 @@ void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
 
 	serv = ((request_rec *) SG(server_context))->server;
 	
+    PUTS("<table border=5 width=\"600\">\n");
+    php_info_print_table_header(2, "Entry", "Value");
 #if WIN32|WINNT
 	PUTS("Apache for Windows 95/NT<br>");
 #else
-	php3_printf("<tt>APACHE_INCLUDE=%s<br>\n", PHP_APACHE_INCLUDE);
-	php3_printf("APACHE_TARGET=%s<br></tt>\n", PHP_APACHE_TARGET);
+	php_info_print_table_row(2, "APACHE_INCLUDE", PHP_APACHE_INCLUDE);
+	php_info_print_table_row(2, "APACHE_TARGET", PHP_APACHE_TARGET);
 #endif
-	php3_printf("Apache Version: <b>%s</b><br>",SERVER_VERSION);
+	php_info_print_table_row(2, "Apache Version", SERVER_VERSION);
 #ifdef APACHE_RELEASE
-	php3_printf("Apache Release: <b>%d</b><br>",APACHE_RELEASE);
+	sprintf(output_buf, "%d", APACHE_RELEASE);
+	php_info_print_table_row(2, "Apache Release", output_buf);
 #endif
-	php3_printf("Apache API Version: <b>%d</b><br>",MODULE_MAGIC_NUMBER);
-	php3_printf("Hostname/port: <b>%s:%u</b><br>\n",serv->server_hostname,serv->port);
+	sprintf(output_buf, "%d", MODULE_MAGIC_NUMBER);
+	php_info_print_table_row(2, "Apache API Version", output_buf);
+	sprintf(output_buf, "%s:%u", serv->server_hostname,serv->port);
+	php_info_print_table_row(2, "Hostname/Port", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
-	php3_printf("User/Group: <b>%s(%d)/%d</b><br>\n",user_name,(int)user_id,(int)group_id);
-	php3_printf("Max Requests: <b>per child: %d &nbsp;&nbsp; keep alive: %s &nbsp;&nbsp; max per connection: %d</b><br>\n",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
+	sprintf(output_buf, "%s(%d)/%d", user_name,(int)user_id,(int)group_id);
+	php_info_print_table_row(2, "User/Group", output_buf);
+	sprintf(output_buf, "per child: %d<br>keep alive: %s<br>max per connection: %d",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
+	php_info_print_table_row(2, "Max Requests", output_buf);
 #endif
-	php3_printf("Timeouts: <b>connection: %d &nbsp;&nbsp; keep-alive: %d</b><br>",serv->timeout,serv->keep_alive_timeout);
+	sprintf(output_buf, "connection: %d<br>keep-alive: %d",serv->timeout,serv->keep_alive_timeout);
+	php_info_print_table_row(2, "Timeouts", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
-	php3_printf("Server Root: <b>%s</b><br>\n",server_root);
+	php_info_print_table_row(2, "Server Root", server_root);
 
-	PUTS("Loaded modules: ");
+	
+	PUTS("<tr><td valign=\"top\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">Loaded modules</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 	for(modp = top_module; modp; modp = modp->next) {
 		strncpy(name, modp->name, sizeof(name) - 1);
 		if ((p = strrchr(name, '.'))) {
@@ -203,7 +214,8 @@ void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
 		}
 	}
 #endif
-	PUTS("<br></td?</tr>\n");
+	PUTS("</td></tr>\n");
+	PUTS("</table>\n");
 }
 
 /* This function is equivalent to <!--#include virtual...-->

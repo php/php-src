@@ -41,13 +41,9 @@
 
 
 #define PHP3_CONF_LONG(directive,value1,value2) \
-	php3_printf("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">%s</td><td bgcolor=\"" CONTENTS_COLOR "\">%ld</td><td bgcolor=\"" CONTENTS_COLOR "\">%ld</td></tr>\n",directive,value1,value2);
+	php3_printf("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">%s</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">%ld</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">%ld</td></tr>\n",directive,value1,value2);
 
 #define SECTION(name)  PUTS("<hr><h2>" name "</h2>\n")
-
-#define ENTRY_NAME_COLOR "#999999"
-#define CONTENTS_COLOR "#DDDDDD"
-#define HEADER_COLOR "#00DDDD"
 
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 
@@ -115,7 +111,7 @@ PHPAPI void _php3_info(void)
 	PUTS("<hr><h1>Credits</h1>\n");
 
 	PUTS("<table border=5 width=\"600\">\n");
-	PUTS("<tr><th colspan=\"2\" bgcolor=\"" HEADER_COLOR "\">PHP 4.0 Authors</th></tr>\n");
+	PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">PHP 4.0 Authors</th></tr>\n");
 	php_info_print_table_header(2, "Module", "Authors");
 	CREDIT_LINE("Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 	CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
@@ -182,7 +178,7 @@ PHPAPI void _php3_info(void)
 			_php3_hash_internal_pointer_reset((*data)->value.ht);
 			while (_php3_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_string(*tmp);
-				PUTS("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">HTTP_GET_VARS[\"");
+				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">HTTP_GET_VARS[\"");
 				switch (_php3_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
 						PUTS(string_key);
@@ -192,7 +188,7 @@ PHPAPI void _php3_info(void)
 						php3_printf("%ld",num_key);
 						break;
 				}
-				PUTS("\"]</td><td bgcolor=\"" CONTENTS_COLOR "\">");
+				PUTS("\"]</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 				PUTS((*tmp)->value.str.val); /* This could be "Array" - too ugly to expand that for now */
 				PUTS("</td></tr>\n");
 				_php3_hash_move_forward((*data)->value.ht);
@@ -202,7 +198,7 @@ PHPAPI void _php3_info(void)
 			_php3_hash_internal_pointer_reset((*data)->value.ht);
 			while (_php3_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_string(*tmp);
-				PUTS("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">HTTP_POST_VARS[\"");
+				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">HTTP_POST_VARS[\"");
 				switch (_php3_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
 						PUTS(string_key);
@@ -212,7 +208,7 @@ PHPAPI void _php3_info(void)
 						php3_printf("%ld",num_key);
 						break;
 				}
-				PUTS("\"]</td><td bgcolor=\"" CONTENTS_COLOR "\">");
+				PUTS("\"]</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 				PUTS((*tmp)->value.str.val);
 				PUTS("</td></tr>\n");
 				_php3_hash_move_forward((*data)->value.ht);
@@ -222,7 +218,7 @@ PHPAPI void _php3_info(void)
 			_php3_hash_internal_pointer_reset((*data)->value.ht);
 			while (_php3_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_string(*tmp);
-				PUTS("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">HTTP_COOKIE_VARS[\"");
+				PUTS("<tr><td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">HTTP_COOKIE_VARS[\"");
 				switch (_php3_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
 					case HASH_KEY_IS_STRING:
 						PUTS(string_key);
@@ -232,7 +228,7 @@ PHPAPI void _php3_info(void)
 						php3_printf("%ld",num_key);
 						break;
 				}
-				PUTS("\"]</td><td bgcolor=\"" CONTENTS_COLOR "\">");
+				PUTS("\"]</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 				PUTS((*tmp)->value.str.val);
 				PUTS("</td></tr>\n");
 				_php3_hash_move_forward((*data)->value.ht);
@@ -274,7 +270,7 @@ PHPAPI void _php3_info(void)
 		r = ((request_rec *) SG(server_context));
 		SECTION("HTTP Headers Information");
 		PUTS("<table border=5 width=\"600\">\n");
-		PUTS(" <tr><th colspan=2 bgcolor=\"" HEADER_COLOR "\">HTTP Request Headers</th></tr>\n");
+		PUTS(" <tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Request Headers</th></tr>\n");
 		php_info_print_table_row(2, "HTTP Request", r->the_request);
 		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
@@ -283,7 +279,7 @@ PHPAPI void _php3_info(void)
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
-		PUTS(" <tr><th colspan=2  bgcolor=\"" HEADER_COLOR "\">HTTP Response Headers</th></tr>\n");
+		PUTS(" <tr><th colspan=2  bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Response Headers</th></tr>\n");
 		env_arr = table_elts(r->headers_out);
 		env = (table_entry *)env_arr->elts;
 		for(i = 0; i < env_arr->nelts; ++i) {
@@ -335,7 +331,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 		if (!row_element || !*row_element) {
 			row_element = "&nbsp;";
 		}
-		php3_printf("<th bgcolor=\"" HEADER_COLOR "\" valign=\"top\">%s</th>", row_element);
+		php3_printf("<th bgcolor=\"" PHP_HEADER_COLOR "\" valign=\"top\">%s</th>", row_element);
 	}
 	php3_printf("</tr>\n");
 
@@ -347,7 +343,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 {
 	int i;
 	va_list row_elements;
-	char *color = ENTRY_NAME_COLOR;
+	char *color = PHP_ENTRY_NAME_COLOR;
 	char *row_element;
 
 	va_start(row_elements, num_cols);
@@ -359,7 +355,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 			row_element = "&nbsp;";
 		}
 		php3_printf("<td bgcolor=\"%s\" valign=\"top\">%s</td>", color, row_element);
-		color = CONTENTS_COLOR;
+		color = PHP_CONTENTS_COLOR;
 	}
 	php3_printf("</tr>\n");
 
