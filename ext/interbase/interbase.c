@@ -831,6 +831,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	zval ***args;
 	char *ib_server = NULL, *ib_uname, *ib_passwd, *ib_charset = NULL, *ib_buffers = NULL, *ib_dialect = NULL, *ib_role = NULL;
+	unsigned short sql_dialect = SQL_DIALECT_CURRENT;
 	int ib_uname_len, ib_passwd_len;
 	isc_db_handle db_handle = NULL;
 	char *hashed_details;
@@ -855,6 +856,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	switch (ZEND_NUM_ARGS()) {
+		unsigned short d;
+		
 		case 7:
 			convert_to_string_ex(args[6]);
 			ib_role = Z_STRVAL_PP(args[6]);
@@ -863,6 +866,10 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 6:
 			convert_to_string_ex(args[5]);
 			ib_dialect = Z_STRVAL_PP(args[5]);
+			if ((d = (unsigned short)strtoul(ib_dialect, NULL, 10))) 
+			{
+				sql_dialect = d;
+			}
 			hashed_details_length += Z_STRLEN_PP(args[5]);
 			/* fallout */
 		case 5:
@@ -940,10 +947,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			ib_link->handle = db_handle;
-			if (ib_dialect) {
-				unsigned short d = (unsigned short)strtoul(ib_dialect, NULL, 10);
-				ib_link->dialect = (d ? d : SQL_DIALECT_CURRENT);
-			}
+			ib_link->dialect = sql_dialect;
 			ib_link->tr_list = NULL;
 
 			/* hash it up */
@@ -1005,10 +1009,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 		ib_link->handle = db_handle;
-		if (ib_dialect) {
-			unsigned short d = (unsigned short)strtoul(ib_dialect, NULL, 10);
-			ib_link->dialect = (d ? d : SQL_DIALECT_CURRENT);
-		}
+		ib_link->dialect = sql_dialect;
 		ib_link->tr_list = NULL;
 		
 		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
