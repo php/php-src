@@ -1,3 +1,92 @@
+2003-12-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      Properly detect bundled libtool when PHP is built in a separate directory.
+      Detect version of system libtool, which is used by phpize.
+
+    * ext/pgsql/tests/09notice.phpt:
+      Make test work with PostgreSQL 7.4
+
+2003-12-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Those are not structures :-)
+
+2003-12-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/namednodemap.c
+      ext/dom/nodelist.c:
+      Compiler warning fixes.
+
+    * ext/iconv/iconv.c:
+      Fixed compiler warnings.
+
+2003-12-23  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      add oci_fetch_assoc(), oci_fetch_object(), oci_fetch_array() &
+      oci_fetch_row()
+      change ocifetchinto() to use php_oci_fetch_row()
+
+    * ext/oci8/oci8.c:
+      huge patch
+      change almost all func names to match naming conventions
+      keep ocifetchinto & *buffering for awhile - they will be rewritten soon
+      old names are kept as aliases
+
+2003-12-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/dba/config.w32:
+      enable inifile handler under new win32 build too
+
+2003-12-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/dba.dsp:
+      Add inifile handler in windows build too.
+
+2003-12-23  Andi Gutmans  <andi@zend.com>
+
+    * sapi/cli/php.1.in:
+      - Commit fixes to PHP man page
+
+2003-12-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Oops.
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Fix fgetcsv()'s null line handling.
+
+2003-12-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/tests/bug26697.phpt:
+      Fixed bug #26697 (calling class_exists on a nonexistent class in __autoload
+      results in segfault).
+
+2003-12-23  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      do not delete connection ids, we need them
+
+2003-12-23  Georg Richter  <phpinfo@t-online.de>
+
+    * NEWS:
+      
+
+2003-12-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * README.WIN32-BUILD-SYSTEM:
+      Now that it has matured somewhat, don't discourage questions about it
+      quite so strongly.
+      Add note about snapshot building.
+
 2003-12-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * README.SUBMITTING_PATCH
