@@ -80,6 +80,8 @@ typedef struct {
 #define SIMPLEXML_G(v) (simplexml_globals.v)
 #endif
 
+PHP_API zend_class_entry *sxe_get_element_class_entry();
+
 #endif
 
 /*
