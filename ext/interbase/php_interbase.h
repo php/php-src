@@ -90,6 +90,8 @@ PHP_FUNCTION(ibase_delete_user);
 PHP_FUNCTION(ibase_errmsg);
 PHP_FUNCTION(ibase_errcode);
 
+PHP_FUNCTION(ibase_wait_event);
+
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
 #define IBASE_BLOB_SEG 4096
