@@ -71,13 +71,13 @@ typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 extern opcode_handler_t zend_opcode_handlers[512];
 
 struct _zend_op {
-	zend_uchar opcode;
+	opcode_handler_t handler;
 	znode result;
 	znode op1;
 	znode op2;
 	ulong extended_value;
 	uint lineno;
-	opcode_handler_t handler;
+	zend_uchar opcode;
 };
 
 
