@@ -239,10 +239,12 @@ static SWFCharacter getCharacter(zval *id TSRMLS_DC)
 	else if(Z_OBJCE_P(id) == sound_class_entry_ptr)
 		return (SWFCharacter)getSound(id TSRMLS_CC);
 #ifdef HAVE_NEW_MING
-/*
+
+	else if(Z_OBJCE_P(id) == fontchar_class_entry_ptr)
+		return (SWFCharacter)getFontCharacter(id TSRMLS_CC);
 	else if(Z_OBJCE_P(id) == soundinstance_class_entry_ptr)
 		return (SWFCharacter)getSoundInstance(id TSRMLS_CC);
-*/
+
 	else if(Z_OBJCE_P(id) == videostream_class_entry_ptr)
 		return (SWFCharacter)getVideoStream(id TSRMLS_CC);
 	else if(Z_OBJCE_P(id) == prebuiltclip_class_entry_ptr)
@@ -615,6 +617,7 @@ PHP_METHOD(swfbutton, addSound)
 		ret = zend_list_insert(item, le_swfsoundinstancep);
 		object_init_ex(return_value, soundinstance_class_entry_ptr);
 		add_property_resource(return_value, "soundinstance", ret);
+		zend_list_addref(ret);
 	}
 }
 /* }}} */
@@ -2171,6 +2174,7 @@ PHP_METHOD(swfmovie, add)
 		ret = zend_list_insert(item, le_swfdisplayitemp);
 		object_init_ex(return_value, displayitem_class_entry_ptr);
 		add_property_resource(return_value, "displayitem", ret);
+		zend_list_addref(ret);
 	}
 }
 /* }}} */
@@ -2501,6 +2505,7 @@ PHP_METHOD(swfmovie, startSound)
 		ret = zend_list_insert(item, le_swfsoundinstancep);
 		object_init_ex(return_value, soundinstance_class_entry_ptr);
 		add_property_resource(return_value, "soundinstance", ret);
+		zend_list_addref(ret);
 	}
 }
 /* }}} */
@@ -2545,6 +2550,7 @@ PHP_METHOD(swfmovie, importChar)
     	ret = zend_list_insert(res, le_swfspritep);
 		object_init_ex(return_value, sprite_class_entry_ptr);
 		add_property_resource(return_value, "sprite", ret);
+		zend_list_addref(ret);
 	}	
 }
 /* }}} */
@@ -2572,6 +2578,7 @@ PHP_METHOD(swfmovie, importFont)
     	ret = zend_list_insert(res, le_swffontcharp);
 		object_init_ex(return_value, fontchar_class_entry_ptr);
 		add_property_resource(return_value, "fontcharacter", ret);
+		zend_list_addref(ret);
 	}	
 }
 /* }}} */
@@ -2600,6 +2607,7 @@ PHP_METHOD(swfmovie, addFont)
     	ret = zend_list_insert(res, le_swffontcharp);
 		object_init_ex(return_value, fontchar_class_entry_ptr);
 		add_property_resource(return_value, "fontcharacter", ret);
+		zend_list_addref(ret);
 	}	
 }
 /* }}} */
@@ -2784,6 +2792,7 @@ PHP_METHOD(swfshape, addFill)
 	ret = zend_list_insert(fill, le_swffillp);
 	object_init_ex(return_value, fill_class_entry_ptr);
 	add_property_resource(return_value, "fill", ret);
+	zend_list_addref(ret);
 }
 /* }}} */
 
@@ -3070,7 +3079,7 @@ PHP_METHOD(swfshape, drawCircle)
 /* }}} */
 
 /* {{{ proto void swfshape::drawarc(float r, float startAngle, float endAngle)
-   Draws an arc of radius r centered at the current location, from angle startAngle to angle endAngle measured counterclockwise from 12 o'clock */
+   Draws an arc of radius r centered at the current location, from angle startAngle to angle endAngle measured clockwise from 12 o'clock */
 PHP_METHOD(swfshape, drawArc)
 {
 	zval **r, **start, **end;
@@ -3083,7 +3092,7 @@ PHP_METHOD(swfshape, drawArc)
 	convert_to_double_ex(end);
 
 	/* convert angles to radians, since that's what php uses elsewhere */
-	SWFShape_drawArc(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(r), (float)(Z_DVAL_PP(start)*M_PI/180.0), (float)(Z_DVAL_PP(end)*M_PI/180.0));
+	SWFShape_drawArc(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(r), FLOAT_Z_DVAL_PP(start), FLOAT_Z_DVAL_PP(end));
 }
 /* }}} */
 
@@ -3215,6 +3224,7 @@ PHP_METHOD(swfsprite, add)
 		ret = zend_list_insert(item, le_swfdisplayitemp);
 		object_init_ex(return_value, displayitem_class_entry_ptr);
 		add_property_resource(return_value, "displayitem", ret);
+		zend_list_addref(ret);
 	}
 }
 /* }}} */
@@ -3297,6 +3307,7 @@ PHP_METHOD(swfsprite, startSound)
 		ret = zend_list_insert(item, le_swfsoundinstancep);
 		object_init_ex(return_value, soundinstance_class_entry_ptr);
 		add_property_resource(return_value, "soundinstance", ret);
+		zend_list_addref(ret);
 	}
 }
 
@@ -4073,7 +4084,6 @@ PHP_MINIT_FUNCTION(ming)
 
 	le_swfvideostreamp = zend_register_list_destructors_ex(destroy_SWFVideoStream_resource, NULL, "SWFVideoStream", module_number);
 	le_swfprebuiltclipp = zend_register_list_destructors_ex(destroy_SWFPrebuiltClip_resource, NULL, "SWFPrebuiltClip", module_number);
-
 #endif
 
 	INIT_CLASS_ENTRY(shape_class_entry, "SWFShape", swfshape_functions);
