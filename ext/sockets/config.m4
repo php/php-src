@@ -31,7 +31,6 @@ if test "$PHP_SOCKETS" != "no"; then
   AC_CHECK_HEADERS(unistd.h)
   AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h netinet/in.h netinet/tcp.h sys/un.h arpa/inet.h)
   AC_CHECK_HEADERS(sys/time.h errno.h fcntl.h)
-
   AC_DEFINE(HAVE_SOCKETS, 1, [ ])
   dnl Write more examples of tests here...
   PHP_EXTENSION(sockets, $ext_shared)
