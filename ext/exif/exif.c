@@ -2121,7 +2121,7 @@ static void add_assoc_image_info(pval *value, int sub_array, image_info_type *im
    We want to print out the marker contents as legible text;
    we must guard against random junk and varying newline representations.
 */
-static void exif_process_COM (image_info_type *image_info, uchar *value, size_t length TSRMLS_DC)
+static void exif_process_COM (image_info_type *image_info, char *value, size_t length TSRMLS_DC)
 {
 	exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2 TSRMLS_CC);
 }
@@ -2133,7 +2133,7 @@ static void exif_process_COM (image_info_type *image_info, uchar *value, size_t 
    we must guard against random junk and varying newline representations.
 */
 #ifdef EXIF_JPEG2000
-static void exif_process_CME (image_info_type *image_info, uchar *value, size_t length TSRMLS_DC)
+static void exif_process_CME (image_info_type *image_info, char *value, size_t length TSRMLS_DC)
 {
 	if (length>3) {
 		switch(value[2]) {
