@@ -44,6 +44,7 @@ $spell_file['en']='/opt/udm/ispell/en.dict';
 $stopwordtable_arr[]='stopword';
 // $stopwordfile_arr[]='stopwords.txt';
 $synonym_arr[]='/opt/udm/synonym/english.syn';
+$searchd_arr[]='localhost';
 
 $minwordlength=1;
 $maxwordlength=32;
@@ -601,6 +602,15 @@ function make_nav($query_orig){
    	        Udm_Set_Agent_Param($udm_agent,UDM_PARAM_SYNONYM,$synonym_arr[$i]);
    	    }
         }
+	
+	for ($i=0; $i < count($searchd_arr); $i++) {
+   	    if ($searchd_arr[$i] != '') {
+   	        Udm_Set_Agent_Param($udm_agent,UDM_PARAM_SEARCHD,$searchd_arr[$i]);
+   	    }
+        }
+
+	Udm_Set_Agent_Param($udm_agent,UDM_PARAM_QSTRING,$QUERY_STRING);
+        Udm_Set_Agent_Param($udm_agent,UDM_PARAM_REMOTE_ADDR,$REMOTE_ADDR);
    }
 
    if  ($m=='any') {
