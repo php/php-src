@@ -607,6 +607,7 @@ function_entry basic_functions[] = {
 	PHP_FE(restore_include_path,											NULL)
 
 	PHP_FE(setcookie,														NULL)
+	PHP_FE(setrawcookie,													NULL)
 	PHP_FE(header,															NULL)
 	PHP_FE(headers_sent,  first_and_second__args_force_ref)
 
