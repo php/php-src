@@ -266,23 +266,23 @@ fi
 AC_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS(
+alloca.h \
 arpa/inet.h \
 crypt.h \
-dlfcn.h \
 fcntl.h \
 grp.h \
-ieeefp.h \
 limits.h \
 locale.h \
-memory.h \
 netinet/in.h \
 pwd.h \
 signal.h \
 stdarg.h \
 stdlib.h \
 string.h \
+syslog.h \
 sys/file.h \
 sys/mman.h \
+sys/resource.h \
 sys/select.h \
 sys/socket.h \
 sys/statfs.h \
@@ -291,8 +291,6 @@ sys/time.h \
 sys/types.h \
 sys/varargs.h \
 sys/wait.h \
-sys/resource.h \
-syslog.h \
 unistd.h \
 unix.h \
 )
