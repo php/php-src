@@ -166,10 +166,10 @@ OK_NEWLINE
 == INVALID PARAMETER TEST ==
 ERR: Warning
 OK_NULL
-ERR: Notice
+ERR: Warning
 OK_ARRAY
-ERR: Notice
+ERR: Warning
 OK_OBJECT
-ERR: Notice
+ERR: Warning
 OK_BAD_ENCODING
 

@@ -30,7 +30,7 @@ print "$enc\n";
 // Invalid Parameter
 print "== INVALID PARAMETER ==\n";
 
-// Note: Other than string type, PHP raise both Notice and Warning
+// Note: Other than string type, PHP raises Warning
 $r = mb_internal_encoding('BAD');
 ($r === FALSE) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
 $enc = mb_internal_encoding();
@@ -59,11 +59,9 @@ ASCII
 ERR: Warning
 OK_BAD_SET
 ASCII
-ERR: Notice
 ERR: Warning
 OK_BAD_ARY_SET
 ASCII
-ERR: Notice
 ERR: Warning
 OK_BAD_OBJ_SET
 ASCII
