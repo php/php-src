@@ -906,7 +906,7 @@ void sqlite_iterator_get_current_data(zend_object_iterator *iter, zval ***data T
 	*data = &((sqlite_object_iterator*)iter)->value;
 	if (res && !**data) {
 		MAKE_STD_ZVAL(**data);
-		php_sqlite_fetch_array(res, PHPSQLITE_NUM, 1, 0, **data TSRMLS_CC);
+		php_sqlite_fetch_array(res, res->mode, 1, 0, **data TSRMLS_CC);
 	}
 	
 }
