@@ -139,6 +139,8 @@ PHPAPI void php_print_info(int flag)
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
 	
+	PUTS("<CENTER>");
+
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 
@@ -296,9 +298,6 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_table_end();
 	}
 
-	PUTS("</center>");
-
-
 	if (flag & PHP_INFO_LICENSE) {
 		SECTION("PHP License");
 		php_info_print_box_start(0);
@@ -318,17 +317,20 @@ PHPAPI void php_print_info(int flag)
 		PUTS("</P>\n");
 		php_info_print_box_end();
 	}
+
+	PUTS("</center>");
 }
 
 
 void php_print_credits(int flag)
 {
 	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("<html><head><title>PHP Credits</title></head><body><center>\n");
+		PUTS("<html><head><title>PHP Credits</title></head><body>\n");
 	}
 
 	php_info_print_style();
 
+	PUTS("<center>");
 	PUTS("<h1>PHP 4.0 Credits</h1>\n");
 
 	if (flag & PHP_CREDITS_GROUP) {
@@ -438,21 +440,21 @@ void php_print_credits(int flag)
 		php_info_print_table_end();
 	}
 
+	PUTS("</center>");
+
 	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("</center></body></html>\n");
+		PUTS("</body></html>\n");
 	}
 }
 
 PHPAPI void php_info_print_table_start()
 {
-	php_printf("<CENTER>\n");
 	php_printf("<TABLE BORDER=0 CELLPADDING=3 CELLSPACING=1 WIDTH=600 BGCOLOR=\"#000000\">\n");
 }
 
 PHPAPI void php_info_print_table_end()
 {
 	php_printf("</TABLE><BR>\n");
-	php_printf("</CENTER>\n");
 
 }
 
