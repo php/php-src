@@ -2075,9 +2075,9 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 			} else {
 				dc = gdImageGetPixel(dst, tox, toy);
 
- 				ncR = (int)gdImageRed (src, c) * (pct / 100.0) + gdImageRed (dst, dc) * ((100 - pct) / 100.0);
- 				ncG = (int)gdImageGreen (src, c) * (pct / 100.0) + (int)gdImageGreen (dst, dc) * ((100 - pct) / 100.0);
- 				ncB = (int)gdImageBlue (src, c) * (pct / 100.0) + gdImageBlue (dst, dc) * ((100 - pct) / 100.0);
+ 				ncR = (int)(gdImageRed (src, c) * (pct / 100.0) + gdImageRed (dst, dc) * ((100 - pct) / 100.0));
+ 				ncG = (int)(gdImageGreen (src, c) * (pct / 100.0) + gdImageGreen (dst, dc) * ((100 - pct) / 100.0));
+ 				ncB = (int)(gdImageBlue (src, c) * (pct / 100.0) + gdImageBlue (dst, dc) * ((100 - pct) / 100.0));
 
 				/* Find a reasonable color */
 				nc = gdImageColorResolve (dst, ncR, ncG, ncB);
@@ -2368,14 +2368,22 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double dWeight, int clrBack)
 {
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
-	int i, r, g, b, a;
+	int i, r, g, b, a, clrBackR, clrBackG, clrBackB, clrBackA;
 	FuncPtr f;
 
 	int pxlOldLeft, pxlLeft=0, pxlSrc;
 
+	/* Keep clrBack as color index if required */
 	if (src->trueColor) {
+		pxlOldLeft = clrBack;
 		f = gdImageGetTrueColorPixel;
 	} else {
+		pxlOldLeft = clrBack;
+		clrBackR = gdImageRed(src, clrBack); 
+		clrBackG = gdImageGreen(src, clrBack);
+		clrBackB = gdImageBlue(src, clrBack);
+		clrBackA = gdImageAlpha(src, clrBack);
+		clrBack =  gdTrueColorAlpha(clrBackR, clrBackG, clrBackB, clrBackA);
 		f = gdImageGetPixel;
 	}
 
@@ -2386,8 +2394,6 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 	if (i < dst->sx) {
 		gdImageSetPixel (dst, i, uRow, clrBack);
 	}
-
-	pxlOldLeft  = clrBack;
 
 	for (i = 0; i < src->sx; i++) {
 		pxlSrc = f (src,i,uRow);
@@ -2541,10 +2547,8 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 	FuncPtr f;
 
 	if (src->trueColor) {
-		dst = gdImageCreateTrueColor(src->sy, src->sx);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst = gdImageCreate (src->sy, src->sx);
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor(src->sy, src->sx);
@@ -2629,6 +2633,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	double dRadAngle, dSinE, dTan, dShear;
 	double dOffset;     /* Variable skew offset */
 	int u, iShear, newx, newy;
+	int clrBackR, clrBackG, clrBackB, clrBackA;
 
 	/* See GEMS I for the algorithm details */
 	dRadAngle = dAngle * ROTATE_DEG2RAD; /* Angle in radians */
@@ -2658,6 +2663,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	}
 	
 	gdImagePaletteCopy (dst1, src);
+
 	dRadAngle = dAngle * ROTATE_DEG2RAD; /* Angle in radians */
 	dSinE = sin (dRadAngle);
 	dTan = tan (dRadAngle / 2.0);
@@ -2674,6 +2680,15 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 		gdImageSkewX(dst1, src, u, iShear, (dShear - iShear), clrBack);
 	}
 
+	/*
+	The 1st shear may use the original clrBack as color index
+	Convert it once here
+	*/
+	clrBackR = gdImageRed(src, clrBack); 
+	clrBackG = gdImageGreen(src, clrBack);
+	clrBackB = gdImageBlue(src, clrBack);
+	clrBackA = gdImageAlpha(src, clrBack);
+	clrBack =  gdTrueColorAlpha(clrBackR, clrBackG, clrBackB, clrBackA);
 	/* 2nd shear */
 	newx = dst1->sx;
 	
@@ -2686,13 +2701,11 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	newy = (int) ((double) src->sx * fabs( dSinE ) + (double) src->sy * cos (dRadAngle));
 
 	if (src->trueColor) {
-		dst2 = gdImageCreateTrueColor (newx, newy);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst2 = gdImageCreate (newx, newy);
 		f = gdImageGetPixel;
 	}
-
+	dst2 = gdImageCreateTrueColor(newx, newy);
 	if (dst2 == NULL) {
 		gdImageDestroy(dst1);
 		return NULL;
@@ -2710,13 +2723,11 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	newy = dst2->sy;
     
 	if (src->trueColor) {
-		dst3 = gdImageCreateTrueColor (newx, newy);
 		f = gdImageGetTrueColorPixel;
 	} else {
-		dst3 = gdImageCreate (newx, newy);
 		f = gdImageGetPixel;
 	}
-	
+	dst3 = gdImageCreateTrueColor(newx, newy);	
 	if (dst3 == NULL) {
 		gdImageDestroy(dst2);
 		return NULL;
@@ -2749,7 +2760,6 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
 	if (!gdImageTrueColor(src) && clrBack>=gdImageColorsTotal(src)) {
 		return NULL;
 	}
-
 
 	while (dAngle >= 360.0) {
 		dAngle -= 360.0;
