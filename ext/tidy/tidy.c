@@ -293,9 +293,7 @@ static zend_object_handlers tidy_object_handlers_node;
 static zend_object_handlers tidy_object_handlers_exception;
 
 zend_module_entry tidy_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"tidy",
 	tidy_functions,
 	PHP_MINIT(tidy),
@@ -303,9 +301,7 @@ zend_module_entry tidy_module_entry = {
 	PHP_RINIT(tidy),
 	PHP_RSHUTDOWN(tidy),
 	PHP_MINFO(tidy),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_TIDY_MODULE_VERSION,
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -395,7 +391,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 			break;
 
 		default:
-			TIDY_THROW("Unable to determine type of configuration option");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of configuration option");
 			break;
 	}	
 	
@@ -446,14 +442,14 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		convert_to_string_ex(&config);
 		TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(config));
 		if (tidyLoadConfig(doc, Z_STRVAL_P(config)) < 0) {
-			TIDY_THROW("Could not load configuration file '%s'", Z_STRVAL_P(config));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(config));
 			RETVAL_FALSE;
 		}
 	}
 
 	if(enc_len) {
 		if (tidySetCharEncoding(doc, enc) < 0) {
-			TIDY_THROW("Could not set encoding '%s'", enc);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not set encoding '%s'", enc);
 			RETVAL_FALSE;
 		}
 	}
@@ -879,13 +875,13 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, char *enc TSRMLS
 {	
 	if(enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
-			TIDY_THROW("Could not set encoding '%s'", enc);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not set encoding '%s'", enc);
 			return FAILURE;
 		}
 	}
 	
 	if (tidyParseString(obj->ptdoc->doc, string) < 0) {
-		TIDY_THROW("%s", obj->ptdoc->errbuf->bp);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", obj->ptdoc->errbuf->bp);
 		return FAILURE;
 	
 	} else {
@@ -991,7 +987,7 @@ PHP_FUNCTION(ob_tidyhandler)
 
 	if (input_len > 1) {
 		if (tidyParseString(doc, input) < 0 || tidyCleanAndRepair(doc) < 0) {
-			TIDY_THROW(errbuf.bp);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, errbuf.bp);
 			RETVAL_NULL();
 		} else {
 			TidyBuffer output = {0};
@@ -1087,7 +1083,7 @@ PHP_FUNCTION(tidy_parse_file)
 	obj = (PHPTidyObj *) zend_object_store_get_object(return_value TSRMLS_CC);
 
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
-		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
 		return;
 	}
 
@@ -1312,7 +1308,7 @@ PHP_FUNCTION(tidy_getopt)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
     
 	if (!opt) {
-		TIDY_THROW("Unknown Tidy Configuration Option '%s'", optname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
 		RETURN_FALSE;
 	}
 
@@ -1330,12 +1326,12 @@ PHP_FUNCTION(tidy_getopt)
 			if (optval) {
 				RETURN_TRUE;
 			} else {
-				RETURN_NULL();
+				RETURN_FALSE;
 			}
 			break;
 
 		default:
-			TIDY_THROW("Unable to determine type of configuration option");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of configuration option");
 			break;
 	}
 
@@ -1364,7 +1360,7 @@ TIDY_DOC_METHOD(__construct)
     if(inputfile) {
         
         if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
-            TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
             return;
         }
         
@@ -1396,7 +1392,7 @@ TIDY_DOC_METHOD(parseFile)
 	}
 	
 	if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
-		TIDY_THROW("Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
 		RETURN_FALSE;
 	}
 
