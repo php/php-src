@@ -275,8 +275,7 @@ static zend_object_handlers zend_object_proxy_handlers = {
 	NULL,						/* write_property */
 	NULL,						/* read dimension */
 	NULL,						/* write_dimension */
-	NULL,						/* get_property_ptr */
-	NULL,						/* get_property_zval_ptr */
+	NULL,						/* get_property_ptr_ptr */
 	zend_object_proxy_get,		/* get */
 	zend_object_proxy_set,		/* set */
 	NULL,						/* has_property */

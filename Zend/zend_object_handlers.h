@@ -36,11 +36,8 @@ typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *v
 /* Used to set dimension of the object */
 typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *value TSRMLS_DC);
 
-/* Used to create pointer to the property of the object, for future r/w access via get/set */
-typedef zval **(*zend_object_get_property_ptr_t)(zval *object, zval *member TSRMLS_DC);
-
 /* Used to create pointer to the property of the object, for future direct r/w access */
-typedef zval **(*zend_object_get_property_zval_ptr_t)(zval *object, zval *member TSRMLS_DC);
+typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member TSRMLS_DC);
 
 /* Used to set object value (most probably used in combination with
  * typedef the result of the get_property_ptr)
@@ -96,8 +93,7 @@ typedef struct _zend_object_handlers {
 	zend_object_write_property_t			write_property;
 	zend_object_read_dimension_t			read_dimension;
 	zend_object_write_dimension_t			write_dimension;
-	zend_object_get_property_ptr_t			get_property_ptr;
-	zend_object_get_property_zval_ptr_t		get_property_zval_ptr;
+	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr;
 	zend_object_get_t						get;
 	zend_object_set_t						set;
 	zend_object_has_property_t				has_property;

@@ -386,7 +386,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 }
 
 
-static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
+static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -428,6 +428,15 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 	}
 	return retval;
 }
+
+
+static zval *zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
+{
+	zval **rv = zend_std_get_property_ptr_ptr(object, member TSRMLS_CC);
+
+	return *rv;
+}
+
 
 static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 {
@@ -892,8 +901,7 @@ zend_object_handlers std_object_handlers = {
 	zend_std_write_property,				/* write_property */
 	zend_std_read_dimension,				/* read_dimension */
 	zend_std_write_dimension,				/* write_dimension */
-	zend_std_get_property_ptr,				/* get_property_ptr */
-	zend_std_get_property_ptr,				/* get_property_zval_ptr */
+	zend_std_get_property_ptr_ptr,			/* get_property_ptr_ptr */
 	NULL,									/* get */
 	NULL,									/* set */
 	zend_std_has_property,					/* has_property */
