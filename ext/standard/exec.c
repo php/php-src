@@ -194,8 +194,10 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 		/* strip trailing spaces */
 		l = strlen(buf);
 		t = l;
-		while (l && isspace((int)buf[--l]));
-		if (l < t) buf[l + 1] = '\0';
+		while (l && isspace((int)buf[l - 1])) {
+			l--;
+		}
+		if (l < t) buf[l] = '\0';
 
 		/* Return last line from the shell command */
 		if (PG(magic_quotes_runtime)) {
@@ -204,7 +206,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 			tmp = php_addslashes(buf, 0, &len, 0);
 			RETVAL_STRINGL(tmp,len,0);
 		} else {
-			RETVAL_STRINGL(buf,l?l+1:0,1);
+			RETVAL_STRINGL(buf,l,1);
 		}
 	} else {
 		int b, i;
@@ -233,7 +235,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 	return FG(pclose_ret);
 }
 
-/* {{{ proto int exec(string command [, array output [, int return_value]])
+/* {{{ proto string exec(string command [, array output [, int return_value]])
    Execute an external program */
 PHP_FUNCTION(exec)
 {
