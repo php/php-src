@@ -1,3 +1,26 @@
+2003-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.c
+      zend_hash.h:
+      Bugfix 21918
+
+2003-08-11  Masaki Fujimoto  <masaki-f@fides.dti.ne.jp>
+
+    * Zend.m4
+      flex.skl
+      zend_compile.c
+      zend_globals.h
+      zend_highlight.c
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_multibyte.c
+      zend_multibyte.h:
+      - added script encoding support to Zend Engine 2.
+        this enables ZE2 to gracefully parse scripts written in UTF-8 (with
+      BOM),
+        UTF-16, UTF-32, Shift_JIS, ISO-2022-JP etc... (when configured with
+        '--enable-zend-multibyte' and '--enable-mbstring')
+
 2003-08-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:
