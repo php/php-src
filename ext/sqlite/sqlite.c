@@ -1357,7 +1357,10 @@ PHP_FUNCTION(sqlite_array_query)
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
 	sqlite_query(db, sql, sql_len, mode, 0, NULL, rres TSRMLS_CC);
 	if (db->last_err_code != SQLITE_OK) {
-		efree(rres);
+		if(!rres->vm) {
+			/* no query happened - it's out responsibility to free it */
+			efree(rres);
+		}
 		RETURN_FALSE;
 	}
 
