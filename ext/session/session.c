@@ -1246,13 +1246,23 @@ PHP_FUNCTION(session_set_save_handler)
 	zval **args[6];
 	int i;
 	ps_user *mdata;
+	char *name;
 
 	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_array_ex(6, args) == FAILURE)
 		WRONG_PARAM_COUNT;
 	
 	if (PS(session_status) != php_session_none) 
 		RETURN_FALSE;
-	
+
+	for (i = 0; i < 6; i++) {
+		if (!zend_is_callable(*args[i], 0, &name)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
+			efree(name);
+			RETURN_FALSE;
+		}
+		efree(name);
+	}
+
 	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 	mdata = emalloc(sizeof(*mdata));
