@@ -1427,11 +1427,11 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			  	char *prop_name;
 
 					if (Z_TYPE_P(data) == IS_OBJECT) {
-					  char *class_name;
+						char *class_name;
 
 						zend_unmangle_property_name(str_key, &class_name, &prop_name);
-				  } else {
-				    prop_name = str_key;
+					} else {
+						prop_name = str_key;
 					}
 					if (prop_name) {
 						xmlNodeSetName(property, prop_name);
