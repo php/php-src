@@ -30,12 +30,12 @@
 #include "ext/standard/php_string.h"
 #include "php_mysqli.h"
 
-
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 1
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
 static zend_object_handlers mysqli_object_handlers;
+PR_MAIN *prmain;
 
 /* {{{ php_clear_stmt_bind */
 void php_clear_stmt_bind(STMT *stmt)
@@ -79,9 +79,6 @@ static void mysqli_objects_dtor(void *object, zend_object_handle handle TSRMLS_D
 	if (intern->zo.ce == mysqli_link_class_entry) {
 		if (my_res && my_res->ptr) {
 			mysql_close(my_res->ptr);
-			if (MyG(profiler)) {
-				php_mysqli_profiler_report(my_res->prinfo, 0);
-			}
 		}
 	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
 		if (my_res && my_res->ptr) {
@@ -278,6 +275,12 @@ PHP_MINIT_FUNCTION(mysqli)
 	/* bind blob support */
 	REGISTER_LONG_CONSTANT("MYSQLI_NEED_DATA", MYSQL_NEED_DATA, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_NO_DATA", MYSQL_NO_DATA, CONST_CS | CONST_PERSISTENT);
+
+	/* profiler support */
+	REGISTER_LONG_CONSTANT("MYSQLI_PR_REPORT_STDERR", 1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_PR_REPORT_PORT", 2, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_PR_REPORT_FILE", 3, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -312,6 +315,18 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
+	}
+
+	if (MyG(profiler)) {
+		if (prmain->header.child) {
+			php_mysqli_profiler_report((PR_COMMON *)prmain, 0);
+		}
+		switch (prmain->mode) {
+			case MYSQLI_PR_REPORT_FILE:
+				fclose(prmain->fp);
+				efree(prmain->name);
+			break;
+		}
 	}
 
 	return SUCCESS;
@@ -405,7 +420,9 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	}
 
 	if (MyG(profiler)) {
-		MYSQLI_PROFILER_COMMAND_RETURNSTRING(prcommand, NULL);
+		char tmp[10];
+		sprintf ((char *)&tmp,"row[%d]", mysql_num_fields(result));
+		MYSQLI_PROFILER_COMMAND_RETURNSTRING(prcommand, tmp);
 		prresult->fetched_rows++;
 	}
 }
