@@ -1891,6 +1891,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 
 	if (exclusive) {
+		psession = session;
 		/*
 		zend_hash_next_index_insert(OCI(user),
 									(void *)session,
