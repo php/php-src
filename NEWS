@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- Make the 2nd parameter to pgsql_fetch_* support NULL in case 3
+  parameters are supplied, but you do not want to provide a row number
+  yourself. (Derick)
+- Improved iconv with libc's iconv
 - Added PHP_SAPI constant which contains the name of running SAPI. (Edin)
 - Added ob_get_status() to get array of buffers and it's status. (Yasuo)
 - Fixed crash bug with ob_end_*() function. ob_end_*() will not delete
