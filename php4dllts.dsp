@@ -331,6 +331,10 @@ SOURCE=.\ext\standard\iptc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\lcg\lcg.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\link.c
 # End Source File
 # Begin Source File
@@ -524,6 +528,10 @@ SOURCE=.\functions\php3_string.h
 # Begin Source File
 
 SOURCE=.\functions\php3_syslog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\lcg\php_lcg.h
 # End Source File
 # Begin Source File
 
