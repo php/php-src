@@ -202,6 +202,7 @@ zend_class_entry *xpathobject_class_entry;
 zend_class_entry *domxsltstylesheet_class_entry;
 #endif
 
+static int xslt_has_xsl_keys (xmlDocPtr doc);
 
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC);
 static int node_children(zval **children, xmlNode *nodep TSRMLS_DC);
@@ -4724,6 +4725,21 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 /* }}} */
 #endif
 
+static int xslt_has_xsl_keys (xmlDocPtr doc) {
+	
+	xmlNode *nodep;
+	nodep = xmlDocGetRootElement(doc)->children;
+	while (nodep) {
+		if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
+				return 1;
+				break;
+			}
+		nodep = nodep->next;
+	}
+	return 0;
+}
+
+
 /* {{{ int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
@@ -5382,7 +5398,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	xmlDocPtr xmldocp;
 	xmlDocPtr docp;
 	char **params = NULL;
-	int ret, clone = 0;
+	int ret, clone = -1;
 	char *filename;
 	int filename_len = 0;
 	FILE *f;
@@ -5404,7 +5420,10 @@ PHP_FUNCTION(domxml_xslt_process)
 	}
 
 	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
-
+	if (clone == -1 && xslt_has_xsl_keys(xsltstp->doc) == 1) {
+		clone = 1;
+	}
+	
 	if (idparams) {
 		params = php_domxslt_make_params(idparams, xpath_params TSRMLS_CC);
 	}
