@@ -67,17 +67,10 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
-#if WIN32|WINNT || !defined(HAVE_GETOPT)
-#include "php_getopt.h"
-#endif
-
 PHPAPI extern char *php_ini_path;
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
   (JNIEnv *newJenv, jclass self);
-
-PHPAPI extern char *optarg;
-PHPAPI extern int optind;
 
 typedef struct {
 	JNIEnv *jenv;

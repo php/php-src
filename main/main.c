@@ -69,11 +69,6 @@
 
 #include "SAPI.h"
 
-#if MSVC5 || !defined(HAVE_GETOPT)
-#include "php_getopt.h"
-#endif
-
-
 #ifndef ZTS
 php_core_globals core_globals;
 #else
