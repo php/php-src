@@ -170,7 +170,7 @@
                "/_xsl" => $xsl);
  
  $xh = xslt_create();
- $data = xslt_process("arg:/_xml", "arg:/_xsl", NULL, $args);
+ $data = xslt_process($xh, "arg:/_xml", "arg:/_xsl", NULL, $args);
  xslt_free($xh);
  
  print( "The results of the transformation were\n" );
