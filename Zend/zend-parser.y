@@ -176,7 +176,7 @@ statement:
 	|	T_ECHO echo_expr_list ';'
 	|	T_INLINE_HTML			{ do_echo(&$1 CLS_CC); }
 	|	expr ';'			{ do_free(&$1 CLS_CC); }
-	|	T_REQUIRE expr ';'			{ if ($2.op_type==IS_CONST && $2.u.constant.type==IS_STRING) { require_filename($2.u.constant.value.str.val CLS_CC); zval_dtor(&$2.u.constant); } else { do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); } }
+	|	T_REQUIRE scalar ';'			{ if ($2.op_type==IS_CONST && $2.u.constant.type==IS_STRING) { require_filename($2.u.constant.value.str.val CLS_CC); zval_dtor(&$2.u.constant); } else { do_include_or_eval(ZEND_INCLUDE, &$$, &$2 CLS_CC); } }
 	|	T_REQUIRE '(' expr ')' ';'	{ if ($3.op_type==IS_CONST && $3.u.constant.type==IS_STRING) { require_filename($3.u.constant.value.str.val CLS_CC); zval_dtor(&$3.u.constant); } else { do_include_or_eval(ZEND_INCLUDE, &$$, &$3 CLS_CC); } }
 	|	T_UNSET '(' r_cvar ')' ';' { do_unset(&$3 CLS_CC); }
 	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
