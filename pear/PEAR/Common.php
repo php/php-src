@@ -655,9 +655,6 @@ class PEAR_Common extends PEAR
             case 'changelog':
                 $this->in_changelog = false;
                 break;
-            case 'summary':
-                $this->pkginfo['summary'] = $data;
-                break;
         }
         array_pop($this->element_stack);
         $spos = sizeof($this->element_stack) - 1;
@@ -1049,12 +1046,6 @@ class PEAR_Common extends PEAR
      */
     function validatePackageInfo($info, &$errors, &$warnings, $dir_prefix = '')
     {
-        global $_PEAR_Common_maintainer_roles,
-               $_PEAR_Common_release_states,
-               $_PEAR_Common_dependency_types,
-               $_PEAR_Common_dependency_relations,
-               $_PEAR_Common_file_roles,
-               $_PEAR_Common_replacement_types;
         if (PEAR::isError($info = $this->infoFromAny($info))) {
             return $this->raiseError($info);
         }
@@ -1086,8 +1077,9 @@ class PEAR_Common extends PEAR
         }
         if (empty($info['release_state'])) {
             $errors[] = 'missing release state';
-        } elseif (!in_array($info['release_state'], $_PEAR_Common_release_states)) {
-            $errors[] = "invalid release state `$info[release_state]', should be one of: ".implode(' ', $_PEAR_Common_release_states);
+        } elseif (!in_array($info['release_state'], PEAR_Common::getReleaseStates())) {
+            $errors[] = "invalid release state `$info[release_state]', should be one of: "
+                . implode(' ', PEAR_Common::getReleaseStates());
         }
         if (empty($info['release_date'])) {
             $errors[] = 'missing release date';
@@ -1107,8 +1099,9 @@ class PEAR_Common extends PEAR
                 }
                 if (empty($m['role'])) {
                     $errors[] = "maintainer $i: missing role";
-                } elseif (!in_array($m['role'], $_PEAR_Common_maintainer_roles)) {
-                    $errors[] = "maintainer $i: invalid role `$m[role]', should be one of: ".implode(' ', $_PEAR_Common_maintainer_roles);
+                } elseif (!in_array($m['role'], PEAR_Common::getUserRoles())) {
+                    $errors[] = "maintainer $i: invalid role `$m[role]', should be one of: "
+                        . implode(' ', PEAR_Common::getUserRoles());
                 }
                 if (empty($m['name'])) {
                     $errors[] = "maintainer $i: missing name";
@@ -1124,13 +1117,15 @@ class PEAR_Common extends PEAR
             foreach ($info['deps'] as $d) {
                 if (empty($d['type'])) {
                     $errors[] = "dependency $i: missing type";
-                } elseif (!in_array($d['type'], $_PEAR_Common_dependency_types)) {
-                    $errors[] = "dependency $i: invalid type, should be one of: ".implode(' ', $_PEAR_Common_depenency_types);
+                } elseif (!in_array($d['type'], PEAR_Common::getDependencyTypes())) {
+                    $errors[] = "dependency $i: invalid type, should be one of: " .
+                        implode(' ', PEAR_Common::getDependencyTypes());
                 }
                 if (empty($d['rel'])) {
                     $errors[] = "dependency $i: missing relation";
-                } elseif (!in_array($d['rel'], $_PEAR_Common_dependency_relations)) {
-                    $errors[] = "dependency $i: invalid relation, should be one of: ".implode(' ', $_PEAR_Common_dependency_relations);
+                } elseif (!in_array($d['rel'], PEAR_Common::getDependencyRelations())) {
+                    $errors[] = "dependency $i: invalid relation, should be one of: "
+                        . implode(' ', PEAR_Common::getDependencyRelations());
                 }
                 if (!empty($d['optional'])) {
                     if (!in_array($d['optional'], array('yes', 'no'))) {
@@ -1169,8 +1164,9 @@ class PEAR_Common extends PEAR
                 if (empty($fa['role'])) {
                     $errors[] = "file $file: missing role";
                     continue;
-                } elseif (!in_array($fa['role'], $_PEAR_Common_file_roles)) {
-                    $errors[] = "file $file: invalid role, should be one of: ".implode(' ', $_PEAR_Common_file_roles);
+                } elseif (!in_array($fa['role'], PEAR_Common::getFileRoles())) {
+                    $errors[] = "file $file: invalid role, should be one of: "
+                        . implode(' ', PEAR_Common::getFileRoles());
                 }
                 if ($fa['role'] == 'php' && $dir_prefix) {
                     $this->log(1, "Analyzing $file");
