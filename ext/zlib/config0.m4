@@ -38,7 +38,7 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
 
   case $ZLIB_DIR in
   /usr) ac_extra= ;; 
-  *) ac_extra=-L$ZLIB_DIR/lib ;;
+  *) ac_extra=-L$ZLIB_DIR/$PHP_LIBDIR ;;
   esac
 
   PHP_CHECK_LIBRARY(z, gzgets, [
@@ -49,7 +49,7 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
     $ac_extra
   ])
 
-  PHP_ADD_LIBPATH($ZLIB_DIR/lib, ZLIB_SHARED_LIBADD)
+  PHP_ADD_LIBPATH($ZLIB_DIR/$PHP_LIBDIR, ZLIB_SHARED_LIBADD)
 
   PHP_ZLIB_DIR=$ZLIB_DIR
   PHP_ADD_LIBRARY(z,, ZLIB_SHARED_LIBADD)

@@ -25,7 +25,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
       AC_MSG_ERROR([Could not find pcre.h in $PHP_PCRE_REGEX])
     fi
 
-    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/lib; do
+    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
       test -f $j/libpcre.a -o -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
     done
     

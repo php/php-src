@@ -21,7 +21,7 @@ AC_DEFUN(PHP_TEMP_LDFLAGS,[
 dnl Assign INCLUDE/LFLAGS from PREFIX
 AC_DEFUN(PHP_DBA_STD_ASSIGN,[
   if test -n "$THIS_PREFIX" && test "$THIS_PREFIX" != "/usr"; then
-    THIS_LFLAGS=$THIS_PREFIX/lib
+    THIS_LFLAGS=$THIS_PREFIX/$PHP_LIBDIR
   fi
 ])
 
@@ -86,7 +86,7 @@ AC_ARG_WITH(qdbm,
           AC_DEFINE_UNQUOTED(QDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
           AC_DEFINE(DBA_QDBM, 1, [ ])
           THIS_LIBS=$LIB
-        ], [], [-L$THIS_PREFIX/lib])
+        ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
         if test -n "$THIS_LIBS"; then
           break
         fi
@@ -121,7 +121,7 @@ AC_ARG_WITH(gdbm,
         AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
         AC_DEFINE(DBA_GDBM, 1, [ ]) 
         THIS_LIBS=gdbm
-      ], [], [-L$THIS_PREFIX/lib])
+      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
     fi
     
     PHP_DBA_STD_ASSIGN
@@ -153,7 +153,7 @@ AC_ARG_WITH(ndbm,
           AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
           AC_DEFINE(DBA_NDBM, 1, [ ]) 
           THIS_LIBS=$LIB
-        ], [], [-L$THIS_PREFIX/lib])
+        ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
         if test -n "$THIS_LIBS"; then
           break
         fi
@@ -171,8 +171,8 @@ dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
 AC_DEFUN(PHP_DBA_DB_CHECK,[
   for LIB in $2; do
-    if test -f $THIS_PREFIX/lib/lib$LIB.a -o -f $THIS_PREFIX/lib/lib$LIB.$SHLIB_SUFFIX_NAME; then
-      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib, -l$LIB,[
+    if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a -o -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
         AC_TRY_LINK([
 #include "$THIS_INCLUDE"
         ],[
@@ -367,7 +367,7 @@ AC_ARG_WITH(dbm,
           fi
           AC_DEFINE(DBA_DBM, 1, [ ]) 
           THIS_LIBS=$LIB
-        ], [], [-L$THIS_PREFIX/lib])
+        ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
         if test -n "$THIS_LIBS"; then
           break
         fi
@@ -409,7 +409,7 @@ AC_ARG_WITH(cdb,
           AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
           AC_DEFINE(DBA_CDB, 1, [ ]) 
           THIS_LIBS=$LIB
-        ], [], [-L$THIS_PREFIX/lib])
+        ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
         if test -n "$THIS_LIBS"; then
           break
         fi
