@@ -44,6 +44,7 @@ PHP_RSHUTDOWN_FUNCTION(qtdom);
 PHP_MINFO_FUNCTION(qtdom);
 
 PHP_FUNCTION(qdom_tree);
+PHP_FUNCTION(qdom_error);
 
 /* 
   	Declare any global variables you may need between the BEGIN
