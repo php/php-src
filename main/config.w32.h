@@ -32,12 +32,6 @@
 /* Enable / Disable CALENDAR extension (default: enabled) */
 #define HAVE_CALENDAR 1
 
-/* Enable / Disable RPC extension (default: enabled) */
-#define HAVE_RPC 1
-
-/* Enable / Disable COM extension (default: enabled) */
-#define HAVE_COM 1
-
 /* Enable / Disable CTYPE extension (default: enabled) */
 #define HAVE_CTYPE 1
 
