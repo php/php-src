@@ -5,7 +5,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Ora_Fetch_Into now resets the returned array in all cases (Thies) 
 - Fixed NULL-Column problem in Oracle-Driver (Thies)
 - Added extra metadata functions to ODBC, SQLTables etc (nick@easysoft.com)
-- Fixed SEGV in mcal make_event_object() (Andrew Skalski)
+- Fixed SEGV in mcal make_event_object() and
+  typo in mcal_list_alarms() (Andrew Skalski)
 - Fixed Ora_PLogon (Thies)
 - Resourcified Oracle (Thies)
 - Implemented object serialization/deserialization in WDDX (Andrey)
