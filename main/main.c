@@ -255,9 +255,6 @@ void php_log_err(char *log_message)
 	struct tm tmbuf;
 	time_t error_time;
 	PLS_FETCH();
-#if APACHE
-	SLS_FETCH();
-#endif
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
@@ -265,42 +262,25 @@ void php_log_err(char *log_message)
 		if (!strcmp(PG(error_log), "syslog")) {
 			syslog(LOG_NOTICE, log_message);
 			return;
-		} else {
-#endif
-			log_file = fopen(PG(error_log), "a");
-			if (log_file != NULL) {
-				time(&error_time);
-				strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", localtime_r(&error_time, &tmbuf)); 
-				fprintf(log_file, "[%s] ", error_time_str);
-				fprintf(log_file, log_message);
-				fprintf(log_file, "\n");
-				fclose(log_file);
-				return;
-			}
-#if HAVE_SYSLOG_H
 		}
 #endif
+		log_file = fopen(PG(error_log), "a");
+		if (log_file != NULL) {
+			time(&error_time);
+			strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", localtime_r(&error_time, &tmbuf)); 
+			fprintf(log_file, "[%s] ", error_time_str);
+			fprintf(log_file, log_message);
+			fprintf(log_file, "\n");
+			fclose(log_file);
+			return;
+		}
 	}
-	/* Otherwise fall back to the default logging location. */
-#if APACHE
-	if (SG(server_context)) {
-#if MODULE_MAGIC_NUMBER >= 19970831
-		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, log_message);
-#else
-		log_error(log_message, ((requset_rec *) SG(server_context))->server);
-#endif
-	} else {
-		fprintf(stderr, log_message);
-		fprintf(stderr, "\n");
-	}
-#endif							/*APACHE */
 
-#if CGI_BINARY
-	if (php_header()) {
-		fprintf(stderr, log_message);
-		fprintf(stderr, "\n");
+	/* Otherwise fall back to the default logging location, if we have one */
+
+	if (sapi_module.log_message) {
+		sapi_module.log_message(log_message);
 	}
-#endif
 }
 
 

@@ -236,6 +236,7 @@ static sapi_module_struct sapi_module = {
 	sapi_servlet_read_cookies,		/* read Cookies */
 
 	NULL,							/* register server variables */
+	NULL,							/* Log message */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
