@@ -298,9 +298,11 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			smart_str_append_const(&soap_headers,"\"\r\n");
 		} else {
 			smart_str_append_const(&soap_headers,"Content-Type: text/xml; charset=\"utf-8\"\r\n");
-			smart_str_append_const(&soap_headers, "SOAPAction: \"");
-			smart_str_appends(&soap_headers, soapaction);
-			smart_str_append_const(&soap_headers, "\"\r\n");
+			if (soapaction) {
+				smart_str_append_const(&soap_headers, "SOAPAction: \"");
+				smart_str_appends(&soap_headers, soapaction);
+				smart_str_append_const(&soap_headers, "\"\r\n");
+			}
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
 		smart_str_append_long(&soap_headers, buf_size);

@@ -38,6 +38,7 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 
 static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
+static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr node);
 
 static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[], int *version TSRMLS_DC);
 static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, int version TSRMLS_DC);
@@ -1857,15 +1858,31 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 		trav = trav->next;
 	}
 	if (func == NULL) {
-		php_error(E_ERROR,"looks like we got \"Body\" without function call");
-	}
-
-	function = get_function(sdl, func->name);
-	if (sdl != NULL && function == NULL) {
-		if (*version == SOAP_1_2) {
-			soap_server_fault("rpc:ProcedureNotPresent","Procedure not present", NULL, NULL);
+		function = get_doc_function(sdl, NULL);
+		if (function != NULL) {
+			func = body;
 		} else {
-			php_error(E_ERROR, "Procedure '%s' not present", func->name);
+			php_error(E_ERROR,"looks like we got \"Body\" without function call");
+		}
+	} else {
+		function = get_function(sdl, func->name);
+		if (function && function->binding && function->binding->bindingType == BINDING_SOAP) {
+			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
+			if (fnb->style == SOAP_DOCUMENT) {
+				function = NULL;
+			}
+		}
+		if (sdl != NULL && function == NULL) {
+			function = get_doc_function(sdl, func);
+			if (function != NULL) {
+				func = body;
+			} else {
+				if (*version == SOAP_1_2) {
+					soap_server_fault("rpc:ProcedureNotPresent","Procedure not present", NULL, NULL);
+				} else {
+					php_error(E_ERROR, "Procedure '%s' not present", func->name);
+				}
+			}
 		}
 	}
 
@@ -2094,9 +2111,9 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 				if (function && function->binding->bindingType == BINDING_SOAP) {
 					sdlParamPtr *sparam;
 
-					if (zend_hash_index_find(function->responseParameters, 0, (void **)&sparam) == SUCCESS) {
-						ns = encode_add_ns(param, (*sparam)->encode->details.ns);
-						xmlNodeSetName(param, (*sparam)->encode->details.type_str);
+					if (zend_hash_index_find(function->responseParameters, 0, (void **)&sparam) == SUCCESS && (*sparam)->element) {
+						ns = encode_add_ns(param, (*sparam)->element->namens);
+						xmlNodeSetName(param, (*sparam)->element->name);
 						xmlSetNs(param, ns);
 					}
 				}
@@ -2350,6 +2367,63 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name)
 		}
 	}
 	efree(str);
+	return NULL;
+}
+
+static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params)
+{
+	if (sdl) {
+		sdlFunctionPtr *tmp;
+		sdlParamPtr    *param;
+		
+		zend_hash_internal_pointer_reset(&sdl->functions);
+		while (zend_hash_get_current_data(&sdl->functions, (void**)&tmp) == SUCCESS) {
+			if ((*tmp)->binding && (*tmp)->binding->bindingType == BINDING_SOAP) {
+				sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)(*tmp)->bindingAttributes;
+				if (fnb->style == SOAP_DOCUMENT) {
+					if (params == NULL) {
+						if ((*tmp)->requestParameters == NULL ||
+						    zend_hash_num_elements((*tmp)->requestParameters) == 0) {
+						  return *tmp;
+						} 
+					} else if ((*tmp)->requestParameters != NULL) {
+						int ok = 1;
+						xmlNodePtr node = params;
+
+						zend_hash_internal_pointer_reset((*tmp)->requestParameters);
+						while (zend_hash_get_current_data((*tmp)->requestParameters, (void**)&param) == SUCCESS) {
+						  if ((*param)->element) {
+						  	if (strcmp((*param)->element->name,node->name) != 0) {
+							  	ok = 0; 
+							  	break;
+						  	}
+						  	if ((*param)->element->namens != NULL && node->ns != NULL) {
+						  		if (strcmp((*param)->element->namens,node->ns->href) != 0) {
+								  	ok = 0; 
+								  	break;
+						  		}
+						  	} else if ((void*)(*param)->element->namens != (void*)node->ns) {
+							  	ok = 0; 
+							  	break;
+						  	}
+						  } else if (strcmp((*param)->paramName,node->name) != 0) {
+						  	ok = 0; 
+						  	break;
+						  }
+							zend_hash_move_forward((*tmp)->requestParameters);
+							do {
+								node = node->next;
+							} while (node != NULL && node->type != XML_ELEMENT_NODE);
+						}
+						if (ok && node == NULL) {
+							return (*tmp);
+						}						
+					}
+				}
+			}
+			zend_hash_move_forward(&sdl->functions);
+		}
+	}
 	return NULL;
 }
 
