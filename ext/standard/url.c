@@ -300,7 +300,6 @@ PHP_FUNCTION(urlencode)
 	}
 	str = php_url_encode((*arg)->value.str.val, (*arg)->value.str.len, &str_len);
 	RETVAL_STRINGL(str, str_len, 0);
-	efree(str);
 }
 /* }}} */
 
