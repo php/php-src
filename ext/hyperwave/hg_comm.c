@@ -654,7 +654,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 		scriptname = emalloc(5*sizeof(char *));
 		if (zend_hash_find(&EG(symbol_table), "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &script_name)==FAILURE)
 			for(i=0; i<5; i++)
-				scriptname[i] = &emptystring;
+				scriptname[i] = (char *) &emptystring;
 		else {
 			convert_to_string_ex(script_name);
 			for(i=0; i<5; i++)
@@ -684,7 +684,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	newtext = text;
 	bgstr[0] = '\0';
 #ifdef newlist
-	zend_llist_sort(pAnchorList, fnCmpAnchors TSRMLS_CC);
+	zend_llist_sort(pAnchorList, (llist_compare_func_t) fnCmpAnchors TSRMLS_CC);
 	ptr = (ANCHOR **) zend_llist_get_last(pAnchorList);
 	if(ptr)
 		cur_ptr = *ptr;
@@ -1513,7 +1513,7 @@ hg_msg *recv_command(int sockfd)
 	return(comm_msg);
 }
 
-int send_dummy(int sockfd, hw_objectID objectID, int msgid, char **attributes)
+int send_dummy(int sockfd, hw_objectID objectID, int msg_id, char **attributes)
 {
 	hg_msg msg, *retmsg;
 	int  length, error;
@@ -1521,7 +1521,7 @@ int send_dummy(int sockfd, hw_objectID objectID, int msgid, char **attributes)
 
 	length = HEADER_LENGTH + sizeof(hw_objectID);
 
-	build_msg_header(&msg, length, msgid++, msgid);
+	build_msg_header(&msg, length, msg_id++, msg_id);
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
 /*		perror("send_command"); */
