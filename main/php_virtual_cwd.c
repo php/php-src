@@ -429,7 +429,7 @@ CWD_API int virtual_creat(const char *path, mode_t mode)
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	virtual_file_ex(&new_state, path, NULL);
 
-	f = open(new_state.cwd, O_CREAT | O_TRUNC, mode);
+	f = creat(new_state.cwd,  mode);
 
 	CWD_STATE_FREE(&new_state);
 	return f;
