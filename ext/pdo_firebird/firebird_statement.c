@@ -53,8 +53,14 @@ static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
-	int i;
+	int result = 1, i;
 	
+	/* release the statement */
+	if (*S->name && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+		RECORD_ERROR(stmt);
+		result = 0;
+	}
+
 	/* clean up the fetch buffers if they have been used */
 	for (i = 0; i < S->out_sqlda.sqld; ++i) {
 		if (S->fetch_buf[i]) {
@@ -72,7 +78,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	free_sqlda(&S->out_sqlda);
 	efree(S);
 	
-	return 1;
+	return result;
 }
 /* }}} */
 
@@ -329,12 +335,10 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	}
 
 	switch (event_type) {
-		zval *zparam;
 		char *value;
 		unsigned long value_len;
 			
 		case PDO_PARAM_EVT_ALLOC:
-				
 			if (param->is_param) {
 				/* allocate the parameter */
 				var->sqlind = (void*)emalloc(var->sqllen + 2*sizeof(short));
@@ -343,17 +347,26 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			break;
 			
 		case PDO_PARAM_EVT_EXEC_PRE:
-
 			if (!param->is_param) {
 				break;
 			}
 
-			zparam = param->parameter;
+			*var->sqlind = 0;
 
 			/* check if a NULL should be inserted */
-			switch (Z_TYPE_P(zparam)) {
+			switch (Z_TYPE_P(param->parameter)) {
 				int force_null;
-	
+				
+				case IS_LONG:
+					var->sqltype = sizeof(long) == 8 ? SQL_INT64 : SQL_LONG;
+					var->sqldata = (void*)&Z_LVAL_P(param->parameter);
+					var->sqllen = sizeof(long);
+					break;
+				case IS_DOUBLE:
+					var->sqltype = SQL_DOUBLE;
+					var->sqldata = (void*)&Z_DVAL_P(param->parameter);
+					var->sqllen = sizeof(double);
+					break;
 				case IS_STRING:
 					force_null = 0;
 	
@@ -367,30 +380,28 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
-							force_null = (Z_STRLEN_P(zparam) == 0);
+							force_null = (Z_STRLEN_P(param->parameter) == 0);
 					}
-					if (! force_null) break;
-	
+					if (!force_null) {
+						var->sqltype = SQL_TEXT;
+						var->sqldata = Z_STRVAL_P(param->parameter);
+						var->sqllen	 = Z_STRLEN_P(param->parameter);
+						break;
+					}
 				case IS_NULL:
 					/* complain if this field doesn't allow NULL values */
-					if (! (var->sqltype & 1)) {
+					if (~var->sqltype & 1) {
 						stmt->error_code = PDO_ERR_CONSTRAINT;
+						S->H->last_app_error = "Parameter requires non-null value";
 						return 0;
 					}
 					*var->sqlind = -1;
-					return 1;
+					break;
+				default:
+					stmt->error_code = PDO_ERR_NOT_IMPLEMENTED;
+					S->H->last_app_error = "Binding arrays/objects is not supported";
+					return 0;
 			}
-
-			*var->sqlind = 0;
-	
-			SEPARATE_ZVAL(&zparam);
-
-			convert_to_string(zparam);
-
-			var->sqltype = SQL_TEXT;
-			var->sqldata = Z_STRVAL_P(zparam);
-			var->sqllen	 = Z_STRLEN_P(zparam);
-
 			break;
 
 		case PDO_PARAM_EVT_FETCH_POST:
@@ -449,7 +460,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 }
 /* }}} */
 
-static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
+static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
@@ -468,7 +479,7 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, long attr, zval *val TS
 }
 /* }}} */
 
-struct pdo_stmt_methods firebird_stmt_methods = {
+struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_dtor,
 	firebird_stmt_execute,
 	firebird_stmt_fetch,
