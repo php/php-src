@@ -1,3 +1,74 @@
+2001-02-23  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/config.m4
+      ext/midgard/preparser.c:
+    - workaround for the function mgd_eval() to return a value like the PHP eval().
+    - changed --with-mgd-experimental to --enable-mgd-experimental
+
+2001-02-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: That should do the trick.
+
+2001-02-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c
+      main/php.h
+      sapi/cgi/cgi_main.c
+      sapi/servlet/servlet.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/image.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/Makefile.in
+      ext/dbase/dbase.c
+      ext/filepro/filepro.c
+      ext/hyperwave/hw.c
+      ext/db/db.c: Finish fopen-wrappers rename.
+
+    * ext/fribidi/config.m4: Fix another instance of the == bug.
+
+    * ext/midgard/config.m4:
+    Note that the equality operator in the Bourne shell is a single =,
+    unlike C/C++/PHP.
+
+2001-02-23  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/config.m4:
+    Added --with-mgd-experimental option to compile experimental stuff (off by defeult)
+
+2001-02-23  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/test.php: mnogosearch example updated.
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+    Added ispell loading routines and date search limits in mnogosearch module.
+
+2001-02-23  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/oop.c: another typo.
+
+    * ext/midgard/midgard.c: removed unneeded header inclusion.
+
+    * ext/midgard/oop.c: typo fixed.
+
+    * ext/midgard/midgard.c:
+    Removed constants registration, added a conversion table $midgard->types[$objtype]
+    try var_dump($midgard) for more details
+
+2001-02-23  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * ext/standard/exec.c:
+    fix stas' last commit, added additional ifdefs PHP_SIGCHILD to fix win32 build
+
+2001-02-23  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/preparser-scanner.l:
+    misbehavior of the preparser that translated (eg) myeval() into mymgd_eval()
+
 2001-02-22  David Guerizec  <david@guerizec.net>
 
     * ext/midgard/midgard.c: Registering Midgard constants.
