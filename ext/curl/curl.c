@@ -71,7 +71,7 @@ static CURLcode win32_init()
 	WORD    requested_version = MAKEWORD(1, 1);
 	int     error;
 	
-	error = WSAStartup(requested_version, wsa_data);
+	error = WSAStartup(requested_version, &wsa_data);
 	if (error != 0) {
 		return CURLE_FAILED_INIT;
 	}
