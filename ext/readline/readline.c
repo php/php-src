@@ -335,16 +335,11 @@ PHP_FUNCTION(readline_write_history)
 /* }}} */
 /* {{{ proto void readline_completion_function(string funcname) 
    Readline completion function? */
-char *test[] = { "bleibt", "da", "helfen", "keine", "pillen", "und" , "heissen", "umschlaege","hallo", "pallo", "egon", "thies", "ist", "doof", "tubu", "tata", 0 };
 
 static char *_readline_command_generator(char *text,int state)
 {
 	HashTable  *myht = Z_ARRVAL(_readline_array);
 	zval **entry;
-	
-	/*
-	printf("\n_readline_command_generator(\"%s\",%d)\n",text,state);
-	*/
 	
 	if (! state)	{
 		zend_hash_internal_pointer_reset(myht);
