@@ -38,9 +38,9 @@ static int le_domxmltextp;
 static int le_domxmlpip;
 static int le_domxmlcommentp;
 static int le_domxmlnotationp;
-static int le_domxmlentityp;
+/*static int le_domxmlentityp;*/
 static int le_domxmlentityrefp;
-static int le_domxmlnsp;
+/*static int le_domxmlnsp;*/
 
 #if defined(LIBXML_XPATH_ENABLED)
 static int le_xpathctxp;
@@ -294,12 +294,37 @@ zend_module_entry domxml_module_entry = {
 ZEND_GET_MODULE(domxml)
 #endif
 
+static void dom_object_set_data(void *obj, zval *wrapper) {
+	/*
+	char tmp[20];
+	sprintf(tmp, "%08X", obj);
+	fprintf(stderr, "Adding %s to hash\n", tmp);
+	*/	
+	((xmlNodePtr) obj)->_private = wrapper;
+}
+
+static zval *dom_object_get_data(void *obj) {
+	/*	char tmp[20];
+		sprintf(tmp, "%08X", obj);
+		fprintf(stderr, "Trying getting %s from object ...", tmp);
+		if(((xmlNodePtr) obj)->_private)
+		fprintf(stderr," found\n");
+		else
+		fprintf(stderr," not found\n"); */
+	return((zval *) (((xmlNodePtr) obj)->_private));
+}
+
 static void php_free_xml_doc(zend_rsrc_list_entry *rsrc)
 {
 	xmlDoc *doc = (xmlDoc *)rsrc->ptr;
 /*	fprintf(stderr, "Freeing document: %s\n", doc->name); */
-	if(doc)
+
+	if (doc) {
+		zval *wrapper = dom_object_get_data(doc);
+		if (wrapper)
+			zval_ptr_dtor(&wrapper);
 		xmlFreeDoc(doc);
+	}
 }
 
 void php_free_xml_node(zend_rsrc_list_entry *rsrc) {
@@ -501,24 +526,6 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 
 	return obj;
 }  
-
-static void dom_object_set_data(void *obj, zval *wrapper) {
-	char tmp[20];
-	sprintf(tmp, "%08X", obj);
-/*	fprintf(stderr, "Adding %s to hash\n", tmp); */
-	((xmlNodePtr) obj)->_private = wrapper;
-}
-
-static zval *dom_object_get_data(void *obj) {
-/*	char tmp[20];
-	sprintf(tmp, "%08X", obj);
-	fprintf(stderr, "Trying getting %s from object ...", tmp);
-	if(((xmlNodePtr) obj)->_private)
-		fprintf(stderr," found\n");
-	else
-		fprintf(stderr," not found\n"); */
-	return((zval *) (((xmlNodePtr) obj)->_private));
-}
 
 static void php_dom_set_object(zval *wrapper, void *obj, int rsrc_type) {
 	zval *handle, *addr;
@@ -933,6 +940,7 @@ PHP_FUNCTION(domxml_node)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1045,6 +1053,7 @@ PHP_FUNCTION(domxml_node_first_child)
 	rv = php_domobject_new(first, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1067,6 +1076,7 @@ PHP_FUNCTION(domxml_node_last_child)
 	rv = php_domobject_new(last, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1090,6 +1100,7 @@ PHP_FUNCTION(domxml_node_next_sibling)
 	rv = php_domobject_new(first, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1113,6 +1124,7 @@ PHP_FUNCTION(domxml_node_previous_sibling)
 	rv = php_domobject_new(first, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1137,6 +1149,7 @@ PHP_FUNCTION(domxml_node_owner_document)
 	rv = php_domobject_new((xmlNodePtr) docp, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1224,6 +1237,7 @@ PHP_FUNCTION(domxml_node_parent)
 	rv = php_domobject_new(last, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1302,6 +1316,7 @@ PHP_FUNCTION(domxml_node_add_child)
 	rv = php_domobject_new(child, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1328,6 +1343,7 @@ PHP_FUNCTION(domxml_node_append_child)
 	rv = php_domobject_new(child, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1355,6 +1371,7 @@ PHP_FUNCTION(domxml_node_insert_before)
 	rv = php_domobject_new(child, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1441,6 +1458,7 @@ PHP_FUNCTION(domxml_node_new_child)
 	rv = php_domobject_new(child, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1525,6 +1543,7 @@ PHP_FUNCTION(domxml_element)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1595,6 +1614,7 @@ PHP_FUNCTION(domxml_elem_set_attribute)
 	rv = php_domobject_new((xmlNodePtr) attr, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1723,6 +1743,7 @@ PHP_FUNCTION(domxml_doc_doctype)
 	rv = php_domobject_new((xmlNodePtr) dtd, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1768,6 +1789,7 @@ PHP_FUNCTION(domxml_doc_document_element)
 			rv = php_domobject_new(node, &ret);
 			SEPARATE_ZVAL(&rv);
 			*return_value = *rv;
+			FREE_ZVAL(rv);
 			return;
 		}
 		node = node->next;
@@ -1803,6 +1825,7 @@ PHP_FUNCTION(domxml_doc_create_element)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1834,6 +1857,7 @@ PHP_FUNCTION(domxml_doc_create_text_node)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1865,6 +1889,7 @@ PHP_FUNCTION(domxml_doc_create_comment)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1897,6 +1922,7 @@ PHP_FUNCTION(domxml_doc_create_attribute)
 	rv = php_domobject_new((xmlNodePtr) node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1929,6 +1955,7 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1964,6 +1991,7 @@ PHP_FUNCTION(domxml_doc_imported_node)
 	rv = php_domobject_new(node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -1986,6 +2014,7 @@ PHP_FUNCTION(domxml_intdtd)
 	rv = php_domobject_new((xmlNodePtr) dtd, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -2041,6 +2070,7 @@ PHP_FUNCTION(xmldoc)
 	rv = php_domobject_new((xmlNodePtr) docp, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -2129,6 +2159,7 @@ PHP_FUNCTION(domxml_add_root)
 	rv = php_domobject_new(nodep, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -2152,6 +2183,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 	rv = php_domobject_new((xmlNodePtr) docp, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -2355,6 +2387,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	rv = php_xpathcontext_new(ctx, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
+	FREE_ZVAL(rv);
 }
 /* }}} */
 
@@ -2454,6 +2487,8 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		case XPATH_LOCATIONSET:
 			break;
 		case XPATH_USERS:
+			break;
+		case XPATH_XSLT_TREE:
 			break;
 	}
 	*return_value = *rv;
