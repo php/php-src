@@ -182,6 +182,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 	}
 
 
+#define DVAL_TO_LVAL(d, l) (l) = (d) > LONG_MAX ? (unsigned long) (d) : (long) (d)
 
 #define zendi_convert_to_long(op, holder, result)					\
 	if (op==result) {												\
@@ -192,7 +193,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = 0;							\
 				break;												\
 			case IS_DOUBLE:											\
-				(holder).value.lval = (long) (op)->value.dval;		\
+				DVAL_TO_LVAL((op)->value.dval, (holder).value.lval);	\
 				break;												\
 			case IS_STRING:											\
 				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);					\
@@ -277,7 +278,7 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 		case IS_LONG:
 			break;
 		case IS_DOUBLE:
-			op->value.lval = (long) op->value.dval;
+			DVAL_TO_LVAL(op->value.dval, op->value.lval);
 			break;
 		case IS_STRING:
 			strval = op->value.str.val;
