@@ -723,18 +723,31 @@ SPL_METHOD(Array, seek)
  Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {
-	long position;
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = HASH_OF(intern->array);
 	HashPosition pos;
+	long cnt;
 
 	if (!aht) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
 		RETURN_LONG(0);
 	}
 
-	RETURN_LONG(zend_hash_num_elements(aht));
+	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
+		pos = intern->pos;
+		cnt = 0;
+		zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
+		while(intern->pos) {
+			cnt++;
+			spl_array_next(intern TSRMLS_CC);
+		}
+		intern->pos = pos;
+		RETURN_LONG(cnt);
+	} else {
+		RETURN_LONG(zend_hash_num_elements(aht));
+	}
+	
 } /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
