@@ -23,7 +23,7 @@ libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 	
 # automake isn't too clever about "non-standard" use of lex and yacc
 
-zend-scanner.l: zend-parser.h
+$(srcdir)/zend-scanner.l: zend-parser.h
 
 zend-scanner.c: $(srcdir)/zend-scanner.l
 	$(LEX) -Pzend -o$@ -i $(srcdir)/zend-scanner.l
