@@ -1,3 +1,8 @@
+2003-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_operators.h:
+      Use pretty macro instead.
+
 2003-10-28  Andi Gutmans  <andi@zend.com>
 
     * zend_language_parser.y:
