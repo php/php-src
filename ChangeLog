@@ -1,3 +1,52 @@
+2003-02-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c
+      win32/php4dllts.dsp:
+      Add comment about thread-safety of gethostbyname on win32.
+      Set the correct path to the win32 config.h file in the .dsp file.
+
+2003-02-21  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      fixed headers and cleaned up a bit
+
+    * ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/dns.h:
+      - Fixed bug: #22339
+
+    * ext/informix/ifx.ec
+      ext/informix/php_informix_includes.h
+      ext/snmp/php_snmp.h:
+      MFB
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      ZTS build fixes, style and ws fixes
+
+    * ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h:
+      ZTS fixes
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      Fix ZTS build
+
+2003-02-21  David Viner  <dviner@yahoo-inc.com>
+
+    * sapi/apache/php4apache.dsp:
+      this tiny change adds the location of apache includes and libraries that
+      are installed when you use the Apache Windows Installer
+      (C:\Program Files\Apache Group\Apache\*).  With this patch,
+      a windows developer who has used the Apache Windows Installer should be
+      able to compile the Apache sapi module without any modifications to
+      his/her
+      installed tree.  It should have no effect whatsoever on anyone else.
+      
+      --dviner
+
 2003-02-20  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * README.input_filter
