@@ -47,6 +47,13 @@ PHP_FUNCTION(pfpro_process);            /* Transaction processing     */
 typedef struct {
 	int le_pfpro;
 	int initialised;
+	char *defaulthost;
+	char *defaultport;
+	char *defaulttimeout;
+	char *proxyaddress;
+	char *proxyport;
+	char *proxylogon;
+	char *proxypassword;
 } php_pfpro_globals;
 
 #ifdef ZTS

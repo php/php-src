@@ -71,16 +71,21 @@ zend_module_entry pfpro_module_entry = {
 ZEND_GET_MODULE(pfpro)
 #endif
 
-/*
+
 PHP_INI_BEGIN()
-PHP_INI_END()
-*/
+	STD_PHP_INI_ENTRY("pfpro.defaulthost",			"test.signio.com",	PHP_INI_ALL, OnUpdateString,			defaulthost,			php_pfpro_globals,	pfpro_globals) 
+	STD_PHP_INI_ENTRY("pfpro.defaultport",			"443",			PHP_INI_ALL, OnUpdateInt,			defaultport,			php_pfpro_globals,	pfpro_globals) 
+	STD_PHP_INI_ENTRY("pfpro.defaulttimeout",		"30",			PHP_INI_ALL, OnUpdateInt,			defaulttimeout,			php_pfpro_globals,	pfpro_globals) 
+	STD_PHP_INI_ENTRY("pfpro.proxyaddress",			"",			PHP_INI_ALL, OnUpdateString,			proxyaddress,			php_pfpro_globals,	pfpro_globals) 
+	STD_PHP_INI_ENTRY("pfpro.proxyport",			"",			PHP_INI_ALL, OnUpdateInt,			proxyport,			php_pfpro_globals,	pfpro_globals) 
+	STD_PHP_INI_ENTRY("pfpro.proxylogon",			"",			PHP_INI_ALL, OnUpdateString,			proxylogon,			php_pfpro_globals,	pfpro_globals) 
+	STD_PHP_INI_ENTRY("pfpro.proxypassword",		"",			PHP_INI_ALL, OnUpdateString,			proxypassword,			php_pfpro_globals,	pfpro_globals) 
+PHP_INI_END() 
+
 
 PHP_MINIT_FUNCTION(pfpro)
 {
-/*
 	REGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 
@@ -189,12 +194,12 @@ PHP_FUNCTION(pfpro_process_raw)
 
 	char *parmlist;
 	char *address = NULL;
-	int port = 443;
-	int timeout = 30;
-	char *proxyAddress = NULL;
-	int proxyPort = 0;
-	char *proxyLogon = NULL;
-	char *proxyPassword = NULL;
+	int port = (int)PFPROG(defaultport);
+	int timeout = (int)PFPROG(defaulttimeout);
+	char *proxyAddress = (char*)PFPROG(proxyaddress);
+	int proxyPort = (int)PFPROG(proxyport);
+	char *proxyLogon = (char*)PFPROG(proxylogon); 
+	char *proxyPassword = (char*)PFPROG(proxypassword);
 
 	int freeaddress = 0;
 
@@ -261,7 +266,7 @@ PHP_FUNCTION(pfpro_process_raw)
 	/* Default to signio's test server */
 
 	if (address == NULL) {
-		address = estrdup("test.signio.com");
+		address = estrdup(PFPROG(defaulthost));
 		freeaddress = 1;
 	}
 
@@ -314,12 +319,13 @@ PHP_FUNCTION(pfpro_process)
 	int pass;
 
 	char *address = NULL;
-	int port = 443;
-	int timeout = 30;
-	char *proxyAddress = NULL;
-	int proxyPort = 0;
-	char *proxyLogon = NULL;
-	char *proxyPassword = NULL;
+	int port = (int)PFPROG(defaultport);
+	int timeout = (int)PFPROG(defaulttimeout);
+	char *proxyAddress = (char*)PFPROG(proxyaddress);
+	int proxyPort = (int)PFPROG(proxyport);
+	char *proxyLogon = (char*)PFPROG(proxylogon); 
+	char *proxyPassword = (char*)PFPROG(proxypassword);
+
 	int freeaddress = 0;
 
 	char *parmlist = NULL;
@@ -504,7 +510,7 @@ PHP_FUNCTION(pfpro_process)
 
 	if (address == NULL) {
 		/* is it safe to just do address = "test.signio.com"; here? */
-		address = estrdup("test.signio.com");
+		address = estrdup(PFPROG(defaulthost));
 		freeaddress = 1;
 	}
 
@@ -623,7 +629,6 @@ PHP_FUNCTION(pfpro_process)
 
 }
 /* }}} */
-
 
 #endif	/* HAVE_PFPRO */
 
