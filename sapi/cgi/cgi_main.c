@@ -294,7 +294,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	if(SG(request_info).no_headers == 1) {
 		return  SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
-	/* Check wheater to send RFC2616 style headers compatible with
+	/* Check whether to send RFC 2616 style headers compatible with
 	 * PHP versions 4.2.3 and earlier compatible with web servers
 	 * such as IIS. Default is informal CGI RFC header compatible 
 	 * with Apache.
@@ -489,6 +489,16 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
+static int sapi_cgi_get_fd(int *fd TSRMLS_DC)
+{
+	*fd = STDOUT_FILENO;
+	return SUCCESS;
+}
+
+static int sapi_cgi_force_http_10(TSRMLS_D)
+{
+	return SUCCESS;
+}
 
 /* {{{ sapi_module_struct cgi_sapi_module
  */
@@ -524,7 +534,17 @@ static sapi_module_struct cgi_sapi_module = {
 	sapi_cgi_register_variables,	/* register server variables */
 	sapi_cgi_log_message,			/* Log message */
 
-	STANDARD_SAPI_MODULE_PROPERTIES
+	NULL,							/* php.ini path override */
+	NULL,							/* block interruptions */
+	NULL,							/* unblock interruptions */
+	NULL,							/* default post reader */
+	NULL,							/* treat data */
+	NULL,							/* executable location */
+	
+	0,								/* php.ini ignore */
+
+	sapi_cgi_get_fd,				/* get fd */
+	sapi_cgi_force_http_10,			/* force HTTP/1.0 */
 };
 /* }}} */
 
