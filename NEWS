@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+17 Feb 2003, Version 4.3.1
+- Fixed serious security vulnerability in CGI SAPI. (Shane)
+
 27 Dec 2002, Version 4.3.0
 - If you don't specify building any other SAPI "make install" will install the
   CGI SAPI binary in {PREFIX}/bin/php. If you want to install CLI SAPI in that
