@@ -1,3 +1,43 @@
+2001-01-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: Fixed bug #8733
+
+2001-01-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sockets/sockets.c: Kill some warnings
+
+2001-01-16  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/Image/Remote.php:
+    Fixed the vim rules.
+
+2001-01-16  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    Added the SABLOT_SET_ERROR() macro to set sablotron errors...
+
+2001-01-16  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c
+      README.Zeus:    Added changes to environment variable manipulations, to support Zeus 3.3.8
+    and increase compatibility between Zeus/IIS/Apache. Now, URLs like
+    http://foo.org/file.php/a/b/c/d work correctly.
+
+2001-01-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Use the write buffer subsystem to accumulate network writes and to
+    increase the overall through-put.
+
+2001-01-16  Sean Grimes  <metallic@noworlater.net>
+
+    * pear/XML/Render.php:
+    Added a method to call the HTML and PDF rendering modes(not implemented yet).
+    Added the parse function which should allow for finer XML parsing.
+    The XML file contents are now stored in a var available to the entire class.
+    Added a wrapper around setInputFile() and setInput()
+
 2001-01-15  Zeev Suraski  <zeev@zend.com>
 
     * sapi/isapi/stresstest/stresstest.dsp: Fix output dir
