@@ -1,3 +1,40 @@
+2002-08-30  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/sapi_apache.c:
+    Cleaned up a bunch of code, fully integrated the class::method handler
+    code into a single stack per handlers (for correct interleaving).
+
+    Changed the syntax so that now they are of the form
+
+    phpUriHandler /filename
+    phpUriHandlerMethod Class::Method
+
+    This now works for all handlers including response handlers.
+
+2002-08-30  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Bug fix: dont cache connection if proxy setting have changed
+
+2002-08-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/config.m4: Fix shared build
+
+    * ext/xmlrpc/config.m4
+      ext/xmlrpc/xmlrpc-epi-php.c:
+    MFH: Fix for bug: #19124 (shared extension build fixes)
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/config.m4:
+    Fix bug: #19124, xmlrpc extension builds ok now as shared extension.
+
+    * ext/gd/config.m4:
+    xpm.h is sometimes in /usr/include/X11 (or /usr/X11R6/include/X11)
+
+    * ext/pdf/pdf.c: Fix the build when bundled gd library is used
+
 2002-08-29  George Schlossnagle  <george@omniti.com>
 
     * sapi/apache/mod_php4.c
