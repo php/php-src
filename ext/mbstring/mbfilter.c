@@ -128,7 +128,7 @@
 /* language structure */
 static const char *mbfl_language_uni_aliases[] = {"universal", "none", NULL};
 
-static mbfl_language mbfl_language_uni = {
+static const mbfl_language mbfl_language_uni = {
 	mbfl_no_language_uni,
 	"uni",
 	"uni",
@@ -138,7 +138,7 @@ static mbfl_language mbfl_language_uni = {
 	mbfl_no_encoding_base64
 };
 
-static mbfl_language mbfl_language_japanese = {
+static const mbfl_language mbfl_language_japanese = {
 	mbfl_no_language_japanese,
 	"Japanese",
 	"ja",
@@ -148,7 +148,7 @@ static mbfl_language mbfl_language_japanese = {
 	mbfl_no_encoding_7bit
 };
 
-static mbfl_language mbfl_language_korean = {
+static const mbfl_language mbfl_language_korean = {
 	mbfl_no_language_korean,
 	"Korean",
 	"ko",
@@ -158,12 +158,24 @@ static mbfl_language mbfl_language_korean = {
 	mbfl_no_encoding_7bit
 };
 
-static mbfl_language mbfl_language_english = {
+static const mbfl_language mbfl_language_english = {
 	mbfl_no_language_english,
 	"English",
 	"en",
 	NULL,
 	mbfl_no_encoding_8859_1,
+	mbfl_no_encoding_qprint,
+	mbfl_no_encoding_8bit
+};
+
+static const char *mbfl_language_german_aliases[] = {"Deutsch", NULL};
+
+static const mbfl_language mbfl_language_german = {
+	mbfl_no_language_english,
+	"German",
+	"de",
+	(const char *(*)[])&mbfl_language_german_aliases,
+	mbfl_no_encoding_8859_15,
 	mbfl_no_encoding_qprint,
 	mbfl_no_encoding_8bit
 };
@@ -198,13 +210,14 @@ static mbfl_language mbfl_language_russian = {
 	mbfl_no_encoding_8bit
 };
 
-static mbfl_language *mbfl_language_ptr_table[] = {
+static const mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_uni,
 	&mbfl_language_japanese,
 	&mbfl_language_korean,
 	&mbfl_language_simplified_chinese,
 	&mbfl_language_traditional_chinese,
 	&mbfl_language_english,
+	&mbfl_language_german,
 	&mbfl_language_russian,
 	NULL
 };
@@ -387,7 +400,7 @@ static const unsigned char mblen_table_uhc[] = { /* 0x81-0xFE */
 /* encoding structure */
 static const char *mbfl_encoding_pass_aliases[] = {"none", NULL};
 
-static mbfl_encoding mbfl_encoding_pass = {
+static const mbfl_encoding mbfl_encoding_pass = {
 	mbfl_no_encoding_pass,
 	"pass",
 	NULL,
@@ -398,7 +411,7 @@ static mbfl_encoding mbfl_encoding_pass = {
 
 static const char *mbfl_encoding_auto_aliases[] = {"unknown", NULL};
 
-static mbfl_encoding mbfl_encoding_auto = {
+static const mbfl_encoding mbfl_encoding_auto = {
 	mbfl_no_encoding_auto,
 	"auto",
 	NULL,
@@ -407,7 +420,7 @@ static mbfl_encoding mbfl_encoding_auto = {
 	0
 };
 
-static mbfl_encoding mbfl_encoding_wchar = {
+static const mbfl_encoding mbfl_encoding_wchar = {
 	mbfl_no_encoding_wchar,
 	"wchar",
 	NULL,
@@ -416,7 +429,7 @@ static mbfl_encoding mbfl_encoding_wchar = {
 	MBFL_ENCTYPE_WCS4BE
 };
 
-static mbfl_encoding mbfl_encoding_byte2be = {
+static const mbfl_encoding mbfl_encoding_byte2be = {
 	mbfl_no_encoding_byte2be,
 	"byte2be",
 	NULL,
@@ -425,7 +438,7 @@ static mbfl_encoding mbfl_encoding_byte2be = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_byte2le = {
+static const mbfl_encoding mbfl_encoding_byte2le = {
 	mbfl_no_encoding_byte2le,
 	"byte2le",
 	NULL,
@@ -434,7 +447,7 @@ static mbfl_encoding mbfl_encoding_byte2le = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_byte4be = {
+static const mbfl_encoding mbfl_encoding_byte4be = {
 	mbfl_no_encoding_byte4be,
 	"byte4be",
 	NULL,
@@ -443,7 +456,7 @@ static mbfl_encoding mbfl_encoding_byte4be = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_byte4le = {
+static const mbfl_encoding mbfl_encoding_byte4le = {
 	mbfl_no_encoding_byte4le,
 	"byte4le",
 	NULL,
@@ -452,7 +465,7 @@ static mbfl_encoding mbfl_encoding_byte4le = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_base64 = {
+static const mbfl_encoding mbfl_encoding_base64 = {
 	mbfl_no_encoding_base64,
 	"BASE64",
 	"BASE64",
@@ -461,7 +474,7 @@ static mbfl_encoding mbfl_encoding_base64 = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_uuencode = {
+static const mbfl_encoding mbfl_encoding_uuencode = {
 	mbfl_no_encoding_uuencode,
 	"UUENCODE",
 	"x-uuencode",
@@ -472,7 +485,7 @@ static mbfl_encoding mbfl_encoding_uuencode = {
 
 static const char *mbfl_encoding_qprint_aliases[] = {"qprint", NULL};
 
-static mbfl_encoding mbfl_encoding_qprint = {
+static const mbfl_encoding mbfl_encoding_qprint = {
 	mbfl_no_encoding_qprint,
 	"Quoted-Printable",
 	"Quoted-Printable",
@@ -481,7 +494,7 @@ static mbfl_encoding mbfl_encoding_qprint = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_7bit = {
+static const mbfl_encoding mbfl_encoding_7bit = {
 	mbfl_no_encoding_7bit,
 	"7bit",
 	"7bit",
@@ -490,7 +503,7 @@ static mbfl_encoding mbfl_encoding_7bit = {
 	MBFL_ENCTYPE_SBCS
 };
 
-static mbfl_encoding mbfl_encoding_8bit = {
+static const mbfl_encoding mbfl_encoding_8bit = {
 	mbfl_no_encoding_8bit,
 	"8bit",
 	"8bit",
@@ -501,7 +514,7 @@ static mbfl_encoding mbfl_encoding_8bit = {
 
 static const char *mbfl_encoding_ucs2_aliases[] = {"ISO-10646-UCS-2", "UCS2" , "UNICODE", NULL};
 
-static mbfl_encoding mbfl_encoding_ucs2 = {
+static const mbfl_encoding mbfl_encoding_ucs2 = {
 	mbfl_no_encoding_ucs2,
 	"UCS-2",
 	"UCS-2",
@@ -510,7 +523,7 @@ static mbfl_encoding mbfl_encoding_ucs2 = {
 	MBFL_ENCTYPE_WCS2BE
 };
 
-static mbfl_encoding mbfl_encoding_ucs2be = {
+static const mbfl_encoding mbfl_encoding_ucs2be = {
 	mbfl_no_encoding_ucs2be,
 	"UCS-2BE",
 	"UCS-2BE",
@@ -519,7 +532,7 @@ static mbfl_encoding mbfl_encoding_ucs2be = {
 	MBFL_ENCTYPE_WCS2BE
 };
 
-static mbfl_encoding mbfl_encoding_ucs2le = {
+static const mbfl_encoding mbfl_encoding_ucs2le = {
 	mbfl_no_encoding_ucs2le,
 	"UCS-2LE",
 	"UCS-2LE",
@@ -530,7 +543,7 @@ static mbfl_encoding mbfl_encoding_ucs2le = {
 
 static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
 
-static mbfl_encoding mbfl_encoding_ucs4 = {
+static const mbfl_encoding mbfl_encoding_ucs4 = {
 	mbfl_no_encoding_ucs4,
 	"UCS-4",
 	"UCS-4",
@@ -539,7 +552,7 @@ static mbfl_encoding mbfl_encoding_ucs4 = {
 	MBFL_ENCTYPE_WCS4BE
 };
 
-static mbfl_encoding mbfl_encoding_ucs4be = {
+static const mbfl_encoding mbfl_encoding_ucs4be = {
 	mbfl_no_encoding_ucs4be,
 	"UCS-4BE",
 	"UCS-4BE",
@@ -548,7 +561,7 @@ static mbfl_encoding mbfl_encoding_ucs4be = {
 	MBFL_ENCTYPE_WCS4BE
 };
 
-static mbfl_encoding mbfl_encoding_ucs4le = {
+static const mbfl_encoding mbfl_encoding_ucs4le = {
 	mbfl_no_encoding_ucs4le,
 	"UCS-4LE",
 	"UCS-4LE",
@@ -559,7 +572,7 @@ static mbfl_encoding mbfl_encoding_ucs4le = {
 
 static const char *mbfl_encoding_utf32_aliases[] = {"utf32", NULL};
 
-static mbfl_encoding mbfl_encoding_utf32 = {
+static const mbfl_encoding mbfl_encoding_utf32 = {
 	mbfl_no_encoding_utf32,
 	"UTF-32",
 	"UTF-32",
@@ -568,7 +581,7 @@ static mbfl_encoding mbfl_encoding_utf32 = {
 	MBFL_ENCTYPE_WCS4BE
 };
 
-static mbfl_encoding mbfl_encoding_utf32be = {
+static const mbfl_encoding mbfl_encoding_utf32be = {
 	mbfl_no_encoding_utf32be,
 	"UTF-32BE",
 	"UTF-32BE",
@@ -577,7 +590,7 @@ static mbfl_encoding mbfl_encoding_utf32be = {
 	MBFL_ENCTYPE_WCS4BE
 };
 
-static mbfl_encoding mbfl_encoding_utf32le = {
+static const mbfl_encoding mbfl_encoding_utf32le = {
 	mbfl_no_encoding_utf32le,
 	"UTF-32LE",
 	"UTF-32LE",
@@ -588,7 +601,7 @@ static mbfl_encoding mbfl_encoding_utf32le = {
 
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
-static mbfl_encoding mbfl_encoding_utf16 = {
+static const mbfl_encoding mbfl_encoding_utf16 = {
 	mbfl_no_encoding_utf16,
 	"UTF-16",
 	"UTF-16",
@@ -597,7 +610,7 @@ static mbfl_encoding mbfl_encoding_utf16 = {
 	MBFL_ENCTYPE_MWC2BE
 };
 
-static mbfl_encoding mbfl_encoding_utf16be = {
+static const mbfl_encoding mbfl_encoding_utf16be = {
 	mbfl_no_encoding_utf16be,
 	"UTF-16BE",
 	"UTF-16BE",
@@ -606,7 +619,7 @@ static mbfl_encoding mbfl_encoding_utf16be = {
 	MBFL_ENCTYPE_MWC2BE
 };
 
-static mbfl_encoding mbfl_encoding_utf16le = {
+static const mbfl_encoding mbfl_encoding_utf16le = {
 	mbfl_no_encoding_utf16le,
 	"UTF-16LE",
 	"UTF-16LE",
@@ -617,7 +630,7 @@ static mbfl_encoding mbfl_encoding_utf16le = {
 
 static const char *mbfl_encoding_utf8_aliases[] = {"utf8", NULL};
 
-static mbfl_encoding mbfl_encoding_utf8 = {
+static const mbfl_encoding mbfl_encoding_utf8 = {
 	mbfl_no_encoding_utf8,
 	"UTF-8",
 	"UTF-8",
@@ -628,7 +641,7 @@ static mbfl_encoding mbfl_encoding_utf8 = {
 
 static const char *mbfl_encoding_utf7_aliases[] = {"utf7", NULL};
 
-static mbfl_encoding mbfl_encoding_utf7 = {
+static const mbfl_encoding mbfl_encoding_utf7 = {
 	mbfl_no_encoding_utf7,
 	"UTF-7",
 	"UTF-7",
@@ -637,7 +650,7 @@ static mbfl_encoding mbfl_encoding_utf7 = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
 
-static mbfl_encoding mbfl_encoding_utf7imap = {
+static const mbfl_encoding mbfl_encoding_utf7imap = {
 	mbfl_no_encoding_utf7imap,
 	"UTF7-IMAP",
 	NULL,
@@ -646,7 +659,7 @@ static mbfl_encoding mbfl_encoding_utf7imap = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
 
-static mbfl_encoding mbfl_encoding_ascii = {
+static const mbfl_encoding mbfl_encoding_ascii = {
 	mbfl_no_encoding_ascii,
 	"ASCII",
 	"US-ASCII",
@@ -658,7 +671,7 @@ static mbfl_encoding mbfl_encoding_ascii = {
 #if defined(HAVE_MBSTR_JA)
 static const char *mbfl_encoding_euc_jp_aliases[] = {"EUC", "EUC_JP", "eucJP", "x-euc-jp", NULL};
 
-static mbfl_encoding mbfl_encoding_euc_jp = {
+static const mbfl_encoding mbfl_encoding_euc_jp = {
 	mbfl_no_encoding_euc_jp,
 	"EUC-JP",
 	"EUC-JP",
@@ -669,7 +682,7 @@ static mbfl_encoding mbfl_encoding_euc_jp = {
 
 static const char *mbfl_encoding_sjis_aliases[] = {"x-sjis", "SHIFT-JIS", NULL};
 
-static mbfl_encoding mbfl_encoding_sjis = {
+static const mbfl_encoding mbfl_encoding_sjis = {
 	mbfl_no_encoding_sjis,
 	"SJIS",
 	"Shift_JIS",
@@ -680,7 +693,7 @@ static mbfl_encoding mbfl_encoding_sjis = {
 
 static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", NULL};
 
-static mbfl_encoding mbfl_encoding_eucjp_win = {
+static const mbfl_encoding mbfl_encoding_eucjp_win = {
 	mbfl_no_encoding_eucjp_win,
 	"eucJP-win",
 	"EUC-JP",
@@ -691,7 +704,7 @@ static mbfl_encoding mbfl_encoding_eucjp_win = {
 
 static const char *mbfl_encoding_sjis_win_aliases[] = {"SJIS-open", "MS_Kanji", "Windows-31J", "CP932", NULL};
 
-static mbfl_encoding mbfl_encoding_sjis_win = {
+static const mbfl_encoding mbfl_encoding_sjis_win = {
 	mbfl_no_encoding_sjis_win,
 	"SJIS-win",
 	"Shift_JIS",
@@ -700,7 +713,7 @@ static mbfl_encoding mbfl_encoding_sjis_win = {
 	MBFL_ENCTYPE_MBCS
 };
 
-static mbfl_encoding mbfl_encoding_jis = {
+static const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
 	"JIS",
 	"ISO-2022-JP",
@@ -709,7 +722,7 @@ static mbfl_encoding mbfl_encoding_jis = {
 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
 };
 
-static mbfl_encoding mbfl_encoding_2022jp = {
+static const mbfl_encoding mbfl_encoding_2022jp = {
 	mbfl_no_encoding_2022jp,
 	"ISO-2022-JP",
 	"ISO-2022-JP",
@@ -782,7 +795,7 @@ static mbfl_encoding mbfl_encoding_big5 = {
 #if defined(HAVE_MBSTR_KR)
 static const char *mbfl_encoding_euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
 
-static mbfl_encoding mbfl_encoding_euc_kr = {
+static const mbfl_encoding mbfl_encoding_euc_kr = {
 	mbfl_no_encoding_euc_kr,
 	"EUC-KR",
 	"EUC-KR",
@@ -793,7 +806,7 @@ static mbfl_encoding mbfl_encoding_euc_kr = {
 
 static const char *mbfl_encoding_uhc_aliases[] = {"CP949", NULL};
 
-static mbfl_encoding mbfl_encoding_uhc = {
+static const mbfl_encoding mbfl_encoding_uhc = {
 	mbfl_no_encoding_uhc,
 	"UHC",
 	"UHC",
@@ -802,7 +815,7 @@ static mbfl_encoding mbfl_encoding_uhc = {
 	MBFL_ENCTYPE_MBCS
 };
 
-static mbfl_encoding mbfl_encoding_2022kr = {
+static const mbfl_encoding mbfl_encoding_2022kr = {
 	mbfl_no_encoding_2022kr,
 	"ISO-2022-KR",
 	"ISO-2022-KR",
@@ -815,7 +828,7 @@ static mbfl_encoding mbfl_encoding_2022kr = {
 
 static const char *mbfl_encoding_cp1252_aliases[] = {"cp1252", NULL};
 
-static mbfl_encoding mbfl_encoding_cp1252 = {
+static const mbfl_encoding mbfl_encoding_cp1252 = {
 	mbfl_no_encoding_cp1252,
 	"Windows-1252",
 	"Windows-1252",
@@ -826,7 +839,7 @@ static mbfl_encoding mbfl_encoding_cp1252 = {
 
 static const char *mbfl_encoding_8859_1_aliases[] = {"ISO_8859-1", "latin1", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_1 = {
+static const mbfl_encoding mbfl_encoding_8859_1 = {
 	mbfl_no_encoding_8859_1,
 	"ISO-8859-1",
 	"ISO-8859-1",
@@ -837,7 +850,7 @@ static mbfl_encoding mbfl_encoding_8859_1 = {
 
 static const char *mbfl_encoding_8859_2_aliases[] = {"ISO_8859-2", "latin2", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_2 = {
+static const mbfl_encoding mbfl_encoding_8859_2 = {
 	mbfl_no_encoding_8859_2,
 	"ISO-8859-2",
 	"ISO-8859-2",
@@ -848,7 +861,7 @@ static mbfl_encoding mbfl_encoding_8859_2 = {
 
 static const char *mbfl_encoding_8859_3_aliases[] = {"ISO_8859-3", "latin3", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_3 = {
+static const mbfl_encoding mbfl_encoding_8859_3 = {
 	mbfl_no_encoding_8859_3,
 	"ISO-8859-3",
 	"ISO-8859-3",
@@ -859,7 +872,7 @@ static mbfl_encoding mbfl_encoding_8859_3 = {
 
 static const char *mbfl_encoding_8859_4_aliases[] = {"ISO_8859-4", "latin4", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_4 = {
+static const mbfl_encoding mbfl_encoding_8859_4 = {
 	mbfl_no_encoding_8859_4,
 	"ISO-8859-4",
 	"ISO-8859-4",
@@ -870,7 +883,7 @@ static mbfl_encoding mbfl_encoding_8859_4 = {
 
 static const char *mbfl_encoding_8859_5_aliases[] = {"ISO_8859-5", "cyrillic", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_5 = {
+static const mbfl_encoding mbfl_encoding_8859_5 = {
 	mbfl_no_encoding_8859_5,
 	"ISO-8859-5",
 	"ISO-8859-5",
@@ -881,7 +894,7 @@ static mbfl_encoding mbfl_encoding_8859_5 = {
 
 static const char *mbfl_encoding_8859_6_aliases[] = {"ISO_8859-6", "arabic", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_6 = {
+static const mbfl_encoding mbfl_encoding_8859_6 = {
 	mbfl_no_encoding_8859_6,
 	"ISO-8859-6",
 	"ISO-8859-6",
@@ -892,7 +905,7 @@ static mbfl_encoding mbfl_encoding_8859_6 = {
 
 static const char *mbfl_encoding_8859_7_aliases[] = {"ISO_8859-7", "greek", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_7 = {
+static const mbfl_encoding mbfl_encoding_8859_7 = {
 	mbfl_no_encoding_8859_7,
 	"ISO-8859-7",
 	"ISO-8859-7",
@@ -903,7 +916,7 @@ static mbfl_encoding mbfl_encoding_8859_7 = {
 
 static const char *mbfl_encoding_8859_8_aliases[] = {"ISO_8859-8", "hebrew", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_8 = {
+static const mbfl_encoding mbfl_encoding_8859_8 = {
 	mbfl_no_encoding_8859_8,
 	"ISO-8859-8",
 	"ISO-8859-8",
@@ -914,7 +927,7 @@ static mbfl_encoding mbfl_encoding_8859_8 = {
 
 static const char *mbfl_encoding_8859_9_aliases[] = {"ISO_8859-9", "latin5", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_9 = {
+static const mbfl_encoding mbfl_encoding_8859_9 = {
 	mbfl_no_encoding_8859_9,
 	"ISO-8859-9",
 	"ISO-8859-9",
@@ -925,7 +938,7 @@ static mbfl_encoding mbfl_encoding_8859_9 = {
 
 static const char *mbfl_encoding_8859_10_aliases[] = {"ISO_8859-10", "latin6", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_10 = {
+static const mbfl_encoding mbfl_encoding_8859_10 = {
 	mbfl_no_encoding_8859_10,
 	"ISO-8859-10",
 	"ISO-8859-10",
@@ -936,7 +949,7 @@ static mbfl_encoding mbfl_encoding_8859_10 = {
 
 static const char *mbfl_encoding_8859_13_aliases[] = {"ISO_8859-13", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_13 = {
+static const mbfl_encoding mbfl_encoding_8859_13 = {
 	mbfl_no_encoding_8859_13,
 	"ISO-8859-13",
 	"ISO-8859-13",
@@ -947,7 +960,7 @@ static mbfl_encoding mbfl_encoding_8859_13 = {
 
 static const char *mbfl_encoding_8859_14_aliases[] = {"ISO_8859-14", "latin8", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_14 = {
+static const mbfl_encoding mbfl_encoding_8859_14 = {
 	mbfl_no_encoding_8859_14,
 	"ISO-8859-14",
 	"ISO-8859-14",
@@ -958,7 +971,7 @@ static mbfl_encoding mbfl_encoding_8859_14 = {
 
 static const char *mbfl_encoding_8859_15_aliases[] = {"ISO_8859-15", NULL};
 
-static mbfl_encoding mbfl_encoding_8859_15 = {
+static const mbfl_encoding mbfl_encoding_8859_15 = {
 	mbfl_no_encoding_8859_15,
 	"ISO-8859-15",
 	"ISO-8859-15",
@@ -970,7 +983,7 @@ static mbfl_encoding mbfl_encoding_8859_15 = {
 #if defined(HAVE_MBSTR_RU)
 static const char *mbfl_encoding_cp1251_aliases[] = {"CP1251", "CP-1251", "WINDOWS-1251", NULL};
 
-static mbfl_encoding mbfl_encoding_cp1251 = {
+static const mbfl_encoding mbfl_encoding_cp1251 = {
 	mbfl_no_encoding_cp1251,
 	"Windows-1251",
 	"Windows-1251",
@@ -981,7 +994,7 @@ static mbfl_encoding mbfl_encoding_cp1251 = {
 
 static const char *mbfl_encoding_cp866_aliases[] = {"CP866", "CP-866", "IBM-866", NULL};
 
-static mbfl_encoding mbfl_encoding_cp866 = {
+static const mbfl_encoding mbfl_encoding_cp866 = {
 	mbfl_no_encoding_cp866,
 	"CP866",
 	"CP866",
@@ -992,7 +1005,7 @@ static mbfl_encoding mbfl_encoding_cp866 = {
 
 static const char *mbfl_encoding_koi8r_aliases[] = {"KOI8-R", "KOI8R", NULL};
 
-static mbfl_encoding mbfl_encoding_koi8r = {
+static const mbfl_encoding mbfl_encoding_koi8r = {
 	mbfl_no_encoding_koi8r,
 	"KOI8-R",
 	"KOI8-R",
@@ -1002,7 +1015,7 @@ static mbfl_encoding mbfl_encoding_koi8r = {
 };
 #endif
 
-static mbfl_encoding *mbfl_encoding_ptr_list[] = {
+static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_pass,
 	&mbfl_encoding_auto,
 	&mbfl_encoding_wchar,
@@ -1073,6 +1086,11 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_koi8r,
 #endif
 	NULL
+};
+
+/* hex character table "0123456789ABCDEF" */
+static char mbfl_hexchar_table[] = {
+	0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x41,0x42,0x43,0x44,0x45,0x46
 };
 
 /* forward */
@@ -1193,7 +1211,7 @@ static int mbfl_filt_ident_false(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_true(int c, mbfl_identify_filter *filter TSRMLS_DC);
 
 /* convert filter function table */
-static struct mbfl_convert_vtbl vtbl_pass = {
+static const struct mbfl_convert_vtbl vtbl_pass = {
 	mbfl_no_encoding_pass,
 	mbfl_no_encoding_pass,
 	mbfl_filt_conv_common_ctor,
@@ -1201,7 +1219,7 @@ static struct mbfl_convert_vtbl vtbl_pass = {
 	mbfl_filt_conv_pass,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_byte2be_wchar = {
+static const struct mbfl_convert_vtbl vtbl_byte2be_wchar = {
 	mbfl_no_encoding_byte2be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1209,7 +1227,7 @@ static struct mbfl_convert_vtbl vtbl_byte2be_wchar = {
 	mbfl_filt_conv_byte2be_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_byte2be = {
+static const struct mbfl_convert_vtbl vtbl_wchar_byte2be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_byte2be,
 	mbfl_filt_conv_common_ctor,
@@ -1217,7 +1235,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_byte2be = {
 	mbfl_filt_conv_wchar_byte2be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_byte2le_wchar = {
+static const struct mbfl_convert_vtbl vtbl_byte2le_wchar = {
 	mbfl_no_encoding_byte2le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1225,7 +1243,7 @@ static struct mbfl_convert_vtbl vtbl_byte2le_wchar = {
 	mbfl_filt_conv_byte2le_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_byte2le = {
+static const struct mbfl_convert_vtbl vtbl_wchar_byte2le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_byte2le,
 	mbfl_filt_conv_common_ctor,
@@ -1233,7 +1251,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_byte2le = {
 	mbfl_filt_conv_wchar_byte2le,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_byte4be_wchar = {
+static const struct mbfl_convert_vtbl vtbl_byte4be_wchar = {
 	mbfl_no_encoding_byte4be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1241,7 +1259,7 @@ static struct mbfl_convert_vtbl vtbl_byte4be_wchar = {
 	mbfl_filt_conv_byte4be_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
+static const struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_byte4be,
 	mbfl_filt_conv_common_ctor,
@@ -1249,7 +1267,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_byte4be = {
 	mbfl_filt_conv_wchar_byte4be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
+static const struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
 	mbfl_no_encoding_byte4le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1257,7 +1275,7 @@ static struct mbfl_convert_vtbl vtbl_byte4le_wchar = {
 	mbfl_filt_conv_byte4le_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
+static const struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_byte4le,
 	mbfl_filt_conv_common_ctor,
@@ -1265,7 +1283,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_byte4le = {
 	mbfl_filt_conv_wchar_byte4le,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8bit_b64 = {
+static const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_base64,
 	mbfl_filt_conv_common_ctor,
@@ -1273,7 +1291,7 @@ static struct mbfl_convert_vtbl vtbl_8bit_b64 = {
 	mbfl_filt_conv_base64enc,
 	mbfl_filt_conv_base64enc_flush };
 
-static struct mbfl_convert_vtbl vtbl_b64_8bit = {
+static const struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_no_encoding_base64,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
@@ -1281,17 +1299,15 @@ static struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_filt_conv_base64dec,
 	mbfl_filt_conv_base64dec_flush };
 
-static struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
+static const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
 	mbfl_no_encoding_uuencode,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_uudec,
-	mbfl_filt_conv_common_flush
-};
+	mbfl_filt_conv_common_flush };
 
-
-static struct mbfl_convert_vtbl vtbl_8bit_qprint = {
+static const struct mbfl_convert_vtbl vtbl_8bit_qprint = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_qprint,
 	mbfl_filt_conv_common_ctor,
@@ -1299,7 +1315,7 @@ static struct mbfl_convert_vtbl vtbl_8bit_qprint = {
 	mbfl_filt_conv_qprintenc,
 	mbfl_filt_conv_qprintenc_flush };
 
-static struct mbfl_convert_vtbl vtbl_qprint_8bit = {
+static const struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 	mbfl_no_encoding_qprint,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
@@ -1307,7 +1323,7 @@ static struct mbfl_convert_vtbl vtbl_qprint_8bit = {
 	mbfl_filt_conv_qprintdec,
 	mbfl_filt_conv_qprintdec_flush };
 
-static struct mbfl_convert_vtbl vtbl_8bit_7bit = {
+static const struct mbfl_convert_vtbl vtbl_8bit_7bit = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_7bit,
 	mbfl_filt_conv_common_ctor,
@@ -1315,7 +1331,7 @@ static struct mbfl_convert_vtbl vtbl_8bit_7bit = {
 	mbfl_filt_conv_any_7bit,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_7bit_8bit = {
+static const struct mbfl_convert_vtbl vtbl_7bit_8bit = {
 	mbfl_no_encoding_7bit,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
@@ -1323,7 +1339,7 @@ static struct mbfl_convert_vtbl vtbl_7bit_8bit = {
 	mbfl_filt_conv_pass,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
 	mbfl_no_encoding_ucs4,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1331,7 +1347,7 @@ static struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
 	mbfl_filt_conv_ucs4_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ucs4,
 	mbfl_filt_conv_common_ctor,
@@ -1339,7 +1355,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
 	mbfl_filt_conv_wchar_ucs4be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
 	mbfl_no_encoding_ucs4be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1347,7 +1363,7 @@ static struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
 	mbfl_filt_conv_byte4be_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ucs4be,
 	mbfl_filt_conv_common_ctor,
@@ -1355,7 +1371,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
 	mbfl_filt_conv_wchar_ucs4be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
 	mbfl_no_encoding_ucs4le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1363,7 +1379,7 @@ static struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
 	mbfl_filt_conv_byte4le_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ucs4le,
 	mbfl_filt_conv_common_ctor,
@@ -1371,7 +1387,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
 	mbfl_filt_conv_wchar_ucs4le,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_ucs2_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ucs2_wchar = {
 	mbfl_no_encoding_ucs2,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1379,7 +1395,7 @@ static struct mbfl_convert_vtbl vtbl_ucs2_wchar = {
 	mbfl_filt_conv_ucs2_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ucs2 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ucs2 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ucs2,
 	mbfl_filt_conv_common_ctor,
@@ -1387,7 +1403,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ucs2 = {
 	mbfl_filt_conv_wchar_ucs2be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_ucs2be_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ucs2be_wchar = {
 	mbfl_no_encoding_ucs2be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1395,7 +1411,7 @@ static struct mbfl_convert_vtbl vtbl_ucs2be_wchar = {
 	mbfl_filt_conv_byte2be_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ucs2be = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ucs2be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ucs2be,
 	mbfl_filt_conv_common_ctor,
@@ -1403,7 +1419,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ucs2be = {
 	mbfl_filt_conv_wchar_ucs2be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_ucs2le_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ucs2le_wchar = {
 	mbfl_no_encoding_ucs2le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1411,7 +1427,7 @@ static struct mbfl_convert_vtbl vtbl_ucs2le_wchar = {
 	mbfl_filt_conv_byte2le_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ucs2le = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ucs2le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ucs2le,
 	mbfl_filt_conv_common_ctor,
@@ -1419,7 +1435,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ucs2le = {
 	mbfl_filt_conv_wchar_ucs2le,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf32_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf32_wchar = {
 	mbfl_no_encoding_utf32,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1427,7 +1443,7 @@ static struct mbfl_convert_vtbl vtbl_utf32_wchar = {
 	mbfl_filt_conv_ucs4_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf32 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf32 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf32,
 	mbfl_filt_conv_common_ctor,
@@ -1435,7 +1451,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf32 = {
 	mbfl_filt_conv_wchar_ucs4be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf32be_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf32be_wchar = {
 	mbfl_no_encoding_utf32be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1443,7 +1459,7 @@ static struct mbfl_convert_vtbl vtbl_utf32be_wchar = {
 	mbfl_filt_conv_byte4be_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf32be = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf32be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf32be,
 	mbfl_filt_conv_common_ctor,
@@ -1451,7 +1467,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf32be = {
 	mbfl_filt_conv_wchar_ucs4be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf32le_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf32le_wchar = {
 	mbfl_no_encoding_utf32le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1459,7 +1475,7 @@ static struct mbfl_convert_vtbl vtbl_utf32le_wchar = {
 	mbfl_filt_conv_byte4le_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf32le,
 	mbfl_filt_conv_common_ctor,
@@ -1467,7 +1483,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf32le = {
 	mbfl_filt_conv_wchar_ucs4le,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf16_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf16_wchar = {
 	mbfl_no_encoding_utf16,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1475,7 +1491,7 @@ static struct mbfl_convert_vtbl vtbl_utf16_wchar = {
 	mbfl_filt_conv_utf16_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf16 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf16 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf16,
 	mbfl_filt_conv_common_ctor,
@@ -1483,7 +1499,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf16 = {
 	mbfl_filt_conv_wchar_utf16be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf16be_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf16be_wchar = {
 	mbfl_no_encoding_utf16be,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1491,7 +1507,7 @@ static struct mbfl_convert_vtbl vtbl_utf16be_wchar = {
 	mbfl_filt_conv_utf16be_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf16be = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf16be = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf16be,
 	mbfl_filt_conv_common_ctor,
@@ -1499,7 +1515,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf16be = {
 	mbfl_filt_conv_wchar_utf16be,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf16le_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf16le_wchar = {
 	mbfl_no_encoding_utf16le,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1507,7 +1523,7 @@ static struct mbfl_convert_vtbl vtbl_utf16le_wchar = {
 	mbfl_filt_conv_utf16le_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf16le = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf16le = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf16le,
 	mbfl_filt_conv_common_ctor,
@@ -1515,7 +1531,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf16le = {
 	mbfl_filt_conv_wchar_utf16le,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf8_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf8_wchar = {
 	mbfl_no_encoding_utf8,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1523,7 +1539,7 @@ static struct mbfl_convert_vtbl vtbl_utf8_wchar = {
 	mbfl_filt_conv_utf8_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf8,
 	mbfl_filt_conv_common_ctor,
@@ -1531,7 +1547,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 	mbfl_filt_conv_wchar_utf8,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf7_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf7_wchar = {
 	mbfl_no_encoding_utf7,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1539,7 +1555,7 @@ static struct mbfl_convert_vtbl vtbl_utf7_wchar = {
 	mbfl_filt_conv_utf7_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf7,
 	mbfl_filt_conv_common_ctor,
@@ -1547,7 +1563,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf7 = {
 	mbfl_filt_conv_wchar_utf7,
 	mbfl_filt_conv_wchar_utf7_flush };
 
-static struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
+static const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
 	mbfl_no_encoding_utf7imap,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1555,7 +1571,7 @@ static struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
 	mbfl_filt_conv_utf7imap_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_utf7imap = {
+static const struct mbfl_convert_vtbl vtbl_wchar_utf7imap = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_utf7imap,
 	mbfl_filt_conv_common_ctor,
@@ -1563,7 +1579,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_utf7imap = {
 	mbfl_filt_conv_wchar_utf7imap,
 	mbfl_filt_conv_wchar_utf7imap_flush };
 
-static struct mbfl_convert_vtbl vtbl_ascii_wchar = {
+static const struct mbfl_convert_vtbl vtbl_ascii_wchar = {
 	mbfl_no_encoding_ascii,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1571,7 +1587,7 @@ static struct mbfl_convert_vtbl vtbl_ascii_wchar = {
 	mbfl_filt_conv_pass,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_ascii = {
+static const struct mbfl_convert_vtbl vtbl_wchar_ascii = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_ascii,
 	mbfl_filt_conv_common_ctor,
@@ -1580,7 +1596,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_ascii = {
 	mbfl_filt_conv_common_flush };
 
 #if defined(HAVE_MBSTR_JA)
-static struct mbfl_convert_vtbl vtbl_eucjp_wchar = {
+static const struct mbfl_convert_vtbl vtbl_eucjp_wchar = {
 	mbfl_no_encoding_euc_jp,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1588,7 +1604,7 @@ static struct mbfl_convert_vtbl vtbl_eucjp_wchar = {
 	mbfl_filt_conv_eucjp_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_eucjp = {
+static const struct mbfl_convert_vtbl vtbl_wchar_eucjp = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_jp,
 	mbfl_filt_conv_common_ctor,
@@ -1596,7 +1612,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_eucjp = {
 	mbfl_filt_conv_wchar_eucjp,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_sjis_wchar = {
+static const struct mbfl_convert_vtbl vtbl_sjis_wchar = {
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1604,7 +1620,7 @@ static struct mbfl_convert_vtbl vtbl_sjis_wchar = {
 	mbfl_filt_conv_sjis_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_sjis = {
+static const struct mbfl_convert_vtbl vtbl_wchar_sjis = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis,
 	mbfl_filt_conv_common_ctor,
@@ -1612,7 +1628,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_sjis = {
 	mbfl_filt_conv_wchar_sjis,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_jis_wchar = {
+static const struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_no_encoding_jis,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1620,7 +1636,7 @@ static struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_filt_conv_jis_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_jis = {
+static const struct mbfl_convert_vtbl vtbl_wchar_jis = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_jis,
 	mbfl_filt_conv_common_ctor,
@@ -1628,7 +1644,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_jis = {
 	mbfl_filt_conv_wchar_jis,
 	mbfl_filt_conv_any_jis_flush };
 
-static struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
+static const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_no_encoding_2022jp,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1636,7 +1652,7 @@ static struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_filt_conv_jis_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
+static const struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_2022jp,
 	mbfl_filt_conv_common_ctor,
@@ -1644,7 +1660,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_2022jp = {
 	mbfl_filt_conv_wchar_2022jp,
 	mbfl_filt_conv_any_jis_flush };
 
-static struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {
+static const struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {
 	mbfl_no_encoding_eucjp_win,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1652,7 +1668,7 @@ static struct mbfl_convert_vtbl vtbl_eucjpwin_wchar = {
 	mbfl_filt_conv_eucjpwin_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_eucjpwin = {
+static const struct mbfl_convert_vtbl vtbl_wchar_eucjpwin = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_eucjp_win,
 	mbfl_filt_conv_common_ctor,
@@ -1660,7 +1676,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_eucjpwin = {
 	mbfl_filt_conv_wchar_eucjpwin,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_sjiswin_wchar = {
+static const struct mbfl_convert_vtbl vtbl_sjiswin_wchar = {
 	mbfl_no_encoding_sjis_win,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1668,7 +1684,7 @@ static struct mbfl_convert_vtbl vtbl_sjiswin_wchar = {
 	mbfl_filt_conv_sjiswin_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_sjiswin = {
+static const struct mbfl_convert_vtbl vtbl_wchar_sjiswin = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis_win,
 	mbfl_filt_conv_common_ctor,
@@ -1678,7 +1694,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_sjiswin = {
 #endif /* HAVE_MBSTR_JA */
 
 #if defined(HAVE_MBSTR_CN)
-static struct mbfl_convert_vtbl vtbl_euccn_wchar = {
+static const struct mbfl_convert_vtbl vtbl_euccn_wchar = {
 	mbfl_no_encoding_euc_cn,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1686,7 +1702,7 @@ static struct mbfl_convert_vtbl vtbl_euccn_wchar = {
 	mbfl_filt_conv_euccn_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_euccn = {
+static const struct mbfl_convert_vtbl vtbl_wchar_euccn = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_cn,
 	mbfl_filt_conv_common_ctor,
@@ -1694,7 +1710,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_euccn = {
 	mbfl_filt_conv_wchar_euccn,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_cp936_wchar = {
+static const struct mbfl_convert_vtbl vtbl_cp936_wchar = {
 	mbfl_no_encoding_cp936,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1702,7 +1718,7 @@ static struct mbfl_convert_vtbl vtbl_cp936_wchar = {
 	mbfl_filt_conv_cp936_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp936,
 	mbfl_filt_conv_common_ctor,
@@ -1710,7 +1726,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
 	mbfl_filt_conv_wchar_cp936,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_hz_wchar = {
+static const struct mbfl_convert_vtbl vtbl_hz_wchar = {
 	mbfl_no_encoding_hz,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1718,7 +1734,7 @@ static struct mbfl_convert_vtbl vtbl_hz_wchar = {
 	mbfl_filt_conv_hz_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_hz = {
+static const struct mbfl_convert_vtbl vtbl_wchar_hz = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_hz,
 	mbfl_filt_conv_common_ctor,
@@ -1729,7 +1745,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_hz = {
 #endif /* HAVE_MBSTR_CN */
 
 #if defined(HAVE_MBSTR_TW)
-static struct mbfl_convert_vtbl vtbl_euctw_wchar = {
+static const struct mbfl_convert_vtbl vtbl_euctw_wchar = {
 	mbfl_no_encoding_euc_tw,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1745,7 +1761,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_euctw = {
 	mbfl_filt_conv_wchar_euctw,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_big5_wchar = {
+static const struct mbfl_convert_vtbl vtbl_big5_wchar = {
 	mbfl_no_encoding_big5,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1753,7 +1769,7 @@ static struct mbfl_convert_vtbl vtbl_big5_wchar = {
 	mbfl_filt_conv_big5_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_big5 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_big5 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_big5,
 	mbfl_filt_conv_common_ctor,
@@ -1763,7 +1779,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_big5 = {
 #endif /* HAVE_MBSTR_TW */
 
 #if defined(HAVE_MBSTR_KR)
-static struct mbfl_convert_vtbl vtbl_euckr_wchar = {
+static const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1771,7 +1787,7 @@ static struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_filt_conv_euckr_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_euckr = {
+static const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_conv_common_ctor,
@@ -1779,7 +1795,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_filt_conv_wchar_euckr,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_uhc_wchar = {
+static const struct mbfl_convert_vtbl vtbl_uhc_wchar = {
 	mbfl_no_encoding_uhc,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1787,7 +1803,7 @@ static struct mbfl_convert_vtbl vtbl_uhc_wchar = {
 	mbfl_filt_conv_uhc_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_uhc = {
+static const struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_uhc,
 	mbfl_filt_conv_common_ctor,
@@ -1795,7 +1811,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_uhc = {
 	mbfl_filt_conv_wchar_uhc,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
+static const struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_2022kr,
 	mbfl_filt_conv_common_ctor,
@@ -1803,18 +1819,17 @@ static struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
 	mbfl_filt_conv_wchar_2022kr,
 	mbfl_filt_conv_any_2022kr_flush };
 
-static struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
+static const struct mbfl_convert_vtbl vtbl_2022kr_wchar = {
 	mbfl_no_encoding_2022kr,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_2022kr_wchar,
 	mbfl_filt_conv_common_flush };
-
 #endif /* HAVE_MBSTR_KR */
 
 #if defined(HAVE_MBSTR_RU)
-static struct mbfl_convert_vtbl vtbl_wchar_cp1251 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_cp1251 = {
 	mbfl_no_encoding_cp1251,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1822,7 +1837,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_cp1251 = {
 	mbfl_filt_conv_wchar_cp1251,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_cp1251_wchar = {
+static const struct mbfl_convert_vtbl vtbl_cp1251_wchar = {
 	mbfl_no_encoding_cp1251,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1830,7 +1845,7 @@ static struct mbfl_convert_vtbl vtbl_cp1251_wchar = {
 	mbfl_filt_conv_cp1251_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_cp866 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_cp866 = {
 	mbfl_no_encoding_cp866,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1838,7 +1853,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_cp866 = {
 	mbfl_filt_conv_wchar_cp866,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_cp866_wchar = {
+static const struct mbfl_convert_vtbl vtbl_cp866_wchar = {
 	mbfl_no_encoding_cp866,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1846,7 +1861,7 @@ static struct mbfl_convert_vtbl vtbl_cp866_wchar = {
 	mbfl_filt_conv_cp866_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_koi8r = {
+static const struct mbfl_convert_vtbl vtbl_wchar_koi8r = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_koi8r,
 	mbfl_filt_conv_common_ctor,
@@ -1855,7 +1870,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_koi8r = {
 	mbfl_filt_conv_common_flush };
 
 
-static struct mbfl_convert_vtbl vtbl_koi8r_wchar = {
+static const struct mbfl_convert_vtbl vtbl_koi8r_wchar = {
 	mbfl_no_encoding_koi8r,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1864,7 +1879,7 @@ static struct mbfl_convert_vtbl vtbl_koi8r_wchar = {
 	mbfl_filt_conv_common_flush };
 #endif /* HAVE_MBSTR_RU */
 
-static struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
+static const struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
 	mbfl_no_encoding_cp1252,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1872,7 +1887,7 @@ static struct mbfl_convert_vtbl vtbl_cp1252_wchar = {
 	mbfl_filt_conv_cp1252_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_cp1252 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_cp1252 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_cp1252,
 	mbfl_filt_conv_common_ctor,
@@ -1881,7 +1896,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_cp1252 = {
 	mbfl_filt_conv_common_flush };
 
 
-static struct mbfl_convert_vtbl vtbl_8859_1_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_1_wchar = {
 	mbfl_no_encoding_8859_1,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1889,7 +1904,7 @@ static struct mbfl_convert_vtbl vtbl_8859_1_wchar = {
 	mbfl_filt_conv_pass,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_1 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_1 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_1,
 	mbfl_filt_conv_common_ctor,
@@ -1897,7 +1912,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_1 = {
 	mbfl_filt_conv_wchar_8859_1,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_2_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_2_wchar = {
 	mbfl_no_encoding_8859_2,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1905,7 +1920,7 @@ static struct mbfl_convert_vtbl vtbl_8859_2_wchar = {
 	mbfl_filt_conv_8859_2_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_2 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_2 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_2,
 	mbfl_filt_conv_common_ctor,
@@ -1913,7 +1928,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_2 = {
 	mbfl_filt_conv_wchar_8859_2,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_3_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_3_wchar = {
 	mbfl_no_encoding_8859_3,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1921,7 +1936,7 @@ static struct mbfl_convert_vtbl vtbl_8859_3_wchar = {
 	mbfl_filt_conv_8859_3_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_3 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_3 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_3,
 	mbfl_filt_conv_common_ctor,
@@ -1929,7 +1944,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_3 = {
 	mbfl_filt_conv_wchar_8859_3,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_4_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_4_wchar = {
 	mbfl_no_encoding_8859_4,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1937,7 +1952,7 @@ static struct mbfl_convert_vtbl vtbl_8859_4_wchar = {
 	mbfl_filt_conv_8859_4_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_4 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_4 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_4,
 	mbfl_filt_conv_common_ctor,
@@ -1945,7 +1960,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_4 = {
 	mbfl_filt_conv_wchar_8859_4,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_5_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_5_wchar = {
 	mbfl_no_encoding_8859_5,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1953,7 +1968,7 @@ static struct mbfl_convert_vtbl vtbl_8859_5_wchar = {
 	mbfl_filt_conv_8859_5_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_5 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_5 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_5,
 	mbfl_filt_conv_common_ctor,
@@ -1961,7 +1976,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_5 = {
 	mbfl_filt_conv_wchar_8859_5,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_6_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_6_wchar = {
 	mbfl_no_encoding_8859_6,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1969,7 +1984,7 @@ static struct mbfl_convert_vtbl vtbl_8859_6_wchar = {
 	mbfl_filt_conv_8859_6_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_6 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_6 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_6,
 	mbfl_filt_conv_common_ctor,
@@ -1977,7 +1992,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_6 = {
 	mbfl_filt_conv_wchar_8859_6,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_7_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_7_wchar = {
 	mbfl_no_encoding_8859_7,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -1985,7 +2000,7 @@ static struct mbfl_convert_vtbl vtbl_8859_7_wchar = {
 	mbfl_filt_conv_8859_7_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_7 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_7 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_7,
 	mbfl_filt_conv_common_ctor,
@@ -1993,7 +2008,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_7 = {
 	mbfl_filt_conv_wchar_8859_7,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_8_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_8_wchar = {
 	mbfl_no_encoding_8859_8,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -2001,7 +2016,7 @@ static struct mbfl_convert_vtbl vtbl_8859_8_wchar = {
 	mbfl_filt_conv_8859_8_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_8 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_8 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_8,
 	mbfl_filt_conv_common_ctor,
@@ -2009,7 +2024,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_8 = {
 	mbfl_filt_conv_wchar_8859_8,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_9_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_9_wchar = {
 	mbfl_no_encoding_8859_9,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -2017,7 +2032,7 @@ static struct mbfl_convert_vtbl vtbl_8859_9_wchar = {
 	mbfl_filt_conv_8859_9_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_9 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_9 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_9,
 	mbfl_filt_conv_common_ctor,
@@ -2025,7 +2040,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_9 = {
 	mbfl_filt_conv_wchar_8859_9,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_10_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_10_wchar = {
 	mbfl_no_encoding_8859_10,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -2033,7 +2048,7 @@ static struct mbfl_convert_vtbl vtbl_8859_10_wchar = {
 	mbfl_filt_conv_8859_10_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_10 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_10 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_10,
 	mbfl_filt_conv_common_ctor,
@@ -2041,7 +2056,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_10 = {
 	mbfl_filt_conv_wchar_8859_10,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_13_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_13_wchar = {
 	mbfl_no_encoding_8859_13,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -2049,7 +2064,7 @@ static struct mbfl_convert_vtbl vtbl_8859_13_wchar = {
 	mbfl_filt_conv_8859_13_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_13 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_13 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_13,
 	mbfl_filt_conv_common_ctor,
@@ -2057,7 +2072,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_13 = {
 	mbfl_filt_conv_wchar_8859_13,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_8859_14_wchar = {
+static const struct mbfl_convert_vtbl vtbl_8859_14_wchar = {
 	mbfl_no_encoding_8859_14,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
@@ -2065,7 +2080,7 @@ static struct mbfl_convert_vtbl vtbl_8859_14_wchar = {
 	mbfl_filt_conv_8859_14_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_14 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_14 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_14,
 	mbfl_filt_conv_common_ctor,
@@ -2081,7 +2096,7 @@ static struct mbfl_convert_vtbl vtbl_8859_15_wchar = {
 	mbfl_filt_conv_8859_15_wchar,
 	mbfl_filt_conv_common_flush };
 
-static struct mbfl_convert_vtbl vtbl_wchar_8859_15 = {
+static const struct mbfl_convert_vtbl vtbl_wchar_8859_15 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_8859_15,
 	mbfl_filt_conv_common_ctor,
@@ -2090,7 +2105,7 @@ static struct mbfl_convert_vtbl vtbl_wchar_8859_15 = {
 	mbfl_filt_conv_common_flush };
 
 
-static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
+static const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_utf8_wchar,
 	&vtbl_wchar_utf8,
 #if defined(HAVE_MBSTR_JA)
@@ -2216,56 +2231,56 @@ static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 
 
 /* identify filter function table */
-static struct mbfl_identify_vtbl vtbl_identify_ascii = {
+static const struct mbfl_identify_vtbl vtbl_identify_ascii = {
 	mbfl_no_encoding_ascii,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_ascii };
 
-static struct mbfl_identify_vtbl vtbl_identify_utf8 = {
+static const struct mbfl_identify_vtbl vtbl_identify_utf8 = {
 	mbfl_no_encoding_utf8,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf8 };
 
-static struct mbfl_identify_vtbl vtbl_identify_utf7 = {
+static const struct mbfl_identify_vtbl vtbl_identify_utf7 = {
 	mbfl_no_encoding_utf7,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_utf7 };
 
 #if defined(HAVE_MBSTR_JA)
-static struct mbfl_identify_vtbl vtbl_identify_eucjp = {
+static const struct mbfl_identify_vtbl vtbl_identify_eucjp = {
 	mbfl_no_encoding_euc_jp,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_eucjp };
 
-static struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
+static const struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
 	mbfl_no_encoding_eucjp_win,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_eucjp };
 
-static struct mbfl_identify_vtbl vtbl_identify_sjis = {
+static const struct mbfl_identify_vtbl vtbl_identify_sjis = {
 	mbfl_no_encoding_sjis,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjis };
 
-static struct mbfl_identify_vtbl vtbl_identify_sjiswin = {
+static const struct mbfl_identify_vtbl vtbl_identify_sjiswin = {
 	mbfl_no_encoding_sjis_win,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_sjiswin };
 
-static struct mbfl_identify_vtbl vtbl_identify_jis = {
+static const struct mbfl_identify_vtbl vtbl_identify_jis = {
 	mbfl_no_encoding_jis,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_jis };
 
-static struct mbfl_identify_vtbl vtbl_identify_2022jp = {
+static const struct mbfl_identify_vtbl vtbl_identify_2022jp = {
 	mbfl_no_encoding_2022jp,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
@@ -2348,97 +2363,97 @@ static struct mbfl_identify_vtbl vtbl_identify_koi8r = {
 	mbfl_filt_ident_koi8r };
 #endif /* HAVE_MBSTR_RU */
 
-static struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
+static const struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
 	mbfl_no_encoding_cp1252,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp1252 };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_1 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_1 = {
 	mbfl_no_encoding_8859_1,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_2 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_2 = {
 	mbfl_no_encoding_8859_2,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_3 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_3 = {
 	mbfl_no_encoding_8859_3,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_4 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_4 = {
 	mbfl_no_encoding_8859_4,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_5 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_5 = {
 	mbfl_no_encoding_8859_5,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_6 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_6 = {
 	mbfl_no_encoding_8859_6,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_7 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_7 = {
 	mbfl_no_encoding_8859_7,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_8 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_8 = {
 	mbfl_no_encoding_8859_8,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_9 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_9 = {
 	mbfl_no_encoding_8859_9,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_10 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_10 = {
 	mbfl_no_encoding_8859_10,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_13 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_13 = {
 	mbfl_no_encoding_8859_13,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_14 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_14 = {
 	mbfl_no_encoding_8859_14,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_8859_15 = {
+static const struct mbfl_identify_vtbl vtbl_identify_8859_15 = {
 	mbfl_no_encoding_8859_15,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_true };
 
-static struct mbfl_identify_vtbl vtbl_identify_false = {
+static const struct mbfl_identify_vtbl vtbl_identify_false = {
 	mbfl_no_encoding_pass,
 	mbfl_filt_ident_false_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_false };
 
-static struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
+static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
 	&vtbl_identify_utf7,
 	&vtbl_identify_ascii,
@@ -2489,10 +2504,10 @@ static struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 
 
 /* language resolver */
-mbfl_language *
+const mbfl_language *
 mbfl_name2language(const char *name)
 {
-	mbfl_language *language;
+	const mbfl_language *language;
 	int i, j;
 
 	if (name == NULL) {
@@ -2530,10 +2545,10 @@ mbfl_name2language(const char *name)
 	return NULL;
 }
 
-mbfl_language *
+const mbfl_language *
 mbfl_no2language(enum mbfl_no_language no_language)
 {
-	mbfl_language *language;
+	const mbfl_language *language;
 	int i;
 
 	i = 0;
@@ -2549,7 +2564,7 @@ mbfl_no2language(enum mbfl_no_language no_language)
 enum mbfl_no_language
 mbfl_name2no_language(const char *name)
 {
-	mbfl_language *language;
+	const mbfl_language *language;
 
 	language = mbfl_name2language(name);
 	if (language == NULL) {
@@ -2562,7 +2577,7 @@ mbfl_name2no_language(const char *name)
 const char *
 mbfl_no_language2name(enum mbfl_no_language no_language)
 {
-	mbfl_language *language;
+	const mbfl_language *language;
 
 	language = mbfl_no2language(no_language);
 	if (language == NULL) {
@@ -2575,10 +2590,10 @@ mbfl_no_language2name(enum mbfl_no_language no_language)
 
 
 /* encoding resolver */
-mbfl_encoding *
+const mbfl_encoding *
 mbfl_name2encoding(const char *name)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	int i, j;
 
 	if (name == NULL) {
@@ -2619,10 +2634,10 @@ mbfl_name2encoding(const char *name)
 	return NULL;
 }
 
-mbfl_encoding *
+const mbfl_encoding *
 mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	int i;
 
 	i = 0;
@@ -2638,7 +2653,7 @@ mbfl_no2encoding(enum mbfl_no_encoding no_encoding)
 enum mbfl_no_encoding
 mbfl_name2no_encoding(const char *name)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_name2encoding(name);
 	if (encoding == NULL) {
@@ -2651,7 +2666,7 @@ mbfl_name2no_encoding(const char *name)
 const char *
 mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_no2encoding(no_encoding);
 	if (encoding == NULL) {
@@ -2664,7 +2679,7 @@ mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 const char *
 mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_no2encoding(no_encoding);
 	if (encoding != NULL && encoding->mime_name != NULL && encoding->mime_name[0] != '\0') {
@@ -2677,7 +2692,7 @@ mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
 int
 mbfl_is_support_encoding(const char *name)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_name2encoding(name);
 	if (encoding == NULL) {
@@ -6421,7 +6436,7 @@ mbfl_filt_ident_true(int c, mbfl_identify_filter *filter TSRMLS_DC)
 
 /* setup filter function table */
 static void
-mbfl_convert_filter_set_vtbl(mbfl_convert_filter *filter, struct mbfl_convert_vtbl *vtbl)
+mbfl_convert_filter_set_vtbl(mbfl_convert_filter *filter, const struct mbfl_convert_vtbl *vtbl)
 {
 	if (filter && vtbl) {
 		filter->filter_ctor = vtbl->filter_ctor;
@@ -6432,10 +6447,10 @@ mbfl_convert_filter_set_vtbl(mbfl_convert_filter *filter, struct mbfl_convert_vt
 }
 
 
-static struct mbfl_convert_vtbl *
+static const struct mbfl_convert_vtbl *
 mbfl_convert_filter_get_vtbl(enum mbfl_no_encoding from, enum mbfl_no_encoding to)
 {
-	struct mbfl_convert_vtbl *vtbl;
+	const struct mbfl_convert_vtbl *vtbl;
 	int i;
 
 	if (to == mbfl_no_encoding_base64 ||
@@ -6462,7 +6477,7 @@ mbfl_convert_filter_get_vtbl(enum mbfl_no_encoding from, enum mbfl_no_encoding t
 static void
 mbfl_convert_filter_select_vtbl(mbfl_convert_filter *filter)
 {
-	struct mbfl_convert_vtbl *vtbl;
+	const struct mbfl_convert_vtbl *vtbl;
 
 	vtbl = mbfl_convert_filter_get_vtbl(filter->from->no_encoding, filter->to->no_encoding);
 	if (vtbl == NULL) {
@@ -6645,11 +6660,6 @@ mbfl_convert_filter_strncat(mbfl_convert_filter *filter, const unsigned char *p,
 }
 #endif
 
-/* hex character table "0123456789ABCDEF" */
-static char mbfl_hexchar_table[] = {
-	0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x41,0x42,0x43,0x44,0x45,0x46
-};
-
 /* illegal character output function for conv-filter */
 int
 mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter TSRMLS_DC)
@@ -6727,7 +6737,7 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter TSRMLS_DC)
  */
 
 static void
-mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, struct mbfl_identify_vtbl *vtbl)
+mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, const struct mbfl_identify_vtbl *vtbl)
 {
 	if (filter && vtbl) {
 		filter->filter_ctor = vtbl->filter_ctor;
@@ -6736,10 +6746,10 @@ mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, struct mbfl_identify
 	}
 }
 
-static struct mbfl_identify_vtbl *
+static const struct mbfl_identify_vtbl * 
 mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding)
 {
-	struct mbfl_identify_vtbl *vtbl;
+	const struct mbfl_identify_vtbl * vtbl;
 	int i;
 
 	i = 0;
@@ -6755,7 +6765,7 @@ mbfl_identify_filter_get_vtbl(enum mbfl_no_encoding encoding)
 static void
 mbfl_identify_filter_select_vtbl(mbfl_identify_filter *filter)
 {
-	struct mbfl_identify_vtbl *vtbl;
+	const struct mbfl_identify_vtbl *vtbl;
 
 	vtbl = mbfl_identify_filter_get_vtbl(filter->encoding->no_encoding);
 	if (vtbl == NULL) {
@@ -7149,7 +7159,7 @@ mbfl_convert_encoding(
 {
 	int n;
 	unsigned char *p;
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	mbfl_memory_device device;
 	mbfl_convert_filter *filter1;
 	mbfl_convert_filter *filter2;
@@ -7206,14 +7216,14 @@ mbfl_convert_encoding(
 /*
  * identify encoding
  */
-mbfl_encoding *
+const mbfl_encoding *
 mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
 {
 	int i, n, num, bad;
 	unsigned char *p;
-	struct mbfl_identify_vtbl *vtbl;
+	const struct mbfl_identify_vtbl *vtbl;
 	mbfl_identify_filter *flist, *filter;
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	/* initialize */
 	flist = (mbfl_identify_filter *)mbfl_calloc(eliztsz, sizeof(mbfl_identify_filter));
@@ -7292,7 +7302,7 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 const char*
 mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_identify_encoding(string, elist, eliztsz TSRMLS_CC);
 	if (encoding != NULL &&
@@ -7304,10 +7314,10 @@ mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, i
 	}
 }
 
-enum mbfl_no_encoding
+const enum mbfl_no_encoding
 mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_identify_encoding(string, elist, eliztsz TSRMLS_CC);
 	if (encoding != NULL &&
@@ -7336,7 +7346,7 @@ mbfl_strlen(mbfl_string *string TSRMLS_DC)
 	int len, n, m, k;
 	unsigned char *p;
 	const unsigned char *mbtab;
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 
 	encoding = mbfl_no2encoding(string->no_encoding);
 	if (encoding == NULL || string == NULL) {
@@ -7615,7 +7625,7 @@ mbfl_substr(
     int from,
     int length TSRMLS_DC)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	int n, m, k, len, start, end;
 	unsigned char *p, *w;
 	const unsigned char *mbtab;
@@ -7774,7 +7784,7 @@ mbfl_strcut(
     int from,
     int length TSRMLS_DC)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	int n, m, k, len, start, end;
 	unsigned char *p, *w;
 	const unsigned char *mbtab;
@@ -8441,7 +8451,7 @@ mbfl_ja_jp_hantozen(
 {
 	int n;
 	unsigned char *p;
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	mbfl_memory_device device;
 	struct collector_hantozen_data pc;
 	mbfl_convert_filter *decoder;
@@ -8650,7 +8660,7 @@ mime_header_encoder_new(
 {
 	int n;
 	const char *s;
-	mbfl_encoding *outencoding;
+	const mbfl_encoding *outencoding;
 	struct mime_header_encoder_data *pe;
 
 	/* get output encoding and check MIME charset name */
@@ -8822,7 +8832,7 @@ struct mime_header_decoder_data {
 static int
 mime_header_decoder_collector(int c, void* data TSRMLS_DC)
 {
-	mbfl_encoding *encoding;
+	const mbfl_encoding *encoding;
 	struct mime_header_decoder_data *pd = (struct mime_header_decoder_data*)data;
 
 	switch (pd->status) {

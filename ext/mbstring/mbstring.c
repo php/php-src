@@ -132,19 +132,19 @@ static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 
 static const int php_mbstr_default_identify_list_size = sizeof(php_mbstr_default_identify_list)/sizeof(enum mbfl_no_encoding);
 
-static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
-static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+static const unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
+static const unsigned char second_args_force_ref[]    = { 2, BYREF_NONE, BYREF_FORCE };
 #if HAVE_MBREGEX
-static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+static const unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 #endif
 
-static sapi_post_entry mbstr_post_entries[] = {
-	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data,	php_mbstr_post_handler },
-	{ MULTIPART_CONTENT_TYPE,	sizeof(MULTIPART_CONTENT_TYPE)-1,	NULL,	rfc1867_post_handler },
+static const sapi_post_entry mbstr_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mbstr_post_handler },
+	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
 };
 
-static struct mb_overload_def mb_ovld[] = {
+static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
 	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
 	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strrpos"},
@@ -166,7 +166,7 @@ struct def_mbctype_tbl {
 	int regex_encoding;
 };
 
-struct def_mbctype_tbl mbctype_tbl[] = {
+const struct def_mbctype_tbl mbctype_tbl[] = {
 	{mbfl_no_encoding_ascii,MBCTYPE_ASCII},
 	{mbfl_no_encoding_euc_jp,MBCTYPE_EUC},
 	{mbfl_no_encoding_sjis,MBCTYPE_SJIS},
@@ -182,7 +182,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_http_output,			NULL)
 	PHP_FE(mb_detect_order,			NULL)
 	PHP_FE(mb_substitute_character,	NULL)
-	PHP_FE(mb_parse_str,			second_args_force_ref)
+	PHP_FE(mb_parse_str,			(unsigned char *)second_args_force_ref)
 	PHP_FE(mb_output_handler,			NULL)
 	PHP_FE(mb_preferred_mime_name,	NULL)
 	PHP_FE(mb_strlen,					NULL)
@@ -197,7 +197,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_kana,			NULL)
 	PHP_FE(mb_encode_mimeheader,		NULL)
 	PHP_FE(mb_decode_mimeheader,		NULL)
-	PHP_FE(mb_convert_variables,		third_and_rest_force_ref)
+	PHP_FE(mb_convert_variables,		(unsigned char *)third_and_rest_force_ref)
 	PHP_FE(mb_encode_numericentity,		NULL)
 	PHP_FE(mb_decode_numericentity,		NULL)
 	PHP_FE(mb_send_mail,					NULL)
@@ -217,8 +217,8 @@ function_entry mbstring_functions[] = {
 	PHP_FALIAS(i18n_ja_jp_hantozen,		mb_convert_kana,		NULL)
 #if HAVE_MBREGEX
 	PHP_FE(mb_regex_encoding,	NULL)
-	PHP_FE(mb_ereg,			third_argument_force_ref)
-	PHP_FE(mb_eregi,			third_argument_force_ref)
+	PHP_FE(mb_ereg,			(unsigned char *)third_argument_force_ref)
+	PHP_FE(mb_eregi,			(unsigned char *)third_argument_force_ref)
 	PHP_FE(mb_ereg_replace,			NULL)
 	PHP_FE(mb_eregi_replace,			NULL)
 	PHP_FE(mb_split,					NULL)
@@ -569,7 +569,7 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
 	enum mbfl_no_encoding no_encoding;
 #if HAVE_MBREGEX
-	struct def_mbctype_tbl *p = NULL;
+	const struct def_mbctype_tbl *p = NULL;
 #endif
 
 	no_encoding = mbfl_name2no_encoding(new_value);
@@ -775,7 +775,7 @@ PHP_RINIT_FUNCTION(mbstring)
 {
 	int n, *list=NULL, *entry;
 	zend_function *func, *orig;
-	struct mb_overload_def *p;
+	const struct mb_overload_def *p;
 
 	MBSTRG(current_language) = MBSTRG(language);
 	MBSTRG(current_internal_encoding) = MBSTRG(internal_encoding);
@@ -813,12 +813,12 @@ PHP_RINIT_FUNCTION(mbstring)
 				
 				if (zend_hash_find(EG(function_table), p->orig_func, 
 								   strlen(p->orig_func)+1, (void **)&orig) != SUCCESS) {
-					php_error(E_ERROR, "mbstring couldn't find function %s.", p->orig_func);
+					php_error(E_ERROR, "%s() mbstring couldn't find function %s.", get_active_function_name(TSRMLS_C), p->orig_func);
 				}
 				zend_hash_add(EG(function_table), p->save_func, strlen(p->save_func)+1, orig, sizeof(zend_function), NULL);
 				if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1,
 									 func, sizeof(zend_function), NULL) == FAILURE){
-					php_error(E_ERROR, "mbstring couldn't replace function %s.", p->orig_func);
+					php_error(E_ERROR, "%s() mbstring couldn't replace function %s.", get_active_function_name(TSRMLS_C), p->orig_func);
 				}
 			}
 			p++;
@@ -831,7 +831,7 @@ PHP_RINIT_FUNCTION(mbstring)
 
 PHP_RSHUTDOWN_FUNCTION(mbstring)
 {
-	struct mb_overload_def *p;
+	const struct mb_overload_def *p;
 	zend_function *orig;
 
 	if (MBSTRG(current_detect_order_list) != NULL) {
@@ -3340,7 +3340,7 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-PHPAPI int mbstr_encoding_translation(TSRMLS_DC) {
+PHPAPI int mbstr_encoding_translation(TSRMLS_D) {
 	return MBSTRG(encoding_translation);
 }
 
