@@ -602,7 +602,7 @@ inline zend_function *zend_check_private(zend_function *fbc, zend_class_entry *c
 
 /* Ensures that we're allowed to call a protected method.
  */
-int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
+ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 {
 	zend_class_entry *fbc_scope = ce;
 
@@ -695,7 +695,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
-zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	zend_function *fbc;
 
@@ -731,7 +731,7 @@ zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_n
 }
 
 
-zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
 {
 	zval **retval = NULL;
 	zend_class_entry *tmp_ce = ce;
@@ -769,7 +769,7 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 }
 
 
-zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC)
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC)
 {
 	zend_error(E_ERROR, "Attempt to unset static property %s::$%s", ce->name, property_name);
 	return 0;
