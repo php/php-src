@@ -22,6 +22,10 @@
 #include "config.h"
 #endif
 
+#ifdef PHP_WIN32
+#include <winsock2.h>
+#endif
+
 #include "php.h"
 
 #if HAVE_CURL
@@ -30,7 +34,6 @@
 #include <string.h>
 
 #ifdef PHP_WIN32
-#include <winsock.h>
 #include <sys/types.h>
 #endif
 
