@@ -28,6 +28,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #23326 (ext/domxml: Attributes via append_child not supported).
   (Melvyn)
 - Fixed bug #21220 (Wrong Apache version shown in phpinfo() output). (Jani)
+- Fixed bug #14049 (realpath() w/ZTS returns invalid results for non-existent
+  paths). (Ilia)
 
 25 Aug 2003, Version 4.3.3
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
