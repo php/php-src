@@ -1,3 +1,96 @@
+2003-09-09  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer1.phpt:
+      first step in unit testing the installer - tests the download PREG function
+
+2003-09-09  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/time/002.phpt
+      ext/standard/tests/time/bug13142.phpt:
+      MFB: Fix US/Eastern vs. America/New_York style tzset implementations.
+
+2003-09-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * sapi/apache/php_apache.c:
+      Nuke warning
+
+    * sapi/apache/php_apache.c:
+      fix typo
+
+2003-09-09  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * (PHP_4_3)
+      ext/standard/tests/time/002.phpt
+      ext/standard/tests/time/bug13142.phpt:
+      Fix testcases, failing with 'America/New_York' vs. 'US/Eastern' systems
+      and fallback to POSIX-style. The fallback is based on tzset(3)  manpage
+      [1]
+      for these systems and may apply to past and future unknowns as well.
+      
+      Affected systems:   4.4BSD
+      
+      Possible problem:   OSF
+      
+      Proposed solution:  leave testcase as is, and if OSF systems start
+                          failing during next qa-cycle, always use POSIX style
+      in
+                          testcases and add portability note to docs.
+      
+
+2003-09-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/apache/php_apache.c:
+      Show the runtime version of Apache instead of compile time.
+
+2003-09-09  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN 25294
+
+    * (PHP_4_3)
+      ext/ftp/ftp.c:
+      MFH(r-1.91) Fix Bug #25294 LIST/NLST can cause segfault because ftp->data
+      not cleaned properly
+
+    * ext/ftp/ftp.c:
+      Fix Bug #25294 LIST/NLST can cause segfault because ftp->data not cleaned
+      properly
+
+2003-09-09  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/domxml/tests/bug23326.phpt
+      ext/domxml/tests/bug23326.phpt:
+      
+      file bug23326.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix #23326: Attributes via append_child not supported
+      Add testcase
+
+2003-09-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/image.c
+      ext/standard/php_image.h:
+      MFH: - Fixed bug #25211 (image.c compile failure with AIX)
+
+    * ext/standard/image.c
+      ext/standard/php_image.h:
+      - Fixed bug #25211 (image.c compile failure with AIX)
+
+2003-09-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/gd.c:
+      Add an phpinfo entry showing which version of freetype is linked to gd.
+
 2003-09-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c:
