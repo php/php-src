@@ -2308,13 +2308,28 @@ inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry 
 
 /* Ensures that we're allowed to call a protected method.
  */
-inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope, int fn_flags)
+inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 {
-	while (ce) {
-		if (ce==scope) {
+	zend_class_entry *fbc_scope = ce;
+
+	/* Is the context that's calling the function, the same as one of
+	 * the function's parents?
+	 */
+	while (fbc_scope) {
+		if (fbc_scope==scope) {
 			return 1;
 		}
-		ce = ce->parent;
+		fbc_scope = fbc_scope->parent;
+	}
+
+	/* Is the function's scope the same as our current object context,
+	 * or any of the parents of our context?
+	 */
+	while (scope) {
+		if (scope==ce) {
+			return 1;
+		}
+		scope = scope->parent;
 	}
 	return 0;
 }
@@ -2355,7 +2370,7 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
-			if (!zend_check_protected(EG(scope), EX(fbc)->common.scope, EX(fbc)->common.fn_flags)) {
+			if (!zend_check_protected(EX(fbc)->common.scope, EG(scope))) {
 				zend_error(E_ERROR, "Call to protected constructor from context '%s'", EG(scope) ? EG(scope)->name : "");
 			}
 		}
@@ -2416,7 +2431,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
-			if (!zend_check_protected(EG(scope), EX(fbc)->common.scope, EX(fbc)->common.fn_flags)) {
+			if (!zend_check_protected(EX(fbc)->common.scope, EG(scope))) {
 				zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
 			}
 		}
@@ -2498,7 +2513,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
-		if (!zend_check_protected(EG(scope), EX(fbc)->common.scope, EX(fbc)->common.fn_flags)) {
+		if (!zend_check_protected(EG(scope), EX(fbc)->common.scope)) {
 			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
 		}
 	}
