@@ -1,3 +1,50 @@
+2003-11-01  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      sapi/nsapi/nsapi.c:
+      this is not needed
+
+2003-11-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      TODO.BUILDv5:
+      not really adequate here
+
+2003-11-01  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      NEWS:
+      news update
+
+2003-11-01  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/PEAR/Dependency.php:
+      ack
+
+    * (PHP_4_3)
+      pear/PEAR/Dependency.php:
+      might as well, someone will try it someday
+
+    * (PHP_4_3)
+      pear/PEAR/Dependency.php:
+      rework some odd code
+
+    * (PHP_4_3)
+      pear/PEAR/Dependency.php:
+      PATH_SEPARATOR is very handy
+
+    * pear/PEAR/Dependency.php:
+      checkExtension() was a complete disaster, can't believe it didn't cause any
+      problems before.
+
+    * pear/tests/pear_dependency_checkExtension.phpt
+      pear/tests/pear_dependency_checkPackageUninstall.phpt:
+      new unit test
+
+    * pear/PEAR/Dependency.php:
+      fix bug found by unit test
+
 2003-10-31  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/pear_dependency_checkPackage.phpt:
