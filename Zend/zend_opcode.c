@@ -27,6 +27,8 @@
 #include "zend_extensions.h"
 #include "zend_API.h"
 
+#include "zend_vm.h"
+
 static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_ctor) {
@@ -361,7 +363,7 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 				opline->op2.u.jmp_addr = &op_array->opcodes[opline->op2.u.opline_num];
 				break;
 		}
-		opline->handler = zend_opcode_handlers[opline->opcode];
+		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
 	
