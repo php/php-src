@@ -30,6 +30,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+
 char *_php_math_number_format(double, int, char ,char);
 
 /* {{{ proto int abs(int number)
