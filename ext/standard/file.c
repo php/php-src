@@ -462,7 +462,7 @@ PHP_FUNCTION(get_meta_tags)
 
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context]])
+/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
@@ -472,12 +472,13 @@ PHP_FUNCTION(file_get_contents)
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len, newlen;
+	long offset = -1;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!",
-				  &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!l",
+				  &filename, &filename_len, &use_include_path, &zcontext, &offset) == FAILURE) {
 		return;
 	}
 
@@ -487,6 +488,11 @@ PHP_FUNCTION(file_get_contents)
 				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL, context);
 	if (!stream) {
+		RETURN_FALSE;
+	}
+
+	if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to %ld position in the stream.", offset);
 		RETURN_FALSE;
 	}
 
