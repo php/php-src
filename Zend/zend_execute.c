@@ -1116,15 +1116,13 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 			}
 			z = value;
 		}
+		z->refcount++;
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		incdec_op(z);
 		*retval = z;
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
 		SELECTIVE_PZVAL_LOCK(*retval, result);
-		if (z->refcount == 0) {
-			zval_dtor(z);
-			FREE_ZVAL(z);
-		}
+		zval_ptr_dtor(&z);
 	}
 	
 	FREE_OP(Ts, op2, EG(free_op2));
@@ -1594,6 +1592,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 				}
 				z = value;
 			}
+			z->refcount++;
 			SEPARATE_ZVAL_IF_NOT_REF(&z);
 			binary_op(z, z, value TSRMLS_CC);
 			switch (opline->extended_value) {
@@ -1606,10 +1605,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 			}
 			*retval = z;
 			SELECTIVE_PZVAL_LOCK(*retval, result);
-			if (z->refcount == 0) {
-				zval_dtor(z);
-				FREE_ZVAL(z);
-			}
+			zval_ptr_dtor(&z);
 		}
 
 		if (property == &tmp) {
