@@ -251,9 +251,6 @@ char *
 	return (p);
 }
 
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
-
-
 #ifdef HAVE_GCVT
 
 #define ap_php_ecvt ecvt
@@ -425,6 +422,8 @@ char *
 }
 
 #endif							/* HAVE_CVT */
+
+#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
