@@ -36,8 +36,8 @@
 #include "sqlfront.h"
 #include "sqldb.h"
 
-#if HAVE_FREETDS
 typedef short TDS_SHORT;
+#if HAVE_FREETDS
 #define SQLTEXT SYBTEXT
 #define SQLCHAR SYBCHAR
 #define SQLVARCHAR SYBVARCHAR
