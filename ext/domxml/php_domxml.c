@@ -152,6 +152,7 @@ static int le_domxmlattrp;
 static int le_domxmlcdatap;
 static int le_domxmltextp;
 static int le_domxmlpip;
+static int le_domxmldocumentfragmentp;
 static int le_domxmlcommentp;
 static int le_domxmlnotationp;
 static int le_domxmlparserp;
@@ -182,6 +183,7 @@ zend_class_entry *domxmlattr_class_entry;
 zend_class_entry *domxmlcdata_class_entry;
 zend_class_entry *domxmltext_class_entry;
 zend_class_entry *domxmlpi_class_entry;
+zend_class_entry *domxmldocumentfragment_class_entry;
 zend_class_entry *domxmlcomment_class_entry;
 zend_class_entry *domxmlnotation_class_entry;
 zend_class_entry *domxmlentity_class_entry;
@@ -312,6 +314,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_cdata_section,	domxml_doc_create_cdata_section,	NULL)
 	PHP_FALIAS(create_entity_reference,	domxml_doc_create_entity_reference,	NULL)
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
+	PHP_FALIAS(create_document_fragment,	domxml_doc_create_document_fragment,	NULL)
 	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
 	/* Everything below this comment is none DOM compliant */
@@ -478,6 +481,11 @@ static zend_function_entry php_domxmlpi_class_functions[] = {
 	PHP_FALIAS(target,					domxml_pi_target,				NULL)
 	PHP_FALIAS(data,					domxml_pi_data,					NULL)
 	{NULL, NULL, NULL}
+};
+
+static zend_function_entry php_domxmldocumentfragment_class_functions[] = {
+		PHP_FALIAS(open_mem,					domxml_document_fragment_open_mem,				NULL)
+		{NULL, NULL, NULL}
 };
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -1241,6 +1249,17 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 			break;
 		}
 
+		case XML_DOCUMENT_FRAG_NODE:
+		{
+			xmlNodePtr nodep = obj;
+   			if(!wrapper_in)
+				object_init_ex(wrapper, domxmldocumentfragment_class_entry);
+			add_property_stringl(wrapper, "name", "#document-fragment", 18, 1);
+			rsrc_type = le_domxmldocumentfragmentp;
+			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
+			break;
+		}
+		
 		/* FIXME: nodes of type XML_DTD_NODE used to be domxmldtd_class_entry.
 		 * but the DOM Standard doesn't have a DomDtd class. The DocumentType
 		 * class seems to be want we need and the libxml dtd functions are
@@ -1461,7 +1480,7 @@ xmlDocPtr php_dom_xmlSAXParse(xmlSAXHandlerPtr sax, const char *buffer, int size
 	}
 
 	xmlFreeParserCtxt(ctxt);
-    
+
 	return(ret);
 }
 
@@ -1485,6 +1504,7 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlcdatap = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcdata", module_number);
 	le_domxmlentityrefp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domentityref", module_number);
 	le_domxmlpip = zend_register_list_destructors_ex(php_free_xml_node, NULL, "dompi", module_number);
+	le_domxmldocumentfragmentp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdocumentfragment", module_number);
 	le_domxmlparserp =	zend_register_list_destructors_ex(php_free_xml_parser, NULL, "domparser", module_number);
 	le_domxmldoctypep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdocumenttype", module_number);
 	le_domxmldocp = zend_register_list_destructors_ex(php_free_xml_doc, NULL, "domdocument", module_number);
@@ -1538,6 +1558,9 @@ PHP_MINIT_FUNCTION(domxml)
 
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "domprocessinginstruction", php_domxmlpi_class_functions, NULL, NULL, NULL);
 	domxmlpi_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
+
+   	INIT_OVERLOADED_CLASS_ENTRY(ce, "domdocumentfragment", php_domxmldocumentfragment_class_functions, NULL, NULL, NULL);
+	domxmldocumentfragment_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
 
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "domnotation", php_domxmlnotation_class_functions, NULL, NULL, NULL);
 	domxmlnotation_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
@@ -2360,15 +2383,21 @@ PHP_FUNCTION(domxml_node_append_child)
 		}
 	}
 	/* end libxml2 code */
-	
-	if (NULL == new_child) {
+	if (child->type == XML_DOCUMENT_FRAG_NODE) {
+		new_child = xmlAddChildList(parent, child->children);
+	  	if (NULL != new_child) {
+			/* the children are copied, not moved, but domstandard wants to move it 
+			   therefore we delete the reference here */
+			child->children = NULL;
+		}
+	} else if (NULL == new_child) {
 		new_child = xmlAddChild(parent, child);
 	}
 
 	if (NULL == new_child) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
-	}
+	} 
 
 	DOMXML_RET_OBJ(rv, new_child, &ret);
 }
@@ -2460,13 +2489,27 @@ PHP_FUNCTION(domxml_node_insert_before)
 			new_child = xmlAddPrevSibling(refp, child);
 		}
 	} else {
-		/* first unlink node, if child is already a child of parent
-			for some strange reason, this is needed
-		 */
-		if (child->parent == parent){
-			xmlUnlinkNode(child);
+		
+	  	if (child->type == XML_DOCUMENT_FRAG_NODE) {
+			new_child = xmlAddChildList(parent, child->children);
+	  		if (NULL != new_child) {
+			/* the children are copied, not moved, but domstandard wants to move it 
+			   therefore we delete the reference here */
+				
+			   child->children = NULL;
+			}
+		} else {
+		
+			/* first unlink node, if child is already a child of parent
+				for some strange reason, this is needed
+			 */
+		
+			if (child->parent == parent){
+				xmlUnlinkNode(child);
+			}
+		
+			new_child = xmlAddChild(parent, child);
 		}
-		new_child = xmlAddChild(parent, child);
 	}
 		
 
@@ -3611,6 +3654,54 @@ PHP_FUNCTION(domxml_doc_create_processing_instruction)
 	}
 }
 /* }}} */
+
+/* {{{ proto object domxml_doc_create_document_fragement()
+   Creates new document fragement node */
+PHP_FUNCTION(domxml_doc_create_document_fragment)
+{
+	zval *id, *rv = NULL;
+	xmlNode *node;
+	xmlDocPtr docp = NULL;
+	int ret;
+
+   	DOMXML_PARAM_NONE(docp, id, le_domxmldocumentfragmentp);
+	
+
+	node = xmlNewDocFragment (docp);
+	if (!node) {
+		RETURN_FALSE;
+	}
+	DOMXML_RET_OBJ(rv, node, &ret);	
+}
+/* }}} */
+
+/* {{{ proto bool domxml_document_framgent_open_mem(string buf)
+   Parses a string with a well-balanced XML-Fragment and appends it to the document-fragment */
+PHP_FUNCTION(domxml_document_fragment_open_mem)
+{
+	zval *id;
+	xmlNodePtr dfp = NULL, last = NULL;	
+   	char *buf;
+	int ret, buf_len;
+	xmlNodePtr lst;
+	
+  	DOMXML_PARAM_TWO(dfp, id, le_domxmldocumentfragmentp,"s",&buf, &buf_len);
+
+	ret = xmlParseBalancedChunkMemory(dfp->doc, NULL, NULL, 0, (xmlChar *) buf, &lst);
+	if (ret != 0) {
+	 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string is not balanced (well-formed)");   
+			RETURN_FALSE;
+	}
+	
+	last = xmlAddChildList(dfp, lst);
+	
+	if (last == NULL) {
+	 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add child list");   
+			RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
+}
 
 /* {{{ proto object domxml_doc_imported_node(object node, bool recursive)
    Creates new element node */
