@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added optional parameter to openssl_sign() to specify the hashing
+  algorithm to use. (scott@planetscott.ca, Derick)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #22386 (Using browscap causes segfault). This fix
