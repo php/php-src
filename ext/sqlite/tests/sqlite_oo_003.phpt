@@ -1,5 +1,5 @@
 --TEST--
-sqlite-oo: Simple insert/select, different result represenatation
+sqlite-oo: Simple insert/select, different result representation
 --INI--
 sqlite.assoc_case=0
 --SKIPIF--
