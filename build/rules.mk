@@ -26,23 +26,31 @@
 
 include $(top_builddir)/config_vars.mk
 
-COMPILE = $(CC) $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS)  $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
-CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@
+COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS)
+COMPILE      = $(CC)  $(COMMON_FLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
+CXX_COMPILE  = $(CXX) $(COMMON_FLAGS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
+
+SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(COMPILE) -c $< && touch $@
+CXX_SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CXX_COMPILE) -c $< && touch $@
+
+LINK = $(LIBTOOL) --mode=link $(COMPILE) $(LDFLAGS) -o $@
+
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
-SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(DEFS)   $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -c $< && touch $@
+
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I$(top_builddir) -I$(top_builddir)/main
 
 moduledir    = $(EXTENSION_DIR)
 
 .SUFFIXES:
-.SUFFIXES: .slo .c .lo .o .s .y .l
+.SUFFIXES: .slo .c .cxx .lo .o .s .y .l
 
 .c.o:
 	$(COMPILE) -c $<
+
+.cxx.o:
+	$(CXX_COMPILE) -c $<
 
 .s.o:
 	$(COMPILE) -c $<
@@ -50,11 +58,17 @@ moduledir    = $(EXTENSION_DIR)
 .c.lo:
 	$(PHP_COMPILE)
 
+.cxx.lo:
+	$(CXX_PHP_COMPILE)
+
 .s.lo:
 	$(PHP_COMPILE)
 
 .c.slo:
 	$(SHARED_COMPILE)
+
+.cxx.slo:
+	$(CXX_SHARED_COMPILE)
 
 .y.c:
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
