@@ -289,7 +289,7 @@ int zend_init_rsrc_list(ELS_D)
 
 int zend_init_rsrc_plist(ELS_D)
 {
-	return zend_hash_init(&EG(persistent_list), 0, NULL, plist_entry_destructor, 1);
+	return zend_hash_init_ex(&EG(persistent_list), 0, NULL, plist_entry_destructor, 1, 0);
 }
 
 
