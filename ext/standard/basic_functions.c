@@ -2789,7 +2789,12 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
-			zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &element, sizeof(zval *), NULL);
+			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) { 
+				zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &element, sizeof(zval *), NULL);
+			} else {
+				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_hash_index_update(Z_ARRVAL_P(arr), key, &element, sizeof(zval *), NULL);
+			}
 			break;
 
 		case ZEND_INI_PARSER_SECTION:
@@ -2822,20 +2827,27 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 			*element = *arg2;
 			zval_copy_ctor(element);
 			INIT_PZVAL(element);
-			zend_hash_update(Z_ARRVAL_P(active_arr), Z_STRVAL_P(arg1),
+			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) {
+				zend_hash_update(Z_ARRVAL_P(active_arr), Z_STRVAL_P(arg1),
 							 Z_STRLEN_P(arg1)+1, &element,
 							 sizeof(zval *), NULL);
+			} else {
+				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_hash_index_update(Z_ARRVAL_P(active_arr), key, &element, sizeof(zval *), NULL);
+			}
 		}
 		break;
 
 		case ZEND_INI_PARSER_SECTION:
 			MAKE_STD_ZVAL(BG(active_ini_file_section));
 			array_init(BG(active_ini_file_section));
-			zend_hash_update(	Z_ARRVAL_P(arr),
-								Z_STRVAL_P(arg1),
-								Z_STRLEN_P(arg1)+1,
-								&BG(active_ini_file_section),
-								sizeof(zval *), NULL);
+			if (is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) != IS_LONG) {
+				zend_hash_update(Z_ARRVAL_P(arr), Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1,
+							&BG(active_ini_file_section), sizeof(zval *), NULL);
+			} else {
+				ulong key = (ulong) zend_atoi(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_hash_index_update(Z_ARRVAL_P(arr), key, &BG(active_ini_file_section), sizeof(zval *), NULL);
+			}
 			break;
 	}
 }
