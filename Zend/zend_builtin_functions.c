@@ -514,7 +514,7 @@ ZEND_FUNCTION(defined)
 /* }}} */
 
 
-/* {{{ proto string get_class(object object)
+/* {{{ proto string get_class([object object])
    Retrieves the class name */
 ZEND_FUNCTION(get_class)
 {
@@ -522,6 +522,13 @@ ZEND_FUNCTION(get_class)
 	char *name = "";
 	zend_uint name_len = 0;
 	
+	if (!ZEND_NUM_ARGS()) {
+		if (EG(scope)) {
+			RETURN_STRINGL(EG(scope)->name, EG(scope)->name_length, 1);
+		} else {
+			zend_error(E_ERROR, "get_class() called without object from outside a class");
+		}
+	}
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
