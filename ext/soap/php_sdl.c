@@ -1506,8 +1506,8 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 
 	/* deserialize functions */
 	WSDL_CACHE_GET_INT(num_func, &in);
+	zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
 	if (num_func > 0) {
-		zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
 		functions = emalloc(num_func*sizeof(sdlFunctionPtr));
 		for (i = 0; i < num_func; i++) {
 			int binding_num, num_faults;
