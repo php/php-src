@@ -45,7 +45,7 @@ static request_rec *php_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_string_ex(p1);
 
 	ctx = SG(server_context);
-	return ap_sub_req_lookup_uri(Z_STRVAL_PP(p1), ctx->f->r, NULL);
+	return ap_sub_req_lookup_uri(Z_STRVAL_PP(p1), ctx->f->r, ctx->f->next);
 }
 
 /* {{{ proto bool apache_sub_req(string uri)
