@@ -625,8 +625,8 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 	dummy_short = php_read2(stream TSRMLS_CC); /* Lsiz */
 	dummy_short = php_read2(stream TSRMLS_CC); /* Rsiz */
-	result->height = php_read4(stream TSRMLS_CC); /* Xsiz */
 	result->width = php_read4(stream TSRMLS_CC); /* Ysiz */
+	result->height = php_read4(stream TSRMLS_CC); /* Xsiz */
 
 #if MBO_0
 	php_read4(stream TSRMLS_CC); /* XOsiz */
