@@ -55,6 +55,19 @@
     $ext->write_ms_devstudio_dsp();
 	}
 
+	// generate EXPERIMENTAL file for unstable release states
+	$ext->write_experimental();
+
+  // generate CREDITS file
+	$ext->write_credits();
+
+	// generate PEAR/PECL package.xml file
+	$ext->write_package_xml();
+
 	// generate DocBook XML documantation for PHP manual
   $ext->generate_documentation();
+
+	// generate test case templates
+	$ext->write_test_files();
+
 ?>
