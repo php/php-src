@@ -350,8 +350,8 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 							break;
 
 						case DESCKIND_NONE:
-						default:
-							fptr = NULL;
+						//default:
+						//	fptr = NULL;
 							break;
 					}
 					if (TI) {
