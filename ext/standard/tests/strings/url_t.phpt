@@ -67,7 +67,8 @@ $sample_urls = array (
 'http://user:passwd@www.example.com:8080?bar=1&boom=0',
 'file:///path/to/file',
 'file://path/to/file',
-'file:/path/to/file'
+'file:/path/to/file',
+'http://1.2.3.4:/abc.asp?a=1&b=2'
 );
 
     foreach ($sample_urls as $url) {
@@ -638,4 +639,14 @@ array(2) {
   string(4) "file"
   ["path"]=>
   string(13) "/path/to/file"
+}
+array(4) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(7) "1.2.3.4"
+  ["path"]=>
+  string(8) "/abc.asp"
+  ["query"]=>
+  string(7) "a=1&b=2"
 }

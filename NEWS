@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   POSIX compatible mode. (K.Kosako <kosako at sofnec.co.jp>, Moriyoshi)
 - Fixed bug #25814 (Make flock() return correct value when 3rd argument is
   used). (Ilia)
+- Fixed bug #25800 (parse_url() could not parse urls with empty port). (Ilia)
 - Fixed bug #25780 (ext/session: invalid "session.cookie_lifetime" makes 
   session_start() to crash in win32). (Jani)
 - Fixed bug #25770 (Segfault with PHP and bison 1.875). (eggert@gnu.org, Marcus)
