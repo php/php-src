@@ -20,7 +20,7 @@ fi
 
 autoheader
 
-automake --add-missing --include-deps
+automake --add-missing --include-deps $automake_flags
 
 mv configure configure.old 2>/dev/null
 autoconf
