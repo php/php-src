@@ -203,7 +203,11 @@ AC_ARG_WITH(regex,
 [
   case $withval in 
     system)
-      REGEX_TYPE=system
+      if test "$PHP_SAPI" = "apache" || test "$PHP_SAPI" = "apache2filter"; then
+        REGEX_TYPE=php
+      else
+        REGEX_TYPE=system
+      fi
       ;;
     apache)
       REGEX_TYPE=apache
