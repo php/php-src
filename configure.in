@@ -578,11 +578,11 @@ int main(void) {
   memset(&hints, 0, sizeof(hints));
   hints.ai_flags = AI_NUMERICHOST;
 
-  if (getaddrinfo("127.0.0.1", NULL, &hints, &ai) < 0) {
+  if (getaddrinfo("127.0.0.1", 0, &hints, &ai) < 0) {
     exit(1);
   }
 
-  if (ai == NULL) {
+  if (ai == 0) {
     exit(1);
   }
 
