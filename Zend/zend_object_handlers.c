@@ -10,7 +10,7 @@
 static HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
 {
 	zend_object *zobj;
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 	return zobj->properties;
 }
 
@@ -20,7 +20,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zval tmp_member;
 	zval **retval;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -67,7 +67,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	zval tmp_member;
 	zval **variable_ptr;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -102,7 +102,7 @@ static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 	zval tmp_member;
 	zval **retval;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -133,7 +133,7 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 	zend_object *zobj;
 	zval tmp_member;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -152,7 +152,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 	zend_object *zobj;
 	zend_function *func_method;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 	if(zend_hash_find(&zobj->ce->function_table, method_name, method_len+1, (void **)&func_method) == FAILURE) {
 		zend_error(E_ERROR, "Call to undefined function %s()", method_name);
 	}
@@ -164,28 +164,8 @@ static union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC)
 {
 	zend_object *zobj;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 	return zobj->ce->constructor;
-}
-
-static int zend_std_get_class(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
-{
-	zend_object *zobj;
-	zend_class_entry *ce;
-	
-	zobj = Z_GET_OBJ(object);
-	if(parent) {
-		ce = zobj->ce->parent;
-	} else {
-		ce = zobj->ce;
-	}
-	if(!ce) {
-		return FAILURE;
-	}
-	
-	*class_name = zobj->ce->name;
-	*class_name_len = zobj->ce->name_length;
-	return SUCCESS;
 }
 
 int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2 TSRMLS_DC);
@@ -194,8 +174,8 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC)
 {
 	zend_object *zobj1, *zobj2;
 	
-	zobj1 = Z_GET_OBJ(o1);
-	zobj2 = Z_GET_OBJ(o2);
+	zobj1 = Z_OBJ_P(o1);
+	zobj2 = Z_OBJ_P(o2);
 
 	if(zobj1->ce != zobj2->ce) {
 		return 1; /* different classes */
@@ -210,7 +190,7 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 	zval **value;
 	zval tmp_member;
 	
-	zobj = Z_GET_OBJ(object);
+	zobj = Z_OBJ_P(object);
 	
  	if (member->type != IS_STRING) {
 		tmp_member = *member;
@@ -253,7 +233,8 @@ zend_object_handlers std_object_handlers = {
 	zend_std_get_method,                     /* get_method */
 	NULL,                                    /* call_method */
 	zend_std_get_constructor,                /* get_constructor */
-	zend_std_get_class,                      /* get_class */
+	NULL,                                    /* get_class_entry */
+	NULL,                                    /* get_class */
 	zend_std_compare_objects                 /* compare_objects */
 };
 
