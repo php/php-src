@@ -554,7 +554,7 @@ int main(int argc, char *argv[])
 		CG(interactive) = interactive;
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
-		if (argc > ap_php_optind && !script_file && behavior==PHP_MODE_STANDARD && !strcmp(argv[ap_php_optind-1],"--")) {
+		if (argc > ap_php_optind && !script_file && behavior!=PHP_MODE_CLI_DIRECT && !strcmp(argv[ap_php_optind-1],"--")) {
 			no_headers = 1;
 			script_file=argv[ap_php_optind];
 			ap_php_optind++;
