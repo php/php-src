@@ -59,7 +59,7 @@ static char *_find_xslt_argument(const char **argv, const char *key)
 	char   *return_value = NULL;  /* Value to return from the function */
 
     if (! argv)
-        return;
+        return NULL;
     
 	/* Loop through the array searching for the value */
 	ptr = (char **) argv;
