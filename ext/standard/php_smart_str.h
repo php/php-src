@@ -27,8 +27,8 @@
 	if (!d->c) d->len = d->a = 0; \
 	newlen = d->len + n; \
 	if (newlen >= d->a) {\
-		d->c = perealloc(d->c, n + 129, what); \
-		d->a = n + 128; \
+		d->c = perealloc(d->c, newlen + 129, what); \
+		d->a = newlen + 128; \
 	}\
 }
 
