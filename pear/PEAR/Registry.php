@@ -109,7 +109,7 @@ class PEAR_Registry
     // }}}
     // {{{ packageInfo()
 
-    function packageInfo($package = null)
+    function packageInfo($package = null, $key = null)
     {
         if ($package === null) {
             return array_map(array($this, "packageInfo"),
@@ -121,7 +121,14 @@ class PEAR_Registry
         }
         $data = fread($fp, filesize($this->_packageFileName($package)));
         $this->_closePackageFile($fp);
-        return unserialize($data);
+        $data = unserialize($data);
+        if ($key === null) {
+            return $data;
+        }
+        if (isset($data[$key])) {
+            return $data[$key];
+        }
+        return null;
     }
 
     // }}}
