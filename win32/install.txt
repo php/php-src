@@ -54,7 +54,7 @@ Windows Manual installation from zip binary distribution
   Xitami
   Netscape Enterprise Server, iPlanet
 
- PHP 4 for Windows comes in two flavours - a CGI executable (php-cgi.exe),
+ PHP 4 for Windows comes in two flavours - a CGI executable (php.exe),
  and several SAPI modules (for exapmle php4isapi.dll). The latter form
  is new to PHP 4, and provides significantly improved performance and
  some new functionality. However, please note that the SAPI modules
@@ -96,7 +96,7 @@ Windows Manual installation from zip binary distribution
   will need those as well. To make sure that the dlls can be found, you can
   either copy them to the system directory (e.g. winnt/system32 or 
   windows/system) or you can make sure that they live in the same directory
-  as the main php executable or dll your web server will use (e.g. php-cgi.exe,
+  as the main php executable or dll your web server will use (e.g. php.exe,
   php4apache.dll).
 
   Copy the file, php.ini-dist to your %WINDOWS% directory on
@@ -220,7 +220,7 @@ Web server configuration
 
 
   There are two ways to set up PHP to work with Apache 1.3.x
-  on Windows. One is to use the CGI binary (php-cgi.exe),
+  on Windows. One is to use the CGI binary (php.exe),
   the other is to use the Apache module dll. In either case
   you need to stop the Apache server, and edit your
   httpd.conf or srm.conf to configure Apache to work with PHP.
@@ -301,7 +301,7 @@ Web server configuration
 
    ScriptAlias /php/ "c:/php/"
    AddType application/x-httpd-php .php
-   Action application/x-httpd-php "/php/php-cgi.exe"
+   Action application/x-httpd-php "/php/php.exe"
 
   Note, we consider installing PHP like this suicidal.
 
@@ -369,8 +369,8 @@ Web server configuration
    On the edit menu select: New->String Value.
    Type in the extension you wish to use for your php scripts. ex: .php
    Double click on the new string value and enter the path to
-   php-cgi.exe in the value data field.
-   ex: c:\php\php-cgi.exe
+   php.exe in the value data field.
+   ex: c:\php\php.exe
    Repeat these steps for each extension you wish to associate
    with PHP scripts.
 
@@ -402,7 +402,7 @@ Web server configuration
    New->Key, name it command.
    Highlight the new key 'command' and in the
    right side pane, double click the "default value" and enter
-   the path to php-cgi.exe ex: c:\php\php-cgi.exe -q %1
+   the path to php.exe ex: c:\php\php.exe -q %1
    (don't forget the '%1').
    Exit Regedit.
    If using PWS on Windows, reboot to reload the registry.
@@ -415,7 +415,7 @@ Web server configuration
 
    To install PHP on an NT/2000/XP Server running IIS 4 or newer,
    follow these instructions. You have two options to set up
-   PHP, using the CGI binary (php-cgi.exe) or with the ISAPI module.
+   PHP, using the CGI binary (php.exe) or with the ISAPI module.
 
    In either case, you need to start the Microsoft Management
    Console (may appear as 'Internet Services Manager', either
@@ -430,7 +430,7 @@ Web server configuration
     and then enter the App Mappings tab.
 
     Click Add, and in the Executable box, type:
-    c:\php\php-cgi.exe (assuming that you have unzipped PHP in c:\php\).
+    c:\php\php.exe (assuming that you have unzipped PHP in c:\php\).
 
     In the Extension box, type the file name extension you want
     associated with PHP scripts. Leave 'Method exclusions'
@@ -449,7 +449,7 @@ Web server configuration
     Set up the appropriate security. (This is done in Internet
     Service Manager), and if your NT Server uses NTFS file system,
     add execute rights for I_USR_ to the directory that contains
-    php-cgi.exe
+    php.exe
 
     !NOTE!: Since 4.1.2, the php.ini setting cgi.force_redirect defaults to '1'
     which effectively prevents the cgi from working within IIS. You need to set
@@ -491,7 +491,7 @@ Web server configuration
           tray and select 'Properties'
   Step 3: Click on 'Web Server Global Settings'
   Step 4: On the 'External' tab, enter:
-          virtual = .php | actual = c:\path-to-php-dir\php-cgi.exe
+          virtual = .php | actual = c:\path-to-php-dir\php.exe
           and use the Add button.
   Step 5: On the Mime tab, enter:
           virtual = wwwserver/stdcgi | actual = .php
@@ -523,7 +523,7 @@ Web server configuration
    Edit the Server Properties and select the tab "Mapping".
 
    From the List select "Associations" and enter the desired
-   extension (".php") and the path to the CGI exe (ex. c:\php\php-cgi.exe)
+   extension (".php") and the path to the CGI exe (ex. c:\php\php.exe)
    or the ISAPI dll file (ex. c:\php\sapi\php4isapi.dll).
 
    Select "Content Types" add the same extension ".php"
@@ -550,7 +550,7 @@ Web server configuration
    into the field File extensions (.xxx).
 
    In Filter command or script put the path and name
-   of your php executable i.e. c:\php\php-cgi.exe.
+   of your php executable i.e. c:\php\php.exe.
 
    Press the 'Save' icon.
 
@@ -565,7 +565,7 @@ Web server configuration
 
    Make a file assocition from the command line (type the 2 following lines)
     assoc .php=PHPScript
-    ftype PHPScript=c:\php\php-cgi.exe %1 %*
+    ftype PHPScript=c:\php\php.exe %1 %*
 
    In the Netscape Enterprise Administration Server create a dummy shellcgi
    directory and remove it just after (this step creates 5 important lines in
@@ -585,7 +585,7 @@ Web server configuration
 
    Make a file assocition from the command line (type the 2 following lines)
     assoc .php=PHPScript
-    ftype PHPScript=c:\php\php-cgi.exe %1 %*
+    ftype PHPScript=c:\php\php.exe %1 %*
 
    In the Netscape Enterprise Administration Server create a new mime type
     (Category:type,Content-Type:magnus-internal/x-httpd-php,File Suffix:php)
@@ -659,7 +659,7 @@ Problems?
 
    Something went wrong when the server tried to run PHP. To get to see a
    sensible error message, from the command line, change to the directory
-   containing php-cgi.exe and run "php-cgi.exe -i" (without quotes).
+   containing php.exe and run "php.exe -i" (without quotes).
    If php has any problems running, then a suitable error message will be displayed
    which will give you a clue as to what needs to be done next.
    If you get a screen full of html codes (the output of the phpinfo() function) then
@@ -673,8 +673,8 @@ Problems?
    HTTP headers. The headers it did return are:
 
    This error message means that php failed to output anything at all.
-   From the command line hange to the directory containing php-cgi.exe. Run
-   php-cgi.exe -i
+   From the command line hange to the directory containing php.exe. Run
+   php.exe -i
    If php has any problems running, then a suitable
    error message will be displayed which will give you a clue as to what needs to
    be done next. If you get a screen full of html codes (the output of the
@@ -683,7 +683,7 @@ Problems?
    Once php is working at the command line, try accessing the php script via the browser again.
    If it still fails then it could be one of the following:
 
-   file permissions on your php script, php-cgi.exe, php4ts.dll, php.ini or any php
+   file permissions on your php script, php.exe, php4ts.dll, php.ini or any php
    extensions you are trying to load are such that the anonymous internet user
    ISUR_<machinename> cannot access them.
 
