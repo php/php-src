@@ -1101,7 +1101,7 @@ _oci_get_ocicoll(zval *id,oci_collection **collection TSRMLS_DC)
 {
     zval **coll;
     
-    if (zend_hash_find(id->value.obj.properties, "collection", sizeof("collection"), (void **)&coll) == FAILURE) {
+    if (zend_hash_find(Z_OBJPROP(*id), "collection", sizeof("collection"), (void **)&coll) == FAILURE) {
         php_error(E_WARNING, "cannot find collection");
         return 0;
     }
@@ -1125,7 +1125,7 @@ _oci_get_ocidesc(zval *id,oci_descriptor **descriptor TSRMLS_DC)
 {
 	zval **desc;
 	
-	if (zend_hash_find(id->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
+	if (zend_hash_find(Z_OBJPROP(*id), "descriptor", sizeof("descriptor"), (void **)&desc) == FAILURE) {
 		php_error(E_WARNING, "cannot find descriptor");
 		return 0;
 	}
