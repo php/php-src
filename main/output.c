@@ -22,6 +22,7 @@
 #include "php.h"
 #include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/standard/url_scanner_ex.h"
 #include "SAPI.h"
 
 /* output functions */
@@ -788,6 +789,38 @@ PHPAPI char *php_get_output_start_filename(TSRMLS_D)
 PHPAPI int php_get_output_start_lineno(TSRMLS_D)
 {
 	return OG(output_start_lineno);
+}
+
+PHP_FUNCTION(output_remove_rewrite_var)
+{
+	char *name;
+	int name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (php_url_scanner_remove_var(name, name_len TSRMLS_CC) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(output_add_rewrite_var)
+{
+	char *name, *value;
+	int name_len, value_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &value, &value_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (php_url_scanner_add_var(name, name_len, value, value_len, 1 TSRMLS_CC) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 /*

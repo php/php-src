@@ -809,6 +809,10 @@ function_entry basic_functions[] = {
 #endif
 	PHP_FE(deaggregate,						first_arg_force_ref)
 	PHP_FE(aggregation_info,				first_arg_force_ref)
+
+	PHP_FE(output_add_rewrite_var,											NULL)
+	PHP_FE(output_remove_rewrite_var,										NULL)
+
 	{NULL, NULL, NULL}
 };
 
@@ -1062,6 +1066,7 @@ PHP_RINIT_FUNCTION(basic)
 	PHP_RINIT(filestat) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(syslog) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(dir) (INIT_FUNC_ARGS_PASSTHRU);
+	PHP_RINIT(url_scanner_ex) (INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
@@ -1090,6 +1095,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	PHP_RSHUTDOWN(filestat) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(syslog) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(assert) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(url_scanner_ex) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	if (BG(user_tick_functions)) {
 		zend_llist_destroy(BG(user_tick_functions));

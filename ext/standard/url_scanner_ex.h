@@ -21,14 +21,18 @@
 
 PHP_MINIT_FUNCTION(url_scanner_ex);
 PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
+
+PHP_RINIT_FUNCTION(url_scanner_ex);
+PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
+
+PHP_FUNCTION(output_add_rewrite_var);
+PHP_FUNCTION(output_remove_rewrite_var);
+
+int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC);
+int php_url_scanner_remove_var(char *name, int name_len TSRMLS_DC);
+
 int php_url_scanner_ex_activate(TSRMLS_D);
 int php_url_scanner_ex_deactivate(TSRMLS_D);
-
-char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC);
-
-char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC);
-
-char *url_adapt_flush(size_t * TSRMLS_DC);
 
 #include "php_smart_str_public.h"
 
@@ -43,8 +47,9 @@ typedef struct {
 	smart_str result;
 
 	/* The data which is appended to each relative URL */
-	smart_str q_name;
-	smart_str q_value;
+	HashTable *rewrite_vars;
+
+	int active;
 
 	char *lookup_data;
 	int state;
@@ -52,5 +57,10 @@ typedef struct {
 	/* Everything above is zeroed in RINIT */
 	HashTable *tags;
 } url_adapt_state_ex_t;
+
+typedef struct {
+	smart_str var;
+	smart_str val;
+} url_adapt_var_t;
 
 #endif
