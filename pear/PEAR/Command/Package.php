@@ -27,6 +27,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
         'package' => array(
             'summary' => 'Build Package',
             'function' => 'doPackage',
+            'shortcut' => 'p',
             'options' => array(
                 'nocompress' => array(
                     'shortopt' => 'Z',

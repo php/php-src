@@ -29,6 +29,7 @@ class PEAR_Command_Registry extends PEAR_Command_Common
         'list' => array(
             'summary' => 'List Installed Packages',
             'function' => 'doList',
+            'shortcut' => 'l',
             'options' => array(),
             'doc' => '[package]
 If invoked without parameters, this command lists the PEAR packages
@@ -38,8 +39,8 @@ lists the files in that package.
             ),
         'shell-test' => array(
             'summary' => 'Shell Script Test',
-            'shortcut' => 'stest',
             'function' => 'doShellTest',
+            'shortcut' => 'stest',
             'options' => array(),
             'doc' => '<package> [[relation] version]
 Tests if a package is installed in the system. Will exit(1) if it is not.
