@@ -105,7 +105,7 @@ PHP_SAPI    : " . PHP_SAPI . "
 PHP_VERSION : " . phpversion() . "
 PHP_OS      : " . PHP_OS . "
 INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
-More .INIs  : " . str_replace("\n","", php_ini_scanned_files()); ?>';
+More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 save_text($info_file, $php_info);
 $settings = array(
 		'open_basedir=',
