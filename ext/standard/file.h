@@ -54,7 +54,7 @@ PHP_FUNCTION(unlink);
 PHP_FUNCTION(copy);
 PHP_FUNCTION(file);
 PHP_FUNCTION(file_get_contents);
-PHP_FUNCTION(file_set_contents);
+PHP_FUNCTION(file_put_contents);
 PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);

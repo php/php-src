@@ -27,7 +27,7 @@ PHP                                                                        NEWS
 - Added optional parameter to get_browser() to make it return an array. (Jay)
 - Added optional parameter to openssl_sign() to specify the hashing algorithm.
   (scott@planetscott.ca, Derick)
-- Added file_set_contents() function. (Sterling)
+- Added file_put_contents() function. (Sterling)
 - Added "mail_force_extra_paramaters" php.ini option which forces the addition 
   of the specified parameters to be passed as extra parameters to the sendmail 
   binary. These parameters will always replace the value of the 5th parameter
