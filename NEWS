@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added set_error_handler() to allow custom error handling functions,
+  instead of the built-in error handling code (Zeev, Zend Engine)
+- Renamed user_error() to trigger_error();  user_error() remains
+  defined for compatibility (Zeev, Zend Engine)
 - Fix the global/static statements to require a trailing terminating
   semi-colon ';'. (Andi, Zend Engine)
 - Cleaned up PCRE extension and made it binary-safe. (Andrei)
