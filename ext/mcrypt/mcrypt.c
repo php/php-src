@@ -205,6 +205,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	
 	if(source == RANDOM || source == URANDOM) {
 		int fd;
+		size_t read_bytes = 0;
 
 		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom",
 				O_RDONLY);
@@ -213,7 +214,13 @@ PHP_FUNCTION(mcrypt_create_iv)
 			php_error(E_WARNING, "cannot open source device");
 			RETURN_FALSE;
 		}
-		n = read(fd, iv, i);
+		while (read_bytes < i) {
+			n = read(fd, iv + read_bytes, i - read_bytes);
+			if (n < 0)
+				break;
+			read_bytes += n;
+		}
+		n = read_bytes;
 		close(fd);
 	} else {
 		while(i) {
