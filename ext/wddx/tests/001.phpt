@@ -14,11 +14,11 @@ array(11) {
   ["aNumber"]=>
   float(-12.456)
   ["aDateTime"]=>
-  int(897600732)
+  int(897625932)
   ["aDateTime2"]=>
-  int(329607132)
+  int(329632332)
   ["aDateTime3"]=>
-  string(19) "2040-06-12T04:32:12"
+  string(22) "2040-06-12T04:32:12+00"
   ["aBoolean"]=>
   bool(true)
   ["anArray"]=>
