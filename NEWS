@@ -8,6 +8,7 @@ PHP 4                                                                      NEWS
   exhaustion. (Andrei)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
+- Fixed bug #29805 (HTTP Authentication Issues). (Uwe Schindler)
 - Fixed bug #29753 (mcal_fetch_event() allows 2nd argument to be optional).
   (Ilia, Vrana)
 - Fixed bug #29727 (Added missing CURL authentication directives). (Ilia)
