@@ -1814,59 +1814,60 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 sdlPtr get_sdl(char *uri TSRMLS_DC)
 {
+	sdlPtr sdl = NULL;
+	char* old_error_code = SOAP_GLOBAL(error_code);
 #ifdef SDL_CACHE
-	sdlPtr tmp, *hndl;
-	TSRMLS_FETCH();
+	sdlPtr *hndl;
 
-	tmp = NULL;
-	hndl = NULL;
+	SOAP_GLOBAL(error_code) = "WSDL";
 	if (zend_hash_find(SOAP_GLOBAL(sdls), uri, strlen(uri), (void **)&hndl) == FAILURE) {
-		tmp = load_wsdl(uri);
-		zend_hash_add(SOAP_GLOBAL(sdls), uri, strlen(uri), &tmp, sizeof(sdlPtr), NULL);
+		sdl = load_wsdl(uri);
+		zend_hash_add(SOAP_GLOBAL(sdls), uri, strlen(uri), &sdl, sizeof(sdlPtr), NULL);
 	} else {
-		tmp = *hndl;
+		sdl = *hndl;
 	}
-
-	return tmp;
 #else
+	SOAP_GLOBAL(error_code) = "WSDL";
 	if (SOAP_GLOBAL(cache_enabled)) {
 		char  fn[MAXPATHLEN];
-		char* key;
-		sdlPtr sdl;
-		time_t t = time(0);
-
-	  char md5str[33];
-  	PHP_MD5_CTX context;
-	  unsigned char digest[16];
-	  int len = strlen(SOAP_GLOBAL(cache_dir));
 
 	  if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri,strlen(uri))) {
 		  strcpy(fn, uri);
 		} else if (VCWD_REALPATH(uri, fn) == NULL) {
-			return load_wsdl(uri);
+			sdl = load_wsdl(uri);
 		}
-	  md5str[0] = '\0';
-	  PHP_MD5Init(&context);
-	  PHP_MD5Update(&context, fn, strlen(fn));
-	  PHP_MD5Final(digest, &context);
-	  make_digest(md5str, digest);
-	  key = do_alloca(len+sizeof("/wsdl-")-1+sizeof(md5str));
-	  memcpy(key,SOAP_GLOBAL(cache_dir),len);
-	  memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
-	  memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
+		if (sdl == NULL) {
+			char* key;
+			time_t t = time(0);
+		  char md5str[33];
+	  	PHP_MD5_CTX context;
+		  unsigned char digest[16];
+		  int len = strlen(SOAP_GLOBAL(cache_dir));
 
-		if ((sdl = get_sdl_from_cache(key, fn, t-SOAP_GLOBAL(cache_ttl))) == NULL) {
-			sdl = load_wsdl(fn);
-			if (sdl != NULL) {
-				add_sdl_to_cache(key, fn, t, sdl);
+		  md5str[0] = '\0';
+		  PHP_MD5Init(&context);
+		  PHP_MD5Update(&context, fn, strlen(fn));
+		  PHP_MD5Final(digest, &context);
+		  make_digest(md5str, digest);
+		  key = do_alloca(len+sizeof("/wsdl-")-1+sizeof(md5str));
+		  memcpy(key,SOAP_GLOBAL(cache_dir),len);
+		  memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
+		  memcpy(key+len+sizeof("/wsdl-")-1,md5str,sizeof(md5str));
+
+			if ((sdl = get_sdl_from_cache(key, fn, t-SOAP_GLOBAL(cache_ttl))) == NULL) {
+				sdl = load_wsdl(fn);
+				if (sdl != NULL) {
+					add_sdl_to_cache(key, fn, t, sdl);
+				}
 			}
+			free_alloca(key);
 		}
-		free_alloca(key);
-		return sdl;
 	} else {
-		return load_wsdl(uri);
+		sdl = load_wsdl(uri);
 	}
 #endif
+	SOAP_GLOBAL(error_code) = old_error_code;
+	return sdl;
 }
 
 /* Deletes */
