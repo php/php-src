@@ -1,3 +1,163 @@
+2001-11-30  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    ldap_first_attribute and ldap_next_attribute has been completely broken
+    for 6 months!! Fixed (I think), might be a memory leak there...
+
+2001-11-30  Brian Bruns  <camber@ais.org>
+
+    * ext/sybase_ct/config.m4:
+    Detect FreeTDS to work around different library sets
+
+2001-11-30  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/servlet/config.m4
+      sapi/thttpd/config.m4
+      sapi/tux/config.m4
+      sapi/webjames/config.m4
+      sapi/isapi/config.m4
+      sapi/nsapi/config.m4
+      sapi/phttpd/config.m4
+      sapi/pi3web/config.m4
+      sapi/roxen/config.m4
+      sapi/apache2filter/config.m4
+      sapi/caudium/config.m4
+      sapi/cgi/config.m4
+      sapi/fastcgi/config.m4
+      sapi/aolserver/config.m4
+      sapi/apache/config.m4:
+    Added missing cvs ids and unified configure messages.
+
+    * ext/zlib/config0.m4
+      ext/yaz/config.m4
+      ext/yp/config.m4
+      ext/zip/config.m4
+      ext/xmlrpc/config.m4
+      ext/xslt/config.m4
+      ext/xml/config.m4
+      ext/wddx/config.m4
+      ext/vpopmail/config.m4
+      ext/sysvsem/config.m4
+      ext/sysvshm/config.m4
+      ext/sybase/config.m4
+      ext/sybase_ct/config.m4
+      ext/sockets/config.m4
+      ext/swf/config.m4
+      ext/shmop/config.m4
+      ext/snmp/config.m4
+      ext/satellite/config.m4
+      ext/session/config.m4
+      ext/qtdom/config.m4
+      ext/readline/config.m4
+      ext/recode/config.m4
+      ext/posix/config.m4
+      ext/pspell/config.m4
+      ext/pgsql/config.m4
+      ext/pcre/config.m4
+      ext/pfpro/config.m4
+      ext/ovrimos/config.m4
+      ext/pcntl/config.m4
+      ext/oracle/config.m4
+      ext/overload/config.m4
+      ext/openssl/config.m4
+      ext/odbc/config.m4
+      ext/ncurses/config.m4
+      ext/oci8/config.m4
+      ext/muscat/config.m4
+      ext/mysql/config.m4
+      ext/ming/config.m4
+      ext/mnogosearch/config.m4
+      ext/msession/config.m4
+      ext/msql/config.m4
+      ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/ldap/config.m4
+      ext/mailparse/config.m4
+      ext/mbstring/config.m4
+      ext/mcal/config.m4
+      ext/ingres_ii/config.m4
+      ext/interbase/config.m4
+      ext/ircg/config.m4
+      ext/java/config.m4
+      ext/informix/config.m4
+      ext/icap/config.m4
+      ext/iconv/config.m4
+      ext/gmp/config.m4
+      ext/hyperwave/config.m4
+      ext/gettext/config.m4
+      ext/filepro/config.m4
+      ext/fribidi/config.m4
+      ext/ftp/config.m4
+      ext/gd/config.m4
+      ext/exif/config.m4
+      ext/fbsql/config.m4
+      ext/fdf/config.m4
+      ext/dbplus/config.m4
+      ext/dbx/config.m4
+      ext/dio/config.m4
+      ext/domxml/config.m4
+      ext/dba/config.m4
+      ext/dbase/config.m4
+      ext/db/config.m4
+      ext/curl/config.m4
+      ext/cybercash/config.m4
+      ext/cybermut/config.m4
+      ext/cyrus/config.m4
+      ext/crack/config.m4
+      ext/ctype/config.m4
+      ext/calendar/config.m4
+      ext/ccvs/config.m4
+      ext/cpdf/config.m4
+      ext/bcmath/config.m4
+      ext/bz2/config.m4
+      ext/aspell/config.m4: Unified the configure messages.
+
+2001-11-30  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/sockets/sockets.c: MFH - make sockets extension usable
+
+2001-11-30  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      configure.in
+      main/php_version.h: go with RC4
+
+2001-11-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      main/output.c
+      main/php_output.h:
+    - Added ob_flush and ob_clean functions, which do not end the buffer like
+      ob_end_flush and ob_end_clean do.
+    - Added ob_flush and ob_clean functions, which flush and clean an
+      output buffer without destroying the buffer. 
+
+    * win32/sendmail.c: - Fix for bug 8909 and 12680 (timezone problem)
+
+2001-11-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/domxml/php_domxml.c: Cleanup the function entries a tidbit
+
+2001-11-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/CREDITS
+      ext/pdf/Makefile.in
+      ext/pdf/config.m4
+      ext/pdf/pdf.c
+      ext/pdf/php_pdf.h:
+    This is better way to configure. PDFlib 3/4 can be compiled with external libs too..
+
+2001-11-30  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/limit.inc
+      pear/DB/tests/oci8/13limit.phpt:
+    Added tests for the oci8 limit query support
+
+    * pear/DB/oci8.php:
+    Why try to guess the resultant column names when Oracle could
+    return it with this littles trick?
+    Now the limit support for Oracle should be fast and complete
+
 2001-11-29  Brian Bruns	<camber@ais.org
 
     * ext/sybase_ct/config.m4: detect FreeTDS and adjust libs accordingly
