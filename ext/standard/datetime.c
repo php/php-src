@@ -158,7 +158,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			ta->tm_year = Z_LVAL_PP(arguments[5])
 			  - ((Z_LVAL_PP(arguments[5]) > 1000) ? 1900 : 0);
 		/* fall-through */
-	case 5: /* day in month (1-baesd) */
+	case 5: /* day in month (1-based) */
  		val = (*arguments[4])->value.lval; 
 		if (val < 1) { 
 			chgsecs += (1-val) * 60*60*24; 
@@ -190,10 +190,10 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	case 1: /* hour */
 		val = (*arguments[0])->value.lval; 
 		/*
-		   We don't use 1 here to work around problems in some mktime implementations
-		   when it comes to daylight savings time.  Setting it to 4 and working back from
-		   there with the chgsecs offset makes us immune to these problems.
-		   See http://bugs.php.net/27533 for more info.
+		   We avoid midnight and a couple of hours after midnight here to work around
+		   various OS-level bugs in mktime and specifically daylight savings time issues
+		   in many mktime implementation.
+		   See bugs #27533 and #27719 for more info.
 		*/
 		if (val < 4) { 
 			chgsecs += (4-val) * 60*60; val = 4; 
@@ -215,6 +215,11 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	seconds = t - chgsecs;
 
+	/*
+	   Here we check to see if the chgsecs fuzz factor we applied caused us to
+	   move from dst to non-dst or vice-versa.  If so we adjust accordingly to
+	   avoid being off by an hour on the dst changeover date.
+	*/
 	if (is_dst == -1) {
 		struct tm t1, t2;
 		t1 = *localtime(&t);
@@ -225,6 +230,11 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			ta = localtime(&seconds);
 		}
 
+		/*
+		   If the user didn't specify whether the timestamp passed in was dst or not
+		   then we fill it in based on the dst setting at the evaluated timestamp
+		   at the current TZ
+		*/
 		is_dst = ta->tm_isdst; 
 	}
 	
