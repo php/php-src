@@ -1639,7 +1639,6 @@ PHP_MSHUTDOWN_FUNCTION(session)
 PHP_MINFO_FUNCTION(session)
 {
 	ps_module **mod;
-	ps_serializer *ser;
 	smart_str handlers = {0};
 	int i;
 	
@@ -1653,7 +1652,7 @@ PHP_MINFO_FUNCTION(session)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Session Support", "enabled" );
 
-	if (save_handlers.c) {
+	if (handlers.c) {
 		smart_str_0(&handlers);
 		php_info_print_table_row(2, "Registered save handlers", handlers.c);
 		smart_str_free(&handlers);
