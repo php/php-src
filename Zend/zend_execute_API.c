@@ -883,7 +883,8 @@ void execute_new_code(TSRMLS_D)
             opline->op2.u.constant.is_ref = 1;
             opline->op2.u.constant.refcount = 2;
         }
-        opline++;
+		opline->handler = zend_opcode_handlers[opline->opcode];
+		opline++;
     }
 
 	EG(return_value_ptr_ptr) = &local_retval;
