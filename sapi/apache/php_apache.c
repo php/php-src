@@ -155,6 +155,7 @@ PHP_MINFO_FUNCTION(apache)
 	char output_buf[128];
 #if !defined(WIN32) && !defined(WINNT)
 	char name[64];
+	char modulenames[1024];
 	char *p;
 #endif
 	server_rec *serv;
@@ -167,15 +168,17 @@ PHP_MINFO_FUNCTION(apache)
 
 	serv = ((request_rec *) SG(server_context))->server;
 
-    PUTS("<table border=5 width=\"600\">\n");
-    php_info_print_table_header(2, "Entry", "Value");
 #if WIN32|WINNT
 	PUTS("Apache for Windows 95/NT<br>");
+	php_info_print_table_start();
 #else
+	php_info_print_table_start();
 	php_info_print_table_row(2, "APACHE_INCLUDE", PHP_APACHE_INCLUDE);
 	php_info_print_table_row(2, "APACHE_TARGET", PHP_APACHE_TARGET);
 #endif
+
 	php_info_print_table_row(2, "Apache Version", SERVER_VERSION);
+
 #ifdef APACHE_RELEASE
 	sprintf(output_buf, "%d", APACHE_RELEASE);
 	php_info_print_table_row(2, "Apache Release", output_buf);
@@ -183,33 +186,33 @@ PHP_MINFO_FUNCTION(apache)
 	sprintf(output_buf, "%d", MODULE_MAGIC_NUMBER);
 	php_info_print_table_row(2, "Apache API Version", output_buf);
 	sprintf(output_buf, "%s:%u", serv->server_hostname,serv->port);
-	php_info_print_table_row(2, "Hostname/Port", output_buf);
+	php_info_print_table_row(2, "Hostname:Port", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
 	sprintf(output_buf, "%s(%d)/%d", user_name,(int)user_id,(int)group_id);
 	php_info_print_table_row(2, "User/Group", output_buf);
-	sprintf(output_buf, "per child: %d<br>keep alive: %s<br>max per connection: %d",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
+	sprintf(output_buf, "Per Child: %d<br>Keep Alive: %s<br>Max Per Connection: %d",max_requests_per_child,serv->keep_alive ? "on":"off", serv->keep_alive_max);
 	php_info_print_table_row(2, "Max Requests", output_buf);
 #endif
-	sprintf(output_buf, "connection: %d<br>keep-alive: %d",serv->timeout,serv->keep_alive_timeout);
+	sprintf(output_buf, "Connection: %d<br>Keep-Alive: %d",serv->timeout,serv->keep_alive_timeout);
 	php_info_print_table_row(2, "Timeouts", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
 	php_info_print_table_row(2, "Server Root", server_root);
 
-	
-	PUTS("<tr><td valign=\"top\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">Loaded modules</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 	for(modp = top_module; modp; modp = modp->next) {
 		strlcpy(name, modp->name, sizeof(name));
 		if ((p = strrchr(name, '.'))) {
 			*p='\0'; /* Cut off ugly .c extensions on module names */
 		}
+		strcpy(modulenames, name);
 		PUTS(name);
 		if (modp->next) {
-			PUTS(", ");
+			strcpy(modulenames, ", ");
 		}
 	}
+	php_info_print_table_row(2, "Loaded Modules", modulenames);
 #endif
-	PUTS("</td></tr>\n");
-	PUTS("</table>\n");
+
+	php_info_print_table_end();
 
 
 	{
@@ -223,13 +226,13 @@ PHP_MINFO_FUNCTION(apache)
 		arr = table_elts(r->subprocess_env);
 		elts = (table_entry *)arr->elts;
 		
-		SECTION("Apache Environment");	
-		PUTS("<table border=5 width=\"600\">\n");
+		SECTION("Apache Environment");
+		php_info_print_table_start();	
 		php_info_print_table_header(2, "Variable", "Value");
 		for (i=0; i < arr->nelts; i++) {
 			php_info_print_table_row(2, elts[i].key, elts[i].val);
 		}
-		PUTS("</table>\n");
+		php_info_print_table_end();	
 	}
 
 	{
@@ -241,8 +244,8 @@ PHP_MINFO_FUNCTION(apache)
 		
 		r = ((request_rec *) SG(server_context));
 		SECTION("HTTP Headers Information");
-		PUTS("<table border=5 width=\"600\">\n");
-		PUTS(" <tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Request Headers</th></tr>\n");
+		php_info_print_table_start();	
+		PUTS("<TR BGCOLOR=\"" PHP_HEADER_COLOR "\"><TH COLSPAN=2>HTTP Request Headers</TH></TR>\n");
 		php_info_print_table_row(2, "HTTP Request", r->the_request);
 		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
@@ -251,7 +254,7 @@ PHP_MINFO_FUNCTION(apache)
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
-		PUTS(" <tr><th colspan=2  bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Response Headers</th></tr>\n");
+		PUTS("<TR BGCOLOR=\"" PHP_HEADER_COLOR "\"><TH COLSPAN=2>HTTP Response Headers</TH></TR>\n");
 		env_arr = table_elts(r->headers_out);
 		env = (table_entry *)env_arr->elts;
 		for(i = 0; i < env_arr->nelts; ++i) {
@@ -259,7 +262,7 @@ PHP_MINFO_FUNCTION(apache)
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
-		PUTS("</table>\n\n");
+		php_info_print_table_end();
 	}
 
 }
