@@ -387,7 +387,7 @@ static enum entity_charset determine_charset(char * charset_hint)
 
 /* {{{ php_escape_html_entities
  */
-PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char * hint_charset)
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char *hint_charset)
 {
 	int i, maxlen, len;
 	char *new;
@@ -479,28 +479,16 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
  */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-	zval **arg, **quotes, **charset;
-	int len, quote_style = ENT_COMPAT;
-	int ac = ZEND_NUM_ARGS();
-	char *hint_charset = NULL;
+	char *str, *hint_charset = NULL;
+	int str_len, hint_charset_len, len, quote_style = ENT_COMPAT;
 	char *new;
 
-	if (ac < 1 || ac > 3 || zend_get_parameters_ex(ac, &arg, &quotes, &charset) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
+							  &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg);
-	if(ac==2) {
-		convert_to_long_ex(quotes);
-		quote_style = Z_LVAL_PP(quotes);
-	}
-	if (ac == 3)	{
-		convert_to_string_ex(charset);
-		hint_charset = Z_STRVAL_PP(charset);
-	}
-		
-
-	new = php_escape_html_entities(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &len, all, quote_style, hint_charset);
+	new = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset);
 	RETVAL_STRINGL(new, len, 0);
 }
 /* }}} */
@@ -536,28 +524,17 @@ PHP_FUNCTION(htmlentities)
 }
 /* }}} */
 
-/* {{{ proto array get_html_translation_table([int table [, int quote_style][, string charset]])
+/* {{{ proto array get_html_translation_table([int table [, int quote_style]])
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	zval **whichone, **quotes;
 	int which = HTML_SPECIALCHARS, quote_style = ENT_COMPAT;
-	int ac = ZEND_NUM_ARGS();
 	int i, j;
-	char ind[ 2 ];
+	char ind[2];
 	enum entity_charset charset = determine_charset(NULL);
 
-	if (ac < 0 || ac > 2 || zend_get_parameters_ex(ac, &whichone, &quotes) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (ac > 0) {
-		convert_to_long_ex(whichone);
-		which = Z_LVAL_PP(whichone);
-	} 
-	if (ac == 2) {
-		convert_to_long_ex(quotes);
-		quote_style = Z_LVAL_PP(quotes);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &which, &quote_style) == FAILURE) {
+		return;
 	}
 
 	array_init(return_value);
