@@ -34,6 +34,10 @@
  * it's return value), the next filter is invoked and so on.
  * */
 
+#define PHP_STREAM_FILTER_READ	0x0001
+#define PHP_STREAM_FILTER_WRITE	0x0002
+#define PHP_STREAM_FILTER_ALL	(PHP_STREAM_FILTER_READ | PHP_STREAM_FILTER_WRITE)
+
 typedef struct _php_stream_bucket			php_stream_bucket;
 typedef struct _php_stream_bucket_brigade	php_stream_bucket_brigade;
 
