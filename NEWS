@@ -2,18 +2,20 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0 Release
+- Fixed a bug that could cause a crash when using 'global' inside large include
+  files (Stanislav, Zend Engine)
 - Fixed dynamic loading where extension_dir had no trailing slash (Sascha)
 - Fixed dynamic loading on OpenBSD (Sascha)
 - Improved POSIX threads check. ZTS works now on at least Linux, Solaris, 
   FreeBSD and OpenBSD (Sascha, TSRM)
-- Added !== operator support. (Torben, Zend library)
+- Added !== operator support. (Torben, Zend Engine)
 
 27 March 2000, Version 4.0 Release Candidate 1
 - Added support for UCD-SNMP 4.1.x (Sascha)
 - Fixed a data corruption bug in mysql_result(), if used in table.fieldname
   mode (Zeev)
 - Fixed a crash problem in func_num_args(), func_get_arg() and func_get_args()
-  when used as function arguments (Andi)
+  when used as function arguments (Andi, Zend Engine)
 - Added get_class_methods(string classname) function. (Andrei)
 - Don't default to iso-8859-1 since this confuses some browsers (Rasmus)
 - stristr() no longer modifies it's arguments. (Thies)
@@ -24,7 +26,7 @@ PHP 4.0                                                                    NEWS
 - serialize()/unserialize() now call __sleep() and __wakeup() when
   working on objects. (Thies)
 - renamed to_string() method to __string_value() for consistency.
-  (Thies, Zend library)
+  (Thies, Zend Engine)
 - Fixed a bug in the third argument to define()
 - Added is_numeric() that returns true if the argument is a number
   or a numeric string. (Andrei)
@@ -43,7 +45,7 @@ PHP 4.0                                                                    NEWS
   easy reuse of configuration options (Sascha)
 - Added support for embedded MySQL client library. Unless you specify a path
   to --with-mysql, the bundled MySQL client library will be used (Sascha)
-- Added include_once() and require_once() functionality (Andi, Zend library)
+- Added include_once() and require_once() functionality (Andi, Zend Engine)
 - Removed support for pdflib < 3.0 (Uwe)
 - Added auto-registration of everything in $HTTP_SESSION_VARS[] if
   register_globals is turned off. (Andrei)
@@ -57,7 +59,7 @@ PHP 4.0                                                                    NEWS
   of PHP, and currently lacks section support (Zeev)
 - "none" is now equivalent with "" in Apache config directives (Stig)
 - OCINLogon no longer crashes. (Thies)
-- Fix comparisons of (string) "nan" with (string) "nan". (Thies, Zend library)
+- Fix comparisons of (string) "nan" with (string) "nan". (Thies, Zend Engine)
 - Switched back to the old $HTTP_*_VARS[] behavior - $HTTP_GET_VARS["foo"]
   and $foo are no longer references to each other, but separate variables
   like they were prior to PHP 4.0 Beta 4 (Zeev)
@@ -70,7 +72,7 @@ PHP 4.0                                                                    NEWS
 - The string None is now recognized as a keyword by the php.ini processor, and
   can be used to denote an empty string (Zeev)
 - Added get_class_vars(string class_name) and get_object_vars(object obj)
-  functions. (Andrei, Zend library)
+  functions. (Andrei, Zend Engine)
 - Add pdf_set_parameter(), pdf_skew(), pdf_show_boxed() (Uwe)
 - Fixed comparison of (string) "inf" with (string) "inf", which was erroneously
   returning false (Zeev)
@@ -95,7 +97,7 @@ PHP 4.0                                                                    NEWS
 - Updated the browscap module to work with PHP 4.0 (Zeev)
 - Recover gracefully in ISAPI after the client prematurely presses STOP (Andi)
 - Fix bug in unset() on array offsets which are referenced more than once
-  (Andi, Zend library)
+  (Andi, Zend Engine)
 - Improved ISAPI module - it should no longer be necessary to set PHP as
   an ISAPI filter, only as an ISAPI extension, unless you wish to perform
   authentication using PHP.  This didn't yet get enough testing, but it
@@ -117,7 +119,7 @@ PHP 4.0                                                                    NEWS
 - base64_decode() will decode POST data correct. (Thies)
   Patch submitted by: Turadg Aleahmad <turadg@wise.berkeley.edu>
 - Much more work on domxml. Build xml tree, create xml doc works (Uwe)
-- Made foreach() work on objects. (Thies, Zend library)
+- Made foreach() work on objects. (Thies, Zend Engine)
 - Added domxml extension based on libxml, still little functionality (Uwe)
 - Fixed memory corruption in fgetss(), strip_tags() and gzgetss() (Zeev)
 - Updated calendar dynamic library to work with PHP 4. (Evan)
@@ -173,10 +175,10 @@ PHP 4.0                                                                    NEWS
 - Implemented support for <boolean> and <null> types according
   to WDDX version 1.0 (Andrei)
 - Made var_dump()/serialize()/unserialize() NULL aware. (Thies)
-- Added new NULL constant (Zeev, Zend library)
+- Added new NULL constant (Zeev, Zend Engine)
 - Fixed -c support in the standalone CGI binary (Zeev)
 - Increased PHP's performance by 5-15% using a new memory cache (Andi & Zeev,
-  Zend library)
+  Zend Engine)
 - Improved the php.ini reader to support constants and bitwise operators (Zeev)
 - Fixed strrev() to no longer modify arg1. (Thies)
 - Fixed buffer overruns in iptcembed(). (Thies)
@@ -197,9 +199,9 @@ PHP 4.0                                                                    NEWS
 - Added get_loaded_extensions(), extension_loaded(), and
   get_extension_funcs() functions. (Andrei)
 - Added date/time stamping to PHP error log file. (Andrei, Joey)
-- Added is_subclass_of() function (Andrei, Zend library)
+- Added is_subclass_of() function (Andrei, Zend Engine)
 - Implemented count_chars(). (Thies)
-- Added class_exists() function (Andrei, Zend library)
+- Added class_exists() function (Andrei, Zend Engine)
 - Made strspn() and strcspn() binary-safe. (Andrei)
 - Added array_multisort() function. (Andrei)
 - Made pageinfo.c thread-safe (Sascha)
@@ -227,7 +229,7 @@ PHP 4.0                                                                    NEWS
 - Make the global GET/POST/Cookie variables and their $HTTP_*_VARS[] counterparts
   be references to each other (Zeev)
 - Added support for the 'use' keyword - behaves like 'require', but will not
-  use the same file more than once (Andi & Zeev, Zend library)
+  use the same file more than once (Andi & Zeev, Zend Engine)
 - Added check to see if a persistent connection is still valid with the
   ODBC interface before reusing (nick@easysoft.com)
 - Added DBMaker support (patch by Pax Tsai <paxtsai@lion.syscom.com.tw>)
@@ -236,7 +238,7 @@ PHP 4.0                                                                    NEWS
 - Disable symlinks to urls (Rasmus)
 - Informix driver now reflects version of ESQL/C used  (Danny)
 - Modified session_register() to take variable number of arguments (Andrei)
-- Fixed file descriptor leak in thread safe mode (Zeev, Zend library)
+- Fixed file descriptor leak in thread safe mode (Zeev, Zend Engine)
 - Added select(), fd_set() and fd_isset() (Evan)
 - cpdf support has been ported from php3, needs ClibPDF 2.x (Uwe)
 - Fixed a leak when using automatic output buffering (Zeev)
@@ -245,7 +247,7 @@ PHP 4.0                                                                    NEWS
 - Fixed inconsistencies in the implementation of here-docs (Andi & Zeev, Zend 
   library)
 - Fixed a problem with constant class-member initializations (Andi & Zeev,
-  Zend library)
+  Zend Engine)
 - Fixed float-compare in min(),max(),a[r]sort(),[r]sort() (Thies)
 - Implemented get_html_translation_table() function (Thies)
 - Implemented array_flip() function. Returns input-array with key, value
@@ -276,7 +278,7 @@ November 16 1999, Version 4.0 Beta 3
   Patch submitted by: neal@wanlink.com
 - Added Microsoft SQL Server module for Win32 (Frank)
 - Added support for forcing a variable number of internal function arguments
-  by reference. (Andi & Zeev, Zend library)
+  by reference. (Andi & Zeev, Zend Engine)
 - Implemented getprotoby{name,number} (Evan)
 - Added array_pad() function. (Andrei)
 - Added new getservby{name,port} functions. (Evan)
@@ -292,7 +294,7 @@ November 16 1999, Version 4.0 Beta 3
 - Added getcwd() function. (Thies)
 - XML_Parse_Into_Struct no longer eats data. (Thies)
 - Fixed parse_url('-') crash. (Thies)
-- added === operator support. (Andi & Thies, Zend library)
+- added === operator support. (Andi & Thies, Zend Engine)
 - unserialize() now gives a notice when passed invalid data. (Thies)
 - Fixed shuffle() so that it no longer breaks on Solaris. (Andrei)
 - Added is_resource(), is_bool() functions. (Thies)
@@ -314,7 +316,7 @@ November 16 1999, Version 4.0 Beta 3
   messages. NEWS file is now the place for public announcements. (Andrei)
 - Fixed refcount problem in XML module. (Thies)
 - Fixed crash in HTTP_RAW_POST_DATA handling (Thies)
-- You can use resources as array-indices again (Thies, Zend library)
+- You can use resources as array-indices again (Thies, Zend Engine)
 - Fixed pg_fetch_array() with three arguments (Sascha)
   Patch submitted by: brian@soda.berkeley.edu
 - Upgraded a lot internal functions to use new Zend function API (Thies)
@@ -327,12 +329,12 @@ November 16 1999, Version 4.0 Beta 3
 - Fixed header("HTTP/..."); behaviour (Sascha)
 - Improved UNIX build system. Now utilizes libtool (Sascha)
 - Upgrade some more internal functions to use new Zend function API. (Thies, 
-  Zend library)
+  Zend Engine)
 - Fixed backwards incompatibility with ereg() (Thies)
 - Updated Zend garbage collection with a much more thorough method.
-  (Andi, Zend library)
+  (Andi, Zend Engine)
 - Added the ability to use variable references in the array() construct.
-  For example, array("foo" => &$foo). (Andi, Zend library)
+  For example, array("foo" => &$foo). (Andi, Zend Engine)
 - Added array_reverse() function (Andrei)
 - Some more XML fixes/cleanups (Thies)
 - Updated preg_replace() so that if any argument passed in is an array
@@ -445,15 +447,15 @@ November 16 1999, Version 4.0 Beta 3
   from the command line (Zeev)
 - Fixed a crash that would occur if wddx_deserialize did not receive
   a valid packet (Andrei)
-- Fixed a bugglet when redefining a class at run-time (Andi, Zend library)
+- Fixed a bugglet when redefining a class at run-time (Andi, Zend Engine)
 - Fixed sem_get() on AIX (Sascha)
 - Fixed fopen() to work with URL's in Win32 (Andi & Zeev)
-- Fixed include_path for Win32 (Andi, Zend library)
+- Fixed include_path for Win32 (Andi, Zend Engine)
 - Fixed bug in ISAPI header sending function (Charles)
-- Fixed memory leak when using undefined values (Andi & Zeev, Zend library)
+- Fixed memory leak when using undefined values (Andi & Zeev, Zend Engine)
 - Added output_buffering directive to php.ini, to enable output buffering
   for all PHP scripts - default is off (Zeev).
-- Fixed some more class inheritance issues (Zeev, Zend library)
+- Fixed some more class inheritance issues (Zeev, Zend Engine)
 - Fixed Apache build wrt to shared modules on FreeBSD/Linux (Sascha)
 - Added session.extern_referer_chk which checks whether session ids were
   referred to by an external site and eliminates them (Sascha)
@@ -506,25 +508,25 @@ August 9 1999, Version 4.0 Beta 2
 - Fixed a bug in implode() that caused it to corrupt its arguments (Zeev)
 - Added get_class($obj), get_parent_class($obj) and method_exists($obj,"name")
   (Andi & Zeev)
-- Fixed various inheritance problems (Andi & Zeev, Zend library)
+- Fixed various inheritance problems (Andi & Zeev, Zend Engine)
 - Children now inherit their parent's constructor, if they do not supply a
   constructor of their own.
 - Fixed runtime inheritance of classes (parent methods/properties were
-  overriding their children) (Zeev, Zend library)
-- Fixed backwards incompatibility with the "new" operator (Andi, Zend library)
+  overriding their children) (Zeev, Zend Engine)
+- Fixed backwards incompatibility with the "new" operator (Andi, Zend Engine)
 - Fixed bugs in uksort() and ksort() sort ordering (Andrei)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
-  string (Zeev, Zend library)
+  string (Zeev, Zend Engine)
 - Fixed a problem in inheritance from classes that are defined in include()d
-  files (Zeev, Zend library)
+  files (Zeev, Zend Engine)
 - Fixed a problem with the PHP error handler that could result in a crash
   on certain operating systems (Zeev)
 - Apache php_flag values only recognized 'On' (case sensitive) - changed
   to case insensitive (Zeev)
 - Fixed a memory leak with switch statement containing return statements
-  (Andi & Zeev, Zend library)
+  (Andi & Zeev, Zend Engine)
 - Fixed a crash problem in switch statements that had a string offset
-  as a conditional (Andi & Zeev, Zend library)
+  as a conditional (Andi & Zeev, Zend Engine)
 - Imported PHP 3.0 fixes for rand() and mt_rand() (Rasmus)
 - Added function entries for strip_tags() and similar_text() (Andrei)
 - Fixed a bug in WDDX that would cause a crash if a number was passed in
@@ -547,7 +549,7 @@ August 9 1999, Version 4.0 Beta 2
 - Added session id detection within REQUEST_URI (Sascha)
 - Merged in HP-UX/ANSI compatibility switch from PHP 3.0 (Sascha)
 - Fixed rpath handling for utilitites built during Apache build (Sascha)
-- Added missing E_ error level constants (Zeev, Zend library)
+- Added missing E_ error level constants (Zeev, Zend Engine)
 - Fixed a bug in sending multiple HTTP Cookies under Apache (Zeev)
 - Fixed implicit connect on the MySQL, mSQL, PostgreSQL and Sybase
   modules (Zeev)
