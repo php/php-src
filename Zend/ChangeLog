@@ -1,3 +1,12 @@
+2003-09-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Fix property inheritance where a derived class inherits a public property
+      and owns it as an implicit public property already (noticed by Brad).
+
+    * zend.c:
+      Fix registering/derigistering of stdClass in ZTS and NON ZTS mode
+
 2003-09-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:

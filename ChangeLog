@@ -1,3 +1,128 @@
+2003-09-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      Fix property inheritance where a derived class inherits a public property
+      and owns it as an implicit public property already (noticed by Brad).
+
+2003-09-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+2003-09-08  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN Bug#25314
+
+    * ext/ftp/php_ftp.c:
+      MFB(r-1.74.2.13) Bug #25314 ASCII mode transfers behaving like binary when
+      initiated from windows.
+
+2003-09-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      win32/sendmail.c:
+      MFH: Fixed bug #25333 (Possible body corruption & crash in win32 mail()).
+
+    * win32/sendmail.c:
+      Fixed bug #25333 (Possible body corruption & crash in win32 mail()).
+
+2003-09-08  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/ftp/php_ftp.c:
+      Bug #25314 ASCII mode transfers behaving like binary when initiated from
+      windows.
+
+2003-09-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/gd/gd.dsp:
+      Revert the JIS addition, it did not fix anything
+
+2003-09-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/libgd/gd.c:
+      Fix build in VC++7.
+
+2003-09-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/mail.c:
+      MFH: Re-enable sendmail binary check, now with parameter detection.
+
+    * ext/standard/mail.c:
+      Re-enable sendmail binary check, now with parameter detection.
+
+2003-09-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/dom_fe.h
+      ext/dom/dom_properties.h
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h
+      ext/dom/xpath.c:
+      move some document properties internally
+      add xpath namespace support (by Shane)
+
+2003-09-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/informix/ifx.dsp:
+      MFH: - Fixed bug #25424 (ext/informix: lvarchar not supported in win32
+      build)
+
+    * ext/informix/ifx.dsp:
+      - Fixed bug #25424 (ext/informix: lvarchar not supported in win32 build)
+
+    * (PHP_4_3)
+      win32/php4ts_cli.dsp:
+      - nuke warning about MSVCRT in debug build
+
+    * (PHP_4_3)
+      win32/php_modules.dsw:
+      - fix the mcve addition, removed unused project (gd_bundled)
+
+    * ext/gd/gd.dsp:
+      MFB: - Added JISX0208=1 and USE_GD_JISX0208 defines
+
+    * configure.in:
+      - Should fix bug #25295
+
+    * main/php_scandir.h:
+      configure.in
+
+    * configure.in
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4:
+      - Should fix some CLI build problems on some systems.
+
+2003-09-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      tests/classes/class_stdclass.phpt:
+      Fix registering/derigistering of stdClass in ZTS and NON ZTS mode
+
+2003-09-08  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.h
+      ext/dbx/php_dbx.h:
+      Fix warning and converted dos-crlf to unix line-endings.
+
+2003-09-08  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.dsp:
+      Don't include unnecessary headers in other configuration too
+
+    * ext/interbase/interbase.dsp
+      ext/interbase/interbase.rc:
+      Don't include unnecessary headers
+
 2003-09-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_4_3)
