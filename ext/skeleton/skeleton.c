@@ -9,7 +9,12 @@
 */
 #if HAVE_EXTNAME
 
+/* If you declare any globals in php_extname.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(extname)
+*/
+
+/* True global resources - no need for thread safety here */
+static int le_extname;
 
 /* Every user visible function must have an entry in extname_functions[].
 */
