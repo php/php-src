@@ -28,7 +28,6 @@
  *   especialliy important for things like oci_ping
  * - Change return-value for OCIFetch*() (1-row read, 0-Normal end, false-error) 
  * - Error mode (print or shut up?)
- * - OCIPasswordChange()
  * - binding of arrays
  * - Character sets for NCLOBS
  * - split the module into an upper (php-callable) and lower (c-callable) layer!
@@ -245,6 +244,7 @@ PHP_FUNCTION(ociserverversion);
 PHP_FUNCTION(ocistatementtype);
 PHP_FUNCTION(ocirowcount);
 PHP_FUNCTION(ocisetprefetch);
+PHP_FUNCTION(ocipasswordchange);
 #ifdef HAVE_OCI8_TEMP_LOB
 PHP_FUNCTION(ociwritetemporarylob);
 PHP_FUNCTION(ocicloselob);
@@ -342,6 +342,7 @@ static zend_function_entry php_oci_functions[] = {
     PHP_FE(ocirollback,      NULL)
     PHP_FE(ocinewdescriptor, NULL)
     PHP_FE(ocisetprefetch,   NULL)
+    PHP_FE(ocipasswordchange,NULL)
 #ifdef WITH_COLLECTIONS
     PHP_FE(ocifreecollection,NULL)
     PHP_FE(ocicollappend,    NULL)
@@ -4391,6 +4392,52 @@ PHP_FUNCTION(ocisetprefetch)
 	oci_setprefetch(statement,Z_LVAL_PP(size)); 
 
 	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto bool ocipasswordchange(int conn, string user, string old_password, string new_password)
+  changes the password of an account*/
+
+PHP_FUNCTION(ocipasswordchange)
+{
+	zval **conn, **user_param, **pass_old_param, **pass_new_param;
+	text *user, *pass_old, *pass_new;
+	oci_connection *connection;
+
+	if (zend_get_parameters_ex(4, &conn, &user_param, &pass_old_param, &pass_new_param) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	user      = Z_STRVAL_PP(user_param);
+	pass_old  = Z_STRVAL_PP(pass_old_param);
+	pass_new  = Z_STRVAL_PP(pass_new_param);
+
+	OCI_GET_CONN(connection, conn);
+
+	CALL_OCI_RETURN(
+		 connection->error
+		,OCIPasswordChange(
+			 connection->pServiceContext
+			,connection->pError
+			,user
+			,strlen(user)+1
+			,pass_old
+			,strlen(pass_old)+1
+			,pass_new
+			,strlen(pass_new)+1
+			,OCI_DEFAULT
+		)
+	);
+
+	if (connection->error == OCI_SUCCESS) {
+		RETURN_TRUE;
+	}
+	else {
+		oci_error(connection->pError, "OCIPasswordChange", connection->error);
+		oci_handle_error(connection, connection->error);
+		RETURN_FALSE;
+	}
 }
 
 /* }}} */
