@@ -9,14 +9,10 @@ Bug #8040
 	error_reporting (E_ALL ^ E_NOTICE);
 	echo MCRYPT_TWOFISH."\n";
 	echo MCRYPT_MODE_CBC."\n";
-?>
 
-<?php
 	define ("MODE1", MCRYPT_MODE_CBC);
 	echo MODE1."\n";
-?>
 
-<?php
 	define ("CIPHER", MCRYPT_TWOFISH);
 	define ("MODE2", MCRYPT_MODE_CBC);
 	define ("MODE3", MCRYPT_CBC);
@@ -26,7 +22,5 @@ Bug #8040
 --EXPECT--
 twofish
 cbc
-
 cbc
-
 cipher=twofish mode1=cbc mode2=MCRYPT_CBC
