@@ -576,6 +576,37 @@ PHP_FUNCTION(ldap_unbind)
 /* }}} */
 
 
+static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
+{
+	/* sizelimit */
+	if (sizelimit > -1) {
+#if ( LDAP_API_VERSION >= 2004 ) || HAVE_NSLDAP
+		ldap_set_option(ldap, LDAP_OPT_SIZELIMIT, &sizelimit);
+#else
+		ldap->ld_sizelimit = sizelimit; 
+#endif
+	}
+
+	/* timelimit */
+	if (timelimit > -1) {
+#if ( LDAP_API_VERSION >= 2004 ) || HAVE_NSLDAP
+		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &timelimit);
+#else
+		ldap->ld_timelimit = timelimit; 
+#endif
+	}
+
+	/* deref */
+	if (deref > -1) {
+#if ( LDAP_API_VERSION >= 2004 ) || HAVE_NSLDAP
+		ldap_set_option(ldap, LDAP_OPT_DEREF, &deref);
+#else
+		ldap->ld_deref = deref; 
+#endif
+	}
+}
+
+
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	pval **link, **base_dn, **filter, **attrs, **attr, **attrsonly, **sizelimit, **timelimit, **deref;
@@ -586,7 +617,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int ldap_sizelimit = -1; 
 	int ldap_timelimit = -1; 
 	int ldap_deref = -1;	 
-	LDAPMessage *ldap_result;
+	LDAPMessage *ldap_res;
 	int num_attribs = 0;
 	int i, errno;
 	int myargcount = ZEND_NUM_ARGS();
@@ -639,15 +670,106 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			ldap_attrs[num_attribs] = NULL;
 		
 		case 3 :
-			convert_to_string_ex(base_dn);
 			convert_to_string_ex(filter);
-			ldap_base_dn = (*base_dn)->value.str.val;
 			ldap_filter = (*filter)->value.str.val;
+
+			/* parallel search? */
+			if (Z_TYPE_PP(link) != IS_ARRAY) {
+				convert_to_string_ex(base_dn);
+				ldap_base_dn = Z_STRVAL_PP(base_dn);
+			}
 		break;
 
 		default:
 			WRONG_PARAM_COUNT;
 		break;
+	}
+
+	/* parallel search? */
+	if (Z_TYPE_PP(link) == IS_ARRAY) {
+		int i, nlinks, nbases, *rcs;
+		LDAP **links;
+		zval **entry;
+		
+		nlinks = zend_hash_num_elements(Z_ARRVAL_PP(link));
+		if (nlinks == 0) {
+			php_error(E_WARNING, "LDAP: No links in link array");
+			if (ldap_attrs != NULL) {
+				efree(ldap_attrs);
+			}
+			RETURN_FALSE;
+		}
+
+		if (Z_TYPE_PP(base_dn) == IS_ARRAY) {
+			nbases = zend_hash_num_elements(Z_ARRVAL_PP(base_dn));
+			if (nbases != nlinks) {
+				php_error(E_WARNING, "LDAP: Base must either be a string, or an array with the same number of elements as the links array");
+				if (ldap_attrs != NULL) {
+					efree(ldap_attrs);
+				}
+				RETURN_FALSE;
+			}
+			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(base_dn));
+		} else {
+			nbases = 0; /* this means string, not array */
+			convert_to_string_ex(base_dn);
+			ldap_base_dn = Z_STRLEN_PP(base_dn) < 1 ? NULL : Z_STRVAL_PP(base_dn);
+		}
+
+		links = emalloc(nlinks * sizeof(*links));
+		rcs = emalloc(nlinks * sizeof(*rcs));
+		
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(link));
+		for (i=0; i<nlinks; i++) {
+			zend_hash_get_current_data(Z_ARRVAL_PP(link), (void **)&entry);
+			ldap = _get_ldap_link(entry);
+			if (ldap == NULL) {
+				efree(links);
+				efree(rcs);
+				if (ldap_attrs != NULL) {
+					efree(ldap_attrs);
+				}
+				RETURN_FALSE;
+			}
+			if (nbases != 0) { /* base_dn an array? */
+				zend_hash_get_current_data(Z_ARRVAL_PP(base_dn), (void **)&entry);
+				zend_hash_move_forward(Z_ARRVAL_PP(base_dn));
+				convert_to_string_ex(entry);
+				ldap_base_dn = Z_STRLEN_PP(entry) < 1 ? NULL : Z_STRVAL_PP(entry);
+			}
+
+			php_set_opts(ldap, ldap_sizelimit, ldap_timelimit, ldap_deref);
+
+			/* Run the actual search */	
+			rcs[i] = ldap_search(ldap, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly);
+			links[i] = ldap;
+			zend_hash_move_forward(Z_ARRVAL_PP(link));
+		}
+		
+		if (ldap_attrs != NULL) {
+			efree(ldap_attrs);
+		}
+		
+		if (array_init(return_value) == FAILURE) {
+			efree(links);
+			efree(rcs);
+			RETURN_FALSE;
+		}
+
+		/* Collect results from the searches */
+		for (i=0; i<nlinks; i++) {
+			if (rcs[i] != -1) {
+				rcs[i] = ldap_result(links[i], LDAP_RES_ANY, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
+			}
+			if (rcs[i] != -1) {
+				add_next_index_long(return_value, zend_list_insert(ldap_res, le_result));
+			} else {
+				add_next_index_bool(return_value, 0);
+			}
+		};
+		efree(links);
+		efree(rcs);
+		return;
 	}
 
 	/* fix to make null base_dn's work */
@@ -658,35 +780,10 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	ldap = _get_ldap_link(link);
 	if (ldap == NULL) RETURN_FALSE;
 
-	/* sizelimit */
-	if(ldap_sizelimit > -1) {
-#if ( LDAP_API_VERSION >= 2004 ) || HAVE_NSLDAP
-		ldap_set_option(ldap, LDAP_OPT_SIZELIMIT, &ldap_sizelimit);
-#else
-		ldap->ld_sizelimit = ldap_sizelimit; 
-#endif
-	}
-
-	/* timelimit */
-	if(ldap_timelimit > -1) {
-#if ( LDAP_API_VERSION >= 2004 ) || HAVE_NSLDAP
-		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &ldap_timelimit);
-#else
-		ldap->ld_timelimit = ldap_timelimit; 
-#endif
-	}
-
-	/* deref */
-	if(ldap_deref > -1) {
-#if ( LDAP_API_VERSION >= 2004 ) || HAVE_NSLDAP
-		ldap_set_option(ldap, LDAP_OPT_DEREF, &ldap_deref);
-#else
-		ldap->ld_deref = ldap_deref; 
-#endif
-	}
+	php_set_opts(ldap, ldap_sizelimit, ldap_timelimit, ldap_deref);
 
 	/* Run the actual search */	
-	errno = ldap_search_s(ldap, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, &ldap_result);
+	errno = ldap_search_s(ldap, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, &ldap_res);
 
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
@@ -712,7 +809,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			php_error(E_WARNING,"LDAP: Partial search results returned: Adminlimit exceeded.");
 		}
 #endif
-		RETVAL_LONG(zend_list_insert(ldap_result, le_result));
+		RETVAL_LONG(zend_list_insert(ldap_res, le_result));
 	}
 }
 
