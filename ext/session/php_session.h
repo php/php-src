@@ -155,9 +155,11 @@ typedef struct ps_serializer_struct {
 	{ #x,ps_srlzr_encode_##x, ps_srlzr_decode_##x }
 
 #ifdef TRANS_SID
-void session_adapt_uris(const char *, uint, char **, uint *);
+void session_adapt_uris(const char *, size_t, char **, size_t *);
+void session_adapt_url(const char *, size_t, char **, size_t *);
 #else
 #define session_adapt_uris(a,b,c,d)
+#define session_adapt_url(a,b,c,d)
 #endif
 
 void php_session_auto_start(void *data);
