@@ -1379,8 +1379,8 @@ PHP_FUNCTION(yaz_search)
 	if (!strcmp (type_str, "rpn"))
 	{
 		r->query->which = Z_Query_type_1;
-		r->query->Z_TYPE(u)_1 = p_query_rpn (r->odr, PROTO_Z3950, query_str);
-		if (!r->query->Z_TYPE(u)_1)
+		Z_TYPE(r->query->u)_1 = p_query_rpn (r->odr, PROTO_Z3950, query_str);
+		if (!Z_TYPE(r->query->u)_1)
 		{
 			yaz_resultset_destroy(r);
 			p->resultSets = 0;
@@ -1394,9 +1394,9 @@ PHP_FUNCTION(yaz_search)
 	else if (!strcmp(type_str, "ccl"))
 	{
 		r->query->which = Z_Query_type_2;
-		r->query->Z_TYPE(u)_2 = odr_malloc (r->odr, sizeof(*r->query->Z_TYPE(u)_2));
-		r->query->Z_TYPE(u)_2->buf = odr_strdup(r->odr, query_str);
-		r->query->Z_TYPE(u)_2->len = strlen(query_str);
+		Z_TYPE(r->query->u)_2 = odr_malloc (r->odr, sizeof(*Z_TYPE(r->query->u)_2));
+		Z_TYPE(r->query->u)_2->buf = odr_strdup(r->odr, query_str);
+		Z_TYPE(r->query->u)_2->len = strlen(query_str);
 	}
 	else
 	{

@@ -2729,9 +2729,9 @@ PHP_FUNCTION(imap_bodystruct)
 		add_property_long(return_value, "bytes", body->size.bytes);
 	}
 #ifdef IMAP41
-	if (body->Z_TYPE(disposition)) {
+	if (Z_TYPE(body->disposition)) {
 		add_property_long(return_value, "ifdisposition", 1);
-		add_property_string(return_value, "disposition", body->Z_TYPE(disposition), 1);
+		add_property_string(return_value, "disposition", Z_TYPE(body->disposition), 1);
 	} else {
 		add_property_long(return_value, "ifdisposition", 0);
 	}
@@ -2988,8 +2988,8 @@ PHP_FUNCTION(imap_mail_compose)
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "Z_TYPE(disposition)", sizeof("Z_TYPE(disposition)"), (void **) &pvalue)== SUCCESS) {
 			convert_to_string_ex(pvalue);
-			bod->Z_TYPE(disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
-			memcpy(bod->Z_TYPE(disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+			Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+			memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
 			if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
@@ -3074,8 +3074,8 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "Z_TYPE(disposition)", sizeof("Z_TYPE(disposition)"), (void **) &pvalue)== SUCCESS) {
 				convert_to_string_ex(pvalue);
-				bod->Z_TYPE(disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
-				memcpy(bod->Z_TYPE(disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+				Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+				memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
 				if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
@@ -3729,9 +3729,9 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	}
 
 #ifdef IMAP41
-	if (body->Z_TYPE(disposition)) {
+	if (Z_TYPE(body->disposition)) {
 		add_property_long(arg, "ifdisposition", 1);
-		add_property_string(arg, "disposition", body->Z_TYPE(disposition), 1);
+		add_property_string(arg, "disposition", Z_TYPE(body->disposition), 1);
 	} else {
 		add_property_long(arg, "ifdisposition", 0);
 	}

@@ -422,7 +422,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
   if (!JG(jenv)) return;
   jenv = JG(jenv);
 
-  if (!strcmp("java", function_name->Z_STRVAL(element))) {
+  if (!strcmp("java", Z_STRVAL(function_name->element))) {
 
     /* construct a Java object:
        First argument is the class name.  Any additional arguments will
@@ -457,7 +457,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
       "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;J)V");
     zend_hash_index_find(Z_OBJPROP_P(object), 0, (void**) &handle);
     obj = zend_list_find(Z_LVAL_PP(handle), &type);
-    method = (*jenv)->NewStringUTF(jenv, function_name->Z_STRVAL(element));
+    method = (*jenv)->NewStringUTF(jenv, Z_STRVAL(function_name->element));
     result = (jlong)(long)return_value;
 
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), invoke,
@@ -526,7 +526,7 @@ static pval _java_getset_property
   JNIEnv *jenv;
   jenv = JG(jenv);
 
-  propName = (*jenv)->NewStringUTF(jenv, property->Z_STRVAL(element));
+  propName = (*jenv)->NewStringUTF(jenv, Z_STRVAL(property->element));
 
   /* get the object */
   zend_hash_index_find(Z_OBJPROP_P(property_reference->object),

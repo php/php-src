@@ -40,7 +40,7 @@ int _net_muscat_close(struct MuscatNet_handle *handle) {
 }
 
 int _net_muscat_give(struct MuscatNet_handle *handle, char* string) {
-  handle->Z_TYPE(muscat_response)=' ';
+  Z_TYPE(handle->muscat_response)=' ';
   SOCK_WRITEL(string,strlen(string),handle->socketd);
   SOCK_WRITEL("\n",1,handle->socketd);
 }
@@ -52,7 +52,7 @@ int _net_muscat_get(struct MuscatNet_handle * handle) {
   int clen;
   int rlen;
 
-  if (handle->Z_TYPE(muscat_response) == 'P') return GIVING;
+  if (Z_TYPE(handle->muscat_response) == 'P') return GIVING;
 
   // we can use bcom ourselves!!!
   // read in the 6 byte header...
@@ -66,7 +66,7 @@ int _net_muscat_get(struct MuscatNet_handle * handle) {
     return 1; // NEED TO RAISE ERROR HERE  
   }
   handle->muscat_response.bcom[5]=0;
-  handle->Z_TYPE(muscat_response)=handle->muscat_response.bcom[0];
+  Z_TYPE(handle->muscat_response)=handle->muscat_response.bcom[0];
   // now read bcom[1-4] and turn to an int
   clen=atoi(&(handle->muscat_response.bcom[1]))+1;
 
@@ -83,7 +83,7 @@ int _net_muscat_get(struct MuscatNet_handle * handle) {
 }
 
 void _net_discard(struct MuscatNet_handle * handle) {
-  while(handle->Z_TYPE(muscat_response)!='P') {
+  while(Z_TYPE(handle->muscat_response)!='P') {
     if (0!=_net_muscat_get(handle)) break;
   }
 }
