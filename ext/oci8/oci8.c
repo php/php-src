@@ -342,11 +342,16 @@ PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
 
+/* XXX Joe Brown says OCI_THREADED breaks windows, assuming the same is true for unix - tc
 #ifdef ZTS 
 #define PHP_OCI_INIT_MODE OCI_THREADED
 #else
+*/
 #define PHP_OCI_INIT_MODE OCI_DEFAULT
+
+/*
 #endif
+*/
 
 #if OCI_USE_EMALLOC
     OCIInitialize(PHP_OCI_INIT_MODE, NULL, ocimalloc, ocirealloc, ocifree);
