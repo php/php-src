@@ -55,7 +55,6 @@
 
 #include "util_script.h"
 
-#include "php_version.h"
 #include "mod_php4.h"
 #if HAVE_MOD_DAV
 # include "mod_dav.h"
@@ -395,7 +394,7 @@ static void init_request_info(SLS_D)
 
 static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
 {
-	php_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length+1, per_dir_entry->type);
+	php_alter_ini_entry(per_dir_entry->key, per_dir_entry->key_length+1, per_dir_entry->value, per_dir_entry->value_length+1, per_dir_entry->type, PHP_INI_STAGE_ACTIVATE);
 	return 0;
 }
 
