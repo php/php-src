@@ -63,26 +63,12 @@ PHPAPI int php_header()
 }
 
 
-
-/* php_set_cookie(name, value, expires, path, domain, secure) */
-/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure]]]]])
-   Send a cookie */
-PHP_FUNCTION(setcookie)
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
-	char *name, *value = NULL, *path = NULL, *domain = NULL;
 	int len=sizeof("Set-Cookie: ");
 	time_t t;
 	char *dt;
-	time_t expires = 0;
-	zend_bool secure = 0;
-	int name_len, value_len, path_len, domain_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssb", &name,
-							  &name_len, &value, &value_len, &expires, &path,
-							  &path_len, &domain, &domain_len, &secure) == FAILURE) {
-		return;
-	}
 
 	len += name_len;
 	if (value) {
@@ -98,6 +84,7 @@ PHP_FUNCTION(setcookie)
 		len += domain_len;
 	}
 	cookie = emalloc(len + 100);
+
 	if (value && value_len == 0) {
 		/* 
 		 * MSIE doesn't delete a cookie when you set it to a null value
@@ -134,7 +121,27 @@ PHP_FUNCTION(setcookie)
 		strcat(cookie, "; secure");
 	}
 
-	if (sapi_add_header(cookie, strlen(cookie), 0)==SUCCESS) {
+	return sapi_add_header(cookie, strlen(cookie), 0);
+}
+
+
+/* php_set_cookie(name, value, expires, path, domain, secure) */
+/* {{{ proto bool setcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure]]]]])
+   Send a cookie */
+PHP_FUNCTION(setcookie)
+{
+	char *name, *value = NULL, *path = NULL, *domain = NULL;
+	time_t expires = 0;
+	zend_bool secure = 0;
+	int name_len, value_len, path_len, domain_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssb", &name,
+							  &name_len, &value, &value_len, &expires, &path,
+							  &path_len, &domain, &domain_len, &secure) == FAILURE) {
+		return;
+	}
+
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
