@@ -260,7 +260,7 @@ PHP_FUNCTION(sysvshm_put_var)
 	shm_var.type=IS_STRING;
 	shm_var.value.str.len=0;
 	shm_var.value.str.val=0;
-	php3api_var_serialize(&shm_var,&arg_var);
+	php_var_serialize(&shm_var,&arg_var);
 	/* insert serialized variable into shared memory */
 	ret=php3int_put_shmdata(shm_list_ptr->ptr,key,shm_var.value.str.val,shm_var.value.str.len);
 
@@ -322,7 +322,7 @@ PHP_FUNCTION(sysvshm_get_var)
 	shm_var=(sysvshm_chunk*)((char*)shm_list_ptr->ptr+shm_varpos);
 	shm_data=&shm_var->mem;
 	
-	if(php3api_var_unserialize(&return_value, (const char **) &shm_data, shm_data+shm_var->length)!=1) {
+	if(php_var_unserialize(&return_value, (const char **) &shm_data, shm_data+shm_var->length)!=1) {
 		php_error(E_WARNING, "variable data in shared memory is corruped");
 		RETURN_FALSE;
 	}
