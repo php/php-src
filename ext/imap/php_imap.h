@@ -44,8 +44,8 @@ typedef struct php_imap_le_struct {
 	long flags;
 #ifdef OP_RELOGIN
 	/* AJS: busy flag for persistent connections, pointers for chaining */
-	struct php3_imap_le_struct *next;
-	struct php3_imap_le_struct **prev;
+	struct php_imap_le_struct *next;
+	struct php_imap_le_struct **prev;
 	char busy;
 #endif
 } pils;
