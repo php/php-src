@@ -29,6 +29,97 @@
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
 
+static int le_service;
+
+static void _php_ibase_free_service(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+{
+	ibase_service *sv = (ibase_service *) rsrc->ptr;
+
+	if (isc_service_detach(IB_STATUS, &sv->handle)) {
+		_php_ibase_error(TSRMLS_C);
+	}
+
+	if (sv->hostname) {
+		efree(sv->hostname);
+	}
+	if (sv->username) {
+		efree(sv->username);
+	}
+
+	efree(sv);
+}
+/* }}} */
+
+void php_ibase_service_minit(INIT_FUNC_ARGS) /* {{{ */
+{
+	le_service = zend_register_list_destructors_ex(_php_ibase_free_service, NULL, 
+	    "interbase service manager handle", module_number);
+
+	/* backup options */
+	REGISTER_LONG_CONSTANT("IBASE_BKP_IGNORE_CHECKSUMS", isc_spb_bkp_ignore_checksums, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_BKP_IGNORE_LIMBO", isc_spb_bkp_ignore_limbo, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_BKP_METADATA_ONLY", isc_spb_bkp_metadata_only, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_BKP_NO_GARBAGE_COLLECT", isc_spb_bkp_no_garbage_collect, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_BKP_OLD_DESCRIPTIONS", isc_spb_bkp_old_descriptions, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_BKP_NON_TRANSPORTABLE", isc_spb_bkp_non_transportable, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_BKP_CONVERT", isc_spb_bkp_convert, CONST_PERSISTENT);
+
+	/* restore options */
+	REGISTER_LONG_CONSTANT("IBASE_RES_DEACTIVATE_IDX", isc_spb_res_deactivate_idx, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RES_NO_SHADOW", isc_spb_res_no_shadow, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RES_NO_VALIDITY", isc_spb_res_no_validity, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RES_ONE_AT_A_TIME", isc_spb_res_one_at_a_time, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RES_REPLACE", isc_spb_res_replace, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RES_CREATE", isc_spb_res_create, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RES_USE_ALL_SPACE", isc_spb_res_use_all_space, CONST_PERSISTENT);
+
+	/* manage options */
+	REGISTER_LONG_CONSTANT("IBASE_PRP_PAGE_BUFFERS", isc_spb_prp_page_buffers, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_SWEEP_INTERVAL", isc_spb_prp_sweep_interval, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_SHUTDOWN_DB", isc_spb_prp_shutdown_db, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_DENY_NEW_TRANSACTIONS", isc_spb_prp_deny_new_transactions, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_DENY_NEW_ATTACHMENTS", isc_spb_prp_deny_new_attachments, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_RESERVE_SPACE", isc_spb_prp_reserve_space, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_PRP_RES_USE_FULL", isc_spb_prp_res_use_full, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_PRP_RES", isc_spb_prp_res, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_WRITE_MODE", isc_spb_prp_write_mode, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_PRP_WM_ASYNC", isc_spb_prp_wm_async, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_PRP_WM_SYNC", isc_spb_prp_wm_sync, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_ACCESS_MODE", isc_spb_prp_access_mode, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_PRP_AM_READONLY", isc_spb_prp_am_readonly, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_PRP_AM_READWRITE", isc_spb_prp_am_readwrite, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_SET_SQL_DIALECT", isc_spb_prp_set_sql_dialect, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_ACTIVATE", isc_spb_prp_activate, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_PRP_DB_ONLINE", isc_spb_prp_db_online, CONST_PERSISTENT);
+
+	/* repair options */
+	REGISTER_LONG_CONSTANT("IBASE_RPR_CHECK_DB", isc_spb_rpr_check_db, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RPR_IGNORE_CHECKSUM", isc_spb_rpr_ignore_checksum, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RPR_KILL_SHADOWS", isc_spb_rpr_kill_shadows, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RPR_MEND_DB", isc_spb_rpr_mend_db, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RPR_VALIDATE_DB", isc_spb_rpr_validate_db, CONST_PERSISTENT);
+	  REGISTER_LONG_CONSTANT("IBASE_RPR_FULL", isc_spb_rpr_full, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_RPR_SWEEP_DB", isc_spb_rpr_sweep_db, CONST_PERSISTENT);
+
+	/* db info arguments */
+	REGISTER_LONG_CONSTANT("IBASE_STS_DATA_PAGES", isc_spb_sts_data_pages, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_STS_DB_LOG", isc_spb_sts_db_log, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_STS_HDR_PAGES", isc_spb_sts_hdr_pages, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_STS_IDX_PAGES", isc_spb_sts_idx_pages, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_STS_SYS_RELATIONS", isc_spb_sts_sys_relations, CONST_PERSISTENT);
+
+	/* server info arguments */
+	REGISTER_LONG_CONSTANT("IBASE_SVC_SERVER_VERSION", isc_info_svc_server_version, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_IMPLEMENTATION", isc_info_svc_implementation, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_GET_ENV", isc_info_svc_get_env, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_GET_ENV_LOCK", isc_info_svc_get_env_lock, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_GET_ENV_MSG", isc_info_svc_get_env_msg, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_USER_DBPATH", isc_info_svc_user_dbpath, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_SVR_DB_INFO", isc_info_svc_svr_db_info, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_SVC_GET_USERS", isc_info_svc_get_users, CONST_PERSISTENT);
+}
+/* }}} */
+
 static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation) /* {{{ */
 {
 	zval **args[8];
@@ -38,7 +129,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation) /* {{{ 
 	char spb_buffer[128], *spb = spb_buffer;
 	unsigned short spb_length;
 	isc_svc_handle service_handle = NULL;
-	
+
 	RESET_ERRMSG;
 
 	switch (operation) {
@@ -49,7 +140,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation) /* {{{ 
 				WRONG_PARAM_COUNT;
 			}
 			break;
-	
+
 		case isc_action_svc_delete_user:
 			/* 4 parameters for DELETE operation */
 			if (ZEND_NUM_ARGS() != 4) {
@@ -161,7 +252,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation) /* {{{ 
 			isc_service_detach(IB_STATUS, &service_handle);
 		}
 	}
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -190,7 +281,7 @@ PHP_FUNCTION(ibase_delete_user)
 }
 /* }}} */
 
-/* {{{ proto resource ibase_service_attach(string host, string dba_username, string dba_password) 
+/* {{{ proto resource ibase_service_attach(string host, string dba_username, string dba_password)
    Connect to the service manager */
 PHP_FUNCTION(ibase_service_attach)
 {
@@ -200,33 +291,33 @@ PHP_FUNCTION(ibase_service_attach)
 	isc_svc_handle handle = NULL;
 
 	RESET_ERRMSG;
-	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", 
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss",
 			&host, &hlen, &user, &ulen, &pass, &plen)) {
-		
+
 		RETURN_FALSE;
 	}
 
 	/* construct the spb, hack the service name into it as well */
-	spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%s" "%s:service_mgr", 
+	spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%s" "%s:service_mgr",
 		isc_spb_version, isc_spb_current_version, isc_spb_user_name, (char)ulen,
 		user, isc_spb_password, (char)plen, pass, host);
 
 	if (spb_len > sizeof(buf) || spb_len == -1) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)" 
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)"
 			TSRMLS_CC, spb_len);
 		RETURN_FALSE;
 	}
-	
+
 	spb_len -= hlen + 12;
 	loc = buf + spb_len; /* points to %s:service_mgr part */
-	
+
 	/* attach to the service manager */
 	if (isc_service_attach(IB_STATUS, 0, loc, &handle, (unsigned short)spb_len, buf)) {
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	}
-	
+
 	svm = (ibase_service*)emalloc(sizeof(ibase_service));
 	svm->handle = handle;
 	svm->hostname = estrdup(host);
@@ -237,20 +328,20 @@ PHP_FUNCTION(ibase_service_attach)
 }
 /* }}} */
 
-/* {{{ proto bool ibase_service_detach(resource service_handle) 
+/* {{{ proto bool ibase_service_detach(resource service_handle)
    Disconnect from the service manager */
 PHP_FUNCTION(ibase_service_detach)
 {
 	zval *res;
-	
+
 	RESET_ERRMSG;
-	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res)) { 
-		RETURN_FALSE; 
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res)) {
+		RETURN_FALSE;
 	}
-	
+
 	zend_list_delete(Z_LVAL_P(res));
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -259,7 +350,7 @@ static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 	ibase_service *svm, char info_action)
 {
 	static char spb[] = { isc_info_svc_timeout, 10, 0, 0, 0 };
-		
+
 	char res_buf[400], *result, *heap_buf = NULL, *heap_p;
 	long heap_buf_size = 200, line_len;
 
@@ -272,13 +363,13 @@ static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 			RETURN_FALSE;
 		}
 	}
-	
-query_loop:		
+
+query_loop:
 	result = res_buf;
 
 	if (isc_service_query(IB_STATUS, &svm->handle, NULL, sizeof(spb), spb,
 			1, &info_action, sizeof(res_buf), res_buf)) {
-		
+
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	}
@@ -286,8 +377,8 @@ query_loop:
 		switch (*result++) {
 			default:
 				RETURN_FALSE;
-				
-			case isc_info_svc_line: 
+
+			case isc_info_svc_line:
 				if (! (line_len = isc_vax_integer(result, 2))) {
 					/* done */
 					if (heap_buf) {
@@ -298,9 +389,9 @@ query_loop:
 				}
 				if (!heap_buf || (heap_p - heap_buf + line_len +2) > heap_buf_size) {
 					long res_size = heap_buf ? heap_p - heap_buf : 0;
-					
+
 					while (heap_buf_size < (res_size + line_len +2)) {
-						heap_buf_size *= 2;					
+						heap_buf_size *= 2;
 					}
 					heap_buf = (char*) erealloc(heap_buf, heap_buf_size);
 					heap_p = heap_buf + res_size;
@@ -316,7 +407,7 @@ query_loop:
 			case isc_info_svc_get_env_lock:
 			case isc_info_svc_get_env_msg:
 			case isc_info_svc_user_dbpath:
-				RETURN_STRINGL(result + 2, isc_vax_integer(result, 2), 1);				
+				RETURN_STRINGL(result + 2, isc_vax_integer(result, 2), 1);
 
 			case isc_info_svc_svr_db_info:
 				array_init(return_value);
@@ -329,7 +420,7 @@ query_loop:
 							add_assoc_long(return_value, "attachments", isc_vax_integer(result,4));
 							result += 4;
 							break;
-						
+
 						case isc_spb_num_db:
 							add_assoc_long(return_value, "databases", isc_vax_integer(result,4));
 							result += 4;
@@ -342,16 +433,16 @@ query_loop:
 					}
 				} while (*result != isc_info_flag_end);
 				return;
-				
+
 			case isc_info_svc_get_users: {
 				zval *user;
 				array_init(return_value);
-				
+
 				while (*result != isc_info_end) {
-					
+
 					switch (*result++) {
 						int len;
-						
+
 						case isc_spb_sec_username:
 							/* it appears that the username is always first */
 							ALLOC_INIT_ZVAL(user);
@@ -362,7 +453,7 @@ query_loop:
 							add_assoc_stringl(user, "user_name", result +2, len, 1);
 							result += len+2;
 							break;
-						
+
 						case isc_spb_sec_firstname:
 							len = isc_vax_integer(result,2);
 							add_assoc_stringl(user, "first_name", result +2, len, 1);
@@ -385,14 +476,14 @@ query_loop:
 							add_assoc_long(user, "user_id", isc_vax_integer(result, 4));
 							result += 4;
 							break;
-							
+
 						case isc_spb_sec_groupid:
 							add_assoc_long(user, "group_id", isc_vax_integer(result, 4));
 							result += 4;
 							break;
 					}
 				}
-				return;	
+				return;
 			}
 		}
 	}
@@ -404,47 +495,47 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	/**
 	 * It appears that the service API is a little bit confused about which flag
 	 * to use for the source and destination in the case of a restore operation.
-	 * When passing the backup file as isc_spb_dbname and the destination db as 
+	 * When passing the backup file as isc_spb_dbname and the destination db as
 	 * bpk_file, things work well.
 	 */
 	zval *res;
-	char *db, *bk, buf[200]; 
+	char *db, *bk, buf[200];
 	long dblen, bklen, spb_len, opts = 0;
 	zend_bool verbose = 0;
 	ibase_service *svm;
-	
+
 	RESET_ERRMSG;
-	
+
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|lb",
-			&res, &db, &dblen, &bk, &bklen, &opts, &verbose)) { 
-		RETURN_FALSE; 
+			&res, &db, &dblen, &bk, &bklen, &opts, &verbose)) {
+		RETURN_FALSE;
 	}
-	
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1, 
+
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1,
 		"Interbase service manager handle", le_service);
-	
+
 	/* fill the param buffer */
-	spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%s%c%c%c%c%c", 
-		operation, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), db, 
+	spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%s%c%c%c%c%c",
+		operation, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), db,
 		isc_spb_bkp_file, (char)bklen, (char)(bklen >> 8), bk, isc_spb_options,
 		(char)opts,(char)(opts >> 8), (char)(opts >> 16), (char)(opts >> 24));
-		
+
 	if (verbose) {
 		buf[spb_len++] = isc_spb_verbose;
 	}
 
 	if (spb_len > sizeof(buf) || spb_len <= 0) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)" 
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)"
 			TSRMLS_CC, spb_len);
 		RETURN_FALSE;
 	}
-	
+
 	/* now start the backup/restore job */
 	if (isc_service_start(IB_STATUS, &svm->handle, NULL, (unsigned short)spb_len, buf)) {
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	}
-	
+
 	if (!verbose) {
 		RETURN_TRUE;
 	} else {
@@ -475,22 +566,22 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 	char buf[128], *db;
 	long action, spb_len, dblen, argument = 0;
 	ibase_service *svm;
-	
+
 	RESET_ERRMSG;
-	
+
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsl|l",
-			&res, &db, &dblen, &action, &argument)) { 
-		RETURN_FALSE; 
+			&res, &db, &dblen, &action, &argument)) {
+		RETURN_FALSE;
 	}
-	
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1, 
+
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1,
 		"Interbase service manager handle", le_service);
-	
+
 	if (svc_action == isc_action_svc_db_stats) {
 		switch (action) {
 			default:
 				goto unknown_option;
-				
+
 			case isc_spb_sts_data_pages:
 			case isc_spb_sts_db_log:
 			case isc_spb_sts_hdr_pages:
@@ -502,10 +593,10 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 		/* these actions all expect different types of arguments */
 		switch (action) {
 			default:
-unknown_option:			
+unknown_option:
 				_php_ibase_module_error("Unrecognised option (%ld)" TSRMLS_CC, action);
 				RETURN_FALSE;
-				
+
 			case isc_spb_rpr_check_db:
 			case isc_spb_rpr_ignore_checksum:
 			case isc_spb_rpr_kill_shadows:
@@ -513,13 +604,13 @@ unknown_option:
 			case isc_spb_rpr_validate_db:
 			case isc_spb_rpr_sweep_db:
 				svc_action = isc_action_svc_repair;
-				
+
 			case isc_spb_prp_activate:
 			case isc_spb_prp_db_online:
-options_argument:	
+options_argument:
 				argument |= action;
 				action = isc_spb_options;
-	
+
 			case isc_spb_prp_page_buffers:
 			case isc_spb_prp_sweep_interval:
 			case isc_spb_prp_shutdown_db:
@@ -527,22 +618,22 @@ options_argument:
 			case isc_spb_prp_deny_new_attachments:
 			case isc_spb_prp_set_sql_dialect:
 				spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c%c%c%c",
-					svc_action, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), db, 
+					svc_action, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), db,
 					(char)action, (char)argument, (char)(argument >> 8), (char)(argument >> 16),
 					(char)(argument >> 24));
 				break;
-				
+
 			case isc_spb_prp_reserve_space:
 			case isc_spb_prp_write_mode:
 			case isc_spb_prp_access_mode:
 				spb_len = snprintf(buf, sizeof(buf), "%c%c%c%c%s%c%c",
-					isc_action_svc_properties, isc_spb_dbname, (char)dblen, (char)(dblen >> 8), 
+					isc_action_svc_properties, isc_spb_dbname, (char)dblen, (char)(dblen >> 8),
 					db, (char)action, (char)argument);
 		}
 	}
-	
+
 	if (spb_len > sizeof(buf) || spb_len == -1) {
-		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)" 
+		_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%ld)"
 			TSRMLS_CC, spb_len);
 		RETURN_FALSE;
 	}
@@ -551,14 +642,14 @@ options_argument:
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	}
-	
+
 	if (svc_action == isc_action_svc_db_stats) {
 		_php_ibase_service_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, svm, isc_info_svc_line);
 	} else {
 		RETURN_TRUE;
 	}
-}	
-/* }}} */	    
+}
+/* }}} */
 
 /* {{{ proto bool ibase_maintain_db(resource service_handle, string db, int action [, int argument])
    Execute a maintenance command on the database server */
@@ -577,29 +668,33 @@ PHP_FUNCTION(ibase_db_info)
 /* }}} */
 
 /* {{{ proto string ibase_server_info(resource service_handle, int action)
-   Request information about a database */
+   Request information about a database server */
 PHP_FUNCTION(ibase_server_info)
 {
 	zval *res;
 	long action;
 	ibase_service *svm;
-	
+
 	RESET_ERRMSG;
-	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &res, &action)) { 
-		RETURN_FALSE; 
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &res, &action)) {
+		RETURN_FALSE;
 	}
-	
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1, 
+
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1,
 		"Interbase service manager handle", le_service);
-	
+
 	_php_ibase_service_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, svm, (char)action);
 }
 /* }}} */
 
+#else
+
+void php_ibase_register_service_constants(INIT_FUNC_ARGS) { /* nop */ }
+
 #endif /* HAVE_IBASE6_API */
-        
-/*      
+
+/*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
