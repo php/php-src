@@ -1,2 +1,2 @@
 @echo off
-nmake /I clean
+cscript /nologo win32\build\cvsclean.js
