@@ -135,6 +135,10 @@ void startup_scanner(TSRMLS_D)
 	SCNG(script_org_size) = 0;
 	SCNG(script_filtered) = NULL;
 	SCNG(script_filtered_size) = 0;
+	SCNG(input_filter) = NULL;
+	SCNG(output_filter) = NULL;
+	SCNG(script_encoding) = NULL;
+	SCNG(internal_encoding) = NULL;
 #endif /* ZEND_MULTIBYTE */
 }
 
@@ -160,6 +164,12 @@ void shutdown_scanner(TSRMLS_D)
 		efree(SCNG(script_filtered));
 		SCNG(script_filtered) = NULL;
 	}
+	SCNG(script_org_size) = 0;
+	SCNG(script_filtered_size) = 0;
+	SCNG(input_filter) = NULL;
+	SCNG(output_filter) = NULL;
+	SCNG(script_encoding) = NULL;
+	SCNG(internal_encoding) = NULL;
 #endif /* ZEND_MULTIBYTE */
 }
 END_EXTERN_C()
