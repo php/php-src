@@ -62,8 +62,8 @@ Compiled-in modules:
 Chances are you will see a lot more modules than these two. That's ok, 
 as long as mod_so.c shows up you can proceed with the following steps:
 
-$ gunzip -c php-4.1.x.tar.gz | tar xf -
-$ cd php-4.1.x
+$ gunzip -c php-4.x.y.tar.gz | tar xf -
+$ cd php-4.x.y
 $ ./configure --with-mysql --with-apxs
 $ make
 $ make install
@@ -93,8 +93,8 @@ $ cd apache_1.3.x
 $ ./configure
 $ cd ..
 
-$ gunzip -c php-4.1.x.tar.gz | tar xf -
-$ cd php-4.1.x
+$ gunzip -c php-4.x.y.tar.gz | tar xf -
+$ cd php-4.x.y
 $ ./configure --with-mysql --with-apache=../apache_1.3.x
 $ make
 $ make install
@@ -106,7 +106,7 @@ $ ./configure --prefix=/www --activate-module=src/modules/php4/libphp4.a
 $ make
  (you should now have an httpd binary which you can copy to your Apache bin dir if
   is is your first install then you need to "make install" as well)
-$ cd ../php-4.1.x
+$ cd ../php-4.x.y
 $ cp php.ini-dist /usr/local/lib/php.ini
 You can edit /usr/local/lib/php.ini file to set PHP options.
 Edit your httpd.conf or srm.conf file and add:
@@ -125,12 +125,12 @@ Installing PHP can be done in four simple steps:
 
 1. Unpack your distribution file.  
 
-   You will have downloaded a file named something like php-4.1.x.tar.gz.
-   Unzip this file with a command like: gunzip php-4.1.x.tar.gz
+   You will have downloaded a file named something like php-4.x.y.tar.gz.
+   Unzip this file with a command like: gunzip php-4.x.y.tar.gz
 
-   Next you have to untar it with: tar -xvf php-4.1.x.tar
+   Next you have to untar it with: tar -xvf php-4.x.y.tar
 
-   This will create a php-4.1.x directory.  cd into this new directory.
+   This will create a php-4.x.y directory.  cd into this new directory.
 
 2a. Configure PHP (Dynamic Module) - Skip to 2b if you wish to build
     a static module
