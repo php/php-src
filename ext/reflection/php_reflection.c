@@ -91,32 +91,31 @@ void string_init(string *str)
 	
 string *string_printf(string *str, const char *format, ...)
 {
-  int n;
-  va_list arg;
-  va_start(arg, format); 
-  n = vsnprintf(str->string + str->len, str->alloced - str->len, format, arg);
-  if(n > str->alloced - str->len) {
-    while(n + str->len > str->alloced ) {
-      str->alloced *= 2;
-    }
-    str->string = erealloc(str->string, str->alloced);
-    n = vsnprintf(str->string + str->len, str->alloced - str->len, format, arg);
-  }
-  va_end(arg);
-  str->len += n;
-  return str;
+	int n;
+	va_list arg;
+	va_start(arg, format); 
+	n = vsnprintf(str->string + str->len - 1, str->alloced - str->len, format, arg);
+	if (n > str->alloced - str->len) {
+		while (n + str->len > str->alloced ) {
+			str->alloced *= 2;
+		}
+		str->string = erealloc(str->string, str->alloced + 1);
+		n = vsnprintf(str->string + str->len - 1, str->alloced - str->len, format, arg);
+	}
+	va_end(arg);
+	str->len += n;
+	return str;
 }
 
 string *string_write(string *str, char *buf, int len)
 {
-	int n;
 	if (str->alloced - str->len < len) {
-		while(str->alloced - str->len < len) {
+		while (str->alloced - str->len < len) {
 			str->alloced *= 2;
 		}		
-		str->string = erealloc(str->string, str->alloced);
+		str->string = erealloc(str->string, str->alloced + 1);
 	}
-	memcpy(str->string + str->len, buf, len);
+	memcpy(str->string + str->len - 1, buf, len);
 	str->len += len;
 	return str;
 }
@@ -227,6 +226,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS_DC)
 {
 	int count;
+
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
 		string_printf(str, "%s%s", indent, ce->doc_comment);
@@ -234,20 +234,20 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	}
 
 	string_printf(str, "%sClass [ ", indent);
-	string_printf(str, (ce->type == ZEND_USER_CLASS)?"<user>":"<internal>");
+	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user>  " : "<internal> ");
 	if (ce->ce_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
 	}
 	if (ce->ce_flags & ZEND_ACC_FINAL) {
-		string_printf(str, "final");
+		string_printf(str, "final ");
 	} 
-	string_printf(str, (ce->ce_flags & ZEND_ACC_INTERFACE)?"interface":"class");
+	string_printf(str, (ce->ce_flags & ZEND_ACC_INTERFACE) ? "interface " : "class ");
 	string_write(str, ce->name, ce->name_length);
 	if (ce->parent) {
 		string_printf(str, " extends %s", ce->parent->name);
 	}
 	/* TBI: Interfaces */
-	(string_printf, str, " ] {\n");
+	string_printf(str, " ] {\n");
 
 	/* The information where a class is declared is only available for user classes */
 	if (ce->type == ZEND_USER_CLASS) {
@@ -259,7 +259,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	if (&ce->constants_table) {
 		string_printf(str, "\n");
 		count = zend_hash_num_elements(&ce->constants_table);
-		string_printf(str, "%s  - Constants [%d,] {\n", indent, count);
+		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
 		if (count > 0) {
 			HashPosition pos;
 			zval **value;
@@ -337,8 +337,8 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 		string_printf(str, "%s%s\n", indent, fptr->op_array.doc_comment);
 	}
 
-	string_printf(str, fptr->common.scope?"%sMethod [ ":"%sFunction [ ", indent);
-	string_printf(str, (fptr->type == ZEND_USER_FUNCTION)?"<user> ":"<internal> ");
+	string_printf(str, fptr->common.scope ? "%sMethod [ " : "%sFunction [ ", indent);
+	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user> " : "<internal> ");
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
 	}
@@ -362,7 +362,7 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 			break;
 	}
 
-	string_printf(str, fptr->common.scope?"method ":"function ");
+	string_printf(str, fptr->common.scope ? "method " : "function ");
 	if(fptr->op_array.return_reference) {
 		string_printf(str, "&");
 	}
@@ -380,7 +380,7 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 static void _property_string(string *str, zend_property_info *prop, char* indent TSRMLS_DC)
 {
 	string_printf(str, "%sProperty [ %s", indent,
-				  (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC)?"<dynamic> ":"<default> ");
+				  (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) ? "<dynamic> " : "<default> ");
 
 	/* These are mutually exclusive */
 	switch (prop->flags & ZEND_ACC_PPP_MASK) {
@@ -421,7 +421,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	}
 	string_printf(str, " extension #%d %s version %s ] {\n",
 				  module->module_number, module->name,
-				  (module->version == NO_VERSION_YET)?"<no_version>":module->version);
+				  (module->version == NO_VERSION_YET) ? "<no_version>" : module->version);
 	if (module->functions) {
 		zend_function *fptr;
 		zend_function_entry *func = module->functions;
@@ -475,7 +475,7 @@ ZEND_FUNCTION(reflection_export)
 	/* Invoke the toString() method */
 	MAKE_STD_ZVAL(fname);
 	ZVAL_STRINGL(fname, "tostring", sizeof("tostring") - 1, 1);
-	call_user_function_ex(NULL, &object, fname, &retval_ptr, 0, NULL, 0, NULL TSRMLS_CC);
+	result= call_user_function_ex(NULL, &object, fname, &retval_ptr, 0, NULL, 0, NULL TSRMLS_CC);
 	zval_ptr_dtor(&fname);
 
 	if (result == FAILURE) {
@@ -945,7 +945,6 @@ ZEND_FUNCTION(reflection_method_invoke)
 
 	if (argc < 1) {
 		zend_error(E_WARNING, "First parameter is expected to be an instance of %s", mptr->common.scope->name);
-		efree(params);
 		RETURN_FALSE;
 	}
 	
