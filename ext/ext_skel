@@ -245,7 +245,7 @@ To use your new extension, you will have to execute the following steps:
 8.  $ make
 
 Repeat steps 3-6 until you are satisfied with ext/$extname/config.m4 and
-step 6 confirms that your module is compiled in PHP. Then, start writing
+step 6 confirms that your module is compiled into PHP. Then, start writing
 code and repeat the last two steps as often as necessary.
 $warning
 eof

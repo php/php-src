@@ -126,7 +126,7 @@ CURRENT LIMITATIONS, BUGS AND OTHER ODDITIES
 
   Don't trust too much the generated code. It tries to be useful in most of
   the situations you might encounter, but automatic code generating will never
-  beat a programmer who knows the real situation at hand. axt_skel is generally
+  beat a programmer who knows the real situation at hand. ext_skel is generally
   best suited for quickly generating a wrapper for c-library functions you
   might want to have available in PHP too.
 
