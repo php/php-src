@@ -19,6 +19,13 @@ AC_ARG_WITH(apxs,
 	else
 		AC_EXPAND_PATH($withval, APXS)
 	fi
+
+    if ! $APXS -q CFLAGS >/dev/null 2>&1; then
+      AC_MSG_RESULT()
+      $APXS
+      AC_MSG_ERROR([Sorry, I cannot run apxs. Either you need to install Perl or you need to pass the absolute path to apxs by using --with-apxs=/absolute/path/to/apxs])
+    fi 
+
 	APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
 	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
 	APXS_CFLAGS=`$APXS -q CFLAGS`
