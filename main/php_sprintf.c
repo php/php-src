@@ -26,8 +26,6 @@
 #include "php_config.h"
 #endif
 
-#if PHP_BROKEN_SPRINTF
-
 int
 php_sprintf (char*s, const char* format, ...)
 {
@@ -42,8 +40,6 @@ php_sprintf (char*s, const char* format, ...)
     return -1;
   return strlen (s);
 }
-
-#endif /* PHP_BROKEN_SPRINTF */
 
 /*
  * Local variables:
