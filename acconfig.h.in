@@ -122,4 +122,8 @@
 /* Define if struct sockaddr contains the field sa_len */
 #undef HAVE_SOCKADDR_SA_LEN
 
-#define sprintf zend_sprintf
+#undef BROKEN_SPRINTF
+
+#if BROKEN_SPRINTF
+#define sprintf php_sprintf
+#endif
