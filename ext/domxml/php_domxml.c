@@ -1010,6 +1010,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			object_init_ex(wrapper, domxmlattr_class_entry);
 			rsrc_type = le_domxmlattrp;
 			add_property_stringl(wrapper, "name", (char *) attrp->name, strlen(attrp->name), 1);
+			add_property_long(wrapper, "type", Z_TYPE_P(attrp));
 			content = xmlNodeGetContent((xmlNodePtr) attrp);
 			if (content)
 				add_property_stringl(wrapper, "value", (char *) content, strlen(content), 1);
@@ -1049,6 +1050,7 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			xmlDtdPtr dtd = (xmlDtdPtr) obj;
 			object_init_ex(wrapper, domxmldtd_class_entry);
 			rsrc_type = le_domxmldtdp;
+			add_property_long(wrapper, "type", Z_TYPE_P(dtd));
 			if (dtd->ExternalID)
 				add_property_string(wrapper, "publicId", (char *) dtd->ExternalID, 1);
 			if (dtd->SystemID)
@@ -1064,10 +1066,9 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			object_init_ex(wrapper, domxmlcdata_class_entry);
 			rsrc_type = le_domxmlcdatap;
 			content = xmlNodeGetContent(nodep);
-			if (content) {
-				add_property_long(wrapper, "type", Z_TYPE_P(nodep));
+			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
+			if (content)
 				add_property_stringl(wrapper, "content", (char *) content, strlen(content), 1);
-			}
 			break;
 		}
 
