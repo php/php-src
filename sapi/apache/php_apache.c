@@ -40,6 +40,8 @@ extern module *top_module;
 static int le_apachereq;
 static zend_class_entry *apacherequest_class_entry;
 
+static void apache_table_to_zval(table *, int safe_mode, zval *return_value);
+
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(apache_request_headers);
 PHP_FUNCTION(apache_response_headers);
@@ -131,7 +133,8 @@ static request_rec *get_apache_request(zval *z)
 	return r;
 }
 
-/* {{{
+/* {{{ php_apache_request_new(request_rec *r)
+ * create a new zval-instance for ApacheRequest that wraps request_rec
  */
 PHPAPI zval *php_apache_request_new(request_rec *r)
 {
@@ -537,6 +540,134 @@ PHP_FUNCTION(apache_request_read_body)
 
 /* }}} access int slots of request_rec */
 
+
+/* {{{ proto array apache_request_headers_in()
+ * fetch all incoming request headers
+ */
+PHP_FUNCTION(apache_request_headers_in)
+{
+	zval *id;
+	request_rec *r;
+	
+	APREQ_GET_REQUEST(id, r);
+
+	apache_table_to_zval(r->headers_in, 0, return_value);
+}
+/* }}} */
+
+
+static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *first = NULL;
+	zval *second = NULL;
+	zval **entry, **value;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
+	
+	zend_bool replace = 0;
+	HashPosition pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|zb", &first, &second, &replace) == FAILURE)
+		RETURN_FALSE;
+
+	if (Z_TYPE_P(first) == IS_ARRAY) {
+		switch(ZEND_NUM_ARGS()) {
+			case 1:
+			case 3:
+				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(first), &pos);
+				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(first), (void **)&entry, &pos) == SUCCESS) {
+					switch(zend_hash_get_current_key_ex(Z_ARRVAL_P(first), &string_key, &string_key_len, &num_key, 0, &pos)) {
+						case HASH_KEY_IS_STRING:
+							if (zend_hash_find(Z_ARRVAL_P(first), string_key, string_key_len, (void **)&value) == FAILURE) {
+								zend_hash_move_forward_ex(Z_ARRVAL_P(first), &pos);
+								continue;
+							}
+							if (!value) {
+								zend_hash_move_forward_ex(Z_ARRVAL_P(first), &pos);
+								continue;
+							}
+
+							convert_to_string_ex(value);
+							if (replace)
+								ap_table_set(t, string_key, Z_STRVAL_PP(value));
+							else
+								ap_table_merge(t, string_key, Z_STRVAL_PP(value));
+							
+							break;
+						case HASH_KEY_IS_LONG:
+						default:
+							php_error(E_WARNING, "%s(): Can only add STRING keys to headers!", get_active_function_name(TSRMLS_C));
+							break;
+					}
+
+					zend_hash_move_forward_ex(Z_ARRVAL_P(first), &pos);
+				}
+				break;
+			default:
+				WRONG_PARAM_COUNT;
+				break;
+		}
+	}
+	else if (Z_TYPE_P(first) == IS_STRING) {
+		switch(ZEND_NUM_ARGS()) {
+			case 2:
+			case 3:
+				convert_to_string_ex(&second);
+				if (replace)
+					ap_table_set(t, Z_STRVAL_P(first), Z_STRVAL_P(second));
+				else
+					ap_table_merge(t, Z_STRVAL_P(first), Z_STRVAL_P(second));
+				break;
+			default:
+				WRONG_PARAM_COUNT;
+				break;
+		}
+	}
+	else {
+		RETURN_FALSE;
+	}
+}
+
+/* }}} */
+
+
+/* {{{ proto array apache_request_headers_out([{string name|array list} [, string value [, bool replace = false]]])
+ * fetch all outgoing request headers
+ */
+PHP_FUNCTION(apache_request_headers_out)
+{
+	zval *id;
+	request_rec *r;
+	
+	APREQ_GET_REQUEST(id, r);
+
+	if (ZEND_NUM_ARGS() > 0)
+		add_header_to_table(r->headers_out, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	apache_table_to_zval(r->headers_out, 0, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto array apache_request_err_headers_out([{string name|array list} [, string value [, bool replace = false]]])
+ * fetch all headers that go out in case of an error or a subrequest
+ */
+PHP_FUNCTION(apache_request_err_headers_out)
+{
+	zval *id;
+	request_rec *r;
+	
+	APREQ_GET_REQUEST(id, r);
+
+	if (ZEND_NUM_ARGS() > 0)
+		add_header_to_table(r->err_headers_out, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	apache_table_to_zval(r->err_headers_out, 0, return_value);
+}
+/* }}} */
+
+
 /* {{{ proxy functions for the ap_* functions family
  */
 
@@ -865,6 +996,12 @@ static function_entry php_apache_request_class_functions[] = {
 	PHP_FALIAS(remaining,					apache_request_remaining,			NULL)
 	PHP_FALIAS(request_time,				apache_request_request_time,		NULL)
 	PHP_FALIAS(status,						apache_request_status,				NULL)
+
+	/* tables & arrays */
+	PHP_FALIAS(headers_in,					apache_request_headers_in,			NULL)
+	PHP_FALIAS(headers_out,					apache_request_headers_out,			NULL)
+	PHP_FALIAS(err_headers_out,				apache_request_err_headers_out,			NULL)
+
 
 	/* proxy functions for the ap_* functions family */
 #undef auth_name
@@ -1202,12 +1339,10 @@ PHP_FUNCTION(virtual)
 }
 /* }}} */
 
-/* {{{ proto array getallheaders(void)
-   Alias for apache_request_headers() */
-/* }}} */
-/* {{{ proto array apache_request_headers(void)
+
+/* {{{ apache_table_to_zval(table *, int safe_mode, zval *return_value)
    Fetch all HTTP request headers */
-PHP_FUNCTION(apache_request_headers)
+static void apache_table_to_zval(table *t, int safe_mode, zval *return_value)
 {
     array_header *env_arr;
     table_entry *tenv;
@@ -1216,18 +1351,30 @@ PHP_FUNCTION(apache_request_headers)
     if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
     }
-    env_arr = table_elts(((request_rec *) SG(server_context))->headers_in);
+    env_arr = table_elts(t);
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {
 		if (!tenv[i].key ||
-			(PG(safe_mode) &&
-			 !strncasecmp(tenv[i].key, "authorization", 13))) {
+			(safe_mode && !strncasecmp(tenv[i].key, "authorization", 13))) {
 			continue;
 		}
 		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
 			RETURN_FALSE;
 		}
     }
+
+}
+/* }}} */
+
+
+/* {{{ proto array getallheaders(void)
+   Alias for apache_request_headers() */
+/* }}} */
+/* {{{ proto array apache_request_headers(void)
+   Fetch all HTTP request headers */
+PHP_FUNCTION(apache_request_headers)
+{
+	apache_table_to_zval(((request_rec *)SG(server_context))->headers_in, PG(safe_mode), return_value);
 }
 /* }}} */
 
@@ -1235,21 +1382,7 @@ PHP_FUNCTION(apache_request_headers)
    Fetch all HTTP response headers */
 PHP_FUNCTION(apache_response_headers)
 {
-    array_header *env_arr;
-    table_entry *tenv;
-    int i;
-
-    if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-    }
-    env_arr = table_elts(((request_rec *) SG(server_context))->headers_out);
-    tenv = (table_entry *)env_arr->elts;
-    for (i = 0; i < env_arr->nelts; ++i) {
-		if (!tenv[i].key) continue;
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
-			RETURN_FALSE;
-		}
-	}
+	apache_table_to_zval(((request_rec *) SG(server_context))->headers_out, 0, return_value);
 }
 /* }}} */
 
