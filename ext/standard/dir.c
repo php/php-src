@@ -327,30 +327,38 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 PHP_FUNCTION(glob)
 {
 	char *pattern = NULL;
-	int argc = ZEND_NUM_ARGS();
 	int pattern_len;
-	long flags;
+	long flags = 0;
 	glob_t globbuf;
-	zval *new_val;
-	int n;
-	char path[MAXPATHLEN];
-	char *ret=NULL;
+	int n, ret;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) 
+	if (PG(safe_mode)) {
+		php_error(E_WARNING, "%s() SAFE MODE Restriction in effect, function is disabled",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &pattern, &pattern_len, &flags) == FAILURE) 
 		return;
 
 	globbuf.gl_offs = 0;
-	if(glob(pattern, 0, NULL, &globbuf)) {
+	if (0 != (ret = glob(pattern, flags, NULL, &globbuf))) {
+#ifdef GLOB_NOMATCH
+		if (GLOB_NOMATCH == ret) {
+			/* Linux handles no matches as an error condition, but FreeBSD
+			 * doesn't. This ensure that if no match is found, an empty array
+			 * is always returned so it can be used with worrying in e.g.
+			 * foreach() */
+			array_init(return_value);
+			return;
+		}
+#endif
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
-	for(n=0;n<globbuf.gl_pathc;n++) {
-		MAKE_STD_ZVAL(new_val);
-		ZVAL_STRING(new_val, globbuf.gl_pathv[n], 1);
-		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val,
-												sizeof(zval *), NULL);
-		ret = VCWD_GETCWD(path, MAXPATHLEN);
+	for (n = 0; n < globbuf.gl_pathc; n++) {
+		add_next_index_string(return_value, globbuf.gl_pathv[n], 1);
 	}
 	globfree(&globbuf);
 }
