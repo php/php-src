@@ -31,6 +31,11 @@
 #include <langinfo.h>
 #endif
 
+#if HAVE_MBSTRING
+# include "ext/mbstring/mbstring.h"
+ZEND_EXTERN_MODULE_GLOBALS(mbstring)
+#endif
+
 enum entity_charset { cs_terminator, cs_8859_1, cs_cp1252,
 					  cs_8859_15, cs_utf_8, cs_big5, cs_gb2312, 
  					  cs_big5hkscs, cs_sjis, cs_eucjp};
@@ -525,6 +530,36 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 		return cs_8859_1;
 
 	if (strlen(charset_hint) == 0)	{
+#if HAVE_MBSTRING
+	/* XXX: Ugly things. Why don't we look for a more sophisticated way? */
+		switch (MBSTRG(internal_encoding)) {
+			case mbfl_no_encoding_utf8:
+				return cs_utf_8;
+
+			case mbfl_no_encoding_euc_jp:
+			case mbfl_no_encoding_eucjp_win:
+				return cs_eucjp;
+
+			case mbfl_no_encoding_sjis:
+			case mbfl_no_encoding_sjis_win:
+			case mbfl_no_encoding_sjis_mac:
+				return cs_sjis;
+
+			case mbfl_no_encoding_cp1252:
+				return cs_cp1252;
+
+			case mbfl_no_encoding_8859_15:
+				return cs_8859_15;
+
+			case mbfl_no_encoding_big5:
+				return cs_big5;
+
+			case mbfl_no_encoding_euc_cn:
+			case mbfl_no_encoding_hz:
+			case mbfl_no_encoding_cp936:
+				return cs_gb2312;
+		}
+#endif
 		/* try to detect the charset for the locale */
 #if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
 		charset_hint = nl_langinfo(CODESET);
