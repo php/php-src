@@ -1,3 +1,134 @@
+2001-03-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Make use of the "zero-copy" write queue feature.
+
+2001-03-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c:
+    - Forced call_user_method() and call_user_method_array() to take the
+      object argument by reference. 
+    * Forced call_user_method() and call_user_method_array() to take the
+      object argument by reference.
+    * Also cleaned up the protos for those functions and brought
+      call_user_method_array() into functional equivalence with
+      call_user_method().
+
+2001-03-02  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Benchmark/Iterate.php: - added check for existing bcmath extensions
+      to Benchmark/Iterate.php
+
+    - did some cosmetic changes to Benchmark/Iterate.php
+
+2001-03-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Combine all HTTP headers into a single writev
+
+2001-03-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Graphics.php
+      pear/Cache/Output.php: Fixed small glitches.
+
+2001-03-02  Andi Gutmans  <andi@zend.com>
+
+    * sapi/nsapi/nsapi.c: - Commit NSAPI patches.
+
+2001-03-02  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Output.php:
+    Sorry, removed my local settings. Will take some sleep before commiting again!
+
+    * pear/Cache/Output.php:
+    ... must forgot this commit - endGet(), $cache_id => $output_id
+
+     - added endGet() which returns the output buffering content
+     - changed $cache_id to $output_id seems to be a better name as the class
+       is named Cache_Output
+
+2001-03-02  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Output.php:
+    Wrong order of Parameters in $this->container->save();
+    and $this->cache_id instead of $this->id on the same line
+
+2001-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/cybermut/.cvsignore
+      ext/cybermut/Makefile.in
+      ext/cybermut/config.m4
+      ext/cybermut/cybermut.c
+      ext/cybermut/cybermut.xml
+      ext/cybermut/libs.mk
+      ext/cybermut/php_cybermut.h
+      ext/cybermut/tests/001.phpt:
+    Add CyberMut extension from Sylvain PAGES <spages@free.fr>
+
+2001-03-02  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container.php:
+    - changed $max_age to an absolute timestamp value
+
+    * pear/Cache/Container/db.php
+      pear/Cache/Container/phplib.php:
+    Added a warning on the usage of REPLACE INTO to the inline docs.
+
+    * pear/Cache/Container/phplib.php:
+    Fixed: MySQL data, expire, garbageCollection
+
+    - forgot to mention for db.php and this file
+      changed suggested SQL column type for content (data)
+      from text to mediumtext
+
+    * pear/Cache/Container/file.php: Fixed expire date bug.
+
+    * pear/Cache/Container/db.php:
+    Bugfixes: expire, encode()/decode(), MySQL data
+
+     - the expire date should be saved as a timestamp with
+       ($expire) ?  $expire + time() : 0
+
+     - always use encode(), decode() for data storage
+
+     - the fieldname "data" is a reserved word in old MySQL versions,
+       changed to "content"
+
+2001-03-02  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/README
+      ext/mnogosearch/test.php:
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    UDM_ISPELL_TYPE_SERVER parameter in udm_load_ispell_data has been added
+    to work with ispell server. This feature is available starting from
+    mnoGoSearch 3.1.12 or later. Fixed Udm_Free_Ispell_Data(). Example updated.
+
+2001-03-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Output.php: Fixed typo.
+
+    * pear/Cache.php: Whitespace only.
+
+2001-03-02  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: - Fixed binding of ROWIDs in OCI8. 
+
+2001-03-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Function.php: Fixed example.
+
+    * pear/Cache/Function.php: Added PHPDoc doccomments.
+
+    * pear/Cache/Function.php: Make it work, hopefully.
+
+    * pear/Cache/Function.php: Fixed typo.
+
+    * pear/Cache/Function.php
+      pear/Makefile.in: Added experimental version of Cache_Function module.
+
+2001-03-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/html.c: ws fix
+
 2001-03-01  Rainer Schaaf  <rjs@pdflib.com>
 
     * ext/pdf/php_pdf.h
