@@ -846,7 +846,7 @@ PHP_FUNCTION(odbc_prepare)
 	convert_to_string_ex(pv_query);
 	query = Z_STRVAL_PP(pv_query);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	result->numparams = 0;
 	
@@ -1269,7 +1269,7 @@ PHP_FUNCTION(odbc_exec)
 	convert_to_string_ex(pv_query);
 	query = Z_STRVAL_PP(pv_query);
 	
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -2797,7 +2797,7 @@ PHP_FUNCTION(odbc_tables)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -2881,7 +2881,7 @@ PHP_FUNCTION(odbc_columns)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -2961,7 +2961,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3038,7 +3038,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 		fschema = Z_STRVAL_PP(pv_fschema);
 		convert_to_string_ex(pv_ftable);
 		ftable = Z_STRVAL_PP(pv_ftable);
-#if defined(HAVE_DBMAKER) || defined (HAVE_IBMDB2)
+#if defined(HAVE_DBMAKER) || defined(HAVE_IBMDB2)
 #define EMPTY_TO_NULL(xstr) \
 	if ((int)strlen((xstr)) == 0) (xstr) = NULL
 
@@ -3055,7 +3055,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3130,7 +3130,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3198,7 +3198,7 @@ PHP_FUNCTION(odbc_primarykeys)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3276,7 +3276,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3354,7 +3354,7 @@ PHP_FUNCTION(odbc_procedures)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3436,7 +3436,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3517,7 +3517,7 @@ PHP_FUNCTION(odbc_statistics)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
@@ -3591,7 +3591,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
-	result = (odbc_result *)emalloc(sizeof(odbc_result));
+	result = (odbc_result *)ecalloc(1, sizeof(odbc_result));
 	
 	rc = SQLAllocStmt(conn->hdbc, &(result->stmt));
 	if (rc == SQL_INVALID_HANDLE) {
