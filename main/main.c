@@ -150,14 +150,12 @@ static PHP_INI_MH(OnSetPrecision)
  */
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
-	int new_limit;
-
 	if (new_value) {
-		new_limit = zend_atoi(new_value, new_value_length);
+		PG(memory_limit) = zend_atoi(new_value, new_value_length);
 	} else {
-		new_limit = 1<<30;		/* effectively, no limit */
+		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
-	return zend_set_memory_limit(new_limit);
+	return zend_set_memory_limit(PG(memory_limit));
 }
 /* }}} */
 #endif
@@ -702,6 +700,10 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
 			if (module_initialized) {
+#if MEMORY_LIMIT
+				/* restore memory limit */
+				AG(memory_limit) = PG(memory_limit); 
+#endif
 				zend_bailout();
 				efree(buffer);
 				return;
