@@ -811,7 +811,7 @@ PHP_FUNCTION(ob_get_contents)
 }
 /* }}} */
 
-/* {{{ proto integer ob_get_level(void)
+/* {{{ proto int ob_get_level(void)
    Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
