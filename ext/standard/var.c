@@ -255,10 +255,8 @@ void php_var_serialize(pval *buf, pval **struc)
 				zval_dtor(fname);
 				FREE_ZVAL(fname);
 
-				if (retval_ptr) {
-					zval_dtor(retval_ptr);
-					FREE_ZVAL(retval_ptr);
-				}
+				if (retval_ptr)
+					zval_ptr_dtor(&retval_ptr);
 				return;	
 			}
 
@@ -521,10 +519,8 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 
 				zval_dtor(fname);
 				FREE_ZVAL(fname);
-				if (retval_ptr) {
-					zval_dtor(retval_ptr);
-					FREE_ZVAL(retval_ptr);
-				}
+				if (retval_ptr)
+					zval_ptr_dtor(&retval_ptr);
 			}
 
 			return *((*p)++) == '}';

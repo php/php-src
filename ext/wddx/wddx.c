@@ -449,10 +449,8 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zval_dtor(fname);
 	FREE_ZVAL(fname);
 
-	if (retval) {
-		zval_dtor(retval);
-		FREE_ZVAL(retval);
-	}
+	if (retval)
+		zval_ptr_dtor(&retval);
 }
 
 static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
@@ -756,10 +754,8 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 
 						zval_dtor(fname);
 						FREE_ZVAL(fname);
-						if (retval) {
-							zval_dtor(retval);
-							FREE_ZVAL(retval);
-						}
+						if (retval)
+							zval_ptr_dtor(&retval);
 					}
 					else
 						zend_hash_update(target_hash,
