@@ -1,3 +1,18 @@
+2004-09-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_iterator.c:
+      Use the correct free() here...
+
+2004-09-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Bugfix #30146 (ReflectionProperty->getValue() requires instance for static
+      property)
+
+    * ZendEngine2/zend_reflection_api.c:
+      Bugfix #30148 (ReflectionMethod->isConstructor() fails for inherited
+      classes)
+
 2004-09-17  Wez Furlong  <wez.php@thebrainroom.net>
 
     * main/network.c
