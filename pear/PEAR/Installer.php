@@ -182,7 +182,8 @@ class PEAR_Installer extends PEAR_Common
                 $this->source_files++;
                 return;
             default:
-                break;
+                // Files with no role will end in "/"
+                return $this->raiseError("Invalid role `$atts[role]' for file $file");
         }
         if (!empty($atts['baseinstalldir'])) {
             $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
@@ -393,6 +394,12 @@ class PEAR_Installer extends PEAR_Common
         $pkginfo = $this->infoFromDescriptionFile($descfile);
         if (PEAR::isError($pkginfo)) {
             return $pkginfo;
+        }
+        $this->validatePackageInfo($pkginfo, $errors, $warnings);
+        // XXX We allow warnings, have we to do it?
+        if (count($errors)) {
+            return $this->raiseError("The following errors where found:\n".
+                                     implode("\n", $errors));
         }
 
         $pkgname = $pkginfo['package'];
