@@ -4126,7 +4126,7 @@ PHP_FUNCTION(imagefilter)
 /* }}} */
 /* End section: Filters */
 
-/* {{{ proto bool imagesetantialias(int im, bool on)
+/* {{{ proto bool imageantialias(int im, bool on)
         Should antialiased functions used or not*/
 PHP_FUNCTION(imageantialias)
 {
