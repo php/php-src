@@ -52,8 +52,12 @@
 #include <sys/socket.h>
 #include "netware/param.h"
 #else
+#if HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#if HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
 #if defined(NETWARE) && defined(USE_WINSOCK)
 #include <novsock2.h>
 #else
