@@ -169,7 +169,7 @@ USING PHP3 AND PHP4 AS CONCURRENT APACHE MODULES
 
    - Linux with recent binutils (binutils 2.9.1.0.25 tested)
    - Solaris 2.5 or better
-   - FreeBSD (4.0-current tested)
+   - FreeBSD (3.2, 4.0 tested)
    
    To enable it, configure PHP3 and PHP4 to use APXS (--with-apxs) and the
    necessary link extensions (--enable-versioning). Otherwise, all standard
