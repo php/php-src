@@ -2,7 +2,7 @@ dnl $Id$
 
 PHP_ARG_WITH(fbsql, for FrontBase SQL92 (fbsql) support,
 [  --with-fbsql[=DIR]      Include FrontBase support. DIR is the FrontBase base
-                          directory. .], yes)
+                          directory. .])
 
 if test "$PHP_FBSQL" != "no"; then
   AC_DEFINE(HAVE_FBSQL, 1, [Whether you have FrontBase])
