@@ -1,3 +1,32 @@
+2000-06-03  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
+    * NEWS: news update
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      sapi/apache/php4apache.dsp
+      sapi/isapi/php4isapi.dsp
+      sapi/nsapi/php4nsapi.dsp
+      NEWS
+      TODO
+      ext/mysql/libmysql/libmysql.dsp
+      php4dllts.dsp
+      php4ts.dsp:
+    - Allow all functions that receive user-defined function callbacks to accept
+      an array that contains an object and a method name, in place of a function
+      name, e.g. usort($array, array($obj, "ObjSort"))
+    (I checked the code in array.c and basic_functions.c, other code which uses
+    call_user_function() may still force the function_name argument to be of type
+    IS_STRING, which prevents this feature from working - and is no longer necessary)
+
+    * ext/standard/info.c
+      TODO
+      main.c
+      php_ini.c
+      php_ini.h: - Make the INI entries sorted in phpinfo()
+
 2000-06-02  Andi Gutmans  <andi@php.net>
 
     * NEWS: - Update NEWS so that this is documented
