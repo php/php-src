@@ -84,12 +84,14 @@ PHP_FUNCTION(imageftbbox);
 PHP_FUNCTION(imagefttext);
 
 PHP_FUNCTION(imagecreatetruecolor);
+PHP_FUNCTION(imageistruecolor);
 PHP_FUNCTION(imagetruecolortopalette);
 PHP_FUNCTION(imagesetthickness);
 PHP_FUNCTION(imageellipse);
 PHP_FUNCTION(imagefilledellipse);
 PHP_FUNCTION(imagefilledarc);
 PHP_FUNCTION(imagealphablending);
+PHP_FUNCTION(imagesavealpha);
 PHP_FUNCTION(imagecolorresolvealpha);
 PHP_FUNCTION(imagecolorclosestalpha);
 PHP_FUNCTION(imagecolorexactalpha);

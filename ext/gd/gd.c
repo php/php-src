@@ -148,11 +148,13 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreate,								NULL)
 #if HAVE_LIBGD20
 	PHP_FE(imagecreatetruecolor,					NULL)
+	PHP_FE(imageistruecolor,                        NULL)
 	PHP_FE(imagetruecolortopalette,					NULL)
 	PHP_FE(imagesetthickness,						NULL)
 	PHP_FE(imagefilledarc,							NULL)
 	PHP_FE(imagefilledellipse,						NULL)
 	PHP_FE(imagealphablending,						NULL)
+	PHP_FE(imagesavealpha,                          NULL)
 	PHP_FE(imagecolorresolvealpha, 					NULL)
 	PHP_FE(imagecolorclosestalpha,					NULL)
 	PHP_FE(imagecolorexactalpha,					NULL)
@@ -711,6 +713,23 @@ PHP_FUNCTION(imagecreatetruecolor)
 }
 /* }}} */
 
+/* {{{ proto int imageistruecolor(int im)
+ *    return true if the image uses truecolor */
+PHP_FUNCTION(imageistruecolor)
+{
+	zval **IM;
+	gdImagePtr im;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd); 
+
+	RETURN_BOOL(im->trueColor);
+}
+/* }}} */
+
 /* {{{ proto void imagetruecolortopalette(resource im, bool ditherFlag, int colorsWanted)
    Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
@@ -868,6 +887,27 @@ PHP_FUNCTION(imagealphablending)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#if HAVE_LIBGD20
+/* {{{ proto void imagesavealpha(resource im, bool on)
+ *    Include alpha channel to a saved image */
+PHP_FUNCTION(imagesavealpha)
+{
+	    zval **IM, **save; 
+		    gdImagePtr im;
+
+			    if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &save) == FAILURE) {
+					        ZEND_WRONG_PARAM_COUNT();
+							    }
+
+				    ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd); 
+					    convert_to_boolean_ex(save);
+
+						    gdImageSaveAlpha(im, Z_LVAL_PP(save));
+
+							    RETURN_TRUE;
+}
+#endif
 
 #if HAVE_GD_BUNDLED
 /* {{{ proto void imagelayereffect(resource im, int effect)
