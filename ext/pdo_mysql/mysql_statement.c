@@ -137,6 +137,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+
 	if(S->current_data == NULL || !S->result) {
 		return 0;
 	}
@@ -150,13 +151,103 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	return 1;
 }
 
+static char *type_to_name_native(int type)
+{
+#define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
+
+    switch (type) {
+        PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
+        PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
+#ifdef MYSQL_HAS_TINY
+        PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
+#endif
+        PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
+        PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
+        PDO_MYSQL_NATIVE_TYPE_NAME(LONGLONG)
+        PDO_MYSQL_NATIVE_TYPE_NAME(INT24)
+        PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
+        PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
+        PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
+        PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
+#ifdef MYSQL_HAS_YEAR
+        PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
+#endif
+        PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
+        PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
+        PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
+        PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
+        PDO_MYSQL_NATIVE_TYPE_NAME(MEDIUM_BLOB)
+        PDO_MYSQL_NATIVE_TYPE_NAME(LONG_BLOB)
+        PDO_MYSQL_NATIVE_TYPE_NAME(BLOB)
+        PDO_MYSQL_NATIVE_TYPE_NAME(NULL)
+        default:
+            return NULL;
+    }
+}
+
+static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
+{
+	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+	MYSQL_FIELD *F;
+	zval *flags;
+	char *str;
+	
+	if(S->current_data == NULL || !S->result) {
+		return FAILURE;
+	}
+	if(colno >= mysql_num_fields(S->result)) {
+		/* error invalid column */
+		pdo_mysql_error_stmt(stmt);
+		return FAILURE;
+	}
+	mysql_field_seek(S->result, colno);
+	F = mysql_fetch_field(S->result);
+	if (!F) {
+		pdo_mysql_error_stmt(stmt);
+		return FAILURE;
+	}
+
+	array_init(return_value);
+	MAKE_STD_ZVAL(flags);
+	array_init(flags);
+
+	if (F->def) {
+		add_assoc_string(return_value, "mysql:def", F->def, 1);
+	}
+	if (IS_NOT_NULL(F->flags)) {
+		add_next_index_string(flags, "not_null", 1);
+	}
+	if (IS_PRI_KEY(F->flags)) {
+		add_next_index_string(flags, "primary_key", 1);
+	}
+	if (F->flags & MULTIPLE_KEY_FLAG) {
+		add_next_index_string(flags, "multiple_key", 1);
+	}
+	if (F->flags & UNIQUE_KEY_FLAG) {
+		add_next_index_string(flags, "unique_key", 1);
+	}
+	if (IS_BLOB(F->flags)) {
+		add_next_index_string(flags, "blob", 1);
+	}
+	str = type_to_name_native(F->flags);
+	if (str) {
+		add_assoc_string(return_value, "native_type", str, 1);
+	}
+
+	add_assoc_zval(return_value, "flags", flags);
+	return SUCCESS;
+}
+
 struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_dtor,
 	pdo_mysql_stmt_execute,
 	pdo_mysql_stmt_fetch,
 	pdo_mysql_stmt_describe,
 	pdo_mysql_stmt_get_col,
-	pdo_mysql_stmt_param_hook
+	pdo_mysql_stmt_param_hook,
+	NULL, /* set_attr */
+	NULL, /* get_attr */
+	pdo_mysql_stmt_col_meta
 };
 
 /*
