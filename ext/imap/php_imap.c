@@ -436,7 +436,7 @@ PHP_MINIT_FUNCTION(imap)
 #ifndef PHP_WIN32
 	mail_link(&unixdriver);		/* link in the unix driver */
 	mail_link(&mhdriver);		/* link in the mh driver */
-	mail_link(&mxdriver);		/* link in the mx driver */
+    /* mail_link(&mxdriver); */	/* According to c-client docs (internal.txt) this shouldn't be used. */
 	mail_link(&mmdfdriver);		/* link in the mmdf driver */
 	mail_link(&newsdriver);		/* link in the news driver */
 	mail_link(&philedriver);	/* link in the phile driver */
