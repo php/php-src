@@ -1,3 +1,111 @@
+2002-04-19  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/sablot.c: throw a warning if encoding support not available...
+
+    * TODO: update todo a bit
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+    make it work with dom processing, this allows DOM tree caching to avoid
+    re-parsing the same data.  Currently very beta -- DO NOT USE.  Will be cleaning
+    this up over the next few days...  Need this in here for version history, and
+    to show other people
+
+2002-04-19  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c: fix warning
+
+    * ext/yaz/php_yaz.c: Indentation;)
+
+    * ext/yaz/php_yaz.c: fix warning
+
+2002-04-19  Andrei Zmievski  <andrei@php.net>
+
+    * ext/pcre/php_pcre.c: Revert bogus patch.
+
+2002-04-19  Harald Radi  <h.radi@nme.at>
+
+    * win32/php4dllts.dsp: MFH
+
+2002-04-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pcre/php_pcre.c: - Fix warnings in VC
+
+2002-04-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php: * add http_proxy config setting
+
+    * pear/PEAR/Installer.php:
+    * make "pear install package.xml" possible, so you can install a package
+      without building a tarball first
+
+    * pear/PEAR/Command/Install.php:
+    * reintroduce (un)install -r option for Registeration only
+
+    * pear/PEAR.php: * fix phpdoc
+
+2002-04-19  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Fixed pg_insert/update/select/delete overflow.
+
+    * ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/10pg_convert.phpt
+      ext/pgsql/tests/11pg_metadata.phpt
+      ext/pgsql/tests/escape.inc: Update tests
+
+    * ext/pgsql/pgsql.c:
+    Added "NOT NULL" check and do not add converted variable when field is NULL and HAS DEFAULT.
+    (php_pgsql_convert)
+
+    * ext/pgsql/pgsql.c: Changed "default" -> "has default" (metadata)
+    Fixed comment. Do not use magic number.
+
+2002-04-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/bz2/bz2.c
+      ext/standard/fsock.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/network.c
+      main/streams.c
+      NEWS: Make scheme part decoding rfc2396 compliant.
+    Change zlib:// and bzip2:// to compress.zlib:// and compress.bzip2://
+    Tidy up old socket/network code/comments.
+
+2002-04-19  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/openssl/openssl.c
+      ext/standard/http_fopen_wrapper.c: Remove compiler warnings
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/002.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt: Fixed file include error
+
+    * ext/xslt/sablot.c: Remove warning.
+
+    * ext/mbstring/tests/019.phpt: Fixed test title (strlen -> mb_strlen)
+
+    * ext/pgsql/pgsql.c: Leave "" (null string) when converting.
+
+    * ext/iconv/iconv.c: Remove warnings
+
+    * php.ini-dist
+      php.ini-recommended: Added mbstring.func_overload directive
+
+    * ext/mbstring/config.m4: Fixed messages
+
+    * php.ini-dist: Remove gargabe
+
+    * ext/mbstring/config.m4: Enable mbstring by default.
+
+    * php.ini-dist
+      php.ini-recommended: Added description to mbstring ini entries
+
+    * main/php_ini.c: Avoid defining/using S_ISDIR macro.
+
 2002-04-18  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * sapi/isapi/php4isapi.c: - MFH for bug in Sambar 5.2

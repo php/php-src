@@ -1,3 +1,12 @@
+2002-04-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_list.c
+      zend_hash.c
+      zend_hash.h:
+    MFZE1: make sure the resource-list is always consistent during shutdown (Thies).
+
+    * zend_hash.c: MFZE1: Fix imbalance bug (Zeev).
+
 2002-04-10  Jani Taskinen  <sniper@iki.fi>
 
     * zend_language_scanner.l
