@@ -73,7 +73,7 @@ PHP_FUNCTION(dl)
 void php_dl(pval *file,int type,pval *return_value)
 {
 	void *handle;
-	char libpath[MAXPATHLEN + 1];
+	char *libpath;
 	zend_module_entry *module_entry,*tmp;
 	zend_module_entry *(*get_module)(void);
 	PLS_FETCH();
@@ -84,13 +84,15 @@ void php_dl(pval *file,int type,pval *return_value)
 		&& PG(extension_dir)[0]){
 		int extension_dir_len = strlen(PG(extension_dir));
 
+		libpath = emalloc(extension_dir_len+strlen(file->value.str.val)+1);
+
 		if (PG(extension_dir)[extension_dir_len-1]=='/' || PG(extension_dir)[extension_dir_len-1]=='\\') {
-			sprintf(libpath,"%s%s",PG(extension_dir),file->value.str.val);  /* SAFE */
+			sprintf(libpath,"%s%s",PG(extension_dir),file->value.str.val);
 		} else {
-			sprintf(libpath,"%s/%s",PG(extension_dir),file->value.str.val);  /* SAFE */
+			sprintf(libpath,"%s/%s",PG(extension_dir),file->value.str.val);
 		}
 	} else {
-		sprintf(libpath,"%s",file->value.str.val);  /* SAFE */
+		libpath = estrdup(file->value.str.val);
 	}
 
 	/* load dynamic symbol */
@@ -108,8 +110,14 @@ void php_dl(pval *file,int type,pval *return_value)
 #else
 		php_error(error_type,"Unable to load dynamic library '%s' - %s",libpath,dlerror());
 #endif
+
+		efree(libpath);
+
 		RETURN_FALSE;
 	}
+
+	efree(libpath);
+
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
 	
 	if (!get_module) {
