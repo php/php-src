@@ -1,3 +1,184 @@
+2002-05-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com/COM.c:
+    Add documentation comment for properties in com_print_typeinfo
+
+    * ext/com/COM.c: Enhance com_print_typeinfo.
+    The main expected use is like this, for figuring out what methods
+    are allowed for a COM object:
+
+    $ie = new COM("InternetExplorer.Application");
+    // Prints class definition for IE object
+    com_print_typeinfo($ie, "InternetExplorer.Application", false);
+    // Prints class definition for default IE event handler
+    com_print_typeinfo($ie, "InternetExplorer.Application", true);
+
+2002-05-21  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: *** empty log message ***
+
+    * ext/tokenizer/tokenizer.c: Fix bug #16939.
+
+2002-05-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com/COM.c:
+    Correct usage of convert_to_string_ex which is not allowed to zval*
+
+    * ext/com/COM.c: Reformat some comments.
+
+    * ext/com/COM.c: Fix a flag, remove an old comment.
+
+    * ext/com/com.h
+      ext/com/dispatch.c
+      ext/com/php_COM.h
+      ext/com/variant.h
+      ext/com/COM.c:
+    - Make sure that COM and VARIANT resources are returned as resources
+      rather than longs.
+    - Make the IDispatch implementation a bit more generic (and
+      fix my mess of pointers).
+    - Add new com_message_pump() function that acts like an interruptible
+      usleep() that processes COM calls/events.
+    - Add new com_print_typeinfo() function for "decompiling" the typeinfo
+      for an interface into PHP script.  This is useful for generating a
+      skeleton for use as an event sink.
+    - Add new com_event_sink() function for sinking events from COM
+      objects.  Usage is like this:
+
+    <?php
+
+    class IEEventSinker {
+    	var $terminated = false;
+
+    	function ProgressChange($progress, $progressmax) {
+    		echo "Download progress: $progress / $progressmax\n";
+    	}
+    	function DocumentComplete(&$dom, $url) {
+    		echo "Document $url complete\n";
+    	}
+    	function OnQuit() {
+    		echo "Quit!\n";
+    		$this->terminated = true;
+    	}
+    }
+
+    $ie = new COM("InternetExplorer.Application");
+
+    $sink =& new IEEventSinker();
+    com_event_sink($ie, $sink, "DWebBrowserEvents2");
+
+    $ie->Visible = true;
+    $ie->Navigate("http://www.php.net");
+
+    while(!$sink->terminated) {
+    	com_message_pump(4000);
+    }
+    $ie = null;
+    ?>
+
+2002-05-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/TODO: ZTS issues fixed
+
+    * ext/mime_magic/mime_magic.c:
+    not beautifull (yet), but should fix ZTS builds
+
+2002-05-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    files that are not installed should be removed from the
+    registered file list (TODO--)
+
+2002-05-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php:
+    * show installed_as instead of a "calculated" path for installed packages
+
+    * pear/PEAR/Installer.php: * add TODO comment
+
+2002-05-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp
+      main/config.w32.h.in: Add HAVE_MBSTR_RU support for Win32.
+
+    * ext/mbstring/mbfilter_ru.c: ZTS fixes.
+
+2002-05-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php: * disable wrapping for now
+
+2002-05-21  Den V. Tsopa  <tdv@edisoft.ru>
+
+    * ext/mbstring/mbfilter_ru.c
+      ext/mbstring/mbfilter_ru.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/unicode_table_ru.h
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter.c
+      ext/mbstring/config.m4:
+    Added russian codepages (koi8-r,cp1251,cp866) support.
+
+2002-05-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: Some minor error verbosity updates
+
+    * pear/PEAR/Command/Remote.php: doListRemote -> doRemoteList
+
+    * pear/PEAR/Installer.php:
+    Make the installation of a package fail when _installFile
+    fails and "force" is not set
+
+2002-05-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php:
+    * list command no longer displays test and data files when listing
+      installed files
+
+    * pear/PEAR/Command/Package.php:
+    * package-list command no longer needed ("list" does the same thing and
+      more)
+
+    * pear/PEAR/Command/Registry.php:
+    * rename shell-test shortcut to st (was stest)
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Command/Config.php: * added more shortcuts
+
+    * pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/scripts/pear.in
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php:
+    * implemented shortcuts ("pv" for "package-validate" etc.)
+      do "pear help shortcuts" to see what shortcuts exist
+    * renamed "list-installed" command to "list" and made it able to
+      list the contents of installed packages as well as tar/tgz/xml files
+    * added some more/better command docs
+    * fixed up the synopsis part in the help output
+    * display option parameters (--foo=bar, where bar is specified in
+      'shortarg' as for example 'f:bar')
+    * renamed list-remote-packages to list-remote
+    * renamed remote-package-info to remote-info
+
+    * pear/PEAR/Common.php: * make infoFromAny actually work :)
+
+    * pear/PEAR/Remote.php: * better wording
+
+2002-05-21  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/pgsql/pgsql.dsp: MFH (fix for #17315)
+
+    * ext/pgsql/pgsql.dsp:
+    Fix for #17315. Requires client library 7.2 or greater to compile.
+
 2002-05-20  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/posix/posix.c: - MFH fix for #17323.
