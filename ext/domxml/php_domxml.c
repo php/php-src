@@ -69,6 +69,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_children,	NULL)
 	PHP_FE(domxml_new_child,	NULL)
 	PHP_FE(domxml_node,	NULL)
+	PHP_FE(domxml_unlink_node,	NULL)
 	PHP_FE(domxml_set_content,	NULL)
 	PHP_FE(domxml_new_xmldoc,	NULL)
 	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
@@ -115,12 +116,15 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(set_attribute,	domxml_set_attribute,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
 	PHP_FALIAS(node,	domxml_node,	NULL)
+	PHP_FALIAS(unlink,	domxml_unlink_node,	NULL)
 	PHP_FALIAS(set_content,	domxml_set_content,	NULL)
 	{NULL, NULL, NULL}
 };
 
 #if defined(LIBXML_XPATH_ENABLED)
 static zend_function_entry php_xpathctx_class_functions[] = {
+	PHP_FALIAS(xpath_eval, xpath_eval, NULL)
+	PHP_FALIAS(xpath_eval_expression, xpath_eval_expression, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -699,6 +703,40 @@ PHP_FUNCTION(domxml_children)
 		zend_hash_next_index_insert(return_value->value.ht, &child, sizeof(zval *), NULL);
 		last = last->next;
 	}
+}
+/* }}} */
+
+/* {{{ proto object domxml_unlink_node([int node])
+   Deletes node */
+PHP_FUNCTION(domxml_unlink_node)
+{
+	zval *id, **tmp;
+	xmlNode *nodep, *last;
+	int ret;
+	
+	if (ZEND_NUM_ARGS() == 0) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
+	}
+
+	xmlUnlinkNode(nodep);
+	RETURN_TRUE;
 }
 /* }}} */
 
