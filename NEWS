@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- The CCVS module is now stable and compiling. It compiles as a CGI and into apache cleanly without warnings. (Brendan W. McAdams)
+- Fix mSQL_close(). (nick@loman.net)
 - Made return() in a require()'d file work like return() in an include()'d
   file (Andi & Zeev, Zend Engine)
 - Changed require_once() to work using the same table as include_once()
