@@ -67,6 +67,8 @@ AC_ZEND_BROKEN_SPRINTF
 
 AC_CHECK_FUNCS(finite isfinite isinf isnan)
 
+ZEND_FP_EXCEPT
+	
 AC_SUBST(ZEND_SCANNER)
 
 ])
