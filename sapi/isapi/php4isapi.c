@@ -17,9 +17,14 @@
    +----------------------------------------------------------------------+
  */
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 # include <windows.h>
+# include <process.h>
+#else
+# define __try
+# define __except(val)
 #endif
+
 #include <httpext.h>
 #include <httpfilt.h>
 #include <httpext.h>
@@ -29,6 +34,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_variables.h"
+#include "php_ini.h"
 
 #ifdef WITH_ZEUS
 #include "zeus.h"
@@ -39,6 +45,7 @@
 #define ISAPI_POST_DATA_BUF 1024
 
 static zend_bool bFilterLoaded=0;
+static zend_bool bTerminateThreadsOnError=0;
 
 static char *isapi_server_variables[] = {
 	"ALL_HTTP",
@@ -136,11 +143,10 @@ static int sapi_isapi_ub_write(const char *str, uint str_length)
 	DWORD num_bytes = str_length;
 	LPEXTENSION_CONTROL_BLOCK ecb;
 	SLS_FETCH();
-	ELS_FETCH();
 	
 	ecb = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	if (ecb->WriteClient(ecb->ConnID, (char *) str, &num_bytes, HSE_IO_SYNC ) == FALSE) {
-		longjmp(EG(bailout), 1);
+		zend_bailout();
 	}
 	return num_bytes;
 }
@@ -235,6 +241,7 @@ static int php_isapi_startup(sapi_module_struct *sapi_module)
 		|| zend_startup_module(&php_isapi_module)==FAILURE) {
 		return FAILURE;
 	} else {
+		bTerminateThreadsOnError = (zend_bool) INI_INT("isapi.terminate_threads_on_error");
 		return SUCCESS;
 	}
 }
@@ -486,6 +493,16 @@ BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 }
 
 
+static void my_endthread()
+{
+#ifdef PHP_WIN32
+	if (bTerminateThreadsOnError) {
+		_endthread();
+	}
+#endif
+}
+
+
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
 	zend_file_handle file_handle;
@@ -514,6 +531,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			efree(SG(request_info).cookie_data);
 		}
 	} __except(EXCEPTION_EXECUTE_HANDLER) {
+#ifdef PHP_WIN32
 		if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
 			LPBYTE lpPage;
 			static SYSTEM_INFO si;
@@ -533,28 +551,30 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 
 			/* Free pages below current page */
 			if (!VirtualFree(mi.AllocationBase, (LPBYTE)lpPage - (LPBYTE) mi.AllocationBase, MEM_DECOMMIT)) {
-				ExitThread(0);
+				_endthread();
 			}
 
 			/* Restore the guard page */
 			if (!VirtualProtect(lpPage, si.dwPageSize, PAGE_GUARD | PAGE_READWRITE, &dwOldProtect)) {
-				ExitThread(0);
+				_endthread();
 			}
 
 			CG(unclean_shutdown)=1;
 			php_isapi_report_exception("Stack overflow", sizeof("Stack overflow")-1 SLS_CC);
 		} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
 			php_isapi_report_exception("Access violation", sizeof("Access violation")-1 SLS_CC);
-			ExitThread(0);
+			my_endthread();
 		} else {
-			ExitThread(0);
+			php_isapi_report_exception("Unknown fatal exception", sizeof("Unknown fatal exception")-1 SLS_CC);
+			my_endthread();
 		}
+#endif
 	}
 
 	__try {
 		php_request_shutdown(NULL);
 	} __except(EXCEPTION_EXECUTE_HANDLER) {
-		ExitThread(0);
+		my_endthread();
 	}
 
 	return HSE_STATUS_SUCCESS;
