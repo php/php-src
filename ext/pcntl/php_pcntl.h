@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
@@ -64,9 +66,9 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	int processing_signal_queue;
 ZEND_END_MODULE_GLOBALS(pcntl)
 #ifdef ZTS
-# define PCNTL_G(v) TSRMG(pcntl_globals_id, zend_pcntl_globals *, v)
+#define PCNTL_G(v) TSRMG(pcntl_globals_id, zend_pcntl_globals *, v)
 #else
-# define PCNTL_G(v)	(pcntl_globals.v)
+#define PCNTL_G(v)	(pcntl_globals.v)
 #endif
 
 #endif	/* PHP_PCNTL_H */
