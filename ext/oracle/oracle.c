@@ -36,7 +36,7 @@
 #if HAVE_ORACLE
 
 #include "php_oracle.h"
-#define HASH_DTOR (int (*)(void *))
+#define HASH_DTOR (void (*)(void *))
 
 #ifdef WIN32
 # include "variables.h"
@@ -207,13 +207,12 @@ static int _close_oraconn(oraConnection *conn)
 	return 1;
 }
 
-static int
+static void
 pval_ora_param_destructor(oraParam *param)
 {
 	if (param->progv) {
 		efree(param->progv);
 	}
-	return 1;
 }
 
 
@@ -1112,9 +1111,7 @@ PHP_FUNCTION(ora_fetch_into)
 				continue; /* don't add anything for NULL columns, unless the calles wants it */
 			} else {
 				MAKE_STD_ZVAL(tmp);
-				
-				tmp->type = IS_BOOL; /* return false for NULL columns */
-				tmp->value.lval = 0;
+				ZVAL_NULL(tmp);
 			}
 		} else if (cursor->columns[i].col_retcode != 0 &&
 				   cursor->columns[i].col_retcode != 1406) {
@@ -1386,6 +1383,10 @@ PHP_FUNCTION(ora_getcolumn)
  	column = &cursor->columns[colno]; 
 
  	type = column->dbtype; 
+
+	if (column->col_retcode == 1405) {
+		RETURN_NULL;
+	}
 
 	if (column->col_retcode != 0 && column->col_retcode != 1406) {
 		/* So error fetching column.  The most common is 1405, a NULL
