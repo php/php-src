@@ -26,10 +26,15 @@ require_once 'PEAR/Config.php';
 
 // {{{ constants and globals
 
-define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^[A-Za-z][a-zA-Z0-9_]+$/');
+define('_PEAR_COMMON_PACKAGE_NAME_PREG', '[A-Za-z][a-zA-Z0-9_]+');
+define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^' . _PEAR_COMMON_PACKAGE_NAME_PREG . '$/');
+
+// this should allow: 1, 1.0, 1.0RC1, 1.0dev, 1.0dev123234234234, 1.0a1, 1.0b1, 1.0pl1
+define('_PEAR_COMMON_PACKAGE_VERSION_PREG', '\d+(?:\.\d+)*(?:[a-z]+\d*)?');
+define('PEAR_COMMON_PACKAGE_VERSION_PREG', '/^' . _PEAR_COMMON_PACKAGE_VERSION_PREG . '$/i');
 
 // XXX far from perfect :-)
-define('PEAR_COMMON_PACKAGE_DOWNLOAD_PREG', '/^([A-Za-z][a-zA-Z0-9_]+)(-([.0-9a-zA-Z]+))?$/');
+define('PEAR_COMMON_PACKAGE_DOWNLOAD_PREG', '/^(' . _PEAR_COMMON_PACKAGE_NAME_PREG . ')(-([.0-9a-zA-Z]+))?$/');
 
 /**
  * List of temporary files and directories registered by
@@ -1036,8 +1041,10 @@ class PEAR_Common extends PEAR
         }
         $errors = array();
         $warnings = array();
-        if (empty($info['package'])) {
+        if (!isset($info['package'])) {
             $errors[] = 'missing package name';
+        } elseif (!$this->validPackageName($info['package'])) {
+            $errors[] = 'invalid package name';
         }
         if (empty($info['summary'])) {
             $errors[] = 'missing summary';
@@ -1050,8 +1057,10 @@ class PEAR_Common extends PEAR
         if (empty($info['release_license'])) {
             $errors[] = 'missing license';
         }
-        if (empty($info['version'])) {
+        if (!isset($info['version'])) {
             $errors[] = 'missing version';
+        } elseif (!$this->validPackageVersion($info['version'])) {
+            $errors[] = 'invalid package version';
         }
         if (empty($info['release_state'])) {
             $errors[] = 'missing release state';
@@ -1552,6 +1561,24 @@ class PEAR_Common extends PEAR
     function validPackageName($name)
     {
         return (bool)preg_match(PEAR_COMMON_PACKAGE_NAME_PREG, $name);
+    }
+
+
+    // }}}
+    // {{{ validPackageVersion()
+
+    /**
+     * Test whether a string contains a valid package version.
+     *
+     * @param string $ver the package version to test
+     *
+     * @return bool
+     *
+     * @access public
+     */
+    function validPackageVersion($ver)
+    {
+        return (bool)preg_match(PEAR_COMMON_PACKAGE_VERSION_PREG, $ver);
     }
 
 

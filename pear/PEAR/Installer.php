@@ -1062,10 +1062,6 @@ class PEAR_Installer extends PEAR_Common
                 return $this->raiseError("$pkgname already installed");
             }
         } else {
-            // checks to do only when upgrading packages
-/*            if (!$this->registry->packageExists($pkgname)) {
-                return $this->raiseError("$pkgname not installed");
-            }*/
             if ($this->registry->packageExists($pkgname)) {
                 $v1 = $this->registry->packageInfo($pkgname, 'version');
                 $v2 = $pkginfo['version'];
@@ -1095,12 +1091,9 @@ class PEAR_Installer extends PEAR_Common
                                          null, PEAR_ERROR_DIE);
             }
 
-            // don't want strange characters
-            $pkgname    = ereg_replace ('[^a-zA-Z0-9._]', '_', $pkginfo['package']);
-            $pkgversion = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $pkginfo['version']);
             $tmp_path = dirname($descfile);
             if (substr($pkgfile, -4) != '.xml') {
-                $tmp_path .= DIRECTORY_SEPARATOR . $pkgname . '-' . $pkgversion;
+                $tmp_path .= DIRECTORY_SEPARATOR . $pkgname . '-' . $pkginfo['version'];
             }
 
             //  ==> XXX This part should be removed later on
