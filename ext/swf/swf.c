@@ -157,6 +157,8 @@ PHP_MINIT_FUNCTION(swf)
 PHP_RINIT_FUNCTION(swf)
 {
 	SWFG(use_file) = 0;
+
+	return SUCCESS;
 }
          
 /* {{{ proto void swf_openfile(string name, double xsize, double ysize, double framerate, double r, double g, double b)
