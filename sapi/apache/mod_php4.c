@@ -498,7 +498,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		fh.opened_path = NULL;
 		fh.free_filename = 0;
 		fh.type = ZEND_HANDLE_FILENAME;
-		zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, 1, &fh);
+		zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &fh);
 		return OK;
 	}
 
