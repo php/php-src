@@ -1155,15 +1155,9 @@ int _php_network_is_stream_alive(php_stream *stream TSRMLS_DC)
 	int alive = 1;
 	int fd = sock->socket;
 	fd_set rfds;
-	struct timeval tv;
+	struct timeval tv = {0, 0};
 	char buf;
 	
-	if (sock->timeout.tv_sec == -1) {
-		tv.tv_sec = FG(default_socket_timeout);
-	} else {
-		tv = sock->timeout;
-	}
-
 	/* logic: if the select call indicates that there is data to
 	 * be read, but a read returns 0 bytes of data, then the socket
 	 * has been closed.
