@@ -911,7 +911,7 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return FAILURE;
 	}
 
-	ZVAL_STRINGL(&autoload_function, "__autoload", sizeof("__autoload")-1,  0);
+	ZVAL_STRINGL(&autoload_function, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1,  0);
 
 	INIT_PZVAL(class_name_ptr);
 	ZVAL_STRINGL(class_name_ptr, name, name_length, 0);
@@ -932,7 +932,7 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 
 	if (EG(exception)) {
 		free_alloca(lc_name);
-		zend_error(E_ERROR, "__autoload(%s) threw an exception of type '%s'", name, Z_OBJCE_P(EG(exception))->name);
+		zend_error(E_ERROR, "Function %s(%s) threw an exception of type '%s'", ZEND_AUTOLOAD_FUNC_NAME, name, Z_OBJCE_P(EG(exception))->name);
 		return FAILURE;
 	}
 	EG(exception) = exception;

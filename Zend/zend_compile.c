@@ -1087,16 +1087,37 @@ void zend_do_handle_exception(TSRMLS_D)
 
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 {
+	char lcname[16];
+	int name_len;
+
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 	zend_do_handle_exception(TSRMLS_C);
 
 	pass_two(CG(active_op_array) TSRMLS_CC);
 
-	if (CG(active_class_entry)
-		&& !strcmp(CG(active_op_array)->function_name, ZEND_CLONE_FUNC_NAME)
-		&& CG(active_op_array)->num_args != 0) {
-		zend_error(E_COMPILE_ERROR, "The clone method cannot accept any arguments");
+	/* we don't care if the function name is longer, in fact lowercasing only 
+	 * the beginning of the name speeds up th echeck process */
+	name_len = strlen(CG(active_op_array)->function_name);
+	zend_str_tolower_copy(lcname, CG(active_op_array)->function_name, MIN(name_len, sizeof(lcname)-1));
+	lcname[sizeof(lcname)-1] = '\0'; // zend_str_tolower_copy won't necessarily set the zero byte
+
+	if (CG(active_class_entry)) {
+		if (name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME) && CG(active_op_array)->num_args != 0) {
+			zend_error(E_COMPILE_ERROR, "Destuctor %s::%s() cannot take arguments", CG(active_class_entry)->name, ZEND_DESTRUCTOR_FUNC_NAME);
+		} else if (name_len == sizeof(ZEND_CLONE_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_CLONE_FUNC_NAME) && CG(active_op_array)->num_args != 0) {
+			zend_error(E_COMPILE_ERROR, "Method %s::%s() cannot accept any arguments", CG(active_class_entry)->name, ZEND_CLONE_FUNC_NAME);
+		} else if (name_len == sizeof(ZEND_GET_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_GET_FUNC_NAME) && CG(active_op_array)->num_args != 1) {
+			zend_error(E_COMPILE_ERROR, "Method %s::%s() must take exactly 1 argument", CG(active_class_entry)->name, ZEND_GET_FUNC_NAME);
+		} else if (name_len == sizeof(ZEND_SET_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_SET_FUNC_NAME) && CG(active_op_array)->num_args != 2) {
+			zend_error(E_COMPILE_ERROR, "Method %s::%s() must take exactly 2 arguments", CG(active_class_entry)->name, ZEND_SET_FUNC_NAME);
+		} else if (name_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_CALL_FUNC_NAME) && CG(active_op_array)->num_args != 2) {
+			zend_error(E_COMPILE_ERROR, "Method %s::%s() must take exactly 2 arguments", CG(active_class_entry)->name, ZEND_CALL_FUNC_NAME);
+		}
+	} else {
+		if (name_len == sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_AUTOLOAD_FUNC_NAME) && CG(active_op_array)->num_args != 1) {
+			zend_error(E_COMPILE_ERROR, "%s() must take exactly 1 argument", ZEND_AUTOLOAD_FUNC_NAME);
+		}		
 	}
 
 	CG(active_op_array)->line_end = zend_get_compiled_lineno(TSRMLS_C);
@@ -1114,10 +1135,6 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	zend_arg_info *cur_arg_info;
 
-	if (CG(active_class_entry) && CG(active_class_entry)->destructor == (zend_function *) CG(active_op_array))
-	{
-		zend_error(E_COMPILE_ERROR, "Destuctor %s::%s() cannot take arguments", CG(active_class_entry)->name, CG(active_op_array)->function_name);
-	}
 	CG(active_op_array)->num_args++;
 	opline->opcode = op;
 	opline->result = *var;
