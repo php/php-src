@@ -61,7 +61,9 @@
     <filelist>
       <file role="src" name="config.m4"/>
       <file role="src" name="sqlite.c"/>
+      <file role="src" name="sqlite.dsp"/>
       <file role="src" name="php_sqlite.h"/>
+      <file role="src" name="php_sqlite.def"/>
 	  <file role="src" name="Makefile.frag"/>
       <file role="doc" name="CREDITS"/>
       <file role="doc" name="README"/>
@@ -91,42 +93,48 @@
 		<file role="src" name="VERSION"/>
 
 		<dir name="src">
-			<file role="src" name="parse.c"/>
-			<file role="src" name="parse.y"/>
+			<file role="src" name="attach.c"/>
 			<file role="src" name="auth.c"/>
 			<file role="src" name="btree.c"/>
-			<file role="src" name="encode.c"/>
+			<file role="src" name="btree_rb.c"/>
 			<file role="src" name="build.c"/>
+			<file role="src" name="copy.c"/>
 			<file role="src" name="delete.c"/>
+			<file role="src" name="encode.c"/>
 			<file role="src" name="expr.c"/>
 			<file role="src" name="func.c"/>
 			<file role="src" name="hash.c"/>
 			<file role="src" name="insert.c"/>
 			<file role="src" name="main.c"/>
+			<file role="src" name="opcodes.c"/>
 			<file role="src" name="os.c"/>
 			<file role="src" name="pager.c"/>
+			<file role="src" name="parse.c"/>
+			<file role="src" name="parse.y"/>
+			<file role="src" name="pragma.c"/>
 			<file role="src" name="printf.c"/>
 			<file role="src" name="random.c"/>
 			<file role="src" name="select.c"/>
 			<file role="src" name="table.c"/>
 			<file role="src" name="tokenize.c"/>
+			<file role="src" name="trigger.c"/>
 			<file role="src" name="update.c"/>
 			<file role="src" name="util.c"/>
+			<file role="src" name="vacuum.c"/>
 			<file role="src" name="vdbe.c"/>
 			<file role="src" name="where.c"/>
-			<file role="src" name="trigger.c"/>
-
-			<file role="src" name="opcodes.h"/>
 			<file role="src" name="btree.h"/>
 			<file role="src" name="hash.h"/>
+			<file role="src" name="opcodes.h"/>
 			<file role="src" name="os.h"/>
 			<file role="src" name="pager.h"/>
 			<file role="src" name="parse.h"/>
-			<file role="src" name="sqliteInt.h"/>
+			<file role="src" name="sqlite_config.w32.h"/>
 			<file role="src" name="sqlite.h.in"/>
+			<file role="src" name="sqliteInt.h"/>
+			<file role="src" name="sqlite.w32.h"/>
 			<file role="src" name="vdbe.h"/>
 		</dir>
-		
 	  </dir>
     </filelist>
   </release>
