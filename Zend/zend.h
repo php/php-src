@@ -37,7 +37,11 @@
  * general definitions
  */
 
-#define ZEND_WIN32 ((defined(WINNT) && WINNT) || (defined(WIN32) && WIN32))
+#if (defined(WINNT) && WINNT) || (defined(WIN32) && WIN32)
+#define ZEND_WIN32 1
+#else
+#define ZEND_WIN32 0
+#endif
 
 #if ZEND_WIN32
 # include "zend_config.w32.h"
