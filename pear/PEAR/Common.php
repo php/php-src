@@ -743,8 +743,9 @@ class PEAR_Common extends PEAR
     function infoFromString($data)
     {
         require_once('PEAR/Dependency.php');
-        if ($error = PEAR_Dependency::checkExtension('xml'))
+        if ($error = PEAR_Dependency::checkExtension('xml')) {
             return $this->raiseError($error);
+        }
         $xp = @xml_parser_create();
         if (!$xp) {
             return $this->raiseError('Unable to create XML parser');
