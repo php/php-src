@@ -17,7 +17,7 @@ $dom = new domDocument();
   
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
-  $proc->registerPhpFunctions();
+  $proc->registerPHPFunctions();
   print $proc->transformToXml($xml);
  
   function foobar($id, $secondArg = "" ) {
