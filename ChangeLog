@@ -1,3 +1,135 @@
+2003-09-23  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Always return long from ibase_gen_id() on IB < 6
+
+2003-09-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/interbase/interbase.c:
+      ws fix
+
+2003-09-23  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * NEWS:
+      Added ibase_gen_id()
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Added ibase_gen_id()
+
+2003-09-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c:
+      Remove useless mutex code due to the switch to oniguruma.
+
+2003-09-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/openssl/openssl.c:
+      Fixed typo.
+
+2003-09-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/snmp/snmp.c:
+      MFH: Fixed bug #25636 (SNMP Session not closed on success).
+
+    * ext/snmp/snmp.c:
+      Fixed bug #25636 (SNMP Session not closed on success).
+      Patch by: nesslage[at]mwsc[dot]edu
+
+2003-09-23  Andrey Hristov  <andrey@hristov.com>
+
+    * ext/standard/tests/array/007.phpt:
+      New test cases for the new 4 functions :
+      - array_udiff()
+      - array_udiff_assoc()
+      - array_diff_uassoc()
+      - array_udiff_uassoc()
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+      4 new functions :
+      array_udiff()
+      array_udiff_assoc()
+      array_diff_uassoc()
+      array_udiff_uassoc()
+      They work like array_diff() or array_diff_assoc() but callback function(s)
+      can be used to perform the comparisons. For example array_udiff_uassoc()
+      expects 2 callbacks are last 2 parameters one is used to compare the
+      values
+      of the entries in the arrays the second to compare the keys.
+      Class methods are also valid callbacks. Even when the data that should be
+      used in the comparison is private or protected then a static method of a
+      class should be used (this behaviour can be seen in the regression test -
+      007.phpt).
+
+2003-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c
+      ext/openssl/tests/bug25614.phpt:
+      MFB 25614 "fix"
+
+2003-09-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * main/internal_functions.c.in:
+      Removed unnecessary ssl.h include
+
+2003-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/tests/bug25614.phpt
+      ext/openssl/tests/bug25614.phpt:
+      
+      file bug25614.phpt was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/openssl/openssl.c:
+      "Fix" for bug #25614.
+      The openssl_pkey_get_public() doesn't work as advertized in the docs; it
+      can't
+      get a public key from a private key (because a key is a key), but would
+      return
+      the private key anyway.  The function was originally designed to get the
+      public
+      key from a certificate.
+
+2003-09-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Oops
+
+    * ext/mbstring/mbstring.c:
+      Remove unused variable
+
+2003-09-23  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/snmp/config.m4:
+      MFH: - Fixed bug #25604 (HAVE_SNMP_PARSE_OID undefined with phpize build)
+
+    * ext/snmp/config.m4:
+      - Fixed bug #25604 (HAVE_SNMP_PARSE_OID undefined with phpize build)
+
+2003-09-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_3)
+      ext/mbstring/php_mbregex.c:
+      removed unnessesary null byte (patched by komura).
+
+    * ext/mbstring/php_mbregex.c:
+      fixed wrong string length in mbregex.
+
+    * ext/mbstring/config.m4:
+      revert a patch.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp
+      ext/mbstring/php_mbregex.c:
+      fixed win32-build and update e-mail address in mbstring.
+
 2003-09-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/exif/exif.c
