@@ -38,7 +38,7 @@ ZEND_DECLARE_MODULE_GLOBALS(ctype)
 */
 
 /* True global resources - no need for thread safety here */
-static int le_ctype;
+/* static int le_ctype; */
 
 /* {{{ ctype_functions[]
  * Every user visible function must have an entry in ctype_functions[].

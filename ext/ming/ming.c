@@ -24,11 +24,12 @@
 #endif
 
 #include "php.h"
-
-#if HAVE_MING
+#include "php_ming.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "php_ming.h"
+#include "ext/standard/fsock.h"
+
+#if HAVE_MING
 
 static zend_function_entry ming_functions[] = {
   PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,  NULL)
@@ -180,6 +181,7 @@ SWFCharacter getCharacter(zval *id TSRMLS_DC)
     return (SWFCharacter)getBitmap(id TSRMLS_CC);
   else
     php_error(E_ERROR, "called object is not an SWFCharacter");
+	return NULL;
 }
 
 /* }}} */
@@ -210,7 +212,7 @@ static SWFInput newSWFInput_sock(int socket)
       buffer = realloc(buffer, alloced);
     }
 
-    l = php_sock_fread(buffer+offset, SOCKBUF_INCREMENT, socket);
+    l = SOCK_FREAD(buffer+offset, SOCKBUF_INCREMENT, socket);
 
     offset += l;
   }
@@ -222,8 +224,7 @@ static SWFInput newSWFInput_sock(int socket)
 static SWFInput getInput(zval **zfile)
 {
   FILE *file;
-  int type, s, offset;
-  char *buffer;
+  int type;
   SWFInput input;
 
   file = (FILE *)zend_fetch_resource(zfile, -1, "File-Handle", &type, 3,
@@ -312,7 +313,7 @@ PHP_FUNCTION(swfbitmap_init)
   zval **zfile, **zmask = NULL;
   SWFBitmap bitmap;
   SWFInput input, maskinput;
-  int ret, type;
+  int ret;
 
   if(ZEND_NUM_ARGS() == 1)
   {
@@ -1312,7 +1313,7 @@ static SWFGradient getGradient(zval *id TSRMLS_DC)
 
 PHP_FUNCTION(swfgradient_addEntry)
 {
-  zval **ratio, **r, **g, **b, **za;
+  zval **ratio, **r, **g, **b;
   byte a = 0xff;
 
   if(ZEND_NUM_ARGS() == 4)
@@ -1590,8 +1591,6 @@ PHP_FUNCTION(swfmovie_saveToFile)
 {
   zval **x;
   SWFMovie movie = getMovie(getThis() TSRMLS_CC);
-  int type;
-  int le_fopen;
   void *what;
 
   if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &x) == FAILURE)
@@ -1710,7 +1709,6 @@ PHP_FUNCTION(swfmovie_setFrames)
 
 PHP_FUNCTION(swfmovie_streamMp3)
 {
-  FILE *file;
   zval **zfile;
   SWFSound sound;
   SWFInput input;
@@ -3053,8 +3051,12 @@ PHP_RINIT_FUNCTION(ming)
 {
   /* XXX - this didn't work so well last I tried.. */
 
-  if(Ming_init() != 0)
+  if(Ming_init() != 0) {
     php_error(E_ERROR, "Error initializing Ming module");
+    return FAILURE;
+  }
+
+  return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(ming)
