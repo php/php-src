@@ -57,6 +57,19 @@ NO_PCRE_ERROR;
 exit;
 }
 
+if (!function_exists("proc_open")) {
+	echo <<<NO_PROC_OPEN_ERROR
+
++-----------------------------------------------------------+
+|                       ! ERROR !                           |
+| The test-suite requires that proc_open() is available.    |
+| Please check if you disabled it in php.ini.               |
++-----------------------------------------------------------+
+
+NO_PROC_OPEN_ERROR;
+exit;
+}
+
 // change into the PHP source directory.
 
 if (getenv('TEST_PHP_SRCDIR')) {
