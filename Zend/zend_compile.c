@@ -855,7 +855,7 @@ ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_tab
 				zend_hash_index_find(function_table, opline->op1.u.constant.value.lval, (void **) &function);
 				(*function->op_array.refcount)++;
 				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
-					zend_error(E_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
+					zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
 				}
 			}
 			break;
@@ -865,7 +865,7 @@ ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_tab
 				zend_hash_index_find(class_table, opline->op1.u.constant.value.lval, (void **) &ce);
 				(*ce->refcount)++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
-					zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+					zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 				}
 			}
 			break;
