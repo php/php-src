@@ -66,30 +66,14 @@ unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
 zend_module_entry *php_builtin_extensions[] = {
-    phpext_dl_ptr,
-    phpext_file_ptr,
-    phpext_fsock_ptr,
-    phpext_head_ptr,
-    phpext_pack_ptr,
-    phpext_browscap_ptr,
-    phpext_crypt_ptr,
-    phpext_dir_ptr,
-    phpext_filestat_ptr,
-    phpext_mail_ptr,
-    phpext_syslog_ptr,
 #if WITH_BCMATH
 	phpext_bcmath_ptr,
 #endif
 	phpext_standard_ptr,
 	COM_module_ptr,
-	phpext_regex_ptr,
 	phpext_pcre_ptr,
 	phpext_odbc_ptr,
-	phpext_lcg_ptr,
 	phpext_session_ptr,
-	phpext_output_ptr,
-	phpext_array_ptr,
-	phpext_assert_ptr,
 	phpext_xml_ptr,
 	phpext_mysql_ptr
 };
