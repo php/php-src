@@ -53,11 +53,9 @@
 #ifdef PHP_WIN32
 #include <io.h>
 #include <fcntl.h>
-#include "win32/syslog.h"
 #include "win32/php_registry.h"
-#else
-#include <syslog.h>
 #endif
+#include "php_syslog.h"
 
 #if PHP_SIGCHILD
 #include <sys/types.h>
@@ -251,9 +249,9 @@ void php_log_err(char *log_message)
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
-#if HAVE_SYSLOG_H
+#ifdef HAVE_SYSLOG_H
 		if (!strcmp(PG(error_log), "syslog")) {
-			syslog(LOG_NOTICE, log_message);
+			php_syslog(LOG_NOTICE, log_message);
 			return;
 		}
 #endif

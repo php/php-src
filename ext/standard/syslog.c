@@ -252,7 +252,7 @@ PHP_FUNCTION(syslog)
 	 * this will cause problems.
 	 */
 
-	syslog((*priority)->value.lval, (*message)->value.str.val);
+	php_syslog((*priority)->value.lval, (*message)->value.str.val);
 	RETURN_TRUE;
 }
 /* }}} */
