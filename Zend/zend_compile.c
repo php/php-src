@@ -1352,7 +1352,7 @@ void do_pop_object(znode *object CLS_DC)
 }
 
 
-void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode *class_name CLS_DC)
+void do_begin_new_object(znode *new_token, znode *class_name CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	unsigned char *ptr = NULL;
@@ -1363,12 +1363,14 @@ void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode
 	opline->op1 = *class_name;
 	SET_UNUSED(opline->op2);
 
-	do_assign(result, variable, &opline->result CLS_CC);
+	//*result = opline->result;
+	//do_assign(result, variable, &opline->result CLS_CC);
+	
 
 	new_token->u.opline_num = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 	opline->opcode = ZEND_JMP_NO_CTOR;
-	opline->op1 = *result;
+	opline->op1 = (opline-1)->result;
 	SET_UNUSED(opline->op2);
 
 	if (class_name->op_type == IS_CONST) {
@@ -1376,14 +1378,14 @@ void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode
 	}
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	opline->op1 = *result;
+	opline->op1 = (opline-2)->result;
 	opline->op2 = *class_name;
 	opline->extended_value = ZEND_MEMBER_FUNC_CALL | ZEND_CTOR_CALL;
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }
 
 
-void do_end_new_object(znode *class_name, znode *new_token, znode *argument_list CLS_DC)
+void do_end_new_object(znode *result, znode *class_name, znode *new_token, znode *argument_list CLS_DC)
 {
 	znode ctor_result;
 
@@ -1394,6 +1396,7 @@ void do_end_new_object(znode *class_name, znode *new_token, znode *argument_list
 	do_free(&ctor_result CLS_CC);
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].op1;
 }
 
 

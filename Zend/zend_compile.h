@@ -295,8 +295,8 @@ void do_push_object(znode *object CLS_DC);
 void do_pop_object(znode *object CLS_DC);
 
 
-void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode *class_name CLS_DC);
-void do_end_new_object(znode *class_name, znode *new_token, znode *argument_list CLS_DC);
+void do_begin_new_object(znode *new_token, znode *class_name CLS_DC);
+void do_end_new_object(znode *result, znode *class_name, znode *new_token, znode *argument_list CLS_DC);
 
 void do_fetch_constant(znode *result, znode *constant_name, int mode CLS_DC);
 
