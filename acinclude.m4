@@ -295,7 +295,7 @@ AC_DEFUN(AC_ADD_LIBRARY,[
 dnl
 dnl AC_ADD_LIBRARY_DEFER(library[, append])
 dnl
-dnl add a library to the link line (defferred)
+dnl add a library to the link line (deferred)
 AC_DEFUN(AC_ADD_LIBRARY_DEFER,[
   AC_PHP_ONCE(LIBRARY, $1, [
     ifelse($#, 1, DLIBS="-l$1 $DLIBS", DLIBS="$DLIBS -l$1")
@@ -312,6 +312,16 @@ AC_DEFUN(AC_ADD_LIBRARY_WITH_PATH,[
   AC_ADD_LIBRARY($1)
 ])
 
+dnl
+dnl AC_ADD_LIBRARY_DEFER_WITH_PATH(library, path)
+dnl
+dnl add a library to the link line (deferred)
+dnl and path to linkpath/runpath (not deferred)
+dnl
+AC_DEFUN(AC_ADD_LIBRARY_DEFER_WITH_PATH,[
+  AC_ADD_LIBPATH($2)
+  AC_ADD_LIBRARY_DEFER($1)
+])
 
 AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
   LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'

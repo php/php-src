@@ -1,0 +1,10 @@
+
+DEPTH     = ../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME    = librecode.la
+LTLIBRARY_SOURCES = recode.c
+
+include $(topsrcdir)/build/ltlib.mk

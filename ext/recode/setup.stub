@@ -1,0 +1,3 @@
+define_option with-recode 'GNU-Recode support?' yesnodir no \
+'    Whether to build the recode extension.'
+	
