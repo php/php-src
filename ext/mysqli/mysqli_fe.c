@@ -41,6 +41,11 @@ static
 		ZEND_ARG_PASS_INFO(0)
 	ZEND_END_ARG_INFO();
 
+static
+	ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
+	ZEND_END_ARG_INFO();
+
+
 /* {{{ mysqli_functions[]
  *
  * Every user visible function must have an entry in mysqli_functions[].
@@ -230,7 +235,7 @@ function_entry mysqli_result_methods[] = {
 function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(affected_rows,mysqli_stmt_affected_rows,NULL)
 	PHP_FALIAS(bind_param,mysqli_bind_param,second_arg_force_by_ref_rest)
-	PHP_FALIAS(bind_result,mysqli_bind_result, all_args_by_ref)
+	PHP_FALIAS(bind_result,mysqli_bind_result,all_args_force_by_ref)
 	PHP_FALIAS(close,mysqli_stmt_close,NULL)
 	PHP_FALIAS(data_seek,mysqli_stmt_data_seek,NULL)
 	PHP_FALIAS(execute,mysqli_execute,NULL)
