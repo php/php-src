@@ -25,11 +25,11 @@ if (PHP_PDO_DBLIB != "no") {
 		EXTENSION("pdo_dblib", "pdo_dblib.c dblib_driver.c dblib_stmt.c", null, "", 
 			PDO_DBLIB_FLAVOUR == "freetds" ? "php_pdo_sybase.dll" : "php_pdo_mssql.dll");
 		if (PDO_DBLIB_FLAVOUR != "freetds") {
-			ADD_FLAG("CFLAGS_PDO_DBLIB", "/DDBNTWIN32=1 /DMSSQL" + PDO_DBLIB_FLAVOUR + "0=1 /DMSSQL_VERSION \\\"" + PDO_DBLIB_FLAVOUR + ".0\\\"");
+			ADD_FLAG("CFLAGS_PDO_DBLIB", "/DPHP_DBLIB_IS_MSSQL=1 /DDBNTWIN32=1 /DMSSQL" + PDO_DBLIB_FLAVOUR + "0=1 /DMSSQL_VERSION=\\\"" + PDO_DBLIB_FLAVOUR + ".0\\\"");
 			AC_DEFINE("PDO_DBLIB_IS_MSSQL", PDO_DBLIB_FLAVOUR, "Have MSSQL support");
-			PDO_DBLIB_FLAVOUR = "MSSQL " + PDO_DBLIB_FLAVOUR;
+			PDO_DBLIB_FLAVOUR = "MSSQL_" + PDO_DBLIB_FLAVOUR;
 		}
-		ADD_FLAG('CFLAGS_PDO_DBLIB', "/I ..\\pecl /D PDO_DBLIB_FLAVOUR=\\\"" + PDO_DBLIB_FLAVOUR + "\\\"");
+		ADD_FLAG('CFLAGS_PDO_DBLIB', "/I pecl /I ..\\pecl /D PDO_DBLIB_FLAVOUR=\\\"" + PDO_DBLIB_FLAVOUR + "\\\"");
 	}
 	ADD_EXTENSION_DEP('pdo_dblib', 'pdo');
 }

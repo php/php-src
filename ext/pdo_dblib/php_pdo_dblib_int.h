@@ -30,7 +30,12 @@
 # define DBMSGHANDLE(a, b)	dbprocmsghandle(a, b)
 # define EHANDLEFUNC		DBERRHANDLE_PROC
 # define MHANDLEFUNC		DBMSGHANDLE_PROC
-# define DBSETOPT(a, b, b)	dbsetopt(a, b, c)
+# define DBSETOPT(a, b, c)	dbsetopt(a, b, c)
+# define SYBESMSG		SQLESMSG
+# define SYBESEOF		SQLESEOF
+# define SYBEFCON		SQLECONN		// SQLEFCON does not exist in MS SQL Server.
+# define SYBEMEM		SQLEMEM
+# define SYBEPWD		SQLEPWD
 
 #else
 # include <sybfront.h>
@@ -77,6 +82,12 @@ typedef unsigned char *LPBYTE;
 # endif
 typedef float			DBFLT4;
 #endif
+
+int error_handler(DBPROCESS *dbproc, int severity, int dberr,
+	int oserr, char *dberrstr, char *oserrstr);
+
+int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
+	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line);
 
 extern pdo_driver_t pdo_dblib_driver;
 extern struct pdo_stmt_methods dblib_stmt_methods;

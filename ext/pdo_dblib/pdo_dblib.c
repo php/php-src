@@ -59,7 +59,7 @@ zend_module_entry pdo_dblib_module_entry = {
 ZEND_GET_MODULE(pdo_dblib)
 #endif
 
-static int error_handler(DBPROCESS *dbproc, int severity, int dberr,
+int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr)
 {
 	pdo_dblib_err *einfo;
@@ -98,7 +98,7 @@ static int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	return INT_CANCEL;
 }
 
-static int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
+int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line)
 {
 	pdo_dblib_err *einfo;
