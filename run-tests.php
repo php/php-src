@@ -190,7 +190,7 @@ $exts_tested = count($exts_to_test);
 $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
-$test_dirs = array('tests');//, 'pear', 'ext');
+$test_dirs = array('tests', 'pear', 'ext');
 
 foreach ($test_dirs as $dir) {
 	find_files("{$cwd}/{$dir}", ($dir == 'ext'));
