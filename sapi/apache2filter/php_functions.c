@@ -62,7 +62,9 @@ PHP_FUNCTION(apache_sub_req)
 	if (rr->status == HTTP_OK) {
 		ap_run_sub_req(rr);
 		RETURN_TRUE;
+		ap_destroy_sub_req(rr);
 	}
+	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
 }
 
@@ -101,8 +103,10 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(path_info);
 		ADD_STRING(args);
 
+		ap_destroy_sub_req(rr);
 		return;
 	}
+	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
 }
 
