@@ -208,6 +208,9 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
 	ub4 prefetch;
+	char *nsql = NULL;
+	int nsql_len = 0;
+	int ret;
 
 #if HAVE_OCISTMTFETCH2
 	S->exec_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
@@ -218,8 +221,19 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 #endif
 
 	S->H = H;
-	
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
 
+	if (ret == 1) {
+		/* query was re-written */
+		sql = nsql;
+	} else if (ret == -1) {
+		/* couldn't grok it */
+		strcpy(dbh->error_code, stmt->error_code);
+		efree(S);
+		return 0;
+	}
+	
 	/* create an OCI statement handle */
 	OCIHandleAlloc(H->env, (dvoid*)&S->stmt, OCI_HTYPE_STMT, 0, NULL);
 
@@ -228,7 +242,10 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 
 	if (sql_len) {
 		H->last_err = OCIStmtPrepare(S->stmt, H->err, (text*)sql, sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
-
+		if (nsql) {
+			efree(nsql);
+			nsql = NULL;
+		}
 		if (H->last_err) {
 			H->last_err = oci_drv_error("OCIStmtPrepare");
 			OCIHandleFree(S->stmt, OCI_HTYPE_STMT);
@@ -252,7 +269,10 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 
 	stmt->driver_data = S;
 	stmt->methods = &oci_stmt_methods;
-	stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+	if (nsql) {
+		efree(nsql);
+		nsql = NULL;
+	}
 	
 	return 1;
 }
