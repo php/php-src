@@ -1,3 +1,80 @@
+2001-03-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4: s/--with-ircg/--with-ircg-config/
+
+    * ext/ircg/config.m4: Refine complain message
+
+2001-03-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Error.php: This is 100% pure Ulf :-)
+
+    * pear/Cache/Error.php: I think we need to load PEAR.php here.
+
+2001-03-08  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache.php
+      pear/Cache/Container.php: Formatting and minor inline doc changes.
+
+    * pear/Cache/Container/db.php
+      pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php
+      pear/Cache.php
+      pear/Cache/Container.php
+      pear/Cache/Error.php: Added a basic Cache_Error class.
+
+2001-03-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re: Fix underline handling
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re:
+    Add handling for underline/bold control sequences
+
+2001-03-08  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/recode/recode.c:
+    Better use buffer_to_buffer, since zval is really buffer, not string (it can
+    contain \0's and not end in \0).
+
+2001-03-08  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/db.php
+      pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php
+      pear/Cache/Container.php
+      pear/Cache/Output.php:
+    Introduced getExpiresAbsolute($expire) function, which translates
+    relative/human readable/unixtime expire-times in unixtime-format.
+
+2001-03-08  Zeev Suraski  <zeev@zend.com>
+
+    * win32/README.txt: *** empty log message ***
+
+2001-03-08  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/config.m4:
+    Midgard experimental functions support was not displayed correctly in ./configure
+
+    * ext/midgard/README.session: Forgot to talk about the session table
+
+2001-03-08  Zeev Suraski  <zeev@zend.com>
+
+    * win32/README.txt: Point people to the Windows mailing list...
+
+2001-03-08  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/README.session: Corrected the README.session
+
+    * ext/midgard/README.session
+      ext/midgard/config.m4.session
+      ext/midgard/session.modules.c: More on session installation.
+
+    * ext/midgard/article.c
+      ext/midgard/mgd_session.h
+      ext/midgard/session.c
+      ext/midgard/session.sql: Session management (experimental code)
+
 2001-03-07  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c
