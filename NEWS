@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Added length and charsetnr for field array and object in mysqli. (Georg)
 - Changed foreach() to throw an exception if IteratorAggregate::getIterator()
   does not return an Iterator. (Marcus)
-- Changed phpize not to require automake and libtool. (Jani)
+- Changed phpize not to require libtool. (Jani)
 - Fixed build system to always use bundled libtool files. (Jani)
 - Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values). (Georg)
 - Fixed bug #31651 (ReflectionClass::getDefaultProperties segfaults with arrays).
