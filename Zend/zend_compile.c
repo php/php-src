@@ -573,7 +573,7 @@ void do_add_variable(znode *result, znode *op1, znode *op2 CLS_DC)
 }
 
 	
-void do_free(znode *op1, int is_used CLS_DC)
+void do_free(znode *op1 CLS_DC)
 {
 	if (op1->op_type==IS_TMP_VAR) {
 		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
@@ -581,7 +581,7 @@ void do_free(znode *op1, int is_used CLS_DC)
 		opline->opcode = ZEND_FREE;
 		opline->op1 = *op1;
 		SET_UNUSED(opline->op2);
-	} else if (!is_used && op1->op_type==IS_VAR) {
+	} else if (op1->op_type==IS_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
 		if (opline->result.op_type == op1->op_type
@@ -1095,7 +1095,10 @@ void do_switch_end(znode *case_list CLS_DC)
 	CG(active_op_array)->current_brk_cont = CG(active_op_array)->brk_cont_array[CG(active_op_array)->current_brk_cont].parent;
 
 	/* emit free for the switch condition*/
-	do_free(&switch_entry_ptr->cond, 1 CLS_CC);
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline->opcode = ZEND_SWITCH_FREE;
+	opline->op1 = switch_entry_ptr->cond;
+	SET_UNUSED(opline->op2);
 	if (switch_entry_ptr->cond.op_type == IS_CONST) {
 		zval_dtor(&switch_entry_ptr->cond.u.constant);
 	}
@@ -1370,7 +1373,7 @@ void do_end_new_object(znode *class_name, znode *new_token, znode *argument_list
 		zval_copy_ctor(&class_name->u.constant);
 	}
 	do_end_function_call(class_name, &ctor_result, argument_list, 1 CLS_CC);
-	do_free(&ctor_result, 0 CLS_CC);
+	do_free(&ctor_result CLS_CC);
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
 }
@@ -1767,7 +1770,7 @@ void do_foreach_cont(znode *value, znode *key, znode *as_token CLS_DC)
 		do_assign(&dummy, key, &result_key CLS_CC);
 		CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;	
 	}
-	do_free(as_token, 0 CLS_CC);
+	do_free(as_token CLS_CC);
 
 	do_begin_loop(CLS_C);
 	INC_BPC(CG(active_op_array));
@@ -1786,7 +1789,7 @@ void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC)
 
 	do_end_loop(foreach_token->u.opline_num CLS_CC);
 
-	do_free(open_brackets_token, 0 CLS_CC);
+	do_free(open_brackets_token CLS_CC);
 
 	DEC_BPC(CG(active_op_array));
 }
