@@ -4410,12 +4410,12 @@ static int zend_isset_isempty_dim_prop_obj_handler(int prop_dim, ZEND_OPCODE_HAN
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval <= Z_STRLEN_PP(container)) {
+					if (offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval <= Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
