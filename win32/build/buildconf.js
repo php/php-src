@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.9 2004-01-08 17:33:29 sniper Exp $ */
+/* $Id: buildconf.js,v 1.10 2004-01-08 21:53:48 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -53,7 +53,7 @@ function find_config_w32(dirname)
 	var	fc = new Enumerator(f.SubFolders);
 	var c, i, ok, n;
 	var item = null;
-	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"]\\);", "gm");
+	var re_dep_line = new RegExp("ADD_EXTENSION_DEP\\([^,]*\\s*,\\s*['\"]([^'\"]+)['\"].*\\);", "gm");
 	
 	for (; !fc.atEnd(); fc.moveNext())
 	{
@@ -108,17 +108,19 @@ function emit_dep_modules(module_names)
 {
 	var i, mod_name, j;
 	var output = "";
+	var item = null;
 
 	for (i in module_names) {
 		mod_name = module_names[i];
 
-		if (!MODULES.Exists(mod_name)) {
+		if (MODULES.Exists(mod_name)) {
+			item = MODULES.Item(mod_name);
+			MODULES.Remove(mod_name);
+			if (item.deps.length) {
+				output += emit_dep_modules(item.deps);
+			}
 			output += emit_module(item);
-			continue;
 		}
-		
-		item = MODULES.Item(mod_name);
-		output += emit_dep_modules(item.deps);	
 	}
 
 	return output;
