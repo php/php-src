@@ -686,7 +686,7 @@ AC_DEFUN(PHP_BUILD_RPATH,[
 dnl
 dnl PHP_ADD_INCLUDE(path [,before])
 dnl
-dnl add a include path. 
+dnl add an include path. 
 dnl if before is 1, add in the beginning of INCLUDES.
 dnl
 AC_DEFUN(PHP_ADD_INCLUDE,[
