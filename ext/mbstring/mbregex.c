@@ -23,6 +23,8 @@
 
 #include "php.h"
 
+#if HAVE_MBREGEX
+
 #define re_compile_pattern mbre_compile_pattern
 #define re_free_pattern mbre_free_pattern
 #define re_adjust_startpos mbre_adjust_startpos
@@ -4699,3 +4701,5 @@ re_mbctab_get(mbctype)
 
   return p;
 }
+
+#endif	/* HAVE_MBREGEX */
