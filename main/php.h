@@ -255,6 +255,11 @@ int cfgparse(void);
 
 #define php_error zend_error
 
+/* PHPAPI void php_error(int type, const char *format, ...); */
+PHPAPI void php_error_func0(int type TSRMLS_DC, const char *format, ...);
+PHPAPI void php_error_func1(int type, const char *param1 TSRMLS_DC, const char *format, ...);
+PHPAPI void php_error_func2(int type, const char *param1, const char *param2 TSRMLS_DC, const char *format, ...);
+
 #define zenderror phperror
 #define zendlex phplex
 
