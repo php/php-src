@@ -1118,7 +1118,7 @@ PHP_FUNCTION(socket_iovec_alloc)
 		WRONG_PARAM_COUNT;
 	}
 	
-	args = emalloc(argc*sizeof(zval**));
+	args = safe_emalloc(sizeof(zval**), argc, 0);
 
 	if (argc < 1 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
@@ -1133,7 +1133,7 @@ PHP_FUNCTION(socket_iovec_alloc)
 		WRONG_PARAM_COUNT;
 	}
 
-	vector_array = emalloc(sizeof(struct iovec)*(num_vectors+1));
+	vector_array = safe_emalloc(sizeof(struct iovec), (num_vectors + 1), 0);
 
 	for (i = 0, j = 1; i < num_vectors; i++, j++) {
 		convert_to_long_ex(args[j]);
@@ -1224,9 +1224,13 @@ PHP_FUNCTION(socket_iovec_add)
 
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, &iovec_id, -1, le_iov_name, le_iov);
 
-	vector_array = (struct iovec*)emalloc(sizeof(struct iovec) * (vector->count + 2));
+	vector_array = (struct iovec*)safe_emalloc(sizeof(struct iovec), (vector->count + 2), 0);
 	memcpy(vector_array, vector->iov_array, sizeof(struct iovec) * vector->count);
 
+	if (iov_len < 1) {
+		RETURN_FALSE;
+	}
+	
 	vector_array[vector->count].iov_base	= (char*)emalloc(iov_len);
 	vector_array[vector->count].iov_len		= iov_len;
 	efree(vector->iov_array);
@@ -1258,7 +1262,7 @@ PHP_FUNCTION(socket_iovec_delete)
 		RETURN_FALSE;
 	}
 
-	vector_array = emalloc(vector->count * sizeof(struct iovec));
+	vector_array = safe_emalloc(vector->count, sizeof(struct iovec), 0);
 
 	for (i = 0; i < vector->count; i++) {
 		if (i < iov_pos) {
