@@ -909,7 +909,7 @@ static int parse_context_options(php_stream_context *context, zval *options)
 	HashPosition pos, opos;
 	zval **wval, **oval;
 	char *wkey, *okey;
-	int wkey_len, okey_len;
+	uint wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
 
