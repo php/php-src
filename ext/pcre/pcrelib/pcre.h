@@ -59,7 +59,7 @@ extern pcre *pcre_compile(const char *, int, const char **, int *,
   const unsigned char *);
 extern int pcre_copy_substring(const char *, int *, int, int, char *, int);
 extern int pcre_exec(const pcre *, const pcre_extra *, const char *,
-  int, int, int *, int);
+  int, int, int *, int, int);
 extern int pcre_get_substring(const char *, int *, int, int, const char **);
 extern int pcre_get_substring_list(const char *, int *, int, const char ***);
 extern int pcre_info(const pcre *, int *, int *);

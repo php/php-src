@@ -1,6 +1,3 @@
 /* define if you want to use the PCRE extension */
 #define	HAVE_PCRE 0
 
-/* define if you want to use the bundled PCRE library */
-#define HAVE_BUNDLED_PCRE 0
-

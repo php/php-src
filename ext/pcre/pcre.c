@@ -29,6 +29,8 @@
 
 /* $Id$ */
 
+/* Get PCRE library from ftp://ftp.cus.cam.ac.uk/pub/software/programs/pcre/ */
+
 #include "php.h"
 
 #if HAVE_PCRE
@@ -50,7 +52,7 @@ function_entry pcre_functions[] = {
 	{NULL, 		NULL, 		NULL}
 };
 
-php3_module_entry pcre_module_entry = {
+zend_module_entry pcre_module_entry = {
    "PCRE", pcre_functions, php_minit_pcre, php_mshutdown_pcre,
 		   php_rinit_pcre, NULL,
 		   php_info_pcre, STANDARD_MODULE_PROPERTIES
@@ -381,7 +383,7 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		count = pcre_exec(re, extra, &subject->value.str.val[subject_offset],
 						  subject->value.str.len-subject_offset,
 						  (subject_offset ? exoptions|PCRE_NOTBOL : exoptions),
-						  offsets, size_offsets);
+						  offsets, size_offsets, 0);
 
 		/* Check for too many substrings condition. */	
 		if (count == 0) {
@@ -508,12 +510,14 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	int				 alloc_len;			/* Actual allocated length */
 	int				 subject_len;		/* Length of the subject string */
 	int				 result_len;		/* Current length of the result */
-	int				 subject_offset;	/* Current position in the subject string */
 	int				 backref;			/* Backreference number */
 	char			*result,			/* Result of replacement */
 					*new_buf,			/* Temporary buffer for re-allocation */
 					*walkbuf,			/* Location of current replacement in the result */
-					*walk;				/* Used to walk the replacement string */
+					*walk,				/* Used to walk the replacement string */
+					*match,				/* The current match */
+					*piece,				/* The current piece of subject */
+					*subject_end;		/* Points to the end of the subject */
 
 	/* Compile regex or get it from cache. */
 	if ((re = _pcre_get_compiled_regex(regex, extra)) == NULL) {
@@ -535,23 +539,29 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 		return NULL;
 	}
 
-	subject_offset = 0;
+	/* Initialize */
 	result[0] = '\0';
+	piece = subject;
+	subject_end = subject + subject_len;
+	match = NULL;
 	
 	while (count >= 0) {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, &subject[subject_offset],
-							subject_len-subject_offset,
-						  	(subject_offset ? exoptions|PCRE_NOTBOL : exoptions),
-							offsets, size_offsets);
-
-		/* Check for too many substrings condition. */	
+		count = pcre_exec(re, extra, piece,
+							subject_end-piece,
+						  	(piece==subject ? exoptions : exoptions|PCRE_NOTBOL),
+							offsets, size_offsets, (piece == match));
+		
+		/* Check for too many substrings condition. */
 		if (count == 0) {
 			zend_error(E_NOTICE, "Matched, but too many substrings\n");
 			count = size_offsets/3;
 		}
 
 		if (count > 0) {
+			/* Set the match location in piece */
+			match = piece + offsets[0];
+
 			new_len = strlen(result) + offsets[0]; /* part before the match */
 			walk = replace;
 			while (*walk)
@@ -574,7 +584,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			}
 			result_len = strlen(result);
 			/* copy the part of the string before the match */
-			strncat(result, &subject[subject_offset], offsets[0]);
+			strncat(result, piece, match-piece);
 
 			/* copy replacement and backrefs */
 			walkbuf = &result[result_len + offsets[0]];
@@ -585,7 +595,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 					backref < count) {
 					result_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					memcpy (walkbuf,
-							&subject[subject_offset + offsets[backref<<1]],
+							piece + offsets[backref<<1],
 							result_len);
 					walkbuf += result_len;
 					walk += (backref > 9) ? 3 : 2;
@@ -593,26 +603,10 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 					*walkbuf++ = *walk++;
 			*walkbuf = '\0';
 
-			/* and get ready to keep looking for replacements */
-			if (offsets[0] == offsets[1]) {
-				if (offsets[0] + subject_offset >= subject_len)
-					break;
-				new_len = strlen (result) + 1;
-				if (new_len + 1 > alloc_len) {
-					alloc_len = 1 + alloc_len + 2 * new_len;
-					new_buf = emalloc(alloc_len * sizeof(char));
-					strcpy(new_buf, result);
-					efree(result);
-					result = new_buf;
-				}
-				subject_offset += offsets[1] + 1;
-				result [new_len-1] = subject[subject_offset-1];
-				result [new_len] = '\0';
-			} else {
-				subject_offset += offsets[1];
-			}
+			/* Advance to the next piece */
+			piece += offsets[1];
 		} else {
-			new_len = strlen(result) + strlen(&subject[subject_offset]);
+			new_len = strlen(result) + subject_end-piece;
 			if (new_len + 1 > alloc_len) {
 				alloc_len = new_len + 1; /* now we know exactly how long it is */
 				new_buf = emalloc(alloc_len * sizeof(char));
@@ -621,7 +615,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 				result = new_buf;
 			}
 			/* stick that last bit of string on our output */
-			strcat(result, &subject[subject_offset]);
+			strcat(result, piece);
 		}
 	}
 	
@@ -716,9 +710,8 @@ PHP_FUNCTION(preg_replace)
 	zval			*regex,
 					*replace,
 					*subject,
-					**subject_entry_ptr,
-					*subject_entry,
-					*return_entry;
+				   **subject_entry_ptr,
+					*subject_entry;
 	char			*result;
 	
 	/* Get function parameters and do error-checking. */
@@ -805,7 +798,7 @@ PHP_FUNCTION(preg_split)
 		count = pcre_exec(re, extra, &subject->value.str.val[last_offset],
 						  subject->value.str.len-last_offset,
 						  (last_offset ? exoptions|PCRE_NOTBOL : exoptions),
-						  offsets, size_offsets);
+						  offsets, size_offsets, 0);
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
