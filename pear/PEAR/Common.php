@@ -316,7 +316,8 @@ class PEAR_Common extends PEAR
                     $this->pkginfo['release_state'] = $data;
                 }
                 break;
-            case 'dir':
+            case 'license':
+                $this->pkginfo['release_license'] = trim($data);
                 break;
             case 'file':
                 $this->current_file = trim($data);
