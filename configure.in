@@ -363,6 +363,7 @@ ApplicationServices/ApplicationServices.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
+assert.h \
 crypt.h \
 fcntl.h \
 grp.h \

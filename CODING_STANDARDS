@@ -64,6 +64,9 @@ Exceptions:
     not recommended. Since most of PHP_* macros are ZEND_* macro alias, use of
     PHP_* macro makes browsing source with tag search harder.
 
+[8] Use assert(). assert.h is included in php.h if it is available. 
+    Not only good assertion catch bugs, but also it makes easier to read code.
+
 Naming Conventions
 ------------------
 
