@@ -51,7 +51,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           cli
-MAINTENANCE:         Unknown
+MAINTENANCE:         Marcus Boerger <helly@php.net>, Edin Kadribasic <edink@php.net>
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           fhttpd
@@ -102,6 +102,7 @@ EXTENSION:           dba
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
+COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 -------------------------------------------------------------------------------
 EXTENSION:           dbase
 PRIMARY MAINTAINER:  Jim Winstead <jimw@php.net>
@@ -161,11 +162,21 @@ PRIMARY MAINTAINER:  Zak Greant <zak@mysql.com>, Georg Richter <georg@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           mysqli
+PRIMARY MAINTAINER:  Georg Richter <georg@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
 EXTENSION:           pgsql
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Yasuo Ohgaki <yohgaki@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less have fatal bug.
+-------------------------------------------------------------------------------
+EXTENSION:           sqlite
+PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sybase
 MAINTENANCE:         Unknown
@@ -191,6 +202,41 @@ PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Using the new OCI8 driver is encouraged where possible.
+-------------------------------------------------------------------------------
+
+
+== XML extensions ==
+
+-------------------------------------------------------------------------------
+EXTENSION:           dom
+PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>, Marcus Boerger <helly@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
+EXTENSION:           simplexml
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
+EXTENSION:           wddx
+PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           xml
+PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           xmlrpc
+PRIMARY MAINTAINER:  Dan Libby
+MAINTENANCE:         UNKNOWN
+STATUS:              Experimental
+-------------------------------------------------------------------------------
+EXTENSION:           xsl
+PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
 -------------------------------------------------------------------------------
 
 
@@ -259,11 +305,6 @@ EXTENSION:           cybercash
 PRIMARY MAINTAINER:  Evan Klinger <evan715@sirius.com>
 MAINTENANCE:         Maintained
 STATUS:              Unknown
--------------------------------------------------------------------------------
-EXTENSION:           domxml
-PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           dotnet
 PRIMARY MAINTAINER:  Sam Ruby <rubys@us.ibm.com>
@@ -463,21 +504,6 @@ MAINTENANCE:         Unknown
 STATUS:              Experimental
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
-EXTENSION:           wddx
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           xml
-PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           xslt
-PRIMARY MAINTAINER:  Hartmut Holzgraefe <hholzgra@php.net>
-MAINTENANCE:         Odd Fixes
-STATUS:              Working (mostly)
--------------------------------------------------------------------------------
 EXTENSION:           yaz
 PRIMARY MAINTAINER:  Adam Dickmeiss <adam@indexdata.dk>
 MAINTENANCE:         Maintained
@@ -499,4 +525,3 @@ MAINTENANCE:         Odd Fixes
 STATUS:              Working
 SINCE:               4.0.5
 -------------------------------------------------------------------------------
-# iptc?
