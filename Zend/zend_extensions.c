@@ -123,6 +123,8 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 	extension = *new_extension;
 	extension.handle = handle;
 
+	zend_extension_dispatch_message(ZEND_EXTMSG_NEW_EXTENSION, &extension);
+
 	zend_llist_add_element(&zend_extensions, &extension);
 
 	zend_append_version_info(&extension);
@@ -165,6 +167,26 @@ void zend_extension_dtor(zend_extension *extension)
 		DL_UNLOAD(extension->handle);
 	}
 #endif
+}
+
+
+static void zend_extension_message_dispatcher(zend_extension *extension, int num_args, va_list args)
+{
+	int message;
+	void *arg;
+
+	if (num_args!=2) {
+		return;
+	}
+	message = va_arg(args, int);
+	arg = va_arg(args, void *);
+	extension->message_handler(message, arg);
+}
+
+
+ZEND_API void zend_extension_dispatch_message(int message, void *arg)
+{
+	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher, 2, message, arg);
 }
 
 

@@ -38,7 +38,10 @@ typedef struct _zend_llist {
 	zend_llist_element *traverse_ptr;
 } zend_llist;
 
-typedef int (*llist_compare_func_t) (const zend_llist_element *, const zend_llist_element *);
+typedef int (*llist_compare_func_t)(const zend_llist_element *, const zend_llist_element *);
+typedef void(*llist_apply_with_arg_func_t)(void *data, void *arg);
+typedef void(*llist_apply_with_args_func_t)(void *data, int num_args, va_list args);
+
 typedef zend_llist_element* zend_llist_position;
 
 BEGIN_EXTERN_C()
@@ -52,6 +55,7 @@ ZEND_API void zend_llist_remove_tail(zend_llist *l);
 ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src);
 ZEND_API void zend_llist_apply(zend_llist *l, void (*func)(void *data));
 ZEND_API void zend_llist_apply_with_argument(zend_llist *l, void (*func)(void *data, void *arg), void *arg);
+ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func, int num_args, ...);
 ZEND_API int zend_llist_count(zend_llist *l);
 ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func);
 

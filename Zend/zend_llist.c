@@ -196,6 +196,19 @@ ZEND_API void zend_llist_apply_with_argument(zend_llist *l, void (*func)(void *d
 }
 
 
+ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func, int num_args, ...)
+{
+	zend_llist_element *element;
+	va_list args;
+
+	va_start(args, num_args);
+	for (element=l->head; element; element=element->next) {
+		func(element->data, num_args, args);
+	}
+	va_end(args);
+}
+
+
 ZEND_API int zend_llist_count(zend_llist *l)
 {
 	zend_llist_element *element;
