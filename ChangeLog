@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed XML Callbacks. (Thies)
 - Updated ODBC to use the new high-performance Zend function API (kara)
 - Updated zlib to use the new high-performance Zend function API. (Stefan)
 - Updated preg_split() to allow returning only non-empty pieces (Andrei)
