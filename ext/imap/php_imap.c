@@ -2200,7 +2200,7 @@ PHP_FUNCTION(imap_utf7_decode)
 	/* author: Andrew Skalski <askalski@chek.com> */
 	zval **arg;
 	const unsigned char *in, *inp, *endp;
-	unsigned char *out, *outp;
+	unsigned char *out, *outp, c;
 	int inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
@@ -2302,13 +2302,15 @@ PHP_FUNCTION(imap_utf7_decode)
 				break;
 			case ST_DECODE1:
 				outp[1] = UNB64(*inp);
-				*outp++ |= outp[1] >> 4;
+				c = outp[1] >> 4;
+				*outp++ |= c;
 				*outp <<= 4;
 				state = ST_DECODE2;
 				break;
 			case ST_DECODE2:
 				outp[1] = UNB64(*inp);
-				*outp++ |= outp[1] >> 2;
+				c = outpp[1] >> 2;
+				*outp++ |= c;
 				*outp <<= 6;
 				state = ST_DECODE3;
 				break;
@@ -2341,7 +2343,7 @@ PHP_FUNCTION(imap_utf7_encode)
 	/* author: Andrew Skalski <askalski@chek.com> */
 	zval **arg;
 	const unsigned char *in, *inp, *endp;
-	unsigned char *out, *outp;
+	unsigned char *out, *outp, c;
 	int inlen, outlen;
 	enum {
 		ST_NORMAL,	/* printable text */
@@ -2412,7 +2414,8 @@ PHP_FUNCTION(imap_utf7_encode)
 		} else if (inp == endp || !SPECIAL(*inp)) {
 			/* flush overflow and terminate region */
 			if (state != ST_ENCODE0) {
-				*outp++ = B64(*outp);
+				c = B64(*outp);
+				*outp++ = c;
 			}
 			*outp++ = '-';
 			state = ST_NORMAL;
@@ -2425,12 +2428,14 @@ PHP_FUNCTION(imap_utf7_encode)
 					state = ST_ENCODE1;
 					break;
 				case ST_ENCODE1:
-					*outp++ = B64(*outp | *inp >> 4);
+					c = B64(*outp | *inp >> 4);
+					*outp++ = c;
 					*outp = *inp++ << 2;
 					state = ST_ENCODE2;
 					break;
 				case ST_ENCODE2:
-					*outp++ = B64(*outp | *inp >> 6);
+					c = B64(*outp | *inp >> 6);
+					*outp++ = c;
 					*outp++ = B64(*inp++);
 					state = ST_ENCODE0;
 				case ST_NORMAL:
