@@ -188,16 +188,16 @@ AC_ARG_WITH(ibm-db2,
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
-        ODBC_INCDIR=/home/db2inst1/sqllib/include
-        ODBC_LIBDIR=/home/db2inst1/sqllib/lib
+      ODBC_INCDIR=/home/db2inst1/sqllib/include
+      ODBC_LIBDIR=/home/db2inst1/sqllib/lib
     else
-        ODBC_INCDIR=$withval/include
-        ODBC_LIBDIR=$withval/lib
+      ODBC_INCDIR=$withval/include
+      ODBC_LIBDIR=$withval/lib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=db2
-    ODBC_LIBS="-ldb2"
+    ODBC_LIBS=-ldb2
     AC_DEFINE(HAVE_IBMDB2,1,[ ])
 
     AC_MSG_RESULT(yes)
@@ -538,8 +538,7 @@ fi
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     if test "$shared" != "yes"; then
-      EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ODBC_LFLAGS"
-      EXTRA_LIBS="$EXTRA_LIBS $ODBC_LIBS"
+      PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], OBDC_SHARED_LIBADD)
     fi
   fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
