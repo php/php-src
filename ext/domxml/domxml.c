@@ -23,6 +23,7 @@
 #include "php_domxml.h"
 
 #if HAVE_DOMXML
+//#define newcode
 
 static int le_domxmldocp;
 static int le_domxmldtdp;
@@ -34,6 +35,7 @@ static zend_class_entry *domxmldtd_class_entry_ptr;
 static zend_class_entry *domxmlnode_class_entry_ptr;
 static zend_class_entry *domxmlattr_class_entry_ptr;
 static zend_class_entry *domxmlns_class_entry_ptr;
+static zend_class_entry *domxmltestnode_class_entry_ptr;
 
 static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(xmldoc,	NULL)
@@ -125,11 +127,11 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlattrp = register_list_destructors(NULL, NULL);
 //	le_domxmlnsp = register_list_destructors(NULL, NULL);
 
-	INIT_CLASS_ENTRY(domxmldoc_class_entry, "Dom document", php_domxmldoc_class_functions);
+	INIT_CLASS_ENTRY(domxmldoc_class_entry, "DomDocument", php_domxmldoc_class_functions);
 	INIT_CLASS_ENTRY(domxmldtd_class_entry, "Dtd", php_domxmldtd_class_functions);
-	INIT_CLASS_ENTRY(domxmlnode_class_entry, "Dom node", php_domxmlnode_class_functions);
-	INIT_CLASS_ENTRY(domxmlattr_class_entry, "Dom Attribute", php_domxmlattr_class_functions);
-	INIT_CLASS_ENTRY(domxmlns_class_entry, "Dom Namespace", php_domxmlns_class_functions);
+	INIT_CLASS_ENTRY(domxmlnode_class_entry, "DomNode", php_domxmlnode_class_functions);
+	INIT_CLASS_ENTRY(domxmlattr_class_entry, "DomAttribute", php_domxmlattr_class_functions);
+	INIT_CLASS_ENTRY(domxmlns_class_entry, "DomNamespace", php_domxmlns_class_functions);
 
 	domxmldoc_class_entry_ptr = register_internal_class(&domxmldoc_class_entry);
 	domxmldtd_class_entry_ptr = register_internal_class(&domxmldtd_class_entry);
@@ -230,6 +232,7 @@ int domxmltestnode_class_set_property(zend_property_reference *property_referenc
 void domxmltestnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
 	zend_overloaded_element *overloaded_property;
+	pval *object = property_reference->object;
 	zend_llist_element *element;
 
 
@@ -247,7 +250,7 @@ void domxmltestnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_prope
 			case OE_IS_METHOD: {
 				pval *object_handle;
 				printf("Overloaded method:  ");
-				PHP_FN(domxml_xmltree)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+				PHP_FN(xmltree)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 				if (zend_is_true(return_value)) {
 					var_reset(object);
 					return;
@@ -288,7 +291,7 @@ void domxmltestnode_class_startup()
 								domxmltestnode_class_get_property,
 								domxmltestnode_class_set_property);
 
-	register_internal_class(&domxmltestnode_class_entry);
+	domxmltestnode_class_entry_ptr = register_internal_class(&domxmltestnode_class_entry);
 }
 #endif 
 
@@ -959,6 +962,9 @@ PHP_FUNCTION(xmldoc)
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_resource(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	if(docp->encoding)
+		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
+	add_property_long(return_value, "standalone", docp->standalone);
 	add_property_long(return_value, "type", docp->type);
 	zend_list_addref(ret);
 }
@@ -987,6 +993,9 @@ PHP_FUNCTION(xmldocfile)
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_resource(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	if(docp->encoding)
+		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
+	add_property_long(return_value, "standalone", docp->standalone);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -1128,6 +1137,9 @@ PHP_FUNCTION(domxml_new_xmldoc)
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_resource(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	if(docp->encoding)
+		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
+	add_property_long(return_value, "standalone", docp->standalone);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -1289,6 +1301,9 @@ PHP_FUNCTION(xmltree)
 	/* construct the document is a php object for return */
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	if(docp->encoding)
+		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
+	add_property_long(return_value, "standalone", docp->standalone);
 	add_property_long(return_value, "type", docp->type);
 
 	/* get the root and add as a property to the document */
@@ -1297,6 +1312,16 @@ PHP_FUNCTION(xmltree)
 		xmlFreeDoc(docp);
 		RETURN_FALSE;
 	}
+
+#ifdef newcode
+	{
+	zval *child;
+	MAKE_STD_ZVAL(child);
+	object_init_ex(child, domxmltestnode_class_entry_ptr);
+	zend_hash_update(return_value->value.obj.properties, "testnode", sizeof("testnode"), &child, sizeof(zval *), NULL);
+	add_property_stringl(child, "name", "Testname", sizeof("Testname"), 1);
+	}
+#endif
 
 	/* The root itself maybe an array. Though you may not have two Elements
 	   as root, you may have a comment, pi and and element as root.
