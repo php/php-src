@@ -77,12 +77,6 @@ ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 
 #define ZEND_EXTMSG_NEW_EXTENSION		1
 
-#ifdef ZTS
-#define ZTS_V 1
-#else
-#define ZTS_V 0
-#endif
-
 
 #define ZEND_EXTENSION()	\
 	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, ZEND_VERSION, ZTS_V, ZEND_DEBUG }

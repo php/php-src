@@ -123,6 +123,11 @@
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
 #endif	/* ZEND_DEBUG */
 
+#ifdef ZTS
+#define ZTS_V 1
+#else
+#define ZTS_V 0
+#endif
 
 #include "zend_errors.h"
 #include "zend_alloc.h"

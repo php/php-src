@@ -134,6 +134,12 @@ void zend_register_standard_constants(ELS_D)
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c ELS_CC);
 
+		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
+		c.name_len = sizeof("ZEND_THREAD_SAFE");
+		c.value.value.lval = ZTS_V;
+		c.value.type = IS_BOOL;
+		zend_register_constant(&c ELS_CC);
+
 		c.name = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
 		c.value.type = IS_NULL;
