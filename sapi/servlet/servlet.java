@@ -106,8 +106,12 @@ public class servlet extends HttpServlet {
     {
        this.request=request;
        this.response=response;
+
+       String servletPath=request.getServletPath();
+       String contextPath=getServletContext().getRealPath(servletPath);
+
        send(request.getMethod(), request.getQueryString(),
-            request.getPathInfo(), getPathTranslated(), 
+            request.getPathInfo(), contextPath,
             request.getContentType(), request.getContentLength(),
 	    request.getRemoteUser());
 
@@ -123,16 +127,4 @@ public class servlet extends HttpServlet {
       super.destroy();
     }
 
-    /******************************************************************/
-    /*                         utility function                       */ 
-    /******************************************************************/
-
-    String getPathTranslated() {
-       /* I have no idea why this has to be this hard... */
-       String servletPath=request.getServletPath();
-       String contextPath=getServletContext().getRealPath(servletPath);
-       servletPath=servletPath.replace('/',slash);
-       contextPath=contextPath.substring(0,contextPath.lastIndexOf(slash));
-       return contextPath+servletPath;
-    }
 }

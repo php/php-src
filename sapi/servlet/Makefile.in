@@ -19,8 +19,8 @@ java.c : ../../ext/java/java.c
 phpsrvlt.jar : servlet.java ../../ext/java/reflect.java
 	@test -e net || mkdir net
 	@test -e net/php || mkdir net/php
-	@echo library=sapi>net/php/reflect.properties
-	@echo library=sapi>net/php/servlet.properties
+	@echo library=php4>net/php/reflect.properties
+	@echo library=php4>net/php/servlet.properties
 	@cp servlet.java net/php
 	@cp ../../ext/java/reflect.java net/php
 	javac net/php/reflect.java
