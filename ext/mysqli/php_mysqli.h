@@ -210,6 +210,9 @@ PHP_FUNCTION(mysqli_debug);
 PHP_FUNCTION(mysqli_disable_reads_from_master);
 PHP_FUNCTION(mysqli_disable_rpl_parse);
 PHP_FUNCTION(mysqli_dump_debug_info);
+#ifdef HAVE_EMBEDDED_MYSQLI
+PHP_FUNCTION(mysqli_embedded_connect);
+#endif
 PHP_FUNCTION(mysqli_enable_reads_from_master);
 PHP_FUNCTION(mysqli_enable_rpl_parse);
 PHP_FUNCTION(mysqli_errno);
@@ -260,6 +263,10 @@ PHP_FUNCTION(mysqli_rpl_query_type);
 PHP_FUNCTION(mysqli_select_db);
 PHP_FUNCTION(mysqli_send_long_data);
 PHP_FUNCTION(mysqli_send_query);
+#ifdef HAVE_EMBEDDED_MYSQLI
+PHP_FUNCTION(mysqli_server_init);
+PHP_FUNCTION(mysqli_server_end);
+#endif
 PHP_FUNCTION(mysqli_slave_query);
 #if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_sqlstate);
@@ -283,17 +290,20 @@ PHP_FUNCTION(mysqli_use_result);
 PHP_FUNCTION(mysqli_warning_count);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
-	long		default_link;
-	long		num_links;
-	long		max_links;
+	long			default_link;
+	long			num_links;
+	long			max_links;
 	unsigned int	default_port;
-	char		*default_host;
-	char		*default_user;
-	char		*default_pw;
-	char		*default_socket;
-	long		error_no;
-	char		*error_msg;
+	char			*default_host;
+	char			*default_user;
+	char			*default_pw;
+	char			*default_socket;
+	long			error_no;
+	char			*error_msg;
 	unsigned int	profiler;
+#ifdef HAVE_EMBEDDED_MYSQLI
+	unsigned int	embedded;
+#endif
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 #ifdef ZTS

@@ -29,7 +29,7 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
-/* {{{ proto resource mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
+/* {{{ proto object mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
 {
@@ -99,6 +99,65 @@ PHP_FUNCTION(mysqli_connect)
 	}
 }
 /* }}} */
+
+#ifdef HAVE_EMBEDDED_MYSQLI
+/* {{{ proto object mysqli_embedded_connect(void)
+   Open a connection to a embedded mysql server */ 
+PHP_FUNCTION(mysqli_embedded_connect)
+{
+	MYSQL 				*mysql;
+	MYSQLI_RESOURCE 	*mysqli_resource;
+	PR_MYSQL			*prmysql = NULL;
+	zval  				*object = getThis();
+	char				*dbname = NULL;
+	int					dblen = 0;
+	struct timeval		starttime;
+
+	if (!MyG(embedded)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Embedded server was not initialized.");
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &dbname,  &dblen) == FAILURE) {
+		return;
+	}
+
+	if (MyG(profiler)){
+		gettimeofday(&starttime, NULL);
+	}
+
+	mysql = mysql_init(NULL);
+
+	if (mysql_real_connect(mysql, NULL, NULL, NULL, dbname, 0, NULL, 0) == NULL) {
+		php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
+		/* free mysql structure */
+		mysql_close(mysql);
+		RETURN_FALSE;
+	}
+
+	php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
+
+	if (MyG(profiler)) {
+		prmysql = (PR_MYSQL *)MYSQLI_PROFILER_NEW(prmain, MYSQLI_PR_MYSQL, 0);
+		php_mysqli_profiler_timediff(starttime, &prmysql->header.elapsedtime);
+		MYSQLI_PROFILER_STARTTIME(prmysql);
+		prmysql->hostname = prmysql->username = NULL;
+		prmysql->thread_id = mysql->thread_id;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)mysql;
+	mysqli_resource->prinfo = prmysql;
+
+	if (!object) {
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
+	} else {
+		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->ptr = mysqli_resource;
+	}
+}
+/* }}} */
+#endif
 
 /* {{{ proto int mysqli_connect_errno()
    Returns the numerical value of the error message from last connect command */

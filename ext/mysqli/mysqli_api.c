@@ -1614,6 +1614,41 @@ PHP_FUNCTION(mysqli_send_query)
 }
 /* }}} */
 
+#ifdef HAVE_EMBEDDED_MYSQLI
+/* {{{ proto bool mysqli_server_init(void)
+   initialize embedded server */
+PHP_FUNCTION(mysqli_server_init)
+{
+	zval	*server;
+	zval	*groups;
+
+	if (MyG(embedded)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Embedded server already initialized.");
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|aa", &server, &groups) == FAILURE) {
+		return;
+	}
+
+	if (mysql_server_init(0, NULL, NULL)) {
+			RETURN_FALSE;
+	}
+	MyG(embedded) = 1;
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void mysqli_server_end(void)
+*/
+PHP_FUNCTION(mysqli_server_end)
+{
+	mysql_server_end();
+}
+/* }}} */
+#endif
+
+
 /* {{{ proto bool mysqli_slave_query(object link, string query)
    Enforce execution of a query on a slave in a master/slave setup */
 PHP_FUNCTION(mysqli_slave_query)
@@ -1832,7 +1867,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_stmt_store_result(stmt)
+/* {{{ proto object mysqli_stmt_store_result(stmt)
 */
 PHP_FUNCTION(mysqli_stmt_store_result)
 {
@@ -1871,7 +1906,7 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 #endif
 /* }}} */
 
-/* {{{ proto resource mysqli_store_result(object link)
+/* {{{ proto object mysqli_store_result(object link)
    Buffer result set on client */
 PHP_FUNCTION(mysqli_store_result)
 {
@@ -1921,7 +1956,7 @@ PHP_FUNCTION(mysqli_thread_safe)
 
 /* }}} */
 
-/* {{{ proto resource mysqli_use_result(object link)
+/* {{{ proto object mysqli_use_result(object link)
    Directly retrieve query results - do not buffer results on client side */
 PHP_FUNCTION(mysqli_use_result)
 {
@@ -1945,7 +1980,7 @@ PHP_FUNCTION(mysqli_use_result)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_warning_count (object link)
+/* {{{ proto int mysqli_warning_count (object link)
    Return number of warnings from the last query for the given link */
 PHP_FUNCTION(mysqli_warning_count)
 {
