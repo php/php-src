@@ -3,6 +3,10 @@
 
 #if PHP_WIN32
 
+#include "variant.h"
+
+extern int php_VARIANT_get_le_variant();
+
 extern PHP_MINIT_FUNCTION(VARIANT);
 extern PHP_MSHUTDOWN_FUNCTION(VARIANT);
 
