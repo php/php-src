@@ -17,7 +17,7 @@
  */
 
 #include "php.h"
-#if defined(HAVE_LIBXML) && defined(HAVE_XML) && !defined(HAVE_LIBEXPAT)
+#if defined(HAVE_LIBXML) && (defined(HAVE_XML) || defined(HAVE_XMLRPC)) && !defined(HAVE_LIBEXPAT)
 #include "expat_compat.h"
 
 typedef struct _php_xml_ns {
