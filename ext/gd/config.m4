@@ -8,7 +8,7 @@ AC_DEFUN(PHP_GD_JPEG,[
 
   if test "$PHP_JPEG_DIR" != "no" -a "$PHP_JPEG_DIR"; then
     if test "$PHP_JPEG_DIR" = "yes"; then
-      $PHP_JPEG_DIR=/usr/local
+      PHP_JPEG_DIR=/usr/local
     fi
 
     AC_CHECK_LIB(jpeg,jpeg_read_header,[
@@ -29,7 +29,7 @@ AC_DEFUN(PHP_GD_PNG,[
 
   if test "$PHP_PNG_DIR" != "no" -a "$PHP_PNG_DIR"; then
     if test "$PHP_PNG_DIR" = "yes"; then
-      $PHP_PNG_DIR=/usr/local
+      PHP_PNG_DIR=/usr/local
     fi
 
     AC_CHECK_LIB(png,png_info_init,[
@@ -51,7 +51,7 @@ AC_DEFUN(PHP_GD_XPM,[
 
   if test "$PHP_XPM_DIR" != "no" -a "$PHP_XPM_DIR"; then
     if test "$PHP_XPM_DIR" = "yes"; then
-      $PHP_XPM_DIR=/usr/local
+      PHP_XPM_DIR=/usr/local
     fi
 
     AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [
