@@ -1273,6 +1273,7 @@ PHP_FUNCTION(yaz_connect)
 #if USE_ZOOM
 		if (persistent && as && !as->in_use &&
 			!strcmp_null(option_get(as, "host"), zurl_str) &&
+			!strcmp_null(option_get(as, "proxy"), proxy_str) &&
 			!strcmp_null(option_get(as, "user"), user_str) &&
 			!strcmp_null(option_get(as, "group"), group_str) &&
 			!strcmp_null(option_get(as, "pass"), pass_str) &&
