@@ -118,6 +118,8 @@ static sapi_module_struct sapi_module = {
 	sapi_thttpd_read_post,
 	sapi_thttpd_read_cookies,
 
+	NULL,							/* register server variables */
+
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 

@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "php_variables.h"
 
 #include "SAPI.h"
 
@@ -126,6 +127,37 @@ static char *sapi_cgi_read_cookies(SLS_D)
 }
 
 
+static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+{
+	char *pi;
+
+	/* Build the special-case PHP_SELF variable for the CGI version */
+#if FORCE_CGI_REDIRECT
+	php_register_variable((SG(request_info).request_uri ? SG(request_info).request_uri, "PHP_SELF", track_vars_array ELS_CC PLS_CC);
+#else
+	{
+		char *sn;
+		char *val;
+		int l=0;
+
+		sn = request_info.script_name;
+		pi = SG(request_info).request_uri;
+		if (sn)
+			l += strlen(sn);
+		if (pi)
+			l += strlen(pi);
+		if (pi && sn && !strcmp(pi, sn)) {
+			l -= strlen(pi);
+			pi = NULL;
+		}
+		val = emalloc(l + 1);
+		php_sprintf(val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
+		php_register_variable(val, "PHP_SELF", track_vars_array ELS_CC PLS_CC);
+	}
+#endif
+}
+
+
 static sapi_module_struct sapi_module = {
 	"CGI",							/* name */
 									
@@ -143,6 +175,8 @@ static sapi_module_struct sapi_module = {
 
 	sapi_cgi_read_post,				/* read POST data */
 	sapi_cgi_read_cookies,			/* read Cookies */
+
+	sapi_cgi_register_variables,	/* register server variables */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

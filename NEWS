@@ -2,6 +2,14 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added $HTTP_ENV_VARS[] and $HTTP_SERVER_VARS[] support, which similarly
+  to $HTTP_GET_VARS[], contain environment and server variables.  Setting
+  register_globals to Off will now also prevent registration of the
+  environment and server variables into the global scope (Zeev)
+- Renamed gpc_globals to register_globals (Zeev)
+- Introduced variables_order that deprecates gpc_order, and allows control
+  over the server and environment variables, in addition to GET/POST/Cookies
+  (Zeev)
 - new function cpdf_set_document_limits() (Uwe)
 - Applied safe-mode patch to popen(). (Patch by Kristian Köhntopp)
 - str_repeat() now returns correct length. (Thies)

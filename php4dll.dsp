@@ -164,7 +164,7 @@ SOURCE=.\php_content_types.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_gpce.c
+SOURCE=.\php_variables.c
 # End Source File
 # Begin Source File
 
@@ -264,7 +264,7 @@ SOURCE=.\php_globals.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_gpce.h
+SOURCE=.\php_variables.h
 # End Source File
 # Begin Source File
 

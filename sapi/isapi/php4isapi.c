@@ -28,6 +28,7 @@
 #include "SAPI.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
+#include "php_variables.h"
 
 #ifdef WITH_ZEUS
 #include "zeus.h"
@@ -290,6 +291,54 @@ static char *sapi_isapi_read_cookies(SLS_D)
 }
 
 
+static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+{
+	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+	char *variable_buf;
+	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	char *variable;
+	char *strtok_buf = NULL;
+	LPEXTENSION_CONTROL_BLOCK lpECB;
+
+	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
+
+	if (lpECB->GetServerVariable(lpECB->ConnID, "ALL_HTTP", static_variable_buf, &variable_len)) {
+		variable_buf = static_variable_buf;
+	} else {
+		if (GetLastError()==ERROR_INSUFFICIENT_BUFFER) {
+			variable_buf = (char *) emalloc(variable_len);
+			if (!lpECB->GetServerVariable(lpECB->ConnID, "ALL_HTTP", variable_buf, &variable_len)) {
+				efree(variable_buf);
+				return;
+			}
+		} else {
+			return;
+		}
+	}
+	variable = strtok_r(variable_buf, "\r\n", &strtok_buf);
+	while (variable) {
+		char *colon = strchr(variable, ':');
+
+		if (colon) {
+			char *value = colon+1;
+			zval *entry;
+
+			ALLOC_ZVAL(entry);
+			while (*value==' ') {
+				value++;
+			}
+			*colon = 0;
+			php_register_variable(value, variable, track_vars_array ELS_CC PLS_CC);
+			*colon = ':';
+		}
+		variable = strtok_r(NULL, "\r\n", &strtok_buf);
+	}
+	if (variable_buf!=static_variable_buf) {
+		efree(variable_buf);
+	}
+}
+
+
 static sapi_module_struct sapi_module = {
 	"ISAPI",						/* name */
 									
@@ -307,6 +356,8 @@ static sapi_module_struct sapi_module = {
 
 	sapi_isapi_read_post,			/* read POST data */
 	sapi_isapi_read_cookies,		/* read Cookies */
+
+	sapi_isapi_register_server_variables,	/* register server variables */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
@@ -378,58 +429,6 @@ BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 }
 
 
-static void hash_isapi_variables(ELS_D SLS_DC)
-{
-	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
-	char *variable_buf;
-	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
-	char *variable;
-	char *strtok_buf = NULL;
-	LPEXTENSION_CONTROL_BLOCK lpECB;
-
-	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
-
-	if (lpECB->GetServerVariable(lpECB->ConnID, "ALL_HTTP", static_variable_buf, &variable_len)) {
-		variable_buf = static_variable_buf;
-	} else {
-		if (GetLastError()==ERROR_INSUFFICIENT_BUFFER) {
-			variable_buf = (char *) emalloc(variable_len);
-			if (!lpECB->GetServerVariable(lpECB->ConnID, "ALL_HTTP", variable_buf, &variable_len)) {
-				efree(variable_buf);
-				return;
-			}
-		} else {
-			return;
-		}
-	}
-	variable = strtok_r(variable_buf, "\r\n", &strtok_buf);
-	while (variable) {
-		char *colon = strchr(variable, ':');
-
-		if (colon) {
-			char *value = colon+1;
-			zval *entry;
-
-			ALLOC_ZVAL(entry);
-			while (*value==' ') {
-				value++;
-			}
-			*colon = 0;
-			INIT_PZVAL(entry);
-			entry->value.str.len = strlen(value);
-			entry->value.str.val = estrndup(value, entry->value.str.len);
-			entry->type = IS_STRING;
-			zend_hash_add(&EG(symbol_table), variable, strlen(variable)+1, &entry, sizeof(zval *), NULL);
-			*colon = ':';
-		}
-		variable = strtok_r(NULL, "\r\n", &strtok_buf);
-	}
-	if (variable_buf!=static_variable_buf) {
-		efree(variable_buf);
-	}
-}
-
-
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
 	zend_file_handle file_handle;
@@ -450,7 +449,6 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 	file_handle.type = ZEND_HANDLE_FILENAME;
 
 	php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
-	hash_isapi_variables(ELS_C SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	if (SG(request_info).cookie_data) {
 		efree(SG(request_info).cookie_data);

@@ -21,14 +21,14 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php_standard.h"
-#include "php_gpce.h"
+#include "php_variables.h"
 #include "php_globals.h"
 #include "SAPI.h"
 
 #include "zend_globals.h"
 
 
-void php_register_variable(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
+PHPAPI void php_register_variable(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
@@ -265,7 +265,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				/* FIXME: XXX: not binary safe, discards returned length */
 				php_url_decode(var, strlen(var));
 				php_url_decode(val, strlen(val));
-				php_register_variable(val,var,array_ptr ELS_CC PLS_CC);
+				php_register_variable(val, var, array_ptr ELS_CC PLS_CC);
 			}
 			if (arg == PARSE_COOKIE) {
 				var = strtok_r(NULL, ";", &strtok_buf);
@@ -280,6 +280,31 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 #endif
 	if (free_buffer) {
 		efree(res);
+	}
+}
+
+
+
+void php_import_environment_variables(ELS_D PLS_DC)
+{
+	char **env, *p, *t;
+	zval *array_ptr=NULL;
+
+	if (PG(track_vars)) {
+		ALLOC_ZVAL(array_ptr);
+		array_init(array_ptr);
+		INIT_PZVAL(array_ptr);
+		zend_hash_add(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), &array_ptr, sizeof(pval *),NULL);
+	}
+
+	for (env = environ; env != NULL && *env != NULL; env++) {
+		p = strchr(*env, '=');
+		if (!p) {				/* malformed entry? */
+			continue;
+		}
+		t = estrndup(*env, p - *env);
+		php_register_variable(p+1, t, array_ptr ELS_CC PLS_CC);
+		efree(t);
 	}
 }
 

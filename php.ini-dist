@@ -135,16 +135,20 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
-gpc_order			=	"GPC"	; Order of evaluation of GET/POST/Cookie data.  Later values override
-								; earlier values (e.g., by default, POST variables override GET variables,
-								; and Cookie variables override both POST and GET variables).
-gpc_globals			=	On		; Whether or not to define GET/POST/Cookie variables in the global
-								; scope.  You may want to turn this off if you don't want
+variables_order		=	"EGPCB"	; This directive describes the order in which PHP registers
+								; GET, POST, Cookie, Environment and Built-in variables (G, P,
+								; C, E & B respectively, often referred to as EGPCB or GPC).
+								; Registration is done from left to right, newer values override
+								; older values.
+register_globals	=	On		; Whether or not to register the EGPCB variables as global
+								; variables.  You may want to turn this off if you don't want
 								; to clutter your scripts' global scope with user data.  This makes
 								; most sense when coupled with track_vars - in which case you can
-								; access all of the GPC variables through the $HTTP_GET_VARS[],
-								; $HTTP_POST_VARS[] and $HTTP_COOKIE_VARS[] variables.
-track_vars			=	On		; enable $HTTP_GET_VARS[], $HTTP_POST_VARS[] and $HTTP_COOKIE_VARS[] arrays
+								; access all of the GPC variables through the $HTTP_*_VARS[],
+								; variables.
+track_vars			=	On		; enable the $HTTP_*_VARS[] arrays, where * is one of
+								; ENV, POST, GET, COOKIE or SERVER.
+gpc_order			=	"GPC"	; This directive is deprecated.  Use variables_order instead.
 
 ; Magic quotes
 magic_quotes_gpc	=	On		; magic quotes for incoming GET/POST/Cookie data
