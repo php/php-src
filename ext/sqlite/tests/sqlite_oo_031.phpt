@@ -77,7 +77,7 @@ class SqliteNestedset implements RecursiveIterator
 	
 	function current()
 	{
-		return (string)$this->entry;
+		return $this->entry->__toString();
 	}
 	
 	function key()
