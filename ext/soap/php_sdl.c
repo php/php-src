@@ -2168,13 +2168,14 @@ sdlPtr get_sdl(char *uri TSRMLS_DC)
 {
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
+	int uri_len;
 
 	SOAP_GLOBAL(error_code) = "WSDL";
 
-	if (SOAP_GLOBAL(cache_enabled)) {
+	if (SOAP_GLOBAL(cache_enabled) && ((uri_len = strlen(uri)) < MAXPATHLEN)) {
 		char  fn[MAXPATHLEN];
 
-		if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri,strlen(uri))) {
+		if (strchr(uri,':') != NULL || IS_ABSOLUTE_PATH(uri, uri_len)) {
 			strcpy(fn, uri);
 		} else if (VCWD_REALPATH(uri, fn) == NULL) {
 			sdl = load_wsdl(uri);
