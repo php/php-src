@@ -382,7 +382,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	/* we pass additional args to the respective handler */
-	args = emalloc(ac * sizeof(zval *));
+	args = safe_emalloc(ac, sizeof(zval *), 0);
 	if (zend_get_parameters_array_ex(ac, args) != SUCCESS) {
 		FREENOW;
 		WRONG_PARAM_COUNT;
