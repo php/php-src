@@ -363,7 +363,7 @@ PHP_FUNCTION(ccvs_sale) /* cv_sale() */
   char *invoice;
   register int r;
 
-  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(ht, 2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
   {
     WRONG_PARAM_COUNT;
   }
