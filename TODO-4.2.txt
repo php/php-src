@@ -10,3 +10,5 @@
 * move most extensions and PEAR packages out of the PHP CVS tree,
   include them again during release packaging
 
+* renaming functions so that they all are conform to one standard form
+
