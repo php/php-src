@@ -409,6 +409,10 @@ SOURCE=.\ext\standard\md5.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\metaphone.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\microtime.c
 # End Source File
 # Begin Source File
