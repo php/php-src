@@ -189,6 +189,7 @@ PHP_FUNCTION(domxml_parser_set_keep_blanks);
 PHP_FUNCTION(domxml_parser_start_element);
 PHP_FUNCTION(domxml_parser_end_element);
 PHP_FUNCTION(domxml_parser_characters);
+PHP_FUNCTION(domxml_parser_reference);
 PHP_FUNCTION(domxml_parser_comment);
 PHP_FUNCTION(domxml_parser_cdata_block);
 PHP_FUNCTION(domxml_parser_start_document);

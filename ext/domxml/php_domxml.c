@@ -237,6 +237,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_parser_end_element,											NULL)
 	PHP_FE(domxml_parser_comment,											NULL)
 	PHP_FE(domxml_parser_characters,											NULL)
+	PHP_FE(domxml_parser_reference,											NULL)
 	PHP_FE(domxml_parser_cdata_block,											NULL)
 	PHP_FE(domxml_parser_start_document,											NULL)
 	PHP_FE(domxml_parser_end_document,											NULL)
@@ -329,6 +330,7 @@ static function_entry php_domxmlparser_class_functions[] = {
 	PHP_FALIAS(start_element,				domxml_parser_start_element,		NULL)
 	PHP_FALIAS(end_element,				domxml_parser_end_element,		NULL)
 	PHP_FALIAS(characters,				domxml_parser_characters,		NULL)
+	PHP_FALIAS(reference,				domxml_parser_reference,		NULL)
 	PHP_FALIAS(cdata_block,				domxml_parser_cdata_block,		NULL)
 	PHP_FALIAS(comment,				domxml_parser_comment,		NULL)
 	PHP_FALIAS(start_document,				domxml_parser_start_document,		NULL)
@@ -4093,17 +4095,17 @@ PHP_FUNCTION(domxml_parser_comment)
 {
 	zval *id;
 	xmlParserCtxtPtr parserp;
-	char *comment;
-	int comment_len, error;
+	char *commentstring;
+	int commentstring_len, error;
 	
-	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &comment, &comment_len);
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &commentstring, &commentstring_len);
 
 	if (parserp->myDoc == NULL) {
 		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	comment(parserp, (xmlChar *) comment);
+	comment(parserp, (xmlChar *) commentstring);
 	
 	RETURN_TRUE;
 }
@@ -4137,17 +4139,39 @@ PHP_FUNCTION(domxml_parser_characters)
 {
 	zval *id;
 	xmlParserCtxtPtr parserp;
-	char *characters;
+	char *charactersstring;
 	int characters_len, error;
 	
-	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &characters, &characters_len);
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &charactersstring, &characters_len);
 
 	if (parserp->myDoc == NULL) {
 		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	characters(parserp, (xmlChar *) characters, characters_len);
+	characters(parserp, (xmlChar *) charactersstring, characters_len);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_reference(string reference)
+   Adds entity reference */
+PHP_FUNCTION(domxml_parser_reference)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *referencestring;
+	int reference_len, error;
+	
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &referencestring, &reference_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	reference(parserp, (xmlChar *) referencestring);
 	
 	RETURN_TRUE;
 }
