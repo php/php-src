@@ -440,6 +440,10 @@ SOURCE=.\ext\standard\parsedate.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_gpce.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\mcal\php_mcal.c
 # End Source File
 # Begin Source File
@@ -450,10 +454,6 @@ SOURCE=.\ext\odbc\php_odbc.c
 
 SOURCE=.\ext\pcre\php_pcre.c
 # ADD CPP /D "STATIC"
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\standard\post.c
 # End Source File
 # Begin Source File
 
@@ -582,6 +582,10 @@ SOURCE=.\ext\standard\php_dir.h
 # Begin Source File
 
 SOURCE=.\ext\standard\php_filestat.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_gpce.h
 # End Source File
 # Begin Source File
 
