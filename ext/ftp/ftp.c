@@ -602,7 +602,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 					n++;
 			}
 
-			sin6->sin6_port = htons((unsigned short) strtol(ptr, &endptr, 10));
+			sin6->sin6_port = htons((unsigned short) strtoul(ptr, &endptr, 10));
 			if (ptr == endptr || *endptr != delimiter)
 				return 0;
 
