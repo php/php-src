@@ -228,7 +228,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	if (IS_BLOB(F->flags)) {
 		add_next_index_string(flags, "blob", 1);
 	}
-	str = type_to_name_native(F->flags);
+	str = type_to_name_native(F->type);
 	if (str) {
 		add_assoc_string(return_value, "native_type", str, 1);
 	}
