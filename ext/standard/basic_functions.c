@@ -620,6 +620,9 @@ static void basic_globals_ctor(BLS_D)
 	BG(left) = -1;
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
+#ifdef PHP_WIN32
+	CoInitialize(NULL);
+#endif
 }
 
 static void basic_globals_dtor(BLS_D)
@@ -628,6 +631,9 @@ static void basic_globals_dtor(BLS_D)
 	if (BG(sm_allowed_env_vars)) {
 		free(BG(sm_allowed_env_vars));
 	}
+#ifdef PHP_WIN32
+	CoUninitialize();
+#endif
 }
 
 
