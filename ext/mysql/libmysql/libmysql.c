@@ -56,7 +56,7 @@ my_string	mysql_unix_port=0;
 #endif
 
 #if defined(MSDOS) || defined(__WIN__)
-// socket_errno is defined in global.h for all platforms
+/* socket_errno is defined in global.h for all platforms */
 #define perror(A)
 #else
 #include <errno.h>

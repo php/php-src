@@ -19,7 +19,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 
 #ifdef __EMX__
-// chdir2 support also drive change
+/* chdir2 support also drive change */
 #define chdir _chdir2
 #endif
 
