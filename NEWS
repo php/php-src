@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added get_used_files() function - returns a hash mapping the use()'d files
+  to their full path (Zeev)
 - PHP 4 scripts will now obey the max_execution_time setting and actually
   time out (Rasmus)
 - Add configure command to phpinfo() output (Stig)
