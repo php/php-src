@@ -89,19 +89,20 @@ typedef struct _zend_brk_cont_element {
 } zend_brk_cont_element;
 
 
-#define ZEND_ACC_STATIC		0x01
-#define ZEND_ACC_ABSTRACT	0x02
-#define ZEND_ACC_FINAL		0x04
-#define ZEND_ACC_INTERFACE	0x08
+#define ZEND_ACC_STATIC			0x01
+#define ZEND_ACC_ABSTRACT		0x02
+#define ZEND_ACC_FINAL			0x04
+#define ZEND_ACC_INTERFACE		0x08
+#define ZEND_ACC_ABSTRACT_CLASS	0x10
 
 /* The order of those must be kept - public < protected < private */
-#define ZEND_ACC_PUBLIC		0x10
-#define ZEND_ACC_PROTECTED	0x20
-#define ZEND_ACC_PRIVATE	0x40
+#define ZEND_ACC_PUBLIC		0x100
+#define ZEND_ACC_PROTECTED	0x200
+#define ZEND_ACC_PRIVATE	0x400
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 
-#define ZEND_ACC_CHANGED	0x80
-#define ZEND_ACC_IMPLICIT_PUBLIC	0x100
+#define ZEND_ACC_CHANGED	0x800
+#define ZEND_ACC_IMPLICIT_PUBLIC	0x1000
 
 char *zend_visibility_string(zend_uint fn_flags);
 
@@ -352,7 +353,7 @@ void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC);
 void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC);
 
 void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC);
-void zend_do_end_class_declaration(znode *class_token TSRMLS_DC);
+void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC);
 void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
@@ -663,6 +664,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_ADD_INTERFACE			144
 #define ZEND_VERIFY_INSTANCEOF		145
+#define ZEND_VERIFY_ABSTRACT_CLASS	146
 
 /* end of block */
 

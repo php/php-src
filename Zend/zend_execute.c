@@ -3125,7 +3125,7 @@ int zend_switch_free_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_ABSTRACT) {
+	if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_ABSTRACT_CLASS)) {
 		char *class_type;
 
 		if (EX_T(EX(opline)->op1.u.var).EA.class_entry->ce_flags & ZEND_ACC_INTERFACE) {
@@ -4016,6 +4016,21 @@ int zend_verify_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
+int zend_verify_abstract_class(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	zend_bool declared_abstract = ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS;
+	zend_bool detected_abstract = ce->ce_flags & ZEND_ACC_ABSTRACT;
+
+	if ((ce->ce_flags & ZEND_ACC_ABSTRACT)
+		&& !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)) {
+		zend_error(E_ERROR, "Class %s contains abstract methods and must be declared abstract", ce->name);
+	}
+
+	NEXT_OPCODE();
+}
+
+
 void zend_init_opcodes_handlers()
 {
 	zend_opcode_handlers[ZEND_NOP] = zend_nop_handler;
@@ -4194,6 +4209,7 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
 	zend_opcode_handlers[ZEND_VERIFY_INSTANCEOF] = zend_verify_instanceof_handler;
+	zend_opcode_handlers[ZEND_VERIFY_ABSTRACT_CLASS] = zend_verify_abstract_class;
 }
 
 /*
