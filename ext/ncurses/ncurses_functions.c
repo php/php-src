@@ -2075,7 +2075,7 @@ PHP_FUNCTION(ncurses_wcolor_set)
 
 	RETURN_LONG(wcolor_set(*win, Z_LVAL_PP(color_pair), 0));
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING,"Not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported in this build");
 	RETURN_FALSE;
 #endif
 }
