@@ -714,9 +714,11 @@ int main(int argc, char *argv[])
 			switch (c) {
 
 			case 'a':	/* interactive mode */
-				printf("Interactive mode enabled\n\n");
-				fflush(stdout);
-				interactive=1;
+				if (interactive) {
+					printf("Interactive mode enabled\n\n");
+					fflush(stdout);
+					interactive=1;
+				}
 				break;
 
 			case 'C': /* don't chdir to the script directory */
