@@ -24,7 +24,9 @@ else
     AC_MSG_RESULT($1.$2 (ok))
 fi
 AC_PROG_CC
+if test "$enable_thread_safety" = "yes" ; then
 AC_PROG_CXX
+fi
 AC_PROG_RANLIB
 AC_PROG_CC_C_O
 AM_PROG_LEX
