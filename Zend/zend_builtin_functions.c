@@ -40,6 +40,8 @@ static ZEND_FUNCTION(get_class);
 static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(leak);
+static ZEND_FUNCTION(get_used_files);
+static ZEND_FUNCTION(get_imported_files);
 
 extern unsigned char first_arg_force_ref[];
 
@@ -59,6 +61,8 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_parent_class,	NULL)
 	ZEND_FE(method_exists,		NULL)
 	ZEND_FE(leak,				NULL)
+	ZEND_FE(get_used_files,		NULL)
+	ZEND_FE(get_imported_files,	NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -420,4 +424,42 @@ ZEND_FUNCTION(leak)
 	}
 	
 	emalloc(leakbytes);
+}
+
+
+static int copy_import_use_file(zend_file_handle *fh, zval *array)
+{
+	if (fh->filename) {
+		char *extension_start;
+
+		extension_start = strstr(fh->filename, zend_uv.import_use_extension);
+		if (extension_start) {
+			*extension_start = 0;
+			if (fh->opened_path) {
+				add_assoc_string(array, fh->filename, fh->opened_path, 1);
+			} else {
+				add_assoc_stringl(array, fh->filename, "N/A", sizeof("N/A")-1, 1);
+			}
+			*extension_start = zend_uv.import_use_extension[0];
+		}
+	}
+	return 0;
+}
+
+
+ZEND_FUNCTION(get_used_files)
+{
+	CLS_FETCH();
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(&CG(used_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
+}
+
+
+ZEND_FUNCTION(get_imported_files)
+{
+	ELS_FETCH();
+
+	array_init(return_value);
+	zend_hash_apply_with_argument(&EG(imported_files), (int (*)(void *, void *)) copy_import_use_file, return_value);
 }

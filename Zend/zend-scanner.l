@@ -189,6 +189,11 @@ ZEND_API void zend_open_file_dtor(zend_file_handle *fh)
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
+		case ZEND_HANDLE_FILENAME:
+			/* We're only supposed to get here when destructing the used_files hash,
+			 * which doesn't really contain open files, but references to their names/paths
+			 */
+			break;
 #ifdef ZTS
 		case ZEND_HANDLE_FSTREAM:
 			delete ((ifstream *) fh->handle.is);
@@ -521,10 +526,21 @@ int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC)
 	}
 	if (file_handle->opened_path) {
 		if (unique) {
-			if (zend_hash_add(&CG(used_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, file_handle, sizeof(zend_file_handle), NULL)==FAILURE) {
+			zend_file_handle *pfh;
+
+			if (zend_hash_add(&CG(used_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, file_handle, sizeof(zend_file_handle), (void **) &pfh)==FAILURE) {
 				zend_close_file_handle(file_handle CLS_CC);
 				restore_lexical_state(&original_lex_state CLS_CC);
 				return SUCCESS;
+			} else {
+				/* pfh is a copy we only save for get_used_files() */
+				pfh->type = ZEND_HANDLE_FILENAME;
+				if (pfh->filename) {
+					pfh->filename = estrdup(pfh->filename);
+				}
+				if (pfh->opened_path) {
+					pfh->opened_path = strdup(pfh->opened_path);
+				}
 			}
 		}
 	}
