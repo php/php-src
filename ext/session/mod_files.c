@@ -37,6 +37,7 @@
 #include <time.h>
 
 #include <fcntl.h>
+#include <errno.h>
 
 #include "php_session.h"
 #include "mod_files.h"
