@@ -173,6 +173,8 @@ class PEAR_Error
 	 * PEAR_ERROR_CALLBACK, the callback function or object/method
 	 * tuple.
 	 *
+	 * @access public
+	 *
 	 */
 	function PEAR_Error($message = 'unknown error',
 						$code = 0,
@@ -223,6 +225,12 @@ class PEAR_Error
     // }}}
     // {{{ getMode()
 
+	/**
+	 * Get the error mode from an error object.
+	 *
+	 * @return int error mode
+	 * @access public
+	 */
 	function getMode() {
 		return $this->mode;
 	}
@@ -230,6 +238,12 @@ class PEAR_Error
     // }}}
     // {{{ getCallback()
 
+	/**
+	 * Get the callback function/method from an error object.
+	 *
+	 * @return mixed callback function or object/method array
+	 * @access public
+	 */
 	function getCallback() {
 		return $this->callback;
 	}
@@ -242,6 +256,7 @@ class PEAR_Error
 	 * Get the error message from an error object.
 	 *
 	 * @return	string	full error message
+	 * @access public
 	 */
 	function getMessage ()
 	{
@@ -257,6 +272,7 @@ class PEAR_Error
 	 * Get error code from an error object
 	 *
 	 * @return int error code
+	 * @access public
 	 */
 	 function getCode()
 	 {
@@ -270,6 +286,7 @@ class PEAR_Error
 	 * Get the name of this error/exception.
 	 *
 	 * @return string error/exception name (type)
+	 * @access public
 	 */
 	function getType ()
 	{
@@ -283,6 +300,7 @@ class PEAR_Error
 	 * Get additional debug information supplied by the application.
 	 *
 	 * @return string debug information
+	 * @access public
 	 */
 	function getDebugInfo ()
 	{
@@ -295,7 +313,8 @@ class PEAR_Error
 	/**
 	 * Make a string representation of this object.
 	 *
-	 * @return string a string with an object "summary"
+	 * @return string a string with an object summary
+	 * @access public
 	 */
 	function toString() {
 		$modes = array();
