@@ -35,6 +35,7 @@
 #include "php_mail.h"
 #include "php_ini.h"
 #include "safe_mode.h"
+#include "exec.h"
 
 #if HAVE_SENDMAIL
 #ifdef PHP_WIN32
