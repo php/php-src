@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Applied safe-mode patch to popen(). (Patch by Kristian Köhntopp)
 - str_repeat() now returns correct length. (Thies)
 - Don't assume libz and libpng are installed for the GD checks (Rasmus)
 - Implemented support for <boolean> and <null> types according
