@@ -113,11 +113,10 @@ int dom_processinginstruction_data_read(dom_object *obj, zval **retval TSRMLS_DC
 	
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
 		ZVAL_STRING(*retval, content, 1);
+		xmlFree(content);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
-
-	xmlFree(content);
 
 	return SUCCESS;
 }
