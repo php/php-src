@@ -247,6 +247,10 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_get_attribute
 };
 
+#ifndef PDO_MYSQL_UNIX_ADDR
+# define PDO_MYSQL_UNIX_ADDR	"MySQL"
+#endif
+
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H;
@@ -259,9 +263,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{ "dbname",   "",	0 },
 		{ "host",   "localhost",	0 },
 		{ "port",   "3306",	0 },
-#ifdef PDO_MYSQL_UNIX_ADDR
 		{ "unix_socket",  PDO_MYSQL_UNIX_ADDR,	0 },
-#endif
 	};
 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);
@@ -291,7 +293,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		host = vars[2].optval;
 		port = atoi(vars[3].optval); 
 	} else {
-		host = NULL;
+		host = ".";
 		unix_socket = vars[4].optval;  
 	}
 	dbname = vars[1].optval;
