@@ -1,3 +1,62 @@
+2000-02-16  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/mssql.dsp
+      ext/mssql/.cvsignore:
+    Fixing up TS-modes. Non TS-modes will bee added later
+
+2000-02-16  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      build/ltlib.mk
+      configuration-parser.y
+      ext/standard/browscap.c:
+    - Updated the browscap module to work with PHP 4.0 
+
+    * SAPI.c
+      main.c
+      php4.dsp
+      php4dll.dsp
+      sapi/isapi/php4isapi.c: - Update .dsp's
+    - Fix auth_user issue
+
+2000-02-16  Andrew Skalski  <askalski@chek.com>
+
+    * ext/ftp/ftp.c: recognize 125 as success for put/get commands
+
+2000-02-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/library.mk:
+    Add test to avoid recursion, if the build environment is not
+    correctly set up.
+
+2000-02-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: I'd really like that.
+
+2000-02-16  Andi Gutmans  <andi@php.net>
+
+    * NEWS: Add to the news
+
+    * sapi/isapi/php4isapi.c:
+    - In IIS ISAPI when the user presses the STOP button while the script is
+      running make sure it stops gracefully. Before it stuck the server.
+
+2000-02-16  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: speedup parse_url!
+
+    * ext/standard/url.c: (url_parse) only free regex if compile worked.
+
+    * ext/standard/url.c: (url_parse) fix memory leak (#3495)
+
+2000-02-16  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - OK, for a change I remember to put my changes in the NEWS file.
+
+    * ext/ldap/ldap.c: - PHP_WIN32
+
 2000-02-15  Zeev Suraski  <zeev@php.net>
 
     * SAPI.c
