@@ -1,3 +1,15 @@
+2004-10-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      tests/bug28444.phpt
+      tests/bug29368.phpt:
+      - Add new tests
+
+    * tests/bug28444.phpt
+      tests/bug29368.phpt:
+      
+      - Add new test
+
 2004-10-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * Makefile.frag:

@@ -1,3 +1,15 @@
+2004-10-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug28444.phpt
+      ZendEngine2/tests/bug29368.phpt:
+      - Add new tests
+
+    * ZendEngine2/tests/bug28444.phpt
+      ZendEngine2/tests/bug29368.phpt:
+      
+      - Add new test
+
 2004-10-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * configure.in
