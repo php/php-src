@@ -317,16 +317,12 @@ dnl -------------------------------------------------------------------------
 
 dnl Checks for header files.
 AC_HEADER_STDC
+AC_HEADER_DIRENT
 
-dnl In QNX opendir resides in libc but dirent.h is still required
-if test "`uname -s 2>/dev/null`" != "QNX"; then
-  AC_HEADER_DIRENT
-else
-  AC_CHECK_HEADERS(dirent.h)
-fi
 PHP_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
+dirent.h \
 ApplicationServices/ApplicationServices.h \
 sys/param.h \
 sys/types.h \
