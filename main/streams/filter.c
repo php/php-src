@@ -28,13 +28,22 @@
 
 #include "php_streams_int.h"
 
+/* Global filter hash, copied to FG(stream_filters) on registration of volatile filter */
 static HashTable stream_filters_hash;
 
-PHPAPI HashTable *php_get_stream_filters_hash()
+/* Should only be used during core initialization */
+PHPAPI HashTable *php_get_stream_filters_hash_global()
 {
 	return &stream_filters_hash;
 }
 
+/* Normal hash selection/retrieval call */
+PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D)
+{
+	return (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
+}
+
+/* API for registering GLOBAL filters */
 PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC)
 {
 	return zend_hash_add(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern), factory, sizeof(*factory), NULL);
@@ -43,6 +52,20 @@ PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_str
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS_DC)
 {
 	return zend_hash_del(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern));
+}
+
+/* API for registering VOLATILE wrappers */
+PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC)
+{
+	if (!FG(stream_filters)) {
+		php_stream_filter_factory tmpfactory;
+
+		FG(stream_filters) = emalloc(sizeof(HashTable));
+		zend_hash_init(FG(stream_filters), 0, NULL, NULL, 1);
+		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL, &tmpfactory, sizeof(php_stream_filter_factory));
+	}
+
+	return zend_hash_add(FG(stream_filters), (char*)filterpattern, strlen(filterpattern), factory, sizeof(*factory), NULL);
 }
 
 /* Buckets */
@@ -223,6 +246,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC)
  * charsets (for example) but still be able to provide them all as filters */
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
+	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory;
 	php_stream_filter *filter = NULL;
 	int n;
@@ -230,7 +254,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 
 	n = strlen(filtername);
 	
-	if (SUCCESS == zend_hash_find(&stream_filters_hash, (char*)filtername, n, (void**)&factory)) {
+	if (SUCCESS == zend_hash_find(filter_hash, (char*)filtername, n, (void**)&factory)) {
 		filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
 	} else if ((period = strrchr(filtername, '.'))) {
 		/* try a wildcard */
@@ -241,7 +265,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		while (period && !filter) {
 			*period = '\0';
 			strcat(wildname, ".*");
-			if (SUCCESS == zend_hash_find(&stream_filters_hash, wildname, strlen(wildname), (void**)&factory)) {
+			if (SUCCESS == zend_hash_find(filter_hash, wildname, strlen(wildname), (void**)&factory)) {
 				filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
 			}
 

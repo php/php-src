@@ -1163,6 +1163,9 @@ PHP_RINIT_FUNCTION(basic)
 	/* Default to global wrappers only */
 	FG(stream_wrappers) = NULL;
 
+	/* Default to global filters only */
+	FG(stream_filters) = NULL;
+
 	return SUCCESS;
 }
 
@@ -1186,6 +1189,18 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	}
 	STR_FREE(BG(locale_string));
 
+	if (FG(stream_wrappers)) {
+		zend_hash_destroy(FG(stream_wrappers));
+		efree(FG(stream_wrappers));
+		FG(stream_wrappers) = NULL;
+	}
+
+	if (FG(stream_filters)) {
+		zend_hash_destroy(FG(stream_filters));
+		efree(FG(stream_filters));
+		FG(stream_filters) = NULL;
+	}
+
 	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
 	PHP_RSHUTDOWN(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
@@ -1198,12 +1213,6 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		zend_llist_destroy(BG(user_tick_functions));
 		efree(BG(user_tick_functions));
 		BG(user_tick_functions) = NULL;
-	}
-
-	if (FG(stream_wrappers)) {
-		zend_hash_destroy(FG(stream_wrappers));
-		efree(FG(stream_wrappers));
-		FG(stream_wrappers) = NULL;
 	}
 
 	PHP_RSHUTDOWN(user_filters)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
