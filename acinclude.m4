@@ -1235,6 +1235,8 @@ AC_DEFUN(PHP_SETUP_ICONV, [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
           found_iconv=yes
           AC_DEFINE(HAVE_ICONV, 1, [ ])
+        ], [], [
+          -L$ICONV_DIR/lib
         ])
       ], [
         -L$ICONV_DIR/lib
