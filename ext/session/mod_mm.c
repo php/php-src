@@ -331,7 +331,10 @@ PS_READ_FUNC(mm)
 		(*val)[sd->datalen] = '\0';
 		ret = SUCCESS;
 	}
-
+	else {
+		*val = estrdup("");
+	}
+	
 	mm_unlock(data->mm);
 	
 	return ret;
