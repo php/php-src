@@ -1,5 +1,19 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /* Functions to handle typelib */
 
@@ -20,7 +34,8 @@
 int find_type(my_string x, TYPELIB *typelib, uint full_name)
 {
   int find,pos,findpos;
-  reg1 my_string i,j;
+  reg1 my_string i;
+  reg2 const char *j;
   DBUG_ENTER("find_type");
   DBUG_PRINT("enter",("x: '%s'  lib: %lx",x,typelib));
 
@@ -83,9 +98,9 @@ void make_type(register my_string to, register uint nr, register TYPELIB *typeli
 	/* Get type */
 	/* Warning first type is 0 */
 
-my_string get_type(TYPELIB *typelib, uint nr)
+const char *get_type(TYPELIB *typelib, uint nr)
 {
   if (nr < (uint) typelib->count && typelib->type_names)
     return(typelib->type_names[nr]);
-  return((char*) "?");
+  return "?";
 }

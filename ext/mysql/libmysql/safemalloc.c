@@ -1,5 +1,19 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /*
  * [This posting refers to an article entitled "oops, corrupted memory
@@ -193,7 +207,7 @@ gptr _mymalloc (uint uSize, const char *sFile, uint uLine, myf MyFlags)
  *  Free then old memoryblock
  */
 
-gptr _myrealloc (register my_string pPtr, register uint uSize,
+gptr _myrealloc (register gptr pPtr, register uint uSize,
 		 const char *sFile, uint uLine, myf MyFlags)
 {
   struct remember *pRec;
@@ -209,7 +223,8 @@ gptr _myrealloc (register my_string pPtr, register uint uSize,
   if (check_ptr("Reallocating",(byte*) pPtr,sFile,uLine))
     DBUG_RETURN((gptr) NULL);
 
-  pRec = (struct remember *) (pPtr - sizeof (struct irem)-sf_malloc_prehunc);
+  pRec = (struct remember *) ((char*) pPtr - sizeof (struct irem)-
+			      sf_malloc_prehunc);
   if (*((long*) ((char*) &pRec -> lSpecialValue+sf_malloc_prehunc))
       != MAGICKEY)
   {
@@ -467,6 +482,7 @@ int _sanity (const char *sFile, uint uLine)
   count=cNewCount;
   for (pTmp = pRememberRoot; pTmp != NULL && count-- ; pTmp = pTmp -> pNext)
     flag+=_checkchunk (pTmp, sFile, uLine);
+  pthread_mutex_unlock(&THR_LOCK_malloc);
   if (count || pTmp)
   {
     const char *format="Safemalloc link list destroyed, discovered at '%s:%d'";
@@ -475,7 +491,6 @@ int _sanity (const char *sFile, uint uLine)
     DBUG_PRINT("safe",(format, sFile, uLine));
     flag=1;
   }
-  pthread_mutex_unlock(&THR_LOCK_malloc);
   return flag;
 } /* _sanity */
 

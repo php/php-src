@@ -1,5 +1,19 @@
-/* Copyright Abandoned 1998 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /****************************************************************************
 ** Add all options from files named "group".cnf from the default_directories
@@ -28,7 +42,7 @@
 /* Which directories are searched for options (and in which order) */
 
 const char *default_directories[]= {
-#ifdef __WIN32__
+#ifdef __WIN__
 "C:/",
 #else
 "/etc/",
@@ -36,14 +50,14 @@ const char *default_directories[]= {
 #ifdef DATADIR
 DATADIR,
 #endif
-#ifndef __WIN32__
+#ifndef __WIN__
 "~/",
 #endif
 NullS,
 };
 
 #define default_ext   	".cnf"		/* extension for config file */
-#ifdef __WIN32__
+#ifdef __WIN__
 #include <winbase.h>
 #define windows_ext	".ini"
 #endif
@@ -59,7 +73,7 @@ void load_defaults(const char *conf_file, const char **groups,
   DYNAMIC_ARRAY args;
   const char **dirs, *extra_default_file;
   TYPELIB group;
-  my_bool print_defaults=0;
+  my_bool found_print_defaults=0;
   MEM_ROOT alloc;
   char *ptr,**res;
   DBUG_ENTER("load_defaults");
@@ -78,7 +92,7 @@ void load_defaults(const char *conf_file, const char **groups,
       res[i-1]=argv[0][i];
     (*argc)--;
     *argv=res;
-    memcpy(ptr,&alloc,sizeof(alloc));		/* Save alloc root for free */
+    *(MEM_ROOT*) ptr= alloc;			/* Save alloc root for free */
     DBUG_VOID_RETURN;
   }
 
@@ -88,8 +102,8 @@ void load_defaults(const char *conf_file, const char **groups,
     extra_default_file=strchr(argv[0][1],'=')+1;
 
   group.count=0;
-  group.name= (char*) "defaults";
-  group.type_names=(char**) groups;
+  group.name= "defaults";
+  group.type_names= groups;
   for (; *groups ; groups++)
     group.count++;
 
@@ -109,7 +123,7 @@ void load_defaults(const char *conf_file, const char **groups,
   }
   else
   {
-#ifdef __WIN32__
+#ifdef __WIN__
     char system_dir[FN_REFLEN];
     GetWindowsDirectory(system_dir,sizeof(system_dir));
     if (search_default_file(&args, &alloc, system_dir, conf_file, windows_ext,
@@ -140,7 +154,7 @@ void load_defaults(const char *conf_file, const char **groups,
   /* Check if we wan't to see the new argument list */
   if (*argc >= 2 && !strcmp(argv[0][1],"--print-defaults"))
   {
-    print_defaults=1;
+    found_print_defaults=1;
     --*argc; ++*argv;				/* skipp argument */
   }
 
@@ -150,9 +164,9 @@ void load_defaults(const char *conf_file, const char **groups,
 
   (*argc)+=args.elements;
   *argv= (char**) res;
-  memcpy(ptr,&alloc,sizeof(alloc));		/* Save alloc root for free */
+  *(MEM_ROOT*) ptr= alloc;			/* Save alloc root for free */
   delete_dynamic(&args);
-  if (print_defaults)
+  if (found_print_defaults)
   {
     int i;
     printf("%s would have been started with the following arguments:\n",
@@ -173,7 +187,7 @@ void load_defaults(const char *conf_file, const char **groups,
 void free_defaults(char **argv)
 {
   MEM_ROOT ptr;
-  memcpy((char*) &ptr,(char *) argv - sizeof(ptr),sizeof(ptr));
+  memcpy_fixed((char*) &ptr,(char *) argv - sizeof(ptr), sizeof(ptr));
   free_root(&ptr);
 }
 
@@ -308,7 +322,9 @@ static my_bool search_default_file(DYNAMIC_ARRAY *args, MEM_ROOT *alloc,
 
 void print_defaults(const char *conf_file, const char **groups)
 {
+#ifdef __WIN__
   bool have_ext=fn_ext(conf_file)[0] != 0;
+#endif
   char name[FN_REFLEN];
   const char **dirs;
   puts("\nDefault options are read from the following files in the given order:");
@@ -317,7 +333,7 @@ void print_defaults(const char *conf_file, const char **groups)
     fputs(conf_file,stdout);
   else
   {
-#ifdef __WIN32__
+#ifdef __WIN__
     GetWindowsDirectory(name,sizeof(name));
     printf("%s\\%s%s ",name,conf_file,have_ext ? "" : windows_ext);
 #endif
@@ -342,4 +358,5 @@ void print_defaults(const char *conf_file, const char **groups)
 --print-defaults	Print the program argument list and exit\n\
 --no-defaults		Don't read default options from any options file\n\
 --defaults-file=#	Only read default options from the given file #");
-};
+}
+

@@ -23,7 +23,7 @@ char *strxmov(char *dst,const char *src, ...)
 
   va_start(pvar,src);
   while (src != NullS) {
-    while (*dst++ = *src++) ;
+    while ((*dst++ = *src++)) ;
     dst--;
     src = va_arg(pvar, char *);
   }

@@ -1,5 +1,19 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /*
   Code for handling strings with can grow dynamicly.
@@ -19,7 +33,7 @@ my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
   if (!alloc_increment)
     alloc_increment=128;
   length=1;
-  if (init_str && (length=strlen(init_str)+1) < init_alloc)
+  if (init_str && (length= (uint) strlen(init_str)+1) < init_alloc)
     init_alloc=((length+alloc_increment-1)/alloc_increment)*alloc_increment;
   if (!init_alloc)
     init_alloc=alloc_increment;
@@ -39,7 +53,7 @@ my_bool dynstr_set(DYNAMIC_STRING *str, const char *init_str)
   uint length;
   DBUG_ENTER("dynstr_set");
 
-  if (init_str && (length=strlen(init_str)+1) > str->max_length)
+  if (init_str && (length= (uint) strlen(init_str)+1) > str->max_length)
   {
     str->max_length=((length+str->alloc_increment-1)/str->alloc_increment)*
       str->alloc_increment;

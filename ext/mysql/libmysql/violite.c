@@ -1,5 +1,19 @@
-/* Copyright Abandoned 2000 Monty Program KB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /*
   Note that we can't have assertion on file descriptors;  The reason for
@@ -25,22 +39,22 @@
 #undef HAVE_FCNTL
 #endif				/* defined(__EMX__) */
 
-#if defined(MSDOS) || defined(__WIN32__)
-#ifdef __WIN32__
+#if defined(MSDOS) || defined(__WIN__)
+#ifdef __WIN__
 #undef errno
 #undef EINTR
 #undef EAGAIN
 #define errno WSAGetLastError()
 #define EINTR  WSAEINTR
 #define EAGAIN WSAEINPROGRESS
-#endif /* __WIN32__ */
+#endif /* __WIN__ */
 #define O_NONBLOCK 1    /* For emulation of fcntl() */
 #endif
 #ifndef EWOULDBLOCK
 #define EWOULDBLOCK EAGAIN
 #endif
 
-#ifndef __WIN32__
+#ifndef __WIN__
 #define HANDLE void *
 #endif
 
@@ -85,11 +99,11 @@ Vio *vio_new(my_socket sd, enum enum_vio_type type, my_bool localhost)
   {
     vio_reset(vio, type, sd, 0, localhost);
     sprintf(vio->desc, "socket (%d)", vio->sd);
-#if !defined(___WIN32__) && !defined(__EMX__)
+#if !defined(___WIN__) && !defined(__EMX__)
 #if !defined(NO_FCNTL_NONBLOCK)
     vio->fcntl_mode = fcntl(sd, F_GETFL);
 #endif
-#else /* !defined(__WIN32__) && !defined(__EMX__) */
+#else /* !defined(__WIN__) && !defined(__EMX__) */
     {
       /* set to blocking mode by default */
       ulong arg=0;
@@ -101,7 +115,7 @@ Vio *vio_new(my_socket sd, enum enum_vio_type type, my_bool localhost)
 }
 
 
-#ifdef __WIN32__
+#ifdef __WIN__
 
 Vio *vio_new_win32pipe(HANDLE hPipe)
 {
@@ -140,7 +154,7 @@ int vio_read(Vio * vio, gptr buf, int size)
   int r;
   DBUG_ENTER("vio_read");
   DBUG_PRINT("enter", ("sd=%d, buf=%p, size=%d", vio->sd, buf, size));
-#ifdef __WIN32__
+#ifdef __WIN__
   if (vio->type == VIO_TYPE_NAMEDPIPE)
   {
     DWORD length;
@@ -152,7 +166,7 @@ int vio_read(Vio * vio, gptr buf, int size)
 #else
   errno=0;					/* For linux */
   r = read(vio->sd, buf, size);
-#endif /* __WIN32__ */
+#endif /* __WIN__ */
 #ifndef DBUG_OFF
   if (r < 0)
   {
@@ -169,7 +183,7 @@ int vio_write(Vio * vio, const gptr buf, int size)
   int r;
   DBUG_ENTER("vio_write");
   DBUG_PRINT("enter", ("sd=%d, buf=%p, size=%d", vio->sd, buf, size));
-#ifdef __WIN32__
+#ifdef __WIN__
   if ( vio->type == VIO_TYPE_NAMEDPIPE)
   {
     DWORD length;
@@ -180,7 +194,7 @@ int vio_write(Vio * vio, const gptr buf, int size)
   r = send(vio->sd, buf, size,0);
 #else
   r = write(vio->sd, buf, size);
-#endif /* __WIN32__ */
+#endif /* __WIN__ */
 #ifndef DBUG_OFF
   if (r < 0)
   {
@@ -198,7 +212,7 @@ int vio_blocking(Vio * vio, my_bool set_blocking_mode)
   DBUG_ENTER("vio_blocking");
   DBUG_PRINT("enter", ("set_blocking_mode: %d", (int) set_blocking_mode));
 
-#if !defined(___WIN32__) && !defined(__EMX__)
+#if !defined(___WIN__) && !defined(__EMX__)
 #if !defined(NO_FCNTL_NONBLOCK)
 
   if (vio->sd >= 0)
@@ -212,7 +226,7 @@ int vio_blocking(Vio * vio, my_bool set_blocking_mode)
       r = fcntl(vio->sd, F_SETFL, vio->fcntl_mode);
   }
 #endif /* !defined(NO_FCNTL_NONBLOCK) */
-#else /* !defined(__WIN32__) && !defined(__EMX__) */
+#else /* !defined(__WIN__) && !defined(__EMX__) */
 #ifndef __EMX__
   if (vio->type != VIO_TYPE_NAMEDPIPE)  
 #endif
@@ -232,7 +246,7 @@ int vio_blocking(Vio * vio, my_bool set_blocking_mode)
     if (old_fcntl != vio->fcntl_mode)
       r = ioctlsocket(vio->sd,FIONBIO,(void*) &arg, sizeof(arg));
   }
-#endif /* !defined(__WIN32__) && !defined(__EMX__) */
+#endif /* !defined(__WIN__) && !defined(__EMX__) */
   DBUG_RETURN(r);
 }
 
@@ -304,7 +318,7 @@ int vio_close(Vio * vio)
 {
   int r;
   DBUG_ENTER("vio_close");
-#ifdef __WIN32__
+#ifdef __WIN__
   if (vio->type == VIO_TYPE_NAMEDPIPE)
   {
 #if defined(__NT__) && defined(MYSQL_SERVER)
@@ -314,7 +328,7 @@ int vio_close(Vio * vio)
     r=CloseHandle(vio->hPipe);
   }
   else if (vio->type != VIO_CLOSED)
-#endif /* __WIN32__ */
+#endif /* __WIN__ */
   {
     r=0;
     if (shutdown(vio->sd,2))

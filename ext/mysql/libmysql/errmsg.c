@@ -1,5 +1,19 @@
-/* Copyright Abandoned 1997 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 /* Error messages for MySQL clients */
 /* error messages for the demon is in share/language/errmsg.sys */
@@ -29,7 +43,9 @@ const char *client_errors[]=
   "Verbindung ueber Named Pipe; Host: %-.64s",
   "Kann nicht auf Named Pipe warten. Host: %-.64s  pipe: %-.32s (%lu)",
   "Kann Named Pipe nicht oeffnen. Host: %-.64s  pipe: %-.32s (%lu)",
-  "Kann den Status der Named Pipe nicht setzen.  Host: %-.64s  pipe: %-.32s (%lu)"
+  "Kann den Status der Named Pipe nicht setzen.  Host: %-.64s  pipe: %-.32s (%lu)",
+  "Can't initialize character set %-.64s (path: %-.64s)",
+  "Got packet bigger than 'max_allowed_packet'"
 };
 
 #else /* ENGLISH */
@@ -54,6 +70,8 @@ const char *client_errors[]=
   "Can't wait for named pipe to host: %-.64s  pipe: %-.32s (%lu)",
   "Can't open named pipe to host: %-.64s  pipe: %-.32s (%lu)",
   "Can't set state of named pipe to host: %-.64s  pipe: %-.32s (%lu)",
+  "Can't initialize character set %-.64s (path: %-.64s)",
+  "Got packet bigger than 'max_allowed_packet'"
 };
 #endif
 

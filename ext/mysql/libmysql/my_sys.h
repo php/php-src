@@ -1,5 +1,19 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+   
+   You should have received a copy of the GNU Library General Public
+   License along with this library; if not, write to the Free
+   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+   MA 02111-1307, USA */
 
 #ifndef _my_sys_h
 #define _my_sys_h
@@ -20,6 +34,12 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #else
 #include <my_pthread.h>
 #endif
+
+#ifndef _m_ctype_h
+#include <m_ctype.h>                    /* for CHARSET_INFO */
+#endif
+
+#include <stdarg.h>  
 
 #define MYSYS_PROGRAM_USES_CURSES()  { error_handler_hook = my_message_curses;	mysys_uses_curses=1; }
 #define MYSYS_PROGRAM_DONT_USE_CURSES()  { error_handler_hook = my_message_no_curses; mysys_uses_curses=0;}
@@ -48,6 +68,7 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_ALLOW_ZERO_PTR 64	/* my_realloc() ; zero ptr -> malloc */
 #define MY_FREE_ON_ERROR 128	/* my_realloc() ; Free old ptr on error */
 #define MY_HOLD_ON_ERROR 256	/* my_realloc() ; Return old ptr on error */
+#define MY_THREADSAFE	128	/* pread/pwrite:  Don't allow interrupts */
 
 #define MY_CHECK_ERROR	1	/* Params to my_end; Check open-close */
 #define MY_GIVE_INFO	2	/* Give time info about process*/
@@ -70,10 +91,18 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_SEEK_CUR	1
 #define MY_SEEK_END	2
 
+        /* My charsets_list flags */
+#define MY_NO_SETS       0
+#define MY_COMPILED_SETS 1      /* show compiled-in sets */
+#define MY_CONFIG_SETS   2      /* sets that have a *.conf file */
+#define MY_INDEX_SETS    4      /* all sets listed in the Index file */
+#define MY_LOADED_SETS    8      /* the sets that are currently loaded */
+
 	/* Some constants */
 #define MY_WAIT_FOR_USER_TO_FIX_PANIC	60	/* in seconds */
 #define MY_WAIT_GIVE_USER_A_MESSAGE	10	/* Every 10 times of prev */
 #define MIN_COMPRESS_LENGTH		50	/* Don't compress small bl. */
+#define KEYCACHE_BLOCK_SIZE		1024
 
 	/* defines when allocating data */
 
@@ -136,11 +165,21 @@ extern int (*error_handler_hook)(uint my_err, const char *str,myf MyFlags);
 extern int (*fatal_error_handler_hook)(uint my_err, const char *str,
 				       myf MyFlags);
 
+/* charsets */
+extern uint get_charset_number(const char *cs_name);
+extern const char *get_charset_name(uint cs_number);
+extern CHARSET_INFO *get_charset(uint cs_number, myf flags);
+extern my_bool set_default_charset(uint cs, myf flags);
+extern CHARSET_INFO *get_charset_by_name(const char *cs_name, myf flags);
+extern my_bool set_default_charset_by_name(const char *cs_name, myf flags);
+extern void free_charsets(void);
+extern char *list_charsets(myf want_flags); /* my_free() this string... */
+
 
 /* statisticts */
 extern ulong	_my_cache_w_requests,_my_cache_write,_my_cache_r_requests,
 		_my_cache_read;
-extern uint	 _my_blocks_used,_my_blocks_changed;
+extern ulong	 _my_blocks_used,_my_blocks_changed;
 extern uint	my_file_opened,my_stream_opened;
 
 					/* Point to current my_message() */
@@ -150,16 +189,18 @@ extern void (*my_sigtstp_cleanup)(void),
 	    (*my_abort_hook)(int);
 					/* Executed when comming from shell */
 extern int NEAR my_umask,		/* Default creation mask  */
+	   NEAR my_umask_dir,
 	   NEAR my_recived_signals,	/* Signals we have got */
 	   NEAR my_safe_to_handle_signal, /* Set when allowed to SIGTSTP */
 	   NEAR my_dont_interrupt;	/* call remember_intr when set */
-extern my_bool NEAR mysys_uses_curses;
+extern my_bool NEAR mysys_uses_curses, my_use_symdir;
 extern long lCurMemory,lMaxMemory;	/* from safemalloc */
 
 extern ulong	my_default_record_cache_size;
 extern my_bool NEAR my_disable_locking,NEAR my_disable_async_io,
        NEAR my_disable_flush_key_blocks;
 extern char	wild_many,wild_one,wild_prefix;
+extern const char *charsets_dir;
 
 typedef struct wild_file_pack	/* Struct to hold info when selecting files */
 {
@@ -170,12 +211,13 @@ typedef struct wild_file_pack	/* Struct to hold info when selecting files */
 
 typedef struct st_typelib {	/* Different types saved here */
   uint count;			/* How many types */
-  my_string name;			/* Name of typelib */
-  my_string *type_names;
+  const char *name;			/* Name of typelib */
+  const char **type_names;
 } TYPELIB;
 
 enum cache_type {READ_CACHE,WRITE_CACHE,READ_NET,WRITE_NET};
-enum flush_type { FLUSH_KEEP, FLUSH_RELEASE, FLUSH_IGNORE_CHANGED};
+enum flush_type { FLUSH_KEEP, FLUSH_RELEASE, FLUSH_IGNORE_CHANGED,
+		  FLUSH_FORCE_WRITE};
 
 typedef struct st_record_cache	/* Used when cacheing records */
 {
@@ -229,8 +271,10 @@ typedef struct st_io_cache		/* Used when cacheing files */
 #endif
   enum cache_type type;
   int (*read_function)(struct st_io_cache *,byte *,uint);
-  char *file_name;			/* if used with 'open_cacheed_file' */
+  char *file_name;			/* if used with 'open_cached_file' */
 } IO_CACHE;
+
+typedef int (*qsort2_cmp)(const void *, const void *, const void *);
 
 	/* defines for mf_iocache */
 
@@ -327,7 +371,7 @@ extern my_off_t my_fseek(FILE *stream,my_off_t pos,int whence,myf MyFlags);
 extern my_off_t my_ftell(FILE *stream,myf MyFlags);
 extern gptr _mymalloc(uint uSize,const char *sFile,
 		      uint uLine, myf MyFlag);
-extern gptr _myrealloc(my_string pPtr,uint uSize,const char *sFile,
+extern gptr _myrealloc(gptr pPtr,uint uSize,const char *sFile,
 		       uint uLine, myf MyFlag);
 extern gptr my_multi_malloc _VARARGS((myf MyFlags, ...));
 extern void _myfree(gptr pPtr,const char *sFile,uint uLine, myf MyFlag);
@@ -348,6 +392,9 @@ extern int my_error _VARARGS((int nr,myf MyFlags, ...));
 extern int my_printf_error _VARARGS((uint my_err, const char *format,
 				     myf MyFlags, ...)
 				    __attribute__ ((format (printf, 2, 4))));
+extern int my_vsnprintf( char *str, size_t n,
+                                const char *format, va_list ap );
+
 extern int my_message(uint my_err, const char *str,myf MyFlags);
 extern int my_message_no_curses(uint my_err, const char *str,myf MyFlags);
 extern int my_message_curses(uint my_err, const char *str,myf MyFlags);
@@ -389,11 +436,12 @@ extern my_string my_path(my_string to,const char *progname,
 extern my_string my_load_path(my_string to, const char *path,
 			      const char *own_path_prefix);
 extern int wild_compare(const char *str,const char *wildstr);
-extern my_string strcasestr(const char *src,const char *suffix);
+extern my_string my_strcasestr(const char *src,const char *suffix);
 extern int my_strcasecmp(const char *s,const char *t);
 extern int my_strsortcmp(const char *s,const char *t);
 extern int my_casecmp(const char *s,const char *t,uint length);
 extern int my_sortcmp(const char *s,const char *t,uint length);
+extern int my_sortncmp(const char *s,uint s_len, const char *t,uint t_len);
 extern WF_PACK *wf_comp(my_string str);
 extern int wf_test(struct wild_file_pack *wf_pack,const char *name);
 extern void wf_end(struct wild_file_pack *buffer);
@@ -422,6 +470,9 @@ extern sig_handler my_set_alarm_variable(int signo);
 extern void my_string_ptr_sort(void *base,uint items,size_s size);
 extern void radixsort_for_str_ptr(uchar* base[], uint number_of_elements,
 				  size_s size_of_element,uchar *buffer[]);
+extern qsort_t qsort2(void *base_ptr, size_t total_elems, size_t size,
+		      qsort2_cmp cmp, void *cmp_argument);
+extern qsort2_cmp get_ptr_compare(uint);
 extern int init_io_cache(IO_CACHE *info,File file,uint cachesize,
 			 enum cache_type type,my_off_t seek_offset,
 			 pbool use_async_io, myf cache_myflags);
@@ -433,13 +484,15 @@ extern int _my_b_net_read(IO_CACHE *info,byte *Buffer,uint Count);
 extern int _my_b_get(IO_CACHE *info);
 extern int _my_b_async_read(IO_CACHE *info,byte *Buffer,uint Count);
 extern int _my_b_write(IO_CACHE *info,const byte *Buffer,uint Count);
+extern int my_block_write(IO_CACHE *info, const byte *Buffer,
+			  uint Count, my_off_t pos);
 extern int flush_io_cache(IO_CACHE *info);
 extern int end_io_cache(IO_CACHE *info);
-extern my_bool open_cacheed_file(IO_CACHE *cache,const char *dir,
+extern my_bool open_cached_file(IO_CACHE *cache,const char *dir,
 				 const char *prefix, uint cache_size,
 				 myf cache_myflags);
 extern my_bool real_open_cached_file(IO_CACHE *cache);
-extern void close_cacheed_file(IO_CACHE *cache);
+extern void close_cached_file(IO_CACHE *cache);
 extern my_bool init_dynamic_array(DYNAMIC_ARRAY *array,uint element_size,
 				  uint init_alloc,uint alloc_increment);
 extern my_bool insert_dynamic(DYNAMIC_ARRAY *array,gptr element);
@@ -456,7 +509,7 @@ extern void freeze_size(DYNAMIC_ARRAY *array);
 
 extern int find_type(my_string x,TYPELIB *typelib,uint full_name);
 extern void make_type(my_string to,uint nr,TYPELIB *typelib);
-extern my_string get_type(TYPELIB *typelib,uint nr);
+extern const char *get_type(TYPELIB *typelib,uint nr);
 extern my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
 				   uint init_alloc,uint alloc_increment);
 extern my_bool dynstr_append(DYNAMIC_STRING *str, const char *append);
@@ -488,17 +541,15 @@ my_bool my_uncompress(byte *, ulong *, ulong *);
 byte *my_compress_alloc(const byte *packet, ulong *len, ulong *complen);
 ulong checksum(const byte *mem, uint count);
 
-#if defined(_MSC_VER) && !defined(__WIN32__)
+#if defined(_MSC_VER) && !defined(__WIN__)
 extern void sleep(int sec);
 #endif
-#ifdef __WIN32__
+#ifdef __WIN__
 extern my_bool have_tcpip;		/* Is set if tcpip is used */
 #endif
 
 #ifdef	__cplusplus
 }
 #endif
-#if defined(USE_RAID)
 #include "raid.h"
-#endif
 #endif /* _my_sys_h */
