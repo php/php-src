@@ -797,7 +797,7 @@ ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_fu
 }
 
 
-ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *new))
+ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *p_new))
 {
 	Bucket *p;
 	void *t;
