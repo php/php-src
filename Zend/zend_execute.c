@@ -2378,15 +2378,14 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
 	zend_class_entry *ce;
-	zend_bool is_const = 1;
-	char *function_name_strval;
-	int function_name_strlen;
 
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
 	if(EX(opline)->op2.op_type != IS_UNUSED) {
-		is_const = (EX(opline)->op2.op_type == IS_CONST);
+		char *function_name_strval;
+		int function_name_strlen;
+		zend_bool is_const = (EX(opline)->op2.op_type == IS_CONST);
 
 		if (is_const) {
 			function_name_strval = EX(opline)->op2.u.constant.value.str.val;
@@ -2399,6 +2398,11 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
+
+		if (!is_const) {
+			efree(function_name_strval);
+			FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
+		}	
 	} else {
 		if(!ce->constructor) {
 			zend_error(E_ERROR, "Can not call constructor");
@@ -2407,11 +2411,6 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	EX(calling_scope) = EX(fbc)->common.scope;
-
-	if (!is_const) {
-		efree(function_name_strval);
-		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
-	}
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
