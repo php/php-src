@@ -354,7 +354,7 @@ static char *sapi_isapi_read_cookies(TSRMLS_D)
 			efree(tmp_variable_buf);
 		}
 	}
-	return NULL;
+	return "";
 }
 
 
@@ -490,6 +490,8 @@ static void sapi_isapi_register_server_variables2(char **server_variables, LPEXT
 			} else {
 				efree(variable_buf);
 			}
+		} else { /* for compatibility with Apache SAPIs */
+			php_register_variable(*p, "", track_vars_array TSRMLS_CC);
 		}
 		p++;
 	}
