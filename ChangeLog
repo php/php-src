@@ -1,3 +1,55 @@
+2002-02-02  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/isapi/stresstest/getopt.c
+      sapi/isapi/stresstest/getopt.h: now needs getopt
+
+    * sapi/isapi/stresstest/stresstest.cpp
+      sapi/isapi/stresstest/stresstest.dsp: an update to stresstest
+
+2002-02-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/cgi/cgi_main.c
+      sapi/fastcgi/fastcgi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/servlet/servlet.c:
+    Remove obsolete CG(extended_info) = 0 calls, we already do this in zend_set_default_compile_time_values().
+
+    * ext/calendar/french.c
+      ext/calendar/julian.c: Consistency.
+
+    * ext/calendar/gregor.c
+      ext/calendar/jewish.c: Fix a warning.
+
+2002-02-02  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in: Revert revision 1.294.
+
+    This commit broke things in interesting ways under FreeBSD.  By adding these
+    default header files to every header check, a number of subsequent checks
+    failed (due to unsatisfied header file dependencies).  This occured because
+    <netinet/in.h>, for example, requires <sys/types.h>.  In other words, these
+    default includes are not autonomous and don't make workable defaults.
+
+2002-02-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/fopen_wrappers.c: Fix thread-safe build.
+
+2002-02-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/odbc.php: * use seqname_format option
+
+    * pear/DB/common.php
+      pear/DB/fbsql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php:
+    * the actual name of the sequences or sequence emulation tables may
+      now be configured with the "seqname_format" option
+
+    * pear/package.dtd: * add some missing attributes
+
 2002-02-01  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/array.c:
