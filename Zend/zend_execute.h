@@ -93,9 +93,9 @@ static inline int i_zend_is_true(zval *op)
 			result = (zend_hash_num_elements(op->value.ht)?1:0);
 			break;
 		case IS_OBJECT:
-			if(EG(ze1_compatibility_mode) && IS_ZEND_STD_OBJECT(z)) {
+			if(EG(ze1_compatibility_mode) && IS_ZEND_STD_OBJECT(op)) {
 				TSRMLS_FETCH();
-				result = (zend_hash_num_elements(Z_OBJPROP_PP(struc))?1:0);
+				result = (zend_hash_num_elements(Z_OBJPROP_PP(op))?1:0);
 			} else {
 				result = 1;
 			}
