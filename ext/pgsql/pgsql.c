@@ -3040,14 +3040,14 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 
 #define PGSQL_CONV_CHECK_IGNORE() \
 				if (!err && Z_TYPE_P(new_val) == IS_STRING && !strcmp(Z_STRVAL_P(new_val), "NULL")) { \
-					/* if value is NULL and has default, remove entry to use default value*/ \
+					/* if new_value is string "NULL" and field has default value, remove element to use default value */ \
 					if (!(opt & PGSQL_CONV_IGNORE_DEFAULT) && Z_BVAL_PP(has_default)) { \
 						zval_dtor(new_val); \
 						FREE_ZVAL(new_val); \
 						skip_field = 1; \
 					} \
-					/* raise error if it's not null */ \
-					else if (Z_BVAL_PP(not_null)) { \
+					/* raise error if it's not null and cannot be ignored */ \
+					else if (!(opt & PGSQL_CONV_IGNORE_NOT_NULL) && Z_BVAL_PP(not_null)) { \
 						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Detected NULL for 'NOT NULL' field '%s'", field ); \
 						err = 1; \
 					} \
