@@ -1,7 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 200?, Version 4.0.6
+20 Jun 2001, Version 4.0.6
 - Fix memory fragmention problem which could lead to web server processes
   growing much more than they should. (Andi, Zend Engine)
 - Made $HTTP_SESSION_VARS['foo'] and $foo be references to the same value
