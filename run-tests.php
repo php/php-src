@@ -676,7 +676,7 @@ TEST $file
 	$shortname = str_replace($cwd.'/', '', $file);
 	$tested = trim($section_text['TEST'])." [$shortname]";
 
-	echo "TEST $tested\r";
+	echo "TEST [$shortname]\r";
 	flush();
 
 	$tmp = realpath(dirname($file));
