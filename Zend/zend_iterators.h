@@ -38,7 +38,7 @@ typedef struct _zend_object_iterator_funcs {
 	/* fetch the item data for the current element */
 	void (*get_current_data)(zend_object_iterator *iter, zval ***data TSRMLS_DC);
 
-	/* fetch the key for the current element (return HASH_KEY_IS_STRING or HASH_KEY_IS_LONG) */
+	/* fetch the key for the current element (return HASH_KEY_IS_STRING or HASH_KEY_IS_LONG) (optional, may be NULL) */
 	int (*get_current_key)(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
 
 	/* step forwards to next element */
@@ -51,6 +51,7 @@ typedef struct _zend_object_iterator_funcs {
 struct _zend_object_iterator {
 	void *data;
 	zend_object_iterator_funcs *funcs;
+	ulong index; /* private to fe_reset/fe_fetch opcodes */
 };
 
 typedef zval *(*zend_object_new_iterator_t)(zend_class_entry *ce, zval *object TSRMLS_DC);
