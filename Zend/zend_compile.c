@@ -836,7 +836,7 @@ void do_return(znode *expr CLS_DC)
 }
 
 
-void do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table)
+ZEND_API void do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table)
 {
 	switch (opline->extended_value) {
 		case ZEND_DECLARE_FUNCTION: {
