@@ -253,6 +253,9 @@ PHP_FUNCTION(flock)
 }
 
 /* }}} */
+
+#define PHP_META_UNSAFE ".\\+*?[^]$() "
+
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
    Extracts all meta tag content attributes from a file and returns an array */
 
@@ -319,6 +322,31 @@ PHP_FUNCTION(get_meta_tags)
 					/* We are done here! */
 					done = 1;
 				}
+			} else if (tok_last == TOK_EQUAL && looking_for_val) {
+
+				if (!num_parts) {
+					/* This is a single word attribute */
+					temp = name = estrndup(token_data,token_len);
+
+					while (temp && *temp) {
+						if (strchr(PHP_META_UNSAFE, *temp)) {
+							*temp = '_';
+						}
+						temp++;
+					}
+					num_parts++;
+				} else {
+					if (PG(magic_quotes_runtime)) {
+						value = php_addslashes(token_data,0,&token_len,0);
+					} else {
+						value = estrndup(token_data,token_len);
+					}
+
+					/* Insert the value into the array */
+					add_assoc_string(return_value, name, value, 0);
+					num_parts = 0;
+				}
+				looking_for_val = 0;
 			} else {
 				if (in_meta_tag) {
 					if (strcasecmp("name",token_data) == 0 || strcasecmp("content",token_data) == 0) {
@@ -333,7 +361,7 @@ PHP_FUNCTION(get_meta_tags)
 				/* First, get the name value and store it */
 				temp = name = estrndup(token_data,token_len);
 				while (temp && *temp) {
-					if (strchr(".\\+*?[^]$() ",*temp)) {
+					if (strchr(PHP_META_UNSAFE, *temp)) {
 						*temp = '_';
 					}
 					temp++;
@@ -2096,6 +2124,9 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 	return len;
 }
 
+/* See http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2 */
+#define PHP_META_HTML402_CHARS "-_.:"
+
 /* Tokenizes an HTML file for get_meta_tags */
 php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *use_last_char, int *last_char, char **data, int *datalen) {
 	int ch, compliment;
@@ -2150,10 +2181,13 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
             return TOK_SPACE;
             break;
         default:
-            if (isalpha(ch)) {
+            if (isalnum(ch)) {
                 *datalen = 0;
                 buff[(*datalen)++] = ch;
-				while (!FP_FEOF(socketd,fp,issock) && (ch = FP_FGETC(socketd,fp,issock)) && (isalpha(ch) || ch == '-')) {
+				while (!FP_FEOF(socketd,fp,issock) &&
+					   (ch = FP_FGETC(socketd,fp,issock)) &&
+					   (isalnum(ch) || strchr(PHP_META_HTML402_CHARS,ch))) {
+
 					buff[(*datalen)++] = ch;
 
 					if (*datalen == META_DEF_BUFSIZE)
@@ -2186,3 +2220,5 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
  * c-basic-offset: 4
  * End:
  */
+
+
