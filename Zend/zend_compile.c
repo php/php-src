@@ -1948,7 +1948,7 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry 
 }
 
 
-static void inherit_sttaic_prop(zval **p)
+static void inherit_static_prop(zval **p)
 {
 	(*p)->refcount++;
 	(*p)->is_ref = 1;
@@ -1971,7 +1971,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRML
 
 	/* Inherit properties */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
-	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) inherit_sttaic_prop, NULL, sizeof(zval *), 0);
+	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
