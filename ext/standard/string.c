@@ -3353,14 +3353,14 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					if(allow) {
 						*(tp++) = '<';
 					}
-				} else if (state) {
+				} else if (state == 1) {
 					depth++;
 				}
 				break;
 
 			case '(':
 				if (state == 2) {
-					if (lc != '\"') {
+					if (lc != '"' && lc != '\'') {
 						lc = '(';
 						br++;
 					}
@@ -3373,7 +3373,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 
 			case ')':
 				if (state == 2) {
-					if (lc != '\"') {
+					if (lc != '"' && lc != '\'') {
 						lc = ')';
 						br--;
 					}
@@ -3390,34 +3390,49 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					break;
 				}
 			
-				if (state == 1) {
-					lc = '>';
-					state = 0;
-					if(allow) {
-						*(tp++) = '>';
-						*tp='\0';
-						if(php_tag_find(tbuf, tp-tbuf, allow)) {
-							memcpy(rp, tbuf, tp-tbuf);
-							rp += tp-tbuf;
-						}
-						tp = tbuf;
-					}
-				} else if (state == 2) {
-					if (!br && lc != '\"' && *(p-1)=='?') {
+				switch (state) 
+				{
+					case 1: /* HTML/XML */
+						lc = '>';
 						state = 0;
-						tp = tbuf;
-					}
-				} else {
-					*(rp++) = c;
+						if(allow) {
+							*(tp++) = '>';
+							*tp='\0';
+							if(php_tag_find(tbuf, tp-tbuf, allow)) {
+								memcpy(rp, tbuf, tp-tbuf);
+								rp += tp-tbuf;
+							}
+							tp = tbuf;
+						}
+						break;
+						
+					case 2: /* PHP */
+						if (!br && lc != '\"' && *(p-1)=='?') {
+							state = 0;
+							tp = tbuf;
+						}
+						break;
+						
+					case 3: /* JavaScript/CSS/etc... */
+						if (*(p-1) == '-' && *(p-2) == '-') {
+							state = 0;
+							tp = tbuf;
+						}
+						break;
+					
+					default:
+						*(rp++) = c;
+						break;
 				}
 				break;
 
-			case '\"':
-				if (state == 2) {
-					if (lc == '\"') {
+			case '"':
+			case '\'':
+				if (state == 2 && *(p-1) != '\\') {
+					if (lc == c) {
 						lc = '\0';
 					} else if (lc != '\\') {
-						lc = '\"';
+						lc = c;
 					}
 				} else if (state == 0) {
 					*(rp++) = c;
@@ -3425,7 +3440,14 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					*(tp++) = c;
 				}
 				break;
-
+			
+			case '!': 
+				/* JavaScript & Other HTML scripting languages */
+				if (state == 1 && *(p-1) == '<') { 
+					state = 3;
+				}	
+				break;
+			
 			case '?':
 
 				if (state==1 && *(p-1)=='<') { 
