@@ -285,15 +285,18 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					if (variable_ptr==value) {
 						variable_ptr->refcount++;
 					} else if (value->is_ref) {
+						zval tmp = *value;
+
+						tmp = *value;
+						zval_copy_ctor(&tmp);
+						tmp.refcount=1;
 						zendi_zval_dtor(*variable_ptr);
-						*variable_ptr = *value;
-						zval_copy_ctor(variable_ptr);
-						variable_ptr->refcount=1;
+						*variable_ptr = tmp;
 					} else {
+						value->refcount++;
 						zendi_zval_dtor(*variable_ptr);
 						safe_free_zval_ptr(variable_ptr);
 						*variable_ptr_ptr = value;
-						value->refcount++;
 					}
 					break;
 				case IS_TMP_VAR:

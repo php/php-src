@@ -326,7 +326,7 @@ ZEND_API inline int add_index_string(zval *arg, uint index, char *str, int dupli
 	}
 	tmp->refcount=1;
 	tmp->is_ref=0;
-	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *),NULL);
+	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
