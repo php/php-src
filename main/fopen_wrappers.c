@@ -234,8 +234,6 @@ PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC)
 		char *end;
 		char resolved_name[MAXPATHLEN];
 
-		php_printf("safe_mode_include_dir check for %s<br>\n",path);
-
 		/* Resolve the real path into resolved_name */
 		if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL)
 			return -1;
