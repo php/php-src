@@ -134,7 +134,7 @@ php_stream_wrapper php_stream_ftp_wrapper =	{
  */
 php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	php_stream *stream=NULL, *datastream=NULL;
+	php_stream *stream=NULL, *datastream=NULL, *reuseid=NULL;
 	php_url *resource=NULL;
 	char tmp_line[512];
 	char ip[sizeof("123.123.123.123")];
@@ -190,6 +190,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 			result = GET_FTP_RESULT(stream);
 			if (result != 334) {
 				use_ssl = 0;
+			} else {
+				/* we must reuse the old SSL session id */
+				/* if we talk to an old ftpd-ssl */
+				reuseid = stream;
 			}
 		} else {
 			/* encrypt data etc */
@@ -219,7 +223,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 		/* get the response */
 		result = GET_FTP_RESULT(stream);
-		use_ssl_on_data = result >= 200 && result<=299;
+		use_ssl_on_data = (result >= 200 && result<=299) || reuseid;
 #else
 		php_stream_write_string(stream, "PROT C\r\n");
 
@@ -407,20 +411,20 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	if (datastream == NULL)
 		goto errexit;
 		
-	/* remember control stream */	
-	datastream->wrapperdata = (zval *)stream;
-
 	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
 
 #if HAVE_OPENSSL_EXT
-	if (use_ssl_on_data && php_stream_sock_ssl_activate_with_method(datastream, 1, SSLv23_method()) == FAILURE)	{
+	if (use_ssl_on_data && php_stream_sock_ssl_activate_with_method_ex(datastream, 1, SSLv23_method(), reuseid) == FAILURE)	{
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
 		goto errexit;
 	}
 #endif
+
+	/* remember control stream */	
+	datastream->wrapperdata = (zval *)stream;
 
 	php_url_free(resource);
 	return datastream;

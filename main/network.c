@@ -582,10 +582,15 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int
 }
 
 #if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method TSRMLS_DC)
+PHPAPI int php_stream_sock_ssl_activate_with_method_ex(php_stream *stream, int activate, SSL_METHOD *method, php_stream *control TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+	php_netstream_data_t *psock = NULL;
 	SSL_CTX *ctx = NULL;
+
+	if (control) {
+		psock = (php_netstream_data_t*)control->abstract;
+	}
 
 	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: stream is not a network stream");
@@ -610,6 +615,10 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 		}
 		
 		SSL_set_fd(sock->ssl_handle, sock->socket);
+		
+		if (psock) {
+			SSL_copy_session_id(sock->ssl_handle, psock->ssl_handle);
+		}
 	}
 
 	if (activate)	{
@@ -626,6 +635,7 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 	}
 	return SUCCESS;
 }
+
 #endif
 
 PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout TSRMLS_DC)
