@@ -2587,11 +2587,9 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		} else {
 			param = serialize_parameter(parameter, ret, 0, "return", use, body TSRMLS_CC);
 			if (function && function->binding->bindingType == BINDING_SOAP) {
-				sdlParamPtr *sparam;
-
-				if (zend_hash_index_find(function->responseParameters, 0, (void **)&sparam) == SUCCESS && (*sparam)->element) {
-					ns = encode_add_ns(param, (*sparam)->element->namens);
-					xmlNodeSetName(param, (*sparam)->element->name);
+				if (parameter && parameter->element) {
+					ns = encode_add_ns(param, parameter->element->namens);
+					xmlNodeSetName(param, parameter->element->name);
 					xmlSetNs(param, ns);
 				}
 			} else if (strcmp(param->name,"return") == 0) {
@@ -2619,11 +2617,9 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 			} else {
 				param = serialize_parameter(parameter, *data, i, param_name, use, body TSRMLS_CC);
 				if (function && function->binding->bindingType == BINDING_SOAP) {
-					sdlParamPtr *sparam;
-
-					if (zend_hash_index_find(function->responseParameters, i, (void **)&sparam) == SUCCESS) {
-						ns = encode_add_ns(param, (*sparam)->encode->details.ns);
-						xmlNodeSetName(param, (*sparam)->encode->details.type_str);
+					if (parameter && parameter->element) {
+						ns = encode_add_ns(param, parameter->element->namens);
+						xmlNodeSetName(param, parameter->element->name);
 						xmlSetNs(param, ns);
 					}
 				}
@@ -2911,12 +2907,34 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		} else if (style == SOAP_DOCUMENT) {
 			param = serialize_parameter(parameter, arguments[i], i, NULL, use, body TSRMLS_CC);
 			if (function && function->binding->bindingType == BINDING_SOAP) {
-				sdlParamPtr *sparam;
-
-				if (zend_hash_index_find(function->requestParameters, i, (void **)&sparam) == SUCCESS && (*sparam)->element) {
-					ns = encode_add_ns(param, (*sparam)->element->namens);
-					xmlNodeSetName(param, (*sparam)->element->name);
+				if (parameter && parameter->element) {
+					ns = encode_add_ns(param, parameter->element->namens);
+					xmlNodeSetName(param, parameter->element->name);
 					xmlSetNs(param, ns);
+				}
+			}
+		}
+	}
+	
+	if (function && function->requestParameters) {
+		int n = zend_hash_num_elements(function->requestParameters);
+
+		if (n > arg_count) {
+			for (i = arg_count; i < n; i++) {
+				xmlNodePtr param;
+				sdlParamPtr parameter = get_param(function, NULL, i, FALSE);
+
+				if (style == SOAP_RPC) {
+					param = serialize_parameter(parameter, NULL, i, NULL, use, method TSRMLS_CC);
+				} else if (style == SOAP_DOCUMENT) {
+					param = serialize_parameter(parameter, NULL, i, NULL, use, body TSRMLS_CC);
+					if (function && function->binding->bindingType == BINDING_SOAP) {
+						if (parameter && parameter->element) {
+							ns = encode_add_ns(param, parameter->element->namens);
+							xmlNodeSetName(param, parameter->element->name);
+							xmlSetNs(param, ns);
+						}
+					}
 				}
 			}
 		}
@@ -3026,8 +3044,9 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 	xmlNodePtr xmlParam;
 	char paramNameBuf[10];
 
-	if (Z_TYPE_P(param_val) == IS_OBJECT &&
-		Z_OBJCE_P(param_val) == soap_param_class_entry) {
+	if (param_val &&
+	    Z_TYPE_P(param_val) == IS_OBJECT &&
+	    Z_OBJCE_P(param_val) == soap_param_class_entry) {
 		zval **param_name;
 		zval **param_data;
 
