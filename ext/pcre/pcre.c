@@ -829,9 +829,9 @@ PHP_FUNCTION(preg_split)
 				limit_val--;
 		}
 		else { /* if no match */
-			/* Add the last piece to the return value, if there
-			   were matches before */
-			if (piece > subject->value.str.val)
+			/* Add the last piece to the return value, if there is
+			   something left */
+			if (limit != 0)
 				add_next_index_stringl(return_value,
 									   piece,
 									   subject_end-piece, 1);

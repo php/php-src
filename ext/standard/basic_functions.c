@@ -2583,7 +2583,11 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		zend_error(E_WARNING, "The argument needs to be an array");
 		return;
 	}
-	
+
+	if (zend_hash_num_elements(stack->value.ht) == 0) {
+		return;
+	}
+		
 	/* Get the first or last value and copy it into the return value */
 	if (off_the_end)
 		zend_hash_internal_pointer_end(stack->value.ht);
