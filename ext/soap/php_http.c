@@ -471,10 +471,10 @@ try_again:
 						if (zend_hash_index_find(Z_ARRVAL_PP(data), 0, (void**)&value) == SUCCESS &&
 						    Z_TYPE_PP(value) == IS_STRING) {
 						  zval **tmp;
-						  if (zend_hash_index_find(Z_ARRVAL_PP(data), 1, (void**)&tmp) == SUCCESS &&
-						      strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_PP(tmp),Z_STRLEN_PP(tmp)) == 0 &&
-						      zend_hash_index_find(Z_ARRVAL_PP(data), 2, (void**)&tmp) == SUCCESS &&
-						      in_domain(phpurl->host,Z_STRVAL_PP(tmp)) &&
+						  if ((zend_hash_index_find(Z_ARRVAL_PP(data), 1, (void**)&tmp) == FAILURE ||
+						       strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_PP(tmp),Z_STRLEN_PP(tmp)) == 0) &&
+						      (zend_hash_index_find(Z_ARRVAL_PP(data), 2, (void**)&tmp) == FAILURE ||
+						       in_domain(phpurl->host,Z_STRVAL_PP(tmp))) &&
 						      (use_ssl || zend_hash_index_find(Z_ARRVAL_PP(data), 3, (void**)&tmp) == FAILURE)) {
 								smart_str_appendl(&soap_headers, key, strlen(key));
 								smart_str_appendc(&soap_headers, '=');
