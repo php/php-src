@@ -87,7 +87,7 @@ extern char *crypt(char *__key, char *__salt);
 #endif
 
 
-#define PHP_CRYPT_RAND php_rand()
+#define PHP_CRYPT_RAND php_rand(TSRMLS_C)
 
 static int php_crypt_rand_seeded=0;
 
@@ -106,7 +106,7 @@ PHP_MINIT_FUNCTION(crypt)
 PHP_RINIT_FUNCTION(crypt)
 {
 	if(!php_crypt_rand_seeded) {
-		php_srand(time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0));
+		php_srand(time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0) TSRMLS_CC);
 		php_crypt_rand_seeded=1;
 	} 
 	return SUCCESS;
@@ -115,7 +115,8 @@ PHP_RINIT_FUNCTION(crypt)
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php_to64(char *s, long v, int n)	{
+static void php_to64(char *s, long v, int n)
+{
 	while (--n >= 0) {
 		*s++ = itoa64[v&0x3f]; 		
 		v >>= 6;
