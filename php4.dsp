@@ -90,7 +90,7 @@ LINK32=link.exe
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=.\cgi_main.c
+SOURCE=.\sapi\cgi\cgi_main.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
