@@ -17,7 +17,7 @@ if (PHP_INFORMIX != "no") {
 
 		ADD_FLAG("CFLAGS_INFORMIX", "/I " + php_ifx_dir + "\\incl\\esql "); 
 
-		EXTENSION('informix', 'ifx.c', null, "/D IFX_VERSION=921 /D HAVE_IFX_IUS=1", "php_ifx.dll");
+		EXTENSION('informix', 'ifx.c', null, "/D IFX_VERSION=921 /D HAVE_IFX_IUS=1 /D HAVE_IFX=1", "php_ifx.dll");
 		MFO.WriteLine(configure_module_dirname + "\\ifx.c: " + configure_module_dirname + "\\ifx.ec");
 		MFO.WriteLine("\t<<informix_build.bat");
 		MFO.WriteLine("PATH " + php_ifx_bin + ";%PATH%");
