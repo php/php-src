@@ -6011,6 +6011,10 @@ PHP_FUNCTION(oci_password_change)
 		WRONG_PARAM_COUNT;
 	}
 
+	convert_to_string_ex(user_param);
+	convert_to_string_ex(pass_old_param);
+	convert_to_string_ex(pass_new_param);
+	
 	user      = Z_STRVAL_PP(user_param);
 	pass_old  = Z_STRVAL_PP(pass_old_param);
 	pass_new  = Z_STRVAL_PP(pass_new_param);
