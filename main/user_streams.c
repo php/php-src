@@ -85,29 +85,46 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 /* class should have methods like these:
  
-function stream_open($path, $mode, $options, &$opened_path)
-   {
-      return true/false;
-   }
-   function stream_read($count)
-   {
-      return false on error;
-      else return string;
-   }
-   function stream_write($data)
-   {
-      return false on error;
-      else return count written;
-   }
-   function stream_close()
-   {
-   }
-   function stream_flush()
-   {
-   }
-   function stream_seek($offset, $whence)
-   {
-   }
+	function stream_open($path, $mode, $options, &$opened_path)
+	{
+	  	return true/false;
+	}
+	
+	function stream_read($count)
+	{
+	   	return false on error;
+		else return string;
+	}
+	
+	function stream_write($data)
+	{
+	   	return false on error;
+		else return count written;
+	}
+	
+	function stream_close()
+	{
+	}
+	
+	function stream_flush()
+	{
+		return true/false;
+	}
+	
+	function stream_seek($offset, $whence)
+	{
+		return true/false;
+	}
+
+	function stream_tell()
+	{
+		return (int)$position;
+	}
+
+	function stream_eof()
+	{
+		return true/false;
+	}
   
  **/
 
@@ -267,6 +284,9 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_long_ex(&retval);
 		didwrite = Z_LVAL_P(retval);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " - is not implemented!",
+				us->wrapper->classname);
 	}
 
 	/* don't allow strange buffer overruns due to bogus return */
@@ -305,8 +325,14 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 
 		if (call_result == SUCCESS && retval != NULL && zval_is_true(retval))
 			didread = 0;
-		else
+		else {
+			if (call_result == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_EOF " - is not implemented! Assuming EOF",
+						us->wrapper->classname);
+			}
+
 			didread = EOF;
+		}
 
 	} else {
 		zval *zcount;
@@ -334,8 +360,10 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 			}
 			if (didread > 0)
 				memcpy(buf, Z_STRVAL_P(retval), didread);
+		} else if (call_result == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - is not implemented!",
+					us->wrapper->classname);
 		}
-
 		zval_ptr_dtor(&zcount);
 	}
 	
@@ -430,10 +458,19 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 	zval_ptr_dtor(&zoffs);
 	zval_ptr_dtor(&zwhence);
 
-	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
-		ret = Z_LVAL_P(retval);
-	else
+	if (call_result == FAILURE) {
+		/* stream_seek is not implemented, so disable seeks for this stream */
+		stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+		/* there should be no retval to clean up */
+		return -1;
+	} else if (call_result == SUCCESS && retval != NULL && zval_is_true(retval)) {
+		ret = 0;
+	} else {
 		ret = -1;
+	}
+
+	if (retval)
+		zval_ptr_dtor(&retval);
 
 	/* now determine where we are */
 	ZVAL_STRINGL(&func_name, USERSTREAM_TELL, sizeof(USERSTREAM_TELL)-1, 0);
@@ -446,6 +483,9 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 
 	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
 		*newoffs = Z_LVAL_P(retval);
+	else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_TELL " - is not implemented!",
+				us->wrapper->classname);
 	
 	if (retval)
 		zval_ptr_dtor(&retval);

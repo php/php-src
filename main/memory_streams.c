@@ -216,6 +216,7 @@ php_stream_ops	php_stream_memory_ops = {
 PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 {
 	php_stream_memory_data *self;
+	php_stream *stream;
 
 	self = emalloc(sizeof(*self));
 	assert(self != NULL);
@@ -224,7 +225,10 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	self->fsize = 0;
 	self->smax = -1;
 	self->mode = mode;
-	return php_stream_alloc(&php_stream_memory_ops, self, 0, "rwb");
+	
+	stream = php_stream_alloc(&php_stream_memory_ops, self, 0, "rwb");
+	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
+	return stream;
 }
 /* }}} */
 
@@ -435,8 +439,9 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self->smax = max_memory_usage;
 	self->mode = mode;
 	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "rwb");
+	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create(mode);
-/*	php_stream_temp_write(stream, NULL, 0 TSRMLS_CC); */
+
 	return stream;
 }
 /* }}} */
