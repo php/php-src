@@ -1890,6 +1890,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 
 	if (nc==gdTiled){
 		_gdImageFillTiled(im,x,y,nc);
+		im->alphaBlendingFlag = alphablending_bak;
 		return;
 	}
 
@@ -2192,7 +2193,7 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 	int tox, toy;
 	int ncR, ncG, ncB;
 	toy = dstY;
-
+printf("srccpopy:%X", src->transparent);
 	for (y = srcY; y < (srcY + h); y++) {
 		tox = dstX;
 		for (x = srcX; x < (srcX + w); x++) {
@@ -2493,7 +2494,7 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 #endif /* ROTATE_PI */
 
 #define ROTATE_DEG2RAD  3.1415926535897932384626433832795/180
-void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double dWeight, int clrBack)
+void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double dWeight, int clrBack, int ignoretransparent)
 {
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	int i, r, g, b, a, clrBackR, clrBackG, clrBackB, clrBackA;
@@ -2558,10 +2559,14 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 			a = 127;
 		}
 
-		pxlSrc = gdImageColorAllocateAlpha(dst, r, g, b, a);
+		if (ignoretransparent && pxlSrc == dst->transparent) {
+			pxlSrc = dst->transparent;
+		} else {
+			pxlSrc = gdImageColorAllocateAlpha(dst, r, g, b, a);
 
-	        if (pxlSrc == -1) {
-			pxlSrc = gdImageColorClosestAlpha(dst, r, g, b, a);
+			if (pxlSrc == -1) {
+				pxlSrc = gdImageColorClosestAlpha(dst, r, g, b, a);
+			}
 		}
 
 		if ((i + iOffset >= 0) && (i + iOffset < dst->sx)) {
@@ -2586,7 +2591,7 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 	}
 }
 
-void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double dWeight, int clrBack)
+void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double dWeight, int clrBack, int ignoretransparent)
 {
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	int i, iYPos=0, r, g, b, a;
@@ -2645,10 +2650,14 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 			a = 127;
 		}
 
-		pxlSrc = gdImageColorAllocateAlpha(dst, r, g, b, a);
+		if (ignoretransparent && pxlSrc == dst->transparent) {
+			pxlSrc = dst->transparent;
+		} else {
+			pxlSrc = gdImageColorAllocateAlpha(dst, r, g, b, a);
 
-		if (pxlSrc == -1) {
-			pxlSrc = gdImageColorClosestAlpha(dst, r, g, b, a);
+			if (pxlSrc == -1) {
+				pxlSrc = gdImageColorClosestAlpha(dst, r, g, b, a);
+			}
 		}
 
 		if ((iYPos >= 0) && (iYPos < dst->sy)) {
@@ -2670,7 +2679,7 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 }
 
 /* Rotates an image by 90 degrees (counter clockwise) */
-gdImagePtr gdImageRotate90 (gdImagePtr src)
+gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 {
 	int uY, uX;
 	int c,r,g,b,a;
@@ -2684,6 +2693,7 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor(src->sy, src->sx);
+	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
@@ -2698,7 +2708,11 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 					a = gdImageAlpha(src,c);
 					c = gdTrueColorAlpha(r, g, b, a);
 				}
-				gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
+				if (ignoretransparent && c == dst->transparent) {
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), dst->transparent);
+				} else {
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
+				}
 			}
 		}
 	}
@@ -2707,7 +2721,7 @@ gdImagePtr gdImageRotate90 (gdImagePtr src)
 }
 
 /* Rotates an image by 180 degrees (counter clockwise) */
-gdImagePtr gdImageRotate180 (gdImagePtr src)
+gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 {
 	int uY, uX;
 	int c,r,g,b,a;
@@ -2721,6 +2735,7 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor(src->sx, src->sy);
+	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
@@ -2735,7 +2750,11 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 					a = gdImageAlpha(src,c);
 					c = gdTrueColorAlpha(r, g, b, a);
 				}
-				gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1), c);
+				if (ignoretransparent && c == dst->transparent) {
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), dst->transparent);
+				} else {
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
+				}
 			}
 		}
 	}
@@ -2744,7 +2763,7 @@ gdImagePtr gdImageRotate180 (gdImagePtr src)
 }
 
 /* Rotates an image by 270 degrees (counter clockwise) */
-gdImagePtr gdImageRotate270 ( gdImagePtr src )
+gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 {
 	int uY, uX;
 	int c,r,g,b,a;
@@ -2758,6 +2777,7 @@ gdImagePtr gdImageRotate270 ( gdImagePtr src )
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor (src->sy, src->sx);
+	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
 		gdImagePaletteCopy (dst, src);
@@ -2772,7 +2792,11 @@ gdImagePtr gdImageRotate270 ( gdImagePtr src )
 					a = gdImageAlpha(src,c);
 					c = gdTrueColorAlpha(r, g, b, a);
 				}
-				gdImageSetPixel(dst, (dst->sx - uY - 1), uX, c);
+				if (ignoretransparent && c == dst->transparent) {
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), dst->transparent);
+				} else {
+					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
+				}
 			}
 		}
 	}
@@ -2780,7 +2804,7 @@ gdImagePtr gdImageRotate270 ( gdImagePtr src )
 	return dst;
 }
 
-gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
+gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int ignoretransparent)
 {
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	gdImagePtr dst1,dst2,dst3;
@@ -2820,6 +2844,15 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 
 	gdImagePaletteCopy (dst1, src);
 
+	if (ignoretransparent) {
+		if (gdImageTrueColor(src)) {
+			dst1->transparent = src->transparent;
+		} else {
+
+			dst1->transparent = gdTrueColorAlpha(gdImageRed(src, src->transparent), gdImageBlue(src, src->transparent), gdImageGreen(src, src->transparent), 127);
+		}
+	}
+
 	dRadAngle = dAngle * ROTATE_DEG2RAD; /* Angle in radians */
 	dSinE = sin (dRadAngle);
 	dTan = tan (dRadAngle / 2.0);
@@ -2832,7 +2865,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 		}
 
 		iShear = (int)floor(dShear);
-		gdImageSkewX(dst1, src, u, iShear, (dShear - iShear), clrBack);
+		gdImageSkewX(dst1, src, u, iShear, (dShear - iShear), clrBack, ignoretransparent);
 	}
 
 	/*
@@ -2868,10 +2901,13 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 		return NULL;
 	}
 	dst2->alphaBlendingFlag = gdEffectReplace;
+	if (ignoretransparent) {
+		dst2->transparent = dst1->transparent;
+	}
 
 	for (u = 0; u < dst2->sx; u++, dOffset -= dSinE) {
 		iShear = (int)floor (dOffset);
-		gdImageSkewY(dst2, dst1, u, iShear, (dOffset - (double)iShear), clrBack);
+		gdImageSkewY(dst2, dst1, u, iShear, (dOffset - (double)iShear), clrBack, ignoretransparent);
 	}
 
 	/* 3rd shear */
@@ -2890,6 +2926,12 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 		gdImageDestroy(dst2);
 		return NULL;
 	}
+
+	dst3->alphaBlendingFlag = gdEffectReplace;
+	if (ignoretransparent) {
+		dst3->transparent = dst2->transparent;
+	}
+
 	if (dSinE >= 0.0) {
 		dOffset = (double)(src->sx - 1) * dSinE * -dTan;
 	} else {
@@ -2897,8 +2939,8 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	}
 
 	for (u = 0; u < dst3->sy; u++, dOffset += dTan) {
-	        int iShear = (int)floor(dOffset);
-		gdImageSkewX(dst3, dst2, u, iShear, (dOffset - iShear), clrBack);
+		int iShear = (int)floor(dOffset);
+		gdImageSkewX(dst3, dst2, u, iShear, (dOffset - iShear), clrBack, ignoretransparent);
 	}
 
 	gdImageDestroy(dst2);
@@ -2906,7 +2948,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack)
 	return dst3;
 }
 
-gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
+gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack, int ignoretransparent)
 {
 	gdImagePtr pMidImg;
 	gdImagePtr rotatedImg;
@@ -2928,33 +2970,33 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
 	}
 
 	if (dAngle == 90.00) {
-		return gdImageRotate90(src);
+		return gdImageRotate90(src, ignoretransparent);
 	}
 	if (dAngle == 180.00) {
-		return gdImageRotate180(src);
+		return gdImageRotate180(src, ignoretransparent);
 	}
 	if(dAngle == 270.00) {
-		return gdImageRotate270 ( src);
+		return gdImageRotate270 (src, ignoretransparent);
 	}
 
 	if ((dAngle > 45.0) && (dAngle <= 135.0)) {
-		pMidImg = gdImageRotate90 (src);
+		pMidImg = gdImageRotate90 (src, ignoretransparent);
 		dAngle -= 90.0;
 	} else if ((dAngle > 135.0) && (dAngle <= 225.0)) {
-		pMidImg = gdImageRotate180 (src);
+		pMidImg = gdImageRotate180 (src, ignoretransparent);
 		dAngle -= 180.0;
 	} else if ((dAngle > 225.0) && (dAngle <= 315.0)) {
-		pMidImg = gdImageRotate270 (src);
+		pMidImg = gdImageRotate270 (src, ignoretransparent);
 		dAngle -= 270.0;
 	} else {
-		return gdImageRotate45 (src, dAngle, clrBack);
+		return gdImageRotate45 (src, dAngle, clrBack, ignoretransparent);
 	}
 
 	if (pMidImg == NULL) {
 		return NULL;
 	}
 
-	rotatedImg = gdImageRotate45 (pMidImg, dAngle, clrBack);
+	rotatedImg = gdImageRotate45 (pMidImg, dAngle, clrBack, ignoretransparent);
 	gdImageDestroy(pMidImg);
 
 	return rotatedImg;
