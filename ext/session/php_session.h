@@ -57,6 +57,8 @@ typedef struct ps_module_struct {
 	int (*gc)(PS_GC_ARGS);
 } ps_module;
 
+#define PS_GET_MOD_DATA() *mod_data
+#define PS_SET_MOD_DATA(a) *mod_data = (a)
 
 #define PS_OPEN_FUNC(x) 	int _ps_open_##x(PS_OPEN_ARGS)
 #define PS_CLOSE_FUNC(x) 	int _ps_close_##x(PS_CLOSE_ARGS)
