@@ -593,7 +593,7 @@ mysql.default_user =
 
 ; Default password for mysql_connect() (doesn't apply in safe mode).
 ; Note that this is generally a *bad* idea to store passwords in this file.
-; *Any* user with PHP access can run 'echo cfg_get_var("mysql.default_password")
+; *Any* user with PHP access can run 'echo get_cfg_var("mysql.default_password")
 ; and reveal this password!  And of course, any users with read access to this
 ; file will be able to reveal the password as well.
 mysql.default_password =
