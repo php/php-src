@@ -343,9 +343,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 
 		if (colon) {
 			char *value = colon+1;
-			zval *entry;
 
-			ALLOC_ZVAL(entry);
 			while (*value==' ') {
 				value++;
 			}
