@@ -445,7 +445,7 @@ PHP_FUNCTION(mcal_expunge)
 }
 /* }}} */
 
-/* {{{ proto int mcal_fetch_event(int stream_id,int eventid [, int options])
+/* {{{ proto int mcal_fetch_event(int stream_id, int eventid [, int options])
    Fetch an event */
 PHP_FUNCTION(mcal_fetch_event)
 {
@@ -502,7 +502,7 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 }
 /* }}} */
 
-/* {{{ proto array mcal_list_events(int stream_id,object begindate [, object enddate])
+/* {{{ proto array mcal_list_events(int stream_id, object begindate [, object enddate])
    Returns list of UIDs for that day or range of days */
 PHP_FUNCTION(mcal_list_events)
 {
