@@ -827,7 +827,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	return 0;
 }
 
-/* {{{ proto array_walk(array input, string funcname [, mixed userdata])
+/* {{{ proto int array_walk(array input, string funcname [, mixed userdata])
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk) {
 	int    argc;
