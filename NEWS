@@ -1,5 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2005, PHP 5.0.5
+- Fixed bug #32530 (chunk_split() does not append endstr if chunklen is  
+  longer then the original string). (Ilia)
+
 31 Mar 2005, PHP 5.0.4
 - Added SNMPv2 support. (harrie)
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
