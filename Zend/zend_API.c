@@ -202,7 +202,7 @@ ZEND_API inline int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND
 	zval *tmp;
 
 	if (!class_type->constants_updated) {
-		zend_hash_apply(&class_type->default_properties, (int (*)(void *)) zval_update_constant);
+		zend_hash_apply_with_argument(&class_type->default_properties, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
 		class_type->constants_updated = 1;
 	}
 	

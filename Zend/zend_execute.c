@@ -516,7 +516,7 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 	if (op2->u.fetch_type == ZEND_FETCH_LOCAL) {
 		FREE_OP(op1, free_op1);
 	} else if (op2->u.fetch_type == ZEND_FETCH_STATIC) {
-		zval_update_constant(retval);
+		zval_update_constant(retval, (void *) 1);
 	}
 
 	if (varname == &tmp_varname) {
@@ -1317,7 +1317,7 @@ binary_assign_op_addr: {
 					zval *value;
 					value = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
 
-					zend_assign_to_variable(&opline->result, &opline->op1, &opline->op2, value, (EG(free_op2)?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
+ 					zend_assign_to_variable(&opline->result, &opline->op1, &opline->op2, value, (EG(free_op2)?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
 					/* zend_assign_to_variable() always takes care of op2, never free it! */
 				}
 				NEXT_OPCODE();
@@ -1782,18 +1782,15 @@ send_by_ref:
 					zval **param, *assignment_value;
 
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
-						if (opline->op2.u.constant.type == IS_CONSTANT) {
+						if (opline->op2.u.constant.type == IS_CONSTANT || opline->op2.u.constant.type==IS_CONSTANT_ARRAY) {
 							zval *default_value;
-							zval tmp;
 
 							ALLOC_ZVAL(default_value);
 							*default_value = opline->op2.u.constant;
-							if (!zend_get_constant(default_value->value.str.val, default_value->value.str.len, &tmp)) {
-								default_value->type = IS_STRING;
+							if (opline->op2.u.constant.type==IS_CONSTANT_ARRAY) {
 								zval_copy_ctor(default_value);
-							} else {
-								*default_value = tmp;
 							}
+							zval_update_constant(&default_value, 0);
 							default_value->refcount=0;
 							default_value->is_ref=0;
 							param = &default_value;
