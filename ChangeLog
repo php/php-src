@@ -1,3 +1,33 @@
+2002-02-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    move to the ZEND_DECLARE_MODULE_GLOBALS() and ZEND_EXTERN_MODULE_GLOBALS
+    macros
+
+2002-02-07  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/scripts/pearcmd-remote-list.php: * Better error handling.
+
+    * pear/HTTP.php: * Partially fix bug #15423.
+
+2002-02-07  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c: Legacy code removed.
+    This line incorrectly removes buffer.
+    This line was correct only when ouput.c does not support
+    nested output buffers. Fixed bug #15178
+
+2002-02-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php
+      pear/DB/oci8.php:
+    Moved the array_change_key_case() PHP func definition to common
+
+    * pear/DB/ibase.php: change column case to lower in compatibility mode
+
+    * pear/DB/ibase.php: ws
+
 2002-02-06  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c:
