@@ -49,6 +49,14 @@
 #include "http_log.h"
 #endif
 
+
+/* These are taken out of php_ini.h
+ * they must be updated if php_ini.h changes!
+ */
+#define PHP_INI_USER    (1<<0)
+#define PHP_INI_PERDIR  (1<<1)
+#define PHP_INI_SYSTEM  (1<<2)
+
 #include "util_script.h"
 
 #include "php_version.h"
@@ -384,6 +392,36 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 	return NULL;
 }
 
+
+#if MODULE_MAGIC_NUMBER > 19961007
+#define CONST_PREFIX const
+#else
+#define CONST_PREFIX
+#endif
+
+CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php3_ini_structure *conf, char *arg1, char *arg2)
+{
+	php_alter_ini_entry(arg1, strlen(arg1)+1, arg2, strlen(arg2)+1, PHP_INI_PERDIR);
+	return NULL;
+}
+
+
+CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php3_ini_structure *conf, char *arg1, char *arg2)
+{
+	char bool_val[2];
+
+	if (!strcmp(arg2, "On")) {
+		bool_val[0] = '1';
+	} else {
+		bool_val[0] = '0';
+	}
+	bool_val[1] = 0;
+	
+	php_alter_ini_entry(arg1, strlen(arg1)+1, bool_val, 2, PHP_INI_PERDIR);
+	return NULL;
+}
+
+
 #if MODULE_MAGIC_NUMBER > 19961007
 const char *php3take1handler(cmd_parms * cmd, php3_ini_structure * conf, char *arg)
 {
@@ -546,6 +584,8 @@ handler_rec php3_handlers[] =
 
 command_rec php3_commands[] =
 {
+	{"php4_directive",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
+	{"php4_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
 	{"php3_error_reporting", php3take1handler, (void *)0, OR_OPTIONS, TAKE1, "error reporting level"},
 	{"php3_doc_root", php3take1handler, (void *)1, ACCESS_CONF|RSRC_CONF, TAKE1, "directory"}, /* not used yet */
 	{"php3_user_dir", php3take1handler, (void *)2, ACCESS_CONF|RSRC_CONF, TAKE1, "user directory"}, /* not used yet */

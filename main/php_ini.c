@@ -58,6 +58,8 @@ static int php_restore_ini_entry_cb(php_ini_entry *ini_entry)
 		ini_entry->value = ini_entry->orig_value;
 		ini_entry->value_length = ini_entry->orig_value_length;
 		ini_entry->modified = 0;
+		ini_entry->orig_value = NULL;
+		ini_entry->orig_value_length = 0;
 	}
 	return 0;
 }
@@ -108,6 +110,10 @@ int php_register_ini_entries(php_ini_entry *ini_entry, int module_number)
 				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value->value.str.val, default_value->value.str.len, hashed_ini_entry->mh_arg)==SUCCESS) {
 				hashed_ini_entry->value = default_value->value.str.val;
 				hashed_ini_entry->value_length = default_value->value.str.len;
+			}
+		} else {
+			if (hashed_ini_entry->on_modify) {
+				hashed_ini_entry->on_modify(hashed_ini_entry, hashed_ini_entry->value, hashed_ini_entry->value_length, hashed_ini_entry->mh_arg);
 			}
 		}
 		hashed_ini_entry->modified = 0;
