@@ -2357,6 +2357,19 @@ void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_le
 }
 
 
+void unmangle_property_name(char *mangled_property, char **class_name, char **prop_name)
+{
+	*prop_name = *class_name = NULL;
+
+	if (mangled_property[0]!=0) {
+		*prop_name = mangled_property;
+		return;
+	}
+
+	*class_name = mangled_property+1;
+	*prop_name = (*class_name)+strlen(*class_name)+1;
+}
+
 void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC)
 {
 	zval *property;
