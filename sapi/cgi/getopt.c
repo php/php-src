@@ -10,7 +10,6 @@
 #define OPTERRARG (3)
 
 
-char buff[81]; /* too hold option value when needed */
 char *ap_php_optarg;
 int ap_php_optind = 1;
 static int ap_php_opterr = 1;
