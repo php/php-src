@@ -46,14 +46,16 @@ static int scan(Scanner *s)
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
-	SPECIALS	= [:?"];
-	ESC     	= [\\]["];
+	SPECIALS	= [:?"'];
+	ESCQQ     	= [\\]["];
+	ESCQ     	= [\\]['];
 	EOF			= [\000];
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
-		(["] (ESC|ANYNOEOF\[\\"])* ["])		{ RET(PDO_PARSER_TEXT); }
+		(["] (ESCQQ|ANYNOEOF\[\\"])* ["])		{ RET(PDO_PARSER_TEXT); }
+		(['] (ESCQ|ANYNOEOF\[\\"])* ['])		{ RET(PDO_PARSER_TEXT); }
 		BINDCHR	{ RET(PDO_PARSER_BIND); }
 		QUESTION	{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS	{ RET(PDO_PARSER_TEXT); }
@@ -114,6 +116,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			if(!params) { 
 				/* error */
 				efree(*outquery);
+				*outquery = NULL;
 				return (int) (s.cur - inquery);
 			}
 			/* lookup bind first via hash and then index */
@@ -144,9 +147,10 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 					*outquery_len += (Z_STRLEN_P(param->parameter));
 				}
 			}
-			else {
+			else_{
 				/* error and cleanup */
 				efree(*outquery);
+				*outquery = NULL;
 				return (int) (s.cur - inquery);
 			}
 			bindno++;
@@ -155,6 +159,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			if(!params) { 
 				/* error */
 				efree(*outquery);
+				*outquery = NULL;
 				return (int) (s.cur - inquery);
 			}
 			/* lookup bind by index */
@@ -181,6 +186,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			else {
 				/* error and cleanup */
 				efree(*outquery);
+				*outquery = NULL;
 				return (int) (s.cur - inquery);
 			}
 			bindno++;
