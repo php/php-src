@@ -197,8 +197,8 @@ static int le_pdb;
 static void dba_close(dba_info *info TSRMLS_DC)
 {
 	if(info->hnd) info->hnd->close(info TSRMLS_CC);
-	if(info->path) free(info->path);
-	free(info);
+	if(info->path) efree(info->path);
+	efree(info);
 }
 /* }}} */
 
@@ -365,13 +365,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			RETURN_FALSE;
 	}
 			
-	info = malloc(sizeof(*info));
-	memset(info, 0, sizeof(info));
-	info->path = strdup(Z_STRVAL_PP(args[0]));
+	info = ecalloc(sizeof(dba_info), 1);
+	info->path = estrdup(Z_STRVAL_PP(args[0]));
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
-	info->hnd = NULL;
+	/* info->hnd is NULL here */
 
 	if (hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
 		dba_close(info TSRMLS_CC);
