@@ -2222,7 +2222,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
-		static const char *cast_names[3] = {
+		static const char *cast_names[4] = {
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor", "select()able descriptor"
 		};
 
