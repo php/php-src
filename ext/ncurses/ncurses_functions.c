@@ -44,6 +44,26 @@ PHP_FUNCTION(ncurses_addch)
 }
 /* }}} */
 
+/* {{{ proto int ncurses_waddch(resource window, int ch)
+   Adds character at current position in a window and advance cursor */
+PHP_FUNCTION(ncurses_waddch)
+{
+	long ch;
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &handle, &ch)==FAILURE) {
+        return;
+	}
+
+	FETCH_WINRES(win, &handle);
+
+	RETURN_LONG(waddch(*win, ch));
+}
+/* }}} */
+
+
+
 /* {{{ proto int ncurses_color_set(int pair)
    Sets fore- and background color */
 PHP_FUNCTION(ncurses_color_set)
@@ -106,26 +126,69 @@ PHP_FUNCTION(ncurses_has_colors)
    Initializes ncurses */
 PHP_FUNCTION(ncurses_init)
 {
-	zend_constant c;
-	WINDOW **pscr = (WINDOW**)emalloc(sizeof(WINDOW *));
-	zval *zscr;
-	
 	initscr();             /* initialize the curses library */
 	keypad(stdscr, TRUE);  /* enable keyboard mapping */
 	(void) nonl();         /* tell curses not to do NL->CR/NL on output */
 	(void) cbreak();       /* take input chars one at a time, no wait for \n */
 
-	*pscr = stdscr;
-	MAKE_STD_ZVAL(zscr);
-	ZEND_REGISTER_RESOURCE(zscr, pscr, le_ncurses_windows);
-	c.value = *zscr;
-	zval_copy_ctor(&c.value);
-	c.flags = CONST_CS;
-	c.name = zend_strndup("STDSCR", 7);
-	c.name_len = 7;
-	zend_register_constant(&c TSRMLS_CC);
+	if (!NCURSES_G(registered_constants)) {
+		zend_constant c;
+		
+		WINDOW **pscr = (WINDOW**)emalloc(sizeof(WINDOW *));
+		zval *zscr;
 
-	FREE_ZVAL(zscr);
+		*pscr = stdscr;
+		MAKE_STD_ZVAL(zscr);
+		ZEND_REGISTER_RESOURCE(zscr, pscr, le_ncurses_windows);
+		c.value = *zscr;
+		zval_copy_ctor(&c.value);
+		c.flags = CONST_CS;
+		c.name = zend_strndup("STDSCR", 7);
+		c.name_len = 7;
+		zend_register_constant(&c TSRMLS_CC);
+
+		/* we need this "interesting" arrangement because the
+		 * underlying values of the ACS_XXX defines are not
+		 * initialized until after ncurses has been initialized */
+		
+#define PHP_NCURSES_DEF_CONST(x)    \
+		ZVAL_LONG(zscr, x);         \
+		c.value = *zscr;            \
+		zval_copy_ctor(&c.value);   \
+		c.flags = CONST_CS;         \
+		c.name = zend_strndup("NCURSES_" #x, sizeof("NCURSES_" #x)); \
+		c.name_len = sizeof("NCURSES_" #x);                           \
+		zend_register_constant(&c TSRMLS_CC)
+		
+		PHP_NCURSES_DEF_CONST(ACS_ULCORNER);
+		PHP_NCURSES_DEF_CONST(ACS_LLCORNER);
+		PHP_NCURSES_DEF_CONST(ACS_URCORNER);
+		PHP_NCURSES_DEF_CONST(ACS_LRCORNER);
+		PHP_NCURSES_DEF_CONST(ACS_LTEE);
+		PHP_NCURSES_DEF_CONST(ACS_RTEE);
+		PHP_NCURSES_DEF_CONST(ACS_BTEE);
+		PHP_NCURSES_DEF_CONST(ACS_TTEE);
+		PHP_NCURSES_DEF_CONST(ACS_HLINE);
+		PHP_NCURSES_DEF_CONST(ACS_VLINE);
+		PHP_NCURSES_DEF_CONST(ACS_PLUS);
+		PHP_NCURSES_DEF_CONST(ACS_S1);
+		PHP_NCURSES_DEF_CONST(ACS_S9);
+		PHP_NCURSES_DEF_CONST(ACS_DIAMOND);
+		PHP_NCURSES_DEF_CONST(ACS_CKBOARD);
+		PHP_NCURSES_DEF_CONST(ACS_DEGREE);
+		PHP_NCURSES_DEF_CONST(ACS_PLMINUS);
+		PHP_NCURSES_DEF_CONST(ACS_BULLET);
+		PHP_NCURSES_DEF_CONST(ACS_LARROW);
+		PHP_NCURSES_DEF_CONST(ACS_RARROW);
+		PHP_NCURSES_DEF_CONST(ACS_DARROW);
+		PHP_NCURSES_DEF_CONST(ACS_UARROW);
+		PHP_NCURSES_DEF_CONST(ACS_BOARD);
+		PHP_NCURSES_DEF_CONST(ACS_LANTERN);
+		PHP_NCURSES_DEF_CONST(ACS_BLOCK);
+		
+		FREE_ZVAL(zscr);
+		NCURSES_G(registered_constants) = 1;
+	}
 }
 /* }}} */
 
@@ -1384,6 +1447,26 @@ PHP_FUNCTION(ncurses_border)
 }
 /* }}} */
 
+/* {{{ proto int ncurses_wborder(resource window, int left, int right, int top, int bottom, int tl_corner, int tr_corner, int bl_corner, int br_corner)
+   Draws a border around the window using attributed characters */
+PHP_FUNCTION(ncurses_wborder)
+{
+	long i1,i2,i3,i4,i5,i6,i7,i8;
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllllll",&handle,&i1,&i2,&i3,&i4,&i5,&i6,&i7,&i8)==FAILURE) {
+        return;
+	}
+
+	FETCH_WINRES(win,&handle);
+	
+	RETURN_LONG(wborder(*win,i1,i2,i3,i4,i5,i6,i7,i8));
+}
+/* }}} */
+
+
+
 /* {{{ proto int ncurses_assume_default_colors(int fg, int bg)
    Defines default colors for color 0 */
 PHP_FUNCTION(ncurses_assume_default_colors)
@@ -1446,6 +1529,43 @@ PHP_FUNCTION(ncurses_vline)
 	RETURN_LONG(vline(i1,i2));
 }
 /* }}} */
+
+/* {{{ proto int ncurses_whline(resource window, int charattr, int n)
+   Draws a horizontal line in a window at current position using an attributed character and max. n characters long */
+PHP_FUNCTION(ncurses_whline)
+{
+	long i1,i2;
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll",&handle,&i1,&i2)==FAILURE) {
+        return;
+	}
+
+	FETCH_WINRES(win,&handle);
+	
+	RETURN_LONG(whline(*win,i1,i2));
+}
+/* }}} */
+
+/* {{{ proto int ncurses_wvline(resource window, int charattr, int n)
+   Draws a vertical line in a window at current position using an attributed character and max. n characters long */
+PHP_FUNCTION(ncurses_wvline)
+{
+	long i1,i2;
+	zval *handle;
+	WINDOW **win;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll",&handle,&i1,&i2)==FAILURE) {
+        return;
+	}
+	FETCH_WINRES(win,&handle);
+
+	RETURN_LONG(wvline(*win,i1,i2));
+}
+/* }}} */
+
+
 
 /* {{{ proto int ncurses_keyok(int keycode, bool enable)
    Enables or disable a keycode */
