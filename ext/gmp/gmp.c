@@ -32,7 +32,6 @@
 /* Needed for gmp_random() */
 #include "ext/standard/php_rand.h"
 #include "ext/standard/php_lcg.h"
-#include <gmp-mparam.h>
 #define GMP_ABS(x) ((x) >= 0 ? (x) : -(x))
 
 /* True global resources - no need for thread safety here */
@@ -1091,7 +1090,7 @@ ZEND_FUNCTION(gmp_random)
 
 		GMPG(rand_initialized) = 1;
 	}
-	mpz_urandomb(*gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * BITS_PER_MP_LIMB);
+	mpz_urandomb(*gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
 
 	ZEND_REGISTER_RESOURCE(return_value, gmpnum_result, le_gmp);
 }
