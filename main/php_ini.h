@@ -70,6 +70,7 @@ php_ini_entry *get_ini_entry(char *name, uint name_length);
 PHPAPI int php_ini_register_displayer(char *name, uint name_length, void (*displayer)(php_ini_entry *ini_entry, int type));
 PHPAPI PHP_INI_DISP(php_ini_boolean_displayer_cb);
 PHPAPI PHP_INI_DISP(php_ini_color_displayer_cb);
+PHPAPI PHP_INI_DISP(display_link_numbers);
 
 #define PHP_INI_BEGIN()		static php_ini_entry ini_entries[] = {
 #define PHP_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, NULL } };
