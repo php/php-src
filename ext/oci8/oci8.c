@@ -3866,7 +3866,7 @@ PHP_FUNCTION(ociinternaldebug)
 
 /* }}} */
 
-/* {{{ proto int ociexecute(int stmt [, int mode])
+/* {{{ proto bool ociexecute(int stmt [, int mode])
    Execute a parsed statement */
 
 PHP_FUNCTION(ociexecute)
