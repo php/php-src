@@ -50,7 +50,9 @@
 #endif
 
 #if WIN32||WINNT
-#include <time.h>
+#	include <time.h>
+#	define _PHP_H
+#	include "php_reentrancy.h"
 #else
 #	if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE)
 extern time_t timezone;
