@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
 - Fixed bug #30027 (Possible crash inside ftp_get()).
   (cfield at affinitysolutions dot com)
+- Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
+  characters). (Moriyoshi)
 - Fixed bug #27798 (private / protected variables not exposed by 
   get_object_vars() inside class). (Marcus)
 
