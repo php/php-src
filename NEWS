@@ -5,8 +5,8 @@ PHP 4.0                                                                    NEWS
 - Initital support for pdflib 2.20 (Uwe)
 - Added PostgreSQL support for DB (Rui Hirokawa <louis@cityfujisawa.ne.jp>)
 - Re-introduced "none" for disabling auto_prepend/append_file (Stig)
-- Added DB/storage to PEAR
-  Introduced DB warnings
+- Added DB/storage (Stig, PEAR)
+- Introduced DB warnings (Stig, PEAR)
 - Fix overrun in strip_tags (Stas)
 - Fixed crash in strip_tags() and related functions. (Thies)
 - Workaround for bogus POST-Data from IE/Mac. (Thies)
