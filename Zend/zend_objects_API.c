@@ -120,7 +120,10 @@ void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 				if (obj->dtor) {
 					obj->dtor(obj->object, handle TSRMLS_CC);
 				}
-				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
+				EG(objects_store).object_buckets[handle].valid = 0;
+				if (obj->refcount == 0) {
+					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
+				}
 			}
 		}
 #if ZEND_DEBUG_OBJECTS
