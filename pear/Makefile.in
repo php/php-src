@@ -93,8 +93,15 @@ install-headers:
 		cd $(top_builddir)/$$i && cp -p *.h $(phpincludedir)/$$i) 2>/dev/null || true; \
 	done
 
+test: run-tests Makefile
+	@./run-tests
+
+Makefile: Makefile.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/Makefile CONFIG_HEADERS= $(top_builddir)/config.status)
+
 run-tests: run-tests.in $(top_builddir)/config.status
-	(cd ..;CONFIG_FILES=pear/run-tests CONFIG_HEADERS= $(top_builddir)/config.status)
+	(cd ..;CONFIG_FILES=pear/$@ CONFIG_HEADERS= $(top_builddir)/config.status)
+	chmod +x $@
 
 pear: pear.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/pear CONFIG_HEADERS= $(top_builddir)/config.status)
