@@ -1011,6 +1011,7 @@ terminate:
 		if (return_value) {
 			RETURN_FALSE;
 		} else {
+			efree(rres);
 			return;
 		}
 	}
@@ -1021,7 +1022,6 @@ terminate:
 	memcpy(rres, &res, sizeof(*rres));
 	rres->db = db;
 	zend_list_addref(db->rsrc_id);
-	
 
 	/* now the result set is ready for stepping: get first row */
 	if (php_sqlite_fetch(rres TSRMLS_CC) != SQLITE_OK) {
@@ -1357,10 +1357,7 @@ PHP_FUNCTION(sqlite_array_query)
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
 	sqlite_query(db, sql, sql_len, mode, 0, NULL, rres TSRMLS_CC);
 	if (db->last_err_code != SQLITE_OK) {
-		if(!rres->vm) {
-			/* no query happened - it's out responsibility to free it */
-			efree(rres);
-		}
+		/* no need to free rres, as it will be freed by sqlite_query() for us */
 		RETURN_FALSE;
 	}
 
@@ -1465,7 +1462,7 @@ PHP_FUNCTION(sqlite_single_query)
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
 	sqlite_query(db, sql, sql_len, PHPSQLITE_NUM, 0, NULL, rres TSRMLS_CC);
 	if (db->last_err_code != SQLITE_OK) {
-		efree(rres);
+		/* no need to free rres, as it will be freed by sqlite_query() for us */
 		RETURN_FALSE;
 	}
 
