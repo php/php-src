@@ -697,7 +697,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
 			list_entry new_le;
 
 			if (HwSG(max_links)!=-1 && HwSG(num_links)>=HwSG(max_links)) {
@@ -760,7 +760,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			new_le.ptr = (void *) ptr;
 			new_le.type = HwSG(le_psocketp);
 
-			if (zend_hash_update(plist,hashed_details,hashed_details_length+1,(void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list),hashed_details,hashed_details_length+1,(void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				php_error(E_ERROR, "Could not hash table with connection details");
 				if(host) efree(host);
 				if(username) efree(username);
@@ -791,7 +791,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new hyperwave link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 	
@@ -809,7 +809,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	  		if(host) efree(host);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
 			}
 		}
 	
@@ -857,7 +857,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			php_error(E_ERROR, "Could not update connection details in hash table");
 			if(host) efree(host);
 			efree(hashed_details);
