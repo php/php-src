@@ -4,11 +4,11 @@ PHP 4.0                                                                    NEWS
 ???, Version 4.0 Release Candidate 1
 - serialize()/unserialize() now call __sleep() and __wakeup() when
   working on objects. (Thies)
+- renamed to_string() method to __string_value() for consistency.
+  (Thies, Zend library)
 - Fixed a bug in the third argument to define()
 - Added is_numeric() that returns true if the argument is a number
   or a numeric string. (Andrei)
-- renamed to_string() method to _string_value_() for consistency.
-  (Thies, Zend library)
 - domxml now supports libxml 2.0 Beta and drops support for older versions,
   due to massive changes in libxml
 - fixed possible crash in unserialize() if serialized data was
