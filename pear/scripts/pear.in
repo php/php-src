@@ -129,13 +129,15 @@ if (empty($command) && ($store_user_config || $store_system_config)) {
 if ($fetype == 'Gtk') {
     Gtk::main();
 } else do {
-    if (empty($all_commands[$command]) || $command == 'help') {
+    if ($command == 'help') {
         usage(null, @$options[1][0]);
     }
 
+    PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
     $cmd = PEAR_Command::factory($command, $config);
+    PEAR::popErrorHandling();
     if (PEAR::isError($cmd)) {
-        die($cmd->getMessage());
+        usage(null, @$options[1][0]);
     }
 
     $short_args = $long_args = null;
@@ -175,7 +177,6 @@ function usage($error = null, $helpsubject = null)
 {
     global $progname, $all_commands;
     $stderr = fopen('php://stderr', 'w');
-    fputs($stderr, "\n");
     if (PEAR::isError($error)) {
         fputs($stderr, $error->getMessage() . "\n");
     } elseif ($error !== null) {
@@ -217,11 +218,18 @@ function cmdHelp($command)
         "     -S         store system configuration\n".
         "     -u foo     unset `foo' in the user configuration\n".
         "     -h, -?     display help/usage (this message)\n";
+    } elseif ($command == "shortcuts") {
+        $sc = PEAR_Command::getShortcuts();
+        $ret = "Shortcuts:\n";
+        foreach ($sc as $s => $c) {
+            $ret .= sprintf("     %-8s %s\n", $s, $c);
+        }
+        return $ret;
     } elseif ($help = PEAR_Command::getHelp($command)) {
         if (is_string($help)) {
-            return "$help\n";
+            return "pear $command [options] $help\n";
         }
-        return "{$help[0]}\n{$help[1]}";
+        return "pear $command [options] $help[0]\n$help[1]";
     }
     return "No such command";
 }

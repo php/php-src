@@ -28,25 +28,42 @@ class PEAR_Command_Remote extends PEAR_Command_Common
     // {{{ command definitions
 
     var $commands = array(
-        'remote-package-info' => array(
+        'info-remote' => array(
             'summary' => 'Information About Remote Packages',
-            'function' => 'doRemotePackageInfo',
+            'function' => 'doInfoRemote',
             'options' => array(),
+            'doc' => '<package>
+Get details on a package from the server.',
             ),
         'list-upgrades' => array(
             'summary' => 'List Available Upgrades',
             'function' => 'doListUpgrades',
             'options' => array(),
+            'doc' => '
+List releases on the server of packages you have installed where
+a newer version is available with the same release state (stable etc.).'
             ),
-        'list-remote-packages' => array(
+        'list-remote' => array(
             'summary' => 'List Remote Packages',
-            'function' => 'doListRemotePackages',
+            'function' => 'doListRemote',
             'options' => array(),
+            'doc' => '
+Lists the packages available on the configured server along with the
+latest stable release of each package.',
             ),
         'download' => array(
             'summary' => 'Download Package',
             'function' => 'doDownload',
-            'options' => array(),
+            'options' => array(
+                'nocompress' => array(
+                    'shortopt' => 'Z',
+                    'doc' => 'download an uncompressed (.tar) file',
+                    ),
+                ),
+            'doc' => '{package|package-version}
+Download a package tarball.  The file will be named as suggested by the
+server, for example if you download the DB package and the latest stable
+version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             ),
         );
 
@@ -65,16 +82,17 @@ class PEAR_Command_Remote extends PEAR_Command_Common
 
     // }}}
 
-    // {{{ remote-package-info
+    // {{{ info-remote
 
-    function doRemotePackageInfo($command, $options, $params)
+    function doInfoRemote($command, $options, $params)
     {
+        return false; // coming soon
     }
 
     // }}}
-    // {{{ list-remote-packages
+    // {{{ list-remote
 
-    function doListRemotePackages($command, $options, $params)
+    function doListRemote($command, $options, $params)
     {
         $r = new PEAR_Remote($this->config);
         $available = $r->call('package.listAll', true);

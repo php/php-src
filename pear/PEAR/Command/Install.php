@@ -57,7 +57,8 @@ class PEAR_Command_Install extends PEAR_Command_Common
                     'doc' => 'request uncompressed files when downloading',
                     ),
                 ),
-            'doc' => 'Installs one or more PEAR packages.  You can specify a package to
+            'doc' => '<package> ...
+Installs one or more PEAR packages.  You can specify a package to
 install in four ways:
 
 "Package-1.0.tgz" : installs from a local file
@@ -97,7 +98,8 @@ four ways of specifying packages.
                     'doc' => 'request uncompressed files when downloading',
                     ),
                 ),
-            'doc' => 'Upgrades one or more PEAR packages.  See documentation for the
+            'doc' => '<package> ...
+Upgrades one or more PEAR packages.  See documentation for the
 "install" command for ways to specify a package.
 
 When upgrading, your package will be updated if the provided new
@@ -119,14 +121,9 @@ More than one package may be specified at once.
                     'doc' => 'do not remove files, only register the packages as not installed',
                     ),
                 ),
-            'doc' => 'Upgrades one or more PEAR packages.  See documentation for the
-"install" command for ways to specify a package.
-
-When upgrading, your package will be updated if the provided new
-package has a higher version number (use the -f option if you need to
-upgrade anyway).
-
-More than one package may be specified at once.
+            'doc' => '<package> ...
+Uninstalls one or more PEAR packages.  More than one package may be
+specified at once.
 '),
 
     );
@@ -145,52 +142,46 @@ More than one package may be specified at once.
     }
 
     // }}}
-    // {{{ run()
 
-    function run($command, $options, $params)
+    function doInstall($command, $options, $params)
     {
-        $this->installer = &new PEAR_Installer($ui);
-//        return parent::run($command, $options, $params);
-        $failmsg = '';
-        switch ($command) {
-            case 'upgrade':
-                $options['upgrade'] = true;
-                // fall through
-            case 'install':
-                foreach ($params as $pkg) {
-                    $bn = basename($pkg);
-                    $info = $this->installer->install($pkg, $options, $this->config);
-                    if (is_array($info)) {
-                        if ($this->config->get('verbose') > 0) {
-                            $label = "$info[package] $info[version]";
-                            $this->ui->displayLine("$command ok: $label");
-                        }
-                    } else {
-                        $failmsg = "$command failed";
-                    }
-                }
-                break;
-            case 'uninstall':
-                foreach ($params as $pkg) {
-                    if ($this->installer->uninstall($pkg, $options)) {
-                        if ($this->config->get('verbose') > 0) {
-                            $this->ui->displayLine("uninstall ok");
-                        }
-                    } else {
-                        $failmsg = "uninstall failed";
-                    }
-                }
-                break;
-            default:
-                return false;
+        if (empty($this->installer)) {
+            $this->installer = &new PEAR_Installer($ui);
         }
-        if ($failmsg) {
-            return $this->raiseError($failmsg);
+        if ($command == 'upgrade') {
+            $options[$command] = true;
+        }
+        foreach ($params as $pkg) {
+            $bn = basename($pkg);
+            $info = $this->installer->install($pkg, $options, $this->config);
+            if (is_array($info)) {
+                if ($this->config->get('verbose') > 0) {
+                    $label = "$info[package] $info[version]";
+                    $this->ui->displayLine("$command ok: $label");
+                }
+            } else {
+                return $this->raiseError("$command failed");
+            }
+        }
+    }
+
+    function doUninstall($command, $options, $params)
+    {
+        if (empty($this->installer)) {
+            $this->installer = &new PEAR_Installer($ui);
+        }
+        foreach ($params as $pkg) {
+            if ($this->installer->uninstall($pkg, $options)) {
+                if ($this->config->get('verbose') > 0) {
+                    $this->ui->displayLine("uninstall ok");
+                }
+            } else {
+                return $this->raiseError("uninstall failed");
+            }
         }
         return true;
     }
 
-    // }}}
 }
 
 ?>
