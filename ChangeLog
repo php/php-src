@@ -1,3 +1,20 @@
+2001-01-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/config.m4:
+    Fixed bug #8946. In some systems the libxml.* is actually libxml2.*
+
+    * ext/zziplib/.cvsignore: a little cleanup..
+
+2001-01-29  Harald Radi  <h.radi@nme.at>
+
+    * ext/dotnet/dotnet.cpp
+      ext/com/COM.cpp
+      ext/com/conversion.c
+      ext/com/conversion.h
+      ext/com/php_COM.h
+      ext/com/php_typedef_VARIANT.h
+      ext/com/typedef_VARIANT.c: use *_EXTERN_C() and PHP_WIN32
+
 2001-01-27  John Donagher  <john@webmeta.com>
 
     * configure.in:
