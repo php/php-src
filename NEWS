@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Allow access to uploaded files in safe_mode. Beware that you can only
+  read the file. If you copy it to new location the copy will not have the
+  right UID and you script won't be able to access that copy. (Thies)
 - Changed extract() to check that prefixed name is a valid one. (Andrei)
 - Changed extract() to return the number of variables extracted. (Andrei)
 - Added ldap_rename() function (Stig Venaas)
