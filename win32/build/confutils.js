@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.27 2003-12-23 00:36:32 fmk Exp $
+// $Id: confutils.js,v 1.28 2003-12-23 01:55:33 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -28,7 +28,7 @@ var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 
 if (PROGRAM_FILES == null) {
-	PROGRAM_FILES = "C:\\Program Files\\";
+	PROGRAM_FILES = "C:\\Program Files";
 }
 
 if (!FSO.FileExists("README.CVS-RULES")) {
@@ -624,7 +624,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
 	MFO.WriteLine("\t@echo SAPI " + configure_module_dirname + " build complete");
-	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(DEPS_" + SAPI + ") $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
@@ -1058,6 +1058,98 @@ function copy_and_subst(srcname, destname, subst_array)
 	f.Write(content);
 	f.Close();
 }
+
+// glob using simple filename wildcards
+// returns an array of matches that are found
+// in the filesystem
+function glob(path_pattern)
+{
+	var path_parts = path_pattern.replace(new RegExp("/", "g"), "\\").split("\\");
+	var p;
+	var base = "";
+	var is_pat_re = /\*/;
+	
+	// first, build as much as possible that doesn't have a pattern
+	for (p = 0; p < path_parts.length; p++) {
+		if (path_parts[p].match(is_pat_re))
+			break;
+		if (p)
+			base += "\\";
+		base += path_parts[p];	
+	}
+
+	return _inner_glob(base, p, path_parts);
+}
+
+function _inner_glob(base, p, parts)
+{
+	var pat = parts[p];
+	var full_name = base + "\\" + pat;
+	var re = null;
+	var items = null;
+
+//STDOUT.WriteLine("inner: base=" + base + " p=" + p + " pat=" + pat);
+
+	if (FSO.FileExists(full_name)) {
+		if (p < parts.length - 1) {
+			// we didn't reach the full extent of the pattern
+			return false;
+		}
+		return new Array(full_name);
+	}
+
+	if (FSO.FolderExists(full_name) && p == parts.length - 1) {
+		// we have reached the end of the pattern; no need to recurse
+		return new Array(full_name);
+	}
+
+	// Convert the pattern into a regexp
+	re = new RegExp("^" + pat.replace(/\./g, '\\.').replace(/\*/g, '.*') + "$");
+
+	items = new Array();
+
+	var folder = FSO.GetFolder(base);
+	var fc = null;
+	var subitems = null;
+	var item_name = null;
+	var j;
+
+	fc = new Enumerator(folder.SubFolders);
+	for (; !fc.atEnd(); fc.moveNext()) {
+		item_name = FSO.GetFileName(fc.item());
+
+		if (item_name.match(re)) {
+			// got a match; if we are at the end of the pattern, just add these
+			// things to the items array
+			if (p == parts.length - 1) {
+				items[items.length] = fc.item();
+			} else {
+				// we should recurse and do more matches
+				subitems = _inner_glob(base + "\\" + item_name, p + 1, parts);
+				if (subitems) {
+					for (j = 0; j < subitems.length; j++) {
+						items[items.length] = subitems[j];
+					}
+				}
+			}
+		}
+	}
+
+	// if we are at the end of the pattern, we should match
+	// files too
+	if (p == parts.length - 1) {
+		fc = new Enumerator(folder.Files);
+		for (; !fc.atEnd(); fc.moveNext()) {
+			item_name = FSO.GetFileName(fc.item());
+			if (item_name.match(re)) {
+				items[items.length] = fc.item();
+			}
+		}
+	}
+
+	return items;
+}
+
 
 // for snapshot builders, this option will attempt to enable everything
 // and you can then build everything, ignoring fatal errors within a module
