@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed bug #19366 (gdImageFill crahes when x & y are outside of the
+  image's boundries). (Ilia)
 - Fixed bug #13936 (__FILE__ constant didn't contain full path). (Ilia)
 - Renamed:
     socket_set_timeout()  -> stream_set_timeout()
