@@ -837,12 +837,8 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value)
 
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **) &tmp, &pos) == SUCCESS) {
 		if ((*tmp)->type != IS_STRING) {
-			if (PZVAL_IS_REF(*tmp)) {
-				SEPARATE_ZVAL(tmp);
-				convert_to_string(*tmp);
-			} else {
-				convert_to_string_ex(tmp);
-			}
+			SEPARATE_ZVAL(tmp);
+			convert_to_string(*tmp);
 		} 
 		
 		smart_str_appendl(&implstr, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
