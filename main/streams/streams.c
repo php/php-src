@@ -843,7 +843,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
 			
 			/* Only screw with the buffer if we can seek, otherwise we lose data
 			 * buffered from fifos and sockets */
-			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && !php_stream_is_filtered(stream)) {
+			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 				stream->position += justwrote;
 			}
 		} else {
