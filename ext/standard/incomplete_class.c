@@ -42,8 +42,9 @@ static void incomplete_class_message(int error_type TSRMLS_DC)
 		class_name = php_lookup_class_name(EG(This), NULL);
 	}
 	
-	if (!class_name)
-		class_name = estrdup("unknown");
+	if (!class_name) {
+		class_name = estrndup("unknown", sizeof("unknown")-1);
+	}
 	
 	snprintf(buf, sizeof(buf)-1, INCOMPLETE_CLASS_MSG, class_name);
 	
