@@ -52,8 +52,13 @@ $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
 
 aclocal.m4: configure.in acinclude.m4
-	aclocal 2>&1 | $(SUPPRESS_WARNINGS)
-	
+	@echo rebuilding $@
+	@libtoolize=`./build/shtool path glibtoolize libtoolize`; \
+	$$libtoolize --copy --automake; \
+	ltpath=`dirname $$libtoolize`; \
+	ltfile=`cd $$ltpath/../share/aclocal; pwd`/libtool.m4; \
+	cat acinclude.m4 $$ltfile > $@
+
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
 	@autoconf 2>&1 | $(SUPPRESS_WARNINGS)
