@@ -3,7 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? ????, Version 4.0 Beta 4
 - Renamed "PECL" to "PEAR" (PHP Extension and Add-on Repository) (Stig)
-- buildconf now uses build.mk
+- buildconf now uses build.mk (Stig)
 - Disable symlinks to urls (Rasmus)
 - Informix driver now reflects version of ESQL/C used  (Danny)
 - Modified session_register() to take variable number of arguments (Andrei)
