@@ -1,13 +1,15 @@
 #include "php.h"
 #include "php_ini.h"
 
+#define PHP_REGISTRY_KEY "SOFTWARE\\PHP"
+
 void UpdateIniFromRegistry(char *path TSRMLS_DC)
 {
 	char *p, *orig_path;
 	HKEY MainKey;
 	char *strtok_buf = NULL;
 
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\PHP\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, PHP_REGISTRY_KEY "\\Per Directory Values", 0, KEY_READ, &MainKey)!=ERROR_SUCCESS) {
 		return;
 	}
 
@@ -85,4 +87,24 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 	}
 	RegCloseKey(MainKey);
 	efree(orig_path);
+}
+
+#define PHPRC_REGISTRY_NAME "IniFilePath"
+
+char *GetIniPathFromRegistry()
+{
+	char *reg_location = NULL;
+	HKEY hKey;
+	
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, PHP_REGISTRY_KEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+		reg_location = emalloc(MAXPATHLEN+1);
+		DWORD buflen = MAXPATHLEN;
+		if(RegQueryValueEx(hKey, PHPRC_REGISTRY_NAME, 0, NULL, reg_location, &buflen) != ERROR_SUCCESS) {
+			efree(reg_location);
+			reg_location = NULL;
+			return reg_location;
+		}
+		RegCloseKey(hKey);
+	}
+	return reg_location;
 }
