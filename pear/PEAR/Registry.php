@@ -432,6 +432,12 @@ class PEAR_Registry extends PEAR
 
     /**
     Experimental dependencies database handling functions (not yet in production)
+
+    TODO:
+        - test it
+        - Think on the "not" dep relation. It's supposed that a package can't
+          be installed if conflicts with another. The problem comes when the
+          user forces the installation and later upgrades it
     **/
 
     // XXX Terrible slow, a lot of read, lock, write, unlock
@@ -445,7 +451,7 @@ class PEAR_Registry extends PEAR
         $packages = $this->listPackages();
         foreach ($packages as $package) {
             $deps = $this->packageInfo($package, 'release_deps');
-            $error = $this->depSetPackage($package, $deps);
+            $error = $this->setPackageDep($package, $deps);
             if (PEAR::isError($error)) {
                 return $error;
             }
@@ -497,13 +503,10 @@ class PEAR_Registry extends PEAR
         // This packages are dependant on other packages
         'pkgs' => array(
             'Package Dependant' => array(
-                0 => array(
-                    // This is a index list with paths over the 'deps' array for quick
-                    // searching things like "what dependecies has this package?"
-                    // $dep_db['deps']['Package Name'][3]
-                    0 => 'Package Name',
-                    1 => 3 // (int)key
-                ),
+                // This is a index list with paths over the 'deps' array for quick
+                // searching things like "what dependecies has this package?"
+                // $dep_db['deps']['Package Name'][3]
+                'Package Name' => 3 // key in array ['deps']['Package Name']
             ),
         )
     )
@@ -511,7 +514,7 @@ class PEAR_Registry extends PEAR
     Note: It only supports package dependencies no other type
     */
 
-    function depRemovePackage($package)
+    function removePackageDep($package)
     {
         $data = &$this->_depGetDepDB();
         if (PEAR::isError($data)) {
@@ -521,13 +524,14 @@ class PEAR_Registry extends PEAR
         if (isset($data['deps'][$package])) {
             return $data['deps'][$package];
         }
+        // The package depends on others, remove those dependencies
         if (isset($data['pkgs'][$package])) {
-            foreach ($data['pkgs'][$package] as $remove) {
+            foreach ($data['pkgs'][$package] as $pkg => $key) {
                 // remove the dependency
-                unset($data['deps'][$remove[0]][$remove[1]]);
+                unset($data['deps'][$pkg][$key]);
                 // if no more dependencies, remove the subject too
-                if (!count($data['deps'][$remove[0]])) {
-                    unset($data['deps'][$remove[0]]);
+                if (!count($data['deps'][$pkg])) {
+                    unset($data['deps'][$pkg]);
                 }
             }
             // remove the package from the index list
@@ -536,13 +540,20 @@ class PEAR_Registry extends PEAR
         return $this->_depWriteDepDB();
     }
 
-    function depSetPackage($package, $new_version, $rel_deps = array())
+    /**
+    * Update or insert a the dependencies of a package, prechecking
+    * that the package won't break any dependency in the process
+    */
+    function setPackageDep($package, $new_version, $rel_deps = array())
     {
         $data = &$this->_depGetDepDB();
         if (PEAR::isError($deps)) {
             return $deps;
         }
-        // Other packages depend on this package, check deps
+        // Other packages depend on this package, check deps. Mostly for
+        // handling uncommon cases like:
+        // <dep type='pkg' rel='lt' version='1.0'>Foo</dep> and we are trying to
+        // update Foo to version 2.0
         if (isset($data['deps'][$package])) {
             foreach ($data['deps'][$package] as $dep) {
                 $require  = $dep['version'];
@@ -565,16 +576,27 @@ class PEAR_Registry extends PEAR
             return true;
         }
 
-        // The package depends on others, register the dependencies
+        // The package depends on others, register that
         foreach ($rel_deps as $dep) {
+            // We only support deps of type 'pkg's
             if ($dep && $dep['type'] == 'pkg' && isset($dep['name'])) {
+                $write = array('depend'  => $package,
+                               'version' => $dep['version'],
+                               'rel'     => $dep['rel']);
                 settype($data['deps'][$dep['name']], 'array');
-                $data['deps'][$dep['name']][] = array('depend'  => $package,
-                                                      'version' => $dep['version'],
-                                                      'rel'     => $dep['rel']);
-                settype($data['pkgs'][$package], 'array');
-                $data['pkgs'][$package][] = array($dep['name'],
-                                                  key($data['deps'][$dep['name']]));
+
+                // The dependency already exists, update it
+                if (isset($data['pkgs'][$package][$dep['name']])) {
+                    $key = $data['pkgs'][$package][$dep['name']];
+                    $data['deps'][$dep['name']][$key] = $write;
+
+                // New dependency, insert it
+                } else {
+                    $data['deps'][$dep['name']][] = $write;
+                    $key = key($data['deps'][$dep['name']]);
+                    settype($data['pkgs'][$package], 'array');
+                    $data['pkgs'][$package][$dep['name']] = $key;
+                }
             }
         }
         return $this->_depWriteDepDB($data);
