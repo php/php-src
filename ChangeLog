@@ -1,3 +1,63 @@
+2001-10-06  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/tests/versioning/version_compare.phpt
+      ext/standard/versioning.c: Added version_compare() function 
+
+2001-10-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c
+      main/php_ini.c
+      ext/ovrimos/ovrimos.c
+      ext/standard/dl.c
+      ext/standard/info.c
+      ext/ccvs/ccvs.c
+      ext/muscat/muscat.c
+      ext/notes/php_notes.c
+      ext/oci8/oci8.c: - <br> -> <br />
+
+2001-10-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/filestat.c: fix execution order
+
+    * ext/standard/filestat.c: avoid TSRMLS_FETCH()
+
+    * ext/standard/filestat.c:
+     Don't through a file does not exist warning for the is_dir(), is_writeable(),
+     is_readable(), is_executable(), is_link() and is_file() functions. 
+
+2001-10-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * win32/php4dll.dsp:
+    rand_mt.c, rand_sys.c are gone, remove them from the workspace file.
+
+2001-10-06  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.h
+      ext/com/conversion.c: typo
+    TRUE -> FALSE
+
+2001-10-06  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/002.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt:
+    Made session test pass on systems with short open tags disabled.
+
+    * ext/standard/tests/assert/.cvsignore
+      ext/standard/tests/assert/assert.phpt:
+    Made assert test pass on systems with short open tags disabled.
+    Added .cvsignore
+
+2001-10-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Fix Win32 build.
+
+2001-10-06  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/skeleton/skeleton.c: fixed name of global variables in ext/skelton.
+
 2001-10-05  Stig Bakken  <ssb@fast.no>
 
     * ext/standard/Makefile.in
