@@ -17,6 +17,9 @@ PHP 4                                                                      NEWS
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
 - Added memory_get_usage(). Only available when PHP is configured with 
   --enable-memory-limit. (Andrey)
+- Fixed bug #22191 (frontbase build was broken for people using older versions
+  of frontbase). (Ilia)
+- Fixed bug #22187 (spprintf function did not handle floats correctly). (Ilia)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
   separate tag elements). (Ilia)
 - Fixed bug #22141 (removed undocumented Boyer str_replace() method). (Sara)
