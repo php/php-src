@@ -138,7 +138,7 @@ PHP_MINFO_FUNCTION(session);
 
 static void php_rinit_session_globals(PSLS_D);
 static void php_rshutdown_session_globals(PSLS_D);
-static void _php_session_destroy(PSLS_D);
+static zend_bool _php_session_destroy(PSLS_D);
 
 zend_module_entry session_module_entry = {
 	"session",
@@ -874,18 +874,24 @@ static void _php_session_start(PSLS_D)
 	}
 }
 
-static void _php_session_destroy(PSLS_D)
+static zend_bool _php_session_destroy(PSLS_D)
 {
+	zend_bool retval = SUCCESS;
+
 	if (PS(nr_open_sessions) == 0) {
 		php_error(E_WARNING, "Trying to destroy uninitialized session");
-		return;
+		return FAILURE;
 	}
 
 	if (PS(mod)->destroy(&PS(mod_data), PS(id)) == FAILURE) {
+		retval = FAILURE;
 		php_error(E_WARNING, "Destroying the session object failed");
 	}
+	
 	php_rshutdown_session_globals(PSLS_C);
 	php_rinit_session_globals(PSLS_C);
+
+	return retval;
 }
 
 
@@ -1224,13 +1230,17 @@ PHP_FUNCTION(session_start)
 }
 /* }}} */
 
-/* {{{ proto void session_destroy(void)
+/* {{{ proto bool session_destroy(void)
    Destroy the current session and all data associated with it */
 PHP_FUNCTION(session_destroy)
 {
 	PSLS_FETCH();
-		
-	_php_session_destroy(PSLS_C);
+
+	if (_php_session_destroy(PSLS_C) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 

@@ -275,7 +275,9 @@ PS_DESTROY_FUNC(files)
 	if (!_ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;
 	
-	V_UNLINK(buf);
+	if (V_UNLINK(buf) == -1) {
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }
