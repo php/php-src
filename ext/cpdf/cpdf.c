@@ -882,7 +882,7 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 
 	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_array_ex(arg2);
-	matrix = Z_ARRVAL_P(arg2);
+	matrix = Z_ARRVAL_PP(arg2);
 	
 	if(zend_hash_num_elements(matrix) != 6) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Text matrix must have 6 elements");
