@@ -162,7 +162,7 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 MBFLAPI extern const char *
 mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int elistsz, int strict);
 
-MBFLAPI extern const enum mbfl_no_encoding
+MBFLAPI extern enum mbfl_no_encoding
 mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int elistsz);
 
 /*
