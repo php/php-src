@@ -34,6 +34,7 @@
 #define MAP_FAILED ((void *) -1)
 #endif
 
+#define CHUNK_SIZE	8192
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -226,8 +227,6 @@ PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 	zend_error(E_WARNING, "streams of type %s do not support seeking", stream->ops->label);
 	return -1;
 }
-
-#define CHUNK_SIZE	8192
 
 PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent)
 {

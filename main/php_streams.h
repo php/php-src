@@ -25,6 +25,18 @@
 
 /* See README.STREAMS in php4 root dir for more info about this stuff */
 
+/* The contents of the php_stream_ops and php_stream should only be accessed
+ * using the functions/macros in this header.
+ * If you need to get at something that doesn't have an API,
+ * drop me a line <wez@thebrainroom.com> and we can sort out a way to do
+ * it properly.
+ * 
+ * The only exceptions to this rule are that stream implementations can use
+ * the php_stream->abstract pointer to hold their context, and streams
+ * opened via stream_open_wrappers can use the zval ptr in
+ * php_stream->wrapperdata to hold meta data for php scripts to
+ * retrieve using fgetwrapperdata(). */
+
 typedef struct _php_stream php_stream;
 
 typedef struct _php_stream_ops  {
@@ -64,6 +76,7 @@ struct _php_stream  {
 	int fclose_stdiocast;
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
 }; /* php_stream */
+/* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
 #define PHP_STREAM_FCLOSE_FDOPEN	1
 #define PHP_STREAM_FCLOSE_FOPENCOOKIE 2
@@ -92,8 +105,7 @@ PHPAPI int php_stream_puts(php_stream *stream, char *buf);
  * Uses mmap if the src is a plain file and at offset 0 */
 #define PHP_STREAM_COPY_ALL		-1
 PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen);
-/* read all data from stream and put into a buffer. Caller must free buffer when done,
- * according to allocopts.
+/* read all data from stream and put into a buffer. Caller must free buffer when done.
  * The copy will use mmap if available. */
 PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent);
 
