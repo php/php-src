@@ -444,7 +444,7 @@ PHP_FUNCTION(pdf_set_info_keywords)
 }
 /* }}} */
 
-/* {{{ proto int pdf_open([int filedesc])
+/* {{{ proto resource pdf_open([int filedesc])
    Opens a new pdf document. If filedesc is NULL, document is created in memory. This is the old interface, only for compatibility use pdf_new + pdf_open_file instead */
 PHP_FUNCTION(pdf_open)
 {
@@ -2242,7 +2242,7 @@ PHP_FUNCTION(pdf_add_annotation)
 
 /* RJS: START OF NEW CODE */
 
-/* {{{ proto int pdf_new()
+/* {{{ proto resource pdf_new()
    Creates a new PDF object */
 PHP_FUNCTION(pdf_new)
 {
@@ -2256,7 +2256,6 @@ PHP_FUNCTION(pdf_new)
 
 	ZEND_REGISTER_RESOURCE(return_value, pdf, le_pdf);
 }
-
 /* }}} */
 
 /* {{{ proto int pdf_get_majorversion()
@@ -2269,6 +2268,7 @@ PHP_FUNCTION(pdf_get_majorversion)
 
         RETURN_LONG(PDF_get_majorversion());
 }
+/* }}} */
 
 /* {{{ proto int pdf_get_minorversion()
    Returns the minor version number of the PDFlib */
@@ -2280,8 +2280,8 @@ PHP_FUNCTION(pdf_get_minorversion)
 
 	RETURN_LONG(PDF_get_minorversion());
 }
-
 /* }}} */
+
 /* {{{ proto bool pdf_delete(int pdfdoc)
    Deletes the PDF object */
 PHP_FUNCTION(pdf_delete)
@@ -2298,7 +2298,6 @@ PHP_FUNCTION(pdf_delete)
 
 	RETURN_TRUE;
 }
-
 /* }}} */
 
 /* {{{ proto int pdf_open_file(int pdfdoc [, char filename])
@@ -2339,7 +2338,6 @@ PHP_FUNCTION(pdf_open_file)
 
 	RETURN_TRUE;
 }
-
 /* }}} */
 
 /* {{{ proto string pdf_get_buffer(int pdfdoc)
@@ -2361,7 +2359,6 @@ PHP_FUNCTION(pdf_get_buffer)
 
 	RETURN_STRINGL((char *)buffer, size, 1);
 }
-
 /* }}} */
 
 /* {{{ proto int pdf_findfont(int pdfdoc, string fontname, string encoding [, int embed])
