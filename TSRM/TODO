@@ -1,0 +1,2 @@
+- Improve the lock in ts_resource_ex() in order to cover less code.
+  This can probably be done by more careful hash table access
