@@ -219,14 +219,6 @@ void shutdown_executor(TSRMLS_D)
 
 		zend_hash_destroy(&EG(symbol_table));
 
-		while (EG(garbage_ptr)--) {
-			if (EG(garbage)[EG(garbage_ptr)]->refcount==1) {
-				zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
-			}
-		}
-
-		zend_ptr_stack_destroy(&EG(argument_stack));
-
 		/* Cleanup static data for functions and arrays.
 		   We need separate cleanup stage because of the following problem:
 		   Suppose we destroy class X, which destroys function table,
@@ -238,6 +230,15 @@ void shutdown_executor(TSRMLS_D)
 		   not contain objects and thus are not probelmatic */
 		zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
 		zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
+
+		while (EG(garbage_ptr)) {
+			if (EG(garbage)[--EG(garbage_ptr)]->refcount==1) {
+				zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
+			}
+		}
+
+		zend_ptr_stack_destroy(&EG(argument_stack));
+
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
 			zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function TSRMLS_CC);
