@@ -3339,7 +3339,11 @@ PHP_FUNCTION(domxml_node_set_namespace)
 
 	/* if node is in a document, search for an already existing namespace */
 	if (nodep->doc != NULL) {
-		nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar*) uri);
+		if (nodep->type == XML_ATTRIBUTE_NODE) {
+			nsptr = xmlSearchNsByHref(nodep->doc, nodep->parent, (xmlChar*) uri);
+		} else  {
+			nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar*) uri);
+		} 
 	} else {
 		nsptr = NULL;
 	}
@@ -3354,9 +3358,13 @@ PHP_FUNCTION(domxml_node_set_namespace)
 			sprintf(prefixtmp, "a%d", random);
 			prefix = prefixtmp;
 		}
-		nsptr = xmlNewNs(nodep, uri, prefix);
+		if (nodep->type == XML_ATTRIBUTE_NODE) {
+			nsptr = xmlNewNs(nodep->parent, uri, prefix);
+		} else {
+			nsptr = xmlNewNs(nodep, uri, prefix);
+		}
 	}
-	
+
 	xmlSetNs(nodep, nsptr);
 }
 /* }}} */
