@@ -53,7 +53,6 @@ php3_module_entry dl_module_entry = {
 #endif
 
 /* {{{ proto int dl(string extension_filename)
-
    Load a PHP extension at runtime */
 void dl(INTERNAL_FUNCTION_PARAMETERS)
 {
