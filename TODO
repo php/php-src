@@ -101,6 +101,7 @@ ext/pcntl
 ---------
     * Change internal callback handler to use TICKS
     * Remove all zend_extension code
+    * Add object callback support to pcntl_signal()
 
 ext/pgsql
 ---------
