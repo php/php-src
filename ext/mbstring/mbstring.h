@@ -185,6 +185,8 @@ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 
 #define phpext_mbstring_ptr mbstring_module_ptr
 
+PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC);
+
 #endif		/* _MBSTRING_H */
 
 /*
