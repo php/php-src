@@ -1,3 +1,53 @@
+2003-10-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_mm.c:
+      - Argh, the suffering copy&paste can cause
+
+    * ZendEngine2/zend_alloc.c:
+      - Fix compile problem.
+
+    * ZendEngine2/zend_mm.c:
+      - Fix the fix by making sure the new block is in the right free list.
+
+2003-10-14  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      The freed one is a hashtable - may matter if Hashtables are allocated
+      differently
+
+2003-10-14  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_mm.c:
+      - Support merging free block which was created by reallocing to smaller
+      - size. This should fix some performance issues. This code is still not
+      - thoroughly tested.
+
+2003-10-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch:
+      Embed date of last modification
+
+2003-10-14  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/dbase/dbase.c:
+      - limit writing of field data to field len + 1
+        This fixed many memory overrun errors which appeared
+      	in several scripts when writing a record.
+
+2003-10-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_variables.c:
+      Fixed bug #25836 (last key of multi-dimensional array passed via GPC
+      not being escaped when magic_quotes_gpc is on).
+
+    * (PHP_4_3)
+      NEWS
+      main/php_variables.c:
+      MFH: Fixed bug #25836 (last key of multi-dimensional array passed via GPC
+      not being escaped when magic_quotes_gpc is on).
+
 2003-10-13  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_4_3)

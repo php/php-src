@@ -1,3 +1,27 @@
+2003-10-14  Andi Gutmans  <andi@zend.com>
+
+    * zend_mm.c:
+      - Argh, the suffering copy&paste can cause
+
+    * zend_alloc.c:
+      - Fix compile problem.
+
+    * zend_mm.c:
+      - Fix the fix by making sure the new block is in the right free list.
+
+2003-10-14  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute_API.c:
+      The freed one is a hashtable - may matter if Hashtables are allocated
+      differently
+
+2003-10-14  Andi Gutmans  <andi@zend.com>
+
+    * zend_mm.c:
+      - Support merging free block which was created by reallocing to smaller
+      - size. This should fix some performance issues. This code is still not
+      - thoroughly tested.
+
 2003-10-09  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c
