@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.4
+- Fixed a corruption bug in the thread-safe version (Michael Sisolak)
 - Fixed file_exists(), is_readable(), is_writable(), and is_executable()
   on multi-threaded non-windows platforms. (Edin)
 - Fixed Content-Type so that charset is applied. (Yasuo)
