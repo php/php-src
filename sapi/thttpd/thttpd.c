@@ -50,6 +50,8 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 		php_handle_aborted_connection();
 	}
 
+	TG(hc)->bytes += n;
+
 	return n;
 }
 
@@ -58,8 +60,12 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	char buf[1024];
 
 	if (!SG(sapi_headers).http_status_line) {
+		size_t len;
+
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
-		send(TG(hc)->conn_fd, buf, strlen(buf), 0);
+		len = strlen(buf);
+		send(TG(hc)->conn_fd, buf, len, 0);
+		TG(hc)->bytes += len;
 	}
 	
 	return SAPI_HEADER_DO_SEND;
@@ -69,9 +75,12 @@ static void sapi_thttpd_send_header(sapi_header_struct *sapi_header, void *serve
 {
 	TLS_FETCH();
 
-	if (sapi_header)
+	if (sapi_header) {
 		send(TG(hc)->conn_fd, sapi_header->header, sapi_header->header_len, 0);
+		TG(hc)->bytes += sapi_header->header_len;
+	}
 	send(TG(hc)->conn_fd, "\r\n", sizeof("\r\n") - 1, 0);
+	TG(hc)->bytes += 2;
 }
 
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes SLS_DC)
@@ -122,7 +131,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array ELS_CC PLS_CC);
-	php_register_variable("REQUEST_METHOD", SG(request_info).request_method, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_CC PLS_CC);
 
@@ -274,6 +283,7 @@ off_t thttpd_php_request(httpd_conn *hc)
 	TLS_FETCH();
 
 	TG(hc) = hc;
+	hc->bytes = 0;
 	
 	thttpd_request_ctor(TLS_C SLS_CC);
 
