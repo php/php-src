@@ -464,7 +464,7 @@ ZEND_FUNCTION(define)
 /* }}} */
 
 
-/* {{{ proto bool define(string constant_name)
+/* {{{ proto bool defined(string constant_name)
    Check whether a constant exists */
 ZEND_FUNCTION(defined)
 {
