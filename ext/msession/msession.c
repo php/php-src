@@ -46,8 +46,11 @@
 /* Uncomment to get debugging messages */
 /* #define ERR_DEBUG */
 
-/* comment out the next define to get new Zend parameter handling */
+/* This is for backward compatibility. */
+/* Please keep this module backward compatible to PHP 4.0.6 */
+#if ZEND_MODULE_API_NO < 20010901
 #define OLD_ZEND_PARAM
+#endif
 
 /*
  * Please do not remove backward compatibility from this module.
@@ -176,7 +179,10 @@ PHP_MINFO_FUNCTION(msession)
 
 int PHPMsessionConnect(const char *szhost, int nport)
 {
+
+#ifndef OLD_ZEND_PARAM
 	TSRMLS_FETCH();
+#endif
 	
 	if(!s_reqb)
 		s_reqb = AllocateRequestBuffer(2048);
@@ -187,7 +193,11 @@ int PHPMsessionConnect(const char *szhost, int nport)
 	if(s_conn)
 	{
 		CloseReqConn(s_conn);
+#ifdef OLD_ZEND_PARAM
 		php_log_err("Call to connect with non-null s_conn");
+#else
+		php_log_err("Call to connect with non-null s_conn" TSRMLS_CC);
+#endif
 	}
 	if(strcmp(s_szhost, szhost))
 	{
