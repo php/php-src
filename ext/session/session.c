@@ -64,6 +64,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session_save_path", "/tmp", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_name", "PHPSESSID", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session_module_name", "files", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session_auto_start", "0", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 static int php_minit_session(INIT_FUNC_ARGS);
@@ -179,7 +180,7 @@ static void _php_session_decode(char *val, int vallen)
 	}
 }
 
-static char *_php_create_id(INTERNAL_FUNCTION_PARAMETERS, int *newlen)
+static char *_php_create_id(int *newlen)
 {
 	PHP3_MD5_CTX context;
 	unsigned char digest[16];
@@ -283,7 +284,7 @@ static void _php_session_start(void)
 	}
 	
 	if(!PS(id)) {
-		PS(id) = _php_create_id(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL);
+		PS(id) = _php_create_id(NULL);
 	}
 
 	if(send_cookie) {
@@ -406,6 +407,7 @@ PHP_FUNCTION(session_register)
 
 	convert_to_string(p_name);
 	
+	if(!PS(nr_open_sessions)) _php_session_start();
 	PS_ADD_VAR(p_name->value.str.val);
 }
 
@@ -474,6 +476,9 @@ void php_rshutdown_globals(php_ps_globals *ps_globals)
 int php_rinit_session(INIT_FUNC_ARGS)
 {
 	php_rinit_globals(&ps_globals);
+	if(INI_INT("session_auto_start")) {
+		_php_session_start();
+	}
 	if(PS(mod) == NULL)
 		return FAILURE;
 
