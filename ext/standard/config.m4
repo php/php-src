@@ -291,10 +291,10 @@ int main(int argc, char** argv)
   ],[
       ac_cv_atof_accept_nan=no
   ])
-  if test "$ac_cv_atof_accept_nan" = "yes"; then
-    AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
-  fi
 ])
+if test "$ac_cv_atof_accept_nan" = "yes"; then
+  AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
+fi
 
 AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
   AC_TRY_RUN([
@@ -323,10 +323,10 @@ int main(int argc, char** argv)
   ],[
       ac_cv_atof_accept_inf=no
   ])
-  if test "$ac_cv_atof_accept_inf" = "yes"; then
-    AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
-  fi
 ])
+if test "$ac_cv_atof_accept_inf" = "yes"; then
+  AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
+fi
 
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
                             cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
