@@ -21,7 +21,7 @@ AC_DEFUN(PHP_DOM_CHECK_VERSION,[
 
 PHP_ARG_WITH(dom, for new DOM support,
 [  --with-dom[=DIR]       Include new DOM support (requires libxml >= 2.4.14).
-                          DIR is the libxml install directory.], yes)
+                          DIR is the libxml install directory.])
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
