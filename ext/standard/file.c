@@ -474,19 +474,20 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int file_put_contents(string file, string data[, int flags[, resource context]])
-   Write/Create a file with contents data and returns the number */
+/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]])
+   Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
 	php_stream *stream;
-	char *filename, *data;
-	size_t filename_len, data_len;
-	int numbytes, flags = 0;
+	char *filename;
+	size_t filename_len;
+	zval *data;
+	int numbytes = 0, flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|lr!", &filename, &filename_len, 
-				&data, &data_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|lr!", &filename, &filename_len, 
+				&data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -497,15 +498,66 @@ PHP_FUNCTION(file_put_contents)
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
+	switch (Z_TYPE_P(data)) {
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_BOOL:
+		case IS_CONSTANT:
+			convert_to_string_ex(&data);
 
-	if (data_len) {
-		numbytes = php_stream_write(stream, data, data_len);
-		if (numbytes < 0) {
-			RETURN_FALSE;
-		}
+		case IS_STRING:
+			if (Z_STRLEN_P(data)) {
+				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
+				if (numbytes != Z_STRLEN_P(data)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space.", numbytes, Z_STRLEN_P(data));
+					numbytes = -1;
+				}
+			}
+			break;
+
+		case IS_ARRAY:
+			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
+				int bytes_written;
+				zval **tmp;
+				HashPosition pos;
+
+				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
+				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **) &tmp, &pos) == SUCCESS) {
+					if ((*tmp)->type != IS_STRING) {
+						SEPARATE_ZVAL(tmp);
+						convert_to_string(*tmp);
+					}
+					if (Z_STRLEN_PP(tmp)) {
+						numbytes += Z_STRLEN_PP(tmp);
+						bytes_written = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						if (bytes_written < 0 || bytes_written != Z_STRLEN_PP(tmp)) {
+							if (bytes_written < 0) {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s.",  Z_STRLEN_PP(tmp), filename);
+							} else {
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space.",  bytes_written, Z_STRLEN_PP(tmp));
+							}
+							numbytes = -1;
+							break;
+						}
+					}
+					zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
+				}
+			}
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array.", flags);
+			numbytes = -1;
+			break;
+	
 	}
 	php_stream_close(stream);
-	
+
+	if (numbytes < 0) {
+		RETURN_FALSE;	
+	}
+
 	RETURN_LONG(numbytes);
 }
 /* }}} */
