@@ -77,4 +77,7 @@
 #define zend_print_pval		zend_print_zval
 #define zend_print_pval_r	zend_print_zval_r
 
+
+#define function_entry		zend_function_entry
+
 #endif							/* _PHP3_COMPAT_H */
