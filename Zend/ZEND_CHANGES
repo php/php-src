@@ -519,7 +519,7 @@ Changes in the Zend Engine 2.0
                 $args = '';
             }
 
-            $args = str_replace("\n", '', $args);
+            $args = str_replace(array("\n", ',)'), array('', ')'), $args);
 
             printf(
               "%s%s(%s) [%s:%s]\n",
