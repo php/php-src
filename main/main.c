@@ -288,7 +288,7 @@ PHPAPI int php_write(void *buf, int size)
 	return PHPWRITE(buf, size);
 }
 
-PHPAPI int php_printf(const char *format,...)
+PHPAPI int php_printf(const char *format, ...)
 {
 	va_list args;
 	int ret;
@@ -305,7 +305,7 @@ PHPAPI int php_printf(const char *format,...)
 
 
 /* extended error handling function */
-PHPAPI void php_error(int type, const char *format,...)
+PHPAPI void php_error(int type, const char *format, ...)
 {
 	va_list args;
 	char *error_filename = NULL;
