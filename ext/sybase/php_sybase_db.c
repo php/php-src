@@ -381,7 +381,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				RETURN_FALSE;
 			}
 			/* create the link */
-			if ((sybase.link=dbopen(sybase.login,host))==FAIL) {
+			if ((sybase.link=PHP_SYBASE_DBOPEN(sybase.login,host))==FAIL) {
 				/*php_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
 				efree(hashed_details);
 				dbloginfree(sybase.login);
@@ -417,7 +417,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			sybase_ptr = (sybase_link *) le->ptr;
 			/* test that the link hasn't died */
 			if (DBDEAD(sybase_ptr->link)==TRUE) {
-				if ((sybase_ptr->link=dbopen(sybase_ptr->login,host))==FAIL) {
+				if ((sybase_ptr->link=PHP_SYBASE_DBOPEN(sybase_ptr->login,host))==FAIL) {
 					/*php_error(E_WARNING,"Sybase:  Link to server lost, unable to reconnect");*/
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
@@ -464,7 +464,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			RETURN_FALSE;
 		}
 		
-		if ((sybase.link=dbopen(sybase.login,host))==NULL) {
+		if ((sybase.link=PHP_SYBASE_DBOPEN(sybase.login,host))==NULL) {
 			/*php_error(E_WARNING,"Sybase:  Unable to connect to server:  %s",sybase_error(sybase));*/
 			efree(hashed_details);
 			RETURN_FALSE;
