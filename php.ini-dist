@@ -713,6 +713,8 @@ session.gc_probability = 1
 session.gc_maxlifetime = 1440
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
+; HTTP_REFERER has to contain this substring for the session to be
+; considered as valid.
 session.referer_check =
 
 ; How many bytes to read from the file.
