@@ -155,7 +155,7 @@ ZEND_FUNCTION(crack_opendict)
 /* }}} */
 
 /* {{{ proto string crack_closedict([int link_identifier])
-   Closes an open cracklib dictionary. */
+   Closes an open cracklib dictionary */
 ZEND_FUNCTION(crack_closedict)
 {
 	PWDICT *pwdict;
