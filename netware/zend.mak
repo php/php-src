@@ -14,13 +14,6 @@ include $(PROJECT_ROOT)/netware/common.mif
 .SUFFIXES:
 .SUFFIXES: .nlm .lib .obj .cpp .c .msg .mlc .mdb .xdc .d
 
-# Source files
-##CC_SRC = zend_ini_scanner_cc.cc \
-##         zend_language_scanner_cc.cc
-
-##CPP_SRC = zend_ini_scanner.cpp \
-##          zend_language_scanner.cpp
-
 C_SRC = zend.c \
         zend_alloc.c \
         zend_API.c \
@@ -64,31 +57,21 @@ endif
 
 
 # Compile flags
-
-#C_FLAGS = -c -maxerrors 25 -processor Pentium -align packed
-#C_FLAGS += -msgstyle gcc -ext obj -ARM on
-#C_FLAGS += -cpp_exceptions on -wchar_t off -bool on -w on -ansi off -nostdinc -nosyspath
 C_FLAGS  = -c -maxerrors 25 -msgstyle std
 C_FLAGS += -wchar_t on -bool on
 C_FLAGS += -processor Pentium -align 1
-#C_FLAGS += -r
 C_FLAGS += -nostdinc
-#C_FLAGS += -nosyspath -ext obj
 C_FLAGS += -D__C9X_CMATH_INLINES_DEFINED
-C_FLAGS += -DNETWARE -DZTS
+C_FLAGS += -DNETWARE -D__GNUC__
+C_FLAGS += -DZTS
 C_FLAGS += -DCLIB_STAT_PATCH
 C_FLAGS += -DTHREAD_SWITCH
-#C_FLAGS += -I. -I- -I../netware -I$(SDK_DIR)/sdk	# ../netware added for special SYS/STAT.H : Venkat(6/2/02)
-C_FLAGS += -I. -I- -I../netware -I$(SDK_DIR)/include	# ../netware added for special SYS/STAT.H : Venkat(6/2/02)
+C_FLAGS += -I. -I- -I../netware -I$(SDK_DIR)/include	# ../netware added for special SYS/STAT.H
 C_FLAGS += -I$(MWCIncludes)
-
-#C_FLAGS  += -lang c++ -prefix NLM_PREFIX.H
-#C_FLAGS  += -ext obj -msext on -r -RTTI on
 
 # Link flags
 LD_FLAGS  = -type library
 LD_FLAGS += -o $(BINARY)
-#LDFLAGS += -zerobss -nofail -msgstyle gcc -nostderr
 
 
 # Extra stuff based on debug / release builds
@@ -133,37 +116,13 @@ project: $(BINARY) $(MESSAGE)
 ##zend_language_scanner.c : zend_language_scanner.l
 ##	@flex -i -Pzend -o$@ zend_language_scanner.l
 
-
-#zend_ini_scanner.cpp : zend_ini_scanner.l
-#	@flex -+ -B -i -Sflex.skl -Pini_ -o$@ zend_ini_scanner.l
-
-#zend_language_scanner.cpp : zend_language_scanner.l
-#	@flex -+ -B -i -Sflex.skl -Pzend -o$@ zend_language_scanner.l
-
-
-#$(OBJ_DIR)/%.d: %.cpp
-#	@echo Building Dependencies for $(<F)
-#	@$(CC) -M $< $(C_FLAGS) -o $@
-
 $(OBJ_DIR)/%.d: %.c
 	@echo Building Dependencies for $(<F)
 	@$(CC) -M $< $(C_FLAGS) -o $@
-
-#$(OBJ_DIR)/%.d: %.cc
-#	@echo Building Dependencies for $(<F)
-#	@$(CC) -M $< $(C_FLAGS) -o $@
-
-#$(OBJ_DIR)/%.obj: %.cpp
-#	@echo Compiling $?...
-#	@$(CC) $< $(C_FLAGS) -o $@
 	
 $(OBJ_DIR)/%.obj: %.c
 	@echo Compiling $?...
 	@$(CC) $< $(C_FLAGS) -o $@
-
-#$(OBJ_DIR)/%.obj: %.cc
-#	@echo Compiling $?...
-#	@$(CC) $< $(C_FLAGS) -o $@
 
 
 $(BINARY): $(DEPDS) $(OBJECTS)
@@ -186,9 +145,6 @@ cleansrc:
 	-@del "zend_ini_parser.output"
 	-@del "zend_language_parser.output"
 
-#	-@del "zend_ini_scanner.cpp"
-#	-@del "zend_language_scanner.cpp"
-
 
 .PHONY: cleand
 cleand:
@@ -204,10 +160,4 @@ cleanobj:
 cleanbin:
 	@echo Deleting binary files...
 	-@del "$(FINAL_DIR)\$(MODULE_NAME).lib"
-#	@echo Deleting MAP, DEF files, etc....
-#	-@del "$(FINAL_DIR)\$(MODULE_NAME).map"
-#	-@del "$(FINAL_DIR)\$(MODULE_NAME).def"
-#	-@del "$(FINAL_DIR)\$(MODULE_NAME).link"
-#ifeq '$(BUILD)' 'debug'
-#	-@del $(FINAL_DIR)\$(MODULE_NAME).sym
-#endif
+
