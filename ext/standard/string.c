@@ -2422,7 +2422,11 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	char *new_str;
 	char *source, *target;
 	char *end;
- 	
+	int local_new_length;
+ 	        
+	if (!new_length) {
+		new_length = &local_new_length;
+	}
 	if (!str) {
 		*new_length = 0;
 		return str;
@@ -2471,9 +2475,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	}
 	
 	*target = 0;
-	if (new_length) {
-		*new_length = target - new_str;
-	}
+	*new_length = target - new_str;
 	if (should_free) {
 		STR_FREE(str);
 	}
