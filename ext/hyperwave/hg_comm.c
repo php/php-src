@@ -20,8 +20,6 @@
 
 /* #define HW_DEBUG */
 
-#define newlist
-
 #include <stdlib.h>
 #include "php.h"
 #include "php_globals.h"
@@ -48,7 +46,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "hg_comm.h"
-#include "dlist.h"
 #include "ext/standard/head.h"
 
 static int set_nonblocking(int fd);
@@ -143,9 +140,10 @@ ANCHOR *fnAddAnchor(DLIST *pAnchorList,
                     int start, int end)
 #endif
 {
-	ANCHOR *cur_ptr, **ptr;
+	ANCHOR *cur_ptr;
 
 #ifdef newlist
+	ANCHOR **ptr;
 	if(NULL == (cur_ptr = (ANCHOR *) emalloc(sizeof(ANCHOR))))
 		return NULL;
 #else
@@ -233,13 +231,14 @@ void fnListAnchor(DLIST *pAnchorList)
 	if(ptr)
 		cur_ptr = *ptr;
 	while(ptr) {
+		fprintf(stderr, "0x%X->0x%X ", (int) ptr, (int) cur_ptr);
 #else
 	ANCHOR *cur_ptr;
 	cur_ptr = (ANCHOR *) dlst_last(pAnchorList);
 	while(cur_ptr) {
+		fprintf(stderr, "0x%X ", (int) cur_ptr);
 #endif
 
-		fprintf(stderr, "0x%X->0x%X ", (int) ptr, (int) cur_ptr);
 		fprintf(stderr, "%d, %d, %s, %s, %s, %s %s\n", cur_ptr->start,
 		                                           cur_ptr->end,
 		                                           cur_ptr->tanchor == 1 ? "src" : "dest",
@@ -579,10 +578,11 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 #define BUFFERLEN 200
 #ifdef newlist
 char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char *urlprefix) {
+	ANCHOR **ptr;
 #else
 char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char *urlprefix) {
 #endif
-	ANCHOR *cur_ptr, **ptr;
+	ANCHOR *cur_ptr;
 	char bgstr[BUFFERLEN], istr[BUFFERLEN];
 	char *scriptname;
 	char *newtext;
@@ -1099,8 +1099,12 @@ int open_hg_connection(char *server_name, int port)
 	int option = 1;
 	struct sockaddr_in server_addr;
 	struct hostent *hp;
-	if ( (hp = gethostbyname(server_name)) == NULL )  {
+
+	if ( NULL == server_name )
 		return(-1);
+
+	if ( (hp = gethostbyname(server_name)) == NULL )  {
+		return(-2);
 	}
 
 	bzero((char *)&server_addr, sizeof(server_addr));
@@ -1113,7 +1117,7 @@ int open_hg_connection(char *server_name, int port)
 	server_addr.sin_addr = *(struct in_addr *) hp->h_addr;
 
 	if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) == SOCK_ERR )  {
-		return(-2);
+		return(-3);
 	}
 
 #if defined(SUN) || (WIN32|WINNT)
@@ -1124,7 +1128,7 @@ int open_hg_connection(char *server_name, int port)
 
 	if (connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
 		HWSOCK_FCLOSE(sockfd);
-		return(-3);
+		return(-4);
 	} 
 
 #if !(WIN32|WINNT)
@@ -1133,7 +1137,7 @@ int open_hg_connection(char *server_name, int port)
 
 	if ( set_nonblocking(sockfd) == -1 )  {
 		HWSOCK_FCLOSE(sockfd);
-		return(-4);
+		return(-5);
 	}
 
 	return(sockfd);
@@ -3809,18 +3813,18 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
 		efree(msg.buf);
-		return(-1);
+		return(-2);
 	}
 
 	efree(msg.buf);
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL ) 
-		return(-1);
+		return(-3);
 
 	ptr = (int *) retmsg->buf;
 	if(ptr == NULL) {
 		if(retmsg) efree(retmsg);
-		return -1;
+		return -4;
 	}
 	if(*ptr++ == 0) {
 		*count = (*ptr < maxhits) ? *ptr : maxhits;
@@ -3835,7 +3839,7 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 			efree(retmsg->buf);
 			efree(retmsg);
 			lowerror = LE_MALLOC;
-			return(-1);
+			return(-5);
 		}
 	} else {
 		error = *((int *) retmsg->buf);
@@ -3853,7 +3857,7 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 /*			perror("send_command"); */
 			efree(childIDs);
 			lowerror = LE_MALLOC;
-			return(-1);
+			return(-6);
 		}
 
 		tmp = build_msg_int(msg.buf, childIDs[i]);
@@ -3861,7 +3865,7 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 		if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
 			efree(msg.buf);
 			efree(childIDs);
-			return(-1);
+			return(-7);
 			}
 
 		efree(msg.buf);
@@ -3877,7 +3881,7 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 		}
   		*childrec = NULL;
 		lowerror = LE_MALLOC;
-		return(-1);
+		return(-8);
 	} else {
 	  	*childrec = objptr;
 
@@ -4275,7 +4279,6 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php_error(E_WARNING, "gethostbyname failed for %s", host);
 			HWSOCK_FCLOSE(fd);
 			return(-2);
 		}
@@ -4462,7 +4465,6 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php_error(E_WARNING, "gethostbyname failed for %s", host);
 			HWSOCK_FCLOSE(fd);
 			return(-1);
 		}
@@ -4645,7 +4647,6 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	*/
 	if(host) {
 		if((hostptr = gethostbyname(host)) == NULL) {
-			php_error(E_WARNING, "gethostbyname failed for %s", host);
 			/* close(fd); fd is not set yet */
 			return(-4);
 		}
