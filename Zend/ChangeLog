@@ -1,3 +1,15 @@
+2003-05-28  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_alloc.c:
+      no reason to do this at runtime
+
+    * zend_compile.c
+      zend_execute.c:
+      Cache function call lookups with loops (store in a temporary variable on
+      the
+      result opline).
+      Assuming lazy concensus on message that GeorgeS sent to the list last week
+
 2003-05-27  Sterling Hughes  <sterling@bumblebury.com>
 
     * zend.c

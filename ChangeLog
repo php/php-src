@@ -1,3 +1,70 @@
+2003-05-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/mysql/php_mysql.c:
+      MFB
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c:
+      I see no reason not to allow people to set the timeout on a mysql_connect
+      from inside a script with ini_set().  We allow user-settable timeouts on
+      other socket connections so having this as a system-settable only
+      directive doesn't make much sense to me.
+
+2003-05-28  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - Fix the error message if apxs|2 is fubar.
+
+    * (PHP_4_3_2)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with the release of PHP 4.3.2
+
+2003-05-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      On win32, always open in binary mode unless they asked for text mode using
+      't'.
+      This solves a number of apparent BC breaks that resulted from the move
+      from
+      fopen() to open().
+
+2003-05-28  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * (PHP_4_3)
+      ext/fdf/fdf.c:
+      MFH
+
+    * ext/fdf/fdf.c:
+      
+
+    * ext/fdf/tests/01-general.phpt
+      ext/fdf/tests/02-values.phpt
+      ext/fdf/tests/03-read-file.phpt
+      ext/fdf/tests/04-POST.phpt
+      ext/fdf/tests/simple.fdf:
+        1.1.4;
+      FDF test cases
+
+2003-05-28  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/Archive/Tar.php:
+      - Sync with pear/Archive_Tar/Archive/Tar.php CVS 1.11
+      - Support for bz2 compression
+      - Add new methods AddString() and extractInString()
+
+2003-05-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c
+      ext/sysvshm/php_sysvshm.h
+      ext/sysvshm/sysvshm.c:
+      Fixed compiler warnings.
+
 2003-05-27  Pierre-Alain Joye  <paj@pearfr.org>
 
     * pear/PEAR/Registry.php:
