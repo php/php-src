@@ -688,8 +688,7 @@ PHP_FUNCTION(socket_read)
 	}
 
 	tmpbuf[retval] = '\0';
-	RETVAL_STRING(tmpbuf, 1);
-	efree(tmpbuf);
+	RETURN_STRING(tmpbuf, 0);
 }
 /* }}} */
 
