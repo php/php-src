@@ -1,5 +1,5 @@
 --TEST--
-Nested while(list() = each()). (Bug #16227)
+Assignment bug. (Bug #16227)
 --POST--
 --GET--
 --FILE--
