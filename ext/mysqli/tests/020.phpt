@@ -18,9 +18,7 @@ mysqli bind_param/bind_result date
                                                         c7 timestamp(6))");
 
 	$stmt = mysqli_prepare($link, "INSERT INTO test_bind_result VALUES (?,?,?,?,?,?,?)");
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_STRING, MYSQLI_BIND_STRING, MYSQLI_BIND_STRING, MYSQLI_BIND_STRING,
-				 MYSQLI_BIND_STRING, MYSQLI_BIND_STRING, MYSQLI_BIND_STRING),
-				 $d1, $d2, $d3, $d4, $d5, $d6, $d7);
+	mysqli_bind_param($stmt, "sssssss", $d1, $d2, $d3, $d4, $d5, $d6, $d7);
 
   	$d1 = '2002-01-02';
 	$d2 = '12:49:00';

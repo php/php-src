@@ -9,16 +9,16 @@ mysqli fetch functions
 
 	mysqli_select_db($link, "test");
 
-	$stmt = mysqli_prepare($link, "SELECT current_user(), database()");
-	mysqli_bind_result($stmt, $c0, $c1); 
+	$stmt = mysqli_prepare($link, "SELECT current_user(), database(), 'foo'");
+	mysqli_bind_result($stmt, $c0, $c1, $c2); 
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);
+//	mysqli_stmt_close($stmt);
 
-	$test = array($c0, $c1);
+	$test = array($c0, $c1, $c2);
 
 	var_dump($test);
-
 	mysqli_close($link);
 ?>
 --EXPECT--

@@ -19,7 +19,7 @@ mysqli fetch (bind_param + bind_result)
                                                        col11 char(20))");
   
 	$stmt=  mysqli_prepare($link,"INSERT INTO insert_read(col1,col10, col11) VALUES(?,?,?)");
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT, MYSQLI_BIND_STRING, MYSQLI_BIND_STRING), $c1, $c2, $c3);
+	mysqli_bind_param($stmt, "iss", $c1, $c2, $c3);
 
 	$c1 = 1;
 	$c2 = "foo";

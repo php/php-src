@@ -16,7 +16,7 @@ sqlmode + bind
 
 	$stmt = mysqli_prepare($link, "INSERT INTO mbind VALUES (?||?)");
 	
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_STRING, MYSQLI_BIND_STRING), $a, $b);
+	mysqli_bind_param($stmt, "ss", $a, $b);
 
 	$a = "foo";
 	$b = "bar";

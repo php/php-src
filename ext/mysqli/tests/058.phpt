@@ -14,14 +14,14 @@ multiple binds
 
 	$stmt = mysqli_prepare($link, "INSERT INTO mbind VALUES (?,?)");
 	
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT, MYSQLI_BIND_STRING), $a, $b);
+	mysqli_bind_param($stmt, "is", $a, $b);
 
 	$a = 1;
 	$b = "foo";
 
 	mysqli_execute($stmt);
 
-	mysqli_bind_param($stmt, array(MYSQLI_BIND_INT, MYSQLI_BIND_STRING), $c, $d);
+	mysqli_bind_param($stmt, "is", $c, $d);
 
 	$c = 2;
 	$d = "bar";
