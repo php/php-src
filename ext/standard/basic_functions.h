@@ -133,6 +133,9 @@ PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
 PHP_FUNCTION(array_reverse);
 
+PHP_FUNCTION(getservbyname);
+PHP_FUNCTION(getservbyport);
+
 #if HAVE_PUTENV
 typedef struct {
 	char *putenv_string;

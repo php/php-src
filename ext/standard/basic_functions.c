@@ -28,6 +28,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
+#include <netdb.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -208,7 +209,8 @@ function_entry basic_functions[] = {
 	PHP_FE(mt_rand,									NULL)
 	PHP_FE(mt_srand,								NULL)
 	PHP_FE(mt_getrandmax,							NULL)
-	
+	PHP_FE(getservbyname, NULL)
+	PHP_FE(getservbyport, NULL)	
 	PHP_FE(gethostbyaddr,							NULL)
 	PHP_FE(gethostbyname,							NULL)
 	PHP_FE(gethostbynamel,							NULL)
@@ -3107,10 +3109,54 @@ PHP_FUNCTION(array_reverse)
 }
 /* }}} */
 
+/* {{{ proto int getservbyname(string service, string protocol)
+   Returns port associated with service. protocol must be "tcp" or "udp". */
+PHP_FUNCTION(getservbyname)
+{
+	pval **name,**proto;  
+	struct servent *serv;
+
+	if(ARG_COUNT(ht) != 2 || getParametersEx(2,&name,&proto) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(name);
+	convert_to_string_ex(proto);
+
+	serv = getservbyname((*name)->value.str.val,(*proto)->value.str.val);
+
+	if(serv == NULL)
+		RETURN_FALSE;
+
+	RETURN_LONG(ntohs(serv->s_port));
+}
+/* }}} */
+
+/* {{{ proto string getservbyport(int port, string protocol)
+   Returns service name associated with port. Protocol must be "tcp" or "udp". */
+PHP_FUNCTION(getservbyport)
+{
+	pval **port,**proto;
+	struct servent *serv;
+
+	if(ARG_COUNT(ht) != 2 || getParametersEx(2,&port,&proto) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(port);
+	convert_to_string_ex(proto);
+
+	serv = getservbyport(htons((*port)->value.lval),(*proto)->value.str.val);
+
+	if(serv == NULL)
+		RETURN_FALSE;
+
+	RETURN_STRING(serv->s_name,1);
+}
+/* }}} */
+
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- */
+ */ 
