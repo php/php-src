@@ -51,8 +51,8 @@ class PEAR_Installer extends PEAR_Common
      */
     var $destdir = '';
 
-    /** debug mode (boolean) */
-    var $debug = false;
+    /** debug level (integer) */
+    var $debug = 1;
 
     /** list of installed packages */
     var $pkglist = array();
@@ -401,9 +401,10 @@ class PEAR_Installer extends PEAR_Common
                 if (substr($dir, 0, 1) == "/") {
                     $this->destdir = substr($dir, 1);
                 } else {
-                            $this->destdir = $dir;
-                        }
+                    $this->destdir = $dir;
+                }
                 break;
+                /* XXXXX Remove me!
                 if (is_file($d)) {
                             return $this->raiseError("mkdir $d failed: is a file");
                 }
@@ -415,7 +416,7 @@ class PEAR_Installer extends PEAR_Common
                     break;
                 }
                         $this->log(1, "created dir $d");
-                break;
+                break;*/
             case "File":
                 if (!$this->phpdir) {
                     break;
