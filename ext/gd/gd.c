@@ -176,8 +176,6 @@ DLEXPORT zend_module_entry *get_module(void) { return &gd_module_entry; }
 #endif
 
 
-#define PolyMaxPoints 256
-
 static void php_free_gd_font(gdFontPtr fp)
 {
 	if (fp->data) {
@@ -1418,7 +1416,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	zval **IM, **POINTS, **NPOINTS, **COL;
 	pval **var = NULL;
 	gdImagePtr im;
-	gdPoint points[PolyMaxPoints];	
+	gdPointPtr points;	
 	int npoints, col, nelem, i;
 	GDLS_FETCH();
 
@@ -1464,8 +1462,9 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 		RETURN_FALSE;
 	}
 
-	if (npoints > PolyMaxPoints) {
-		php_error(E_WARNING, "maximum %d points", PolyMaxPoints);
+	points = (gdPointPtr) emalloc(npoints * sizeof(gdPoint));
+	if (points == NULL) {
+		php_error(E_WARNING, "ImagePolygon: Memory allocation fault");
 		RETURN_FALSE;
 	}
 
@@ -1488,6 +1487,8 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	else {
 		gdImagePolygon(im, points, npoints, col);
 	}
+
+	efree(points);
 
 	RETURN_TRUE;
 }
