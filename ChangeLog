@@ -1,3 +1,35 @@
+1999-11-01  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: Added array_pad() function.
+
+1999-11-01  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c:
+    Trying to clean up the last of the body->id/body->description confusion.
+
+1999-11-01  Andrei Zmievski  <zmievski@ispi.net>
+
+    * php.ini-dist: Added new session configuration directives.
+
+1999-11-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/snmp/config.m4: Fix for #2631
+
+1999-11-01  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
+1999-11-01  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    (PHP getservby{name,port}) New functions.
+
 1999-10-31  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c: Add missing initialization entry
