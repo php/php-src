@@ -690,7 +690,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				zend_error(E_ERROR, "Object does not support method calls");
 			}
 			EX(function_state).function = 
-			  Z_OBJ_HT_PP(fci->object_pp)->get_method(*fci->object_pp, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name) TSRMLS_CC);
+			  Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name) TSRMLS_CC);
 		} else if (calling_scope) {
 			char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
 

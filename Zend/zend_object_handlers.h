@@ -79,7 +79,7 @@ typedef HashTable *(*zend_object_get_properties_t)(zval *object TSRMLS_DC);
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
 typedef int (*zend_object_call_method_t)(char *method, INTERNAL_FUNCTION_PARAMETERS);
-typedef union _zend_function *(*zend_object_get_method_t)(zval *object, char *method, int method_len TSRMLS_DC);
+typedef union _zend_function *(*zend_object_get_method_t)(zval **object_ptr, char *method, int method_len TSRMLS_DC);
 typedef union _zend_function *(*zend_object_get_constructor_t)(zval *object TSRMLS_DC);
 
 /* Object maintenance/destruction */

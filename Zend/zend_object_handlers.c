@@ -586,11 +586,12 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 
 
-static union _zend_function *zend_std_get_method(zval *object, char *method_name, int method_len TSRMLS_DC)
+static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, int method_len TSRMLS_DC)
 {
 	zend_object *zobj;
 	zend_function *fbc;
 	char *lc_method_name;
+	zval *object = *object_ptr;
 	
 	lc_method_name = do_alloca(method_len+1);
 	/* Create a zend_copy_str_tolower(dest, src, src_length); */
