@@ -95,6 +95,7 @@ void init_compiler(CLS_D ELS_DC)
 	init_resource_list(ELS_C);
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
+	zend_hash_init(&CG(used_files), 5, NULL, NULL, 0);
 }
 
 
@@ -109,6 +110,7 @@ void shutdown_compiler(CLS_D)
 	zend_hash_apply(CG(function_table), (int (*)(void *)) is_not_internal_function);
 	zend_hash_apply(CG(class_table), (int (*)(void *)) is_not_internal_class);
 	zend_llist_destroy(&CG(open_files));
+	zend_hash_destroy(&CG(used_files));
 }
 
 

@@ -84,6 +84,8 @@ struct _zend_compiler_globals {
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 
+	HashTable used_files;		/* files already included using 'use' */
+
 	zend_llist filenames_list;
 
 	zend_bool short_tags;
@@ -129,6 +131,8 @@ struct _zend_executor_globals {
 
 	HashTable *active_symbol_table;
 	HashTable symbol_table;		/* main symbol table */
+
+	HashTable imported_files;	/* files already included using 'import' */
 
 	jmp_buf bailout;
 

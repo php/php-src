@@ -235,12 +235,14 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 #ifndef ZTS
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
-			file_handle->handle.fp = zend_fopen(file_handle->filename);
+			file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
 			break;
 		case ZEND_HANDLE_FD:
+			file_handle->opened_path = NULL;
 			file_handle->handle.fp = fdopen(file_handle->handle.fd, "r");
 			break;
 		case ZEND_HANDLE_FP:
+			file_handle->opened_path = NULL;
 			file_handle->handle.fp = file_handle->handle.fp;
 			break;
 	}
@@ -258,12 +260,13 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 #else
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
+			file_handle->opened_path = NULL;
 			file_handle->handle.is = new ifstream(file_handle->handle.fd);
 			file_handle->type = ZEND_HANDLE_FSTREAM;
 			break;
 		case ZEND_HANDLE_FILENAME:
 			{
-				file_handle->handle.fp = zend_fopen(file_handle->filename);
+				file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
 				if (!file_handle->handle.fp) {
 					return FAILURE;
 				}
@@ -272,6 +275,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 				break;
 			}
 		case ZEND_HANDLE_FP:
+			file_handle->opened_path = NULL;
 			if (file_handle->handle.fp==stdin) {
 				file_handle->handle.is = (ifstream *) &cin;
 			} else {
@@ -366,7 +370,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 }
 
 
-zend_op_array *compile_filename(zval *filename CLS_DC)
+zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC)
 {
 	zend_file_handle file_handle;
 	zval tmp;
@@ -381,6 +385,9 @@ zend_op_array *compile_filename(zval *filename CLS_DC)
 	file_handle.filename = filename->value.str.val;
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
+	if (file_handle.opened_path) {
+		free(file_handle.opened_path);
+	}
 	if (filename==&tmp) {
 		zval_dtor(&tmp);
 	}
@@ -459,13 +466,13 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 
 
 BEGIN_EXTERN_C()
-int require_filename(char *filename CLS_DC)
+int require_filename(char *filename, zend_bool unique CLS_DC)
 {
 	zend_file_handle file_handle;
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
-	if (require_file(&file_handle CLS_CC)==FAILURE) {
+	if (require_file(&file_handle, unique CLS_CC)==FAILURE) {
 		zend_bailout();
 		return FAILURE; /* will never get here */
 	}
@@ -473,7 +480,7 @@ int require_filename(char *filename CLS_DC)
 }
 
 
-int require_file(zend_file_handle *file_handle CLS_DC)
+int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC)
 {
 	zend_lex_state original_lex_state;
 	int compiler_result;
@@ -482,6 +489,18 @@ int require_file(zend_file_handle *file_handle CLS_DC)
 	if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
 		return FAILURE;
+	}
+	if (file_handle->opened_path) {
+		if (unique) {
+			zend_bool exists=1;
+
+			if (zend_hash_add(&CG(used_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, &exists, sizeof(zend_bool), NULL)==FAILURE) {
+				zend_close_file_handle(file_handle CLS_CC);
+				restore_lexical_state(&original_lex_state CLS_CC);
+				return SUCCESS;
+			}
+		}
+		free(file_handle->opened_path);
 	}
 	compiler_result = zendparse(CLS_C);
 	zend_close_file_handle(file_handle CLS_CC);
@@ -505,6 +524,9 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 	if (open_file_for_scanning(&file_handle CLS_CC)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
 		return FAILURE;
+	}
+	if (file_handle.opened_path) {
+		free(file_handle.opened_path);
 	}
 	zend_highlight(syntax_highlighter_ini);
 	zend_close_file_handle(&file_handle CLS_CC);
@@ -808,8 +830,16 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_INCLUDE;
 }
 
+<ST_IN_SCRIPTING>"import" {
+	return T_IMPORT;
+}
+
 <ST_IN_SCRIPTING>"require" {
 	return T_REQUIRE;
+}
+
+<ST_IN_SCRIPTING>"use" {
+	return T_USE;
 }
 
 <ST_IN_SCRIPTING>"global" {

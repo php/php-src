@@ -44,7 +44,7 @@ ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API int (*zend_write)(const char *str, uint str_length);
 ZEND_API void (*zend_error)(int type, const char *format, ...);
 ZEND_API void (*zend_message_dispatcher)(long message, void *data);
-ZEND_API FILE *(*zend_fopen)(const char *filename);
+ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)();
 ZEND_API void (*zend_unblock_interruptions)();
 ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
@@ -208,8 +208,11 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent)
 }
 
 
-static FILE *zend_fopen_wrapper(const char *filename)
+static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 {
+	if (opened_path) {
+		*opened_path = strdup(filename);
+	}
 	return fopen(filename, "r");
 }
 

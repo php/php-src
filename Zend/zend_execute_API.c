@@ -115,6 +115,8 @@ void init_executor(CLS_D ELS_DC)
 	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_activator);
 	EG(opline_ptr) = NULL;
 	EG(garbage_ptr) = 0;
+
+	zend_hash_init(&EG(imported_files), 5, NULL, NULL, 0);
 }
 
 
@@ -148,6 +150,8 @@ void shutdown_executor(ELS_D)
 		zval_dtor(EG(garbage)[EG(garbage_ptr)]);
 		efree(EG(garbage)[EG(garbage_ptr)]);
 	}
+
+	zend_hash_destroy(&EG(imported_files));
 }
 
 
