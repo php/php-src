@@ -1,0 +1,85 @@
+diff -ur thttpd-2.10/Makefile.in thttpd-2.10-php/Makefile.in
+--- thttpd-2.10/Makefile.in	Mon Oct 11 20:45:38 1999
++++ thttpd-2.10-php/Makefile.in	Mon Dec 20 01:37:49 1999
+@@ -46,13 +46,15 @@
+ 
+ # You shouldn't need to edit anything below here.
+ 
++include php_makefile
++
+ CC =		@CC@
+ CCOPT =		@V_CCOPT@
+ DEFS =		@DEFS@
+ INCLS =		-I.
+ CFLAGS =	$(CCOPT) $(DEFS) $(INCLS)
+-LDFLAGS =	@LDFLAGS@
+-LIBS =		@LIBS@
++LDFLAGS =	@LDFLAGS@ $(PHP_LDFLAGS)
++LIBS =		@LIBS@ $(PHP_LIBS)
+ NETLIBS =	@V_NETLIBS@
+ INSTALL =	@INSTALL@
+ 
+diff -ur thttpd-2.10/libhttpd.c thttpd-2.10-php/libhttpd.c
+--- thttpd-2.10/libhttpd.c	Wed Dec 15 23:22:50 1999
++++ thttpd-2.10-php/libhttpd.c	Mon Dec 20 01:05:47 1999
+@@ -75,6 +75,8 @@
+ #include "match.h"
+ #include "tdate_parse.h"
+ 
++#include "php_thttpd.h"
++
+ #ifndef STDIN_FILENO
+ #define STDIN_FILENO 0
+ #endif
+@@ -211,7 +213,11 @@
+ 	free( (void*) hs->cwd );
+     if ( hs->cgi_pattern != (char*) 0 )
+ 	free( (void*) hs->cgi_pattern );
++    if ( hs->php_pattern != (char*) 0 )
++	free( (void *) hs->php_pattern );
+     free( (void*) hs );
++	
++    thttpd_php_shutdown();
+     }
+ 
+ 
+@@ -244,6 +250,7 @@
+     else
+ 	hs->hostname = strdup( hostname );
+     hs->port = port;
++    hs->php_pattern = strdup("*.php");
+     if ( cgi_pattern == (char*) 0 )
+ 	hs->cgi_pattern = (char*) 0;
+     else
+@@ -272,6 +279,8 @@
+     hs->no_symlinks = no_symlinks;
+     hs->vhost = vhost;
+ 
++    thttpd_php_init();
++
+     /* Create socket. */
+     hs->listen_fd = socket( AF_INET, SOCK_STREAM, 0 );
+     if ( hs->listen_fd < 0 )
+@@ -3129,6 +3138,11 @@
+ 	 ( hc->sb.st_mode & S_IXOTH ) &&
+ 	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
+ 	return cgi( hc );
++
++	if ( hc->hs->php_pattern != (char*) 0 &&
++			match( hc->hs->php_pattern, hc->expnfilename)) {
++		return thttpd_php_request( hc );
++	}
+ 
+     /* It's not CGI.  If it's executable or there's pathinfo, someone's
+     ** trying to either serve or run a non-CGI file as CGI.   Either case
+diff -ur thttpd-2.10/libhttpd.h thttpd-2.10-php/libhttpd.h
+--- thttpd-2.10/libhttpd.h	Wed Dec  8 19:53:34 1999
++++ thttpd-2.10-php/libhttpd.h	Mon Dec 20 01:06:09 1999
+@@ -57,6 +57,7 @@
+     struct in_addr host_addr;
+     int port;
+     char* cgi_pattern;
++    char* php_pattern;
+     char* cwd;
+     int listen_fd;
+     FILE* logfp;
