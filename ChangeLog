@@ -1,3 +1,44 @@
+2004-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c:
+      Add missing constants for socketpair().
+      I thought I had included these...
+      Good catch Nuno :)
+
+2004-12-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/apache2filter/config.m4:
+      - Apply the same fix to apache2filter too.
+
+2004-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Add stream_socket_pair(), a streams based version of socketpair().
+      Modified patch from Vincent [six at t0x dot net]
+
+2004-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/datetime.c:
+      Fixed bug #31056 (php_std_date() returns invalid formatted date if
+      y2k_compliance is On).
+      
+
+2004-12-12  Stanislav Malyshev  <stas@zend.com>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      another 64-bit fix - 's' in zend_parse_parameters uses int, so it should
+      not get long *
+
+2004-12-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/apache2handler/config.m4:
+      - Fixlet for httpd-2.1 on Darwin platforms
+
 2004-12-11  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_4_3)
