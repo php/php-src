@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data
 --SKIPIF--
-<?php if (!extension_loaded("exif")) print "skip";?>
+<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --FILE--
 <?php
 /*

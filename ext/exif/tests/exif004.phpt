@@ -1,7 +1,10 @@
 --TEST--
 Check for exif_read_data, Unicode WinXP tags	
 --SKIPIF--
-<?php if (!extension_loaded("exif") || !extension_loaded("mbstring")) print "skip";?>
+<?php 
+	if (!extension_loaded('exif')) die('skip exif extension not available');
+	if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+?>
 --INI--
 output_handler = 
 zlib.output_compression = Off
