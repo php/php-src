@@ -3,7 +3,7 @@
 PROJECT_ROOT = .
 
 # Module details
-MODULE_NAME = PHPLIB
+MODULE_NAME = phplib
 MODULE_DESC = "PHP 4.3 - Script Interpreter and Library"
 VMAJ = 3
 VMIN = 0
@@ -117,10 +117,10 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/strnatcmp.c \
         ext/standard/type.c \
         ext/standard/uniqid.c \
-        ext/standard/user_filters.c \
         ext/standard/url.c \
         ext/standard/url_scanner.c \
         ext/standard/url_scanner_ex.c \
+        ext/standard/user_filters.c \
         ext/standard/var.c \
         ext/standard/var_unserializer.c \
         ext/standard/versioning.c \
