@@ -222,6 +222,10 @@ class PEAR_Installer extends PEAR_Common
             $this->log(3, "+ mkdir $dest_dir");
         }
         if (empty($atts['replacements'])) {
+            if (!file_exists($orig_file)) {
+                return $this->raiseError("file does not exist",
+                                         PEAR_INSTALLER_FAILED);
+            }
             if (!@copy($orig_file, $dest_file)) {
                 return $this->raiseError("failed to write $dest_file",
                                          PEAR_INSTALLER_FAILED);
@@ -231,6 +235,10 @@ class PEAR_Installer extends PEAR_Common
                 $md5sum = md5_file($dest_file);
             }
         } else {
+            if (!file_exists($orig_file)) {
+                return $this->raiseError("file does not exist",
+                                         PEAR_INSTALLER_FAILED);
+            }
             $fp = fopen($orig_file, "r");
             $contents = fread($fp, filesize($orig_file));
             fclose($fp);
@@ -906,6 +914,9 @@ class PEAR_Installer extends PEAR_Common
                 if (PEAR::isError($res)) {
                     if (empty($options['ignore-errors'])) {
                         $this->rollbackFileTransaction();
+                        if ($res->getMessage() == "file does not exist") {
+                            $this->raiseError("file $file in package.xml does not exist");
+                        }
                         return $this->raiseError($res);
                     } else {
                         $this->log(0, "Warning: " . $res->getMessage());
@@ -1041,10 +1052,11 @@ class PEAR_Installer extends PEAR_Common
                 $code = $depchecker->callCheckMethod($error, $dep);
                 if ($code) {
                     if (isset($dep['optional']) && $dep['optional'] == 'yes') {
+/* die ugly hack die
                         // Ugly hack to adjust the error messages
                         $error = str_replace('requires ', '', $error);
                         $error = ucfirst($error);
-                        $error = $error . ' is recommended to utilize some features.';
+                        $error = $error . ' is recommended to utilize some features.';*/
                         $optional_deps[] = array($dep, $code, $error);
                     } else {
                         $failed_deps[] = array($dep, $code, $error);
