@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Zeev Suraski <zeev@zend.com>                                 |
-   |         Harald Radi  <h.radi@nme.at>
+   |         Harald Radi  <h.radi@nme.at>                                 |
    +----------------------------------------------------------------------+
  */
 
