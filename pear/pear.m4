@@ -69,6 +69,7 @@ enable_static=no
 enable_shared=yes
 
 AC_PROG_LIBTOOL
+AC_PROG_AWK
 
 all_targets='$(PHP_MODULES)'
 install_targets=install-modules
