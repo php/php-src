@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added flags parameter to preg_grep(). The only flag currently is
+  PREG_GREP_INVERT that will make the function return entries that
+  did not match. (Andrei)
 - Fixed several crash bugs in the xslt extension (Markus, Derick)
 - Fixed problem with dbase not returning very large (larger than long)
 - integers properly. (Vlad)
