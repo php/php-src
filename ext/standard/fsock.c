@@ -100,6 +100,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			zval_dtor(zerrstr);
 			ZVAL_STRING(zerrstr, errstr, 0);
 		}
+		else if (!zerrstr && errstr) {
+			efree(errstr);
+		} 
+
 		RETURN_FALSE;
 	}
 
