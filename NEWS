@@ -4,8 +4,6 @@ PHP 4.0                                                                    NEWS
 - Fixed bugs in the mcrypt extension that caused crashes. (Derick)
 - Added the IMG_ARC_ROUNDED option for the ImageFilledArc() function, which
   specified that the drawn curve should be rounded. (Sterling)
-- Fixed getopt so it accepts arguments in the form -<option><value> not
-  just -<option> <value>. (jmoore)
 - Updated the sockets extension to use resources instead of longs for the
   ocket descriptors.  The socket functions have been renamed to conform with
   the PHP standard instead of their C counterparts.  The sockets extension is now
@@ -35,6 +33,8 @@ PHP 4.0                                                                    NEWS
 - Fixed bug in the mcrypt extension that caused segfaults when using a key
   that is too large for the used algorithm, and a bug that caused
   mcrypt_generic() to segfault PHP (Derick)
+- Fixed getopt so that it accepts command line arguments in the form
+  -<opt><arg> and -<opt> <arg>. (Jmoore)
 - Fixed race in writing session files. (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
   specified. (Zeev)
