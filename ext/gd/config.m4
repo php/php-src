@@ -258,6 +258,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   PHP_CHECK_LIBRARY(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGifCtx,          [AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdCacheCreate,          [AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,    [AC_DEFINE(HAVE_GD_THREAD_SAFE,      1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
 dnl
