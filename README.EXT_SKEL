@@ -13,11 +13,16 @@ HOW TO USE IT
 
    ./ext_skel --extname=module_name
 
-  and everything you need is placed in directory module_name. In fact, if you
-  don't need to test the existence of any external header files, libraries or
-  functions in them, the module is already almost ready to be compiled in PHP.
-  Just remove 3 comments in your_module_name/config.m4, cd back up to PHP
-  sources top directory, and do
+  and everything you need is placed in directory module_name. 
+
+  [ Note that GNU awk is likely required for this script to work.  Debian 
+    systems seem to default to using mawk, so you may need to change the 
+    #! line in skeleton/create_stubs to use gawk explicitly. ]
+
+  If you don't need to test the existence of any external header files, 
+  libraries or functions in them, the module is already almost ready to be 
+  compiled in PHP.  Just remove 3 comments in your_module_name/config.m4, 
+  cd back up to PHP sources top directory, and do
 
     ./buildconf; ./configure --enable-module_name; make
 
