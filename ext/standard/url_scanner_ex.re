@@ -129,20 +129,20 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		smart_str_appendl(dest, bash, q - bash);
 }
 
-static inline void tag_arg(url_adapt_state_ex_t *ctx PLS_DC)
+static inline void tag_arg(url_adapt_state_ex_t *ctx, char quote PLS_DC)
 {
 	char f = 0;
 
 	if (strncasecmp(ctx->arg.c, ctx->lookup_data, ctx->arg.len) == 0)
 		f = 1;
 
-	smart_str_appendc(&ctx->result, '"');
+	smart_str_appendc(&ctx->result, quote);
 	if (f) {
 		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator));
 	} else {
 		smart_str_append(&ctx->result, &ctx->val);
 	}
-	smart_str_appendc(&ctx->result, '"');
+	smart_str_appendc(&ctx->result, quote);
 }
 
 enum {
@@ -185,20 +185,22 @@ enum {
 #define HANDLE_TAG() {\
 	int ok = 0; \
 	int i; \
-	smart_str_copyl(&ctx->tag, start, YYCURSOR - start); \
+	ctx->tag.len = 0; \
+	smart_str_appendl(&ctx->tag, start, YYCURSOR - start); \
 	for (i = 0; i < ctx->tag.len; i++) \
 		ctx->tag.c[i] = tolower(ctx->tag.c[i]); \
-	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, &ctx->lookup_data) == SUCCESS) \
+	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, (void **) &ctx->lookup_data) == SUCCESS) \
 		ok = 1; \
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN; \
 }
 
 #define HANDLE_ARG() {\
-	smart_str_copyl(&ctx->arg, start, YYCURSOR - start); \
+	ctx->arg.len = 0; \
+	smart_str_appendl(&ctx->arg, start, YYCURSOR - start); \
 }
-#define HANDLE_VAL(quotes) {\
+#define HANDLE_VAL(quotes, type) {\
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2); \
-	tag_arg(ctx PLS_CC); \
+	tag_arg(ctx, type PLS_CC); \
 }
 
 #ifdef SCANNER_DEBUG
@@ -268,9 +270,9 @@ alpha = [a-zA-Z];
 
 		case STATE_VAL:
 /*!re2c
-  ["] (any\[">])* ["]	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
-  ['] (any\['>])* [']	{ HANDLE_VAL(1); STATE = STATE_NEXT_ARG; continue; }
-  (any\[ \n>"])+		{ HANDLE_VAL(0); STATE = STATE_NEXT_ARG; continue; }
+  ["] (any\[">])* ["]	{ HANDLE_VAL(1, '"');  STATE = STATE_NEXT_ARG; continue; }
+  ['] (any\['>])* [']	{ HANDLE_VAL(1, '\''); STATE = STATE_NEXT_ARG; continue; }
+  (any\[ \n>"])+		{ HANDLE_VAL(0, '"');  STATE = STATE_NEXT_ARG; continue; }
   any					{ PASSTHRU(); STATE = STATE_NEXT_ARG; continue; }
 */
 			break;
@@ -289,6 +291,26 @@ stop:
 	ctx->buf.len = rest;
 }
 
+char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen)
+{
+	smart_str surl = {0};
+	smart_str buf = {0};
+	smart_str sname = {0};
+	smart_str sval = {0};
+	PLS_FETCH();
+
+	smart_str_setl(&surl, url, urllen);
+	smart_str_sets(&sname, name);
+	smart_str_sets(&sval, value);
+
+	append_modified_url(&surl, &buf, &sname, &sval, PG(arg_separator));
+
+	smart_str_0(&buf);
+	if (newlen) *newlen = buf.len;
+	
+	return buf.c;
+}
+
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen)
 {
 	char *ret;
@@ -302,14 +324,12 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	mainloop(ctx, src, srclen);
 
 	*newlen = ctx->result.len;
-
 	if (ctx->result.len == 0) {
 		return strdup("");
 	}
 	smart_str_0(&ctx->result);
 	ret = malloc(ctx->result.len + 1);
 	memcpy(ret, ctx->result.c, ctx->result.len + 1);
-	
 	ctx->result.len = 0;
 	return ret;
 }
