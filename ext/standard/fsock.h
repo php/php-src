@@ -71,7 +71,7 @@ int _php3_sock_close(int socket);
 size_t _php3_sock_set_def_chunk_size(size_t size);
 int php_msock_destroy(int *data);
 
-PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, int addrlen, struct timeval *timeout);
+PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
 
 PHP_MINIT_FUNCTION(fsock);
 PHP_MSHUTDOWN_FUNCTION(fsock);
