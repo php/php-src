@@ -1,3 +1,19 @@
+1999-11-15  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: cleaning up
+
+1999-11-15  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
+1999-11-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mcrypt/mcrypt.c (php_minit_mcrypt): Also allow never versions of mcrypt
+
+    * ext/mhash/mhash.c:
+    (php_minit_mhash): Don't use REGISTER_LONG_CONSTANT macro, because we
+    don't have a fixed size array of chars (this used to work nevertheless).
+
 1999-11-14  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/mhash/mhash.c (PHP mhash): don't segfault, if mhash_end() returns NULL
