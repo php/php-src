@@ -178,6 +178,7 @@ PHP_FUNCTION(imap_thread);
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 PHP_FUNCTION(imap_get_quota);
+PHP_FUNCTION(imap_get_quotaroot);
 PHP_FUNCTION(imap_set_quota);
 PHP_FUNCTION(imap_setacl);
 #endif
@@ -210,6 +211,7 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	unsigned long status_uidvalidity;
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	zval *quota_return;
+	zval *quotaroot_return;
 #endif
 ZEND_END_MODULE_GLOBALS(imap)
 

@@ -135,6 +135,7 @@ function_entry imap_functions[] = {
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	PHP_FE(imap_get_quota,							NULL)
+	PHP_FE(imap_get_quotaroot,						NULL)
 	PHP_FE(imap_set_quota,							NULL)
  	PHP_FE(imap_setacl,								NULL)
 #endif
@@ -396,6 +397,23 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 }
 /* }}} */
 
+/* {{{ mail_getquotaroot
+ *
+ * Mail GET_QUOTAROOT callback
+ * Called via the mail_parameter function in c-client:src/c-client/mail.c
+ * Author DRK
+ */
+void mail_getquotaroot(MAILSTREAM *stream, char *mbx, STRINGLIST *qroot)
+{
+	TSRMLS_FETCH();
+
+	add_next_index_string(IMAPG(quotaroot_return), mbx, 1);
+	for(; qroot; qroot = qroot->next) {
+		add_next_index_string(IMAPG(quotaroot_return), qroot->text.data, 1);
+	}
+
+}
+/* }}} */
 #endif
 
 
@@ -423,6 +441,7 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->folderlist_style = FLIST_ARRAY;
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	imap_globals->quota_return = NULL;
+	imap_globals->quotaroot_return = NULL;
 #endif
 }
 /* }}} */
@@ -1079,6 +1098,45 @@ PHP_FUNCTION(imap_get_quota)
 
 	add_next_index_zval(return_value, IMAPG(quota_return));
 
+}
+/* }}} */
+
+/* {{{ proto array imap_get_quotaroot(int stream_id, string mbox)
+	Returns the quota set to the mailbox account mbox */
+PHP_FUNCTION(imap_get_quotaroot)
+{
+	zval **streamind, **mbox;
+	zval *quotaroot_return;
+	pils *imap_le_struct;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &streamind, &mbox) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+
+	convert_to_string_ex(mbox);
+
+	MAKE_STD_ZVAL(IMAPG(quotaroot_return));
+	if (array_init(IMAPG(quotaroot_return)) == FAILURE) {
+		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
+		FREE_ZVAL(quotaroot_return);
+		RETURN_FALSE;
+	}
+
+	/* set the callback for the GET_QUOTAROOT function */
+	mail_parameters(NIL, SET_QUOTAROOT, (void *) mail_getquotaroot);
+	if(!imap_getquotaroot(imap_le_struct->imap_stream, Z_STRVAL_PP(mbox))) {
+		php_error(E_WARNING, "c-client imap_getquotaroot failed");
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	add_next_index_zval(return_value, IMAPG(quotaroot_return));
 }
 /* }}} */
 
