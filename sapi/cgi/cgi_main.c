@@ -372,12 +372,12 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 	char *s;
 /* temporary locals */
-	int cgi_started=0;
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
 	int orig_optind=ap_php_optind;
 	char *orig_optarg=ap_php_optarg;
 	char *argv0=NULL;
+	char *script_file=NULL;
 	zend_llist global_vars;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
@@ -541,18 +541,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 
   			case 'f': /* parse file */
-					if (!cgi_started){ 
-						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-							php_module_shutdown();
-							return FAILURE;
-						}
-					}
-					if (no_headers) {
-						SG(request_info).no_headers = 1;
-						SG(headers_sent) = 1;
-					}
-					cgi_started=1;
-					SG(request_info).path_translated = estrdup(ap_php_optarg);
+					script_file = estrdup(ap_php_optarg);
 					no_headers = 1;
 					break;
 
@@ -575,17 +564,14 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 
 			case 'i': /* php info & quit */
-					if (!cgi_started) {
-						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-							php_module_shutdown();
-							return FAILURE;
-						}
+					if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+						php_module_shutdown();
+						return FAILURE;
 					}
 					if (no_headers) {
 						SG(headers_sent) = 1;
 						SG(request_info).no_headers = 1;
 					}
-					cgi_started=1;
 					php_print_info(0xFFFFFFFF);
 					exit(1);
 					break;
@@ -624,11 +610,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 			case 'v': /* show php version & quit */
 					no_headers = 1;
-					if (!cgi_started) {
-						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-							php_module_shutdown();
-							return FAILURE;
-						}
+					if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+						php_module_shutdown();
+						return FAILURE;
 					}
 					if (no_headers) {
 						SG(headers_sent) = 1;
@@ -655,12 +639,20 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	if (!cgi) {
 		if (!SG(request_info).query_string) {
-			for (i = ap_php_optind, len = 0; i < argc; i++) {
+			len = 0;
+			if (script_file) {
+				len += strlen(script_file) + 1;
+			}
+			for (i = ap_php_optind; i < argc; i++) {
 				len += strlen(argv[i]) + 1;
 			}
 
 			s = malloc(len + 1);	/* leak - but only for command line version, so ok */
 			*s = '\0';			/* we are pretending it came from the environment  */
+			if (script_file) {
+				strcpy(s, script_file);
+				strcat(s, "+");
+			}
 			for (i = ap_php_optind, len = 0; i < argc; i++) {
 				strcat(s, argv[i]);
 				if (i < (argc - 1)) {
@@ -671,12 +663,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		}
 	}
 
+	if (script_file) {
+		SG(request_info).path_translated = script_file;
+	}
 
-	if (!cgi_started) {
-		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-			php_module_shutdown();
-			return FAILURE;
-		}
+	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+		php_module_shutdown();
+		return FAILURE;
 	}
 	if (no_headers) {
 		SG(headers_sent) = 1;
