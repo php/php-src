@@ -989,6 +989,10 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_IS_IDENTICAL;
 }
 
+<ST_IN_SCRIPTING>"!==" {
+	return T_IS_NOT_IDENTICAL;
+}
+
 <ST_IN_SCRIPTING>"==" {
 	return T_IS_EQUAL;
 }

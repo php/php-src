@@ -384,6 +384,9 @@ ZEND_API void *get_binary_op(int opcode)
 		case ZEND_IS_IDENTICAL:
 			return (void *) is_identical_function;
 			break;
+		case ZEND_IS_NOT_IDENTICAL:
+			return (void *) is_not_identical_function;
+			break;
 		case ZEND_IS_EQUAL:
 			return (void *) is_equal_function;
 			break;
