@@ -70,6 +70,8 @@ ext/session
       the need to serialize frame-loads.
     * maybe implement finer-grained session variables that could be 
       locked individually.
+    * write a network-transparent storage back-end with fallover
+      facilities
 
 ext/standard
 ------------
