@@ -38,7 +38,7 @@ your version of this file under either the MPL or the GPL.
 #endif
 #endif
 
-#include "hashtable.h"
+#include "expat_hashtable.h"
 
 #define INIT_SIZE 64
 
