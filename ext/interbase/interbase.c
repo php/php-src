@@ -1787,13 +1787,14 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 			val->type = IS_STRING;
 
 			if (scale) {
-				int i, len;
-				char dt[20];
+				int j, f = 1;
 				double number = (double) ((ISC_INT64) (*((ISC_INT64 *)data)));
-
-				number /= - 10 * scale;
+				char dt[20];
+				for (j = 0; j < -scale; j++) {
+					f *= 10;
+				}
 				sprintf(dt, "%%0.%df", -scale);
-				val->value.str.len = sprintf (string_data, dt, number);
+				val->value.str.len = sprintf (string_data, dt, number/f );
 			} else {
 				val->value.str.len = sprintf (string_data, "%Ld",
 					(ISC_INT64) (*((ISC_INT64 *)data)));
