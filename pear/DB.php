@@ -133,6 +133,17 @@ define('DB_GETMODE_ASSOC',   DB_FETCHMODE_ASSOC);
 define('DB_GETMODE_FLIPPED', DB_FETCHMODE_FLIPPED);
 
 /**
+ * these are constants for the tableInfo-function
+ * they are bitwised or'ed. so if there are more constants to be defined
+ * in the future, adjust DB_TABLEINFO_FULL accordingly 
+ */
+
+define('DB_TABLEINFO_ORDER', 1);
+define('DB_TABLEINFO_ORDERTABLE', 2);
+define('DB_TABLEINFO_FULL', 3);
+
+
+/**
  * The main "DB" class is simply a container class with some static
  * methods for creating DB objects as well as some utility functions
  * common to all parts of DB.
@@ -625,6 +636,11 @@ class DB_result
         }
         $this->result = false;
         return true;
+    }
+
+    function tableInfo($mode = null)
+    {
+        return $this->dbh->tableInfo($this->result, $mode);
     }
 }
 
