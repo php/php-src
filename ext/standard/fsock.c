@@ -89,8 +89,10 @@ extern int le_fp;
 		efree(key);				\
 	}
 
-#define SEARCHCR() \
-	p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen));
+#define SEARCHCR() do {											\
+	for (p = READPTR(sock), pe = p + MIN(TOREAD(sock), maxlen); \
+			*p != '\n'; ) if (++p >= pe) { p = NULL; break; }	\
+} while (0)
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -540,7 +542,7 @@ PHPAPI void php_sockset_timeout(int socket, struct timeval *timeout)
  */
 static char * php_sock_fgets_internal(char * buf, size_t maxlen, php_sockbuf * sock)
 {
-	char *p = NULL;
+	char *p = NULL, *pe;
 	char *ret = NULL;
 	size_t amount = 0;
 
