@@ -505,8 +505,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			if (prepend_string) {
 				PUTS(prepend_string);
 			}
-			php_printf(error_format, error_type_str, buffer,
-					   error_filename, error_lineno);
+			php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
 			if (PG(xmlrpc_errors)) {
 				free_alloca(error_format);
 			}
@@ -694,9 +693,8 @@ static void php_message_handler_for_zend(long message, void *data)
  */
 static void sigchld_handler(int apar)
 {
-    while (waitpid(-1, NULL, WNOHANG) > 0)
-		;
-    signal(SIGCHLD, sigchld_handler);   
+	while (waitpid(-1, NULL, WNOHANG) > 0);
+	signal(SIGCHLD, sigchld_handler);
 }
 /* }}} */
 #endif
@@ -897,7 +895,7 @@ int php_module_startup(sapi_module_struct *sf)
 		}
 	}
 #else
-    php_os=PHP_OS;
+	php_os=PHP_OS;
 #endif
 
 #ifdef ZTS
@@ -1022,7 +1020,7 @@ int php_module_startup(sapi_module_struct *sf)
 	   theese are loaded after initialization of internal extensions
 	   as extensions *might* rely on things from ext/standard
 	   which is always an internal extension and to be initialized
-       ahead of all other internals
+	   ahead of all other internals
 	 */
 	php_ini_delayed_modules_startup(TSRMLS_C);
 
