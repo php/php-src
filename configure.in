@@ -642,13 +642,11 @@ PHP_CONFIGURE_PART(Configuring Zend)
 LIBZEND_BASIC_CHECKS
 LIBZEND_OTHER_CHECKS
 
-
-TSRM_LIB='TSRM/libtsrm.la'
-TSRM_DIR=TSRM
-INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
-
 if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
+  TSRM_LIB='TSRM/libtsrm.la'
+  TSRM_DIR=TSRM
   AC_DEFINE(ZTS)
+  INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
   PHP_THREAD_SAFETY=yes
 else
   PHP_THREAD_SAFETY=no
@@ -656,21 +654,24 @@ fi
 
 if test "$abs_srcdir" != "$abs_builddir"; then
   INCLUDES="$INCLUDES -I\$(top_srcdir)/Zend"
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
+  if test "$PHP_THREAD_SAFETY" = "yes"; then
+    INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
+  fi
 fi
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
 LIBS=""
 LDFLAGS=""
-
-PHP_CONFIGURE_PART(Configuring TSRM)
-TSRM_BASIC_CHECKS
-TSRM_OTHER_CHECKS
-EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
-EXTRA_LIBS="$EXTRA_LIBS $LIBS"
-LDFLAGS=""
-LIBS=""
-PHP_OUTPUT(TSRM/Makefile)
+if test "$PHP_THREAD_SAFETY" = "yes"; then
+  PHP_CONFIGURE_PART(Configuring TSRM)
+  TSRM_BASIC_CHECKS
+  TSRM_OTHER_CHECKS
+  EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
+  EXTRA_LIBS="$EXTRA_LIBS $LIBS"
+  LDFLAGS=""
+  LIBS=""
+  PHP_OUTPUT(TSRM/Makefile)
+fi
 
 
 phplibdir="`pwd`/modules"
