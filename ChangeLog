@@ -1,3 +1,131 @@
+2002-10-28  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: - Only test the sed in PATH. (testing others is useless)
+
+    * NEWS: if it fits, it fits
+
+2002-10-28  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update & keep most important things on top.
+
+2002-10-28  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/mssql/php_mssql.c: fix bug # 17497
+    (fix by: ddb@bitxtender.de)
+
+2002-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+    This patch addresses the bogus test failures due to error logging/reporting
+    confusion.
+
+2002-10-28  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: remove last line commited by error
+    revert log_errors
+
+    * run-tests.php: forgot 'error_log=' and 'report_memleaks=1'
+
+2002-10-28  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/sockets/php_sockets.h: Fix proto and #20137
+
+2002-10-28  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: forgot 'error_log=' and 'report_memleaks=1'
+
+    * ext/iconv/tests/bug16069.inc
+      ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/eucjp2iso2022jp.inc
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.inc
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.inc
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.inc
+      ext/iconv/tests/iconv002.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt
+      ext/iconv/tests/skipif.inc
+      ext/iconv/tests/test.inc
+      ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.inc
+      ext/iconv/tests/translit-utf8.phpt: fix this tests
+    -they did not dl load module in test....
+    -disable E_NOTICE
+
+2002-10-28  Sterling Hughes  <sterling@bumblebury.com>
+
+    * NEWS: update...
+
+2002-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c: Fix win32 build.
+
+2002-10-28  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c: Raw records for yaz_record
+
+2002-10-28  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Added dbx.colnames_case option that controls the case of the returned
+    column names.
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.h
+      ext/dbx/dbx_oci8.c
+      ext/dbx/tests/002.phpt
+      ext/dbx/tests/005.phpt:
+    Added ini-entry and dbx_query flags to control the returned
+    column names (unchanged, lowercase, uppercase).
+
+2002-10-28  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    Patch by Morus Walter, concerning some dtd/entity expanding stuff.
+
+2002-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_streams.h
+      main/streams.c
+      main/main.c: A better fix for bug #20110.
+
+2002-10-28  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/sockets/sockets.c: make one-line read work on win32...
+
+
+    * main/main.c:
+    remove $_FILES from $_REQUEST as per php-dev conversation...
+
+2002-10-28  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+    - Enable the sed check. (and moved earlier so we can use the $SED everywhere)
+
+2002-10-28  Shane Caraveo  <shane@caraveo.com>
+
+    * run-tests.php:
+    windows will not have these, so dont bother, but add an OS to the stuff so that it makes sense why they are N/A
+
+    * run-tests.php: fix getting ini  values that contain the char =
+    fix command line quoting.  windows requires double quotes in order to handle & (in ini values) correctly
+
+2002-10-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: Bug fixing news.
+
+    * main/streams.c: Fixed bug #20110.
+
+2002-10-28  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+    allow default ini overwrites to be overwritten themselves in --INI--
+
+    * ext/mbstring/tests/htmlent.phpt: fix test
+
 2002-10-27  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/session/tests/008-php4.2.3.phpt: This test requires special settings
