@@ -48,7 +48,7 @@ SAPI_API int sapi_globals_id;
 sapi_globals_struct sapi_globals;
 #endif
 
-static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
+static void sapi_globals_ctor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 {
         memset(sapi_globals,0,sizeof(*sapi_globals));
 }
@@ -64,9 +64,9 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	zend_hash_init_ex(&known_post_content_types, 5, NULL, NULL, 1, 0);
 
 #ifdef ZTS
-	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, NULL);
+	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, NULL);
 #else
-	sapi_globals_ctor(&sapi_globals);
+	sapi_globals_ctor(&sapi_globals TSRMLS_CC);
 #endif
 
 #ifdef VIRTUAL_DIR

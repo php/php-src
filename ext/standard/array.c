@@ -68,7 +68,7 @@ php_array_globals array_globals;
 PHP_MINIT_FUNCTION(array)
 {
 #ifdef ZTS
-    array_globals_id = ts_allocate_id(sizeof(php_array_globals), NULL, NULL);
+	ts_allocate_id(&array_globals_id, sizeof(php_array_globals), NULL, NULL);
 #endif
 
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", EXTR_OVERWRITE, CONST_CS | CONST_PERSISTENT);
@@ -522,7 +522,7 @@ static int array_user_compare(const void *a, const void *b)
 	Bucket *s;
 	pval **args[2];
 	pval *retval_ptr;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	BLS_FETCH();
 
 	f = *((Bucket **) a);
@@ -610,7 +610,7 @@ static int array_user_key_compare(const void *a, const void *b)
 	pval *args[2];
 	pval retval;
 	int status;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	BLS_FETCH();
 
 	args[0] = &key1;
@@ -959,7 +959,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	ulong  num_key;
 	HashPosition pos;
 	BLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	/* Allocate space for key */
 	MAKE_STD_ZVAL(key);

@@ -64,7 +64,7 @@
 
 /* {{{ Prototypes
  */
-int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC);
+int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC TSRMLS_DC PLS_DC SLS_DC);
 void php_save_umask(void);
 void php_restore_umask(void);
 int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC);
@@ -235,7 +235,7 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 
 /* {{{ sapi_apache_register_server_variables
  */
-static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	register int i;
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
@@ -251,7 +251,7 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 		} else {
 			val = empty_string;
 		}
-		php_register_variable(elts[i].key, val, track_vars_array  ELS_CC PLS_CC);
+		php_register_variable(elts[i].key, val, track_vars_array  TSRMLS_CC PLS_CC);
 	}
 
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
@@ -266,10 +266,10 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	if (symbol_table
 		&& !zend_hash_exists(symbol_table, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"))
 		&& zend_hash_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated)==SUCCESS) {
-		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array ELS_CC PLS_CC);
+		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated), track_vars_array TSRMLS_CC PLS_CC);
 	}
 
-	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array TSRMLS_CC PLS_CC);
 }
 /* }}} */
 
@@ -493,7 +493,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	int retval;
 	HashTable *per_dir_conf;
 	SLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	CLS_FETCH();
 	PLS_FETCH();
 	APLS_FETCH();
@@ -505,7 +505,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		fh.opened_path = NULL;
 		fh.free_filename = 0;
 		fh.type = ZEND_HANDLE_FILENAME;
-		zend_execute_scripts(ZEND_INCLUDE CLS_CC ELS_CC, 1, &fh);
+		zend_execute_scripts(ZEND_INCLUDE CLS_CC TSRMLS_CC, 1, &fh);
 		return OK;
 	}
 
@@ -533,7 +533,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			r->content_type = php_apache_get_default_mimetype(r SLS_CC);
 			r->allowed |= (1 << METHODS) - 1;
 			zend_try {
-				zend_ini_deactivate(ELS_C);
+				zend_ini_deactivate(TSRMLS_C);
 			} zend_end_try();
 			return DECLINED;
 		}
@@ -545,7 +545,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 #if MODULE_MAGIC_NUMBER > 19961007
 		if ((retval = setup_client_block(r, REQUEST_CHUNKED_ERROR))) {
 			zend_try {
-				zend_ini_deactivate(ELS_C);
+				zend_ini_deactivate(TSRMLS_C);
 			} zend_end_try();
 			return retval;
 		}
@@ -555,7 +555,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 #if MODULE_MAGIC_NUMBER < 19970912
 			if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
 				zend_try {
-					zend_ini_deactivate(ELS_C);
+					zend_ini_deactivate(TSRMLS_C);
 				} zend_end_try();
 				return retval;
 			}
@@ -579,7 +579,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		add_cgi_vars(r);
 
 		init_request_info(SLS_C);
-		apache_php_module_main(r, display_source_mode CLS_CC ELS_CC PLS_CC SLS_CC);
+		apache_php_module_main(r, display_source_mode CLS_CC TSRMLS_CC PLS_CC SLS_CC);
 
 		/* Done, restore umask, turn off timeout, close file and return */
 		php_restore_umask();

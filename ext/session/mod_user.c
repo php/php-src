@@ -55,7 +55,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv)
 {
 	int i;
 	zval *retval = NULL;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	
 	MAKE_STD_ZVAL(retval);
 	if (call_user_function(EG(function_table), NULL, func, retval, 

@@ -261,10 +261,10 @@ int php_doit(PHLS_D SLS_DC)
 	struct httpinfo *hip = PHG(cip)->hip;
 
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
+	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == FAILURE) {
         return -1;
     }
 
@@ -273,9 +273,9 @@ int php_doit(PHLS_D SLS_DC)
     file_handle.free_filename = 0;
 
 /*
-	php_phttpd_hash_environment(PHLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
+	php_phttpd_hash_environment(PHLS_C CLS_CC TSRMLS_CC PLS_CC SLS_CC);
 */
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 	php_request_shutdown(NULL);
 
 	return SG(sapi_headers).http_response_code;
@@ -287,7 +287,7 @@ int pm_init(const char **argv)
 	sapi_startup(&phttpd_sapi_module);
     phttpd_sapi_module.startup(&phttpd_sapi_module);
 
-	ph_globals_id = ts_allocate_id(sizeof(phttpd_globals_struct), NULL, NULL);
+	ts_allocate_id(&ph_globals_id, sizeof(phttpd_globals_struct), NULL, NULL);
 
 	return 0;
 }

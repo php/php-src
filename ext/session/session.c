@@ -234,7 +234,7 @@ typedef struct {
 void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash PSLS_DC)
 {
 	PLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (PG(register_globals)) {
 		zval **old_symbol;
@@ -267,7 +267,7 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *
 	}
 }
 
-int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC ELS_DC)
+int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC TSRMLS_DC)
 {
 	HashTable *ht = &EG(symbol_table);
 
@@ -448,7 +448,7 @@ static void php_session_track_init(void)
 {
 	zval **old_vars = NULL;
 	PSLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), (void **)&old_vars) == SUCCESS && Z_TYPE_PP(old_vars) == IS_ARRAY) {
 	  PS(http_session_vars) = *old_vars;
@@ -809,7 +809,7 @@ static void php_session_start(PSLS_D)
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (PS(session_status) != php_session_none) 
 		return;
@@ -1448,7 +1448,7 @@ PHP_MINIT_FUNCTION(session)
 #ifdef ZTS
 	php_ps_globals *ps_globals;
 
-	ps_globals_id = ts_allocate_id(sizeof(php_ps_globals), NULL, NULL);
+	ts_allocate_id(&ps_globals_id, sizeof(php_ps_globals), NULL, NULL);
 	ps_globals = ts_resource(ps_globals_id);
 #endif
 

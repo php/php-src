@@ -166,15 +166,15 @@ static char *sapi_cgi_read_cookies(SLS_D)
 }
 
 
-static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
-	php_import_environment_variables(track_vars_array ELS_CC PLS_CC);
+	php_import_environment_variables(track_vars_array TSRMLS_CC PLS_CC);
 
 	/* Build the special-case PHP_SELF variable for the CGI version */
-	php_register_variable("PHP_SELF", (SG(request_info).request_uri ? SG(request_info).request_uri:""), track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", (SG(request_info).request_uri ? SG(request_info).request_uri:""), track_vars_array TSRMLS_CC PLS_CC);
 }
 
 
@@ -347,7 +347,7 @@ static void define_command_line_ini_entry(char *arg)
 static void php_register_command_line_global_vars(char **arg)
 {
 	char *var, *val;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
 	var = *arg;
@@ -356,7 +356,7 @@ static void php_register_command_line_global_vars(char **arg)
 		printf("No value specified for variable '%s'\n", var);
 	} else {
 		*val++ = '\0';
-		php_register_variable(var, val, NULL ELS_CC PLS_CC);
+		php_register_variable(var, val, NULL TSRMLS_CC PLS_CC);
 	}
 	efree(*arg);
 }
@@ -385,6 +385,7 @@ int main(int argc, char *argv[])
 	zend_executor_globals *executor_globals;
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals;
+	void ***tsrm_ls;
 #endif
 
 
@@ -483,6 +484,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	executor_globals = ts_resource(executor_globals_id);
 	core_globals = ts_resource(core_globals_id);
 	sapi_globals = ts_resource(sapi_globals_id);
+	tsrm_ls = ts_resource(0);
 #endif
 
 	zend_try {
@@ -561,7 +563,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						break;
 
 				case 'i': /* php info & quit */
-						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+						if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
 						}
@@ -608,7 +610,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 				case 'v': /* show php version & quit */
 						no_headers = 1;
-						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+						if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
 						}
@@ -665,7 +667,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			SG(request_info).path_translated = script_file;
 		}
 
-		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+		if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC)==FAILURE) {
 			php_module_shutdown();
 			return FAILURE;
 		}
@@ -732,11 +734,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 		switch (behavior) {
 			case PHP_MODE_STANDARD:
-				exit_status = php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+				exit_status = php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 				break;
 			case PHP_MODE_LINT:
 				PG(during_request_startup) = 0;
-				exit_status = php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC);
+				exit_status = php_lint_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 				if (exit_status==SUCCESS) {
 					zend_printf("No syntax errors detected in %s\n", file_handle.filename);
 				} else {

@@ -137,7 +137,7 @@ PHP_MINIT_FUNCTION(dir)
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
 
 #ifdef ZTS
-	dir_globals_id = ts_allocate_id(sizeof(php_dir_globals), NULL, NULL);
+	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
 #endif
 	tmpstr[0] = DEFAULT_SLASH;
 	tmpstr[1] = '\0';

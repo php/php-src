@@ -286,7 +286,7 @@ static void php_close_ora_cursor(zend_rsrc_list_entry *rsrc)
 
 /* {{{ php_ora_init_globals
  */
-static void php_ora_init_globals(ORALS_D)
+static void php_ora_init_globals(ORALS_D TSRMLS_DC)
 {
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORA(allow_persistent))
@@ -319,9 +319,9 @@ PHP_MINIT_FUNCTION(oracle)
 {
 
 #ifdef ZTS
-	ora_globals_id = ts_allocate_id(sizeof(php_ora_globals), (ts_allocate_ctor) php_ora_init_globals, NULL);
+	ts_allocate_id(&ora_globals_id, sizeof(php_ora_globals), (ts_allocate_ctor) php_ora_init_globals, NULL);
 #else
-	php_ora_init_globals(ORALS_C);
+	php_ora_init_globals(ORALS_C TSRMLS_CC);
 #endif
 
 	le_cursor = zend_register_list_destructors_ex(php_close_ora_cursor, NULL, "oracle cursor", module_number);
@@ -1742,7 +1742,7 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 	pval **pdata;
 	int i, len, plen;
 
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_hash_internal_pointer_reset(cursor->params);
 

@@ -235,7 +235,7 @@ PHP_INI_END()
 
 /* {{{ php_pgsql_init_globals
  */
-static void php_pgsql_init_globals(PGLS_D)
+static void php_pgsql_init_globals(PGLS_D TSRMLS_DC)
 {
 	PGG(num_persistent) = 0;
 	PGG(ignore_notices) = 0;
@@ -248,9 +248,9 @@ static void php_pgsql_init_globals(PGLS_D)
 PHP_MINIT_FUNCTION(pgsql)
 {
 #ifdef ZTS
-	pgsql_globals_id = ts_allocate_id(sizeof(php_pgsql_globals), (ts_allocate_ctor) php_pgsql_init_globals, NULL);
+	ts_allocate_id(&pgsql_globals_id, sizeof(php_pgsql_globals), (ts_allocate_ctor) php_pgsql_init_globals, NULL);
 #else
-	php_pgsql_init_globals(PGLS_C);
+	php_pgsql_init_globals(PGLS_C TSRMLS_CC);
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -295,7 +295,7 @@ PHP_RINIT_FUNCTION(pgsql)
  */
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
 	return SUCCESS;
 }

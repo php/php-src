@@ -171,20 +171,20 @@ static char *sapi_thttpd_read_cookies(SLS_D)
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array ELS_CC PLS_CC)
+	php_register_variable(name, buf, track_vars_array TSRMLS_CC PLS_CC)
 
-static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
 	TLS_FETCH();
 
-	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array ELS_CC PLS_CC);
-	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC PLS_CC);
 
 	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
 	/* string representation of IPs are never larger than 512 bytes */
@@ -205,7 +205,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 
 #define CONDADD(name, field) 							\
 	if (TG(hc)->field[0]) {								\
-		php_register_variable(#name, TG(hc)->field, track_vars_array ELS_CC PLS_CC); \
+		php_register_variable(#name, TG(hc)->field, track_vars_array TSRMLS_CC PLS_CC); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -223,7 +223,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	}
 
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_CC PLS_CC);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC PLS_CC);
 }
 
 static sapi_module_struct thttpd_sapi_module = {
@@ -262,7 +262,7 @@ static void thttpd_module_main(TLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
@@ -270,11 +270,11 @@ static void thttpd_module_main(TLS_D SLS_DC)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
+	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 	php_request_shutdown(NULL);
 }
 
@@ -554,7 +554,7 @@ void thttpd_php_init(void)
 {
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
-	thttpd_globals_id = ts_allocate_id(sizeof(php_thttpd_globals), NULL, NULL);
+	ts_allocate_id(&thttpd_globals_id, sizeof(php_thttpd_globals), NULL, NULL);
 	qr_lock = tsrm_mutex_alloc();
 	thttpd_register_on_close(remove_dead_conn);
 #endif

@@ -86,7 +86,7 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateInt,		quiet_eval,		 	php_assert_globals,		assert_globals)
 PHP_INI_END()
 
-static void php_assert_init_globals(ASSERTLS_D)
+static void php_assert_init_globals(ASSERTLS_D TSRMLS_DC)
 {
 	ASSERT(callback) = NULL;
 }
@@ -95,9 +95,9 @@ PHP_MINIT_FUNCTION(assert)
 {
 
 #ifdef ZTS
-	assert_globals_id = ts_allocate_id(sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
+	ts_allocate_id(&assert_globals_id, sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
 #else
-	php_assert_init_globals(ASSERTLS_C);
+	php_assert_init_globals(ASSERTLS_C TSRMLS_CC);
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -173,7 +173,7 @@ PHP_FUNCTION(assert)
 		}
 
 		compiled_string_description = zend_make_compiled_string_description("assert code");
-		if (zend_eval_string(myeval, &retval, compiled_string_description CLS_CC ELS_CC) == FAILURE) {
+		if (zend_eval_string(myeval, &retval, compiled_string_description CLS_CC TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
 			zend_error(E_ERROR, "Failure evaluating code:\n%s\n", myeval);
 			/* zend_error() does not return in this case. */
@@ -199,8 +199,8 @@ PHP_FUNCTION(assert)
 		zval *args[4];
 		zval *retval;
 		int i;
-		uint lineno = zend_get_executed_lineno(ELS_C);
-		char *filename = zend_get_executed_filename(ELS_C);
+		uint lineno = zend_get_executed_lineno(TSRMLS_C);
+		char *filename = zend_get_executed_filename(TSRMLS_C);
 
 		MAKE_STD_ZVAL(args[0]);
 		MAKE_STD_ZVAL(args[1]);

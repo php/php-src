@@ -1577,7 +1577,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 	ITypeComp *TypeComp;
 	int i;
 	int interfaces;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if(NULL == TypeLib)
 	{
@@ -1646,7 +1646,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 
 				/* Before registering the contsnt, let's see if we can find it */
 				{
-					zend_register_constant(&c ELS_CC);
+					zend_register_constant(&c TSRMLS_CC);
 				}
 				j++;
 			}

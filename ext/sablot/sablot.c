@@ -214,7 +214,7 @@ zend_module_entry sablot_module_entry = {
 ZEND_GET_MODULE(sablot)
 #endif
 
-static void php_sablot_init_globals(SABLOTLS_D)
+static void php_sablot_init_globals(SABLOTLS_D TSRMLS_DC)
 {
 	SABLOTG(processor)             = NULL;
 	SABLOTG(errors)                = NULL;
@@ -227,9 +227,9 @@ static void php_sablot_init_globals(SABLOTLS_D)
 PHP_MINIT_FUNCTION(sablot)
 {
 #ifdef ZTS
-	sablot_globals_id = ts_allocate_id(sizeof(php_sablot_globals), (ts_allocate_ctor)php_sablot_init_globals, NULL);
+	ts_allocate_id(&sablot_globals_id, sizeof(php_sablot_globals), (ts_allocate_ctor)php_sablot_init_globals, NULL);
 #else
-	php_sablot_init_globals(SABLOTLS_C);
+	php_sablot_init_globals(SABLOTLS_C TSRMLS_CC);
 #endif
 
     le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
@@ -1161,7 +1161,7 @@ static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval 
 {
     zval *retval;
     int i;
-    ELS_FETCH();
+    TSRMLS_FETCH();
     MAKE_STD_ZVAL(retval);
     
     if (call_user_function(EG(function_table), NULL, handlerName, retval, argc, args) == FAILURE) {
@@ -1427,7 +1427,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     
     if (errorHandler) {
         zval *retval;
-        ELS_FETCH();
+        TSRMLS_FETCH();
         
         MAKE_STD_ZVAL(retval);
         
@@ -1520,7 +1520,7 @@ static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_erro
 static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *scheme, const char *rest, char **buffer, int *byteCount) 
 {
 	php_sablot *handle = (php_sablot *) userData;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (handle->getAllHandler) {
 		zval *retval,

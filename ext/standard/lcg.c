@@ -63,7 +63,7 @@ double php_combined_lcg(void)
 	return z * 4.656613e-10;
 }
 
-static void lcg_init_globals(LCGLS_D)
+static void lcg_init_globals(LCGLS_D TSRMLS_DC)
 {
 	LCG(s1) = 1;
 #ifdef ZTS
@@ -76,7 +76,7 @@ static void lcg_init_globals(LCGLS_D)
 #ifdef ZTS
 PHP_MINIT_FUNCTION(lcg)
 {
-	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
+	ts_allocate_id(&lcg_globals_id, sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
 	return SUCCESS;
 }
 #else 

@@ -174,7 +174,7 @@ dbm_info *php_find_dbm(pval *id)
 	dbm_info *info;
 	int numitems, i;
 	int info_type;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(id) == IS_STRING) {
 		numitems = zend_hash_num_elements(&EG(regular_list));

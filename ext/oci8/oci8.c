@@ -395,7 +395,7 @@ CONST void ocifree(dvoid *ctx, dvoid *ptr)
 /* }}} */
 /* {{{ startup, shutdown and info functions */
 
-static void php_oci_init_globals(OCILS_D)
+static void php_oci_init_globals(OCILS_D TSRMLS_DC)
 { 
 	OCI(shutdown)	= 0;
 
@@ -433,9 +433,9 @@ PHP_MINIT_FUNCTION(oci)
 #endif
 
 #ifdef ZTS
-	oci_globals_id = ts_allocate_id(sizeof(php_oci_globals), (ts_allocate_ctor) php_oci_init_globals, NULL);
+	ts_allocate_id(&oci_globals_id, sizeof(php_oci_globals), (ts_allocate_ctor) php_oci_init_globals, NULL);
 #else
-	php_oci_init_globals(OCILS_C);
+	php_oci_init_globals(OCILS_C TSRMLS_CC);
 #endif
 
 	le_stmt = zend_register_list_destructors_ex(_oci_stmt_list_dtor, NULL, "oci8 statement", module_number);
@@ -2360,7 +2360,7 @@ _oci_close_server(oci_server *server)
 	char *dbname;
 	int oldopen;
 	OCILS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	oldopen = server->is_open;
 	server->is_open = 2;

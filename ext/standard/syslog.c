@@ -130,7 +130,7 @@ PHP_RSHUTDOWN_FUNCTION(syslog)
  */
 static void start_syslog(BLS_D)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	
 	/* error levels */
 	SET_VAR_LONG("LOG_EMERG", LOG_EMERG); /* system unusable */

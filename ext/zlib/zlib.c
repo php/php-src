@@ -147,7 +147,7 @@ static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc)
 #ifdef ZTS
 /* {{{ php_zlib_init_globals
  */
-static void php_zlib_init_globals(ZLIBLS_D)
+static void php_zlib_init_globals(ZLIBLS_D TSRMLS_DC)
 {
         ZLIBG(gzgetss_state) = 0;
 }
@@ -161,9 +161,9 @@ PHP_MINIT_FUNCTION(zlib)
 	PLS_FETCH();
 
 #ifdef ZTS
-        zlib_globals_id = ts_allocate_id(sizeof(php_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
+	ts_allocate_id(&zlib_globals_id, sizeof(php_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
 #else
-        ZLIBG(gzgetss_state)=0;
+	ZLIBG(gzgetss_state)=0;
 #endif
 	le_zp = zend_register_list_destructors_ex(phpi_destructor_gzclose, NULL, "zlib", module_number);
 
@@ -1257,7 +1257,7 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 int php_enable_output_compression(int buffer_size)
 {
 	zval **a_encoding, **data;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	ZLIBLS_FETCH();
 
 	if (zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data)==FAILURE

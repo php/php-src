@@ -181,9 +181,9 @@ static char *sapi_tux_read_cookies(SLS_D)
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array ELS_CC PLS_CC)
+	php_register_variable(name, buf, track_vars_array TSRMLS_CC PLS_CC)
 
-static void sapi_tux_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
@@ -192,14 +192,14 @@ static void sapi_tux_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 	
 	sprintf(buf, "Server: %s", TUXAPI_version);
 	sapi_add_header_ex(buf, strlen(buf), 1, 0);
-	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array ELS_CC PLS_CC);
-	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC PLS_CC);
 
 	p = inet_ntoa(TG(req)->client_host);
 	/* string representation of IPs are never larger than 512 bytes */
@@ -222,7 +222,7 @@ static void sapi_tux_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 
 #define CONDADD(name, field) 							\
 	if (TG(req)->field[0]) {								\
-		php_register_variable(#name, TG(req)->field, track_vars_array ELS_CC PLS_C); \
+		php_register_variable(#name, TG(req)->field, track_vars_array TSRMLS_CC PLS_C); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -242,7 +242,7 @@ static void sapi_tux_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 
 #if 0
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array ELS_CC PLS_C);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC PLS_C);
 #endif
 }
 
@@ -282,7 +282,7 @@ static void tux_module_main(TLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
@@ -290,11 +290,11 @@ static void tux_module_main(TLS_D SLS_DC)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
+	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 	php_request_shutdown(NULL);
 }
 

@@ -184,7 +184,7 @@ struct _sapi_module_struct {
 	int (*read_post)(char *buffer, uint count_bytes SLS_DC);
 	char *(*read_cookies)(SLS_D);
 
-	void (*register_server_variables)(zval *track_vars_array ELS_DC SLS_DC PLS_DC);
+	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC);
 	void (*log_message)(char *message);
 
 	char *php_ini_path_override;

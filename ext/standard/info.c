@@ -58,7 +58,7 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 
 /* {{{ php_print_gpcse_array
  */
-static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
+static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
 	char *string_key;
@@ -152,7 +152,7 @@ PHPAPI void php_print_info(int flag)
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
 	struct tm *ta, tmbuf;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	SLS_FETCH();
 
 	the_time = time(NULL);
@@ -244,7 +244,7 @@ PHPAPI void php_print_info(int flag)
 		PUTS("</a></h1>\n");
 	}
 
-	zend_ini_sort_entries(ELS_C);
+	zend_ini_sort_entries(TSRMLS_C);
 
 	if (flag & PHP_INFO_CONFIGURATION) {
 		php_info_print_hr();
@@ -303,12 +303,12 @@ PHPAPI void php_print_info(int flag)
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", (*data)->value.str.val);
 		}
-		php_print_gpcse_array("HTTP_GET_VARS", sizeof("HTTP_GET_VARS")-1 ELS_CC);
-		php_print_gpcse_array("HTTP_POST_VARS", sizeof("HTTP_POST_VARS")-1 ELS_CC);
-		php_print_gpcse_array("HTTP_POST_FILES", sizeof("HTTP_POST_FILES")-1 ELS_CC);
-		php_print_gpcse_array("HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1 ELS_CC);
-		php_print_gpcse_array("HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1 ELS_CC);
-		php_print_gpcse_array("HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1 ELS_CC);
+		php_print_gpcse_array("HTTP_GET_VARS", sizeof("HTTP_GET_VARS")-1 TSRMLS_CC);
+		php_print_gpcse_array("HTTP_POST_VARS", sizeof("HTTP_POST_VARS")-1 TSRMLS_CC);
+		php_print_gpcse_array("HTTP_POST_FILES", sizeof("HTTP_POST_FILES")-1 TSRMLS_CC);
+		php_print_gpcse_array("HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1 TSRMLS_CC);
+		php_print_gpcse_array("HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1 TSRMLS_CC);
+		php_print_gpcse_array("HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1 TSRMLS_CC);
 		php_info_print_table_end();
 	}
 
