@@ -2110,36 +2110,6 @@ int zend_fetch_dim_tmp_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-int zend_make_var_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zval *value, *value2;
-
-	value = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	switch (opline->op1.op_type) {
-		case IS_TMP_VAR:
-			value2 = value;
-			ALLOC_ZVAL(value);
-			*value = *value2;
-			value->is_ref = 0;
-			value->refcount = 0; /* lock will increase this */
-			break;
-		case IS_CONST:
-			value2 = value;
-			ALLOC_ZVAL(value);
-			*value = *value2;
-			zval_copy_ctor(value);
-			value->is_ref = 0;
-			value->refcount = 0; /* lock will increase this */
-			break;
-	}
-		
-	EX_T(opline->result.u.var).var.ptr = value;
-	PZVAL_LOCK(EX_T(opline->result.u.var).var.ptr);
-
-	NEXT_OPCODE();
-}
-
-
 int zend_assign_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *op_data = opline+1;
