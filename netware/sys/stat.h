@@ -3,7 +3,7 @@
 /*============================================================================
 =  Novell Software Development Kit
 =
-=  Copyright (C) 1999-2002 Novell, Inc. All Rights Reserved.
+=  Copyright (C) 1999-2003 Novell, Inc. All Rights Reserved.
 =
 =  This work is subject to U.S. and international copyright laws and treaties.
 =  Use and redistribution of this work is subject  to  the  license  agreement
