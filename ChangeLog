@@ -1,3 +1,90 @@
+2001-05-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/com/VARIANT.c
+      main/internal_functions_win32.c
+      win32/php4dllts.dsp: Fix Win32 build (MFH)
+
+2001-05-14  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/php_curl.h: leftovers.....
+
+2001-05-14  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/Readme_w32.txt: Adding a small readme file for win32 users
+
+    * ext/mssql/mssql_win32_howto.txt: updating the win32 readme
+
+2001-05-14  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: Register the binary transfer option
+
+2001-05-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c: Clean up call_user_func_*().
+
+2001-05-14  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/basic_functions.c:
+    Use zend_is_callable to test whether or not the given callback is valid
+    before calling the function.
+
+    * ext/standard/basic_functions.c:
+    Use zend_is_callable() and fix sp of deprecated.
+
+    * ext/standard/basic_functions.c:
+    Couple of changes (and a little whitespace correction, sorry to mix :(
+
+        1) Depreciate the call_user_method*() variety of functions, their
+        functionality can be easily duplicated by using the call_user_func*()
+        functions (using the array(&$obj, "method") syntax).
+
+        2) Change some pval's to zval's.
+
+        3) Improve the error handling mechanism of call_user_func*() to report
+        an the class name and the function name if an object or class name is
+        given.
+
+2001-05-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/filestat.c:
+    - Bumbed up the warning level to be in sync with fopen (which is E_WARNING
+      too) (See bug #10856)
+
+2001-05-14  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/imap/php_imap.c:    Also, bogus types and encodings will not be returned any longer.
+    Function imap_bodystruct() is also fixed in the same manner.
+
+2001-05-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c: Need to use ELS_FETCH() here.
+
+    * NEWS: Reformat.
+
+    * ext/standard/basic_functions.c:
+       functions/methods that accepted parameters by reference. (Andrei)
+
+    * Allow separation of arguments in call_user_* functions - this allows calling
+      functions that force parameters by reference.
+    * Use executor function table instead of compiler one.
+
+    * ext/pcre/php_pcre.c:
+    No need for check since callback_name is always filled in.
+
+2001-05-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/xml.c: added expat version to phpinfo();
+
+2001-05-14  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/php_apache.c: fix typo
+
+2001-05-14  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/OutputCompression.php:
+    do not compress if $this->no_cache is True (otherwise we get some "Headers
+    already sent"-errors)
+
 2001-05-13  Harald Radi  <h.radi@nme.at>
 
     * win32/php4dll.dsp
