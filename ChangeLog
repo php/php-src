@@ -1,3 +1,57 @@
+1999-10-08  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c:
+    Forgot to remove workaround for SQLANY_BUG which is no longer needed
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Moved Environment handle to connection struct for thread safety
+
+1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
+
+    * README.CVS-RULES: Mention php-cvs-daily list.
+
+1999-10-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * main.c:     Use correct data type for mutex.
+
+    * main.c:
+        Implement temporary workaround for thread-safety issues. This
+        serializes all request accesses. To disable, define NO_GLOBAL_LOCK
+
+1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
+
+    * README.CVS-RULES: More emphasis on ChangeLog and NEWS daily updates.
+
+1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
+
+    * README.CVS-RULES:
+    More information on how to use the special prefixes and the frequency
+    of NEWS and ChangeLog updates.
+
+1999-10-08  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gdt1.c
+      ext/gd/gdt1.h:
+    Added the files for t1lib support. No porting from PHP3 done yet.
+
+1999-10-08  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+1999-10-08  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/datetime.c:
+    (PHP gmmktime) Should now give right values. Note that there was never need for
+    	       the acrobacy adjusting the time for GMT. mktime() fills
+    	       tm_gmtoff with just the right offset to add.
+
+    * ext/standard/php3_string.h
+      ext/standard/string.c
+      ext/standard/basic_functions.c:
+    (PHP setlocale) Locale settings are now correctly restored to the values
+    		set in environment at request shutdown.
+
 1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
 
     * NEWS: NEWS update
