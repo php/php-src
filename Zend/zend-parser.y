@@ -58,7 +58,7 @@
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
-%right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST '@'
+%right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST '@'
 %right '['
 %nonassoc T_NEW
 %token T_EXIT
@@ -426,6 +426,7 @@ expr_without_variable:
 	|	T_STRING_CAST expr	{ do_cast(&$$, &$2, IS_STRING CLS_CC); } 
 	|	T_ARRAY_CAST expr 	{ do_cast(&$$, &$2, IS_ARRAY CLS_CC); }
 	|	T_OBJECT_CAST expr 	{ do_cast(&$$, &$2, IS_OBJECT CLS_CC); }
+	|	T_BOOL_CAST expr	{ do_cast(&$$, &$2, IS_BOOL CLS_CC); }
 	|	T_EXIT exit_expr	{ do_exit(&$$, &$2 CLS_CC); }
 	|	'@' { do_begin_silence(&$1 CLS_CC); } expr { do_end_silence(&$1 CLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }

@@ -1667,6 +1667,9 @@ send_by_ref:
 						zendi_zval_copy_ctor(*result);
 					}					
 					switch (opline->op2.u.constant.type) {
+						case IS_BOOL:
+							convert_to_boolean(result);
+							break;
 						case IS_LONG:
 							convert_to_long(result);
 							break;
