@@ -1736,7 +1736,7 @@ PHP_FUNCTION(sqlite_escape_string)
 		/* binary string */
 		int enclen;
 		
-		ret = emalloc( 1 + ((256 * stringlen + 1262) / 253) );
+		ret = emalloc( 1 + 5 + stringlen * (256 / 253) );
 		ret[0] = '\x01';
 		enclen = sqlite_encode_binary((const unsigned char*)string, stringlen, ret+1);
 		RETVAL_STRINGL(ret, enclen+1, 0);
@@ -1941,7 +1941,7 @@ PHP_FUNCTION(sqlite_udf_encode_binary)
 		int enclen;
 		char *ret;
 		
-		ret = emalloc( 1 + ((256 * datalen + 1262) / 253) );
+		ret = emalloc( 1 + 5 + datalen * (256 / 253) );
 		ret[0] = '\x01';
 		enclen = sqlite_encode_binary((const unsigned char*)data, datalen, ret+1);
 		RETVAL_STRINGL(ret, enclen+1, 0);
