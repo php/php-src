@@ -1,0 +1,12 @@
+* define PEAR_INSTALL_DIR, PHP_EXTENSION_DIR, PHP_BINDIR and more
+  in main/main.c
+
+* always build CGI (--disable-cgi option to disable)
+
+* clean up installation directories, start using proper autoconf
+  directories: php.ini goes into $sysconfdir, PEAR stuff goes into
+  $datadir[/php]/pear, extensions go into $libdir[/php]/<apispec>.
+
+* move most extensions and PEAR packages out of the PHP CVS tree,
+  include them again during release packaging
+
