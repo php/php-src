@@ -96,12 +96,12 @@
 #define DBM_CLOSE(dbf) dbm_close(dbf)
 #define DBM_STORE(dbf, key, value, mode) dbm_store(dbf, key, value, mode)
 #define DBM_FETCH(dbf, key) dbm_fetch(dbf, key)
-#define DBM_EXISTS(dbf, key) php_dbm_exists(dbf, key)
+#define DBM_EXISTS(dbf, key) php_dbm_key_exists(dbf, key)
 #define DBM_DELETE(dbf, key) dbm_delete(dbf, key)
 #define DBM_FIRSTKEY(dbf) dbm_firstkey(dbf)
 #define DBM_NEXTKEY(dbf, key) dbm_nextkey(dbf)
 
-static int php_dbm_exists(DBM *dbf, datum key_datum) {
+static int php_dbm_key_exists(DBM *dbf, datum key_datum) {
 	datum value_datum;
 	int ret;
 
