@@ -3544,6 +3544,8 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->parent = NULL;
 	ce->num_interfaces = 0;
 	ce->interfaces = NULL;
+	ce->get_iterator = NULL;
+	ce->interface_gets_implemented = NULL;
 }
 
 
