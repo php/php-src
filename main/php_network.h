@@ -44,10 +44,15 @@
 #endif /* defined(PHP_WIN32) */
 
 #ifdef PHP_WIN32
-#define streams_socket_errno WSAGetLastError()
+#define php_socket_errno() WSAGetLastError()
 #else
-#define streams_socket_errno errno
+#define php_socket_errno() errno
 #endif
+
+/* like strerror, but caller must efree the returned string,
+ * unless buf is not NULL.
+ * Also works sensibly for win32 */
+PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>

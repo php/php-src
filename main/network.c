@@ -529,6 +529,50 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 }
 /* }}} */
 
+PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
+{
+#ifndef PHP_WIN32
+	char *errstr;
+
+	errstr = strerror(err);
+	if (buf == NULL) {
+		buf = estrdup(errstr);
+	} else {
+		strncpy(buf, errstr, bufsize);
+	}
+	return buf;
+#else
+	char *sysbuf;
+	int free_it = 1;
+
+	if (!FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				err,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPTSTR)&sysbuf,
+				0,
+				NULL)) {
+		free_it = 0;
+		sysbuf = "Unknown Error";
+	}
+
+	if (buf == NULL) {
+		buf = estrdup(sysbuf);
+	} else {
+		strncpy(buf, sysbuf, bufsize);
+	}
+
+	if (free_it) {
+		LocalFree(sysbuf);
+	}
+
+	return buf;
+#endif
+}
+
 PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
@@ -708,11 +752,21 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 	size_t didwrite;
 	
 #if HAVE_OPENSSL_EXT
-	if (sock->ssl_active)
+	if (sock->ssl_active) {
 		didwrite = SSL_write(sock->ssl_handle, buf, count);
-	else
+	} else
 #endif
-	didwrite = send(sock->socket, buf, count, 0);
+	{
+		didwrite = send(sock->socket, buf, count, 0);
+	
+		if (didwrite <= 0) {
+			char *estr = php_socket_strerror(php_socket_errno(), NULL, 0);
+			
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %d bytes failed with errno=%d %s",
+					count, php_socket_errno(), estr);
+			efree(estr);
+		}
+	}
 	
 	php_stream_notify_progress_increment(stream->context, didwrite, 0);
 
@@ -784,7 +838,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 	php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 
-	if(nr_bytes == 0 || (nr_bytes < 0 && streams_socket_errno != EWOULDBLOCK)) {
+	if(nr_bytes == 0 || (nr_bytes < 0 && php_socket_errno() != EWOULDBLOCK)) {
 		stream->eof = 1;
 	}
 
