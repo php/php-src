@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26446 (domxml_open_file() returns an empty error-Array). (Rob)
 - Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
 - Fixed bug #25963 (PostgreSQL error message include \n characters).
   (Marcus, Ilia)
@@ -43,6 +44,7 @@ PHP 4                                                                      NEWS
   (Marcus)
 - Fixed Bug #25694 (round() and number_format() give inconsistent results).
   (Ilia)
+- Fixed bug #25664 (calling ITypeInfo::Invoke with bogus params). (Wez)
 - Fixed bug #25581 (getimagesize () return incorrect values on bitmap
   (os2) files). (Marcus)
 
