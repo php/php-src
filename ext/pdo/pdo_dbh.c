@@ -134,10 +134,10 @@ static PHP_FUNCTION(dbh_constructor)
 	pdo_dbh_t *dbh = NULL;
 	zend_bool is_persistent = FALSE;
 	char *data_source;
-	long data_source_len;
+	int data_source_len;
 	char *colon;
 	char *username=NULL, *password=NULL;
-	long usernamelen, passwordlen;
+	int usernamelen, passwordlen;
 	pdo_driver_t *driver = NULL;
 	zval *driver_options = NULL;
 
@@ -215,7 +215,7 @@ static PHP_METHOD(PDO, prepare)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	pdo_stmt_t *stmt;
 	char *statement;
-	long statement_len;
+	int statement_len;
 	zval *driver_options = NULL;
 	long options = 0;
 
@@ -425,7 +425,7 @@ static PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *statement;
-	long statement_len;
+	int statement_len;
 	long ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
