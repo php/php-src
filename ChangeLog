@@ -1,3 +1,31 @@
+2004-06-16  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_persist.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/php_com_dotnet_internal.h
+      ext/sqlite/sqlite.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/proc_open.c
+      ext/standard/streamsfuncs.c:
+      64-bit bugsquash party
+
+2004-06-16  Stig Bakken  <stig@yahoo-inc.com>
+
+    * pear/PEAR.php:
+      - don't register object on destructors list if it does not define its
+        own emulated destructor
+
+2004-06-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/string.c:
+      New & improved strspn() & strcspn(), ~30% in most cases.
+      
+
 2004-06-15  Stefan Esser  <sesser@suspekt.org>
 
     * ext/standard/string.c:
