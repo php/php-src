@@ -49,20 +49,20 @@ static void convert_browscap_pattern(zval *pattern)
 	register int i, j;
 	char *t;
 
-	for (i=0; i<Z_STRLEN_P(pattern); i++) {
+	for (i = 0; i < (int)Z_STRLEN_P(pattern); i++) {
 		if (Z_STRVAL_P(pattern)[i]=='*' || Z_STRVAL_P(pattern)[i]=='?' || Z_STRVAL_P(pattern)[i]=='.') {
 			break;
 		}
 	}
 
-	if (i==Z_STRLEN_P(pattern)) { /* no wildcards */
+	if (i == (int)Z_STRLEN_P(pattern)) { /* no wildcards */
 		Z_STRVAL_P(pattern) = zend_strndup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 		return;
 	}
 
 	t = (char *) malloc(Z_STRLEN_P(pattern)*2 + 1);
 	
-	for (i=0, j=0; i<Z_STRLEN_P(pattern); i++, j++) {
+	for (i = 0, j = 0; i < (int)Z_STRLEN_P(pattern); i++, j++) {
 		switch (Z_STRVAL_P(pattern)[i]) {
 			case '?':
 				t[j] = '.';

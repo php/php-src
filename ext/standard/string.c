@@ -1557,7 +1557,7 @@ PHP_FUNCTION(strrpos)
 
 	if (argc == 3) {
 		convert_to_long_ex(offset);
-		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
+		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > (int)Z_STRLEN_PP(haystack)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
 			RETURN_FALSE;
 		}
@@ -1597,7 +1597,7 @@ PHP_FUNCTION(strripos)
 
 	if (argc == 3) {
 		convert_to_long_ex(offset);
-		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
+		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > (int)Z_STRLEN_PP(haystack)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
 			RETURN_FALSE;
 		}
@@ -1786,11 +1786,11 @@ PHP_FUNCTION(substr)
 		}
 	}
 
-	if (f >= Z_STRLEN_PP(str)) {
+	if (f >= (int)Z_STRLEN_PP(str)) {
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > Z_STRLEN_PP(str)) {
+	if ((f + l) > (int)Z_STRLEN_PP(str)) {
 		l = Z_STRLEN_PP(str) - f;
 	}
 
@@ -1833,11 +1833,11 @@ PHP_FUNCTION(substr_replace)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = Z_STRLEN_PP(str) + f;
+		f = (int)Z_STRLEN_PP(str) + f;
 		if (f < 0) {
 			f = 0;
 		}
-	} else if (f > Z_STRLEN_PP(str)) {
+	} else if (f > (int)Z_STRLEN_PP(str)) {
 		f = Z_STRLEN_PP(str);
 	}
 
@@ -1852,7 +1852,7 @@ PHP_FUNCTION(substr_replace)
 		}
 	}
 
-	if ((f + l) > Z_STRLEN_PP(str)) {
+	if ((f + l) > (int)Z_STRLEN_PP(str)) {
 		l = Z_STRLEN_PP(str) - f;
 	}
 
@@ -3014,7 +3014,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	
 	do {
 		if (block_type == _HEB_BLOCK_TYPE_HEB) {
-			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<Z_STRLEN_PP(str)-1) {
+			while ((isheb((int)*(tmp+1)) || _isblank((int)*(tmp+1)) || ispunct((int)*(tmp+1)) || (int)*(tmp+1)=='\n' ) && block_end<((int)Z_STRLEN_PP(str))-1) {
 				tmp++;
 				block_end++;
 				block_length++;
@@ -3059,7 +3059,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 			}
 			block_type = _HEB_BLOCK_TYPE_ENG;
 		} else {
-			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < Z_STRLEN_PP(str)-1) {
+			while (!isheb(*(tmp+1)) && (int)*(tmp+1)!='\n' && block_end < ((int)Z_STRLEN_PP(str))-1) {
 				tmp++;
 				block_end++;
 				block_length++;
@@ -3075,7 +3075,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 			block_type = _HEB_BLOCK_TYPE_HEB;
 		}
 		block_start=block_end+1;
-	} while (block_end < Z_STRLEN_PP(str)-1);
+	} while (block_end < ((int)Z_STRLEN_PP(str))-1);
 
 
 	broken_str = (char *) emalloc(Z_STRLEN_PP(str)+1);
