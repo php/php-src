@@ -1,26 +1,42 @@
 # Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
+
 # ** DO NOT EDIT **
+
+
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
 CFG=php4dllts - Win32 Debug_TS
+
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
+
 !MESSAGE use the Export Makefile command and run
+
 !MESSAGE 
 !MESSAGE NMAKE /f "php4dllts.mak".
 !MESSAGE 
+
 !MESSAGE You can specify a configuration when running NMAKE
+
 !MESSAGE by defining the macro CFG on the command line. For example:
+
 !MESSAGE 
 !MESSAGE NMAKE /f "php4dllts.mak" CFG="php4dllts - Win32 Debug_TS"
 !MESSAGE 
+
 !MESSAGE Possible choices for configuration are:
+
 !MESSAGE 
+
 !MESSAGE "php4dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+
 !MESSAGE "php4dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+
 !MESSAGE "php4dllts - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
+
 !MESSAGE "php4dllts - Win32 Release_TSDbg" (based on "Win32 (x86) Dynamic-Link Library")
+
 !MESSAGE 
 
 # Begin Project
@@ -55,7 +71,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
+
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /out:"..\Debug_TS\php4ts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug_TS" /libpath:"..\..\bindlib_w32\Debug" /libpath:"..\ext\mysql\libmysql\Debug_TS" /libpath:"Debug_TS"
+
+
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
@@ -81,7 +100,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
+
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS" /libpath:"Release_TS"
+
+
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
@@ -108,7 +130,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php4ts.dll" /libpath:"TSRM\Release_TS" /libpath:"Zend\Release_TS" /libpath:"..\bindlib_w32\Release"
+
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS_inline\php4ts.dll" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\Zend\Release_TS_inline" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS_inline" /libpath:"Release_TS_Inline"
+
+
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
 
@@ -135,7 +160,10 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS" /libpath:"Release_TS"
+
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TSDbg\php4ts.dll" /libpath:"..\TSRM\Release_TSDbg" /libpath:"..\Zend\Release_TSDbg" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TSDbg" /libpath:"Release_TSDbg"
+
+
 
 !ENDIF 
 
@@ -318,10 +346,15 @@ SOURCE=..\ext\standard\cyr_convert.h
 # Begin Source File
 
 SOURCE="..\main\fopen_wrappers.h"
+
 # End Source File
+
 # Begin Source File
 
+
+
 SOURCE=..\main\getopt.h
+
 # End Source File
 # Begin Source File
 
@@ -331,10 +364,15 @@ SOURCE=..\main\internal_functions_registry.h
 
 SOURCE=..\main\logos.h
 # End Source File
+
 # Begin Source File
 
+
+
 SOURCE=..\main\output.h
+
 # End Source File
+
 # Begin Source File
 
 SOURCE=..\main\php.h
@@ -1435,55 +1473,105 @@ SOURCE=..\ext\bcmath\libbcmath\src\private.h
 
 # End Source File
 # End Group
+
 # End Group
+
 # Begin Group "COM"
 
+
+
 # PROP Default_Filter ""
+
 # Begin Group "Source Files No. 9"
 
+
+
 # PROP Default_Filter ".c"
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\COM.c
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\conversion.c
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\dispatch.c
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\VARIANT.c
+
 # End Source File
+
 # End Group
+
 # Begin Group "Header Files No. 9"
 
+
+
 # PROP Default_Filter ".h"
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\com.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\conversion.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\php_COM.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\com\php_VARIANT.h
+
 # End Source File
+
 # Begin Source File
 
+
+
 SOURCE=..\ext\com\variant.h
+
 # End Source File
+
 # End Group
+
 # End Group
+
 # Begin Group "Standard"
 
 # PROP Default_Filter ""
@@ -1776,10 +1864,15 @@ SOURCE=..\ext\standard\flock_compat.h
 # Begin Source File
 
 SOURCE=..\ext\standard\fsock.h
+
 # End Source File
+
 # Begin Source File
 
+
+
 SOURCE=..\functions\global.h
+
 # End Source File
 # Begin Source File
 
@@ -1803,9 +1896,15 @@ SOURCE=..\ext\session\mod_user.h
 # End Source File
 # Begin Source File
 
+
+
 SOURCE=..\ext\bcmath\number.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\pageinfo.h
 # End Source File
@@ -1875,43 +1974,76 @@ SOURCE=..\ext\standard\php_string.h
 # End Source File
 # Begin Source File
 
+
+
 SOURCE=..\ext\standard\php_syslog.h
+
 # End Source File
 # Begin Source File
+
+
 
 SOURCE=..\functions\phpdir.h
+
 # End Source File
 # Begin Source File
+
+
 
 SOURCE=..\functions\phpmath.h
+
 # End Source File
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\reg.h
+
 # End Source File
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\scanf.h
+
 # End Source File
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\type.h
+
 # End Source File
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\uniqid.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\url.h
+
 # End Source File
+
 # Begin Source File
+
+
 
 SOURCE=..\ext\standard\url_scanner.h
+
 # End Source File
+
 # Begin Source File
 
+
+
 SOURCE=..\ext\standard\url_scanner_ex.h
+
 # End Source File
 # End Group
 # End Group
