@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.18 2003-12-06 00:00:31 wez Exp $
+// $Id: confutils.js,v 1.19 2003-12-07 02:58:56 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -631,16 +631,26 @@ function ADD_SOURCES(dir, file_list, target)
 
 	dir = dir.replace(new RegExp("/", "g"), "\\");
 
+	var mangle_dir = dir.replace(new RegExp("[\\\\/.]", "g"), "_");
+
 	var objs_line = "";
 	var srcs_line = "";
 
 	var sub_build = "$(BUILD_DIR)\\";
 
-//	if (target != "php") {
-		build_dirs[build_dirs.length] = target;
-		sub_build += target + "\\";
-//	}
-	DEFINE("CFLAGS_BD_" + target.toUpperCase(), "/Fo" + sub_build + " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
+	sub_build += dir + "\\";
+
+	var dirs = dir.split("\\");
+	var i, d = "";
+	for (i = 0; i < dirs.length; i++) {
+		d += dirs[i];
+		build_dirs[build_dirs.length] = d;
+		d += "\\";
+	}
+
+	var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
+
+	DEFINE(bd_flags_name, "/Fo" + sub_build + " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
 
 	for (i in file_list) {
 		src = file_list[i];
@@ -657,13 +667,13 @@ function ADD_SOURCES(dir, file_list, target)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
-			MFO.WriteLine("\t$(CC) $(CFLAGS) $(" + flags + ") $(CFLAGS_BD_" + target.toUpperCase() + ") -c " + dir + "\\" + src + " -o " + sub_build + obj);
+			MFO.WriteLine("\t$(CC) $(CFLAGS) $(" + flags + ") $(" + bd_flags_name + ") -c " + dir + "\\" + src + " -o " + sub_build + obj);
 		}
 	}
 
 	if (PHP_ONE_SHOT == "yes") {
 		MFO.WriteLine(objs_line + ": " + srcs_line);
-		MFO.WriteLine("\t$(CC) $(CFLAGS) $(" + flags + ") $(CFLAGS_BD_" + target.toUpperCase() + ") -c " + srcs_line);
+		MFO.WriteLine("\t$(CC) $(CFLAGS) $(" + flags + ") $(" + bd_flags_name + ") -c " + srcs_line);
 	}
 
 	DEFINE(sym, tv);
