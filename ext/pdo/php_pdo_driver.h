@@ -249,6 +249,16 @@ enum pdo_placeholder_support {
 
 /* represents a connection to a database */
 struct _pdo_dbh_t {
+	/* these items mst appear in this order at the beginning of the
+       struct so that this can be cast as a zend_object.  we need this
+       to allow the extending class to escape all the custom handlers
+	   that PDO decalres.
+    */
+	zend_class_entry *ce; 
+	HashTable *properties;
+	unsigned int in_get:1;
+	unsigned int in_set:1;
+
 	/* driver specific methods */
 	struct pdo_dbh_methods *methods;
 	/* driver specific data */
@@ -302,8 +312,6 @@ struct _pdo_dbh_t {
 
 	enum pdo_case_conversion native_case, desired_case;
 
-	/* needed for inheritance to work */
-	zend_class_entry *ce; 
 #if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
