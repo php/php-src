@@ -1,7 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-fdftk 'Acrobat Forms (Ftf Toolkit 2.0) support? ' yesnodir \
-    'no /usr/local ftktk install' \
-'    Whether to use the Ftf Toolkit support to write/read .fdf-files.\n
-    Tested for version 2.0!'

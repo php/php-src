@@ -1,5 +1,0 @@
-# $Source$
-# $Id$
-
-define_option enable-sysvshm 'System V shared memory support? ' yesno no \
-'    Whether to use the System V shared memory (currently only Solaris and Linux).'

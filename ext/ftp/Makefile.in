@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libftp.la
-LTLIBRARY_SOURCES = php_ftp.c ftp.c
-LTLIBRARY_SHARED_NAME = ftp.la
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-sybase-ct 'Sybase-CT support?' yesnodir \
-    'no /home/sybase Sybase-CT install' \
-'     Whether to build PHP with Sybase-CT support.'

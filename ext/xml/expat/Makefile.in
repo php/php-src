@@ -1,9 +1,0 @@
-
-LTLIBRARY_NAME          = libexpat.la
-LTLIBRARY_DEPENDENCIES  = xmltok/libexpat_tok.la xmlparse/libexpat_parse.la
-LTLIBRARY_LIBADD        = $(LTLIBRARY_DEPENDENCIES)
-LTLIBRARY_SHARED_LIBADD = $(LTLIBRARY_LIBADD)
-
-SUBDIRS = xmltok xmlparse
-
-include $(top_srcdir)/build/dynlib.mk

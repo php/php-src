@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = librecode.la
-LTLIBRARY_SOURCES = recode.c
-LTLIBRARY_SHARED_NAME = recode.la
-LTLIBRARY_SHARED_LIBADD = $(RECODE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

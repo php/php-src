@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libsybase.la
-LTLIBRARY_SOURCES = php_sybase_db.c
-LTLIBRARY_SHARED_NAME = php_sybase_db.la
-LTLIBRARY_SHARED_LIBADD = $(SYBASE_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,5 +1,0 @@
-
-LTLIBRARY_NAME    = libpdf.la
-LTLIBRARY_SOURCES = pdf.c
-
-include $(top_srcdir)/build/dynlib.mk

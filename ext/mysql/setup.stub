@@ -1,7 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-mysql 'MySQL support?' yesnodir \
-    'no /usr/local MySQL install' \
-'    Whether to build PHP with MySQL support.\n
-    More info about MySQL can be found at http://www.mysql.com/.'

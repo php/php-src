@@ -1,8 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-ldap 'LDAP support?' yesnodir \
-    'no /usr/local/ldap LDAP base install' \
-'     Whether to build with LDAP (Lightweight Directory Access Protocol)\n
-     support.\n
-     More information about LDAP can be found in RFC1777 and RFC1778.'
