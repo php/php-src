@@ -1394,7 +1394,7 @@ static int node_children(zval **children, xmlNode *nodep)
 		xmlChar *content;
 		int ret;
 	
-//		if(last->type != XML_TEXT_NODE) {
+/*		if(last->type != XML_TEXT_NODE) { */
 		/* Each child is a node object */
 		MAKE_STD_ZVAL(child);
 		ret = zend_list_insert(last, le_domxmlnodep);
@@ -1428,7 +1428,7 @@ static int node_children(zval **children, xmlNode *nodep)
 			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 
 		count++;
-//		}
+/*		} */
 		last = last->next;
 	}
 	return count;
