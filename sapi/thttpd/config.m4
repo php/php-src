@@ -12,7 +12,7 @@ AC_ARG_WITH(thttpd,
   
   if grep thttpd.2.21b $withval/version.h >/dev/null; then
     patch="test -f $THTTPD/php_patched || \
-    (cd $THTTPD && patch -p 1 < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
+    (cd $THTTPD && patch -p1 < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
 
   elif grep Premium $withval/version.h >/dev/null; then
     patch=
