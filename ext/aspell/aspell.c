@@ -63,7 +63,7 @@ PHP_MINIT_FUNCTION(aspell)
 
 }
 
-/* {{{ proto int aspell_new(string master[, string personal])
+/* {{{ proto int aspell_new(string master [, string personal])
    Load a dictionary */
 PHP_FUNCTION(aspell_new)
 {
@@ -91,7 +91,7 @@ PHP_FUNCTION(aspell_new)
 /* }}} */
 
 
-/* {{{ proto array aspell_suggest(aspell int,string word)
+/* {{{ proto array aspell_suggest(aspell int, string word)
    Return array of Suggestions */
 PHP_FUNCTION(aspell_suggest)
 {
@@ -128,7 +128,7 @@ PHP_FUNCTION(aspell_suggest)
 }
 /* }}} */
 
-/* {{{ proto int aspell_check(aspell int,string word)
+/* {{{ proto int aspell_check(aspell int, string word)
    Return if word is valid */
 PHP_FUNCTION(aspell_check)
 {
@@ -160,8 +160,8 @@ PHP_FUNCTION(aspell_check)
 }
 /* }}} */
 
-/* {{{ proto int aspell_check_raw(aspell int,string word)
-   Return if word is valid, ignoring case or trying to trim it in any way*/
+/* {{{ proto int aspell_check_raw(aspell int, string word)
+   Return if word is valid, ignoring case or trying to trim it in any way */
 PHP_FUNCTION(aspell_check_raw)
 {
   pval **scin,**word;
