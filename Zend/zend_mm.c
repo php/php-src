@@ -34,6 +34,7 @@
 #define MAX(a, b) (((a)>(b))?(a):(b))
 #endif
 
+#if 0
 /* Platform alignment test */
 typedef union _mm_align_test {
 	void *ptr;
@@ -50,6 +51,7 @@ typedef union _mm_align_test {
 /* We're going to need some kind of configure test for this */
 #undef ZEND_MM_ALIGNMENT
 #define ZEND_MM_ALIGNMENT 8
+#endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
 
