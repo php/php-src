@@ -564,7 +564,6 @@ default_socket_timeout = 60
 ;extension=php_xslt.dll
 ;extension=php_yaz.dll
 ;extension=php_zip.dll
-;extension=php_zlib.dll
 
 
 ;;;;;;;;;;;;;;;;;;;
