@@ -440,6 +440,11 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 		return 0;
 	}
 
+	if (how == PDO_FETCH_BOUND) {
+		RETVAL_TRUE;
+		return 1;
+	}
+
 	if (return_value) {
 		int i;
 
