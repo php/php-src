@@ -214,7 +214,7 @@ disable_functions =
 disable_classes =
 
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
-; <font color="??????"> would work.
+; <span style="color: ???????"> would work.
 ;highlight.string  = #DD0000
 ;highlight.comment = #FF9900
 ;highlight.keyword = #007700
