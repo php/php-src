@@ -1410,12 +1410,24 @@ do_fcall_common:
 							&& object_ptr
 							&& function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
 							zval **this_ptr;
+							zval *tmp;
 
 							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), NULL, sizeof(zval *), (void **) &this_ptr);
+							if (!PZVAL_IS_REF(object_ptr)) {
+		        				 /* break it away */
+                        		object_ptr->refcount--;
+                        		if (object_ptr->refcount>0) {
+                                	tmp = (zval *) emalloc(sizeof(zval));
+                                	*tmp = *object_ptr;
+                                	zendi_zval_copy_ctor(*tmp);
+									object_ptr = tmp;
+                        		}
+                        		object_ptr->refcount = 1;
+                        		object_ptr->EA.is_ref = 1;
+                        		object_ptr->EA.locks = 0;
+                			}
 							*this_ptr = object_ptr;
-							object_ptr->EA.is_ref=1;
 							object_ptr->refcount++;
-							object_ptr = NULL;
 						}
 						original_return_value = EG(return_value);
 						EG(return_value) = &Ts[opline->result.u.var].tmp_var;
