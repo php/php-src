@@ -641,7 +641,7 @@ typedef struct sdlCtx {
 	HashTable services;
 } sdlCtx;
 
-static void load_wsdl_ex(char *struri, sdlCtx *ctx)
+static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 {
 	sdlPtr tmpsdl = ctx->root;
 	xmlDocPtr wsdl;
@@ -662,6 +662,13 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx)
 	root = wsdl->children;
 	definitions = get_node(root, "definitions");
 	if (!definitions) {
+		if (include) {
+			xmlNodePtr schema = get_node(root, "schema");
+			if (schema) {
+				load_schema(&tmpsdl, schema);
+				return;
+			}
+		}
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't find \"definitions\" in %s", struri);
 	}
 
@@ -686,7 +693,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx)
 				/* TODO: namespace ??? */
 				xmlAttrPtr tmp = get_attribute(trav->properties, "location");
 				if (tmp) {
-					load_wsdl_ex(tmp->children->content, ctx);
+					load_wsdl_ex(tmp->children->content, ctx, 1);
 				}
 
 			} else if (strcmp(trav->name,"message") == 0) {
@@ -733,6 +740,12 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx)
 	}
 }
 
+static void delete_document(void *doc_ptr)
+{
+	xmlDocPtr doc = *((xmlDocPtr*)doc_ptr);
+	xmlFreeDoc(doc);
+}
+
 sdlPtr load_wsdl(char *struri)
 {
 	sdlCtx ctx;
@@ -741,14 +754,14 @@ sdlPtr load_wsdl(char *struri)
 	ctx.root = malloc(sizeof(sdl));
 	memset(ctx.root, 0, sizeof(sdl));
 	ctx.root->source = strdup(struri);
-	zend_hash_init(&ctx.root->docs, 0, NULL, xmlFreeDoc, 1);
+	zend_hash_init(&ctx.root->docs, 0, NULL, delete_document, 1);
 
 	zend_hash_init(&ctx.messages, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.bindings, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(struri,&ctx);
+	load_wsdl_ex(struri,&ctx, 0);
 
 	n = zend_hash_num_elements(&ctx.services);
 	if (n > 0) {
