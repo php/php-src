@@ -66,9 +66,9 @@
 #define OPTSTRING "ac:d:Def:hnp:vVz:?"
 #define MG(v)  TSRMG(milter_globals_id, zend_milter_globals *, v)
 
-#define IS_NONE "%s(): This function must not be called outside of a milter callback functions scope"
-#define NOT_EOM "%s(): This function can only be used inside the milter_eom callbacks scope"
-#define NOT_INIT "%s(): This function can only be used inside the milter_init callbacks scope"
+#define IS_NONE "%s(): This function must not be called outside of a milter callback function's scope"
+#define NOT_EOM "%s(): This function can only be used inside the milter_eom callback's scope"
+#define NOT_INIT "%s(): This function can only be used inside the milter_init callback's scope"
 
 #define MLFI_NONE		0
 #define MLFI_CONNECT	1
