@@ -95,6 +95,13 @@ void _close_crack_dict(PWDICT *pwdict)
 
 ZEND_MODULE_STARTUP_D(crack)
 {
+#ifdef ZTS
+	zend_crack_globals *crack_globals;
+
+	ts_allocate_id(&crack_globals_id, sizeof(zend_crack_globals), NULL, NULL);
+	crack_globals = ts_resource(crack_globals_id);
+#endif
+	
 	REGISTER_INI_ENTRIES();
 
 	le_crack = register_list_destructors(_close_crack_dict, NULL);

@@ -99,6 +99,13 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(mailparse)
 {
+#ifdef ZTS
+	zend_mailparse_globals *mailparse_globals;
+
+	ts_allocate_id(&mailparse_globals_id, sizeof(zend_mailparse_globals), NULL, NULL);
+	mailparse_globals = ts_resource(mailparse_globals_id);
+#endif
+
 	le_rfc2045 = 		zend_register_list_destructors_ex(rfc2045_dtor, NULL, mailparse_msg_name, module_number);
 	le_rfc2045_nofree = zend_register_list_destructors_ex(NULL, NULL, mailparse_msg_name, module_number);
 
