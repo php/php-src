@@ -285,6 +285,8 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	DBA_ID_PARS;
 	zval **val, **key;
+	char *v;
+	int len;
 
 	if(ac != 3 || zend_get_parameters_ex(ac, &key, &val, &id) != SUCCESS) {
 		WRONG_PARAM_COUNT;
@@ -295,8 +297,19 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	DBA_WRITE_CHECK;
 	
-	if(info->hnd->update(info, VALLEN(key), VALLEN(val), mode TSRMLS_CC) == SUCCESS)
-		RETURN_TRUE;
+	if (PG(magic_quotes_runtime)) {
+		len = Z_STRLEN_PP(val);
+		v = estrndup(Z_STRVAL_PP(val), len);
+		php_stripslashes(v, &len TSRMLS_CC); 
+		if(info->hnd->update(info, VALLEN(key), v, len, mode TSRMLS_CC) == SUCCESS) {
+			efree(v);
+			RETURN_TRUE;
+		}
+		efree(v);
+	} else {
+		if(info->hnd->update(info, VALLEN(key), VALLEN(val), mode TSRMLS_CC) == SUCCESS)
+			RETURN_TRUE;
+	}
 	RETURN_FALSE;
 }
 /* }}} */
