@@ -492,7 +492,7 @@ xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding)
 	}
 	/* This is the theoretical max (will never get beyond len * 2 as long
 	 * as we are converting from single-byte characters, though) */
-	newbuf = emalloc(len * 4);
+	newbuf = emalloc(len * 4 + 1);
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
 		if (c < 0x80) {
@@ -513,9 +513,8 @@ xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding)
 		pos--;
 		s++;
     }
-	if (*newlen < len * 4) {
-		newbuf = erealloc(newbuf, *newlen);
-	}
+	newbuf[*newlen] = 0;
+	newbuf = erealloc(newbuf, (*newlen)+1);
 	return newbuf;
 }
 /* }}} */
