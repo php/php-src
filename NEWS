@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- OCIResult() could return garbage if called on empty result-sets. (thies)
 - Added ability to use Perl-style ${n} subpattern references in the
   replacement string for preg_replace(). Takes care of bug #18442. (Andrei)
 - Fixed array_merge_recursive() to avoid problems with merging cyclical
