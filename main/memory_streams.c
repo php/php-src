@@ -232,7 +232,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 	php_stream *stream;
 	php_stream_memory_data *ms;
 
-	if ((stream = _php_stream_memory_create(TEMP_STREAM_DEFAULT STREAMS_REL_CC)) != NULL) {
+	if ((stream = php_stream_memory_create_rel(TEMP_STREAM_DEFAULT)) != NULL) {
 		if (length) {
 			assert(buf != NULL);
 			php_stream_write(stream, buf, length);
@@ -273,7 +273,7 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_MEMORY)) {
 		size_t memsize;
-		char *membuf = _php_stream_memory_get_buffer(ts->innerstream, &memsize STREAMS_CC);
+		char *membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
 
 		if (memsize + count >= ts->smax) {
 			php_stream *file = php_stream_fopen_tmpfile();
@@ -375,7 +375,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 	php_stream *stream;
 	php_stream_temp_data *ms;
 
-	if ((stream = _php_stream_temp_create(mode & ~TEMP_STREAM_READONLY, max_memory_usage STREAMS_REL_CC)) != NULL) {
+	if ((stream = php_stream_temp_create_rel(mode & ~TEMP_STREAM_READONLY, max_memory_usage)) != NULL) {
 		if (length) {
 			assert(buf != NULL);
 			php_stream_temp_write(stream, buf, length);
