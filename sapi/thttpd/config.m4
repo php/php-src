@@ -1,6 +1,7 @@
 AC_ARG_WITH(thttpd,
 [  --with-thttpd=SRCDIR    Build PHP as thttpd module],[
   test -d $withval || AC_MSG_RESULT(thttpd directory does not exist ($withval))
+  egrep thttpd.2.21b $withval/version.h || AC_MSG_RESULT([This version only supports thttpd-2.21b])
   PHP_EXPAND_PATH($withval, THTTPD)
   PHP_TARGET_RDYNAMIC
   INSTALL_IT="\
