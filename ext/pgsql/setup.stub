@@ -1,8 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-pgsql 'PostgreSQL support?' yesnodir \
-    'no /usr/local/pgsql PostgreSQL base install' \
-'    Whether to build PHP with PostgreSQL support.\n
-    More info about PostgreSQL can be found at\n
-    http://www.postgreSQL.org/.'

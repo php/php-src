@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-oci8 'oci8 support?' yesnodir no \
-'    Whether to build the oci8 extension.'
-	

@@ -1,7 +1,0 @@
-/* Define if you want System V semaphore support.
- */
-#define HAVE_SYSVSEM 0
-
-/* Define if you have union semun.
- */
-#define HAVE_SEMUN 0
