@@ -33,6 +33,7 @@
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
+#include "spl_directory.h"
 
 #include "php.h"
 #include "fopen_wrappers.h"
@@ -105,19 +106,6 @@ static zend_object_handlers spl_ce_dir_handlers;
 /* decalre the class entry */
 zend_class_entry *spl_ce_DirectoryIterator;
 zend_class_entry *spl_ce_RecursiveDirectoryIterator;
-
-
-/* the overloaded class structure */
-
-/* overloading the structure results in the need of having 
-   dedicated creatin/cloning/destruction functions */
-typedef struct _spl_ce_dir_object {
-	zend_object       std;
-	php_stream        *dirp;
-	php_stream_dirent entry;
-	char              *path;
-	int               index;
-} spl_ce_dir_object;
 
 
 /* {{{ spl_ce_dir_object_dtor */
