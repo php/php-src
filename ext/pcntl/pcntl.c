@@ -386,7 +386,7 @@ PHP_FUNCTION(pcntl_exec)
 		args_hash = HASH_OF(args);
 		argc = zend_hash_num_elements(args_hash);
 		
-		argv = alloca((argc+2) * sizeof(char *));
+		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
 		*argv = path;
 		for ( zend_hash_internal_pointer_reset(args_hash), current_arg = argv+1; 
 			(argi < argc && (zend_hash_get_current_data(args_hash, (void **) &element) == SUCCESS));
@@ -397,7 +397,7 @@ PHP_FUNCTION(pcntl_exec)
 		}
 		*(current_arg) = NULL;
 	} else {
-		argv = alloca(2 * sizeof(char *));
+		argv = emalloc(2 * sizeof(char *));
 		*argv = path;
 		*(argv+1) = NULL;
 	}
@@ -407,13 +407,13 @@ PHP_FUNCTION(pcntl_exec)
 		envs_hash = HASH_OF(envs);
 		envc = zend_hash_num_elements(envs_hash);
 		
-		envp = alloca((envc+1) * sizeof(char *));
+		envp = safe_emalloc((envc + 1), sizeof(char *), 0);
 		for ( zend_hash_internal_pointer_reset(envs_hash), pair = envp; 
 			(envi < envc && (zend_hash_get_current_data(envs_hash, (void **) &element) == SUCCESS));
 			(envi++, pair++, zend_hash_move_forward(envs_hash)) ) {
 			switch (return_val = zend_hash_get_current_key_ex(envs_hash, &key, &key_length, &key_num, 0, NULL)) {
 				case HASH_KEY_IS_LONG:
-					key = alloca(101);
+					key = emalloc(101);
 					snprintf(key, 100, "%ld", key_num);
 					key_length = strlen(key);
 					break;
@@ -432,7 +432,7 @@ PHP_FUNCTION(pcntl_exec)
 			strlcat(*pair, Z_STRVAL_PP(element), pair_length);
 			
 			/* Cleanup */
-			if (return_val == HASH_KEY_IS_LONG) free_alloca(key);
+			if (return_val == HASH_KEY_IS_LONG) efree(key);
 		}
 		*(pair) = NULL;
 	}
@@ -445,10 +445,10 @@ PHP_FUNCTION(pcntl_exec)
 	/* Cleanup */
 	if (envp != NULL) {
 		for (pair = envp; *pair != NULL; pair++) efree(*pair);
-		free_alloca(envp);
+		efree(envp);
 	}
 
-	free_alloca(argv);
+	efree(argv);
 	
 	RETURN_FALSE;
 }
