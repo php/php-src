@@ -106,6 +106,7 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 	zval ***zargs;
 	zval funcname;
 	int i, res;
+	char *callable = NULL, *errbuf=NULL;
 
 	/* sanity check the args */
 	if (argc == 0) {
@@ -115,10 +116,14 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 	
 	ZVAL_STRING(&funcname, (char*)argv[0], 0);
 
-	if (!zend_is_callable(&funcname, 0, NULL)) {
-		sqlite_set_result_error(func, "function is not callable", -1);
+	if (!zend_is_callable(&funcname, 0, &callable)) {
+		spprintf(&errbuf, 0, "function `%s' is not callable", callable);
+		sqlite_set_result_error(func, errbuf, -1);
+		efree(errbuf);
+		efree(callable);
 		return;
 	}
+	efree(callable);
 	
 	if (argc > 1) {
 		zargs = (zval ***)emalloc((argc - 1) * sizeof(zval **));
