@@ -1899,11 +1899,12 @@ PHP_FUNCTION(rename)
 	old_name = Z_STRVAL_PP(old_arg);
 	new_name = Z_STRVAL_PP(new_arg);
 
-	if (PG(safe_mode) &&(!php_checkuid(old_name, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) && (!php_checkuid(old_name, NULL, CHECKUID_CHECK_FILE_AND_DIR) ||
+				!php_checkuid(new_name, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(old_name TSRMLS_CC)) {
+	if (php_check_open_basedir(old_name TSRMLS_CC) || php_check_open_basedir(new_name TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
