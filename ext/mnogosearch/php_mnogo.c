@@ -129,6 +129,9 @@ static int le_link,le_res;
  */
 function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_api_version,		NULL)
+#if UDM_VERSION_ID >= 30200			
+	PHP_FE(udm_check_charset,	NULL)
+#endif
 
 	PHP_FE(udm_alloc_agent,		NULL)
 	PHP_FE(udm_set_agent_param,	NULL)
@@ -753,12 +756,12 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 }
 /* }}} */
 
-/* {{{ proto int udm_load_ispell_data(int agent, int var, string val1, string val2, int flag)
+/* {{{ proto int udm_load_ispell_data(int agent, int var, string val1, [string charset], string val2, int flag)
    Load ispell data */
 DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 {
-	pval **yyagent, **yyvar, **yyval1, **yyval2, **yyflag;
-	char *val1, *val2;
+	pval **yyagent, **yyvar, **yyval1, **yyval2, **yyflag, **yycharset ;
+	char *val1, *val2, *charset;
 	int var, flag;
 	UDM_AGENT * Agent;
 
@@ -777,6 +780,25 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			flag = Z_LVAL_PP(yyflag);
 			val1 = Z_STRVAL_PP(yyval1);
 			val2 = Z_STRVAL_PP(yyval2);
+			charset = "us-ascii";
+			
+			break;
+
+		case 6: 		
+			if(zend_get_parameters_ex(6,&yyagent,&yyvar,&yyval1,&yycharset,&yyval2,&yyflag)==FAILURE){
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(yyvar);
+			convert_to_long_ex(yyflag);
+			convert_to_string_ex(yyval1);
+			convert_to_string_ex(yyval2);
+			convert_to_string_ex(yycharset);
+			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
+			var  = Z_LVAL_PP(yyvar);
+			flag = Z_LVAL_PP(yyflag);
+			val1 = Z_STRVAL_PP(yyval1);
+			val2 = Z_STRVAL_PP(yyval2);
+			charset = Z_STRVAL_PP(yycharset);
 			
 			break;
 			
@@ -785,8 +807,9 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			break;
 	}
 
-#if UDM_VERSION_ID < 30200	
+
 	switch(var){
+#if UDM_VERSION_ID < 30200		
 		case UDM_ISPELL_TYPE_DB: 
 			Agent->Conf->ispell_mode |= UDM_ISPELL_MODE_DB;
 			
@@ -794,37 +817,9 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			    UdmImportDictionaryFromDB(Agent)) {
 				RETURN_FALSE;
 			} 
-						
+									
 			break;
 			
-		case UDM_ISPELL_TYPE_AFFIX: 
-			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
-
-#if UDM_VERSION_ID > 30111
-			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
-#endif
-			
-			if (UdmImportAffixes(Agent->Conf,val1,val2,NULL,0)) {
-				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load affix file %s",val2);
-				RETURN_FALSE;
-			}
-			
-			break;
-			
-		case UDM_ISPELL_TYPE_SPELL: 
-			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
-			
-#if UDM_VERSION_ID > 30111
-			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
-#endif
-			
-			if (UdmImportDictionary(Agent->Conf,val1,val2,1,"")) {
-				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load spell file %s",val2);
-				RETURN_FALSE;
-			}
-			
-			break;
-
 #if UDM_VERSION_ID > 30111
 
 		case UDM_ISPELL_TYPE_SERVER:
@@ -835,7 +830,50 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 		
 			break;
 			
+#endif			
 #endif
+
+		case UDM_ISPELL_TYPE_AFFIX: 
+#if UDM_VERSION_ID < 30200		
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
+
+#if UDM_VERSION_ID > 30111
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
+#endif
+			
+			if (UdmImportAffixes(Agent->Conf,val1,val2,NULL,0)) {
+				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load affix file %s",val2);
+				RETURN_FALSE;
+			}
+#else
+			if (UdmImportAffixes(Agent->Conf,val1,charset,val2)) {
+				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load affix file %s",val2);
+				RETURN_FALSE;
+			}
+    
+#endif
+			break;
+			
+		case UDM_ISPELL_TYPE_SPELL: 
+#if UDM_VERSION_ID < 30200				
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
+			
+#if UDM_VERSION_ID > 30111
+			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
+#endif
+			
+			if (UdmImportDictionary(Agent->Conf,val1,val2,1,"")) {
+				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load spell file %s",val2);
+				RETURN_FALSE;
+			}
+#else
+			if (UdmImportDictionary(Agent->Conf,val1,charset,val2,0,"")) {
+				php_error(E_WARNING,"Udm_Load_Ispell_Data: Cannot load spell file %s",val2);
+				RETURN_FALSE;
+			}
+#endif
+			break;
+
 
 		default:
 			php_error(E_WARNING,"Udm_Load_Ispell_Data: Unknown ispell type parameter");
@@ -849,7 +887,6 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 		  	UdmSortAffixes(Agent->Conf);
 		}
 	}
-#endif
 	
 	RETURN_TRUE;
 }
@@ -981,6 +1018,39 @@ DLEXPORT PHP_FUNCTION(udm_clear_search_limits)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#if UDM_VERSION_ID >= 30200		
+/* {{{ proto int udm_check_charset(int agent, string charset)
+   Check if the given charset is known to mnogosearch */
+DLEXPORT PHP_FUNCTION(udm_check_charset)
+{
+	pval ** yycharset, ** yyagent;
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent,&yycharset)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	convert_to_string_ex(yycharset);
+	
+
+	if (UdmGetCharSet(Z_STRVAL_PP(yycharset))) {
+	    RETURN_TRUE;
+	} else {
+	    RETURN_FALSE;
+	}	
+}
+/* }}} */
+#endif
 
 /* {{{ proto int udm_find(int agent, string query)
    Perform search */

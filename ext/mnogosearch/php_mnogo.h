@@ -50,6 +50,9 @@ DLEXPORT PHP_MSHUTDOWN_FUNCTION(mnogosearch);
 DLEXPORT PHP_MINFO_FUNCTION(mnogosearch);
 
 DLEXPORT PHP_FUNCTION(udm_api_version);
+#if UDM_VERSION_ID >= 30200
+DLEXPORT PHP_FUNCTION(udm_check_charset);
+#endif
 
 DLEXPORT PHP_FUNCTION(udm_alloc_agent);
 DLEXPORT PHP_FUNCTION(udm_set_agent_param);
