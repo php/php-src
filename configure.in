@@ -184,9 +184,6 @@ fi
 
 INCLUDES="$INCLUDES -I\$(top_builddir)/Zend -I\$(top_srcdir)"
 
-AC_CHECK_LIB(nsl, gethostname, [
- AC_ADD_LIBRARY(nsl)
- AC_DEFINE(HAVE_LIBNSL) ], [])
 
 AC_CHECK_LIB(socket, socket, [
  AC_ADD_LIBRARY(socket)
@@ -195,9 +192,26 @@ AC_CHECK_LIB(socket, socket, [
    AC_ADD_LIBRARY(socket)
    ])])
 
-AC_CHECK_LIB(nsl, gethostbyaddr, [
+dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try
+dnl to avoid -lnsl checks, if we already have the functions which
+dnl are usually in libnsl
+
+unset ac_cv_func_yp_get_default_domain
+AC_CHECK_FUNC(yp_get_default_domain,
+ [php_no_nsl_checks=yes],[ ])
+unset ac_cv_func_yp_get_default_domain
+
+if test "$php_no_nsl_checks" != "yes"; then
+
+AC_CHECK_LIB(nsl, gethostname, [
  AC_ADD_LIBRARY(nsl)
- AC_DEFINE(HAVE_LIBNSL) ], [])
+ AC_DEFINE(HAVE_LIBNSL) ],[
+ AC_CHECK_LIB(nsl, gethostbyaddr, [
+  AC_ADD_LIBRARY(nsl)
+  AC_DEFINE(HAVE_LIBNSL) ], [])
+])
+
+fi
 
 AC_CHECK_LIB(crypt, crypt, [
  AC_ADD_LIBRARY(crypt)
