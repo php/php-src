@@ -14,3 +14,5 @@ $(builddir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
 
 $(builddir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	$(LEX) -Pini_ -S$(srcdir)/flex.skl -o$@ -i $(srcdir)/zend_ini_scanner.l
+
+$(builddir)/zend_indent.lo $(builddir)/zend_highlight.lo $(builddir)/zend_compile.lo: $(builddir)/zend_language_parser.h
