@@ -80,6 +80,7 @@ if test ! -d libzend; then
         echo "           libzend should be installed in . or .., how to fetch:"
 	echo ""
 	echo "             cvs -d :pserver:cvsread@cvs.zend.com:/repository login"
+	echo "             (password \"zend\")"
 	echo "             cvs -d :pserver:cvsread@cvs.zend.com:/repository co libzend"
 	echo ""
 	exit 1
@@ -94,6 +95,7 @@ if test ! -d TSRM; then
         echo "           TSRM should be installed in . or .., how to fetch:"
 	echo ""
 	echo "             cvs -d :pserver:cvsread@cvs.zend.com:/repository login"
+	echo "             (password \"zend\")"
 	echo "             cvs -d :pserver:cvsread@cvs.zend.com:/repository co TSRM"
 	echo ""
 	exit 1
