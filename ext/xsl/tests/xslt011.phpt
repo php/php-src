@@ -39,6 +39,13 @@ $dom = new domDocument();
   function nonDomNode() {
     return  new foo();
   }
+  
+  class aClass {
+    static function aStaticFunction($id) {
+        return $id;
+    }
+  }
+  
 --EXPECTF--
 Test 11: php:function Support
 
@@ -48,4 +55,5 @@ foobar - secondArg
 foobar - 
 this is from an external DomDocument
 from the Input Document
+static
 

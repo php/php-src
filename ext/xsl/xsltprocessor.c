@@ -142,7 +142,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	zval handler;
 	xmlXPathObjectPtr obj;
 	char *str;
-
+	char *callable = NULL;
+	
 	TSRMLS_FETCH();
 
 	tctxt = xsltXPathGetTransformContext(ctxt);
@@ -243,29 +244,34 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	fci.retval_ptr_ptr = &retval;
 	fci.no_separation = 0;
 	/*fci.function_handler_cache = &function_ptr;*/
-	
-	result = zend_call_function(&fci, NULL TSRMLS_CC);
-	if (result == FAILURE) {
-		if (Z_TYPE(handler) == IS_STRING) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
-		} 
+	if (!zend_make_callable(&handler, &callable TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", callable);
+		efree(callable);
+		
 	} else {
-		if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
-			xmlNode *nodep;
-			dom_object *obj;
-			obj = (dom_object *)zend_object_store_get_object(retval TSRMLS_CC);
-			nodep = dom_object_get_node(obj);
-			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
-		} else if (retval->type == IS_BOOL) {
-			valuePush(ctxt, xmlXPathNewBoolean(retval->value.lval));
-		} else if (retval->type == IS_OBJECT) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "A PHP Object can not be converted to a XPath-string");
-			valuePush(ctxt, xmlXPathNewString(""));
+		result = zend_call_function(&fci, NULL TSRMLS_CC);
+		if (result == FAILURE) {
+			if (Z_TYPE(handler) == IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
+			} 
 		} else {
-			convert_to_string_ex(&retval);
-			valuePush(ctxt, xmlXPathNewString( Z_STRVAL_P(retval)));
+			if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
+				xmlNode *nodep;
+				dom_object *obj;
+				obj = (dom_object *)zend_object_store_get_object(retval TSRMLS_CC);
+				nodep = dom_object_get_node(obj);
+				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
+			} else if (retval->type == IS_BOOL) {
+				valuePush(ctxt, xmlXPathNewBoolean(retval->value.lval));
+			} else if (retval->type == IS_OBJECT) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "A PHP Object can not be converted to a XPath-string");
+				valuePush(ctxt, xmlXPathNewString(""));
+			} else {
+				convert_to_string_ex(&retval);
+				valuePush(ctxt, xmlXPathNewString( Z_STRVAL_P(retval)));
+			}
+			zval_ptr_dtor(&retval);
 		}
-		zval_ptr_dtor(&retval);
 	}
 	zval_dtor(&handler);
 	for (i = 0; i < nargs - 1; i++) {

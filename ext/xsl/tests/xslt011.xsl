@@ -16,6 +16,10 @@
 <xsl:value-of select="php:function('nodeSet',/doc)/i"/>
 <xsl:text>
 </xsl:text>
+<xsl:value-of select="php:function('aClass::aStaticFunction','static')"/>
+<xsl:text>
+</xsl:text>
+
 <xsl:value-of select="php:function('nonDomNode')"/>
 </xsl:template>
 </xsl:stylesheet>
