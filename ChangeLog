@@ -1,3 +1,81 @@
+2002-05-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Improve readability of the header send function
+
+2002-05-17  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Stuff all Win32 mail() changes together.
+
+2002-05-17  Jon Parise  <jon@csh.rit.edu>
+
+    * NEWS: Credit where credit is due.
+
+2002-05-17  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+    - Win32 mail() is no longer case-sensitive when it comes to match for any headers
+      (e.g. from:, cc:, etc).
+
+2002-05-17  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * win32/php4ts.dsw:
+    Re-add "tests" project - this is the only change to file.  For some reason MSVC chose to put "" around all the project file names.  (Why?  Ask Microsoft :).  Perhaps different patch levels on MSVC6?).  These files are not hand-edited.
+
+2002-05-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c: proto tweak
+
+    * ext/sysvsem/sysvsem.c
+      ext/sysvsem/php_sysvsem.h:
+    Add an optional flag to sem_get that specifies if the semaphore should be
+    automatically released on request shutdown. (#16986)
+    Fix a segfault in sem_remove (#17274)
+
+2002-05-17  Joseph Tate  <jtate@mi-corporation.com>
+
+    * win32/php4ts.dsw:
+    Reverted the last commit which moved all the projects around.
+
+
+2002-05-17  Cliff Woolley  <jwoolley@apache.org>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache/config.m4:
+    Allow the version checks for --with-apxs= and --with-apxs2= to work
+    with development version of Apache, whose version strings end in "-dev",
+    eg "Apache/2.0.37-dev".
+
+    PR: 17233
+    Submitted by: Dale Ghent <daleg@elemental.org>
+
+    * ext/standard/head.c:
+    Only the last cookie was getting set.  (You can have
+    more than one Set-Cookie: header, as indicated by
+    http://wp.netscape.com/newsref/std/cookie_spec.html.)
+
+    PR: 16626
+    Submitted by: regina@hitel.net
+
+    * sapi/apache2filter/php_functions.c:
+    apache 2.0's apache_lookup_uri() was returning an array rather than an
+    object, which contradicted both the documentation and the behavior of the
+    same function under apache 1.3.
+
+    PR: 14999
+
+    * sapi/apache2filter/apache_config.c:
+    * restore the php_flag and php_admin_flag Apache directives which for
+      some mysterious reason never made their way from sapi/apache to
+      sapi/apache2filter when it was first written  PR: 16629
+    * change the allowed locations of php_admin_value (and php_admin_flag to
+      match) to ACCESS_CONF instead of OR_NONE to match sapi/apache.  No
+      idea why it was ever OR_NONE.  PR: 16489
+
+2002-05-17  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * tests/php.ini: Default INI file used with run-tests.php
+
 2002-05-16  Christian Stocker  <chregu@phant.ch>
 
     * ext/domxml/php_domxml.h
