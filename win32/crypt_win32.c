@@ -18,6 +18,9 @@
 
 /* $Id$ */
 
+/* This code is dristributed under the PHP license with permission from
+   the author Jochen Obalek <jochen.obalek@bigfoot.de> */
+   
 /* encrypt.c - providing 56 bit DES encryption
    Copyright (C) 1991 Jochen Obalek
 
