@@ -55,10 +55,10 @@ A lot... */
 #define SQL_DIALECT_CURRENT 1
 #endif
 
-#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 /*
-#define IBDEBUG(a)
+#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 */
+#define IBDEBUG(a)
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
