@@ -388,11 +388,12 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 			php_error(E_WARNING, "Unable to allocate t_map memory");
 			FREE_ZVAL(t_map);
 			FREE_ZVAL(IMAPG(quota_return));
+			return;
 		}
 
-		add_assoc_long_ex(t_map, "usage", sizeof("usage"), qlist->usage);
-		add_assoc_long_ex(t_map, "limit", sizeof("usage"), qlist->limit);
-		add_assoc_zval_ex(IMAPG(quota_return), qlist->name, strlen(qlist->name), t_map);
+		add_assoc_long_ex(t_map, "usage", sizeof("usage")+1, qlist->usage);
+		add_assoc_long_ex(t_map, "limit", sizeof("limit")+1, qlist->limit);
+		add_assoc_zval_ex(IMAPG(quota_return), qlist->name, strlen(qlist->name)+1, t_map);
 	}
 }
 /* }}} */
@@ -407,9 +408,9 @@ void mail_getquotaroot(MAILSTREAM *stream, char *mbx, STRINGLIST *qroot)
 {
 	TSRMLS_FETCH();
 
-	add_next_index_string(IMAPG(quotaroot_return), mbx, 1);
+	add_next_index_stringl(IMAPG(quota_return), mbx, strlen(mbx)+1, 1);
 	for(; qroot; qroot = qroot->next) {
-		add_next_index_string(IMAPG(quotaroot_return), qroot->text.data, 1);
+		add_next_index_stringl(IMAPG(quota_return), qroot->text.data, qroot->text.size+1, 1);
 	}
 
 }
@@ -1079,7 +1080,7 @@ PHP_FUNCTION(imap_get_quota)
 
 	MAKE_STD_ZVAL(IMAPG(quota_return));
 	if (array_init(IMAPG(quota_return)) == FAILURE) {
-		php_error(E_WARNING, "Unable to allocate array memory");
+		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
 		FREE_ZVAL(IMAPG(quota_return));
 		RETURN_FALSE;
 	}
@@ -1092,7 +1093,8 @@ PHP_FUNCTION(imap_get_quota)
 	}
 
 	*return_value = *IMAPG(quota_return);
-	FREE_ZVAL(IMAPG(quota_return));
+	//FREE_ZVAL(IMAPG(quota_return));
+	//IMAPG(quota_return) = NULL;
 
 }
 /* }}} */
@@ -1102,7 +1104,6 @@ PHP_FUNCTION(imap_get_quota)
 PHP_FUNCTION(imap_get_quotaroot)
 {
 	zval **streamind, **mbox;
-	zval *quotaroot_return;
 	pils *imap_le_struct;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &streamind, &mbox) == FAILURE) {
@@ -1113,10 +1114,10 @@ PHP_FUNCTION(imap_get_quotaroot)
 
 	convert_to_string_ex(mbox);
 
-	MAKE_STD_ZVAL(IMAPG(quotaroot_return));
-	if (array_init(IMAPG(quotaroot_return)) == FAILURE) {
+	MAKE_STD_ZVAL(IMAPG(quota_return));
+	if (array_init(IMAPG(quota_return)) == FAILURE) {
 		php_error(E_WARNING, "%s(): Unable to allocate array memory", get_active_function_name(TSRMLS_C));
-		FREE_ZVAL(quotaroot_return);
+		FREE_ZVAL(IMAPG(quota_return));
 		RETURN_FALSE;
 	}
 
@@ -1127,8 +1128,9 @@ PHP_FUNCTION(imap_get_quotaroot)
 		RETURN_FALSE;
 	}
 
-	*return_value = *IMAPG(quotaroot_return);
-	FREE_ZVAL(IMAPG(quotaroot_return));
+	*return_value = *IMAPG(quota_return);
+	//FREE_ZVAL(IMAPG(quota_return));
+	//IMAPG(quotaroot_return) = NULL;
 }
 /* }}} */
 
