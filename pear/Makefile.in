@@ -34,8 +34,9 @@ PEAR_SUBDIRS = \
 PEAR_FILES = \
 	Benchmark/Iterate.php \
 	Benchmark/Timer.php \
-	Cache.php
+	Cache.php \
 	Cache/Container.php \
+	Cache/Container/db.php \
 	Cache/Container/file.php \
 	Cache/Container/phplib.php \
 	Cache/Container/shm.php \
