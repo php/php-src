@@ -398,14 +398,14 @@ class PEAR_Frontend_CLI extends PEAR
             case 'remote-info':
                 $data = array(
                     'caption' => 'Package details:',
-                    'border' => false,
+                    'border' => true,
                     'data' => array(
-                        array("Latest", $data['stable']),
+                        array("Latest",    $data['stable']),
                         array("Installed", $data['installed']),
-                        array("Package", $data['name']),
-                        array("License", $data['license']),
-                        array("Category", $data['category']),
-                        array("Summary", $data['summary']),
+                        array("Package",   $data['name']),
+                        array("License",   $data['license']),
+                        array("Category",  $data['category']),
+                        array("Summary",   $data['summary']),
                         array("Description", $data['description']),
                         ),
                     );
@@ -418,7 +418,7 @@ class PEAR_Frontend_CLI extends PEAR
                         $opts = array(0 => array('wrap' => 25),
                                       1 => array('wrap' => 55)
                         );
-                    } else {
+                    } elseif ($count == 3) {
                         $opts = array(0 => array('wrap' => 20),
                                       1 => array('wrap' => 20),
                                       2 => array('wrap' => 40)

@@ -61,7 +61,7 @@ latest stable release of each package.',
             'shortcut' => 'sp',
             'options' => array(),
             'doc' => '
-Lists all packages which match the search paramteres (first param 
+Lists all packages which match the search paramteres (first param
 is package name, second package info)',
             ),
         'list-all' => array(
@@ -109,18 +109,9 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
 
     function doRemoteInfo($command, $options, $params)
     {
-/*
-        return false; // coming soon
-
-        var_dump($params[0]);
-        $r = new PEAR_Remote($this->config);
-        $info = $r->call('package.info', $params[0]);
-        if (PEAR::isError($info)) {
-            return $this->raiseError($info);
+        if (sizeof($params) != 1) {
+            return $this->raiseError("$command expects one param: the remote package name");
         }
-        
-        var_dump($info);
-*/
         $r = new PEAR_Remote($this->config);
         $available = $r->call('package.listAll', true);
         if (PEAR::isError($available)) {
@@ -131,11 +122,9 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
 
         $reg = new PEAR_Registry($this->config->get('php_dir'));
         $installed = $reg->packageInfo($info['name']);
-        $info['installed'] = $installed['version'];
-    
+        $info['installed'] = $installed['version'] ? $installed['version'] : '- no -';
+
         $this->ui->outputData($info, $command);
-        
-        return true; // coming soon
     }
 
     // }}}
@@ -180,16 +169,16 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             'border' => true,
             'headline' => array('Package', 'Latest', 'Local'),
             );
-                  
+
         foreach ($available as $name => $info) {
             $installed = $reg->packageInfo($name);
             $desc = $info['summary'];
             if (isset($params[$name]))
                 $desc .= "\n\n".$info['description'];
-            
+
             $data['data'][$info['category']][] = array(
-                $name, 
-                $info['stable'], 
+                $name,
+                $info['stable'],
                 $installed['version'],
                 $desc,
                 );
@@ -206,9 +195,9 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
         if ((!isset($params[0]) || empty($params[0]))
             && (!isset($params[1]) || empty($params[1])))
         {
-            return $this->raiseError('no valid search string suppliedy<');
+            return $this->raiseError('no valid search string supplied');
         };
-            
+
         $r = new PEAR_Remote($this->config);
         $reg = new PEAR_Registry($this->config->get('php_dir'));
         $available = $r->call('package.listAll', true);
@@ -220,24 +209,24 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             'border' => true,
             'headline' => array('Package', 'Latest', 'Local'),
             );
-            
+
         foreach ($available as $name => $info) {
             $found = (!empty($params[0]) && stristr($name, $params[0]) !== false);
             if (!$found && !(isset($params[1]) && !empty($params[1])
                 && (stristr($info['summary'], $params[1]) !== false
                     || stristr($info['description'], $params[1]) !== false)))
-            {   
+            {
                 continue;
             };
-                
+
             $installed = $reg->packageInfo($name);
             $desc = $info['summary'];
             if (isset($params[$name]))
                 $desc .= "\n\n".$info['description'];
-            
+
             $data['data'][$info['category']][] = array(
-                $name, 
-                $info['stable'], 
+                $name,
+                $info['stable'],
                 $installed['version'],
                 $desc,
                 );
