@@ -141,6 +141,8 @@ PHP_FUNCTION(mail)
 				subject_r[i] = ' ';
 			}
 		}
+	} else {
+		subject_r = subject;
 	}
 
 	if (force_extra_parameters) {
