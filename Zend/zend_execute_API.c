@@ -182,8 +182,6 @@ void init_executor(TSRMLS_D)
 
 	EG(scope) = NULL;
 
-	EG(current_execute_data) = NULL;
-
 	EG(This) = NULL;
 
 	EG(float_separator)[0] = '.';
