@@ -1,3 +1,141 @@
+2001-09-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php:
+    added a fix to solve the problem with multiple DB instances and different
+    databases (under equal user/pass/host)
+
+2001-09-06  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/sapi_apache.c: Ok, get it onto the right branch
+    (cvs can get annoying sometimes)
+
+    * sapi/apache/sapi_apache.c:
+    Damn, went to head instead of the branch - revert
+
+    * sapi/apache/sapi_apache.c:
+    Oops, forgot to add sapi_apache.c to the apache_hooks branch
+
+2001-09-06  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: Go with RC2
+
+2001-09-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c
+      ext/gd/config.m4: Fixed bug: #13172
+
+2001-09-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/apache/mod_php4.c: no need to cast a 'HashTable *' to 'HashTable *'
+
+2001-09-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ext_skel:
+    Introduce the good practise of using [] around output messages.
+
+    * ext/gd/config.m4
+      acinclude.m4
+      configure.in: Always quote the messages.
+
+    * ext/gd/config.m4:
+    Hope this reduces the amount of bogus bug reports when people use wrong paths..
+
+2001-09-06  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Fixing spelling
+
+2001-09-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Clean-up NEWS.
+
+2001-09-06  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c
+      main/main.c
+      main/php_main.h:
+    Apache request handler hook framework.  So far only the uri hook is
+    implemented, but the others will be easy once I finish the uri translation
+    example.  The big things left to do is to create a proper $r request
+    object to be manipulated in user-space and also to verify that the hooks
+    don't steal the POST data such that it isn't available to the content
+    handler once it is finally called.  Or if we do steal it, make sure it
+    is somehow available to the content handler later on.
+
+    Comments and help with this stuff is more than welcome.  Check out these
+    files from the 'apache_hooks' branch to play along.
+
+2001-09-06  Dan Libby  <dan@libby.com>
+
+    * ext/xmlrpc/config.m4
+      ext/xmlrpc/libxmlrpc/acinclude.m4
+      ext/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc.m4:
+    fix various build errors.  default to no xmlrpc
+
+2001-09-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/string.c: I should really learn how to spell
+
+    * ext/standard/string.c: avoid lowercasing the string
+
+    * ext/standard/rand.c: add missing )
+
+2001-09-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp: Fix Win32 build.
+
+2001-09-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/rand.c: fix ms compile warnings
+
+2001-09-06  Dan Libby  <dan@libby.com>
+
+    * ext/xmlrpc/CREDITS
+      ext/xmlrpc/EXPERIMENTAL
+      ext/xmlrpc/Makefile.in
+      ext/xmlrpc/config.m4
+      ext/xmlrpc/libs.mk
+      ext/xmlrpc/libxmlrpc/Makefile.in
+      ext/xmlrpc/libxmlrpc/README
+      ext/xmlrpc/libxmlrpc/acinclude.m4
+      ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/libxmlrpc/base64.h
+      ext/xmlrpc/libxmlrpc/encodings.c
+      ext/xmlrpc/libxmlrpc/encodings.h
+      ext/xmlrpc/libxmlrpc/libs.mk
+      ext/xmlrpc/libxmlrpc/queue.c
+      ext/xmlrpc/libxmlrpc/queue.h
+      ext/xmlrpc/libxmlrpc/simplestring.c
+      ext/xmlrpc/libxmlrpc/simplestring.h
+      ext/xmlrpc/libxmlrpc/system_methods.c
+      ext/xmlrpc/libxmlrpc/system_methods_private.h
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xml_element.h
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_dandarpc.h
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xml_to_xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/xmlrpc/libxmlrpc/xmlrpc.m4
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection_private.h
+      ext/xmlrpc/libxmlrpc/xmlrpc_private.h
+      ext/xmlrpc/php_config.h.in
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xmlrpc/xmlrpc-epi-php.c: adding xmlrpc extension, per Stig's request
+
+2001-09-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/rand.c: spaces -> tabs work cont.
+
+    * ext/standard/rand.c: ws fix
+
 2001-09-05  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/standard/rand.c: Fix ts build
