@@ -89,6 +89,7 @@ AC_ARG_WITH(java,
         AC_ADD_LIBRARY($JAVA_LIB)
       fi
 
+      INSTALL_IT="$INSTALL_IT; \$(srcdir)/build/shtool mkdir -p -f -m 0755 \$(libdir)"
       INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(libdir)"
     fi
 
