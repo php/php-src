@@ -2365,6 +2365,11 @@ int zendlex(znode *zendlval TSRMLS_DC)
 {
 	int retval;
 
+	if (CG(increment_lineno)) {
+		CG(zend_lineno)++;
+		CG(increment_lineno) = 0;
+	}
+
 	zendlval->u.constant.type = IS_LONG;
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
 	switch(retval) {
@@ -2374,6 +2379,10 @@ int zendlex(znode *zendlval TSRMLS_DC)
 			retval = zendlex(zendlval TSRMLS_CC);
 			break;
 		case T_CLOSE_TAG:
+			if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1]=='\n'
+				|| (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-2]=='\r' && LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1])) {
+				CG(increment_lineno) = 1;
+			}
 			retval = ';'; /* implicit ; */
 			break;
 		case T_OPEN_TAG_WITH_ECHO:

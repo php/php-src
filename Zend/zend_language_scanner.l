@@ -322,6 +322,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 
 	zend_set_compiled_filename(file_path TSRMLS_CC);
 	CG(zend_lineno) = 1;
+	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
 END_EXTERN_C()
@@ -1233,7 +1234,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -1245,7 +1245,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
 		zendlval->value.str.val = yytext; /* no copying - intentional */
-		HANDLE_NEWLINES(yytext,yyleng);
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);

@@ -122,6 +122,8 @@ struct _zend_compiler_globals {
 	struct _zend_ini_parser_param *ini_parser_param;
 
 	int interactive;
+
+	zend_bool increment_lineno;
 };
 
 
