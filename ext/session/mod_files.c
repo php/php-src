@@ -260,7 +260,10 @@ PS_WRITE_FUNC(files)
 
 	ftruncate(data->fd, 0);
 	lseek(data->fd, 0, SEEK_SET);
-	write(data->fd, val, vallen);
+	if (write(data->fd, val, vallen) != vallen) {
+		php_error(E_WARNING, "write failed: %m (%d)", errno);
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }
