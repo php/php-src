@@ -35,7 +35,7 @@
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		php_error(E_WARNING, "Node no longer exists"); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node no longer exists"); \
 	} \
 }
 
