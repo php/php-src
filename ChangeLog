@@ -1,3 +1,39 @@
+2003-10-01  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_3)
+      main/main.c:
+      Make sure to clear out the refcount.
+
+    * main/php_variables.c:
+      Made the $argc and $argv always available as globals in CLI, and not as
+      $_SERVER vars which depended on variables_order anyway. No more
+      silliness.
+
+    * (PHP_4_3)
+      main/main.c:
+      
+
+2003-10-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/cpdf/config.m4
+      ext/crack/config.m4
+      ext/fbsql/config.m4
+      ext/fdf/config.m4
+      ext/gd/config.m4
+      ext/gettext/config.m4
+      ext/gmp/config.m4
+      ext/imap/config.m4
+      ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/ovrimos/config.m4
+      ext/pfpro/config.m4
+      ext/readline/config.m4
+      ext/recode/config.m4
+      ext/session/config.m4
+      ext/xmlrpc/config.m4:
+      - Always look into /usr/local before /usr
+      - Added breaks to make sure the preferred value is used.
+
 2003-09-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
