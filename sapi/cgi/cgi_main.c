@@ -1614,7 +1614,9 @@ fastcgi_request_done:
 			}
 
 			php_request_shutdown((void *) 0);
-			exit_status = EG(exit_status);
+			if (exit_status == 0) {
+				exit_status = EG(exit_status);
+			}
 
 			if (SG(request_info).path_translated) {
 				free(SG(request_info).path_translated);
