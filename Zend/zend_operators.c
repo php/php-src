@@ -1170,26 +1170,54 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 }
 
 
+static inline zend_free_obj_get_result(zval *op, int free_op)
+{
+	if (free_op) {
+		if (op->refcount == 0) {
+			zval_dtor(op);
+			FREE_ZVAL(op);
+		} else {
+			zval_ptr_dtor(&op);
+		}
+	}
+}
+
+#define COMPARE_RETURN_AND_FREE(retval) \
+			zend_free_obj_get_result(op1, free_op1); \
+			zend_free_obj_get_result(op2, free_op2); \
+			return retval;
+
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
+	zend_bool free_op1 = 0, free_op2 = 0;
+	
+	if (op1->type == IS_OBJECT && Z_OBJ_HT_P(op1)->get) {
+		op1 = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
+		free_op1 = 1;
+	}
+	if (op2->type == IS_OBJECT && Z_OBJ_HT_P(op2)->get) {
+		op2 = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
+		free_op2 = 1;
+	}
+
 
 	if ((op1->type == IS_NULL && op2->type == IS_STRING)
 		|| (op2->type == IS_NULL && op1->type == IS_STRING)) {
 		if (op1->type == IS_NULL) {
 			result->type = IS_LONG;
 			result->value.lval = zend_binary_strcmp("", 0, op2->value.str.val, op2->value.str.len);
-			return SUCCESS;
+			COMPARE_RETURN_AND_FREE(SUCCESS);
 		} else {
 			result->type = IS_LONG;
 			result->value.lval = zend_binary_strcmp(op1->value.str.val, op1->value.str.len, "", 0);
-			return SUCCESS;
+			COMPARE_RETURN_AND_FREE(SUCCESS);
 		}
 	}
 		
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zendi_smart_strcmp(result, op1, op2);
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 	
 	if (op1->type == IS_BOOL || op2->type == IS_BOOL
@@ -1198,7 +1226,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		zendi_convert_to_boolean(op2, op2_copy, result);
 		result->type = IS_LONG;
 		result->value.lval = ZEND_NORMALIZE_BOOL(op1->value.lval-op2->value.lval);
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
 	zendi_convert_scalar_to_number(op1, op1_copy, result);
@@ -1207,48 +1235,48 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	if (op1->type == IS_LONG && op2->type == IS_LONG) {
 		result->type = IS_LONG;
 		result->value.lval = op1->value.lval>op2->value.lval?1:(op1->value.lval<op2->value.lval?-1:0);
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 	if ((op1->type == IS_DOUBLE || op1->type == IS_LONG)
 		&& (op2->type == IS_DOUBLE || op2->type == IS_LONG)) {
 		result->value.dval = (op1->type == IS_LONG ? (double) op1->value.lval : op1->value.dval) - (op2->type == IS_LONG ? (double) op2->value.lval : op2->value.dval);
 		result->value.lval = ZEND_NORMALIZE_BOOL(result->value.dval);
 		result->type = IS_LONG;
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 	if (op1->type==IS_ARRAY && op2->type==IS_ARRAY) {
 		zend_compare_arrays(result, op1, op2 TSRMLS_CC);
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
 	if (op1->type==IS_OBJECT && op2->type==IS_OBJECT) {
 		zend_compare_objects(result, op1, op2 TSRMLS_CC);
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
 	if (op1->type==IS_ARRAY) {
 		result->value.lval = 1;
 		result->type = IS_LONG;
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 	if (op2->type==IS_ARRAY) {
 		result->value.lval = -1;
 		result->type = IS_LONG;
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 	if (op1->type==IS_OBJECT) {
 		result->value.lval = 1;
 		result->type = IS_LONG;
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 	if (op2->type==IS_OBJECT) {
 		result->value.lval = -1;
 		result->type = IS_LONG;
-		return SUCCESS;
+		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
 
 	ZVAL_BOOL(result, 0);
-	return FAILURE;
+	COMPARE_RETURN_AND_FREE(FAILURE);
 }
 
 
