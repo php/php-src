@@ -50,12 +50,12 @@
 #if THREAD_SAFE & HAVE_NSLDAP
 #include "php3_threads.h"
 /* Structure for LDAP error values */
-#define LDAP_TLS_VARS ldap_module *PHP3_TLS_GET(ldapTLS,php3_ldap_module)
-#define LDAP_GLOBAL(a) php3_ldap_module->a
+#define LDAP_TLS_VARS ldap_module *PHP3_TLS_GET(ldapTLS,php_ldap_module)
+#define LDAP_GLOBAL(a) php_ldap_module->a
 #else
 #define LDAP_TLS_VARS
-#define LDAP_GLOBAL(a) php3_ldap_module.a
-ldap_module php3_ldap_module;
+#define LDAP_GLOBAL(a) php_ldap_module.a
+ldap_module php_ldap_module;
 #endif
 
 
@@ -111,7 +111,7 @@ DLEXPORT zend_module_entry *get_module(void ) { return &ldap_module_entry; }
 
 #if 0 /* see my note in php_ldap.h.  smc */
 /* Function for setting thread-specific LDAP error values */
-static void php3_ldap_set_ld_error( int err, char *matched, char *errmsg, void *dummy )
+static void php_ldap_set_ld_error( int err, char *matched, char *errmsg, void *dummy )
 {
 	LDAP_TLS_VARS;
 
@@ -131,7 +131,7 @@ static void php3_ldap_set_ld_error( int err, char *matched, char *errmsg, void *
 }
 
 /* Function for getting the thread-specific LDAP error values */
-static int php3_ldap_get_ld_error( char **matched, char **errmsg, void *dummy )
+static int php_ldap_get_ld_error( char **matched, char **errmsg, void *dummy )
 {
 	LDAP_TLS_VARS;
    /* Retrieve the error values */
@@ -145,13 +145,13 @@ static int php3_ldap_get_ld_error( char **matched, char **errmsg, void *dummy )
 }
 
 /* Function for setting the value of the errno variable */
-static void php3_ldap_set_errno( int err )
+static void php_ldap_set_errno( int err )
 {
    errno = err;
 }
 
 /* Function for getting the value of the errno variable */
-static int php3_ldap_get_errno( void )
+static int php_ldap_get_errno( void )
 {
    return( errno );
 }
@@ -174,7 +174,7 @@ static void _free_ldap_result(LDAPMessage *result)
 PHP_MINIT_FUNCTION(ldap)
 {
 #if defined(THREAD_SAFE)
-	ldap_module	*php3_ldap_module;
+	ldap_module	*php_ldap_module;
 	PHP3_MUTEX_ALLOC(ldap_mutex);
 	PHP3_MUTEX_LOCK(ldap_mutex);
 	numthreads++;
@@ -186,7 +186,7 @@ PHP_MINIT_FUNCTION(ldap)
 		}
 	}
 	PHP3_MUTEX_UNLOCK(ldap_mutex);
-	if(!PHP3_TLS_THREAD_INIT(ldapTLS,php3_ldap_module,ldap_module))
+	if(!PHP3_TLS_THREAD_INIT(ldapTLS,php_ldap_module,ldap_module))
 		return 0;
 #if 0 /*HAVE_NSLDAP*/
    /* Set up the ldap_thread_fns structure with pointers 
@@ -206,15 +206,15 @@ PHP_MINIT_FUNCTION(ldap)
       thread needs to unlock a mutex. */
    LDAP_GLOBAL(tfns).ltf_mutex_unlock = (int (*)(void *)) php3_mutex_unlock;
    /* Call the get_errno() function to get the value of errno */
-   LDAP_GLOBAL(tfns).ltf_get_errno = php3_ldap_get_errno;
+   LDAP_GLOBAL(tfns).ltf_get_errno = php_ldap_get_errno;
    /* Call the set_errno() function to set the value of errno */
-   LDAP_GLOBAL(tfns).ltf_set_errno = php3_ldap_set_errno;
+   LDAP_GLOBAL(tfns).ltf_set_errno = php_ldap_set_errno;
    /* Call the get_ld_error() function to get error values from 
       calls to functions in the libldap library */
-   LDAP_GLOBAL(tfns).ltf_get_lderrno = php3_ldap_get_ld_error;
+   LDAP_GLOBAL(tfns).ltf_get_lderrno = php_ldap_get_ld_error;
    /* Call the set_ld_error() function to set error values for 
       calls to functions in the libldap library */
-   LDAP_GLOBAL(tfns).ltf_set_lderrno = php3_ldap_set_ld_error;
+   LDAP_GLOBAL(tfns).ltf_set_lderrno = php_ldap_set_ld_error;
    /* Don't pass any extra parameter to the functions for 
      getting and setting libldap function call errors */
    LDAP_GLOBAL(tfns).ltf_lderrno_arg = NULL;
@@ -245,7 +245,7 @@ PHP_MSHUTDOWN_FUNCTION(ldap)
 {
 #ifdef THREAD_SAFE
 	LDAP_TLS_VARS;
-	PHP3_TLS_THREAD_FREE(php3_ldap_module);
+	PHP3_TLS_THREAD_FREE(php_ldap_module);
 	PHP3_MUTEX_LOCK(ldap_mutex);
 	numthreads--;
 	if (!numthreads) {
@@ -537,7 +537,7 @@ PHP_FUNCTION(ldap_unbind)
 /* }}} */
 
 
-static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
+static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	pval **link, **base_dn, **filter, **attrs, **attr;
 	char *ldap_base_dn, *ldap_filter;
@@ -642,7 +642,7 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
    Read an entry */
 PHP_FUNCTION(ldap_read)
 {
-	php3_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_BASE);
+	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_BASE);
 }
 /* }}} */
 
@@ -650,7 +650,7 @@ PHP_FUNCTION(ldap_read)
    Single-level search */
 PHP_FUNCTION(ldap_list)
 {
-	php3_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_ONELEVEL);
+	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_ONELEVEL);
 }
 /* }}} */
 
@@ -659,7 +659,7 @@ PHP_FUNCTION(ldap_list)
    Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
-	php3_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_SUBTREE);
+	php_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_SUBTREE);
 }
 /* }}} */
 
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 #define PHP_LD_FULL_ADD 0xff
  	
 
-static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
+static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 {
 	pval **link, **dn, **entry, **value, **ivalue;
 	LDAP *ldap;
@@ -1231,8 +1231,8 @@ static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 PHP_FUNCTION(ldap_add)
 {
 	/* use a newly define parameter into the do_modify so ldap_mod_add can be used the way it is supposed to be used , Gerrit THomson */
-	/* php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);*/
-	php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD);
+	/* php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);*/
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD);
 }
 /* }}} */
 
@@ -1241,7 +1241,7 @@ PHP_FUNCTION(ldap_add)
    Modify an LDAP entry */
 PHP_FUNCTION(ldap_modify)
 {
-	php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE); 
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE); 
 }
 /* }}} */
 
@@ -1254,14 +1254,14 @@ PHP_FUNCTION(ldap_modify)
    Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace)
 {
-        php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE);}
+        php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE);}
 /* }}} */
 
 /* {{{ proto int ldap_mod_add(int link, string dn, array entry)
         Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
-        php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);
+        php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);
 }
 /* }}} */
 
@@ -1269,7 +1269,7 @@ PHP_FUNCTION(ldap_mod_add)
    Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
-        php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE);
+        php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE);
 }
 
 /* end of attribute based functions , gerrit thomson */

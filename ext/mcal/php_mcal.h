@@ -18,10 +18,10 @@
 #endif
 
 /* Functions accessable to PHP */
-//extern zend_module_entry php3_mcal_module_entry;
-extern zend_module_entry php3_mcal_module_entry;
-#define php3_mcal_module_ptr &php3_mcal_module_entry
-#define phpext_mcal_ptr php3_mcal_module_ptr
+//extern zend_module_entry php_mcal_module_entry;
+extern zend_module_entry php_mcal_module_entry;
+#define php_mcal_module_ptr &php_mcal_module_entry
+#define phpext_mcal_ptr php_mcal_module_ptr
 
 #ifdef ZEND_VERSION
 extern PHP_MINIT_FUNCTION(mcal);
@@ -35,47 +35,47 @@ extern void PHP_MINFO_FUNCTION(void);
 extern int mcal_init_request(INIT_FUNC_ARGS);
 extern int mcal_end_request(void);
 void make_event_object();
-void php3_event_init();
+void php_mcal_event_init();
 
-void php3_mcal_open(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_popen(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_reopen(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_close(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_fetch_event(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_list_events(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_create_calendar(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_rename_calendar(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_delete_calendar(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_store_event(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_delete_event(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_snooze(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_list_alarms(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_category(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_title(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_description(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_start(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_end(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_alarm(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_class(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_is_leap_year(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_days_in_month(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_date_valid(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_time_valid(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_day_of_week(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_day_of_year(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_date_compare(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_init(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_next_recurrence(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_recur_daily(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_recur_weekly(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_recur_monthly_mday(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_recur_monthly_wday(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_event_set_recur_yearly(INTERNAL_FUNCTION_PARAMETERS);
-void php3_mcal_fetch_current_stream_event(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(mcal_open);
+PHP_FUNCTION(mcal_popen);
+PHP_FUNCTION(mcal_reopen);
+PHP_FUNCTION(mcal_close);
+PHP_FUNCTION(mcal_fetch_event);
+PHP_FUNCTION(mcal_list_events);
+PHP_FUNCTION(mcal_create_calendar);
+PHP_FUNCTION(mcal_rename_calendar);
+PHP_FUNCTION(mcal_delete_calendar);
+PHP_FUNCTION(mcal_store_event);
+PHP_FUNCTION(mcal_delete_event);
+PHP_FUNCTION(mcal_snooze);
+PHP_FUNCTION(mcal_list_alarms);
+PHP_FUNCTION(mcal_event_set_category);
+PHP_FUNCTION(mcal_event_set_title);
+PHP_FUNCTION(mcal_event_set_description);
+PHP_FUNCTION(mcal_event_set_start);
+PHP_FUNCTION(mcal_event_set_end);
+PHP_FUNCTION(mcal_event_set_alarm);
+PHP_FUNCTION(mcal_event_set_class);
+PHP_FUNCTION(mcal_is_leap_year);
+PHP_FUNCTION(mcal_days_in_month);
+PHP_FUNCTION(mcal_date_valid);
+PHP_FUNCTION(mcal_time_valid);
+PHP_FUNCTION(mcal_day_of_week);
+PHP_FUNCTION(mcal_day_of_year);
+PHP_FUNCTION(mcal_date_compare);
+PHP_FUNCTION(mcal_event_init);
+PHP_FUNCTION(mcal_next_recurrence);
+PHP_FUNCTION(mcal_event_set_recur_daily);
+PHP_FUNCTION(mcal_event_set_recur_weekly);
+PHP_FUNCTION(mcal_event_set_recur_monthly_mday);
+PHP_FUNCTION(mcal_event_set_recur_monthly_wday);
+PHP_FUNCTION(mcal_event_set_recur_yearly);
+PHP_FUNCTION(mcal_fetch_current_stream_event);
 
 
 #else
-#define php3_mcal_module_ptr NULL
+#define php_mcal_module_ptr NULL
 #endif /* HAVE_MCAL */
 
 

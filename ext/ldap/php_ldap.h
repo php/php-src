@@ -113,7 +113,7 @@ typedef struct {
 } ldap_module;
 
 #ifndef THREAD_SAFE
-extern ldap_module php3_ldap_module;
+extern ldap_module php_ldap_module;
 #endif
 
 #else
