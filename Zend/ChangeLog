@@ -1,3 +1,11 @@
+2004-10-18  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend_modules.h:
+      including zend_compile.h for NetWare as NetWare uses MetroWerks Code
+      warrior compiler which does not allow declarations of following kind
+      before defining the types.
+      extern struct _zend_arg_info first_arg_force_ref[2];
+
 2004-10-16  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
