@@ -693,13 +693,12 @@ void f_php_roxen_request_handler(INT32 args)
   
   status = php_roxen_module_main(SLS_C);
   current_thread = -1;
-  PHP_UNLOCK(THIS);
   
   apply_svalue(done_callback, 0);
   pop_stack();
   pop_n_elems(args);
   push_int(status);
-
+  PHP_UNLOCK(THIS);
 }
 
 
