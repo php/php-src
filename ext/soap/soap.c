@@ -925,7 +925,7 @@ PHP_FUNCTION(handle)
 		sprintf(response_name,"%sResponse\0",fn_name);
 
 		if(service->type == SOAP_CLASS)
-		{
+		{ 
 			soap_obj = NULL;
 			/* If persistent then set soap_obj from from the previous created session (if available) */
 			if(service->soap_class.persistance == SOAP_PERSISTENCE_SESSION)
@@ -1029,7 +1029,7 @@ PHP_FUNCTION(handle)
 			sdlFunctionPtr function;
 			function = get_function(get_binding_from_type(service->sdl, BINDING_SOAP), Z_STRVAL(function_name));
 			SOAP_GLOBAL(overrides) = service->mapping;
-			doc_return = seralize_response_call(function, response_name, service->uri, &retval);
+			doc_return = seralize_response_call(function, response_name, service->uri, &retval TSRMLS_CC);
 			SOAP_GLOBAL(overrides) = NULL;
 		}
 		else
@@ -1111,7 +1111,7 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
 
 		set_soap_fault(&ret, "SOAP-ENV:Server", buffer, NULL, &outbuf TSRMLS_CC);
-		doc_return = seralize_response_call(NULL, NULL, NULL, &ret);
+		doc_return = seralize_response_call(NULL, NULL, NULL, &ret TSRMLS_CC);
 
 		/* Build and send our headers + http 500 status */
 		/* 
@@ -1283,11 +1283,11 @@ PHP_FUNCTION(__generate)
 
 		php_strtolower(function, function_len);
 		sdlFunction = get_function(binding, function);
-		request = seralize_function_call(this_ptr, sdlFunction, NULL, uri, real_args, arg_count);
+		request = seralize_function_call(this_ptr, sdlFunction, NULL, uri, real_args, arg_count TSRMLS_CC);
 	}
 	else
 	{
-		request = seralize_function_call(this_ptr, NULL, function, uri, real_args, arg_count);
+		request = seralize_function_call(this_ptr, NULL, function, uri, real_args, arg_count TSRMLS_CC);
 	}
 
 	xmlDocDumpMemory(request, &buf, &size);
@@ -1361,7 +1361,7 @@ PHP_FUNCTION(__call)
 			real_args[i++] = *param;
 	}
 
-	request = seralize_function_call(this_ptr, NULL, function, uri, real_args, arg_count);
+	request = seralize_function_call(this_ptr, NULL, function, uri, real_args, arg_count TSRMLS_CC);
 	send_http_soap_request(getThis(), request, function, soap_action TSRMLS_CC);
 	xmlFreeDoc(request);
 
@@ -1507,7 +1507,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 	char *function = Z_STRVAL(function_name->element);
 	zend_function *builtin_function;
 	
-	TSRMLS_FETCH();
+//	TSRMLS_FETCH();
 
 	GET_THIS_OBJECT(thisObj);
 
@@ -1550,12 +1550,12 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 				if(binding->bindingType == BINDING_SOAP)
 				{
 					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
-					request = seralize_function_call(this_ptr, fn, NULL, fnb->input.ns, arguments, arg_count);
+					request = seralize_function_call(this_ptr, fn, NULL, fnb->input.ns, arguments, arg_count TSRMLS_CC);
 					send_http_soap_request(getThis(), request, fn->functionName, fnb->soapAction TSRMLS_CC);
 				}
 				else
 				{
-					request = seralize_function_call(this_ptr, fn, NULL, sdl->target_ns, arguments, arg_count);
+					request = seralize_function_call(this_ptr, fn, NULL, sdl->target_ns, arguments, arg_count TSRMLS_CC);
 					send_http_soap_request(getThis(), request, fn->functionName, NULL TSRMLS_CC);
 				}
 
@@ -1591,7 +1591,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 			if(zend_hash_find(Z_OBJPROP_P(thisObj), "uri", sizeof("uri"), (void *)&uri) == FAILURE)
 				php_error(E_ERROR, "Error finding uri in soap_call_function_handler");
 
-			request = seralize_function_call(this_ptr, NULL, function, Z_STRVAL_PP(uri), arguments, arg_count);
+			request = seralize_function_call(this_ptr, NULL, function, Z_STRVAL_PP(uri), arguments, arg_count TSRMLS_CC);
 			action = build_soap_action(thisObj, function);
 			send_http_soap_request(getThis(), request, function, action->c TSRMLS_CC);
 
@@ -1734,7 +1734,7 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 	ENDFOREACH(trav);
 }
 
-xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret)
+xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret TSRMLS_DC)
 {
 	xmlDoc *doc;
 	xmlNode *envelope,*body,*method, *param;
@@ -1762,7 +1762,7 @@ xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, c
 	if(Z_TYPE_P(ret) == IS_OBJECT &&
 		Z_OBJCE_P(ret)->refcount == soap_fault_class_entry.refcount)
 	{
-		param = seralize_zval(ret, NULL, "SOAP-ENV:Fault", SOAP_ENCODED);
+		param = seralize_zval(ret, NULL, "SOAP-ENV:Fault", SOAP_ENCODED TSRMLS_CC);
 		xmlAddChild(body, param);
 	}
 	else
@@ -1788,12 +1788,12 @@ xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, c
 
 			if(zend_hash_find(Z_OBJPROP_P(ret), "param_name", sizeof("param_name"), (void **)&ret_name) == SUCCESS &&
 				zend_hash_find(Z_OBJPROP_P(ret), "param_data", sizeof("param_data"), (void **)&ret_data) == SUCCESS)
-				param = seralize_parameter(parameter, *ret_data, 0, Z_STRVAL_PP(ret_name), SOAP_ENCODED);
+				param = seralize_parameter(parameter, *ret_data, 0, Z_STRVAL_PP(ret_name), SOAP_ENCODED TSRMLS_CC);
 			else
-				param = seralize_parameter(parameter, ret, 0, "return", SOAP_ENCODED);
+				param = seralize_parameter(parameter, ret, 0, "return", SOAP_ENCODED TSRMLS_CC);
 		}
 		else
-			param = seralize_parameter(parameter, ret, 0, "return", SOAP_ENCODED);
+			param = seralize_parameter(parameter, ret, 0, "return", SOAP_ENCODED TSRMLS_CC);
 
 		xmlAddChild(method,param);
 	}
@@ -1801,7 +1801,7 @@ xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, c
 	return doc;
 }
 
-xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count)
+xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count TSRMLS_DC)
 {
 	xmlDoc *doc;
 	xmlNode *envelope, *body, *method;
@@ -1874,12 +1874,12 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 
 			if(zend_hash_find(Z_OBJPROP_P(arguments[i]), "param_name", sizeof("param_name"), (void **)&ret_name) == SUCCESS &&
 				zend_hash_find(Z_OBJPROP_P(arguments[i]), "param_data", sizeof("param_data"), (void **)&ret_data) == SUCCESS)
-				param = seralize_parameter(parameter, *ret_data, i, Z_STRVAL_PP(ret_name), use);
+				param = seralize_parameter(parameter, *ret_data, i, Z_STRVAL_PP(ret_name), use TSRMLS_CC);
 			else
-				param = seralize_parameter(parameter, arguments[i], i, NULL, use);
+				param = seralize_parameter(parameter, arguments[i], i, NULL, use TSRMLS_CC);
 		}
 		else
-			param = seralize_parameter(parameter, arguments[i], i, NULL, use);
+			param = seralize_parameter(parameter, arguments[i], i, NULL, use TSRMLS_CC);
 
 		if(style == SOAP_RPC)
 			xmlAddChild(method, param);
@@ -1904,7 +1904,7 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 	return doc;
 }
 
-xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int index, char *name, int style)
+xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int index, char *name, int style TSRMLS_DC)
 {
 	int type = 0;
 	char *paramName;
@@ -1923,17 +1923,16 @@ xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int index, cha
 			paramName = estrdup(name);
 	}
 
-	xmlParam = seralize_zval(param_val, param, paramName, style);
+	xmlParam = seralize_zval(param_val, param, paramName, style TSRMLS_CC);
 
 	efree(paramName);
 
 	return xmlParam;
 }
 
-zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param)
+zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param TSRMLS_DC)
 {
 	encodePtr enc;
-/*	TSRMLS_FETCH(); //think not needed  */
 
 	if(param != NULL)
 		enc = param->encode;
@@ -1943,11 +1942,10 @@ zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param)
 	return enc->to_zval(enc->details, data);
 }
 
-xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style)
+xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC)
 {
 	xmlNodePtr xmlParam;
 	encodePtr enc;
-/*	TSRMLS_FETCH(); //think not needed */
 
 	if(param != NULL)
 		enc = param->encode;

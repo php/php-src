@@ -269,12 +269,12 @@ zval soap_get_property_handler(zend_property_reference *property_reference);
 int soap_set_property_handler(zend_property_reference *property_reference, zval *value);
 void soap_destructor(void *jobject);
 
-void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[] TSRMLS_CC);
-xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret);
-xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count);
-xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style);
-xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style);
-zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param);
+void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[] TSRMLS_DC);
+xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret TSRMLS_DC);
+xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count TSRMLS_DC);
+xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style TSRMLS_DC);
+xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC);
+zval *desearlize_zval(sdlPtr sdl, xmlNodePtr data, sdlParamPtr param TSRMLS_DC);
 
 void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 #ifndef ZEND_ENGINE_2
