@@ -3,6 +3,7 @@ proc_open
 --SKIPIF--
 <?php # vim:syn=php
 if (!is_executable("/bin/cat")) echo "skip";
+if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 ?>
 --POST--
 --GET--
