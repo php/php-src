@@ -16,6 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "php.h"
 #include "SAPI.h"
@@ -178,6 +179,12 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
+	if (TG(hc)->one_one) {
+		php_register_variable("SERVER_PROTOCOL", "HTTP/1.1", track_vars_array TSRMLS_CC);
+	} else {
+		php_register_variable("SERVER_PROTOCOL", "HTTP/1.0", track_vars_array TSRMLS_CC);
+	}
+	
 	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
 	/* string representation of IPs are never larger than 512 bytes */
 	if (p) {
