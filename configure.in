@@ -1018,7 +1018,7 @@ X
   fi
 
   # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
-  if test "$PHP_OCI8" != "no"; then
+  if test "$PHP_OCI8" != "no" -o "$PHP_ORACLE" != "no"; then
     if test "$PHP_SAPI" = "apache"; then
       if test `uname` = "Linux"; then
 cat <<X
@@ -1031,9 +1031,8 @@ cat <<X
 X
       fi
     fi
-  fi
 
-  if test "$PHP_SIGCHILD" != "yes"; then
+    if test "$PHP_SIGCHILD" != "yes"; then
 cat <<X
 +--------------------------------------------------------------------+
 | Notice:                                                            |
@@ -1041,6 +1040,7 @@ cat <<X
 | please recompile PHP and specify --enable-sigchild when configuring|
 | (This problem has been reported un Linux using Oracle >= 8.1.5)    |
 X
+    fi
   fi
 
 cat<<X
