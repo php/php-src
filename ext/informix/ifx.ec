@@ -126,8 +126,8 @@ typedef char IFX[128];
 #define PHP_IFX_CHECK_CONNECTION(ifx)       \
         {                                   \
             if (ifx_check() < 0) {          \
-                IFXG(sv_sqlcode) = SQLCODE; \
                 char *ifx_err = ifx_error(ifx); \
+                IFXG(sv_sqlcode) = SQLCODE; \
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Set connection %s fails (%s)", ifx, ifx_err); \
                 efree(ifx_err);		    \
                 RETURN_FALSE;               \
@@ -289,7 +289,7 @@ EXEC SQL BEGIN DECLARE SECTION;
 	PARAMETER char *link;
 EXEC SQL END DECLARE SECTION;
 {
-	char *ifx_err = null;
+	char *ifx_err = NULL;
 	TSRMLS_FETCH();
 
 	EXEC SQL SET CONNECTION :link;
