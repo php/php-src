@@ -77,7 +77,6 @@ inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
 static XML_Char *xml_utf8_encode(const char *, int, int *, const XML_Char *);
-static char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
 static zval *xml_call_handler(xml_parser *, char *, int, zval **);
 static zval *_xml_xmlchar_zval(const XML_Char *, int, const XML_Char *);
 static int _xml_xmlcharlen(const XML_Char *);
@@ -497,7 +496,7 @@ xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding)
 }
 /* }}} */
     /* {{{ xml_utf8_decode */
-static char *
+PHPAPI char *
 xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_Char *encoding)
 {
 	int pos = len;
