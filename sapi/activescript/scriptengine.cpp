@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2002 The PHP Group                                |
+   | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,13 +43,8 @@ extern "C" {
 #include "php_variables.h"
 #include "php_ini.h"
 #include "php4activescript.h"
-#define PHP_COM_DONT_DECLARE_RPC_HANDLER 1
-#include "ext/rpc/php_rpc.h"
-#include "ext/rpc/rpc_proxy.h"
-#include "ext/rpc/com/com.h"
-#include "ext/rpc/com/com_wrapper.h"
-#include "ext/rpc/com/php_COM.h"
-#include "ext/rpc/com/conversion.h"
+#include "ext/com_dotnet/php_com_dotnet.h"
+#include "ext/com_dotnet/php_com_dotnet_internal.h"
 }
 #include "php_ticks.h"
 #include "php4as_scriptengine.h"
@@ -210,7 +205,7 @@ static int execute_code_fragment(code_frag *frag,
 		VARIANT *varResult,
 		EXCEPINFO *excepinfo
 		TSRMLS_DC);
-static void free_code_fragment(code_frag *frag);
+static void free_code_fragment(code_frag *frag TSRMLS_DC);
 static code_frag *clone_code_fragment(code_frag *frag, TPHPScriptingEngine *engine TSRMLS_DC);
 
 /* }}} */
@@ -470,7 +465,7 @@ trace("code to compile is:\ncode_offs=%d  func=%s\n%s\n", code_offs, functionnam
 	frag->opcodes = compile_string(&pv, "fragment" TSRMLS_CC);
 
 	if (frag->opcodes == NULL) {
-		free_code_fragment(frag);
+		free_code_fragment(frag TSRMLS_CC);
 
 		if (excepinfo) {
 			memset(excepinfo, 0, sizeof(EXCEPINFO));
@@ -485,7 +480,7 @@ trace("code to compile is:\ncode_offs=%d  func=%s\n%s\n", code_offs, functionnam
 	return frag;
 }
 
-static void free_code_fragment(code_frag *frag)
+static void free_code_fragment(code_frag *frag TSRMLS_DC)
 {
 	switch(frag->fragtype) {
 		case FRAG_PROCEDURE:
@@ -499,7 +494,7 @@ static void free_code_fragment(code_frag *frag)
 	}
 	
 	if (frag->opcodes)
-		destroy_op_array(frag->opcodes);
+		destroy_op_array(frag->opcodes TSRMLS_CC);
 	if (frag->functionname)
 		CoTaskMemFree(frag->functionname);
 	CoTaskMemFree(frag->code);
@@ -538,7 +533,7 @@ trace("%08x: CLONED FRAG\n", newfrag);
 	newfrag->opcodes = compile_string(&pv, "fragment" TSRMLS_CC);
 
 	if (newfrag->opcodes == NULL) {
-		free_code_fragment(newfrag);
+		free_code_fragment(newfrag TSRMLS_CC);
 /*
 		if (excepinfo) {
 			memset(excepinfo, 0, sizeof(EXCEPINFO));
@@ -616,7 +611,7 @@ static int execute_code_fragment(code_frag *frag,
 	
 	if (retval_ptr) {
 		if (varResult)
-			php_zval_to_variant(retval_ptr, varResult, CP_ACP);
+			php_com_variant_from_zval(varResult, retval_ptr, CP_ACP TSRMLS_CC);
 		zval_ptr_dtor(&retval_ptr);
 	}
 
@@ -625,8 +620,9 @@ static int execute_code_fragment(code_frag *frag,
 
 static void frag_dtor(void *pDest)
 {
+	TSRMLS_FETCH();
 	code_frag *frag = *(code_frag**)pDest;
-	free_code_fragment(frag);
+	free_code_fragment(frag TSRMLS_CC);
 }
 /* }}} */
 
@@ -796,7 +792,7 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 
 				if (SUCCEEDED(LoadRegTypeLib(*info->rguidTypeLib, (USHORT)info->dwMajor,
 								(USHORT)info->dwMinor, LANG_NEUTRAL, &TypeLib))) {
-					php_COM_load_typelib(TypeLib, CONST_CS);
+					php_com_import_typelib(TypeLib, CONST_CS, CP_ACP TSRMLS_CC);
 					TypeLib->Release();
 				}
 			}
@@ -1017,7 +1013,7 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 						if (Z_TYPE_PP(tmp) == IS_OBJECT) {
 							/* FIXME: if this causes an allocation (emalloc) and we are
 							 * not in the engine thread, things could get ugly!!! */
-							disp = php_COM_export_object(*tmp);
+							disp = php_com_wrapper_export(*tmp TSRMLS_CC);
 						}
 					}
 
@@ -1256,6 +1252,8 @@ void TPHPScriptingEngine::engine_thread_func(void)
  * When SCRIPTITEM_GLOBALMEMBERS is set, we're only adding COM objects to the namespace.
  * We could add *all* properties, but I don't like this idea; what if the value changes
  * while the page is running?  We'd be left with stale data.
+ *
+ * TODO: evaluate if it is appropriate to register as an auto_global
  * */
 void TPHPScriptingEngine::add_to_global_namespace(IDispatch *disp, DWORD flags, char *name TSRMLS_DC)
 {
@@ -1273,7 +1271,7 @@ void TPHPScriptingEngine::add_to_global_namespace(IDispatch *disp, DWORD flags, 
 
 trace("Add %s to global namespace\n", name);
 	
-	val = php_COM_object_from_dispatch(disp);
+	php_com_wrap_dispatch(val, disp, CP_ACP TSRMLS_CC);
 	
 	if (val == NULL) {
 		disp->Release();
@@ -1282,7 +1280,7 @@ trace("Add %s to global namespace\n", name);
 
 	ZEND_SET_SYMBOL(&EG(symbol_table), name, val);
 
-	if (flags & SCRIPTITEM_GLOBALMEMBERS == 0) {
+	if ((flags & SCRIPTITEM_GLOBALMEMBERS) == 0) {
 		disp->Release();
 		return;
 	}
@@ -1327,10 +1325,12 @@ trace("Add %s to global namespace\n", name);
 							if (sub) {
 								/* find out its name */
 								typ->GetDocumentation(func->memid, &funcname, NULL, NULL, NULL);
-								name = php_OLECHAR_to_char(funcname, &namelen, CP_ACP, 0);
+								name = php_com_olestring_to_string(funcname, &namelen, CP_ACP, 0);
 
 								/* add to namespace */
-								zval *subval = php_COM_object_from_dispatch(sub);
+								zval *subval;
+								
+								php_com_wrap_dispatch(subval, sub, CP_ACP TSRMLS_CC);
 								if (subval) {
 									ZEND_SET_SYMBOL(&EG(symbol_table), name, subval);	
 								}
@@ -1537,7 +1537,7 @@ STDMETHODIMP TPHPScriptingEngine::GetScriptDispatch(
 	info.dispatch = NULL;
 	
 	/* This hack is required because the host is likely to query us
-	 * for a dispatch if we use any of it's objects from PHP script.
+	 * for a dispatch if we use any of its objects from PHP script.
 	 * Since the engine thread will be waiting for the return from
 	 * a COM call, we need to deliberately poke a hole in thread
 	 * safety so that it is possible to read the symbol table from
