@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added support for a C-like assert() function. (Thies)
+- Added CyberCash support. (Evan)
 - explode() is now binary-safe. (Thies)
 - strpos() is now binary-safe. (Thies)
 - added XML_Set_Object() function, now you can use the XML-Parser from
