@@ -169,6 +169,7 @@ typedef struct {
 
 	/* var.c */
 	zend_class_entry *incomplete_class;
+	zend_bool use_trans_sid;
 
 #ifdef TRANS_SID
 	/* url_scanner.c */
