@@ -274,7 +274,7 @@ SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\config.w32.h
+SOURCE=..\main\config.w32.h
 # End Source File
 # Begin Source File
 
@@ -346,11 +346,11 @@ SOURCE=..\main\php_output.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php_scandir.h
+SOURCE=..\main\php_regex.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php_regex.h
+SOURCE=..\main\php_scandir.h
 # End Source File
 # Begin Source File
 
