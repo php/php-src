@@ -919,7 +919,7 @@ PHP_FUNCTION(gzdeflate)
 }
 /* }}} */
 
-/* {{{ proto string gzinflate(string data, int length) 
+/* {{{ proto string gzinflate(string data [, int length]) 
    Unzip a gzip-compressed string */
 PHP_FUNCTION(gzinflate)
 {
@@ -967,7 +967,7 @@ PHP_FUNCTION(gzinflate)
 		if(! s2) { if(s1) efree(s1); RETURN_FALSE; }
 
 		stream.next_in = (Bytef*) Z_STRVAL_PP(data);
-		stream.avail_in = (uInt) Z_STRLEN_PP(data);
+		stream.avail_in = (uInt) Z_STRLEN_PP(data) + 1; /* there is room for \0 */
 
 		stream.next_out = s2;
 		stream.avail_out = (uInt) length;
