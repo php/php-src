@@ -99,7 +99,7 @@
 #define	QUOTE		'\\'
 #define	RANGE		'-'
 #define	RBRACKET	']'
-#define	SEP		'/'
+#define	SEP		DEFAULT_SLASH
 #define	STAR		'*'
 #define	TILDE		'~'
 #define	UNDERSCORE	'_'
@@ -170,6 +170,13 @@ glob(pattern, flags, errfunc, pglob)
 	const u_char *patnext;
 	int c;
 	Char *bufnext, *bufend, patbuf[MAXPATHLEN];
+
+#ifdef PHP_WIN32
+	/* Force skipping escape sequences on windows
+	 * due to the ambiguity with path backslashes
+	 */
+	flags |= GLOB_NOESCAPE;
+#endif
 
 	patnext = (u_char *) pattern;
 	if (!(flags & GLOB_APPEND)) {
@@ -558,7 +565,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 				return(0);
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
-			    pathend[-1] != SEP) && (S_ISDIR(sb.st_mode) ||
+			    !IS_SLASH(pathend[-1])) && (S_ISDIR(sb.st_mode) ||
 			    (S_ISLNK(sb.st_mode) &&
 			    (g_stat(pathbuf, &sb, pglob) == 0) &&
 			    S_ISDIR(sb.st_mode)))) {
@@ -574,7 +581,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 		/* Find end of next segment, copy tentatively to pathend. */
 		q = pathend;
 		p = pattern;
-		while (*p != EOS && *p != SEP) {
+		while (*p != EOS && !IS_SLASH(*p)) {
 			if (ismeta(*p))
 				anymeta = 1;
 			if (q+1 > pathend_last)
@@ -585,7 +592,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 		if (!anymeta) {		/* No expansion, do next segment. */
 			pathend = q;
 			pattern = p;
-			while (*pattern == SEP) {
+			while (IS_SLASH(*pattern)) {
 				if (pathend+1 > pathend_last)
 					return (1);
 				*pathend++ = *pattern++;
