@@ -1616,8 +1616,7 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		convert_to_long_ex(len);
 		l = Z_LVAL_PP(len);
-	}
-	else {
+	} else {
 		l = Z_STRLEN_PP(str);
 	}
 	
@@ -2441,8 +2440,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 				break;
 			}
 		}
-	}
-	else {
+	} else {
 		for (source = str, end = source+length, target = new_str; source < end; source++) {
 			c = *source;
 			switch (c) {
@@ -3431,8 +3429,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					break;
 				}
 			
-				switch (state) 
-				{
+				switch (state) {
 					case 1: /* HTML/XML */
 						lc = '>';
 						state = 0;
@@ -3635,29 +3632,29 @@ PHP_FUNCTION(count_chars)
 
 	for (inx = 0; inx < 256; inx++) {
 		switch (mymode) {
- 		case 0:
-			add_index_long(return_value, inx, chars[inx]);
-			break;
- 		case 1:
-			if (chars[inx] != 0) {
+	 		case 0:
 				add_index_long(return_value, inx, chars[inx]);
-			}
-			break;
-  		case 2:
-			if (chars[inx] == 0) {
-				add_index_long(return_value, inx, chars[inx]);
-			}
-			break;
-  		case 3:
-			if (chars[inx] != 0) {
-				retstr[retlen++] = inx;
-			}
-			break;
-  		case 4:
-			if (chars[inx] == 0) {
-				retstr[retlen++] = inx;
-			}
-			break;
+				break;
+	 		case 1:
+				if (chars[inx] != 0) {
+					add_index_long(return_value, inx, chars[inx]);
+				}
+				break;
+  			case 2:
+				if (chars[inx] == 0) {
+					add_index_long(return_value, inx, chars[inx]);
+				}
+				break;
+	  		case 3:
+				if (chars[inx] != 0) {
+					retstr[retlen++] = inx;
+				}
+				break;
+  			case 4:
+				if (chars[inx] == 0) {
+					retstr[retlen++] = inx;
+				}
+				break;
 		}
 	}
 	
