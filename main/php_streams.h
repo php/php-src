@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifndef PHP_STREAMS_H
 #define PHP_STREAMS_H
 
@@ -329,6 +331,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
+#define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC);
 #define php_stream_free(stream, close_options)	_php_stream_free((stream), (close_options) TSRMLS_CC)
 #define php_stream_close(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE TSRMLS_CC)
@@ -456,7 +459,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 /* cast as a socketd */
 #define PHP_STREAM_AS_SOCKETD	2
 
-/* try really, really hard to make sure the cast happens (socketpair) */
+/* try really, really hard to make sure the cast happens (avoid using this flag if possible) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
 #define PHP_STREAM_CAST_RELEASE		0x40000000	/* stream becomes invalid on success */
 #define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
@@ -499,11 +502,8 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_INCLUDE		128
 
-#ifdef PHP_WIN32
-# define IGNORE_URL_WIN STREAM_MUST_SEEK
-#else
-# define IGNORE_URL_WIN 0
-#endif
+/* Antique - no longer has meaning */
+#define IGNORE_URL_WIN 0
 
 int php_init_stream_wrappers(int module_number TSRMLS_DC);
 int php_shutdown_stream_wrappers(int module_number TSRMLS_DC);
@@ -528,6 +528,7 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 #define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
 #define PHP_STREAM_NO_PREFERENCE	0
 #define PHP_STREAM_PREFER_STDIO		1
+#define PHP_STREAM_FORCE_CONVERSION	2
 /* DO NOT call this on streams that are referenced by resources! */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC TSRMLS_CC)

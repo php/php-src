@@ -1480,16 +1480,16 @@ AC_DEFUN([PHP_FOPENCOOKIE],[
 #include <stdio.h>
 
 struct cookiedata {
-	fpos_t pos;
+	__off64_t pos;
 };
 
-size_t reader(void *cookie, char *buffer, size_t size)
+__ssize_t reader(void *cookie, char *buffer, size_t size)
 { return size; }
-size_t writer(void *cookie, const char *buffer, size_t size)
+__ssize_t writer(void *cookie, const char *buffer, size_t size)
 { return size; }
 int closer(void *cookie)
 { return 0; }
-int seeker(void *cookie, fpos_t *position, int whence)
+int seeker(void *cookie, __off64_t *position, int whence)
 { ((struct cookiedata*)cookie)->pos = *position; return 0; }
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
@@ -1498,13 +1498,13 @@ main() {
   struct cookiedata g = { 0 };
   FILE *fp = fopencookie(&g, "r", funcs);
 
-  if (fp && fseek(fp, 69, SEEK_SET) == 0 && g.pos == 69)
+  if (fp && fseek(fp, 8192, SEEK_SET) == 0 && g.pos == 8192)
 	  exit(0);
   exit(1);
 }
 
 					   ],
-					   [ cookie_io_functions_use_fpos_t=yes ],
+					   [ cookie_io_functions_use_off64_t=yes ],
 					   [ ] )
 		
       else
@@ -1525,8 +1525,8 @@ main() {
       if test "$have_fopen_cookie" = "yes" ; then
         AC_DEFINE(HAVE_FOPENCOOKIE, 1, [ ])
         AC_DEFINE_UNQUOTED(COOKIE_IO_FUNCTIONS_T, $cookie_io_functions_t, [ ])
-		if test "$cookie_io_functions_use_fpos_t" = "yes" ; then
-          AC_DEFINE(COOKIE_SEEKER_USES_FPOS_T, 1, [ ])
+		if test "$cookie_io_functions_use_off64_t" = "yes" ; then
+          AC_DEFINE(COOKIE_SEEKER_USES_OFF64_T, 1, [ ])
 		fi
       fi      
 
