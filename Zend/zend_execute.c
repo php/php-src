@@ -562,7 +562,6 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			*/
 		} while (0);
 		/* zval_ptr_dtor(&T->str_offset.str); Nuke this line if it doesn't cause a leak */
-		T->tmp_var.type = IS_STRING;
 		
 /*		T(result->u.var).var.ptr_ptr = &EG(uninitialized_zval_ptr); */
 		if (!RETURN_VALUE_UNUSED(result)) {
