@@ -253,7 +253,7 @@ ZEND_GET_MODULE(mime_magic)
  */
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("mime_magic.magicfile", PHP_MIME_MAGIC_FILE_PATH, PHP_INI_SYSTEM, OnUpdateString, magicfile, zend_mime_magic_globals, mime_magic_globals)
-STD_PHP_INI_ENTRY("mime_magic.debug", "0", PHP_INI_SYSTEM, OnUpdateBool, debug, zend_mime_magic_globals, mime_magic_globals)
+STD_PHP_INI_BOOLEAN("mime_magic.debug", "0", PHP_INI_SYSTEM, OnUpdateBool, debug, zend_mime_magic_globals, mime_magic_globals)
 PHP_INI_END()
 /* }}} */
 
