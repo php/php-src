@@ -825,6 +825,8 @@ PHP_FUNCTION(curl_exec)
 
 	error = curl_easy_perform(ch->cp);
 	if (error != CURLE_OK) {
+		if (ch->handlers->write->buf)
+			smart_str_free(&ch->handlers->write->buf);
 		SAVE_CURL_ERROR(ch, error);
 		RETURN_FALSE;
 	}
