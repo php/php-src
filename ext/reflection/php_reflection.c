@@ -157,6 +157,7 @@ typedef struct {
 	void *ptr;
 	unsigned int free_ptr:1;
 	zval *obj;
+	zend_class_entry *ce;
 } reflection_object;
 
 static zend_object_handlers reflection_object_handlers;
@@ -828,6 +829,7 @@ static void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_D
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = ce;
 	intern->free_ptr = 0;
+	intern->ce = ce;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
 /* }}} */
@@ -855,6 +857,7 @@ static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
 	ZVAL_STRINGL(name, module->name, name_len, 1);
 	intern->ptr = module;
 	intern->free_ptr = 0;
+	intern->ce = NULL;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
 /* }}} */
@@ -881,6 +884,7 @@ static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_i
 	reference->fptr = fptr;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
+	intern->ce = fptr->common.scope;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
 /* }}} */
@@ -898,6 +902,7 @@ static void reflection_function_factory(zend_function *function, zval *object TS
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = function;
 	intern->free_ptr = 0;
+	intern->ce = NULL;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
 /* }}} */
@@ -917,6 +922,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = method;
 	intern->free_ptr = 0;
+	intern->ce = ce;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
@@ -962,6 +968,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	reference->prop = prop;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
+	intern->ce = ce;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
@@ -1191,6 +1198,7 @@ ZEND_METHOD(reflection_function, __construct)
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = fptr;
 	intern->free_ptr = 0;
+	intern->ce = NULL;
 }
 /* }}} */
 
@@ -1470,6 +1478,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	zend_function *fptr;
 	struct _zend_arg_info *arg_info;
 	int position;
+	zend_class_entry *ce = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &reference, &parameter) == FAILURE) {
 		return;
@@ -1502,7 +1511,6 @@ ZEND_METHOD(reflection_parameter, __construct)
 		case IS_ARRAY: {
 				zval **classref;
 				zval **method;
-				zend_class_entry *ce;
 				zend_class_entry **pce;
 	  			char *lcname;
 				
@@ -1582,6 +1590,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	ref->fptr = fptr;
 	intern->ptr = ref;
 	intern->free_ptr = 1;
+	intern->ce = ce;
 }
 /* }}} */
 
@@ -1812,6 +1821,7 @@ ZEND_METHOD(reflection_method, __construct)
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = mptr;
 	intern->free_ptr = 0;
+	intern->ce = ce;
 }
 /* }}} */
 
@@ -1991,7 +2001,10 @@ ZEND_METHOD(reflection_method, isConstructor)
 
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	RETURN_BOOL(mptr->common.scope->constructor == mptr);
+	/* we need to check if the ctor is the ctor of the class level we we 
+	 * looking at since we might be looking at an inherited old style ctor
+	 * defined in base class. */
+	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_CTOR && intern->ce->constructor && intern->ce->constructor->common.scope == mptr->common.scope);
 }
 /* }}} */
 
@@ -2004,7 +2017,7 @@ ZEND_METHOD(reflection_method, isDestructor)
 
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	RETURN_BOOL(mptr->common.scope->destructor == mptr);
+	RETURN_BOOL(mptr->common.fn_flags && ZEND_ACC_DTOR);
 }
 /* }}} */
 
@@ -2918,6 +2931,7 @@ ZEND_METHOD(reflection_property, __construct)
 	reference->prop = property_info;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
+	intern->ce = ce;
 }
 /* }}} */
 
@@ -3158,6 +3172,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = module;
 	intern->free_ptr = 0;
+	intern->ce = NULL;
 }
 /* }}} */
 
