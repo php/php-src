@@ -16,7 +16,7 @@
 #  | Authors: Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: fastgen.sh,v 1.11 2001-08-28 12:15:01 ssb Exp $ 
+# $Id: fastgen.sh,v 1.12 2001-09-11 07:50:53 sas Exp $ 
 #
 
 if test "$#" = "0"; then
@@ -45,7 +45,7 @@ if test "$bsd_makefile" = "yes"; then
   (cd $top_srcdir; ./build/bsd_makefile)
 
   for makefile in $@; do
-    echo "creating $makefile"
+    echo "fastgen.sh: creating $makefile"
     dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
     $mkdir_p "$dir/"
 
@@ -62,7 +62,7 @@ EOF
   done
 else  
   for makefile in $@; do
-    echo "creating $makefile"
+    echo "fastgen.sh: creating $makefile"
     dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
     $mkdir_p "$dir/"
 
