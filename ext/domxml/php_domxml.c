@@ -3469,10 +3469,10 @@ static char *php_domxslt_string_to_xpathexpr(const char *str)
 {
 	const xmlChar *string = (const xmlChar *)str;
 
-	TSRMLS_FETCH();
-	
 	xmlChar *value;
 
+	TSRMLS_FETCH();
+	
         if (xmlStrchr(string, '"')) {
     		if (xmlStrchr(string, '\'')) {
 			php_error(E_WARNING, "Cannot create XPath expression (string contains both quote and double-quotes) in %s",
