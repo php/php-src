@@ -576,10 +576,21 @@ PHP_FUNCTION(socket_select)
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
-		convert_to_long_ex(&sec);
+		zval tmp;
+
+		if (Z_TYPE_P(sec) != IS_LONG) {
+			tmp = *sec;
+			zval_copy_ctor(&tmp);
+			convert_to_long(&tmp);
+			sec = &tmp;
+		}
 		tv.tv_sec = Z_LVAL_P(sec);
 		tv.tv_usec = usec;
 		tv_p = &tv;
+
+		if (sec == &tmp) {
+			zval_dtor(&tmp);
+		}
 	}
 
 	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
