@@ -708,40 +708,6 @@ PHP_FUNCTION(ftp_close)
 }
 /* }}} */
 	
-/* Temporarely copied over from zend_API.c until it gets exposed */
-static char *ze_zval_type_name(zval *arg)
-{
-	switch (Z_TYPE_P(arg)) {
-		case IS_NULL:
-			return "null";
-
-		case IS_LONG:
-			return "integer";
-
-		case IS_DOUBLE:
-			return "double";
-
-		case IS_STRING:
-			return "string";
-
-		case IS_ARRAY:
-			return "array";
-
-		case IS_OBJECT:
-			return "object";
-
-		case IS_BOOL:
-			return "boolean";
-
-		case IS_RESOURCE:
-			return "resource";
-
-		default:
-			return "unknown";
-	}
-}
-
-
 /* {{{ proto bool ftp_set_option(resource stream, int option, mixed value)
    Sets an FTP option */
 PHP_FUNCTION(ftp_set_option)
@@ -760,7 +726,7 @@ PHP_FUNCTION(ftp_set_option)
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
 				php_error(E_WARNING, "%s(): option TIMEOUT_SEC expects value of type long, %s given",
-						  get_active_function_name(TSRMLS_C), ze_zval_type_name(z_value));
+						  get_active_function_name(TSRMLS_C), zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
