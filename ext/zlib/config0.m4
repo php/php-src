@@ -36,6 +36,8 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
     AC_MSG_ERROR(Cannot find libz)
   fi
 
+  AC_DEFINE(HAVE_ZLIB,1,[ ])
+
   PHP_ADD_LIBPATH($ZLIB_DIR/lib, ZLIB_SHARED_LIBADD)
 
   PHP_ZLIB_DIR=$ZLIB_DIR
