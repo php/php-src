@@ -1,3 +1,34 @@
+2004-11-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/com_dotnet/com_saproxy.c:
+      emalloc -> safe_emalloc.
+
+2004-11-21  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/xml/compat.c:
+      MFH: internal entities expanded if no default handler but cdata handler
+      exists
+
+    * ext/xml/compat.c:
+      internal entities get expanded if no default handler but cdata handler
+      exists
+
+2004-11-21  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/standard/string.c
+      ext/standard/string.c:
+      fix yet another typo
+
+    * ext/standard/string.c
+      ext/standard/string.c:
+      fix typo (bug #30857)
+
+2004-11-21  Andi Gutmans  <andi@zend.com>
+
+    * ext/oci8/oci8.c:
+      -** empty log message ***
+
 2004-11-20  Stefan Esser  <sesser@suspekt.org>
 
     * main/rfc1867.c:
