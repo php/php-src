@@ -1656,10 +1656,17 @@ overloaded_function_call_cont:
 				goto do_fcall_common;
 			case ZEND_DO_FCALL: {
 					zval *fname = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-
-					if (zend_hash_find(EG(namespace)?&EG(namespace)->function_table:EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
-						zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
-					}
+					
+					do {
+						if (EG(namespace)) {
+							if (zend_hash_find(&EG(namespace)->function_table, fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function) == SUCCESS) {
+								break;
+							}
+						}
+						if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+							zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
+						}
+					} while (0);
 					EX(calling_namespace) = EG(namespace);
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 					zend_ptr_stack_push(&EG(arg_types_stack), EX(object).ptr);
