@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libshmop.la
-LTLIBRARY_SOURCES     = shmop.c
-LTLIBRARY_SHARED_NAME = shmop.la
-LTLIBRARY_SHARED_LIBADD  = $(SHMOP_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

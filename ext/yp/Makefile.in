@@ -1,6 +1,0 @@
-
-LTLIBRARY_NAME    = libyp.la
-LTLIBRARY_SOURCES = yp.c
-LTLIBRARY_SHARED_NAME = yp.la
-
-include $(top_srcdir)/build/dynlib.mk

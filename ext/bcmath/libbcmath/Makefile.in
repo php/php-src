@@ -1,9 +1,0 @@
-
-LTLIBRARY_NAME          = libbcmath.la
-LTLIBRARY_DEPENDENCIES  = src/libbcmath.la
-LTLIBRARY_LIBADD        = $(LTLIBRARY_DEPENDENCIES)
-LTLIBRARY_SHARED_LIBADD = $(LTLIBRARY_LIBADD)
-
-SUBDIRS = src
-
-include $(top_srcdir)/build/dynlib.mk

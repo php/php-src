@@ -1,8 +1,0 @@
-# $Id$
-
-LTLIBRARY_NAME        = libpcntl.la
-LTLIBRARY_SOURCES     = pcntl.c php_signal.c
-LTLIBRARY_SHARED_NAME = pcntl.la
-LTLIBRARY_SHARED_LIBADD  = $(PCNTL_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
