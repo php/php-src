@@ -129,8 +129,8 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 /*
 			"Connection: close\r\n"
 			"Accept: text/html; text/xml; text/plain\r\n"
-			"User-Agent: PHP SOAP 0.1\r\n"
 */
+			"User-Agent: PHP SOAP 0.1\r\n"
 			"Content-Type: text/xml; charset=\"utf-8\"\r\n"
 			"Content-Length: ");
 		smart_str_append_long(&soap_headers, buf_size);
