@@ -1561,8 +1561,10 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			dims[0] = i;
 			el = &data;
 			for (i = 1; i < dimension; i++) {
-				if (el != NULL && Z_TYPE_PP(el) == IS_ARRAY && Z_ARRVAL_PP(el)->pListHead) {
-					el = (zval**)Z_ARRVAL_PP(el)->pListHead->pData;
+				if (el != NULL && Z_TYPE_PP(el) == IS_ARRAY &&
+				    zend_hash_num_elements(Z_ARRVAL_PP(el)) > 0) {
+				  zend_hash_internal_pointer_reset(Z_ARRVAL_PP(el));
+					zend_hash_get_current_data(Z_ARRVAL_PP(el), (void**)&el);
 					if (Z_TYPE_PP(el) == IS_ARRAY) {
 						dims[i] = zend_hash_num_elements(Z_ARRVAL_PP(el));
 					} else {
@@ -1627,7 +1629,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 
 			if (sdl_type && sdl_type->elements &&
 			    zend_hash_num_elements(sdl_type->elements) == 1 &&
-			    (elementType = *(sdlTypePtr*)sdl_type->elements->pListHead->pData) != NULL &&
+			    (zend_hash_internal_pointer_reset(sdl_type->elements),
+			     zend_hash_get_current_data(sdl_type->elements, (void**)&elementType) == SUCCESS) &&
+					(elementType = *(sdlTypePtr*)elementType) != NULL &&
 			     elementType->encode && elementType->encode->details.type_str) {
 				element_type = elementType;
 				enc = elementType->encode;
@@ -1638,7 +1642,9 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			}
 		} else if (sdl_type && sdl_type->elements &&
 		           zend_hash_num_elements(sdl_type->elements) == 1 &&
-		           (elementType = *(sdlTypePtr*)sdl_type->elements->pListHead->pData) != NULL &&
+		           (zend_hash_internal_pointer_reset(sdl_type->elements),
+		            zend_hash_get_current_data(sdl_type->elements, (void**)&elementType) == SUCCESS) &&
+		           (elementType = *(sdlTypePtr*)elementType) != NULL &&
 		           elementType->encode && elementType->encode->details.type_str) {
 
 			element_type = elementType;
@@ -1817,13 +1823,17 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 		dims = get_position_12(dimension, (*ext)->val);
 		if (type->sdl_type && type->sdl_type->elements &&
 		    zend_hash_num_elements(type->sdl_type->elements) == 1 &&
-		    (elementType = *(sdlTypePtr*)type->sdl_type->elements->pListHead->pData) != NULL &&
+		    (zend_hash_internal_pointer_reset(type->sdl_type->elements),
+		     zend_hash_get_current_data(type->sdl_type->elements, (void**)&elementType) == SUCCESS) &&
+		    (elementType = *(sdlTypePtr*)elementType) != NULL &&
 		    elementType->encode) {
 			enc = elementType->encode;
 		}
 	} else if (type->sdl_type && type->sdl_type->elements &&
 	           zend_hash_num_elements(type->sdl_type->elements) == 1 &&
-	           (elementType = *(sdlTypePtr*)type->sdl_type->elements->pListHead->pData) != NULL &&
+	           (zend_hash_internal_pointer_reset(type->sdl_type->elements),
+	            zend_hash_get_current_data(type->sdl_type->elements, (void**)&elementType) == SUCCESS) &&
+	           (elementType = *(sdlTypePtr*)elementType) != NULL &&
 	           elementType->encode) {
 		enc = elementType->encode;
 	}
