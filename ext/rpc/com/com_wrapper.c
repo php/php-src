@@ -488,7 +488,7 @@ PHP_FUNCTION(com_load)
 		/* if a server is passed, one obviously wants to instanciate a
 		 * remote server
 		 */
-		flags = CTX_REMOTE_SERVER;
+		flags = CLSCTX_REMOTE_SERVER;
 
 		/* What is server name? A String or an array? */
 
@@ -550,7 +550,7 @@ PHP_FUNCTION(com_load)
 			}
 			if (SUCCESS == zend_hash_find(ht, "Flags", 6, (void **) &tmp)) {
 				convert_to_long_ex(tmp);
-				flags = (CLSCTX) Z_LVAL_P(tmp);
+				flags = (CLSCTX) Z_LVAL_PP(tmp);
 			}
 		}
 		if (Z_TYPE_P(server_name) == IS_NULL) {
