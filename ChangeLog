@@ -1,3 +1,13 @@
+2000-08-12  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/sysvshm/sysvshm.c: Some protos corrected.
+
+2000-08-12  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+     - The destructor for a connection resource closed the current
+       connection if the connection had been closed before (danny)
+
 2000-08-11  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/image.c: - Fixed warning under VC6
