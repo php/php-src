@@ -214,7 +214,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 }
 /* }}} */
 
-/* {{{ proto int fdf_open(string filename)
+/* {{{ proto resource fdf_open(string filename)
    Opens a new FDF document */
 PHP_FUNCTION(fdf_open) 
 {
@@ -239,7 +239,7 @@ PHP_FUNCTION(fdf_open)
 } 
 /* }}} */
 
-/* {{{ proto int fdf_open_string(string fdf_data)
+/* {{{ proto resource fdf_open_string(string fdf_data)
    Opens a new FDF document from string */
 PHP_FUNCTION(fdf_open_string) 
 {
@@ -276,7 +276,7 @@ PHP_FUNCTION(fdf_open_string)
 } 
 /* }}} */
 
-/* {{{ proto int fdf_create(void)
+/* {{{ proto resource fdf_create(void)
    Creates a new FDF document */
 PHP_FUNCTION(fdf_create) 
 {
@@ -1096,7 +1096,7 @@ PHP_FUNCTION(fdf_set_javascript_action)
 }
 /* }}} */
 
-/* {{{ proto bool fdf_set_encoding(int fdf_document, string encoding)
+/* {{{ proto bool fdf_set_encoding(resource fdf_document, string encoding)
    Sets FDF encoding (either "Shift-JIS" or "Unicode") */  
 PHP_FUNCTION(fdf_set_encoding) 
 {
@@ -1191,14 +1191,14 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 }
 /* }}} */
 
-/* {{{ int fdf_errno(void) 
+/* {{{ proto int fdf_errno(void) 
    Gets error code for last operation */
 PHP_FUNCTION(fdf_errno) {
 	RETURN_LONG((long)FDF_G(error));
 }
 /* }}} */
 
-/* {{{ string fdf_error([int errno]) 
+/* {{{ proto string fdf_error([int errno]) 
    Gets error description for error code */
 PHP_FUNCTION(fdf_error) {
 	FDFErc err;
@@ -1520,8 +1520,8 @@ PHP_FUNCTION(fdf_get_attachment) {
   }
 /* }}} */
 
-/* {{{ proto bool fdf_enum_values(resource fdfdoc, mixed callback [, mixed userdata])
- */
+/* {{{ proto bool fdf_enum_values(resource fdfdoc, callback function [, mixed userdata])
+   Call a user defined function for each document value */
 PHP_FUNCTION(fdf_enum_values) {
 	zval *r_fdf;
 	zval *callback;
@@ -1570,7 +1570,7 @@ PHP_FUNCTION(fdf_enum_values) {
 /* }}} */
 
 /* {{{ proto fdf_header() 
- Set FDF specific HTTP headers */
+   Set FDF specific HTTP headers */
 PHP_FUNCTION(fdf_header) {
 	sapi_header_line ctr = {0};
 	
