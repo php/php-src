@@ -1,3 +1,85 @@
+2000-09-13  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c:
+    Added prototypes for socketpair() and shutdown(), and corrected an obvious
+    bug in socketpair (causing it to not return the created sockets to the PHP
+    script.)
+
+2000-09-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+    - Added ftp_exec to the ftp functions (thanks to <jhennebicq@i-d.net>)
+     Added ftp_exec to the ftp functions (thanks to <jhennebicq@i-d.net>)
+     
+
+2000-09-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/DB/common.php: Fixed DB::getAll() to respect DB_FETCHMODE_FLIPPED.
+
+    * ext/wddx/php_wddx.h
+      ext/wddx/wddx.c: Create module info function.
+
+2000-09-13  Hénot David  <henot@iie.cnam.fr>
+
+    * php.ini-dist
+      php.ini-optimized:
+    Changed the php.ini examples to match the names in the source code.
+
+2000-09-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c: Really fix the de-allocation.
+
+    * ext/wddx/wddx.c: Fixed block overrun.
+
+2000-09-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php.ini-dist
+      php.ini-optimized: - a comma sneaked in before the java extension
+    - added the java configuration section
+
+    * php.ini-dist
+      php.ini-optimized:
+    added note about odbc support and changed to the appropriate names of the windows extensions
+
+2000-09-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/PEAR.php.in
+      pear/tests/pear_error.phpt: PEAR:
+     * added $debuginfo parameter to PEAR_Error constructor
+     * put last query in $debuginfo from DB_common::raiseError()
+
+    * pear/tests/pear_error.phpt
+      pear/tests/pear_error_callback.phpt
+      pear/DB/mysql.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/Makefile.in
+      pear/PEAR.php.in: PEAR:
+     * show what's going on when PEAR files are installed
+     * allow multiple modes (or'ed) in PEAR_Error
+
+2000-09-13  Andi Gutmans  <andi@zend.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - The Sprit of PHP is to have descriptive function names and not
+      necessarily short ones. Maybe we should have some FAQ for this?
+
 2000-09-12  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
 
     * ext/pgsql/pgsql.c
