@@ -27,13 +27,29 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 
-
+#define ZEND_FN(name) zend_if_##name
 #define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
-#define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(zend_if_##name)
+#define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(ZEND_FN(name))
 
-#define ZEND_NAMED_FE(runtime_name, name, arg_types) { #runtime_name, name, arg_types },
-#define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, zend_if_##name, arg_types)
+#define ZEND_NAMED_FE(zend_name, name, arg_types) { #zend_name, name, arg_types },
+#define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(name), arg_types)
+#define ZEND_FALIAS(name, alias, arg_types) ZEND_NAMED_FE(name, ZEND_FN(alias), arg_types)
 
+#define ZEND_MINIT(module)       zend_minit_##module
+#define ZEND_MSHUTDOWN(module)   zend_mshutdown_##module
+#define ZEND_RINIT(module)       zend_rinit_##module
+#define ZEND_RSHUTDOWN(module)   zend_rshutdown_##module
+#define ZEND_MINFO(module)       zend_info_##module
+#define ZEND_GINIT(module)       zend_ginit_##module
+#define ZEND_GSHUTDOWN(module)   zend_gshutdown_##module
+
+#define ZEND_MINIT_FUNCTION(module)      int ZEND_MINIT(module)(INIT_FUNC_ARGS)
+#define ZEND_MSHUTDOWN_FUNCTION(module)  int ZEND_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
+#define ZEND_RINIT_FUNCTION(module)      int ZEND_RINIT(module)(INIT_FUNC_ARGS)
+#define ZEND_RSHUTDOWN_FUNCTION(module)  int ZEND_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
+#define ZEND_MINFO_FUNCTION(module)      void ZEND_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
+#define ZEND_GINIT_FUNCTION(module)      int ZEND_GINIT(module)(GINIT_FUNC_ARGS)
+#define ZEND_GSHUTDOWN_FUNCTION(module)  int ZEND_GSHUTDOWN(module)(void)
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions)	\
 	{																\
