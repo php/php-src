@@ -46,9 +46,9 @@ function_entry pcre_functions[] = {
 };
 
 zend_module_entry pcre_module_entry = {
-   "PCRE", pcre_functions, php_minit_pcre, php_mshutdown_pcre,
-		   php_rinit_pcre, NULL,
-		   php_info_pcre, STANDARD_MODULE_PROPERTIES
+   "PCRE", pcre_functions, PHP_MINIT(pcre), PHP_MSHUTDOWN(pcre),
+		   PHP_RINIT(pcre), NULL,
+		   PHP_MINFO(pcre), STANDARD_MODULE_PROPERTIES
 };
 
 /* }}} */
@@ -98,8 +98,8 @@ static void _php_pcre_shutdown_globals(php_pcre_globals *pcre_globals)
 #endif
 
 
-/* {{{ void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS) */
-void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS)
+/* {{{ PHP_MINFO_FUNCTION(pcre) */
+PHP_MINFO_FUNCTION(pcre)
 {
 	php_printf("Perl Compatible Regular Expressions");
 	php_printf("<table cellpadding=5>"
@@ -110,8 +110,8 @@ void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS)
 /* }}} */
 
 
-/* {{{ int php_minit_pcre(INIT_FUNC_ARGS) */
-int php_minit_pcre(INIT_FUNC_ARGS)
+/* {{{ PHP_MINIT_FUNCTION(pcre) */
+PHP_MINIT_FUNCTION(pcre)
 {
 	ELS_FETCH();
 
@@ -131,8 +131,8 @@ int php_minit_pcre(INIT_FUNC_ARGS)
 /* }}} */
 
 
-/* {{{ int php_mshutdown_pcre(void) */
-int php_mshutdown_pcre(SHUTDOWN_FUNC_ARGS)
+/* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
+PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 #ifndef ZTS
 	zend_hash_destroy(&PCRE_G(pcre_cache));
@@ -144,8 +144,8 @@ int php_mshutdown_pcre(SHUTDOWN_FUNC_ARGS)
 /* }}} */
 
 
-/* {{{ int php_rinit_pcre(INIT_FUNC_ARGS) */
-int php_rinit_pcre(INIT_FUNC_ARGS)
+/* {{{ PHP_RINIT_FUNCTION(pcre) */
+PHP_RINIT_FUNCTION(pcre)
 {
 	pcre_malloc = php_pcre_malloc;
 	pcre_free = php_pcre_free;
