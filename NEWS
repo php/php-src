@@ -3,7 +3,26 @@ PHP 4                                                                      NEWS
 ?? ??? 2002, Version 4.2.3
 - Fixed ob_gzhandler()'s handling of requests that do have the Accept-Encoding
   header, but do not allow compression (Zeev)
-- Transparent sid support is now disabled by default. (Yasuo)
+- Fixed several bugs in the multithreaded version that could cause random parse
+  errors, especially on machines with multiple CPUs (Zeev, Zend Engine)
+- Fixed a build problem in bcmath (Alan)
+- Fixed several bzip2 issues (Andrei, kalowsky)
+- Fixed several COM issues (Harald)
+- Various exif fixes (Marcus Boerger)
+- Fixed domxml_xslt_process() and domxml_get_element_by_id() and several
+  other issues in DOMXML (Christian)
+- Fixed DOMXML crash on removing previously created attributes (Christian)
+- Fixed crash when converting $GLOBALS to an object (Zeev, Zend Engine)
+- Fixed ImageCreateFromGD2Part() (Jani)
+- Fixed a build issue in the IMAP extension under IRIX (kalowsky)
+- Fixed a bug in imap_last_error() (Jani)
+- Various mbstring fixes (Yasuo, Rui)
+- Fixed a build problem in the mcal extension (Jani)
+- Made MySQL rollback open transactions when the request ends (Georg)
+- Fixed a crash in the shutdown order of the ODBC module (kalowsky)
+- Fixed PCRE build problems (troels@arvin.dk)
+- Fixed a crash in pg_lo_write() (Yasuo)
+- Fix posix_isatty() and posix_ttyname() (Marcus)
 - Fixed accidental pg_lo_import() API change. (Yasuo)
 - Fixed ereg_replace() crash when the backreference number was greater than the 
   number of captured subpatterns. (oliver@billix.franken.de)
