@@ -34,7 +34,6 @@
 static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-	int i;
 
 	if (S->result) {
 		/* free the resource */
@@ -51,7 +50,6 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 
 static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = stmt->dbh;
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 

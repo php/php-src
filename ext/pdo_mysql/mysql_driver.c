@@ -239,7 +239,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	pdo_mysql_db_handle *H;
 	int i, ret = 0;
 	char *host = NULL, *unix_socket = NULL;
-	unsigned int port;
+	unsigned int port = 3306;
 	char *dbname;
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",  NULL,	0 },
