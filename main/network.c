@@ -100,9 +100,11 @@ int inet_aton(const char *, struct in_addr *);
 #ifdef PHP_WIN32
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
+# define PHP_TIMEOUT_ERROR_VALUE		WSAETIMEDOUT
 #else
 # define SOCK_ERR -1
 # define SOCK_CONN_ERR -1
+# define PHP_TIMEOUT_ERROR_VALUE		ETIMEDOUT
 #endif
 
 #ifdef HAVE_GETADDRINFO
@@ -266,6 +268,7 @@ PHPAPI int php_connect_nonb(int sockfd,
 	int ret = 0;
 	fd_set rset;
 	fd_set wset;
+	fd_set eset;
 
 	if (timeout == NULL)	{
 		/* blocking mode */
@@ -286,11 +289,13 @@ PHPAPI int php_connect_nonb(int sockfd,
 	}
 
 	FD_ZERO(&rset);
+	FD_ZERO(&eset);
 	FD_SET(sockfd, &rset);
+	FD_SET(sockfd, &eset);
 
 	wset = rset;
 
-	if ((n = select(sockfd + 1, &rset, &wset, NULL, timeout)) == 0) {
+	if ((n = select(sockfd + 1, &rset, &wset, &eset, timeout)) == 0) {
 		error = ETIMEDOUT;
 	}
 
@@ -400,9 +405,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 	struct sockaddr **sal, **psal;
 	struct timeval individual_timeout;
 	int set_timeout = 0;
-#ifdef PHP_WIN32
 	int err;
-#endif
 	
 	n = php_network_getaddresses(host, &sal TSRMLS_CC);
 
@@ -463,10 +466,19 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 #ifdef PHP_WIN32
 			/* Preserve the last error */
 			err = WSAGetLastError();
+#else
+			err = errno;
 #endif
 			close (s);
 		}
 		sal++;
+
+		if (err == PHP_TIMEOUT_ERROR_VALUE) {
+			/* if the first attempt timed out, it's highly likely
+			 * that any subsequent attempts will do so also */
+			break;
+		}
+		
 	}
 	php_network_freeaddresses(psal);
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_hostconnect: connect failed");
