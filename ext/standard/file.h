@@ -54,7 +54,6 @@ PHP_FUNCTION(unlink);
 PHP_FUNCTION(copy);
 PHP_FUNCTION(file);
 PHP_FUNCTION(file_get_contents);
-PHP_FUNCTION(file_write_content);
 PHP_FUNCTION(set_socket_blocking); /* deprecated */
 PHP_FUNCTION(stream_set_blocking);
 PHP_FUNCTION(stream_select);
