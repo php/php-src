@@ -49,6 +49,8 @@
 #define UDM_FIELD_ORDER		11
 #define UDM_FIELD_CRC		12
 #define UDM_FIELD_CATEGORY	13
+#define UDM_FIELD_LANG		14
+#define UDM_FIELD_CHARSET	15
 
 /* udm_set_agent_param constants */
 #define UDM_PARAM_PAGE_SIZE		1
@@ -131,6 +133,10 @@ function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_api_version,		NULL)
 #if UDM_VERSION_ID >= 30200			
 	PHP_FE(udm_check_charset,	NULL)
+#endif
+
+#if UDM_VERSION_ID >= 30203			
+	PHP_FE(udm_crc32,	NULL)
 #endif
 
 	PHP_FE(udm_alloc_agent,		NULL)
@@ -217,6 +223,8 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_FIELD_ORDER",	UDM_FIELD_ORDER,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_CRC",		UDM_FIELD_CRC,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_CATEGORY",	UDM_FIELD_CATEGORY,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_LANG",	UDM_FIELD_LANG,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_CHARSET",	UDM_FIELD_CHARSET,CONST_CS | CONST_PERSISTENT);
 
 	/* udm_set_agent_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_SIZE",	UDM_PARAM_PAGE_SIZE,CONST_CS | CONST_PERSISTENT);
@@ -1019,7 +1027,7 @@ DLEXPORT PHP_FUNCTION(udm_clear_search_limits)
 }
 /* }}} */
 
-#if UDM_VERSION_ID >= 30200		
+#if UDM_VERSION_ID >= 30200
 /* {{{ proto int udm_check_charset(int agent, string charset)
    Check if the given charset is known to mnogosearch */
 DLEXPORT PHP_FUNCTION(udm_check_charset)
@@ -1051,6 +1059,42 @@ DLEXPORT PHP_FUNCTION(udm_check_charset)
 }
 /* }}} */
 #endif
+
+#if UDM_VERSION_ID >= 30203
+/* {{{ proto int udm_crc32(int agent, string str)
+   Return CRC32 checksum of gived string */
+DLEXPORT PHP_FUNCTION(udm_crc32)
+{
+	pval ** yystr, ** yyagent;
+	char *str;
+	int crc32;
+	char buf[32];
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent,&yystr)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	convert_to_string_ex(yystr);
+	str = Z_STRVAL_PP(yystr);
+
+	crc32=UdmCRC32((str),strlen(str));
+	snprintf(buf,sizeof(buf)-1,"%u",crc32);
+	
+	RETURN_STRING(buf,1);
+}
+/* }}} */
+#endif
+
 
 /* {{{ proto int udm_find(int agent, string query)
    Perform search */
@@ -1165,6 +1209,16 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 			case UDM_FIELD_CATEGORY:		
 				RETURN_STRING((Res->Doc[row].category)?(Res->Doc[row].category):"",1);
 				break;
+
+#if UDM_VERSION_ID >= 30203		
+			case UDM_FIELD_LANG:		
+				RETURN_STRING((Res->Doc[row].lang)?(Res->Doc[row].lang):"",1);
+				break;
+
+			case UDM_FIELD_CHARSET:		
+				RETURN_STRING((Res->Doc[row].charset)?(Res->Doc[row].charset):"",1);
+				break;
+#endif
 				
 			default: 
 				php_error(E_WARNING,"Udm_Get_Res_Field: Unknown mnoGoSearch field name");
