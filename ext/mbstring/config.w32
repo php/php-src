@@ -8,10 +8,8 @@ if (PHP_MBSTRING == "yes") {
 
 	FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.vc6",
 	   	"ext\\mbstring\\libmbfl\\config.h", true);
-/* XXX this file does not exist!	   	
 	FSO.CopyFile("ext\\mbstring\\oniguruma\\win32\\config.h",
 		"ext\\mbstring\\oniguruma\\config.h", true);
-*/
 	
 	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", null,
 		"-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
@@ -51,12 +49,13 @@ if (PHP_MBSTRING == "yes") {
 
 	if (PHP_MBREGEX == "yes") {
 		ADD_SOURCES("ext/mbstring/oniguruma", "regcomp.c regerror.c \
-			regenc.c regexec.c reggnu.c regparse.c regposerr.c \
-			ascii.c big5.c euc_jp.c euc_kr.c euc_tw.c iso8859_1 \
-			iso8859_2.c iso8859_3.c iso8859_4.c iso8859_5.c \
-			iso8859_6.c iso8859_7.c iso8859_8.c iso8859_9.c \
-			iso8859_10.c iso8859_11.c iso8859_13.c iso8859_15.c \
-			iso8859_16.c koi8.c koi8_r.c sjis.c utf8.c", "mbstring");
+			regenc.c regexec.c reggnu.c regparse.c regposerr.c", "mbstring");
+		ADD_SOURCES("ext/mbstring/oniguruma/enc", "ascii.c big5.c \
+			euc_jp.c euc_kr.c euc_tw.c iso8859_1 iso8859_2.c \
+			iso8859_3.c iso8859_4.c iso8859_5.c iso8859_6.c \
+			iso8859_7.c iso8859_8.c iso8859_9.c iso8859_10.c \
+			iso8859_11.c iso8859_13.c iso8859_15.c iso8859_16.c \
+			koi8.c koi8_r.c sjis.c utf8.c", "mbstring");
 		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 	}
 }
