@@ -8,8 +8,10 @@ if (PHP_MBSTRING == "yes") {
 
 	FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.vc6",
 	   	"ext\\mbstring\\libmbfl\\config.h", true);
+/* XXX this file does not exist!	   	
 	FSO.CopyFile("ext\\mbstring\\oniguruma\\win32\\config.h",
 		"ext\\mbstring\\oniguruma\\config.h", true);
+*/
 	
 	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", null,
 		"-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
