@@ -3908,9 +3908,11 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 					  get_active_function_name(TSRMLS_C));
 			goto cleanup;
 		}
-		smart_str_appendl(&querystr, fld, fld_len);
+		smart_str_appendl(&querystr, fld, fld_len - 1);
+		smart_str_appendc(&querystr, ',');
 		zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
 	}
+	querystr.len--;
 	smart_str_appends(&querystr, ") VALUES (");
 	
 	/* make values string */
@@ -4004,7 +4006,7 @@ static inline int build_assignment_string(smart_str *querystr, HashTable *ht, co
 					  get_active_function_name(TSRMLS_C));
 			return -1;
 		}
-		smart_str_appendl(querystr, fld, fld_len);
+		smart_str_appendl(querystr, fld, fld_len - 1);
 		smart_str_appendc(querystr, '=');
 		
 		switch(Z_TYPE_PP(val)) {
