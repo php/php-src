@@ -24,11 +24,6 @@
 
 static zend_class_entry zend_iterator_class_entry;
 
-static zend_class_entry *iter_handler_get_ce(zval *object TSRMLS_DC)
-{
-	return &zend_iterator_class_entry;
-}
-
 static zend_object_handlers iterator_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	NULL, /* prop read */
@@ -46,7 +41,7 @@ static zend_object_handlers iterator_object_handlers = {
 	NULL, /* method get */
 	NULL, /* call */
 	NULL, /* get ctor */
-	iter_handler_get_ce,
+	NULL, /* get_ce */
 	NULL, /* get class name */
 	NULL, /* compare */
 	NULL  /* cast */
@@ -78,12 +73,9 @@ ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 	zval *array_ptr, zend_object_iterator **iter TSRMLS_DC)
 {
-	zend_class_entry *ce;
-
 	switch (Z_TYPE_P(array_ptr)) {
 		case IS_OBJECT:
-			ce = Z_OBJCE_P(array_ptr);
-			if (ce == &zend_iterator_class_entry) {
+			if (Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
 				*iter = (zend_object_iterator *)zend_object_store_get_object(array_ptr TSRMLS_CC);
 				return ZEND_ITER_OBJECT;
 			}
