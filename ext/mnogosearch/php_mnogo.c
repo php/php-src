@@ -1804,7 +1804,7 @@ DLEXPORT PHP_FUNCTION(udm_errno)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
 #if UDM_VERSION_ID >= 30204
-	RETURN_LONG(UdmDBErrorCode(Agent->Conf->db));
+	RETURN_LONG(UdmEnvErrCode(Agent->Conf));
 #else
 	RETURN_LONG(UdmDBErrorCode(Agent->db));
 #endif
@@ -1831,7 +1831,7 @@ DLEXPORT PHP_FUNCTION(udm_error)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
 #if UDM_VERSION_ID >= 30204
-	RETURN_STRING((UdmDBErrorMsg(Agent->Conf->db))?(UdmDBErrorMsg(Agent->Conf->db)):"",1);
+	RETURN_STRING((UdmEnvErrMsg(Agent->Conf))?(UdmEnvErrMsg(Agent->Conf)):"",1);
 #else
 	RETURN_STRING((UdmDBErrorMsg(Agent->db))?(UdmDBErrorMsg(Agent->db)):"",1);
 #endif
@@ -1872,7 +1872,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 	convert_to_string_ex(yycat);
 	cat = Z_STRVAL_PP(yycat);
 
+#if UDM_VERSION_ID >= 30204
+	if(UdmCatList(Agent,c,cat)){
+#else
 	if((c=UdmCatList(Agent,cat))){
+#endif
 		if (array_init(return_value)==FAILURE) {
 			RETURN_FALSE;
 		}
@@ -1881,13 +1885,24 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 			RETURN_FALSE;
 		}
 		
+#if UDM_VERSION_ID >= 30204
+		{
+		    int i;
+		    for(i==0;i<c->ncategories;i++){			
+			snprintf(buf, UDMSTRSIZ, "%s%s",c->Category[i].link[0]?"@ ":"", c->Category[i].name);				 
+			add_next_index_string(return_value, c->Category[i].link[0]?c->Category[i].link:c->Category[i].path, 1);
+			add_next_index_string(return_value, buf, 1);
+			c++;
+		    }
+		}
+#else
 		while(c->rec_id){			
 			snprintf(buf, UDMSTRSIZ, "%s%s",c->link[0]?"@ ":"", c->name);				 
 			add_next_index_string(return_value, c->link[0]?c->link:c->path, 1);
 			add_next_index_string(return_value, buf, 1);
 			c++;
 		}
-		
+#endif		
 		free(buf);
 	} else {
 		RETURN_FALSE;
@@ -1921,7 +1936,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 	convert_to_string_ex(yycat);
 	cat = Z_STRVAL_PP(yycat);
 
+#if UDM_VERSION_ID >= 30204
+	if(UdmCatPath(Agent,c,cat)){
+#else
 	if((c=UdmCatPath(Agent,cat))){
+#endif
 		if (array_init(return_value)==FAILURE) {
 			RETURN_FALSE;
 		}
@@ -1930,13 +1949,24 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 			RETURN_FALSE;
 		}
 		
+#if UDM_VERSION_ID >= 30204
+		{
+		    int i;
+		    for(i==0;i<c->ncategories;i++){			
+			snprintf(buf, UDMSTRSIZ, "%s%s",c->Category[i].link[0]?"@ ":"", c->Category[i].name);
+			add_next_index_string(return_value, c->Category[i].link[0]?c->Category[i].link:c->Category[i].path, 1);
+			add_next_index_string(return_value, buf, 1);
+			c++;
+		    }
+		}
+#else
 		while(c->rec_id){			
 			snprintf(buf, UDMSTRSIZ, "%s%s",c->link[0]?"@ ":"", c->name);				 
 			add_next_index_string(return_value, c->link[0]?c->link:c->path, 1);
 			add_next_index_string(return_value, buf, 1);
 			c++;
 		}
-		
+#endif		
 		free(buf);
 	} else {
 		RETURN_FALSE;
