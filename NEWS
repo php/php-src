@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2004, Version 4.3.7
+- Fixed bug #28569 (informix connection id is not thread safe).
+  (novicky at aarongroup dot cz, Ard)
 - Fixed bug #28564 (Problem building informix as a shared extension). 
   (roques at mti dot ag, Ilia)
 
