@@ -1248,7 +1248,7 @@ void yyFlexLexer::yy_delete_buffer( YY_BUFFER_STATE b TSRMLS_DC )
 %-
 #ifndef YY_ALWAYS_INTERACTIVE
 #ifndef YY_NEVER_INTERACTIVE
-extern int isatty YY_PROTO(( int ));
+ZEND_DLIMPORT int isatty YY_PROTO(( int ));
 #endif
 #endif
 

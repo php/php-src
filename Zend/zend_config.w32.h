@@ -73,6 +73,7 @@ typedef unsigned int uint;
 #endif
 
 #define ZEND_DLEXPORT		__declspec(dllexport)
+#define ZEND_DLIMPORT		__declspec(dllimport)
 
 /* 0x00200000L is MB_SERVICE_NOTIFICATION, which is only supported under Windows NT 
  * (and requires _WIN32_WINNT to be defined, which prevents the resulting executable
