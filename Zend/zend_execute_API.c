@@ -575,6 +575,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zval *params_array;
 	int call_via_handler = 0;
 
+	if (EG(exception)) {
+		return FAILURE; /* we would result in an instable executor otherwise */
+	}
+
 	switch (fci->size) {
 		case sizeof(zend_fcall_info):
 			break; /* nothing to do currently */
