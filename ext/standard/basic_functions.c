@@ -1082,11 +1082,11 @@ void array_each(INTERNAL_FUNCTION_PARAMETERS)
 	entry = *entry_ptr;
 
 	/* add value elements */
-	if (entry->is_ref) {
+	if (entry->EA) {
 		tmp = (pval *)emalloc(sizeof(pval));
 		*tmp = *entry;
 		pval_copy_constructor(tmp);
-		tmp->is_ref=0;
+		tmp->EA=0;
 		tmp->refcount=0;
 		entry=tmp;
 	}
@@ -1131,7 +1131,7 @@ void array_reset(INTERNAL_FUNCTION_PARAMETERS)
 	*return_value = **entry;
 	pval_copy_constructor(return_value);
 	return_value->refcount=1;
-	return_value->is_ref=0;
+	return_value->EA=0;
 }
 
 void array_current(INTERNAL_FUNCTION_PARAMETERS)
@@ -2362,7 +2362,7 @@ PHP_FUNCTION(extract)
 					data = (zval *)emalloc(sizeof(zval));
 					*data = *entry;
 					zval_copy_ctor(data);
-					data->is_ref = 0;
+					data->EA = 0;
 					data->refcount = 1;
 
 					zend_hash_update(EG(active_symbol_table), finalname,
@@ -2392,7 +2392,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 			data = (zval *)emalloc(sizeof(zval));
 			*data = *value;
 			zval_copy_ctor(data);
-			data->is_ref = 0;
+			data->EA = 0;
 			data->refcount = 1;
 			
 			zend_hash_update(return_value->value.ht, entry->value.str.val,
@@ -2604,7 +2604,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	*return_value = **val;
 	zval_copy_ctor(return_value);
 	return_value->refcount=1;
-	return_value->is_ref=0;
+	return_value->EA=0;
 	
 	/* Delete the first or last value */
 	new_hash = _phpi_splice(stack->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
@@ -2919,7 +2919,7 @@ PHP_FUNCTION(array_keys)
 	zend_hash_internal_pointer_reset(input->value.ht);
 	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
 		new_val = (zval *)emalloc(sizeof(zval));
-		new_val->is_ref = 0;
+		new_val->EA = 0;
 		new_val->refcount = 1;
 		
 		switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {

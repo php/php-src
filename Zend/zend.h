@@ -91,7 +91,7 @@ struct _zval_struct {
 	/* Variable information */
 	zvalue_value value;		/* value */
 	unsigned char type;	/* active type */
-	unsigned char is_ref;
+	unsigned char EA;
 	short refcount;
 };
 
@@ -175,7 +175,7 @@ typedef struct _zend_utility_values {
 #define MAKE_STD_ZVAL(zv) \
 	zv = (zval *) emalloc(sizeof(zval)); \
 	zv->refcount = 1; \
-	zv->is_ref = 0;
+	zv->EA = 0;
 
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);

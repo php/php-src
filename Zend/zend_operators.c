@@ -333,7 +333,7 @@ static void convert_scalar_to_array(zval *op, int type)
 	
 	*entry = *op;
 	entry->refcount = 1;
-	entry->is_ref = 0;
+	entry->EA = 0;
 	
 	switch (type) {
 		case IS_ARRAY:

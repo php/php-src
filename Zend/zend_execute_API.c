@@ -80,10 +80,10 @@ void init_executor(CLS_D ELS_DC)
 	var_uninit(&EG(uninitialized_zval));
 	var_uninit(&EG(error_zval));
 	EG(uninitialized_zval).refcount = 1;
-	EG(uninitialized_zval).is_ref=0;
+	EG(uninitialized_zval).EA=0;
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval).refcount = 1;
-	EG(error_zval).is_ref=0;
+	EG(error_zval).EA=0;
 	EG(error_zval_ptr)=&EG(error_zval);
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
@@ -265,7 +265,7 @@ ZEND_API void zval_update_constant(zval *p)
 			*p = c;
 		}
 		p->refcount = 1;
-		p->is_ref = 0;
+		p->EA = 0;
 	}
 }
 
@@ -300,7 +300,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		param = (zval *) emalloc(sizeof(zval));
 		*param = *(params[i]);
 		param->refcount=1;
-		param->is_ref=0;
+		param->EA=0;
 		zval_copy_ctor(param);
 		//zend_hash_next_index_insert_ptr(function_state.function_symbol_table, param, sizeof(zval *), NULL);
 		zend_ptr_stack_push(&EG(argument_stack), param);
@@ -318,7 +318,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 
 			var_uninit(dummy);
 			dummy->refcount=1;
-			dummy->is_ref=0;
+			dummy->EA=0;
 			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
 			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
 		}
@@ -419,7 +419,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 			efree(variable_ptr);
 		}
 
-		if (!value_ptr->is_ref) {
+		if (!value_ptr->EA) {
 			/* break it away */
 			value_ptr->refcount--;
 			if (value_ptr->refcount>0) {
@@ -429,7 +429,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 				zendi_zval_copy_ctor(*value_ptr);
 			}
 			value_ptr->refcount=1;
-			value_ptr->is_ref=1;
+			value_ptr->EA=1;
 		}
 
 		*variable_ptr_ptr = value_ptr;

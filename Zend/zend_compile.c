@@ -840,7 +840,7 @@ void do_return(znode *expr CLS_DC)
 		var_uninit(&opline->op1.u.constant);
 		opline->op1.op_type = IS_CONST;
 		opline->op1.u.constant.refcount=1;
-		opline->op1.u.constant.is_ref=0;
+		opline->op1.u.constant.EA=0;
 	}
 	SET_UNUSED(opline->op2);
 }
@@ -1039,7 +1039,7 @@ void do_brk_cont(int op, znode *expr CLS_DC)
 		opline->op2.u.constant.type = IS_LONG;
 		opline->op2.u.constant.value.lval = 1;
 		opline->op2.u.constant.refcount=1;
-		opline->op2.u.constant.is_ref=0;
+		opline->op2.u.constant.EA=0;
 		opline->op2.op_type = IS_CONST;
 	}
 }
@@ -1190,7 +1190,7 @@ void do_default_before_statement(znode *case_list, znode *default_token CLS_DC)
 	opline->op1.u.constant.type = IS_LONG;
 	opline->op1.u.constant.value.lval = 1;
 	opline->op1.u.constant.refcount=1;
-	opline->op1.u.constant.is_ref=0;
+	opline->op1.u.constant.EA=0;
 	SET_UNUSED(opline->op2);
 	switch_entry_ptr->default_case = next_op_number;
 
@@ -1423,7 +1423,7 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC)
 	opline->op1.u.constant.value.str.val = estrndup("shell_exec",sizeof("shell_exec")-1);
 	opline->op1.u.constant.value.str.len = sizeof("shell_exec")-1;
 	opline->op1.u.constant.refcount = 1;
-	opline->op1.u.constant.is_ref = 0;
+	opline->op1.u.constant.EA = 0;
 	opline->op1.u.constant.type = IS_STRING;
 	opline->op1.op_type = IS_CONST;
 	opline->extended_value = 1;
@@ -1562,7 +1562,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 			opline->op2.u.constant.type = IS_LONG;
 			opline->op2.u.constant.value.lval = *((int *) dimension->data);
 			opline->op2.u.constant.refcount = 1;
-			opline->op2.u.constant.is_ref = 0;
+			opline->op2.u.constant.EA = 0;
 			if (le == CG(list_llist).tail) {
 				opline->extended_value = ZEND_FETCH_STANDARD;
 			} else {
@@ -1973,7 +1973,7 @@ int zendlex(znode *zendlval CLS_DC)
 	}
 		
 	zendlval->u.constant.refcount = 1;
-	zendlval->u.constant.is_ref = 0;
+	zendlval->u.constant.EA = 0;
 	zendlval->op_type = IS_CONST;
 	return retval;
 }

@@ -394,7 +394,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		for (i=0; i<num_subpats; i++) {
 			match_sets[i] = (zval *)emalloc(sizeof(zval));
 			array_init(match_sets[i]);
-			match_sets[i]->is_ref = 0;
+			match_sets[i]->EA = 0;
 			match_sets[i]->refcount = 1;
 		}
 	}
@@ -444,7 +444,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 						/* Allocate the result set array */
 						result_set = emalloc(sizeof(zval));
 						array_init(result_set);
-						result_set->is_ref = 0;
+						result_set->EA = 0;
 						result_set->refcount = 1;
 						
 						/* Add all the subpatterns to it */

@@ -109,7 +109,7 @@ static pval *php3i_long_pval(long value)
  
     ret->type = IS_LONG;
     ret->value.lval = value;
-	ret->is_ref = 0;
+	ret->EA = 0;
 	ret->refcount = 1;
     return ret;
 }
@@ -121,7 +121,7 @@ static pval *php3i_string_pval(const char *str)
  
     ret->type = IS_STRING;
     ret->value.str.len = len;
-	ret->is_ref = 0;
+	ret->EA = 0;
 	ret->refcount = 1;
     ret->value.str.val = estrndup(str, len);
     return ret;
@@ -647,7 +647,7 @@ static void php3i_add_to_info(xml_parser *parser,char *name)
 			return;
 		}
 
-		values->is_ref = 0;
+		values->EA = 0;
 		values->refcount = 1;
 		
 		_php3_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(pval*), (void **) &element);
@@ -712,11 +712,11 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			int atcnt = 0;
 
 			tag = emalloc(sizeof(pval));
-			tag->is_ref = 0;
+			tag->EA = 0;
 			tag->refcount = 1;
 
 			atr = emalloc(sizeof(pval));
-			atr->is_ref = 0;
+			atr->EA = 0;
 			atr->refcount = 1;
 
 			array_init(tag);
@@ -802,7 +802,7 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 				tag = emalloc(sizeof(pval));
 
 				array_init(tag);
-				tag->is_ref = 0;
+				tag->EA = 0;
 				tag->refcount = 1;
 				  
 				php3i_add_to_info(parser,((char *) name) + parser->toffset);
