@@ -421,14 +421,6 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 
-			if (MS_SQL_G(textsize) != -1) {
-				sprintf(buffer, "%li", MS_SQL_G(textsize));
-				if (dbsetopt(mssql.link, DBTEXTSIZE, buffer)==FAIL) {
-					efree(hashed_details);
-					dbfreelogin(mssql.login);
-					RETURN_FALSE;
-				}	
-			}
 			if (MS_SQL_G(textlimit) != -1) {
 				sprintf(buffer, "%li", MS_SQL_G(textlimit));
 				if (dbsetopt(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
@@ -436,6 +428,12 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					dbfreelogin(mssql.login);
 					RETURN_FALSE;
 				}
+			}
+			if (MS_SQL_G(textsize) != -1) {
+				sprintf(buffer, "SET TEXTSIZE %li", MS_SQL_G(textsize));
+				dbcmd(mssql.link, buffer);
+				dbsqlexec(mssql.link);
+				dbresults(mssql.link);
 			}
 
 			/* hash it up */
@@ -545,15 +543,9 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		if (MS_SQL_G(textsize) != -1) {
 			sprintf(buffer, "SET TEXTSIZE %li", MS_SQL_G(textsize));
-
 			dbcmd(mssql.link, buffer);
 			dbsqlexec(mssql.link);
 			dbresults(mssql.link);
-//			if (dbsetopt(mssql.link, DBTEXTSIZE, buffer)==FAIL) {
-//				efree(hashed_details);
-//				dbfreelogin(mssql.login);
-//				RETURN_FALSE;
-//			}	
 		}
 
 		/* add it to the list */
