@@ -33,6 +33,10 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
+#ifdef ZTS
+static MUTEX_T mbregex_locale_mutex = NULL;
+#endif
+
 /*
  * string buffer
  */
@@ -80,6 +84,94 @@ _php_mb_regex_strbuf_ncat(struct strbuf *pd, const unsigned char *psrc, int len)
 	return len;
 }
 
+/* {{{ static void php_mb_regex_free_cache() */
+static void php_mb_regex_free_cache(mb_regex_t *pre) 
+{
+	mbre_free_pattern(pre);
+}
+/* }}} */
+
+/* {{{ php_mb_regex_globals_ctor */
+void php_mb_regex_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
+{
+	MBSTRG(default_mbctype) = MBCTYPE_EUC;
+	MBSTRG(current_mbctype) = MBCTYPE_EUC;
+	zend_hash_init(&(MBSTRG(ht_rc)), 0, NULL, (void (*)(void *)) php_mb_regex_free_cache, 1);
+	MBSTRG(search_str) = (zval**)0;
+	MBSTRG(search_str_val) = (zval*)0;
+	MBSTRG(search_re) = (mb_regex_t*)0;
+	MBSTRG(search_pos) = 0;
+	MBSTRG(search_regs) = (struct mbre_registers*)0;
+}
+/* }}} */
+
+/* {{{ php_mb_regex_globals_dtor */
+void php_mb_regex_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC) 
+{
+	zend_hash_destroy(&MBSTRG(ht_rc));
+}
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION(mb_regex) */
+PHP_MINIT_FUNCTION(mb_regex)
+{
+# ifdef ZTS
+	mbregex_locale_mutex = tsrm_mutex_alloc();
+# endif
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION(mb_regex) */
+PHP_MSHUTDOWN_FUNCTION(mb_regex)
+{
+#ifdef ZTS
+	if (mbregex_locale_mutex != NULL) {
+		tsrm_mutex_free(mbregex_locale_mutex);
+	}
+#endif
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION(mb_regex) */
+PHP_RINIT_FUNCTION(mb_regex)
+{
+	MBSTRG(regex_default_options) = MBRE_OPTION_POSIXLINE;
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION(mb_regex) */
+PHP_RSHUTDOWN_FUNCTION(mb_regex)
+{
+	MBSTRG(current_mbctype) = MBSTRG(default_mbctype);
+	if (MBSTRG(search_str)) {
+		if (ZVAL_REFCOUNT(*MBSTRG(search_str)) > 1) {
+			ZVAL_DELREF(*MBSTRG(search_str));
+		} else {
+			zval_dtor(*MBSTRG(search_str));
+			FREE_ZVAL(*MBSTRG(search_str));
+		}
+		MBSTRG(search_str) = (zval **)0;
+		MBSTRG(search_str_val) = (zval *)0;
+	}
+	MBSTRG(search_pos) = 0;
+	if (MBSTRG(search_re)) {
+		efree(MBSTRG(search_re));
+		MBSTRG(search_re) = (mb_regex_t *)0;
+	}
+	if (MBSTRG(search_regs)) {
+		mbre_free_registers(MBSTRG(search_regs));
+		efree(MBSTRG(search_regs));
+		MBSTRG(search_regs) = (struct mbre_registers*)0;
+	}
+	zend_hash_clean(&MBSTRG(ht_rc));
+
+	return SUCCESS;
+}
+/* }}} */
 
 /*
  * encoding name resolver
