@@ -41,10 +41,6 @@ void php_dl(pval *file,int type,pval *return_value);
 /* dynamic loading functions */
 PHP_FUNCTION(dl);
 
-#ifdef HAVE_LIBDL
 PHP_MINFO_FUNCTION(dl);
-#else
-
-#endif
 
 #endif /* _DL_H */
