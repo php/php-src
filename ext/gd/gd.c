@@ -41,7 +41,6 @@
 #ifdef PHP_WIN32
 # include <io.h>
 # include <fcntl.h>
-#define PHPAPI __declspec(dllexport)
 #endif
 
 #if HAVE_LIBGD
