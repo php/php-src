@@ -411,7 +411,14 @@ PHP_FUNCTION(glob)
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
-#ifdef GLOB_EMULATE_ONLYDIR
+		/* we need to this everytime since GLOB_ONLYDIR does not guarantee that
+		 * all directories will be filtered. GNU libc documentation states the
+		 * following: 
+		 * If the information about the type of the file is easily available 
+		 * non-directories will be rejected but no extra work will be done to 
+		 * determine the information for each file. I.e., the caller must still be 
+		 * able to filter directories out. 
+		 */
 		if (flags & GLOB_ONLYDIR) {
 			struct stat s;
 
@@ -423,7 +430,6 @@ PHP_FUNCTION(glob)
 				continue;
 			}
 		}
-#endif
 		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
 	}
 
