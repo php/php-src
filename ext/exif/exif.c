@@ -255,10 +255,10 @@ static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
 static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
 static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
-#define EXIF_ERRLOG_FILEEOF(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, EXIF_ERROR_FILEEOF);
-#define EXIF_ERRLOG_CORRUPT(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, EXIF_ERROR_CORRUPT);
-#define EXIF_ERRLOG_THUMBEOF(ImageInfo)   exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, EXIF_ERROR_THUMBEOF);
-#define EXIF_ERRLOG_FSREALLOC(ImageInfo)  exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, EXIF_ERROR_FSREALLOC);
+#define EXIF_ERRLOG_FILEEOF(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FILEEOF);
+#define EXIF_ERRLOG_CORRUPT(ImageInfo)    exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_CORRUPT);
+#define EXIF_ERRLOG_THUMBEOF(ImageInfo)   exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_THUMBEOF);
+#define EXIF_ERRLOG_FSREALLOC(ImageInfo)  exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "%s", EXIF_ERROR_FSREALLOC);
 /* }}} */
 
 /* {{{ format description defines
