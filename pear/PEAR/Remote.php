@@ -52,24 +52,26 @@ class PEAR_Remote extends PEAR
         }
         $params = array_slice(func_get_args(), 1);
         $request = xmlrpc_encode_request($method, $params);
-        print "<p><b>Request:</b><p>\n";
-        print "<pre>";
-        print htmlspecialchars($request);
-        print "</pre>";
-        $fp = @fsockopen($config->get("master_server"), 80);
+        $server_host = $this->config_object->get("master_server");
+        $server_port = 80;
+        flush();
+        $fp = @fsockopen($server_host, $server_port);
         if (!$fp) {
             return $this->raiseError("PEAR_Remote::call: connect failed");
         }
         $len = strlen($request);
         fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n".
+                     "Host: $server_host:$server_port\r\n".
                      "Content-type: text/xml\r\n".
                      "Content-length: $len\r\n".
                      "\r\n$request"));
-        print "Response:\n";
-        while ($line = fgets($fp, 2048)) {
-            print $line;
+        $response = '';
+        while (trim(fgets($fp, 2048)) != ''); // skip headers
+        while ($chunk = fread($fp, 10240)) {
+            $response .= $chunk;
         }
-        // XXX UNFINISHED
+        fclose($fp);
+        return xmlrpc_decode($response);
     }
 
     // }}}
