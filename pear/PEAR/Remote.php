@@ -110,6 +110,8 @@ class PEAR_Remote extends PEAR
     // }}}
 }
 
-overload("PEAR_Remote");
+if (function_exists("overload")) {
+    overload("PEAR_Remote");
+}
 
 ?>
