@@ -361,37 +361,45 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
  */
 PHPAPI char *php_url_encode(char *s, int len, int *new_length)
 {
-	register int x, y;
-	unsigned char *str;
+	register unsigned char c;
+	unsigned char *to, *from, *start;
+	unsigned char *end;
+	
+	from = s;
+	end = s + len;
+	start = to = (unsigned char *) emalloc(3 * len + 1);
 
-	str = (unsigned char *) emalloc(3 * len + 1);
-	for (x = 0, y = 0; len--; x++, y++) {
-		str[y] = (unsigned char) s[x];
-		if (str[y] == ' ') {
-			str[y] = '+';
+	while (from < end) {
+		c = *from++;
+
+		if (c == ' ') {
+			*to++ = '+';
 #ifndef CHARSET_EBCDIC
-		} else if ((str[y] < '0' && str[y] != '-' && str[y] != '.') ||
-				   (str[y] < 'A' && str[y] > '9') ||
-				   (str[y] > 'Z' && str[y] < 'a' && str[y] != '_') ||
-				   (str[y] > 'z')) {
-			str[y++] = '%';
-			str[y++] = hexchars[(unsigned char) s[x] >> 4];
-			str[y] = hexchars[(unsigned char) s[x] & 15];
-		}
+		} else if ((c < '0' && c != '-' && c != '.') ||
+				   (c < 'A' && c > '9') ||
+				   (c > 'Z' && c < 'a' && c != '_') ||
+				   (c > 'z')) {
+			to[0] = '%';
+			to[1] = hexchars[(unsigned char) c >> 4];
+			to[2] = hexchars[(unsigned char) c & 15];
+			to += 3;
 #else /*CHARSET_EBCDIC*/
-		} else if (!isalnum(str[y]) && strchr("_-.", str[y]) == NULL) {
+		} else if (!isalnum(c) && strchr("_-.", c) == NULL) {
 			/* Allow only alphanumeric chars and '_', '-', '.'; escape the rest */
-			str[y++] = '%';
-			str[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			str[y] = hexchars[os_toascii[(unsigned char) s[x]] & 0x0F];
-		}
+			to[0] = '%';
+			to[1] = hexchars[os_toascii[(unsigned char) c] >> 4];
+			to[2] = hexchars[os_toascii[(unsigned char) c] & 15];
+			to += 3;
 #endif /*CHARSET_EBCDIC*/
+		} else {
+			*to++ = c;
+		}
 	}
-	str[y] = '\0';
+	*to = 0;
 	if (new_length) {
-		*new_length = y;
+		*new_length = to - start;
 	}
-	return ((char *) str);
+	return (char *) start;
 }
 /* }}} */
 
