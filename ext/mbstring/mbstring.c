@@ -1094,7 +1094,7 @@ PHP_FUNCTION(mb_http_output)
 	int name_len;
 	enum mbfl_no_encoding no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", (char **)&name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", (char **)&name, &name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(mb_strpos)
 		}
 	}
 
-	if (offset < 0 || offset > haystack.len) {
+	if (offset < 0 || (unsigned long)offset > haystack.len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is out of range");
 		RETURN_FALSE;
 	}
