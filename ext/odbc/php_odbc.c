@@ -25,7 +25,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
+ 
 #include "php.h"
 #include "php_globals.h"
 
@@ -259,6 +259,8 @@ static PHP_INI_DISP(display_defPW)
 #else
 		PUTS("********");
 #endif
+	} else {
+		PUTS("<i>no value</i>");
 	}
 }
 
