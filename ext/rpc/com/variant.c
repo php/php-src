@@ -280,9 +280,9 @@ static void variant_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	}
 
 	if (!strcmp(Z_STRVAL_P(member), "value")) {
-		php_zval_to_variant(value, var->var, var->codepage);
+		php_zval_to_variant(value, var->var, var->codepage TSRMLS_CC);
 	} else if (zend_hash_find(&types, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, (void **) &type) == SUCCESS) {
-		php_zval_to_variant_ex(value, var->var, *type, var->codepage);
+		php_zval_to_variant_ex(value, var->var, *type, var->codepage TSRMLS_CC);
 	} else {
 		rpc_error(E_WARNING, "Unknown member.");
 	}
@@ -314,9 +314,9 @@ ZEND_FUNCTION(variant_load)
 
 	if (value) {
 		if (type) {
-			php_zval_to_variant_ex(value, var->var, type, var->codepage);
+			php_zval_to_variant_ex(value, var->var, type, var->codepage TSRMLS_CC);
 		} else {
-			php_zval_to_variant(value, var->var, var->codepage);
+			php_zval_to_variant(value, var->var, var->codepage TSRMLS_CC);
 		}
 	}
 }

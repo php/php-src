@@ -97,11 +97,11 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 }
 
 
-ZEND_API void destroy_zend_function(zend_function *function)
+ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 {
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:
-			destroy_op_array((zend_op_array *) function);
+			destroy_op_array((zend_op_array *) function TSRMLS_CC);
 			break;
 		case ZEND_INTERNAL_FUNCTION:
 			/* do nothing */
@@ -194,11 +194,10 @@ void zend_class_add_ref(zend_class_entry **ce)
 }
 
 
-ZEND_API void destroy_op_array(zend_op_array *op_array)
+ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes+op_array->last;
-	TSRMLS_FETCH();
 
 	if (op_array->static_variables) {
 		zend_hash_destroy(op_array->static_variables);

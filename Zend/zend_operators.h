@@ -239,7 +239,7 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 #define Z_ARRVAL(zval)			(zval).value.ht
 #define Z_OBJ_HANDLE(zval)		(zval).value.obj.handle
 #define Z_OBJ_HT(zval)			(zval).value.obj.handlers
-#define Z_OBJCE(zval)			zend_get_class_entry(&(zval))
+#define Z_OBJCE(zval)			zend_get_class_entry(&(zval) TSRMLS_CC)
 #define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
 #define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
 #define Z_RESVAL(zval)			(zval).value.lval

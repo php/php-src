@@ -103,6 +103,7 @@ static HRESULT STDMETHODCALLTYPE disp_queryinterface(
 	/* [in] */ REFIID riid,
 	/* [iid_is][out] */ void **ppvObject)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("QueryInterface");
 
 	if (IsEqualGUID(&IID_IUnknown, riid) ||
@@ -120,6 +121,7 @@ static HRESULT STDMETHODCALLTYPE disp_queryinterface(
         
 static ULONG STDMETHODCALLTYPE disp_addref(IDispatchEx *This)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("AddRef");
 
 	return InterlockedIncrement(&disp->refcount);
@@ -145,6 +147,7 @@ static HRESULT STDMETHODCALLTYPE disp_gettypeinfocount(
 	IDispatchEx *This,
 	/* [out] */ UINT *pctinfo)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("GetTypeInfoCount");
 
 	*pctinfo = 0;
@@ -157,6 +160,7 @@ static HRESULT STDMETHODCALLTYPE disp_gettypeinfo(
 	/* [in] */ LCID lcid,
 	/* [out] */ ITypeInfo **ppTInfo)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("GetTypeInfo");
 	
 	*ppTInfo = NULL;
@@ -328,7 +332,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 					V_VT(pvarRes) = VT_DISPATCH;
 					V_DISPATCH(pvarRes) = php_COM_export_object(retval);
 				} else {
-					php_zval_to_variant(retval, pvarRes, codepage);
+					php_zval_to_variant(retval, pvarRes, codepage TSRMLS_CC);
 				}
 			}
 			zval_ptr_dtor(&retval);
@@ -348,6 +352,7 @@ static HRESULT STDMETHODCALLTYPE disp_deletememberbyname(
 	/* [in] */ BSTR bstrName,
 	/* [in] */ DWORD grfdex)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("DeleteMemberByName");
 
 	return S_FALSE;
@@ -357,6 +362,7 @@ static HRESULT STDMETHODCALLTYPE disp_deletememberbydispid(
 	IDispatchEx *This,
 	/* [in] */ DISPID id)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("DeleteMemberByDispID");
 	
 	return S_FALSE;
@@ -368,6 +374,7 @@ static HRESULT STDMETHODCALLTYPE disp_getmemberproperties(
 	/* [in] */ DWORD grfdexFetch,
 	/* [out] */ DWORD *pgrfdex)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("GetMemberProperties");
 
 	return DISP_E_UNKNOWNNAME;
@@ -399,6 +406,7 @@ static HRESULT STDMETHODCALLTYPE disp_getnextdispid(
 	/* [out] */ DISPID *pid)
 {
 	ulong next = id+1;
+	TSRMLS_FETCH();
 	FETCH_DISP("GetNextDispID");
 
 	while(!zend_hash_index_exists(disp->dispid_to_name, next))
@@ -415,6 +423,7 @@ static HRESULT STDMETHODCALLTYPE disp_getnamespaceparent(
 	IDispatchEx *This,
 	/* [out] */ IUnknown **ppunk)
 {
+	TSRMLS_FETCH();
 	FETCH_DISP("GetNameSpaceParent");
 
 	*ppunk = NULL;

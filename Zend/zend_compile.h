@@ -433,13 +433,13 @@ ZEND_API zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC);
 ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC);
-ZEND_API void destroy_op_array(zend_op_array *op_array);
+ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 
-ZEND_API void destroy_zend_function(zend_function *function);
+ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 

@@ -820,7 +820,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
 		EG(function_state_ptr) = original_function_state_ptr;
-		destroy_op_array(new_op_array);
+		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
 		retval = SUCCESS;

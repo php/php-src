@@ -3456,7 +3456,7 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = op_array;
 		EG(function_state_ptr) = &EX(function_state);
-		destroy_op_array(new_op_array);
+		destroy_op_array(new_op_array TSRMLS_CC);
 		efree(new_op_array);
 	} else {
 		if (return_value_used) {
