@@ -71,6 +71,7 @@ PEAR_FILES = \
 	HTML/Form.php \
 	HTML/IT.php \
 	HTML/ITX.php \
+	HTML/IT_Error.php \
 	HTML/Page.php \
 	HTML/Processor.php \
 	HTML/Select.php \
