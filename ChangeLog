@@ -1,3 +1,37 @@
+2002-08-10  helly  <helly@pb1.pair.com>
+
+    * sapi/cli/php_cli.c:
+    change order of initialisation to allow making filename available
+    through $_SERVER variables (Bug #18657)
+
+2002-08-10  wez  <wez@pb1.pair.com>
+
+    * main/streams.c: remove obsolete TSRMLS_FETCH
+
+    * ext/openssl/openssl.c: correct proto
+
+2002-08-10  Tomas V.V.Cox  <cox@pb1.pair.com>
+
+    * pear/System.php:
+    ZE2 fix on calls to mkdir() (thanks Brad Bulger <tater@potatoe.com>)
+
+2002-08-10  helly  <helly@pb1.pair.com>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/zlib/zlib.c
+      main/output.c: corrected handling of internal output buffers
+    minor fixs
+
+    * ext/zlib/zlib.c:
+    no need to start additional first buffer when output compression is first buffer
+
+    * ext/zlib/zlib.c: should fix all windows warnings
+
+2002-08-10  sebastian  <sebastian@pb1.pair.com>
+
+    * main/network.c: Fix ZTS builds.
+
 2002-08-09  helly  <helly@pb1.pair.com>
 
     * ext/zlib/php_zlib.h
