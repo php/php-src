@@ -1733,6 +1733,14 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
 
+	if (parent->common.fn_flags & ZEND_ACC_ABSTRACT
+		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
+		zend_error(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)", 
+			parent->common.scope->name,
+			child->common.function_name,
+			child->common.prototype->common.scope->name);
+	}
+
 	if (parent_flags & ZEND_ACC_FINAL) {
 		zend_error(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
 	}
@@ -1766,8 +1774,9 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		}
 	}
 
-	if (parent_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_ABSTRACT)) {
+	if (parent_flags & ZEND_ACC_ABSTRACT) {
 		child->common.prototype = parent;
+		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
 	} else if (parent->common.prototype) {
 		child->common.prototype = parent->common.prototype;
 	}
@@ -2426,6 +2435,23 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 	CG(active_class_entry) = NULL;
 }
 
+
+#if 0
+/* This is a part of an incomplete patch, coming soon */
+ZEND_API void zend_do_extends(znode *result, znode *class_token, zend_bool is_first_parent TSRMLS_DC)
+{
+	zend_bool is_class = CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE;
+
+	if (is_class) {
+		if (!is_first_parent) {
+			zend_error(E_COMPILE_ERROR, "Classes may extend only one parent");
+		} else {
+			*result = *class_token;
+		}
+	} else { /* interface */
+	}
+}
+#endif
 
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 {
