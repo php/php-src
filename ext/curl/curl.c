@@ -103,6 +103,8 @@ PHP_MINFO_FUNCTION(curl)
  */
 PHP_MINIT_FUNCTION(curl)
 {
+	int startup_options;
+
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	
 	/* Constants for curl_setopt() */
@@ -245,7 +247,13 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT("CURLE_TELNET_OPTION_SYNTAX",        CURLE_TELNET_OPTION_SYNTAX);
 	REGISTER_CURL_CONSTANT("CURLE_ALREADY_COMPLETE",            CURLE_ALREADY_COMPLETE);
 
-	if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {  
+#if HAVE_OPENSSL_EXT	/* OpenSSL already takes care of initialization */
+	startup_options = CURL_GLOBAL_NONE;
+#else
+	startup_options = CURL_GLOBAL_ALL;
+#endif
+
+	if (curl_global_init(startup_options) != CURLE_OK) {  
 		return FAILURE;  
 	}  
 	return SUCCESS;
