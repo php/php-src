@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
@@ -12,30 +12,26 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
+   | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
-*/
-
+ */
 /* $Id$ */
 
-#ifndef EXEC_H
-#define EXEC_H
+#ifdef PHP_WIN32
+typedef HANDLE php_file_descriptor_t;
+typedef HANDLE php_process_id_t;
+#else
+typedef int php_file_descriptor_t;
+typedef pid_t php_process_id_t;
+#endif
 
-PHP_FUNCTION(system);
-PHP_FUNCTION(exec);
-PHP_FUNCTION(escapeshellcmd);
-PHP_FUNCTION(escapeshellarg);
-PHP_FUNCTION(passthru);
-PHP_FUNCTION(shell_exec);
-PHP_FUNCTION(proc_open);
-PHP_FUNCTION(proc_get_status);
-PHP_FUNCTION(proc_close);
-PHP_MINIT_FUNCTION(proc_open);
+#define PHP_PROC_OPEN_MAX_DESCRIPTORS	16
 
-char *php_escape_shell_cmd(char *);
-char *php_escape_shell_arg(char *);
-int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC);
+struct php_process_handle {
+	php_process_id_t	child;
+	int npipes;
+	long pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	char *command;
+	int is_persistent;
+};
 
-#define PHP_EMPTY_EXEC_PARAM { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute a blank command"); RETURN_FALSE; }
-
-#endif /* EXEC_H */

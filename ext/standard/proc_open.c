@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Wez Furlong                                                  |
+   | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -52,27 +52,39 @@
  * */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 
+#include "proc_open.h"
+
 static int le_proc_open;
 
 static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
+	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
+	int i;
 #ifdef PHP_WIN32
-	HANDLE child;
 	DWORD wstatus;
-	
-	child = (HANDLE)rsrc->ptr;
-	WaitForSingleObject(child, INFINITE);
-	GetExitCodeProcess(child, &wstatus);
-	FG(pclose_ret) = wstatus;
-#else
-# if HAVE_SYS_WAIT_H
+#elif HAVE_SYS_WAIT_H
 	int wstatus;
-	pid_t child, wait_pid;
-	
-	child = (pid_t)rsrc->ptr;
+	pid_t wait_pid;
+#endif
 
+	/* Close all handles to avoid a deadlock */
+	for (i = 0; i < proc->npipes; i++) {
+		if (proc->pipes[i] != 0) {
+			zend_list_delete(proc->pipes[i]);
+			proc->pipes[i] = 0;
+		}
+	}
+	
+#ifdef PHP_WIN32
+	
+	WaitForSingleObject(proc->child, INFINITE);
+	GetExitCodeProcess(proc->child, &wstatus);
+	FG(pclose_ret) = wstatus;
+	
+#elif HAVE_SYS_WAIT_H
+	
 	do {
-		wait_pid = waitpid(child, &wstatus, 0);
+		wait_pid = waitpid(proc->child, &wstatus, 0);
 	} while (wait_pid == -1 && errno == EINTR);
 	
 	if (wait_pid == -1)
@@ -83,20 +95,23 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		FG(pclose_ret) = wstatus;
 	}
 	
-# else
+#else
 	FG(pclose_ret) = -1;
-# endif
 #endif
+
+	pefree(proc->command, proc->is_persistent);
+	pefree(proc, proc->is_persistent);
+	
 }
 
 /* {{{ php_make_safe_mode_command */
-static int php_make_safe_mode_command(char *cmd, char **safecmd TSRMLS_DC)
+static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persistent TSRMLS_DC)
 {
 	int lcmd, larg0, ldir, len, overflow_limit;
 	char *space, *sep, *arg0;
 
 	if (!PG(safe_mode)) {
-		*safecmd = estrdup(cmd);
+		*safecmd = pestrdup(cmd, is_persistent);
 		return SUCCESS;
 	}
 
@@ -140,7 +155,12 @@ static int php_make_safe_mode_command(char *cmd, char **safecmd TSRMLS_DC)
 	efree(arg0);
 	arg0 = php_escape_shell_cmd(*safecmd);
 	efree(*safecmd);
-	*safecmd = arg0;
+	if (is_persistent) {
+		*safecmd = pestrdup(arg0, 1);
+		efree(arg0);
+	} else {
+		*safecmd = arg0;
+	}
 
 	return SUCCESS;
 }
@@ -158,23 +178,85 @@ PHP_MINIT_FUNCTION(proc_open)
    close a process opened by proc_open */
 PHP_FUNCTION(proc_close)
 {
-	zval *proc;
-	void *child;
+	zval *zproc;
+	struct php_process_handle *proc;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &proc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zproc) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(child, void *, &proc, -1, "process", le_proc_open);
+	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
 	
-	zend_list_delete(Z_LVAL_P(proc));
+	zend_list_delete(Z_LVAL_P(zproc));
 	RETURN_LONG(FG(pclose_ret));
+}
+/* }}} */
+
+/* {{{ proto array proc_get_status(resource process)
+   get information about a process opened by proc_open */
+PHP_FUNCTION(proc_get_status)
+{
+	zval *zproc;
+	struct php_process_handle *proc;
+#ifdef PHP_WIN32
+	DWORD wstatus;
+#elif HAVE_SYS_WAIT_H
+	int wstatus;
+	pid_t wait_pid;
+#endif
+	int running = 1, signaled = 0, stopped = 0;
+	int exitcode = -1, termsig = 0, stopsig = 0;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zproc) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
+
+	array_init(return_value);
+
+	add_assoc_string(return_value, "command", proc->command, 1);
+	add_assoc_long(return_value, "pid", proc->child);
+	
+#ifdef PHP_WIN32
+	
+	GetExitCodeProcess(proc->child, &wstatus);
+
+	running = wstatus == STILL_ACTIVE;
+	exitcode == STILL_ACTIVE ? -1 : wstatus;
+	
+#elif HAVE_SYS_WAIT_H
+	
+	errno = 0;
+	wait_pid = waitpid(proc->child, &wstatus, WNOHANG|WUNTRACED);
+	
+	if (wait_pid == proc->child) {
+		if (WIFEXITED(wstatus)) {
+			running = 0;
+			exitcode = WEXITSTATUS(wstatus);
+		}
+		if (WIFSIGNALED(wstatus)) {
+			signaled = 1;
+			termsig = WTERMSIG(wstatus);
+		}
+		if (WIFSTOPPED(wstatus)) {
+			stopped = 1;
+			stopsig = WSTOPSIG(wstatus);
+		}
+	}
+#endif
+
+	add_assoc_bool(return_value, "running", running);
+	add_assoc_bool(return_value, "signaled", signaled);
+	add_assoc_bool(return_value, "stopped", stopped);
+	add_assoc_long(return_value, "exitcode", exitcode);
+	add_assoc_long(return_value, "termsig", termsig);
+	add_assoc_long(return_value, "stopsig", stopsig);
 }
 /* }}} */
 
 /* {{{ handy definitions for portability/readability */
 #ifdef PHP_WIN32
-typedef HANDLE descriptor_t;
 # define pipe(pair)		(CreatePipe(&pair[0], &pair[1], &security, 2048L) ? 0 : -1)
 
 # define COMSPEC_NT	"cmd.exe"
@@ -197,9 +279,7 @@ static inline HANDLE dup_fd_as_handle(int fd)
 
 # define close_descriptor(fd)	CloseHandle(fd)
 #else
-typedef int descriptor_t;
 # define close_descriptor(fd)	close(fd)
-
 #endif
 
 #define DESC_PIPE		1
@@ -208,7 +288,7 @@ typedef int descriptor_t;
 
 struct php_proc_open_descriptor_item {
 	int index; 							/* desired fd number in child process */
-	descriptor_t parentend, childend;	/* fds for pipes in parent/child */
+	php_file_descriptor_t parentend, childend;	/* fds for pipes in parent/child */
 	int mode;							/* mode for proc_open code */
 	int mode_flags;						/* mode flags for opening fds */
 };
@@ -218,7 +298,6 @@ struct php_proc_open_descriptor_item {
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
-#define MAX_DESCRIPTORS	16
 
 	char *command;
 	long command_len;
@@ -228,24 +307,24 @@ PHP_FUNCTION(proc_open)
 	int i;
 	zval **descitem = NULL;
 	HashPosition pos;
-	struct php_proc_open_descriptor_item descriptors[MAX_DESCRIPTORS];
+	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	STARTUPINFO si;
 	BOOL newprocok;
-	HANDLE child;
 	SECURITY_ATTRIBUTES security;
 	char *command_with_cmd;
-#else
-	pid_t child;
 #endif
+	php_process_id_t child;
+	struct php_process_handle *proc;
+	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz/", &command,
 				&command_len, &descriptorspec, &pipes) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == php_make_safe_mode_command(command, &command TSRMLS_CC)) {
+	if (FAILURE == php_make_safe_mode_command(command, &command, is_persistent TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -317,7 +396,7 @@ PHP_FUNCTION(proc_open)
 			}
 
 			if (strcmp(Z_STRVAL_PP(ztype), "pipe") == 0) {
-				descriptor_t newpipe[2];
+				php_file_descriptor_t newpipe[2];
 				zval **zmode;
 
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zmode) == SUCCESS) {
@@ -358,7 +437,6 @@ PHP_FUNCTION(proc_open)
 				zval **zfile, **zmode;
 				int fd;
 				php_stream *stream;
-				size_t old_size = FG(def_chunk_size);
 
 				descriptors[ndesc].mode = DESC_FILE;
 
@@ -377,11 +455,8 @@ PHP_FUNCTION(proc_open)
 				}
 
 				/* try a wrapper */
-
-				FG(def_chunk_size) = 1;
 				stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), Z_STRVAL_PP(zmode),
-						ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
-				FG(def_chunk_size) = old_size;
+						ENFORCE_SAFE_MODE|REPORT_ERRORS|STREAM_WILL_CAST, NULL);
 
 				/* force into an fd */
 				if (stream == NULL || FAILURE == php_stream_cast(stream,
@@ -403,7 +478,7 @@ PHP_FUNCTION(proc_open)
 		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(descriptorspec), &pos);
-		if (++ndesc == MAX_DESCRIPTORS)
+		if (++ndesc == PHP_PROC_OPEN_MAX_DESCRIPTORS)
 			break;
 	}
 
@@ -447,7 +522,7 @@ PHP_FUNCTION(proc_open)
 	child = pi.hProcess;
 	CloseHandle(pi.hThread);
 
-#else
+#elif HAVE_FORK
 	/* the unix way */
 
 	child = fork();
@@ -487,10 +562,17 @@ PHP_FUNCTION(proc_open)
 		goto exit_fail;
 
 	}
+#else
+# error You lose (configure should not have let you get here)
 #endif
 	/* we forked/spawned and this is the parent */
 
-	efree(command);
+	proc = (struct php_process_handle*)pemalloc(sizeof(struct php_process_handle), is_persistent);
+	proc->is_persistent = is_persistent;
+	proc->command = command;
+	proc->npipes = ndesc;
+	proc->child = child;
+
 	array_init(pipes);
 
 	/* clean up all the child ends and then open streams on the parent
@@ -534,17 +616,21 @@ PHP_FUNCTION(proc_open)
 						MAKE_STD_ZVAL(retfp);
 						php_stream_to_zval(stream, retfp);
 						add_index_zval(pipes, descriptors[i].index, retfp);
+
+						proc->pipes[i] = Z_LVAL_P(retfp);
 					}
 				}
 				break;
+			default:
+				proc->pipes[i] = 0;
 		}
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, (void*)child, le_proc_open);
+	ZEND_REGISTER_RESOURCE(return_value, proc, le_proc_open);
 	return;
 
 exit_fail:
-	efree(command);
+	pefree(command, is_persistent);
 	RETURN_FALSE;
 
 }
