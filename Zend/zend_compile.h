@@ -111,7 +111,8 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_IMPLICIT_PUBLIC	0x1000
 
 #define ZEND_ACC_CTOR		0x2000
-#define ZEND_ACC_DTOR		0x4000 
+#define ZEND_ACC_DTOR		0x4000
+#define ZEND_ACC_CLONE		0x8000
 
 char *zend_visibility_string(zend_uint fn_flags);
 

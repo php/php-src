@@ -2400,6 +2400,12 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 			zend_error(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
 		}
 	}
+	if (ce->clone) {
+		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
+		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
+			zend_error(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
+		}
+	}
 
 	ce->line_end = zend_get_compiled_lineno(TSRMLS_C);
 
