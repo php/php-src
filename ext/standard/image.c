@@ -77,11 +77,10 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char a[2];
-	char temp[3];
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
-	php_stream_read(stream, temp, sizeof(temp));  /*	fseek(fp, 6L, SEEK_SET); */
+	php_stream_seek(stream, 3, SEEK_CUR);
 
 	php_stream_read(stream, a, sizeof(a)); /*	fread(a, sizeof(a), 1, fp); */
 	result->width = (unsigned short)a[0] | (((unsigned short)a[1])<<8);
@@ -165,10 +164,9 @@ static struct gfxinfo *php_handle_swf (php_stream * stream)
 	struct gfxinfo *result = NULL;
 	long bits;
 	unsigned char a[32];
-	char temp[5];
 
 	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
-	php_stream_read(stream, temp, 5);	/*	fseek(fp, 8L, SEEK_SET); */
+	php_stream_seek(stream, 5, SEEK_CUR);
 
 	php_stream_read(stream, a, sizeof(a)); /*	fread(a, sizeof(a), 1, fp); */
 	bits = php_swf_get_bits (a, 0, 5);
@@ -186,12 +184,11 @@ static struct gfxinfo *php_handle_png (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned long in_width, in_height;
-	char temp[8];
 	unsigned char a[8];
 
 	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
-	php_stream_read(stream, temp, sizeof(temp));	/* fseek(fp, 16L, SEEK_SET); */
+	php_stream_seek(stream, 8, SEEK_CUR);
 
 	if((php_stream_read(stream, a, sizeof(a))) <= 0) {
 		in_width  = 0;
@@ -316,7 +313,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
  * skip over a variable-length block; assumes proper length marker */
 static void php_skip_variable(php_stream * stream)
 {
-	size_t length = ((unsigned int)php_read2(stream)) & 0xFFFF;
+	off_t length = ((unsigned int)php_read2(stream));
 
 	length = length-2;
 	if (length) php_stream_seek(stream, (long)length, SEEK_CUR);
