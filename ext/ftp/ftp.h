@@ -140,7 +140,13 @@ int		ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp,
 /* returns the size of the given file, or -1 on error */
 int		ftp_size(ftpbuf_t *ftp, const char *path);
 
-/* returns the last modified time  of the given file, or -1 on error */
+/* returns the last modified time of the given file, or -1 on error */
 time_t		ftp_mdtm(ftpbuf_t *ftp, const char *path);
+
+/* renames a file on the server */
+int		ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest);
+
+/* deletes the file from the server */
+int		ftp_delete(ftpbuf_t *ftp, const char *path);
 
 #endif
