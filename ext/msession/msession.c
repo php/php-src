@@ -330,7 +330,7 @@ void PHPMsessionDisconnect()
 #endif
 }
 
-char *PHPMsessionGetData(const char *session)
+char *PHPMsessionGetData(const char *session TSRMLS_DC)
 {
 	char *ret = NULL;
 
@@ -345,7 +345,7 @@ char *PHPMsessionGetData(const char *session)
 	
 	return ret;
 }
-int PHPMsessionSetData(const char *session, const char *data)
+int PHPMsessionSetData(const char *session, const char *data TSRMLS_DC)
 {
 	IFCONNECT_BEGIN
 	int ret=0;
@@ -360,7 +360,7 @@ int PHPMsessionSetData(const char *session, const char *data)
 
 	IFCONNECT_ENDVAL(0)
 }
-int PHPMsessionDestroy(const char *session)
+int PHPMsessionDestroy(const char *session TSRMLS_DC)
 {
 	IFCONNECT_BEGIN
 
@@ -477,7 +477,7 @@ PHP_FUNCTION(msession_destroy)
 	}
 	convert_to_string_ex(session);
 	szsession = Z_STRVAL_PP(session);
-	PHPMsessionDestroy(szsession);
+	PHPMsessionDestroy(szsession TSRMLS_CC);
 
 	RETURN_TRUE;
 }
@@ -1119,7 +1119,7 @@ PHP_FUNCTION(msession_get_data)
 	}
 	convert_to_string_ex(session);
 
-	val = PHPMsessionGetData(Z_STRVAL_PP(session));
+	val = PHPMsessionGetData(Z_STRVAL_PP(session) TSRMLS_CC);
 
 	if(val)
 	{
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(msession_set_data)
 	convert_to_string_ex(session);
 	convert_to_string_ex(value);
 
-	if(PHPMsessionSetData(Z_STRVAL_PP(session),Z_STRVAL_PP(value)))
+	if(PHPMsessionSetData(Z_STRVAL_PP(session), Z_STRVAL_PP(value) TSRMLS_CC))
 	{
 		RETURN_TRUE;
 	}
@@ -1298,7 +1298,7 @@ PS_CLOSE_FUNC(msession)
 PS_READ_FUNC(msession)
 {
 	ELOG( "ps_read_msession");
-	*val = PHPMsessionGetData(key);
+	*val = PHPMsessionGetData(key TSRMLS_CC);
 	if(*val)
 		{
 			*vallen = strlen(*val);
@@ -1315,13 +1315,13 @@ PS_READ_FUNC(msession)
 PS_WRITE_FUNC(msession)
 {
 	ELOG( "ps_write_msession");
-	return (PHPMsessionSetData(key,val)) ? SUCCESS : FAILURE;
+	return (PHPMsessionSetData(key, val TSRMLS_CC)) ? SUCCESS : FAILURE;
 }
 
 PS_DESTROY_FUNC(msession)
 {
 	ELOG( "ps_destroy_msession");
-	return (PHPMsessionDestroy(key)) ? SUCCESS : FAILURE;
+	return (PHPMsessionDestroy(key TSRMLS_CC)) ? SUCCESS : FAILURE;
 }
 
 PS_GC_FUNC(msession)
