@@ -2213,7 +2213,7 @@ PHP_FUNCTION(ibase_prepare)
 /* }}} */
 
 
-/* {{{ proto int ibase_execute(int query [, int bind_args [, int ...])
+/* {{{ proto int ibase_execute(int query [, int bind_args [, int ...]])
    Execute a previously prepared query */
 PHP_FUNCTION(ibase_execute)
 {

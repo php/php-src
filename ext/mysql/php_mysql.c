@@ -1927,7 +1927,7 @@ PHP_FUNCTION(mysql_field_table)
 /* }}} */
 
 
-/* {{{ proto int mysql_field_len(int result, int field_offet)
+/* {{{ proto int mysql_field_len(int result, int field_offset)
    Returns the length of the specified field */
 PHP_FUNCTION(mysql_field_len)
 {
