@@ -1,3 +1,27 @@
+1999-12-23  Andi Gutmans  <andi@php.net>
+
+    * php4dll.dsp: - Make the project compile again
+
+1999-12-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: clean up basic_functions
+
+    * ext/standard/string.c: pval->zval
+
+    * ext/standard/string.c:
+    * ext/xml/xml.c
+      TODO: killed warning + added reminder
+
+    * ext/imap/imap.c: ZTS fix
+
+1999-12-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk: Also remove files which are ignored by default by CVS.
+
+1999-12-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: digital cc doe not like whitespaces before a # mark
+
 1999-12-22  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/mysql/php_mysql.c: Kill compiler warning
