@@ -203,7 +203,11 @@ AC_ARG_WITH(regex,
 [
   case $withval in 
     system)
-      REGEX_TYPE=system
+      if test "$PHP_SAPI" = "apache" || test "$PHP_SAPI" = "apache2filter"; then
+        REGEX_TYPE=php
+      else
+        REGEX_TYPE=system
+      fi
       ;;
     apache)
       REGEX_TYPE=apache
@@ -220,15 +224,6 @@ AC_ARG_WITH(regex,
   REGEX_TYPE=php
 ])
 	
-AC_ARG_WITH(system-regex,
-[  --with-system-regex     (deprecated) Use system regex library],[
-  if test "$withval" = "yes"; then
-    REGEX_TYPE=system
-  else
-    REGEX_TYPE=php
-  fi
-])
-
 AC_CHECK_FUNCS(fnmatch glob)
 
 if test "$PHP_SAPI" = "cgi"; then
