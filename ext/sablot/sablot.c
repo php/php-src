@@ -490,11 +490,11 @@ PHP_FUNCTION(xslt_openlog)
 	zval **xh, 
 	     **logfile, 
 		 **opt_loglevel;
-	
 	php_sablot *handle;
 	int ret      = 0, 
 	    loglevel = 0, 
 		argc     = ZEND_NUM_ARGS();
+    SABLOTLS_FETCH();
 	
 	if (argc < 2 || argc > 3 ||
 	    zend_get_parameters_ex(argc, &xh, &logfile, &opt_loglevel) == FAILURE) {
@@ -684,7 +684,8 @@ PHP_FUNCTION(xslt_error)
 	php_sablot *handle;
 	int serrno = 0,
 	    argc = ZEND_NUM_ARGS();
-	
+	SABLOTLS_FETCH();
+    
 	if (argc < 0 || argc > 1 ||
 	    zend_get_parameters_ex(argc, &xh) == FAILURE) {
 		WRONG_PARAM_COUNT;
