@@ -53,7 +53,7 @@ zend_module_entry calendar_module_entry = {
   STANDARD_MODULE_PROPERTIES,
 };
 
-#ifdef COMPILE_DL_CALENDAR
+#if COMPILE_DL
 ZEND_GET_MODULE(calendar)
 #endif
 
