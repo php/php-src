@@ -205,7 +205,7 @@ BEGIN_EXTERN_C()
 void init_compiler(CLS_D ELS_DC);
 void shutdown_compiler(CLS_D);
 
-extern ZEND_API zend_op_array *(*zend_compile_files)(int mark_as_ref CLS_DC, int file_count, ...);
+extern ZEND_API zend_op_array *(*zend_compile_files)(int type CLS_DC, int file_count, ...);
 
 void zend_activate(CLS_D ELS_DC);
 void zend_deactivate(CLS_D ELS_DC);
@@ -368,10 +368,10 @@ void do_ticks(CLS_D);
 ZEND_API int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC);	
 ZEND_API int require_filename(char *filename, zend_bool unique CLS_DC);
 ZEND_API int use_filename(char *filename, uint filename_length CLS_DC);
-ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...);
-ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files);
+ZEND_API zend_op_array *compile_files(int type CLS_DC, int file_count, ...);
+ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list files);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
-ZEND_API zend_op_array *compile_filename(int mode, zval *filename CLS_DC ELS_DC);
+ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);

@@ -316,19 +316,19 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 END_EXTERN_C()
 
 
-ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...)
+ZEND_API zend_op_array *compile_files(int type CLS_DC, int file_count, ...)
 {
 	va_list files;
 	zend_op_array *op_array;
 
 	va_start(files, file_count);
-	op_array = v_compile_files(mark_as_ref CLS_CC, file_count, files);
+	op_array = v_compile_files(type CLS_CC, file_count, files);
 	va_end(files);
 	return op_array;
 }
 
 
-ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files)
+ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list files)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
@@ -401,7 +401,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 }
 
 
-zend_op_array *compile_filename(int mode, zval *filename CLS_DC ELS_DC)
+zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 {
 	zend_file_handle file_handle;
 	zval tmp;
@@ -420,16 +420,16 @@ zend_op_array *compile_filename(int mode, zval *filename CLS_DC ELS_DC)
 	file_handle.opened_path = NULL;
 
 
-	if (mode==ZEND_REQUIRE) {
+	if (type==ZEND_REQUIRE) {
 		/* We don't want to hear about inclusion failures;  If we fail,
 		 * we'll generate a require failure
 		 */
 		error_reporting = EG(error_reporting);
 		EG(error_reporting) = 0;
 	}
-	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
+	retval = zend_compile_files(type CLS_CC, 1, &file_handle);
 
-	if (mode==ZEND_REQUIRE) {
+	if (type==ZEND_REQUIRE) {
 		EG(error_reporting) = error_reporting;
 		if (!retval) {
 			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, filename->value.str.val);
