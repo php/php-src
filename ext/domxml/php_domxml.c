@@ -28,6 +28,8 @@
 #endif
 
 #include "php.h"
+#include "ext/standard/php_rand.h"
+
 #include "php_domxml.h"
 
 #if HAVE_DOMXML
@@ -127,6 +129,17 @@
 																	} \
 																} else { \
 																	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, s, p1, p2, p3, p4) == FAILURE) { \
+																		return; \
+																	} \
+																} \
+																DOMXML_GET_OBJ(ret, zval, le);
+
+#define DOMXML_PARAM_SIX(ret, zval, le, s, p1, p2, p3, p4, p5, p6)		if (NULL == (zval = getThis())) { \
+																	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o"s, &zval, p1, p2, p3, p4, p5, p6) == FAILURE) { \
+																		return; \
+																	} \
+																} else { \
+																	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, s, p1, p2, p3, p4, p5, p6) == FAILURE) { \
 																		return; \
 																	} \
 																} \
@@ -233,6 +246,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_node_set_content,										NULL)
 	PHP_FE(domxml_node_get_content,										NULL)
 	PHP_FE(domxml_node_add_namespace,									NULL)
+	PHP_FE(domxml_node_set_namespace,									NULL)
 	PHP_FE(domxml_new_xmldoc,											NULL)
 	PHP_FALIAS(domxml_new_doc,				domxml_new_xmldoc,	NULL)
 	PHP_FE(domxml_parser,												NULL)
@@ -395,6 +409,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 /* Non DOM functions start here */
 	PHP_FALIAS(add_namespace,			domxml_node_add_namespace,		NULL)
+	PHP_FALIAS(set_namespace,			domxml_node_set_namespace,		NULL)
 	PHP_FALIAS(add_child,				domxml_node_append_child,		NULL)
 	PHP_FALIAS(append_sibling,			domxml_node_append_sibling,		NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
@@ -3262,18 +3277,18 @@ PHP_FUNCTION(domxml_doc_create_element)
 }
 /* }}} */
 
-/* {{{ proto object domxml_doc_create_element_ns(string uri, string name)
-   Creates new element node with a namespace*/
+/* {{{ proto object domxml_doc_create_element_ns(string uri, string name [, string prefix])
+   Creates new element node with a namespace */
 PHP_FUNCTION(domxml_doc_create_element_ns)
 {
 	zval *id, *rv = NULL;
 	xmlNode *node;
 	xmlNs	*nsptr;
 	xmlDocPtr docp = NULL;
-	int ret, name_len, uri_len;
-	char *name, *uri;
+	int ret, name_len, uri_len, prefix_len=0;
+	char *name, *uri, *prefix;
 
-	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "ss", &uri, &uri_len, &name, &name_len);
+	DOMXML_PARAM_SIX(docp, id, le_domxmldocp, "ss|s", &uri, &uri_len, &name, &name_len, &prefix, &prefix_len);
 
 	nsptr = xmlSearchNsByHref(docp, xmlDocGetRootElement(docp), (xmlChar*) uri);
 	node = xmlNewNode(nsptr, name);
@@ -3282,14 +3297,24 @@ PHP_FUNCTION(domxml_doc_create_element_ns)
 		RETURN_FALSE;
 	}
 	/* if no namespace with the same uri was found, we have to create a new one.
-	     I do this here with a + the adress of the node. this is not very sophisticated,
+	     I do this here with "a" + a random number. this is not very sophisticated,
 		 therefore if someone has a better idea in creating unique prefixes, here's your
 		 chance (a0,a1, etc would be good enough, this is the way mozilla does it). I'm
 		 to lazy right now to think of a better solution... */
 	
 	if (nsptr == NULL) {
-		char prefix[20];
-		sprintf(prefix, "a%d",node);
+		/* if there was a prefix provided, take that, otherwise generate a new one
+			 this is not w3c-like, since the have no option to provide a prefix, but
+			 i don't care :)
+		*/
+		if (prefix_len == 0)
+		{	
+			char prefixtmp[20];
+			int random;
+			random = (int) (10000.0*php_rand(TSRMLS_C)/(PHP_RAND_MAX));
+			sprintf(prefixtmp, "a%d", random);
+			prefix = prefixtmp;
+		}
 		nsptr = xmlNewNs(node, uri, prefix);
 		xmlSetNs(node, nsptr);
 	}
@@ -3322,6 +3347,42 @@ PHP_FUNCTION(domxml_node_add_namespace)
 		RETURN_TRUE;
 	}
 	
+}
+/* }}} */
+
+/* {{{ proto object domxml_node_set_namespace(string uri [, string prefix])
+   Sets the namespace of a node */
+PHP_FUNCTION(domxml_node_set_namespace)
+{
+	zval *id;
+	xmlNode *nodep;
+	xmlNs	*nsptr;
+	int prefix_len = 0, uri_len;
+	char *prefix, *uri;
+
+	DOMXML_PARAM_FOUR(nodep, id, le_domxmldocp, "s|s", &uri, &uri_len, &prefix, &prefix_len);
+
+	/* if node is in a document, search for an already existing namespace */
+	if (nodep->doc != NULL) {
+		nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar*) uri);
+	} else {
+		nsptr = NULL;
+	}
+
+	/* if no namespace decleration was found in the parents of the node, generate one */
+	if (nsptr == NULL) {
+		/* if there was a prefix provided, take that, otherwise generate a new one */
+		if (prefix_len == 0) {	
+			char prefixtmp[20];
+			int random;
+			random = (int) (10000.0*php_rand(TSRMLS_C)/(PHP_RAND_MAX));
+			sprintf(prefixtmp, "a%d", random);
+			prefix = prefixtmp;
+		}
+		nsptr = xmlNewNs(nodep, uri, prefix);
+	}
+	
+	xmlSetNs(nodep, nsptr);
 }
 /* }}} */
 
