@@ -17,17 +17,9 @@ PHP_ARG_ENABLE(xml,for XML support,
 
 if test "$PHP_XML" != "no"; then
 
-  AC_MSG_CHECKING(for expat in default path)
-  for i in /usr/local /usr; do
-    if test -r $i/include/expat.h; then
-      EXPAT_DIR=$i
-      AC_MSG_RESULT(found in $i)
-    fi
-  done
-
   AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
 
-  if test -z "$EXPAT_DIR"; then
+  if test "$PHP_XML" = "yes"; then
     CPPFLAGS="$CPPFLAGS -DXML_BYTE_ORDER=$order"
     EXPAT_INTERNAL_LIBADD="expat/libexpat.la"	    
     PHP_SUBST(EXPAT_INTERNAL_LIBADD)
@@ -44,10 +36,10 @@ if test "$PHP_XML" != "no"; then
 
   else
 
-    if test -f $EXPAT/lib/libexpat.a -o -f $EXPAT_DIR/lib/libexpat.so ; then
+    EXPAT_DIR="$withval"
+    if test -f $EXPAT_DIR/lib/libexpat.a -o -f $EXPAT_DIR/lib/libexpat.so ; then
         AC_DEFINE(HAVE_LIBEXPAT2, 1, [ ])
         AC_ADD_INCLUDE($EXPAT_DIR/include)
-	AC_ADD_LIBRARY(expat)
     else
         AC_MSG_RESULT(not found)
         AC_MSG_ERROR(Please reinstall the expat distribution)
