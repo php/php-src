@@ -166,7 +166,6 @@ cat >.cvsignore <<eof
 .deps
 *.lo
 *.la
-.libs
 eof
 
 $ECHO_N " $extname.c$ECHO_C"
