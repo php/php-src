@@ -1453,7 +1453,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 char**
 ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 {
-	FILE		*tmpfp = NULL;
+	php_stream	*tmpstream = NULL;
 	databuf_t	*data = NULL;
 	char		*ptr;
 	int		ch, lastch;
@@ -1463,7 +1463,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	char		**entry;
 	char		*text;
 
-	if ((tmpfp = tmpfile()) == NULL) {
+	if ((tmpstream = php_stream_fopen_tmpfile()) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory.");
 		return NULL;
 	}
@@ -1491,7 +1491,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 		if (rcvd == -1)
 			goto bail;
 
-		fwrite(data->buf, rcvd, 1, tmpfp);
+		php_stream_write(tmpstream, data->buf, rcvd);
 
 		size += rcvd;
 		for (ptr = data->buf; rcvd; rcvd--, ptr++) {
@@ -1505,12 +1505,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	ftp->data = data = data_close(ftp, data);
 
-	if (ferror(tmpfp))
-		goto bail;
-
-
-
-	rewind(tmpfp);
+	php_stream_rewind(tmpstream);
 
 	ret = emalloc((lines + 1) * sizeof(char**) + size * sizeof(char*));
 
@@ -1518,7 +1513,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	text = (char*) (ret + lines + 1);
 	*entry = text;
 	lastch = 0;
-	while ((ch = getc(tmpfp)) != EOF) {
+	while ((ch = php_stream_getc(tmpstream)) != EOF) {
 		if (ch == '\n' && lastch == '\r') {
 			*(text - 1) = 0;
 			*++entry = text;
@@ -1530,10 +1525,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	}
 	*entry = NULL;
 
-	if (ferror(tmpfp))
-		goto bail;
-
-	fclose(tmpfp);
+	php_stream_close(tmpstream);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		efree(ret);
@@ -1543,7 +1535,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	return ret;
 bail:
 	ftp->data = data_close(ftp, data);
-	fclose(tmpfp);
+	php_stream_close(tmpstream);
 	if (ret)
 		efree(ret);
 	return NULL;
