@@ -35,9 +35,6 @@ void zend_ob_append(const char *text, uint text_length);
 void zend_ob_prepend(const char *text, uint text_length);
 static inline void zend_ob_send();
 
-/* HEAD support  */
-static int header_request;
-
 
 /*
  * Main
@@ -47,7 +44,6 @@ PHPAPI void zend_output_startup()
 {
 	ob_buffer = NULL;
 	zend_body_write = zend_ub_body_write;
-	header_request=0;
 	zend_header_write = sapi_module.ub_write;
 }
 
@@ -172,7 +168,9 @@ static int zend_b_body_write(const char *str, uint str_length)
 
 static int zend_ub_body_write(const char *str, uint str_length)
 {
-	if (header_request) {
+	SLS_FETCH();
+
+	if (SG(request_info).headers_only) {
 		zend_bailout();
 	}
 	if (php3_header()) {
@@ -189,5 +187,5 @@ static int zend_ub_body_write(const char *str, uint str_length)
 
 void set_header_request(int value)
 {
-	header_request = value;
+	/* deprecated */
 }

@@ -56,7 +56,7 @@ extern int php3_init_head(INIT_FUNC_ARGS);
 extern void php3_Header(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS);
 
-void php4i_add_header_information(char *header_information);
+void php4i_add_header_information(char *header_information, uint header_length);
 
 PHPAPI void php3_noheader(void);
 PHPAPI int php3_header(void);

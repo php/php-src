@@ -1,3 +1,5 @@
+#define CONTEXT_TYPE_IMAGE_GIF "Content-Type:  image/gif"
+
 unsigned char zendtech_logo[] = {
 	 71,  73,  70,  56,  57,  97, 100,   0,  89,   0, 
 	247, 255,   0, 255, 255, 255,   8,   8,   8,  16, 
