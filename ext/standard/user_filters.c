@@ -417,6 +417,7 @@ PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
 	int key_flags, filter_name_len = 0;
+	HashTable *filters_hash;
 
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
@@ -424,10 +425,12 @@ PHP_FUNCTION(stream_get_filters)
 
 	array_init(return_value);
 
-	if (BG(user_filter_map)) {
-		for(zend_hash_internal_pointer_reset(BG(user_filter_map));
-			(key_flags = zend_hash_get_current_key_ex(BG(user_filter_map), &filter_name, &filter_name_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
-			zend_hash_move_forward(BG(user_filter_map)))
+	filters_hash = php_get_stream_filters_hash();
+
+	if (filters_hash) {
+		for(zend_hash_internal_pointer_reset(filters_hash);
+			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+			zend_hash_move_forward(filters_hash))
 				if (key_flags == HASH_KEY_IS_STRING)
 					add_next_index_stringl(return_value, filter_name, filter_name_len, 1);
 	}

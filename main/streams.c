@@ -387,6 +387,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 /* {{{ filter API */
 static HashTable stream_filters_hash;
 
+PHPAPI HashTable *php_get_stream_filters_hash()
+{
+	return &stream_filters_hash;
+}
+
 PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC)
 {
 	return zend_hash_add(&stream_filters_hash, (char*)filterpattern, strlen(filterpattern), factory, sizeof(*factory), NULL);
