@@ -192,6 +192,9 @@ SAPI_API void sapi_activate(SLS_D)
 		}
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
 	}
+	if (sapi_module.activate) {
+		sapi_module.activate(SLS_C);
+	}
 }
 
 
@@ -200,6 +203,9 @@ SAPI_API void sapi_deactivate(SLS_D)
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
+	}
+	if (sapi_module.deactivate) {
+		sapi_module.deactivate(SLS_C);
 	}
 }
 

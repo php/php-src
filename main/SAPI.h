@@ -135,6 +135,9 @@ struct _sapi_module_struct {
 	int (*startup)(struct _sapi_module_struct *sapi_module);
 	int (*shutdown)(struct _sapi_module_struct *sapi_module);
 
+	int (*activate)(SLS_D);
+	int (*deactivate)(SLS_D);
+
 	int (*ub_write)(const char *str, unsigned int str_length);
 	void (*flush)(void *server_context);
 

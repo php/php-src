@@ -10,8 +10,8 @@
 #define OPTERRARG (3)
 
 
-PHPAPI char *ap_php_optarg;
-PHPAPI int ap_php_optind = 1;
+char *ap_php_optarg;
+int ap_php_optind = 1;
 static int ap_php_opterr = 1;
 static int ap_php_optopt;
 
@@ -42,7 +42,7 @@ ap_php_optiserr(int argc, char * const *argv, int oint, const char *optstr,
     return('?');
 }
     
-PHPAPI int ap_php_getopt(int argc, char* const *argv, const char *optstr)
+int ap_php_getopt(int argc, char* const *argv, const char *optstr)
 {
     static int optchr = 0;
     static int dash = 0; /* have already seen the - */

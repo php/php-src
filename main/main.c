@@ -623,24 +623,8 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	
 	php_output_startup();
 
-#if APACHE
-	/*
-	 * For the Apache module version, this bit of code registers a cleanup
-	 * function that gets triggered when our request pool is destroyed.
-	 * We need this because at any point in our code we can be interrupted
-	 * and that may happen before we have had time to free our memory.
-	 * The php_request_shutdown function needs to free all outstanding allocated
-	 * memory.  
-	 */
-	block_alarms();
-	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
-	unblock_alarms();
-#endif
-
 	/* initialize global variables */
-	{
-		PG(header_is_being_sent)=0;
-	}
+	PG(header_is_being_sent)=0;
 
 	if (php_init_request_info(NULL)) {
 		php_printf("Unable to initialize request info.\n");
@@ -693,14 +677,6 @@ void php_request_shutdown(void *dummy)
 	php_destroy_request_info(NULL);
 	shutdown_memory_manager(CG(unclean_shutdown), 0);
 	php_unset_timeout();
-
-#if CGI_BINARY
-	fflush(stdout);
-	if(request_info.php_argv0) {
-		free(request_info.php_argv0);
-		request_info.php_argv0 = NULL;
-	}
-#endif
 
 	global_unlock();
 }

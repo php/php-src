@@ -107,6 +107,9 @@ static sapi_module_struct sapi_module = {
 	php_module_startup,
 	php_module_shutdown_wrapper,
 	
+	NULL,									/* activate */
+	NULL,									/* deactivate */
+
 	sapi_thttpd_ub_write,
 	NULL,
 
