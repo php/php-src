@@ -26,10 +26,10 @@ void zend_objects_destroy(zend_objects *objects)
 
 zend_object_value zend_objects_new(zend_object **object)
 {
-	TSRMLS_FETCH();
-
 	zend_object_handle handle;
 	zend_object_value retval;
+
+	TSRMLS_FETCH();
 
 	if (EG(objects).free_list_head != -1) {
 		handle = EG(objects).free_list_head;
