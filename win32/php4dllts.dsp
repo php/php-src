@@ -577,6 +577,10 @@ SOURCE=..\ext\standard\url_scanner_ex.c
 
 SOURCE=..\ext\standard\var.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\versioning.c
+# End Source File
 # End Group
 # Begin Group "Header Files No. 1"
 
@@ -1808,6 +1812,10 @@ SOURCE=..\win32\php_registry.h
 # Begin Source File
 
 SOURCE=..\ext\com\php_VARIANT.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\com\php_versioning.h
 # End Source File
 # Begin Source File
 
