@@ -724,7 +724,7 @@ fi
 
 if test "$no_recursion" != "yes"; then
 	(set -x; test -d libzend || mkdir libzend; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=../$cache_file $passthru) || exit 1
-	if test "$enable_thread_safety" = "yes"; then
+	if test "$PHP_THREAD_SAFETY" = "yes"; then
 		(set -x; test -d TSRM || mkdir TSRM; cd TSRM && $cwd/$srcdir/TSRM/configure --cache-file=../$cache_file $passthru) || exit 1
 	fi
 dnl	(set -x; cd $srcdir; sh ltconfig --disable-static --enable-dlopen --cache-file=$cache_file ltmain.sh)
