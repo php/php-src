@@ -161,8 +161,8 @@ enum {
 #define YYMARKER q
 #define STATE ctx->state
 
-#define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR
-#define STD_ARGS ctx, start, xp
+#define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR PLS_DC
+#define STD_ARGS ctx, start, xp PLS_CC
 
 static inline void passthru(STD_PARA) 
 {
