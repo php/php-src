@@ -29,9 +29,10 @@
  */
 
 #include "php.h"
+#include "ext/standard/info.h"
+#include "cybercash.h"
 
 #if HAVE_MCK
-#include "cybercash.h"
 #include "mckcrypt.h"
 #include "base64.h"
 
@@ -137,14 +138,14 @@ PHP_FUNCTION(cybercash_decr)
 	errcode = mck_decr(Z_STRVAL_PP(wmk),
 	                   Z_STRVAL_PP(sk),
 	                   Z_STRLEN_PP(inbuff),
-	                   Z_STRLEN_PP(inbuff),
+	                   Z_STRVAL_PP(inbuff),
 	                   outAlloc,
 	                   outbuff,
 	                   &outLth,
 	                   macbuff);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "Could not initialize Return value from cybercash_decr")
+		php_error(E_WARNING, "Could not initialize Return value from cybercash_decr");
 		RETURN_FALSE;
 	}
 
