@@ -1966,23 +1966,27 @@ void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 
 void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC)
 {
+	zval *property;
+
+	ALLOC_ZVAL(property);
+
 	if (value) {
-		zval *property;
-
-		ALLOC_ZVAL(property);
-
 		*property = value->u.constant;
-		switch (declaration_type) {
-			case T_VAR:
-				zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-				break;
-			case T_STATIC:
-				zend_hash_update(CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-				break;
-			case T_CONST:
-				zend_hash_update(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-				break;
-		}
+	} else {
+		INIT_PZVAL(property);
+		property->type = IS_NULL;
+	}
+
+	switch (declaration_type) {
+		case T_VAR:
+			zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+			break;
+		case T_STATIC:
+			zend_hash_update(CG(active_class_entry)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+			break;
+		case T_CONST:
+			zend_hash_update(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+			break;
 	}
 	FREE_PNODE(var_name);
 }
