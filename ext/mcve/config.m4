@@ -22,4 +22,5 @@ if test "$PHP_MCVE" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(mcve, $MCVE_DIR/lib, MCVE_SHARED_LIBADD)
   PHP_NEW_EXTENSION(mcve, mcve.c, $ext_shared)
   PHP_SUBST(MCVE_SHARED_LIBADD)
+  AC_DEFINE(HAVE_MCVE, 1, [ ])
 fi
