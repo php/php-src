@@ -1,5 +1,5 @@
 --TEST--
-Session Object Deserialization
+session object deserialization
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -8,6 +8,7 @@ session.cache_limiter=
 register_globals=1
 --FILE--
 <?php
+error_reporting(E_ALL);
 
 class foo {
 	var $bar = "ok";

@@ -1,5 +1,5 @@
 --TEST--
-Verify PHP 4.2 compatibility: unset($c) with enabled register_globals
+bug compatibility: unset($c) with enabled register_globals
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -9,7 +9,7 @@ register_globals=1
 session.bug_compat_42=1
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL);
 
 session_id("abtest");
 

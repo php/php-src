@@ -1,5 +1,5 @@
 --TEST--
-References between variables in sessions
+correct instantiation of references between variables in sessions
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -8,7 +8,7 @@ session.cache_limiter=
 register_globals=1
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL);
 
 session_id("abtest");
 session_start();

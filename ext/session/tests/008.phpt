@@ -1,5 +1,5 @@
 --TEST--
-Verify PHP 4.2 compatibility: global is used albeit register_globals=0
+bug compatibility: global is used albeit register_globals=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

@@ -1,5 +1,5 @@
 --TEST--
-Registering _SESSION should not segfault.
+registering $_SESSION should not segfault
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
@@ -10,7 +10,7 @@ session.bug_compat_42=1
 session.bug_compat_warn=0
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL);
 
 ### Absurd example, value of $_SESSION does not matter
 
