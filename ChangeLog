@@ -1,3 +1,184 @@
+2003-01-06  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      Adding support for anonymous fileuploads (#21450)
+
+2003-01-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      Fix for Bug #20827: where stat is a macro on Tru64.
+      Patch from <julien.soula@free.fr>
+
+2003-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug21453.phpt:
+      Fixed bug #21453 (improper handling of non-terminated <).
+
+    * ext/standard/browscap.c:
+      Fixed Bug #21443 and related bug #21468.
+
+2003-01-06  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+      Patch for bug #19349
+
+    * ext/odbc/php_odbc.c:
+      Correction for bug #21279
+
+2003-01-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c
+      ext/standard/quot_print.c
+      ext/standard/quot_print.h:
+      Moved php_quot_print_decode() to quot_print.c so that it can be used
+      outside the iconv module
+
+    * ext/iconv/iconv.c:
+      Added more RFC2047-compliancy check in iconv_mime_decode()
+
+    * ext/iconv/iconv.c:
+      Fixed iconv_mime_decode() so that it comforms to RFC2231
+
+2003-01-06  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+      fixed missing & (Thx to Sebastian Bergmann)
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c:
+      fixed a missing & (Thx to Sebastian Bergmann
+
+2003-01-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/userfilters.phpt:
+      Make it slightly more obvious that the return value is relative to the
+      length
+      of the input data.
+
+    * main/php_streams.h:
+      Fix for bug #21406; infinite loop during filter flushing.
+
+2003-01-06  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Bugfixing news.
+
+    * ext/gd/gd_bundled.dsp:
+      MFB:
+      Fixed bug #20503 (imagesetbrush() availability on windows).
+
+    * (PHP_4_3)
+      ext/gd/gd_bundled.dsp:
+      Fixed bug #20503 (imagesetbrush() availability on windows).
+
+2003-01-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/pgsql/php_pgsql.h:
+      Removed #ifdef NetWare and made the necessary changes in the directory
+      structure of NetWare.
+
+    * netware/libpq/libpq-fs.h:
+      Header file for PostgreSQL. Moved from netware directory to netware/libpq
+      directory.
+
+    * netware/libpq-fs.h:
+      This file moved to netware/libpq directory.
+
+2003-01-06  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      - fix crash in domxml_node_insert_before() (by Lukas Schröder)
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+      - get_path forgotten in .h file
+      - fix crash in domxml_node_insert_before() (by Lukas Schröder)
+
+2003-01-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/phplib.imp:
+      Added symbols to build PostgreSQL extension for NetWare.
+
+    * ext/mysql/mysql.mak:
+      Changes for NetWare makefile.
+
+    * ext/pgsql/pgsql.mak
+      ext/pgsql/php_pgsql.h:
+      Makefile added newly and modified the header file for NetWare.
+
+2003-01-06  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      partly MFH from 1.288 (Fixed segfault, when trying to add a node to itself)
+
+    * ext/domxml/php_domxml.c:
+      - Fixed segfault, when trying to add a node to itself.
+
+2003-01-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/basic_functions.c:
+      Added #ifdef HAVE_SYSLOG_H around syslog function in the whole file to
+      avoid link failure.
+
+    * netware/phplib.mak:
+      Modified for Netware.
+
+2003-01-06  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/filters.c:
+      Added string.toupper and string.tolower filters and generalized non-op
+      filter methods
+
+2003-01-06  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/gd/libgd/gdft.c:
+      Nuke warning, on Win32 build
+
+    * ext/gd/gd_bundled.dsp:
+      enable imageftbbox() and imagefttext() on WIn32
+
+2003-01-06  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/user_filters.c
+      main/php_streams.h
+      main/streams.c:
+      Expose stream_filters_hash so that it can be searched by
+      stream_get_filters()
+
+2003-01-06  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Mention gif read-only support on windows.
+
+    * (PHP_4_3)
+      ext/gd/gd_bundled.dsp:
+      MFH: Added missing flags and .c files for gif read support on Windows.
+
+    * ext/gd/gd_bundled.dsp:
+      Complete gif readonly support addition by adding missing gd_gif_in.c
+      file to the project.
+
+    * ext/mcrypt/mcrypt.c:
+      Comment out non ANSI C standard comliant code. Fixes win32 build.
+
+    * ext/dba/dba.c:
+      Fixed win32 build.
+
+2003-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * ext/gd/libgd/gd.h
+      ext/gd/libgd/gdft.c:
+      Fixed bug #21445.
+
 2003-01-05  Sara Golemon  <php@alphaweb.net>
 
     * ext/standard/file.c
