@@ -722,6 +722,8 @@ ZEND_FUNCTION(get_class_methods)
 	char *string_key;
 	ulong num_key;
 	int key_type;
+	HashPosition pos;
+	zend_function *mptr;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -747,14 +749,13 @@ ZEND_FUNCTION(get_class_methods)
 	}
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset(&ce->function_table);
-	while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key, 1)) != HASH_KEY_NON_EXISTANT) {
-		if (key_type == HASH_KEY_IS_STRING) {
-			MAKE_STD_ZVAL(method_name);
-			ZVAL_STRING(method_name, string_key, 0);
-			zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
-		}
-		zend_hash_move_forward(&ce->function_table);
+	zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
+
+	while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
+		MAKE_STD_ZVAL(method_name);
+		ZVAL_STRING(method_name, mptr->common.function_name, 1);
+		zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
+		zend_hash_move_forward_ex(&ce->function_table, &pos);
 	}
 }
 /* }}} */
