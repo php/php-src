@@ -55,7 +55,7 @@ static PHP_MINIT_FUNCTION(mhash)
 		name = mhash_get_hash_name(i);
 		if(name) {
 			snprintf(buf, 127, "MHASH_%s", name);
-			REGISTER_LONG_CONSTANT(buf, i, CONST_PERSISTENT);
+			zend_register_long_constant(buf, strlen(buf) + 1, i, CONST_PERSISTENT, module_number ELS_CC);
 			free(name);
 		}
 	}
