@@ -1,4 +1,5 @@
 --TEST--
+Bug #21918 (different handling of positive vs. negative array indexes)
 --FILE--
 <?php
 
@@ -21,7 +22,6 @@ foreach($b as $k => $v) {
 
 echo "==Negative==\n";
 $c = array('-2' => 'a');
-$c[] = 'b';
 
 foreach($c as $k => $v) {
 	var_dump($k);
@@ -52,6 +52,4 @@ string(1) "a"
 ==Negative==
 int(-2)
 string(1) "a"
-int(-1)
-string(1) "b"
 ==Done==
