@@ -20,7 +20,7 @@ bin_src_SCRIPTS = phpextdist
 install-build:
 	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(phpbuilddir) $(INSTALL_ROOT)$(bindir) && \
-	(cd $(top_srcdir) && cp $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
+	(cd $(top_srcdir) && $(INSTALL_DATA) $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
 HEADER_DIRS = \
 	/ \
@@ -42,10 +42,10 @@ install-headers:
 	$(mkinstalldirs) $$paths && \
 	echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
 	for i in $(HEADER_DIRS); do \
-		(cd $(top_srcdir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
-		cd $(top_builddir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
+		(cd $(top_srcdir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+		cd $(top_builddir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
 	done; \
-	cd $(top_srcdir)/sapi/embed && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/main
+	cd $(top_srcdir)/sapi/embed && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/main
 
 install-programs:
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
