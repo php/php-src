@@ -44,7 +44,7 @@ AC_DEFUN(CPDF_TIFF_TEST,[
   ],)
 ])
 
-PHP_ARG_WITH(cpdflib,
+PHP_ARG_WITH(cpdflib, for cpdflib support,
 [  --with-cpdflib[=DIR]    Include cpdflib support (requires cpdflib >= 2).])
 
 if test "$PHP_CPDFLIB" != "no"; then
