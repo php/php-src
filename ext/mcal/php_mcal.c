@@ -153,7 +153,7 @@ PHP_MINFO_FUNCTION(mcal)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "MCAL Support", "enabled" );
 #ifdef MCALVER
-	snprintf(tmp, 128, "%s<br />%d", CALVER, MCALVER);
+	snprintf(tmp, 128, "%s - %d", CALVER, MCALVER);
 #else
 	snprintf(tmp, 128, "%s", CALVER );
 #endif
