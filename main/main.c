@@ -813,13 +813,7 @@ int php_request_startup(TSRMLS_D)
 		}
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
-			zval *output_handler;
-
-			ALLOC_INIT_ZVAL(output_handler);
-			Z_STRLEN_P(output_handler) = strlen(PG(output_handler));	/* this can be optimized */
-			Z_STRVAL_P(output_handler) = estrndup(PG(output_handler), Z_STRLEN_P(output_handler));
-			Z_TYPE_P(output_handler) = IS_STRING;
-			php_start_ob_buffer(output_handler, 0, 1 TSRMLS_CC);
+			php_start_ob_buffer_named(PG(output_handler), 0, 1 TSRMLS_CC);
 		}
 		else if (PG(output_buffering)) {
 			if (PG(output_buffering)>1) {
