@@ -121,6 +121,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #16798 (Compile failure with LOB support for Oracle version < 8.1).
   (Maxim)
 - Fixed bug #14532 (fixed connection_status() to return 2 for timeouts). (Jani)
+- Fixed bug #14245 ('make install' fails on AIX when using --with-apxs). (Jani)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
 
 17 Feb 2003, Version 4.3.1
