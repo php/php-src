@@ -54,7 +54,9 @@ if (PHP_DEBUG == "yes") {
 } else {
 	// Equivalent to Release_TSInline build -> best optimization
 	ADD_FLAG("CFLAGS", "/LD /MD /W3 /O2 /D NDebug /D NDEBUG \
-/D ZEND_WIN32_FORCE_INLINE /GB /GF /GS /D ZEND_DEBUG=0");
+/D ZEND_WIN32_FORCE_INLINE /GB /GF /D ZEND_DEBUG=0");
+	// if you have VS.Net /GS hardens the binary against buffer overruns
+	// ADD_FLAG("CFLAGS", "/GS");
 }
 
 if (PHP_ZTS == "yes") {
@@ -94,7 +96,7 @@ if (PHP_PHP_BUILD == "no") {
 }
 
 if (!FSO.FolderExists(PHP_PHP_BUILD)) {
-	ERROR("Could not find the php_build dir; please specify it\r\n\
+	WARNING("Could not find the php_build dir; please specify it\r\n\
 using the --with-php-build option to configure");
 }
 
