@@ -31,7 +31,7 @@ if test "$recurse" = "yes"; then
 	fi
 fi
 
-(set -x; cd $srcdir; ./ltconfig --disable-static --enable-dlopen --cache-file=$cachefile ltmain.sh)
+(set -x; cd $srcdir; sh ltconfig --disable-static --enable-dlopen --cache-file=$cachefile ltmain.sh)
 
 dnl ## Diversion 1 is the initial checking of OS features, programs,
 dnl ## libraries and so on.
@@ -86,9 +86,11 @@ if test "$YACC" != "bison -y"; then
     AC_MSG_WARN(You will need bison if you want to regenerate the PHP parsers.)
 else
     AC_MSG_CHECKING(bison version)
-    set `$YACC --version| sed -e 's/^GNU Bison version //' -e 's/\./ /'`
+    oldIFS=$IFS; IFS=.
+    set `bison -V | sed -e 's/^GNU Bison version //'`
+    IFS=$oldIFS
     if test "$1" = "1" -a "$2" -lt "25"; then
-        AC_MSG_WARN(You will need bison 1.25 if you want to regenerate the PHP parsers (found $1.$2).)
+        AC_MSG_WARN(Bison 1.25 or newer needed to regenerate parsers (found $1.$2).)
     fi
     AC_MSG_RESULT($1.$2 (ok))
 fi
