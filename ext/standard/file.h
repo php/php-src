@@ -100,7 +100,7 @@ typedef struct _php_meta_tags_data {
   int in_meta;
 } php_meta_tags_data;
 
-php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
+php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 
 typedef struct {
   int fgetss_state;

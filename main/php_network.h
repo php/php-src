@@ -112,32 +112,32 @@ typedef struct _php_netstream_data_t php_netstream_data_t;
 extern php_stream_ops php_stream_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
-PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC);
+PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC TSRMLS_DC );
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, int timeout, int persistent STREAMS_DC);
+		int socktype, int timeout, int persistent STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int persistent,
-		struct timeval *timeout STREAMS_DC);
+		struct timeval *timeout STREAMS_DC TSRMLS_DC);
 
-#define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC)
-#define php_stream_sock_open_host(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_CC)
-#define php_stream_sock_open_unix(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_CC)
+#define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)
+#define php_stream_sock_open_host(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_CC TSRMLS_CC)
+#define php_stream_sock_open_unix(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_CC TSRMLS_CC)
 
 /* {{{ memory debug */
-#define php_stream_sock_open_from_socket_rel(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_REL_CC)
-#define php_stream_sock_open_host_rel(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_REL_CC)
-#define php_stream_sock_open_unix_rel(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_REL_CC)
+#define php_stream_sock_open_from_socket_rel(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_sock_open_host_rel(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_sock_open_unix_rel(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_REL_CC TSRMLS_CC)
 
 /* }}} */
 
-PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout);
-PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode);
+PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout TSRMLS_DC);
+PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode TSRMLS_DC);
 /* set the chunk size for the stream; return the old chunk size */
-PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size);
+PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSRMLS_DC);
 
 #if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method);
-#define php_stream_sock_ssl_activate(stream, activate)	php_stream_sock_ssl_activate_with_method((stream), (activate), SSLv23_client_method())
+PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method TSRMLS_DC);
+#define php_stream_sock_ssl_activate(stream, activate)	php_stream_sock_ssl_activate_with_method((stream), (activate), SSLv23_client_method() TSRMLS_CC)
 
 #endif
 

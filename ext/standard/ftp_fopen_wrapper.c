@@ -66,7 +66,7 @@
 
 #include "php_fopen_wrappers.h"
 
-static int php_get_ftp_result(php_stream *stream)
+static int php_get_ftp_result(php_stream *stream TSRMLS_DC)
 {
 	char tmp_line[513];
 
@@ -85,7 +85,7 @@ php_stream_wrapper php_stream_ftp_wrapper =	{
 
 /* {{{ php_fopen_url_wrap_ftp
  */
-php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char **opened_path STREAMS_DC)
+php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream=NULL;
 	php_url *resource=NULL;
@@ -109,7 +109,7 @@ php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char *
 		goto errexit;
 
 	/* Start talking to ftp server */
-	result = php_get_ftp_result(stream);
+	result = php_get_ftp_result(stream TSRMLS_CC);
 	if (result > 299 || result < 200)
 		goto errexit;
 
@@ -124,7 +124,7 @@ php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char *
 	php_stream_write_string(stream, "\r\n");
 	
 	/* get the response */
-	result = php_get_ftp_result(stream);
+	result = php_get_ftp_result(stream TSRMLS_CC);
 	
 	/* if a password is required, send it */
 	if (result >= 300 && result <= 399) {
@@ -144,14 +144,14 @@ php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char *
 		php_stream_write_string(stream, "\r\n");
 		
 		/* read the response */
-		result = php_get_ftp_result(stream);
+		result = php_get_ftp_result(stream TSRMLS_CC);
 	}
 	if (result > 299 || result < 200)
 		goto errexit;
 	
 	/* set the connection to be binary */
 	php_stream_write_string(stream, "TYPE I\r\n");
-	result = php_get_ftp_result(stream);
+	result = php_get_ftp_result(stream TSRMLS_CC);
 	if (result > 299 || result < 200)
 		goto errexit;
 	
@@ -161,7 +161,7 @@ php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char *
 	php_stream_write_string(stream, "\r\n");
 	
 	/* read the response */
-	result = php_get_ftp_result(stream);
+	result = php_get_ftp_result(stream TSRMLS_CC);
 	if (mode[0] == 'r') {
 		/* when reading file, it must exist */
 		if (result > 299 || result < 200) {

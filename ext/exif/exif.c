@@ -3271,7 +3271,7 @@ PHP_FUNCTION(exif_imagetype)
 
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
 
-	itype = itype = php_getimagetype(stream, NULL);
+	itype = itype = php_getimagetype(stream, NULL TSRMLS_CC);
 
 	zend_list_delete(rsrc_id);
 

@@ -73,7 +73,7 @@ struct gfxinfo {
 
 /* {{{ php_handle_gif
  * routine to handle GIF files. If only everything were that easy... ;} */
-static struct gfxinfo *php_handle_gif (php_stream * stream)
+static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char a[2];
@@ -94,7 +94,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream)
 
 /* {{{ php_handle_psd
  */
-static struct gfxinfo *php_handle_psd (php_stream * stream)
+static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char a[8];
@@ -121,7 +121,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream)
 
 /* {{{ php_handle_bmp
  */
-static struct gfxinfo *php_handle_bmp (php_stream * stream)
+static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	char temp[15];
@@ -159,7 +159,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 
 /* {{{ php_handle_swf
  */
-static struct gfxinfo *php_handle_swf (php_stream * stream)
+static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	long bits;
@@ -180,7 +180,7 @@ static struct gfxinfo *php_handle_swf (php_stream * stream)
 
 /* {{{ php_handle_png
  * routine to handle PNG files */
-static struct gfxinfo *php_handle_png (php_stream * stream)
+static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	unsigned long in_width, in_height;
@@ -245,7 +245,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream)
 
 /* {{{ php_read2
  */
-static unsigned short php_read2(php_stream * stream)
+static unsigned short php_read2(php_stream * stream TSRMLS_DC)
 {
 	unsigned char a[2];
 
@@ -258,7 +258,7 @@ static unsigned short php_read2(php_stream * stream)
 
 /* {{{ php_next_marker
  * get next marker byte from file */
-static unsigned int php_next_marker(php_stream * stream, int last_marker, int comment_correction, int ff_read)
+static unsigned int php_next_marker(php_stream * stream, int last_marker, int comment_correction, int ff_read TSRMLS_DC)
 {
 	int a=0, marker;
 
@@ -311,9 +311,9 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
 
 /* {{{ php_skip_variable
  * skip over a variable-length block; assumes proper length marker */
-static void php_skip_variable(php_stream * stream)
+static void php_skip_variable(php_stream * stream TSRMLS_DC)
 {
-	off_t length = ((unsigned int)php_read2(stream));
+	off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
 
 	length = length-2;
 	if (length)
@@ -325,14 +325,14 @@ static void php_skip_variable(php_stream * stream)
 
 /* {{{ php_read_APP
  */
-static void php_read_APP(php_stream * stream, unsigned int marker, zval *info)
+static void php_read_APP(php_stream * stream, unsigned int marker, zval *info TSRMLS_DC)
 {
 	unsigned short length;
 	unsigned char *buffer;
 	unsigned char markername[ 16 ];
 	zval *tmp;
 
-	length = php_read2(stream);
+	length = php_read2(stream TSRMLS_CC);
 	length -= 2;				/* length includes itself */
 
 	buffer = emalloc(length);
@@ -356,14 +356,14 @@ static void php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 /* {{{ php_handle_jpeg
    main loop to parse JPEG structure */
-static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info)
+static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info TSRMLS_DC) 
 {
 	struct gfxinfo *result = NULL;
 	unsigned int marker = M_PSEUDO;
 	unsigned short length, ff_read=1;
 
 	for (;;) {
-		marker = php_next_marker(stream, marker, 1, ff_read);
+		marker = php_next_marker(stream, marker, 1, ff_read TSRMLS_CC);
 		ff_read = 0;
 		switch (marker) {
 			case M_SOF0:
@@ -384,16 +384,16 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info)
 					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 					if ( !result)
 						return NULL;
-					length = php_read2(stream);
+					length = php_read2(stream TSRMLS_CC);
 					result->bits     = php_stream_getc(stream);
-					result->height   = php_read2(stream);
-					result->width    = php_read2(stream);
+					result->height   = php_read2(stream TSRMLS_CC);
+					result->width    = php_read2(stream TSRMLS_CC);
 					result->channels = php_stream_getc(stream);
 					if (!info || length<8) /* if we don't want an extanded info -> return */
 						return result;
 					php_stream_seek(stream, length-8, SEEK_CUR);
 				} else {
-					php_skip_variable(stream);
+					php_skip_variable(stream TSRMLS_CC);
 				}
 				break;
 
@@ -414,9 +414,9 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info)
 			case M_APP14:
 			case M_APP15:
 				if (info) {
-					php_read_APP(stream, marker, info); /* read all the app markes... */
+					php_read_APP(stream, marker, info TSRMLS_CC); /* read all the app markes... */
 				} else {
-					php_skip_variable(stream);
+					php_skip_variable(stream TSRMLS_CC);
 				}
 				break;
 
@@ -426,7 +426,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info)
 				break;
 
 			default:
-				php_skip_variable(stream);		/* anything else isn't interesting */
+				php_skip_variable(stream TSRMLS_CC);		/* anything else isn't interesting */
 				break;
 		}
 	}
@@ -443,7 +443,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info)
 
 /* {{{ php_read4
  */
-static unsigned int php_read4(php_stream * stream)
+static unsigned int php_read4(php_stream * stream TSRMLS_DC)
 {
 	unsigned char a[4];
 
@@ -459,32 +459,32 @@ static unsigned int php_read4(php_stream * stream)
 
 /* {{{ php_handle_tiff
    main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_jpc(php_stream * stream)
+static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	unsigned int marker, dummy;
 	unsigned short length, ff_read = 1;
 
-	marker = php_next_marker(stream, 0, 0, ff_read);
+	marker = php_next_marker(stream, 0, 0, ff_read TSRMLS_CC);
 	ff_read = 0;
 	if ( marker == JC_SIZ)
 	{
-		length           = php_read2(stream); /* Lsiz: length of segment */
+		length           = php_read2(stream TSRMLS_CC); /* Lsiz: length of segment */
 		if ( length<42 || length>49191) /* read the spec */
 			return NULL;
 		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 		if ( !result)
 			return NULL;
-		dummy            = php_read2(stream); /* Rsiz: capabilities */
-		result->height   = php_read4(stream); /* Xsiz */
-		result->width    = php_read4(stream); /* Ysiz */
-		dummy            = php_read4(stream); /* X0siz */
-		dummy            = php_read4(stream); /* Y0siz */
-		dummy            = php_read4(stream); /* XTsiz */
-		dummy            = php_read4(stream); /* YTsiz */
-		dummy            = php_read4(stream); /* XT0siz */
-		dummy            = php_read4(stream); /* YT0siz */
-		result->bits     = php_read2(stream); /* Csiz: precision in bitss */
+		dummy            = php_read2(stream TSRMLS_CC); /* Rsiz: capabilities */
+		result->height   = php_read4(stream TSRMLS_CC); /* Xsiz */
+		result->width    = php_read4(stream TSRMLS_CC); /* Ysiz */
+		dummy            = php_read4(stream TSRMLS_CC); /* X0siz */
+		dummy            = php_read4(stream TSRMLS_CC); /* Y0siz */
+		dummy            = php_read4(stream TSRMLS_CC); /* XTsiz */
+		dummy            = php_read4(stream TSRMLS_CC); /* YTsiz */
+		dummy            = php_read4(stream TSRMLS_CC); /* XT0siz */
+		dummy            = php_read4(stream TSRMLS_CC); /* YT0siz */
+		result->bits     = php_read2(stream TSRMLS_CC); /* Csiz: precision in bitss */
 		result->channels = 0; /* don't know yet */
 		return result;
 	}
@@ -563,7 +563,7 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 
 /* {{{ php_handle_tiff
    main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int motorola_intel)
+static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int motorola_intel TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
 	int i, num_entries;
@@ -635,7 +635,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-int php_getimagetype(php_stream * stream, char *filetype)
+PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 {
 	char tmp[8];
 
@@ -725,38 +725,38 @@ PHP_FUNCTION(getimagesize)
 
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
 
-	itype = php_getimagetype(stream, NULL);
+	itype = php_getimagetype(stream, NULL TSRMLS_CC);
 	switch( itype) {
         case IMAGE_FILETYPE_GIF:
-			result = php_handle_gif (stream);
+			result = php_handle_gif (stream TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_JPEG:
 			if (info) {
-				result = php_handle_jpeg(stream, *info);
+				result = php_handle_jpeg(stream, *info TSRMLS_CC);
 			} else {
-				result = php_handle_jpeg(stream, NULL);
+				result = php_handle_jpeg(stream, NULL TSRMLS_CC);
 			}
 	        break;
         case IMAGE_FILETYPE_PNG:
-			result = php_handle_png(stream);
+			result = php_handle_png(stream TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_SWF:
-			result = php_handle_swf(stream);
+			result = php_handle_swf(stream TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_PSD:
-			result = php_handle_psd(stream);
+			result = php_handle_psd(stream TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_BMP:
-			result = php_handle_bmp(stream);
+			result = php_handle_bmp(stream TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_TIFF_II:
-			result = php_handle_tiff(stream, NULL, 0);
+			result = php_handle_tiff(stream, NULL, 0 TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_TIFF_MM:
-			result = php_handle_tiff(stream, NULL, 1);
+			result = php_handle_tiff(stream, NULL, 1 TSRMLS_CC);
 	        break;
         case IMAGE_FILETYPE_JPC:
-			result = php_handle_jpc(stream);
+			result = php_handle_jpc(stream TSRMLS_CC);
 	        break;
 		default:
         case IMAGE_FILETYPE_UNKNOWN:

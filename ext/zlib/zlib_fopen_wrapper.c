@@ -28,7 +28,7 @@ struct php_gz_stream_data_t	{
 	php_stream *stream;
 };
 
-static size_t php_gziop_read(php_stream *stream, char *buf, size_t count)
+static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 
@@ -41,33 +41,33 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 	return gzread(self->gz_file, buf, count); 
 }
 
-static char *php_gziop_gets(php_stream *stream, char *buf, size_t size)
+static char *php_gziop_gets(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	return gzgets(self->gz_file, buf, size);
 }
 
 
-static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count)
+static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	return gzwrite(self->gz_file, (char*)buf, count); 
 }
 
-static int php_gziop_seek(php_stream *stream, off_t offset, int whence)
+static int php_gziop_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	return gzseek(self->gz_file, offset, whence);
 }
 
-static int php_gziop_close(php_stream *stream, int close_handle)
+static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	int ret = EOF;
 	
 	if (close_handle)
 		ret = gzclose(self->gz_file);
-	php_stream_free(self->stream, close_handle);
+	php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE | (close_handle == 0 ? PHP_STREAM_FREE_PRESERVE_HANDLE : 0));
 	efree(self);
 
 	return ret;
@@ -80,7 +80,7 @@ php_stream_ops php_stream_gzio_ops = {
 	NULL, "ZLIB"
 };
 
-php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path STREAMS_DC)
+php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self;
 	php_stream *stream = NULL;

@@ -413,7 +413,7 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 }
 /* }}} */
 
-PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC)
+PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
 	php_netstream_data_t *sock;
@@ -435,7 +435,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent 
 }
 
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, int timeout, int persistent STREAMS_DC)
+		int socktype, int timeout, int persistent STREAMS_DC TSRMLS_DC)
 {
 	int socket;
 
@@ -448,7 +448,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 }
 
 PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int persistent,
-		struct timeval *timeout STREAMS_DC)
+		struct timeval *timeout STREAMS_DC TSRMLS_DC)
 {
 #if defined(AF_UNIX)
 	int socketd;
@@ -484,7 +484,7 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int
 }
 
 #if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method)
+PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	SSL_CTX *ctx = NULL;
@@ -524,7 +524,7 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 }
 #endif
 
-PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout)
+PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 
@@ -535,7 +535,7 @@ PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *time
 	sock->timeout_event = 0;
 }
 
-PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode)
+PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode TSRMLS_DC)
 {
 	int oldmode;
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -549,7 +549,7 @@ PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode)
 	return oldmode;
 }
 
-PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size)
+PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSRMLS_DC)
 {
 	size_t oldsize;
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -567,7 +567,7 @@ PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size)
 #define READPTR(sock) ((sock)->readbuf + (sock)->readpos)
 #define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
 
-static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
+static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 #if HAVE_OPENSSL_EXT
@@ -576,7 +576,7 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 #endif
 	return send(sock->socket, buf, count, 0);
 }
-static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock)
+static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
 	fd_set fdr, tfdr;
 	int retval;
@@ -605,7 +605,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	}
 }
 
-static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_data_t *sock)
+static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
 	char buf[PHP_SOCK_CHUNK_SIZE];
 	int nr_bytes;
@@ -620,7 +620,7 @@ static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_da
 
 
 	if(sock->is_blocked) {
-		php_sock_stream_wait_for_data(stream, sock);
+		php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
 		if (sock->timeout_event)
 			return 0;
 	}
@@ -649,14 +649,14 @@ static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_da
 
 }
 
-static size_t php_sock_stream_read(php_stream *stream, php_netstream_data_t *sock)
+static size_t php_sock_stream_read(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
 	size_t nr_bytes;
 	size_t nr_read = 0;
 	int i;
 
 	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
-		nr_bytes = php_sock_stream_read_internal(stream, sock);
+		nr_bytes = php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 		if(nr_bytes == 0) break;
 		nr_read += nr_bytes;
 	}
@@ -664,17 +664,17 @@ static size_t php_sock_stream_read(php_stream *stream, php_netstream_data_t *soc
 	return nr_read;
 }
 
-static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
+static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	size_t ret = 0;
 
 	if (sock->is_blocked)	{
 		while(!sock->eof && TOREAD(sock) < count && !sock->timeout_event)
-			php_sock_stream_read_internal(stream, sock);
+			php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 	}
 	else	
-		php_sock_stream_read(stream, sock);
+		php_sock_stream_read(stream, sock TSRMLS_CC);
 
 	if(count < 0)
 		return ret;
@@ -688,7 +688,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	return ret;
 }
 
-static int php_sockop_close(php_stream *stream, int close_handle)
+static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 
@@ -714,16 +714,15 @@ static int php_sockop_close(php_stream *stream, int close_handle)
 	return 0;
 }
 
-static int php_sockop_flush(php_stream *stream)
+static int php_sockop_flush(php_stream *stream TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	return fsync(sock->socket);
 }
 
-static int php_sockop_cast(php_stream *stream, int castas, void **ret)
+static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	TSRMLS_FETCH();
 
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:
@@ -768,7 +767,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret)
 } while (0)
 
 
-static char *php_sockop_gets(php_stream *stream, char *buf, size_t maxlen)
+static char *php_sockop_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	char *p = NULL, *pe;
@@ -785,11 +784,11 @@ static char *php_sockop_gets(php_stream *stream, char *buf, size_t maxlen)
 	if(!p) {
 		if(sock->is_blocked) {
 			while(!p && !sock->eof && !sock->timeout_event && TOREAD(sock) < maxlen) {
-				php_sock_stream_read_internal(stream, sock);
+				php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 				SEARCHCR();
 			}
 		} else {
-			php_sock_stream_read(stream, sock);
+			php_sock_stream_read(stream, sock TSRMLS_CC);
 			SEARCHCR();
 		}
 	}

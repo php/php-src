@@ -131,6 +131,14 @@ struct _php_core_globals {
 	zend_bool allow_url_fopen;
 
 	zend_bool always_populate_raw_post_data;
+
+#if ZEND_DEBUG
+	long streams_call_depth;
+	char * streams_orig_filename;
+	long streams_orig_lineno;
+	char * streams_filename;
+	long streams_lineno;
+#endif
 };
 
 
