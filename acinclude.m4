@@ -34,10 +34,20 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
     AC_MSG_ERROR(OpenSSL version 0.9.6 or greater required.)
   ])
   CPPFLAGS=$old_CPPFLAGS
-    
+
   AC_ADD_LIBPATH($OPENSSL_DIR/lib)
-  AC_ADD_LIBRARY(crypto)
-  AC_ADD_LIBRARY(ssl)
+
+  AC_CHECK_LIB(crypto, CRYPTO_free, [
+    AC_ADD_LIBRARY(crypto)
+  ],[
+    AC_MSG_ERROR(libcrypto not found!)
+  ])
+
+  AC_CHECK_LIB(ssl, SSL_CTX_set_ssl_version, [
+    AC_ADD_LIBRARY(ssl)
+  ],[
+    AC_MSG_ERROR(libssl not found!)
+  ])
   AC_ADD_INCLUDE($OPENSSL_INC)
 ])
 
