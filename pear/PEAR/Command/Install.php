@@ -77,8 +77,17 @@ class PEAR_Command_Install extends PEAR_Command_Common
         $ret[1] = "{$ret[1]}\n" .
                   "   -f    forces the installation of the package\n".
                   "         when it is already installed\n".
-                  "   -n    do not take care of package dependencies";
+                  "   -n    do not take care of package dependencies\n".
+                  "   -s    soft update: install or upgrade only if needed";
         return $ret;
+    }
+
+    // }}}
+    // {{{ getOptions()
+
+    function getOptions()
+    {
+        return array('f', 'n', 's');
     }
 
     // }}}
@@ -89,6 +98,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
         $installer = &new PEAR_Installer($this->config->get('php_dir'),
                                          $this->config->get('ext_dir'),
                                          $this->config->get('doc_dir'));
+        $installer->setFrontend($this->ui);
         $installer->debug = $this->config->get('verbose');
 
         $failmsg = '';
@@ -98,6 +108,9 @@ class PEAR_Command_Install extends PEAR_Command_Common
         }
         if (isset($options['n'])) {
             $opts['nodeps'] = true;
+        }
+        if (isset($options['s'])) {
+            $opts['soft'] = true;
         }
         switch ($command) {
             case 'upgrade':
@@ -130,11 +143,6 @@ class PEAR_Command_Install extends PEAR_Command_Common
     }
 
     // }}}
-
-    function getOptions()
-    {
-        return array('f', 'n');
-    }
 }
 
 ?>
