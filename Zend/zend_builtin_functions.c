@@ -1082,7 +1082,8 @@ ZEND_FUNCTION(zend_test_func)
 }
 #endif
 
-
+/* {{{ proto string get_resource_type(resource res)
+   Get the resource type name for a given resource */
 ZEND_FUNCTION(get_resource_type)
 {
 	char *resource_type;
@@ -1104,6 +1105,7 @@ ZEND_FUNCTION(get_resource_type)
 		RETURN_STRING("Unknown", 1);
 	}
 }
+/* }}} */
 
 
 static int add_extension_info(zend_module_entry *module, void *arg TSRMLS_DC)
