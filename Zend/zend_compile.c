@@ -1608,6 +1608,12 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	ce->create_object = ce->parent->create_object;
 	
 	/* Inherit special functions if needed */
+	if (!ce->get_iterator) {
+		ce->get_iterator = ce->parent->get_iterator;
+	}
+	if (!ce->iterator_funcs.funcs) {
+		ce->iterator_funcs.funcs = ce->parent->iterator_funcs.funcs;
+	}
 	if (!ce->__get) {
 		ce->__get   = ce->parent->__get;
 	}
