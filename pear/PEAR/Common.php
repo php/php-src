@@ -409,7 +409,9 @@ class PEAR_Common extends PEAR
         $xml = null;
         foreach ($content as $file) {
             $name = $file['filename'];
-            if (ereg('^.*/package.xml$', $name, $match)) {
+            if ($name == 'package.xml') {
+                $xml = $name;
+            } elseif (ereg('^.*/package.xml$', $name, $match)) {
                 $xml = $match[0];
             }
         }
