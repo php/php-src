@@ -1432,6 +1432,10 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 	int rv = FAILURE;
 	
 	IB_RESULT = NULL;
+
+	if (argc > 0 && args != NULL) {
+		SEPARATE_ZVAL(args);
+	}
 	
 	/* allocate sqlda and output buffers */
 	if (ib_query->out_sqlda) { /* output variables in select, select for update */
