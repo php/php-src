@@ -75,7 +75,9 @@ dumpall($reg);
 $reg->updatePackage("pkg3", array("version" => "3.1b1", "status" => "beta"));
 dumpall($reg);
 
-print_r($reg->checkFilemap(array_merge($files3, $files2)));
+$testing = $reg->checkFilemap(array_merge($files3, $files2));
+$ok = ($testing == array('pkg3-1.php' => 'pkg3', 'pkg3' . DIRECTORY_SEPARATOR . 'pkg3-2.php' => 'pkg3'));
+echo 'filemap OK? ' . ($ok ? "yes\n" : "no\n");
 
 $reg->updatePackage("pkg3", array("filelist" => $files3_new));
 dumpall($reg);
@@ -160,11 +162,7 @@ dumping registry...
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.1b1" filelist=array(pkg3-1.php[role=php],pkg3-2.php[role=php,baseinstalldir=pkg3]) status="beta"
 dump done
-Array
-(
-    [pkg3-1.php] => pkg3
-    [pkg3/pkg3-2.php] => pkg3
-)
+filemap OK? yes
 dumping registry...
 pkg1: version="1.0" filelist=array(pkg1-1.php[role=php],pkg1-2.php[role=php,baseinstalldir=pkg1])
 pkg3: version="3.1b1" filelist=array(pkg3-3.php[role=php,baseinstalldir=pkg3],pkg3-4.php[role=php]) status="beta"

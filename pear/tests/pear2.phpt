@@ -1,11 +1,15 @@
 --TEST--
 PEAR complete set/push/pop error-handling test (run from pear/tests dir)
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 
-require_once "../PEAR.php";
+require_once "PEAR.php";
 
 class testErrorHandlingStatic {
     function doSetErrorHandlingFunction()
