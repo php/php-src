@@ -25,7 +25,10 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "SAPI.h"
+
+#ifndef PHP_WIN32
 #include "build-defs.h"
+#endif
 
 #ifdef HAVE_LIBDL
 #include <stdlib.h>
