@@ -1005,14 +1005,14 @@ PHP_MINIT_FUNCTION(basic)
 
 
 	if (PG(allow_url_fopen)) {
-		if (FAILURE == php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC))
+		if (FAILURE == php_register_url_stream_wrapper("http", &php_stream_http_wrapper))
 			return FAILURE;
-		if (FAILURE == php_register_url_stream_wrapper("php", &php_stream_php_wrapper TSRMLS_CC))
+		if (FAILURE == php_register_url_stream_wrapper("php", &php_stream_php_wrapper))
 			return FAILURE;
-		if (FAILURE == php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC))
+		if (FAILURE == php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper))
 			return FAILURE;
 # if HAVE_OPENSSL_EXT
-		if (FAILURE == php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC))
+		if (FAILURE == php_register_url_stream_wrapper("https", &php_stream_http_wrapper))
 			return FAILURE;
 # endif
 	}
@@ -1030,11 +1030,11 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 #endif
 
 	if (PG(allow_url_fopen)) {
-		php_unregister_url_stream_wrapper("http" TSRMLS_CC);
-		php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
-		php_unregister_url_stream_wrapper("php" TSRMLS_CC);
+		php_unregister_url_stream_wrapper("http");
+		php_unregister_url_stream_wrapper("ftp");
+		php_unregister_url_stream_wrapper("php");
 # if HAVE_OPENSSL_EXT
-		php_unregister_url_stream_wrapper("https" TSRMLS_CC);
+		php_unregister_url_stream_wrapper("https");
 # endif
 
 	}
@@ -1532,7 +1532,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 			break;
 
 		case 3:		/*save to a file */
-			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL TSRMLS_CC);
+			stream = php_stream_open_wrapper(opt, "a", IGNORE_URL | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 			if (!stream)
 				return FAILURE;
 			php_stream_write(stream, message, strlen(message));

@@ -112,11 +112,23 @@ typedef struct _php_netstream_data_t php_netstream_data_t;
 extern php_stream_ops php_stream_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
-PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent);
+PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC);
 /* open a connection to a host using php_hostconnect and return a stream */
-PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, int timeout, int persistent);
-PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int pathlen, int persistent, struct timeval *timeout);
+PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
+		int socktype, int timeout, int persistent STREAMS_DC);
+PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int persistent,
+		struct timeval *timeout STREAMS_DC);
+
+#define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC)
+#define php_stream_sock_open_host(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_CC)
+#define php_stream_sock_open_unix(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_CC)
+
+/* {{{ memory debug */
+#define php_stream_sock_open_from_socket_rel(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_REL_CC)
+#define php_stream_sock_open_host_rel(host, port, socktype, timeout, persistent)	_php_stream_sock_open_host((host), (port), (socktype), (timeout), (persistent) STREAMS_REL_CC)
+#define php_stream_sock_open_unix_rel(path, pathlen, persistent, timeval)	_php_stream_sock_open_unix((path), (pathlen), (persistent), (timeval) STREAMS_REL_CC)
+
+/* }}} */
 
 PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout);
 PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode);

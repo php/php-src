@@ -71,7 +71,7 @@
 #define HTTP_HEADER_BLOCK_SIZE		1024
 
 
-php_stream *php_stream_url_wrap_http(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
+php_stream *php_stream_url_wrap_http(char *path, char *mode, int options, char **opened_path STREAMS_DC)
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -268,7 +268,7 @@ php_stream *php_stream_url_wrap_http(char *path, char *mode, int options, char *
 			else {
 				strlcpy(new_path, location, sizeof(new_path));
 			}
-			stream = php_stream_url_wrap_http(new_path, mode, options, opened_path TSRMLS_CC);
+			stream = php_stream_url_wrap_http(new_path, mode, options, opened_path STREAMS_CC);
 			if (stream->wrapperdata)	{
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);

@@ -413,7 +413,7 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 }
 /* }}} */
 
-PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent)
+PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC)
 {
 	php_stream *stream;
 	php_netstream_data_t *sock;
@@ -426,7 +426,7 @@ PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent)
 	sock->timeout.tv_sec = -1;
 	sock->socket = socket;
 
-	stream = php_stream_alloc(&php_stream_socket_ops, sock, persistent, "r+");
+	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent, "r+");
 
 	if (stream == NULL)	
 		pefree(sock, persistent);
@@ -434,8 +434,8 @@ PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent)
 	return stream;
 }
 
-PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, int timeout, int persistent)
+PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
+		int socktype, int timeout, int persistent STREAMS_DC)
 {
 	int socket;
 
@@ -444,10 +444,11 @@ PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short po
 	if (socket == -1)
 		return NULL;
 
-	return php_stream_sock_open_from_socket(socket, persistent);
+	return php_stream_sock_open_from_socket_rel(socket, persistent);
 }
 
-PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int pathlen, int persistent, struct timeval *timeout)
+PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int persistent,
+		struct timeval *timeout STREAMS_DC)
 {
 #if defined(AF_UNIX)
 	int socketd;
@@ -476,7 +477,7 @@ PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int pathlen, int 
 	if (php_connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), timeout) == SOCK_CONN_ERR) 
 		return NULL;
 
-	return php_stream_sock_open_from_socket(socketd, persistent);
+	return php_stream_sock_open_from_socket_rel(socketd, persistent);
 #else
 	return NULL;
 #endif

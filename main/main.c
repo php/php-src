@@ -565,9 +565,8 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 {
 	FILE *retval = NULL;
 	php_stream *stream;
-	TSRMLS_FETCH();
 
-	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS, opened_path TSRMLS_CC);
+	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS, opened_path);
 	if (stream)	{
 		/* no need for us to check the stream type here */
 		php_stream_sock_set_chunk_size(stream, 1);
@@ -952,7 +951,7 @@ int php_module_startup(sapi_module_struct *sf)
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)
 	 */
-	if (php_init_stream_wrappers(TSRMLS_C) == FAILURE)	{
+	if (php_init_stream_wrappers() == FAILURE)	{
 		php_printf("PHP:  Unable to initialize stream url wrappers.\n");
 		return FAILURE;
 	}
@@ -1057,7 +1056,7 @@ void php_module_shutdown(TSRMLS_D)
 
 	zend_shutdown(TSRMLS_C);
 
-	php_shutdown_stream_wrappers(TSRMLS_C);
+	php_shutdown_stream_wrappers();
 
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();

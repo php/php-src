@@ -188,7 +188,7 @@ PHP_MINIT_FUNCTION(zlib)
 	le_zp = zend_register_list_destructors_ex(phpi_destructor_gzclose, NULL, "zlib", module_number);
 
 	if(PG(allow_url_fopen)) {
-		php_register_url_stream_wrapper("zlib", &php_stream_gzip_wrapper TSRMLS_CC);
+		php_register_url_stream_wrapper("zlib", &php_stream_gzip_wrapper);
 	}
 
 	REGISTER_LONG_CONSTANT("FORCE_GZIP", CODING_GZIP, CONST_CS | CONST_PERSISTENT);
@@ -255,7 +255,7 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options TSRMLS_DC)
 	php_stream *stream = NULL;
 	int fd;
 
-	stream = php_stream_open_wrapper(path, mode, options | REPORT_ERRORS, NULL TSRMLS_CC);
+	stream = php_stream_open_wrapper(path, mode, options | REPORT_ERRORS, NULL);
 	if (stream)	{
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD|PHP_STREAM_CAST_TRY_HARD, (void**)&fd, 1))
 		{
@@ -302,7 +302,7 @@ PHP_FUNCTION(gzfile)
 	convert_to_string_ex(filename);
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "rb", use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL TSRMLS_CC);
+	stream = php_stream_gzopen(Z_STRVAL_PP(filename), "rb", use_include_path|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL STREAMS_CC);
 	if (stream == NULL) {
 		php_error(E_WARNING,"gzFile(\"%s\") - %s",Z_STRVAL_PP(filename),strerror(errno));
 		RETURN_FALSE;

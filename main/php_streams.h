@@ -25,6 +25,54 @@
 
 /* See README.STREAMS in php4 root dir for more info about this stuff */
 
+/* {{{ Streams memory debugging stuff */
+
+#if ZEND_DEBUG
+/* these have more of a dependency on the definitions of the zend macros than
+ * I would prefer, but doing it this way saves loads of idefs :-/ */
+# define STREAMS_D			int __php_stream_call_depth ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC TSRMLS_DC
+# define STREAMS_C			0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC TSRMLS_CC
+# define STREAMS_REL_C		__php_stream_call_depth + 1 ZEND_FILE_LINE_CC, \
+	__php_stream_call_depth ? __zend_orig_filename : __zend_filename, \
+	__php_stream_call_depth ? __zend_orig_lineno : __zend_lineno \
+	TSRMLS_CC
+
+# define STREAMS_DC		, STREAMS_D
+# define STREAMS_CC		, STREAMS_C
+# define STREAMS_REL_CC	, STREAMS_REL_C
+#else
+# define STREAMS_D		TSRMLS_D
+# define STREAMS_C		TSRMLS_C
+# define STREAMS_REL_C	TSRMLS_C
+# define STREAMS_DC		TSRMLS_DC
+# define STREAMS_CC		TSRMLS_CC
+# define STREAMS_REL_CC	TSRMLS_CC
+#endif
+
+/* these functions relay the file/line number information. They are depth aware, so they will pass
+ * the ultimate ancestor, which is useful, because there can be several layers of calls */
+#define php_stream_alloc_rel(ops, thisptr, persistent, mode) _php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_REL_CC)
+
+#define php_stream_copy_to_mem_rel(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC)
+	
+#define php_stream_fopen_rel(filename, mode, opened) _php_stream_fopen((filename), (mode), (opened) STREAMS_REL_CC)
+
+#define php_stream_fopen_with_path_rel(filename, mode, path, opened) _php_stream_fopen_with_path((filename), (mode), (path), (opened) STREAMS_REL_CC)
+
+#define php_stream_fopen_from_file_rel(file, mode)	 _php_stream_fopen_from_file((file), (mode) STREAMS_REL_CC)
+	
+#define php_stream_fopen_from_pipe_rel(file, mode)	 _php_stream_fopen_from_pipe((file), (mode) STREAMS_REL_CC)
+	
+#define php_stream_fopen_tmpfile_rel()	_php_stream_fopen_tmpfile(STREAMS_REL_C)
+
+#define php_stream_fopen_temporary_file_rel(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_REL_CC)
+	
+#define php_stream_open_wrapper_rel(path, mode, options, opened) _php_stream_open_wrapper((path), (mode), (options), (opened) STREAMS_REL_CC)
+
+#define php_stream_make_seekable_rel(origstream, newstream) _php_stream_make_seekable(origstream, newstream STREAMS_REL_CC)
+
+/* }}} */
+	
 /* The contents of the php_stream_ops and php_stream should only be accessed
  * using the functions/macros in this header.
  * If you need to get at something that doesn't have an API,
@@ -53,7 +101,7 @@ typedef struct _php_stream_ops  {
 } php_stream_ops;
 
 /* options uses the IGNORE_URL family of defines from fopen_wrappers.h */
-typedef php_stream *(*php_stream_factory_func_t)(char *filename, char *mode, int options, char **opened_path TSRMLS_DC);
+typedef php_stream *(*php_stream_factory_func_t)(char *filename, char *mode, int options, char **opened_path STREAMS_DC);
 typedef void (*php_stream_wrapper_dtor_func_t)(php_stream *stream);
 
 typedef struct _php_stream_wrapper	{
@@ -83,7 +131,9 @@ struct _php_stream  {
 
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream *php_stream_alloc(php_stream_ops *ops, void *abstract, int persistent, const char *mode);
+PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
+		int persistent, const char *mode STREAMS_DC);
+#define php_stream_alloc(ops, thisptr, persistent, mode)	_php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_CC)
 
 PHPAPI int php_stream_free(php_stream *stream, int call_dtor);
 #define php_stream_close(stream)	php_stream_free(stream, 1)
@@ -107,7 +157,10 @@ PHPAPI int php_stream_puts(php_stream *stream, char *buf);
 PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen);
 /* read all data from stream and put into a buffer. Caller must free buffer when done.
  * The copy will use mmap if available. */
-PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent);
+PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
+		int persistent STREAMS_DC);
+#define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC)
+
 
 /* maybe implement someday */
 #define php_stream_error(stream)	(0)
@@ -115,12 +168,23 @@ PHPAPI size_t php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
 /* operations for a stdio FILE; use the php_stream_fopen_XXX funcs below */
 extern php_stream_ops php_stream_stdio_ops;
 /* like fopen, but returns a stream */
-PHPAPI php_stream *php_stream_fopen(const char *filename, const char *mode, char **opened_path TSRMLS_DC);
-PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path TSRMLS_DC);
-PHPAPI php_stream *php_stream_fopen_from_file(FILE *file, const char *mode);
-PHPAPI php_stream *php_stream_fopen_from_pipe(FILE *file, const char *mode);
-PHPAPI php_stream *php_stream_fopen_tmpfile(void);
-PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path TSRMLS_DC);
+PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path STREAMS_DC);
+#define php_stream_fopen(filename, mode, opened)	_php_stream_fopen((filename), (mode), (opened) STREAMS_CC)
+
+PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path STREAMS_DC);
+#define php_stream_fopen_with_path(filename, mode, path, opened)	_php_stream_fopen_with_path((filename), (mode), (path), (opened) STREAMS_CC)
+
+PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC);
+#define php_stream_fopen_from_file(file, mode)	_php_stream_fopen_from_file((file), (mode) STREAMS_CC)
+
+PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC);
+#define php_stream_fopen_from_pipe(file, mode)	_php_stream_fopen_from_pipe((file), (mode) STREAMS_CC)
+
+PHPAPI php_stream *_php_stream_fopen_tmpfile(STREAMS_D);
+#define php_stream_fopen_tmpfile()	_php_stream_fopen_tmpfile(STREAMS_C)
+
+PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC);
+#define php_stream_fopen_temporary_file(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_CC)
 
 /* coerce the stream into some other form */
 /* cast as a stdio FILE * */
@@ -163,18 +227,20 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 # define IGNORE_URL_WIN 0
 #endif
 
-int php_init_stream_wrappers(TSRMLS_D);
-int php_shutdown_stream_wrappers(TSRMLS_D);
-PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
-PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
-PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path TSRMLS_DC);
+int php_init_stream_wrappers(void);
+int php_shutdown_stream_wrappers(void);
+PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper);
+PHPAPI int php_unregister_url_stream_wrapper(char *protocol);
+PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC);
+#define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper((path), (mode), (options), (opened) STREAMS_CC)
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */
 #define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
 #define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
 /* DO NOT call this on streams that are referenced by resources! */
-PHPAPI int php_stream_make_seekable(php_stream *origstream, php_stream **newstream);
+PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream STREAMS_DC);
+#define php_stream_make_seekable(origstream, newstream)	_php_stream_make_seekable(origstream, newstream STREAMS_CC)
 
 #endif
 

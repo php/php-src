@@ -30,7 +30,7 @@
 #include "php_standard.h"
 #include "php_fopen_wrappers.h"
 
-php_stream * php_stream_url_wrap_php(char * path, char * mode, int options, char ** opened_path TSRMLS_DC)
+php_stream * php_stream_url_wrap_php(char * path, char * mode, int options, char ** opened_path STREAMS_DC)
 {
 	FILE * fp = NULL;
 	php_stream * stream = NULL;
