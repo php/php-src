@@ -104,6 +104,8 @@ Windows Manual installation from zip binary distribution
   %SYSTEMROOT% directory is typically:
    c:\windows for Windows 95/98
    c:\winnt or c:\winnt40 for NT/2000/XP servers
+  We will refer to %SYSTEMROOT% for both %WINDOWS% or
+  %SYSTEMROOT% throughout the text.
 
   Edit your php.ini file:
 
@@ -204,24 +206,75 @@ Web server configuration
   on Windows. One is to use the CGI binary (php-cgi.exe),
   the other is to use the Apache module dll. In either case
   you need to stop the Apache server, and edit your
-  srm.conf or httpd.conf to configure Apache to work with PHP.
+  httpd.conf or srm.conf to configure Apache to work with PHP.
+  We'll refer to either of these files with httpd.conf in the
+  text.
 
   Although there can be a few variations of configuring PHP
   under Apache, these are simple enough to be used by the
   newcomer. Please consult the Apache Docs for further
   configuration directives.
 
+
+  Installing PHP for Apache as module
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
   Now that version 4.1 introduces a safer sapi module, we recommend
   that you configure PHP as a module in Apache.
 
-  To do this, you should move php4ts.dll to the windows/system (for Windows 9x/Me)
-  or winnt/system32 (for Windows NT/2000/XP) directory, overwriting any
-  older file. Then you should add the following three lines to your Apache
-  conf file: (swap c:/php/ for your PHP install path)
+  To accomplish this, you have to load the php4apache.dll in your
+  Apache httpd.conf.
+
+  !! NOTE !!
+  Whereever you load php4apache.dll from, php4apache.dll also
+  needs the php4ts.dll also included in the PHP4 distribution.
+  php4apache.dll depends on php4ts.dll which is loaded as soon as
+  Apache loads php4apache.dll. If php4ts.dll can't be found, you
+  usually get an error like (also see the "Problems?" section at
+  the end of the file):
+
+    Cannot load c:/php/sapi/php4apache.dll into server
+
+  So where does php4ts.dll has to be to be properly loaded ?
+  php4ts.dll is searched in the following order:
+
+  1) in the directory where apache.exe is start from
+  2) in the directory where php4apache.dll is loaded from
+  3) in your %SYSTEMROOT%\System32, %SYSTEMROOT%\system and
+     %SYSTEMROOT% directory.
+     Note: %SYSTEMROOT%\System32 only applies to Windows NT/2000/XP)
+  4) in your whole %PATH%
+
+  Note: What is %SYSTEMROOT% ? Depending on your Windows
+        installation this may be for example c:\winnt or C:\windows
+
+  Usually you would just copy it over to %SYSTEMROOT%\System32.
+  But if you want to have multiple PHP installations (for
+  whatever reason) this is a bad idea. For this circumstance the
+  safest thing is to let php4ts.dll reside in the same directory
+  where php4apache.dll is loaded from (see point 2 above).
+
+
+  After you've set up the file layout properly, you're ready to
+  finally configure Apache to load the PHP4 module. Just add the
+  following lines to your httpd.conf:
 
    LoadModule php4_module c:/php/sapi/php4apache.dll
    AddModule mod_php4.c
    AddType application/x-httpd-php .php
+
+  Note: Especially newer versions of Apache do not need the
+        AddModule directive anymore, your milage may vary.
+
+
+  Where do I have to put the php.ini ?
+   The php.ini files is only searched in two places:
+   1) in your Apache installation directory (e.g. c:\apache\apache)
+   2) in your %SYSTEMROOT% directory.
+  
+
+  Installing PHP for Apache as CGI binary
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   If you wish to install PHP as a CGI binary, read this first:
 
@@ -253,9 +306,21 @@ Web server configuration
   If you wish to use this feature with the cgi binary, create a new
   file, and use the show_source("path/to/original_file.php"); function.
 
-  On Win-Apache all backslashes in a path statement such
-  as: "c:\directory\file.ext", must be converted to
-  forward slashes.
+
+  Forward or backslash in pathnames ?
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  On Win-Apache, path names can contain either forward- or backslashes.
+  Example:
+
+    LoadModule php4_module C:\php\sapi\php4apache.dll
+
+  works as good as 
+
+    LoadModule php4_module C:/php/sapi/php4apache.dll
+
+  You even can mix the slash-style:
+
+    LoadModule php4_module C:\php/php4apache.dll
 
 ----------------------------------------------------------
 
@@ -585,6 +650,56 @@ Problems?
    Manager. If a script file does not exist then the server will return a 404 error instead.
    There is also the additional benefit that IIS will do any authentication required for you
    based on the NTLanMan permissions on your script file.
+
+
+ You have inherent problems loading the right DLL?
+  Sometimes, loading the right DLL can be a pain on Windows.
+  Advanced Windows users may use a tool called strace (named
+  after the famous Unix application) to trace file access on the
+  system (however, it only works on NT-alike Windows, read:
+  NT/2000/XP). It can be found at
+  http://razor.bindview.com/tools/desc/strace_readme.html . Read
+  the instruction there carefully!
+
+  Example scenery:
+
+   Apache/PHP4 as module. Though I've properly configured
+   php4apache.dll in httpd.conf, I always get:
+
+   Syntax error on line 1025 of c:/apache/apache/conf/httpd.conf:
+   Cannot load c:/php/php-4.2.1-win32/sapi/php4apache.dll into server
+
+   But c:/php/php-4.2.1-win32/sapi/php4apache.dll definitely
+   exists:
+
+   dir c:\php\php-4.2.1-win32\sapi\php4apache.dll
+    Directory of c:\php\php-4.2.1-win32\sapi
+    13.05.2002  00:01               24.576 php4apache.dll
+
+   'strace'ing the apache.exe binary revealed the following:
+   c:
+   cd \apache\apache
+   strace apache >strace.txt
+
+   Then looking into strace.txt:
+   [...]
+729 3348 3248 NtOpenSection (0xe, {24, 24, 0x40, 0, 0, "php4ts.dll"}, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+731 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\c:\php\php-4.2.1-win32\sapi\php4ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+733 3348 3248 NtQueryAttributesFile ({24, 108, 0x40, 0, 0, "php4ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+735 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\C:\WINNT\System32\php4ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+   [...]
+
+   This went on quiet some time for all directories in the %PATH%
+   environment variable. The solution finally was to copy
+   php4ts.dll in any of the directories searched by the System (I
+   prefered to use c:\php\php-4.2.1-win32\sapi).
+
+   Note: This does not only apply to php4ts.dll but in fact to every
+         DLL which gets loaded through PHP too. So, if you've
+         problems running your PHP CLI application because it
+         can't load a certain library but you're sure it's there,
+         try this tool.
+
 
  Other problems
   If you are still stuck, someone on the PHP installation mailing list may be
