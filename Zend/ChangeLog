@@ -1,3 +1,13 @@
+2004-02-22  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_operators.c:
+      - Fixed bug #27354 (Modulus operator crashes PHP).
+
+2004-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES:
+      Add some more obviously needed information
+
 2004-02-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * zend.h
