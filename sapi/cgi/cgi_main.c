@@ -78,8 +78,8 @@ PHPAPI extern char *php_ini_path;
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
 
-PHPAPI extern char *ap_php_optarg;
-PHPAPI extern int ap_php_optind;
+extern char *ap_php_optarg;
+extern int ap_php_optind;
 
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
@@ -165,12 +165,25 @@ static void sapi_cgi_log_message(char *message)
 	}
 }
 
+static int sapi_cgi_activate(SLS_D)
+{
+	fflush(stdout);
+	if(request_info.php_argv0) {
+		free(request_info.php_argv0);
+		request_info.php_argv0 = NULL;
+	}
+	return SUCCESS;
+}
+
 
 static sapi_module_struct sapi_module = {
 	"CGI",							/* name */
 									
 	php_module_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
+
+	NULL,							/* activate */
+	sapi_cgi_activate,				/* deactivate */
 
 	sapi_cgibin_ub_write,			/* unbuffered write */
 	sapi_cgibin_flush,				/* flush */

@@ -521,6 +521,9 @@ static sapi_module_struct sapi_module = {
   php_module_startup,						/* startup */
   pike_module_exit,							/* shutdown */
 
+  NULL,										/* activate */
+  NULL,										/* deactivate */
+
   php_roxen_sapi_ub_write,					/* unbuffered write */
   NULL,										/* flush */
 
