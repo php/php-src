@@ -3006,7 +3006,7 @@ PHP_FUNCTION(hw_output_document)
 		RETURN_FALSE;
 	}
 
-	php_write(ptr->data, ptr->size);
+	php_write(ptr->data, ptr->size TSRMLS_CC);
 
 	RETURN_TRUE;
 }
