@@ -4,6 +4,7 @@ Testing $argc and $argv handling (cli)
 <?php if(php_sapi_name()!='cli') echo 'skip'; ?>
 --INI--
 register_argc_argv=1
+variables_order=GPS
 --ARGS--
 ab cd ef 123 test
 --FILE--
