@@ -5,8 +5,7 @@ PHP 4                                                                      NEWS
   (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
-- Fixed bug #25916 (get_browser() -> PHP Fatal error: Nesting level
-  too deep - recursive dependency?). (Uwe Schindler)
+- Fixed bug #26548 (ext/session: Malformed HTTP dates headers). (Derick)
 - Fixed bug #26488 (Missing declaration of CRTSCTS in ext/dio/dio.c). (Jani)
 - Fixed bug #26467 (flock() does not force the "wouldblock" parameter to be 
   passed by reference). (Wez)
@@ -56,6 +55,8 @@ PHP 4                                                                      NEWS
   under *BSD platforms). (Moriyoshi)
 - Fixed bug #26003 (Make fgetcsv() binary safe). (Ilia, Moriyoshi)
 - Fixed bug #25939 (feof() not working correctly for sockets). (Wez)
+- Fixed bug #25916 (get_browser() -> PHP Fatal error: Nesting level
+  too deep - recursive dependency?). (Uwe Schindler)
 - Fixed bug #25794 (Cannot open existing hash db3 file with write" ext/dba).
   (Marcus)
 - Fixed Bug #25694 (round() and number_format() give inconsistent results).
