@@ -1707,7 +1707,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 
 	/* You cannot change create_object */
 	ce->create_object = ce->parent->create_object;
-	
+
 	/* Inherit special functions if needed */
 	if (!ce->get_iterator) {
 		ce->get_iterator = ce->parent->get_iterator;
@@ -1727,12 +1727,19 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	if (!ce->clone) {
 		ce->clone = ce->parent->clone;
 	}
+	if(!ce->serialize) {
+		ce->serialize = ce->parent->serialize;
+	}
+	if(!ce->unserialize) {
+		ce->unserialize = ce->parent->unserialize;
+	}
 	if (!ce->destructor) {
 		ce->destructor   = ce->parent->destructor;
 	}
 	if (ce->constructor) {
 		return;
 	}
+	
 	if (zend_hash_find(&ce->parent->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), (void **)&function)==SUCCESS) {
 		/* inherit parent's constructor */
 		zend_hash_update(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), function, sizeof(zend_function), NULL);
@@ -3839,6 +3846,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
 		ce->module = NULL;
+		ce->serialize = NULL;
+		ce->unserialize = NULL;
 	}
 }
 
