@@ -1,17 +1,19 @@
-* always build CGI (--disable-cgi option to disable)
+* Always build CGI (--disable-cgi option to disable).
 
-* move most extensions and PEAR packages out of the PHP CVS tree,
-  include them again during release packaging
+* Move most extensions and PEAR packages out of the PHP CVS tree,
+  include them again during release packaging.
 
-* renaming functions so that they all are conform to one standard form
+* Renaming functions, so that they all are conform to one standard form.
 
-* allow foreach($array as $key => &$value)
+* Allow foreach($array as $key => &$value).
 
-* allow foreach($array as list($var1, $var2))
+* Allow foreach($array as list($var1, $var2)).
 
-* clean up "$instance = &new object" syntax (default to the =& behaviour?)
+* Clean up "$instance = &new object" syntax (default to the =& behaviour?).
 
-* change PHP error messages so that they point to pages or sections in the
-  PHP manual
+* Change PHP error messages, so that they point to pages or sections in the
+  PHP Manual.
 
 * Fix Zend shallow copy issues with objects and arrays.
+
+* Make all extensions thread-safe.
