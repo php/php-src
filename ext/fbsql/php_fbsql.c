@@ -552,12 +552,12 @@ PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *user
 }
 
 
-int phpfbFetchRow (PHPFBResult* result, int row)
+int phpfbFetchRow(PHPFBResult* result, int row)
 {
 	if (result->rowHandler == NULL)
 	{
-		 void *rawData = fbcdcFetch(result->connection,result->batchSize,result->fetchHandle);
-		 if (rawData == NULL)
+		void *rawData = fbcdcFetch(result->connection,result->batchSize,result->fetchHandle);
+		if (rawData == NULL)
 			result->rowCount = 0;
 		else
 			result->rowHandler = fbcrhInitWith(rawData, result->metaData);
@@ -1513,26 +1513,6 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 
 	meta     = fbcdcExecuteDirectSQL(database->connection,sql);
 
-	if (fbcmdErrorCount(meta) > 0) {
-		FBCErrorMetaData *errorMeta;
-		char		 *errorMessage;
-		unsigned	 error_type = 0;
-
-		errorMeta = fbcdcErrorMetaData(database->connection, meta);
-		error_type = fbcemdErrorCodeAtIndex(errorMeta, 0);
-		errorMessage = fbcemdAllErrorMessages(errorMeta);
-		if (error_type != 250) {
-			php_error(E_WARNING, "Error executing SQL-statement (%s)", sql);
-		}
-//		free(errorMessage);
-		fbcemdRelease(errorMeta);
-
-		if (error_type != 250) {
-			fbcmdRelease(meta);
-			return NULL;
-		}
-	}
-
 	if (fbcmdHasMetaDataArray(meta)) {
 		sR = fbcmdMetaDataArrayCount(meta);
 		md = (FBCMetaData*)fbcmdMetaDataAtIndex(meta, cR);
@@ -1540,7 +1520,7 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 	else
 		md = meta;
 
-	ok     = mdOk(database,md);
+	ok     = mdOk(database, md);
 	tp     = fbcmdStatementType(md);
 
 	return_value->value.lval = ok?-1:0;
