@@ -42,6 +42,10 @@ PHP_FUNCTION(mysqli_connect)
 	unsigned int 		port=0;
 	struct timeval		starttime;
 
+	if (getThis() && !ZEND_NUM_ARGS()) {
+		RETURN_NULL();
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssls", &hostname, &hostname_len, &username, &username_len, 
 		&passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len) == FAILURE) {
 		return;
