@@ -45,7 +45,6 @@
 PHPAPI int ValidateFormat(char *format, int numVars, int *totalVars);
 PHPAPI int php_sscanf_internal(char *string,char *format,int argCount,zval ***args, 
 				int varStart,pval **return_value);
-inline void scan_set_error_return(int numVars,pval **return_value);
 
 
 #endif /* SCANF_H */
