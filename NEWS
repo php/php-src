@@ -3,8 +3,8 @@ PHP 4                                                                      NEWS
 ? ? ??? 2002, Version 4.3.0
 - Added support for fopen("ftps://...", ...) which allows to connect to FTP 
   servers via SSL. (Stefan Esser)
-- Made the User-Agent that php's fopen wrappers send, configurable via
-  php.ini or via a stream context. (Sterling)
+- Made the "User-Agent" header send by the fopen wrappers to be configurable
+  in php.ini or via a stream context. (Sterling)
 - Added support for fopen("php://output", "wb") which returns a stream that
   writes to the output buffer (like echo and print). (Wez)
 - Added --disable-all configure option. (Jani)
