@@ -34,7 +34,7 @@
 #include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
 
-#define MAX_LENGTH_OF_LONG 18
+#define MAX_LENGTH_OF_LONG 20
 #define MAX_LENGTH_OF_DOUBLE 32
 
 BEGIN_EXTERN_C()
