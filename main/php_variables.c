@@ -639,7 +639,7 @@ int php_hash_environment(TSRMLS_D)
 		}
 	}
 
-	if (!jit_initialization && !_gpc_flags[4]) {
+	if (!jit_initialization && !have_variables_order && !_gpc_flags[4]) {
 		php_register_server_variables(TSRMLS_C);
 		if (PG(register_globals)) {
 			php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]) TSRMLS_CC);
