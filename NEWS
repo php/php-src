@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Implemented support for Perl-style matching regexp delimiters in PCRE.
+  You can use <{[( and )]}> to delimit your expressions now. (Andrei)
+- Introduced new 'F' modifier in PCRE that lets you specify a function
+  name in the replacement argument to preg_replace() that will be called
+  at run-time to provide the replacement string. It is passed an array of
+  matched pattern and subpatterns. (Andrei)
 - Put an end to BUG#4615 (kalowsky & Eric Veldhuyzen)
 - Fixed realpath() in Virtual Directory mode (Daniel)
 - Integrated the Phil Nelson's bc math library routines into PHP, now that
