@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added the pg_lolseek and pg_lotell functions (Derick)
+- Fixed 'O' and 'r' flags of date() to have correct sign for timezone
+  offset. (Andrei)
 - Changed 'Z' flag to date() to always return timezone offset with
   negative sign if it's west of UTC. (Andrei)
 - Add the HTML_Processor class which provides common functions for processing HTML.
