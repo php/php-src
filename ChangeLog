@@ -1,3 +1,102 @@
+2003-11-19  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/head.c
+      ext/standard/head.h:
+      New function: headers_list().   Ennumerate headers sent to SAPI engine
+
+2003-11-19  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/mysqli/mysqli_api.c
+      sapi/apache_hooks/php_apache.c:
+      proto fix
+
+    * ext/standard/parsedate.y:
+      XSchema stuff finally done right ... (at least i hope so ...)
+
+    * ext/standard/tests/time/bug26320.phpt:
+      typo fix
+
+    * (PHP_4_3)
+      ext/standard/tests/time/bug26320.phpt:
+      removed ext/standard/tests/time/bug26320.phpt
+
+    * ext/standard/tests/time/bug26320.phpt:
+      
+      regression test for bug # 26320
+      "strtotime() does not understand ISO6801 datetime format as used in
+      XMLSchema"
+
+    * ext/standard/tests/time/bug26317.phpt:
+      
+      Testcase done right ...
+
+    * ext/standard/tests/time/bug26317.phpt:
+      regression test for http://bugs.php.net/bug.php?id=26317
+      "military timezones and strtotime()"
+
+2003-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c:
+      MFH: Fixed bug #26309 (Fixed argument parsing for imageftbbox()).
+
+    * ext/gd/gd.c:
+      Fixed bug #26309 (Fixed argument parsing for imageftbbox()).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/exec.c:
+      MFH: Fixed bug #26285 (escapeshellarg() uses wrong quotes on windows).
+
+    * ext/standard/exec.c:
+      Fixed bug #26285 (escapeshellarg() uses wrong quotes on windows).
+
+2003-11-19  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/config.m4
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h:
+      added exslt support
+
+2003-11-19  Andi Gutmans  <andi@zend.com>
+
+    * main/main.c:
+      - Commit patch by standards
+
+2003-11-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/gmp/gmp.c:
+      ws fix
+
+    * (PHP_4_3)
+      NEWS
+      ext/gmp/config.m4
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h:
+      MFH: - Fixed bug #26267 (gmp_random() leaks memory and does not produce
+      random numbers)
+
+    * ext/gmp/config.m4
+      ext/gmp/gmp.c
+      ext/gmp/php_gmp.h:
+      - Fixed bug #26267 (gmp_random() leaks memory and does not produce random
+      numbers)
+
+2003-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug26281.phpt:
+      Possible fix for bug #26281 & test case.
+
+2003-11-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/tokenizer/Makefile.frag
+      ext/tokenizer/Makefile.frag:
+      Fix build
+
 2003-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.h:
