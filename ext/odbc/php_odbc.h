@@ -215,7 +215,6 @@ typedef struct odbc_connection {
 	HENV henv;
 	HDBC hdbc;
 #endif
-/*	int open;*/
 	int id;
 	int persistent;
 } odbc_connection;
