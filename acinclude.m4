@@ -208,7 +208,7 @@ dnl Sets PHP_ARG_NAME either to the user value or to the default value.
 dnl default-val defaults to no. 
 dnl
 AC_DEFUN(PHP_ARG_WITH,[
-PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
+PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_WITH,[
