@@ -2337,16 +2337,70 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 }
 
 
-/* {{{ proto void parse_ini_file(string filename)
+static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback_type, zval *arr)
+{
+	zval *element;
+	BLS_FETCH();
+
+	switch (callback_type) {
+		case ZEND_INI_PARSER_ENTRY: {
+				zval *active_arr;
+
+				if (BG(active_ini_file_section)) {
+					active_arr = BG(active_ini_file_section);
+				} else {
+					active_arr = arr;
+				}
+				ALLOC_ZVAL(element);
+				*element = *arg2;
+				zval_copy_ctor(element);
+				INIT_PZVAL(element);
+				zend_hash_update(active_arr->value.ht, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &element, sizeof(zval *), NULL);
+			}
+			break;
+		case ZEND_INI_PARSER_SECTION:
+			MAKE_STD_ZVAL(BG(active_ini_file_section));
+			array_init(BG(active_ini_file_section));
+			zend_hash_update(arr->value.ht, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, &BG(active_ini_file_section), sizeof(zval *), NULL);
+			break;
+	}
+}
+
+
+/* {{{ proto void parse_ini_file(string filename [, boolean process_sections])
    Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
-	zval **filename;
+	zval **filename, **process_sections;
 	zend_file_handle fh;
+	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &filename)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch (ARG_COUNT(ht)) {
+		case 1:
+			if (zend_get_parameters_ex(1, &filename)==FAILURE) {
+				RETURN_FALSE;
+			}
+			ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &filename, &process_sections)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_boolean_ex(process_sections);
+			if (Z_BVAL_PP(process_sections)) {
+				BLS_FETCH();
+
+				BG(active_ini_file_section) = NULL;
+				ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;
+			} else {
+				ini_parser_cb = (zend_ini_parser_cb_t) php_simple_ini_parser_cb;
+			}
+			break;
+		default:
+			ZEND_WRONG_PARAM_COUNT();
+			break;
 	}
+
 	convert_to_string_ex(filename);
 	fh.handle.fp = V_FOPEN((*filename)->value.str.val, "r");
 	if (!fh.handle.fp) {
@@ -2355,8 +2409,7 @@ PHP_FUNCTION(parse_ini_file)
 	}
 	fh.type = ZEND_HANDLE_FP;
 	array_init(return_value);
-	zend_parse_ini_file(&fh, (zend_ini_parser_cb_t) php_simple_ini_parser_cb, return_value);
-
+	zend_parse_ini_file(&fh, ini_parser_cb, return_value);
 }
 /* }}} */
 
