@@ -53,4 +53,8 @@ extern void php_call_shutdown_functions(void);
 extern int php_init_environ(void);
 extern int php_shutdown_environ(void);
 
+#if defined(JSTR_ENC_TRANS)
+#define php_treat_data jstr_treat_data
+#endif
+
 #endif
