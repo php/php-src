@@ -208,7 +208,6 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					}
 				}
 				add_assoc_zval(return_value, param->paramName, tmp);
-				/*add_assoc_zval(return_value, (char*)val->name, tmp);*/
 
 				param_count++;
 

@@ -115,7 +115,12 @@ class SOAP_Test {
         } else {
             $fault = $this->result['fault'];
             if ($fault) {
-                print "<font color=\"#ff0000\">FAILED: {$fault->faultcode} {$fault->faultstring}</font>\n";
+            		$res = $fault->faultcode;
+                $pos = strpos($res,':');
+                if ($pos !== false) {
+                	$res = substr($res,$pos+1);                	
+                }
+                print "<font color=\"#ff0000\">FAILED: [$res] {$fault->faultstring}</font>\n";
             } else {
                 print "<font color=\"#ff0000\">FAILED: ".$this->result['result']."</font>\n";
             }

@@ -16,6 +16,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval **trace, **tmp;
+	int old_error_reporting;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -29,7 +30,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 	xmlDocDumpMemory(doc, &buf, &buf_size);
 	if (!buf) {
-		add_soap_fault(this_ptr, "Client", "Error build soap request", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "HTTP", "Error build soap request", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
@@ -59,7 +60,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 	}
 	if (phpurl == NULL) {
 		xmlFree(buf);
-		add_soap_fault(this_ptr, "Client", "Unable to parse URL", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "HTTP", "Unable to parse URL", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 
@@ -69,7 +70,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
 			xmlFree(buf);
 			php_url_free(phpurl);
- 			add_soap_fault(this_ptr, "Client", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
+ 			add_soap_fault(this_ptr, "HTTP", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
  			return FALSE;
 		}
 
@@ -84,22 +85,28 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 			reslen = spprintf(&res, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", phpurl->host, phpurl->port);
 
+			old_error_reporting = EG(error_reporting);
+			EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
 			stream = php_stream_xport_create(res, reslen,
 				ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 				NULL /*persistent_id*/,
 				NULL /*timeout*/,
 				NULL, NULL, NULL);
+			EG(error_reporting) = old_error_reporting;
 
 			efree(res);
 		}
 #else
+		old_error_reporting = EG(error_reporting);
+		EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
 		stream = php_stream_sock_open_host(phpurl->host, (unsigned short)phpurl->port, SOCK_STREAM, NULL, NULL);
+		EG(error_reporting) = old_error_reporting;
  		if (use_ssl) {
  			if (FAILURE == php_stream_sock_ssl_activate(stream, 1)) {
 				xmlFree(buf);
  				php_url_free(phpurl);
- 	 			add_soap_fault(this_ptr, "Client", "SSL Connection attempt failed", NULL, NULL TSRMLS_CC);
+ 	 			add_soap_fault(this_ptr, "HTTP", "SSL Connection attempt failed", NULL, NULL TSRMLS_CC);
  	 			return FALSE;
  			}
  		}
@@ -111,7 +118,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		} else {
 			xmlFree(buf);
 			php_url_free(phpurl);
-			add_soap_fault(this_ptr, "Client", "Could not connect to host", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
 	}
@@ -202,7 +209,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
 			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-			add_soap_fault(this_ptr, "Client", "Failed Sending HTTP SOAP request", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
@@ -235,7 +242,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-		add_soap_fault(this_ptr, "Client", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 
@@ -259,23 +266,23 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 
 		if (http_status >= 200 && http_status < 300) {
 		} else if (http_status >= 300 && http_status < 400) {
-			add_soap_fault(this_ptr, "Client", "HTTTP redirection is not supported", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "HTTTP redirection is not supported", NULL, NULL TSRMLS_CC);
 		} else if (http_status == 400) {
-			add_soap_fault(this_ptr, "Client", "Bad Request", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Bad Request", NULL, NULL TSRMLS_CC);
 		} else if (http_status == 401) {
-			add_soap_fault(this_ptr, "Client", "Unauthorized Request", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Unauthorized Request", NULL, NULL TSRMLS_CC);
 		} else if (http_status == 405) {
-			add_soap_fault(this_ptr, "Client", "Method not allowed", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Method not allowed", NULL, NULL TSRMLS_CC);
 		} else if (http_status == 415) {
-			add_soap_fault(this_ptr, "Client", "Unsupported Media Type", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Unsupported Media Type", NULL, NULL TSRMLS_CC);
 		} else if (http_status >= 400 && http_status < 500) {
-			add_soap_fault(this_ptr, "Client", "Client Error", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Client Error", NULL, NULL TSRMLS_CC);
 		} else if (http_status == 500) {
-			add_soap_fault(this_ptr, "Server", "Internal Server Error", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Internal Server Error", NULL, NULL TSRMLS_CC);
 		} else if (http_status >= 500 && http_status < 600) {
-			add_soap_fault(this_ptr, "Server", "Server Error", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Server Error", NULL, NULL TSRMLS_CC);
 		} else {
-			add_soap_fault(this_ptr, "Client", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "HTTP", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
 		}
 		*/
 
@@ -285,7 +292,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 				php_stream_close(stream);
 				zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-				add_soap_fault(this_ptr, "Client", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
+				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL TSRMLS_CC);
 				return FALSE;
 			}
 		}
@@ -299,7 +306,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	if (!get_http_body(stream, http_headers, &http_body, &http_body_size TSRMLS_CC)) {
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-		add_soap_fault(this_ptr, "Client", "Error Fetching http body", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length or chunked data", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
 
@@ -345,7 +352,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 				zval *err;
 				MAKE_STD_ZVAL(err);
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
-				add_soap_fault(this_ptr, "Client", "Didn't recieve an xml document", NULL, err TSRMLS_CC);
+				add_soap_fault(this_ptr, "HTTP", "Didn't recieve an xml document", NULL, err TSRMLS_CC);
 				efree(content_type);
 				efree(http_headers);
 				efree(http_body);
@@ -505,7 +512,6 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 		http_buf[size] = '\0';
 		efree(content_length);
 	} else {
-		php_error(E_ERROR, "Don't know how to read http body, No Content-Length or chunked data");
 		return FALSE;
 	}
 
