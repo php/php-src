@@ -3,7 +3,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2003 The PHP Group                                |
+  | Copyright (c) 1997-2004 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.32 2004-01-08 00:25:48 wez Exp $
+// $Id: confutils.js,v 1.33 2004-01-08 17:33:29 sniper Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
