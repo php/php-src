@@ -1,7 +1,11 @@
 --TEST--
 strtotime() function
---POST--
---GET--
+--SKIPIF--
+<?php
+if (!@putenv("TZ=Europe/Amsterdam") || getenv("TZ") != 'Europe/Amsterdam') {
+	die("skip unable to change TZ enviroment variable\n");
+}
+?>
 --FILE--
 <?php
 	$dates = array (
