@@ -85,11 +85,11 @@ PHP_FUNCTION(dbplus_xunlockrel);
 
 
 /* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+    Declare any global variables you may need between the BEGIN
+    and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(dbplus)
-	int global_variable;
+    int global_variable;
 ZEND_END_MODULE_GLOBALS(dbplus)
 */
 
@@ -114,7 +114,7 @@ void dbplus_destruct_relation(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 void dbplus_destruct_tupel(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 
-#endif	/* PHP_DBPLUS_H */
+#endif  /* PHP_DBPLUS_H */
 
 
 /*
