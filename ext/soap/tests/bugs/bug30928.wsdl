@@ -34,10 +34,10 @@
 		<operation name="test">
 			<soap:operation soapAction="#test" style="rpc"/>
 			<input>
-				<soap:body parts="body" use="encoded" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+				<soap:body use="encoded" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
 			</input>
 			<output>
-				<soap:body parts="body" use="encoded" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+				<soap:body use="encoded" namespace="http://test-uri/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
 			</output>
 		</operation>
 	</binding>
