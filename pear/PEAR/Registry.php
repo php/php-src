@@ -404,7 +404,7 @@ class PEAR_Registry extends PEAR
         if (PEAR::isError($e = $this->_lock(LOCK_EX))) {
             return $e;
         }
-        $fp = $this->_openPackageFile($package, 'w');
+        $fp = $this->_openPackageFile($package, 'wb');
         if ($fp === null) {
             $this->_unlock();
             return false;
