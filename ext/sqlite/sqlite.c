@@ -1081,7 +1081,7 @@ PHP_FUNCTION(sqlite_popen)
 				int type;
 				/* sanity check to ensure that the resource is still a valid regular resource
 				 * number */
-				if (_zend_list_find(db->rsrc_id, &type TSRMLS_CC) == db) {
+				if (zend_list_find(db->rsrc_id, &type) == db) {
 					/* already accessed this request; map it */
 					zend_list_addref(db->rsrc_id);
 					ZVAL_RESOURCE(return_value, db->rsrc_id);
