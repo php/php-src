@@ -33,7 +33,7 @@ typedef unsigned long uint32;
 #error Need type which holds 32 bits
 #endif
 
-PHPAPI void uint32_pack(char *out, uint32 in);
-PHPAPI void uint32_unpack(const char *in, uint32 *out);
+void uint32_pack(char *out, uint32 in);
+void uint32_unpack(const char *in, uint32 *out);
 
 #endif
