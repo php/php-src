@@ -310,6 +310,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Sybase", "Zeev Suraski");
 		CREDIT_LINE("System V Shared Memory", "Christian Cartus");
 		CREDIT_LINE("System V Semaphores", "Tom May");
+		CREDIT_LINE("WDDX", "Andrey Zmievski");
 		CREDIT_LINE("XML", "Stig Bakken");
 		CREDIT_LINE("Yellow Pages", "Stephanie Wehner");
 		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Ruhrich");
