@@ -878,8 +878,14 @@ ZEND_FUNCTION(method_exists)
 		RETURN_TRUE;
 	} else {
 		efree(lcname);
-		RETURN_FALSE;
+		if (Z_TYPE_PP(klass) == IS_OBJECT 
+		&& Z_OBJ_HT_PP(klass)->get_method != NULL
+		&& Z_OBJ_HT_PP(klass)->get_method(klass, Z_STRVAL_PP(method_name), Z_STRLEN_PP(method_name) TSRMLS_CC) != NULL
+		) {
+			RETURN_TRUE;
+		}
 	}
+	RETURN_FALSE;
 }
 /* }}} */
 
