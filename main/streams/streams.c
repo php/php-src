@@ -1891,7 +1891,7 @@ PHPAPI int _php_stream_scandir(char *dirname, php_stream_dirent **namelist[], in
 	*namelist = vector;
 
 	if (compare) {
-		qsort(*namelist, nfiles, sizeof(php_stream_dirent *), compare);
+		qsort(*namelist, nfiles, sizeof(php_stream_dirent *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
 }
