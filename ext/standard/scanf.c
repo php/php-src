@@ -789,6 +789,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
                 fn = (long (*)())strtol;
                 break;
             case 'x':
+            case 'X':
                 op = 'i';
                 base = 16;
                 fn = (long (*)())strtol;
