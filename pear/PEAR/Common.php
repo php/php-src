@@ -136,6 +136,12 @@ class PEAR_Common extends PEAR
      * @var object
      */
     var $source_analyzer = null;
+    /**
+     * Flag variable used to mark a valid package file
+     * @var boolean
+     * @access private
+     */
+    var $_validPackageFile;
 
     // }}}
 
@@ -333,6 +339,7 @@ class PEAR_Common extends PEAR
         $this->current_attributes = $attribs;
         switch ($name) {
             case 'package': {
+                $this->_validPackageFile = true;
                 if (isset($attribs['version'])) {
                     $vs = preg_replace('/[^0-9a-z]/', '_', $attribs['version']);
                 } else {
@@ -345,6 +352,7 @@ class PEAR_Common extends PEAR
                       !method_exists($this, $elem_end) ||
                       !method_exists($this, $cdata)) {
                     $this->raiseError("No handlers for package.xml version $attribs[version]");
+                    return;
                 }
                 xml_set_element_handler($xp, $elem_start, $elem_end);
                 xml_set_character_data_handler($xp, $cdata);
@@ -790,6 +798,7 @@ class PEAR_Common extends PEAR
         $this->in_changelog = false;
         $this->d_i = 0;
         $this->cdata = '';
+        $this->_validPackageFile = false;
 
         if (!xml_parse($xp, $data, 1)) {
             $code = xml_get_error_code($xp);
@@ -802,6 +811,9 @@ class PEAR_Common extends PEAR
 
         xml_parser_free($xp);
 
+        if (!$this->_validPackageFile) {
+            return $this->raiseError('Invalid Package File, no <package> tag');
+        }
         foreach ($this->pkginfo as $k => $v) {
             if (!is_array($v)) {
                 $this->pkginfo[$k] = trim($v);
