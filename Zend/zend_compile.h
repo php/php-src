@@ -92,10 +92,12 @@ typedef struct _zend_brk_cont_element {
 #define ZEND_ACC_ABSTRACT	0x02
 
 /* The order of those must be kept - public < protected < private */
-#define ZEND_ACC_PUBLIC    0x10
-#define ZEND_ACC_PROTECTED 0x20
-#define ZEND_ACC_PRIVATE   0x40
+#define ZEND_ACC_PUBLIC		0x10
+#define ZEND_ACC_PROTECTED	0x20
+#define ZEND_ACC_PRIVATE	0x40
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
+
+#define ZEND_ACC_CHANGED	0x80
 
 char *zend_visibility_string(zend_uint fn_flags);
 

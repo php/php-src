@@ -2228,19 +2228,23 @@ inline int zend_check_private(zend_execute_data *execute_data, zend_class_entry 
 		return 0;
 	}
 
-	/* We may call a private function in one of two cases:
-	 * 1.  The scope of the function is the same as the class entry of our object
-	 * 2.  The class of our object is different, but a private function exists
-	 *     in one of the ancestor that corresponds to our object's ce.
+	/* We may call a private function if:
+	 * 1.  The class of our object is the same as the scope, and the private
+	 *     function (EX(fbc)) has the same scope.
+	 * 2.  One of our parent classes are the same as the scope, and it contains
+	 *     a private function with the same name that has the same scope.
 	 */
-	if (EX(fbc)->common.scope == ce) {
+	if (EX(fbc)->common.scope == ce
+		&& EG(scope) == ce) {
 		/* rule #1 checks out ok, allow the function call */
 		return 1;
 	}
 
-	orig_fbc = EX(fbc);
 
 	/* Check rule #2 */
+	orig_fbc = EX(fbc);
+
+	ce = ce->parent;
 	while (ce) {
 		if (ce == EG(scope)) {
 			if (zend_hash_find(&ce->function_table, function_name_strval, function_name_strlen+1, (void **) &EX(fbc))==SUCCESS
@@ -2296,7 +2300,7 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX(fbc) = EX(fbc_constructor);
 	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
 		if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-			/* No further checks necessary, most common case */
+			/* No further checks necessary */
 		} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
@@ -2347,7 +2351,17 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-			/* No further checks necessary, most common case */
+			/* Ensure that we haven't overridden a private function and end up calling
+			 * the overriding public function...
+			 */
+			if (EX(fbc)->op_array.fn_flags & ZEND_ACC_CHANGED) {
+				zend_function *priv_fbc;
+
+				if (zend_hash_find(&EG(scope)->function_table, function_name_strval, function_name_strlen+1, (void **) &priv_fbc)==SUCCESS
+					&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE) {
+					EX(fbc) = priv_fbc;
+				}
+			}
 		} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
