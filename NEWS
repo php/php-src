@@ -2,7 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
 - ATTENTION!! "make install" will *always* install the CLI SAPI binary in 
-  {PREFIX}/bin/php. If you enabled the CGI binary to be built, it is
+  {PREFIX}/bin/php. If you enable the CGI binary to be built, it will be
   installed as {PREFIX}/bin/php-cgi.
 - Added pg_fetch_assoc(), pg_fetch_all(), pg_metadate(), pg_convert(), 
   pg_insert(), pg_select(), pg_update() and pg_delete(). (Yasuo)
