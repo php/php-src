@@ -121,7 +121,7 @@ array(10) {
     string(9) "image/iff"
   }
   ["test4pix.png"]=>
-  array(5) {
+  array(6) {
     [0]=>
     int(4)
     [1]=>
@@ -130,6 +130,8 @@ array(10) {
     int(3)
     [3]=>
     string(20) "width="4" height="1""
+    ["bits"]=>
+    int(4)
     ["mime"]=>
     string(9) "image/png"
   }
