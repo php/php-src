@@ -214,7 +214,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 
 static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS_DC)
 {
-	int count;
+	int count, count_static_props = 0, count_static_funcs = 0;
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
@@ -279,12 +279,10 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 		string_printf(str, "%s  }\n", indent);
 	}
 
-	/* Properties */
+	/* Static properties */
 	if (&ce->properties_info) {
-		string_printf(str, "\n");
-		
+		/* counting static properties */		
 		count = zend_hash_num_elements(&ce->properties_info);
-		string_printf(str, "%s  - Properties [%d] {\n", indent, count);
 		if (count > 0) {
 			HashPosition pos;
 			zend_property_info *prop;
@@ -292,19 +290,35 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
-				_property_string(str, prop, "    " TSRMLS_CC);
+				if (prop->flags & ZEND_ACC_STATIC) {
+					count_static_props++;
+				}
+				zend_hash_move_forward_ex(&ce->properties_info, &pos);
+			}
+		}
+
+		/* static properties */		
+		string_printf(str, "\n%s  - Static properties [%d] {\n", indent, count_static_props);
+		if (count > 0) {
+			HashPosition pos;
+			zend_property_info *prop;
+
+			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+
+			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
+				if (prop->flags & ZEND_ACC_STATIC) {
+					_property_string(str, prop, "    " TSRMLS_CC);
+				}
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
 			}
 		}
 		string_printf(str, "%s  }\n", indent);
 	}
-
-	/* Methods */
+	
+	/* Static methods */
 	if (&ce->function_table) {
-		string_printf(str, "\n");
-
+		/* counting static properties */		
 		count = zend_hash_num_elements(&ce->function_table);
-		string_printf(str, "%s  - Methods [%d] {", indent, count);
 		if (count > 0) {
 			HashPosition pos;
 			zend_function *mptr;
@@ -312,8 +326,69 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
-				string_printf(str, "\n");
-				_function_string(str, mptr, "    " TSRMLS_CC);
+				if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
+					count_static_funcs++;
+				}
+				zend_hash_move_forward_ex(&ce->function_table, &pos);
+			}
+		}
+
+		/* static properties */		
+		string_printf(str, "\n%s  - Static methods [%d] {", indent, count_static_funcs);
+		if (count > 0) {
+			HashPosition pos;
+			zend_function *mptr;
+
+			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
+
+			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
+				if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
+					string_printf(str, "\n");
+					_function_string(str, mptr, "    " TSRMLS_CC);
+				}
+				zend_hash_move_forward_ex(&ce->function_table, &pos);
+			}
+		} else {
+			string_printf(str, "\n");
+		}
+		string_printf(str, "  }\n");
+	}
+
+	/* Default/Implicit properties */
+	if (&ce->properties_info) {
+		count = zend_hash_num_elements(&ce->properties_info) - count_static_props;
+		string_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
+		if (count > 0) {
+			HashPosition pos;
+			zend_property_info *prop;
+
+			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+
+			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
+				if (!(prop->flags & ZEND_ACC_STATIC)) {
+					_property_string(str, prop, "    " TSRMLS_CC);
+				}
+				zend_hash_move_forward_ex(&ce->properties_info, &pos);
+			}
+		}
+		string_printf(str, "%s  }\n", indent);
+	}
+
+	/* Non static methods */
+	if (&ce->function_table) {
+		count = zend_hash_num_elements(&ce->function_table) - count_static_funcs;
+		string_printf(str, "\n%s  - Methods [%d] {", indent, count);
+		if (count > 0) {
+			HashPosition pos;
+			zend_function *mptr;
+
+			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
+
+			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
+				if (!(mptr->common.fn_flags & ZEND_ACC_STATIC)) {
+					string_printf(str, "\n");
+					_function_string(str, mptr, "    " TSRMLS_CC);
+				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
 		} else {
@@ -431,8 +506,14 @@ static void _property_string(string *str, zend_property_info *prop, char* indent
 {
 	char *class_name, *prop_name;
 
-	string_printf(str, "%sProperty [ %s", indent,
-				  (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) ? "<implicit> " : "<default> ");
+	string_printf(str, "%sProperty [ ", indent);
+	if (!(prop->flags & ZEND_ACC_STATIC)) {
+		if (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
+			string_write(str, "<implicit> ", sizeof("<implicit> ") - 1);
+		} else {
+			string_write(str, "<default> ", sizeof("<default> ") - 1);
+		}
+	}
 
 	/* These are mutually exclusive */
 	switch (prop->flags & ZEND_ACC_PPP_MASK) {
