@@ -2217,6 +2217,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	zend_property_info property_info;
 	zend_property_info *existing_property_info;
 	HashTable *target_symbol_table;
+	zend_bool free_var_name = 0;
 
 	if (access_type & ZEND_ACC_ABSTRACT) {
 		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");
@@ -2252,6 +2253,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 				int priv_name_length;
 
 				mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
+				free_var_name = 1;
 				zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = priv_name;
 				property_info.name_length = priv_name_length;
@@ -2262,6 +2264,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 				int prot_name_length;
 
 				mangle_property_name(&prot_name, &prot_name_length, "*", 1, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
+				free_var_name = 1;
 				zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = prot_name;
 				property_info.name_length = prot_name_length;
@@ -2277,6 +2280,9 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
 
 	zend_hash_update(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property_info, sizeof(zend_property_info), NULL);
+	if (free_var_name) {
+		efree(var_name->u.constant.value.str.val);
+	}
 }
 
 
