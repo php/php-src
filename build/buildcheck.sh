@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.8 2001-05-06 18:51:21 sas Exp $ 
+# $Id: buildcheck.sh,v 1.8.2.1 2001-05-12 09:03:58 andi Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -70,7 +70,7 @@ fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
 IFS=.; set $lt_version; IFS=' '
 
-if test "$1" -gt "1" || test "$2" -ge "4";
+if test "$1" -gt "1" || test "$2" -gt "3" || (test "$2" = "3" && (test "$3" = "c" || test "$3" -ge "3"))
 then
 echo "buildconf: libtool version $lt_pversion (ok)"
 else
