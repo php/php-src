@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 dnl Test mSQL version by checking if msql.h has "IDX_TYPE" defined.
 dnl
-AC_DEFUN(AC_MSQL_VERSION,[
+AC_DEFUN(PHP_MSQL_VERSION,[
   AC_MSG_CHECKING([mSQL version])
   ac_php_oldcflags=$CFLAGS
   CFLAGS="$INCLUDES $CFLAGS"
@@ -19,28 +19,22 @@ AC_DEFUN(AC_MSQL_VERSION,[
   AC_MSG_RESULT($MSQL_VERSION)
 ])
 
-AC_MSG_CHECKING(for mSQL support)
-AC_ARG_WITH(msql,
+PHP_ARG_WITH(msql,for mSQL support,
 [  --with-msql[=DIR]       Include mSQL support.  DIR is the mSQL base
-                          install directory, defaults to /usr/local/Hughes.],
-[
-  if test "$withval" != "no"; then
-    if test "$withval" = "yes"; then
+                          install directory, defaults to /usr/local/Hughes.])
+
+  if test "$PHP_MSQL" != "no"; then
+    if test "$PHP_MSQL" = "yes"; then
       MSQL_INCDIR=/usr/local/Hughes/include
       MSQL_LIBDIR=/usr/local/Hughes/lib
     else
-      MSQL_INCDIR=$withval/include
-      MSQL_LIBDIR=$withval/lib
+      MSQL_INCDIR=$PHP_MSQL/include
+      MSQL_LIBDIR=$PHP_MSQL/lib
     fi
-    AC_ADD_LIBRARY_WITH_PATH(msql, $MSQL_LIBDIR)
+    AC_ADD_LIBRARY_WITH_PATH(msql, $MSQL_LIBDIR, MSQL_SHARED_LIBADD)
     AC_ADD_INCLUDE($MSQL_INCDIR)
     AC_DEFINE(HAVE_MSQL,1,[ ])
-    AC_MSG_RESULT(yes)
-    PHP_EXTENSION(msql)
-    AC_MSQL_VERSION
-  else
-    AC_MSG_RESULT(no)
+    PHP_SUBST(MSQL_SHARED_LIBADD)
+    PHP_EXTENSION(msql,$ext_shared)
+    PHP_MSQL_VERSION
   fi
-],[
-  AC_MSG_RESULT(no)
-])
