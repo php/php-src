@@ -377,7 +377,7 @@ static char *_readline_command_generator(char *text,int state)
 		}
 	}
 
-	return strdup("");
+	return NULL;
 }
 
 static zval *_readline_string_zval(const char *str)
@@ -420,7 +420,13 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 
 	if (call_user_function(CG(function_table), NULL, _readline_completion, &_readline_array, 3, params TSRMLS_CC) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {
-			matches = completion_matches(text,_readline_command_generator);
+			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
+				matches = completion_matches(text,_readline_command_generator);
+			} else {
+				matches = malloc(sizeof(char *) * 2);
+				matches[0] = strdup("");
+				matches[1] = '\0';
+			}
 		}
 	}
 	
