@@ -130,7 +130,7 @@ class PEAR_Frontend_CLI extends PEAR
             $fp = fopen("php://stdin", "r");
             foreach ($prompts as $key => $prompt) {
                 $type = $types[$key];
-                $default = $defaults[$key];
+                $default = @$defaults[$key];
                 if ($type == 'password') {
                     system('stty -echo');
                 }
