@@ -250,6 +250,7 @@ upload_max_filesize = 2M		    ; Maximum allowed size for uploaded files
 ; Fopen wrappers ;
 ;;;;;;;;;;;;;;;;;;
 allow_url_fopen = On                ; Whether to allow the treatment of URLs (like http:// or ftp://) as files
+;from="john@doe.com"                ; Define the anonymous ftp password (your email address)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
