@@ -46,14 +46,14 @@ install-tester:
 
 install-su: install-pear install-tester
 
-test: $(SAPI_CLI_PHP)
-	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PHP) \
-			$(top_builddir)/$(SAPI_CLI_PHP) -c php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
+test: $(SAPI_CLI_PATH)
+	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
+			$(top_builddir)/$(SAPI_CLI_PATH) -c php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
 	find . -name \*.lo -o -name \*.o -o -name \*.la -o -name \*.a -o -name \*.so| xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
-	rm -f libphp4.la $(SAPI_CLI_PHP) $(SAPI_CGI_PHP) modules/* libs/*
+	rm -f libphp4.la $(SAPI_CLI_PATH) $(OVERALL_TARGET) modules/* libs/*
 
 distclean: clean
 	rm -f config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h php4.spec sapi/apache/libphp4.module buildmk.stamp
