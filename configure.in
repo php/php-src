@@ -23,7 +23,7 @@ for arg in $0 "$@"; do
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '$arg'"
 done
 
-php_shtool="$srcdir/build/shtool"
+php_shtool=$srcdir/build/shtool
 T_MD=`$php_shtool echo -n -e %B`
 T_ME=`$php_shtool echo -n -e %b`
 
@@ -172,26 +172,26 @@ PHP_MISSING_TIME_R_DECL
 dnl check for -R, etc. switch
 AC_MSG_CHECKING(whether compiler supports -R)
 AC_CACHE_VAL(php_cv_cc_dashr,[
-	SAVE_LIBS="${LIBS}"
-	LIBS="-R /usr/lib ${LIBS}"
+	SAVE_LIBS=$LIBS
+	LIBS="-R /usr/lib $LIBS"
 	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
-	LIBS="${SAVE_LIBS}"])
+	LIBS=$SAVE_LIBS])
 AC_MSG_RESULT($php_cv_cc_dashr)
 if test $php_cv_cc_dashr = "yes"; then
-	ld_runpath_switch="-R"
+	ld_runpath_switch=-R
 else
 	AC_MSG_CHECKING([whether compiler supports -Wl,-rpath,])
 	AC_CACHE_VAL(php_cv_cc_rpath,[
-		SAVE_LIBS="${LIBS}"
-		LIBS="-Wl,-rpath,/usr/lib ${LIBS}"
+		SAVE_LIBS=$LIBS
+		LIBS="-Wl,-rpath,/usr/lib $LIBS"
 		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
-		LIBS="${SAVE_LIBS}"])
+		LIBS=$SAVE_LIBS])
 	AC_MSG_RESULT($php_cv_cc_rpath)
 	if test $php_cv_cc_rpath = "yes"; then
-		ld_runpath_switch="-Wl,-rpath,"
+		ld_runpath_switch=-Wl,-rpath,
 	else
 		dnl something innocuous
-		ld_runpath_switch="-L"
+		ld_runpath_switch=-L
 	fi
 fi
 
@@ -476,34 +476,34 @@ PHP_ARG_WITH(config-file-path,[path to configuration file],
                           Sets the path in which to look for php.ini,
                           defaults to PREFIX/lib], DEFAULT)
 
-if test "x$PHP_CONFIG_FILE_PATH" = "xDEFAULT"; then
+if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   case $PHP_LAYOUT in
     GNU)
-      PHP_CONFIG_FILE_PATH="$sysconfdir"
+      PHP_CONFIG_FILE_PATH=$sysconfdir
       oldstyleextdir=no;;
     *)
-      PHP_CONFIG_FILE_PATH="$libdir"
+      PHP_CONFIG_FILE_PATH=$libdir
       oldstyleextdir=yes;;
   esac
 fi
 
 # compatibility
 if test "x$with_pear" = "x" -a "x$enable_pear" = "xno"; then
-    with_pear="no"
+    with_pear=no
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR, and where],
 [  --with-pear=DIR         Install PEAR in DIR (default PREFIX/lib/php)
   --without-pear          Do not install PEAR], DEFAULT)
 
-if test "x$PHP_PEAR" != "xno"; then
+if test "$PHP_PEAR" != "no"; then
   PEAR_DIR=pear
 fi
 
-if test "x$PHP_PEAR" = "xDEFAULT"; then
+if test "$PHP_PEAR" = "DEFAULT"; then
   case $PHP_LAYOUT in
-    GNU) PEAR_INSTALLDIR="$datadir/pear";;
-    *)   PEAR_INSTALLDIR="$libdir/php";;
+    GNU) PEAR_INSTALLDIR=$datadir/pear;;
+    *)   PEAR_INSTALLDIR=$libdir/php;;
   esac
 fi
 
@@ -698,8 +698,7 @@ if test "$abs_srcdir" != "$abs_builddir"; then
 fi
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
-LIBS=""
-LDFLAGS=""
+unset LIBS LDFLAGS
 
 PHP_CONFIGURE_PART(Configuring TSRM)
 TSRM_BASIC_CHECKS
@@ -708,31 +707,30 @@ if test "$PHP_THREAD_SAFETY" = "yes"; then
 fi
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
-LDFLAGS=""
-LIBS=""
+unset LIBS LDFLAGS
 
-test "$prefix" = "NONE" && prefix="/usr/local"
+test "$prefix" = "NONE" && prefix=/usr/local
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 
 case $libdir in
   '${exec_prefix}/lib')
-    libdir="$libdir/php"
+    libdir=$libdir/php
     ;;
 esac
 case $datadir in
   '${prefix}/share')
-    datadir="$datadir/php"
+    datadir=$datadir/php
     ;;
   *) ;;
 esac
 
-phplibdir="`pwd`/modules"
+phplibdir=`pwd`/modules
 $php_shtool mkdir -p $phplibdir
-phptempdir="`pwd`/libs"
+phptempdir=`pwd`/libs
 
-old_exec_prefix="$exec_prefix"
-old_libdir="$libdir"
-old_datadir="$datadir"
+old_exec_prefix=$exec_prefix
+old_libdir=$libdir
+old_datadir=$datadir
 exec_prefix=`eval echo $exec_prefix`
 libdir=`eval echo $libdir`
 datadir=`eval echo $datadir`
@@ -741,30 +739,30 @@ dnl Build extension directory path
 
 ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
 
-if test "x$EXTENSION_DIR" = "x"; then
-  extbasedir="$ZEND_MODULE_API_NO"
+if test -z "$EXTENSION_DIR"; then
+  extbasedir=$ZEND_MODULE_API_NO
   if test "$oldstyleextdir" = "yes"; then
     if test "$PHP_DEBUG" = "1"; then
-      part1="debug"
+      part1=debug
     else
-      part1="no-debug"
+      part1=no-debug
     fi
     if test "$enable_experimental_zts" = "yes"; then
-      part2="zts"
+      part2=zts
     else
-      part2="non-zts"
+      part2=non-zts
     fi
-    extbasedir="$part1-$part2-$extbasedir"
-  	EXTENSION_DIR="$libdir/extensions/$extbasedir"
+    extbasedir=$part1-$part2-$extbasedir
+  	EXTENSION_DIR=$libdir/extensions/$extbasedir
   else
   	if test "$enable_experimental_zts" = "yes"; then
-  	  extbasedir="${extbasedir}-zts"
+  	  extbasedir=$extbasedir-zts
   	fi
   	
   	if test "$PHP_DEBUG" = "1"; then
-  	  extbasedir="${extbasedir}-debug"
+  	  extbasedir=$extbasedir-debug
   	fi
-  	EXTENSION_DIR="$libdir/$extbasedir"
+  	EXTENSION_DIR=$libdir/$extbasedir
   fi
 fi
 
@@ -773,15 +771,15 @@ EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
 EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
 EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
 EXPANDED_BINDIR=`eval echo $bindir`
-EXPANDED_LIBDIR="$libdir"
+EXPANDED_LIBDIR=$libdir
 EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
-EXPANDED_DATADIR="$datadir"
+EXPANDED_DATADIR=$datadir
 EXPANDED_PHP_CONFIG_FILE_PATH=`eval echo "$PHP_CONFIG_FILE_PATH"`
-INCLUDE_PATH=".:${EXPANDED_PEAR_INSTALLDIR}"
+INCLUDE_PATH=.:$EXPANDED_PEAR_INSTALLDIR
 
-exec_prefix="$old_exec_prefix"
-libdir="$old_libdir"
-datadir="$old_datadir"
+exec_prefix=$old_exec_prefix
+libdir=$old_libdir
+datadir=$old_datadir
 
 AC_SUBST(INCLUDE_PATH)
 AC_SUBST(EXPANDED_PEAR_INSTALLDIR)
@@ -864,7 +862,7 @@ PHP_SUBST_OLD(YACC)
 
 PHP_CONFIGURE_PART(Configuring libtool)
 
-old_CC="$CC"
+old_CC=$CC
 
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
@@ -904,7 +902,7 @@ else
   fi
 fi
 
-CC="$old_CC"
+CC=$old_CC
 
 changequote({,})
 if test "$PHP_PIC" = "no"; then

@@ -5,7 +5,7 @@ dnl This file contains local autoconf functions.
 sinclude(dynlib.m4)
 
 AC_DEFUN(PHP_REMOVE_USR_LIB,[
-  ac_new_flags=""
+  unset ac_new_flags
   for i in [$]$1; do
     case [$]i in
     -L/usr/lib|-L/usr/lib/) ;;
@@ -32,7 +32,7 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   fi
 
   old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="-I$OPENSSL_INC"
+  CPPFLAGS=-I$OPENSSL_INC
   AC_MSG_CHECKING(for OpenSSL version)
   AC_EGREP_CPP(yes,[
   #include <openssl/opensslv.h>
@@ -162,7 +162,7 @@ AC_DEFUN(PHP_SHLIB_SUFFIX_NAME,[
 ])
 
 AC_DEFUN(PHP_DEBUG_MACRO,[
-  DEBUG_LOG="$1"
+  DEBUG_LOG=$1
   cat >$1 <<X
 CONFIGURE:  $CONFIGURE_COMMAND
 CC:         $CC
@@ -225,7 +225,7 @@ dnl Stores the location of libgcc in libgcc_libpath
 dnl
 AC_DEFUN(PHP_LIBGCC_LIBPATH,[
   changequote({,})
-  libgcc_libpath="`$1 --print-libgcc-file-name|sed 's%/*[^/][^/]*$%%'`"
+  libgcc_libpath=`$1 --print-libgcc-file-name|sed 's%/*[^/][^/]*$%%'`
   changequote([,])
 ])
 
@@ -242,11 +242,11 @@ shared)
   $1=yes
   ;;
 no)
-  ext_output="no"
+  ext_output=no
   ext_shared=no
   ;;
 *)
-  ext_output="yes"
+  ext_output=yes
   ext_shared=no
   ;;
 esac
@@ -410,26 +410,26 @@ AC_DEFUN(PHP_RUNPATH_SWITCH,[
 dnl check for -R, etc. switch
 AC_MSG_CHECKING(if compiler supports -R)
 AC_CACHE_VAL(php_cv_cc_dashr,[
-	SAVE_LIBS="${LIBS}"
-	LIBS="-R /usr/lib ${LIBS}"
+	SAVE_LIBS=$LIBS
+	LIBS="-R /usr/lib $LIBS"
 	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
-	LIBS="${SAVE_LIBS}"])
+	LIBS=$SAVE_LIBS])
 AC_MSG_RESULT($php_cv_cc_dashr)
 if test $php_cv_cc_dashr = "yes"; then
-	ld_runpath_switch="-R"
+	ld_runpath_switch=-R
 else
 	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
 	AC_CACHE_VAL(php_cv_cc_rpath,[
-		SAVE_LIBS="${LIBS}"
-		LIBS="-Wl,-rpath,/usr/lib ${LIBS}"
+		SAVE_LIBS=$LIBS
+		LIBS="-Wl,-rpath,/usr/lib $LIBS"
 		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
-		LIBS="${SAVE_LIBS}"])
+		LIBS=$SAVE_LIBS])
 	AC_MSG_RESULT($php_cv_cc_rpath)
 	if test $php_cv_cc_rpath = "yes"; then
-		ld_runpath_switch="-Wl,-rpath,"
+		ld_runpath_switch=-Wl,-rpath,
 	else
 		dnl something innocuous
-		ld_runpath_switch="-L"
+		ld_runpath_switch=-L
 	fi
 fi
 ])
@@ -476,7 +476,7 @@ dnl set the path of the file which contains the symbol export list
 dnl
 AC_DEFUN(PHP_SET_SYM_FILE,
 [
-  PHP_SYM_FILE="$1"
+  PHP_SYM_FILE=$1
 ])
 
 dnl
@@ -541,7 +541,7 @@ dnl expands path to an absolute path and assigns it to variable
 dnl
 AC_DEFUN(PHP_EXPAND_PATH,[
   if test -z "$1" || echo "$1" | grep '^/' >/dev/null ; then
-    $2="$1"
+    $2=$1
   else
     changequote({,})
     ep_dir="`echo $1|sed 's%/*[^/][^/]*/*$%%'`"
@@ -579,11 +579,11 @@ dnl
 AC_DEFUN(PHP_BUILD_RPATH,[
   if test "$PHP_RPATH" = "yes" && test -n "$PHP_RPATHS"; then
     OLD_RPATHS="$PHP_RPATHS"
-    PHP_RPATHS=""
+    unset PHP_RPATHS
     for i in $OLD_RPATHS; do
       PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
       PHP_RPATHS="$PHP_RPATHS -R $i"
-      NATIVE_RPATHS="$NATIVE_RPATHS ${ld_runpath_switch}$i"
+      NATIVE_RPATHS="$NATIVE_RPATHS $ld_runpath_switch$i"
     done
   fi
 ])
@@ -684,7 +684,7 @@ dnl Check for cc option
 dnl
 AC_DEFUN(PHP_CHECK_CC_OPTION,[
   echo "main(){return 0;}" > conftest.$ac_ext
-  opt="$1"
+  opt=$1
   changequote({,})
   var=`echo $opt|sed 's/[^a-zA-Z0-9]/_/g'`
   changequote([,])
@@ -772,12 +772,12 @@ AC_DEFUN(PHP_EXTENSION,[
   
   if test -d "$abs_srcdir/ext/$1"; then
 dnl ---------------------------------------------- Internal Module
-    ext_builddir="ext/$1"
-    ext_srcdir="$abs_srcdir/ext/$1"
+    ext_builddir=ext/$1
+    ext_srcdir=$abs_srcdir/ext/$1
   else
 dnl ---------------------------------------------- External Module
-    ext_builddir="."
-    ext_srcdir="$abs_srcdir"
+    ext_builddir=.
+    ext_srcdir=$abs_srcdir
   fi
 
   if test "$2" != "shared" && test "$2" != "yes"; then
@@ -809,7 +809,7 @@ dnl choose dynamic extensions, and after the gcc test.
 dnl
 AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
   AC_MSG_CHECKING(whether -fPIC is required)
-  if test "$EXT_SHARED" != ""; then
+  if test -n "$EXT_SHARED"; then
     os=`uname -sr 2>/dev/null`
     case "$os" in
         "SunOS 5.6"|"SunOS 5.7")
@@ -939,11 +939,11 @@ int main(void) {
   return (unsigned char)'A' != (unsigned char)0xC1; 
 } 
 ],[
-  ac_cv_ebcdic="yes"
+  ac_cv_ebcdic=yes
 ],[
-  ac_cv_ebcdic="no"
+  ac_cv_ebcdic=no
 ],[
-  ac_cv_ebcdic="no"
+  ac_cv_ebcdic=no
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
     AC_DEFINE(CHARSET_EBCDIC,1, [Define if system uses EBCDIC])
