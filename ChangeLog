@@ -1,3 +1,85 @@
+2001-11-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: MFH
+
+    * NEWS: Crash fix news.
+
+    * NEWS: Added crash fix news.
+
+    * ext/pcre/php_pcre.c
+      ext/standard/string.c: MFH
+
+    * ext/pcre/php_pcre.c: Fixed bug #13635.
+
+    * ext/standard/string.c: Fixed bug #13901.
+
+2001-11-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp: No need to 'include' a .re file here.
+
+2001-11-10  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/fastcgi/fastcgi.c
+      sapi/fastcgi/fastcgi.dsp:
+    Make the win32 fastcgi compilable with the php4ts projects.
+
+2001-11-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/Makefile.in
+      ext/standard/php_var.h
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      win32/php4dll.dsp
+      win32/php4dllts.dsp
+      ext/session/php_session.h
+      ext/session/session.c:
+    Rewrite of unserializer which should be more maintainable and extensible.
+
+    Changes pass `make test´ and a couple of custom tests.
+
+    Enjoy.
+
+2001-11-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h: - Fixing this bad idea
+
+2001-11-10  James Moore  <James@phpuk.org>
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/basic_functions.c: Fix apache win32 dso build.
+    (This is untested on linux but shouldnt break anything)
+
+2001-11-10  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c:
+    Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor images.
+
+2001-11-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/credits.c:
+    - Correcting Goba's name, and adding me to QA team
+
+2001-11-10  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php: proper initialization of the $row array in fetchInto
+    (suggested by yavo <yavo@itenasolutions.com>)
+
+2001-11-10  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/WebInstaller.php: * some minor improvements
+
+2001-11-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: Fixed bug: #13955.Checks now for png_write_image().
+
+2001-11-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Make fbsql_list_fields work as documented
+
 2001-11-09  Jon Parise  <jon@csh.rit.edu>
 
     * ext/gettext/config.m4
