@@ -1424,7 +1424,9 @@ binary_assign_op_addr: {
 						}
 						function_add_ref(function);
 					} else {
-						//zend_hash_apply(&ce->function_table, (apply_func_t) zend_import_function, (void *) 1 TSRMLS_CC);
+						zend_function tmp_zend_function;
+
+						zend_hash_copy(EG(function_table), &ce->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
 					}
 					NEXT_OPCODE();
 				}
@@ -1450,7 +1452,9 @@ binary_assign_op_addr: {
 						}
 						zend_class_add_ref(import_ce);
 					} else {
-						//zend_hash_apply(&ce->function_table, (apply_func_t) zend_import_function, (void *) 1 TSRMLS_CC);
+						zend_class_entry tmp_zend_class_entry;
+
+						zend_hash_copy(EG(class_table), &ce->class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_zend_class_entry, sizeof(zend_class_entry));
 					}
 
 					NEXT_OPCODE();
