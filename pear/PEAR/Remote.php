@@ -51,10 +51,29 @@ class PEAR_Remote extends PEAR
             $args = func_get_args();
             return call_user_func_array(array(&$this, 'call_epi'), $args);
         }
-        if (!include_once("XML/RPC.php")) {
-            return $this->raiseError("XML_RPC package not installed");
+        if (!@include_once("XML/RPC.php")) {
+            return $this->raiseError("For this remote PEAR operation you need to install the XML_RPC package");
         }
-        return $this->raiseError("XML_RPC fallback not yet implemented");
+        $args = func_get_args();
+        array_shift($args);
+        $server_host = $this->config->get('master_server');
+        $username = $this->config->get('username');
+        $password = $this->config->get('password');
+        $f = new XML_RPC_Message($method, $this->_encode($args));
+        $c = new XML_RPC_Client('/xmlrpc.php', $server_host, 80);
+        if ($username && $password) {
+            $c->setCredentials($username, $password);
+        }
+        $c->setDebug(1);
+        $r = $c->send($f);
+        if (!$r) {
+            return $this->raiseError("XML_RPC send failed");
+        }
+        $v = $r->value();
+        if ($e = $r->faultCode()) {
+            return $this->raiseError($r->faultString(), $e);
+        }
+        return XML_RPC_decode($v);
     }
 
     // }}}
@@ -166,6 +185,74 @@ class PEAR_Remote extends PEAR
     }
 
     // }}}
+
+    // {{{ _encode
+
+    // a slightly extended version of XML_RPC_encode
+    function _encode($php_val)
+    {
+        global $XML_RPC_Boolean, $XML_RPC_Int, $XML_RPC_Double;
+        global $XML_RPC_String, $XML_RPC_Array, $XML_RPC_Struct;
+        
+        $type = gettype($php_val);
+        $xmlrpcval = new XML_RPC_value;
+        
+        switch($type) {
+            case "array":
+                reset($php_val);
+                $firstkey = key($php_val);
+                end($php_val);
+                $lastkey = key($php_val);
+                if ($firstkey === 0 && is_int($lastkey) &&
+                    ($lastkey + 1) == count($php_val)) {
+                    $is_continous = true;
+                    reset($php_val);
+                    for ($expect = 0; $expect < count($php_val); $expect++) {
+                        if (key($php_val) !== $expect) {
+                            $is_continous = false;
+                            break;
+                        }
+                    }
+                    if ($is_continous) {
+                        reset($php_val);
+                        $arr = array();
+                        while (list($k, $v) = each($php_val)) {
+                            $arr[$k] = $this->_encode($v);
+                        }
+                        $xmlrpcval->addArray($arr);
+                        break;
+                    }
+                }
+                // fall though if not numerical and continous
+            case "object":
+                $arr = array();
+                while (list($k, $v) = each($php_val)) {
+                    $arr[$k] = $this->_encode($v);
+                }
+                $xmlrpcval->addStruct($arr);
+                break;
+            case "integer":
+                $xmlrpcval->addScalar($php_val, $XML_RPC_Int);
+                break;
+            case "double":
+                $xmlrpcval->addScalar($php_val, $XML_RPC_Double);
+                break;
+            case "string":
+            case "NULL":
+                $xmlrpcval->addScalar($php_val, $XML_RPC_String);
+                break;
+            case "boolean":
+                $xmlrpcval->addScalar($php_val, $XML_RPC_Boolean);
+                break;
+            case "unknown type":
+            default:
+                return null;
+        }
+        return $xmlrpcval;
+    }
+
+    // }}}
+
 }
 
 ?>
