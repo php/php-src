@@ -1597,7 +1597,7 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 		DB_FROM_ZVAL(db, &zdb);
 	}
 
-	if (!(sql = sqlite_mprintf("SELECT * FROM %q LIMIT 1", tbl))) {
+	if (!(sql = sqlite_mprintf("SELECT * FROM '%q' LIMIT 1", tbl))) {
 		RETURN_FALSE;
 	}
 
