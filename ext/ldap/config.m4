@@ -16,6 +16,9 @@ AC_ARG_WITH(ldap,
 		elif test -f /usr/local/ldap/include/ldap.h; then
 			LDAP_INCDIR=/usr/local/ldap/include
 			LDAP_LIBDIR=/usr/local/ldap/lib
+		elif test -f /usr/include/umich-ldap/ldap.h; then
+			LDAP_INCDIR=/usr/include/umich-ldap
+			LDAP_LIBDIR=/usr/lib
 		else
 			AC_MSG_RESULT(no)
 			AC_MSG_ERROR(Unable to find ldap.h)
@@ -58,6 +61,9 @@ dnl these here if necessary.   -RL
 	elif test -f $LDAP_LIBDIR/libldap30.sl; then
         AC_ADD_LIBRARY(ldap30)
 		AC_DEFINE(HAVE_NSLDAP)
+	elif test -f $LDAP_LIBDIR/libumich_ldap.so; then
+        AC_ADD_LIBRARY(umich_ldap)
+        AC_ADD_LIBRARY(umich_lber)
 	fi  
 
     AC_ADD_INCLUDE($LDAP_INCDIR)
