@@ -27,7 +27,6 @@ ext/standard
     * advanced sort (Andrei)
 	* NOT binary safe:
 		strcspn()
-		implode()
 		strtok()
 		basename()
 		dirname()

@@ -265,19 +265,17 @@ PHP_FUNCTION(explode)
 PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value) 
 {
 	pval **tmp;
-	int len = 0, count = 0;
+	int len = 0, count = 0, target = 0;
 
 	/* convert everything to strings, and calculate length */
 	zend_hash_internal_pointer_reset(arr->value.ht);
 	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
 		convert_to_string_ex(tmp);
-		if ((*tmp)->type == IS_STRING && (*tmp)->value.str.val != undefined_variable_string) {
-			len += (*tmp)->value.str.len;
-			if (count>0) {
-				len += delim->value.str.len;
-			}
-			count++;
+		len += (*tmp)->value.str.len;
+		if (count>0) {
+			len += delim->value.str.len;
 		}
+		count++;
 		zend_hash_move_forward(arr->value.ht);
 	}
 
@@ -287,12 +285,14 @@ PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value)
 	return_value->value.str.val[len] = '\0';
 	zend_hash_internal_pointer_reset(arr->value.ht);
 	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
-		if ((*tmp)->type == IS_STRING && (*tmp)->value.str.val != undefined_variable_string) {
-			count--;
-			strcat(return_value->value.str.val, (*tmp)->value.str.val);
-			if (count > 0) {
-				strcat(return_value->value.str.val, delim->value.str.val);
-			}
+		count--;
+		memcpy(return_value->value.str.val + target, (*tmp)->value.str.val,
+               (*tmp)->value.str.len);
+		target += (*tmp)->value.str.len; 
+		if (count > 0) {
+			memcpy(return_value->value.str.val + target, delim->value.str.val,
+                   delim->value.str.len);
+			target += delim->value.str.len;
 		}
 		zend_hash_move_forward(arr->value.ht);
 	}
