@@ -157,6 +157,10 @@ PHP_FUNCTION(ncurses_wstandend);
 PHP_FUNCTION(ncurses_wattrset);
 PHP_FUNCTION(ncurses_wattron);
 PHP_FUNCTION(ncurses_wattroff);
+PHP_FUNCTION(ncurses_waddch);
+PHP_FUNCTION(ncurses_wborder);
+PHP_FUNCTION(ncurses_whline);
+PHP_FUNCTION(ncurses_wvline);
 #if HAVE_NCURSES_PANEL
 PHP_FUNCTION(ncurses_update_panels);
 PHP_FUNCTION(ncurses_panel_window);
