@@ -54,6 +54,8 @@ php_apache_sapi_ub_write(const char *str, uint str_length)
 
 	ctx = SG(server_context);
 
+	if (!str_length) return 0;
+	
 	bb = ap_brigade_create(ctx->f->r->pool);
 	while (str_length > 0) {
 		now = MIN(str_length, 4096);
@@ -145,17 +147,13 @@ php_apache_sapi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 {
 	php_struct *ctx = SG(server_context);
 	apr_array_header_t *arr = apr_table_elts(ctx->f->r->subprocess_env);
-	apr_table_entry_t *elts = (apr_table_entry_t *) arr->elts;
-	int i;
-	char *val;
+	char *key, *val;
 	
-	for (i = 0; i < arr->nelts; i++) {
-		if (!(val = elts[i].val))
-			val = empty_string;
-
-		php_register_variable(elts[i].key, val, track_vars_array ELS_CC PLS_CC);
-	}
-	
+	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		if (!val) val = empty_string;
+		php_register_variable(key, val, track_vars_array ELS_CC PLS_CC);
+	APR_ARRAY_FOREACH_CLOSE()
+		
 	php_register_variable("PHP_SELF", ctx->f->r->uri, track_vars_array ELS_CC PLS_CC);
 }
 
@@ -263,6 +261,49 @@ static int php_input_filter(ap_filter_t *f, ap_bucket_brigade *bb,
 	return APR_SUCCESS;
 }
 
+static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx SLS_DC)
+{
+	char *content_type;
+	const char *auth;
+	CLS_FETCH();
+	ELS_FETCH();
+	PLS_FETCH();
+	
+	PG(during_request_startup) = 0;
+	SG(sapi_headers).http_response_code = 200;
+	SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
+#undef safe_strdup
+#define safe_strdup(x) ((x)?strdup((x)):NULL)	
+	SG(request_info).query_string = safe_strdup(f->r->args);
+	SG(request_info).request_method = f->r->method;
+	SG(request_info).request_uri = safe_strdup(f->r->uri);
+	f->r->no_local_copy = 1;
+	content_type = sapi_get_default_content_type(SLS_C);
+	f->r->content_type = apr_pstrdup(f->r->pool, content_type);
+	SG(request_info).post_data = ctx->post_data;
+	SG(request_info).post_data_length = ctx->post_len;
+	efree(content_type);
+	apr_table_unset(f->r->headers_out, "Content-Length");
+	apr_table_unset(f->r->headers_out, "Last-Modified");
+	apr_table_unset(f->r->headers_out, "Expires");
+	apr_table_unset(f->r->headers_out, "ETag");
+	apr_table_unset(f->r->headers_in, "Connection");
+	auth = apr_table_get(f->r->headers_in, "Authorization");
+	php_handle_auth_data(auth SLS_CC);
+
+	php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+}
+
+static void php_apache_request_dtor(ap_filter_t *f SLS_DC)
+{
+	php_request_shutdown(NULL);
+
+#undef safe_free
+#define safe_free(x) ((x)?free((x)):0)
+	safe_free(SG(request_info).query_string);
+	safe_free(SG(request_info).request_uri);
+}
+
 static int php_output_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 {
 	php_struct *ctx;
@@ -284,37 +325,12 @@ static int php_output_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 	 * 2: script execution and request shutdown
 	 */
 	if (ctx->state == 0) {
-		char *content_type;
-		const char *auth;
-		CLS_FETCH();
-		ELS_FETCH();
-		PLS_FETCH();
-		SLS_FETCH();
 	
 		apply_config(conf);
 		
 		ctx->state++;
 
-		/* XXX: Lots of startup crap. Should be moved into its own func */
-		PG(during_request_startup) = 0;
-		SG(sapi_headers).http_response_code = 200;
-		SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
-		SG(request_info).query_string = f->r->args;
-		SG(request_info).request_method = f->r->method;
-		SG(request_info).request_uri = f->r->uri;
-		f->r->no_local_copy = 1;
-		content_type = sapi_get_default_content_type(SLS_C);
-		f->r->content_type = apr_pstrdup(f->r->pool, content_type);
-		efree(content_type);
-		apr_table_unset(f->r->headers_out, "Content-Length");
-		apr_table_unset(f->r->headers_out, "Last-Modified");
-		apr_table_unset(f->r->headers_out, "Expires");
-		apr_table_unset(f->r->headers_out, "ETag");
-		apr_table_unset(f->r->headers_in, "Connection");
-		auth = apr_table_get(f->r->headers_in, "Authorization");
-		php_handle_auth_data(auth SLS_CC);
-		
-		php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+		php_apache_request_ctor(f, ctx SLS_CC);
 	}
 
 	/* moves all buckets from bb to ctx->bb */
@@ -387,7 +403,7 @@ skip_execution:
 		eos = ap_bucket_create_transient(NO_DATA, sizeof(NO_DATA)-1);
 		AP_BRIGADE_INSERT_HEAD(bb, eos);
 ok:
-		php_request_shutdown(NULL);
+		php_apache_request_dtor(f SLS_CC);
 
 		SG(server_context) = 0;
 		/* Pass EOS bucket to next filter to signal end of request */
@@ -417,6 +433,7 @@ php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
 	apr_register_cleanup(pchild, NULL, php_apache_server_shutdown, NULL);
+	php_apache_register_module();
 }
 
 static void php_register_hook(void)
