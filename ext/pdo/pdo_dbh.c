@@ -385,7 +385,7 @@ static PHP_FUNCTION(dbh_constructor)
 }
 /* }}} */
 
-static zval * pdo_instanciate_stmt(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+static zval * pdo_stmt_instanciate(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {
 	if (ctor_args) {
 		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -403,6 +403,11 @@ static zval * pdo_instanciate_stmt(zval *object, zend_class_entry *dbstmt_ce, zv
 	object->refcount = 1;
 	object->is_ref = 1;
 	
+	return object;
+} /* }}} */
+
+static void pdo_stmt_construct(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+{	
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
@@ -448,8 +453,6 @@ static zval * pdo_instanciate_stmt(zval *object, zend_class_entry *dbstmt_ce, zv
 			efree(fci.params);
 		}
 	}
-
-	return object;
 }
 /* }}} */
 
@@ -502,7 +505,7 @@ static PHP_METHOD(PDO, prepare)
 		ctor_args = NULL;
 	}
 
-	if (!pdo_instanciate_stmt(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
+	if (!pdo_stmt_instanciate(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", dbstmt_ce->name);
 		return;
 	}
@@ -520,7 +523,7 @@ static PHP_METHOD(PDO, prepare)
 	ZVAL_NULL(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options TSRMLS_CC)) {
-
+		pdo_stmt_construct(return_value, dbstmt_ce, ctor_args TSRMLS_CC);
 		return;
 	}
 
@@ -818,7 +821,7 @@ static PHP_METHOD(PDO, query)
 	
 	PDO_DBH_CLEAR_ERR();
 
-	if (!pdo_instanciate_stmt(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
+	if (!pdo_stmt_instanciate(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", pdo_dbstmt_ce->name);
 		return;
 	}
@@ -852,6 +855,7 @@ static PHP_METHOD(PDO, query)
 					stmt->executed = 1;
 				}
 				if (ret) {
+					pdo_stmt_construct(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC);
 					return;
 				}
 			}
