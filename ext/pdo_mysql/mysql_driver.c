@@ -29,13 +29,24 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
+#include <mysqld_error.h>
 #include "zend_exceptions.h"
+
+
+const char *pdo_mysql_get_sqlstate(unsigned int my_errno) {
+	switch (my_errno) {
+		/* import auto-generated case: code */
+#include "php_pdo_mysql_sqlstate.h"
+	default: return "HY000";
+	}
+}
 
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
 	pdo_mysql_error_info *einfo = &H->einfo;
+	char *sqlstate = NULL;
 
 	einfo->errcode = mysql_errno(H->server);
 	einfo->file = file;
@@ -53,51 +64,13 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		return 0;
 	}
 
-	/* mapping taken from: 
-		http://dev.mysql.com/doc/mysql/en/Error-handling.html
-	*/
-	switch (einfo->errcode) {
-		default:
-		case 1000: case 1001: case 1002: case 1003:
-		case 1004: case 1005: case 1006: case 1007:
-		case 1008: case 1009: case 1010: case 1011:
-		case 1012: case 1013: case 1014: case 1015:
-		case 1016: case 1017: case 1018: case 1019:
-		case 1020: case 1021: case 1023: case 1024:
-		case 1025: case 1026: case 1027: case 1028:
-		case 1029: case 1030: case 1031: case 1032:
-		case 1034: case 1035: case 1036: case 1039:
-		case 1041:
-			strcpy(*pdo_err, "HY000");
-			break;
-		case 1022:
-			strcpy(*pdo_err, "23000");
-			break;
-		case 1037: case 1038:
-			strcpy(*pdo_err, "HY001");
-			break;
-		case 1040:
-			strcpy(*pdo_err, "08004");
-			break;
-		case 1042: case 1043:
-			strcpy(*pdo_err, "08S01");
-			break;
-		case 1044:
-			strcpy(*pdo_err, "42000");
-			break;
-		case 1045:
-			strcpy(*pdo_err, "28000");
-			break;
-
-	/* TODO: someone with more time on their hands
-	 * needs to complete this list */
-	}
-
 	if (!dbh->methods) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
-	
+
+	strcpy(*pdo_err, pdo_mysql_get_sqlstate(einfo->errcode));
+
 	return einfo->errcode;
 }
 /* }}} */

@@ -37,6 +37,7 @@
    <file role="src" name="mysql_statement.c"/>
    <file role="src" name="php_pdo_mysql.h"/>
    <file role="src" name="php_pdo_mysql_int.h"/>
+   <file role="src" name="php_pdo_mysql_sqlstate.h"/>
 
    <file role="doc" name="CREDITS"/>
   </filelist>
