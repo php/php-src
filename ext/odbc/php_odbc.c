@@ -1631,6 +1631,11 @@ PHP_FUNCTION(odbc_result)
 	
 	/* get field index if the field parameter was a string */
 	if (field != NULL) {
+		if (result->values == NULL) {
+			php_error(E_WARNING, "Result set contains no data");
+			RETURN_FALSE;
+		}
+
 		for(i = 0; i < result->numcols; i++) {
 			if (!strcasecmp(result->values[i].name, field)) {
 				field_ind = i;
