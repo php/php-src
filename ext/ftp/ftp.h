@@ -130,11 +130,11 @@ int		ftp_pasv(ftpbuf_t *ftp, int pasv);
 int		ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path,
 			ftptype_t type);
 
-/* stores the data from infp as a file on the remote server
+/* stores the data from a file, socket, or process as a file on the remote server
  * returns true on success, false on error
  */
 int		ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp,
-			ftptype_t type);
+			int insocket, int issock, ftptype_t type);
 
 /* returns the size of the given file, or -1 on error */
 int		ftp_size(ftpbuf_t *ftp, const char *path);
