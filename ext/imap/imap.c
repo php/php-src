@@ -3870,9 +3870,8 @@ void mm_fatal (char *str)
 {
 }
 
-/* {{{ proto array mime_decode(string str)
-   Decode mime header element in accordance with RFC 2047
-   return array of objects containing 'charset' encoding and decoded 'text' */
+/* {{{ proto array imap_mime_header_decode(string str)
+   Decode mime header element in accordance with RFC 2047 and return array of objects containing 'charset' encoding and decoded 'text' */
 PHP_FUNCTION(imap_mime_header_decode)
 {
 	zval **str,*myobject;
