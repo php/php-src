@@ -238,6 +238,10 @@ static SWFCharacter getCharacter(zval *id TSRMLS_DC)
 		return (SWFCharacter)getBitmap(id TSRMLS_CC);
 	else if(Z_OBJCE_P(id) == sound_class_entry_ptr)
 		return (SWFCharacter)getSound(id TSRMLS_CC);
+	else if(Z_OBJCE_P(id) == videostream_class_entry_ptr)
+		return (SWFCharacter)getVideoStream(id TSRMLS_CC);
+	else if(Z_OBJCE_P(id) == prebuiltclip_class_entry_ptr)
+		return (SWFCharacter)getPrebuiltClip(id TSRMLS_CC);
 /*
 	else if(Z_OBJCE_P(id) == soundinstance_class_entry_ptr)
 		return (SWFCharacter)getSoundInstance(id TSRMLS_CC);
