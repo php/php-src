@@ -320,12 +320,14 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS
 }
 
 
+#endif
+
+
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
 	start_memory_manager(TSRMLS_C);
 }
 
-#endif
 
 #ifdef __FreeBSD__
 /* FreeBSD floating point precision fix */
@@ -350,7 +352,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, NULL);
 #else
-	start_memory_manager(TSRMLS_C);
+	alloc_globals_ctor(&alloc_globals TSRMLS_CC);
 #endif
 
 #ifdef __FreeBSD__
