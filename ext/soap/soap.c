@@ -1296,7 +1296,7 @@ PHP_METHOD(SoapServer, handle)
 						INIT_ZVAL(readfile_ret);
 						MAKE_STD_ZVAL(param);
 
-						sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\"")-1, 1);
+						sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 						ZVAL_STRING(param, service->sdl->source, 1);
 						ZVAL_STRING(&readfile, "readfile", 1);
 						if (call_user_function(EG(function_table), NULL, &readfile, &readfile_ret, 1, &param  TSRMLS_CC) == FAILURE) {
@@ -1312,7 +1312,7 @@ PHP_METHOD(SoapServer, handle)
 					} else {
 						soap_server_fault("Server", "WSDL generation is not supported yet", NULL, NULL, NULL TSRMLS_CC);
 /*
-						sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
+						sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8"), 1);
 						PUTS("<?xml version=\"1.0\" ?>\n<definitions\n");
 						PUTS("    xmlns=\"http://schemas.xmlsoap.org/wsdl/\"\n");
 						PUTS("    targetNamespace=\"");
@@ -1661,9 +1661,9 @@ PHP_METHOD(SoapServer, handle)
 	sprintf(cont_len, "Content-Length: %d", size);
 	sapi_add_header(cont_len, strlen(cont_len), 1);
 	if (soap_version == SOAP_1_2) {
-		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\"")-1, 1);
+		sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
 	} else {
-		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\"")-1, 1);
+		sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 	}
 
 	xmlFreeDoc(doc_return);
@@ -1748,9 +1748,9 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	sprintf(cont_len,"Content-Length: %d", size);
 	sapi_add_header(cont_len, strlen(cont_len), 1);
 	if (soap_version == SOAP_1_2) {
-		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\"")-1, 1);
+		sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
 	} else {
-		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\"")-1, 1);
+		sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 	}
 	php_write(buf, size TSRMLS_CC);
 
