@@ -1,3 +1,16 @@
+2002-01-26  Marko Karppinen  <karppinen@pobox.com>
+
+    * configure.in:
+    - Reorganized stuff in configure.in and added a few comments
+    - Added a check for ApplicationServices/ApplicationServices.h (Mac OS X)
+    - Added AC_PROG_CPP, AC_PROG_CXX and AC_PROG_CXXCPP
+    - Improved the IPv6 check to fail on Mac OS X (there's no IPv6 there yet)
+
+2002-01-26  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/PEAR/Packager.php: * Remove the use of a temp dir
+    * Tar archive is now doing the same work with less overhead
+
 2002-01-25  Marko Karppinen  <karppinen@pobox.com>
 
     * configure.in:
