@@ -226,7 +226,7 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 	PLS_FETCH();
 	SLS_FETCH();
 
-	fn = SG(request_info).path_translated;
+	fn = request_info.filename;
 	path_info = SG(request_info).request_uri;
 #if HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir)
@@ -254,8 +254,8 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 					strcat(fn, PG(user_dir));	/* safe */
 					strcat(fn, "/");	/* safe */
 					strcat(fn, s + 1);	/* safe (shorter than path_info) */
-					STR_FREE(SG(request_info).path_translated);
-					SG(request_info).path_translated = fn;
+					STR_FREE(request_info.filename);
+					request_info.filename = fn;
 				}
 			}
 		}
@@ -277,17 +277,17 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 			if ('/' == path_info[0])
 				l--;
 			strcpy(fn + l, path_info);
-			STR_FREE(SG(request_info).path_translated);
-			SG(request_info).path_translated = fn;
+			STR_FREE(request_info.filename);
+			request_info.filename = fn;
 		}
 	}							/* if doc_root && path_info */
 	if (!fn) {
-		/* we have to free SG(request_info).path_translated here because
+		/* we have to free request_info.filename here because
 		   php3_destroy_request_info assumes that it will get
 		   freed when the include_names hash is emptied, but
 		   we're not adding it in this case */
-		STR_FREE(SG(request_info).path_translated);
-		SG(request_info).path_translated = NULL;
+		STR_FREE(request_info.filename);
+		request_info.filename = NULL;
 		return NULL;
 	}
 	fp = fopen(fn, "r");
@@ -299,7 +299,7 @@ PHPAPI FILE *php3_fopen_for_parser(void)
 	}
 	if (!fp) {
 		php3_error(E_CORE_ERROR, "Unable to open %s", fn);
-		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
+		STR_FREE(request_info.filename);	/* for same reason as above */
 		return NULL;
 	}
 	
