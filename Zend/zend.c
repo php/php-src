@@ -54,6 +54,7 @@ ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
@@ -567,6 +568,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_get_configuration_directive_p = utility_functions->get_configuration_directive;
 	zend_ticks_function = utility_functions->ticks_function;
 	zend_on_timeout = utility_functions->on_timeout;
+	zend_vspprintf = utility_functions->vspprintf_function;
 
 	zend_compile_file = compile_file;
 	zend_execute = execute;

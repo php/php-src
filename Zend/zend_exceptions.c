@@ -232,7 +232,7 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	len = va_arg(args, int*);
 	num = va_arg(args, int*);
 
-	s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 2 + 1);
+	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
@@ -358,18 +358,11 @@ ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code 
 {
 	zval *ex;
 	va_list arg;
-
-#ifdef _GNU_SOURCE
 	char *message;
+
 	va_start(arg, format); 
-	vasprintf(message, format, arg);
+	zend_vspprintf(&message, 0, format, arg);
 	va_end(arg);
-#else
-	char message[1024];
-	va_start(arg, format); 
-	vsnprintf(message, sizeof(message), format, arg);
-	va_end(arg);
-#endif
 
 	MAKE_STD_ZVAL(ex);
 	if (exception_ce) {
@@ -390,9 +383,7 @@ ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code 
 		zend_update_property_long(exception_ce, ex, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
-#ifdef _GNU_SOURCE
-	free(message);
-#endif
+	efree(message);
 
 	EG(exception) = ex;
 }
