@@ -58,7 +58,7 @@ CALSTREAM *cal_close_it ();
 CALSTREAM *cal_close_full ();
 
 
-typedef struct php3_icap_le_struct {
+typedef struct php_icap_le_struct {
 	CALSTREAM *icap_stream;
 	long flags;
 } pils;
@@ -78,29 +78,29 @@ static cal_list_t *g_cal_list_end=NULL;
  */
 
 function_entry icap_functions[] = {
-	{"icap_open", php3_icap_open, NULL},
-	{"icap_popen", php3_icap_popen, NULL},
-	{"icap_reopen", php3_icap_reopen, NULL},
-	{"icap_fetch_event", php3_icap_fetch_event, NULL},
-	{"icap_list_events", php3_icap_list_events, NULL},
-	{"icap_list_alarms", php3_icap_list_alarms, NULL},
-	{"icap_create_calendar", php3_icap_create_calendar, NULL},
-	{"icap_rename_calendar", php3_icap_rename_calendar, NULL},
-	{"icap_delete_calendar", php3_icap_delete_calendar, NULL},
-	{"icap_delete_event", php3_icap_delete_event, NULL},
-	{"icap_store_event", php3_icap_store_event, NULL},
-	{"icap_snooze", php3_icap_snooze, NULL},
+	PHP_FE(icap_open,				NULL)
+	PHP_FE(icap_popen,				NULL)
+	PHP_FE(icap_reopen,				NULL)
+	PHP_FE(icap_fetch_event,		NULL)
+	PHP_FE(icap_list_event,			NULL)
+	PHP_FE(icap_list_alarms,		NULL)
+	PHP_FE(icap_create_calendar,	NULL)
+	PHP_FE(icap_rename_calendar,	NULL)
+	PHP_FE(icap_delete_calendar,	NULL)
+	PHP_FE(icap_delete_event,		NULL)
+	PHP_FE(icap_store_event,		NULL)
+	PHP_FE(icap_snooze,				NULL)
 	{NULL, NULL, NULL}
 };
 
 
-zend_module_entry php3_icap_module_entry = {
+zend_module_entry php_icap_module_entry = {
 	CALVER, icap_functions, PHP_MINIT(icap), NULL, NULL, NULL, PHP_MINFO(icap), 0, 0, 0, NULL
 };
 
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &php3_icap_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &php_icap_module_entry; }
 #endif
 
 /* 
@@ -156,7 +156,7 @@ static int add_assoc_object(pval *arg, char *key, pval *tmp)
 }
 
 
-void php3_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+void php_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval *calendar;
 	pval *user;
@@ -201,7 +201,7 @@ void php3_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* {{{ proto int icap_close(int stream_id [, int options])
    Close an ICAP stream */
-void php3_icap_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_close)
 {
         pval *options, *streamind;
         int ind, ind_type;
@@ -238,16 +238,16 @@ void php3_icap_close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int icap_open(string calendar, string user, string password [, int options])
    Open an ICAP stream to a calendar */
-void php3_icap_open(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_open)
 {
-	php3_icap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_icap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 
 /* {{{ proto int icap_reopen(int stream_id, string calendar [, int options])
    Reopen ICAP stream to new calendar */
-void php3_icap_reopen(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_reopen)
 {
 	pval *streamind;
 	pval *calendar;
@@ -290,7 +290,7 @@ void php3_icap_reopen(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int icap_expunge(int stream_id)
    Delete all messages marked for deletion */
-void php3_icap_expunge(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_expunge)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -320,7 +320,7 @@ void php3_icap_expunge(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int icap_fetch_event(int stream_id,int eventid, [int options])
    Fetch an event*/
-void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_fetch_event)
 {
 	pval *streamind,*eventid,*start,*end,*options=NULL;
 	int ind, ind_type;
@@ -388,7 +388,7 @@ void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array icap_list_events(int stream_id,int begindate, [int enddate])
    Returns list of UIDs for that day or range of days */
-void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_list_events)
 {
 	pval *streamind,*begindate,*enddate;
         pval **pvalue;
@@ -476,7 +476,7 @@ g_cal_list=NULL;
 /* {{{ proto string icap_create_calendar(int stream_id, string calendar)
    Create a new calendar*/
 
-void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_create_calendar)
 {
 	pval *streamind, *calendar;
 	int ind, ind_type;
@@ -511,7 +511,7 @@ void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string icap_rename(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar*/
-void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_rename_calendar)
 {
 	pval *streamind, *src_calendar,*dest_calendar;
 	int ind, ind_type;
@@ -543,7 +543,7 @@ void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int icap_reopen(int stream_id, array date, array time)
    list alarms for a given time */
-void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_list_alarms)
 {
 	pval *streamind, *date,*time;
         pval **pvalue;
@@ -620,7 +620,7 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string icap_delete_calendar(int stream_id, string calendar)
    Delete calendar*/
-void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_delete_calendar)
 {
 	pval *streamind, *calendar;
 	int ind, ind_type;
@@ -655,7 +655,7 @@ void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string icap_delete_event(int stream_id, int uid)
    Delete event*/
-void php3_icap_delete_event(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_delete_event)
 {
 	pval *streamind, *uid;
 	int ind, ind_type;
@@ -692,13 +692,14 @@ icap_delete_calendar(){
 }
 /* }}} */
 
-void php3_icap_popen(INTERNAL_FUNCTION_PARAMETERS){
+PHP_FUNCTION(icap_popen)
+{
 }
 
 
 /* {{{ proto string icap_store_event(int stream_id, object event)
    Store an  event*/
-void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_store_event)
 {
 	pval *streamind,*storeobject;
 	int ind, ind_type;
@@ -850,7 +851,7 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string icap_snooze(int stream_id, int uid)
    Snooze an alarm*/
-void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(icap_snooze)
 {
 	pval *streamind,*uid;
 	int ind, ind_type;
