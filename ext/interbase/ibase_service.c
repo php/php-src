@@ -33,6 +33,7 @@ typedef struct {
 	isc_svc_handle handle;
 	char *hostname;
 	char *username;
+	long res_id;
 } ibase_service;
 
 static int le_service;
@@ -55,6 +56,12 @@ static void _php_ibase_free_service(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 	efree(sv);
 }
 /* }}} */
+
+/* the svc api seems to get confused after an error has occurred, 
+   so invalidate the handle on errors */
+#define IBASE_SVC_ERROR(svm) \
+	do { zend_list_delete(svm->res_id); _php_ibase_error(TSRMLS_C); } while (0)
+	
 
 void php_ibase_service_minit(INIT_FUNC_ARGS) /* {{{ */
 {
@@ -126,161 +133,73 @@ void php_ibase_service_minit(INIT_FUNC_ARGS) /* {{{ */
 }
 /* }}} */
 
-static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation) /* {{{ */
+static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{ */
 {
-	zval **args[8];
-	char *ib_server, *dba_user_name, *dba_password, *user_name, *user_password = NULL;
-	char *first_name = NULL, *middle_name = NULL, *last_name = NULL;
-	char service_name_buffer[128], *service_name = service_name_buffer;
-	char spb_buffer[128], *spb = spb_buffer;
-	unsigned short spb_length;
-	isc_svc_handle service_handle = NULL;
+	/* user = 0, password = 1, first_name = 2, middle_name = 3, last_name = 4 */
+	static char const user_flags[] = { isc_spb_sec_username, isc_spb_sec_password, 
+	    isc_spb_sec_firstname, isc_spb_sec_middlename, isc_spb_sec_lastname };
+	char buf[128], *args[] = { NULL, NULL, NULL, NULL, NULL };
+	int i, args_len[] = { 0, 0, 0, 0, 0 };
+	unsigned short spb_len = 1;
+	zval *res;
+	ibase_service *svm;
 
 	RESET_ERRMSG;
 
-	switch (operation) {
-		case isc_action_svc_add_user:
-		case isc_action_svc_modify_user:
-			/* 5 to 8 parameters for ADD or MODIFY operation */
-			if (ZEND_NUM_ARGS() < 5 || ZEND_NUM_ARGS() > 8) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-
-		case isc_action_svc_delete_user:
-			/* 4 parameters for DELETE operation */
-			if (ZEND_NUM_ARGS() != 4) {
-				WRONG_PARAM_COUNT;
-			}
-	}
-
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+			(operation == isc_action_svc_delete_user) ? "rs" : "rss|sss",
+			&res, &args[0], &args_len[0], &args[1], &args_len[1], &args[2], &args_len[2],
+			&args[3], &args_len[3], &args[4], &args_len[4])) {
 		RETURN_FALSE;
 	}
+			
+	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1, "Interbase service manager handle",
+		le_service);
 
-	switch (ZEND_NUM_ARGS()) {
-		case 8:
-			convert_to_string_ex(args[7]);
-			last_name = Z_STRVAL_PP(args[7]);
-			/* fallout */
-		case 7:
-			convert_to_string_ex(args[6]);
-			middle_name = Z_STRVAL_PP(args[6]);
-			/* fallout */
-		case 6:
-			convert_to_string_ex(args[5]);
-			first_name = Z_STRVAL_PP(args[5]);
-			/* fallout */
+	buf[0] = operation;
+	
+	for (i = 0; i < sizeof(user_flags); ++i) {
+		if (args[i] != NULL) {
+			int chunk = snprintf(&buf[spb_len], sizeof(buf) - spb_len, "%c%c%c%s",
+				user_flags[i], (char)args_len[i], (char)(args_len[i] >> 8), args[i]);
+			
+			if ((spb_len + chunk) > sizeof(buf) || chunk <= 0) {
+				_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)"
+					TSRMLS_CC, spb_len);
+				RETURN_FALSE;
+			}
+			spb_len += chunk;
+		}
 	}
 
-	if (operation != isc_action_svc_delete_user) {
-		/* Parameter not available for DELETE operation */
-		convert_to_string_ex(args[4]);
-		user_password = Z_STRVAL_PP(args[4]);
-	}
-
-	convert_to_string_ex(args[3]);
-	user_name = Z_STRVAL_PP(args[3]);
-
-	convert_to_string_ex(args[2]);
-	dba_password = Z_STRVAL_PP(args[2]);
-
-	convert_to_string_ex(args[1]);
-	dba_user_name = Z_STRVAL_PP(args[1]);
-
-	convert_to_string_ex(args[0]);
-	ib_server = Z_STRVAL_PP(args[0]);
-
-	/* Build buffer for isc_service_attach() */
-	*spb++ = isc_spb_version;
-	*spb++ = isc_spb_current_version;
-	*spb++ = isc_spb_user_name;
-	*spb++ = strlen(dba_user_name);
-	strcpy(spb, dba_user_name);
-	spb += strlen(dba_user_name);
-	*spb++ = isc_spb_password;
-	*spb++ = strlen(dba_password);
-	strcpy(spb, dba_password);
-	spb += strlen(dba_password);
-	spb_length = spb - spb_buffer;
-
-	/* Attach to the Service Manager */
-	sprintf(service_name, "%s:service_mgr", ib_server);
-	if (isc_service_attach(IB_STATUS, 0, service_name, &service_handle, spb_length, spb_buffer)) {
-		_php_ibase_error(TSRMLS_C);
+	/* now start the job */
+	if (isc_service_start(IB_STATUS, &svm->handle, NULL, spb_len, buf)) {
+		IBASE_SVC_ERROR(svm);
 		RETURN_FALSE;
-	} else {
-		char request[128], *x, *p = request;
-
-		/* Identify cluster (here, isc_action_svc_*_user) */
-		*p++ = operation;
-
-		/* Argument for username */
-		*p++ = isc_spb_sec_username;
-		ADD_SPB_LENGTH(p, strlen(user_name));
-		for (x = user_name ; *x;) *p++ = *x++;
-
-		/* Argument for password */
-		if (user_password) {
-			*p++ = isc_spb_sec_password;
-			ADD_SPB_LENGTH(p, strlen(user_password));
-			for (x = user_password ; *x;) *p++ = *x++;
-		}
-
-		/* Argument for first name */
-		if (first_name) {
-			*p++ = isc_spb_sec_firstname;
-			ADD_SPB_LENGTH(p, strlen(first_name));
-			for (x = first_name ; *x;) *p++ = *x++;
-		}
-
-		/* Argument for middle name */
-		if (middle_name) {
-			*p++ = isc_spb_sec_middlename;
-			ADD_SPB_LENGTH(p, strlen(middle_name));
-			for (x = middle_name ; *x;) *p++ = *x++;
-		}
-
-		/* Argument for last name */
-		if (last_name) {
-			*p++ = isc_spb_sec_lastname;
-			ADD_SPB_LENGTH(p, strlen(last_name));
-			for (x = last_name ; *x;) *p++ = *x++;
-		}
-
-		/* Let's go update: start Service Manager */
-		if (isc_service_start(IB_STATUS, &service_handle, NULL, (unsigned short) (p - request), request)) {
-			_php_ibase_error(TSRMLS_C);
-			isc_service_detach(IB_STATUS, &service_handle);
-			RETURN_FALSE;
-		} else {
-			/* Detach from Service Manager */
-			isc_service_detach(IB_STATUS, &service_handle);
-		}
 	}
 
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ibase_add_user(string server, string dba_user_name, string dba_password, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
-   Add an user to security database (only for IB6 or later) */
+/* {{{ proto bool ibase_add_user(resource service_handle, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
+   Add a user to security database */
 PHP_FUNCTION(ibase_add_user)
 {
 	_php_ibase_user(INTERNAL_FUNCTION_PARAM_PASSTHRU, isc_action_svc_add_user);
 }
 /* }}} */
 
-/* {{{ proto bool ibase_modify_user(string server, string dba_user_name, string dba_password, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
-   Modify an user in security database (only for IB6 or later) */
+/* {{{ proto bool ibase_modify_user(resource service_handle, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
+   Modify a user in security database */
 PHP_FUNCTION(ibase_modify_user)
 {
 	_php_ibase_user(INTERNAL_FUNCTION_PARAM_PASSTHRU, isc_action_svc_modify_user);
 }
 /* }}} */
 
-/* {{{ proto bool ibase_delete_user(string server, string dba_user_name, string dba_password, string username)
-   Delete an user from security database (only for IB6 or later) */
+/* {{{ proto bool ibase_delete_user(resource service_handle, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
+   Delete a user from security database */
 PHP_FUNCTION(ibase_delete_user)
 {
 	_php_ibase_user(INTERNAL_FUNCTION_PARAM_PASSTHRU, isc_action_svc_delete_user);
@@ -330,7 +249,7 @@ PHP_FUNCTION(ibase_service_attach)
 	svm->username = estrdup(user);
 
 	ZEND_REGISTER_RESOURCE(return_value, svm, le_service);
-	zend_list_addref(Z_LVAL_P(return_value));
+	svm->res_id = Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -365,7 +284,7 @@ static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 		static char action[] = { isc_action_svc_display_user };
 
 		if (isc_service_start(IB_STATUS, &svm->handle, NULL, sizeof(action), action)) {
-			_php_ibase_error(TSRMLS_C);
+			IBASE_SVC_ERROR(svm);
 			RETURN_FALSE;
 		}
 	}
@@ -376,7 +295,7 @@ query_loop:
 	if (isc_service_query(IB_STATUS, &svm->handle, NULL, sizeof(spb), spb,
 			1, &info_action, sizeof(res_buf), res_buf)) {
 
-		_php_ibase_error(TSRMLS_C);
+		IBASE_SVC_ERROR(svm);
 		RETURN_FALSE;
 	}
 	while (*result != isc_info_end) {
@@ -538,7 +457,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 
 	/* now start the backup/restore job */
 	if (isc_service_start(IB_STATUS, &svm->handle, NULL, (unsigned short)spb_len, buf)) {
-		_php_ibase_error(TSRMLS_C);
+		IBASE_SVC_ERROR(svm);
 		RETURN_FALSE;
 	}
 
@@ -645,7 +564,7 @@ options_argument:
 	}
 
 	if (isc_service_start(IB_STATUS, &svm->handle, NULL, (unsigned short)spb_len, buf)) {
-		_php_ibase_error(TSRMLS_C);
+		IBASE_SVC_ERROR(svm);
 		RETURN_FALSE;
 	}
 
