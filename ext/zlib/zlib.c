@@ -47,6 +47,7 @@
 #include "safe_mode.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_zlib.h"
 #include "fopen_wrappers.h"
 #if HAVE_PWD_H
@@ -76,6 +77,22 @@
 #define OS_CODE			0x03 /* FIXME */
 #define GZIP_HEADER_LENGTH		10
 #define GZIP_FOOTER_LENGTH		8
+
+#define ADD_CL_HEADER(xln)										\
+{																\
+		smart_str str = {0};									\
+		sapi_header_line ctr = {0};								\
+																\
+		smart_str_appends(&str, "Content-Length: ");			\
+		smart_str_append_long(&str, xln);						\
+		smart_str_0(&str);										\
+																\
+		ctr.line = str.c;										\
+		ctr.line_len = str.len;									\
+																\
+		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);	\
+		smart_str_free(&str);									\
+}
 
 /* True globals, no need for thread safety */
 static int gz_magic[2] = {0x1f, 0x8b};	/* gzip magic header */
@@ -1000,6 +1017,8 @@ PHP_FUNCTION(ob_gzhandler)
 
 		if (return_original) {
 			zval_dtor(return_value);
+		} else if(do_start && do_end) {
+			ADD_CL_HEADER(Z_STRLEN_P(return_value));
 		}
 
 	} else {
@@ -1027,6 +1046,8 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 		do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
 		if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC)!=SUCCESS) {
 			zend_error(E_ERROR, "Compression failed");
+		} else if (do_start && do_end) {
+			ADD_CL_HEADER(*handled_output_len);
 		}
 	}
 }
