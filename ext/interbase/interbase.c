@@ -220,12 +220,16 @@ static void _php_ibase_error(TSRMLS_D)
 
 /* {{{ _php_ibase_module_error()
    print php interbase module error and save it for ibase_errmsg() */
-static void _php_ibase_module_error(char *msg, ...)
+static void _php_ibase_module_error(char *msg TSRMLS_DC, ...)
 {
 	va_list ap;
-	TSRMLS_FETCH();
 
+#ifdef ZTS
+	va_start(ap, TSRMLS_C);
+#else
 	va_start(ap, msg);
+#endif
+
 	/* vsnprintf NUL terminates the buf and writes at most n-1 chars+NUL */
 	vsnprintf(IBG(errmsg), MAX_ERRMSG, msg, ap);
 	va_end(ap);
@@ -263,7 +267,7 @@ static void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_
 			IBDEBUG("Type is le_trans");
 			ZEND_FETCH_RESOURCE(*trans, ibase_trans *, link_id, -1, "InterBase transaction", le_trans);
 			if ((*trans)->link_cnt > 1) {
-				_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections.");
+				_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections." TSRMLS_CC);
 				return;
 			}				
 			*ib_link = (*trans)->db_link[0];
@@ -520,7 +524,7 @@ static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (ib_blob->bl_handle != NULL) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_module_error("You can lose data. Close any blob after " 
-				"reading from or writing to it. Use ibase_blob_close() before calling ibase_close()");
+				"reading from or writing to it. Use ibase_blob_close() before calling ibase_close()" TSRMLS_CC);
 		}
 	}
 	efree(ib_blob);
@@ -864,7 +868,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *le;
 		int open_new_connection = 1;
 		
-		if ( (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void *) &le)) ) {
+		if ( (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void *) &le) != FAILURE) ) {
 			static char info[] = {isc_info_base_level, isc_info_end};
 			char result[8]; /* Enough? Hope so... */ 
 
@@ -883,12 +887,12 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 			
 			if ((IBG(max_links) != -1) && (IBG(num_links) >= IBG(max_links))) {
-				_php_ibase_module_error("Too many open links (%d)", IBG(num_links));
+				_php_ibase_module_error("Too many open links (%d)" TSRMLS_CC, IBG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if ((IBG(max_persistent) != -1) && (IBG(num_persistent) >= IBG(max_persistent))) {
-				_php_ibase_module_error("Too many open persistent links (%d)", IBG(num_persistent));
+				_php_ibase_module_error("Too many open persistent links (%d)" TSRMLS_CC, IBG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -929,7 +933,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new ib_link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if ( (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length + 1, (void *) &index_ptr)) ) {
+		if ( (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length + 1, (void *) &index_ptr) == SUCCESS) ) {
 			int type, xlink;
 			void *ptr;
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
@@ -949,7 +953,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if ((IBG(max_links) != -1) && (IBG(num_links) >= IBG(max_links))) {
-			_php_ibase_module_error("Too many open links (%d)", IBG(num_links));
+			_php_ibase_module_error("Too many open links (%d)" TSRMLS_CC, IBG(num_links));
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -1145,7 +1149,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQL
 						IB_ARRAY[ar_cnt].el_size = ar_desc->array_desc_length + sizeof(short);
 						break;
 					default:
-						_php_ibase_module_error("Unexpected array type %d in relation '%s' column '%s'", ar_desc->array_desc_dtype, var->relname, var->sqlname);
+						_php_ibase_module_error("Unexpected array type %d in relation '%s' column '%s'" TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
 						efree(IB_ARRAY);
 						IB_ARRAY = NULL;
 						return FAILURE;
@@ -1338,7 +1342,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 			case SQL_SHORT:
 				convert_to_long(b_var);
 				if (Z_LVAL_P(b_var) > SHRT_MAX || Z_LVAL_P(b_var) < SHRT_MIN) {
-					_php_ibase_module_error("Field %*s overflow", var->aliasname_length, var->aliasname);
+					_php_ibase_module_error("Field %*s overflow" TSRMLS_CC, var->aliasname_length, var->aliasname);
 					return FAILURE;
 				}
 				buf[i].val.sval = (short) Z_LVAL_P(b_var);
@@ -1403,7 +1407,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 					n = sscanf(Z_STRVAL_P(b_var), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d", &t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec);
 
 					if (n != 3 && n != 6) {
-						_php_ibase_module_error("Invalid date/time format: Expected 3 or 6 fields, got %d. Use format m/d/Y H:i:s. You gave '%s'", n, Z_STRVAL_P(b_var));
+						_php_ibase_module_error("Invalid date/time format: Expected 3 or 6 fields, got %d. Use format m/d/Y H:i:s. You gave '%s'" TSRMLS_CC, n, Z_STRVAL_P(b_var));
 						return FAILURE;
 					}
 					t.tm_year -= 1900;
@@ -1482,7 +1486,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 				var->sqldata = (void ISC_FAR *) &buf[i].val.qval;
 				break;
 			case SQL_ARRAY:
-				_php_ibase_module_error("Binding arrays not supported yet");
+				_php_ibase_module_error("Binding arrays not supported yet" TSRMLS_CC);
 				return FAILURE;
 			break;
 		} /* switch */
@@ -1652,7 +1656,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	if (ib_query->in_sqlda) { /* has placeholders */
 		IBDEBUG("Query wants XSQLDA for input");
 		if (ib_query->in_sqlda->sqld != argc) {
-			_php_ibase_module_error("Placeholders (%d) and variables (%d) mismatch", ib_query->in_sqlda->sqld, argc);
+			_php_ibase_module_error("Placeholders (%d) and variables (%d) mismatch" TSRMLS_CC, ib_query->in_sqlda->sqld, argc);
 			goto _php_ibase_exec_error;
 		}
 		in_sqlda = emalloc(XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
@@ -1935,7 +1939,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
 			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				/* this link doesn't have a default transaction */
-				_php_ibase_module_error("Default link has no default transaction");
+				_php_ibase_module_error("Default link has no default transaction" TSRMLS_CC);
 				RETURN_FALSE;
 			}
 			trans = ib_link->tr_list->trans;
@@ -1956,7 +1960,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 
 				if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 					/* this link doesn't have a default transaction */
-					_php_ibase_module_error("Link has no default transaction");
+					_php_ibase_module_error("Link has no default transaction" TSRMLS_CC);
 					RETURN_FALSE;
 				}
 				trans = ib_link->tr_list->trans;
@@ -2057,7 +2061,7 @@ PHP_FUNCTION(ibase_query)
 	i = 0;
 	while (Z_TYPE_PP(args[i++]) != IS_STRING) {
 		if (i >= ZEND_NUM_ARGS()) {
-			_php_ibase_module_error("Query argument missing");
+			_php_ibase_module_error("Query argument missing" TSRMLS_CC);
 			free_alloca(args);
 			RETURN_FALSE;
 		}
@@ -2138,7 +2142,7 @@ PHP_FUNCTION(ibase_query)
 			break;
 		default:
 			/* more than two arguments preceed the SQL string */
-			_php_ibase_module_error("Invalid arguments");
+			_php_ibase_module_error("Invalid arguments" TSRMLS_CC);
 			free_alloca(args);
 			RETURN_FALSE;
 	}
@@ -2442,7 +2446,7 @@ static int _php_ibase_arr_zval(zval *ar_zval, char **datap, ibase_array *ib_arra
 	int i, dim_len, l_bound, u_bound;
 
 	if (dim > 16) { /* InterBase limit */
-		_php_ibase_module_error("Too many dimensions");
+		_php_ibase_module_error("Too many dimensions" TSRMLS_CC);
 		return FAILURE;
 	}
 
@@ -2605,7 +2609,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 							if (item == isc_info_end || item == isc_info_truncated || 
 								item == isc_info_error || i >= sizeof(bl_info)) {
 
-								_php_ibase_module_error("Could not determine BLOB size (internal error)");
+								_php_ibase_module_error("Could not determine BLOB size (internal error)" TSRMLS_CC);
 								RETURN_FALSE;
 							}								
 
@@ -3034,7 +3038,7 @@ PHP_FUNCTION(ibase_field_info)
 	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, "InterBase result", le_result);
 
 	if (ib_result->out_sqlda == NULL) {
-		_php_ibase_module_error("Trying to get field info from a non-select query");
+		_php_ibase_module_error("Trying to get field info from a non-select query" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -3241,7 +3245,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle, IBASE_BLOBINFO *bl_in
 				break;
 			case isc_info_truncated:
 			case isc_info_error:  /* hmm. don't think so...*/
-				_php_ibase_module_error("PHP module internal error");
+				_php_ibase_module_error("PHP module internal error" TSRMLS_CC);
 				return FAILURE;
 		} /* switch */
 		p += item_len;
@@ -3331,7 +3335,7 @@ PHP_FUNCTION(ibase_blob_open)
 	ib_blob->type = BLOB_OUTPUT;
 	
 	if (! _php_ibase_string_to_quad(Z_STRVAL_PP(blob_arg), &(ib_blob->bl_qd))) {
-		_php_ibase_module_error("String is not a BLOB ID");
+		_php_ibase_module_error("String is not a BLOB ID" TSRMLS_CC);
 		efree(ib_blob);
 		RETURN_FALSE;
 	}
@@ -3368,7 +3372,7 @@ PHP_FUNCTION(ibase_blob_add)
 	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
 
 	if (ib_blob->type != BLOB_INPUT) {
-		_php_ibase_module_error("BLOB is not open for input");
+		_php_ibase_module_error("BLOB is not open for input" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -3394,7 +3398,7 @@ PHP_FUNCTION(ibase_blob_get)
 	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
 
 	if (ib_blob->type != BLOB_OUTPUT) {
-		_php_ibase_module_error("BLOB is not open for output");
+		_php_ibase_module_error("BLOB is not open for output" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -3493,7 +3497,7 @@ PHP_FUNCTION(ibase_blob_info)
 	convert_to_string_ex(blob_arg);
 
 	if (! _php_ibase_string_to_quad(Z_STRVAL_PP(blob_arg), &(ib_blob.bl_qd))) {
-		_php_ibase_module_error("Unrecognized BLOB ID");
+		_php_ibase_module_error("Unrecognized BLOB ID" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -3575,7 +3579,7 @@ PHP_FUNCTION(ibase_blob_echo)
 	convert_to_string_ex(blob_arg);
 
 	if (! _php_ibase_string_to_quad(Z_STRVAL_PP(blob_arg), &(ib_blob_id.bl_qd))) {
-		_php_ibase_module_error("Unrecognized BLOB ID");
+		_php_ibase_module_error("Unrecognized BLOB ID" TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -3992,7 +3996,7 @@ static isc_callback _php_ibase_callback(ibase_event *event, unsigned short buffe
 
 		/* call the callback provided by the user */
 		if (SUCCESS != call_user_function(EG(function_table), NULL, event->callback, &return_value, 2, args TSRMLS_CC)) {
-			_php_ibase_module_error("Error calling callback %s", Z_STRVAL_P(event->callback));
+			_php_ibase_module_error("Error calling callback %s" TSRMLS_CC, Z_STRVAL_P(event->callback));
 			return 0;
 		}
 
@@ -4067,7 +4071,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 		
 	/* get the callback */
 	if (!zend_is_callable(*cb_arg, 0, &callback_name)) {
-		_php_ibase_module_error("Callback argument %s is not a callable function", callback_name);
+		_php_ibase_module_error("Callback argument %s is not a callable function" TSRMLS_CC, callback_name);
 		efree(callback_name);
 		efree(args);
 		RETURN_FALSE;
