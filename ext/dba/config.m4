@@ -167,6 +167,19 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
       AC_MSG_ERROR(Version 4.1 requires patch level 25)
     ])
   fi
+  if test "$ext_shared" = "yes"; then
+    AC_MSG_CHECKING(if db can be used as shared extension)
+    AC_EGREP_CPP(yes,[
+#include "$THIS_INCLUDE"
+#if DB_VERSION_MAJOR > 3 || (DB_VERSION_MAJOR == 3 && DB_VERSION_MINOR > 2)
+      yes
+#endif
+    ],[
+      AC_MSG_RESULT(yes)
+    ],[
+      AC_MSG_ERROR(At least version 3.3 is required)
+    ])
+  fi
   if test -n "$THIS_LIBS"; then
     AC_DEFINE(DBA_DB$1, 1, [ ]) 
     if test -n "$THIS_INCLUDE"; then
