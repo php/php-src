@@ -175,9 +175,9 @@ PHPAPI void php_print_info(int flag)
 				PUTS(SG(request_info).request_uri);
 			}
 			if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
-				PUTS("?=PHPE9568F36-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\" alt=\"Thies!\"></a>");
+				PUTS("?="PHP_EGG_LOGO_GUID"\" border=0 align=\"right\" alt=\"Thies!\"></a>");
 			} else {
-				PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\" alt=\"PHP Logo\"></a>");
+				PUTS("?="PHP_LOGO_GUID"\" border=0 align=\"right\" alt=\"PHP Logo\"></a>");
 			}
 		}
 		php_printf("<H1>PHP Version %s</H1>\n", PHP_VERSION);
@@ -220,7 +220,7 @@ PHPAPI void php_print_info(int flag)
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
-			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
+			PUTS("?="ZEND_LOGO_GUID"\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
 		}
 		php_printf("This program makes use of the Zend scripting language engine:<BR>");
 		zend_html_puts(zend_version, strlen(zend_version));
