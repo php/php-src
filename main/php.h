@@ -226,7 +226,9 @@ char *strerror(int);
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
 #define PHP_ATTRIBUTE_FORMAT ZEND_ATTRIBUTE_FORMAT
 
+BEGIN_EXTERN_C()
 #include "snprintf.h"
+END_EXTERN_C()
 #include "spprintf.h"
 
 #define EXEC_INPUT_BUF 4096

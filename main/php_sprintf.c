@@ -20,13 +20,16 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#ifdef NETWARE
+#include "php.h"
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#elif defined NETWARE
 #include "config.nw.h"
 #else
 #include "php_config.h"
 #endif
 
-int
+PHPAPI int
 php_sprintf (char*s, const char* format, ...)
 {
   va_list args;
