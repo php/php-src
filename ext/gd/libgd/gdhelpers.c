@@ -100,3 +100,9 @@ gdFree (void *ptr)
 {
   efree (ptr);
 }
+
+char *
+gdEstrdup (const char *ptr)
+{
+  return estrdup(ptr);
+}

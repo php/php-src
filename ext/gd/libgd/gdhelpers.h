@@ -14,6 +14,7 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 void *gdCalloc(size_t nmemb, size_t size);
 void *gdMalloc(size_t size);
 void *gdRealloc(void *ptr, size_t size);
+char *gdEstrdup(const char *ptr);
 
 #endif /* GDHELPERS_H */
 

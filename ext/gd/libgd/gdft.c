@@ -347,7 +347,7 @@ fontFetch (char **error, void *key)
   FT_CharMap charmap;
 
   a = (font_t *) gdMalloc (sizeof (font_t));
-  a->fontlist = estrdup (b->fontlist);
+  a->fontlist = gdEstrdup (b->fontlist);
   a->library = b->library;
 
   /*
@@ -356,7 +356,7 @@ fontFetch (char **error, void *key)
   fontsearchpath = getenv ("GDFONTPATH");
   if (!fontsearchpath)
     fontsearchpath = DEFAULT_FONTPATH;
-  fontlist = estrdup (a->fontlist);
+  fontlist = gdEstrdup (a->fontlist);
 
   /*
    * Must use gd_strtok_r else pointer corrupted by strtok in nested loop.
@@ -366,7 +366,7 @@ fontFetch (char **error, void *key)
     {
 
       /* make a fresh copy each time - strtok corrupts it. */
-      path = estrdup (fontsearchpath);
+      path = gdEstrdup (fontsearchpath);
       /*
        * Allocate an oversized buffer that is guaranteed to be
        * big enough for all paths to be tested.
