@@ -37,27 +37,14 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.2b5</version>
-    <state>beta</state>
-    <date>2003-08-05</date>
+    <version>1.2.2?</version>
+    <date>2003-08-??</date>
+    <state>stable</state>
     <notes>
-* Changed license from PHP 2.02 to 3.0
-* Added support for optional dependencies
-* Made upgrade and uninstall package case insensitive
-* pear makerpm, now works and generates a better system independant spec file
-* pear install|build pecl-package, now exposes the compilation progress
-* Installer now checks dependencies on package uninstall
-* Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
-* Added the command "download-all" (Alex Merz)
-* Made package dependency checking back to work
-* Added support for spaces in path names (Greg)
+* Fixed #25117 - MD5 checksum should be case-insensitive
 * Fixed static calls to PEAR error-handling methods in classes (Greg)
 * Added ability to use a static method callback for error-handling, and removed
 use of inadvisable @ in setErrorHandling (Greg)
-* Various bugfixes
-* Added new pear "bundle" command, which downloads and uncompress a PECL package.
-The main purpouse of this command is for easily adding extensions to the PHP sources
-before compiling it.
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
@@ -123,6 +110,35 @@ before compiling it.
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>1.2.1</version>
+      <date>2003-08-15</date>
+      <state>stable</state>
+      <notes>- Set back the default library path (BC issues)</notes>
+    </release>
+    <release>
+      <version>1.2</version>
+      <date>2003-08-14</date>
+      <state>stable</state>
+      <notes>Changes from 1.1:
+
+* Changed license from PHP 2.02 to 3.0
+* Added support for optional dependencies
+* Made upgrade and uninstall package case insensitive
+* pear makerpm, now works and generates a better system independant spec file
+* pear install|build pecl-package, now exposes the compilation progress
+* Installer now checks dependencies on package uninstall
+* Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
+* Added the command &quot;download-all&quot; (Alex Merz)
+* Made package dependency checking back to work
+* Added support for spaces in path names (Greg)
+* Various bugfixes
+* Added new pear &quot;bundle&quot; command, which downloads and uncompress a PECL package.
+The main purpouse of this command is for easily adding extensions to the PHP sources
+before compiling it.
+      
+</notes>
+    </release>
     <release>
         <version>1.1</version>
         <state>stable</state>
