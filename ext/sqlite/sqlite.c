@@ -198,6 +198,7 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 	zval funcname;
 	int i, res;
 	char *callable = NULL, *errbuf=NULL;
+	TSRMLS_FETCH();
 
 	/* sanity check the args */
 	if (argc == 0) {
@@ -355,6 +356,8 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	sdb = sqlite_open(filename, mode, &errtext);
 
 	if (sdb == NULL) {
+		TSRMLS_FETCH();
+
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 
 		if (errmsg) {
@@ -386,6 +389,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 
 	if (persistent_id) {
 		list_entry le;
+		TSRMLS_FETCH();
 
 		Z_TYPE(le) = le_sqlite_pdb;
 		le.ptr = db;
