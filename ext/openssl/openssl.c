@@ -292,9 +292,6 @@ PHP_FUNCTION(openssl_sign)
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, key, -1, "OpenSSL key", le_key);
 	siglen = EVP_PKEY_size(pkey);
 	sigbuf = emalloc(siglen + 1);
-	if (sigbuf == NULL) {
-		RETURN_FALSE;
-	}
 
 	EVP_SignInit(&md_ctx, EVP_sha1());
 	EVP_SignUpdate(&md_ctx, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
@@ -304,8 +301,8 @@ PHP_FUNCTION(openssl_sign)
 		ZVAL_STRINGL(*signature, sigbuf, siglen, 0);
 		RETURN_TRUE;
 	} else {
-		RETURN_FALSE;
 		efree(sigbuf);
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -366,20 +363,8 @@ PHP_FUNCTION(openssl_seal)
 	}
 
 	pkeys = emalloc(nkeys * sizeof(*pkeys));
-	if (pkeys == NULL) {
-		RETURN_FALSE;
-	}
 	eksl = emalloc(nkeys * sizeof(*eksl));
-	if (eksl == NULL) {
-		efree(pkeys);
-		RETURN_FALSE;
-	}
 	eks = emalloc(nkeys * sizeof(*eks));
-	if (eks == NULL) {
-		efree(eksl);
-		efree(pkeys);
-		RETURN_FALSE;
-	}
 	
 	convert_to_string_ex(data);
 
@@ -390,15 +375,6 @@ PHP_FUNCTION(openssl_seal)
 		ZEND_FETCH_RESOURCE(pkeys[i], EVP_PKEY *, pubkey, -1,
 				    "OpenSSL key", le_key);
 		eks[i] = emalloc(EVP_PKEY_size(pkeys[i]) + 1);
-		if (eks[i] == NULL) {
-			while (i--) {
-				efree(eks[i]);
-			}
-			efree(eks);
-			efree(eksl);
-			efree(pkeys);
-			RETURN_FALSE;
-		}
                 zend_hash_move_forward_ex(pubkeysht, &pos);
 		i++;
 	}
@@ -420,32 +396,10 @@ PHP_FUNCTION(openssl_seal)
 #if 0
 	/* Need this if allow ciphers that require initialization vector */
 	ivlen = EVP_CIPHER_CTX_iv_length(&ctx);
-	if (ivlen) {
-		iv = emalloc(ivlen + 1);
-		if (iv == NULL) {
-			for (i=0; i<nkeys; i++) {
-				efree(eks[i]);
-			}
-			efree(eks);
-			efree(eksl);
-			efree(pkeys);
-			RETURN_FALSE;
-		}
-	} else {
-		iv = NULL;
-	}
+	iv = ivlen ? emalloc(ivlen + 1) : NULL;
 #endif
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc(Z_STRLEN_PP(data) + EVP_CIPHER_CTX_block_size(&ctx));
-	if (buf == NULL) {
-		for (i=0; i<nkeys; i++) {
-			efree(eks[i]);
-		}
-		efree(eks);
-		efree(eksl);
-		efree(pkeys);
-		RETURN_FALSE;
-	}
 
 	if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys)
 #if OPENSSL_VERSION_NUMBER >= 0x0090600fL
@@ -542,9 +496,6 @@ PHP_FUNCTION(openssl_open)
 			    le_key);
 
 	buf = emalloc(Z_STRLEN_PP(data) + 1);
-	if (buf == NULL) {
-		RETURN_FALSE;
-	}
 
 	if (EVP_OpenInit(&ctx, EVP_rc4(), Z_STRVAL_PP(ekey),
 			  Z_STRLEN_PP(ekey), NULL, pkey)
