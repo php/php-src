@@ -132,16 +132,21 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 */
 			"User-Agent: PHP SOAP 0.1\r\n");
 		if (soap_version == SOAP_1_2) {
-			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=\"utf-8\"\r\n");
+			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=\"utf-8");
+			if (soapaction) {
+				smart_str_append_const(&soap_headers,"\"; action=\"");
+				smart_str_appends(&soap_headers, soapaction);
+			}
+			smart_str_append_const(&soap_headers,"\"\r\n");
 		} else {
 			smart_str_append_const(&soap_headers,"Content-Type: text/xml; charset=\"utf-8\"\r\n");
+			smart_str_append_const(&soap_headers, "SOAPAction: \"");
+			smart_str_appends(&soap_headers, soapaction);
+			smart_str_append_const(&soap_headers, "\"\r\n");
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
 		smart_str_append_long(&soap_headers, buf_size);
-		smart_str_append_const(&soap_headers, "\r\n"
-			"SOAPAction: \"");
-		smart_str_appends(&soap_headers, soapaction);
-		smart_str_append_const(&soap_headers, "\"\r\n");
+		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS) {
