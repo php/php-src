@@ -574,7 +574,7 @@ static void curl_free_slist(void **slist)
 /* }}} */
 
 
-/* {{{ proto array curl_version(void)
+/* {{{ proto string curl_version(void)
    Return cURL version information. */
 PHP_FUNCTION(curl_version)
 {
@@ -1023,7 +1023,7 @@ PHP_FUNCTION(curl_exec)
 }
 /* }}} */
 
-/* {{{ proto string curl_getinfo(resource ch, int opt)
+/* {{{ proto mixed curl_getinfo(resource ch, int opt)
    Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
