@@ -1,3 +1,39 @@
+2000-11-27  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/gettext/gettext.c: fix path operations, under win32
+
+2000-11-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.h:
+    Add a note about what a missing const specifier does mean in the context
+    of the request_info structure.
+
+    * ext/standard/array.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/standard/crypt.c
+      ext/standard/dns.c
+      ext/standard/exec.c:
+    The result of conv_z_macros and some manual conversion of
+    "return_value.*=.*IS_STRING" constructs to RETVAL_STRINGL.
+
+    * ext/pcre/php_pcre.c: Oh man, gcc's logic is really flawed
+
+    * .cvsignore
+      build-defs.h.in
+      build/build2.mk
+      build/rules_common.mk
+      configure.in
+      main/.cvsignore
+      main/build-defs.h.in: Move build-defs.h(.in) and php_config.h to main
+
+    * ext/pcre/php_pcre.c: Kill a warning (code is correct)
+
+2000-11-27  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php.ini-dist
+      php.ini-optimized: update win32 extension section
+
 2000-11-26  Jon Parise  <jon@csh.rit.edu>
 
     * CODING_STANDARDS:
