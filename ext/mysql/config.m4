@@ -23,6 +23,7 @@ AC_DEFUN(PHP_MYSQL_SOCK,[
   for i in  \
       /var/run/mysqld/mysqld.sock \
       /var/tmp/mysql.sock \
+      /var/run/mysql/mysql.sock \
       /var/lib/mysql/mysql.sock \
       /var/mysql/mysql.sock \
       /Private/tmp/mysql.sock \
