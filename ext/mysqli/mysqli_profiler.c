@@ -167,18 +167,18 @@ void php_mysqli_profiler_report_header(PR_HEADER header, char *ident)
 			php_mysqli_profiler_timediff(header.starttime, &header.lifetime);
 			break;
 	}
-	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "name", header.functionname);
+	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "functionname", header.functionname);
 	
 	MYSQLI_PROFILER_ADD_STARTTAG(buffer, "fileinfo",0);
-	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "name", header.filename);
+	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "filename", header.filename);
 	MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "line", header.lineno);
 	MYSQLI_PROFILER_ADD_ENDTAG(buffer, "fileinfo");
-	MYSQLI_PROFILER_ADD_STARTTAG(buffer, "times",0);
+	MYSQLI_PROFILER_ADD_STARTTAG(buffer, "timeinfo",0);
 	MYSQLI_PROFILER_ADD_ATTR_TIME(buffer, "execution_time", header.elapsedtime.tv_sec, header.elapsedtime.tv_usec);
 	if (header.lifetime.tv_sec + header.lifetime.tv_usec) {
 		MYSQLI_PROFILER_ADD_ATTR_TIME(buffer, "life_time", header.lifetime.tv_sec, header.lifetime.tv_usec);
 	}
-	MYSQLI_PROFILER_ADD_ENDTAG(buffer, "times");
+	MYSQLI_PROFILER_ADD_ENDTAG(buffer, "timeinfo");
 	if (header.error) {
 		MYSQLI_PROFILER_ADD_STARTTAG(buffer,  "errors",0);
 		MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "errno", header.error);
@@ -344,9 +344,9 @@ void php_mysqli_profiler_report(PR_COMMON *current, int depth)
 		case MYSQLI_PR_MAIN:
 		{
 			MYSQLI_PROFILER_ADD_STARTTAG(buffer,"?xml version=\"1.0\" ?", 0); 
-			sprintf((char *)&tag, "profilerinfo source='PHP5' version='%2.1f'", MYSQLI_PROFILER_VERSION);
+			sprintf((char *)&tag, "protocol origin='PHP5' version='%2.1f'", MYSQLI_PROFILER_PROTOCOL_VERSION);
 			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 0);
-			strcpy (tag, "profilerinfo");
+			strcpy (tag, "protocol");
 		}
 		break;
 		case MYSQLI_PR_MYSQL:
