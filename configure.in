@@ -801,12 +801,12 @@ AC_OUTPUT([php4.spec Zend/Makefile
 		   $PHP_OUTPUT_FILES
 		   ], [], [
 
-if test "$CONFIG_FILES" = ""; then
+if test "\$CONFIG_FILES" = ""; then
     PHP_GEN_MAKEFILES
 else
     for file in $PHP_FAST_OUTPUT_FILES; do
-		if test "$file" = "$CONFIG_FILES"; then
-			PHP_GEN_MAKEFILE($file)
+		if test "\$file" = "\$CONFIG_FILES"; then
+			PHP_GEN_MAKEFILE(\$file)
 		fi
     done
 fi
@@ -834,7 +834,7 @@ cat >Zend/zend_config.h <<FEO
 FEO
 
 # run this only when generating all the files?
-if true; then
+if test "\$CONFIG_FILES" = ""; then
   # Hacking while airborne considered harmful.
   #
   echo "creating main/internal_functions.c"
