@@ -1,5 +1,4 @@
 <?
-
 $foo = array(7,"foo",3,array(1,2),4);
 
 //print $foo[1];
