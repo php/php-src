@@ -74,8 +74,13 @@ PHP_FUNCTION(imap_mail_compose);
 PHP_FUNCTION(imap_alerts);
 PHP_FUNCTION(imap_errors);
 PHP_FUNCTION(imap_last_error);
+#if !(WIN32|WINNT)
+PHP_FUNCTION(imap_mail);
+#endif
 PHP_FUNCTION(imap_search);
 PHP_FUNCTION(imap_utf8);
+PHP_FUNCTION(imap_utf7_decode);
+PHP_FUNCTION(imap_utf7_encode);
 #else
 #define imap_module_ptr NULL
 #endif /* HAVE_IMAP */
