@@ -576,6 +576,9 @@ void do_end_variable_parse(int type, int arg_offset CLS_DC)
 				opline->opcode += 9; /* 3+3+3 */
 				opline->extended_value = arg_offset;
 				break;
+			case BP_VAR_UNSET:
+				opline->opcode += 12; /* 3+3+3+3 */
+				break;
 		}
 		le = le->next;
 	}
@@ -1943,11 +1946,11 @@ void do_unset(znode *variable CLS_DC)
 	last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
 
 	switch (last_op->opcode) {
-		case ZEND_FETCH_R:
+		case ZEND_FETCH_UNSET:
 			last_op->opcode = ZEND_UNSET_VAR;
 			break;
-		case ZEND_FETCH_DIM_R:
-		case ZEND_FETCH_OBJ_R:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_OBJ_UNSET:
 			last_op->opcode = ZEND_UNSET_DIM_OBJ;
 			break;
 
