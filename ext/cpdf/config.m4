@@ -10,7 +10,6 @@ AC_DEFUN(CPDF_JPEG_TEST,[
       fi
     done
     if test -z "$CPDF_JPEG_DIR"; then
-      AC_MSG_CHECKING([for libjpeg (needed by cpdflib 2.x)])
       AC_MSG_ERROR([libjpeg.(a|so) not found.])
     fi
     PHP_CHECK_LIBRARY(jpeg, jpeg_read_header, [
@@ -33,7 +32,6 @@ AC_DEFUN(CPDF_TIFF_TEST,[
       fi
     done
     if test -z "$CPDF_TIFF_DIR"; then
-      AC_MSG_CHECKING([for libtiff (needed by cpdflib 2.x)])
       AC_MSG_ERROR([libtiff.(a|so) not found.])
     fi
     PHP_CHECK_LIBRARY(tiff, TIFFOpen, [
@@ -46,7 +44,6 @@ AC_DEFUN(CPDF_TIFF_TEST,[
   ],)
 ])
 
-AC_MSG_CHECKING(for cpdflib support)
 PHP_ARG_WITH(cpdflib,
 [  --with-cpdflib[=DIR]    Include cpdflib support (requires cpdflib >= 2).])
 
@@ -59,8 +56,6 @@ if test "$PHP_CPDFLIB" != "no"; then
   for i in $PHP_CPDFLIB /usr/local /usr; do
     if test -f "$i/include/cpdflib.h"; then
       CPDFLIB_INCLUDE=$i/include
-      AC_MSG_CHECKING(for cpdflib.h)
-      AC_MSG_RESULT([in $i/include])
 
       PHP_CHECK_LIBRARY(cpdf, cpdf_open, [
         PHP_ADD_INCLUDE($CPDFLIB_INCLUDE)
@@ -76,7 +71,6 @@ if test "$PHP_CPDFLIB" != "no"; then
   done  
 
   if test -z "$CPDFLIB_INCLUDE"; then
-    AC_MSG_CHECKING(for cpdflib.h)
-    AC_MSG_ERROR([not found])
+    AC_MSG_ERROR([cpdflib.h not found])
   fi
 fi
