@@ -52,18 +52,28 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-/* {{{ */
+/* {{{ php_base64_encode */
 unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length)
 {
 	const unsigned char *current = str;
-	int i = 0;
-	unsigned char *result = (unsigned char *)emalloc(((length + 3 - length % 3) * 4 / 3 + 1) * sizeof(char));
+	unsigned char *p;
+	unsigned char *result;
+
+	if ((length + 2) < 0 || ((length + 2) / 3) >= (1 << (sizeof(int) * 8 - 2))) {
+		if (ret_length != NULL) {
+			*ret_length = 0;
+		}
+		return NULL;
+	}
+
+	result = (unsigned char *)safe_emalloc(((length + 2) / 3) * 4, sizeof(char), 1);
+	p = result;
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
-		result[i++] = base64_table[current[0] >> 2];
-		result[i++] = base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
-		result[i++] = base64_table[((current[1] & 0x0f) << 2) + (current[2] >> 6)];
-		result[i++] = base64_table[current[2] & 0x3f];
+		*p++ = base64_table[current[0] >> 2];
+		*p++ = base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
+		*p++ = base64_table[((current[1] & 0x0f) << 2) + (current[2] >> 6)];
+		*p++ = base64_table[current[2] & 0x3f];
 
 		current += 3;
 		length -= 3; /* we just handle 3 octets of data */
@@ -71,22 +81,21 @@ unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_
 
 	/* now deal with the tail end of things */
 	if (length != 0) {
-		result[i++] = base64_table[current[0] >> 2];
+		*p++ = base64_table[current[0] >> 2];
 		if (length > 1) {
-			result[i++] = base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
-			result[i++] = base64_table[(current[1] & 0x0f) << 2];
-			result[i++] = base64_pad;
-		}
-		else {
-			result[i++] = base64_table[(current[0] & 0x03) << 4];
-			result[i++] = base64_pad;
-			result[i++] = base64_pad;
+			*p++ = base64_table[((current[0] & 0x03) << 4) + (current[1] >> 4)];
+			*p++ = base64_table[(current[1] & 0x0f) << 2];
+			*p++ = base64_pad;
+		} else {
+			*p++ = base64_table[(current[0] & 0x03) << 4];
+			*p++ = base64_pad;
+			*p++ = base64_pad;
 		}
 	}
-	if(ret_length) {
-		*ret_length = i;
+	if (ret_length != NULL) {
+		*ret_length = (int)(p - result);
 	}
-	result[i] = '\0';
+	*p = '\0';
 	return result;
 }
 /* }}} */
@@ -125,7 +134,7 @@ void php_base64_init()
 */
 /* }}} */
 
-/* {{{ */
+/* {{{ php_base64_decode */
 /* as above, but backwards. :) */
 unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
 {
