@@ -327,6 +327,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "mcve"=..\ext\mcve\mcve\mcve.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "mhash"=..\ext\mhash\mhash.dsp - Package Owner=<4>
 
 Package=<5>

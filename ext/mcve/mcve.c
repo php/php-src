@@ -19,6 +19,12 @@
 
 /* $Id$ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_MCVE
+
 /* standard php include(s) */
 #include "php.h"
 #include "ext/standard/head.h"
@@ -39,8 +45,7 @@ static int mcve_init;  /* For Safe Memory Deallocation */
 /* }}} */
 
 /* {{{ extension definition structures */
-static unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-
+static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 function_entry mcve_functions[] = {
 	PHP_FE(mcve_initengine,			NULL)
 	PHP_FE(mcve_initconn,			NULL)
@@ -77,7 +82,7 @@ function_entry mcve_functions[] = {
 	PHP_FE(mcve_monitor,			NULL)
 	PHP_FE(mcve_transinqueue,		NULL)
 	PHP_FE(mcve_checkstatus,		NULL)
-	PHP_FE(mcve_completeauthorizations,	second_arg_force_ref)
+	PHP_FE(mcve_completeauthorizations,	second_args_force_ref)
 	PHP_FE(mcve_sale,			NULL)
 	PHP_FE(mcve_preauth,			NULL)
 	PHP_FE(mcve_void,			NULL)
@@ -148,7 +153,7 @@ ZEND_GET_MODULE(mcve)
 #endif
 
 /* {{{ MCVE_CONN destructor */
-static void _free_mcve_conn(zend_rsrc_list_entry *rsrc)
+static void _free_mcve_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	MCVE_CONN *conn;
 
@@ -503,7 +508,9 @@ PHP_FUNCTION(mcve_deletetrans)
    Destroy the connection and MCVE_CONN structure */
 PHP_FUNCTION(mcve_destroyconn)
 {
+#if 0
 	MCVE_CONN *conn;
+#endif 
 	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
@@ -2249,6 +2256,8 @@ PHP_FUNCTION(mcve_text_cv)
 	}
 }
 /* }}} */
+
+#endif
 
 /* END OF MCVE PHP EXTENSION */
 
