@@ -15,3 +15,4 @@ oci8                Working (but no blob-support yet)
 oracle              Working
 iptc                Working
 informix            Working
+zlib                Working

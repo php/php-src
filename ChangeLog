@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Imported PHP3 fixes for problem with PHP as a dynamic module and Redhat
+  libc2.1 in zlib module (Stefan)
 - Fixed sybase_fetch_object() (Zeev)
 - Made the IMAP module work with PHP 4.0 (Zeev)
 - Fixed a problem with include()/require() of URLs (Sascha, Zeev)

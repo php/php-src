@@ -38,9 +38,9 @@
 extern php3_module_entry php3_zlib_module_entry;
 #define zlib_module_ptr &php3_zlib_module_entry
 
-extern int php3_minit_zlib(INIT_FUNC_ARGS);
-extern int php3_mshutdown_zlib(SHUTDOWN_FUNC_ARGS);
-void php3_info_zlib(ZEND_MODULE_INFO_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(zlib);
+extern PHP_MSHUTDOWN_FUNCTION(zlib);
+PHP_MINFO_FUNCTION(zlib);
 PHP_FUNCTION(gzopen);
 PHP_FUNCTION(gzclose);
 PHP_FUNCTION(gzeof);

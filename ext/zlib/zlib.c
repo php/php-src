@@ -106,33 +106,44 @@ void *zlib_mutex;
 #endif
 
 function_entry php3_zlib_functions[] = {
-	{"readgzfile",	php3_readgzfile,	NULL},
-	{"gzrewind",	php3_gzrewind,   	NULL},
-	{"gzclose",		php3_gzclose,		NULL},
-	{"gzeof",		php3_gzeof,			NULL},
-	{"gzgetc",		php3_gzgetc,		NULL},
-	{"gzgets",		php3_gzgets,		NULL},
-	{"gzgetss",		php3_gzgetss,		NULL},
-	{"gzread",		php3_gzread,		NULL},
-	{"gzopen",		php3_gzopen,		NULL},
-	{"gzpassthru",	php3_gzpassthru,   	NULL},
-	{"gzseek",		php3_gzseek,	   	NULL},
-	{"gztell",		php3_gztell,	   	NULL},
-	{"gzwrite",		php3_gzwrite,		NULL},
-	{"gzputs",		php3_gzwrite,		NULL},
-	{"gzfile",		php3_gzfile,   		NULL},
+	PHP_FE(readgzfile,					NULL)
+	PHP_FE(gzrewind,					NULL)
+	PHP_FE(gzclose,						NULL)
+	PHP_FE(gzeof,						NULL)
+	PHP_FE(gzgetc,						NULL)
+	PHP_FE(gzgets,						NULL)
+	PHP_FE(gzgetss,						NULL)
+	PHP_FE(gzread,						NULL)
+	PHP_FE(gzopen,						NULL)
+	PHP_FE(gzpassthru,					NULL)
+	PHP_FE(gzseek,						NULL)
+	PHP_FE(gztell,						NULL)
+	PHP_FE(gzwrite,						NULL)
+	PHP_FALIAS(gzputs,		gzwrite,	NULL)
+	PHP_FE(gzfile,						NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry php3_zlib_module_entry = {
-	"zlib", php3_zlib_functions, php3_minit_zlib, php3_mshutdown_zlib, NULL, NULL, php3_info_zlib, STANDARD_MODULE_PROPERTIES
+	"zlib",
+	php3_zlib_functions,
+	PHP_MINIT(zlib),
+	PHP_MSHUTDOWN(zlib),
+	NULL,
+	NULL,
+	PHP_MINFO(zlib),
+	STANDARD_MODULE_PROPERTIES
 };
 
 #if defined(COMPILE_DL)
 DLEXPORT php3_module_entry *get_module(void) { return &php3_zlib_module_entry; }
 #endif
 
-int php3_minit_zlib(INIT_FUNC_ARGS)
+static void php3i_destructor_gzclose(gzFile *zp) {
+	(void)gzclose(zp);
+}
+
+PHP_MINIT_FUNCTION(zlib)
 {
 #ifdef THREAD_SAFE
 	zlib_global_struct *zlib_globals;
@@ -152,11 +163,12 @@ int php3_minit_zlib(INIT_FUNC_ARGS)
 		return FAILURE;
 	}
 #endif
-	ZLIB_GLOBAL(le_zp) = register_list_destructors(gzclose,NULL);
+	ZLIB_GLOBAL(le_zp) = register_list_destructors(php3i_destructor_gzclose,NULL);
 	return SUCCESS;
 }
 
-int php3_mshutdown_zlib(SHUTDOWN_FUNC_ARGS){
+PHP_MSHUTDOWN_FUNCTION(zlib)
+{
 #if defined(THREAD_SAFE)
 	ZLIB_TLS_VARS;
 	PHP3_TLS_THREAD_FREE(zlib_globals);
@@ -173,7 +185,7 @@ int php3_mshutdown_zlib(SHUTDOWN_FUNC_ARGS){
 	return SUCCESS;
 }
 
-void php3_info_zlib(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(zlib)
 {
 		PUTS("Zlib support active (compiled with ");
 		PUTS(ZLIB_VERSION);
@@ -895,5 +907,6 @@ PHP_FUNCTION(gzread)
 /*
  * Local variables:
  * tab-width: 4
+ * c-basic-offset: 4
  * End:
  */
