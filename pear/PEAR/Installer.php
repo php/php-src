@@ -22,13 +22,14 @@
 
 require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
+require_once 'PEAR/Dependency.php';
 
 /**
  * Administration class used to install PEAR packages and maintain the
  * installed package database.
  *
  * TODO:
- *  - finish and test Windows support
+ *  - Install the "role=doc" files in a central pear doc dir
  *  - kill FIXME's
  *
  * @since PHP 4.0.2
@@ -114,6 +115,7 @@ class PEAR_Installer extends PEAR_Common
                 return true;
                 break;
             case 'doc':
+                // XXX Fixme: install doc in a central doc dir. PEAR_DOC constant?
             case 'php':
             default:
                 $dest_file = $dest_dir . basename($file);
@@ -237,6 +239,15 @@ class PEAR_Installer extends PEAR_Common
 
         $pkgname = $pkginfo['package'];
 
+        // Check dependencies -------------------------------------------
+        if (isset($pkginfo['release_deps']) && !isset($options['nodeps'])) {
+            $error = $this->checkDeps($pkginfo);
+            if ($error) {
+                $this->log(0, $error);
+                return $this->raiseError('Dependencies failed');
+            }
+        }
+
         if (empty($options['upgrade'])) {
             // checks to do only when installing new packages
             if (empty($options['force']) && $this->registry->packageExists($pkgname)) {
@@ -278,7 +289,7 @@ class PEAR_Installer extends PEAR_Common
                 $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
                 $this->_installFile($fname, $dest_dir, $atts);
             }
-        }            
+        }
 
         // Register that the package is installed -----------------------
         if (empty($options['upgrade'])) {
@@ -307,6 +318,23 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+
+    function checkDeps(&$pkginfo)
+    {
+        $deps = new PEAR_Dependency;
+        $errors = null;
+        if (is_array($pkginfo['release_deps'])) {
+            foreach($pkginfo['release_deps'] as $dep) {
+                if ($error = $deps->callCheckMethod($dep)) {
+                    $errors .= "\n$error";
+                }
+            }
+            if ($errors) {
+                return $errors;
+            }
+        }
+        return false;
+    }
 }
 
 ?>
