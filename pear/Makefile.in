@@ -69,8 +69,8 @@ PEAR_FILES = \
 	Log/syslog.php \
 	Mail.php \
 	Mail/RFC822.php \
-	Mail/Sendmail.php \
-	Mail/SMTP.php \
+	Mail/sendmail.php \
+	Mail/smtp.php \
 	Math/Fraction.php \
 	Math/Util.php \
 	Net/Curl.php \

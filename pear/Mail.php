@@ -35,15 +35,9 @@ class Mail extends PEAR {
      */
     function factory($driver, $params = array())
     {
+	$driver = strtolower($driver);
         if (@include_once 'Mail/' . $driver . '.php') {
             $class = 'Mail_' . $driver;
-        } elseif (@include_once 'Mail/' . strtoupper($driver) . '.php') {
-            $class = 'Mail_' . strtoupper($driver);
-        } elseif (@include_once 'Mail/' . ucfirst($driver) . '.php') {
-            $class = 'Mail_' . ucfirst($driver);
-        }
-        
-        if (isset($class)) {
             return new $class($params);
         } else {
             return new PEAR_Error('Unable to find class for driver ' . $driver);
