@@ -1203,9 +1203,12 @@ ZEND_FUNCTION(debug_backtrace)
 		if (ptr->object) {
 			printf("%s::", Z_OBJCE(*ptr->object)->name);
 		}
+		if (ptr->function_state.function->common.scope) {
+			printf("%s::", ptr->function_state.function->common.scope->name);
+		}
 		function_name = ptr->function_state.function->common.function_name;
 		if (!function_name) {
-			function_name = "main";
+			function_name = "_main_";
 		}
 
 		ptr = ptr->prev_execute_data;

@@ -2748,11 +2748,24 @@ send_by_ref:
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 					if (new_op_array) {
+						zval *saved_object;
+						zend_function *saved_function;
+
+
 						EG(return_value_ptr_ptr) = EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr;
 						EG(active_op_array) = new_op_array;
 						EX(Ts)[EX(opline)->result.u.var].var.ptr = NULL;
 
+						saved_object = EX(object);
+						saved_function = EX(function_state).function;
+
+						EX(function_state).function = (zend_function *) new_op_array;
+						EX(object) = NULL;
+						
 						zend_execute(new_op_array TSRMLS_CC);
+						
+						EX(function_state).function = saved_function;
+						EX(object) = saved_object;
 						
 						if (!return_value_used) {
 							if (EX(Ts)[EX(opline)->result.u.var].var.ptr) {
