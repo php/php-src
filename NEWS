@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Fixed bug #31174 (compile warning in url.c). (Ilia, lukem at NetBSD dot org)
 - Fixed bug #31159 (COM object access is not working). (Wez)
 - Fixed bug #31142 (imap_mail_compose() fails to generate correct output). (Ilia)
