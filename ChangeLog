@@ -5,7 +5,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Updated XML to use the new high-performance Zend function API. (Thies)
 - Updated Oracle to use the new high-performance Zend function API. (Thies)
 - Improved the performance of the MySQL module significantly by using the new
-  high-performance Zend function API.
+  high-performance Zend function API. (Zeev)
 - Add support for the Easysoft ODBC-ODCB Bridge (martin@easysoft.com)
 - Fix bug in odbc_setoption, getParameter call incorrect (martin@easysoft.com)
 - Ora_Fetch_Into now resets the returned array in all cases (Thies) 
