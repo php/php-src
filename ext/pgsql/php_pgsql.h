@@ -196,6 +196,7 @@ typedef enum _php_pgsql_data_type {
 	PG_DATE,
 	PG_TIME,
 	PG_TIME_WITH_TIMEZONE,
+	PG_TIMESTAMP,
 	PG_TIMESTAMP_WITH_TIMEZONE,
 	PG_INTERVAL,
 	/* binary */

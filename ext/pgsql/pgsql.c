@@ -3203,8 +3203,10 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 		return PG_DATE;
 	if (!strcmp(type_name, "time"))
 		return PG_TIME;
-	if (!strcmp(type_name, "timestamp") || !strcmp(type_name, "time with time zone"))
+	if (!strcmp(type_name, "time with time zone") || !strcmp(type_name, "timetz"))
 		return PG_TIME_WITH_TIMEZONE;
+	if (!strcmp(type_name, "timestamp without time zone") || !strcmp(type_name, "timestamp"))
+		return PG_TIMESTAMP;
 	if (!strcmp(type_name, "timestamp with time zone") || !strcmp(type_name, "timestamptz"))
 		return PG_TIMESTAMP_WITH_TIMEZONE;
 	if (!strcmp(type_name, "interval"))
@@ -3657,6 +3659,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 				break;
 				
 			case PG_TIME_WITH_TIMEZONE:
+			case PG_TIMESTAMP:
 			case PG_TIMESTAMP_WITH_TIMEZONE:
 				switch(Z_TYPE_PP(val)) {
 					case IS_STRING:
