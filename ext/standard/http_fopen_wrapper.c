@@ -186,6 +186,8 @@ continue_bucket:
 				memcpy(data->chunksize_buffer_pos, buf, buflen);
 				memset(data->chunksize_buffer_pos + buflen, 0, HTTP_CHUNK_SIZE_MAXLEN - buflen - (data->chunksize_buffer_pos - data->chunksize_buffer));
 				chunk_remaining = strtoul(data->chunksize_buffer, &e, 16);
+				/* Skip whitespace */
+				while ((*e == ' ') && (e < (data->chunksize_buffer + HTTP_CHUNK_SIZE_MAXLEN))) e++;
 				if (*e != '\r') {
 					if (!((*e >= '0' && *e <= '9') ||
 						  (*e >= 'a' && *e <= 'f') ||
@@ -201,6 +203,8 @@ continue_bucket:
 			} else {
 				memcpy(data->chunksize_buffer_pos, buf, HTTP_CHUNK_SIZE_MAXLEN - (data->chunksize_buffer_pos - data->chunksize_buffer));
 				chunk_remaining = strtoul(data->chunksize_buffer, &e, 16);
+				/* Skip whitespace */
+				while ((*e == ' ') && (e < (data->chunksize_buffer + HTTP_CHUNK_SIZE_MAXLEN))) e++;
 				if (*e != '\r') {
 					/* Invalid chunksize */
 					return PSFS_ERR_FATAL;
@@ -799,7 +803,6 @@ out:
 				php_stream_filter_append(&stream->readfilters, filter);
 			}
 		}
-
 	}
 
 	return stream;
