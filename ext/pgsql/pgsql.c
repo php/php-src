@@ -76,6 +76,8 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_loread,		NULL)
 	PHP_FE(pg_lowrite,		NULL)
 	PHP_FE(pg_loreadall,	NULL)
+	PHP_FE(pg_loimport,		NULL)
+	PHP_FE(pg_loexport,		NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1510,6 +1512,95 @@ PHP_FUNCTION(pg_loreadall)
 	return_value->type = IS_LONG;
 }
 /* }}} */
+
+/* {{{ proto int pg_loimport(string filename[, resource connection])
+   Import large object direct from filesystem */
+PHP_FUNCTION(pg_loimport)
+{
+	zval **pgsql_link, **file_in;
+	int id = -1;
+	PGconn *pgsql;
+	Oid oid;
+	PLS_FETCH();
+	PGLS_FETCH();
+	
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &file_in) == FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &file_in, &pgsql_link) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(file_in);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(file_in), 2))) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	oid = lo_import(pgsql, Z_STRVAL_PP(file_in));
+
+	if (oid > 0) {
+		RETURN_LONG((int)oid);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int pg_loexport(int objoid, string filename[, resource connection])
+   Emport large object direct to filesystem */
+PHP_FUNCTION(pg_loexport)
+{
+	zval **pgsql_link, **oid_id, **file_out;
+	int id = -1;
+	Oid oid;
+	PGconn *pgsql;
+	PGLS_FETCH();
+	
+	switch (ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &oid_id, &file_out) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(oid_id);
+			convert_to_string_ex(file_out);
+			id = PGG(default_link);
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &oid_id, &file_out, &pgsql_link) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(oid_id);
+			convert_to_string_ex(file_out);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	oid = (Oid) Z_LVAL_PP(oid_id);
+
+	if (lo_export(pgsql, oid, Z_STRVAL_PP(file_out))) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 	
 #endif
 
@@ -1519,3 +1610,4 @@ PHP_FUNCTION(pg_loreadall)
  * c-basic-offset: 4
  * End:
  */
+
