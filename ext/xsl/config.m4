@@ -1,6 +1,7 @@
 dnl
 dnl $Id$
 dnl
+
 AC_DEFUN(PHP_XSL_CHECK_VERSION,[
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=-I$XSL_DIR/include
@@ -19,10 +20,8 @@ AC_DEFUN(PHP_XSL_CHECK_VERSION,[
 ])
 
 PHP_ARG_WITH(xsl, for XSL support,
-[  --with-xsl[=DIR]        Include new DOM support (requires libxml >= 2.4.14).
-                          DIR is the libxml install directory.])
-
-
+[  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.0.3).
+                          DIR is the libxslt install directory.])
 
 if test "$PHP_XSL" != "no"; then
 
@@ -53,15 +52,8 @@ if test "$PHP_XSL" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $XSL_DIR/lib, XSL_SHARED_LIBADD)
     PHP_ADD_INCLUDE($XSL_DIR/include)
   fi
-
   
   AC_DEFINE(HAVE_XSL,1,[ ])
   PHP_NEW_EXTENSION(xsl, php_xsl.c xsltprocessor.c, $ext_shared)
   PHP_SUBST(XSL_SHARED_LIBADD)
 fi
-
-
-
-
-
-
