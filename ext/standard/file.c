@@ -44,6 +44,9 @@
 #else
 #include <sys/param.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 #endif
 #include "ext/standard/head.h"
 #include "safe_mode.h"
@@ -58,13 +61,6 @@
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
-#ifdef PHP_WIN32
-#include <winsock.h>
-#else
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 #endif
 #include "fsock.h"
 #include "fopen-wrappers.h"
