@@ -288,7 +288,7 @@ END_EXTERN_C()
 
 static inline int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)					\
 {
-	int idx;
+	long idx;
 
 	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
 		return zend_hash_index_update(ht, idx, pData, nDataSize, pDest);
@@ -300,7 +300,7 @@ static inline int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLeng
 
 static inline int zend_symtable_del(HashTable *ht, char *arKey, uint nKeyLength)
 {
-	int idx;
+	long idx;
 
 	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
 		return zend_hash_index_del(ht, idx);
@@ -312,7 +312,7 @@ static inline int zend_symtable_del(HashTable *ht, char *arKey, uint nKeyLength)
 
 static inline int zend_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
 {
-	int idx;
+	long idx;
 
 	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
 		return zend_hash_index_find(ht, idx, pData);
@@ -324,7 +324,7 @@ static inline int zend_symtable_find(HashTable *ht, char *arKey, uint nKeyLength
 
 static inline int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength)
 {
-	int idx;
+	long idx;
 
 	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
 		return zend_hash_index_exists(ht, idx);
