@@ -46,7 +46,8 @@ configuration layers are "user", "system" and "default".
             'function' => 'doConfigGet',
             'shortcut' => 'cg',
             'options' => array(),
-            'doc' => 'Displays the value of one configuration parameter.  The
+            'doc' => '<parameter> [layer]
+Displays the value of one configuration parameter.  The
 first argument is the name of the parameter, an optional second argument
 may be used to tell which configuration layer to look in.  Valid configuration
 layers are "user", "system" and "default".  If no layer is specified, a value
@@ -59,12 +60,23 @@ just specified.
             'function' => 'doConfigSet',
             'shortcut' => 'cs',
             'options' => array(),
-            'doc' => 'Sets the value of one configuration parameter.  The first
+            'doc' => '<parameter> <new-value> [layer]
+Sets the value of one configuration parameter.  The first
 argument is the name of the parameter, the second argument is the new value.
 Some parameters are be subject to validation, and the command will fail with
 an error message if the new value does not make sense.  An optional third
 argument may be used to specify which layer to set the configuration parameter
 in.  The default layer is "user".
+',
+            ),
+        'config-help' => array(
+            'summary' => 'Show Information About Setting',
+            'function' => 'doConfigHelp',
+            'shortcut' => 'ch',
+            'options' => array(),
+            'doc' => '[parameter]
+Displays help for a configuration parameter.  Without arguments it
+displays help for all configuration parameters.
 ',
             ),
         );
@@ -153,6 +165,27 @@ in.  The default layer is "user".
             return $this->raiseError($failmsg);
         }
         return true;
+    }
+
+    function doConfigHelp($command, $options, $params)
+    {
+        if (empty($params)) {
+            $params = $this->config->getKeys();
+        }
+        $this->ui->startTable();
+        $this->ui->tableRow(array('Name', 'Type', 'Description'),
+                            array('bold' => true));
+        foreach ($params as $name) {
+            $type = $this->config->getType($name);
+            $docs = $this->config->getDocs($name);
+            if ($type == 'set') {
+                $docs = rtrim($docs) . "\nValid set: " .
+                    implode(' ', $this->config->getSetValues($name));
+            }
+            $this->ui->tableRow(array($name, $type, $docs), null,
+                                array(2 => array('wrap' => 50)));
+        }
+        $this->ui->endTable();
     }
 
     /**
