@@ -1,3 +1,18 @@
+2003-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Convert objects to string if string is required by newer parameter parsing
+      since we do this for older parameter parsing does so too.
+
+    * zend_object_handlers.c:
+      The macro REPLACE_ZVAL_VALUE cannot be used since we only have zval *
+      writeobj. to allow it the api needs to be changed to zval **writeobj.
+
+    * zend_builtin_functions.c:
+      Add a support function to check for property existance which is different
+      from checking a property from being empty/set.
+      Update test #26182.
+
 2003-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c
