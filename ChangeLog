@@ -1,3 +1,48 @@
+2002-04-03  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c: fix bug #15150, thanks to daniel at haxx.se for the fix
+
+2002-04-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/openssl/tests/001.phpt: Fix the test..somehow got corrupted?
+
+    * ext/mcal/config.m4: Partial MFH
+
+    * .cvsignore: - Added the autom4te.cache to be cleaned too with cvsclean
+
+2002-04-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in
+      main/php_version.h: - Swap back version numbers for development
+
+    * ext/exif/exif.c: - Fix build (Patch by Marcus Boerger)
+
+    * ext/exif/exif.c: - Fix as suggested my Marcus
+
+    * main/php_version.h
+      configure.in: - Fix version number
+
+2002-04-03  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * tests/func/007.phpt: Added ini_set()/ini_get()/ini_restore() test
+
+2002-04-03  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/exec.c: fix TS build
+
+    * ext/standard/exec.c
+      ext/standard/exec.h
+      ext/standard/basic_functions.c:
+    Tidy up win32 implementation of proc_open.
+    Respect safe_mode_exec_dir.
+    Implement proc_close and return process return code under win32.
+
+    * ext/mailparse/tests/006.phpt: add test for mailparse_extract_part_file
+
+2002-04-03  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php: * work around a php segfault
+
 2002-04-02  Wez Furlong  <wez.php@thebrainroom.com>
 
     * main/memory_streams.c
