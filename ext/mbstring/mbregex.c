@@ -306,9 +306,16 @@ init_syntax_once()
 	register int c;
 	static int done = 0;
 
+#ifdef ZTS
+	extern MUTEX_T mbregex_locale_mutex;
+#endif
+
 	if (done) {
 		return;
 	}
+#ifdef ZTS
+	tsrm_mutex_lock( mbregex_locale_mutex );
+#endif
 
 	memset(re_syntax_table, 0, sizeof(re_syntax_table));
 
@@ -324,6 +331,9 @@ init_syntax_once()
 			re_syntax_table[c] = Sword2;
 		}
 	}
+#ifdef ZTS
+	tsrm_mutex_unlock( mbregex_locale_mutex );
+#endif
 	done = 1;
 }
 
