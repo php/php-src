@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Improved extension build framework (Sascha)
+  Refer to README.SELF-CONTAINED-EXTENSIONS for an introduction.
 - Dynamically allocate points for ImagePolygon (Marc Pohl)
 - Added configure time checking for bcmath package (Joey)
 - Added get_declared_classes(). (Andrei, Zend library)
