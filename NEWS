@@ -48,6 +48,7 @@ PHP 4.0                                                                    NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 ?? ??? 200?, Version 4.1.0
+- Fixed a crash bug within Cobalt systems. Patch by tomc@tripac.com. (Jani)
 - Introduced extension version numbers (Stig)
 - Added version_compare() function (Stig)
 - Fixed pg_last_notice() (could cause random crashes in PostgreSQL applications,
