@@ -91,6 +91,7 @@ PHP_FUNCTION(mb_output_handler);
 PHP_FUNCTION(mb_strlen);
 PHP_FUNCTION(mb_strpos);
 PHP_FUNCTION(mb_strrpos);
+PHP_FUNCTION(mb_substr_count);
 PHP_FUNCTION(mb_substr);
 PHP_FUNCTION(mb_strcut);
 PHP_FUNCTION(mb_strwidth);

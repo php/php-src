@@ -487,6 +487,13 @@ mbfl_oddlen(mbfl_string *string);
 int
 mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, int offset, int reverse TSRMLS_DC);
 
+
+/*
+ * substr_count
+ */
+int
+mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle TSRMLS_DC);
+
 /*
  * substr
  */
