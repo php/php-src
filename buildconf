@@ -1,5 +1,7 @@
 #!/bin/sh
 
+supplied_flag=$1
+
 # do some version checking for the tools we use
 if test "$1" = "--force"; then
     shift
@@ -67,7 +69,7 @@ else
     touch buildconf.stamp
 fi
 
-if test "$1" = "--copy"; then
+if test "$supplied_flag" = "--copy"; then
     automake_flags=--copy
 fi
 
