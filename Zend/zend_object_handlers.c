@@ -828,28 +828,28 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 }
 
 zend_object_handlers std_object_handlers = {
-	zend_objects_store_add_ref,              /* add_ref */
-	zend_objects_store_del_ref,              /* del_ref */
-	zend_objects_store_delete_obj,           /* delete_obj */
-	zend_objects_clone_obj,                  /* clone_obj */
+	zend_objects_store_add_ref,				/* add_ref */
+	zend_objects_store_del_ref,				/* del_ref */
+	zend_objects_store_delete_obj,			/* delete_obj */
+	zend_objects_clone_obj,					/* clone_obj */
 	
-	zend_std_read_property,                  /* read_property */
-	zend_std_write_property,                 /* write_property */
-	zend_std_write_dimension,                /* write_dimension */
-	zend_std_get_property_ptr,               /* get_property_ptr */
-	zend_std_get_property_ptr,               /* get_property_zval_ptr */
-	NULL,                                    /* get */
-	NULL,                                    /* set */
-	zend_std_has_property,                   /* has_property */
-	zend_std_unset_property,                 /* unset_property */
-	zend_std_get_properties,                 /* get_properties */
-	zend_std_get_method,                     /* get_method */
-	NULL,                                    /* call_method */
-	zend_std_get_constructor,                /* get_constructor */
-	zend_std_object_get_class,               /* get_class_entry */
-	zend_std_object_get_class_name,          /* get_class_name */
-	zend_std_compare_objects,                /* compare_objects */
-	NULL,									 /* cast_object */
+	zend_std_read_property,					/* read_property */
+	zend_std_write_property,				/* write_property */
+	zend_std_write_dimension,				/* write_dimension */
+	zend_std_get_property_ptr,				/* get_property_ptr */
+	zend_std_get_property_ptr,				/* get_property_zval_ptr */
+	NULL,									/* get */
+	NULL,									/* set */
+	zend_std_has_property,					/* has_property */
+	zend_std_unset_property,				/* unset_property */
+	zend_std_get_properties,				/* get_properties */
+	zend_std_get_method,					/* get_method */
+	NULL,									/* call_method */
+	zend_std_get_constructor,				/* get_constructor */
+	zend_std_object_get_class,				/* get_class_entry */
+	zend_std_object_get_class_name,			/* get_class_name */
+	zend_std_compare_objects,				/* compare_objects */
+	NULL,									/* cast_object */
 };
 
 /*
