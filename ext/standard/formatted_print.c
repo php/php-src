@@ -605,10 +605,10 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					convert_to_string_ex(args[argnum]);
 					php_sprintf_appendstring(&result, &outpos, &size,
 											 Z_STRVAL_PP(args[argnum]),
-											 width, precision, padding,
+											 width, 0, padding,
 											 alignment,
 											 Z_STRLEN_PP(args[argnum]),
-											 0, expprec);
+											 0, 0);
 					break;
 
 				case 'd':
