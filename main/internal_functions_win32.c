@@ -71,9 +71,6 @@
 #if HAVE_SESSION
 #include "ext/session/php_session.h"
 #endif
-#if HAVE_MYSQL
-#include "ext/mysql/php_mysql.h"
-#endif
 #if HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 #endif
@@ -118,9 +115,6 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 #if HAVE_MBSTRING
 	,phpext_mbstring_ptr
-#endif
-#if HAVE_MYSQL
-	,phpext_mysql_ptr
 #endif
 #if HAVE_UODBC
 	,phpext_odbc_ptr
