@@ -94,7 +94,7 @@ PHP_FUNCTION(session_id);
 PHP_FUNCTION(session_decode);
 PHP_FUNCTION(session_register);
 PHP_FUNCTION(session_unregister);
-PHP_FUNCTION(session_encoded);
+PHP_FUNCTION(session_encode);
 PHP_FUNCTION(session_start);
 
 PS_FUNCS(files);

@@ -34,6 +34,7 @@
  * - improve files handler for better scaling
  * - add complete support for objects (partially implemented)
  * - complete ZTS support (currently only useable as non-ZTS)
+ * - userland callback functions for ps_module
  */
 
 #include <sys/time.h>
@@ -63,7 +64,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_decode, NULL)
 	PHP_FE(session_register, NULL)
 	PHP_FE(session_unregister, NULL)
-	PHP_FE(session_encoded, NULL)
+	PHP_FE(session_encode, NULL)
 	PHP_FE(session_start, NULL)
 	{0}
 };
@@ -453,9 +454,9 @@ PHP_FUNCTION(session_unregister)
 }
 /* }}} */
 
-/* {{{ proto string session_encoded()
+/* {{{ proto string session_encode()
    serializes the current setup and returns the serialized representation */
-PHP_FUNCTION(session_encoded)
+PHP_FUNCTION(session_encode)
 {
 	int len;
 	char *enc;
