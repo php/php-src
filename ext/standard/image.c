@@ -322,7 +322,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
 			{
 				marker = 0xff;
 				comment_correction--;
-            } else {
+			} else {
 				last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
 			}
 		}
@@ -374,7 +374,7 @@ static void php_read_APP(php_stream * stream, unsigned int marker, zval *info TS
 	buffer = emalloc(length);
 	if ( !buffer) return;
 
- 	if (php_stream_read(stream, buffer, (long) length) <= 0) {
+	if (php_stream_read(stream, buffer, (long) length) <= 0) {
 		efree(buffer);
 		return;
 	}
@@ -581,10 +581,10 @@ static int php_ifd_get32s(void *Long, int motorola_intel)
 {
 	if (motorola_intel) {
 		return  ((( char *)Long)[0] << 24) | (((uchar *)Long)[1] << 16)
-			  | (((uchar *)Long)[2] << 8 ) | (((uchar *)Long)[3] << 0 );
+		      | (((uchar *)Long)[2] << 8 ) | (((uchar *)Long)[3] << 0 );
 	} else {
 		return  ((( char *)Long)[3] << 24) | (((uchar *)Long)[2] << 16)
-			  | (((uchar *)Long)[1] << 8 ) | (((uchar *)Long)[0] << 0 );
+		      | (((uchar *)Long)[1] << 8 ) | (((uchar *)Long)[0] << 0 );
 	}
 }
 /* }}} */
@@ -614,7 +614,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 	ifd_size = 2;
 	ifd_data = emalloc(ifd_size);
 	php_stream_read(stream, ifd_data, 2);
-    num_entries = php_ifd_get16u(ifd_data, motorola_intel);
+	num_entries = php_ifd_get16u(ifd_data, motorola_intel);
 	dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 	ifd_size = dir_size;
 	ifd_data = erealloc(ifd_data,ifd_size);
@@ -643,7 +643,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 				entry_value  = php_ifd_get32s(dir_entry+8, motorola_intel);
 				break;
 			default:
-			    continue;
+				continue;
 		}
 		switch(entry_tag) {
 			case TAG_IMAGEWIDTH:
@@ -723,7 +723,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 PHP_FUNCTION(getimagesize)
 {
 	zval **arg1, **info = NULL;
- 	int itype = 0;
+	int itype = 0;
 	char temp[64];
 	struct gfxinfo *result = NULL;
 	php_stream * stream = NULL;
@@ -763,45 +763,45 @@ PHP_FUNCTION(getimagesize)
 
 	itype = php_getimagetype(stream, NULL TSRMLS_CC);
 	switch( itype) {
-        case IMAGE_FILETYPE_GIF:
+		case IMAGE_FILETYPE_GIF:
 			result = php_handle_gif (stream TSRMLS_CC);
-	        break;
-        case IMAGE_FILETYPE_JPEG:
+			break;
+		case IMAGE_FILETYPE_JPEG:
 			if (info) {
 				result = php_handle_jpeg(stream, *info TSRMLS_CC);
 			} else {
 				result = php_handle_jpeg(stream, NULL TSRMLS_CC);
 			}
-	        break;
-        case IMAGE_FILETYPE_PNG:
+			break;
+		case IMAGE_FILETYPE_PNG:
 			result = php_handle_png(stream TSRMLS_CC);
-	        break;
-        case IMAGE_FILETYPE_SWF:
+			break;
+		case IMAGE_FILETYPE_SWF:
 			result = php_handle_swf(stream TSRMLS_CC);
-	        break;
+			break;
 #if HAVE_ZLIB
-        case IMAGE_FILETYPE_SWC:
+		case IMAGE_FILETYPE_SWC:
 			result = php_handle_swc(stream TSRMLS_CC);
-	        break;
+			break;
 #endif
-        case IMAGE_FILETYPE_PSD:
+		case IMAGE_FILETYPE_PSD:
 			result = php_handle_psd(stream TSRMLS_CC);
-	        break;
-        case IMAGE_FILETYPE_BMP:
+			break;
+		case IMAGE_FILETYPE_BMP:
 			result = php_handle_bmp(stream TSRMLS_CC);
-	        break;
-        case IMAGE_FILETYPE_TIFF_II:
+			break;
+		case IMAGE_FILETYPE_TIFF_II:
 			result = php_handle_tiff(stream, NULL, 0 TSRMLS_CC);
-	        break;
-        case IMAGE_FILETYPE_TIFF_MM:
+			break;
+		case IMAGE_FILETYPE_TIFF_MM:
 			result = php_handle_tiff(stream, NULL, 1 TSRMLS_CC);
-	        break;
-        case IMAGE_FILETYPE_JPC:
+			break;
+		case IMAGE_FILETYPE_JPC:
 			result = php_handle_jpc(stream TSRMLS_CC);
-	        break;
+			break;
 		default:
-        case IMAGE_FILETYPE_UNKNOWN:
-	        break;
+		case IMAGE_FILETYPE_UNKNOWN:
+			break;
 	}
 
 	php_stream_close(stream);
