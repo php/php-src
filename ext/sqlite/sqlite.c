@@ -205,17 +205,11 @@ static void php_sqlite_callback_dtor(void *pDest)
 	}
 }
 
-static ZEND_RSRC_DTOR_FUNC(php_sqlite_pdb_invalidator)
-{
-	struct php_sqlite_db *db = (struct php_sqlite_db*)rsrc->ptr;
-	
-	db->rsrc_id = FAILURE;
-}
-
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_db_dtor)
 {
 	if (rsrc->ptr) {
 		struct php_sqlite_db *db = (struct php_sqlite_db*)rsrc->ptr;
+	
 		sqlite_close(db->db);
 
 		zend_hash_destroy(&db->callbacks);
@@ -631,7 +625,7 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_INI_ENTRIES();
 
 	le_sqlite_db = zend_register_list_destructors_ex(php_sqlite_db_dtor, NULL, "sqlite database", module_number);
-	le_sqlite_pdb = zend_register_list_destructors_ex(php_sqlite_pdb_invalidator, php_sqlite_db_dtor, "sqlite database (persistent)", module_number);
+	le_sqlite_pdb = zend_register_list_destructors_ex(NULL, php_sqlite_db_dtor, "sqlite database (persistent)", module_number);
 	le_sqlite_result = zend_register_list_destructors_ex(php_sqlite_result_dtor, NULL, "sqlite result", module_number);
 
 	REGISTER_LONG_CONSTANT("SQLITE_BOTH",	PHPSQLITE_BOTH, CONST_CS|CONST_PERSISTENT);
@@ -787,8 +781,16 @@ PHP_FUNCTION(sqlite_popen)
 				/* give it a valid resource id for this request */
 				db->rsrc_id = ZEND_REGISTER_RESOURCE(return_value, db, le_sqlite_pdb);
 			} else {
-				/* already accessed this request; map it */
-				ZVAL_RESOURCE(return_value, db->rsrc_id);
+				int type;
+				/* sanity check to ensure that the resource is still a valid regular resource
+				 * number */
+				if (_zend_list_find(db->rsrc_id, &type) == db) {
+					/* already accessed this request; map it */
+					zend_list_addref(db->rsrc_id);
+					ZVAL_RESOURCE(return_value, db->rsrc_id);
+				} else {
+					db->rsrc_id = ZEND_REGISTER_RESOURCE(return_value, db, le_sqlite_pdb);
+				}
 			}
 
 			/* all set */
