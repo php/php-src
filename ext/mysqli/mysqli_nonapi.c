@@ -83,6 +83,10 @@ PHP_FUNCTION(mysqli_connect)
 	}
 #endif
 
+	if (!socket) {
+		socket = MyG(default_socket);
+	}
+
 	if (mysql_real_connect(mysql->mysql,hostname,username,passwd,dbname,port,socket,CLIENT_MULTI_RESULTS) == NULL) {
 		/* Save error messages */
 
