@@ -2,14 +2,6 @@ dnl
 dnl $Id$
 dnl
 
-AC_C_BIGENDIAN
-
-if test "$ac_cv_c_bigendian" = "yes"; then
-  order=4321
-else
-  order=1234
-fi
-
 PHP_ARG_WITH(xml,whether to enable XML support,
 [  --without-xml           Disable XML support. Requires libxml2.], yes)
 
