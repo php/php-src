@@ -1,3 +1,47 @@
+2004-07-31  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/wsyslog.c:
+      Fix bug #8314: sane syslog output to the WinNT event log.
+      
+      Big fat note: if you're building from a .dsp, you need to replicate
+      the custom build step that uses MC to generate the message catalog
+      
+      To make use of this fix, you need to register the event source; running
+      "nmake
+      install" will handle this for you (if you also build the win32std
+      extension
+      from pecl).
+      
+      I'll arrange with Phil to have the installer handle this registration too.
+
+    * pear/go-pear-list.php:
+      Un-bork
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      win32/globals.c
+      win32/php_win32_globals.h:
+      Allow win32 stuff to build non-zts.
+      Fix stream crypto func (again? didn't I already commit that?)
+
+    * ext/com_dotnet/com_persist.c
+      ext/com_dotnet/com_wrapper.c:
+      Allow COM to build under non-zts.
+      Thanks Frank.
+
+    * main/streams/xp_socket.c:
+      zts fix...
+
+    * main/streams/transports.c
+      main/streams/xp_socket.c:
+      Misc sendto/recvfrom tweaks that have been pending here for a while...
+
+    * main/streams/xp_socket.c:
+      Make sure this is initialized...
+
+    * main/streams/plain_wrapper.c:
+      Implement an fstat cache for plain files.
+
 2004-07-30  Andi Gutmans  <andi@zend.com>
 
     * win32/php5dllts.dsp:
