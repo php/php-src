@@ -273,7 +273,7 @@ static union _zend_function *php_mysqli_constructor_get(zval *object TSRMLS_DC)
 {
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 
-	if (obj->zo.ce != mysqli_link_class_entry && obj->zo.ce->constructor) {
+	if (obj->zo.ce != mysqli_link_class_entry) {
 		return obj->zo.ce->constructor;
 	} else {
 		static zend_internal_function f;
@@ -443,6 +443,14 @@ PHP_MINIT_FUNCTION(mysqli)
 	
 	/* for mysqli_stmt_set_attr */
 	REGISTER_LONG_CONSTANT("MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH", STMT_ATTR_UPDATE_MAX_LENGTH, CONST_CS | CONST_PERSISTENT);
+
+#ifdef STMT_ATTR_CURSOR_TYPE
+	REGISTER_LONG_CONSTANT("MYSQLI_STMT_ATTR_CURSOR_TYPE", STMT_ATTR_CURSOR_TYPE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_NO_CURSOR", CURSOR_TYPE_NO_CURSOR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_READ_ONLY", CURSOR_TYPE_READ_ONLY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_FOR_UPDATE", CURSOR_TYPE_FOR_UPDATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_CURSOR_TYPE_SCROLLABLE", CURSOR_TYPE_SCROLLABLE, CONST_CS | CONST_PERSISTENT);
+#endif
 	
 	/* column information */
 	REGISTER_LONG_CONSTANT("MYSQLI_NOT_NULL_FLAG", NOT_NULL_FLAG, CONST_CS | CONST_PERSISTENT);
