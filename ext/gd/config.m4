@@ -40,6 +40,9 @@ PHP_ARG_WITH(t1lib, for T1lib support,
 PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
 [  --enable-gd-native-ttf    GD: Enable TrueType string function.], no, no)
 
+PHP_ARG_ENABLE(gd-jis-conv, whether to enable japanese encoding conversion in GD,
+[  --enable-gd-jis-conv    GD: Enable Japanese encoding conversion.], no, no)
+
 dnl  
 dnl Checks for the configure options 
 dnl 
@@ -225,6 +228,12 @@ AC_DEFUN(PHP_GD_TTSTR,[
   fi
 ])
 
+AC_DEFUN(PHP_GD_JISX0208,[
+  if test "$PHP_GD_JIS_CONV" = "yes"; then
+   USE_GD_JIS_CONV=1
+  fi
+])
+
 AC_DEFUN(PHP_GD_CHECK_VERSION,[
   PHP_CHECK_LIBRARY(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
@@ -269,6 +278,7 @@ dnl PNG is required by GD library
       
 dnl Various checks for GD features
   PHP_GD_TTSTR
+  PHP_GD_JISX0208
   PHP_GD_JPEG
   PHP_GD_PNG
   PHP_GD_XPM
@@ -317,6 +327,10 @@ dnl enable the support in bundled GD library
 
   if test -n "$TTF_DIR"; then
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBTTF"
+  fi
+
+  if test -n "$USE_GD_JIS_CONV"; then
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DJISX0208"
   fi
 
 else
