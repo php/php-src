@@ -1606,9 +1606,20 @@ PHP_FUNCTION(strrpos)
 		}
 	}
 
+	if (needle_len == 1) {
+		/* Single character search can shortcut memcmps */
+		while (e >= p) {
+			if (*e == *needle) {
+				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
+			}
+			e--;
+		}
+		RETURN_FALSE;
+	}
+
 	while (e >= p) {
 		if (memcmp(e, needle, needle_len) == 0) {
-			RETURN_LONG(e - p);
+			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 		}
 		e--;
 	}
@@ -1646,6 +1657,27 @@ PHP_FUNCTION(strripos)
 		RETURN_FALSE;
 	}
 
+	if (needle_len == 1) {
+		/* Single character search can shortcut memcmps 
+		   Can also avoid tolower emallocs */
+		if (offset >= 0) {
+			p = haystack + offset;
+			e = haystack + haystack_len - 1;
+		} else {
+			p = haystack;
+			e = haystack + haystack_len - offset;
+		}
+		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
+		*ord_needle = tolower(*needle);
+		while (e >= p) {
+			if (tolower(*e) == *ord_needle) {
+				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
+			}
+			e--;
+		}
+		RETURN_FALSE;
+	}
+
 	needle_dup = estrndup(needle, needle_len);
 	php_strtolower(needle_dup, needle_len);
 	haystack_dup = estrndup(haystack, haystack_len);
@@ -1667,7 +1699,7 @@ PHP_FUNCTION(strripos)
 		if (memcmp(e, needle_dup, needle_len) == 0) {
 			efree(haystack_dup);
 			efree(needle_dup);
-			RETURN_LONG(e - p);
+			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 		}
 		e--;
 	}
