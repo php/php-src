@@ -359,7 +359,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	const char	   **stringlist;		/* Holds list of subpatterns */
 	char			*match;				/* The current match */
 	char 		   **subpat_names = NULL;/* Array for named subpatterns */
-	int				 i;
+	int				 i, rc;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ((global) ? "ssz|ll" : "ss|zll"), &regex, &regex_len,
 							  &subject, &subject_len, &subpats, &flags, &start_offset) == FAILURE) {
@@ -405,7 +405,12 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
+	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
+	if (rc < 0) {
+		php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
+				  get_active_function_name(TSRMLS_C), rc);
+		RETURN_FALSE;
+	}
 	num_subpats++;
 	size_offsets = num_subpats * 3;
 	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
@@ -422,10 +427,22 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		char *name_table;
 		unsigned short name_idx;
 
-		pcre_fullinfo(re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
+		rc = pcre_fullinfo(re, extra, PCRE_INFO_NAMECOUNT, &name_cnt);
+		if (rc < 0) {
+			php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
+					  get_active_function_name(TSRMLS_C), rc);
+			RETURN_FALSE;
+		}
 		if (name_cnt > 0) {
-			pcre_fullinfo(re, extra, PCRE_INFO_NAMETABLE, &name_table);
-			pcre_fullinfo(re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
+			int rc1, rc2;
+			rc1 = pcre_fullinfo(re, extra, PCRE_INFO_NAMETABLE, &name_table);
+			rc2 = pcre_fullinfo(re, extra, PCRE_INFO_NAMEENTRYSIZE, &name_size);
+			rc = rc2 ? rc2 : rc1;
+			if (rc < 0) {
+				php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
+						  get_active_function_name(TSRMLS_C), rc);
+				RETURN_FALSE;
+			}
 
 			while (ni++ < name_cnt) {
 				name_idx = 0xff * name_table[0] + name_table[1];
@@ -793,6 +810,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 					*replace_end=NULL,	/* End of replacement string */
 					*eval_result,		/* Result of eval or custom function */
 					 walk_last;			/* Last walked character */
+	int				 rc;
 
 	/* Compile regex or get it from cache. */
 	if ((re = pcre_get_compiled_regex(regex, &extra, &preg_options TSRMLS_CC)) == NULL) {
@@ -812,7 +830,13 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
+	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &size_offsets);
+	if (rc < 0) {
+		php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
+				  get_active_function_name(TSRMLS_C), rc);
+		return NULL;
+	}
+	size_offsets = (size_offsets + 1) * 3;
 	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
 	alloc_len = 2 * subject_len + 1;
@@ -1178,6 +1202,7 @@ PHP_FUNCTION(preg_split)
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	char			*match,				/* The current match */
 					*last_match;		/* Location of last match */
+	int				 rc;
 
 	/* Get function parameters and do error checking */	
 	argc = ZEND_NUM_ARGS();
@@ -1212,7 +1237,13 @@ PHP_FUNCTION(preg_split)
 	array_init(return_value);
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
+	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &size_offsets);
+	if (rc < 0) {
+		php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
+				  get_active_function_name(TSRMLS_C), rc);
+		RETURN_FALSE;
+	}
+	size_offsets = (size_offsets + 1) * 3;
 	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
 	/* Start at the beginning of the string */
@@ -1437,6 +1468,7 @@ PHP_FUNCTION(preg_grep)
 	ulong			 num_key;
 	zend_bool		 invert = 0;		/* Whether to return non-matching
 										   entries */
+	int				 rc;
 	
 	/* Get arguments and do error checking */
 	
@@ -1466,7 +1498,13 @@ PHP_FUNCTION(preg_grep)
 	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
+	rc = pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &size_offsets);
+	if (rc < 0) {
+		php_error(E_WARNING, "%s: internal pcre_fullinfo() error %d",
+				  get_active_function_name(TSRMLS_C), rc);
+		RETURN_FALSE;
+	}
+	size_offsets = (size_offsets + 1) * 3;
 	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
 	/* Initialize return array */
