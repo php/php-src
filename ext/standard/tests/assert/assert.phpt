@@ -1,7 +1,7 @@
 --TEST--
 assert()
---POST--
---GET--
+--INI--
+error_reporting = 2039
 --FILE--
 <?php
 function a($file,$line,$myev)
