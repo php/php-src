@@ -44,8 +44,9 @@ if (getenv('TEST_PHP_SRCDIR')) {
 
 $cwd = getcwd();
 set_time_limit(0);
-ob_implicit_flush();
 error_reporting(E_ALL);
+ini_set('magic_quotes_runtime', 0);
+ini_set('memory_limit', '8M');
 
 if (ini_get('safe_mode')) {
 	echo <<< SAFE_MODE_WARNING
