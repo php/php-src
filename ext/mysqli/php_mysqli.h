@@ -36,9 +36,6 @@
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
 
-#define MYSQLI_PR_TYPE_QUERY	 0
-#define MYSQLI_PR_TYPE_PREPARE	 1
-
 
 typedef struct {
 	ulong		buflen;
@@ -56,21 +53,97 @@ typedef struct {
 } STMT;
 
 typedef struct {
-	char		active;
-	struct timeval	start;
-	unsigned int	count[2];
-	ulong		min_row_val[2];
-	ulong		max_row_val[2];
-	ulong		row_val[2];
-	double		min_elapsed[2];
-	double		max_elapsed[2];
-	double		elapsed[2];
-} PROFILER;
+	void		*prinfo;	/* profiler info */
+	void		*ptr;		/* resource: (mysql, result, stmt) */
+} MYSQLI_RESOURCE;
+
+/* common profiler header struct */
+
+typedef struct {
+	unsigned int	type;
+	void		*child;
+	void		*next;
+	char		*filename;
+	unsigned int	lineno;
+	char		*functionname;
+	struct timeval	starttime;
+	struct timeval	elapsedtime;
+	struct timeval	lifetime;
+	char		*errormsg;
+	ulong		error;
+} PR_HEADER;
+
+/* explain output */
+typedef struct {
+	char		*query;
+	unsigned int	exp_cnt;
+	char		**exp_table;
+	char		**exp_type;
+	char		**exp_key;
+	ulong		*exp_rows;	
+} PR_EXPLAIN;
+
+/* common */
+typedef struct {
+	PR_HEADER	header;
+} PR_COMMON;
+
+/* connection */
+typedef struct {
+	PR_HEADER	header;
+	unsigned int	thread_id;
+	char		*hostname;
+	char		*username;
+	unsigned int	closed;
+} PR_MYSQL;
+
+/* resultset */
+typedef struct {
+	PR_HEADER	header;
+	unsigned int	columns;
+	ulong		rows;
+	ulong		fields;
+	ulong		fetched_rows;
+	unsigned int	closed;
+} PR_RESULT;
+
+/* command */
+/* TODO: return values */
+typedef struct {
+	PR_HEADER	header;
+	ulong		returntype;
+	void		*returnvalue;
+} PR_COMMAND;
+
+/* query */
+typedef struct {
+	PR_HEADER	header;
+	PR_EXPLAIN	explain;
+	ulong		affectedrows;
+	ulong		insertid;
+} PR_QUERY;
+
+/* statement */
+typedef struct {
+	PR_HEADER	header;
+	PR_EXPLAIN	explain;
+	unsigned int	param_cnt;
+	unsigned int	field_cnt;
+} PR_STMT;
 
 typedef struct _mysqli_object {
 	zend_object zo;
 	void *ptr;
 } mysqli_object; /* extends zend_object */
+
+#define MYSQLI_PR_MYSQL		0
+#define MYSQLI_PR_QUERY		1
+#define MYSQLI_PR_QUERY_RESULT	2
+#define MYSQLI_PR_STMT		3
+#define MYSQLI_PR_STMT_RESULT	4
+#define MYSQLI_PR_RESULT	5
+#define MYSQLI_PR_COMMAND	6
+
 
 #define phpext_mysqli_ptr &mysqli_module_entry
 
@@ -95,10 +168,11 @@ extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int flag);
 extern void php_clear_stmt_bind(STMT *stmt);
 
 /* Profiler functions */
+extern void php_mysqli_profiler_report(PR_COMMON *, int);
+extern PR_COMMON *php_mysqli_profiler_new_object(PR_COMMON *parent, unsigned int type, unsigned int settime);
 extern void php_mysqli_profiler_result_info(MYSQL_RES *res);
-void php_mysqli_profiler_explain(MYSQL *mysql, char *query);
-void php_mysqli_profiler_header(char *query);
-void php_mysqli_profiler_elapsed_time();
+extern int php_mysqli_profiler_explain(PR_EXPLAIN *explain, PR_HEADER *header, MYSQL *mysql, char *query);
+extern void php_mysqli_profiler_timediff(struct timeval start, struct timeval *elapsed);
 
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
@@ -135,13 +209,16 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object, __ce)\
 }
 
-#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name) \
+#define MYSQLI_FETCH_RESOURCE(__ptr, __type, __prptr, __prtype, __id, __name) \
 { \
+	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
-	if (!(__ptr = (__type)intern->ptr)) {\
+	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
   		php_error(E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
   		RETURN_NULL();\
   	}\
+	__ptr = (__type)my_res->ptr; \
+	__prptr = (__prtype)my_res->prinfo; \
 	if (!strcmp((char *)__name, "mysqli_stmt")) {\
 		if (!((STMT *)__ptr)->stmt->mysql) {\
   			php_error(E_WARNING, "Statement isn't valid anymore");\
@@ -153,6 +230,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_CLEAR_RESOURCE(__id) \
 { \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+	efree(intern->ptr); \
 	intern->ptr = NULL; \
 }
 
@@ -246,6 +324,7 @@ PHP_FUNCTION(mysqli_ping);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);
 PHP_FUNCTION(mysqli_prepare_result);
+PHP_FUNCTION(mysqli_profiler);
 PHP_FUNCTION(mysqli_read_query_result);
 PHP_FUNCTION(mysqli_real_connect);
 PHP_FUNCTION(mysqli_real_query);
@@ -259,7 +338,6 @@ PHP_FUNCTION(mysqli_rpl_query_type);
 PHP_FUNCTION(mysqli_select_db);
 PHP_FUNCTION(mysqli_send_long_data);
 PHP_FUNCTION(mysqli_send_query);
-PHP_FUNCTION(mysqli_set_profiler_opt);
 PHP_FUNCTION(mysqli_slave_query);
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
@@ -285,7 +363,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char		*default_socket;
 	long		error_no;
 	char		*error_msg;
-	PROFILER	profiler;
+	unsigned int	profiler;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 #ifdef ZTS
@@ -294,17 +372,36 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #define MyG(v) (mysqli_globals.v)
 #endif
 
-#define MYSQLI_PROFILER_GETTIME gettimeofday(&MyG(profiler.start), NULL)
-#define MYSQLI_PROFILER_REPORTTIME php_mysqli_profiler_elapsed_time()
-#define MYSQLI_PROFILER_HEADER(query) php_mysqli_profiler_header(query)
-#define MYSQLI_PROFILER_REPORT_RESULT(res) php_mysqli_profiler_result_info(res)
-#define MYSQLI_PROFILER_EXPLAIN(mysql,query) \
-if (!strncasecmp("select", query, 6)){ \
-	php_mysqli_profiler_explain(mysql,query); \
-	if (mysql_errno(mysql)) { \
-		RETURN_FALSE; \
-	} \
+#define my_estrdup(x) (x) ? estrdup(x) : NULL
+#define my_efree(x) if (x) efree(x)
+
+/****** PROFILER MACROS *******/
+#define MYSQLI_PROFILER_STARTTIME(ptr) gettimeofday(&ptr##->header.starttime, NULL)
+#define MYSQLI_PROFILER_ELAPSEDTIME(ptr) php_mysqli_profiler_timediff(ptr##->header.starttime, &ptr##->header.elapsedtime)
+#define MYSQLI_PROFILER_LIFETIME(ptr) php_mysqli_profiler_timediff((ptr)->starttime, &(ptr)->lifetime)
+
+#define MYSQLI_PROFILER_NEW(parent, type, time) php_mysqli_profiler_new_object((PR_COMMON *)parent, type, time)
+#define MYSQLI_PROFILER_COMMAND_START(cmd,parent)\
+if (MyG(profiler))\
+{\
+	cmd = (PR_COMMAND *)php_mysqli_profiler_new_object((PR_COMMON *)parent, MYSQLI_PR_COMMAND,1);\
 }
+#define MYSQLI_PROFILER_COMMAND_RETURNLONG(cmd, value)\
+if (MyG(profiler))\
+{\
+	char tmp[30];\
+	sprintf ((char *)&tmp, "%ld", value);\
+	MYSQLI_PROFILER_ELAPSEDTIME(cmd);\
+	cmd##->returnvalue = my_estrdup(tmp);\
+}
+#define MYSQLI_PROFILER_COMMAND_RETURNSTRING(cmd, value)\
+if (MyG(profiler))\
+{\
+	MYSQLI_PROFILER_ELAPSEDTIME(cmd);\
+	cmd##->returnvalue = my_estrdup(value);\
+}
+#define MYSQLI_PROFILER_EXPLAIN(explain,header,mysql,query) php_mysqli_profiler_explain(explain,header, mysql, query)
+
 
 ZEND_EXTERN_MODULE_GLOBALS(mysqli);
 

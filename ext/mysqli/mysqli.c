@@ -35,7 +35,6 @@
 #define MYSQLI_USE_RESULT 1
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
-
 static zend_object_handlers mysqli_object_handlers;
 
 /* {{{ php_clear_stmt_bind */
@@ -73,25 +72,27 @@ void php_clear_stmt_bind(STMT *stmt)
  */
 static void mysqli_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
-	mysqli_object *intern = (mysqli_object *)object;
+	mysqli_object 	*intern = (mysqli_object *)object;
+	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	/* link object */
 	if (intern->zo.ce == mysqli_link_class_entry) {
-		MYSQL	*mysql = (MYSQL *)intern->ptr;
-		if (mysql) {
-			mysql_close(mysql);
+		if (my_res && my_res->ptr) {
+			mysql_close(my_res->ptr);
+			if (MyG(profiler)) {
+				php_mysqli_profiler_report(my_res->prinfo, 0);
+			}
 		}
 	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
-		STMT *stmt = (STMT *)intern->ptr;
-		if (stmt) {
-			php_clear_stmt_bind(stmt);
+		if (my_res && my_res->ptr) {
+			php_clear_stmt_bind((STMT *)my_res->ptr);
 		}
 	} else if (intern->zo.ce == mysqli_result_class_entry) { /* result object */
-		MYSQL_RES *res = (MYSQL_RES *)intern->ptr;
-		if (res) {
-			mysql_free_result(res);
+		if (my_res && my_res->ptr) {
+			mysql_free_result(my_res->ptr);
 		}
 	}
+	my_efree(my_res);
 	zend_objects_destroy_object(object, handle TSRMLS_CC);
 }
 /* }}} */
@@ -176,7 +177,7 @@ static void php_mysqli_init_globals(zend_mysqli_globals *mysqli_globals)
 	mysqli_globals->default_user = NULL;
 	mysqli_globals->default_pw = NULL;
 	mysqli_globals->default_socket = NULL;
-	memset(&mysqli_globals->profiler, '\0', sizeof(PROFILER));
+	mysqli_globals->profiler = 0;
 }
 /* }}} */
 
@@ -337,14 +338,16 @@ PHP_MINFO_FUNCTION(mysqli)
  */
 void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags)
 {
-	MYSQL_RES *result;
-	zval *mysql_result;
-	int fetchtype;
-	int copyflag;
-	unsigned int i;
-	MYSQL_FIELD *fields;
-	MYSQL_ROW row;
-	unsigned long *field_len;
+	MYSQL_RES		*result;
+	zval			*mysql_result;
+	int				fetchtype;
+	int				copyflag;
+	unsigned int	i;
+	MYSQL_FIELD		*fields;
+	MYSQL_ROW		row;
+	unsigned long	*field_len;
+	PR_RESULT		*prresult;
+	PR_COMMAND		*prcommand;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
 		return;
@@ -358,12 +361,15 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		fetchtype = override_flags;
 	}
 
-	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result"); 
+	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, prresult, PR_RESULT *, &mysql_result, "mysqli_result"); 
+
+	MYSQLI_PROFILER_COMMAND_START(prcommand, prresult);
 
 	fields = mysql_fetch_fields(result);
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_FALSE;
 	}
+
 	array_init(return_value);
 	field_len = mysql_fetch_lengths(result);
 
@@ -396,6 +402,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				add_assoc_null(return_value, fields[i].name);
 			}
 		}
+	}
+
+	if (MyG(profiler)) {
+		MYSQLI_PROFILER_COMMAND_RETURNSTRING(prcommand, NULL);
+		prresult->fetched_rows++;
 	}
 }
 /* }}} */
