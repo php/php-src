@@ -813,10 +813,15 @@ static void _php_session_start(PSLS_D)
 	_php_session_initialize(PSLS_C);
 
 	if (PS(mod_data) && PS(gc_probability) > 0) {
+		int nrdels = -1;
+
 		srand(time(NULL));
 		nrand = (int) (100.0*rand()/RAND_MAX);
-		if (nrand < PS(gc_probability))
-			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime));
+		if (nrand < PS(gc_probability)) {
+			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
+			if (nrdels != -1)
+				php_error(E_NOTICE, "Session gc: cleared %d\n", nrdels);
+		}
 	}
 }
 
