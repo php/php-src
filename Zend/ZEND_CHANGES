@@ -38,18 +38,18 @@ Changes in the Zend Engine 2.0
 
         <?php
         class MyClass {
-          private $Hello = "Hello, World!\n";
+            private $Hello = "Hello, World!\n";
 
-          function printHello() {
-            print $this->Hello;
-          }
+            function printHello() {
+                print $this->Hello;
+            }
         }
 
         class MyClass2 extends MyClass {
-          function printHello() {
-            MyClass::printHello(); /* Should print */
-            print $this->Hello;    /* Shouldn't print out anything */
-          }
+            function printHello() {
+                MyClass::printHello(); /* Should print */
+                print $this->Hello;    /* Shouldn't print out anything */
+            }
         }
 
         $obj = new MyClass();
@@ -103,23 +103,23 @@ Changes in the Zend Engine 2.0
 
         <?php
         class MyCloneable {
-          static $id = 0;
+            static $id = 0;
 
-          function MyCloneable() {
-            $this->id = self::$id++;
-          }
+            function MyCloneable() {
+                $this->id = self::$id++;
+            }
 
-          function __clone() {
-            $this->name = $clone->name;
-            $this->address = "New York";
-            $this->id = self::$id++;
-          }
+            function __clone() {
+                $this->name = $clone->name;
+                $this->address = 'New York';
+                $this->id = self::$id++;
+            }
         }
 
         $obj = new MyCloneable();
 
-        $obj->name    = "Hello";
-        $obj->address = "Tel-Aviv";
+        $obj->name    = 'Hello';
+        $obj->address = 'Tel-Aviv';
 
         print $obj->id . "\n";
 
@@ -175,26 +175,26 @@ Changes in the Zend Engine 2.0
 
             <?php
             class DB::MySQL {
-              var $host = "";
+                var $host = '';
 
-              function db_connect($user) {
-                print "Connecting to MySQL database '$this->host' as $user\n";
-              }
+                function db_connect($user) {
+                    print "Connecting to MySQL database '$this->host' as $user\n";
+                }
             }
 
             class DB::Oracle {
-              var $host = "localhost";
+                var $host = 'localhost';
 
-              function db_connect($user) {
-                print "Connecting to Oracle database '$this->host' as $user\n";
-              }
+                function db_connect($user) {
+                    print "Connecting to Oracle database '$this->host' as $user\n";
+                }
             }	
 
             $MySQL_obj = new DB::MySQL();
-            $MySQL_obj->db_connect("Susan");
+            $MySQL_obj->db_connect('Susan');
 
             $Oracle_obj = new DB::Oracle();
-            $Oracle_obj->db_connect("Barbara");
+            $Oracle_obj->db_connect('Barbara');
             ?>
 
         * Classes may contain constants.
@@ -202,11 +202,11 @@ Changes in the Zend Engine 2.0
           Example:
 
             <?php
-              class foo {
-                const hey = "hello";
-              }
+            class foo {
+                const hey = 'hello';
+            }
 
-              print foo::hey;
+            print foo::hey;
             ?>
 
         * Current namespace's symbol tables are searched first for
@@ -219,15 +219,15 @@ Changes in the Zend Engine 2.0
             the same name.
 
             <?php
-              define("foo", "bar");
+            define('foo', 'bar');
 
-              class FooClass {
-                const foo = "foobar";
+            class FooClass {
+                const foo = 'foobar';
 
                 function printFoo() {
-                  print foo;
+                    print foo;
                 }
-              }
+            }
             ?>
 
         * In the scope of a function, the current namespace is that
@@ -236,20 +236,20 @@ Changes in the Zend Engine 2.0
           Example:
 
             <?php
-              class FooClass {
+            class FooClass {
                 function foo() {
-                  $this->bar();
-                  bar();
+                    $this->bar();
+                    bar();
                 }
 
                 function bar() {
-                  print "foobar\n";
+                    print "foobar\n";
                 }
-              }
+            }
 
-              $obj = new FooClass;
-              $obj->foo();
-              $obj->foo();
+            $obj = new FooClass;
+            $obj->foo();
+            $obj->foo();
             ?>
 
           This prints "foobar" two times, since a bar() method exists 
@@ -262,15 +262,15 @@ Changes in the Zend Engine 2.0
 
             <?php
             class MyClass {
-              function hello() {
-                print "Hello, World\n";
-              }
-
-              class MyClass2 {
-                function hello() {
-                  print "Hello, World in MyClass2\n";
+                class MyClass2 {
+                    function hello() {
+                        print "Hello, World in MyClass2\n";
+                    }
                 }
-              }
+
+                function hello() {
+                    print "Hello, World\n";
+                }
             }
 
             import function hello, class MyClass2 from MyClass;
@@ -283,15 +283,15 @@ Changes in the Zend Engine 2.0
 
             <?php
             class MyOuterClass {
-              class MyInnerClass {
-                function func1() {
-                  print "func1()\n";
-                }
+                class MyInnerClass {
+                    function func1() {
+                        print "func1()\n";
+                    }
 
-                function func2() {
-                  print "func2()\n";
+                    function func2() {
+                        print "func2()\n";
+                    }
                 }
-              }
             }
 
             import class * from MyOuterClass;
@@ -305,7 +305,7 @@ Changes in the Zend Engine 2.0
 
             <?php
             class MyOuterClass {
-              const Hello = "Hello, World\n";
+                const Hello = "Hello, World\n";
             }
             
             import const Hello from MyOuterClass;
@@ -338,16 +338,16 @@ Changes in the Zend Engine 2.0
 
         <?php
         class BaseClass {
-          function __construct() {
-            print "In BaseClass constructor\n";	
-          }
+            function __construct() {
+                print "In BaseClass constructor\n";	
+            }
         }
 
         class SubClass extends BaseClass {
-          function __construct() {
-            parent::__construct();
-            print "In SubClass constructor\n";	
-          }
+            function __construct() {
+                parent::__construct();
+                print "In SubClass constructor\n";	
+            }
         }
 
         $obj = new BaseClass();
@@ -381,18 +381,18 @@ Changes in the Zend Engine 2.0
       Example:
 
         <?php
-          class MyDestructableClass {
+        class MyDestructableClass {
             function __construct() {
-              print "In constructor\n";
-              $this->name = "MyDestructableClass";
+                print "In constructor\n";
+                $this->name = 'MyDestructableClass';
             }
 
             function __destruct() {
-              print "Destroying " . $this->name . "\n";
+                print 'Destroying ' . $this->name . "\n";
             }	
-          }
+        }
 
-          $obj = new MyDestructableClass();
+        $obj = new MyDestructableClass();
         ?>
 
       Like constructors, parent destructors will not be called
@@ -410,31 +410,31 @@ Changes in the Zend Engine 2.0
 
         <?php
         class MyException {
-          function __construct($exception) {
-            $this->exception = $exception;
-          }
+            function __construct($exception) {
+                $this->exception = $exception;
+            }
 
-          function Display() {
-            print "MyException: $this->exception\n";
-          }
+            function Display() {
+                print "MyException: $this->exception\n";
+            }
         }
 
         class MyExceptionFoo extends MyException {
-          function __construct($exception) {
-            $this->exception = $exception;
-          }
+            function __construct($exception) {
+                $this->exception = $exception;
+            }
 
-          function Display() {
-            print "MyException: $this->exception\n";
-          }
+            function Display() {
+                print "MyException: $this->exception\n";
+            }
         }
 
         try {
-          throw  new MyExceptionFoo("Hello");
+            throw new MyExceptionFoo('Hello');
         }
 
         catch (MyException $exception) {
-          $exception->Display();
+            $exception->Display();
         }
         ?>
 
@@ -445,29 +445,29 @@ Changes in the Zend Engine 2.0
 
       Example:
 
-      <?php
-      class Circle {
-        function draw() {
-          print "Circle\n";	
+        <?php
+        class Circle {
+            function draw() {
+                print "Circle\n";	
+            }
         }
-      }
 
-      class Square {
-        function draw() {
-          print "Square\n";	
+        class Square {
+            function draw() {
+                print "Square\n";	
+            }
         }
-      }
 
-      function ShapeFactoryMethod($shape) {
-        switch ($shape) {
-          case "Circle": return new Circle();
-          case "Square": return new Square();
+        function ShapeFactoryMethod($shape) {
+            switch ($shape) {
+                case 'Circle': return new Circle();
+                case 'Square': return new Square();
+            }
         }
-      }
 
-      ShapeFactoryMethod("Circle")->draw();
-      ShapeFactoryMethod("Square")->draw();
-      ?>
+        ShapeFactoryMethod('Circle')->draw();
+        ShapeFactoryMethod('Square')->draw();
+        ?>
 
     * Static member variables of static classes can now be
       initialized.
@@ -475,11 +475,11 @@ Changes in the Zend Engine 2.0
       Example:
 
         <?php
-          class foo {
-            static $my_static = 5;
-          }
+        class foo {
+          static $my_static = 5;
+        }
 
-          print foo::$my_static;
+        print foo::$my_static;
         ?>
 
     * Supporting default values for by-reference function parameters.
@@ -487,11 +487,11 @@ Changes in the Zend Engine 2.0
       Example:
 
         <?php
-          function my_function(&$var = null) {
-               if ($var === null) {
-                   die('$var needs to have a value');
-               }
-          }
+        function my_function(&$var = null) {
+             if ($var === null) {
+                 die('$var needs to have a value');
+             }
+        }
         ?>
 
 
@@ -524,7 +524,7 @@ Changes in the Zend Engine 1.0
       without further coding. The return value may be changed by
       returning a value from the global scope of the included file or
       the evaluated string. For example, if 'return 7;' is executed in
-      the global scope of foo.inc, include("foo.inc") would evaluate
+      the global scope of foo.inc, include('foo.inc') would evaluate
       to 7.
 
     * Automatic resource deallocation.
@@ -592,7 +592,7 @@ Changes in the Zend Engine 1.0
 
         For example:
 
-          $foo[5]["bar"] = "foobar";
+          $foo[5]['bar'] = 'foobar';
           print "{$foo[5]["bar"]}";  // would print "foobar"
 
     * Ability to call member functions of other classes from within
