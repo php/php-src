@@ -157,7 +157,6 @@ remote SOAP clients over HTTP or HTTPS.
 <tr><td><a href="#ref.soap.soapserver.getfunctions">getFunctions</a> -- returns list of defined functions</td></tr>
 <tr><td><a href="#ref.soap.soapserver.setpersistence">setPersistence</a> -- sets persistence mode of SoapServer</td></tr>
 <tr><td><a href="#ref.soap.soapserver.handle">handle</a> -- handles a SOAP request</td></tr>
-<tr><td><a href="#ref.soap.soapserver.fault">fault</a> -- generates SOAP fault response</td></tr>
 </table>
 <a name="ref.soap.soapparam">
 <h4>SoapParam class</h4>
@@ -219,7 +218,6 @@ client side.
 <tr><td><a href="#ref.soap.soapserver.getfunctions">SoapServer::getFunctions</a> -- returns list of defined functions</td></tr>
 <tr><td><a href="#ref.soap.soapserver.setpersistence">SoapServer::setPersistence</a> -- sets persistence mode of SoapServer</td></tr>
 <tr><td><a href="#ref.soap.soapserver.handle">SoapServer::handle</a> -- handles a SOAP request</td></tr>
-<tr><td><a href="#ref.soap.soapserver.fault">SoapServer::fault</a> -- generates SOAP fault response</td></tr>
 <tr><td><a href="#ref.soap.soapparam.soapparam">SoapParam::SoapParam</a> -- SoapParam constructor</td></tr>
 <tr><td><a href="#ref.soap.soapvar.soapvar">SoapVar::SoapVar</a> -- SoapVar constructor</td></tr>
 <tr><td><a href="#ref.soap.soapheader.soapheader">SoapHeader::SoapHeader</a> -- SoapHeader constructor</td></tr>
@@ -256,7 +254,7 @@ is_soap_fault() functions checks if the given parameter is a SoapFault object.<b
     try {
         $client = SoapClient("some.wsdl");
         $result = $client->SomeFunction(...);
-    } catch {SoapFault $fault) {
+    } catch (SoapFault $fault) {
         trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faulstring})", E_ERROR);
     }
 ?&gt;</PRE></TD></TR></TABLE>
@@ -524,29 +522,6 @@ if the argument is omitted.
 ?&gt;
 </PRE></TD></TR></TABLE>
 
-<a name="ref.soap.soapserver.fault"></a>
-<h2>SoapServer::fault</h2>
-<p>(PHP 5)</p>
-<p>generates SOAP fault response</p>
-<h3>Description</h3>
-<p>void <b>fault</b>(string faultcode, string faultstring [, string faultactor [, mixed details]])</p>
-This function is useful when you like to send SOAP fault response from PHP handler.
-It never returns.
-<h4>Example</h4>
-<TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
-&lt;?php
-    function test($x) {
-        global $server;
-        $server->fault("Server","Some error message");
-    }
-
-    $server = new SoapServer(null,array('uri'=>"http://test-uri/"));
-    $server->addFunction("test");
-    $server->handle();
-?&gt;
-</PRE></TD></TR></TABLE>
-<p>See also: <a href="#ref.soap.soapfault.soapfault">SoapFault::SoapFault</a></p>
-
 <a name="ref.soap.soapparam.soapparam"></a>
 <h2>SoapParam::SoapParam</h2>
 <p>(PHP 5)</p>
@@ -638,9 +613,11 @@ Header element.
 <p>(PHP 5)</p>
 <p>SoapFault constructor</p>
 <h3>Description</h3>
-<p><b>SoapFault</b>(string faultcode, string faultstring [, string faultactor [, mixed details]])</p>
-This class is useful when you like to send SOAP fault response from PHP handler.
-<h4>Example</h4>
+<p><b>SoapFault</b>(string faultcode, string faultstring [, string faultactor [, mixed details [, string faultname [, mixed headerfault]]]])</p>
+This class is useful when you like to send SOAP fault response from PHP handler.<br>
+<b>faultcode</b>, <b>faultstring</b>, <b>faultactor</b> and <b>details</b> are standard elements of SOAP Fault;<br>
+<b>faultname</b> is an optional parameter that can be used to select proper fault encoding from WSDL.<br>
+<b>headerfault</b> is an optional parameter that can be used during SOAP header handling to report error in response header.
 <h4>Example</h4>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
 &lt;?php
@@ -665,6 +642,5 @@ This class is useful when you like to send SOAP fault response from PHP handler.
     $server->handle();
 ?&gt;
 </PRE></TD></TR></TABLE>
-<p>See also: <a href="#ref.soap.soapserver.fault">SoapServer::fault</a></p>
 </BODY>
 </HTML>
