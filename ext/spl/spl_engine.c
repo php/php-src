@@ -158,10 +158,12 @@ spl_is_a spl_implements(zend_class_entry *ce)
 	register zend_class_entry **pce = ce->interfaces;
 
 	while (i--) {
-		if (*pce == spl_ce_iterator)      is_a |= SPL_IS_A_ITERATOR;
-		else if (*pce == spl_ce_forward)  is_a |= SPL_IS_A_FORWARD;
-		else if (*pce == spl_ce_assoc)    is_a |= SPL_IS_A_ASSOC;
-		else if (*pce == spl_ce_sequence) is_a |= SPL_IS_A_SEQUENCE;
+		if (*pce == spl_ce_iterator)          is_a |= SPL_IS_A_ITERATOR;
+		else if (*pce == spl_ce_forward)      is_a |= SPL_IS_A_FORWARD;
+		else if (*pce == spl_ce_assoc)        is_a |= SPL_IS_A_ASSOC;
+		else if (*pce == spl_ce_sequence)     is_a |= SPL_IS_A_SEQUENCE;
+		else if (*pce == spl_ce_array_read)   is_a |= SPL_IS_A_ARRAY_READ;
+		else if (*pce == spl_ce_array_access) is_a |= SPL_IS_A_ARRAY_ACCESS;
 		pce++;
 	}
 	return is_a;

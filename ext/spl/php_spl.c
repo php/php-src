@@ -56,7 +56,7 @@ zend_module_entry spl_module_entry = {
 	PHP_RINIT(spl),
 	PHP_RSHUTDOWN(spl),
 	PHP_MINFO(spl),
-	"0.1",
+	"0.2",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -69,26 +69,10 @@ zend_class_entry *spl_ce_forward_assoc;
 zend_class_entry *spl_ce_sequence_assoc;
 zend_class_entry *spl_ce_array_read;
 zend_class_entry *spl_ce_array_access;
-zend_class_entry *spl_ce_array_access_ex;
-zend_class_entry *spl_ce_array_writer;
-#ifdef SPL_ARRAY_WRITE
-zend_class_entry *spl_ce_array_writer_default;
-#endif /* SPL_ARRAY_WRITE */
 
 /* {{{ spl_functions_none
  */
 function_entry spl_functions_none[] = {
-	{NULL, NULL, NULL}
-};
-/* }}} */
-
-static unsigned char first_of_two_force_ref[] = { 2, BYREF_FORCE, BYREF_NONE };
-
-/* {{{ spl_array_writer_funcs
- */
-function_entry spl_array_writer_funcs[] = {
-	SPL_CLASS_FE(array_writer_default,   __construct,   first_of_two_force_ref)
-	SPL_CLASS_FE(array_writer_default,   set,           NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -110,7 +94,7 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 #endif
 
 #ifdef SPL_ARRAY_WRITE
-	ZEND_EXECUTE_HOOK(ZEND_ASSIGN);
+	ZEND_EXECUTE_HOOK(ZEND_ASSIGN_DIM);
 #endif /* SPL_ARRAY_WRITE */
 }
 /* }}} */
@@ -152,18 +136,6 @@ PHP_MINIT_FUNCTION(spl)
 	REGISTER_SPL_IMPLEMENT(array_access, array_read);
 	REGISTER_SPL_INTF_FUNC(array_access, set);
 
-	REGISTER_SPL_INTERFACE(array_access_ex);
-	REGISTER_SPL_IMPLEMENT(array_access_ex, array_access);
-	REGISTER_SPL_INTF_FUNC(array_access_ex, new_writer);
-
-	REGISTER_SPL_INTERFACE(array_writer);
-	REGISTER_SPL_INTF_FUNC(array_writer, set); 
-
-#ifdef SPL_ARRAY_WRITE
-	REGISTER_SPL_STD_CLASS(array_writer_default, spl_array_writer_default_create);
-	REGISTER_SPL_FUNCTIONS(array_writer_default, spl_array_writer_funcs);
-#endif
-
 	return SUCCESS;
 }
 /* }}} */
@@ -203,7 +175,7 @@ PHP_MSHUTDOWN_FUNCTION(spl)
 #endif
 
 #ifdef SPL_ARRAY_WRITE
-	ZEND_EXECUTE_HOOK_RESTORE(ZEND_ASSIGN);
+	ZEND_EXECUTE_HOOK_RESTORE(ZEND_ASSIGN_DIM);
 #endif /* SPL_ARRAY_WRITE */
 
 	return SUCCESS;
@@ -240,8 +212,6 @@ PHP_MINFO_FUNCTION(spl)
 	php_info_print_table_row(2,    "sequence_assoc",     foreach);
 	php_info_print_table_row(2,    "array_read",         array_read);
 	php_info_print_table_row(2,    "array_access",       array_write);
-	php_info_print_table_row(2,    "array_access_ex",    array_write);
-	php_info_print_table_row(2,    "array_writer",       array_write);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -295,12 +265,6 @@ PHP_FUNCTION(spl_classes)
 	SPL_ADD_CLASS(sequence_assoc);
 	SPL_ADD_CLASS(array_read);
 	SPL_ADD_CLASS(array_access);
-	SPL_ADD_CLASS(array_access_ex);
-	SPL_ADD_CLASS(array_writer);
-
-#ifdef SPL_ARRAY_WRITE
-	SPL_ADD_CLASS(array_writer_default);
-#endif
 }
 /* }}} */
 

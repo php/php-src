@@ -69,8 +69,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 
 	if (is_a & SPL_IS_A_ITERATOR) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-		spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval);
 		obj_ce = instance_ce;
+		spl_begin_method_call_ex(obj, obj_ce, NULL, "new_iterator", sizeof("new_iterator")-1, &retval);
 		instance_ce = spl_get_class_entry(retval TSRMLS_CC);
 		is_a = spl_implements(instance_ce);
 		if (!(is_a & SPL_IS_A_FORWARD)) {
