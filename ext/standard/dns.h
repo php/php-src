@@ -34,7 +34,9 @@ PHP_FUNCTION(gethostbynamel);
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32))
 
 PHP_FUNCTION(dns_check_record);
+# if HAVE_DN_SKIPNAME && HAVE_DN_EXPAND
 PHP_FUNCTION(dns_get_mx);
+# endif
 
 # if HAVE_DNS_FUNCS
 
