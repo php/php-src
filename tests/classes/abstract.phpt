@@ -5,7 +5,7 @@ An abstract method may not be called
 --FILE--
 <?php
 
-class fail {
+abstract class fail {
 	abstract function show();
 }
 

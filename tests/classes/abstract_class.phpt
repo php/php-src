@@ -5,7 +5,7 @@ An abstract class cannot be instantiated
 --FILE--
 <?php
 
-class fail {
+abstract class fail {
 	abstract function show();
 }
 
