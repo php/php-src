@@ -28,9 +28,6 @@ static void (*old_error_handler)(int, const char *, const uint, const char*, va_
 #define PHP_SOAP_FAULT_CLASSNAME  "soapfault"
 #define PHP_SOAP_PARAM_CLASSNAME  "soapparam"
 
-extern zend_module_entry soap_module_entry;
-#define  soap_module_ptr & soap_module_entry
-
 PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
 PHP_MINFO_FUNCTION(soap);
