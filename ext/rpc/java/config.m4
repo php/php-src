@@ -173,8 +173,12 @@ if test "$PHP_JAVA" != "no"; then
       fi
     fi
 
-    INSTALL_IT="$INSTALL_IT; \$(srcdir)/build/shtool mkdir -p -f -m 0755 \$(INSTALL_ROOT)\$(libdir)"
-    INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(INSTALL_ROOT)\$(libdir)"
+    if test -n "$INSTALL_IT"; then
+      INSTALL_IT="$INSTALL_IT ;"
+    fi
+
+    INSTALL_IT="$INSTALL_IT \$(srcdir)/build/shtool mkdir -p -f -m 0755 \$(INSTALL_ROOT)\$(libdir)"
+    INSTALL_IT="$INSTALL_IT ; \$(INSTALL) -m 0755 \$(srcdir)/ext/java/php_java.jar \$(INSTALL_ROOT)\$(libdir)"
   fi
 
   PHP_SUBST(JAVA_CLASSPATH)
