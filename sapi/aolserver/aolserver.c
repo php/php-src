@@ -444,6 +444,8 @@ php_ns_request_ctor(TSRMLS_D)
 	root = Ns_PageRoot(server);
 	SG(request_info).request_uri = strdup(SG(request_info).path_translated + strlen(root));
 	SG(request_info).request_method = NSG(conn)->request->method;
+	if(NSG(conn)->request->version > 1.0) SG(request_info).proto_num = 1001;
+	else SG(request_info).proto_num = 1000;
 	SG(request_info).content_length = Ns_ConnContentLength(NSG(conn));
 	index = Ns_SetIFind(NSG(conn)->headers, "content-type");
 	SG(request_info).content_type = index == -1 ? NULL : 

@@ -418,6 +418,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	SG(request_info).content_type = apr_table_get(r->headers_in, "Content-Type");
 	SG(request_info).query_string = apr_pstrdup(r->pool, r->args);
 	SG(request_info).request_method = r->method;
+	SG(request_info).proto_num = r->proto_num;
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	SG(request_info).path_translated = apr_pstrdup(r->pool, r->filename);
 	r->no_local_copy = 1;
