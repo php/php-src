@@ -170,6 +170,11 @@ typedef unsigned short zend_ushort;
 typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
+typedef struct _zend_object {
+	zend_class_entry *ce;
+	HashTable *properties;
+} zend_object;
+
 typedef union _zvalue_value {
 	long lval;					/* long value */
 	double dval;				/* double value */
@@ -178,10 +183,7 @@ typedef union _zvalue_value {
 		int len;
 	} str;
 	HashTable *ht;				/* hash table value */
-	struct {
-		zend_class_entry *ce;
-		HashTable *properties;
-	} obj;
+	zend_object obj;
 } zvalue_value;
 
 
