@@ -8,12 +8,12 @@ CFG=Zend - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "libZend.mak".
+!MESSAGE NMAKE /f "Zend.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libZend.mak" CFG="Zend - Win32 Debug"
+!MESSAGE NMAKE /f "Zend.mak" CFG="Zend - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "TSRM_EXPORTS" /D "LIBZEND_EXPORTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug" /D "_LIB" /D "TSRM_EXPORTS" /D "Zend_EXPORTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40d /d "NDebug"
 # ADD RSC /l 0x40d /d "NDebug"
@@ -61,7 +61,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug" /D "_LIB" /D "Zend_EXPORTS" /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=1 /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40d /d "_Debug"
 # ADD RSC /l 0x40d /d "_Debug"
 BSC32=bscmake.exe
