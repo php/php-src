@@ -65,7 +65,7 @@ PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char
 PHPAPI const char php_sig_tif_ii[4] = {'I','I', (char)0x2A, (char)0x00};
 PHPAPI const char php_sig_tif_mm[4] = {'M','M', (char)0x00, (char)0x2A};
 PHPAPI const char php_sig_jpc[3] = {(char)0xFF, (char)0x4F, (char)0xff};
-/* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_imagetype2mimetype */
+/* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 
 /* return info as a struct, to make expansion easier */
 
@@ -668,9 +668,9 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 }
 /* }}} */
 
-/* {{{ php_imagetype2mimetype
+/* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
-PHPAPI const char * php_imagetype2mimetype(int image_type)
+PHPAPI const char * php_image_type_to_mime_type(int image_type)
 {
 	switch( image_type) {
 		case IMAGE_FILETYPE_GIF:
@@ -697,9 +697,9 @@ PHPAPI const char * php_imagetype2mimetype(int image_type)
 }
 /* }}} */
 
-/* {{{ proto array imagetype2mimetype(int imagetype)
+/* {{{ proto array image_type_to_mime_type(int imagetype)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
-PHP_FUNCTION(imagetype2mimetype)
+PHP_FUNCTION(image_type_to_mime_type)
 {
 	zval **p_image_type;
 	int arg_c = ZEND_NUM_ARGS();
@@ -708,7 +708,7 @@ PHP_FUNCTION(imagetype2mimetype)
 		WRONG_PARAM_COUNT;
 	}
 	zval_dtor(*p_image_type);
-	ZVAL_STRING(return_value, (char*)php_imagetype2mimetype(Z_LVAL_PP(p_image_type)), 1);
+	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type)), 1);
 }
 /* }}} */
 
@@ -868,7 +868,7 @@ PHP_FUNCTION(getimagesize)
 		if (result->channels != 0) {
 			add_assoc_long(return_value, "channels", result->channels);
 		}
-		add_assoc_string(return_value, "mime", (char*)php_imagetype2mimetype(itype), 1);
+		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype), 1);
 		efree(result);
 	} else {
 		RETURN_FALSE;
