@@ -164,7 +164,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 			4, args,
 			0, NULL	TSRMLS_CC);
 	
-	if (call_result == SUCCESS && zretval != NULL) {
+	if (call_result == SUCCESS && zretval != NULL && zval_is_true(zretval)) {
 		/* the stream is now open! */
 		stream = php_stream_alloc_rel(&php_stream_userspace_ops, us, 0, mode);
 
@@ -177,12 +177,15 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 		stream->wrapperdata = us->object;
 		zval_add_ref(&stream->wrapperdata);
 	} else {
-		/* destroy the object */
-		zval_ptr_dtor(&us->object);
-		efree(us);
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "\"%s::" USERSTREAM_OPEN "\" call failed",
+			us->wrapper->classname);
 	}
 	
 	/* destroy everything else */
+	if (stream == NULL) {
+		zval_ptr_dtor(&us->object);
+		efree(us);
+	}
 	if (zretval)
 		zval_ptr_dtor(&zretval);
 	
@@ -266,10 +269,11 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 			1, args,
 			0, NULL TSRMLS_CC);
 
-	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
+	didwrite = 0;
+	if (call_result == SUCCESS && retval != NULL) {
+		convert_to_long_ex(&retval);
 		didwrite = Z_LVAL_P(retval);
-	else
-		didwrite = 0;
+	}
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
@@ -326,7 +330,8 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 				1, args,
 				0, NULL TSRMLS_CC);
 
-		if (retval && Z_TYPE_P(retval) == IS_STRING) {
+		if (call_result == SUCCESS && retval != NULL) {
+			convert_to_string_ex(&retval);
 			didread = Z_STRLEN_P(retval);
 			if (didread > count) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
@@ -464,6 +469,7 @@ static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TS
 	zval **args[2];
 	size_t didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+	int call_result;
 
 	assert(us != NULL);
 
@@ -475,14 +481,15 @@ static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TS
 	ZVAL_LONG(zcount, size);
 	args[0] = &zcount;
 
-	call_user_function_ex(NULL,
+	call_result = call_user_function_ex(NULL,
 			&us->object,
 			&func_name,
 			&retval,
 			1, args,
 			0, NULL TSRMLS_CC);
 
-	if (retval && Z_TYPE_P(retval) == IS_STRING) {
+	if (retval && call_result == SUCCESS) {
+		convert_to_string_ex(&retval);
 		didread = Z_STRLEN_P(retval);
 		if (didread > size) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_GETS " - read more data than requested; some data will be lost",
