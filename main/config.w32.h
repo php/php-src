@@ -174,7 +174,7 @@
 #define SIZEOF_LONG_LONG_INT 0
 #define SIZEOF_LONG_LONG 0
 #define SIZEOF_INTMAX_T 0
-#define ssize_t ptrdiff_t
+#define ssize_t SSIZE_T
 #ifdef _WIN64
 # define SIZEOF_SIZE_T 8
 # define SIZEOF_PTRDIFF_T 8

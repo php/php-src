@@ -38,10 +38,6 @@
 #include "jpeglib.h"
 #include "jerror.h"
 
-#if PHP_WIN32
-typedef SSIZE_T ssize_t;
-#endif
-
 static const char *const GD_JPEG_VERSION = "1.0";
 
 typedef struct _jmpbuf_wrapper
