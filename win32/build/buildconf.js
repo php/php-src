@@ -1,4 +1,4 @@
-// $Id: buildconf.js,v 1.3 2003-12-04 01:37:52 wez Exp $
+// $Id: buildconf.js,v 1.4 2003-12-04 01:59:46 wez Exp $
 /*
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.3 2003-12-04 01:37:52 wez Exp $ */
+/* $Id: buildconf.js,v 1.4 2003-12-04 01:59:46 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -36,6 +36,10 @@ function file_get_contents(filename)
 
 function find_config_w32(dirname)
 {
+	if (!FSO.FolderExists(dirname)) {
+		return;
+	}
+
 	var f = FSO.GetFolder(dirname);
 	var	fc = new Enumerator(f.SubFolders);
 	var c;
