@@ -68,13 +68,13 @@ PHP_ORA_API php_ora_globals ora_globals;
 #define ORA_FETCHINTO_ASSOC (1<<0)
 #define ORA_FETCHINTO_NULLS (1<<1)
 
-static oraCursor *ora_get_cursor(HashTable *, pval **);
+static oraCursor *ora_get_cursor(HashTable *, pval ** TSRMLS_DC);
 static char *ora_error(Cda_Def *);
 static int ora_describe_define(oraCursor *);
 static int _close_oraconn(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-static int _close_oracur(oraCursor *cur);
+static int _close_oracur(oraCursor *cur TSRMLS_DC);
 static int _ora_ping(oraConnection *conn);
-int ora_set_param_values(oraCursor *cursor, int isout);
+int ora_set_param_values(oraCursor *cursor, int isout TSRMLS_DC);
 
 void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
@@ -236,10 +236,9 @@ pval_ora_param_destructor(oraParam *param)
 
 /* {{{ _close_oracur
  */
-static int _close_oracur(oraCursor *cur)
+static int _close_oracur(oraCursor *cur TSRMLS_DC)
 {
 	int i;
-	TSRMLS_FETCH();
 
 	if (cur){
 		if (cur->query){
@@ -279,7 +278,8 @@ static int _close_oracur(oraCursor *cur)
 static void php_close_ora_cursor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	oraCursor *cur = (oraCursor *)rsrc->ptr;
-	_close_oracur(cur);
+
+	_close_oracur(cur TSRMLS_CC);
 }
 /* }}} */
 
@@ -772,7 +772,7 @@ PHP_FUNCTION(ora_parse)
 		RETURN_FALSE;
 	}
 
-	if (!(cursor = ora_get_cursor(&EG(regular_list),curs))){
+	if (!(cursor = ora_get_cursor(&EG(regular_list),curs TSRMLS_CC))){
 		efree(query);
 		RETURN_FALSE;
 	}
@@ -822,7 +822,7 @@ PHP_FUNCTION(ora_bind)
 		WRONG_PARAM_COUNT;
 	}
 
-	cursor = ora_get_cursor(&EG(regular_list), curs);
+	cursor = ora_get_cursor(&EG(regular_list), curs TSRMLS_CC);
 	if (cursor == NULL) {
 		RETURN_FALSE;
 	}
@@ -912,7 +912,7 @@ PHP_FUNCTION(ora_exec)
 	if (zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if ((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), arg TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -924,7 +924,7 @@ PHP_FUNCTION(ora_exec)
 	}
 
 	if(cursor->nparams > 0){
-		if(!ora_set_param_values(cursor, 0)){
+		if(!ora_set_param_values(cursor, 0 TSRMLS_CC)){
 			RETURN_FALSE;
 		}
 	}
@@ -936,7 +936,7 @@ PHP_FUNCTION(ora_exec)
 	}
 	
 	if(cursor->nparams > 0){
-		if(!ora_set_param_values(cursor, 1)){
+		if(!ora_set_param_values(cursor, 1 TSRMLS_CC)){
 			RETURN_FALSE;
 		}
 	}
@@ -954,7 +954,7 @@ PHP_FUNCTION(ora_numcols)
 	if (zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if ((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), arg TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -972,7 +972,7 @@ PHP_FUNCTION(ora_numrows)
 	if(zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
+	if((cursor = ora_get_cursor(&EG(regular_list), arg TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(ora_do)
 	if (oparse(&cursor->cda, query, (sb4) - 1, 1, VERSION_7)){
 		php_error(E_WARNING, "Ora_Do failed (%s)",
 				  ora_error(&cursor->cda));
-		_close_oracur(cursor);
+		_close_oracur(cursor TSRMLS_CC);
 		RETURN_FALSE;
 	}
 	
@@ -1036,13 +1036,13 @@ PHP_FUNCTION(ora_do)
 	if (cursor->cda.ft == FT_SELECT) {
 		if (ora_describe_define(cursor) < 0){
 			/* error message is given by ora_describe_define() */
-			_close_oracur(cursor);
+			_close_oracur(cursor TSRMLS_CC);
 			RETURN_FALSE;
 		}
 		if (oexfet(&cursor->cda, 1, 0, 0)) {
 			php_error(E_WARNING, "Ora_Do failed (%s)",
 					  ora_error(&cursor->cda));
-			_close_oracur(cursor);
+			_close_oracur(cursor TSRMLS_CC);
 			RETURN_FALSE;
 		}
 		cursor->fetched = 1;
@@ -1050,7 +1050,7 @@ PHP_FUNCTION(ora_do)
 		if (oexec(&cursor->cda)) {
 			php_error(E_WARNING, "Ora_Do failed (%s)",
 					  ora_error(&cursor->cda));
-			_close_oracur(cursor);
+			_close_oracur(cursor TSRMLS_CC);
 			RETURN_FALSE;
 		}
 	}
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(ora_fetch)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), arg TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1118,7 +1118,7 @@ PHP_FUNCTION(ora_fetch_into)
 	}
 	
 	/* Find the cursor */
-	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1240,7 +1240,7 @@ PHP_FUNCTION(ora_columnname)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1278,7 +1278,7 @@ PHP_FUNCTION(ora_columntype)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1346,7 +1346,7 @@ PHP_FUNCTION(ora_columnsize)
 		WRONG_PARAM_COUNT;
 	}
 	/* Find the cursor */
-	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1386,7 +1386,7 @@ PHP_FUNCTION(ora_getcolumn)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1584,11 +1584,10 @@ PHP_MINFO_FUNCTION(oracle)
 /* {{{ ora_get_cursor
  */
 static oraCursor *
-ora_get_cursor(HashTable *list, pval **ind)
+ora_get_cursor(HashTable *list, pval **ind TSRMLS_DC)
 {
 	oraCursor *cursor;
 	oraConnection *db_conn;
-	TSRMLS_FETCH();
 
 	cursor = (oraCursor *) zend_fetch_resource(ind TSRMLS_CC, -1, "Oracle-Cursor", NULL, 1, le_cursor);
 	if (! cursor) {
@@ -1724,13 +1723,12 @@ ora_describe_define(oraCursor * cursor)
 
 /* {{{ ora_set_param_values
  */
-int ora_set_param_values(oraCursor *cursor, int isout)
+int ora_set_param_values(oraCursor *cursor, int isout TSRMLS_DC)
 {
 	char *paramname;
 	oraParam *param;
 	pval **pdata;
 	int i, len, plen;
-	TSRMLS_FETCH();
 
 	zend_hash_internal_pointer_reset(cursor->params);
 
