@@ -48,7 +48,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	switch (*pdo_err) {
-		case PDO_ERR_NONE:		msg = "No erro"; break;
+		case PDO_ERR_NONE:		msg = "No error"; break;
 		case PDO_ERR_CANT_MAP:	msg = "Consult errorInfo() for more details"; break;
 		case PDO_ERR_SYNTAX:	msg = "Syntax Error"; break;
 		case PDO_ERR_CONSTRAINT:msg = "Constraint violation"; break;
