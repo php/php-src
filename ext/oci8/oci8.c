@@ -18,6 +18,7 @@
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
    | Temporary LOB support by David Benson <dbenson@mancala.com>          |
+   | ZTS per process OCIPLogon by Harald Radi <harald.radi@nme.at>        |
    +----------------------------------------------------------------------+
  */
 
@@ -27,6 +28,10 @@
  *
  * - php.ini flags 
  *   especialliy important for things like oci_ping
+ *		allowpconns
+ *		timeout
+ *		maxlifetime
+ *		maxpconns
  * - Change return-value for OCIFetch*() (1-row read, 0-Normal end, false-error) 
  * - Error mode (print or shut up?)
  * - binding of arrays
@@ -37,7 +42,6 @@
  * - make OCIInternalDebug accept a mask of flags....
  * - have one ocifree() call.
  * - make it possible to have persistent statements?
- * - implement connection pooling in ZTS mode.
  * - failover
  * - change all the lob stuff to work without classes (optional)! 
  * - make sure that the callbacks terminate the strings with \0
@@ -60,6 +64,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "php_ini.h"
 
 /* #define HAVE_OCI8_TEMP_LOB 1 */
 #define WITH_COLLECTIONS 1
@@ -67,6 +72,13 @@
 #if HAVE_OCI8
 
 #include "php_oci8.h"
+
+/* True globals, only used by thread safe functions */
+static TsHashTable *persistent_servers;
+static TsHashTable *persistent_sessions;
+
+static long num_persistent = 0;
+static long num_links = 0;
 
 /* True globals, no need for thread safety */
 static int le_conn;
@@ -91,6 +103,21 @@ static zend_class_entry *oci_coll_class_entry_ptr;
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
+#ifdef ZTS
+MUTEX_T mx_lock;
+
+#define mutex_alloc() tsrm_mutex_alloc()
+#define mutex_free(mutex) tsrm_mutex_free(mutex)
+#define mutex_lock(mutex) tsrm_mutex_lock(mutex)
+#define mutex_unlock(mutex) tsrm_mutex_unlock(mutex)
+#define thread_id()	tsrm_thread_id()
+#else
+#define mutex_alloc()
+#define mutex_free(mutex)
+#define mutex_lock(mutex)
+#define mutex_unlock(mutex)
+#define thread_id() 1
+#endif
 
 /* dirty marcos to make sure we _never_ call oracle-functions recursivly 
  *
@@ -462,47 +489,12 @@ zend_module_entry oci8_module_entry = {
 };
 
 /* }}} */
-/* {{{ debug malloc/realloc/free */
-
-#define OCI_USE_EMALLOC 0		/* set this to 1 if you want to use the php memory manager! */
-
-#if OCI_USE_EMALLOC
-CONST dvoid *ocimalloc(dvoid *ctx, size_t size)
-{
-	dvoid *ret;
-	ret = (dvoid *)malloc(size);
-	oci_debug("ocimalloc(%d) = %08x", size,ret);
-	return ret;
-}
-
-CONST dvoid *ocirealloc(dvoid *ctx, dvoid *ptr, size_t size)
-{
-	dvoid *ret;
-	oci_debug("ocirealloc(%08x, %d)", ptr, size);
-	ret = (dvoid *)realloc(ptr, size);
-	return ptr;
-}
-
-CONST void ocifree(dvoid *ctx, dvoid *ptr)
-{
-	oci_debug("ocifree(%08x)", ptr);
-	free(ptr);
-}
-#endif
-
-/* }}} */
 /* {{{ startup, shutdown and info functions */
 
 static void php_oci_init_globals(php_oci_globals *oci_globals_p TSRMLS_DC)
 { 
 	OCI(shutdown)	= 0;
 	OCI(in_call)	= 0;
-
-	OCI(user) = malloc(sizeof(HashTable));
-	zend_hash_init(OCI(user), 13, NULL, NULL, 1);
-
-	OCI(server) = malloc(sizeof(HashTable));
-	zend_hash_init(OCI(server), 13, NULL, NULL, 1); 
 
 	CALL_OCI(OCIEnvInit(
 				&OCI(pEnv), 
@@ -516,6 +508,27 @@ static void php_oci_init_globals(php_oci_globals *oci_globals_p TSRMLS_DC)
 				OCI_HTYPE_ERROR, 
 				0, 
 				NULL));
+}
+
+static int _sessions_pcleanup(zend_llist *session_list TSRMLS_DC)
+{
+	zend_llist_destroy(session_list);
+
+	return 1;
+}
+
+static int _session_pcleanup(oci_session *session TSRMLS_DC)
+{
+	_oci_close_session(session);
+
+	return 1;
+}
+
+static int _server_pcleanup(oci_server *server TSRMLS_DC)
+{
+	_oci_close_server(server);
+
+	return 1;
 }
 
 PHP_MINIT_FUNCTION(oci)
@@ -543,11 +556,14 @@ PHP_MINIT_FUNCTION(oci)
 
 #endif
 
-#if OCI_USE_EMALLOC
- 	OCIInitialize(PHP_OCI_INIT_MODE, NULL, ocimalloc, ocirealloc, ocifree);
-#else
+	mx_lock = mutex_alloc();
+
+	persistent_servers = malloc(sizeof(TsHashTable));
+	persistent_sessions = malloc(sizeof(TsHashTable));
+	zend_ts_hash_init(persistent_servers, 13, NULL, (dtor_func_t) _server_pcleanup, 1); 
+	zend_ts_hash_init(persistent_sessions, 13, NULL, (dtor_func_t) _sessions_pcleanup, 1); 
+
 	OCIInitialize(PHP_OCI_INIT_MODE, NULL, NULL, NULL, NULL);
-#endif
 
 #ifdef ZTS
 	ts_allocate_id(&oci_globals_id, sizeof(php_oci_globals), (ts_allocate_ctor) php_oci_init_globals, NULL);
@@ -642,11 +658,6 @@ PHP_MINIT_FUNCTION(oci)
 
 PHP_RINIT_FUNCTION(oci)
 {
-	/* XXX NYI
-	OCI(num_links) = 
-		OCI(num_persistent);
-	*/
-
 	OCI(debug_mode) = 0; /* start "fresh" */
 /*	OCI(in_call) = 0; i don't think we want this! */
 
@@ -655,34 +666,19 @@ PHP_RINIT_FUNCTION(oci)
 	return SUCCESS;
 }
 
-static int _session_pcleanup(oci_session *session TSRMLS_DC)
-{
-	_oci_close_session(session);
-
-	return 1;
-}
-
-static int _server_pcleanup(oci_server *server TSRMLS_DC)
-{
-	_oci_close_server(server);
-
-	return 1;
-}
-
 PHP_MSHUTDOWN_FUNCTION(oci)
 {
 	OCI(shutdown) = 1;
 
 	oci_debug("START php_mshutdown_oci");
 
-	zend_hash_apply(OCI(user), (apply_func_t)_session_pcleanup TSRMLS_CC);
-	zend_hash_apply(OCI(server), (apply_func_t)_server_pcleanup TSRMLS_CC);
+	zend_ts_hash_destroy(persistent_sessions);
+	zend_ts_hash_destroy(persistent_servers);
 
-	zend_hash_destroy(OCI(user));
-	zend_hash_destroy(OCI(server));
+	free(persistent_sessions);
+	free(persistent_servers);
 
-	free(OCI(user));
-	free(OCI(server));
+	mutex_free(mx_lock);
 
 	CALL_OCI(OCIHandleFree(
 				(dvoid *)OCI(pEnv), 
@@ -700,8 +696,8 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 #if 0
 	/* XXX free all statements, rollback all outstanding transactions */
 
-	zend_hash_apply(OCI(user), (apply_func_t) _session_cleanup TSRMLS_CC);
-	zend_hash_apply(OCI(server), (apply_func_t) _server_cleanup TSRMLS_CC);
+	zend_ts_hash_apply(persistent_sessions, (apply_func_t) _session_cleanup TSRMLS_CC);
+	zend_ts_hash_apply(persistent_servers, (apply_func_t) _server_cleanup TSRMLS_CC);
 #endif
 
 	oci_debug("END   php_rshutdown_oci");
@@ -712,10 +708,17 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 
 PHP_MINFO_FUNCTION(oci)
 {
+	char buf[32];
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
 	php_info_print_table_row(2, "Revision", "$Revision$");
+
+	sprintf(buf, "%ld", num_persistent);
+	php_info_print_table_row(2, "Active Persistent Links", buf);
+	sprintf(buf, "%ld", num_links);
+	php_info_print_table_row(2, "Active Links", buf);
+
 #ifndef PHP_WIN32
 	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_VERSION );
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DIR );
@@ -910,9 +913,8 @@ _oci_conn_list_dtor(oci_connection *connection TSRMLS_DC)
 					(ub4) OCI_HTYPE_SVCCTX));
 	}
 
-	if (connection->session && connection->session->exclusive) {
-		/* exclusive connection created via OCINLogon() close their 
-		   associated session when destructed */
+	if (connection->session) {
+		/* close associated session when destructed */
 		zend_list_delete(connection->session->num);
 	}
 
@@ -1003,8 +1005,11 @@ static void
 _oci_session_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	oci_session *session = (oci_session *)rsrc->ptr;
-	if (session->persistent)
+	if (session->persistent) {
+		/* clear thread assignment */
+		session->thread = 0;
 		return;
+	}
 
 	_oci_close_session(session);
 }
@@ -2120,7 +2125,7 @@ oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer, 
 	ub4 siz = 0;
 	ub4 readlen = 0;
 	ub4 loblen = 0;
-	int bytes = 0;
+	ub4 bytes = 0;
 	char *buf;
 	TSRMLS_FETCH();
 
@@ -2172,7 +2177,7 @@ oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer, 
 		return -1;
 	}
 
-	while (readlen > 0 && bytes < *len && siz < loblen) {  //paranoia
+	while (readlen > 0 && bytes < *len && siz < loblen) {  /* paranoia */
 		CALL_OCI_RETURN(connection->error, OCILobRead(
 					connection->pServiceContext, 
 					connection->pError, 
@@ -2420,8 +2425,9 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 
 static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive,char *charset)
 {
-	oci_session *session = 0, *psession = 0;
-	OCISvcCtx *svchp = 0;
+	zend_llist *session_list;
+	oci_session *session = NULL;
+	OCISvcCtx *svchp = NULL;
 	smart_str hashed_details = {0};
 #ifdef HAVE_OCI_9_2
 	ub2 charsetid = 0;
@@ -2475,7 +2481,27 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	smart_str_0(&hashed_details);
 
 	if (! exclusive) {
-		zend_hash_find(OCI(user), hashed_details.c, hashed_details.len+1, (void **) &session);
+		if (zend_ts_hash_find(persistent_sessions, hashed_details.c, hashed_details.len+1, &session_list) != SUCCESS) {
+			zend_llist tmp;
+			/* first session, set up a session list */
+			zend_llist_init(&tmp, sizeof(oci_session), (llist_dtor_func_t) _session_pcleanup, 1);
+			zend_ts_hash_update(persistent_sessions, hashed_details.c, hashed_details.len+1, &tmp, sizeof(zend_llist), &session_list);
+		} else {
+			mutex_lock(mx_lock);
+
+			/* session list found, search for an idle session or an already opened session by the current thread */
+			session = zend_llist_get_first(session_list);
+			while ((session != NULL) && session->thread && (session->thread != thread_id())) {
+				session = zend_llist_get_next(session_list);
+			}
+
+			if (session != NULL) {
+				/* mark session as busy */
+				session->thread = thread_id();
+			}
+
+			mutex_unlock(mx_lock);
+		}
 
 		if (session) {
 			if (session->is_open) {
@@ -2491,16 +2517,17 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 		}
 	}
 
-	session = calloc(1,sizeof(oci_session));
+	session = ecalloc(1,sizeof(oci_session));
 
 	if (! session) {
 		goto CLEANUP;
 	}
 
 	session->persistent = persistent;
-	session->hashed_details = hashed_details.c;
 	session->server = server;
 	session->exclusive = exclusive;
+	session->sessions_list = session_list;
+	session->thread = thread_id();
 
 #ifdef HAVE_OCI_9_2
 
@@ -2627,25 +2654,22 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 				(dvoid *) svchp, 
 				(ub4) OCI_HTYPE_SVCCTX));
 
-	if (exclusive) {
-		psession = session;
-	} else {
-		zend_hash_update(OCI(user),
-						 session->hashed_details,
-						 strlen(session->hashed_details)+1, 
-						 (void *)session,
-						 sizeof(oci_session),
-						 (void**)&psession);
-	}
+	session->num = zend_list_insert(session, le_session);
+ 	session->is_open = 1;
 
-	psession->num = zend_list_insert(psession,le_session);
- 	psession->is_open = 1;
+	mutex_lock(mx_lock);
+		num_links++;
+		if (! exclusive) {
+			zend_llist_add_element(session_list, session);
+			efree(session);
+			session = (oci_session*) session_list->tail->data;
+			num_persistent++;
+		}
+	mutex_unlock(mx_lock);
 
-	oci_debug("_oci_open_session new sess=%d user=%s",psession->num,username);
+	oci_debug("_oci_open_session new sess=%d user=%s",session->num,username);
 
-	if (! exclusive) free(session);
-
-	return psession;
+	return session;
 
 CLEANUP:
 	oci_debug("_oci_open_session: FAILURE -> CLEANUP called");
@@ -2659,11 +2683,15 @@ CLEANUP:
 /* {{{ _oci_close_session()
  */
 
+static int _session_compare(oci_session *sess1, oci_session *sess2)
+{
+	return sess1->num = sess2->num;
+}
+
 static void
 _oci_close_session(oci_session *session)
 {
 	OCISvcCtx *svchp;
-	char *hashed_details;
 	TSRMLS_FETCH();
 
 	if (! session) {
@@ -2735,13 +2763,17 @@ _oci_close_session(oci_session *session)
 					(ub4) OCI_HTYPE_SESSION));
 	}
 
-	hashed_details = session->hashed_details;
+	mutex_lock(mx_lock);
+		num_links--;
+		if (! OCI(shutdown) && session->persistent) {
+			zend_llist_del_element(session->sessions_list, session, _session_compare);
+			num_persistent--;
+		}
+	mutex_unlock(mx_lock);
 
-	if (! OCI(shutdown)) {
-		zend_hash_del(OCI(user), hashed_details, strlen(hashed_details)+1);
+	if (session->exclusive) {
+		efree(session);
 	}
-
-	free(hashed_details);
 }
 
 /* }}} */
@@ -2750,7 +2782,7 @@ _oci_close_session(oci_session *session)
 
 static oci_server *_oci_open_server(char *dbname,int persistent)
 { 
-	oci_server *server, *pserver = 0;
+	oci_server *server, *pserver = NULL;
 	TSRMLS_FETCH();
 
 	/* 
@@ -2762,7 +2794,8 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 	   but only as pesistent requested connections will be kept between requests!
 	*/
 
-	zend_hash_find(OCI(server), dbname, strlen(dbname)+1, (void **) &pserver);
+	/* TODO either keep servers global or don't reuse them at all */
+	zend_ts_hash_find(persistent_servers, dbname, strlen(dbname)+1, (void **) &pserver);
 
 	if (pserver) {
 		/* XXX ini-flag */
@@ -2784,7 +2817,7 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 		}
 	}
 	
-	server = calloc(1,sizeof(oci_server));
+	server = ecalloc(1,sizeof(oci_server));
 
 	server->persistent = persistent;
 	server->dbname = strdup(SAFE_STRING(dbname));
@@ -2808,7 +2841,7 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 		goto CLEANUP;
 	}
 	
-	zend_hash_update(OCI(server),
+	zend_ts_hash_update(persistent_servers,
 					 server->dbname,
 					 strlen(server->dbname)+1, 
 					 (void *)server,
@@ -2820,7 +2853,7 @@ static oci_server *_oci_open_server(char *dbname,int persistent)
 
 	oci_debug("_oci_open_server new conn=%d dname=%s",server->num,server->dbname);
 
-	free(server);
+	efree(server);
 
 	return pserver;
 
@@ -2909,7 +2942,7 @@ _oci_close_server(oci_server *server)
 	dbname = server->dbname;
 
 	if (! OCI(shutdown)) {
-		zend_hash_del(OCI(server),dbname,strlen(dbname)+1);
+		zend_ts_hash_del(persistent_servers, dbname, strlen(dbname)+1);
 	}
 
 	free(dbname);
@@ -2977,7 +3010,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 		persistent = 0;
 	} else {
 		/* if our server-context is not persistent we can't */
-		persistent = server->persistent; 
+		persistent = (server->persistent) ? persistent : 0;
 	}
 
 	session = _oci_open_session(server,username,password,persistent,exclusive,charset);
@@ -3620,7 +3653,6 @@ PHP_FUNCTION(ocitelllob)
 	zval *id;
 	oci_descriptor *descr;
 	int inx;
-	int len;
 
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
@@ -3642,7 +3674,6 @@ PHP_FUNCTION(ocirewindlob)
 	zval *id;
 	oci_descriptor *descr;
 	int inx;
-	int len;
 
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
@@ -3704,7 +3735,7 @@ PHP_FUNCTION(ociseeklob)
 				}
 	        }
 			else {
-				//OCI_SEEK_SET by default
+				/* OCI_SEEK_SET by default */
 				descr->lob_current_position = Z_LVAL_PP(arg1);
 			}
 			RETURN_TRUE;
@@ -3825,7 +3856,7 @@ PHP_FUNCTION(ociwritelob)
 			descr->lob_size = descr->lob_current_position;
 		}
 		
-		//marking buffer as used
+		/* marking buffer as used */
 		if (descr->buffering == 1) {
 			descr->buffering = 2;
 		}
@@ -3954,7 +3985,7 @@ PHP_FUNCTION(ocitruncatelob)
 		}
 
 		if (trim_length < 0) {
-			//negative length is not allowed
+			/* negative length is not allowed */
 			RETURN_FALSE;
 		}
 		
@@ -4095,12 +4126,12 @@ PHP_FUNCTION(ociflushlob)
 		}
 
 		if (descr->buffering == 0) {
-			//buffering wasn't enabled, there is nothing to flush
+			/* buffering wasn't enabled, there is nothing to flush */
 			RETURN_FALSE;
 		}
 		else if (descr->buffering == 1) {
-			//buffering is enabled, but not used yet
-			//dunno why, but OCI returns error in this case, so I think we should suppress it
+			/* buffering is enabled, but not used yet
+			   dunno why, but OCI returns error in this case, so I think we should suppress it */
 			RETURN_TRUE;
 		}
 		
@@ -4212,11 +4243,10 @@ PHP_FUNCTION(ocisetbufferinglob)
 
 PHP_FUNCTION(ocigetbufferinglob)
 {
-	zval *id, **flag;
+	zval *id;
 	OCILobLocator *mylob;
 	oci_descriptor *descr;
 	int inx;
-	ub4 curloblen;
 
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocidesc(id,&descr TSRMLS_CC)) == 0) {
@@ -4333,7 +4363,6 @@ PHP_FUNCTION(ociisequallob)
 	oci_connection *connection;
 	oci_descriptor *first_descr,*second_descr;
 	int inx;
-	ub4 first_curloblen,second_curloblen;
 	boolean is_equal;
 
 		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
