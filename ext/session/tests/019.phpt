@@ -5,7 +5,6 @@ serializing references test case using globals
 --INI--
 session.use_cookies=0
 session.cache_limiter=
-session.use_trans_sid=1
 register_globals=1
 --FILE--
 <?php
