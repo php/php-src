@@ -1395,7 +1395,7 @@ PHP_FUNCTION(mysqli_read_query_result)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_real_connect(resource link [,string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
+/* {{{ proto bool mysqli_real_connect(resource link [,string hostname [,string username [,string passwd [,string dbname [,int port [,string socket [,int flags]]]]]]])
    open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_real_connect)
 {
