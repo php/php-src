@@ -1,3 +1,0 @@
-#ifndef HAVE_JAVA
-#define HAVE_JAVA 0
-#endif

@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-hyperwave 'Hyperwave support?' yesno no \
-'     Whether to build with Hyperwave support. More\n
-     information about Hyperwave can be found at http://www.hyperwave.com.'
