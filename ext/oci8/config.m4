@@ -35,7 +35,7 @@ AC_ARG_WITH(oci8,
       AC_MSG_RESULT(no)
       ;;
     *)
-      ORACLEINST_TOP=$withval
+      AC_EXPAND_PATH($withval, ORACLEINST_TOP)
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(oci8)
       ;;
