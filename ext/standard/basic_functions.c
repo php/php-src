@@ -336,6 +336,7 @@ function_entry basic_functions[] = {
 	PHP_FE(is_array,								first_arg_allow_ref)
 	PHP_FE(is_object,								first_arg_allow_ref)
     PHP_FE(is_scalar,                               NULL)
+	PHP_FE(is_callable,								third_argument_force_ref)
 
 	PHP_FE(error_log,								NULL)
 	PHP_FE(call_user_func,							NULL)
@@ -2624,6 +2625,36 @@ PHP_FUNCTION(parse_ini_file)
 	fh.filename = Z_STRVAL_PP(filename);
 	array_init(return_value);
 	zend_parse_ini_file(&fh, 0, ini_parser_cb, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name ]]) */
+PHP_FUNCTION(is_callable)
+{
+	zval **var, **syntax_only, **callable_name;
+	char *name;
+	zend_bool retval;
+	zend_bool syntax = 0;
+
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &var, &syntax_only, &callable_name) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_boolean_ex(syntax_only);
+		syntax = Z_BVAL_PP(syntax_only);
+	}
+
+	if (ZEND_NUM_ARGS() > 2) {
+		retval = zend_is_callable(*var, syntax, &name);
+		zval_dtor(*callable_name);
+		ZVAL_STRING(*callable_name, name, 0);
+	} else
+		retval = zend_is_callable(*var, syntax, NULL);
+
+	RETURN_BOOL(retval);
 }
 /* }}} */
 
