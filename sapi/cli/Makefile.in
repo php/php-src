@@ -2,11 +2,11 @@ LTLIBRARY_NAME = libphp4cli.la
 LTLIBRARY_SOURCES = php_cli.c getopt.c
 
 LTLIBRARY_DEPENDENCIES = \
-		$(top_srcdir)/Zend/libZend.la \
-		$(top_srcdir)/main/libmain.la \
-		$(top_srcdir)/$(REGEX_LIB) \
+		$(top_builddir)/Zend/libZend.la \
+		$(top_builddir)/main/libmain.la \
+		$(top_builddir)/$(REGEX_LIB) \
 		$(EXT_LTLIBS) \
-		$(top_srcdir)/$(TSRM_LIB)
+		$(top_builddir)/$(TSRM_LIB)
 
 LTLIBRARY_LDFLAGS = -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS)
 LTLIBRARY_LIBADD = $(LTLIBRARY_DEPENDENCIES) $(EXTRA_LIBS)
