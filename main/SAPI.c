@@ -619,18 +619,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 											 	0, &result_len, -1 TSRMLS_CC);
 						if(result_len==ptr_len) {
 							char *lower_temp = estrdup(ptr);	
-							char conv_temp[64];
+							char conv_temp[32];
 							int conv_len;
 
 							php_strtolower(lower_temp,strlen(lower_temp));
 							/* If there is no realm string at all, append one */
 							if(!strstr(lower_temp,"realm")) {
 								efree(result);
-								conv_len = snprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
-								/* some broken snprintf() impls may return a negative value on failure */
-								if (conv_len < 0) {
-									conv_len = 0;
-								}
+								conv_len = sprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
 								result = emalloc(ptr_len+conv_len+1);
 								result_len = ptr_len+conv_len;
 								memcpy(result, ptr, ptr_len);	
@@ -653,7 +649,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 #else
 				{
 					myuid = php_getuid();
-					result = emalloc(32);
+					result = emalloc(sizeof("WWW-Authenticate: ")+20);
 					newlen = sprintf(result, "WWW-Authenticate: %ld", myuid);	
 					newheader = estrndup(result,newlen);
 					efree(header_line);
