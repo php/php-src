@@ -347,6 +347,8 @@ void zend_do_throw(znode *expr TSRMLS_DC);
 ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
 ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC);
 ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC);
+ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *ce2);
+ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);

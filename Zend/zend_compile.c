@@ -1826,6 +1826,22 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 }
 
 
+ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry *ce2)
+{
+	int num = ce2->num_interfaces;
+
+	if (num) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (ce->num_interfaces + num));
+		} else {
+			ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce->num_interfaces + num));
+		}
+		memcpy(&ce->interfaces[ce->num_interfaces], ce2->interfaces, num * sizeof(zend_class_entry*));
+		ce->num_interfaces += num;
+	}
+}
+
+
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 {
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
@@ -1834,6 +1850,8 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	}
 
 	ce->parent = parent_ce;
+	/* Inherit interfaces */
+	zend_do_inherit_interfaces(ce, parent_ce);
 
 	/* Inherit properties */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
@@ -1847,10 +1865,12 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 }
 
 
-void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface)
+ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface)
 {
 	zend_hash_merge(&ce->constants_table, &iface->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->function_table, &iface->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
+
+	zend_do_inherit_interfaces(ce, iface);
 }
 
 
@@ -2305,16 +2325,19 @@ static void do_verify_abstract_class(TSRMLS_D)
 
 void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC)
 {
-	do_inherit_parent_constructor(CG(active_class_entry));
+	zend_class_entry *ce = CG(active_class_entry);
 
-	CG(active_class_entry)->line_end = zend_get_compiled_lineno(TSRMLS_C);
+	do_inherit_parent_constructor(ce);
 
-	if (CG(active_class_entry)->num_interfaces > 0) {
-		CG(active_class_entry)->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*CG(active_class_entry)->num_interfaces);
+	ce->line_end = zend_get_compiled_lineno(TSRMLS_C);
+
+	/* Inherit interfaces */
+	if (ce->num_interfaces > 0) {
+		ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *)*ce->num_interfaces);
 	}
-	if (!(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)
-		&& !(CG(active_class_entry)->ce_flags & ZEND_ACC_ABSTRACT_CLASS)
-		&& ((parent_token->op_type != IS_UNUSED) || (CG(active_class_entry)->num_interfaces > 0))) {
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)
+		&& !(ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS)
+		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
 		do_verify_abstract_class(TSRMLS_C);
 	}
 	CG(active_class_entry) = NULL;
