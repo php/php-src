@@ -43,8 +43,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "NETOOLS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\php4" /I "..\..\..\php4\main" /I "..\..\..\php4\Zend" /I "..\..\..\php4\TSRM" /I "..\..\..\php4\win32" /I "..\..\..\php_build" /I "..\..\..\php_build\include\lcrzo" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_NETOOLS" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS" /FR /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SQLITE_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\php4" /I "..\..\..\php4\main" /I "..\..\..\php4\Zend" /I "..\..\..\php4\TSRM" /I "..\..\..\php4\win32" /I "..\..\..\php_build" /I "..\..\..\php_build\include\lcrzo" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_SQLITE" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -69,8 +69,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "NETOOLS_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\..\php4" /I "..\..\..\php4\main" /I "..\..\..\php4\Zend" /I "..\..\..\php4\TSRM" /I "..\..\..\php4\win32" /I "..\..\..\php_build" /I "..\..\..\php_build\include\lcrzo" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_NETOOLS" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS" /YX /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SQLITE_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\..\php4" /I "..\..\..\php4\main" /I "..\..\..\php4\Zend" /I "..\..\..\php4\TSRM" /I "..\..\..\php4\win32" /I "..\..\..\php_build" /I "..\..\..\php_build\include\lcrzo" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_SQLITE" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -98,103 +98,103 @@ LINK32=link.exe
 
 SOURCE=.\libsqlite\src\auth.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\btree.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\build.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\delete.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\encode.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\expr.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\func.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\hash.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\insert.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\main.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\opcodes.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\os.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\pager.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\parse.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\printf.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\random.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\select.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
@@ -258,43 +258,43 @@ InputPath=.\libsqlite\src\sqlite_config.w32.h
 
 SOURCE=.\libsqlite\src\table.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\tokenize.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\trigger.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\update.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\util.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\vdbe.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # Begin Source File
 
 SOURCE=.\libsqlite\src\where.c
 # ADD CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
-# SUBTRACT CPP /D HAVE_NETOOLS=1 /D "PHP_NETOOLS_EXPORTS"
+# SUBTRACT CPP /D HAVE_SQLITE=1 /D "PHP_SQLITE_EXPORTS"
 # End Source File
 # End Group
 # Begin Source File
