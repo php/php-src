@@ -11,7 +11,7 @@ extern "C" {
 #define PATHSEPARATOR ":"
 #else
 /* default fontpath for windows systems */
-#define DEFAULT_FONTPATH "c:\\winnt\\fonts;."
+#define DEFAULT_FONTPATH "c:\\winnt\\fonts;c:\\windows\\fonts;."
 #define PATHSEPARATOR ";"
 #endif
 
