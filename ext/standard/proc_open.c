@@ -56,6 +56,136 @@
 
 static int le_proc_open;
 
+/* {{{ _php_array_to_envp */
+static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent TSRMLS_DC)
+{
+	zval **element;
+	php_process_env_t env;
+	char *string_key, *data;
+#ifndef PHP_WIN32
+	char **ep;
+#endif
+	char *p;
+	uint string_length, cnt, l, sizeenv=0, el_len;
+	ulong num_key;
+	HashTable *target_hash;
+	HashPosition pos;
+
+	memset(&env, 0, sizeof(env));
+	
+	if (!environment) {
+		return env;
+	}
+	
+	cnt = zend_hash_num_elements(Z_ARRVAL_P(environment));
+	
+	if (cnt < 1) {
+		return env;
+	}
+
+	target_hash = HASH_OF(environment);
+	if (!target_hash) {
+		return env;
+	}
+
+	/* first, we have to get the size of all the elements in the hash */
+	for (zend_hash_internal_pointer_reset_ex(target_hash, &pos);
+			zend_hash_get_current_data_ex(target_hash, (void **) &element, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(target_hash, &pos)) {
+		
+		convert_to_string_ex(element);
+		el_len = Z_STRLEN_PP(element);
+		if (el_len == 0) {
+			continue;
+		}
+		
+		sizeenv += el_len+1;
+		
+		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, &pos)) {
+			case HASH_KEY_IS_STRING:
+				if (string_length == 0) {
+					continue;
+				}
+				sizeenv += string_length+1;
+				break;
+		}
+	}
+
+#ifndef PHP_WIN32
+	ep = env.envarray = (char **) pecalloc(cnt + 1, sizeof(char *), is_persistent);
+#endif
+	p = env.envp = (char *) pecalloc(sizeenv + 4, 1, is_persistent);
+
+	for (zend_hash_internal_pointer_reset_ex(target_hash, &pos);
+			zend_hash_get_current_data_ex(target_hash, (void **) &element, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(target_hash, &pos)) {
+		
+		convert_to_string_ex(element);
+		el_len = Z_STRLEN_PP(element);
+		
+		if (el_len == 0) {
+			continue;
+		}
+		
+		data = Z_STRVAL_PP(element);
+		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, &pos)) {
+			case HASH_KEY_IS_STRING:
+				if (string_length == 0) {
+					continue;
+				}
+				l = string_length + el_len + 1;
+				memcpy(p, string_key, string_length);
+				strcat(p, "=");
+				strcat(p, data);
+				
+				if (PG(magic_quotes_gpc)) {
+					php_stripslashes(p, &l TSRMLS_CC);
+				}
+#ifndef PHP_WIN32
+				*ep = p;
+				++ep;
+#endif
+				p += l;
+				break;
+			case HASH_KEY_IS_LONG:
+				memcpy(p,data,el_len);
+				if (PG(magic_quotes_gpc)) {
+					php_stripslashes(p, &el_len TSRMLS_CC);
+				}
+#ifndef PHP_WIN32
+				*ep = p;
+				++ep;
+#endif
+				p += el_len + 1;
+				break;
+			case HASH_KEY_NON_EXISTANT:
+				break;
+		}
+	}	
+
+	assert(p - env.envp <= sizeenv);
+	
+	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
+
+	return env;
+}
+/* }}} */
+
+/* {{{ _php_free_envp */
+static void _php_free_envp(php_process_env_t env, int is_persistent)
+{
+#ifndef PHP_WIN32
+	if (env.envarray) {
+		pefree(env.envarray, is_persistent);
+	}
+#endif
+	if (env.envp) {
+		pefree(env.envp, is_persistent);
+	}
+}
+/* }}} */
+
+
 static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
@@ -98,7 +228,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 #else
 	FG(pclose_ret) = -1;
 #endif
-
+	_php_free_envp(proc->env, proc->is_persistent);
 	pefree(proc->command, proc->is_persistent);
 	pefree(proc, proc->is_persistent);
 	
@@ -165,8 +295,6 @@ static int php_make_safe_mode_command(char *cmd, char **safecmd, int is_persiste
 	return SUCCESS;
 }
 /* }}} */
-
-
 
 PHP_MINIT_FUNCTION(proc_open)
 {
@@ -321,15 +449,17 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
-/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes)
+/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
 
-	char *command;
-	long command_len;
+	char *command, *cwd=NULL;
+	long command_len, cwd_len;
 	zval *descriptorspec;
 	zval *pipes;
+	zval *environment = NULL;
+	php_process_env_t env;
 	int ndesc = 0;
 	int i;
 	zval **descitem = NULL;
@@ -346,8 +476,8 @@ PHP_FUNCTION(proc_open)
 	struct php_process_handle *proc;
 	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz/", &command,
-				&command_len, &descriptorspec, &pipes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz/|sa!", &command,
+				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -357,6 +487,12 @@ PHP_FUNCTION(proc_open)
 
 	command_len = strlen(command);
 	
+	if (environment) {
+		env = _php_array_to_envp(environment, is_persistent TSRMLS_CC);
+	} else {
+		memset(&env, 0, sizeof(env));
+	}
+
 	memset(descriptors, 0, sizeof(descriptors));
 
 #ifdef PHP_WIN32
@@ -538,7 +674,7 @@ PHP_FUNCTION(proc_open)
 	
 	command_with_cmd = emalloc(command_len + sizeof(COMSPEC_9X) + 1 + sizeof(" /c "));
 	sprintf(command_with_cmd, "%s /c %s", GetVersion() < 0x80000000 ? COMSPEC_NT : COMSPEC_9X, command);
-	newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+	newprocok = CreateProcess(NULL, command_with_cmd, &security, &security, TRUE, NORMAL_PRIORITY_CLASS, env.envp, cwd, &si, &pi);
 	efree(command_with_cmd);
 
 	if (FALSE == newprocok) {
@@ -551,7 +687,6 @@ PHP_FUNCTION(proc_open)
 
 #elif HAVE_FORK
 	/* the unix way */
-
 	child = fork();
 
 	if (child == 0) {
@@ -571,8 +706,15 @@ PHP_FUNCTION(proc_open)
 			if (descriptors[i].childend != descriptors[i].index)
 				close(descriptors[i].childend);
 		}
-
-		execl("/bin/sh", "sh", "-c", command, NULL);
+		if (cwd) {
+			chdir(cwd);
+		}
+		
+		if (env.envarray) {
+			execle("/bin/sh", "sh", "-c", command, NULL, env.envarray);
+		} else {
+			execl("/bin/sh", "sh", "-c", command, NULL);
+		}
 		_exit(127);
 
 	} else if (child < 0) {
@@ -599,6 +741,7 @@ PHP_FUNCTION(proc_open)
 	proc->command = command;
 	proc->npipes = ndesc;
 	proc->child = child;
+	proc->env = env;
 
 	array_init(pipes);
 
@@ -657,6 +800,7 @@ PHP_FUNCTION(proc_open)
 	return;
 
 exit_fail:
+	_php_free_envp(env, is_persistent);
 	pefree(command, is_persistent);
 	RETURN_FALSE;
 
