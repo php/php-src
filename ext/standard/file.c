@@ -1691,7 +1691,7 @@ PHP_FUNCTION(copy)
 {
 	pval **source, **target;
 	PLS_FETCH();
-	
+
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &source, &target) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1702,7 +1702,11 @@ PHP_FUNCTION(copy)
 	if (PG(safe_mode) &&(!php_checkuid((*source)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
-	
+
+	if (PG(safe_mode) &&(!php_checkuid((*target)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+
 	if (php_copy_file(Z_STRVAL_PP(source), Z_STRVAL_PP(target))==SUCCESS) {
 		RETURN_TRUE;
 	} else {
