@@ -1540,6 +1540,10 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 	image_info_data  *info_data;
 	image_info_data  *list;
 
+	if (length >= LONG_MAX) {
+		return;
+	}
+
 	list = erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1)*sizeof(image_info_data));
 	if (!list) {
 		EXIF_ERRLOG_EALLOC
