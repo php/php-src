@@ -2,6 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 14 Sep 2004, Version 4.3.9RC3
 - GPC input processing fixes (Stefano Di Paola, Rasmus, Stefan)
+- Fixed bug #30050 (Possible crash inside php_shutdown_config()). 
+  (Ilia, nw at softwarekombinat dot de)
 
 31 Aug 2004, Version 4.3.9RC2
 - Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
