@@ -38,6 +38,7 @@
 #define DBX_PGSQL 3
 #define DBX_MSSQL 4
 #define DBX_FBSQL 5
+#define DBX_OCI8 6
 /* includes for supported databases */
 #include "dbx.h"
 #include "dbx_mysql.h"
@@ -45,6 +46,7 @@
 #include "dbx_pgsql.h"
 #include "dbx_mssql.h"
 #include "dbx_fbsql.h"
+#include "dbx_oci8.h"
 
 /* support routines */
 int module_exists(char * module_name) {
@@ -61,6 +63,7 @@ int module_identifier_exists(long module_identifier) {
         case DBX_PGSQL: return module_exists("pgsql");
         case DBX_MSSQL: return module_exists("mssql");
         case DBX_FBSQL: return module_exists("fbsql");
+        case DBX_OCI8: return module_exists("oci8");
         }
     return 0;
     }
@@ -71,6 +74,7 @@ int get_module_identifier(char * module_name) {
     if (!strcmp("pgsql", module_name)) return DBX_PGSQL;
     if (!strcmp("mssql", module_name)) return DBX_MSSQL;
     if (!strcmp("fbsql", module_name)) return DBX_FBSQL;
+    if (!strcmp("oci8", module_name)) return DBX_OCI8;
     return DBX_UNKNOWN;
     }
 
@@ -161,6 +165,7 @@ ZEND_MINIT_FUNCTION(dbx)
     REGISTER_LONG_CONSTANT("DBX_PGSQL", DBX_PGSQL, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_MSSQL", DBX_MSSQL, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_FBSQL", DBX_FBSQL, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DBX_OCI8", DBX_OCI8, CONST_CS | CONST_PERSISTENT);
 
     REGISTER_LONG_CONSTANT("DBX_PERSISTENT", DBX_PERSISTENT, CONST_CS | CONST_PERSISTENT);
 
@@ -197,7 +202,7 @@ ZEND_MINFO_FUNCTION(dbx)
     php_info_print_table_start();
     php_info_print_table_row(2, "dbx support", "enabled");
     php_info_print_table_row(2, "dbx version", "1.0.0");
-    php_info_print_table_row(2, "supported databases", "MySQL<br />ODBC<br />PostgreSQL<br />Microsoft SQL Server<br />FrontBase");
+    php_info_print_table_row(2, "supported databases", "MySQL<br />ODBC<br />PostgreSQL<br />Microsoft SQL Server<br />FrontBase<br />Oracle 8");
     php_info_print_table_end();
 }
 
@@ -671,6 +676,7 @@ int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, z
         case DBX_PGSQL: return dbx_pgsql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: zend_error(E_WARNING, "dbx_connect: OCI8 extension is still highly experimental!"); return dbx_oci8_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_connect: not supported in this module");
     return 0;
@@ -684,6 +690,7 @@ int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, 
         case DBX_PGSQL: return dbx_pgsql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: zend_error(E_WARNING, "dbx_pconnect: OCI8 extension is still highly experimental!"); return dbx_oci8_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_pconnect: not supported in this module");
     return 0;
@@ -697,6 +704,7 @@ int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
         case DBX_PGSQL: return dbx_pgsql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_close: not supported in this module");
     return 0;
@@ -710,6 +718,7 @@ int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sq
         case DBX_PGSQL: return dbx_pgsql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_query: not supported in this module");
     return 0;
@@ -723,6 +732,7 @@ int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTI
         case DBX_PGSQL: return dbx_pgsql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getcolumncount: not supported in this module");
     return 0;
@@ -736,6 +746,7 @@ int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_inde
         case DBX_PGSQL: return dbx_pgsql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getcolumnname: not supported in this module");
     return 0;
@@ -749,6 +760,7 @@ int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_inde
         case DBX_PGSQL: return dbx_pgsql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
        }
     zend_error(E_WARNING, "dbx_getcolumntype: not supported in this module");
     return 0;
@@ -762,6 +774,7 @@ int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERN
         case DBX_PGSQL: return dbx_pgsql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getrow: not supported in this module");
     return 0;
@@ -775,6 +788,7 @@ int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
         case DBX_PGSQL: return dbx_pgsql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_MSSQL: return dbx_mssql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_FBSQL: return dbx_fbsql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_OCI8: return dbx_oci8_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_error: not supported in this module");
     return 0;
