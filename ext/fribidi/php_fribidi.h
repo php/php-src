@@ -48,7 +48,7 @@ PHP_RINIT_FUNCTION(fribidi);
 PHP_RSHUTDOWN_FUNCTION(fribidi);
 PHP_MINFO_FUNCTION(fribidi);
 
-ZEND_FUNCTION(fribidi_log2vis);
+PHP_FUNCTION(fribidi_log2vis);
 /*void php_fribidi_free_rsrc(php_fribidi_rsrc* p_rsrc);*/
 /* 
   	Declare any global variables you may need between the BEGIN
