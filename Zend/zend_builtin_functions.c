@@ -41,6 +41,8 @@ static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(leak);
 
+extern unsigned char first_arg_force_ref[];
+
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
 	ZEND_FE(func_num_args,		NULL)
@@ -49,7 +51,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(strlen,				NULL)
 	ZEND_FE(strcmp,				NULL)
 	ZEND_FE(strcasecmp,			NULL)
-	ZEND_FE(each,				NULL)
+	ZEND_FE(each,				first_arg_force_ref)
 	ZEND_FE(error_reporting,	NULL)
 	ZEND_FE(define,				NULL)
 	ZEND_FE(defined,			NULL)
