@@ -725,8 +725,6 @@ AC_SUBST(PHP_LIBS)
 AC_SUBST(PHP_SAPI)
 AC_SUBST(INSTALL_IT)
 
-PHP_OUTPUT_FILES=`echo $PHP_OUTPUT_FILES | sort`
-
 #libphp4.module 
 AC_OUTPUT([Makefile php4.spec ext/Makefile sapi/Makefile $PHP_OUTPUT_FILES
            scripts/mkextlib regex/Makefile build-defs.h], [], [

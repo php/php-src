@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed header("HTTP/..."); behaviour (Sascha)
+- Improved UNIX build system. Now utilizes libtool (Sascha)
 - Upgrade some more internal functions to use new Zend function API. (Thies, 
   Zend library)
 - Fixed backwards incompatibility with ereg() (Thies)

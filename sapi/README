@@ -10,8 +10,8 @@ not specified, they will default to "cgi" and "do nothing,"
 respectively.  Additionally, the following m4 macros can be used to
 influence what is created during "make":
 
-PHP_BUILD_SHARED    -- build shared target      libs/php_lib.so
-PHP_BUILD_STATIC    -- build static target      libs/php_lib.a
+PHP_BUILD_SHARED    -- build shared target      libs/libphp4.so
+PHP_BUILD_STATIC    -- build static target      libs/libphp4.a
 PHP_BUILD_PROGRAM   -- build executable         php
 
 (paths relative to top build dir)

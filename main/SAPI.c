@@ -198,6 +198,20 @@ SAPI_API void sapi_deactivate(SLS_D)
 	}
 }
 
+static int sapi_extract_response_code(const char *header_line)
+{
+	int code = 200;
+	const char *ptr;
+
+	for (ptr = header_line; *ptr; ptr++) {
+		if (*ptr == ' ' && *(ptr + 1) != ' ') {
+			code = atoi(ptr + 1);
+			break;
+		}
+	}
+	
+	return code;
+}
 
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
@@ -221,6 +235,8 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	/* Check the header for a few cases that we have special support for in SAPI */
 	if (header_line_len>=5 
 		&& !memcmp(header_line, "HTTP/", 5)) {
+		/* filter out the response code */
+		SG(sapi_headers).http_response_code = sapi_extract_response_code(header_line);
 		SG(sapi_headers).http_status_line = header_line;
 		return SUCCESS;
 	} else {
@@ -256,6 +272,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 SAPI_API int sapi_send_headers()
 {
 	int retval;
+	int ret = FAILURE;
 	sapi_header_struct default_header = { SAPI_DEFAULT_CONTENT_TYPE, sizeof(SAPI_DEFAULT_CONTENT_TYPE)-1 };
 	SLS_FETCH();
 
@@ -272,7 +289,7 @@ SAPI_API int sapi_send_headers()
 	switch (retval) {
 		case SAPI_HEADER_SENT_SUCCESSFULLY:
 			SG(headers_sent) = 1;
-			return SUCCESS;
+			ret = FAILURE;
 			break;
 		case SAPI_HEADER_DO_SEND:
 			if (SG(sapi_headers).http_status_line) {
@@ -281,7 +298,6 @@ SAPI_API int sapi_send_headers()
 				http_status_line.header = SG(sapi_headers).http_status_line;
 				http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
 				sapi_module.send_header(&http_status_line, SG(server_context));
-				efree(SG(sapi_headers).http_status_line);
 			}
 			if (SG(sapi_headers).send_default_content_type) {
 				sapi_module.send_header(&default_header, SG(server_context));
@@ -289,13 +305,18 @@ SAPI_API int sapi_send_headers()
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
 			sapi_module.send_header(NULL, SG(server_context));
 			SG(headers_sent) = 1;
-			return SUCCESS;
+			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_SEND_FAILED:
-			return FAILURE;
+			ret = FAILURE;
 			break;
 	}
-	return FAILURE;
+	
+	if (SG(sapi_headers).http_status_line) {
+		efree(SG(sapi_headers).http_status_line);
+	}
+	
+	return ret;
 }
 
 
