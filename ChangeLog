@@ -1,3 +1,90 @@
+2003-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/image/getimagesize.phpt:
+      Added missing test result.
+
+2003-01-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * header:
+      Bump year.
+
+    * win32/md5crypt.c:
+      WS fix
+
+2003-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Removed pointless checks of array_init() return value.
+
+2003-01-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed a quoted printable decoder so that it would conform to RFC2045.
+
+2003-01-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch:
+      Fix POST handling once and for all.  The daemon now never blocks and
+      handles
+      uploads of up to 2GB on 32 bit platforms.
+      
+      Uploads >16KB are put into a file-backed mmap area.
+      
+      SG(request_info).content_type got corrupted somewhere. As a workaround,
+      we provide SAPI with a duplicate of the original string.
+
+2003-01-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c
+      ext/standard/tests/image/image_type_to_mime_type.phpt
+      ext/standard/tests/image/test1pix.jp2:
+      fix jp2 detection and add testfile
+
+2003-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_jpeg.c:
+      Syncronize bundled GD library with latest GD (2.0.11).
+
+2003-01-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      ext/standard/info.c:
+      - MFH: Fixed a bug that made that no newline was displayed when there was
+      no
+        value for a row.
+
+    * ext/standard/info.c:
+      - Fixed a bug that made that no newline was displayed when there was no
+      value
+        for a row.
+
+2003-01-17  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/swf/swf.c:
+      Removed pointless checks around array_init().
+
+2003-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      Fixed memory leaks in imap_get_quota & imap_get_quotaroot.
+      Removed pointless checks around array_init().
+
+2003-01-17  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Significant speed enhancements. I was underestimating the power of recent
+      CPUs :)
+
+2003-01-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/internal_functions_win32.c:
+      Move ZEND_ENGINE_2 check to where it is defined.
+
 2003-01-16  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * main/config.w32.h
