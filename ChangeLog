@@ -1,3 +1,91 @@
+1999-12-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c
+      sapi/servlet/servlet.c
+      sapi/isapi/php4isapi.c
+      sapi/roxen/roxen.c
+      sapi/cgi/cgi_main.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      ext/standard/info.c: Use sapi_module_struct to contain SAPI module name
+
+1999-12-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: (PHP preg_quote) Made binary-safe.
+
+    * ext/standard/string.c
+      TODO:
+    Made quotemeta() binary-safe.
+
+    * ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/basic_functions.c
+      ext/db/db.c
+      ext/gd/gdt1.c
+      ext/bcmath/bcmath.c: getParameters -> zend_get_parameters
+
+1999-12-20  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/filestat.c
+      ext/standard/info.c: Make the Win32 tree compile again
+
+1999-12-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/gd/gd.c
+      ext/posix/posix.c: Zend fixups.
+
+1999-12-20  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/imap/imap.c: Corrected some protos.
+
+1999-12-20  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/imap/imap.c
+      ext/imap/imap.h: IMAP should now be in sync with its PHP3 counterpart
+
+1999-12-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Fix typo
+
+    * NEWS: Add and fix a few entries
+
+    * build-defs.h.in
+      ext/standard/info.c:
+    Add information about chosen SAPI module to phpinfo()
+
+    * sapi/thttpd/.cvsignore
+      sapi/thttpd/Makefile.am
+      sapi/thttpd/README
+      sapi/thttpd/config.m4
+      sapi/thttpd/php.sym
+      sapi/thttpd/php_thttpd.h
+      sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch:
+    Add SAPI module for thttpd server. Quote from the README:
+
+        This is a SAPI module for PHP 4.0 supporting thttpd, the tiny,
+        turbo, throttling HTTP server by Jef Poskanzer.
+
+        The module contains a patch against version 2.10 of thttpd. The patch
+        adds hooks to thttpd to call PHP, if a filename matches *.php. This
+        patch will be applied when you install PHP.
+
+        While functional, this module exists primarily to demonstrate the
+        ability of PHP to work in almost every web server environment.
+
+1999-12-20  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/browscap.c
+      ext/standard/cyr_convert.c
+      ext/standard/filestat.c
+      ext/standard/head.c
+      ext/standard/pack.c
+      ext/standard/quot_print.c
+      ext/standard/datetime.c
+      ext/standard/exec.c: Ex API
+
+    * ext/standard/fsock.c: Ex API and UDP support.
+
 1999-12-19  Zeev Suraski  <zeev@php.net>
 
     * ext/pgsql/pgsql.c
