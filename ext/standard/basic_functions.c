@@ -620,6 +620,7 @@ function_entry basic_functions[] = {
 	PHP_FE(setrawcookie,													NULL)
 	PHP_FE(header,															NULL)
 	PHP_FE(headers_sent,  first_and_second__args_force_ref)
+	PHP_FE(headers_list,													NULL)
 
 	PHP_FE(connection_aborted,												NULL)
 	PHP_FE(connection_status,												NULL)
