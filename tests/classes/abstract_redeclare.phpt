@@ -19,4 +19,4 @@ echo "Done\n"; // Shouldn't be displayed
 ?>
 --EXPECTF--
 
-Fatal error: Cannot redeclare pass::show() abstract in class fail in %s on line %d
+Fatal error: Cannot make non abstract method pass::show() abstract in class fail in %s on line %d
