@@ -1,3 +1,15 @@
+2004-11-09  Andrei Zmievski  <andreiz@gravitonic.com>
+
+    * zend_ini_parser.y:
+      Revert inadvertent commit.
+
+    * zend_ini_parser.y:
+      .dylib extension are Mach-O shared libraries that meant for linking
+      against. Loadable modules (aka bundles) can have any extension, so we
+      should probably stick with .so
+      
+      http://fink.sourceforge.net/doc/porting/shared.php?phpLang=en#lib-and-mod
+
 2004-11-05  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
