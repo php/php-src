@@ -15,7 +15,7 @@
 
 /* #ifndef WIN32 */
 #ifndef WIN32
-# include "tsrm_config.h"
+# include <tsrm_config.h>
 #endif
 
 #ifdef WIN32
