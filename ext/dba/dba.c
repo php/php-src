@@ -321,7 +321,11 @@ static void dba_close(dba_info *info TSRMLS_DC)
 		pefree(info->path, info->flags&DBA_PERSISTENT);
 	}
 	if (info->fp && info->fp!=info->lock.fp) {
-		php_stream_close(info->fp);
+		if(info->flags&DBA_PERSISTENT) {
+			php_stream_pclose(info->fp);
+		} else {
+			php_stream_close(info->fp);
+		}
 	}
 	if (info->lock.fd) {
 		php_flock(info->lock.fd, LOCK_UN);
@@ -329,7 +333,11 @@ static void dba_close(dba_info *info TSRMLS_DC)
 		info->lock.fd = 0;
 	}
 	if (info->lock.fp) {
-		php_stream_close(info->lock.fp);
+		if(info->flags&DBA_PERSISTENT) {
+			php_stream_pclose(info->lock.fp);
+		} else {
+			php_stream_close(info->lock.fp);
+		}
 	}
 	if (info->lock.name) {
 		pefree(info->lock.name, info->flags&DBA_PERSISTENT);

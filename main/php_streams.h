@@ -333,11 +333,14 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */
 #define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
 #define PHP_STREAM_FREE_RSRC_DTOR			8 /* called from the resource list dtor */
+#define PHP_STREAM_FREE_PERSISTENT			16 /* manually freeing a persistent connection */
 #define PHP_STREAM_FREE_CLOSE				(PHP_STREAM_FREE_CALL_DTOR | PHP_STREAM_FREE_RELEASE_STREAM)
 #define PHP_STREAM_FREE_CLOSE_CASTED		(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PRESERVE_HANDLE)
+#define PHP_STREAM_FREE_CLOSE_PERSISTENT	(PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_PERSISTENT)
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC);
 #define php_stream_free(stream, close_options)	_php_stream_free((stream), (close_options) TSRMLS_CC)
 #define php_stream_close(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE TSRMLS_CC)
+#define php_stream_pclose(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE_PERSISTENT TSRMLS_CC)
 
 PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET TSRMLS_CC)

@@ -1156,7 +1156,11 @@ PHPAPI PHP_FUNCTION(fclose)
 	}
 
 	php_stream_from_zval(stream, arg1);
-	zend_list_delete(stream->rsrc_id);
+	if (!stream->is_persistent) {
+		zend_list_delete(stream->rsrc_id);
+	} else {
+		php_stream_pclose(stream);
+	}
 
 	RETURN_TRUE;
 }
