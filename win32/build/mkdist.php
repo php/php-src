@@ -5,21 +5,26 @@ $build_dir = $argv[1];
 $phpdll = $argv[2];
 $sapi_targets = explode(" ", $argv[3]);
 $ext_targets = explode(" ", $argv[4]);
-$snapshot_template = $argv[5];
+$pecl_targets = explode(" ", $argv[5]);
+$snapshot_template = $argv[6];
 
 $is_debug = preg_match("/^debug/i", $build_dir);
 
 echo "Making dist for $build_dir\n";
 
 $dist_dir = $build_dir . "/php-" . phpversion();
+$pecl_dir = $dist_dir . "-pecl";
+
 @mkdir($dist_dir);
 @mkdir("$dist_dir/ext");
 @mkdir("$dist_dir/dev");
 @mkdir("$dist_dir/extras");
+@mkdir($pecl_dir);
 
 /* figure out additional DLL's that are required */
 $extra_dll_deps = array();
 $per_module_deps = array();
+$pecl_dll_deps = array();
 
 function get_depends($module)
 {
@@ -55,10 +60,12 @@ function get_depends($module)
 		'msvcrt.dll',
 
 		);
-	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $phpdll, $per_module_deps;
+	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
 	$bd = strtolower(realpath($build_dir));
 
+	$is_pecl = in_array($module, $pecl_targets);
+	
 	$cmd = "$GLOBALS[build_dir]\\deplister.exe \"$module\" \"$GLOBALS[build_dir]\"";
 	$proc = proc_open($cmd, 
 			array(1 => array("pipe", "w")),
@@ -73,7 +80,7 @@ function get_depends($module)
 		/* ignore stuff in our build dir, but only if it is
 	     * one of our targets */
 		if (((in_array($depbase, $sapi_targets) ||
-			   	in_array($depbase, $ext_targets)) ||
+			   	in_array($depbase, $ext_targets) || in_array($depbase, $pecl_targets)) ||
 				$depbase == $phpdll) && file_exists($GLOBALS['build_dir'] . "/$depbase")) {
 			continue;
 		}
@@ -82,8 +89,14 @@ function get_depends($module)
 			continue;
 		}
 		
-		if (!in_array($dep, $extra_dll_deps)) {
-			$extra_dll_deps[] = $dep;
+		if ($is_pecl) {
+			if (!in_array($dep, $pecl_dll_deps)) {
+				$pecl_dll_deps[] = $dep;
+			}
+		} else {
+			if (!in_array($dep, $extra_dll_deps)) {
+				$extra_dll_deps[] = $dep;
+			}
 		}
 
 		$per_module_deps[basename($module)][] = $dep;
@@ -139,6 +152,9 @@ copy_file_list($build_dir, "$dist_dir", $sapi_targets);
 /* copy the extensions */
 copy_file_list($build_dir, "$dist_dir/ext", $ext_targets);
 
+/* pecl sapi and extensions */
+copy_file_list($build_dir, $pecl_dir, $pecl_targets);
+
 /* populate reading material */
 $text_files = array(
 	"LICENSE" => 		"license.txt",
@@ -188,6 +204,9 @@ fwrite($fp, "\r\n\r\n");
 /* list dependencies */
 fprintf($fp, "Dependency information:\r\n");
 foreach ($per_module_deps as $modulename => $deps) {
+	if (in_array($modulename, $pecl_targets))
+		continue;
+
 	fprintf($fp, "Module: %s\r\n", $modulename);
 	fwrite($fp, "===========================\r\n");
 	foreach ($deps as $dll) {
@@ -209,6 +228,23 @@ foreach ($extra_dll_deps as $dll) {
 		$dll = $tdll;
 	}
 	copy($dll, "$dist_dir/" . basename($dll));
+}
+/* and those for pecl */
+foreach ($pecl_dll_deps as $dll) {
+	if (in_array($dll, $extra_dll_deps)) {
+		/* already in main distro */
+		continue;
+	}
+	if (!file_exists($dll)) {
+		/* try template dir */
+		$tdll = $snapshot_template . "/dlls/" . basename($dll);
+		if (!file_exists($tdll)) {
+			echo "WARNING: distro depends on $dll, but could not find it on your system\n";
+			continue;
+		}
+		$dll = $tdll;
+	}
+	copy($dll, "$pecl_dir/" . basename($dll));
 }
 
 function copy_dir($source, $dest)
