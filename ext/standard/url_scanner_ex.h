@@ -22,7 +22,7 @@
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RINIT_FUNCTION(url_scanner_ex);
 
-char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen);
+char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen);
 
 typedef struct {
 	char *c;
