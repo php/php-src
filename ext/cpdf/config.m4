@@ -58,14 +58,22 @@ if test "$PHP_CPDFLIB" != "no"; then
       CPDFLIB_INCLUDE=$i/include
 
       PHP_CHECK_LIBRARY(cpdf, cpdf_open, [
-        PHP_ADD_INCLUDE($CPDFLIB_INCLUDE)
-        PHP_ADD_LIBRARY_WITH_PATH(cpdf, $i/lib, CPDF_SHARED_LIBADD)
-        AC_DEFINE(HAVE_CPDFLIB,1,[Whether you have cpdflib])
+        cpdf_libname=cpdf
       ], [
-        AC_MSG_ERROR([Cpdflib module requires cpdflib >= 2.])
+        PHP_CHECK_LIBRARY(cpdfm, cpdf_open, [
+          cpdf_libname=cpdfm
+        ], [
+          AC_MSG_ERROR([Cpdflib module requires cpdflib >= 2.])
+        ], [
+          -L$i/$PHP_LIBDIR $CPDF_SHARED_LIBADD
+        ])
       ], [
         -L$i/$PHP_LIBDIR $CPDF_SHARED_LIBADD
       ])
+
+      PHP_ADD_LIBRARY_WITH_PATH($cpdf_libname, $i/$PHP_LIBDIR, CPDF_SHARED_LIBADD)
+      PHP_ADD_INCLUDE($CPDFLIB_INCLUDE)
+      AC_DEFINE(HAVE_CPDFLIB,1,[Whether you have cpdflib])
       break
     fi
   done  
