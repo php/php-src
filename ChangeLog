@@ -1,3 +1,31 @@
+2002-01-12  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/Makefile.in:
+    Fixed CLI build when the main SAPI is built as a shered library.
+
+    * Makefile.in
+      acinclude.m4
+      configure.in
+      sapi/cli/.cvsignore
+      sapi/cli/Makefile.in
+      sapi/cli/config.m4: Modified the build system to always build CLI SAPI.
+
+2002-01-12  Gavin Sherry  <swm@linuxworld.com.au>
+
+    * ext/dba/dba_db2.c:
+    My bad. Left some stray debugging code in previous commit.
+
+    * ext/dba/dba_db2.c: See the update to dba_db3.c
+
+    * ext/dba/dba_db3.c:
+    This fixes the notorious "mode 'c' fails" bug (see bugs - 10380, 10798, 11732). The bug originates from the fact that mode "c" for db3 sets 'type' to DB_UNKNOWN and mode DB_CREATE when the database already exists. The underlying library raises an error at this logical discrepancy: obviously one cannot create a database of unknown type.
+
+2002-01-12  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/imap/php_imap.c:
+    Fixed segfault in imap_bodystruct() when called with an invalid message
+    number. Now it fails with a warning instead.
+
 2002-01-11  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
 
     * ext/domxml/php_domxml.c
