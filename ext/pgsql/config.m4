@@ -23,6 +23,9 @@ if test "$PHP_PGSQL" != "no"; then
       if test -r "$i/$j/libpq-fe.h"; then
         PGSQL_INC_BASE=$i
         PGSQL_INCLUDE=$i/$j
+        if test -r "$i/$j/pg_config.h"; then
+          AC_DEFINE(HAVE_PG_CONFIG_H,1,[Whether to have pg_config.h])
+        fi
       fi
     done
 

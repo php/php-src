@@ -38,6 +38,10 @@ extern zend_module_entry pgsql_module_entry;
 #include <libpq/libpq-fs.h>
 #endif
 
+#ifdef HAVE_PG_CONFIG_H
+#include <pg_config.h>
+#endif
+
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 const char * pg_encoding_to_char(int encoding);
 #endif
