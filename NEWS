@@ -5,8 +5,8 @@ PHP 4.0                                                                    NEWS
 - Fixed serializer behaviour with regards to serializing objects which class
   definition was not available in the current context. (Sascha)
 - Improve memory cache performance and increase cache size. (Stas, Zend Engine)
-- Added a crc32 checksum function - used by the udm_search search engine
-  and currently run through a system call.  This will speed up the udm_search
+- Added a crc32 checksum function - used by the UdmSearch search engine
+  and currently run through a system call.  This will speed up the UdmSearch
   php frontend significantly. (Rasmus)
 - Modified in_array() to not touch array pointer. (Andrei)
 - Added restore_error_handler(). (Zeev, Zend engine)
