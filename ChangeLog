@@ -1,3 +1,57 @@
+2004-04-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ldap/ldap.c:
+      Removed pointless check.
+
+2004-04-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (RELEASE_1_3_1)
+      pear/package-PEAR.xml:
+      add PEAR_ErrorStack to description of PEAR
+
+    * pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      change release date
+
+2004-04-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/xpath.c:
+      register_namespace changed to registerNamespace for consistency
+
+2004-04-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      - Update NEWS with fugbix.
+
+2004-04-06  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix Bug #27769 crash using domxml_xmltree
+
+2004-04-06  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+      Allow character set conversion for yaz_record's array method, e.g.
+       yaz_record($id,$pos,"array;charset=marc8,iso-8859-1")
+
+2004-04-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/credits_ext.h:
+      update credits
+
+    * NEWS:
+      reorder, reword, typos..
+
+    * NEWS:
+      Remove duplicate entry
+
+    * (PHP_4_3)
+      NEWS:
+      rtd
+
 2004-04-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
