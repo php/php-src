@@ -399,7 +399,7 @@ int java_set_property_handler
 
 /***************************************************************************/
 
-static void _php3_java_destructor(void *jobject) {
+static void _php_java_destructor(void *jobject) {
   if (jenv) (*jenv)->DeleteGlobalRef(jenv, jobject);
 }
 
@@ -411,7 +411,7 @@ PHP_MINIT_FUNCTION(java) {
 
   register_internal_class(&java_class_entry);
 
-  le_jobject = register_list_destructors(_php3_java_destructor,NULL);
+  le_jobject = register_list_destructors(_php_java_destructor,NULL);
 
   REGISTER_INI_ENTRIES();
   return SUCCESS;
