@@ -1,3 +1,14 @@
+2002-10-20  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: looks like this message should go
+
+    * zend_compile.c: Fix private handling
+
+2002-10-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_highlight.c
+      zend_highlight.h: Sync zend_html_puts parameter list with Zend Engine 1.
+
 2002-10-19  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.h: - Fix compile warning.
