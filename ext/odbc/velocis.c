@@ -204,6 +204,8 @@ velocis_del_result(HashTable *list,int ind)
 
 /* Users functions */
 
+/* {{{ proto long velocis_connect(string server, string user, sting pass)
+ */
 PHP_FUNCTION(velocis_connect)
 {
 	pval *serv,*user,*pass;
@@ -250,7 +252,10 @@ PHP_FUNCTION(velocis_connect)
 	php_velocis_module.num_links++;
 	RETURN_LONG(ind);
 }
+/* }}} */
 
+/* {{{ proto bool velocis_close(int id)
+ */
 PHP_FUNCTION(velocis_close)
 {
 	pval *id;
@@ -271,7 +276,10 @@ PHP_FUNCTION(velocis_close)
 	php_velocis_module.num_links--;
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int velocis(int index, string exec_str)
+ */
 PHP_FUNCTION(velocis_exec)
 {
 	pval *ind,*exec_str;
@@ -369,7 +377,10 @@ PHP_FUNCTION(velocis_exec)
 	indx = velocis_add_result(list,res,conn);
 	RETURN_LONG(indx);
 }
+/* }}} */
 
+/* {{{ proto bool velocis_fetch(int index)
+ */
 PHP_FUNCTION(velocis_fetch)
 {
 	pval *ind;
@@ -402,7 +413,10 @@ PHP_FUNCTION(velocis_fetch)
 	res->fetched = 1;
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto mixed velocis_result(int index, int col)
+ */
 PHP_FUNCTION(velocis_result)
 {
 	pval *ind,*col;
@@ -499,7 +513,10 @@ l1:
 			}
 	}
 }
+/* }}} */
 
+/* {{{ proto bool velocis_freeresult(int index)
+ */
 PHP_FUNCTION(velocis_freeresult)
 {
 	pval *ind;
@@ -518,7 +535,10 @@ PHP_FUNCTION(velocis_freeresult)
 	velocis_del_result(list,Z_LVAL_P(ind));
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto bool velocis_on_autocommit(int index)
+ */
 PHP_FUNCTION(velocis_autocommit)
 {
 	pval *id;
@@ -541,7 +561,10 @@ PHP_FUNCTION(velocis_autocommit)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto bool velocis_off_autocommit(int index)
+ */
 PHP_FUNCTION(velocis_off_autocommit)
 {
 	pval *id;
@@ -564,7 +587,10 @@ PHP_FUNCTION(velocis_off_autocommit)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto bool velocis_commit(int index)
+ */
 PHP_FUNCTION(velocis_commit)
 {
 	pval *id;
@@ -587,7 +613,10 @@ PHP_FUNCTION(velocis_commit)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto bool velocis_rollback(int index)
+ */
 PHP_FUNCTION(velocis_rollback)
 {
 	pval *id;
@@ -610,7 +639,10 @@ PHP_FUNCTION(velocis_rollback)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto string velocis_fieldname(int index, int col)
+ */
 PHP_FUNCTION(velocis_fieldname)
 {
 	pval *ind,*col;
@@ -634,7 +666,10 @@ PHP_FUNCTION(velocis_fieldname)
 	}
 	RETURN_STRING(res->values[indx].name,TRUE);
 }
+/* }}} */
 
+/* {{{ proto int velocis_fieldnum(int index)
+ */
 PHP_FUNCTION(velocis_fieldnum)
 {
 	pval *ind;
@@ -651,6 +686,7 @@ PHP_FUNCTION(velocis_fieldnum)
 	}
 	RETURN_LONG(res->numcols);
 }
+/* }}} */
 
 #endif /* HAVE_VELOCIS */
 
