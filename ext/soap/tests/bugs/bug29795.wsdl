@@ -1,0 +1,40 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://xml.amazon.com/AWSProductData/2004-08-01" targetNamespace="http://xml.amazon.com/AWSProductData/2004-08-01">
+	<types>
+		<xs:schema targetNamespace="http://xml.amazon.com/AWSProductData/2004-08-01" elementFormDefault="qualified">
+			<xs:complexType name="Price">
+				<xs:sequence>
+					<xs:element name="Amount" type="xs:integer" minOccurs="0"/>
+					<xs:element name="CurrencyCode" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+	</types>
+	<message name="GetPriceRequest">
+	</message>
+	<message name="GetPriceResponse">
+		<part name="Price" type="tns:Price"/>
+	</message>
+	<portType name="AWSProductDataPortType">
+		<operation name="GetPrice">
+			<input message="tns:GetPriceRequest"/>
+			<output message="tns:GetPriceResponse"/>
+		</operation>
+	</portType>
+	<binding name="AWSProductDataBinding" type="tns:AWSProductDataPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetPrice">
+			<soap:operation soapAction="http://soap.amazon.com"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="AWSProductData">
+		<port name="AWSProductDataPort" binding="tns:AWSProductDataBinding">
+			<soap:address location="http://aws-beta.amazon.com/onca/soap?Service=AWSProductData"/>
+		</port>
+	</service>
+</definitions>
