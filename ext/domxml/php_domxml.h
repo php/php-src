@@ -56,6 +56,17 @@
 extern zend_module_entry domxml_module_entry;
 #define domxml_module_ptr &domxml_module_entry
 
+#ifdef PHP_WIN32
+#ifdef PHPAPI
+#undef PHPAPI
+#endif
+#ifdef DOMXML_EXPORTS
+#define PHPAPI __declspec(dllexport)
+#else
+#define PHPAPI __declspec(dllimport)
+#endif /* DOMXML_EXPORTS */
+#endif /* PHP_WIN32 */
+
 PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval* in TSRMLS_DC);
 
 /* directory functions */
