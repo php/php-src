@@ -70,7 +70,6 @@
 
 #define HTTP_HEADER_BLOCK_SIZE		1024
 
-
 php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
@@ -309,8 +308,21 @@ out:
 	return stream;
 }
 
+static int php_stream_http_stream_stat(php_stream_wrapper *wrapper,
+		php_stream *stream,
+		php_stream_statbuf *ssb
+		TSRMLS_DC)
+{
+	/* one day, we could fill in the details based on Date: and Content-Length:
+	 * headers.  For now, we return with a failure code to prevent the underlying
+	 * file's details from being used instead. */
+	return -1;
+}
+
 static php_stream_wrapper_ops http_stream_wops = {
 	php_stream_url_wrap_http,
+	NULL,
+	php_stream_http_stream_stat,
 	NULL
 };
 

@@ -232,10 +232,11 @@ static int php_stream_memory_cast(php_stream *stream, int castas, void **ret TSR
 php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_write, php_stream_memory_read,
 	php_stream_memory_close, php_stream_memory_flush,
+	"MEMORY",
 	php_stream_memory_seek,
 	php_stream_memory_gets,
 	php_stream_memory_cast,
-	"MEMORY"
+	NULL
 };
 
 
@@ -448,10 +449,11 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 php_stream_ops	php_stream_temp_ops = {
 	php_stream_temp_write, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
+	"TEMP",
 	php_stream_temp_seek,
 	php_stream_temp_gets,
 	php_stream_temp_cast,
-	"TEMP"
+	NULL
 };
 
 

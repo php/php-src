@@ -22,6 +22,8 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* See README.STREAMS in php4 root dir for more info about this stuff */
 
@@ -88,23 +90,37 @@
 typedef struct _php_stream php_stream;
 typedef struct _php_stream_wrapper php_stream_wrapper;
 
+typedef struct _php_stream_statbuf {
+	struct stat sb; /* regular info */
+	/* extended info to go here some day */
+} php_stream_statbuf;
+
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
 	size_t (*write)(php_stream *stream, const char *buf, size_t count TSRMLS_DC);
 	size_t (*read)(php_stream *stream, char *buf, size_t count TSRMLS_DC);
 	int    (*close)(php_stream *stream, int close_handle TSRMLS_DC);
 	int    (*flush)(php_stream *stream TSRMLS_DC);
+	
+	const char *label; /* label for this ops structure */
+	
 	/* these are optional */
 	int    (*seek)(php_stream *stream, off_t offset, int whence TSRMLS_DC);
 	char *(*gets)(php_stream *stream, char *buf, size_t size TSRMLS_DC);
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
-	const char *label; /* label for this ops structure */
+	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 } php_stream_ops;
 
 typedef struct _php_stream_wrapper_ops {
+	/* open/create a wrapped stream */
 	php_stream *(*opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
 			int options, char **opened_path STREAMS_DC TSRMLS_DC);
-	php_stream *(*closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
+	/* close/destroy a wrapped stream */
+	int (*closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
+	/* stat a wrapped stream */
+	int (*stream_stat)(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
+	/* stat a URL */
+	int (*url_stat)(php_stream_wrapper *wrapper, php_stream_statbuf *ssb TSRMLS_DC);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
@@ -198,6 +214,9 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
 #define php_stream_puts(stream, buf)	_php_stream_puts((stream), (buf) TSRMLS_CC)
+
+PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
+#define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb) TSRMLS_CC)
 
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
  * Uses mmap if the src is a plain file and at offset 0 */
