@@ -170,17 +170,27 @@ inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 }
 
 
-zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...)
+
+ZEND_API zend_op_array *compile_files(int mark_as_ref ELS_DC, int file_count, ...)
+{
+	va_list files;
+	zend_op_array *op_array;
+
+	va_start(files, file_count);
+	op_array = v_compile_files(mark_as_ref ELS_CC, file_count, files);
+	va_end(files);
+	return op_array;
+}
+
+
+ZEND_API zend_op_array *v_compile_files(int mark_as_ref ELS_DC, int file_count, va_list files)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	zend_op_array *original_active_op_array = CG(active_op_array);
 	zend_op_array *retval=NULL;
 	zend_file_handle *file_handle;
-	va_list files;
 	int i;
-
-	va_start(files, file_count);
 
 	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
@@ -215,7 +225,6 @@ zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...)
 			pass_include_eval(op_array);
 		}
 	}
-	va_end(files);
 	return retval;
 }
 
