@@ -743,6 +743,7 @@ static sapi_module_struct nsapi_sapi_module = {
 
 	sapi_nsapi_register_server_variables,   /* register server variables */
 	nsapi_log_message,                      /* Log message */
+	NULL,									/* Get request time */
 
 	NULL,                                   /* Block interruptions */
 	NULL,                                   /* Unblock interruptions */

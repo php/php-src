@@ -342,6 +342,7 @@ static sapi_module_struct cli_sapi_module = {
 
 	sapi_cli_register_variables,	/* register server variables */
 	sapi_cli_log_message,			/* Log message */
+	NULL,							/* Get request time */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

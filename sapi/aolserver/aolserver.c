@@ -385,6 +385,7 @@ static sapi_module_struct aolserver_sapi_module = {
 
 	php_ns_sapi_register_variables,
 	NULL,									/* Log message */
+	NULL,									/* Get request time */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
