@@ -132,6 +132,8 @@ PHP_MINFO_FUNCTION(fribidi)
 /*         on failure:						*/ 
 /*--------------------------------------------------------------*/           
 
+/* {{{ proto string fribidi_log2vis(string str, string direction, int charset)
+   Convert a logical string to a visual one */
 ZEND_FUNCTION(fribidi_log2vis)
 {
 	zval **parameter1,**parameter2, **parameter3;
@@ -253,6 +255,8 @@ ZEND_FUNCTION(fribidi_log2vis)
 	
 	RETURN_STRING(outString,1);
 }
+/* }}} */
+
 
 #endif	/* HAVE_FRIBIDI */
 
