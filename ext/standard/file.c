@@ -198,6 +198,7 @@ function_entry php3_file_functions[] = {
 	{"copy",		php3_file_copy,	NULL},
 	{"tempnam",		php3_tempnam,	NULL},
 	{"file",		php3_file,		NULL},
+    PHP_FE(flock, NULL)
 	{"get_meta_tags",	php3_get_meta_tags,	NULL},
 	{"set_socket_blocking",	php3_set_socket_blocking,	NULL},
 #if (0 && HAVE_SYS_TIME_H && HAVE_SETSOCKOPT && defined(SO_SNDTIMEO) && defined(SO_RCVTIMEO))
@@ -209,6 +210,59 @@ function_entry php3_file_functions[] = {
 php3_module_entry php3_file_module_entry = {
 	"PHP_file", php3_file_functions, php3_minit_file, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
+
+static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
+
+/* {{{ proto bool flock(int fp, int operation)
+   portable file locking */
+PHP_FUNCTION(flock)
+{
+    pval *arg1, *arg2;
+    FILE *fp;
+    int type;
+    int issock=0;
+    int *sock, fd=0;
+    int act = 0;
+    TLS_VARS;
+
+    if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+    convert_to_long(arg1);
+    convert_to_long(arg2);
+
+    fp = php3_list_find(arg1->value.lval, &type);
+    if (type == GLOBAL(wsa_fp)){
+        issock = 1;
+        sock = php3_list_find(arg1->value.lval, &type);
+        fd = *sock;
+    }
+
+    if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!fd || type!=GLOBAL(wsa_fp))) {
+        php3_error(E_WARNING,"Unable to find file identifier %d",arg1->value.lval);
+        RETURN_FALSE;
+    }
+
+    if (!issock) {
+        fd = fileno(fp);
+    }
+
+    act = arg2->value.lval & 3;
+    if(act < 1 || act > 3) {
+            php3_error(E_WARNING, "illegal value for second argument");
+            RETURN_FALSE;
+    }
+    /* flock_values contains all possible actions
+       if (arg2 & 4) we won't block on the lock */
+    act = flock_values[act - 1] | (arg2->value.lval & 4 ? LOCK_NB : 0);
+    if (flock(fd, act) == -1) {
+        RETURN_FALSE;
+    }
+
+    RETURN_TRUE;
+}
+/* }}} */
 
 
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
