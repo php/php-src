@@ -1062,7 +1062,7 @@ PHP_FUNCTION(xmldoc)
 	if(docp->name)
 		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
 	if(docp->URL)
-		add_property_stringl(return_value, "url", (char *) docp->name, strlen(docp->name), 1);
+		add_property_stringl(return_value, "url", (char *) docp->URL, strlen(docp->URL), 1);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
 	if(docp->encoding)
 		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
@@ -1096,10 +1096,17 @@ PHP_FUNCTION(xmldocfile)
 	/* construct an object with some methods */
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
 	add_property_resource(return_value, "doc", ret);
+	if(docp->name)
+		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
+	if(docp->URL)
+		add_property_stringl(return_value, "url", (char *) docp->URL, strlen(docp->URL), 1);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
 	if(docp->encoding)
 		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
 	add_property_long(return_value, "standalone", docp->standalone);
+	add_property_long(return_value, "type", docp->type);
+	add_property_long(return_value, "compression", docp->compression);
+	add_property_long(return_value, "charset", docp->charset);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -1386,7 +1393,8 @@ static int node_children(zval **children, xmlNode *nodep)
 		zval *child;
 		xmlChar *content;
 		int ret;
-
+	
+//		if(last->type != XML_TEXT_NODE) {
 		/* Each child is a node object */
 		MAKE_STD_ZVAL(child);
 		ret = zend_list_insert(last, le_domxmlnodep);
@@ -1419,8 +1427,9 @@ static int node_children(zval **children, xmlNode *nodep)
 		if(0 <= node_children(&mchildren, last->children))
 			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 
-		last = last->next;
 		count++;
+//		}
+		last = last->next;
 	}
 	return count;
 }
