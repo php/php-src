@@ -634,7 +634,7 @@ static int ProcessExifComment(char **pszInfoPtr,char *szValuePtr,int ByteCount)
 	char  mbBuffer[MB_CUR_MAX];
 
 	/* Copy the comment */
-	if ( ByteCount>8 && !memcmp(szValuePtr, "UNICODE\0", 8) || !memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
+	if ( ((ByteCount>8) && !memcmp(szValuePtr, "UNICODE\0", 8)) || !memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
 		/* treat JIS encoding as if it where UNICODE */
 		szValuePtr = szValuePtr+8;
 		ByteCount -= 8;
@@ -736,7 +736,7 @@ static int CopyExifString(char **pszInfoPtr,char *szValuePtr,int ByteCount) {
 static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *OffsetBase, unsigned ExifLength, char *LastExifRefd, int ReadThumbnail)
 {
 	int de;
-	int a,l;
+	int l;
 	int NumDirEntries;
 	int NextDirOffset;
 
