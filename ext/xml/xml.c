@@ -28,13 +28,13 @@
 #include "php.h"
 
 #define PHP_XML_INTERNAL
-#include "php_xml.h"
 #include "zend_variables.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 
-#if HAVE_LIBEXPAT
+#if HAVE_XML
 
+#include "php_xml.h"
 # include "ext/standard/head.h"
 
 /* Short-term TODO list:
@@ -85,8 +85,8 @@ static int _xml_xmlcharlen(const XML_Char *);
 static void _xml_add_to_info(xml_parser *parser,char *name);
 inline static char *_xml_decode_tag(xml_parser *parser, const char *tag);
 
-void _xml_startElementHandler(void *, const char *, const char **);
-void _xml_endElementHandler(void *, const char *);
+void _xml_startElementHandler(void *, const XML_Char *, const XML_Char **);
+void _xml_endElementHandler(void *, const XML_Char *);
 void _xml_characterDataHandler(void *, const XML_Char *, int);
 void _xml_processingInstructionHandler(void *, const XML_Char *, const XML_Char *);
 void _xml_defaultHandler(void *, const XML_Char *, int);
@@ -202,6 +202,10 @@ PHP_MINIT_FUNCTION(xml)
 	REGISTER_LONG_CONSTANT("XML_OPTION_TARGET_ENCODING", PHP_XML_OPTION_TARGET_ENCODING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_TAGSTART", PHP_XML_OPTION_SKIP_TAGSTART, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_WHITE", PHP_XML_OPTION_SKIP_WHITE, CONST_CS|CONST_PERSISTENT);
+
+#ifdef LIBXML_EXPAT_COMPAT
+	xmlMemSetup(_efree, _emalloc, _erealloc, _estrdup);
+#endif
 	
 	return SUCCESS;
 }
@@ -615,7 +619,7 @@ static char *_xml_decode_tag(xml_parser *parser, const char *tag)
 /* }}} */
 
 /* {{{ _xml_startElementHandler() */
-void _xml_startElementHandler(void *userData, const char *name, const char **attributes)
+void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
 {
 	xml_parser *parser = (xml_parser *)userData;
 	const char **attrs = attributes;
@@ -701,7 +705,7 @@ void _xml_startElementHandler(void *userData, const char *name, const char **att
 /* }}} */
 
 /* {{{ _xml_endElementHandler() */
-void _xml_endElementHandler(void *userData, const char *name)
+void _xml_endElementHandler(void *userData, const XML_Char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
 	char *tag_name;
