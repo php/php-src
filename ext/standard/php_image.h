@@ -48,7 +48,7 @@ typedef enum
   IMAGE_FILETYPE_IFF,
   IMAGE_FILETYPE_WBMP,
   /* IMAGE_FILETYPE_JPEG2000 is a userland alias for IMAGE_FILETYPE_JPC */
-  IMAGE_FILETYPE_XBM,
+  IMAGE_FILETYPE_XBM
 /* WHEN EXTENDING: PLEASE ALSO REGISTER IN image.c:PHP_MINIT_FUNCTION(imagetypes) */
 } image_filetype;
 /* }}} */
