@@ -1238,16 +1238,16 @@ ANY_CHAR (.|[\n])
 
 
 <ST_IN_SCRIPTING>"%>"([\n]|"\r\n")? {
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext,yyleng);
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
+		zendlval->value.str.len = yyleng;
+		zendlval->type = IS_STRING;
 		zendlval->value.str.val = yytext; /* no copying - intentional */
+		HANDLE_NEWLINES(yytext,yyleng);
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
-	        zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-		return T_INLINE_HTML;
+		yyless(1);
+		return yytext[0];
 	}
 }
 
