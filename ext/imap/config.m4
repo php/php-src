@@ -158,7 +158,7 @@ if test "$PHP_IMAP" != "no"; then
     done
 
     if test -z "$IMAP_LIBDIR"; then
-      AC_MSG_ERROR(Cannot find imap library. Please check your IMAP installation.)
+      AC_MSG_ERROR(Cannot find imap library (libc-client.a). Please check your IMAP installation.)
     fi
 
     PHP_ADD_INCLUDE($IMAP_INC_DIR)
