@@ -1,3 +1,58 @@
+2002-05-29  Jan Lehnardt  <jan@dasmoped.net>
+
+    * pear/PEAR.php:  - minor improvement of readability,
+
+    * pear/PEAR.php:
+     - added delExpect() API method. It allows to unset one or more expected
+     - error codes.
+     - requires _checkDelExpect() (private) which I added as well.
+     - inspired by chregu (PHP-Deluxe, page 75)
+
+2002-05-29  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Common.php: fix a bug and add UI::log
+
+2002-05-29  Den V. Tsopa  <tdv@edisoft.ru>
+
+    * ext/mbstring/mbfilter.c: Added GB2312 alias for CN-GB
+
+2002-05-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/imap/php_imap.c: - Fix for bug #17503
+
+2002-05-29  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * netware/mktemp.h
+      netware/sys/stat.h
+      netware/tsrm.mak: Changes to build TSRM on NetWare
+
+2002-05-29  Den V. Tsopa  <tdv@edisoft.ru>
+
+    * ext/mbstring/mbfilter_ru.c: Fixed some dummy errors. (dets)
+
+2002-05-29  Venkat Raghavan S  <rvenkat@novell.com>
+
+    * netware/zend.mak: Changes to build Zend on NetWare
+
+2002-05-29  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command.php: * no longer test on whether displayLine exists
+
+    * pear/PEAR/Builder.php
+      pear/PEAR/Command/Build.php:
+    * build extensions in /var/tmp/pear-build-$USER/extname-n.n
+    * copy built .so files
+
+    * pear/PEAR/Command/Registry.php: * folding marks
+
+    * pear/PEAR/Common.php: * make PEAR_Common::log work with the new UI API
+
+    * pear/PEAR/Frontend/CLI.php:
+    * for now, provoke php errors on calls to the old methods
+
 2002-05-28  Andrei Zmievski  <andrei@php.net>
 
     * acinclude.m4: Fix a bug in case statement.
