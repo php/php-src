@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, Version 4.3.9
+- Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Fixed bug #29727 (Added missing CURL authentication directives). (Ilia)
 - Fixed bug #29719 (fgetcsv() has problem parsing strings ending with escaped
