@@ -626,6 +626,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 				*tmp = **(args[argnum]);
 				zval_copy_ctor(tmp);
 			} else {
+				SEPARATE_ZVAL(args[argnum]);
 				tmp = *(args[argnum]);
 			}
 
