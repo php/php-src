@@ -5,4 +5,4 @@ SUBDIRS = @EXT_SUBDIRS@
 noinst_LIBRARIES=libphpext.a
 
 libphpext.a: @EXT_LIBS@
-	$(top_srcdir)/scripts/mkextlib $@ $(SUBDIRS)
+	top_srcdir=$(top_srcdir) $(top_builddir)/scripts/mkextlib $@ $(SUBDIRS)
