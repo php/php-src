@@ -35,6 +35,7 @@ PHP_FUNCTION(dbase_get_record);
 PHP_FUNCTION(dbase_delete_record);
 PHP_FUNCTION(dbase_pack);
 PHP_FUNCTION(dbase_get_record_with_names);
+PHP_FUNCTION(dbase_get_header_info);
 #else
 #define dbase_module_ptr NULL
 #endif
