@@ -810,6 +810,7 @@ PHP_FUNCTION(key)
 {
 	pval **array;
 	char *string_key;
+	uint string_length;
 	ulong num_key;
 	HashTable *target_hash;
 
@@ -818,12 +819,12 @@ PHP_FUNCTION(key)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Variable passed to key() is not an array or object");
+		php_error(E_WARNING, "%s(): Variable passed is not an array or object", get_active_function_name (TSRMLS_C));
 		RETURN_FALSE;
 	}
-	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
+	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, NULL)) {
 		case HASH_KEY_IS_STRING:
-			RETVAL_STRING(string_key, 0);
+			RETVAL_STRINGL(string_key, string_length - 1, 1);
 			break;
 		case HASH_KEY_IS_LONG:
 			RETVAL_LONG(num_key);
