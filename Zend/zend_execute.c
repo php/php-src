@@ -2136,7 +2136,7 @@ send_by_ref:
 						*tmp = *array_ptr;
 						INIT_PZVAL(tmp);
 						array_ptr = tmp;
-					} else { /* IS_CONST */
+					} else {
 						array_ptr->refcount++;
 					}
 
