@@ -147,7 +147,8 @@ class System
     function _multipleToStruct($files)
     {
         $struct = array('dirs' => array(), 'files' => array());
-        foreach($files as $file) {
+        settype($files, 'array');
+        foreach ($files as $file) {
             if (is_dir($file)) {
                 $tmp = System::_dirToStruct($file, 0);
                 $struct = array_merge_recursive($tmp, $struct);
