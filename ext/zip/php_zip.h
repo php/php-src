@@ -21,7 +21,11 @@
 
 #if HAVE_ZZIPLIB
 
+#ifdef HAVE_NEW_ZZIPLIB
+#include <zzip/zzip.h>
+#else
 #include <zziplib.h>
+#endif
 
 extern zend_module_entry zip_module_entry;
 #define phpext_zip_ptr &zip_module_entry

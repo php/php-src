@@ -29,7 +29,12 @@
 #if HAVE_ZZIPLIB
 
 #include "ext/standard/info.h"
+
+#ifdef HAVE_NEW_ZZIPLIB
+#include <zzip/zzip.h>
+#else
 #include <zziplib.h>
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0

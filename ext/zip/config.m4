@@ -20,6 +20,10 @@ if test "$PHP_ZIP" != "no"; then
     AC_MSG_ERROR(Cannot find libzzip)
   fi
 
+  if test -f $ZZIPLIB_INCDIR/zzip/zzip.h; then
+  	AC_DEFINE(HAVE_NEW_ZZIPLIB,1,[ ])	
+  fi
+
   ZZIPLIB_LIBDIR=$ZZIPLIB_DIR/lib
 
   PHP_CHECK_LIBRARY(zzip, zzip_open,
