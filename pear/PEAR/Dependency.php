@@ -201,6 +201,9 @@ class PEAR_Dependency
             }
             foreach ($deps as $dep) {
                 if ($dep['type'] == 'pkg' && strcasecmp($dep['name'], $package) == 0) {
+                    if ($dep['rel'] == 'ne') {
+                        continue;
+                    }
                     if (isset($dep['optional']) && $dep['optional'] == 'yes') {
                         $warning .= "\nWarning: Package '$pkg' optionally depends on '$package'";
                     } else {
