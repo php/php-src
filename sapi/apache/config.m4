@@ -2,6 +2,16 @@ dnl
 dnl $Id$
 dnl
 
+AC_DEFUN(PHP_AP_EXTRACT_VERSION,[
+  ac_IFS=$IFS
+IFS="- /.
+"
+  set `$1 -v 2>&1`
+  IFS=$ac_IFS
+
+  APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
+])
+
 AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]      Build shared Apache 1.x module. FILE is the optional
@@ -36,7 +46,7 @@ AC_ARG_WITH(apxs,
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
 
   # Test that we're trying to configure with apache 1.x
-  APACHE_VERSION=`$APXS_HTTPD -v | head -1 | awk 'BEGIN { RS=" "; } /Apache/ { print $1; }' | cut -f2 -d'/' | cut -f1 -d'-' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+  PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -ge 2000000; then
     AC_MSG_ERROR([You have enabled Apache 1.3 support while your server is Apache 2.  Please use the appropiate switch --with-apxs2]) 
   fi
