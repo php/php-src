@@ -66,7 +66,6 @@ BEGIN
         BEGIN
             VALUE "FileDescription", "PHP Interbase module\0"
             VALUE "FileVersion", PHP_VERSION "\0"
-            VALUE "File Revision", FILE_REVISION "\0"
             VALUE "LegalCopyright", "Copyright © 2003 The PHP Group\0"
 			VALUE "Build Type", BUILD_TYPE "\0"
             VALUE "Client Library", CLIENT_LIB "\0"
