@@ -78,5 +78,7 @@ $(srcdir)/libsqlite/src/vacuum.c: $(srcdir)/libsqlite/src/sqlite.h
 
 $(srcdir)/libsqlite/src/vdbe.c: $(srcdir)/libsqlite/src/sqlite.h
 
+$(srcdir)/libsqlite/src/vdbeaux.c: $(srcdir)/libsqlite/src/sqlite.h
+
 $(srcdir)/libsqlite/src/where.c: $(srcdir)/libsqlite/src/sqlite.h
 
