@@ -1,3 +1,30 @@
+2002-02-22  Christian Stocker  <chregu@phant.ch>
+
+    * pear/HTML/ITX.php: E_ALL fix
+
+2002-02-22  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php:
+    * Packager : Changing the order of the files in the package archive file.
+    The package.xml file is now at the 'root' of the archive, the files tree are under a 'packagename'-'packageversion' folder
+    * Installer : installing the knew archive format AND supporting the existing format
+
+2002-02-22  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Return true on update success.
+
+2002-02-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: Keep track of what has gone into 4.1.2 so far
+
+2002-02-22  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/session.c:
+    Fix crash bug. 4th parameter is not incremental value, but it's assigned.
+
+    * ext/pspell/pspell.c: Fix crash bug 15607
+
 2002-02-21  Stefan Esser  <s.esser@e-matters.de>
 
     * main/rfc1867.c: fixing boundary check before someone other does it...
