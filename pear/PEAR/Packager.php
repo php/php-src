@@ -21,8 +21,7 @@
 require_once "PEAR.php";
 
 /**
- * Administration class used to install PEAR packages and maintain the
- * installed package database.
+ * Administration class used to make a PEAR release tarball.
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
