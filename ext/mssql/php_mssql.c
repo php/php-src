@@ -442,24 +442,30 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		RETURN_FALSE;
 	}
 	
-	dbprocerrhandle(mssql.login, (DBERRHANDLE_PROC) php_mssql_error_handler);
-	dbprocmsghandle(mssql.login, (DBMSGHANDLE_PROC) php_mssql_message_handler);
+	DBERRHANDLE(mssql.login, (EHANDLEFUNC) php_mssql_error_handler);
+	DBMSGHANDLE(mssql.login, (MHANDLEFUNC) php_mssql_message_handler);
 
+#ifndef HAVE_FREETDS
 	if (MS_SQL_G(secure_connection) == 1){
 		DBSETLSECURE(mssql.login);
 	}
 	else {
+#endif
 		if (user) {
 			DBSETLUSER(mssql.login,user);
 		}
 		if (passwd) {
 			DBSETLPWD(mssql.login,passwd);
 		}
+#ifndef HAVE_FREETDS
 	}
+#endif
 	DBSETLAPP(mssql.login,MS_SQL_G(appname));
 	mssql.valid = 1;
 
+#ifndef HAVE_FREETDS
 	DBSETLVERSION(mssql.login, DBVER60);
+#endif
 /*	DBSETLTIME(mssql.login, TIMEOUT_INFINITE); */
 
 	if (!MS_SQL_G(allow_persistent)) {
@@ -492,7 +498,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 
-			if (dbsetopt(mssql.link, DBBUFFER, "2")==FAIL) {
+			if (DBSETOPT(mssql.link, DBBUFFER, "2")==FAIL) {
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				dbclose(mssql.link);
@@ -501,7 +507,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			if (MS_SQL_G(textlimit) != -1) {
 				sprintf(buffer, "%li", MS_SQL_G(textlimit));
-				if (dbsetopt(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
+				if (DBSETOPT(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
 					efree(hashed_details);
 					dbfreelogin(mssql.login);
 					RETURN_FALSE;
@@ -554,7 +560,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if BROKEN_MSSQL_PCONNECTS
 				log_error("PHP/MS SQL:  Reconnect successful!",php_rqst->server);
 #endif
-				if (dbsetopt(mssql_ptr->link, DBBUFFER, "2")==FAIL) {
+				if (DBSETOPT(mssql_ptr->link, DBBUFFER, "2")==FAIL) {
 #if BROKEN_MSSQL_PCONNECTS
 					log_error("PHP/MS SQL:  Unable to set required options",php_rqst->server);
 #endif
@@ -605,7 +611,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			RETURN_FALSE;
 		}
 
-		if (dbsetopt(mssql.link, DBBUFFER,"2")==FAIL) {
+		if (DBSETOPT(mssql.link, DBBUFFER,"2")==FAIL) {
 			efree(hashed_details);
 			dbfreelogin(mssql.login);
 			dbclose(mssql.link);
@@ -614,7 +620,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		if (MS_SQL_G(textlimit) != -1) {
 			sprintf(buffer, "%li", MS_SQL_G(textlimit));
-			if (dbsetopt(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
+			if (DBSETOPT(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
 				RETURN_FALSE;
@@ -1108,7 +1114,11 @@ PHP_FUNCTION(mssql_query)
 	 * 1)  Being able to fire up another query without explicitly reading all rows
 	 * 2)  Having numrows accessible
 	 */
+#ifdef HAVE_FREETDS
+	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0) {
+#else
 	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && !dbdataready(mssql_ptr->link)) {
+#endif
 		RETURN_TRUE;
 	}
 
@@ -1172,8 +1182,10 @@ PHP_FUNCTION(mssql_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);	
+#ifndef HAVE_FREETDS
 	if (dbdataready(result->mssql_ptr->link))
 		dbresults(result->mssql_ptr->link);
+#endif
 	zend_list_delete(Z_LVAL_PP(mssql_result_index));
 	RETURN_TRUE;
 }
@@ -1996,7 +2008,7 @@ PHP_FUNCTION(mssql_bind)
 
 	/* no call to dbrpcparam if RETVAL */
 	if ( strcmp("RETVAL",Z_STRVAL_PP(param_name))!=0 ) {						
-		if (dbrpcparam(mssql_ptr->link, Z_STRVAL_PP(param_name), (BYTE)status, type, maxlen, datalen, (LPCBYTE)value)==FAIL) {
+		if (dbrpcparam(mssql_ptr->link, Z_STRVAL_PP(param_name), (BYTE)status, type, maxlen, datalen, (LPBYTE)value)==FAIL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set parameter");
 			RETURN_FALSE;
 		}
