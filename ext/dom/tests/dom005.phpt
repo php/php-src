@@ -15,13 +15,13 @@ print $dom->saveHTML();
 --EXPECT--
 --- save as XML
 <?xml version="1.0" standalone="yes"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html><head><title>Hello world</title></head><body><p>
 This is a not well-formed<br/>
 html files with undeclared entities 
 </p></body></html>
 --- save as HTML
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head><title>Hello world</title></head>
 <body><p>
