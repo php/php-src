@@ -2823,7 +2823,7 @@ static long php_intifx_getType(long id, HashTable *list TSRMLS_DC)
    Creates a blob-object */
 PHP_FUNCTION(ifx_create_blob) 
 {
-	zval **pmode, **pparam,*ptype;
+	zval **pmode, **pparam,**ptype;
 	long id;
 	long mode,type;
   
