@@ -191,7 +191,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		return_value->type = IS_BOOL;	\
 		return_value->value.lval = b;	\
 	}
-#define RETVAL_NULL() {					\
+#define RETVAL_NULL {					\
 		return_value->type = IS_NULL;	\
 	}
 #define RETVAL_LONG(l) {				\
@@ -236,7 +236,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		return;							\
 	}
 
-#define RETURN_NULL() {				\
+#define RETURN_NULL {				\
 		return_value->type = IS_NULL;	\
 		return;							\
 	}
