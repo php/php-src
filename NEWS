@@ -1,6 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added mb_convert_case() function to the mbstring extension which can convert
+  strings between upper, lower and title case using Unicode mappings.
+  Fixed bug #19257 (strtolower & strtoupper does not work for UTF-8 strings).
+  (Wez).
+- Fixed bug #18521 (htmlentities did not warn about unsupported charsets).
+  (Wez)
 - Fixed bug #11643 (Session related, fix SID redefinition). (Ilia)
 - Fixed bug #18556 (Scripting Engine, problem with locales like tr_TR). 
   (Ilia)
@@ -12,7 +18,7 @@ PHP 4                                                                      NEWS
   proper HTML escaping, and make it XHTML compliant. (Colin)
 - Added php.ini option "auto_detect_line_endings" which enables PHP to detect
   Macintosh, Unix and Dos end-of-line characters in fgets() and file().
-  Fixes Bug #16521. (Wez)
+  Fixes bugs #16521 and #16708. (Wez)
 - Fixed compile errors in the FriBidi extension (Bug #16414). (Tal)
 - Fixed bugs #7472, #12120 and #12989 as well as other potential problems
   with strip_tags() function. (Ilia)
