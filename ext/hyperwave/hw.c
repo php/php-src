@@ -1175,7 +1175,7 @@ php_printf("%s\n", ptr);
 	while(attrname != NULL) {
 		char *name;
 
-		user_arr = (zval *) emalloc(sizeof(zval));
+		user_arr = ALLOC_ZVAL();
 		if (array_init(user_arr) == FAILURE) {
 			efree(object);
 			RETURN_FALSE;
