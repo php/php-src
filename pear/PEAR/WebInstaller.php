@@ -352,7 +352,7 @@ class PEAR_WebInstaller extends PEAR
 
         // check if we can write the Package.xml file for caching
 
-        if ( is_writeable($this->installdir."/$PackageFile") || !file_exists($this->installdir."/$PackageFile") && is_writeable($this->installdir) )
+        if ( (file_exists($this->installdir."/$PackageFile") && is_writeable($this->installdir."/$PackageFile")) || !file_exists($this->installdir."/$PackageFile") && is_writeable($this->installdir) )
         {
             $time = filemtime($this->installdir."/$PackageFile");
 
