@@ -124,25 +124,17 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(implementation,			domxml_doc_implementation,		NULL)
 	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)	/* not DOM */
 	PHP_FALIAS(document_element,		domxml_doc_document_element,	NULL)
-	PHP_FALIAS(documentelement,			domxml_doc_document_element,	NULL)
-	PHP_FALIAS(createelement,			domxml_doc_create_element,		NULL)
 	PHP_FALIAS(create_element,			domxml_doc_create_element,		NULL)
-	PHP_FALIAS(createtextnode,			domxml_doc_create_text_node,	NULL)
 	PHP_FALIAS(create_text_node,		domxml_doc_create_text_node,	NULL)
-	PHP_FALIAS(createcomment,			domxml_doc_create_comment,		NULL)
 	PHP_FALIAS(create_comment,			domxml_doc_create_comment,		NULL)
-	PHP_FALIAS(createattribute,			domxml_doc_create_attribute,	NULL)
 	PHP_FALIAS(create_attribute,		domxml_doc_create_attribute,	NULL)
-	PHP_FALIAS(createprocessinginstruction,		domxml_doc_create_processing_instruction,	NULL)
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
 	PHP_FALIAS(children,				domxml_node_children,			NULL)
 	PHP_FALIAS(add_root,				domxml_add_root,				NULL)
-	PHP_FALIAS(importednode,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dumpmem,					NULL)
 /*	
-	PHP_FALIAS(createcdatasection,		domxml_create_cdata_section,	NULL)
 	PHP_FALIAS(create_cdata_section,	domxml_create_cdata_section,	NULL)
 */
 #if defined(LIBXML_XPATH_ENABLED)
@@ -158,11 +150,8 @@ static function_entry php_domxmldoctype_class_functions[] = {
 /*	
 	PHP_FALIAS(entities,				domxml_doctype_entities,		NULL)
 	PHP_FALIAS(notations,				domxml_doctype_notations,		NULL)
-	PHP_FALIAS(systemid,				domxml_doctype_system_id,		NULL)
 	PHP_FALIAS(system_id,				domxml_doctype_system_id,		NULL)
-	PHP_FALIAS(publicid,				domxml_doctype_public_id,		NULL)
 	PHP_FALIAS(public_id,				domxml_doctype_public_id,		NULL)
-	PHP_FALIAS(internalsubset,			domxml_doctype_internal_subset,	NULL)
 	PHP_FALIAS(internal_subset,			domxml_doctype_internal_subset,	NULL)
 */ 
 	{NULL, NULL, NULL}
@@ -174,29 +163,19 @@ static zend_function_entry php_domxmldtd_class_functions[] = {
 
 static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(domnode,					domxml_node,					NULL)
-	PHP_FALIAS(firstchild,				domxml_node_first_child,		NULL)
 	PHP_FALIAS(first_child,				domxml_node_first_child,		NULL)
-	PHP_FALIAS(lastchild,				domxml_node_last_child,			NULL)
 	PHP_FALIAS(last_child,				domxml_node_last_child,			NULL)
 	PHP_FALIAS(add_child,				domxml_node_add_child,			NULL)
 	PHP_FALIAS(children,				domxml_node_children,			NULL)
-	PHP_FALIAS(childnodes,				domxml_node_children,			NULL)
 	PHP_FALIAS(child_nodes,				domxml_node_children,			NULL)
-	PHP_FALIAS(previoussibling,			domxml_node_previous_sibling,	NULL)
 	PHP_FALIAS(previous_sibling,		domxml_node_previous_sibling,	NULL)
-	PHP_FALIAS(nextsibling,				domxml_node_next_sibling,		NULL)
 	PHP_FALIAS(next_sibling,			domxml_node_next_sibling,		NULL)
 	PHP_FALIAS(has_child_nodes,			domxml_node_has_child_nodes,	NULL)
-	PHP_FALIAS(haschildnodes,			domxml_node_has_child_nodes,	NULL)
 	PHP_FALIAS(prefix,					domxml_node_prefix,				NULL)
 	PHP_FALIAS(parent,					domxml_node_parent,				NULL)
-	PHP_FALIAS(parentnode,				domxml_node_parent,				NULL)
 	PHP_FALIAS(parent_node,				domxml_node_parent,				NULL)
 	PHP_FALIAS(insert_before,			domxml_node_insert_before,		NULL)
-	PHP_FALIAS(insertbefore,			domxml_node_insert_before,		NULL)
 	PHP_FALIAS(append_child,			domxml_node_append_child,		NULL)
-	PHP_FALIAS(appendchild,				domxml_node_append_child,		NULL)
-	PHP_FALIAS(ownerdocument,			domxml_node_owner_document,		NULL)
 	PHP_FALIAS(owner_document,			domxml_node_owner_document,		NULL)
 	PHP_FALIAS(new_child,				domxml_node_new_child,			NULL)
 	PHP_FALIAS(attributes,				domxml_node_attributes,			NULL)
@@ -206,26 +185,18 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(text_concat,				domxml_node_text_concat,		NULL)
 	PHP_FALIAS(set_name,				domxml_node_set_name,			NULL)
 	PHP_FALIAS(node_name,				domxml_node_name,				NULL)
-	PHP_FALIAS(nodename,				domxml_node_name,				NULL)
 	PHP_FALIAS(node_value,				domxml_node_value,				NULL)
-	PHP_FALIAS(nodevalue,				domxml_node_value,				NULL)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry php_domxmlelement_class_functions[] = {
 	PHP_FALIAS(domelement,				domxml_element,					NULL)
 	PHP_FALIAS(tagname,					domxml_elem_tagname,			NULL)
-	PHP_FALIAS(getattribute,			domxml_elem_get_attribute,		NULL)
 	PHP_FALIAS(get_attribute,			domxml_elem_get_attribute,		NULL)
-	PHP_FALIAS(setattribute,			domxml_elem_set_attribute,		NULL)
 	PHP_FALIAS(set_attribute,			domxml_elem_set_attribute,		NULL)
-	PHP_FALIAS(removeattribute,			domxml_elem_remove_attribute,	NULL)
 	PHP_FALIAS(remove_attribute,		domxml_elem_remove_attribute,	NULL)
-	PHP_FALIAS(getattributenode,		domxml_elem_get_attribute_node,	NULL)
 	PHP_FALIAS(get_attributenode,		domxml_elem_get_attribute_node,	NULL)
-	PHP_FALIAS(setattributenode,		domxml_elem_set_attribute_node,	NULL)
 	PHP_FALIAS(set_attributenode,		domxml_elem_set_attribute_node,	NULL)
-	PHP_FALIAS(getelementbytagname,		domxml_elem_get_element_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_tagname,	domxml_elem_get_element_by_tagname,	NULL)
 	{NULL, NULL, NULL}
 };
@@ -244,9 +215,7 @@ static zend_function_entry php_domxmlcomment_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlnotation_class_functions[] = {
-	PHP_FALIAS(publicid,				domxml_notation_public_id,		NULL)
 	PHP_FALIAS(public_id,				domxml_notation_public_id,		NULL)
-	PHP_FALIAS(systemid,				domxml_notation_system_id,		NULL)
 	PHP_FALIAS(system_id,				domxml_notation_system_id,		NULL)
 	{NULL, NULL, NULL}
 };
@@ -257,11 +226,8 @@ static zend_function_entry php_domxmlentityref_class_functions[] = {
 
 static zend_function_entry php_domxmlentity_class_functions[] = {
 /*	
-	PHP_FALIAS(publicid,				domxml_entity_public_id,		NULL)
 	PHP_FALIAS(public_id,				domxml_entity_public_id,		NULL)
-	PHP_FALIAS(systemid,				domxml_entity_system_id,		NULL)
 	PHP_FALIAS(system_id,				domxml_entity_system_id,		NULL)
-	PHP_FALIAS(notationname,			domxml_entity_notation_name,	NULL)
 	PHP_FALIAS(notation_name,			domxml_entity_notation_name,	NULL)
 */
 	{NULL, NULL, NULL}
@@ -290,7 +256,6 @@ static zend_function_entry php_domxmlattr_class_functions[] = {
 	PHP_FALIAS(value,					domxml_attr_value,				NULL)
 	PHP_FALIAS(specified,				domxml_attr_specified,			NULL)
 /*	
-	PHP_FALIAS(ownerelement,			domxml_attr_owner_element,		NULL)
 	PHP_FALIAS(owner_element,			domxml_attr_owner_element,		NULL)
 */
 	{NULL, NULL, NULL}
