@@ -233,14 +233,14 @@ class PEAR_Error
 	}
 
     // }}}
-    // {{{ __string_value()
+    // {{{ toString()
 
 	/**
 	 * Make a string representation of this object.
 	 *
 	 * @return string a string with an object "summary"
 	 */
-	function __string_value() {
+	function toString() {
 		$modes = array(PEAR_ERROR_RETURN => "return",
 					   PEAR_ERROR_PRINT => "print",
 					   PEAR_ERROR_TRIGGER => "trigger",
