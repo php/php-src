@@ -13,7 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: John Coggeshall <john@php.net>                               |
-  |         Ilia Alshanetsky <ilia@php.net>				 |
+  |         Ilia Alshanetsky <ilia@php.net>				 				 |
   +----------------------------------------------------------------------+
 */
 
@@ -238,7 +238,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSR
 	return data;
 }
 
-static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file TSRMLS_DC)
+static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
 {
 	char *data=NULL, *cfg_file=NULL, *arg1;
 	int cfg_file_len, arg1_len;
@@ -486,7 +486,7 @@ PHP_FUNCTION(tidy_clean_repair)
    Repair a string using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_string)
 {
-	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0 TSRMLS_CC);
+	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
