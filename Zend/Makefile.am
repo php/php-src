@@ -51,7 +51,7 @@ zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 
 zend_ini_scanner_cc.cc: $(srcdir)/zend_ini_scanner.l
 	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pini_ -o$@ $(srcdir)/zend_ini_scanner.l
-zend_init_parser.h: zend_ini_parser.c
+zend_ini_parser.h: zend_ini_parser.c
 
 depend:
 
