@@ -10,6 +10,8 @@ PHP 4                                                                      NEWS
   with multiple result sets returned. (Frank)
 - Fixed logic bug in session_register() which allowed registering _SESSION
   and/or HTTP_SESSION_VARS. (Sara)
+- Fixed bug #28355 (glob() does not return error on Linux when it does not
+  have permission to open the directory). (Ilia)
 - Fixed bug #28289 (incorrect resolving of relative paths by glob() in
   windows). (Ilia)
 - Fixed bug #28229 (run-tests tripped up by spaces in names). (Marcus)

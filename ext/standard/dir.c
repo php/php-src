@@ -391,8 +391,12 @@ PHP_FUNCTION(glob)
 			 * doesn't. This ensure that if no match is found, an empty array
 			 * is always returned so it can be used without worrying in e.g.
 			 * foreach() */
+#if __linux__
+			RETURN_FALSE;
+#else
 			array_init(return_value);
 			return;
+#endif
 		}
 #endif
 		RETURN_FALSE;
