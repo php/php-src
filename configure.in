@@ -8,11 +8,11 @@ AC_INIT(README.CVS-RULES)
 PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile main/Makefile)
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
-  AC_MSG_ERROR(--with-shared-apache is not supported. Please refer to the documentation for using APXS)
+  AC_MSG_ERROR([--with-shared-apache is not supported. Please refer to the documentation for using APXS])
 fi
 
 if test -n "$with_apache" && test -n "$with_apxs"; then
-  AC_MSG_ERROR(--with-apache and --with-apxs cannot be used together)
+  AC_MSG_ERROR([--with-apache and --with-apxs cannot be used together])
 fi
 
 cwd=`pwd`
@@ -76,16 +76,16 @@ dnl Checks for programs.
 AC_PROG_AWK
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
-    AC_MSG_WARN(You will need bison if you want to regenerate the PHP parsers.)
+    AC_MSG_WARN([You will need bison if you want to regenerate the PHP parsers.])
 else
-    AC_MSG_CHECKING(bison version)
+    AC_MSG_CHECKING([bison version])
     oldIFS=$IFS; IFS=.
     set `bison -V | sed -e 's/^GNU Bison version //'`
     IFS=$oldIFS
     if test "$1" = "1" -a "$2" -lt "25"; then
-        AC_MSG_WARN(Bison 1.25 or newer needed to regenerate parsers (found $1.$2).)
+        AC_MSG_WARN([Bison 1.25 or newer needed to regenerate parsers (found $1.$2).])
     fi
-    AC_MSG_RESULT($1.$2 (ok))
+    AC_MSG_RESULT([$1.$2 (ok)])
 fi
 
 AC_PROG_CC
@@ -158,8 +158,8 @@ PHP_CONFIGURE_PART(Configuring SAPI modules)
 
 esyscmd(./scripts/config-stubs sapi)
 
-AC_MSG_CHECKING(for chosen SAPI module)
-AC_MSG_RESULT($PHP_SAPI)
+AC_MSG_CHECKING([for chosen SAPI module])
+AC_MSG_RESULT([$PHP_SAPI])
 
 if test "$enable_experimental_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
@@ -173,13 +173,13 @@ PHP_CONFIGURE_PART(Running system checks)
 PHP_MISSING_TIME_R_DECL
 
 dnl check for -R, etc. switch
-AC_MSG_CHECKING(whether compiler supports -R)
+AC_MSG_CHECKING([whether compiler supports -R])
 AC_CACHE_VAL(php_cv_cc_dashr,[
 	SAVE_LIBS=$LIBS
 	LIBS="-R /usr/lib $LIBS"
 	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
 	LIBS=$SAVE_LIBS])
-AC_MSG_RESULT($php_cv_cc_dashr)
+AC_MSG_RESULT([$php_cv_cc_dashr])
 if test $php_cv_cc_dashr = "yes"; then
 	ld_runpath_switch=-R
 else
@@ -189,7 +189,7 @@ else
 		LIBS="-Wl,-rpath,/usr/lib $LIBS"
 		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
 		LIBS=$SAVE_LIBS])
-	AC_MSG_RESULT($php_cv_cc_rpath)
+	AC_MSG_RESULT([$php_cv_cc_rpath])
 	if test $php_cv_cc_rpath = "yes"; then
 		ld_runpath_switch=-Wl,-rpath,
 	else
@@ -344,7 +344,7 @@ dnl The WARNING_LEVEL required because cc in QNX hates -w option without an argu
 if test "`uname -s 2>/dev/null`" != "QNX"; then
 	AC_STRUCT_ST_BLOCKS
 else
-    AC_MSG_WARN(warnings level for cc set to 0)
+    AC_MSG_WARN([warnings level for cc set to 0])
 	WARNING_LEVEL=0
 fi
 AC_STRUCT_ST_RDEV
@@ -446,7 +446,7 @@ PHP_TIME_R_TYPE
 PHP_READDIR_R_TYPE
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
-dnl AC_MSG_CHECKING(for in_addr_t)
+dnl AC_MSG_CHECKING([for in_addr_t])
 AC_CACHE_VAL(ac_cv_type_$1,
 [AC_EGREP_CPP(dnl
 changequote(<<,>>)dnl
@@ -460,7 +460,7 @@ changequote([,]), [#include <sys/types.h>
 #include <netinet/in.h>
 #endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
 
-dnl AC_MSG_RESULT($ac_cv_type_in_addr_t)
+dnl AC_MSG_RESULT([$ac_cv_type_in_addr_t])
 if test $ac_cv_type_in_addr_t = no; then
   AC_DEFINE(in_addr_t, u_int, [ ])
 fi
@@ -530,7 +530,7 @@ else
   AC_DEFINE(PHP_SAFE_MODE,0,[ ])
 fi
 
-AC_MSG_CHECKING(for safe mode exec dir)
+AC_MSG_CHECKING([for safe mode exec dir])
 AC_ARG_WITH(exec-dir,
 [  --with-exec-dir[=DIR]   Only allow executables in DIR when in safe mode
                           defaults to /usr/local/php/bin],
@@ -538,18 +538,18 @@ AC_ARG_WITH(exec-dir,
   if test "$withval" != "no"; then
   	if test "$withval" = "yes"; then
 		AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
-    	AC_MSG_RESULT(/usr/local/php/bin)
+    	AC_MSG_RESULT([/usr/local/php/bin])
    	else
 		AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR,"$withval", [ ])
-    	AC_MSG_RESULT($withval)
+    	AC_MSG_RESULT([$withval])
    	fi
   else
 	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
-   	AC_MSG_RESULT(/usr/local/php/bin)
+   	AC_MSG_RESULT([/usr/local/php/bin])
   fi
 ],[
 	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
-   	AC_MSG_RESULT(/usr/local/php/bin)
+   	AC_MSG_RESULT([/usr/local/php/bin])
 ])
 
 PHP_ARG_WITH(openssl,for OpenSSL support,
@@ -590,7 +590,7 @@ PHP_ARG_ENABLE(libgcc, whether to explicitly link against libgcc,
 if test "$PHP_LIBGCC" = "yes"; then
   PHP_LIBGCC_LIBPATH(gcc)
   if test -z "$libgcc_libpath"; then
-    AC_MSG_ERROR(Cannot locate libgcc. Make sure that gcc is in your path)
+    AC_MSG_ERROR([Cannot locate libgcc. Make sure that gcc is in your path])
   fi
   PHP_ADD_LIBPATH($libgcc_libpath)
   PHP_ADD_LIBRARY(gcc, yes)
@@ -616,7 +616,7 @@ if test "$PHP_DMALLOC" = "yes"; then
     AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
     CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
   ], [
-    AC_MSG_ERROR(Problem with enabling dmalloc. Please check config.log for details.)
+    AC_MSG_ERROR([Problem with enabling dmalloc. Please check config.log for details.])
   ])
 fi
 
@@ -644,7 +644,7 @@ esyscmd(./scripts/config-stubs ext)
 
 PHP_FAST_OUTPUT(sapi/$PHP_SAPI/Makefile)
 
-AC_MSG_CHECKING(whether to enable versioning)
+AC_MSG_CHECKING([whether to enable versioning])
 AC_ARG_ENABLE(versioning,
 [  --enable-versioning     Export only required symbols.
                           See INSTALL for more information],[
@@ -652,7 +652,7 @@ AC_ARG_ENABLE(versioning,
 ],[
   PHP_VERSIONING=no
 ])
-AC_MSG_RESULT($PHP_VERSIONING)
+AC_MSG_RESULT([$PHP_VERSIONING])
 
 if test "$PHP_VERSIONING" = "yes"; then
   test -z "$PHP_SYM_FILE" && PHP_SYM_FILE="$abs_srcdir/sapi/$PHP_SAPI/php.sym"
