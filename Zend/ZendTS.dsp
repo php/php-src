@@ -332,6 +332,10 @@ SOURCE=.\zend_ini_scanner.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_istdiostream.h
+# End Source File
+# Begin Source File
+
 SOURCE=".\zend_language_parser.h"
 # End Source File
 # Begin Source File
