@@ -298,7 +298,10 @@ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 		while (p1 < &buf[NDIG])
 			*p++ = *p1++;
 	} else if (arg > 0) {
-		while ((fj = arg * 10) < 1 && (r2 * -1) < ndigits) {
+		while ((fj = arg * 10) < 1) {
+			if (!eflag && (r2 * -1) < ndigits) {
+				break;
+			}
 			arg = fj;
 			r2--;
 		}
