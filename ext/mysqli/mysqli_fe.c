@@ -182,6 +182,7 @@ function_entry mysqli_link_methods[] = {
  * Every user visible function must have an entry in mysqli_result_functions[].
  */
 function_entry mysqli_result_methods[] = {
+	PHP_FALIAS(close,mysqli_free_result,NULL)
 	PHP_FALIAS(data_seek,mysqli_data_seek,NULL)
 	PHP_FALIAS(fetch_field,mysqli_fetch_field,NULL)
 	PHP_FALIAS(fetch_fields,mysqli_fetch_fields,NULL)
