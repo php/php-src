@@ -1,3 +1,180 @@
+2002-04-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/Makefile.in: Make sure the extension will be named java.so
+
+2002-04-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-pear.xml: 0.9.1 release notes ++
+
+    * pear/PEAR/Common.php: * make validator work again
+
+2002-04-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/README: MFH
+
+    * ext/java/README: Fixed the extension name.
+
+2002-04-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-db.xml: * roll out 1.2 release
+
+2002-04-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: MFH
+
+    * ext/gd/config.m4: Wrong variable used here..
+
+    * configure.in: ws fix
+
+2002-04-23  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/posix/posix.c: - Fix proto.
+
+    * ext/pcntl/pcntl.c: - MFH fix for #16766.
+
+    * ext/pcntl/pcntl.c: - Fix pcntl_waitpid() [Fixes #16766].
+
+2002-04-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c: Add #ifdef.. around F_SETFD.
+
+2002-04-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/cyrus/cyrus.c
+      ext/ldap/ldap.c: Fix TSRMLS_CC thingies.
+
+    * ext/cyrus/cyrus.c
+      ext/ldap/ldap.c: Fix TSRMLS_CC
+
+2002-04-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c: MFH: Rip out use of O_EXCL
+
+    * ext/session/session.c: MFH define_sid issue
+
+2002-04-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * win32/readdir.c:
+    fixed access problem when japanese Shift_JIS character is used as directory name. Some characters in Shift_JIS are including 0x5c (slash) as second byte.
+
+2002-04-23  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/File/Find.php:
+    * added $maxrecursion parameter to mapTreeMultiple()
+
+2002-04-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c: - replace_child() will not add a child twice
+    - domxml_open_mem() drops old optional parameter to switch between reading
+      from a string or a file.
+    - new optional parameter for domxml_open_mem() which set the mode how the
+      document shall be parsed
+
+2002-04-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c: MFH
+    Fix empty output when no conversion is done.
+    Fix possible problem with wide chars.
+
+2002-04-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * sapi/apache/php_apache.c:
+    apache_child_terminate() returns status as bool
+    proto fixes
+
+2002-04-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c: Remove unneeded 'return'.
+
+    * ext/mbstring/mbstring.c: Fix possible wide char prolem.
+    Fix empty output when no conversion is performed.
+
+2002-04-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Remote.php: * use PEAR_Common::downloadHttp()
+
+    * pear/PEAR/Common.php:
+    * downloadHttp: pass the total number of bytes downloaded as parameter
+      to the 'done' callback
+
+    * pear/PEAR/Common.php:
+    * moved these "class variables" to global variables and added static methods for getting
+      them: maintainer_roles, release_states, dependency_types, dependency_relations,
+      file_roles, replacement_types
+    * added downloadHttp method with status callback support (can be used by installers
+      to show download progress)
+
+2002-04-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.h:
+    - added new function DomDocument->ids (subject to change)
+
+    * ext/domxml/php_domxml.c:
+    - get_element_by_id() doesn't use xpath anymore but searches in
+      xmlDoc->ids as provided by libxml.
+    - New function DomDocument->ids() returns a list of ids (subject to change)
+    - replace_node() doesn't make a copy of the new node if it has no parents
+
+2002-04-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    No need for an ifelse here (which was lacking a char anyway :-)
+
+2002-04-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/php_pgsql.h
+      ext/pgsql/tests/12pg_insert.phpt
+      ext/pgsql/tests/13pg_select.phpt
+      ext/pgsql/tests/14pg_update.phpt
+      ext/pgsql/tests/pg_delete.inc
+      ext/pgsql/tests/pg_insert.inc
+      ext/pgsql/tests/pg_select.inc
+      ext/pgsql/tests/pg_update.inc
+      ext/pgsql/pgsql.c:
+    Make pg_convert/pg_insert/pg_select/pg_update/pg_delete a bit more flexible.
+    pg_convert() may ignore, NOT NULL and/or DEFAULT.
+    pg_insert/pg_update/pg_select/pg_update may return query string.
+
+2002-04-23  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c:
+    MFH the possible crash bug fix and warning -> notice change.
+
+    * sapi/apache/mod_php4.c: This was not supposed to be uncommented..yet.
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      sapi/apache/php_apache_http.h
+      sapi/apache/sapi_apache.c: Part 4 of apache sapi build fixes:
+    - Fixed many conflicts caused by bogus includes, e.g the infamous XtOffset
+      redefinition warning is gone now.
+
+    * sapi/apache/apMakefile.tmpl
+      sapi/apache/config.m4
+      sapi/apache/libphp4.module.in: Part 3 of static apache build fixes:
+    - Use the PHP_CFLAGS when compiling the php4 module in apache tree.
+    - Use the apache include dir only when compiling sapi/apache
+      o Fixes the fnmatch.h issue Wez complained about :)
+
+    * configure.in: Part 2 of static apache build fixes:
+    - Added 2 variables to be used in libphp4.module
+      o Apparently autoconf 2.53 screws abs_srcdir
+    - Made INCLUDES and EXTRA_INCLUDES available to be used with AC_OUTPUT()
+      o Not related to the static apache build issues
+
+    * acinclude.m4:
+    Part 1 of commits to fix some issues with static apache (1.3.x) compile:
+    - Made the OPENSSL_INCDIR available to be added in the PHP_CFLAGS
+      in libphp4.module
+    - Make it possible to set SAPI specific include dirs
+
+    * NEWS: Missing date for 4.2.0
+
+    * main/rfc1867.c:
+    Changed the error for 'no upload' to E_NOTICE so that it doesn't
+    pollute the logs too much.
+
+
 2002-04-22  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * win32/readdir.c:
