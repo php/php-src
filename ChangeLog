@@ -1,3 +1,49 @@
+2004-01-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/oci8/oci8.c:
+      fix savelob() to make it possible to write data at the beginning of LOB
+
+2004-01-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/dom_iterators.c
+      ext/dom/xpath.c:
+      Warn when empty string supplied to load methods (by Pierre-Alain)
+      Fix refcount on xpath iterators
+      xpath_query should return nodelist even when empty
+
+2004-01-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/README:
+      update todo part of readme
+
+2004-01-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/xpath.c:
+      Fix warning (and possible problem)
+
+2004-01-20  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/simplexml.c:
+      -
+
+2004-01-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      acinclude.m4:
+      MFH: Fixed bug #26969 (shared openssl build fails)
+
+    * acinclude.m4:
+      - Fixed Bug #26969 (shared openssl build fails)
+
+    * NEWS:
+      BfN
+
+    * tests/lang/bug26696.phpt:
+      test case for bug #26696
+
 2004-01-19  Frank M. Kromann  <frank@kromann.info>
 
     * ext/simplexml/simplexml.c:
