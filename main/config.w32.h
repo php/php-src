@@ -266,3 +266,7 @@
 #define PHP_LOCALSTATEDIR "c:\\php4"
 #define PHP_CONFIG_FILE_PATH "c:\\winnt"
 #define PEAR_INSTALLDIR "c:\\php4\\pear"
+
+/* Win32 supports strcoll */
+#define HAVE_STRCOLL 1
+
