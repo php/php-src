@@ -2579,30 +2579,38 @@ PHP_FUNCTION(imap_clearflag_full)
 /* }}} */
 
 
-/* {{{ proto array imap_sort(int stream_id, int criteria, int reverse [, int options])
-   Sort an array of message headers */
+/* {{{ proto array imap_sort(int stream_id, int criteria, int reverse [, int options [, string search_criteria]])
+   Sort an array of message headers, optionally including only messages that meet specified criteria. */
 PHP_FUNCTION(imap_sort)
 {
-	zval **streamind, **pgm, **rev, **flags;
+	zval **streamind, **pgm, **rev, **flags, **criteria;
 	int ind, ind_type;
 	unsigned long *slst, *sl;
+	char *search_criteria;
 	SORTPGM *mypgm=NIL;
 	SEARCHPGM *spg=NIL;
 	pils *imap_le_struct;
-	int myargc=ZEND_NUM_ARGS();
-
-	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags) ==FAILURE) {
+	int myargc = ZEND_NUM_ARGS();
+	
+	if (myargc < 3 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria) ==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_long_ex(streamind);
 	convert_to_long_ex(rev);
 	convert_to_long_ex(pgm);
-	if (Z_LVAL_PP(pgm)>SORTSIZE) {
+	if (Z_LVAL_PP(pgm) > SORTSIZE) {
 		php_error(E_WARNING, "Unrecognized sort criteria");
 		RETURN_FALSE;
 	}
-	if (myargc==4) {
+	if (myargc >= 4) {
 		convert_to_long_ex(flags);
+	}
+	if (myargc == 5) {
+		search_criteria = estrndup(Z_STRVAL_PP(criteria), Z_STRLEN_PP(criteria));
+		spg = mail_criteria(search_criteria);
+		efree(search_criteria);
+	} else {
+		spg = mail_newsearchpgm();
 	}
 	
 	ind = Z_LVAL_PP(streamind);
@@ -2611,15 +2619,14 @@ PHP_FUNCTION(imap_sort)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	spg = mail_newsearchpgm();
 	mypgm = mail_newsortpgm();
 	mypgm->reverse = Z_LVAL_PP(rev);
 	mypgm->function = (short) Z_LVAL_PP(pgm);
 	mypgm->next = NIL;
 	
-	array_init(return_value);
-	slst = mail_sort(imap_le_struct->imap_stream, NIL, spg, mypgm, myargc==4 ? Z_LVAL_PP(flags) : NIL);
+	slst = mail_sort(imap_le_struct->imap_stream, NIL, spg, mypgm, myargc >= 4 ? Z_LVAL_PP(flags) : NIL);
 	
+	array_init(return_value);
 	for (sl = slst; *sl; sl++) { 
 		add_next_index_long(return_value, *sl);
 	}
