@@ -498,7 +498,7 @@ TEST $file
 		"open_basedir=",
 		"disable_functions=",
 		"error_reporting=2047",
-		"display_errors=0",
+		"display_errors=1",
 		"log_errors=0",
 		"html_errors=0",
 		"track_errors=1",
