@@ -609,9 +609,14 @@ PHP_ARG_ENABLE(dmalloc,whether to enable dmalloc,
 [  --enable-dmalloc        Enable dmalloc])
 
 if test "$PHP_DMALLOC" = "yes"; then
-  AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
-  PHP_ADD_LIBRARY(dmalloc)
-  CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
+  
+  AC_CHECK_LIB(dmalloc, dmalloc_error, [
+    PHP_ADD_LIBRARY(dmalloc)
+    AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
+    CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
+  ], [
+    AC_MSG_ERROR(Problem with enabling dmalloc. Please check config.log for details.)
+  ])
 fi
 
 # temporary until streams are better integrated
