@@ -2320,9 +2320,9 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto int    OCIDefineByName(int stmt, string name, mixed &var [,int type])
-  Define a PHP variable to an Oracle column by name.
-  if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!!
+/* {{{ proto int OCIDefineByName(int stmt, string name, mixed &var [, int type])
+   Define a PHP variable to an Oracle column by name */
+/* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!!
  */
 
 PHP_FUNCTION(ocidefinebyname)
@@ -2378,9 +2378,9 @@ PHP_FUNCTION(ocidefinebyname)
 }
 
 /* }}} */
-/* {{{ proto int    OCIBindByName(int stmt, string name, mixed &var, int maxlength [,int type])
-  Bind a PHP variable to an Oracle placeholder by name.
-  if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
+/* {{{ proto int OCIBindByName(int stmt, string name, mixed &var, int maxlength [, int type])
+   Bind a PHP variable to an Oracle placeholder by name */
+/* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
  */
 
 PHP_FUNCTION(ocibindbyname)
@@ -2500,7 +2500,7 @@ PHP_FUNCTION(ocibindbyname)
 
 /* }}} */
 /* {{{ proto string ocifreedesc(object lob)
- */
+   Deletes large object description */
 
 PHP_FUNCTION(ocifreedesc)
 {
@@ -2521,7 +2521,7 @@ PHP_FUNCTION(ocifreedesc)
 }
 /* }}} */
 /* {{{ proto string ocisavelob(object lob)
- */
+   Saves a large object */
 
 PHP_FUNCTION(ocisavelob)
 {
@@ -2610,7 +2610,7 @@ PHP_FUNCTION(ocisavelob)
 
 /* }}} */
 /* {{{ proto string ocisavelobfile(object lob)
- */
+   Saves a large object file */
 
 PHP_FUNCTION(ocisavelobfile)
 {
@@ -2689,7 +2689,7 @@ PHP_FUNCTION(ocisavelobfile)
 
 /* }}} */
 /* {{{ proto string ociloadlob(object lob)
- */
+   Loads a large object */
 
 PHP_FUNCTION(ociloadlob)
 {
@@ -2717,8 +2717,8 @@ PHP_FUNCTION(ociloadlob)
   RETURN_FALSE;
 }
 /* }}} */
-/* {{{ proto void ociwritelobtofile(object lob [,string filename][,int start][,int length])
- */
+/* {{{ proto void ociwritelobtofile(object lob [, string filename] [, int start] [, int length])
+   Writes a large object into a file */
 
 PHP_FUNCTION(ociwritelobtofile)
 {
@@ -2897,9 +2897,8 @@ PHP_FUNCTION(ociwritelobtofile)
 	RETURN_FALSE;
 }
 /* }}} */
-/* {{{ proto string OCINewDescriptor(int connection [,int type ])
-  initialize a new empty descriptor LOB/FILE (LOB is default)
- */
+/* {{{ proto string OCINewDescriptor(int connection [, int type ])
+   Initialize a new empty descriptor LOB/FILE (LOB is default) */
 
 PHP_FUNCTION(ocinewdescriptor)
 {
@@ -2929,8 +2928,7 @@ PHP_FUNCTION(ocinewdescriptor)
 
 /* }}} */
 /* {{{ proto string OCIRollback(int conn)
-  rollback the current context
- */
+   Rollback the current context */
 
 PHP_FUNCTION(ocirollback)
 {
@@ -2958,8 +2956,7 @@ PHP_FUNCTION(ocirollback)
 
 /* }}} */
 /* {{{ proto string OCICommit(int conn)
-  commit the current context
- */
+   Commit the current context */
 
 PHP_FUNCTION(ocicommit)
 {
@@ -2991,8 +2988,7 @@ PHP_FUNCTION(ocicommit)
 
 /* }}} */
 /* {{{ proto string OCIColumnName(int stmt, int col)
-  Tell the name of a column.
- */
+   Tell the name of a column */
 
 PHP_FUNCTION(ocicolumnname)
 {
@@ -3015,9 +3011,8 @@ PHP_FUNCTION(ocicolumnname)
 }
 
 /* }}} */
-/* {{{ proto int    OCIColumnSize(int stmt, int col)
-  Tell the maximum data size of a column.
- */
+/* {{{ proto int OCIColumnSize(int stmt, int col)
+   Tell the maximum data size of a column */
 
 PHP_FUNCTION(ocicolumnsize)
 {
@@ -3040,8 +3035,7 @@ PHP_FUNCTION(ocicolumnsize)
 
 /* }}} */
 /* {{{ proto mixed  OCIColumnType(int stmt, int col)
-  Tell the data type of a column.
- */
+   Tell the data type of a column */
 
 PHP_FUNCTION(ocicolumntype)
 {
@@ -3102,9 +3096,8 @@ PHP_FUNCTION(ocicolumntype)
 }
 
 /* }}} */
-/* {{{ proto int    OCIColumnIsNULL(int stmt, int col)
-  Tell whether a column is NULL.
- */
+/* {{{ proto int OCIColumnIsNULL(int stmt, int col)
+   Tell whether a column is NULL */
 
 PHP_FUNCTION(ocicolumnisnull)
 {
@@ -3130,9 +3123,8 @@ PHP_FUNCTION(ocicolumnisnull)
 }
 
 /* }}} */
-/* {{{ proto void   OCIDebug(int onoff)
-  Toggle internal debugging output for the OCI extension.
- */
+/* {{{ proto void OCIDebug(int onoff)
+   Toggle internal debugging output for the OCI extension */
 
 /* Disables or enables the internal debug output.
  * By default it is disabled.
@@ -3151,9 +3143,8 @@ PHP_FUNCTION(ociinternaldebug)
 
 
 /* }}} */
-/* {{{ proto int    OCIExecute(int stmt [,int mode])
-  Execute a parsed statement.
- */
+/* {{{ proto int OCIExecute(int stmt [, int mode])
+   Execute a parsed statement */
 
 PHP_FUNCTION(ociexecute)
 {
@@ -3180,9 +3171,8 @@ PHP_FUNCTION(ociexecute)
 }
 
 /* }}} */
-/* {{{ proto int    OCICancel(int stmt)
-  Prepare a new row of data for reading.
- */
+/* {{{ proto int OCICancel(int stmt)
+   Prepare a new row of data for reading */
 
 PHP_FUNCTION(ocicancel)
 {
@@ -3203,9 +3193,8 @@ PHP_FUNCTION(ocicancel)
 }
 
 /* }}} */
-/* {{{ proto int    OCIFetch(int stmt)
-  Prepare a new row of data for reading.
- */
+/* {{{ proto int OCIFetch(int stmt)
+   Prepare a new row of data for reading */
 
 PHP_FUNCTION(ocifetch)
 {
@@ -3227,9 +3216,8 @@ PHP_FUNCTION(ocifetch)
 }
 
 /* }}} */
-/* {{{ proto int    OCIFetchInto(int stmt, array &output [, int mode])
-  Fetch a row of result data into an array.
- */
+/* {{{ proto int OCIFetchInto(int stmt, array &output [, int mode])
+   Fetch a row of result data into an array */
 
 PHP_FUNCTION(ocifetchinto)
 {
@@ -3295,9 +3283,8 @@ PHP_FUNCTION(ocifetchinto)
 }
 
 /* }}} */
-/* {{{ proto int    OCIFetchStatement(int stmt, array &output)
-  Fetch all rows of result data into an array.
- */
+/* {{{ proto int OCIFetchStatement(int stmt, array &output)
+   Fetch all rows of result data into an array */
 
 PHP_FUNCTION(ocifetchstatement)
 {
@@ -3361,9 +3348,8 @@ PHP_FUNCTION(ocifetchstatement)
 }
 
 /* }}} */
-/* {{{ proto int    OCIFreeStatement(int stmt)
-  Free all resources associated with a statement.
- */
+/* {{{ proto int OCIFreeStatement(int stmt)
+   Free all resources associated with a statement */
 
 PHP_FUNCTION(ocifreestatement)
 {
@@ -3382,9 +3368,8 @@ PHP_FUNCTION(ocifreestatement)
 }
 
 /* }}} */
-/* {{{ proto int    OCILogoff(int conn)
-   Disconnect from database.
- */
+/* {{{ proto int OCILogoff(int conn)
+   Disconnect from database */
 
 PHP_FUNCTION(ocilogoff)
 {
@@ -3418,9 +3403,8 @@ PHP_FUNCTION(ocilogoff)
 }
 
 /* }}} */
-/* {{{ proto int    OCINLogon(string user, string pass[, string db])
-  Connect to an Oracle database and log on. returns a new session.
- */
+/* {{{ proto int OCINLogon(string user, string pass [, string db])
+   Connect to an Oracle database and log on. returns a new session */
 
 /* Connects to an Oracle 8 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
@@ -3446,9 +3430,8 @@ PHP_FUNCTION(ocilogon)
 }
 
 /* }}} */
-/* {{{ proto int    OCIPLogon(string user, string pass[, string db])
-  Connect to an Oracle database using a persistent connection and log on. returns a new session.
- */
+/* {{{ proto int OCIPLogon(string user, string pass [, string db])
+   Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 
 /* Connects to an Oracle 8 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
@@ -3460,9 +3443,8 @@ PHP_FUNCTION(ociplogon)
 }
 
 /* }}} */
-/* {{{ proto int    OCIError([int stmt|conn])
-  Return the last error of stmt|conn|global. If no error happened returns false.
- */
+/* {{{ proto int OCIError([int stmt|conn|global])
+   Return the last error of stmt|conn|global. If no error happened returns false. */
 
 PHP_FUNCTION(ocierror)
 {
@@ -3514,9 +3496,8 @@ PHP_FUNCTION(ocierror)
 }
 
 /* }}} */
-/* {{{ proto int    OCINumCols(int stmt)
-  Return the number of result columns in a statement.
- */
+/* {{{ proto int OCINumCols(int stmt)
+   Return the number of result columns in a statement */
 
 PHP_FUNCTION(ocinumcols)
 {
@@ -3533,9 +3514,8 @@ PHP_FUNCTION(ocinumcols)
 }
 
 /* }}} */
-/* {{{ proto int    OCIParse(int conn, string query)
-  Parse a query and return a statement.
- */
+/* {{{ proto int OCIParse(int conn, string query)
+   Parse a query and return a statement */
 
 PHP_FUNCTION(ociparse)
 {
@@ -3557,9 +3537,8 @@ PHP_FUNCTION(ociparse)
 }
 
 /* }}} */
-/* {{{ proto int    OCIParse(int conn, string query)
-  Parse a query and return a statement.
- */
+/* {{{ proto int OCIParse(int conn, string query)
+   Parse a query and return a statement */
 
 PHP_FUNCTION(ocisetprefetch)
 {
@@ -3580,10 +3559,8 @@ PHP_FUNCTION(ocisetprefetch)
 }
 
 /* }}} */
-/* {{{ proto int    OCINewCursor(int conn)
-   return a new cursor (Statement-Handle) - use this to bind ref-cursors!
- 
- */
+/* {{{ proto int OCINewCursor(int conn)
+   Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
 
 PHP_FUNCTION(ocinewcursor)
 {
@@ -3604,8 +3581,7 @@ PHP_FUNCTION(ocinewcursor)
 
 /* }}} */
 /* {{{ proto string OCIResult(int stmt, mixed column)
-  Return a single column of result data.
- */
+   Return a single column of result data */
 
 PHP_FUNCTION(ociresult)
 {
@@ -3630,8 +3606,7 @@ PHP_FUNCTION(ociresult)
 
 /* }}} */
 /* {{{ proto string OCIServerVersion(int conn)
-  Return a string containing server version information.
- */
+   Return a string containing server version information */
 
 PHP_FUNCTION(ociserverversion)
 {
@@ -3661,9 +3636,8 @@ PHP_FUNCTION(ociserverversion)
 }
 
 /* }}} */
-/* {{{ proto int    OCIStatementType(int stmt)
-  Return the query type of an OCI statement.
- */
+/* {{{ proto int OCIStatementType(int stmt)
+   Return the query type of an OCI statement */
  
 /* XXX it would be better with a general interface to OCIAttrGet() */
 
