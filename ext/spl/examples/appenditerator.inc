@@ -18,11 +18,6 @@ class AppendIterator implements Iterator
 	function append(Iterator $it)
 	{
 		$this->iterators->append($it);
-		if (!$this->valid())
-		{
-			$this->iterators->seek($this->iterators->count() - 1);
-			$this->iterators->current()->rewind();
-		}
 	}
 
 	function getInnerIterator()
