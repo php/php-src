@@ -1,4 +1,7 @@
 ## Process this file with automake to produce Makefile.in -*- makefile -*-
+
+CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
+
 AUTOMAKE_OPTIONS=foreign
 noinst_LIBRARIES=libzend.a
 libzend_a_SOURCES=\
@@ -12,15 +15,12 @@ libzend_a_SOURCES=\
 # automake isn't too clever about "non-standard" use of lex and yacc
 
 zend-scanner.c: zend-scanner.l
-	$(LEX) -Pzend -ozend-scanner.c -i zend-scanner.l
+	$(LEX) -Pzend -ozend-scanner.c -i $(srcdir)/zend-scanner.l
 
 zend-scanner.cc: zend-scanner.l
-	$(LEX) -+ -Sflex.skl -Pzend -ozend-scanner.cc -i zend-scanner.l
+	$(LEX) -+ -Sflex.skl -Pzend -ozend-scanner.cc -i $(srcdir)/zend-scanner.l
 
 zend-parser.h: zend-parser.c
 zend-parser.c: zend-parser.y
-	$(YACC) -p zend -v -d zend-parser.y -o zend-parser.c
-
-clean:
-	-rm -f zend-parser.c zend-parser.h zend-scanner.c zend-parser.output
+	$(YACC) -p zend -v -d $(srcdir)/zend-parser.y -o zend-parser.c
 
