@@ -356,7 +356,7 @@ static sapi_module_struct apache_sapi_module = {
 	sapi_apache_register_server_variables,		/* register server variables */
 	php_apache_log_message,			/* Log message */
 
-	NULL,					/* php.ini path override */
+	NULL,							/* php.ini path override */
 
 #ifdef PHP_WIN32
 	NULL,
