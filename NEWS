@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed bug #30281 (Prevent non-wbmp images from being detected as such).
   (Ilia)
 - Fixed bug #30276 (Possible crash in ctype_digit on large numbers). (Ilia)
+- Fixed bug #30230 (exception handler not working with objects). (Marcus)
 - Fixed bug #30224 (Sybase date strings are sometimes not null terminated).
   (Ilia)
 - Fixed bug #30175 (SOAP results aren't parsed correctly). (Dmitry)
