@@ -93,6 +93,11 @@ PHP_FUNCTION(imagecolorresolvealpha);
 PHP_FUNCTION(imagecolorclosestalpha);
 PHP_FUNCTION(imagecolorexactalpha);
 PHP_FUNCTION(imagecopyresampled);
+
+#ifdef HAVE_GD_BUNDLED
+PHP_FUNCTION(imagerotate);
+#endif
+
 PHP_FUNCTION(imagesetthickness);
 PHP_FUNCTION(imagesettile);
 PHP_FUNCTION(imagecopymergegray);
