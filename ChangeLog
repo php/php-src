@@ -1,3 +1,74 @@
+2005-01-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: Use multibyte specific code for handling files and generic basename
+      based code in all other instances.
+
+    * main/rfc1867.c:
+      Use multibyte specific code for handling files and generic basename based
+      code in all other instances.
+
+    * (PHP_5_0)
+      ext/sysvmsg/sysvmsg.c:
+      Fixed compiler warning.
+
+2005-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      - BFN
+
+    * (PHP_5_0)
+      NEWS:
+      - MFH fix for bug #31348 CachingIterator::rewind() leaks
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug30725.phpt:
+      - Second and last part of #30725 fix
+
+    * ZendEngine2/zend_interfaces.c:
+      - Allow getIterator() to fail
+
+    * ZendEngine2/tests/bug30725.phpt:
+      
+      - Add new test
+
+    * NEWS:
+      - mysqli/sqlite changes
+
+    * ext/sqlite/sqlite.c:
+      - Synch with MYSQLi extension and use RuntimeException as base for
+        SQLiteException if SPL is present.
+
+2005-01-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/rfc1867.c:
+      - Revert irrelevant part.
+
+2005-01-24  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/sysvmsg/tests/002.phpt:
+        1.1.4;
+      add test
+
+    * ext/sysvmsg/sysvmsg.c:
+      fix msg_recieve() returning TRUE instead of FALSE when unserialize failed
+      (patch by Andrey Hristov)
+
+2005-01-24  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/php_functions.c:
+      MFH: Fixed regression #31645 - only flush before running the subrequest.
+
+    * sapi/apache2handler/php_functions.c:
+      Fixed regression #31645 - only flush before running the subrequest.
+
 2005-01-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

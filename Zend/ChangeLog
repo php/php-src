@@ -1,3 +1,17 @@
+2005-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug30725.phpt:
+      - Second and last part of #30725 fix
+
+    * zend_interfaces.c:
+      - Allow getIterator() to fail
+
+    * tests/bug30725.phpt:
+      
+      - Add new test
+
 2005-01-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_5_0)
