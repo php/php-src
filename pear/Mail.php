@@ -48,7 +48,7 @@ class Mail extends PEAR
         if (class_exists($class)) {
             return new $class($params);
         } else {
-            return $this->raiseError('Unable to find class for driver ' . $driver);
+            return PEAR::raiseError('Unable to find class for driver ' . $driver);
         }
     }
 
