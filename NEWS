@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Bundle gd library 2.0.1 with php (ext/gd/libgd) (Rasmus), tweak config.m4 to
+  work with it (Jani), smallers tweaks for Win32 (Markus, Edin)
 - Fixed bug with Apache which let PHP_AUTH_* variables to be set when
   external basic auth mechanism was used. (Jani)
 - Fixed bzopen() crash in thread-safe mode. (Andrei)
@@ -43,7 +45,9 @@ PHP 4                                                                      NEWS
 - Added experimental support for Simplified Chinese, Traditional Chinese and
   Korean encodings into mbstring. (Rui)
 - Misc. Win32 mail() enhancements: support 'From:' header (msisolak@yahoo.com),
-  Bcc headers and be case-insensitive, enhanced error reporting. (Markus)
+  support Bcc header, case-insensitive headers, enhanced error reporting,
+  automatic proper line ending conversion, fix crash with Cc, fix buffer
+  overflows with $header. (Markus)
 - Improved IMAP extension performance. (adam.kauffman@mindspring.com,
   rjs3@andrew.cmu.edu, Jon)
 - Added optional 5th parameter to domxml_xslt_process(). When set, profiling
