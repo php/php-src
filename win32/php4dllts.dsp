@@ -489,6 +489,10 @@ SOURCE=..\ext\dom\domimplementationsource.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\dom\dom_iterators.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\dom\domlocator.c
 # End Source File
 # Begin Source File
