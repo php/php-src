@@ -185,12 +185,13 @@ class DB
         @include_once("DB/${type}.php");
 
         $classname = "DB_${type}";
-        @$obj =& new $classname;
 
-        if (!$obj) {
+        if (!class_exists($classname)) {
             return PEAR::raiseError(DB_ERROR_NOT_FOUND,
                                     null, null, null, null, 'DB_Error', true);
         }
+
+        @$obj =& new $classname;
 
         return $obj;
     }
@@ -227,18 +228,17 @@ class DB
             $options["debug"] >= 2) {
             // expose php errors with sufficient debug level
             include_once "DB/${type}.php";
-            $classname = "DB_${type}";
-            $obj =& new $classname;
         } else {
             @include_once "DB/${type}.php";
-            $classname = "DB_${type}";
-            @$obj =& new $classname;
         }
 
-        if (!$obj) {
+        $classname = "DB_${type}";
+        if (!class_exists($classname)) {
             return PEAR::raiseError(DB_ERROR_NOT_FOUND,
                                     null, null, null, null, 'DB_Error', true);
         }
+
+        @$obj =& new $classname;
 
         if (is_array($options)) {
             foreach ($options as $option => $value) {
