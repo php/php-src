@@ -672,12 +672,7 @@ class PEAR_Common extends PEAR
         if (!@is_file($file)) {
             return $this->raiseError("tgz :: could not open file \"$file\"");
         }
-        if (substr($file, -4) == '.tar') {
-            $compress = false;
-        } else {
-            $compress = true;
-        }
-        $tar = new Archive_Tar($file, $compress);
+        $tar = new Archive_Tar($file);
         $content = $tar->listContent();
         if (!is_array($content)) {
             return $this->raiseError("tgz :: could not get contents of package \"$file\"");
@@ -1519,7 +1514,6 @@ class PEAR_Common extends PEAR
         if ($callback) {
             call_user_func($callback, 'done', $bytes);
         }
-        // callback: done!
         return $dest_file;
     }
 
