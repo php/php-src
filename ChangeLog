@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Add versioning support for shared library (Sascha)
 - Added second parameter to array_keys which specifies search value
   for which the key should be returned (Andrey)
 - Resourcified Informix driver (Danny)
