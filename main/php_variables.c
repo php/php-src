@@ -182,7 +182,9 @@ plain_var:
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				zend_symtable_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+				zend_symtable_update(symtable1, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				efree(escaped_index);
 			}
 			break;
 		}
