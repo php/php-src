@@ -111,7 +111,6 @@ void init_executor(CLS_D ELS_DC)
 	zend_llist_apply(&zend_extensions, (void (*)(void *)) zend_extension_activator);
 	EG(opline_ptr) = NULL;
 	EG(garbage_ptr) = 0;
-	EG(suspend_garbage) = 0;
 
 	zend_hash_init(&EG(imported_files), 5, NULL, NULL, 0);
 
