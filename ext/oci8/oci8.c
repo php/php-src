@@ -4077,8 +4077,8 @@ PHP_FUNCTION(ociparse)
 
 /* }}} */
 
-/* {{{ proto int ocisetprefetch(int conn, string query)
-   Set a prefetch query??? */
+/* {{{ proto int ocisetprefetch(int stmt, int prefetch_rows)
+  sets the number of rows to be prefetched on execute to prefetch_rows for stmt */
 
 PHP_FUNCTION(ocisetprefetch)
 {
