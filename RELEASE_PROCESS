@@ -1,0 +1,186 @@
+	Advisory on the PHP Release Cycle
+
+
+Copyright & Liciencing
+
+  This Document is  (c)  Copyright 2000,2001 by The PHP Group 
+
+  This Document is distributed under the terms of the GNU General
+  Public License as published by the Free Software Foundation; 
+  either version 2 of the License, or (at your option) any later
+  version. 
+
+
+Table of Contents
+
+  1. Introduction
+  2. Dealing with bugs
+  2.1  As a QA Team Member
+  2.2  As a Developer
+  3. Releaseing another RC
+  4. CVS During the Release Process
+  4.1  Useful CVS Commands	  
+  5  The Final Release
+  6  Summary
+
+
+1. Introduction
+
+   This cycle should take place over roughly 10 days.  When it is
+   decided it is time for an Release to occur Andi/Zeev (Or 
+   Whoever) will tarball RC1, Tag & Branch CVS (see section 4)
+   and then announce the RC on PHP-QA and PHP-DEV.  At this 
+   point the build tracker and QA Bug System come into play.
+   If you successfully build PHP then report it in the build
+   tracker, If you then run and complete all the tests you
+   should report this too in the build tracker when
+   these features become avalible.
+
+2. Dealing with Bugs
+
+2.1 As a QA Team member
+
+   If you find a bug in an RC that you think is a showstopper
+   then, even if it is a known bug, you should report it in the
+   QA Bug system.  This marks the bug for discussion at least,
+   and preferably fixing before the actual release.  This system
+   is separate from the main bugs system so that important bugs
+   dont get lost in the midst if lots of feature/change request
+   in the approach to a release.  It is imperitive where 
+   appropraite that as a QA'er a test script, Configure options
+   and PHP.ini files are provided to enable the developer to
+   reproduce the bug, this is an important part of our job.  If
+   you have a serious bug then you should also create a test
+   script to be added to the tests dir of the php source so
+   that at the end of the process to enable us to make sure bug
+   does not return.  It is not difficult to create these test
+   scripts and a readme on it can be found in
+   php4/tests/README.
+
+
+2.2 As a Developer
+
+   What should happen is that when a bug is reported it
+   is send to php-dev and php-qa as with other bugs.  We should
+   have far stricter assignment system in this bug cycle rather
+   than just leaving them. Once again bugs should be able to be
+   marked as To Be Fixed Before release or moved to other bug
+   system. (This is currently the Release Masters responsibility)
+
+   Then before the actual release the qa bugs system can be
+   checked and if there are outstanding To Be Fixed Before
+   release bugs the Developers can see this easyly rather than
+   show stoppers being dismissed and not worried about.
+
+   When a bug is fixed the QAer who reported the bug is emailed
+   and asked to test again and see if the bug is fixed.
+
+3 Releasing another RC
+
+   If it is felt necessary that a 2nd RC is needed then it
+   should be packaged as before and announced to both lists
+   again. The testing process then starts again, the RC2 is 
+   added to the build tracker and QA'ers are asked to build and
+   retest the scripts as appropriate, espectially if you
+   reported a bug, you should test thourghly for your 
+   bug and make sure it no longer occurs. This will normally
+   add anouther 3 days to the cycle, giving QA'ers time to
+   build test and report back, then for developers to 
+   fix any problems.
+
+4 CVS during the release process
+
+   At the point where the first RC is create a branch is
+   formed. This branch is not altered form that point onward
+   other than major bug fixes. Minor non important bug 
+   fixes should not be applied to this branch but to the main
+   tree instead. Any major bug fixes should be applied to both
+   trees. The developer should test and check the RC tree then
+   also test and check the MAIN tree. This is their
+   responsibility to make sure (as far as possible) that the
+   bug fix works on both trees.
+
+4.1 Useful CVS Commands
+
+   To create a Branch <Should only be done by person tarballing
+   the RC (The Release Master)>:
+
+	$ cvs tag -b php_4_0_<Version>RC<NUMBER> 
+   IE:
+	$ cvs tag -b php_4_0_1RC1
+
+   This should be executed in the PHP directory of an up to
+   date checkout. Remember to also tag the Zend and TSRM repositories.
+
+   You can retrieve a branch in one of two ways: by checking it
+   out fresh from the repository, or by switching an existing
+   working copy over to the branch, I would suggest you
+   checkout a new copy.
+
+   To check out a new copy:
+	$ cvs checkout -r php_4_0_<Version>RC<NUMBER> php4
+   IE:
+	$ cvs checkout -r php_4_0_1RC1 php4
+
+
+   To switch a working copy (Not recomended due to possible
+   commiting to wrong branch)
+	$ cvs update -r php_4_0_<Version>RC<NUMBER> php4
+   IE:
+	$ cvs update -r php_4_0_1RC1 php4
+
+   This should be done in the PHP4 directory itself.
+
+   To revert back to normal branch you should use the
+   following:
+	$ cvs update -A
+
+   To Commit to the branch you follow exactly the same
+   procedure as normal
+	$ cvs commit file.c
+
+   MAKE SURE YOU DO NOT COMMIT TO THE WRONG BRANCH.
+
+5 The Final Release
+
+   When it is time to make the final release the following
+   proceedure should be followed. The person who is tarballing
+   the final release should check the QA bugs system and make
+   sure there are no showstoppers left unfixed. If there are
+   then bug the person the bug is assigned to until they fix
+   it. If there are no more qa bugs then they should tag the
+   branch as  php_4_0_<Version> and tarball as usual. An email
+   should be sent to PHP-GEN, PHP_DEV and PHP-QA about the new
+   release and it should be added to php.net. The windows
+   binaries and servelets should be built as soon as possible
+   and added too, as should the windows installer.
+
+6 Summary
+
+   Here is a summary of what a release cycle might look like:
+
+   Thurs: RC is agreed on and packaged, an email is sent to   
+          PHP_QA and PHP-DEV, the CVS is Branched and the     
+          Release Cycle Begins. 
+
+   Mon:   After a weekends testing most show stoppers should  
+          have been found (Hopefully) and the developers get to
+          work on fixing them.
+
+   Thurs: A second RC is released if needed with the new bug  
+          fixes in and the QAers test again.
+
+   Sun:   A review is made of all outstanding bugs and any show
+          stoppers should be fixed. if there are no show      
+          stoppers then the final release is packaged and     
+          released on the monday morning on php.net
+
+   Mon:   Release is made.
+
+
+James
+--  
+James Moore
+PHP QA Team
+jmoore@php.net
+
