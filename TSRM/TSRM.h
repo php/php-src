@@ -17,7 +17,15 @@
 #ifndef _TSRM_H
 #define _TSRM_H
 
-#include <windows.h>
+#if !(WIN32||WINNT)
+# define PTHREADS
+#endif
+
+#if WIN32||WINNT
+# include <windows.h>
+#elif defined(PTHREADS)
+# include <pthread.h>
+#endif
 
 typedef int ts_rsrc_id;
 
