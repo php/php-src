@@ -1,4 +1,9 @@
 <?php
+	$min_version = "5.0.0-dev";
+	if (!function_exists("version_compare") || version_compare(phpversion(), $min_version) <0) {
+		die("need at least PHP version $min_version, you are running ".phpversion());
+	}
+
   require_once "extension_parser.php";
 	require_once "System.php";
 
@@ -27,7 +32,9 @@
   mkdir($ext->name);
 
 	// write LICENSE file
-	$ext->license->write_license_file("{$ext->name}/LICENSE");
+	if(is_object($ext->license)) {
+		$ext->license->write_license_file("{$ext->name}/LICENSE");
+	}
 
   // generate code
   $ext->write_header_file();
