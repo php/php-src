@@ -432,6 +432,8 @@ function_entry basic_functions[] = {
 	PHP_FE(socket_set_blocking,	NULL)
 #if HAVE_PHP_STREAM
 	PHP_FE(fopenstream,			NULL)
+#else
+	PHP_FALIAS(fopenstream, warn_not_available,      NULL)
 #endif
 #if HAVE_SYS_TIME_H
 	PHP_FE(socket_set_timeout,	NULL)
