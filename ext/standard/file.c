@@ -650,8 +650,12 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd T
 		if (stream == NULL)
 			continue;
 
-		/* get the fd */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&this_fd, 1)) {
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 * */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1)) {
 			FD_SET(this_fd, fds);
 			if (this_fd > *max_fd) {
 				*max_fd = this_fd;
@@ -666,7 +670,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	zval **elem, **dest_elem;
 	php_stream *stream;
 	HashTable *new_hash;
-	int this_fd;
+	int this_fd, ret = 0;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY)
 		return 0;
@@ -682,12 +686,18 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		if (stream == NULL)
 			continue;
 
-		/* get the fd */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&this_fd, 1)) {
+		/* get the fd 
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1)) {
 			if (FD_ISSET(this_fd, fds)) {
 				zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
 				if (dest_elem)
 					zval_add_ref(dest_elem);
+				ret++;
+				continue;
 			}
 		}
 	}
@@ -699,7 +709,58 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	zend_hash_internal_pointer_reset(new_hash);
 	Z_ARRVAL_P(stream_array) = new_hash;
 	
-	return 1;
+	return ret;
+}
+
+static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
+{
+	zval **elem, **dest_elem;
+	php_stream *stream;
+	HashTable *new_hash;
+	int ret = 0;
+
+	if (Z_TYPE_P(stream_array) != IS_ARRAY)
+		return 0;
+
+	ALLOC_HASHTABLE(new_hash);
+	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
+	
+	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
+		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
+		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
+
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL)
+			continue;
+
+		if ((stream->writepos - stream->readpos) > 0) {
+			/* allow readable non-descriptor based streams to participate in stream_select.
+			 * Non-descriptor streams will only "work" if they have previously buffered the
+			 * data.  Not ideal, but better than nothing.
+			 * This branch of code also allows blocking streams with buffered data to
+			 * operate correctly in stream_select.
+			 * */
+			zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
+			if (dest_elem)
+				zval_add_ref(dest_elem);
+			ret++;
+			continue;
+		}
+	}
+
+	if (ret > 0) {
+		/* destroy old array and add new one */
+		zend_hash_destroy(Z_ARRVAL_P(stream_array));
+		efree(Z_ARRVAL_P(stream_array));
+
+		zend_hash_internal_pointer_reset(new_hash);
+		Z_ARRVAL_P(stream_array) = new_hash;
+	} else {
+		zend_hash_destroy(new_hash);
+		FREE_HASHTABLE(new_hash);
+	}
+	
+	return ret;
 }
 /* }}} */
 
@@ -738,6 +799,17 @@ PHP_FUNCTION(stream_select)
 		tv_p = &tv;
 	}
 
+	/* slight hack to support buffered data; if there is data sitting in the
+	 * read buffer of any of the streams in the read array, let's pretend
+	 * that we selected, but return only the readable sockets */
+	if (r_array != NULL) {
+
+		retval = stream_array_emulate_read_fd_set(r_array TSRMLS_CC);
+		if (retval > 0) {
+			RETURN_LONG(retval);
+		}
+	}
+	
 	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
