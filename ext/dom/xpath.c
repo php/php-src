@@ -251,6 +251,8 @@ PHP_FUNCTION(dom_xpath_query)
 			child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
 			add_next_index_zval(retval, child);
 		}
+	} else {
+		RETURN_FALSE;
 	}
 
 	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
