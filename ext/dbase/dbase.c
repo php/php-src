@@ -274,13 +274,18 @@ PHP_FUNCTION(dbase_add_record) {
 
 	dbf = dbh->db_fields;
 	for (i = 0, cur_f = dbf; cur_f < &dbf[num_fields]; i++, cur_f++) {
+		zval tmp;
 		if (zend_hash_index_find(fields->value.ht, i, (void **)&field) == FAILURE) {
 			php_error(E_WARNING, "unexpected error");
 			efree(cp);
 			RETURN_FALSE;
 		}
-		convert_to_string(field);
-		sprintf(t_cp, cur_f->db_format, field->value.str.val); 
+		
+		tmp = *field;
+		zval_copy_ctor(&tmp);
+		convert_to_string(&tmp);
+		sprintf(t_cp, cur_f->db_format, tmp.value.str.val);
+		zval_dtor(&tmp); 
 		t_cp += cur_f->db_flen;
 	}
 
