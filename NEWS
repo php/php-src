@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added optional 3rd parameter 'recursive' to ftp_rawlist() which will
+  do 'LIST -R' instead of 'LIST'. (Jani)
 - Disabled the fifth parameter to the mail function in safemode. (Derick)
 - GetImageSize now allways set fields unknown to 0 and new Imagetype
   iff. (Marcus)
