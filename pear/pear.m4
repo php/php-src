@@ -76,7 +76,7 @@ PHP_SUBST(SHELL)
 PHP_FAST_OUTPUT(Makefile)
 
 PHP_GEN_CONFIG_VARS
-PHP_GEN_MAKEFILES
+PHP_GEN_MAKEFILES($PHP_FAST_OUTPUT_FILES)
 
 test -d modules || mkdir modules
 touch .deps
