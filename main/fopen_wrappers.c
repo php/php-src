@@ -603,6 +603,16 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		free_url(resource);
 		*issock = 1;
 		return (fp);
+	} else if (!strncasecmp(path, "php://", 6)) {
+		const char *res = path + 6;
+
+		if (!strcasecmp(res, "stdin")) {
+			return fdopen(STDIN_FILENO, mode);
+		} else if (!strcasecmp(res, "stdout")) {
+			return fdopen(STDOUT_FILENO, mode);
+		} else if (!strcasecmp(res, "stderr")) {
+			return fdopen(STDERR_FILENO, mode);
+		}
 	} else if (!strncasecmp(path, "ftp://", 6)) {
 		resource = url_parse((char *) path);
 		if (resource == NULL) {
