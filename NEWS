@@ -11,7 +11,7 @@ PHP 4                                                                      NEWS
   it contained null byte. (Andrei)
 - Added persistent connections/pipelining to thttpd. (Sascha)
 - Fixed two potential blocking issues in thttpd. (Sascha)
-- Fixed broken header detection on Solaris. (Sascha)
+- Fixed broken header file detection on Solaris. (Sascha)
 - Improved nss/socket-related symbol/library detection. (Jani, Sascha)
 - Made iconv() work well with both libiconv or libgiconv. (Moriyoshi, Yasuo)
 - Fixed socket_set_timeout() on win32. (Jason, Edin, Jani)
