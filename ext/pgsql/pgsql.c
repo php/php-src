@@ -1923,7 +1923,7 @@ PHP_FUNCTION(pg_lo_export)
 }
 /* }}} */
 
-/* {{{ proto bool pg_lo_lseek(resource large_object, int offset [, int whence])
+/* {{{ proto bool pg_lo_seek(resource large_object, int offset [, int whence])
    Seeks position of large object */
 PHP_FUNCTION(pg_lo_seek)
 {
