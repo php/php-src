@@ -62,7 +62,7 @@ yes
     AC_MSG_RESULT([yes])
   ],[
     AC_DEFINE([LIBMONETRA_BELOW_4_2], 1, [Whether or not we're using libmonetra 4.2 or higher ])
-    AC_MSG_ERROR([no])
+    AC_MSG_RESULT([no])
   ])
 
   CPPFLAGS=$saved_CPPFLAGS
