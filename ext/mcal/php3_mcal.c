@@ -235,7 +235,7 @@ static int add_assoc_object(pval *arg, char *key, pval tmp)
         return zend_hash_update(symtable, key, strlen(key)+1, (void *) &tmp, sizeof(pval *), NULL);
 #else
 	return _php3_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(pval), NULL);
-#end
+#endif
 }
 
 
