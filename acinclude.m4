@@ -40,7 +40,7 @@ AC_DEFUN(AC_ADD_LIBPATH,[
     EXTRA_LIBS="$EXTRA_LIBS -L$ai_p"
     if test -n "$rpath_raw" ; then
       RPATHS="$RPATHS ${raw_runpath_switch}$ai_p"
-    if test -n "$APXS" ; then
+    elif test -n "$APXS" ; then
       RPATHS="$RPATHS ${apxs_runpath_switch}$ai_p'"
     else
       RPATHS="$RPATHS ${ld_runpath_switch}$ai_p"
