@@ -3194,7 +3194,8 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
 	}	
 	if (argc > 3) {
-		Z_LVAL_PP(zcount) = count;
+		zval_dtor(*zcount);
+		ZVAL_LONG(*zcount, count);
 	}
 }
 /* }}} */
