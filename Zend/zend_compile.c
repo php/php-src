@@ -924,7 +924,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
-	unsigned int name_len = function_name->u.constant.value.str.len;
+	int name_len = function_name->u.constant.value.str.len;
 	int function_begin_line = function_token->u.opline_num;
 
 	function_token->u.op_array = CG(active_op_array);
