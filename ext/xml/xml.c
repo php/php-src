@@ -285,13 +285,6 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xml_parser *parser = (xml_parser *)rsrc->ptr;
-
-	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
-/*#ifdef ZEND_ENGINE_2
-	if (parser->object) {
-		zval_ptr_dtor(&parser->object);
-	}
-#endif */
 	
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
