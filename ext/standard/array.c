@@ -44,6 +44,7 @@
 #include "basic_functions.h"
 #include "php_string.h"
 #include "php_rand.h"
+#include "php_smart_str.h"
 
 #ifdef ZTS
 int array_globals_id;
@@ -1135,13 +1136,14 @@ PHP_FUNCTION(extract)
 {
 	zval **var_array, **z_extract_type, **prefix;
 	zval **entry, *data;
-	char *var_name, *final_name;
+	char *var_name;
+	smart_str final_name = {0};
 	ulong num_key;
 	uint var_name_len;
 	int var_exists, extract_type, key_type, count = 0;
 	HashPosition pos;
 
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &var_array) == FAILURE) {
 				WRONG_PARAM_COUNT;
@@ -1191,15 +1193,15 @@ PHP_FUNCTION(extract)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(var_array), &pos);
 	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(var_array), (void **)&entry, &pos) == SUCCESS) {
 		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
-		final_name = NULL;
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING) {
 			var_name_len--;
 			var_exists = zend_hash_exists(EG(active_symbol_table), var_name, var_name_len + 1);
 		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
-			final_name = emalloc(MAX_LENGTH_OF_LONG + Z_STRLEN_PP(prefix) + 2);
-			zend_sprintf(final_name, "%s_%ld", Z_STRVAL_PP(prefix), num_key);
+			smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
+			smart_str_appendc(&final_name, '_');
+			smart_str_append_long(&final_name, num_key);
 		} else {
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(var_array), &pos);
 			continue;
@@ -1207,69 +1209,69 @@ PHP_FUNCTION(extract)
 			
 		switch (extract_type) {
 			case EXTR_IF_EXISTS:
-				if(!var_exists) break;
+				if (!var_exists) break;
 				/* break omitted intentionally */
 
 			case EXTR_OVERWRITE:
-				final_name = estrndup(var_name, var_name_len);
+				smart_str_appendl(&final_name, var_name, var_name_len);
 				break;
 
 			case EXTR_PREFIX_IF_EXISTS:
-				if(var_exists) {
-					final_name = emalloc(var_name_len + Z_STRLEN_PP(prefix) + 2);
-					strcpy(final_name, Z_STRVAL_PP(prefix));
-					strcat(final_name, "_");
-					strcat(final_name, var_name);
+				if (var_exists) {
+					smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
+					smart_str_appendc(&final_name, '_');
+					smart_str_appendl(&final_name, var_name, var_name_len);
 				}
 				break;
 
 			case EXTR_PREFIX_SAME:
 				if (!var_exists)
-					final_name = estrndup(var_name, var_name_len);
+					smart_str_appendl(&final_name, var_name, var_name_len);
 				/* break omitted intentionally */
 
 			case EXTR_PREFIX_ALL:
-				if (!final_name) {
-					final_name = emalloc(var_name_len + Z_STRLEN_PP(prefix) + 2);
-					strcpy(final_name, Z_STRVAL_PP(prefix));
-					strcat(final_name, "_");
-					strcat(final_name, var_name);
+				if (final_name.len == 0) {
+					smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
+					smart_str_appendc(&final_name, '_');
+					smart_str_appendl(&final_name, var_name, var_name_len);
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
-				if (!final_name) {
+				if (final_name.len == 0) {
 					if (!php_valid_var_name(var_name)) {
-						final_name = emalloc(var_name_len + Z_STRLEN_PP(prefix) + 2);
-						strcpy(final_name, Z_STRVAL_PP(prefix));
-						strcat(final_name, "_");
-						strcat(final_name, var_name);
+						smart_str_appendl(&final_name, Z_STRVAL_PP(prefix), Z_STRLEN_PP(prefix));
+						smart_str_appendc(&final_name, '_');
+						smart_str_appendl(&final_name, var_name, var_name_len);
 					} else
-						final_name = estrndup(var_name, var_name_len);
+						smart_str_appendl(&final_name, var_name, var_name_len);
 				}
 				break;
 
 			default:
 				if (!var_exists)
-					final_name = estrndup(var_name, var_name_len);
+					smart_str_appendl(&final_name, var_name, var_name_len);
 				break;
 		}
 
-		if (final_name) {
-			if (php_valid_var_name(final_name)) {
+		if (final_name.len) {
+			smart_str_0(&final_name);
+			if (php_valid_var_name(final_name.c)) {
 				MAKE_STD_ZVAL(data);
 				*data = **entry;
 				zval_copy_ctor(data);
 
-				ZEND_SET_SYMBOL(EG(active_symbol_table), final_name, data);
+				ZEND_SET_SYMBOL(EG(active_symbol_table), final_name.c, data);
 
 				count++;
 			}
-			efree(final_name);
+			final_name.len = 0;
 		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(var_array), &pos);
 	}
+
+	smart_str_free(&final_name);
 
 	RETURN_LONG(count);
 }
