@@ -1352,8 +1352,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 					"If you would like to enable call-time pass-by-reference, you can set "
 					"allow_call_time_pass_reference to true in your INI file.  "
 					"However, future versions may not support this any longer. ",
-					(function_ptr?function_ptr->common.function_name:"[runtime function name]"),
-					offset+1);
+					(function_ptr?function_ptr->common.function_name:"[runtime function name]"));
 	}
 
 	if (function_ptr) {

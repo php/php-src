@@ -245,7 +245,7 @@ ZEND_FUNCTION(func_get_arg)
 	arg_count = (ulong) *p;
 
 	if (requested_offset>=arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Argument %d not passed to function", requested_offset);
+		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 
@@ -1461,6 +1461,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			lineno = ptr->opline->lineno;
 		} else {
 			filename = NULL;
+			lineno = 0;
 		}
 
 		function_name = ptr->function_state.function->common.function_name;
@@ -1516,6 +1517,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				array_init(arg_array);
 				add_next_index_string(arg_array, include_filename, 1);
 			}
+			call_type = NULL;
 		}
 		zend_printf("#%-2d ", indent);
 		if (class_name) {

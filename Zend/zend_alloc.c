@@ -470,8 +470,12 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 {
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	zend_mem_header *p, *t;
+#endif
+#if ZEND_DEBUG
 	zend_uint grand_total_leaks=0;
+#endif
 
 #if defined(ZEND_MM) && !ZEND_DEBUG
 	if (clean_cache) {
