@@ -29,9 +29,10 @@
 #else
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	(dval) = (double) (a) * (double) (b);							\
+	double __tmpvar = (double) (a) * (double) (b);					\
 																	\
-	if ((dval) >= LONG_MAX || (dval) <= LONG_MIN) {					\
+	if (__tmpvar >= LONG_MAX || __tmpvar <= LONG_MIN) {				\
+		(dval) = __tmpvar;											\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = (a) * (b);											\
