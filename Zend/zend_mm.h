@@ -26,7 +26,13 @@
 
 #include "zend_types.h"
 
-/* Define this to enable Zend MM */
+#ifdef ZTS
+#define ZEND_MM
+#else
+#undef ZEND_MM
+#endif
+
+/* Zend MM is currently broken, so never use it. */
 #undef ZEND_MM
 
 /* mm block type */
