@@ -21,22 +21,14 @@ class Base_php5 {
   function __construct() {
     var_dump('Base constructor');
   }
-  
-  function Base_php5() {
-    var_dump('I should not be called');
   }
-}
 
 class Child_php5 extends Base_php5 {
   function __construct() {
     var_dump('Child constructor');
     parent::__construct();
   }
-  
-  function Child_php5() {
-    var_dump('I should not be called');
   }
-}
 
 class Child_mx1 extends Base_php4 {
   function __construct() {

@@ -9,9 +9,6 @@ class early {
 	function early() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 	}
-	function __construct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
 	function __destruct() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 	}
@@ -19,9 +16,6 @@ class early {
 
 class late {
 	function __construct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
-	function late() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 	}
 	function __destruct() {
@@ -33,16 +27,14 @@ $t = new early();
 $t->early();
 unset($t);
 $t = new late();
-$t->late();
 //unset($t); delay to end of script
 
 echo "Done\n";
 ?>
 --EXPECTF--
-early::__construct
+early::early
 early::early
 early::__destruct
 late::__construct
-late::late
 Done
 late::__destruct
