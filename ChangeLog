@@ -1,3 +1,16 @@
+2002-07-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/informix/.cvsignore: Added missing .libs entry
+
+2002-07-06  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Config.php
+      pear/PEAR/Remote.php: add local XMLRPC cache
+
+2002-07-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: - Consistent error messages
+
 2002-07-05  Jani Taskinen  <sniper@iki.fi>
 
     * ext/dio/dio.c: Fix bug: #16707

@@ -1,3 +1,13 @@
+2002-07-06  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+    - Fix problem where scope was lost in nested function calls.
+    - Thanks to Timm Friebe for diving into this one.
+
+2002-07-06  Zeev Suraski  <zeev@zend.com>
+
+    * zend_language_parser.y: spelling fix
+
 2002-07-05  Stig Bakken  <ssb@fast.no>
 
     * zend_builtin_functions.c: * folding fixes
