@@ -45,6 +45,8 @@ function_entry php3_ftp_functions[] = {
 	PHP_FE(ftp_login,			NULL)
 	PHP_FE(ftp_chdir,			NULL)
 	PHP_FE(ftp_nlist,			NULL)
+	PHP_FE(ftp_listraw,			NULL)
+	PHP_FE(ftp_systype,			NULL)
 	PHP_FE(ftp_get,				NULL)
 	PHP_FE(ftp_put,				NULL)
 	PHP_FE(ftp_quit,			NULL)
@@ -249,6 +251,115 @@ PHP_FUNCTION(ftp_nlist)
 		(void) getc(outfp);
 	} while (size != -1);
 	fclose(outfp);
+}
+
+PHP_FUNCTION(ftp_listraw)
+{
+	pval		*arg1, *arg2;
+	int		id, type;
+	netbuf		*net;
+	FILE		*outfp;
+	char		*entry = NULL;
+	char		*ptr;
+	long		size;
+	char		ch;
+
+
+	/* arg1 - netbuf
+	 * arg2 - directory
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+
+	id = arg1->value.lval;
+	net = php3_list_find(id, &type);
+	if (!net || type != le_netbuf) {
+		php_error(E_WARNING, "Unable to find netbuf %d", id);
+		RETURN_FALSE;
+	}
+
+	/* set up a temporary output file */
+	if ((outfp = tmpfile()) == NULL) {
+		php_error(E_WARNING, "error opening tmpfile");
+		RETURN_FALSE;
+	}
+
+	/* list to the temporary file */
+	if (!FtpDir(outfp, arg2->value.str.val, net) || ferror(outfp)) {
+		fclose(outfp);
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	rewind(outfp);
+
+	/* Pluck out each file name and save to the return array. */
+	do {
+		/* scan for end of line */
+		size = 1;
+		while ((ch = getc(outfp)) != '\n') {
+			if (ch == EOF) {
+				size = -1;
+				break;
+			}
+			size++;
+		}
+
+		if (size > 0) {
+			/* seek back to the start of file name and copy
+			 * to a buffer.  add the buffer to the array.
+			 */
+			fseek(outfp, -size, SEEK_CUR);
+			entry = emalloc(size);
+			ptr = entry;
+			while (--size)
+				*ptr++ = getc(outfp);
+			*ptr = 0;
+
+			add_next_index_string(return_value, entry, 0);
+		}
+
+		/* eat the \n */
+		(void) getc(outfp);
+	} while (size != -1);
+	fclose(outfp);
+}
+
+PHP_FUNCTION(ftp_systype)
+{
+	pval		*arg1;
+	int		id, type;
+	netbuf		*net;
+	char		buf[64];
+
+
+	/* arg1 - netbuf
+	 * arg2 - directory
+	 */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+
+	id = arg1->value.lval;
+	net = php3_list_find(id, &type);
+	if (!net || type != le_netbuf) {
+		php_error(E_WARNING, "Unable to find netbuf %d", id);
+		RETURN_FALSE;
+	}
+
+	if (!FtpSysType(buf, sizeof(buf), net)) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(buf, 1);
 }
 
 PHP_FUNCTION(ftp_get)

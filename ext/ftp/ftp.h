@@ -19,6 +19,8 @@ PHP_FUNCTION(ftp_connect);
 PHP_FUNCTION(ftp_login);
 PHP_FUNCTION(ftp_chdir);
 PHP_FUNCTION(ftp_nlist);
+PHP_FUNCTION(ftp_listraw);
+PHP_FUNCTION(ftp_systype);
 PHP_FUNCTION(ftp_get);
 PHP_FUNCTION(ftp_put);
 PHP_FUNCTION(ftp_quit);
