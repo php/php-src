@@ -2382,6 +2382,11 @@ PHP_FUNCTION(swftext_addString)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &s) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	if (!getFont(getText(getThis() TSRMLS_CC))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must specify a font before writing text.");
+		RETURN_FALSE;
+	}
+
 	convert_to_string_ex(s);
 	SWFText_addString(text, Z_STRVAL_PP(s), NULL);
 }
