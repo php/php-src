@@ -368,7 +368,10 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 	char *buf = NULL;
 	if (!name) return NULL;
 	len = strlen(name) + (value?strlen(value):0) + sizeof("=") + 2;
-	buf = (char *)emalloc(len);
+	buf = (char *)malloc(len);
+	if (buf == NULL) {
+		return getenv(name);
+	}
 	if (value) {
 		snprintf(buf,len-1,"%s=%s", name, value);
 	} else {
@@ -382,7 +385,7 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
 		FCGX_PutEnv(request,buf);
-		efree(buf);
+		free(buf);
 		return sapi_cgibin_getenv(name,0 TSRMLS_CC);
 	}
 #endif
@@ -391,11 +394,7 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 		this leaks, but it's only cgi anyway, we'll fix
 		it for 5.0
 	*/
-	if (value)
-		putenv(strdup(buf));
-	else
-		putenv(buf);
-	efree(buf);
+	putenv(buf);
 	return getenv(name);
 }
 
@@ -787,8 +786,8 @@ static void init_request_info(TSRMLS_D)
 			} else {
 				/* make sure path_info/translated are empty */
 				script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME",script_path_translated TSRMLS_CC);
-				_sapi_cgibin_putenv("PATH_INFO", "" TSRMLS_CC);
-				_sapi_cgibin_putenv("PATH_TRANSLATED", "" TSRMLS_CC);
+				_sapi_cgibin_putenv("PATH_INFO", NULL TSRMLS_CC);
+				_sapi_cgibin_putenv("PATH_TRANSLATED", NULL TSRMLS_CC);
 			}
 			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
 		} else {
