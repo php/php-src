@@ -25,7 +25,7 @@
 #include "zend_builtin_functions.h"
 #include "zend_interfaces.h"
 
-static zend_class_entry *default_exception_ce;
+zend_class_entry *default_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
 
@@ -452,35 +452,12 @@ ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code 
 	zend_throw_exception_internal(ex TSRMLS_CC);
 }
 
-/* at the moment we can't use zend_throw_exception_ex because we don't have a protable
- * vsnprintf that tells us the number of characters needed nor do we have spprintf from
- * php or asprintf from glibc always.
- */
+
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC)
 {
-	zval *ex;
-
-	MAKE_STD_ZVAL(ex);
-	if (exception_ce) {
-		if (!instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Exceptions must be derived from exception");
-			exception_ce = default_exception_ce;
-		}
-	} else {
-		exception_ce = default_exception_ce;
-	}
-	object_init_ex(ex, exception_ce);
-	
-
-	if (message) {
-		zend_update_property_string(default_exception_ce, ex, "message", sizeof("message")-1, message TSRMLS_CC);
-	}
-	if (code) {
-		zend_update_property_long(default_exception_ce, ex, "code", sizeof("code")-1, code TSRMLS_CC);
-	}
-
-	zend_throw_exception_internal(ex TSRMLS_CC);
+	zend_throw_exception_ex(exception_ce, code TSRMLS_CC, "%s", message);
 }
+
 
 static void zend_error_va(int type, const char *file, uint lineno, const char *format, ...)
 {
@@ -533,6 +510,24 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		zend_error(E_ERROR, "Uncaught exception '%s'", ce_exception->name);
 	}
 }
+
+
+ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
+{
+	zend_class_entry *exception_ce;
+
+	if (exception == NULL || exception->type != IS_OBJECT) {
+		zend_error(E_ERROR, "Need to supply an object when throwing an exception");
+	}
+
+	exception_ce = Z_OBJCE_P(exception);
+
+	if (!exception_ce || !instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
+		zend_error(E_ERROR, "Exceptions must valid objects that are derived from class Exception");
+	}
+	zend_throw_exception_internal(exception TSRMLS_CC);
+}
+
 
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {

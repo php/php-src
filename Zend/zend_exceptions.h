@@ -31,6 +31,7 @@ ZEND_API void zend_register_default_classes(TSRMLS_D);
  * message        NULL or the message of the exception */
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
 ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...);
+ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC);
 
 /* show an exception using zend_error(E_ERROR,...) */
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
