@@ -1,7 +1,9 @@
 <?php
 	require_once "extension_parser.php";
 
-	$ext = &new extension_parser(fopen("extension.xml", "r"));
+	$filename = isset($_SERVER["argv"][1]) ? $_SERVER["argv"][1] : "extension.xml";
+
+	$ext = &new extension_parser(fopen($filename, "r"));
 
   system("rm -rf {$ext->name}");
   mkdir($ext->name);
