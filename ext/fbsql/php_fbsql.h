@@ -119,8 +119,6 @@ ZEND_END_MODULE_GLOBALS(fbsql)
 # define FB_SQL_G(v)	(fbsql_globals.v)
 #endif
 
-
-
 //#ifndef ZTS  // No need for external definitions
 //extern fbsql_module* phpfbModule;
 //#endif
