@@ -1,3 +1,17 @@
+2003-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_object_handlers.c:
+      - Fix situation where a derived class declares a public (or implicit
+      public)
+        with the same name as a private in the parent
+      - Optimize 'static binding' of private properties a bit
+
+2003-03-18  Stig Bakken  <ssb@fast.no>
+
+    * RFCs/002.txt:
+      - email address change
+
 2003-03-17  Stanislav Malyshev  <stas@zend.com>
 
     * zend_extensions.c:

@@ -1,3 +1,205 @@
+2003-03-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      Add the mode string that was used to open the stream to the meta data,
+      as requested by Philip Olson.
+
+    * (PHP_4_3)
+      main/php_streams.h
+      main/streams.c:
+      Manual merge of the persistent plain file streams code.
+      See http://news.php.net/article.php?group=php.cvs&article=19680 for
+      more information.
+
+    * ext/standard/php_fopen_wrapper.c
+      main/php_streams.h
+      main/streams/php_stream_plain_wrapper.h
+      main/streams/plain_wrapper.c:
+      Implement persistent plain file streams.
+      
+      Usage:
+      
+      php_stream *stream = php_stream_fopen("/path/to/file", "r+b", NULL,
+      	STREAM_OPEN_PERSISTENT | ENFORCE_SAFE_MODE | REPORT_ERRORS);
+      
+      the filename and mode are combined to form the hash key for the persistent
+      list; they must be identical for this same stream to be returned again in
+      the
+      next request.
+      
+      Calling php_stream_close() on a persistent stream *will* close it, as is
+      usual with all persistent resources in PHP/ZE.
+      
+      This is deliberately *not* exposed to user-space PHP at this time.
+
+    * main/streams/streams.c:
+      Q}
+
+    * (PHP_4_3)
+      main/streams.c:
+      WS Fix: I forgot to apply Q} to my comment.
+
+2003-03-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      -turn html_errors on by default again
+      -disbale clickable error messages by docref_root default to ''
+
+2003-03-18  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/browscap.c:
+      get_browser() needs to use zend_is_auto_global() on _SERVER.
+
+2003-03-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/info.c
+      main/SAPI.h
+      sapi/cli/php_cli.c:
+      make phpinfo() depend on executed sapi
+
+2003-03-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gdxpm.c:
+      Cleanup.
+
+2003-03-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/ftp.c:
+      Fixed bug #22765
+
+2003-03-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/php_fopen_wrapper.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/streams/plain_wrapper.c:
+      Avoid using FILE* where possible.
+      Tidy up handling of potential error situations for the php:// wrapper.
+
+    * (PHP_4_3)
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/php_streams.h
+      main/streams.c:
+      Avoid using FILE* unless we have to.
+
+2003-03-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      use new callback to overwrite ini settings
+
+    * main/SAPI.h
+      main/php_ini.c:
+      give sapi modules the possibility to overwrite default ini settings
+
+2003-03-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/openssl/xp_ssl.c
+      main/streams/xp_socket.c:
+      avoid unsigned issues.
+
+    * (PHP_4_3)
+      main/streams.c:
+      Fix my 64-bit casting fix.
+      MFH Fix for #22721 - poor performance for file() on systems without mmap
+      support.
+
+    * ext/standard/file.c:
+      CS fixes
+
+    * main/streams/streams.c:
+      Fix for #22721 (poor file() performance on systems without mmap)
+
+2003-03-18  Stig Bakken  <ssb@fast.no>
+
+    * run-tests.php
+      run-tests2.php
+      build/buildcheck.sh
+      ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/iconv/iconv.c
+      ext/iconv/php_iconv.h
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8.h
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      ext/odbc/php_odbc_includes.h
+      ext/oracle/oracle.c
+      ext/standard/file.c
+      ext/standard/formatted_print.c
+      ext/standard/math.c
+      ext/standard/php_ext_syslog.h
+      ext/standard/php_math.h
+      ext/standard/php_string.h
+      ext/standard/php_versioning.h
+      ext/standard/string.c
+      ext/standard/syslog.c
+      ext/standard/uniqid.c
+      ext/standard/uniqid.h
+      ext/standard/versioning.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      main/build-defs.h.in
+      main/php_ticks.c
+      main/php_ticks.h
+      main/snprintf.h
+      pear/PEAR.php
+      pear/System.php
+      pear/package.dtd
+      pear/OS/Guess.php
+      pear/PEAR/Autoloader.php
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php
+      pear/scripts/pear.in
+      pear/scripts/pearwin.php
+      sapi/apache/php_apache.c
+      sapi/apache/php_apache_http.h
+      sapi/apache/sapi_apache.c
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/sapi_apache.c
+      sapi/cgi/cgi_main.c:
+      - email address change
+
+2003-03-18  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/gd/config.m4
+      ext/gd/gdcache.c:
+      MFH: Fixed bug #22751 (Compile error in gdcache when external libgd is
+      used)
+
+    * ext/gd/config.m4
+      ext/gd/gdcache.c:
+      Fixed bug #22751 (Compile error in gdcache when external libgd is used)
+
+    * sapi/apache2handler/sapi_apache2.c:
+      whitespace..
+
 2003-03-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/streams/streams.c:
