@@ -1114,17 +1114,17 @@ ZEND_FUNCTION(reflection_method_getdeclaringclass)
 	reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
 }
 
-/* {{{ proto public Reflection_Class::__construct(string name)
-   Constructor. Throws an Exception in case the given class does not exist */
+/* {{{ proto public Reflection_Class::__construct(mixed argument) throws Exception
+   Constructor. Takes a string or an instance as an argument */
 ZEND_FUNCTION(reflection_class)
 {
-	zval *name;
+	zval *argument;
 	zval *object;
 	reflection_object *intern;
 	char *lcname;
 	zend_class_entry **ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &argument) == FAILURE) {
 		return;
 	}
 
@@ -1133,16 +1133,26 @@ ZEND_FUNCTION(reflection_class)
 	if (intern == NULL) {
 		return;
 	}
-	convert_to_string_ex(&name);
-	zval_add_ref(&name);
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
-	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(name), (int) Z_STRLEN_P(name));
-	if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(name) + 1), (void **)&ce) == FAILURE) {
+	
+	if (Z_TYPE_P(argument) == IS_OBJECT) {
+		zval *name;
+
+		MAKE_STD_ZVAL(name);
+		ZVAL_STRINGL(name, Z_OBJCE_P(argument)->name, Z_OBJCE_P(argument)->name_length, 1);
+		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+		intern->ptr = Z_OBJCE_P(argument);
+	} else { 
+		convert_to_string_ex(&argument);
+		zval_add_ref(&argument);
+		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &argument, sizeof(zval *), NULL);
+		lcname = zend_str_tolower_dup((const char *)Z_STRVAL_P(argument), (int) Z_STRLEN_P(argument));
+		if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(argument) + 1), (void **)&ce) == FAILURE) {
+			efree(lcname);
+			_DO_THROW("Class does not exist");
+		}
 		efree(lcname);
-		_DO_THROW("Class does not exist");
+		intern->ptr = *ce;
 	}
-	efree(lcname);
-	intern->ptr = *ce;
 	intern->free_ptr = 0;
 }
 /* }}} */
