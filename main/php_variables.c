@@ -63,22 +63,14 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 	char *ip;		/* index pointer */
 	char *index;
 	int var_len, index_len;
-	zval *gpc_element, **gpc_element_p, **top_gpc_p=NULL;
+	zval *gpc_element, **gpc_element_p;
 	zend_bool is_array;
 	HashTable *symtable1=NULL;
-	HashTable *symtable2=NULL;
 
 	assert(var != NULL);
 	
 	if (track_vars_array) {
 		symtable1 = Z_ARRVAL_P(track_vars_array);
-	}
-	if (PG(register_globals)) {
-		if (symtable1) {
-			symtable2 = EG(active_symbol_table);
-		} else {
-			symtable1 = EG(active_symbol_table);
-		}	
 	}
 	if (!symtable1) {
 		/* Nothing to do */
@@ -164,9 +156,6 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 					efree(escaped_index);
 				}
 			}
-			if (!top_gpc_p) {
-				top_gpc_p = gpc_element_p;
-			}
 			symtable1 = Z_ARRVAL_PP(gpc_element_p);
 			/* ip pointed to the '[' character, now obtain the key */
 			index = index_s;
@@ -189,18 +178,8 @@ plain_var:
 			} else {
 				zend_hash_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
-			if (!top_gpc_p) {
-				top_gpc_p = gpc_element_p;
-			}
 			break;
 		}
-	}
-
-	if (top_gpc_p) {
-		if (symtable2) {
-			zend_hash_update(symtable2, var, var_len+1, top_gpc_p, sizeof(zval *), NULL);
-			(*top_gpc_p)->refcount++;
-		}	
 	}
 }
 
