@@ -47,8 +47,12 @@ A lot... */
 #include "ext/standard/fsock.h"
 #include "ext/standard/info.h"
 
+#ifdef SQL_INT64
+#include <math.h>
+#endif
+
 /*
-#define IBDEBUG(a) printf("%s\n", a);
+#define IBDEBUG(a) printf("::: %s\n", a);
 */
 #define IBDEBUG(a)
 
@@ -778,6 +782,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 		ib_link->link = db_handle;
+		ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : 1);
 		for (i = 0; i < IBASE_TRANS_ON_LINK; i++)
 			ib_link->trans[i] = NULL;
 
@@ -954,7 +959,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp,
 
 /* {{{ _php_ibase_alloc_query() */
 /* allocate and prepare query */
-static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query)
+static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query, int dialect)
 {
 #define IB_QUERY (*ib_queryp)
 	
@@ -968,6 +973,7 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 	IB_QUERY->in_array_cnt = 0;
 	IB_QUERY->out_array = NULL;
 	IB_QUERY->out_array_cnt = 0;
+	IB_QUERY->dialect = dialect;
 	
 	if (isc_dsql_allocate_statement(IB_STATUS, &link, &IB_QUERY->stmt)) {
 		_php_ibase_error();
@@ -978,7 +984,7 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 	IB_QUERY->out_sqlda->sqln = 0;
 	IB_QUERY->out_sqlda->version = SQLDA_VERSION1;
 
-	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans, &IB_QUERY->stmt, 0, query, SQLDA_VERSION1, IB_QUERY->out_sqlda)) {
+	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans, &IB_QUERY->stmt, 0, query, dialect, IB_QUERY->out_sqlda)) {
 		_php_ibase_error();
 		goto _php_ibase_alloc_query_error;
 	}
@@ -1055,7 +1061,7 @@ _php_ibase_alloc_query_error:
 /* }}} */
 
 
-/* {{{ proto int ibase_bind(int query)
+/* {{{ _php_ibase_bind()
    Bind parameter placeholders in a previously prepared query */
 static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 {
@@ -1101,6 +1107,12 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 				convert_to_double(b_var);
 				var->sqldata = (void ISC_FAR *)(&b_var->value.dval);
 				break;
+				/* FIX THESE
+			case SQL_INT64:
+			case SQL_TIMESTAMP:
+			case SQL_TYPE_DATE:
+			case SQL_TYPE_TIME:
+				*/
 			case SQL_DATE:
 				{
 					struct tm t;
@@ -1182,7 +1194,24 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 			case SQL_DOUBLE:
 				var->sqldata = emalloc(sizeof(double));
 				break;
+#ifdef SQL_INT64
+			case SQL_INT64:
+				var->sqldata = emalloc(sizeof(ISC_INT64));
+				break;
+#endif
+#ifdef SQL_TIMESTAMP
+			case SQL_TIMESTAMP:
+				var->sqldata = emalloc(sizeof(ISC_TIMESTAMP));
+				break;
+			case SQL_TYPE_DATE:
+				var->sqldata = emalloc(sizeof(ISC_DATE));
+				break;
+			case SQL_TYPE_TIME:
+				var->sqldata = emalloc(sizeof(ISC_TIME));
+				break;
+#else
 			case SQL_DATE:
+#endif
 			case SQL_BLOB:
 			case SQL_ARRAY:
 				var->sqldata = emalloc(sizeof(ISC_QUAD));
@@ -1240,7 +1269,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 		}
 	}
 
-	if (isc_dsql_execute(IB_STATUS, &ib_query->trans, &ib_query->stmt, 1, in_sqlda)) {
+	if (isc_dsql_execute(IB_STATUS, &ib_query->trans, &ib_query->stmt, ib_query->dialect, in_sqlda)) {
 		IBDEBUG("Could not execute query... (_php_ibase_exec)");
 		_php_ibase_error();
 		goto _php_ibase_exec_error;
@@ -1507,7 +1536,7 @@ PHP_FUNCTION(ibase_query)
 		RETURN_FALSE;
 	}
 
-	if (_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n], query) == FAILURE) {
+	if (_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n], query, ib_link->dialect) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
@@ -1595,11 +1624,48 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 				val->value.dval = *(double *)data;
 			}
 			break;
-		case SQL_DATE:{
+#ifdef SQL_INT64
+		case SQL_INT64:
+			val->type = IS_STRING;
+			val->value.str.len = sprintf(string_data, "%Ld.%Ld",
+										 (ISC_INT64) (*(ISC_INT64 *)data / (int) pow(10.0, (double) -scale)),
+										 (ISC_INT64) abs((*(ISC_INT64 *)data % (int) pow(10.0, (double) -scale))));
+			val->value.str.val = estrdup(string_data);
+			break;
+			/*
+			sprintf(buf, "%Ld.%Ld",
+					(ISC_INT64) (q / (int)
+								 pow(10.0, (double) -ovar->sqlscale)),
+					(ISC_INT64) (q % (int)
+								 pow(10.0, (double) -ovar->sqlscale)));
+			*/
+                            
+#endif
+#ifndef SQL_TIMESTAMP
+		case SQL_DATE:
+#else
+		case SQL_TIMESTAMP:
+		case SQL_TYPE_DATE:
+		case SQL_TYPE_TIME:
+#endif
+		{
 			struct tm t;
 			long timestamp = -1;
-					 
+#ifndef SQL_TIMESTAMP_
 			isc_decode_date((ISC_QUAD *) data, &t);
+#else
+			switch (type & ~1) {
+				case SQL_TIMESTAMP:
+					isc_decode_timestamp((ISC_TIMESTAMP *) data, &t);
+					break;
+				case SQL_TYPE_DATE:
+					isc_decode_sql_date((ISC_DATE *) data, &t);
+					break;
+				case SQL_TYPE_TIME:
+					isc_decode_sql_time((ISC_TIME *) data, &t);
+					break;
+			}
+#endif
 			/*
 			  XXX - Might have to remove this later - seems that isc_decode_date()
 			   always sets tm_isdst to 0, sometimes incorrectly (InterBase 6 bug?)
@@ -1757,6 +1823,9 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 				case SQL_LONG:
 				case SQL_FLOAT:
 				case SQL_DOUBLE:
+#ifdef SQL_INT64
+				case SQL_INT64:
+#endif
 				case SQL_DATE:
 					_php_ibase_var_pval(tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag);
 					break;
@@ -1981,7 +2050,7 @@ PHP_FUNCTION(ibase_prepare)
 		RETURN_FALSE;
 	}
 	
-	if (_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n],  query) == FAILURE) {
+	if (_php_ibase_alloc_query(&ib_query, ib_link->link, ib_link->trans[trans_n],  query, ib_link->dialect) == FAILURE) {
 		RETURN_FALSE;
 	}
 
