@@ -3,5 +3,23 @@
 # $Id$
 
 makefiles=`echo ext/*/Makefile.am | sed -e 's/\.am//g'`
-rm -f configure.in
-sed -e "s#@@EXT_MAKEFILES@@#$makefiles#" configure.in.in > configure.in
+sed -e "s#@@EXT_MAKEFILES@@#$makefiles#" configure.in.in > configure.in.new
+if ! cmp configure.in configure.in.new 2>/dev/null; then
+    mv configure.in.new configure.in
+else
+    rm -f configure.in.new
+fi
+
+cat acconfig.h.in > acconfig.h.new
+confighfiles=`echo ext/*/config.h.stub`
+if test "$confighfiles" != "ext/*/config.h.stub"; then
+    for file in $confighfiles; do
+	cat $file >> acconfig.h.new
+    done
+fi
+if ! cmp acconfig.h acconfig.h.new 2>/dev/null; then
+    mv acconfig.h.new acconfig.h
+    autoheader
+else
+    rm -f acconfig.h.new
+fi
