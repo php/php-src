@@ -241,3 +241,7 @@ Guidance for when these instructions don't work.
 
    If all else fails, "man dlopen" on Unix systems will give more insight on 
    what the system is trying to do internally.
+
+   There have been some issues where users need to create a symbolic link 
+   from java.so to libphp_java.so.  If you notice a large number of unexplained 
+   crashes in your webserver log file, try doing this.  
