@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21.2.3 2003-05-19 13:14:06 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.21.2.4 2003-06-27 00:19:26 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -50,39 +50,17 @@ if test "$1" = "2" && test "$2" -ge "50"; then
   stamp=
 fi
 
-
-# automake 1.4 or newer
-am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
-am_version_clean=`echo $am_version|sed -e 's/-p[0-9]*$//'`
-if test "$am_version" = ""; then
-echo "buildconf: automake not found."
-echo "           You need automake version 1.4 or newer installed"
-echo "           to build PHP from CVS."
-exit 1
-fi
-IFS=.; set $am_version_clean; IFS=' '
-if test "$1" = "1" -a "$2" -lt "4" || test "$1" -lt "1"; then
-echo "buildconf: automake version $am_version found."
-echo "           You need automake version 1.4 or newer installed"
-echo "           to build PHP from CVS."
-exit 1
-else
-echo "buildconf: automake version $am_version (ok)"
-fi
-
-# libtool 1.4.3 or newer
-# Prefer glibtool over libtool for Mac OS X compatibility
-libtool=`./build/shtool path glibtool 2> /dev/null`
-if test ! -r "$libtool"; then libtool=`./build/shtool path libtool`; fi
-lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
+# libtoolize 1.4.3 or newer
+# Prefer glibtoolize over libtoolize for Mac OS X compatibility
+libtoolize=`./build/shtool path glibtoolize libtoolize 2> /dev/null`
+lt_pversion=`$libtoolize --version 2>/dev/null|sed -e 's/^[^0-9]*//'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.4.3 or newer installed"
 echo "           to build PHP from CVS."
 exit 1
 fi
-lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
-IFS=.; set $lt_version; IFS=' '
+IFS=.; set $lt_pversion; IFS=' '
 
 if test "$3" = ""; then
   third=0
@@ -100,12 +78,14 @@ echo "           to build PHP from CVS."
 exit 1
 fi
 
-am_prefix=`./build/shtool path automake | sed -e 's#/[^/]*/[^/]*$##'`
-lt_prefix=`echo $libtool | sed -e 's#/[^/]*/[^/]*$##'`
-if test "$am_prefix" != "$lt_prefix"; then
-    echo "WARNING: automake and libtool are installed in different"
-    echo "         directories.  This may cause aclocal to fail."
-    echo "         continuing anyway"
+ltpath=`echo $libtoolize | sed -e 's#/[^/]*/[^/]*$##'`
+ltfile="$ltpath/share/aclocal/libtool.m4"
+if test -r "$ltfile"; then
+  :
+else
+  echo "buildconf: $ltfile does not exist."
+  echo "           Please reinstall libtool."
+  exit 1
 fi
 
 test -n "$stamp" && touch $stamp
