@@ -850,6 +850,7 @@ int php_module_startup(sapi_module_struct *sf)
 
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
+	php_output_register_constants();
 
 	if (php_startup_ticks(PLS_C) == FAILURE) {
 		php_printf("Unable to start PHP ticks\n");
