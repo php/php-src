@@ -1,3 +1,27 @@
+2002-09-01  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - Udm_Cat_Path, Udm_Cat_List, Udm_Get_Doc_Count functions have been fixed
+      to work with mnogosearch-3.2.6 and later.
+    - Removed search words highlighting while getting document URL in
+      mnogosearch extention
+
+2002-09-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/main.c
+      main/output.c
+      main/php_globals.h
+      main/php_output.h
+      NEWS
+      php.ini-dist
+      php.ini-recommended:
+    Per discussion on #php.bugs (+1 from at least Derick and Jani), revert double_buffering.
+
+2002-09-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/config.m4:
+    Fix the shared build for real. (thanks to Brian France)
+
 2002-08-31  Jan Lehnardt  <jan@dasmoped.net>
 
     * ext/standard/info.c:  - cosmetics
