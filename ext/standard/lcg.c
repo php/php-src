@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -73,18 +73,22 @@ static void lcg_init_globals(LCGLS_D)
 #endif
 }
 
+#ifdef ZTS
+PHP_MINIT_FUNCTION(lcg)
+{
+	lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
+	return SUCCESS;
+}
+#else 
 PHP_RINIT_FUNCTION(lcg)
 {
 	if (!php_lcg_initialized) {
-#ifdef ZTS
-		lcg_globals_id = ts_allocate_id(sizeof(php_lcg_globals), (ts_allocate_ctor) lcg_init_globals, NULL);
-#else
 		lcg_init_globals();
-#endif
 		php_lcg_initialized = 1;
 	}
 	return SUCCESS;
 }
+#endif
 
 /* {{{ proto double lcg_value()
    Returns a value from the combined linear congruential generator */
