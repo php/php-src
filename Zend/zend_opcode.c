@@ -1,0 +1,375 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski                  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+#include <stdio.h>
+
+#include "zend.h"
+#include "zend_alloc.h"
+#include "zend_compile.h"
+#include "zend_variables.h"
+#include "zend_operators.h"
+#include "zend_extensions.h"
+#include "zend_API.h"
+
+static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array)
+{
+	if (extension->op_array_ctor) {
+		if (extension->resource_number>=0) {
+			extension->op_array_ctor(&op_array->reserved[extension->resource_number]);
+		} else {
+			extension->op_array_ctor(NULL);
+		}
+	}
+}
+
+
+static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend_op_array *op_array)
+{
+	if (extension->op_array_dtor) {
+		if (extension->resource_number>=0) {
+			extension->op_array_dtor(&op_array->reserved[extension->resource_number]);
+		} else {
+			extension->op_array_dtor(NULL);
+		}
+	}
+}
+
+
+static void op_array_alloc_ops(zend_op_array *op_array)
+{
+	op_array->opcodes = erealloc(op_array->opcodes, (op_array->size)*sizeof(zend_op));
+}
+
+
+
+void init_op_array(zend_op_array *op_array, int initial_ops_size)
+{
+	op_array->type = ZEND_USER_FUNCTION;
+#if SUPPORT_INTERACTIVE
+	CLS_FETCH();
+
+	op_array->start_op_number = op_array->end_op_number = op_array->last_executed_op_number = 0;
+	op_array->backpatch_count = 0;
+	if (EG(interactive)) {
+		/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
+		 * will become invalid
+		 */
+		initial_ops_size = 8192;
+	}
+#endif
+
+	op_array->refcount = (int *) emalloc(sizeof(int));
+	*op_array->refcount = 1;
+	op_array->size = initial_ops_size;
+	op_array->last = 0;
+	op_array->opcodes = NULL;
+	op_array_alloc_ops(op_array);
+
+	op_array->T = 0;
+
+	op_array->function_name = NULL;
+
+	op_array->arg_types = NULL;
+
+	op_array->brk_cont_array = NULL;
+	op_array->last_brk_cont = 0;
+	op_array->current_brk_cont = -1;
+
+	op_array->static_variables = NULL;
+
+	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_ctor_handler, op_array);
+}
+
+
+void destroy_zend_function(zend_function *function)
+{
+	switch (function->type) {
+		case ZEND_USER_FUNCTION:
+			destroy_op_array((zend_op_array *) function);
+			break;
+		case ZEND_INTERNAL_FUNCTION:
+			/* do nothing */
+			break;
+	}
+}
+
+void destroy_zend_class(zend_class_entry *ce)
+{
+	switch (ce->type) {
+		case ZEND_USER_CLASS:
+			efree(ce->name);
+			zend_hash_destroy(&ce->function_table);
+			zend_hash_destroy(&ce->default_properties);
+			break;
+		case ZEND_INTERNAL_CLASS:
+			free(ce->name);
+			zend_hash_destroy(&ce->function_table);
+			zend_hash_destroy(&ce->default_properties);
+			break;
+	}
+}
+
+
+ZEND_API void destroy_op_array(zend_op_array *op_array)
+{
+	zend_op *opline = op_array->opcodes;
+	zend_op *end = op_array->opcodes+op_array->last;
+
+	if (--(*op_array->refcount)>0) {
+		return;
+	}
+
+	efree(op_array->refcount);
+
+	while (opline<end) {
+		if (opline->op1.op_type==IS_CONST) {
+#if DEBUG_ZEND>2
+			printf("Reducing refcount for %x 1=>0 (destroying)\n", &opline->op1.u.constant);
+#endif
+			zval_dtor(&opline->op1.u.constant);
+		}
+		if (opline->op2.op_type==IS_CONST) {
+#if DEBUG_ZEND>2
+			printf("Reducing refcount for %x 1=>0 (destroying)\n", &opline->op2.u.constant);
+#endif
+			zval_dtor(&opline->op2.u.constant);
+		}
+		opline++;
+	}
+	efree(op_array->opcodes);
+	if (op_array->function_name) {
+		efree(op_array->function_name);
+	}
+	if (op_array->arg_types) {
+		efree(op_array->arg_types);
+	}
+	if (op_array->brk_cont_array) {
+		efree(op_array->brk_cont_array);
+	}
+	if (op_array->static_variables) {
+		zend_hash_destroy(op_array->static_variables);
+		efree(op_array->static_variables);
+	}
+	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_dtor_handler, op_array);
+}
+
+
+zend_op *get_next_op(zend_op_array *op_array CLS_DC)
+{
+	int next_op_num = op_array->last++;
+	zend_op *next_op;
+
+	if (next_op_num >= op_array->size) {
+#if SUPPORT_INTERACTIVE
+		ELS_FETCH();
+
+		if (EG(interactive)) {
+			/* we messed up */
+			zend_printf("Ran out of opcode space!\n"
+						"You should probably consider writing this huge script into a file!\n");
+			zend_bailout();
+		}
+#endif
+		op_array->size *= 2;
+		op_array_alloc_ops(op_array);
+	}
+	
+	next_op = &(op_array->opcodes[next_op_num]);
+	next_op->lineno = CG(zend_lineno);
+	next_op->filename = zend_get_compiled_filename();
+	next_op->result.op_type = IS_UNUSED;
+
+	return next_op;
+}
+
+
+int get_next_op_number(zend_op_array *op_array)
+{
+	return op_array->last;
+}
+
+
+
+
+zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
+{
+	op_array->last_brk_cont++;
+	op_array->brk_cont_array = erealloc(op_array->brk_cont_array, sizeof(zend_brk_cont_element)*op_array->last_brk_cont);
+	return &op_array->brk_cont_array[op_array->last_brk_cont-1];
+}
+
+
+static void zend_update_extended_info(zend_op_array *op_array)
+{
+	zend_op *opline = op_array->opcodes, *end=opline+op_array->last;
+
+	while (opline<end) {
+		if (opline->opcode == ZEND_EXT_STMT) {
+			if (opline+1<end) {
+				if ((opline+1)->opcode == ZEND_EXT_STMT) {
+					opline->opcode = ZEND_NOP;
+					opline++;
+					continue;
+				}
+				opline->lineno = (opline+1)->lineno;
+				opline->filename = (opline+1)->filename;
+			} else {
+				opline->opcode = ZEND_NOP;
+			}
+		}
+		opline++;
+	}
+	opline = get_next_op(op_array);
+	opline->opcode = ZEND_EXT_STMT;
+	opline->op1.op_type = IS_UNUSED;
+	opline->op2.op_type = IS_UNUSED;
+	if (op_array->last>0) {
+		opline->filename = op_array->opcodes[op_array->last-2].filename;
+		opline->lineno= op_array->opcodes[op_array->last-2].lineno;
+	}
+}
+
+
+
+static void zend_extension_op_array_handler(zend_extension *extension, zend_op_array *op_array)
+{
+	if (extension->op_array_handler) {
+		extension->op_array_handler(op_array);
+	}
+}
+
+
+int pass_two(zend_op_array *op_array)
+{
+	CLS_FETCH();
+
+	if (op_array->type != ZEND_USER_FUNCTION) {
+		return 0;
+	}
+	if (CG(extended_info)) {
+		zend_update_extended_info(op_array);
+	}
+	if (CG(handle_op_arrays)) {
+		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_handler, op_array);
+	}
+	return 0;
+}
+
+
+void pass_include_eval(zend_op_array *op_array)
+{
+	zend_op *opline=op_array->opcodes, *end=opline+op_array->last;
+
+	while (opline<end) {
+		if (opline->op1.op_type==IS_CONST) {
+			opline->op1.u.constant.is_ref = 1;
+		}
+		if (opline->op2.op_type==IS_CONST) {
+			opline->op2.u.constant.is_ref = 1;
+		}
+		opline++;
+	}
+}
+
+
+int print_class(zend_class_entry *class_entry)
+{
+	printf("Class %s:\n", class_entry->name);
+	zend_hash_apply(&class_entry->function_table, (int (*)(void *)) pass_two);
+	printf("End of class %s.\n\n", class_entry->name);
+	return 0;
+}
+
+ZEND_API void *get_unary_op(int opcode)
+{
+	switch(opcode) {
+		case ZEND_BW_NOT:
+			return (void *) bitwise_not_function;
+			break;
+		case ZEND_BOOL_NOT:
+			return (void *) boolean_not_function;
+			break;
+		default:
+			return (void *) NULL;
+			break;
+	}
+}
+
+
+ZEND_API void *get_binary_op(int opcode)
+{
+	switch (opcode) {
+		case ZEND_ADD:
+		case ZEND_ASSIGN_ADD:
+			return (void *) add_function;
+			break;
+		case ZEND_SUB:
+		case ZEND_ASSIGN_SUB:
+			return (void *) sub_function;
+			break;
+		case ZEND_MUL:
+		case ZEND_ASSIGN_MUL:
+			return (void *) mul_function;
+			break;
+		case ZEND_DIV:
+		case ZEND_ASSIGN_DIV:
+			return (void *) div_function;
+			break;
+		case ZEND_MOD:
+		case ZEND_ASSIGN_MOD:
+			return (void *) mod_function;
+			break;
+		case ZEND_SL:
+		case ZEND_ASSIGN_SL:
+			return (void *) shift_left_function;
+			break;
+		case ZEND_SR:
+		case ZEND_ASSIGN_SR:
+			return (void *) shift_right_function;
+			break;
+		case ZEND_CONCAT:
+		case ZEND_ASSIGN_CONCAT:
+			return (void *) concat_function;
+			break;
+		case ZEND_IS_EQUAL:
+			return (void *) is_equal_function;
+			break;
+		case ZEND_IS_NOT_EQUAL:
+			return (void *) is_not_equal_function;
+			break;
+		case ZEND_IS_SMALLER:
+			return (void *) is_smaller_function;
+			break;
+		case ZEND_IS_SMALLER_OR_EQUAL:
+			return (void *) is_smaller_or_equal_function;
+			break;
+		case ZEND_BW_OR:
+		case ZEND_ASSIGN_BW_OR:
+			return (void *) bitwise_or_function;
+			break;
+		case ZEND_BW_AND:
+		case ZEND_ASSIGN_BW_AND:
+			return (void *) bitwise_and_function;
+			break;
+		case ZEND_BW_XOR:
+		case ZEND_ASSIGN_BW_XOR:
+			return (void *) bitwise_xor_function;
+			break;
+		default:
+			return (void *) NULL;
+			break;
+	}
+}

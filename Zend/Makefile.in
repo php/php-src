@@ -1,0 +1,145 @@
+CC = @CC@
+AR = ar rc
+LIBNAME = libzend.a
+PROF_CFLAGS =
+CFLAGS_SHLIB = @CFLAGS_SHLIB@
+LDFLAGS_SHLIB = @LDFLAGS_SHLIB@
+LDFLAGS_SHLIB_EXPORT = @LDFLAGS_SHLIB_EXPORT@
+CPPFLAGS = @CPPFLAGS@
+CFLAGS = @CFLAGS@ $(CFLAGS_SHLIB) $(CPPFLAGS) $(INCLUDE) @DEBUG_CFLAGS@ $(PROF_CFLAGS)
+LDFLAGS = @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT)
+RANLIB = @RANLIB@
+YACC = @YACC@
+
+SOURCE = zend_alloc.c zend_compile.c zend_constants.c zend_execute.c zend_execute_API.c \
+       zend_highlight.c zend_llist.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
+       zend_stack.c zend_variables.c zend-parser.c zend-scanner.c zend.c zend_API.c zend_extensions.c \
+       zend_hash.c zend_list.c zend_indent.c
+       
+OBJS = zend_alloc.o zend_compile.o zend_constants.o zend_execute.o zend_execute_API.o \
+       zend_highlight.o zend_llist.o zend_opcode.o zend_operators.o zend_ptr_stack.o \
+       zend_stack.o zend_variables.o zend-parser.o zend-scanner.o zend.o zend_API.o zend_extensions.o \
+       zend_hash.o zend_list.o zend_indent.o
+
+LIBS = @LIBS@
+
+all:	$(LIBNAME)
+
+libzend.a: $(OBJS)
+	-rm -f libzend.a
+	$(AR) libzend.a $(OBJS)
+	$(RANLIB) libzend.a
+	
+zend-parser.h zend-parser.c: zend-parser.y
+	bison -p zend -v -d zend-parser.y -o zend-parser.c
+
+zend-scanner.o:
+	$(CC) $(CFLAGS) -w -c zend-scanner.c
+
+zend-scanner.c:  zend-scanner.l
+	flex -Pzend -ozend-scanner.c -i zend-scanner.l
+
+clean:  
+	-rm -f libzend.a *.o
+
+distclean: clean
+	-rm -f *-scanner.c *-parser.[ch] *.output
+	-rm -f config.status config.cache config.log
+	-rm -f Makefile Makefile.depend config.h
+
+.c.o:
+	@rm -f $@
+	$(CC) $(CFLAGS) -c $< -o $@
+	@bn=`echo $@ | sed -e 's#functions/##'`; test -f $@ || \
+	  (test "$@" != "$$bn" && test -f "$$bn" && mv $$bn $@)
+
+parser-scanner: zend-parser.c zend-parser.h zend-scanner.c
+
+depend:	parser-scanner
+	$(CC) $(CFLAGS) -MM $(SOURCE) | perl -pe 's|regex/regex.h||;' > Makefile.depend
+
+
+zend_alloc.o: zend_alloc.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h zend_globals.h zend_stack.h \
+ zend_ptr_stack.h zend_compile.h zend-parser.h zend_execute.h
+zend_compile.o: zend_compile.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_API.h modules.h zend_list.h zend_variables.h \
+ zend_operators.h
+zend_constants.o: zend_constants.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_constants.h \
+ zend_variables.h zend_operators.h zend_globals.h zend_stack.h \
+ zend_ptr_stack.h zend_compile.h zend-parser.h zend_execute.h
+zend_execute.o: zend_execute.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_API.h modules.h zend_list.h zend_variables.h \
+ zend_operators.h zend_constants.h zend_extensions.h
+zend_execute_API.o: zend_execute_API.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_API.h modules.h zend_list.h zend_variables.h \
+ zend_operators.h zend_constants.h zend_extensions.h
+zend_highlight.o: zend_highlight.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_highlight.h
+zend_llist.o: zend_llist.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h
+zend_opcode.o: zend_opcode.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_variables.h zend_operators.h zend_extensions.h \
+ zend_API.h modules.h zend_list.h
+zend_operators.o: zend_operators.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_operators.h \
+ zend_variables.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_compile.h zend-parser.h zend_execute.h
+zend_ptr_stack.o: zend_ptr_stack.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_ptr_stack.h
+zend_stack.o: zend_stack.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h zend_stack.h
+zend_variables.o: zend_variables.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_API.h \
+ modules.h zend_list.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_compile.h zend-parser.h zend_execute.h zend_constants.h \
+ zend_variables.h
+zend-parser.o: zend-parser.c zend_compile.h zend.h config.h \
+ config.unix.h zend_errors.h zend_alloc.h zend_hash.h zend_llist.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_list.h zend_API.h modules.h zend_variables.h \
+ zend_operators.h
+zend-scanner.o: zend-scanner.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend-scanner.h zend_highlight.h zend_constants.h \
+ zend_variables.h zend_operators.h
+zend.o: zend.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h zend_operators.h \
+ zend_variables.h zend_extensions.h zend_compile.h zend-parser.h \
+ zend_globals.h zend_stack.h zend_ptr_stack.h zend_execute.h modules.h \
+ zend_constants.h zend_list.h
+zend_API.o: zend_API.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h zend_variables.h zend_execute.h \
+ zend_compile.h zend-parser.h zend_globals.h zend_stack.h \
+ zend_ptr_stack.h zend_API.h modules.h zend_list.h zend_constants.h \
+ zend_operators.h
+zend_extensions.o: zend_extensions.c zend_extensions.h zend_compile.h \
+ zend.h config.h config.unix.h zend_errors.h zend_alloc.h zend_hash.h \
+ zend_llist.h zend-parser.h zend_globals.h zend_stack.h \
+ zend_ptr_stack.h zend_execute.h
+zend_hash.o: zend_hash.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h
+zend_list.o: zend_list.c zend.h config.h config.unix.h zend_errors.h \
+ zend_alloc.h zend_hash.h zend_llist.h zend_list.h zend_API.h \
+ modules.h zend_globals.h zend_stack.h zend_ptr_stack.h zend_compile.h \
+ zend-parser.h zend_execute.h
+zend_indent.o: zend_indent.c zend.h config.h config.unix.h \
+ zend_errors.h zend_alloc.h zend_hash.h zend_llist.h zend_compile.h \
+ zend-parser.h zend_globals.h zend_stack.h zend_ptr_stack.h \
+ zend_execute.h zend_indent.h
+
+# Local Variables:
+# tab-width: 4
+# End:

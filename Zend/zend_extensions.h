@@ -1,0 +1,90 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski                  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+#ifndef _ZEND_EXTENSIONS_H
+#define _ZEND_EXTENSIONS_H
+
+#include "zend_compile.h"
+
+#define ZEND_EXTENSION_API_NO		2
+
+typedef struct {
+	int zend_extension_api_no;
+	char *required_zend_version;
+	unsigned char thread_safe;
+} zend_extension_version_info;
+
+
+typedef struct _zend_extension zend_extension;
+
+struct _zend_extension {
+	char *name;
+	char *version;
+	char *author;
+	char *URL;
+	char *copyright;
+
+	void (*startup)(zend_extension *extension);
+	void (*shutdown)(zend_extension *extension);
+	void (*activate)();
+	void (*deactivate)();
+
+	void (*op_array_handler)(zend_op_array *op_array);
+	
+	void (*statement_handler)(zend_op_array *op_array);
+	void (*fcall_begin_handler)(zend_op_array *op_array);
+	void (*fcall_end_handler)(zend_op_array *op_array);
+
+	void (*op_array_ctor)(void **resource);
+	void (*op_array_dtor)(void **resource);
+
+	void *reserved1;
+	void *reserved2;
+	void *reserved3;
+	void *reserved4;
+	void *reserved5;
+	void *reserved6;
+	void *reserved7;
+	void *reserved8;
+
+	DL_HANDLE handle;
+	int resource_number;
+};
+
+
+ZEND_API int zend_get_resource_handle();
+
+#ifdef ZTS
+#define ZTS_V 1
+#else
+#define ZTS_V 0
+#endif
+
+
+#define ZEND_EXTENSION()	\
+	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, "0.80A", ZTS_V }
+
+#define STANDARD_ZEND_EXTENSION_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1
+
+
+ZEND_API extern zend_llist zend_extensions;
+
+void zend_extension_dtor(zend_extension *extension);
+int zend_load_extension(char *path);
+int zend_load_extensions(char **extension_paths);
+void zend_append_version_info(zend_extension *extension);
+
+#endif /* _ZEND_EXTENSIONS_H */

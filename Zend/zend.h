@@ -1,0 +1,205 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Andi Gutmans, Zeev Suraski                  |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+#ifndef _ZEND_H
+#define _ZEND_H
+
+#define ZEND_VERSION "0.80A"
+
+#include <stdio.h>
+
+/*
+ * general definitions
+ */
+
+#if WINNT||WIN32
+#include "config.w32.h"
+#else
+#include "config.h"
+#include "config.unix.h"
+#endif
+
+#include "zend_errors.h"
+#include "zend_alloc.h"
+
+
+#undef SUCCESS
+#undef FAILURE
+#define SUCCESS 0
+#define FAILURE -1				/* this MUST stay a negative number, or it may effect functions! */
+
+
+#include "zend_hash.h"
+#include "zend_llist.h"
+
+
+#define INTERNAL_FUNCTION_PARAMETERS HashTable *ht, zval *return_value, HashTable *list, HashTable *plist
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, list, plist
+
+/*
+ * zval
+ */
+typedef struct _zval_struct zval;
+typedef struct _zend_class_entry zend_class_entry;
+
+typedef union {
+	long lval;					/* long value */
+	double dval;				/* double value */
+	struct {
+		char *val;
+		int len;
+	} str;
+	char chval;					/* char value */
+	HashTable *ht;				/* hash table value */
+	struct {
+		zend_class_entry *ce;
+		HashTable *properties;
+	} obj;
+} zvalue_value;
+
+
+struct _zval_struct {
+	/* Variable information */
+	zvalue_value value;		/* value */
+	unsigned char type;	/* active type */
+	unsigned char is_ref;
+	short refcount;
+};
+
+
+
+typedef struct {
+	char *fname;
+	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	unsigned char *func_arg_types;
+} function_entry;
+
+
+typedef struct {
+	int type;  /* read, write or r/w */
+	zval **object;
+	zend_llist elements_list;
+} zend_property_reference;
+
+
+
+typedef struct {
+	int type;		/* array offset or object proprety */
+	zval element;
+} zend_overloaded_element;
+
+
+struct _zend_class_entry {
+	char type;
+	char *name;
+	uint name_length;
+	struct _zend_class_entry *parent; 
+
+	HashTable function_table;
+	HashTable default_properties;
+
+	/* handlers */
+	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+	zval (*handle_property_get)(zend_property_reference *property_reference);
+	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
+};
+
+
+
+typedef struct {
+	void (*error_function)(int type, const char *format, ...);
+	int (*printf_function)(const char *format, ...);
+	int (*write_function)(const char *str, uint str_length);
+	FILE *(*fopen_function)(const char *filename);
+	void (*message_handler)(long message, void *data);
+	void (*block_interruptions)();
+	void (*unblock_interruptions)();
+} zend_utility_functions;
+
+		
+typedef struct {
+	unsigned char short_tags;
+	unsigned char asp_tags;
+} zend_utility_values;
+
+
+#undef MIN
+#undef MAX
+#define MAX(a,b)  (((a)>(b))?(a):(b))
+#define MIN(a,b)  (((a)<(b))?(a):(b))
+
+/* data types */
+#define IS_LONG		1
+#define IS_DOUBLE	2
+#define IS_STRING	3
+#define IS_ARRAY	4
+#define IS_OBJECT	5
+#define IS_BC 		6 /* for parser internal use only */
+#define IS_BOOL		7
+#define IS_RESOURCE 8
+#define IS_CONSTANT	9
+#define IS_METHOD	10 /* for overloaded function calls */
+
+int zend_startup(zend_utility_functions *utility_functions, zend_utility_values *utility_values, char **extensions);
+void zend_shutdown();
+ZEND_API void zend_bailout();
+ZEND_API char *get_zend_version();
+
+ZEND_API int zend_print_zval(zval *expr, int indent);
+ZEND_API void zend_print_zval_r(zval *expr, int indent);
+
+ZEND_API extern char *empty_string;
+ZEND_API extern char *undefined_variable_string;
+
+#define STR_FREE(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree(ptr); }
+
+
+/* output support */
+#define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
+#define ZEND_PUTS(str)					zend_write((str), strlen((str)))
+#define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
+
+extern ZEND_API int (*zend_printf)(const char *format, ...);
+extern ZEND_API int (*zend_write)(const char *str, uint str_length);
+extern ZEND_API void (*zend_error)(int type, const char *format, ...);
+extern FILE *(*zend_fopen)(const char *filename);
+extern void (*zend_message_dispatcher)(long message, void *data);
+extern void (*zend_block_interruptions)();
+extern void (*zend_unblock_interruptions)();
+
+
+void zenderror(char *error);
+
+extern zend_class_entry standard_class;
+extern zend_utility_values zend_uv;
+
+#define ZEND_UV(name) (zend_uv.name)
+
+
+#define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
+#define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+
+
+
+
+/* Messages for applications of Zend */
+#define ZMSG_ENABLE_TRACK_VARS			1L
+#define ZMSG_FAILED_INCLUDE_FOPEN		2L
+#define ZMSG_FAILED_REQUIRE_FOPEN		3L
+#define ZMSG_FAILED_HIGHLIGHT_FOPEN		4L
+#define ZMSG_MEMORY_LEAK_DETECTED		5L
+
+#endif /* _ZEND_H */
