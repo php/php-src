@@ -113,16 +113,16 @@ mode=print: test error[pear_error: message="test error" code=-42 mode=print leve
 mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" prepend="" append="" info=""]
 mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" prepend="" append="" info=""]
 mode=print&trigger: test error<br>
-<b>Notice</b>:  test error in <b>/usr/local/lib/php/PEAR.php</b> on line <b>413</b><br>
+<b>Notice</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append="" info=""]
 mode=trigger: <br>
-<b>Notice</b>:  test error in <b>/usr/local/lib/php/PEAR.php</b> on line <b>413</b><br>
+<b>Notice</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
 mode=trigger,level=notice: <br>
-<b>Notice</b>:  test error in <b>/usr/local/lib/php/PEAR.php</b> on line <b>413</b><br>
+<b>Notice</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
 mode=trigger,level=warning: <br>
-<b>Warning</b>:  test error in <b>/usr/local/lib/php/PEAR.php</b> on line <b>413</b><br>
+<b>Warning</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append="" info=""]
 mode=trigger,level=error: <br>
-<b>Fatal error</b>:  test error in <b>/usr/local/lib/php/PEAR.php</b> on line <b>413</b><br>
+<b>Fatal error</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>

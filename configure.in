@@ -461,24 +461,10 @@ fi
 
 divert(4)
 
-
-
-PHP_ARG_WITH(config-file-path,whether to use a configuration file,
+PHP_ARG_WITH(config-file-path,[path to configuration file],
 [  --with-config-file-path=PATH  
                           Sets the path in which to look for php.ini.
-                          defaults to /usr/local/lib], yes)
-
-if test "$PHP_CONFIG_FILE_PATH" = "yes"; then
-  PHP_CONFIG_FILE_PATH="/usr/local/lib"
-fi
-
-if test "$PHP_CONFIG_FILE_PATH" != "no"; then
-  AC_DEFINE_UNQUOTED(CONFIGURATION_FILE_PATH, "$PHP_CONFIG_FILE_PATH",[ ])
-  AC_DEFINE(USE_CONFIG_FILE, 1, [ ])
-else
-  AC_DEFINE(CONFIGURATION_FILE_PATH, 0, [ ])
-  AC_DEFINE(USE_CONFIG_FILE, 0, [ ])
-fi
+                          defaults to --sysconfdir, "none" to disable], $sysconfdir)
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
 [  --enable-debug          Compile with debugging symbols.], no)
@@ -524,6 +510,20 @@ AC_ARG_WITH(exec-dir,
 	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
    	AC_MSG_RESULT(/usr/local/php/bin)
 ])
+
+# compatibility
+if test "x$with_pear" = "x" -a "x$enable_pear" = "xno"; then
+    with_pear="no"
+fi
+
+PHP_ARG_WITH(pear, [whether to install PEAR, and where],
+[  --with-pear=DIR         Install PEAR in DIR (default \$datadir/php/pear)
+  --without-pear          Do not install PEAR], $datadir/php/pear)
+
+if test "$PHP_PEAR" != "no"; then
+  PEAR_DIR=pear
+  PEAR_INSTALLDIR="$PHP_PEAR"
+fi
 
 PHP_ARG_WITH(openssl,for OpenSSL support,
 [  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ])
@@ -590,13 +590,6 @@ if test "$PHP_DMALLOC" = "yes"; then
   AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
   PHP_ADD_LIBRARY(dmalloc)
   CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
-fi
-
-PHP_ARG_ENABLE(pear,whether to install PEAR,
-[  --disable-pear          Do not install PEAR],yes)
-
-if test "$PHP_PEAR" = "yes"; then
-  PEAR_DIR=pear
 fi
 
 # temporary until streams are better integrated
@@ -703,31 +696,67 @@ $php_shtool mkdir -p $phplibdir
 phptempdir="`pwd`/libs"
 
 test "$prefix" = "NONE" && prefix="/usr/local"
-test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
+case $libdir in
+  */php) ;;
+  *) libdir="$libdir/php";;
+esac
+case $datadir in
+  */php) ;;
+  *) datadir="$datadir/php";;
+esac
 
 dnl Build extension directory path
 
-if test "$PHP_DEBUG" = "1"; then
-  PART1=debug
-else
-  PART1=no-debug
-fi
-
-if test "$enable_experimental_zts" = "yes"; then
-  PART2=zts
-else
-  PART2=non-zts
-fi
-
 ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
 
-if test -z "$PEAR_INSTALLDIR"; then
-  PEAR_INSTALLDIR="$prefix/lib/php"
+extbasedir="$ZEND_MODULE_API_NO"
+
+if test "$enable_experimental_zts" = "yes"; then
+  extbasedir="${extbasedir}-zts"
 fi
 
-EXTENSION_DIR="${PEAR_INSTALLDIR}/extensions/$PART1-$PART2-$ZEND_MODULE_API_NO"
+if test "$PHP_DEBUG" = "1"; then
+  extbasedir="${extbasedir}-debug"
+fi
 
-INCLUDE_PATH=".:${PEAR_INSTALLDIR}"
+if test "x$PEAR_INSTALLDIR" = "x"; then
+  PEAR_INSTALLDIR="$datadir/pear"
+fi
+
+if test "x$EXTENSION_DIR" = "x"; then
+  EXTENSION_DIR="$libdir/$extbasedir"
+fi
+
+old_exec_prefix="$exec_prefix"
+old_libdir="$libdir"
+old_datadir="$datadir"
+exec_prefix=`eval echo $exec_prefix`
+libdir=`eval echo $libdir`
+datadir=`eval echo $datadir`
+EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
+EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
+EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
+EXPANDED_BINDIR=`eval echo $bindir`
+EXPANDED_LIBDIR="$libdir"
+EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
+EXPANDED_DATADIR="$datadir"
+EXPANDED_PHP_CONFIG_FILE_PATH=`eval echo "$PHP_CONFIG_FILE_PATH"`
+INCLUDE_PATH=".:${EXPANDED_PEAR_INSTALLDIR}"
+
+exec_prefix="$old_exec_prefix"
+libdir="$old_libdir"
+datadir="$old_datadir"
+
+AC_SUBST(INCLUDE_PATH)
+AC_SUBST(EXPANDED_PEAR_INSTALLDIR)
+AC_SUBST(EXPANDED_EXTENSION_DIR)
+AC_SUBST(EXPANDED_BINDIR)
+AC_SUBST(EXPANDED_LIBDIR)
+AC_SUBST(EXPANDED_DATADIR)
+AC_SUBST(EXPANDED_SYSCONFDIR)
+AC_SUBST(EXPANDED_LOCALSTATEDIR)
+AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
 
 PHP_BUILD_RPATH
 
@@ -752,6 +781,8 @@ PHP_SUBST(phplibdir)
 PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
 PHP_SUBST(localstatedir)
+PHP_SUBST(datadir)
+PHP_SUBST(sysconfdir)
 
 PHP_SUBST(AWK)
 PHP_SUBST(CC)
@@ -856,7 +887,7 @@ PHP_GEN_CONFIG_VARS
 
 $php_shtool mkdir -p pear/scripts
 ALL_OUTPUT_FILES="php4.spec Zend/Makefile main/build-defs.h \
-pear/scripts/pear pear/scripts/phpize pear/scripts/php-config pear/PEAR.php \
+pear/scripts/pear pear/scripts/phpize pear/scripts/php-config \
 TSRM/Makefile $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [

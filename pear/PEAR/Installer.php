@@ -18,7 +18,7 @@
 // +----------------------------------------------------------------------+
 //
 
-require_once "PEAR.php";
+require_once "PEAR/Common.php";
 
 /**
  * Administration class used to install PEAR packages and maintain the
@@ -27,21 +27,9 @@ require_once "PEAR.php";
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
  */
-class PEAR_Installer extends PEAR
+class PEAR_Installer extends PEAR_Common
 {
     // {{{ properties
-
-    /** stack of elements, gives some sort of XML context */
-    var $element_stack;
-
-    /** name of currently parsed XML element */
-    var $current_element;
-
-    /** array of attributes of the currently parsed XML element */
-    var $current_attributes = array();
-
-    /** assoc with information about the package */
-    var $pkginfo = array();
 
     /** name of the package directory, for example Foo-1.0 */
     var $pkgdir;
@@ -75,9 +63,6 @@ class PEAR_Installer extends PEAR
     /** file pointer for package list file if open */
     var $pkglist_fp;
 
-    /** list of temporary files created by this object */
-    var $_tempfiles = array();
-
     // }}}
 
     // {{{ constructor
@@ -98,7 +83,6 @@ class PEAR_Installer extends PEAR
     // {{{ destructor
 
     function _PEAR_Installer() {
-	$this->_PEAR();
 	if ($this->tmpdir && is_dir($this->tmpdir)) {
 	    system("rm -rf $this->tmpdir"); // XXX FIXME Windows
 	}
@@ -108,15 +92,7 @@ class PEAR_Installer extends PEAR
 	}
 	$this->tmpdir = null;
 	$this->pkglist_fp = null;
-        while (is_array($this->_tempfiles) &&
-               $file = array_shift($this->_tempfiles))
-        {
-            if (is_dir($file)) {
-                system("rm -rf $file"); // XXX FIXME Windows
-            } else {
-                unlink($file);
-            }
-        }
+	$this->_PEAR_Common();
     }
 
     // }}}
@@ -261,7 +237,7 @@ class PEAR_Installer extends PEAR
 
         if ($need_download) {
             $file = basename($pkgfile);
-            // XXX FIXME Windows
+            // XXX FIXME use ??? on Windows, use $TMPDIR on unix
             $downloaddir = "/tmp/pearinstall";
             $this->mkDirHier($downloaddir);
             $downloadfile = $downloaddir.DIRECTORY_SEPARATOR.$file;
@@ -274,6 +250,7 @@ class PEAR_Installer extends PEAR
             if (!$wp) {
                 return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
             }
+            $this->addTempFile($downloadfile);
             $bytes = 0;
             while ($data = @fread($fp, 16384)) {
                 $bytes += strlen($data);
@@ -285,9 +262,8 @@ class PEAR_Installer extends PEAR
             fclose($fp);
             fclose($wp);
             $this->log(1, "...done, $bytes bytes");
-            $this->tempfiles[] = $downloadfile;
         }
-        // XXX FIXME need internal support for gzip+tar
+        // XXX FIXME depends on external gzip+tar
 	$fp = popen("gzip -dc $pkgfile | tar -tf -", "r");
 	if (!$fp) {
 	    return $this->raiseError("Unable to examine $pkgfile (gzip or tar failed)");
@@ -313,9 +289,10 @@ class PEAR_Installer extends PEAR
 	if (!mkdir($this->tmpdir, 0755)) {
 	    return $this->raiseError("Unable to create temporary directory $this->tmpdir.");
 	}
-        $this->tempfiles[] = $this->tmpdir;
+        $this->addTempFile($this->tmpdir);
 	$pwd = getcwd();
 
+        // XXX FIXME Windows should check for drive
 	if (substr($pkgfile, 0, 1) == DIRECTORY_SEPARATOR) {
 	    $pkgfilepath = $pkgfile;
 	} else {

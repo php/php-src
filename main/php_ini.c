@@ -18,12 +18,12 @@
 
 
 #include "php.h"
+#include "build-defs.h"
 #include "ext/standard/info.h"
 #include "zend_ini.h"
 #include "php_ini.h"
 #include "ext/standard/dl.h"
 #include "zend_extensions.h"
-
 
 typedef struct _php_extension_lists {
 	zend_llist engine;
@@ -210,7 +210,7 @@ int php_init_config(char *php_ini_path_override)
 		}
 		free_default_location=1;
 #else
-		default_location = CONFIGURATION_FILE_PATH;
+		default_location = PHP_CONFIG_FILE_PATH;
 		free_default_location=0;
 #endif
 		php_ini_search_path = (char *) emalloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
@@ -332,3 +332,11 @@ PHPAPI int cfg_get_string(char *varname, char **result)
 	*result = tmp->value.str.val;
 	return SUCCESS;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

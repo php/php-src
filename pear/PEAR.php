@@ -26,10 +26,6 @@ define('PEAR_ERROR_TRIGGER', 4);
 define('PEAR_ERROR_DIE', 8);
 define('PEAR_ERROR_CALLBACK', 16);
 
-define('PHP_BINDIR', '@prefix@/bin');
-define('PEAR_INSTALL_DIR', '@PEAR_INSTALLDIR@');
-define('PEAR_EXTENSION_DIR', '@EXTENSION_DIR@');
-
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     define('OS_WINDOWS', true);
     define('OS_UNIX', false);
@@ -40,18 +36,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     define('PEAR_OS', 'Unix'); // blatant assumption
 }
 
-if (!defined("DIRECTORY_SEPARATOR")) {
-    if (OS_WINDOWS) {
-        define("DIRECTORY_SEPARATOR", "\\");
-    } else {
-        define("DIRECTORY_SEPARATOR", "/");
-    }
-}
-
-$_PEAR_default_error_mode = PEAR_ERROR_RETURN;
-$_PEAR_default_error_options = E_USER_NOTICE;
-$_PEAR_default_error_callback = '';
-$_PEAR_destructor_object_list = array();
+$GLOBALS['_PEAR_default_error_mode'] = PEAR_ERROR_RETURN;
+$GLOBALS['_PEAR_default_error_options'] = E_USER_NOTICE;
+$GLOBALS['_PEAR_default_error_callback'] = '';
+$GLOBALS['_PEAR_destructor_object_list'] = array();
 
 //
 // Tests needed: - PEAR inheritance
