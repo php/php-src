@@ -79,8 +79,8 @@ static void print_hash(HashTable *ht, int indent)
 {
 	zval **tmp;
 	char *string_key;
-	Bucket *save_internal_pointer;
-	unsigned long num_key;
+	HashPosition iterator;
+	unsigned long num_key, str_len;
 	int i;
 
 	for (i=0; i<indent; i++) {
@@ -88,14 +88,13 @@ static void print_hash(HashTable *ht, int indent)
 	}
 	ZEND_PUTS("(\n");
 	indent += PRINT_ZVAL_INDENT;
-	save_internal_pointer = ht->pInternalPointer;
-	zend_hash_internal_pointer_reset(ht);
-	while (zend_hash_get_current_data(ht, (void **) &tmp) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(ht, &iterator);
+	while (zend_hash_get_current_data_ex(ht, (void **) &tmp, &iterator) == SUCCESS) {
 		for (i=0; i<indent; i++) {
 			ZEND_PUTS(" ");
 		}
 		ZEND_PUTS("[");
-		switch (zend_hash_get_current_key(ht, &string_key, &num_key)) {
+		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, &iterator)) {
 			case HASH_KEY_IS_STRING:
 				ZEND_PUTS(string_key);
 				efree(string_key);
@@ -107,14 +106,13 @@ static void print_hash(HashTable *ht, int indent)
 		ZEND_PUTS("] => ");
 		zend_print_zval_r(*tmp, indent+PRINT_ZVAL_INDENT);
 		ZEND_PUTS("\n");
-		zend_hash_move_forward(ht);
+		zend_hash_move_forward_ex(ht, &iterator);
 	}
 	indent -= PRINT_ZVAL_INDENT;
 	for (i=0; i<indent; i++) {
 		ZEND_PUTS(" ");
 	}
 	ZEND_PUTS(")\n");
-	ht->pInternalPointer = save_internal_pointer;
 }
 
 
