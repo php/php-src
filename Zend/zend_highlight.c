@@ -185,41 +185,36 @@ ZEND_API void zend_strip(TSRMLS_D)
 {
 	zval token;
 	int token_type;
+	int prev_space = 0;
 
 	token.type = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
+			case T_WHITESPACE:
+				if (!prev_space) {
+					putchar(' ');
+					prev_space = 1;
+				}
+						/* lack of break; is intentional */
 			case T_COMMENT:
 				token.type = 0;
 				continue;
-
-			case T_WHITESPACE:
-				if (token.type) {
-					putchar(' ');
-					token.type = 0;
-				}
-				continue;
-		}
-
-		switch (token_type) {
-			case T_CLASS:
-				break;
-
-			default: {
+			
+			case T_END_HEREDOC: {
 					char *ptr = LANG_SCNG(yy_text);
 
-					if (token_type != T_END_HEREDOC) {
-						fwrite(ptr, LANG_SCNG(yy_leng), 1, stdout);
-					} else {
-						fwrite(ptr, LANG_SCNG(yy_leng) - 1, 1, stdout);
-						/* The ensure that we only write one ; and that it followed by the required newline */
-						putchar('\n');
-						if (ptr[LANG_SCNG(yy_leng) - 1] == ';') {
-							lex_scan(&token TSRMLS_CC);
-						}
-						efree(token.value.str.val);
+					fwrite(ptr, LANG_SCNG(yy_leng) - 1, 1, stdout);
+					/* The ensure that we only write one ; and that it followed by the required newline */
+					putchar('\n');
+					if (ptr[LANG_SCNG(yy_leng) - 1] == ';') {
+						lex_scan(&token TSRMLS_CC);
 					}
+					efree(token.value.str.val);
 				}
+				break;
+			
+			default:
+				fwrite(LANG_SCNG(yy_text), LANG_SCNG(yy_leng), 1, stdout);
 				break;
 		}
 
@@ -237,7 +232,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 			}
 		}
-		token.type = 0;
+		prev_space = token.type = 0;
 	}
 }
 
@@ -248,3 +243,4 @@ ZEND_API void zend_strip(TSRMLS_D)
  * indent-tabs-mode: t
  * End:
  */
+
