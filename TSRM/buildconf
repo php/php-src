@@ -9,7 +9,7 @@ else
     echo "buildconf: created or modified ${1}aclocal.m4"
 fi
 
-autoheader
+#autoheader
 
 automake --add-missing --include-deps
 
