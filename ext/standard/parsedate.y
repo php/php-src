@@ -1079,7 +1079,7 @@ time_t php_parse_date(char *p, time_t *now)
   tm.tm_year = ToYear (date.yyYear) - TM_YEAR_ORIGIN + date.yyRelYear;
   tm.tm_mon = date.yyMonth - 1 + date.yyRelMonth;
   tm.tm_mday = date.yyDay + date.yyRelDay;
-  if (date.yyHaveTime /*|| (date.yyHaveRel && !date.yyHaveDate && !date.yyHaveDay) */)
+  if (date.yyHaveTime || (date.yyHaveRel && !date.yyHaveDate && !date.yyHaveDay))
     {
       tm.tm_hour = ToHour (date.yyHour, date.yyMeridian);
       if (tm.tm_hour < 0)
