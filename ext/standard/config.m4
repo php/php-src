@@ -224,8 +224,9 @@ AC_ARG_WITH(regex,
 ],[
   REGEX_TYPE=php
 ])
-	
-AC_CHECK_FUNCS(fnmatch glob)
+
+AC_FUNC_FNMATCH	
+AC_CHECK_FUNCS(glob)
 
 AC_CHECK_FUNCS(strfmon)
 
