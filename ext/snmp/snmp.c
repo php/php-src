@@ -148,7 +148,8 @@ PHP_MINFO_FUNCTION(snmp)
 * st=11  snmpset() - query an agent and set a single value
 *
 */
-void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
+static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) 
+{
 	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7;
 	struct snmp_session session, *ss;
 	struct snmp_pdu *pdu=NULL, *response;
@@ -215,15 +216,16 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	
 	if (st >= 2) { /* walk */
 		rootlen = MAX_NAME_LEN;
-		if ( strlen(objid) ) { /* on a walk, an empty string means top of tree - no error */
-			if ( read_objid(objid, root, &rootlen) ) {
+		if (strlen(objid)) { /* on a walk, an empty string means top of tree - no error */
+			if (read_objid(objid, root, &rootlen)) {
 				gotroot = 1;
 			} else {
 				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
 			}
 		}
-		if (gotroot == 0) {
-			memmove((char *)root, (char *)objid_mib, sizeof(objid_mib));
+
+		if (!gotroot) {
+			memmove((char *) root, (char *) objid_mib, sizeof(objid_mib));
 			rootlen = sizeof(objid_mib) / sizeof(oid);
 			gotroot = 1;
 		}
@@ -281,12 +283,12 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		}
 	}
 
-	while(keepwalking) {
-		keepwalking=0;
+	while (keepwalking) {
+		keepwalking = 0;
 		if (st == 1) {
 			pdu = snmp_pdu_create(SNMP_MSG_GET);
 			name_length = MAX_NAME_LEN;
-			if ( !read_objid(objid, name, &name_length) ) {
+			if (!read_objid(objid, name, &name_length)1) {
 				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
 				snmp_close(ss);
 				RETURN_FALSE;
@@ -317,9 +319,7 @@ retry:
 					if (st != 11) {
 						sprint_value((struct sbuf *)buf,vars->name, vars->name_length, vars);
 					}
-#if 0
-					Debug("snmp response is: %s\n",buf);
-#endif
+
 					if (st == 1) {
 						RETVAL_STRING(buf,1);
 					} else if (st == 2) {
