@@ -34,7 +34,7 @@ enum REQ_TYPES
 {
 	REQ_ERR,
 	REQ_OK,
-	REQ_STAT,
+	REQ_CTL,
 	REQ_SETVAL,
 	REQ_GETVAL,
 	REQ_CREATE,
@@ -55,9 +55,13 @@ enum REQ_TYPES
 	REQ_RANDSTR,
 	REQ_PLUGIN,
 	REQ_CALL,
+	REQ_SERIALIZE,
 	REQ_LAST,
-	REQ_POPEN=1024,
-	REQ_PCLOSE
+	REQ_INTERNAL_BEGIN=1023,
+	REQ_POPEN,
+	REQ_PCLOSE,
+	REQ_LOADDLL,
+	REQ_INTERNALLAST,
 };
 enum REQ_ERRORS
 {
@@ -102,6 +106,15 @@ typedef struct _requestBuf
 
 #define REQB_STATIC	1
 #define REQB_DYNAMIC	2
+
+#define REQ_STAT_EXIST	0
+#define REQ_STAT_TTL	1	
+#define REQ_STAT_AGE	2
+#define REQ_STAT_TLA	3
+#define REQ_STAT_CTIM	4
+#define REQ_STAT_TOUCH	5
+#define REQ_STAT_NOW	6
+
 
 #define STATIC_REQB( len )	\
 	char buffer [ len ]; 	\

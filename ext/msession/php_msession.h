@@ -44,6 +44,7 @@ PHP_FUNCTION(msession_connect);
 PHP_FUNCTION(msession_disconnect);
 PHP_FUNCTION(msession_lock);
 PHP_FUNCTION(msession_unlock);
+PHP_FUNCTION(msession_ctl);
 PHP_FUNCTION(msession_count);
 PHP_FUNCTION(msession_create);
 PHP_FUNCTION(msession_destroy);
