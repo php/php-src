@@ -476,7 +476,7 @@ xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding)
 	while (pos > 0) {
 		c = encoder ? encoder((unsigned char)(*s)) : (unsigned short)(*s);
 		if (c < 0x80) {
-			newbuf[(*newlen)++] = c;
+			newbuf[(*newlen)++] = (char) c;
 		} else if (c < 0x800) {
 			newbuf[(*newlen)++] = (0xc0 | (c >> 6));
 			newbuf[(*newlen)++] = (0x80 | (c & 0x3f));
