@@ -65,7 +65,7 @@ snapshot:
 	md5sum $$distname.tar.bz2; \
 	bzip2 -t $$distname.tar.bz2
 
-cvsclean:
+cvsclean-work:
 	@for i in `find . -name .cvsignore`; do \
 		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore | grep -v config.nice` *.o *.a .libs || true); \
 	done
