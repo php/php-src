@@ -3,6 +3,7 @@ Installing PHP
      _________________________________________________________________
 
    Table of Contents
+   Preface
    1. General Installation Considerations
    2. Installation on Windows systems
 
@@ -10,7 +11,7 @@ Installing PHP
         Manual Installation Steps
         ActiveScript
         Microsoft IIS / PWS
-        Apache 1.3.x on Microsft Windows
+        Apache 1.3.x on Microsoft Windows
         Apache 2.0.x on Microsoft Windows
         Sun, iPlanet and Netscape servers on Microsoft Windows
         OmniHTTPd Server
@@ -18,16 +19,32 @@ Installing PHP
         Xitami on Microsoft Windows
         Installation of extensions on Windows
 
-   3. Problems?
+   3. Installation of PECL extensions
+
+        Introduction to PECL Installations
+        Downloading PECL extensions
+        PECL for Windows users
+        Compiling shared PECL extensions with PEAR
+        Compiling shared PECL extensions with phpize
+        Compiling PECL extensions statically into PHP
+
+   4. Problems?
 
         Read the FAQ
         Other problems
         Bug reports
 
-   4. Runtime Configuration
+   5. Runtime Configuration
 
         The configuration file
         How to change configuration settings
+     _________________________________________________________________
+
+Preface
+
+   These installation instructions were generated from the HTML version
+   of the PHP Manual so formatting and linking have been altered. See the
+   online and updated version at: http://php.net/install.windows
      _________________________________________________________________
 
 Chapter 1. General Installation Considerations
@@ -129,12 +146,9 @@ Windows Installer
    can, and advanced, which asks questions as it goes along.
 
    The installation wizard gathers enough information to set up the
-   php.ini file, and configure certain web servers to use PHP. With IIS
-   or PWS on a NT Workstation, a list of all the nodes on the server with
-   script map settings is displayed, and you can choose those nodes to
-   which you wish to add the PHP script mappings. One of the web servers
-   the PHP installer does not configure for is Apache, so you'll need to
-   configure it manually.
+   php.ini file, and configure certain web servers to use PHP. One of the
+   web servers the PHP installer does not configure for is Apache, so
+   you'll need to configure it manually.
 
    Once the installation has completed, the installer will inform you if
    you need to restart your system, restart the server, or just start
@@ -401,7 +415,7 @@ c:\php
        follow the next step. Set the doc_root to point to your web
        servers document_root. For example:
 
-doc_root = c:\inetpub       // for IIS/PWS
+doc_root = c:\inetpub\wwwroot // for IIS/PWS
 
 doc_root = c:\apache\htdocs // for Apache
 
@@ -430,7 +444,7 @@ ActiveScript
    ASP/ASP.NET, Windows Script Components or Microsoft Scriptlet control.
 
    As of PHP 5.0.1, ActiveScript has been moved to the PECL repository.
-   You may download this PECL extensions DLL from the PHP Downloads page
+   You may download this PECL extension DLL from the PHP Downloads page
    or at http://snaps.php.net/.
 
      Note: You should read the manual installation steps first!
@@ -466,18 +480,131 @@ ActiveScript
 Microsoft IIS / PWS
 
    This section contains notes and hints specific to IIS (Microsoft
-   Internet Information Server). We have included installation
-   instructions for PWS/IIS 3, PWS 4 or newer and IIS 4 or newer
-   versions.
-
-     Important for CGI users: Read the faq on cgi.force_redirect for
-     important details. This directive needs to be set to 0.
+   Internet Information Server).
 
    Warning
 
    By using the CGI setup, your server is open to several possible
    attacks. Please read our CGI security section to learn how to defend
    yourself from those attacks.
+     _________________________________________________________________
+
+General considerations for all installations of PHP with IIS
+
+     * First, read the Manual Installation Instructions. Do not skip this
+       step as it provides crucial information for installing PHP on
+       Windows.
+     * CGI users must set the cgi.force_redirect PHP directive to 0
+       inside php.ini. Read the faq on cgi.force_redirect for important
+       details. Also, CGI users should set the cgi.redirect_status_env
+       directive to ENV_VAR_NAME. Be sure these directives aren't
+       commented out inside php.ini.
+     * The PHP 4 CGI is named php.exe while in PHP 5 it's php-cgi.exe. In
+       PHP 5, php.exe is the CLI, and not the CGI.
+     * Modify the Windows PATH environment variable to include the PHP
+       directory. This way the PHP DLL files, PHP executables, and
+       php.ini can all remain in the PHP directory without cluttering up
+       the Windows system directory. For more details, see the FAQ on
+       Setting the PATH.
+     * Be sure the extension_dir and doc_root PHP directives are
+       appropriately set in php.ini. These directives depend on the
+       system that PHP is being installed on. In PHP 4, the extension_dir
+       is extensions while with PHP 5 it's ext. So, an example PHP 5
+       extensions_dir value is "c:\php\ext" and an example IIS doc_root
+       value is "c:\Inetpub\wwwroot".
+     * PHP extension DLL files, such as php_mysql.dll and php_curl.dll,
+       are found in the zip package of the PHP download (not the PHP
+       installer). In PHP 5, many extensions are part of PECL and can be
+       downloaded in the "Collection of PECL modules" package. Files such
+       as php_zip.dll and php_ssh2.dll. Download PHP files here.
+     * When defining the executable, the 'check that file exists' box may
+       also be checked. For a small performance penalty, the IIS (or PWS)
+       will check that the script file exists and sort out authentication
+       before firing up PHP. This means that the web server will provide
+       sensible 404 style error messages instead of CGI errors
+       complaining that PHP did not output any data.
+     _________________________________________________________________
+
+Windows NT/200x/XP and IIS 4 or newer
+
+   PHP may be installed as a CGI binary, or with the ISAPI module. In
+   either case, you need to start the Microsoft Management Console (may
+   appear as 'Internet Services Manager', either in your Windows NT 4.0
+   Option Pack branch or the Control Panel=>Administrative Tools under
+   Windows 2000/XP). Then right click on your Web server node (this will
+   most probably appear as 'Default Web Server'), and select
+   'Properties'.
+
+   If you want to use the CGI binary, do the following:
+
+     * Under 'Home Directory', 'Virtual Directory', or 'Directory', do
+       the following:
+     * Change the Execute Permissions to 'Scripts only'
+     * Click on the 'Configuration' button, and choose the Application
+       Mappings tab. Click Add and set the Executable path to the
+       appropriate CGI file. An example PHP 5 value is:
+       C:\php\php-cgi.exe Supply .php as the extension. Leave 'Method
+       exclusions' blank, and check the 'Script engine' checkbox. Now,
+       click OK a few times.
+     * Set up the appropriate security. (This is done in Internet Service
+       Manager), and if your NT Server uses NTFS file system, add execute
+       rights for I_USR_ to the directory that contains php.exe /
+       php-cgi.exe.
+
+   To use the ISAPI module, do the following:
+
+     * If you don't want to perform HTTP Authentication using PHP, you
+       can (and should) skip this step. Under ISAPI Filters, add a new
+       ISAPI filter. Use PHP as the filter name, and supply a path to the
+       php4isapi.dll / php5isapi.dll.
+     * Under 'Home Directory', 'Virtual Directory', or 'Directory', do
+       the following:
+     * Change the Execute Permissions to 'Scripts only'
+     * Click on the 'Configuration' button, and choose the Application
+       Mappings tab. Click Add and set the Executable path to the
+       appropriate ISAPI DLL. An example PHP 5 value is:
+       C:\php\php5isapi.dll Supply .php as the extension. Leave 'Method
+       exclusions' blank, and check the 'Script engine' checkbox. Now,
+       click OK a few times.
+     * Stop IIS completely (NET STOP iisadmin)
+     * Start IIS again (NET START w3svc)
+
+   With IIS 6 (2003 Server), open up the IIS Manager, go to Web Service
+   Extensions, choose "Add a new Web service extension", enter in a name
+   such as PHP, choose the Add button and for the value browse to either
+   the ISAPI file (php4isapi.dll or php5isapi.dll) or CGI (php.exe or
+   php-cgi.exe) then check "Set extension status to Allowed" and click
+   OK.
+
+   In order to use index.php as a default content page, do the following:
+   From within the Documents tab, choose Add. Type in index.php and click
+   OK. Adjust the order by choosing Move Up or Move Down. This is similar
+   to setting DirectoryIndex with Apache.
+
+   The steps above must be repeated for each extension that is to be
+   associated with PHP scripts. .php is the most common although .php3
+   may be required for legacy applications.
+
+   If you experience 100% CPU usage after some time, turn off the IIS
+   setting Cache ISAPI Application.
+     _________________________________________________________________
+
+Windows and PWS 4
+
+   PWS 4 does not support ISAPI, only PHP CGI should be used.
+
+     * Edit the enclosed pws-php4cgi.reg / pws-php5cgi.reg file (look
+       into the SAPI folder for PHP 4, or in the main folder for PHP 5)
+       to reflect the location of your php.exe / php-cgi.exe. Backslashes
+       should be escaped, for example:
+       [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\parame
+       ters\Script Map] ".php"="C:\\php\\php.exe" (change to
+       C:\\php\\php-cgi.exe if you are using PHP 5) Now merge this
+       registery file into your system; you may do this by
+       double-clicking it.
+     * In the PWS Manager, right click on a given directory you want to
+       add PHP support to, and select Properties. Check the 'Execute'
+       checkbox, and confirm.
      _________________________________________________________________
 
 Windows and PWS/IIS 3
@@ -541,106 +668,17 @@ Windows and PWS/IIS 3
    maps.
      _________________________________________________________________
 
-Windows and PWS 4 or newer
-
-   When installing PHP on Windows with PWS 4 or newer version, you have
-   two options. One to set up the PHP CGI binary, the other is to use the
-   ISAPI module DLL.
-
-   If you choose the CGI binary, do the following:
-
-     * Edit the enclosed pws-php4cgi.reg / pws-php5cgi.reg file (look
-       into the SAPI folder for PHP 4, or in the main folder for PHP 5)
-       to reflect the location of your php.exe / php-cgi.exe. Backslashes
-       should be escaped, for example:
-       [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\parame
-       ters\Script Map] ".php"="C:\\php\\php.exe" (change to
-       C:\\php\\php-cgi.exe if you are using PHP 5) Now merge this
-       registery file into your system; you may do this by
-       double-clicking it.
-     * In the PWS Manager, right click on a given directory you want to
-       add PHP support to, and select Properties. Check the 'Execute'
-       checkbox, and confirm.
-
-   If you choose the ISAPI module, do the following:
-
-     * Edit the enclosed pws-php4isapi.reg / pws-php5isapi.reg file (look
-       into the SAPI folder for PHP 4, or in the main folder for PHP 5)
-       to reflect the location of your php4isapi.dll / php5isapi.dll.
-       Backslashes should be escaped, for example:
-       [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\parame
-       ters\Script Map] ".php"="C:\\php\\sapi\\php4isapi.dll" (or
-       C:\\php\\php5isapi.dll for PHP 5) Now merge this registery file
-       into your system; you may do this by double-clicking it.
-     * In the PWS Manager, right click on a given directory you want to
-       add PHP support to, and select Properties. Check the 'Execute'
-       checkbox, and confirm.
-     _________________________________________________________________
-
-Windows NT/2000/XP and IIS 4 or newer
-
-   To install PHP on an NT/2000/XP Server running IIS 4 or newer, follow
-   these instructions. You have two options to set up PHP, using the CGI
-   binary (php.exe in PHP 4, or php-cgi.exe in PHP 5) or with the ISAPI
-   module.
-
-   In either case, you need to start the Microsoft Management Console
-   (may appear as 'Internet Services Manager', either in your Windows NT
-   4.0 Option Pack branch or the Control Panel=>Administrative Tools
-   under Windows 2000/XP). Then right click on your Web server node (this
-   will most probably appear as 'Default Web Server'), and select
-   'Properties'.
-
-   If you want to use the CGI binary, do the following:
-
-     * Under 'Home Directory', 'Virtual Directory', or 'Directory', click
-       on the 'Configuration' button, and then enter the App Mappings
-       tab.
-     * Click Add, and in the Executable box, type: C:\php\php.exe for PHP
-       4 or C:\php\php-cgi.exe for PHP 5 (assuming that you have unziped
-       PHP in c:\php\).
-     * In the Extension box, type the file name extension you want
-       associated with PHP scripts. Leave 'Method exclusions' blank, and
-       check the 'Script engine' checkbox. You may also like to check the
-       'check that file exists' box - for a small performance penalty,
-       IIS (or PWS) will check that the script file exists and sort out
-       authentication before firing up PHP. This means that you will get
-       sensible 404 style error messages instead of CGI errors
-       complaining that PHP did not output any data.
-       You must start over from the previous step for each extension you
-       want associated with PHP scripts. .php and .phtml are common,
-       although .php3 may be required for legacy applications.
-     * Set up the appropriate security. (This is done in Internet Service
-       Manager), and if your NT Server uses NTFS file system, add execute
-       rights for I_USR_ to the directory that contains php.exe /
-       php-cgi.exe.
-
-   To use the ISAPI module, do the following:
-
-     * If you don't want to perform HTTP Authentication using PHP, you
-       can (and should) skip this step. Under ISAPI Filters, add a new
-       ISAPI filter. Use PHP as the filter name, and supply a path to the
-       php4isapi.dll / php5isapi.dll.
-     * Under 'Home Directory', click on the 'Configuration' button. Add a
-       new entry to the Application Mappings. Use the path to the
-       php4isapi.dll / php5isapi.dll as the Executable, supply .php as
-       the extension, leave 'Method exclusions' blank, and check the
-       'Script engine' checkbox.
-     * Stop IIS completely (NET STOP iisadmin)
-     * Start IIS again (NET START w3svc)
-     _________________________________________________________________
-
-Apache 1.3.x on Microsft Windows
+Apache 1.3.x on Microsoft Windows
 
    This section contains notes and hints specific to Apache 1.3.x
-   installs of PHP on Microsoft Windows systems. We also have
+   installs of PHP on Microsoft Windows systems. There are also
    instructions and notes for Apache 2 on a separate page.
 
-     Note: You should read the manual installation steps first!
+     Note: Please read the manual installation steps first!
 
    There are two ways to set up PHP to work with Apache 1.3.x on Windows.
    One is to use the CGI binary (php.exe for PHP 4 and php-cgi.exe for
-   PHP 5), the other is to use the Apache module DLL. In either case you
+   PHP 5), the other is to use the Apache Module DLL. In either case you
    need to edit your httpd.conf to configure Apache to work with PHP, and
    then restart the server.
 
@@ -662,13 +700,44 @@ Apache 1.3.x on Microsft Windows
      c:/directory/file.ext.
      _________________________________________________________________
 
+Installing as an Apache module
+
+   You should add the following lines to your Apache httpd.conf file:
+
+   Example 2-3. PHP as an Apache 1.3.x module
+
+   This assumes PHP is installed to c:\php. Adjust the path if this is
+   not the case.
+
+   For PHP 4:
+# Add to the end of the LoadModule section
+LoadModule php4_module "c:/php/php4apache.dll"
+
+# Add to the end of the AddModule section
+AddModule mod_php4.c
+
+   For PHP 5:
+# Add to the end of the LoadModule section
+LoadModule php5_module "c:/php/php5apache.dll"
+
+# Add to the end of the AddModule section
+AddModule mod_php5.c
+
+   For both:
+# Add this line inside the <IfModule mod_mime.c> conditional brace
+AddType application/x-httpd-php .php
+
+# For syntax highlighted .phps files, also add
+AddType application/x-httpd-php-source .phps
+     _________________________________________________________________
+
 Installing as a CGI binary
 
-   If you unziped the PHP package to C:\php\ as described in the Manual
+   If you unzipped the PHP package to C:\php\ as described in the Manual
    Installation Steps section, you need to insert these lines to your
    Apache configuration file to set up the CGI binary:
 
-   Example 2-3. PHP and Apache 1.3.x as CGI
+   Example 2-4. PHP and Apache 1.3.x as CGI
 ScriptAlias /php/ "c:/php/"
 AddType application/x-httpd-php .php
 
@@ -692,44 +761,11 @@ SetEnv PHPRC C:/php
    yourself from those attacks.
 
    If you would like to present PHP source files syntax highlighted,
-   there is no such convinient option as with the module version of PHP.
+   there is no such convenient option as with the module version of PHP.
    If you chose to configure Apache to use PHP as a CGI binary, you will
-   need to use the show_source() function. To do this simply create a PHP
-   script file and add this code: <?php
-   show_source("original_php_script.php"); ?>. Substitute
-   original_php_script.php with the name of the file you wish to show the
-   source of.
-     _________________________________________________________________
-
-Installing as an Apache module
-
-   You should add the following lines to your Apache httpd.conf file:
-
-   Example 2-4. PHP as an Apache 1.3.x module
-AddType application/x-httpd-php .php
-
-# For PHP 4
-LoadModule php4_module "c:/php/sapi/php4apache.dll"
-
-# For PHP 5
-LoadModule php5_module "c:/php/php5apache.dll"
-
-# specify the directory where php.ini is
-SetEnv PHPRC C:/php
-
-   You may find after using the Windows installer for Apache that you
-   need to define the AddModule directive for mod_php4.c. This is
-   especially important if the ClearModuleList directive is defined,
-   which you will find by scrolling down a few lines. You will see a list
-   of AddModule entries, add the following line at the end of the list:
-   AddModule mod_php4.c. For PHP 5, instead use AddModule mod_php5.c
-
-   If you would like to use the source code highlighting feature, you
-   need to add the following line to your httpd.conf: AddType
-   application/x-httpd-php-source .phps. This should be inserted at the
-   same place where you inserted AddType application/x-httpd-php .php
-   above). With this setup, all files served with the .phps extension
-   will be syntax highlighted for the browser.
+   need to use the highlight_file() function. To do this simply create a
+   PHP script file and add this code: <?php
+   highlight_file('some_php_script.php'); ?>.
      _________________________________________________________________
 
 Apache 2.0.x on Microsoft Windows
@@ -742,9 +778,9 @@ Apache 2.0.x on Microsoft Windows
 
    Warning
 
-   Do not use Apache 2.0.x and PHP in a production environment neither on
-   Unix nor on Windows. For information on why, read the following FAQ
-   entry
+   We do not recommend using a threaded MPM in production with Apache2.
+   Use the prefork MPM instead, or use Apache1. For information on why,
+   read the following FAQ entry
 
    You are highly encouraged to take a look at the Apache Documentation
    to get a basic understanding of the Apache 2.0.x Server. Also consider
@@ -820,7 +856,7 @@ Installing as an Apache module
 
    Example 2-6. PHP and Apache 2.0 as Module
 # For PHP 4 do something like this:
-LoadModule php4_module "c:/php/sapi/php4apache2.dll"
+LoadModule php4_module "c:/php/php4apache2.dll"
 AddType application/x-httpd-php .php
 
 # For PHP 5 do something like this:
@@ -835,6 +871,8 @@ PHPIniDir "C:/php"
      or php5apache2.dll in your LoadModule directive and not
      php4apache.dll or php5apache.dll as the latter ones are designed to
      run with Apache 1.3.x.
+
+     Note: If you want to use content negotiation, read related FAQ.
 
    Warning
 
@@ -1159,7 +1197,7 @@ extension_dir = c:/php/extensions/
 
      * Enable the extension(s) in php.ini you want to use by uncommenting
        the extension=php_*.dll lines in php.ini. This is done by deleting
-       the leading ; form the extension you want to load.
+       the leading ; from the extension you want to load.
 
    Example 2-8. Enable Bzip2 extension for PHP-Windows
 // change the following line from ...
@@ -1176,6 +1214,11 @@ extension=php_bz2.dll
        bundled DLLs from C:\php\dlls folder to the main C:\php folder.
        Don't forget to include C:\php in the system PATH (this process is
        explained in a separate FAQ entry).
+     * Some of these DLLs are not bundled with the PHP distribution. See
+       each extensions documentation page for details. Also, read the
+       manual section titled Installation of PECL extensions for details
+       on PECL. An increasingly large number of PHP extensions are found
+       in PECL, and these extensions require a separate download.
 
      Note: If you are running a server module version of PHP remember to
      restart your webserver to reflect your changes to php.ini.
@@ -1201,7 +1244,8 @@ extension=php_bz2.dll
    php_domxml.dll DOM XML functions PHP <= 4.2.0 requires: libxml2.dll
    (bundled) PHP >= 4.3.0 requires: iconv.dll (bundled)
    php_dotnet.dll .NET functions PHP <= 4.1.1
-   php_exif.dll Read EXIF headers from JPEG None
+   php_exif.dll EXIF functions php_mbstring.dll. And, php_exif.dll must
+   be loaded after php_mbstring.dll in php.ini.
    php_fbsql.dll FrontBase functions PHP <= 4.2.0
    php_fdf.dll FDF: Forms Data Format functions. Requires: fdftk.dll
    (bundled)
@@ -1235,8 +1279,8 @@ extension=php_bz2.dll
    php_mssql.dll MSSQL functions Requires: ntwdblib.dll (bundled)
    php_mysql.dll MySQL functions PHP >= 5.0.0, requires libmysql.dll
    (bundled)
-   php_mysqli.dll MySQLi functions PHP >= 5.0.0, requires libmysqli.dll
-   (bundled)
+   php_mysqli.dll MySQLi functions PHP >= 5.0.0, requires libmysql.dll
+   (libmysqli.dll in PHP <= 5.0.2) (bundled)
    php_oci8.dll Oracle 8 functions Requires: Oracle 8.1+ client libraries
    php_openssl.dll OpenSSL functions Requires: libeay32.dll (bundled)
    php_oracle.dll Oracle functions Requires: Oracle 7 client libraries
@@ -1262,7 +1306,145 @@ extension=php_bz2.dll
    php_zlib.dll ZLib compression functions Built in since PHP 4.3.0
      _________________________________________________________________
 
-Chapter 3. Problems?
+Chapter 3. Installation of PECL extensions
+
+Introduction to PECL Installations
+
+   PHP extensions may be installed in a variety of ways. PECL is a
+   repository of PHP extensions living within the PEAR structure, and the
+   following demonstrates how to install these extensions.
+
+   These instructions assume /your/phpsrcdir/ is the path to the PHP
+   source, and extname is the name of the PECL extension. Adjust
+   accordingly. These instructions also assume a familiarity with the
+   pear command.
+
+   Shared extensions may be installed by including them inside of php.ini
+   using the extension PHP directive. See also the extensions_dir
+   directive, and dl(). The installation methods described below do not
+   automatically configure PHP to include these extensions, this step
+   must be done manually.
+
+   When building PHP modules, it's important to have the appropriate
+   versions of the required tools (autoconf, automake, libtool, etc.) See
+   the Anonymous CVS Instructions for details on the required tools, and
+   required versions.
+     _________________________________________________________________
+
+Downloading PECL extensions
+
+   There are several options for downloading PECL extensions, such as:
+
+     * http://pecl.php.net
+       Listed here is information like the ChangeLog, release
+       information, requirements, revisions, etc. Although not every PECL
+       extension has a webpage, most do.
+     * pear download extname
+       The pear command may also be used to download source files.
+       Specific revisions may also be specified.
+     * CVS
+       All PECL files reside in CVS. A web-based view may be seen at
+       http://cvs.php.net/pecl/. To download straight from CVS, consider
+       the following where phpfi is the password for user cvsread:
+
+$ cvs -d:pserver:cvsread@cvs.php.net:/repository login
+$ cvs -d:pserver:cvsread@cvs.php.net:/repository co pecl/extname
+
+     * Windows downloads
+       Windows users may find compiled PECL binaries by downloading the
+       Collection of PECL modules from the PHP Downloads page, and by
+       retrieving a PECL Snapshot. To compile PHP under Windows, read the
+       Win32 Build README.
+     _________________________________________________________________
+
+PECL for Windows users
+
+   Like with any other PHP extension DLL, to install move the PECL
+   extension DLLs into the extension_dir folder and include them within
+   php.ini. For example:
+
+   extension=php_extname.dll
+
+   After doing this, restart the web server.
+     _________________________________________________________________
+
+Compiling shared PECL extensions with PEAR
+
+   PEAR makes it easy to create shared PHP extensions. Using the pear
+   command, do the following:
+
+   $ pear install extname
+
+   That will download the source for extname, and compile it on the
+   system. This results in an extname.so file that may then be included
+   in php.ini
+
+   In case the systems preferred_state is set higher than an available
+   extname version, like it's set to stable and the extension is still in
+   beta, either alter the preferred_state via pear config-set or specify
+   a specific version of the PECL extension. For example:
+
+   $ pear install extname-0.1.1
+
+   Regardless, pear will copy this extname.so into the extensions
+   directory. Adjust php.ini accordingly.
+     _________________________________________________________________
+
+Compiling shared PECL extensions with phpize
+
+   If using pear is not an option, like for building shared PECL
+   extensions from CVS, or for unreleased PECL packages, then creating a
+   shared extension may also be done by manually using the phpize
+   command. The pear command essentially does this but it may also be
+   done manually. Assuming the source file is named extname.tgz, and that
+   it was downloaded into the current directory, consider the following:
+
+$ pear download extname
+$ gzip -d < extname.tgz | tar -xvf -
+$ cd extname
+$ phpize
+$ ./configure && make
+
+   Upon success, this will create extname.so and put it into the modules/
+   and/or .libs/ directory within the extname/ source. Move this shared
+   extension (extname.so) into the PHP extensions directory, and adjust
+   php.ini accordingly.
+     _________________________________________________________________
+
+Compiling PECL extensions statically into PHP
+
+   To statically include the extension within the PHP build, put the
+   extensions source into the ext/ directory found in the PHP source. For
+   example:
+
+$ cd /your/phpsrcdir/ext
+$ pear download extname
+$ gzip -d < extname.tgz | tar -xvf -
+$ mv extname-x.x.x extname
+$ rm package.xml
+
+   This will result in the following directory:
+
+   /your/phpsrcdir/ext/extname
+
+   From here, build PHP as normal:
+
+$ cd /your/phpsrcdir
+$ ./buildconf
+$ ./configure --help
+$ ./configure --with-extname --enable-someotherext --with-foobar
+$ make
+$ make install
+
+   Whether --enable-extname or --with-extname is used depends on the
+   extension. Typically an extension that does not require external
+   libraries uses --enable. To be sure, run the following after
+   buildconf:
+
+   $ ./configure --help | grep extname
+     _________________________________________________________________
+
+Chapter 4. Problems?
 
 Read the FAQ
 
@@ -1301,7 +1483,7 @@ Bug reports
    reports!
      _________________________________________________________________
 
-Chapter 4. Runtime Configuration
+Chapter 5. Runtime Configuration
 
 The configuration file
 
@@ -1324,14 +1506,14 @@ The configuration file
      filesystem if it exists.
 
    The php.ini directives handled by extensions are documented
-   respectively on the pages of the extensions themselfs. The list of the
-   core directives is available in the appendix. Probably not all the PHP
-   directives are documented in the manual though. For a completel list
-   of directives available in your PHP version, please read your well
-   commented php.ini file. Alternatively, you may find the the latest
-   php.ini from CVS helpful too.
+   respectively on the pages of the extensions themselves. The list of
+   the core directives is available in the appendix. Probably not all the
+   PHP directives are documented in the manual though. For a completel
+   list of directives available in your PHP version, please read your
+   well commented php.ini file. Alternatively, you may find the the
+   latest php.ini from CVS helpful too.
 
-   Example 4-1. php.ini example
+   Example 5-1. php.ini example
 ; any text on a line after an unquoted semicolon (;) is ignored
 [php] ; section markers (text within square brackets) are also ignored
 ; Boolean values can be set to either:
@@ -1360,7 +1542,7 @@ Running PHP as an Apache module
    you to change the PHP configuration from within the Apache
    configuration files. For a listing of which directives are
    PHP_INI_ALL, PHP_INI_PERDIR, or PHP_INI_SYSTEM, have a look at the
-   table found within the ini_set() documentation.
+   List of php.ini directives appendix.
 
      Note: With PHP 3, there are Apache directives that correspond to
      each configuration setting in the php3.ini name, except the name is
@@ -1390,7 +1572,7 @@ Running PHP as an Apache module
           php_admin_flag can not be overridden by .htaccess or
           virtualhost directives.
 
-   Example 4-2. Apache configuration example
+   Example 5-2. Apache configuration example
 <IfModule mod_php5.c>
   php_value include_path ".:/usr/local/lib/php"
   php_admin_flag safe_mode on
@@ -1425,7 +1607,8 @@ Changing PHP configuration via the Windows registry
    active for any script running from this directory or any subdirectory
    of it. The values under the key should have the name of the PHP
    configuration directive and the string value. PHP constants in the
-   values are not parsed.
+   values are not parsed. However, only configuration values changeable
+   in PHP_INI_USER can be set this way, PHP_INI_PERDIR values can not.
      _________________________________________________________________
 
 Other interfaces to PHP
