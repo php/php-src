@@ -26,7 +26,6 @@
 #include "zend_constants.h"
 #include "zend_ini_scanner.h"
 #include "zend_extensions.h"
-#include "SAPI.h"
 
 #define YYSTYPE zval
 
@@ -140,7 +139,7 @@ void zend_ini_get_var(zval *result, zval *name)
 	if (zend_get_configuration_directive(name->value.str.val, name->value.str.len+1, &curval) == SUCCESS) {
 		result->value.str.val = zend_strndup(curval.value.str.val, curval.value.str.len);
 		result->value.str.len = curval.value.str.len;
-	} else if ((envvar = sapi_getenv(name->value.str.val, name->value.str.len TSRMLS_CC)) != NULL ||
+	} else if ((envvar = zend_getenv(name->value.str.val, name->value.str.len TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(name->value.str.val)) != NULL) {
 		result->value.str.val = strdup(envvar);
 		result->value.str.len = strlen(envvar);
