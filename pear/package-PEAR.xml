@@ -25,34 +25,10 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.10</version>
+    <version>0.11-dev</version>
     <state>beta</state>
-    <date>2002-05-26</date>
+    <date>YYYY-MM-DD</date>
     <notes>
-Lots of stuff this time.  0.9 was not actually self-hosting, even
-though it claimed to be.  This version finally is self-hosting
-(really!), meaning you can upgrade the installer with the command
-"pear upgrade PEAR".
-
-* new config paramers: http_proxy and umask
-* HTTP proxy support when downloading packages
-* generalized command handling code
-* and fixed the bug that would not let commands have the
-  same options as "pear" itself
-* added long options to every command
-* added command shortcuts ("pear help shortcuts")
-* added stub for Gtk installer
-* some phpdoc fixes
-* added class dependency detector (using ext/tokenizer)
-* dependency handling fixes
-* added OS_Guess class for detecting OS
-* install files with the "platform" attribute set
-  only on matching operating systems
-* PEAR_Remote now falls back to the XML_RPC package
-  if xmlrpc-epi is not available
-* renamed command: package-list -> list
-* new command: package-dependencies
-* lots of minor fixes
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -99,6 +75,42 @@ though it claimed to be.  This version finally is self-hosting
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.10</version>
+      <state>beta</state>
+      <date>2002-05-26</date>
+      <notes>
+Lots of stuff this time.  0.9 was not actually self-hosting, even
+though it claimed to be.  This version finally is self-hosting
+(really!), meaning you can upgrade the installer with the command
+"pear upgrade PEAR".
+
+* new config paramers: http_proxy and umask
+* HTTP proxy support when downloading packages
+* generalized command handling code
+* and fixed the bug that would not let commands have the
+  same options as "pear" itself
+* added long options to every command
+* added command shortcuts ("pear help shortcuts")
+* added stub for Gtk installer
+* some phpdoc fixes
+* added class dependency detector (using ext/tokenizer)
+* dependency handling fixes
+* added OS_Guess class for detecting OS
+* install files with the "platform" attribute set
+  only on matching operating systems
+* PEAR_Remote now falls back to the XML_RPC package
+  if xmlrpc-epi is not available
+* renamed command: package-list -> list
+* new command: package-dependencies
+* lots of minor fixes
+</notes>
+      <deps>
+  	<dep type="php" rel="ge" version="4.1"/>
+  	<dep type="pkg" rel="has" version="0.4">Archive_Tar</dep>
+  	<dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+      </deps>
+    </release>
     <release>
       <version>0.9</version>
       <state>beta</state>
