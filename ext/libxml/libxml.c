@@ -43,6 +43,10 @@
 
 #include "php_libxml.h"
 
+#define PHP_LIBXML_ERROR 0
+#define PHP_LIBXML_CTX_ERROR 1
+#define PHP_LIBXML_CTX_WARNING 2
+
 /* a true global for initialization */
 int _php_libxml_initialized = 0;
 
@@ -294,22 +298,33 @@ int php_libxml_streams_IO_close(void *context)
 	return php_stream_close((php_stream*)context);
 }
 
-static void php_libxml_error_handler(void *ctx, const char *msg, ...)
+static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg TSRMLS_DC)
 {
-	va_list ap;
+	xmlParserCtxtPtr parser;
+
+	parser = (xmlParserCtxtPtr) ctx;
+
+	if (parser != NULL && parser->input != NULL) {
+		if (parser->input->filename) {
+			php_error_docref(NULL TSRMLS_CC, level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, level, "%s in Entity, line: %d", msg, parser->input->line);
+		}
+	}
+}
+
+static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
+{
 	char *buf;
 	int len, len_iter, output = 0;
 
 	TSRMLS_FETCH();
 
-	va_start(ap, msg);
-	len = vspprintf(&buf, 0, msg, ap);
-	va_end(ap);
-
+	len = vspprintf(&buf, 0, *msg, ap);
 	len_iter = len;
 
 	/* remove any trailing \n */
-	while (len && buf[--len_iter] == '\n') {
+	while (len_iter && buf[--len_iter] == '\n') {
 		buf[len_iter] = '\0';
 		output = 1;
 	}
@@ -319,11 +334,45 @@ static void php_libxml_error_handler(void *ctx, const char *msg, ...)
 	efree(buf);
 
 	if (output == 1) {
-		php_error(E_WARNING, "%s", (char *) LIBXML(error_buffer));
+		switch (error_type) {
+			case PHP_LIBXML_CTX_ERROR:
+				php_libxml_ctx_error_level(E_WARNING, ctx, (char *) LIBXML(error_buffer) TSRMLS_CC);
+				break;
+			case PHP_LIBXML_CTX_WARNING:
+				php_libxml_ctx_error_level(E_NOTICE, ctx, (char *) LIBXML(error_buffer) TSRMLS_CC);
+				break;
+			default:
+				php_error(E_WARNING, "%s", (char *) LIBXML(error_buffer));
+		}
 		smart_str_free(&LIBXML(error_buffer));
 		LIBXML(error_buffer) = NULL;
 	}
 }
+
+void php_libxml_ctx_error(void *ctx, const char *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	php_libxml_internal_error_handler(PHP_LIBXML_CTX_ERROR, ctx, &msg, args);
+	va_end(args);
+}
+
+void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	php_libxml_internal_error_handler(PHP_LIBXML_CTX_WARNING, ctx, &msg, args);
+	va_end(args);
+}
+
+void php_libxml_error_handler(void *ctx, const char *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	php_libxml_internal_error_handler(PHP_LIBXML_ERROR, ctx, &msg, args);
+	va_end(args);
+}
+
 
 PHP_LIBXML_API void php_libxml_initialize() {
 	if (!_php_libxml_initialized) {
