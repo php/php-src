@@ -21,6 +21,14 @@ var_dump($ar["a"] = "a");
 var_dump($ar);
 var_dump($ar[0]);
 var_dump($ar[6]);
+var_dump($ar["b"]);
+
+unset($ar[1]);
+unset($ar["3"]);
+unset($ar["a"]);
+unset($ar[7]);
+unset($ar["c"]);
+var_dump($ar);
 
 echo "Done\n";
 ?>
@@ -64,4 +72,17 @@ int(0)
 
 Notice: Undefined offset:  6 in %sarray.php on line %d
 NULL
+
+Notice: Undefined index:  b in %sarray.php on line %d
+NULL
+
+Notice: Undefined offset:  7 in %sarray.php on line %d
+
+Notice: Undefined index:  c in %sarray.php on line %d
+object(spl_array)#1 (2) {
+  [0]=>
+  int(0)
+  [2]=>
+  &int(2)
+}
 Done
