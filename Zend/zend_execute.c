@@ -65,14 +65,6 @@ static void zend_extension_statement_handler(zend_extension *extension, zend_op_
 static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_op_array *op_array);
 static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
 
-/*
-#define SEPARATE_ON_READ_OBJECT(obj, _type)	\
-if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT)) { \
-		SEPARATE_ZVAL_IF_NOT_REF((obj));			\
-		(*(obj))->is_ref = 1;			\
-	}
-*/
-
 #define RETURN_VALUE_USED(opline) (!((opline)->result.u.EA.type & EXT_TYPE_UNUSED))
 
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
@@ -504,7 +496,6 @@ static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_v
 		zval_dtor(varname);
 	}
 	Ts[result->u.var].var.ptr_ptr = retval;
-	/*	SEPARATE_ON_READ_OBJECT(retval, type); */
 	SELECTIVE_PZVAL_LOCK(*retval, result);
 }
 
@@ -682,7 +673,6 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
 			}
-			/* SEPARATE_ON_READ_OBJECT(*retval, type); */
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			break;
 		case IS_NULL:
@@ -873,7 +863,6 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		zendi_zval_copy_ctor(*container);
 	}
 	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type ELS_CC);
-	/* SEPARATE_ON_READ_OBJECT(*retval, type); */
 	SELECTIVE_PZVAL_LOCK(**retval, result);
 }
 
