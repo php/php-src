@@ -3,7 +3,8 @@ Various pow() tests
 --POST--
 --GET--
 --FILE--
-<?php 
+<?php // $Id$
+
 define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
 define('LONG_MIN', -LONG_MAX - 1);
 printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
