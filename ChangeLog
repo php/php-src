@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed array_walk to always reset array pointer before working (Andrey)
 - Fixed thread-safety issues in the MySQL module (Zeev)
 - Fixed thread-safe support for dynamic modules (Zeev)
 - Fixed Sybase CT build process (Zeev)
