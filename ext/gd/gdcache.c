@@ -42,7 +42,7 @@
 #else
 #include "php_config.h"
 #endif
-#ifdef ENABLE_GD_TTF
+#if HAVE_LIBTTF|HAVE_LIBFREETYPE
 
 #include "gdcache.h"
 
