@@ -1,3 +1,40 @@
+2001-04-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/crypt.c: spaces to tabs
+
+2001-04-05  Andi Gutmans  <andi@zend.com>
+
+    * README.BCMATH: - Nuke README.BCMATH
+
+    * README.BCMATH: Remove README.BCMATH
+
+2001-04-05  Daniel Beulshausen  <daniel@php4win.de>
+
+    * EXTENSIONS
+      php.ini-dist
+      php.ini-optimized: add printer ext to php.ini & maintain extensions file
+
+    * ext/printer/php_printer.h
+      ext/printer/printer.c
+      ext/printer/printer.php: overhaul printer extension
+
+2001-04-05  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/pgsql/pgsql.c: pg_close not closing right connection.
+
+2001-04-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/libphp4.module.in:
+    Fix static Apache builds which were broken by the last commit.
+
+2001-04-05  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c: Fix for Bug #10168 (is_dst undeclared)
+
+2001-04-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/fdf.c: Fix bugs: #10157, #7549
+
 2001-04-04  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/pgsql.php:
