@@ -194,7 +194,7 @@ EOF
 ])
 
 AC_DEFUN(PHP_TIME_R_TYPE,[
-AC_CACHE_CHECK(for *time_r type, ac_cv_time_r_type,[
+AC_CACHE_CHECK(for type of reentrant time-related functions, ac_cv_time_r_type,[
 AC_TRY_RUN([
 #include <time.h>
 #include <stdlib.h>
@@ -213,9 +213,9 @@ exit(1);
 ],[
   ac_cv_time_r_type=hpux
 ],[
-  ac_cv_time_r_type=SUSV2
+  ac_cv_time_r_type=POSIX
 ],[
-  ac_cv_time_r_type=SUSV2
+  ac_cv_time_r_type=POSIX
 ])
 ])
 if test "$ac_cv_time_r_type" = "hpux"; then
