@@ -258,8 +258,8 @@ void ts_free_thread()
 		}
 		if (thread_resources->next) {
 			last = thread_resources;
-			thread_resources = thread_resources->next;
 		}
+		thread_resources = thread_resources->next;
 	}
 	tsrm_mutex_unlock(tsmm_mutex);
 }
