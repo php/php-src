@@ -1,3 +1,63 @@
+2004-03-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/wddx/tests/001.phpt:
+      - Fix test, take 2
+
+2004-03-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mbstring/mbstring.c:
+      MFH: Fixed bug #27421 (mbstring.func_overload should be system ini setting)
+
+    * ext/mbstring/mbstring.c:
+      Fixed bug #27421 (mbstring.func_overload should be system ini setting).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/base64.c:
+      MFH: Fixed bug #27460 (base64_decode() does not handle extra padding).
+
+    * ext/standard/base64.c:
+      Fixed bug #27460 (base64_decode() does not handle extra padding).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/html.c:
+      MFH: Fixed bug #27505 (htmlentities() does not handle BIG5 correctly).
+
+    * ext/standard/html.c:
+      Fixed bug #27505 (htmlentities() does not handle BIG5 correctly).
+
+    * ext/sqlite/sqlite.c:
+      Use correct variable name.
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdft.c:
+      Fixed bug #27437 (wrong freetype include inside GD library).
+
+    * ext/sqlite/sqlite.c:
+      Fixed a possible memory leaks inside sqlite_popen() &
+      sqlite_fetch_column_types().
+      Resolve the file path inside sqlite_factory().
+
+    * ext/sqlite/sess_sqlite.c:
+      Fixed possible crash due to an integer overflow.
+
+    * ext/sqlite/sqlite.php:
+      Better extension availability check.
+
+2004-03-06  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      NEWS:
+      - Add #27238 entry
+
+    * ext/standard/iptc.c:
+      - fix #27238
+
 2004-03-05  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_compile.c:
