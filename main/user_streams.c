@@ -33,12 +33,17 @@ struct php_user_stream_wrapper {
 };
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC);
+static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
-	NULL,
-	NULL,
-	NULL
+	NULL, /* close - the streams themselves know how */
+	NULL, /* stat - the streams themselves know how */
+	user_wrapper_stat_url,
+	user_wrapper_opendir,
+	"user-space"
 };
 
 
@@ -83,8 +88,14 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_SEEK		"stream_seek"
 #define USERSTREAM_TELL		"stream_tell"
 #define USERSTREAM_EOF		"stream_eof"
+#define USERSTREAM_STAT		"stream_stat"
+#define USERSTREAM_STATURL	"url_stat"
+#define USERSTREAM_DIR_OPEN		"dir_opendir"
+#define USERSTREAM_DIR_READ		"dir_readdir"
+#define USERSTREAM_DIR_REWIND	"dir_rewinddir"
+#define USERSTREAM_DIR_CLOSE	"dir_closedir"
 
-/* class should have methods like these:
+/* {{{ class should have methods like these:
  
 	function stream_open($path, $mode, $options, &$opened_path)
 	{
@@ -126,8 +137,38 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	{
 		return true/false;
 	}
+
+	function stream_stat()
+	{
+		return array( just like that returned by fstat() );
+	}
+
+	function url_stat(string $url)
+	{
+		return array( just like that returned by stat() );
+	}
+
+	function dir_opendir(string $url, int $options)
+	{
+		return true / false;
+	}
+
+	function dir_readdir()
+	{
+		return string next filename in dir ;
+	}
+
+	function dir_closedir()
+	{
+		release dir related resources;
+	}
+
+	function dir_rewinddir()
+	{
+		reset to start of dir list;
+	}
   
- **/
+	}}} **/
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
@@ -138,7 +179,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	int call_result;
 	php_stream *stream = NULL;
 
-	/* Try to catch bad usage without prevent flexibility */
+	/* Try to catch bad usage without preventing flexibility */
 	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "infinite recursion prevented");
 		return NULL;
@@ -219,6 +260,81 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	return stream;
 }
 
+static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	php_userstream_data_t *us;
+	zval *zfilename, *zoptions, *zretval = NULL, *zfuncname;
+	zval **args[2];	
+	int call_result;
+	php_stream *stream = NULL;
+
+	/* Try to catch bad usage without preventing flexibility */
+	if (FG(user_stream_current_filename) != NULL && strcmp(filename, FG(user_stream_current_filename)) == 0) {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "infinite recursion prevented");
+		return NULL;
+	}
+	FG(user_stream_current_filename) = filename;
+	
+	us = emalloc(sizeof(*us));
+	us->wrapper = uwrap;	
+
+	/* create an instance of our class */
+	ALLOC_ZVAL(us->object);
+	object_init_ex(us->object, uwrap->ce);
+	ZVAL_REFCOUNT(us->object) = 1;
+	PZVAL_IS_REF(us->object) = 1;
+	
+	/* call it's dir_open method - set up params first */
+	MAKE_STD_ZVAL(zfilename);
+	ZVAL_STRING(zfilename, filename, 1);
+	args[0] = &zfilename;
+
+	MAKE_STD_ZVAL(zoptions);
+	ZVAL_LONG(zoptions, options);
+	args[1] = &zoptions;
+
+	MAKE_STD_ZVAL(zfuncname);
+	ZVAL_STRING(zfuncname, USERSTREAM_DIR_OPEN, 1);
+	
+	call_result = call_user_function_ex(NULL,
+			&us->object,
+			zfuncname,
+			&zretval,
+			2, args,
+			0, NULL	TSRMLS_CC);
+	
+	if (call_result == SUCCESS && zretval != NULL && zval_is_true(zretval)) {
+		/* the stream is now open! */
+		stream = php_stream_alloc_rel(&php_stream_userspace_dir_ops, us, 0, mode);
+
+		/* set wrapper data to be a reference to our object */
+		stream->wrapperdata = us->object;
+		zval_add_ref(&stream->wrapperdata);
+	} else {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "\"%s::" USERSTREAM_DIR_OPEN "\" call failed",
+			us->wrapper->classname);
+	}
+	
+	/* destroy everything else */
+	if (stream == NULL) {
+		zval_ptr_dtor(&us->object);
+		efree(us);
+	}
+	if (zretval)
+		zval_ptr_dtor(&zretval);
+	
+	zval_ptr_dtor(&zfuncname);
+	zval_ptr_dtor(&zoptions);
+	zval_ptr_dtor(&zfilename);
+
+	FG(user_stream_current_filename) = NULL;
+		
+	return stream;
+}
+
+
 /* {{{ proto bool file_register_wrapper(string protocol, string classname)
    Registers a custom URL protocol handler class */
 PHP_FUNCTION(file_register_wrapper)
@@ -286,16 +402,16 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	didwrite = 0;
 	if (call_result == SUCCESS && retval != NULL) {
-		convert_to_long_ex(&retval);
+		convert_to_long(retval);
 		didwrite = Z_LVAL_P(retval);
 	} else if (call_result == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " - is not implemented!",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " is not implemented!",
 				us->wrapper->classname);
 	}
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " - wrote %d bytes more data than requested (%d written, %d max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %d bytes more data than requested (%d written, %d max)",
 				us->wrapper->classname,
 				didwrite - count, didwrite, count);
 		didwrite = count;
@@ -331,7 +447,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 			didread = 0;
 		else {
 			if (call_result == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_EOF " - is not implemented! Assuming EOF",
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 						us->wrapper->classname);
 			}
 
@@ -355,7 +471,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 				0, NULL TSRMLS_CC);
 
 		if (call_result == SUCCESS && retval != NULL) {
-			convert_to_string_ex(&retval);
+			convert_to_string(retval);
 			didread = Z_STRLEN_P(retval);
 			if (didread > count) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
@@ -365,7 +481,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 			if (didread > 0)
 				memcpy(buf, Z_STRVAL_P(retval), didread);
 		} else if (call_result == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - is not implemented!",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
 					us->wrapper->classname);
 		}
 		zval_ptr_dtor(&zcount);
@@ -488,7 +604,7 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
 		*newoffs = Z_LVAL_P(retval);
 	else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_TELL " - is not implemented!",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_TELL " is not implemented!",
 				us->wrapper->classname);
 	
 	if (retval)
@@ -497,11 +613,228 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 	return 0;
 }
 
+
+/* parse the return value from one of the stat functions and store the
+ * relevant fields into the statbuf provided */
+static int statbuf_from_array(zval *array, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	zval *elem;
+
+#define STAT_PROP_ENTRY(name)                        \
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(array), #name, sizeof(#name), (void**)&elem)) {     \
+		convert_to_long(elem);                                                                   \
+		ssb->sb.st_##name = Z_LVAL_P(elem);                                                      \
+	}
+
+	STAT_PROP_ENTRY(dev);
+	STAT_PROP_ENTRY(ino);
+	STAT_PROP_ENTRY(mode);
+	STAT_PROP_ENTRY(nlink);
+	STAT_PROP_ENTRY(uid);
+	STAT_PROP_ENTRY(gid);
+#if HAVE_ST_RDEV
+	STAT_PROP_ENTRY(rdev);
+#endif
+	STAT_PROP_ENTRY(size);
+	STAT_PROP_ENTRY(atime);
+	STAT_PROP_ENTRY(mtime);
+	STAT_PROP_ENTRY(ctime);
+#ifdef HAVE_ST_BLKSIZE
+	STAT_PROP_ENTRY(blksize);
+#endif
+#ifdef HAVE_ST_BLOCKS
+	STAT_PROP_ENTRY(blocks);
+#endif
+
+#undef STAT_PROP_ENTRY	
+	return SUCCESS;
+}
+
+static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	zval func_name;
+	zval *retval = NULL;
+	int call_result;
+	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+	int ret = -1;
+
+	ZVAL_STRINGL(&func_name, USERSTREAM_STAT, sizeof(USERSTREAM_STAT)-1, 0);
+
+	call_result = call_user_function_ex(NULL,
+			&us->object,
+			&func_name,
+			&retval,
+			0, NULL, 0, NULL TSRMLS_CC);
+
+	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_ARRAY) {
+		if (SUCCESS == statbuf_from_array(retval, ssb TSRMLS_CC))
+			ret = 0;
+	} else {
+		if (call_result == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_STAT " is not implemented!",
+					us->wrapper->classname);
+		}
+	}
+	return ret;
+}
+
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zval *zfilename, *zfuncname, *zretval;
+	zval **args[1];	
+	int call_result;
+	zval *object;
+	int ret = -1;
+
+	/* create an instance of our class */
+	ALLOC_ZVAL(object);
+	object_init_ex(object, uwrap->ce);
+	ZVAL_REFCOUNT(object) = 1;
+	PZVAL_IS_REF(object) = 1;
+
+	/* call the stat_url method */
+	
+	/* call it's stream_open method - set up params first */
+	MAKE_STD_ZVAL(zfilename);
+	ZVAL_STRING(zfilename, url, 1);
+	args[0] = &zfilename;
+
+	MAKE_STD_ZVAL(zfuncname);
+	ZVAL_STRING(zfuncname, USERSTREAM_STATURL, 1);
+	
+	call_result = call_user_function_ex(NULL,
+			&object,
+			zfuncname,
+			&zretval,
+			1, args,
+			0, NULL	TSRMLS_CC);
+	
+	if (call_result == SUCCESS && zretval != NULL && Z_TYPE_P(zretval) == IS_ARRAY) {
+		/* We got the info we needed */
+		if (SUCCESS == statbuf_from_array(zretval, ssb TSRMLS_CC))
+			ret = 0;
+	} else {
+		if (call_result == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_STATURL " is not implemented!",
+					uwrap->classname);
+		}
+	}
+	
+	/* clean up */
+	zval_ptr_dtor(&object);
+	if (zretval)
+		zval_ptr_dtor(&zretval);
+	
+	zval_ptr_dtor(&zfuncname);
+	zval_ptr_dtor(&zfilename);
+		
+	return ret;
+
+}
+
+static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	zval func_name;
+	zval *retval = NULL;
+	int call_result;
+	size_t didread = 0;
+	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+	php_stream_dirent *ent = (php_stream_dirent*)buf;
+
+	/* avoid problems if someone mis-uses the stream */
+	if (count != sizeof(php_stream_dirent))
+		return 0;
+
+	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_READ, sizeof(USERSTREAM_DIR_READ)-1, 0);
+
+	call_result = call_user_function_ex(NULL,
+			&us->object,
+			&func_name,
+			&retval,
+			0, NULL,
+			0, NULL TSRMLS_CC);
+
+	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) != IS_BOOL) {
+		convert_to_string(retval);
+		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRLEN_P(retval));
+
+		didread = sizeof(php_stream_dirent);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_DIR_READ " is not implemented!",
+				us->wrapper->classname);
+	}
+
+	if (retval)
+		zval_ptr_dtor(&retval);
+
+	return didread;
+}
+
+static int php_userstreamop_closedir(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	zval func_name;
+	zval *retval = NULL;
+	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+
+	assert(us != NULL);
+	
+	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_CLOSE, sizeof(USERSTREAM_DIR_CLOSE)-1, 0);
+	
+	call_user_function_ex(NULL,
+			&us->object,
+			&func_name,
+			&retval,
+			0, NULL, 0, NULL TSRMLS_CC);
+
+	if (retval)
+		zval_ptr_dtor(&retval);
+	
+	zval_ptr_dtor(&us->object);
+
+	efree(us);
+	
+	return 0;
+}
+
+static int php_userstreamop_rewinddir(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+{
+	zval func_name;
+	zval *retval = NULL;
+	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+
+	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_REWIND, sizeof(USERSTREAM_DIR_REWIND)-1, 0);
+	
+	call_user_function_ex(NULL,
+			&us->object,
+			&func_name,
+			&retval,
+			0, NULL, 0, NULL TSRMLS_CC);
+
+	if (retval)
+		zval_ptr_dtor(&retval);
+	
+	return 0;
+
+}
+
 php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_write, php_userstreamop_read,
 	php_userstreamop_close, php_userstreamop_flush,
 	"user-space",
 	php_userstreamop_seek,
+	NULL, /* cast */
+	php_userstreamop_stat, /* stat */
+	NULL  /* set_option */
+};
+
+php_stream_ops php_stream_userspace_dir_ops = {
+	NULL, /* write */
+	php_userstreamop_readdir,
+	php_userstreamop_closedir,
+	NULL, /* flush */
+	"user-space-dir",
+	php_userstreamop_rewinddir,
 	NULL, /* cast */
 	NULL, /* stat */
 	NULL  /* set_option */
