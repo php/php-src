@@ -2673,14 +2673,14 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 	xmlDocPtr docp;
 	idsIterator iter;
 	xmlHashTable *ids = NULL;
-	int retnode;
-
-	id = getThis();
-	DOMXML_GET_OBJ(docp, id, le_domxmldocp);
+	int retnode,idname_len;
+	char *idname;
+	
+	DOMXML_PARAM_TWO(docp, id, le_domxmldocp, "s", &idname, &idname_len);
 
 	ids = (xmlHashTable *) docp->ids;
 	if(ids) {
-		iter.elementId = (xmlChar *) 
+		iter.elementId = (xmlChar *) idname;
 		iter.element = NULL;
 		xmlHashScan(ids, idsHashScanner, &iter);
 		rv = php_domobject_new(iter.element, &retnode TSRMLS_CC);
