@@ -1,3 +1,56 @@
+2002-01-17  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+    New function yaz_es_result: Z395.0 Extended Services Result.
+
+2002-01-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/shmop.c:
+    Fixed shmop_read to append \0 to returned string in shmop_read to eliminate Zend warnings
+
+2002-01-17  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/session/session.c:
+    guys, shoot me if i'm wrong, but when we have set register_globals to off we
+    should _not_ touch any global variables at any time, right? so all session
+    register/unregister should only work on $HTTP_SESSION_VARS and $_SESSION. this
+    patch fixes at least one spot where we were touching globals even with
+    register_globals set to off.
+
+    * ext/oci8/oci8.c:
+     - Added 3 new optional parameters to OCIFetchStatement(). They control
+       the number of rows to skip at the beginning of the cursor, the
+       maximun numer of rows that should be fetched and the format of the
+       returned array. 
+
+2002-01-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: Fix attribution, its Petr's patch, not mine :)
+
+    * NEWS: Little cleanup, add information about Sablotron 0.8
+
+    * ext/xslt/config.m4: Update for Sablotron .8
+
+2002-01-17  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php: Test for results in _pgFieldFlags (thanks Brian Abent
+    <brian@onlineinfo.net>)
+
+2002-01-17  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/domxml/config.m4:
+    Use libxml2 header if there are older version. Reported by <jwagoner@wlion.com>
+
+2002-01-17  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: Added XsltStylesheet class with methods:
+    - domxml_xslt_stylesheet(string),
+    - domxml_xslt_stylesheet_doc(DomDocument),
+    - domxml_xslt_stylesheet_file(filename),
+    - process(DomDocument,parameters array) - previously domxml_xslt_process().
+
 2002-01-16  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
 
     * ext/session/session.c: Export php_session_register_module/serializer
