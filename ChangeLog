@@ -1,3 +1,118 @@
+2001-03-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+    - Added array_filter(), which allows filtering of array elements via
+      the specified callback. 
+
+    * ext/standard/array.c:
+    All user callbacks should be to EG(function_table).
+
+2001-03-16  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/standard/array.c:
+    Fixing build on Win32 by adding missing 	BLS_FETCH();
+
+2001-03-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Fixed all relevant array functions to avoid moving the internal array
+     pointer during operations. 
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c: This has got to be the last one..
+
+2001-03-16  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h:
+    - Inserting links without any delimiters is now possible
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * tests/.cvsignore: .php files should not be ignored. Typo?
+
+2001-03-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Fixed mem leak
+
+2001-03-16  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/article.c: String used as long.
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/dns.h: Missed this one.
+
+2001-03-16  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/php_imap.c:
+    This is to correct bug #9762, patch submitted by Bug reporter.
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c:
+    Make compile again when ZTS is enabled and imap-2000 is used. Bug #9762
+
+2001-03-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pdf/config.m4: Don't do anything, if the user wants no PDF.
+
+2001-03-16  Egon Schmid  <eschmid@s.netic.de>
+
+    * pear/Cache/Output.php: Ulf, you have a conflict.
+
+2001-03-16  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Output.php: Usage example changes should answer peoples FAQs.
+
+2001-03-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/Output.php: Fix the example.
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      ext/standard/dns.c: This should fix problems in systems without libbind.
+
+2001-03-16  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/printer/CREDITS: Adding credits
+
+2001-03-16  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/bz2/bz2.c:
+    Slightly modified fix from jeremy brand <jeremy@nirvani.net>.  he
+    correctly pointed out that allocating the buffer to a little more than
+    need (exact formula is in the code) will save the need to keep retrying
+    the compression.
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ming/config.m4:
+    Added a check for the one function missing in <= 0.1.0 versions of ming lib.
+
+2001-03-16  Brian Bruns  <camber@ais.org>
+
+    * ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.h:
+    sybase_affected_rows implementation submitted by John F. Dumas <jdumas@locutus.kingwoodcable.com>
+
+2001-03-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/bz2.c: Make this extension compile again..
+
+    * ext/ming/ming.c:
+    Killed a compile warning + made ming extension compile with the older ming libs.
+
+    * ext/ming/.cvsignore
+      ext/ming/CREDITS: Missing files.
+
+    * ext/ming/config.m4:
+    Beutify + fix some errors in finding libs and header files.
+
 2001-03-15  Emiliano Heyns  <emile@iris-advies.com>
 
     * ext/midgard/attachment.c: closing file after serving it.
