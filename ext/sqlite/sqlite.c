@@ -1756,17 +1756,12 @@ PHP_FUNCTION(sqlite_fetch_object)
 			fci.params = NULL;
 		}
 		fci.no_separation = 1;
-	
 
 		fcc.initialized = 1;
-
 		fcc.function_handler = ce->constructor;
-
 		fcc.calling_scope = EG(scope);
-
 		fcc.object_pp = &return_value;
 
-	
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%s()", class_name, ce->constructor->common.function_name);
 		} else {
