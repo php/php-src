@@ -256,7 +256,7 @@ package if needed.
             $this->installer = &new PEAR_Installer($this->ui);
         }
         if ($command == 'upgrade') {
-            $options[$command] = true;
+            $options['upgrade'] = true;
         }
         if ($command == 'upgrade-all') {
             include_once "PEAR/Remote.php";
@@ -292,7 +292,12 @@ package if needed.
         $errors = array();
         $downloaded = array();
         $this->installer->download($params, $options, $this->config, $downloaded,
-            $errors);
+                                   $errors);
+        if ($command != 'upgrade-all') {
+            for ($i = 0; $i < count($params); $i++) {
+                $params[$i] = $this->installer->extractDownloadFileName($params[$i], $_tmp);
+            }
+        }
         if (count($errors)) {
             $err['data'] = array($errors);
             $err['headline'] = 'Install Errors';
