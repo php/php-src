@@ -14,4 +14,5 @@ xslt_free($xh);
 ?>
 --EXPECTF--
 Warning: Sablotron error on line none: cannot open file '%s/ext/xslt/tests/non-existent.xsl' in %s/ext/xslt/tests/009.%s on line %i
+
 %sext/xslt/tests/009.%s(%i) : Warning - Sablotron error on line none: cannot open file '%sext/xslt/tests/non-existent.xsl'
