@@ -1218,14 +1218,19 @@ binary_assign_op_addr: {
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_ASSIGN: {
-					zval *value = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
+					zval *value;
+					SUSPEND_GARBAGE();
+					value = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
+					RESUME_GARBAGE();
 
 					zend_assign_to_variable(&opline->result, &opline->op1, &opline->op2, value, (EG(free_op2)?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
 					/* zend_assign_to_variable() always takes care of op2, never free it! */
 				}
 				break;
 			case ZEND_ASSIGN_REF:
+				SUSPEND_GARBAGE();
 				zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W), get_zval_ptr_ptr(&opline->op2, Ts, BP_VAR_W), Ts ELS_CC);
+				RESUME_GARBAGE();
 				break;
 			case ZEND_JMP:
 #if DEBUG_ZEND>=2
@@ -1467,13 +1472,18 @@ overloaded_function_call_cont:
 				}
 do_fcall_common:
 				{
-					zval *original_return_value;
+					zval **original_return_value;
 					int return_value_not_used = (opline->result.u.EA.type & EXT_TYPE_UNUSED);
 
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
-					var_uninit(&Ts[opline->result.u.var].tmp_var);
+					Ts[opline->result.u.var].var.ptr = (zval *)emalloc(sizeof(zval));
+					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
+					var_uninit(Ts[opline->result.u.var].var.ptr);
+					Ts[opline->result.u.var].var.ptr->is_ref = 0;
+					Ts[opline->result.u.var].var.ptr->refcount = 1;
+
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
-						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr, !return_value_not_used);
+						((zend_internal_function *) function_state.function)->handler(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list), object.ptr, !return_value_not_used);
 						if (object.ptr) {
 							object.ptr->refcount--;
 						}
@@ -1502,13 +1512,13 @@ do_fcall_common:
 							*this_ptr = object.ptr;
 							object.ptr = NULL;
 						}
-						original_return_value = EG(return_value);
-						EG(return_value) = &Ts[opline->result.u.var].tmp_var;
+						original_return_value = EG(return_value_ptr_ptr);
+						EG(return_value_ptr_ptr) = Ts[opline->result.u.var].var.ptr_ptr;
 						EG(active_op_array) = (zend_op_array *) function_state.function;
 						zend_execute(EG(active_op_array) ELS_CC);
 						EG(opline_ptr) = &opline;
 						EG(active_op_array) = op_array;
-						EG(return_value)=original_return_value;
+						EG(return_value_ptr_ptr)=original_return_value;
 						if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
 							zend_hash_destroy(function_state.function_symbol_table);
 							efree(function_state.function_symbol_table);
@@ -1518,11 +1528,11 @@ do_fcall_common:
 						}
 						EG(active_symbol_table) = calling_symbol_table;
 					} else { /* ZEND_OVERLOADED_FUNCTION */
-						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
+						call_overloaded_function(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(fbc);
 					}
 					if (return_value_not_used) {
-							zendi_zval_dtor(Ts[opline->result.u.var].tmp_var);
+						zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
 					}
 					object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
@@ -1536,9 +1546,15 @@ do_fcall_common:
 			case ZEND_RETURN: {
 					zval *retval = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					
-					*EG(return_value) = *retval;
-					if (!EG(free_op1)) {
-						zendi_zval_copy_ctor(*EG(return_value));
+					if (!EG(free_op1)) { /* Not a temp var */
+						efree(*EG(return_value_ptr_ptr));
+						/* Still need to check for reference */
+						*EG(return_value_ptr_ptr) = retval;
+						retval->refcount++;
+					} else {
+						**EG(return_value_ptr_ptr) = *retval;
+						(*EG(return_value_ptr_ptr))->refcount = 1;
+						(*EG(return_value_ptr_ptr))->is_ref = 0;
 					}
 #if SUPPORT_INTERACTIVE
 					op_array->last_executed_op_number = opline-op_array->opcodes;
@@ -1566,7 +1582,10 @@ do_fcall_common:
 						goto send_by_ref;
 				}
 				{
-					zval *varptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval *varptr;
+					SUSPEND_GARBAGE();
+					varptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					RESUME_GARBAGE();
 
 					if (varptr == &EG(uninitialized_zval)) {
 						varptr = (zval *) emalloc(sizeof(zval));
@@ -1589,8 +1608,13 @@ do_fcall_common:
 				break;
 send_by_ref:
 			case ZEND_SEND_REF: {
-					zval **varptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W);
-					zval *varptr = *varptr_ptr;
+					zval **varptr_ptr;
+					zval *varptr;
+					SUSPEND_GARBAGE();
+					varptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W);
+					RESUME_GARBAGE();
+
+					varptr = *varptr_ptr;
 
 					if (!PZVAL_IS_REF(varptr)) {
 						/* code to break away this variable */

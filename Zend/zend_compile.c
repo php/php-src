@@ -839,7 +839,7 @@ void do_end_function_call(znode *function_name, znode *result, znode *argument_l
 	}
 	opline->op1 = *function_name;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->result.op_type = IS_TMP_VAR;
+	opline->result.op_type = IS_VAR;
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
 	opline->op2.u.constant.value.lval = is_method;
@@ -948,7 +948,7 @@ static int generate_free_foreach_copy(znode *foreach_copy CLS_DC)
 	return 0;
 }
 
-void do_return(znode *expr CLS_DC)
+void do_return(znode *expr, int return_reference CLS_DC)
 {
 	zend_op *opline;
 	
@@ -963,6 +963,7 @@ void do_return(znode *expr CLS_DC)
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_RETURN;
+	opline->extended_value = return_reference;
 	if (expr) {
 		opline->op1 = *expr;
 	} else {

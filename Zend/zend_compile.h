@@ -267,7 +267,7 @@ int do_begin_function_call(znode *function_name CLS_DC);
 void do_begin_dynamic_function_call(znode *function_name CLS_DC);
 void do_begin_class_member_function_call(znode *class_name, znode *function_name CLS_DC);
 void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall CLS_DC);
-void do_return(znode *expr CLS_DC);
+void do_return(znode *expr, int return_reference CLS_DC);
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
 void do_early_binding(CLS_D);
 
@@ -573,20 +573,23 @@ int zendlex(znode *zendlval CLS_DC);
 #define PZVAL_IS_REF(z)		((z)->is_ref)
 
 #define PZVAL_LOCK(z)	((z)->refcount++)
-#define PZVAL_UNLOCK(z)	{ ((z)->refcount--);							\
-							if (!(z)->refcount) {						\
-								EG(garbage)[EG(garbage_ptr)++] = (z);	\
-								if (EG(garbage_ptr) == 4) {				\
-									zval_dtor(EG(garbage)[0]);			\
-									efree(EG(garbage)[0]);				\
-									zval_dtor(EG(garbage)[1]);			\
-									efree(EG(garbage)[1]);				\
-									EG(garbage)[0] = EG(garbage)[2];	\
-									EG(garbage)[1] = EG(garbage)[3];	\
-									EG(garbage_ptr) -= 2;				\
-								}										\
-							}											\
+#define PZVAL_UNLOCK(z)	{ ((z)->refcount--);								\
+							if (!(z)->refcount && !EG(suspend_garbage)) {	\
+								EG(garbage)[EG(garbage_ptr)++] = (z);		\
+								if (EG(garbage_ptr) == 4) {					\
+									zval_dtor(EG(garbage)[0]);				\
+									efree(EG(garbage)[0]);					\
+									zval_dtor(EG(garbage)[1]);				\
+									efree(EG(garbage)[1]);					\
+									EG(garbage)[0] = EG(garbage)[2];		\
+									EG(garbage)[1] = EG(garbage)[3];		\
+									EG(garbage_ptr) -= 2;					\
+								}											\
+							}												\
 						}
+
+#define SUSPEND_GARBAGE() (EG(suspend_garbage)=1)
+#define RESUME_GARBAGE() (EG(suspend_garbage)=0)
 
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 

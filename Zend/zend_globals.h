@@ -110,6 +110,7 @@ struct _zend_compiler_globals {
 
 struct _zend_executor_globals {
 	zval *return_value;
+	zval **return_value_ptr_ptr;
 
 	zval uninitialized_zval;
 	zval *uninitialized_zval_ptr;
@@ -160,6 +161,7 @@ struct _zend_executor_globals {
 
 	zval *garbage[4];
 	int garbage_ptr;
+	zend_bool suspend_garbage;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 #if SUPPORT_INTERACTIVE
