@@ -275,13 +275,15 @@ HELP;
 	}
 
 	// Run selected tests.
-	if (count($test_files)) {
+	$test_cnt = count($test_files);
+	if ($test_cnt) {
 		write_information();
 		usort($test_files, "test_sort");
 		echo "Running selected tests.\n";
 		$start_time = time();
+		$test_idx = 0;
 		foreach($test_files AS $name) {
-			$test_results[$name] = run_test($php,$name);
+			$test_results[$name] = run_test($php,$name,$test_cnt,++$test_idx);
 			if ($failed_tests_file && ($test_results[$name] == 'FAILED' || $test_results[$name] == 'WARNED')) {
 				fwrite($failed_tests_file, "$name\n");
 			}
@@ -383,8 +385,10 @@ echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "
 =====================================================================
 ";
 
+$test_cnt = count($test_files);
+$test_idx = 0;
 foreach ($test_files as $name) {
-	$test_results[$name] = run_test($php,$name);
+	$test_results[$name] = run_test($php,$name,$test_cnt,++$test_idx);
 }
 
 $end_time = time();
@@ -632,7 +636,7 @@ function system_with_timeout($commandline)
 //  Run an individual test case.
 //
 
-function run_test($php, $file)
+function run_test($php, $file, $test_cnt, $test_idx)
 {
 	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
 
@@ -675,11 +679,11 @@ TEST $file
 		// Add to the section text.
 		$section_text[$section] .= $line;
 	}
-	if (!@count($section_text['FILE'])) {
+	if (@count($section_text['FILE']) != 1) {
 		echo "BORK missing section --FILE-- [$file]\n";
 		return 'BORKED';
 	}
-	if (!(@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX']))) {
+	if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
 		echo "BORK missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]\n";
 		return 'BORKED';
 	}
@@ -696,7 +700,7 @@ TEST $file
 	$shortname = str_replace($cwd.'/', '', $file);
 	$tested = trim($section_text['TEST'])." [$shortname]";
 
-	echo "TEST [$shortname]\r";
+	echo "TEST $test_idx/$test_cnt [$shortname]\r";
 	flush();
 
 	$tmp = realpath(dirname($file));
