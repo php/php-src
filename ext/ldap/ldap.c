@@ -207,7 +207,7 @@ PHP_MINIT_FUNCTION(ldap)
 
 	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
-	le_result_entry = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result entry", module_number);
+	le_result_entry = zend_register_list_destructors_ex(NULL, NULL, "ldap result entry", module_number);
 
 	ldap_module_entry.type = type;
 
@@ -2004,6 +2004,6 @@ PHP_FUNCTION(ldap_8859_to_t61)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */
