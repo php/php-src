@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Changed exif extension to consider php.ini option magic_quotes_runtime.
+  (Marcus)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Renamed stream_register_wrapper() to stream_wrapper_register(). (Derick)
