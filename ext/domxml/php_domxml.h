@@ -214,6 +214,7 @@ PHP_FUNCTION(xpath_new_context);
 PHP_FUNCTION(xpath_eval);
 PHP_FUNCTION(xpath_eval_expression);
 PHP_FUNCTION(xpath_register_ns);
+PHP_FUNCTION(xpath_register_ns_auto);
 PHP_FUNCTION(domxml_doc_get_elements_by_tagname);
 PHP_FUNCTION(domxml_doc_get_element_by_id);
 #endif
