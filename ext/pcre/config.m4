@@ -6,9 +6,10 @@ dnl if DIR is supplied, we'll use that for linking
 
 AC_MSG_CHECKING(whether to include PCRE support)
 AC_ARG_WITH(pcre-regex,
-[  --without-pcre-regex    Don't include Perl Compatible Regular Expressions support
-                          Use --with-pcre-regex=DIR to specify DIR where PCRE include
-                          and library files are located],[
+[  --without-pcre-regex    Do not include Perl Compatible Regular Expressions 
+                          support. Use --with-pcre-regex=DIR to specify DIR
+                          where PCRE's include and library files are located],
+[
 	case "$withval" in 
 		no)
 			AC_MSG_RESULT(no)

@@ -135,7 +135,8 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
 
   AC_MSG_CHECKING(whether to enable 4bit antialias hack with FreeType2)
   AC_ARG_ENABLE(freetype-4bit-antialias-hack,
-  [  --enable-freetype-4bit-antialias-hack  For the crazy with FreeType2.],[
+  [  --enable-freetype-4bit-antialias-hack  
+                          Include support for FreeType2 (experimental).],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(FREETYPE_4BIT_ANTIALIAS_HACK, 1)
     AC_MSG_RESULT(yes)

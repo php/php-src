@@ -2,7 +2,8 @@ dnl $Id$
 
 AC_MSG_CHECKING(for IMAP support)
 AC_ARG_WITH(imap,
-[  --with-imap[=DIR]       Include IMAP support (DIR is the IMAP include dir and c-client.a dir).],
+[  --with-imap[=DIR]       Include IMAP support.  DIR is the IMAP include
+                          and c-client.a directory.],
 [
 	if test "$withval" = "yes"; then
 		if test -f /usr/local/include/mail.h; then
