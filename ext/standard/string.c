@@ -3050,7 +3050,6 @@ PHP_FUNCTION(iconv)
     zval **in_charset, **out_charset, **in_buffer;
     unsigned int in_size, out_size;
     char *out_buffer, *in_p, *out_p;
-    iconv_t cd;
     size_t result;
     typedef unsigned int ucs4_t;
 
@@ -3094,6 +3093,33 @@ PHP_FUNCTION(ob_iconv_handler)
 		zval_copy_ctor(return_value);		
 	}
 	
+}
+
+/* {{{ proto bool iconv_set_encoding(string int_charset, string out_charset)
+   set internal encoding and output encoding for ob_iconv_handler().
+*/
+PHP_FUNCTION(iconv_set_encoding)
+{
+    zval **int_charset, **out_charset;
+
+    if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &int_charset, &out_charset) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+    convert_to_string_ex(int_charset);
+    convert_to_string_ex(out_charset);
+
+	if (BG(iconv_internal_encoding)) {
+		free(BG(iconv_internal_encoding));
+	}
+	BG(iconv_internal_encoding) = estrndup(Z_STRVAL_PP(int_charset),Z_STRLEN_PP(int_charset));
+
+	if (BG(iconv_output_encoding)) {
+		free(BG(iconv_output_encoding));
+	}
+	BG(iconv_output_encoding) = estrndup(Z_STRVAL_PP(out_charset),Z_STRLEN_PP(out_charset));
+
+	RETURN_TRUE;
 }
 
 #endif

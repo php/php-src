@@ -197,6 +197,7 @@ function_entry basic_functions[] = {
 #ifdef HAVE_ICONV
     PHP_FE(iconv,									NULL)
     PHP_FE(ob_iconv_handler,						NULL)
+    PHP_FE(iconv_set_encoding,						NULL)
 #endif
 	PHP_FE(parse_url,								NULL)
 	PHP_FE(urlencode,								NULL)
