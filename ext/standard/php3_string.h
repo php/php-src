@@ -83,6 +83,7 @@ PHP_FUNCTION(chunk_split);
 PHP_FUNCTION(parsestr);
 PHP_FUNCTION(bin2hex);
 PHP_FUNCTION(similar_text);
+PHP_FUNCTION(strip_tags);
 
 extern PHPAPI char *_php3_strtoupper(char *s);
 extern PHPAPI char *_php3_strtolower(char *s);
