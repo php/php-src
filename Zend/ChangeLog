@@ -1,3 +1,9 @@
+2002-09-23  Andi Gutmans  <andi@zend.com>
+
+    * zend_globals.h
+      zend_ini.c
+      zend_language_parser.y: - MFZE1.
+
 2002-09-21  Andi Gutmans  <andi@zend.com>
 
     * zend_extensions.h: - Someone screwed this up.

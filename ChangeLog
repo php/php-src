@@ -1,3 +1,164 @@
+2002-09-23  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: yadda yadda..
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Correct a buglet in the newly introduced buffer code.
+
+2002-09-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c: MFH: fix for bug #17915
+
+2002-09-23  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/fribidi.c:
+    - Fixed build on Win32 (and made the ext use a newer API)
+    - Various CS fixes
+    - Converted the parameter parsing to the new API
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: include(URL).
+
+    * main/streams.c:
+    Ensure that the seekable stream returned for include("http://") under win32
+    is based on a temporary file rather than a memory stream.
+
+    * main/php_streams.h:
+    Enable include("http://....") under win32 by downloading to a temporary
+    stream so that flex will get on nicely with the content.
+
+2002-09-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c: Fixed bug #17466
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: Reflect recent streams changes.
+
+    * main/user_streams.c:
+    Remove allow_url_fopen checks from the user streams code.
+    Rationale: user streams might not be implementing network access,
+    and the administrator can disable the file_register_wrapper function
+    and other network access functions if s/he does not want to allow
+    this functionality.
+
+    * ext/standard/file.h: WS
+
+    * main/streams.c
+      ext/standard/basic_functions.h
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/http_fopen_wrapper.c
+      main/network.c
+      php.ini-dist
+      php.ini-recommended:
+    Implement a default_socket_timeout and auto_detect_line_endings ini options.
+    Also move user_agent from BG to FG.
+
+2002-09-23  David Reid  <dreid@jetnet.co.uk>
+
+    * sapi/apache2filter/config.m4:
+    Allow this to build on beos with it's bizarre linking.
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c: basic_functions.c
+
+2002-09-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Force /nocache/ entities to be delivered completely, even if a
+    broken proxy ignores our anti-cache headers and sends an IMS request.
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+    Hopefully fix the other warnings that my last warning-fixing commit caused.
+
+2002-09-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/filestat.c: (PHP touch) Remove an extraneous time() call.
+
+    Yasuo added this line in rev 1.90 for no apparent reason.
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ftp/ftp.c
+      main/streams.c
+      main/php_streams.h: fix some warnings.
+
+2002-09-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/string.c: Fix warning.
+
+2002-09-23  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c: Fix bug #19525
+
+2002-09-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    (php_get_session_var) Always return FAILURE if no data source was found.
+
+    Noticed by: Sebastian Bergmann
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/userstreams.phpt
+      main/memory_streams.c
+      main/php_streams.h
+      main/streams.c
+      main/user_streams.c: Revise buffer/seek code a little.
+    Tidy up user streams even more.
+    Make test case quite aggressive.
+
+2002-09-23  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_ini.c: Compat fix
+
+    * sapi/cgi/cgi_main.c:
+    We leak quite a few things intentionally, if you want to debug it - enable
+    explicitly please..
+
+2002-09-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/sapi_apache2.c: Fixed bug #17662
+
+2002-09-23  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c
+      ext/sockets/win32_socket_constants.h: Implement contstants on win32
+
+2002-09-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c
+      main/php_network.h
+      main/php_streams.h
+      main/streams.c
+      main/user_streams.c
+      main/memory_streams.c
+      ext/bz2/bz2.c
+      ext/standard/file.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/curl/curlstreams.c: Implement read buffering in streams.
+    Eliminate similar code from network.c.
+    Implement fgets equivalent at the streams level, which can detect
+    the mac, dos and unix line endings and handle them appropriately.
+    The default behaviour is unix (and dos) line endings.
+    An ini option to control this behaviour will follow.
+
+2002-09-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Use generic getnameinfo for address-to-name translation, if available.
+
+    This adds support for IPv6 addresses.
+
 2002-09-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/fopen_wrappers.c: Fixed bug #19395
