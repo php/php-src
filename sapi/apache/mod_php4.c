@@ -108,8 +108,6 @@ typedef struct _php_per_dir_entry {
 	int type;
 } php_per_dir_entry;
 
-php_apache_info_struct php_apache_info;		/* active config */
-
 /* some systems are missing these from their header files */
 
 void php_save_umask(void)
@@ -437,6 +435,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	ELS_FETCH();
 	CLS_FETCH();
 	PLS_FETCH();
+	APLS_FETCH();
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
@@ -460,7 +459,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	/* If PHP parser engine has been turned off with an "engine off"
 	 * directive, then decline to handle this request
 	 */
-	if (!php_apache_info.engine) {
+	if (!AP(engine)) {
 		r->content_type = php_apache_get_default_mimetype(r SLS_CC);
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
@@ -475,7 +474,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 		return retval;
 #endif
 
-	if (php_apache_info.last_modified) {
+	if (AP(last_modified)) {
 #if MODULE_MAGIC_NUMBER < 19970912
 		if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
 			return retval;
