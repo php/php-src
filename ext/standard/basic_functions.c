@@ -1053,6 +1053,7 @@ void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_
 	efree(shutdown_function_entry->arguments);
 }
 
+
 int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
 {
 	zval retval;
@@ -1060,19 +1061,31 @@ int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_e
 
 	if (call_user_function(CG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
 		zval_dtor(&retval);
-	} else
+	} else {
 		php_error(E_WARNING,"Unable to call %s() - function does not exist",
 				  shutdown_function_entry->arguments[0]->value.str.val);
+	}
 	return 0;
 }
+
 
 void php_call_shutdown_functions(void)
 {
 	BLS_FETCH();
-	
+	ELS_FETCH();
+
 	if (BG(user_shutdown_function_names)) {
+		jmp_buf orig_bailout;
+
+		memcpy(&orig_bailout, &EG(bailout), sizeof(jmp_buf));
+		if (setjmp(EG(bailout))!=0) {
+			/* one of the shutdown functions bailed out */
+			memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));
+			return;
+		}
 		zend_hash_apply(BG(user_shutdown_function_names),
 						(apply_func_t)user_shutdown_function_call);
+		memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));
 		zend_hash_destroy(BG(user_shutdown_function_names));
 		efree(BG(user_shutdown_function_names));
 	}
