@@ -1039,21 +1039,21 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
             XMLRPC_VALUE xAnswer = NULL;
             MAKE_STD_ZVAL(data.xmlrpc_method); /* init. very important.  spent a frustrating day finding this out. */
             MAKE_STD_ZVAL(data.return_data);
-            data.Z_TYPE_P(return_data) = IS_NULL;  /* in case value is never init'd, we don't dtor to think it is a string or something */
-            data.Z_TYPE_P(xmlrpc_method) = IS_NULL;
+            Z_TYPE_P(data.return_data) = IS_NULL;  /* in case value is never init'd, we don't dtor to think it is a string or something */
+            Z_TYPE_P(data.xmlrpc_method) = IS_NULL;
 
             /* setup some data to pass to the callback function */
-            data.Z_STRVAL_P(xmlrpc_method) = estrdup(XMLRPC_RequestGetMethodName(xRequest));
-            data.Z_STRLEN_P(xmlrpc_method) = strlen(data.Z_STRVAL_P(xmlrpc_method));
-            data.Z_TYPE_P(xmlrpc_method) = IS_STRING;
+            Z_STRVAL_P(data.xmlrpc_method) = estrdup(XMLRPC_RequestGetMethodName(xRequest));
+            Z_STRLEN_P(data.xmlrpc_method) = strlen(Z_STRVAL_P(data.xmlrpc_method));
+            Z_TYPE_P(data.xmlrpc_method) = IS_STRING;
             data.caller_params = caller_params;
             data.php_executed = 0;
             data.server = server;
 
             /* check if the called method has been previous registered */
             if(zend_hash_find(Z_ARRVAL_P(server->method_map), 
-                              data.Z_STRVAL_P(xmlrpc_method), 
-                              data.Z_STRLEN_P(xmlrpc_method) + 1, 
+                              Z_STRVAL_P(data.xmlrpc_method), 
+                              Z_STRLEN_P(data.xmlrpc_method) + 1, 
                               (void**)&php_function) == SUCCESS) {
 
                data.php_function = *php_function;
