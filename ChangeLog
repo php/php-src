@@ -1,3 +1,85 @@
+2003-01-25  Shane Caraveo  <shane@caraveo.com>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      MFH
+      
+      fix bug 21261
+          putenv on some platforms requires we provide the memory
+          cleanup env parsing logic
+      fix bug 21367
+          missed optargs in a previous patch
+
+    * sapi/cgi/cgi_main.c:
+      fix bug 21261
+          putenv on some platforms requires we provide the memory
+          cleanup env parsing logic
+      fix bug 21367
+          missed optargs in a previous patch
+
+2003-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_ini.c:
+      Fixed bug #21625 (When scanning a directory for ini files, do so in
+      alphabetical order. This gives a user a way to control the order in which
+      the ini files are loaded).
+      Fixed a bug that would make the code try to read files without an
+      extension
+      as ini files.
+
+2003-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/config.m4:
+      MFH: The builtin version was always used even if configured otherwise.
+
+    * (PHP_4_3)
+      run-tests.php:
+      MFH: Bug #21751: Part one never let this happen again...
+
+    * ext/dba/config.m4:
+      The builtin version was always used even if configured otherwise.
+
+    * run-tests.php:
+      Bug #21751: Part one never let this happen again...
+
+2003-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/informix/ifx.ec:
+      Removed unneeded code.
+
+2003-01-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/mime_magic.c:
+      - mime file parser messages only with mime_magic.debug=On (default: off)
+      - fix docref URL in startup error messages
+      - show status in php info, either "enabled" or "..., disabled"
+
+    * ext/mime_magic/php_mime_magic.h:
+      preparations for making magic file parser silent
+
+    * ext/mime_magic/config.m4:
+      suggesting a plain magic file insteat of a mime one is a bad idea
+
+2003-01-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/osguess.php:
+      - not a real test, just a script for displaying OS_Guess output
+
+    * pear/OS/Guess.php:
+      - add glibc version detection for Linux
+
+    * pear/PEAR/Command/Remote.php:
+      - typo
+
+2003-01-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/informix/ifx.ec:
+      Fixed a typo.
+
+    * ext/standard/image.c:
+      Fixed compiler warning.
+
 2003-01-24  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/mod_files.c
