@@ -1,0 +1,21 @@
+This is msession, it is an interface to a stand-alone session
+management system. The msession daemon can be found at 
+HTTP://www.mohawksoft.com under Project Phoenix
+
+Requirements:
+Mohawk Software's Phoenix library.
+Mohawk Software's msession daemon.
+
+http://www.mohawksoft.com/phoenix.html
+
+Building:
+I am still a newbee at PHP hacking so I am scared to death 
+I will break something, and I (regretfully) have not invested
+the time to make all this stuff automatic.
+
+In the config.m4 file you will need to specify the include 
+and library directories for Phoenix. The setting in config.m4
+is probably wrong.
+
+
+
