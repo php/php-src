@@ -51,6 +51,7 @@ define("DB_ERROR_CANNOT_DELETE",  -16);
 define("DB_ERROR_CANNOT_DROP",    -17);
 define("DB_ERROR_NOSUCHTABLE",    -18);
 define("DB_ERROR_NOSUCHFIELD",    -19);
+define("DB_ERROR_NEED_MORE_DATA", -20);
 
 // }}}
 // {{{ Prepare/execute parameter types
@@ -59,11 +60,12 @@ define("DB_ERROR_NOSUCHFIELD",    -19);
  * These constants are used when storing information about prepared
  * statements (using the "prepare" method in DB_dbtype).
  *
- * The prepare/execute model in DB is borrowed from the ODBC extension,
- * in a query the "?" character means a scalar parameter, and a "*"
- * character means an opaque parameter.  An opaque parameter is simply
- * a file name, the real data are in that file (useful for large blob
- * operations). 
+ * The prepare/execute model in DB is mostly borrowed from the ODBC
+ * extension, in a query the "?" character means a scalar parameter.
+ * There is one extension though, a "*" character means an opaque
+ * parameter.  An opaque parameter is simply a file name, the real
+ * data are in that file (useful for stuff like putting uploaded files
+ * into your database).
  */
 define("DB_PARAM_SCALAR",           1);
 define("DB_PARAM_OPAQUE",           2);
@@ -117,16 +119,17 @@ class DB {
     // {{{ factory()
 
 	/**
-	 * Create a new DB object for the specified database type.
+	 * <purpose>Create a new DB object for the specified database
+	 * type</purpose>
 	 *
-	 * @param   $type   database type
+	 * <param name="$type" type="string">database type</param>
 	 *
-	 * @return object a newly created DB object, or a DB error code on
-	 * error
+	 * <return type="object">a newly created DB object, or a DB error
+	 * code on error</return>
 	 */
     function factory($type) {
 		global $USED_PACKAGES;
-		// "include" should be replaced with "use" once PHP gets it
+		// "include" should be replaced with "import" once PHP gets it
 		$pkgname = 'DB/' . $type;
 		if (!is_array($USED_PACKAGES) || !$USED_PACKAGES[$pkgname]) {
 			if (!@include("DB/${type}.php")) {
@@ -137,24 +140,26 @@ class DB {
 		}
 		$classname = 'DB_' . $type;
 		$obj = new $classname;
-		return $obj;
+		return $obj; // XXX ADDREF
     }
 
     // }}}
     // {{{ connect()
 
 	/**
-	 * Create a new DB object and connect to the specified database.
+	 * <purpose>Create a new DB object and connect to the specified
+	 * database </purpose>
 	 *
-	 * @param $dsn "data source name", see the parseDSN method for a
-	 * description of the dsn format.
+	 * <param name="$dsn" type="string">"data source name", see the
+	 * <ref method="DB::parseDSN"/> method for a description of the
+	 * dsn format.</param>
 	 *
-	 * @param $persistent (optional) whether this connection should be
-	 * persistent.  Ignored if the backend extension does not support
-	 * persistent connections.
+	 * <param name="$persistent" type="bool">whether this connection
+	 * should be persistent.  Ignored if the backend extension does
+	 * not support persistent connections.</param>
 	 *
-	 * @return object a newly created DB object, or a DB error code on
-	 * error
+	 * <return type="object">a newly created DB object, or a DB error
+	 * code on error</return>
 	 */
 	function connect($dsn, $persistent = false) {
 		global $USED_PACKAGES;
@@ -183,9 +188,9 @@ class DB {
     // {{{ apiVersion()
 
 	/**
-	 * Return the DB API version.
+	 * <purpose>Return the DB API version</purpose>
 	 *
-	 * @return double the DB API version number
+	 * <return type="double">the DB API version number</return>
 	 */
     function apiVersion() {
 		return 1.00;
@@ -195,11 +200,12 @@ class DB {
     // {{{ isError()
 
 	/**
-	 * Tell whether a result code from a DB method is an error.
+	 * <purpose>Tell whether a result code from a DB method is an
+	 * error</purpose>
 	 *
-	 * @param $code result code
+	 * <param name="$code" type="int">result code</param>
 	 *
-	 * @return bool whether $code is an error
+	 * <return type="bool">whether $code is an error</return>
 	 */
 	function isError($code) {
 		return is_int($code) && ($code < 0);
@@ -209,12 +215,13 @@ class DB {
     // {{{ errorMessage()
 
 	/**
-	 * Return a textual error message for a DB error code.
+	 * <purpose>Return a textual error message for a DB error
+	 * code</purpose>
 	 *
-	 * @param $code error code
+	 * <param name="$code" type="int">error code</param>
 	 *
-	 * @return string error message, or false if the error code was
-	 * not recognized
+	 * <return type="string">error message, or false if the error code
+	 * was not recognized</return>
 	 */
 	function errorMessage($code) {
 		if (!is_array($errorMessages)) {
@@ -247,30 +254,50 @@ class DB {
     // {{{ parseDSN()
 
 	/**
+	 * <purpose>Parse a data source name</purpose>
+	 *
+	 * <param name="$dsn" type="string">Data Source Name to be
+	 * parsed</param>
+	 *
+	 * <desc>
+	 * <para>
 	 * Parse a data source name and return an associative array with
 	 * the following keys:
-	 *  phptype       Database backend used in PHP (mysql, odbc etc.)
-	 *  dbsyntax      Database used with regards to SQL syntax etc.
-	 *  protocol      Communication protocol to use (tcp, unix etc.)
-	 *  hostspec      Host specification (hostname[:port])
-	 *  database      Database to use on the DBMS server
-	 *  username      User name for login
-     *  password      Password for login
-	 *
+	 * <dl>
+	 *  <dt>phptype</dt>
+	 *  <dd>Database backend used in PHP (mysql, odbc etc.)</dd>
+	 *  <dt>dbsyntax</dt>
+	 *  <dd>Database used with regards to SQL syntax etc.</dd>
+	 *  <dt>protocol</dt>
+	 *  <dd>Communication protocol to use (tcp, unix etc.)</dd>
+	 *  <dt>hostspec</dt>
+	 *  <dd>Host specification (hostname[:port])</dd>
+	 *  <dt>database</dt>
+	 *  <dd>Database to use on the DBMS server</dd>
+	 *  <dt>username</dt>
+	 *  <dd>User name for login</dd>
+	 *  <dt>password</dt>
+	 *  <dd>Password for login</dd>
+	 * </dl>
+	 * </para><para>
 	 * The format of the supplied DSN is in its fullest form:
-	 *  phptype(dbsyntax)://username:password@protocol+hostspec/database
+	 * <ul>
+	 *  <li>phptype(dbsyntax)://username:password@protocol+hostspec/database</li>
+	 * </ul>
 	 * Most variations are allowed:
-	 *  phptype://username:password@protocol+hostspec/database
-	 *  phptype://username:password@hostspec/database
-	 *  phptype://username:password@hostspec
-	 *  phptype://hostspec/database
-	 *  phptype://hostspec
-	 *  phptype(dbsyntax)
-	 *  phptype
+	 * <ul>
+	 *  <li>phptype://username:password@protocol+hostspec/database</li>
+	 *  <li>phptype://username:password@hostspec/database</li>
+	 *  <li>phptype://username:password@hostspec</li>
+	 *  <li>phptype://hostspec/database</li>
+	 *  <li>phptype://hostspec</li>
+	 *  <li>phptype(dbsyntax)</li>
+	 *  <li>phptype</li>
+	 * </ul>
+	 * </para>
+	 * </desc>
 	 *
-	 * FALSE is returned on error.
-	 *
-	 * @param $dsn Data Source Name to be parsed
+	 * <return type="bool">FALSE is returned on error</return>
 	 */
 	function parseDSN($dsn) {
 		$parsed = array(

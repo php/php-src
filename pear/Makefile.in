@@ -11,7 +11,6 @@ include $(topsrcdir)/build/rules.mk
 peardir=$(prefix)/lib/php
 pear_DBdir=$(prefix)/lib/php/DB
 
-
 install-data-local:
 	-@$(mkinstalldirs) $(peardir) $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB.php $(peardir) && \
@@ -39,14 +38,16 @@ install-build:
 	echo "creating phpize" && \
 	sed \
 		-e 's#@PREFIX@#$(prefix)#' \
-		< $(srcdir)/phpize.in > $(bindir)/phpize && \
-	chmod +x $(bindir)/phpize && \
+		< $(srcdir)/phpize.in > $(bindir)/phpize.tmp && \
+	chmod +x $(bindir)/phpize.tmp && \
+	mv $(bindir)/phpize.tmp $(bindir)/phpize && \
 	echo "creating php-config" && \
 	sed \
 		-e 's#@PREFIX@#$(prefix)#' \
 		-e 's#@PHPINCLUDEDIR@#$(phpincludedir)#g' \
-		< $(srcdir)/php-config.in > $(bindir)/php-config && \
-	chmod +x $(bindir)/php-config
+		< $(srcdir)/php-config.in > $(bindir)/php-config.tmp && \
+	chmod +x $(bindir)/php-config.tmp && \
+	mv $(bindir)/php-config.tmp $(bindir)/php-config &&
 
 SRC_HEADERS = \
 	php.h \
@@ -68,7 +69,7 @@ BUILD_HEADERS = \
 
 STANDARD_HEADERS = \
 	php_output.h
-	
+
 HEADER_DIRS = \
 	Zend \
 	TSRM \
