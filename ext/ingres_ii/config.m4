@@ -1,5 +1,5 @@
 dnl $Id$
-dnl config.m4 for extension ii
+dnl config.m4 for extension ingres_ii
 
 PHP_ARG_WITH(ii, for Ingres II support,
 [  --with-ii[=DIR]         Include Ingres II support. DIR is the Ingres
@@ -8,7 +8,7 @@ no)
 
 if test "$PHP_II" != "no"; then
   AC_DEFINE(HAVE_II, 1, [Whether you have Ingres II])
-  PHP_EXTENSION(ii, $ext_shared)
+  PHP_EXTENSION(ingres_ii, $ext_shared)
 
   if test "$PHP_II" = "yes"; then
     II_DIR=$II_SYSTEM/ingres
