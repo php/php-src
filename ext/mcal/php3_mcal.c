@@ -501,9 +501,12 @@ void make_event_object(pval *mypvalue,CALEVENT *event)
   add_assoc_object(mypvalue, "end",end);
   
 	
-	add_property_string(mypvalue,"category",event->category,1);
-	add_property_string(mypvalue,"title",event->title,1);
-	add_property_string(mypvalue,"description",event->description,1);
+	if (event->category)
+		add_property_string(mypvalue,"category",event->category,1);
+	if (event->title)
+		add_property_string(mypvalue,"title",event->title,1);
+	if (event->description)
+		add_property_string(mypvalue,"description",event->description,1);
 	add_property_long(mypvalue,"alarm",event->alarm);
 	add_property_long(mypvalue,"recur_type",event->recur_type);
 	add_property_long(mypvalue,"recur_interval",event->recur_interval);
