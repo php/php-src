@@ -852,6 +852,7 @@ SXE_METHOD(asXML)
 
 		sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 		GET_NODE(sxe, node);
+		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
 		if (node) {
 			if (XML_DOCUMENT_NODE == node->parent->type) {
@@ -874,6 +875,7 @@ SXE_METHOD(asXML)
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	GET_NODE(sxe, node);
+	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
 
 	if (node) {
 		if (XML_DOCUMENT_NODE == node->parent->type) {
@@ -1088,6 +1090,31 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sxe_object_dtor()
+ */
+static void sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+{
+	/* dtor required to cleanup iterator related data properly */
+
+	php_sxe_object *sxe;
+
+	sxe = (php_sxe_object *) object;
+
+	if (sxe->iter.data) {
+		zval_ptr_dtor(&sxe->iter.data);
+		sxe->iter.data = NULL;
+	}
+
+	if (sxe->iter.name) {
+		xmlFree(sxe->iter.name);
+		sxe->iter.name = NULL;
+	}
+	if (sxe->iter.nsprefix) {
+		xmlFree(sxe->iter.nsprefix);
+		sxe->iter.nsprefix = NULL;
+	}
+}
+
 /* {{{ sxe_object_free_storage()
  */
 static void sxe_object_free_storage(void *object TSRMLS_DC)
@@ -1098,17 +1125,6 @@ static void sxe_object_free_storage(void *object TSRMLS_DC)
 
 	zend_hash_destroy(sxe->zo.properties);
 	FREE_HASHTABLE(sxe->zo.properties);
-
-	if (sxe->iter.data) {
-		zval_ptr_dtor(&sxe->iter.data);
-	}
-
-	if (sxe->iter.name) {
-		xmlFree(sxe->iter.name);
-	}
-	if (sxe->iter.nsprefix) {
-		xmlFree(sxe->iter.nsprefix);
-	}
 
 	php_libxml_node_decrement_resource((php_libxml_node_object *)sxe TSRMLS_CC);
 
@@ -1152,7 +1168,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 {
 	zend_object_value rv;
 
-	rv.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
+	rv.handle = zend_objects_store_put(intern, sxe_object_dtor, (zend_objects_free_object_storage_t)sxe_object_free_storage, sxe_object_clone TSRMLS_CC);
 	rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
 
 	return rv;
@@ -1364,7 +1380,10 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
-	zval_ptr_dtor((zval**)&iterator->intern.data);
+	/* cleanup handled in sxe_object_dtor as we dont always have an iterator wrapper */
+	if (iterator->intern.data) {
+		zval_ptr_dtor((zval**)&iterator->intern.data);
+	}
 
 	efree(iterator);
 }
