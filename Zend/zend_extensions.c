@@ -45,6 +45,7 @@ int zend_load_extension(char *path)
 	new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
 	if (!extension_version_info || !new_extension) {
 		fprintf(stderr, "%s doesn't appear to be a valid Zend extension\n", path);
+		DL_UNLOAD(handle);
 		return FAILURE;
 	}
 
