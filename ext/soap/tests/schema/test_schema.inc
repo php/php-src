@@ -70,11 +70,5 @@ EOF;
     ob_end_clean();
     var_dump($val);
   }
-
-/*
-  xml_parse_into_struct($xml,$x->__getlastrequest(),&$x,&$y);
-  var_dump($x);
-  var_dump($y);
-*/
 }
 ?>
