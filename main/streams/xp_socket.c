@@ -46,7 +46,7 @@ static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, 
 static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	size_t didwrite;
+	int didwrite;
 
 	if (sock->socket == -1) {
 		return 0;
@@ -64,6 +64,10 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 
 	if (didwrite > 0) {
 		php_stream_notify_progress_increment(stream->context, didwrite, 0);
+	}
+
+	if (didwrite < 0) {
+		didwrite = 0;
 	}
 
 	return didwrite;
@@ -124,8 +128,13 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 		stream->eof = 1;
 	}
 
-	if (nr_bytes > 0)
+	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
+	}
+
+	if (nr_bytes < 0) {
+		nr_bytes = 0;
+	}
 
 	return nr_bytes;
 }
