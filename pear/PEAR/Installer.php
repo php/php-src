@@ -265,10 +265,19 @@ class PEAR_Installer extends PEAR_Common
                     }
                 } elseif ($a['type'] == 'pear-config') {
                     $to = $this->config->get($a['to']);
+                    if (is_null($to)) {
+                        $this->log(0, "invalid pear-config replacement: $a[to]");
+                        continue;
+                    }
                 } elseif ($a['type'] == 'package-info') {
-                    $to = $this->pkginfo[$a['to']];
+                    if (isset($this->pkginfo[$a['to']]) && is_string($this->pkginfo[$a['to']])) {
+                        $to = $this->pkginfo[$a['to']];
+                    } else {
+                        $this->log(0, "invalid package-info replacement: $a[to]");
+                        continue;
+                    }
                 }
-                if ($to) {
+                if (!is_null($to)) {
                     $subst_from[] = $a['from'];
                     $subst_to[] = $to;
                 }
