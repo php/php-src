@@ -27,6 +27,7 @@ PHP_FUNCTION(imap_num_msg);
 PHP_FUNCTION(imap_num_recent);
 PHP_FUNCTION(imap_headers);
 PHP_FUNCTION(imap_headerinfo);
+PHP_FUNCTION(imap_rfc822_parse_headers);
 PHP_FUNCTION(imap_body);
 PHP_FUNCTION(imap_fetchstructure);
 PHP_FUNCTION(imap_fetchbody);
