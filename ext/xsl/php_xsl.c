@@ -176,8 +176,12 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		return;
 	}
 
-	args = safe_emalloc(sizeof(zval **), nargs - 1, 0);
-	for (i = 0; i < nargs - 1; i++) {
+	fci.param_count = nargs - 1;
+	fci.params = safe_emalloc(fci.param_count, sizeof(zval**), 0);
+
+	args = safe_emalloc(nargs - 1, sizeof(zval *), 0);
+	/* Reverse order to pop values off ctxt stack */
+	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
 		MAKE_STD_ZVAL(args[i]);
 		switch (obj->type) {
@@ -236,6 +240,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			ZVAL_STRING(args[i], "", 0);
 		}
 		xmlXPathFreeObject(obj);
+		fci.params[i] = &args[i];
 	}
 	
 	fci.size = sizeof(fci);
@@ -250,8 +255,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	fci.symbol_table = NULL;
 	fci.object_pp = NULL;
 	fci.retval_ptr_ptr = &retval;
-	fci.param_count = nargs - 1;
-	fci.params = &args;
 	fci.no_separation = 0;
 	/*fci.function_handler_cache = &function_ptr;*/
 	
@@ -280,6 +283,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		zval_ptr_dtor(&args[i]);
 	}
 	efree(args);
+	efree(fci.params);
 }
 
 static void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
