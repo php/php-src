@@ -1,3 +1,50 @@
+2002-02-13  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/sockets/sockets.dsp: Fixing release and debug build on Win32
+
+2002-02-13  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/scripts/pearwin.php:
+    * Synchronize pearwin script with pearcmd-xxx.php commands
+    * Still work to do
+
+    * pear/scripts/pearcmd-list.php:
+    * user system/user config rather than default value
+
+2002-02-13  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/HTML/Select.php:
+    Initialize $this->_values to avoid warrnings in case _values property is not set
+
+    * pear/Schedule/At.php: White spaces.
+
+2002-02-13  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/dbx/dbx_pgsql.c: Fix memory leaks.
+
+2002-02-13  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_pgsql.c:
+    Fixed bug where users with empty passwords could not connect. (Mc)
+
+2002-02-13  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/scripts/pearwin.php:
+    - Adding support for remote-list command (with XML-RPC installed)
+    - Start support of show-config (still work to do ...)
+
+2002-02-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Ack.
+
+2002-02-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php: * "pear-get install Auth" works now
+
+    * pear/PEAR/Remote.php: * don't use ext/overload yet
+
+    * pear/scripts/pearcmd-remote-list.php: * print package name
+
 2002-02-12  Jason Greene  <jason@inetgurus.net>
 
     * NEWS: Fix entry
