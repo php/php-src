@@ -27,6 +27,7 @@
 typedef struct {
 	httpd_conn *hc;
 	int post_off;
+	void (*on_close)(int);
 } php_thttpd_globals;
 
 static php_thttpd_globals thttpd_globals;
@@ -281,6 +282,26 @@ off_t thttpd_php_request(httpd_conn *hc)
 	thttpd_request_dtor(TLS_C SLS_CC);
 
 	return 0;
+}
+
+void thttpd_register_on_close(void (*arg)(int)) 
+{
+	TG(on_close) = arg;
+}
+
+void thttpd_closed_conn(int fd)
+{
+	if (TG(on_close)) TG(on_close)(fd);
+}
+
+int thttpd_get_fd(void)
+{
+	return TG(hc)->conn_fd;
+}
+
+void thttpd_set_dont_close(void)
+{
+	TG(hc)->file_address = (char *) 1;
 }
 
 void thttpd_php_init(void)
