@@ -89,8 +89,11 @@ void init_executor(CLS_D ELS_DC)
 	EG(error_zval_ptr)=&EG(error_zval);
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
+/* destroys stack frame, therefore makes core dumps worthless */
+#if 0
 #if ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
+#endif
 #endif
 	EG(return_value) = &EG(global_return_value);
 	EG(symtable_cache_ptr) = EG(symtable_cache)-1;
