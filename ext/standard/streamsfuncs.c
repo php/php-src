@@ -570,7 +570,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
 {
-	zval			*r_array, *w_array, *e_array, *sec;
+	zval			*r_array, *w_array, *e_array, *sec = NULL;
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
