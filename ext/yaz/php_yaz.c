@@ -383,7 +383,7 @@ PHP_FUNCTION(yaz_connect)
 #endif
 
 	ZEND_REGISTER_RESOURCE(return_value, &shared_associations[i], le_link);
-    as->zval_resource = Z_LVAL_P(return_value);
+	as->zval_resource = Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -513,7 +513,7 @@ PHP_FUNCTION(yaz_wait)
 
 	if (ZEND_NUM_ARGS() == 1) {
 		long *val = 0;
-        long *event_bool = 0;
+		long *event_bool = 0;
 		HashTable *options_ht = 0;
 		if (zend_get_parameters_ex(1, &pval_options) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -547,8 +547,8 @@ PHP_FUNCTION(yaz_wait)
 #ifdef ZTS
 	tsrm_mutex_unlock(yaz_mutex);
 #endif
-    if (event_mode) {
-        long ev = ZOOM_event(no, conn_ar);
+	if (event_mode) {
+		long ev = ZOOM_event(no, conn_ar);
 		if (ev <= 0) {
 			RETURN_FALSE;
 		} else {
@@ -561,12 +561,12 @@ PHP_FUNCTION(yaz_wait)
 			Z_LVAL_P(return_value) = p->zval_resource;
 			Z_TYPE_P(return_value) = IS_RESOURCE;
 			return;
-        }
-    }
+		}
+	}
 
 	if (no) {
-        while (ZOOM_event (no, conn_ar))
-            ;
+		while (ZOOM_event (no, conn_ar))
+			;
 	}
 	RETURN_TRUE;
 }
