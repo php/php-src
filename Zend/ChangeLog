@@ -1,3 +1,16 @@
+2002-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_constants.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_object_handlers.c
+      zend_operators.c
+      zend_operators.h: MFZE1
+
 2002-09-25  Stanislav Malyshev  <stas@zend.com>
 
     * zend_extensions.h:
