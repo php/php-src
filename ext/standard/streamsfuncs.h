@@ -27,6 +27,8 @@ PHP_FUNCTION(stream_socket_server);
 PHP_FUNCTION(stream_socket_accept);
 PHP_FUNCTION(stream_socket_get_name);
 
+PHP_FUNCTION(stream_copy_to_stream);
+
 PHP_FUNCTION(set_socket_blocking); /* deprecated */
 PHP_FUNCTION(stream_set_blocking);
 PHP_FUNCTION(stream_select);
