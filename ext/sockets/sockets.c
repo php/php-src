@@ -140,7 +140,9 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_send,				NULL)
 	PHP_FE(socket_recvfrom,			second_fifth_and_sixth_args_force_ref)
 	PHP_FE(socket_sendto,			NULL)
+#ifdef HAVE_CMSGHDR
 	PHP_FE(socket_recvmsg,			third_through_seventh_args_force_ref)
+#endif
 	PHP_FE(socket_sendmsg,			NULL)
 	PHP_FE(socket_readv,			NULL)
 	PHP_FE(socket_writev,			NULL)
@@ -1546,6 +1548,7 @@ PHP_FUNCTION(socket_sendto)
 
 /* {{{ proto bool socket_recvmsg(resource socket, resource iovec, array &control, int &controllen, int &flags, string &addr [, int &port])
    Used to receive messages on a socket, whether connection-oriented or not */
+#ifdef HAVE_CMSGHDR
 PHP_FUNCTION(socket_recvmsg)
 {
 	zval					*arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7 = NULL;
@@ -1693,6 +1696,7 @@ PHP_FUNCTION(socket_recvmsg)
 		RETURN_FALSE;
 	}
 }
+#endif
 /* }}} */
 
 /* {{{ proto bool socket_sendmsg(resource socket, resource iovec, int flags, string addr [, int port])
