@@ -30,6 +30,40 @@
 #include "php_standard.h"
 #include "php_fopen_wrappers.h"
 
+static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	PHPWRITE(buf, count);
+	return count;
+}
+
+static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+	return 0;
+}
+
+static int php_stream_output_close(php_stream *stream, int close_handle TSRMLS_DC)
+{
+	return 0;
+}
+
+static int php_stream_output_flush(php_stream *stream TSRMLS_DC)
+{
+	sapi_flush(TSRMLS_C);
+	return 0;
+}
+
+php_stream_ops php_stream_output_ops = {
+	php_stream_output_write,
+	php_stream_output_read,
+	php_stream_output_close,
+	php_stream_output_flush,
+	"Output",
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	FILE * fp = NULL;
@@ -38,6 +72,10 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	if (!strncasecmp(path, "php://", 6))
 		path += 6;
 	
+	if (!strcasecmp(path, "output")) {
+		return php_stream_alloc(&php_stream_output_ops, NULL, 0, "wb");
+	}
+	
 	if (!strcasecmp(path, "stdin")) {
 		fp = fdopen(dup(STDIN_FILENO), mode);
 	} else if (!strcasecmp(path, "stdout")) {
@@ -45,7 +83,6 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	} else if (!strcasecmp(path, "stderr")) {
 		fp = fdopen(dup(STDERR_FILENO), mode);
 	}
-	/* TODO: implement php://output as a stream to write to the current output buffer ? */
 
 	if (fp)	{
 		stream = php_stream_fopen_from_file(fp, mode);
