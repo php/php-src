@@ -76,6 +76,9 @@ PHP_RINIT_FUNCTION(mbstring);
 PHP_RSHUTDOWN_FUNCTION(mbstring);
 PHP_MINFO_FUNCTION(mbstring);
 
+/* functions in php_unicode.c */
+PHP_FUNCTION(mb_convert_case);
+
 /* php function registration */
 PHP_FUNCTION(mb_language);
 PHP_FUNCTION(mb_internal_encoding);

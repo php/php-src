@@ -30,7 +30,8 @@ if test "$PHP_MBSTRING" != "no"; then
     AC_DEFINE(HAVE_MBSTR_KR,1,[whether to have korean support])
     AC_DEFINE(HAVE_MBSTR_RU,1,[whether to have russian support])
   fi
-  PHP_NEW_EXTENSION(mbstring, mbfilter_ja.c mbfilter_cn.c mbfilter_tw.c mbfilter_kr.c mbfilter_ru.c mbfilter.c mbstring.c mbregex.c php_mbregex.c html_entities.c, $ext_shared)
+
+  PHP_NEW_EXTENSION(mbstring, mbfilter_ja.c mbfilter_cn.c mbfilter_tw.c mbfilter_kr.c mbfilter_ru.c mbfilter.c mbstring.c mbregex.c php_mbregex.c html_entities.c php_unicode.c, $ext_shared)
 fi
 
 
