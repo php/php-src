@@ -890,7 +890,8 @@ Properties must be set after open() or XML() and before the first read() is call
 PHP_METHOD(xmlreader, setParserProperty)
 {
 	zval *id;
-	int property, value, retval = -1;
+	int property, retval = -1;
+	zend_bool value;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lb", &property, &value) == FAILURE) {
