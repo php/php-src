@@ -279,7 +279,7 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 
 static inline int object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
-	long elements;
+	int elements;
 
 	elements = parse_iv2((*p) + 2, p);
 
@@ -621,7 +621,7 @@ yy36:	yych = *++YYCURSOR;
 yy37:
 #line 419
 	{
-	long elements = parse_iv(start + 2);
+	int elements = parse_iv(start + 2);
 
 	*p = YYCURSOR;
 

@@ -155,10 +155,10 @@ any = [\000-\277];
 
 
 
-static inline int parse_iv2(const unsigned char *p, const unsigned char **q)
+static inline long parse_iv2(const unsigned char *p, const unsigned char **q)
 {
 	char cursor;
-	int result = 0;
+	long result = 0;
 	int neg = 0;
 
 	switch (*p) {
@@ -183,7 +183,7 @@ static inline int parse_iv2(const unsigned char *p, const unsigned char **q)
 	return result;
 }
 
-static inline int parse_iv(const unsigned char *p)
+static inline long parse_iv(const unsigned char *p)
 {
 	return parse_iv2(p, NULL);
 }
