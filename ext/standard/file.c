@@ -1559,26 +1559,26 @@ PHP_FUNCTION(copy)
 	}
 	
 #ifdef PHP_WIN32
-	if ((fd_s=open((*source)->value.str.val,O_RDONLY|_O_BINARY))==-1) {
+	if ((fd_s=V_OPEN((Z_STRVAL_PP(source),O_RDONLY|_O_BINARY)))==-1) {
 #else
-	if ((fd_s=open((*source)->value.str.val,O_RDONLY))==-1) {
+	if ((fd_s=V_OPEN((Z_STRVAL_PP(source),O_RDONLY)))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to open '%s' for reading:  %s",(*source)->value.str.val,strerror(errno));
+		php_error(E_WARNING,"Unable to open '%s' for reading:  %s", Z_STRVAL_PP(source), strerror(errno));
 		RETURN_FALSE;
 	}
 #ifdef PHP_WIN32
-	if ((fd_t=open((*target)->value.str.val,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE))==-1){
+	if ((fd_t=V_OPEN((Z_STRVAL_PP(target),_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1){
 #else
-	if ((fd_t=creat((*target)->value.str.val,0777))==-1) {
+	if ((fd_t=V_CREAT(Z_STRVAL_PP(target),0777))==-1) {
 #endif
-		php_error(E_WARNING,"Unable to create '%s':  %s", (*target)->value.str.val,strerror(errno));
+		php_error(E_WARNING,"Unable to create '%s':  %s", Z_STRVAL_PP(target), strerror(errno));
 		close(fd_s);
 		RETURN_FALSE;
 	}
 
 	while ((read_bytes=read(fd_s,buffer,8192))!=-1 && read_bytes!=0) {
 		if (write(fd_t,buffer,read_bytes)==-1) {
-			php_error(E_WARNING,"Unable to write to '%s':  %s",(*target)->value.str.val,strerror(errno));
+			php_error(E_WARNING,"Unable to write to '%s':  %s", Z_STRVAL_PP(target), strerror(errno));
 			close(fd_s);
 			close(fd_t);
 			RETURN_FALSE;
