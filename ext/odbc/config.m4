@@ -454,11 +454,9 @@ AC_ARG_WITH(dbmaker,
     # check DBMaker version (from 5.0 to 2.0)
     DBMAKER_VERSION=5.0
 
-    while test test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a \
-                 "$DBMAKER_VERSION" != "2.9"; do
+    while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a "$DBMAKER_VERSION" != "2.9"; do
         DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | awk '{ print $1-1;}'`
-        MAJOR_V=`echo $DM_VER | awk '{ print $1/10; }' \
-                 | awk  -F. '{ print $1; }'`
+        MAJOR_V=`echo $DM_VER | awk '{ print $1/10; }'  | awk  -F. '{ print $1; }'`
         MINOR_V=`echo $DM_VER | awk '{ print $1%10; }'`
         DBMAKER_VERSION=$MAJOR_V.$MINOR_V
     done
