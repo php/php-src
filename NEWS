@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed bugs #7472, #12120 and #12989 as well as other potential problems
+  with strip_tags() function. (Ilia)
 - Upgraded PCRE to version 3.9. (Wez)
 - Fixed bug in OCIResult() which returned garbage when called on 
   empty result-sets. (Thies)
