@@ -558,13 +558,13 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	if (retval & SAPI_HEADER_ADD) {
 		/* in replace mode first remove the header if it already exists in the headers llist */
 		if (replace) {
-			colon_offset = strchr(header_line, ':');
+			colon_offset = strchr(sapi_header.header, ':');
 			if (colon_offset) {
 				char sav;
 				colon_offset++;
 				sav = *colon_offset;
 				*colon_offset = 0;
-				zend_llist_del_element(&SG(sapi_headers).headers, header_line, (int(*)(void*, void*))sapi_find_matching_header);
+				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
 				*colon_offset = sav;
 			}
 		}
