@@ -4035,13 +4035,10 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo TSRMLS_CC);
 		}
-		zval_dtor(*p_width);
-		zval_dtor(*p_height);
 		ZVAL_LONG(*p_width,  ImageInfo.Thumbnail.width);
 		ZVAL_LONG(*p_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		zval_dtor(*p_imagetype);
 		ZVAL_LONG(*p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
