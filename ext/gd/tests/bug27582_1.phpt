@@ -1,5 +1,5 @@
 --TEST--
-gdimagefill() function (Bug #19366 (fixed in bundled libgd))
+Bug #27582 (ImageFillToBorder() on alphablending image looses alpha on fill color)
 --SKIPIF--
 <?php
         if (!extension_loaded('gd')) die("skip gd extension not available\n");
