@@ -100,6 +100,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh)
 			break;
 		case ZEND_HANDLE_FILENAME:
 			fp = zend_fopen(fh->filename, NULL);
+			fh->type = ZEND_HANDLE_FP;
 			break;
 		default:
 			return FAILURE;
@@ -120,6 +121,22 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh)
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 #endif
 	return SUCCESS;
+}
+
+
+void zend_ini_close_file(zend_file_handle *fh)
+{
+	switch (fh->type) {
+		case ZEND_HANDLE_FP:
+			fclose(fh->handle.fp);
+			break;
+		case ZEND_HANDLE_STDIOSTREAM: {
+				CLS_FETCH();
+
+				delete CG(ini_scanner);
+			}
+			break;
+	}
 }
 
 %}
