@@ -55,9 +55,9 @@ distclean: distclean-recursive clean-x
 
 test: $(top_builddir)/php
 	@if test "$(TESTS)" = ""; then \
-		$(top_builddir)/php -q $(top_srcdir)/run-tests.php `pwd`; \
+		$(top_builddir)/php -d include_path=".:$(top_srcdir)/pear:$(PEAR_INSTALLDIR)" -q $(top_srcdir)/run-tests.php `pwd`; \
 	else \
-		$(top_builddir)/php -q $(top_srcdir)/run-tests.php $(TESTS); \
+		$(top_builddir)/php -d include_path=".:$(top_srcdir)/pear:$(PEAR_INSTALLDIR)" -q $(top_srcdir)/run-tests.php $(TESTS); \
 	fi
 
 include $(builddir)/.deps
