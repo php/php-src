@@ -1100,7 +1100,7 @@ PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char
 	while(c>=s) {
 		if(*c == '/'
 #ifdef PHP_WIN32
-		   || ( *c == '\\' && !IsDBCSLeadByte(*c-1))
+		   || ( *c == '\\' && !IsDBCSLeadByte(*(c-1)))
 #endif			
 		   ) {
 			c++;
