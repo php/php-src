@@ -98,7 +98,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\openldap\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D ZEND_DEBUG=1 /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\openldap\include" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D "COMPILE_DL_LDAP_LDAP" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\openldap\include" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D "COMPILE_DL_LDAP" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -124,7 +124,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\openldap\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D ZEND_DEBUG=0 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\openldap\include" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D "COMPILE_DL_LDAP_LDAP" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\openldap\include" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D "COMPILE_DL_LDAP" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
