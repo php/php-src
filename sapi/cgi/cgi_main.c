@@ -165,7 +165,7 @@ static void sapi_cgi_log_message(char *message)
 	}
 }
 
-static int sapi_cgi_activate(SLS_D)
+static int sapi_cgi_deactivate(SLS_D)
 {
 	fflush(stdout);
 	if(request_info.php_argv0) {
@@ -183,7 +183,7 @@ static sapi_module_struct sapi_module = {
 	php_module_shutdown_wrapper,	/* shutdown */
 
 	NULL,							/* activate */
-	sapi_cgi_activate,				/* deactivate */
+	sapi_cgi_deactivate,			/* deactivate */
 
 	sapi_cgibin_ub_write,			/* unbuffered write */
 	sapi_cgibin_flush,				/* flush */
