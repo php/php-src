@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Added four additional arguments: attrsonly, sizelimit, timelimit, deref which
+  were missing in ldap_search(), ldap_list() and ldap_read() functions (Jani)
+- Fixed a bug in ldap_search/list/read() which prevented returning the partial
+  results when 'Sizelimit exceeded' error occurred. (Jani Taskinen)
 - Fixed preg_replace() to automatically escape quotes in matched
   strings when using /e modifier. (Andrei)
 - Itanium patch (Steve Robb)
