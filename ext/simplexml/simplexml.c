@@ -1406,7 +1406,6 @@ SXE_METHOD(getChildren)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 
-//	REPLACE_ZVAL_VALUE(&return_value, sxe->iter.data, 0);
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = zend_objects_store_clone_obj(sxe->iter.data TSRMLS_CC);
 }
