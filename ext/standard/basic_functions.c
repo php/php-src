@@ -2632,6 +2632,10 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 	switch (callback_type) {
 	
 		case ZEND_INI_PARSER_ENTRY:
+			if(!arg2) {
+				/* bare string - nothing to do */
+				break;
+			}
 			ALLOC_ZVAL(element);
 			*element = *arg2;
 			zval_copy_ctor(element);
@@ -2654,6 +2658,11 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 		case ZEND_INI_PARSER_ENTRY:
 		{
 			zval *active_arr;
+
+			if(!arg2) {
+				/* bare string - nothing to do */
+				break;
+			}
 
 			if (BG(active_ini_file_section)) {
 				active_arr = BG(active_ini_file_section);
