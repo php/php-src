@@ -819,7 +819,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					/* check if the current tag already has a value - if yes append to that! */
 					if (zend_hash_find((*parser->ctag)->value.ht,"value",sizeof("value"),(void **) &myval) == SUCCESS) {
 						int newlen = (*myval)->value.str.len + decoded_len;
-						(*myval)->value.str.val = erealloc((*myval)->value.str.val,newlen);
+						(*myval)->value.str.val = erealloc((*myval)->value.str.val,newlen+1);
 						strcpy((*myval)->value.str.val + (*myval)->value.str.len,decoded_value);
 						(*myval)->value.str.len += decoded_len;
 						efree(decoded_value);
