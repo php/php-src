@@ -88,7 +88,7 @@ PS_OPEN_FUNC(sqlite)
 	   unclear as to how to check for a table's existence in SQLite -- that would be better here. */
 	sqlite_exec(db, 
 	    "CREATE TABLE session_data ("
-		"	sess_id TEXT PRIMARY KEY," 
+	    "    sess_id TEXT PRIMARY KEY," 
 	    "    value TEXT, updated INTEGER "
 	    ")", NULL, NULL, NULL);
 
