@@ -134,20 +134,23 @@ class Interop_Client
     */
     function fetchEndpoints($test = NULL) {
         // fetch from the interop server
-        $soapclient = new SoapClient($this->interopServer);
-
-        if ($test) {
-            $this->_fetchEndpoints($soapclient, $test);
-        } else {
-            foreach ($this->tests as $test) {
+        try {
+            $soapclient = new SoapClient($this->interopServer);
+            if ($test) {
                 $this->_fetchEndpoints($soapclient, $test);
+            } else {
+                foreach ($this->tests as $test) {
+                    $this->_fetchEndpoints($soapclient, $test);
+                }
+                $test = 'base';
             }
-            $test = 'base';
+        } catch (SoapFault $fault) {
+        		echo "<pre>$fault</pre>";
+            return NULL;
         }
-
         // retreive all endpoints now
         $this->currentTest = $test;
-        $x = $this->_getEndpoints();
+        $x = $this->_getEndpoints($test);
         return $x;
     }
 
@@ -358,13 +361,17 @@ class Interop_Client
         if ($this->useWSDL) {
             if (array_key_exists('wsdlURL',$endpoint_info)) {
                 if (!array_key_exists('client',$endpoint_info)) {
-                    $endpoint_info['client'] = new SoapClient($endpoint_info['wsdlURL'], array("trace"=>1));
+                    try {
+                        $endpoint_info['client'] = new SoapClient($endpoint_info['wsdlURL'], array("trace"=>1));
+                    } catch (SoapFault $ex) {
+                        $endpoint_info['client']->wsdl->fault = $ex;
+                    }
                 }
                 $soap =& $endpoint_info['client'];
 
                 # XXX how do we determine a failure on retreiving/parsing wsdl?
                 if ($soap->wsdl->fault) {
-                    $fault = $soap->wsdl->fault->getFault();
+                    $fault = $soap->wsdl->fault;
                     $soap_test->setResult(0,'WSDL',
                                           $fault->faultstring."\n\n".$fault->detail,
                                           $fault->faultstring,
@@ -407,6 +414,7 @@ class Interop_Client
         // XXX no way to set encoding
         // this lets us set UTF-8, US-ASCII or other
         //$soap->setEncoding($soap_test->encoding);
+try {
         if ($this->useWSDL && !$soap_test->headers && !$soap_test->headers_expect) {
             $args = '';
             foreach ($soap_test->method_params as $pname => $param) {
@@ -421,6 +429,10 @@ class Interop_Client
             $return = $soap->__call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace));
           }
         }
+} catch (SoapFault $ex) {
+	$return = $ex;
+}
+//var_dump($return);
 
 
         if(!is_soap_fault($return)){

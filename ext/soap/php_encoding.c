@@ -2363,26 +2363,33 @@ void encode_reset_ns()
 
 encodePtr get_conversion_ex(HashTable *encoding, int encode)
 {
-	encodePtr *enc;
+	encodePtr *enc = NULL;
 	TSRMLS_FETCH();
 
 	if (zend_hash_index_find(encoding, encode, (void **)&enc) == FAILURE) {
-		php_error(E_ERROR, "SOAP-ERROR: Encoding: Cannot find encoding");
+		if (SOAP_GLOBAL(overrides)) {
+			smart_str nscat = {0};
+
+			smart_str_appendl(&nscat, (*enc)->details.ns, strlen((*enc)->details.ns));
+			smart_str_appendc(&nscat, ':');
+			smart_str_appendl(&nscat, (*enc)->details.type_str, strlen((*enc)->details.type_str));
+			smart_str_0(&nscat);
+
+			if (zend_hash_find(SOAP_GLOBAL(overrides), nscat.c, nscat.len + 1, (void **)&enc) == FAILURE) {
+				smart_str_free(&nscat);
+				php_error(E_ERROR, "SOAP-ERROR: Encoding: Cannot find encoding");
+				return NULL;
+			} else {
+				smart_str_free(&nscat);
+				return *enc;
+			}
+		} else {
+			php_error(E_ERROR, "SOAP-ERROR: Encoding: Cannot find encoding");
+			return NULL;
+		}
+	} else {
+		return *enc;
 	}
-
-	if (SOAP_GLOBAL(overrides)) {
-		smart_str nscat = {0};
-
-		smart_str_appendl(&nscat, (*enc)->details.ns, strlen((*enc)->details.ns));
-		smart_str_appendc(&nscat, ':');
-		smart_str_appendl(&nscat, (*enc)->details.type_str, strlen((*enc)->details.type_str));
-		smart_str_0(&nscat);
-
-		zend_hash_find(SOAP_GLOBAL(overrides), nscat.c, nscat.len + 1, (void **)&enc);
-		smart_str_free(&nscat);
-	}
-
-	return *enc;
 }
 
 encodePtr get_conversion_from_href_type_ex(HashTable *encoding, const char *type, int len)

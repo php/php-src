@@ -53,7 +53,7 @@ EOF;
   $f = fopen($fname,"w");
   fwrite($f,$wsdl);
   fclose($f);
-  $x = new SoapClient($fname, array("trace"=>1));
+  $x = new SoapClient($fname, array("trace"=>1,"exceptions"=>0));
   $y = new SoapServer($fname);
 	$y->addfunction("test");
   unlink($fname);
