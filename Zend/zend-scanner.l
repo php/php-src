@@ -481,6 +481,28 @@ int require_filename(char *filename, zend_bool unique CLS_DC)
 }
 
 
+int use_filename(char *filename, zend_bool unique CLS_DC)
+{
+	zend_file_handle file_handle;
+	int filenamelen;
+	char *newfile;
+
+	filenamelen = strlen(filename);
+	newfile = emalloc(filenamelen + 5);
+	strcpy(newfile, filename);
+	strcpy(newfile+strnamelen, ".php");
+	newfile[filenamelen+4] = '\0';
+
+	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.filename = newfile;
+	if (require_file(&file_handle, unique CLS_CC)==FAILURE) {
+		zend_bailout();
+		return FAILURE; /* will never get here */
+	}
+	return SUCCESS;
+}
+
+
 int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC)
 {
 	zend_lex_state original_lex_state;
