@@ -1136,6 +1136,10 @@ consult the installation file that came with this distribution, or visit \n\
 	tsrm_shutdown();
 #endif
 
+#ifdef PHP_WIN32
+	_CrtDumpMemoryLeaks( );
+#endif
+
 	return exit_status;
 }
 /* }}} */
