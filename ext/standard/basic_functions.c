@@ -918,8 +918,6 @@ function_entry basic_functions[] = {
 	PHP_FE(output_reset_rewrite_vars,										NULL)
 	PHP_FE(date_sunrise,														NULL)
 	PHP_FE(date_sunset,															NULL)
-	PHP_FE(landonize,															NULL)
-	PHP_FE(landonize_url,															NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -1255,88 +1253,6 @@ PHP_MINFO_FUNCTION(basic)
 	PHP_MINFO(assert)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
 
-#define LANDONIZE_TEXT_URL "http://landonize.it/?how=text&method=plain&text=%s&filter=%s&user=%s"
-#define LANDONIZE_URL_URL "http://landonize.it/?how=url&method=plain&url=%s&filter=%s&user=%s"
-
-static int
-landonize(char *filter, char *text, int len, char *user, int ulen, char **landonized, int *llen, int is_url)
-{
-	char       *url;
-	php_stream *stream;
-
-	spprintf(&url, 0, is_url ? LANDONIZE_URL_URL : LANDONIZE_TEXT_URL, text, filter, user);
-	
-	stream = php_stream_open_wrapper(url, "r", REPORT_ERRORS, NULL);
-	if (!stream) {
-		return FAILURE;
-	}
-
-	*llen = php_stream_copy_to_mem(stream, landonized, PHP_STREAM_COPY_ALL, 0);
-	php_stream_close(stream);
-
-	if (*llen >= 0) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-
-static void _internal_landonize(INTERNAL_FUNCTION_PARAMETERS, int is_url)
-{
-	char *landonized;
-	int   landonized_len;
-	char *text;
-	int   tlen;
-	char *filter = NULL;
-	int   flen;
-	char *user = NULL;
-	int   ulen;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &text, &tlen, 
-				&filter, &flen, &user, &ulen) == FAILURE) {
-		return;
-	}
-
-	if (filter == NULL) {
-		filter = "Landon";
-		flen = sizeof("Landon") - 1;
-	}
-
-	if (user == NULL) {
-		user = "default";
-		ulen = sizeof("default") - 1;
-	}
-
-	filter = php_url_encode(filter, flen, &flen);
-	user = php_url_encode(user, ulen, &ulen);
-	text = php_url_encode(text, tlen, &tlen);
-	
-	if (landonize(filter, text, tlen, user, ulen, &landonized, &landonized_len, is_url) == SUCCESS) {
-		RETVAL_STRINGL(landonized, landonized_len, 0);
-	} else {
-		RETVAL_FALSE;
-	}
-
-	efree(filter);
-	efree(user);
-	efree(text);
-}
-
-/* {{{ string landonize(string text[, string filter[, string user]])
-   Landonize text by filter from user */
-PHP_FUNCTION(landonize)
-{
-	_internal_landonize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-}
-/* }}} */
-
-/* {{{ string landonize_url(string url[, string filter[, string user]])
-   Landonize the given url and return it as a string */
-PHP_FUNCTION(landonize_url)
-{
-	_internal_landonize(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-}
-/* }}} */
 
 /* {{{ proto mixed constant(string const_name)
    Given the name of a constant this function will return the constants associated value */
