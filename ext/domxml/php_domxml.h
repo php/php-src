@@ -108,6 +108,7 @@ PHP_FUNCTION(domxml_node_next_sibling);
 PHP_FUNCTION(domxml_node_previous_sibling);
 PHP_FUNCTION(domxml_node_owner_document);
 PHP_FUNCTION(domxml_node_insert_before);
+PHP_FUNCTION(domxml_node_append_sibling);
 PHP_FUNCTION(domxml_node_append_child);
 PHP_FUNCTION(domxml_node_remove_child);
 PHP_FUNCTION(domxml_node_add_child);
