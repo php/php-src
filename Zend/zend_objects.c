@@ -76,10 +76,13 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		old_exception = EG(exception);
 		EG(exception) = NULL;
 		zend_call_method_with_0_params(&obj, object->ce, NULL, "__destruct", NULL);
-		if (EG(exception)) {
-			zval_ptr_dtor(&EG(exception));
+		if (old_exception) {
+			if (EG(exception)) {
+				zend_error(E_ERROR, "Ignoring exception from %s::__destruct() while an exception is already active", object->ce->name);
+				zval_ptr_dtor(&EG(exception));
+			}
+			EG(exception) = old_exception;
 		}
-		EG(exception) = old_exception;
 	}
 }
 
