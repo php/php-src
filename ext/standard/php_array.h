@@ -17,7 +17,7 @@
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Andrei Zmievski <andrei@ispi.net>                           |
    +----------------------------------------------------------------------+
- */
+*/
 
 /* $Id$ */
 

@@ -14,14 +14,17 @@
    +----------------------------------------------------------------------+
    | Authors: Chad Robinson <chadr@brttech.com>                           |
    +----------------------------------------------------------------------+
+*/
 
+/* $Id$ */
+
+/*
   filePro 4.x support developed by Chad Robinson, chadr@brttech.com
   Contact Chad Robinson at BRT Technical Services Corp. for details.
   filePro is a registered trademark by Fiserv, Inc.  This file contains
   no code or information that is not freely available from the filePro
   web site at http://www.fileproplus.com/
-
- */
+*/
 
 #include "php.h"
 #include "safe_mode.h"

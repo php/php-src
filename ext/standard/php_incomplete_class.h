@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
    | Author:  Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
- */
+*/
 
+/* $Id$ */
 
 #ifndef PHP_INCOMPLETE_CLASS_H
 #define PHP_INCOMPLETE_CLASS_H
