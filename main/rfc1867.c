@@ -105,7 +105,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 	ALLOC_ZVAL(http_post_files);
 	array_init(http_post_files);
 	INIT_PZVAL(http_post_files);
-	PG(http_globals)[TRACK_VARS_POST] = http_post_files;
+	PG(http_globals)[TRACK_VARS_FILES] = http_post_files;
 
 	ptr = buf;
 	rem = cnt;
