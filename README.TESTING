@@ -108,7 +108,7 @@ Example script to be run by cron(1):
 ========== qa-test.sh =============
 #!/bin/sh
 
-CO_DIR=$HOME/cvs/php4
+CO_DIR=$HOME/cvs/php5
 MYMAIL=qa-test@domain.com
 TMPDIR=/var/tmp
 TODAY=`date +"%Y%m%d"`

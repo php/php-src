@@ -1,4 +1,4 @@
-Installation Instructions for PHP 4
+Installation Instructions for PHP 5
 -----------------------------------
 
 STOP!
@@ -108,8 +108,8 @@ $ make
 $ make install
 
 $ cd ../apache_1.3.x
-$ ./configure --prefix=/www --activate-module=src/modules/php4/libphp4.a
- (The above line is correct!  Yes, we know libphp4.a does not exist at this
+$ ./configure --prefix=/www --activate-module=src/modules/php5/libphp5.a
+ (The above line is correct!  Yes, we know libphp5.a does not exist at this
   stage.  It isn't supposed to.  It will be created.)
 $ make
  (you should now have an httpd binary which you can copy to your Apache bin dir if
@@ -226,7 +226,7 @@ Installing PHP can be done in four simple steps:
 3b.   Static Module Installation
 
    For the Apache module version this will copy the appropriate files
-   to the src/modules/php4 directory in your Apache distribution if
+   to the src/modules/php5 directory in your Apache distribution if
    you are using Apache 1.3.x.  If you are still running Apache 1.2.x
    these files will be copied directly to the main src directory.
 
@@ -235,7 +235,7 @@ Installing PHP can be done in four simple steps:
 
        cd apache_1.3.x
        ./configure --prefix=/<path>/apache \
-                   --activate-module=src/modules/php4/libphp4.a
+                   --activate-module=src/modules/php5/libphp5.a
        make
        make install
 
@@ -248,29 +248,29 @@ Installing PHP can be done in four simple steps:
 
    For Apache 1.3.x add:
 
-      AddModule modules/php4/libphp4.a
+      AddModule modules/php5/libphp5.a
 
    For Apache 1.3.x don't do anything else.  Just add this line and then
    run "./Configure" followed by "make".
 
    For Apache 1.2.x add:
 
-      Module php4_module mod_php4.o
+      Module php5_module mod_php5.o
 
-   For Apache 1.2.x you will also have to look in the libphp4.module file,
+   For Apache 1.2.x you will also have to look in the libphp5.module file,
    which was copied to the src directory. The EXTRA_LIBS line in the Apache
    Configuration file needs to be set to use the same libs as specified on
-   the LIBS line in libphp4.module. You also need to make sure to add
+   the LIBS line in libphp5.module. You also need to make sure to add
    "-L." to the beginning of the EXTRA_LIBS line.
 
    So, as an example, your EXTRA_LIBS line might look like:
 
-	EXTRA_LIBS=-L. -lphp4 -lgdbm -ldb -L/usr/local/mysql/lib -lmysqlclient
+	EXTRA_LIBS=-L. -lphp5 -lgdbm -ldb -L/usr/local/mysql/lib -lmysqlclient
 
    NOTE: You should not enclose the EXTRA_LIBS line in double-quotes, as it
-   is in the libphp4.module file.
+   is in the libphp5.module file.
 
-   Also, look at the RULE_WANTHSREGEX setting in the libphp4.module file 
+   Also, look at the RULE_WANTHSREGEX setting in the libphp5.module file 
    and set the WANTHSREGEX directive accordingly in your Configuration file.
    This last step applies to versions of Apache prior to 1.3b3.
 
@@ -291,17 +291,17 @@ Installing PHP can be done in four simple steps:
    enable the dynamic PHP module.  To verify this, look for a line that
    looks like this:
 
-      LoadModule php4_module libexec/libphp4.so
+      LoadModule php5_module libexec/libphp5.so
 
-   The actual path before the libphp4.so part might differ slightly.  This
+   The actual path before the libphp5.so part might differ slightly.  This
    is likely fine.  If you are paranoid you can examine the output from the
-   make install step to see where the libphp4.so file was actually put and
+   make install step to see where the libphp5.so file was actually put and
    place the full path to this file on this LoadModule line.
 
    If somewhere in your httpd.conf file you have a ClearModuleList line
    then you also need this line:
 
-      AddModule mod_php4.c
+      AddModule mod_php5.c
 
    And finally you need to tell Apache which file extension should trigger
    PHP.  You do this by creating a special mime type and associating it
