@@ -181,7 +181,7 @@ END {
 		if (maxargs[i]>0) {
 			fetchargs = "\tif (zend_parse_parameters("
 			ints = ints "\tint argc = ZEND_NUM_ARGS();\n"
-			fetchargs = fetchargs "argc, " specs[i]
+			fetchargs = fetchargs "argc TSRMLS_CC, " specs[i]
 		} else
 			fetchargs = fetchargs "\tif (ZEND_NUM_ARGS() != 0) {\n\t\tWRONG_PARAM_COUNT;\n\t}"
 
