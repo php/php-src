@@ -281,9 +281,9 @@ static int php_cli_startup(sapi_module_struct *sapi_module)
 
 /* {{{ sapi_cli_ini_defaults */
 
-#define INI_DEFAULT(name,name_len,value)\
+#define INI_DEFAULT(name,value)\
 	ZVAL_STRING(tmp, value, 0);\
-	zend_hash_update(configuration_hash, name, name_len, tmp, sizeof(zval), (void**)&entry);\
+	zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
 	Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
@@ -292,10 +292,10 @@ static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 	
 	MAKE_STD_ZVAL(tmp);
 
-	INI_DEFAULT("register_argc_argv", 19, "1");
-	INI_DEFAULT("html_errors", 12, "0");
-	INI_DEFAULT("implicit_flush", 15, "1");
-	INI_DEFAULT("max_execution_time", 19, "0");
+	INI_DEFAULT("register_argc_argv", "1");
+	INI_DEFAULT("html_errors", "0");
+	INI_DEFAULT("implicit_flush", "1");
+	INI_DEFAULT("max_execution_time", "0");
 
 	FREE_ZVAL(tmp);
 }
