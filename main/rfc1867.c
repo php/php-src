@@ -608,7 +608,7 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
-	char *boundary, *s=NULL, *start_arr=NULL, *array_index=NULL;
+	char *boundary, *boundary_end=NULL, *s=NULL, *start_arr=NULL, *array_index=NULL;
 	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
 	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0;
 	zval *http_post_files=NULL;
@@ -632,14 +632,20 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	boundary++;
 	boundary_len = strlen(boundary);
 
-	if (boundary[0] == '"' && boundary[boundary_len-1] == '"') {
-		if (boundary_len < 2) { /* otherwise a single " passes */
+	if (boundary[0] == '"') {
+		boundary++;
+		boundary_end = strchr(boundary, '"');
+		if (!boundary_end) { 
 			sapi_module.sapi_error(E_WARNING, "Invalid boundary in multipart/form-data POST data");
 			return;
 		}
-		boundary++;
-		boundary_len -= 2;
-		boundary[boundary_len] = '\0';
+	} else {
+		/* search for the end of the boundary */
+		boundary_end = strchr(boundary, ',');
+	}
+	if (boundary_end) {
+		boundary_end[0] = '\0';
+		boundary_len = boundary_end-boundary;
 	}
 
 	/* Initialize the buffer */
