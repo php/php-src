@@ -17,9 +17,10 @@
  */
 /* $Id$ */
 
-#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE 500
 #define __EXTENSIONS__ 1
 #define _BSD_SOURCE
+#define _OSF_SOURCE
 
 #include "php.h"
 #include <stdio.h>
@@ -52,7 +53,6 @@
  * around the alternate code.
  * */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
-
 
 #if HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
 # include <sys/ioctl.h>
