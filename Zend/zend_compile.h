@@ -99,18 +99,21 @@ typedef struct _zend_try_catch_element {
 } zend_try_catch_element;
 
 
+/* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
-#define ZEND_ACC_INTERFACE		0x08
-/* ZEND_ACC_ABSTRACT is used for abstract classes and methods. Abstract checks work only on this flag. */
-/* ZEND_ACC_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
-#define ZEND_ACC_ABSTRACT_CLASS	0x10
-#define ZEND_ACC_FINAL_CLASS	0x20
-#define ZEND_ACC_IMPLEMENTED_ABSTRACT	0x40
+#define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
 
-#define ZEND_ACC_ALLOW_STATIC	0x80
+/* class flags (types) */
+/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
+/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
+#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
+#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
+#define ZEND_ACC_FINAL_CLASS	            0x40
+#define ZEND_ACC_INTERFACE		            0x80
 
+/* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
 #define ZEND_ACC_PUBLIC		0x100
 #define ZEND_ACC_PROTECTED	0x200
@@ -120,9 +123,13 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_CHANGED	0x800
 #define ZEND_ACC_IMPLICIT_PUBLIC	0x1000
 
+/* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
 #define ZEND_ACC_CLONE		0x8000
+
+/* method flag (bc only), any method that has this flag can be used statically and non statically. */
+#define ZEND_ACC_ALLOW_STATIC	0x10000
 
 char *zend_visibility_string(zend_uint fn_flags);
 

@@ -293,7 +293,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 
 	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator)) {
 		return SUCCESS;
-	}	
+	}
 	for (i = 0; i < class_type->num_interfaces; i++) {
 		if (class_type->interfaces[i] == zend_ce_aggregate || class_type->interfaces[i] == zend_ce_iterator) {
 			return SUCCESS;

@@ -1237,11 +1237,12 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
 				/* This is a class that must be abstract itself. Here we set the check info. */
-				scope->ce_flags |= ZEND_ACC_ABSTRACT;
+				scope->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 				if (!(scope->ce_flags & ZEND_ACC_INTERFACE)) {
 					/* Since the class is not an interface it needs to be declared as a abstract class. */
+					/* Since here we are handling internal functions only we can add the keyword flag. */
 					/* This time we set the flag for the keyword 'abstratc'. */
-					scope->ce_flags |= ZEND_ACC_ABSTRACT_CLASS;
+					scope->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 				}
 			}
 		} else {
@@ -1522,7 +1523,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry TSRMLS_DC)
 {
-	return do_register_internal_class(orig_class_entry, ZEND_ACC_ABSTRACT|ZEND_ACC_INTERFACE TSRMLS_CC);
+	return do_register_internal_class(orig_class_entry, ZEND_ACC_INTERFACE TSRMLS_CC);
 }
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,

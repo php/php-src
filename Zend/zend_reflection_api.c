@@ -269,13 +269,17 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (ce->get_iterator != NULL) {
 		string_printf(str, "<iterateable> ");
 	}
-	if (ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS) {
-		string_printf(str, "abstract ");
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		string_printf(str, "interface ");
+	} else {
+		if (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+			string_printf(str, "abstract ");
+		}
+		if (ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+			string_printf(str, "final ");
+		} 
+		string_printf(str, "class ");
 	}
-	if (ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
-		string_printf(str, "final ");
-	} 
-	string_printf(str, (ce->ce_flags & ZEND_ACC_INTERFACE) ? "interface " : "class ");
 	string_write(str, ce->name, ce->name_length);
 	if (ce->parent) {
 		string_printf(str, " extends %s", ce->parent->name);
@@ -952,7 +956,7 @@ ZEND_METHOD(reflection, getModifierNames)
 
 	array_init(return_value);
 
-	if (modifiers & (ZEND_ACC_ABSTRACT | ZEND_ACC_ABSTRACT_CLASS)) {
+	if (modifiers & (ZEND_ACC_ABSTRACT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		add_next_index_stringl(return_value, "abstract", sizeof("abstract"), 1);
 	}
 	if (modifiers & (ZEND_ACC_FINAL | ZEND_ACC_FINAL_CLASS)) {
@@ -2252,7 +2256,7 @@ ZEND_METHOD(reflection_class, isFinal)
    Returns whether this class is abstract */
 ZEND_METHOD(reflection_class, isAbstract)
 {
-	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_ABSTRACT_CLASS);
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 }
 /* }}} */
 
@@ -3192,7 +3196,8 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	REGISTER_MAIN_LONG_CONSTANT("M_FINAL", ZEND_ACC_FINAL, CONST_PERSISTENT|CONST_CS);
 
 	/* Class modifiers */
-	REGISTER_MAIN_LONG_CONSTANT("C_ABSTRACT", ZEND_ACC_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("C_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("C_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS, CONST_PERSISTENT|CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("C_FINAL", ZEND_ACC_FINAL_CLASS, CONST_PERSISTENT|CONST_CS);
 }
 /* }}} */

@@ -1204,7 +1204,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_STD_CLASS_EX(FilterIterator, spl_dual_it_new, spl_funcs_FilterIterator);
 	REGISTER_SPL_ITERATOR(FilterIterator);
-	spl_ce_FilterIterator->ce_flags |= ZEND_ACC_ABSTRACT_CLASS;
+	spl_ce_FilterIterator->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 
 	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, FilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 	REGISTER_SPL_IMPLEMENTS(ParentIterator, RecursiveIterator);
