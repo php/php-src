@@ -512,6 +512,7 @@ void php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 int odbc_bindcols(odbc_result *result)
 {
+	RETCODE rc;
     int i;
     SWORD       colnamelen; /* Not used */
 	SDWORD      displaysize;
@@ -530,12 +531,12 @@ int odbc_bindcols(odbc_result *result)
     result->binmode = ODBCG(defaultbinmode);
         
     for(i = 0; i < result->numcols; i++) {
-        SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_NAME,
+        rc = SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_NAME,
                          result->values[i].name,
                          sizeof(result->values[i].name),
                          &colnamelen,
                          0);
-		SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_TYPE,
+		rc = SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_TYPE,
 							NULL, 0, NULL, &result->values[i].coltype);
 		
 		/* Don't bind LONG / BINARY columns, so that fetch behaviour can
@@ -558,10 +559,10 @@ int odbc_bindcols(odbc_result *result)
 				break;
 #endif /* HAVE_ADABAS */
 			default:
-				SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_DISPLAY_SIZE,
+				rc = SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_DISPLAY_SIZE,
 									NULL, 0, NULL, &displaysize);
 				result->values[i].value = (char *)emalloc(displaysize + 1);
-				SQLBindCol(result->stmt, (UWORD)(i+1), SQL_C_CHAR, result->values[i].value,
+				rc = SQLBindCol(result->stmt, (UWORD)(i+1), SQL_C_CHAR, result->values[i].value,
 							displaysize + 1, &result->values[i].vallen);
 				break;
 		}
@@ -591,20 +592,51 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	RETURN_TRUE;
 }
 
+static int _close_pconn_with_id(list_entry *le, int *id)
+{
+
+	if(le->type == le_pconn && (((odbc_connection *)(le->ptr))->id == *id)){
+		return 1;
+	}else{
+		return 0;
+	}
+}
 /* Main User Functions */
-/* XXX This one needs rework, it won't work if there are active statements */
+
 /* {{{ proto void odbc_close_all(void)
    Close all ODBC connections */
 PHP_FUNCTION(odbc_close_all)
 {
 	void *ptr;
 	int type;
-	int i, nument = zend_hash_next_free_element(&EG(regular_list));
-
+	int i;
+	int nument;
+	ELS_FETCH();
+	
+	nument = zend_hash_next_free_element(&EG(regular_list));
+	
+	/* Loop through list and close all statements */
 	for(i = 1; i < nument; i++) {
 		ptr = zend_list_find(i, &type);
-		if (ptr && (type == le_conn || type == le_pconn)) {
+		if (ptr && (type == le_result)){
 			zend_list_delete(i);
+		}
+	}
+
+	/* Second loop through list, now close all connections */
+	nument = zend_hash_next_free_element(&EG(regular_list));
+	
+	for(i = 1; i < nument; i++) {
+		ptr = zend_list_find(i, &type);
+		if (ptr){
+			if(type == le_conn){
+				zend_list_delete(i);
+			}else if(type == le_pconn){
+				zend_list_delete(i);
+				/* Delete the persistent connection */
+				zend_hash_apply_with_argument(&EG(persistent_list), 
+					(int (*)(void *, void *)) _close_pconn_with_id, (void *) &i);
+			}
 		}
 	}
 }
@@ -1717,7 +1749,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		persistent = 0;
 	}
 
-	len = strlen(db) + strlen(uid) + strlen(pwd) + sizeof(ODBC_TYPE) - 1 + 5;
+	len = strlen(db) + strlen(uid) + strlen(pwd) + sizeof(ODBC_TYPE) + 5;
 	hashed_details = emalloc(len);
 
 	if (hashed_details == NULL) {
@@ -1799,7 +1831,7 @@ try_and_get_another_connection:
 				}
 			}
 		}
-		/* db_conn->id = ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn); */
+		db_conn->id = ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn);
 	} else { /* non persistent */
 		list_entry *index_ptr, new_index_ptr;
 		
@@ -1851,16 +1883,44 @@ try_and_get_another_connection:
 PHP_FUNCTION(odbc_close)
 {
 	pval **pv_conn;
+	void *ptr;
 	odbc_connection *conn;
+	odbc_result *res;
+	int nument;
+	int i;
+	int type;
+	int is_pconn = 0;
 	ODBCLS_FETCH();
+	ELS_FETCH();
 
     if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
+	conn = (odbc_connection *) zend_fetch_resource(pv_conn, -1, "ODBC-Link", NULL, 1, le_conn);
+	if(!conn){
+		ZEND_FETCH_RESOURCE(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_pconn);
+		is_pconn = 1;
+	}
+
+	nument = zend_hash_next_free_element(&EG(regular_list));
+
+	for(i = 1; i < nument; i++){
+		ptr = zend_list_find(i, &type);
+		if(ptr && (type == le_result)){
+			res = (odbc_result *)ptr;
+			if(res->conn_ptr == conn){
+				zend_list_delete(i);
+			}
+		}
+	}
 	
 	zend_list_delete((*pv_conn)->value.lval);
+	
+	if(is_pconn){
+		zend_hash_apply_with_argument(&EG(persistent_list),
+			(int (*)(void *, void *)) _close_pconn_with_id, (void *) &((*pv_conn)->value.lval));	
+	}
 }
 /* }}} */
 
