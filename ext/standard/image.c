@@ -269,7 +269,9 @@ static unsigned int php_next_marker(int socketd, FILE *fp, int issock)
 			return M_EOI;		/* we hit EOF */
 		if (++a >= 10) return M_EOI;
 	} while (c == 0xff);
-	if (a<2) c = M_EOI; /* at least one 0xff is needed before marker code */
+/*	if (a<2) c = M_EOI; at least one 0xff is needed before marker code  */
+/*  this test will be enabled in 4.3 because we must know if we already */
+/*  handled the 0xff from image-start.                                  */
 	return (unsigned int) c;
 }
 /* }}} */
@@ -294,7 +296,8 @@ static void php_skip_over(int socketd, FILE *fp, int issock, size_t length)
  * skip over a variable-length block; assumes proper length marker */
 static void php_skip_variable(int socketd, FILE *fp, int issock)
 {
-	php_skip_over( socketd, fp, issock, php_read2(socketd, fp, issock)-2);
+	size_t length = php_read2(socketd, fp, issock); /* compiler issue */
+	php_skip_over( socketd, fp, issock, length-2);
 }
 /* }}} */
 
