@@ -125,7 +125,7 @@ if test "$PHP_DOM_XSLT" != "no"; then
   if test -r $PHP_DOM_XSLT/include/libxslt/transform.h; then
     DOMXSLT_DIR=$PHP_DOM_XSLT
   else
-    for i in /usr/local /usr /usr/lib; do
+    for i in /usr/local /usr; do
       test -r $i/include/libxslt/transform.h && DOMXSLT_DIR=$i
     done
   fi
@@ -175,7 +175,7 @@ if test "$PHP_DOM_EXSLT" != "no"; then
   if test -r $PHP_DOM_EXSLT/include/libexslt/exslt.h; then
     DOMEXSLT_DIR=$PHP_DOM_EXSLT
   else
-    for i in /usr/local /usr /usr/lib; do
+    for i in /usr/local /usr; do
       test -r $i/include/libexslt/exslt.h && DOMEXSLT_DIR=$i
     done
   fi
