@@ -99,8 +99,8 @@ PHP_MSHUTDOWN_FUNCTION(fribidi)
 PHP_MINFO_FUNCTION(fribidi)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "FriBidi support", "enabled");
-	php_info_print_table_header(2, "FriBidi version", FRIBIDI_VERSION);
+	php_info_print_table_row(2, "FriBidi support", "enabled");
+	php_info_print_table_row(2, "FriBidi version", FRIBIDI_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
