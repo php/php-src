@@ -327,7 +327,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 		if (include) {
 			xmlNodePtr schema = get_node(root, "schema");
 			if (schema) {
-				load_schema(&tmpsdl, schema);
+				load_schema(tmpsdl, schema);
 				return;
 			}
 		}
@@ -349,7 +349,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 				xmlNodePtr trav2 = trav->children;
 				xmlNodePtr schema;
 				FOREACHNODE(trav2, "schema", schema) {
-					load_schema(&tmpsdl, schema);
+					load_schema(tmpsdl, schema);
 				}
 				ENDFOREACH(trav2);
 
@@ -899,7 +899,7 @@ void delete_sdl(void *handle)
 		zend_hash_destroy(tmp->bindings);
 		free(tmp->bindings);
 	}
-	if (tmp->encoders) {
+	if (tmp->requests) {
 		zend_hash_destroy(tmp->requests);
 		free(tmp->requests);
 	}
