@@ -109,7 +109,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #24210 (not detecting assume_default_colors - typo). (Sara)
 - Fixed bug #24198 (Invalid recursion detection in array_merge_recurcive()).
   (Ilia)
-- Fixed bug #24177 (Apahce2 SAPIs: status set incorrectly after flush()).
+- Fixed bug #24177 (Apache2 SAPIs: status set incorrectly after flush()).
   (Ilia)
 - Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis).
   (tom@gksystems.com, Ilia)
