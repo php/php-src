@@ -1,3 +1,54 @@
+2004-02-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      - Yet another BFN
+
+2004-02-29  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Apply fixes by Timm.
+
+    * ZendEngine2/zend_compile.c:
+      - Change prototype isA check not to check the constructor.
+      - Only give an E_STRICT for non-isA compliant code as opposed to
+        E_COMPILE_ERROR.
+
+2004-02-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.h:
+      add ZEND_API there too for opcode handlers
+
+2004-02-29  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_execute.c:
+      - Initialize memory to \0 so that we can reliable detect whether a specific
+        opcode element is in use.
+
+2004-02-29  Anil Madhavapeddy  <anil@recoil.org>
+
+    * pear/PEAR/Downloader.php
+      pear/PEAR/Installer.php:
+      Move the _prependPath function into PEAR_Downloader from PEAR_Installer,
+      as PEAR_Downloader uses it (and PEAR_Installer inherits PEAR_Downloader).
+      
+      Unbreaks 'pear install -R'
+
+2004-02-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      export opcode table
+
+2004-02-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      - BFN
+
+    * ext/wddx/wddx.c:
+      - Bugfix #27287 (wddx segfaults during deserialization)
+
+    * ext/session/session.c:
+      - Fix segfaults on deserialisation of referenced variables.
+
 2004-02-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pdf/pdf.c:

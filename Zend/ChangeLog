@@ -1,3 +1,29 @@
+2004-02-29  Andi Gutmans  <andi@zend.com>
+
+    * zend_reflection_api.c:
+      - Apply fixes by Timm.
+
+    * zend_compile.c:
+      - Change prototype isA check not to check the constructor.
+      - Only give an E_STRICT for non-isA compliant code as opposed to
+        E_COMPILE_ERROR.
+
+2004-02-29  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.h:
+      add ZEND_API there too for opcode handlers
+
+2004-02-29  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_execute.c:
+      - Initialize memory to \0 so that we can reliable detect whether a specific
+        opcode element is in use.
+
+2004-02-29  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      export opcode table
+
 2004-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
