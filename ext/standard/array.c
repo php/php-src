@@ -1048,7 +1048,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (Z_TYPE_PP(value) == IS_ARRAY || Z_TYPE_PP(value) == IS_OBJECT) {
+	if (Z_TYPE_PP(value) == IS_OBJECT) {
 		php_error(E_WARNING, "Wrong datatype for first argument in call to %s", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
