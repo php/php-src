@@ -1967,6 +1967,14 @@ PHP_METHOD(SoapClient, SoapClient)
 				}
 			}
 		}
+		if (zend_hash_find(ht, "local_cert", sizeof("local_cert"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			add_property_stringl(this_ptr, "_local_cert", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+			if (zend_hash_find(ht, "passphrase", sizeof("passphrase"), (void**)&tmp) == SUCCESS &&
+			    Z_TYPE_PP(tmp) == IS_STRING) {
+				add_property_stringl(this_ptr, "_passphrase", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+			}
+		}
 		if (zend_hash_find(ht, "trace", sizeof("trace"), (void**)&tmp) == SUCCESS &&
 		    (Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) &&
 				Z_LVAL_PP(tmp) == 1) {
