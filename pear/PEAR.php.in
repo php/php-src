@@ -513,12 +513,12 @@ class PEAR_Error
             $modes[] = "return";
         }
         return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" '.
-                       'prepend="%s" append="%s" debug="%s"]',
+                       'prepend="%s" append="%s" info="%s"]',
                        get_class($this), $this->message, $this->code,
                        implode("|", $modes), $levels[$this->level],
                        $this->error_message_prefix,
                        $this->error_prepend, $this->error_append,
-                       $this->debuginfo);
+                       $this->userinfo);
     }
 
     // }}}

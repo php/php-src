@@ -56,6 +56,7 @@ define("DB_ERROR_NEED_MORE_DATA",     -20);
 define("DB_ERROR_NOT_LOCKED",         -21);
 define("DB_ERROR_VALUE_COUNT_ON_ROW", -22);
 define("DB_ERROR_INVALID_DSN",        -23);
+define("DB_ERROR_CONNECT_FAILED",     -24);
 
 /*
  * Warnings are not detected as errors by DB::isError(), and are not
@@ -326,6 +327,8 @@ class DB
                 DB_ERROR_SYNTAX             => 'syntax error',
                 DB_ERROR_UNSUPPORTED        => 'not supported',
                 DB_ERROR_VALUE_COUNT_ON_ROW => 'value count on row',
+                DB_ERROR_INVALID_DSN        => "invalid DSN",
+                DB_ERROR_CONNECT_FAILED     => "connect failed",
                 DB_OK                       => 'no error',
                 DB_WARNING                  => 'unknown warning',
                 DB_WARNING_READ_ONLY        => 'read only'
