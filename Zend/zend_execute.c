@@ -1874,6 +1874,16 @@ send_by_ref:
 					zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_fcall_end_handler, op_array);
 				}
 				break;
+			case ZEND_INIT_GLOBALS: {
+					zval *globals = (zval *) emalloc(sizeof(zval));
+
+					globals->refcount=1;
+					globals->is_ref=1;
+					globals->type = IS_ARRAY;
+					globals->value.ht = &EG(symbol_table);
+					zend_hash_add(EG(active_symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
+				}
+				break;
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
 				break;
