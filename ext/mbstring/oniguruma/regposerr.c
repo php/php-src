@@ -2,7 +2,7 @@
 
   regposerr.c - Oniguruma (regular expression library)
 
-  Copyright (C) 2003  K.Kosako (kosako@sofnec.co.jp)
+  Copyright (C) 2003-2004  K.Kosako (kosako@sofnec.co.jp)
 
 **********************************************************************/
 #include "config.h"

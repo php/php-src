@@ -80,7 +80,32 @@ int main() { return foo(10, "", 3.14); }
       oniguruma/regexec.c
       oniguruma/reggnu.c
       oniguruma/regparse.c
+      oniguruma/regenc.c
       oniguruma/regposerr.c
+      oniguruma/enc/ascii.c
+      oniguruma/enc/utf8.c
+      oniguruma/enc/euc_jp.c
+      oniguruma/enc/euc_tw.c
+      oniguruma/enc/euc_kr.c
+      oniguruma/enc/sjis.c
+      oniguruma/enc/iso8859_1.c
+      oniguruma/enc/iso8859_2.c
+      oniguruma/enc/iso8859_3.c
+      oniguruma/enc/iso8859_4.c
+      oniguruma/enc/iso8859_5.c
+      oniguruma/enc/iso8859_6.c
+      oniguruma/enc/iso8859_7.c
+      oniguruma/enc/iso8859_8.c
+      oniguruma/enc/iso8859_9.c
+      oniguruma/enc/iso8859_10.c
+      oniguruma/enc/iso8859_11.c
+      oniguruma/enc/iso8859_13.c
+      oniguruma/enc/iso8859_14.c
+      oniguruma/enc/iso8859_15.c
+      oniguruma/enc/iso8859_16.c
+      oniguruma/enc/koi8.c
+      oniguruma/enc/koi8_r.c
+      oniguruma/enc/big5.c
     ])
   fi
 ])

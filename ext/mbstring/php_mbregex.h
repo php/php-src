@@ -29,16 +29,16 @@
 
 /* {{{ PHP_MBREGEX_GLOBALS */
 #define PHP_MBREGEX_GLOBALS \
-	php_mb_reg_char_encoding default_mbctype; \
-	php_mb_reg_char_encoding current_mbctype; \
+	OnigEncoding default_mbctype; \
+	OnigEncoding current_mbctype; \
 	HashTable ht_rc; \
 	zval *search_str; \
 	zval *search_str_val; \
 	unsigned int search_pos; \
 	php_mb_regex_t *search_re; \
-	struct php_mb_re_registers *search_regs; \
-	int regex_default_options; \
-	php_mb_reg_syntax_type *regex_default_syntax;
+	OnigRegion *search_regs; \
+	OnigOptionType regex_default_options; \
+	OnigSyntaxType *regex_default_syntax;
 /* }}} */
 
 /* {{{ PHP_MBREGEX_FUNCTION_ENTRIES */
@@ -83,10 +83,10 @@ PHP_MSHUTDOWN_FUNCTION(mb_regex);
 PHP_RINIT_FUNCTION(mb_regex);
 PHP_RSHUTDOWN_FUNCTION(mb_regex);
 void _php_mb_regex_globals_ctor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
-void php_mb_regex_set_options(php_mb_reg_option_type options, php_mb_reg_syntax_type *syntax, php_mb_reg_option_type *prev_options, php_mb_reg_syntax_type **prev_syntax TSRMLS_DC);
+void php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *syntax, OnigOptionType *prev_options, OnigSyntaxType **prev_syntax TSRMLS_DC);
 void _php_mb_regex_globals_dtor(zend_mbstring_globals_ptr pglobals TSRMLS_DC);
-php_mb_reg_char_encoding php_mb_regex_name2mbctype(const char *pname);
-const char *php_mb_regex_mbctype2name(php_mb_reg_char_encoding mbctype);
+OnigEncoding php_mb_regex_name2mbctype(const char *pname);
+const char *php_mb_regex_mbctype2name(OnigEncoding mbctype);
 
 PHP_FUNCTION(mb_regex_encoding);
 PHP_FUNCTION(mb_ereg);

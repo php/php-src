@@ -2,56 +2,62 @@
 
   regint.h -  Oniguruma (regular expression library)
 
-  Copyright (C) 2002-2003  K.Kosako (kosako@sofnec.co.jp)
+  Copyright (C) 2002-2004  K.Kosako (kosako@sofnec.co.jp)
 
 **********************************************************************/
 #ifndef REGINT_H
 #define REGINT_H
 
 /* for debug */
-/* #define REG_DEBUG_PARSE_TREE */
-/* #define REG_DEBUG_COMPILE */
-/* #define REG_DEBUG_SEARCH */
-/* #define REG_DEBUG_MATCH */
-/* #define REG_DONT_OPTIMIZE */
+/* #define ONIG_DEBUG_PARSE_TREE */
+/* #define ONIG_DEBUG_COMPILE */
+/* #define ONIG_DEBUG_SEARCH */
+/* #define ONIG_DEBUG_MATCH */
+/* #define ONIG_DONT_OPTIMIZE */
 
 /* for byte-code statistical data. */
-/* #define REG_DEBUG_STATISTICS */
+/* #define ONIG_DEBUG_STATISTICS */
 
-#if defined(REG_DEBUG_PARSE_TREE) || defined(REG_DEBUG_MATCH) || \
-    defined(REG_DEBUG_COMPILE) || defined(REG_DEBUG_STATISTICS)
-#ifndef REG_DEBUG
-#define REG_DEBUG
+#if defined(ONIG_DEBUG_PARSE_TREE) || defined(ONIG_DEBUG_MATCH) || \
+    defined(ONIG_DEBUG_COMPILE) || defined(ONIG_DEBUG_STATISTICS)
+#ifndef ONIG_DEBUG
+#define ONIG_DEBUG
 #endif
 #endif
 
 #if defined(__i386) || defined(__i386__) || defined(_M_IX86) || \
     (defined(__ppc__) && defined(__APPLE__)) || \
+    defined(__x86_64) || defined(__x86_64__) || \
     defined(__mc68020__)
-#define UNALIGNED_WORD_ACCESS
+#define PLATFORM_UNALIGNED_WORD_ACCESS
 #endif
 
 /* config */
-#define USE_NAMED_SUBEXP
+/* spec. config */
+#define USE_NAMED_GROUP
 #define USE_SUBEXP_CALL
+#define USE_FOLD_MATCH                                  /* ess-tsett etc... */
+#define USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK /* /(?:()|())*\2/ */
+#define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
+#define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
+/* internal config */
+#define USE_RECYCLE_NODE
 #define USE_OP_PUSH_OR_JUMP_EXACT
 #define USE_QUALIFIER_PEEK_NEXT
-#define USE_RECYCLE_NODE
-#define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE   /* /\n$/ =~ "\n" */
-/* #define USE_SBMB_CLASS */
 
 #define INIT_MATCH_STACK_SIZE                     160
-#define MATCH_STACK_LIMIT_SIZE                 200000
+#define MATCH_STACK_LIMIT_SIZE                 500000
 
 /* interface to external system */
 #ifdef NOT_RUBY      /* gived from Makefile */
 #include "config.h"
+#define USE_VARIABLE_META_CHARS
 #define USE_VARIABLE_SYNTAX
 #define USE_WORD_BEGIN_END          /* "\<": word-begin, "\>": word-end */
-#define DEFAULT_TRANSTABLE_EXIST    1
-#define THREAD_ATOMIC_START   /* depend on thread system */
-#define THREAD_ATOMIC_END     /* depend on thread system */
-#define THREAD_PASS           /* depend on thread system */
+#define USE_POSIX_REGION_OPTION     /* needed for POSIX API support */
+#define THREAD_ATOMIC_START         /* depend on thread system */
+#define THREAD_ATOMIC_END           /* depend on thread system */
+#define THREAD_PASS                 /* depend on thread system */
 #define xmalloc     malloc
 #define xrealloc    realloc
 #define xfree       free
@@ -59,12 +65,11 @@
 #include "ruby.h"
 #include "version.h"
 #include "rubysig.h"      /* for DEFER_INTS, ENABLE_INTS */
-#define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
-#define THREAD_ATOMIC_START    DEFER_INTS
-#define THREAD_ATOMIC_END      ENABLE_INTS
-#define THREAD_PASS            /* I want to use rb_thread_pass() */
-#define WARNING                rb_warn
-#define VERB_WARNING           rb_warning
+#define THREAD_ATOMIC_START          DEFER_INTS
+#define THREAD_ATOMIC_END            ENABLE_INTS
+#define THREAD_PASS                  rb_thread_schedule()
+#define DEFAULT_WARN_FUNCTION        rb_warn
+#define DEFAULT_VERB_WARN_FUNCTION   rb_warning
 
 #if defined(RUBY_VERSION_MAJOR)
 #if RUBY_VERSION_MAJOR > 1 || \
@@ -74,6 +79,8 @@
 #endif
 #endif
 
+#define ONIG_RUBY_DEFINE_GLOBAL_FUNCTION(s,f,n) \
+        rb_define_global_function(s, f, n)
 #endif /* else NOT_RUBY */
 
 #define THREAD_PASS_LIMIT_COUNT    10
@@ -82,7 +89,9 @@
 #define xmemmove    memmove
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #define xalloca     _alloca
+#ifdef NOT_RUBY
 #define vsnprintf   _vsnprintf
+#endif
 #else
 #define xalloca     alloca
 #endif
@@ -104,15 +113,12 @@
 #include <ctype.h>
 #include <sys/types.h>
 
-#ifdef REG_DEBUG
+#ifdef ONIG_DEBUG
 # include <stdio.h>
 #endif
 
-#ifdef NOT_RUBY
-# include "oniguruma.h"
-#else
-# include "regex.h"
-#endif
+#include "regenc.h"
+#include "oniguruma.h"
 
 #ifdef MIN
 #undef MIN
@@ -123,17 +129,24 @@
 #define MIN(a,b) (((a)>(b))?(b):(a))
 #define MAX(a,b) (((a)<(b))?(b):(a))
 
-#ifndef UNALIGNED_WORD_ACCESS
+#define IS_NULL(p)                    (((void*)(p)) == (void*)0)
+#define IS_NOT_NULL(p)                (((void*)(p)) != (void*)0)
+#define CHECK_NULL_RETURN(p)          if (IS_NULL(p)) return NULL
+#define CHECK_NULL_RETURN_VAL(p,val)  if (IS_NULL(p)) return (val)
+#define NULL_UCHARP                   ((UChar* )0)
+
+#ifndef PLATFORM_UNALIGNED_WORD_ACCESS
 #define WORD_ALIGNMENT_SIZE       SIZEOF_INT
 
 #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
-  (pad_size) = WORD_ALIGNMENT_SIZE - ((int )(addr) % WORD_ALIGNMENT_SIZE);\
+  (pad_size) = WORD_ALIGNMENT_SIZE \
+               - ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
   if ((pad_size) == WORD_ALIGNMENT_SIZE) (pad_size) = 0;\
 } while (0)
 
 #define ALIGNMENT_RIGHT(addr) do {\
   (addr) += (WORD_ALIGNMENT_SIZE - 1);\
-  (addr) -= ((int )(addr) % WORD_ALIGNMENT_SIZE);\
+  (addr) -= ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
 } while (0)
 
 
@@ -216,7 +229,7 @@
 #define SERIALIZE_UINT(i,p)    SERIALIZE_8BYTE_INT(i,p)
 #endif
 
-#endif /* UNALIGNED_WORD_ACCESS */
+#endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
 
 /* stack pop level */
 #define STACK_POP_LEVEL_FREE        0
@@ -224,12 +237,12 @@
 #define STACK_POP_LEVEL_ALL         2
 
 /* optimize flags */
-#define REG_OPTIMIZE_NONE              0
-#define REG_OPTIMIZE_EXACT             1   /* Slow Search */
-#define REG_OPTIMIZE_EXACT_BM          2   /* Boyer Moore Search */
-#define REG_OPTIMIZE_EXACT_BM_NOT_REV  3   /* BM   (but not simple match) */
-#define REG_OPTIMIZE_EXACT_IC          4   /* Slow Search (ignore case) */
-#define REG_OPTIMIZE_MAP               5   /* char map */
+#define ONIG_OPTIMIZE_NONE              0
+#define ONIG_OPTIMIZE_EXACT             1   /* Slow Search */
+#define ONIG_OPTIMIZE_EXACT_BM          2   /* Boyer Moore Search */
+#define ONIG_OPTIMIZE_EXACT_BM_NOT_REV  3   /* BM   (but not simple match) */
+#define ONIG_OPTIMIZE_EXACT_IC          4   /* Slow Search (ignore case) */
+#define ONIG_OPTIMIZE_MAP               5   /* char map */
 
 /* bit status */
 typedef unsigned int  BitStatusType;
@@ -255,71 +268,32 @@ typedef unsigned int  BitStatusType;
 
 #define INT_MAX_LIMIT           ((1UL << (SIZEOF_INT * 8 - 1)) - 1)
 
-typedef unsigned int   WCINT;
+#define DIGITVAL(code)    ((code) - '0')
+#define ODIGITVAL(code)   DIGITVAL(code)
+#define XDIGITVAL(enc,code) \
+  (ONIGENC_IS_CODE_DIGIT(enc,code) ? DIGITVAL(code) \
+   : (ONIGENC_IS_CODE_UPPER(enc,code) ? (code) - 'A' + 10 : (code) - 'a' + 10))
 
-#define SIZE_WCINT        sizeof(WCINT)
-#define GET_WCINT(wc,p)   (wc) = *((WCINT* )(p))
-
-#define INFINITE_DISTANCE  ~((RegDistance )0)
-
-#if defined STDC_HEADERS || (!defined isascii && !defined HAVE_ISASCII)
-# define IS_ASCII(c) 1
-#else
-# define IS_ASCII(c) isascii(c)
-#endif
-
-#ifdef isblank
-# define IS_BLANK(c) (IS_ASCII(c) && isblank(c))
-#else
-# define IS_BLANK(c) ((c) == ' ' || (c) == '\t')
-#endif
-#ifdef isgraph
-# define IS_GRAPH(c) (IS_ASCII(c) && isgraph(c))
-#else
-# define IS_GRAPH(c) (IS_ASCII(c) && isprint(c) && !isspace(c))
-#endif
-
-#define IS_PRINT(c)  (isprint(c)  && IS_ASCII(c))
-#define IS_ALNUM(c)  (isalnum(c)  && IS_ASCII(c))
-#define IS_ALPHA(c)  (isalpha(c)  && IS_ASCII(c))
-#define IS_LOWER(c)  (islower(c)  && IS_ASCII(c))
-#define IS_UPPER(c)  (isupper(c)  && IS_ASCII(c))
-#define IS_CNTRL(c)  (iscntrl(c)  && IS_ASCII(c))
-#define IS_PUNCT(c)  (ispunct(c)  && IS_ASCII(c))
-#define IS_SPACE(c)  (isspace(c)  && IS_ASCII(c))
-#define IS_DIGIT(c)  (isdigit(c)  && IS_ASCII(c))
-#define IS_XDIGIT(c) (isxdigit(c) && IS_ASCII(c))
-#define IS_ODIGIT(c) (IS_DIGIT(c) && (c) < '8')
-
-#define DIGITVAL(c)    ((c) - '0')
-#define ODIGITVAL(c)   DIGITVAL(c)
-#define XDIGITVAL(c) \
-  (IS_DIGIT(c) ? DIGITVAL(c) : (IS_UPPER(c) ? (c) - 'A' + 10 : (c) - 'a' + 10))
-
-#define IS_SINGLELINE(option)     ((option) & REG_OPTION_SINGLELINE)
-#define IS_MULTILINE(option)      ((option) & REG_OPTION_MULTILINE)
-#define IS_IGNORECASE(option)     ((option) & REG_OPTION_IGNORECASE)
-#define IS_EXTEND(option)         ((option) & REG_OPTION_EXTEND)
-#define IS_FIND_LONGEST(option)   ((option) & REG_OPTION_FIND_LONGEST)
-#define IS_FIND_NOT_EMPTY(option) ((option) & REG_OPTION_FIND_NOT_EMPTY)
+#define IS_SINGLELINE(option)     ((option) & ONIG_OPTION_SINGLELINE)
+#define IS_MULTILINE(option)      ((option) & ONIG_OPTION_MULTILINE)
+#define IS_IGNORECASE(option)     ((option) & ONIG_OPTION_IGNORECASE)
+#define IS_EXTEND(option)         ((option) & ONIG_OPTION_EXTEND)
+#define IS_FIND_LONGEST(option)   ((option) & ONIG_OPTION_FIND_LONGEST)
+#define IS_FIND_NOT_EMPTY(option) ((option) & ONIG_OPTION_FIND_NOT_EMPTY)
 #define IS_POSIXLINE(option)      (IS_SINGLELINE(option) && IS_MULTILINE(option))
 #define IS_FIND_CONDITION(option) ((option) & \
-          (REG_OPTION_FIND_LONGEST | REG_OPTION_FIND_NOT_EMPTY))
-#define IS_NOTBOL(option)         ((option) & REG_OPTION_NOTBOL)
-#define IS_NOTEOL(option)         ((option) & REG_OPTION_NOTEOL)
-#define IS_POSIX_REGION(option)   ((option) & REG_OPTION_POSIX_REGION)
+          (ONIG_OPTION_FIND_LONGEST | ONIG_OPTION_FIND_NOT_EMPTY))
+#define IS_NOTBOL(option)         ((option) & ONIG_OPTION_NOTBOL)
+#define IS_NOTEOL(option)         ((option) & ONIG_OPTION_NOTEOL)
+#define IS_POSIX_REGION(option)   ((option) & ONIG_OPTION_POSIX_REGION)
 
-#ifdef NEWLINE
-#undef NEWLINE
-#endif
-#define NEWLINE     '\n'
-#define IS_NULL(p)                    (((void*)(p)) == (void*)0)
-#define IS_NOT_NULL(p)                (((void*)(p)) != (void*)0)
-#define IS_NEWLINE(c)                 ((c) == NEWLINE)
-#define CHECK_NULL_RETURN(p)          if (IS_NULL(p)) return NULL
-#define CHECK_NULL_RETURN_VAL(p,val)  if (IS_NULL(p)) return (val)
+/* OP_SET_OPTION is required for these options.
+#define IS_DYNAMIC_OPTION(option) \
+  (((option) & (ONIG_OPTION_MULTILINE | ONIG_OPTION_IGNORECASE)) != 0)
+*/
+/* ignore-case and multibyte status are included in compiled code. */
+#define IS_DYNAMIC_OPTION(option)  0
 
-#define NULL_UCHARP       ((UChar* )0)
 
 /* bitset */
 #define BITS_PER_BYTE      8
@@ -327,7 +301,7 @@ typedef unsigned int   WCINT;
 #define BITS_IN_ROOM       (sizeof(Bits) * BITS_PER_BYTE)
 #define BITSET_SIZE        (SINGLE_BYTE_SIZE / BITS_IN_ROOM)
 
-#ifdef UNALIGNED_WORD_ACCESS
+#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
 typedef unsigned int   Bits;
 #else
 typedef unsigned char  Bits;
@@ -357,18 +331,18 @@ typedef struct _BBuf {
   unsigned int alloc;
 } BBuf;
 
-#define BBUF_INIT(buf,size)    regex_bbuf_init((BBuf* )(buf), (size))
+#define BBUF_INIT(buf,size)    onig_bbuf_init((BBuf* )(buf), (size))
 
 #define BBUF_SIZE_INC(buf,inc) do{\
   (buf)->alloc += (inc);\
   (buf)->p = (UChar* )xrealloc((buf)->p, (buf)->alloc);\
-  if (IS_NULL((buf)->p)) return(REGERR_MEMORY);\
+  if (IS_NULL((buf)->p)) return(ONIGERR_MEMORY);\
 } while (0)
 
 #define BBUF_EXPAND(buf,low) do{\
   do { (buf)->alloc *= 2; } while ((buf)->alloc < low);\
   (buf)->p = (UChar* )xrealloc((buf)->p, (buf)->alloc);\
-  if (IS_NULL((buf)->p)) return(REGERR_MEMORY);\
+  if (IS_NULL((buf)->p)) return(ONIGERR_MEMORY);\
 } while (0)
 
 #define BBUF_ENSURE_SIZE(buf,size) do{\
@@ -376,7 +350,7 @@ typedef struct _BBuf {
   while (new_alloc < (size)) { new_alloc *= 2; }\
   if ((buf)->alloc != new_alloc) {\
     (buf)->p = (UChar* )xrealloc((buf)->p, new_alloc);\
-    if (IS_NULL((buf)->p)) return(REGERR_MEMORY);\
+    if (IS_NULL((buf)->p)) return(ONIGERR_MEMORY);\
     (buf)->alloc = new_alloc;\
   }\
 } while (0)
@@ -430,112 +404,6 @@ typedef struct _BBuf {
 
 #define BBUF_GET_BYTE(buf, pos) (buf)->p[(pos)]
 
-extern UChar* DefaultTransTable;
-#define TOLOWER(enc,c)           (DefaultTransTable[c])
-
-/* methods for support multi-byte code, */
-#define ismb(code,c)             (mblen((code),(c)) != 1)
-#define MB2WC(p,end,code)        mb2wc((p),(end),(code))
-#define MBBACK(code,start,s,n)   step_backward_char((code),(start),(s),(n))
-
-#ifdef REG_RUBY_M17N
-
-#define MB2WC_AVAILABLE(enc)     1
-#define WC2MB_FIRST(enc, wc)          m17n_firstbyte((enc),(wc))
-
-#define mbmaxlen(enc)                 m17n_mbmaxlen(enc)
-#define mblen(enc,c)                  m17n_mbclen(enc,c)
-#define mbmaxlen_dist(enc) \
-      (mbmaxlen(enc) > 0 ? mbmaxlen(enc) : INFINITE_DISTANCE)
-
-#define IS_SINGLEBYTE_CODE(enc)    (m17n_mbmaxlen(enc) == 1)
-/* #define IS_INDEPENDENT_TRAIL(enc)  m17n_independent_trail(enc) */
-#define IS_INDEPENDENT_TRAIL(enc)  IS_SINGLEBYTE_CODE(enc)
-
-#define IS_CODE_ASCII(enc,c)     IS_ASCII(c)
-#define IS_CODE_GRAPH(enc,c)     IS_GRAPH(c)
-#define IS_CODE_PRINT(enc,c)     m17n_isprint(enc,c)
-#define IS_CODE_ALNUM(enc,c)     m17n_isalnum(enc,c)
-#define IS_CODE_ALPHA(enc,c)     m17n_isalpha(enc,c)
-#define IS_CODE_LOWER(enc,c)     m17n_islower(enc,c)
-#define IS_CODE_UPPER(enc,c)     m17n_isupper(enc,c)
-#define IS_CODE_CNTRL(enc,c)     m17n_iscntrl(enc,c)
-#define IS_CODE_PUNCT(enc,c)     m17n_ispunct(enc,c)
-#define IS_CODE_SPACE(enc,c)     m17n_isspace(enc,c)
-#define IS_CODE_BLANK(enc,c)     IS_BLANK(c)
-#define IS_CODE_DIGIT(enc,c)     m17n_isdigit(enc,c)
-#define IS_CODE_XDIGIT(enc,c)    m17n_isxdigit(enc,c)
-
-#define IS_CODE_WORD(enc,c)      m17n_iswchar(enc,c)
-#define ISNOT_CODE_WORD(enc,c)  (!m17n_iswchar(enc,c))
-
-#define IS_WORD_STR(code,s,end) \
-  (ismb((code),*(s)) ? (s + mblen((code),*(s)) <= (end)) : \
-                       m17n_iswchar(code,*(s)))
-#define IS_WORD_STR_INC(code,s,end) \
-  (ismb((code),*(s)) ? ((s) += mblen((code),*(s)), (s) <= (end)) : \
-                       (s++, m17n_iswchar(code,s[-1])))
-
-#define IS_WORD_HEAD(enc,c) (ismb(enc,c) ? 1 : IS_CODE_WORD(enc,c))
-
-#define IS_SB_WORD(code,c)  (mblen(code,c) == 1 && IS_CODE_WORD(code,c))
-#define IS_MB_WORD(code,c)  ismb(code,c)
-
-#define mb2wc(p,e,enc)        m17n_codepoint((enc),(p),(e))
-
-#else  /* REG_RUBY_M17N */
-
-#define mb2wc(p,e,code)              regex_mb2wc((p),(e),(code))
-
-#define MB2WC_AVAILABLE(code)       1
-#define WC2MB_FIRST(code, wc)       regex_wc2mb_first(code, wc)
-
-#define mbmaxlen_dist(code)         mbmaxlen(code)
-#define mbmaxlen(code)              regex_mb_max_length(code)
-#define mblen(code,c)               (code)[(int )(c)]
-
-#define IS_SINGLEBYTE_CODE(code)    ((code) == REGCODE_ASCII)
-#define IS_INDEPENDENT_TRAIL(code) \
-        ((code) == REGCODE_ASCII || (code) == REGCODE_UTF8)
-
-#define IS_CODE_ASCII(code,c)        IS_ASCII(c)
-#define IS_CODE_GRAPH(code,c)        IS_GRAPH(c)
-#define IS_CODE_PRINT(code,c)        IS_PRINT(c)
-#define IS_CODE_ALNUM(code,c)        IS_ALNUM(c)
-#define IS_CODE_ALPHA(code,c)        IS_ALPHA(c)
-#define IS_CODE_LOWER(code,c)        IS_LOWER(c)
-#define IS_CODE_UPPER(code,c)        IS_UPPER(c)
-#define IS_CODE_CNTRL(code,c)        IS_CNTRL(c)
-#define IS_CODE_PUNCT(code,c)        IS_PUNCT(c)
-#define IS_CODE_SPACE(code,c)        IS_SPACE(c)
-#define IS_CODE_BLANK(code,c)        IS_BLANK(c)
-#define IS_CODE_DIGIT(code,c)        IS_DIGIT(c)
-#define IS_CODE_ODIGIT(code,c)       IS_ODIGIT(c)
-#define IS_CODE_XDIGIT(code,c)       IS_XDIGIT(c)
-
-#define IS_SB_WORD(code,c)  (IS_CODE_ALNUM(code,c) || (c) == '_')
-#define IS_MB_WORD(code,c)  ismb(code,c)
-
-#define IS_CODE_WORD(code,c) \
-  (IS_SB_WORD(code,c) && ((c) < 0x80 || (code) == REGCODE_ASCII))
-#define ISNOT_CODE_WORD(code,c) \
-  ((!IS_SB_WORD(code,c)) && !ismb(code,c))
-
-#define IS_WORD_STR(code,s,end) \
-  (ismb((code),*(s)) ? (s + mblen((code),*(s)) <= (end)) : \
-                       IS_SB_WORD(code,*(s)))
-#define IS_WORD_STR_INC(code,s,end) \
-  (ismb((code),*(s)) ? ((s) += mblen((code),*(s)), (s) <= (end)) : \
-                       (s++, IS_SB_WORD(code,s[-1])))
-
-#define IS_WORD_HEAD(code,c) (ismb(code,c) ? 1 : IS_SB_WORD(code,c))
-
-extern int   regex_mb_max_length P_((RegCharEncoding code));
-extern WCINT regex_mb2wc P_((UChar* p, UChar* end, RegCharEncoding code));
-extern int   regex_wc2mb_first P_((RegCharEncoding code, WCINT wc));
-
-#endif /* not REG_RUBY_M17N */
-
 
 #define ANCHOR_BEGIN_BUF        (1<<0)
 #define ANCHOR_BEGIN_LINE       (1<<1)
@@ -571,7 +439,7 @@ enum OpCode {
   OP_EXACTMB2N2,        /* mb-length = 2 N = 2 */
   OP_EXACTMB2N3,        /* mb-length = 2 N = 3 */
   OP_EXACTMB2N,         /* mb-length = 2 */
-  OP_EXACTMB3N,         /* mb length = 3 */
+  OP_EXACTMB3N,         /* mb-length = 3 */
   OP_EXACTMBN,          /* other length */
 
   OP_EXACT1_IC,         /* single byte, N = 1, ignore case */
@@ -584,9 +452,12 @@ enum OpCode {
   OP_CCLASS_MB_NOT,
   OP_CCLASS_MIX_NOT,
 
-  OP_ANYCHAR,                /* "."  */
-  OP_ANYCHAR_STAR,           /* ".*" */
+  OP_ANYCHAR,                 /* "."  */
+  OP_ANYCHAR_ML,              /* "."  multi-line */
+  OP_ANYCHAR_STAR,            /* ".*" */
+  OP_ANYCHAR_ML_STAR,         /* ".*" multi-line */
   OP_ANYCHAR_STAR_PEEK_NEXT,
+  OP_ANYCHAR_ML_STAR_PEEK_NEXT,
 
   OP_WORD,
   OP_NOT_WORD,
@@ -608,7 +479,9 @@ enum OpCode {
   OP_BACKREF2,
   OP_BACKREF3,
   OP_BACKREFN,
+  OP_BACKREFN_IC,
   OP_BACKREF_MULTI,
+  OP_BACKREF_MULTI_IC,
 
   OP_MEMORY_START,
   OP_MEMORY_START_PUSH,   /* push back-tracker to stack */
@@ -632,6 +505,8 @@ enum OpCode {
   OP_REPEAT_INC_NG,        /* non greedy */
   OP_NULL_CHECK_START,     /* null loop checker start */
   OP_NULL_CHECK_END,       /* null loop checker end   */
+  OP_NULL_CHECK_END_MEMST, /* null loop checker end (with capture status) */
+  OP_NULL_CHECK_END_MEMST_PUSH, /* with capture status and push check-end */
 
   OP_PUSH_POS,             /* (?=...)  start */
   OP_POP_POS,              /* (?=...)  end   */
@@ -668,9 +543,10 @@ typedef int         RepeatNumType;
 #define SIZE_LENGTH        sizeof(LengthType)
 #define SIZE_MEMNUM        sizeof(MemNumType)
 #define SIZE_REPEATNUM     sizeof(RepeatNumType)
-#define SIZE_OPTION        sizeof(RegOptionType)
+#define SIZE_OPTION        sizeof(OnigOptionType)
+#define SIZE_CODE_POINT    sizeof(OnigCodePoint)
 
-#ifdef UNALIGNED_WORD_ACCESS
+#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
 #define GET_RELADDR_INC(addr,p) do{\
   addr = *((RelAddrType* )(p));\
   (p) += SIZE_RELADDR;\
@@ -697,7 +573,7 @@ typedef int         RepeatNumType;
 } while(0)
 
 #define GET_OPTION_INC(option,p) do{\
-  option = *((RegOptionType* )(p));\
+  option = *((OnigOptionType* )(p));\
   (p) += SIZE_OPTION;\
 } while(0)
 #else
@@ -718,8 +594,10 @@ typedef int         RepeatNumType;
 
 #define SERIALIZE_BUFSIZE            SIZEOF_INT
 
-#endif  /* UNALIGNED_WORD_ACCESS */
+#endif  /* PLATFORM_UNALIGNED_WORD_ACCESS */
 
+/* code point's address must be aligned address. */
+#define GET_CODE_POINT(code,p)   code = *((OnigCodePoint* )(p))
 #define GET_BYTE_INC(byte,p) do{\
   byte = *(p);\
   (p)++;\
@@ -760,31 +638,50 @@ typedef int         RepeatNumType;
 #define SIZE_OP_RETURN                  SIZE_OPCODE
 
 
-#ifdef REG_DEBUG
+typedef struct {
+  OnigCodePoint esc;
+  OnigCodePoint anychar;
+  OnigCodePoint anytime;
+  OnigCodePoint zero_or_one_time;
+  OnigCodePoint one_or_more_time;
+  OnigCodePoint anychar_anytime;
+} OnigMetaCharTableType;
+
+extern OnigMetaCharTableType OnigMetaCharTable;
+
+#define MC_ESC               OnigMetaCharTable.esc
+#define MC_ANYCHAR           OnigMetaCharTable.anychar
+#define MC_ANYTIME           OnigMetaCharTable.anytime
+#define MC_ZERO_OR_ONE_TIME  OnigMetaCharTable.zero_or_one_time
+#define MC_ONE_OR_MORE_TIME  OnigMetaCharTable.one_or_more_time
+#define MC_ANYCHAR_ANYTIME   OnigMetaCharTable.anychar_anytime
+
+
+#ifdef ONIG_DEBUG
 
 typedef struct {
   short int opcode;
   char*     name;
   short int arg_type;
-} RegOpInfoType;
+} OnigOpInfoType;
 
-extern RegOpInfoType RegOpInfo[];
+extern OnigOpInfoType OnigOpInfo[];
 
-extern void regex_print_compiled_byte_code P_((FILE* f, UChar* bp, UChar** nextp));
+extern void onig_print_compiled_byte_code P_((FILE* f, UChar* bp, UChar** nextp));
 
-#ifdef REG_DEBUG_STATISTICS
-extern void regex_statistics_init P_((void));
-extern void regex_print_statistics P_((FILE* f));
+#ifdef ONIG_DEBUG_STATISTICS
+extern void onig_statistics_init P_((void));
+extern void onig_print_statistics P_((FILE* f));
 #endif
 #endif
 
-extern char* regex_error_code_to_format P_((int code));
-extern void  regex_snprintf_with_pattern PV_((char buf[], int bufsize, RegCharEncoding enc, char* pat, char* pat_end, char *fmt, ...));
-extern UChar* regex_strdup P_((UChar* s, UChar* end));
-extern int  regex_bbuf_init P_((BBuf* buf, int size));
-extern int  regex_alloc_init P_((regex_t** reg, RegOptionType option, RegCharEncoding code, RegSyntaxType* syntax));
-extern int  regex_compile P_((regex_t* reg, UChar* pattern, UChar* pattern_end, RegErrorInfo* einfo));
-extern void regex_chain_reduce P_((regex_t* reg));
-extern int  regex_is_in_wc_range P_((UChar* p, WCINT wc));
+extern char* onig_error_code_to_format P_((int code));
+extern void  onig_snprintf_with_pattern PV_((char buf[], int bufsize, OnigEncoding enc, char* pat, char* pat_end, char *fmt, ...));
+extern UChar* onig_strdup P_((UChar* s, UChar* end));
+extern int  onig_bbuf_init P_((BBuf* buf, int size));
+extern int  onig_alloc_init P_((regex_t** reg, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax));
+extern int  onig_compile P_((regex_t* reg, UChar* pattern, UChar* pattern_end, OnigErrorInfo* einfo));
+extern void onig_chain_reduce P_((regex_t* reg));
+extern int  onig_is_in_code_range P_((UChar* p, OnigCodePoint code));
 
 #endif /* REGINT_H */
