@@ -153,6 +153,7 @@ PHP_FUNCTION(domxml_node_set_content);
 PHP_FUNCTION(domxml_node_get_content);
 PHP_FUNCTION(domxml_node_text_concat);
 PHP_FUNCTION(domxml_node_set_name);
+PHP_FUNCTION(domxml_node_get_path);
 PHP_FUNCTION(domxml_node_name);
 PHP_FUNCTION(domxml_node_type);
 PHP_FUNCTION(domxml_node_value);
