@@ -1,3 +1,53 @@
+2000-11-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Validators are happy now.
+
+2000-11-01  dickmeiss  <dickmeiss@toye.p.sourceforge.net>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h: Updated for ZTS mode.
+
+2000-11-01  Andi Gutmans  <andi@zend.com>
+
+    * ext/pdf/pdf.c: - Beautify
+
+2000-11-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Our context's lifetime differs from the lifetime of a filter's context,
+    so don't set the filter's context in the INIT_CTX macro.
+
+    * sapi/apache2filter/README
+      sapi/apache2filter/sapi_apache2.c:
+    Use Input filters for handling POST data
+
+2000-11-01  Andi Gutmans  <andi@zend.com>
+
+    * main/safe_mode.c
+      main/safe_mode.h:
+    - Define the different possible modes for readibility and use in the rest
+    - of PHP
+
+    * main/safe_mode.c:
+    - In function declerations the opening { should be on a new line
+
+    * ext/standard/file.c: - Change some estrdup()'s to estrndup()'s
+
+    * sapi/apache/mod_php4.c:
+    - Revert patch which seems to have caused the STOP mechanism not to work.
+    - I'm not quite sure why this should have caused harm even if not completey
+    - the right way of doing it.
+
+2000-11-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: No more segfaults.
+
+    * ext/gd/gd.c: Add line of possible XBM support to the phpinfo()
+
+    * ext/mcal/php_mcal.c:
+    Fixed some compile warnings and removed useless code.
+
 2000-10-31  Zeev Suraski  <zeev@zend.com>
 
     * sapi/apache/mod_php4.c: Fix Apache build
