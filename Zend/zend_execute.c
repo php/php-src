@@ -37,6 +37,7 @@ static void destroy_garbage(HashTable *ht)
 
 #define INC_AI_COUNT(znode_ptr)		if (!((znode_ptr)->u.EA.type & EXT_TYPE_UNUSED)) { EG(AiCount)++; }
 #define DEC_AI_COUNT()		if (--EG(AiCount)==0) { zend_ptr_stack_clean(&EG(garbage), (void (*)(void *)) destroy_garbage); }
+#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts ELS_CC)
@@ -346,7 +347,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (result) {
 		Ts[result->u.var].var = variable_ptr_ptr;
 		INC_AI_COUNT(result);
-		PZVAL_LOCK(*variable_ptr_ptr);
+		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
 	} 
 }
 
@@ -447,7 +448,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 	}
 	Ts[result->u.var].var = retval;	
 	INC_AI_COUNT(result);
-	PZVAL_LOCK(*retval);
+	SELECTIVE_PZVAL_LOCK(*retval, result);
 }
 
 
@@ -608,7 +609,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
 			}
-			PZVAL_LOCK(**retval);
+			SELECTIVE_PZVAL_LOCK(**retval, result);
 			break;
 		case IS_STRING: {
 				zval *offset;
@@ -669,7 +670,7 @@ static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znod
 
 	INC_AI_COUNT(result);
 	Ts[result->u.var].var = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, BP_VAR_R ELS_CC);
-	PZVAL_LOCK(*Ts[result->u.var].var);
+	SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
 }
 
 
@@ -789,7 +790,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 	}
 	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type ELS_CC);
 	INC_AI_COUNT(result);
-	PZVAL_LOCK(**retval);
+	SELECTIVE_PZVAL_LOCK(**retval, result);
 }
 
 
@@ -1019,7 +1020,7 @@ binary_assign_op_addr: {
 					(*var_ptr)->EA.locks = previous_lock_count;
 					Ts[opline->result.u.var].var = var_ptr;
 					INC_AI_COUNT(&opline->result);
-					PZVAL_LOCK(*var_ptr);
+					SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 					FREE_OP(&opline->op2, free_op2);
 				}
 				break;
@@ -1070,7 +1071,7 @@ binary_assign_op_addr: {
 						case ZEND_PRE_DEC:
 							Ts[opline->result.u.var].var = var_ptr;
 							INC_AI_COUNT(&opline->result);
-							PZVAL_LOCK(*var_ptr);
+							SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 							break;
 					}
 					(*var_ptr)->EA.locks = previous_lock_count;
