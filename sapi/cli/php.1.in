@@ -281,7 +281,7 @@ A List of active developers can be found here:
 And last but not least PHP was developed with the help of a huge amount of 
 contributors all around the world.
 .SH VERSION INFORMATION
-This manpage describes \fBphp\fP, version 5.0.0.
+This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
 Copyright \(co 1997\-2003 The PHP Group
 .LP
