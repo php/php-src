@@ -164,7 +164,7 @@ struct PHPFBLink
 #define FBSQL_ISO_VERSIONED 4
 
 #define FBSQL_LOB_DIRECT 0				/* default */
-#define FBSQL_LOB_HANDLE 1				/I default */
+#define FBSQL_LOB_HANDLE 1				/* default */
 
 
 /* {{{ fbsql_functions[]
