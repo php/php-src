@@ -1,0 +1,89 @@
+***************
+*** 321,327 ****
+  }
+  
+  
+- static sapi_module_struct sapi_module = {
+         "apache",                                               /* name */
+         "Apache",                                               /* pretty name */
+                                                                         
+--- 321,327 ----
+  }
+  
+  
++ static sapi_module_struct sapi_module_conf = {
+         "apache",                                               /* name */
+         "Apache",                                               /* pretty name */
+                                                                         
+***************
+*** 576,583 ****
+  #ifdef ZTS
+                 tsrm_startup(1, 1, 0);
+  #endif
+-                sapi_startup(&sapi_module);
+-                php_apache_startup(&sapi_module);
+         }
+         per_dir_entry.type = mode;
+  
+--- 576,583 ----
+  #ifdef ZTS
+                 tsrm_startup(1, 1, 0);
+  #endif
++                sapi_startup(&sapi_module_conf);
++                php_apache_startup(&sapi_module_conf);
+         }
+         per_dir_entry.type = mode;
+  
+***************
+*** 661,667 ****
+  static void apache_php_module_shutdown_wrapper(void)
+  {
+         apache_php_initialized = 0;
+-        sapi_module.shutdown(&sapi_module);
+  
+  #if MODULE_MAGIC_NUMBER >= 19970728
+         /* This function is only called on server exit if the apache API
+--- 661,667 ----
+  static void apache_php_module_shutdown_wrapper(void)
+  {
+         apache_php_initialized = 0;
++        sapi_module.shutdown(&sapi_module_conf);
+  
+  #if MODULE_MAGIC_NUMBER >= 19970728
+         /* This function is only called on server exit if the apache API
+***************
+*** 679,685 ****
+  static void php_child_exit_handler(server_rec *s, pool *p)
+  {
+  /*     apache_php_initialized = 0; */
+-        sapi_module.shutdown(&sapi_module);
+  
+  #ifdef ZTS
+         tsrm_shutdown();
+--- 679,685 ----
+  static void php_child_exit_handler(server_rec *s, pool *p)
+  {
+  /*     apache_php_initialized = 0; */
++        sapi_module.shutdown(&sapi_module_conf);
+  
+  #ifdef ZTS
+         tsrm_shutdown();
+***************
+*** 695,702 ****
+  #ifdef ZTS
+                 tsrm_startup(1, 1, 0);
+  #endif
+-                sapi_startup(&sapi_module);
+-                php_apache_startup(&sapi_module);
+         }
+  #if MODULE_MAGIC_NUMBER >= 19980527
+         {
+--- 695,702 ----
+  #ifdef ZTS
+                 tsrm_startup(1, 1, 0);
+  #endif
++                sapi_startup(&sapi_module_conf);
++                php_apache_startup(&sapi_module_conf);
+         }
+  #if MODULE_MAGIC_NUMBER >= 19980527
+         {
