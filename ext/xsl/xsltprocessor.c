@@ -144,6 +144,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	sheetp = xsltParseStylesheetDoc(newdoc);
 
 	if (!sheetp) {
+		xmlFreeDoc(newdoc);
 		RETURN_FALSE;
 	}
 
@@ -153,21 +154,9 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
 			((xsltStylesheetPtr) intern->ptr)->_private = NULL;   
 		}
-		if (intern->document != NULL) {
-			if (--intern->document->refcount == 0) {
-				xmlFreeDoc((xmlDocPtr) intern->document->ptr);
-				efree(intern->document);
-			}
-			((xsltStylesheetPtr) intern->ptr)->doc = NULL;
-			intern->document = NULL;
-		}
 		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
 		intern->ptr = NULL;
 	}
-
-	intern->document = emalloc(sizeof(dom_ref_obj));
-	intern->document->ptr = newdoc;
-	intern->document->refcount = 1;
 
 	php_xsl_set_object(id, sheetp TSRMLS_CC);
 }
