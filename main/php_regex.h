@@ -12,7 +12,7 @@
 #ifndef _RX_H
 #define _RX_H 1				  	/* Try defining these for Linux to	*/
 #endif
-#ifndef __REGEXP_LIBRARY___H
+#ifndef __REGEXP_LIBRARY_H__
 #define __REGEXP_LIBRARY_H__ 1 	/* avoid Apache including regex.h	*/
 #endif
 #ifndef _H_REGEX
