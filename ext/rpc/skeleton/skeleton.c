@@ -56,40 +56,68 @@ skeleton_call,				/* method call handler */
 skeleton_get,				/* property get handler */
 skeleton_set,				/* property set handler */
 skeleton_compare,			/* compare handler, can be NULL */
-skeleton_has_property,		/* reflection functions,
-skeleton_unset_property,	 *  can be NULL
-skeleton_get_properties		 */
+skeleton_has_property,		/* reflection functions */
+skeleton_unset_property,	/* can be NULL */
+skeleton_get_properties
 RPC_REGISTER_HANDLERS_END()
 
 /* register ini settings */
-RPC_INI_START(skeleton)
+PHP_INI_BEGIN()
 	/* TODO: palce your ini entries here */
-RPC_INI_END()
+PHP_INI_END()
 
 /* register userspace functions */
-RPC_FUNCTION_ENTRY_START(skeleton)
+RPC_FUNCTION_ENTRY_BEGIN(skeleton)
 	/* TODO: add your userspace functions here */
 	ZEND_FE(skeleton_function, NULL)
 RPC_FUNCTION_ENTRY_END()
 
 /* register class methods */
-RPC_METHOD_ENTRY_START(skeleton)
+RPC_METHOD_ENTRY_BEGIN(skeleton)
 	/* TODO: add your class methods here */
 	ZEND_FALIAS(method, skeleton_function, NULL)
 RPC_METHOD_ENTRY_END()
 
-/* init function that is called before the class is registered
- * so you can do any tricky stuff in here
- */
-RPC_INIT_FUNCTION(skeleton)
+zend_module_entry skeleton_module_entry = {
+	ZE2_STANDARD_MODULE_HEADER,
+	"skeleton",
+	RPC_FUNCTION_ENTRY(skeleton),
+	ZEND_MINIT(skeleton),
+	ZEND_MSHUTDOWN(skeleton),
+	NULL,
+	NULL,
+	ZEND_MINFO(skeleton),
+	"0.1a",
+	STANDARD_MODULE_PROPERTIES
+};
+
+ZEND_MINIT_FUNCTION(skeleton)
 {
 	/* TODO: place your init stuff here */
+
+	RPC_REGISTER_LAYER(skeleton);
+	REGISTER_INI_ENTRIES();
+
+	return SUCCESS;
 }
 
-RPC_SHUTDOWN_FUNCTION(skeleton)
+ZEND_MSHUTDOWN_FUNCTION(skeleton)
 {
 	/* TODO: place your shutdown stuff here */
+
+	UNREGISTER_INI_ENTRIES();
+
+	return SUCCESS;
 }
+
+ZEND_MINFO_FUNCTION(skeleton)
+{
+	DISPLAY_INI_ENTRIES();
+}
+
+#ifdef COMPILE_DL_COM
+ZEND_GET_MODULE(skeleton);
+#endif
 
 /* rpc handler functions */
 static int skeleton_hash(rpc_string name, rpc_string *hash, void *data, int num_args, char *arg_types, int type)
