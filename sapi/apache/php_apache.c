@@ -524,9 +524,17 @@ PHP_FUNCTION(apache_get_modules)
 	char *p;
 	
 	array_init(return_value);
+
+	if (!ap_loaded_modules) {
+		return;
+	}
 	
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
+		if (!s) {
+			continue;
+		}
+		
 		if ((p = strchr(s, '.'))) {
 			add_next_index_stringl(return_value, s, (p - s), 1);
 		} else {
