@@ -321,10 +321,12 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	compiler_globals_dtor(compiler_globals);
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
-	zend_startup_constants(executor_globals->zend_constants, executor_globals);
-	GLOBAL_CONSTANTS_TABLE = executor_globals->zend_constants;
-	zend_register_standard_constants(ELS_C);
+	zend_startup_constants(EG(zend_constants), executor_globals);
+	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
+#else
+	zend_startup_constants(EG(zend_constants));
 #endif
+	zend_register_standard_constants(ELS_C);
 
 #ifndef ZTS
 	init_resource_plist(ELS_C);
