@@ -48,7 +48,7 @@ function_entry pdo_odbc_functions[] = {
 /* {{{ pdo_odbc_module_entry */
 zend_module_entry pdo_odbc_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"pdo_odbc",
+	"PDO_ODBC",
 	pdo_odbc_functions,
 	PHP_MINIT(pdo_odbc),
 	PHP_MSHUTDOWN(pdo_odbc),
