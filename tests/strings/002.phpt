@@ -1,13 +1,12 @@
 --TEST--
 Formatted print functions
---POST--
---GET--
 --FILE--
 <?php 
 error_reporting(0);
 
 $fp = fopen("php://stdout", "w") or die("Arrggsgg!!");
-$x = fprintf($fp, "fprintf test 1:%.5s\n", "abcdefghij");
+$x = fprintf($fp, "fprintf test 1:%.5s", "abcdefghij");
+echo "\n";
 var_dump($x);
 
 printf("printf test 1:%s\n", "simple string");
