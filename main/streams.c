@@ -646,6 +646,9 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		if (stream->flags & PHP_STREAM_FLAG_AVOID_BLOCKING) {
 			break;
 		}
+
+		/* just break anyway, to avoid greedy read */
+		break;
 	}
 
 	if (didread > 0)
