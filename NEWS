@@ -19,7 +19,7 @@ PHP 4.0                                                                    NEWS
 - ext/odbc: IBM DB2 patch by Walter Franzini <walter@sys-net.it>
 - Added extension for the cracklib library. (Alexander Feldman)
 
-?? ??? 2000, Version 4.0.4
+19 Dec. 2000, Version 4.0.4
 - Allow assigning a newly created object by reference. This is needed only if
   your constructor makes other data structures reference the $this object (for
   example, $GLOBALS["foobar"] =& $this;)
