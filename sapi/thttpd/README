@@ -18,10 +18,10 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 
 REQUIRED DOWNLOADS
 
-	1. thttpd 2.xx
+	1. thttpd 2.21b (2.20 or 2.22beta will _not_ work)
 	   
 	   Full Distribution:
-	   http://www.acme.com/software/thttpd/
+	   http://www.acme.com/software/thttpd/thttpd-2.21b.tar.gz
 	   
 	2. PHP 4.0.x
 	   
