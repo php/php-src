@@ -281,23 +281,31 @@ static union _zend_function *php_mysqli_constructor_get(zval *object TSRMLS_DC)
 {
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 
-	if (obj->zo.ce != mysqli_link_class_entry) {
+	if (obj->zo.ce != mysqli_link_class_entry && obj->zo.ce != mysqli_stmt_class_entry &&
+		obj->zo.ce != mysqli_result_class_entry) {
 		return obj->zo.ce->constructor;
 	} else {
 		static zend_internal_function f;
 
-		f.function_name = mysqli_link_class_entry->name;
-		f.scope = mysqli_link_class_entry;
+		f.function_name = obj->zo.ce->name;
+		f.scope = obj->zo.ce;
 		f.arg_info = NULL;
 		f.num_args = 0;
 		f.fn_flags = 0;
 
 		f.type = ZEND_INTERNAL_FUNCTION;
-		f.handler = ZEND_FN(mysqli_connect);
+		if (obj->zo.ce == mysqli_link_class_entry) {
+			f.handler = ZEND_FN(mysqli_connect);
+		} else if (obj->zo.ce == mysqli_stmt_class_entry) {
+			f.handler = ZEND_FN(mysqli_stmt_construct);
+		} else if (obj->zo.ce == mysqli_result_class_entry) {
+			f.handler = ZEND_FN(mysqli_result_construct);
+		}
 	
 		return (union _zend_function*)&f;
 	}
 }
+
 /* {{{ mysqli_objects_new
  */
 PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_type TSRMLS_DC)
@@ -575,6 +583,109 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
+}
+/* }}} */
+
+/* {{{ mixed mysqli_stmt_construct() 
+constructor for statement object.
+Parameters: 
+  object -> mysqli_init
+  object, query -> mysqli_prepare
+*/
+ZEND_FUNCTION(mysqli_stmt_construct)
+{
+	MY_MYSQL			*mysql;
+	zval  				**mysql_link, **statement;
+	MY_STMT				*stmt;
+	MYSQLI_RESOURCE 	*mysqli_resource;
+
+	switch (ZEND_NUM_ARGS())
+	{
+		case 1:  /* mysql_stmt_init */
+	        if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
+				return;
+			}
+			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, mysql_link, "mysqli_link");
+
+			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
+
+			stmt->stmt = mysql_stmt_init(mysql->mysql);
+		break;
+		case 2:
+	        if (zend_get_parameters_ex(2, &mysql_link, &statement)==FAILURE) {
+				return;
+			}
+			MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, mysql_link, "mysqli_link");
+			convert_to_string_ex(statement);
+
+			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
+	
+			if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
+				mysql_stmt_prepare(stmt->stmt, Z_STRVAL_PP(statement), strlen(Z_STRVAL_PP(statement)));
+			}
+		break;
+		default:
+			WRONG_PARAM_COUNT;
+		break;
+	}
+
+	if (!stmt->stmt) {
+		efree(stmt);
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)stmt;
+	
+	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
+	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
+}
+/* }}} */
+
+/* {{{ mixed mysqli_result_construct() 
+constructor for result object.
+Parameters: 
+  object [, mode] -> mysqli_store/use_result
+*/
+ZEND_FUNCTION(mysqli_result_construct)
+{
+	MY_MYSQL			*mysql;
+	MYSQL_RES			*result;
+	zval				**mysql_link, **mode;
+	MYSQLI_RESOURCE 	*mysqli_resource;
+	int					resmode = MYSQLI_STORE_RESULT;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+	        if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
+				return;
+			}
+		break;
+		case 2:
+	        if (zend_get_parameters_ex(2, &mysql_link, &mode)==FAILURE) {
+				return;
+			}
+			resmode = Z_LVAL_PP(mode);
+		break;
+		default:
+			WRONG_PARAM_COUNT;
+	}
+
+	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, mysql_link, "mysqli_link");
+
+	result = (resmode == MYSQLI_STORE_RESULT) ? mysql_store_result(mysql->mysql) :
+												mysql_use_result(mysql->mysql);
+
+	if (!result) {
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)result;
+	
+	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
+	((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
+
 }
 /* }}} */
 
