@@ -319,6 +319,9 @@ PHP_FUNCTION(virtual)
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
+	
+	php_end_ob_buffering(1);
+	php_header();
 
 	if (run_sub_req(rr)) {
 		php_error(E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
