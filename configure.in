@@ -1314,17 +1314,6 @@ cat <<X
 X
   fi
 
-  if test "$PHP_DB" != "no"; then
-cat <<X
-+--------------------------------------------------------------------+
-|                        *** WARNING ***                             |
-|                                                                    |
-| You chose to compile PHP with the DB extension. This extension is  |
-| deprecated and does not support database locking correctly. Please |
-| use the DBA extension, which is a fully operational superset.      |
-X
-  fi
-
   # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
   if test "$PHP_OCI8" != "no" -o "$PHP_ORACLE" != "no"; then
     if test "$PHP_SAPI" = "apache"; then
