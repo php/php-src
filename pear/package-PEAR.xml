@@ -33,9 +33,10 @@
   <release>
     <version>1.0b1</version>
     <state>stable</state>
-    <date>2002-10-13</date>
+    <date>2002-10-12</date>
     <notes>
 New Features, Installer:
+* new command: "pear makerpm"
 * new command: "pear search"
 * new command: "pear upgrade-all"
 * new command: "pear config-help"
