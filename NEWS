@@ -12,6 +12,8 @@ PHP 4                                                                      NEWS
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length.
   (Marcus)
+- Added zlib_get_coding_type() function, which returns one of coding types
+  used for output compression. (Moriyoshi)
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added stream_get_line() function. This function will read either 
   the specified number of bytes or until the ending string is found. (Ilia)
