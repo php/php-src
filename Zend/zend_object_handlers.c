@@ -705,7 +705,6 @@ zend_function *zend_std_get_static_method(zend_class_entry *ce, char *function_n
 
 zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
 {
-	HashTable *statics_table;
 	zval **retval = NULL;
 	zend_class_entry *tmp_ce = ce;
 	zend_property_info *property_info;
@@ -729,7 +728,6 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 
 	while (tmp_ce) {
 		if (zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval)==SUCCESS) {
-			statics_table = tmp_ce->static_members;
 			break;
 		}
 		tmp_ce = tmp_ce->parent;
