@@ -31,8 +31,10 @@ if test "$PHP_SAPI_CLI" != "no"; then
     ;;
   esac
   INSTALL_CLI="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(bindir); \$(INSTALL) -m 0755 \$(SAPI_CLI_PATH) \$(INSTALL_ROOT)\$(bindir)/php"
+
   PHP_SUBST(BUILD_CLI)
   PHP_SUBST(INSTALL_CLI)
+  PHP_OUTPUT(sapi/cli/php.1)
 fi
 
 AC_MSG_RESULT($PHP_SAPI_CLI)
