@@ -47,7 +47,7 @@ PHP_FUNCTION(ob_get_contents);
 PHP_FUNCTION(ob_get_length);
 PHP_FUNCTION(ob_implicit_flush);
 
-PHP_GINIT_FUNCTION(output);
+PHP_MINIT_FUNCTION(output);
 
 typedef struct _php_ob_buffer {
 	char *buffer;

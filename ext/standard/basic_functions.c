@@ -653,9 +653,7 @@ zend_module_entry basic_functions_module = {
 	PHP_RINIT(basic),			/* request startup */
 	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	PHP_MINFO(basic),			/* extension info */
-	PHP_GINIT(basic),			/* global startup function */
-	NULL,						/* global shutdown function */
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 
 #if defined(HAVE_PUTENV)
@@ -749,6 +747,7 @@ PHP_MINIT_FUNCTION(basic)
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
 
+	PHP_MINIT(output)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(regex)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(file)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(pack)(INIT_FUNC_ARGS_PASSTHRU);
@@ -908,14 +907,6 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		munmap(BG(mmap_file), BG(mmap_len));
 	}
 #endif
-
-	return SUCCESS;
-}
-
-
-PHP_GINIT_FUNCTION(basic)
-{
-	PHP_GINIT(output)(GINIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
