@@ -1,3 +1,10 @@
+2004-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c:
+      Apply the same parse error handling to (include|require)_once as the one
+      for
+      their non-once counterparts.
+
 2004-01-28  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:

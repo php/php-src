@@ -1,3 +1,48 @@
+2004-01-30  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_prop.c:
+      added nuw_rows property for statement object
+
+2004-01-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * CODING_STANDARDS:
+      word fix
+
+2004-01-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      order
+
+2004-01-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * CODING_STANDARDS:
+      Include Sascha's indendation hint
+
+    * CODING_STANDARDS:
+      Newer compilers don't need this so many people don't know. Hence we make
+      it a coding standard.
+
+2004-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFH: Apply the same parse error handling to (include|require)_once as the
+      one for their non-once counterparts.
+
+    * ZendEngine2/zend_execute.c:
+      Apply the same parse error handling to (include|require)_once as the one
+      for
+      their non-once counterparts.
+
+2004-01-30  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Fix potential bug in http:// proxy support.
+      Some proxy servers require entire URI be sent in request string.
+      
+      Add context option "http"/"request_fulluri" to allow this behavior.
+
 2004-01-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sqlite/config.m4:
