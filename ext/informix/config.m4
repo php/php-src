@@ -18,10 +18,18 @@ WARNING: You asked for Informix support, but don't have \\\$INFORMIXDIR
     else
       if test "$withval" = "yes"; then
         IFX_INCDIR=$INFORMIXDIR/incl/esql
-        IFX_LIBDIR="-L$INFORMIXDIR/lib -L$INFORMIXDIR/lib/esql"
+        if test -z "$IFX_LIBDIR"; then
+          IFX_LIBDIR="-L$INFORMIXDIR/lib -L$INFORMIXDIR/lib/esql"
+        else
+          IFX_LIBDIR=$IFX_LIBDIR
+        fi
       else
         IFX_INCDIR=$withval/incl/esql
-        IFX_LIBDIR="-L$withval/lib -L$withval/lib/esql"
+        if test -z "$IFX_LIBDIR"; then
+          IFX_LIBDIR="-L$withval/lib -L$withval/lib/esql"
+        else
+          IFX_LIBDIR=$IFX_LIBDIR
+        fi
         if test "$withval" != "$INFORMIXDIR"; then
           INFORMIX_WARNING="
 WARNING: You specified Informix base install directory that is different
