@@ -1,3 +1,168 @@
+2003-01-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/credits.c:
+      s/4.4/5.0
+
+2003-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/bz2/bz2.c
+      ext/curl/interface.c
+      ext/cyrus/cyrus.c
+      ext/ircg/ircg.c
+      ext/ldap/ldap.c
+      ext/mnogosearch/php_mnogo.c
+      ext/msession/msession.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/sysvmsg/sysvmsg.c
+      ext/xslt/sablot.c:
+      Changed php_error to php_error_docref.
+      
+      Thanks to Marcus Börger for writing a script that significantly simplifies
+      this process.
+
+    * ext/pcre/php_pcre.c:
+      Fixed bug #21732 (Added a sanity check, that prevents parameter mismatch).
+
+    * ext/swf/swf.c
+      ext/xslt/sablot.c
+      ext/yp/yp.c
+      ext/zip/zip.c:
+      Changed php_error to php_error_docref.
+
+    * ext/wddx/wddx.c
+      ext/yaz/php_yaz.c:
+      Removed pointless memory allocation checks.
+      Changed php_error to php_error_docref.
+
+    * ext/bz2/bz2.c
+      ext/db/db.c
+      ext/dba/dba.c
+      ext/dbx/dbx.c
+      ext/dbx/dbx_odbc.c
+      ext/domxml/php_domxml.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/hwapi/hwapi.cpp
+      ext/hyperwave/hw.c
+      ext/iconv/iconv.c
+      ext/informix/ifx.ec
+      ext/ingres_ii/ii.c
+      ext/interbase/interbase.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mcal/php_mcal.c
+      ext/mcrypt/mcrypt.c
+      ext/mnogosearch/php_mnogo.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/oracle/oracle.c
+      ext/ovrimos/ovrimos.c
+      ext/pdf/pdf.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/qtdom/qtdom.c
+      ext/session/session.c
+      ext/sockets/sockets.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/metaphone.c
+      ext/standard/string.c
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/zlib/zlib.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/php_apache.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache_hooks/php_apache.c:
+      Removed pointless memory allocation checks.
+
+2003-01-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug21094.phpt:
+      Added test case for bug #21094
+
+    * ext/standard/scanf.c:
+      WS
+
+2003-01-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      correct my fault here and documnet the sense of the test
+
+2003-01-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/bug21730.phpt:
+      
+      Fixed typo
+
+    * ext/standard/tests/strings/bug21730.phpt:
+      Added test case for bug #21730
+
+2003-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c:
+      Additional memory allocation fixes by Marcus Börger.
+
+2003-01-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/scanf.c:
+      Tons of WS fixes
+
+2003-01-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c:
+      Removed the no longer needed memory allocation checks.
+
+2003-01-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/scanf.c:
+      Fixed bug #21726 and #21730
+
+2003-01-18  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:
+      Renamed get_memory_usage() to memory_get_usage() (per Andi's advice)
+      This doesn't break any BC.
+
+2003-01-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c:
+      Fix potential problem for 64-bit architectures.
+
+2003-01-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/file.c:
+      - Fixed memleak in fscanf().
+
+    * ext/standard/tests/general_functions/proc_open.phpt:
+      - Skip test if the function to test is not available
+
+2003-01-18  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/imap/config.m4
+      ext/imap/php_imap.c:
+      MFH: Fix bug: #21687, imap extension does not include gss authentication
+      mechanism
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c:
+      Fix bug: #21687, imap extension does not include gss authentication
+      mechanism
+
 2003-01-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/image/getimagesize.phpt:
