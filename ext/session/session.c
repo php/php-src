@@ -779,7 +779,9 @@ static void _php_session_destroy(PSLS_D)
 		return;
 	}
 
-	PS(mod)->destroy(&PS(mod_data), PS(id));
+	if (PS(mod)->destroy(&PS(mod_data), PS(id)) == FAILURE) {
+		php_error(E_WARNING, "Destroying the session object failed");
+	}
 	php_rshutdown_session_globals(PSLS_C);
 	php_rinit_session_globals(PSLS_C);
 }
