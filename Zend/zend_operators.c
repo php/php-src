@@ -32,7 +32,7 @@
 #include "zend_list.h"
 #include "zend_fast_cache.h"
 
-#if WITH_BCMATH
+#if 0&&WITH_BCMATH
 #include "ext/bcmath/number.h"
 #endif
 
@@ -116,7 +116,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 			case IS_DOUBLE:
 			case IS_LONG:
 				break;
-#if WITH_BCMATH
+#if 0&&WITH_BCMATH
 			case FLAG_IS_BC:
 				op->type = IS_DOUBLE; /* may have lost significant digits */
 				break;
@@ -1598,7 +1598,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 	
 	if ((ret1=is_numeric_string(s1->value.str.val, s1->value.str.len, &lval1, &dval1)) &&
 		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2))) {
-#if WITH_BCMATH
+#if 0&&WITH_BCMATH
 		if ((ret1==FLAG_IS_BC) || (ret2==FLAG_IS_BC)) {
 			bc_num first, second;
 			
