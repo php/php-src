@@ -201,6 +201,10 @@ else
 	AC_MSG_WARN(You will need flex 2.5.4 or later if you want to regenerate Zend/PHP lexical parsers.)
 fi
 
+dnl Check whether byte ordering is bigendian
+PHP_C_BIGENDIAN
+
+
 dnl Platform-specific compile settings.
 dnl -------------------------------------------------------------------------
 
