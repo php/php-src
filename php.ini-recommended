@@ -351,6 +351,8 @@ auto_append_file =
 default_mimetype = "text/html"
 ;default_charset = "iso-8859-1"
 
+; Always populate the $HTTP_RAW_POST_DATA variable.                               
+;always_populate_raw_post_data = On
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
