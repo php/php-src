@@ -1,3 +1,78 @@
+2001-08-24  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/crypt.c
+      ext/standard/lcg.c
+      ext/standard/php_crypt.h
+      ext/standard/php_rand.h
+      ext/standard/php_standard.h
+      ext/standard/rand.c:
+    Implement (not yet totally complete) INI-logic for rand.
+    Seed random generators on script execution start (was
+    already done in some configurations by crypt, removed that)
+
+2001-08-24  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Math/Util.php
+      pear/Math/Fraction.php:
+    * Made the mathematic classes more coding standard compliant
+
+2001-08-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/php_gd.h: MFH
+
+    * ext/gd/config.m4
+      ext/gd/gd.c: Fixed bug: #12948, #12945
+
+2001-08-24  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Makefile.in: Merge From 1.84 (XML/RPC stuff has gone to /pear)
+
+2001-08-24  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * NEWS: Ahem.
+
+    * NEWS: update news
+
+    * ext/standard/html.c: Fix htmlspecialchars problem.
+
+2001-08-24  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/PEAR/WebInstaller.php:
+    changed the URL from my testing server to  pear.php.net
+
+2001-08-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Fixed a crash bug in array_map() if the input arrays had string or
+      non-sequential keys. Also modified it so that if a single array is passed,
+      its keys are preserved in the resulting array. 
+
+2001-08-24  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/zip/zip.c: proto fix
+
+2001-08-24  John Donagher  <john@webmeta.com>
+
+    * ext/standard/url.c:
+    Don't try and search a 0-length string. This allows parse_url() to correctly
+    parse a non-pathed URI, i.e. 'scheme://'
+
+2001-08-24  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/zip/zip.c
+      ext/swf/swf.c: noet
+
+    * ext/sockets/sockets.c: Break the entire PHP build
+
+
+    * ext/curl/curl.c: noet
+
+    * ext/skeleton/skeleton.c: New extensions should put this in by default
+
 2001-08-23  Sterling Hughes  <sterling@designmultimedia.com>
 
     * ext/xslt/sablot.c
