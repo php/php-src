@@ -27,14 +27,7 @@
 #include "TSRM.h"
 #endif
 
-#if PHP_API_VERSION < 19990421
-#define  zend_module_entry zend_module_entry
-#include "zend_modules.h"
-#include "internal_functions.h"
-#endif
-
 extern zend_module_entry mcrypt_module_entry;
-
 #define mcrypt_module_ptr &mcrypt_module_entry
 
 /* Functions for both old and new API */
@@ -47,7 +40,6 @@ PHP_FUNCTION(mcrypt_get_block_size);
 PHP_FUNCTION(mcrypt_get_key_size);
 PHP_FUNCTION(mcrypt_create_iv);
 
-#if HAVE_LIBMCRYPT24
 /* Support functions for old API */
 PHP_FUNCTION(mcrypt_list_algorithms);
 PHP_FUNCTION(mcrypt_list_modes);
@@ -61,9 +53,8 @@ PHP_FUNCTION(mcrypt_generic_init);
 PHP_FUNCTION(mcrypt_generic);
 PHP_FUNCTION(mdecrypt_generic);
 PHP_FUNCTION(mcrypt_generic_end);
-#if HAVE_MCRYPT_GENERIC_DEINIT
 PHP_FUNCTION(mcrypt_generic_deinit);
-#endif
+
 PHP_FUNCTION(mcrypt_enc_self_test);
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode);
 PHP_FUNCTION(mcrypt_enc_is_block_algorithm);
@@ -90,11 +81,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mcrypt)
 ZEND_END_MODULE_GLOBALS(mcrypt)
 
 #ifdef ZTS
-# define MCG(v) TSRMG(mcrypt_globals_id, zend_mcrypt_globals *, v)
+# define MCG(v)    TSRMG(mcrypt_globals_id, zend_mcrypt_globals *, v)
 #else
-# define MCG(v)        (mcrypt_globals.v)
-#endif
-
+# define MCG(v)    (mcrypt_globals.v)
 #endif
 
 #else
