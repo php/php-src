@@ -1110,6 +1110,7 @@ ZEND_API int decrement_function(zval *op1)
 				op1->type = IS_LONG;
 				break;
 			} else if (is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, NULL)==IS_LONG) { /* long */
+				STR_FREE(op1->value.str.val);
 				op1->value.lval = lval-1;
 				op1->type = IS_LONG;
 				break;
