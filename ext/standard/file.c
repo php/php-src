@@ -461,15 +461,14 @@ PHP_FUNCTION(file)
 {
 	char *filename;
 	int filename_len;
-	char *slashed, *target_buf;
+	char *slashed, *target_buf, *p, *s, *e;
 	register int i = 0;
-	int len;
+	int target_len, len;
 	char eol_marker = '\n';
 	zend_bool use_include_path = 0;
-	zend_bool reached_eof = 0;
 	php_stream *stream;
 
-    /* Parse arguments */
+	/* Parse arguments */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
 							  &filename, &filename_len, &use_include_path) == FAILURE) {
 		return;
@@ -485,21 +484,39 @@ PHP_FUNCTION(file)
 	/* Initialize return array */
 	array_init(return_value);
 
-	/* Now loop through the file and do the magic quotes thing if needed */
-	while (1) {
-		target_buf = php_stream_gets(stream, NULL, 0);
-		if (target_buf == NULL) {
-			break;
-		}
-		
-		if (PG(magic_quotes_runtime)) {
-			/* 1 = free source string */
-			slashed = php_addslashes(target_buf, strlen(target_buf), &len, 1 TSRMLS_CC);
-			add_next_index_stringl(return_value, slashed, len, 0);
-		} else {
-			add_next_index_string(return_value, target_buf, 0);
-		}
-	}
+ 	if ((target_len = php_stream_copy_to_mem(stream, &target_buf, PHP_STREAM_COPY_ALL, 0))) {
+ 		s = target_buf;
+ 		e = target_buf + target_len;
+ 	
+ 		if (!(p = php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
+ 			p = e;
+ 			goto parse_eol;
+  		}
+  		
+ 		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
+  			eol_marker = '\r';
+ 		}	
+ 	
+ 		do {
+ 			p++;
+ 			parse_eol:
+ 			if (PG(magic_quotes_runtime)) {
+ 				slashed = php_addslashes(s, (p-s), &len, 1 TSRMLS_CC);
+ 				add_index_stringl(return_value, i++, slashed, len, 0);
+ 			} else {
+ 				add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
+  			}
+ 			s = p;
+ 		} while ((p = memchr(p, eol_marker, (e-p))));
+ 		
+ 		/* handle any left overs of files without new lines */
+ 		if (s != e) {
+ 			p = e;
+ 			goto parse_eol;
+  		}
+  	}
+
+ 	efree(target_buf);
 	php_stream_close(stream);
 }
 /* }}} */

@@ -626,14 +626,19 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	return stream->ops->stat(stream, ssb TSRMLS_CC);
 }
 
-static char *php_stream_locate_eol(php_stream *stream TSRMLS_DC)
+PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC)
 {
 	size_t avail;
 	char *cr, *lf, *eol = NULL;
 	char *readptr;
 	
-	readptr = stream->readbuf + stream->readpos;
-	avail = stream->writepos - stream->readpos;
+	if (!buf) {
+		readptr = stream->readbuf + stream->readpos;
+		avail = stream->writepos - stream->readpos;
+	} else {
+		readptr = buf;
+		avail = buf_len;
+	}	
 
 	/* Look for EOL */
 	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
@@ -699,7 +704,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			int done = 0;
 
 			readptr = stream->readbuf + stream->readpos;
-			eol = php_stream_locate_eol(stream TSRMLS_CC);
+			eol = php_stream_locate_eol(stream, NULL, 0 TSRMLS_CC);
 
 			if (eol) {
 				cpysz = eol - readptr + 1;
