@@ -539,24 +539,24 @@ PHP_FUNCTION(mysqli_stmt_execute)
 	
 	for (i = 0; i < stmt->param.var_cnt; i++) {		
 		if (stmt->param.vars[i]) {
-			stmt->param.is_null[i] = (stmt->param.vars[i]->type == IS_NULL);
-
-			switch (stmt->stmt->params[i].buffer_type) {
-				case MYSQL_TYPE_VAR_STRING:
-					convert_to_string_ex(&stmt->param.vars[i]);
-					stmt->stmt->params[i].buffer = Z_STRVAL_PP(&stmt->param.vars[i]);
-					stmt->stmt->params[i].buffer_length = strlen(Z_STRVAL_PP(&stmt->param.vars[i]));
-					break;
-				case MYSQL_TYPE_DOUBLE:
-					convert_to_double_ex(&stmt->param.vars[i]);
-					stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
-					break;
-				case MYSQL_TYPE_LONG:
-					convert_to_long_ex(&stmt->param.vars[i]);
-					stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
-					break;
-				default:
-					break;
+			if ( !(stmt->param.is_null[i] = (stmt->param.vars[i]->type == IS_NULL)) ) {
+				switch (stmt->stmt->params[i].buffer_type) {
+					case MYSQL_TYPE_VAR_STRING:
+						convert_to_string_ex(&stmt->param.vars[i]);
+						stmt->stmt->params[i].buffer = Z_STRVAL_PP(&stmt->param.vars[i]);
+						stmt->stmt->params[i].buffer_length = strlen(Z_STRVAL_PP(&stmt->param.vars[i]));
+						break;
+					case MYSQL_TYPE_DOUBLE:
+						convert_to_double_ex(&stmt->param.vars[i]);
+						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
+						break;
+					case MYSQL_TYPE_LONG:
+						convert_to_long_ex(&stmt->param.vars[i]);
+						stmt->stmt->params[i].buffer = (gptr)&Z_LVAL_PP(&stmt->param.vars[i]);
+						break;
+					default:
+						break;
+				}
 			}	
 		}
 	}
