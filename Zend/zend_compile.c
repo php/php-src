@@ -708,7 +708,7 @@ void zend_do_if_end(TSRMLS_D)
 void zend_check_writable_variable(znode *variable)
 {
 	zend_uint type = variable->u.EA.type;
-	
+
 	if (type & ZEND_PARSED_METHOD_CALL) {
 		zend_error(E_COMPILE_ERROR, "Can't use method return value in write context");
 	}
@@ -744,6 +744,8 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 
 	le = fetch_list_ptr->head;
 
+	/* TODO: $foo->x->y->z = 1 should fetch "x" and "y" for R or RW, not just W */
+	
 	while (le) {
 		opline_ptr = (zend_op *)le->data;
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
