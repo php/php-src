@@ -51,8 +51,8 @@ in a future PHP/PEAR release.
 fi
 ])
 
-PHP_ARG_ENABLE(pdo, whether to disable PDO support,
-[  --disable-pdo            Disable PHP Data Objects support], yes)
+PHP_ARG_ENABLE(pdo, whether to enable PDO support,
+[  --enable-pdo=yes         Enable PHP Data Objects support (recommended)], yes)
 
 if test "$PHP_PDO" != "no"; then
   if test "$ext_shared" = "yes" ; then

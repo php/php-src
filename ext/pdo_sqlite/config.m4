@@ -3,17 +3,17 @@ dnl config.m4 for extension pdo_sqlite
 dnl vim:et:sw=2:ts=2:
 
 PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
-[  --with-pdo-sqlite             Include PDO sqlite 3 support])
+[  --with-pdo-sqlite             Include PDO sqlite 3 support],yes)
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 
   AC_MSG_CHECKING([for PDO includes])
-  if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-  	pdo_inc_path=$prefix/include/php/ext
-  elif test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-  	pdo_inc_path=$abs_srcdir/ext
-  elif test -f ext/pdo/php_pdo_driver.h; then
-  	pdo_inc_path=ext
+  if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$prefix/include/php/ext
   else
     AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
   fi
@@ -110,5 +110,5 @@ EOF
       AC_CHECK_HEADERS(time.h)
     
   fi
-dnl  PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+  PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
 fi
