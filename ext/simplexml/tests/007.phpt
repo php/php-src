@@ -8,8 +8,7 @@ SimpleXML and attributes
 $sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml');
 
 echo "===Property===\n";
-var_dump($sxe->id);
-var_dump($sxe->elem1->attr1);
+var_dump($sxe->elem1);
 echo "===Array===\n";
 var_dump($sxe['id']);
 var_dump($sxe->elem1['attr1']);
@@ -30,10 +29,25 @@ $dummy = $sxe->elem1[$a];
 var_dump($a);
 ?>
 ===Done===
---EXPECT--
+--EXPECTF--
 ===Property===
-string(5) "elem1"
-string(5) "first"
+object(simplexml_element)#%d (2) {
+  ["comment"]=>
+  object(simplexml_element)#%d (0) {
+  }
+  ["elem2"]=>
+  object(simplexml_element)#%d (1) {
+    ["elem3"]=>
+    object(simplexml_element)#%d (1) {
+      ["elem4"]=>
+      object(simplexml_element)#%d (1) {
+        ["test"]=>
+        object(simplexml_element)#%d (0) {
+        }
+      }
+    }
+  }
+}
 ===Array===
 string(5) "elem1"
 string(5) "first"
