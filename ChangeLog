@@ -1,3 +1,109 @@
+1999-12-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/roxen/Makefile.am
+      sapi/isapi/Makefile.am
+      sapi/cgi/Makefile.am
+      sapi/aolserver/Makefile.am
+      sapi/apache/Makefile.am
+      pear/Makefile.am
+      sapi/Makefile.am
+      ext/odbc/Makefile.am
+      ext/standard/Makefile.am
+      ext/gd/Makefile.am
+      ext/Makefile.am
+      ext/dbase/Makefile.am
+      build-defs.h.in: Some cleanup
+
+1999-12-21  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/standard/info.h
+      ext/odbc/php_odbc.c
+      main.c:
+1999-12-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * sapi/apache/mod_php4.c
+      ext/cpdf/cpdf.c: Some more php3->php stuff.
+
+    * fopen-wrappers.c
+      fopen-wrappers.h
+      main.c
+      request_info.c
+      request_info.h: php3 -> php prefix work
+
+    * ext/apache/apache.c
+      php.h: Correct PHP's mime type.
+
+    * TODO: *** empty log message ***
+
+1999-12-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Move TSRM checks, so that additional flags can be considered
+
+1999-12-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/browscap.c
+      ext/standard/var.c
+      ext/java/java.c
+      ext/com/COM.c
+      main.c: We're using ZVAL's now.
+
+1999-12-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: some more thoughts
+
+    * ext/standard/file.c
+      NEWS:
+    commented out select() & friends for now - we need to come up with a good API for those!
+
+1999-12-21  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - This should have made it into the NEWS
+
+1999-12-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Optimize.
+
+1999-12-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: would be nice & clean
+
+1999-12-21  Evan Klinger  <evan715@sirius.com>
+
+    * ext/bcmath/bcmath.c: Ex API
+
+1999-12-21  Zeev Suraski  <zeev@php.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: This should get it to compile...
+
+1999-12-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Only add additional include paths, if building in a separate directory
+    (cosmetic change)
+
+    * acinclude.m4: Workaround for broken trs
+
+1999-12-21  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/parsedate.y:
+    Further cleanup as including php.h is no longer harmful
+    - thanks to Sascha for noticing it.
+    Tested on Linux and WinNT, should work everywhere.
+
+1999-12-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_sprintf.c:
+    Change order to avoid system prototype mismatch (sprint is defined to
+    php_sprintf by php_config.h)
+
+    * acinclude.m4
+      configure.in: Propagate ZTS setting correctly
+
 1999-12-20  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/thttpd/thttpd.c
