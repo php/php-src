@@ -33,5 +33,3 @@
 
 * Using arg_separator.input to implode args in the CGI sapi extension
   and arg_separator.input to explode in php_build_argv().
-
-* Pop, pop, Pop that pussy baby
