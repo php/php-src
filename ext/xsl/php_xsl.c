@@ -27,6 +27,9 @@
 #include "ext/standard/info.h"
 #include "php_xsl.h"
 
+static void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
+static void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
+
 /* If you declare any globals in php_xsl.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(xsl)
 */
@@ -136,10 +139,149 @@ PHP_MINIT_FUNCTION(xsl)
 #if HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif
+	xsltRegisterExtModuleFunction ((const xmlChar *) "functionString",
+				   (const xmlChar *) "http://php.net/xsl",
+				   xsl_ext_function_string_php);
+	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
+				   (const xmlChar *) "http://php.net/xsl",
+				   xsl_ext_function_object_php);
 
 	return SUCCESS;
 }
 /* }}} */
+
+
+static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type)
+{
+	xsltTransformContextPtr tctxt;
+	zval **args;
+	zval *retval;
+	int result, i, ret;
+	zend_fcall_info fci;
+	zval handler;
+	xmlXPathObjectPtr obj;
+	char *str;
+
+	TSRMLS_FETCH();
+
+	tctxt = xsltXPathGetTransformContext(ctxt);
+	if (tctxt == NULL) {
+		xsltGenericError(xsltGenericErrorContext,
+		"xsltExtFunctionTest: failed to get the transformation context\n");
+		return;
+	}
+
+	args = safe_emalloc(sizeof(zval **), nargs - 1, 0);
+	for (i = 0; i < nargs - 1; i++) {
+		obj = valuePop(ctxt);
+		MAKE_STD_ZVAL(args[i]);
+		switch (obj->type) {
+			case XPATH_STRING:
+				ZVAL_STRING(args[i],  obj->stringval, 1);
+				break;
+			case XPATH_BOOLEAN:
+				ZVAL_BOOL(args[i],  obj->boolval);
+				break;
+			case XPATH_NUMBER:
+				ZVAL_DOUBLE(args[i], obj->floatval);
+				break;
+			case XPATH_NODESET:
+				if (type == 1) {
+					str = xmlXPathCastToString(obj);
+					ZVAL_STRING(args[i], str, 1);
+					xmlFree(str);
+				} else if (type == 2) {
+					int j;
+					dom_object *intern;
+					array_init(args[i]);
+					if (obj->nodesetval->nodeNr > 0) {
+						intern = (dom_object *) php_dom_object_get_data((void *) obj->nodesetval->nodeTab[0]->doc);
+						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
+							xmlNodePtr node = obj->nodesetval->nodeTab[j];
+							zval *child;
+							
+							MAKE_STD_ZVAL(child);
+							/* not sure, if we need this... it's copied from xpath.c */
+							if (node->type == XML_NAMESPACE_DECL) {
+								xmlNsPtr curns;
+								xmlNodePtr nsparent;
+								
+								nsparent = node->_private;
+								curns = xmlNewNs(NULL, node->name, NULL);
+								if (node->children) {
+									curns->prefix = xmlStrdup((char *) node->children);
+								}
+								if (node->children) {
+									node = xmlNewDocNode(node->doc, NULL, (char *) node->children, node->name);
+								} else {
+									node = xmlNewDocNode(node->doc, NULL, "xmlns", node->name);
+								}
+								node->type = XML_NAMESPACE_DECL;
+								node->parent = nsparent;
+								node->ns = curns;
+							}
+							child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
+							add_next_index_zval(args[i], child);
+						}
+					}
+				}
+				break;
+			default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php:function object type %d is not supported yet", obj->type);
+			ZVAL_STRING(args[i], "", 0);
+		}
+		xmlXPathFreeObject(obj);
+	}
+	
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	
+	obj = valuePop(ctxt);
+	INIT_PZVAL(&handler);
+	ZVAL_STRING(&handler, obj->stringval, 1);
+	xmlXPathFreeObject(obj);
+	
+	fci.function_name = &handler;
+	fci.symbol_table = NULL;
+	fci.object_pp = NULL;
+	fci.retval_ptr_ptr = &retval;
+	fci.param_count = nargs - 1;
+	fci.params = &args;
+	fci.no_separation = 0;
+	/*fci.function_handler_cache = &function_ptr;*/
+	
+	result = zend_call_function(&fci, NULL TSRMLS_CC);
+	if (result == FAILURE) {
+		if (Z_TYPE(handler) == IS_STRING) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
+		} 
+	} else {
+		if (retval->type == IS_BOOL) {
+			valuePush(ctxt, xmlXPathNewBoolean(retval->value.lval));
+		} else {
+			convert_to_string_ex(&retval);
+			valuePush(ctxt, xmlXPathNewString( Z_STRVAL_P(retval)));
+		}
+		zval_ptr_dtor(&retval);
+	}
+	zval_dtor(&handler);
+	for (i = 0; i < nargs - 1; i++) {
+		zval_ptr_dtor(&args[i]);
+	}
+	efree(args);
+}
+
+static void
+xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	xsl_ext_function_php(ctxt, nargs, 1);
+}
+
+static void
+xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	xsl_ext_function_php(ctxt, nargs, 2);
+}
 
 /* {{{ xsl_object_get_data */
 zval *xsl_object_get_data(void *obj)
