@@ -783,8 +783,7 @@ PHP_FUNCTION(end)
 			RETURN_FALSE;
 		}
 
-		*return_value = **entry;
-		zval_copy_ctor(return_value);
+		RETURN_ZVAL(*entry, 1, 0);
 	}
 }
 /* }}} */
@@ -811,8 +810,7 @@ PHP_FUNCTION(prev)
 			RETURN_FALSE;
 		}
 	
-		*return_value = **entry;
-		zval_copy_ctor(return_value);
+		RETURN_ZVAL(*entry, 1, 0);
 	}
 }
 /* }}} */
@@ -839,8 +837,7 @@ PHP_FUNCTION(next)
 			RETURN_FALSE;
 		}
 
-		*return_value = **entry;
-		zval_copy_ctor(return_value);
+		RETURN_ZVAL(*entry, 1, 0);
 	}
 }
 /* }}} */
@@ -867,8 +864,7 @@ PHP_FUNCTION(reset)
 			RETURN_FALSE;
 		}
 
-		*return_value = **entry;
-		zval_copy_ctor(return_value);
+		RETURN_ZVAL(*entry, 1, 0);
 	}
 }
 /* }}} */
@@ -891,8 +887,7 @@ PHP_FUNCTION(current)
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
-	*return_value = **entry;
-	zval_copy_ctor(return_value);
+	RETURN_ZVAL(*entry, 1, 0);
 }
 /* }}} */
 
@@ -946,8 +941,7 @@ PHP_FUNCTION(min)
 			WRONG_PARAM_COUNT;
 		}
 		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
-			*return_value = **result;
-			zval_copy_ctor(return_value);
+			RETVAL_ZVAL(*result, 1, 0);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain atleast one element");
 			RETURN_FALSE;
@@ -971,8 +965,7 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		*return_value = **min;
-		zval_copy_ctor(return_value);
+		RETVAL_ZVAL(*min, 1, 0);
 
 		efree(args);
 	}
@@ -998,8 +991,7 @@ PHP_FUNCTION(max)
 			WRONG_PARAM_COUNT;
 		}
 		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
-			*return_value = **result;
-			zval_copy_ctor(return_value);
+			RETVAL_ZVAL(*result, 1, 0);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain atleast one element");
 			RETURN_FALSE;
@@ -1023,9 +1015,7 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		*return_value = **max;
-		zval_copy_ctor(return_value);
-
+		RETVAL_ZVAL(*max, 1, 0);
 		efree(args);
 	}
 }
@@ -1947,9 +1937,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	else
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(stack));
 	zend_hash_get_current_data(Z_ARRVAL_PP(stack), (void **)&val);
-	*return_value = **val;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	RETVAL_ZVAL(*val, 1, 0);
 	
 	/* Delete the first or last value */
 	zend_hash_get_current_key_ex(Z_ARRVAL_PP(stack), &key, &key_len, &index, 0, NULL);
@@ -2605,8 +2593,7 @@ PHP_FUNCTION(array_pad)
 	do_pad = (input_size >= pad_size_abs) ? 0 : 1;
 	
 	/* Copy the original array */
-	*return_value = **input;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*input, 1, 0);
 	
 	/* If no need to pad, no need to continue */
 	if (!do_pad) {
@@ -2771,8 +2758,7 @@ PHP_FUNCTION(array_unique)
 	}
 
 	/* copy the argument array */
-	*return_value = **array;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*array, 1, 0);
 
 	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
 		return;
@@ -3003,8 +2989,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	}
 
 	/* copy the argument array */
-	*return_value = **args[0];
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*args[0], 1, 0);
 
 	if ((behavior & INTERSECT_NORMAL) && data_compare_type == INTERSECT_COMP_DATA_USER) {
 		/* array_uintersect() */
@@ -3384,8 +3369,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	}
 
 	/* copy the argument array */
-	*return_value = **args[0];
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*args[0], 1, 0);
 
 	if (behavior == DIFF_NORMAL && data_compare_type == DIFF_COMP_DATA_USER) {
 		/* array_udiff() */
@@ -3966,8 +3950,7 @@ PHP_FUNCTION(array_reduce)
 	
 	if (zend_hash_num_elements(htbl) == 0) {
 		if (result) {
-			*return_value = *result;
-			zval_copy_ctor(return_value);
+			RETVAL_ZVAL(result, 1, 0);
 		}
 		return;
 	}
@@ -4005,9 +3988,7 @@ PHP_FUNCTION(array_reduce)
 		zend_hash_move_forward_ex(htbl, &pos);
 	}
 	
-	*return_value = *result;
-	zval_copy_ctor(return_value);
-	zval_ptr_dtor(&result);
+	RETVAL_ZVAL(result, 0, 1);
 }
 /* }}} */
 
@@ -4164,8 +4145,7 @@ PHP_FUNCTION(array_map)
 
 	/* Short-circuit: if no callback and only one array, just return it. */
 	if (Z_TYPE_P(callback) == IS_NULL && ZEND_NUM_ARGS() == 2) {
-		*return_value = *args[1];
-		zval_copy_ctor(return_value);
+		RETVAL_ZVAL(args[1], 1, 0);
 		efree(array_len);
 		efree(array_pos);
 		efree(args);
