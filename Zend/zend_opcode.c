@@ -309,11 +309,16 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 			opline->op2.u.constant.is_ref = 1;
 			opline->op2.u.constant.refcount = 2;
 		}
-		if (opline->opcode == ZEND_JMP) {
-			opline->op1.u.jmp_addr = &op_array->opcodes[opline->op1.u.opline_num];
-		}
-		if (opline->opcode == ZEND_JMPZ || opline->opcode == ZEND_JMPNZ) {
-			opline->op2.u.jmp_addr = &op_array->opcodes[opline->op2.u.opline_num];
+		switch (opline->opcode) {
+			case ZEND_JMP:
+				opline->op1.u.jmp_addr = &op_array->opcodes[opline->op1.u.opline_num];
+				break;
+			case ZEND_JMPZ:
+			case ZEND_JMPNZ:
+			case ZEND_JMPZ_EX:
+			case ZEND_JMPNZ_EX:
+				opline->op2.u.jmp_addr = &op_array->opcodes[opline->op2.u.opline_num];
+				break;
 		}
 		opline->handler = zend_opcode_handlers[opline->opcode];
 		opline++;

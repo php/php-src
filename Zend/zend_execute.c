@@ -1939,7 +1939,7 @@ int zend_jmpz_ex_handler(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", EX(opline)->op2.u.opline_num);
 #endif
-		EX(opline) = &op_array->opcodes[EX(opline)->op2.u.opline_num];
+		EX(opline) = EX(opline)->op2.u.jmp_addr;
 		return 0; /* CHECK_ME */
 	}
 	NEXT_OPCODE();
@@ -1957,7 +1957,7 @@ int zend_jmpnz_ex_handler(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", EX(opline)->op2.u.opline_num);
 #endif
-		EX(opline) = &op_array->opcodes[EX(opline)->op2.u.opline_num];
+		EX(opline) = EX(opline)->op2.u.jmp_addr;
 		return 0; /* CHECK_ME */
 	}
 	NEXT_OPCODE();
