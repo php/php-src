@@ -2,14 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
 - Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x (gluke)
-- Added version_{lt,le,gt,ge,eq} functions (Stig)
 - Added ldap_start_tls() function (Stig Venaas, patch by kuenne@rentec.com)
 - Added support for word match mnogosearch-3.2 command and for stopfile
   command. StopTable will not be supported by mnogosearch-3.2.x
 - Added mmapfile(), read a file into a variabele with mmap (Ilia A, Derick)
 - Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
   not been called. (Sterling)
-- Added version_compare() function (Stig)
 - Don't throw a 'file does not exist' warning for the is_dir(), is_writeable(),
   is_readable(), is_executable(), is_link() and is_file() functions. (Sterling)
 - Added array_change_key_case() function that returns array with
@@ -45,6 +43,7 @@ PHP 4.0                                                                    NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 ?? ??? 200?, Version 4.0.7
+- Added version_compare() function (Stig)
 - Fixed pg_last_notice() (could cause random crashes in PostgreSQL applications,
   even if they didn't use pg_last_notice()) (Zeev)
 - Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of 
