@@ -422,7 +422,9 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	}
 
 	if (length == -1) {
-		return virtual_chdir(path);
+		/* No directory only file name */
+		errno = ENOENT;
+		return -1;
 	}
 
 	if (length == COPY_WHEN_ABSOLUTE && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
