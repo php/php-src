@@ -23,8 +23,17 @@
     <version>0.6</version>
     <date>2003-04-18</date>
 	<notes>
-		Initial release.
-		Should be quite stable.
+		SQLite is now bundled with the extension; no need to download and build
+		it separately.
+		
+		Fixed memory corruption bug when calling back into a PHP function from
+		an SQL statement.
+
+		Added sqlite_busy_timeout() to set the maximum duration for attempting
+		to lock the database when updating it.  Default timeout is set to 1/2
+		second.
+
+		NULL columns are now correctly returned as NULL values.
     </notes>
     <filelist>
       <file role="src" name="config.m4"/>
