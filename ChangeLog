@@ -1,3 +1,31 @@
+2004-10-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in
+      ZendEngine2/Makefile.frag:
+      - Add makefile fragment which simplifies working on the executer
+
+2004-10-01  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/ming/ming.c:
+      Slightly different fix for HEAD for the ming output method BC breaking
+      change.
+
+    * (PHP_4_3)
+      ext/ming/ming.c
+      ext/ming/ming.c:
+      Not sure when this BC breaking change snuck in, but the output method
+      didn't take an argument before and this compression argument is documented
+      to be optional but in the code it wasn't.  This patch fixes the BC break
+      by making the compression argument optional.
+
+2004-10-01  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * (PHP_4_3)
+      ext/standard/url.c:
+      The length should be passed to the function,
+      so no need to check it inside the function too.
+      Will also fix a compile failure with gcc 3.4.
+
 2004-09-30  Andi Gutmans  <andi@zend.com>
 
     * (PHP_4_3)
