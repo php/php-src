@@ -1,9 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- updated FDF extension to work with current Adodeb fdftk 5.0 (hartmut)
-- raw POST data is now available as php://input stream (hartmut)
-- Added mb_strtolower() and mb_strtoupper(). (Moriyoshi)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -14,6 +11,9 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Updated FDF extension to work with Adode fdftk 5.0. (Hartmut)
+- Made raw POST data to be available also as "php://input" stream. (Hartmut)
+- Added mb_strtolower() and mb_strtoupper(). (Moriyoshi)
 - Fixed an infinite loop in setlocale() when only invalid locale names
   were passed in the array. (patch by Pal Loberg, pallo@initio.no)
 - Fixed bugs #19156 and #19544 (COM extension leaks memory and keeps
