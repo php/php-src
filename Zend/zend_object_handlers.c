@@ -578,7 +578,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 		if (EG(scope) && fbc->op_array.fn_flags & ZEND_ACC_CHANGED) {
 			zend_function *priv_fbc;
 
-			if (zend_hash_find(&EG(scope)->function_table, method_name, method_len+1, (void **) &priv_fbc)==SUCCESS
+			if (zend_hash_find(&EG(scope)->function_table, lc_method_name, method_len+1, (void **) &priv_fbc)==SUCCESS
 				&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE) {
 				fbc = priv_fbc;
 			}
@@ -588,7 +588,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
-		updated_fbc = zend_check_private(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), fbc->common.fn_flags, method_name, method_len TSRMLS_CC);
+		updated_fbc = zend_check_private(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), fbc->common.fn_flags, lc_method_name, method_len TSRMLS_CC);
 		if (!updated_fbc) {
 			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
 		}
