@@ -48,14 +48,10 @@
 
 #define DEBUG_SMIME	0
 
-static unsigned char arg2of2_force_ref[] =
+static unsigned char arg2_force_ref[] =
                        { 2, BYREF_NONE, BYREF_FORCE };
-static unsigned char arg2of3_force_ref[] =
-                       { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
-static unsigned char arg2of4_force_ref[] =
-                       { 4, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE };
-static unsigned char arg2and3of4_force_ref[] =
-                       { 4, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_NONE };
+static unsigned char arg2and3_force_ref[] =
+                       { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 
 enum php_openssl_key_type	{
 	OPENSSL_KEYTYPE_RSA,
@@ -70,7 +66,7 @@ function_entry openssl_functions[] = {
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			NULL)
 	PHP_FE(openssl_pkey_new,			NULL)
-	PHP_FE(openssl_pkey_export,			arg2of2_force_ref)
+	PHP_FE(openssl_pkey_export,			arg2_force_ref)
 	PHP_FE(openssl_pkey_export_to_file,	NULL)
 	PHP_FE(openssl_pkey_get_private,	NULL)
 	PHP_FE(openssl_pkey_get_public,		NULL)
@@ -85,20 +81,20 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_parse,			 	NULL)
 	PHP_FE(openssl_x509_checkpurpose,		NULL)
 	PHP_FE(openssl_x509_check_private_key,	NULL)
-	PHP_FE(openssl_x509_export,				arg2of2_force_ref)
+	PHP_FE(openssl_x509_export,				arg2_force_ref)
 	PHP_FE(openssl_x509_export_to_file,		NULL)
 
 /* CSR funcs */
-	PHP_FE(openssl_csr_new,				arg2of2_force_ref)
-	PHP_FE(openssl_csr_export,			arg2of2_force_ref)
+	PHP_FE(openssl_csr_new,				arg2_force_ref)
+	PHP_FE(openssl_csr_export,			arg2_force_ref)
 	PHP_FE(openssl_csr_export_to_file,	NULL)
 	PHP_FE(openssl_csr_sign,			NULL)
 
 	
-	PHP_FE(openssl_sign,               arg2of3_force_ref)
+	PHP_FE(openssl_sign,               arg2_force_ref)
 	PHP_FE(openssl_verify,             NULL)
-	PHP_FE(openssl_seal,               arg2and3of4_force_ref)
-	PHP_FE(openssl_open,               arg2of4_force_ref)
+	PHP_FE(openssl_seal,               arg2and3_force_ref)
+	PHP_FE(openssl_open,               arg2_force_ref)
 
 /* for S/MIME handling */
 	PHP_FE(openssl_pkcs7_verify,	  	  NULL)
@@ -106,10 +102,10 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_pkcs7_sign,			  NULL)
 	PHP_FE(openssl_pkcs7_encrypt,		  NULL)
 
- 	PHP_FE(openssl_private_encrypt,    arg2of3_force_ref)
- 	PHP_FE(openssl_private_decrypt,    arg2of3_force_ref)
- 	PHP_FE(openssl_public_encrypt,     arg2of3_force_ref)
- 	PHP_FE(openssl_public_decrypt,     arg2of3_force_ref)
+ 	PHP_FE(openssl_private_encrypt,    arg2_force_ref)
+ 	PHP_FE(openssl_private_decrypt,    arg2_force_ref)
+ 	PHP_FE(openssl_public_encrypt,     arg2_force_ref)
+ 	PHP_FE(openssl_public_decrypt,     arg2_force_ref)
 
 	PHP_FE(openssl_error_string, NULL)
 	{NULL, NULL, NULL}
