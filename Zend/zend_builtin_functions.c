@@ -1149,9 +1149,9 @@ ZEND_FUNCTION(restore_exception_handler)
 static int copy_class_or_interface_name(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *array = va_arg(args, zval *);
-	int mask = va_arg(args, int);
-	int comply = va_arg(args, int);
-	int comply_mask = (comply)? mask:0;
+	zend_uint mask = va_arg(args, zend_uint);
+	zend_uint comply = va_arg(args, zend_uint);
+	zend_uint comply_mask = (comply)? mask:0;
 	zend_class_entry *ce  = *pce;
 
 	if ((hash_key->nKeyLength==0 || hash_key->arKey[0]!=0)
@@ -1166,8 +1166,8 @@ static int copy_class_or_interface_name(zend_class_entry **pce, int num_args, va
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	int mask = ZEND_ACC_INTERFACE;
-	int comply = 0;
+	zend_uint mask = ZEND_ACC_INTERFACE;
+	zend_uint comply = 0;
 
 	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1182,8 +1182,8 @@ ZEND_FUNCTION(get_declared_classes)
    Returns an array of all declared interfaces. */
 ZEND_FUNCTION(get_declared_interfaces)
 {
-	int mask = ZEND_ACC_INTERFACE;
-	int comply = 1;
+	zend_uint mask = ZEND_ACC_INTERFACE;
+	zend_uint comply = 1;
 	
 	if (ZEND_NUM_ARGS() != 0) {
 		ZEND_WRONG_PARAM_COUNT();
