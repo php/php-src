@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added sybase_get_last_message() to the Sybase CT module (Jan Fedak)
 - Made ldap_list(), ldap_read() and ldap_search() do parallel search when
   first parameter is an array of link identifiers (Stig Venaas)
 - Made fopen() of HTTP URL follow redirects, $http_response_header will
