@@ -458,7 +458,7 @@ yy27:
 	INIT_PZVAL(*rval);
 	
 	return object_common2(UNSERIALIZE_PASSTHRU,
-			object_common1(UNSERIALIZE_PASSTHRU, &zend_standard_class_def));
+			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
 }
 yy28:	yych = *++YYCURSOR;
 	if(yych <= ','){

@@ -1074,7 +1074,7 @@ PHP_FUNCTION(sybase_fetch_object)
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
 		Z_TYPE_P(return_value)=IS_OBJECT;
 		Z_OBJPROP_P(return_value) = Z_ARRVAL_P(return_value);
-		Z_OBJCE_P(return_value) = &zend_standard_class_def;
+		Z_OBJCE_P(return_value) = ZEND_STANDARD_CLASS_DEF_PTR;
 	}
 }
 /* }}} */
