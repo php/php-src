@@ -65,6 +65,10 @@ int libxml_globals_id;
 PHP_LIBXML_API php_libxml_globals libxml_globals;
 #endif
 
+#if LIBXML_VERSION >= 20600
+zend_class_entry *libxmlerror_class_entry;
+#endif
+
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_LIBXML
 ZEND_GET_MODULE(libxml)
@@ -86,6 +90,10 @@ PHP_MINFO_FUNCTION(libxml);
 /* {{{ extension definition structures */
 function_entry libxml_functions[] = {
 	PHP_FE(libxml_set_streams_context, NULL)
+	PHP_FE(libxml_use_internal_errors, NULL)
+	PHP_FE(libxml_get_last_error, NULL)
+	PHP_FE(libxml_clear_errors, NULL)
+	PHP_FE(libxml_get_errors, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -235,6 +243,7 @@ static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_
 {
 	LIBXML(stream_context) = NULL;
 	LIBXML(error_buffer).c = NULL;
+	LIBXML(error_list) = NULL;
 }
 #endif
 
@@ -325,6 +334,45 @@ int php_libxml_streams_IO_close(void *context)
 	return php_stream_close((php_stream*)context);
 }
 
+static int _php_libxml_free_error(xmlErrorPtr error) {
+	/* This will free the libxml alloc'd memory */
+	xmlResetError(error);
+	return 1;
+}
+
+static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
+{
+	xmlError error_copy;
+	int ret;
+
+	TSRMLS_FETCH();
+
+	memset(&error_copy, 0, sizeof(xmlError));
+
+	if (error) {
+		ret = xmlCopyError(error, &error_copy);
+	} else {
+		error_copy.domain = 0;
+		error_copy.code = XML_ERR_INTERNAL_ERROR;
+		error_copy.level = XML_ERR_ERROR;
+		error_copy.line = 0;
+		error_copy.node = NULL;
+		error_copy.int1 = 0;
+		error_copy.int2 = 0;
+		error_copy.ctxt = NULL;
+		error_copy.message = xmlStrdup(msg);
+		error_copy.file = NULL;
+		error_copy.str1 = NULL;
+		error_copy.str2 = NULL;
+		error_copy.str3 = NULL;
+		ret = 0;
+	}
+
+	if (ret == 0) {
+		zend_llist_add_element(LIBXML(error_list), &error_copy);
+	}
+}
+
 static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg TSRMLS_DC)
 {
 	xmlParserCtxtPtr parser;
@@ -361,15 +409,19 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 	efree(buf);
 
 	if (output == 1) {
-		switch (error_type) {
-			case PHP_LIBXML_CTX_ERROR:
-				php_libxml_ctx_error_level(E_WARNING, ctx, LIBXML(error_buffer).c TSRMLS_CC);
-				break;
-			case PHP_LIBXML_CTX_WARNING:
-				php_libxml_ctx_error_level(E_NOTICE, ctx, LIBXML(error_buffer).c TSRMLS_CC);
-				break;
-			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", LIBXML(error_buffer).c);
+		if (LIBXML(error_list)) {
+			_php_list_set_error_structure(NULL, LIBXML(error_buffer).c);
+		} else {
+			switch (error_type) {
+				case PHP_LIBXML_CTX_ERROR:
+					php_libxml_ctx_error_level(E_WARNING, ctx, LIBXML(error_buffer).c TSRMLS_CC);
+					break;
+				case PHP_LIBXML_CTX_WARNING:
+					php_libxml_ctx_error_level(E_NOTICE, ctx, LIBXML(error_buffer).c TSRMLS_CC);
+					break;
+				default:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", LIBXML(error_buffer).c);
+			}
 		}
 		smart_str_free(&LIBXML(error_buffer));
 	}
@@ -389,6 +441,13 @@ void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 	va_start(args, msg);
 	php_libxml_internal_error_handler(PHP_LIBXML_CTX_WARNING, ctx, &msg, args);
 	va_end(args);
+}
+
+PHP_LIBXML_API void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
+{
+	_php_list_set_error_structure(error, NULL);
+
+	return;
 }
 
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
@@ -449,6 +508,10 @@ PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC) {
 
 PHP_MINIT_FUNCTION(libxml)
 {
+#if LIBXML_VERSION >= 20600
+	zend_class_entry ce;
+#endif
+
 	php_libxml_initialize();
 
 #ifdef ZTS
@@ -456,6 +519,7 @@ PHP_MINIT_FUNCTION(libxml)
 #else
 	LIBXML(stream_context) = NULL;
 	LIBXML(error_buffer).c = NULL;
+	LIBXML(error_list) = NULL;
 #endif
 
 #if LIBXML_VERSION >= 20600
@@ -471,6 +535,15 @@ PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_NSCLEAN",	XML_PARSE_NSCLEAN,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NOCDATA",	XML_PARSE_NOCDATA,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NONET",		XML_PARSE_NONET,		CONST_CS | CONST_PERSISTENT);
+
+	/* Error levels */
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_NONE",		XML_ERR_NONE,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_WARNING",	XML_ERR_WARNING,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_ERROR",		XML_ERR_ERROR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL",		XML_ERR_FATAL,		CONST_CS | CONST_PERSISTENT);
+
+	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
+	libxmlerror_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 #endif
 
 	return SUCCESS;
@@ -481,7 +554,6 @@ PHP_RINIT_FUNCTION(libxml)
 {
 	/* report errors via handler rather than stderr */
 	xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
-
     return SUCCESS;
 }
 
@@ -498,8 +570,15 @@ PHP_RSHUTDOWN_FUNCTION(libxml)
 {
 	/* reset libxml generic error handling */
 	xmlSetGenericErrorFunc(NULL, NULL);
+	xmlSetStructuredErrorFunc(NULL, NULL);
 
 	smart_str_free(&LIBXML(error_buffer));
+	if (LIBXML(error_list)) {
+		zend_llist_destroy(LIBXML(error_list));
+		efree(LIBXML(error_list));
+		LIBXML(error_list) = NULL;
+	}
+
 	return SUCCESS;
 }
 
@@ -530,6 +609,144 @@ PHP_FUNCTION(libxml_set_streams_context)
 	}
 	ZVAL_ADDREF(arg);
 	LIBXML(stream_context) = arg;
+}
+/* }}} */
+
+/* {{{ proto void libxml_use_internal_errors(boolean use_errors) 
+   Disable libxml errors and allow user to fetch error information as needed */
+PHP_FUNCTION(libxml_use_internal_errors)
+{
+#if LIBXML_VERSION >= 20600
+	xmlStructuredErrorFunc current_handler;
+	int use_errors=0, retval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &use_errors) == FAILURE) {
+		return;
+	}
+
+	current_handler = xmlStructuredError;
+	if (current_handler && current_handler == php_libxml_structured_error_handler) {
+		retval = 1;
+	} else {
+		retval = 0;
+	}
+
+	if (ZEND_NUM_ARGS() == 0) {
+		RETURN_BOOL(retval);
+	}
+
+	if (use_errors == 0) {
+		xmlSetStructuredErrorFunc(NULL, NULL);
+		if (LIBXML(error_list)) {
+			zend_llist_destroy(LIBXML(error_list));
+			efree(LIBXML(error_list));
+			LIBXML(error_list) = NULL;
+		}
+	} else {
+		xmlSetStructuredErrorFunc(NULL, php_libxml_structured_error_handler);
+		if (LIBXML(error_list) == NULL) {
+			LIBXML(error_list) = (zend_llist *) emalloc(sizeof(zend_llist));
+			zend_llist_init(LIBXML(error_list), sizeof(xmlError), (llist_dtor_func_t) _php_libxml_free_error, 0);
+		}
+	}
+	RETURN_BOOL(retval);
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
+#endif
+}
+
+/* {{{ proto object libxml_get_last_error() 
+   Retrieve last error from libxml */
+PHP_FUNCTION(libxml_get_last_error)
+{
+#if LIBXML_VERSION >= 20600
+	xmlErrorPtr error;
+
+	error = xmlGetLastError();
+	
+	if (error) {
+		object_init_ex(return_value, libxmlerror_class_entry);
+		add_property_long(return_value, "level", error->level);
+		add_property_long(return_value, "code", error->code);
+		add_property_long(return_value, "column", error->int2);
+		if (error->message) {
+			add_property_string(return_value, "message", error->message, 1);
+		} else {
+			add_property_stringl(return_value, "message", "", 0, 1);
+		}
+		if (error->file) {
+			add_property_string(return_value, "file", error->file, 1);
+		} else {
+			add_property_stringl(return_value, "file", "", 0, 1);
+		}
+		add_property_long(return_value, "line", error->line);
+	} else {
+		RETURN_FALSE;
+	}
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
+#endif
+}
+/* }}} */
+
+/* {{{ proto object libxml_get_errors()
+   Retrieve array of errors */
+PHP_FUNCTION(libxml_get_errors)
+{
+#if LIBXML_VERSION >= 20600
+	
+	xmlErrorPtr error;
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (LIBXML(error_list)) {
+
+		error = zend_llist_get_first(LIBXML(error_list));
+
+		while (error != NULL) {
+			zval *z_error;
+			MAKE_STD_ZVAL(z_error);
+
+			object_init_ex(z_error, libxmlerror_class_entry);
+			add_property_long(z_error, "level", error->level);
+			add_property_long(z_error, "code", error->code);
+			add_property_long(z_error, "column", error->int2);
+			if (error->message) {
+				add_property_string(z_error, "message", error->message, 1);
+			} else {
+				add_property_stringl(z_error, "message", "", 0, 1);
+			}
+			if (error->file) {
+				add_property_string(z_error, "file", error->file, 1);
+			} else {
+				add_property_stringl(z_error, "file", "", 0, 1);
+			}
+			add_property_long(z_error, "line", error->line);
+			add_next_index_zval(return_value, z_error);
+
+			error = zend_llist_get_next(LIBXML(error_list));
+		}
+	}
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
+#endif
+}
+/* }}} */
+
+/* {{{ proto void libxml_clear_errors() 
+    Clear last error from libxml */
+PHP_FUNCTION(libxml_clear_errors)
+{
+#if LIBXML_VERSION >= 20600
+	xmlResetLastError();
+	if (LIBXML(error_list)) {
+		zend_llist_clean(LIBXML(error_list));
+	}
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
+#endif
 }
 /* }}} */
 
