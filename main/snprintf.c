@@ -53,7 +53,7 @@
  * <panos@alumni.cs.colorado.edu> for xinetd.
  */
 
-#include "php_config.h"
+#include "php.h"
 
 #if !defined(APACHE) || (!APACHE)
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
@@ -66,7 +66,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "php.h"
 
 #ifdef HAVE_GCVT
 
