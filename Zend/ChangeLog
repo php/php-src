@@ -1,3 +1,12 @@
+2002-06-09  Harald Radi  <harald.radi@nme.at>
+
+    * zend_API.h
+      zend_builtin_functions.c
+      zend_object_handlers.h:
+    only check for an available class entry instead of
+    the std_object_handlers on some places
+
+
 2002-06-08  Andi Gutmans  <andi@zend.com>
 
     * zend_hash.h
