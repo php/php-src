@@ -131,6 +131,7 @@ int lookup_hostname(const char *addr, struct in_addr *in)
 	struct hostent *host_info;
 
 	if (!inet_aton(addr, in)) {
+		/* XXX NOT THREAD SAFE */
 		host_info = gethostbyname(addr);
 		if (host_info == 0) {
 			/* Error: unknown host */
