@@ -1464,8 +1464,8 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC)
 {
 	zend_op *opline;
 	
-	if (switch_entry->cond.op_type!=IS_VAR && switch_entry->cond.op_type!=IS_TMP_VAR) {
-		return 1;
+	if (switch_entry->cond.op_type != IS_VAR && switch_entry->cond.op_type != IS_TMP_VAR) {
+		return 0;
 	}
 	
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1482,7 +1482,7 @@ static int generate_free_foreach_copy(znode *foreach_copy TSRMLS_DC)
 	zend_op *opline;
 	
 	if (foreach_copy->op_type != IS_VAR && foreach_copy->op_type != IS_TMP_VAR) {
-		return 1;
+		return 0;
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
