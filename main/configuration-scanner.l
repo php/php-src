@@ -113,8 +113,8 @@ void init_cfg_scanner()
 	/* eat leading " */
 	yytext++;
 
-	cfglval->value.str.val = zend_strndup(yytext,yyleng);
-	cfglval->value.str.len = yyleng;
+	cfglval->value.str.val = zend_strndup(yytext, yyleng - 2);
+	cfglval->value.str.len = yyleng - 2;
 	cfglval->type = IS_STRING;
 	return TC_ENCAPSULATED_STRING;
 }
