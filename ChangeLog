@@ -1,3 +1,110 @@
+2003-10-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      hrm
+
+2003-10-24  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/ZEND_CHANGES:
+      - Fix typo
+
+2003-10-24  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h:
+      For YAZ, RSHUTDOWN closes persistent connections that have been idle
+      more than yaz.keepalive seconds. Default value for config yaz.keepalive
+      is 120 seconds. The shutdown prevents many sockets in CLOSE_WAIT state.
+
+2003-10-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sockets/sockets.c:
+      Revert accidential commit
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c:
+      Revert accidental commit
+
+    * ZendEngine2/ZEND_CHANGES
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute_API.c
+      ext/sockets/sockets.c:
+      Zend/ZEND_CHANGES
+
+2003-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in:
+      MFH: Fixed bug #25955 (Compile failure on MacOSX 10.3 (Panther)).
+
+2003-10-24  Marko Karppinen  <karppinen@pobox.com>
+
+    * configure.in
+      ext/standard/dns.c:
+      Workaround for bug #25955
+      Generalized a Darwin check in dns.c to a check for inet_pton() (kalowsky)
+
+2003-10-24  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (php_5_0_0b2RC1)
+      pear/package-PEAR.xml:
+      add #25174 note
+
+    * (php_5_0_0b2RC1)
+      pear/OS/Guess.php:
+      fixed #25174 Wrong handling of readlink() in OS/Guess.php
+
+2003-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0b2RC1)
+      ext/mbstring/tests/htmlent.phpt
+      ext/pgsql/tests/80_bug24499.phpt
+      ext/sqlite/tests/sqlite_024.phpt
+      ext/standard/tests/file/001.phpt
+      ext/standard/tests/file/bug22414.phpt
+      ext/standard/tests/file/bug24313.phpt
+      ext/standard/tests/file/bug24482.phpt
+      ext/standard/tests/general_functions/006.phpt
+      ext/standard/tests/general_functions/009.phpt
+      ext/standard/tests/time/mktime.phpt
+      tests/classes/bug23951.phpt
+      tests/classes/bug24399.phpt
+      tests/classes/bug24445.phpt
+      tests/classes/clone_001.phpt
+      tests/classes/clone_002.phpt
+      tests/classes/clone_003.phpt
+      tests/classes/clone_004.phpt
+      tests/classes/clone_005.phpt
+      tests/classes/destructor_and_globals.phpt
+      tests/classes/destructor_and_references.phpt
+      tests/classes/destructor_inheritance.phpt
+      tests/classes/factory_and_singleton_003.phpt
+      tests/classes/factory_and_singleton_004.phpt
+      tests/classes/factory_and_singleton_005.phpt
+      tests/classes/factory_and_singleton_006.phpt
+      tests/classes/factory_and_singleton_007.phpt
+      tests/classes/factory_and_singleton_008.phpt
+      tests/classes/inheritance_002.phpt
+      tests/classes/interface_class.phpt
+      tests/classes/interface_doubled.phpt
+      tests/classes/interface_implemented.phpt
+      tests/classes/interface_instantiate.phpt
+      tests/classes/interface_member.phpt
+      tests/classes/interface_method.phpt
+      tests/classes/interface_method_final.phpt
+      tests/classes/interface_method_private.phpt
+      tests/classes/interface_must_be_implemented.phpt
+      tests/lang/036.phpt
+      tests/lang/037.phpt
+      tests/lang/bug24499.phpt
+      tests/lang/bug24640.phpt
+      tests/lang/bug24652.phpt
+      tests/lang/bug25547.phpt:
+      Fixed some test names.
+      Removed extraneous \r from a number of tests.
+
 2003-10-23  Gabor Hojtsy  <gabor@hojtsy.hu>
 
     * win32/install.txt:
