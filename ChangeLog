@@ -1,3 +1,216 @@
+2001-09-26  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: fixed Z_* conversion errors
+
+2001-09-26  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/curl/curl.c
+      ext/xslt/xslt.c:
+    Revert macro-subst, because wasn't necessary here, and those who were
+    substitued weren't zvals
+
+2001-09-26  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: MFH the list of 4.0.7 changes
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: MFH
+
+    * NEWS: More accurate NEWS entry
+
+    * NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Fix pg_last_notice()
+
+2001-09-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/oci8/001.phpt
+      pear/DB/tests/oci8/002.phpt
+      pear/DB/tests/oci8/003.phpt
+      pear/DB/tests/oci8/004.phpt
+      pear/DB/tests/oci8/005.phpt
+      pear/DB/tests/oci8/006.phpt
+      pear/DB/tests/oci8/007.phpt
+      pear/DB/tests/oci8/008.phpt
+      pear/DB/tests/oci8/009.phpt
+      pear/DB/tests/oci8/010.phpt
+      pear/DB/tests/oci8/01connect.phpt
+      pear/DB/tests/oci8/02fetch.phpt
+      pear/DB/tests/oci8/03simplequery.phpt
+      pear/DB/tests/oci8/04numcols.phpt
+      pear/DB/tests/oci8/05sequences.phpt
+      pear/DB/tests/oci8/06prepexec.phpt
+      pear/DB/tests/oci8/07errornative.phpt
+      pear/DB/tests/oci8/08affectedrows.phpt
+      pear/DB/tests/oci8/09numrows.phpt
+      pear/DB/tests/oci8/10errormap.phpt
+      pear/DB/tests/odbc/001.phpt
+      pear/DB/tests/odbc/002.phpt
+      pear/DB/tests/odbc/003.phpt
+      pear/DB/tests/odbc/004.phpt
+      pear/DB/tests/odbc/006.phpt
+      pear/DB/tests/odbc/007.phpt
+      pear/DB/tests/odbc/009.phpt
+      pear/DB/tests/odbc/010.phpt
+      pear/DB/tests/odbc/01connect.phpt
+      pear/DB/tests/odbc/02fetch.phpt
+      pear/DB/tests/odbc/03simplequery.phpt
+      pear/DB/tests/odbc/04numcols.phpt
+      pear/DB/tests/odbc/06prepexec.phpt
+      pear/DB/tests/odbc/07errornative.phpt
+      pear/DB/tests/odbc/09numrows.phpt
+      pear/DB/tests/odbc/10errormap.phpt
+      pear/DB/tests/pgsql/001.phpt
+      pear/DB/tests/pgsql/002.phpt
+      pear/DB/tests/pgsql/003.phpt
+      pear/DB/tests/pgsql/004.phpt
+      pear/DB/tests/pgsql/005.phpt
+      pear/DB/tests/pgsql/006.phpt
+      pear/DB/tests/pgsql/007.phpt
+      pear/DB/tests/pgsql/008.phpt
+      pear/DB/tests/pgsql/009.phpt
+      pear/DB/tests/pgsql/010.phpt
+      pear/DB/tests/pgsql/011.phpt
+      pear/DB/tests/pgsql/01connect.phpt
+      pear/DB/tests/pgsql/02fetch.phpt
+      pear/DB/tests/pgsql/03simplequery.phpt
+      pear/DB/tests/pgsql/04numcols.phpt
+      pear/DB/tests/pgsql/05sequences.phpt
+      pear/DB/tests/pgsql/06prepexec.phpt
+      pear/DB/tests/pgsql/07errornative.phpt
+      pear/DB/tests/pgsql/08affectedrows.phpt
+      pear/DB/tests/pgsql/09numrows.phpt
+      pear/DB/tests/pgsql/10errormap.phpt
+      pear/DB/tests/pgsql/11transact.phpt
+      pear/DB/tests/ibase/001.phpt
+      pear/DB/tests/ibase/002.phpt
+      pear/DB/tests/ibase/003.phpt
+      pear/DB/tests/ibase/004.phpt
+      pear/DB/tests/ibase/006.phpt
+      pear/DB/tests/ibase/010.phpt
+      pear/DB/tests/ibase/01connect.phpt
+      pear/DB/tests/ibase/02fetch.phpt
+      pear/DB/tests/ibase/03simplequery.phpt
+      pear/DB/tests/ibase/04numcols.phpt
+      pear/DB/tests/ibase/06prepexec.phpt
+      pear/DB/tests/ibase/10errormap.phpt
+      pear/DB/tests/mysql/001.phpt
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/mysql/003.phpt
+      pear/DB/tests/mysql/004.phpt
+      pear/DB/tests/mysql/005.phpt
+      pear/DB/tests/mysql/006.phpt
+      pear/DB/tests/mysql/007.phpt
+      pear/DB/tests/mysql/008.phpt
+      pear/DB/tests/mysql/009.phpt
+      pear/DB/tests/mysql/010.phpt
+      pear/DB/tests/mysql/012.phpt
+      pear/DB/tests/mysql/01connect.phpt
+      pear/DB/tests/mysql/02fetch.phpt
+      pear/DB/tests/mysql/03simplequery.phpt
+      pear/DB/tests/mysql/04numcols.phpt
+      pear/DB/tests/mysql/05sequences.phpt
+      pear/DB/tests/mysql/06prepexec.phpt
+      pear/DB/tests/mysql/07errornative.phpt
+      pear/DB/tests/mysql/08affectedrows.phpt
+      pear/DB/tests/mysql/09numrows.phpt
+      pear/DB/tests/mysql/10errormap.phpt
+      pear/DB/tests/mysql/12tableinfo.phpt:
+    * more sensible filenames for tests
+
+2001-09-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c:
+    - nl2br now handles different styles of line endings in one string. (Patch
+      by Boian Bonev <boian@bonev.com>)
+    - nl2br now handles all styles of line-endings in one string. (Boian,
+      Derick)
+
+    * ext/domxml/config.m4:
+    - This patch adds proper header file detection on system which
+      simultaneously isntallied libxml1 and libxml2 (eg. Debian) (patch by
+      Markus Fischer <mfischer@php.net>)
+
+2001-09-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sockets/php_sockets.h:
+    Force proper alignment of php_sockaddr_storage.  Sparc will throw
+    a SIGBUS, when accessing the family part of a char-aligned structure.
+
+2001-09-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zip/zip.c: - whitespace fix
+
+    * ext/zip/zip.c: - Fixed error introduced by the macro substitution
+
+2001-09-26  David Eriksson  <david@2good.com>
+
+    * ext/satellite/enum.c
+      ext/satellite/namedvalue_to_zval.c
+      ext/satellite/object.c
+      ext/satellite/struct.c
+      ext/satellite/typecode.c
+      ext/satellite/zval_to_namedvalue.c: Fixed Jeroen's macrofication
+
+    * ext/satellite/config.m4: leave on first directory
+
+2001-09-26  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/math.c:
+    5th and probably/hopefully last run of conv_z_macros
+
+    * scripts/conv_z_macros: Typo
+
+    * ext/zip/zip.c: Fix build
+
+    * ext/hyperwave/hw.c: Parse-fix
+
+    * ext/xmlrpc/xmlrpc-epi-php.c
+      scripts/conv_z_macros: 4rd run... now also var.Z_*
+
+    * ext/sybase/php_sybase_db.c: Fix the fix
+
+    * ext/sybase/php_sybase_db.c: Fix parse-error
+
+    * ext/yaz/php_yaz.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xslt/xslt.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/satellite/class.c
+      ext/satellite/typecode.c
+      ext/sybase/php_sybase_db.c
+      ext/muscat/muscat_net.c
+      ext/oci8/oci8.c
+      ext/imap/php_imap.c
+      ext/java/java.c
+      ext/curl/curl.c:
+    3rd run in back-substitutin Z_* macro's. The val->Z_ cases are all solved now.
+
+    * scripts/conv_z_macros: Now fixes virtually everything.
+
+    Sorry, but I assumed that the original script was correct. Unfortunately, that
+    wasn't the case.
+
+2001-09-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Fix NEWS
+
+2001-09-26  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * scripts/conv_z_macros: And now correctly... and up until 3 levels
+
+    * scripts/conv_z_macros: This fixes most var->Z_* problems
+
+2001-09-26  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c
+      ext/iisfunc/setup.c
+      ext/iisfunc/setup.h:
+    Fixing Win32 build...after the last macro convertions.
+
+    * ext/com/COM.c
+      ext/com/VARIANT.c: Fixing Win32 build...
+
 2001-09-25  Harald Radi  <h.radi@nme.at>
 
     * ext/com/COM.c: no message
