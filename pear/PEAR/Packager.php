@@ -97,7 +97,7 @@ class PEAR_Packager extends PEAR_Common
         $filelist = array();
         $i = 0;
 
-        // Copy files -----------------------------------------------
+        // {{{ Copy files -----------------------------------------------
         foreach ($this->pkginfo['filelist'] as $fname => $atts) {
             if (!file_exists($fname)) {
                 chdir($oldcwd);
@@ -111,6 +111,7 @@ class PEAR_Packager extends PEAR_Common
                 $this->log(2, "Adding file $fname");
             }
         }
+        // }}}
         $new_xml = $this->xmlFromInfo($this->pkginfo);
         if (PEAR::isError($new_xml)) {
             chdir($oldcwd);
@@ -129,7 +130,7 @@ class PEAR_Packager extends PEAR_Common
         fwrite($np, $new_xml);
         fclose($np);
 
-        // TAR the Package -------------------------------------------
+        // {{{ TAR the Package -------------------------------------------
         $ext = $compress ? '.tgz' : '.tar';
         $dest_package = $oldcwd . DIRECTORY_SEPARATOR . $pkgver . $ext;
         $tar =& new Archive_Tar($dest_package, $compress);
@@ -155,6 +156,7 @@ class PEAR_Packager extends PEAR_Common
             $this->log(1, "Tag the released code with `pear cvstag $pkgfile'");
             $this->log(1, "(or set the CVS tag $cvstag by hand)");
         }
+        // }}}
         chdir($oldcwd);
         return $dest_package;
     }
@@ -162,6 +164,7 @@ class PEAR_Packager extends PEAR_Common
     // }}}
 }
 
+// {{{ md5_file() utility function
 if (!function_exists('md5_file')) {
     function md5_file($file) {
         if (!$fd = @fopen($file, 'r')) {
@@ -172,5 +175,6 @@ if (!function_exists('md5_file')) {
         return $md5;
     }
 }
+// }}}
 
 ?>

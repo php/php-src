@@ -96,6 +96,8 @@ $GLOBALS['_PEAR_Command_uiobject'] = null;
  */
 class PEAR_Command
 {
+    // {{{ factory()
+
     /**
      * Get the right object for executing a command.
      *
@@ -123,6 +125,9 @@ class PEAR_Command
         return $obj;
     }
 
+    // }}}
+    // {{{ & getFrontendObject()
+
     /**
      * Get instance of frontend object.
      *
@@ -135,6 +140,9 @@ class PEAR_Command
         }
         return $GLOBALS['_PEAR_Command_uiobject'];
     }
+
+    // }}}
+    // {{{ & setFrontendClass()
 
     /**
      * Load current frontend class.
@@ -166,6 +174,9 @@ class PEAR_Command
         return PEAR::raiseError("no such class: $uiclass");
     }
 
+    // }}}
+    // {{{ setFrontendType()
+
     /**
      * Set current frontend.
      *
@@ -178,6 +189,9 @@ class PEAR_Command
         $uiclass = 'PEAR_Frontend_' . $uitype;
         return PEAR_Command::setFrontendClass($uiclass);
     }
+
+    // }}}
+    // {{{ registerCommands()
 
     /**
      * Scan through the Command directory looking for classes
@@ -232,6 +246,9 @@ class PEAR_Command
         return true;
     }
 
+    // }}}
+    // {{{ getCommands()
+
     /**
      * Get the list of currently supported commands, and what
      * classes implement them.
@@ -248,6 +265,9 @@ class PEAR_Command
         return $GLOBALS['_PEAR_Command_commandlist'];
     }
 
+    // }}}
+    // {{{ getShortcuts()
+
     /**
      * Get the list of command shortcuts.
      *
@@ -262,6 +282,9 @@ class PEAR_Command
         }
         return $GLOBALS['_PEAR_Command_shortcuts'];
     }
+
+    // }}}
+    // {{{ getGetoptArgs()
 
     /**
      * Compiles arguments for getopt.
@@ -287,6 +310,9 @@ class PEAR_Command
         return $obj->getGetoptArgs($command, $short_args, $long_args);
     }
 
+    // }}}
+    // {{{ getDescription()
+
     /**
      * Get description for a command.
      *
@@ -300,6 +326,9 @@ class PEAR_Command
     {
         return @$GLOBALS['_PEAR_Command_commanddesc'][$command];
     }
+
+    // }}}
+    // {{{ getHelp()
 
     /**
      * Get help for command.
@@ -317,6 +346,7 @@ class PEAR_Command
         }
         return false;
     }
+    // }}}
 }
 
 ?>
