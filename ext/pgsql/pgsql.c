@@ -624,6 +624,11 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					goto err;
 				}
 			}
+			if (atof(PG_VERSION) >= 7.2) {
+				PGresult *pg_result;
+				pg_result = PQexec(le->ptr, "RESET ALL");
+				PQclear(pg_result);
+			}
 			pgsql = (PGconn *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
