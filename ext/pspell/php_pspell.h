@@ -27,12 +27,14 @@ extern zend_module_entry pspell_module_entry;
 PHP_MINIT_FUNCTION(pspell);
 PHP_MINFO_FUNCTION(pspell);
 PHP_FUNCTION(pspell_new);
+PHP_FUNCTION(pspell_new_personal);
 PHP_FUNCTION(pspell_check);
 PHP_FUNCTION(pspell_suggest);
 PHP_FUNCTION(pspell_store_replacement);
 PHP_FUNCTION(pspell_add_to_personal);
 PHP_FUNCTION(pspell_add_to_session);
 PHP_FUNCTION(pspell_clear_session);
+PHP_FUNCTION(pspell_save_wordlist);
 #else
 #define pspell_module_ptr NULL
 #endif

@@ -40,12 +40,14 @@
 
 function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
+	PHP_FE(pspell_new_personal,		NULL)
 	PHP_FE(pspell_check,		NULL)
 	PHP_FE(pspell_suggest,		NULL)
 	PHP_FE(pspell_store_replacement,		NULL)
 	PHP_FE(pspell_add_to_personal,		NULL)
 	PHP_FE(pspell_add_to_session,		NULL)
 	PHP_FE(pspell_clear_session,		NULL)
+	PHP_FE(pspell_save_wordlist,		NULL)
 };
 
 static int le_pspell;
@@ -61,7 +63,6 @@ ZEND_GET_MODULE(pspell)
 static void php_pspell_close(PspellManager *manager){
 	delete_pspell_manager(manager);
 }
-
 
 PHP_MINIT_FUNCTION(pspell){
 	REGISTER_MAIN_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
@@ -115,6 +116,86 @@ PHP_FUNCTION(pspell_new){
 	}
 
 	if(argc > 4){
+		convert_to_long_ex(pmode);
+		mode = Z_LVAL_PP(pmode);
+		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
+
+		/* First check what mode we want (how many suggestions) */
+		if(speed == PSPELL_FAST){
+			pspell_config_replace(config, "sug-mode", "fast");
+		}else if(speed == PSPELL_NORMAL){
+			pspell_config_replace(config, "sug-mode", "normal");
+		}else if(speed == PSPELL_BAD_SPELLERS){
+			pspell_config_replace(config, "sug-mode", "bad-spellers");
+		}
+		
+		/* Then we see if run-together words should be treated as valid components */
+		if(mode & PSPELL_RUN_TOGETHER){
+			pspell_config_replace(config, "run-together", "true");
+		}
+	}
+
+	ret = new_pspell_manager(config);
+	delete_pspell_config(config);
+
+	if(pspell_error_number(ret) != 0){
+		php_error(E_WARNING, "PSPELL couldn't open the dictionary. reason: %s ", pspell_error_message(ret));
+		RETURN_FALSE;
+	}
+	
+	manager = to_pspell_manager(ret);
+	ind = zend_list_insert(manager, le_pspell);
+	RETURN_LONG(ind);
+}
+/* }}} */
+
+/* {{{ proto int pspell_new_personal(string personal, string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
+   Load a dictionary with a personal wordlist*/
+PHP_FUNCTION(pspell_new_personal){
+	zval **personal, **language,**spelling,**jargon,**encoding,**pmode;
+	long mode = 0L,  speed = 0L;
+	int argc;
+	int ind;
+
+	PspellCanHaveError *ret;
+	PspellManager *manager;
+	PspellConfig *config;
+	
+	argc = ZEND_NUM_ARGS();
+	if (argc < 2 || argc > 6 || zend_get_parameters_ex(argc,&personal,&language,&spelling,&jargon,&encoding,&pmode) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	config = new_pspell_config();
+
+	convert_to_string_ex(personal);
+	pspell_config_replace(config, "personal", (*personal)->value.str.val);
+
+	convert_to_string_ex(language);
+	pspell_config_replace(config, "language-tag", (*language)->value.str.val);
+
+	if(argc > 2){
+		convert_to_string_ex(spelling);
+	 	if((*spelling)->value.str.len > 0){
+			pspell_config_replace(config, "spelling", (*spelling)->value.str.val);
+		}
+	}
+
+	if(argc > 3){
+		convert_to_string_ex(jargon);
+		if((*jargon)->value.str.len > 0){
+			pspell_config_replace(config, "jargon", (*jargon)->value.str.val);
+		}
+	}
+
+	if(argc > 4){
+		convert_to_string_ex(encoding);
+		if((*encoding)->value.str.len > 0){
+			pspell_config_replace(config, "encoding", (*encoding)->value.str.val);
+		}
+	}
+
+	if(argc > 5){
 		convert_to_long_ex(pmode);
 		mode = Z_LVAL_PP(pmode);
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
@@ -219,7 +300,6 @@ PHP_FUNCTION(pspell_suggest)
 }
 /* }}} */
 
-
 /* {{{ proto int pspell_store_replacement(int pspell, string misspell, string correct)
    Notify the dictionary of a user-selected replacement */
 PHP_FUNCTION(pspell_store_replacement)
@@ -285,7 +365,6 @@ PHP_FUNCTION(pspell_add_to_personal)
 }
 /* }}} */
 
-
 /* {{{ proto int pspell_add_to_session(int pspell, string word)
    Adds a word to the current session */
 PHP_FUNCTION(pspell_add_to_session)
@@ -318,7 +397,6 @@ PHP_FUNCTION(pspell_add_to_session)
 }
 /* }}} */
 
-
 /* {{{ proto int pspell_clear_session(int pspell)
    Clears the current session */
 PHP_FUNCTION(pspell_clear_session)
@@ -347,6 +425,43 @@ PHP_FUNCTION(pspell_clear_session)
 		php_error(E_WARNING, "pspell_clear_session() gave error: %s", pspell_manager_error_message(manager));
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto int pspell_save_wordlist(int pspell)
+   Saves the current (personal) wordlist */
+PHP_FUNCTION(pspell_save_wordlist)
+{
+	int type;
+	zval **scin;
+	PspellManager *manager;
+
+	int argc;
+	argc = ZEND_NUM_ARGS();
+	if (argc != 1 || zend_get_parameters_ex(argc, &scin) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+    
+	convert_to_long_ex(scin);
+	manager = (PspellManager *) zend_list_find((*scin)->value.lval, &type);
+	if(!manager){
+		php_error(E_WARNING, "%d is not an PSPELL result index",(*scin)->value.lval);
+		RETURN_FALSE;
+	}
+
+	pspell_manager_save_all_word_lists(manager);
+	RETURN_TRUE;
+/*	FIXME: The following should be back in place once Kevin Atkinson 
+	(the author of pspell & aspell) fixes pspell so that 
+	pspell_manager_save_all_word_lists() does not attempt to write to $HOME/.*.prepl
+	Current version (.11.1) generates an error that can be safely ignored.
+	if(pspell_manager_error_number(manager) == 0){
+		RETURN_TRUE;
+	}else{
+		php_error(E_WARNING, "pspell_save_wordlist() gave error: %s", pspell_manager_error_message(manager));
+		RETURN_FALSE;
+	}
+*/
 }
 /* }}} */
 
