@@ -1,3 +1,37 @@
+2001-09-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    add a seventh parameter to ircg_pconnect to treat errors
+    such as incorrect channel-keys in a non-fatal way.
+
+    add a modifier to format-messages which stops the execution
+    of the format-message, if the argument is not equal to the username.
+    this is useful, if you want a client to only process channel-mode
+    changes which concern the client (e.g. voice-change).
+
+    * NEWS: .
+
+2001-09-01  Zeev Suraski  <zeev@zend.com>
+
+    * main/php.h: MFH
+
+    * main/php.h: Update API number
+
+2001-09-01  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/HTML/Form.php: add a default pw lenght
+
+    * pear/HTML/Form.php: style/ws
+
+2001-09-01  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c
+      main/main.c: MFH
+
+2001-09-01  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/bz2/bz2.c: noet
+
 2001-08-31  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/README.txt: refinements
