@@ -1,3 +1,4 @@
+#if 0
 /*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
@@ -732,6 +733,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type)
 
 #endif
 
+#endif
 
 /*
  * Local variables:

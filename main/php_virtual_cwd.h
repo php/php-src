@@ -1,3 +1,5 @@
+#if 0
+
 /*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
@@ -139,3 +141,5 @@ typedef struct _virtual_cwd_globals {
 #endif
 
 #endif /* VIRTUAL_CWD_H */
+
+#endif
