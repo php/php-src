@@ -948,7 +948,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			cancel_upload = 0;
 
 			if(strlen(filename) == 0) {
-#ifdef DEBUG_FILE_UPLOAD
+#if DEBUG_FILE_UPLOAD
 				sapi_module.sapi_error(E_NOTICE, "No file uploaded");
 #endif
 				cancel_upload = UPLOAD_ERROR_D;
@@ -957,12 +957,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff) TSRMLS_CC)))
 			{
 				if (PG(upload_max_filesize) > 0 && total_bytes > PG(upload_max_filesize)) {
-#ifdef DEBUG_FILE_UPLOAD
+#if DEBUG_FILE_UPLOAD
 					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_A;
 				} else if (max_file_size && (total_bytes > max_file_size)) {
-#ifdef DEBUG_FILE_UPLOAD
+#if DEBUG_FILE_UPLOAD
 					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
@@ -970,7 +970,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					wlen = fwrite(buff, 1, blen, fp);
 			
 					if (wlen < blen) {
-#ifdef DEBUG_FILE_UPLOAD
+#if DEBUG_FILE_UPLOAD
 						sapi_module.sapi_error(E_NOTICE, "Only %d bytes were written, expected to write %ld", wlen, blen);
 #endif
 						cancel_upload = UPLOAD_ERROR_C;
@@ -981,7 +981,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} 
 			fclose(fp);
 
-#ifdef DEBUG_FILE_UPLOAD
+#if DEBUG_FILE_UPLOAD
 			if(strlen(filename) > 0 && total_bytes == 0) {
 				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
 				cancel_upload = 5;
