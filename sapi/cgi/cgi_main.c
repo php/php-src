@@ -682,7 +682,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	
 
 	if (SG(request_info).path_translated) {
-		zend_persist(SG(request_info).path_translated);
+		persist_alloc(SG(request_info).path_translated);
 	}
 
 	php_request_shutdown((void *) 0);
