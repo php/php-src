@@ -58,6 +58,7 @@ function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_exec,			NULL)
 	PHP_FE(ftp_mkdir,			NULL)
 	PHP_FE(ftp_rmdir,			NULL)
+	PHP_FE(ftp_chmod,			NULL)
 	PHP_FE(ftp_nlist,			NULL)
 	PHP_FE(ftp_rawlist,			NULL)
 	PHP_FE(ftp_systype,			NULL)
@@ -377,6 +378,30 @@ PHP_FUNCTION(ftp_rmdir)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int ftp_chmod(resource stream, int mode, string filename)
+   Sets permissions on a file */
+PHP_FUNCTION(ftp_chmod)
+{
+	zval		*z_ftp;
+	ftpbuf_t	*ftp;
+	char		*filename;
+	int			mode, filename_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &z_ftp, &mode, &filename, &filename_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
+
+	if (!ftp_chmod(ftp, mode, filename)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(mode);
 }
 /* }}} */
 
