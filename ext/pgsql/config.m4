@@ -27,7 +27,7 @@ if test "$PHP_PGSQL" != "no"; then
     done
 
     for j in lib lib/pgsql lib/postgres lib/postgresql ""; do
-      if test -f "$i/$j/libpq.so"; then 
+      if test -f "$i/$j/libpq.so" || test -f "$i/$j/libpq.a"; then 
         PGSQL_LIBDIR=$i/$j
       fi
     done
