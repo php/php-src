@@ -34,6 +34,7 @@
 #include "ext/standard/php_filestat.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
+#include "php_ini.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -155,6 +156,10 @@ static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
 }
 
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_basic_globals, basic_globals)
+PHP_INI_END()
+
 PHP_MINIT_FUNCTION(file)
 {
 	le_stream = zend_register_list_destructors_ex(_file_stream_dtor, NULL, "stream", module_number);
@@ -166,6 +171,8 @@ PHP_MINIT_FUNCTION(file)
 	file_globals_ctor(&file_globals TSRMLS_CC);
 #endif
 
+	REGISTER_INI_ENTRIES();
+	
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
