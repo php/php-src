@@ -29,7 +29,9 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 
+#ifdef WITH_ZEUS
 #include "zeus.h"
+#endif
 
 #define MAX_STATUS_LENGTH sizeof("xxxx LONGEST STATUS DESCRIPTION")
 #define ISAPI_SERVER_VAR_BUF_SIZE 1024
