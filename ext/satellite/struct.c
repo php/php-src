@@ -58,7 +58,7 @@ struct _OrbitStruct
 static void OrbitStruct_Wakeup(INTERNAL_FUNCTION_PARAMETERS);
 static void OrbitStruct_Sleep(INTERNAL_FUNCTION_PARAMETERS);
 
-static zend_function_entry OrbitStruct_functions[] =
+static zend_function_entry OrbitStruct_class_functions[] =
 {
 	{"__sleep", OrbitStruct_Sleep},
 	{"__wakeup", OrbitStruct_Wakeup},
@@ -70,7 +70,7 @@ IMPLEMENT_DECLARATIONS(name, flags)		\
 IMPLEMENT_FUNCTION_CALL(name, flags)	\
 IMPLEMENT_PUT_PROPERTY(name, flags)		\
 IMPLEMENT_GET_PROPERTY(name, flags)		\
-IMPLEMENT_INIT_EX(name, flags, ##name##_functions, _##name##_FunctionCall, _##name##_GetProperty, _##name##_PutProperty)\
+IMPLEMENT_INIT_EX(name, flags, ##name##_class_functions, _##name##_FunctionCall, _##name##_GetProperty, _##name##_PutProperty)\
 IMPLEMENT_DATA_HELPERS(name, flags)
 	
 MY_IMPLEMENT_CLASS(OrbitStruct, NO_FUNCTIONS);
