@@ -1,3 +1,49 @@
+1999-11-22  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/output.c
+      main.c: Fixed a leak when using automatic output buffering
+
+1999-11-22  Andrei Zmievski  <zmievski@ispi.net>
+
+    * buildconf: Don't forget the pickle.
+
+    * MODULES_STATUS: Reformatting.
+
+1999-11-22  Frank M. Kromann  <fmk@swwwing.com>
+
+    * MODULES_STATUS: add MS SQL module seams to be working
+
+    * ext/standard/info.c: add MS SQL module to credit info
+
+1999-11-22  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
+1999-11-22  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testhyperwave: - test for hyperwave module
+
+    * tests/testcpdf: - test for cpdf module
+
+1999-11-22  Stig Bakken  <ssb@fast.no>
+
+    * Makefile.am
+      build.mk
+      configure.in:    Introduced PECL - PHP Extension and Code Library (prounounced "picke"), in
+    the "pecl" subdir.  "make install" will now install the database abstraction
+    layer in PREFIX/lib/php.
+    I hereby dedicate this part of PHP to my daughter-of-yesterday Malin. :-)
+
+1999-11-22  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/math.c: Optimize a tiny bit
+
+    * ext/ldap/ldap.c: Optimize LDAP a little with Ex API
+
+1999-11-22  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-21  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/url.c:
