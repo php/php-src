@@ -895,7 +895,6 @@ PHP_FUNCTION(imap_reopen)
 /* }}} */
 
 /* {{{ proto int imap_append(int stream_id, string folder, string message [, string flags])
-
    Append a string message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {
@@ -931,7 +930,7 @@ PHP_FUNCTION(imap_append)
 
 /* }}} */
 
-/* {{{ proto imap_num_msg(int stream_id)
+/* {{{ proto int imap_num_msg(int stream_id)
    Gives the number of messages in the current mailbox */
 PHP_FUNCTION(imap_num_msg)
 {
@@ -1068,7 +1067,6 @@ PHP_FUNCTION(imap_close)
 /* }}} */
 
 /* {{{ proto array imap_headers(int stream_id)
-
    Returns headers for all messages in a mailbox */
 PHP_FUNCTION(imap_headers)
 {
@@ -1131,7 +1129,7 @@ PHP_FUNCTION(imap_headers)
 
 /* }}} */
 
-/* {{{ proto imap_body(int stream_id, int msg_no [, int options])
+/* {{{ proto string imap_body(int stream_id, int msg_no [, int options])
    Read the message body */
 PHP_FUNCTION(imap_body)
 {
@@ -1157,9 +1155,9 @@ PHP_FUNCTION(imap_body)
 }
 /* }}} */
 
-/*    v--- add proto here when this function is done */
-/* {{{ string imap_fetchtext_full(int stream_id, int msg_no [, int options])
-   Read the body of a message*/
+
+/* {{{ proto string imap_fetchtext_full(int stream_id, int msg_no [, int options])
+   Read the body of a message */
 PHP_FUNCTION(imap_fetchtext_full)
 {
 	pval *streamind, * msgno, *flags;
@@ -1216,7 +1214,7 @@ PHP_FUNCTION(imap_mail_copy)
 }
 /* }}} */
 
-/* {{{ proto imap_mail_move(int stream_id, int msg_no, string mailbox)
+/* {{{ proto int imap_mail_move(int stream_id, int msg_no, string mailbox)
    Move specified message to a mailbox */
 PHP_FUNCTION(imap_mail_move)
 {
@@ -1309,7 +1307,7 @@ PHP_FUNCTION(imap_renamemailbox)
 }
 /* }}} */
 
-/* {{{ proto imap_deletemailbox(int stream_id, string mailbox)
+/* {{{ proto int imap_deletemailbox(int stream_id, string mailbox)
    Delete a mailbox */
 PHP_FUNCTION(imap_deletemailbox)
 {
@@ -1340,7 +1338,6 @@ PHP_FUNCTION(imap_deletemailbox)
 /* }}} */
 
 /* {{{ proto array imap_list(int stream_id, string ref, string pattern)
-
    Read the list of mailboxes */
 PHP_FUNCTION(imap_list)
 {
@@ -1386,8 +1383,7 @@ PHP_FUNCTION(imap_list)
 
 
 /* {{{ proto array imap_getmailboxes(int stream_id, string ref, string pattern)
-
-   Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter. */
+   Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter */
 /* Author: CJH */
 PHP_FUNCTION(imap_list_full)
 {
@@ -1448,8 +1444,7 @@ PHP_FUNCTION(imap_list_full)
 /* }}} */
 
 
-/* {{{ proto imap_scan(int stream_id, string ref, string pattern, string content)
-
+/* {{{ proto array imap_scan(int stream_id, string ref, string pattern, string content)
    Read list of mailboxes containing a certain string */
 PHP_FUNCTION(imap_listscan)
 {
@@ -1491,7 +1486,6 @@ PHP_FUNCTION(imap_listscan)
 /* }}} */
 
 /* {{{ proto object imap_check(int stream_id)
-
    Get mailbox properties */
 PHP_FUNCTION(imap_check)
 {
@@ -1589,7 +1583,6 @@ PHP_FUNCTION(imap_undelete)
 /* }}} */
 
 /* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
-
    Read the header of the message */
 PHP_FUNCTION(imap_headerinfo)
 {
@@ -2237,7 +2230,6 @@ PHP_FUNCTION(imap_fetchstructure)
 /* }}} */
 
 /* {{{ proto string imap_fetchbody(int stream_id, int msg_no, int section [, int options])
-
    Get a specific body section */
 PHP_FUNCTION(imap_fetchbody)
 {
@@ -2462,7 +2454,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 
 
 /* {{{ proto string imap_utf8(string string)
-   convert a string to UTF8 */
+   Convert a string to UTF8 */
 PHP_FUNCTION(imap_utf8)
 {
        pval *string;
@@ -2515,7 +2507,7 @@ PHP_FUNCTION(imap_setflag_full)
 }
 /* }}} */
 
-/* {{{ proto imap_clearflag_full(int stream_id, string sequence, string flag [, int options])
+/* {{{ proto int imap_clearflag_full(int stream_id, string sequence, string flag [, int options])
    Clears flags on messages */
 PHP_FUNCTION(imap_clearflag_full)
 {
@@ -2726,7 +2718,6 @@ PHP_FUNCTION(imap_status)
 /* }}} */
  
 /* {{{ proto object imap_bodystruct(int stream_id, int msg_no, int section)
-
    Read the structure of a specified body section of a specific message */
 PHP_FUNCTION(imap_bodystruct)
 {
@@ -3135,7 +3126,7 @@ PHP_FUNCTION(imap_mail_compose)
 /* }}} */
 
 /* {{{ proto array imap_search(int stream_id, string criteria [, long flags])
-   Return a list of messages matching the criteria. */
+   Return a list of messages matching the criteria */
 PHP_FUNCTION(imap_search)
 {
 	pval *streamind, *criteria, *search_flags;
@@ -3184,11 +3175,8 @@ PHP_FUNCTION(imap_search)
 /* }}} */
 
 
-/* {{{ proto string imap_alerts(void)
-   Returns an array of all IMAP alerts that have been generated either
-   since the last page load, or since the last imap_alerts() call,
-   whichever came last. The alert stack is cleared after imap_alerts()
-   is called. */
+/* {{{ proto array imap_alerts(void)
+   Returns an array of all IMAP alerts that have been generated */
 /* Author: CJH */
 PHP_FUNCTION(imap_alerts)
 {
@@ -3216,10 +3204,8 @@ PHP_FUNCTION(imap_alerts)
 /* }}} */
 
 
-/* {{{ proto string imap_errors(void)
-   Returns an array of all IMAP errors generated either since the last
-   page load, or since the last imap_errors() call, whichever came
-   last. The error stack is cleared after imap_errors() is called. */
+/* {{{ proto array imap_errors(void)
+   Returns an array of all IMAP errors generated */
 /* Author: CJH */
 PHP_FUNCTION(imap_errors)
 {
@@ -3248,8 +3234,7 @@ PHP_FUNCTION(imap_errors)
 
 
 /* {{{ proto string imap_last_error(void) 
-   Returns the last error that was generated by an IMAP function. 
-   The error stack is NOT cleared after this call. */
+   Returns the last error that was generated by an IMAP function. The error stack is NOT cleared after this call. */
 /* Author: CJH */
 PHP_FUNCTION(imap_last_error)
 {
