@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.13 2002-01-30 09:23:34 ssb Exp $
+     $Id: package.dtd,v 1.14 2002-02-02 00:06:44 ssb Exp $
 
      This is the PEAR package description, version 1.1b2.
      It should be used with the informal public identifier:
@@ -54,12 +54,15 @@
 <!ELEMENT filelist (dir|file|libfile)*>
 
 <!ELEMENT dir (file|libfile)*>
+<!ATTLIST dir name           CDATA #REQUIRED
+              baseinstalldir CDATA #IMPLIED>
 
 <!ELEMENT file (#PCDATA)>
-<!ATTLIST file role     (php|ext|test|doc) 'php'
-               debug    (na|on|off)        'na'
-               threaded (na|on|off)        'na'
-               format   CDATA              #IMPLIED>
+<!ATTLIST file role           (php|ext|test|doc) 'php'
+               debug          (na|on|off)        'na'
+               threaded       (na|on|off)        'na'
+               format         CDATA              #IMPLIED
+               baseinstalldir CDATA              #IMPLIED>
 
 <!ELEMENT libfile (libname|sources|includes|libadd)*>
 
