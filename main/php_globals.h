@@ -42,6 +42,7 @@ extern PHPAPI int core_globals_id;
 extern ZEND_API struct _php_core_globals core_globals;
 #endif
 
+struct _php_tick_function_entry;
 
 struct _php_core_globals {
 	zend_bool magic_quotes_gpc;
@@ -83,9 +84,6 @@ struct _php_core_globals {
 	char *gpc_order;
 	char *variables_order;
 
-	char *default_mimetype;
-	char *default_charset;
-
 	zend_bool expose_php;
 
 	zend_bool track_vars;
@@ -100,6 +98,8 @@ struct _php_core_globals {
 	long max_execution_time;
 
 	unsigned char header_is_being_sent;
+
+	zend_llist tick_functions;
 };
 
 

@@ -100,6 +100,8 @@ typedef struct {
 	uint read_post_bytes;
 	unsigned char headers_sent;
 	struct stat global_stat;
+	char *default_mimetype;
+	char *default_charset;
 } sapi_globals_struct;
 
 
@@ -141,6 +143,9 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D
 SAPI_API int sapi_flush();
 SAPI_API struct stat *sapi_get_stat();
 SAPI_API char *sapi_getenv(char *name, int name_len);
+
+SAPI_API char *sapi_get_default_content_type(SLS_D);
+SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC);
 
 struct _sapi_module_struct {
 	char *name;
