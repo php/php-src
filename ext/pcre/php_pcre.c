@@ -675,7 +675,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 			
 			/* If evaluating, do it and add the return string's length */
 			if (eval) {
-				eval_result_len = _preg_do_eval(replace, piece, offsets,
+				eval_result_len = _preg_do_eval(replace, subject, offsets,
 												count, &eval_result);
 				new_len += eval_result_len;
 			} else { /* do regular substitution */
