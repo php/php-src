@@ -65,6 +65,14 @@ PHP_FUNCTION(readlink)
 	}
 	convert_to_string_ex(filename);
 
+	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	ret = readlink(Z_STRVAL_PP(filename), buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
