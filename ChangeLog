@@ -1,3 +1,99 @@
+2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/pcre/php_pcre.c: - Typo.
+
+2002-06-10  Stig Bakken  <ssb@fast.no>
+
+    * ext/mysql/config.m4: Add --with-mysql-sock option (James Cox)
+
+2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/php4dllts.dsp: - Revert zlib.lib patch.
+
+2002-06-10  Harald Radi  <harald.radi@nme.at>
+
+    * ext/rpc/handler.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h: pooling and singleton finally work
+
+    * ext/rpc/tests/test1.php
+      ext/rpc/tests/test2.php
+      ext/rpc/tests/test3.php
+      ext/rpc/tests/test4.php
+      ext/rpc/tests/tests.php: new testcases
+
+2002-06-10  Frank M. Kromann  <frank@kromann.info>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/mssql/php_mssql.h
+      ext/mssql/php_mssql.c: Adding ini setting for max_procs
+
+2002-06-10  Harald Radi  <harald.radi@nme.at>
+
+    * win32/php4dllts.dsp: mysql need zlib.lib now
+
+
+2002-06-10  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+2002-06-10  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/array.c:  - MFH (WS-fix)
+
+    * ext/standard/array.c:  - whitespace fix
+
+2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/mysql/libmysql/config-win.h
+      win32/php4dllts.dsp: - Fix win32/mysql.
+    - Revert cryptic WS commit on php4dllts.dsp.
+
+2002-06-10  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+2002-06-10  Harald Radi  <harald.radi@nme.at>
+
+    * win32/php4dllts.dsp: mysql need zlib.lib now
+
+    * ext/mysql/libmysql/my_wincond.c
+      ext/mysql/libmysql/my_winthread.c: fix the build
+
+
+2002-06-10  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - MnoGoSearch extension compile fix with mnogosearch-3.2.4 and 3.2.5
+
+2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/mail.c: - WS fix, damn win32.
+
+2002-06-10  Harald Radi  <harald.radi@nme.at>
+
+    * ext/standard/array.c: fix the build
+
+2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/file.c: - Fix proto.
+
+2002-06-10  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/calendar/easter.c:
+    - Fix easter_(days|date)()s first parameter now really defaults to the current
+      year if ommited (it was document but didn't work).
+
+2002-06-10  Andrei Zmievski  <andrei@php.net>
+
+    * ext/standard/array.c
+      NEWS:
+    Fix bug #7045: shuffle() now provides consistent distribution of values
+    in the array.
+
 2002-06-09  Tomas V.V.Cox  <cox@idecnet.com>
 
     * pear/Makefile.frag: Commented out old unused stuff
