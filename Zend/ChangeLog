@@ -1,3 +1,12 @@
+2005-02-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c
+      zend_reflection_api.c:
+      - Be more gracious in reflection API
+
+    * zend_language_scanner.l:
+      - Fix doc comment handling
+
 2005-02-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:
