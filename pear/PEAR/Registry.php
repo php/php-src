@@ -98,6 +98,18 @@ class PEAR_Registry extends PEAR
         $this->statedir = $pear_install_dir.$ds.'.registry';
         $this->filemap  = $pear_install_dir.$ds.'.filemap';
         $this->lockfile = $pear_install_dir.$ds.'.lock';
+
+        // XXX Compatibility code should be removed in the future
+        // rename all registry files if any to lowercase
+        if (!OS_WINDOWS && $handle = opendir($this->statedir)) {
+            $dest = $this->statedir . DIRECTORY_SEPARATOR;
+            while (false !== ($file = readdir($handle))) {
+                if (preg_match('/^.*[A-Z].*\.reg$/', $file)) {
+                    rename($dest . $file, $dest . strtolower($file));
+                }
+            }
+            closedir($handle);
+        }
         if (!file_exists($this->filemap)) {
             $this->rebuildFileMap();
         }
@@ -155,23 +167,7 @@ class PEAR_Registry extends PEAR
      */
     function _packageFileName($package)
     {
-        if (is_file("{$this->statedir}/{$package}.reg")) {
-            return "{$this->statedir}/{$package}.reg";
-        }
-        /**
-         * Iterate through the directory to find the matching
-         * registry file, even if it has been provided in
-         * another case (foobar vs. FooBar)
-         */
-        $package = strtolower($package);
-        if ($handle = opendir($this->statedir)) {
-            while (false !== ($file = readdir($handle))) {
-               if (strtolower($file) == $package . ".reg") {
-                   return "{$this->statedir}/{$file}";
-               }
-            }
-            closedir($handle);
-        }
+        return $this->statedir . DIRECTORY_SEPARATOR . strtolower($package) . '.reg';
     }
 
     // }}}
