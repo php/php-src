@@ -2159,7 +2159,7 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-static char *_php_fgetcsv_find_enclosure(char *start, int len, char enclosure)
+static char *_php_fgetcsv_find_enclosure(char *start, int len, char enclosure, int end)
 {
 	char *s=start, *p, *e=start+len;
 
@@ -2177,10 +2177,58 @@ static char *_php_fgetcsv_find_enclosure(char *start, int len, char enclosure)
 				continue;
 			}
 		}
+		if (end) {
+			int i = 0;
+			while (e > p && *p == enclosure) {
+				s = ++p;
+				i++;
+			}
+			if (!(i % 2)) {
+				continue;
+			} else {
+				p--;
+			}
+		}
 		return p;
 	}
 
 	return NULL;
+}
+
+static void _php_fgetcsv_trim_enclosed(char *buf2, int *buf2_len, char enclosure)
+{
+	if (memchr(buf2, enclosure, *buf2_len)) {
+		int esc = 0, enc_c = 0, pos = 0;
+		while (pos < *buf2_len) {
+			if (*(buf2 + pos) == '\\') {
+				esc = !esc;
+				enc_c = 0;
+			} else if (*(buf2 + pos) == enclosure) {
+				if (esc) {
+					esc = 0;
+				} else if (enc_c) {
+					enc_c = 0;
+					memmove(buf2 + pos, buf2 + pos + 1, *buf2_len - pos - 1);
+					(*buf2_len)--;
+					continue;
+				} else if (!esc) {
+					enc_c = 2;
+				}
+			} else {
+				if (enc_c == 2) {
+					memmove(buf2 + pos - 1, buf2 + pos, *buf2_len - pos);
+					(*buf2_len)--;
+					enc_c--;
+				}
+				esc = 0;
+			}
+			pos++;
+		}
+		if (enc_c && *(buf2 + pos - 1) == enclosure) {
+			(*buf2_len)--;
+		}
+	}
+	buf2[*buf2_len] = '\0';
 }
 
 /* {{{ proto array fgetcsv(resource fp, int length [, string delimiter [, string enclosure]])
@@ -2264,29 +2312,23 @@ PHP_FUNCTION(fgetcsv)
 	while (isspace((int)*(unsigned char *)s) && *s != delimiter && s < re) {
 		s++;
 	}
+
 	/* strip trailing spaces */
-	while (--e >= s && isspace((int)*(unsigned char *)(e)) && *e != delimiter);
+	while (--e >= s && (*e == '\n' || *e == '\r') && *e != delimiter);
 	e++;
 
 	array_init(return_value);
 
-#define CSV_ADD_ENTRY(os, es, st)	{	\
-	int tmp_sl = es - st;	\
-	char *tmp_s=os;	\
-	if (tmp_sl) {	\
-		while (isspace((int)*(unsigned char *)tmp_s)) {	\
-			tmp_s++;	\
-			tmp_sl--;	\
-		}	\
-	}	\
-	if (tmp_sl) {	\
-		add_next_index_stringl(return_value, tmp_s, tmp_sl, 1);	\
+#define CSV_ADD_ENTRY(os, es, st) {	\
+	if (es - st) {	\
+		add_next_index_stringl(return_value, os, es - st, 1);	\
 	} else {	\
 		add_next_index_string(return_value, "", 1);	\
 	}	\
-}	\
+}
 
-	if (!enclosure || !(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure))) {
+csv_start:
+	if (!enclosure || !(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure, 0))) {
 no_enclosure:
 		while ((p = memchr(s, delimiter, (e - s)))) {
 			CSV_ADD_ENTRY(s, p, s);
@@ -2303,12 +2345,23 @@ enclosure:
 		}
 
 		p++;
-		if (*s == enclosure) {
+		/* strip leading spaces */
+		while (isspace((int)*(unsigned char *)s) && *s != delimiter && s < re) {
 			s++;
 		}
+		if (*s != enclosure) {
+			if ((p = memchr(s, delimiter, (e - s)))) {
+				CSV_ADD_ENTRY(s, p, s);
+			        s = p + 1;
+			        goto csv_start;
+			} else {
+				goto no_enclosure;
+			}
+		}
+		s++;
 
 		/* try to find end of enclosure */
-		while (!(p2 = _php_fgetcsv_find_enclosure(p, (e - p), enclosure))) {
+		while (!(p2 = _php_fgetcsv_find_enclosure(p, (e - p), enclosure, 1))) {
 			buf2 = erealloc(buf2, buf2_len + (re - p) + 1);
 			memcpy(buf2 + buf2_len, p, (re - p));
 			buf2_len += (re - p);
@@ -2318,8 +2371,9 @@ enclosure:
 			}
 			s = p = buf;
 			re = e = buf + buf_len;
+
 			/* strip trailing spaces */
-			while (isspace((int)*(unsigned char *)(--e)) && *e != delimiter);
+			while (--e >= s && (*e == '\n' || *e == '\r') && *e != delimiter);
 			e++;
 		}
 
@@ -2327,18 +2381,20 @@ enclosure:
 		if ((p = memchr(p2, delimiter, (e - p2)))) {
 			p2 = s;
 			s = p + 1;
-			if (p > p2 && *(p - 1) == enclosure) {
-				p--;
+			if (*p2 == enclosure) {
+				p2++;
 			}
-			if (p - p2) {
-				buf2 = erealloc(buf2, buf2_len + (p - p2) + 1);
-				memcpy(buf2 + buf2_len, p2, (p - p2));
-				buf2_len += (p - p2);
-			}
+
+			/* copy data to buffer */
+			buf2 = erealloc(buf2, buf2_len + (p - p2) + 1);
+			memcpy(buf2 + buf2_len, p2, (p - p2));
+			buf2_len += p - p2;
+
+			_php_fgetcsv_trim_enclosed(buf2, &buf2_len, enclosure);
 			CSV_ADD_ENTRY(buf2, buf2_len, 0);
 			buf2_len = 0;
 
-			if (!(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure))) {
+			if (!(p = _php_fgetcsv_find_enclosure(s, (e - s), enclosure, 0))) {
 				goto no_enclosure;
 			} else {
 				goto enclosure;
@@ -2351,16 +2407,17 @@ enclosure:
 			if (e - s) {
 				buf2 = erealloc(buf2, buf2_len + (e - s) + 1);
 				memcpy(buf2 + buf2_len, s, (e - s));
-				buf2_len += (e - s);
+				buf2_len += e - s;
 			}
 enclosure_done:
+			_php_fgetcsv_trim_enclosed(buf2, &buf2_len, enclosure);
 			CSV_ADD_ENTRY(buf2, buf2_len, 0);
 
 			goto done;
 		}
 	}
 
-	if (s < e) {
+	if (s < e || (s > buf && *(s - 1) == delimiter)) {
 		CSV_ADD_ENTRY(s, e, s);
 	}
 done:
