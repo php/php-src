@@ -24,7 +24,7 @@ $passed = 0;
 $tests = 0;
 
 while ($dir = trim(fgets($fp, 1024))) {
-    print "DIRECTORY : $dir\n";
+//    print "DIRECTORY : $dir\n";
     //print "dir=$dir\n";
     $dp = opendir($dir);
     while ($ent = readdir($dp)) {

@@ -12,22 +12,32 @@ peardir=$(PEAR_INSTALLDIR)
 PEAR_SUBDIRS = \
 	DB \
 	File \
+	HTML \
 	Net \
-	PEAR
+	Payment \
+	PEAR \
+	XML
 
 PEAR_FILES = \
 	DB.php \
 	DB/common.php \
-	DB/odbc.php \
-	DB/mysql.php \
+	DB/ibase.php \
+	DB/msql.php \
 	DB/mssql.php \
+	DB/mysql.php \
+	DB/oci8.php \
+	DB/odbc.php \
 	DB/pgsql.php \
 	DB/storage.php \
-	DB/oci8.php \
-	HTTP.php \
+	DB/sybase.php \
 	File/Find.php \
+	HTML/Form.php \
+	HTTP.php \
 	Net/Socket.php \
-	PEAR/Installer.php
+	PEAR.php \
+	PEAR/Installer.php \
+	Payment/Verisign.php \
+	XML/Parser.php
 
 install-data-local: PEAR.php
 	@if $(mkinstalldirs) $(peardir); then \
