@@ -46,7 +46,7 @@ $cwd = getcwd();
 set_time_limit(0);
 
 // delete as much output buffers as possible
-while(ob_end_clean());
+while(@ob_end_clean());
 if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
