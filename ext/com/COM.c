@@ -71,10 +71,11 @@ PHP_FUNCTION(com_addref);
 PHP_FUNCTION(com_release);
 PHP_FUNCTION(com_propget);
 PHP_FUNCTION(com_propput);
+PHP_FUNCTION(com_load_typelib);
 
 PHPAPI int php_COM_get_le_idispatch();
 static ITypeLib *php_COM_find_typelib(char *search_string, int mode);
-static int php_COM_load_typelib(char *typelib_name, int mode);
+static int php_COM_load_typelib(ITypeLib *TypeLib, int mode);
 
 static int le_idispatch;
 static int codepage;
@@ -86,6 +87,7 @@ function_entry COM_functions[] = {
 	PHP_FE(com_release,		                        NULL)
 	PHP_FE(com_propget,                             NULL)
 	PHP_FE(com_propput,                             NULL)
+	PHP_FE(com_load_typelib,                        NULL)
 
 	PHP_FALIAS(com_get,         com_propget,        NULL)
 	PHP_FALIAS(com_propset,     com_propput,        NULL)
@@ -214,7 +216,7 @@ PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
 
 	obj->i.dispatch = pDisp;
 	obj->referenced = 1;
-	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &(obj->i.typeinfo)));
+	obj->typelib = SUCCEEDED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &obj->i.typeinfo));
 
 	if(!cleanup)
 	{
@@ -314,12 +316,13 @@ static PHP_INI_MH(OnTypelibFileChange)
 	}
 #endif
 
-	typelib_name_buffer = (char *) malloc(sizeof(char)*1024);
+	typelib_name_buffer = (char *) emalloc(sizeof(char)*1024);
 
 	while(fgets(typelib_name_buffer, 1024, typelib_file))
 	{
+		ITypeLib *pTL;
 		char *typelib_name;
-		char *modifier;
+		char *modifier, *ptr;
 		int mode = CONST_PERSISTENT|CONST_CS;
 
 		if(typelib_name_buffer[0]==';')
@@ -327,25 +330,47 @@ static PHP_INI_MH(OnTypelibFileChange)
 			continue;
 		}
 		typelib_name = php_strtok_r(typelib_name_buffer, "\r\n", &strtok_buf); /* get rid of newlines */
+		if (typelib_name == NULL)
+		{
+			continue;
+		}
 		typelib_name = php_strtok_r(typelib_name, "#", &strtok_buf);
 		modifier = php_strtok_r(NULL, "#", &strtok_buf);
-		if(modifier)
+		if(modifier != NULL)
 		{
 			if(!strcmp(modifier, "cis") || !strcmp(modifier, "case_insensitive"))
 			{
 				mode &= ~CONST_CS;
 			}
 		}
+
+		/* Remove leading/training white spaces on search_string */
+		while (isspace(*typelib_name)) /* Ends on '\0' in worst case */
+		{
+			typelib_name ++;
+		}
+		ptr = typelib_name + strlen(typelib_name) - 1;
+		while ((ptr != typelib_name) && isspace(*ptr))
+		{
+			*ptr = '\0';
+			ptr--;
+		}
+
+
 #if SUPPORT_INTERACTIVE
 		if(interactive)
 		{
 			printf("\rLoading %-60s\r", typelib_name);
 		}
 #endif
-		php_COM_load_typelib(typelib_name, mode);
+		if((pTL = php_COM_find_typelib(typelib_name, mode)) != NULL)
+		{
+			php_COM_load_typelib(pTL, mode);
+			pTL->lpVtbl->Release(pTL);
+		}
 	}
 
-	free(typelib_name_buffer);
+	efree(typelib_name_buffer);
 	fclose(typelib_file);
 
 #if SUPPORT_INTERACTIVE
@@ -361,65 +386,80 @@ static PHP_INI_MH(OnTypelibFileChange)
 
 PHP_INI_BEGIN()
 PHP_INI_ENTRY_EX("com.allow_dcom", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
+PHP_INI_ENTRY_EX("com.autoregister_typelib", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
+PHP_INI_ENTRY_EX("com.autoregister_casesensitive", "1", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypelibFileChange)
 PHP_INI_END()
 
 
-/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage]])
+/* {{{ proto int com_load(string module_name [, string remote_host [, int codepage[, string typelib]]])
    Loads a COM module */
 PHP_FUNCTION(com_load)
 {
-	pval *module_name, *server_name=NULL, *code_page;
+	pval *module_name, *code_page, *typelib = NULL, *server_name = NULL;
 	CLSID clsid;
 	HRESULT hr;
 	OLECHAR *ProgID;
 	i_dispatch *obj;
 	char *error_message;
 	char *clsid_str;
+	int mode = CONST_PERSISTENT;
+	ITypeLib *pTL;
 
+
+	codepage = CP_ACP;
+	
 	switch(ZEND_NUM_ARGS())
 	{
 		case 1:
 			getParameters(ht, 1, &module_name);
-			codepage = CP_ACP;
 			break;
+
 		case 2:
+			getParameters(ht, 2, &module_name, &server_name);
+			break;
+
+		case 3:
+			getParameters(ht, 3, &module_name, &server_name, &code_page);
+
+			convert_to_long_ex(&code_page);
+			codepage = code_page->value.lval;
+			break;
+
+		case 4:
+			getParameters(ht, 4, &module_name, &server_name, &code_page, &typelib);
+
+			convert_to_string_ex(&typelib);
+			convert_to_long_ex(&code_page);
+			codepage = code_page->value.lval;
+
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+	}
+
+	if(server_name != NULL)
+	{
+		if(server_name->type == IS_NULL)
+		{
+			server_name = NULL;
+		}
+		else
+		{
 			if(!INI_INT("com.allow_dcom"))
 			{
 				php_error(E_WARNING, "DCOM is disabled");
 				RETURN_FALSE;
 			}
-			getParameters(ht, 2, &module_name, &server_name);
-			convert_to_string(server_name);
-			codepage = CP_ACP;
-			break;
-		case 3:
-			getParameters(ht, 3, &module_name, &server_name, &code_page);
-
-			if(server_name->type == IS_NULL)
-			{
-				efree(server_name);
-				server_name = NULL;
-			}
 			else
 			{
-				if(!INI_INT("com.allow_dcom"))
-				{
-					php_error(E_WARNING, "DCOM is disabled");
-					RETURN_FALSE;
-				}
-				convert_to_string(server_name);
+				convert_to_string_ex(&server_name);
 			}
-
-			convert_to_long(code_page);
-			codepage = code_page->value.lval;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+		}
 	}
 
-	convert_to_string(module_name);
+	convert_to_string_ex(&module_name);
 	ProgID = php_char_to_OLECHAR(module_name->value.str.val, module_name->value.str.len, codepage);
 	hr=CLSIDFromProgID(ProgID, &clsid);
 	efree(ProgID);
@@ -474,6 +514,43 @@ PHP_FUNCTION(com_load)
 	}
 
 	php_COM_set(obj, obj->i.dispatch, TRUE);
+	
+	if(INI_INT("com.autoregister_casesensitive"))
+	{
+		mode |= CONST_CS;
+	}
+
+	if(obj->typelib)
+	{
+		if(INI_INT("com.autoregister_typelib"))
+		{
+			unsigned int idx;
+
+			if(obj->i.typeinfo->lpVtbl->GetContainingTypeLib(obj->i.typeinfo, &pTL, &idx) == S_OK)
+			{
+				php_COM_load_typelib(pTL, mode);
+				pTL->lpVtbl->Release(pTL);
+			}
+		}
+	}
+	else
+	{
+		if(typelib != NULL)
+		{
+			ITypeLib *pTL;
+
+			if((pTL = php_COM_find_typelib(typelib->value.str.val, mode)) != NULL)
+			{
+				obj->typelib = SUCCEEDED(pTL->lpVtbl->GetTypeInfo(pTL, 0, &obj->i.typeinfo));
+				/* idx 0 should deliver the ITypeInfo for the IDispatch Interface */
+				if(INI_INT("com.autoregister_typelib"))
+				{
+					php_COM_load_typelib(pTL, mode);
+				}
+				pTL->lpVtbl->Release(pTL);
+			}
+		}
+	}
 
 	RETURN_LONG(zend_list_insert(obj, le_idispatch));
 }
@@ -568,7 +645,7 @@ PHP_FUNCTION(com_invoke)
 	}
 
 	/* obtain property/method handler */
-	convert_to_string(function_name);
+	convert_to_string_ex(&function_name);
 
 	if(do_COM_invoke(obj, function_name, &var_result, arguments+2, arg_count-2)==FAILURE)
 	{
@@ -804,7 +881,7 @@ PHP_FUNCTION(com_propget)
 	{
 		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}
-	convert_to_string(arg_property);
+	convert_to_string_ex(&arg_property);
 
 	if(do_COM_propget(&var_result, obj, arg_property, 0)==FAILURE)
 	{
@@ -836,9 +913,47 @@ PHP_FUNCTION(com_propput)
 	{
 		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}
-	convert_to_string(arg_property);
+	convert_to_string_ex(&arg_property);
 
 	do_COM_propput(return_value, obj, arg_property, arg_value);
+}
+/* }}} */
+
+/* {{{ proto bool com_load_typelib(string typelib_name[, int case_insensitiv]) */
+PHP_FUNCTION(com_load_typelib)
+{
+	pval *arg_typelib, *arg_cis;
+	ITypeLib *pTL;
+	int mode;
+
+	switch(ZEND_NUM_ARGS())
+	{
+		case 1:
+			getParameters(ht, 1, &arg_typelib);
+			mode = CONST_PERSISTENT|CONST_CS;
+			break;
+		case 2:
+			getParameters(ht, 2, &arg_typelib, &arg_cis);
+			convert_to_boolean_ex(&arg_cis);
+			if(arg_cis->value.lval)
+			{
+				mode &= ~CONST_CS;
+			}
+		default:
+			WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(&arg_typelib);
+	pTL = php_COM_find_typelib(arg_typelib->value.str.val, mode);
+	if(php_COM_load_typelib(pTL, mode) == SUCCESS)
+	{
+		pTL->lpVtbl->Release(pTL);
+		RETVAL_TRUE;
+	}
+	else
+	{
+		RETVAL_FALSE;
+	}
 }
 /* }}} */
 
@@ -1135,7 +1250,6 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 	char *strtok_buf, *major, *minor;
 	CLSID clsid;
 	OLECHAR *p;
-	char *ptr;
 
 	/* Type Libraries:
 	 * The string we have is either:
@@ -1146,24 +1260,14 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 	 * other two, so we will do that when both other attempts
 	 * fail.
 	 */
+
 	search_string = php_strtok_r(search_string, ",", &strtok_buf);
 	major = php_strtok_r(NULL, ",", &strtok_buf);
 	minor = php_strtok_r(NULL, ",", &strtok_buf);
 
-	/* Remove leading/training white spaces on search_string */
-	while (isspace(*search_string)) /* Ends on '\0' in worst case */
-	{
-		search_string ++;
-	}
-	ptr = search_string + strlen(search_string) - 1;
-	while ((ptr != search_string) && isspace(*ptr))
-	{
-		*ptr = '\0';
-		ptr--;
-	}
-
 	p = php_char_to_OLECHAR(search_string, strlen(search_string), codepage);
 	/* Is the string a GUID ? */
+
 	if(!FAILED(CLSIDFromString(p, &clsid)))
 	{
 		HRESULT hr;
@@ -1172,7 +1276,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 
 		/* We have a valid GUID, check to see if a major/minor */
 		/* version was specified otherwise assume 1,0 */
-		if(major && minor)
+		if((major != NULL) && (minor != NULL))
 		{
 			major_i = (WORD) atoi(major);
 			minor_i = (WORD) atoi(minor);
@@ -1234,6 +1338,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 			/* Walk all subkeys (Typelib GUIDs) looking */
 			/* at each version for a string match to the */
 			/* supplied argument */
+
 			if (ERROR_SUCCESS != RegOpenKey(HKEY_CLASSES_ROOT, "TypeLib",&hkey))
 			{
 				/* This is pretty bad - better bail */
@@ -1244,8 +1349,9 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 				RegCloseKey(hkey);
 				return NULL;
 			}
-			keyname = malloc(MaxSubKeyLength);
-			libname = malloc(strlen(search_string)+1);
+			MaxSubKeyLength++; /* \0 is not counted */
+			keyname = emalloc(MaxSubKeyLength);
+			libname = emalloc(strlen(search_string)+1);
 			for (ii=0;ii<SubKeys;ii++)
 			{
 				if (ERROR_SUCCESS != RegEnumKey(hkey, ii, keyname, MaxSubKeyLength))
@@ -1284,6 +1390,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 							/* Found it */
 							RegCloseKey(hkey);
 							RegCloseKey(hsubkey);
+
 							efree(libname);
 							/* We can either open up the "win32" key and find the DLL name */
 							/* Or just parse the version string and pass that in */
@@ -1294,11 +1401,11 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 								major = 1;
 								minor = 0;
 							}
-							str = malloc(strlen(keyname)+strlen(version)+20); /* 18 == safety, 2 == extra comma and \0 */
+							str = emalloc(strlen(keyname)+strlen(version)+20); /* 18 == safety, 2 == extra comma and \0 */
 							sprintf(str, "%s,%d,%d", keyname, major, minor);
-							free(keyname);
+							efree(keyname);
 							TypeLib = php_COM_find_typelib(str, mode);
-							free(str);
+							efree(str);
 							/* This is probbaly much harder to read and follow */
 							/* But it is MUCH more effiecient than trying to */
 							/* test for errors and leave through a single "return" */
@@ -1313,8 +1420,8 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 				}
 				RegCloseKey(hsubkey);
 			}
-			free(keyname);
-			free(libname);
+			efree(keyname);
+			efree(libname);
 			return NULL;
 		}
 	}
@@ -1322,15 +1429,13 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 	return TypeLib;
 }
 
-static int php_COM_load_typelib(char *typelib_name, int mode)
+static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
 {
-	ITypeLib *TypeLib;
 	ITypeComp *TypeComp;
 	int i;
 	int interfaces;
 	ELS_FETCH();
 
-	TypeLib = php_COM_find_typelib(typelib_name, mode);
 	if (NULL == TypeLib)
 	{
 		return FAILURE;
@@ -1390,8 +1495,6 @@ static int php_COM_load_typelib(char *typelib_name, int mode)
 		}
 	}
 
-
-	TypeLib->lpVtbl->Release(TypeLib);
 	return SUCCESS;
 }
 
