@@ -2,80 +2,18 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_DOM_CHECK_VERSION,[
-  old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$DOMXML_DIR/include$DOMXML_DIR_ADD
-  AC_MSG_CHECKING(for libxml version)
-  AC_EGREP_CPP(yes,[
-#include <libxml/xmlversion.h>
-#if LIBXML_VERSION >= 20414
-  yes
-#endif
-  ],[
-    AC_MSG_RESULT(>= 2.4.14)
-  ],[
-    AC_MSG_ERROR(libxml version 2.4.14 or greater required.)
-  ])
-  CPPFLAGS=$old_CPPFLAGS
-])
-
 PHP_ARG_WITH(dom, for DOM support,
-[  --with-dom[=DIR]        Include DOM support (requires libxml >= 2.4.14).
-                          DIR is the libxml install directory.])
-
-if test -z "$PHP_ZLIB_DIR"; then
-  PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]     DOMXML: Set the path to libz install prefix.], no, no)
-fi
+[  --with-dom[=DIR]        Include DOM support])
 
 if test "$PHP_DOM" != "no"; then
 
-  DOMXML_DIR_ADD=""
-  if test -r $PHP_DOM/include/libxml2/libxml/tree.h; then
-    DOMXML_DIR=$PHP_DOM
-    DOMXML_DIR_ADD="/libxml2"
-  elif test -r $PHP_DOM/include/libxml/tree.h; then
-    DOMXML_DIR=$PHP_DOM
-  else
-    for i in /usr/local /usr; do
-      test -r $i/include/libxml/tree.h && DOMXML_DIR=$i
-      test -r $i/include/libxml2/libxml/tree.h && DOMXML_DIR=$i && DOMXML_DIR_ADD="/libxml2"
-    done
-  fi
-
-  if test -z "$DOMXML_DIR"; then
+  if test "$PHP_BUNDLE_LIBXML" = "no"; then
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR(Please reinstall the libxml >= 2.4.14 distribution)
+    AC_MSG_ERROR(libxml2 required)
   fi
 
-  PHP_DOM_CHECK_VERSION
-
-  if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.$SHLIB_SUFFIX_NAME ; then
-    DOM_LIBNAME=xml2
-  else
-    DOM_LIBNAME=xml
-  fi
-
-  XML2_CONFIG=$DOMXML_DIR/bin/xml2-config
- 
-  if test -x $XML2_CONFIG; then
-    DOM_LIBS=`$XML2_CONFIG --libs`
-    PHP_EVAL_LIBLINE($DOM_LIBS, DOMXML_SHARED_LIBADD)
-  else 
-    PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
-  fi
-
-  PHP_ADD_INCLUDE($DOMXML_DIR/include$DOMXML_DIR_ADD)
-
-  if test "$PHP_ZLIB_DIR" = "no"; then
-    AC_MSG_ERROR(DOMXML requires ZLIB. Use --with-zlib-dir=<DIR>)
-  else
-    PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, DOMXML_SHARED_LIBADD)
-  fi
-  
   AC_DEFINE(HAVE_DOMXML,1,[ ])
   PHP_NEW_EXTENSION(domxml, php_domxml.c, $ext_shared)
-  PHP_SUBST(DOMXML_SHARED_LIBADD)
 fi
 
 AC_DEFUN(PHP_DOM_XSLT_CHECK_VERSION,[
@@ -142,24 +80,15 @@ if test "$PHP_DOM_XSLT" != "no"; then
   PHP_ADD_INCLUDE($DOMXSLT_DIR/include)
 
   if test "$PHP_DOM" = "no"; then
-    AC_MSG_ERROR(DOMXSLT requires DOMXML. Use --with-dom=<DIR>)
-  fi
-  
-  if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.$SHLIB_SUFFIX_NAME ; then
-    DOM_LIBNAME=xml2
-  else
-    DOM_LIBNAME=xml
+    AC_MSG_ERROR(DOMXSLT requires DOMXML. Use --with-dom)
   fi
 
-  PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
-  PHP_ADD_INCLUDE($DOMXML_DIR/include$DOMXML_DIR_ADD)
-
-  if test -f $DOMXML_DIR/lib/libxsltbreakpoint.a -o -f $DOMXML_DIR/lib/libxsltbreakpoint.$SHLIB_SUFFIX_NAME ; then
-    PHP_ADD_LIBRARY_WITH_PATH(xsltbreakpoint, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  if test -f $DOMXSLT_DIR/lib/libxsltbreakpoint.a -o -f $DOMXSLT_DIR/lib/libxsltbreakpoint.$SHLIB_SUFFIX_NAME ; then
+    PHP_ADD_LIBRARY_WITH_PATH(xsltbreakpoint, $DOMXSLT_DIR/lib, DOMXML_SHARED_LIBADD)
   fi
 
   AC_DEFINE(HAVE_DOMXSLT,1,[ ])
-  
+
   PHP_SUBST(DOMXML_SHARED_LIBADD)
 fi
 
@@ -171,7 +100,7 @@ if test "$PHP_DOM_EXSLT" != "no"; then
   if test "$PHP_DOM_XSLT" = "no"; then
     AC_MSG_ERROR(DOMEXSLT requires DOMXSLT. Use --with-dom-xslt=<DIR>)
   fi
-  
+
   if test -r $PHP_DOM_EXSLT/include/libexslt/exslt.h; then
     DOMEXSLT_DIR=$PHP_DOM_EXSLT
   else
