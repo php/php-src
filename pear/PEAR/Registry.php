@@ -36,7 +36,7 @@ class PEAR_Registry
 
     function PEAR_Registry()
     {
-        $this->statedir = PHP_LOCALSTATEDIR . "/pear/registry";
+        $this->statedir = PEAR_INSTALL_DIR . "/.registry";
     }
 
     // }}}
