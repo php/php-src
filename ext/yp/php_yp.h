@@ -42,7 +42,6 @@ extern zend_module_entry yp_module_entry;
 #define yp_module_ptr &yp_module_entry
 
 /* yp.c functions */
-int php3_minit_yp(INIT_FUNC_ARGS);
 PHP_FUNCTION(yp_get_default_domain);
 PHP_FUNCTION(yp_order);
 PHP_FUNCTION(yp_master);

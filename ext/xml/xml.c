@@ -148,7 +148,6 @@ static int le_xml_parser;
 /* }}} */
 /* {{{ startup, shutdown and info functions */
 
-/* {{{ php3_minit_xml */
 
 #ifdef ZTS
 static void php_xml_init_globals(php_xml_globals *xml_globals)
@@ -193,48 +192,39 @@ PHP_MINIT_FUNCTION(xml)
 	REGISTER_LONG_CONSTANT("XML_ERROR_UNCLOSED_CDATA_SECTION", XML_ERROR_UNCLOSED_CDATA_SECTION, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ERROR_EXTERNAL_ENTITY_HANDLING", XML_ERROR_EXTERNAL_ENTITY_HANDLING, CONST_CS|CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("XML_OPTION_CASE_FOLDING", PHP3_XML_OPTION_CASE_FOLDING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XML_OPTION_TARGET_ENCODING", PHP3_XML_OPTION_TARGET_ENCODING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_TAGSTART", PHP3_XML_OPTION_SKIP_TAGSTART, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_WHITE", PHP3_XML_OPTION_SKIP_WHITE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XML_OPTION_CASE_FOLDING", PHP_XML_OPTION_CASE_FOLDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XML_OPTION_TARGET_ENCODING", PHP_XML_OPTION_TARGET_ENCODING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_TAGSTART", PHP_XML_OPTION_SKIP_TAGSTART, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_WHITE", PHP_XML_OPTION_SKIP_WHITE, CONST_CS|CONST_PERSISTENT);
 	
 
 	return SUCCESS;
 }
 
-/* }}} */
-/* {{{ php3_rinit_xml */
 
 PHP_RINIT_FUNCTION(xml)
 {
     return SUCCESS;
 }
 
-/* }}} */
-/* {{{ php3_mshutdown_xml() */
 
 PHP_MSHUTDOWN_FUNCTION(xml)
 {
 	return SUCCESS;
 }
 
-/* }}} */
-/* {{{ php3_rshutdown_xml() */
 
 PHP_RSHUTDOWN_FUNCTION(xml)
 {
     return SUCCESS;
 }
 
-/* }}} */
-/* {{{ php3_info_xml() */
 
 PHP_MINFO_FUNCTION(xml)
 {
 	PUTS("XML support active");
 }
 
-/* }}} */
 
 /* {{{ extension-internal functions */
 
@@ -1405,19 +1395,19 @@ PHP_FUNCTION(xml_parser_set_option)
 	convert_to_long_ex(opt);
 
 	switch ((*opt)->value.lval) {
-		case PHP3_XML_OPTION_CASE_FOLDING:
+		case PHP_XML_OPTION_CASE_FOLDING:
 			convert_to_long_ex(val);
 			parser->case_folding = (*val)->value.lval;
 			break;
-		case PHP3_XML_OPTION_SKIP_TAGSTART:
+		case PHP_XML_OPTION_SKIP_TAGSTART:
 			convert_to_long_ex(val);
 			parser->toffset = (*val)->value.lval;
 			break;
-		case PHP3_XML_OPTION_SKIP_WHITE:
+		case PHP_XML_OPTION_SKIP_WHITE:
 			convert_to_long_ex(val);
 			parser->skipwhite = (*val)->value.lval;
 			break;
-		case PHP3_XML_OPTION_TARGET_ENCODING: {
+		case PHP_XML_OPTION_TARGET_ENCODING: {
 			xml_encoding *enc;
 			convert_to_string_ex(val);
 			enc = xml_get_encoding((*val)->value.str.val);
@@ -1454,10 +1444,10 @@ PHP_FUNCTION(xml_parser_get_option)
 	convert_to_long_ex(opt);
 
 	switch ((*opt)->value.lval) {
-		case PHP3_XML_OPTION_CASE_FOLDING:
+		case PHP_XML_OPTION_CASE_FOLDING:
 			RETURN_LONG(parser->case_folding);
 			break;
-		case PHP3_XML_OPTION_TARGET_ENCODING:
+		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING(parser->target_encoding, 1);
 			break;
 		default:
