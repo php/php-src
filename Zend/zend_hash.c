@@ -535,11 +535,13 @@ ZEND_API void zend_hash_reverse_destroy(HashTable *ht)
 
 	while (1) {
 		p = ht->pListTail;
-		if (! p)
+		if (!p) {
 			break;
+		}
 		q = p->pListLast;
-		if (q)
+		if (q) {
 			q->pListNext = NULL;
+		}
 		ht->pListTail = q;
 
 		if (ht->pDestructor) {
