@@ -1587,6 +1587,25 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   unset OPENSSL_INCDIR
   unset OPENSSL_LIBDIR
 
+  dnl First try to find pkg-config
+  if test -z "$PKG_CONFIG"; then
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+  fi
+
+  dnl If pkg-config is found try using it
+  if test "$PHP_OPENSSL" = "yes" && test -x "$PKG_CONFIG"; then
+    if $PKG_CONFIG --atleast-version=0.9.6 openssl; then
+      found_openssl=yes
+      OPENSSL_LIBS=`$PKG_CONFIG --libs openssl`
+      OPENSSL_INCS=`$PKG_CONFIG --cflags-only-I openssl`
+      OPENSSL_INCDIR=`$PKG_CONFIG --variable=includedir openssl`
+    else
+      AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
+    fi
+
+  else 
+
+  dnl If pkg-config fails for some reason, revert to the old method
   if test "$PHP_OPENSSL" = "yes"; then
     PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
   fi
@@ -1626,6 +1645,8 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
     PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
       found_openssl=yes
+      OPENSSL_LIBS=-L$OPENSSL_LIBDIR -lcrypto -lssl
+      OPENSSL_INCS=-I$OPENSSL_INCDIR
     ], [
       AC_MSG_ERROR([libssl not found!])
     ],[
@@ -1636,16 +1657,16 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   ],[
     -L$OPENSSL_LIBDIR
   ])
+  fi
 
+  dnl For apache 1.3.x static build
   OPENSSL_INCDIR_OPT=-I$OPENSSL_INCDIR
   AC_SUBST(OPENSSL_INCDIR_OPT)
 
   if test "$found_openssl" = "yes"; then
-    if test -n "$OPENSSL_INCDIR" && test -n "$OPENSSL_LIBDIR"; then
-      PHP_ADD_INCLUDE($OPENSSL_INCDIR)
-      PHP_ADD_LIBPATH($OPENSSL_LIBDIR, $1)
-      PHP_ADD_LIBRARY(crypto,,$1)
-      PHP_ADD_LIBRARY(ssl,, $1)
+    if test -n "$OPENSSL_LIBS" && test -n "$OPENSSL_INCS"; then
+      PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
+      PHP_EVAL_INCLINE($OPENSSL_INCS)
     fi
     $2
 ifelse([$3],[],,[else $3])
