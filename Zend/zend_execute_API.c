@@ -29,7 +29,7 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_execute_locks.h"
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
