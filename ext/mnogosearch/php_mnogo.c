@@ -5,7 +5,7 @@
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
+   | Copyright (c) 1997, 1998, 1999, 2000, 2001 The PHP Group             |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -233,7 +233,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 /* }}} */
 
 
-/* {{{ proto int udm_set_agent_param(agent,var,val)
+/* {{{ proto int udm_set_agent_param(string agent, int var, string val)
    Set mnoGoSearch agent session parameters */
 DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 {
@@ -363,8 +363,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 /* }}} */
 
 
-/* {{{ proto int udm_find(int agent_identifier,string query)
-   perform search */
+/* {{{ proto int udm_find(int agent_identifier, string query)
+   Perform search */
 DLEXPORT PHP_FUNCTION(udm_find)
 {
 	pval ** yyquery, ** yyagent;
@@ -391,7 +391,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 /* }}} */
 
 
-/* {{{ proto int udm_get_res_field(int res_identifier,int row_num,const int field_name)
+/* {{{ proto int udm_get_res_field(int res_identifier, int row_num, int field_name)
    Fetch mnoGoSearch result field */
 DLEXPORT PHP_FUNCTION(udm_get_res_field){
 	pval **yyres, **yyrow_num, **yyfield_name;
@@ -440,8 +440,8 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field){
 /* }}} */
 
 
-/* {{{ proto int udm_get_res_param(int res_identifier, const int param_id)
-    mnoGoSearch result parameters */
+/* {{{ proto int udm_get_res_param(int res_identifier, int param_id)
+   mnoGoSearch result parameters */
 DLEXPORT PHP_FUNCTION(udm_get_res_param)
 {
 	pval ** yyres, ** yyparam;
@@ -474,7 +474,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 
 
 /* {{{ proto int udm_free_res(int res_identifier)
-    mnoGoSearch free result */
+   mnoGoSearch free result */
 DLEXPORT PHP_FUNCTION(udm_free_res)
 {
 	pval ** yyres;
@@ -498,7 +498,7 @@ DLEXPORT PHP_FUNCTION(udm_free_res)
 
 
 /* {{{ proto int udm_errno(int agent_identifier)
-    mnoGoSearch error number */
+   mnoGoSearch error number */
 DLEXPORT PHP_FUNCTION(udm_errno)
 {
 	pval ** yyagent;
@@ -521,7 +521,7 @@ DLEXPORT PHP_FUNCTION(udm_errno)
 
 
 /* {{{ proto int udm_error(int agent_identifier)
-    mnoGoSearch error message */
+   mnoGoSearch error message */
 DLEXPORT PHP_FUNCTION(udm_error)
 {
 	pval ** yyagent;
