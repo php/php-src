@@ -402,3 +402,15 @@ SAPI_API int sapi_get_uid()
 		return statbuf.st_uid;
 	}
 }
+
+
+SAPI_API char *sapi_getenv(char *name, int name_len)
+{
+	if (sapi_module.getenv) {
+		SLS_FETCH();
+
+		return sapi_module.getenv(name, name_len SLS_CC);
+	} else {
+		return NULL;
+	}
+}

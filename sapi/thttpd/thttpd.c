@@ -113,6 +113,7 @@ static sapi_module_struct sapi_module = {
 	sapi_thttpd_ub_write,
 	NULL,
 	NULL,									/* get uid */
+	NULL,									/* getenv */
 
 	php_error,
 	
