@@ -946,7 +946,7 @@ PHP_FUNCTION(proc_open)
 	 * ends, where appropriate */
 	for (i = 0; i < ndesc; i++) {
 		FILE *fp;
-		char *mode_string;
+		char *mode_string=NULL;
 		php_stream *stream;
 
 		close_descriptor(descriptors[i].childend);
