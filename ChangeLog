@@ -1,0 +1,20 @@
+2004-01-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/recode/recode.c:
+      Fix ZTS build
+
+2004-01-01  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_prop.c:
+      fixed bug(s) in macro call for statement properties
+
+    * ext/mysqli/mysqli_prop.c:
+      Added Macro for longlong values
+      added property stmt->affected_rows
+
+2004-01-01  Derick Rethans  <php@derickrethans.nl>
+
+    * ChangeLog
+      ChangeLog.2003.gz:
+      - Compress 2003 changelog
+
