@@ -3158,7 +3158,7 @@ static int add_extension_class(zend_class_entry **pce, int num_args, va_list arg
 }
 /* }}} */
 
-/* {{{ proto public array Reflection_Extension::getClasses()
+/* {{{ proto public ReflectionClass[] Reflection_Extension::getClasses()
    Returns an array containing Reflection_Class objects for all classes of this extension */
 ZEND_METHOD(reflection_extension, getClasses)
 {
@@ -3173,7 +3173,7 @@ ZEND_METHOD(reflection_extension, getClasses)
 }
 /* }}} */
 
-/* {{{ proto public array Reflection_Extension::getClasses()
+/* {{{ proto public array Reflection_Extension::getClassNames()
    Returns an array containing all names of all classes of this extension */
 ZEND_METHOD(reflection_extension, getClassNames)
 {
