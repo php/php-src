@@ -149,8 +149,8 @@ PHP_FUNCTION(ncurses_init)
 		c.value = *zscr;
 		zval_copy_ctor(&c.value);
 		c.flags = CONST_CS;
-		c.name = zend_strndup("STDSCR", 7);
-		c.name_len = 7;
+		c.name = zend_strndup(ZEND_STRS("STDSCR"));
+		c.name_len = sizeof("STDSCR");
 		zend_register_constant(&c TSRMLS_CC);
 
 		/* we need this "interesting" arrangement because the
@@ -162,7 +162,7 @@ PHP_FUNCTION(ncurses_init)
 		c.value = *zscr;            \
 		zval_copy_ctor(&c.value);   \
 		c.flags = CONST_CS;         \
-		c.name = zend_strndup("NCURSES_" #x, sizeof("NCURSES_" #x)); \
+		c.name = zend_strndup(ZEND_STRS("NCURSES_" #x)); \
 		c.name_len = sizeof("NCURSES_" #x);                           \
 		zend_register_constant(&c TSRMLS_CC)
 		
