@@ -334,9 +334,11 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 			tmp_read_bytes = FCGX_GetStr( pos, count_bytes-read_bytes, request->in );
 			pos += tmp_read_bytes;
 		} else {
-#endif
 			tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
 		}
+#else
+		tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
+#endif
 
 		if (tmp_read_bytes<=0) {
 			break;
