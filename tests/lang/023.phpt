@@ -27,23 +27,17 @@ if ($time_left>0) {
 
 ?>
 --EXPECT--
-
 PHP Regression Test
 
 <html>
 <head>
 
-
 *** Testing assignments and variable aliasing: ***<br>
-
 This should read "blah": blah<br>
-
 This should read "this is nifty": this is nifty<br>
-
 *************************************************<br>
 
 *** Testing integer operators ***<br>
-
 Correct result - 8:  8<br>
 Correct result - 8:  8<br>
 Correct result - 2:  2<br>
@@ -55,7 +49,6 @@ Correct result - 3:  3<br>
 *********************************<br>
 
 *** Testing real operators ***<br>
-
 Correct result - 8:  8<br>
 Correct result - 8:  8<br>
 Correct result - 2:  2<br>
@@ -73,7 +66,6 @@ this_still_works<br>
 should_print<br>
 
 
-
 *** Seriously nested if's test ***<br>
 ** spelling correction by kluzz **
 Only two lines of text should follow:<br>
@@ -85,10 +77,8 @@ this is supposed to be displayed. should be:  $i=2, $j=4.  is:  $i=2, $j=4<br>
 4 4<br>
 **********************************<br>
 
-
 *** C-style else-if's ***<br>
 This should be displayed<br>
-
 *************************<br>
 
 *** WHILE tests ***<br>
@@ -132,7 +122,6 @@ This should be displayed<br>
 37 is greater than 20<br>
 38 is greater than 20<br>
 39 is greater than 20<br>
-
 *******************<br>
 
 
@@ -170,7 +159,6 @@ ${test22}[2] = 6<br>
 
 *** hash test... ***<br>
 commented out...
-
 **************************<br>
 
 *** Hash resizing test ***<br>
@@ -204,7 +192,6 @@ baaaaaaaaa<br>
 2<br>
 baaaaaaaaaa<br>
 1<br>
-
 **************************<br>
 
 
@@ -258,7 +245,6 @@ $k should go from 0 to 2<br>
     $k=1<br>
     $k=2<br>
 $i=2<br>
-
 ***********************<br>
 
 *** Nested file include test ***<br>
@@ -267,9 +253,7 @@ This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>
-
 ********************************<br>
 
 Tests completed.<br>
-
 Limor Ullmann is now Limor Baruch :I

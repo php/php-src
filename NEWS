@@ -5,9 +5,9 @@ PHP 4.0                                                                    NEWS
 - Removed support of print $obj automatically calling the __string_value()
   method. Instead define yourself a method such as toString() and use
   print $obj->toString() (Andi, Zend Engine)
-- Added PHP API for Zend's ticks. (Stig)
 
 29 Aug 2000, Version 4.0.2 
+- Added PHP API for Zend's ticks. (Stig)
 - PHP 3 regression testing framework re-born (Stig)
 - Added php_uname() function (Stig)
 - Made a minor change to allow building with OpenLDAP 2.0 (Stig Venaas)
