@@ -1,5 +1,5 @@
 --TEST--
-An interface method cannot be final
+ZE2 An interface method cannot be final
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--

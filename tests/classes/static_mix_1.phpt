@@ -1,5 +1,5 @@
 --TEST--
-You cannot overload a static method with a non static method
+ZE2 You cannot overload a static method with a non static method
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--

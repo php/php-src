@@ -1,7 +1,5 @@
 --TEST--
 Classes general test
---POST--
---GET--
 --FILE--
 
 <?php 
