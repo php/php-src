@@ -67,6 +67,11 @@ extern "C" {
 #define gdTrueColorGetRed(c) (((c) & 0xFF0000) >> 16)
 #define gdTrueColorGetGreen(c) (((c) & 0x00FF00) >> 8)
 #define gdTrueColorGetBlue(c) ((c) & 0x0000FF)
+#define gdEffectReplace 0
+#define gdEffectAlphaBlend 1
+#define gdEffectNormal 2
+#define gdEffectOverlay 3
+
 
 /* This function accepts truecolor pixel values only. The 
 	source color is composited with the destination color
@@ -334,6 +339,11 @@ void gdImageColorDeallocate(gdImagePtr im, int color);
         it can be negative) and the quality loss is ugly. */
 
 void gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
+
+/* An attempt at getting the results of gdImageTrueColorToPalette
+	to look a bit more like the original (im1 is the original
+	and im2 is the palette version */
+int gdImageColorMatch(gdImagePtr im1, gdImagePtr im2);
 
 /* Specifies a color index (if a palette image) or an
 	RGB color (if a truecolor image) which should be
