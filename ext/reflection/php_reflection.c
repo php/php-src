@@ -836,8 +836,8 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 }
 /* }}} */
 
-/* {{{ _relection_export */
-static void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
+/* {{{ _reflection_export */
+static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
 {
 	zval reflector, *reflector_ptr = &reflector;
 	zval output, *output_ptr = &output;
@@ -1018,7 +1018,7 @@ ZEND_METHOD(reflection, getModifierNames)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_function, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_function_ptr, 1);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_function_ptr, 1);
 }
 /* }}} */
 
@@ -1292,7 +1292,7 @@ ZEND_METHOD(reflection_function, getParameters)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_parameter, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_parameter_ptr, 2);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_parameter_ptr, 2);
 }
 /* }}} */
 
@@ -1506,7 +1506,7 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_method, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_method_ptr, 2);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_method_ptr, 2);
 }
 /* }}} */
 
@@ -1802,7 +1802,7 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_class, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_class_ptr, 1);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_class_ptr, 1);
 }
 /* }}} */
 
@@ -2575,7 +2575,7 @@ ZEND_METHOD(reflection_class, getExtensionName)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_object, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_object_ptr, 1);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_object_ptr, 1);
 }
 /* }}} */
 
@@ -2591,7 +2591,7 @@ ZEND_METHOD(reflection_object, __construct)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_property, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_property_ptr, 2);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_property_ptr, 2);
 }
 /* }}} */
 
@@ -2874,7 +2874,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
 {
-	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_extension_ptr, 1);
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_extension_ptr, 1);
 }
 /* }}} */
 
