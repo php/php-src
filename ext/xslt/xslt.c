@@ -213,6 +213,7 @@ extern void xslt_free_arguments(xslt_args *to_free)
    Call an XSLT handler */
 extern void xslt_call_function(char *name, 
                                zval *function, 
+                               zval *object,
                                int argc, 
                                zval **user_args, 
                                zval **retval)
@@ -227,10 +228,21 @@ extern void xslt_call_function(char *name,
 		argv[idx] = &user_args[idx];
 	}
 	
-	/* Call the function */
-	error = call_user_function_ex(EG(function_table),
-	                              NULL, function,
-							      retval, argc, argv, 0, NULL TSRMLS_CC);
+
+	/* Call the function (with object when appropriate)*/
+	if (object == NULL)
+	{
+		error = call_user_function_ex(EG(function_table),
+					      NULL, function,
+					      retval, argc, argv, 0, NULL TSRMLS_CC);
+	}
+	else
+	{
+		error = call_user_function_ex(EG(function_table),
+					      &object, function,
+					      retval, argc, argv, 0, NULL TSRMLS_CC);
+	}
+
 	if (error == FAILURE) {
 		php_error(E_WARNING, "Cannot call the %s handler: %s", 
 		          name, Z_STRVAL_P(function));
