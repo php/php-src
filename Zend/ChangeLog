@@ -1,3 +1,10 @@
+2003-01-02  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      Fix incorrect linkage of access-levels, when using private methods
+
 2003-01-01  Zeev Suraski  <zeev@zend.com>
 
     * zend_API.c
