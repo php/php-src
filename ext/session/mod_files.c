@@ -47,6 +47,7 @@ typedef struct {
 	int fd;
 	char *lastkey;
 	char *basedir;
+	size_t basedir_len;
 	int dirdepth;
 } ps_files;
 
@@ -81,24 +82,28 @@ static int ps_files_valid_key(const char *key)
 
 static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key)
 {
-	int keylen;
+	size_t key_len;
 	const char *p;
 	int i;
 	int n;
 	
-	keylen = strlen(key);
-	if (keylen <= data->dirdepth || buflen < 
-			(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
+	key_len = strlen(key);
+	if (key_len <= data->dirdepth || buflen < 
+			(strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) 
 		return NULL;
 	p = key;
-	n = sprintf(buf, "%s%c", data->basedir, PHP_DIR_SEPARATOR);
+	memcpy(buf, data->basedir, data->basedir_len);
+	n = data->basedir_len;
+	buf[n++] = PHP_DIR_SEPARATOR;
 	for (i = 0; i < data->dirdepth; i++) {
 		buf[n++] = *p++;
 		buf[n++] = PHP_DIR_SEPARATOR;
 	}
+	memcpy(buf + n, FILE_PREFIX, sizeof(FILE_PREFIX) - 1);
+	n += sizeof(FILE_PREFIX) - 1;
+	memcpy(buf + n, key, key_len);
+	n += key_len;
 	buf[n] = '\0';
-	strcat(buf, FILE_PREFIX);
-	strcat(buf, key);
 	
 	return buf;
 }
@@ -162,6 +167,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
+	size_t dirname_len;
 
 	dir = opendir(dirname);
 	if (!dir) {
@@ -171,18 +177,31 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 
 	time(&now);
 
+	dirname_len = strlen(dirname);
+
+	/* Prepare buffer (dirname never changes) */
+	memcpy(buf, dirname, dirname_len);
+	buf[dirname_len] = PHP_DIR_SEPARATOR;
+	
 	while (php_readdir_r(dir, (struct dirent *) dentry, &entry) == 0 && entry) {
 		/* does the file start with our prefix? */
-		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
-				/* create full path */
-				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, PHP_DIR_SEPARATOR,
-					entry->d_name) > 0 &&
-				/* stat the directory entry */
-				V_STAT(buf, &sbuf) == 0 &&
-				/* is it expired? */
-				(now - sbuf.st_atime) > maxlifetime) {
-			V_UNLINK(buf);
-			nrdels++;
+		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
+			size_t entry_len;
+
+			entry_len = strlen(entry->d_name);
+			/* does it fit into our buffer? */
+			if (entry_len + dirname_len + 2 < MAXPATHLEN) {
+				/* create the full path.. */
+				memcpy(buf + dirname_len + 1, entry->d_name, entry_len);
+				/* NUL terminate it and */
+				buf[dirname_len + entry_len + 1] = '\0';
+				/* check whether its last access was more than maxlifet ago */
+				if (V_STAT(buf, &sbuf) == 0 && 
+						(now - sbuf.st_atime) > maxlifetime) {
+					V_UNLINK(buf);
+					nrdels++;
+				}
+			}
 		}
 	}
 
@@ -206,7 +225,8 @@ PS_OPEN_FUNC(files)
 		data->dirdepth = strtol(save_path, NULL, 10);
 		save_path = p + 1;
 	}
-	data->basedir = estrdup(save_path);
+	data->basedir_len = strlen(save_path);
+	data->basedir = estrndup(save_path, data->basedir_len);
 	
 	return SUCCESS;
 }

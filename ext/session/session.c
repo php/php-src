@@ -48,6 +48,8 @@ static php_ps_globals ps_globals;
 
 #include "modules.c"
 
+#include "ext/standard/php_smart_str.h"
+
 function_entry session_functions[] = {
 	PHP_FE(session_name, NULL)
 	PHP_FE(session_module_name, NULL)
@@ -632,16 +634,18 @@ static char *week_days[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
 };
 
-static void strcat_gmt(char *ubuf, time_t *when)
+static void strcpy_gmt(char *ubuf, time_t *when)
 {
 	char buf[MAX_STR];
 	struct tm tm;
+	int n;
 	
 	php_gmtime_r(when, &tm);
 	
 	/* we know all components, thus it is safe to use sprintf */
-	sprintf(buf, "%s, %d %s %d %02d:%02d:%02d GMT", week_days[tm.tm_wday], tm.tm_mday, month_names[tm.tm_mon], tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	strcat(ubuf, buf);
+	n = sprintf(buf, "%s, %d %s %d %02d:%02d:%02d GMT", week_days[tm.tm_wday], tm.tm_mday, month_names[tm.tm_mon], tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	memcpy(ubuf, buf, n);
+	ubuf[n] = '\0';
 }
 
 static void last_modified(void)
@@ -657,8 +661,9 @@ static void last_modified(void)
 			return;
 		}
 
-		strcpy(buf, "Last-Modified: ");
-		strcat_gmt(buf, &sb.st_mtime);
+#define LAST_MODIFIED "Last-Modified: "
+		memcpy(buf, LAST_MODIFIED, sizeof(LAST_MODIFIED) - 1);
+		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
 		ADD_COOKIE(buf);
 	}
 }
@@ -670,8 +675,9 @@ CACHE_LIMITER_FUNC(public)
 	
 	time(&now);
 	now += PS(cache_expire) * 60;
-	strcpy(buf, "Expires: ");
-	strcat_gmt(buf, &now);
+#define EXPIRES "Expires: "
+	memcpy(buf, EXPIRES, sizeof(EXPIRES) - 1);
+	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_COOKIE(buf);
 	
 	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60);
@@ -735,7 +741,7 @@ static int php_session_cache_limiter(PSLS_D)
 	return (-1);
 }
 
-#define COOKIE_FMT 		"Set-Cookie: %s=%s"
+#define COOKIE_SET_COOKIE "Set-Cookie: "
 #define COOKIE_EXPIRES	"; expires="
 #define COOKIE_PATH		"; path="
 #define COOKIE_DOMAIN	"; domain="
@@ -743,10 +749,7 @@ static int php_session_cache_limiter(PSLS_D)
 
 static void php_session_send_cookie(PSLS_D)
 {
-	int len;
-	int pathlen;
-	int domainlen;
-	char *cookie;
+	smart_str ncookie = {0};
 	char *date_fmt = NULL;
 	SLS_FETCH();
 
@@ -763,49 +766,36 @@ static void php_session_send_cookie(PSLS_D)
 		return;
 	}
 
-	len = strlen(PS(session_name)) + strlen(PS(id)) + sizeof(COOKIE_FMT);
+	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
+	smart_str_appends(&ncookie, PS(session_name));
+	smart_str_appendc(&ncookie, '=');
+	smart_str_appends(&ncookie, PS(id));
+	
 	if (PS(cookie_lifetime) > 0) {
 		date_fmt = php_std_date(time(NULL) + PS(cookie_lifetime));
-		len += sizeof(COOKIE_EXPIRES) + strlen(date_fmt);
-	}
-
-	if(PS(cookie_secure)) {
-		len += sizeof(COOKIE_SECURE);
-	}
-
-	pathlen = strlen(PS(cookie_path));
-	if (pathlen > 0)
-		len += pathlen + sizeof(COOKIE_PATH);
-
-	domainlen = strlen(PS(cookie_domain));
-	if (domainlen > 0)
-		len += domainlen + sizeof(COOKIE_DOMAIN);
-	
-	cookie = ecalloc(len + 1, 1);
-	
-	len = snprintf(cookie, len, COOKIE_FMT, PS(session_name), PS(id));
-	if (PS(cookie_lifetime) > 0) {
-		strcat(cookie, COOKIE_EXPIRES);
-		strcat(cookie, date_fmt);
-		len += strlen(COOKIE_EXPIRES) + strlen(date_fmt);
+		
+		smart_str_appends(&ncookie, COOKIE_EXPIRES);
+		smart_str_appends(&ncookie, date_fmt);
 		efree(date_fmt);
 	}
-	
-	if (pathlen > 0) {
-		strcat(cookie, COOKIE_PATH);
-		strcat(cookie, PS(cookie_path));
-	}
 
-	if (domainlen > 0) {
-		strcat(cookie, COOKIE_DOMAIN);
-		strcat(cookie, PS(cookie_domain));
+	if (PS(cookie_path)[0]) {
+		smart_str_appends(&ncookie, COOKIE_PATH);
+		smart_str_appends(&ncookie, PS(cookie_path));
+	}
+	
+	if (PS(cookie_domain)[0]) {
+		smart_str_appends(&ncookie, COOKIE_DOMAIN);
+		smart_str_appends(&ncookie, PS(cookie_domain));
 	}
 
 	if (PS(cookie_secure)) {
-		strcat(cookie, COOKIE_SECURE);
+		smart_str_appends(&ncookie, COOKIE_SECURE);
 	}
 
-	sapi_add_header(cookie, strlen(cookie), 0);
+	smart_str_0(&ncookie);
+	
+	sapi_add_header(ncookie.c, ncookie.len, 0);
 }
 
 static ps_module *_php_find_ps_module(char *name PSLS_DC)
