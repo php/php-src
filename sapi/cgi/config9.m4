@@ -133,6 +133,7 @@ if test "$PHP_SAPI" = "default"; then
       exit 1
     fi
     if test "$PHP_ENABLE_FASTCGI" = "yes"; then
+      PHP_ADD_BUILD_DIR($abs_builddir/sapi/cgi/libfcgi)
       PHP_FASTCGI=1
       PHP_FCGI_FILES="libfcgi/fcgi_stdio.c libfcgi/fcgiapp.c libfcgi/os_unix.c"
       PHP_FCGI_INCLUDE="-I$PHP_LIBFCGI_DIR/include"
