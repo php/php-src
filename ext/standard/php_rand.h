@@ -113,9 +113,10 @@ PHP_FUNCTION(mt_srand);
 PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);
 
-PHPAPI long php_rand(void);
-PHPAPI long php_rand_range(long min, long max);
-PHPAPI long php_randmax(void);
+PHPAPI long   php_rand(void);
+PHPAPI long   php_rand_range(long min, long max);
+PHPAPI double php_drand(void);
+PHPAPI long   php_randmax(void);
 
 #endif	/* PHP_RAND_H */
 

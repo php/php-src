@@ -41,6 +41,8 @@ php_randgen_entry *php_randgen_entries[PHP_RAND_NUMRANDS];
 #define PHP_RANDMAX(which)		(php_randgen_entries[which]->randmax)
 #define PHP_RAND_INISTR(which)	(php_randgen_entries[which]->ini_str)
 
+#define CURR_GEN BG(rand_generator_current)
+
 PHP_MINIT_FUNCTION(rand)
 {
 	PHP_MINIT(rand_sys)(INIT_FUNC_ARGS_PASSTHRU);
@@ -110,7 +112,7 @@ PHP_INI_END()
 /* {{{ PHPAPI void php_srand(void) */
 PHPAPI void php_srand(void)
 {
-	BG(rand_generator_current) = BG(rand_generator);
+	CURR_GEN = BG(rand_generator);
 	PHP_SRAND(BG(rand_generator), SRAND_A_RANDOM_SEED);
 }
 /* }}} */
@@ -119,25 +121,49 @@ PHPAPI void php_srand(void)
 #define pim_srand_common(name,type) 				\
 PHP_FUNCTION(name)							\
 {											\
-	zval **arg;								\
+	zval **seed;								\
+	zval **alg;								\
 											\
-	if (ZEND_NUM_ARGS() != 1) {				\
-		WRONG_PARAM_COUNT;					\
-	}										\
-	zend_get_parameters_ex(1, &arg);		\
-	convert_to_long_ex(arg);				\
-											\
-	BG(rand_generator_current) = type;		\
-	PHP_SRAND(type, Z_LVAL_PP(arg)); 		\
+	switch (ZEND_NUM_ARGS()) {						\
+		case 0:										\
+			CURR_GEN = BG(rand_generator);	\
+			PHP_SRAND(BG(rand_generator), SRAND_A_RANDOM_SEED);	\
+			RETURN_TRUE;							\
+		case 1:										\
+			zend_get_parameters_ex(1, &seed);		\
+			convert_to_long_ex(seed);				\
+			CURR_GEN = type;		\
+			PHP_SRAND(type, Z_LVAL_PP(seed)); 		\
+			RETURN_TRUE;							\
+		case 2:										\
+			/* algorithm, seed is most logic, though it is the other way
+			 * around than current way... */		\
+			zend_get_parameters_ex(2, &alg, &seed);	\
+			convert_to_long_ex(seed);				\
+			convert_to_long_ex(alg);				\
+			if (0 > Z_LVAL_PP(alg) || Z_LVAL_PP(alg) >= PHP_RAND_NUMRANDS) {	\
+				php_error(E_WARNING, "%s(): There is no algorithm %d.", get_active_function_name(TSRMLS_C), Z_LVAL_PP(alg));		\
+				RETURN_FALSE;						\
+			}										\
+			if (!PHP_HAS_SRAND(Z_LVAL_PP(alg))) {	\
+				php_error(E_WARNING, "%s(): Algorithm %d does not support reproducable results.", get_active_function_name(TSRMLS_C), Z_LVAL_PP(alg));	\
+				RETURN_FALSE;						\
+			}										\
+			CURR_GEN = Z_LVAL_PP(alg);		\
+			PHP_SRAND(Z_LVAL_PP(alg), Z_LVAL_PP(seed)); 		\
+			RETURN_TRUE;							\
+		default:									\
+			WRONG_PARAM_COUNT;						\
+	}												\
 }
 /* }}} */
 
-/* {{{ proto void srand(int seed)
+/* {{{ proto bool srand(int seed)
    Seeds random number generator */
 pim_srand_common(srand,PHP_RAND_SYS)
 /* }}} */
 
-/* {{{ proto void mt_srand(int seed)
+/* {{{ proto bool mt_srand(int seed)
    Seeds random number generator */
 pim_srand_common(mt_srand,PHP_RAND_MT)
 /* }}} */
@@ -147,7 +173,16 @@ pim_srand_common(mt_srand,PHP_RAND_MT)
 /* {{{ PHPAPI long php_rand(void) */
 PHPAPI long php_rand(void)
 {
-	return PHP_RAND(BG(rand_generator_current));
+	return PHP_RAND(CURR_GEN);
+}
+/* }}} */
+
+/* {{{ PHPAPI double php_drand(void) 
+ *      returns a double in the range [0,1) */
+PHPAPI double php_drand(void)
+{
+	return  (double)php_rand() /
+			(double)(PHP_RANDMAX(CURR_GEN)+1.0);
 }
 /* }}} */
 
@@ -192,7 +227,8 @@ PHPAPI long php_rand(void)
 PHPAPI long php_rand_range(long min, long max)
 {
 	register long result;
-	PHP_RAND_RANGE(BG(rand_generator_current), min, max, result);
+
+	PHP_RAND_RANGE(CURR_GEN, min, max, result);
 	return result;
 }
 /* }}} */
@@ -239,7 +275,7 @@ PHP_FUNCTION_RAND(mt_rand,PHP_RAND_MT)
    Returns the maximum value a random number can have */
 PHPAPI long php_randmax(void)
 {
-	return PHP_RANDMAX(BG(rand_generator_current));
+	return PHP_RANDMAX(CURR_GEN);
 }
 /* }}} */
 
@@ -251,7 +287,7 @@ PHP_FUNCTION(getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG( PHP_RANDMAX(PHP_RAND_SYS));
+	RETURN_LONG( php_randmax());
 }
 /* }}} */
 
@@ -263,7 +299,7 @@ PHP_FUNCTION(mt_getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG( PHP_RANDMAX(PHP_RAND_MT));
+	RETURN_LONG( php_randmax() );
 }
 /* }}} */
 
