@@ -287,7 +287,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		/* output any remaining errors at their original error level */
 		ecur = IMAPG(imap_errorstack);
 		while (ecur != NIL) {
-			php_error(ecur->errflg, ecur->LTEXT);
+			php_error(E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
 			ecur = ecur->next;
 		}
 		mail_free_errorlist(&IMAPG(imap_errorstack));
