@@ -2236,8 +2236,8 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 
 	if (CG(in_clone_method)) {
 		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
-			(opline_ptr->op1.u.constant.value.str.len == (sizeof("clone")-1)) &&
-			!memcmp(opline_ptr->op1.u.constant.value.str.val, "clone", sizeof("clone"))) {
+			(opline_ptr->op1.u.constant.value.str.len == (sizeof("that")-1)) &&
+			!memcmp(opline_ptr->op1.u.constant.value.str.val, "that", sizeof("that"))) {
 			if (CG(active_class_entry) && (opline.op2.op_type == IS_CONST)) {
 				if (zend_hash_exists(&CG(active_class_entry)->private_properties, opline.op2.u.constant.value.str.val, opline.op2.u.constant.value.str.len+1)) {
 					char *priv_name;
