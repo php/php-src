@@ -2041,6 +2041,15 @@ PHP_FUNCTION(ini_get_all)
 }
 /* }}} */
 
+static int php_ini_check_path(char *option_name, int option_len, char *new_option_name, int new_option_len)
+{
+	if( option_len != (new_option_len-1) ) {
+		return 0;
+	}
+	
+	return strncmp(option_name, new_option_name, option_len);
+}
+
 /* {{{ proto string ini_set(string varname, string newvalue)
    Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
@@ -2064,6 +2073,29 @@ PHP_FUNCTION(ini_set)
 		RETVAL_FALSE;
 	}
 
+	/* safe_mode & basedir check */
+	if( 
+		(PG(safe_mode) || PG(open_basedir)) && 
+		(
+			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "error_log", sizeof("error_log")) ||
+			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "java.class.path", sizeof("java.class.path")) ||
+			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "java.home", sizeof("java.home")) ||
+			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "java.library.path", sizeof("java.library.path")) ||
+			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "session.save_path", sizeof("session.save_path")) ||
+			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "vpopmail.directory", sizeof("vpopmail.directory"))
+		) 
+	) {
+		if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(new_value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
+
+		if (php_check_open_basedir(Z_STRVAL_PP(new_value) TSRMLS_CC)) {
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}
+	}	
+		
 	if (zend_alter_ini_entry(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, Z_STRVAL_PP(new_value), Z_STRLEN_PP(new_value),
 								PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
 		zval_dtor(return_value);
