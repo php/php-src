@@ -2,6 +2,10 @@
 
 class ParentIterator extends FilterIterator implements RecursiveIterator
 {
+	function __construct(RecursiveIterator $it)
+	{
+		parent::__construct($it);
+	}
 	function accept()
 	{
 		return $this->it->hasChildren();
