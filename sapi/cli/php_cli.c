@@ -317,7 +317,7 @@ static void php_cli_usage(char *argv0)
 				"  -R <code>        Run PHP <code> for every input line\n"
 				"  -F <file>        Parse and execute <file> for every input line\n"
 				"  -E <end_code>    Run PHP <end_code> after processing all input lines\n"
-				"  -H               Hide any passed arguments\n"
+				"  -H               Hide any passed arguments from external tools.\n"
 				"  -s               Display colour syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Display source with stripped comments and whitespace.\n"
