@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #27997 (SPL: Crash with getInnerIterator()). (Marcus)
 - Fixed bug #27928 (sqlite incorrectly handles invalid filenames). (Ilia)
+- Fixed bug #27865 (STDIN, STDOUT, STDERR are dup()d under CLI). (Wez)
 - Fixed bug #27821 (xml_parse() segfaults when xml_set_object() is called from
   class method). (Andi, Rob)
 - Fixed bug #27742 (WDSL SOAP Parsing Schema bug). (Dmitry)
