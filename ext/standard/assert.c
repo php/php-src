@@ -88,12 +88,7 @@ PHP_INI_END()
 
 static void php_assert_init_globals(php_assert_globals *assert_globals)
 {
-	assert_globals->active = 0;
-	assert_globals->bail = 0;
-	assert_globals->warning = 1;
-	assert_globals->quiet_eval = 0;
-	assert_globals->default_callback = 0;
-	assert_globals->callback = 0;
+	ASSERT(callback) = 0;
 }
 
 PHP_MINIT_FUNCTION(assert)
@@ -102,6 +97,8 @@ PHP_MINIT_FUNCTION(assert)
 #ifdef ZTS
 	ELS_FETCH();
 	assert_globals_id = ts_allocate_id(sizeof(php_assert_globals), (ts_allocate_ctor) php_assert_init_globals, NULL);
+#else
+	ASSERT(callback) = 0;
 #endif
 
 	REGISTER_INI_ENTRIES();
