@@ -2740,7 +2740,7 @@ PHP_FUNCTION(sqlite_create_aggregate)
 	zval *object = getThis();
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &zdb, &funcname, &funcname_len, &zstep, &zfinal, &num_args)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &funcname, &funcname_len, &zstep, &zfinal, &num_args)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
