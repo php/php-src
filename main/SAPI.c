@@ -30,7 +30,7 @@
 #if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
 #endif
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "ext/zlib/php_zlib.h"
 ZEND_EXTERN_MODULE_GLOBALS(zlib)
 #endif
@@ -556,7 +556,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				while (*ptr == ' ' && *ptr != '\0') {
 					ptr++;
 				}
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 				if(!strncmp(ptr, "image/", sizeof("image/")-1)) {
 					ZLIBG(output_compression) = 0;
 				}
@@ -704,7 +704,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 		return SUCCESS;
 	}
 
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 	/* Add output compression headers at this late stage in order to make
 	   it possible to switch it off inside the script. */
 	if (ZLIBG(output_compression)) {

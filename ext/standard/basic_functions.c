@@ -886,7 +886,7 @@ function_entry basic_functions[] = {
 	PHP_FE(aggregate_methods_by_list,		first_arg_force_ref)
 	PHP_FE(aggregate_properties,			first_arg_force_ref)
 	PHP_FE(aggregate_properties_by_list,	first_arg_force_ref)
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	PHP_FE(aggregate_methods_by_regexp,		first_arg_force_ref)
 	PHP_FE(aggregate_properties_by_regexp,	first_arg_force_ref)
 #endif
