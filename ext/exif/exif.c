@@ -560,27 +560,27 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
         switch(Tag) {
 
             case TAG_MAKE:
-                strncpy(ImageInfo->CameraMake, ValuePtr, 31);
+                strlcpy(ImageInfo->CameraMake, ValuePtr, sizeof(ImageInfo->CameraMake));
                 break;
 
             case TAG_MODEL:
-                strncpy(ImageInfo->CameraModel, ValuePtr, 63);
+                strlcpy(ImageInfo->CameraModel, ValuePtr, sizeof(ImageInfo->CameraModel));
                 break;
 
             case TAG_GPSINFO:
-                strncpy(ImageInfo->GPSinfo, ValuePtr, 47);
+                strlcpy(ImageInfo->GPSinfo, ValuePtr, sizeof(ImageInfo->GPSinfo));
                 break;
 
             case TAG_EXIFVERSION:
-                strncpy(ImageInfo->ExifVersion, ValuePtr, 15);
+                strlcpy(ImageInfo->ExifVersion, ValuePtr, sizeof(ImageInfo->ExifVersion));
                 break;
 
             case TAG_COPYRIGHT:
-                strncpy(ImageInfo->Copyright, ValuePtr, 31);
+                strlcpy(ImageInfo->Copyright, ValuePtr, sizeof(ImageInfo->Copyright));
                 break;
 
 			case TAG_SOFTWARE:
-                strncpy(ImageInfo->Software, ValuePtr, 31);
+                strlcpy(ImageInfo->Software, ValuePtr, sizeof(ImageInfo->Software));
                 break;
 
 			case TAG_ORIENTATION:
@@ -592,7 +592,7 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 				break;
 
             case TAG_DATETIME_ORIGINAL:
-                strncpy(ImageInfo->DateTime, ValuePtr, 19);
+                strlcpy(ImageInfo->DateTime, ValuePtr, sizeof(ImageInfo->DateTime));
                 break;
 
             case TAG_USERCOMMENT:
@@ -613,13 +613,13 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
                         int c;
                         c = (ValuePtr)[a];
                         if (c != '\0' && c != ' ') {
-                            strncpy(ImageInfo->Comments, a+ValuePtr, 199);
+                            strlcpy(ImageInfo->Comments, a+ValuePtr, sizeof(ImageInfo->Comments));
                             break;
                         }
                     }
                     
                 } else {
-                    strncpy(ImageInfo->Comments, ValuePtr, 199);
+                    strlcpy(ImageInfo->Comments, ValuePtr, sizeof(ImageInfo->Comments));
                 }
                 break;
 
@@ -729,15 +729,15 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 				break;
 
 			case TAG_SOFTWARERELEASE:
-                strncpy(ImageInfo->SoftwareRelease, ValuePtr, 15);
+                strlcpy(ImageInfo->SoftwareRelease, ValuePtr, sizeof(ImageInfo->SoftwareRelease));
 				break;
 
 			case TAG_PICTINFO:
-                strncpy(ImageInfo->PictInfo, ValuePtr, 63);
+                strlcpy(ImageInfo->PictInfo, ValuePtr, sizeof(ImageInfo->PictInfo));
 				break;
 
 			case TAG_CAMERAID:
-                strncpy(ImageInfo->CameraId, ValuePtr, 63);
+                strlcpy(ImageInfo->CameraId, ValuePtr, sizeof(ImageInfo->CameraId));
 				break;
         }
 
@@ -986,7 +986,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     memset(Sections, 0, sizeof(*Sections));
 
 	tmp = php_basename(FileName,strlen(FileName));
-    strncpy(ImageInfo->FileName, tmp, 119);
+    strlcpy(ImageInfo->FileName, tmp, sizeof(ImageInfo->FileName));
 	efree(tmp);
     ImageInfo->FocalLength = 0;
     ImageInfo->ExposureTime = 0;
