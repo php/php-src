@@ -43,6 +43,7 @@ PHP_FUNCTION(chop);
 PHP_FUNCTION(trim);
 PHP_FUNCTION(ltrim);
 PHP_FUNCTION(soundex);
+PHP_FUNCTION(levdist);
 
 PHP_FUNCTION(count_chars);
 PHP_FUNCTION(explode);
