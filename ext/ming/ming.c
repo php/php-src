@@ -1201,7 +1201,7 @@ PHP_FUNCTION(swfgradient_addEntry)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(za);
-		a = Z_LVAL_PP(za);
+		a = BYTE_Z_LVAL_PP(za);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1212,7 +1212,7 @@ PHP_FUNCTION(swfgradient_addEntry)
 	convert_to_long_ex(b);
 
 	SWFGradient_addEntry( getGradient(getThis() TSRMLS_CC), 
-		FLOAT_Z_DVAL_PP(ratio), Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), a
+		FLOAT_Z_DVAL_PP(ratio), BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), a
 	);
 }
 /* }}} */
