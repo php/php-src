@@ -429,7 +429,7 @@ static const char *param_mode_conflict = "Either execute direct code, process st
 
 /* {{{ cli_seek_file_begin
  */
-static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno)
+static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno TSRMLS_DC)
 {
 	int c;
 
@@ -820,7 +820,7 @@ int main(int argc, char *argv[])
 			ap_php_optind++;
 		}
 		if (script_file) {
-			if (cli_seek_file_begin(&file_handle, script_file, &lineno) != SUCCESS) {
+			if (cli_seek_file_begin(&file_handle, script_file, &lineno TSRMLS_CC) != SUCCESS) {
 				goto err;
 			}
 			script_filename = script_file;
@@ -952,7 +952,7 @@ int main(int argc, char *argv[])
 						}
 					} else {
 						if (script_file) {
-							if (cli_seek_file_begin(&file_handle, script_file, &lineno) != SUCCESS) {
+							if (cli_seek_file_begin(&file_handle, script_file, &lineno TSRMLS_CC) != SUCCESS) {
 								exit_status = 1;
 							} else {
 								CG(start_lineno) = lineno;
