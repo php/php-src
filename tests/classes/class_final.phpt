@@ -12,7 +12,6 @@ final class base {
 }
 
 $t = new base();
-$t->show();
 
 class derived extends base {
 }
@@ -20,6 +19,4 @@ class derived extends base {
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-base
-
 Fatal error: Class derived may not inherit from final class (base) in %s on line %d
