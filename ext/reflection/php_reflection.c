@@ -145,8 +145,8 @@ typedef struct _property_reference {
 
 /* Struct for parameters */
 typedef struct _parameter_reference {
-	int offset;
-	int required;
+	zend_uint offset;
+	zend_uint required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
 } parameter_reference;
@@ -504,7 +504,7 @@ static void _const_string(string *str, char *name, zval *value, char *indent TSR
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, int offset, int required, char* indent TSRMLS_DC)
+static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, zend_uint offset, zend_uint required, char* indent TSRMLS_DC)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
 	if (offset >= required) {
@@ -559,9 +559,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 /* {{{ _function_parameter_string */
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
-	zend_uint i;
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
-	int required = fptr->common.required_num_args;
+	zend_uint i, required = fptr->common.required_num_args;
 
 	if (!arg_info) {
 		return;
@@ -863,7 +862,7 @@ static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_info *arg_info, int offset, int required, zval *object TSRMLS_DC)
+static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_info *arg_info, zend_uint offset, zend_uint required, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -1437,7 +1436,7 @@ ZEND_METHOD(reflection_function, getParameters)
 {
 	reflection_object *intern;
 	zend_function *fptr;
-	int i;
+	zend_uint i;
 	struct _zend_arg_info *arg_info;
 
 	METHOD_NOTSTATIC;
@@ -1554,12 +1553,12 @@ ZEND_METHOD(reflection_parameter, __construct)
 	arg_info = fptr->common.arg_info;
 	if (Z_TYPE_P(parameter) == IS_LONG) {
 		position= Z_LVAL_P(parameter);
-		if (position < 0 || position >= fptr->common.num_args) {
+		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
 			_DO_THROW("The parameter specified by its offset could not be found");
 			/* returns out of this function */
 		}
 	} else {
-		int i;
+		zend_uint i;
 
 		position= -1;
 		convert_to_string_ex(&parameter);
@@ -1585,7 +1584,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	ref = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	ref->arg_info = &arg_info[position];
-	ref->offset = position;
+	ref->offset = (zend_uint)position;
 	ref->required = fptr->common.required_num_args;
 	ref->fptr = fptr;
 	intern->ptr = ref;
