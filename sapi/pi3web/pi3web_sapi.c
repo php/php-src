@@ -156,7 +156,6 @@ static int sapi_pi3web_header_handler(sapi_header_struct *sapi_header, sapi_head
 }
 
 
-
 static void accumulate_header_length(sapi_header_struct *sapi_header, uint *total_length TSRMLS_DC)
 {
 	*total_length += sapi_header->header_len+2;
@@ -208,6 +207,7 @@ static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	efree(combined_headers);
 	if (SG(sapi_headers).http_status_line) {
 		efree(SG(sapi_headers).http_status_line);
+		SG(sapi_headers).http_status_line = 0;
 	}
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
@@ -305,12 +305,11 @@ static void sapi_pi3web_register_variables(zval *track_vars_array TSRMLS_DC)
 	while (*p) {
 		variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 		if (lpCB->GetServerVariable(lpCB->ConnID, *p, static_variable_buf, &variable_len)
-			&& static_variable_buf[0]) {
+			&& (variable_len > 1)) {
 			php_register_variable(*p, static_variable_buf, track_vars_array TSRMLS_CC);
 		} else if (PIPlatform_getLastError()==PIAPI_EINVAL) {
 			variable_buf = (char *) emalloc(variable_len);
-			if (lpCB->GetServerVariable(lpCB->ConnID, *p, variable_buf, &variable_len)
-				&& variable_buf[0]) {
+			if (lpCB->GetServerVariable(lpCB->ConnID, *p, variable_buf, &variable_len)) {
 				php_register_variable(*p, variable_buf, track_vars_array TSRMLS_CC);
 			}
 			efree(variable_buf);
@@ -321,12 +320,13 @@ static void sapi_pi3web_register_variables(zval *track_vars_array TSRMLS_DC)
 	/* PHP_SELF support */
 	variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 	if (lpCB->GetServerVariable(lpCB->ConnID, "SCRIPT_NAME", static_variable_buf, &variable_len)
-		&& static_variable_buf[0]) {
+		&& (variable_len > 1)) {
 		php_register_variable("PHP_SELF", static_variable_buf, track_vars_array TSRMLS_CC);
 	}
 
 	variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
-	if (lpCB->GetServerVariable(lpCB->ConnID, "ALL_HTTP", static_variable_buf, &variable_len)) {
+	if (lpCB->GetServerVariable(lpCB->ConnID, "ALL_HTTP", static_variable_buf, &variable_len)
+		&& (variable_len > 1)) {
 		variable_buf = static_variable_buf;
 	} else {
 		if (PIPlatform_getLastError()==PIAPI_EINVAL) {
