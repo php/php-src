@@ -145,9 +145,12 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		
 		if (data->fd != -1) {
 			flock(data->fd, LOCK_EX);
+
+#ifdef F_SETFD
 			if (fcntl(data->fd, F_SETFD, 1)) {
 				php_error(E_WARNING, "fcntl(%d, F_SETFD, 1) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
+#endif
 		} else {
 			php_error(E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, 
 					strerror(errno), errno);
