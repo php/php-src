@@ -249,6 +249,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 			switch(response_code) {
 				case 200:
 				case 302:
+				case 301:
 					reqok = 1;
 					break;
 				case 403:
