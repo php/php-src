@@ -1,3 +1,97 @@
+2005-03-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      - Temporary reversion as per release masters' requests.
+
+    * (PHP_5_0)
+      NEWS:
+      - Temporary reversion.
+
+    * (PHP_4_3)
+      NEWS:
+      - Reorder.
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN.
+
+    * (PHP_4_3)
+      NEWS:
+      - MFH: fix bug #32311 (mb_encode_mimeheader() does not properly escape
+        characters).
+
+    * (PHP_5_0)
+      ext/iconv/iconv.c
+      ext/iconv/tests/iconv004.phpt:
+      - MFH: Add sanity check in iconv_mime_encode(). Leaving the third parameter
+        unspecified would yield bus error.
+      - MFH: Add testcase for the bug.
+
+    * ext/iconv/tests/iconv004.phpt
+      ext/iconv/tests/iconv004.phpt:
+      
+      - Add test case for iconv_mime_encode().
+
+    * ext/iconv/iconv.c:
+      - Add sanity check in iconv_mime_encode(). Leaving the third parameter
+        unspecified would yield bus error.
+
+2005-03-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+2005-03-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_execute.c:
+      Consolidate: call _get_zval_ptr_var() for IS_VAR case in
+      _get_zval_ptr().
+
+2005-03-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      4.3.11RC2
+
+2005-03-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      main/main.c:
+      - MFH Notices shouldn't be treatedas errors and thus not being conidered to
+        be converted to exceptions.
+
+    * main/main.c:
+      - Notices shouldn't be treatedas errors and thus not being conidered to be
+        converted to exceptions.
+
+2005-03-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #31695 (Cannot redefine endpoint when using WSDL)
+
+2005-03-23  Christopher Kings-Lynne  <chriskl@users.sourceforge.net>
+
+    * ext/pgsql/tests/02connection.phpt
+      ext/pgsql/tests/03sync_query.phpt
+      ext/pgsql/tests/23sync_query_params.phpt
+      ext/pgsql/tests/24sync_query_prepared.phpt
+      ext/pgsql/tests/25async_query_params.phpt
+      ext/pgsql/tests/26async_query_prepared.phpt:
+      - Ensure that ext/pgsql tests work when linked against 7.2 or lower libpq
+
+2005-03-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/run-test/.cvsignore:
+      Missing line
+
+    * NEWS:
+      clean
+
 2005-03-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/config.m4
