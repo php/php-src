@@ -416,11 +416,11 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
 	num_subpats++;
 	size_offsets = num_subpats * 3;
-	offsets = (int *)emalloc(size_offsets * sizeof(int));
+	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 
 	/* Allocate match sets array and initialize the values */
 	if (global && subpats_order == PREG_PATTERN_ORDER) {
-		match_sets = (zval **)emalloc(num_subpats * sizeof(zval *));
+		match_sets = (zval **)safe_emalloc(num_subpats, sizeof(zval *), 0);
 		for (i=0; i<num_subpats; i++) {
 			ALLOC_ZVAL(match_sets[i]);
 			array_init(match_sets[i]);
@@ -787,10 +787,10 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
-	offsets = (int *)emalloc(size_offsets * sizeof(int));
+	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
 	alloc_len = 2 * subject_len + 1;
-	result = emalloc(alloc_len * sizeof(char));
+	result = safe_emalloc(alloc_len, sizeof(char), 0);
 
 	/* Initialize */
 	match = NULL;
@@ -912,7 +912,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 				new_len = *result_len + subject_len - start_offset;
 				if (new_len + 1 > alloc_len) {
 					alloc_len = new_len + 1; /* now we know exactly how long it is */
-					new_buf = emalloc(alloc_len * sizeof(char));
+					new_buf = safe_emalloc(alloc_len, sizeof(char), 0);
 					memcpy(new_buf, result, *result_len);
 					efree(result);
 					result = new_buf;
@@ -1184,7 +1184,7 @@ PHP_FUNCTION(preg_split)
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
-	offsets = (int *)emalloc(size_offsets * sizeof(int));
+	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
 	/* Start at the beginning of the string */
 	start_offset = 0;
@@ -1324,7 +1324,7 @@ PHP_FUNCTION(preg_quote)
 	
 	/* Allocate enough memory so that even if each character
 	   is quoted, we won't run out of room */
-	out_str = emalloc(2 * Z_STRLEN_PP(in_str_arg) + 1);
+	out_str = safe_emalloc(2, Z_STRLEN_PP(in_str_arg), 1);
 	
 	/* Go through the string and quote necessary characters */
 	for(p = in_str, q = out_str; p != in_str_end; p++) {
@@ -1415,7 +1415,7 @@ PHP_FUNCTION(preg_grep)
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
-	offsets = (int *)emalloc(size_offsets * sizeof(int));
+	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
 	/* Initialize return array */
 	array_init(return_value);
