@@ -1,3 +1,21 @@
+2004-12-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      New sarbage collector's bug was fixed (the behavior should be the same as
+      in PHP_5_0)
+
+    * zend_execute.c
+      tests/unset_cv01.phpt
+      tests/unset_cv02.phpt
+      tests/unset_cv03.phpt
+      tests/unset_cv04.phpt
+      tests/unset_cv06.phpt
+      tests/unset_cv08.phpt
+      tests/unset_cv09.phpt
+      tests/unset_cv10.phpt:
+      "Undefined variable:  %s" noticies were fixed to be compatible with PHP_5_0
+
 2004-12-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_5_0)
