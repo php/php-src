@@ -248,7 +248,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT("CURLE_ALREADY_COMPLETE",            CURLE_ALREADY_COMPLETE);
 
 #if HAVE_OPENSSL_EXT	/* OpenSSL already takes care of initialization */
-	startup_options = CURL_GLOBAL_NONE;
+	startup_options = CURL_GLOBAL_NOTHING;
 #else
 	startup_options = CURL_GLOBAL_ALL;
 #endif
