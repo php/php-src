@@ -1,3 +1,9 @@
+2004-08-25  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c:
+      - Add interface_exists() and differentiate between classes and interfaces
+        (Andrey Hristov)
+
 2004-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:

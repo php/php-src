@@ -1,3 +1,79 @@
+2004-08-25  Andrei Zmievski  <andreiz@gmail.com>
+
+    * ext/pcre/php_pcre.c
+      ext/pcre/php_pcre.c:
+      MFB.
+
+    * (PHP_4_3)
+      ext/pcre/php_pcre.c:
+      Rewrite cache clean-up using zend_hash_apply_with_argument().
+
+2004-08-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/bz2/bz2.c:
+      Fixed operations on remote bzip2 compressed files ala:
+      compress.bzip2://http://downloads.php.net/ilia/php-4.3.5RC1.tar.bz2
+      
+      Patch by Wez (MFH from HEAD)
+
+2004-08-25  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/061.phpt:
+      test for local_infile_handler
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      changed local_infile_handler:
+        mysql client lib now uses php_local_infile functions by default, which
+      allows
+        to use php_fopen_wrapper: e.g. LOAD DATA LOCAL INFILE
+      'http://foo.com/bar.csv' ...
+      
+        mysql_set_local_infile_handler now only supports a callback function for
+      read.
+
+2004-08-25  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/document.c:
+      if $doc->recover = true; set error_reporting to (old | E_WARNING)
+      This way, you can't silence XML parse errors with the @ character
+
+2004-08-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug29566.phpt:
+      No short tags
+
+2004-08-25  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_0)
+      NEWS:
+      .
+
+2004-08-25  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Those two are already in the NEWS for 5.0.2.
+
+2004-08-25  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      NEWS:
+      - Improve wording
+
+    * NEWS:
+      - MFB
+
+    * (PHP_5_0)
+      NEWS:
+      - NEWS
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Add interface_exists() and differentiate between classes and interfaces
+        (Andrey Hristov)
+
 2004-08-24  Andrey Hristov  <php@hristov.com>
 
     * README.PHP4-TO-PHP5-THIN-CHANGES:
