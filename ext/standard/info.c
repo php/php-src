@@ -212,7 +212,13 @@ PHPAPI void php_print_info(int flag)
 						break;
 				}
 				PUTS("\"]</b></td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-				PUTS(value_ptr->value.str.val); /* This could be "Array" - too ugly to expand that for now */
+				if ((*tmp)->type == IS_ARRAY) {
+					PUTS("<br><pre>");
+					zend_print_zval_r(*tmp, 0);
+					PUTS("</pre>");
+				} else {
+					PUTS(value_ptr->value.str.val);
+				}
 				PUTS("</td></tr>\n");
 				zend_hash_move_forward((*data)->value.ht);
 				if (value_ptr==&tmp2) {
