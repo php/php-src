@@ -104,8 +104,7 @@ Naming Conventions
     'hw_GetObjectByQueryCollObj'
     'pg_setclientencoding'
     'jf_n_s_i'
-    
-    
+
 [2] If they are part of a "parent set" of functions, that parent should
     be included in the user function name, and should be clearly related
     to the parent program or function family. This should be in the form
@@ -126,13 +125,42 @@ Naming Conventions
     with "_php_", and followed by a word or an underscore-delimited list of
     words, in lowercase letters, that describes the function.  If applicable,
     they should be declared 'static'.
-    
+
 [4] Variable names must be meaningful.  One letter variable names must be
     avoided, except for places where the variable has no real meaning or
     a trivial meaning (e.g. for (i=0; i<100; i++) ...).
 
 [5] Variable names should be in lowercase.  Use underscores to separate
     between words.
+
+[6] Method names follow the 'studlyCaps' (also referred to as 'bumpy case'
+    or 'camel caps') naming convention, with care taken to minimize the
+    letter count. The initial letter of the name is lowercase, and each
+    letter that starts a new 'word' is capitalized.
+
+    Good:
+    'connect()'
+    'getData()'
+    'buildSomeWidget()'
+
+    Bad:
+    'get_Data()'
+    'buildsomewidget'
+    'getI()'
+
+[7] Classes should be given descriptive names. Avoid using abbreviations
+    where possible. Each word in the class name should start with a capital
+    letter, with words underscore delimited. The class name should be prefixed
+    with the name of the 'parent set'.
+
+    Good:
+    'Curl'
+    'Foo_Bar'
+
+    Bad:
+    'foobar'
+    'foo_bar'
+    'FooBar'
 
 
 Syntax and indentation
