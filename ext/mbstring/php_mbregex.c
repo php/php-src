@@ -94,7 +94,8 @@ static int _php_mb_regex_name2mbctype(const char *pname)
 		    || strcasecmp("X-EUC-JP", pname) == 0
 		    || strcasecmp("UJIS", pname) == 0
 		    || strcasecmp("EUCJP", pname) == 0
-		    || strcasecmp("EUC_JP", pname) == 0) {
+		    || strcasecmp("EUC_JP", pname) == 0
+		    || strcasecmp("EUCJP-WIN", pname) == 0) {
 			mbctype = MBCTYPE_EUC;
 		} else if (strcasecmp("UTF-8", pname) == 0
 		           || strcasecmp("UTF8", pname) == 0) {
@@ -102,7 +103,8 @@ static int _php_mb_regex_name2mbctype(const char *pname)
 		} else if (strcasecmp("SJIS", pname) == 0
 		           || strcasecmp("CP932", pname) == 0
 		           || strcasecmp("MS932", pname) == 0
-		           || strcasecmp("SHIFT_JIS", pname) == 0 ) {
+		           || strcasecmp("SHIFT_JIS", pname) == 0
+		           || strcasecmp("SJIS-WIN", pname) == 0) {
 			mbctype = MBCTYPE_SJIS;
 		} else if (strcasecmp("ASCII", pname) == 0) {
 			mbctype = MBCTYPE_ASCII;
