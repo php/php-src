@@ -1,3 +1,170 @@
+2000-08-20  Zeev Suraski  <zeev@php.net>
+
+    * win32/php4dllts.dsp: Fix Win32 build
+
+    * ext/session/mod_files.c
+      sapi/pi3web/pi3web_sapi.c: Fix build
+
+2000-08-20  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c
+      main/main.c
+      main/php.h: - Change PHP_SEPARATOR to PHP_DIR_SEPARATOR
+
+    * main/php_virtual_cwd.c:
+    - Checking for ".." isn't enough. include_once() could mess up even if both
+    - names didn't include ".." but were referenced different directories which
+    - were symlinked to each other.
+
+2000-08-20  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c:
+    Added another bug fix to detect for negative values being passed into the
+    fd_*() functions, as passing negative values would cause PHP to segfault.
+
+2000-08-20  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c: Added Oracle LDAP SDK SSL support
+
+2000-08-20  Andi Gutmans  <andi@php.net>
+
+    * main/main.c
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h:
+    - Sascha's patch should make PHP in VIRTUAL_DIR mode also change to the
+    - right directory so this shouldn't be needed anymore.
+
+2000-08-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/config.m4: - Fix for bug #6263
+
+2000-08-20  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Net/Socket.php:
+    remove call-time pass-by-reference semantics from (p)fsockopen - works fine
+    without them.
+
+2000-08-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c: Fix by-reference passing for scanf's
+
+    * ext/xml/xml.c: Fix XML by-reference passing
+
+2000-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/info.c: Fix numerus of SAPI Modules title
+
+    * sapi/apache/mod_php4.c
+      sapi/isapi/php4isapi.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      main/main.c:
+    The status quo in PHP is that the current directory is initialized
+    to the directory where the executing script is located.
+
+    Since this needs to be implemented for all SAPI modules anyway, this
+    change moves the functionality to php_execute_script() and gets rid
+    of the per-module code.
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/apache/mod_php4.c:
+    Use size_t as parameter type in the getenv member of struct sapi_module
+
+    * main/php_virtual_cwd.c
+      main/php_virtual_cwd.h: const'ify virtual-cwd API
+
+    * ext/session/mod_files.c
+      main/fopen-wrappers.c
+      main/php.h:
+    Provide PHP_SEPARATOR which expands to the default directory separator
+    on the target platform.
+
+2000-08-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c: Fix fgetc (#6259) and ftell error condition returns
+
+2000-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_virtual_cwd.h: Fix prototype of virtual_real_chdir_file.
+
+    * main/php.h
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h:
+    Add virtual_real_chdir_file. Silly name for a useful function.
+
+2000-08-20  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: A Whole buncha stuff, mostly bug fixing...
+    	- Make constants case-sensitive, conforming with the rest of PHP &
+    	the C API.
+    	- Make module compatible with thread safety features.
+    	- open_listen_sok() -> open_listen_sock()
+    	- Remove ext_skel comments
+    	- Get rid of the ZVAL macro and replace with the correct Z_*_*
+    	macros
+    	- declare all functions local to the file as static.
+    	- Remove empty PHP_MSHUTDOWN() function.
+    	- Removed confirm_sockets_compiled()
+    	- Changed RETVAL_* macro's to RETURN_* macro's eliminating errors
+    	with incorrect return values and a potential leak/crash or two.
+    	- functions that return void, actually return void
+    	- Replaced 'long' in the prototypes with 'int'
+    	- Fixed fd_zero() function, it gave a WRONG_PARAM_COUNT when you
+    	gave it the proper parameter count.
+    	- Changed the way an arbitrary number of parameters were accessed
+    	from build_iovec() to use the Zend API.
+    	- Added socketpair() and shutdown() functions.
+
+2000-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Execute PHP scripts everywhere (not only in the top-level directory)
+
+    * build/rules_common.mk: Remove -DHAVE_CONFIG_H. It ain't used anywhere.
+
+2000-08-20  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: Bunch o' changes..
+    	- Add the ability to return the web page into a variable
+    	by setting the CURLOPT_RETURNTRANSFER constant to 1.
+    	- Make everything conform to the naming guidelines.
+    	- Delete the resource id from the file_id table when a
+    	resource is closed.
+
+2000-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/formatted_print.c: Make use of zend_isinf and zend_isnan.
+
+    * build/buildcheck.sh
+      build/fastgen.sh: Add/update license
+
+    * build/build.mk
+      build/build2.mk
+      build/dynlib.mk
+      build/library.mk
+      build/ltlib.mk
+      build/program.mk
+      build/rules.mk
+      build/rules_common.mk
+      build/rules_pear.mk
+      pear/Makefile.in
+      pear/phpize.in
+      dynlib.m4: Relicense build-related files under the PHP License
+
+    Move common make rules to rules_common.mk. This gets rid of the duplicated
+    stuff in rules.mk/rules_pear.mk.
+
+    * ext/standard/file.c
+      main/Makefile.in
+      main/fopen-wrappers.c
+      main/php_realpath.c
+      main/php_realpath.h: Remove php_realpath from build.
+
+    It was broken and should not be used in any way.
+
 2000-08-19  Jesus M. Castagnetto  <jesusmc@scripps.edu>
 
     * ext/standard/php_math.h: Added some more predefined constants
