@@ -58,6 +58,7 @@ MAILSTREAM DEFAULTPROTO;
 
 #define CRLF	"\015\012"
 #define PHP_EXPUNGE 32768
+#define PHP_IMAP_ADDRESS_SIZE_BUF 10
 
 static void _php_make_header_object(zval *myzvalue, ENVELOPE *en TSRMLS_DC);
 static void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC);
@@ -3546,7 +3547,7 @@ PHP_FUNCTION(imap_mime_header_decode)
 static int _php_imap_address_size (ADDRESS *addresslist)
 {
 	ADDRESS *tmp;
-	int ret=0;
+	int ret=0, num_ent=0;
 
 	tmp = addresslist;
 
@@ -3555,10 +3556,15 @@ static int _php_imap_address_size (ADDRESS *addresslist)
 		ret += (tmp->adl)      ? strlen(tmp->adl)      : 0;
 		ret += (tmp->mailbox)  ? strlen(tmp->mailbox)  : 0;
 		ret += (tmp->host)     ? strlen(tmp->host)     : 0;
+		num_ent++;
 	} while ((tmp = tmp->next));
 
-	/* rfc822_write_address_full() needs some extra space for '<>,', etc. */
-	ret += (ret) ? MAILTMPLEN : 0;
+	/* 
+	 * rfc822_write_address_full() needs some extra space for '<>,', etc. 
+	 * for this perpouse we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
+	 * by default this buffer is 10 bytes long
+	*/
+	ret += (ret) ? num_ent*PHP_IMAP_ADDRESS_SIZE_BUF : 0;
 
 	return ret;
 }
