@@ -1534,7 +1534,7 @@ static int exif_file_sections_free(image_info_type *ImageInfo)
 */
 static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, int motorola_intel TSRMLS_DC)
 {
-	size_t index;
+	size_t idex;
 	void *vptr;
 	image_info_value *info_value;
 	image_info_data  *info_data;
@@ -1630,9 +1630,9 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			} else {
 				info_value = &info_data->value;
 			}
-			for (index=0,vptr=value; index<length; index++,(int)vptr+=php_tiff_bytes_per_format[format]) {
+			for (idex=0,vptr=value; idex<length; idex++,(char *)vptr+=php_tiff_bytes_per_format[format]) {
 				if (length>1) {
-					info_value = &info_data->value.list[index];
+					info_value = &info_data->value.list[idex];
 				}
 				switch (format) {
 					case TAG_FMT_USHORT:
