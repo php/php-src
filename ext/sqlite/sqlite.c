@@ -757,7 +757,8 @@ PHP_FUNCTION(sqlite_popen)
 {
 	long mode = 0666;
 	char *filename, *fullpath, *hashkey;
-	long filename_len, hashkeylen;
+	int filename_len;
+	long hashkeylen;
 	zval *errmsg = NULL;
 	struct php_sqlite_db *db = NULL;
 	list_entry *le;
@@ -832,7 +833,7 @@ PHP_FUNCTION(sqlite_open)
 {
 	long mode = 0666;
 	char *filename, *fullpath = NULL;
-	long filename_len;
+	int filename_len;
 	zval *errmsg = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
@@ -1054,7 +1055,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 	zval *zdb;
 	struct php_sqlite_db *db;
 	char *sql;
-	long sql_len;
+	int sql_len;
 	long mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
 
@@ -1090,7 +1091,7 @@ PHP_FUNCTION(sqlite_query)
 	zval *zdb;
 	struct php_sqlite_db *db;
 	char *sql;
-	long sql_len;
+	int sql_len;
 	long mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
 
@@ -1125,7 +1126,7 @@ PHP_FUNCTION(sqlite_exec)
 	zval *zdb;
 	struct php_sqlite_db *db;
 	char *sql;
-	long sql_len;
+	int sql_len;
 	char *errtext = NULL;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
@@ -1335,7 +1336,7 @@ PHP_FUNCTION(sqlite_array_query)
 	struct php_sqlite_db *db;
 	struct php_sqlite_result *rres;
 	char *sql;
-	long sql_len;
+	int sql_len;
 	long mode = PHPSQLITE_BOTH;
 	char *errtext = NULL;
 	zend_bool decode_binary = 1;
@@ -1440,7 +1441,7 @@ PHP_FUNCTION(sqlite_single_query)
 	struct php_sqlite_db *db;
 	struct php_sqlite_result *rres;
 	char *sql;
-	long sql_len;
+	int sql_len;
 	char *errtext = NULL;
 	zend_bool decode_binary = 1;
 	zend_bool srow = 1;
@@ -1779,7 +1780,7 @@ PHP_FUNCTION(sqlite_next)
 PHP_FUNCTION(sqlite_escape_string)
 {
 	char *string = NULL;
-	long stringlen;
+	int stringlen;
 	char *ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &stringlen)) {
@@ -1912,7 +1913,7 @@ static enum callback_prep_t prep_callback_struct(struct php_sqlite_db *db, int i
 PHP_FUNCTION(sqlite_create_aggregate)
 {
 	char *funcname = NULL;
-	long funcname_len;
+	int funcname_len;
 	zval *zstep, *zfinal, *zdb;
 	struct php_sqlite_db *db;
 	struct php_sqlite_agg_functions *funcs;
@@ -1953,7 +1954,7 @@ PHP_FUNCTION(sqlite_create_aggregate)
 PHP_FUNCTION(sqlite_create_function)
 {
 	char *funcname = NULL;
-	long funcname_len;
+	int funcname_len;
 	zval *zcall, *zdb;
 	struct php_sqlite_db *db;
 	struct php_sqlite_agg_functions *funcs;
@@ -1983,7 +1984,7 @@ PHP_FUNCTION(sqlite_create_function)
 PHP_FUNCTION(sqlite_udf_encode_binary)
 {
 	char *data = NULL;
-	long datalen;
+	int datalen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &data, &datalen)) {
 		return;
@@ -2012,7 +2013,7 @@ PHP_FUNCTION(sqlite_udf_encode_binary)
 PHP_FUNCTION(sqlite_udf_decode_binary)
 {
 	char *data = NULL;
-	long datalen;
+	int datalen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &data, &datalen)) {
 		return;
