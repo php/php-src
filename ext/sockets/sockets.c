@@ -350,7 +350,7 @@ static char *php_strerror(int error TSRMLS_DC)
 		buf = hstrerror(error);
 #else
 		{
-			sprintf(SOCKETS_G(strerror_buf), "Host lookup error %d", error);
+			spprintf(&(SOCKETS_G(strerror_buf), "Host lookup error %d", error);
 			buf = SOCKETS_G(strerror_buf);
 		}
 #endif
@@ -364,7 +364,7 @@ static char *php_strerror(int error TSRMLS_DC)
 
 		if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
 				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL)) {
-			strlcpy(SOCKETS_G(strerror_buf), (char *) tmp, 10000);
+			SOCKETS_G(strerror_buf) = estrndup(tmp);
 			LocalFree(tmp);
 		
 			buf = SOCKETS_G(strerror_buf);
@@ -483,18 +483,18 @@ PHP_MINFO_FUNCTION(sockets)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(sockets)
 {
-	if ((SOCKETS_G(strerror_buf) = emalloc(16384))) 
-		return SUCCESS;
-	
-	return FAILURE;
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(sockets)
 {
-	efree(SOCKETS_G(strerror_buf));
-	
+	if (SOCKETS_G(strerror_buf)) {
+		efree(SOCKETS_G(strerror_buf));
+		SOCKETS_G(strerror_buf) = NULL;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
