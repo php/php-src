@@ -1615,13 +1615,24 @@ binary_assign_op_addr: {
 							}
 							active_function_table = &Z_OBJCE_P(EX(object).ptr)->function_table;
 						}
+						if (zend_hash_find(active_function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
+							zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
+						}
 					} else { /* function pointer */
 						EX(object).ptr = NULL;
-						active_function_table = EG(namespace)?&EG(namespace)->function_table:EG(function_table);
+						do {
+							if (EG(namespace)) {
+								if (zend_hash_find(&EG(namespace)->function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function) == SUCCESS) {
+									break;
+								}
+							}
+							if (zend_hash_find(EG(function_table), function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
+								zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
+							}
+							EX(calling_namespace) = NULL;
+						} while (0);
 					}
-					if (zend_hash_find(active_function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
-						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
-					}
+					
 					zval_dtor(&tmp);
 					EX(fbc) = function;
 overloaded_function_call_cont:
@@ -2065,19 +2076,24 @@ send_by_ref:
 					if (EX(opline)->op1.op_type == IS_UNUSED) {
 						if (EG(namespace)) {
 							ce = EG(namespace);
-						} else {
-							if (!zend_get_constant(EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len, &EX(Ts)[EX(opline)->result.u.var].tmp_var TSRMLS_CC)) {
-								zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-											EX(opline)->op2.u.constant.value.str.val,
-											EX(opline)->op2.u.constant.value.str.val);
-								EX(Ts)[EX(opline)->result.u.var].tmp_var = EX(opline)->op2.u.constant;
+							if (zend_hash_find(&ce->constants, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
+								zval_update_constant(value, (void *) 1 TSRMLS_CC);
+								EX(Ts)[EX(opline)->result.u.var].tmp_var = **value;
 								zval_copy_ctor(&EX(Ts)[EX(opline)->result.u.var].tmp_var);
+								NEXT_OPCODE();
 							}
-							NEXT_OPCODE();
 						}
-					} else {
-						ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+						if (!zend_get_constant(EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len, &EX(Ts)[EX(opline)->result.u.var].tmp_var TSRMLS_CC)) {
+							zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+										EX(opline)->op2.u.constant.value.str.val,
+										EX(opline)->op2.u.constant.value.str.val);
+							EX(Ts)[EX(opline)->result.u.var].tmp_var = EX(opline)->op2.u.constant;
+							zval_copy_ctor(&EX(Ts)[EX(opline)->result.u.var].tmp_var);
+						}
+						NEXT_OPCODE();
 					}
+					
+					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 					
 					if (zend_hash_find(&ce->constants, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
 						zval_update_constant(value, (void *) 1 TSRMLS_CC);
