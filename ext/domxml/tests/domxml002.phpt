@@ -1,7 +1,5 @@
 --TEST--
 Test 2: Memleak in accessing children() of document.
---INI--
-report_memleaks=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
