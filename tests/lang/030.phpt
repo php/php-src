@@ -17,17 +17,17 @@ function &foo2(&$foo)	{
 	return $foo; }
 
 
-$bar1 = new foo('constructor');
+$bar1 =& new foo('constructor');
 $bar1->Name = 'outside';
 $bar1->echoName();
+$List->echoName();
 
-$bar1 = foo2(new foo('constructor'));
+$bar1 =& foo2(new foo('constructor'));
 $bar1->Name = 'outside';
 $bar1->echoName();
 
 $List->echoName();
 
-print ($names==array('constructor','constructor','constructor','constructor','constructor')) ? 'success:':'failure';
-?>
+print ($names==array('constructor','outside','outside','constructor','outside','outside')) ? 'success':'failure'; ?>
 --EXPECT--
 success
