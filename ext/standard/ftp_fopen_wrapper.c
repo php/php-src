@@ -35,14 +35,6 @@
 #include <winsock2.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
-#elif defined(NETWARE)
-/*#include <ws2nlm.h>*/
-/*#include <sys/socket.h>*/
-#ifdef NEW_LIBC
-#include <sys/param.h>
-#else
-#include "netware/param.h"
-#endif
 #else
 #include <sys/param.h>
 #endif
@@ -57,7 +49,6 @@
 #ifdef PHP_WIN32
 #include <winsock2.h>
 #elif defined(NETWARE) && defined(USE_WINSOCK)
-/*#include <ws2nlm.h>*/
 #include <novsock2.h>
 #else
 #include <netinet/in.h>
@@ -828,19 +819,33 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, int f
 		tm.tm_sec += stamp - mktime(gmt);
 		tm.tm_isdst = gmt->tm_isdst;
 
+#ifdef NETWARE
+		ssb->sb.st_mtime.tv_sec = mktime(&tm);
+#else
 		ssb->sb.st_mtime = mktime(&tm);
+#endif
 	} else {
 		/* error or unsupported command */
  mdtm_error:
+#ifdef NETWARE
+		ssb->sb.st_mtime.tv_sec = -1;
+#else
 		ssb->sb.st_mtime = -1;
+#endif
 	}
 
 	ssb->sb.st_ino = 0;						/* Unknown values */
 	ssb->sb.st_dev = 0;
 	ssb->sb.st_uid = 0;
 	ssb->sb.st_gid = 0;
+#ifdef NETWARE
+	ssb->sb.st_atime.tv_sec = -1;
+	ssb->sb.st_ctime.tv_sec = -1;
+#else
 	ssb->sb.st_atime = -1;
 	ssb->sb.st_ctime = -1;
+#endif
+
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
 #ifdef HAVE_ST_BLKSIZE
