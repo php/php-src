@@ -99,13 +99,11 @@ typedef struct php_imap_error_struct {
 	struct php_imap_error_struct *next;
 } ERRORLIST;
 
-
 typedef struct _php_imap_message_struct {
 	unsigned long msgid;
 	struct _php_imap_message_struct *next;
 } MESSAGELIST;
  
-
 
 /* Functions */
 
