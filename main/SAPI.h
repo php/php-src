@@ -27,6 +27,7 @@ typedef struct {
 	zend_llist headers;
 	int http_response_code;
 	unsigned char send_default_content_type;
+	char *http_status_line;
 } sapi_headers_struct;
 
 
@@ -49,6 +50,10 @@ typedef struct {
 	char *content_type;
 
 	unsigned char headers_only;
+
+	/* for HTTP authentication */
+	char *auth_user;
+	char *auth_password;
 } sapi_request_info;
 
 

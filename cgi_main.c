@@ -170,6 +170,10 @@ static void init_request_info(SLS_D)
 	}
 	SG(request_info).content_type = getenv("CONTENT_TYPE");
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
+
+	/* CGI does not support HTTP authentication */
+	SG(request_info).auth_user = NULL;
+	SG(request_info).auth_password = NULL;
 }
 
 
@@ -182,6 +186,7 @@ int main(int argc, char *argv[])
 	char *_cgi_filename=NULL;
 	int _cgi_started=0;
 	int behavior=PHP_MODE_STANDARD;
+	int no_headers=0;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
 #endif
@@ -273,11 +278,14 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 							return FAILURE;
 						}
 					}
+					if (no_headers) {
+						SG(headers_sent) = 1;
+					}
 					_cgi_started=1;
 					_cgi_filename = estrdup(optarg);
 					/* break missing intentionally */
 				case 'q':
-					php3_noheader();
+					no_headers = 1;
 					break;
 				case 'v':
 					if (!_cgi_started) {
@@ -285,6 +293,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 							php_module_shutdown();
 							return FAILURE;
 						}
+					}
+					if (no_headers) {
+						SG(headers_sent) = 1;
 					}
 					php3_printf("%s\n", PHP_VERSION);
 					exit(1);
@@ -295,6 +306,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 							php_module_shutdown();
 							return FAILURE;
 						}
+					}
+					if (no_headers) {
+						SG(headers_sent) = 1;
 					}
 					_cgi_started=1;
 					php3_TreatHeaders();
@@ -323,8 +337,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'h':
 				case '?':
-					php3_noheader();
 					zend_output_startup();
+					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
 					exit(1);
 					break;
@@ -343,6 +357,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			php_module_shutdown();
 			return FAILURE;
 		}
+	}
+	if (no_headers) {
+		SG(headers_sent) = 1;
 	}
 	file_handle.filename = "-";
 	file_handle.type = ZEND_HANDLE_FP;
