@@ -23,6 +23,8 @@
 
 #include <stdio.h>
 
+#include "zend_globals_macros.h"
+
 #define MEM_BLOCK_START_MAGIC	0x7312F8DCL
 #define MEM_BLOCK_END_MAGIC		0x2A8FCC84L
 #define MEM_BLOCK_FREED_MAGIC	0x99954317L
@@ -101,7 +103,7 @@ ZEND_API void _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
 
-ZEND_API void start_memory_manager(void);
+ZEND_API void start_memory_manager(ALS_D);
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache);
 
 #if ZEND_DEBUG
