@@ -103,7 +103,6 @@ int php_sockaddr_size(php_sockaddr_storage *addr);
 
 struct _php_netstream_data_t	{
 	int socket;
-	char eof;
 	char is_blocked;
 	struct timeval timeout;
 	char timeout_event;
