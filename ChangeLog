@@ -1,3 +1,76 @@
+2002-08-17  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c: Fix build
+
+    * ext/session/mod_files.c:
+    Use mtime instead of atime, as we always update the session file anyway.
+
+2002-08-17  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c: MFH - fix Irix compiler errors
+
+2002-08-17  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: AFAIK, 4.3.0 will not contain ZE2..
+
+2002-08-17  iliaa  <iliaa@pb1.pair.com>
+
+    * ext/standard/pack.c: Backported memory leak fixes from the 4.3 branch
+
+2002-08-17  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/vpopmail/php_vpopmail.c: MFH
+
+    * sapi/nsapi/config.m4:
+    MFH, builds and reportadly re-enables nsapi support
+
+    * ext/odbc/php_odbc.c: MFH, fixing close crash case on Windows
+
+2002-08-17  venaas  <venaas@pb1.pair.com>
+
+    * configure.in: Default is enable, so better --disable-ipv6 I guess
+
+2002-08-17  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * sapi/apache/mod_php4.c: MFH Apache threading fix
+
+2002-08-17  venaas  <venaas@pb1.pair.com>
+
+    * configure.in
+      main/network.c:
+    Added --enable-ipv6 and only look up AAAA in DNS when enabled
+
+2002-08-17  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/bz2/bz2.c:  when I learn to type, life will be good
+
+2002-08-17  sesser  <sesser@pb1.pair.com>
+
+    * main/rfc1867.c: MFH
+
+    * main/rfc1867.c: IE does not use quotes but now we are safe...
+
+2002-08-17  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c:
+    More W3C conformance stuff (they returned all false before..)
+    - DomNode->attributes() returns NULL, if not found.
+    - DomNode->first_child() returns NULL, if not found
+    - DomNode->last_child() returns NULL, if not found.
+    - DomNode->namespace_uri() returns NULL, if not found.
+
+2002-08-17  sesser  <sesser@pb1.pair.com>
+
+    * main/rfc1867.c: fixed the user supplied patch for bug #18792
+
+2002-08-17  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/bz2/bz2.c: Reverting back to original method as requested by Wez
+
+2002-08-17  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * php.ini-dist: Add warning about atime requirement for session gc
+
 2002-08-16  sniper  <sniper@pb1.pair.com>
 
     * ext/imap/php_imap.c: ws fixes
