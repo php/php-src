@@ -1,5 +1,5 @@
 --TEST--
-sqlite: fetch all (unbuffered)
+sqlite: fetch all (iterator)
 --INI--
 sqlite.assoc_case=0
 --SKIPIF--
@@ -9,27 +9,70 @@ if (!extension_loaded("sqlite")) print "skip"; ?>
 <?php 
 include "blankdb.inc";
 
-sqlite_query("CREATE TABLE strings(foo VARCHAR, bar VARCHAR, baz VARCHAR)", $db);
+$data = array(
+	"one",
+	"two",
+	"three"
+	);
 
-echo "Buffered\n";
-$r = sqlite_query("SELECT * from strings", $db);
-for($i=0; $i<sqlite_num_fields($r); $i++) {
-	var_dump(sqlite_field_name($r, $i));
+sqlite_query("CREATE TABLE strings(a VARCHAR)", $db);
+
+foreach ($data as $str) {
+	sqlite_query("INSERT INTO strings VALUES('$str')", $db);
 }
-echo "Unbuffered\n";
-$r = sqlite_unbuffered_query("SELECT * from strings", $db);
-for($i=0; $i<sqlite_num_fields($r); $i++) {
-	var_dump(sqlite_field_name($r, $i));
+
+$r = sqlite_unbuffered_query("SELECT a from strings", $db);
+while (sqlite_has_more($r)) {
+	var_dump(sqlite_current($r, SQLITE_NUM));
+	sqlite_next($r);
+}
+$r = sqlite_query("SELECT a from strings", $db);
+while (sqlite_has_more($r)) {
+	var_dump(sqlite_current($r, SQLITE_NUM));
+	sqlite_next($r);
+}
+sqlite_rewind($r);
+while (sqlite_has_more($r)) {
+	var_dump(sqlite_current($r, SQLITE_NUM));
+	sqlite_next($r);
 }
 echo "DONE!\n";
 ?>
 --EXPECT--
-Buffered
-string(3) "foo"
-string(3) "bar"
-string(3) "baz"
-Unbuffered
-string(3) "foo"
-string(3) "bar"
-string(3) "baz"
+array(1) {
+  [0]=>
+  string(3) "one"
+}
+array(1) {
+  [0]=>
+  string(3) "two"
+}
+array(1) {
+  [0]=>
+  string(5) "three"
+}
+array(1) {
+  [0]=>
+  string(3) "one"
+}
+array(1) {
+  [0]=>
+  string(3) "two"
+}
+array(1) {
+  [0]=>
+  string(5) "three"
+}
+array(1) {
+  [0]=>
+  string(3) "one"
+}
+array(1) {
+  [0]=>
+  string(3) "two"
+}
+array(1) {
+  [0]=>
+  string(5) "three"
+}
 DONE!

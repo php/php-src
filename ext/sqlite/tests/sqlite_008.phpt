@@ -1,5 +1,5 @@
 --TEST--
-sqlite: fetch all
+sqlite: fetch all (buffered)
 --INI--
 sqlite.assoc_case=0
 --SKIPIF--
