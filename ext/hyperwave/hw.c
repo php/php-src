@@ -199,7 +199,7 @@ static PHP_INI_MH(OnHyperwavePort)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("hyerwave.allow_persistent", "0", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_hw_globals, hw_globals)
+	STD_PHP_INI_ENTRY("hyperwave.allow_persistent", "0", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_hw_globals, hw_globals)
 	PHP_INI_ENTRY("hyperwave.default_port",	"418", PHP_INI_ALL,	OnHyperwavePort)
 PHP_INI_END()
 
