@@ -373,7 +373,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 }
 
-zval *zend_std_read_dimension(zval *object, zval *offset TSRMLS_DC)
+zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval *retval;

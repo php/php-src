@@ -911,26 +911,24 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			}
 			break;
 		case IS_OBJECT:
-			if (type == BP_VAR_R || type == BP_VAR_RW) {
-				if (!Z_OBJ_HT_P(container)->read_dimension) {
-					zend_error(E_ERROR, "Cannot use object as array");
-				} else {
-					zval *dim = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
-					zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim TSRMLS_CC);
+			if (!Z_OBJ_HT_P(container)->read_dimension) {
+				zend_error(E_ERROR, "Cannot use object as array");
+			} else {
+				zval *dim = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+				zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
-					if (overloaded_result) {
-						if (type == BP_VAR_RW && !overloaded_result->is_ref) {
-							zend_error(E_ERROR, "Objects used as arrays in post/pre increment/decrement must return values by reference");
-						}
-	
-						*retval = &overloaded_result;
-					} else {
-						*retval = &EG(error_zval_ptr);
+				if (overloaded_result) {
+					if (type == BP_VAR_RW && !overloaded_result->is_ref) {
+						zend_error(E_ERROR, "Objects used as arrays in post/pre increment/decrement must return values by reference");
 					}
-					AI_USE_PTR(T(result->u.var).var);
-					FREE_OP(Ts, op2, EG(free_op2));
-					SELECTIVE_PZVAL_LOCK(**retval, result);
+
+					*retval = &overloaded_result;
+				} else {
+					*retval = &EG(error_zval_ptr);
 				}
+				AI_USE_PTR(T(result->u.var).var);
+				FREE_OP(Ts, op2, EG(free_op2));
+				SELECTIVE_PZVAL_LOCK(**retval, result);
 			}
 			break;
 		default: {
@@ -1559,7 +1557,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 					z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
 					break;
 				case ZEND_ASSIGN_DIM:
-					z = Z_OBJ_HT_P(object)->read_dimension(object, property TSRMLS_CC);
+					z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_W TSRMLS_CC);
 					break;
 			}
 			SEPARATE_ZVAL_IF_NOT_REF(&z);
