@@ -367,6 +367,20 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			}
 			pval_arg->type = IS_DOUBLE;
 			break;
+		case VT_DECIMAL:
+			switch (VarR8FromDec(&var_arg->decVal, &pval_arg->value.dval)) {
+				case DISP_E_OVERFLOW:
+					php_error(E_WARNING, "Overflow converting DECIMAL value to PHP floating point - number truncated");
+					pval_arg->value.dval = DBL_MAX;
+					/* break missing intentionally */
+				case S_OK:
+					pval_arg->type = IS_DOUBLE;
+					break;
+				default:
+					php_error(E_WARNING, "Error converting DECIMAL value to PHP floating point");
+					break;
+			}
+			break;
 		case VT_BOOL:
 			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF) {
 				if (var_arg->boolVal & 0xFFFF) {
@@ -382,6 +396,9 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 				}
 			}
 			pval_arg->type = IS_BOOL;
+			break;
+		case VT_VOID:
+			pval_arg->type = IS_NULL;
 			break;
 		case VT_BSTR:
 			if (pval_arg->is_ref == 0  || (var_arg->vt & VT_BYREF) != VT_BYREF) {
@@ -432,7 +449,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 			break;
 		case VT_UNKNOWN:
 			var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
-			/* fallthru */
+			/* break missing intentionally */
 		default:
 			php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", var_arg->vt, var_arg->vt);
 			var_reset(pval_arg);

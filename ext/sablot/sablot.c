@@ -801,7 +801,7 @@ PHP_FUNCTION(xslt_set_sax_handler)
         
         SEPARATE_ZVAL(indiv_handlers);
         
-        if (zend_hash_get_current_key(handlers_list, &string_key, &num_key) == HASH_KEY_IS_LONG) {
+        if (zend_hash_get_current_key(handlers_list, &string_key, &num_key, 0) == HASH_KEY_IS_LONG) {
             php_error(E_WARNING, "The Keys of the first dimension of your array must be strings");
             RETURN_FALSE;
         }
@@ -830,9 +830,7 @@ PHP_FUNCTION(xslt_set_sax_handler)
         } else {        
             php_error(E_WARNING, "Invalid option: %s", string_key);
         }
-        
-        S_FREE(string_key);
-    }
+	}
 }
 /* }}} */
 
@@ -1394,7 +1392,7 @@ static void _php_sablot_ht_char(HashTable *php, char **sablot)
         SEPARATE_ZVAL(value);
         convert_to_string_ex(value);
         
-        switch (zend_hash_get_current_key(php, &string_key, &num_key)) {
+        switch (zend_hash_get_current_key(php, &string_key, &num_key, 1)) {
             case HASH_KEY_IS_LONG:
                 sablot[i++] = Z_STRVAL_PP(value);
                 break;

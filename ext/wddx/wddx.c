@@ -476,9 +476,8 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			if (*ent == obj)
 				continue;
 
-			if (zend_hash_get_current_key(HASH_OF(obj), &key, &idx) == HASH_KEY_IS_STRING) {
+			if (zend_hash_get_current_key(HASH_OF(obj), &key, &idx, 0) == HASH_KEY_IS_STRING) {
 				php_wddx_serialize_var(packet, *ent, key);
-				efree(key);
 			} else {
 				sprintf(tmp_buf, "%ld", idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf);
@@ -511,11 +510,10 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 		 zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS;
 		 zend_hash_move_forward(target_hash)) {
 
-		type = zend_hash_get_current_key(target_hash, &key, &idx);
+		type = zend_hash_get_current_key(target_hash, &key, &idx, 0);
 
 		if (type == HASH_KEY_IS_STRING) {
 			is_struct = 1;
-			efree(key);
 			break;
 		}
 
@@ -541,11 +539,10 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 			continue;
 
 		if (is_struct) {
-			ent_type = zend_hash_get_current_key(target_hash, &key, &idx);
+			ent_type = zend_hash_get_current_key(target_hash, &key, &idx, 0);
 
 			if (ent_type == HASH_KEY_IS_STRING) {
 				php_wddx_serialize_var(packet, *ent, key);
-				efree(key);
 			} else {
 				sprintf(tmp_buf, "%ld", idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf);

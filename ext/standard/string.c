@@ -1488,12 +1488,11 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 	
 	zend_hash_internal_pointer_reset_ex(hash, &hpos);
 	while (zend_hash_get_current_data_ex(hash, (void **)&entry, &hpos) == SUCCESS) {
-		switch (zend_hash_get_current_key_ex(hash, &string_key, NULL, &num_key, &hpos)) {
+		switch (zend_hash_get_current_key_ex(hash, &string_key, NULL, &num_key, 0, &hpos)) {
 		case HASH_KEY_IS_STRING:
 			len = strlen(string_key);
 			if (len > maxlen) maxlen = len;
 			if (len < minlen) minlen = len;
-			efree(string_key);
 			break; 
 			
 		case HASH_KEY_IS_LONG:

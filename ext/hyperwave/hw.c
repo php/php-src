@@ -551,7 +551,7 @@ static char * make_objrec_from_array(HashTable *lht) {
 	objrec = malloc(1);
 	*objrec = '\0';
 	for(i=0; i<count; i++) {
-		keytype = zend_hash_get_current_key(lht, &key, &length);
+		keytype = zend_hash_get_current_key(lht, &key, &length, 0);
 /*		if(HASH_KEY_IS_STRING == keytype) { */
 			zend_hash_get_current_data(lht, (void **) &keydataptr);
 			keydata = *keydataptr;
@@ -601,7 +601,6 @@ static char * make_objrec_from_array(HashTable *lht) {
 					break;
 				}
 			}
-			if(HASH_KEY_IS_STRING == keytype) efree(key);
 			objrec = realloc(objrec, strlen(objrec)+strlen(str)+1);
 			strcat(objrec, str);
 /*		} */
@@ -1567,7 +1566,7 @@ PHP_FUNCTION(hw_changeobject) {
 		int j, noinsert=1;
 		ulong ind;
 
-		zend_hash_get_current_key(newobjarr, &key, &ind);
+		zend_hash_get_current_key(newobjarr, &key, &ind, 0);
 		zend_hash_get_current_data(newobjarr, (void *) &dataptr);
 		data = *dataptr;
 		switch(data->type) {
@@ -1599,7 +1598,6 @@ PHP_FUNCTION(hw_changeobject) {
 				modification = fnInsStr(modification, 0, "rem ");
 			} 
 		}
-		efree(key);
 		zend_hash_move_forward(newobjarr);
 	}
 	efree(oldobjrec);
@@ -1667,7 +1665,7 @@ PHP_FUNCTION(hw_modifyobject) {
 			int noinsert=1;
 			ulong ind;
 
-			zend_hash_get_current_key(addobjarr, &key, &ind);
+			zend_hash_get_current_key(addobjarr, &key, &ind, 0);
 			zend_hash_get_current_data(addobjarr, (void *) &dataptr);
 			data = *dataptr;
 			switch(data->type) {
@@ -1721,7 +1719,6 @@ PHP_FUNCTION(hw_modifyobject) {
 				modification = fnInsStr(modification, 0, "\\");
 				modification = fnInsStr(modification, 0, addattribute);
 			}
-			efree(key);
 			zend_hash_move_forward(addobjarr);
 		}
 	}
@@ -1736,7 +1733,7 @@ PHP_FUNCTION(hw_modifyobject) {
 			int noinsert=1;
 			ulong ind;
 
-			zend_hash_get_current_key(remobjarr, &key, &ind);
+			zend_hash_get_current_key(remobjarr, &key, &ind, 0);
 			zend_hash_get_current_data(remobjarr, (void *) &dataptr);
 			data = *dataptr;
 			switch(data->type) {
@@ -1793,7 +1790,6 @@ PHP_FUNCTION(hw_modifyobject) {
 				modification = fnInsStr(modification, 0, "\\");
 				modification = fnInsStr(modification, 0, remattribute);
 			}
-			efree(key);
 			zend_hash_move_forward(remobjarr);
 		}
 	}
@@ -2349,7 +2345,7 @@ PHP_FUNCTION(hw_pipedocument) {
 			zval *data, **dataptr;
 			ulong ind;
 			
-			zend_hash_get_current_key(prefixarray, &key, &ind);
+			zend_hash_get_current_key(prefixarray, &key, &ind, 0);
 			zend_hash_get_current_data(prefixarray, (void *) &dataptr);
 			data = *dataptr;
 			if (data->type != IS_STRING) {
@@ -2369,7 +2365,6 @@ PHP_FUNCTION(hw_pipedocument) {
 				php_error(E_WARNING,"%s is not a valid urlprefix", key);
 				RETURN_FALSE;
 			}
-			efree(key);
 			zend_hash_move_forward(prefixarray);
 		}
 	} else {
@@ -4151,7 +4146,7 @@ PHP_FUNCTION(hw_insertanchors) {
 			zval *data, **dataptr;
 			ulong ind;
 			
-			zend_hash_get_current_key(prefixarray, &key, &ind);
+			zend_hash_get_current_key(prefixarray, &key, &ind, 0);
 			zend_hash_get_current_data(prefixarray, (void *) &dataptr);
 			data = *dataptr;
 			if (data->type != IS_STRING) {
@@ -4171,7 +4166,6 @@ PHP_FUNCTION(hw_insertanchors) {
 				php_error(E_WARNING,"%s is not a valid urlprefix", key);
 				RETURN_FALSE;
 			}
-			efree(key);
 			zend_hash_move_forward(prefixarray);
 		}
 	} else {

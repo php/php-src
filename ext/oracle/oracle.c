@@ -1691,20 +1691,18 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 	}
 
 	for(i = 0; i < cursor->nparams; i++, zend_hash_move_forward(cursor->params)){
-		if(zend_hash_get_current_key(cursor->params, &paramname, NULL) != HASH_KEY_IS_STRING){
+		if(zend_hash_get_current_key(cursor->params, &paramname, NULL, 0) != HASH_KEY_IS_STRING){
 			php_error(E_WARNING, "Can't get parameter name");
 			return 0;
 		}
 
 		if(zend_hash_get_current_data(cursor->params, (void **)&param) == FAILURE){
 			php_error(E_WARNING, "Can't get parameter data");
-			efree(paramname);
 			return 0;
 		}
 
 		if(isout){
 			SET_VAR_STRINGL(paramname, estrdup(param->progv), strlen(param->progv));
-			efree(paramname);
 			continue;
 		}
 		

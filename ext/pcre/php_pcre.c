@@ -1017,11 +1017,10 @@ PHP_FUNCTION(preg_replace)
 										  (void **)&subject_entry) == SUCCESS) {
 			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val)) != NULL) {
 				/* Add to return array */
-				switch(zend_hash_get_current_key((*subject)->value.ht, &string_key, &num_key))
+				switch(zend_hash_get_current_key((*subject)->value.ht, &string_key, &num_key, 0))
 				{
 					case HASH_KEY_IS_STRING:
 						add_assoc_stringl(return_value, string_key, result, result_len, 0);
-						efree(string_key);
 						break;
 
 					case HASH_KEY_IS_LONG:
@@ -1314,12 +1313,11 @@ PHP_FUNCTION(preg_grep)
 			(*entry)->refcount++;
 
 			/* Add to return array */
-			switch(zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key))
+			switch(zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key, 0))
 			{
 				case HASH_KEY_IS_STRING:
 					zend_hash_update(return_value->value.ht, string_key,
 									 strlen(string_key)+1, entry, sizeof(zval *), NULL);
-					efree(string_key);
 					break;
 
 				case HASH_KEY_IS_LONG:

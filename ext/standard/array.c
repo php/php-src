@@ -876,7 +876,7 @@ PHP_FUNCTION(key)
 		php_error(E_WARNING, "Variable passed to key() is not an array or object");
 		RETURN_FALSE;
 	}
-	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
+	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
 		case HASH_KEY_IS_STRING:
 			RETVAL_STRING(string_key, 0);
 			break;
@@ -1015,7 +1015,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	/* Iterate through hash */
 	while(zend_hash_get_current_data(target_hash, (void **)&args[0]) == SUCCESS) {
 		/* Set up the key */
-		if (zend_hash_get_current_key(target_hash, &string_key, &num_key) == HASH_KEY_IS_LONG) {
+		if (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1) == HASH_KEY_IS_LONG) {
 			Z_TYPE_P(key) = IS_LONG;
 			Z_LVAL_P(key) = num_key;
 		} else {
@@ -1213,7 +1213,7 @@ PHP_FUNCTION(extract)
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(var_array));
 	while(zend_hash_get_current_data(Z_ARRVAL_PP(var_array), (void **)&entry) == SUCCESS) {
 
-		if (zend_hash_get_current_key(Z_ARRVAL_PP(var_array), &varname, &lkey) == HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key(Z_ARRVAL_PP(var_array), &varname, &lkey, 0) == HASH_KEY_IS_STRING) {
 
 			if (_valid_var_name(varname)) {
 				finalname = NULL;
@@ -1253,8 +1253,6 @@ PHP_FUNCTION(extract)
 					efree(finalname);
 				}
 			}
-
-			efree(varname);
 		}
 
 		zend_hash_move_forward(Z_ARRVAL_PP(var_array));
@@ -1777,11 +1775,10 @@ PHP_FUNCTION(array_slice)
 		
 		(*entry)->refcount++;
 
-		switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) {
+		switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 0)) {
 			case HASH_KEY_IS_STRING:
 				zend_hash_update(Z_ARRVAL_P(return_value), string_key, strlen(string_key)+1,
 								 entry, sizeof(zval *), NULL);
-				efree(string_key);
 				break;
 	
 			case HASH_KEY_IS_LONG:
@@ -1805,7 +1802,7 @@ PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
 
 	zend_hash_internal_pointer_reset(src);
 	while(zend_hash_get_current_data(src, (void **)&src_entry) == SUCCESS) {
-		switch (zend_hash_get_current_key(src, &string_key, &num_key)) {
+		switch (zend_hash_get_current_key(src, &string_key, &num_key, 0)) {
 			case HASH_KEY_IS_STRING:
 				if (recursive &&
 					zend_hash_find(dest, string_key, strlen(string_key) + 1,
@@ -1820,7 +1817,6 @@ PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
 					zend_hash_update(dest, string_key, strlen(string_key)+1,
 									 src_entry, sizeof(zval *), NULL);
 				}
-				efree(string_key);
 				break;
 
 			case HASH_KEY_IS_LONG:
@@ -1922,7 +1918,7 @@ PHP_FUNCTION(array_keys)
 		if (add_key) {	
 			MAKE_STD_ZVAL(new_val);
 
-			switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) {
+			switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 1)) {
 				case HASH_KEY_IS_STRING:
 					Z_TYPE_P(new_val) = IS_STRING;
 					Z_STRVAL_P(new_val) = string_key;
@@ -2075,11 +2071,10 @@ PHP_FUNCTION(array_reverse)
 	while(zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&entry) == SUCCESS) {
 		(*entry)->refcount++;
 		
-		switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) {
+		switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 0)) {
 			case HASH_KEY_IS_STRING:
 				zend_hash_update(Z_ARRVAL_P(return_value), string_key, strlen(string_key)+1,
 								 entry, sizeof(zval *), NULL);
-				efree(string_key);
 				break;
 
 			case HASH_KEY_IS_LONG:
@@ -2186,7 +2181,7 @@ PHP_FUNCTION(array_flip)
 	zend_hash_internal_pointer_reset(target_hash);
 	while (zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
 		MAKE_STD_ZVAL(data);
-		switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
+		switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
 			case HASH_KEY_IS_STRING:
 				Z_STRVAL_P(data) = string_key;
 				Z_STRLEN_P(data) = strlen(string_key);
@@ -2726,7 +2721,7 @@ PHP_FUNCTION(array_rand)
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
-	while (num_req_val && (key_type = zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) != HASH_KEY_NON_EXISTANT) {
+	while (num_req_val && (key_type = zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key, 0)) != HASH_KEY_NON_EXISTANT) {
 
 #ifdef HAVE_LRAND48
 		randval = lrand48();
@@ -2742,21 +2737,19 @@ PHP_FUNCTION(array_rand)
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (key_type == HASH_KEY_IS_STRING) {
-					RETURN_STRING(string_key, 0);
+					RETURN_STRING(string_key, 1);
 				} else {
 					RETURN_LONG(num_key);
 				}
 			} else {
 				/* Append the result to the return value. */
 				if (key_type == HASH_KEY_IS_STRING)
-					add_next_index_string(return_value, string_key, 0);
+					add_next_index_string(return_value, string_key, 1);
 				else
 					add_next_index_long(return_value, num_key);
 			}
 			num_req_val--;
-		} else if (key_type == HASH_KEY_IS_STRING)
-			efree(string_key);
-
+		}
 		num_avail--;
 		zend_hash_move_forward(Z_ARRVAL_PP(input));
 	}  

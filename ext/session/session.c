@@ -199,12 +199,11 @@ typedef struct {
 
 #define ENCODE_LOOP(code)										\
 	for (zend_hash_internal_pointer_reset(&PS(vars));			\
-			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING; \
+			zend_hash_get_current_key(&PS(vars), &key, &num_key, 0) == HASH_KEY_IS_STRING; \
 			zend_hash_move_forward(&PS(vars))) {				\
 		if (php_get_session_var(key, strlen(key), &struc PLS_CC PSLS_CC ELS_CC) == SUCCESS) { \
 			code;		 										\
 		} 														\
-		efree(key);												\
 	}
 
 static void php_set_session_var(char *name, size_t namelen,
@@ -452,7 +451,6 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	char tmp[128];
 	ulong idx;
 	int hash_type;
-	int dofree = 1;
 	int ret;
 
 	if (vallen == 0) 
@@ -465,19 +463,16 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(retval));
 			 zend_hash_get_current_data(Z_ARRVAL_P(retval), (void **) &ent) == SUCCESS;
 			 zend_hash_move_forward(Z_ARRVAL_P(retval))) {
-			hash_type = zend_hash_get_current_key(Z_ARRVAL_P(retval), &key, &idx);
+			hash_type = zend_hash_get_current_key(Z_ARRVAL_P(retval), &key, &idx, 0);
 
 			switch (hash_type) {
 				case HASH_KEY_IS_LONG:
 					sprintf(tmp, "%ld", idx);
 					key = tmp;
-					dofree = 0;
 					/* fallthru */
 				case HASH_KEY_IS_STRING:
 					php_set_session_var(key, strlen(key), *ent PSLS_CC);
 					PS_ADD_VAR(key);
-					if (dofree) efree(key);
-					dofree = 1;
 			}
 		}
 	}
@@ -601,7 +596,7 @@ static void php_session_save_current_state(PSLS_D)
 		}
 
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(PS(http_session_vars)));
-				zend_hash_get_current_key(Z_ARRVAL_P(PS(http_session_vars)), &variable, &num_key) == HASH_KEY_IS_STRING;
+				zend_hash_get_current_key(Z_ARRVAL_P(PS(http_session_vars)), &variable, &num_key, 1) == HASH_KEY_IS_STRING;
 				zend_hash_move_forward(Z_ARRVAL_P(PS(http_session_vars)))) {
 			PS_ADD_VAR(variable);
 		}
@@ -1394,12 +1389,11 @@ PHP_FUNCTION(session_unset)
 	PSLS_FETCH();
 	
 	for (zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &variable, &num_key) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key(&PS(vars), &variable, &num_key, 0) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&PS(vars))) {
 		if (zend_hash_find(&EG(symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
 				== SUCCESS)
 			zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
-		efree(variable);
 	}
 
 	/* Clean $HTTP_SESSION_VARS. */

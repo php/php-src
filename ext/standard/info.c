@@ -82,10 +82,9 @@ static void php_print_gpcse_array(char *name, uint name_length ELS_DC)
 			PUTS("<TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\"><B>");
 			PUTS(name);
 			PUTS("[\"");
-			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key)) {
+			switch (zend_hash_get_current_key((*data)->value.ht, &string_key, &num_key, 0)) {
 				case HASH_KEY_IS_STRING:
 					PUTS(string_key);
-					efree(string_key);
 					break;
 				case HASH_KEY_IS_LONG:
 					php_printf("%ld",num_key);
