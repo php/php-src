@@ -1,3 +1,75 @@
+2002-05-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php:
+    * moved the --without-pear compat defines to the right place
+
+    * pear/PEAR/Config.php:
+    * change root for documentation files to <peardir>/docs
+
+    * pear/PEAR/Command/Config.php:
+    * treat umask as octal in "config-set" command
+
+    * pear/PEAR/Common.php: * use new Archive_Tar gzip autodetection
+
+    * pear/package-Archive_Tar.xml: * prepare 0.9 release
+
+    * pear/PEAR/Config.php:
+    * fixed a bug in PEAR_Config::set() that broke validation of "set" parameters
+
+    * pear/Archive/Tar.php: * better gzip detection (magic cookie)
+
+2002-05-27  Andi Gutmans  <andi@zend.com>
+
+    * genfiles:
+    - Hope this is the last commit in the series. Make sure that the .h file
+    - also goes into ext/standard. I'm not sure how 4.2.1 was built with these
+    - broken files
+
+    * genfiles: - One more try.
+
+    * genfiles: - Isn't Makefile.frag being called? (Weird)
+
+    * genfiles: - Be a bit more verbose
+
+2002-05-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Flush data related to the streaming connection during php's rshutdown,
+    and not during the ircg_set_current call, because it is otherwise not
+    guaranteed that the HTTP header is sent out first.
+
+2002-05-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php
+      pear/package-PEAR.xml: * fixes for php without zlib
+
+    * pear/Archive/Tar.php
+      pear/package-Archive_Tar.xml:
+    * make Archive_Tar auto-detect whether zlib is needed based on file
+      extension (.tar -> no zlib)
+
+2002-05-27  Andi Gutmans  <andi@zend.com>
+
+    * makedist.ZendEngine2: - Small update
+
+2002-05-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * update version
+
+    * pear/PEAR/Command/Build.php
+      pear/PEAR/Common.php
+      pear/package.dtd
+      pear/package-PEAR.xml:
+    * first shot at "pear build" command for building extensions from C code
+
+    * pear/PEAR/Command/Registry.php: * "info" command
+
+    * pear/PEAR/Command/Config.php: * added config-help command
+
+    * pear/PEAR/Config.php: * drop "any" as a valid preferred_state
+
+    * pear/PEAR/Config.php: * more verbose docs for "verbose" :)
+
 2002-05-26  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Common.php: * un-indent description too
