@@ -18,6 +18,8 @@
 
 /* $Id$ */
 
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -43,8 +45,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "php_curl.h"
-
-static unsigned char second_arg_force_ref[] = {2, BYREF_NONE, BYREF_FORCE};
 
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 

@@ -16,7 +16,9 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: */ 
+/* $Id$ */
+
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
 
@@ -27,10 +29,21 @@
 #include <curl/curl.h>
 #include <curl/multi.h>
 
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
+
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 /* {{{ proto resource curl_multi_init(void)
    Returns a new cURL multi handle */
