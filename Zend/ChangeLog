@@ -1,3 +1,8 @@
+2004-08-21  Sara Golemon  <php@alphaweb.net>
+
+    * zend_compile.c:
+      Bugfix#29777 Some compilers don't like // style comments
+
 2004-08-20  Sara Golemon  <php@alphaweb.net>
 
     * zend_ini_parser.y:
