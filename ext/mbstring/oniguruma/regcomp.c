@@ -3339,7 +3339,6 @@ typedef struct {
 
 typedef struct {
   MinMaxLen       mmd;
-  BitStatusType   backrefed_status;
   OnigEncoding    enc;
   OnigOptionType  options;
   OnigAmbigType   ambig_flag;
@@ -4271,7 +4270,7 @@ optimize_node_left(Node* node, NodeOptInfo* opt, OptEnv* env)
 	  r = optimize_node_left(en->target, opt, env);
 
 	  if (is_set_opt_anc_info(&opt->anc, ANCHOR_ANYCHAR_STAR_MASK)) {
-	    if (BIT_STATUS_AT(env->backrefed_status, en->regnum))
+	    if (BIT_STATUS_AT(env->scan_env->backrefed_mem, en->regnum))
 	      remove_opt_anc_info(&opt->anc, ANCHOR_ANYCHAR_STAR_MASK);
 	  }
 	}

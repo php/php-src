@@ -29,7 +29,7 @@
 
 #include "regint.h"
 
-#ifndef ONIGGNU_H     /* name changes from oniggnu.h to regex.h in ruby. */
+#ifndef ONIGGNU_H
 #include "oniggnu.h"
 #endif
 

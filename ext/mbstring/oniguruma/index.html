@@ -5,14 +5,18 @@
 </head>
 <body BGCOLOR="#ffffff" VLINK="#808040" TEXT="#696969">
 
-<h2>Oniguruma</h2>
-<p>
-2005/02/19 (C) K.Kosako
-</p>
-<p>
+<!--
 <a href="http://miuras.net/matsushita.html">
 <img src="anti_matsushita.PNG" height="46" width="266">
 </a>
+-->
+<a href="http://miuras.net/matsushita.html">M</a>
+<a href="http://www.micropac.co.jp/nec/">N</a>
+
+<h1>Oniguruma</h1>
+
+<p>
+2005/03/07 (C) K.Kosako
 </p>
 
 <p>
@@ -38,7 +42,8 @@ ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 <dt><b>What's new</b>
 </font>
 <ul>
-<li>Character types(\w, \s, \d and POSIX bracket) were supported in full code point range with the Version 4.0.1 of the <a href="http://www.unicode.org/ucd/">Unicode Standard</a>. (since Version 3.5.0)
+<li>released Version 3.7.1 (2005/03/07)
+<li>released Version 2.4.2 (2005/03/05)
 </ul>
 </dl>
 
@@ -49,7 +54,7 @@ ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 <ul>
 <li> (1) C library (supported APIs: GNU regex, POSIX and Oniguruma native)
 <li> (2) Built-in regular expressions engine of <a href="http://www.ruby-lang.org/">Ruby</a> 1.6/1.8/1.9 <br>
-     In Ruby 1.9, Oniguruma is already incorporated by Kazuo Saito.
+     In Ruby 1.9, Oniguruma is already integrated by Kazuo Saito.
 </ul>
 </dl>
 
@@ -70,12 +75,12 @@ It follows the BSD license in the case of the one except for it.
 
 <dt><b>Download:</b>
 <ul>
-<li> <a href="archive/onigd20050219.tar.gz">Latest release version 3.7.0</a> (2005/02/19)   <a href="HISTORY_3X.txt">Change Log</a>
+<li> <a href="archive/onigd20050307.tar.gz">Latest release version 3.7.1</a> (2005/03/07)   <a href="HISTORY_3X.txt">Change Log</a>
+<li> <a href="archive/onigd20050219.tar.gz">3.7.0</a> (2005/02/19)
 <li> <a href="archive/onigd20050204.tar.gz">3.6.0</a> (2005/02/04)
-<li> <a href="archive/onigd20050119.tar.gz">3.5.4</a> (2005/01/19)
-<li> <a href="archive/onigd2_4_1.tar.gz">Latest release version 2.4.1</a> (2005/01/05)   <a href="HISTORY_2X.txt">Change Log</a>
+<li> <a href="archive/onigd2_4_2.tar.gz">Latest release version 2.4.2</a> (2005/03/05)   <a href="HISTORY_2X.txt">Change Log</a>
+<li> <a href="archive/onigd2_4_1.tar.gz">2.4.1</a> (2005/01/05)
 <li> <a href="archive/onigd2_4_0.tar.gz">2.4.0</a> (2004/12/01)
-<li> <a href="archive/onigd2_3_3.tar.gz">2.3.3</a> (2004/10/30)
 </ul>
 
 <br>
@@ -86,7 +91,7 @@ It follows the BSD license in the case of the one except for it.
 
 <br>
 <br>
-<dt><b>Documents:</b> (version 3.7.0)
+<dt><b>Documents:</b> (version 3.7.1)
 <ul>
  <li> <a href="doc/RE.txt">Regular Expressions</a>
       <a href="doc/RE.ja.txt">(Japanese: EUC-JP)</a>
@@ -162,7 +167,7 @@ and I'm thankful to Akinori MUSHA.
 To: "Greg A. Woods"<br>
 I can't send mail to you. (rejected)<br>
 Please set the nmatch argument of regexec() to 1,
-and use Oniguruma 3.6.0 or 2.4.1.<br>
+and use Oniguruma 3.7.1 or 2.4.2.<br>
 The nmatch argument should be array size of a pmatch.<br>
 But I don't know whether this problem is related to the crash
 that you reported.

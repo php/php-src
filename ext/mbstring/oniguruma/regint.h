@@ -73,7 +73,7 @@
 #define DEFAULT_MATCH_STACK_LIMIT_SIZE              0 /* unlimited */
 
 /* interface to external system */
-#ifdef NOT_RUBY      /* gived from Makefile */
+#ifdef NOT_RUBY      /* given from Makefile */
 #include "config.h"
 #define USE_CAPTURE_HISTORY
 #define USE_VARIABLE_META_CHARS

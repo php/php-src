@@ -1,5 +1,19 @@
 History
 
+2005/03/07: Version 3.7.1
+
+2005/03/07: [test] success in ruby 1.9.0 (2005-03-07) [i686-linux].
+2005/03/07: [impl] (thanks Rui Hirokawa)
+                   add ONIG_ESCAPE_UCHAR_COLLISION.
+                   rename UChar to OnigUChar in oniguruma.h.
+2005/03/07: [impl] remove declarations for Ruby in oniggnu.h.
+2005/03/05: [bug]  ANCHOR_ANYCHAR_STAR didn't work in onig_search().
+2005/03/01: [dist] remove oniggnu.h from MANIFEST-RUBY.
+                   remove oniggnu.h from make 19.
+2005/03/01: [bug]  (thanks matz) [ruby-dev:25778]
+                   uninitialized member (OptEnv.backrefed_status)
+                   was used. 
+
 2005/02/19: Version 3.7.0
 
 2005/02/19: [test] success in ruby 1.9.0 (2005-02-19) [i386-cygwin].
