@@ -91,7 +91,7 @@ zend_bool OrbitEnum_Constructor(OrbitEnum ** ppEnum, int parameterCount,
 	/* check parameter count */
 	if (parameterCount != 1)
 	{
-		wrong_param_count();
+		zend_wrong_param_count(TSRMLS_C);
 		goto error;
 	}
 
