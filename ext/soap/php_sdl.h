@@ -16,10 +16,10 @@
 
 struct _sdl
 {
-	xmlDocPtr doc;			//pointer to the parsed xml file
-	HashTable *types;		//array of sdlTypesPtr
-	HashTable *encoders;	//array of encodePtr
-	HashTable *bindings;	//array of sdlBindings (key'd by name)
+	xmlDocPtr doc;			/* pointer to the parsed xml file */
+	HashTable *types;		/* array of sdlTypesPtr */
+	HashTable *encoders;	/* array of encodePtr */
+	HashTable *bindings;	/* array of sdlBindings (key'd by name) */
 	char *target_ns;
 	char *source;
 };
@@ -33,7 +33,7 @@ struct _sdlBinding
 	void *bindingAttributes;
 };
 
-//Soap Binding Specfic stuff
+/* Soap Binding Specfic stuff */
 struct _sdlSoapBinding
 {
 	char *transport;
@@ -44,8 +44,8 @@ struct _sdlSoapBindingFunctionBody
 {
 	char *ns;
 	int use;
-	char *parts;			//not implemented yet
-	char *encodingStyle;	//not implemented yet
+	char *parts;			/* not implemented yet */
+	char *encodingStyle;	/* not implemented yet */
 };
 
 struct _sdlSoapBindingFunction
@@ -58,7 +58,7 @@ struct _sdlSoapBindingFunction
 	sdlSoapBindingFunctionBody falut;
 };
 
-//HTTP Binding Specfic stuff
+/* HTTP Binding Specfic stuff */
 /*********** not implemented yet ************
 struct _sdlHttpBinding
 {
@@ -82,7 +82,7 @@ struct _sdlRestrictionChar
 
 struct _sdlRestrictions
 {
-	HashTable *enumeration;				//array of sdlRestrictionCharPtr
+	HashTable *enumeration;				/* array of sdlRestrictionCharPtr */
 	sdlRestrictionIntPtr minExclusive;
 	sdlRestrictionIntPtr minInclusive;
 	sdlRestrictionIntPtr maxExclusive;
@@ -103,8 +103,8 @@ struct _sdlType
 	int nullable;
 	int min_occurs;
 	int max_occurs;
-	HashTable *elements;				//array of sdlTypePtr
-	HashTable *attributes;				//array of sdlAttributePtr
+	HashTable *elements;				/* array of sdlTypePtr */
+	HashTable *attributes;				/* array of sdlAttributePtr */
 	sdlRestrictionsPtr restrictions;
 	encodePtr encode;
 };
@@ -121,8 +121,8 @@ struct _sdlFunction
 	char *functionName;
 	char *requestName;
 	char *responseName;
-	HashTable *requestParameters;		//array of sdlParamPtr
-	HashTable *responseParameters;		//array of sdlParamPtr (this should only be one)
+	HashTable *requestParameters;		/* array of sdlParamPtr */
+	HashTable *responseParameters;		/* array of sdlParamPtr (this should only be one) */
 	int bindingType;
 	void *bindingAttributes;
 };
@@ -137,7 +137,7 @@ struct _sdlAttribute
 	char *ref;
 	char *type;
 	char *use;
-	HashTable *extraAttributes;			//array of xmlNodePtr
+	HashTable *extraAttributes;			/* array of xmlNodePtr */
 };
 
 sdlPtr get_sdl(char *uri);
