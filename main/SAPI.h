@@ -148,6 +148,7 @@ struct _sapi_module_struct {
 	char *(*read_cookies)(SLS_D);
 
 	void (*register_server_variables)(zval *track_vars_array ELS_DC SLS_DC PLS_DC);
+	void (*log_message)(char *message);
 
 	void (*default_post_reader)(char *content_type_dup SLS_DC);
 };

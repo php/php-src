@@ -159,6 +159,15 @@ static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 }
 
 
+static void sapi_cgi_log_message(char *message)
+{
+	if (php_header()) {
+		fprintf(stderr, message);
+		fprintf(stderr, "\n");
+	}
+}
+
+
 static sapi_module_struct sapi_module = {
 	"CGI",							/* name */
 									
@@ -178,6 +187,7 @@ static sapi_module_struct sapi_module = {
 	sapi_cgi_read_cookies,			/* read Cookies */
 
 	sapi_cgi_register_variables,	/* register server variables */
+	sapi_cgi_log_message,			/* Log message */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

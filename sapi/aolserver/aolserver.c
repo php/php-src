@@ -288,6 +288,7 @@ php_ns_startup(sapi_module_struct *sapi_module)
 	}
 }
 
+
 /* this structure is static (as in "it does not change") */
 
 static sapi_module_struct sapi_module = {
@@ -309,6 +310,7 @@ static sapi_module_struct sapi_module = {
 	php_ns_sapi_read_cookies,				/* read Cookies */
 
 	NULL,									/* register server variables */
+	NULL,									/* Log message */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
