@@ -656,6 +656,9 @@ PHP_METHOD(SoapParam, SoapParam)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &data, &name, &name_length) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
+	if (name_length == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid parameter name.");
+	}
 
 #ifndef ZEND_ENGINE_2
 	zval_add_ref(&data);
@@ -678,6 +681,12 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|zbz", &ns, &ns_len, &name, &name_len, &data, &must_understand, &actor) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	}
+	if (ns_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid namespace.");
+	}
+	if (name_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid header name.");
+	}
 
 	add_property_stringl(this_ptr, "namespace", ns, ns_len, 1);
 	add_property_stringl(this_ptr, "name", name, name_len, 1);
@@ -689,12 +698,15 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	}
 	add_property_bool(this_ptr, "mustUnderstand", must_understand);
 	if (actor == NULL) {
-	} else if (Z_TYPE_P(actor) == IS_LONG) {
+	} else if (Z_TYPE_P(actor) == IS_LONG &&
+	  (Z_LVAL_P(actor) == SOAP_ACTOR_NEXT ||
+	   Z_LVAL_P(actor) == SOAP_ACTOR_NONE ||
+	   Z_LVAL_P(actor) == SOAP_ACTOR_UNLIMATERECEIVER)) {
 		add_property_long(this_ptr, "actor", Z_LVAL_P(actor));
-	} else if (Z_TYPE_P(actor) == IS_STRING) {
+	} else if (Z_TYPE_P(actor) == IS_STRING && Z_STRLEN_P(actor) > 0) {
 		add_property_stringl(this_ptr, "actor", Z_STRVAL_P(actor), Z_STRLEN_P(actor), 1);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid actor.");
 	}
 }
 
@@ -712,6 +724,12 @@ PHP_METHOD(SoapFault, SoapFault)
 		&fault_actor, &fault_actor_len,
 		&details, &name, &name_len, &headerfault) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	}
+	if (fault_code != NULL && fault_code_len == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
+	}
+	if (name != NULL && name_len == 0) {
+		name = NULL;
 	}
 
 	set_soap_fault(this_ptr, fault_code, fault_string, fault_actor, details, name TSRMLS_CC);
@@ -792,16 +810,16 @@ PHP_METHOD(SoapVar, SoapVar)
 		add_property_zval(this_ptr, "enc_value", data);
 	}
 
-	if (stype && strlen(stype) > 0) {
+	if (stype && stype_len > 0) {
 		add_property_stringl(this_ptr, "enc_stype", stype, stype_len, 1);
 	}
-	if (ns && strlen(ns) > 0) {
+	if (ns && ns_len > 0) {
 		add_property_stringl(this_ptr, "enc_ns", ns, ns_len, 1);
 	}
-	if (name && strlen(name) > 0) {
+	if (name && name_len > 0) {
 		add_property_stringl(this_ptr, "enc_name", name, name_len, 1);
 	}
-	if (namens && strlen(namens) > 0) {
+	if (namens && namens_len > 0) {
 		add_property_stringl(this_ptr, "enc_namens", namens, namens_len, 1);
 	}
 }
