@@ -41,6 +41,7 @@ PHP_RSHUTDOWN_FUNCTION(sqlite);
 PHP_MINFO_FUNCTION(sqlite);
 
 PHP_FUNCTION(sqlite_open);
+PHP_FUNCTION(sqlite_popen);
 PHP_FUNCTION(sqlite_close);
 PHP_FUNCTION(sqlite_query);
 PHP_FUNCTION(sqlite_unbuffered_query);
