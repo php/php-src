@@ -70,8 +70,16 @@ function_entry sysvsem_functions[] = {
 /* {{{ sysvsem_module_entry
  */
 zend_module_entry sysvsem_module_entry = {
-    STANDARD_MODULE_HEADER,
-	"sysvsem", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_HEADER,
+	"sysvsem",
+	sysvsem_functions,
+	PHP_MINIT(sysvsem),
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -113,7 +121,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  * Need better way to handle this
  */
 
-	if(sem_ptr->count == -1 || !sem_ptr->auto_release) {
+	if (sem_ptr->count == -1 || !sem_ptr->auto_release) {
 		efree(sem_ptr);
 		return;
 	}
@@ -162,7 +170,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 PHP_FUNCTION(sem_get)
 {
 	long key, max_acquire, perm, auto_release = 1;
-    int semid;
+	int semid;
 	struct sembuf sop[3];
 	int count;
 	sysvsem_sem *sem_ptr;
@@ -183,7 +191,7 @@ PHP_FUNCTION(sem_get)
 	 * the kernel versions 2.0.x and 2.1.z do in fact zero them.
 	 */
 
-    semid = semget(key, 3, perm|IPC_CREAT);
+	semid = semget(key, 3, perm|IPC_CREAT);
 	if (semid == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
 		RETURN_FALSE;
@@ -281,9 +289,9 @@ PHP_FUNCTION(sem_get)
  */
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
-	pval **arg_id;
+	zval **arg_id;
 	sysvsem_sem *sem_ptr;
-    struct sembuf sop;
+	struct sembuf sop;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -303,14 +311,13 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 		RETURN_FALSE;
 	}
 
-    sop.sem_num = SYSVSEM_SEM;
-    sop.sem_op  = acquire ? -1 : 1;
-    sop.sem_flg = SEM_UNDO;
+	sop.sem_num = SYSVSEM_SEM;
+	sop.sem_op  = acquire ? -1 : 1;
+	sop.sem_flg = SEM_UNDO;
 
-    while (semop(sem_ptr->semid, &sop, 1) == -1) {
+	while (semop(sem_ptr->semid, &sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s",
-					   acquire ? "acquire" : "release",  sem_ptr->key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", acquire ? "acquire" : "release", sem_ptr->key, strerror(errno));
 			RETURN_FALSE;
 		}
 	}
@@ -346,14 +353,14 @@ PHP_FUNCTION(sem_release)
 
 PHP_FUNCTION(sem_remove)
 {
-	pval **arg_id;
+	zval **arg_id;
 	sysvsem_sem *sem_ptr;
 #if HAVE_SEMUN
 	union semun un;
 	struct semid_ds buf;
 #endif
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
 			WRONG_PARAM_COUNT;
 	}
 
@@ -361,18 +368,18 @@ PHP_FUNCTION(sem_remove)
 
 #if HAVE_SEMUN
 	un.buf = &buf;
-	if(semctl(sem_ptr->semid, 0, IPC_STAT, un) < 0) {
+	if (semctl(sem_ptr->semid, 0, IPC_STAT, un) < 0) {
 #else
-	if(semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
+	if (semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
 #endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semphore %d does not (any longer) exist", Z_LVAL_PP(arg_id));
 		RETURN_FALSE;
 	}
 
 #if HAVE_SEMUN
-	if(semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
+	if (semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
 #else
-	if(semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
+	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV sempphore %d: %s", Z_LVAL_PP(arg_id), strerror(errno));
 		RETURN_FALSE;
