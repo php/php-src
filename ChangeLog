@@ -1,3 +1,42 @@
+2001-10-18  Stig Bakken  <ssb@fast.no>
+
+    * NEWS: * update NEWS file
+
+2001-10-18  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/curl/curl.c:
+    Reverting the last fix for ZTS and adding TSRMLS_FETCH() to make it work.
+
+    * ext/curl/curl.dsp:
+    Adding include path for having curl header and libraries in php_build\curl
+
+    * ext/curl/curl.c: Fixing ZTS build on win32
+
+2001-10-18  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/session/session.c:
+    fix ws issue introduce in my use_trans_sid commit...
+
+
+    * ext/session/session.c: fix formatting, this line really was too long ;)
+
+    * ext/session/session.c: force use of the session.use_trans_sid setting
+
+2001-10-18  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist
+      php.ini-recommended: Add php_overload.dll.
+
+    * win32/php_modules.dsw: Add ext/overload to modules workspace.
+
+2001-10-18  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/VARIANT.c: MFH
+
+    * ext/com/VARIANT.c: fixed wrong constant definition
+
+    * ext/overload/overload.dsp: fix linkage error
+
 2001-10-17  eschmid  <eschmid@pb1.pair.com>
 
     * ext/xmlrpc/xmlrpc-epi-php.c: Fixed some protos.
