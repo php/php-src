@@ -28,7 +28,7 @@ extern "C" {
 /*
 ** The version of the SQLite library.
 */
-#define SQLITE_VERSION         "2.8.9"
+#define SQLITE_VERSION         "2.8.11"
 
 /*
 ** The version string is also compiled into the library so that a program
