@@ -45,7 +45,7 @@
 #include "zend_errors.h"
 #include "zend_alloc.h"
 
-#if SIZEOF_LONG == 8
+#if SIZEOF_VOID_P == 8
 typedef unsigned int zend_bool;
 #else
 typedef unsigned char zend_bool;
