@@ -776,6 +776,7 @@ PHP_FUNCTION(pg_exec)
 				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
+				pg_result->row = -1;
 				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
 				/*
 				return_value->value.lval = zend_list_insert(pg_result,le_result);
@@ -1088,27 +1089,37 @@ PHP_FUNCTION(pg_fieldnum)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_result(int result, int row_number, mixed field_name)
+/* {{{ proto mixed pg_result(int result, [int row_number,] mixed field_name)
    Returns values from a result identifier */
 PHP_FUNCTION(pg_result)
 {
 	zval **result, **row, **field=NULL;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int field_offset;
+	int field_offset, pgsql_row;
 	
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &result, &row, &field)==FAILURE) {
+	if ((ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &result, &row, &field)==FAILURE) &&
+	    (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &result, &field)==FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
 
 	pgsql_result = pg_result->result;
-	
-	convert_to_long_ex(row);
-	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= PQntuples(pgsql_result)) {
-		php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
-		RETURN_FALSE;
+	if (ZEND_NUM_ARGS() == 2) {
+		if (pg_result->row < 0)
+			pg_result->row = 0;
+		pgsql_row = pg_result->row;
+		if (pgsql_row >= PQntuples(pgsql_result)) {
+			RETURN_FALSE;
+		}
+	} else {
+		convert_to_long_ex(row);
+		pgsql_row = Z_LVAL_PP(row);
+		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+			php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+			RETURN_FALSE;
+		}
 	}
 	switch(Z_TYPE_PP(field)) {
 		case IS_STRING:
@@ -1124,10 +1135,10 @@ PHP_FUNCTION(pg_result)
 		RETURN_FALSE;
 	}
 	
-	if (PQgetisnull(pgsql_result, Z_LVAL_PP(row), field_offset)) {
+	if (PQgetisnull(pgsql_result, pgsql_row, field_offset)) {
 		return_value->type = IS_NULL;
 	} else {
-		return_value->value.str.val = PQgetvalue(pgsql_result, Z_LVAL_PP(row), field_offset);
+		return_value->value.str.val = PQgetvalue(pgsql_result, pgsql_row, field_offset);
 		return_value->value.str.len = (return_value->value.str.val ? strlen(return_value->value.str.val) : 0);
 		return_value->value.str.val = safe_estrndup(return_value->value.str.val,return_value->value.str.len);
 		return_value->type = IS_STRING;
@@ -1142,12 +1153,20 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	zval **result, **row, **arg3;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int i, num_fields;
+	int i, num_fields, pgsql_row;
 	char *element, *field_name;
 	uint element_len;
 	PLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			if (!result_type) {
+				result_type = PGSQL_BOTH;
+			}
+			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &result, &row)==FAILURE) {
 				RETURN_FALSE;
@@ -1171,15 +1190,25 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
 
 	pgsql_result = pg_result->result;
-	
-	convert_to_long_ex(row);
-	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= PQntuples(pgsql_result)) {
-		php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
-		RETURN_FALSE;
+
+	if (ZEND_NUM_ARGS() == 1) {
+		pg_result->row++;
+		pgsql_row = pg_result->row;
+		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+			RETURN_FALSE;
+		}
+	} else {
+		convert_to_long_ex(row);
+		pgsql_row = Z_LVAL_PP(row);
+		pg_result->row = pgsql_row;
+		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+			php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+			RETURN_FALSE;
+		}
 	}
 	array_init(return_value);
 	for (i = 0, num_fields = PQnfields(pgsql_result); i<num_fields; i++) {
-		if (PQgetisnull(pgsql_result, Z_LVAL_PP(row), i)) {
+		if (PQgetisnull(pgsql_result, pgsql_row, i)) {
 			if (result_type & PGSQL_NUM) {
 				add_index_null(return_value, i);
 			}
@@ -1188,7 +1217,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				add_assoc_null(return_value, field_name);
 			}
 		} else {
-			element = PQgetvalue(pgsql_result, Z_LVAL_PP(row), i);
+			element = PQgetvalue(pgsql_result, pgsql_row, i);
 			element_len = (element ? strlen(element) : 0);
 			if (element) {
 				char *data;
@@ -1217,7 +1246,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_row(int result, int row)
+/* {{{ proto array pg_fetch_row(int result, [int row])
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pg_fetch_row)
 {
@@ -1226,7 +1255,7 @@ PHP_FUNCTION(pg_fetch_row)
 /* }}} */
 
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
-/* {{{ proto array pg_fetch_array(int result, int row [, int result_type])
+/* {{{ proto array pg_fetch_array(int result, [int row [, int result_type]])
    Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
 {
@@ -1234,7 +1263,7 @@ PHP_FUNCTION(pg_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(int result, int row [, int result_type])
+/* {{{ proto object pg_fetch_object(int result, [int row [, int result_type]])
    Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {
@@ -1257,21 +1286,32 @@ void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	zval **result, **row, **field;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	int field_offset;
+	int field_offset, pgsql_row;
 	
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &result, &row, &field)==FAILURE) {
+	if ((ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &result, &row, &field)==FAILURE) &&
+	    (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &result, &field)==FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
 
 	pgsql_result = pg_result->result;
-	
-	convert_to_long_ex(row);
-	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= PQntuples(pgsql_result)) {
-		php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
-		RETURN_FALSE;
+	if (ZEND_NUM_ARGS() == 2) {
+		if (pg_result->row < 0)
+			pg_result->row = 0;
+		pgsql_row = pg_result->row;
+		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+			RETURN_FALSE;
+		}
+	} else {
+		convert_to_long_ex(row);
+		pgsql_row = Z_LVAL_PP(row);
+		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+			php_error(E_WARNING,"Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+			RETURN_FALSE;
+		}
 	}
+	
 	switch(Z_TYPE_PP(field)) {
 		case IS_STRING:
 			convert_to_string_ex(field);
@@ -1289,17 +1329,17 @@ void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	switch (entry_type) {
 		case PHP_PG_DATA_LENGTH:
-			return_value->value.lval = PQgetlength(pgsql_result, Z_LVAL_PP(row), field_offset);
+			return_value->value.lval = PQgetlength(pgsql_result, pgsql_row, field_offset);
 			break;
 		case PHP_PG_DATA_ISNULL:
-			return_value->value.lval = PQgetisnull(pgsql_result, Z_LVAL_PP(row), field_offset);
+			return_value->value.lval = PQgetisnull(pgsql_result, pgsql_row, field_offset);
 			break;
 	}
 	return_value->type = IS_LONG;
 }
 /* }}} */
 
-/* {{{ proto int pg_fieldprtlen(int result, int row, mixed field_name_or_number)
+/* {{{ proto int pg_fieldprtlen(int result, [int row,] mixed field_name_or_number)
    Returns the printed length */
 PHP_FUNCTION(pg_fieldprtlen)
 {
@@ -1307,7 +1347,7 @@ PHP_FUNCTION(pg_fieldprtlen)
 }
 /* }}} */
 
-/* {{{ proto int pg_fieldisnull(int result, int row, mixed field_name_or_number)
+/* {{{ proto int pg_fieldisnull(int result, [int row,] mixed field_name_or_number)
    Test if a field is NULL */
 PHP_FUNCTION(pg_fieldisnull)
 {

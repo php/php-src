@@ -112,6 +112,7 @@ typedef struct pgLofp {
 typedef struct _php_pgsql_result_handle {
 	PGconn *conn;
 	PGresult *result;
+	int row;
 } pgsql_result_handle;
 
 typedef struct {
