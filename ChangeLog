@@ -1,3 +1,207 @@
+2002-04-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php:
+    * ignore dirs and libfiles in older releases (changelog)
+
+    * pear/PEAR/Common.php: * ignore files in older releases (changelog)
+
+2002-04-09  jim winstead  <jimw@apache.org>
+
+    * ext/gmp/gmp.c: MFH
+
+    * ext/gmp/gmp.c: Fix bug #15835.
+
+2002-04-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in: * MFH Makefile
+
+    * pear/Schedule/At.php
+      pear/scripts/pear.bat
+      pear/scripts/pear.in
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Uploader.php
+      pear/PEAR/Command.php
+      pear/PEAR/CommandResponse.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php
+      pear/Net/Socket.php
+      pear/Mail/RFC822.php
+      pear/DB/tests/oci8/05sequences.phpt
+      pear/HTML/Common.php
+      pear/HTML/Form.php
+      pear/HTML/Select.php
+      pear/DB/pgsql.php
+      pear/DB/tests/driver/05sequences.phpt
+      pear/DB/tests/mysql/05sequences.phpt
+      pear/DB/tests/sequences.inc
+      pear/DB/oci8.php
+      pear/DB/mysql.php
+      pear/DB/ibase.php
+      pear/DB/common.php
+      pear/package-db.xml
+      pear/package-pear.xml
+      pear/package.dtd
+      pear/pear.m4
+      pear/PEAR.php
+      pear/DB.php: * PEAR MFH
+
+    * pear/DB/common.php
+      pear/DB.php: * drop the ondemand connect stuff for now
+
+    * pear/tests/pear_config.phpt: * add preferred_state
+
+    * pear/package-pear.xml: * drop file replace= attribute
+
+    * pear/tests/pear_config.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error3.phpt
+      pear/PEAR/Frontend/CLI.php
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/scripts/.cvsignore
+      pear/scripts/pear-get.in
+      pear/scripts/pear.in
+      pear/scripts/pearcmd-common.php
+      pear/scripts/pearcmd-help.php
+      pear/scripts/pearcmd-info.php
+      pear/scripts/pearcmd-install.php
+      pear/scripts/pearcmd-list.php
+      pear/scripts/pearcmd-package.php
+      pear/scripts/pearcmd-remote-list.php
+      pear/scripts/pearcmd-show-config.php
+      pear/scripts/pearcmd-uninstall.php
+      pear/scripts/phpize.in
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/DB/tests/ibase/03simplequery.phpt
+      pear/DB/tests/ibase/04numcols.phpt
+      pear/DB/tests/ibase/05sequences.phpt
+      pear/DB/tests/ibase/06prepexec.phpt
+      pear/DB/tests/ibase/10errormap.phpt
+      pear/DB/tests/ibase/connect.inc
+      pear/DB/tests/ibase/mktable.inc
+      pear/DB/tests/ibase/skipif.inc
+      pear/HTML/Form.php
+      pear/HTML/Select.php
+      pear/PEAR/Command.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Installer.php
+      pear/DB/IDEAS
+      pear/DB/STATUS
+      pear/DB/TESTERS
+      pear/DB/common.php
+      pear/DB/ibase.php
+      pear/DB/pgsql.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/tests/driver/setup.inc
+      pear/DB/tests/ibase/02fetch.phpt
+      pear/.cvsignore
+      pear/DB.php
+      pear/Makefile.frag
+      pear/Makefile.in
+      pear/PEAR.php
+      pear/package.dtd
+      pear/pear.m4: * partial PEAR MFH
+
+    * ext/xml/xml.c: * remove extra end-fold
+
+2002-04-09  Sterling Hughes  <sterling@bumblebury.com>
+
+    * sapi/apache2filter/php_functions.c:
+    eekk -- and ssb thought my macro's were icky :)
+
+2002-04-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php:
+    * package-validate uses package.xml as default param
+
+    * pear/Makefile.in: * MFH: install the right expat header files
+
+    * pear/Makefile.frag:
+    * ext/xml/expat no longer has xmltok and xmlparse subdirs
+
+2002-04-09  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php:
+    Make the dependencies check look for the correct registry file
+
+2002-04-09  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/PEAR/Registry.php:
+    Win95/98/Me doesn't support locking, please check patch on other systems
+
+2002-04-09  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+    Fix package-list not showing the right Install path
+
+    * pear/PEAR/Registry.php:
+    Fix a problem when list-installed is called in a new installation
+
+2002-04-09  James Cox  <james@wherewithal.com>
+
+    * pear/scripts/pear.bat: it's been changed back to php.exe
+
+2002-04-09  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/scripts/pear.bat: updated, requires PHP4.2 php-cgi
+
+2002-04-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Packager.php: * show full cvstag command
+
+    * pear/PEAR/Command/Common.php: * get rid of CommandResponse stufff
+
+    * pear/PEAR/Common.php: * drop file replace= attribute
+
+    * pear/Makefile.frag: * remove PEAR/Uploader.php
+
+    * pear/PEAR/CommandResponse.php
+      pear/PEAR/Uploader.php: * unused files
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Config.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Common.php
+      pear/package-pear.xml
+      pear/package.dtd:
+    * implemented role="script" and <replace> substitution during install
+
+2002-04-09  Sterling Hughes  <sterling@bumblebury.com>
+
+    * sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c: fix compile warnings
+
+2002-04-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-pear.xml: * package definition for the base PEAR system
+
+    * pear/package.dtd: HEADS UP, package.xml format change:
+    <file>foo.php</file> is now <file name="foo.php/>
+    Added tags for configure-like substitutions.
+
 2002-04-08  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
 
     * ext/msession/php_msession.h
