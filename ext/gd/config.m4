@@ -44,11 +44,62 @@ dnl A whole whack of possible places where this might be
   AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
 ])
 if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
+  CHECK_TTF="yes"
+  AC_ARG_WITH(ttf,
+  [  --with-ttf[=DIR]        Include Freetype support],[
+    if test $withval = "no" ; then
+      CHECK_TTF=""
+    else
+      CHECK_TTF="$withval"
+    fi
+  ])
+
+  AC_MSG_CHECKING(whether to include ttf support)
+  if test -n "$CHECK_TTF" ; then
+    for i in /usr /usr/local "$CHECK_TTF" ; do
+      if test -f "$i/include/truetype.h" ; then
+        FREETYPE_DIR="$i"
+      fi
+      if test -f "$i/include/freetype.h" ; then
+        TTF_DIR="$i"
+      fi
+    done
+    if test -n "$FREETYPE_DIR" ; then
+      AC_DEFINE(HAVE_LIBFREETYPE)
+      AC_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE_DIR/lib)
+      AC_ADD_INCLUDE($FREETYPE_DIR/include)
+      AC_MSG_RESULT(yes)
+    else
+      if test -n "$TTF_DIR" ; then
+        AC_DEFINE(HAVE_LIBTTF)
+        AC_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
+        AC_ADD_INCLUDE($TTF_DIR/include)
+        AC_MSG_RESULT(yes)
+      else
+        AC_MSG_RESULT(no)
+      fi
+    fi
+  else
+    AC_MSG_RESULT(no)
+  fi
+  
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE="-I/usr/pkg/include/gd"
   fi
-  AC_CHECK_LIB(ttf, TT_Open_Face)
-  AC_CHECK_HEADERS(freetype.h)
+
+  AC_MSG_CHECKING(whether to enable 4bit antialias hack with FreeType2)
+  AC_ARG_ENABLE(freetype-4bit-antialias-hack,
+  [  --enable-freetype-4bit-antialias-hack  For the crazy with FreeType2.],[
+  if test "$enableval" = "yes" ; then
+    AC_DEFINE(FREETYPE_4BIT_ANTIALIAS_HACK, 1)
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+  ],[
+    AC_MSG_RESULT(no)
+  ])
+  
   PHP_EXTENSION(gd)
   EXTRA_LIBS="$EXTRA_LIBS $GD_LIBS"
   INCLUDES="$INCLUDES $GD_INCLUDE"

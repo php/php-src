@@ -9,7 +9,7 @@
 #else
 #include "php_config.h"
 #endif
-#ifdef ENABLE_GD_TTF
+#if HAVE_LIBTTF|HAVE_LIBFREETYPE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +17,11 @@
 #include <gd.h>
 #include "gdttf.h"
 #include "gdcache.h"
+#if HAVE_LIBFREETYPE
+#include <truetype.h>
+#else
 #include <freetype.h>
+#endif
 
 /* number of fonts cached before least recently used is replaced */
 #define FONTCACHESIZE 6
@@ -31,7 +35,11 @@
 #define BITMAPCACHESIZE 8
 
 /* number of antialias color lookups cached */
+#if FREETYPE_4BIT_ANTIALIAS_HACK
+#define TWEENCOLORCACHESIZE 128
+#else
 #define TWEENCOLORCACHESIZE 32
+#endif
 
 /* ptsize below which anti-aliasing is ineffective */
 #define MINANTIALIASPTSIZE 0
@@ -40,7 +48,11 @@
 #define RESOLUTION 72
 
 /* Number of colors used for anti-aliasing */
+#if FREETYPE_4BIT_ANTIALIAS_HACK
+#define NUMCOLORS 16
+#else
 #define NUMCOLORS 4
+#endif
 
 /* Line separation as a factor of font height.  
       No space between if LINESPACE = 1.00 
@@ -379,7 +391,11 @@ fontFetch ( char **error, void *key )
 	a->cos_a = cos(a->angle);
 	a->engine = b->engine;
 	if ((err = TT_Open_Face(*b->engine, a->fontname, &a->face))) {
+#if HAVE_LIBFREETYPE
+		if (err == 0x008) { /* The FT2 oldapi is missing this code */
+#else
 		if (err == TT_Err_Could_Not_Open_File) {
+#endif
 			*error = "Could not find/open font";
 		}
 		else {
@@ -852,7 +868,7 @@ gdttf(gdImage *im, int *brect, int fg, char *fontname,
     return (char *)NULL;
 }
    
-#endif /* ENABLE_GD_TTF */
+#endif /* HAVE_LIBTTF|HAVE_LIBFREETYPE */
 
 /*
  * Local variables:
