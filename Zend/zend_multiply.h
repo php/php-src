@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #if defined(__i386__) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
