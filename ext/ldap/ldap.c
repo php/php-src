@@ -123,7 +123,7 @@ static void _free_ldap_result(LDAPMessage *result)
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("ldap.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			zend_ldap_globals,		ldap_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY("mysql.base_dn",			NULL,	PHP_INI_ALL,			OnUpdateString,		base_dn,			zend_ldap_globals,		ldap_globals)
+	STD_PHP_INI_ENTRY("ldap.base_dn",			NULL,	PHP_INI_ALL,			OnUpdateString,		base_dn,			zend_ldap_globals,		ldap_globals)
 PHP_INI_END()
 
 
@@ -156,8 +156,9 @@ PHP_MSHUTDOWN_FUNCTION(ldap)
 
 PHP_MINFO_FUNCTION(ldap)
 {
-	char maxl[32], tmp[32];
+	char maxl[32];
 #if HAVE_NSLDAP
+	char tmp[32]
 	LDAPVersion ver;
 	double SDKVersion;
 #endif
