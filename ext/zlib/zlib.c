@@ -161,7 +161,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression_level)
 
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_ALL, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
+    STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_USER, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdate_zlib_output_compression_level, output_compression_level, zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
