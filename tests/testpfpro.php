@@ -8,7 +8,7 @@ echo "<pre>\n\n";
 
 echo "Payflow Pro library is version ".pfpro_version()."\n";
 
-echo "Payflow Pro init returned ".pfpro_init()."\n";
+pfpro_init();
 
 $transaction = array(USER	=> 'mylogin',
 		     PWD	=> 'mypassword',
@@ -28,14 +28,10 @@ if (!$response) {
 echo "Signio response code was ".$response[RESULT];
 echo ", which means: ".$response[RESPMSG]."\n";
 
-echo "\n";
-
-echo "Dump of the transaction request ";
+echo "\nDump of the transaction request ";
 print_r($transaction);
 
-echo "\n";
-
-echo "Dump of the response ";
+echo "\nDump of the response ";
 print_r($response);
 
 pfpro_cleanup();
