@@ -430,6 +430,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	   or user_dir configuration directives, PATH_INFO is used to construct
 	   the filename as a side effect of php3_fopen_for_parser.
 	 */
+	if(cgi) {
+		SG(request_info).path_translated = getenv("PATH_TRANSLATED");
+	}
 	if (cgi || SG(request_info).path_translated) {
 		file_handle.handle.fp = php3_fopen_for_parser();
 		file_handle.filename = SG(request_info).path_translated;
