@@ -205,6 +205,83 @@ static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var) 
 #define FETCH_BUF(buf,type,len) ((buf) = (buf) ? (buf) : \
 	emalloc((len) ? (len * sizeof(type)) : ((len) = sizeof(type))))
 
+/* fetch a blob into a fetch buffer */
+static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ */
+	unsigned long *len, ISC_QUAD *blob_id TSRMLS_DC)
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+	pdo_firebird_db_handle *H = S->H;
+	isc_blob_handle blobh = NULL;
+	static char bl_items[] = {isc_info_blob_total_length};
+	char bl_info[20];
+	unsigned short i;
+	int result = *len = 0;
+
+	if (isc_open_blob(H->isc_status, &H->db, &H->tr, &blobh, blob_id)) {
+		RECORD_ERROR(stmt);
+		return 0;
+	}
+
+	if (isc_blob_info(H->isc_status, &blobh, sizeof(bl_items), bl_items,
+			sizeof(bl_info), bl_info)) {
+		RECORD_ERROR(stmt);
+		goto fetch_blob_end;
+	}
+
+	/* find total length of blob's data */
+	for (i = 0; i < sizeof(bl_info); ) {
+		unsigned short item_len;
+		char item = bl_info[i++];
+
+		if (item == isc_info_end || item == isc_info_truncated || item == isc_info_error
+				|| i >= sizeof(bl_info)) {
+			H->last_app_error = "Couldn't determine BLOB size";
+			goto fetch_blob_end;
+		}								
+
+		item_len = (unsigned short) isc_vax_integer(&bl_info[i], 2);
+
+		if (item == isc_info_blob_total_length) {
+			*len = isc_vax_integer(&bl_info[i+2], item_len);
+			break;
+		}
+		i += item_len+2;
+	}
+
+	/* we've found the blob's length, now fetch! */
+	
+	if (*len) {
+		unsigned long cur_len;
+		unsigned short seg_len;
+		ISC_STATUS stat;
+
+		*ptr = S->fetch_buf[colno] = erealloc(*ptr, *len+1);
+	
+		for (cur_len = stat = 0; (!stat || stat == isc_segment) && cur_len < *len; cur_len += seg_len) {
+	
+			unsigned short chunk_size = (*len-cur_len) > USHRT_MAX ? USHRT_MAX
+				: (unsigned short)(*len-cur_len);
+	
+			stat = isc_get_segment(H->isc_status, &blobh, &seg_len, chunk_size, &(*ptr)[cur_len]);
+		}
+	
+		(*ptr)[*len++] = '\0';
+	
+		if (H->isc_status[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
+			H->last_app_error = "Error reading from BLOB";
+			goto fetch_blob_end;
+		}
+	}
+	result = 1;
+
+fetch_blob_end:
+	if (isc_close_blob(H->isc_status, &blobh)) {
+		RECORD_ERROR(stmt);
+		return 0;
+	}
+	return result;
+}
+
 static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{{ */
 	unsigned long *len TSRMLS_DC)
 {
@@ -310,12 +387,54 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, *len);
 					*len = strftime(*ptr, *len, fmt, &t);
 					break;
+				case SQL_BLOB:
+					return firebird_fetch_blob(stmt,colno,ptr,len,
+						(ISC_QUAD*)var->sqldata TSRMLS_CC);
 			}
 		}
 	}
 	return 1;
 }
 /* }}} */
+
+static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param TSRMLS_DC)
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+	pdo_firebird_db_handle *H = S->H;
+	isc_blob_handle h = NULL;
+	unsigned long put_cnt = 0, rem_cnt;
+	unsigned short chunk_size;
+	int result = 1;
+	
+	if (isc_create_blob(H->isc_status, &H->db, &H->tr, &h, blob_id)) {
+		RECORD_ERROR(stmt);
+		return 0;
+	}
+
+	SEPARATE_ZVAL(&param);
+
+	convert_to_string_ex(&param);
+	
+	for (rem_cnt = Z_STRLEN_P(param); rem_cnt > 0; rem_cnt -= chunk_size)  {
+
+		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
+
+		if (isc_put_segment(H->isc_status, &h, chunk_size, &Z_STRVAL_P(param)[put_cnt])) {
+			RECORD_ERROR(stmt);
+			result = 0;
+			break;
+		}
+		put_cnt += chunk_size;
+	}
+	
+	zval_dtor(param);
+
+	if (isc_close_blob(H->isc_status, &h)) {
+		RECORD_ERROR(stmt);
+		return 0;
+	}
+	return result;
+}	
 
 static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, /* {{{ */
 	enum pdo_param_event event_type TSRMLS_DC)
@@ -353,6 +472,17 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 
 			*var->sqlind = 0;
 
+			switch (var->sqltype & ~1) {
+				case SQL_ARRAY:
+					stmt->error_code = PDO_ERR_NOT_IMPLEMENTED;
+					S->H->last_app_error = "Cannot bind to array field";
+					return 0;
+	
+				case SQL_BLOB:
+					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata,
+						param->parameter TSRMLS_CC);
+			}
+							
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(param->parameter)) {
 				int force_null;
