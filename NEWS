@@ -1,8 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Added parameter to print_r which returns the variable representation
-  instead of echoing it. (Derick)
+- Added optional 2nd parameter to print_r() to make it return the variable
+  representation instead of echoing it. (Derick)
 - Added mysql_ping(), mysql_real_escape_string(), mysql_character_set_name(), 
   mysql_thread_id(), mysql_stat() and mysql_list_processes(). (Zak, Georg)
 - Added pg_fetch_all() which fetches all rows in a result. (Yasuo)
