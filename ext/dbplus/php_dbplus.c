@@ -1140,7 +1140,7 @@ PHP_FUNCTION(dbplus_rquery)
   zval **name, **dbpath;
   int argc;
   
-  if (argc <1 || argc>2 || zend_get_parameters_ex(1, &name, &dbpath) == FAILURE){
+  if ((argc <1) || (argc>2) || (zend_get_parameters_ex(2, &name, &dbpath) == FAILURE)){
     WRONG_PARAM_COUNT;
   }
 
