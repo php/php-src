@@ -449,7 +449,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_startup_constants(tsrm_ls);
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
-	zend_hash_init_ex(&CG(auto_globals), 8, NULL, NULL, 1, 0);
+	zend_hash_init_ex(CG(auto_globals), 8, NULL, NULL, 1, 0);
 	scanner_globals_ctor(&ini_scanner_globals TSRMLS_CC);
 	scanner_globals_ctor(&language_scanner_globals TSRMLS_CC);
 	zend_startup_constants();
