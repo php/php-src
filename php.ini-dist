@@ -809,6 +809,9 @@ mssql.compatability_mode = Off
 ; Use NT authentication when connecting to the server
 mssql.secure_connection = Off
 
+; Specify max number of processes. Default = 25
+;mssql.max_procs = 25
+
 [Assertion]
 ; Assert(expr); active by default.
 ;assert.active = On
