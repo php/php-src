@@ -309,7 +309,7 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC);
 void do_init_array(znode *result, znode *expr, znode *offset, int is_ref CLS_DC);
 void do_add_array_element(znode *result, znode *expr, znode *offset, int is_ref CLS_DC);
 void do_add_static_array_element(znode *result, znode *offset, znode *expr);
-void do_list_init(void);
+void do_list_init(CLS_D);
 void do_list_end(znode *result, znode *expr CLS_DC);
 void do_add_list_element(znode *element CLS_DC);
 void do_new_list_begin(CLS_D);
