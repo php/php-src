@@ -44,6 +44,7 @@ static char *errorName(int rc){
     case SQLITE_CANTOPEN:   zName = "SQLITE_CANTOPEN";    break;
     case SQLITE_PROTOCOL:   zName = "SQLITE_PROTOCOL";    break;
     case SQLITE_EMPTY:      zName = "SQLITE_EMPTY";       break;
+    case SQLITE_LOCKED:     zName = "SQLITE_LOCKED";      break;
     default:                zName = "SQLITE_Unknown";     break;
   }
   return zName;
@@ -315,6 +316,7 @@ static int btree_drop_table(
   Btree *pBt;
   int iTable;
   int rc;
+  int notUsed1;
   if( argc!=3 ){
     Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
        " ID TABLENUM\"", 0);
@@ -322,7 +324,7 @@ static int btree_drop_table(
   }
   pBt = sqlite3TextToPtr(argv[1]);
   if( Tcl_GetInt(interp, argv[2], &iTable) ) return TCL_ERROR;
-  rc = sqlite3BtreeDropTable(pBt, iTable);
+  rc = sqlite3BtreeDropTable(pBt, iTable, &notUsed1);
   if( rc!=SQLITE_OK ){
     Tcl_AppendResult(interp, errorName(rc), 0);
     return TCL_ERROR;
@@ -512,10 +514,10 @@ static int btree_pager_stats(
   }
   pBt = sqlite3TextToPtr(argv[1]);
   a = sqlite3pager_stats(sqlite3BtreePager(pBt));
-  for(i=0; i<9; i++){
+  for(i=0; i<11; i++){
     static char *zName[] = {
       "ref", "page", "max", "size", "state", "err",
-      "hit", "miss", "ovfl",
+      "hit", "miss", "ovfl", "read", "write"
     };
     char zBuf[100];
     Tcl_AppendElement(interp, zName[i]);
@@ -544,7 +546,9 @@ static int btree_pager_ref_dump(
     return TCL_ERROR;
   }
   pBt = sqlite3TextToPtr(argv[1]);
+#ifdef SQLITE_DEBUG
   sqlite3pager_refdump(sqlite3BtreePager(pBt));
+#endif
   return TCL_OK;
 }
 
@@ -562,10 +566,10 @@ static int btree_integrity_check(
   const char **argv      /* Text of each argument */
 ){
   Btree *pBt;
-  char *zResult;
   int nRoot;
   int *aRoot;
   int i;
+  char *zResult;
 
   if( argc<3 ){
     Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
@@ -578,7 +582,11 @@ static int btree_integrity_check(
   for(i=0; i<argc-2; i++){
     if( Tcl_GetInt(interp, argv[i+2], &aRoot[i]) ) return TCL_ERROR;
   }
+#ifndef SQLITE_OMIT_INTEGRITY_CHECK
   zResult = sqlite3BtreeIntegrityCheck(pBt, aRoot, nRoot);
+#else
+  zResult = 0;
+#endif
   if( zResult ){
     Tcl_AppendResult(interp, zResult, 0);
     sqliteFree(zResult); 
@@ -1014,7 +1022,7 @@ static int btree_key(
 }
 
 /*
-** Usage:   btree_data ID
+** Usage:   btree_data ID ?N?
 **
 ** Return the data for the entry at which the cursor is pointing.
 */
@@ -1029,13 +1037,17 @@ static int btree_data(
   u32 n;
   char *zBuf;
 
-  if( argc!=2 ){
+  if( argc!=2 && argc!=3 ){
     Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
        " ID\"", 0);
     return TCL_ERROR;
   }
   pCur = sqlite3TextToPtr(argv[1]);
-  sqlite3BtreeDataSize(pCur, &n);
+  if( argc==2 ){
+    sqlite3BtreeDataSize(pCur, &n);
+  }else{
+    n = atoi(argv[2]);
+  }
   zBuf = malloc( n+1 );
   rc = sqlite3BtreeData(pCur, 0, n, zBuf);
   if( rc ){
@@ -1315,6 +1327,72 @@ static int btree_varint_test(
 }
 
 /*
+** usage:   btree_from_db  DB-HANDLE
+**
+** This command returns the btree handle for the main database associated
+** with the database-handle passed as the argument. Example usage:
+**
+** sqlite3 db test.db
+** set bt [btree_from_db db]
+*/
+static int btree_from_db(
+  void *NotUsed,
+  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
+  int argc,              /* Number of arguments */
+  const char **argv      /* Text of each argument */
+){
+  char zBuf[100];
+  Tcl_CmdInfo info;
+  sqlite3 *db;
+  Btree *pBt;
+
+  if( argc!=2 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+       " DB-HANDLE\"", 0);
+    return TCL_ERROR;
+  }
+
+  if( 1!=Tcl_GetCommandInfo(interp, argv[1], &info) ){
+    Tcl_AppendResult(interp, "No such db-handle: \"", argv[1], "\"", 0);
+    return TCL_ERROR;
+  }
+  db = *((sqlite3 **)info.objClientData);
+  assert( db );
+
+  pBt = db->aDb[0].pBt;
+  sqlite3_snprintf(sizeof(zBuf), zBuf, "%p", pBt);
+  Tcl_SetResult(interp, zBuf, TCL_VOLATILE);
+  return TCL_OK;
+}
+
+
+/*
+** usage:   btree_set_cache_size ID NCACHE
+**
+** Set the size of the cache used by btree $ID.
+*/
+static int btree_set_cache_size(
+  void *NotUsed,
+  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
+  int argc,              /* Number of arguments */
+  const char **argv      /* Text of each argument */
+){
+  int nCache;
+  Btree *pBt;
+
+  if( argc!=3 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+       " BT NCACHE\"", 0);
+    return TCL_ERROR;
+  }
+  pBt = sqlite3TextToPtr(argv[1]);
+  if( Tcl_GetInt(interp, argv[2], &nCache) ) return TCL_ERROR;
+  sqlite3BtreeSetCacheSize(pBt, nCache);
+  return TCL_OK;
+}
+
+
+/*
 ** Register commands with the TCL interpreter.
 */
 int Sqlitetest3_Init(Tcl_Interp *interp){
@@ -1360,6 +1438,8 @@ int Sqlitetest3_Init(Tcl_Interp *interp){
      { "btree_begin_statement",    (Tcl_CmdProc*)btree_begin_statement    },
      { "btree_commit_statement",   (Tcl_CmdProc*)btree_commit_statement   },
      { "btree_rollback_statement", (Tcl_CmdProc*)btree_rollback_statement },
+     { "btree_from_db",            (Tcl_CmdProc*)btree_from_db            },
+     { "btree_set_cache_size",     (Tcl_CmdProc*)btree_set_cache_size     },
   };
   int i;
 

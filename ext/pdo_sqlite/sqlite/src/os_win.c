@@ -202,7 +202,7 @@ int sqlite3OsOpenDirectory(
 ** name of a directory, then that directory will be used to store
 ** temporary files.
 */
-const char *sqlite3_temp_directory = 0;
+char *sqlite3_temp_directory = 0;
 
 /*
 ** Create a temporary file name in zBuf.  zBuf must be big enough to
@@ -275,12 +275,13 @@ int sqlite3OsRead(OsFile *id, void *pBuf, int amt){
 ** or some other error code on failure.
 */
 int sqlite3OsWrite(OsFile *id, const void *pBuf, int amt){
-  int rc;
+  int rc = 0;
   DWORD wrote;
   assert( id->isOpen );
   SimulateIOError(SQLITE_IOERR);
   SimulateDiskfullError;
   TRACE3("WRITE %d lock=%d\n", id->h, id->locktype);
+  assert( amt>0 );
   while( amt>0 && (rc = WriteFile(id->h, pBuf, amt, &wrote, 0))!=0 && wrote>0 ){
     amt -= wrote;
     pBuf = &((char*)pBuf)[wrote];
@@ -408,6 +409,24 @@ static int unlockReadLock(OsFile *id){
   }
   return res;
 }
+
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
+/*
+** Check that a given pathname is a directory and is writable 
+**
+*/
+int sqlite3OsIsDirWritable(char *zBuf){
+  int fileAttr;
+  if(! zBuf ) return 0;
+  if(! isNT() && strlen(zBuf) > MAX_PATH ) return 0;
+  fileAttr = GetFileAttributesA(zBuf);
+  if( fileAttr == 0xffffffff ) return 0;
+  if( (fileAttr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY ){
+    return 0;
+  }
+  return 1;
+}
+#endif /* SQLITE_OMIT_PAGER_PRAGMAS */
 
 /*
 ** Lock the file with the lock specified by parameter locktype - one

@@ -94,6 +94,27 @@ void sqlite3TableAffinityStr(Vdbe *v, Table *pTab){
   sqlite3VdbeChangeP3(v, -1, pTab->zColAff, 0);
 }
 
+/*
+** Return non-zero if SELECT statement p opens the table with rootpage
+** iTab in database iDb.  This is used to see if a statement of the form 
+** "INSERT INTO <iDb, iTab> SELECT ..." can run without using temporary
+** table for the results of the SELECT. 
+**
+** No checking is done for sub-selects that are part of expressions.
+*/
+static int selectReadsTable(Select *p, int iDb, int iTab){
+  int i;
+  struct SrcList_item *pItem;
+  if( p->pSrc==0 ) return 0;
+  for(i=0, pItem=p->pSrc->a; i<p->pSrc->nSrc; i++, pItem++){
+    if( pItem->pSelect ){
+      if( selectReadsTable(p, iDb, iTab) ) return 1;
+    }else{
+      if( pItem->pTab->iDb==iDb && pItem->pTab->tnum==iTab ) return 1;
+    }
+  }
+  return 0;
+}
 
 /*
 ** This routine is call to handle SQL of the following forms:
@@ -182,18 +203,24 @@ void sqlite3Insert(
   sqlite3 *db;          /* The main database structure */
   int keyColumn = -1;   /* Column that is the INTEGER PRIMARY KEY */
   int endOfLoop;        /* Label for the end of the insertion loop */
-  int useTempTable;     /* Store SELECT results in intermediate table */
+  int useTempTable = 0; /* Store SELECT results in intermediate table */
   int srcTab = 0;       /* Data comes from this temporary cursor if >=0 */
   int iSelectLoop = 0;  /* Address of code that implements the SELECT */
   int iCleanup = 0;     /* Address of the cleanup code */
   int iInsertBlock = 0; /* Address of the subroutine used to insert data */
   int iCntMem = 0;      /* Memory cell used for the row counter */
-  int isView;           /* True if attempting to insert into a view */
+  int newIdx = -1;      /* Cursor for the NEW table */
+  Db *pDb;              /* The database containing table being inserted into */
+  int counterMem = 0;   /* Memory cell holding AUTOINCREMENT counter */
 
-  int row_triggers_exist = 0; /* True if there are FOR EACH ROW triggers */
-  int before_triggers;        /* True if there are BEFORE triggers */
-  int after_triggers;         /* True if there are AFTER triggers */
-  int newIdx = -1;            /* Cursor for the NEW table */
+#ifndef SQLITE_OMIT_TRIGGER
+  int isView;                 /* True if attempting to insert into a view */
+  int triggers_exist = 0;     /* True if there are FOR EACH ROW triggers */
+#endif
+
+#ifndef SQLITE_OMIT_AUTOINCREMENT
+  int counterRowid;     /* Memory cell holding rowid of autoinc counter */
+#endif
 
   if( pParse->nErr || sqlite3_malloc_failed ) goto insert_cleanup;
   db = pParse->db;
@@ -208,22 +235,32 @@ void sqlite3Insert(
     goto insert_cleanup;
   }
   assert( pTab->iDb<db->nDb );
-  zDb = db->aDb[pTab->iDb].zName;
+  pDb = &db->aDb[pTab->iDb];
+  zDb = pDb->zName;
   if( sqlite3AuthCheck(pParse, SQLITE_INSERT, pTab->zName, 0, zDb) ){
     goto insert_cleanup;
   }
+
+  /* Figure out if we have any triggers and if the table being
+  ** inserted into is a view
+  */
+#ifndef SQLITE_OMIT_TRIGGER
+  triggers_exist = sqlite3TriggersExist(pParse, pTab, TK_INSERT, 0);
+  isView = pTab->pSelect!=0;
+#else
+# define triggers_exist 0
+# define isView 0
+#endif
+#ifdef SQLITE_OMIT_VIEW
+# undef isView
+# define isView 0
+#endif
 
   /* Ensure that:
   *  (a) the table is not read-only, 
   *  (b) that if it is a view then ON INSERT triggers exist
   */
-  before_triggers = sqlite3TriggersExist(pParse, pTab->pTrigger, TK_INSERT, 
-                                       TK_BEFORE, TK_ROW, 0);
-  after_triggers = sqlite3TriggersExist(pParse, pTab->pTrigger, TK_INSERT,
-                                       TK_AFTER, TK_ROW, 0);
-  row_triggers_exist = before_triggers || after_triggers;
-  isView = pTab->pSelect!=0;
-  if( sqlite3IsReadOnly(pParse, pTab, before_triggers) ){
+  if( sqlite3IsReadOnly(pParse, pTab, triggers_exist) ){
     goto insert_cleanup;
   }
   if( pTab==0 ) goto insert_cleanup;
@@ -245,13 +282,41 @@ void sqlite3Insert(
   */
   v = sqlite3GetVdbe(pParse);
   if( v==0 ) goto insert_cleanup;
-  sqlite3VdbeCountChanges(v);
-  sqlite3BeginWriteOperation(pParse, pSelect || row_triggers_exist, pTab->iDb);
+  if( pParse->nested==0 ) sqlite3VdbeCountChanges(v);
+  sqlite3BeginWriteOperation(pParse, pSelect || triggers_exist, pTab->iDb);
 
   /* if there are row triggers, allocate a temp table for new.* references. */
-  if( row_triggers_exist ){
+  if( triggers_exist ){
     newIdx = pParse->nTab++;
   }
+
+#ifndef SQLITE_OMIT_AUTOINCREMENT
+  /* If this is an AUTOINCREMENT table, look up the sequence number in the
+  ** sqlite_sequence table and store it in memory cell counterMem.  Also
+  ** remember the rowid of the sqlite_sequence table entry in memory cell
+  ** counterRowid.
+  */
+  if( pTab->autoInc ){
+    int iCur = pParse->nTab;
+    int base = sqlite3VdbeCurrentAddr(v);
+    counterRowid = pParse->nMem++;
+    counterMem = pParse->nMem++;
+    sqlite3VdbeAddOp(v, OP_Integer, pTab->iDb, 0);
+    sqlite3VdbeAddOp(v, OP_OpenRead, iCur, pDb->pSeqTab->tnum);
+    sqlite3VdbeAddOp(v, OP_SetNumColumns, iCur, 2);
+    sqlite3VdbeAddOp(v, OP_Rewind, iCur, base+13);
+    sqlite3VdbeAddOp(v, OP_Column, iCur, 0);
+    sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->zName, 0);
+    sqlite3VdbeAddOp(v, OP_Ne, 28417, base+12);
+    sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_MemStore, counterRowid, 1);
+    sqlite3VdbeAddOp(v, OP_Column, iCur, 1);
+    sqlite3VdbeAddOp(v, OP_MemStore, counterMem, 1);
+    sqlite3VdbeAddOp(v, OP_Goto, 0, base+13);
+    sqlite3VdbeAddOp(v, OP_Next, iCur, base+4);
+    sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
+  }
+#endif /* SQLITE_OMIT_AUTOINCREMENT */
 
   /* Figure out how many columns of data are supplied.  If the data
   ** is coming from a SELECT statement, then this step also generates
@@ -268,8 +333,11 @@ void sqlite3Insert(
     iInitCode = sqlite3VdbeAddOp(v, OP_Goto, 0, 0);
     iSelectLoop = sqlite3VdbeCurrentAddr(v);
     iInsertBlock = sqlite3VdbeMakeLabel(v);
-    rc = sqlite3Select(pParse, pSelect, SRT_Subroutine, iInsertBlock, 0,0,0,0);
+
+    /* Resolve the expressions in the SELECT statement and execute it. */
+    rc = sqlite3Select(pParse, pSelect, SRT_Subroutine, iInsertBlock,0,0,0,0);
     if( rc || pParse->nErr || sqlite3_malloc_failed ) goto insert_cleanup;
+
     iCleanup = sqlite3VdbeMakeLabel(v);
     sqlite3VdbeAddOp(v, OP_Goto, 0, iCleanup);
     assert( pSelect->pEList );
@@ -283,20 +351,8 @@ void sqlite3Insert(
     ** of the tables being read by the SELECT statement.  Also use a 
     ** temp table in the case of row triggers.
     */
-    if( row_triggers_exist ){
+    if( triggers_exist || selectReadsTable(pSelect, pTab->iDb, pTab->tnum) ){
       useTempTable = 1;
-    }else{
-      int addr = 0;
-      useTempTable = 0;
-      while( useTempTable==0 ){
-        VdbeOp *pOp;
-        addr = sqlite3VdbeFindOp(v, addr, OP_OpenRead, pTab->tnum);
-        if( addr==0 ) break;
-        pOp = sqlite3VdbeGetOp(v, addr-2);
-        if( pOp->opcode==OP_Integer && pOp->p1==pTab->iDb ){
-          useTempTable = 1;
-        }
-      }
     }
 
     if( useTempTable ){
@@ -328,15 +384,16 @@ void sqlite3Insert(
     /* This is the case if the data for the INSERT is coming from a VALUES
     ** clause
     */
-    SrcList dummy;
+    NameContext sNC;
+    memset(&sNC, 0, sizeof(sNC));
+    sNC.pParse = pParse;
     assert( pList!=0 );
     srcTab = -1;
     useTempTable = 0;
     assert( pList );
     nColumn = pList->nExpr;
-    dummy.nSrc = 0;
     for(i=0; i<nColumn; i++){
-      if( sqlite3ExprResolveAndCheck(pParse,&dummy,0,pList->a[i].pExpr,0,0) ){
+      if( sqlite3ExprResolveNames(&sNC, pList->a[i].pExpr) ){
         goto insert_cleanup;
       }
     }
@@ -404,7 +461,7 @@ void sqlite3Insert(
 
   /* Open the temp table for FOR EACH ROW triggers
   */
-  if( row_triggers_exist ){
+  if( triggers_exist ){
     sqlite3VdbeAddOp(v, OP_OpenPseudo, newIdx, 0);
     sqlite3VdbeAddOp(v, OP_SetNumColumns, newIdx, pTab->nCol);
   }
@@ -418,7 +475,7 @@ void sqlite3Insert(
   }
 
   /* Open tables and indices if there are no row triggers */
-  if( !row_triggers_exist ){
+  if( !triggers_exist ){
     base = pParse->nTab;
     sqlite3OpenTableAndIndices(pParse, pTab, base, OP_OpenWrite);
   }
@@ -440,7 +497,7 @@ void sqlite3Insert(
   /* Run the BEFORE and INSTEAD OF triggers, if there are any
   */
   endOfLoop = sqlite3VdbeMakeLabel(v);
-  if( before_triggers ){
+  if( triggers_exist & TRIGGER_BEFORE ){
 
     /* build the NEW.* reference row.  Note that if there is an INTEGER
     ** PRIMARY KEY into which a NULL is being inserted, that NULL will be
@@ -452,9 +509,8 @@ void sqlite3Insert(
       sqlite3VdbeAddOp(v, OP_Integer, -1, 0);
     }else if( useTempTable ){
       sqlite3VdbeAddOp(v, OP_Column, srcTab, keyColumn);
-    }else if( pSelect ){
-      sqlite3VdbeAddOp(v, OP_Dup, nColumn - keyColumn - 1, 1);
     }else{
+      assert( pSelect==0 );  /* Otherwise useTempTable is true */
       sqlite3ExprCode(pParse, pList->a[keyColumn].pExpr);
       sqlite3VdbeAddOp(v, OP_NotNull, -1, sqlite3VdbeCurrentAddr(v)+3);
       sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
@@ -473,13 +529,12 @@ void sqlite3Insert(
         }
       }
       if( pColumn && j>=pColumn->nId ){
-        sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->aCol[i].zDflt, P3_STATIC);
+        sqlite3ExprCode(pParse, pTab->aCol[i].pDflt);
       }else if( useTempTable ){
         sqlite3VdbeAddOp(v, OP_Column, srcTab, j); 
-      }else if( pSelect ){
-        sqlite3VdbeAddOp(v, OP_Dup, nColumn-j-1, 1);
       }else{
-        sqlite3ExprCode(pParse, pList->a[j].pExpr);
+        assert( pSelect==0 ); /* Otherwise useTempTable is true */
+        sqlite3ExprCodeAndCache(pParse, pList->a[j].pExpr);
       }
     }
     sqlite3VdbeAddOp(v, OP_MakeRecord, pTab->nCol, 0);
@@ -495,7 +550,7 @@ void sqlite3Insert(
     sqlite3VdbeAddOp(v, OP_PutIntKey, newIdx, 0);
 
     /* Fire BEFORE or INSTEAD OF triggers */
-    if( sqlite3CodeRowTrigger(pParse, TK_INSERT, 0, TK_BEFORE, pTab, 
+    if( sqlite3CodeRowTrigger(pParse, TK_INSERT, 0, TRIGGER_BEFORE, pTab, 
         newIdx, -1, onError, endOfLoop) ){
       goto insert_cleanup;
     }
@@ -504,7 +559,7 @@ void sqlite3Insert(
   /* If any triggers exists, the opening of tables and indices is deferred
   ** until now.
   */
-  if( row_triggers_exist && !isView ){
+  if( triggers_exist && !isView ){
     base = pParse->nTab;
     sqlite3OpenTableAndIndices(pParse, pTab, base, OP_OpenWrite);
   }
@@ -528,11 +583,16 @@ void sqlite3Insert(
       */
       sqlite3VdbeAddOp(v, OP_NotNull, -1, sqlite3VdbeCurrentAddr(v)+3);
       sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
-      sqlite3VdbeAddOp(v, OP_NewRecno, base, 0);
+      sqlite3VdbeAddOp(v, OP_NewRecno, base, counterMem);
       sqlite3VdbeAddOp(v, OP_MustBeInt, 0, 0);
     }else{
-      sqlite3VdbeAddOp(v, OP_NewRecno, base, 0);
+      sqlite3VdbeAddOp(v, OP_NewRecno, base, counterMem);
     }
+#ifndef SQLITE_OMIT_AUTOINCREMENT
+    if( pTab->autoInc ){
+      sqlite3VdbeAddOp(v, OP_MemMax, counterMem, 0);
+    }
+#endif /* SQLITE_OMIT_AUTOINCREMENT */
 
     /* Push onto the stack, data for all columns of the new entry, beginning
     ** with the first column.
@@ -554,7 +614,7 @@ void sqlite3Insert(
         }
       }
       if( pColumn && j>=pColumn->nId ){
-        sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->aCol[i].zDflt, P3_STATIC);
+        sqlite3ExprCode(pParse, pTab->aCol[i].pDflt);
       }else if( useTempTable ){
         sqlite3VdbeAddOp(v, OP_Column, srcTab, j); 
       }else if( pSelect ){
@@ -570,7 +630,7 @@ void sqlite3Insert(
     sqlite3GenerateConstraintChecks(pParse, pTab, base, 0, keyColumn>=0,
                                    0, onError, endOfLoop);
     sqlite3CompleteInsertion(pParse, pTab, base, 0,0,0,
-                            after_triggers ? newIdx : -1);
+                            (triggers_exist & TRIGGER_AFTER)!=0 ? newIdx : -1);
   }
 
   /* Update the count of rows that are inserted
@@ -579,7 +639,7 @@ void sqlite3Insert(
     sqlite3VdbeAddOp(v, OP_MemIncr, iCntMem, 0);
   }
 
-  if( row_triggers_exist ){
+  if( triggers_exist ){
     /* Close all tables opened */
     if( !isView ){
       sqlite3VdbeAddOp(v, OP_Close, base, 0);
@@ -589,8 +649,8 @@ void sqlite3Insert(
     }
 
     /* Code AFTER triggers */
-    if( sqlite3CodeRowTrigger(pParse, TK_INSERT, 0, TK_AFTER, pTab, newIdx, -1, 
-          onError, endOfLoop) ){
+    if( sqlite3CodeRowTrigger(pParse, TK_INSERT, 0, TRIGGER_AFTER, pTab,
+          newIdx, -1, onError, endOfLoop) ){
       goto insert_cleanup;
     }
   }
@@ -608,7 +668,7 @@ void sqlite3Insert(
     sqlite3VdbeResolveLabel(v, iCleanup);
   }
 
-  if( !row_triggers_exist ){
+  if( !triggers_exist ){
     /* Close all tables opened */
     sqlite3VdbeAddOp(v, OP_Close, base, 0);
     for(idx=1, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, idx++){
@@ -616,10 +676,35 @@ void sqlite3Insert(
     }
   }
 
-  /*
-  ** Return the number of rows inserted.
+#ifndef SQLITE_OMIT_AUTOINCREMENT
+  /* Update the sqlite_sequence table by storing the content of the
+  ** counter value in memory counterMem back into the sqlite_sequence
+  ** table.
   */
-  if( db->flags & SQLITE_CountRows ){
+  if( pTab->autoInc ){
+    int iCur = pParse->nTab;
+    int base = sqlite3VdbeCurrentAddr(v);
+    sqlite3VdbeAddOp(v, OP_Integer, pTab->iDb, 0);
+    sqlite3VdbeAddOp(v, OP_OpenWrite, iCur, pDb->pSeqTab->tnum);
+    sqlite3VdbeAddOp(v, OP_SetNumColumns, iCur, 2);
+    sqlite3VdbeAddOp(v, OP_MemLoad, counterRowid, 0);
+    sqlite3VdbeAddOp(v, OP_NotNull, -1, base+7);
+    sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
+    sqlite3VdbeAddOp(v, OP_NewRecno, iCur, 0);
+    sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->zName, 0);
+    sqlite3VdbeAddOp(v, OP_MemLoad, counterMem, 0);
+    sqlite3VdbeAddOp(v, OP_MakeRecord, 2, 0);
+    sqlite3VdbeAddOp(v, OP_PutIntKey, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
+  }
+#endif
+
+  /*
+  ** Return the number of rows inserted. If this routine is 
+  ** generating code because of a call to sqlite3NestedParse(), do not
+  ** invoke the callback function.
+  */
+  if( db->flags & SQLITE_CountRows && pParse->nested==0 && !pParse->trigStack ){
     sqlite3VdbeAddOp(v, OP_MemLoad, iCntMem, 0);
     sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
     sqlite3VdbeSetNumCols(v, 1);
@@ -753,11 +838,13 @@ void sqlite3GenerateConstraintChecks(
     }else if( onError==OE_Default ){
       onError = OE_Abort;
     }
-    if( onError==OE_Replace && pTab->aCol[i].zDflt==0 ){
+    if( onError==OE_Replace && pTab->aCol[i].pDflt==0 ){
       onError = OE_Abort;
     }
     sqlite3VdbeAddOp(v, OP_Dup, nCol-1-i, 1);
     addr = sqlite3VdbeAddOp(v, OP_NotNull, 1, 0);
+    assert( onError==OE_Rollback || onError==OE_Abort || onError==OE_Fail
+        || onError==OE_Ignore || onError==OE_Replace );
     switch( onError ){
       case OE_Rollback:
       case OE_Abort:
@@ -775,11 +862,10 @@ void sqlite3GenerateConstraintChecks(
         break;
       }
       case OE_Replace: {
-        sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->aCol[i].zDflt, P3_STATIC);
+        sqlite3ExprCode(pParse, pTab->aCol[i].pDflt);
         sqlite3VdbeAddOp(v, OP_Push, nCol-i, 0);
         break;
       }
-      default: assert(0);
     }
     sqlite3VdbeChangeP2(v, addr, sqlite3VdbeCurrentAddr(v));
   }
@@ -885,6 +971,8 @@ void sqlite3GenerateConstraintChecks(
     jumpInst2 = sqlite3VdbeAddOp(v, OP_IsUnique, base+iCur+1, 0);
 
     /* Generate code that executes if the new index entry is not unique */
+    assert( onError==OE_Rollback || onError==OE_Abort || onError==OE_Fail
+        || onError==OE_Ignore || onError==OE_Replace );
     switch( onError ){
       case OE_Rollback:
       case OE_Abort:
@@ -929,7 +1017,6 @@ void sqlite3GenerateConstraintChecks(
         seenReplace = 1;
         break;
       }
-      default: assert(0);
     }
     contAddr = sqlite3VdbeCurrentAddr(v);
     assert( contAddr<(1<<24) );
@@ -975,12 +1062,18 @@ void sqlite3CompleteInsertion(
   }
   sqlite3VdbeAddOp(v, OP_MakeRecord, pTab->nCol, 0);
   sqlite3TableAffinityStr(v, pTab);
+#ifndef SQLITE_OMIT_TRIGGER
   if( newIdx>=0 ){
     sqlite3VdbeAddOp(v, OP_Dup, 1, 0);
     sqlite3VdbeAddOp(v, OP_Dup, 1, 0);
     sqlite3VdbeAddOp(v, OP_PutIntKey, newIdx, 0);
   }
-  pik_flags = (OPFLAG_NCHANGE|(isUpdate?0:OPFLAG_LASTROWID));
+#endif
+  if( pParse->nested ){
+    pik_flags = 0;
+  }else{
+    pik_flags = (OPFLAG_NCHANGE|(isUpdate?0:OPFLAG_LASTROWID));
+  }
   sqlite3VdbeAddOp(v, OP_PutIntKey, base, pik_flags);
   
   if( isUpdate && recnoChng ){

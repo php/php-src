@@ -72,8 +72,10 @@
 <file role="src" name="sqlite3.pc.in"/>
 <file role="src" name="sqlite.pc.in"/>
 <file role="src" name="VERSION"/>
+<file role="src" name="keywordhash.h"/>
 <dir name="src">
 <file role="src" name="attach.c"/>
+<file role="src" name="alter.c"/>
 <file role="src" name="auth.c"/>
 <file role="src" name="btree.c"/>
 <file role="src" name="btree.h"/>
@@ -81,6 +83,7 @@
 <file role="src" name="date.c"/>
 <file role="src" name="delete.c"/>
 <file role="src" name="expr.c"/>
+<file role="src" name="experimental.c"/>
 <file role="src" name="func.c"/>
 <file role="src" name="hash.c"/>
 <file role="src" name="hash.h"/>

@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP CXX CXXFLAGS ac_ct_CXX CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA program_prefix VERSION BUILD_CC BUILD_CFLAGS BUILD_LIBS TARGET_CC TARGET_CFLAGS TARGET_LINK TARGET_LFLAGS TARGET_RANLIB TARGET_AR THREADSAFE TARGET_THREAD_LIB ALLOWRELEASE TEMP_STORE BUILD_EXEEXT OS_UNIX OS_WIN TARGET_EXEEXT TARGET_LIBS TARGET_TCL_LIBS TARGET_TCL_INC TARGET_READLINE_LIBS TARGET_READLINE_INC TARGET_HAVE_READLINE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB STRIP ac_ct_STRIP CPP CXX CXXFLAGS ac_ct_CXX CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA program_prefix VERSION VERSION_NUMBER RELEASE BUILD_CC BUILD_CFLAGS BUILD_LIBS TARGET_CC TARGET_CFLAGS TARGET_LINK TARGET_LFLAGS TARGET_RANLIB TARGET_AR THREADSAFE TARGET_THREAD_LIB ALLOWRELEASE TEMP_STORE BUILD_EXEEXT OS_UNIX OS_WIN TARGET_EXEEXT TARGET_LIBS TCL_VERSION TCL_BIN_DIR TCL_SRC_DIR TCL_LIBS TCL_INCLUDE_SPEC TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC HAVE_TCL TARGET_READLINE_LIBS TARGET_READLINE_INC TARGET_HAVE_READLINE TARGET_DEBUG LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1028,6 +1028,8 @@ Optional Features:
   --enable-threadsafe           Support threadsafe operation
   --enable-releasemode           Support libtool link to release mode
   --enable-tempstore     Use an in-ram database for temporary tables (never,no,yes,always)
+  --disable-tcl       do not build TCL extension
+  --enable-debug         enable debugging & verbose explain
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1038,6 +1040,7 @@ Optional Packages:
   --with-tags[=TAGS]
                           include additional configurations [automatic]
   --with-hints=FILE       Read configuration options from FILE
+  --with-tcl=DIR          directory containing tcl configuration (tclConfig.sh)
 
 Some influential environment variables:
   CC          C compiler command
@@ -3052,7 +3055,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3055 "configure"' > conftest.$ac_ext
+  echo '#line 3058 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4515,7 +4518,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4518:" \
+echo "$as_me:4521:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5549,11 +5552,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5552: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5555: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:5556: \$? = $ac_status" >&5
+   echo "$as_me:5559: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -5782,11 +5785,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5785: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5788: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:5789: \$? = $ac_status" >&5
+   echo "$as_me:5792: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -5842,11 +5845,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5845: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5848: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:5849: \$? = $ac_status" >&5
+   echo "$as_me:5852: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8026,7 +8029,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8029 "configure"
+#line 8032 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8124,7 +8127,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8127 "configure"
+#line 8130 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10303,11 +10306,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10306: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10309: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10310: \$? = $ac_status" >&5
+   echo "$as_me:10313: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -10363,11 +10366,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10366: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10369: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10370: \$? = $ac_status" >&5
+   echo "$as_me:10373: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11724,7 +11727,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11727 "configure"
+#line 11730 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11822,7 +11825,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11825 "configure"
+#line 11828 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12649,11 +12652,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12652: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12655: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12656: \$? = $ac_status" >&5
+   echo "$as_me:12659: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -12709,11 +12712,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12712: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12715: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12716: \$? = $ac_status" >&5
+   echo "$as_me:12719: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14743,11 +14746,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14746: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14749: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14750: \$? = $ac_status" >&5
+   echo "$as_me:14753: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14976,11 +14979,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14979: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14982: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14983: \$? = $ac_status" >&5
+   echo "$as_me:14986: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -15036,11 +15039,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15039: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15042: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15043: \$? = $ac_status" >&5
+   echo "$as_me:15046: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17220,7 +17223,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17223 "configure"
+#line 17226 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17318,7 +17321,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17321 "configure"
+#line 17324 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18420,11 +18423,17 @@ if test "$program_prefix" = "NONE"; then
 fi
 
 
-if test -f VERSION; then
-  VERSION=`cat VERSION`
-  echo "Version set to $VERSION"
-fi
+VERSION=`cat $srcdir/VERSION | sed 's/^\([0-9]*\.*[0-9]*\).*/\1/'`
+echo "Version set to $VERSION"
 
+RELEASE=`cat $srcdir/VERSION`
+echo "Release set to $RELEASE"
+
+VERSION_NUMBER=`cat $srcdir/VERSION  \
+	        | sed 's/[^0-9]/ /g' \
+                | awk '{printf "%d%03d%03d",$1,$2,$3}'`
+
+echo "Version number set to $VERSION_NUMBER"
 
 #########
 # Check to see if the --with-hints=FILE option is used.  If there is none,
@@ -19611,520 +19620,169 @@ fi
 
 
 ##########
-# Figure out what C libraries are required to compile Tcl programs.
+# Figure out all the parameters needed to compile against Tcl.
 #
-if test "$config_TARGET_TCL_LIBS" != ""; then
-  TARGET_TCL_LIBS="$config_TARGET_TCL_LIBS"
-else
-  if test "$with_tcl" != ""; then
-    extra=`echo $with_tcl/$tclsubdir/libtcl8*.a`
-  fi
-  CC=$TARGET_CC
-  echo "$as_me:$LINENO: checking for sin" >&5
-echo $ECHO_N "checking for sin... $ECHO_C" >&6
-if test "${ac_cv_func_sin+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-/* Define sin to an innocuous variant, in case <limits.h> declares sin.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define sin innocuous_sin
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char sin (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef sin
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char sin ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_sin) || defined (__stub___sin)
-choke me
-#else
-char (*f) () = sin;
-#endif
-#ifdef __cplusplus
-}
-#endif
-
-int
-main ()
-{
-return f != sin;
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_func_sin=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_func_sin=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $ac_cv_func_sin" >&5
-echo "${ECHO_T}$ac_cv_func_sin" >&6
-if test $ac_cv_func_sin = yes; then
-  LIBS=""
-else
-  LIBS="-lm"
-fi
-
-
-echo "$as_me:$LINENO: checking for dlopen in -ldl" >&5
-echo $ECHO_N "checking for dlopen in -ldl... $ECHO_C" >&6
-if test "${ac_cv_lib_dl_dlopen+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldl  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char dlopen ();
-int
-main ()
-{
-dlopen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_dl_dlopen=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_dl_dlopen=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_dl_dlopen" >&5
-echo "${ECHO_T}$ac_cv_lib_dl_dlopen" >&6
-if test $ac_cv_lib_dl_dlopen = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBDL 1
-_ACEOF
-
-  LIBS="-ldl $LIBS"
-
-fi
-
-  otherlibs=$LIBS
-  if test "$extra" != ""; then
-    LIBS=$extra
-  else
-    LIBS=""
-    echo "$as_me:$LINENO: checking for library containing Tcl_Init" >&5
-echo $ECHO_N "checking for library containing Tcl_Init... $ECHO_C" >&6
-if test "${ac_cv_search_Tcl_Init+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-ac_cv_search_Tcl_Init=no
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char Tcl_Init ();
-int
-main ()
-{
-Tcl_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_search_Tcl_Init="none required"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-if test "$ac_cv_search_Tcl_Init" = no; then
-  for ac_lib in         tcl8.4 tcl8.3 tcl84 tcl83 tcl; do
-    LIBS="-l$ac_lib $otherlibs $ac_func_search_save_LIBS"
-    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char Tcl_Init ();
-int
-main ()
-{
-Tcl_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_search_Tcl_Init="-l$ac_lib"
-break
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-  done
-fi
-LIBS=$ac_func_search_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_search_Tcl_Init" >&5
-echo "${ECHO_T}$ac_cv_search_Tcl_Init" >&6
-if test "$ac_cv_search_Tcl_Init" != no; then
-  test "$ac_cv_search_Tcl_Init" = "none required" || LIBS="$ac_cv_search_Tcl_Init $LIBS"
-
-fi
-
-  fi
-  TARGET_TCL_LIBS="$LIBS $otherlibs"
-fi
-
-
-##########
-# Figure out where to get the TCL header files.
+# This code is derived from the SC_PATH_TCLCONFIG and SC_LOAD_TCLCONFIG
+# macros in the in the tcl.m4 file of the standard TCL distribution.
+# Those macros could not be used directly since we have to make some
+# minor changes to accomodate systems that do not have TCL installed.
 #
-echo "$as_me:$LINENO: checking TCL header files" >&5
-echo $ECHO_N "checking TCL header files... $ECHO_C" >&6
-found=no
-if test "$config_TARGET_TCL_INC" != ""; then
-  TARGET_TCL_INC=$config_TARGET_TCL_INC
-  found=yes
+# Check whether --enable-tcl or --disable-tcl was given.
+if test "${enable_tcl+set}" = set; then
+  enableval="$enable_tcl"
+  use_tcl=$enableval
 else
-  if test "$with_tcl" != ""; then
-    TARGET_TCL_INC="-I$with_tcl/generic -I$with_tcl/$tclsubdir"
-    found=yes
-  else
-    TARGET_TCL_INC=""
-    found=no
-  fi
-fi
-if test "$found" = "yes"; then
-  echo "$as_me:$LINENO: result: $TARGET_TCL_INC" >&5
-echo "${ECHO_T}$TARGET_TCL_INC" >&6
-else
-  echo "$as_me:$LINENO: result: not specified: still searching..." >&5
-echo "${ECHO_T}not specified: still searching..." >&6
-  if test "${ac_cv_header_tcl_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for tcl.h" >&5
-echo $ECHO_N "checking for tcl.h... $ECHO_C" >&6
-if test "${ac_cv_header_tcl_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_tcl_h" >&5
-echo "${ECHO_T}$ac_cv_header_tcl_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking tcl.h usability" >&5
-echo $ECHO_N "checking tcl.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <tcl.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
+  use_tcl=yes
+fi;
+if test "${use_tcl}" = "yes" ; then
 
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking tcl.h presence" >&5
-echo $ECHO_N "checking tcl.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <tcl.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_c_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: tcl.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: tcl.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: tcl.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: tcl.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: tcl.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: tcl.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: tcl.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: tcl.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: tcl.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: tcl.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: tcl.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: tcl.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: tcl.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: tcl.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: tcl.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: tcl.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ------------------------------------------ ##
-## Report this to the AC_PACKAGE_NAME lists.  ##
-## ------------------------------------------ ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for tcl.h" >&5
-echo $ECHO_N "checking for tcl.h... $ECHO_C" >&6
-if test "${ac_cv_header_tcl_h+set}" = set; then
+# Check whether --with-tcl or --without-tcl was given.
+if test "${with_tcl+set}" = set; then
+  withval="$with_tcl"
+  with_tclconfig=${withval}
+fi;
+  echo "$as_me:$LINENO: checking for Tcl configuration" >&5
+echo $ECHO_N "checking for Tcl configuration... $ECHO_C" >&6
+  if test "${ac_cv_c_tclconfig+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_tcl_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_tcl_h" >&5
-echo "${ECHO_T}$ac_cv_header_tcl_h" >&6
 
-fi
-if test $ac_cv_header_tcl_h = yes; then
-  found=yes
-fi
-
-
-fi
-if test "$found" = "no"; then
-  for dir in /usr/local /usr/X11 /usr/X11R6 /usr/pkg /usr/contrib /usr; do
-    as_ac_File=`echo "ac_cv_file_$dir/include/tcl.h" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for $dir/include/tcl.h" >&5
-echo $ECHO_N "checking for $dir/include/tcl.h... $ECHO_C" >&6
-if eval "test \"\${$as_ac_File+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  test "$cross_compiling" = yes &&
-  { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
-echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+    # First check to see if --with-tcl was specified.
+    if test x"${with_tclconfig}" != x ; then
+      if test -f "${with_tclconfig}/tclConfig.sh" ; then
+        ac_cv_c_tclconfig=`(cd ${with_tclconfig}; pwd)`
+      else
+        { { echo "$as_me:$LINENO: error: ${with_tclconfig} directory doesn't contain tclConfig.sh" >&5
+echo "$as_me: error: ${with_tclconfig} directory doesn't contain tclConfig.sh" >&2;}
    { (exit 1); exit 1; }; }
-if test -r "$dir/include/tcl.h"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_File'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_File'}'`" >&6
-if test `eval echo '${'$as_ac_File'}'` = yes; then
-  found=yes
+      fi
+    fi
+    # then check for a private Tcl installation
+    if test x"${ac_cv_c_tclconfig}" = x ; then
+      for i in \
+            ../tcl \
+            `ls -dr ../tcl[8-9].[0-9].[0-9]* 2>/dev/null` \
+            `ls -dr ../tcl[8-9].[0-9] 2>/dev/null` \
+            `ls -dr ../tcl[8-9].[0-9]* 2>/dev/null` \
+            ../../tcl \
+            `ls -dr ../../tcl[8-9].[0-9].[0-9]* 2>/dev/null` \
+            `ls -dr ../../tcl[8-9].[0-9] 2>/dev/null` \
+            `ls -dr ../../tcl[8-9].[0-9]* 2>/dev/null` \
+            ../../../tcl \
+            `ls -dr ../../../tcl[8-9].[0-9].[0-9]* 2>/dev/null` \
+            `ls -dr ../../../tcl[8-9].[0-9] 2>/dev/null` \
+            `ls -dr ../../../tcl[8-9].[0-9]* 2>/dev/null`
+      do
+        if test -f "$i/unix/tclConfig.sh" ; then
+          ac_cv_c_tclconfig=`(cd $i/unix; pwd)`
+          break
+        fi
+      done
+    fi
+
+    # check in a few common install locations
+    if test x"${ac_cv_c_tclconfig}" = x ; then
+      for i in \
+            `ls -d ${libdir} 2>/dev/null` \
+            `ls -d /usr/local/lib 2>/dev/null` \
+            `ls -d /usr/contrib/lib 2>/dev/null` \
+            `ls -d /usr/lib 2>/dev/null`
+      do
+        if test -f "$i/tclConfig.sh" ; then
+           ac_cv_c_tclconfig=`(cd $i; pwd)`
+           break
+        fi
+      done
+    fi
+
+    # check in a few other private locations
+    if test x"${ac_cv_c_tclconfig}" = x ; then
+      for i in \
+         ${srcdir}/../tcl \
+         `ls -dr ${srcdir}/../tcl[8-9].[0-9].[0-9]* 2>/dev/null` \
+         `ls -dr ${srcdir}/../tcl[8-9].[0-9] 2>/dev/null` \
+         `ls -dr ${srcdir}/../tcl[8-9].[0-9]* 2>/dev/null`
+      do
+        if test -f "$i/unix/tclConfig.sh" ; then
+          ac_cv_c_tclconfig=`(cd $i/unix; pwd)`
+          break
+        fi
+      done
+    fi
+
 fi
 
-    if test "$found" = "yes"; then
-      TARGET_TCL_INC="-I$dir/include"
-      break
+
+  if test x"${ac_cv_c_tclconfig}" = x ; then
+    use_tcl=no
+    { echo "$as_me:$LINENO: WARNING: Can't find Tcl configuration definitions" >&5
+echo "$as_me: WARNING: Can't find Tcl configuration definitions" >&2;}
+    { echo "$as_me:$LINENO: WARNING: *** Without Tcl the regression tests cannot be executed ***" >&5
+echo "$as_me: WARNING: *** Without Tcl the regression tests cannot be executed ***" >&2;}
+    { echo "$as_me:$LINENO: WARNING: *** Consider using --with-tcl=... to define location of Tcl ***" >&5
+echo "$as_me: WARNING: *** Consider using --with-tcl=... to define location of Tcl ***" >&2;}
+  else
+    TCL_BIN_DIR=${ac_cv_c_tclconfig}
+    echo "$as_me:$LINENO: result: found $TCL_BIN_DIR/tclConfig.sh" >&5
+echo "${ECHO_T}found $TCL_BIN_DIR/tclConfig.sh" >&6
+
+    echo "$as_me:$LINENO: checking for existence of $TCL_BIN_DIR/tclConfig.sh" >&5
+echo $ECHO_N "checking for existence of $TCL_BIN_DIR/tclConfig.sh... $ECHO_C" >&6
+    if test -f "$TCL_BIN_DIR/tclConfig.sh" ; then
+      echo "$as_me:$LINENO: result: loading" >&5
+echo "${ECHO_T}loading" >&6
+      . $TCL_BIN_DIR/tclConfig.sh
+    else
+      echo "$as_me:$LINENO: result: file not found" >&5
+echo "${ECHO_T}file not found" >&6
     fi
-  done
+
+    #
+    # If the TCL_BIN_DIR is the build directory (not the install directory),
+    # then set the common variable name to the value of the build variables.
+    # For example, the variable TCL_LIB_SPEC will be set to the value
+    # of TCL_BUILD_LIB_SPEC. An extension should make use of TCL_LIB_SPEC
+    # instead of TCL_BUILD_LIB_SPEC since it will work with both an
+    # installed and uninstalled version of Tcl.
+    #
+
+   if test -f $TCL_BIN_DIR/Makefile ; then
+      TCL_LIB_SPEC=${TCL_BUILD_LIB_SPEC}
+      TCL_STUB_LIB_SPEC=${TCL_BUILD_STUB_LIB_SPEC}
+      TCL_STUB_LIB_PATH=${TCL_BUILD_STUB_LIB_PATH}
+    fi
+
+    #
+    # eval is required to do the TCL_DBGX substitution
+    #
+
+    eval "TCL_LIB_FILE=\"${TCL_LIB_FILE}\""
+    eval "TCL_LIB_FLAG=\"${TCL_LIB_FLAG}\""
+    eval "TCL_LIB_SPEC=\"${TCL_LIB_SPEC}\""
+
+    eval "TCL_STUB_LIB_FILE=\"${TCL_STUB_LIB_FILE}\""
+    eval "TCL_STUB_LIB_FLAG=\"${TCL_STUB_LIB_FLAG}\""
+    eval "TCL_STUB_LIB_SPEC=\"${TCL_STUB_LIB_SPEC}\""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  fi
 fi
-if test "$found" = "no"; then
-  TARGET_TCL_INC="-DNO_TCL=1"
+if test "${use_tcl}" = "no" ; then
+  HAVE_TCL=""
+else
+  HAVE_TCL=1
 fi
 
 
@@ -20566,6 +20224,22 @@ else
   TARGET_HAVE_READLINE=0
 fi
 
+
+
+#########
+# check for debug enabled
+# Check whether --enable-debug or --disable-debug was given.
+if test "${enable_debug+set}" = set; then
+  enableval="$enable_debug"
+  use_debug=$enableval
+else
+  use_debug=no
+fi;
+if test "${use_debug}" = "yes" ; then
+  TARGET_DEBUG=""
+else
+  TARGET_DEBUG="-DNDEBUG"
+fi
 
 
 #########
@@ -21344,6 +21018,8 @@ s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
 s,@program_prefix@,$program_prefix,;t t
 s,@VERSION@,$VERSION,;t t
+s,@VERSION_NUMBER@,$VERSION_NUMBER,;t t
+s,@RELEASE@,$RELEASE,;t t
 s,@BUILD_CC@,$BUILD_CC,;t t
 s,@BUILD_CFLAGS@,$BUILD_CFLAGS,;t t
 s,@BUILD_LIBS@,$BUILD_LIBS,;t t
@@ -21362,11 +21038,22 @@ s,@OS_UNIX@,$OS_UNIX,;t t
 s,@OS_WIN@,$OS_WIN,;t t
 s,@TARGET_EXEEXT@,$TARGET_EXEEXT,;t t
 s,@TARGET_LIBS@,$TARGET_LIBS,;t t
-s,@TARGET_TCL_LIBS@,$TARGET_TCL_LIBS,;t t
-s,@TARGET_TCL_INC@,$TARGET_TCL_INC,;t t
+s,@TCL_VERSION@,$TCL_VERSION,;t t
+s,@TCL_BIN_DIR@,$TCL_BIN_DIR,;t t
+s,@TCL_SRC_DIR@,$TCL_SRC_DIR,;t t
+s,@TCL_LIBS@,$TCL_LIBS,;t t
+s,@TCL_INCLUDE_SPEC@,$TCL_INCLUDE_SPEC,;t t
+s,@TCL_LIB_FILE@,$TCL_LIB_FILE,;t t
+s,@TCL_LIB_FLAG@,$TCL_LIB_FLAG,;t t
+s,@TCL_LIB_SPEC@,$TCL_LIB_SPEC,;t t
+s,@TCL_STUB_LIB_FILE@,$TCL_STUB_LIB_FILE,;t t
+s,@TCL_STUB_LIB_FLAG@,$TCL_STUB_LIB_FLAG,;t t
+s,@TCL_STUB_LIB_SPEC@,$TCL_STUB_LIB_SPEC,;t t
+s,@HAVE_TCL@,$HAVE_TCL,;t t
 s,@TARGET_READLINE_LIBS@,$TARGET_READLINE_LIBS,;t t
 s,@TARGET_READLINE_INC@,$TARGET_READLINE_INC,;t t
 s,@TARGET_HAVE_READLINE@,$TARGET_HAVE_READLINE,;t t
+s,@TARGET_DEBUG@,$TARGET_DEBUG,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

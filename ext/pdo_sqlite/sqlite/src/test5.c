@@ -190,7 +190,9 @@ static int test_translate_selftest(
   int objc,
   Tcl_Obj *CONST objv[]
 ){
+#ifndef SQLITE_OMIT_UTF16
   sqlite3utfSelfTest();
+#endif
   return SQLITE_OK;
 }
 
@@ -214,4 +216,3 @@ int Sqlitetest5_Init(Tcl_Interp *interp){
   }
   return SQLITE_OK;
 }
-

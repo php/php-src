@@ -20,18 +20,18 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#if SQLITE_DEBUG>2 && defined(__GLIBC__)
+#if SQLITE_MEMDEBUG>2 && defined(__GLIBC__)
 #include <execinfo.h>
 void print_stack_trace(){
   void *bt[30];
   int i;
   int n = backtrace(bt, 30);
 
-  sqlite3DebugPrintf("STACK: ");
+  fprintf(stderr, "STACK: ");
   for(i=0; i<n;i++){
-    sqlite3DebugPrintf("%p ", bt[i]);
+    fprintf(stderr, "%p ", bt[i]);
   }
-  sqlite3DebugPrintf("\n");
+  fprintf(stderr, "\n");
 }
 #else
 #define print_stack_trace()
@@ -44,19 +44,23 @@ void print_stack_trace(){
 int sqlite3_malloc_failed = 0;
 
 /*
-** If SQLITE_DEBUG is defined, then use versions of malloc() and
+** If SQLITE_MEMDEBUG is defined, then use versions of malloc() and
 ** free() that track memory usage and check for buffer overruns.
 */
-#ifdef SQLITE_DEBUG
+#ifdef SQLITE_MEMDEBUG
 
 /*
 ** For keeping track of the number of mallocs and frees.   This
-** is used to check for memory leaks.
+** is used to check for memory leaks.  The iMallocFail and iMallocReset
+** values are used to simulate malloc() failures during testing in 
+** order to verify that the library correctly handles an out-of-memory
+** condition.
 */
 int sqlite3_nMalloc;         /* Number of sqliteMalloc() calls */
 int sqlite3_nFree;           /* Number of sqliteFree() calls */
 int sqlite3_iMallocFail;     /* Fail sqliteMalloc() after this many calls */
-#if SQLITE_DEBUG>1
+int sqlite3_iMallocReset = -1; /* When iMallocFail reaches 0, set to this */
+#if SQLITE_MEMDEBUG>1
 static int memcnt = 0;
 #endif
 
@@ -77,11 +81,11 @@ void *sqlite3Malloc_(int n, int bZero, char *zFile, int line){
     sqlite3_iMallocFail--;
     if( sqlite3_iMallocFail==0 ){
       sqlite3_malloc_failed++;
-#if SQLITE_DEBUG>1
+#if SQLITE_MEMDEBUG>1
       fprintf(stderr,"**** failed to allocate %d bytes at %s:%d\n",
               n, zFile,line);
 #endif
-      sqlite3_iMallocFail--;
+      sqlite3_iMallocFail = sqlite3_iMallocReset;
       return 0;
     }
   }
@@ -89,7 +93,7 @@ void *sqlite3Malloc_(int n, int bZero, char *zFile, int line){
   k = (n+sizeof(int)-1)/sizeof(int);
   pi = malloc( (N_GUARD*2+1+k)*sizeof(int));
   if( pi==0 ){
-    sqlite3_malloc_failed++;
+    if( n>0 ) sqlite3_malloc_failed++;
     return 0;
   }
   sqlite3_nMalloc++;
@@ -98,7 +102,7 @@ void *sqlite3Malloc_(int n, int bZero, char *zFile, int line){
   for(i=0; i<N_GUARD; i++) pi[k+1+N_GUARD+i] = 0xdead3344;
   p = &pi[N_GUARD+1];
   memset(p, bZero==0, n);
-#if SQLITE_DEBUG>1
+#if SQLITE_MEMDEBUG>1
   print_stack_trace();
   fprintf(stderr,"%06d malloc %d bytes at 0x%x from %s:%d\n",
       ++memcnt, n, (int)p, zFile,line);
@@ -152,7 +156,7 @@ void sqlite3Free_(void *p, char *zFile, int line){
       }
     }
     memset(pi, 0xff, (k+N_GUARD*2+1)*sizeof(int));
-#if SQLITE_DEBUG>1
+#if SQLITE_MEMDEBUG>1
     fprintf(stderr,"%06d free %d bytes at 0x%x from %s:%d\n",
          ++memcnt, n, (int)p, zFile,line);
 #endif
@@ -193,7 +197,7 @@ void *sqlite3Realloc_(void *oldP, int n, char *zFile, int line){
   k = (n + sizeof(int) - 1)/sizeof(int);
   pi = malloc( (k+N_GUARD*2+1)*sizeof(int) );
   if( pi==0 ){
-    sqlite3_malloc_failed++;
+    if( n>0 ) sqlite3_malloc_failed++;
     return 0;
   }
   for(i=0; i<N_GUARD; i++) pi[i] = 0xdead1122;
@@ -206,7 +210,7 @@ void *sqlite3Realloc_(void *oldP, int n, char *zFile, int line){
   }
   memset(oldPi, 0xab, (oldK+N_GUARD+2)*sizeof(int));
   free(oldPi);
-#if SQLITE_DEBUG>1
+#if SQLITE_MEMDEBUG>1
   print_stack_trace();
   fprintf(stderr,"%06d realloc %d to %d bytes at 0x%x to 0x%x at %s:%d\n",
     ++memcnt, oldN, n, (int)oldP, (int)p, zFile, line);
@@ -241,13 +245,13 @@ char *sqlite3StrNDup_(const char *z, int n, char *zFile, int line){
 void sqlite3FreeX(void *p){
   sqliteFree(p);
 }
-#endif /* SQLITE_DEBUG */
+#endif /* SQLITE_MEMDEBUG */
 
 /*
 ** The following versions of malloc() and free() are for use in a
 ** normal build.
 */
-#if !defined(SQLITE_DEBUG)
+#if !defined(SQLITE_MEMDEBUG)
 
 /*
 ** Allocate new memory and set it to zero.  Return NULL if
@@ -300,7 +304,7 @@ void *sqlite3Realloc(void *p, int n){
   }
   p2 = realloc(p, n);
   if( p2==0 ){
-    sqlite3_malloc_failed++;
+    if( n>0 ) sqlite3_malloc_failed++;
   }
   return p2;
 }
@@ -325,7 +329,7 @@ char *sqlite3StrNDup(const char *z, int n){
   }
   return zNew;
 }
-#endif /* !defined(SQLITE_DEBUG) */
+#endif /* !defined(SQLITE_MEMDEBUG) */
 
 /*
 ** Create a string from the 2nd and subsequent arguments (up to the
@@ -487,20 +491,6 @@ const unsigned char sqlite3UpperToLower[] = {
     252,253,254,255
 };
 #define UpperToLower sqlite3UpperToLower
-
-/*
-** This function computes a hash on the name of a keyword.
-** Case is not significant.
-*/
-int sqlite3HashNoCase(const char *z, int n){
-  int h = 0;
-  if( n<=0 ) n = strlen(z);
-  while( n > 0  ){
-    h = (h<<3) ^ h ^ UpperToLower[(unsigned char)*z++];
-    n--;
-  }
-  return h & 0x7fffffff;
-}
 
 /*
 ** Some systems have stricmp().  Others have strcasecmp().  Because
@@ -796,7 +786,7 @@ int sqlite3SafetyCheck(sqlite3 *db){
 int sqlite3PutVarint(unsigned char *p, u64 v){
   int i, j, n;
   u8 buf[10];
-  if( v & 0xff00000000000000 ){
+  if( v & (((u64)0xff000000)<<32) ){
     p[8] = v;
     v >>= 8;
     for(i=7; i>=0; i--){
@@ -868,6 +858,7 @@ int sqlite3GetVarint32(const unsigned char *p, u32 *v){
   u32 x;
   int n;
   unsigned char c;
+#if 0
   if( ((c = p[0]) & 0x80)==0 ){
     *v = c;
     return 1;
@@ -878,6 +869,18 @@ int sqlite3GetVarint32(const unsigned char *p, u32 *v){
     return 2;
   }
   x = (x<<7) | (c & 0x7f);
+#else
+  if( ((signed char*)p)[0]>=0 ){
+    *v = p[0];
+    return 1;
+  }
+  x = p[0] & 0x7f;
+  if( ((signed char*)p)[1]>=0 ){
+    *v = (x<<7) | p[1];
+    return 2;
+  }
+  x = (x<<7) | (p[1] & 0x7f);
+#endif
   n = 2;
   do{
     x = (x<<7) | ((c = p[n++])&0x7f);
@@ -899,6 +902,8 @@ int sqlite3VarintLen(u64 v){
   return i;
 }
 
+#if (!defined(SQLITE_OMIT_BLOB_LITERAL) && !defined(SQLITE_HAS_CODEC)) \
+    || defined(SQLITE_TEST)
 /*
 ** Translate a single byte of Hex into an integer.
 */
@@ -907,13 +912,14 @@ static int hexToInt(int h){
     return h - '0';
   }else if( h>='a' && h<='f' ){
     return h - 'a' + 10;
-  }else if( h>='A' && h<='F' ){
-    return h - 'A' + 10;
   }else{
-    return 0;
+    assert( h>='A' && h<='F' );
+    return h - 'A' + 10;
   }
 }
+#endif /* (!SQLITE_OMIT_BLOB_LITERAL && !SQLITE_HAS_CODEC) || SQLITE_TEST */
 
+#if !defined(SQLITE_OMIT_BLOB_LITERAL) || defined(SQLITE_HAS_CODEC)
 /*
 ** Convert a BLOB literal of the form "x'hhhhhh'" into its binary
 ** value.  Return a pointer to its binary value.  Space to hold the
@@ -932,6 +938,7 @@ void *sqlite3HexToBlob(const char *z){
   }
   return zBlob;
 }
+#endif /* !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC */
 
 #if defined(SQLITE_TEST)
 /*

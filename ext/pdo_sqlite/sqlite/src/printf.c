@@ -99,6 +99,7 @@ typedef struct et_info {   /* Information about each format field */
 */
 #define FLAG_SIGNED  1     /* True if the value to convert is signed */
 #define FLAG_INTERN  2     /* True if for internal use only */
+#define FLAG_STRING  4     /* Allow infinity precision */
 
 
 /*
@@ -109,10 +110,10 @@ static const char aDigits[] = "0123456789ABCDEF0123456789abcdef";
 static const char aPrefix[] = "-x0\000X0";
 static const et_info fmtinfo[] = {
   {  'd', 10, 1, etRADIX,      0,  0 },
-  {  's',  0, 0, etSTRING,     0,  0 },
-  {  'z',  0, 2, etDYNSTRING,  0,  0 },
-  {  'q',  0, 0, etSQLESCAPE,  0,  0 },
-  {  'Q',  0, 0, etSQLESCAPE2, 0,  0 },
+  {  's',  0, 4, etSTRING,     0,  0 },
+  {  'z',  0, 6, etDYNSTRING,  0,  0 },
+  {  'q',  0, 4, etSQLESCAPE,  0,  0 },
+  {  'Q',  0, 4, etSQLESCAPE2, 0,  0 },
   {  'c',  0, 0, etCHARX,      0,  0 },
   {  'o',  8, 0, etRADIX,      0,  2 },
   {  'u', 10, 0, etRADIX,      0,  0 },
@@ -296,8 +297,6 @@ static int vxprintf(
           c = *++fmt;
         }
       }
-      /* Limit the precision to prevent overflowing buf[] during conversion */
-      if( precision>etBUFSIZE-40 ) precision = etBUFSIZE-40;
     }else{
       precision = -1;
     }
@@ -327,6 +326,11 @@ static int vxprintf(
       }
     }
     zExtra = 0;
+
+    /* Limit the precision to prevent overflowing buf[] during conversion */
+    if( precision>etBUFSIZE-40 && (infop->flags & FLAG_STRING)==0 ){
+      precision = etBUFSIZE-40;
+    }
 
     /*
     ** At this point, variables are initialized as follows:
@@ -563,13 +567,15 @@ static int vxprintf(
       case etSQLESCAPE2:
         {
           int i, j, n, c, isnull;
+          int needQuote;
           char *arg = va_arg(ap,char*);
           isnull = arg==0;
           if( isnull ) arg = (xtype==etSQLESCAPE2 ? "NULL" : "(NULL)");
           for(i=n=0; (c=arg[i])!=0; i++){
             if( c=='\'' )  n++;
           }
-          n += i + 1 + ((!isnull && xtype==etSQLESCAPE2) ? 2 : 0);
+          needQuote = !isnull && xtype==etSQLESCAPE2;
+          n += i + 1 + needQuote*2;
           if( n>etBUFSIZE ){
             bufpt = zExtra = sqliteMalloc( n );
             if( bufpt==0 ) return -1;
@@ -577,12 +583,12 @@ static int vxprintf(
             bufpt = buf;
           }
           j = 0;
-          if( !isnull && xtype==etSQLESCAPE2 ) bufpt[j++] = '\'';
+          if( needQuote ) bufpt[j++] = '\'';
           for(i=0; (c=arg[i])!=0; i++){
             bufpt[j++] = c;
             if( c=='\'' ) bufpt[j++] = c;
           }
-          if( !isnull && xtype==etSQLESCAPE2 ) bufpt[j++] = '\'';
+          if( needQuote ) bufpt[j++] = '\'';
           bufpt[j] = 0;
           length = j;
           if( precision>=0 && precision<length ) length = precision;

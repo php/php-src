@@ -81,7 +81,7 @@ static int pager_open(
     return TCL_ERROR;
   }
   if( Tcl_GetInt(interp, argv[2], &nPage) ) return TCL_ERROR;
-  rc = sqlite3pager_open(&pPager, argv[1], 0, 1);
+  rc = sqlite3pager_open(&pPager, argv[1], 0, 0);
   if( rc!=SQLITE_OK ){
     Tcl_AppendResult(interp, errorName(rc), 0);
     return TCL_ERROR;
@@ -377,6 +377,34 @@ static int page_lookup(
 }
 
 /*
+** Usage:   pager_truncate ID PGNO
+*/
+static int pager_truncate(
+  void *NotUsed,
+  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
+  int argc,              /* Number of arguments */
+  const char **argv      /* Text of each argument */
+){
+  Pager *pPager;
+  int rc;
+  int pgno;
+  if( argc!=3 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+       " ID PGNO\"", 0);
+    return TCL_ERROR;
+  }
+  pPager = sqlite3TextToPtr(argv[1]);
+  if( Tcl_GetInt(interp, argv[2], &pgno) ) return TCL_ERROR;
+  rc = sqlite3pager_truncate(pPager, pgno);
+  if( rc!=SQLITE_OK ){
+    Tcl_AppendResult(interp, errorName(rc), 0);
+    return TCL_ERROR;
+  }
+  return TCL_OK;
+}
+
+
+/*
 ** Usage:   page_unref PAGE
 **
 ** Drop a pointer to a page.
@@ -553,6 +581,7 @@ int Sqlitetest2_Init(Tcl_Interp *interp){
     { "page_read",               (Tcl_CmdProc*)page_read           },
     { "page_write",              (Tcl_CmdProc*)page_write          },
     { "page_number",             (Tcl_CmdProc*)page_number         },
+    { "pager_truncate",          (Tcl_CmdProc*)pager_truncate      },
     { "fake_big_file",           (Tcl_CmdProc*)fake_big_file       },
   };
   int i;

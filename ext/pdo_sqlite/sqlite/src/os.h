@@ -25,30 +25,17 @@
 */
 #if !defined(OS_UNIX) && !defined(OS_TEST)
 # ifndef OS_WIN
-#  ifndef OS_MAC
-#    if defined(__MACOS__)
-#      define OS_MAC 1
-#      define OS_WIN 0
-#      define OS_UNIX 0
-#    elif defined(_WIN32) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
-#      define OS_MAC 0
-#      define OS_WIN 1
-#      define OS_UNIX 0
-#    else
-#      define OS_MAC 0
-#      define OS_WIN 0
-#      define OS_UNIX 1
-#    endif
-#  else
-#    define OS_WIN 0
-#    define OS_UNIX 0
+#   if defined(_WIN32) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
+#     define OS_WIN 1
+#     define OS_UNIX 0
+#   else
+#     define OS_WIN 0
+#     define OS_UNIX 1
 #  endif
 # else
-#  define OS_MAC 0
 #  define OS_UNIX 0
 # endif
 #else
-# define OS_MAC 0
 # ifndef OS_WIN
 #  define OS_WIN 0
 # endif
@@ -65,9 +52,6 @@
 #endif
 #if OS_WIN
 # include "os_win.h"
-#endif
-#if OS_MAC
-# include "os_mac.h"
 #endif
 
 /*
@@ -162,7 +146,7 @@
 **
 */
 #define PENDING_BYTE      0x40000000  /* First byte past the 1GB boundary */
-/* #define PENDING_BYTE     0x5400   // Page 20 - for testing */
+/* #define PENDING_BYTE     0x5400   // Page 22 - for testing */
 #define RESERVED_BYTE     (PENDING_BYTE+1)
 #define SHARED_FIRST      (PENDING_BYTE+2)
 #define SHARED_SIZE       510
@@ -176,6 +160,7 @@ int sqlite3OsOpenReadOnly(const char*, OsFile*);
 int sqlite3OsOpenDirectory(const char*, OsFile*);
 int sqlite3OsSyncDirectory(const char*);
 int sqlite3OsTempFileName(char*);
+int sqlite3OsIsDirWritable(char*);
 int sqlite3OsClose(OsFile*);
 int sqlite3OsRead(OsFile*, void*, int amt);
 int sqlite3OsWrite(OsFile*, const void*, int amt);

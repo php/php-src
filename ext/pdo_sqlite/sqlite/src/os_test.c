@@ -239,10 +239,12 @@ printf("Writing block %d of %s\n", i, pFile->zName);
         if( BLOCK_OFFSET(i+1)>nMax ){
           len = nMax-BLOCK_OFFSET(i);
         }
-        if( trash ){
-          sqlite3Randomness(len, p);
+        if( len>0 ){
+          if( trash ){
+            sqlite3Randomness(len, p);
+          }
+          rc = sqlite3RealWrite(&pFile->fd, p, len);
         }
-        rc = sqlite3RealWrite(&pFile->fd, p, len);
       }
       sqliteFree(p);
     }

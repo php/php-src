@@ -1,9 +1,4 @@
 #
-# This file describes a "configure" script that is used to build
-# makefiles for a particular platform.  Process this file using 
-# Autoconf version 1.13 in order to generate that script.  All 
-# lines of this file up to the AC_INIT macro are ignored.
-#
 # The build process allows for using a cross-compiler.  But the default
 # action is to target the same platform that we are running on.  The
 # configure script needs to discover the following properties of the 
@@ -62,18 +57,11 @@
 #        into *.o files.  Do not include TARGET_TCL_INC in this list.
 #        Makefiles might add additional switches such as "-I.".
 #
-#    TARGET_TCL_LIBS
+#    TCL_*
 #
-#        This is the library directives passed to the target linker
-#        that cause the executable to link against Tcl.  This might
-#        be a switch like "-ltcl8.0" or pathnames of library file
-#        like "../../src/libtcl8.0.a".
-#
-#    TARGET_TCL_INC
-#
-#        This variables define the directory that contain header
-#        files for Tcl.  If the compiler is able to find <tcl.h>
-#        on its own, then this can be blank.
+#        Lots of values are read in from the tclConfig.sh script,
+#        if that script is available.  This values are used for
+#        constructing and installing the TCL extension.
 #
 #    TARGET_READLINE_LIBS
 #
@@ -118,16 +106,6 @@
 # where FILE is the name of the file that sets the environment
 # variables.  FILE should be an absolute pathname.
 #
-# If you have a Tcl/Tk/BLT source distribution available, then the
-# files in that distribution will be used instead of any other
-# Tcl/Tk/BLT files the script might discover if you tell the configure
-# script about the source tree.  Use commandline options:
-#
-#         --with-tcl=PATH  --with-tk=PATH  --with-blt=PATH
-#
-# Or set environment variables config_WITH_TCL, config_WITH_TK, or
-# config_WITH_BLT.
-#
 # This configure.in file is easy to reuse on other projects.  Just
 # change the argument to AC_INIT().  And disable any features that
 # you don't need (for example BLT) by erasing or commenting out
@@ -154,11 +132,17 @@ if test "$program_prefix" = "NONE"; then
 fi
 AC_SUBST(program_prefix)
 
-if test -f VERSION; then
-  VERSION=`cat VERSION`
-  echo "Version set to $VERSION"
-fi
+VERSION=[`cat $srcdir/VERSION | sed 's/^\([0-9]*\.*[0-9]*\).*/\1/'`]
+echo "Version set to $VERSION"
 AC_SUBST(VERSION)
+RELEASE=`cat $srcdir/VERSION`
+echo "Release set to $RELEASE"
+AC_SUBST(RELEASE)
+VERSION_NUMBER=`cat $srcdir/VERSION  \
+                           | sed 's/[^0-9]/ /g' \
+                | awk '{printf "%d%03d%03d",$1,$2,$3}'`
+echo "Version number set to $VERSION_NUMBER"
+AC_SUBST(VERSION_NUMBER)
 
 #########
 # Check to see if the --with-hints=FILE option is used.  If there is none,
@@ -410,65 +394,146 @@ fi
 AC_SUBST(TARGET_LIBS)
 
 ##########
-# Figure out what C libraries are required to compile Tcl programs.
+# Figure out all the parameters needed to compile against Tcl.
 #
-if test "$config_TARGET_TCL_LIBS" != ""; then
-  TARGET_TCL_LIBS="$config_TARGET_TCL_LIBS"
-else
-  if test "$with_tcl" != ""; then
-    extra=`echo $with_tcl/$tclsubdir/libtcl8*.a`
-  fi
-  CC=$TARGET_CC
-  AC_CHECK_FUNC(sin, LIBS="", LIBS="-lm")
-  AC_CHECK_LIB(dl, dlopen)
-  otherlibs=$LIBS
-  if test "$extra" != ""; then
-    LIBS=$extra
-  else 
-    LIBS=""
-    AC_SEARCH_LIBS(Tcl_Init, dnl
-        tcl8.4 tcl8.3 tcl84 tcl83 tcl,,,$otherlibs)
-  fi
-  TARGET_TCL_LIBS="$LIBS $otherlibs"
-fi
-AC_SUBST(TARGET_TCL_LIBS)
-
-##########
-# Figure out where to get the TCL header files.
+# This code is derived from the SC_PATH_TCLCONFIG and SC_LOAD_TCLCONFIG
+# macros in the in the tcl.m4 file of the standard TCL distribution.
+# Those macros could not be used directly since we have to make some
+# minor changes to accomodate systems that do not have TCL installed.
 #
-AC_MSG_CHECKING([TCL header files])
-found=no
-if test "$config_TARGET_TCL_INC" != ""; then
-  TARGET_TCL_INC=$config_TARGET_TCL_INC
-  found=yes
-else
-  if test "$with_tcl" != ""; then
-    TARGET_TCL_INC="-I$with_tcl/generic -I$with_tcl/$tclsubdir"
-    found=yes
-  else
-    TARGET_TCL_INC=""
-    found=no
-  fi
-fi
-if test "$found" = "yes"; then
-  AC_MSG_RESULT($TARGET_TCL_INC)
-else
-  AC_MSG_RESULT(not specified: still searching...)
-  AC_CHECK_HEADER(tcl.h, [found=yes])
-fi
-if test "$found" = "no"; then
-  for dir in /usr/local /usr/X11 /usr/X11R6 /usr/pkg /usr/contrib /usr; do
-    AC_CHECK_FILE($dir/include/tcl.h, found=yes)
-    if test "$found" = "yes"; then
-      TARGET_TCL_INC="-I$dir/include"
-      break
+AC_ARG_ENABLE(tcl, [  --disable-tcl       do not build TCL extension],
+      [use_tcl=$enableval],[use_tcl=yes])
+if test "${use_tcl}" = "yes" ; then
+  AC_ARG_WITH(tcl, [  --with-tcl=DIR          directory containing tcl configuration (tclConfig.sh)], with_tclconfig=${withval})
+  AC_MSG_CHECKING([for Tcl configuration])
+  AC_CACHE_VAL(ac_cv_c_tclconfig,[
+    # First check to see if --with-tcl was specified.
+    if test x"${with_tclconfig}" != x ; then
+      if test -f "${with_tclconfig}/tclConfig.sh" ; then
+        ac_cv_c_tclconfig=`(cd ${with_tclconfig}; pwd)`
+      else
+        AC_MSG_ERROR([${with_tclconfig} directory doesn't contain tclConfig.sh])
+      fi
     fi
-  done
+    # then check for a private Tcl installation
+    if test x"${ac_cv_c_tclconfig}" = x ; then
+      for i in \
+            ../tcl \
+            `ls -dr ../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
+            `ls -dr ../tcl[[8-9]].[[0-9]] 2>/dev/null` \
+            `ls -dr ../tcl[[8-9]].[[0-9]]* 2>/dev/null` \
+            ../../tcl \
+            `ls -dr ../../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
+            `ls -dr ../../tcl[[8-9]].[[0-9]] 2>/dev/null` \
+            `ls -dr ../../tcl[[8-9]].[[0-9]]* 2>/dev/null` \
+            ../../../tcl \
+            `ls -dr ../../../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
+            `ls -dr ../../../tcl[[8-9]].[[0-9]] 2>/dev/null` \
+            `ls -dr ../../../tcl[[8-9]].[[0-9]]* 2>/dev/null`
+      do
+        if test -f "$i/unix/tclConfig.sh" ; then
+          ac_cv_c_tclconfig=`(cd $i/unix; pwd)`
+          break
+        fi
+      done
+    fi
+
+    # check in a few common install locations
+    if test x"${ac_cv_c_tclconfig}" = x ; then
+      for i in \
+            `ls -d ${libdir} 2>/dev/null` \
+            `ls -d /usr/local/lib 2>/dev/null` \
+            `ls -d /usr/contrib/lib 2>/dev/null` \
+            `ls -d /usr/lib 2>/dev/null`
+      do
+        if test -f "$i/tclConfig.sh" ; then
+           ac_cv_c_tclconfig=`(cd $i; pwd)`
+           break
+        fi
+      done
+    fi
+
+    # check in a few other private locations
+    if test x"${ac_cv_c_tclconfig}" = x ; then
+      for i in \
+         ${srcdir}/../tcl \
+         `ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]].[[0-9]]* 2>/dev/null` \
+         `ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]] 2>/dev/null` \
+         `ls -dr ${srcdir}/../tcl[[8-9]].[[0-9]]* 2>/dev/null`
+      do
+        if test -f "$i/unix/tclConfig.sh" ; then
+          ac_cv_c_tclconfig=`(cd $i/unix; pwd)`
+          break
+        fi
+      done
+    fi
+  ])
+
+  if test x"${ac_cv_c_tclconfig}" = x ; then
+    use_tcl=no
+    AC_MSG_WARN(Can't find Tcl configuration definitions)
+    AC_MSG_WARN(*** Without Tcl the regression tests cannot be executed ***)
+    AC_MSG_WARN(*** Consider using --with-tcl=... to define location of Tcl ***)
+  else
+    TCL_BIN_DIR=${ac_cv_c_tclconfig}
+    AC_MSG_RESULT(found $TCL_BIN_DIR/tclConfig.sh)
+
+    AC_MSG_CHECKING([for existence of $TCL_BIN_DIR/tclConfig.sh])
+    if test -f "$TCL_BIN_DIR/tclConfig.sh" ; then
+      AC_MSG_RESULT([loading])
+      . $TCL_BIN_DIR/tclConfig.sh
+    else
+      AC_MSG_RESULT([file not found])
+    fi
+    
+    #
+    # If the TCL_BIN_DIR is the build directory (not the install directory),
+    # then set the common variable name to the value of the build variables.
+    # For example, the variable TCL_LIB_SPEC will be set to the value
+    # of TCL_BUILD_LIB_SPEC. An extension should make use of TCL_LIB_SPEC
+    # instead of TCL_BUILD_LIB_SPEC since it will work with both an
+    # installed and uninstalled version of Tcl.
+    #
+    
+   if test -f $TCL_BIN_DIR/Makefile ; then
+      TCL_LIB_SPEC=${TCL_BUILD_LIB_SPEC}
+      TCL_STUB_LIB_SPEC=${TCL_BUILD_STUB_LIB_SPEC}
+      TCL_STUB_LIB_PATH=${TCL_BUILD_STUB_LIB_PATH}
+    fi
+    
+    #
+    # eval is required to do the TCL_DBGX substitution
+    #
+    
+    eval "TCL_LIB_FILE=\"${TCL_LIB_FILE}\""
+    eval "TCL_LIB_FLAG=\"${TCL_LIB_FLAG}\""
+    eval "TCL_LIB_SPEC=\"${TCL_LIB_SPEC}\""
+    
+    eval "TCL_STUB_LIB_FILE=\"${TCL_STUB_LIB_FILE}\""
+    eval "TCL_STUB_LIB_FLAG=\"${TCL_STUB_LIB_FLAG}\""
+    eval "TCL_STUB_LIB_SPEC=\"${TCL_STUB_LIB_SPEC}\""
+    
+    AC_SUBST(TCL_VERSION)
+    AC_SUBST(TCL_BIN_DIR)
+    AC_SUBST(TCL_SRC_DIR)
+    AC_SUBST(TCL_LIBS)
+    AC_SUBST(TCL_INCLUDE_SPEC)
+    
+    AC_SUBST(TCL_LIB_FILE)
+    AC_SUBST(TCL_LIB_FLAG)
+    AC_SUBST(TCL_LIB_SPEC)
+    
+    AC_SUBST(TCL_STUB_LIB_FILE)
+    AC_SUBST(TCL_STUB_LIB_FLAG)
+    AC_SUBST(TCL_STUB_LIB_SPEC)
+  fi
 fi
-if test "$found" = "no"; then
-  TARGET_TCL_INC="-DNO_TCL=1"
+if test "${use_tcl}" = "no" ; then
+  HAVE_TCL=""
+else
+  HAVE_TCL=1
 fi
-AC_SUBST(TARGET_TCL_INC)
+AC_SUBST(HAVE_TCL)
 
 ##########
 # Figure out what C libraries are required to compile programs
@@ -525,6 +590,17 @@ else
 fi
 AC_SUBST(TARGET_READLINE_INC)
 AC_SUBST(TARGET_HAVE_READLINE)
+
+#########
+# check for debug enabled
+AC_ARG_ENABLE(debug, [  --enable-debug         enable debugging & verbose explain],
+      [use_debug=$enableval],[use_debug=no])
+if test "${use_debug}" = "yes" ; then
+  TARGET_DEBUG=""
+else
+  TARGET_DEBUG="-DNDEBUG"
+fi
+AC_SUBST(TARGET_DEBUG)
 
 #########
 # Figure out whether or not we have a "usleep()" function.
