@@ -142,7 +142,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 PHP_FUNCTION(setcookie)
 {
 	char *name, *value = NULL, *path = NULL, *domain = NULL;
-	time_t expires = 0;
+	long expires = 0;
 	zend_bool secure = 0;
 	int name_len, value_len, path_len, domain_len;
 

@@ -1439,7 +1439,7 @@ PHP_FUNCTION(pg_fetch_all)
 PHP_FUNCTION(pg_result_seek)
 {
 	zval *result;
-	int row;
+	long row;
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &row) == FAILURE) {
@@ -2190,7 +2190,7 @@ PHP_FUNCTION(pg_lo_export)
 PHP_FUNCTION(pg_lo_seek)
 {
 	zval *pgsql_id = NULL;
-	int offset = 0, whence = SEEK_CUR;
+	long offset = 0, whence = SEEK_CUR;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -2601,7 +2601,8 @@ PHP_FUNCTION(pg_copy_from)
 PHP_FUNCTION(pg_escape_string)
 {
 	char *from = NULL, *to = NULL;
-	size_t from_len, to_len;
+	size_t to_len;
+	long from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -2618,7 +2619,8 @@ PHP_FUNCTION(pg_escape_string)
 PHP_FUNCTION(pg_escape_bytea)
 {
 	char *from = NULL, *to = NULL;
-	size_t from_len, to_len;
+	size_t to_len;
+	long from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -2741,7 +2743,8 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 PHP_FUNCTION(pg_unescape_bytea)
 {
 	char *from = NULL, *to = NULL;
-	size_t from_len, to_len;
+	size_t to_len;
+	long from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &from_len) == FAILURE) {
 		return;
@@ -3917,7 +3920,7 @@ PHP_FUNCTION(pg_convert)
 {
 	zval *pgsql_link, *values;
 	char *table_name;
-	size_t table_name_len;
+	int table_name_len;
 	ulong option = 0;
 	PGconn *pg_link;
 	int id = -1;
@@ -4076,7 +4079,7 @@ PHP_FUNCTION(pg_insert)
 {
 	zval *pgsql_link, *values;
 	char *table, *sql = NULL;
-	ulong table_len;
+	int table_len;
 	ulong option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	int id = -1, argc = ZEND_NUM_ARGS();
@@ -4225,7 +4228,7 @@ PHP_FUNCTION(pg_update)
 {
 	zval *pgsql_link, *values, *ids;
 	char *table, *sql = NULL;
-	ulong table_len;
+	int table_len;
 	ulong option =  PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	int id = -1, argc = ZEND_NUM_ARGS();
@@ -4314,7 +4317,8 @@ PHP_FUNCTION(pg_delete)
 {
 	zval *pgsql_link, *ids;
 	char *table, *sql = NULL;
-	ulong table_len, option = PGSQL_DML_EXEC;
+	int table_len;
+	ulong option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	int id = -1, argc = ZEND_NUM_ARGS();
 
@@ -4451,7 +4455,8 @@ PHP_FUNCTION(pg_select)
 {
 	zval *pgsql_link, *ids;
 	char *table, *sql = NULL;
-	ulong table_len, option = PGSQL_DML_EXEC;
+	int table_len;
+	ulong option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	int id = -1, argc = ZEND_NUM_ARGS();
 

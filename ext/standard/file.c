@@ -770,7 +770,8 @@ PHP_FUNCTION(stream_select)
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
 	int				max_fd = 0;
-	int				retval, sets = 0, usec = 0;
+	int				retval, sets = 0;
+	long				usec = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;

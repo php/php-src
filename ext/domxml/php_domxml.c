@@ -1967,7 +1967,8 @@ PHP_FUNCTION(domxml_clone_node)
 	zval *rv = NULL;
 	zval *id;
 	xmlNode *n, *node;
-	int ret, recursive = 0;;
+	int ret; 
+	long recursive = 0;
 
 	DOMXML_GET_THIS_OBJ(n, id, le_domxmlnodep);
 
@@ -3558,7 +3559,8 @@ PHP_FUNCTION(domxml_doc_imported_node)
 	zval *arg1, *id, *rv = NULL;
 	xmlNodePtr node, srcnode;
 	xmlDocPtr docp;
-	int ret, recursive = 0;
+	int ret; 
+	long recursive = 0;
 
 	DOMXML_GET_THIS_OBJ(docp, id, le_domxmldocp);
 
@@ -3764,7 +3766,8 @@ PHP_FUNCTION(xmldoc)
 	int ret; 
 	char *buffer;
 	int buffer_len;
-	int mode = 0, prevSubstValue;
+	long mode = 0;
+	int prevSubstValue;
 	int oldvalue =  xmlDoValidityCheckingDefaultValue;
 	int oldvalue_keepblanks;
  	int prevLoadExtDtdValue = xmlLoadExtDtdDefaultValue;
@@ -3850,7 +3853,8 @@ PHP_FUNCTION(xmldocfile)
 	xmlDoc *docp = NULL;
 	int ret, file_len;
 	char *file;
-	int mode = 0, prevSubstValue;
+	long mode = 0;
+	int prevSubstValue;
 	int oldvalue =  xmlDoValidityCheckingDefaultValue;
 	int oldvalue_keepblanks;
 	zval *errors = NULL;
@@ -5211,7 +5215,8 @@ PHP_FUNCTION(domxml_xslt_result_dump_file)
 	xmlDocPtr xmldocp;
 	char *filename;
 	int filename_len;
-	int ret, compression = 0;
+	int ret;
+	long compression = 0;
 
 	DOMXML_GET_THIS(idxsl);
 

@@ -554,7 +554,8 @@ PHP_FUNCTION(fdf_set_ap)
 PHP_FUNCTION(fdf_get_ap) {
 	zval *r_fdf;
 	char *fieldname, *filename;
-	int fieldname_len, filename_len, face;
+	int fieldname_len, filename_len;
+	long face;
 	FDFDoc fdf;
 	FDFErc err;
 	FDFAppFace facenr;
@@ -941,7 +942,8 @@ PHP_FUNCTION(fdf_set_flags)
 PHP_FUNCTION(fdf_get_flags) {
  	zval *r_fdf;
 	char *fieldname;
-	int fieldname_len, whichflags;
+	int fieldname_len;
+	long whichflags;
 	FDFDoc fdf;
 	FDFErc err;
 	ASUns32 flags;
@@ -997,7 +999,8 @@ PHP_FUNCTION(fdf_set_opt)
 PHP_FUNCTION(fdf_get_opt) {
  	zval *r_fdf;
 	char *fieldname;
-	int fieldname_len, element = -1;
+	int fieldname_len;
+	long element = -1;
 	FDFDoc fdf;
 	FDFErc err;
 

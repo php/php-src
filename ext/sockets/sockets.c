@@ -555,7 +555,8 @@ PHP_FUNCTION(socket_select)
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
 	SOCKET			max_fd = 0;
-	int				retval, sets = 0, usec = 0;
+	int			retval, sets = 0;
+	long			usec = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
@@ -602,7 +603,7 @@ PHP_FUNCTION(socket_select)
 PHP_FUNCTION(socket_create_listen)
 {
 	php_socket	*php_sock;
-	int			port, backlog = 128;
+	long		port, backlog = 128;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &port, &backlog) == FAILURE)
 		return;
@@ -702,7 +703,7 @@ PHP_FUNCTION(socket_listen)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			backlog = 0;
+	long			backlog = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &backlog) == FAILURE)
 		return;
@@ -739,7 +740,8 @@ PHP_FUNCTION(socket_write)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			retval, str_len, length;
+	int			retval, str_len;
+	long			length;
 	char		*str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &str, &str_len, &length) == FAILURE)
@@ -773,7 +775,8 @@ PHP_FUNCTION(socket_read)
 	zval		*arg1;
 	php_socket	*php_sock;
 	char		*tmpbuf;
-	int			retval, length, type = PHP_BINARY_READ;
+	int			retval;
+	long			length, type = PHP_BINARY_READ;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &length, &type) == FAILURE)
 		return;
@@ -920,7 +923,7 @@ PHP_FUNCTION(socket_getpeername)
    Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket_create)
 {
-	int			arg1, arg2, arg3;
+	long			arg1, arg2, arg3;
 	php_socket	*php_sock = (php_socket*)emalloc(sizeof(php_socket));
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &arg1, &arg2, &arg3) == FAILURE) {
@@ -962,7 +965,8 @@ PHP_FUNCTION(socket_connect)
 	struct sockaddr_in	sin;
 	struct sockaddr_un	s_un;
 	char				*addr;
-	int					retval, addr_len, port;
+	int					retval, addr_len;
+	long					port;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE)
 		return;
@@ -1012,7 +1016,7 @@ PHP_FUNCTION(socket_connect)
    Returns a string describing an error */
 PHP_FUNCTION(socket_strerror)
 {
-	int	arg1;
+	long	arg1;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg1) == FAILURE)
 		return;
@@ -1030,7 +1034,8 @@ PHP_FUNCTION(socket_bind)
 	struct sockaddr			*sock_type = (struct sockaddr*) &sa_storage;
 	php_socket				*php_sock;
 	char					*addr;
-	int						addr_len, port = 0;
+	int						addr_len;
+	int						port = 0;
 	long					retval = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE)
@@ -1127,7 +1132,7 @@ PHP_FUNCTION(socket_iovec_fetch)
 {
 	zval			*iovec_id;
 	php_iovec_t		*vector;
-	unsigned int	iovec_position;
+	unsigned long	iovec_position;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &iovec_id, &iovec_position) == FAILURE)
 		return;
@@ -1150,7 +1155,7 @@ PHP_FUNCTION(socket_iovec_set)
 	zval			*iovec_id;
 	php_iovec_t		*vector;
 	int				new_val_len;
-	unsigned int	iovec_position;
+	unsigned long	iovec_position;
 	char			*new_val;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &iovec_id, &iovec_position, &new_val, &new_val_len) == FAILURE)
@@ -1181,7 +1186,7 @@ PHP_FUNCTION(socket_iovec_add)
 	zval			*iovec_id;
 	php_iovec_t		*vector;
 	struct iovec	*vector_array;
-	int				iov_len;
+	long				iov_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &iovec_id, &iov_len) == FAILURE)
 		return;
@@ -1209,7 +1214,8 @@ PHP_FUNCTION(socket_iovec_delete)
 	zval			*iovec_id;
 	php_iovec_t		*vector;
 	struct iovec	*vector_array;
-	unsigned int	i, iov_pos;
+	unsigned int	i;
+	unsigned long	iov_pos;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &iovec_id, &iov_pos) == FAILURE)
 		return;
@@ -1309,7 +1315,8 @@ PHP_FUNCTION(socket_recv)
 	zval		*php_sock_res, *buf;
 	char		*recv_buf;
 	php_socket	*php_sock;
-	int			retval, len, flags;
+	int			retval;
+	long			len, flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzll", &php_sock_res, &buf, &len, &flags) == FAILURE)
 		return;
@@ -1350,7 +1357,8 @@ PHP_FUNCTION(socket_send)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	int			buf_len, len, flags, retval;
+	int			buf_len, retval;
+	long			len, flags;
 	char		*buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsll", &arg1, &buf, &buf_len, &len, &flags) == FAILURE)
@@ -1378,7 +1386,8 @@ PHP_FUNCTION(socket_recvfrom)
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
 	socklen_t			slen;
-	int					retval, arg3, arg4;
+	int					retval;
+	long					arg3, arg4;
 	char				*recv_buf, *address;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzllz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE)
@@ -1454,7 +1463,8 @@ PHP_FUNCTION(socket_sendto)
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
-	int					retval, buf_len, len, flags, addr_len, port = 0;
+	int					retval, buf_len, addr_len;
+	long					len, flags, port = 0;
 	char				*buf, *addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE)
@@ -1662,7 +1672,8 @@ PHP_FUNCTION(socket_sendmsg)
 	struct sockaddr	sa;
 	char			*addr;
 	socklen_t		salen;
-	int				flags, addr_len, port;
+	int				addr_len;
+	long				flags, port;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrls|l", &arg1, &arg2, &flags, &addr, &addr_len, &port) == FAILURE)
 		return;
@@ -1747,7 +1758,8 @@ PHP_FUNCTION(socket_get_option)
 	struct timeval		tv;
 	socklen_t		optlen;
 	php_socket		*php_sock;
-	int				other_val, level, optname;
+	int				other_val;
+	long				level, optname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll", &arg1, &level, &optname) == FAILURE)
 		return;
@@ -1810,7 +1822,8 @@ PHP_FUNCTION(socket_set_option)
 	struct linger	lv;
 	struct timeval tv;
 	php_socket		*php_sock;
-	int				ov, optlen, retval, level, optname;
+	int				ov, optlen, retval;
+	long				level, optname;
 	void 			*opt_ptr;
 	
 	HashTable 		*opt_ht;
@@ -1902,7 +1915,7 @@ PHP_FUNCTION(socket_create_pair)
 	zval		*retval[2], *fds_array_zval;
 	php_socket	*php_sock[2];
 	SOCKET		fds_array[2];
-	int			domain, type, protocol;
+	long			domain, type, protocol;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lllz", &domain, &type, &protocol, &fds_array_zval) == FAILURE)
 		return;
@@ -1959,7 +1972,7 @@ PHP_FUNCTION(socket_create_pair)
 PHP_FUNCTION(socket_shutdown)
 {
 	zval		*arg1;
-	int			how_shutdown = 2;
+	long			how_shutdown = 2;
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &how_shutdown) == FAILURE)

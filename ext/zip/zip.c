@@ -285,7 +285,7 @@ PHP_FUNCTION(zip_entry_read)
 	zval             *zzip_ent;
 	php_zzip_dirent  *entry = NULL;
 	char             *buf   = NULL;
-	int               len   = 1024;
+	long              len   = 1024;
 	int               ret   = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zzip_ent, &len) == FAILURE) {

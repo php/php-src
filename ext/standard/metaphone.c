@@ -35,7 +35,8 @@ PHP_FUNCTION(metaphone)
 {
 	char *str;
 	char *result = 0;
-	int phones = 0, str_len;
+	int str_len;
+	long phones = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len,
 							  &phones) == FAILURE) {

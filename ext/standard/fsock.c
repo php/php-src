@@ -136,7 +136,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host;
 	int host_len;
-	int port = -1;
+	long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = FG(default_socket_timeout);
 	unsigned long conv;

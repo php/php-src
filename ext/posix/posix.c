@@ -702,7 +702,8 @@ PHP_FUNCTION(posix_getcwd)
 PHP_FUNCTION(posix_mkfifo)
 {
 	char *path;
-	long path_len, mode;
+	int path_len;
+	long mode;
 	int     result;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &path, &path_len, &mode) == FAILURE)

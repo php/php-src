@@ -811,7 +811,7 @@ PHP_FUNCTION(gzencode)
 {
 	char *data, *s2;
 	int data_len;
-	int level = Z_DEFAULT_COMPRESSION, coding = CODING_GZIP;
+	long level = Z_DEFAULT_COMPRESSION, coding = CODING_GZIP;
 	int status;
 	z_stream stream;
 

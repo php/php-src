@@ -872,7 +872,8 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len, len, quote_style = ENT_COMPAT;
+	int str_len, hint_charset_len, len; 
+	long quote_style = ENT_COMPAT;
 	char *replaced;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
@@ -898,7 +899,7 @@ PHP_FUNCTION(htmlentities)
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	int which = HTML_SPECIALCHARS, quote_style = ENT_COMPAT;
+	long which = HTML_SPECIALCHARS, quote_style = ENT_COMPAT;
 	int i, j;
 	char ind[2];
 	enum entity_charset charset = determine_charset(NULL TSRMLS_CC);

@@ -671,7 +671,7 @@ PHP_FUNCTION(proc_open)
 #define MAX_DESCRIPTORS	16
 
 	char *command;
-	long command_len;
+	int command_len;
 	zval *descriptorspec;
 	zval *pipes;
 	int ndesc = 0;
