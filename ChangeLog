@@ -1,3 +1,163 @@
+2003-02-12  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_fe.c:
+      changed function entries for statements
+
+2003-02-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      Bug fixing news.
+
+    * ext/fbsql/php_fbsql.c:
+      Fixed bug #22191 (frontbase build was broken for people using older
+      versions).
+
+    * main/snprintf.c:
+      Fixed bug #22187 (spprintf function did not handle floats correctly).
+
+2003-02-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/spprintf.c:
+          - trims +100 lines of code from spprintf.c
+          - introduces an overflow detection in STR_TO_DEC
+          - eliminates dead code (e.g. assert(foo); if (foo) {..})
+          - removes unused macros from the original code
+          - simplifies code (e.g. cc was completely dropped)
+          - improves run-time performance
+      
+            The max_len feature is never used in our code base.
+            Nevertheless, cpu cycles were spent on each string
+            operation to check the current length against max_len which
+            is quite inefficient.  Thus, I've moved the check to
+            vspprintf where it is applied only once per call.
+
+2003-02-12  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/config.m4:
+      Fix for GCC 3
+
+2003-02-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4:
+      Fixed the "member fd in BUFF" test for --with-apxs builds
+
+2003-02-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysqli/config.m4:
+      - Let's add the config.m4 file too :-)
+
+2003-02-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cli/.cvsignore:
+      added missing entry
+
+    * (PHP_4_3)
+      NEWS:
+      add blame tag
+
+2003-02-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      Fixed bug #22048 (incorrect insertion of session id when tabs are used to
+      separate tag elements).
+
+2003-02-12  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hwapi/hwapi.cpp:
+      - Fixed compile errors and some oddities like missing strcmp
+
+2003-02-12  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/036.phpt
+      ext/mysqli/tests/037.phpt
+      ext/mysqli/tests/038.phpt
+      ext/mysqli/tests/039.phpt
+      ext/mysqli/tests/040.phpt
+      ext/mysqli/tests/041.phpt:
+      added new tests
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      removed function mysql_num_warnings (libmysql change).
+
+2003-02-12  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cli/Makefile.frag
+      sapi/cli/config.m4
+      sapi/cli/php.1
+      sapi/cli/php.1.in:
+      "Generate" the man page so that it gets correct version always.
+
+    * NEWS:
+      Man page is added in 4.3.1, moved this entry to branch
+
+    * sapi/cli/Makefile.frag
+      sapi/cli/config.m4:
+      - Added the man page installation
+
+    * (PHP_4_3)
+      Makefile.global:
+      MFH: Use $(INSTALL) for installing shared extensions.
+
+    * ext/yaz/config.m4:
+      Fix obvious errors..
+
+    * NEWS:
+      news news news..
+
+2003-02-12  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/018.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/027.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/029.phpt
+      ext/mysqli/tests/030.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/035.phpt:
+      adding a few tests
+
+    * ext/mysqli/CREDITS
+      ext/mysqli/EXPERIMENTAL
+      ext/mysqli/TODO
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      initial upload
+
 2003-02-11  Sascha Schumann  <sascha@schumann.cx>
 
     * configure.in:
