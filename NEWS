@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Make the seed options to srand() and mt_srand() optional, if the seed is
+  not specified, the generate the most random seed possible. (Sterling)
 - A bug fixed when tryint to return NULL strings.
   Added a new example of building search frontend based on mnoGoSearch
   extension.
