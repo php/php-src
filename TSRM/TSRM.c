@@ -290,6 +290,15 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	int hash_value;
 	tsrm_tls_entry *thread_resources;
 
+#ifdef NETWARE
+	/* The below if loop is added for NetWare to fix an abend while unloading PHP
+	 * when an Apache unload command is issued on the system console.
+	 * While exiting from PHP, at the end for some reason, this function is called
+	 * with tsrm_tls_table = NULL. When this happened, the server abends when
+	 * tsrm_tls_table is accessed since it is NULL.
+	 */
+	if(tsrm_tls_table) {
+#endif
 	if (!th_id) {
 #if defined(PTHREADS)
 		/* Fast path for looking up the resources for the current
@@ -352,6 +361,9 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	 * changes to the structure as we read it.
 	 */
 	TSRM_SAFE_RETURN_RSRC(thread_resources->storage, id, thread_resources->count);
+#ifdef NETWARE
+	}	/* if(tsrm_tls_table) */
+#endif
 }
 
 
@@ -419,7 +431,12 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 #ifdef TSRM_WIN32
 	return GetCurrentThreadId();
 #elif defined(NETWARE)
-	return NXThreadGetId();
+	/* There seems to be some problem with the LibC call: NXThreadGetId().
+	 * Due to this, the PHPMyAdmin application is abending in PHP calls.
+	 * Used the call, kCurrentThread instead and it works fine.
+	 */
+/*	return NXThreadGetId(); */
+	return kCurrentThread();
 #elif defined(GNUPTH)
 	return pth_self();
 #elif defined(PTHREADS)
@@ -441,16 +458,23 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 {
 	MUTEX_T mutexp;
 #ifdef NETWARE
-	long flags = 0;  /* Don't require NX_MUTEX_RECURSIVE, I guess */
+#ifndef USE_MPK
+	/* To use the Recursive Mutex Locking of LibC */
+	long flags = NX_MUTEX_RECURSIVE;
 	NXHierarchy_t order = 0;
 	NX_LOCK_INFO_ALLOC (lockInfo, "PHP-TSRM", 0);
-#endif    
+#endif
+#endif
 
 #ifdef TSRM_WIN32
 	mutexp = malloc(sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(mutexp);
 #elif defined(NETWARE)
-	mutexp = NXMutexAlloc(flags, order, &lockInfo); /* return value ignored for now */
+#ifdef USE_MPK
+	mutexp = kMutexAlloc((BYTE*)"PHP-TSRM");
+#else
+	mutexp = NXMutexAlloc(flags, order, &lockInfo);
+#endif
 #elif defined(GNUPTH)
 	mutexp = (MUTEX_T) malloc(sizeof(*mutexp));
 	pth_mutex_init(mutexp);
@@ -482,7 +506,11 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 		DeleteCriticalSection(mutexp);
 #elif defined(NETWARE)
+#ifdef USE_MPK
+		kMutexFree(mutexp);
+#else
 		NXMutexFree(mutexp);
+#endif
 #elif defined(GNUPTH)
 		free(mutexp);
 #elif defined(PTHREADS)
@@ -513,7 +541,11 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 	EnterCriticalSection(mutexp);
 	return 1;
 #elif defined(NETWARE)
+#ifdef USE_MPK
+	return kMutexLock(mutexp);
+#else
 	return NXLock(mutexp);
+#endif
 #elif defined(GNUPTH)
 	return pth_mutex_acquire(mutexp, 0, NULL);
 #elif defined(PTHREADS)
@@ -540,7 +572,11 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 	LeaveCriticalSection(mutexp);
 	return 1;
 #elif defined(NETWARE)
+#ifdef USE_MPK
+	return kMutexUnlock(mutexp);
+#else
 	return NXUnlock(mutexp);
+#endif
 #elif defined(GNUPTH)
 	return pth_mutex_release(mutexp);
 #elif defined(PTHREADS)
