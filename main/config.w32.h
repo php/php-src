@@ -37,7 +37,7 @@
 #define TRANS_SID 1
 
 /* set to enable force cgi redirect */
-#define FORCE_CGI_REDIRECT 0
+#define FORCE_CGI_REDIRECT 1
 
 /* should be added to runtime config*/
 #define PHP_URL_FOPEN 1
