@@ -11,7 +11,7 @@
 #undef PHP3_BLOWFISH_CRYPT
 
 /* Define if you have libdl (used for dynamic linking) */
-#define HAVE_LIBDL 0
+#undef HAVE_LIBDL
 
 #undef HAVE_GETWD
 #undef HAVE_GETCWD

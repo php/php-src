@@ -22,7 +22,7 @@
 #include "dl.h"
 #include "php_globals.h"
 
-#if HAVE_LIBDL
+#ifdef HAVE_LIBDL
 #include <stdlib.h>
 #include <stdio.h>
 #ifndef RTLD_LAZY
@@ -78,7 +78,7 @@ void dl(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 
-#if HAVE_LIBDL
+#ifdef HAVE_LIBDL
 
 void php_dl(pval *file,int type,pval *return_value)
 {
