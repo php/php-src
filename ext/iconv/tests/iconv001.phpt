@@ -1,5 +1,5 @@
 --TEST--
-iconv test
+iconv() test 1
 --SKIPIF--
 <?php /* include('skipif.inc'); */ ?>
 --INI--
