@@ -373,7 +373,7 @@ ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
 ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
-ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
+ZEND_API void init_op_array(zend_op_array *op_array, int type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC);
 ZEND_API void zend_open_file_dtor(zend_file_handle *fh);

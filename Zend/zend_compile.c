@@ -715,7 +715,7 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 	function_token->u.op_array = CG(active_op_array);
 	zend_str_tolower(name, name_len);
 
-	init_op_array(&op_array, INITIAL_OP_ARRAY_SIZE);
+	init_op_array(&op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
 	op_array.function_name = name;
 	op_array.arg_types = NULL;

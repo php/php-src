@@ -58,9 +58,9 @@ static void op_array_alloc_ops(zend_op_array *op_array)
 
 
 
-void init_op_array(zend_op_array *op_array, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, int type, int initial_ops_size)
 {
-	op_array->type = ZEND_USER_FUNCTION;
+	op_array->type = type;
 #if SUPPORT_INTERACTIVE
 	{
 		ELS_FETCH();
