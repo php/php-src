@@ -228,10 +228,9 @@ int zend_init_rsrc_plist(TSRMLS_D)
 }
 
 
-void zend_destroy_rsrc_list(TSRMLS_D)
+void zend_destroy_rsrc_list(HashTable *ht TSRMLS_DC)
 {
 	Bucket *p, *q;
-	HashTable *ht = &EG(regular_list);
 
 	while (1) {
 		p = ht->pListTail;
@@ -255,13 +254,6 @@ void zend_destroy_rsrc_list(TSRMLS_D)
 		pefree(p, ht->persistent);
 	}
 	pefree(ht->arBuckets, ht->persistent);
-}
-
-
-
-void zend_destroy_rsrc_plist(TSRMLS_D)
-{
-	zend_hash_reverse_destroy(&EG(persistent_list));
 }
 
 

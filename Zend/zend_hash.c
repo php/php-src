@@ -524,32 +524,6 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 	return FAILURE;
 }
 
-ZEND_API void zend_hash_reverse_destroy(HashTable *ht)
-{
-	Bucket *p, *q;
-
-	while (1) {
-		p = ht->pListTail;
-		if (!p) {
-			break;
-		}
-		q = p->pListLast;
-		if (q) {
-			q->pListNext = NULL;
-		}
-		ht->pListTail = q;
-
-		if (ht->pDestructor) {
-			ht->pDestructor(p->pData);
-		}
-		if (!p->pDataPtr && p->pData) {
-			pefree(p->pData, ht->persistent);
-		}
-		pefree(p, ht->persistent);
-	}
-	pefree(ht->arBuckets, ht->persistent);
-}
-
 
 ZEND_API void zend_hash_destroy(HashTable *ht)
 {
