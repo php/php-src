@@ -29,36 +29,27 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
-	pval *year_arg;
 	struct tm *ta, te;
 	time_t the_time;
 	long year, golden, solar, lunar, pfm, dom, tmp, easter;
+	long method = CAL_EASTER_DEFAULT;
 
-	switch(ZEND_NUM_ARGS()) {
-	case 0:
-		the_time = time(NULL);
-		ta = localtime(&the_time);
-		year = ta->tm_year + 1900;
-		break;
-	case 1:
-		if (getParameters(ht, 1, &year_arg) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long(year_arg);
-		year = Z_LVAL_P(year_arg);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+		"l|l", &year, &method) == FAILURE) {
+			return;
 	}
  
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
-		php3_error(E_WARNING, "easter_date() is only valid for years between 1970 and 2037 inclusive");
+		php_error(E_WARNING, "easter_date() is only valid for years between 1970 and 2037 inclusive");
 		RETURN_FALSE;
 	}
 
 	golden = (year % 19) + 1;					/* the Golden number */
 
-	if ( year <= 1752 ) {						/* JULIAN CALENDAR */
+	if ((year <= 1582 && method != CAL_EASTER_ALWAYS_GREGORIAN) ||
+	    (year >= 1583 && year <= 1752 && method != CAL_EASTER_ROMAN && method != CAL_EASTER_ALWAYS_GREGORIAN) ||
+	     method == CAL_EASTER_ALWAYS_JULIAN) {		/* JULIAN CALENDAR */
+	     
 		dom = (year + (year/4) + 5) % 7;			/* the "Dominical number" - finding a Sunday */
 		if (dom < 0) {
 			dom += 7;
