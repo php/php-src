@@ -601,13 +601,14 @@ PHP_FUNCTION(imagegif )
 		output = php3_header();
 
 		if (output) {
-			SLS_FETCH();
-			
 			gdImageGif (im, tmp);
 			fseek(tmp, 0, SEEK_SET);
 #if APACHE && defined(CHARSET_EBCDIC)
-			/* This is a binary file already: avoid EBCDIC->ASCII conversion */
-			ap_bsetflag(((request_rec *) SG(server_context))->connection->client, B_EBCDIC2ASCII, 0);
+			{
+				SLS_FETCH();
+				/* This is a binary file already: avoid EBCDIC->ASCII conversion */
+				ap_bsetflag(((request_rec *) SG(server_context))->connection->client, B_EBCDIC2ASCII, 0);
+			}
 #endif
 			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0) {
 				php3_write(buf, b);
