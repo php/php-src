@@ -463,7 +463,7 @@ PHP_FUNCTION(pcntl_exec)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_signal(long signo, mixed handle, [bool restart_syscalls])
+/* {{{ proto bool pcntl_signal(long signo, callback handle, [bool restart_syscalls])
    Assigns a system signal handler to a PHP function */
 PHP_FUNCTION(pcntl_signal)
 {
@@ -633,7 +633,7 @@ void pcntl_tick_handler()
 
 		ZVAL_LONG(param, *signal_num);
 		
-		/* Call php singal handler - Note that we do not report errors, and we ignore the eturn value */
+		/* Call php singal handler - Note that we do not report errors, and we ignore the return value */
 		call_user_function(EG(function_table), NULL, *handle, retval, 1, &param TSRMLS_CC);
 	}
 	/* Clear */
