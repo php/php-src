@@ -110,6 +110,7 @@ int zend_load_extension(char *path)
 
 int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 {
+#if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
 
 	if (new_extension->startup) {
@@ -126,6 +127,7 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 
 	zend_append_version_info(&extension);
 	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
+#endif
 
 	return SUCCESS;
 }
