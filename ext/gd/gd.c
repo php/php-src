@@ -117,6 +117,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagegif,								NULL)
 	PHP_FE(imagecreatefromjpeg,						NULL)
 	PHP_FE(imagejpeg,								NULL)
+	PHP_FE(imagecreatefromwbmp,                     NULL)
 	PHP_FE(imagewbmp,                               NULL)
 	PHP_FE(imagecreatefromxbm,						NULL)
 	PHP_FE(imagecreatefromxpm,						NULL)
@@ -453,7 +454,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	fclose(fp);
 
 	if (!im) {
-		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name, fn, tn);
+		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name(), fn, tn);
 		RETURN_FALSE;
 	}
 
@@ -526,6 +527,19 @@ PHP_FUNCTION(imagecreatefromxpm)
 	/*
 #endif
 	*/
+}
+/* }}} */
+
+/* {{{ proto int imagecreatefromwbmp(string filename)
+   Create a new image from WBMP file or URL */
+PHP_FUNCTION(imagecreatefromwbmp)
+{
+#ifdef HAVE_GD_WBMP
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageCreateFromWBMP);
+#else /* HAVE_GD_WBMP */
+	php_error(E_WARNING, "ImageCreateFromWBMP: No WBMP support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_WBMP */
 }
 /* }}} */
 
@@ -648,7 +662,11 @@ PHP_FUNCTION(imagejpeg)
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
+#ifdef HAVE_GD_WBMP
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMP);
+#else
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_output_wbmp);
+#endif
 }
 /* }}} */
 
