@@ -475,7 +475,7 @@ PHP_FUNCTION(touch)
 	struct stat sb;
 	FILE *file;
 	struct utimbuf newtimebuf;
-	struct utimbuf *newtime = &newtimebuf;
+	struct utimbuf *newtime = NULL;
 	int ac = ZEND_NUM_ARGS();
 
 	if (ac == 1 && zend_get_parameters_ex(1, &filename) != FAILURE) {
@@ -483,9 +483,12 @@ PHP_FUNCTION(touch)
 		newtime->modtime = newtime->actime = time(NULL);
 #endif
 	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
+		newtime = &newtimebuf;
 		convert_to_long_ex(filetime);
+		newtime->actime = time(NULL);
 		newtime->modtime = newtime->actime = Z_LVAL_PP(filetime);
 	} else if (ac == 3 && zend_get_parameters_ex(3, &filename, &filetime, &fileatime) != FAILURE) {
+		newtime = &newtimebuf;
 		convert_to_long_ex(fileatime);
 		convert_to_long_ex(filetime);
 		newtime->actime = Z_LVAL_PP(fileatime);
@@ -519,9 +522,8 @@ PHP_FUNCTION(touch)
 	if (ret == -1) {
 		php_error(E_WARNING, "utime failed: %s", strerror(errno));
 		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
 	}
+	RETURN_TRUE;
 #endif
 }
 /* }}} */
