@@ -248,8 +248,6 @@ if test "$PHP_GD" = "php"; then
 		libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c libgd/gdcache.c libgd/gdkanji.c \
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
 
-  PHP_ADD_BUILD_DIR($ext_builddir/libgd)
-
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS(fabsf floorf)
 
@@ -365,6 +363,7 @@ if test "$PHP_GD" != "no"; then
 
   if test "$GD_MODULE_TYPE" = "builtin"; then
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
+    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
   else
     GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_FCLAGS"
     PHP_ADD_INCLUDE($GD_INCLUDE)
