@@ -496,10 +496,12 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 #endif /* !ZEND_DISABLE_MEMORY_CACHE */
 
 #if defined(ZEND_MM) && !ZEND_DEBUG
+	zend_mm_shutdown(&AG(mm_heap));
 	if (full_shutdown) {
-		zend_mm_shutdown(&AG(mm_heap));
 		return;
 	}
+	zend_mm_startup(&AG(mm_heap), 256*1024);
+
 #elif defined(ZEND_WIN32) && !ZEND_DEBUG
 	if (full_shutdown && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
@@ -621,10 +623,11 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 #endif
 
 #if defined(ZEND_MM) && ZEND_DEBUG
+	zend_mm_shutdown(&AG(mm_heap));
 	if (full_shutdown) {
-		zend_mm_shutdown(&AG(mm_heap));
 		return;
 	}
+	zend_mm_startup(&AG(mm_heap), 256*1024);
 #elif defined(ZEND_WIN32) && ZEND_DEBUG
 	if (full_shutdown && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
