@@ -1431,15 +1431,14 @@ ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class
 {
 	zend_uint i;
 
+	for (i=0; i<instance_ce->num_interfaces; i++) {
+		if (instanceof_function(instance_ce->interfaces[i], ce TSRMLS_CC)) {
+			return 1;
+		}
+	}
 	while (instance_ce) {
 		if (instance_ce == ce) {
 			return 1;
-		}
-		for (i=0; i<instance_ce->num_interfaces; i++) {
-
-			if (instanceof_function(instance_ce->interfaces[i], ce TSRMLS_CC)) {
-				return 1;
-			}
 		}
 		instance_ce = instance_ce->parent;
 	}
