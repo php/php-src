@@ -262,7 +262,7 @@ void sqlite_busy_handler(sqlite*, int(*)(void*,const char*,int), void*);
 ** Calling this routine with an argument less than or equal to zero
 ** turns off all busy handlers.
 */
-void sqlite_busy_timeout(sqlite*, int ms);
+void sqlite_busy_timeout(sqlite*, long ms);
 
 /*
 ** This next routine is really just a wrapper around sqlite_exec().
