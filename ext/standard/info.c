@@ -42,7 +42,7 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 	int show_info_func = *((int *) arg);
 
 	if (show_info_func && module->info_func) {
-		php_printf("<hr><h2>%s</h2>\n", module->name);
+		php_printf("<hr><a name=\"module_%s\"><h2>%s</h2>\n", module->name, module->name);
 		module->info_func(module);
 	} else if (!show_info_func && !module->info_func) {
 		php_printf("<tr><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
