@@ -284,6 +284,7 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	header_info.cchStatus = strlen(header_info.pszStatus);
 	header_info.pszHeader = combined_headers;
 	header_info.cchHeader = total_length;
+	header_info.fKeepConn = FALSE;
 	lpECB->dwHttpStatusCode = SG(sapi_headers).http_response_code;
 
 	lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
