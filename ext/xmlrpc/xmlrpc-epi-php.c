@@ -1345,8 +1345,8 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
                   ztimestamp->value.lval = timestamp;
 
                   convert_to_object(value);
-                  if(SUCCESS == zend_hash_update(value->value.obj.properties, OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR), (void *) &type, sizeof(zval *), NULL)) {
-                     bSuccess = zend_hash_update(value->value.obj.properties, OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR), (void *) &ztimestamp, sizeof(zval *), NULL);
+                  if(SUCCESS == zend_hash_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR), (void *) &type, sizeof(zval *), NULL)) {
+                     bSuccess = zend_hash_update(Z_OBJPROP_P(value), OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR), (void *) &ztimestamp, sizeof(zval *), NULL);
                   }
                }
                XMLRPC_CleanupValue(v);
