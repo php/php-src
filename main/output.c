@@ -119,6 +119,7 @@ php3_module_entry output_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+
 PHP_RINIT_FUNCTION(output)
 {
 	php_output_startup();

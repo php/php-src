@@ -710,9 +710,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	php_output_startup();
 	php_init_post_request_startup(PLS_C);
 
-	if (PG(output_buffering)) {
-		php_start_ob_buffering();
-	}
 #if APACHE
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
@@ -739,6 +736,10 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	
 	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);	
+
+	if (PG(output_buffering)) {
+		php_start_ob_buffering();
+	}
 
 	if (SG(request_info).auth_user) {
 		zval *auth_user;
