@@ -2817,7 +2817,7 @@ PHP_FUNCTION(domxml_intdtd)
 }
 /* }}} */
 
-/* {{{ proto string domxml_dump_mem([object doc_handle[,int format] ])
+/* {{{ proto string domxml_dump_mem(object doc_handle [, int format])
    Dumps document into string and optionally formats it */
 PHP_FUNCTION(domxml_dump_mem)
 {
@@ -2827,7 +2827,7 @@ PHP_FUNCTION(domxml_dump_mem)
 	int format = 0;
 	int size;
 
-	DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"|l",&format);
+	DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"|l", &format);
 	if (format) {
 		xmlKeepBlanksDefault(0);
 		xmlDocDumpFormatMemory(docp, &mem, &size, format);
@@ -2842,7 +2842,7 @@ PHP_FUNCTION(domxml_dump_mem)
 }
 /* }}} */
 
-/* {{{ proto int domxml_dump_mem_file([object doc_handle],filename,compressmode)
+/* {{{ proto int domxml_dump_mem_file(object doc_handle [, int filename [, int compressmode]])
    Dumps document into file and uses compression if specified
    Returns false on error, otherwise the length of the xml-document (uncompressed)
    */
@@ -2872,7 +2872,7 @@ PHP_FUNCTION(domxml_dump_mem_file)
 }
 /* }}} */
 
-/* {{{ proto string domxml_dump_node([object doc_handle],object node_handle[,int format[,int level]])
+/* {{{ proto string domxml_dump_node(object doc_handle, object node_handle [, int format [, int level]])
    Dumps node into string */
 PHP_FUNCTION(domxml_dump_node)
 {
