@@ -280,6 +280,10 @@ disable_classes =
 ;highlight.default = #0000BB
 ;highlight.html    = #000000
 
+; If enabled, the request will be allowed to complete even if the user aborts
+; the request. Consider enabling it if executing long request, which may end up
+; being interrupted by the user or a browser timing out.
+; ignore_user_abort = On
 
 ;
 ; Misc
