@@ -75,7 +75,7 @@ PHP_FUNCTION(curl_multi_exec);
 PHP_FUNCTION(curl_multi_getcontent);
 PHP_FUNCTION(curl_multi_info_read);
 PHP_FUNCTION(curl_multi_close);
-void _php_curl_multi_close(zend_rsrc_list_entry *);
+void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
 
 typedef struct {
 	zval          *func_name;
