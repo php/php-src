@@ -90,6 +90,7 @@ function_entry msession_functions[] = {
 	PHP_FE(msession_listvar,NULL)
 	PHP_FE(msession_list,NULL)
 	PHP_FE(msession_uniq,NULL)
+	PHP_FE(msession_randstr,NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in msession_functions[] */
 };
 
@@ -517,6 +518,37 @@ PHP_FUNCTION(msession_uniq)
 	val = Z_LVAL_PP(param);
 
 	FormatRequest(&g_reqb, REQ_UNIQ,"", "", "",val);
+	DoRequest(g_conn, &g_reqb);
+
+	if(g_reqb->req.stat==REQ_OK)
+	{
+		char *szval = safe_estrdup(g_reqb->req.datum);
+		RETURN_STRING(szval, 0)
+	}
+	else
+	{
+		RETURN_NULL();
+	}
+}
+PHP_FUNCTION(msession_randstr)
+{
+	long val;
+	zval **param;
+	GET_REQB
+	
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&param) == FAILURE)
+ 	{
+                WRONG_PARAM_COUNT;
+	}
+	if(!g_conn)
+	{
+		RETURN_FALSE;
+	}
+
+	convert_to_long_ex(param);
+	val = Z_LVAL_PP(param);
+
+	FormatRequest(&g_reqb, REQ_RANDSTR,"", "", "",val);
 	DoRequest(g_conn, &g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK)

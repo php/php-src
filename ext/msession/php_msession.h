@@ -60,6 +60,7 @@ PHP_FUNCTION(msession_getdata);
 PHP_FUNCTION(msession_listvar);
 PHP_FUNCTION(msession_list);
 PHP_FUNCTION(msession_uniq);
+PHP_FUNCTION(msession_randstr);
 PHP_FUNCTION();
 
 /* 
