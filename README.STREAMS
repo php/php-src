@@ -28,6 +28,8 @@ The main functions are:
 PHPAPI size_t php_stream_read(php_stream * stream, char * buf, size_t count);
 PHPAPI size_t php_stream_write(php_stream * stream, const char * buf, size_t
         count);
+PHPAPI size_t php_stream_printf(php_stream * stream TSRMLS_DC, 
+        const char * fmt, ...);
 PHPAPI int php_stream_eof(php_stream * stream);
 PHPAPI int php_stream_getc(php_stream * stream);
 PHPAPI char *php_stream_gets(php_stream * stream, char *buf, size_t maxlen);
