@@ -6319,7 +6319,7 @@ PHP_FUNCTION(oci_collection_append)
 				OCICollAppend(
 					connection->session->pEnv, 
 					connection->pError, 
-					(dword *)0, 
+					(dvoid *)0, 
 					&null_ind, 
 					coll->coll
 				)
@@ -6667,7 +6667,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 					connection->session->pEnv, 
 					connection->pError, 
 					ndx, 
-					(dword *)0, 
+					(dvoid *)0, 
 					&null_ind, 
 					coll->coll
 				)
@@ -6706,7 +6706,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 						connection->session->pEnv, 
 						connection->pError, 
 						ndx, 
-						(dword *)&dt, 
+						(dvoid *)&dt, 
 						&new_ind, 
 						coll->coll
 					)
@@ -6740,7 +6740,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 						connection->session->pEnv, 
 						connection->pError, 
 						ndx, 
-						(dword *)ocistr, 
+						(dvoid *)ocistr, 
 						&new_ind, 
 						coll->coll
 					)
@@ -6785,7 +6785,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 						connection->session->pEnv, 
 						connection->pError, 
 						ndx, 
-						(dword *)&num, 
+						(dvoid *)&num, 
 						&new_ind, 
 						coll->coll
 					)
