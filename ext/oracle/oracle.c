@@ -577,9 +577,7 @@ PHP_FUNCTION(ora_logoff)
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	zend_list_delete((*arg)->value.lval);
 }
@@ -597,9 +595,7 @@ PHP_FUNCTION(ora_open)
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	if ((cursor = (oraCursor *)emalloc(sizeof(oraCursor))) == NULL){
 		php_error(E_WARNING, "Out of memory");
@@ -630,11 +626,7 @@ PHP_FUNCTION(ora_close)
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	cursor = (oraCursor *) zend_fetch_resource_ex(arg, -1, "Oracle-Cursor", 1, le_cursor);
-	if (! cursor) {
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(cursor, oraCursor *, arg, -1, "Oracle-Cursor", le_cursor);
 
 	zend_list_delete((*arg)->value.lval);
 
@@ -652,9 +644,7 @@ PHP_FUNCTION(ora_commitoff)
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	if (ocof(&conn->lda)) {
 		php_error(E_WARNING, "Unable to turn off auto-commit (%s)",
@@ -675,8 +665,7 @@ PHP_FUNCTION(ora_commiton)
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	if (ocon(&conn->lda)) {
 		php_error(E_WARNING, "Unable to turn on auto-commit (%s)",
@@ -697,8 +686,7 @@ PHP_FUNCTION(ora_commit)
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	if (ocom(&conn->lda)) {
 		php_error(E_WARNING, "Unable to commit transaction (%s)",
@@ -719,8 +707,7 @@ PHP_FUNCTION(ora_rollback)
 	if (getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	if (orol(&conn->lda)) {
 		php_error(E_WARNING, "Unable to roll back transaction (%s)",
@@ -984,9 +971,7 @@ PHP_FUNCTION(ora_do)
 	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &con,&sql) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	conn = (oraConnection *) zend_fetch_resource_ex(con, -1, "Oracle-Connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, oraConnection *, con, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	convert_to_string_ex(sql);
 
@@ -1501,21 +1486,22 @@ PHP_FUNCTION(ora_error)
 	pval **arg;
 	oraCursor *cursor;
 	oraConnection *conn;
+	void *res;
+	int what;
 
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
+	ZEND_VERIFY_RESOURCE(res);
 
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, NULL, 2, le_conn, le_pconn);
-	if (conn) {
-		RETURN_STRING(ora_error(&conn->lda),1);
+	if (what == le_cursor) {
+		cursor = (oraCursor *) res;
+		RETURN_STRING(ora_error(&cursor->cda),1);
 	} else {
-		cursor = (oraCursor *) zend_fetch_resource_ex(arg, -1, NULL, 1, le_cursor);
-		if (cursor) {
-			RETURN_STRING(ora_error(&cursor->cda),1);
-		}
+		conn = (oraConnection *) res;
+		RETURN_STRING(ora_error(&conn->lda),1);
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1526,21 +1512,22 @@ PHP_FUNCTION(ora_errorcode)
 	pval **arg;
 	oraCursor *cursor;
 	oraConnection *conn;
+	void *res;
+	int what;
 
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
+	ZEND_VERIFY_RESOURCE(res);
 
-	conn = (oraConnection *) zend_fetch_resource_ex(arg, -1, NULL, 2, le_conn, le_pconn);
-	if (conn) {
-		RETURN_LONG(conn->lda.rc);
+	if (what == le_cursor) {
+		cursor = (oraCursor *) res;
+		RETURN_LONG(cursor->cda.rc);
 	} else {
-		cursor = (oraCursor *) zend_fetch_resource_ex(arg, -1, NULL, 1, le_cursor);
-		if (cursor) {
-			RETURN_LONG(cursor->cda.rc);
-		}
+		conn = (oraConnection *) res;
+		RETURN_LONG(conn->lda.rc);
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1566,7 +1553,7 @@ ora_get_cursor(HashTable *list, pval **ind)
 	oraConnection *db_conn;
 	ORALS_FETCH();
 
-	cursor = (oraCursor *) zend_fetch_resource_ex(ind, -1, "Oracle-Cursor", 1, le_cursor);
+	cursor = (oraCursor *) zend_fetch_resource(ind, -1, "Oracle-Cursor", NULL, 1, le_cursor);
 	if (! cursor) {
 		return NULL;
 	}
