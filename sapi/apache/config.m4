@@ -29,7 +29,6 @@ AC_ARG_WITH(apxs,
 	if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
 		APACHE_HAS_REGEX=yes
 	fi
-	PHP_EXTENSION(apache)
 	PHP_SAPI=apache
 	APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED"
 	PHP_BUILD_SHARED
@@ -234,7 +233,6 @@ if test -n "$APACHE_MODULE"; then
   fi
   PHP_SUBST(APACHE_WANT_HSREGEX)
   PHP_APACHE_CHECK_RDYNAMIC
-  PHP_EXTENSION(apache)
   PHP_OUTPUT(sapi/apache/libphp4.module)
   PHP_BUILD_STATIC
 fi
