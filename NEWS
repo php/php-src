@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed a crash in CGI mode, in case no file was provided (Daniel Beulshausen
+  & Zeev)
 - Fixed possible crash bug in imap_fetchstructure() (Jani)
 - Fixed possible crash bug in imap_open() (Jani & Mark Musone)
 - Added url_rewriter.tags configuration directive (Sascha)

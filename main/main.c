@@ -67,6 +67,7 @@
 #include "zend_execute.h"
 #include "zend_highlight.h"
 #include "zend_indent.h"
+#include "zend_extensions.h"
 
 #include "php_content_types.h"
 #include "php_ticks.h"
@@ -657,7 +658,7 @@ void php_request_shutdown(void *dummy)
 		php_end_ob_buffers(SG(request_info).headers_only?0:1);
 	}
 
-	if (setjmp(EG(bailout))==0) {
+	if (PG(modules_activated) && setjmp(EG(bailout))==0) {
 		php_call_shutdown_functions();
 	}
 	
