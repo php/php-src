@@ -36,25 +36,14 @@
 
 #ifdef HAVE_ICONV
 
-#ifdef HAVE_GICONV_H
-#include <giconv.h>
-#else
-#include <iconv.h>
+#ifndef PHP_ICONV_H_PATH
+#define PHP_ICONV_H_PATH <iconv.h>
 #endif
+
+#include PHP_ICONV_H_PATH
 
 #ifdef HAVE_GLIBC_ICONV
 #include <gnu/libc-version.h>
-#endif
-
-#ifdef HAVE_LIBICONV
-#define LIBICONV_PLUG
-#define icv_open(a, b) libiconv_open(a, b)
-#define icv_close(a) libiconv_close(a)
-#define icv(a, b, c, d, e) libiconv(a, b, c, d, e)
-#else
-#define icv_open(a, b) iconv_open(a, b)
-#define icv_close(a) iconv_close(a)
-#define icv(a, b, c, d, e) iconv(a, (char **) b, c, d, e)
 #endif
 
 /* {{{ iconv_functions[]
@@ -213,7 +202,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 
 	in_size = in_len;
 
-	cd = icv_open(out_charset, in_charset);
+	cd = icov_open(out_charset, in_charset);
 	
 	if (cd == (iconv_t)(-1)) {
 		return PHP_ICONV_ERR_UNKNOWN;
@@ -222,7 +211,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_buffer = (char *) emalloc(out_size + 1);
 	out_p = out_buffer;
 	
-	result = icv(cd, (const char **) &in_p, &in_size, (char **)
+	result = iconv(cd, (const char **) &in_p, &in_size, (char **)
 				&out_p, &out_left);
 	
 	if (result == (size_t)(-1)) {
@@ -235,7 +224,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	}
 
 	/* flush the shift-out sequences */ 
-	result = icv(cd, NULL, NULL, &out_p, &out_left);
+	result = iconv(cd, NULL, NULL, &out_p, &out_left);
 
 	if (result == (size_t)(-1)) {
 		efree(out_buffer);
@@ -246,7 +235,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_buffer[*out_len] = '\0';
 	*out = out_buffer;
 
-	icv_close(cd);
+	iconv_close(cd);
 
 	return PHP_ICONV_ERR_SUCCESS;
 
@@ -263,7 +252,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	*out = NULL;
 	*out_len = 0;
 
-	cd = icv_open(out_charset, in_charset);
+	cd = iconv_open(out_charset, in_charset);
 
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
@@ -280,7 +269,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	out_p = out_buf;
 
 	while (in_left > 0) {
-		result = icv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
+		result = iconv(cd, (const char **) &in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
 		if (result == (size_t)(-1)) {
 			if (errno == E2BIG && in_left > 0) {
@@ -303,7 +292,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	if (result != (size_t)(-1)) {
 		/* flush the shift-out sequences */ 
 		for (;;) {
-		   	result = icv(cd, NULL, NULL, (char **) &out_p, &out_left);
+		   	result = iconv(cd, NULL, NULL, (char **) &out_p, &out_left);
 			out_size = bsz - out_left;
 
 			if (result != (size_t)(-1)) {
@@ -327,7 +316,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 		}
 	}
 
-	icv_close(cd);
+	iconv_close(cd);
 
 	if (result == (size_t)(-1)) {
 		switch (errno) {
