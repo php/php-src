@@ -829,12 +829,11 @@ static int stream_array_emulate_read_fd_set(zval *stream_array TSRMLS_DC)
 static int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
 	HANDLE *handles;
-	DWORD ms, waitret;
+	DWORD waitret;
 	DWORD ms_total;
 	int i, f, s, fd_count = 0, sock_count = 0;
 	int retval;
 	fd_set ard, awr, aex; /* active fd sets */
-	long sock_events;
 
 	for (i = 0; i < max_fd; i++) {
 		if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
