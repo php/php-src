@@ -96,3 +96,40 @@ for example:
 support to, and select Properties. Check the 'Execute' checkbox, and
 confirm.
 4. At this point, PWS should have built-in PHP support.
+
+NETSCAPE SERVERS, PHP as CGI (for Netscape Enterprise Server, iPlanet, perhaps Fastrack..) 
+1. Copy the php.ini-dist to your systemroot (the directory where you installed windows), and edit it to fit your needs
+2. Copy php4ts.dll to your systemroot (the directory where you installed windows) 
+3. Make a file assocition from the command line (type the 2 following lines)
+      assoc .php=PHPScript
+      ftype PHPScript=d:\php4\php.exe %1 %*
+4. In the Netscape Enterprise Administration Server create a dummy shellcgi directory and remove it just after
+      (this step creates 5 important lines in obj.conf and allow the web server to handle shellcgi scripts)
+5. In the Netscape Enterprise Administration Server create a new mime type
+      (Category:type,Content-Type:magnus-internal/shellcgi,File Suffix:php)
+6. Do it for each web server instance you want php to run
+7. More details http://benoit.noss.free.fr/php/install-php.html
+
+	  
+NETSCAPE SERVERS, PHP as NSAPI (for Netscape Enterprise Server, iPlanet, perhaps Fastrack..) 
+1. Copy the php.ini-dist to your systemroot (the directory where you installed windows), and edit it to fit your needs
+2. Copy php4ts.dll to your systemroot (the directory where you installed windows) 
+3. Make a file assocition from the command line (type the 2 following lines)
+      assoc .php=PHPScript
+      ftype PHPScript=d:\php4\php.exe %1 %*
+4. In the Netscape Enterprise Administration Server create a new mime type
+      (Category:type,Content-Type:magnus-internal/x-httpd-php,File Suffix:php)
+5. Stop your web service and edit obj.conf
+6.1 At the end of the Init section, place this 2 lines (necessarely after mime type init!)
+      Init fn="load-modules" funcs="php4_init,php4_close,php4_execute,php4_auth_trans" shlib="d:/php4/sapi/php4nsapi.dll"
+      Init fn="php4_init" errorString="Failed to initialise PHP!"
+6.2 In The < Object name="default" > section, place this line necessarely after all 'ObjectType' and before all 'AddLog' lines! 
+      Service fn="php4_execute" type="magnus-internal/x-httpd-php"
+6.3 At the end of the file, create a new object called x-httpd-php, by inserting this lines
+      <Object name="x-httpd-php">
+      ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
+      Service fn=php4_execute
+      </Object>
+7. Restart your web service and apply changes
+8. Do it for each web server instance you want php to run
+9. More details http://benoit.noss.free.fr/php/install-php4.html
