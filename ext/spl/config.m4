@@ -22,17 +22,19 @@ PHP_ARG_ENABLE(spl, enable hook on array write,
 
 dnl last do checks on hooks
 
-if test "$PHP_SPL_HOOK_ALL" != "no" -o "$PHP_SPL_FOREACH" != "no"; then
-  AC_DEFINE(SPL_FOREACH, 1, [Activate opcode hook on foreach])
-  PHP_SPL="yes"
-fi
-if test "$PHP_SPL_HOOK_ALL" != "no" -o "$PHP_SPL_ARRAY_READ" != "no" -o "$PHP_SPL_ARRAY_WRITE" != "no"; then
-  AC_DEFINE(SPL_ARRAY_READ, 1, [Activate opcode hook on array read])
-  PHP_SPL="yes"
-fi
-if test "$PHP_SPL_HOOK_ALL" != "no" -o "$PHP_SPL_ARRAY_WRITE" != "no"; then
-  AC_DEFINE(SPL_ARRAY_WRITE, 1, [Activate opcode hook on array write])
-  PHP_SPL="yes"
+if test "$PHP_SPL" != "no"; then
+  if test "$PHP_SPL_HOOK_ALL" != "no" -o "$PHP_SPL_FOREACH" != "no"; then
+    AC_DEFINE(SPL_FOREACH, 1, [Activate opcode hook on foreach])
+    PHP_SPL="yes"
+  fi
+  if test "$PHP_SPL_HOOK_ALL" != "no" -o "$PHP_SPL_ARRAY_READ" != "no" -o "$PHP_SPL_ARRAY_WRITE" != "no"; then
+    AC_DEFINE(SPL_ARRAY_READ, 1, [Activate opcode hook on array read])
+    PHP_SPL="yes"
+  fi
+  if test "$PHP_SPL_HOOK_ALL" != "no" -o "$PHP_SPL_ARRAY_WRITE" != "no"; then
+    AC_DEFINE(SPL_ARRAY_WRITE, 1, [Activate opcode hook on array write])
+    PHP_SPL="yes"
+  fi
 fi
 
 if test "$PHP_SPL" != "no"; then
