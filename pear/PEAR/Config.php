@@ -142,7 +142,7 @@ if (isset($_ENV['PHP_PEAR_PREFERRED_STATE'])) {
 if (isset($_ENV['PHP_PEAR_UMASK'])) {
     define('PEAR_CONFIG_DEFAULT_UMASK', $_ENV['PHP_PEAR_UMASK']);
 } else {
-    define('PEAR_CONFIG_DEFAULT_UMASK', umask());
+    define('PEAR_CONFIG_DEFAULT_UMASK', decoct(umask()));
 }
 
 // Default for cache_ttl
