@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added search_array which works similar to in_array but returns
+  the key instead of a boolean. (jason@php.net)
 - Fixed pgsql transaction support (Stig, PEAR/DB)
 - Added new object VARIANT() to encapsulate values for use with
   the COM and DOTNET module. Therefore it is now possible to pass
