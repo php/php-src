@@ -164,7 +164,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 	zval_copy_ctor(return_value);
 }
 
-void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC)
+static void reflection_register_implement(zend_class_entry *class_entry, zend_class_entry *interface_entry TSRMLS_DC)
 {
 	zend_uint num_interfaces = ++class_entry->num_interfaces;
 
@@ -203,7 +203,7 @@ static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC
 	}
 }
 
-ZEND_API zend_object_value reflection_objects_new(zend_class_entry *class_type TSRMLS_DC)
+static zend_object_value reflection_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
 	reflection_object *intern;
@@ -670,7 +670,7 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 /* }}} */
 
 /* {{{ reflection_class_factory */
-void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
+static void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -686,7 +686,7 @@ void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, zval *object TSRMLS_DC)
+static void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -710,7 +710,7 @@ void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, z
 /* }}} */
 
 /* {{{ reflection_function_factory */
-void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC)
+static void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -727,7 +727,7 @@ void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC
 /* }}} */
 
 /* {{{ reflection_method_factory */
-void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *object TSRMLS_DC)
+static void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -747,7 +747,7 @@ void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval
 /* }}} */
 
 /* {{{ reflection_property_factory */
-void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
+static void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	zval *name;
@@ -788,7 +788,7 @@ void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop,
 /* }}} */
 
 /* {{{ _relection_export */
-void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
+static void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
 {
 	zval reflector, *reflector_ptr = &reflector;
 	zval output, *output_ptr = &output;
@@ -1743,7 +1743,7 @@ ZEND_METHOD(reflection_class, export)
 /* }}} */
 
 /* {{{ reflection_class_object_ctor */
-void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_object)
+static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_object)
 {
 	zval *argument;
 	zval *object;
@@ -2794,6 +2794,7 @@ ZEND_METHOD(reflection_extension, getconstants)
 }
 /* }}} */
 
+/* {{{ _addinientry */
 static int _addinientry(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval *retval = va_arg(args, zval*);
@@ -2808,6 +2809,7 @@ static int _addinientry(zend_ini_entry *ini_entry, int num_args, va_list args, z
 	}
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto public array Reflection_Extension::getINIEntries()
    Returns an associative array containing this extension's INI entries and their values */
@@ -2822,7 +2824,9 @@ ZEND_METHOD(reflection_extension, getinientries)
 	array_init(return_value);
 	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _addinientry, 2, return_value, module->module_number);
 }
+/* }}} */
 
+/* {{{ method tables */
 static zend_function_entry reflection_functions[] = {
 	ZEND_ME(reflection, getmodifiernames, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(reflection, export, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -2948,7 +2952,9 @@ static zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection_extension, getinientries, NULL, 0)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ zend_register_reflection_api */
 ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	zend_class_entry _reflection_entry;
 
@@ -3016,6 +3022,7 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	REGISTER_MAIN_LONG_CONSTANT("C_FINAL", ZEND_ACC_FINAL_CLASS, CONST_PERSISTENT|CONST_CS);
 	reflection_register_implement(reflection_extension_ptr, reflector_ptr TSRMLS_CC);
 }
+/* }}} */
 
 /*
  * Local variables:
