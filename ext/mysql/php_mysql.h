@@ -58,6 +58,7 @@ PHP_FUNCTION(mysql_db_query);
 PHP_FUNCTION(mysql_list_dbs);
 PHP_FUNCTION(mysql_list_tables);
 PHP_FUNCTION(mysql_list_fields);
+PHP_FUNCTION(mysql_list_processes);
 PHP_FUNCTION(mysql_error);
 PHP_FUNCTION(mysql_errno);
 PHP_FUNCTION(mysql_affected_rows);
@@ -84,6 +85,7 @@ PHP_FUNCTION(mysql_get_client_info);
 PHP_FUNCTION(mysql_get_host_info);
 PHP_FUNCTION(mysql_get_proto_info);
 PHP_FUNCTION(mysql_get_server_info);
+PHP_FUNCTION(mysql_stat);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;
