@@ -334,12 +334,13 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	zend_op_array *original_active_op_array = CG(active_op_array);
 	zend_op_array *retval=NULL;
-	zend_file_handle *file_handle;
 	int i;
 	int compiler_result;
 	int compiled_files=0;
+	int last_file=0;
 	znode retval_znode;
 	zend_bool original_in_compilation = CG(in_compilation);
+	zend_file_handle **file_handles = (zend_file_handle **) do_alloca(file_count * sizeof(zend_file_handle *));
 
 	retval_znode.op_type = IS_CONST;
 	retval_znode.u.constant.type = IS_LONG;
@@ -351,19 +352,26 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 	save_lexical_state(&original_lex_state CLS_CC);
 
 	retval = op_array; /* success oriented */
+
 	for (i=0; i<file_count; i++) {
-		file_handle = va_arg(files, zend_file_handle *);
-		if (!file_handle) {
+		file_handles[i] = va_arg(files, zend_file_handle *);
+		if (file_handles[i]) {
+			last_file = i;
+		}
+	}
+
+	for (i=0; i<file_count; i++) {
+		if (!file_handles[i]) {
 			continue;
 		}
-		if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		if (open_file_for_scanning(file_handles[i] CLS_CC)==FAILURE) {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handles[i]->filename);
 		} else {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			compiler_result = zendparse(CLS_C);
-			zend_close_file_handle(file_handle CLS_CC);
-			if (i == file_count-1) {
+			zend_close_file_handle(file_handles[i] CLS_CC);
+			if (i == last_file) {
 				do_return(&retval_znode, 0 CLS_CC);
 			}
 			restore_lexical_state(&original_lex_state CLS_CC);
@@ -391,6 +399,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 			retval = NULL;
 		}
 	}
+	free_alloca(file_handles);
 	return retval;
 }
 

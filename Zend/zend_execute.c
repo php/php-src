@@ -966,15 +966,6 @@ static int zend_check_symbol(zval **pz)
 #define CHECK_SYMBOL_TABLES()
 #endif
 
-
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32))
-#	define do_alloca(p) alloca(p)
-#	define free_alloca(p)
-#else
-#	define do_alloca(p)		emalloc(p)
-#	define free_alloca(p)	efree(p)
-#endif
-
 #define NEXT_OPCODE()		\
 	CHECK_SYMBOL_TABLES()	\
 	opline++;				\

@@ -74,6 +74,14 @@
 # define ZEND_EXTENSIONS_SUPPORT	0
 #endif
 
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32))
+#	define do_alloca(p) alloca(p)
+#	define free_alloca(p)
+#else
+#	define do_alloca(p)		emalloc(p)
+#	define free_alloca(p)	efree(p)
+#endif
+
 #if ZEND_DEBUG
 #define ZEND_FILE_LINE_D				char *__zend_filename, uint __zend_lineno
 #define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
