@@ -962,7 +962,14 @@ PHP_FUNCTION(socket_strerror)
 #ifndef PHP_WIN32
 	if (Z_LVAL_PP(arg1) < -10000) {
 		Z_LVAL_PP(arg1) += 10000;
-		buf = hstrerror(-(Z_LVAL_PP(arg1)));
+#ifdef HAVE_HSTRERROR
+               buf = hstrerror(-(Z_LVAL_PP(arg1)));
+#else
+               {
+               static char buf[100];
+               sprintf (buf, "Host lookup error %d", -(Z_LVAL_PP(arg1)));
+               }
+#endif 
 	} else {
 		buf = strerror(-(Z_LVAL_PP(arg1)));
 	}
