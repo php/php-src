@@ -191,6 +191,7 @@ struct _zend_executor_globals {
 	int ticks_count;
 
 	zend_bool in_execution;
+	zend_bool in_autoload;
 	zend_bool bailout_set;
 	zend_bool full_tables_cleanup;
 	zend_bool implicit_clone;
