@@ -31,6 +31,9 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 /*
  * If type==0, only last line of output is returned (exec)
@@ -48,6 +51,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 	int overflow_limit, lcmd, ldir;
 	int rsrc_id;
 	char *b, *c, *d=NULL;
+	void (*sig_handler)();
 	PLS_FETCH();
 	FLS_FETCH();
 
@@ -89,6 +93,8 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 		tmp = php_escape_shell_cmd(d);
 		efree(d);
 		d = tmp;
+
+		sig_handler = signal (SIGCHLD, SIG_DFL);
 #ifdef PHP_WIN32
 		fp = V_POPEN(d, "rb");
 #else
@@ -98,9 +104,11 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 			php_error(E_WARNING, "Unable to fork [%s]", d);
 			efree(d);
 			efree(buf);
+			signal (SIGCHLD, sig_handler);
 			return -1;
 		}
 	} else { /* not safe_mode */
+		sig_handler = signal (SIGCHLD, SIG_DFL);
 #ifdef PHP_WIN32
 		fp = V_POPEN(cmd, "rb");
 #else
@@ -109,6 +117,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 		if (!fp) {
 			php_error(E_WARNING, "Unable to fork [%s]", cmd);
 			efree(buf);
+			signal (SIGCHLD, sig_handler);
 			return -1;
 		}
 	}
@@ -137,6 +146,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 					if ( buf == NULL ) {
 						php_error(E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
 								buflen + EXEC_INPUT_BUF);
+						signal (SIGCHLD, sig_handler);
 						return -1;
 					}
 					buflen += EXEC_INPUT_BUF;
@@ -203,6 +213,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 	}
 #endif
 
+	signal (SIGCHLD, sig_handler);
 	if (d) {
 		efree(d);
 	}
