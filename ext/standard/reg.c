@@ -80,12 +80,9 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	reg_cache *rc = NULL;
 	REGLS_FETCH();
 	
-	printf("called for pattern %s\n", pattern);
 	if(_php3_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == FAILURE ||
 			rc->cflags != cflags) {
-		printf("compiling it\n");
 		r = regcomp(preg, pattern, cflags);
-		printf("regcomp returned %d\n", r);
 		if(!r) {
 			reg_cache rcp;
 
@@ -95,7 +92,6 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 					(void *) &rcp, sizeof(rcp), NULL);
 		}
 	} else {
-		printf("found it at %x\n", rc);
 		memcpy(preg, &rc->preg, sizeof(*preg));
 	}
 	
