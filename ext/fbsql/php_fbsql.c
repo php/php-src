@@ -163,6 +163,8 @@ struct PHPFBLink
 #define FBSQL_LOB_DIRECT 0				/* default */
 #define FBSQL_LOB_HANDLE 1				/* default */
 
+#define DIGEST_BUFFER_SIZE 17			/* fbcDigestPassword() expects a preallocated buffer for 16 bytes plus termination */
+
 int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql);
 char *DigestPassword(char *user, char *password)
 {
@@ -170,7 +172,7 @@ char *DigestPassword(char *user, char *password)
 
 	if (user && strlen(user) && password && strlen(password)) {
 		char *user_upper = estrdup(user);
-		digest = emalloc(17);
+		digest = emalloc(DIGEST_BUFFER_SIZE);
 		digest[0] = '\0';
 		(void)fbcDigestPassword(php_strtoupper(user_upper, strlen(user_upper)), password, digest);
 		efree(user_upper);
