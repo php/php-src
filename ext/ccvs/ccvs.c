@@ -88,7 +88,7 @@ static char const cvsid[] = "$Id$";
 		PHP_FALIAS(cv_command,ccvs_command,NULL)
 		PHP_FE(ccvs_textvalue,NULL)
 		PHP_FALIAS(cv_textvalue,ccvs_textvalue,NULL)
-		{NULL,NULL}
+		{NULL,NULL,NULL}
 	};
 
 /* End function declarations */
