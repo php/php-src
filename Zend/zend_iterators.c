@@ -54,7 +54,7 @@ ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
 	zend_iterator_class_entry.name = "__iterator_wrapper";
 }
 
-static void iter_wrapper_free_storage(void *object TSRMLS_DC)
+static void iter_wrapper_free_storage(zend_object *object TSRMLS_DC)
 {
 	zend_object_iterator *iter = (zend_object_iterator*)object;
 	iter->funcs->dtor(iter TSRMLS_CC);
