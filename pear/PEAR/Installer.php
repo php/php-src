@@ -560,10 +560,15 @@ class PEAR_Installer extends PEAR_Common
                     $remote = new PEAR_Remote($config);
                     if (!PEAR::isError($info = $remote->call('package.info',
                           $origpkgfile))) {
-                        return $this->raiseError('No releases of preferred state "'
+                        if (!count($info['releases'])) {
+                            return $this->raiseError('Package ' . $origpkgfile .
+                            ' has no releases');
+                        } else {
+                            return $this->raiseError('No releases of preferred state "'
                             . $state . '" exist for package ' . $origpkgfile .
                             '.  Use ' . $origpkgfile . '-state to install another' .
                             ' state (like ' . $origpkgfile .'-beta)');
+                        }
                     } else {
                         return $pkgfile;
                     }
