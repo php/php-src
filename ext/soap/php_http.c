@@ -430,7 +430,7 @@ try_again:
 		/* HTTP Authentication */
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS &&
 		    Z_TYPE_PP(login) == IS_STRING) {
-		  zval **digest;
+			zval **digest;
 
 			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"), (void **)&digest) == SUCCESS) {
 				if (Z_TYPE_PP(digest) == IS_ARRAY) {
@@ -447,7 +447,7 @@ try_again:
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "nc", sizeof("nc"), (void **)&tmp) == SUCCESS &&
 					    Z_TYPE_PP(tmp) == IS_LONG) {
 						Z_LVAL_PP(tmp)++;
-						sprintf(nc, "%08d", Z_LVAL_PP(tmp));
+						sprintf(nc, "%08ld", Z_LVAL_PP(tmp));
 					} else {
 						add_assoc_long(*digest, "nc", 1);
 						strcpy(nc, "00000001");
@@ -830,9 +830,9 @@ try_again:
 		char *loc;
 
 		if ((loc = get_http_header_value(http_headers,"Location: ")) != NULL) {
-		  php_url *new_url  = php_url_parse(loc);
-		  char *body;
-		  int body_size;
+			php_url *new_url  = php_url_parse(loc);
+			char *body;
+			int body_size;
 
 			if (new_url != NULL) {
 				if (get_http_body(stream, !http_1_1, http_headers, &body, &body_size TSRMLS_CC)) {
@@ -846,19 +846,19 @@ try_again:
 				efree(http_body);
 				efree(loc);
 				if (new_url->scheme == NULL && new_url->path != NULL) {
-				  new_url->scheme = estrdup(phpurl->scheme);
-				  new_url->host = estrdup(phpurl->host);
-				  new_url->port = phpurl->port;
+					new_url->scheme = estrdup(phpurl->scheme);
+					new_url->host = estrdup(phpurl->host);
+					new_url->port = phpurl->port;
 					if (new_url->path && new_url->path[0] != '/') {
-					  char *t = phpurl->path?phpurl->path:"/";
-					  char *p = strrchr(t, '/');
-					  char *s = emalloc((p - t) + strlen(new_url->path) + 2);
+						char *t = phpurl->path?phpurl->path:"/";
+						char *p = strrchr(t, '/');
+						char *s = emalloc((p - t) + strlen(new_url->path) + 2);
 
-					  strncpy(s, t, (p - t) + 1);
-					  s[(p - t) + 1] = 0;
-					  strcat(s, new_url->path);
-					  efree(new_url->path);
-					  new_url->path = s;
+						strncpy(s, t, (p - t) + 1);
+						s[(p - t) + 1] = 0;
+						strcat(s, new_url->path);
+						efree(new_url->path);
+						new_url->path = s;
 					}
 				}
 				phpurl = new_url;
@@ -892,8 +892,8 @@ try_again:
 					*s = '\0';
 					++s;
 					if (*s == '"') {
-					  ++s;
-					  val = s;
+						++s;
+						val = s;
 						while (*s != '\0' && *s != '"') ++s;
 					} else {
 						val = s;
@@ -919,7 +919,7 @@ try_again:
 			}
 
 			if (digest != NULL) {
-			  php_url *new_url  = emalloc(sizeof(php_url));
+				php_url *new_url  = emalloc(sizeof(php_url));
 
 #ifdef ZEND_ENGINE_2
 				digest->refcount--;
