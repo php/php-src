@@ -26,5 +26,4 @@ AC_DEFINE(PTHREADS)
 AC_CHECK_HEADERS(stdarg.h)
 
 AC_OUTPUT(Makefile tsrm_config)
-
-chmod +x tsrm_config
+AC_OUTPUT_COMMANDS([chmod +x tsrm_config])
