@@ -51,7 +51,9 @@ test: $(SAPI_CLI_PATH)
 			$(top_builddir)/$(SAPI_CLI_PATH) -c php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
-	find . -name \*.lo -o -name \*.o -o -name \*.la -o -name \*.a -o -name \*.so| xargs rm -f
+	find . -name \*.lo -o -name \*.o | xargs rm -f
+   	find . -name \*.la -o -name \*.a | xargs rm -f 
+	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
 	rm -f libphp4.la $(SAPI_CLI_PATH) $(OVERALL_TARGET) modules/* libs/*
 
