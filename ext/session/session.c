@@ -907,7 +907,7 @@ PHP_FUNCTION(session_set_cookie_params)
 }
 /* }}} */
 
-/* {{{ proto array session_get_cookie_params()
+/* {{{ proto array session_get_cookie_params(void)
    Return the session cookie parameters */ 
 PHP_FUNCTION(session_get_cookie_params)
 {
@@ -929,7 +929,7 @@ PHP_FUNCTION(session_get_cookie_params)
 /* }}} */
 
 /* {{{ proto string session_name([string newname])
-   Return the current session name. if newname is given, the session name is replaced with newname */
+   Return the current session name. If newname is given, the session name is replaced with newname */
 PHP_FUNCTION(session_name)
 {
 	pval **p_name;
@@ -953,7 +953,7 @@ PHP_FUNCTION(session_name)
 /* }}} */
 
 /* {{{ proto string session_module_name([string newname])
-   Return the current module name used for accessing session data. if newname is given, the module name is replaced with newname */
+   Return the current module name used for accessing session data. If newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
 	pval **p_name;
@@ -1018,7 +1018,7 @@ PHP_FUNCTION(session_set_save_handler)
 /* }}} */
 
 /* {{{ proto string session_save_path([string newname])
-   Return the current save path passed to module_name. if newname is given, the save path is replaced with newname */
+   Return the current save path passed to module_name. If newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
 	pval **p_name;
@@ -1042,7 +1042,7 @@ PHP_FUNCTION(session_save_path)
 /* }}} */
 
 /* {{{ proto string session_id([string newid])
-   Return the current session id. if newid is given, the session id is replaced with newid */
+   Return the current session id. If newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
 	pval **p_name;
@@ -1089,7 +1089,7 @@ static void php_register_var(zval** entry PSLS_DC PLS_DC)
 /* }}} */
 
 
-/* {{{ proto bool session_register(mixed var_names [, ...])
+/* {{{ proto bool session_register(mixed var_names [, mixed ...])
    Adds varname(s) to the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_register)
 {
