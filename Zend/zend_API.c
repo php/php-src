@@ -74,12 +74,11 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 }
 
 
-ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_array)
+ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument_array TSRMLS_DC)
 {
 	void **p;
 	int arg_count;
 	zval *param_ptr;
-	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
@@ -139,11 +138,10 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...)
 }
 
 
-ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_array)
+ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_array TSRMLS_DC)
 {
 	void **p;
 	int arg_count;
-	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;

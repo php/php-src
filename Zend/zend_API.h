@@ -104,9 +104,14 @@
 int zend_next_free_module(void);
 
 ZEND_API int zend_get_parameters(int ht, int param_count, ...);
-ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_array);
+ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument_array TSRMLS_DC);
 ZEND_API int zend_get_parameters_ex(int param_count, ...);
-ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_array);
+ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_array TSRMLS_DC);
+
+#define zend_get_parameters_array(ht, param_count, argument_array)			\
+	_zend_get_parameters_array(ht, param_count, argument_array TSRMLS_CC)
+#define zend_get_parameters_array_ex(param_count, argument_array)			\
+	_zend_get_parameters_array_ex(param_count, argument_array TSRMLS_CC)
 
 
 /* Parameter parsing API -- andrei */
