@@ -1,9 +1,9 @@
 --TEST--
 Streams Based Unix Domain Loopback test
 --SKIPIF--
-<?php
+<?php # vim:ft=php:
 	if (array_search("unix",stream_get_transports()) === false)
-		die('No support for UNIX domain sockets.'); 
+		die('SKIP No support for UNIX domain sockets.'); 
 ?>
 --FILE--
 <?php
