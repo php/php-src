@@ -43,7 +43,6 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 	le.refcount=1;
 
 	index = zend_hash_next_free_element(&EG(regular_list));
-	le.id = index;
 
 	zend_hash_index_update(&EG(regular_list), index, (void *) &le, sizeof(zend_rsrc_list_entry), NULL);
 	return index;
