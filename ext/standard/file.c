@@ -939,7 +939,6 @@ PHP_FUNCTION(socket_get_status)
 	void *what;
 	int socketd = 0;
 	struct php_sockbuf *sock;
-	//FLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket) == FAILURE) {
 		WRONG_PARAM_COUNT;
