@@ -34,7 +34,7 @@
 
 #if HAVE_WDDX
 
-#include "xml/xmlparse.h"
+#include "xmlparse.h"
 
 extern int php_minit_wddx(INIT_FUNC_ARGS);
 
