@@ -226,10 +226,11 @@ Web server configuration
   If you would like to use PHP as a module in Apache,
   you should move php4ts.dll to the windows/system (for Windows 9x/Me)
   or winnt/system32 (for Windows NT/2000) directory, overwriting any
-  older file. Then you should add the following two lines to you Apache
+  older file. Then you should add the following three lines to your Apache
   conf file:
 
    LoadModule php4_module c:/php/sapi/php4apache.dll
+   AddModule mod_php4.c
    AddType application/x-httpd-php .php
 
   Remember to restart the server, for example,
