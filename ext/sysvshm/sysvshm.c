@@ -316,7 +316,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_data = &shm_var->mem;
 	
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (php_var_unserialize(&return_value, (const char **) &shm_data, shm_data + shm_var->length, &var_hash TSRMLS_CC) != 1) {
+	if (php_var_unserialize(&return_value, (const unsigned char **) &shm_data, shm_data + shm_var->length, &var_hash TSRMLS_CC) != 1) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable data in shared memory is corruped");
 		RETURN_FALSE;
