@@ -466,7 +466,7 @@ PHP_FUNCTION(libxml_set_streams_context)
 		return;
 	}
 	if (LIBXML(stream_context)) {
-		ZVAL_DELREF(LIBXML(stream_context));
+		zval_ptr_dtor(&LIBXML(stream_context));
 		LIBXML(stream_context) = NULL;
 	}
 	ZVAL_ADDREF(arg);

@@ -70,7 +70,7 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 			}
 		}
 		if (bbuf.vars[i]) {
-			ZVAL_DELREF(bbuf.vars[i]);
+			zval_ptr_dtor(&bbuf.vars[i]);
 		}	
 	}
 
