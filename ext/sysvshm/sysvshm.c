@@ -189,7 +189,7 @@ PHP_FUNCTION(shm_detach)
 	convert_to_long_ex(arg_id);
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(Z_LVAL_PP(arg_id), &type);
 	if (!shm_list_ptr || type != php_sysvshm.le_shm) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The parameter is not a valid shm_indentifier");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The parameter is not a valid shm_identifier");
 		RETURN_FALSE;
 	}
 
@@ -217,7 +217,7 @@ PHP_FUNCTION(shm_remove)
 	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 
 	if (!shm_list_ptr) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The parameter is not a valid shm_indentifier");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The parameter is not a valid shm_identifier");
 		RETURN_FALSE;
 	}
 
@@ -318,7 +318,7 @@ PHP_FUNCTION(shm_get_var)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (php_var_unserialize(&return_value, (const unsigned char **) &shm_data, shm_data + shm_var->length, &var_hash TSRMLS_CC) != 1) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable data in shared memory is corruped");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable data in shared memory is corrupted");
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
