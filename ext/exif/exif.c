@@ -2185,7 +2185,6 @@ static void exif_process_SOFn (uchar *Data, int marker, jpeg_sof_info *result)
 /* }}} */
 
 /* forward declarations */
-static void exif_error_docref(const char *docref TSRMLS_DC, const image_info_type *ImageInfo, int type, const char *format, ...);
 static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index TSRMLS_DC);
 static int exif_process_IFD_TAG(    image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table TSRMLS_DC);
 
@@ -2363,7 +2362,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 		return; /* ignore this call */
 	}
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail.filetype = %d", ImageInfo->Thumbnail.filetype);
+	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail: filetype = %d", ImageInfo->Thumbnail.filetype);
 #endif
 	switch(ImageInfo->Thumbnail.filetype) {
 		default:
@@ -2375,7 +2374,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 			info_list = &ImageInfo->info_list[SECTION_THUMBNAIL];
 			new_size  = 8 + 2 + info_list->count * 12 + 4;
 #ifdef EXIF_DEBUG
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "thumbnail: size of signature + directory(%d): 0x%02X", info_list->count, new_size);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail: size of signature + directory(%d): 0x%02X", info_list->count, new_size);
 #endif
 			new_value= new_size; /* offset for ifd values outside ifd directory */
 			for (i=0; i<info_list->count; i++) {
@@ -2410,7 +2409,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 				info_data  = &info_list->list[i];
 				byte_count = php_tiff_bytes_per_format[info_data->format] * info_data->length;
 #ifdef EXIF_DEBUG
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", info_data->tag, exif_get_tagname(info_data->tag, tagname, -12, tag_table_IFD TSRMLS_CC), (info_data->length>1)&&info_data->format!=TAG_FMT_UNDEFINED&&info_data->format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data->format), byte_count);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", info_data->tag, exif_get_tagname(info_data->tag, tagname, -12, tag_table_IFD TSRMLS_CC), (info_data->length>1)&&info_data->format!=TAG_FMT_UNDEFINED&&info_data->format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data->format), byte_count);
 #endif
 				if (info_data->tag==TAG_STRIP_OFFSETS || info_data->tag==TAG_JPEG_INTERCHANGE_FORMAT) {
 					php_ifd_set16u(new_data + 0, info_data->tag,    ImageInfo->motorola_intel);
@@ -2434,7 +2433,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 					} else {
 						php_ifd_set32u(new_data+8, new_value, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
-						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "thumbnail: writing with value offset: 0x%04X + 0x%02X", new_value, byte_count);
+						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail: writing with value offset: 0x%04X + 0x%02X", new_value, byte_count);
 #endif
 						memmove(ImageInfo->Thumbnail.data+new_value, value_ptr, byte_count);
 						new_value += byte_count;
@@ -2445,7 +2444,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 			}
 			memset(new_data, 0, 4); /* next ifd pointer */
 #ifdef EXIF_DEBUG
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "thumbnail: created");
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail: created");
 #endif
 			break;
 	}
@@ -2456,7 +2455,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
  * Grab the thumbnail, corrected */
 static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, size_t length TSRMLS_DC) {
 	if (ImageInfo->Thumbnail.data) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "multiple possible thumbnails");
+		exif_error_docref("exif_read_data#error_mult_thumb" TSRMLS_CC, ImageInfo, E_WARNING, "multiple possible thumbnails");
 		return; /* Should not happen */
 	}
 	if (!ImageInfo->read_thumbnail)	{
@@ -2467,7 +2466,7 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, siz
 	 || ImageInfo->Thumbnail.size <= 0
 	 || ImageInfo->Thumbnail.offset <= 0
 	) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Illegal thumbnail size/offset");
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "illegal thumbnail size/offset");
 		return;
 	}
 	/* Check to make sure we are not going to go past the ExifLength */
@@ -2694,7 +2693,7 @@ static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * val
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
 	if ((2+NumDirEntries*12) > value_len) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Illegal directory size: 2 + x%04X*12 = x%04X > x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);
+		exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "illegal IFD size: 2 + x%04X*12 = x%04X > x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);
 		return FALSE;
 	}
 
@@ -2729,7 +2728,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 	if (!format || format > NUM_FORMATS) {
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), format);
+		exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), format);
 		format = TAG_FMT_BYTE;
 		/*return TRUE;*/
 	}
@@ -2750,11 +2749,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				if (value_ptr < dir_entry) {
 					/* we can read this if offset_val > 0 */
 					/* some files have their values in other parts of the file */
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), offset_val, dir_entry);
+					exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), offset_val, dir_entry);
 				} else {
 					/* this is for sure not allowed */
 					/* exception are IFD pointers */
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), offset_val, byte_count, offset_val+byte_count, IFDlength);
+					exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table TSRMLS_CC), offset_val, byte_count, offset_val+byte_count, IFDlength);
 				}
 				return TRUE;
 			}
@@ -2782,7 +2781,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			fgot = php_stream_tell(ImageInfo->infile);
 			if (fgot!=offset_val) {
 				EFREE_IF(outside);
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Wrong file pointer: 0x%08X != 0x08X", fgot, offset_val);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "wrong file pointer: 0x%08X != 0x08X", fgot, offset_val);
 				return FALSE;
 			}
 			fgot = php_stream_read(ImageInfo->infile, value_ptr, byte_count);
@@ -2996,7 +2995,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 					}
 					Subdir_start = offset_base + php_ifd_get32u(value_ptr, ImageInfo->motorola_intel);
 					if (Subdir_start < offset_base || Subdir_start > offset_base+IFDlength) {
-						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Illegal IFD Pointer");
+						exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "Illegal IFD Pointer");
 						return FALSE;
 					}
 					exif_process_IFD_in_JPEG(ImageInfo, Subdir_start, offset_base, IFDlength, displacement, sub_section_index TSRMLS_CC);
@@ -3029,7 +3028,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
 	if ((dir_start+2+NumDirEntries*12) > (offset_base+IFDlength)) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Illegal directory size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)dir_start+2-(int)offset_base, NumDirEntries, (int)dir_start+2+NumDirEntries*12-(int)offset_base, IFDlength);
+		exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)dir_start+2-(int)offset_base, NumDirEntries, (int)dir_start+2+NumDirEntries*12-(int)offset_base, IFDlength);
 		return FALSE;
 	}
 
@@ -3047,7 +3046,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	if (NextDirOffset) {
 		/* the next line seems false but here IFDlength means length of all IFDs */
 		if (offset_base + NextDirOffset < offset_base || offset_base + NextDirOffset > offset_base+IFDlength) {
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Illegal directory offset");
+			exif_error_docref("exif_read_data#error_ifd" TSRMLS_CC, ImageInfo, E_WARNING, "illegal IFD offset");
 			return FALSE;
 		}
 		/* That is the IFD for the first thumbnail */
@@ -3056,7 +3055,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 #endif
 		if (exif_process_IFD_in_JPEG(ImageInfo, offset_base + NextDirOffset, offset_base, IFDlength, displacement, SECTION_THUMBNAIL TSRMLS_CC)) {
 #ifdef EXIF_DEBUG
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "thumbnail size: 0x%04X", ImageInfo->Thumbnail.size);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Thumbnail size: 0x%04X", ImageInfo->Thumbnail.size);
 #endif
 			if (ImageInfo->Thumbnail.filetype != IMAGE_FILETYPE_UNKNOWN
 			&&  ImageInfo->Thumbnail.size
@@ -3085,7 +3084,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 	} else if (memcmp(CharBuf, "MM", 2) == 0) {
 		ImageInfo->motorola_intel = 1;
 	} else {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Invalid TIFF alignment marker");
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "invalid TIFF alignment marker");
 		return;
 	}
 
@@ -3093,7 +3092,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 	if (php_ifd_get16u(CharBuf+2, ImageInfo->motorola_intel) != 0x2a
 	  || php_ifd_get32u(CharBuf+4, ImageInfo->motorola_intel) != 0x08
 	) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Invalid TIFF start (1)");
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "invalid TIFF start (1)");
 		return;
 	}
 
@@ -3121,7 +3120,7 @@ static void exif_process_APP1(image_info_type *ImageInfo, char *CharBuf, size_t 
 	/* Check the APP1 for Exif Identifier Code */
 	static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
 	if (memcmp(CharBuf+2, ExifHeader, 6)) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Incorrect APP1 Exif Identifier Code");
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "incorrect APP1 Exif Identifier Code");
 		return;
 	}
 	exif_process_TIFF_in_JPEG(ImageInfo, CharBuf + 8, length - 8, displacement+8 TSRMLS_CC);
@@ -3146,7 +3145,7 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t 
 		}
 	}
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Process section APP12 with l1=%d, l2=%d done", l1, l2);
+	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "process section APP12 with l1=%d, l2=%d done", l1, l2);
 #endif
 }
 /* }}} */
@@ -3165,7 +3164,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 	for(section=0;;section++) {
 #ifdef EXIF_DEBUG
 		fpos = php_stream_tell(ImageInfo->infile);
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Needing section %d @ 0x%08X", ImageInfo->file.count, fpos);
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "needing section %d @ 0x%08X", ImageInfo->file.count, fpos);
 #endif
 
 		/* get marker byte, swallowing possible padding                           */
@@ -3189,7 +3188,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 			}
 		} while (marker == 0xff);
 		if (last_marker==M_COM && !comment_correction) {
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Image has corrupt M_COM section: some software set wrong length information");
+			exif_error_docref("exif_read_data#error_mcom" TSRMLS_CC, ImageInfo, E_NOTICE, "Image has corrupt M_COM section: some software set wrong length information");
 		}
 		if (last_marker==M_COM && comment_correction)
 			return M_EOI; /* ah illegal: char after COM section not 0xFF */
@@ -3198,7 +3197,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 
 		if (marker == 0xff) {
 			/* 0xff is legal padding, but if we get that many, something's wrong. */
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Too many padding bytes!");
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "too many padding bytes!");
 			return FALSE;
 		}
 
@@ -3225,12 +3224,12 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 
 		got = php_stream_read(ImageInfo->infile, Data+2, itemlen-2); /* Read the whole section. */
 		if (got != itemlen-2) {
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)", got, got, itemlen-2, itemlen-2);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)", got, got, itemlen-2, itemlen-2);
 			return FALSE;
 		}
 
 #ifdef EXIF_DEBUG
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Process section(x%02X=%s) @ x%04X + x%04X(=%d)", marker, exif_get_markername(marker), fpos, itemlen, itemlen);
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "process section(x%02X=%s) @ x%04X + x%04X(=%d)", marker, exif_get_markername(marker), fpos, itemlen, itemlen);
 #endif
 		switch(marker) {
 			case M_SOS:   /* stop before hitting compressed data  */
@@ -3253,7 +3252,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 				return TRUE;
 
 			case M_EOI:   /* in case it's a tables-only JPEG stream */
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "No image in jpeg!");
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "no image in jpeg!");
 				return (ImageInfo->sections_found&(~FOUND_COMPUTED)) ? TRUE : FALSE;
 
 			case M_COM: /* Comment section */
@@ -3380,7 +3379,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo TSRMLS_DC)
 
 			case M_SOS:
 			case M_EOI:
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Could not compute size of thumbnail");
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "could not compute size of thumbnail");
 				return FALSE;
 				break;
 
@@ -3390,7 +3389,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo TSRMLS_DC)
 		}
 	}
 
-	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Could not compute size of thumbnail");
+	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "could not compute size of thumbnail");
 	return FALSE;
 }
 /* }}} */
@@ -3412,7 +3411,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 			return FALSE;
 		}
 #ifdef EXIF_DEBUG
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, 2);
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, 2);
 #endif
 		php_stream_seek(ImageInfo->infile, dir_offset, SEEK_SET); /* we do not know the order of sections */
 		php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data, 2);
@@ -3420,7 +3419,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 		dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 		if (ImageInfo->FileSize >= dir_offset+dir_size) {
 #ifdef EXIF_DEBUG
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X), IFD entries(%d)", ImageInfo->FileSize, dir_offset+2, dir_size-2, num_entries);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X), IFD entries(%d)", ImageInfo->FileSize, dir_offset+2, dir_size-2, num_entries);
 #endif
 			if (exif_file_sections_realloc(ImageInfo, sn, dir_size TSRMLS_CC)) {
 				return FALSE;
@@ -3429,7 +3428,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 1));*/
 			next_offset = php_ifd_get32u(ImageInfo->file.list[sn].data + dir_size - 4, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read from TIFF done, next offset x%04X", next_offset);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF done, next offset x%04X", next_offset);
 #endif
 			/* now we have the directory we can look how long it should be */
 			ifd_size = dir_size;
@@ -3438,7 +3437,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo->motorola_intel);
 				entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
 				if (entry_type > NUM_FORMATS) {
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read from TIFF: tag(0x%04X,%12s): Illegal format code 0x%04X, switching to BYTE", entry_tag, exif_get_tagname(entry_tag, tagname, -12, tag_table TSRMLS_CC), entry_type);
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF: tag(0x%04X,%12s): Illegal format code 0x%04X, switching to BYTE", entry_tag, exif_get_tagname(entry_tag, tagname, -12, tag_table TSRMLS_CC), entry_type);
 					/* Since this is repeated in exif_process_IFD_TAG make it a notice here */
 					/* and make it a warning in the exif_process_IFD_TAG which is called    */
 					/* elsewhere. */
@@ -3496,7 +3495,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					  && entry_offset == dir_offset + ifd_size) {
 						ifd_size = entry_offset + entry_length - dir_offset;
 #ifdef EXIF_DEBUG
-						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Resize struct: x%04X + x%04X - x%04X = x%04X", entry_offset, entry_length, dir_offset, ifd_size);
+						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "resize struct: x%04X + x%04X - x%04X = x%04X", entry_offset, entry_length, dir_offset, ifd_size);
 #endif
 					}
 				}
@@ -3504,7 +3503,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 			if (ImageInfo->FileSize >= dir_offset + ImageInfo->file.list[sn].size) {
 				if (ifd_size > dir_size) {
 					if (dir_offset + ifd_size > ImageInfo->FileSize) {
-						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
+						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "error in TIFF: filesize(x%04X) less than size of IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
 						return FALSE;
 					}
 					if (exif_file_sections_realloc(ImageInfo, sn, ifd_size TSRMLS_CC)) {
@@ -3512,11 +3511,11 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					}
 					/* read values not stored in directory itself */
 #ifdef EXIF_DEBUG
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF: filesize(x%04X), IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
 #endif
 					php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data+dir_size, ifd_size-dir_size);
 #ifdef EXIF_DEBUG
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read from TIFF, done");
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF, done");
 #endif
 				}
 				/* now process the tags */
@@ -3550,7 +3549,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						}
 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
-						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Next IFD: %s @x%04X", exif_get_sectionname(sub_section_index), entry_offset);
+						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "next IFD: %s @x%04X", exif_get_sectionname(sub_section_index), entry_offset);
 #endif
 						exif_process_IFD_in_TIFF(ImageInfo, entry_offset, sub_section_index TSRMLS_CC);
 						if (section_index!=SECTION_THUMBNAIL && entry_tag==TAG_SUB_IFD) {
@@ -3560,7 +3559,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 							&&  ImageInfo->read_thumbnail
 							) {
 #ifdef EXIF_DEBUG
-								exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
+								exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "ignore" : "read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 #endif
 								if (!ImageInfo->Thumbnail.data) {
 									ImageInfo->Thumbnail.data = emalloc(ImageInfo->Thumbnail.size);
@@ -3578,7 +3577,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 							}
 						}
 #ifdef EXIF_DEBUG
-						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Next IFD: %s done", exif_get_sectionname(sub_section_index));
+						exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "next IFD: %s done", exif_get_sectionname(sub_section_index));
 #endif
 					} else {
 						if (!exif_process_IFD_TAG(ImageInfo, dir_entry,
@@ -3593,11 +3592,11 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					/* this should be a thumbnail IFD */
 					/* the thumbnail itself is stored at Tag=StripOffsets */
 #ifdef EXIF_DEBUG
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) at x%04X", next_offset);
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read next IFD (THUMBNAIL) at x%04X", next_offset);
 #endif
 					exif_process_IFD_in_TIFF(ImageInfo, next_offset, SECTION_THUMBNAIL TSRMLS_CC);
 #ifdef EXIF_DEBUG
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "Ignore" : "Read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "%s THUMBNAIL @0x%04X + 0x%04X", ImageInfo->Thumbnail.data ? "ignore" : "read", ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
 #endif
 					if (!ImageInfo->Thumbnail.data && ImageInfo->Thumbnail.offset && ImageInfo->Thumbnail.size && ImageInfo->read_thumbnail) {
 						ImageInfo->Thumbnail.data = emalloc(ImageInfo->Thumbnail.size);
@@ -3613,20 +3612,20 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						}
 					}
 #ifdef EXIF_DEBUG
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Read next IFD (THUMBNAIL) done");
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read next IFD (THUMBNAIL) done");
 #endif
 				}
 				return TRUE;
 			} else {
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD(x%04X)", ImageInfo->FileSize, dir_offset+ImageInfo->file.list[sn].size);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "error in TIFF: filesize(x%04X) less than size of IFD(x%04X)", ImageInfo->FileSize, dir_offset+ImageInfo->file.list[sn].size);
 				return FALSE;
 			}
 		} else {
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than size of IFD dir(x%04X)", ImageInfo->FileSize, dir_offset+dir_size);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "error in TIFF: filesize(x%04X) less than size of IFD dir(x%04X)", ImageInfo->FileSize, dir_offset+dir_size);
 			return FALSE;
 		}
 	} else {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Error in TIFF: filesize(x%04X) less than start of IFD dir(x%04X)", ImageInfo->FileSize, dir_offset+2);
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "error in TIFF: filesize(x%04X) less than start of IFD dir(x%04X)", ImageInfo->FileSize, dir_offset+2);
 		return FALSE;
 	}
 }
@@ -3649,7 +3648,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 			if (exif_scan_JPEG_header(ImageInfo TSRMLS_CC)) {
 				ret = TRUE;
 			} else {
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Invalid JPEG file: '%s'", ImageInfo->FileName);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "invalid JPEG file");
 			}
 		} else if (ImageInfo->FileSize >= 8) {
 			php_stream_read(ImageInfo->infile, file_header+2, 6);
@@ -3657,7 +3656,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
 				ImageInfo->motorola_intel = 0;
 #ifdef EXIF_DEBUG
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "File(%s) has TIFF/II format", ImageInfo->FileName);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "file has TIFF/II format");
 #endif
 				ImageInfo->sections_found |= FOUND_IFD0;
 				if (exif_process_IFD_in_TIFF(ImageInfo, 
@@ -3665,7 +3664,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 											 SECTION_IFD0 TSRMLS_CC)) {
 					ret = TRUE;
 				} else {
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Invalid TIFF file: '%s'", ImageInfo->FileName);
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "invalid TIFF file");
 				}
 			}
 			else
@@ -3673,7 +3672,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_MM;
 				ImageInfo->motorola_intel = 1;
 #ifdef EXIF_DEBUG
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "File(%s) has TIFF/MM format", ImageInfo->FileName);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "file has TIFF/MM format");
 #endif
 				ImageInfo->sections_found |= FOUND_IFD0;
 				if (exif_process_IFD_in_TIFF(ImageInfo,
@@ -3681,15 +3680,15 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 											 SECTION_IFD0 TSRMLS_CC)) {
 					ret = TRUE;
 				} else {
-					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Invalid TIFF file: '%s'", ImageInfo->FileName);
+					exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "invalid TIFF file");
 				}
 			} else {
-				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "File(%s) not supported", ImageInfo->FileName);
+				exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "file not supported");
 				return FALSE;
 			}
 		}
 	} else {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "File(%s) to small (%d)", ImageInfo->FileName, ImageInfo->FileSize);
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "file to small (%d)", ImageInfo->FileSize);
 	}
 	return ret;
 }
@@ -3744,7 +3743,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 	if (!ImageInfo->infile) {
-		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "Unable to open '%s'", FileName);
+		exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_WARNING, "unable to open file");
 		return FALSE;
 	}
 
@@ -3765,7 +3764,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 			/* Store file date/time. */
 			ImageInfo->FileDateTime = st.st_mtime;
 			ImageInfo->FileSize = st.st_size;
-			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Open stream is file: %d", ImageInfo->FileSize);*/
+			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "open stream is file: %d", ImageInfo->FileSize);*/
 		}
 	} else {
 		if (!ImageInfo->FileSize) {
@@ -3828,7 +3827,7 @@ PHP_FUNCTION(exif_read_data)
 		if (!sections_str) {
 			RETURN_FALSE;
 		}
-		exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Sections needed: %s", sections_str[0] ? sections_str : "None");
+		exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "sections needed: %s", sections_str[0] ? sections_str : "None");
 		EFREE_IF(sections_str);
 #endif
 	}
@@ -3866,7 +3865,7 @@ PHP_FUNCTION(exif_read_data)
 	}
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Generate section FILE");
+	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "generate section FILE");
 #endif
 
 	/* now we can add our information */
@@ -3878,7 +3877,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_str(&ImageInfo, SECTION_FILE, "SectionsFound", sections_str ? sections_str : "NONE" TSRMLS_CC);
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Generate section COMPUTED");
+	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "generate section COMPUTED");
 #endif
 
 	if (ImageInfo.Width>0 &&  ImageInfo.Height>0) {
@@ -3949,7 +3948,7 @@ PHP_FUNCTION(exif_read_data)
    	EFREE_IF(sections_str);
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Adding image infos");
+	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "adding image infos");
 #endif
 
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FILE       TSRMLS_CC);
@@ -3967,13 +3966,13 @@ PHP_FUNCTION(exif_read_data)
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_MARKERNOTE TSRMLS_CC);
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Discarding info");
+	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "discarding info");
 #endif
 
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(p_name), E_NOTICE, "exif_read_data done");
+	php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(p_name), E_NOTICE, "done");
 #endif
 }
 /* }}} */
@@ -4016,7 +4015,7 @@ PHP_FUNCTION(exif_thumbnail)
 	}
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Returning thumbnail(%d)", ImageInfo.Thumbnail.size);
+	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "returning thumbnail(%d)", ImageInfo.Thumbnail.size);
 #endif
 
 	ZVAL_STRINGL(return_value, ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, 1);
@@ -4032,13 +4031,13 @@ PHP_FUNCTION(exif_thumbnail)
 	}
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "Discarding info");
+	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "discarding info");
 #endif
 
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(p_name), E_NOTICE, "exif_thumbnail done");
+	php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(p_name), E_NOTICE, "done");
 #endif
 }
 /* }}} */
