@@ -1,3 +1,37 @@
+2003-11-26  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR.php
+      pear/package-PEAR.xml:
+      fix Bug #293 [Patch] PEAR_Error not calling static method callbacks for
+      error-handler
+
+2003-11-26  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Fix crash bug reported by jani/ilia
+
+2003-11-26  Derick Rethans  <php@derickrethans.nl>
+
+    * main/php_variables.c
+      main/rfc1867.c:
+      - Prevent registration of the variable when a zero-length is returned
+        from the sapi_input_filter.
+
+2003-11-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug26182.phpt:
+      In PHP5 this will create an implicit public property
+
+    * tests/lang/bug21820.phpt:
+      Errro message has changed
+
+2003-11-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      main/SAPI.c:
+      MFH: On error do not leave content_type_dup unitialized.
+
 2003-11-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
