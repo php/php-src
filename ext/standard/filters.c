@@ -24,6 +24,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/php_smart_str.h"
 
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -63,8 +64,7 @@ static php_stream_filter_ops strfilter_rot13_ops = {
 	"string.rot13"
 };
 
-static php_stream_filter *strfilter_rot13_create(const char *filtername, const char *filterparams,
-		int filterparamslen, int persistent TSRMLS_DC)
+static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent);
 }
@@ -146,14 +146,12 @@ static php_stream_filter_ops strfilter_tolower_ops = {
 	"string.tolower"
 };
 
-static php_stream_filter *strfilter_toupper_create(const char *filtername, const char *filterparams,
-		int filterparamslen, int persistent TSRMLS_DC)
+static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent);
 }
 
-static php_stream_filter *strfilter_tolower_create(const char *filtername, const char *filterparams,
-		int filterparamslen, int persistent TSRMLS_DC)
+static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent);
 }
@@ -241,15 +239,52 @@ static php_stream_filter_ops strfilter_strip_tags_ops = {
 	"string.strip_tags"
 };
 
-static php_stream_filter *strfilter_strip_tags_create(const char *filtername, const char *filterparams,
-		int filterparamslen, int persistent TSRMLS_DC)
+static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	php_strip_tags_filter *inst;
+	smart_str tags_ss = { 0, 0, 0 };
+	
 	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
 
-	if (php_strip_tags_filter_ctor(inst, filterparams, filterparamslen, persistent) != SUCCESS) {
+	if (inst == NULL) { /* it's possible pemalloc returns NULL
+						   instead of causing it to bail out */
+		return NULL;
+	}
+	
+	if (filterparams != NULL) {
+		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
+			HashPosition pos;
+			zval **tmp;
+
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(filterparams), &pos);
+			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(filterparams), (void **) &tmp, &pos) == SUCCESS) {
+				convert_to_string_ex(tmp);
+				smart_str_appendc(&tags_ss, '<');
+				smart_str_appendl(&tags_ss, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				smart_str_appendc(&tags_ss, '>');
+				zend_hash_move_forward_ex(Z_ARRVAL_P(filterparams), &pos);
+			}
+			smart_str_0(&tags_ss);
+		} else {
+			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
+			convert_to_string_ex(&filterparams);
+
+			tags_ss.c = Z_STRVAL_P(filterparams);
+			tags_ss.len = Z_STRLEN_P(filterparams);
+			tags_ss.a = 0;
+		}
+	}
+
+	if (php_strip_tags_filter_ctor(inst, tags_ss.c, tags_ss.len, persistent) != SUCCESS) {
+		if (tags_ss.a != 0) {
+			STR_FREE(tags_ss.c);
+		}
 		pefree(inst, persistent);
 		return NULL;
+	}
+
+	if (tags_ss.a != 0) {
+		STR_FREE(tags_ss.c);
 	}
 
 	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
@@ -1618,198 +1653,12 @@ static php_stream_filter_ops strfilter_convert_ops = {
 	"convert.*"
 };
 
-static zval *strfilter_convert_parse_parameters(const char *param_str)
-{
-	zval *retval, *node;
-	const unsigned char *p;
-	char *node_name;
-	char *value;
-	size_t node_name_len, value_len;
-	int scan_stat;
-	char *buf;
-	size_t buf_size;
-
-	static int scancode_tbl[256] = {
-		 -1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  4,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  5,  1,  3,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  2,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
-		  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1
-	};
-		
-
-	MAKE_STD_ZVAL(retval);
-	array_init(retval);
-
-	node = retval;
-	node_name = NULL;
-	node_name_len = 0;
-	value = NULL;
-	buf = NULL;
-	buf_size = 0;
-
-	scan_stat = 0;
-	p = (const unsigned char *)param_str;
-	for (;;) {
-		int m = scancode_tbl[(unsigned int)*p];
-		switch (m) {
-			case 2: /* '=' */
-				switch (scan_stat) {
-					case 2:
-						node_name_len = (size_t)((char *)p - node_name);
-						scan_stat = 3;
-						break;
-
-					case 3:
-						goto out_failure;
-				}
-				break;
-
-			case 5: /* ',' */
-			case -1: /* EOS */
-				if (value == NULL) {
-					value = empty_string;
-					value_len = 0;
-				} else {
-					value_len = (size_t)((char *)p - value);
-				}
-				if (node_name != NULL) {
-					zval *new_val;
-
-					if (buf_size <= node_name_len) {
-						char *new_buf;
-
-						buf_size = node_name_len + 1;
-						new_buf = erealloc(buf, buf_size);
-						assert(new_buf != NULL);
-						buf = new_buf;
-					}
-					memcpy(buf, node_name, node_name_len);
-					buf[node_name_len] = '\0';
-
-					MAKE_STD_ZVAL(new_val);
-					ZVAL_STRINGL(new_val, value, (int)value_len, 1);
-					zend_hash_update(Z_ARRVAL_P(node), buf, node_name_len + 1, &new_val, sizeof(zval *), NULL);
-					node_name = NULL;
-				}
-				value = NULL;
-				node = retval;
-				scan_stat = 0;
-				if (m == -1) {
-					goto end_scan;
-				}
-				break;
-
-			case 3: /* '.' */
-				switch (scan_stat) {
-					case 0: case 1:
-						node_name = (char *)p;
-					case 2: {
-						zval **z_tmp;
-
-						node_name_len = (size_t)((char *)p - node_name);
-
-						if (buf_size <= node_name_len) {
-							char *new_buf;
-
-							buf_size = node_name_len + 1;
-							new_buf = erealloc(buf, buf_size);
-							assert(new_buf != NULL);
-							buf = new_buf;
-						}
-						memcpy(buf, node_name, node_name_len);
-						buf[node_name_len] = '\0';
-
-						if (zend_hash_find(Z_ARRVAL_P(node), buf, node_name_len + 1, (void **)&z_tmp) != SUCCESS || Z_TYPE_PP(z_tmp) != IS_ARRAY) {
-							zval *new_node;
-						
-							MAKE_STD_ZVAL(new_node);
-							array_init(new_node);
-							zend_hash_update(Z_ARRVAL_P(node), buf, node_name_len + 1, &new_node, sizeof(zval *), NULL);
-							node = new_node;
-						} else {
-							node = *z_tmp;
-						}
-						scan_stat = 1;
-					} break;
-
-					case 3:
-						value = (char *)p;
-						scan_stat = 4;
-					case 4:
-						break;
-				}
-				break;
-
-			case 4: /* ' ' */
-				switch (scan_stat) {
-					default:
-						goto out_failure;
-
-					case 0:
-						scan_stat = 1;
-						break;
-
-					case 1:
-						break;
-					
-					case 3:
-						value = (char *)p;
-						scan_stat = 4;
-					case 4:
-						break;
-				}
-				break;
-
-			case 1:
-				switch (scan_stat) {
-					case 0: case 1:
-						node_name = (char *)p;
-						scan_stat = 2;
-						break;
-
-					case 3:
-						value = (char *)p;
-						scan_stat = 4;
-						break;
-				}
-				break;
-		}
-		p++;
-	}
-end_scan:
-	if (buf != NULL) {
-		efree(buf);
-	}
-	return retval;
-
-out_failure:
-	if (buf != NULL) {
-		efree(buf);
-	}
-	zval_dtor(retval);
-	FREE_ZVAL(retval);
-	return NULL;
-}
-
-static php_stream_filter *strfilter_convert_create(const char *filtername, const char *filterparams,
-		int filterparamslen, int persistent TSRMLS_DC)
+static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	php_convert_filter *inst;
 	php_stream_filter *retval = NULL;
+
 	char *dot;
-	zval *options = NULL;
 	int conv_mode;
 
 	if ((dot = strchr(filtername, '.')) == NULL) {
@@ -1819,11 +1668,8 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 
 	inst = pemalloc(sizeof(php_convert_filter), persistent);
 
-	if (filterparams != NULL) {
-		options = strfilter_convert_parse_parameters(filterparams);
-		if (options == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid filter parameter \"%s\"", filtername, filterparams);
-		}
+	if (Z_TYPE_P(filterparams) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid filter parameter", filtername);
 	}
 
 	if (strcasecmp(dot, "base64-encode") == 0) {
@@ -1837,7 +1683,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 	}
 	
 	if (php_convert_filter_ctor(inst, conv_mode,
-		(options != NULL ? Z_ARRVAL_P(options) : NULL),
+		(filterparams != NULL ? Z_ARRVAL_P(filterparams) : NULL),
 		filtername, persistent) != SUCCESS) {
 		goto out;
 	}	
@@ -1848,9 +1694,6 @@ out:
 		pefree(inst, persistent);
 	}
 
-	if (options != NULL) {
-		zval_ptr_dtor(&options);
-	}
 	return retval;
 }
 

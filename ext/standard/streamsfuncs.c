@@ -803,12 +803,13 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *zstream;
 	php_stream *stream;
-	char *filtername, *filterparams = NULL;
-	int filternamelen, filterparamslen = 0, read_write = 0;
+	char *filtername;
+	int filternamelen, read_write = 0;
+	zval *filterparams = NULL;
 	php_stream_filter *filter;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ls", &zstream,
-				&filtername, &filternamelen, &read_write, &filterparams, &filterparamslen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lz", &zstream,
+				&filtername, &filternamelen, &read_write, &filterparams) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -829,7 +830,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (read_write & PHP_STREAM_FILTER_READ) {
-		filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
+		filter = php_stream_filter_create(filtername, filterparams, php_stream_is_persistent(stream) TSRMLS_CC);
 		if (filter == NULL) {
 			RETURN_FALSE;
 		}
@@ -842,7 +843,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (read_write & PHP_STREAM_FILTER_WRITE) {
-		filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
+		filter = php_stream_filter_create(filtername, filterparams, php_stream_is_persistent(stream) TSRMLS_CC);
 		if (filter == NULL) {
 			RETURN_FALSE;
 		}
