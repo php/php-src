@@ -2,6 +2,9 @@
 strtotime() function
 --SKIPIF--
 <?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    print 'skip Windows does not support dates prior to midnight (00:00:00), January 1, 1970';
+}
 if (!@putenv("TZ=Europe/Amsterdam") || getenv("TZ") != 'Europe/Amsterdam') {
 	die("skip unable to change TZ enviroment variable\n");
 }
