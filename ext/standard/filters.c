@@ -25,6 +25,18 @@
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
 
+/* {{{ common "no-opperation" methods */
+static int commonfilter_nop_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
+{
+	return php_stream_filter_flush_next(stream, thisfilter, closing);
+}
+
+static int commonfilter_nop_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
+{
+	return php_stream_filter_eof_next(stream, thisfilter);
+}
+/* }}} */
+
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
@@ -63,21 +75,11 @@ static size_t strfilter_rot13_read(php_stream *stream, php_stream_filter *thisfi
 	return read;
 }
 
-static int strfilter_rot13_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
-{
-	return php_stream_filter_flush_next(stream, thisfilter, closing);
-}
-
-static int strfilter_rot13_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
-{
-	return php_stream_filter_eof_next(stream, thisfilter);
-}
-
 static php_stream_filter_ops strfilter_rot13_ops = {
 	strfilter_rot13_write,
 	strfilter_rot13_read,
-	strfilter_rot13_flush,
-	strfilter_rot13_eof,
+	commonfilter_nop_flush,
+	commonfilter_nop_eof,
 	NULL,
 	"string.rot13"
 };
@@ -93,11 +95,124 @@ static php_stream_filter_factory strfilter_rot13_factory = {
 };
 /* }}} */
 
+/* {{{ string.toupper / string.tolower stream filter implementation */
+static char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
+static char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+static size_t strfilter_toupper_write(php_stream *stream, php_stream_filter *thisfilter,
+			const char *buf, size_t count TSRMLS_DC)
+{
+	char tmpbuf[1024];
+	size_t chunk;
+	size_t wrote = 0;
+
+	while (count > 0) {
+		chunk = count;
+		if (chunk > sizeof(tmpbuf))
+			chunk = sizeof(tmpbuf);
+
+		PHP_STRLCPY(tmpbuf, buf, sizeof(tmpbuf), chunk);
+		buf += chunk;
+		count -= chunk;
+
+		php_strtr(tmpbuf, chunk, lowercase, uppercase, 26);
+		wrote += php_stream_filter_write_next(stream, thisfilter, tmpbuf, chunk);
+	}
+
+	return wrote;
+}
+
+static size_t strfilter_tolower_write(php_stream *stream, php_stream_filter *thisfilter,
+			const char *buf, size_t count TSRMLS_DC)
+{
+	char tmpbuf[1024];
+	size_t chunk;
+	size_t wrote = 0;
+
+	while (count > 0) {
+		chunk = count;
+		if (chunk > sizeof(tmpbuf))
+			chunk = sizeof(tmpbuf);
+
+		PHP_STRLCPY(tmpbuf, buf, sizeof(tmpbuf), chunk);
+		buf += chunk;
+		count -= chunk;
+
+		php_strtr(tmpbuf, chunk, uppercase, lowercase, 26);
+		wrote += php_stream_filter_write_next(stream, thisfilter, tmpbuf, chunk);
+	}
+
+	return wrote;
+}
+
+static size_t strfilter_toupper_read(php_stream *stream, php_stream_filter *thisfilter,
+			char *buf, size_t count TSRMLS_DC)
+{
+	size_t read;
+
+	read = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	php_strtr(buf, read, lowercase, uppercase, 26);
+
+	return read;
+}
+
+static size_t strfilter_tolower_read(php_stream *stream, php_stream_filter *thisfilter,
+			char *buf, size_t count TSRMLS_DC)
+{
+	size_t read;
+
+	read = php_stream_filter_read_next(stream, thisfilter, buf, count);
+	php_strtr(buf, read, uppercase, lowercase, 26);
+
+	return read;
+}
+
+static php_stream_filter_ops strfilter_toupper_ops = {
+	strfilter_toupper_write,
+	strfilter_toupper_read,
+	commonfilter_nop_flush,
+	commonfilter_nop_eof,
+	NULL,
+	"string.toupper"
+};
+
+static php_stream_filter_ops strfilter_tolower_ops = {
+	strfilter_tolower_write,
+	strfilter_tolower_read,
+	commonfilter_nop_flush,
+	commonfilter_nop_eof,
+	NULL,
+	"string.tolower"
+};
+
+static php_stream_filter *strfilter_toupper_create(const char *filtername, const char *filterparams,
+		int filterparamslen, int persistent TSRMLS_DC)
+{
+	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent);
+}
+
+static php_stream_filter *strfilter_tolower_create(const char *filtername, const char *filterparams,
+		int filterparamslen, int persistent TSRMLS_DC)
+{
+	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent);
+}
+
+static php_stream_filter_factory strfilter_toupper_factory = {
+	strfilter_toupper_create
+};
+
+static php_stream_filter_factory strfilter_tolower_factory = {
+	strfilter_tolower_create
+};
+/* }}} */
+
 static const struct {
 	php_stream_filter_ops *ops;
 	php_stream_filter_factory *factory;
 } standard_filters[] = {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
+	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
+	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
 	/* additional filters to go here */
 	{ NULL, NULL }
 };
