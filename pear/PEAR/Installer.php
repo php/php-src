@@ -304,6 +304,7 @@ class PEAR_Installer extends PEAR_Common
     function install($pkgfile, $options = array())
     {
         // recognized options:
+        // - force         : force installation
         // - register-only : update registry but don't install files
         // - upgrade       : upgrade existing install
         // - soft          : fail silently
@@ -315,7 +316,9 @@ class PEAR_Installer extends PEAR_Common
             $need_download = true;
         } elseif (!@is_file($pkgfile)) {
             if ($this->validPackageName($pkgfile)) {
-                if ($this->registry->packageExists($pkgfile) && empty($options['upgrade'])) {
+                if ($this->registry->packageExists($pkgfile) &&
+                    empty($options['upgrade']) && empty($options['force']))
+                {
                     return $this->raiseError("$pkgfile already installed");
                 }
                 $pkgfile = $this->getPackageDownloadUrl($pkgfile);
