@@ -1,3 +1,31 @@
+2000-08-05  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    - Fix INT8 returning garbage because ifx_int8toasc does not null_terminate
+      the returned string. (danny)
+
+2000-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c: Fix crash on broken setups (#5979)
+
+2000-08-05  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - Fixed warning when shutting down OCINLogon() connections. 
+
+2000-08-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/mod_files.c: Open session files in binary mode (fix #5953)
+
+2000-08-05  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - OCIError() would sometimes not report failed connections. 
+
+2000-08-05  Hénot David  <henot@iie.cnam.fr>
+
+    * ext/ingres_ii/ii.c: Fix for a bug with persistent connections.
+
 2000-08-04  Hartmut Holzgraefe  <hartmut@six.de>
 
     * main/main.c
