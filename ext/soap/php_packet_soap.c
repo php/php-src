@@ -24,6 +24,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got no XML document", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
+	if (xmlGetIntSubset(response) != NULL) {
+		add_soap_fault(this_ptr, "SOAP-ENV:Client", "DTD are not supported by SOAP", NULL, NULL TSRMLS_CC);
+		return FALSE;
+	}
 
 	/* Get <Envelope> element */
 	env = NULL;

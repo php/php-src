@@ -1051,6 +1051,9 @@ PHP_METHOD(soapserver, handle)
 		if (doc_request == NULL) {
 			php_error(E_ERROR, "Bad Request");
 		}
+		if (xmlGetIntSubset(doc_request) != NULL) {
+			php_error(E_ERROR,"DTD are not supported by SOAP");
+		}
 
 		SOAP_GLOBAL(sdl) = service->sdl;
 		deseralize_function_call(service->sdl, doc_request, &function_name, &num_params, &params, &soap_version TSRMLS_CC);
