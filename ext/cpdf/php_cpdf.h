@@ -33,6 +33,13 @@
 
 #if HAVE_CPDFLIB
 
+/* The macro T is defined in the IMAP headers and clashes with a function
+   declaration here. Get rid of it. */
+
+#ifdef T
+#undef T
+#endif
+
 #include <cpdflib.h>
 
 extern zend_module_entry cpdf_module_entry;
