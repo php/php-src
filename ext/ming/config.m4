@@ -21,7 +21,7 @@ if test "$PHP_MING" != "no"; then
   ],[
     AC_MSG_ERROR([Ming library 0.2a or greater required.])
   ],[
-    -L$MING_DIR/lib -lm -ldl
+    -L$MING_DIR/lib
   ])
 
   PHP_ADD_INCLUDE($MING_DIR/include)
