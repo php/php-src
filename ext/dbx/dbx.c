@@ -623,7 +623,7 @@ ZEND_FUNCTION(dbx_compare)
 	if (comparison_direction==DBX_CMP_DESC) RETURN_LONG(-result);
 	RETURN_LONG(result);
 }
-
+/* }}} */
 
 /* {{{ proto long dbx_sort(dbx_result_object dbx_result, string compare_function_name)
    returns 0 on failure, 1 on success
@@ -657,6 +657,7 @@ ZEND_FUNCTION(dbx_sort)
 	
 	RETURN_LONG(1);
 }
+/* }}} */
 
 /***********************************/
 
