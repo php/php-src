@@ -423,7 +423,7 @@ SINCE:               4.0.2
 EXTENSION:           swf
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Orphaned
-STATUS:              Depreciated (Use the ming swf extension instead)
+STATUS:              Deprecated (Use the ming swf extension instead)
 COMMENT:             Only for Unix (won't change)
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
