@@ -948,6 +948,23 @@ PHP_FUNCTION(mysqli_get_server_info)
 
 /* }}} */
 
+/* {{{ proto int mysqli_get_server_version 
+*/
+PHP_FUNCTION(mysqli_get_server_version)
+{
+	MYSQL	*mysql;
+	zval  	*mysql_link = NULL;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
+
+	RETURN_LONG(mysql_get_server_version(mysql));
+}
+
+/* }}} */
+
 /* {{{ proto string mysqli_info(resource link)
 */
 PHP_FUNCTION(mysqli_info)
