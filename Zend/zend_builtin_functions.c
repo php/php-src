@@ -402,7 +402,6 @@ ZEND_FUNCTION(is_subclass_of)
 	zval **obj, **class_name;
 	char *lcname;
 	zend_class_entry *parent_ce = NULL;
-	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &obj, &class_name)==FAILURE) {
 		RETURN_FALSE;
