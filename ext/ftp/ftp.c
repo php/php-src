@@ -486,6 +486,7 @@ ftp_chdir(ftpbuf_t *ftp, const char *dir)
 
 	if (ftp->pwd) {
 		efree(ftp->pwd);
+		ftp->pwd = NULL;
 	}
 
 	if (!ftp_putcmd(ftp, "CWD", dir)) {
@@ -509,6 +510,7 @@ ftp_cdup(ftpbuf_t *ftp)
 
 	if (ftp->pwd) {
 		efree(ftp->pwd);
+		ftp->pwd = NULL;
 	}
 
 	if (!ftp_putcmd(ftp, "CDUP", NULL)) {
@@ -1662,8 +1664,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	return ret;
 bail:
-	if (data)
-		ftp->data = data_close(ftp, data);
+	ftp->data = data_close(ftp, data);
 	fclose(tmpfp);
 	if (ret)
 		efree(ret);
