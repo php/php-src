@@ -1,3 +1,43 @@
+2003-05-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/serialize/004.phpt:
+      
+      added another test case (due to the problems we saw with 4.3.2RC4)
+
+    * (PHP_4_3)
+      ext/standard/var_unserializer.c:
+      fix the generated file.
+
+2003-05-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/curl/config.m4:
+      - Fixed bug #23751: Confusing configure warning concerning required cURL
+        version
+
+2003-05-22  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xml/compat.c
+      ext/xml/expat_compat.h:
+      rename namespace to use_namespace to avoid a c++ keyword conflict
+      fix whitespace surrounding the enums, use tabs please :)
+
+    * ext/xml/xml.c:
+      use zval_ptr_dtor() instead of the more verbose and less correct version
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c:
+      take advantage of the fast_call_user_function() api call for all of the
+      callbacks.
+
+2003-05-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * makedist:
+      --force here too for release packages
+
+    * (PHP_4_3)
+      makedist:
+      Add --force so release package building works
+
 2003-05-21  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
