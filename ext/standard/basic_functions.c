@@ -1832,6 +1832,7 @@ void test_class_startup()
 PHP_FUNCTION(ini_get)
 {
 	pval **varname;
+	char *str;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1839,15 +1840,13 @@ PHP_FUNCTION(ini_get)
 
 	convert_to_string_ex(varname);
 
-	return_value->value.str.val = php_ini_string((*varname)->value.str.val, (*varname)->value.str.len+1, 0);
+	str = php_ini_string((*varname)->value.str.val, (*varname)->value.str.len+1, 0);
 
-	if (!return_value->value.str.val) {
+	if (!str) {
 		RETURN_FALSE;
 	}
 
-	return_value->value.str.len = strlen(return_value->value.str.val);
-	return_value->type = IS_STRING;
-	pval_copy_constructor(return_value);
+	RETURN_STRING(str,1);
 }
 /* }}} */
 
@@ -1866,13 +1865,14 @@ PHP_FUNCTION(ini_set)
 	convert_to_string_ex(new_value);
 
 	old_value = php_ini_string((*varname)->value.str.val, (*varname)->value.str.len+1, 0);
+	/* copy to return here, because alter might free it! */
+	if (old_value) {
+		RETVAL_STRING(old_value, 1);
+	} else {
+		RETVAL_FALSE;
+	}
 
 	if (php_alter_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, (*new_value)->value.str.val, (*new_value)->value.str.len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)==FAILURE) {
-		RETURN_FALSE;
-	}
-	if (old_value) {
-		RETURN_STRING(old_value, 1);
-	} else {
 		RETURN_FALSE;
 	}
 }
