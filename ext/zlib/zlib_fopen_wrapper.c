@@ -161,7 +161,8 @@ static php_stream_wrapper_ops gzip_stream_wops = {
 	NULL, /* stat */
 	NULL, /* stat_url */
 	NULL, /* opendir */
-	"ZLIB"
+	"ZLIB",
+	NULL /* unlink */
 };
 
 php_stream_wrapper php_stream_gzip_wrapper =	{

@@ -1403,34 +1403,36 @@ PHP_FUNCTION(rename)
 }
 /* }}} */
 
-/* {{{ proto bool unlink(string filename)
+/* {{{ proto bool unlink(string filename[, context context])
    Delete a file */
 PHP_FUNCTION(unlink)
 {
-	zval **filename;
-	int ret;
+	char *filename;
+	int filename_len;
+	php_stream_wrapper *wrapper;
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(filename);
-
-	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(filename), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &filename, &filename_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(Z_STRVAL_PP(filename) TSRMLS_CC)) {
+	if (zcontext) {
+		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+	}
+
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+
+	if (!wrapper || !wrapper->wops) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
-	ret = VCWD_UNLINK(Z_STRVAL_PP(filename));
-	if (ret == -1) {
-		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(filename), E_WARNING, "%s", strerror(errno));
+	if (!wrapper->wops->unlink) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		RETURN_FALSE;
 	}
-	/* Clear stat cache */
-	PHP_FN(clearstatcache)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	RETURN_TRUE;
+	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, context TSRMLS_CC));
 }
 /* }}} */
 

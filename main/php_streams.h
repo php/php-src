@@ -145,6 +145,9 @@ typedef struct _php_stream_wrapper_ops {
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 	
 	const char *label;
+
+	/* delete a file */
+	int (*unlink)(php_stream_wrapper *wrapper, char *url, php_stream_context *context TSRMLS_DC);
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{

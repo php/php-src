@@ -42,7 +42,8 @@ static php_stream_wrapper_ops user_stream_wops = {
 	NULL, /* stat - the streams themselves know how */
 	user_wrapper_stat_url,
 	user_wrapper_opendir,
-	"user-space"
+	"user-space",
+	NULL /* unlink */
 };
 
 
