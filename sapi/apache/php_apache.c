@@ -21,7 +21,7 @@
 
 #include "php_apache_http.h"
 
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 #include "zend.h"
 #include "ap_compat.h"
 #else
@@ -39,7 +39,8 @@ php_apache_info_struct php_apache_info;
 extern module *top_module;
 
 PHP_FUNCTION(virtual);
-PHP_FUNCTION(getallheaders);
+PHP_FUNCTION(apache_request_headers);
+PHP_FUNCTION(apache_response_headers);
 PHP_FUNCTION(apachelog);
 PHP_FUNCTION(apache_note);
 PHP_FUNCTION(apache_lookup_uri);
@@ -50,11 +51,13 @@ PHP_MINFO_FUNCTION(apache);
 
 function_entry apache_functions[] = {
 	PHP_FE(virtual,									NULL)
-	PHP_FE(getallheaders,							NULL)
+	PHP_FE(apache_request_headers,					NULL)
 	PHP_FE(apache_note,								NULL)
 	PHP_FE(apache_lookup_uri,						NULL)
 	PHP_FE(apache_child_terminate,					NULL)
 	PHP_FE(apache_setenv,							NULL)
+	PHP_FE(apache_response_headers,					NULL)
+	PHP_FALIAS(getallheaders, apache_request_headers, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -77,7 +80,7 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRML
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), (ts_allocate_ctor)php_apache_globals_ctor, NULL);
+	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), php_apache_globals_ctor, NULL);
 #else
 	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
 #endif
@@ -180,10 +183,6 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(1, "Apache for Windows 95/NT");
 	php_info_print_table_end();
 	php_info_print_table_start();
-#elif defined(NETWARE)
-	php_info_print_table_row(1, "Apache for NetWare");
-	php_info_print_table_end();
-	php_info_print_table_start();
 #else
 	php_info_print_table_row(2, "APACHE_INCLUDE", PHP_APACHE_INCLUDE);
 	php_info_print_table_row(2, "APACHE_TARGET", PHP_APACHE_TARGET);
@@ -208,11 +207,6 @@ PHP_MINFO_FUNCTION(apache)
 	sprintf(output_buf, "Connection: %d - Keep-Alive: %d", serv->timeout, serv->keep_alive_timeout);
 	php_info_print_table_row(2, "Timeouts", output_buf);
 #if !defined(WIN32) && !defined(WINNT)
-/*
-    This block seems to be working on NetWare; But it seems to be showing
-    all modules instead of just the loaded ones
-*/
-
 	php_info_print_table_row(2, "Server Root", server_root);
 
 	strcpy(modulenames, "");
@@ -330,8 +324,11 @@ PHP_FUNCTION(virtual)
 /* }}} */
 
 /* {{{ proto array getallheaders(void)
+   Alias for apache_request_headers() */
+/* }}} */
+/* {{{ proto array apache_request_headers(void)
    Fetch all HTTP request headers */
-PHP_FUNCTION(getallheaders)
+PHP_FUNCTION(apache_request_headers)
 {
     array_header *env_arr;
     table_entry *tenv;
@@ -352,6 +349,28 @@ PHP_FUNCTION(getallheaders)
 			RETURN_FALSE;
 		}
     }
+}
+/* }}} */
+
+/* {{{ proto array apache_response_headers(void)
+   Fetch all HTTP response headers */
+PHP_FUNCTION(apache_response_headers)
+{
+    array_header *env_arr;
+    table_entry *tenv;
+    int i;
+
+    if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+    }
+    env_arr = table_elts(((request_rec *) SG(server_context))->headers_out);
+    tenv = (table_entry *)env_arr->elts;
+    for (i = 0; i < env_arr->nelts; ++i) {
+		if (!tenv[i].key) continue;
+		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+			RETURN_FALSE;
+		}
+	}
 }
 /* }}} */
 
