@@ -157,11 +157,6 @@ typedef struct {
 
 	HashTable sm_protected_env_vars;
 	char *sm_allowed_env_vars;
-
-#ifdef HAVE_ICONV
-	char *iconv_internal_encoding;
-	char *iconv_output_encoding;
-#endif
  
 	/* pageinfo.c */
 	long page_uid;
@@ -226,8 +221,5 @@ typedef struct {
  */
 #define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
 #define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
-
-#define ICONV_OUTPUT_ENCODING "ISO-8859-1"
-#define ICONV_INTERNAL_ENCODING "ISO-8859-1" 
 
 #endif /* BASIC_FUNCTIONS_H */
