@@ -164,7 +164,7 @@ AC_ARG_WITH(db3,
       elif test -f "$i/include/db3.h"; then
         THIS_PREFIX=$i
         DB3_EXTRA=db3.h
-      elif test -f "$i/include/db.h" ; 
+      elif test -f "$i/include/db.h"; then
         THIS_PREFIX=$i
         DB3_EXTRA=db.h
       fi
