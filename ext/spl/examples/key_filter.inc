@@ -10,10 +10,11 @@
  * and the instance will only return elements which match the given regular 
  * expression.
  */
-class filter implements spl_forward
+class key_filter implements spl_forward_assoc
 {
 	protected $it;
 	protected $regex;
+	protected $key;
 	protected $curr;
 
 	/**
@@ -46,11 +47,13 @@ class filter implements spl_forward
 	 * @return void
 	 */
 	protected function fetch() {
+		$this->key = false;
 		$this->curr = false;
 		while ($this->it->has_more()) {
-			$curr = $this->it->current();
-			if (ereg($this->regex, $curr)) {
-				$this->curr = $curr;
+			$key = $this->it->key();
+			if (ereg($this->regex, $key)) {
+				$this->key = $key;
+				$this->curr = $this->it->current();
 				return;
 			}
 			$this->it->next();
@@ -71,7 +74,14 @@ class filter implements spl_forward
 	 * @return Whether more elements are available
 	 */
 	function has_more() {
-		return $this->curr !== false;
+		return $this->key !== false;
+	}
+	
+	/**
+	 * @return The current key
+	 */
+	function key() {
+		return $this->key;
 	}
 	
 	/**
