@@ -410,16 +410,6 @@ Changes in the Zend Engine 2.0
         echo 'Foo::constant = ' . Foo::constant . "\n";
         ?>
 
-      The Zend Engine 2.0 allows for expressions within constants:
-
-        <?php
-        class Bar {
-            const a = 1<<0;
-            const b = 1<<1;
-            const c = a | b;
-        }
-        ?>
-
       Old code that has no user-defined classes or functions 
       named 'const' will run without modifications.
 
@@ -609,7 +599,22 @@ Changes in the Zend Engine 2.0
       The pseudo variable $this is not available inside a method that
       has been declared static.
 
-    * instanceof (TBD)
+    * instanceof.
+      New support for an instanceof operator which checks if an object
+      is of a certain class or interface type.
+      
+      Example:
+      
+      <?php
+      
+      class Foo {
+      }
+      
+      $obj = new Foo();
+      if ($obj instanceof Foo) {
+        print "Yay!\n";
+      }
+      ?>
 
     * Static function variables.
 
@@ -636,7 +641,8 @@ Changes in the Zend Engine 2.0
       The __autoload() interceptor function will be automatically called 
       when an undeclared class is to be instantiated. The name of that 
       class will be passed to the __autoload() interceptor function as its 
-      only argument.
+      only argument. __autoload() must succeed in loading the class. If it
+      doesn't then an E_ERROR is emitted.
 
       Example:
 
@@ -872,7 +878,15 @@ Changes in the Zend Engine 2.0
             reflection_extension::export('standard');
         ?>
 
+    * New memory manager
+      The Zend Engine has a new memory manager which allows it to run efficiently
+      in multi-threaded environments as it doesn't need to use mutexes to lock
+      and unlock during allocation/deallocation.
 
+    * Others
+      Probably other changes which we forgot to list. This list will be kept up-to-date
+      as much as possible.
+    
 
 Changes in the Zend Engine 1.0
 
