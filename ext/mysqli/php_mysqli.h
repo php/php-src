@@ -30,10 +30,9 @@
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
 
-
 typedef struct {
 	ulong		buflen;
-	char		*buffer;
+	char		*val;
 	ulong		type;
 } VAR_BUFFER;
 
@@ -259,8 +258,6 @@ PHP_MINFO_FUNCTION(mysqli);
 PHP_FUNCTION(mysqli);
 PHP_FUNCTION(mysqli_affected_rows);
 PHP_FUNCTION(mysqli_autocommit);
-PHP_FUNCTION(mysqli_bind_param);
-PHP_FUNCTION(mysqli_bind_result);
 PHP_FUNCTION(mysqli_change_user);
 PHP_FUNCTION(mysqli_character_set_name);
 PHP_FUNCTION(mysqli_close);
@@ -280,8 +277,6 @@ PHP_FUNCTION(mysqli_enable_reads_from_master);
 PHP_FUNCTION(mysqli_enable_rpl_parse);
 PHP_FUNCTION(mysqli_errno);
 PHP_FUNCTION(mysqli_error);
-PHP_FUNCTION(mysqli_execute);
-PHP_FUNCTION(mysqli_fetch);
 PHP_FUNCTION(mysqli_fetch_array);
 PHP_FUNCTION(mysqli_fetch_assoc);
 PHP_FUNCTION(mysqli_fetch_object);
@@ -311,11 +306,10 @@ PHP_FUNCTION(mysqli_next_result);
 PHP_FUNCTION(mysqli_num_fields);
 PHP_FUNCTION(mysqli_num_rows);
 PHP_FUNCTION(mysqli_options);
-PHP_FUNCTION(mysqli_param_count);
 PHP_FUNCTION(mysqli_ping);
 PHP_FUNCTION(mysqli_prepare);
 PHP_FUNCTION(mysqli_query);
-PHP_FUNCTION(mysqli_get_metadata);
+PHP_FUNCTION(mysqli_stmt_result_metadata);
 PHP_FUNCTION(mysqli_report);
 PHP_FUNCTION(mysqli_read_query_result);
 PHP_FUNCTION(mysqli_real_connect);
@@ -327,7 +321,16 @@ PHP_FUNCTION(mysqli_rpl_parse_enabled);
 PHP_FUNCTION(mysqli_rpl_probe);
 PHP_FUNCTION(mysqli_rpl_query_type);
 PHP_FUNCTION(mysqli_select_db);
-PHP_FUNCTION(mysqli_send_long_data);
+PHP_FUNCTION(mysqli_stmt_bind_param);
+PHP_FUNCTION(mysqli_stmt_bind_result);
+PHP_FUNCTION(mysqli_stmt_execute);
+#ifndef MYSQLI_HAVE_OLDAPI
+PHP_FUNCTION(mysqli_stmt_init);
+PHP_FUNCTION(mysqli_stmt_prepare);
+#endif
+PHP_FUNCTION(mysqli_stmt_fetch);
+PHP_FUNCTION(mysqli_stmt_param_count);
+PHP_FUNCTION(mysqli_stmt_send_long_data);
 PHP_FUNCTION(mysqli_send_query);
 #ifdef HAVE_EMBEDDED_MYSQLI
 PHP_FUNCTION(mysqli_server_init);
