@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed a couple of overflow bugs in case of very large negative integer
+  numbers (Zeev, Zend Engine)
 - Added new experimental module pcntl (Process Control) (Jason)
 - References between session-variables are now possible. (Thies)
 - Fixed a crash bug in the string-offsets implementation (Zeev, Zend Engine)
