@@ -69,3 +69,5 @@ ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *))
 	zend_ptr_stack_apply(stack, func);
 	stack->top = 0;
 }
+
+

@@ -702,7 +702,6 @@ void do_begin_function_call(znode *function_name CLS_DC)
 			}
 			break;
 	}
-
 	opline->opcode = ZEND_INIT_FCALL;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
@@ -741,7 +740,7 @@ void do_begin_class_member_function_call(znode *class_name, znode *function_name
 }
 
 
-void do_end_function_call(znode *function_name, znode *result, int is_method CLS_DC)
+void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	ELS_FETCH();
@@ -754,6 +753,7 @@ void do_end_function_call(znode *function_name, znode *result, int is_method CLS
 	SET_UNUSED(opline->op2);
 	opline->op2.u.constant.value.lval = is_method;
 	zend_stack_del_top(&CG(function_call_stack));
+	opline->extended_value = argument_list->u.constant.value.lval;
 }
 
 
@@ -777,8 +777,8 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 				break;
 		}
 	}
-	if (arg_types && offset<arg_types[0]
-		&& arg_types[1+offset]==BYREF_FORCE) {
+	if (arg_types && offset<=arg_types[0]
+		&& arg_types[offset]==BYREF_FORCE) {
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:
@@ -1223,14 +1223,14 @@ void do_begin_new_object(znode *result, znode *variable, znode *new_token, znode
 }
 
 
-void do_end_new_object(znode *class_name, znode *new_token CLS_DC)
+void do_end_new_object(znode *class_name, znode *new_token, znode *argument_list CLS_DC)
 {
 	znode ctor_result;
 
 	if (class_name->op_type == IS_CONST) {
 		zval_copy_ctor(&class_name->u.constant);
 	}
-	do_end_function_call(class_name, &ctor_result, 1 CLS_CC);
+	do_end_function_call(class_name, &ctor_result, argument_list, 1 CLS_CC);
 	do_free(&ctor_result CLS_CC);
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
@@ -1438,7 +1438,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 	le = CG(list_llist).head;
 	while (le) {
 		do_assign(result, &((list_llist_element *) le->data)->var, &((list_llist_element *) le->data)->value CLS_CC);
-		EG(active_op_array)->opcodes[EG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
+		CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 		le = le->next;
 	}
 	zend_llist_destroy(&CG(dimension_llist));

@@ -31,21 +31,23 @@ static int module_count=0;
 HashTable list_destructors, module_registry;
 
 /* this function doesn't check for too many parameters */
-int getParameters(HashTable *ht, int param_count,...)
+int getParameters(int ht, int param_count,...)
 {
+	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	int arg_count = (ulong) *p;
 	va_list ptr;
-	zval **param, **tmp = NULL, *param_ptr;
-	int i;
+	zval **param, *param_ptr;
+	ELS_FETCH();
+
+	if (param_count>arg_count) {
+		return FAILURE;
+	}
 
 	va_start(ptr, param_count);
 
-	for (i = 0; i < param_count; i++) {
+	do {
 		param = va_arg(ptr, zval **);
-		if (zend_hash_index_find(ht, i, (void **) &tmp) == FAILURE) {
-			va_end(ptr);
-			return FAILURE;
-		}
-		param_ptr = *tmp;
+		param_ptr = *(p-param_count);
 		if (!param_ptr->is_ref && param_ptr->refcount>1) {
 			zval *new_tmp;
 
@@ -55,25 +57,30 @@ int getParameters(HashTable *ht, int param_count,...)
 			new_tmp->refcount = 1;
 			new_tmp->is_ref = 0;
 			param_ptr = new_tmp;
-			zend_hash_index_update(ht, i, &param_ptr, sizeof(zval *), NULL);
+			*(p-param_count) = param_ptr;
 		}
 		*param = param_ptr;
-	}
+	} while (--param_count);
 	va_end(ptr);
+
 	return SUCCESS;
 }
 
 
-int getParametersArray(HashTable *ht, int param_count, zval **argument_array)
+int getParametersArray(int ht, int param_count, zval **argument_array)
 {
-	int i;
-	zval **tmp = NULL, *param_ptr;
+	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	int arg_count = (ulong) *p;
+	zval *param_ptr;
+	ELS_FETCH();
 
-	for (i = 0; i < param_count; i++) {
-		if (zend_hash_index_find(ht, i, (void **) &tmp) == FAILURE) {
-			return FAILURE;
-		}
-		param_ptr = *tmp;
+	if (param_count>arg_count) {
+		return FAILURE;
+	}
+
+
+	do {
+		param_ptr = *(p-param_count);
 		if (!param_ptr->is_ref && param_ptr->refcount>1) {
 			zval *new_tmp;
 
@@ -83,10 +90,11 @@ int getParametersArray(HashTable *ht, int param_count, zval **argument_array)
 			new_tmp->refcount = 1;
 			new_tmp->is_ref = 0;
 			param_ptr = new_tmp;
-			zend_hash_index_update(ht, i, &param_ptr, sizeof(zval *), NULL);
+			*(p-param_count) = param_ptr;
 		}
-		argument_array[i] = param_ptr;
-	}
+		*(argument_array++) = param_ptr;
+	} while (--param_count);
+
 	return SUCCESS;
 }
 
@@ -106,14 +114,18 @@ int getThis(zval **this)
 	return SUCCESS;
 }
 
-int ParameterPassedByReference(HashTable *ht, uint n)
+int ParameterPassedByReference(int ht, uint n)
 {
-	zval **tmp;
+	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	ulong arg_count = (ulong) *p;
+	zval *arg;
+	ELS_FETCH();
 
-	if (zend_hash_index_find(ht, n-1, (void **) &tmp) == FAILURE) {
-		return 0;
+	if (n>arg_count) {
+		return FAILURE;
 	}
-	return (*tmp)->is_ref;
+	arg = (zval *) *(p-arg_count+n);
+	return arg->is_ref;
 }
 
 
