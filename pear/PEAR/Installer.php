@@ -193,8 +193,8 @@ class PEAR_Installer extends PEAR_Common
         $tmp_path = dirname($descfile);
         foreach ($pkginfo['filelist'] as $fname => $atts) {
             $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR;
-            if (isset($atts['BaseInstallDir'])) {
-                $dest_dir .= $atts['BaseInstallDir'] . DIRECTORY_SEPARATOR;
+            if (isset($atts['BASEINSTALLDIR'])) {
+                $dest_dir .= $atts['BASEINSTALLDIR'] . DIRECTORY_SEPARATOR;
             }
             if (dirname($fname) != '.') {
                 $dest_dir .= dirname($fname) . DIRECTORY_SEPARATOR;
@@ -205,9 +205,13 @@ class PEAR_Installer extends PEAR_Common
         return true;
     }
 
+    // }}}
+
+    // {{{ _installFile()
+
     function _installFile($file, $dest_dir, $atts)
     {
-        $type = strtolower($atts['Role']);
+        $type = strtolower($atts['ROLE']);
         switch ($type) {
             case "test":
                 // don't install test files for now

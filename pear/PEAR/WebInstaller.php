@@ -432,7 +432,7 @@ class PEAR_WebInstaller extends PEAR
     function _element_end($xp, $name)
     {
         array_pop($this->element_stack);
-        if ($name == "Package")
+        if ($name == "PACKAGE")
         {
             $this->AllPackages[$this->pkginfo["name"]] = $this->pkginfo;
             $this->pkginfo = array();
@@ -449,36 +449,36 @@ class PEAR_WebInstaller extends PEAR
     {
         $next = $this->element_stack[sizeof($this->element_stack)-1];
         switch ($this->current_element) {
-        case "Name":
+        case "NAME":
                 $this->pkginfo["name"] .= $data;
             break;
-        case "Summary":
+        case "SUMMARY":
             $this->pkginfo["summary"] .= $data;
             break;
-        case "Initials":
+        case "INITIALS":
             $this->pkginfo["maintainer_handle"] .= $data;
             break;
-        case "Email":
+        case "EMAIL":
             $this->pkginfo["maintainer_email"] .= $data;
             break;
-        case "Version":
+        case "VERSION":
             $this->pkginfo["version"] .= $data;
             break;
-        case "Date":
+        case "DATE":
             $this->pkginfo["release_date"] .= $data;
             break;
-        case "Notes":
+        case "NOTES":
             $this->pkginfo["release_notes"] .= $data;
             break;
-        case "Dir":
+        case "DIR":
             if (!$this->installdir) {
                 break;
             }
             $dir = trim($data);
             // XXX add to file list
             break;
-        case "File":
-            $role = strtolower($this->current_attributes["Role"]);
+        case "FILE":
+            $role = strtolower($this->current_attributes["ROLE"]);
             $file = trim($data);
             // XXX add to file list
             break;
@@ -504,7 +504,7 @@ class PEAR_WebInstaller extends PEAR
 
         xml_set_element_handler($xp, "_element_start", "_element_end");
         xml_set_character_data_handler($xp, "_pkginfo_cdata");
-        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
+        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, true);
 
         $this->element_stack = array();
         $this->pkginfo = array();
@@ -600,7 +600,7 @@ class PEAR_WebInstaller extends PEAR
         }
     }
     function help ($Full = False) {
-global $PHP_SELF;
+        global $PHP_SELF;
         $this->loggerEnd();
         print "From the WebInstaller.php introduction: <p>";
 
