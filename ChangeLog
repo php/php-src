@@ -1,3 +1,74 @@
+2000-10-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/php_apache.c: trivial output change
+
+2000-10-13  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calendar.php: initial commit
+
+2000-10-13  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c: Fix php_value issue
+
+2000-10-13  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: *** empty log message ***
+
+2000-10-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/SAPI.c
+      main/SAPI.h
+      ext/fdf/fdf.c: post handler registration done right
+    (never use emalloc in an extension MINIT function)
+
+    * ext/standard/basic_functions.c
+      main/fopen-wrappers.c
+      main/main.c:
+    now it works for me as CGI and APXS, with or without --enable-debug ...
+
+2000-10-13  Daniel Beulshausen  <daniel@php4win.de>
+
+    * configure.in
+      main/php_version.h: step to 4.0.4-dev
+
+    * main/fopen-wrappers.c
+      win32/php4dllts.dsp
+      ext/standard/basic_functions.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c: compile fixes & update of win32 dsp
+
+2000-10-13  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/XML/RPC/Client.php
+      pear/XML/RPC/Definitions.php
+      pear/XML/RPC/Message.php
+      pear/XML/RPC/Parser.php
+      pear/XML/RPC/Response.php
+      pear/XML/RPC/Value.php:
+    Added preliminary rewrite of PEAR's XMLRPC interface. This is not working yet!
+
+2000-10-13  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/zlib/zlib.c
+      main/fopen-wrappers.c
+      main/fopen-wrappers.h
+      main/main.c
+      main/php_globals.h
+      configure.in
+      ext/standard/Makefile.in
+      php.ini-dist
+      php.ini-optimized: fopen wrappers cleanup
+      - comfiguration is now done by an ini parameter
+        instead of a compile time option
+      - the implementations of the three standard wrappers
+        now live in seperate files in ext/standard
+      - the compiler is happy again, no more warnings
+
 2000-10-12  Sascha Schumann  <sascha@schumann.cx>
 
     * acinclude.m4: Ignore trailing slashes
