@@ -70,7 +70,7 @@ PHP_FUNCTION(ezmlm_hash)
 PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
-	int to_len,message_len,headers_len,subject_len,extra_cmd_len;
+	int to_len,message_len,headers_len,subject_len,extra_cmd_len,i;
 	
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
@@ -83,14 +83,22 @@ PHP_FUNCTION(mail)
 		return;
 	}
 
-	for(to_len--;to_len;to_len--) {
-		if(!isspace(to[to_len]))break;
-		to[to_len]='\0';
+	if (to_len > 0) {
+		for(to_len--;to_len;to_len--) {
+			if(!isspace((unsigned char)to[to_len]))break;
+			to[to_len]='\0';
+		}
+		for(i=0;!iscntrl((unsigned char)to[i]);i++) {}
+		to[i]='\0';
 	}
 
-	for(subject_len--;subject_len;subject_len--) {
-		if(!isspace(subject[subject_len]))break;
-		subject[subject_len]='\0';
+	if (subject_len > 0) {
+		for(subject_len--;subject_len;subject_len--) {
+			if(!isspace((unsigned char)subject[subject_len]))break;
+			subject[subject_len]='\0';
+		}
+		for(i=0;!iscntrl((unsigned char)subject[i]);i++) {}
+		subject[i]='\0';
 	}
 
 	if(extra_cmd)
