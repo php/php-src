@@ -36,6 +36,11 @@ PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           apache2
+PRIMARY MAINTAINER:  Aaron Bannert <aaron@clove.org>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
 EXTENSION:           cgi
 MAINTENANCE:         Unknown
 STATUS:              Working
