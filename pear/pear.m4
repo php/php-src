@@ -24,6 +24,8 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   AC_MSG_RESULT($EXTENSION_DIR)
 ])
 
+abs_srcdir=`(cd $srcdir && pwd)`
+
 php_always_shared=yes
 
 AC_PROG_CC
