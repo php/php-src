@@ -7,21 +7,21 @@
 CFG=ZendTS - Win32 Release_TSDbg
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "ZendTS.mak".
-!MESSAGE
+!MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "ZendTS.mak" CFG="ZendTS - Win32 Release_TSDbg"
-!MESSAGE
+!MESSAGE 
 !MESSAGE Possible choices for configuration are:
-!MESSAGE
+!MESSAGE 
 !MESSAGE "ZendTS - Win32 Release_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "ZendTS - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "ZendTS - Win32 Release_TS_inline" (based on "Win32 (x86) Static Library")
 !MESSAGE "ZendTS - Win32 Release_TSDbg" (based on "Win32 (x86) Static Library")
-!MESSAGE
+!MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -119,7 +119,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
@@ -324,10 +324,6 @@ SOURCE=.\zend_execute.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_execute_locks.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_extensions.h
 # End Source File
 # Begin Source File
@@ -510,7 +506,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -581,7 +577,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # End Group
@@ -636,7 +632,7 @@ InputPath=.\zend_ini_scanner.l
 
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # Begin Source File
@@ -683,7 +679,7 @@ InputPath=".\zend_language_scanner.l"
 
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
 # End Source File
 # End Group
