@@ -1,7 +1,7 @@
 --TEST--
 EUC-JP to UTF8
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include('skipif.inc'); if (iconv("EUC-JP", "UTF8", '') === FALSE) die("skip\n"); ?>
 --POST--
 --GET--
 --FILE--
