@@ -68,7 +68,6 @@ typedef struct {
 
 typedef struct {
 	Ns_Conn *conn;
-	Ns_DString content_type;
 } ns_globals_struct;
 
 static void php_ns_config(php_ns_context *ctx);
@@ -306,7 +305,7 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 static void
 php_ns_request_dtor(NSLS_D SLS_DC)
 {
-	Ns_DStringFree(&NSG(content_type));
+	free(SG(request_info).path_translated);
 }
 
 /*
