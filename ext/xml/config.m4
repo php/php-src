@@ -27,9 +27,9 @@ AC_ARG_WITH(xml,
       AC_MSG_RESULT([yes (static)])
     fi
     if test "$withval" = "yes"; then
-      test -d /usr/include/xmltok && XML_INCLUDE="-I/usr/include/xmltok"
-      test -d /usr/include/xml && XML_INCLUDE="-I/usr/include/xml"
-      test -d /usr/local/include/xml && XML_INCLUDE="-I/usr/local/include/xml"
+      test -d /usr/include/xmltok && XML_INCLUDE="/usr/include/xmltok"
+      test -d /usr/include/xml && XML_INCLUDE="/usr/include/xml"
+      test -d /usr/local/include/xml && XML_INCLUDE="/usr/local/include/xml"
       AC_CHECK_LIB(expat, main, XML_LIBS="-lexpat", XML_LIBS="-lxmlparse -lxmltok")
     else
       XML_LIBS="-L$withval/lib -lexpat"
