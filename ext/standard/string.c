@@ -741,7 +741,7 @@ PHP_FUNCTION(pathinfo)
 	if (argc > 1) {
 		convert_to_long_ex(uopt);
 		opt = Z_LVAL_PP(uopt);
-		if (opt < PHP_PATHINFO_BASENAME || opt > PHP_PATHINFO_EXTENSION) {
+		if (opt < PHP_PATHINFO_DIRNAME || opt > PHP_PATHINFO_EXTENSION) {
 			php_error(E_WARNING, "Invalid option in call to %s()",
 					  get_active_function_name());
 			return;
@@ -751,7 +751,7 @@ PHP_FUNCTION(pathinfo)
 	MAKE_STD_ZVAL(tmp);
 	array_init(tmp);
 	
-	if (opt == PHP_PATHINFO_BASENAME || argc < 2) {
+	if (opt == PHP_PATHINFO_DIRNAME || argc < 2) {
 		ret = estrndup(Z_STRVAL_PP(path), len);
 		php_dirname(ret, len);
 		if (*ret)
@@ -759,7 +759,7 @@ PHP_FUNCTION(pathinfo)
 		efree(ret);
 	}
 	
-	if (opt == PHP_PATHINFO_DIRNAME || argc < 2) {
+	if (opt == PHP_PATHINFO_BASENAME || argc < 2) {
 		ret = php_basename(Z_STRVAL_PP(path), len);
 		add_assoc_string(tmp, "basename", ret, 0);
 	}			
