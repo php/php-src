@@ -27,22 +27,6 @@
 #undef THREAD_SAFE
 #endif
 
-
-#if 0
-	if((NULL != SG(request_info).content_type) && (0 == strcmp(SG(request_info).content_type, "application/vnd.fdf"))) {
-		pval *tmp;
-
-		ALLOC_ZVAL(tmp);
-		tmp->value.str.len = SG(request_info).post_data_length;
-		tmp->value.str.val = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
-		tmp->type = IS_STRING;
-		INIT_PZVAL(tmp);
-		zend_hash_add(&EG(symbol_table), "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), &tmp, sizeof(pval *),NULL);
-
-	} else {
-#endif
-
-
 #include "php.h"
 #include "ext/standard/head.h"
 #include <math.h>
@@ -95,6 +79,9 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_set_file,							NULL)
 	PHP_FE(fdf_get_file,							NULL)
 	PHP_FE(fdf_add_template,							NULL)
+	PHP_FE(fdf_set_flags,							NULL)
+	PHP_FE(fdf_set_opt,								NULL)
+	PHP_FE(fdf_set_submit_form_action,				NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -592,6 +579,102 @@ PHP_FUNCTION(fdf_add_template) {
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto void fdf_set_flags(int fdfdoc, string fieldname, int whichFlags, int newFlags)
+   modifies a flag for a field in the fdf*/
+PHP_FUNCTION(fdf_set_flags) {
+	pval **arg1, **arg2, **arg3, **arg4;
+	int id, type;
+	FDFDoc fdf;
+	FDFErc err;
+	FDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_long_ex(arg4);	
+	id=(*arg1)->value.lval;
+	fdf = zend_list_find(id,&type);
+	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	err=FDFSetFlags(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.lval);
+	if(err != FDFErcOK)
+		printf("Error setting FDF flags: %d\n",err);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void fdf_set_opt(int fdfdoc, string fieldname, int element, string value, string name)
+   Sets a value in the opt array for a field in the FDF*/
+PHP_FUNCTION(fdf_set_opt) {
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
+	int id, type;
+	FDFDoc fdf;
+	FDFErc err;	
+	FDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_string_ex(arg4);
+	convert_to_string_ex(arg5);
+	id=(*arg1)->value.lval;
+	fdf = zend_list_find(id,&type);
+	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	err = FDFSetOpt(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val,(*arg5)->value.str.val);
+	if(err != FDFErcOK)
+		printf("Error setting FDF option: %d",err);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void fdf_set_submit_form_action(int fdfdoc, string fieldname, int whichTrigger, string url, int flags)
+   sets the submit form action for a field in the fdf*/
+PHP_FUNCTION(fdf_set_submit_form_action) {
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
+	int id, type;
+	FDFDoc fdf;
+	FDFErc err;	
+	FDF_TLS_VARS;
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_string_ex(arg4);
+	convert_to_long_ex(arg5);
+	id=(*arg1)->value.lval;
+	fdf = zend_list_find(id,&type);
+	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	err = FDFSetSubmitFormAction(fdf,(*arg2)->value.str.val,(*arg3)->value.lval,(*arg4)->value.str.val,(*arg5)->value.lval);
+	if(err != FDFErcOK)
+		printf("Error setting FDF submit action: %d",err);
+
+	RETURN_TRUE;
+}
 
 #endif
 

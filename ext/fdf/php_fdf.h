@@ -49,6 +49,9 @@ PHP_FUNCTION(fdf_set_status);
 PHP_FUNCTION(fdf_set_file);
 PHP_FUNCTION(fdf_get_file);
 PHP_FUNCTION(fdf_add_template);
+PHP_FUNCTION(fdf_set_flags);
+PHP_FUNCTION(fdf_set_opt);
+PHP_FUNCTION(fdf_set_submit_form_action);
 #else
 #define fdf_module_ptr NULL
 #endif
