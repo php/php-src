@@ -306,8 +306,7 @@ zval *dom_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 		ret = hnd->read_func(obj, &retval TSRMLS_CC);
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
-			retval->refcount = 1;
-			PZVAL_UNLOCK(retval);
+			retval->refcount = 0;
 		} else {
 			retval = EG(uninitialized_zval_ptr);
 		}
