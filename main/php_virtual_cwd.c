@@ -149,7 +149,7 @@ int virtual_chdir(cwd_state *state, char *path)
 	}
 
 	if (copy_amount != -1) {
-		state->cwd = realloc(state->cwd, copy_amount + 1);
+		state->cwd = (char *) realloc(state->cwd, copy_amount + 1);
 		if (copy_amount)
 			memcpy(state->cwd, old_state->cwd, copy_amount);
 		state->cwd[copy_amount] = '\0';
@@ -219,11 +219,10 @@ void main(void)
 		state.cwd_length <<= 1;
 		state.cwd = realloc(state.cwd, state.cwd_length + 1);
 	}
-	state.cwd_length = strlen(state.cwd);
 #else
 	state.cwd = strdup("d:\\foo\\bar");
-	state.cwd_length = strlen(state.cwd);
 #endif
+	state.cwd_length = strlen(state.cwd);
 
 #define T(a) \
 	printf("[%s] $ cd %s\n", virtual_getcwd(&state, &length), a); \
