@@ -796,7 +796,7 @@ int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue
 }
 
 /* {{{ proto int mssql_fetch_batch(string result_index)
-	returns the next batch of records*/
+   Returns the next batch of records */
 PHP_FUNCTION(mssql_fetch_batch) {
 	zval **mssql_result_index;
 	mssql_result *result;
@@ -836,7 +836,7 @@ PHP_FUNCTION(mssql_fetch_batch) {
 }
 /* }}} */
 
-/* {{{ proto int mssql_query(string query [, int conn_id [, int batch_size = 0]])
+/* {{{ proto int mssql_query(string query [, int conn_id [, int batch_size]])
    Perform an SQL query on a MS-SQL server database */
 PHP_FUNCTION(mssql_query)
 {
@@ -969,7 +969,7 @@ PHP_FUNCTION(mssql_query)
 /* }}} */
 
 /* {{{ proto int mssql_rows_affected(int conn_id)
-	returns the number of records affected by the query*/
+   Returns the number of records affected by the query */
 PHP_FUNCTION(mssql_rows_affected) {
 	zval **mssql_link_index;
 	mssql_link *mssql_ptr;
