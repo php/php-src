@@ -17,7 +17,7 @@
  */
 /* $Id$ */
 
-int hostconnect(char *host, int port, int socktype);
+int hostconnect(char *host, int port, int socktype, int timeout);
 
 /*
  * Local variables:
