@@ -579,7 +579,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
-			if (PGG(auto_reset_persistent)) {
+			if (PGG(auto_reset_persistent) & 1) {
 				/* need to send & get something from backend to
 				   make sure we catch CONNECTION_BAD everytime */
 				PGresult *pg_result;
@@ -930,7 +930,12 @@ PHP_FUNCTION(pg_query)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first.");
 	}
 	pgsql_result = PQexec(pgsql, Z_STRVAL_PP(query));
-	
+	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+		PQclear(pgsql_result);
+		PQreset(pgsql);
+		pgsql_result = PQexec(pgsql, Z_STRVAL_PP(query));
+	}
+
 	if (pgsql_result) {
 		status = PQresultStatus(pgsql_result);
 	} else {
@@ -951,7 +956,7 @@ PHP_FUNCTION(pg_query)
 				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
-				pg_result->row = -1;
+				pg_result->row = 0;
 				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
 			} else {
 				RETURN_FALSE;
@@ -1301,11 +1306,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	pgsql_result = pg_result->result;
 
 	if (ZEND_NUM_ARGS() == 1) {
-		pg_result->row++;
 		pgsql_row = pg_result->row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
 			RETURN_FALSE;
 		}
+		pg_result->row++;
 	} else {
 		if (Z_TYPE_PP(row) != IS_NULL) { 
 			convert_to_long_ex(row);
@@ -1317,11 +1322,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 		} else {
 			/* If 2nd param is NULL, use internal row counter to access next row */
-			pg_result->row++;
 			pgsql_row = pg_result->row;
 			if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
 				RETURN_FALSE;
 			}
+			pg_result->row++;
 		}
 	}
 	array_init(return_value);
@@ -1448,7 +1453,7 @@ PHP_FUNCTION(pg_result_seek)
 	}
 	
 	/* seek to offset */
-	pg_result->row = row - 1;
+	pg_result->row = row;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2934,7 +2939,12 @@ PHP_FUNCTION(pg_send_query)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There are results on this connection. Call pg_get_result() until it returns FALSE.");
 	}
 	if (!PQsendQuery(pgsql, query)) {
-		RETURN_FALSE;
+		if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+			PQreset(pgsql);
+		}
+		if (!PQsendQuery(pgsql, query)) {
+			RETURN_FALSE;
+		}
 	}
 	if (PQ_SETNONBLOCKING(pgsql, 0)) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to blocking mode.");
