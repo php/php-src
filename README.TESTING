@@ -1,13 +1,13 @@
 [IMPORTANT NOTICE]
 ------------------
-Do _not_ ask to developers why some or all tests are failed under
+ Do _not_ ask to developers why some or all tests are failed under
 your environment! Let us know if you find why it fails. Thank you.
 
 
-[Testing Basics]
---------
-You must build CGI SAPI, then you can do "make test" to
-execute all or some test scripts saved under
+[Testing Basics] 
+----------------
+ To execute test scripts, you must build PHP with some SAPI, then you
+type "make test" to execute all or some test scripts saved under
 "tests" directory under source root directory.
 
 Usage:
@@ -15,22 +15,24 @@ make test
 
  "make test" basically executes "run-tests.php" script
 under source root. Therefore you can execute the script
-like
+as follows
 
-./php -c php.ini-dist run-tests.php [ext/some_extension_name]
+./sapi/cli/php -c php.ini-dist run-tests.php [ext/some_extension_name]
 
 
 
 [Which "php" executable "make test" look for]
 ---------------------------------------------
- "make test" executes "run-tests.php" script with "./php".
-Test scripts must be executed by CGI SAPI. Therefore, you 
-must build PHP with CGI SAPI to perform tests.
+ "make test" executes "run-tests.php" script with "php" binary.  Some
+test scripts such as session must be executed by CGI SAPI. Therefore,
+you must build PHP with CGI SAPI to perform all tests.
 
- "run-tests.php" look for "php" executable in build top directory,
-then look for search path. Therefore, if you have "php" executable
-other than CGI SAPI in your search path or source root, tests may fail.
+ If PHP is not build with CGI SAPI, "run-tests.php" script uses CLI
+SAPI. Tests that may not executed by CLI SAPI will be skipped.
 
+NOTE: PHP binary executing "run-tests.php" and php binary used for
+executing test scripts may differ. If you use different PHP binary for
+executing "run-tests.php" script, you may get errors.
 
 
 [Which php.ini is used]
@@ -40,10 +42,10 @@ you would like to test with other configuration file, user
 "run-tests.php" script.
 
 Example:
-./php -c ./your_php.ini ext/standard
+./sapi/cli/php -c ./your_php.ini ext/standard
 
-If you use php.ini other than php.ini-dist, you may see more
-failed.
+If you use php.ini other than php.ini-dist, you may see more failed
+tests.
 
 
 [Which test scripts are executed]
@@ -56,7 +58,7 @@ executes it.
  Tester can easily executes tests selectively with as follows.
 
 Example:
-./php -c php.ini-dist run-tests.php ext/mbstring
+./sapi/cli/php -c php.ini-dist run-tests.php ext/mbstring
 
 
 [Test results]
@@ -144,7 +146,7 @@ However, it is recommended to use other files for ease of writing
 test script. For instance, you can execute test script under 
 ext/iconv as follows:
 
-./php -c /etc/php.ini-dist ext/iconv
+./sapi/cli/php -c /etc/php.ini-dist ext/iconv
 
 
 [How to help us]
