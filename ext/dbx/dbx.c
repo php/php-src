@@ -464,15 +464,13 @@ ZEND_FUNCTION(dbx_query)
             zend_hash_index_update(data->value.ht, row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
             /* associate results with fieldnames */
             if (info_flags & DBX_RESULT_ASSOC) {
-                zval **columnname_ptr, **actual_ptr, **reference_ptr;
-                zval * dummy;
-                ALLOC_ZVAL(dummy);
-                INIT_ZVAL(*dummy);
+                zval **columnname_ptr, **actual_ptr;
                 for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
                     zend_hash_index_find((*inforow_ptr)->value.ht, col_index, (void **) &columnname_ptr);
                     zend_hash_index_find((*row_ptr)->value.ht, col_index, (void **) &actual_ptr);
-                    zend_hash_update((*row_ptr)->value.ht, (*columnname_ptr)->value.str.val, (*columnname_ptr)->value.str.len + 1, &dummy, sizeof(zval *), (void **) &reference_ptr);
-                    zend_assign_to_variable_reference(NULL, reference_ptr, actual_ptr, NULL ELS_CC);
+                    (*actual_ptr)->refcount+=1;
+                    (*actual_ptr)->is_ref=1;
+                    zend_hash_update((*row_ptr)->value.ht, (*columnname_ptr)->value.str.val, (*columnname_ptr)->value.str.len + 1, actual_ptr, sizeof(zval *), NULL);
                     }
                 }
             ++row_count;
