@@ -19,6 +19,7 @@ extern "C" {
 #include "gd.h"
 
 extern gdFontPtr gdFontMediumBold;
+extern gdFontPtr gdFontGetMediumBold(void);
 
 #ifdef __cplusplus
 }
