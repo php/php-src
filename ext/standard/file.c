@@ -1395,6 +1395,7 @@ PHP_FUNCTION(readfile)
 	int size=0;
 	int use_include_path=0;
 	int issock=0, socketd=0;
+	int rsrc_id;
 	
 	/* check args */
 	switch (ARG_COUNT(ht)) {
@@ -1429,14 +1430,21 @@ PHP_FUNCTION(readfile)
 		}
 		RETURN_FALSE;
 	}
+
+	if (issock) {
+		int *sock=emalloc(sizeof(int));
+		*sock = socketd;
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,sock,php_file_le_socket());
+	} else {
+		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,fp,php_file_le_fopen());
+	}
+
 	if (php_header()) {
 		size = php_passthru_fd(socketd, fp, issock);
 	}
-	if (issock) {
-		SOCK_FCLOSE(socketd);
-	} else {
-		fclose(fp);
-	}
+
+	zend_list_delete(rsrc_id);
+
 	RETURN_LONG(size);
 }
 
