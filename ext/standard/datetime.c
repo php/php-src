@@ -314,7 +314,11 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #else
 		tzone = timezone;
 #endif
-		tname[0] = tzname[0];
+		if (tzname[0] != NULL) {
+			tname[0] = tzname[0];
+		} else {
+			tname[0] = "???";
+		}
 #endif
 	}
 
