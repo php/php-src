@@ -57,13 +57,13 @@
 
 #if HAVE_EXIF
 
-#undef EXIF_DEBUG
+#define EXIF_DEBUG
 
 #include "php_exif.h"
 #include <math.h>
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
-/* include "ext/standard/php_image.h" */
+#include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 
 typedef unsigned char uchar;
@@ -967,7 +967,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 
 	/* Extract useful components of IFD */
 	#ifdef EXIF_DEBUG
-	php_error(E_NOTICE,"process tag(x%04x=%s,%i): %s", Tag, exif_get_headername(Tag), ByteCount, Format==FMT_STRING?(ValuePtr?ValuePtr:"<no data>"):"<no string>");
+	php_error(E_NOTICE,"process tag(x%04x=%s,@x%04X+%i): %s", Tag, exif_get_headername(Tag), ValuePtr-OffsetBase, ByteCount, Format==FMT_STRING?(ValuePtr?ValuePtr:"<no data>"):"<no string>");
 	#endif
 	switch(Tag) {
 		case TAG_MAKE:
