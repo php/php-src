@@ -49,8 +49,13 @@
 		tdoc = obj->ptdoc; \
 	}
 
+#define TIDY_SET_CONTEXT \
+    zval *object; \
+    TG(inst) = getThis(); \
+    object = TG(inst)
+   
 #define TIDY_FETCH_OBJECT	\
-	zval *object = getThis();	\
+	TIDY_SET_CONTEXT; \
 	PHPTidyObj *obj;	\
 	if (object) {	\
 		if (ZEND_NUM_ARGS()) {	\
@@ -64,7 +69,7 @@
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
 
 #define TIDY_FETCH_ONLY_OBJECT	\
-	zval *object = getThis();	\
+	TIDY_SET_CONTEXT; \
 	PHPTidyObj *obj;	\
 	if (ZEND_NUM_ARGS()) {	\
 		WRONG_PARAM_COUNT;	\
@@ -88,14 +93,7 @@
         } \
     }
 
-/* This is necessary, as apparently some Win32 compilers aren't C99
-   compliant. When that isn't the case we can't use variable arg preprocessor
-   macros and need to instead call a wrapper function */
-#if defined(__STDC_VERSION__) && __STDC_VERSION__  >= 199901L
-#define TIDY_THROW(...) zend_throw_exception_ex(tidy_ce_exception, 0 TSRMLS_CC, __VA_ARGS__)
-#else
 #define TIDY_THROW _php_tidy_throw_exception
-#endif
 
 #define REGISTER_TIDY_CLASS(classname, name, parent) \
 	{ \
@@ -109,7 +107,6 @@
 	}
 
 #define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
-#define TIDY_ATTR_CONST(attr) REGISTER_LONG_CONSTANT("TIDY_ATTR_" #attr, TidyAttr_##attr, CONST_CS | CONST_PERSISTENT)
 #define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
 
 #ifndef TRUE
@@ -168,7 +165,6 @@ typedef struct _PHPTidyObj PHPTidyObj;
 
 typedef enum {
 	is_node,
-	is_attr,
 	is_doc,
 	is_exception
 } tidy_obj_type;
@@ -337,18 +333,23 @@ void php_tidy_panic(ctmbstr msg)
 	zend_error(E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
-/* Workaround for compilers that are not C99 complaint */
 static void _php_tidy_throw_exception(char *message, ...)
 {
 	char *msg;
 	va_list ap;
 	
 	TSRMLS_FETCH();
-	
+    
 	va_start(ap, message);
 	vspprintf(&msg, 0, message, ap);
-	zend_throw_exception(tidy_ce_exception, msg, 0 TSRMLS_CC);
-	va_end(ap);
+	
+    if(TG(inst)) {
+        zend_throw_exception(tidy_ce_exception, msg, 0 TSRMLS_CC);
+    } else {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, msg);
+    }
+	    
+    va_end(ap);
 	efree(msg);
 	
 }
@@ -407,7 +408,6 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	TidyDoc doc;
 	TidyBuffer *errbuf;
 	zval *config;
-	
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
@@ -602,6 +602,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	if (!object) {
 		ALLOC_ZVAL(object);
 	}
+    
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
 	object->refcount = 1;
@@ -894,10 +895,12 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, char *enc TSRMLS
 
 static void tidy_globals_ctor(void *global TSRMLS_DC)
 {
+    
 }
 
 static void tidy_globals_dtor(void *global TSRMLS_DC)
 {
+    
 }
 
 PHP_MINIT_FUNCTION(tidy)
@@ -1272,7 +1275,8 @@ PHP_FUNCTION(tidy_config_count)
    Returns the value of the specified configuration option for the tidy document. */
 PHP_FUNCTION(tidy_getopt)
 {
-	zval *object = getThis();
+	TIDY_SET_CONTEXT;
+    
 	PHPTidyObj *obj;
 	char *optname;
 	void *optval;
@@ -1333,7 +1337,8 @@ TIDY_DOC_METHOD(__construct)
 	char *contents;
 	zval *options = NULL;
 	
-	zval *object = getThis();
+    TIDY_SET_CONTEXT;
+	
 	PHPTidyObj *obj;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szsb", &inputfile, &input_len,
@@ -1363,9 +1368,10 @@ TIDY_DOC_METHOD(parseFile)
 	zend_bool use_include_path = 0;
 	char *contents;
 	zval *options = NULL;
-	zval *object = getThis();
-	PHPTidyObj *obj;	
-
+    PHPTidyObj *obj;
+    
+    TIDY_SET_CONTEXT;
+	
 	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
@@ -1394,9 +1400,9 @@ TIDY_DOC_METHOD(parseString)
 	char *input, *enc = NULL;
 	int input_len, enc_len = 0;
 	zval *options = NULL;
-	
-	zval *object = getThis();
 	PHPTidyObj *obj;
+    
+    TIDY_SET_CONTEXT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1453,7 +1459,7 @@ TIDY_NODE_METHOD(__construct)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::has_children()
+/* {{{ proto boolean tidy_node::hasChildren()
    Returns true if this node has children */
 TIDY_NODE_METHOD(hasChildren)
 {
@@ -1467,7 +1473,7 @@ TIDY_NODE_METHOD(hasChildren)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::has_siblings()
+/* {{{ proto boolean tidy_node::hasSiblings()
    Returns true if this node has siblings */
 TIDY_NODE_METHOD(hasSiblings)
 {
@@ -1481,7 +1487,7 @@ TIDY_NODE_METHOD(hasSiblings)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_comment()
+/* {{{ proto boolean tidy_node::isComment()
    Returns true if this node represents a comment */
 TIDY_NODE_METHOD(isComment)
 {
@@ -1495,7 +1501,7 @@ TIDY_NODE_METHOD(isComment)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_html()
+/* {{{ proto boolean tidy_node::isHtml()
    Returns true if this node is part of a HTML document */
 TIDY_NODE_METHOD(isHtml)
 {
@@ -1509,7 +1515,7 @@ TIDY_NODE_METHOD(isHtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_xhtml()
+/* {{{ proto boolean tidy_node::isXhtml()
    Returns true if this node is part of a XHTML document */
 TIDY_NODE_METHOD(isXhtml)
 {
@@ -1523,7 +1529,7 @@ TIDY_NODE_METHOD(isXhtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_xml()
+/* {{{ proto boolean tidy_node::isXml()
    Returns true if this node is part of a XML document */
 TIDY_NODE_METHOD(isXml)
 {
@@ -1537,7 +1543,7 @@ TIDY_NODE_METHOD(isXml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_text()
+/* {{{ proto boolean tidy_node::isText()
    Returns true if this node represents text (no markup) */
 TIDY_NODE_METHOD(isText)
 {
@@ -1551,7 +1557,7 @@ TIDY_NODE_METHOD(isText)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_jste()
+/* {{{ proto boolean tidy_node::isJste()
    Returns true if this node is JSTE */
 TIDY_NODE_METHOD(isJste)
 {
@@ -1565,7 +1571,7 @@ TIDY_NODE_METHOD(isJste)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_asp()
+/* {{{ proto boolean tidy_node::isAsp()
    Returns true if this node is ASP */
 TIDY_NODE_METHOD(isAsp)
 {
@@ -1579,7 +1585,7 @@ TIDY_NODE_METHOD(isAsp)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_node::is_php()
+/* {{{ proto boolean tidy_node::isPhp()
    Returns true if this node is PHP */
 TIDY_NODE_METHOD(isPhp)
 {
