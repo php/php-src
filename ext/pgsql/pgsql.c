@@ -1968,7 +1968,7 @@ PHP_FUNCTION(pg_lo_read)
 		buf_len = Z_LVAL_PP(len);
 	}
 	
-	buf = (char *) emalloc(sizeof(char)*(buf_len+1));
+	buf = (char *) safe_emalloc(sizeof(char), (buf_len+1), 0);
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf, buf_len))<0) {
 		efree(buf);
 		RETURN_FALSE;
@@ -2622,7 +2622,7 @@ PHP_FUNCTION(pg_escape_string)
 		return;
 	}
 
-	to = (char *)emalloc(from_len*2+1);
+	to = (char *)safe_emalloc(from_len, 2, 1);
 	to_len = (int)PQescapeString(to, from, from_len);
 	RETURN_STRINGL(to, to_len, 0);
 }
@@ -3566,7 +3566,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 #if HAVE_PQESCAPE
 							{
 								char *tmp;
-	 							tmp = (char *)emalloc(Z_STRLEN_PP(val)*2+1);
+	 							tmp = (char *)safe_emalloc(Z_STRLEN_PP(val), 2, 1);
 								Z_STRLEN_P(new_val) = (int)PQescapeString(tmp, Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 								Z_STRVAL_P(new_val) = tmp;
 							}
