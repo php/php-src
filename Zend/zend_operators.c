@@ -1042,6 +1042,7 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2)
 	return SUCCESS;
 }
 
+
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
@@ -1075,12 +1076,50 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		result->type = IS_LONG;
 		return SUCCESS;
 	}
-	if ((op1->type==IS_ARRAY || op1->type==IS_OBJECT)
-		&& (op2->type==IS_ARRAY || op2->type==IS_OBJECT)) {
-		zend_error(E_WARNING,"Cannot compare arrays or objects");
+	if (op1->type==IS_ARRAY && op2->type==IS_ARRAY) {
+		zend_compare_arrays(result, op1, op2);
+		return SUCCESS;
 	}
+
+	if (op1->type==IS_OBJECT && op2->type==IS_OBJECT) {
+		zend_compare_objects(result, op1, op2);
+		return SUCCESS;
+	}
+
+	if (op1->type==IS_ARRAY) {
+		result->value.lval = 1;
+		result->type = IS_LONG;
+		return SUCCESS;
+	}
+	if (op2->type==IS_ARRAY) {
+		result->value.lval = -1;
+		result->type = IS_LONG;
+		return SUCCESS;
+	}
+	if (op1->type==IS_OBJECT) {
+		result->value.lval = 1;
+		result->type = IS_LONG;
+		return SUCCESS;
+	}
+	if (op2->type==IS_OBJECT) {
+		result->value.lval = -1;
+		result->type = IS_LONG;
+		return SUCCESS;
+	}
+
 	var_reset(result);
 	return FAILURE;
+}
+
+
+static int hash_zval_identical_function(const zval **z1, const zval **z2)
+{
+	zval result;
+
+	if (is_identical_function(&result, (zval *) *z1, (zval *) *z2)==FAILURE) {
+		return 0;
+	}
+	return result.value.lval;
 }
 
 
@@ -1116,8 +1155,22 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			return SUCCESS;
 			break;
 		case IS_ARRAY:
+			if (zend_hash_compare(op1->value.ht, op2->value.ht, hash_zval_identical_function)==0) {
+				result->value.lval = 1;
+			} else {
+				result->value.lval = 0;
+			}
+			break;
 		case IS_OBJECT:
-			zend_error(E_WARNING,"Cannot compare arrays or objects");
+			if (op1->value.obj.ce != op2->value.obj.ce) {
+				result->value.lval = 0;
+			} else {
+				if (zend_hash_compare(op1->value.obj.properties, op2->value.obj.properties, hash_zval_identical_function)==0) {
+					result->value.lval = 1;
+				} else {
+					result->value.lval = 0;
+				}
+			}
 			break;
 	}
 	var_reset(result);
@@ -1128,7 +1181,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2)
 {
    result->type = IS_BOOL;
-   if ( is_identical_function( result, op1, op2 ) == FAILURE ) {
+   if (is_identical_function( result, op1, op2 ) == FAILURE) {
 	  return FAILURE;
    }
    result->value.lval = !result->value.lval;
@@ -1475,6 +1528,42 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 		result->type = IS_LONG;
 	}
 	return;	
+}
+
+
+static int hash_zval_compare_function(const zval **z1, const zval **z2)
+{
+	zval result;
+
+	if (compare_function(&result, (zval *) *z1, (zval *) *z2)==FAILURE) {
+		return 0;
+	}
+	return result.value.lval;
+}
+
+
+
+ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2)
+{
+	result->type = IS_LONG;
+	result->value.lval = zend_hash_compare(ht1, ht2, hash_zval_compare_function);
+}
+
+
+ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2)
+{
+	zend_compare_symbol_tables(result, a1->value.ht, a2->value.ht);
+}
+
+
+ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2)
+{
+	if (o1->value.obj.ce != o2->value.obj.ce) {
+		result->value.lval = 1;	/* Comparing objects of different types is pretty much meaningless */
+		result->type = IS_LONG;
+		return;
+	}
+	zend_compare_symbol_tables(result, o1->value.obj.properties, o2->value.obj.properties);
 }
 
 
