@@ -756,8 +756,7 @@ ZEND_FUNCTION(trigger_error)
 
 
 /* {{{ proto string set_error_handler(string error_handler)
-   Sets a user-defined error handler function.  Returns the previously defined
-   error handler, or false on error */
+   Sets a user-defined error handler function.  Returns the previously defined error handler, or false on error */
 ZEND_FUNCTION(set_error_handler)
 {
 	zval **error_handler;
