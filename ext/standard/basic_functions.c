@@ -291,6 +291,8 @@ function_entry basic_functions[] = {
 	PHP_FE(ini_restore,					NULL)
 
 	PHP_FE(print_r,					NULL)
+	{"setcookie",		php3_SetCookie,		NULL},
+	{"header",			php3_Header,		NULL},
 
 	{NULL, NULL, NULL}
 };
