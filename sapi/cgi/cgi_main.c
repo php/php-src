@@ -676,7 +676,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			SG(request_info).no_headers = 1;
 		}
 		file_handle.filename = "-";
-		Z_TYPE(file_handle) = ZEND_HANDLE_FP;
+		file_handle.type = ZEND_HANDLE_FP;
 		file_handle.handle.fp = stdin;
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;

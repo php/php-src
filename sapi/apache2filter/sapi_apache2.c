@@ -369,7 +369,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 
 				apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
 				
-				Z_TYPE(zfd) = ZEND_HANDLE_FILENAME;
+				zfd.type = ZEND_HANDLE_FILENAME;
 				zfd.filename = (char *) path;
 				zfd.free_filename = 0;
 				zfd.opened_path = NULL;

@@ -369,7 +369,7 @@ static const char *array_lookup_string(HashTable *ht, const char *idx)
 	{
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
-		return Z_STRVAL_PP(pvalue);
+		return (*pvalue)->value.str.val;
 	}
 	return 0;
 }
@@ -383,7 +383,7 @@ static long *array_lookup_long(HashTable *ht, const char *idx)
 	{
 		SEPARATE_ZVAL(pvalue);
 		convert_to_long(*pvalue);
-		return &Z_LVAL_PP(pvalue);
+		return &(*pvalue)->value.lval;
 	}
 	return 0;
 }
@@ -397,7 +397,7 @@ static long *array_lookup_bool(HashTable *ht, const char *idx)
 	{
 		SEPARATE_ZVAL(pvalue);
 		convert_to_boolean(*pvalue);
-		return &Z_LVAL_PP(pvalue);
+		return &(*pvalue)->value.lval;
 	}
 	return 0;
 }
@@ -1235,7 +1235,7 @@ PHP_FUNCTION(yaz_connect)
 		else
 		{
 			convert_to_string_ex (user);
-			user_str = Z_STRVAL_PP(user);
+			user_str = (*user)->value.str.val;
 		}
 	}
 	else
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(yaz_connect)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex (zurl);
-	zurl_str = Z_STRVAL_PP(zurl);
+	zurl_str = (*zurl)->value.str.val;
 	for (cp = zurl_str; *cp && strchr("\t\n ", *cp); cp++)
 		;
 	if (!*cp)
@@ -1339,7 +1339,7 @@ PHP_FUNCTION(yaz_close)
 	if (!p)
 		RETURN_FALSE;
 	release_assoc (p);
-	zend_list_delete (Z_LVAL_PP(id));
+	zend_list_delete ((*id)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1370,17 +1370,17 @@ PHP_FUNCTION(yaz_search)
 	}
 	p->action = 0;
 	convert_to_string_ex (type);
-	type_str = Z_STRVAL_PP(type);
+	type_str = (*type)->value.str.val;
 	convert_to_string_ex (query);
-	query_str = Z_STRVAL_PP(query);
+	query_str = (*query)->value.str.val;
 	yaz_resultset_destroy (p->resultSets);
 	r = p->resultSets = yaz_resultset_mk();
 	r->query = odr_malloc (r->odr, sizeof(*r->query));
 	if (!strcmp (type_str, "rpn"))
 	{
 		r->query->which = Z_Query_type_1;
-		Z_TYPE(r->query->u)_1 = p_query_rpn (r->odr, PROTO_Z3950, query_str);
-		if (!Z_TYPE(r->query->u)_1)
+		r->query->u.type_1 = p_query_rpn (r->odr, PROTO_Z3950, query_str);
+		if (!r->query->u.type_1)
 		{
 			yaz_resultset_destroy(r);
 			p->resultSets = 0;
@@ -1394,9 +1394,9 @@ PHP_FUNCTION(yaz_search)
 	else if (!strcmp(type_str, "ccl"))
 	{
 		r->query->which = Z_Query_type_2;
-		Z_TYPE(r->query->u)_2 = odr_malloc (r->odr, sizeof(*Z_TYPE(r->query->u)_2));
-		Z_TYPE(r->query->u)_2->buf = odr_strdup(r->odr, query_str);
-		Z_TYPE(r->query->u)_2->len = strlen(query_str);
+		r->query->u.type_2 = odr_malloc (r->odr, sizeof(*r->query->u.type_2));
+		r->query->u.type_2->buf = odr_strdup(r->odr, query_str);
+		r->query->u.type_2->len = strlen(query_str);
 	}
 	else
 	{
@@ -1560,10 +1560,10 @@ PHP_FUNCTION(yaz_error)
 				msg = "unknown diagnostic";
 		}
 		/* Not macro using because RETURN_STRING throws away const */
-		Z_STRLEN_P(return_value) = strlen(msg);
-		Z_STRVAL_P(return_value) =
-			estrndup(msg, Z_STRLEN_P(return_value));
-		Z_TYPE_P(return_value) = IS_STRING;
+		return_value->value.str.len = strlen(msg);
+		return_value->value.str.val =
+			estrndup(msg, return_value->value.str.len);
+		return_value->type = IS_STRING;
 	}
 	release_assoc (p);
 }
@@ -1867,7 +1867,7 @@ static void retval_grs1 (zval *return_value, Z_GenericRecord *p)
 			grs[level] = e->content->u.subtree;
 			eno[level] = -1;
 		}
-		zend_hash_next_index_insert (Z_ARRVAL_P(return_value),
+		zend_hash_next_index_insert (return_value->value.ht,
 									 (void *) &my_zval, sizeof(zval *), NULL);
 		eno[level]++;
 	}
@@ -1892,10 +1892,10 @@ PHP_FUNCTION(yaz_record)
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 
 	convert_to_long_ex(pval_pos);
-	pos = Z_LVAL_PP(pval_pos);
+	pos = (*pval_pos)->value.lval;
 
 	convert_to_string_ex(pval_type);
-	type = Z_STRVAL_PP(pval_type);
+	type = (*pval_type)->value.str.val;
 
 	if (p && p->resultSets && p->resultSets->recordList &&
 		pos >= p->resultSetStartPoint &&
@@ -1996,7 +1996,7 @@ PHP_FUNCTION(yaz_syntax)
 	{
 		convert_to_string_ex (pval_syntax);
 		xfree (p->preferredRecordSyntax);
-		p->preferredRecordSyntax = xstrdup (Z_STRVAL_PP(pval_syntax));
+		p->preferredRecordSyntax = xstrdup ((*pval_syntax)->value.str.val);
 	}
 	release_assoc (p);
 }
@@ -2018,7 +2018,7 @@ PHP_FUNCTION(yaz_element)
 	{
 		convert_to_string_ex (pval_element);
 		xfree (p->elementSetNames);
-		p->elementSetNames = xstrdup (Z_STRVAL_PP(pval_element));
+		p->elementSetNames = xstrdup ((*pval_element)->value.str.val);
 	}
 	release_assoc (p);
 }
@@ -2041,11 +2041,11 @@ PHP_FUNCTION(yaz_range)
 	if (p)
 	{
 		convert_to_long_ex (pval_start);
-		p->resultSetStartPoint = Z_LVAL_PP(pval_start);
+		p->resultSetStartPoint = (*pval_start)->value.lval;
 		if (p->resultSetStartPoint < 1)
 			p->resultSetStartPoint = 1;
 		convert_to_long_ex (pval_number);
-		p->numberOfRecordsRequested = Z_LVAL_PP(pval_number);
+		p->numberOfRecordsRequested = (*pval_number)->value.lval;
 	}
 	release_assoc (p);
 }
@@ -2071,11 +2071,11 @@ PHP_FUNCTION(yaz_sort)
 		if (p->resultSets && p->resultSets->sorted)
 		{
 			if (!p->sort_criteria || strcmp (p->sort_criteria,
-											 Z_STRVAL_PP(pval_criteria)))
+											 (*pval_criteria)->value.str.val))
 				p->resultSets->sorted = 0;
 		}
 		xfree (p->sort_criteria);
-		p->sort_criteria = xstrdup (Z_STRVAL_PP(pval_criteria));
+		p->sort_criteria = xstrdup ((*pval_criteria)->value.str.val);
 	}
 	release_assoc (p);
 }
@@ -2441,7 +2441,7 @@ PHP_FUNCTION(yaz_scan_result)
 				add_next_index_string(my_zval, "unknown", 1);
 			
 			zend_hash_next_index_insert (
-				Z_ARRVAL_P(return_value), (void *) &my_zval, sizeof(zval *),
+				return_value->value.ht, (void *) &my_zval, sizeof(zval *),
 				NULL);
 		}
 
@@ -2492,7 +2492,7 @@ PHP_FUNCTION(yaz_ccl_conf)
 #endif
 			if (type != HASH_KEY_IS_STRING || Z_TYPE_PP(ent) != IS_STRING)
 				continue;
-			ccl_qual_fitem(p->ccl_parser->bibset, Z_STRVAL_PP(ent), key);
+			ccl_qual_fitem(p->ccl_parser->bibset, (*ent)->value.str.val, key);
 		}
 	}
 	release_assoc (p);
@@ -2523,7 +2523,7 @@ PHP_FUNCTION(yaz_ccl_parse)
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
-		const char *query_str = Z_STRVAL_PP(pval_query);
+		const char *query_str = (*pval_query)->value.str.val;
 		struct ccl_rpn_node *rpn;
 		struct ccl_token *token_list =
 			ccl_parser_tokenize(p->ccl_parser, query_str);
@@ -2575,7 +2575,7 @@ PHP_FUNCTION(yaz_database)
 	if (p)
 	{
 		xfree (p->local_databases);
-		p->local_databases = xstrdup (Z_STRVAL_PP(pval_database));
+		p->local_databases = xstrdup ((*pval_database)->value.str.val);
 		RETVAL_TRUE;
 	}
 	else
