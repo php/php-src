@@ -1,3 +1,69 @@
+2000-11-17  Stig Venaas  <venaas@uninett.no>
+
+    * EXTENSIONS: Added openssl extension info
+
+    * ext/openssl/openssl.c:
+    Added optional passphrase argument to openssl_get_privatekey()
+
+    * ext/openssl/openssl.c
+      ext/openssl/php_openssl.h:
+    Renamed openssl_read_privatekey openssl_get_privatekey, and some minor
+    fixes including init and shutdown functions
+
+2000-11-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Reset the state, if there is garbage in an HTML tag.
+
+    PR: #7854
+
+2000-11-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/standard/parsedate.y: close bug 7851
+
+2000-11-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php.h:
+    PHP does not care about inline at all, so get rid of this block.
+
+2000-11-17  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/php_odbc.c:
+    Missed one section that required the addition of a new HAVE_SOLID_30
+    This should be correct now.
+
+2000-11-17  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS:
+    Decided not to clutter NEWS file with build fix, It is big enough already.
+
+2000-11-17  Dan Kalowsky  <dkalowsky@wgate.com>
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Corrected the spelling of verion to version, and cleaned the configuration
+    code up a bit.  Also added in much better (read: tested) support for
+    Solid 3.0.   Credit for almost all of the patch goes to Eric Veldhuyzen,
+    minor modifications done (by me) to make it non-linux specific.
+
+    This commit also creates the HAVE_SOLID_30 define
+
+
+2000-11-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix.
+
+2000-11-17  Kirill Maximov  <kir@actimind.com>
+
+    * ext/standard/quot_print.c
+      ext/standard/tests/general_functions/002.phpt:
+     quoted_printable_decode() function is made RFC-2045 compliant. 
+
+      This hopefully closes bugs #5321, #7138, #7855.
+      Test script for the function is added.
+
 2000-11-16  Jason Greene  <jason@inetgurus.net>
 
     * NEWS: Added ext/java fix line - I should learn to use '@' correctly : )
