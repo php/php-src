@@ -201,7 +201,7 @@ PHP_FUNCTION(stream_socket_accept)
 
 	char *errstr = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz!", &zstream, &timeout, &peername) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|dz", &zstream, &timeout, &peername) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
