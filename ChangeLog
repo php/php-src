@@ -1,3 +1,75 @@
+2003-10-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      NFN
+
+    * ext/standard/file.c:
+      Change fgetcsv() so that the second parameter is also optional.
+
+2003-10-04  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+      Better fix #61
+
+    * pear/PEAR/Installer.php:
+      Fix: #61 [NEW]: error with pear install in pear 1.3b1
+      by outputting a full error message plus some help
+
+    * pear/package-PEAR.xml:
+      notes++
+      Bug #25413 Add local installed packages to list-all
+        (thanks to Christian DickMann)
+
+    * pear/PEAR/Command/Remote.php:
+      Bug #25413 Add local installed packages to list-all
+      (thanks to Christian DickMann)
+
+2003-10-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/config.m4:
+      Fix autoconf(2.13) build
+
+2003-10-04  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_4_3)
+      ext/mnogosearch/README:
+      - README in mnogosearch extension is updated
+
+    * ext/mnogosearch/README:
+      - Updated README for mnogosearch extension
+
+2003-10-04  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      fix warning in rare case (file doesn't exist in package.xml)
+
+2003-10-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      New feature news.
+
+    * ext/standard/basic_functions.h
+      ext/standard/config.m4
+      ext/standard/file.c
+      main/config.w32.h:
+      Fix fgetcsv() to correctly support international characters
+
+2003-10-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ncurses/config.m4
+      ext/ncurses/php_ncurses.h:
+      MFH: - Fixed bug #25752 (ext/ncurses: ncurses.h instead of curses.h with
+      BSD).
+
+    * ext/ncurses/config.m4
+      ext/ncurses/php_ncurses.h:
+      - Fixed bug #25752 (ext/ncurses: ncurses.h instead of curses.h with BSD).
+
+    * ext/ncurses/config.m4:
+      ws
+
 2003-10-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * NEWS
