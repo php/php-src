@@ -51,7 +51,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 	int overflow_limit, lcmd, ldir;
 	int rsrc_id;
 	char *b, *c, *d=NULL;
-	php_stream * stream = NULL;
+	php_stream *stream = NULL;
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif

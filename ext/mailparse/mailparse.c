@@ -333,7 +333,7 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == php_file_le_stream())	{
-		php_stream * stream = (php_stream*)what;
+		php_stream *stream = (php_stream*)what;
 
 		php_stream_rewind(stream);
 		while(!php_stream_eof(stream))	{
@@ -372,27 +372,27 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 /* {{{ proto boolean mailparse_stream_encode(resource sourcefp, resource destfp, string encoding)
    Streams data from source file pointer, apply encoding and write to destfp */
 
-static int mailparse_stream_output(int c, void * stream)
+static int mailparse_stream_output(int c, void *stream)
 {
 	char buf = c;
 	return php_stream_write((php_stream*)stream, &buf, 1);
 }
-static int mailparse_stream_flush(void * stream)
+static int mailparse_stream_flush(void *stream)
 {
 	return php_stream_flush((php_stream*)stream);
 }
 
 PHP_FUNCTION(mailparse_stream_encode)
 {
-	zval ** srcfile, ** destfile, ** encod;
-	void * what;
+	zval **srcfile, **destfile, **encod;
+	void *what;
 	int type;
-	php_stream * srcstream, * deststream;
-	char * buf;
+	php_stream *srcstream, *deststream;
+	char *buf;
 	size_t len;
 	size_t bufsize = 2048;
 	enum mbfl_no_encoding enc;
-	mbfl_convert_filter * conv = NULL;
+	mbfl_convert_filter *conv = NULL;
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &srcfile, &destfile, &encod) == FAILURE)	{
 		WRONG_PARAM_COUNT;
@@ -454,8 +454,8 @@ PHP_FUNCTION(mailparse_stream_encode)
    Incrementally parse data into buffer */
 PHP_FUNCTION(mailparse_msg_parse)
 {
-	zval ** arg, ** data;
-	struct rfc2045 * rfcbuf;
+	zval **arg, **data;
+	struct rfc2045 *rfcbuf;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg, &data) == FAILURE)	{
 		WRONG_PARAM_COUNT;
@@ -477,10 +477,10 @@ PHP_FUNCTION(mailparse_msg_parse)
    Parse file and return a resource representing the structure */
 PHP_FUNCTION(mailparse_msg_parse_file)
 {
-	zval ** filename;
-	struct rfc2045 * rfcbuf;
-	char * filebuf;
-	FILE * fp;
+	zval **filename;
+	struct rfc2045 *rfcbuf;
+	char *filebuf;
+	FILE *fp;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE)	{
 		WRONG_PARAM_COUNT;
@@ -519,7 +519,7 @@ PHP_FUNCTION(mailparse_msg_parse_file)
 PHP_FUNCTION(mailparse_msg_free)
 {
 	zval **arg;
-	struct rfc2045 * rfcbuf;
+	struct rfc2045 *rfcbuf;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -541,7 +541,7 @@ PHP_FUNCTION(mailparse_msg_free)
    Returns a handle that can be used to parse a message */
 PHP_FUNCTION(mailparse_msg_create)
 {
-	struct rfc2045 * rfcbuf;
+	struct rfc2045 *rfcbuf;
 
 	rfcbuf = rfc2045_alloc_ac();
 
@@ -551,7 +551,7 @@ PHP_FUNCTION(mailparse_msg_create)
 
 static void get_structure_callback(struct rfc2045 *p, struct rfc2045id *id, void *ptr)
 {
-	zval * return_value = (zval *)ptr;
+	zval *return_value = (zval *)ptr;
 	char intbuf[16];
 	char buf[256];
 	int len, i = 0;
@@ -577,7 +577,7 @@ static void get_structure_callback(struct rfc2045 *p, struct rfc2045id *id, void
 PHP_FUNCTION(mailparse_msg_get_structure)
 {
 	zval **arg;
-	struct rfc2045 * rfcbuf;
+	struct rfc2045 *rfcbuf;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -600,8 +600,8 @@ PHP_FUNCTION(mailparse_msg_get_structure)
 /* callback for decoding using a "userdefined" php function */
 static int extract_callback_user_func(const char *p, size_t n, zval *userfunc)
 {
-	zval * retval;
-	zval * arg;
+	zval *retval;
+	zval *arg;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(retval);
@@ -636,7 +636,7 @@ static int extract_callback_stdout(const char *p, size_t n, void *ptr)
 PHP_FUNCTION(mailparse_msg_extract_part)
 {
 	zval **arg, **bodystr, **cbfunc;
-	struct rfc2045 * rfcbuf;
+	struct rfc2045 *rfcbuf;
 	off_t start, end, body;
 	off_t nlines;
 	off_t nbodylines;
@@ -689,9 +689,9 @@ PHP_FUNCTION(mailparse_msg_extract_part)
 PHP_FUNCTION(mailparse_msg_extract_part_file)
 {
 	zval **arg, **filename, **cbfunc;
-	struct rfc2045 * rfcbuf;
-	char * filebuf = NULL;
-	FILE * fp = NULL;
+	struct rfc2045 *rfcbuf;
+	char *filebuf = NULL;
+	FILE *fp = NULL;
 	off_t start, end, body;
 	off_t nlines;
 	off_t nbodylines;
@@ -774,14 +774,14 @@ cleanup:
 	that are emitted here - it will break my PHP scripts if you do! */
 PHP_FUNCTION(mailparse_msg_get_part_data)
 {
-	zval ** arg;
-	struct rfc2045 * rfcbuf;
-	char * content_type, *transfer_encoding, *charset;
+	zval **arg;
+	struct rfc2045 *rfcbuf;
+	char *content_type, *transfer_encoding, *charset;
 	off_t start, end, body, nlines, nbodylines;
-	char * disposition, * disposition_name, *disposition_filename;
+	char *disposition, *disposition_name, *disposition_filename;
 	char *p;
-	struct rfc2045attr * attr;
-	zval * headers;
+	struct rfc2045attr *attr;
+	zval *headers;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)	{
 		WRONG_PARAM_COUNT;
@@ -865,8 +865,8 @@ PHP_FUNCTION(mailparse_msg_get_part_data)
    Returns a handle on a given section in a mimemessage */
 PHP_FUNCTION(mailparse_msg_get_part)
 {
-	zval ** arg, ** mimesection;
-	struct rfc2045 * rfcbuf, * newsection;
+	zval **arg, **mimesection;
+	struct rfc2045 *rfcbuf, *newsection;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg, &mimesection) == FAILURE)	{
 		WRONG_PARAM_COUNT;

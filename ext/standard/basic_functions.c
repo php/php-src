@@ -1508,7 +1508,7 @@ PHP_FUNCTION(error_log)
 
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC)
 {
-	php_stream * stream = NULL;
+	php_stream *stream = NULL;
 
 	switch (opt_err) {
 

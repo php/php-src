@@ -1435,7 +1435,7 @@ PHP_FUNCTION(pg_trace)
 	PGconn *pgsql;
 	char *mode = "w";
 	FILE *fp;
-	php_stream * stream;
+	php_stream *stream;
 	id = PGG(default_link);
 
 	switch (ZEND_NUM_ARGS()) {

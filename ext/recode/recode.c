@@ -163,7 +163,7 @@ PHP_FUNCTION(recode_file)
 	int success;
 	pval **req;
 	pval **input, **output;
-	php_stream * instream, *outstream;
+	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
 	int    in_type, out_type;
 
