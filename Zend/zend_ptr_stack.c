@@ -38,12 +38,8 @@ ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...)
 	va_list ptr;
 	void *elem;
 	
-	if (stack->top+count > stack->max) {		/* we need to allocate more memory */
-		stack->max *= 2;
-		stack->max += count; 
-		stack->elements = (void **) erealloc(stack->elements, (sizeof(void *) * (stack->max)));
-		stack->top_element = stack->elements+stack->top;
-	}
+	ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, count)
+
 	va_start(ptr, count);
 	while (count>0) {
 		elem = va_arg(ptr, void *);

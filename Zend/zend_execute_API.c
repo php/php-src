@@ -781,7 +781,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		fci->param_count = 2;
 	}
 
-	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) fci->param_count, NULL);
+	zend_ptr_stack_2_push(&EG(argument_stack), (void *) (long) fci->param_count, NULL);
 
 	original_function_state_ptr = EG(function_state_ptr);
 	EG(function_state_ptr) = &EX(function_state);
