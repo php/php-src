@@ -292,8 +292,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 
 #undef MIN
 #undef MAX
-#define MAX(a,b)  (((a)>(b))?(a):(b))
-#define MIN(a,b)  (((a)<(b))?(a):(b))
+#define MAX(a, b)  (((a)>(b))?(a):(b))
+#define MIN(a, b)  (((a)<(b))?(a):(b))
 #define ZEND_STRL(str)		(str), (sizeof(str)-1)
 #define ZEND_STRS(str)		(str), (sizeof(str))
 #define ZEND_NORMALIZE_BOOL(n)			\
@@ -490,15 +490,15 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
 	}										\
 	INIT_PZVAL(&(zv));
 
-#define REPLACE_ZVAL_VALUE(ppzv_dest,pzv_src,copy) {	\
-	int is_ref,refcount;						\
+#define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
+	int is_ref, refcount;						\
 												\
 	SEPARATE_ZVAL_IF_NOT_REF(ppzv_dest);		\
 	is_ref = (*ppzv_dest)->is_ref;				\
 	refcount = (*ppzv_dest)->refcount;			\
 	zval_dtor(*ppzv_dest);						\
 	**ppzv_dest = *pzv_src;						\
-	if (copy) {                                  \
+	if (copy) {                                 \
 		zval_copy_ctor(*ppzv_dest);				\
     }		                                    \
 	(*ppzv_dest)->is_ref = is_ref;				\

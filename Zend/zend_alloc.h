@@ -84,11 +84,11 @@ ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 /* Standard wrapper macros */
 #define emalloc(size)					_emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define efree(ptr)						_efree((ptr) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define ecalloc(nmemb,size)				_ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define erealloc(ptr,size)				_erealloc((ptr), (size),0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define erealloc_recoverable(ptr,size)	_erealloc((ptr), (size),1 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define ecalloc(nmemb, size)			_ecalloc((nmemb), (size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define erealloc(ptr, size)				_erealloc((ptr), (size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define erealloc_recoverable(ptr, size)	_erealloc((ptr), (size), 1 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define estrdup(s)						_estrdup((s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-#define estrndup(s,length)				_estrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define estrndup(s, length)				_estrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define persist_alloc(p)				_persist_alloc((p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 /* Relay wrapper macros */
@@ -102,15 +102,15 @@ ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 #define persist_alloc_rel(p)				_persist_alloc((p) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
 /* Selective persistent/non persistent allocation macros */
-#define pemalloc(size,persistent) ((persistent)?malloc(size):emalloc(size))
-#define pefree(ptr,persistent)  ((persistent)?free(ptr):efree(ptr))
-#define pecalloc(nmemb,size,persistent) ((persistent)?calloc((nmemb),(size)):ecalloc((nmemb),(size)))
-#define perealloc(ptr,size,persistent) ((persistent)?realloc((ptr),(size)):erealloc((ptr),(size)))
-#define perealloc_recoverable(ptr,size,persistent) ((persistent)?realloc((ptr),(size)):erealloc_recoverable((ptr),(size)))
-#define pestrdup(s,persistent) ((persistent)?strdup(s):estrdup(s))
+#define pemalloc(size, persistent) ((persistent)?malloc(size):emalloc(size))
+#define pefree(ptr, persistent)  ((persistent)?free(ptr):efree(ptr))
+#define pecalloc(nmemb, size, persistent) ((persistent)?calloc((nmemb), (size)):ecalloc((nmemb), (size)))
+#define perealloc(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc((ptr), (size)))
+#define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
+#define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
 
 #define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):(empty_string))
-#define safe_estrndup(ptr,len) ((ptr)?(estrndup((ptr),(len))):(empty_string))
+#define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):(empty_string))
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
 

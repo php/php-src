@@ -63,7 +63,7 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 }
 
 
-#define DEL_LLIST_ELEMENT(current,l) \
+#define DEL_LLIST_ELEMENT(current, l) \
 			if (current->prev) {\
 				current->prev->next = current->next;\
 			} else {\
@@ -86,7 +86,7 @@ ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare
 
 	while (current) {
 		if (compare(current->data, element)) {
-			DEL_LLIST_ELEMENT(current,l);
+			DEL_LLIST_ELEMENT(current, l);
 			break;
 		}
 		current = current->next;
@@ -151,7 +151,7 @@ ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data))
 	while (element) {
 		next = element->next;
 		if (func(element->data)) {
-			DEL_LLIST_ELEMENT(element,l);
+			DEL_LLIST_ELEMENT(element, l);
 		}
 		element = next;
 	}

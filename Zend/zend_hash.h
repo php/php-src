@@ -82,23 +82,23 @@ ZEND_API void zend_hash_destroy(HashTable *ht);
 ZEND_API void zend_hash_clean(HashTable *ht);
 
 /* additions/updates/changes */
-ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest,int flag);
-#define zend_hash_update(ht,arKey,nKeyLength,pData,nDataSize,pDest) \
-		zend_hash_add_or_update(ht,arKey,nKeyLength,pData,nDataSize,pDest,HASH_UPDATE)
-#define zend_hash_add(ht,arKey,nKeyLength,pData,nDataSize,pDest) \
-		zend_hash_add_or_update(ht,arKey,nKeyLength,pData,nDataSize,pDest,HASH_ADD)
+ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag);
+#define zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
+		zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_UPDATE)
+#define zend_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
+		zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD)
 
-ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest,int flag);
-#define zend_hash_quick_update(ht,arKey,nKeyLength,h,pData,nDataSize,pDest) \
-		zend_hash_quick_add_or_update(ht,arKey,nKeyLength,h,pData,nDataSize,pDest,HASH_UPDATE)
-#define zend_hash_quick_add(ht,arKey,nKeyLength,h,pData,nDataSize,pDest) \
-		zend_hash_quick_add_or_update(ht,arKey,nKeyLength,h,pData,nDataSize,pDest,HASH_ADD)
+ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag);
+#define zend_hash_quick_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
+		zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_UPDATE)
+#define zend_hash_quick_add(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
+		zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_ADD)
 
 ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag);
-#define zend_hash_index_update(ht,h,pData,nDataSize,pDest) \
-		zend_hash_index_update_or_next_insert(ht,h,pData,nDataSize,pDest,HASH_UPDATE)
-#define zend_hash_next_index_insert(ht,pData,nDataSize,pDest) \
-		zend_hash_index_update_or_next_insert(ht,0,pData,nDataSize,pDest,HASH_NEXT_INSERT)
+#define zend_hash_index_update(ht, h, pData, nDataSize, pDest) \
+		zend_hash_index_update_or_next_insert(ht, h, pData, nDataSize, pDest, HASH_UPDATE)
+#define zend_hash_next_index_insert(ht, pData, nDataSize, pDest) \
+		zend_hash_index_update_or_next_insert(ht, 0, pData, nDataSize, pDest, HASH_NEXT_INSERT)
 
 ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength);
 
@@ -134,10 +134,10 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 
 /* Deletes */
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag);
-#define zend_hash_del(ht,arKey,nKeyLength) \
-		zend_hash_del_key_or_index(ht,arKey,nKeyLength,0,HASH_DEL_KEY)
-#define zend_hash_index_del(ht,h) \
-		zend_hash_del_key_or_index(ht,NULL,0,h,HASH_DEL_INDEX)
+#define zend_hash_del(ht, arKey, nKeyLength) \
+		zend_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
+#define zend_hash_index_del(ht, h) \
+		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 
 ZEND_API ulong zend_get_hash_value(HashTable *ht, char *arKey, uint nKeyLength);
 

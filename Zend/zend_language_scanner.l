@@ -98,9 +98,9 @@ ZEND_API zend_scanner_globals language_scanner_globals;
 
 #define YY_FATAL_ERROR zend_fatal_scanner_error
 
-#define HANDLE_NEWLINES(s,l)													\
+#define HANDLE_NEWLINES(s, l)													\
 do {																			\
-	char *p = (s),*boundary = p+(l);											\
+	char *p = (s), *boundary = p+(l);											\
 																				\
 	while (p<boundary) {														\
 		if (*p == '\n') {														\
@@ -150,7 +150,7 @@ END_EXTERN_C()
 static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
 #ifndef __cplusplus
-	memcpy(&lex_state->buffer_state,&YY_CURRENT_BUFFER,sizeof(YY_BUFFER_STATE));
+	memcpy(&lex_state->buffer_state, &YY_CURRENT_BUFFER, sizeof(YY_BUFFER_STATE));
 	lex_state->in = yyin;
 	lex_state->state = YYSTATE;
 #else
@@ -1008,7 +1008,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	errno = 0;
 	zendlval->value.lval = strtol(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
-		zendlval->value.dval = strtod(yytext,NULL);
+		zendlval->value.dval = strtod(yytext, NULL);
 		zendlval->type = IS_DOUBLE;
 		return T_DNUMBER;
 	} else {
@@ -1023,7 +1023,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (errno == ERANGE) { /* overflow */
 		/* not trying strtod - it returns trash on 0x-es */
 		zendlval->value.lval = LONG_MAX; /* maximal long */
-		zend_error(E_NOTICE,"Hex number is too big: %s",yytext);
+		zend_error(E_NOTICE,"Hex number is too big: %s", yytext);
 	} else {
 		if (zendlval->value.lval < 0) {
 			/* maintain consistency with the old way */
@@ -1045,7 +1045,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	zendlval->value.dval = strtod(yytext,NULL);
+	zendlval->value.dval = strtod(yytext, NULL);
 	zendlval->type = IS_DOUBLE;
 	return T_DNUMBER;
 }
@@ -1078,7 +1078,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <INITIAL>"<?"|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	if (CG(short_tags) || yyleng>2) { /* yyleng>2 means it's not <? but <script> */
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
@@ -1173,7 +1173,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
 
@@ -1264,7 +1264,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
 	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	
 	/* convert escape sequences */
 	s = t = zendlval->value.str.val;
@@ -1346,7 +1346,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
 	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	
 	/* convert escape sequences */
 	s = t = zendlval->value.str.val;
@@ -1451,7 +1451,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1459,7 +1459,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_SINGLE_QUOTE>([^'\\]|\\[^'\\])+ {
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1556,7 +1556,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			zendlval->value.lval = (long) yytext[1];
 			break;
 		default:
-			zendlval->value.str.val = estrndup(yytext,yyleng);
+			zendlval->value.str.val = estrndup(yytext, yyleng);
 			zendlval->value.str.len = yyleng;
 			zendlval->type = IS_STRING;
 			return T_BAD_CHARACTER;
@@ -1604,5 +1604,5 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>{ANY_CHAR} {
-	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d",yytext[0],yytext[0],YYSTATE);
+	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 }

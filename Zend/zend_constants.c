@@ -167,7 +167,7 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 	c.value.type = IS_LONG;
 	c.value.value.lval = lval;
 	c.flags = flags;
-	c.name = zend_strndup(name,name_len);
+	c.name = zend_strndup(name, name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -181,7 +181,7 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 	c.value.type = IS_DOUBLE;
 	c.value.value.dval = dval;
 	c.flags = flags;
-	c.name = zend_strndup(name,name_len);
+	c.name = zend_strndup(name, name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -196,7 +196,7 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 	c.value.value.str.val = strval;
 	c.value.value.str.len = strlen;
 	c.flags = flags;
-	c.name = zend_strndup(name,name_len);
+	c.name = zend_strndup(name, name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -212,7 +212,7 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
-	char *lookup_name = estrndup(name,name_len);
+	char *lookup_name = estrndup(name, name_len);
 	int retval;
 
 	zend_str_tolower(lookup_name, name_len);
@@ -240,14 +240,14 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	int ret = SUCCESS;
 
 #if 0
-	printf("Registering constant for module %d\n",c->module_number);
+	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
 	zend_str_tolower(lowercase_name, c->name_len);
 	if (zend_hash_add(EG(zend_constants), lowercase_name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		free(c->name);
 		zval_dtor(&c->value);
-		zend_error(E_NOTICE,"Constant %s already defined",lowercase_name);
+		zend_error(E_NOTICE,"Constant %s already defined", lowercase_name);
 		ret = FAILURE;
 	}
 	free(lowercase_name);

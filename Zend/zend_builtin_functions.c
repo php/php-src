@@ -251,7 +251,7 @@ ZEND_FUNCTION(strcmp)
 	}
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
-	RETURN_LONG(zend_binary_zval_strcmp(*s1,*s2));
+	RETURN_LONG(zend_binary_zval_strcmp(*s1, *s2));
 }
 /* }}} */
 
@@ -267,7 +267,7 @@ ZEND_FUNCTION(strncmp)
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
 	convert_to_long_ex(s3);
-	RETURN_LONG(zend_binary_zval_strncmp(*s1,*s2,*s3));
+	RETURN_LONG(zend_binary_zval_strncmp(*s1, *s2, *s3));
 }
 /* }}} */
 
@@ -298,13 +298,13 @@ ZEND_FUNCTION(strncasecmp)
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
 	convert_to_long_ex(s3);
-	RETURN_LONG(zend_binary_zval_strncasecmp(*s1,*s2,*s3));
+	RETURN_LONG(zend_binary_zval_strncasecmp(*s1, *s2, *s3));
 }
 /* }}} */
 
 ZEND_FUNCTION(each)
 {
-	zval **array,*entry,**entry_ptr, *tmp;
+	zval **array, *entry, **entry_ptr, *tmp;
 	char *string_key;
 	ulong num_key;
 	zval **inserted_pointer;
@@ -342,10 +342,10 @@ ZEND_FUNCTION(each)
 	/* add the key elements */
 	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
 		case HASH_KEY_IS_STRING:
-			add_get_index_string(return_value,0,string_key,(void **) &inserted_pointer,0);
+			add_get_index_string(return_value, 0, string_key, (void **) &inserted_pointer, 0);
 			break;
 		case HASH_KEY_IS_LONG:
-			add_get_index_long(return_value,0,num_key, (void **) &inserted_pointer);
+			add_get_index_long(return_value, 0, num_key, (void **) &inserted_pointer);
 			break;
 	}
 	zend_hash_update(return_value->value.ht, "key", sizeof("key"), inserted_pointer, sizeof(zval *), NULL);
@@ -363,7 +363,7 @@ ZEND_FUNCTION(error_reporting)
 		case 0:
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1,&arg) == FAILURE) {
+			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg);

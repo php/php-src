@@ -445,12 +445,12 @@ expr_without_variable:
 	|	expr '|' expr	{ zend_do_binary_op(ZEND_BW_OR, &$$, &$1, &$3 TSRMLS_CC); }
 	|	expr '&' expr	{ zend_do_binary_op(ZEND_BW_AND, &$$, &$1, &$3 TSRMLS_CC); }
 	|	expr '^' expr	{ zend_do_binary_op(ZEND_BW_XOR, &$$, &$1, &$3 TSRMLS_CC); }
-	|	expr '.' expr 	{ zend_do_binary_op(ZEND_CONCAT,&$$,&$1,&$3 TSRMLS_CC); }
-	|	expr '+' expr 	{ zend_do_binary_op(ZEND_ADD,&$$,&$1,&$3 TSRMLS_CC); }
-	|	expr '-' expr 	{ zend_do_binary_op(ZEND_SUB,&$$,&$1,&$3 TSRMLS_CC); }
-	|	expr '*' expr	{ zend_do_binary_op(ZEND_MUL,&$$,&$1,&$3 TSRMLS_CC); }
-	|	expr '/' expr	{ zend_do_binary_op(ZEND_DIV,&$$,&$1,&$3 TSRMLS_CC); }
-	|	expr '%' expr 	{ zend_do_binary_op(ZEND_MOD,&$$,&$1,&$3 TSRMLS_CC); }
+	|	expr '.' expr 	{ zend_do_binary_op(ZEND_CONCAT, &$$, &$1, &$3 TSRMLS_CC); }
+	|	expr '+' expr 	{ zend_do_binary_op(ZEND_ADD, &$$, &$1, &$3 TSRMLS_CC); }
+	|	expr '-' expr 	{ zend_do_binary_op(ZEND_SUB, &$$, &$1, &$3 TSRMLS_CC); }
+	|	expr '*' expr	{ zend_do_binary_op(ZEND_MUL, &$$, &$1, &$3 TSRMLS_CC); }
+	|	expr '/' expr	{ zend_do_binary_op(ZEND_DIV, &$$, &$1, &$3 TSRMLS_CC); }
+	|	expr '%' expr 	{ zend_do_binary_op(ZEND_MOD, &$$, &$1, &$3 TSRMLS_CC); }
 	| 	expr T_SL expr	{ zend_do_binary_op(ZEND_SL, &$$, &$1, &$3 TSRMLS_CC); }
 	|	expr T_SR expr	{ zend_do_binary_op(ZEND_SR, &$$, &$1, &$3 TSRMLS_CC); }
 	|	'+' expr { $1.u.constant.value.lval=0; $1.u.constant.type=IS_LONG; $1.op_type = IS_CONST; INIT_PZVAL(&$1.u.constant); zend_do_binary_op(ZEND_ADD, &$$, &$1, &$2 TSRMLS_CC); }

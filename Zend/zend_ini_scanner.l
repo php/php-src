@@ -172,7 +172,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
-	ini_lval->value.str.val = zend_strndup("1",1);
+	ini_lval->value.str.val = zend_strndup("1", 1);
 	ini_lval->value.str.len = 1;
 	ini_lval->type = IS_STRING;
 	return CFG_TRUE;
@@ -180,7 +180,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>[ ]*("false"|"off"|"no"|"none")[ ]* {
-	ini_lval->value.str.val = zend_strndup("",0);
+	ini_lval->value.str.val = zend_strndup("", 0);
 	ini_lval->value.str.len = 0;
 	ini_lval->type = IS_STRING;
 	return CFG_FALSE;
@@ -199,7 +199,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yytext++;
 	yyleng--;
 
-	ini_lval->value.str.val = zend_strndup(yytext,yyleng);
+	ini_lval->value.str.val = zend_strndup(yytext, yyleng);
 	ini_lval->value.str.len = yyleng;
 	ini_lval->type = IS_STRING;
 	return SECTION;
@@ -249,7 +249,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 	}
 	if (yyleng!=0) {
-		ini_lval->value.str.val = zend_strndup(yytext,yyleng);
+		ini_lval->value.str.val = zend_strndup(yytext, yyleng);
 		ini_lval->value.str.len = yyleng;
 		ini_lval->type = IS_STRING;
 		return TC_STRING;
@@ -279,7 +279,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>. {
 #if DEBUG
-	php_error(E_NOTICE,"Unexpected character on line %d:  '%s' (ASCII %d)\n",yylineno,yytext,yytext[0]);
+	php_error(E_NOTICE,"Unexpected character on line %d:  '%s' (ASCII %d)\n", yylineno, yytext, yytext[0]);
 #endif
 }
 

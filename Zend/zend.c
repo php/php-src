@@ -103,7 +103,7 @@ static void print_hash(HashTable *ht, int indent)
 				ZEND_PUTS(string_key);
 				break;
 			case HASH_KEY_IS_LONG:
-				zend_printf("%ld",num_key);
+				zend_printf("%ld", num_key);
 				break;
 		}
 		ZEND_PUTS("] => ");
@@ -183,7 +183,7 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 		}
 		return 0;
 	}
-	write_func(expr->value.str.val,expr->value.str.len);
+	write_func(expr->value.str.val, expr->value.str.len);
 	if (use_copy) {
 		zval_dtor(expr);
 	}
@@ -207,7 +207,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				expr->value.ht->nApplyCount=0;
 				return;
 			}
-			print_hash(expr->value.ht,indent);
+			print_hash(expr->value.ht, indent);
 			expr->value.ht->nApplyCount--;
 			break;
 		case IS_OBJECT:
