@@ -34,6 +34,7 @@ PHP                                                                        NEWS
   (Christian, Rob)
 - Fixed bug #29656 (segfault on result and statement properties). (Georg)
 - Fixed bug #29447 (Reflection API issues). (Marcus)
+- Fixed bug #29296 (Added sslv2 and sslv3 transports). (Wez)
 - Fixed bug #29283 (Invalid statement handle in mysqli on execute). (Georg)
 - Fixed bug #27994 (segfault with Soapserver when WSDL-Cache is enabled).
   (Dmitry)
