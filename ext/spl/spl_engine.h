@@ -34,8 +34,6 @@
 	EX(opline)++;			\
 	return 0;
 
-int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS);
-
 int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
 /* {{{ zend_class_entry */
