@@ -784,8 +784,10 @@ session.cache_limiter = nocache
 ; Document expires after n minutes.
 session.cache_expire = 180
 
-; use transient sid support if enabled by compiling with --enable-trans-sid.
-session.use_trans_sid = 1
+; trans sid support is disabled by default.
+; Use of trans sid may risk your users security. It may not be
+; feasible to use this option for some sites. Use this option with caution.
+session.use_trans_sid = 0
 
 url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
