@@ -867,7 +867,7 @@ if true; then
 cat <<X
 +--------------------------------------------------------------------+
 | ATTENTION!                                                         |
-| Something is likely to be screwed up here, because the configure   |
+| Something is likely to be messed up here, because the configure    |
 | script was not able to detect a simple feature on your platform.   |
 | This is often caused by incorrect configuration parameters. Please |
 | see the file debug.log for error messages.                         |
