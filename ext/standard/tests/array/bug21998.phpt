@@ -1,5 +1,5 @@
 --TEST--
-Bug #21998 (array_pop() changes current array key)
+Bug #21998 (array_pop() does not reset the current array position)
 --FILE--
 <?php
 
