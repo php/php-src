@@ -13,10 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors:                                                             |
+   | PHP 4.0 patches by Thies C. Arntzen (thies@digicol.de)               |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
+
+/* {{{ includes/startup/misc */
 
 #include "php.h"
 #include "fopen-wrappers.h"
@@ -38,9 +41,46 @@
 #include "win32/readdir.h"
 #endif
 
-static int dirp_id = 0;
+typedef struct {
+	int default_dir;
+} php_dir_globals;
+
+#ifdef ZTS
+#define DIR(v) (dir_globals->v)
+#define DIRLS_FETCH() php_dir_globals *dir_globals = ts_resource(dir_globals_id)
+int dir_globals_id;
+#else
+#define DIR(v) (xml_globals.v)
+#define DIRLS_FETCH()
+php_dir_globals dir_globals;
+#endif
+
+typedef struct {
+	int id;
+	DIR *dir;
+} php_dir;
+
 static int le_dirp;
+
 static zend_class_entry *dir_class_entry_ptr;
+
+#define FETCH_DIRP() \
+	if (ARG_COUNT(ht) == 0) { \
+		myself = getThis(); \
+		if (myself) { \
+			if (zend_hash_find(myself->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) { \
+				php_error(E_WARNING, "unable to find my handle property"); \
+				RETURN_FALSE; \
+			} \
+			ZEND_FETCH_RESOURCE(dirp,php_dir *,tmp,-1, "Directory", le_dirp); \
+		} else { \
+			ZEND_FETCH_RESOURCE(dirp,php_dir *,0,DIR(default_dir), "Directory", le_dirp); \
+		} \
+	} else if ((ARG_COUNT(ht) != 1) || getParametersEx(1, &id) == FAILURE) { \
+		WRONG_PARAM_COUNT; \
+	} else { \
+		ZEND_FETCH_RESOURCE(dirp,php_dir *,id,-1, "Directory", le_dirp); \
+	} 
 
 static zend_function_entry php_dir_functions[] = {
 	PHP_FE(opendir,				NULL)
@@ -65,209 +105,170 @@ php3_module_entry php3_dir_module_entry = {
 	"PHP_dir", php_dir_functions, PHP_MINIT(dir), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
+static void _dir_dtor(php_dir *dirp)
+{
+	closedir(dirp->dir);
+	efree(dirp);
+}
+
+#ifdef ZTS
+static void php_dir_init_globals(php_dir_globals *dir_globals)
+{
+	DIR(default_dir) = 0;
+}
+#endif
 
 PHP_MINIT_FUNCTION(dir)
 {
 	zend_class_entry dir_class_entry;
 
-	le_dirp = register_list_destructors(closedir,NULL);
+	le_dirp = register_list_destructors(_dir_dtor,NULL);
 
 	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
 	dir_class_entry_ptr = register_internal_class(&dir_class_entry);
+
+#ifdef ZTS
+	dir_globals_id = ts_allocate_id(sizeof(php_dir_globals), php_dir_init_globals, NULL);
+#else
+	DIR(default_dir) = 0;
+#endif
+
 	return SUCCESS;
 }
 
+/* }}} */
+/* {{{ internal functions */
+
+static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
+{
+	pval **arg;
+	php_dir *dirp;
+	DIRLS_FETCH();
+	
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(arg);
+
+	if (_php3_check_open_basedir((*arg)->value.str.val)) {
+		RETURN_FALSE;
+	}
+	
+	dirp = emalloc(sizeof(php_dir));
+
+	dirp->dir = opendir((*arg)->value.str.val);
+	
+	if (! dirp->dir) {
+		efree(dirp);
+		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
+		RETURN_FALSE;
+	}
+
+	dirp->id = zend_list_insert(dirp,le_dirp);
+
+	DIR(default_dir) = dirp->id;
+
+	if (createobject) {
+		object_init_ex(return_value, dir_class_entry_ptr);
+		add_property_stringl(return_value, "path", (*arg)->value.str.val, (*arg)->value.str.len, 1);
+		add_property_resource(return_value, "handle", dirp->id);
+		zend_list_addref(dirp->id);
+	} else {
+		RETURN_RESOURCE(dirp->id);
+	}
+}
+
+/* }}} */
 /* {{{ proto int opendir(string path)
    Open a directory and return a dir_handle */
+
 PHP_FUNCTION(opendir)
 {
-	pval *arg;
-	DIR *dirp;
-	int ret;
-	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string(arg);
-
-	/* Check open_basedir */
-	if (_php3_check_open_basedir(arg->value.str.val)) RETURN_FALSE;
-	
-	dirp = opendir(arg->value.str.val);
-	if (!dirp) {
-		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno),errno);
-		RETURN_FALSE;
-	}
-	ret = php3_list_insert(dirp, le_dirp);
-	dirp_id = ret;
-	RETURN_LONG(ret);
+	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
-/* }}} */
 
+/* }}} */
+/* {{{ proto class dir(string directory)
+Directory class with properties, handle and class and methods read, rewind and close */
+
+PHP_FUNCTION(getdir)
+{
+	_php_do_opendir(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+}
+
+/* }}} */
 /* {{{ proto void closedir([int dir_handle])
 Close directory connection identified by the dir_handle */
+
 PHP_FUNCTION(closedir)
 {
-	pval *id, **tmp;
-	int id_to_find;
-	DIR *dirp;
-	int dirp_type;
-	
-	if (ARG_COUNT(ht) == 0) {
-		id = getThis();
-		if (id) {
-			if (zend_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
-				php_error(E_WARNING, "unable to find my handle property");
-				RETURN_FALSE;
-			}
-			id_to_find = (*tmp)->value.lval;
-		} else {
-			id_to_find = dirp_id;
-		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
-	if (!dirp || dirp_type != le_dirp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-	php3_list_delete(id_to_find);
+	pval **id, **tmp, *myself;
+	php_dir *dirp;
+	DIRLS_FETCH();
+
+	FETCH_DIRP();
+
+	php3_list_delete(dirp->id);
 }
 /* }}} */
-
 /* {{{ proto int chdir(string directory)
 Change the current directory */
+
 PHP_FUNCTION(chdir)
 {
-	pval *arg;
+	pval **arg;
 	int ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
-	ret = chdir(arg->value.str.val);
+	convert_to_string_ex(arg);
 
+	ret = chdir((*arg)->value.str.val);
+	
 	if (ret < 0) {
 		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */
-
 /* {{{ proto void rewinddir([int dir_handle])
 Rewind dir_handle back to the start */
+
 PHP_FUNCTION(rewinddir)
 {
-	pval *id, **tmp;
-	int id_to_find;
-	DIR *dirp;
-	int dirp_type;
+	pval **id, **tmp, *myself;
+	php_dir *dirp;
+	DIRLS_FETCH();
 	
-	if (ARG_COUNT(ht) == 0) {
-		id = getThis();
-		if (id) {
-			if (zend_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
-				php_error(E_WARNING, "unable to find my handle property");
-				RETURN_FALSE;
-			}
-			id_to_find = (*tmp)->value.lval;
-		} else {
-			id_to_find = dirp_id;
-		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
-	if (!dirp || dirp_type != le_dirp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-	rewinddir(dirp);
+	FETCH_DIRP();
+
+	rewinddir(dirp->dir);
 }
 /* }}} */
-
 /* {{{ proto string readdir([int dir_handle])
 Read directory entry from dir_handle */
+
 PHP_FUNCTION(readdir)
 {
-	pval *id, **tmp;
-	int id_to_find;
-	DIR *dirp;
-	int dirp_type;
+	pval **id, **tmp, *myself;
+	php_dir *dirp;
 	struct dirent *direntp;
+	DIRLS_FETCH();
+
+	FETCH_DIRP();
 	
-	if (ARG_COUNT(ht) == 0) {
-		id = getThis();
-		if (id) {
-			if (zend_hash_find(id->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) {
-				php_error(E_WARNING, "unable to find my handle property");
-				RETURN_FALSE;
-			}
-			id_to_find = (*tmp)->value.lval;
-		} else {
-			id_to_find = dirp_id;
-		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
-	if (!dirp || dirp_type != le_dirp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-	direntp = readdir(dirp);
+	direntp = readdir(dirp->dir);
 	if (direntp) {
 		RETURN_STRINGL(direntp->d_name, strlen(direntp->d_name), 1);
 	}
 	RETURN_FALSE;
 }
+
 /* }}} */
 
-/* {{{ proto class dir(string directory)
-Directory class with properties, handle and class and methods read, rewind and close */
-PHP_FUNCTION(getdir)
-{
-	pval *arg;
-	DIR *dirp;
-	int ret;
-	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string(arg);
-
-	/* Check open_basedir */
-	if (_php3_check_open_basedir(arg->value.str.val)) RETURN_FALSE;
-	
-	dirp = opendir(arg->value.str.val);
-	if (!dirp) {
-		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
-		RETURN_FALSE;
-	}
-	ret = php3_list_insert(dirp, le_dirp);
-	dirp_id = ret;
-
-	/* construct an object with some methods */
-	object_init_ex(return_value, dir_class_entry_ptr);
-	add_property_long(return_value, "handle", ret);
-	add_property_stringl(return_value, "path", arg->value.str.val, arg->value.str.len, 1);
-}
-/* }}} */
 
 /*
  * Local variables:
