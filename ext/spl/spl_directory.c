@@ -44,13 +44,18 @@ SPL_CLASS_FUNCTION(dir, next);
 SPL_CLASS_FUNCTION(dir, has_more);
 SPL_CLASS_FUNCTION(dir, get_path);
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0)
+	ZEND_ARG_INFO(0, path)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_dir_class_functions[] = {
-	SPL_CLASS_FE(dir, __construct,   NULL)
-	SPL_CLASS_FE(dir, rewind,        NULL)
-	SPL_CLASS_FE(dir, current,       NULL)
-	SPL_CLASS_FE(dir, next,          NULL)
-	SPL_CLASS_FE(dir, has_more,      NULL)
-	SPL_CLASS_FE(dir, get_path,      NULL)
+	SPL_CLASS_FE(dir, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, current,       NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, has_more,      NULL, ZEND_ACC_PUBLIC)
+	SPL_CLASS_FE(dir, get_path,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
