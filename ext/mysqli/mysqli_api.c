@@ -1836,7 +1836,7 @@ PHP_FUNCTION(mysqli_sqlstate)
 #endif
 /* }}} */
 
-/* {{{ proto string mysqli_ssl_set(object link [,string key [,string cert [,string ca [,string capath [,string cipher]]]]])
+/* {{{ proto bool mysqli_ssl_set(object link ,string key ,string cert ,string ca ,string capath ,string cipher])
 */
 PHP_FUNCTION(mysqli_ssl_set)
 {
