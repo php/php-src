@@ -54,7 +54,6 @@ END_EXTERN_C()
 
 
 #include "zend_compile.h"
-#include "zend_execute.h"
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
@@ -208,6 +207,5 @@ struct _zend_alloc_globals {
 	unsigned char memory_exhausted;
 #endif
 };
-
 
 #endif /* _T_GLOBALS_H */

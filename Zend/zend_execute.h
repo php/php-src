@@ -23,6 +23,8 @@
 
 #include "zend_compile.h"
 #include "zend_hash.h"
+#include "zend_variables.h"
+#include "zend_execute_locks.h"
 
 typedef union _temp_variable {
 	zval tmp_var;
@@ -52,15 +54,95 @@ void init_executor(CLS_D ELS_DC);
 void shutdown_executor(ELS_D);
 void execute(zend_op_array *op_array ELS_DC);
 ZEND_API int zend_is_true(zval *op);
-ZEND_API inline void safe_free_zval_ptr(zval *p);
+ZEND_API inline void safe_free_zval_ptr(zval *p)
+#if defined(C0X_INLINE_SEMANTICS)
+{
+	ELS_FETCH();
+
+	if (p!=EG(uninitialized_zval_ptr)) {
+		FREE_ZVAL(p);
+	}
+}
+#else
+;
+#endif
+
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC);
-ZEND_API inline int i_zend_is_true(zval *op);
+ZEND_API inline int i_zend_is_true(zval *op)
+#if defined(C0X_INLINE_SEMANTICS)
+{
+	int result;
+
+	switch (op->type) {
+		case IS_NULL:
+			result = 0;
+			break;
+		case IS_LONG:
+		case IS_BOOL:
+		case IS_RESOURCE:
+			result = (op->value.lval?1:0);
+			break;
+		case IS_DOUBLE:
+			result = (op->value.dval ? 1 : 0);
+			break;
+		case IS_STRING:
+			if (op->value.str.len == 0
+				|| (op->value.str.len==1 && op->value.str.val[0]=='0')) {
+				result = 0;
+			} else {
+				result = 1;
+			}
+			break;
+		case IS_ARRAY:
+			result = (zend_hash_num_elements(op->value.ht)?1:0);
+			break;
+		case IS_OBJECT:
+			result = (zend_hash_num_elements(op->value.obj.properties)?1:0);
+			break;
+		default:
+			result = 0;
+			break;
+	}
+	return result;
+}
+#else
+;
+#endif
+
 ZEND_API int zval_update_constant(zval **pp, void *arg);
-ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC);
 
 /* dedicated Zend executor functions - do not use! */
-ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D);
-ZEND_API inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC);
+ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
+#if defined(C0X_INLINE_SEMANTICS)
+{
+	void **p = EG(argument_stack).top_element-2;
+	int delete_count = (ulong) *p;
+
+	EG(argument_stack).top -= (delete_count+2);
+	while (--delete_count>=0) {
+		zval_ptr_dtor((zval **) --p);
+	}
+	EG(argument_stack).top_element = p;
+}
+#else
+;
+#endif
+
+ZEND_API inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
+#if defined(C0X_INLINE_SEMANTICS)
+{
+	void **p = EG(argument_stack).top_element-2;
+	int arg_count = (ulong) *p;
+
+	if (requested_arg>arg_count) {
+		return FAILURE;
+	}
+	*data = (p-arg_count+requested_arg-1);
+	return SUCCESS;
+}
+#else
+;
+#endif
 
 #if SUPPORT_INTERACTIVE
 void execute_new_code(CLS_D);
@@ -78,6 +160,60 @@ ZEND_API zend_bool zend_is_executing(void);
 
 #define active_opline (*EG(opline_ptr))
 
+ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC)
+#if defined(C0X_INLINE_SEMANTICS)
+{
+	zval *variable_ptr = *variable_ptr_ptr;
+	zval *value_ptr;
+	
+
+	if (!value_ptr_ptr) {
+		zend_error(E_ERROR, "Cannot create references to string offsets nor overloaded objects");
+		return;
+	}
+
+	value_ptr = *value_ptr_ptr;
+	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
+		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
+/*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
+	} else if (variable_ptr_ptr != value_ptr_ptr) {
+		variable_ptr->refcount--;
+		if (variable_ptr->refcount==0) {
+			zendi_zval_dtor(*variable_ptr);
+			FREE_ZVAL(variable_ptr);
+		}
+
+		if (!PZVAL_IS_REF(value_ptr)) {
+			/* break it away */
+			value_ptr->refcount--;
+			if (value_ptr->refcount>0) {
+				ALLOC_ZVAL(*value_ptr_ptr);
+				**value_ptr_ptr = *value_ptr;
+				value_ptr = *value_ptr_ptr;
+				zendi_zval_copy_ctor(*value_ptr);
+			}
+			value_ptr->refcount = 1;
+			value_ptr->is_ref = 1;
+		}
+
+		*variable_ptr_ptr = value_ptr;
+		value_ptr->refcount++;
+	} else {
+		if (variable_ptr->refcount>1) { /* we need to break away */
+			SEPARATE_ZVAL(variable_ptr_ptr);
+		}
+		(*variable_ptr_ptr)->is_ref = 1;
+	}
+
+	if (result && (result->op_type != IS_UNUSED)) {
+		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
+		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
+		AI_USE_PTR(Ts[result->u.var].var);
+	}
+}
+#else
+;
+#endif
 
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
