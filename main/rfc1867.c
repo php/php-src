@@ -807,12 +807,18 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				register_http_post_files_variable(lbuf, filename, http_post_files, 0 TSRMLS_CC);
 			}
-			s = "";
 			efree(filename);
+			s = NULL;
 	
 			/* Possible Content-Type: */
 			if (!(cd = php_mime_get_hdr_value(header, "Content-Type")) || filename == "") {
 				cd = "";
+			} else { 
+				/* fix for Opera 6.01 */
+				s = strchr(cd, ';');
+				if (s != NULL) {
+					*s = '\0';
+				}
 			}
 
 			/* Add $foo_type */
@@ -830,6 +836,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				sprintf(lbuf, "%s[type]", param);
 			}
 			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
+
+			/* Restore Content-Type Header */
+			if (s != NULL) {
+				*s = ';';
+			}
+			s = "";
 
 			/* Initialize variables */
 			add_protected_variable(param TSRMLS_CC);
