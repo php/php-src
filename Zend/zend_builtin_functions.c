@@ -1016,7 +1016,13 @@ static int add_extension_info(zend_module_entry *module, void *arg)
 static int add_constant_info(zend_constant *constant, void *arg)
 {
 	zval *name_array = (zval *)arg;
-	add_assoc_zval(name_array, constant->name, &(constant->value));
+	zval *const_val;
+
+	MAKE_STD_ZVAL(const_val);
+	*const_val = constant->value;
+	zval_copy_ctor(const_val);
+	INIT_PZVAL(const_val);
+	add_assoc_zval_ex(name_array, constant->name, constant->name_len, const_val);
 	return 0;
 }
 
