@@ -1605,30 +1605,11 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers)
 
 static void unable_to_call_user_function(zval **fcall)
 {
-	switch (Z_TYPE_PP(fcall)) {
-	case IS_STRING:
-		php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(fcall));
-		break;
-	case IS_ARRAY: {
-		zval **tmp_obj;
-		zval **tmp_func;
-		char format[] = "Unable to call %s::%s()";
-		
-		zend_hash_index_find(Z_ARRVAL_PP(fcall), 0, (void **) &tmp_obj);
-		zend_hash_index_find(Z_ARRVAL_PP(fcall), 1, (void **) &tmp_func);
+	char *name;
 
-		if (Z_TYPE_PP(tmp_obj) == IS_OBJECT) {
-			php_error(E_WARNING, format, Z_OBJCE_PP(tmp_obj)->name, Z_STRVAL_PP(tmp_func));
-		}
-		else {
-			convert_to_string_ex(tmp_obj);
-
-			php_error(E_WARNING, format, Z_STRVAL_PP(tmp_obj), Z_STRVAL_PP(tmp_func));
-		}
-
-		break;
-	}
-	}
+	zend_is_callable(*fcall, 1, &name);
+	php_error(E_WARNING, "Unable to call %s()", name);
+	efree(name);
 }
 
 /* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...])
@@ -1709,7 +1690,7 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-#define _CUM_DEPREC "The %s() function is depreciated, use the call_user_func variety with the array($obj, \"method\") syntax instead"
+#define _CUM_DEPREC "The %s() function is deprecated, use the call_user_func variety with the array(&$obj, \"method\") syntax instead"
 
 /* {{{ proto mixed call_user_method(string method_name, mixed object [, mixed parameter] [, mixed ...])
    Call a user method on a specific object or class */
