@@ -1,13 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
-- Fix possible crash when internal get_method is not defined (Andi)
-- Use the scope of the PHP user function when calling methods using
-  call_user_func() in conjuntion with the array("Class", "Method") syntax
+- Fixed possible crash when internal get_method() is not defined. (Andi)
+- Fixed calling methods using call_user_func() in conjunction with 
+  the array("Class","Method") syntax to use the scope of the PHP user function.
   (Dmitry)
 - Fixed php-cgi to not ignore command-line switches when run in a web context.
-  This fixes our test cases allowing INI with GET sections to work (Rasmus)
-- Fixed getopt() so it works without $_SERVER (Rasmus, bfrance)
+  This fixes our test cases allowing INI with GET sections to work. (Rasmus)
+- Fixed getopt() so it works without $_SERVER. (Rasmus, bfrance)
 - Added support for PHP 4 style object comparisons which is enabled in
   ze1_compatiblity_mode. (Andi)
 - Added support for PHP 4 style object conversion to long, double, and boolean
