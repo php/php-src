@@ -44,6 +44,7 @@ static ZEND_FUNCTION(function_exists);
 static ZEND_FUNCTION(leak);
 static ZEND_FUNCTION(get_used_files);
 static ZEND_FUNCTION(get_imported_files);
+static ZEND_FUNCTION(is_subclass_of);
 
 extern unsigned char first_arg_force_ref[];
 
@@ -67,6 +68,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(leak,				NULL)
 	ZEND_FE(get_used_files,		NULL)
 	ZEND_FE(get_imported_files,	NULL)
+	ZEND_FE(is_subclass_of,		NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -390,6 +392,45 @@ ZEND_FUNCTION(get_parent_class)
 		RETURN_FALSE;
 	}
 	RETURN_STRINGL((*arg)->value.obj.ce->parent->name,	(*arg)->value.obj.ce->parent->name_length, 1);
+}
+/* }}} */
+
+/* {{{ proto bool is_subclass_of(object object, string class_name)
+   Returns true if the object is part of hierarchy derived from passed class */
+ZEND_FUNCTION(is_subclass_of)
+{
+	zval **obj, **class_name;
+	char *lcname;
+	zend_class_entry *parent_ce = NULL;
+	CLS_FETCH();
+
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &obj, &class_name)==FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if ((*obj)->type != IS_OBJECT) {
+		RETURN_FALSE;
+	}
+
+	parent_ce = (*obj)->value.obj.ce->parent;
+	if (!parent_ce) {
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(class_name);
+	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
+	zend_str_tolower(lcname, (*class_name)->value.str.len);
+
+	do {
+		if (!strcmp(parent_ce->name, lcname)) {
+			efree(lcname);
+			RETURN_TRUE;
+		}
+	} while (parent_ce->parent
+             && zend_hash_find(CG(class_table), parent_ce->parent->name,
+                               parent_ce->parent->name_length+1, (void**)&parent_ce)==SUCCESS);
+	efree(lcname);
+	RETURN_FALSE;
 }
 /* }}} */
 
