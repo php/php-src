@@ -1,3 +1,52 @@
+2002-07-30  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c:
+    fixes a typo in the word "limit", adds the null character to the strlen,
+    and seems to make imap_get_quotaroot return the correct values despite
+    cclients claim of "getquotaroot list improper".
+
+2002-07-30  rodif_bl  <rodif_bl@pb1.pair.com>
+
+    * ext/standard/array.c: fixed bugs 16063 and 16068
+    increased preformance of array_pop and array_shift
+
+2002-07-30  sesser  <sesser@pb1.pair.com>
+
+    * ext/ftp/php_ftp.c:
+    ftp_close returns now TRUE on success and FALSE on failure.
+
+2002-07-30  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/standard/filestat.c:
+    Commiting Steph@php.net's patch to re-enable touch on Win32 machines
+
+2002-07-30  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * ext/ext_skel: Add --skel=dir option to ext_skel (patch from David Viner)
+
+    * ext/standard/parsedate.y
+      NEWS: Fix strtotime() "next" keyword handling.
+
+    * NEWS: WTF?  What sort of bogus commit was that?  Fine, here you go.
+
+2002-07-30  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: .
+
+2002-07-30  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * NEWS: .
+
+    * ext/standard/string.c: Fix for #18638  (str_rot13 bug)
+
+2002-07-30  dickmeiss  <dickmeiss@pb1.pair.com>
+
+    * ext/yaz/php_yaz.c: Fixed proxy setting for ZOOM
+
+2002-07-30  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: hot, damn hot.
+
 2002-07-29  Sterling Hughes  <sterling@pb1.pair.com>
 
     * ext/xslt/sablot.c: add sablotron version, patch by Christian Stocker...
