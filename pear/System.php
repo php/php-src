@@ -284,10 +284,10 @@ class System extends PEAR
     * Creates temporal files or directories
     *
     * Usage:
-    *   1) System::mktemp("prefix");
-    *   2) System::mktemp("-d prefix");
-    *   3) System::mktemp();
-    *   4) System::mktemp("-t /var/tmp prefix");
+    *   1) $tempfile = System::mktemp("prefix");
+    *   2) $tempdir  = System::mktemp("-d prefix");
+    *   3) $tempfile = System::mktemp();
+    *   4) $tempfile = System::mktemp("-t /var/tmp prefix");
     *
     * prefix -> The string that will be prepended to the temp name
     *           (defaults to "tmp").
@@ -298,7 +298,7 @@ class System extends PEAR
     *           c:\windows\temp or /tmp will be used.
     *
     * @param   string  $args  The arguments
-    * @return  mixed   PEAR_Error or true for success
+    * @return  mixed   the full path of the created (file|dir) or a PEAR_Error
     * @access  public
     */
     function mktemp($args = null)
