@@ -284,7 +284,10 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define PUTS_H(str)					php_header_write((str), strlen((str)))
 #define PUTC_H(c)					(php_header_write(&(c), 1), (c))
 
+#ifdef ZTS
 #define VIRTUAL_DIR
+#endif
+
 /* Virtual current directory support */
 #ifdef VIRTUAL_DIR
 #include "php_virtual_cwd.h"
