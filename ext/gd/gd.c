@@ -458,7 +458,7 @@ PHP_FUNCTION(imageloadfont)
 	Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
 PHP_FUNCTION(imagesetstyle)
 {
-	zval **IM, **dither, **styles;
+	zval **IM, **styles;
 	gdImagePtr im;
 	int * stylearr;
 	int index;
@@ -470,7 +470,6 @@ PHP_FUNCTION(imagesetstyle)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-	convert_to_array_ex(dither);
 
 	/* copy the style values in the stylearr */
 	stylearr = emalloc(sizeof(int) * zend_hash_num_elements(HASH_OF(*styles)));
