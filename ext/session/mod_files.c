@@ -98,7 +98,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	memcpy(buf, data->basedir, data->basedir_len);
 	n = data->basedir_len;
 	buf[n++] = PHP_DIR_SEPARATOR;
-	for (i = 0; i < data->dirdepth; i++) {
+	for (i = 0; i < (int)data->dirdepth; i++) {
 		buf[n++] = *p++;
 		buf[n++] = PHP_DIR_SEPARATOR;
 	}
@@ -290,7 +290,7 @@ PS_WRITE_FUNC(files)
 	 * the existing data set.
 	 */
 	
-	if (vallen < data->st_size)
+	if (vallen < (int)data->st_size)
 		ftruncate(data->fd, 0);
 
 #ifdef HAVE_PWRITE
