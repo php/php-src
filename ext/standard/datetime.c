@@ -96,13 +96,6 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	tzset();
 #endif
 	tn = localtime(&t);
-	if (gm) {
-#if HAVE_TM_GMTOFF
-		gmadjust=(tn->tm_gmtoff)/3600;
-#else
-		gmadjust=timezone/3600;
-#endif
-	}
 	memcpy(&ta,tn,sizeof(struct tm));
 	ta.tm_isdst = -1;
 
@@ -123,10 +116,22 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		ta.tm_min = arguments[1]->value.lval;
 		/* fall-through */
 	case 1:
-		ta.tm_hour = arguments[0]->value.lval - gmadjust;
+		ta.tm_hour = arguments[0]->value.lval;
 	case 0:
 		break;
 	}
+	t=mktime(&ta); /* Need to do this because of Daylight savings */
+	tn = localtime(&t);
+
+	if (gm) {
+#if HAVE_TM_GMTOFF
+		gmadjust=(tn->tm_gmtoff)/3600;
+#else
+		gmadjust=timezone/3600;
+#endif
+	}
+
+	ta.tm_hour+=gmadjust;
 	return_value->value.lval = mktime(&ta);
 	return_value->type = IS_LONG;
 }
