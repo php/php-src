@@ -603,19 +603,17 @@ static void php_message_handler_for_zend(long message, void *data)
 						mem_header *t = (mem_header *) data;
 						void *ptr = (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING);
 
-#if WIN32||WINNT
 						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
-#else
-						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8lX (%d bytes), allocated in %s on line %d<br>\n", SAFE_FILENAME(SG(request_info).path_translated), (unsigned long)ptr, t->size,t->filename,t->lineno);
-#endif
+						if (t->orig_filename) {
+							char relay_buf[512];
+
+							snprintf(relay_buf, 512, "%s(%d) : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
+							strcat(memory_leak_buf, relay_buf);
+						}
 					} else {
 						unsigned long leak_count = (unsigned long) data;
 
-#if WIN32||WINNT
 						snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
-#else
-						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %ld time%s\n", SAFE_FILENAME(SG(request_info).path_translated), leak_count, (leak_count>1?"s":""));
-#endif
 					}
 #	if WIN32||WINNT
 					OutputDebugString(memory_leak_buf);
