@@ -31,17 +31,19 @@ $dom = new domDocument();
       } else {
           $dom = new domdocument;
           $dom->loadXML("<root>this is from an external DomDocument</root>");
-          return $dom->documentElement  ;
+          return $dom->documentElement;
       }
   }
   function nonDomNode() {
     return  new foo();
   }
---EXPECT--
+--EXPECTF--
 Test 11: php:function Support
+
+Notice: Object of class foo could not be converted to string in %s on line 15
 <?xml version="1.0"?>
 foobar
 foobar
 this is from an external DomDocument
 from the Input Document
-not a DomNode object
+Object
