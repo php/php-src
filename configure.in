@@ -684,7 +684,7 @@ PHP_REGEX
 dnl If we are using gcc and the user has not specified CFLAGS, add -O2.
 test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
 
-CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
+CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT"
 
 export CPPFLAGS
 
@@ -693,7 +693,6 @@ if test "$PHP_THREAD_SAFETY" = "yes" || test "$PHP_EXPERIMENTAL_ZTS" = "yes"; th
   TSRM_LIB='TSRM/libtsrm.la'
   TSRM_DIR=TSRM
   AC_DEFINE(ZTS)
-  CPPFLAGS="$CPPFLAGS -D_REENTRANT"
   INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM -I\$(top_srcdir)/TSRM"
   PHP_THREAD_SAFETY=yes
 else
