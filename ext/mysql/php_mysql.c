@@ -322,6 +322,12 @@ PHP_RINIT_FUNCTION(mysql)
 	
 	MySG(default_link)=-1;
 	MySG(num_links) = MySG(num_persistent);
+	/* Reset connect error/errno on every request */
+	if (MySG(connect_error)!=NULL) {
+		efree(MySG(connect_error));
+		MySG(connect_error)=NULL;
+	}
+	MySG(connect_errno)=0;
 	return SUCCESS;
 }
 
