@@ -1,7 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 3
-- You may now use count() on COM arrays. (Wez)
+- Added count() support for COM arrays. (Wez)
+- Changed tidy_node to tidyNode and removed tidy_exception. (John)
 - Fixed bug #28300 (Userspace stream/filter names forced to lowercase). (Sara)
 - Fixed bug #28287 (stream_*_register() not calling __autoload()). (Sara)
 - Fixed bug #28161 (COM: Array style properties could not be accessed). (Wez)
@@ -25,7 +26,6 @@ PHP                                                                        NEWS
   in using reflection API. (Marcus)
 - Changed tidy error handling to no longer use exceptions and 
   renamed the "error_buf" property to errorBuffer. (John)
-- Changed tidy_node to tidyNode and removed tidy_exception (John)
 - Changed class and method names to use studlyCaps convention. (Marcus)
 - Changed language parser to throw errors when a non-empty signature is used in
   a destructor definition. (Marcus)
