@@ -43,27 +43,18 @@ static char EntTable[][7] =
 	"uuml","yacute","thorn","yuml"
 };
 
-static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all)
 {
-    pval **arg;
-    int i, len, maxlen;
-    unsigned char *old;
+	int i, maxlen, len;
 	char *new;
 
-    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-    }
-
-    convert_to_string_ex(arg);
-
-	maxlen = 2 * (*arg)->value.str.len;
+	maxlen = 2 * oldlen;
 	if (maxlen < 128)
 		maxlen = 128;
 	new = emalloc (maxlen);
 	len = 0;
 
-	old = (unsigned char *)(*arg)->value.str.val;
-	i = (*arg)->value.str.len;
+	i = oldlen;
 	while (i--) {
 		if (len + 9 > maxlen)
 			new = erealloc (new, maxlen += 128);
@@ -90,9 +81,25 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		old++;
 	}
     new [len] = '\0';
+	*newlen = len;
 
-    RETVAL_STRINGL(new,len,1);
-    efree(new);
+	return new;
+}
+
+static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
+{
+    zval **arg;
+    int len;
+	char *new;
+
+    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+    }
+
+    convert_to_string_ex(arg);
+
+	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all);
+    RETVAL_STRINGL(new,len,0);
 }
 
 #define HTML_SPECIALCHARS 	0
