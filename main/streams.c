@@ -1264,6 +1264,9 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 #ifdef S_ISFIFO
 		 && !S_ISFIFO(ssbuf.sb.st_mode)
 #endif
+#ifdef S_ISCHR
+		 && !S_ISCHR(ssbuf.sb.st_mode)
+#endif
 		) {
 			return 1;
 		}
