@@ -144,7 +144,7 @@ PHP_FUNCTION(disk_total_space)
 	/* These are used by GetDiskFreeSpaceEx, if available. */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
-  	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	ULARGE_INTEGER TotalNumberOfFreeBytes;
 
 	/* These are used by GetDiskFreeSpace otherwise. */
 	DWORD SectorsPerCluster;
@@ -207,7 +207,7 @@ PHP_FUNCTION(disk_total_space)
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-  		char drive = Z_STRVAL_PP(path)[0] & 95;
+		char drive = Z_STRVAL_PP(path)[0] & 95;
 
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
@@ -247,7 +247,7 @@ PHP_FUNCTION(disk_free_space)
 	/* These are used by GetDiskFreeSpaceEx, if available. */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
-  	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	ULARGE_INTEGER TotalNumberOfFreeBytes;
 
 	/* These are used by GetDiskFreeSpace otherwise. */
 	DWORD SectorsPerCluster;
@@ -310,7 +310,7 @@ PHP_FUNCTION(disk_free_space)
 #elif defined(OS2)
 	{
 		FSALLOCATE fsinfo;
-  		char drive = Z_STRVAL_PP(path)[0] & 95;
+		char drive = Z_STRVAL_PP(path)[0] & 95;
 
 		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
 			bytesfree = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnitAvail;
@@ -458,7 +458,7 @@ PHP_FUNCTION(chmod)
 	   that safe mode doesn't give them.
 	*/
 	if(PG(safe_mode))
-	  imode &= 0777;
+		imode &= 0777;
 
 	ret = VCWD_CHMOD(Z_STRVAL_PP(filename), imode);
 	if (ret == -1) {
@@ -477,7 +477,7 @@ PHP_FUNCTION(touch)
 	pval **filename, **filetime, **fileatime;
 	int ret;
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-    struct stat_libc sb;
+	struct stat_libc sb;
 #else
 	struct stat sb;
 #endif
@@ -572,18 +572,18 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 #ifndef PHP_WIN32
-    switch (type) {
-        case FS_IS_W:
-            RETURN_BOOL (!access (filename, W_OK));
-        case FS_IS_R:
-            RETURN_BOOL (!access (filename, R_OK));
-        case FS_IS_X:
-            RETURN_BOOL (!access (filename, X_OK));
-        case FS_EXISTS:
-            RETURN_BOOL (!access (filename, F_OK));
-    }
+	switch (type) {
+		case FS_IS_W:
+			RETURN_BOOL (!access (filename, W_OK));
+		case FS_IS_R:
+			RETURN_BOOL (!access (filename, R_OK));
+		case FS_IS_X:
+			RETURN_BOOL (!access (filename, X_OK));
+		case FS_EXISTS:
+			RETURN_BOOL (!access (filename, F_OK));
+	}
 #endif
-            
+
 	stat_sb = &BG(sb);
 
 	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
@@ -669,21 +669,21 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_LONG((long)BG(sb).st_gid);
 	case FS_ATIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
-        RETURN_LONG((long)(BG(sb).st_atime).tv_nsec);
+		RETURN_LONG((long)(BG(sb).st_atime).tv_nsec);
 #else
-        RETURN_LONG((long)BG(sb).st_atime);
+		RETURN_LONG((long)BG(sb).st_atime);
 #endif
 	case FS_MTIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
 		RETURN_LONG((long)(BG(sb).st_mtime).tv_nsec);
 #else
-        RETURN_LONG((long)BG(sb).st_mtime);
+	RETURN_LONG((long)BG(sb).st_mtime);
 #endif
 	case FS_CTIME:
 #if defined(NETWARE) && defined(NEW_LIBC)
 		RETURN_LONG((long)(BG(sb).st_ctime).tv_nsec);
 #else
-        RETURN_LONG((long)BG(sb).st_ctime);
+		RETURN_LONG((long)BG(sb).st_ctime);
 #endif
 	case FS_TYPE:
 #if HAVE_SYMLINK
@@ -705,7 +705,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 #ifdef NETWARE
-        RETURN_LONG(0);
+		RETURN_LONG(0);
 #else
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
@@ -713,7 +713,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
 	case FS_IS_R:
 #ifdef NETWARE
-        RETURN_LONG(0);
+		RETURN_LONG(0);
 #else
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
@@ -721,7 +721,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
 	case FS_IS_X:
 #ifdef NETWARE
-        RETURN_LONG(0);
+		RETURN_LONG(0);
 #else
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
@@ -748,7 +748,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-	
+
 		MAKE_LONG_ZVAL_INCREF(stat_dev, stat_sb->st_dev);
 		MAKE_LONG_ZVAL_INCREF(stat_ino, stat_sb->st_ino);
 		MAKE_LONG_ZVAL_INCREF(stat_mode, stat_sb->st_mode);
