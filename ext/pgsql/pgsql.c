@@ -2664,7 +2664,7 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 		return NULL;
 	buflen = strlen(strtext);	/* will shrink, also we discover if
 								 * strtext */
-	buffer = (unsigned char *) malloc(buflen);	/* isn't NULL terminated */
+	buffer = (unsigned char *) emalloc(buflen);	/* isn't NULL terminated */
 	if (buffer == NULL)
 		return NULL;
 	for (bp = buffer, sp = strtext; *sp != '\0'; bp++, sp++)
@@ -2710,10 +2710,14 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 			case 3:
 				if (isdigit(*sp))		/* state=4 */
 				{
-					int			v;
+					unsigned int  v,i;
+					unsigned char buf[4]; /* 000 + '\0' */
 
 					bp -= 3;
-					sscanf(sp - 2, "%03o", &v);
+					for (i = 0; i < 3; i++)
+						buf[i] = *((sp-2)+i);
+					buf[i] = '\0';
+					sscanf(buf, "%03o", &v);
 					*bp = v;
 					buflen -= 3;
 					state = 0;
@@ -2726,7 +2730,7 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 				break;
 		}
 	}
-	buffer = realloc(buffer, buflen);
+	buffer = erealloc(buffer, buflen);
 	if (buffer == NULL)
 		return NULL;
 
@@ -2749,8 +2753,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 	if (!to) {
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL(to, to_len, 1);
-	free(to);
+	RETVAL_STRINGL(to, to_len, 0);
 }
 /* }}} */
 #endif
