@@ -473,16 +473,19 @@ static void sapi_isapi_register_iis_variables(LPEXTENSION_CONTROL_BLOCK lpECB, z
 	HSE_URL_MAPEX_INFO humi;
 
 	/* Get SCRIPT_NAME, we use this to work out which bit of the URL
-	 * belongs in PHP's version of PATH_INFO
+	 * belongs in PHP's version of PATH_INFO.  SCRIPT_NAME also becomes PHP_SELF.
 	 */
 	lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &scriptname_len);
+	php_register_variable("SCRIPT_FILENAME", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
 
-	/* Adjust Zeus' version of PATH_INFO, set PHP_SELF,
+	/* Adjust IIS' version of PATH_INFO, set PHP_SELF,
 	 * and generate REQUEST_URI
+	 * Get and adjust PATH_TRANSLATED to what PHP wants
 	 */
 	if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
 
 		/* Chop off filename to get just the 'real' PATH_INFO' */
+		php_register_variable( "ORIG_PATH_INFO", static_variable_buf, track_vars_array TSRMLS_CC );
 		pathinfo_len = variable_len - scriptname_len;
 		strncpy(path_info_buf, static_variable_buf + scriptname_len - 1, sizeof(path_info_buf)-1);
 		php_register_variable( "PATH_INFO", path_info_buf, track_vars_array TSRMLS_CC );
@@ -496,23 +499,17 @@ static void sapi_isapi_register_iis_variables(LPEXTENSION_CONTROL_BLOCK lpECB, z
 			php_register_variable( "URL", static_variable_buf, track_vars_array TSRMLS_CC );
 			php_register_variable( "REQUEST_URI", static_variable_buf, track_vars_array TSRMLS_CC );
 		}
-	}
-
-	/* Get and adjust PATH_TRANSLATED to what PHP wants */
-	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
-	if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_TRANSLATED", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
-		static_variable_buf[ variable_len - pathinfo_len - 1 ] = '\0';
-		php_register_variable( "SCRIPT_FILENAME", static_variable_buf, track_vars_array TSRMLS_CC );
-		efree(SG(request_info).path_translated);
-		SG(request_info).path_translated = estrdup(static_variable_buf);
-		if (pathinfo_len) {
-			char *t = strrchr(static_variable_buf,'\\');
-			if (t) *t = 0;
-			strncat(static_variable_buf, path_info_buf, sizeof(static_variable_buf)-1);
-		} else {
-			static_variable_buf[0]=0;
+		variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+		if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_TRANSLATED", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+			php_register_variable( "ORIG_PATH_TRANSLATED", static_variable_buf, track_vars_array TSRMLS_CC );
 		}
-		php_register_variable( "PATH_TRANSLATED", static_variable_buf, track_vars_array TSRMLS_CC );
+		if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, path_info_buf, &pathinfo_len, (LPDWORD) &humi)) {
+			/* Remove trailing \  */
+			if (humi.lpszPath[variable_len-2] == '\\') {
+				humi.lpszPath[variable_len-2] = 0;
+			}
+			php_register_variable("PATH_TRANSLATED", humi.lpszPath, track_vars_array TSRMLS_CC);
+		}
 	}
 
 	static_variable_buf[0] = '/';
@@ -714,15 +711,47 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LP
 
 static void init_request_info(LPEXTENSION_CONTROL_BLOCK lpECB TSRMLS_DC)
 {
+	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+#ifndef WITH_ZEUS
+	HSE_URL_MAPEX_INFO humi;
+#endif
+
 	SG(request_info).request_method = lpECB->lpszMethod;
 	SG(request_info).query_string = lpECB->lpszQueryString;
-	SG(request_info).path_translated = estrdup(lpECB->lpszPathTranslated);
 	SG(request_info).request_uri = lpECB->lpszPathInfo;
 	SG(request_info).content_type = lpECB->lpszContentType;
 	SG(request_info).content_length = lpECB->cbTotalBytes;
 	SG(sapi_headers).http_response_code = 200;  /* I think dwHttpStatusCode is invalid at this stage -RL */
 	if (!bFilterLoaded) { /* we don't have valid ISAPI Filter information */
 		SG(request_info).auth_user = SG(request_info).auth_password = NULL;
+	}
+
+#ifdef WITH_ZEUS
+	/* PATH_TRANSLATED can contain extra PATH_INFO stuff after the
+	 * file being loaded, so we must use SCRIPT_FILENAME instead
+	 */
+	if(lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_FILENAME", static_variable_buf, &variable_len)) {
+		SG(request_info).path_translated = estrdup(static_variable_buf);
+	} else 
+#else
+	/* happily, IIS gives us SCRIPT_NAME which is correct (without PATH_INFO stuff)
+	   so we can just map that to the physical path and we have our filename */
+
+	lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &variable_len);
+	if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, static_variable_buf, &variable_len, (LPDWORD) &humi)) {
+		SG(request_info).path_translated = estrdup(humi.lpszPath);
+	} else 
+#endif
+		/* if mapping fails, default to what the server tells us */
+		SG(request_info).path_translated = estrdup(lpECB->lpszPathTranslated);
+
+	/* some server configurations allow '..' to slip through in the
+	   translated path.   We'll just refuse to handle such a path. */
+	if (strstr(SG(request_info).path_translated,"..")) {
+		SG(sapi_headers).http_response_code = 404;
+		efree(SG(request_info).path_translated);
+		SG(request_info).path_translated = NULL;
 	}
 }
 
@@ -782,6 +811,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
 	zend_file_handle file_handle;
 	zend_bool stack_overflown=0;
+	int retval = FAILURE;
 #ifdef PHP_ENABLE_SEH
 	LPEXCEPTION_POINTERS e;
 #endif
@@ -795,39 +825,23 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			SG(server_context) = lpECB;
 
 			php_request_startup(TSRMLS_C);
-#ifdef WITH_ZEUS
-			/* PATH_TRANSLATED can contain extra PATH_INFO stuff after the
-			 * file being loaded, so we must use SCRIPT_FILENAME instead
-			 */
-			file_handle.filename = (char *)emalloc( ISAPI_SERVER_VAR_BUF_SIZE );
-			file_handle.free_filename = 1;
-			{
-				DWORD filename_len = ISAPI_SERVER_VAR_BUF_SIZE;
-				if( !lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_FILENAME", file_handle.filename, &filename_len) || file_handle.filename[ 0 ] == '\0' ) {
-					/* If we're running on an earlier version of Zeus, this
-					 * variable won't be present, so fall back to old behaviour.
-					 */
-					efree( file_handle.filename );
-					file_handle.filename = SG(request_info).path_translated;
-					file_handle.free_filename = 0;
-				}
-			}
-#else
+
 			file_handle.filename = SG(request_info).path_translated;
 			file_handle.free_filename = 0;
-#endif
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.opened_path = NULL;
-			/* some server configurations allow '..' to slip through in the
-			   translated path.   We'll just refuse to handle such a path. */
-			if (strstr(SG(request_info).path_translated,"..")) {
+
+			/* open the script here so we can 404 if it fails */
+			if (file_handle.filename)
+				retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
+
+			if (!file_handle.filename || retval == FAILURE) {
 				SG(sapi_headers).http_response_code = 404;
-				efree(SG(request_info).path_translated);
-				SG(request_info).path_translated = NULL;
+				PUTS("No input file specified.\n");
+			} else {
+				php_execute_script(&file_handle TSRMLS_CC);
 			}
 
-
-			php_execute_script(&file_handle TSRMLS_CC);
 			if (SG(request_info).cookie_data) {
 				efree(SG(request_info).cookie_data);
 			}
