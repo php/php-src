@@ -488,7 +488,7 @@ PHP_FUNCTION(gzuncompress)
 	/*
 	 zlib::uncompress() wants to know the output data length
 	 if none was given as a parameter
-	 we try from input length * 2 up to input length * 2^8
+	 we try from input length * 2 up to input length * 2^15
 	 doubling it whenever it wasn't big enough
 	 that should be eneugh for all real life cases	
 	*/
@@ -616,7 +616,7 @@ PHP_FUNCTION(gzinflate)
 	/*
 	  stream.avail_out wants to know the output data length
 	  if none was given as a parameter
-	  we try from input length * 2 up to input length * 2^16
+	  we try from input length * 2 up to input length * 2^15
 	  doubling it whenever it wasn't big enough
 	  that should be enaugh for all real life cases	
 	*/
