@@ -16,6 +16,7 @@
    |          Eric Warnke    <ericw@albany.edu>                           |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Gerrit Thomson <334647@swin.edu.au>                         |
+   |          Jani Taskinen  <sniper@iki.fi>                              |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
@@ -718,7 +719,6 @@ PHP_FUNCTION(ldap_get_entries)
 	pval *tmp1, *tmp2;
 	LDAP *ldap;
 	int num_entries, num_attrib, num_values, i;
-	int attr_count, entry_count;
 	BerElement *ber;
 	char *attribute;
 	size_t attr_len;
@@ -736,32 +736,22 @@ PHP_FUNCTION(ldap_get_entries)
 	if (ldap_result == NULL) RETURN_FALSE;
 
 	num_entries = ldap_count_entries(ldap, ldap_result);
+	if (num_entries == 0) RETURN_FALSE;
 
 	array_init(return_value);
-	add_assoc_long(return_value, "count", num_entries);
-
-	if (num_entries == 0) return;
 	
+	num_entries = 0;
 	ldap_result_entry = ldap_first_entry(ldap, ldap_result);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
-	
-	entry_count = 0;
 
 	while(ldap_result_entry != NULL) {
-
-		num_attrib = 0;
-		attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber);
-		if (attribute == NULL) RETURN_FALSE;
-		while (attribute != NULL) {
-			num_attrib++;
-			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
-		}
 
 		MAKE_STD_ZVAL(tmp1);
 		array_init(tmp1);
 
-		attr_count = 0;
+		num_attrib = 0;
 		attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber);
+
 		while (attribute != NULL) {
 			ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute);
 			num_values = ldap_count_values(ldap_value);
@@ -769,16 +759,16 @@ PHP_FUNCTION(ldap_get_entries)
 			MAKE_STD_ZVAL(tmp2);
 			array_init(tmp2);
 			add_assoc_long(tmp2, "count", num_values);
-			for(i=0; i<num_values; i++) {
+			for(i=0; i < num_values; i++) {
 				add_index_string(tmp2, i, ldap_value[i], 1);
 			}	
 			ldap_value_free(ldap_value);
 
 			attr_len = strlen(attribute);
 			zend_hash_update(tmp1->value.ht, php_strtolower(attribute, attr_len), attr_len+1, (void *) &tmp2, sizeof(pval *), NULL);
-			add_index_string(tmp1, attr_count, attribute, 1);
+			add_index_string(tmp1, num_attrib, attribute, 1);
 
-			attr_count++;
+			num_attrib++;
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
 
@@ -786,13 +776,14 @@ PHP_FUNCTION(ldap_get_entries)
 		dn = ldap_get_dn(ldap, ldap_result_entry);
 		add_assoc_string(tmp1, "dn", dn, 1);
 
-		zend_hash_index_update(return_value->value.ht, entry_count, (void *) &tmp1, sizeof(pval *), NULL);
+		zend_hash_index_update(return_value->value.ht, num_entries, (void *) &tmp1, sizeof(pval *), NULL);
 		
-		entry_count++;
+		num_entries++;
 		ldap_result_entry = ldap_next_entry(ldap, ldap_result_entry);
 	}
 
 	add_assoc_long(return_value, "count", num_entries);
+
 }
 /* }}} */
 
@@ -878,7 +869,7 @@ PHP_FUNCTION(ldap_get_attributes)
 	LDAPMessage *ldap_result_entry;
 	char *attribute;
 	char **ldap_value;
-	int i, count, num_values, num_attrib;
+	int i, num_values, num_attrib;
 	BerElement *ber;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &link, &result_entry) == FAILURE) {
@@ -891,17 +882,9 @@ PHP_FUNCTION(ldap_get_attributes)
 	ldap_result_entry = _get_ldap_result_entry(result_entry);
 	if (ldap_result_entry == NULL) RETURN_FALSE;
 
-	num_attrib = 0;
-	attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber);
-	if (attribute == NULL) RETURN_FALSE;
-	while (attribute != NULL) {
-		num_attrib++;
-		attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
-	}
-	
 	array_init(return_value);
-
-	count=0;
+	num_attrib = 0;
+	
 	attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber);
 	while (attribute != NULL) {
 		ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute);
@@ -916,9 +899,9 @@ PHP_FUNCTION(ldap_get_attributes)
 		ldap_value_free(ldap_value);
 
 		zend_hash_update(return_value->value.ht, attribute, strlen(attribute)+1, (void *) &tmp, sizeof(pval *), NULL);
-		add_index_string(return_value, count, attribute, 1);
+		add_index_string(return_value, num_attrib, attribute, 1);
 
-		count++;
+		num_attrib++;
 		attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 	}
 	
