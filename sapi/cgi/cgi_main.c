@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
 								that sockets created via fsockopen()
 								don't kill PHP if the remote site
 								closes it.  in apache|apxs mode apache
-								does that for us!  thies@digicol.de
+								does that for us!  thies@thieso.net
 								20000419 */
 #endif
 #endif

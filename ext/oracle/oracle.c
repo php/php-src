@@ -16,7 +16,7 @@
    |          Mitch Golden <mgolden@interport.net>                        |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |          Thies C. Arntzen <thies@digicol.de>                         |
+   |          Thies C. Arntzen <thies@thieso.net>                         |
    +----------------------------------------------------------------------+
  */
 

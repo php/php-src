@@ -168,7 +168,7 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
     /* 
 	  this can cause crashes in the current model.
       if the resource gets destroyed via destroy_resource_list() resource_list
-      will *not* be in a consistent state. thies@digicol.de
+      will *not* be in a consistent state. thies@thieso.net
     */
 
 	zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);
@@ -670,7 +670,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				res_buf = (char *) emalloc(res_length+1);
 				memset(res_buf,' ',res_length+1);  /* XXX i'm sure there's a better way
 													  but i don't have sybase here to test
-													  991105 thies@digicol.de  */
+													  991105 thies@thieso.net  */
 				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), res_length,SYBCHAR,res_buf,-1);
 		
 				/* get rid of trailing spaces */
