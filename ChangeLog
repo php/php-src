@@ -1,3 +1,63 @@
+2001-01-11  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: Class that emulates Perl's Crypt::CBC module
+
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-11  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/PHPDoc/apidoc/keep/index2.html
+      pear/PHPDoc/renderer/html/PhpdocHTMLIndexRenderer.php:
+    rename this frame. for some reason, IE wasn't recognizing the target
+    correctly, but it works with a shorter frame name. go figure.
+
+    * pear/PHPDoc/xmlreader/PhpdocXMLReader.php:
+    xml_parse_into_struct() forces the third and fourth arguments to be passed
+    by reference; there's no need to specify it at call-time and cause a warning.
+
+2001-01-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/Console/Getopt.php
+      pear/Makefile.in:
+    - Added Console_Getopt class for parsing command-line args. (Andrei, PEAR)
+
+2001-01-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/config.m4: Fix build.
+
+2001-01-11  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      NEWS
+      configure.in: Prepare to roll pl1
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/wddx/php_wddx.h: If external expat is used, header file is expat.h
+
+2001-01-11  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sablot/sablot.dsp: removed old expat libs
+
+2001-01-11  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/zziplib/CREDITS
+      ext/zziplib/EXPERIMENTAL
+      ext/zziplib/README
+      EXTENSIONS: Housekeeping...
+
+    * ext/zziplib/php_zziplib.h
+      ext/zziplib/zziplib.c:
+     Add an experimental version of the ZZipLib extension which provides the
+     ability to read zip files. 
+
 2001-01-10  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c: Improved handling for empty format strings
