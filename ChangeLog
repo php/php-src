@@ -1,3 +1,62 @@
+2004-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      - Drop unused variable
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      - Boost up __autoload() calls by caching the lookup
+
+2004-08-23  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Improve wording
+
+    * NEWS:
+      - NEWS
+
+    * ZendEngine2/zend_compile.c:
+      - Improve performance of switch()
+
+2004-08-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/dio/dio.c
+      ext/dio/dio.c:
+      MFH: Fixed possible crash inside dio_read().
+
+    * ext/dio/dio.c:
+      Fixed possible crash inside dio_read().
+
+    * ext/standard/head.c:
+      Fixed proto of headers_list().
+
+2004-08-23  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      Fix names
+
+2004-08-23  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS:
+      - There was a bug # attached to this fix.
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - MFB: Fixed Apache 2.0 SAPI build against Apache 2 HEAD. (Patch by Joe
+      Orton)
+
+    * NEWS:
+      - Little changes.
+
+    * (PHP_5_0)
+      NEWS
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - Fixed Apache 2.0 SAPI build against Apache 2 HEAD. (Patch by Joe Orton)
+
 2004-08-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)

@@ -1,3 +1,23 @@
+2004-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      - Drop unused variable
+
+    * zend_execute_API.c
+      zend_globals.h:
+      - Boost up __autoload() calls by caching the lookup
+
+2004-08-23  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Improve performance of switch()
+
+2004-08-23  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      Fix names
+
 2004-08-21  Sara Golemon  <php@alphaweb.net>
 
     * zend_compile.c:
