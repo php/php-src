@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Chris Vandomelen <chrisv@b0rked.dhs.org>                    |
-   |          Sterling Hughes <Sterling.Hughes@pentap.net>                |
+   |          Sterling Hughes <sterling@php.net>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -65,6 +65,13 @@ php_sockets_globals sockets_globals;
 #define MSG_WAITALL 0x00000000
 #endif
 #endif
+
+/* Use the read() wrapper, stopping at '\n', '\r', or '\0'. */
+#define PHP_NORMAL_READ 0x0001
+/* Use the read() wrapper, but read until the entire buffer is filled. */
+#define PHP_BINARY_READ 0x0002
+/* Use the system read() function. */
+#define PHP_SYSTEM_READ 0x0004
 
 typedef struct {
 	unsigned char info[128];
@@ -193,17 +200,11 @@ static void destroy_iovec(zend_rsrc_list_entry *rsrc)
 	}
 }
 
-PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("sockets.use_system_read", "0", PHP_INI_ALL, OnUpdateInt, use_system_read, php_sockets_globals, sockets_globals)
-PHP_INI_END()
-
 PHP_MINIT_FUNCTION(sockets)
 {
 	SOCKETSLS_FETCH();
 	SOCKETSG(le_destroy) = zend_register_list_destructors_ex(destroy_fd_sets, NULL, "sockets file descriptor set", module_number);
-	SOCKETSG(le_iov)     = zend_register_list_destructors_ex(destroy_iovec, NULL, "sockets i/o vector", module_number);
-
-	REGISTER_INI_ENTRIES();
+	SOCKETSG(le_iov)     = zend_register_list_destructors_ex(destroy_iovec,   NULL, "sockets i/o vector", module_number);
 
 	REGISTER_LONG_CONSTANT("AF_UNIX", AF_UNIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET", AF_INET, CONST_CS | CONST_PERSISTENT);
@@ -232,7 +233,10 @@ PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_TYPE", SO_TYPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_ERROR", SO_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOL_SOCKET", SOL_SOCKET, CONST_CS | CONST_PERSISTENT);
-	
+	REGISTER_LONG_CONSTANT("PHP_NORMAL_READ", PHP_NORMAL_READ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_BINARY_READ", PHP_BINARY_READ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_SYSTEM_READ", PHP_SYSTEM_READ, CONST_CS | CONST_PERSISTENT);
+
 	{
 		struct protoent *pe;
 		pe = getprotobyname("tcp");
@@ -605,54 +609,57 @@ PHP_FUNCTION(write)
 }
 /* }}} */
 
-/* {{{ proto int read(int fd, string &buf, int length [, int binary])
+/* {{{ proto int read(int fd, string &buf, int length [, int type])
    Reads length bytes from fd into buf */
 
-/* php_read -- wrapper around read() so that it only reads to a \r, \n, or \0. */
+/* php_read -- wrapper around read() so that it only reads to a \r or \n. */
 
-int php_read(int fd, void *buf, int maxlen, int binary)
+int php_read(int fd, void *buf, int maxlen)
 {
      char *t;
      int m = 0, n = 0;
      int no_read = 0;
      int nonblock = 0;
-     int keep_going = 1;
-     errno = 0;
 
      m = fcntl(fd, F_GETFL);
-     if (m == -1)
-          return -1;
+     if (m < 0)
+	return m;
 
-     if (m & O_NONBLOCK)
-          nonblock = 1;
+     nonblock = (m & O_NONBLOCK);
+     m = 0;
 
+     errno = 0;
      t = (char *) buf;
-     while (keep_going) { /* (*t != '\n' && *t != '\r' && *t != '\0' && n < maxlen) { */
-          m = read(fd, (void *) t, 1);
+     while (*t != '\n' && *t != '\r' && n < maxlen) {
           if (m > 0) {
                t++;
                n++;
           } else if (m == 0) {
                no_read++;
+	       if (nonblock && no_read >= 2) {
+			return n; /* The first pass, m always is 0, so no_read becomes 1
+                                   * in the first pass. no_read becomes 2 in the second pass,
+				   * and if this is nonblocking, we should return.. */
+	       }
                if (no_read > 200) {
                     errno = ECONNRESET;
                     return -1;
                }
           }
+	  if (n < maxlen) {
+	          m = read(fd, (void *) t, 1);
+	  }
           if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
                return -1;
           }
           errno = 0;
-          if (!binary) {
-		if (*t == '\n' || *t == '\r' || *t == '\0') {
-			keep_going = 0;
-		}
-	  }
-	  if (n == maxlen)
-		keep_going = 0;
-	  if (m == 0 && nonblock)
-		keep_going = 0;
      }
+     if (n < maxlen)
+	n++; /* The only reasons it makes it to here is
+	      * if '\n' or '\r' are encountered. So, increase
+	      * the return by 1 to make up for the lack of the
+	      * '\n' or '\r' in the count (since read() takes
+              * place at the end of the loop..) */
      return n;
 }
 
@@ -661,8 +668,7 @@ PHP_FUNCTION(read)
 	zval **fd, **buf, **length, **binary;
 	char *tmpbuf;
 	int ret;
-	int (*read_function)(int, void *, int, int);
-	SOCKETSLS_FETCH();
+	int (*read_function)(int, void *, int);
 
 	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
 	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &buf, &length, &binary) == FAILURE) {
@@ -672,10 +678,19 @@ PHP_FUNCTION(read)
 	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, length, binary);
 	convert_to_string_ex(buf);
 
-	if (SOCKETSG(use_system_read) == 1) {
-		read_function = (int (*)(int, void *, int, int)) read;
+	if (ZEND_NUM_ARGS() == 4) {
+		switch (Z_LVAL_PP(binary)) {
+		case PHP_SYSTEM_READ:
+		case PHP_BINARY_READ:
+			read_function = (int (*)(int, void *, int)) read;
+			break;
+		case PHP_NORMAL_READ:
+		default:
+			read_function = (int (*)(int, void *, int)) php_read;
+			break;
+		}
 	} else {
-		read_function = (int (*)(int, void *, int, int)) php_read;
+		read_function = (int (*)(int, void *, int)) php_read;
 	}
 
 	tmpbuf = emalloc(Z_LVAL_PP(length)*sizeof(char));
@@ -684,12 +699,21 @@ PHP_FUNCTION(read)
 		RETURN_FALSE;
 	}
 	
-	ret = (*read_function)(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length), ZEND_NUM_ARGS() == 4 ? Z_LVAL_PP(binary) : 0);
+	ret = (*read_function)(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
 	
 	if (ret >= 0) {
-		Z_STRVAL_PP(buf) = estrndup(tmpbuf,ret);
-		Z_STRLEN_PP(buf) = ret;
-		
+		if (Z_STRLEN_PP(buf) > 0) {
+			efree(Z_STRVAL_PP(buf));
+		}
+		if (ZEND_NUM_ARGS() == 4 && Z_LVAL_PP(binary) != PHP_NORMAL_READ) {
+			Z_STRVAL_PP(buf) = emalloc(ret);
+			memcpy(Z_STRVAL_PP(buf), tmpbuf, ret);
+			Z_STRLEN_PP(buf) = ret;
+		} else {
+			Z_STRVAL_PP(buf) = estrndup(tmpbuf,strlen(tmpbuf));
+			Z_STRLEN_PP(buf) = strlen(tmpbuf);
+			ret = strlen(tmpbuf);
+		}
 		efree(tmpbuf);
 
 		RETURN_LONG(ret);
