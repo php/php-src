@@ -1757,10 +1757,7 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 
 void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 {
-	int lastBorder;
-	/* Seek left */
-	int leftLimit = -1, rightLimit;
-	int i, restoreAlphaBleding=0;
+	int i, j, restoreAlphaBleding = 0;
 
 	if (border < 0) {
 		/* Refuse to fill to a non-solid border */
@@ -1779,61 +1776,16 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		y = im->sy - 1;
 	}
 
-	for (i = x; i >= 0; i--) {
-		if (gdImageGetPixel(im, i, y) == border) {
-			break;
-		}
-		gdImageSetPixel(im, i, y, color);
-		leftLimit = i;
-	}
-	if (leftLimit == -1) {
-		if (restoreAlphaBleding) {
-			im->alphaBlendingFlag = 1;
-		}
-		return;
-	}
-	/* Seek right */
-	rightLimit = x;
-	for (i = (x + 1); i < im->sx; i++) {
-		if (gdImageGetPixel(im, i, y) == border) {
-			break;
-		}
-		gdImageSetPixel(im, i, y, color);
-		rightLimit = i;
-	}
-	/* Look at lines above and below and start paints */
-	/* Above */
-	if (y > 0) {
-		lastBorder = 1;
-		for (i = leftLimit; i <= rightLimit; i++) {
-			int c = gdImageGetPixel(im, i, y - 1);
-			if (lastBorder) {
-				if ((c != border) && (c != color)) {
-					gdImageFillToBorder(im, i, y - 1, border, color);
-					lastBorder = 0;
-				}
-			} else if ((c == border) || (c == color)) {
-				lastBorder = 1;
+	for (i = x; i < im->sx; i++) {
+		for (j = y; j < im->sy; j++) {
+			int c = gdImageGetPixel(im, i, j);
+			if (c == border || c == color) {
+				continue;
 			}
+			gdImageSetPixel(im, i, j, color);
 		}
 	}
 
-	/* Below */
-	if (y < ((im->sy) - 1)) {
-		lastBorder = 1;
-		for (i = leftLimit; i <= rightLimit; i++) {
-			int c = gdImageGetPixel(im, i, y + 1);
-
-			if (lastBorder) {
-				if ((c != border) && (c != color)) {
-					gdImageFillToBorder(im, i, y + 1, border, color);
-					lastBorder = 0;
-				}
-			} else if ((c == border) || (c == color)) {
-				lastBorder = 1;
-			}
-		}
-	}
 	if (restoreAlphaBleding) {
 		im->alphaBlendingFlag = 1;
 	}
