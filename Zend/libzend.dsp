@@ -102,6 +102,10 @@ SOURCE=.\zend_API.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_builtin_functions.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_compile.c
 # End Source File
 # Begin Source File
@@ -170,10 +174,6 @@ SOURCE=.\zend_variables.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\zend_config.w32.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\FlexLexer.h
 # End Source File
 # Begin Source File
@@ -202,7 +202,15 @@ SOURCE=.\zend_API.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_builtin_functions.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_compile.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_config.w32.h
 # End Source File
 # Begin Source File
 

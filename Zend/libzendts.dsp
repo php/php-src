@@ -102,6 +102,10 @@ SOURCE=.\zend_API.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_builtin_functions.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_compile.c
 # End Source File
 # Begin Source File
@@ -195,6 +199,10 @@ SOURCE=.\zend_alloc.h
 # Begin Source File
 
 SOURCE=.\zend_API.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_builtin_functions.h
 # End Source File
 # Begin Source File
 
