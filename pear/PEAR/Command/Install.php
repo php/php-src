@@ -39,7 +39,8 @@ class PEAR_Command_Install extends PEAR_Command_Common
     var $command; // XXX UNUSED
 
     /**
-     * PEAR_Command_Install constructor.  Nothing to see here.
+     * PEAR_Command_Install constructor.
+     *
      * @access public
      */
     function PEAR_Command_Install()
@@ -59,44 +60,40 @@ class PEAR_Command_Install extends PEAR_Command_Common
 
     function run($command, $options, $params)
     {
+        $installer =& new PEAR_Installer($options['php_dir'],
+                                         $options['ext_dir'],
+                                         $options['doc_dir']);
+        $installer->debug = @$options['verbose'];
+        $status = PEAR_COMMAND_SUCCESS;
+        ob_start();
         switch ($command) {
-        }
-    }
-
-    function doInstall($command, $options, $params)
-    {
-            $pkgfile = $cmdargs[0];
-            $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
-            $installer->setErrorHandling(PEAR_ERROR_DIE,
-                                         basename($pkgfile) . ": %s\n");
-            $installer->debug = $verbose;
-            $install_options = array();
-            if ($command == 'upgrade') {
-                $install_options['upgrade'] = true;
-            }
-            foreach ($cmdopts as $opt) {
-                switch ($opt[0]) {
-                    case 'r':
-                        // This option is for use by rpm and other package
-                        // tools that can install files etc. by itself, but
-                        // still needs to register the package as installed in
-                        // PEAR's local registry.
-                        $install_options['register_only'] = true;
-                    break;
-                    case 'f':
-                        $install_options['force'] = true;
-                    break;
+            case 'install':
+            case 'upgrade': {
+                if ($command == 'upgrade') {
+                    $options['upgrade'] = true;
                 }
+                if ($installer->install($params[0], $options, $this->config)) {
+                    print "install ok\n";
+                } else {
+                    print "install failed\n";
+                    $status = PEAR_COMMAND_FAILURE;
+                }
+                break;
             }
-            if ($installer->install($pkgfile, $install_options, $config)) {
-                print "install ok\n";
-            } else {
-                print "install failed\n";
-            }
+            case 'uninstall': {
+                if ($installer->uninstall($params[0], $uninstall_options)) {
+                    print "uninstall ok\n";
+                } else {
+                    print "uninstall failed\n";
+                    $status = PEAR_COMMAND_FAILURE;
+                }
+                break;
+            }                
         }
+        $output = ob_get_contents();
+        ob_end_clean();
+        return $this->makeResponse($status, $output);
     }
-
-    function getStatus(
 }
 
 ?>

@@ -23,15 +23,46 @@ require_once "PEAR/CommandResponse.php";
 
 class PEAR_Command_Common extends PEAR
 {
+    /**
+     * PEAR_Config object used to pass user system and configuration
+     * on when executing commands
+     *
+     * @var object
+     */
+    var $config;
+
+    /**
+     * PEAR_Command_Common constructor.
+     *
+     * @access public
+     */
     function PEAR_Command_Common()
     {
         parent::PEAR();
+        $this->config = PEAR_Config::singleton();
     }
 
-    function &makeResponse($status, $message)
+    /**
+     * Return a PEAR_CommandResponse object with parameters
+     * filled in.
+     *
+     * @param int     status code
+     * @param string  message text
+     * @param string  (optional) message character encoding
+     *
+     * @return object a PEAR_CommandResponse object
+     *
+     * @access public
+     *
+     * @see PEAR_CommandResponse
+     */
+    function &makeResponse($status, $message, $encoding = null)
     {
-        
+        $obj =& new PEAR_CommandResponse($status, $message, $encoding);
+        return $obj;
     }
+
+    
 }
 
 ?>
