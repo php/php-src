@@ -9,7 +9,7 @@ include("pg_convert.inc");
 --EXPECT--
 array(3) {
   ["num"]=>
-  int(1234)
+  string(4) "1234"
   ["str"]=>
   string(5) "'AAA'"
   ["bin"]=>

@@ -18,7 +18,7 @@ array(3) {
     int(4)
     ["not null"]=>
     bool(false)
-    ["default"]=>
+    ["has default"]=>
     bool(false)
   }
   ["str"]=>
@@ -31,7 +31,7 @@ array(3) {
     int(-1)
     ["not null"]=>
     bool(false)
-    ["default"]=>
+    ["has default"]=>
     bool(false)
   }
   ["bin"]=>
@@ -44,8 +44,7 @@ array(3) {
     int(-1)
     ["not null"]=>
     bool(false)
-    ["default"]=>
+    ["has default"]=>
     bool(false)
   }
 }
-
