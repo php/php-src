@@ -3863,9 +3863,9 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
-/* {{{ proto string rot13(string str)
+/* {{{ proto string str_rot13(string str)
    Perform the rot13 transform on a string */
-PHP_FUNCTION(rot13)
+PHP_FUNCTION(str_rot13)
 {
 	char *str;
 	int str_len;
