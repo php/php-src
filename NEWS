@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added var_export, which shows a representation of a variable, much like
+  var_dump, but in such a way you can use it as PHP code. (Derick)
+- Added -w option to the cgi-version. This will remove all comments and
+  whitespace from teh script. (Thies)
 - Added support for SO_RCVTIMEO and SO_SNDTIMEO to ext/sockets (Jason)
 - Added ob_get_level, which returns the nesting level of the output buffering
   mechanism. (Yasuo, Derick)
