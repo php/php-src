@@ -2859,7 +2859,7 @@ int zend_throw_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	INIT_PZVAL(exception);
 
-	zend_throw_exception_internal(exception TSRMLS_CC);
+	zend_throw_exception_object(exception TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
