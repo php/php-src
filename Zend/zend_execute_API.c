@@ -645,6 +645,11 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	zval *retval_ptr;
 	int retval;
 
+	if (EG(scope)) {
+		if (zend_hash_find(&EG(scope)->class_table, name, name_length+1, (void **) ce) == SUCCESS) {
+			return SUCCESS;
+		}
+	}
 	if (zend_hash_find(EG(class_table), name, name_length+1, (void **) ce) == SUCCESS) {
 		return SUCCESS;
 	}

@@ -2066,7 +2066,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 		CG(active_ce_parent_class_name).value.str.val = estrndup(parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len);
 		CG(active_ce_parent_class_name).value.str.len = parent_class_name->u.constant.value.str.len;
 
-		if (zend_hash_find(CG(active_class_entry)?&CG(active_class_entry)->class_table:CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class_p)==SUCCESS) {
+		if ((CG(active_class_entry) && (zend_hash_find(&CG(active_class_entry)->class_table, parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class_p) == SUCCESS)) ||
+			zend_hash_find(CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class_p) == SUCCESS) {
 			parent_class = *parent_class_p;
 			/* copy functions */
 			zend_hash_copy(&new_class_entry->function_table, &parent_class->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
