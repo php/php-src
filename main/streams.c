@@ -1943,7 +1943,9 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 		return NULL;
 	}
 
-	realpath = expand_filepath(filename, NULL TSRMLS_CC);
+	if ((realpath = expand_filepath(filename, NULL TSRMLS_CC)) == NULL) {
+		return NULL;
+	}
 
 	if (persistent) {
 		spprintf(&persistent_id, 0, "streams_stdio_%d_%s", open_flags, realpath);
