@@ -63,7 +63,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
 
 AC_MSG_CHECKING(whether to enable truetype string function in gd)
 AC_ARG_ENABLE(gd-native-ttf,
-[  --enable-gd-imgstrttf  Enable TrueType string function in gd],[
+[  --enable-gd-imgstrttf   Enable TrueType string function in gd],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
     AC_MSG_RESULT(yes)
@@ -77,8 +77,7 @@ AC_ARG_ENABLE(gd-native-ttf,
 
 shared=no
 AC_ARG_WITH(gd,
-[  
-  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).
+[  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).
                           Set DIR to "shared" to build as a dl, or 
                           "shared,DIR" to build as a dl and still specify DIR.],
 [

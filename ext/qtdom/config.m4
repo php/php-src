@@ -4,7 +4,7 @@ dnl don't forget to call PHP_EXTENSION(qtdom)
 
 AC_MSG_CHECKING(whether to include QDOM support)
 AC_ARG_WITH(qtdom,
-[  --with-qtdom        Include QtDOM support (requires Qt >= 2.2.0).],
+[  --with-qtdom            Include QtDOM support (requires Qt >= 2.2.0).],
 [
 case "$withval" in
     no)

@@ -5,9 +5,9 @@ dnl don't forget to call PHP_EXTENSION(fribidi)
 
 
 PHP_ARG_WITH(fribidi, whether to add fribidi support,
-[  --with-fribidi[=DIR]             Include fribidi support (requires FriBidi >=0.1.12).
-                                    DIR is the fribidi installation directory - 
-                                    default /usr/local/],"no")
+[  --with-fribidi[=DIR]    Include fribidi support (requires FriBidi >=0.1.12).
+                          DIR is the fribidi installation directory - 
+                          default /usr/local/])
 
 
 
