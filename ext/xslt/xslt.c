@@ -45,34 +45,94 @@ extern void xslt_debug(char *function_name, char *format, ...)
 }
 /* }}} */
 
-static char *find_xslt_argument(const char **argv, const char *key)
+/* {{{ find_xslt_argument()
+   Find and return an xslt argument from the argument buffer */
+static char *_find_xslt_argument(const char **argv, const char *key)
 {
-	char  **ptr;
-	char   *return_value;
+	char  **ptr;                  /* Pointer to the passed char ** array */
+	char   *return_value = NULL;  /* Value to return from the function */
 
+	/* Loop through the array searching for the value */
 	ptr = (char **) argv;
 	while (ptr && *ptr) {
+		/* If we have a match, save the value and exit out */
 		if (! strcmp(*ptr, key)) {
 			return_value = estrdup(*ptr);
-			return return_value;
+			break;
 		}
 
 		ptr++;
 	}
 
-	if (! return_value) {
-		return NULL;
-	}
+	return return_value;
 }
+/* }}} */
 
-/* {{{ parse_xslt_arguments()
+/* {{{ xslt_make_array() 
+   Make an XSLT array (char **) from a zval array (HashTable *) */
+extern void xslt_make_array(zval **zarr, char ***carr)
+{
+	zval      **current;
+	HashTable  *arr;
+	int         idx = 0;
+
+	arr = HASH_OF(*zarr);
+	if (! arr) {
+		php_error(E_WARNING, "Invalid argument or parameter array to %s",
+		          get_active_function_name());
+		return;
+	}
+
+	*carr = emalloc((zend_hash_num_elements(arr) * 2) + 1);
+	
+	for (zend_hash_internal_pointer_reset(arr);
+	     zend_hash_get_current_data(arr, (void **) &current) == SUCCESS;
+	     zend_hash_move_forward(arr)) {
+		char  *string_key = NULL;
+		ulong  num_key;		
+		int    type;
+
+		SEPARATE_ZVAL(current);
+		convert_to_string_ex(current);
+
+		type = zend_hash_get_current_key(arr, &string_key, &num_key, 0);
+		if (type == HASH_KEY_IS_LONG) {
+			php_error(E_WARNING, "Invalid argument or parameter array to %s",
+			          get_active_function_name());
+			return;
+		}
+
+		(*carr)[idx++] = estrdup(string_key);
+		(*carr)[idx++] = estrndup(Z_STRVAL_PP(current), Z_STRLEN_PP(current));
+	}
+
+	(*carr)[idx] = NULL;
+}
+/* }}} */
+
+/* {{{ xslt_free_array()
+   Free an xslt array built by xslt_make_array() */
+extern void xslt_free_array(char **arr)
+{
+	char **ptr = arr;
+
+	while (*ptr != NULL) {
+		efree(*ptr);
+		ptr++;
+	}
+
+	efree(arr);
+}
+/* }}} */
+
+/* {{{ xslt_parse_arguments()
    Parse an XSLT argument buffer */
-extern xslt_args *parse_xslt_arguments(char  *xml, 
+extern xslt_args *xslt_parse_arguments(char  *xml, 
                                        char  *xsl, 
                                        char  *result, 
                                        char **argv)
 {
-	xslt_args *return_value;
+	xslt_args *return_value;  /* The value to return from the function */
 
 	return_value = emalloc(sizeof(xslt_args));
 
@@ -81,8 +141,8 @@ extern xslt_args *parse_xslt_arguments(char  *xml,
 		char *key = xml + 5;
 
 		return_value->xml.type = XSLT_IS_DATA;
-		return_value->xml.ptr  = find_xslt_argument((const char **) argv, 
-		                                            (const char *)  key);
+		return_value->xml.ptr  = _find_xslt_argument((const char **) argv, 
+		                                             (const char *)  key);
 	}
 	else {
 		return_value->xml.type = XSLT_IS_FILE;
@@ -94,8 +154,8 @@ extern xslt_args *parse_xslt_arguments(char  *xml,
 		char *key = xsl + 5;
 
 		return_value->xsl.type = XSLT_IS_DATA;
-		return_value->xsl.ptr  = find_xslt_argument((const char **) argv, 
-		                                            (const char *)  key);
+		return_value->xsl.ptr  = _find_xslt_argument((const char **) argv, 
+		                                             (const char *)  key);
 	}
 	else {
 		return_value->xsl.type = XSLT_IS_FILE;
@@ -107,8 +167,8 @@ extern xslt_args *parse_xslt_arguments(char  *xml,
 		char *key = result + 5;
 
 		return_value->result.type = XSLT_IS_DATA;
-		return_value->result.ptr  = find_xslt_argument((const char **) argv, 
-		                                               (const char *)  key);
+		return_value->result.ptr  = _find_xslt_argument((const char **) argv, 
+		                                                (const char *)  key);
 	}
 	else {
 		return_value->result.type = XSLT_IS_FILE;
@@ -121,7 +181,7 @@ extern xslt_args *parse_xslt_arguments(char  *xml,
 
 /* {{{ free_xslt_arguments()
    Free's an XSLT argument list returned from parse_xslt_arguments() */
-extern void free_xslt_arguments(xslt_args *to_free)
+extern void xslt_free_arguments(xslt_args *to_free)
 {
 	if (to_free->xml.ptr) {
 		efree(to_free->xml.ptr);
@@ -141,7 +201,7 @@ extern void free_xslt_arguments(xslt_args *to_free)
 
 /* {{{ call_xslt_function()
    Call an XSLT handler */
-extern void call_xslt_function(char *name, 
+extern void xslt_call_function(char *name, 
                                struct xslt_function *fptr, 
                                int argc, 
                                zval **argv, 
@@ -173,7 +233,7 @@ extern void call_xslt_function(char *name,
 /* }}} */
 
 
-extern void free_xslt_handler(struct xslt_function *func)
+extern void xslt_free_handler(struct xslt_function *func)
 {
 	if (!func) {
 		return;
@@ -190,7 +250,7 @@ extern void free_xslt_handler(struct xslt_function *func)
 	efree(func);
 }
 
-extern void assign_xslt_handler(struct xslt_function **func, zval **zfunc)
+extern void xslt_assign_handler(struct xslt_function **func, zval **zfunc)
 {
 	char error[] = "Invalid function passed to %s";
 

@@ -198,10 +198,10 @@
 	 /* Fetch the arguments from the user into a zval ** */
 	 
 	 /* Translate the zval array into a character array */
-	 make_xslt_array(&arguments_cp, arguments_zp);
+	 xslt_make_array(&arguments_cp, arguments_zp);
 	 
 	 /* Translate the character array into an xslt_arg * structure */
-	 arguments = parse_xslt_arguments(arguments_cp);
+	 arguments = xslt_parse_arguments(arguments_cp);
 	 
 	 /* Print out the resulting xslt_arg * structure */
 	 php_printf("XML type: %s\n",    types[arguments->xml.type]);
