@@ -180,6 +180,7 @@ typedef unsigned short zend_ushort;
 
 
 #include "zend_hash.h"
+#include "zend_ts_hash.h"
 #include "zend_llist.h"
 
 #define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval *this_ptr, int return_value_used TSRMLS_DC
