@@ -26,7 +26,8 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_simplexml.h"
-
+//#include "zend.h"
+//#include "zend_fast_cache.h"
 
 zend_class_entry *sxe_class_entry;
 
@@ -45,7 +46,7 @@ php_sxe_fetch_object(zval *object TSRMLS_DC)
 /* {{{ _node_as_zval()
  */
 static void
-_node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
+_node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value TSRMLS_DC)
 {
 	php_sxe_object *subnode;
 
@@ -118,7 +119,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_PREV_ELEMENT(counter, value);
 
 			MAKE_STD_ZVAL(value);
-			_node_as_zval(sxe, node, value);
+			_node_as_zval(sxe, node, value TSRMLS_CC);
 
 			APPEND_CUR_ELEMENT(counter, value);
 		}
@@ -280,12 +281,8 @@ static HashTable *
 sxe_properties_get(zval *object TSRMLS_DC)
 {
 	HashTable      *rv;
-	zval           *value;
 	php_sxe_object *sxe;
-	char           *name;
-	char           *contents;
 	xmlNodePtr      node;
-	xmlAttrPtr      attr;
 	int             counter = 0;
 
 	ALLOC_HASHTABLE_REL(rv);
@@ -311,6 +308,7 @@ sxe_properties_get(zval *object TSRMLS_DC)
 static int
 sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 {
+	return 0;
 }
 /* }}} */
 
@@ -346,7 +344,7 @@ sxe_method_get(zval *object, char *name, int len TSRMLS_DC)
 static int
 sxe_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
-	RETURN_NULL();
+	RETVAL_NULL();
 	return 1;
 }
 /* }}} */
@@ -442,7 +440,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 		}
 	}
 
-	cast_object_with_contents(writeobj, type, contents);
+	cast_object_with_contents(writeobj, type, contents TSRMLS_CC);
 }
 /* }}} */
 
@@ -535,7 +533,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 {
 	zend_object_value rv;
 
-	rv.handle = zend_objects_store_put(intern, sxe_object_dtor, sxe_object_clone);
+	rv.handle = zend_objects_store_put(intern, sxe_object_dtor, sxe_object_clone TSRMLS_CC);
 	rv.handlers = (zend_object_handlers *) &sxe_object_handlers;
 
 	return rv;
@@ -548,7 +546,6 @@ static zend_object_value
 sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	php_sxe_object    *intern;
-	zend_object_value  rv;
 
 	intern = php_sxe_object_new(TSRMLS_C);
 	return php_sxe_register_object(intern TSRMLS_CC);
@@ -643,12 +640,16 @@ PHP_FUNCTION(simplexml_save_document_string)
 }
 /* }}} */
 
+/* this is lame, first_arg_force_ref (and others) doesn't 
+   work through dll linkage on windows.  no other extension 
+   outside basic_functions uses first_arg_force_ref.  */
+unsigned char fix_first_arg_force_ref[] = { 1, BYREF_FORCE };
 
 function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_load_string, NULL)
 	PHP_FE(simplexml_save_document_file, NULL)
-	PHP_FE(simplexml_save_document_string, first_arg_force_ref)
+	PHP_FE(simplexml_save_document_string, fix_first_arg_force_ref)
 	{NULL, NULL, NULL}
 };
 
@@ -675,7 +676,6 @@ ZEND_GET_MODULE(simplexml)
 PHP_MINIT_FUNCTION(simplexml)
 {
 	zend_class_entry sxe;
-	zend_internal_function sxe_constructor;
 
 	INIT_CLASS_ENTRY(sxe, "simplexml_element", NULL);
 	sxe.create_object = sxe_object_new;
