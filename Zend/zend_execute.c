@@ -313,6 +313,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				case IS_TMP_VAR:
 					zendi_zval_dtor(*variable_ptr);
 					value->refcount=1;
+					previous_lock_count = variable_ptr->EA.locks;
 					*variable_ptr = *value;
 					variable_ptr->EA.locks = previous_lock_count;
 					break;
@@ -989,6 +990,7 @@ binary_op_addr:
 				/* Fall through */
 binary_assign_op_addr: {
 					zval **var_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_RW);
+					int previous_lock_count;
 				
 					if (!var_ptr) {
 						zend_error(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
@@ -1009,9 +1011,12 @@ binary_assign_op_addr: {
 							**var_ptr = *orig_var;
 							zendi_zval_copy_ctor(**var_ptr);
 							(*var_ptr)->refcount=1;
+							(*var_ptr)->EA.locks = 0;
 						}
 					}
+					previous_lock_count = (*var_ptr)->EA.locks;
 					binary_op(*var_ptr, *var_ptr, get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R));
+					(*var_ptr)->EA.locks = previous_lock_count;
 					Ts[opline->result.u.var].var = var_ptr;
 					INC_AI_COUNT(&opline->result);
 					PZVAL_LOCK(*var_ptr);
@@ -1024,6 +1029,7 @@ binary_assign_op_addr: {
 			case ZEND_POST_DEC: {
 					int (*incdec_op)(zval *op);
 					zval **var_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_RW);
+					int previous_lock_count;
 
 					if (!var_ptr) {
 						zend_error(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
@@ -1054,8 +1060,10 @@ binary_assign_op_addr: {
 							**var_ptr = *orig_var;
 							zendi_zval_copy_ctor(**var_ptr);
 							(*var_ptr)->refcount=1;
+							(*var_ptr)->EA.locks = 0;
 						}
 					}
+					previous_lock_count = (*var_ptr)->EA.locks;
 					incdec_op(*var_ptr);
 					switch (opline->opcode) {
 						case ZEND_PRE_INC:
@@ -1065,6 +1073,7 @@ binary_assign_op_addr: {
 							PZVAL_LOCK(*var_ptr);
 							break;
 					}
+					(*var_ptr)->EA.locks = previous_lock_count;
 				}
 				break;
 			case ZEND_PRINT:
