@@ -602,8 +602,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 			return;
 		}
 
-		return_value->value = retval->value;
-		return_value->type  = retval->type;
+		*return_value = *retval;
 		zval_copy_ctor(return_value);
 		zval_ptr_dtor(&retval);
 	}
