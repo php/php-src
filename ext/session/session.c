@@ -76,6 +76,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
 	PHP_FE(session_write_close,       NULL)
+	PHP_FALIAS(session_commit, session_write_close, NULL)
 	{NULL, NULL, NULL} 
 };
 /* }}} */
