@@ -1,9 +1,12 @@
 dnl $Id$
 
 AC_DEFUN(IMAP_INC_CHK,[if test -r $i$1/rfc822.h; then IMAP_DIR=$i; IMAP_INC_DIR=$i$1])
-AC_DEFUN(IMAP_LIB_CHK,[if test "$IMAP_DIR/$1/lib$lib*" != '$IMAP_DIR/$1/lib$lib*'; then
-		IMAP_LIB_DIR=$IMAP_DIR/$1
-		break
+AC_DEFUN(IMAP_LIB_CHK,[
+		str="$IMAP_DIR/$1/lib$lib."
+		if test "`echo $str*`" != $str'*'; then
+			IMAP_LIB_DIR=$IMAP_DIR/$1
+			break 2
+		fi
 		])
 
 RESULT=no
@@ -44,6 +47,8 @@ AC_ARG_WITH(imap,
     AC_ADD_INCLUDE($IMAP_INC_DIR)
     AC_ADD_LIBPATH($IMAP_LIB_DIR)
     AC_ADD_LIBRARY_DEFER($IMAP_LIB)
+
+    PHP_EXTENSION(imap)
 
     AC_DEFINE(HAVE_IMAP,1,[ ])
     RESULT=yes
