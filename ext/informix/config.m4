@@ -75,7 +75,7 @@ WARNING: You specified Informix base install directory that is different
         *.o)
             AC_ADD_LIBPATH($abs_builddir/ext/informix)
             AC_ADD_LIBRARY(php_ifx, 1)
-            test -d ext/informix || mkdir ext ext/informix
+            $srcdir/build/shtool mkdir -f -p ext/informix
             cd ext/informix
             ar r libphp_ifx.a $i
             ranlib libphp_ifx.a
