@@ -945,7 +945,7 @@ PHP_FUNCTION(constant)
 /* }}} */
 
 
-/* {{{ proto string ip2long(string ip_address)
+/* {{{ proto int ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
@@ -1015,7 +1015,7 @@ PHP_FUNCTION(getenv)
 
 #ifdef HAVE_PUTENV
 
-/* {{{ proto void putenv(string setting)
+/* {{{ proto bool putenv(string setting)
    Set the value of an environment variable */
 PHP_FUNCTION(putenv)
 {
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(gettype)
 }
 /* }}} */
 
-/* {{{ proto int settype(mixed var, string type)
+/* {{{ proto bool settype(mixed var, string type)
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
@@ -1318,7 +1318,7 @@ PHP_FUNCTION(get_cfg_var)
 /* }}} */
 
 
-/* {{{ proto int set_magic_quotes_runtime(int new_setting)
+/* {{{ proto bool set_magic_quotes_runtime(int new_setting)
    Set the current active configuration setting of magic_quotes_runtime and return previous */
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
@@ -1505,7 +1505,7 @@ PHP_FUNCTION(is_scalar)
 	3 = save to file in 3rd parameter
 */
 
-/* {{{ proto int error_log(string message, int message_type [, string destination] [, string extra_headers])
+/* {{{ proto bool error_log(string message, int message_type [, string destination] [, string extra_headers])
    Send an error message somewhere */
 PHP_FUNCTION(error_log)
 {
@@ -1717,7 +1717,7 @@ PHP_FUNCTION(call_user_method)
 	int arg_count=ZEND_NUM_ARGS();
 
 	php_error(E_NOTICE, _CUM_DEPREC, "call_user_method");
-	
+
 	if (arg_count<2) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1939,7 +1939,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 }
 
 
-/* {{{ proto boolean highlight_file(string file_name)
+/* {{{ proto bool highlight_file(string file_name)
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
@@ -1962,7 +1962,7 @@ PHP_FUNCTION(highlight_file)
 /* }}} */
 
 
-/* {{{ proto boolean highlight_string(string string)
+/* {{{ proto bool highlight_string(string string)
    Syntax highlight a string */
 PHP_FUNCTION(highlight_string)
 {
@@ -2179,7 +2179,7 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto string print_r(mixed var)
+/* {{{ proto bool print_r(mixed var)
    Prints out information about the specified variable */
 PHP_FUNCTION(print_r)
 {
@@ -2348,7 +2348,7 @@ PHP_FUNCTION(getprotobynumber)
 /* }}} */
 
 
-/* {{{ proto void register_tick_function(string function_name [, mixed arg [, ... ]])
+/* {{{ proto bool register_tick_function(string function_name [, mixed arg [, ... ]])
    Registers a tick callback function */
 PHP_FUNCTION(register_tick_function)
 {
@@ -2420,7 +2420,7 @@ PHPAPI PHP_FUNCTION(warn_not_available)
 }
 
 
-/* {{{ proto boolean is_uploaded_file(string path)
+/* {{{ proto bool is_uploaded_file(string path)
    check if file was created by rfc1867 upload  */
 PHP_FUNCTION(is_uploaded_file)
 {
@@ -2445,7 +2445,7 @@ PHP_FUNCTION(is_uploaded_file)
 /* }}} */
 
 
-/* {{{ proto boolean move_uploaded_file(string path, string new_path)
+/* {{{ proto bool move_uploaded_file(string path, string new_path)
    move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
@@ -2539,7 +2539,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 }
 
 
-/* {{{ proto void parse_ini_file(string filename [, boolean process_sections])
+/* {{{ proto array parse_ini_file(string filename [, boolean process_sections])
    Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
