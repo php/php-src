@@ -46,6 +46,13 @@
 #include "ap_mpm.h"
 
 #include "php_apache.h"
+
+/* UnixWare defines shutdown to _shutdown, which causes problems later
+ * on when using a structure member named shutdown. Since this source
+ * file does not use the system call shutdown, it is safe to #undef it.
+ */
+#undef shutdown
+
  
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
