@@ -776,22 +776,17 @@ PHP_METHOD(xmlreader, next)
 	id = getThis();
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern != NULL && intern->ptr != NULL) {
+#if LIBXML_VERSION <= 20617
+		/* Bug in libxml prevents a next in certain cases when positioned on end of element */
+		if (xmlTextReaderNodeType(intern->ptr) == XML_READER_TYPE_END_ELEMENT) {
+			retval = xmlTextReaderRead(intern->ptr);
+		} else
+#endif
 		retval = xmlTextReaderNext(intern->ptr);
 		while (name != NULL && retval == 1) {
-#ifdef PHP_WIN32
-			/* xmlTextReaderConstLocalName should be used once its added to win def libxml.def file.
-			Doing so will not require localname to be freed as its not allocated */
-			xmlChar *localname = xmlTextReaderLocalName(intern->ptr);
-			if (xmlStrEqual(localname, name)) {
-				xmlFree(localname);
-				RETURN_TRUE;
-			}
-			xmlFree(localname);
-#else
 			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), name)) {
 				RETURN_TRUE;
 			}
-#endif
 			retval = xmlTextReaderNext(intern->ptr); 
 		}
 		if (retval == -1) {
