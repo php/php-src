@@ -1829,7 +1829,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 
 static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
-	if (!(ce->ce_flags & ZEND_ACC_ABSTRACT) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce TSRMLS_CC) == FAILURE) {
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce TSRMLS_CC) == FAILURE) {
 		zend_error(E_CORE_ERROR, "Class %s could not implement interface %s", ce->name, iface->name);
 	}
 }
