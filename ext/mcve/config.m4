@@ -7,6 +7,9 @@ PHP_ARG_WITH(openssl-dir,OpenSSL dir for MCVE,
 [  --with-openssl-dir[=DIR]  MCVE: openssl install prefix.], no, no)
 
 if test "$PHP_MCVE" != "no"; then
+  dnl determine egrep command for AC_EGREP_CPP below
+  AC_CHECK_PROG(EGREP, egrep, grep -E)
+  AC_SUBST(EGREP)
 
   if test "$PHP_OPENSSL_DIR" != "no"; then
     PHP_OPENSSL=$PHP_OPENSSL_DIR
