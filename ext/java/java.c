@@ -438,7 +438,7 @@ void java_call_function_handler
     jmethodID co = (*jenv)->GetMethodID(jenv, JG(reflect_class), "CreateObject",
       "(Ljava/lang/String;[Ljava/lang/Object;J)V");
     jstring className;
-    (pval*)(long)result = object;
+    result = (jlong)(long)object;
 
     if (ZEND_NUM_ARGS() < 1) {
       php_error(E_ERROR, "Missing classname in new Java() call");
@@ -465,7 +465,7 @@ void java_call_function_handler
     zend_hash_index_find(object->value.obj.properties, 0, (void**) &handle);
     obj = zend_list_find((*handle)->value.lval, &type);
     method = (*jenv)->NewStringUTF(jenv, function_name->element.value.str.val);
-    (pval*)(long)result = return_value;
+    result = (jlong)(long)return_value;
 
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), invoke,
       obj, method, _java_makeArray(arg_count, arguments JG_CC), result);
@@ -491,7 +491,7 @@ PHP_FUNCTION(java_last_exception_get)
 
   if (ZEND_NUM_ARGS()!=0) WRONG_PARAM_COUNT;
 
-  (pval*)(long)result = return_value;
+  result = (jlong)(long)return_value;
   
   lastEx = (*JG(jenv))->GetMethodID(JG(jenv), JG(reflect_class), 
           "lastException", "(J)V");
@@ -510,7 +510,7 @@ PHP_FUNCTION(java_last_exception_clear)
 
   if (ZEND_NUM_ARGS()!=0) WRONG_PARAM_COUNT;
 
-  (pval*)(long)result = return_value;
+  result = (jlong)(long)return_value;
   
   clearEx = (*JG(jenv))->GetMethodID(JG(jenv), JG(reflect_class), 
           "clearException", "()V");
