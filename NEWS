@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- fixed a bug that caused php to crash in php_COM_get_ids_of_names() (Harald, Paul)
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo)
