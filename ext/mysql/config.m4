@@ -41,12 +41,12 @@ PHP_ARG_WITH(mysql, for MySQL support,
 
 if test "$PHP_MYSQL" != "no"; then
   PHP_MYSQL_SOCK
-  MYSQL_CHECKS
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 fi
 
 if test "$PHP_MYSQL" = "yes"; then
   MYSQL_MODULE_TYPE=builtin
+  MYSQL_CHECKS
   sources="libmysql/libmysql.c libmysql/errmsg.c libmysql/net.c libmysql/violite.c libmysql/password.c \
 	libmysql/my_init.c libmysql/my_lib.c libmysql/my_static.c libmysql/my_malloc.c libmysql/my_realloc.c libmysql/my_create.c \
 	libmysql/my_delete.c libmysql/my_tempnam.c libmysql/my_open.c libmysql/mf_casecnv.c libmysql/my_read.c \
@@ -60,7 +60,7 @@ if test "$PHP_MYSQL" = "yes"; then
 	libmysql/strcont.c libmysql/strcend.c libmysql/bchange.c libmysql/bmove.c libmysql/bmove_upp.c \
 	libmysql/longlong2str.c libmysql/strtoull.c libmysql/strtoll.c libmysql/charset.c libmysql/ctype.c"
 
-  PHP_NEW_EXTENSION(mysql, php_mysql.c, $sources $ext_shared,,-I@ext_srcdir@/libmysql)
+  PHP_NEW_EXTENSION(mysql, php_mysql.c $sources, $ext_shared,,-I@ext_srcdir@/libmysql)
   PHP_ADD_BUILD_DIR($ext_builddir/libmysql)
 
 elif test "$PHP_MYSQL" != "no"; then
@@ -118,8 +118,7 @@ elif test "$PHP_MYSQL" != "no"; then
   MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
 
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
-  MYSQL_INCLUDE="-I$MYSQL_INC_DIR"
-  PHP_MYSQL_SOCK
+  MYSQL_INCLUDE=-I$MYSQL_INC_DIR
 
 else
   MYSQL_MODULE_TYPE=none
