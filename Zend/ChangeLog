@@ -1,3 +1,12 @@
+2005-01-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      zend_language_scanner.l:
+      MFH: - Fixed bug #31444 (Memory leak in zend_language_scanner.c)
+
+    * zend_language_scanner.l:
+      - Fixed bug #31444 (Memory leak in zend_language_scanner.c)
+
 2005-01-15  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
