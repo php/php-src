@@ -221,7 +221,7 @@ ZEND_GET_MODULE(mysql)
 
 void timeout(int sig);
 
-#define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING, "%s(): A link to the server could not be established", get_active_function_name(TSRMLS_C)); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
 /* {{{ _rollback_mysql_transactions
  */
@@ -486,7 +486,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (PG(sql_safe_mode)) {
 		if (ZEND_NUM_ARGS()>0) {
-			php_error(E_NOTICE, "%s(): SQL safe mode in effect - ignoring host/user/password information", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "SQL safe mode in effect - ignoring host/user/password information");
 		}
 		host_and_port=passwd=NULL;
 		user=php_get_current_user();
@@ -620,12 +620,12 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
-				php_error(E_WARNING, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), MySG(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", MySG(num_links));
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			if (MySG(max_persistent)!=-1 && MySG(num_persistent)>=MySG(max_persistent)) {
-				php_error(E_WARNING, "%s(): Too many open persistent links (%d)", get_active_function_name(TSRMLS_C), MySG(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", MySG(num_persistent));
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
@@ -645,7 +645,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* Populate connect error globals so that the error functions can read them */
 				if (MySG(connect_error)!=NULL) efree(MySG(connect_error));
 				MySG(connect_error)=estrdup(mysql_error(&mysql->conn));
-				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), MySG(connect_error));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", MySG(connect_error));
 #if defined(HAVE_MYSQL_ERRNO)
 				MySG(connect_errno)=mysql_errno(&mysql->conn);
 #endif
@@ -723,7 +723,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
-			php_error(E_WARNING, "%s(): Too many open links (%d)", get_active_function_name(TSRMLS_C), MySG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", MySG(num_links));
 			efree(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
@@ -743,11 +743,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* Populate connect error globals so that the error functions can read them */
 			if (MySG(connect_error)!=NULL) efree(MySG(connect_error));
 			MySG(connect_error)=estrdup(mysql_error(&mysql->conn));
-			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), MySG(connect_error));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", MySG(connect_error));
 #if defined(HAVE_MYSQL_ERRNO)
 			MySG(connect_errno)=mysql_errno(&mysql->conn);
 #endif
-			php_error(E_WARNING, "%s(): MySQL Connection Failed: %s\n", get_active_function_name(TSRMLS_C), mysql_error(&mysql->conn));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "MySQL Connection Failed: %s\n", mysql_error(&mysql->conn));
 			efree(hashed_details);
 			efree(mysql);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
@@ -1107,7 +1107,7 @@ PHP_FUNCTION(mysql_create_db)
 			break;
 	}
 
-	zend_error(E_NOTICE, "%s(): This function is deprecated, please use mysql_query() to issue a SQL CREATE DATABASE statement instead.", get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, please use mysql_query() to issue a SQL CREATE DATABASE statement instead.");
 
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(mysql_drop_db)
 			break;
 	}
 
-	zend_error(E_NOTICE, "%s(): This function is deprecated, please use mysql_query() to issue a SQL DROP DATABASE statement instead.", get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, please use mysql_query() to issue a SQL DROP DATABASE statement instead.");
 
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
@@ -1217,7 +1217,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 	}
 	if (!mysql_result) {
 		if (PHP_MYSQL_VALID_RESULT(&mysql->conn)) { /* query should have returned rows */
-			php_error(E_WARNING, "%s(): Unable to save result set", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save result set");
 			RETURN_FALSE;
 		} else {
 			RETURN_TRUE;
@@ -1303,7 +1303,7 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	zend_error(E_NOTICE, "%s(): This function is deprecated; use mysql_select_db() and mysql_query() instead", get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_select_db() and mysql_query() instead");
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
 }
@@ -1338,7 +1338,7 @@ PHP_FUNCTION(mysql_list_dbs)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if ((mysql_result=mysql_list_dbs(&mysql->conn, NULL))==NULL) {
-		php_error(E_WARNING, "%s(): Unable to save MySQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
@@ -1381,7 +1381,7 @@ PHP_FUNCTION(mysql_list_tables)
 		RETURN_FALSE;
 	}
 	if ((mysql_result=mysql_list_tables(&mysql->conn, NULL))==NULL) {
-		php_error(E_WARNING, "%s(): Unable to save MySQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(mysql_list_fields)
 	}
 	convert_to_string_ex(table);
 	if ((mysql_result=mysql_list_fields(&mysql->conn, Z_STRVAL_PP(table), NULL))==NULL) {
-		php_error(E_WARNING, "%s(): Unable to save MySQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
@@ -1454,7 +1454,7 @@ PHP_FUNCTION(mysql_list_processes)
 
 	mysql_result = mysql_list_processes(&mysql->conn);
 	if (mysql_result == NULL) {
-		php_error(E_WARNING, "%s(): Unable to save MySQL query result", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
 
@@ -1587,7 +1587,7 @@ PHP_FUNCTION(mysql_escape_string)
 	 * be worth it
 	 */
 
-	zend_error(E_NOTICE, "%s(): This function is deprecated, please use mysql_real_escape_string() instead", get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, please use mysql_real_escape_string() instead");
 
 	Z_STRVAL_P(return_value) = (char *) emalloc(Z_STRLEN_PP(str)*2+1);
 	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), Z_STRVAL_PP(str), Z_STRLEN_PP(str));
@@ -1689,7 +1689,7 @@ PHP_FUNCTION(mysql_result)
 		
 	convert_to_long_ex(row);
 	if (Z_LVAL_PP(row)<0 || Z_LVAL_PP(row)>=(int)mysql_num_rows(mysql_result)) {
-		php_error(E_WARNING, "%s(): Unable to jump to row %d on MySQL result index %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(row), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on MySQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, Z_LVAL_PP(row));
@@ -1721,7 +1721,7 @@ PHP_FUNCTION(mysql_result)
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error(E_WARNING, "%s(): %s%s%s not found in MySQL result index %d", get_active_function_name(TSRMLS_C),
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %d",
 									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_PP(result));
 						efree(field_name);
 						if (table_name) {
@@ -1739,7 +1739,7 @@ PHP_FUNCTION(mysql_result)
 				convert_to_long_ex(field);
 				field_offset = Z_LVAL_PP(field);
 				if (field_offset<0 || field_offset>=(int)mysql_num_fields(mysql_result)) {
-					php_error(E_WARNING, "%s(): Bad column offset specified", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
 					RETURN_FALSE;
 				}
 				break;
@@ -1941,7 +1941,7 @@ PHP_FUNCTION(mysql_data_seek)
 
 	convert_to_long_ex(offset);
 	if (Z_LVAL_PP(offset)<0 || Z_LVAL_PP(offset)>=(int)mysql_num_rows(mysql_result)) {
-		php_error(E_WARNING, "%s(): Offset %d is invalid for MySQL result index %d (or the query data is unbuffered)", get_active_function_name(TSRMLS_C), Z_LVAL_PP(offset), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %d is invalid for MySQL result index %d (or the query data is unbuffered)", Z_LVAL_PP(offset), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, Z_LVAL_PP(offset));
@@ -2064,7 +2064,7 @@ PHP_FUNCTION(mysql_fetch_field)
 
 	if (field) {
 		if (Z_LVAL_PP(field)<0 || Z_LVAL_PP(field)>=(int)mysql_num_fields(mysql_result)) {
-			php_error(E_WARNING, "%s(): Bad field offset", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad field offset");
 			RETURN_FALSE;
 		}
 		mysql_field_seek(mysql_result, Z_LVAL_PP(field));
@@ -2108,7 +2108,7 @@ PHP_FUNCTION(mysql_field_seek)
 
 	convert_to_long_ex(offset);
 	if (Z_LVAL_PP(offset)<0 || Z_LVAL_PP(offset)>=(int)mysql_num_fields(mysql_result)) {
-		php_error(E_WARNING, "%s(): Field %d is invalid for MySQL result index %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(offset), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %d is invalid for MySQL result index %d", Z_LVAL_PP(offset), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, Z_LVAL_PP(offset));
@@ -2141,7 +2141,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	convert_to_long_ex(field);
 	if (Z_LVAL_PP(field)<0 || Z_LVAL_PP(field)>=(int)mysql_num_fields(mysql_result)) {
-		php_error(E_WARNING, "%s(): Field %d is invalid for MySQL result index %d", get_active_function_name(TSRMLS_C), Z_LVAL_PP(field), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %d is invalid for MySQL result index %d", Z_LVAL_PP(field), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, Z_LVAL_PP(field));
