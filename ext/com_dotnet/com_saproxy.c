@@ -168,7 +168,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 		VariantInit(&v);
 		
 		/* we can return a real value */
-		indices = emalloc(dims * sizeof(LONG));
+		indices = safe_emalloc(dims, sizeof(LONG), 0);
 
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
@@ -244,7 +244,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		VARTYPE vt;
 
 		dims = SafeArrayGetDim(V_ARRAY(&proxy->obj->v));
-		indices = emalloc(dims * sizeof(LONG));
+		indices = safe_emalloc(dims, sizeof(LONG), 0);
 		/* copy indices from proxy */
 		for (i = 0; i < dims; i++) {
 			convert_to_long(proxy->indices[i]);
