@@ -44,11 +44,11 @@
  * ret = 1  key already exists - nothing done
  */
 
-/* {{{ dbm_file_store
+/* {{{ flatfile_store
  */
-PHPAPI int dbm_file_store(flatfile *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC) {
-	if (mode == DBM_INSERT) {
-		if (dbm_file_findkey(dba, key_datum TSRMLS_CC)) {
+PHPAPI int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC) {
+	if (mode == FLATFILE_INSERT) {
+		if (flatfile_findkey(dba, key_datum TSRMLS_CC)) {
 			return 1;
 		}
 		php_stream_seek(dba->fp, 0L, SEEK_END);
@@ -61,7 +61,7 @@ PHPAPI int dbm_file_store(flatfile *dba, datum key_datum, datum value_datum, int
 		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize)
 			return -1;
 	} else { /* DBM_REPLACE */
-		dbm_file_delete(dba, key_datum TSRMLS_CC);
+		flatfile_delete(dba, key_datum TSRMLS_CC);
 		php_stream_printf(dba->fp TSRMLS_CC, "%d\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize)
@@ -75,14 +75,14 @@ PHPAPI int dbm_file_store(flatfile *dba, datum key_datum, datum value_datum, int
 }
 /* }}} */
 
-/* {{{ dbm_file_fetch
+/* {{{ flatfile_fetch
  */
-PHPAPI datum dbm_file_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
+PHPAPI datum flatfile_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
 	datum value_datum = {NULL, 0};
 	int num=0, buf_size=1024;
 	char *buf;	
 
-	if (dbm_file_findkey(dba, key_datum TSRMLS_CC)) {
+	if (flatfile_findkey(dba, key_datum TSRMLS_CC)) {
 		buf = emalloc((buf_size+1) * sizeof(char));
 		if (php_stream_gets(dba->fp, buf, 15)) {
 			num = atoi(buf);
@@ -103,9 +103,9 @@ PHPAPI datum dbm_file_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
 }
 /* }}} */
 
-/* {{{ dbm_file_delete
+/* {{{ flatfile_delete
  */
-PHPAPI int dbm_file_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
+PHPAPI int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 	char *key = key_datum.dptr;
 	int size = key_datum.dsize;
 
@@ -162,9 +162,9 @@ PHPAPI int dbm_file_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 }	
 /* }}} */
 
-/* {{{ dbm_file_findkey
+/* {{{ flatfile_findkey
  */
-PHPAPI int dbm_file_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
+PHPAPI int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 	char *buf = NULL;
 	int num;
 	int buf_size=1024;
@@ -209,9 +209,9 @@ PHPAPI int dbm_file_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 }
 /* }}} */
 
-/* {{{ dbm_file_firstkey
+/* {{{ flatfile_firstkey
  */
-PHPAPI datum dbm_file_firstkey(flatfile *dba TSRMLS_DC) {
+PHPAPI datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
 	datum buf;
 	int num;
 	int buf_size=1024;
@@ -250,9 +250,9 @@ PHPAPI datum dbm_file_firstkey(flatfile *dba TSRMLS_DC) {
 }
 /* }}} */
 
-/* {{{ latfile_nextkey
+/* {{{ flatfile_nextkey
  */
-PHPAPI datum dbm_file_nextkey(flatfile *dba TSRMLS_DC) {
+PHPAPI datum flatfile_nextkey(flatfile *dba TSRMLS_DC) {
 	datum buf;
 	int num;
 	int buf_size=1024;

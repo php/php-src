@@ -44,8 +44,8 @@
 #endif
 #endif
 
-#define DBM_DATA flatfile *dba = info->dbf
-#define DBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
+#define FLATFILE_DATA flatfile *dba = info->dbf
+#define FLATFILE_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
 
 #define TRUNC_IT(extension, mode) \
 	snprintf(buf, MAXPATHLEN, "%s" extension, info->path); \
@@ -152,7 +152,7 @@ DBA_OPEN_FUNC(flatfile)
 
 DBA_CLOSE_FUNC(flatfile)
 {
-	DBM_DATA;
+	FLATFILE_DATA;
 
 	if (dba->lockfn) {
 #if NFS_HACK
@@ -171,19 +171,15 @@ DBA_CLOSE_FUNC(flatfile)
 	efree(dba);
 }
 
-#define DBM_FETCH(gkey)       dbm_file_fetch((flatfile*)info->dbf, gkey TSRMLS_CC)
-#define DBM_STORE(gkey, gval) dbm_file_store((flatfile*)info->dbf, gkey, gval, DBM_REPLACE TSRMLS_CC)
-#define DBM_DELETE(gkey)      dbm_file_delete((flatfile*)info->dbf, gkey TSRMLS_CC)
-#define DBM_FIRSTKEY()        dbm_file_firstkey((flatfile*)info->dbf TSRMLS_CC)
-#define DBM_NEXTKEY(gkey)     dbm_file_nextkey((flatfile*)info->dbf TSRMLS_CC)
-
 DBA_FETCH_FUNC(flatfile)
 {
 	datum gval;
 	char *new = NULL;
 
-	DBM_GKEY;
-	gval = DBM_FETCH(gkey);
+	FLATFILE_DATA;
+	FLATFILE_GKEY;
+
+	gval = flatfile_fetch(dba, gkey TSRMLS_CC);
 	if(gval.dptr) {
 		if(newlen) *newlen = gval.dsize;
 		new = estrndup(gval.dptr, gval.dsize);
@@ -196,19 +192,31 @@ DBA_UPDATE_FUNC(flatfile)
 {
 	datum gval;
 
-	DBM_GKEY;
+	FLATFILE_DATA;
+	FLATFILE_GKEY;
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 	
-	return (DBM_STORE(gkey, gval) == -1 ? FAILURE : SUCCESS);
+	switch(flatfile_store(dba, gkey, gval, mode==1 ? FLATFILE_INSERT : FLATFILE_REPLACE TSRMLS_CC)) {
+	case -1:
+		php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Operation not possible");
+		return FAILURE;
+	default:
+	case 0:
+		return SUCCESS;
+	case 1:
+		php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Key already exists");
+		return SUCCESS;
+	}
 }
 
 DBA_EXISTS_FUNC(flatfile)
 {
 	datum gval;
-	DBM_GKEY;
+	FLATFILE_DATA;
+	FLATFILE_GKEY;
 	
-	gval = DBM_FETCH(gkey);
+	gval = flatfile_fetch(dba, gkey TSRMLS_CC);
 	if(gval.dptr) {
 		efree(gval.dptr);
 		return SUCCESS;
@@ -218,17 +226,18 @@ DBA_EXISTS_FUNC(flatfile)
 
 DBA_DELETE_FUNC(flatfile)
 {
-	DBM_GKEY;
-	return(DBM_DELETE(gkey) == -1 ? FAILURE : SUCCESS);
+	FLATFILE_DATA;
+	FLATFILE_GKEY;
+	return(flatfile_delete(dba, gkey TSRMLS_CC) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(flatfile)
 {
-	DBM_DATA;
+	FLATFILE_DATA;
 
 	if (dba->nextkey.dptr)
 		efree(dba->nextkey.dptr);
-	dba->nextkey = DBM_FIRSTKEY();
+	dba->nextkey = flatfile_firstkey(dba TSRMLS_CC);
 	if(dba->nextkey.dptr) {
 		if(newlen) 
 			*newlen = dba->nextkey.dsize;
@@ -239,16 +248,14 @@ DBA_FIRSTKEY_FUNC(flatfile)
 
 DBA_NEXTKEY_FUNC(flatfile)
 {
-	DBM_DATA;
-	datum lkey;
+	FLATFILE_DATA;
 	
 	if(!dba->nextkey.dptr) 
 		return NULL;
 	
-	lkey = dba->nextkey;
-	dba->nextkey = DBM_NEXTKEY(lkey);
-	if (lkey.dptr)
-		efree(lkey.dptr);
+	if (dba->nextkey.dptr)
+		efree(dba->nextkey.dptr);
+	dba->nextkey = flatfile_nextkey(dba TSRMLS_CC);
 	if(dba->nextkey.dptr) {
 		if(newlen) 
 			*newlen = dba->nextkey.dsize;
