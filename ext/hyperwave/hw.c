@@ -372,9 +372,10 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 		attrname = strtok(NULL, "\n");
 	}
 	if(NULL == sarr){
-		spec_arr->refcount--;
-		zend_hash_destroy(spec_arr->value.ht);
-		efree(spec_arr->value.ht);
+//		spec_arr->refcount--;
+//		zend_hash_destroy(spec_arr->value.ht);
+//		efree(spec_arr->value.ht);
+		zval_dtor(spec_arr);
 		efree(spec_arr);
 	}
 	efree(temp);

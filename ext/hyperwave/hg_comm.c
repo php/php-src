@@ -217,12 +217,13 @@ int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2)
 * Function fnCreateAnchorList()                                        *
 *                                                                      *
 * Returns a list of Anchors converted from an object record            *
-* Parameter: char **anchors: object records of anchors                 *
+* Parameter: int objectID: the object for which the list is created    *
+*            char **anchors: object records of anchors                 *
 *            char **dest: object records of destinations               *
 *            int ancount: number of anchors                            *
 * Return: List of Anchors, NULL if error                               *
 ***********************************************************************/
-DLIST *fnCreateAnchorList(char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode)
+DLIST *fnCreateAnchorList(hw_objectID objectID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode)
 {
 	int start, end, i, destid, anchordestid, objectID;
 	ANCHOR *cur_ptr = NULL;
@@ -287,22 +288,29 @@ DLIST *fnCreateAnchorList(char **anchors, char **docofanchorrec, char **reldestr
 								tempptr = reldestptr;
 						}
 						if(NULL != tempptr) {
-							/* It's always nice to deal with names, so let's first check
-						  		for a name. If there is none we take the ObjectID.
-							*/
-							if(NULL != (str = strstr(tempptr, "Name="))) {
-								str += 5;
-							} else if(NULL != (str = strstr(tempptr, "ObjectID="))) {
-								str += 9;
-							}
-							if(sscanf(str, "%s\n", destdocname)) {
-								cur_ptr->destdocname = estrdup(destdocname);
-							}
 							destid = 0;
 							if(NULL != (str = strstr(tempptr, "ObjectID="))) {
 								str += 9;
 								sscanf(str, "0x%X", &destid);
 							}
+							/* This is basically for NAME tags. There is no need
+							   to add the destname if it is the document itself.
+							*/
+/*							if(destid == objectID) {
+								cur_ptr->destdocname = NULL;
+							} else { */
+								/* It's always nice to deal with names, so let's first check
+						  			for a name. If there is none we take the ObjectID.
+								*/
+								if(NULL != (str = strstr(tempptr, "Name="))) {
+									str += 5;
+								} else if(NULL != (str = strstr(tempptr, "ObjectID="))) {
+									str += 9;
+								}
+								if(sscanf(str, "%s\n", destdocname)) {
+									cur_ptr->destdocname = estrdup(destdocname);
+								}
+/*							} */
 						}
 					}
 		
@@ -938,7 +946,8 @@ int open_hg_connection(char *server_name, int port)
 		server_addr.sin_port = htons(port);
 	else
 		server_addr.sin_port = htons(HG_SERVER_PORT); 
-	bcopy(hp->h_addr, (char *) &server_addr.sin_addr, hp->h_length);
+/*	bcopy(hp->h_addr, (char *) &server_addr.sin_addr, hp->h_length); */
+	server_addr.sin_addr = *(struct in_addr *) hp->h_addr;
 
 	if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) == SOCK_ERR )  {
 		return(-2);
@@ -1882,7 +1891,7 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 
 			send_getdestforanchorsobj(sockfd, anchors, &destrec, ancount);
 			send_getreldestforanchorsobj(sockfd, anchors, &reldestrec, ancount, rootid, objectID);
-			pAnchorList = fnCreateAnchorList(anchors, destrec, reldestrec, ancount, mode);
+			pAnchorList = fnCreateAnchorList(objectID, anchors, destrec, reldestrec, ancount, mode);
 			/* Free only the array, the objrecs has been freed in fnCreateAnchorList() */
 			if(anchors) efree(anchors);
 			if(destrec) efree(destrec);
@@ -4220,7 +4229,7 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 
 			send_getdestforanchorsobj(sockfd, anchors, &destrec, ancount);
 			send_getreldestforanchorsobj(sockfd, anchors, &reldestrec, ancount, rootid, objectID);
-			pAnchorList = fnCreateAnchorList(anchors, destrec, reldestrec, ancount, mode);
+			pAnchorList = fnCreateAnchorList(objectID, anchors, destrec, reldestrec, ancount, mode);
 			/* Free only the array, the objrecs has been freed in fnCreateAnchorList() */
 			if(anchors) efree(anchors);
 			if(destrec) efree(destrec);
