@@ -812,6 +812,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 				err = FDFGetValue(theFDF,name,value,value_len-1,&nBytes);
 				if(err == FDFErcOK && nBytes != 0) {
 					for(p=value;*p;p++) if(*p=='\r') *p='\n';
+					if(lastfieldname) efree(lastfieldname);
 					lastfieldname = estrdup(name);		
 					php_register_variable(name, value, array_ptr ELS_CC PLS_CC);
 				} 
