@@ -49,7 +49,7 @@
 
 #include "TSRM.h"
 
-/* Only need mutex for popen() in Windows and NetWare, because it doesn't chdir() on UNIX */
+/* Only need mutex for popen() in Windows and NetWare because it doesn't chdir() on UNIX */
 #if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
 MUTEX_T cwd_mutex;
 #endif
@@ -210,7 +210,7 @@ CWD_API void virtual_cwd_startup(void)
 	cwd_globals_ctor(&cwd_globals TSRMLS_CC);
 #endif
 
-#if defined(TSRM_WIN32) && defined(ZTS)
+#if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
@@ -220,7 +220,7 @@ CWD_API void virtual_cwd_shutdown(void)
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals TSRMLS_CC);
 #endif
-#if defined(TSRM_WIN32) && defined(ZTS)
+#if (defined(TSRM_WIN32) || defined(NETWARE)) && defined(ZTS)
 	tsrm_mutex_free(cwd_mutex);
 #endif
 
