@@ -34,8 +34,8 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_object_handlers.h"
 
-#include "tidy/tidy.h"
-#include "tidy/buffio.h"
+#include "tidy.h"
+#include "buffio.h"
 
 #define PHP_TIDY_MODULE_VERSION	"2.0-dev"
 
