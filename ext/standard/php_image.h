@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Rasmus Lerdorf <rasmus@php.net>                              |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -35,8 +36,15 @@ typedef enum
   IMAGE_FILETYPE_SWF,
   IMAGE_FILETYPE_PSD,
   IMAGE_FILETYPE_BMP,
-  IMAGE_FILETYPE_TIFF
+  IMAGE_FILETYPE_TIFF_II, /* intel */
+  IMAGE_FILETYPE_TIFF_MM, /* motorola */
+  IMAGE_FILETYPE_JPC,
+  IMAGE_FILETYPE_JP2,
+  IMAGE_FILETYPE_JPX,
+  IMAGE_FILETYPE_JB2
 } image_filetype;
 /* }}} */
+
+extern int php_getimagetype(int socketd, FILE *fp, int issock, char *filetype);
 
 #endif /* PHP_IMAGE_H */

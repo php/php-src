@@ -59,6 +59,7 @@ PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char
 (char) 0x0d, (char) 0x0a, (char) 0x1a, (char) 0x0a};
 PHPAPI const char php_sig_tif_ii[4] = {'I','I', (char)0x2A, (char)0x00};
 PHPAPI const char php_sig_tif_mm[4] = {'M','M', (char)0x00, (char)0x2A};
+PHPAPI const char php_sig_jpc[3] = {(char)0xFF, (char)0x4F, (char)0xff};
 
 
 /* return info as a struct, to make expansion easier */
@@ -241,6 +242,9 @@ static struct gfxinfo *php_handle_png (int socketd, FILE *fp, int issock)
 #define M_APP13 0xed
 #define M_APP14 0xee
 #define M_APP15 0xef
+#define M_COM   0xFE            /* COMment                                  */
+
+#define M_PSEUDO 0xFFD8			/* pseudo marker for start of image(byte 0) */
 
 /* {{{ php_read2
  */
@@ -256,36 +260,85 @@ static unsigned short php_read2(int socketd, FILE *fp, int issock)
 /* }}} */
 
 /* {{{ php_next_marker
- */
-static unsigned int php_next_marker(int socketd, FILE *fp, int issock)
-	 /* get next marker byte from file */
+ * get next marker byte from file */
+static unsigned int php_next_marker(int socketd, FILE *fp, int issock, int last_marker, int comment_correction, int ff_read)
 {
-	int c;
+	int a=0, marker;
 
-	/* get marker byte, swallowing possible padding */
+	/* get marker byte, swallowing possible padding                           */
+	if ( last_marker==M_COM && comment_correction) {
+		/* some software does not count the length bytes of COM section           */
+		/* one company doing so is very much envolved in JPEG... so we accept too */
+		/* by the way: some of those companies changed their code now...          */
+		comment_correction = 2;
+	} else {
+		last_marker = 0;
+		comment_correction = 0;
+	}
+	if ( ff_read) {
+		a = 1; /* already read 0xff in filetype detection */
+	}
 	do {
-		if ((c = FP_FGETC(socketd, fp, issock)) == EOF)
-			return M_EOI;		/* we hit EOF */
-	} while (c == 0xff);
-
-	return (unsigned int) c;
+		if ((marker = FP_FGETC(socketd, fp, issock)) == EOF)
+		{
+			return M_EOI;/* we hit EOF */
+		}
+		if ( last_marker==M_COM && comment_correction>0)
+		{
+			if ( marker != 0xFF)
+			{
+				marker = 0xff;
+				comment_correction--;
+            } else {
+				last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
+			}
+		}
+		if ( ++a > 10)
+		{
+			/* who knows the maxim amount of 0xff? though 7 */
+			/* but found other implementations              */
+			return M_EOI;
+		}
+	} while ( marker == 0xff);
+	if ( a < 2)
+	{
+		return M_EOI; /* at least one 0xff is needed before marker code */
+	}
+	if ( last_marker==M_COM && comment_correction)
+	{
+		return M_EOI; /* ah illegal: char after COM section not 0xFF */
+	}
+	return (unsigned int)marker;
 }
 /* }}} */
 
-/* {{{ php_skip_variable
- */
-static void php_skip_variable(int socketd, FILE *fp, int issock)
-	 /* skip over a variable-length block; assumes proper length marker */
+/* {{{ php_skip_over
+ * skip over a block of specified length */
+#ifndef FP_FSKIP
+
+#define FP_FSKIP(l,socketd,fp,issock) php_skip_over(socketd,fp,issock,l)
+
+static void php_skip_over(int socketd, FILE *fp, int issock, size_t length)
 {
-	unsigned short length;
-	char *tmp;
+	static char tmp[1024];
 
-	length = php_read2(socketd, fp, issock);
-	length -= 2;				/* length includes itself */
+	while(length>=sizeof(tmp)) {
+		FP_FREAD(tmp, sizeof(tmp), socketd, fp, issock);
+		length -= sizeof(tmp);
+	}
+	if(length) {
+		FP_FREAD(tmp, length, socketd, fp, issock);
+	}
+}
+#endif
+/* }}} */
 
-	tmp = emalloc(length);
-	FP_FREAD(tmp, (long) length, socketd, fp, issock); /* skip the header */
-	efree(tmp);
+/* {{{ php_skip_variable
+ * skip over a variable-length block; assumes proper length marker */
+static void php_skip_variable(int socketd, FILE *fp, int issock)
+{
+	size_t length = php_read2(socketd, fp, issock);
+	FP_FSKIP( length-2, socketd,  fp, issock);
 }
 /* }}} */
 
@@ -302,6 +355,7 @@ static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker,
 	length -= 2;				/* length includes itself */
 
 	buffer = emalloc(length);
+	if ( !buffer) return;
 
  	if (FP_FREAD(buffer, (long) length, socketd, fp, issock) <= 0) {
 		efree(buffer);
@@ -324,12 +378,12 @@ static void php_read_APP(int socketd, FILE *fp, int issock, unsigned int marker,
 static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval *info)
 {
 	struct gfxinfo *result = NULL;
-	unsigned int marker;
-	char tmp[2];
-	unsigned char a[4];
+	unsigned int marker = M_PSEUDO;
+	unsigned short length, ff_read=1;
 
 	for (;;) {
-		marker = php_next_marker(socketd, fp, issock);
+		marker = php_next_marker(socketd, fp, issock, marker, 1, ff_read);
+		ff_read = 0;
 		switch (marker) {
 			case M_SOF0:
 			case M_SOF1:
@@ -347,15 +401,16 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 				if (result == NULL) {
 					/* handle SOFn block */
 					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-					FP_FREAD(tmp, sizeof(tmp), socketd, fp, issock);
-					result->bits   = FP_FGETC(socketd, fp, issock);
-					FP_FREAD(a, sizeof(a), socketd, fp, issock);
-					result->height = (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
-					result->width  = (((unsigned short) a[ 2 ]) << 8) + ((unsigned short) a[ 3 ]);
-					result->channels = FP_FGETC(socketd, fp, issock);
-
-					if (! info) /* if we don't want an extanded info -> return */
+					if ( !result)
+						return NULL;
+					length = php_read2(socketd, fp, issock);
+					result->bits     = FP_FGETC(socketd,  fp, issock);
+					result->height   = php_read2(socketd, fp, issock);
+					result->width    = php_read2(socketd, fp, issock);
+					result->channels = FP_FGETC(socketd,  fp, issock);
+					if (!info || length<8) /* if we don't want an extanded info -> return */
 						return result;
+					FP_FSKIP( length-8, socketd,  fp, issock);
 				} else {
 					php_skip_variable(socketd, fp, issock);
 				}
@@ -395,7 +450,64 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 		}
 	}
 
-	return NULL;
+	return result; /* perhaps image broken -> no info but size */
+}
+/* }}} */
+
+/* {{{ jpeg2000 constants
+  See ext/exif for more */
+#define JC_SOC   0x4F		/* Start of codestream */
+#define JC_SIZ   0x51		/* Image and tile size */
+/* }}} */
+
+/* {{{ php_read4
+ */
+static unsigned int php_read4(int socketd, FILE *fp, int issock)
+{
+	unsigned char a[4];
+
+	/* just return 0 if we hit the end-of-file */
+	if((FP_FREAD(a, sizeof(a), socketd, fp, issock)) <= 0) return 0;
+
+	return (((unsigned int)a[0]) << 24)
+	     + (((unsigned int)a[1]) << 16)
+	     + (((unsigned int)a[2]) <<  8)
+	     + (((unsigned int)a[3]));
+}
+/* }}} */
+
+/* {{{ php_handle_tiff
+   main loop to parse TIFF structure */
+static struct gfxinfo *php_handle_jpc(int socketd, FILE *fp, int issock)
+{
+	struct gfxinfo *result = NULL;
+	unsigned int marker, dummy;
+	unsigned short length, ff_read = 1;
+
+	marker = php_next_marker(socketd, fp, issock, 0, 0, ff_read);
+	ff_read = 0;
+	if ( marker == JC_SIZ)
+	{
+		length           = php_read2(socketd, fp, issock); /* Lsiz: length of segment */
+		if ( length<42 || length>49191) /* read the spec */
+			return NULL;
+		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+		if ( !result)
+			return NULL;
+		dummy            = php_read2(socketd, fp, issock); /* Rsiz: capabilities */
+		result->height   = php_read4(socketd, fp, issock); /* Xsiz */
+		result->width    = php_read4(socketd, fp, issock); /* Ysiz */
+		dummy            = php_read4(socketd, fp, issock); /* X0siz */
+		dummy            = php_read4(socketd, fp, issock); /* Y0siz */
+		dummy            = php_read4(socketd, fp, issock); /* XTsiz */
+		dummy            = php_read4(socketd, fp, issock); /* YTsiz */
+		dummy            = php_read4(socketd, fp, issock); /* XT0siz */
+		dummy            = php_read4(socketd, fp, issock); /* YT0siz */
+		result->bits     = php_read2(socketd, fp, issock); /* Csiz: precision in bitss */
+		result->channels = 0; /* don't know yet */
+		return result;
+	}
+	return result;
 }
 /* }}} */
 
@@ -473,7 +585,6 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval *info, int motorola_intel)
 {
 	struct gfxinfo *result = NULL;
-	static char skip[1024];
 	int i, num_entries;
 	unsigned char *dir_entry;
 	size_t ifd_size, dir_size, entry_value, entry_length, width, height, ifd_addr;
@@ -481,16 +592,8 @@ static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval 
 	char *ifd_data, ifd_ptr[4];
 
 	FP_FREAD(ifd_ptr, 4, socketd, fp, issock);
-	ifd_addr = php_ifd_get32u(ifd_ptr, motorola_intel)-8;
-	while ( ifd_addr>sizeof(skip)) {
-		FP_FREAD( skip, sizeof(skip), socketd, fp, issock);
-		ifd_addr -= sizeof(skip);
-		if (FP_FEOF( socketd, fp, issock)) return NULL;
-	}
-	if ( ifd_addr > 0) {
-		FP_FREAD( skip, ifd_addr, socketd, fp, issock);
-		if (FP_FEOF( socketd, fp, issock)) return NULL;
-	}
+	ifd_addr = php_ifd_get32u(ifd_ptr, motorola_intel);
+	FP_FSKIP(ifd_addr-8, socketd, fp, issock);
 	ifd_size = 2;
 	ifd_data = emalloc(ifd_size);
 	FP_FREAD(ifd_data, 2, socketd, fp, issock);
@@ -537,6 +640,7 @@ static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval 
 				break;
 		}
 	}
+	efree(ifd_data);
 	if ( width && height) {
 		/* not the same when in for-loop */
 		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
@@ -548,6 +652,52 @@ static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval 
 }
 /* }}} */
 
+/* {{{ php_imagetype
+   detect filetype from first bytes */
+int php_getimagetype(int socketd, FILE *fp, int issock, char *filetype)
+{
+	char tmp[8];
+
+	if ( !filetype) filetype = tmp;
+	if((FP_FREAD(filetype, 3, socketd, fp, issock)) <= 0) {
+		php_error(E_WARNING, "getimagesize: Read error!");
+		return IMAGE_FILETYPE_UNKNOWN;
+	}
+
+	if (!memcmp(filetype, php_sig_gif, 3)) {
+		return IMAGE_FILETYPE_GIF;
+	} else if (!memcmp(filetype, php_sig_jpg, 3)) {
+		return IMAGE_FILETYPE_JPEG;
+	} else if (!memcmp(filetype, php_sig_png, 3)) {
+		FP_FREAD(filetype+3, 5, socketd, fp, issock);
+		if (!memcmp(filetype, php_sig_png, 8)) {
+			return IMAGE_FILETYPE_PNG;
+		} else {
+			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");
+			return IMAGE_FILETYPE_UNKNOWN;
+		}
+	} else if (!memcmp(filetype, php_sig_swf, 3)) {
+		return IMAGE_FILETYPE_SWF;
+	} else if (!memcmp(filetype, php_sig_psd, 3)) {
+		return IMAGE_FILETYPE_PSD;
+	} else if (!memcmp(filetype, php_sig_bmp, 2)) {
+		return IMAGE_FILETYPE_BMP;
+	} else if (!memcmp(filetype, php_sig_jpc, 3)) {
+		return IMAGE_FILETYPE_JPC;
+	} else {
+		FP_FREAD(filetype+3, 1, socketd, fp, issock);
+		if (!memcmp(filetype, php_sig_tif_ii, 4)) {
+			return IMAGE_FILETYPE_TIFF_II;
+		} else
+		if (!memcmp(filetype, php_sig_tif_mm, 4)) {
+			return IMAGE_FILETYPE_TIFF_MM;
+		}
+	}
+
+	return IMAGE_FILETYPE_UNKNOWN;
+}
+/* }}} */
+
 /* {{{ proto array getimagesize(string imagefile [, array info])
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
@@ -556,7 +706,6 @@ PHP_FUNCTION(getimagesize)
 	FILE *fp;
 	int issock=0, socketd=0, rsrc_id;
  	int itype = 0;
-	char filetype[8];
 	char temp[64];
 	struct gfxinfo *result = NULL;
 
@@ -607,48 +756,42 @@ PHP_FUNCTION(getimagesize)
 		rsrc_id = ZEND_REGISTER_RESOURCE(NULL, fp, php_file_le_fopen());
 	}
 
-	if((FP_FREAD(filetype, 3, socketd, fp, issock)) <= 0) {
-		php_error(E_WARNING, "getimagesize: Read error!");
-		RETURN_FALSE;
-	}
-
-	if (!memcmp(filetype, php_sig_gif, 3)) {
-		result = php_handle_gif (socketd, fp, issock);
-		itype = IMAGE_FILETYPE_GIF;
-	} else if (!memcmp(filetype, php_sig_jpg, 3)) {
-		if (info) {
-			result = php_handle_jpeg(socketd, fp, issock, *info);
-		} else {
-			result = php_handle_jpeg(socketd, fp, issock, NULL);
-		}
-		itype = IMAGE_FILETYPE_JPEG;
-	} else if (!memcmp(filetype, php_sig_png, 3)) {
-		FP_FREAD(filetype+3, 5, socketd, fp, issock);
-		if (!memcmp(filetype, php_sig_png, 8)) {
+	itype = php_getimagetype(socketd, fp, issock, NULL);
+	switch( itype) {
+        case IMAGE_FILETYPE_GIF:
+			result = php_handle_gif (socketd, fp, issock);
+	        break;
+        case IMAGE_FILETYPE_JPEG:
+			if (info) {
+				result = php_handle_jpeg(socketd, fp, issock, *info);
+			} else {
+				result = php_handle_jpeg(socketd, fp, issock, NULL);
+			}
+	        break;
+        case IMAGE_FILETYPE_PNG:
 			result = php_handle_png(socketd, fp, issock);
-			itype = IMAGE_FILETYPE_PNG;
-		} else {
-			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");
-		}
-	} else if (!memcmp(filetype, php_sig_swf, 3)) {
-		result = php_handle_swf(socketd, fp, issock);
-		itype = IMAGE_FILETYPE_SWF;
-	} else if (!memcmp(filetype, php_sig_psd, 3)) {
-		result = php_handle_psd(socketd, fp, issock);
-		itype = IMAGE_FILETYPE_PSD;
-	} else if (!memcmp(filetype, php_sig_bmp, 2)) {
-		result = php_handle_bmp(socketd, fp, issock);
-		itype = IMAGE_FILETYPE_BMP;
-	} else {
-		FP_FREAD(filetype+3, 1, socketd, fp, issock);
-		if (!memcmp(filetype, php_sig_tif_ii, 4)) {
+	        break;
+        case IMAGE_FILETYPE_SWF:
+			result = php_handle_swf(socketd, fp, issock);
+	        break;
+        case IMAGE_FILETYPE_PSD:
+			result = php_handle_psd(socketd, fp, issock);
+	        break;
+        case IMAGE_FILETYPE_BMP:
+			result = php_handle_bmp(socketd, fp, issock);
+	        break;
+        case IMAGE_FILETYPE_TIFF_II:
 			result = php_handle_tiff(socketd, fp, issock, NULL, 0);
-			itype = IMAGE_FILETYPE_TIFF;
-		} else
-		if (!memcmp(filetype, php_sig_tif_mm, 4)) {
+	        break;
+        case IMAGE_FILETYPE_TIFF_MM:
 			result = php_handle_tiff(socketd, fp, issock, NULL, 1);
-			itype = IMAGE_FILETYPE_TIFF;
-		}
+	        break;
+        case IMAGE_FILETYPE_JPC:
+			result = php_handle_jpc(socketd, fp, issock);
+	        break;
+		default:
+        case IMAGE_FILETYPE_UNKNOWN:
+	        break;
 	}
 
 	zend_list_delete(rsrc_id);
@@ -672,6 +815,8 @@ PHP_FUNCTION(getimagesize)
 			add_assoc_long(return_value, "channels", result->channels);
 		}
 		efree(result);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
