@@ -945,7 +945,9 @@ static int _php_image_type (char data[8])
 	if (data == NULL)
 		return -1;
 
-	if (!memcmp(data, php_sig_jpg, 3))
+	if (!memcmp(data, php_sig_gd2, 3))
+		return PHP_GDIMG_TYPE_GD2;
+	else if (!memcmp(data, php_sig_jpg, 3))
 		return PHP_GDIMG_TYPE_JPG;
 	else if (!memcmp(data, php_sig_png, 3)) {
 		if (!memcmp(data, php_sig_png, 8))
@@ -1047,12 +1049,21 @@ PHP_FUNCTION(imagecreatefromstring)
 
 		case PHP_GDIMG_TYPE_WBM:
 #ifdef HAVE_GD_WBMP
-			im = _php_image_create_from_string (data, "WBMP",gdImageCreateFromWBMPCtx TSRMLS_CC);
+			im = _php_image_create_from_string (data, "WBMP", gdImageCreateFromWBMPCtx TSRMLS_CC);
 #else
 			php_error(E_WARNING, "No WBMP support in this PHP build");
 			RETURN_FALSE;
 #endif
-			 break;
+			break;
+
+		case PHP_GDIMG_TYPE_GD2:
+#ifdef HAVE_GD_GD2
+			im = _php_image_create_from_string (data, "GD2", gdImageCreateFromGd2Ctx TSRMLS_CC);
+#else
+			php_error(E_WARNING, "No GD2 support in this PHP build");
+			RETURN_FALSE;
+#endif
+			break;
 
 		default:
 			php_error(E_WARNING, "Data is not in a recognized format.");
