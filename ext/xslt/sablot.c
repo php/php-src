@@ -30,7 +30,6 @@
 #if HAVE_SABLOT_BACKEND
 
 #include <sablot.h>
-#include <sdom.h>
 
 #include <string.h>
 #include <stdarg.h>
@@ -53,15 +52,15 @@ static int  scheme_put(void *, SablotHandle, int, const char *, int *);
 static int  scheme_close(void *, SablotHandle, int);
 
 /* Sax handler functions */
-static SAX_RETURN sax_startdoc(void *, SablotHandle);
-static SAX_RETURN sax_startelement(void *, SablotHandle, const char *, const char **);
-static SAX_RETURN sax_endelement(void *, SablotHandle, const char *);
-static SAX_RETURN sax_startnamespace(void *, SablotHandle, const char *, const char *);
-static SAX_RETURN sax_endnamespace(void *, SablotHandle, const char *);
-static SAX_RETURN sax_comment(void *, SablotHandle, const char *);
-static SAX_RETURN sax_pi(void *, SablotHandle, const char *, const char *);
-static SAX_RETURN sax_characters(void *, SablotHandle, const char *, int);
-static SAX_RETURN sax_enddoc(void *, SablotHandle);
+static SAX_RETURN sax_startdoc(void *);
+static SAX_RETURN sax_startelement(void *, const char *, const char **);
+static SAX_RETURN sax_endelement(void *, const char *);
+static SAX_RETURN sax_startnamespace(void *, const char *, const char *);
+static SAX_RETURN sax_endnamespace(void *, const char *);
+static SAX_RETURN sax_comment(void *, const char *);
+static SAX_RETURN sax_pi(void *, const char *, const char *);
+static SAX_RETURN sax_characters(void *, const char *, int);
+static SAX_RETURN sax_enddoc(void *);
 
 /* Error handlers */
 static MH_ERROR error_makecode(void *, SablotHandle, int, unsigned short, unsigned short);
@@ -78,17 +77,18 @@ function_entry xslt_functions[] = {
 	PHP_FE(xslt_create,              NULL)
 	PHP_FE(xslt_set_sax_handlers,    NULL)
 	PHP_FE(xslt_set_scheme_handlers, NULL)
-	PHP_FE(xslt_process,             NULL)
-	PHP_FE(xslt_set_base,            NULL)
-	PHP_FE(xslt_set_log,             NULL)
 	PHP_FE(xslt_set_error_handler,   NULL)
+	PHP_FE(xslt_set_base,		 NULL)
 #ifdef HAVE_SABLOT_SET_ENCODING
 	PHP_FE(xslt_set_encoding,        NULL)
+#else
+	PHP_FALIAS(xslt_set_encoding, warn_not_available, NULL)
 #endif
+	PHP_FE(xslt_set_log,             NULL)
+	PHP_FE(xslt_process,             NULL)
+	PHP_FE(xslt_error,               NULL)
+	PHP_FE(xslt_errno,               NULL)
 	PHP_FE(xslt_free,                NULL)
-
-	PHP_FE(xslt_error,                   NULL)
-	PHP_FE(xslt_errno,                   NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -170,10 +170,9 @@ PHP_MINFO_FUNCTION(xslt)
    Create a new XSLT processor */
 PHP_FUNCTION(xslt_create)
 {
-	php_xslt        *handle;      /* The php -> sablotron handle */
-	SablotSituation  ctx;         /* Sablotron situation */
-	SablotHandle     processor;   /* The sablotron processor */
-	int              error;       /* The error container */
+	php_xslt     *handle;      /* The php -> sablotron handle */
+	SablotHandle  processor;   /* The sablotron processor */
+	int           error;       /* The error container */
 
 	/* Allocate the php-sablotron handle */
 	handle                   = ecalloc(1, sizeof(php_xslt));
@@ -182,20 +181,8 @@ PHP_FUNCTION(xslt_create)
 
 	XSLT_LOG(handle).path = NULL;
 
-	/* Unless SAX handlers are  */
-	handle->cacheable = 1;
-
-	/* Allocate the processor ctx */
-	error = SablotCreateSituation(&ctx);
-	if (error) {
-		XSLT_ERRNO(handle) = error;
-		RETURN_FALSE;
-	}
-
-	XSLT_CONTEXT(handle) = ctx;
-
 	/* Allocate the actual processor itself, via sablotron */
-	error = SablotCreateProcessorForSituation(XSLT_CONTEXT(handle), &processor);
+	error = SablotCreateProcessor(&processor);
 	if (error) {
 		XSLT_ERRNO(handle) = error;
 		RETURN_FALSE;
@@ -234,8 +221,6 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 	}
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 	
-	handle->cacheable = 0;
-
 	/* Convert the sax_handlers_p zval ** to a hash table we can process */
 	sax_handlers = HASH_OF(*sax_handlers_p);
 	if (!sax_handlers) {
@@ -257,39 +242,39 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		}
 
 		/* Document handlers (document start, document end) */
-		if (!strcmp(string_key, "document")) {
+		if (strcasecmp(string_key, "document") == 0) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).doc_start, 
 			                          &XSLT_SAX(handle).doc_end, 
 			                          handler);
 		}
 		/* Element handlers, start of an element, and end of an element */
-		else if (!strcmp(string_key, "element")) {
+		else if (strcasecmp(string_key, "element") == 0) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).element_start, 
 			                          &XSLT_SAX(handle).element_end, 
 			                          handler);
 		}
 		/* Namespace handlers, start of a namespace, end of a namespace */
-		else if (!strcmp(string_key, "namespace")) {
+		else if (strcasecmp(string_key, "namespace") == 0) {
 			SEPARATE_ZVAL(handler);
 			register_sax_handler_pair(&XSLT_SAX(handle).namespace_start, 
 			                          &XSLT_SAX(handle).namespace_end, 
 			                          handler);
 		}
 		/* Comment handlers, called when a comment is reached */
-		else if (!strcmp(string_key, "comment")) {
+		else if (strcasecmp(string_key, "comment") == 0) {
 			XSLT_SAX(handle).comment = *handler;
 			zval_add_ref(&XSLT_SAX(handle).comment);
 		}
 		/* Processing instructions handler called when processing instructions
 		   (<? ?>) */
-		else if (!strcmp(string_key, "pi")) {
+		else if (strcasecmp(string_key, "pi") == 0) {
 			XSLT_SAX(handle).pi = *handler;
 			zval_add_ref(&XSLT_SAX(handle).pi);
 		}
 		/* Character handler, called when data is found */
-		else if (!strcmp(string_key, "character")) {
+		else if (strcasecmp(string_key, "character") == 0) {
 			XSLT_SAX(handle).characters = *handler;
 			zval_add_ref(&XSLT_SAX(handle).characters);
 		}
@@ -335,36 +320,34 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 
 		key_type = zend_hash_get_current_key(scheme_handlers, &string_key, &num_key, 0);
 		if (key_type == HASH_KEY_IS_LONG) {
-			php_error(E_NOTICE, "Numerical key %d (with value %s) being ignored "
-					  "in xslt_set_scheme_handlers()",
+			php_error(E_NOTICE, "Numerical key %d (with value %s) being ignored in xslt_set_scheme_handlers()",
 					  num_key, Z_STRVAL_PP(handler));
 			continue;
 		}
 
 		/* Open the URI and return the whole string */
-		if (!strcmp(string_key, "get_all")) {
+		if (strcasecmp(string_key, "get_all") == 0) {
 			assign_handle = &XSLT_SCHEME(handle).get_all;
 		}
 		/* Open the URI and return a handle */
-		else if (!strcmp(string_key, "open")) {
+		else if (strcasecmp(string_key, "open") == 0) {
 			assign_handle = &XSLT_SCHEME(handle).open;
 		}
 		/* Retrieve data from the URI */
-		else if (!strcmp(string_key, "get")) {
+		else if (strcasecmp(string_key, "get") == 0) {
 			assign_handle = &XSLT_SCHEME(handle).get;
 		}
 		/* Save data to the URI */
-		else if (!strcmp(string_key, "put")) {
+		else if (strcasecmp(string_key, "put") == 0) {
 			assign_handle = &XSLT_SCHEME(handle).put;
 		}
 		/* Close the URI */
-		else if (!strcmp(string_key, "close")) {
+		else if (strcasecmp(string_key, "close") == 0) {
 			assign_handle = &XSLT_SCHEME(handle).close;
 		}
 		/* Invalid handler name */
 		else {
-			php_error(E_WARNING, "%s() invalid option '%s', skipping", 
-					  get_active_function_name(TSRMLS_C), string_key);
+			php_error(E_WARNING, "%s() invalid option '%s', skipping", get_active_function_name(TSRMLS_C), string_key);
 			continue;
 		}
 
@@ -435,8 +418,6 @@ PHP_FUNCTION(xslt_set_encoding)
 
 	/* Set the encoding */
 	SablotSetEncoding(XSLT_PROCESSOR(handle), Z_STRVAL_PP(encoding));
-#else
-	php_error(E_WARNING, "Sablotron not compiled with encoding support");
 #endif
 
 }
@@ -457,9 +438,7 @@ PHP_FUNCTION(xslt_set_log)
 	}
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 	
-	if (Z_TYPE_PP(logfile) == IS_LONG || 
-		Z_TYPE_PP(logfile) == IS_BOOL || 
-		Z_TYPE_PP(logfile) == IS_DOUBLE) {
+	if (Z_TYPE_PP(logfile) == IS_LONG || Z_TYPE_PP(logfile) == IS_BOOL || Z_TYPE_PP(logfile) == IS_DOUBLE) {
 		XSLT_LOG(handle).do_log = Z_LVAL_PP(logfile);
 		RETURN_NULL();
 	}
@@ -478,163 +457,83 @@ PHP_FUNCTION(xslt_set_log)
 }
 /* }}} */
 
-/* {{{ S_DOM *_php_sablot_dom_proc(php_xslt *, char *, size_t, zval **)
- */
-static SDOM_Document 
-_php_sablot_dom_proc(php_xslt *handle, char *datap, size_t data_len, zval **args)
-{
-	SDOM_Document domtree;
-
-	if (!strncmp(datap, "arg:", 4)) {
-		zval **data;
-
-		if (zend_hash_find(Z_ARRVAL_PP(args), 
-						   datap + 4, 
-						   data_len - 3,
-						   (void **) &data) == FAILURE && 
-			zend_hash_find(Z_ARRVAL_PP(args),
-						   datap + 5,
-						   data_len - 4,
-						   (void **) &data) == FAILURE) {
-			php_error(E_WARNING, "Cannot find argument: %s", datap);
-			return NULL;
-		}
-
-		SablotParseBuffer(XSLT_CONTEXT(handle), Z_STRVAL_PP(data), &domtree);
-	}
-	else {
-		SablotParse(XSLT_CONTEXT(handle), datap, &domtree);
-	}
-
-	return domtree;
-}
-/* }}} */
-
 /* {{{ proto string xslt_process(resource processor, string xml, string xslt[, mixed result[, array args[, array params]]])
    Perform the xslt transformation */
 PHP_FUNCTION(xslt_process)
 {
-	zval          **processor_p;    /* Resource Pointer to a PHP-XSLT processor */
-	zval          **xml_p;          /* A zval pointer to the XML data */
-	zval          **xsl_p;          /* A zval pointer to the XSL data */
-	zval          **result_p;       /* A zval pointer to the transformation results */
-	zval          **params_p;       /* A zval pointer to the XSL parameters array */
-	zval          **args_p;         /* A zval pointer to the XSL arguments array */
-	zval          **data;           /* Parameter data */
-	php_xslt       *handle;         /* A PHP-XSLT processor */
-	SDOM_Document   xml_dom;        /* XML DOM tree to SablotRunProcessorGen */
-	SDOM_Document   xsl_dom;        /* XSL DOM tree to SablotRunProcessorGen */
-	char           *string_key;     /* String key from xslt_process() */
-	char           *result;         /* The result file or argument buffer */
-	int             argc;           /* The number of arguments given */
-	int             error;          /* Our error container */
-	ulong           num_key;        /* Numerical key */
-	
-	argc = ZEND_NUM_ARGS();
+	zval       **processor_p,             /* Resource Pointer to a PHP-XSLT processor */
+	           **xml_p,                   /* A zval pointer to the XML data */
+	           **xslt_p,                  /* A zval pointer to the XSLT data */
+	           **result_p,                /* A zval pointer to the transformation results */
+	           **params_p,                /* A zval pointer to the XSLT parameters array */
+	           **args_p;                  /* A zval pointer to the XSLT arguments array */
+	php_xslt    *handle;                  /* A PHP-XSLT processor */
+	char       **params = NULL;           /* A Sablotron parameter array (derived from the zval parameter array) */
+	char       **args   = NULL;           /* A Sablotron argument array (derived from the zval argument array) */
+	char        *xslt;                    /* The XSLT stylesheet or argument buffer (pointer to xslt_p) */
+	char        *xml;                     /* The XML stylesheet or argument buffer (pointer to xml_p) */
+	char        *result;                  /* The result file or argument buffer */
+	int          argc = ZEND_NUM_ARGS();  /* The number of arguments given */
+	int          error;                   /* Our error container */
 
 	if (argc < 3 || argc > 6 ||
-	    zend_get_parameters_ex(argc, &processor_p, &xml_p, &xsl_p, 
-							   &result_p, &args_p, &params_p) == FAILURE) {
+	    zend_get_parameters_ex(argc, &processor_p, &xml_p, &xslt_p, &result_p, &args_p, &params_p) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
-
-	/* Convert the XML and XSLT strings to S_DOM * handles */
 	convert_to_string_ex(xml_p);
-	convert_to_string_ex(xsl_p);
+	convert_to_string_ex(xslt_p);
 
-	xml_dom = _php_sablot_dom_proc(handle, 
-								   Z_STRVAL_PP(xml_p), 
-								   Z_STRLEN_PP(xml_p), 
-								   args_p);
-	if (!xml_dom) {
-		RETURN_FALSE;
-	}
-
-	xsl_dom = _php_sablot_dom_proc(handle, 
-								   Z_STRVAL_PP(xsl_p),
-								   Z_STRLEN_PP(xsl_p), 
-								   args_p);
-	if (!xsl_dom) {
-		RETURN_FALSE;
-	}
-
-
-	SablotAddArgTree(XSLT_CONTEXT(handle),
-					 XSLT_PROCESSOR(handle),
-					 "xml",
-					 xml_dom);
-	SablotAddArgTree(XSLT_CONTEXT(handle),
-					 XSLT_PROCESSOR(handle),
-					 "xsl",
-					 xsl_dom);
+	xml  = Z_STRVAL_PP(xml_p);
+	xslt = Z_STRVAL_PP(xslt_p);
 
 	/* Well, no result file was given or result buffer, that means (guess what?)
-	 * we're returning the result yipp di doo! 
-	 */
-	if (argc < 4 || 
-		Z_TYPE_PP(result_p) == IS_NULL || 
-		!strcmp(Z_STRVAL_PP(result_p), "arg:/result")) {
-		result = "result";
-		SablotAddArgBuffer(XSLT_CONTEXT(handle), 
-						   XSLT_PROCESSOR(handle), 
-						   result, 
-						   NULL);
+	   we're returning the result yipp di doo! */
+	if (argc < 4 || Z_TYPE_PP(result_p) == IS_NULL) {
+		result = "arg:/_result";
 	}
-	/* The result buffer to place the data into, either a file or 
-	 * an argument buffer, etc. 
-	 */
+	/* The result buffer to place the data into, either a file or an argument buffer, etc. */
 	else {
 		convert_to_string_ex(result_p);
 		result = Z_STRVAL_PP(result_p);
 	}
 
-	/* Add the XSLT parameters */
-	if (argc > 5) {
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(params_p));
-			 zend_hash_get_current_data(Z_ARRVAL_PP(params_p), (void **) &data) == FAILURE;
-			 zend_hash_move_forward(Z_ARRVAL_PP(params_p))) {
-			if (zend_hash_get_current_key(Z_ARRVAL_PP(params_p), 
-										  &string_key, 
-										  &num_key, 
-										  0) == HASH_KEY_IS_LONG) {
-				php_error(E_WARNING, "Only string keys are allowed as XSLT parameters");
-				RETURN_FALSE;
-			}
-			
-			SablotAddParam(XSLT_CONTEXT(handle), 
-						   XSLT_PROCESSOR(handle), 
-						   string_key, 
-						   Z_STRVAL_PP(data));
-		}
+	/* Translate a PHP array into a Sablotron array */
+	if (argc > 4) {
+		xslt_make_array(args_p, &args);
 	}
-
+	
+	if (argc > 5) {
+		xslt_make_array(params_p, &params);
+	}
+	
 	/* Perform transformation */
-	error = SablotRunProcessorGen(XSLT_CONTEXT(handle),
-								  XSLT_PROCESSOR(handle), 
-								  "arg:/xsl",
-								  "arg:/xml",
-								  result);
+	error = SablotRunProcessor(XSLT_PROCESSOR(handle), xslt, xml, result, params, args);
 	if (error) {
 		XSLT_ERRNO(handle) = error;
+
+		if (params) xslt_free_array(params);
+		if (args)   xslt_free_array(args);
+
 		RETURN_FALSE;
 	}
 
-	SablotDestroyDocument(XSLT_CONTEXT(handle), xml_dom);
-	SablotDestroyDocument(XSLT_CONTEXT(handle), xsl_dom);
-
 	/* If the result buffer is specified, then we return the results of the XSLT
 	   transformation */
-	if (!strcmp(result, "arg:/result")) {
+	if (!strcmp(result, "arg:/_result")) {
 		char *trans_result;
 
 		/* Fetch the result buffer into trans_result */
-		error = SablotGetResultArg(XSLT_PROCESSOR(handle), 
-								   "arg:/result", 
-								   &trans_result);
+		error = SablotGetResultArg(handle->processor.ptr, "arg:/_result", &trans_result);
 		if (error) {
 			/* Save the error number */
 			XSLT_ERRNO(handle) = error;
+			
+			/* Cleanup */
+			if (params) xslt_free_array(params);
+			if (args)   xslt_free_array(args);
+			
 			RETURN_FALSE;
 		}
 
@@ -642,26 +541,12 @@ PHP_FUNCTION(xslt_process)
 		SablotFree(trans_result);
 	}
 	else {
-		RETURN_TRUE;
+		RETVAL_TRUE;
 	}
-}
-/* }}} */
-
-/* {{{ proto void xslt_free(resource processor)
-   Free the xslt processor up */
-PHP_FUNCTION(xslt_free)
-{
-	zval     **processor_p;   /* Resource pointer to a php-xslt processor */
-	php_xslt  *handle;        /* A PHP-XSLT processor */
 	
-	if (ZEND_NUM_ARGS() != 1 ||
-	    zend_get_parameters_ex(1, &processor_p) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
-	
-	/* Remove the entry from the list */
-	zend_list_delete(Z_LVAL_PP(processor_p));
+	/* Cleanup */
+	if (params) xslt_free_array(params);
+	if (args)   xslt_free_array(args);
 }
 /* }}} */
 
@@ -703,6 +588,24 @@ PHP_FUNCTION(xslt_error)
 }
 /* }}} */
 
+/* {{{ proto void xslt_free(resource processor)
+   Free the xslt processor up */
+PHP_FUNCTION(xslt_free)
+{
+	zval     **processor_p;   /* Resource pointer to a php-xslt processor */
+	php_xslt  *handle;        /* A PHP-XSLT processor */
+	
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_ex(1, &processor_p) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
+	
+	/* Remove the entry from the list */
+	zend_list_delete(Z_LVAL_PP(processor_p));
+}
+/* }}} */
+
 /* {{{ free_processor()
    Free an XSLT processor */
 static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -715,10 +618,6 @@ static void free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		SablotUnregHandler(XSLT_PROCESSOR(handle), HLR_SAX,     NULL, NULL);
 		SablotUnregHandler(XSLT_PROCESSOR(handle), HLR_SCHEME,  NULL, NULL);
 		SablotDestroyProcessor(XSLT_PROCESSOR(handle));
-	}
-
-	if (XSLT_CONTEXT(handle)) {
-		SablotDestroySituation(XSLT_CONTEXT(handle));
 	}
 
 	/* Free Scheme handlers */
@@ -792,16 +691,11 @@ static void register_sax_handler_pair(zval **handler1, zval **handler2, zval **h
 
 /* {{{ scheme_getall()
    The getall scheme handler */
-static int scheme_getall(void *user_data, 
-						 SablotHandle proc, 
-						 const char *scheme, 
-						 const char *rest, 
-						 char **buffer, 
-						 int *byte_count)
+static int scheme_getall(void *user_data, SablotHandle proc, const char *scheme, const char *rest, char **buffer, int *byte_count)
 {
-	zval       *argv[3];                         /* Arguments to the scheme getall function */
-	zval       *retval;                          /* Return value from the scheme getall function */
-	php_xslt   *handle = (php_xslt *) user_data; /* A PHP-XSLT processor */
+	zval       *argv[3];                           /* Arguments to the scheme getall function */
+	zval       *retval;                            /* Return value from the scheme getall function */
+	php_xslt   *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
     TSRMLS_FETCH();
     
 	/* If the scheme handler get all function doesn't
@@ -875,15 +769,11 @@ static int scheme_freememory(void *user_data, SablotHandle proc, char *buffer)
 
 /* {{{ scheme_open()
    Called when the URI needs to be opened */
-static int  scheme_open(void *user_data, 
-						SablotHandle proc, 
-						const char *scheme, 
-						const char *rest, 
-						int *fd)
+static int  scheme_open(void *user_data, SablotHandle proc, const char *scheme, const char *rest, int *fd)
 {
-	zval      *argv[3];                         /* Arguments to the scheme open function */
-	zval      *retval;                          /* The return value from the scheme open function */
-	php_xslt  *handle = (php_xslt *) user_data; /* A PHP-XSLT processor */
+	zval      *argv[3];                            /* Arguments to the scheme open function */
+	zval      *retval;                             /* The return value from the scheme open function */
+	php_xslt  *handle = (php_xslt *) user_data;    /* A PHP-XSLT processor */
     TSRMLS_FETCH();
     
 	/* If no open handler exists, let's exit */
@@ -924,9 +814,9 @@ static int  scheme_open(void *user_data,
    Called when data needs to be fetched from the URI */
 static int  scheme_get(void *user_data, SablotHandle proc, int fd, char *buffer, int *byte_count)
 {
-	zval       *argv[3];                         /* Arguments to the scheme get function  */
-	zval       *retval;                          /* Return value from the scheme get function */
-	php_xslt   *handle = (php_xslt *) user_data; /* A PHP-XSLT processor */
+	zval       *argv[3];                           /* Arguments to the scheme get function  */
+	zval       *retval;                            /* Return value from the scheme get function */
+	php_xslt   *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
     TSRMLS_FETCH();
     
 	/* If no get handler exists, let's exit */
@@ -966,15 +856,11 @@ static int  scheme_get(void *user_data, SablotHandle proc, int fd, char *buffer,
 
 /* {{{ scheme_put()
    Called when data needs to be written */
-static int  scheme_put(void *user_data, 
-					   SablotHandle proc, 
-					   int fd, 
-					   const char *buffer, 
-					   int *byte_count)
+static int  scheme_put(void *user_data, SablotHandle proc, int fd, const char *buffer, int *byte_count)
 {
-	zval       *argv[3];                         /* Arguments to the scheme put function */
-	zval       *retval;                          /* Return value from the scheme put function */
-	php_xslt   *handle = (php_xslt *) user_data; /* A PHP-XSLT processor */
+	zval       *argv[3];                            /* Arguments to the scheme put function */
+	zval       *retval;                             /* Return value from the scheme put function */
+	php_xslt   *handle = (php_xslt *) user_data;    /* A PHP-XSLT processor */
     TSRMLS_FETCH();
     
 	/* If no put handler exists, let's exit */
@@ -1016,9 +902,9 @@ static int  scheme_put(void *user_data,
    Called when its time to close the fd */
 static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 {
-	zval       *argv[2];                         /* Arguments to the scheme close function*/
-	zval       *retval;                          /* Return value from the scheme close function */
-	php_xslt   *handle = (php_xslt *) user_data; /* A PHP-XSLT processor */
+	zval       *argv[2];                           /* Arguments to the scheme close function*/
+	zval       *retval;                            /* Return value from the scheme close function */
+	php_xslt   *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
     TSRMLS_FETCH();
     
 	/* if no close handler exists, exit */
@@ -1052,7 +938,7 @@ static int  scheme_close(void *user_data, SablotHandle proc, int fd)
 
 /* {{{ sax_startdoc()
    Called when the document starts to be processed */
-static SAX_RETURN sax_startdoc(void *ctx, SablotHandle proc)
+static SAX_RETURN sax_startdoc(void *ctx)
 {
 	zval       *argv[1];                    /* Arguments to the sax start doc function */
 	zval       *retval;                     /* Return value from sax start doc function */
@@ -1083,14 +969,13 @@ static SAX_RETURN sax_startdoc(void *ctx, SablotHandle proc)
 /* {{{ sax_startelement()
    Called when an element is begun to be processed */
 static SAX_RETURN sax_startelement(void *ctx, 
-								   SablotHandle proc,
                                    const char  *name, 
                                    const char **attr)
 {
-	zval       *argv[3];                   /* Arguments to the sax start element function */
-	zval       *retval;                    /* Return value from the sax start element function */
-	php_xslt   *handle = (php_xslt *) ctx; /* A PHP-XSLT processor */
-	char      **p;                         /* Pointer to attributes */
+	zval       *argv[3];                     /* Arguments to the sax start element function */
+	zval       *retval;                      /* Return value from the sax start element function */
+	php_xslt   *handle = (php_xslt *) ctx;   /* A PHP-XSLT processor */
+	char      **p;                           /* Pointer to attributes */
     TSRMLS_FETCH();
     
 	/* If no element start function is found, exit */
@@ -1129,9 +1014,9 @@ static SAX_RETURN sax_startelement(void *ctx,
 }
 /* }}} */
 
-/* {{{ sax_endelement()
+/* {{{ xslt_sax_endelement()
    Called when an ending XML element is encountered */
-static SAX_RETURN sax_endelement(void *ctx, SablotHandle proc, const char *name)
+static SAX_RETURN sax_endelement(void *ctx, const char *name)
 {
 	zval        *argv[2];                   /* Arguments to the sax end element function */
 	zval        *retval;                    /* Return value from the sax end element function */
@@ -1166,7 +1051,6 @@ static SAX_RETURN sax_endelement(void *ctx, SablotHandle proc, const char *name)
 /* {{{ sax_startnamespace()
    Called at the beginning of the parsing of a new namespace */
 static SAX_RETURN sax_startnamespace(void *ctx, 
-									 SablotHandle proc,
                                      const char *prefix, 
                                      const char *uri)
 {
@@ -1205,7 +1089,7 @@ static SAX_RETURN sax_startnamespace(void *ctx,
 
 /* {{{ sax_endnamespace()
    Called when a new namespace is finished being parsed */
-static SAX_RETURN sax_endnamespace(void *ctx, SablotHandle proc, const char *prefix)
+static SAX_RETURN sax_endnamespace(void *ctx, const char *prefix)
 {
 	zval        *argv[2];                    /* Arguments to the sax end namespace function */
 	zval        *retval;                     /* Return value from the sax end namespace function */
@@ -1239,7 +1123,7 @@ static SAX_RETURN sax_endnamespace(void *ctx, SablotHandle proc, const char *pre
 
 /* {{{ sax_comment()
    Called when a comment is found */
-static SAX_RETURN sax_comment(void *ctx, SablotHandle proc, const char *contents)
+static SAX_RETURN sax_comment(void *ctx, const char *contents)
 {
 	zval        *argv[2];                    /* Arguments to the sax comment function */
 	zval        *retval;                     /* Return value from the sax comment function */
@@ -1274,16 +1158,13 @@ static SAX_RETURN sax_comment(void *ctx, SablotHandle proc, const char *contents
 /* {{{ sax_pi()
    Called when processing instructions are found */
 static SAX_RETURN sax_pi(void *ctx, 
-						 SablotHandle proc,
                          const char *target, 
                          const char *contents)
 {
-	zval        *argv[3]; /* Arguments to the sax processing instruction function */
-	zval        *retval;  /* Return value from the sax processing instruction function */
-	php_xslt    *handle;  /* A PHP-XSLT processor */
+	zval        *argv[3];                    /* Arguments to the sax processing instruction function */
+	zval        *retval;                     /* Return value from the sax processing instruction function */
+	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
     TSRMLS_FETCH();
-
-	handle = (php_xslt *) ctx;
     
 	/* If no processing instructions function exists, exit */
 	if (!XSLT_SAX(handle).pi) {
@@ -1316,7 +1197,6 @@ static SAX_RETURN sax_pi(void *ctx,
 /* {{{ sax_characters()
    Called when characters are come upon */
 static SAX_RETURN sax_characters(void *ctx,
-								 SablotHandle proc,
                                  const char *contents, 
                                  int length)
 {
@@ -1352,13 +1232,13 @@ static SAX_RETURN sax_characters(void *ctx,
 
 /* {{{ sax_enddoc()
    Called when the document is finished being parsed */
-static SAX_RETURN sax_enddoc(void *ctx, SablotHandle proc)
+static SAX_RETURN sax_enddoc(void *ctx)
 {
 	zval        *argv[1];                    /* Arguments to the end document function */
 	zval        *retval;                     /* Return value from the end document function */
 	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
     TSRMLS_FETCH();
-
+    
 	/* If no end document function exists, exit */
 	if (!XSLT_SAX(handle).doc_end) {
 		return;
@@ -1381,78 +1261,9 @@ static SAX_RETURN sax_enddoc(void *ctx, SablotHandle proc)
 }
 /* }}} */
 
-
-/* {{{ _error_parse()
-   Parse a char ** array into an _error_fields structure */
-struct _error_fields {
-	char *message;
-	char *type;
-	char *line;
-};
-
-static void
-_error_parse (char **fields, struct _error_fields *xse)
-{
-	char *val;
-	char *p;
-	int   pos;
-	int   len;
-
-	/* Prep structure */
-	memset(xse, 0, sizeof(struct _error_fields));
-
-	while (*fields) {
-		p = strchr(*fields, ':');
-		if (p == NULL)
-			continue;
-
-		len = strlen(*fields);
-
-		pos = p - *fields;
-		val = estrndup(*fields + pos + 1, len - pos);
-
-		if (!strncmp(*fields, "msg", MIN(3, pos+1))) {
-			xse->message = val;
-		}
-		else if (!strncmp(*fields, "type", MIN(4, pos+1))) {
-			xse->type = val;
-		}
-		else if (!strncmp(*fields, "line", MIN(4, pos+1))) {
-			xse->line = val;
-		}
-
-		++fields;
-	}
-
-	if (!xse->type) 
-		xse->type = estrdup("unknown error type");
-
-	if (!xse->line)
-		xse->line = estrdup("unknown line");
-
-	if (!xse->message)
-		xse->message = estrdup("unknown error");
-}
-/* }}} */
-
-/* {{{ _free_error_field_struct()
-   Free an error field structure created by _error_parse() */
-static void
-_free_error_field_struct(struct _error_fields *xse)
-{
-	if (xse->message) efree(xse->message);
-	if (xse->type) efree(xse->type);
-	if (xse->line) efree(xse->line);
-}
-/* }}} */
-
 /* {{{ error_makecode()
    Make the error code */
-static MH_ERROR error_makecode(void *user_data, 
-							   SablotHandle proc, 
-							   int severity, 
-							   unsigned short facility, 
-							   unsigned short code)
+static MH_ERROR error_makecode(void *user_data, SablotHandle proc, int severity, unsigned short facility, unsigned short code)
 {
 	return 0;
 }
@@ -1460,34 +1271,87 @@ static MH_ERROR error_makecode(void *user_data,
 
 /* {{{ error_log()
    Called when its time to log data */
-static MH_ERROR error_log(void *user_data, 
-						  SablotHandle proc, 
-						  MH_ERROR code, 
-						  MH_LEVEL level, 
-						  char **fields)
+static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_LEVEL level, char **fields)
 {
-	php_xslt             *handle = (php_xslt *) user_data;  /* A PHP-XSLT processor */
-	struct _error_fields  err;                              /* Error structure */
-	char                 *msgbuf;                           /* Message buffer */
-	int                   msgbuf_len;                       /* Message buffer len */
-	int                   error = 0;                        /* Error container */
+	php_xslt *handle = (php_xslt *) user_data;                              /* A PHP-XSLT processor */
+	char     *errmsg  = NULL;                                               /* Error message*/
+	char     *errtype = NULL;                                               /* Error type */
+	char     *errline = NULL;                                               /* Error line */
+	char     *msgbuf  = NULL;                                               /* Message buffer */
+	char      msgformat[] = "Sablotron Message on line %s, level %s: %s\n"; /* Message format */
+	int       error = 0;                                                    /* Error container */
 
-#define msgformat "Sablotron message on line %s, level %s: %s\n"
-
-	/* Skip, if logging is disabled */
 	if (!XSLT_LOG(handle).do_log)
 		return 0;
 	
-	/* parse error list into a structure */
-	_error_parse(fields, &err);
+	/* Parse the error array */
+	/* Loop through the error array */
+	if (fields) {
+		while (*fields) {
+			char *key;  /* Key to for the message */
+			char *val;  /* The message itself */
+			char *ptr;  /* Pointer to the location of the ':' (separator) */
+			int   pos;  /* Position of the ':' (separator) */
+			int   len;  /* Length of the string */
 
+			len = strlen(*fields);
+
+			/* Grab the separator's position */
+			ptr = strchr(*fields, ':');
+			if (!ptr) {
+				continue;
+			}
+			pos = ptr - *fields;
+
+			/* Allocate the key and value and copy the data onto them */
+			key = emalloc(pos + 1);
+			val = emalloc((len - pos) + 1);
+
+			strlcpy(key, *fields, pos + 1);
+			strlcpy(val, *fields + pos + 1, len - pos);
+
+			/* Check to see whether or not we want to save the data */
+			if (!strcmp(key, "msg")) {
+				errmsg = estrndup(val, len - pos);
+			}
+			else if (!strcmp(key, "type")) {
+				errtype = estrndup(val, len - pos);
+			}
+			else if (!strcmp(key, "line")) {
+				errline = estrndup(val, len - pos);
+			}
+			
+			/* Cleanup */
+			if (key) efree(key);
+			if (val) efree(val);
+
+			/* Next key:value pair please :) */
+			fields++;
+		}
+	}
+	
+	/* If no error line is given, then place none in the 
+	   file */
+	if (!errline) {
+		errline = estrndup("none", sizeof("none") - 1);
+	}
+	
+	/* Default type is a log handle */
+	if (!errtype) {
+		errtype = estrndup("log", sizeof("log") - 1);
+	}
+	
+	/* No error message, no cry */
+	if (!errmsg) {
+		errmsg = estrndup("unknown error", sizeof("unknown error") - 1);
+	}
+	
 	/* Allocate the message buf and copy the data into it */
-	msgbuf_len = (sizeof(msgformat) - 6) +
-	              strlen(err.message) +
-	              strlen(err.line) +
-	              strlen(err.type);
-	msgbuf = emalloc(msgbuf_len + 1);
-	snprintf(msgbuf, msgbuf_len, msgformat, err.line, err.type, err.message);
+	msgbuf = emalloc((sizeof(msgformat) - 6) +
+	                 strlen(errmsg) +
+	                 strlen(errline) +
+	                 strlen(errtype) + 1);
+	sprintf(msgbuf, msgformat, errline, errtype, errmsg);
 
 	/* If the error is serious enough, copy it to our error buffer 
 	   which will show up when someone calls the xslt_error() function */
@@ -1497,7 +1361,7 @@ static MH_ERROR error_log(void *user_data,
 		if (XSLT_ERRSTR(handle))
 			efree(XSLT_ERRSTR(handle));
 		
-		XSLT_ERRSTR(handle) = estrndup(msgbuf, msgbuf_len);
+		XSLT_ERRSTR(handle) = estrdup(errmsg);
 	}
 
 	/* If we haven't allocated and opened the file yet */
@@ -1522,7 +1386,7 @@ static MH_ERROR error_log(void *user_data,
 	}
 	
 	/* Write the error to the file */
-	error = write(XSLT_LOG(handle).fd, msgbuf, msgbuf_len);
+	error = write(XSLT_LOG(handle).fd, msgbuf, strlen(msgbuf));
 	if (error == -1) {
 		php_error(E_WARNING, "Cannot write data to log file, %s, with fd, %d [%d]: %s",
 		          (XSLT_LOG(handle).path ? XSLT_LOG(handle).path : "stderr"),
@@ -1533,8 +1397,10 @@ static MH_ERROR error_log(void *user_data,
 	}
 
 	/* Cleanup */
-	if (msgbuf) efree(msgbuf);
-	_free_error_field_struct(&err);
+	if (msgbuf)  efree(msgbuf);
+	if (errtype) efree(errtype);
+	if (errline) efree(errline);
+	if (errmsg)  efree(errmsg);
 	
 	return 0;
 }
@@ -1542,17 +1408,10 @@ static MH_ERROR error_log(void *user_data,
 
 /* {{{ error_print()
    Print out an error message or call the error handler */
-static MH_ERROR error_print(void *user_data, 
-							SablotHandle proc, 
-							MH_ERROR code, 
-							MH_LEVEL level, 
-							char **fields)
+static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, MH_LEVEL level, char **fields)
 {
-	php_xslt             *handle = (php_xslt *) user_data;  /* A PHP-XSLT processor */
-	struct _error_fields  err;                              /* Error field structure */
+	php_xslt *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
 	
-	_error_parse(fields, &err);
-
 	if (XSLT_ERROR(handle)) {
 		zval   *argv[4];   /* Arguments to the error function */
 		zval   *retval;    /* Return value from the error function */
@@ -1575,9 +1434,41 @@ static MH_ERROR error_print(void *user_data,
 		ZVAL_LONG(argv[1], level);
 		ZVAL_LONG(argv[2], code);
 
-		add_assoc_string_ex(argv[3], "type", sizeof("type") - 1, err.type, 0);
-		add_assoc_string_ex(argv[3], "message", sizeof("message") - 1, err.message, 0);
-		add_assoc_long_ex(argv[3], "line", sizeof("line") - 1, atoi(err.line));
+		if (fields) {
+			while (*fields) {
+				char *key;  /* Key to for the message */
+				char *val;  /* The message itself */
+				char *ptr;  /* Pointer to the location of the ':' (separator) */
+				int   pos;  /* Position of the ':' (separator) */
+				int   len;  /* Length of the string */
+				
+				len = strlen(*fields);
+			
+				/* Grab the separator's position */
+				ptr = strchr(*fields, ':');
+				if (!ptr) {
+					continue;
+				}
+				pos = ptr - *fields;
+
+				/* Allocate the key and value and copy the data onto them */
+				key = emalloc(pos + 1);
+				val = emalloc((len - pos) + 1);
+
+				strlcpy(key, *fields, pos + 1);
+				strlcpy(val, *fields + pos + 1, len - pos);
+
+				/* Add it */				
+				add_assoc_stringl_ex(argv[3], key, pos, val, len - pos - 1, 1);
+
+				/* Cleanup */
+				efree(key);
+				efree(val);
+
+				/* Next field please */
+				fields++;
+			}
+		}
 
 		/* Call the function */
 		xslt_call_function("error handler", XSLT_ERROR(handle),
@@ -1587,10 +1478,10 @@ static MH_ERROR error_print(void *user_data,
 		zval_ptr_dtor(&retval);
 	}
 	else {
-		char   *msgbuf;     /* Message buffer */
-		size_t  msgbuf_len; /* Message buffer length */
-
-#define msgformat "Sablotron error on line %s: %s"
+		char *errmsg  = NULL;                                  /* Error message */
+		char *errline = NULL;                                  /* Error line */
+		char *msgbuf  = NULL;                                  /* Message buffer */
+		char  msgformat[] = "Sablotron error on line %s: %s";  /* Message format */
 
 		/* If the error is not serious, exit out */
 		if (code == MH_LEVEL_WARN  || 
@@ -1599,27 +1490,75 @@ static MH_ERROR error_print(void *user_data,
 			return 0;
 		}
 
-		/* Allocate the message buffer and copy the data onto it */
-		msgbuf_len = (sizeof(msgformat) - 4) + 
-			strlen(err.message) + 
-			strlen(err.line);
-		msgbuf = emalloc(msgbuf_len + 1);
+		/* Loop through and extract the error message and the 
+		   error line */
+		if (fields) {
+			while (fields && *fields) {
+				char *key;  /* Key to for the message */
+				char *val;  /* The message itself */
+				char *ptr;  /* Pointer to the location of the ':' (separator) */
+				int   pos;  /* Position of the ':' (separator) */
+				int   len;  /* Length of the string */
+			
+				len = strlen(*fields);
+			
+				/* Grab the separator's position */
+				ptr = strchr(*fields, ':');
+				if (!ptr) {
+					continue;
+				}
+				pos = ptr - *fields;
+			
+				/* Allocate the key and value and copy the data onto them */
+				key = emalloc(pos + 1);
+				val = emalloc((len - pos) + 1);
+			
+				strlcpy(key, *fields, pos + 1);
+				strlcpy(val, *fields + pos + 1, len - pos);
+			
+				/* Check to see whether or not we want to save the data */
+				if (!strcmp(key, "msg")) {
+					errmsg = estrndup(val, len - pos);
+				}
+				else if (!strcmp(key, "line")) {
+					errline = estrndup(val, len - pos);
+				}
 
-		snprintf(msgbuf, msgbuf_len, msgformat, err.line, err.message);
+				/* Cleanup */
+				if (key) efree(key);
+				if (val) efree(val);
+			
+				/* Next key:value pair please :) */
+				fields++;
+			}
+		}
+		
+		if (!errline) {
+			errline = estrndup("none", sizeof("none") - 1);
+		}
+
+		if (!errmsg) {
+			errmsg = estrndup("unkown error", sizeof("unkown error") - 1);
+		}
+
+		/* Allocate the message buffer and copy the data onto it */
+		msgbuf = emalloc((sizeof(msgformat) - 4) + strlen(errmsg) + strlen(errline) + 1);
+		sprintf(msgbuf, msgformat, errline, errmsg);
 
 		/* Copy the error message onto the handle for use when 
 		   the xslt_error function is called */
-		XSLT_ERRSTR(handle) = estrndup(msgbuf, msgbuf_len);
+		XSLT_ERRSTR(handle) = estrdup(errmsg);
 
 		/* Output a warning */
 		php_error(E_WARNING, msgbuf);
 
 		/* Cleanup */
 		efree(msgbuf);
-		_free_error_field_struct(&err);
+		efree(errmsg);
+		efree(errline);
 	}
 
-	return 0;
+	return(0);
 }
 /* }}} */
 
@@ -1630,6 +1569,6 @@ static MH_ERROR error_print(void *user_data,
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
  */
