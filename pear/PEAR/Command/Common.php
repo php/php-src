@@ -203,6 +203,8 @@ class PEAR_Command_Common extends PEAR
                         $sapp = " $v[arg]";
                         $lapp = "=$v[arg]";
                     }
+                } else {
+                    $sapp = $lapp = "";
                 }
                 if (isset($v['shortopt'])) {
                     $s = $v['shortopt'];
