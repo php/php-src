@@ -102,6 +102,11 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 
 ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength);
 
+
+#define ZEND_HASH_APPLY_KEEP				0
+#define ZEND_HASH_APPLY_REMOVE				1<<0
+#define ZEND_HASH_APPLY_STOP				1<<1
+
 typedef struct _zend_hash_key {
 	char *arKey;
 	uint nKeyLength;
@@ -118,7 +123,13 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * TSRMLS_DC);
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int, ...);
 
-
+/* This function should be used with special care (in other words,
+ * it should usually not be used).  When used with the ZEND_HASH_APPLY_STOP
+ * return value, it assumes things about the order of the elements in the hash.
+ * Also, it does not provide the same kind of reentrancy protection that
+ * the standard apply functions do.
+ */
+ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
 
 
 /* Deletes */
