@@ -175,10 +175,7 @@ ZEND_GET_MODULE(sablot)
 /* MINIT and MINFO Functions */
 PHP_MINIT_FUNCTION(sablot)
 {
-    SABLOTLS_FETCH();
     le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
-
-    SABLOTG(processor) = NULL;
 
     return SUCCESS;
 }
@@ -255,7 +252,7 @@ PHP_FUNCTION(xslt_output_endtransform)
     buffer = estrndup(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
 
     /* Nake sure there is data to send */
-    if (strlen(buffer)) {
+    if (OG(active_ob_buffer).text_length) {
         char *args[] = {"/_xmlinput", buffer,
                         "/_output",   NULL};
         
@@ -1347,6 +1344,7 @@ static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
     FUNCH_FREE(handle->endDocHandler);
 
     SABLOT_FREE_ERROR_HANDLE(*handle);
+    efree(handle);
 }
 /* }}} */
 
