@@ -29,16 +29,6 @@ ZEND_FUNCTION(rpc_get);
 ZEND_FUNCTION(rpc_singleton);
 ZEND_FUNCTION(rpc_poolable);
 
-ZEND_BEGIN_MODULE_GLOBALS(rpc)
-	TsHashTable *proxy;
-ZEND_END_MODULE_GLOBALS(rpc)
-
-#ifdef ZTS
-#define RPC_G(v) TSRMG(rpc_globals_id, zend_rpc_globals *, v)
-#else
-#define RPC_G(v) (rpc_globals.v)
-#endif
-	
 #define phpext_rpc_ptr &rpc_module_entry
 
 #endif	/* PHP_RPC_H */

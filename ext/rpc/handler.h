@@ -91,22 +91,24 @@ typedef struct _rpc_handler_entry {
 
 /* class/method/function hash */
 typedef struct _rpc_class_hash {
-	rpc_string name; /* must be first entry */
-	TsHashTable methods;
-	TsHashTable properties;
-	zend_class_entry		*ce;
+	rpc_string			name;		/* must be first entry */
+	zend_bool			poolable;
+	zend_bool			singleton;
+	TsHashTable			methods;
+	TsHashTable			properties;
+	rpc_object_handlers	**handlers;
+	zend_class_entry	*ce;
+	void				*data;
 } rpc_class_hash;
 
 /* internal data */
 typedef struct _rpc_internal {
-	zend_bool				poolable;
-	zend_bool				singleton;
-	zend_class_entry		*ce;
-	rpc_object_handlers		**handlers;
-	void					*data;
-	rpc_class_hash			*hash;
-	TsHashTable				function_table;
 	MUTEX_T					mx_handler;
+	TsHashTable				function_table;
+	rpc_object_handlers		**handlers;
+	rpc_class_hash			*hash;
+	zend_class_entry		*ce;
+	void					*data;
 } rpc_internal;
 
 /* proxy data */
