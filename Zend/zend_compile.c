@@ -320,7 +320,8 @@ void do_assign_ref(znode *result, znode *lvar, znode *rvar CLS_DC)
 		opline->result.u.var = get_temporary_variable(CG(active_op_array));
 		*result = opline->result;
 	} else {
-		SET_UNUSED(opline->result);
+		/* SET_UNUSED(opline->result); */
+		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 	}
 	opline->op1 = *lvar;
 	opline->op2 = *rvar;
