@@ -52,6 +52,8 @@
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
 static int le_ps_font, le_ps_enc;
+static void php_free_ps_font(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #endif
 
 #include <gd.h>
@@ -94,6 +96,14 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #define gdImageCreateFromWBMPCtx    NULL
 typedef FILE gdIOCtx;
 #define CTX_PUTC(c, fp) fputc(c, fp)
+#endif
+
+#ifndef HAVE_GDIMAGECOLORRESOLVE
+extern int gdImageColorResolve(gdImagePtr, int, int, int);
+#endif
+
+#if HAVE_COLORCLOSESTHWB
+int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #endif
 
 static gdImagePtr _php_image_create_from_string (zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC);
@@ -2745,7 +2755,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 /* {{{ php_free_ps_font
  */
-void php_free_ps_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_free_ps_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	int *font = (int *)rsrc->ptr;
 
@@ -2756,7 +2766,7 @@ void php_free_ps_font(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* {{{ php_free_ps_enc
  */
-void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	char **enc = (char **)rsrc->ptr;
 
@@ -2764,9 +2774,6 @@ void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-#endif
-
-#if HAVE_LIBT1
 /* {{{ proto int imagepsloadfont(string pathname)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
@@ -2816,7 +2823,6 @@ PHP_FUNCTION(imagepsloadfont)
 /* The function in t1lib which this function uses seem to be buggy...
 PHP_FUNCTION(imagepscopyfont)
 {
-#if HAVE_LIBT1
 	zval **fnt;
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
@@ -2863,10 +2869,6 @@ PHP_FUNCTION(imagepscopyfont)
 	nf_ind->extend = 1;
 	l_ind = zend_list_insert(nf_ind, le_ps_font);
 	RETURN_LONG(l_ind);
-#else 
-	php_error(E_WARNING, "ImagePsCopyFont: No T1lib support in this PHP build");
-	RETURN_FALSE;
-#endif 
 }
 */
 /* }}} */
