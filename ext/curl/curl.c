@@ -560,7 +560,7 @@ static void alloc_curl_handle(php_curl **ch)
 }
 /* }}} */
 
-/* {{{ proto int curl_init([string url])
+/* {{{ proto resource curl_init([string url])
    Initialize a CURL session */
 PHP_FUNCTION(curl_init)
 {
