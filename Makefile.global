@@ -20,7 +20,7 @@ libphp5.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 libs/libphp5.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp5.so
 
-install: $(install_targets)
+install: $(all_targets) $(install_targets)
 
 install-sapi: libphp5.la
 	@echo "Installing PHP SAPI module"
