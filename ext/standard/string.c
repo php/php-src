@@ -691,32 +691,55 @@ PHP_FUNCTION(basename)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
-	ret = php_basename((*str)->value.str.val,(*str)->value.str.len);
-	RETVAL_STRING(ret,1)
-	efree(ret);
+	ret = php_basename(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+	RETVAL_STRING(ret, 0)
 }
 /* }}} */
 
-PHPAPI void php_dirname(char *str, int len)
+/* This function doesn't work with absolute paths in Win32 such as C:\foo
+ *  (and it didn't before either). This needs to be fixed
+ */
+PHPAPI void php_dirname(char *path, int len)
 {
-	register char *c;
+	register char *end = path + len - 1;
 
-	c = str + len - 1;
-	while (*c == '/'
-#ifdef PHP_WIN32
-		   || *c == '\\'
-#endif
-		)
-		c--; /* strip trailing slashes */
-	*(c + 1) = '\0';
-	if ((c = strrchr(str, '/'))
-#ifdef PHP_WIN32
-		|| (c = strrchr(str, '\\'))
-#endif
-		)
-		*c='\0';
-	else
-		*str='\0';
+	if (len <= 0) {
+		/* Illegal use of this function */
+		return;
+	}
+
+	/* Strip trailing slashes */
+	while (end >= path && IS_SLASH(*end)) {
+		end--;
+	}
+	if (end < path) {
+		/* The path only contained slashes */
+		path[0] = DEFAULT_SLASH;
+		path[1] = '\0';
+		return;
+	}
+
+	/* Strip filename */
+	while (end >= path && !IS_SLASH(*end)) {
+		end--;
+	}
+	if (end < path) {
+		/* No slash found, therefore return '.' */
+		path[0] = '.';
+		path[1] = '\0';
+		return;
+	}
+
+	/* Strip slashes which came before the file name */
+	while (end >= path && IS_SLASH(*end)) {
+		end--;
+	}
+	if (end < path) {
+		path[0] = DEFAULT_SLASH;
+		path[1] = '\0';
+		return;
+	}
+	*(end+1) = '\0';
 }
 
 /* {{{ proto string dirname(string path)
@@ -730,14 +753,9 @@ PHP_FUNCTION(dirname)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
-	ret = estrdup((*str)->value.str.val);
-	php_dirname(ret,(*str)->value.str.len);
-	if(*ret) {
-		RETVAL_STRING(ret,1);
-	} else { 
-		RETVAL_FALSE;
-	}
-	efree(ret);
+	ret = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+	php_dirname(ret, Z_STRLEN_PP(str));
+	RETVAL_STRING(ret, 0);
 }
 /* }}} */
 
