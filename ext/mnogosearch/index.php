@@ -5,7 +5,7 @@
     $Id$ 
 */
 
-/*   mnoGoSearch-php-lite v.1.1
+/*   mnoGoSearch-php-lite v.1.2
  *   for mnoGoSearch ( formely known as UdmSearch ) free web search engine
  *   (C) 2001 by Sergey Kartashoff <gluke@mail.ru>,
  *               mnoGoSearch Developers Team <devel@mnogosearch.org>
@@ -45,6 +45,8 @@ $stopwordtable_arr[]='stopword';
 // $stopwordfile_arr[]='stopwords.txt';
 $minwordlength=1;
 $maxwordlength=32;
+
+$storedocurl="/cgi-bin/storedoc.cgi";
 
 /* initialisation section */
 
@@ -917,6 +919,11 @@ if(($errno=Udm_Errno($udm_agent))>0){
 		$crc=Udm_Get_Res_Field($res,$i,UDM_FIELD_CRC);
 		$rec_id=Udm_Get_Res_Field($res,$i,UDM_FIELD_URLID);
 		
+		if (Udm_Api_Version() >= 30203) {
+		    $doclang=Udm_Get_Res_Field($res,$i,UDM_FIELD_LANG);
+		    $doccharset=Udm_Get_Res_Field($res,$i,UDM_FIELD_CHARSET);
+		}
+		
 		if ($phpver >= 40006) {
   			$category=Udm_Get_Res_Field($res,$i,UDM_FIELD_CATEGORY);
   		} else {
@@ -928,6 +935,17 @@ if(($errno=Udm_Errno($udm_agent))>0){
                 print (($desc != '')?$desc:$text."...<BR>$t_DY<UL><li>\n");
                 print ("<A HREF=\"$url\" TARGET=\"_blank\">$url</A>\n");
                 print ("($contype) $lastmod, $docsize bytes</UL></DL>\n");
+		
+		if (Udm_Api_Version() >= 30203) {
+		    $storedstr="$storedocurl?rec_id=".Udm_CRC32($udm_agent,$url).
+            		    "&DM=".urlencode($lastmod).
+	    		    "&DS=$docsize".
+	    		    "&L=$doclang".
+	    		    "&CS=$doccharset".
+	    		    "&DU=".urlencode($url).
+	    		    "&q=".urlencode($query_orig);
+		    print ("<DD><a href=\"$storedstr\">Cached copy</a>\n");
+		} 		
 	}	
         
         print("<HR><CENTER> $nav </CENTER>\n");    
