@@ -111,6 +111,7 @@ EXEC SQL include sqlstype;
 #include <errno.h>
 
 typedef char IFX[128];
+#define SAFE_STRING(s) ((s)?(s):"")
 #define PHP_IFX_CHECK_CONNECTION(ifx)       \
         {                                   \
             if (ifx_check() < 0) {          \
@@ -451,7 +452,7 @@ EXEC SQL END DECLARE SECTION;
 
 		hashed_details_length = sizeof("ifx___") - 1 + host_len + user_len + passwd_len;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
-		sprintf(hashed_details,"ifx_%s_%s_%s", host, user, passwd);
+		sprintf(hashed_details,"ifx_%s_%s_%s", SAFE_STRING(host), SAFE_STRING(user), SAFE_STRING(passwd));
 	}
 
 	IFXG(sv_sqlcode) = 0;
@@ -480,7 +481,7 @@ EXEC SQL END DECLARE SECTION;
 			/* create the link */
 			ifx = (char *) malloc(sizeof(IFX));
 			IFXG(connectionid)++;
-			sprintf(ifx,"%s%x", user, IFXG(connectionid));
+			sprintf(ifx,"%s%x", SAFE_STRING(user), IFXG(connectionid));
 			
 			EXEC SQL CONNECT TO :host AS :ifx USER :user USING :passwd WITH CONCURRENT TRANSACTION;  
 	
