@@ -2381,6 +2381,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
 		    } else {
+			free(buf);
 			RETURN_FALSE;
 		    }
 		}
@@ -2455,6 +2456,7 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
 		    } else {
+			free(buf);
 			RETURN_FALSE;
 		    }
 		}
