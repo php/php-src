@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
-<package version="1.0"><!-- $Id: package.xml,v 1.4 2004-06-23 13:26:08 abies Exp $ -->
- <name>PDO_Firebird</name>
- <summary>Firebird/InterBase support for PDO</summary>
+<package version="1.0"><!-- $Id: package.xml,v 1.5 2004-06-23 13:42:06 abies Exp $ -->
+ <name>PDO_FIREBIRD</name>
+ <summary>Firebird/InterBase 6 driver for PDO</summary>
  <maintainers>
   <maintainer>
    <user>abies</user>
