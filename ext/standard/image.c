@@ -16,6 +16,7 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
+
 /* $Id$ */
 
 #include "php.h"
@@ -90,7 +91,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	char dim[5];
+	unsigned char dim[5];
 
 	if (php_stream_seek(stream, 3, SEEK_CUR))
 		return NULL;
@@ -113,7 +114,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	char dim[8];
+	unsigned char dim[8];
 
 	if (php_stream_seek(stream, 11, SEEK_CUR))
 		return NULL;
@@ -134,7 +135,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	char dim[12];
+	unsigned char dim[12];
 
 	if (php_stream_seek(stream, 15, SEEK_CUR))
 		return NULL;
@@ -275,7 +276,7 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	char dim[8];
+	unsigned char dim[8];
 
 	if (php_stream_seek(stream, 8, SEEK_CUR))
 		return NULL;
