@@ -73,7 +73,7 @@ static Yaz_Association yaz_association_mk ()
 	p->zoom_conn = ZOOM_connection_create (0);
 	p->zoom_set = 0;
 	p->zoom_scan = 0;
-    p->zoom_package = 0;
+	p->zoom_package = 0;
 	ZOOM_connection_option_set(p->zoom_conn, "implementationName", "PHP");
 	ZOOM_connection_option_set(p->zoom_conn, "async", "1");
 	p->sort_criteria = 0;
@@ -91,7 +91,7 @@ static void yaz_association_destroy (Yaz_Association p)
 		return ;
 	ZOOM_resultset_destroy (p->zoom_set);
 	ZOOM_scanset_destroy (p->zoom_scan);
-    ZOOM_package_destroy (p->zoom_package);
+	ZOOM_package_destroy (p->zoom_package);
 	ZOOM_connection_destroy (p->zoom_conn);
 	xfree (p->sort_criteria);
 	ccl_qual_rm(&p->ccl_parser->bibset);
@@ -143,7 +143,7 @@ function_entry yaz_functions [] = {
 };
 
 static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id,
-                       Yaz_Association *assocp)
+					   Yaz_Association *assocp)
 {
 	Yaz_Association *as = 0;
 	
@@ -274,14 +274,14 @@ PHP_FUNCTION(yaz_connect)
 	const char *user_str = 0, *group_str = 0, *pass_str = 0;
 	const char *cookie_str = 0, *proxy_str = 0;
 	const char *charset_str = 0;
-    const char *client_IP = 0;
-    const char *otherInfo[3];
+	const char *client_IP = 0;
+	const char *otherInfo[3];
 	int persistent = 1;
 	int piggyback = 1;
 	pval **zurl, **user = 0;
 	Yaz_Association as;
 
-    otherInfo[0] = otherInfo[1] = otherInfo[2] = 0;
+	otherInfo[0] = otherInfo[1] = otherInfo[2] = 0;
 	if (ZEND_NUM_ARGS() == 1)
 	{
 		if (zend_get_parameters_ex (1, &zurl) == FAILURE)
@@ -309,9 +309,9 @@ PHP_FUNCTION(yaz_connect)
 			piggyback_val = array_lookup_bool(ht, "piggyback");
 			if (piggyback_val)
 				piggyback = *piggyback_val;
-            otherInfo[0] = array_lookup_string(ht, "otherInfo0");
-            otherInfo[1] = array_lookup_string(ht, "otherInfo1");
-            otherInfo[2] = array_lookup_string(ht, "otherInfo2");
+			otherInfo[0] = array_lookup_string(ht, "otherInfo0");
+			otherInfo[1] = array_lookup_string(ht, "otherInfo1");
+			otherInfo[2] = array_lookup_string(ht, "otherInfo2");
 		}
 		else
 		{
@@ -377,19 +377,19 @@ PHP_FUNCTION(yaz_connect)
 		}
 		shared_associations[i] = as = yaz_association_mk ();
 
-        option_set (as, "proxy", proxy_str);
+		option_set (as, "proxy", proxy_str);
 		option_set (as, "user", user_str);
 		option_set (as, "group", group_str);
 		option_set (as, "pass", pass_str);
 		option_set (as, "cookie", cookie_str);
-        option_set (as, "charset", charset_str);
+		option_set (as, "charset", charset_str);
 	}
-    option_set (as, "otherInfo0", otherInfo[0]);
-    option_set (as, "otherInfo1", otherInfo[1]);
-    option_set (as, "otherInfo2", otherInfo[2]);
-    option_set (as, "clientIP", client_IP);
-    option_set (as, "piggyback", piggyback ? "1" : "0");
-    ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
+	option_set (as, "otherInfo0", otherInfo[0]);
+	option_set (as, "otherInfo1", otherInfo[1]);
+	option_set (as, "otherInfo2", otherInfo[2]);
+	option_set (as, "clientIP", client_IP);
+	option_set (as, "piggyback", piggyback ? "1" : "0");
+	ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 	as->in_use = 1;
 	as->persistent = persistent;
 	as->order = YAZSG(assoc_seq);
@@ -456,8 +456,8 @@ PHP_FUNCTION(yaz_search)
 		ZOOM_query_prefix (q, query_str);
 		if (p->sort_criteria)
 			ZOOM_query_sortby (q, p->sort_criteria);
-        xfree (p->sort_criteria);
-        p->sort_criteria = 0;
+		xfree (p->sort_criteria);
+		p->sort_criteria = 0;
 		p->zoom_set = ZOOM_connection_search (p->zoom_conn, q);
 		ZOOM_query_destroy (q);
 		RETVAL_TRUE;
@@ -468,8 +468,8 @@ PHP_FUNCTION(yaz_search)
 		ZOOM_query_cql (q, query_str);
 		if (p->sort_criteria)
 			ZOOM_query_sortby (q, p->sort_criteria);
-        xfree (p->sort_criteria);
-        p->sort_criteria = 0;
+		xfree (p->sort_criteria);
+		p->sort_criteria = 0;
 		p->zoom_set = ZOOM_connection_search (p->zoom_conn, q);
 		ZOOM_query_destroy (q);
 		RETVAL_TRUE;
@@ -545,13 +545,13 @@ PHP_FUNCTION(yaz_wait)
 	{
 		Yaz_Association p = shared_associations[i];
 		if (p && p->order == YAZSG(assoc_seq))
-        {
-            char str[20];
+		{
+			char str[20];
 
-            sprintf (str, "%d", timeout);
-            ZOOM_connection_option_set (p->zoom_conn, "timeout", str);
+			sprintf (str, "%d", timeout);
+			ZOOM_connection_option_set (p->zoom_conn, "timeout", str);
 			conn_ar[no++] = p->zoom_conn;
-        }
+		}
 	}
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
@@ -976,15 +976,15 @@ PHP_FUNCTION(yaz_record)
 					odr_destroy (odr);
 				}
 			}
-            else
+			else
 			{
-                int rlen;
+				int rlen;
 				const char *info = ZOOM_record_get (r, type, &rlen);
 
-                return_value->value.str.len = (rlen > 0) ? rlen : 0;
-                return_value->value.str.val =
-                    estrndup(info, return_value->value.str.len);
-                return_value->type = IS_STRING;
+				return_value->value.str.len = (rlen > 0) ? rlen : 0;
+				return_value->value.str.val =
+					estrndup(info, return_value->value.str.len);
+				return_value->type = IS_STRING;
 			}
 		}
 	}
@@ -1042,7 +1042,7 @@ PHP_FUNCTION(yaz_schema)
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	convert_to_string_ex (pval_element);
-    option_set (p, "schema", (*pval_element)->value.str.val);
+	option_set (p, "schema", (*pval_element)->value.str.val);
 	release_assoc (p);
 }
 /* }}} */
@@ -1054,58 +1054,58 @@ PHP_FUNCTION(yaz_set_option)
 	pval **pval_ar, **pval_name, **pval_val, **pval_id;
 	Yaz_Association p;
 
-    if (ZEND_NUM_ARGS() == 2)
-    {
-        if (zend_get_parameters_ex(2, &pval_id, &pval_ar) == FAILURE)
-            WRONG_PARAM_COUNT;
-        if (Z_TYPE_PP(pval_ar) != IS_ARRAY)
-            WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() == 2)
+	{
+		if (zend_get_parameters_ex(2, &pval_id, &pval_ar) == FAILURE)
+			WRONG_PARAM_COUNT;
+		if (Z_TYPE_PP(pval_ar) != IS_ARRAY)
+			WRONG_PARAM_COUNT;
 
-        get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
-        if (p)
-        {
-            HashPosition pos;
-            HashTable *ht;
-            zval **ent;
-            
-            ht = Z_ARRVAL_PP(pval_ar);
-            for(zend_hash_internal_pointer_reset_ex(ht, &pos);
-                zend_hash_get_current_data_ex(ht, (void**) &ent, &pos) == SUCCESS;
-                zend_hash_move_forward_ex(ht, &pos)) 
-            {
-                char *key;
-                ulong idx;
+		get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+		if (p)
+		{
+			HashPosition pos;
+			HashTable *ht;
+			zval **ent;
+			
+			ht = Z_ARRVAL_PP(pval_ar);
+			for(zend_hash_internal_pointer_reset_ex(ht, &pos);
+				zend_hash_get_current_data_ex(ht, (void**) &ent, &pos) == SUCCESS;
+				zend_hash_move_forward_ex(ht, &pos)) 
+			{
+				char *key;
+				ulong idx;
 #if PHP_API_VERSION > 20010101
-                int type = zend_hash_get_current_key_ex(ht, &key, 0, 
-                                                        &idx, 0, &pos);
+				int type = zend_hash_get_current_key_ex(ht, &key, 0, 
+														&idx, 0, &pos);
 #else
-                int type = zend_hash_get_current_key_ex(ht, &key, 0, 
-                                                        &idx, &pos);
+				int type = zend_hash_get_current_key_ex(ht, &key, 0, 
+														&idx, &pos);
 #endif
-                if (type != HASH_KEY_IS_STRING || Z_TYPE_PP(ent) != IS_STRING)
-                    continue;
-                
-                option_set(p, key, (*ent)->value.str.val);
-            }
-            release_assoc (p);
-        }
-    }
-    else if (ZEND_NUM_ARGS() == 3)
-    {
-        if (zend_get_parameters_ex(3, &pval_id, &pval_name, &pval_val)
-            == FAILURE)
-            WRONG_PARAM_COUNT;
-        get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
-        convert_to_string_ex(pval_name);
-        convert_to_string_ex(pval_val);
-        option_set(p, (*pval_name)->value.str.val, (*pval_val)->value.str.val);
-        
-        release_assoc (p);
-    }
-    else
-    {
-        WRONG_PARAM_COUNT;
-    }
+				if (type != HASH_KEY_IS_STRING || Z_TYPE_PP(ent) != IS_STRING)
+					continue;
+				
+				option_set(p, key, (*ent)->value.str.val);
+			}
+			release_assoc (p);
+		}
+	}
+	else if (ZEND_NUM_ARGS() == 3)
+	{
+		if (zend_get_parameters_ex(3, &pval_id, &pval_name, &pval_val)
+			== FAILURE)
+			WRONG_PARAM_COUNT;
+		get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+		convert_to_string_ex(pval_name);
+		convert_to_string_ex(pval_val);
+		option_set(p, (*pval_name)->value.str.val, (*pval_val)->value.str.val);
+		
+		release_assoc (p);
+	}
+	else
+	{
+		WRONG_PARAM_COUNT;
+	}
 }
 /* }}} */
 
@@ -1116,30 +1116,30 @@ PHP_FUNCTION(yaz_get_option)
 	pval **pval_id, **pval_name;
 	Yaz_Association p;
 
-    if (ZEND_NUM_ARGS() != 2)
-        WRONG_PARAM_COUNT;
-    if (zend_get_parameters_ex(2, &pval_id, &pval_name) == FAILURE)
-        WRONG_PARAM_COUNT;
-    get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
-    if (p)
-    {
-        const char *name_str, *v;
-        convert_to_string_ex (pval_name);
-        name_str = (*pval_name)->value.str.val;
+	if (ZEND_NUM_ARGS() != 2)
+		WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(2, &pval_id, &pval_name) == FAILURE)
+		WRONG_PARAM_COUNT;
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	if (p)
+	{
+		const char *name_str, *v;
+		convert_to_string_ex (pval_name);
+		name_str = (*pval_name)->value.str.val;
 
-        v = option_get(p, name_str);
-        if (!v)
-            v = "";
-        return_value->value.str.len = strlen(v);
-        return_value->value.str.val = 
-            estrndup(v, return_value->value.str.len);
-        return_value->type = IS_STRING;
-    }
-    else
-    {
-        RETVAL_FALSE;
-    }
-    release_assoc (p);
+		v = option_get(p, name_str);
+		if (!v)
+			v = "";
+		return_value->value.str.len = strlen(v);
+		return_value->value.str.val = 
+			estrndup(v, return_value->value.str.len);
+		return_value->type = IS_STRING;
+	}
+	else
+	{
+		RETVAL_FALSE;
+	}
+	release_assoc (p);
 }
 /* }}} */
 
@@ -1159,8 +1159,8 @@ PHP_FUNCTION(yaz_range)
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	convert_to_long_ex (pval_start);
 	convert_to_long_ex (pval_number);
-	option_set_int (p, "start",  (*pval_start)->value.lval - 1);
-	option_set_int (p, "count",  (*pval_number)->value.lval);
+	option_set_int (p, "start",	 (*pval_start)->value.lval - 1);
+	option_set_int (p, "count",	 (*pval_number)->value.lval);
 	release_assoc (p);
 }
 /* }}} */
@@ -1216,14 +1216,14 @@ PHP_FUNCTION(yaz_itemorder)
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
-        ZOOM_options options = ZOOM_options_create();
-        
-        ZOOM_options_set_callback (options, ill_array_lookup,
-                                   Z_ARRVAL_PP(pval_package));
-        ZOOM_package_destroy (p->zoom_package);
-        p->zoom_package = ZOOM_connection_package (p->zoom_conn, options);
-        ZOOM_package_send(p->zoom_package, "itemorder");
-        ZOOM_options_destroy (options);
+		ZOOM_options options = ZOOM_options_create();
+		
+		ZOOM_options_set_callback (options, ill_array_lookup,
+								   Z_ARRVAL_PP(pval_package));
+		ZOOM_package_destroy (p->zoom_package);
+		p->zoom_package = ZOOM_connection_package (p->zoom_conn, options);
+		ZOOM_package_send(p->zoom_package, "itemorder");
+		ZOOM_options_destroy (options);
 	}
 	release_assoc (p);
 }
@@ -1301,14 +1301,14 @@ PHP_FUNCTION(yaz_es_result)
 	}
 	array_init(return_value);
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
-    if (p && p->zoom_package)
-    {
-        const char *str = ZOOM_package_option_get(p->zoom_package,
-                                                  "targetReference");
-        if (str)
-            add_assoc_string (return_value, "targetReference", 
-                              (char*)str, 1);
-    }
+	if (p && p->zoom_package)
+	{
+		const char *str = ZOOM_package_option_get(p->zoom_package,
+												  "targetReference");
+		if (str)
+			add_assoc_string (return_value, "targetReference", 
+							  (char*)str, 1);
+	}
 	release_assoc (p);
 }
 /* }}} */
@@ -1548,15 +1548,15 @@ static void yaz_close_link (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ PHP_INI_BEGIN
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL,
-                      OnUpdateInt, max_links,
-                      zend_yaz_globals, yaz_globals)
-    STD_PHP_INI_ENTRY("yaz.log_file", NULL, PHP_INI_ALL,
-                      OnUpdateString, log_file,
-                      zend_yaz_globals, yaz_globals)
-    PHP_INI_END()
+	STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL,
+					  OnUpdateInt, max_links,
+					  zend_yaz_globals, yaz_globals)
+	STD_PHP_INI_ENTRY("yaz.log_file", NULL, PHP_INI_ALL,
+					  OnUpdateString, log_file,
+					  zend_yaz_globals, yaz_globals)
+	PHP_INI_END()
 /* }}} */
-    
+	
 PHP_MINIT_FUNCTION(yaz)
 {
 	int i;
@@ -1566,15 +1566,15 @@ PHP_MINIT_FUNCTION(yaz)
 #endif
 	ZEND_INIT_MODULE_GLOBALS(yaz, php_yaz_init_globals, NULL);
 
-    REGISTER_INI_ENTRIES();
+	REGISTER_INI_ENTRIES();
 
-    if (YAZSG(log_file))
+	if (YAZSG(log_file))
 	{
-        yaz_log_init_level(LOG_ALL);
-        yaz_log_init_file(YAZSG(log_file));
-    }
+		yaz_log_init_level(LOG_ALL);
+		yaz_log_init_file(YAZSG(log_file));
+	}
 	else
-	    yaz_log_init_level (0);
+		yaz_log_init_level (0);
 
 	le_link = zend_register_list_destructors_ex (yaz_close_link, 0,
 												"YAZ link", module_number);
@@ -1623,8 +1623,8 @@ PHP_RSHUTDOWN_FUNCTION(yaz)
 
 PHP_RINIT_FUNCTION(yaz)
 {
-    char pidstr[20];
-    sprintf (pidstr, "%ld", (long) getpid());
+	char pidstr[20];
+	sprintf (pidstr, "%ld", (long) getpid());
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
@@ -1632,7 +1632,7 @@ PHP_RINIT_FUNCTION(yaz)
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
-    yaz_log_init_prefix(pidstr);
+	yaz_log_init_prefix(pidstr);
 	return SUCCESS;
 }
 
