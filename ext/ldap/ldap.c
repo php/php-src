@@ -459,9 +459,9 @@ PHP_FUNCTION(ber_free)
    Bind to LDAP directory */
 PHP_FUNCTION(ldap_bind)
 {
-pval *link, *bind_rdn, *bind_pw;
-char *ldap_bind_rdn, *ldap_bind_pw;
-LDAP *ldap;
+	pval *link, *bind_rdn, *bind_pw;
+	char *ldap_bind_rdn, *ldap_bind_pw;
+	LDAP *ldap;
 
 	switch(ARG_COUNT(ht)) {
 		case 1: /* Anonymous Bind */
@@ -515,8 +515,8 @@ LDAP *ldap;
    Unbind from LDAP directory */
 PHP_FUNCTION(ldap_unbind)
 {
-pval *link;
-LDAP *ldap;
+	pval *link;
+	LDAP *ldap;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &link) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -661,8 +661,8 @@ PHP_FUNCTION(ldap_search)
    Free result memory */
 PHP_FUNCTION(ldap_free_result)
 {
-pval *result;
-LDAPMessage *ldap_result;
+	pval *result;
+	LDAPMessage *ldap_result;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -683,9 +683,9 @@ LDAPMessage *ldap_result;
    Count the number of entries in a search result */
 PHP_FUNCTION(ldap_count_entries)
 {
-pval *result, *link;
-LDAP *ldap;
-LDAPMessage *ldap_result;
+	pval *result, *link;
+	LDAP *ldap;
+	LDAPMessage *ldap_result;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &link, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -760,16 +760,16 @@ PHP_FUNCTION(ldap_next_entry)
    Get all result entries */
 PHP_FUNCTION(ldap_get_entries)
 {
-pval *link, *result;
-LDAPMessage *ldap_result, *ldap_result_entry;
-pval tmp1, tmp2;
-LDAP *ldap;
-int num_entries, num_attrib, num_values, i;
-int attr_count, entry_count;
-BerElement *ber;
-char *attribute;
-char **ldap_value;
-char *dn;
+	pval *link, *result;
+	LDAPMessage *ldap_result, *ldap_result_entry;
+	pval *tmp1, *tmp2;
+	LDAP *ldap;
+	int num_entries, num_attrib, num_values, i;
+	int attr_count, entry_count;
+	BerElement *ber;
+	char *attribute;
+	char **ldap_value;
+	char *dn;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &link, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -803,7 +803,8 @@ char *dn;
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
 
-		array_init(&tmp1);
+		tmp1 = (pval *) emalloc(sizeof(pval));
+		array_init(tmp1);
 
 		attr_count = 0;
 		attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber);
@@ -811,25 +812,26 @@ char *dn;
 			ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute);
 			num_values = ldap_count_values(ldap_value);
 
-			array_init(&tmp2);
-			add_assoc_long(&tmp2, "count", num_values);
+			tmp2 = (pval *) emalloc(sizeof(pval));
+			array_init(tmp2);
+			add_assoc_long(tmp2, "count", num_values);
 			for(i=0; i<num_values; i++) {
-				add_index_string(&tmp2, i, ldap_value[i], 1);
+				add_index_string(tmp2, i, ldap_value[i], 1);
 			}	
 			ldap_value_free(ldap_value);
 
-			_php3_hash_update(tmp1.value.ht, _php3_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval), NULL);
-			add_index_string(&tmp1, attr_count, attribute, 1);
+			_php3_hash_update(tmp1->value.ht, _php3_strtolower(attribute), strlen(attribute)+1, (void *) &tmp2, sizeof(pval *), NULL);
+			add_index_string(tmp1, attr_count, attribute, 1);
 
 			attr_count++;
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
 
-		add_assoc_long(&tmp1, "count", num_attrib);
+		add_assoc_long(tmp1, "count", num_attrib);
 		dn = ldap_get_dn(ldap, ldap_result_entry);
-		add_assoc_string(&tmp1, "dn", dn, 1);
+		add_assoc_string(tmp1, "dn", dn, 1);
 
-		_php3_hash_index_update(return_value->value.ht, entry_count, (void *) &tmp1, sizeof(pval), NULL);
+		_php3_hash_index_update(return_value->value.ht, entry_count, (void *) &tmp1, sizeof(pval *), NULL);
 		
 		entry_count++;
 		ldap_result_entry = ldap_next_entry(ldap, ldap_result_entry);
@@ -879,11 +881,11 @@ PHP_FUNCTION(ldap_first_attribute)
    Get the next attribute in result */
 PHP_FUNCTION(ldap_next_attribute)
 {
-pval *result,*link,*berp;
-LDAP *ldap;
-LDAPMessage *ldap_result_entry;
-BerElement *ber;
-char *attribute;
+	pval *result,*link,*berp;
+	LDAP *ldap;
+	LDAPMessage *ldap_result_entry;
+	BerElement *ber;
+	char *attribute;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &link, &result,&berp) == FAILURE ) {
 		WRONG_PARAM_COUNT;
@@ -912,14 +914,14 @@ char *attribute;
    Get attributes from a search result entry */
 PHP_FUNCTION(ldap_get_attributes)
 {
-pval *link, *result_entry;
-pval tmp;
-LDAP *ldap;
-LDAPMessage *ldap_result_entry;
-char *attribute;
-char **ldap_value;
-int i, count, num_values, num_attrib;
-BerElement *ber;
+	pval *link, *result_entry;
+	pval *tmp;
+	LDAP *ldap;
+	LDAPMessage *ldap_result_entry;
+	char *attribute;
+	char **ldap_value;
+	int i, count, num_values, num_attrib;
+	BerElement *ber;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &link, &result_entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -947,14 +949,15 @@ BerElement *ber;
 		ldap_value = ldap_get_values(ldap, ldap_result_entry, attribute);
 		num_values = ldap_count_values(ldap_value);
 
-		array_init(&tmp);
-		add_assoc_long(&tmp, "count", num_values);
+		tmp = (pval *) emalloc(sizeof(pval));
+		array_init(tmp);
+		add_assoc_long(tmp, "count", num_values);
 		for(i=0; i<num_values; i++) {
-			add_index_string(&tmp, i, ldap_value[i], 1);
+			add_index_string(tmp, i, ldap_value[i], 1);
 		}
 		ldap_value_free(ldap_value);
 
-		_php3_hash_update(return_value->value.ht, attribute, strlen(attribute)+1, (void *) &tmp, sizeof(pval), NULL);
+		_php3_hash_update(return_value->value.ht, attribute, strlen(attribute)+1, (void *) &tmp, sizeof(pval *), NULL);
 		add_index_string(return_value, count, attribute, 1);
 
 		count++;
@@ -969,12 +972,12 @@ BerElement *ber;
    Get all values from a result entry */
 PHP_FUNCTION(ldap_get_values)
 {
-pval *link, *result_entry, *attr;
-LDAP *ldap;
-LDAPMessage *ldap_result_entry;
-char *attribute;
-char **ldap_value;
-int i, num_values;
+	pval *link, *result_entry, *attr;
+	LDAP *ldap;
+	LDAPMessage *ldap_result_entry;
+	char *attribute;
+	char **ldap_value;
+	int i, num_values;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &link, &result_entry, &attr) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1051,9 +1054,9 @@ PHP_FUNCTION(ldap_get_dn)
    Splits DN into its component parts */
 PHP_FUNCTION(ldap_explode_dn)
 {
-pval *dn, *with_attrib;
-char **ldap_value;
-int i, count;
+	pval *dn, *with_attrib;
+	char **ldap_value;
+	int i, count;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &dn, &with_attrib)== FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1113,14 +1116,14 @@ PHP_FUNCTION(ldap_dn2ufn)
 
 static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 {
-pval *link, *dn, *entry, *value, *ivalue;
-LDAP *ldap;
-char *ldap_dn;
-LDAPMod **ldap_mods;
-int i, j, num_attribs, num_values;
-char *attribute;
-ulong index;
-int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
+	pval *link, *dn, *entry, *value, *ivalue;
+	LDAP *ldap;
+	char *ldap_dn;
+	LDAPMod **ldap_mods;
+	int i, j, num_attribs, num_values;
+	char *attribute;
+	ulong index;
+	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
  
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &link, &dn, &entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1268,9 +1271,9 @@ PHP_FUNCTION(ldap_mod_del)
    Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
-pval *link, *dn;
-LDAP *ldap;
-char *ldap_dn;
+	pval *link, *dn;
+	LDAP *ldap;
+	char *ldap_dn;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &link, &dn) == FAILURE) {
 		WRONG_PARAM_COUNT;
