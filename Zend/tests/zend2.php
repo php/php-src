@@ -210,7 +210,7 @@ Example 6: Multiple derefencing of objects returned from methods
 	}	
 
 	$person = new Person("John", "New York");
-	print $person->getName()->display();
+	$person->getName()->display();
 	
 ?>
 
