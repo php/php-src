@@ -1853,27 +1853,13 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 
 	switch (mode[0]) {
 		case 'r':
-			if (strchr(mode, '+')) {
-				flags = O_RDWR;
-			} else {
-				flags = O_RDONLY;
-			}
+			flags = 0;
 			break;
 		case 'w':
-			if (strchr(mode, '+')) {
-				flags = O_RDWR;
-			} else {
-				flags = O_WRONLY;
-			}
-			flags |= O_TRUNC|O_CREAT;
+			flags = O_TRUNC|O_CREAT;
 			break;
 		case 'a':
-			if (strchr(mode, '+')) {
-				flags = O_RDWR;
-			} else {
-				flags = O_WRONLY;
-			}
-			flags |= O_CREAT|O_APPEND;
+			flags = O_CREAT|O_APPEND;
 			break;
 		case 'x':
 			flags = O_CREAT|O_EXCL;
@@ -1881,6 +1867,14 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 		default:
 			/* unknown mode */
 			return FAILURE;
+	}
+
+	if (strchr(mode, '+')) {
+		flags |= O_RDWR;
+	} else if (flags) {
+		flags |= O_WRONLY;
+	} else {
+		flags |= O_RDONLY'
 	}
 
 #ifdef O_BINARY
