@@ -8,7 +8,7 @@ PHP 4                                                                      NEWS
   ex. socket_select($w, $r, $e=NULL, 10);
 - Added optional 3rd parameter to mysql_select_db() which makes it return
   the previously selected database name. (Jani)
-- If possible set Content-Length header in zlib.output_compression mode. (thies)
+- Set Content-Length header whenenver it's possible. (thies, Yasuo)
 - Major update of domxml. New functions and better DOM compliance. (Uwe)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
   pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
