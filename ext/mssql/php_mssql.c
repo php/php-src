@@ -1238,7 +1238,7 @@ PHP_FUNCTION(mssql_fetch_object)
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
-	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC);
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_BOTH);
 }
 
 /* }}} */
