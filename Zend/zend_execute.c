@@ -550,7 +550,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		}
 		return;
 	}
-	
+
+	/* TODO!: call set on object */
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
 		if (value->value.obj.handlers->clone_obj == NULL) {
 			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(value)->name);
@@ -588,7 +589,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (variable_ptr!=value) {
 			zend_uint refcount = variable_ptr->refcount;
 			zval garbage;
-	
+			
 			if (type!=IS_TMP_VAR) {
 				value->refcount++;
 			}
@@ -613,7 +614,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						variable_ptr->refcount++;
 					} else if (PZVAL_IS_REF(value)) {
 						zval tmp;
-
+						
 						tmp = *value;
 						zval_copy_ctor(&tmp);
 						tmp.refcount=1;
@@ -631,8 +632,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					value->refcount=1;
 					*variable_ptr = *value;
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
+					EMPTY_SWITCH_DEFAULT_CASE()
+						}
 		} else { /* we need to split */
 			switch (type) {
 				case IS_VAR:
@@ -654,8 +655,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					value->refcount=1;
 					**variable_ptr_ptr = *value;
 					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
+					EMPTY_SWITCH_DEFAULT_CASE()
+						}
 		}
 		(*variable_ptr_ptr)->is_ref=0;
 	}
@@ -1099,7 +1100,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 {
 	zval *container;
 	zval **retval;
-
+	
 	retval = &T(result->u.var).var.ptr;
 	T(result->u.var).var.ptr_ptr = retval;
 
@@ -1111,7 +1112,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 		return;
 	}
 
-	
+
 	if (container->type != IS_OBJECT) {
 		zend_error(E_NOTICE, "Trying to get property of non-object");
 
@@ -1123,7 +1124,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 	} else {
 		zval *offset;
 		zval tmp;
-		
+
 		offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 		switch (op2->op_type) {
 			case IS_CONST:
@@ -1760,7 +1761,18 @@ static inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zv
 	
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
 
-	binary_op(*var_ptr, *var_ptr, value TSRMLS_CC);
+	if(Z_TYPE_PP(var_ptr) == IS_OBJECT && Z_OBJ_HANDLER_PP(var_ptr, get)
+	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr);
+		objval->refcount++;
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, objval);
+		zval_ptr_dtor(&objval);
+	} else {
+		binary_op(*var_ptr, *var_ptr, value TSRMLS_CC);
+	}
+	
 	EX_T(opline->result.u.var).var.ptr_ptr = var_ptr;
 	SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 	FREE_OP(Ex(Ts), &opline->op1, EG(free_op1));
@@ -1893,7 +1905,17 @@ static inline int zend_incdec_op_helper(incdec_t incdec_op_arg, ZEND_OPCODE_HAND
 	
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
 
-	incdec_op(*var_ptr);
+	if(Z_TYPE_PP(var_ptr) == IS_OBJECT && Z_OBJ_HANDLER_PP(var_ptr, get)
+	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
+		/* proxy object */
+		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr);
+		val->refcount++;
+		incdec_op(val);
+		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val);
+		zval_ptr_dtor(&val);
+	} else {
+		incdec_op(*var_ptr);
+	}
 
 	switch (opline->opcode) {
 		case ZEND_PRE_INC:
