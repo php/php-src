@@ -241,6 +241,8 @@ struct _sapi_module_struct {
 	int (*get_target_gid)(gid_t * TSRMLS_DC);
 
 	unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC);
+	
+	void (*ini_defaults)(HashTable *configuration_hash);
 };
 
 
