@@ -781,6 +781,7 @@ PHP_FUNCTION(user_printf)
 	}
 	PHPWRITE(result, len);
 	efree(result);
+	RETURN_LONG(len);
 }
 /* }}} */
 
@@ -796,6 +797,7 @@ PHP_FUNCTION(vprintf)
 	}
 	PHPWRITE(result, len);
 	efree(result);
+	RETURN_LONG(len);
 }
 /* }}} */
 
@@ -826,7 +828,7 @@ PHP_FUNCTION(fprintf)
 
 	efree(result);
 
-	RETVAL_LONG(len - 1);
+	RETURN_LONG(len);
 }
 
 /* {{{ proto int vfprintf(resource stream, string format, array args)
@@ -856,7 +858,7 @@ PHP_FUNCTION(vfprintf)
 
 	efree(result);
 
-	RETVAL_LONG(len - 1);
+	RETURN_LONG(len);
 }
 
 
