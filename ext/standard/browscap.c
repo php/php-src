@@ -203,7 +203,8 @@ PHP_FUNCTION(get_browser)
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
-			if (zend_hash_find(&EG(symbol_table), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
+			if (!PG(http_globals)[TRACK_VARS_SERVER]
+				|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
 				zend_error(E_WARNING,"HTTP_USER_AGENT variable is not set, cannot determine user agent name");
 				RETURN_FALSE;
 			}
