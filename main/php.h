@@ -307,7 +307,7 @@ int module_startup_modules(void);
 int module_global_startup_modules(void);
 int module_global_shutdown_modules(void);
 
-int mergesort(void *base, size_t nmemb, size_t size, int (*cmp) (const void *, const void *));
+int mergesort(void *base, size_t nmemb, register size_t size, int (*cmp) (const void *, const void *));
 
 /*from basic functions*/
 extern PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
