@@ -29,6 +29,9 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, zval *data, int style);
 static xmlNodePtr guess_array_map(encodeTypePtr type, zval *data, int style);
 static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style);
 
+static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style);
+static xmlNodePtr to_xml_list1(encodeTypePtr enc, zval *data, int style);
+
 /* Datetime encode/decode */
 static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *format, int style);
 static xmlNodePtr to_xml_datetime(encodeTypePtr type, zval *data, int style);
@@ -142,14 +145,14 @@ encode defaultEncoding[] = {
 	{{XSD_TOKEN, XSD_TOKEN_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_LANGUAGE, XSD_LANGUAGE_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_NMTOKEN, XSD_NMTOKEN_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_NMTOKENS, XSD_NMTOKENS_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NMTOKENS, XSD_NMTOKENS_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_list1},
 	{{XSD_NAME, XSD_NAME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_NCNAME, XSD_NCNAME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_ID, XSD_ID_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_IDREF, XSD_IDREF_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_IDREFS, XSD_IDREFS_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_IDREFS, XSD_IDREFS_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_list1},
 	{{XSD_ENTITY, XSD_ENTITY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_ENTITIES, XSD_ENTITIES_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_ENTITIES, XSD_ENTITIES_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_list1},
 
 	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL}, to_zval_map, to_xml_map},
 
@@ -532,18 +535,14 @@ static zval *to_zval_ulong(encodeTypePtr type, xmlNodePtr data)
 
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			unsigned long val = 0;
-			char *s;
 			whiteSpace_collapse(data->children->content);
-			s = data->children->content;
-			while (*s >= '0' && *s <= '9') {
-				val = (val*10)+(*s-'0');
-				s++;
-			}
-			if ((long)val >= 0) {
-				ZVAL_LONG(ret, val);
+			errno = 0;
+			ret->value.lval = strtol(data->children->content, NULL, 0);
+			if (errno == ERANGE) { /* overflow */
+				ret->value.dval = strtod(data->children->content, NULL);
+				ret->type = IS_DOUBLE;
 			} else {
-				ZVAL_STRING(ret, data->children->content, 1);
+				ret->type = IS_LONG;
 			}
 		} else {
 			php_error(E_ERROR,"Violation of encoding rules");
@@ -580,20 +579,25 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style)
 static xmlNodePtr to_xml_ulong(encodeTypePtr type, zval *data, int style)
 {
 	xmlNodePtr ret;
-	zval tmp;
 
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret, style);
 
-	/* TODO: long overflow */
-	tmp = *data;
-	zval_copy_ctor(&tmp);
-	if (Z_TYPE(tmp) != IS_LONG) {
-		convert_to_long(&tmp);
+	if (Z_TYPE_P(data) == IS_DOUBLE) {
+		char s[16];
+		sprintf(s, "%0.0F",Z_DVAL_P(data));
+		xmlNodeSetContent(ret, s);
+	} else {
+		zval tmp = *data;
+
+		zval_copy_ctor(&tmp);
+		if (Z_TYPE(tmp) != IS_LONG) {
+			convert_to_long(&tmp);
+		}
+		convert_to_string(&tmp);
+		xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
+		zval_dtor(&tmp);
 	}
-	convert_to_string(&tmp);
-	xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
-	zval_dtor(&tmp);
 
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(ret, type);
@@ -1941,8 +1945,8 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 
 	if (Z_TYPE_P(data) == IS_LONG) {
 		timestamp = Z_LVAL_P(data);
-		/*time(&timestamp);*/
 		ta = php_localtime_r(&timestamp, &tmbuf);
+		/*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 
 		buf = (char *) emalloc(buf_len);
 		while ((real_len = strftime(buf, buf_len, format, ta)) == buf_len || real_len == 0) {
@@ -2077,6 +2081,11 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style) {
 	return ret;
 }
 
+static xmlNodePtr to_xml_list1(encodeTypePtr enc, zval *data, int style) {
+	/*FIXME: minLength=1 */
+	return to_xml_list(enc,data,style);
+}
+
 static zval* to_zval_union(encodeTypePtr enc, xmlNodePtr data) {
 	/*FIXME*/
 	return to_zval_list(enc, data);
@@ -2092,7 +2101,7 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 	sdlTypePtr type;
 
 	type = enc->sdl_type;
-
+/*FIXME: restriction support
 	if (type && type->restrictions &&
 	    data &&  data->children && data->children->content) {
 		if (type->restrictions->whiteSpace && type->restrictions->whiteSpace->value) {
@@ -2120,6 +2129,7 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 		  php_error(E_WARNING,"Restriction: length is not equal to 'length'");
 		}
 	}
+*/
 	switch (type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
 			if (type->encode && enc != &type->encode->details) {
@@ -2152,6 +2162,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style)
 
 	type = enc->sdl_type;
 
+/*FIXME: restriction support
 	if (type) {
 		if (type->restrictions && Z_TYPE_P(data) == IS_STRING) {
 			if (type->restrictions->enumeration) {
@@ -2173,6 +2184,7 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style)
 			}
 		}
 	}
+*/
 	switch(type->kind) {
 		case XSD_TYPEKIND_SIMPLE:
 			if (type->encode && enc != &type->encode->details) {
