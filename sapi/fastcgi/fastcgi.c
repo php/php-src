@@ -126,10 +126,13 @@ static void sapi_fastcgi_register_variables(zval *track_vars_array ELS_DC SLS_DC
 	char *self = getenv("REQUEST_URI");
 	char *ptr = strchr( self, '?' );
 
-	/* In CGI mode, we consider the environment to be a part of the server
-	 * variables
-	 */
-	php_import_environment_variables(track_vars_array ELS_CC PLS_CC);
+	/*
+         * note that the environment will already have been set up
+         * via fastcgi_module_main(), below.
+         *
+         * fastcgi_module_main() -> php_request_startup() ->
+         * php_hash_environment() -> php_import_environment_variables()
+         */
 
 	/* strip query string off this */
 	if ( ptr ) *ptr = 0;
