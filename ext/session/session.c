@@ -306,7 +306,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	current = (zval *) ecalloc(sizeof(zval), 1);
+	MAKE_STD_ZVAL(current);
 	for (p = val; p < endptr; ) {
 		namelen = *p & (~PS_BIN_UNDEF);
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
@@ -324,7 +324,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
-	efree(current);
+	FREE_ZVAL(current);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
@@ -386,7 +386,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
-	current = (zval *) ecalloc(sizeof(zval), 1);
+	MAKE_STD_ZVAL(current);
 	for (p = q = val; (p < endptr) && (q = memchr(p, PS_DELIMITER, endptr - p)); p = q) {
 		if (p[0] == PS_UNDEF_MARKER) {
 			p++;
@@ -408,7 +408,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
-	efree(current);
+	FREE_ZVAL(current);
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	return SUCCESS;
