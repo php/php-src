@@ -224,7 +224,7 @@ class PEAR
      * handling applied.  If the $mode and $options parameters are not
      * specified, the object's defaults are used.
      *
-     * @param $message  a text error message
+     * @param $message  a text error message or a PEAR error object
      * @param $code     a numeric error code (it is up to your class
      *                  to define these if you want to use codes)
      * @param $mode     One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
@@ -260,6 +260,14 @@ class PEAR
                          $error_class = null,
                          $skipmsg = false)
     {
+        // The error is yet a PEAR error object
+        if (is_object($message)) {
+            $code        = $message->getCode();
+            $userinfo    = $message->getUserInfo();
+            $error_class = $message->getType();
+            $message     = $message->getMessage();
+        }
+
         if ($mode === null) {
             if (isset($this) && isset($this->_default_error_mode)) {
                 $mode = $this->_default_error_mode;
@@ -453,7 +461,7 @@ class PEAR_Error
         $this->message   = $message;
         $this->code      = $code;
         $this->mode      = $mode;
-        $this->userinfo = $userinfo;
+        $this->userinfo  = $userinfo;
         if ($mode & PEAR_ERROR_CALLBACK) {
             $this->level = E_USER_NOTICE;
             $this->callback = $options;
