@@ -7731,7 +7731,7 @@ collector_encode_htmlnumericentity(int c, void *data)
 		mapelm = &(pc->convmap[n*4]);
 		if (c >= mapelm[0] && c <= mapelm[1]) {
 			s = (c + mapelm[2]) & mapelm[3];
-			if (s > 0) {
+			if (s >= 0) {
 				(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
 				(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
 				r = 100000000;
@@ -7744,6 +7744,10 @@ collector_encode_htmlnumericentity(int c, void *data)
 						(*pc->decoder->filter_function)(mbfl_hexchar_table[d], pc->decoder);
 					}
 					r /= 10;
+				}
+				if (!f) {
+					f = 1;
+					(*pc->decoder->filter_function)(mbfl_hexchar_table[0], pc->decoder);
 				}
 				(*pc->decoder->filter_function)(0x3b, pc->decoder);		/* ';' */
 			}
@@ -7824,12 +7828,18 @@ collector_decode_htmlnumericentity(int c, void *data)
 		if (f) {
 			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
 			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			r = pc->digit*10;
+			r = 1;
+			n = pc->digit;
+			while (n > 0) {
+				r *= 10;
+				n--;
+			}
 			s %= r;
+			r /= 10;
 			while (r > 0) {
-				r /= 10;
 				d = s/r;
 				s %= r;
+				r /= 10;
 				(*pc->decoder->filter_function)(mbfl_hexchar_table[d], pc->decoder);
 			}
 			(*pc->decoder->filter_function)(c, pc->decoder);
