@@ -77,7 +77,6 @@ ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getIterator,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,  arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetGet,     arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetSet,     arginfo_array_offsetSet, ZEND_ACC_PUBLIC)
@@ -85,24 +84,27 @@ static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, count,         NULL, ZEND_ACC_PUBLIC)
+	/* ArrayObject specific */
+	SPL_ME(Array, getIterator,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, valid,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,  arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetGet,     arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetSet,     arginfo_array_offsetSet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetUnset,   arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, seek,          arginfo_array_seek,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, count,         NULL, ZEND_ACC_PUBLIC)
+	/* ArrayIterator specific */
+	SPL_ME(Array, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, current,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, key,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, valid,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, seek,          arginfo_array_seek,        ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -327,6 +329,7 @@ static int spl_array_has_dimension(zval *object, zval *offset, int check_empty T
 /* }}} */
 
 /* {{{ proto bool ArrayObject::offsetExists(mixed $index)
+       proto bool ArrayIterator::offsetExists(mixed $index)
  Returns whether the requested $index exists. */
 SPL_METHOD(Array, offsetExists)
 {
@@ -338,6 +341,7 @@ SPL_METHOD(Array, offsetExists)
 } /* }}} */
 
 /* {{{ proto bool ArrayObject::offsetGet(mixed $index)
+       proto bool ArrayIterator::offsetGet(mixed $index)
  Returns the value at the specified $index. */
 SPL_METHOD(Array, offsetGet)
 {
@@ -349,7 +353,8 @@ SPL_METHOD(Array, offsetGet)
 	RETURN_ZVAL(value, 0, 1);
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::offsetSet(mixed $index, mixed $newval)
+/* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval)
+       proto void ArrayIterator::offsetSet(mixed $index, mixed $newval)
  Sets the value at the specified $index to $newval. */
 SPL_METHOD(Array, offsetSet)
 {
@@ -360,7 +365,8 @@ SPL_METHOD(Array, offsetSet)
 	spl_array_write_dimension(getThis(), index, value TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::append(mixed $newval)
+/* {{{ proto void ArrayObject::append(mixed $newval)
+       proto void ArrayIterator::append(mixed $newval)
  Appends the value (cannot be called for objects). */
 SPL_METHOD(Array, append)
 {
@@ -388,7 +394,8 @@ SPL_METHOD(Array, append)
 	}
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::offsetUnset(mixed $index)
+/* {{{ proto void ArrayObject::offsetUnset(mixed $index)
+       proto void ArrayIterator::offsetUnset(mixed $index)
  Unsets the value at the specified $index. */
 SPL_METHOD(Array, offsetUnset)
 {
@@ -400,6 +407,7 @@ SPL_METHOD(Array, offsetUnset)
 } /* }}} */
 
 /* {{ proto array ArrayObject::getArrayCopy()
+      proto array ArrayIterator::getArrayCopy()
  Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
 {
@@ -713,7 +721,7 @@ SPL_METHOD(Array, rewind)
 }
 /* }}} */
 
-/* {{{ proto bool ArrayIterator::seek(int $position)
+/* {{{ proto void ArrayIterator::seek(int $position)
  Seek to position. */
 SPL_METHOD(Array, seek)
 {
@@ -736,7 +744,8 @@ SPL_METHOD(Array, seek)
 	while (position-- > 0 && spl_array_next(intern TSRMLS_CC));
 } /* }}} */
 
-/* {{{ proto bool ArrayObject::count()
+/* {{{ proto int ArrayObject::count()
+       proto int ArrayIterator::count()
  Return the number of elements in the Iterator. */
 SPL_METHOD(Array, count)
 {

@@ -143,10 +143,14 @@ class ArrayObject implements IteratorAggregate, ArrayAccess
 	function offsetUnset($index);
 
 	/** \param $value is appended as last element
+	 * \warning this method cannot be called when the ArrayObject refers to 
+	 *          an object.
 	 */	
 	function append($value);
 
 	/** \return a \b copy of the array
+	 * \note when the ArrayObject refers to an object then this method 
+	 *       returns an array of the public properties.
 	 */	
 	function getArrayCopy();
 }
@@ -190,10 +194,14 @@ class ArrayIterator implements Iterator, SeekableIterator, ArrayAccess
 	function offsetUnset($index);
 
 	/** \param $value is appended as last element
+	 * \warning this method cannot be called when the ArrayIterator refers to 
+	 *          an object.
 	 */	
 	function append($value);
 
 	/** \return a \b copy of the array
+	 * \note when the ArrayIterator refers to an object then this method 
+	 *       returns an array of the public properties.
 	 */	
 	function getArrayCopy();
 
