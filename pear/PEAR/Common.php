@@ -20,7 +20,7 @@
 
 require_once "PEAR.php";
 
-class PEAR_Common
+class PEAR_Common extends PEAR
 {
     // {{{ properties
 
@@ -73,6 +73,7 @@ class PEAR_Common
     }
 
     // }}}
+    // {{{ _element_start()
 
     function _element_start($xp, $name, $attribs)
     {
@@ -81,6 +82,8 @@ class PEAR_Common
 	$this->current_attributes = $attribs;
     }
 
+    // }}}
+    // {{{ _element_end()
 
     function _element_end($xp, $name)
     {
@@ -88,6 +91,8 @@ class PEAR_Common
 	$this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
     }
 
+    // }}}
+    // {{{ _pkginfo_cdata()
 
     function _pkginfo_cdata($xp, $data)
     {
@@ -96,30 +101,30 @@ class PEAR_Common
             case "Name":
                 switch ($next) {
                     case "Package":
-                        $this->pkginfo["package"] = trim($data);
+                        $this->pkginfo["package"] .= $data;
                         break;
                     case "Maintainer":
-                        $this->pkginfo["maintainer_name"] = trim($data);
+                        $this->pkginfo["maintainer_name"] .= $data;
                         break;
                 }
                 break;
             case "Summary":
-                $this->pkginfo["summary"] = trim($data);
+                $this->pkginfo["summary"] .= $data;
                 break;
             case "Initials":
-                $this->pkginfo["maintainer_handle"] = trim($data);
+                $this->pkginfo["maintainer_handle"] .= $data;
                 break;
             case "Email":
-                $this->pkginfo["maintainer_email"] = trim($data);
+                $this->pkginfo["maintainer_email"] .= $data;
                 break;
             case "Version":
-                $this->pkginfo["version"] = trim($data);
+                $this->pkginfo["version"] .= $data;
                 break;
             case "Date":
-                $this->pkginfo["release_date"] = trim($data);
+                $this->pkginfo["release_date"] .= $data;
                 break;
             case "Notes":
-                $this->pkginfo["release_notes"] = trim($data);
+                $this->pkginfo["release_notes"] .= $data;
                 break;
 	    case "Dir":
 		if (!$this->phpdir) {
@@ -136,11 +141,13 @@ class PEAR_Common
 	}
     }
 
+    // }}}
+    // {{{ infoFromDescriptionFile()
 
-    function infoFromDescriptionFile($file)
+    function infoFromDescriptionFile($descfile)
     {
 	$fp = fopen($descfile, "r");
-	$xp = xml_parser_create();
+	$xp = @xml_parser_create();
 	if (!$xp) {
 	    return $this->raiseError("Unable to create XML parser.");
 	}
@@ -157,7 +164,7 @@ class PEAR_Common
         // read the whole thing so we only get one cdata callback
         // for each block of cdata
 	$data = fread($fp, filesize($descfile));
-        if (!xml_parse($xp, $data, 1)) {
+        if (!@xml_parse($xp, $data, 1)) {
             $msg = sprintf("XML error: %s at line %d",
                            xml_error_string(xml_get_error_code($xp)),
                            xml_get_current_line_number($xp));
@@ -167,8 +174,14 @@ class PEAR_Common
 
 	xml_parser_free($xp);
 
+        foreach ($this->pkginfo as $k => $v) {
+            $this->pkginfo[$k] = trim($v);
+        }
+
         return $this->pkginfo;
     }
+
+    // }}}
 }
 
 ?>
