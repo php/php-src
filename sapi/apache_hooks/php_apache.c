@@ -153,7 +153,7 @@ PHPAPI zval *php_apache_request_new(request_rec *r)
  */
 static void apache_request_read_string_slot(int offset, INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval *id, **new_value;
+	zval *id;
 	request_rec *r;
 	char *s;
 
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(apache_request_log_error)
 */
 PHP_FUNCTION(apache_request_sub_req_lookup_uri)
 {
-    zval *id, *ret;
+    zval *id;
     zval **file;
     request_rec *r, *sub_r;
     TSRMLS_FETCH();
@@ -1186,7 +1186,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_uri)
 */
 PHP_FUNCTION(apache_request_sub_req_lookup_file)
 {
-    zval *id, *ret;
+    zval *id;
     zval **file;
     request_rec *r, *sub_r;
     TSRMLS_FETCH();
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(apache_request_internal_redirect)
 {
     zval *id;
     zval **new_uri;
-    request_rec *r, *sub_r;
+    request_rec *r;
     TSRMLS_FETCH();
     if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &new_uri) == FAILURE) {
         WRONG_PARAM_COUNT;
