@@ -20,50 +20,141 @@
 // $Id$
 
 require_once 'PEAR.php';
+require_once 'PEAR/Common.php';
+require_once 'PEAR/Config.php';
+require_once 'PEAR/Remote.php';
+require_once 'PEAR/Registry.php';
 require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-$options = Console_Getopt::getopt($argv, "h?v:e:p:d:");
+$progname = basename($argv[0]);
+
+PEAR::setErrorHandling(PEAR_ERROR_PRINT, "$progname: %s\n");
+
+$argv = Console_Getopt::readPHPArgv();
+if (PEAR::isError($argv)) {
+    die($argv->getMessage());
+}
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
 if (PEAR::isError($options)) {
     usage($options);
 }
 
+$php_sysconfdir = getenv('PHP_SYSCONFDIR');
+if (!empty($php_sysconfdir)) {
+    $pear_default_config = $php_sysconfdir.DIRECTORY_SEPARATOR.'pearsys.ini';
+    $pear_user_config    = $php_sysconfdir.DIRECTORY_SEPARATOR.'pear.ini';
+} else {
+    $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pearsys.ini';
+    $pear_user_config    = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.ini';
+}
+
 $opts = $options[0];
+
 foreach ($opts as $opt) {
-    $param = $opt[1];
     switch ($opt[0]) {
-        case 'v':
-            $verbose = $param;
+        case 'c':
+            $pear_user_config = $opt[1];
             break;
-        case 'e':
-            if ($param{0} != getenv('DIRECTORY_SEPARATOR')) {
-                usage (new PEAR_Error("no absolute path (eg. /usr/lib/php)\n"));
-            }
-            $ext_dir = $param;
-            break;
-        case 'p':
-            if ($param{0} != getenv('DIRECTORY_SEPARATOR')) {
-                usage (new PEAR_Error("no absolute path (eg. /usr/lib/php)\n"));
-            }
-            $script_dir = $param;
-            break;
-        case 'd':
-            if ($param{0} != getenv('DIRECTORY_SEPARATOR')) {
-                usage (new PEAR_Error("no absolute path (eg. /usr/lib/php)\n"));
-            }
-            $doc_dir = $param;
+        case 'C':
+            $pear_default_config = $opt[1];
             break;
     }
 }
 
-$verbose    = (isset($verbose)) ? $verbose : 1;
-$script_dir = (isset($script_dir)) ? $script_dir : getenv('PEAR_INSTALL_DIR');
-$ext_dir    = (isset($ext_dir)) ? $ext_dir : getenv('PEAR_EXTENSION_DIR');
-$doc_dir    = (isset($doc_dir)) ? $doc_dir : '';
+$config = new PEAR_Config($pear_user_config, $pear_default_config);
+$store_user_config = false;
+$store_default_config = false;
+$verbose = 1;
+
+foreach ($opts as $opt) {
+    $param = $opt[1];
+    switch ($opt[0]) {
+        case 'd':
+            list($key, $value) = explode('=', $param);
+            $config->set($key, $value);
+            break;
+        case 'D':
+            list($key, $value) = explode('=', $param);
+            $config->set($key, $value, true);
+            break;
+        case 's':
+            $store_user_config = true;
+            break;
+        case 'S':
+            $store_default_config = true;
+            break;
+        case 'u':
+            $config->toDefault($param);
+            break;
+        case 'v':
+            $verbose++;
+            break;
+        case 'q':
+            $verbose--;
+            break;
+    }
+}
+
+if ($store_default_config) {
+    if (@is_writeable($pear_default_config)) {
+        $config->writeConfigFile($pear_default_config, 'default');
+    } else {
+        die("You don't have write access to $pear_default_config, exiting!\n");
+    }
+}
+
+if ($store_user_config) {
+    $config->writeConfigFile($pear_user_config, 'userdefined');
+}
+
+$fallback_config = array(
+    'master_server' => 'pear.php.net',
+    'php_dir'       => getenv('PEAR_INSTALL_DIR'),
+    'ext_dir'       => getenv('PEAR_EXTENSION_DIR'),
+    'doc_dir'       => getenv('PHP_DATADIR') . DIRECTORY_SEPARATOR . 'pear' .
+                       DIRECTORY_SEPARATOR . 'doc',
+    'verbose'       => true,
+);
+$fallback_done = array();
+
+foreach ($fallback_config as $key => $value) {
+    if (!$config->isDefined($key)) {
+        $config->set($key, $value);
+        $fallback_done[$key] = true;
+    }
+}
+
+//$verbose    = $config->get("verbose");
+$script_dir = $config->get("php_dir");
+$ext_dir    = $config->get("ext_dir");
+$doc_dir    = $config->get("doc_dir");
 
 PEAR::setErrorHandling(PEAR_ERROR_PRINT);
-$command = $options[1][1];
+
+$command = (isset($options[1][1])) ? $options[1][1] : null;
+$rest = array_slice($options[1], 2);
+
+if (isset($command_options[$command])) {
+    $tmp = Console_Getopt::getopt($rest, $command_options[$command]);
+    if (PEAR::isError($tmp)) {
+        usage($tmp);
+    }
+    $cmdopts = $tmp[0];
+    $cmdargs = $tmp[1];
+} else {
+    $cmdopts = array();
+    $cmdargs = $rest;
+}
+
+
+/* Extracted from pearcmd-common.php */
+function heading($text)
+{
+    $l = strlen(trim($text));
+    print rtrim($text) . "\n" . str_repeat("=", $l) . "\n";
+}
 
 switch ($command) {
     case 'install':
@@ -88,12 +179,12 @@ switch ($command) {
             print "uninstall ok\n";
         }
         break;
-    case 'list-installed':
+    case 'list':
         include_once 'PEAR/Registry.php';
-        $reg = new PEAR_Registry($script_dir);
+        $reg = &new PEAR_Registry($script_dir);
         $installed = $reg->packageInfo();
         $i = $j = 0;
-        print("Installed packages:\n");
+        heading("Installed packages:");
         foreach ($installed as $package) {
             if ($i++ % 20 == 0) {
                 if ($j++ > 0) {
@@ -118,9 +209,29 @@ switch ($command) {
             print "package ok\n";
         }
         break;
-    default:
-        usage();
+    case 'remote-list':
+        include 'pearcmd-remote-list.php';
         break;
+    case 'show-config':
+        $keys = $config->getKeys();
+        foreach ($keys as $key) {
+            $value = $config->get($key);
+            $xi = "";
+            if ($config->isDefaulted($key)) {
+                $xi .= " (default)";
+            }
+            if (isset($fallback_done[$key])) {
+                $xi .= " (built-in)";
+            }
+            printf("%s = %s%s\n", $key, $value, $xi);
+        }
+        break;
+    default: {
+        if (!$store_default_config && !$store_user_config) {
+            usage();
+        }
+        break;
+    }
 }
 
 function usage($obj = null)
@@ -130,18 +241,26 @@ function usage($obj = null)
         fputs($stderr, $obj->getMessage());
     }
     fputs($stderr,
-          "Usage: pear [-v n] [-h] [-p <dir>] [-e <dir>] [-d <dir>] command <parameters>\n".
+          "Usage: pear [options] command [command-options] <parameters>\n".
           "Options:\n".
-          "     -v        set verbosity level to <n> (0-2, default 1)\n".
-          "     -p <dir>  set script install dir (absolute path)\n".
-          "     -e <dir>  set extension install dir (absolute path)\n".
-          "     -d <dir>  set documentation dest dir (absolute path)\n".
-          "     -h, -?    display help/usage (this message)\n".
+          "     -v         increase verbosity level (default 1)\n".
+          "     -q         be quiet, decrease verbosity level\n".
+          "     -c file    find user configuration in `file'\n".
+          "     -C file    find system configuration in `file'\n".
+          "     -d foo=bar set user config variable `foo' to `bar'\n".
+          "     -D foo=bar set system config variable `foo' to `bar'\n".
+          "     -s         store user configuration\n".
+          "     -S         store system configuration\n".
+          "     -u foo     unset `foo' in the user configuration\n".
+          "     -h, -?     display help/usage (this message)\n".
           "Commands:\n".
-          "   list-installed \n".
-          "   install <package file>\n".
-          "   uninstall <package file>\n".
+          "   help [command]\n".
+          "   install [-r] <package file>\n".
+          "   uninstall [-r] <package name>\n".
           "   package [package info file]\n".
+          "   list\n".
+          "   remote-list\n".
+          "   show-config\n".
           "\n");
     fclose($stderr);
     exit;
