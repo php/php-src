@@ -1,4 +1,5 @@
 #include "php_soap.h"
+#include "libxml/uri.h"
 
 static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type);
 static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type);
@@ -135,32 +136,32 @@ static void schema_cleanup(xmlNodePtr schema)
 	}
 }
 
-static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlAttrPtr location, xmlAttrPtr tns, int import) {
+static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
 	if (location != NULL &&
-	    !zend_hash_exists(&sdl->docs, location->children->content, strlen(location->children->content)+1)) {
+	    !zend_hash_exists(&sdl->docs, location, strlen(location)+1)) {
 		xmlDocPtr doc;
 		xmlNodePtr schema;
 		xmlAttrPtr new_tns;
 
-		doc = xmlParseFile(location->children->content);
+		doc = xmlParseFile(location);
 		xmlCleanupParser();
 		if (doc == NULL) {
-			php_error(E_ERROR, "Error parsing schema (can't import schema from '%s')",location->children->content);
+			php_error(E_ERROR, "Error parsing schema (can't import schema from '%s')",location);
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
 			xmlFreeDoc(doc);
-			php_error(E_ERROR, "Error parsing schema (can't import schema from '%s')",location->children->content);
+			php_error(E_ERROR, "Error parsing schema (can't import schema from '%s')",location);
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
 			if (ns != NULL && (new_tns == NULL || strcmp(ns->children->content,new_tns->children->content) != 0)) {
 				xmlFreeDoc(doc);
-				php_error(E_ERROR, "Error parsing schema (can't import schema from '%s', unexpected 'targetNamespace'='%s')",location->children->content,new_tns->children->content);
+				php_error(E_ERROR, "Error parsing schema (can't import schema from '%s', unexpected 'targetNamespace'='%s')",location,new_tns->children->content);
 			}
 			if (ns == NULL && new_tns != NULL) {
 				xmlFreeDoc(doc);
-				php_error(E_ERROR, "Error parsing schema (can't import schema from '%s', unexpected 'targetNamespace'='%s')",location->children->content,new_tns->children->content);
+				php_error(E_ERROR, "Error parsing schema (can't import schema from '%s', unexpected 'targetNamespace'='%s')",location,new_tns->children->content);
 			}
 		} else {
 			new_tns = get_attribute(schema->properties, "targetNamespace");
@@ -171,10 +172,10 @@ static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlAttrPtr location, xml
 				}
 			} else if (tns != NULL && strcmp(tns->children->content,new_tns->children->content) != 0) {
 				xmlFreeDoc(doc);
-				php_error(E_ERROR, "Error parsing schema (can't include schema from '%s', different 'targetNamespace')",location->children->content);
+				php_error(E_ERROR, "Error parsing schema (can't include schema from '%s', different 'targetNamespace')",location);
 			}
 		}
-		zend_hash_add(&sdl->docs, location->children->content, strlen(location->children->content)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
+		zend_hash_add(&sdl->docs, location, strlen(location)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
 		load_schema(sdl, schema);
 	}
 }
@@ -225,7 +226,17 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 			if (location == NULL) {
 				php_error(E_ERROR, "Error parsing schema (include has no 'schemaLocation' attribute)");
 			} else {
-				schema_load_file(sdl,NULL,location,tns,0);
+			  xmlChar *uri;
+				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
+
+				if (base == NULL) {
+			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
+				} else {
+	    		uri = xmlBuildURI(location->children->content, base);
+			    xmlFree(base);
+				}
+				schema_load_file(sdl,NULL,uri,tns,0);
+		    xmlFree(uri);
 			}
 
 		} else if (node_is_equal(trav,"redefine")) {
@@ -235,12 +246,23 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 			if (location == NULL) {
 				php_error(E_ERROR, "Error parsing schema (redefine has no 'schemaLocation' attribute)");
 			} else {
-				schema_load_file(sdl,NULL,location,tns,0);
+			  xmlChar *uri;
+				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
+
+				if (base == NULL) {
+			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
+				} else {
+	    		uri = xmlBuildURI(location->children->content, base);
+			    xmlFree(base);
+				}
+				schema_load_file(sdl,NULL,uri,tns,0);
+		    xmlFree(uri);
 				/* TODO: <redefine> support */
 			}
 
 		} else if (node_is_equal(trav,"import")) {
 			xmlAttrPtr ns, location;
+		  xmlChar *uri = NULL;
 
 			ns = get_attribute(trav->properties, "namespace");
 			location = get_attribute(trav->properties, "schemaLocation");
@@ -248,7 +270,18 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 			if (ns != NULL && tns != NULL && strcmp(ns->children->content,tns->children->content) == 0) {
 				php_error(E_ERROR, "Error parsing schema (can't import schema from '%s', namespace must not match the enclosing schema 'targetNamespace')",location->children->content);
 			}
-			schema_load_file(sdl,ns,location,tns,1);
+			if (location) {
+				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
+
+				if (base == NULL) {
+			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
+				} else {
+	    		uri = xmlBuildURI(location->children->content, base);
+			    xmlFree(base);
+				}
+			} 
+			schema_load_file(sdl,ns,uri,tns,1);
+		  if (uri != NULL) {xmlFree(uri);}
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */
 /* annotation cleanup
