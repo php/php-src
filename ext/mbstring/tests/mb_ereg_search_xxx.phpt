@@ -3,7 +3,7 @@ mb_ereg_search() stuff
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
-function_exists('mb_ereg_search') or die("SKIP");
+function_exists('mb_ereg_search') or die("skip\n");
 ?>
 --INI--
 output_handler=

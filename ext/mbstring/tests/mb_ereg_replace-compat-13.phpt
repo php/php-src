@@ -3,7 +3,7 @@ mb_ereg_replace() compat test 13
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
-function_exists('mb_ereg_replace') or die("SKIP mb_ereg_replace() is not availab
+function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 le in this build");
 ?>
 --FILE--
