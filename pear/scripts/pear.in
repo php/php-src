@@ -19,6 +19,12 @@
 // +----------------------------------------------------------------------+
 //
 
+ini_set('allow_url_fopen', true);
+set_time_limit(0);
+ob_implicit_flush(true);
+ini_set('track_errors', true);
+ini_set('html_errors', false);
+
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
 require_once 'PEAR/Command.php';
@@ -171,44 +177,6 @@ function cmdHelp($command)
         return "Usage : $progname $command {$help[0]}\n{$help[1]}";
     }
     return "No such command";
-}
-
-// }}}
-// {{{ present_array()
-
-function present_array(&$arr, $keys = null)
-{
-    if ($keys === null) {
-        $keys = array_keys($arr);
-    }
-    $longest_key = max(array_map("strlen", array_keys($arr))) + 2;
-    $format_string = "%{$longest_key}s : %s\n";
-    foreach ($keys as $k) {
-        if (is_array($arr[$k])) {
-            foreach ($arr[$k] as $i => $value) {
-                $x = "$k #$i";
-                $cont = array();
-                foreach(array_keys($value) as $val) {
-                    $cont[] = "$val=" . $value[$val];
-                }
-                $v = implode(", ", $cont);
-                printf($format_string, $x, $v);
-            }
-            continue;
-        } else {
-            $v = $arr[$k];
-            printf($format_string, $k, $v);
-        }
-    }
-}
-
-// }}}
-// {{{ heading()
-
-function heading($text)
-{
-    $l = strlen(trim($text));
-    print rtrim($text) . "\n" . str_repeat("=", $l) . "\n";
 }
 
 // }}}
