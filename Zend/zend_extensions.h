@@ -44,8 +44,8 @@ struct _zend_extension {
 
 	int (*startup)(zend_extension *extension);
 	void (*shutdown)(zend_extension *extension);
-	void (*activate)(void);
-	void (*deactivate)(void);
+	void (*activate)();
+	void (*deactivate)();
 
 	void (*op_array_handler)(zend_op_array *op_array);
 	
