@@ -121,7 +121,7 @@ extern int ap_php_optind;
 
 #if ENABLE_PATHINFO_CHECK
 /* true global.  this is retreived once only, even for fastcgi */
-int fix_pathinfo=1;
+long fix_pathinfo=1;
 #endif
 
 #ifdef PHP_WIN32
