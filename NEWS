@@ -20,6 +20,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #31101 (missing kerberos header file path with --with-openssl). (Jani)
 - Fixed bug #31072 (var_export() does not output an array element with an empty
   string key). (Derick)
+- Fixed bug #31060 (imageftbbox() does not use linespacing parameter). (Jani)
 - Fixed bug #31056 (php_std_date() returns invalid formatted date if 
   y2k_compliance is On). (Ilia)
 - Fixed bug #31055 (apache2filter: per request leak proportional to the full
