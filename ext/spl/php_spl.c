@@ -99,6 +99,58 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 }
 /* }}} */
 
+PHP_FUNCTION(spl_abstract) {}
+
+#define SPL_ABSTRACT_FE(class, name, arg_info) \
+	{ #name, ZEND_FN(spl_abstract), arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, ZEND_ACC_ABSTRACT|ZEND_ACC_PUBLIC },
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_one_param, 0)
+	ZEND_ARG_PASS_INFO(0)
+ZEND_END_ARG_INFO();
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_two_params, 0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(0)
+ZEND_END_ARG_INFO();
+
+function_entry spl_funcs_iterator[] = {
+	SPL_ABSTRACT_FE(iterator, new_iterator, NULL)
+	{NULL, NULL, NULL}
+};
+
+function_entry spl_funcs_forward[] = {
+	SPL_ABSTRACT_FE(forward, current,  NULL)
+	SPL_ABSTRACT_FE(forward, next,     NULL)
+	SPL_ABSTRACT_FE(forward, has_more, NULL)
+	{NULL, NULL, NULL}
+};
+
+function_entry spl_funcs_sequence[] = {
+	SPL_ABSTRACT_FE(sequence, rewind,  NULL)
+	{NULL, NULL, NULL}
+};
+
+function_entry spl_funcs_assoc[] = {
+	SPL_ABSTRACT_FE(assoc, key,  NULL)
+	{NULL, NULL, NULL}
+};
+
+function_entry *spl_funcs_forward_assoc  = NULL;
+function_entry *spl_funcs_sequence_assoc = NULL;
+
+function_entry spl_funcs_array_read[] = {
+	SPL_ABSTRACT_FE(array_read, get,     arginfo_one_param)
+	SPL_ABSTRACT_FE(array_read, exists,  arginfo_one_param)
+	{NULL, NULL, NULL}
+};
+
+function_entry spl_funcs_array_access[] = {
+	SPL_ABSTRACT_FE(array_access, set,  arginfo_two_params)
+	{NULL, NULL, NULL}
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl)
  */
 PHP_MINIT_FUNCTION(spl)
@@ -106,19 +158,13 @@ PHP_MINIT_FUNCTION(spl)
 	ZEND_INIT_MODULE_GLOBALS(spl, spl_init_globals, NULL);
 
 	REGISTER_SPL_INTERFACE(iterator);
-	REGISTER_SPL_INTF_FUNC(iterator, new_iterator);
 
 	REGISTER_SPL_INTERFACE(forward);
-	REGISTER_SPL_INTF_FUNC(forward, current);
-	REGISTER_SPL_INTF_FUNC(forward, next);
-	REGISTER_SPL_INTF_FUNC(forward, has_more);
 
 	REGISTER_SPL_INTERFACE(sequence);
-	REGISTER_SPL_INTF_FUNC(sequence, rewind);
 	REGISTER_SPL_IMPLEMENT(sequence, forward);
 
 	REGISTER_SPL_INTERFACE(assoc);
-	REGISTER_SPL_INTF_FUNC(assoc, key);
 
 	REGISTER_SPL_INTERFACE(forward_assoc);
 	REGISTER_SPL_IMPLEMENT(forward_assoc, assoc);
@@ -129,12 +175,9 @@ PHP_MINIT_FUNCTION(spl)
 	REGISTER_SPL_IMPLEMENT(sequence_assoc, sequence);
 
 	REGISTER_SPL_INTERFACE(array_read);
-	REGISTER_SPL_INTF_FUNC(array_read, get);
-	REGISTER_SPL_INTF_FUNC(array_read, exists);
 
 	REGISTER_SPL_INTERFACE(array_access);
 	REGISTER_SPL_IMPLEMENT(array_access, array_read);
-	REGISTER_SPL_INTF_FUNC(array_access, set);
 
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);

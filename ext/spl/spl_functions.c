@@ -35,11 +35,11 @@ void spl_destroy_class(zend_class_entry ** ppce)
 /* }}} */
 
 /* {{{ spl_register_interface */
-void spl_register_interface(zend_class_entry ** ppce, char * class_name TSRMLS_DC)
+void spl_register_interface(zend_class_entry ** ppce, char * class_name, zend_function_entry *functions TSRMLS_DC)
 {
 	zend_class_entry ce;
 	
-	INIT_CLASS_ENTRY(ce, class_name, NULL);
+	INIT_CLASS_ENTRY(ce, class_name, functions);
 	ce.name_length = strlen(class_name);
 	*ppce = zend_register_internal_class(&ce TSRMLS_CC);
 
@@ -59,23 +59,6 @@ void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * 
 
 	/* entries changed by initialize */
 	(*ppce)->create_object = obj_ctor;
-}
-/* }}} */
-
-/* {{{ spl_register_interface_function */
-void spl_register_interface_function(zend_class_entry * class_entry, char * fn_name TSRMLS_DC)
-{
-	zend_function function, *reg_function;
-	zend_internal_function *pfunction = (zend_internal_function *)&function;
-
-	pfunction->type = ZEND_INTERNAL_FUNCTION;
-	pfunction->handler = NULL;
-	pfunction->arg_types = NULL;
-	pfunction->function_name = fn_name;
-	pfunction->scope = class_entry;
-	pfunction->fn_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_PUBLIC;
-	pfunction->prototype = NULL;
-	zend_hash_add(&class_entry->function_table, fn_name, strlen(fn_name)+1, &function, sizeof(zend_function), (void**)&reg_function);
 }
 /* }}} */
 
