@@ -1,3 +1,96 @@
+2001-04-19  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB.php:
+    fix small bug on error reporting (PEAR::raiseError params order)
+
+2001-04-19  Frank M. Kromann  <frank@frontbase.com>
+
+    * pear/DB/MAINTAINERS
+      pear/DB/fbsql.php: Adding FrontBase support to pear/DB
+
+2001-04-19  Jason Greene  <jason@inetgurus.net>
+
+    * ext/oci8/oci8.c: Change all // to /* */, fixed small whitespace.
+    Builds on Solaris now.
+
+2001-04-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/common.php:
+    * fixed DB_common::getXxx when using the parameter array (didn't work before)
+
+2001-04-19  Andi Gutmans  <andi@zend.com>
+
+    * ext/odbc/php_odbc.c:
+    - Use memcpy() instead of strlcpy() which is faster.
+
+2001-04-19  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    appling patch for joey since he has no ODBC karma.  this is for bug #10252
+
+2001-04-19  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/sablot/sablot.c: fix crash bug 10400.
+
+2001-04-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/gd/config.m4:
+    Patch from Adam Dickmeiss to make configure detect libtff again.
+
+2001-04-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php.in: * cotcha, Tomas
+
+2001-04-19  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/db.php
+      pear/Cache/Container/dbx.php
+      pear/Cache/Container/file.php
+      pear/Cache/Container/phplib.php
+      pear/Cache.php: - fixed the garbage collection
+      Added some kind of LRU to delete all entries older than n seconds.
+      This fixes the bug that cache entries with lifetime 0 (endless) never
+      got removed although if they are no longer used. What's still missing
+      is some space limit for cache data.
+
+2001-04-19  Andi Gutmans  <andi@zend.com>
+
+    * ext/odbc/php_odbc.c: - \r\n -> \n
+
+    * ext/iconv/iconv.c: - WS
+
+2001-04-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_error.phpt: * forgot to update this test too
+
+    * pear/DB/tests/db_error.phpt: * forgot to update this test
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php
+      pear/DB/sybase.php
+      pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/tests/db_parsedsn.phpt
+      pear/tests/pear_error.phpt:
+    * DB_common now inherits PEAR and its error handling stuff
+    * DB_common::raiseError is now just a wrapper for PEAR::raiseError
+    * fixed some cast warnings in prepare/execute
+    * updated tests
+
+    * pear/PEAR.php.in: * check that error callbacks exist
+
+    * pear/DB.php: * added Colin's connect/factory error reporting fix
+
+2001-04-19  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    corrects bug #7488, patch supplied by submitter (torben@php.net).
+    quick local tests show it to work.
+
 2001-04-18  Stig Bakken  <ssb@fast.no>
 
     * pear/DB.php: * fix handling of broken DSNs like Colin suggested
