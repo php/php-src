@@ -51,6 +51,7 @@ sys/types.h \
 sys/time.h \
 signal.h \
 unix.h \
+stdlib.h \
 dlfcn.h)
 
 AC_TYPE_SIZE_T
