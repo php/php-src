@@ -2384,23 +2384,6 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX(fbc) = zend_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 	EX(calling_scope) = EX(fbc)->common.scope;
 
-#if 0
-	if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PUBLIC) {
-		/* No further checks necessary, most common case */
-	} else if (EX(fbc)->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-		/* Ensure that if we're calling a private function, we're allowed to do so.
-		 */
-		if (!zend_check_private(execute_data, EG(scope), EX(fbc)->common.fn_flags, function_name_strval, function_name_strlen TSRMLS_CC)) {
-			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
-		}
-	} else if ((EX(fbc)->common.fn_flags & ZEND_ACC_PROTECTED)) {
-		/* Ensure that if we're calling a protected function, we're allowed to do so.
-		 */
-		if (!zend_check_protected(EG(scope), EX(fbc)->common.scope)) {
-			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(EX(fbc)->common.fn_flags), ZEND_FN_SCOPE_NAME(EX(fbc)), function_name_strval, EG(scope) ? EG(scope)->name : "");
-		}
-	}
-#endif
 	if (!is_const) {
 		zval_dtor(&tmp);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
