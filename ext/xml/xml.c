@@ -1133,11 +1133,9 @@ PHP_FUNCTION(xml_set_object)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *,pind, -1, "XML Parser", le_xml_parser);
 
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
-#ifdef ZEND_ENGINE_2
 	if (parser->object) {
 		zval_ptr_dtor(&parser->object);
 	}
-#endif
 	
 	parser->object = *mythis;
 
