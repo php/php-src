@@ -89,9 +89,16 @@ extern int le_fp;
 		efree(key);				\
 	}
 
-#define SEARCHCR() do {											\
-	for (p = READPTR(sock), pe = p + MIN(TOREAD(sock), maxlen); \
-			*p != '\n'; ) if (++p >= pe) { p = NULL; break; }	\
+#define SEARCHCR() do {												\
+	if (TOREAD(sock)) {												\
+		for (p = READPTR(sock), pe = p + MIN(TOREAD(sock), maxlen);	\
+				*p != '\n'; ) 										\
+			if (++p >= pe) { 										\
+				p = NULL; 											\
+				break; 												\
+			}														\
+	} else															\
+		p = NULL;													\
 } while (0)
 
 #ifdef PHP_WIN32
