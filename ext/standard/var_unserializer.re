@@ -356,7 +356,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	}
 
 	if (zend_hash_find(CG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
-		if (PG(unserialize_callback_func) == NULL) {
+		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 		} else {
