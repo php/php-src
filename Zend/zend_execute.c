@@ -3972,7 +3972,7 @@ static int zend_isset_isempty_dim_prop_obj_handler(int prop_dim, ZEND_OPCODE_HAN
 				case IS_BOOL: 
 				case IS_LONG:
 					if (offset->type == IS_DOUBLE) {
-						index = (long) offset->value.lval;
+						index = (long) offset->value.dval;
 					} else {
 						index = offset->value.lval;
 					}
