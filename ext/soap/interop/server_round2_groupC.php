@@ -25,14 +25,15 @@ class SOAP_Interop_GroupC {
     function echoMeStringRequest($string)
     {
 //        return $string;
-        return new SoapVar($string, XSD_STRING, "string", XSD_NAMESPACE, "echoMeStringResponse", $this->method_namespace);
+//        return new SoapVar($string, XSD_STRING, "string", XSD_NAMESPACE, "echoMeStringResponse", $this->method_namespace);
+        return new SoapHeader($this->method_namespace, "echoMeStringResponse", $string);
     }
 
     function echoMeStructRequest($struct)
     {
 //        return $struct;
-        return new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPStruct", "http://soapinterop.org/", "echoMeStructResponse",$this->method_namespace);
-//        new SOAP_Value('{'.$this->method_namespace.'}echoMeStructResponse','SOAPStruct',$struct);
+//        return new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPStruct", "http://soapinterop.org/", "echoMeStructResponse",$this->method_namespace);
+        return new SoapHeader($this->method_namespace, "echoMeStructResponse", $struct);
     }
 
     function echoVoid()

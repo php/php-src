@@ -31,6 +31,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	int param_count = 0;
 	int old_error_reporting;
 	int soap_version;
+	HashTable *hdrs = NULL;
 
 	ZVAL_NULL(return_value);
 
@@ -177,17 +178,6 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		}
 	}
 
-	if (soap_headers && head) {
-		trav = head->children;
-		while (trav != NULL) {
-			if (trav->type == XML_ELEMENT_NODE) {
-				zval *val = master_to_zval(NULL, trav);
-				add_assoc_zval(soap_headers, (char*)trav->name, val);
-			}
-			trav = trav->next;
-		}
-	}
-
 	/* Check if <Body> contains <Fault> element */
 	fault = get_node_ex(body->children,"Fault",envelope_ns);
 	if (fault != NULL) {
@@ -258,6 +248,8 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			zval* tmp;
 			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
 			int res_count = zend_hash_num_elements(fn->responseParameters);
+
+			hdrs = fnb->output.headers;
 
 			zend_hash_internal_pointer_reset(fn->responseParameters);
 			while (zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS) {
@@ -349,6 +341,35 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			zval_dtor(return_value);
 			*return_value = *tmp;
 			FREE_ZVAL(tmp);
+		}
+	}
+
+	if (soap_headers && head) {
+		trav = head->children;
+		while (trav != NULL) {
+			if (trav->type == XML_ELEMENT_NODE) {
+				encodePtr enc = NULL;
+				zval* val;
+
+				if (hdrs) {
+					smart_str key = {0};
+					sdlSoapBindingFunctionHeaderPtr *hdr;
+
+					if (trav->ns) {
+						smart_str_appends(&key,trav->ns->href);
+						smart_str_appendc(&key,':');
+					}
+					smart_str_appends(&key,trav->name);
+					smart_str_0(&key);
+					if (zend_hash_find(hdrs, key.c, key.len+1, (void**)&hdr) == SUCCESS) {
+						enc = (*hdr)->encode;
+					}
+					smart_str_free(&key);
+				}
+				val = master_to_zval(enc, trav);
+				add_assoc_zval(soap_headers, (char*)trav->name, val);
+			}
+			trav = trav->next;
 		}
 	}
 

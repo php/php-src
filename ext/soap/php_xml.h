@@ -48,26 +48,28 @@ void *php_stream_xmlIO_open_wrapper(const char *filename);
 int php_stream_xmlIO_read(void *context, char *buffer, int len);
 int php_stream_xmlIO_close(void *context);
 
-#define FOREACHATTRNODE(n,c,i) \
+#define FOREACHATTRNODE(n,c,i)      FOREACHATTRNODEEX(n,c,NULL,i)
+#define FOREACHATTRNODEEX(n,c,ns,i) \
 	do { \
 		if (n == NULL) { \
 			break; \
 		} \
 		if (c) { \
-			i = get_attribute(n,c); \
+			i = get_attribute_ex(n,c,ns); \
 		} else { \
 			i = n; \
 		} \
 		if (i != NULL) { \
 			n = i;
 
-#define FOREACHNODE(n,c,i) \
+#define FOREACHNODE(n,c,i)      FOREACHNODEEX(n,c,NULL,i)
+#define FOREACHNODEEX(n,c,ns,i) \
 	do { \
 		if (n == NULL) { \
 			break; \
 		} \
 		if (c) { \
-			i = get_node(n,c); \
+			i = get_node_ex(n,c,NULL); \
 		} else { \
 			i = n; \
 		} \

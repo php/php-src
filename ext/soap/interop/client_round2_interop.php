@@ -409,7 +409,7 @@ class Interop_Client
         // XXX no way to set encoding
         // this lets us set UTF-8, US-ASCII or other
         //$soap->setEncoding($soap_test->encoding);
-        if ($this->useWSDL) {
+        if ($this->useWSDL && !$soap_test->headers && !$soap_test->headers_expect) {
             $args = '';
             foreach ($soap_test->method_params as $pname => $param) {
                 $arg = '$soap_test->method_params["'.$pname.'"]';
