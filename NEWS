@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- Moved extensions to PECL:
+  . ext/db (Jani)
 - Added possibility to call PHP functions as XSLT-functions. (Christian)
 - Added possibility to prevent PHP from registering variables when
   input filter support is used. (Derick)
