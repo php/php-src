@@ -85,6 +85,14 @@ typedef struct {
 	char *cookies;
 } servlet_request;
 
+extern zend_module_entry java_module_entry;
+
+static zend_module_entry *additional_php_extensions[] = {
+  &java_module_entry
+};
+
+#define EXTCOUNT (sizeof(additional_php_extensions)/sizeof(zend_module_entry *))
+
 /***************************************************************************/
 
 /*
@@ -252,15 +260,20 @@ JNIEXPORT void JNICALL Java_net_php_servlet_startup
 		ThrowServletException(jenv,"module startup failure");
 		return;
 	}
+
+	if (php_startup_extensions(additional_php_extensions, EXTCOUNT)==FAILURE) {
+		ThrowServletException(jenv,"extension startup failure");
+		return;
+	}
+
 }
 
 
 JNIEXPORT void JNICALL Java_net_php_servlet_shutdown
 	(JNIEnv *jenv, jobject self)
 {
-	SLS_FETCH();
-
 	php_module_shutdown();
+	php_global_shutdown_extensions(additional_php_extensions, EXTCOUNT);
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
@@ -304,7 +317,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 
 	zend_file_handle file_handle;
 	char cwd[MAXPATHLEN+1];
-	jlong addr = 0;
 	SLS_FETCH();
 	PLS_FETCH();
 	CLS_FETCH();
