@@ -396,7 +396,7 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 		
 	zobj = Z_OBJ_P(object);
 	if (zend_hash_find(&zobj->ce->function_table, lc_method_name, method_len+1, (void **)&func_method) == FAILURE) {
-		if (zobj->ce->__call != NULL) {
+		if (zobj->ce->__call) {
 			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 			call_user_call->type = ZEND_INTERNAL_FUNCTION;
 			call_user_call->handler = zend_std_call_user_call;
@@ -407,8 +407,9 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 
 			free_alloca(lc_method_name);
 			return (union _zend_function *)call_user_call;
+		} else {
+			return NULL;
 		}
-		zend_error(E_ERROR, "Call to undefined function %s()", method_name);
 	}
 
 	free_alloca(lc_method_name);
