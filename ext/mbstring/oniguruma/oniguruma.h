@@ -8,7 +8,7 @@
 #ifndef ONIGURUMA_H
 #define ONIGURUMA_H
 
-#include "php_compat.h"
+#include "php_onig_compat.h"
 
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   2
