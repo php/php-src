@@ -24,21 +24,11 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>0.7</version>
-  <date>2003-05-07</date>
+  <state>stable</state>
+  <version>1.0</version>
+  <date>2003-11-13</date>
   <notes>
-    The tidy extension now works in PHP4 for most tasks, only the parsing
-    abilities of the extension are not available (ZE2 only). The OO portions
-    of the extension have been completely re-written and are now stable and
-    work quite well. 
-
-    The way all tidy functions work has also changed slightly. Instead of
-    calling tidy_create() to create a tidy resource, the tidy resource is
-    stored internally and used as needed. Thus, all tidy functions no longer
-    need the initial $tidy parameter to function. If you'd like to reset
-    tidy to an initial state, you can still call tidy_create(). This change
-    was done to make tidy faster per-request. 
+    Fixed a few PHP5-specific bugs when working with node objects. 
   </notes>
   <configureoptions>
     <configureoption name="with-tidy" default="autodetect" prompt="Tidy library installation dir?"/>
@@ -65,7 +55,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
    <file role="test" name="tests/007.phpt"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge">5.0.0</dep>
+   <dep type="php" rel="ge">4.3.0</dep>
   </deps>
  </release>
 </package>
