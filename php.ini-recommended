@@ -808,9 +808,32 @@ ifx.nullformat = 0
 session.save_handler = files
 
 ; Argument passed to save_handler.  In the case of files, this is the path
-; where data files are stored. Note: Windows users have to change this 
+; where data files are stored. Note: Windows users have to change this
 ; variable in order to use PHP's session functions.
-session.save_path = /tmp
+;
+; As of PHP 4.0.1, you can define the path as:
+;
+;     session.save_path = "N;/path"
+;
+; where N is an integer.  Instead of storing all the session files in
+; /path, what this will do is use subdirectories N-levels deep, and
+; store the session data in those directories.  This is useful if you
+; or your OS have problems with lots of files in one directory, and is
+; a more efficient layout for servers that handle lots of sessions.
+;
+; NOTE 1: PHP will not create this directory structure automatically.
+;         You can use the script in the ext/session dir for that purpose.
+; NOTE 2: See the section on garbage collection below if you choose to
+;         use subdirectories for session storage
+;
+; The file storage module creates files using mode 600 by default.
+; You can change that by using
+;
+;     session.save_path = "N;MODE;/path"
+;
+; where MODE is the octal representation of the mode. Note that this
+; does not overwrite the process's umask.
+session.save_path = "/tmp"
 
 ; Whether to use cookies.
 session.use_cookies = 1
