@@ -117,10 +117,8 @@ PHP_FUNCTION(ftp_connect)
 
 	/* connect */
 	ftp = ftp_open(arg1->value.str.val, 0);
-	if (ftp == NULL) {
-		php_error(E_WARNING, "ftp_connect: %s", ftp->inbuf);
+	if (ftp == NULL)
 		RETURN_FALSE;
-	}
 
 	id = php3_list_insert(ftp, le_ftpbuf);
 	RETURN_LONG(id);
