@@ -647,6 +647,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				if (container->value.str.val == undefined_variable_string) {
 					/* for read-mode only */
 					*retval = &EG(uninitialized_zval_ptr);
+					SELECTIVE_PZVAL_LOCK(**retval, result);
 					FREE_OP(op2, free_op2);
 				} else {
 					zval tmp;
