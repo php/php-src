@@ -64,7 +64,6 @@ static void *javadl = 0;
 
 static int le_jobject = 0;
 
-static char *javalib   = 0;
 static char *classpath = 0;
 static char *libpath   = 0;
 static char *javahome  = 0;
@@ -88,8 +87,6 @@ PHP_INI_BEGIN()
     NULL, PHP_INI_ALL, OnIniUpdate, &classpath)
   PHP_INI_ENTRY1("java.home",
     NULL, PHP_INI_ALL, OnIniUpdate, &javahome)
-  PHP_INI_ENTRY1("java.library",
-    NULL, PHP_INI_ALL, OnIniUpdate, &javalib)
   PHP_INI_ENTRY1("java.library.path",
     NULL, PHP_INI_ALL, OnIniUpdate, &libpath)
 PHP_INI_END()
@@ -150,13 +147,6 @@ static int jvm_create() {
 
 #ifndef PHP_WIN32
   if (!libpath)   libpath   = getenv("LD_LIBRARY_PATH");
-  if (javalib) {
-    javadl = dlopen(javalib, RTLD_GLOBAL | RTLD_LAZY);
-    if (!javadl) {
-      php_error(E_ERROR, "Unable to create Java Virtual Machine");
-      return -1;
-    }
-  }
 #endif
 
 #ifdef JNI_12

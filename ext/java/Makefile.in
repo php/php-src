@@ -1,12 +1,15 @@
 
-DEPTH     = ../..
+DEPTH	  = ../..
 topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
+srcdir	  = @srcdir@
+VPATH	  = @srcdir@
 
 LTLIBRARY_SHARED_NAME  = libphp_java.la
-LTLIBRARY_SOURCES = java.c
+LTLIBRARY_SOURCES      = java.c
 LTLIBRARY_DEPENDENCIES = php_java.jar
+
+LTLIBRARY_LDFLAGS	= $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS)
+LTLIBRARY_SHARED_LIBADD = $(LTLIBRARY_DEPENDENCIES) $(EXTRA_LIBS)
 
 EXTRA_CFLAGS   = $(JAVA_CFLAGS)
 EXTRA_INCLUDES = $(JAVA_INCLUDE)
