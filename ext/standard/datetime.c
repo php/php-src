@@ -601,6 +601,9 @@ PHP_FUNCTION(checkdate)
 		zend_get_parameters_ex(3, &month, &day, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	if((*year)->type != IS_LONG) {
+		RETURN_FALSE;	
+	}
 	convert_to_long_ex(day);
 	convert_to_long_ex(month);
 	convert_to_long_ex(year);
