@@ -1,3 +1,94 @@
+1999-11-09  Frank M. Kromann  <fmk@swwwing.com>
+
+    * php.ini-dist: Adding default mssql ini-setings
+
+1999-11-09  Stig Bakken  <ssb@fast.no>
+
+    * config.w32.h:
+1999-11-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/config.m4
+      ext/oci8/config.m4: IRIX ld likes this order better
+
+1999-11-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk: Move only, if the file exists.
+
+    * build.mk:
+    automake overwrites libtool's files, if
+
+    - --add-missing was used
+    - *_LTLIBRARIES targets are used
+
+    Thus, we preserve our customized files while automake runs
+
+    * config.guess
+      config.sub: Add libtool helper files
+
+1999-11-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4dll.dsp: add mergesort into build
+
+1999-11-09  Stig Bakken  <ssb@fast.no>
+
+    * configure.in
+      php_version.h: 4.0b3-RC4
+
+    * makedist:
+    Preserve the CVS versions of ltconfig/ltmain.sh during makedist.
+
+1999-11-09  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/snmp/config.m4: Better lib detection for ucd-snmp
+
+1999-11-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * php4dll.dsp: location of output.c moved.
+
+1999-11-09  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/snmp/config.m4: Find ucd-snmp include files more intelligently
+
+1999-11-09  Stig Bakken  <ssb@fast.no>
+
+    * ext/odbc/config.h.stub
+      ext/odbc/config.m4
+      ext/odbc/php3_velocis.h
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h
+      ext/odbc/velocis.c:
+    Clean up ODBC HAVE_XXX symbols, compile fixes for OpenLink and Solid.
+
+1999-11-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c
+      php.ini-dist: - set default path for cookie to the root directory ("/")
+    - complete session documentation in php.ini-dist
+
+1999-11-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * MAINTAINERS: add java
+
+1999-11-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner.re:
+    Include proper header files (replacement functions were not used).
+
+1999-11-09  Stig Bakken  <ssb@fast.no>
+
+    * ext/odbc/config.m4: Fix OpenLink ODBC support
+
+    * configure.in
+      php_version.h: Bump version to 4.0b3-RC3.
+
+    * makedist: Makedist can now be run from outside the CVS tree.
+
+    * ext/standard/basic_functions.c:
+1999-11-09  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-08  Jakub Skopal  <j@kubs.cz>
 
     * ext/sybase_ct/php_sybase_ct.c:
