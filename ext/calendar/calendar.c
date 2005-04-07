@@ -247,8 +247,8 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_start = calendar->to_jd(year, month, 1);
 
 	if (sdn_start == 0) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid date.");
-        RETURN_FALSE;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid date.");
+		RETURN_FALSE;
 	}
 
 	sdn_next = calendar->to_jd(year, 1 + month, 1);
