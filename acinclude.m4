@@ -2205,8 +2205,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   unset ICONV_DIR
 
   # Create the directories for a VPATH build:
-  test -d ext || mkdir ext
-  test -d ext/iconv || mkdir ext/iconv
+  $php_shtool mkdir -p ext/iconv
 
   echo > ext/iconv/php_have_bsd_iconv.h
   echo > ext/iconv/php_have_glibc_iconv.h
@@ -2221,11 +2220,11 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   dnl
   if test "$PHP_ICONV" = "yes"; then
     AC_CHECK_FUNC(iconv, [
-      PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
       found_iconv=yes
     ],[
       AC_CHECK_FUNC(libiconv,[
         PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
+        AC_DEFINE(HAVE_LIBICONV, 1, [ ])
         found_iconv=yes
       ])
     ])
@@ -2259,10 +2258,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
         PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
+        AC_DEFINE(HAVE_LIBICONV,1,[ ])
       ], [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
           found_iconv=yes
-          PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
         ], [], [
           -L$ICONV_DIR/$PHP_LIBDIR
         ])
@@ -2273,8 +2272,9 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   fi
 
   if test "$found_iconv" = "yes"; then
+    PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
+    AC_DEFINE(HAVE_ICONV,1,[ ])
     if test -n "$ICONV_DIR"; then
-      AC_DEFINE(HAVE_ICONV, 1, [ ])
       PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/$PHP_LIBDIR, $1)
       PHP_ADD_INCLUDE($ICONV_DIR/include)
     fi
