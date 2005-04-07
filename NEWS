@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #32560 (configure looks for incorrect db2 library). (Tony)
 - Fixed bug #32553 (mmap loads only the 1st 2000000 bytes on Win32). (Ilia)
+- Fixed bug #32533 (proc_get_status() returns the incorrect process status). (Ilia)
 - Fixed bug #32530 (chunk_split() does not append endstr if chunklen is  
   longer then the original string). (Ilia)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
