@@ -172,8 +172,8 @@ char *_strndup(char *s, uint l);
 #define perealloc_recoverable_rel(ptr, size, persistent)	realloc((ptr), (size))
 #define pestrdup_rel(s, persistent)			strdup(s)
 
-#define safe_estrdup(ptr)  ((ptr)?(strdup(ptr)):(empty_string))
-#define safe_estrndup(ptr, len) ((ptr)?(_strndup((ptr), (len))):(empty_string))
+#define safe_estrdup(ptr)  ((ptr)?(strdup(ptr)):(STR_EMPTY_ALLOC()))
+#define safe_estrndup(ptr, len) ((ptr)?(_strndup((ptr), (len))):(STR_EMPTY_ALLOC()))
 
 #endif
 
