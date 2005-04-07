@@ -66,7 +66,7 @@ phpize_print_api_numbers()
 
 phpize_no_shtool()
 {
-  echo <<EOF
+  cat <<EOF
 shtool at '$builddir/build/shtool' not executable. 
 Make sure that the file exists and is executable and then rerun this script. 
 
@@ -90,16 +90,16 @@ phpize_check_autotools()
   test -z "$PHP_AUTOCONF" && PHP_AUTOCONF=autoconf
   test -z "$PHP_AUTOHEADER" && PHP_AUTOHEADER=autoheader
   
-  if ! test -x "$php_shtool path $PHP_AUTOCONF"; then
-    echo <<EOF
+  if ! test -x "`$php_shtool path $PHP_AUTOCONF`"; then
+    cat <<EOF
 Cannot find autoconf. Please check your autoconf installation and the \$PHP_AUTOCONF 
 environment variable is set correctly and then rerun this script. 
 
 EOF
     exit 1
   fi
-  if ! test -x "$php_shtool path $PHP_AUTOHEADER"; then
-    echo <<EOF
+  if ! test -x "`$php_shtool path $PHP_AUTOHEADER`"; then
+    cat <<EOF
 Cannot find autoheader. Please check your autoconf installation and the \$PHP_AUTOHEADER 
 environment variable is set correctly and then rerun this script. 
 
@@ -114,7 +114,7 @@ phpize_copy_files()
  
   (cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
   (cd "$phpdir" && cp $FILES "$builddir")
-  (cd "$builddir" && cat ./build/libtool.m4 >> acinclude.m4)
+  (cd "$builddir" && cat acinclude.m4 ./build/libtool.m4 > aclocal.m4)
 }
 
 phpize_replace_prefix()
