@@ -16,15 +16,20 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21.2.11 2005-01-20 01:43:18 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.21.2.12 2005-04-07 20:49:00 sniper Exp $
 #
 
 echo "buildconf: checking installation..."
 
 stamp=$1
 
+# Allow the autoconf executable to be overriden by $PHP_AUTOCONF.
+if test -z "$PHP_AUTOCONF"; then
+  PHP_AUTOCONF='autoconf'
+fi
+
 # autoconf 2.13 or newer
-ac_version=`autoconf --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
 echo "           You need autoconf version 2.13 or newer installed"
@@ -42,7 +47,9 @@ echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
 if test "$1" = "2" && test "$2" -ge "50"; then
-  echo "buildconf: running cvsclean."
+  echo "buildconf: Your version of autoconf likely contains buggy cache code."
+  echo "           Running cvsclean for you."
+  echo "           To avoid this, install autoconf-2.13 and automake-1.5."
   ./cvsclean
   stamp=
 fi

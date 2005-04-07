@@ -80,9 +80,33 @@ phpize_check_shtool()
   if test ! -x "$builddir/build/shtool"; then
     phpize_no_shtool
     exit 1
+  else
+    php_shtool=$builddir/build/shtool
   fi
 }
 
+phpize_check_autotools()
+{
+  test -z "$PHP_AUTOCONF" && PHP_AUTOCONF=autoconf
+  test -z "$PHP_AUTOHEADER" && PHP_AUTOHEADER=autoheader
+  
+  if ! test -x "$php_shtool path $PHP_AUTOCONF"; then
+    echo <<EOF
+Cannot find autoconf. Please check your autoconf installation and the \$PHP_AUTOCONF 
+environment variable is set correctly and then rerun this script. 
+
+EOF
+    exit 1
+  fi
+  if ! test -x "$php_shtool path $PHP_AUTOHEADER"; then
+    echo <<EOF
+Cannot find autoheader. Please check your autoconf installation and the \$PHP_AUTOHEADER 
+environment variable is set correctly and then rerun this script. 
+
+EOF
+    exit 1
+  fi
+}
 
 phpize_copy_files()
 {
@@ -102,9 +126,8 @@ phpize_replace_prefix()
 
 phpize_autotools()
 {
-  aclocal    || exit 1
-  autoconf   || exit 1
-  autoheader || exit 1
+  $PHP_AUTOCONF   || exit 1
+  $PHP_AUTOHEADER || exit 1
 }
 
 # Main script
@@ -141,10 +164,11 @@ case "$1" in
 
      touch install-sh mkinstalldirs missing
 
-     phpize_autotools
-
      phpize_check_shtool
 
+     phpize_check_autotools
+
+     phpize_autotools
      ;;
 esac
 
