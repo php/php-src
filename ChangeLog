@@ -1,3 +1,73 @@
+2005-04-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      - Not every OS has ldd..
+
+    * ext/standard/url_scanner_ex.c:
+      Regenerated with re2c 0.9.4
+
+    * NEWS:
+      Keep removed stuff in top..
+
+2005-04-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS:
+      bug fixing news.
+
+    * (PHP_5_0)
+      main/php_streams.h:
+      MFH: Fixed bug #32553 (mmap loads only the 1st 2000000 bytes on Win32).
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      MFH: Removed php_check_syntax() function, it never worked properly. For now
+      use shell_exec("php -l script_name") or similar.
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Removed php_check_syntax() function, it never worked properly. For now
+      use shell_exec("php -l script_name") or similar.
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/file.c
+      main/streams/plain_wrapper.c:
+      MFH: Fixed bug #31363 (broken non-blocking flock()).
+
+    * ext/standard/file.c
+      main/streams/plain_wrapper.c:
+      Fixed bug #31363 (broken non-blocking flock()).
+      
+
+2005-04-06  Christian Stocker  <chregu@bitflux.ch>
+
+    * NEWS
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      - Added optional first parameter to XsltProcessor::registerPHPFunctions to
+      only
+        allow certain functions to be called from XSLT.
+
+2005-04-06  Antony Dovgal  <tony2001@phpclub.net>
+
+    * main/streams/streams.c:
+      do not try to read after EOF
+
+2005-04-06  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c:
+      MFH: fix for #32282 (segfault in mysqli_fetch_array on 64-bit)
+
+    * ext/mysqli/mysqli.c:
+      fix for bug #32282 (segfault in mysqli_fetch_array on 64-bit)
+
 2005-04-05  Antony Dovgal  <tony2001@phpclub.net>
 
     * ext/ldap/ldap.c:
