@@ -51,6 +51,9 @@
 # endif
 # include <netdb.h>
 # include <netinet/in.h>
+# if HAVE_ARPA_INET_H
+#  include <arpa/inet.h>
+# endif
 #endif
 
 #include <mysql.h>
