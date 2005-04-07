@@ -409,16 +409,6 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
-#if !USE_ZEND_ALLOC
-char *_strndup(char *s, uint l)
-{
-	char *tmp = malloc(l+1);
-	tmp[l] = '\0';
-	memcpy(tmp, s, l);
-	return tmp;
-}
-#endif
-
 ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
