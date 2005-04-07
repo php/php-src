@@ -125,17 +125,12 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 #define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
-#define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
-#define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):STR_EMPTY_ALLOC())
-
 #else
 
 #define _GNU_SOURCE
 #include <string.h>
 #undef _GNU_SOURCE
 
-char *_strndup(char *s, uint l);
-																 
 /* Standard wrapper macros */
 #define emalloc(size)					malloc(size)
 #define safe_emalloc(nmemb, size, offset)		malloc((nmemb) * (size) + (offset))
@@ -144,7 +139,7 @@ char *_strndup(char *s, uint l);
 #define erealloc(ptr, size)				realloc((ptr), (size))
 #define erealloc_recoverable(ptr, size)	realloc((ptr), (size))
 #define estrdup(s)						strdup(s)
-#define estrndup(s, length)				_strndup((s), (length))
+#define estrndup(s, length)				zend_strndup((s), (length))
 
 /* Relay wrapper macros */
 #define emalloc_rel(size)					malloc(size)
@@ -154,7 +149,7 @@ char *_strndup(char *s, uint l);
 #define erealloc_rel(ptr, size)				realloc((ptr), (size))
 #define erealloc_recoverable_rel(ptr, size)	realloc((ptr), (size))
 #define estrdup_rel(s)						strdup(s)
-#define estrndup_rel(s, length)				_strndup((s), (length))
+#define estrndup_rel(s, length)				zend_strndup((s), (length))
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent)		malloc(size)
@@ -172,10 +167,10 @@ char *_strndup(char *s, uint l);
 #define perealloc_recoverable_rel(ptr, size, persistent)	realloc((ptr), (size))
 #define pestrdup_rel(s, persistent)			strdup(s)
 
-#define safe_estrdup(ptr)  ((ptr)?(strdup(ptr)):(STR_EMPTY_ALLOC()))
-#define safe_estrndup(ptr, len) ((ptr)?(_strndup((ptr), (len))):(STR_EMPTY_ALLOC()))
+#endif /* !USE_ZEND_ALLOC */
 
-#endif
+#define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
+#define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):STR_EMPTY_ALLOC())
 
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit);
 
