@@ -1595,6 +1595,9 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			if (ret) {
 				if (data->file == NULL) {
 					data->file = fdopen(data->fd, stream->mode);
+					if (data->file == NULL) {
+						return FAILURE;
+					}
 				}
 				*(FILE**)ret = data->file;
 				data->fd = -1;
