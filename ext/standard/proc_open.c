@@ -402,6 +402,7 @@ PHP_FUNCTION(proc_get_status)
 			exitcode = WEXITSTATUS(wstatus);
 		}
 		if (WIFSIGNALED(wstatus)) {
+			running = 0;
 			signaled = 1;
 #ifdef NETWARE
 			termsig = WIFTERMSIG(wstatus);
@@ -413,7 +414,7 @@ PHP_FUNCTION(proc_get_status)
 			stopped = 1;
 			stopsig = WSTOPSIG(wstatus);
 		}
-	} else {
+	} else if (wait_pid == -1) {
 		running = 0;
 	}
 #endif
