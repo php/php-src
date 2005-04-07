@@ -16,15 +16,20 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.30.2.4 2005-01-20 01:41:52 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.30.2.5 2005-04-07 20:43:26 sniper Exp $ 
 #
 
 echo "buildconf: checking installation..."
 
 stamp=$1
 
+# Allow the autoconf executable to be overriden by $PHP_AUTOCONF.
+if test -z "$PHP_AUTOCONF"; then
+  PHP_AUTOCONF='autoconf'
+fi
+
 # autoconf 2.13 or newer
-ac_version=`autoconf --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
 echo "           You need autoconf version 2.13 or newer installed"

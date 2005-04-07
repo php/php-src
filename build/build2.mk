@@ -32,6 +32,9 @@ acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
 
 targets = $(TOUCH_FILES) configure $(config_h_in)
 
+PHP_AUTOCONF ?= 'autoconf'
+PHP_AUTOHEADER ?= 'autoheader'
+
 SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
 
 all: $(targets)
@@ -45,7 +48,7 @@ $(config_h_in): configure acconfig.h
 # correctly otherwise (timestamps are not updated)
 	@echo rebuilding $@
 	@rm -f $@
-	autoheader $(SUPPRESS_WARNINGS)
+	$(PHP_AUTOHEADER) $(SUPPRESS_WARNINGS)
 
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
@@ -56,5 +59,5 @@ aclocal.m4: configure.in acinclude.m4
 
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
-	autoconf $(SUPPRESS_WARNINGS)
+	$(PHP_AUTOCONF) $(SUPPRESS_WARNINGS)
 
