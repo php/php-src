@@ -16,14 +16,14 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.30.2.5 2005-04-07 20:43:26 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.30.2.6 2005-04-07 23:33:37 jon Exp $ 
 #
 
 echo "buildconf: checking installation..."
 
 stamp=$1
 
-# Allow the autoconf executable to be overriden by $PHP_AUTOCONF.
+# Allow the autoconf executable to be overridden by $PHP_AUTOCONF.
 if test -z "$PHP_AUTOCONF"; then
   PHP_AUTOCONF='autoconf'
 fi
