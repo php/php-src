@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 20??, Version 4.?.?
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
   them sort based on the current locale. (Derick)
+- Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
 - Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
   (Ilia)
 - Fixed bug #32567 (ext/gmp fails to compile in threadsafe mode). (Tony)
