@@ -461,6 +461,9 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 					/* we were opened as a plain file descriptor, so we
 					 * need fdopen now */
 					data->file = fdopen(data->fd, stream->mode);
+					if (data->file == NULL) {
+						return FAILURE;
+					}
 				}
 				
 				*(FILE**)ret = data->file;
