@@ -14,7 +14,9 @@
    +----------------------------------------------------------------------+
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
- */
+*/
+
+/* $Id$ */
 
 /* This is the spprintf implementation.
  * It has emerged from apache snprintf. See original header:
@@ -76,6 +78,19 @@
  */
 
 #include "php.h"
+
+#include <stddef.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 #include "snprintf.h"
 
 #define FALSE           0
@@ -89,6 +104,8 @@
 #define FLOAT_DIGITS    6
 #define EXPONENT_LENGTH 10
 
+#include "ext/standard/php_smart_str.h"
+
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
  *
@@ -96,113 +113,48 @@
  */
 #define NUM_BUF_SIZE    512
 
-
 /*
- * Size for realloc operations
- */
-#define SPPRINTF_BLOCK_SIZE 128
-
-/*
- * Descriptor for buffer area
- */
-struct xbuf_area {
-	char    *buf;      /* pointer to buffer */
-	size_t  size;
-	size_t  max_len;
-	char    *buf_end;  /* pointer to buffer end or ~0 */
-	char    *nextb;    /* pointer to next byte to read/write   */
-};
-
-typedef struct xbuf_area xbuffy;
-
-/* Resize xbuf so that add bytes can be added. Reallocation is done
- * in defined block size to minimize calls to realloc.
- */
-static void xbuf_resize(xbuffy *xbuf, size_t add) 
-{
-	char *buf;
-	size_t size, offset;
-
-	if (xbuf->buf) {
-		offset = xbuf->nextb - xbuf->buf;
-		if (offset+add < xbuf->size) {
-			return; /* do not change size if not necessary */
-		}
-	} else {
-		offset = 0;
-	}
-	if (add<SPPRINTF_BLOCK_SIZE) {
-		size = xbuf->size + SPPRINTF_BLOCK_SIZE;
-	} else {
-		size = xbuf->size + add;
-	}
-	if (xbuf->max_len && size > xbuf->max_len) {
-		size = xbuf->max_len;
-	}
-
-	buf = erealloc(xbuf->buf, size+1); /* alloc space for NUL */
-	
-	if (buf) {
-		xbuf->buf = buf;
-		xbuf->buf_end = xbuf->max_len ? &buf[size] : (char *) ~0;
-		xbuf->nextb = buf+offset;
-		xbuf->size = size;
-	}
-}
-
-/* Initialise xbuffy with size spprintf_BLOCK_SIZE
- */
-static char * xbuf_init(xbuffy *xbuf, size_t max_len) 
-{
-	xbuf->buf = NULL;
-	xbuf->size = 0;
-	xbuf->max_len = max_len;
-	xbuf_resize(xbuf, 0); /* NOT max_len */
-	return xbuf->buf;
-}
-
-/*
- * The INS_CHAR macro inserts a character in the buffer and writes
- * the buffer back to disk if necessary
- * It uses the char pointers sp and bep:
- *      sp points to the next available character in the buffer
- *      bep points to the end-of-buffer+1
- * While using this macro, note that the nextb pointer is NOT updated.
+ * The INS_CHAR macro inserts a character in the buffer.
  *
- * NOTE: Evaluation of the c argument should not have any side-effects
+ * NOTE: Evaluation of the ch argument should not have any side-effects
  */
-#define INS_CHAR_NR(xbuf, ch, cc)       \
-	if (xbuf->nextb < xbuf->buf_end) {  \
-		*(xbuf->nextb++) = ch;          \
-		cc++;                           \
-	}
+#define INS_CHAR_NR(xbuf, ch) do {	\
+	smart_str_appendc(xbuf, ch);	\
+} while (0)
 
-#define INS_CHAR(xbuf, ch, cc)          \
-	xbuf_resize(xbuf, 1);               \
-	INS_CHAR_NR(xbuf, ch, cc)
+#define INS_STRING(xbuf, s, slen) do { 	\
+	smart_str_appendl(xbuf, s, slen);	\
+} while (0)
+	
+#define INS_CHAR(xbuf, ch)          \
+	INS_CHAR_NR(xbuf, ch)
 
 /*
  * Macro that does padding. The padding is done by printing
  * the character ch.
  */
-#define PAD(xbuf, width, len, ch)       \
-	if (width > len) {                  \
-		xbuf_resize(xbuf, width-len);   \
-		do {                            \
-			INS_CHAR_NR(xbuf, ch, cc);  \
-			width--;                    \
-		}                               \
-		while (width > len);\
-	}
+#define PAD(xbuf, count, ch) do {					\
+	if ((count) > 0) {                  			\
+		size_t newlen;								\
+		smart_str_alloc(xbuf, (count), 0); 			\
+		memset(xbuf->c + xbuf->len, ch, (count));	\
+		xbuf->len += (count);				\
+	}												\
+} while (0)
 
 #define NUM(c) (c - '0')
 
-#define STR_TO_DEC(str, num)            \
-	num = NUM(*str++);                  \
-	while (isdigit((int)*str)) {        \
-		num *= 10;                      \
-		num += NUM(*str++);             \
-    }
+#define STR_TO_DEC(str, num) do {			\
+	num = NUM(*str++);                  	\
+	while (isdigit((int)*str)) {        	\
+		num *= 10;                      	\
+		num += NUM(*str++);             	\
+		if (num >= INT_MAX / 10) {			\
+			while (isdigit((int)*str++));	\
+			break;							\
+		}									\
+    }										\
+} while (0)
 
 /*
  * This macro does zero padding so that the precision
@@ -210,33 +162,21 @@ static char * xbuf_init(xbuffy *xbuf, size_t max_len)
  * adding '0's to the left of the string that is going
  * to be printed.
  */
-#define FIX_PRECISION(adjust, precision, s, s_len)  \
-    if (adjust)					                    \
-		while (s_len < precision) {                 \
-			*--s = '0';                             \
-			s_len++;                                \
-		}
-
-/*
- * Prefix the character ch to the string str
- * Increase length
- * Set the has_prefix flag
- */
-#define PREFIX(str, length, ch) \
-	*--str = ch;                \
-	length++;                   \
-	has_prefix = YES
+#define FIX_PRECISION(adjust, precision, s, s_len) do {	\
+    if (adjust)					                    	\
+		while (s_len < precision) {                 	\
+			*--s = '0';                             	\
+			s_len++;                                	\
+		}												\
+} while (0)
 
 
 
 /*
  * Do format conversion placing the output in buffer
  */
-static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_list ap)
+static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 {
-	register int cc = 0;
-	register int i;
-
 	register char *s = NULL;
 	char *q;
 	int s_len;
@@ -259,7 +199,7 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 	/*
 	 * Flag variables
 	 */
-	boolean_e is_long;
+	length_modifier_e modifier;
 	boolean_e alternate_form;
 	boolean_e print_sign;
 	boolean_e print_blank;
@@ -269,7 +209,7 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 
 	while (*fmt) {
 		if (*fmt != '%') {
-			INS_CHAR(xbuf, *fmt, cc);
+			INS_CHAR(xbuf, *fmt);
 		} else {
 			/*
 			 * Default variable settings
@@ -347,11 +287,51 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 			/*
 			 * Modifier check
 			 */
-			if (*fmt == 'l') {
-				is_long = YES;
-				fmt++;
-			} else
-				is_long = NO;
+			switch (*fmt) {
+				case 'L':
+					fmt++;
+					modifier = LM_LONG_DOUBLE;
+					break;
+				case 'l':
+					fmt++;
+#if SIZEOF_LONG_LONG
+					if (*fmt == 'l') {
+						fmt++;
+						modifier = LM_LONG_LONG;
+					} else
+#endif
+						modifier = LM_LONG;
+					break;
+				case 'z':
+					fmt++;
+					modifier = LM_SIZE_T;
+					break;
+				case 'j':
+					fmt++;
+#if SIZEOF_INTMAX_T
+					modifier = LM_INTMAX_T;
+#else
+					modifier = LM_SIZE_T;
+#endif
+					break;
+				case 't':
+					fmt++;
+#if SIZEOF_PTRDIFF_T
+					modifier = LM_PTRDIFF_T;
+#else
+					modifier = LM_SIZE_T;
+#endif
+					break;
+				case 'h':
+					fmt++;
+					if (*fmt == 'h') {
+						fmt++;
+					}
+					/* these are promoted to int, so no break */
+				default:				
+					modifier = LM_STD;
+					break;
+			}
 
 			/*
 			 * Argument extraction and printing.
@@ -366,10 +346,34 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 			 */
 			switch (*fmt) {
 				case 'u':
-					if (is_long)
-						i_num = va_arg(ap, u_wide_int);
-					else
-						i_num = (wide_int) va_arg(ap, unsigned int);
+					switch(modifier) {
+						default:
+							i_num = (wide_int) va_arg(ap, unsigned int);
+							break;
+						case LM_LONG_DOUBLE:
+							goto fmt_error;
+						case LM_LONG:
+							i_num = (wide_int) va_arg(ap, unsigned long int);
+							break;
+						case LM_SIZE_T:
+							i_num = (wide_int) va_arg(ap, size_t);
+							break;
+#if SIZEOF_LONG_LONG
+						case LM_LONG_LONG:
+							i_num = (wide_int) va_arg(ap, u_wide_int);
+							break;
+#endif
+#if SIZEOF_INTMAX_T
+						case LM_INTMAX_T:
+							i_num = (wide_int) va_arg(ap, uintmax_t);
+							break;
+#endif
+#if SIZEOF_PTRDIFF_T
+						case LM_PTRDIFF_T:
+							i_num = (wide_int) va_arg(ap, ptrdiff_t);
+							break;
+#endif
+					}
 					/*
 					 * The rest also applies to other integer formats, so fall
 					 * into that case.
@@ -380,11 +384,39 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					 * Get the arg if we haven't already.
 					 */
 					if ((*fmt) != 'u') {
-						if (is_long)
-							i_num = va_arg(ap, wide_int);
-						else
-							i_num = (wide_int) va_arg(ap, int);
-					};
+						switch(modifier) {
+							default:
+								i_num = (wide_int) va_arg(ap, int);
+								break;
+							case LM_LONG_DOUBLE:
+								goto fmt_error;
+							case LM_LONG:
+								i_num = (wide_int) va_arg(ap, long int);
+								break;
+							case LM_SIZE_T:
+#if SIZEOF_SSIZE_T
+								i_num = (wide_int) va_arg(ap, ssize_t);
+#else
+								i_num = (wide_int) va_arg(ap, size_t);
+#endif
+								break;
+#if SIZEOF_LONG_LONG
+							case LM_LONG_LONG:
+								i_num = (wide_int) va_arg(ap, wide_int);
+								break;
+#endif
+#if SIZEOF_INTMAX_T
+							case LM_INTMAX_T:
+								i_num = (wide_int) va_arg(ap, intmax_t);
+								break;
+#endif
+#if SIZEOF_PTRDIFF_T
+							case LM_PTRDIFF_T:
+								i_num = (wide_int) va_arg(ap, ptrdiff_t);
+								break;
+#endif
+						}
+					}
 					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -401,10 +433,34 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 
 
 				case 'o':
-					if (is_long)
-						ui_num = va_arg(ap, u_wide_int);
-					else
-						ui_num = (u_wide_int) va_arg(ap, unsigned int);
+					switch(modifier) {
+						default:
+							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							break;
+						case LM_LONG_DOUBLE:
+							goto fmt_error;
+						case LM_LONG:
+							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							break;
+						case LM_SIZE_T:
+							ui_num = (u_wide_int) va_arg(ap, size_t);
+							break;
+#if SIZEOF_LONG_LONG
+						case LM_LONG_LONG:
+							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							break;
+#endif
+#if SIZEOF_INTMAX_T
+						case LM_INTMAX_T:
+							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							break;
+#endif
+#if SIZEOF_PTRDIFF_T
+						case LM_PTRDIFF_T:
+							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							break;
+#endif
+					}
 					s = ap_php_conv_p2(ui_num, 3, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -417,10 +473,34 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 
 				case 'x':
 				case 'X':
-					if (is_long)
-						ui_num = (u_wide_int) va_arg(ap, u_wide_int);
-					else
-						ui_num = (u_wide_int) va_arg(ap, unsigned int);
+					switch(modifier) {
+						default:
+							ui_num = (u_wide_int) va_arg(ap, unsigned int);
+							break;
+						case LM_LONG_DOUBLE:
+							goto fmt_error;
+						case LM_LONG:
+							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
+							break;
+						case LM_SIZE_T:
+							ui_num = (u_wide_int) va_arg(ap, size_t);
+							break;
+#if SIZEOF_LONG_LONG
+						case LM_LONG_LONG:
+							ui_num = (u_wide_int) va_arg(ap, u_wide_int);
+							break;
+#endif
+#if SIZEOF_INTMAX_T
+						case LM_INTMAX_T:
+							ui_num = (u_wide_int) va_arg(ap, uintmax_t);
+							break;
+#endif
+#if SIZEOF_PTRDIFF_T
+						case LM_PTRDIFF_T:
+							ui_num = (u_wide_int) va_arg(ap, ptrdiff_t);
+							break;
+#endif
+					}
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
@@ -449,7 +529,16 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 				case 'f':
 				case 'e':
 				case 'E':
-					fp_num = va_arg(ap, double);
+					switch(modifier) {
+						case LM_LONG_DOUBLE:
+							fp_num = (double) va_arg(ap, long double);
+							break;
+						case LM_STD:
+							fp_num = va_arg(ap, double);
+							break;
+						default:
+							goto fmt_error;
+					}
 
 					if (zend_isnan(fp_num)) {
 						s = "nan";
@@ -473,22 +562,31 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 
 				case 'g':
 				case 'G':
-					fp_num = va_arg(ap, double);
+					switch(modifier) {
+						case LM_LONG_DOUBLE:
+							fp_num = (double) va_arg(ap, long double);
+							break;
+						case LM_STD:
+							fp_num = va_arg(ap, double);
+							break;
+						default:
+							goto fmt_error;
+					}
 
 					if (zend_isnan(fp_num)) {
-						s = "NAN";
-						s_len = 3;
-						break;
-					} else if (zend_isinf(fp_num)) {
-						if (fp_num > 0) {
-							s = "INF";
-							s_len = 3;
-						} else {
-							s = "-INF";
-							s_len = 4;
-						}
-						break;
-					}
+ 						s = "NAN";
+ 						s_len = 3;
+ 						break;
+ 					} else if (zend_isinf(fp_num)) {
+ 						if (fp_num > 0) {
+ 							s = "INF";
+ 							s_len = 3;
+ 						} else {
+ 							s = "-INF";
+ 							s_len = 4;
+ 						}
+ 						break;
+ 					}
 
 					if (adjust_precision == NO)
 						precision = FLOAT_DIGITS;
@@ -497,7 +595,8 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(fp_num, precision, &num_buf[1], alternate_form);
+					s = ap_php_gcvt(fp_num, precision, &num_buf[1],
+							alternate_form);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
@@ -531,7 +630,7 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 
 
 				case 'n':
-					*(va_arg(ap, int *)) = cc;
+					*(va_arg(ap, int *)) = xbuf->len;
 					break;
 
 					/*
@@ -543,11 +642,16 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					 * we print "%p" to indicate that we don't handle "%p".
 					 */
 				case 'p':
-					ui_num = (u_wide_int) va_arg(ap, char *);
-
-					if (sizeof(char *) <= sizeof(u_wide_int))
-						s = ap_php_conv_p2(ui_num, 4, 'x', &num_buf[NUM_BUF_SIZE], &s_len);
-					else {
+					if (sizeof(char *) <= sizeof(u_wide_int)) {
+						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
+						s = ap_php_conv_p2(ui_num, 4, 'x', 
+								&num_buf[NUM_BUF_SIZE], &s_len);
+						if (ui_num != 0) {
+							*--s = 'x';
+							*--s = '0';
+							s_len += 2;
+						}
+					} else {
 						s = "%p";
 						s_len = 2;
 					}
@@ -563,6 +667,8 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					continue;
 
 
+fmt_error:
+				php_error(E_ERROR, "Illegal length modifier specified '%c' in s[np]printf call", *fmt);
 					/*
 					 * The default case is for unrecognized %'s.
 					 * We print %<char> to help the user identify what
@@ -588,28 +694,24 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 			}
 			if (adjust_width && adjust == RIGHT && min_width > s_len) {
 				if (pad_char == '0' && prefix_char != NUL) {
-					INS_CHAR(xbuf, *s, cc)
-						s++;
+					INS_CHAR(xbuf, *s);
+					s++;
 					s_len--;
 					min_width--;
 				}
-				PAD(xbuf, min_width, s_len, pad_char);
+				PAD(xbuf, min_width - s_len, pad_char);
 			}
 			/*
 			 * Print the string s. 
 			 */
-			xbuf_resize(xbuf, s_len);
-			for (i = s_len; i != 0; i--) {
-				INS_CHAR_NR(xbuf, *s, cc);
-				s++;
-			}
+			INS_STRING(xbuf, s, s_len);
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
-				PAD(xbuf, min_width, s_len, pad_char);
+				PAD(xbuf, min_width - s_len, pad_char);
 		}
 		fmt++;
 	}
-	return (cc);
+	return;
 }
 
 
@@ -618,34 +720,18 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
  */
 PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap)
 {
-	xbuffy xbuf;
-	int cc;
+	smart_str xbuf = {0};
 
-	assert(pbuf != NULL);
-	/*
-	 * First initialize the descriptor
-	 * Notice that if no length is given, we initialize buf_end to the
-	 * highest possible address.
-	 */
-	if (!xbuf_init(&xbuf, max_len)) {
-		if (pbuf)
-			*pbuf = NULL;
-		return 0;
-	} else {
-		/*
-		 * Do the conversion
-		 */
-		cc = xbuf_format_converter(&xbuf, format, ap);
-		if (xbuf.nextb <= xbuf.buf_end)
-			*(xbuf.nextb) = '\0';
-		else if (xbuf.size)
-			xbuf.buf[xbuf.size-1] = '\0';
-		if (pbuf)
-			*pbuf = xbuf.buf;
-		else
-			efree(pbuf);
-		return cc;
+	xbuf_format_converter(&xbuf, format, ap);
+	
+	if (max_len && xbuf.len > max_len) {
+		xbuf.len = max_len;
 	}
+	smart_str_0(&xbuf);
+		
+	*pbuf = xbuf.c;
+	
+	return xbuf.len;
 }
 
 
