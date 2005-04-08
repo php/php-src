@@ -1281,24 +1281,26 @@ static inline void zend_free_obj_get_result(zval *op, int free_op)
 }
 
 #define COMPARE_RETURN_AND_FREE(retval) \
-			zend_free_obj_get_result(op1, free_op1); \
-			zend_free_obj_get_result(op2, free_op2); \
+			zend_free_obj_get_result(op1_orig, free_op1); \
+			zend_free_obj_get_result(op2_orig, free_op2); \
 			return retval;
 
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	zend_bool free_op1 = 0, free_op2 = 0;
+	zval *op1_orig, *op2_orig;
 	
 	if (op1->type == IS_OBJECT && Z_OBJ_HT_P(op1)->get) {
 		op1 = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
 		free_op1 = 1;
 	}
+	op1_orig = op1;
 	if (op2->type == IS_OBJECT && Z_OBJ_HT_P(op2)->get) {
 		op2 = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
 		free_op2 = 1;
 	}
-
+	op2_orig = op2;
 
 	if ((op1->type == IS_NULL && op2->type == IS_STRING)
 		|| (op2->type == IS_NULL && op1->type == IS_STRING)) {
