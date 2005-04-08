@@ -1,3 +1,102 @@
+2005-04-07  Jon Parise  <jon+php@csh.rit.edu>
+
+    * build/buildcheck.sh:
+      Spell "overridden" correctly.
+
+2005-04-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/proc_open.c:
+      MFH: Fixed bug #32533 (proc_get_status() returns the incorrect process
+      status).
+
+    * ext/standard/proc_open.c:
+      Fixed bug #32533 (proc_get_status() returns the incorrect process status).
+
+2005-04-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/mysql/php_mysql.c:
+      MFH: - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX)
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.c:
+      - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX)
+
+    * scripts/phpize.in:
+      Fix the echo/backquote issues + aclocal
+
+    * (PHP_5_0)
+      build/build2.mk
+      build/buildcheck.sh
+      scripts/phpize.in:
+      MFH: Use PHP_AUTOCONF / PHP_AUTOHEADER environment variables
+
+    * acinclude.m4:
+      - Cleanup a bit. And make use of shtool mkdir
+
+    * run-tests.php:
+      - Reword the send-report-part a bit. (bug #32624)
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Nuke the code duplication
+
+    * ZendEngine2/zend_alloc.h:
+      Fix build when USE_ZEND_ALLOC is 0
+
+2005-04-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/calendar/calendar.c
+      ext/calendar/calendar.c:
+      Fixed indentation
+
+    * ext/calendar/calendar.c
+      ext/calendar/calendar.c:
+      Fixed wrong result of cal_days_in_month() with bad dates
+
+2005-04-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      Zend/zend_alloc.h:
+      - Doh, this should not have been in of course :)
+
+    * (PHP_4_3)
+      Zend/zend_alloc.c
+      Zend/zend_alloc.h:
+      - Fixed bug with estrndup when the Zend Allocator was not in use.
+
+2005-04-07  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      MFH (Fix strdup() bug when USE_ZEND_ALLOC was disabled)
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      Fix strdup() bug when USE_ZEND_ALLOC is disabled
+
+2005-04-07  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      main/streams.c
+      main/streams/plain_wrapper.c
+      main/streams/plain_wrapper.c:
+      Bug #32614 - prevent from crahsing with segfault on solaris if fdopen()
+      fails - this fixes NOT the stdio-problem on solaris!
+
+2005-04-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * scripts/phpize.in:
+      - Added the $PHP_AUTOCONF/$PHP_AUTOHEADER usage to phpize
+
 2005-04-06  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * run-tests.php:
