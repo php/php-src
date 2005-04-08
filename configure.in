@@ -363,8 +363,7 @@ unix.h \
 utime.h \
 sys/utsname.h \
 sys/ipc.h \
-dlfcn.h \
-inttypes.h
+dlfcn.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
