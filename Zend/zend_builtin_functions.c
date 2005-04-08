@@ -43,6 +43,7 @@ static ZEND_FUNCTION(defined);
 static ZEND_FUNCTION(get_class);
 static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
+static ZEND_FUNCTION(property_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(interface_exists);
 static ZEND_FUNCTION(function_exists);
@@ -102,6 +103,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_class,			NULL)
 	ZEND_FE(get_parent_class,	NULL)
 	ZEND_FE(method_exists,		NULL)
+	ZEND_FE(property_exists,	NULL)
 	ZEND_FE(class_exists,		NULL)
 	ZEND_FE(interface_exists,	NULL)
 	ZEND_FE(function_exists,	NULL)
@@ -888,6 +890,63 @@ ZEND_FUNCTION(method_exists)
 	RETURN_FALSE;
 }
 /* }}} */
+
+/* {{{ proto bool property_exists(mixed object_or_class, string property_name)
+   Checks if the object or class has a property */
+ZEND_FUNCTION(property_exists)
+{
+	zval **object, **property;
+	zend_class_entry *ce, **pce;
+	zend_property_info *property_info;
+	char *prop_name, *class_name;
+
+	if (ZEND_NUM_ARGS()!= 2 || zend_get_parameters_ex(2, &object, &property)==FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	convert_to_string_ex(property);
+
+	switch((*object)->type) {
+	case IS_STRING:
+		if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
+			ce = *pce;
+		}
+		if (!ce) {
+			RETURN_NULL();
+		}
+		if (!(property_info = zend_get_property_info(ce, *property, 1 TSRMLS_CC)) || property_info == &EG(std_property_info)) {
+			RETURN_FALSE;
+		}
+		if (property_info->flags & ZEND_ACC_PUBLIC) {
+			RETURN_TRUE;
+		}
+		zend_unmangle_property_name(property_info->name, &class_name, &prop_name);
+		if (!strncmp(class_name, "*", 1)) {
+			if (instanceof_function(EG(scope), ce TSRMLS_CC)) {
+				RETURN_TRUE;
+			}
+			RETURN_FALSE;
+		}
+		if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
+			ce = *pce;
+		} else {
+			RETURN_FALSE; /* shouldn't happen */
+		}
+		RETURN_BOOL(EG(scope) == ce);
+		RETURN_FALSE;
+	
+	case IS_OBJECT:
+		if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 1 TSRMLS_CC)) {
+			RETURN_TRUE;
+		}
+		RETURN_FALSE;
+
+	default:
+		zend_error(E_WARNING, "Parameter must either be an object or the name of an existing class");
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
 
 /* {{{ proto bool class_exists(string classname [, bool autoload])
    Checks if the class exists */
