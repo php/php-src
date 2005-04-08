@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
 - Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
   (Ilia)
+- Fixed bug #32587 (Apache2: errors sent to error_log do not include
+  timestamps). (Jani)
 - Fixed bug #32560 (configure looks for incorrect db2 library). (Tony)
 - Fixed bug #32553 (mmap loads only the 1st 2000000 bytes on Win32). (Ilia)
 - Fixed bug #32533 (proc_get_status() returns the incorrect process status). (Ilia)
