@@ -4,12 +4,13 @@ Bug #22836 (returning references to NULL)
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?>
 --FILE--
 <?php
+ini_set('error_reporting',E_ALL|E_STRICT);
 function &f()
 {
 	$x = "foo";
 	var_dump($x);
 	print "'$x'\n";
-	return ($a);
+	return $a;
 }
 for ($i = 0; $i < 8; $i++) {
 	$h =& f();
