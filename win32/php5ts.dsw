@@ -57,21 +57,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php5activescript"=..\SAPI\activescript\php5activescript.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name php5dllts
-    End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "php5aolserver"=..\sapi\aolserver\php5aolserver.dsp - Package Owner=<4>
 
 Package=<5>
