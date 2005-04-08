@@ -856,7 +856,51 @@ int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 /* }}} */
 
 
+static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
+					xmlNodePtr nextsib, xmlNodePtr fragment, 
+					dom_object *intern, dom_object *childobj TSRMLS_DC)
+{
+	xmlNodePtr newchild, node;
 
+	newchild = fragment->children;
+
+	if (newchild) {
+		if (prevsib == NULL) {
+			nodep->children = newchild;
+		} else {
+			prevsib->next = newchild;
+		}
+		newchild->prev = prevsib;
+		if (nextsib == NULL) {
+			nodep->last = fragment->last;
+		} else {
+			fragment->last->next = nextsib;
+			nextsib->prev = fragment->last;
+		}
+
+		node = newchild;
+		while (node != NULL) {
+			node->parent = nodep;
+			if (node->doc != nodep->doc) {
+				xmlSetTreeDoc(node, nodep->doc);
+				if (node->_private != NULL) {
+					childobj = node->_private;
+					childobj->document = intern->document;
+					php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL TSRMLS_CC);
+				}
+			}
+			if (node == fragment->last) {
+				break;
+			}
+			node = node->next;
+		}
+
+		fragment->children = NULL;
+		fragment->last = NULL;
+	}
+
+	return newchild;
+}
 
 /* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
@@ -958,32 +1002,7 @@ PHP_FUNCTION(dom_node_insert_before)
 				}
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
-			xmlNodePtr fragment;
-
-			fragment = child;
-			new_child = child->children;
-			child = new_child;
-			while (child->next != NULL) {
-				child->parent = parentp;
-				if (child->doc != parentp->doc) {
-					xmlSetTreeDoc(child, parentp->doc);
-				}
-				child = child->next;
-			}
-			child->parent = parentp;
-			if (child->doc != parentp->doc) {
-				xmlSetTreeDoc(child, parentp->doc);
-			}
-
-			if (refp->prev != NULL) {
-				refp->prev->next = new_child;
-			} else {
-				parentp->children = new_child;
-			}
-			new_child->prev = refp->prev;
-			refp->prev = child;
-			child->next = refp;
-			fragment->children = NULL;
+			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern, childobj TSRMLS_CC);
 		}
 
 		if (new_child == NULL) {
@@ -1025,32 +1044,7 @@ PHP_FUNCTION(dom_node_insert_before)
 				}
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
-			xmlNodePtr fragment;
-
-			fragment = child;
-
-			new_child = child->children;
-			if (parentp->children == NULL) {
-				parentp->children = new_child;
-			} else {
-				child = parentp->last;
-				child->next = new_child;
-				new_child->prev = child;
-			}
-			child = new_child;
-			while (child->next != NULL) {
-				child->parent = parentp;
-				if (child->doc != parentp->doc) {
-					xmlSetTreeDoc(child, parentp->doc);
-				}
-				child = child->next;
-			}
-			child->parent = parentp;
-			if (child->doc != parentp->doc) {
-				xmlSetTreeDoc(child, parentp->doc);
-			}
-			parentp->last = child;
-			fragment->children = NULL;
+			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern, childobj TSRMLS_CC);
 		}
 		if (new_child == NULL) {
 			new_child = xmlAddChild(parentp, child);
@@ -1133,50 +1127,14 @@ PHP_FUNCTION(dom_node_replace_child)
 		zval *rv = NULL;
 
 		if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
-			xmlNodePtr fragment, prevsib, nextsib;
-			fragment = newchild;
+			xmlNodePtr prevsib, nextsib;
 			prevsib = oldchild->prev;
 			nextsib = oldchild->next;
 
-			newchild = fragment->children;
-
 			xmlUnlinkNode(oldchild);
 
-			if (prevsib == NULL && nextsib == NULL) {
-				nodep->children = newchild;
-				nodep->last = fragment->last;
-			} else {
-				if (newchild) {
-					prevsib->next = newchild;
-					newchild->prev = prevsib;
-
-					fragment->last->next = nextsib;
-					if (nextsib) {
-						nextsib->prev = fragment->last;
-					} else {
-						nodep->last = fragment->last;
-					}
-				}
-			}
-			node = newchild;
-			while (node != NULL) {
-				node->parent = nodep;
-				if (node->doc != nodep->doc) {
-					xmlSetTreeDoc(node, nodep->doc);
-					if (node->_private != NULL) {
-						newchildobj = node->_private;
-						newchildobj->document = intern->document;
-						php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL TSRMLS_CC);
-					}
-				}
-				if (node == fragment->last) {
-					break;
-				}
-				node = node->next;
-			}
-
-			fragment->children = NULL;
-			fragment->last = NULL;
+			newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj TSRMLS_CC);
+			dom_reconcile_ns(nodep->doc, newchild);
 		} else if (oldchild != newchild) {
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
@@ -1333,31 +1291,7 @@ PHP_FUNCTION(dom_node_append_child)
 			}
 		}
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
-		xmlNodePtr fragment;
-
-		fragment = child;
-		new_child = child->children;
-		if (nodep->children == NULL) {
-			nodep->children = new_child;
-		} else {
-			child = nodep->last;
-			child->next = new_child;
-			new_child->prev = child;
-		}
-		child = new_child;
-		while (child->next != NULL) {
-			child->parent = nodep;
-			if (child->doc != nodep->doc) {
-				xmlSetTreeDoc(child, nodep->doc);
-			}
-			child = child->next;
-		}
-		child->parent = nodep;
-		if (child->doc != nodep->doc) {
-			xmlSetTreeDoc(child, nodep->doc);
-		}
-		nodep->last = child;
-		fragment->children = NULL;
+		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern, childobj TSRMLS_CC);
 	}
 
 	if (new_child == NULL) {
