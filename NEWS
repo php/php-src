@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
 - Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
   (Ilia)
+- Fixed bug #32587 (Apache2: errors sent to error_log do not include
+  timestamps). (Jani)
 - Fixed bug #32567 (ext/gmp fails to compile in threadsafe mode). (Tony)
 - Fixed bug #32538 (ext/swf/swf.c does not compile with gcc-3.4.x or newer).
   (adam dot greenfield at gmail dot com)
