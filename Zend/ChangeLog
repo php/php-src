@@ -1,3 +1,23 @@
+2005-04-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Nuke the code duplication
+
+    * zend_alloc.h:
+      Fix build when USE_ZEND_ALLOC is 0
+
+2005-04-07  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      zend_alloc.c
+      zend_alloc.h:
+      MFH (Fix strdup() bug when USE_ZEND_ALLOC was disabled)
+
+    * zend_alloc.c
+      zend_alloc.h:
+      Fix strdup() bug when USE_ZEND_ALLOC is disabled
+
 2005-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c:
