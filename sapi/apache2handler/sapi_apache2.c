@@ -264,22 +264,17 @@ static void php_apache_sapi_log_message(char *msg)
 
 	ctx = SG(server_context);
 
-	/* We use APLOG_STARTUP because it keeps us from printing the
-	 * data and time information at the beginning of the error log
-	 * line.  Not sure if this is correct, but it mirrors what happens
-	 * with Apache 1.3 -- rbb
-	 */
 	if (ctx == NULL) { /* we haven't initialized our ctx yet, oh well */
 		ap_log_error(APLOG_MARK, APLOG_ERR | APLOG_STARTUP, 0, NULL, "%s", msg);
 	} else {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_STARTUP, 0, ctx->r, "%s", msg);
+		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, ctx->r, "%s", msg);
 	}
 }
 
 static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
 {
 	if (r) {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR | APLOG_STARTUP, 0, r, msg, r->filename);
+		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
 	} else {
 		php_apache_sapi_log_message(msg);
 	}
