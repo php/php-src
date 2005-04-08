@@ -811,7 +811,7 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	if (!(property_info = zend_get_property_info(zobj->ce, member, 0 TSRMLS_CC))) {
+	if (!(property_info = zend_get_property_info(zobj->ce, member, 1 TSRMLS_CC))) {
 		return 0;
 	}
 
