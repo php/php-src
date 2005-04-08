@@ -27,7 +27,7 @@ object(DOMException)#%d (6) {
   ["string:private"]=>
   string(0) ""
   ["file:protected"]=>
-  string(%d) "%s/ext/dom/tests/dom003.php"
+  string(%d) "%sdom003.php"
   ["line:protected"]=>
   int(8)
   ["trace:private"]=>
