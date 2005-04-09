@@ -1,3 +1,25 @@
+2005-04-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_operators.c:
+      - Fix memory corruption found by rob
+
+    * tests/bug22836.phpt:
+      - Ensure we see all errors. No need for () in return
+
+    * zend_builtin_functions.c:
+      - Add property_exits()
+
+    * zend_object_handlers.c:
+      - No E_ERROR when we just check (where did my 0->1 change go on first
+      commit?)
+
+    * zend_object_handlers.c:
+      - No E_ERROR when we just check, here visibility simply means there is none
+
+    * zend_object_handlers.c
+      zend_object_handlers.h:
+      - Simplify getting property info and make it an api function
+
 2005-04-07  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_alloc.c
