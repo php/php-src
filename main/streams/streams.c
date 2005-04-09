@@ -1417,10 +1417,12 @@ int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 	return SUCCESS;
 }
 
-/* API for registering GLOBAL wrappers */
-PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
+/* Validate protocol scheme names during registration
+ * Must conform to /^[a-zA-Z0-9+.-]+$/
+ */
+static inline int php_stream_wrapper_scheme_validate(char *protocol, int protocol_len)
 {
-	int i, protocol_len = strlen(protocol);
+	int i;
 
 	for(i = 0; i < protocol_len; i++) {
 		if (!isalnum((int)protocol[i]) &&
@@ -1429,6 +1431,18 @@ PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *w
 			protocol[i] != '.') {
 			return FAILURE;
 		}
+	}
+
+	return SUCCESS;
+}
+
+/* API for registering GLOBAL wrappers */
+PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
+{
+	int protocol_len = strlen(protocol);
+
+	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
+		return FAILURE;
 	}
 
 	return zend_hash_add(&url_stream_wrappers_hash, protocol, protocol_len, wrapper, sizeof(*wrapper), NULL);
@@ -1442,15 +1456,10 @@ PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 /* API for registering VOLATILE wrappers */
 PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	int i, protocol_len = strlen(protocol);
+	int protocol_len = strlen(protocol);
 
-	for(i = 0; i < protocol_len; i++) {
-		if (!isalnum((int)protocol[i]) &&
-			protocol[i] != '+' &&
-			protocol[i] != '-' &&
-			protocol[i] != '.') {
-			return FAILURE;
-		}
+	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
+		return FAILURE;
 	}
 
 	if (!FG(stream_wrappers)) {
