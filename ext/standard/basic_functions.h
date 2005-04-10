@@ -50,6 +50,7 @@ PHP_FUNCTION(sleep);
 PHP_FUNCTION(usleep);
 #if HAVE_NANOSLEEP
 PHP_FUNCTION(time_nanosleep);
+PHP_FUNCTION(time_sleep_until);
 #endif
 PHP_FUNCTION(flush);
 #ifdef HAVE_INET_NTOP
