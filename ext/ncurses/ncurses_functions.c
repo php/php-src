@@ -84,7 +84,7 @@ PHP_FUNCTION(ncurses_color_set)
 /* }}} */
 #endif
 
-/* {{{ proto int ncurses_delwin(resource window)
+/* {{{ proto bool ncurses_delwin(resource window)
    Deletes a ncurses window */
 PHP_FUNCTION(ncurses_delwin)
 {
@@ -98,6 +98,8 @@ PHP_FUNCTION(ncurses_delwin)
 	FETCH_WINRES(w, &handle);
 
 	zend_list_delete(Z_LVAL_P(handle));
+	ZVAL_NULL(handle);
+	RETURN_TRUE;
 }
 /* }}} */
 
