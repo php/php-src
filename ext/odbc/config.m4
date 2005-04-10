@@ -212,7 +212,7 @@ AC_ARG_WITH(ibm-db2,
       AC_MSG_ERROR([
 build test failed. Please check the config.log for details.
 You need to source your DB2 environment before running PHP configure:
-# . $IBM_DB2/db2profile
+# . \$IBM_DB2/db2profile
 ])
     ], [
       $ODBC_LFLAGS $ODBC_LIBS
