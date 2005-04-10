@@ -83,6 +83,7 @@ PHP                                                                        NEWS
   . fputcsv() (David Sklar)
   . posix_access() (Magnus)
   . htmlspecialchars_decode() (Ilia)
+  . time_sleep_until() (Ilia)
 - Added DomDocument::$recover property for parsing not well-formed
   XML Documents. (Christian)   
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
