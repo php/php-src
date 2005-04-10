@@ -1548,7 +1548,8 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	dom_doc_props *doc_prop;
 	dom_object *intern;
 	char *source;
-	int source_len, refcount, ret, options = 0;
+	int source_len, refcount, ret;
+	long options = 0;
 
 	id = getThis();
 	if (id != NULL && ! instanceof_function(Z_OBJCE_P(id), dom_document_class_entry TSRMLS_CC)) {

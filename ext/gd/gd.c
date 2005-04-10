@@ -3105,7 +3105,8 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 {
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
-	int col = -1, x = -1, y = -1, str_len, fontname_len, i, brect[8];
+	long col = -1, x = -1, y = -1;
+	int str_len, fontname_len, i, brect[8];
 	double ptsize, angle;
 	unsigned char *str = NULL, *fontname = NULL;
 	char *error = NULL;
