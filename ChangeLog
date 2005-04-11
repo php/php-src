@@ -1,3 +1,45 @@
+2005-04-10  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      news
+
+    * ext/dom/document.c
+      ext/gd/gd.c:
+      fix memory corruption on 64bit in imagefttext(),
+      domdocument::load() and domdocument::loadxml()
+
+    * ext/ncurses/ncurses_functions.c:
+      fix proto. return true instead of null
+
+    * ext/calendar/calendar.c:
+      simplify code (no need of local variable - return directly)
+
+2005-04-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/apache2handler/config.m4:
+      - Say in the help too this is the handler module..
+
+    * sapi/apache2filter/config.m4:
+      Might not be obvious for everyone :)
+
+    * ext/odbc/config.m4:
+      - This was supposed to be escaped with \
+
+    * ext/odbc/config.m4:
+      Add more detailed failure msg. (bug #32649)
+
+    * ext/bz2/bz2.dsp
+      ext/gd/gd.dsp:
+      - Make VC6 happy
+
+2005-04-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Added time_sleep_until() function, which is a high precision mechanism of
+      making a script sleep until specified timestamp.
+
 2005-04-09  Sara Golemon  <php@alphaweb.net>
 
     * main/streams/streams.c:
