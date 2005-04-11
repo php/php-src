@@ -628,7 +628,7 @@ static void php_add_filter(request_rec *r, ap_filter_t *f)
 	/* for those who still have Set*Filter PHP configured */
 	while (f) {
 		if (strcmp(f->frec->name, "PHP") == 0) {
-			ap_log_error(APLOG_MARK, APLOG_WARNING
+			ap_log_error(APLOG_MARK, APLOG_WARNING,
 				     0, r->server,
 				     "\"Set%sFilter PHP\" already configured for %s",
 				     output ? "Output" : "Input", r->uri);
