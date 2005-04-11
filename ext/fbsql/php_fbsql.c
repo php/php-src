@@ -1555,7 +1555,7 @@ PHP_FUNCTION(fbsql_create_db)
 	zval	**fbsql_link_index = NULL, **database_name, **database_options = NULL;
 	int id;
 	int i, status;
-	char *databaseName, *databaseOptions;
+	char *databaseName, *databaseOptions = NULL;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1762,7 +1762,16 @@ PHP_FUNCTION(fbsql_start_db)
 
 	if (status == FBStopped)
 	{
-		if (!fbcehStartDatabaseNamedWithOptions(phpLink->execHandler, databaseName, databaseOptions))
+		int dbstarted;
+		if (databaseOptions != NULL) 
+		{
+			dbstarted = fbcehStartDatabaseNamedWithOptions(phpLink->execHandler, databaseName, databaseOptions);
+		}
+		else 
+		{
+			dbstarted = fbcehStartDatabaseNamed(phpLink->execHandler, databaseName);
+		}
+		if (!dbstarted)
 		{
 			char* error = fbechErrorMessage(phpLink->execHandler);
 			if (FB_SQL_G(generateWarnings))
