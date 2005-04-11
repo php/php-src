@@ -326,14 +326,14 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 *
 * Generic SNMP object fetcher (for all SNMP versions)
 *
-* st=1   snmpget()  - query an agent and return a single value.
-* st=2   snmpget()  - query an agent and return the next single value.
-* st=3   snmpwalk() - walk the mib and return a single dimensional array 
-*                     containing the values.
-* st=4   snmprealwalk() and snmpwalkoid() - walk the mib and return an 
-*                                           array of oid,value pairs.
+* st=1   get - query an agent with SNMP-GET.
+* st=2   getnext - query an agent with SNMP-GETNEXT.
+* st=3   walk - walk the mib and return a single dimensional array 
+*          containing the values.
+* st=4   realwalk() and walkoid() - walk the mib and return an 
+*          array of oid,value pairs.
 * st=5-8 ** Reserved **
-* st=11  snmpset()  - query an agent and set a single value
+* st=11  set() - query an agent and set a single value
 *
 */
 static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, 
@@ -419,7 +419,13 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				RETURN_FALSE;
 			}
 		} else if (st >= 3) {
-			pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+                        if (session->version == SNMP_VERSION_1) {
+				pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
+			} else {
+				pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
+				pdu->non_repeaters = 0;
+				pdu->max_repetitions = 20;
+                        }
 			snmp_add_null_var(pdu, name, name_length);
 		}
 
@@ -490,8 +496,14 @@ retry:
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
 							goto retry;
 						}
-					} else if (st >= 2) { /* Here we do both getnext and walks. */
+					} else if (st == 2) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
+							goto retry;
+						}
+					} else if (st >= 3) { /* Here we do walks. */
+						if ((pdu = snmp_fix_pdu(response, ((session->version == SNMP_VERSION_1)
+										? SNMP_MSG_GETNEXT
+										: SNMP_MSG_GETBULK))) != NULL) {
 							goto retry;
 						}
 					}
@@ -528,14 +540,14 @@ retry:
 * This function makes use of the internal SNMP object fetcher.
 * The object fetcher is shared with SNMPv3.
 *
-* st=1   snmpget() - query an agent and return a single value.
-* st=2   snmpgetnext() - query an agent and return the next single value.
-* st=3   snmpwalk() - walk the mib and return a single dimensional array 
+* st=1   get - query an agent with SNMP-GET.
+* st=2   getnext - query an agent with SNMP-GETNEXT.
+* st=3   walk - walk the mib and return a single dimensional array 
 *          containing the values.
-* st=4 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
+* st=4   realwalk() and walkoid() - walk the mib and return an 
 *          array of oid,value pairs.
 * st=5-8 ** Reserved **
-* st=11  snmpset() - query an agent and set a single value
+* st=11  set() - query an agent and set a single value
 *
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version) 
