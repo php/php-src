@@ -522,7 +522,10 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				continue;
 
 			if (zend_hash_get_current_key_ex(HASH_OF(obj), &key, &key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
-				php_wddx_serialize_var(packet, *ent, key, key_len TSRMLS_CC);
+				char *class_name, *prop_name;
+				
+				zend_unmangle_property_name(key, &class_name, &prop_name);
+				php_wddx_serialize_var(packet, *ent, prop_name, strlen(prop_name)+1 TSRMLS_CC);
 			} else {
 				key_len = sprintf(tmp_buf, "%ld", idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf, key_len TSRMLS_CC);
@@ -972,6 +975,13 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						
 						/* Clean up class name var entry */
 						zval_ptr_dtor(&ent1->data);
+					} else if (Z_TYPE_P(ent2->data) == IS_OBJECT) {
+						zend_class_entry *old_scope = EG(scope);
+	
+		    				EG(scope) = Z_OBJCE_P(ent2->data);
+						ent1->data->refcount--;
+						add_property_zval(ent2->data, ent1->varname, ent1->data);
+						EG(scope) = old_scope;
 					} else
 						zend_hash_update(target_hash,
 										 ent1->varname, strlen(ent1->varname)+1,
