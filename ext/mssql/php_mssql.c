@@ -317,7 +317,11 @@ PHP_MINIT_FUNCTION(mssql)
 PHP_MSHUTDOWN_FUNCTION(mssql)
 {
 	UNREGISTER_INI_ENTRIES();
+#ifndef HAVE_FREETDS
+	dbwinexit();
+#else
 	dbexit();
+#endif
 	return SUCCESS;
 }
 
