@@ -48,7 +48,12 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage TSRMLS
 {
 	if (ini_entry->modified) {
 		if (ini_entry->on_modify) {
-			ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC);
+			zend_try {
+			/* even if on_modify bails out, we have to continue on with restoring,
+				since there can be allocated variables that would be freed on MM shutdown
+				and would lead to memory corruption later  ini entry is modified again */
+				ini_entry->on_modify(ini_entry, ini_entry->orig_value, ini_entry->orig_value_length, ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage TSRMLS_CC);
+			} zend_end_try();
 		}
 		efree(ini_entry->value);
 		ini_entry->value = ini_entry->orig_value;
