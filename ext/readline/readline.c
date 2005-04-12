@@ -177,13 +177,13 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"done",rl_done);
 		add_assoc_long(return_value,"pending_input",rl_pending_input);
 		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt),1);
-		add_assoc_string(return_value,"terminal_name",SAFE_STRING(rl_terminal_name),1);
+		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name),1);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
-		add_assoc_string(return_value,"library_version",SAFE_STRING(rl_library_version),1);
-		add_assoc_string(return_value,"readline_name",SAFE_STRING(rl_readline_name),1);
+		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version),1);
+		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name),1);
 	} else {
 		convert_to_string_ex(what);
 
@@ -219,7 +219,7 @@ PHP_FUNCTION(readline_info)
 		} else if (! strcasecmp(Z_STRVAL_PP(what),"prompt")) {
 			RETVAL_STRING(SAFE_STRING(rl_prompt),1);
 		} else if (! strcasecmp(Z_STRVAL_PP(what),"terminal_name")) {
-			RETVAL_STRING(SAFE_STRING(rl_terminal_name),1);
+			RETVAL_STRING((char *)SAFE_STRING(rl_terminal_name),1);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		} else if (! strcasecmp(Z_STRVAL_PP(what),"erase_empty_line")) {
@@ -231,7 +231,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_LONG(oldval);
 #endif
 		} else if (! strcasecmp(Z_STRVAL_PP(what),"library_version")) {
-			RETVAL_STRING(SAFE_STRING(rl_library_version),1);
+			RETVAL_STRING((char *)SAFE_STRING(rl_library_version),1);
 		} else if (! strcasecmp(Z_STRVAL_PP(what),"readline_name")) {
 			oldstr = (char*)rl_readline_name;
 			if (ac == 2) {
