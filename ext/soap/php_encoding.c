@@ -1483,7 +1483,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 								   an implicit schema. Otherwise, use form.
 								*/
 								if (!strncmp((*attr)->namens, XML_NAMESPACE, sizeof(XML_NAMESPACE)) || 
-								    (*attr)->form == XSD_FORM_QUALIFIED && (*attr)->namens) {
+								    ((*attr)->form == XSD_FORM_QUALIFIED) && (*attr)->namens) {
 									xmlNsPtr nsp = encode_add_ns(xmlParam, (*attr)->namens);
 
 									xmlSetNsProp(xmlParam, nsp, (*attr)->name, dummy->children->content);
