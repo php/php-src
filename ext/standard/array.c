@@ -2466,7 +2466,6 @@ PHP_FUNCTION(array_count_values)
 	zend_hash_internal_pointer_reset_ex(myht, &pos);
 	while (zend_hash_get_current_data_ex(myht, (void **)&entry, &pos) == SUCCESS) {
 		if (Z_TYPE_PP(entry) == IS_LONG) {
-int_key:
 			if (zend_hash_index_find(Z_ARRVAL_P(return_value), 
 									 Z_LVAL_PP(entry), 
 									 (void**)&tmp) == FAILURE) {
@@ -2481,9 +2480,28 @@ int_key:
 		} else if (Z_TYPE_PP(entry) == IS_STRING) {
 			/* make sure our array does not end up with numeric string keys */
 			if (is_numeric_string(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, NULL, 0) == IS_LONG) {
-				SEPARATE_ZVAL(entry);
-				convert_to_long_ex(entry);
-				goto int_key;
+				zval tmp_entry;
+				
+				tmp_entry = **entry;
+				zval_copy_ctor(&tmp_entry);
+
+				convert_to_long(&tmp_entry);
+
+				if (zend_hash_index_find(Z_ARRVAL_P(return_value), 
+										 Z_LVAL(tmp_entry), 
+										 (void**)&tmp) == FAILURE) {
+					zval *data;
+					MAKE_STD_ZVAL(data);
+					Z_TYPE_P(data) = IS_LONG;
+					Z_LVAL_P(data) = 1;
+					zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL(tmp_entry), &data, sizeof(data), NULL);
+				} else {
+					Z_LVAL_PP(tmp)++;
+				}
+				
+				zval_dtor(&tmp_entry);
+				zend_hash_move_forward_ex(myht, &pos);
+				continue;
 			}
 		
 			if (zend_hash_find(Z_ARRVAL_P(return_value), Z_STRVAL_PP(entry), Z_STRLEN_PP(entry)+1, (void**)&tmp) == FAILURE) {
