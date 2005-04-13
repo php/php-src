@@ -379,7 +379,6 @@ PHP_FUNCTION(jdtojulian)
 PHP_FUNCTION(juliantojd)
 {
 	long year, month, day;
-	int jdate;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &month, &day, &year) == FAILURE) {
 		RETURN_FALSE;
@@ -561,7 +560,6 @@ PHP_FUNCTION(jdtofrench)
 PHP_FUNCTION(frenchtojd)
 {
 	long year, month, day;
-	int jdate;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &month, &day, &year) == FAILURE) {
 		RETURN_FALSE;
