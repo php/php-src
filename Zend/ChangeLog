@@ -1,3 +1,12 @@
+2005-04-12  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_ini.c:
+      fix memory corruption if one on the on_modify handlers errors out
+
+    * (PHP_5_0)
+      zend_ini.c:
+      fi memory corruption if one on the on_modify handlers errors out
+
 2005-04-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_operators.c:

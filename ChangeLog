@@ -1,3 +1,37 @@
+2005-04-12  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFH: Fix for #32682. Error on module shutdown when called from activescript
+
+    * ext/mssql/php_mssql.c:
+      Fix for #32682. Error on module shutdown when called from activescript
+
+2005-04-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/readline/readline.c:
+      Fixed compiler warning.
+
+2005-04-12  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/array.c:
+      MFH: fix #30833 (array_count_values modifying input array)
+
+    * ext/standard/array.c:
+      fix #30833 (array_count_values modifying input array)
+
+2005-04-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_ini.c:
+      fix memory corruption if one on the on_modify handlers errors out
+
+    * (PHP_5_0)
+      ZendEngine2/zend_ini.c:
+      fi memory corruption if one on the on_modify handlers errors out
+
 2005-04-11  Frank M. Kromann  <frank@kromann.info>
 
     * ext/fbsql/php_fbsql.c:
