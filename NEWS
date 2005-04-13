@@ -15,6 +15,8 @@ PHP 4                                                                      NEWS
   longer then the original string). (Ilia)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
   (Uwe Schindler)
+- Fixed bug #32311 (mb_encode_mimeheader() does not properly escape characters).
+  (Moriyoshi)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
