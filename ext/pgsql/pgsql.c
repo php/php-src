@@ -197,7 +197,9 @@ function_entry pgsql_functions[] = {
 	/* aliases for downwards compatibility */
 	PHP_FALIAS(pg_exec,          pg_query,          NULL)
 	PHP_FALIAS(pg_getlastoid,    pg_last_oid,       NULL)
+#if HAVE_PQCMDTUPLES
 	PHP_FALIAS(pg_cmdtuples,	 pg_affected_rows,  NULL)
+#endif
 	PHP_FALIAS(pg_errormessage,	 pg_last_error,     NULL)
 	PHP_FALIAS(pg_numrows,		 pg_num_rows,       NULL)
 	PHP_FALIAS(pg_numfields,	 pg_num_fields,     NULL)
