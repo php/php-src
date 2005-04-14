@@ -23,6 +23,6 @@
 
 #include <time.h>
 
-time_t php_parse_date(char *p, time_t *now);
+PHPAPI time_t php_parse_date(char *p, time_t *now);
 
 #endif
