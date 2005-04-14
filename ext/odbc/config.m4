@@ -223,7 +223,7 @@ AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
 [  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
                           install directory, defaults to \$EMPRESSPATH.
-                          From PHP4, this option only supports Empress Version
+                          From PHP 4, this option only supports Empress Version
                           8.60 and above],
 [
   PHP_WITH_SHARED
@@ -255,7 +255,7 @@ AC_ARG_WITH(empress-bcs,
 [  --with-empress-bcs[=DIR]
                           Include Empress Local Access support.  DIR is the 
                           Empress base install directory, defaults to 
-                          \$EMPRESSPATH.  From PHP4, this option only supports
+                          \$EMPRESSPATH.  From PHP 4, this option only supports
                           Empress Version 8.60 and above.],
 [
   PHP_WITH_SHARED
@@ -313,10 +313,35 @@ AC_ARG_WITH(birdstep,
         ODBC_INCDIR=$withval/include
         ODBC_LIBDIR=$withval/lib
     fi
+   
+    case $host_alias in
+      *aix*[)]
+        AC_DEFINE(AIX,1,[ ]);;
+      *hpux*[)]
+        AC_DEFINE(HPUX,1,[ ]);;
+      *linux*[)]
+        AC_DEFINE(LINUX,1,[ ]);;
+      *qnx*[)]
+        AC_DEFINE(NEUTRINO,1,[ ]);;
+      i?86-*-solaris*[)]
+        AC_DEFINE(ISOLARIS,1,[ ]);;
+      sparc-*-solaris*[)]
+        AC_DEFINE(SOLARIS,1,[ ]);;
+      *unixware*[)]
+        AC_DEFINE(UNIXWARE,1,[ ]);;
+    esac
+
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=birdstep
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
+    
+    if test -e "$ODBC_LIBDIR/libCrdbc32.$SHLIB_SUFFIX_NAME"; then
+      ODBC_LIBS="-lCrdbc32 -lCadm32 -lCncp32 -lCrm32 -lCsql32 -lCdict32 -lCrdm32 -lCrpc32 -lutil"
+    elif test -e "$ODBC_LIBDIR/libCrdbc.$SHLIB_SUFFIX_NAME"; then
+      ODBC_LIBS="-lCrdbc -lCadm -lCncp -lCrm -lCsql -lCdict -lCrdm -lCrpc -lutil"
+    fi
+
     AC_DEFINE(HAVE_BIRDSTEP,1,[ ])
 
     AC_MSG_RESULT(yes)
