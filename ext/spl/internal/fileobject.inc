@@ -1,8 +1,8 @@
 <?php
 
-/** @file file.inc
+/** @file fileobject.inc
  * @ingroup SPL
- * @brief class File
+ * @brief class FileObject
  * @author  Marcus Boerger
  * @date    2003 - 2005
  *
@@ -15,7 +15,7 @@
  * @version 1.0
  * @since PHP 5.1
  */
-class File extends RecursiveIterator
+class FileObject implements RecursiveIterator
 {
 	private $fp;
 	private $fname;
@@ -28,9 +28,11 @@ class File extends RecursiveIterator
 	 * Constructs a new file object
 	 * 
 	 * @param $file_name         The name of the stream to open
-	 * @param $open_mode         The fle open mode
+	 * @param $open_mode         The file open mode
 	 * @param $use_include_path  Whether to search in include paths
 	 * @param $context           A stream context
+	 * @throw RuntimeException   If file cannot be opened (e.g. insufficient 
+	 *                           access rights).
 	 */
 	function __construct($file_name, $open_mode = 'r', $use_include_path = false, $context = NULL)
 	{
@@ -236,6 +238,7 @@ class File extends RecursiveIterator
 	function valid()
 	{
 		return !$this->eof();
+	}
 	
 	/**
 	 * @note Fill current line buffer if not done yet.

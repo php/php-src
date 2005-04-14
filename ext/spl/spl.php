@@ -47,12 +47,13 @@
  * - class InfiniteIterator extends IteratorIterator
  * - class AppendIterator implements OuterIterator
  * 
- * 2) Directories
+ * 2) Directories and Files
  * 
- * SPL offers two advanced directory classes:
+ * SPL offers two advanced directory and file handling classes:
  * 
  * - class DirectoryIterator implements Iterator
  * - class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
+ * - class FileObject implements RecursiveIterator
  * 
  * 3) XML
  * 
@@ -99,8 +100,14 @@
  * - interface Observer
  * - interface Subject
  * 
- * A nice article about SPL can be found 
- * <a href="http://www.sitepoint.com/article/php5-standard-library/1">here</a>.
+ * Some articles about SPL:
+ * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
+ * - <a href="http://www.phpriot.com/d/articles/php/oop/oop-with-spl-php-5-1/index.html">Advanced OOP with SPL in PHP 5</a>
+ * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-1/">The Standard PHP Library, Part 1</a>
+ *
+ * Talks on PL:
+ * - <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">SPL for the masses [pps]</a>
+ * - <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">SPL for the masses [pdf]</a>
  *
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
@@ -697,6 +704,20 @@ class DirectoryIterator implements Iterator
 	/** @return getFilename()
 	 */
 	function __toString();
+
+	/** Open the current file as a FileObject instance
+	 *
+	 * @param mode              open mode
+	 * @param use_include_path  whether to search include paths (don't use)
+	 * @param context           resource context to pased to open function
+	 * @throw RuntimeException  if file cannot be opened (e.g. insufficient 
+	 *                          access rights).
+	 * @return The opened file as a FileObject instance
+	 *
+	 * @see FileObject
+	 * @see file()
+	 */
+	function DirectoryIterator::openFile($mode = 'r', $use_include_path = false, $context = NULL);
 }
 
 /** @ingroup SPL
