@@ -81,7 +81,7 @@ PHP_FUNCTION(time)
 
 /* {{{ php_mktime
  */
-void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
+PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **arguments[7];
 	struct tm *ta, tmbuf;
@@ -695,7 +695,7 @@ PHP_FUNCTION(gmdate)
 
 /* {{{ php_idate
  */
-int php_idate(char format, int timestamp, int gm)
+PHPAPI int php_idate(char format, int timestamp, int gm)
 {
 	time_t the_time;
 	struct tm *ta, tmbuf;
@@ -941,7 +941,7 @@ PHP_FUNCTION(getdate)
 
 /* {{{ php_std_date
    Return date string in standard format for http headers */
-char *php_std_date(time_t t TSRMLS_DC)
+PHPAPI char *php_std_date(time_t t TSRMLS_DC)
 {
 	struct tm *tm1, tmbuf;
 	char *str;
@@ -957,7 +957,7 @@ char *php_std_date(time_t t TSRMLS_DC)
 				tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
 	} else {
 		snprintf(str, 80, "%s, %02d-%s-%02d %02d:%02d:%02d GMT",
-				day_short_names[tm1->tm_wday],
+				day_full_names[tm1->tm_wday],
 				tm1->tm_mday,
 				mon_short_names[tm1->tm_mon],
 				((tm1->tm_year) % 100),
@@ -989,7 +989,7 @@ PHP_FUNCTION(checkdate)
 #if HAVE_STRFTIME
 /* {{{ _php_strftime
  */
-void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
+PHPAPI void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **format_arg, **timestamp_arg;
 	char *format, *buf;
