@@ -266,7 +266,7 @@ PHP_FUNCTION(cal_days_in_month)
    Converts from a supported calendar to Julian Day Count */
 PHP_FUNCTION(cal_to_jd)
 {
-	long cal, month, day, year, jdate;
+	long cal, month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll", &cal, &month, &day, &year) != SUCCESS) {
 		RETURN_FALSE;
@@ -277,8 +277,7 @@ PHP_FUNCTION(cal_to_jd)
 		RETURN_FALSE;
 	}
 
-	jdate = cal_conversion_table[cal].to_jd(year, month, day);
-	RETURN_LONG(jdate);
+	RETURN_LONG(cal_conversion_table[cal].to_jd(year, month, day));
 }
 /* }}} */
 
@@ -347,15 +346,12 @@ PHP_FUNCTION(jdtogregorian)
 PHP_FUNCTION(gregoriantojd)
 {
 	long year, month, day;
-	int jdate;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &month, &day, &year) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	jdate = GregorianToSdn(year, month, day);
-
-	RETURN_LONG(jdate);
+	RETURN_LONG(GregorianToSdn(year, month, day));
 }
 /* }}} */
 
@@ -383,15 +379,12 @@ PHP_FUNCTION(jdtojulian)
 PHP_FUNCTION(juliantojd)
 {
 	long year, month, day;
-	int jdate;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &month, &day, &year) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	jdate = JulianToSdn(year, month, day);
-
-	RETURN_LONG(jdate);
+	RETURN_LONG(JulianToSdn(year, month, day));
 }
 /* }}} */
 
@@ -534,15 +527,12 @@ PHP_FUNCTION(jdtojewish)
 PHP_FUNCTION(jewishtojd)
 {
 	long year, month, day;
-	int jdate;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &month, &day, &year) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	jdate = JewishToSdn(year, month, day);
-
-	RETURN_LONG(jdate);
+	RETURN_LONG(JewishToSdn(year, month, day));
 }
 /* }}} */
 
@@ -570,15 +560,12 @@ PHP_FUNCTION(jdtofrench)
 PHP_FUNCTION(frenchtojd)
 {
 	long year, month, day;
-	int jdate;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &month, &day, &year) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	jdate = FrenchToSdn(year, month, day);
-
-	RETURN_LONG(jdate);
+	RETURN_LONG(FrenchToSdn(year, month, day));
 }
 /* }}} */
 
