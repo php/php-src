@@ -194,11 +194,11 @@ AC_ARG_WITH(ibm-db2,
       ODBC_INCDIR=$withval/include
       ODBC_LIBDIR=$withval/lib
     fi
-	
+
     if ! test -f "$ODBC_INCDIR/sqlcli1.h"; then
       AC_MSG_ERROR([IBM DB2 header files not found])
     fi
-
+	
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=db2
@@ -217,7 +217,6 @@ You need to source your DB2 environment before running PHP configure:
     ], [
       $ODBC_LFLAGS $ODBC_LIBS
     ])
-
   else
     AC_MSG_RESULT(no)
   fi
@@ -321,10 +320,35 @@ AC_ARG_WITH(birdstep,
         ODBC_INCDIR=$withval/include
         ODBC_LIBDIR=$withval/lib
     fi
+   
+    case $host_alias in
+      *aix*[)]
+        AC_DEFINE(AIX,1,[ ]);;
+      *hpux*[)]
+        AC_DEFINE(HPUX,1,[ ]);;
+      *linux*[)]
+        AC_DEFINE(LINUX,1,[ ]);;
+      *qnx*[)]
+        AC_DEFINE(NEUTRINO,1,[ ]);;
+      i?86-*-solaris*[)]
+        AC_DEFINE(ISOLARIS,1,[ ]);;
+      sparc-*-solaris*[)]
+        AC_DEFINE(SOLARIS,1,[ ]);;
+      *unixware*[)]
+        AC_DEFINE(UNIXWARE,1,[ ]);;
+    esac
+
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=birdstep
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
+    
+    if test -e "$ODBC_LIBDIR/libCrdbc32.$SHLIB_SUFFIX_NAME"; then
+      ODBC_LIBS="-lCrdbc32 -lCadm32 -lCncp32 -lCrm32 -lCsql32 -lCdict32 -lCrdm32 -lCrpc32 -lutil"
+    elif test -e "$ODBC_LIBDIR/libCrdbc.$SHLIB_SUFFIX_NAME"; then
+      ODBC_LIBS="-lCrdbc -lCadm -lCncp -lCrm -lCsql -lCdict -lCrdm -lCrpc -lutil"
+    fi
+
     AC_DEFINE(HAVE_BIRDSTEP,1,[ ])
 
     AC_MSG_RESULT(yes)
