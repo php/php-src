@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   them sort based on the current locale. (Derick)
 - Fixed bug #32699 (pg_affected_rows() was defined when it was not available).
   (Derick)
+- Fixed bug #32682 (ext/mssql: Error on module shutdown when called from 
+  activescript). (Frank)
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
 - Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
   (Ilia)
