@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_pdo_driver.h"
+#include "php_pdo_int.h"
 
 #define PDO_PARSER_TEXT 1
 #define PDO_PARSER_BIND 2
