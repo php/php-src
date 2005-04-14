@@ -50,7 +50,7 @@ static zend_object_handlers spl_ce_dir_handlers;
 /* decalre the class entry */
 PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
-PHPAPI zend_class_entry *spl_ce_File;
+PHPAPI zend_class_entry *spl_ce_FileObject;
 
 static zend_object_value spl_file_object_new_ex(zend_class_entry *class_type, spl_file_object **obj TSRMLS_DC);
 static int spl_file_object_open(spl_file_object *intern, int use_include_path, int silent TSRMLS_DC);
@@ -428,7 +428,7 @@ DirectoryFunction(isDir, FS_IS_DIR)
 DirectoryFunction(isLink, FS_IS_LINK)
 /* }}} */
 
-/* {{{ proto File DirectoryIterator::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
+/* {{{ proto FileObject DirectoryIterator::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
    Open the current file */
 SPL_METHOD(DirectoryIterator, openFile)
 {
@@ -445,7 +445,7 @@ SPL_METHOD(DirectoryIterator, openFile)
 		return;
 	}
 
-	return_value->value.obj = spl_file_object_new_ex(spl_ce_File, &intern TSRMLS_CC);
+	return_value->value.obj = spl_file_object_new_ex(spl_ce_FileObject, &intern TSRMLS_CC);
 
 	spl_dir_get_path_name(dir_obj);
 	intern->file_name = dir_obj->path_name;
@@ -973,7 +973,7 @@ static void spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, 
 	zval *retval;
 
 	/* if overloaded call the function, otherwise do it directly */
-	if (intern->func_getCurr->common.scope != spl_ce_File) {
+	if (intern->func_getCurr->common.scope != spl_ce_FileObject) {
 		zend_call_method_with_0_params(&getThis(), Z_OBJCE_P(getThis()), &intern->func_getCurr, "getCurrentLine", &retval);
 		if (retval) {
 			if (Z_TYPE_P(retval) == IS_STRING) {
@@ -1019,9 +1019,9 @@ static int spl_file_object_open(spl_file_object *intern, int use_include_path, i
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ proto void __construct::File(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
+/* {{{ proto void FileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
    Construct a new file reader */
-SPL_METHOD(File, __construct)
+SPL_METHOD(FileObject, __construct)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zend_bool use_include_path = 0;
@@ -1044,9 +1044,9 @@ SPL_METHOD(File, __construct)
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void rewind()
+/* {{{ proto void FileObject::rewind()
    Rewind the file and read the first line */
-SPL_METHOD(File, rewind)
+SPL_METHOD(FileObject, rewind)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1058,36 +1058,36 @@ SPL_METHOD(File, rewind)
 	}
 } /* }}} */
 
-/* {{{ proto string getFilename()
+/* {{{ proto string FileObject::getFilename()
    Return the filename */
-SPL_METHOD(File, getFilename)
+SPL_METHOD(FileObject, getFilename)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_STRINGL(intern->file_name, intern->file_name_len, 1);	
 } /* }}} */
 
-/* {{{ proto void eof()
+/* {{{ proto void FileObject::eof()
    Return whether end of file is reached */
-SPL_METHOD(File, eof)
+SPL_METHOD(FileObject, eof)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(php_stream_eof(intern->stream));
 } /* }}} */
 
-/* {{{ proto void valid()
+/* {{{ proto void FileObject::valid()
    Return !eof() */
-SPL_METHOD(File, valid)
+SPL_METHOD(FileObject, valid)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETVAL_BOOL(!php_stream_eof(intern->stream));
 } /* }}} */
 
-/* {{{ proto string fgets()
+/* {{{ proto string FileObject::fgets()
    Rturn next line from file */
-SPL_METHOD(File, fgets)
+SPL_METHOD(FileObject, fgets)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1097,9 +1097,9 @@ SPL_METHOD(File, fgets)
 	RETURN_STRINGL(intern->current_line, intern->current_line_len, 1);
 } /* }}} */
 
-/* {{{ proto string current()
+/* {{{ proto string FileObject::current()
    Return current line from file */
-SPL_METHOD(File, current)
+SPL_METHOD(FileObject, current)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1114,9 +1114,9 @@ SPL_METHOD(File, current)
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto int key()
+/* {{{ proto int FileObject::key()
    Return line number */
-SPL_METHOD(File, key)
+SPL_METHOD(FileObject, key)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1126,36 +1126,36 @@ SPL_METHOD(File, key)
 	RETURN_LONG(intern->current_line_num);
 } /* }}} */
 
-/* {{{ proto void next()
+/* {{{ proto void FileObject::next()
    Read next line */
-SPL_METHOD(File, next)
+SPL_METHOD(FileObject, next)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_file_object_free_line(intern TSRMLS_CC);
 } /* }}} */
 
-/* {{{ proto void setFlags(int flags)
+/* {{{ proto void FileObject::setFlags(int flags)
    Set file handling flags */
-SPL_METHOD(File, setFlags)
+SPL_METHOD(FileObject, setFlags)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags);
 } /* }}} */
 
-/* {{{ proto int getFlags()
+/* {{{ proto int FileObject::getFlags()
    Get file handling flags */
-SPL_METHOD(File, getFlags)
+SPL_METHOD(FileObject, getFlags)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_LONG(intern->flags);
 } /* }}} */
 
-/* {{{ proto void setMaxLineLen(int max_len)
+/* {{{ proto void FileObject::setMaxLineLen(int max_len)
    Set maximum line length */
-SPL_METHOD(File, setMaxLineLen)
+SPL_METHOD(FileObject, setMaxLineLen)
 {
 	long max_len;
 
@@ -1173,9 +1173,9 @@ SPL_METHOD(File, setMaxLineLen)
 	intern->max_line_len = max_len;
 } /* }}} */
 
-/* {{{ proto int getMaxLineLen()
+/* {{{ proto int FileObject::getMaxLineLen()
    Get maximum line length */
-SPL_METHOD(File, getMaxLineLen)
+SPL_METHOD(FileObject, getMaxLineLen)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1184,14 +1184,14 @@ SPL_METHOD(File, getMaxLineLen)
 
 /* {{{ proto bool hasChildren()
    Rturn false */
-SPL_METHOD(File, hasChildren)
+SPL_METHOD(FileObject, hasChildren)
 {
 	RETURN_FALSE;
 } /* }}} */
 
-/* {{{ proto bool getChildren()
+/* {{{ proto bool FileObject::getChildren()
    Read NULL */
-SPL_METHOD(File, getChildren)
+SPL_METHOD(FileObject, getChildren)
 {
 	/* return NULL */
 } /* }}} */
@@ -1248,16 +1248,16 @@ static int spl_file_object_call(INTERNAL_FUNCTION_PARAMETERS, spl_file_object *i
 
 /* {{{ FileFunction */
 #define FileFunction(func_name) \
-SPL_METHOD(File, func_name) \
+SPL_METHOD(FileObject, func_name) \
 { \
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
 	FileFunctionCall(func_name, NULL); \
 }
 /* }}} */
 
-/* {{{ proto array File::fgetcsv([string delimiter [, string enclosure]])
+/* {{{ proto array FileObject::fgetcsv([string delimiter [, string enclosure]])
    Return current line as csv */
-SPL_METHOD(File, fgetcsv)
+SPL_METHOD(FileObject, fgetcsv)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval *arg2 = NULL;
@@ -1271,14 +1271,14 @@ SPL_METHOD(File, fgetcsv)
 }
 /* }}} */
 
-/* {{{ proto bool File::flock(int operation [, int &wouldblock])
+/* {{{ proto bool FileObject::flock(int operation [, int &wouldblock])
    Portable file locking */
 FileFunction(flock)
 /* }}} */
 
-/* {{{ proto bool File::fflush()
+/* {{{ proto bool FileObject::fflush()
    Flush the file */
-SPL_METHOD(File, fflush)
+SPL_METHOD(FileObject, fflush)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1286,9 +1286,9 @@ SPL_METHOD(File, fflush)
 } /* }}} */
 
 
-/* {{{ proto int File::ftell()
+/* {{{ proto int FileObject::ftell()
    Return current file position */
-SPL_METHOD(File, ftell)
+SPL_METHOD(FileObject, ftell)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);	
 	long ret = php_stream_tell(intern->stream);
@@ -1300,9 +1300,9 @@ SPL_METHOD(File, ftell)
 	}
 } /* }}} */
 
-/* {{{ proto int File::fseek(int pos [, int whence = SEEK_SET])
+/* {{{ proto int FileObject::fseek(int pos [, int whence = SEEK_SET])
    Return current file position */
-SPL_METHOD(File, fseek)
+SPL_METHOD(FileObject, fseek)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long pos, whence = SEEK_SET;
@@ -1315,9 +1315,9 @@ SPL_METHOD(File, fseek)
 	RETURN_LONG(php_stream_seek(intern->stream, pos, whence));
 } /* }}} */
 
-/* {{{ proto int File::fgetc()
+/* {{{ proto int FileObject::fgetc()
    Get a character form the file */
-SPL_METHOD(File, fgetc)
+SPL_METHOD(FileObject, fgetc)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char buf[2];
@@ -1335,9 +1335,9 @@ SPL_METHOD(File, fgetc)
 	}
 } /* }}} */
 
-/* {{{ proto string File::fgetss([string allowable_tags])
+/* {{{ proto string FileObject::fgetss([string allowable_tags])
    Get a line from file pointer and strip HTML tags */
-SPL_METHOD(File, fgetss)
+SPL_METHOD(FileObject, fgetss)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval *arg2 = NULL;
@@ -1350,18 +1350,18 @@ SPL_METHOD(File, fgetss)
 	intern->current_line_num++;
 } /* }}} */
 
-/* {{{ proto int File::fpassthru()
+/* {{{ proto int FileObject::fpassthru()
    Output all remaining data from a file pointer */
-SPL_METHOD(File, fpassthru)
+SPL_METHOD(FileObject, fpassthru)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_LONG(php_stream_passthru(intern->stream));
 } /* }}} */
 
-/* {{{ proto bool File::fscanf(string format [, string ...])
+/* {{{ proto bool FileObject::fscanf(string format [, string ...])
    Implements a mostly ANSI compatible fscanf() */
-SPL_METHOD(File, fscanf)
+SPL_METHOD(FileObject, fscanf)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -1371,9 +1371,9 @@ SPL_METHOD(File, fscanf)
 }
 /* }}} */
 
-/* {{{ proto mixed File::fwrite(string str [, int length])
+/* {{{ proto mixed FileObject::fwrite(string str [, int length])
    Binary-safe file write */
-SPL_METHOD(File, fwrite)
+SPL_METHOD(FileObject, fwrite)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *str;
@@ -1403,14 +1403,14 @@ SPL_METHOD(File, fwrite)
 	RETURN_LONG(php_stream_write(intern->stream, str, str_len));
 } /* }}} */
 
-/* {{{ proto bool File::fstat()
+/* {{{ proto bool FileObject::fstat()
    Stat() on a filehandle */
 FileFunction(fstat)
 /* }}} */
 
-/* {{{ proto bool File::ftruncate(int size)
+/* {{{ proto bool FileObject::ftruncate(int size)
    Truncate file to 'size' length */
-SPL_METHOD(File, ftruncate)
+SPL_METHOD(FileObject, ftruncate)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long size;
@@ -1485,35 +1485,35 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_file_object_class_functions[] = {
-	SPL_ME(File, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
-	SPL_ME(File, getFilename,    NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, rewind,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, eof,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, valid,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgets,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgetcsv,        arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
-	SPL_ME(File, flock,          arginfo_file_object_flock,         ZEND_ACC_PUBLIC)
-	SPL_ME(File, fflush,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, ftell,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fseek,          arginfo_file_object_fseek,         ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgetc,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fpassthru,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, fgetss,         arginfo_file_object_fgetss,        ZEND_ACC_PUBLIC)
-	SPL_ME(File, fscanf,         arginfo_file_object_fscanf,        ZEND_ACC_PUBLIC)
-	SPL_ME(File, fwrite,         arginfo_file_object_fwrite,        ZEND_ACC_PUBLIC)
-	SPL_ME(File, fstat,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, ftruncate,      arginfo_file_object_ftruncate,     ZEND_ACC_PUBLIC)
-	SPL_ME(File, current,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, key,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, next,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, setFlags,       arginfo_file_object_setFlags,      ZEND_ACC_PUBLIC)
-	SPL_ME(File, getFlags,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, setMaxLineLen,  arginfo_file_object_setMaxLineLen, ZEND_ACC_PUBLIC)
-	SPL_ME(File, getMaxLineLen,  NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, hasChildren,    NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(File, getChildren,    NULL, ZEND_ACC_PUBLIC)
-	SPL_MA(File, getCurrentLine, File, fgets,      NULL, ZEND_ACC_PUBLIC)
-	SPL_MA(File, __toString,     File, current,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, getFilename,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, rewind,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, eof,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, valid,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fgets,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fgetcsv,        arginfo_file_object_fgetcsv,       ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, flock,          arginfo_file_object_flock,         ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fflush,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, ftell,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fseek,          arginfo_file_object_fseek,         ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fgetc,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fpassthru,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fgetss,         arginfo_file_object_fgetss,        ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fscanf,         arginfo_file_object_fscanf,        ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fwrite,         arginfo_file_object_fwrite,        ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, fstat,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, ftruncate,      arginfo_file_object_ftruncate,     ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, current,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, key,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, next,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, setFlags,       arginfo_file_object_setFlags,      ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, getFlags,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, setMaxLineLen,  arginfo_file_object_setMaxLineLen, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, getMaxLineLen,  NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, hasChildren,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, getChildren,    NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(FileObject, getCurrentLine, FileObject, fgets,      NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(FileObject, __toString,     FileObject, current,    NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1534,8 +1534,8 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	spl_ce_RecursiveDirectoryIterator->get_iterator = spl_ce_dir_tree_get_iterator;
 
-	REGISTER_SPL_STD_CLASS_EX(File, spl_file_object_new, spl_file_object_class_functions);
-	REGISTER_SPL_IMPLEMENTS(File, RecursiveIterator);
+	REGISTER_SPL_STD_CLASS_EX(FileObject, spl_file_object_new, spl_file_object_class_functions);
+	REGISTER_SPL_IMPLEMENTS(FileObject, RecursiveIterator);
 
 	REGISTER_LONG_CONSTANT("FO_DROP_NEW_LINE",  (long)SPL_FILE_OBJECT_DROP_NEW_LINE,  CONST_CS | CONST_PERSISTENT); 
 
