@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Removed php_check_syntax() function, never worked properly. (Ilia)
 - Fixed bug #32699 (pg_affected_rows() was defined when it was not available).
   (Derick)
+- Fixed bug #32682 (ext/mssql: Error on module shutdown when called from
+  activescript). (Frank)
 - Fixed bug #32615 (Segfault in replaceChild() using fragment when 
   previousSibling is NULL). (Rob)
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
