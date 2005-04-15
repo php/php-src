@@ -336,41 +336,53 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		}
 
 		if (!have_get_ptr) {
-			zval *z;
+			zval *z = NULL;
 
 			switch (opline->extended_value) {
 				case ZEND_ASSIGN_OBJ:
-					z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+					if (Z_OBJ_HT_P(object)->read_property) {
+						z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+					}
 					break;
 				case ZEND_ASSIGN_DIM:
-					z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_RW TSRMLS_CC);
+					if (Z_OBJ_HT_P(object)->read_dimension) {
+						z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_RW TSRMLS_CC);
+					}
 					break;
 			}
-			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+			if (z) {
+				if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
-				if (z->refcount == 0) {
-					zval_dtor(z);
-					FREE_ZVAL(z);
+					if (z->refcount == 0) {
+						zval_dtor(z);
+						FREE_ZVAL(z);
+					}
+					z = value;
 				}
-				z = value;
+				z->refcount++;
+				SEPARATE_ZVAL_IF_NOT_REF(&z);
+				binary_op(z, z, value TSRMLS_CC);
+				switch (opline->extended_value) {
+					case ZEND_ASSIGN_OBJ:
+						Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+						break;
+					case ZEND_ASSIGN_DIM:
+						Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
+						break;
+				}
+				if (!RETURN_VALUE_UNUSED(result)) {
+					*retval = z;
+					PZVAL_LOCK(*retval);
+				}
+				zval_ptr_dtor(&z);
+			} else {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (!RETURN_VALUE_UNUSED(result)) {
+					*retval = EG(uninitialized_zval_ptr);
+					PZVAL_LOCK(*retval);
+				}
 			}
-			z->refcount++;
-			SEPARATE_ZVAL_IF_NOT_REF(&z);
-			binary_op(z, z, value TSRMLS_CC);
-			switch (opline->extended_value) {
-				case ZEND_ASSIGN_OBJ:
-					Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-					break;
-				case ZEND_ASSIGN_DIM:
-					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
-					break;
-			}
-			if (!RETURN_VALUE_UNUSED(result)) {
-				*retval = z;
-				PZVAL_LOCK(*retval);
-			}
-			zval_ptr_dtor(&z);
 		}
 
 		if (property == &tmp) {
@@ -568,24 +580,32 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 	}
 
 	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 
-		if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-			zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
-			if (z->refcount == 0) {
-				zval_dtor(z);
-				FREE_ZVAL(z);
+				if (z->refcount == 0) {
+					zval_dtor(z);
+					FREE_ZVAL(z);
+				}
+				z = value;
 			}
-			z = value;
+			z->refcount++;
+			SEPARATE_ZVAL_IF_NOT_REF(&z);
+			incdec_op(z);
+			*retval = z;
+			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
+			zval_ptr_dtor(&z);
+		} else {
+			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+			if (!RETURN_VALUE_UNUSED(&opline->result)) {
+				*retval = EG(uninitialized_zval_ptr);
+				PZVAL_LOCK(*retval);
+			}
 		}
-		z->refcount++;
-		SEPARATE_ZVAL_IF_NOT_REF(&z);
-		incdec_op(z);
-		*retval = z;
-		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
-		zval_ptr_dtor(&z);
 	}
 
 	FREE_OP2();
@@ -641,23 +661,28 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	}
 
 	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 
-		if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-			zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
-			if (z->refcount == 0) {
-				zval_dtor(z);
-				FREE_ZVAL(z);
+				if (z->refcount == 0) {
+					zval_dtor(z);
+					FREE_ZVAL(z);
+				}
+				z = value;
 			}
-			z = value;
+			*retval = *z;
+			zendi_zval_copy_ctor(*retval);
+			incdec_op(z);
+			z->refcount++;
+			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			zval_ptr_dtor(&z);
+		} else {
+			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+			*retval = *EG(uninitialized_zval_ptr);
 		}
-		*retval = *z;
-		zendi_zval_copy_ctor(*retval);
-		incdec_op(z);
-		z->refcount++;
-		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		zval_ptr_dtor(&z);
 	}
 
 	FREE_OP2();
@@ -1096,7 +1121,7 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 	}
 
 
-	if (container->type != IS_OBJECT) {
+	if (container->type != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
 		zend_error(E_NOTICE, "Trying to get property of non-object");
 		*retval = EG(uninitialized_zval_ptr);
 	} else {
