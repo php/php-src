@@ -23,9 +23,10 @@
  * md5_file() added by Alessandro Astarita <aleast@capri.it>
  */
 
-#include <stdio.h>
 #include "php.h"
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "md5.h"
 
 PHPAPI void make_digest(char *md5str, unsigned char *digest)
@@ -80,8 +81,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	int           n;
-	FILE          *fp;
+	int           n,fd;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
@@ -95,25 +95,25 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 		RETURN_FALSE;
 	}
 
-	if ((fp = VCWD_FOPEN(arg, "rb")) == NULL) {
+	if ((fd = VCWD_OPEN(arg, O_RDONLY)) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
 		RETURN_FALSE;
 	}
 
 	PHP_MD5Init(&context);
 
-	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
+	while ((n = read(fd, buf, sizeof(buf))) > 0) {
 		PHP_MD5Update(&context, buf, n);
 	}
 
 	PHP_MD5Final(digest, &context);
 
-	if (ferror(fp)) {
-		fclose(fp);
+	if (n<0) {
+		close(fd);
 		RETURN_FALSE;
 	}
 
-	fclose(fp);
+	close(fd);
 
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16, 1);

@@ -18,8 +18,10 @@
 
 /* $Id$ */
 
-#include <stdio.h>
 #include "php.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 /* This code is heavily based on the PHP md5 implementation */ 
 
@@ -78,8 +80,7 @@ PHP_FUNCTION(sha1_file)
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
-	int           n;
-	FILE          *fp;
+	int           n, fd;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
@@ -93,25 +94,25 @@ PHP_FUNCTION(sha1_file)
 		RETURN_FALSE;
 	}
 
-	if ((fp = VCWD_FOPEN(arg, "rb")) == NULL) {
+	if ((fd = VCWD_OPEN(arg, O_RDONLY)) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
 		RETURN_FALSE;
 	}
 
 	PHP_SHA1Init(&context);
 
-	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
+	while ((n = read(fd, buf, sizeof(buf))) > 0) {
 		PHP_SHA1Update(&context, buf, n);
 	}
 
 	PHP_SHA1Final(digest, &context);
 
-	if (ferror(fp)) {
-		fclose(fp);
+	if (n<0) {
+		close(fd);
 		RETURN_FALSE;
 	}
 
-	fclose(fp);
+	close(fd);
 
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20, 1);
