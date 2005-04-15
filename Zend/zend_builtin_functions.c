@@ -904,9 +904,15 @@ ZEND_FUNCTION(property_exists)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_string_ex(property);
+	if (!Z_STRLEN_PP(property)) {
+		RETURN_FALSE;
+	}
 
 	switch((*object)->type) {
 	case IS_STRING:
+		if (!Z_STRLEN_PP(object)) {
+			RETURN_FALSE;
+		}
 		if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
@@ -941,7 +947,7 @@ ZEND_FUNCTION(property_exists)
 		RETURN_FALSE;
 
 	default:
-		zend_error(E_WARNING, "Parameter must either be an object or the name of an existing class");
+		zend_error(E_WARNING, "First parameter must either be an object or the name of an existing class");
 		RETURN_NULL();
 	}
 }
