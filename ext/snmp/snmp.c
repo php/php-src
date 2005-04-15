@@ -347,9 +347,9 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS,
 	struct snmp_pdu *pdu=NULL, *response;
 	struct variable_list *vars;
 	oid name[MAX_NAME_LEN];
-	int name_length;
+	size_t name_length;
 	oid root[MAX_NAME_LEN];
-	int rootlen = 0;
+	size_t rootlen = 0;
 	int gotroot = 0;
 	int status, count;
 	char buf[2048];
