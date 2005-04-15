@@ -9,6 +9,8 @@ class A
 	protected $b = 2;
 	private   $c = 3;
 	
+	public    $empty;
+	
 	function __toString()
 	{
 		return 'obj(' . get_class($this) . ')';
@@ -74,10 +76,16 @@ foreach($pc as $p1) {
 	}
 }
 
+echo "===PROBLEMS===\n";
+var_dump(property_exists(NULL, 'empty'));
+var_dump(property_exists(25,'empty'));
+var_dump(property_exists('',''));
+var_dump(property_exists('A',''));
+var_dump(property_exists('A','empty'));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--
+--EXPECTF--
 ===A===
 obj(A)::$a
 bool(true)
@@ -188,4 +196,14 @@ obj(C)::$d
 bool(false)
 obj(C)::$e
 bool(false)
+===PROBLEMS===
+
+Warning: First parameter must either be an object or the name of an existing class in %sproperty_exists.php on line %d
+NULL
+
+Warning: First parameter must either be an object or the name of an existing class in %sproperty_exists.php on line %d
+NULL
+bool(false)
+bool(false)
+bool(true)
 ===DONE===
