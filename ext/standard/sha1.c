@@ -88,7 +88,7 @@ PHP_FUNCTION(sha1_file)
 		RETURN_FALSE;
 	}
 
-	if ((fd = VCWD_OPEN(arg, O_RDONLY)) == -1) {
+	if ((fd = VCWD_OPEN(Z_STRVAL_PP(arg), O_RDONLY)) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
 		RETURN_FALSE;
 	}
