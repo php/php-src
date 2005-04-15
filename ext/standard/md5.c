@@ -109,8 +109,6 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 
 	close(fd);
 
-	fclose(fp);
-
 	make_digest(md5str, digest);
 
 	RETVAL_STRING(md5str, 1);
