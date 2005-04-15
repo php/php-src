@@ -1,3 +1,58 @@
+2005-04-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      - Regenerated with re2c 0.9.6 (fixes severe bugs)
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.h:
+      - Add support for latest Birdstep
+
+2005-04-14  Andrey Hristov  <php@hristov.com>
+
+    * ext/skeleton/skeleton.php:
+      - don't use short tag
+      - detect CLI binary and don't print &lt ;br &lt; in this case
+
+2005-04-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/calendar/calendar.c:
+      MFH: Fixes & cleanup + some minor new features
+
+2005-04-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/parsedate.y
+      ext/standard/php_parsedate.h:
+      MFB43: Fixed bug #31583 (php_std_date() uses short day names in
+      non-y2k_compliance mode).
+      Fixed bug #31689 (PHPAPI missing for php_std_date() and php_parse_date()).
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/datetime.c:
+      MFB43: Fixed bug #31583 (php_std_date() uses short day names in
+      non-y2k_compliance mode).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/datetime.c:
+      Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance
+      mode).
+      
+      Patch by: mike at php dot net
+
 2005-04-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/calendar/calendar.c:
