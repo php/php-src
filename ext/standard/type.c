@@ -177,7 +177,7 @@ PHP_FUNCTION(floatval)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
-	pval **num, *tmp;
+	zval **num, *tmp;
 	zval expr_copy;
 	int use_copy;
 
@@ -190,7 +190,7 @@ PHP_FUNCTION(strval)
 		tmp = &expr_copy;
 		RETVAL_ZVAL(tmp, 0, 0);
 	} else {
-		RETVAL_ZVAL(*num, 0, 0);
+		RETVAL_ZVAL(*num, 1, 0);
 	}
 }
 /* }}} */
