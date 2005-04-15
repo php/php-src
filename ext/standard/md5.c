@@ -67,14 +67,13 @@ PHP_NAMED_FUNCTION(php_if_md5)
 }
 /* }}} */
 
-/* {{{ proto string md5_file(string filename [, bool raw_output [, bool use_include_path]])
+/* {{{ proto string md5_file(string filename [, bool raw_output])
    Calculate the md5 hash of given filename */
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
 	int           arg_len;
 	zend_bool raw_output = 0;
-	zend_bool use_include_path = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
@@ -82,12 +81,11 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bb", &arg, &arg_len, &raw_output, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
-	stream = php_stream_open_wrapper(arg, "rb",
-		(use_include_path ? USE_PATH : 0) | REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL);
+	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL);
 	if (!stream) {
 		RETURN_FALSE;
 	}
