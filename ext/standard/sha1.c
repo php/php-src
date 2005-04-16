@@ -19,9 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 /* This code is heavily based on the PHP md5 implementation */ 
 
@@ -69,6 +66,7 @@ PHP_FUNCTION(sha1)
 
 /* }}} */
 
+
 /* {{{ proto string sha1_file(string filename [, bool raw_output])
    Calculate the sha1 hash of given filename */
 PHP_FUNCTION(sha1_file)
@@ -80,39 +78,31 @@ PHP_FUNCTION(sha1_file)
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
-	int           n, fd;
+	int           n;
+	php_stream    *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-
-	if (PG(safe_mode) && (!php_checkuid(arg, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(arg TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if ((fd = VCWD_OPEN(arg, O_RDONLY)) == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
+	
+	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL);
+	if (!stream) {
 		RETURN_FALSE;
 	}
 
 	PHP_SHA1Init(&context);
 
-	while ((n = read(fd, buf, sizeof(buf))) > 0) {
+	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 		PHP_SHA1Update(&context, buf, n);
 	}
 
 	PHP_SHA1Final(digest, &context);
 
+	php_stream_close(stream);
+
 	if (n<0) {
-		close(fd);
 		RETURN_FALSE;
 	}
-
-	close(fd);
 
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20, 1);
