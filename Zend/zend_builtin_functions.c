@@ -869,6 +869,7 @@ ZEND_FUNCTION(method_exists)
 		if (zend_lookup_class(Z_STRVAL_PP(klass), Z_STRLEN_PP(klass), &pce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
+		ce = *pce;
 	} else {
 		RETURN_FALSE;
 	}
