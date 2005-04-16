@@ -175,6 +175,7 @@ PHP_FUNCTION(image2wbmp);
 PHP_FUNCTION(imagelayereffect);
 PHP_FUNCTION(imagecolormatch);
 PHP_FUNCTION(imagefilter);
+PHP_FUNCTION(imageconvolution);
 PHP_FUNCTION(imagexbm);
 #endif
 
