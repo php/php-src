@@ -1,8 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
-- Changed sha1_file() / md5_file() to use streams instead of low level IO (Uwe)
-- Removed php_check_syntax() function, never worked properly. (Ilia)
+- Removed php_check_syntax() function which never worked properly. (Ilia)
+- Changed sha1_file() and md5_file() functions to use streams instead of
+  low level IO. (Uwe)
 - Fixed bug #32699 (pg_affected_rows() was defined when it was not available).
   (Derick)
 - Fixed bug #32682 (ext/mssql: Error on module shutdown when called from
