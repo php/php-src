@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, Version 4.?.?
+- Changed sha1_file() / md5_file() to use streams instead of low level IO (Uwe)
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
   them sort based on the current locale. (Derick)
 - Fixed bug #32699 (pg_affected_rows() was defined when it was not available).

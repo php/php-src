@@ -24,9 +24,6 @@
  */
 
 #include "php.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include "md5.h"
 
 PHPAPI void make_digest(char *md5str, unsigned char *digest)
@@ -73,7 +70,8 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	int           n,fd;
+	int           n;
+	php_stream    *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -81,33 +79,24 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 
 	convert_to_string_ex(arg);
 
-	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir(Z_STRVAL_PP(arg) TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if ((fd = VCWD_OPEN(Z_STRVAL_PP(arg), O_RDONLY)) == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open file");
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg), "rb", REPORT_ERRORS | ENFORCE_SAFE_MODE, NULL);
+	if (!stream) {
 		RETURN_FALSE;
 	}
 
 	PHP_MD5Init(&context);
 
-	while ((n = read(fd, buf, sizeof(buf))) > 0) {
+	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 		PHP_MD5Update(&context, buf, n);
 	}
 
 	PHP_MD5Final(digest, &context);
 
+	php_stream_close(stream);
+
 	if (n<0) {
-		close(fd);
 		RETURN_FALSE;
 	}
-
-	close(fd);
 
 	make_digest(md5str, digest);
 
