@@ -1,3 +1,74 @@
+2005-04-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/type.c:
+      - Fixed bug #32719 (strval() fails to zero terminate strings)
+
+    * ext/standard/tests/strings/strval.phpt:
+      Add some more cases
+
+    * ext/standard/tests/strings/strval.phpt
+      ext/standard/tests/strings/strval.phpt
+      ext/standard/tests/strings/strval.phpt:
+        1.1.4;
+      Added test for strval() function
+
+    * ext/snmp/snmp.c:
+      - Use correct type (bug #32720)
+
+2005-04-15  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      ext/ming/ming.c:
+      Backporting prebuilt and videostring functions
+
+2005-04-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c
+      tests/classes/property_exists.phpt:
+      - Fix even though we already know that the function will be renamed
+
+2005-04-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fix certain operations to stop relying on presence of read_property and
+      write_property handlers. They may be NULL'ed out by certain objects
+      pretending to be pure arrays, for example. Do checks first.
+
+2005-04-15  Uwe Schindler  <uwe@thetaphi.de>
+
+    * NEWS
+      ext/standard/md5.c
+      ext/standard/sha1.c:
+      Remove include_path support from md5_file/sha1_file again
+
+    * ext/standard/md5.c
+      ext/standard/sha1.c:
+      use streams api for md5_file and sha1_file. Added parameter
+      use_include_path similar to other PHP file functions. Documentation update
+      outstanding
+
+    * (PHP_4_3)
+      ext/standard/md5.c
+      ext/standard/md5.c
+      ext/standard/sha1.c:
+      correct copy/paste problem
+
+    * (PHP_4_3)
+      ext/standard/md5.c
+      ext/standard/md5.c
+      ext/standard/sha1.c
+      ext/standard/sha1.c:
+      MFH: fix various solaris problems by replacing stdio with posix io where
+      possible
+
+    * ext/standard/md5.c
+      ext/standard/sha1.c:
+      fix various solaris problems by replacing stdio with posix io where
+      possible
+
 2005-04-14  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/standard/url_scanner_ex.c
