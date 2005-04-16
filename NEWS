@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Added imageconvolution, allow to apply a custom 3x3 matrix convultion to 
+- Added imageconvolution, allow to apply a custom 3x3 matrix convolution to 
   an image. (Pierre)
 - Removed php_check_syntax() function as it never worked properly. (Ilia)
 - Removed garbage manager in Zend Engine which results in more aggressive
