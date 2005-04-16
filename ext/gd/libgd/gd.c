@@ -3883,9 +3883,14 @@ int gdImageGaussianBlur(gdImagePtr im)
 
 int gdImageEmboss(gdImagePtr im)
 {
+/*
 	float filter[3][3] =	{{1.0,1.0,1.0},
 				{0.0,0.0,0.0},
 				{-1.0,-1.0,-1.0}};
+*/
+	float filter[3][3] =	{{ 1.5, 0.0, 0.0},
+				 { 0.0, 0.0, 0.0},
+				 { 0.0, 0.0,-1.5}};
 
 	return gdImageConvolution(im, filter, 1, 127);
 }
