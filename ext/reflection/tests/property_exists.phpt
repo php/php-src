@@ -10,6 +10,7 @@ class A
 	private   $c = 3;
 	
 	public    $empty;
+	public    $init = 1;
 	
 	function __toString()
 	{
@@ -81,7 +82,13 @@ var_dump(property_exists(NULL, 'empty'));
 var_dump(property_exists(25,'empty'));
 var_dump(property_exists('',''));
 var_dump(property_exists('A',''));
+var_dump(property_exists('A','123'));
+var_dump(property_exists('A','init'));
 var_dump(property_exists('A','empty'));
+var_dump(property_exists(new A, ''));
+var_dump(property_exists(new A, '123'));
+var_dump(property_exists(new A, 'init'));
+var_dump(property_exists(new A, 'empty'));
 ?>
 ===DONE===
 <?php exit(0); ?>
@@ -205,5 +212,11 @@ Warning: First parameter must either be an object or the name of an existing cla
 NULL
 bool(false)
 bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
 bool(true)
 ===DONE===
