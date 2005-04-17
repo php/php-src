@@ -265,6 +265,13 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_DEBUG_LEVEL", LDAP_OPT_DEBUG_LEVEL, CONST_PERSISTENT | CONST_CS);
 #endif
 
+#ifdef HAVE_LDAP_SASL
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_MECH", LDAP_OPT_X_SASL_MECH, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_REALM", LDAP_OPT_X_SASL_REALM, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_AUTHCID", LDAP_OPT_X_SASL_AUTHCID, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_AUTHZID", LDAP_OPT_X_SASL_AUTHZID, CONST_PERSISTENT | CONST_CS);
+#endif
+
 #ifdef ORALDAP
 	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_CS);
@@ -478,42 +485,122 @@ PHP_FUNCTION(ldap_bind)
 /* }}} */
 
 #ifdef HAVE_LDAP_SASL
+typedef struct {
+	char *mech;
+	char *realm;
+	char *authcid;
+	char *passwd;
+	char *authzid;
+} php_ldap_bictx;
+
+/* {{{ _php_sasl_setdefs
+ */
+static php_ldap_bictx *_php_sasl_setdefs(LDAP *ld, char *sasl_mech, char *sasl_realm, char *binddn, char *pass, char *sasl_authz_id)
+{
+	php_ldap_bictx *ctx;
+
+	ctx = ber_memalloc(sizeof(php_ldap_bictx));	
+	ctx->mech    = (sasl_mech) ? ber_strdup(sasl_mech) : NULL;
+	ctx->realm   = (sasl_realm) ? ber_strdup(sasl_realm) : NULL;
+	ctx->authcid = (binddn) ? ber_strdup(binddn) : NULL;
+	ctx->passwd  = (pass) ? ber_strdup(pass) : NULL;
+	ctx->authzid = (sasl_authz_id) ? ber_strdup(sasl_authz_id) : NULL;
+
+	if (ctx->mech == NULL) {
+		ldap_get_option(ld, LDAP_OPT_X_SASL_MECH, &ctx->mech);
+	}
+	if (ctx->realm == NULL) {
+		ldap_get_option(ld, LDAP_OPT_X_SASL_REALM, &ctx->realm);
+	}
+	if (ctx->authcid == NULL) {
+		ldap_get_option(ld, LDAP_OPT_X_SASL_AUTHCID, &ctx->authcid);
+	}
+	if (ctx->authzid == NULL) {
+		ldap_get_option(ld, LDAP_OPT_X_SASL_AUTHZID, &ctx->authzid);
+	}
+
+	return ctx;
+}
+
+/* {{{ _php_sasl_setdefs
+ */
+static void _php_sasl_freedefs(php_ldap_bictx *ctx)
+{
+	if (ctx->mech) ber_memfree(ctx->mech);
+	if (ctx->realm) ber_memfree(ctx->realm);
+	if (ctx->authcid) ber_memfree(ctx->authcid);
+	if (ctx->passwd) ber_memfree(ctx->passwd);
+	if (ctx->authzid) ber_memfree(ctx->authzid);
+	ber_memfree(ctx);
+}
+
 /* {{{ _php_sasl_interact
-   Interact function for SASL */
+   Internal interact function for SASL */
 static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in)
 {
 	sasl_interact_t *interact = in;
+	const char *p;
+	php_ldap_bictx *ctx = defaults;
 
-	while (interact->id != SASL_CB_LIST_END) {
-		const char *dflt = interact->defresult;
-
-		interact->result = strdup((dflt && *dflt) ? dflt : "");
-		interact->len = interact->result ? strlen(interact->result) : 0;
-		interact++;
-	};
+	for (;interact->id != SASL_CB_LIST_END;interact++) {
+		p = NULL;
+		switch(interact->id) {
+			case SASL_CB_GETREALM:
+				p = ctx->realm;
+				break;
+			case SASL_CB_AUTHNAME:
+				p = ctx->authcid;
+				break;
+			case SASL_CB_USER:
+				p = ctx->authzid;
+				break;
+			case SASL_CB_PASS:
+				p = ctx->passwd;
+				break;
+		}
+		if (p) {
+			interact->result = p;
+			interact->len = strlen(interact->result);
+		}
+	}
 	return LDAP_SUCCESS;
 }
 
-/* {{{ proto bool ldap_sasl_bind(resource link)
+/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn, string password, string sasl_mech, string sasl_realm, string sasl_authz_id, string props])
    Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
 {
 	zval *link;
 	ldap_linkdata *ld;
-	int rc;
+	char *binddn = NULL;
+	char *pass = NULL;
+	char *sasl_mech = NULL;
+	char *sasl_realm = NULL;
+	char *sasl_authz_id = NULL;
+	char *props = NULL;
+	int rc, dn_len, pass_len, mech_len, realm_len, authz_id_len, props_len;
+	php_ldap_bictx *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ssssss", &link, &binddn, &dn_len, &pass, &pass_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authz_id, &authz_id_len, &props, &props_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, &link, -1, "ldap link", le_link);
 
-	if ((rc = ldap_sasl_interactive_bind_s(ld->link, NULL, NULL, NULL, NULL, LDAP_SASL_QUIET, _php_sasl_interact, NULL)) != LDAP_SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
+	ctx = _php_sasl_setdefs(ld->link, sasl_mech, sasl_realm, binddn, pass, sasl_authz_id);
+
+	if (props) {
+		ldap_set_option(ld->link, LDAP_OPT_X_SASL_SECPROPS, props);
 	}
+
+	rc = ldap_sasl_interactive_bind_s(ld->link, binddn, ctx->mech, NULL, NULL, LDAP_SASL_QUIET, _php_sasl_interact, ctx);
+	if (rc != LDAP_SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to bind to server: %s", ldap_err2string(rc));
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
+	_php_sasl_freedefs(ctx);
 }
 /* }}} */
 #endif /* HAVE_LDAP_SASL */
@@ -1647,6 +1734,12 @@ PHP_FUNCTION(ldap_get_option)
 	/* options with string value */
 	case LDAP_OPT_HOST_NAME:
 	case LDAP_OPT_ERROR_STRING:
+#ifdef HAVE_LDAP_SASL
+	case LDAP_OPT_X_SASL_MECH:   
+	case LDAP_OPT_X_SASL_REALM:
+	case LDAP_OPT_X_SASL_AUTHCID:
+	case LDAP_OPT_X_SASL_AUTHZID:
+#endif
 #ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
 #endif
@@ -1700,7 +1793,7 @@ PHP_FUNCTION(ldap_set_option)
 	opt = Z_LVAL_PP(option);
 
 	switch (opt) {
-		/* options with int value */
+	/* options with int value */
 	case LDAP_OPT_DEREF:
 	case LDAP_OPT_SIZELIMIT:
 	case LDAP_OPT_TIMELIMIT:
@@ -1720,6 +1813,12 @@ PHP_FUNCTION(ldap_set_option)
 		/* options with string value */
 	case LDAP_OPT_HOST_NAME:
 	case LDAP_OPT_ERROR_STRING:
+#ifdef HAVE_LDAP_SASL
+	case LDAP_OPT_X_SASL_MECH:   
+	case LDAP_OPT_X_SASL_REALM:
+	case LDAP_OPT_X_SASL_AUTHCID:
+	case LDAP_OPT_X_SASL_AUTHZID:
+#endif
 #ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
 #endif
