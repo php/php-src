@@ -916,6 +916,8 @@ ZEND_FUNCTION(property_exists)
 		}
 		if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
+		} else {
+			RETURN_FALSE;
 		}
 		if (!ce) {
 			RETURN_NULL();
@@ -942,7 +944,7 @@ ZEND_FUNCTION(property_exists)
 		RETURN_FALSE;
 	
 	case IS_OBJECT:
-		if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 1 TSRMLS_CC)) {
+		if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 0 TSRMLS_CC)) {
 			RETURN_TRUE;
 		}
 		RETURN_FALSE;
