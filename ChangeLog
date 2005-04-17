@@ -1,3 +1,65 @@
+2005-04-16  Sara Golemon  <php@alphaweb.net>
+
+    * ZendEngine2/tests/method_exists.phpt:
+      method_exists() regression test
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Fix method_exists(), pce is fetched, but ce is used
+
+2005-04-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS
+      NEWS
+      NEWS:
+      retype
+
+2005-04-16  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * NEWS:
+      - Typo
+
+    * NEWS:
+      - Entry for imageconvolution addition
+
+2005-04-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      ext/dotnet/.cvsignore:
+      typofix
+
+2005-04-16  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      - export imageconvolution to userland, making people happy to do not
+        use the predefined ones :)
+
+2005-04-16  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/md5.c
+      ext/standard/md5.c
+      ext/standard/sha1.c
+      ext/standard/sha1.c:
+      MFH: use streams api for md5_file() and sha1_file()
+
+2005-04-16  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/gd/libgd/gd.c:
+      I think this is a cleaner emboss filter.  Less fringing.
+
+    * (PHP_5_0)
+      ext/gd/libgd/gd.c:
+      MFH: The emboss and edge detection filter matrices were swapped
+
+    * ext/gd/libgd/gd.c:
+      The emboss and edge detection matrices are swapped
+
+    * ext/sqlite/config.m4:
+      Don't do PDO here if PDO is disabled
+
 2005-04-15  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/standard/type.c:

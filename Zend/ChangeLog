@@ -1,3 +1,11 @@
+2005-04-16  Sara Golemon  <php@alphaweb.net>
+
+    * tests/method_exists.phpt:
+      method_exists() regression test
+
+    * zend_builtin_functions.c:
+      Fix method_exists(), pce is fetched, but ce is used
+
 2005-04-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:
