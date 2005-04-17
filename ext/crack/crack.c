@@ -29,6 +29,10 @@
 
 #include <packer.h>
 
+#ifndef STRINGSIZE
+#define STRINGSIZE 1024
+#endif
+
 extern char * FascistLook(PWDICT *pwp, char *instring);
 extern int PWClose(PWDICT *pwp);
 
