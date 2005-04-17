@@ -4199,6 +4199,7 @@ PHP_FUNCTION(imageconvolution)
 	gdImagePtr im_src = NULL;
 	float div, offset;
 	int nelem, i, j, res;
+	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "radd", &SIM, &hash_matrix, &div, &offset) == FAILURE) {
 		RETURN_FALSE;
@@ -4211,8 +4212,6 @@ PHP_FUNCTION(imageconvolution)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have 3x3 array");
 		RETURN_FALSE;
 	}
-
-	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 	for (i=0; i<3; i++) {
 		if (zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i), (void **) &var) == SUCCESS) {
