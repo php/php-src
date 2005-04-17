@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   serializer). (Dmitry) 
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
 - Fixed bug #30833 (array_count_values() modifying input array). (Tony)
+- Fixed bug #30819 (Better support for LDAP SASL bind). (Jani)
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
 
