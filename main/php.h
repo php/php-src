@@ -256,7 +256,6 @@ char *strerror(int);
 
 
 /* global variables */
-extern pval *data;
 #if !defined(PHP_WIN32)
 #ifdef NETWARE
 #ifdef NEW_LIBC
