@@ -57,7 +57,7 @@ exception trapping when running under a debugger
 #endif
 */
 
-#define MAX_STATUS_LENGTH sizeof("xxxx LONGEST STATUS DESCRIPTION")
+#define MAX_STATUS_LENGTH sizeof("xxxx LONGEST POSSIBLE STATUS DESCRIPTION")
 #define ISAPI_SERVER_VAR_BUF_SIZE 1024
 #define ISAPI_POST_DATA_BUF 1024
 
@@ -245,8 +245,8 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	char *combined_headers, *combined_headers_ptr;
 	LPEXTENSION_CONTROL_BLOCK lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	HSE_SEND_HEADER_EX_INFO header_info;
-	char status_buf[MAX_STATUS_LENGTH];
 	sapi_header_struct default_content_type;
+	char *status_buf = NULL;
 
 	/* Obtain headers length */
 	if (SG(sapi_headers).send_default_content_type) {
@@ -277,10 +277,21 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		case 401:
 			header_info.pszStatus = "401 Authorization Required";
 			break;
-		default:
-			snprintf(status_buf, MAX_STATUS_LENGTH, "%d Undescribed", SG(sapi_headers).http_response_code);
+		default: {
+			const char *sline = SG(sapi_headers).http_status_line;
+			
+			status_buf = emalloc(MAX_STATUS_LENGTH + 1);
+			
+			/* httpd requires that r->status_line is set to the first digit of
+			 * the status-code: */
+			if (sline && strlen(sline) > 12 && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
+				status_buf = estrndup(sline + 9, MAX_STATUS_LENGTH);
+			} else {
+				snprintf(status_buf, MAX_STATUS_LENGTH, "%d Undescribed", SG(sapi_headers).http_response_code);
+			}
 			header_info.pszStatus = status_buf;
 			break;
+		}
 	}
 	header_info.cchStatus = strlen(header_info.pszStatus);
 	header_info.pszHeader = combined_headers;
@@ -291,6 +302,9 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
 
 	efree(combined_headers);
+	if (status_buf) {
+		efree(status_buf);
+	}
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -304,7 +318,6 @@ static int php_isapi_startup(sapi_module_struct *sapi_module)
 		return SUCCESS;
 	}
 }
-
 
 
 static int sapi_isapi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
