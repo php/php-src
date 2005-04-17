@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance 
   mode). (mike at php dot net)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit) (Georg).
+- Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
+  response message). (Jani)
 - Fixed bug #31502 (Wrong deserialization from session when using WDDX
   serializer). (Dmitry) 
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
