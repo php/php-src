@@ -253,7 +253,6 @@ END_EXTERN_C()
 
 
 /* global variables */
-extern pval *data;
 #if !defined(PHP_WIN32)
 #define PHP_SLEEP_NON_VOID
 #define php_sleep sleep
