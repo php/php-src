@@ -258,7 +258,6 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 			value_ptr->refcount = 1;
 			value_ptr->is_ref = 1;
 		}
-
 		*variable_ptr_ptr = value_ptr;
 		value_ptr->refcount++;
 	} else if (!variable_ptr->is_ref) {
