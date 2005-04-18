@@ -717,7 +717,6 @@ static void helper_free_storage(void *obj TSRMLS_DC)
 static void helper_clone(void *obj, void **clone_ptr TSRMLS_DC)
 {
 	php_com_persist_helper *clone, *object = (php_com_persist_helper*)obj;
-	zval *tmp;
 
 	clone = emalloc(sizeof(*object));
 	memcpy(clone, object, sizeof(*object));
@@ -744,7 +743,6 @@ static zend_object_value helper_new(zend_class_entry *ce TSRMLS_DC)
 {
 	php_com_persist_helper *helper;
 	zend_object_value retval;
-	zval *tmp;
 
 	helper = emalloc(sizeof(*helper));
 	memset(helper, 0, sizeof(*helper));
