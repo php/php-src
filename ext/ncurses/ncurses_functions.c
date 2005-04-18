@@ -98,7 +98,6 @@ PHP_FUNCTION(ncurses_delwin)
 	FETCH_WINRES(w, &handle);
 
 	zend_list_delete(Z_LVAL_P(handle));
-	ZVAL_NULL(handle);
 	RETURN_TRUE;
 }
 /* }}} */
