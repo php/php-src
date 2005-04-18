@@ -1,3 +1,11 @@
+2005-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c:
+      - Fix special cases of property_exists()
+
+    * zend_object_handlers.c:
+      - Fix logic
+
 2005-04-16  Sara Golemon  <php@alphaweb.net>
 
     * tests/method_exists.phpt:

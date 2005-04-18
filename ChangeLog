@@ -1,3 +1,56 @@
+2005-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/property_exists.phpt:
+      - Add more tests
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fix special cases of property_exists()
+
+    * ZendEngine2/zend_object_handlers.c:
+      - Fix logic
+
+2005-04-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      NEWS
+      ext/ldap/config.w32
+      ext/ldap/ldap.c:
+      MFH: - Fixed bug #30819 (Better support for LDAP SASL bind)
+
+    * ext/ldap/ldap.c:
+      - Fixed bug #30819 (Better support for LDAP SASL bind)
+
+    * NEWS:
+      - Removed unnecessary NEWS entry
+
+    * main/php.h:
+      - Remove relic
+
+    * (PHP_4_3)
+      NEWS
+      ext/crack/crack.c:
+      - Fixed bug #32730 (ext/crack.c fails to compile with cracklib-2.8.3)
+
+2005-04-17  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/gd/gd.c:
+      - Fixed bug #32735 (Compile error in GD extension).
+
+2005-04-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      sapi/isapi/php4isapi.c
+      sapi/isapi/php5isapi.c:
+      MFH: - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct
+      HTTP response message)
+
+    * sapi/isapi/php5isapi.c:
+      - Fixed bug #31887 (Custom 5xx error does not return correct HTTP response
+      message)
+
 2005-04-16  Sara Golemon  <php@alphaweb.net>
 
     * ZendEngine2/tests/method_exists.phpt:
