@@ -62,6 +62,12 @@ $frag->appendChild(new DOMElement('second'));
 $frag->appendChild(new DOMElement('third'));
 $root->insertBefore($frag, $node);
 
+echo $dom->saveXML()."\n";
+
+$frag = $dom->createDocumentFragment();
+$root = $dom->documentElement;
+$root->replaceChild($frag, $root->firstChild);
+
 echo $dom->saveXML();
 
 ?>
@@ -72,4 +78,7 @@ echo $dom->saveXML();
 
 <?xml version="1.0"?>
 <root><first/><second/><third/><fourth/></root>
+
+<?xml version="1.0"?>
+<root><second/><third/><fourth/></root>
 

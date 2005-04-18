@@ -1134,7 +1134,9 @@ PHP_FUNCTION(dom_node_replace_child)
 			xmlUnlinkNode(oldchild);
 
 			newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj TSRMLS_CC);
-			dom_reconcile_ns(nodep->doc, newchild);
+			if (newchild) {
+				dom_reconcile_ns(nodep->doc, newchild);
+			}
 		} else if (oldchild != newchild) {
 			if (newchild->doc == NULL && nodep->doc != NULL) {
 				xmlSetTreeDoc(newchild, nodep->doc);
