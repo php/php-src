@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<definitions name="SoapInterop" targetNamespace="http://soapinterop.org/definitions/" 
+		xmlns:wsdlns="http://soapinterop.org/definitions/" 
+		xmlns:typens="http://soapinterop.org/xsd" 
+		xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns="http://schemas.xmlsoap.org/wsdl/">
+	<import location="import2B.xsd" namespace="http://soapinterop.org/xsd" />
+	<message name='Server.echoStruct'>
+    		<part name='inputStruct' type='typens:SOAPStruct'/>
+  	</message>
+  	<message name='Server.echoStructResponse'>
+    		<part name='Result' type='typens:SOAPStruct'/>
+  	</message>
+
+	<portType name="SoapInteropImport2PortType">
+		<operation name='echoStruct' parameterOrder='inputStruct'>
+    			  <input message='wsdlns:Server.echoStruct' />
+      			  <output message='wsdlns:Server.echoStructResponse' />
+		</operation>
+	</portType>	
+</definitions>
