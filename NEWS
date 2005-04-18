@@ -27,11 +27,13 @@ PHP                                                                        NEWS
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit) (Georg).
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
   response message). (Jani)
+- Fixed bug #31636 (another crash when echoing a COM object). (Wez)
 - Fixed bug #31502 (Wrong deserialization from session when using WDDX
   serializer). (Dmitry) 
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
 - Fixed bug #30833 (array_count_values() modifying input array). (Tony)
 - Fixed bug #30819 (Better support for LDAP SASL bind). (Jani)
+- Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
 
