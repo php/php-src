@@ -167,6 +167,10 @@ case $host_alias in
     fi
     ;;
 *netware*)
+    PHP_OS="NetWare"
+    PHP_UNAME="NetWare"
+    AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
+    AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
     PHP_BUILD_PROGRAM
     PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS,php)
     ;;
