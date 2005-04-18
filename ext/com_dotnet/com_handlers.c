@@ -525,14 +525,15 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	php_com_dotnet_object *obj;
 	VARIANT v;
 	VARTYPE vt = VT_EMPTY;
+	zval free_obj;
+	HRESULT res = S_OK;
 	
 	if (should_free) {
-		zval_dtor(writeobj);
+		free_obj = *writeobj;
 	}
 
-	ZVAL_NULL(writeobj);
-
 	obj = CDNO_FETCH(readobj);
+	ZVAL_NULL(writeobj);
 	VariantInit(&v);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
@@ -566,12 +567,24 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	}
 
 	if (vt != VT_EMPTY && vt != V_VT(&v)) {
-		VariantChangeType(&v, &v, 0, vt);
+		res = VariantChangeType(&v, &v, 0, vt);
 	}
 
-	php_com_zval_from_variant(writeobj, &v, obj->code_page TSRMLS_CC);
+	if (SUCCEEDED(res)) {
+		php_com_zval_from_variant(writeobj, &v, obj->code_page TSRMLS_CC);
+	}
+
 	VariantClear(&v);
-	return SUCCESS;
+
+	if (should_free) {
+		zval_dtor(&free_obj);
+	}
+
+	if (SUCCEEDED(res)) {
+		return SUCCESS;
+	}
+
+	return FAILURE;
 }
 
 static int com_object_count(zval *object, long *count TSRMLS_DC)
