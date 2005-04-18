@@ -1771,7 +1771,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 	char *function_name;
 	char *filename;
 	char *class_name;
-	char *call_type;
 	char *include_filename = NULL;
 	zval *stack_frame;
 	void **cur_arg_pos = EG(argument_stack).top_element;
@@ -1830,21 +1829,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 				zend_uint class_name_len;
 				if (Z_OBJ_HT_P(ptr->object)->get_class_name == NULL ||
                     Z_OBJ_HT_P(ptr->object)->get_class_name(ptr->object, &class_name, &class_name_len, 0 TSRMLS_CC) != SUCCESS) {
-
-				class_name = Z_OBJCE(*ptr->object)->name;
+					add_assoc_string_ex(stack_frame, "class", sizeof("class"), Z_OBJCE(*ptr->object)->name, 1);
+				} else {
+					add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 0);
 				}
-				call_type = "->";
+				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
-				class_name = ptr->function_state.function->common.scope->name;
-				call_type = "::";
-			} else {
-				class_name = NULL;
-				call_type = NULL;
-			}
-
-			if (class_name) {
-				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
-				add_assoc_string_ex(stack_frame, "type", sizeof("type"), call_type, 1);
+				add_assoc_string_ex(stack_frame, "class", sizeof("class"), ptr->function_state.function->common.scope->name, 1);
+				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 			}
 
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
