@@ -229,14 +229,6 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 
 	xmlFreeURI(uri);
 
-	if (PG(safe_mode) && (!php_checkuid(file_dest, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		return NULL;
-	}
-
-	if (php_check_open_basedir(file_dest TSRMLS_CC)) {
-		return NULL;
-	}
-
 	return file_dest;
 }
 
