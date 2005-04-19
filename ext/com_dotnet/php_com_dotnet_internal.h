@@ -37,10 +37,8 @@ typedef struct _php_com_dotnet_object {
 
 	ITypeInfo *typeinfo;
 	long code_page;
-	unsigned int have_default_bind:1;
 
 	zend_class_entry *ce;
-	DISPID default_bind; /* default property for array accesses */
 
    	/* associated event sink */
 	IDispatch *sink_dispatch;

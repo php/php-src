@@ -49,7 +49,7 @@ static zval *com_property_read(zval *object, zval *member, int type TSRMLS_DC)
 		convert_to_string_ex(&member);
 
 		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC);
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
@@ -84,30 +84,6 @@ static void com_property_write(zval *object, zval *member, zval *value TSRMLS_DC
 	}
 }
 
-static HRESULT com_get_default_binding(php_com_dotnet_object *obj TSRMLS_DC)
-{
-	VARDESC *vardesc;
-	int i;
-
-	if (!obj->typeinfo) {
-		return FAILURE;
-	}
-
-	for (i = 0; !obj->have_default_bind; i++) {
-		if (FAILED(ITypeInfo_GetVarDesc(obj->typeinfo, i, &vardesc))) {
-			return FAILURE;
-		}
-
-		if (vardesc->wVarFlags & VARFLAG_FDEFAULTBIND) {
-			obj->default_bind = (DISPID)vardesc->memid;
-			obj->have_default_bind = 1;
-		}
-
-		ITypeInfo_ReleaseVarDesc(obj->typeinfo, vardesc);
-	}
-	return obj->have_default_bind ? SUCCESS : FAILURE;
-}
-
 static zval *com_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 {
 	zval *return_value;
@@ -122,14 +98,9 @@ static zval *com_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
-			php_com_throw_exception(E_INVALIDARG, "this COM object has no default property" TSRMLS_CC);
-			return return_value;
-		}
-
 		VariantInit(&v);
 
-		if (SUCCESS == php_com_do_invoke_by_id(obj, obj->default_bind,
+		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, &offset TSRMLS_CC)) {
 			php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 			VariantClear(&v);
@@ -163,17 +134,12 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
-			php_com_throw_exception(E_INVALIDARG, "this COM object has no default property" TSRMLS_CC);
-			return;
-		}
-
 		args[0] = offset;
 		args[1] = value;
 
 		VariantInit(&v);
 
-		if (SUCCESS == php_com_do_invoke_by_id(obj, obj->default_bind,
+		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
 				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args TSRMLS_CC)) {
 			VariantClear(&v);
 		}
@@ -537,11 +503,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 	VariantInit(&v);
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (!obj->have_default_bind && !com_get_default_binding(obj TSRMLS_CC)) {
-			return FAILURE;
-		}
-
-		if (FAILURE == php_com_do_invoke_by_id(obj, obj->default_bind,
+		if (FAILURE == php_com_do_invoke_by_id(obj, DISPID_VALUE,
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL TSRMLS_CC)) {
 			return FAILURE;
 		}

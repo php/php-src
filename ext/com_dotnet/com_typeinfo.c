@@ -400,6 +400,7 @@ static const struct {
 	{ VT_VOID,		"VT_VOID" },
 	{ VT_PTR,		"VT_PTR" },
 	{ VT_HRESULT,	"VT_HRESULT" },
+	{ VT_SAFEARRAY, "VT_SAFEARRAY" },
 	{ 0, NULL }
 };
 
