@@ -1,3 +1,60 @@
+2005-04-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/dom/node.c
+      ext/dom/tests/bug32615.phpt:
+      MFH: Fix bug #32755 Segfault in replaceChild() when DocumentFragment has no
+      children
+      update test
+
+    * ext/dom/node.c
+      ext/dom/tests/bug32615.phpt:
+      Fix bug #32755 Segfault in replaceChild() when DocumentFragment has no
+      children
+      update test
+
+2005-04-18  Andrey Hristov  <php@hristov.com>
+
+    * ext/ncurses/ncurses_functions.c:
+      don't null it - let the engine do its magic ;)
+
+2005-04-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_handlers.c:
+      merge bug fixes from branch
+
+    * (PHP_5_0)
+      NEWS
+      ext/com_dotnet/com_handlers.c:
+      Fix bugs #29583 and #31636
+
+2005-04-18  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * configure.in:
+      PHP_OS and PHP_UNAME need to be hardcoded for cross builds
+
+2005-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute.c:
+      Fixed memory leak in debug_backtrace()
+
+2005-04-18  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c:
+      cursor support for 5.0.4 (STMT_ATTR_CURSOR_TYPE changed to enum)
+
+2005-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_persist.c:
+      removed unused vars.
+
 2005-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/property_exists.phpt:

@@ -1,3 +1,10 @@
+2005-04-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_execute.c:
+      Fixed memory leak in debug_backtrace()
+
 2005-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:
