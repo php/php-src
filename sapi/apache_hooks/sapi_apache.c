@@ -33,8 +33,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		return FAILURE;
 	}
 	/* sending a file handle to another dll is not working
-	// so let zend open it. 
-	*/
+	   so let zend open it. */
 	
 	if (display_source_mode) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
