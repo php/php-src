@@ -588,7 +588,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 	zval 			*mysql_stmt;
 	unsigned int 	i;
 	ulong 			ret;
-	long			lval;
+	int				lval;
 	double			dval;
 	my_ulonglong	llval;
 	
@@ -614,11 +614,11 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
 					case IS_LONG:
-						memcpy(&lval, stmt->result.buf[i].val, sizeof(long));
+						memcpy(&lval, stmt->result.buf[i].val, sizeof(lval));
 						ZVAL_LONG(stmt->result.vars[i], lval);
 						break;
 					case IS_DOUBLE:
-						memcpy(&dval, stmt->result.buf[i].val, sizeof(double));
+						memcpy(&dval, stmt->result.buf[i].val, sizeof(dval));
 						ZVAL_DOUBLE(stmt->result.vars[i], dval);
 						break;
 					case IS_STRING:
@@ -1491,6 +1491,9 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_stmt, mysqli_stmt_class_entry, &offset) == FAILURE) {
 		return;
 	}
+	if (offset < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be positive");	
+	}
 
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt");
 
@@ -1698,7 +1701,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 {
 	MY_STMT	*stmt;
 	zval 	*mysql_stmt;
-	zend_bool mode;
+	ulong   mode;
 	ulong	attr;
 	int		rc;
 
