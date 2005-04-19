@@ -36,6 +36,7 @@ mysqli autocommit/commit/rollback
 	mysqli_rollback($link);
 
 	$result = mysqli_query($link, "SELECT * FROM ac_01");
+	printf("Num_of_rows=%d\n", mysqli_num_rows($result));
 	$row = mysqli_fetch_row($result);
 	mysqli_free_result($result);
 
@@ -54,6 +55,7 @@ mysqli autocommit/commit/rollback
 	mysqli_close($link);
 ?>
 --EXPECT--
+Num_of_rows=1
 array(2) {
   [0]=>
   string(1) "1"

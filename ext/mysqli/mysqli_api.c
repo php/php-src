@@ -310,6 +310,9 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 			case MYSQL_TYPE_BLOB:
 			case MYSQL_TYPE_TIMESTAMP:
 			case MYSQL_TYPE_DECIMAL:
+#ifdef FIELD_TYPE_NEWDECIMAL
+			case MYSQL_TYPE_NEWDECIMAL:
+#endif
 				stmt->result.buf[ofs].type = IS_STRING; 
 				stmt->result.buf[ofs].buflen =
 					(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
@@ -749,7 +752,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 	MYSQL_RES	*result;
 	zval		*mysql_result;
 	MYSQL_FIELD *field;
-	int 		offset;
+	long 		offset;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_result, mysqli_result_class_entry, &offset) == FAILURE) {
 		return;
@@ -839,7 +842,7 @@ PHP_FUNCTION(mysqli_field_seek)
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	unsigned int	fieldnr;
+	unsigned long	fieldnr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_result, mysqli_result_class_entry, &fieldnr) == FAILURE) {
 		return;
@@ -1029,7 +1032,7 @@ PHP_FUNCTION(mysqli_kill)
 {
 	MY_MYSQL 	*mysql;
 	zval  		*mysql_link;
-	int   		processid;
+	long   		processid;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &mysql_link, mysqli_link_class_entry, &processid) == FAILURE) {
 		return;
@@ -1097,7 +1100,8 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 
 /* {{{ proto bool mysqli_more_results(object link)
    check if there any more query results from a multi query */
-PHP_FUNCTION(mysqli_more_results) {
+PHP_FUNCTION(mysqli_more_results)
+{
 	MY_MYSQL		*mysql;
 	zval			*mysql_link;
 
@@ -1277,7 +1281,7 @@ PHP_FUNCTION(mysqli_real_connect)
 	MY_MYSQL 		*mysql;
 	char 			*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
 	unsigned int 	hostname_len, username_len, passwd_len, dbname_len, socket_len;
-	unsigned int 	port=0, flags=0;
+	unsigned long 	port=0, flags=0;
 	zval			*mysql_link;
 	zval  			*object = getThis();
 
@@ -1414,7 +1418,8 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 	MY_STMT *stmt;
 	zval  	*mysql_stmt;
 	char	*data;
-	long	param_nr, data_len;
+	long	param_nr;
+	int		data_len;
 
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &mysql_stmt, mysqli_stmt_class_entry, &param_nr, &data, &data_len) == FAILURE) {
@@ -1693,7 +1698,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 {
 	MY_STMT	*stmt;
 	zval 	*mysql_stmt;
-	ulong	mode;
+	zend_bool mode;
 	ulong	attr;
 	int		rc;
 
