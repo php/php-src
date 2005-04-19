@@ -390,7 +390,7 @@ static int sqlite2_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquo
 		ret[len + 3] = '\0';
 		*quoted = ret;
 		*quotedlen = len + 3;
-		//fprintf(stderr, "Quoting:%d:%.*s:\n", *quotedlen, *quotedlen, *quoted);
+		/* fprintf(stderr, "Quoting:%d:%.*s:\n", *quotedlen, *quotedlen, *quoted); */
 		return 1;
 	} else if (unquotedlen) {
 		ret = sqlite_mprintf("'%q'", unquoted);
