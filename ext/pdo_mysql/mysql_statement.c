@@ -116,7 +116,6 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	MYSQL_RES *R = S->result;
-	MYSQL_FIELD *F;
 	struct pdo_column_data *cols = stmt->columns;
 	unsigned int i;
 
