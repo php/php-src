@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   longer then the original string). (Ilia)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
   (Uwe Schindler)
+- Fixed bug #32405 (mysqli::fetch() returns bad data - 64bit problem). (Andrey)
+- Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance 
   mode). (mike at php dot net)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit) (Georg).
@@ -41,6 +43,7 @@ PHP                                                                        NEWS
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
+- Fixed memory corruption in ImageTTFText() on 64 bit. (Andrey)
 
 31 Mar 2005, PHP 5.0.4
 - Added SNMPv2 support. (harrie)
