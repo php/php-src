@@ -32,9 +32,9 @@
 
 static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
 {
-	int i;
-
 	if (S->cols) {
+		int i;
+
 		for (i = 0; i < stmt->column_count; i++) {
 			if (S->cols[i].data) {
 				efree(S->cols[i].data);
@@ -48,7 +48,6 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
 static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
-	int i;
 
 	if (S->stmt != SQL_NULL_HANDLE) {
 		if (stmt->executed) {
