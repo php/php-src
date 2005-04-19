@@ -1891,6 +1891,11 @@ ZEND_API char *zend_get_module_version(char *module_name)
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC)
 {
+	return zend_declare_property_ex(ce, name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
+}
+
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC)
+{
 	zend_property_info property_info;
 	HashTable *target_symbol_table;
 
@@ -1952,6 +1957,9 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 	property_info.flags = access_type;
 	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
 
+	property_info.doc_comment = doc_comment;
+	property_info.doc_comment_len = doc_comment_len;
+	
 	zend_hash_update(&ce->properties_info, name, name_length + 1, &property_info, sizeof(zend_property_info), NULL);
 
 	return SUCCESS;

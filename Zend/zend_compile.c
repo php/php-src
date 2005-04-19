@@ -54,6 +54,9 @@ static void zend_duplicate_property_info_internal(zend_property_info *property_i
 static void zend_destroy_property_info(zend_property_info *property_info)
 {
 	efree(property_info->name);
+	if (property_info->doc_comment) {
+		efree(property_info->doc_comment);
+	}
 }
 
 
@@ -1818,8 +1821,11 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 	}
 
 	if (proto->common.return_reference != ZEND_RETURN_REFERENCE_AGNOSTIC
-		&& fe->common.return_reference != proto->common.return_reference) {
-		return 0;
+	&& fe->common.return_reference != proto->common.return_reference) {
+		/* atm we cannot let internal function return by ref */
+		if (fe->type != ZEND_INTERNAL_FUNCTION && proto->type == ZEND_INTERNAL_FUNCTION) {
+			return 0;
+		}
 	}
 
 	for (i=0; i < proto->common.num_args; i++) {
@@ -2687,6 +2693,8 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 {
 	zval *property;
 	zend_property_info *existing_property_info;
+	char *comment = NULL;
+	int comment_len = 0;
 
 	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -2715,7 +2723,13 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 		property->type = IS_NULL;
 	}
 
-	zend_declare_property(CG(active_class_entry), var_name->u.constant.value.str.val, var_name->u.constant.value.str.len, property, access_type TSRMLS_CC);
+	if (CG(doc_comment)) {
+		comment = estrndup(CG(doc_comment), CG(doc_comment_len));
+		comment_len = CG(doc_comment_len);
+		RESET_DOC_COMMENT();
+	}
+
+	zend_declare_property_ex(CG(active_class_entry), var_name->u.constant.value.str.val, var_name->u.constant.value.str.len, property, access_type, comment, comment_len TSRMLS_CC);
 	efree(var_name->u.constant.value.str.val);
 }
 

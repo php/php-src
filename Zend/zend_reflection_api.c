@@ -3455,6 +3455,21 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	zend_reflection_class_factory(ref->ce, return_value TSRMLS_CC);
 }
 
+/* {{{ proto public string ReflectionProperty::getDocComment()
+   Returns the doc comment for this property */
+ZEND_METHOD(reflection_property, getDocComment)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	METHOD_NOTSTATIC_NUMPARAMS(0);
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop->doc_comment) {
+		RETURN_STRINGL(ref->prop->doc_comment, ref->prop->doc_comment_len, 1);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
 /* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
@@ -3814,6 +3829,7 @@ static zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, isDefault, NULL, 0)
 	ZEND_ME(reflection_property, getModifiers, NULL, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, NULL, 0)
+	ZEND_ME(reflection_property, getDocComment, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
