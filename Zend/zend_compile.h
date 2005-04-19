@@ -138,6 +138,8 @@ typedef struct _zend_property_info {
 	char *name;
 	int name_length;
 	ulong h;
+	char *doc_comment;
+	int doc_comment_len;
 } zend_property_info;
 
 
