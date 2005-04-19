@@ -95,7 +95,7 @@ static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_per_
 module MODULE_VAR_EXPORT php5_module;
 
 int saved_umask;
-//static int setup_env = 0;
+/* static int setup_env = 0; */
 static unsigned char apache_php_initialized;
 
 typedef struct _php_per_dir_entry {

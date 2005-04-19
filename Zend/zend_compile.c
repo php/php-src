@@ -241,7 +241,7 @@ static int lookup_cv(zend_op_array *op_array, char* name, int name_len)
 		op_array->size_var += 16; /* FIXME */		
 		op_array->vars = erealloc(op_array->vars, op_array->size_var*sizeof(zend_compiled_variable));
 	}
-	op_array->vars[i].name = name; //estrndup(name, name_len);
+	op_array->vars[i].name = name; /* estrndup(name, name_len); */
 	op_array->vars[i].name_len = name_len;
 	op_array->vars[i].hash_value = hash_value;
 	return i;
@@ -1658,7 +1658,7 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
 	opline->op1 = *catch_class;
-/*	SET_UNUSED(opline->op1); *//* FIXME: Define IS_CLASS or something like that */
+/*	SET_UNUSED(opline->op1); */ /* FIXME: Define IS_CLASS or something like that */
 	opline->op2 = *catch_var;
 	opline->op1.u.EA.type = 0; /* 1 means it's the last catch in the block */
 

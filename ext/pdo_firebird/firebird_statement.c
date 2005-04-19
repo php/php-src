@@ -351,7 +351,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = var->sqldata;
 					*len = var->sqllen;
 					break;
-// --- cut here ---
+/* --- cut here --- */
 				case SQL_SHORT:
 				    *ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
 					*len = sprintf(*ptr, "%d", *(short*)var->sqldata);
@@ -372,7 +372,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*ptr = FETCH_BUF(S->fetch_buf[colno], char, 24, NULL);
 					*len = sprintf(*ptr, "%f" , *(double*)var->sqldata);
 					break;
-// --- cut here ---
+/* --- cut here --- */
 #if abies_0
 				case SQL_SHORT:
 					*ptr = FETCH_BUF(S->fetch_buf[colno], long, 0, *len);

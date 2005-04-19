@@ -79,7 +79,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_pgsql)
  */
 PHP_RINIT_FUNCTION(pdo_pgsql)
 {
-	//	php_pdo_register_driver(&pdo_pgsql_driver);
+	/*	php_pdo_register_driver(&pdo_pgsql_driver); */
 	return SUCCESS;
 }
 /* }}} */
@@ -88,7 +88,7 @@ PHP_RINIT_FUNCTION(pdo_pgsql)
  */
 PHP_RSHUTDOWN_FUNCTION(pdo_pgsql)
 {
-	//	php_pdo_unregister_driver(&pdo_pgsql_driver);
+	/*	php_pdo_unregister_driver(&pdo_pgsql_driver); */
 	return SUCCESS;
 }
 /* }}} */
