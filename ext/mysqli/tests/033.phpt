@@ -12,9 +12,9 @@ function test: mysqli_get_host_info
 
 	$hinfo = mysqli_get_host_info($link);
 
-	var_dump($hinfo);
+	var_dump(str_replace('/','', $hinfo));
 
 	mysqli_close($link);
 ?>
---EXPECT--
-string(25) "Localhost via UNIX socket"
+--EXPECTF--
+string(%d) "%s via %s"
