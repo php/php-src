@@ -2611,7 +2611,7 @@ PHP_FUNCTION(openssl_private_encrypt)
 	cryptedlen = EVP_PKEY_size(pkey);
 	cryptedbuf = emalloc(cryptedlen + 1);
 
-	switch (Z_TYPE_P(pkey)) {
+	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			successful =  (RSA_private_encrypt(data_len, 
@@ -2669,7 +2669,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	cryptedlen = EVP_PKEY_size(pkey);
 	crypttemp = emalloc(cryptedlen + 1);
 
-	switch (Z_TYPE_P(pkey)) {
+	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			cryptedlen = RSA_private_decrypt(data_len, 
@@ -2734,7 +2734,7 @@ PHP_FUNCTION(openssl_public_encrypt)
 	cryptedlen = EVP_PKEY_size(pkey);
 	cryptedbuf = emalloc(cryptedlen + 1);
 
-	switch (Z_TYPE_P(pkey)) {
+	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			successful = (RSA_public_encrypt(data_len, 
@@ -2793,7 +2793,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 	cryptedlen = EVP_PKEY_size(pkey);
 	crypttemp = emalloc(cryptedlen + 1);
 
-	switch (Z_TYPE_P(pkey)) {
+	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
 			cryptedlen = RSA_public_decrypt(data_len, 
