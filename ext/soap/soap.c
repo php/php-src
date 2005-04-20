@@ -1689,24 +1689,29 @@ PHP_METHOD(SoapServer, handle)
 	/* Flush buffer */
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
 
-	/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
-	xmlDocDumpMemory(doc_return, &buf, &size);
+	if (doc_return) {
+		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
+		xmlDocDumpMemory(doc_return, &buf, &size);
 
-	if (size == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Dump memory failed");
-	}
+		if (size == 0) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Dump memory failed");
+		} 	
 
-	sprintf(cont_len, "Content-Length: %d", size);
-	sapi_add_header(cont_len, strlen(cont_len), 1);
-	if (soap_version == SOAP_1_2) {
-		sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
+		sprintf(cont_len, "Content-Length: %d", size);
+		sapi_add_header(cont_len, strlen(cont_len), 1);
+		if (soap_version == SOAP_1_2) {
+			sapi_add_header("Content-Type: application/soap+xml; charset=utf-8", sizeof("Content-Type: application/soap+xml; charset=utf-8")-1, 1);
+		} else {
+			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
+		}
+
+		xmlFreeDoc(doc_return);
+		php_write(buf, size TSRMLS_CC);
+		xmlFree(buf);
 	} else {
-		sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
+		sapi_add_header("HTTP/1.1 202 Accepted", sizeof("HTTP/1.1 202 Accepted")-1, 1);
+		sapi_add_header("Content-Length: 0", sizeof("Content-Length: 0")-1, 1);
 	}
-
-	xmlFreeDoc(doc_return);
-	php_write(buf, size TSRMLS_CC);
-	xmlFree(buf);
 
 fail:
 	SOAP_GLOBAL(soap_version) = old_soap_version;
@@ -3156,7 +3161,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 			ns = encode_add_ns(body, fnb->output.ns);
 			if (function->responseName) {
 				method = xmlNewChild(body, ns, function->responseName, NULL);
-			} else {
+			} else if (function->responseParameters) {
 				method = xmlNewChild(body, ns, function->functionName, NULL);
 			}
 		}
@@ -3248,6 +3253,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 	xmlNodePtr envelope = NULL, body, param;
 	xmlNsPtr ns = NULL;
 	int use = SOAP_LITERAL;
+	xmlNodePtr head = NULL;
 
 	encode_reset_ns();
 
@@ -3459,7 +3465,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 	} else {
 
 		if (headers) {
-			xmlNodePtr head;
 			soapHeader *h;
 
 			head = xmlNewChild(envelope, ns, "Header", NULL);
@@ -3552,6 +3557,11 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 		}
 	}
 
+	if (function && function->responseName == NULL && 
+	    body->children == NULL && head == NULL) {
+		xmlFreeDoc(doc);
+		return NULL;
+	}
 	return doc;
 }
 

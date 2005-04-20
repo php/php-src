@@ -34,6 +34,11 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	ZVAL_NULL(return_value);
 
+	/* Response for one-way opearation */
+	if (buffer_size == 0) {
+		return TRUE;
+	}
+
 	/* Parse XML packet */
 	response = soap_xmlParseMemory(buffer, buffer_size);
 
