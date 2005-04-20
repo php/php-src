@@ -1065,7 +1065,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x0c
+#define WSDL_CACHE_VERSION 0x0d
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -1214,6 +1214,7 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 	type->fixed = sdl_deserialize_string(in);
 	type->ref = sdl_deserialize_string(in);
 	WSDL_CACHE_GET_1(type->nillable, char, in);
+	WSDL_CACHE_GET_1(type->form, sdlForm, in);
 
 	WSDL_CACHE_GET_INT(i, in);
 	type->encode = encoders[i];
@@ -1788,6 +1789,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 	sdl_serialize_string(type->fixed, out);
 	sdl_serialize_string(type->ref, out);
 	WSDL_CACHE_PUT_1(type->nillable, out);
+	WSDL_CACHE_PUT_1(type->form, out);
 	sdl_serialize_encoder_ref(type->encode, tmp_encoders, out);
 
 	if (type->restrictions) {

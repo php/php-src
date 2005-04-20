@@ -8,7 +8,7 @@
 	targetNamespace="http://soapinterop.org/wsdl">
 
 	<types>
-		<schema
+		<schema elementFormDefault="qualified"
 			xmlns="http://www.w3.org/2001/XMLSchema"
 			xmlns:tns="http://soapinterop.org/types"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

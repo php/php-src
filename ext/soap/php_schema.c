@@ -1664,6 +1664,39 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 		cur_type->def = estrdup(attr->children->content);
 	}
 
+	/* form */
+	attr = get_attribute(attrs, "form");
+	if (attr) {
+		if (strncmp(attr->children->content,"qualified",sizeof("qualified")) == 0) {
+		  cur_type->form = XSD_FORM_QUALIFIED;
+		} else if (strncmp(attr->children->content,"unqualified",sizeof("unqualified")) == 0) {
+		  cur_type->form = XSD_FORM_UNQUALIFIED;
+		} else {
+		  cur_type->form = XSD_FORM_DEFAULT;
+		}
+	} else {
+	  cur_type->form = XSD_FORM_DEFAULT;
+	}
+	if (cur_type->form == XSD_FORM_DEFAULT) {
+ 		xmlNodePtr parent = element->parent;
+ 		while (parent) {
+			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
+				xmlAttrPtr def;
+				def = get_attribute(parent->properties, "elementFormDefault");
+				if(def == NULL || strncmp(def->children->content, "qualified", sizeof("qualified"))) {
+					cur_type->form = XSD_FORM_UNQUALIFIED;
+				} else {
+					cur_type->form = XSD_FORM_QUALIFIED;
+				}
+				break;
+			}
+			parent = parent->parent;
+  	}
+		if (parent == NULL) {
+			cur_type->form = XSD_FORM_UNQUALIFIED;
+		}	
+	}
+
 	/* type = QName */
 	type = get_attribute(attrs, "type");
 	if (type) {
@@ -1890,10 +1923,10 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		}
 		attr = attr->next;
 	}
-	if(newAttr->form == XSD_FORM_DEFAULT) {
-  		xmlNodePtr parent = attrType->parent;
-  		while(parent) {
-			if(node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
+	if (newAttr->form == XSD_FORM_DEFAULT) {
+ 		xmlNodePtr parent = attrType->parent;
+ 		while (parent) {
+			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "attributeFormDefault");
 				if(def == NULL || strncmp(def->children->content, "qualified", sizeof("qualified"))) {
@@ -1904,8 +1937,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				break;
 			}
 			parent = parent->parent;
-  		}
-		if(parent == NULL) {
+  	}
+		if (parent == NULL) {
 			newAttr->form = XSD_FORM_UNQUALIFIED;
 		}	
 	}
@@ -2209,6 +2242,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 				if ((*tmp)->def) {
 				  type->def = estrdup((*tmp)->def);
 				}
+				type->form = (*tmp)->form;
 			} else if (strcmp(type->ref, SCHEMA_NAMESPACE ":schema") == 0) {
 				type->encode = get_conversion(XSD_ANYXML);
 			} else {
