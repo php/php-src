@@ -610,7 +610,7 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 #ifdef MYSQL_DATA_TRUNCATED
 	if (!ret || ret == MYSQL_DATA_TRUNCATED) {
 #else
-	if (!ret || ret == MYSQL_DATA_TRUNCATED) {
+	if (!ret) {
 #endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
 			if (stmt->result.vars[i]->type == IS_STRING && stmt->result.vars[i]->value.str.len) {
