@@ -1,3 +1,106 @@
+2005-04-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      NEWS:
+      reorder
+
+2005-04-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_reflection_api.c:
+      - Add ReflectionProperty::getDocComment()
+
+2005-04-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/openssl/openssl.c:
+      - Never use Z_TYPE* macros on non-zvals.
+
+2005-04-19  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_0)
+      NEWS:
+      FN
+
+    * main/main.c:
+      add INT_MAX and INT_SIZE constants.
+
+    * ext/mysqli/tests/033.phpt:
+      MFB
+
+    * (PHP_5_0)
+      ext/mysqli/tests/033.phpt:
+      fix test to be able to run not only over Unix socket but also over TCP/IP
+      and not only connected to localhost.
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/mysqli/tests/bug32405.phpt
+      ext/mysqli/tests/bug32405.phpt:
+      
+      add a test case for Bug #32405 (the previous commit incorporated a fix
+      for it).
+
+    * ext/mysqli/mysqli_api.c:
+      - nail down another 64bit problem. this will fix about 14 failing tests
+        on amd64 (probably other 64 bit arch).
+      - use ulong for this boolean variable, as it was before
+      - throw an warning if offset passed to mysqli_stmt_data_seek is negative
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/014.phpt:
+      - fixing all "long" into "int" fetching problems (cause memory corruption
+        on 64 bit)
+      - nail down a problem because of the new MYSQL_TYPE_NEWDECIMAL introduced
+        in MySQL 5.0+
+      - Add more info to the autocommit test
+
+2005-04-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      sapi/apache/sapi_apache.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/apache_hooks/sapi_apache.c:
+      No c++ comments in C code
+
+    * ext/sqlite/pdo_sqlite2.c:
+      - This is not C++ code
+
+2005-04-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      merge from branch: fixes for #32758 and #32759
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      - Fix #32758 Cannot access safearray properties
+      - Fix #32759 incorrect determination of default value
+
+2005-04-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/sqlite/sqlite.c:
+      MFH: Fixed bug #32753 (Undefined constant SQLITE_NOTADB).
+
+    * ext/sqlite/sqlite.c:
+      Fixed bug #32753 (Undefined constant SQLITE_NOTADB).
+
 2005-04-18  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_0)
