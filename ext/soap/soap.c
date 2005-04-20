@@ -3412,7 +3412,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 		}
 		if (fault && fault->details && zend_hash_num_elements(fault->details) == 1) {
 			xmlNodePtr node;
-		  zval *detail = NULL;
+			zval *detail = NULL;
 			sdlParamPtr sparam;
 			xmlNodePtr x;
 
