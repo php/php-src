@@ -1234,7 +1234,9 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 						}
 					}
 					xmlNodeSetName(property, model->u.element->name);
-					if (style == SOAP_LITERAL && model->u.element->namens) {
+					if (style == SOAP_LITERAL &&
+					    model->u.element->namens &&
+					    model->u.element->form == XSD_FORM_QUALIFIED) {
 						xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
 						xmlSetNs(property, nsp);
 					}
@@ -1482,8 +1484,9 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 								/* we need to handle xml: namespace specially, since it is
 								   an implicit schema. Otherwise, use form.
 								*/
-								if ((!strncmp((*attr)->namens, XML_NAMESPACE, sizeof(XML_NAMESPACE)) || 
-								    ((*attr)->form == XSD_FORM_QUALIFIED)) && (*attr)->namens) {
+								if ((*attr)->namens &&
+								    (!strncmp((*attr)->namens, XML_NAMESPACE, sizeof(XML_NAMESPACE)) || 
+								     (*attr)->form == XSD_FORM_QUALIFIED)) {
 									xmlNsPtr nsp = encode_add_ns(xmlParam, (*attr)->namens);
 
 									xmlSetNsProp(xmlParam, nsp, (*attr)->name, dummy->children->content);

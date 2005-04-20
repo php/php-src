@@ -10,7 +10,7 @@
 	targetNamespace="http://soapinterop.org/wsdl">
 
 	<types>
-		<schema
+		<schema elementFormDefault="qualified"
 			xmlns="http://www.w3.org/2001/XMLSchema"
 			xmlns:tns="http://soapinterop.org/types"
 			targetNamespace="http://soapinterop.org/types">
@@ -62,7 +62,7 @@
 
 		</schema>
 
-		<schema
+		<schema elementFormDefault="qualified"
 			xmlns="http://www.w3.org/2001/XMLSchema"
 			xmlns:tns="http://soapinterop.org/types/part"
 			targetNamespace="http://soapinterop.org/types/part">
@@ -74,7 +74,7 @@
 
 		</schema>
 
-		<schema
+		<schema elementFormDefault="qualified"
 			xmlns="http://www.w3.org/2001/XMLSchema"
 			xmlns:tns="http://soapinterop.org/types/requestresponse"
 			targetNamespace="http://soapinterop.org/types/requestresponse">

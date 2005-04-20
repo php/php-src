@@ -11,7 +11,7 @@
     <types>
         <schema targetNamespace="http://soapinterop.org/xsd" 
             xmlns="http://www.w3.org/2001/XMLSchema" 
-            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" elementFormDefault="qualified">
             <import namespace = "http://schemas.xmlsoap.org/soap/encoding/"/>          
             <complexType name="ArrayOfstring">
                 <complexContent>
