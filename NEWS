@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, Version 4.?.?
+- Added support for .cc files in extensions. (Brian)
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
   them sort based on the current locale. (Derick)
 - Changed sha1_file() and md5_file() functions to use streams instead of 
