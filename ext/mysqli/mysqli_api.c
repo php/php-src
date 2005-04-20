@@ -606,7 +606,12 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 			memset(stmt->result.buf[i].val, 0, stmt->result.buf[i].buflen);
 		}
 	}
-	if (!(ret = mysql_stmt_fetch(stmt->stmt))) {
+	ret = mysql_stmt_fetch(stmt->stmt);
+#ifdef MYSQL_DATA_TRUNCATED
+	if (!ret || ret == MYSQL_DATA_TRUNCATED) {
+#else
+	if (!ret || ret == MYSQL_DATA_TRUNCATED) {
+#endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
 			if (stmt->result.vars[i]->type == IS_STRING && stmt->result.vars[i]->value.str.len) {
 		        efree(stmt->result.vars[i]->value.str.val);
