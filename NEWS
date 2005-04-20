@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   . added class File
   . added possibility to use a string with class_parents() and
     class_implements(). (Andrey)
+- Added support for .cc files in extensions. (Brian)
 - Added imageconvolution() function which can be used to apply a custom 3x3
   matrix convolution to an image. (Pierre)
 - Added optional first parameter to XsltProcessor::registerPHPFunctions to only  
