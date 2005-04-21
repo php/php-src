@@ -201,7 +201,7 @@ PHP_METHOD(domimplementation, createDocument)
 			xmlFreeDoc(docp);
 			xmlFree(localname);
 			/* Need some type of error here */
-			php_error(E_WARNING, "Unexpected Error");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected Error");
 			RETURN_FALSE;
 		}
 

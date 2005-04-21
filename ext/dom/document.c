@@ -113,7 +113,7 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) dtdptr, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error(E_WARNING, "Cannot create required DOM object");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -165,7 +165,7 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object(root, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error(E_WARNING, "Cannot create required DOM object");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -1635,7 +1635,7 @@ PHP_FUNCTION(dom_document_save)
 	}
 
 	if (file_len == 0) {
-		php_error(E_WARNING, "Invalid Filename");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Filename");
 		RETURN_FALSE;
 	}
 
@@ -1687,7 +1687,7 @@ PHP_FUNCTION(dom_document_savexml)
 		}
 		buf = xmlBufferCreate();
 		if (!buf) {
-			php_error(E_WARNING, "Could not fetch buffer");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
 
@@ -1697,7 +1697,7 @@ PHP_FUNCTION(dom_document_savexml)
 			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
-		RETVAL_STRING(mem,  1);
+		RETVAL_STRING(mem, 1);
 		xmlBufferFree(buf);
 	} else {
 		/* Encoding is handled from the encoding property set on the document */
@@ -1844,7 +1844,7 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	if (source_len == 0) {
-		php_error(E_WARNING, "Invalid Schema source");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Schema source");
 		RETURN_FALSE;
 	}
 
@@ -1854,7 +1854,7 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	case DOM_LOAD_FILE:
 		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
 		if (!valid_file) {
-			php_error(E_WARNING, "Invalid Schema file source");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Schema file source");
 			RETURN_FALSE;
 		}
 		parser = xmlSchemaNewParserCtxt(valid_file);
@@ -1875,7 +1875,7 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	sptr = xmlSchemaParse(parser);
 	xmlSchemaFreeParserCtxt(parser);
 	if (!sptr) {
-		php_error(E_WARNING, "Invalid Schema");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Schema");
 		RETURN_FALSE;
 	}
 
@@ -1934,7 +1934,7 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	if (source_len == 0) {
-		php_error(E_WARNING, "Invalid Schema source");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Schema source");
 		RETURN_FALSE;
 	}
 
@@ -1944,7 +1944,7 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	case DOM_LOAD_FILE:
 		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
 		if (!valid_file) {
-			php_error(E_WARNING, "Invalid RelaxNG file source");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid RelaxNG file source");
 			RETURN_FALSE;
 		}
 		parser = xmlRelaxNGNewParserCtxt(valid_file);
@@ -1965,7 +1965,7 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	sptr = xmlRelaxNGParse(parser);
 	xmlRelaxNGFreeParserCtxt(parser);
 	if (!sptr) {
-		php_error(E_WARNING, "Invalid RelaxNG");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid RelaxNG");
 		RETURN_FALSE;
 	}
 
@@ -2115,7 +2115,7 @@ PHP_FUNCTION(dom_document_save_html_file)
 	}
 
 	if (file_len == 0) {
-		php_error(E_WARNING, "Invalid Filename");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Filename");
 		RETURN_FALSE;
 	}
 
