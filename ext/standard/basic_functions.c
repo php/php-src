@@ -2251,17 +2251,21 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC)
 {
 	zval retval;
+	char *function_name = NULL;
 
-	if (call_user_function(	EG(function_table), NULL,
-							shutdown_function_entry->arguments[0],
-							&retval, 
-							shutdown_function_entry->arg_count - 1,
-							shutdown_function_entry->arguments + 1 
-							TSRMLS_CC ) == SUCCESS ) {
+	if (!zend_is_callable(shutdown_function_entry->arguments[0], 0, &function_name)) {
+		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name);
+	} else if (call_user_function(EG(function_table), NULL,
+								shutdown_function_entry->arguments[0],
+								&retval, 
+								shutdown_function_entry->arg_count - 1,
+								shutdown_function_entry->arguments + 1 
+								TSRMLS_CC ) == SUCCESS)
+	{
 		zval_dtor(&retval);
-
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_P(shutdown_function_entry->arguments[0]));
+	} 
+	if (function_name) {
+		efree(function_name);
 	}
 	return 0;
 }
@@ -2354,6 +2358,7 @@ void php_free_shutdown_functions(TSRMLS_D)
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
+	char *function_name = NULL;
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
@@ -2362,26 +2367,31 @@ PHP_FUNCTION(register_shutdown_function)
 		WRONG_PARAM_COUNT;
 	}
 
-	shutdown_function_entry.arguments = (pval **) safe_emalloc(sizeof(pval *), shutdown_function_entry.arg_count, 0);
+	shutdown_function_entry.arguments = (zval **) safe_emalloc(sizeof(zval *), shutdown_function_entry.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
-	/* Prevent entering of anything but arrays/strings */
-	if (Z_TYPE_P(shutdown_function_entry.arguments[0]) != IS_ARRAY) {
-		convert_to_string(shutdown_function_entry.arguments[0]);
-	}
-	
-	if (!BG(user_shutdown_function_names)) {
-		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
-		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *)) user_shutdown_function_dtor, 0);
-	}
+	/* Prevent entering of anything but valid callback (syntax check only!) */
+	if (!zend_is_callable(shutdown_function_entry.arguments[0], 1, &function_name)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", function_name);
+		efree(shutdown_function_entry.arguments);
+		RETVAL_FALSE;
+	} else {
+		if (!BG(user_shutdown_function_names)) {
+			ALLOC_HASHTABLE(BG(user_shutdown_function_names));
+			zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *)) user_shutdown_function_dtor, 0);
+		}
 
-	for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-		shutdown_function_entry.arguments[i]->refcount++;
+		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
+			shutdown_function_entry.arguments[i]->refcount++;
+		}
+		zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 	}
-	zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
+	if (function_name) {
+		efree(function_name);
+	}
 }
 /* }}} */
 
