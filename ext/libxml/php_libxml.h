@@ -22,14 +22,9 @@
 #ifndef PHP_LIBXML_H
 #define PHP_LIBXML_H
 
-#ifdef HAVE_LIBXML
+#if HAVE_LIBXML
 extern zend_module_entry libxml_module_entry;
 #define libxml_module_ptr &libxml_module_entry
-#else
-#define libxml_module_ptr NULL
-#endif
-
-#ifdef HAVE_LIBXML 
 
 #ifdef PHP_WIN32
 #define PHP_LIBXML_API __declspec(dllexport)
@@ -90,9 +85,9 @@ PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg TSRMLS_DC);
 
-#endif /* HAVE_LIBXML */
-
-#define phpext_libxml_ptr libxml_module_ptr
+/* Init/shutdown functions*/
+PHP_LIBXML_API void php_libxml_initialize();
+PHP_LIBXML_API void php_libxml_shutdown();
 
 #ifdef ZTS
 #define LIBXML(v) TSRMG(libxml_globals_id, php_libxml_globals *, v)
@@ -100,8 +95,11 @@ PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg TSRMLS_DC)
 #define LIBXML(v) (libxml_globals.v)
 #endif
 
-PHP_LIBXML_API void php_libxml_initialize();
-PHP_LIBXML_API void php_libxml_shutdown();
+#else /* HAVE_LIBXML */
+#define libxml_module_ptr NULL
+#endif
+
+#define phpext_libxml_ptr libxml_module_ptr
 
 #endif /* PHP_LIBXML_H */
 
