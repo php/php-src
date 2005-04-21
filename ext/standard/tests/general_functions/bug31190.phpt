@@ -1,5 +1,5 @@
 --TEST--
-bug #31190 (exception in call_user_func_array())
+Bug #31190 (exception in call_user_func_array())
 --FILE--
 <?php
 
