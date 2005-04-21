@@ -11,6 +11,8 @@ PHP 4                                                                      NEWS
   (Derick)
 - Fixed bug #32682 (ext/mssql: Error on module shutdown when called from 
   activescript). (Frank)
+- Fixed bug #32647 (Using register_shutdown_function() with invalid callback
+  can crash PHP). (Jani)
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
 - Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
   (Ilia)
