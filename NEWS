@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed bug #32682 (ext/mssql: Error on module shutdown when called from
   activescript). (Frank)
+- Fixed bug #32647 (Using register_shutdown_function() with invalid callback
+  can crash PHP). (Jani)
 - Fixed bug #32615 (Segfault in replaceChild() using fragment when 
   previousSibling is NULL). (Rob)
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
@@ -33,12 +35,12 @@ PHP                                                                        NEWS
   (Uwe Schindler)
 - Fixed bug #32405 (mysqli::fetch() returns bad data - 64bit problem). (Andrey)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
-- Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance 
-  mode). (mike at php dot net)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit) (Georg).
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
   response message). (Jani)
 - Fixed bug #31636 (another crash when echoing a COM object). (Wez)
+- Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance 
+  mode). (mike at php dot net)
 - Fixed bug #31502 (Wrong deserialization from session when using WDDX
   serializer). (Dmitry) 
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
