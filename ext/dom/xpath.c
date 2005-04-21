@@ -96,7 +96,7 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error(E_WARNING, "Cannot create required DOM object");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -119,7 +119,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 
 	ctxp = (xmlXPathContextPtr) intern->ptr;
 	if (ctxp == NULL) {
-		php_error(E_WARNING, "Invalid XPath Context");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
 	}
 
@@ -159,13 +159,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 
 	ctxp = (xmlXPathContextPtr) intern->ptr;
 	if (ctxp == NULL) {
-		php_error(E_WARNING, "Invalid XPath Context");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
 	}
 
 	docp = (xmlDocPtr) ctxp->doc;
 	if (docp == NULL) {
-		php_error(E_WARNING, "Invalid XPath Document Pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Document Pointer");
 		RETURN_FALSE;
 	}
 
@@ -178,7 +178,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 	}
 
 	if (nodep && docp != nodep->doc) {
-		php_error(E_WARNING, "Node From Wrong Document");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node From Wrong Document");
 		RETURN_FALSE;
 	}
 

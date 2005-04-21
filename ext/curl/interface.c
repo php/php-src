@@ -868,7 +868,7 @@ PHP_FUNCTION(curl_copy_handle)
 
 	cp = curl_easy_duphandle(ch->cp);
 	if (!cp) {
-		php_error(E_WARNING, "Cannot duplicate cURL handle");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot duplicate cURL handle");
 		RETURN_FALSE;
 	}
 
