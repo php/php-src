@@ -44,6 +44,11 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.6  2004/06/01 20:16:06  iliaa
+ *   Fixed bug #28597 (xmlrpc_encode_request() incorrectly encodes chars in
+ *   200-210 range).
+ *   Patch by: fernando dot nemec at folha dot com dot br
+ *
  *   Revision 1.5  2003/12/16 21:00:21  sniper
  *   Fix some compile warnings (patch by Joe Orton)
  *
@@ -108,7 +113,7 @@ static const char rcsid[] = "#(@) $Id$";
 #include "expat.h"
 #include "encodings.h"
 
-#define my_free(thing)  if(thing) {free(thing); thing = 0;}
+#define my_free(thing)  if(thing) {free(thing); thing = NULL;}
 
 #define XML_DECL_START                 "<?xml"
 #define XML_DECL_START_LEN             sizeof(XML_DECL_START) - 1
@@ -184,7 +189,10 @@ void xml_elem_free_non_recurse(xml_element* root) {
 
       Q_Destroy(&root->children);
       Q_Destroy(&root->attrs);
-      my_free((char*)root->name);
+      if(root->name) {
+          free((char *)root->name);
+          root->name = NULL;
+      }
       simplestring_free(&root->text);
       my_free(root);
    }
