@@ -1,3 +1,63 @@
+2005-04-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/odbc/config.m4:
+      - Fix birdstep support (no SQLDataSources() support in it)
+
+2005-04-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c
+      ext/dom/attr.c
+      ext/dom/document.c
+      ext/dom/domimplementation.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h
+      ext/dom/xpath.c:
+      php_error() -> php_error_docref().
+
+2005-04-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      - Allow using --enable-versioning with any SAPI module
+
+    * configure.in
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4:
+      Expose EXEEXT and use for cli/cgi binaries
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH: - Fixed bug #32647 (Using register_shutdown_function() with invalid
+      callback can crash PHP)
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/standard/basic_functions.c:
+      - Fixed bug #32647 (Using register_shutdown_function() with invalid
+      callback can crash PHP)
+
+    * (PHP_4_3)
+      ext/standard/tests/general_functions/bug32647.phpt:
+      Fix test
+
+    * ZendEngine2/tests/unset_cv05.phpt:
+      Fix test when register_long_arrays is off in your php.ini
+
+    * ext/standard/tests/general_functions/bug32647.phpt
+      ext/standard/tests/general_functions/bug32647.phpt
+      ext/standard/tests/general_functions/bug32647.phpt:
+        1.1.4;
+      Added test for bug #32647
+
+    * ext/standard/tests/general_functions/bug29038.phpt
+      ext/standard/tests/general_functions/bug31190.phpt:
+      bug => Bug
+
 2005-04-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/fdf/fdf.c:
