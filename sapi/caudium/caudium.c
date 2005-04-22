@@ -287,7 +287,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
   struct svalue *s_headermap, *soldval;
   int vallen;
   GET_THIS();
-  //  hval = make_shared_string(value);
+  /*  hval = make_shared_string(value); */
   ind = make_shared_string(" _headers");
   hind = make_shared_binary_string(header_name,
 				   (int)(p - header_name));
@@ -597,7 +597,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   Pike_interpreter.recoveries = NULL;
   call_c_initializers(Pike_interpreter.thread_id);
   state->id=th_self();
-  //  SWAP_OUT_THREAD(OBJ2THREAD(Pike_interpreter.thread_id));
+  /*  SWAP_OUT_THREAD(OBJ2THREAD(Pike_interpreter.thread_id)); */
   num_threads++;
   thread_table_insert(Pike_interpreter.thread_id);
   state->status=THREAD_RUNNING;

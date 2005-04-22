@@ -194,12 +194,12 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
 	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
 	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
-//	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
+/*	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 
 	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
 	php_com_saproxy_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
-//	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
+/*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 	
 	INIT_CLASS_ENTRY(ce, "variant", NULL);
