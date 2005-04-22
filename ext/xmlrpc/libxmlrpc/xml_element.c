@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.8  2005/03/28 00:07:24  edink
+ *   Reshufle includes to make it compile on windows
+ *
  *   Revision 1.7  2005/03/26 03:13:58  sniper
  *   - Made it possible to build ext/xmlrpc with libxml2
  *
@@ -116,7 +119,7 @@ static const char rcsid[] = "#(@) $Id$";
 #include "queue.h"
 #include "encodings.h"
 
-#define my_free(thing)  if(thing) {free(thing); thing = 0;}
+#define my_free(thing)  if(thing) {free(thing); thing = NULL;}
 
 #define XML_DECL_START                 "<?xml"
 #define XML_DECL_START_LEN             sizeof(XML_DECL_START) - 1
@@ -192,7 +195,10 @@ void xml_elem_free_non_recurse(xml_element* root) {
 
       Q_Destroy(&root->children);
       Q_Destroy(&root->attrs);
-      my_free((char*)root->name);
+      if(root->name) {
+          free((char *)root->name);
+          root->name = NULL;
+      }
       simplestring_free(&root->text);
       my_free(root);
    }
