@@ -405,16 +405,16 @@ mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string)
 		num = identd->filter_list_size;
 		n = string->len;
 		p = string->val;
+		bad = 0;
 		while (n > 0) {
-			i = 0;
-			bad = 0;
-			while (i < num) {
+			for (i = 0; i < num; i++) {
 				filter = identd->filter_list[i];
-				(*filter->filter_function)(*p, filter);
-				if (filter->flag) {
-					bad++;
+				if (!filter->flag) {
+					(*filter->filter_function)(*p, filter);
+					if (filter->flag) {
+						bad++;
+					}
 				}
-				i++;
 			}
 			if ((num - 1) <= bad) {
 				res = 1;
@@ -555,9 +555,11 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 		while (n > 0) {
 			for (i = 0; i < num; i++) {
 				filter = &flist[i];
-				(*filter->filter_function)(*p, filter);
-				if (filter->flag) {
-					bad++;
+				if (!filter->flag) {
+					(*filter->filter_function)(*p, filter);
+					if (filter->flag) {
+						bad++;
+					}
 				}
 			}
 			if ((num - 1) <= bad && !strict) {
