@@ -1746,7 +1746,7 @@ static int dbstmt_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-static zend_object_handlers pdo_dbstmt_object_handlers;
+zend_object_handlers pdo_dbstmt_object_handlers;
 
 void pdo_stmt_init(TSRMLS_D)
 {
@@ -2112,7 +2112,7 @@ static int row_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return -1;
 }
 
-static zend_object_handlers pdo_row_object_handlers = {
+zend_object_handlers pdo_row_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	row_prop_or_dim_read,
 	row_prop_or_dim_write,
