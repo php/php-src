@@ -36,7 +36,7 @@ PHP                                                                        NEWS
 - Fixed bug #32405 (mysqli::fetch() returns bad data - 64bit problem). (Andrey)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit) (Georg).
-- Fixed bug #32111 (Cookies can also be separated by colon). (Jani)
+- Fixed bug #32111 (Cookies can also be separated by comma). (Jani)
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
   response message). (Jani)
 - Fixed bug #31636 (another crash when echoing a COM object). (Wez)
