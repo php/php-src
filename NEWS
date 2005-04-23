@@ -27,6 +27,7 @@ PHP 4                                                                      NEWS
   (Uwe Schindler)
 - Fixed bug #32311 (mb_encode_mimeheader() does not properly escape characters).
   (Moriyoshi)
+- Fixed bug #32111 (Cookies can also be separated by colon). (Jani)
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
   response message). (Jani) 
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance mode).
