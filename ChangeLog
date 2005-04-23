@@ -1,3 +1,35 @@
+2005-04-22  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xml_element.c:
+      MFH: Fixed bug #32797 (invalid C code in xmlrpc extension).
+
+    * ext/xmlrpc/libxmlrpc/xml_element.c:
+      Fixed bug #32797 (invalid C code in xmlrpc extension).
+
+2005-04-22  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/mysql/.cvsignore:
+      add missing entries in .cvsignore
+
+    * ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_extension.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/caudium/caudium.c
+      sapi/caudium/caudium.c
+      sapi/caudium/caudium.c
+      sapi/cgi/libfcgi/fcgiapp.c:
+      fix C++ comments
+
+2005-04-22  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_4_3)
+      main/main.c:
+      MFH
+      introduce INT_MAX and INT_SIZE
+
 2005-04-21  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/odbc/config.m4:
