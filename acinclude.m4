@@ -1936,10 +1936,10 @@ AC_DEFUN([PHP_PROG_BISON], [
   if test "$YACC" = "bison -y"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
       set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'|tr -d a-z`
-      if test "${1}" -ne "1" -o "(" "${2}" != "28" -a "${2}" != "35" -a "${2}" != "75" -a "${2}" != "875" ")"; then 
-        php_cv_bison_version=invalid
-      else
+      if test "(" "${1}" = "1" -a "(" "${2}" = "28" -o "${2}" = "35" -o "${2}" = "75" -o "${2}" = "875" ")" ")" -o "(" "${1}" = "2" -a "(" "${2}" = "0" ")" ")"; then
         php_cv_bison_version="${1}.${2} (ok)"
+      else
+        php_cv_bison_version=invalid
       fi
     ])
   fi
