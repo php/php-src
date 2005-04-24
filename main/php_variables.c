@@ -182,7 +182,7 @@ plain_var:
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				zval *tmp;
+				zval **tmp;
 				char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
 				/* 
 				 * According to rfc2965, more specific paths are listed above the less specific ones.
