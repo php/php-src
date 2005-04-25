@@ -292,8 +292,6 @@ typedef unsigned long (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, unsig
 #define gmp_unary_opl(op)         _gmp_unary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_unary_ui_op(op)      _gmp_unary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 
-typedef int (*gmp_validate_params_t)(mpz_ptr);
-
 /* {{{ gmp_zval_binary_ui_op_ex
    Execute GMP binary operation.
    May return GMP resource or long if operation allows this
