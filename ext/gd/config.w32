@@ -7,8 +7,11 @@ if (PHP_GD != "no") {
 	if (CHECK_LIB("libjpeg.lib", "gd", PHP_GD) &&
 		CHECK_LIB("freetype2.lib", "gd", PHP_GD) &&
 		CHECK_LIB("libpng.lib", "gd", PHP_GD) &&
+		CHECK_LIB("T1_StaticMD.lib", "gd", PHP_GD) &&
 		CHECK_LIB("zlib.lib", "gd", PHP_GD + ";..\\zlib;" + php_usual_lib_suspects) &&
-		CHECK_HEADER_ADD_INCLUDE("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd")) {
+		CHECK_HEADER_ADD_INCLUDE("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd") &&
+		CHECK_HEADER_ADD_INCLUDE("t1lib.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\t1lib")
+		) {
 
 		EXTENSION("gd", "gd.c gdttf.c", null, "-Iext/gd/libgd", "php_gd2.dll");
 		ADD_SOURCES("ext/gd/libgd", "gd2copypal.c gd_arc_f_buggy.c gd.c \
@@ -40,6 +43,7 @@ if (PHP_GD != "no") {
 /D HAVE_LIBPNG  \
 /D USE_GD_IMGSTRTTF  \
 /D USE_GD_IOCTX \
+/D HAVE_LIBT1 \
 /D MSWIN32 \
 		");
 		} else {
