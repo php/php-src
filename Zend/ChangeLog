@@ -1,3 +1,8 @@
+2005-04-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      - Need to copy doc comments correct for properties
+
 2005-04-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug29674.phpt
