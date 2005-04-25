@@ -1,3 +1,27 @@
+2005-04-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_variables.c:
+      MFB: zval** not zval*
+
+    * (PHP_5_0)
+      main/php_variables.c:
+      zval** not zval*.
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      main/php_variables.c
+      main/php_variables.c:
+      MFH: Fixed bug #32802 (General cookie overrides more specific cookie).
+
+    * main/php_variables.c:
+      Fixed bug #32802 (General cookie overrides more specific cookie).
+
+2005-04-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c:
+      - Need to copy doc comments correct for properties
+
 2005-04-23  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_4_3)
