@@ -32,6 +32,12 @@ if test "$PHP_TIDY" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(tidy, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
   PHP_ADD_INCLUDE($TIDY_INCDIR)
 
+  PHP_CHECK_LIBRARY(tidy,tidyOptGetDoc,
+  [
+  AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
+  ],[],[])
+
+
   PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared)
   PHP_SUBST(TIDY_SHARED_LIBADD)
   AC_DEFINE(HAVE_TIDY,1,[ ])
