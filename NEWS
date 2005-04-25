@@ -238,6 +238,8 @@ PHP                                                                        NEWS
 - Fixed bug #27633 (Double \r problem on ftp_get in ASCII mode on Win32). (Ilia)
 - Fixed bug #18613 (Multiple OUs in x509 certificate not handled properly).
   (Jani)
+- Fixed bug #32773 (GMP fincs break when second parameter is 0) and made right
+  fix for GMP FPEs (Stas)
 
 15 Dec 2004, PHP 5.0.3
 - Added the %F modifier to *printf to render a non-locale-aware representation
