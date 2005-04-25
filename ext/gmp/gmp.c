@@ -309,10 +309,6 @@ static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zv
 		FETCH_GMP_ZVAL(gmpnum_b, b_arg);
 	}
 
-	if (!Z_LVAL_PP(b_arg)) {
-		RETURN_FALSE;
-	}
-
 	INIT_GMP_NUM(gmpnum_result);
 	if(use_ui && gmp_ui_op) {
 		if(allow_ui_return) {
@@ -350,10 +346,6 @@ static inline void gmp_zval_binary_ui_op2_ex(zval *return_value, zval **a_arg, z
 		use_ui=1;
 	} else {
 		FETCH_GMP_ZVAL(gmpnum_b, b_arg);
-	}
-
-	if (!Z_LVAL_PP(b_arg)) {
-		RETURN_FALSE;
 	}
 
 	INIT_GMP_NUM(gmpnum_result1);
