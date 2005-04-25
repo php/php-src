@@ -1530,7 +1530,7 @@ static int generate_free_switch_expr(zend_switch_entry *switch_entry TSRMLS_DC)
 	zend_op *opline;
 	
 	if (switch_entry->cond.op_type != IS_VAR && switch_entry->cond.op_type != IS_TMP_VAR) {
-		return 0;
+		return (switch_entry->cond.op_type == IS_UNUSED);
 	}
 	
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
