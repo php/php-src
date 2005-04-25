@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Added the tidy_get_opt_doc() function to return documentation for
-  configuration options in tidy. Thanks to nlopess for the patch. (John)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
 - Removed garbage manager in Zend Engine which results in more aggressive
   freeing of data. (Dmitry, Andi)
@@ -33,6 +31,8 @@ PHP                                                                        NEWS
   . added class File
   . added possibility to use a string with class_parents() and
     class_implements(). (Andrey)
+- Added the tidy_get_opt_doc() function to return documentation for
+  configuration options in tidy. Thanks to nlopess for the patch. (John)
 - Added support for .cc files in extensions. (Brian)
 - Added imageconvolution() function which can be used to apply a custom 3x3
   matrix convolution to an image. (Pierre)
