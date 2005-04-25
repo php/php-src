@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Fixed bug #32809 (Missing T1LIB support on Windows). (Edin)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bug #32776 (SOAP doesn't support one-way operations). (Dmitry)
+- Fixed bug #32773 (GMP functions break when second parameter is 0). (Stas)
 - Fixed bug #32759 (incorrect determination of default value (COM)). (Wez)
 - Fixed bug #32758 (Cannot access safearray properties in VB6 objects). (Wez)
 - Fixed bug #32755 (Segfault in replaceChild() when DocumentFragment has
@@ -238,8 +239,6 @@ PHP                                                                        NEWS
 - Fixed bug #27633 (Double \r problem on ftp_get in ASCII mode on Win32). (Ilia)
 - Fixed bug #18613 (Multiple OUs in x509 certificate not handled properly).
   (Jani)
-- Fixed bug #32773 (GMP fincs break when second parameter is 0) and made right
-  fix for GMP FPEs (Stas)
 
 15 Dec 2004, PHP 5.0.3
 - Added the %F modifier to *printf to render a non-locale-aware representation
