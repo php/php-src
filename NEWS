@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Changed sha1_file() and md5_file() functions to use streams instead of
   low level IO. (Uwe)
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
+- Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
 - Fixed bug #32809 (Missing T1LIB support on Windows). (Edin)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bug #32776 (SOAP doesn't support one-way operations). (Dmitry)
