@@ -701,7 +701,7 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 	s = *((Bucket **) b);
 
 	if (f->nKeyLength) {
-		Z_STRVAL(key1) = estrndup(f->arKey, f->nKeyLength);
+		Z_STRVAL(key1) = estrndup(f->arKey, f->nKeyLength-1);
 		Z_STRLEN(key1) = f->nKeyLength-1;
 		Z_TYPE(key1) = IS_STRING;
 	} else {
@@ -709,7 +709,7 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 		Z_TYPE(key1) = IS_LONG;
 	}
 	if (s->nKeyLength) {
-		Z_STRVAL(key2) = estrndup(s->arKey, s->nKeyLength);
+		Z_STRVAL(key2) = estrndup(s->arKey, s->nKeyLength-1);
 		Z_STRLEN(key2) = s->nKeyLength-1;
 		Z_TYPE(key2) = IS_STRING;
 	} else {
@@ -2737,7 +2737,7 @@ PHP_FUNCTION(array_change_key_case)
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(entry), NULL);
 				break;
 			case HASH_KEY_IS_STRING:
-				new_key=estrndup(string_key,str_key_len);
+				new_key=estrndup(string_key,str_key_len - 1);
 				if (change_to_upper)
 					php_strtoupper(new_key, str_key_len - 1);
 				else
