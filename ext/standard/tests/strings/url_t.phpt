@@ -67,7 +67,8 @@ $sample_urls = array (
 'file://path/to/file',
 'file:/path/to/file',
 'http://1.2.3.4:/abc.asp?a=1&b=2',
-'http://foo.com#bar'
+'http://foo.com#bar',
+'scheme:'
 );
 
     foreach ($sample_urls as $url) {
@@ -656,4 +657,8 @@ array(3) {
   string(7) "foo.com"
   ["fragment"]=>
   string(3) "bar"
+}
+array(1) {
+  ["scheme"]=>
+  string(6) "scheme"
 }
