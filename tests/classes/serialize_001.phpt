@@ -1,9 +1,9 @@
 --TEST--
-ZE2 Serializeable
+ZE2 Serializable
 --FILE--
 <?php
 
-class Test implements Serializeable
+class Test implements Serializable
 {
 	public $data;
 
@@ -65,7 +65,7 @@ object(Test)#1 (1) {
 NULL
 Test::__construct()
 Test::serialize()
-Exception: Test::serialize() must return a string or NULL
+NULL
 ==========
 int(42)
 Test::__construct(42)
