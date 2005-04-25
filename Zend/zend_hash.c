@@ -239,7 +239,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLengt
 		p = p->pNext;
 	}
 	
-	p = (Bucket *) pemalloc(sizeof(Bucket)-1+nKeyLength, ht->persistent);
+	p = (Bucket *) pemalloc(sizeof(Bucket) - 1 + nKeyLength, ht->persistent);
 	if (!p) {
 		return FAILURE;
 	}
@@ -304,7 +304,7 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKe
 		p = p->pNext;
 	}
 	
-	p = (Bucket *) pemalloc(sizeof(Bucket)-1+nKeyLength, ht->persistent);
+	p = (Bucket *) pemalloc(sizeof(Bucket) - 1 + nKeyLength, ht->persistent);
 	if (!p) {
 		return FAILURE;
 	}
@@ -380,11 +380,11 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 		}
 		p = p->pNext;
 	}
-	p = (Bucket *) pemalloc_rel(sizeof(Bucket)-1, ht->persistent);
+	p = (Bucket *) pemalloc_rel(sizeof(Bucket) - 1, ht->persistent);
 	if (!p) {
 		return FAILURE;
 	}
-	p->nKeyLength = 0;			/*  Numeric indices are marked by making the nKeyLength == 0 */
+	p->nKeyLength = 0; /* Numeric indices are marked by making the nKeyLength == 0 */
 	p->h = h;
 	INIT_DATA(ht, p, pData, nDataSize);
 	if (pDest) {
@@ -761,9 +761,9 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 		} else {
 			zend_hash_index_update(target, p->h, p->pData, size, &new_entry);
 		}
-        if (pCopyConstructor) {
-            pCopyConstructor(new_entry);
-        }
+		if (pCopyConstructor) {
+			pCopyConstructor(new_entry);
+		}
 		p = p->pListNext;
 	}
 	target->pInternalPointer = target->pListHead;
@@ -779,7 +779,7 @@ ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_f
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 
-    p = source->pListHead;
+	p = source->pListHead;
 	while (p) {
 		if (p->nKeyLength>0) {
 			if (_zend_hash_add_or_update(target, p->arKey, p->nKeyLength, p->pData, size, &t, mode ZEND_FILE_LINE_RELAY_CC)==SUCCESS && pCopyConstructor) {
@@ -815,7 +815,7 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 
-    p = source->pListHead;
+	p = source->pListHead;
 	while (p) {
 		if (zend_hash_replace_checker_wrapper(target, p->pData, p, pParam, pMergeSource)) {
 			if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
@@ -1046,7 +1046,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos)
 {
 	Bucket *p;
-   
+
 	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
@@ -1054,7 +1054,7 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint 
 	if (p) {
 		if (p->nKeyLength) {
 			if (duplicate) {
-				*str_index = estrndup(p->arKey, p->nKeyLength-1);
+				*str_index = estrndup(p->arKey, p->nKeyLength - 1);
 			} else {
 				*str_index = p->arKey;
 			}
@@ -1074,7 +1074,7 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint 
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 {
 	Bucket *p;
-   
+
 	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
@@ -1093,7 +1093,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos)
 {
 	Bucket *p;
-   
+
 	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
@@ -1140,17 +1140,17 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 
 	arTmp[0]->pListLast = NULL;
 	if (i > 1) {
-    	arTmp[0]->pListNext = arTmp[1];
-    	for (j = 1; j < i-1; j++) {
-    		arTmp[j]->pListLast = arTmp[j-1];
-    		arTmp[j]->pListNext = arTmp[j+1];
-    	}
-    	arTmp[j]->pListLast = ht->pListTail;
-    	arTmp[j]->pListNext = NULL;
-    } else {
-    	arTmp[0]->pListNext = NULL;
-    }
-   	ht->pListTail = arTmp[i-1];
+		arTmp[0]->pListNext = arTmp[1];
+		for (j = 1; j < i-1; j++) {
+			arTmp[j]->pListLast = arTmp[j-1];
+			arTmp[j]->pListNext = arTmp[j+1];
+		}
+		arTmp[j]->pListLast = ht->pListTail;
+		arTmp[j]->pListNext = NULL;
+	} else {
+		arTmp[0]->pListNext = NULL;
+	}
+	ht->pListTail = arTmp[i-1];
 
 	pefree(arTmp, ht->persistent);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
