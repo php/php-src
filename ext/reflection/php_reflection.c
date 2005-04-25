@@ -2576,7 +2576,7 @@ ZEND_METHOD(reflection_class, hasMethod)
 /* }}} */
 
 /* {{{ proto public ReflectionMethod ReflectionClass::getMethod(string name) throws ReflectionException
-   Returns the class' method specified by it's name */
+   Returns the class' method specified by its name */
 ZEND_METHOD(reflection_class, getMethod)
 {
 	reflection_object *intern;
@@ -2672,7 +2672,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 /* }}} */
 
 /* {{{ proto public ReflectionProperty ReflectionClass::getProperty(string name) throws ReflectionException
-   Returns the class' property specified by it's name */
+   Returns the class' property specified by its name */
 ZEND_METHOD(reflection_class, getProperty)
 {
 	reflection_object *intern;
