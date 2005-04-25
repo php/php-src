@@ -33,6 +33,7 @@ PHP 4                                                                      NEWS
   response message). (Jani) 
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance mode).
   (mike at php dot net)
+- Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
