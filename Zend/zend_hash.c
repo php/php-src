@@ -1054,7 +1054,7 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, uint 
 	if (p) {
 		if (p->nKeyLength) {
 			if (duplicate) {
-				*str_index = estrndup(p->arKey, p->nKeyLength);
+				*str_index = estrndup(p->arKey, p->nKeyLength-1);
 			} else {
 				*str_index = p->arKey;
 			}
