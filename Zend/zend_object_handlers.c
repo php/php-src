@@ -819,9 +819,7 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 		if (check_empty) {
 			result = zend_is_true(*value);
 		} else {
-			/* We do not need to check for NULL here because this is not called for isset/isempty.
-			 * And indeed even a NULL value means the property is defined. */
-			result = 1;
+			result = (Z_TYPE_PP(value) != IS_NULL);
 		}
 	} else {
 		result = 0;
