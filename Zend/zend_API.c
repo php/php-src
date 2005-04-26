@@ -712,8 +712,13 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC)
 {
 	if (!class_type->constants_updated) {
+		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+		zend_class_entry *old_scope = *scope;
+
+		*scope = class_type;
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 		zend_hash_apply_with_argument(class_type->static_members, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		*scope = old_scope;
 		class_type->constants_updated = 1;
 	}
 }
