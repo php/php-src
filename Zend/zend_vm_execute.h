@@ -8422,6 +8422,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, Z
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -8434,9 +8435,14 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, Z
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -9762,6 +9768,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEN
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -9774,9 +9781,14 @@ static int zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEN
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -11102,6 +11114,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEN
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -11114,9 +11127,14 @@ static int zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEN
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -12593,6 +12611,7 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -12605,9 +12624,14 @@ static int zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -13796,6 +13820,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -13808,9 +13833,14 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -14811,6 +14841,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, 
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -14823,9 +14854,14 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, 
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -15785,6 +15821,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, 
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -15797,9 +15834,14 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, 
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -16878,6 +16920,7 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, Z
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -16890,9 +16933,14 @@ static int zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, Z
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -19274,6 +19322,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZE
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -19286,9 +19335,14 @@ static int zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZE
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -20614,6 +20668,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -20626,9 +20681,14 @@ static int zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -21954,6 +22014,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -21966,9 +22027,14 @@ static int zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -23445,6 +23511,7 @@ static int zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -23457,9 +23524,14 @@ static int zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -28670,6 +28742,7 @@ static int zend_post_incdec_property_helper(incdec_t incdec_op, ZEND_OPCODE_HAND
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+			zval *z_copy;
 
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -28682,9 +28755,14 @@ static int zend_post_incdec_property_helper(incdec_t incdec_op, ZEND_OPCODE_HAND
 			}
 			*retval = *z;
 			zendi_zval_copy_ctor(*retval);
-			incdec_op(z);
+			ALLOC_ZVAL(z_copy);
+			*z_copy = *z;
+			zendi_zval_copy_ctor(*z_copy);
+			INIT_PZVAL(z_copy);
+			incdec_op(z_copy);
 			z->refcount++;
-			Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+			Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
 			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
