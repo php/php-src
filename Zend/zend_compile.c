@@ -1019,7 +1019,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 	if (is_method) {
 		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
-			if (!(fn_flags_znode->u.constant.value.lval == ZEND_ACC_PUBLIC)) {
+			if ((fn_flags_znode->u.constant.value.lval & ~(ZEND_ACC_STATIC|ZEND_ACC_PUBLIC))) {
 				zend_error(E_COMPILE_ERROR, "Access type for interface method %s::%s() must be omitted", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
 			}
 			fn_flags_znode->u.constant.value.lval |= ZEND_ACC_ABSTRACT; /* propagates to the rest of the parser */
