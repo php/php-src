@@ -1270,6 +1270,7 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 
 	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
+		zval *z_copy;
 
 		if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 			zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -1282,9 +1283,14 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 		}
 		*retval = *z;
 		zendi_zval_copy_ctor(*retval);
-		incdec_op(z);
+		ALLOC_ZVAL(z_copy);
+		*z_copy = *z;
+		zendi_zval_copy_ctor(*z_copy);
+		INIT_PZVAL(z_copy);
+		incdec_op(z_copy);
 		z->refcount++;
-		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
+		Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
+		zval_ptr_dtor(&z_copy);
 		zval_ptr_dtor(&z);
 	}
 	
