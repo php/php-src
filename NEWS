@@ -52,6 +52,8 @@ PHP                                                                        NEWS
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
 - Fixed bug #30833 (array_count_values() modifying input array). (Tony)
 - Fixed bug #30819 (Better support for LDAP SASL bind). (Jani)
+- Fixed bug #30702 (cannot initialize class variable from class constant).
+  (Dmitry)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
