@@ -880,11 +880,20 @@ ZEND_FUNCTION(method_exists)
 		efree(lcname);
 		RETURN_TRUE;
 	} else {
+		union _zend_function *func = NULL;
 		efree(lcname);
+
 		if (Z_TYPE_PP(klass) == IS_OBJECT 
 		&& Z_OBJ_HT_PP(klass)->get_method != NULL
-		&& Z_OBJ_HT_PP(klass)->get_method(klass, Z_STRVAL_PP(method_name), Z_STRLEN_PP(method_name) TSRMLS_CC) != NULL
+		&& (func = Z_OBJ_HT_PP(klass)->get_method(klass, Z_STRVAL_PP(method_name), Z_STRLEN_PP(method_name) TSRMLS_CC)) != NULL
 		) {
+			if (func->type == ZEND_INTERNAL_FUNCTION 
+			&& ((zend_internal_function*)func)->handler == zend_std_call_user_call
+			) {
+				efree(((zend_internal_function*)func)->function_name);
+				efree(func);
+				RETURN_FALSE;
+			}
 			RETURN_TRUE;
 		}
 	}
