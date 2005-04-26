@@ -1,3 +1,40 @@
+2005-04-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_object_handlers.c:
+      Reverting. Let's not introduce major BC breakage like this without a
+      good reason.
+
+2005-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug29944.phpt
+      tests/bug29944.phpt:
+      
+      Fixed bug #29944 (Function defined in switch, crashes).
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug29944.phpt:
+      Fixed bug #29944 (Function defined in switch, crashes).
+
+2005-04-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_hash.c:
+      ws
+
+2005-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_hash.c:
+      Fixed call to estrndup() with invalid length
+
+    * (PHP_5_0)
+      zend_hash.c:
+      Fixed call to estrndup() with invalid lengt
+
+2005-04-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      Correct grammar.
+
 2005-04-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c:
