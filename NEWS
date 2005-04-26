@@ -109,6 +109,8 @@ PHP                                                                        NEWS
 - Fixed ZTS destruction. (Marcus)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
   (Uwe Schindler)
+- Fixed bug #32429 (method_exists() always return TRUE if __call method
+  exists). (Dmitry)
 - Fixed bug #32109 ($_POST is not populated in multithreaded environment).
   (Moriyoshi)
 - Fixed bug #31478 (segfault with empty() / isset()). (Moriyoshi)
