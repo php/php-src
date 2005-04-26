@@ -1,3 +1,172 @@
+2005-04-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/url.c
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt
+      ext/standard/tests/strings/url_t.phpt:
+      MFH: Fixed bug #32813 (parse_url() does not handle scheme-only urls
+      properly).
+
+    * ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      Fixed bug #32813 (parse_url() does not handle scheme-only urls properly).
+
+2005-04-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/classes/serialize_001.phpt:
+      Fix test
+
+    * NEWS:
+      Reorder
+
+    * (PHP_4_3)
+      NEWS
+      main/php_variables.c:
+      MFH: Revert. Nokia didn't pay me enough. :)
+
+    * (PHP_5_0)
+      NEWS:
+      rbfn
+
+    * main/php_variables.c:
+      Revert. (Nokia is not that important :)
+
+2005-04-25  John Coggeshall  <john@coggeshall.org>
+
+    * NEWS:
+      Update
+
+2005-04-25  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Reverting. Let's not introduce major BC breakage like this without a
+      good reason.
+
+2005-04-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/zlib/tests/compress_zlib_wrapper.phpt:
+      - Added test: For some reason this fails with ZTS mode and
+      "outside-src-tree-build"
+
+    * (PHP_5_0)
+      NEWS:
+      reorder + shorten..
+
+    * NEWS:
+      When an entry goes to the PHP_5_0 branch, no entry here
+
+2005-04-25  Stanislav Malyshev  <stas@zend.com>
+
+    * NEWS:
+      oops
+
+    * NEWS
+      NEWS:
+      fix
+
+    * ext/gmp/gmp.c
+      ext/gmp/gmp.c
+      ext/gmp/tests/bug32773.phpt
+      ext/gmp/tests/bug32773.phpt:
+      Fix #32773 and make right fix for GMP FPEs
+
+    * (PHP_4_3)
+      ext/gmp/gmp.c:
+      rm unneeded
+
+    * (PHP_4_3)
+      NEWS:
+      fix for #32773
+
+    * (PHP_4_3)
+      ext/gmp/gmp.c:
+      Fix #32773 and made right fix for GMP FPEs
+
+2005-04-25  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/tests/bug24155.phpt
+      ext/gd/tests/bug27582_1.phpt:
+      -  do not use md5, png signature can change between libpng version
+         some floating points issue can end to different colors (+/- 1/255)
+         tests should work again now.
+
+2005-04-25  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/gmp/tests/bug32773.phpt
+      ext/gmp/tests/bug32773.phpt
+      ext/gmp/tests/bug32773.phpt:
+        1.1.4;
+      file bug32773.phpt was initially added on branch PHP_4_3.
+
+2005-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_3)
+      NEWS
+      tests/lang/bug29944.phpt:
+      Test case fnd news entriey for bug #29944
+
+2005-04-25  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      ext/gmp/gmp.c:
+      Remove broken fix - second operand of GMP operation certainly can be 0 in
+      general case
+
+2005-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      Zend/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug29944.phpt:
+      Fixed bug #29944 (Function defined in switch, crashes).
+
+    * ZendEngine2/tests/bug29944.phpt
+      ZendEngine2/tests/bug29944.phpt:
+      
+      Fixed bug #29944 (Function defined in switch, crashes).
+
+2005-04-25  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/gd/config.w32:
+      MFH: Added T1LIB support on Windows (#32809)
+
+    * ext/gd/config.w32:
+      Added T1LIB support on Windows (#32809)
+
+2005-04-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_hash.c:
+      ws
+
+2005-04-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend_hash.c
+      ZendEngine2/zend_hash.c
+      ext/standard/array.c
+      ext/standard/array.c:
+      Fixed call to estrndup() with invalid length
+
+    * (PHP_5_0)
+      ZendEngine2/zend_hash.c
+      ext/standard/array.c:
+      Fixed call to estrndup() with invalid lengt
+
+2005-04-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Correct grammar.
+
 2005-04-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/php_variables.c:
