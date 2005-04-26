@@ -24,5 +24,5 @@ try {
 }
 
 ?>
---EXPEXT--
+--EXPECT--
 bool(false)
