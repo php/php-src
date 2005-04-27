@@ -313,9 +313,21 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 #ifdef FIELD_TYPE_NEWDECIMAL
 			case MYSQL_TYPE_NEWDECIMAL:
 #endif
-				stmt->result.buf[ofs].type = IS_STRING; 
-				stmt->result.buf[ofs].buflen =
-					(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
+				stmt->result.buf[ofs].type = IS_STRING;
+				/*
+					If the user has called $stmt->store_result() then we have asked
+					max_length to be updated. this is done only for BLOBS because we don't want to allocate
+					big chunkgs of memory 2^16 or 2^24 
+				*/
+				if (stmt->stmt->fields[ofs].max_length == 0) {
+					stmt->result.buf[ofs].buflen =
+						(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
+				} else {
+					/*
+						the user has called store_result(). if he does not there is no way to determine the
+					*/
+					stmt->result.buf[ofs].buflen = stmt->stmt->fields[ofs].max_length;
+				}
 				stmt->result.buf[ofs].val = (char *)emalloc(stmt->result.buf[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_STRING;
 				bind[ofs].buffer = stmt->result.buf[ofs].val;
@@ -1858,11 +1870,27 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 {
 	MY_STMT *stmt;
 	zval 	*mysql_stmt;
+	int		i=0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt"); 
+	
+	/*
+	  If the user wants to store the data and we have BLOBs/TEXTs we try to allocate
+	  not the maximal length of the type (which is 16MB even for LONGBLOB) but
+	  the maximal length of the field in the result set. If he/she has quite big
+	  BLOB/TEXT columns after calling store_result() the memory usage of PHP will
+	  double - but this is a known problem of the simple MySQL API ;)
+	*/
+	for (i = mysql_stmt_field_count(stmt->stmt) - 1; i >=0; --i) {
+		if (stmt->stmt->fields && stmt->stmt->fields[i].type == MYSQL_TYPE_BLOB) {
+			my_bool	tmp=1;
+			mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);
+			break;
+		}
+	}
 	
 	if (mysql_stmt_store_result(stmt->stmt)){
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
