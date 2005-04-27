@@ -132,6 +132,12 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
 
+/* these 3 APIs should only be used by people that fully understand the threading model
+ * used by PHP/Zend and the selected SAPI. */
+TSRM_API void *tsrm_new_interpreter_context(void);
+TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
+TSRM_API void tsrm_free_interpreter_context(void *context);
+
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
