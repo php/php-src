@@ -745,7 +745,6 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						break;
 					}
 				}
-				fprintf(stderr, "FAIL\n");
 				return 0;
 
 			case PDO_FETCH_OBJ:
