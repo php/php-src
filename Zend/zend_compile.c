@@ -1039,7 +1039,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.fn_flags = fn_flags;
 	op_array.pass_rest_by_reference = 0;
 
-	op_array.scope = CG(active_class_entry);
+	op_array.scope = is_method?CG(active_class_entry):NULL;
 	op_array.prototype = NULL;
 
 	op_array.line_start = zend_get_compiled_lineno(TSRMLS_C);
