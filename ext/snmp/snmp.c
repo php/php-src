@@ -452,8 +452,7 @@ retry:
 					if (st == SNMP_CMD_GET) {
 						*return_value = *snmpval;
 						zval_copy_ctor(return_value);
-						zval_dtor(snmpval);
-						efree(snmpval);
+						zval_ptr_dtor(&snmpval);
 						snmp_close(ss);
 						return;
 					} else if (st == SNMP_CMD_GETNEXT) {
