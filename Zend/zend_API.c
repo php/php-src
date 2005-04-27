@@ -1741,7 +1741,7 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	return 1;
 }
 
-ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
+ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name)
 {
 	char *lcname;
 	zend_bool retval = 0;
@@ -1752,7 +1752,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 			if (callable_name) {
 				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
 			}
-			if (syntax_only) {
+			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				return 1;
 			}
 
@@ -1789,7 +1789,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
 						}
 
-						if (syntax_only)
+						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY)
 							return 1;
 
 						lcname = zend_str_tolower_dup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
@@ -1818,14 +1818,27 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
 						}
 
-						if (syntax_only)
+						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY)
 							return 1;
 					}
 
 					if (ce) {
+						zend_function *fbc;
+
 						lcname = zend_str_tolower_dup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
-						if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1)) {
-							retval = 1;
+						if (zend_hash_find(&ce->function_table, lcname, Z_STRLEN_PP(method)+1, (void **)&fbc) == SUCCESS) {
+ 							retval = 1;
+							if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
+								if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+									if (!zend_check_private(fbc, (Z_TYPE_PP(obj) == IS_STRING)?EG(scope):(*obj)->value.obj.handlers->get_class_entry(*obj TSRMLS_CC), lcname, Z_STRLEN_PP(method) TSRMLS_CC)) {
+										retval = 0;
+									}
+								} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+									if (!zend_check_protected(fbc->common.scope, EG(scope))) {
+										retval = 0;
+									}
+								}
+							}
 						}
 						/* check for __call too */
 						if (retval == 0 && ce->__call != 0) {
