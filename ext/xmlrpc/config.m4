@@ -28,20 +28,23 @@ if test "$PHP_XMLRPC" != "no"; then
   AC_DEFINE(HAVE_XMLRPC,1,[ ])
 
   dnl
-  dnl Default to libxml2.
+  dnl Default to libxml2 if --with-expat-dir is not used
   dnl
-  PHP_SETUP_LIBXML(XMLRPC_SHARED_LIBADD, [
-    if test "$PHP_XML" = "no"; then
-      PHP_ADD_SOURCES(ext/xml, compat.c)
-      PHP_ADD_BUILD_DIR(ext/xml)
-    fi
-  ], [
-    if test "$PHP_EXPAT_DIR" = "no"; then
-      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
-    fi
-  ])
+  if test "$PHP_EXPAT_DIR" = "no"; then
 
-  if test "$PHP_EXPAT_DIR" != "no"; then
+    if test "$PHP_LIBXML" = "no"; then
+      AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --enable-libxml])
+    fi
+
+    PHP_SETUP_LIBXML(XMLRPC_SHARED_LIBADD, [
+      if test "$PHP_XML" = "no"; then
+        PHP_ADD_SOURCES(ext/xml, compat.c)
+        PHP_ADD_BUILD_DIR(ext/xml)
+      fi
+    ], [
+      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
+    ])
+  else
     testval=no
     for i in $PHP_EXPAT_DIR $XMLRPC_DIR /usr/local /usr; do
       if test -f $i/$PHP_LIBDIR/libexpat.a -o -f $i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME; then
@@ -54,7 +57,7 @@ if test "$PHP_XMLRPC" != "no"; then
     done
 
     if test "$testval" = "no"; then
-      AC_MSG_ERROR(XML-RPC support requires libexpat. Use --with-expat-dir=<DIR>)
+      AC_MSG_ERROR([XML-RPC support requires libexpat. Use --with-expat-dir=<DIR> (deprecated!)])
     fi
   fi
 

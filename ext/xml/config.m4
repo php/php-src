@@ -13,31 +13,37 @@ fi
 PHP_ARG_WITH(libexpat-dir, libexpat install dir,
 [  --with-libexpat-dir=DIR   XML: libexpat install prefix (deprecated)], no, no)
 
-if test "$PHP_XML" != "no" && test "$PHP_LIBXML" != "no" -o "$PHP_LIBEXPAT_DIR" != "no"; then
+if test "$PHP_XML" != "no"; then
+
   dnl 
-  dnl Default to libxml2.
+  dnl Default to libxml2 if --with-libexpat-dir is not used.
   dnl
-  PHP_SETUP_LIBXML(XML_SHARED_LIBADD, [
-    xml_extra_sources="compat.c"
-  ], [
-    if test "$PHP_LIBEXPAT_DIR" = "no"; then
-      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
+  if test "$PHP_LIBEXPAT_DIR" = "no"; then
+
+    if test "$PHP_LIBXML" = "no"; then
+      AC_MSG_ERROR([XML extension requires LIBXML extension, add --enable-libxml])
     fi
-  ])
+
+    PHP_SETUP_LIBXML(XML_SHARED_LIBADD, [
+      xml_extra_sources="compat.c"
+    ], [
+      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
+    ])
+  fi
   
   dnl
   dnl Check for expat only if --with-libexpat-dir is used.
   dnl
   if test "$PHP_LIBEXPAT_DIR" != "no"; then
     for i in $PHP_XML $PHP_LIBEXPAT_DIR; do
-      if test -f "$i/$PHP_LIBDIR/libexpat.a" -o -f "$i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME"; then
+      if test -f "$i/$PHP_LIBDIR/libexpat.a" || test -f "$i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME"; then
         EXPAT_DIR=$i
         break
       fi
     done
 
     if test -z "$EXPAT_DIR"; then
-      AC_MSG_ERROR(not found. Please reinstall the expat distribution.)
+      AC_MSG_ERROR([not found. Please reinstall the expat distribution.])
     fi
 
     PHP_ADD_INCLUDE($EXPAT_DIR/include)

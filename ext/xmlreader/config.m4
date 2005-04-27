@@ -10,7 +10,11 @@ if test -z "$PHP_LIBXML_DIR"; then
   [  --with-libxml-dir=DIR     XMLReader: libxml2 install prefix], no, no)
 fi
 
-if test "$PHP_XMLREADER" != "no" && test "$PHP_LIBXML" != "no"; then
+if test "$PHP_XMLREADER" != "no"; then
+
+  if test "$PHP_LIBXML" = "no"; then
+    AC_MSG_ERROR([XMLReader extension requires LIBXML extension, add --enable-libxml])
+  fi
 
   PHP_SETUP_LIBXML(XMLREADER_SHARED_LIBADD, [
     AC_DEFINE(HAVE_XMLREADER,1,[ ])
