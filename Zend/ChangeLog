@@ -1,3 +1,40 @@
+2005-04-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug30889.phpt
+      tests/bug30889.phpt:
+      
+      file bug30889.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug30889.phpt:
+      Fixed bug #30889 (Conflict between __get/__set and ++ operator)
+
+    * tests/bug32429.phpt:
+      fix
+
+    * zend_API.c
+      zend_API.c
+      tests/bug30702.phpt:
+      Fixed bug #30702 (cannot initialize class variable from class constant)
+
+    * tests/bug30702.phpt
+      tests/bug30702.phpt:
+      
+      file bug30702.phpt was initially added on branch PHP_5_0.
+
+    * zend_compile.c
+      tests/bug32427.phpt:
+      Fixed bug #32427 (Interfaces are not allowed 'static' access modifier).
+
+    * zend_builtin_functions.c
+      tests/bug32429.phpt:
+      Fixed bug #32429 (method_exists() always return TRUE if __call method
+      exists)
+
 2005-04-25  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_object_handlers.c:

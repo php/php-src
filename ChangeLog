@@ -1,3 +1,51 @@
+2005-04-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug30889.phpt
+      ZendEngine2/tests/bug30889.phpt:
+      
+      file bug30889.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug30889.phpt:
+      Fixed bug #30889 (Conflict between __get/__set and ++ operator)
+
+    * ZendEngine2/tests/bug32429.phpt:
+      fix
+
+    * ZendEngine2/tests/bug30702.phpt
+      ZendEngine2/tests/bug30702.phpt:
+      
+      file bug30702.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug30702.phpt:
+      Fixed bug #30702 (cannot initialize class variable from class constant)
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug32427.phpt:
+      Fixed bug #32427 (Interfaces are not allowed 'static' access modifier).
+
+    * NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug32429.phpt:
+      Fixed bug #32429 (method_exists() always return TRUE if __call method
+      exists)
+
+2005-04-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4
+      acinclude.m4:
+      Netware stuff
+
 2005-04-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
