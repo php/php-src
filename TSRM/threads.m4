@@ -87,7 +87,7 @@ int main() {
   ], [
   dnl For cross compiling running this test is of no use. NetWare supports pthreads
   pthreads_working=no
-  case $target_alias in
+  case $host_alias in
   *netware*)
     pthreads_working=yes
   esac
