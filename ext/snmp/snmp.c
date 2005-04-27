@@ -442,8 +442,7 @@ retry:
 					if (st == 1) {
 						*return_value = *snmpval;
 						zval_copy_ctor(return_value);
-						zval_dtor(snmpval);
-						efree(snmpval);
+						zval_ptr_dtor(&snmpval);
 						snmp_close(ss);
 						return;
 					} else if (st == 2) {
