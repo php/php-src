@@ -60,6 +60,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
+- Fixed bug #29104 (Function declaration in method doesn't work). (Dmitry)
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
 
