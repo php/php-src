@@ -531,7 +531,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-static inline zend_function *zend_check_private(zend_function *fbc, zend_class_entry *ce, int fn_flags, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
 {
 	if (!ce) {
 		return 0;
@@ -563,6 +563,12 @@ static inline zend_function *zend_check_private(zend_function *fbc, zend_class_e
 		ce = ce->parent;
 	}
 	return NULL;
+}
+
+
+ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC)
+{
+	return zend_check_private_int(fbc, ce, function_name_strval, function_name_strlen TSRMLS_CC) != NULL;
 }
 
 
@@ -643,7 +649,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
-		updated_fbc = zend_check_private(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), fbc->common.fn_flags, lc_method_name, method_len TSRMLS_CC);
+		updated_fbc = zend_check_private_int(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
 		if (!updated_fbc) {
 			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
 		}
@@ -681,7 +687,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 */
-		updated_fbc = zend_check_private(fbc, EG(scope), fbc->common.fn_flags, function_name_strval, function_name_strlen TSRMLS_CC); 
+		updated_fbc = zend_check_private_int(fbc, EG(scope), function_name_strval, function_name_strlen TSRMLS_CC); 
 		if (!updated_fbc) {
 			zend_error(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
 		}

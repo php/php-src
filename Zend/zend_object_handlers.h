@@ -139,6 +139,8 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 #define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
 
+ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC);
+
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
 ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name TSRMLS_DC);
