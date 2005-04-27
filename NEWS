@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
 - Added support for .cc files in extensions. (Brian)
-- Added INT_MAX and INT_SIZE as predefined constants. (Andrey)
+- Added PHP_INT_MAX and PHP_INT_SIZE as predefined constants. (Andrey)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
 - Changed sha1_file() and md5_file() functions to use streams instead of
   low level IO. (Uwe)
