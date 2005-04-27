@@ -67,7 +67,7 @@ PHP_FUNCTION(mysqli_connect)
 		}
 	}
 
-	mysql = (MY_MYSQL *)calloc(1, sizeof(MY_MYSQL));
+	mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
@@ -132,7 +132,7 @@ PHP_FUNCTION(mysqli_embedded_connect)
 		return;
 	}
 
-	mysql = (MY_MYSQL *) calloc(1, sizeof(MY_MYSQL));
+	mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql = mysql_init(NULL))) {
 		efree(mysql);
@@ -217,7 +217,7 @@ PHP_FUNCTION(mysqli_multi_query)
 	MY_MYSQL		*mysql;
 	zval			*mysql_link;
 	char			*query = NULL;
-	unsigned int 	query_len;
+	unsigned long 	query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;

@@ -55,6 +55,7 @@ typedef struct {
 	MYSQL		*mysql;
 	zval		*li_read;
 	php_stream	*li_stream;
+	unsigned int multi_query;	
 } MY_MYSQL;
 
 typedef struct {
@@ -131,14 +132,14 @@ zend_class_entry _mysqli_result_class_entry;
 
 PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
 
-#define MYSQLI_DISABLE_MQ if (MyG(multi_query)) { \
+#define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
-	MyG(multi_query) = 0; \
+	mysql->multi_query = 0; \
 } 
 
-#define MYSQLI_ENABLE_MQ if (!MyG(multi_query)) { \
+#define MYSQLI_ENABLE_MQ if (!mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
-	MyG(multi_query) = 1; \
+	mysql->multi_query = 1; \
 } 
 
 #define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
@@ -386,7 +387,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char			*error_msg;
 	int				report_mode;
 	HashTable		*report_ht;
-	unsigned int	multi_query;
 #ifdef HAVE_EMBEDDED_MYSQLI
 	unsigned int	embedded;
 #endif
