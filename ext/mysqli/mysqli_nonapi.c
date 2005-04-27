@@ -67,7 +67,7 @@ PHP_FUNCTION(mysqli_connect)
 		}
 	}
 
-	mysql = (MY_MYSQL *)calloc(1, sizeof(MY_MYSQL));
+	mysql = (MY_MYSQL *) ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
