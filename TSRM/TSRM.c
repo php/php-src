@@ -379,6 +379,96 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 #endif
 }
 
+/* frees an interpreter context.  You are responsible for making sure that
+ * it is not linked into the TSRM hash, and not marked as the current interpreter */
+void tsrm_free_interpreter_context(void *context)
+{
+	tsrm_tls_entry *next, *thread_resources = (tsrm_tls_entry*)context;
+	int i;
+
+	while (thread_resources) {
+		next = thread_resources->next;
+
+		for (i=0; i<thread_resources->count; i++) {
+			if (resource_types_table[i].dtor) {
+				resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
+			}
+		}
+		for (i=0; i<thread_resources->count; i++) {
+			free(thread_resources->storage[i]);
+		}
+		free(thread_resources->storage);
+		free(thread_resources);
+		thread_resources = next;
+	}
+}
+
+void *tsrm_set_interpreter_context(void *new_ctx)
+{
+	tsrm_tls_entry *current;
+
+#if defined(PTHREADS)
+	current = pthread_getspecific(tls_key);
+#elif defined(TSRM_ST)
+	current = st_thread_getspecific(tls_key);
+#elif defined(TSRM_WIN32)
+	current = TlsGetValue(tls_key);
+#elif defined(BETHREADS)
+	current = (tsrm_tls_entry*)tls_get(tls_key);
+#else
+#warning tsrm_set_interpreter_context is probably broken on this platform
+	current = NULL;
+#endif
+
+	/* TODO: unlink current from the global linked list, and replace it
+	 * it with the new context, protected by mutex where/if appropriate */
+
+	/* Set thread local storage to this new thread resources structure */
+#if defined(PTHREADS)
+	pthread_setspecific(tls_key, new_ctx);
+#elif defined(TSRM_ST)
+	st_thread_setspecific(tls_key, new_ctx);
+#elif defined(TSRM_WIN32)
+	TlsSetValue(tls_key, new_ctx);
+#elif defined(BETHREADS)
+	tls_set(tls_key, new_ctx);
+#endif
+
+	/* return old context, so caller can restore it when they're done */
+	return current;
+}
+
+
+/* allocates a new interpreter context */
+void *tsrm_new_interpreter_context(void)
+{
+	tsrm_tls_entry *new_ctx, *current;
+	THREAD_T thread_id;
+
+	thread_id = tsrm_thread_id();
+	tsrm_mutex_lock(tsmm_mutex);
+
+#if defined(PTHREADS)
+	current = pthread_getspecific(tls_key);
+#elif defined(TSRM_ST)
+	current = st_thread_getspecific(tls_key);
+#elif defined(TSRM_WIN32)
+	current = TlsGetValue(tls_key);
+#elif defined(BETHREADS)
+	current = (tsrm_tls_entry*)tls_get(tls_key);
+#else
+#warning tsrm_new_interpreter_context is probably broken on this platform
+	current = NULL;
+#endif
+
+	new_ctx = malloc(sizeof(*new_ctx));
+	allocate_new_resource(&new_ctx, thread_id);
+	
+	/* switch back to the context that was in use prior to our creation
+	 * of the new one */
+	return tsrm_set_interpreter_context(current);
+}
+
 
 /* frees all resources allocated for the current thread */
 void ts_free_thread(void)
