@@ -1333,7 +1333,7 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 
 #define SET_OPCODE(new_op)	\
 	CHECK_SYMBOL_TABLES()	\
-	EX(opline) = new_op;
+	EX(opline) = new_op; \
 
 #define INC_OPCODE()			\
 	if (!EG(exception)) {		\
@@ -3784,6 +3784,11 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 		iter->index = 0;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
+			if (EG(exception)) {
+				array_ptr->refcount--;
+				zval_ptr_dtor(&array_ptr);
+				NEXT_OPCODE();
+			}
 		}
 	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
 		/* probably redundant */
@@ -3860,13 +3865,28 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 				/* This could cause an endless loop if index becomes zero again.
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
+				if (EG(exception)) {
+					array->refcount--;
+					zval_ptr_dtor(&array);
+					NEXT_OPCODE();
+				}
 			}
 			if (!iter || iter->funcs->valid(iter TSRMLS_CC) == FAILURE) {
 				/* reached end of iteration */
+				if (EG(exception)) {
+					array->refcount--;
+					zval_ptr_dtor(&array);
+					NEXT_OPCODE();
+				}
 				SET_OPCODE(op_array->opcodes+opline->op2.u.opline_num);
 				return 0; /* CHECK_ME */
 			}	
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
+			if (EG(exception)) {
+				array->refcount--;
+				zval_ptr_dtor(&array);
+				NEXT_OPCODE();
+			}
 			if (!value) {
 				/* failure in get_current_data */
 				SET_OPCODE(op_array->opcodes+opline->op2.u.opline_num);
@@ -3874,6 +3894,11 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			if (iter->funcs->get_current_key) {
 				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				if (EG(exception)) {
+					array->refcount--;
+					zval_ptr_dtor(&array);
+					NEXT_OPCODE();
+				}
 			} else {
 				key_type = HASH_KEY_IS_LONG;
 				int_key = iter->index;
