@@ -2917,8 +2917,18 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		iter->index = 0;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
+			if (EG(exception)) {
+				array_ptr->refcount--;
+				zval_ptr_dtor(&array_ptr);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		}
 		is_empty = iter->funcs->valid(iter TSRMLS_CC) != SUCCESS;
+		if (EG(exception)) {
+			array_ptr->refcount--;
+			zval_ptr_dtor(&array_ptr);
+			ZEND_VM_NEXT_OPCODE();
+		}
 	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
 		zend_hash_internal_pointer_reset(fe_ht);
 		if (ce) {
@@ -3019,21 +3029,41 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				/* This could cause an endless loop if index becomes zero again.
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
+				if (EG(exception)) {
+					array->refcount--;
+					zval_ptr_dtor(&array);
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!iter || (iter->index > 1 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
 				/* reached end of iteration */
+				if (EG(exception)) {
+					array->refcount--;
+					zval_ptr_dtor(&array);
+					ZEND_VM_NEXT_OPCODE();
+				}
 				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
 				ZEND_VM_CONTINUE_JMP();
 			}
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
 			if (!value) {
 				/* failure in get_current_data */
+				if (EG(exception)) {
+					array->refcount--;
+					zval_ptr_dtor(&array);
+					ZEND_VM_NEXT_OPCODE();
+				}
 				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
 				ZEND_VM_CONTINUE_JMP();
 			}
 			if (use_key) {
 				if (iter->funcs->get_current_key) {
 					key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+					if (EG(exception)) {
+						array->refcount--;
+						zval_ptr_dtor(&array);
+						ZEND_VM_NEXT_OPCODE();
+					}
 				} else {
 					key_type = HASH_KEY_IS_LONG;
 					int_key = iter->index;
