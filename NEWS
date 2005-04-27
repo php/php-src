@@ -107,6 +107,7 @@ PHP                                                                        NEWS
 - Fixed bug with raw_post_data not getting set. (Brian)
 - Fixed bug in mysql::client_version(). (Georg)
 - Fixed ZTS destruction. (Marcus)
+- Fixed bug #32833 (Invalid opcode). (Dmitry)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
   (Uwe Schindler)
 - Fixed bug #32429 (method_exists() always return TRUE if __call method
