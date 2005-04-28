@@ -482,9 +482,14 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 static void sapi_cgi_log_message(char *message)
 {
 #if PHP_FASTCGI
+	int logging = 1;
 	TSRMLS_FETCH();
 
-	if (!FCGX_IsCGI()) {
+	if (cfg_get_long("fastcgi.logging", &logging) == FAILURE) {
+		logging = 1;
+	}
+                                                                                                        
+	if (!FCGX_IsCGI() && logging) {
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
 		FCGX_FPrintF( request->err, "%s\n", message );
 		/* ignore return code */
