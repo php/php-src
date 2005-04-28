@@ -199,6 +199,16 @@ static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
 
+	if (Z_STRVAL_P(member)[0] == '\0') {
+		if (!silent) {
+			if (Z_STRLEN_P(member) == 0) {
+				zend_error(E_ERROR, "Cannot access empty property");
+			} else {
+				zend_error(E_ERROR, "Cannot access property started with '\\0'");
+			}
+		}
+		return NULL;				
+	}
 	ulong h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member)+1);
 	if (zend_hash_quick_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
 		if (zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
