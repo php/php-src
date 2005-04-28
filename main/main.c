@@ -1133,6 +1133,7 @@ void php_request_shutdown_for_exec(void *dummy)
 void php_request_shutdown_for_hook(void *dummy)
 {
 	TSRMLS_FETCH();
+
 	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions(TSRMLS_C);
 	} zend_end_try();
@@ -1177,32 +1178,39 @@ void php_request_shutdown(void *dummy)
 	TSRMLS_FETCH();
 
 	report_memleaks = PG(report_memleaks);
+	
 	/* EG(opline_ptr) points into nirvana and therefore cannot be safely accessed
 	 * inside zend_executor callback functions.
 	 */
 	EG(opline_ptr) = NULL;
 
-	zend_try {
-		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
-	} zend_end_try();
-
-	zend_try {
-		sapi_send_headers(TSRMLS_C);
-	} zend_end_try();
-
+	/* 1. Call all possible __destruct() functions */
 	zend_try {
 		zend_call_destructors(TSRMLS_C);
 	} zend_end_try();
 
+	/* 2. Call all possible shutdown functions registered with register_shutdown_function() */
 	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions(TSRMLS_C);
 	} zend_end_try();
 	
+	/* 3. Flush all output buffers */
+	zend_try {
+		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
+	} zend_end_try();
+
+	/* 4. Send the set HTTP headers (note: This must be done AFTER php_end_ob_buffers() !!) */
+	zend_try {
+		sapi_send_headers(TSRMLS_C);
+	} zend_end_try();
+
+	/* 5. Call all extensions RSHUTDOWN functions */
 	if (PG(modules_activated)) {
 		zend_deactivate_modules(TSRMLS_C);
 		php_free_shutdown_functions(TSRMLS_C);
 	}
 
+	/* 6. Destroy super-globals */
 	zend_try {
 		int i;
 
@@ -1213,21 +1221,25 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-		
+	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
 
+	/* 8. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules(TSRMLS_C);
 	} zend_end_try();
 
+	/* 9. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
+	/* 10. Free Willy (here be crashes) */
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
 
+	/* 11. Reset max_execution_time */
 	zend_try { 
 		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
