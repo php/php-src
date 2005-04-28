@@ -1,3 +1,49 @@
+2005-04-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      tests/bug29210.phpt:
+      Fixed bug #29210 (Function: is_callable - no support for private and
+      protected classes)
+
+    * (PHP_5_0)
+      zend_API.c
+      zend_API.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      tests/bug29210.phpt
+      tests/bug29210.phpt:
+      Fixed bug #29210 (Function: is_callable - no support for private and
+      protected classes).
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug29104.phpt
+      tests/bug29104.phpt
+      tests/bug29104.phpt:
+      Fixed bug #29104 (Function declaration in method doesn't work)
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug32833.phpt:
+      Fixed bug #32833 (Invalid opcode)
+
+    * tests/bug32674.phpt
+      tests/bug32674.phpt:
+      
+      file bug32674.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug32674.phpt:
+      Fixed bug #32674 (exception in iterator causes crash)
+
 2005-04-26  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug30889.phpt
