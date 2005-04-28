@@ -92,12 +92,28 @@ static FILE *tsrm_error_file;
 #if defined(PTHREADS)
 /* Thread local storage */
 static pthread_key_t tls_key;
+# define tsrm_tls_set(what)		pthread_setspecific(tls_key, (void*)(what))
+# define tsrm_tls_get()			pthread_getspecific(tls_key)
+
 #elif defined(TSRM_ST)
 static int tls_key;
+# define tsrm_tls_set(what)		st_thread_setspecific(tls_key, (void*)(what))
+# define tsrm_tls_get()			st_thread_getspecific(tls_key)
+
 #elif defined(TSRM_WIN32)
 static DWORD tls_key;
+# define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
+# define tsrm_tls_get()			TlsGetValue(tls_key)
+
 #elif defined(BETHREADS)
 static int32 tls_key;
+# define tsrm_tls_set(what)		tls_set(tls_key, (void*)(what)
+# define tsrm_tls_get()			(tsrm_tls_entry*)tls_get(tls_key)
+
+#else
+# define tsrm_tls_set(what)
+# define tsrm_tls_get()			NULL
+# warning tsrm_set_interpreter_context is probably broken on this platform
 #endif
 
 /* Startup TSRM (call once for the entire process) */
@@ -262,16 +278,8 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	(*thread_resources_ptr)->thread_id = thread_id;
 	(*thread_resources_ptr)->next = NULL;
 
-#if defined(PTHREADS)
 	/* Set thread local storage to this new thread resources structure */
-	pthread_setspecific(tls_key, (void *) *thread_resources_ptr);
-#elif defined(TSRM_ST)
-	st_thread_setspecific(tls_key, (void *) *thread_resources_ptr);
-#elif defined(TSRM_WIN32)
-	TlsSetValue(tls_key, (void *) *thread_resources_ptr);
-#elif defined(BETHREADS)
-	tls_set(tls_key, (void*) *thread_resources_ptr);
-#endif
+	tsrm_tls_set(*thread_resources_ptr);
 
 	if (tsrm_new_thread_begin_handler) {
 		tsrm_new_thread_begin_handler(thread_id, &((*thread_resources_ptr)->storage));
@@ -313,22 +321,13 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	if(tsrm_tls_table) {
 #endif
 	if (!th_id) {
-#if defined(PTHREADS)
 		/* Fast path for looking up the resources for the current
 		 * thread. Its used by just about every call to
 		 * ts_resource_ex(). This avoids the need for a mutex lock
 		 * and our hashtable lookup.
 		 */
-		thread_resources = pthread_getspecific(tls_key);
-#elif defined(TSRM_ST)
-		thread_resources = st_thread_getspecific(tls_key);
-#elif defined(TSRM_WIN32)
-		thread_resources = TlsGetValue(tls_key);
-#elif defined(BETHREADS)
-		thread_resources = (tsrm_tls_entry*)tls_get(tls_key);
-#else
-		thread_resources = NULL;
-#endif
+		thread_resources = tsrm_tls_get();
+
 		if (thread_resources) {
 			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Fetching resource id %d for current thread %d", id, (long) thread_resources->thread_id));
 			/* Read a specific resource from the thread's resources.
@@ -407,32 +406,13 @@ void *tsrm_set_interpreter_context(void *new_ctx)
 {
 	tsrm_tls_entry *current;
 
-#if defined(PTHREADS)
-	current = pthread_getspecific(tls_key);
-#elif defined(TSRM_ST)
-	current = st_thread_getspecific(tls_key);
-#elif defined(TSRM_WIN32)
-	current = TlsGetValue(tls_key);
-#elif defined(BETHREADS)
-	current = (tsrm_tls_entry*)tls_get(tls_key);
-#else
-#warning tsrm_set_interpreter_context is probably broken on this platform
-	current = NULL;
-#endif
+	current = tsrm_tls_get();
 
 	/* TODO: unlink current from the global linked list, and replace it
 	 * it with the new context, protected by mutex where/if appropriate */
 
 	/* Set thread local storage to this new thread resources structure */
-#if defined(PTHREADS)
-	pthread_setspecific(tls_key, new_ctx);
-#elif defined(TSRM_ST)
-	st_thread_setspecific(tls_key, new_ctx);
-#elif defined(TSRM_WIN32)
-	TlsSetValue(tls_key, new_ctx);
-#elif defined(BETHREADS)
-	tls_set(tls_key, new_ctx);
-#endif
+	tsrm_tls_set(new_ctx);
 
 	/* return old context, so caller can restore it when they're done */
 	return current;
@@ -448,18 +428,7 @@ void *tsrm_new_interpreter_context(void)
 	thread_id = tsrm_thread_id();
 	tsrm_mutex_lock(tsmm_mutex);
 
-#if defined(PTHREADS)
-	current = pthread_getspecific(tls_key);
-#elif defined(TSRM_ST)
-	current = st_thread_getspecific(tls_key);
-#elif defined(TSRM_WIN32)
-	current = TlsGetValue(tls_key);
-#elif defined(BETHREADS)
-	current = (tsrm_tls_entry*)tls_get(tls_key);
-#else
-#warning tsrm_new_interpreter_context is probably broken on this platform
-	current = NULL;
-#endif
+	current = tsrm_tls_get();
 
 	new_ctx = malloc(sizeof(*new_ctx));
 	allocate_new_resource(&new_ctx, thread_id);
@@ -499,11 +468,7 @@ void ts_free_thread(void)
 			} else {
 				tsrm_tls_table[hash_value] = thread_resources->next;
 			}
-#if defined(PTHREADS)
-			pthread_setspecific(tls_key, 0);
-#elif defined(TSRM_WIN32)
-			TlsSetValue(tls_key, 0);
-#endif
+			tsrm_tls_set(0);
 			free(thread_resources);
 			break;
 		}
