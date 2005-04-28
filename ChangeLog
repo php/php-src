@@ -1,3 +1,156 @@
+2005-04-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/snmp/snmp.c:
+      Better use zval_ptr_dtor() instead (thanks Andi)
+
+    * (PHP_5_0)
+      NEWS:
+      reword
+
+2005-04-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * TSRM/TSRM.c
+      TSRM/TSRM.h:
+      Add three new TSRM api functions:
+      
+      TSRM_API void *tsrm_new_interpreter_context(void);
+      TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
+      TSRM_API void tsrm_free_interpreter_context(void *context);
+      
+      These can be used, with a suitable SAPI, to host multiple interpreters on
+      the same thread.
+
+2005-04-27  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_0)
+      NEWS:
+      update NEWS
+
+    * main/main.c:
+      rename
+
+    * (PHP_4_3)
+      main/main.c
+      main/main.c:
+      change names
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      MFH (fix bug #31023)
+
+    * ext/mysqli/mysqli_api.c:
+      fix bug #32013(MySQLi bind_result causes fatal error: memory limit reached)
+
+2005-04-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/tests/bug29210.phpt
+      ext/standard/basic_functions.c:
+      Fixed bug #29210 (Function: is_callable - no support for private and
+      protected classes)
+
+    * ZendEngine2/tests/bug29210.phpt
+      ZendEngine2/tests/bug29210.phpt
+      ext/standard/basic_functions.c:
+      
+      file bug29210.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      Fixed bug #29210 (Function: is_callable - no support for private and
+      protected classes).
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug29104.phpt:
+      Fixed bug #29104 (Function declaration in method doesn't work)
+
+    * ZendEngine2/tests/bug29104.phpt
+      ZendEngine2/tests/bug29104.phpt:
+      
+      Fixed bug #29104 (Function declaration in method doesn't work)
+
+2005-04-27  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * TSRM/threads.m4
+      TSRM/threads.m4:
+      check should be on host_alias rather than on target_alias, but somehow
+      works on configure generated using autoconf 2.57.
+
+2005-04-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/dom/config.m4
+      ext/simplexml/config.m4
+      ext/xml/config.m4
+      ext/xmlrpc/config.m4
+      ext/xsl/config.m4:
+      - Made the libxml related stuff to error out if someone does --disable-all
+        or --disable-libxml. Better than silently just leave the ext out..
+
+2005-04-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug32833.phpt:
+      Fixed bug #32833 (Invalid opcode)
+
+2005-04-27  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/bug31668.phpt:
+      MFB (fixing bug 31668)
+
+    * ext/mysqli/tests/bug31668.phpt
+      ext/mysqli/tests/bug31668.phpt:
+      
+      file bug31668.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      - Fix bug 31668 (multi query fails every other time). The multi_query flag
+        was global and not per connection.
+      - use ecalloc() instead of calloc() for memory that will be freed with
+        efree()
+
+2005-04-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/zlib/tests/compress_zlib_wrapper.phpt:
+      nuking that file was not very good idea :)
+
+2005-04-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug32674.phpt
+      ZendEngine2/tests/bug32674.phpt:
+      
+      file bug32674.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug32674.phpt:
+      Fixed bug #32674 (exception in iterator causes crash)
+
 2005-04-26  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/tests/bug30889.phpt
