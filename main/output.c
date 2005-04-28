@@ -238,7 +238,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		OG(ob_lock) = 1;
 
 		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL TSRMLS_CC)==SUCCESS) {
-			if (!(Z_TYPE_P(alternate_buffer)==IS_BOOL && Z_BVAL_P(alternate_buffer)==0)) {
+			if (alternate_buffer && !(Z_TYPE_P(alternate_buffer)==IS_BOOL && Z_BVAL_P(alternate_buffer)==0)) {
 				convert_to_string_ex(&alternate_buffer);
 				final_buffer = Z_STRVAL_P(alternate_buffer);
 				final_buffer_length = Z_STRLEN_P(alternate_buffer);
