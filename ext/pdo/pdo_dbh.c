@@ -323,7 +323,9 @@ static PHP_FUNCTION(dbh_constructor)
 			}
 			
 			pdbh->is_persistent = 1;
-			pdbh->persistent_id = pemalloc(plen + 1, 1);
+			if (!(pdbh->persistent_id = pemalloc(plen + 1, 1))) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO handle");
+			}
 			memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
 			pdbh->persistent_id_len = plen+1;
 			pdbh->refcount = 1;
@@ -973,7 +975,9 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 		return 0;
 	}
 
-	dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent);
+	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO methods.");
+	}
 	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, NULL, dbh->is_persistent, 0);
 
 	while (funcs->fname) {
