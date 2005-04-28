@@ -44,6 +44,8 @@ PHP                                                                        NEWS
   (Uwe Schindler)
 - Fixed bug #32405 (mysqli::fetch() returns bad data - 64bit problem). (Andrey)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
+- Fixed bug #32245 (xml_parser_free() in a function assigned to the xml parser
+  gives a segfault). (Rob)
 - Fixed bug #32013 (ext/mysqli bind_result causes fatal error: memory
   limit). (Andrey)
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
