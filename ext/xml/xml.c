@@ -1044,6 +1044,8 @@ PHP_FUNCTION(xml_parser_create)
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
 	parser->object = NULL;
+	parser->isparsing = 0;
+
 	XML_SetUserData(parser->parser, parser);
 
 	ZEND_REGISTER_RESOURCE(return_value,parser,le_xml_parser);
@@ -1337,7 +1339,9 @@ PHP_FUNCTION(xml_parse)
 		isFinal = 0;
 	}
 
+	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, Z_STRVAL_PP(data), Z_STRLEN_PP(data), isFinal);
+	parser->isparsing = 0;
 	RETVAL_LONG(ret);
 }
 
@@ -1376,7 +1380,9 @@ PHP_FUNCTION(xml_parse_into_struct)
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
+	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, Z_STRVAL_PP(data), Z_STRLEN_PP(data), 1);
+	parser->isparsing = 0;
 
 	RETVAL_LONG(ret);
 }
@@ -1476,6 +1482,11 @@ PHP_FUNCTION(xml_parser_free)
 	}
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
+	if (parser->isparsing == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parser cannot be freed while it is parsing.");
+		RETURN_FALSE;
+	}
 
 	if (zend_list_delete(parser->index) == FAILURE) {
 		RETURN_FALSE;

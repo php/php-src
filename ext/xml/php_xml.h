@@ -79,6 +79,7 @@ typedef struct {
 	char **ltags;
 	int lastwasopen;
 	int skipwhite;
+	int isparsing;
 	
 	XML_Char *baseURI;
 } xml_parser;
