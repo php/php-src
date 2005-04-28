@@ -51,9 +51,7 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 		return NULL;
 	}
 
-	if (!(w = (MYSQLI_WARNING *)ecalloc(sizeof(MYSQLI_WARNING), 1))) {
-		return NULL;
-	}
+	w = (MYSQLI_WARNING *)ecalloc(sizeof(MYSQLI_WARNING), 1);
 
 	w->warning_count = cwarnings;
 	w->result = mysql_store_result(mysql);
