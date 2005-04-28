@@ -3694,6 +3694,10 @@ break;
 			}
 			value_sz = sizeof(void*);
 			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: %u", ocitype);
+			RETURN_FALSE;
+			break;
 	}
 	
 	if ((ocitype == SQLT_CHR) && (value_sz == -1)) {
