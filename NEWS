@@ -119,6 +119,8 @@ PHP                                                                        NEWS
 - Fixed bug #31478 (segfault with empty() / isset()). (Moriyoshi)
 - Fixed bug #31033 (php:function(string, nodeset) with xsl:key crashes PHP).
   (Rob)
+- Fixed bug #30578 (Output buffers flushed before calling __desctruct()
+  functions). (Jani)
 - Fixed bug #30407 (Strange behaviour of default arguments). (Dmitry)
 - Fixed bug #29728 (Reflection API Feature: Default parameter value). (Marcus)
 - Fixed bug #29522 (accessing properties without connection). (Georg)
