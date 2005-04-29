@@ -1,3 +1,16 @@
+2005-04-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug29015.phpt:
+      Fixed bug #29015 (Incorrect behavior of member vars(non string
+      ones)-numeric mem vars und others)
+
+    * tests/bug29015.phpt
+      tests/bug29015.phpt:
+      
+      file bug29015.phpt was initially added on branch PHP_5_0.
+
 2005-04-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
