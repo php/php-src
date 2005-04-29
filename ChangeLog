@@ -1,3 +1,102 @@
+2005-04-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli_warning.c:
+      e* allocation cannot fail.
+
+2005-04-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug29015.phpt
+      ZendEngine2/tests/bug29015.phpt:
+      
+      file bug29015.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug29015.phpt:
+      Fixed bug #29015 (Incorrect behavior of member vars(non string
+      ones)-numeric mem vars und others)
+
+2005-04-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * tests/lang/bug32828.phpt
+      tests/lang/bug32828.phpt:
+      
+      add test for bug #32828
+
+2005-04-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cgi/cgi_main.c:
+      int != long
+
+2005-04-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      main/output.c:
+      MFH: fix #32828 (Throwing exception in output_callback function with
+      ob_start and
+      ob_end_clean leads to segfault)
+
+    * main/output.c:
+      fix #32828 (Throwing exception in output_callback function with ob_start
+      and
+      ob_end_clean leads to segfault)
+
+    * (PHP_4_3)
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      MFH: handle unsupported datatypes and prevent segfault
+
+    * ext/oci8/oci8.c:
+      handle unsupported datatype (OCIBindByName segfaults somewhere in OCI lib
+      when
+      unknown type is provided)
+
+2005-04-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * php.ini-dist
+      php.ini-recommended
+      sapi/cgi/cgi_main.c:
+      - Added fastcgi.logging php.ini option to be able to disable
+        logging through the fastcgi connection
+
+2005-04-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/xml/php_xml.h
+      ext/xml/php_xml.h
+      ext/xml/xml.c
+      ext/xml/xml.c:
+      MFH: Fix bug #32245 (xml_parser_free() in function assigned to the xml
+      parser
+        gives a segfault)
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c:
+      - Fix bug #32245 (xml_parser_free() in function assigned to the xml parser
+        gives a segfault)
+
+2005-04-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/main.c:
+      - Reorder request shutdown calls: Call all __destruct() functions and
+        register_shutdown_function() callbacks before flushing output buffers
+        and sending headers.
+      - Fixes bug #30578 and possibly others related to output buffering.
+      
+
+2005-04-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * TSRM/TSRM.c:
+      consolidate the various tls get/set calls for the different platforms into
+      a single macro, at Andi's request.
+
 2005-04-27  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/snmp/snmp.c:
