@@ -1,6 +1,7 @@
 --TEST--
 Bug #22367 (weird zval allocation problem)
 --INI--
+error_reporting=4095
 zend.ze1_compatibility_mode=1
 --FILE--
 <?php
