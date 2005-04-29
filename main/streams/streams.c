@@ -892,7 +892,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
 	 * performing a low-level seek */
-	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && stream->readpos != stream->writepos) {
 		stream->readpos = stream->writepos = 0;
 
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
