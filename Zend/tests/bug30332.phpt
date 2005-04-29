@@ -2,6 +2,7 @@
 Bug #30332 (zend.ze1_compatibility_mode isnt fully compatable with array_push())
 --INI--
 zend.ze1_compatibility_mode=on
+error_reporting=4095
 --FILE--
 <?php
 class x { };

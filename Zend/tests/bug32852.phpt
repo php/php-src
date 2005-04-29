@@ -2,6 +2,7 @@
 Bug #32852 (Crash with singleton and __destruct when zend.ze1_compatibility_mode = On)
 --INI--
 zend.ze1_compatibility_mode=on
+error_reporting=4095
 --FILE--
 <?php
 class crashme {
