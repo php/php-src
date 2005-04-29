@@ -398,6 +398,13 @@ register_long_arrays = On
 ; should turn it off for increased performance.
 register_argc_argv = On
 
+; When enabled, the SERVER and ENV variables are created when they're first
+; used (Just In Time) instead of when the script starts. If these variables
+; are not used within a script, having this directive on will result in a
+; performance gain. The PHP directives register_globals, register_long_arrays,
+; and register_argc_argv must be disabled for this directive to have any affect.
+auto_globals_jit = On
+
 ; Maximum size of POST data that PHP will accept.
 post_max_size = 8M
 
