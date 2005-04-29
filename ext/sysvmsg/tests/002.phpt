@@ -1,5 +1,5 @@
 --TEST--
-msg_recieve() should return false when unserialize() failed
+msg_receive() should return false when unserialize() failed
 --SKIPIF--
 <?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extenions is not available")?>
 --FILE--
