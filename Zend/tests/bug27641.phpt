@@ -2,6 +2,8 @@
 Bug #27641 (zend.ze1_compatibility_mode = On causes object properties to be misreported)
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?>
+--INI--
+error_reporting=4095
 --FILE--
 <?php
   class A {

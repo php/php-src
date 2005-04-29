@@ -2,9 +2,10 @@
 Bug #22836 (returning references to NULL)
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 is needed'); ?>
+--INI--
+error_reporting=4095
 --FILE--
 <?php
-ini_set('error_reporting',E_ALL|E_STRICT);
 function &f()
 {
 	$x = "foo";
