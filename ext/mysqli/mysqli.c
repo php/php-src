@@ -387,7 +387,6 @@ static void php_mysqli_init_globals(zend_mysqli_globals *mysqli_globals)
 	mysqli_globals->reconnect = 0;
 	mysqli_globals->report_mode = 0;
 	mysqli_globals->report_ht = 0;
-	mysqli_globals->multi_query = 0;
 }
 /* }}} */
 
