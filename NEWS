@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Fixed ext/mysqli to allocate less memory when fetching bound params
   of type (MEDIUM|LONG)BLOB/(MEDIUM|LONG)TEXT. (Andrey)
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
+- Fixed bug #32852 (Crash with singleton and __destruct when
+  zend.ze1_compatibility_mode = On). (Dmitry)
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
 - Fixed bug #32809 (Missing T1LIB support on Windows). (Edin)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
@@ -46,10 +48,13 @@ PHP                                                                        NEWS
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
 - Fixed bug #32245 (xml_parser_free() in a function assigned to the xml parser
   gives a segfault). (Rob)
+- Fixed bug #32080 (segfault when assigning object to itself with
+  zend.ze1_compatibility_mode=On). (Dmitry)
 - Fixed bug #32013 (ext/mysqli bind_result causes fatal error: memory
   limit). (Andrey)
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
   response message). (Jani)
+- Fixed bug #31828 (Crash with zend.ze1_compatibility_mode=On). (Dmitry)
 - Fixed bug #31668 (multi_query works exactly every other time - multi query
   d/e flag global and not per connection). (Andrey)
 - Fixed bug #31636 (another crash when echoing a COM object). (Wez)
