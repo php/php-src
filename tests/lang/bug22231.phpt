@@ -1,5 +1,7 @@
 --TEST--
 Bug #22231 (segfault when returning a global variable by reference)
+--INI--
+error_reporting=4095
 --FILE--
 <?php
 class foo {
