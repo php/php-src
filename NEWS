@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - Fixed bug #30819 (Better support for LDAP SASL bind). (Jani)
 - Fixed bug #30702 (cannot initialize class variable from class constant).
   (Dmitry)
+- Fixed bug #30332 (zend.ze1_compatibility_mode isnt fully compatable with
+  array_push()). (Dmitry)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #29210 (Function: is_callable - no support for private and
