@@ -21,7 +21,7 @@ BUILD_FILES_EXEC = \
 	config.sub
 
 bin_SCRIPTS = phpize php-config
-bin_src_SCRIPTS = phpextdist
+bin_src_SCRIPTS =
 
 install-build:
 	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
