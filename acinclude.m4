@@ -2413,9 +2413,11 @@ EOF
 
   for arg in [$]0 "[$]@"; do
     echo "'[$]arg' \\" >> $1
+    CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]arg'"
   done
   echo '"[$]@"' >> $1
   chmod +x $1
+  PHP_SUBST_OLD(CONFIGURE_COMMAND)
 ])
 
 dnl
