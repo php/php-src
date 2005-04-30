@@ -2095,6 +2095,10 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
   unset OPENSSL_INCDIR
   unset OPENSSL_LIBDIR
 
+  dnl Empty variable means 'no'
+  test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
+  test -z "$PHP_IMAP_SSL" && PHP_IMAP_SSL=no
+
   dnl Fallbacks for different configure options
   if test "$PHP_OPENSSL" != "no"; then
     PHP_OPENSSL_DIR=$PHP_OPENSSL
