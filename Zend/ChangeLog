@@ -1,3 +1,51 @@
+2005-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_object_handlers.c:
+      compile fix
+
+    * tests/bug30332.phpt
+      tests/bug32852.phpt:
+      Make sure E_STRICT is set always
+
+2005-04-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      tests/bug30332.phpt:
+      Fixed bug #30332 (zend.ze1_compatibility_mode isnt fully compatable with
+      array_push())
+
+    * tests/bug30332.phpt
+      tests/bug30332.phpt:
+      
+      file bug30332.phpt was initially added on branch PHP_5_0.
+
+    * zend_execute.c
+      zend_execute.c
+      tests/bug31828.phpt
+      tests/bug32080.phpt
+      tests/bug32852.phpt:
+      Fixed bug #32852 (Crash with singleton and __destruct when
+      zend.ze1_compatibility_mode = On)
+      Fixed bug #31828 (Crash with zend.ze1_compatibility_mode=On)
+      Fixed bug #32080 (segfault when assigning object to itself with
+      zend.ze1_compatibility_mode=On)
+
+    * tests/bug31828.phpt
+      tests/bug31828.phpt
+      tests/bug32080.phpt
+      tests/bug32080.phpt
+      tests/bug32852.phpt
+      tests/bug32852.phpt:
+      
+      file bug31828.phpt was initially added on branch PHP_5_0.
+
+2005-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug22836.phpt
+      tests/bug27641.phpt:
+      - Unify error_reporting setting + make sure E_STRICT is set when wanted
+
 2005-04-28  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_object_handlers.c
