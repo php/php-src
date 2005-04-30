@@ -1,3 +1,95 @@
+2005-04-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/streams.c:
+      Attempt to eliminate seek() prior to every write.
+
+2005-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_object_handlers.c:
+      compile fix
+
+2005-04-29  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli.c:
+      multi_query is no more global
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli.c:
+      missed to remove that. multi_query is no more a global.
+
+2005-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/tests/bug30332.phpt
+      ZendEngine2/tests/bug32852.phpt:
+      Make sure E_STRICT is set always
+
+2005-04-29  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug30332.phpt
+      ZendEngine2/tests/bug30332.phpt:
+      
+      file bug30332.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug30332.phpt:
+      Fixed bug #30332 (zend.ze1_compatibility_mode isnt fully compatable with
+      array_push())
+
+    * ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32852.phpt
+      ZendEngine2/tests/bug32852.phpt:
+      
+      file bug31828.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32852.phpt:
+      Fixed bug #32852 (Crash with singleton and __destruct when
+      zend.ze1_compatibility_mode = On)
+      Fixed bug #31828 (Crash with zend.ze1_compatibility_mode=On)
+      Fixed bug #32080 (segfault when assigning object to itself with
+      zend.ze1_compatibility_mode=On)
+
+2005-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sysvmsg/tests/002.phpt:
+      typofix
+
+    * (PHP_5_0)
+      php.ini-dist
+      php.ini-recommended:
+      MFH: Add auto_globals_jit entry to php.ini-* (bug #29514)
+
+    * php.ini-dist
+      php.ini-recommended:
+      Add auto_globals_jit entry to php.ini-* (bug #29514)
+
+    * tests/classes/array_access_003.phpt
+      tests/lang/bug22231.phpt
+      tests/lang/bug22367.phpt
+      tests/lang/bug22510.phpt:
+      - Make sure E_STRICT is set when expecting Strict errors..
+
+    * ZendEngine2/tests/bug22836.phpt
+      ZendEngine2/tests/bug27641.phpt:
+      - Unify error_reporting setting + make sure E_STRICT is set when wanted
+
+    * tests/lang/bug30578.phpt:
+      Added test for bug #30578
+
+    * NEWS:
+      BFN
+
 2005-04-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/mysqli/mysqli_warning.c:
