@@ -1949,7 +1949,7 @@ AC_DEFUN([PHP_PROG_BISON], [
   fi
   case $php_cv_bison_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75 or 1.875 if you want to regenerate the Zend/PHP parsers (found ${1}.${2}).])
+      AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75, 1.875 or 2.0 if you want to regenerate the Zend/PHP parsers (found ${1}.${2}).])
       YACC="exit 0;"
       ;;
   esac
