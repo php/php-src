@@ -25,23 +25,21 @@
  </maintainers>
 
  <release>
-  <version>1.0</version>
-  <date>2004-07-27</date>
+  <version>1.0.1</version>
+  <date>2005-04-30</date>
   <state>stable</state>
   <notes>
-   Add name parameter to next() to skip to next named sibling node.
+   Add workaround for next() bug when using libxml 2.6.17 and lower.
   </notes>
  </release>
 
  <changelog>
   <release>
-   <version>0.2</version>
-   <date>2004-05-10</date>
-   <state>beta</state>
+   <version>1.0</version>
+   <date>2004-07-27</date>
+   <state>stable</state>
    <notes>
-    Allow open and XML methods to be called statically.
-    Add expand() support to export copies of nodes as DOM objects. (chregu)
-    Add next() support to skip to next sibling node. (chregu)
+    Add name parameter to next() to skip to next named sibling node.
    </notes>
   </release>
  </changelog>
