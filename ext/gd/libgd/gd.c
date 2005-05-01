@@ -1735,8 +1735,8 @@ void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 	rx = r << 1;
 	ry = 0;
 	x = a;
-	old_y2=-1;
-	old_y1=-1;
+	old_y2=-2;
+	old_y1=-2;
 	while (x > 0){
 		if (r > 0) {
 			my1++;my2--;
