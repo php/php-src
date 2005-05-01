@@ -1,3 +1,49 @@
+2005-04-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      acinclude.m4
+      acinclude.m4:
+      MFH: - Fix problems with phpized ext/imap
+
+    * acinclude.m4:
+      - Fix problems with phpized ext/imap
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      configure.in
+      configure.in
+      scripts/Makefile.frag
+      scripts/Makefile.frag:
+      MFH: - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
+
+    * configure.in
+      scripts/Makefile.frag:
+      - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
+
+    * sapi/cli/php.1.in:
+      Silence the warnings about weird characters in this man page
+
+    * scripts/dev/phpextdist
+      scripts/dev/phpextdist
+      scripts/dev/phpextdist:
+        1.1.4;
+      Moved phpextdist to dev/
+
+    * scripts/Makefile.frag
+      scripts/phpextdist:
+      Moved phpextdist to dev/
+
+    * acinclude.m4
+      configure.in:
+      - No need to iterate through the options twice
+
+    * acinclude.m4:
+      re2c 0.96 is the one that works (tm)
+
+    * acinclude.m4:
+      We do allow 2.0 now too.
+
 2005-04-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/streams/streams.c:
