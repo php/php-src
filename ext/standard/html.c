@@ -996,7 +996,11 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 								if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
 									invalid_code = 1;
 								} else {
-									*(q++) = code;
+									if (code == 39 || !quote_style) {
+										invalid_code = 1;
+									} else {
+										*(q++) = code;
+									}
 								}
 								break;
 
