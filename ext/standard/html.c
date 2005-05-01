@@ -117,7 +117,7 @@ static entity_table_t ent_uni_338_402[] = {
 	"Yuml", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, */
-	/* 400 (0x0190)*/
+	/* 400 (0x0192)*/
 	NULL, NULL, "fnof"
 };
 
@@ -988,7 +988,11 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 								if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
 									invalid_code = 1;
 								} else {
-									*(q++) = code;
+									if (code == 39 || !quote_style) {
+										invalid_code = 1;
+									} else {
+										*(q++) = code;
+									}
 								}
 								break;
 
