@@ -1183,22 +1183,12 @@ PHP_FUNCTION(fmod)
 /* }}} */
 
 
-
-/* {{{ proto float math_std_dev(array a)
-   Returns the standard deviation */
-PHP_FUNCTION(math_std_dev)
+static long double php_population_variance(zval *arr)
 {
 	double mean, sum = 0.0, vr = 0.0;
-	zval *arr, **entry;
+	zval **entry;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a",  &arr) == FAILURE) {
-		return;
-	}
-	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has zero elements");
-		RETURN_FALSE;
-	}
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
 		convert_to_double_ex(entry);
@@ -1215,8 +1205,41 @@ PHP_FUNCTION(math_std_dev)
 		vr += d*d;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);	
 	}
+	return (vr / zend_hash_num_elements(Z_ARRVAL_P(arr)));
+}
 
-	RETURN_DOUBLE(sqrt(vr / zend_hash_num_elements(Z_ARRVAL_P(arr))));
+/* {{{ proto float math_variance(array a)
+   Returns the standard deviation */
+PHP_FUNCTION(math_variance)
+{
+	zval *arr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a",  &arr) == FAILURE) {
+		return;
+	}
+	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has zero elements");
+		RETURN_FALSE;
+	}
+	RETURN_DOUBLE(php_population_variance(arr));
+}
+/* }}} */
+
+
+/* {{{ proto float math_std_dev(array a)
+   Returns the standard deviation */
+PHP_FUNCTION(math_std_dev)
+{
+	zval *arr;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a",  &arr) == FAILURE) {
+		return;
+	}
+	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has zero elements");
+		RETURN_FALSE;
+	}
+	RETURN_DOUBLE(sqrt(php_population_variance(arr)));
 }
 /* }}} */
 
