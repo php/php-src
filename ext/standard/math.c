@@ -1228,6 +1228,10 @@ PHP_FUNCTION(math_variance)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has zero elements");
 		RETURN_FALSE;
 	}
+	if (sample && zend_hash_num_elements(Z_ARRVAL_P(arr)) == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has only 1 element");
+		RETURN_FALSE;
+	}
 	RETURN_DOUBLE(php_population_variance(arr, sample));
 }
 /* }}} */
@@ -1245,6 +1249,10 @@ PHP_FUNCTION(math_std_dev)
 	}
 	if (zend_hash_num_elements(Z_ARRVAL_P(arr)) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has zero elements");
+		RETURN_FALSE;
+	}
+	if (sample && zend_hash_num_elements(Z_ARRVAL_P(arr)) == 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array has only 1 element");
 		RETURN_FALSE;
 	}
 	RETURN_DOUBLE(sqrt(php_population_variance(arr, sample)));
