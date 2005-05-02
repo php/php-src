@@ -17,12 +17,22 @@
    <role>lead</role>
   </maintainer>
  </maintainers>
-
+  <maintainer>
+   <user>pajoye</user>
+   <name>Pierre-Alain Joye</name>
+   <email>pierre.dev@gmail.com</email>
+   <role>developer</role>
+  </maintainer>
  <release>
-  <version>0.2</version>
-  <date>2004-10-08</date>
-  <state>alpha</state>
-  <notes>Fix bug 2482 and other function parameters</notes>
+  <version>1.0</version>
+  <date>2005-05-02</date>
+  <state>stable</state>
+  <notes>
+   Many Bug Fixes
+   Use PHP streams under PHP 4
+   Add xmlwriter_flush function to flush buffer
+   Add support for xmlTextWriterStart/EndComment
+  </notes>
  </release>
 
  <changelog>
@@ -32,6 +42,12 @@
    <state>alpha</state>
    <notes>Initial Release </notes>
   </release>
+ <release>
+  <version>0.2</version>
+  <date>2004-10-08</date>
+  <state>alpha</state>
+  <notes>Fix bug 2482 and other function parameters</notes>
+ </release>
  </changelog>
 
  <configureoptions>
