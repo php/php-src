@@ -61,7 +61,12 @@ typedef void (*zend_object_set_t)(zval **property, zval *value TSRMLS_DC);
 typedef zval* (*zend_object_get_t)(zval *property TSRMLS_DC);
 
 /* Used to check if a property of the object exists */
-typedef int (*zend_object_has_property_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
+/* param has_set_exists:
+ * 0 (has) whetehr property exists and is not NULL
+ * 1 (set) whether property exists and is true
+ * 2 (exists) whether property exists
+ */
+typedef int (*zend_object_has_property_t)(zval *object, zval *member, int has_set_exists TSRMLS_DC);
 
 /* Used to check if a dimension of the object exists */
 typedef int (*zend_object_has_dimension_t)(zval *object, zval *member, int check_empty TSRMLS_DC);

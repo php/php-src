@@ -806,8 +806,7 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC)
 	return zend_compare_symbol_tables_i(zobj1->properties, zobj2->properties TSRMLS_CC);
 }
 
-
-static int zend_std_has_property(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int zend_std_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC)
 {
 	zend_object *zobj;
 	int result;
@@ -833,10 +832,16 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 	}
 
 	if (zend_hash_find(zobj->properties, property_info->name, property_info->name_length+1, (void **) &value) == SUCCESS) {
-		if (check_empty) {
-			result = zend_is_true(*value);
-		} else {
+		switch (has_set_exists) {
+		case 0:
 			result = (Z_TYPE_PP(value) != IS_NULL);
+			break;
+		default:
+			result = zend_is_true(*value);
+			break;
+		case 2:
+			result = 1;
+			break;
 		}
 	} else {
 		result = 0;
