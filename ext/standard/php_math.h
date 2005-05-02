@@ -59,6 +59,7 @@ PHP_FUNCTION(octdec);
 PHP_FUNCTION(base_convert);
 PHP_FUNCTION(number_format);
 PHP_FUNCTION(fmod);
+PHP_FUNCTION(math_std_dev);
 PHP_FUNCTION(deg2rad);
 PHP_FUNCTION(rad2deg);
 

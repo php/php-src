@@ -1182,6 +1182,40 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
+
+
+/* {{{ proto float math_std_dev(array a)
+   Returns the standard deviation */
+PHP_FUNCTION(math_std_dev)
+{
+	double mean, sum = 0.0, vr = 0.0;
+	zval *arr, **entry;
+	HashPosition pos;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a",  &arr) == FAILURE) {
+		return;
+	}
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
+		convert_to_double_ex(entry);
+		sum += Z_DVAL_PP(entry);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);	
+	}
+	mean = sum / zend_hash_num_elements(Z_ARRVAL_P(arr));
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
+		double d;
+		convert_to_double_ex(entry);
+		d = Z_DVAL_PP(entry) - mean;
+		vr += d*d;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);	
+	}
+
+	RETURN_DOUBLE(sqrt(vr / zend_hash_num_elements(Z_ARRVAL_P(arr))));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
