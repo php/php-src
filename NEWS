@@ -92,6 +92,7 @@ PHP                                                                        NEWS
   . htmlspecialchars_decode() (Ilia)
   . time_sleep_until() (Ilia)
   . math_std_dev() (Andrey)
+  . math_variance() - calculating population variance (Andrey)
 - Added DomDocument::$recover property for parsing not well-formed
   XML Documents. (Christian)   
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
