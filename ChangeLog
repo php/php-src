@@ -1,3 +1,31 @@
+2005-05-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/html.c:
+      MFH: Fixed bug #32608 (html_entity_decode() converts single quotes even if
+      ENT_NOQUOTES is given).
+
+    * ext/standard/html.c:
+      Fixed bug #32608 (html_entity_decode() converts single quotes even if
+      ENT_NOQUOTES is given).
+
+2005-05-01  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/libgd/gd.c:
+      - MFB: #32891, init old y positions to non possible values. -1 being used
+        if the center start a (x,0)
+
+    * (PHP_5_0)
+      ext/gd/libgd/gd.c:
+        - MFB: #32891, init old y positions to non possible values. -1 being used
+          if the center start a (x,0)
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c:
+      - #32891, init old y positions to non possible values. -1 being used if the
+        center start a (x,0)
+
 2005-04-30  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_4_3)
