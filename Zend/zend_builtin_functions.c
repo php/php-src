@@ -953,7 +953,7 @@ ZEND_FUNCTION(property_exists)
 		RETURN_FALSE;
 	
 	case IS_OBJECT:
-		if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 0 TSRMLS_CC)) {
+		if (Z_OBJ_HANDLER_PP(object, has_property) && Z_OBJ_HANDLER_PP(object, has_property)(*object, *property, 2 TSRMLS_CC)) {
 			RETURN_TRUE;
 		}
 		RETURN_FALSE;
