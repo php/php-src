@@ -10,6 +10,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bug #32730 (ext/crack.c fails to compile with cracklib-2.8.3). (Jani)
+- Fixed bug #32670 (foreach() does not issue warning on unset array arg). (Ilia)
 - Fixed bug #32699 (pg_affected_rows() was defined when it was not available).
   (Derick)
 - Fixed bug #32682 (ext/mssql: Error on module shutdown when called from 
