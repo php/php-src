@@ -14,7 +14,10 @@ import_request_variables("g");
 echo $x;
 echo "\nok\n";
 ?>
---EXPECT--
+--EXPECTF--
 1
+<br />
+<b>Notice</b>:  import_request_variables() [<a href='function.import-request-variables'>function.import-request-variables</a>]: No prefix specified - possible security hazard in <b>%sunset_cv07.php</b> on line <b>4</b><br />
+%sunset_cv07.php(4) : Notice - import_request_variables() [<a href='function.import-request-variables'>function.import-request-variables</a>]: No prefix specified - possible security hazard
 2
 ok
