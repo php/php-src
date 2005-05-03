@@ -527,7 +527,11 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		RETVAL_ZVAL(method_result_ptr, 0, 1);
+		if (method_result_ptr->is_ref || method_result_ptr->refcount > 1) {
+			RETVAL_ZVAL(method_result_ptr, 1, 1);
+		} else {
+			RETVAL_ZVAL(method_result_ptr, 0, 1);
+		}
 	}
 	
 	/* now destruct all auxiliaries */
