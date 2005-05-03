@@ -812,7 +812,6 @@ ZEND_FUNCTION(get_class_methods)
 	zend_class_entry *ce = NULL, **pce;
 	HashPosition pos;
 	zend_function *mptr;
-	int instanceof;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -834,14 +833,16 @@ ZEND_FUNCTION(get_class_methods)
 		RETURN_NULL();
 	}
 
-	instanceof = EG(scope) && instanceof_function(EG(scope), ce TSRMLS_CC);
-
 	array_init(return_value);
 	zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 	while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC) 
-		 || (instanceof && ((mptr->common.fn_flags & ZEND_ACC_PROTECTED) || EG(scope) == mptr->common.scope))) {
+		 || (EG(scope) &&
+		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
+		       instanceof_function(EG(scope), mptr->common.scope TSRMLS_CC))
+		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
+		       EG(scope) == mptr->common.scope)))) {
 			MAKE_STD_ZVAL(method_name);
 			ZVAL_STRING(method_name, mptr->common.function_name, 1);
 			zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
