@@ -49,6 +49,8 @@ PHP                                                                        NEWS
   (Uwe Schindler)
 - Fixed bug #32405 (mysqli::fetch() returns bad data - 64bit problem). (Andrey)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
+- Fixed bug #32296 (get_class_methods output has changed between 5.0.2 and
+  5.0.3). (Dmitry)
 - Fixed bug #32245 (xml_parser_free() in a function assigned to the xml parser
   gives a segfault). (Rob)
 - Fixed bug #32080 (segfault when assigning object to itself with
