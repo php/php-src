@@ -32,7 +32,6 @@ install-build:
 	$(INSTALL_DATA) $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
 HEADER_DIRS = \
-	/ \
 	Zend/ \
 	TSRM/ \
 	include/ \
