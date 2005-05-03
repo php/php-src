@@ -872,19 +872,14 @@ static zend_function_entry spl_ce_dir_tree_class_functions[] = {
 
 static void spl_file_object_free_line(spl_file_object *intern TSRMLS_DC) /* {{{ */
 {
-	long line_add = 0;
-
 	if (intern->current_line) {
 		efree(intern->current_line);
 		intern->current_line = NULL;
-		line_add = 1;
 	}
 	if (intern->current_zval) {
 		zval_ptr_dtor(&intern->current_zval);
 		intern->current_zval = NULL;
-		line_add = 1;
 	}
-	intern->current_line_num += line_add;
 } /* }}} */
 
 static void spl_file_object_free_storage(void *object TSRMLS_DC) /* {{{ */
@@ -944,7 +939,10 @@ static int spl_file_object_read(spl_file_object *intern, int silent TSRMLS_DC) /
 	char *buf;
 	size_t line_len;
 	int len;
+	long line_add = (intern->current_line || intern->current_zval) ? 1 : 0;
 
+	spl_file_object_free_line(intern TSRMLS_CC);
+	
 	if (php_stream_eof(intern->stream)) {
 		if (!silent) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
@@ -954,8 +952,6 @@ static int spl_file_object_read(spl_file_object *intern, int silent TSRMLS_DC) /
 
 	buf = php_stream_get_line(intern->stream, NULL, intern->max_line_len, &line_len);
 
-	spl_file_object_free_line(intern TSRMLS_CC);
-	
 	if (!buf) {
 		intern->current_line = estrdup("");
 		intern->current_line_len = 0;
@@ -973,18 +969,28 @@ static int spl_file_object_read(spl_file_object *intern, int silent TSRMLS_DC) /
 		intern->current_line = buf;
 		intern->current_line_len = line_len;
 	}
+	intern->current_line_num += line_add;
 
 	return SUCCESS;
 } /* }}} */
 
-static void spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, int silent TSRMLS_DC) /* {{{ */
+static int spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, int silent TSRMLS_DC) /* {{{ */
 {
 	zval *retval;
 
 	/* if overloaded call the function, otherwise do it directly */
 	if (intern->func_getCurr->common.scope != spl_ce_FileObject) {
+		if (php_stream_eof(intern->stream)) {
+			if (!silent) {
+				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
+			}
+			return FAILURE;
+		}
 		zend_call_method_with_0_params(&getThis(), Z_OBJCE_P(getThis()), &intern->func_getCurr, "getCurrentLine", &retval);
 		if (retval) {
+			if (intern->current_line || intern->current_zval) {
+				intern->current_line_num++;
+			}
 			spl_file_object_free_line(intern TSRMLS_CC);
 			if (Z_TYPE_P(retval) == IS_STRING) {
 				intern->current_line = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
@@ -994,9 +1000,12 @@ static void spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, 
 				ZVAL_ZVAL(intern->current_zval, retval, 1, 0);
 			}
 			zval_ptr_dtor(&retval);
+			return SUCCESS;
+		} else {
+			return FAILURE;
 		}
 	} else {
-		spl_file_object_read(intern, silent TSRMLS_CC);
+		return spl_file_object_read(intern, silent TSRMLS_CC);
 	}
 } /* }}} */
 
@@ -1134,9 +1143,10 @@ SPL_METHOD(FileObject, key)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
+/*	Do not read the next line to support correct counting with fgetc()
 	if (!intern->current_line) {
 		spl_file_object_read_line(getThis(), intern, 1 TSRMLS_CC);
-	}
+	} */
 	RETURN_LONG(intern->current_line_num);
 } /* }}} */
 
@@ -1147,6 +1157,7 @@ SPL_METHOD(FileObject, next)
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_file_object_free_line(intern TSRMLS_CC);
+	intern->current_line_num++;
 } /* }}} */
 
 /* {{{ proto void FileObject::setFlags(int flags)
@@ -1279,6 +1290,7 @@ SPL_METHOD(FileObject, fgetcsv)
 	ZVAL_LONG(arg2, intern->max_line_len);
 
 	spl_file_object_free_line(intern TSRMLS_CC);
+	intern->current_line_num++;
 
 	FileFunctionCall(fgetcsv, arg2);
 
@@ -1338,11 +1350,16 @@ SPL_METHOD(FileObject, fgetc)
 	char buf[2];
 	int result;
 
+	spl_file_object_free_line(intern TSRMLS_CC);
+
 	result = php_stream_getc(intern->stream);
 
 	if (result == EOF) {
 		RETVAL_FALSE;
 	} else {
+		if (result == '\n') {
+			intern->current_line_num++;
+		}
 		buf[0] = result;
 		buf[1] = '\0';
 
@@ -1360,6 +1377,7 @@ SPL_METHOD(FileObject, fgetss)
 	ZVAL_LONG(arg2, intern->max_line_len);
 
 	spl_file_object_free_line(intern TSRMLS_CC);
+	intern->current_line_num++;
 
 	FileFunctionCall(fgetss, arg2);
 
@@ -1382,6 +1400,7 @@ SPL_METHOD(FileObject, fscanf)
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_file_object_free_line(intern TSRMLS_CC);
+	intern->current_line_num++;
 
 	FileFunctionCall(fscanf, NULL);
 }
