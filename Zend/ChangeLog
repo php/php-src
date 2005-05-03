@@ -1,3 +1,17 @@
+2005-05-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      - Extend API to support real existance test without the need to add any new
+        functions or change any behavior
+
+    * zend_execute_API.c:
+      -  Part 2 of #30126: Enhancement for error message for abstract classes
+
+    * zend_execute_API.c:
+      - Part 1 of #30126: Enhancement for error message for abstract classes
+
 2005-04-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_object_handlers.c:
