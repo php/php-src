@@ -15,7 +15,7 @@
  * @version 1.0
  * @since PHP 5.1
  */
-class FileObject implements RecursiveIterator
+class FileObject implements RecursiveIterator, SeekableIterator
 {
 	private $fp;
 	private $fname;
@@ -65,6 +65,7 @@ class FileObject implements RecursiveIterator
 	 */
 	function fgets()
 	{
+		$this->freeLine();
 		$this->lnum++;
 		$buf = fgets($this->fp, $this->max_len);
 		
@@ -77,6 +78,7 @@ class FileObject implements RecursiveIterator
 	 */
 	function fgetcsv($delimiter = ';', $enclosure = '')
 	{
+		$this->freeLine();
 		$this->lnum++;
 		return fgetcsv($this->fp, $this->max_len, $delimiter, $enclosure); 
 	}
@@ -122,7 +124,11 @@ class FileObject implements RecursiveIterator
 	 */
 	function fgetc()
 	{
-		return fgetc($this->fp);
+		$this->freeLine();
+		$c = fgetc($this->fp);
+		if ($c == '\n') {
+			$this->lnum++;
+		}
 	}
 
 	/** Read and return remaining part of stream
@@ -146,6 +152,7 @@ class FileObject implements RecursiveIterator
 	 */	
 	function fscanf($format /* , ... */)
 	{
+		$this->freeLine();
 		$this->lnum++;
 		return fscanf($this->fp, $format /* , ... */);
 	}
@@ -228,7 +235,7 @@ class FileObject implements RecursiveIterator
 	 */
 	function rewind()
 	{
-		$this->line = NULL;
+		$this->freeLine();
 		$this->lnum = 0;
 	}
 
@@ -254,15 +261,13 @@ class FileObject implements RecursiveIterator
 	}
 
 	/**
-	 * @note Fill current line buffer if not done yet.
 	 * @return line number 
+	 * @note fgetc() will increase the line number when reaing a new line char.
+	 *       This has the effect key() called on a read a new line will already
+	 *       return the increased line number.
 	 */	
 	function key()
 	{
-		if (is_null($this->line))
-		{
-			$line = getCurrentLine();
-		}
 		return $this->lnum;
 	}
 
@@ -270,7 +275,7 @@ class FileObject implements RecursiveIterator
 	 */	
 	function next()
 	{
-		$this->line = NULL;
+		$this->freeLine();
 	}
 
 	/**
@@ -278,16 +283,41 @@ class FileObject implements RecursiveIterator
 	 */
 	private function readLine()
 	{
-		$this->lnum++;
-		return fgets($this->fp, $this->max_len);
+		if ($this->eof())
+		{
+			$this->freeLine();
+			throw new RuntimeException("Cannot read from file " . $this->fname);
+		}
+		if ($this->line) {
+			$this->lnum++;
+		}
+		$this->freeLine();
+		$this->line = fgets($this->fp, $this->max_len);
+		return $this->line;
+	}
+
+	/**
+	 * Free the current line buffer and increment the line counter
+	 */
+	private function freeLine()
+	{
+		if ($this->line) {
+			$this->line = NULL;
+		}
 	}
 
 	/*
-	 * @note if you overload this function key() and current() will increment
-	 *       $this->lnum.
+	 * @note If you DO overload this function key() and current() will increment
+	 *       $this->lnum automatically. If not then function reaLine() will do
+	 *       that for you.
 	 */ 
 	function getCurrentLine()
 	{
+		$this->freeLine();
+		if ($this->eof())
+		{
+			throw new RuntimeException("Cannot read from file " . $this->fname);
+		}
 		$this->readLine();
 	}
 
@@ -297,6 +327,18 @@ class FileObject implements RecursiveIterator
 	function __toString()
 	{
 		return current();
+	}
+
+	/**
+	 * @param $line_pos Seek to this line
+	 */	
+	function seek($line_pos)
+	{
+		$this->rewind();
+		while($this->lnum < $line_pos && !$this->eof())
+		{
+			$this->getCurrentLine();
+		}
 	}
 }
 
