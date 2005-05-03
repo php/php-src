@@ -872,14 +872,19 @@ static zend_function_entry spl_ce_dir_tree_class_functions[] = {
 
 static void spl_file_object_free_line(spl_file_object *intern TSRMLS_DC) /* {{{ */
 {
+	long line_add = 0;
+
 	if (intern->current_line) {
 		efree(intern->current_line);
 		intern->current_line = NULL;
+		line_add = 1;
 	}
 	if (intern->current_zval) {
 		zval_ptr_dtor(&intern->current_zval);
 		intern->current_zval = NULL;
+		line_add = 1;
 	}
+	intern->current_line_num += line_add;
 } /* }}} */
 
 static void spl_file_object_free_storage(void *object TSRMLS_DC) /* {{{ */
@@ -940,30 +945,34 @@ static int spl_file_object_read(spl_file_object *intern, int silent TSRMLS_DC) /
 	size_t line_len;
 	int len;
 
-	buf = php_stream_get_line(intern->stream, NULL, intern->max_line_len, &line_len);
-
-	if (!buf) {
+	if (php_stream_eof(intern->stream)) {
 		if (!silent) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
 		}
 		return FAILURE;
 	}
 
+	buf = php_stream_get_line(intern->stream, NULL, intern->max_line_len, &line_len);
+
 	spl_file_object_free_line(intern TSRMLS_CC);
 	
-	if (intern->flags & SPL_FILE_OBJECT_DROP_NEW_LINE) {
-		line_len = strcspn(buf, "\r\n");
-		buf[line_len] = '\0';
+	if (!buf) {
+		intern->current_line = estrdup("");
+		intern->current_line_len = 0;
+	} else {
+		if (intern->flags & SPL_FILE_OBJECT_DROP_NEW_LINE) {
+			line_len = strcspn(buf, "\r\n");
+			buf[line_len] = '\0';
+		}
+	
+		if (PG(magic_quotes_runtime)) {
+			buf = php_addslashes(buf, line_len, &len, 1 TSRMLS_CC);
+			line_len = len;
+		}
+	
+		intern->current_line = buf;
+		intern->current_line_len = line_len;
 	}
-
-	if (PG(magic_quotes_runtime)) {
-		buf = php_addslashes(buf, line_len, &len, 1 TSRMLS_CC);
-		line_len = len;
-	}
-
-	intern->current_line = buf;
-	intern->current_line_len = line_len;
-	intern->current_line_num++;
 
 	return SUCCESS;
 } /* }}} */
@@ -976,6 +985,7 @@ static void spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, 
 	if (intern->func_getCurr->common.scope != spl_ce_FileObject) {
 		zend_call_method_with_0_params(&getThis(), Z_OBJCE_P(getThis()), &intern->func_getCurr, "getCurrentLine", &retval);
 		if (retval) {
+			spl_file_object_free_line(intern TSRMLS_CC);
 			if (Z_TYPE_P(retval) == IS_STRING) {
 				intern->current_line = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 				intern->current_line_len = Z_STRLEN_P(retval);
@@ -984,10 +994,19 @@ static void spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, 
 				ZVAL_ZVAL(intern->current_zval, retval, 1, 0);
 			}
 			zval_ptr_dtor(&retval);
-			intern->current_line_num++;
 		}
 	} else {
 		spl_file_object_read(intern, silent TSRMLS_CC);
+	}
+} /* }}} */
+
+static void spl_file_object_rewind(spl_file_object *intern TSRMLS_DC) /* {{{ */
+{
+	if (-1 == php_stream_rewind(intern->stream)) {
+		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
+	} else {
+		spl_file_object_free_line(intern TSRMLS_CC);
+		intern->current_line_num = 0;
 	}
 } /* }}} */
 
@@ -1050,12 +1069,7 @@ SPL_METHOD(FileObject, rewind)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (-1 == php_stream_rewind(intern->stream)) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
-	} else {
-		intern->current_line_num = 0;
-		spl_file_object_free_line(intern TSRMLS_CC);
-	}
+	spl_file_object_rewind(intern TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto string FileObject::getFilename()
@@ -1264,10 +1278,11 @@ SPL_METHOD(FileObject, fgetcsv)
 	MAKE_STD_ZVAL(arg2);
 	ZVAL_LONG(arg2, intern->max_line_len);
 
+	spl_file_object_free_line(intern TSRMLS_CC);
+
 	FileFunctionCall(fgetcsv, arg2);
 
 	zval_ptr_dtor(&arg2);
-	intern->current_line_num++;
 }
 /* }}} */
 
@@ -1344,10 +1359,11 @@ SPL_METHOD(FileObject, fgetss)
 	MAKE_STD_ZVAL(arg2);
 	ZVAL_LONG(arg2, intern->max_line_len);
 
+	spl_file_object_free_line(intern TSRMLS_CC);
+
 	FileFunctionCall(fgetss, arg2);
 
 	zval_ptr_dtor(&arg2);
-	intern->current_line_num++;
 } /* }}} */
 
 /* {{{ proto int FileObject::fpassthru()
@@ -1365,9 +1381,9 @@ SPL_METHOD(FileObject, fscanf)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	FileFunctionCall(fscanf, NULL);
+	spl_file_object_free_line(intern TSRMLS_CC);
 
-	intern->current_line_num++;
+	FileFunctionCall(fscanf, NULL);
 }
 /* }}} */
 
@@ -1427,6 +1443,28 @@ SPL_METHOD(FileObject, ftruncate)
 	RETURN_BOOL(0 == php_stream_truncate_set_size(intern->stream, size));
 } /* }}} */
 
+/* {{{ proto void FileObject::seek(int line_pos)
+   Seek to specified line */
+SPL_METHOD(FileObject, seek)
+{
+	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long line_pos;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &line_pos) == FAILURE) {
+		return;
+	}
+	if (line_pos < 0) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
+		RETURN_FALSE;		
+	}
+	
+	spl_file_object_rewind(intern TSRMLS_CC);
+	
+	while(intern->current_line_num < line_pos) {
+		spl_file_object_read_line(getThis(), intern, 1 TSRMLS_CC);
+	}
+}
+
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, file_name)
@@ -1484,6 +1522,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1)
 	ZEND_ARG_INFO(0, size)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1) 
+	ZEND_ARG_INFO(0, line_pos)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_file_object_class_functions[] = {
 	SPL_ME(FileObject, __construct,    arginfo_file_object___construct,   ZEND_ACC_PUBLIC)
 	SPL_ME(FileObject, getFilename,    NULL, ZEND_ACC_PUBLIC)
@@ -1512,6 +1555,8 @@ static zend_function_entry spl_file_object_class_functions[] = {
 	SPL_ME(FileObject, getMaxLineLen,  NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FileObject, hasChildren,    NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FileObject, getChildren,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(FileObject, seek,           arginfo_file_object_seek,          ZEND_ACC_PUBLIC)
+	// mappings
 	SPL_MA(FileObject, getCurrentLine, FileObject, fgets,      NULL, ZEND_ACC_PUBLIC)
 	SPL_MA(FileObject, __toString,     FileObject, current,    NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -1536,6 +1581,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	REGISTER_SPL_STD_CLASS_EX(FileObject, spl_file_object_new, spl_file_object_class_functions);
 	REGISTER_SPL_IMPLEMENTS(FileObject, RecursiveIterator);
+	REGISTER_SPL_IMPLEMENTS(FileObject, SeekableIterator);
 
 	REGISTER_LONG_CONSTANT("FO_DROP_NEW_LINE",  (long)SPL_FILE_OBJECT_DROP_NEW_LINE,  CONST_CS | CONST_PERSISTENT); 
 
