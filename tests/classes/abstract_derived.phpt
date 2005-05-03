@@ -17,4 +17,4 @@ class derived extends base {
 <?php exit(0); ?>
 --EXPECTF--
 
-Fatal error: Class derived contains 1 abstract methods and must therefore be declared abstract (derived::show) in %sabstract_derived.php on line %d
+Fatal error: Class derived contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (derived::show) in %sabstract_derived.php on line %d
