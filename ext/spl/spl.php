@@ -75,9 +75,9 @@
  *
  * - interface Countable allows to hook into the standard array function count().
  *
- * 6) Exceptions
+ * 6) Exception%s
  *
- * SPL provides a set of standard exception classes each meant to indicate a 
+ * SPL provides a set of standard Exception classes each meant to indicate a 
  * certain problem type.
  *
  * - class LogicException           extends Exception
@@ -102,10 +102,12 @@
  * 
  * Some articles about SPL:
  * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
+ * - <a href="http://www.ramikayyali.com/archives/2005/02/25/iterators">Iterators in PHP5</a>
  * - <a href="http://www.phpriot.com/d/articles/php/oop/oop-with-spl-php-5-1/index.html">Advanced OOP with SPL in PHP 5</a>
  * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-1/">The Standard PHP Library, Part 1</a>
+ * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-2/">The Standard PHP Library, Part 2</a>
  *
- * Talks on PL:
+ * Talks on SPL:
  * - <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">SPL for the masses [pps]</a>
  * - <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">SPL for the masses [pdf]</a>
  *
