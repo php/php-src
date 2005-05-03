@@ -1,3 +1,60 @@
+2005-05-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      - Extend API to support real existance test without the need to add any new
+        functions or change any behavior
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+    * ZendEngine2/zend_execute_API.c:
+      -  Part 2 of #30126: Enhancement for error message for abstract classes
+
+    * ZendEngine2/zend_execute_API.c:
+      - Part 1 of #30126: Enhancement for error message for abstract classes
+
+2005-05-02  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/math.c:
+      fixed div by zero
+
+    * ext/standard/math.c
+      ext/standard/tests/math/math_std_dev.phpt:
+      add possibility to calculate the standard deviation and the variance
+      on a sample - the formulae are slightly different.
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/tests/math/math_std_dev.phpt:
+      add also math_variance() which uses the same calculation as math_std_dev()
+
+    * ext/standard/math.c
+      ext/standard/tests/math/math_std_dev.phpt:
+      fix division by zero. throw an warning if the array is empty.
+
+2005-05-02  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * (PHP_4_3)
+      ext/gd/gd.c:
+      - MFH (#32893, imagettf crashes)
+        uses long for zval
+
+2005-05-02  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      FRN
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/tests/math/math_std_dev.phpt:
+      add math_std_dev()
+
 2005-05-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
