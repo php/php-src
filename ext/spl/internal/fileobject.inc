@@ -265,6 +265,8 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	 * @note fgetc() will increase the line number when reaing a new line char.
 	 *       This has the effect key() called on a read a new line will already
 	 *       return the increased line number.
+	 * @note Line counting works as long as you only read the file and do not
+	 *       use fseek().
 	 */	
 	function key()
 	{
