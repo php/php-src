@@ -20,10 +20,10 @@ class Exception_foo implements Throwable {
 
 // this should die -- Exception class must be abstract...
 $foo = new Exception_foo;
-echo $foo->getMessage() . "\n";
+echo "Message: " . $foo->getMessage() . "\n";
 
 ?>
+===DONE===
 --EXPECTF--
 
-Fatal error: Class Exception_foo contains 1 abstract methods and must therefore be declared abstract (Throwable::getErrno) in %s on line %d
-
+Fatal error: Class Exception_foo contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (Throwable::getErrno) in %s on line %d
