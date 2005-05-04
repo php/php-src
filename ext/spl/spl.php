@@ -53,7 +53,7 @@
  * 
  * - class DirectoryIterator implements Iterator
  * - class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
- * - class FileObject implements RecursiveIterator
+ * - class FileObject implements RecursiveIterator, SeekableIterator
  * 
  * 3) XML
  * 
