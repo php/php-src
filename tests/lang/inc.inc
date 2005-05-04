@@ -1,0 +1,3 @@
+<?
+echo "Included!\n";
+?>
