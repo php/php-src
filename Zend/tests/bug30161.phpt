@@ -20,7 +20,7 @@ class hariCow extends FIIFO {
         }
         
         public function __toString() {
-                return "Rusticus in asino sedet.";
+                return "ok\n";
         }
 
 }
@@ -31,3 +31,4 @@ $db = new hariCow;
 echo $db;
 ?>
 --EXPECT--
+ok

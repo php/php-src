@@ -1890,9 +1890,11 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		if (EG(exception) && EX(fbc) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
 			EG(This)->refcount--;
 			if (EG(This)->refcount == 1) {
-			    zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
+				zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
 			}
-			zval_ptr_dtor(&EG(This));
+			if (should_change_scope && EG(This) != current_this) {
+				zval_ptr_dtor(&EG(This));
+			}
 		} else if (should_change_scope) {
 			zval_ptr_dtor(&EG(This));
 		}
