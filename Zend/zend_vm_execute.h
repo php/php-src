@@ -491,6 +491,13 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
+	while (EX(fbc)) {
+		if (EX(object)) {
+			zval_ptr_dtor(&EX(object));
+		}
+		zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
+	}
+
 	if (encapsulating_block == -1) {
 		ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
 	} else {
@@ -32439,6 +32446,13 @@ static int ZEND_HANDLE_EXCEPTION_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			&& op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
 			encapsulating_block = i;
 		}
+	}
+
+	while (EX(fbc)) {
+		if (EX(object)) {
+			zval_ptr_dtor(&EX(object));
+		}
+		zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
 	}
 
 	if (encapsulating_block == -1) {
