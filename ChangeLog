@@ -1,3 +1,89 @@
+2005-05-03  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/dom/php_dom.c:
+      MFH: Fix bug #32930 (class extending DOMDocument doesn't clone properly)
+
+    * ext/dom/php_dom.c:
+      Fix bug #32930 (class extending DOMDocument doesn't clone properly)
+
+2005-05-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Prevent double free.
+
+2005-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/unset_cv07.phpt:
+      Fixed notice message
+
+    * tests/classes/interface_must_be_implemented.phpt:
+      Fixed error message
+
+2005-05-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug32252.phpt:
+      - Add test
+
+    * (PHP_5_0)
+      tests/classes/abstract_derived.phpt
+      tests/classes/abstract_not_declared.phpt
+      tests/classes/abstract_redeclare.phpt
+      tests/classes/interface_must_be_implemented.phpt
+      tests/classes/interfaces_002.phpt:
+      - Update tests affexted by fix
+
+2005-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Fixed destruction of zval after returning from __call()
+
+2005-05-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * scripts/Makefile.frag:
+      - acconfig.h should not be installed. (it is only a template file..)
+
+2005-05-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract_derived.phpt
+      tests/classes/abstract_not_declared.phpt
+      tests/classes/abstract_redeclare.phpt
+      tests/classes/interfaces_002.phpt:
+      - Fix tests affected by fix
+
+2005-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug32296.phpt
+      ZendEngine2/tests/bug32296.phpt:
+      
+      file bug32296.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug32296.phpt:
+      Fixed bug #32296 (get_class_methods output has changed between 5.0.2 and
+      5.0.3)
+      Now get_class_methods() shows accessible private and protected methods if
+      it is called from class scope.
+
+2005-05-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFZE2: Fixed bug #32670 (foreach() does not issue warning on unset array
+      arg)
+
 2005-05-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_builtin_functions.c
