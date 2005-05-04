@@ -4334,6 +4334,13 @@ int zend_handle_exception_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
+	while (EX(fbc)) {
+		if (EX(object)) {
+			zval_ptr_dtor(&EX(object));
+		}
+		zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
+	}
+
 	if (encapsulating_block == -1) {
 		RETURN_FROM_EXECUTE_LOOP(execute_data);
 	} else {
