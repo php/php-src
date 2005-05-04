@@ -1,3 +1,32 @@
+2005-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/unset_cv07.phpt:
+      Fixed notice message
+
+2005-05-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      tests/bug32252.phpt:
+      - Add test
+
+2005-05-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_object_handlers.c:
+      Fixed destruction of zval after returning from __call()
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug32296.phpt:
+      Fixed bug #32296 (get_class_methods output has changed between 5.0.2 and
+      5.0.3)
+      Now get_class_methods() shows accessible private and protected methods if
+      it is called from class scope.
+
+    * tests/bug32296.phpt
+      tests/bug32296.phpt:
+      
+      file bug32296.phpt was initially added on branch PHP_5_0.
+
 2005-05-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c
