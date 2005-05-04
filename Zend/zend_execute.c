@@ -42,7 +42,7 @@
 #define _UNUSED_CODE 3
 #define _CV_CODE     4
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(ZEND_VM_OLD_EXECUTOR)
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__sun__) && !defined(ZEND_VM_OLD_EXECUTOR)
 #  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
 /*extern void zend_error_noreturn(int type, const char *format, ...) __asm__("zend_error") __attribute__ ((noreturn));*/
