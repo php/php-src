@@ -1295,6 +1295,8 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 		z->refcount++;
 		Z_OBJ_HT_P(object)->write_property(object, property, z_copy TSRMLS_CC);
 		zval_ptr_dtor(&z_copy);
+		/* this would destroy z if it was returned with refcount == 0 and undo
+		   recount++ above otherwise */
 		zval_ptr_dtor(&z);
 	}
 	
