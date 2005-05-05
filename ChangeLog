@@ -1,3 +1,65 @@
+2005-05-04  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/lang/bug32924.phpt
+      tests/lang/inc.inc:
+      add test
+
+    * NEWS:
+      
+
+    * ZendEngine2/zend.c:
+      fix bug #32924:	prepend does not add file to included files
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      clarify some magic
+
+2005-05-04  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/dl.c
+      ext/standard/dl.c:
+      NetWare LibC dlsym works perfectly only thing that each of the extension
+      need to export a symbol with FULL capital prefix.
+
+2005-05-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_execute.c:
+      Fixed bug #30641 (Compile error: error: symbol "zend_error" is used but not
+      defined)
+
+    * ZendEngine2/tests/bug30707.phpt
+      ZendEngine2/tests/bug30707.phpt:
+      
+      file bug30707.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug30707.phpt:
+      Fixed bug #30707 (Segmentation fault on exception in method)
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      ws
+
+    * ZendEngine2/tests/bug30162.phpt
+      ZendEngine2/tests/bug30162.phpt:
+      
+      file bug30162.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug30161.phpt:
+      Fixed bug #30162 (Catching exception in constructor couses lose of $this)
+
 2005-05-03  Rob Richards  <rrichards@ctindustries.net>
 
     * (PHP_5_0)
