@@ -1,5 +1,7 @@
 --TEST--
 Bug #21600 (assign by reference function call changes variable contents)
+--INI--
+error_reporting=4095
 --FILE--
 <?php
 $tmp = array();
@@ -23,11 +25,14 @@ function fubar($text){
   return $text;
 }
 ?>
---EXPECT--
+--EXPECTF--
+Strict Standards: Only variables should be assigned by reference in %sbug21600.php on line 4
 array(1) {
   ["foo"]=>
-  &string(4) "test"
+  string(4) "test"
 }
+
+Strict Standards: Only variables should be assigned by reference in %sbug21600.php on line 11
 array(1) {
   ["foo"]=>
   string(4) "test"
