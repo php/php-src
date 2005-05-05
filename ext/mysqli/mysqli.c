@@ -66,7 +66,7 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 	for (i=0; i < bbuf.var_cnt; i++) {
 
 		/* free temporary bind buffer */
-		if (type == FETCH_RESULT) {
+		if (type == FETCH_RESULT && bbuf.buf[i].val) {
 			efree(bbuf.buf[i].val);
 		}
 
@@ -129,10 +129,13 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 	if (instanceof_function(intern->zo.ce, mysqli_link_class_entry TSRMLS_CC)) {
 		if (my_res && my_res->ptr) {
 			MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
-		
+
 			mysql_close(mysql->mysql);
 
-			php_clear_mysql(mysql);		
+			php_clear_mysql(mysql);
+			efree(mysql);
+
+			my_res->ptr = NULL;
 		}
 	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
 		if (my_res && my_res->ptr) {
@@ -512,6 +515,9 @@ PHP_MINIT_FUNCTION(mysqli)
 	
 	/* bind blob support */
 	REGISTER_LONG_CONSTANT("MYSQLI_NO_DATA", MYSQL_NO_DATA, CONST_CS | CONST_PERSISTENT);
+#ifdef MYSQL_DATA_TRUNCATED
+	REGISTER_LONG_CONSTANT("MYSQLI_DATA_TRUNCATED", MYSQL_DATA_TRUNCATED, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	/* reporting */
 	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_INDEX", MYSQLI_REPORT_INDEX, CONST_CS | CONST_PERSISTENT);

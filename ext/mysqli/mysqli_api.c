@@ -301,7 +301,14 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				break;
-
+			case MYSQL_TYPE_NULL:
+				stmt->result.buf[ofs].type = IS_NULL; 
+				stmt->result.buf[ofs].buflen = 0;
+				bind[ofs].buffer_type = MYSQL_TYPE_NULL;
+				bind[ofs].buffer = 0;
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				bind[ofs].buffer_length = 0;
+			break;
 			case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_TIME:
 			case MYSQL_TYPE_DATETIME:
@@ -425,7 +432,9 @@ PHP_FUNCTION(mysqli_close)
 
 	mysql_close(mysql->mysql);
 	php_clear_mysql(mysql);	
+	efree(mysql);
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -618,10 +627,15 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 			memset(stmt->result.buf[i].val, 0, stmt->result.buf[i].buflen);
 		}
 	}
-	if (!(ret = mysql_stmt_fetch(stmt->stmt))) {
+	ret = mysql_stmt_fetch(stmt->stmt);
+#ifdef MYSQL_DATA_TRUNCATED
+	if (!ret || ret == MYSQL_DATA_TRUNCATED) {
+#else
+	if (!ret) {
+#endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
 			if (stmt->result.vars[i]->type == IS_STRING && stmt->result.vars[i]->value.str.len) {
-		efree(stmt->result.vars[i]->value.str.val);
+				efree(stmt->result.vars[i]->value.str.val);
 			}
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
@@ -1008,7 +1022,7 @@ PHP_FUNCTION(mysqli_info)
 PHP_FUNCTION(mysqli_init)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
-	MY_MYSQL *mysql = (MY_MYSQL *)calloc(1, sizeof(MY_MYSQL));
+	MY_MYSQL *mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
