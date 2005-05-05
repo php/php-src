@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - Fixed bug #31636 (another crash when echoing a COM object). (Wez)
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance 
   mode). (mike at php dot net)
+- Fixed bug #31525 (object reference being dropped. $this getting lost).
+  (Stas, Dmitry)
 - Fixed bug #31502 (Wrong deserialization from session when using WDDX
   serializer). (Dmitry) 
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
