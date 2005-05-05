@@ -1329,9 +1329,21 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
-	zval **variable_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
+	zval **variable_ptr_ptr;
 	zval **value_ptr_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
 
+	if (OP2_TYPE == IS_VAR &&
+	    !(*value_ptr_ptr)->is_ref &&
+	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
+	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
+		zend_error(E_STRICT, "Only variables should be assigned by reference");
+		if (free_op2.var == NULL) {
+			PZVAL_LOCK(*value_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
+		}
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
+	}
+
+	variable_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
 
 	if (!RETURN_VALUE_UNUSED(&opline->result)) {

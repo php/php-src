@@ -562,6 +562,12 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 	}
 }
 
+static inline zend_bool zend_is_function_or_method_call(znode *variable)
+{
+	zend_uint type = variable->u.EA.type;
+
+	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
+}
 
 void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
 {
@@ -572,6 +578,11 @@ void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
 	opline->opcode = ZEND_ASSIGN_REF;
 	if (opline_is_fetch_this(last_op TSRMLS_CC)) {
 		zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+	}
+	if (zend_is_function_or_method_call(rvar)) {
+		opline->extended_value = ZEND_RETURNS_FUNCTION;	
+	} else {
+		opline->extended_value = 0;
 	}
 	if (result) {
 		opline->result.op_type = IS_VAR;
@@ -794,13 +805,6 @@ void zend_check_writable_variable(znode *variable)
 	if (type == ZEND_PARSED_FUNCTION_CALL) {
 		zend_error(E_COMPILE_ERROR, "Can't use function return value in write context");
 	}
-}
-
-static inline zend_bool zend_is_function_or_method_call(znode *variable)
-{
-	zend_uint type = variable->u.EA.type;
-
-	return  ((type & ZEND_PARSED_METHOD_CALL) || (type == ZEND_PARSED_FUNCTION_CALL));
 }
 
 void zend_do_begin_variable_parse(TSRMLS_D)
