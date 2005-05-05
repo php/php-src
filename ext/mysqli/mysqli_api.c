@@ -277,6 +277,15 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				break;
 
+			case MYSQL_TYPE_NULL:
+				stmt->result.buf[ofs].type = IS_NULL; 
+				stmt->result.buf[ofs].buflen = 0;
+				bind[ofs].buffer_type = MYSQL_TYPE_NULL;
+				bind[ofs].buffer = 0;
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				bind[ofs].buffer_length = 0;
+			break;
+
 			case MYSQL_TYPE_SHORT:
 			case MYSQL_TYPE_TINY:
 			case MYSQL_TYPE_LONG:
@@ -423,7 +432,8 @@ PHP_FUNCTION(mysqli_close)
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
 	mysql_close(mysql->mysql);
-	php_clear_mysql(mysql);	
+	php_clear_mysql(mysql);
+	efree(mysql);
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
 	RETURN_TRUE;
 }
@@ -1013,7 +1023,7 @@ PHP_FUNCTION(mysqli_info)
 PHP_FUNCTION(mysqli_init)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
-	MY_MYSQL *mysql = (MY_MYSQL *)calloc(1, sizeof(MY_MYSQL));
+	MY_MYSQL *mysql = (MY_MYSQL *)ecalloc(1, sizeof(MY_MYSQL));
 
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
