@@ -1,3 +1,48 @@
+2005-05-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c:
+      fix bug #32924:	prepend does not add file to included files
+
+    * (PHP_5_0)
+      zend_execute.c:
+      clarify some magic
+
+2005-05-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c:
+      Fixed bug #30641 (Compile error: error: symbol "zend_error" is used but not
+      defined)
+
+    * tests/bug30707.phpt
+      tests/bug30707.phpt:
+      
+      file bug30707.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug30707.phpt:
+      Fixed bug #30707 (Segmentation fault on exception in method)
+
+    * (PHP_5_0)
+      zend_execute.c:
+      ws
+
+    * tests/bug30162.phpt
+      tests/bug30162.phpt:
+      
+      file bug30162.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug30161.phpt:
+      Fixed bug #30162 (Catching exception in constructor couses lose of $this)
+
 2005-05-03  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/unset_cv07.phpt:
