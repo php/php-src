@@ -69,7 +69,7 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 	for (i=0; i < bbuf.var_cnt; i++) {
 
 		/* free temporary bind buffer */
-		if (type == FETCH_RESULT) {
+		if (type == FETCH_RESULT && bbuf.buf[i].val) {
 			efree(bbuf.buf[i].val);
 		}
 
@@ -133,9 +133,14 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 		if (my_res && my_res->ptr) {
 			MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
 		
-			mysql_close(mysql->mysql);
+			if (mysql->mysql) {
+				mysql_close(mysql->mysql);
+			}
 
-			php_clear_mysql(mysql);		
+			php_clear_mysql(mysql);
+			efree(mysql);
+
+			my_res->ptr = NULL;
 		}
 	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
 		if (my_res && my_res->ptr) {
