@@ -104,6 +104,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 {
 	char *trailing_slash;
 	char *opened_path;
+	int path_len = 0;
 	int fd = -1;
 #ifndef HAVE_MKSTEMP
 	int open_flags = O_CREAT | O_TRUNC | O_RDWR
@@ -120,11 +121,13 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		return -1;
 	}
 
+	path_len = strlen(path);
+
 	if (!(opened_path = emalloc(MAXPATHLEN))) {
 		return -1;
 	}
 
-	if (IS_SLASH(path[strlen(path)-1])) {
+	if (!path_len || IS_SLASH(path[path_len - 1])) {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
