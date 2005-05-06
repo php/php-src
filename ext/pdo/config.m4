@@ -2,18 +2,19 @@ dnl $Id$
 dnl config.m4 for extension pdo
 dnl vim:se ts=2 sw=2 et:
 
-pdo_running_under_pear=0
-case `pwd` in
-  /var/tmp/pear-build-*)
-    pdo_running_under_pear=1
-    ;;
-esac
+AC_DEFUN([PHP_PDO_PEAR_CHECK],[
+  pdo_running_under_pear=0
+  case `pwd` in
+    /var/tmp/pear-build-*)
+      pdo_running_under_pear=1
+      ;;
+  esac
 
-if test "$pdo_running_under_pear$PHP_PEAR_VERSION" = "1"; then
-  # we're running in an environment that smells like pear,
-  # and the PHP_PEAR_VERSION env var is not set.  That implies
-  # that we're running under a slightly broken pear installer
-  AC_MSG_ERROR([
+  if test "$pdo_running_under_pear$PHP_PEAR_VERSION" = "1"; then
+    # we're running in an environment that smells like pear,
+    # and the PHP_PEAR_VERSION env var is not set.  That implies
+    # that we're running under a slightly broken pear installer
+    AC_MSG_ERROR([
 PDO requires that you upgrade your PEAR installer tools. Please
 do so now by running:
 
@@ -22,13 +23,17 @@ do so now by running:
 or by manually downloading and installing PEAR version 1.3.5 or higher.
 
 Once you've upgraded, please re-try your PDO install.
+    ])
+  fi
 ])
-fi
 
 PHP_ARG_ENABLE(pdo, whether to enable PDO support,
 [  --enable-pdo=yes         Enable PHP Data Objects support (recommended)], yes)
 
 if test "$PHP_PDO" != "no"; then
+
+  PHP_PDO_PEAR_CHECK
+
   if test "$ext_shared" = "yes" ; then
     case $host_alias in
       *darwin*)
