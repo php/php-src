@@ -37,7 +37,7 @@ PHP_FUNCTION(mysqli_connect)
 	MYSQLI_RESOURCE 	*mysqli_resource;
 	zval  				*object = getThis();
 	char 				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	unsigned int 		hostname_len, username_len, passwd_len, dbname_len, socket_len;
+	unsigned int 		hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	long				port=0;
 
 	if (getThis() && !ZEND_NUM_ARGS()) {
