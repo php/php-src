@@ -1,10 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
+- Removed php_check_syntax() function which never worked properly. (Ilia)
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
 - Added support for .cc files in extensions. (Brian)
 - Added PHP_INT_MAX and PHP_INT_SIZE as predefined constants. (Andrey)
-- Removed php_check_syntax() function which never worked properly. (Ilia)
 - Changed sha1_file() and md5_file() functions to use streams instead of
   low level IO. (Uwe)
 - Fixed ext/mysqli to allocate less memory when fetching bound params
@@ -52,7 +52,7 @@ PHP                                                                        NEWS
   (Uwe Schindler)
 - Fixed bug #32405 (mysqli::fetch() returns bad data - 64bit problem). (Andrey)
 - Fixed bug #32282 (Segfault in mysqli_fetch_array on 64-bit). (Georg)
-- Fixed bug #32296 (get_class_methods output has changed between 5.0.2 and
+- Fixed bug #32296 (get_class_methods() output has changed between 5.0.2 and
   5.0.3). (Dmitry)
 - Fixed bug #32245 (xml_parser_free() in a function assigned to the xml parser
   gives a segfault). (Rob)
