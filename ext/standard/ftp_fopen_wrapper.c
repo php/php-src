@@ -246,7 +246,20 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	/* send the user name */
 	php_stream_write_string(stream, "USER ");
 	if (resource->user != NULL) {
-		php_raw_url_decode(resource->user, strlen(resource->user));
+		unsigned char *s, *e;
+		int user_len = php_raw_url_decode(resource->user, strlen(resource->user));
+		
+		s = resource->user;
+		e = s + user_len;
+		/* check for control characters that should not be present in the user name */
+		while (s < e) {
+			if (iscntrl(*s)) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid login %s", resource->user);
+				goto connect_errexit;
+			}
+			s++;
+		}
+		
 		php_stream_write_string(stream, resource->user);
 	} else {
 		php_stream_write_string(stream, "anonymous");
