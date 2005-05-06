@@ -1,3 +1,56 @@
+2005-05-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/math.c:
+      fix proto
+
+2005-05-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug31525.phpt
+      ZendEngine2/tests/bug31525.phpt
+      tests/lang/bug20175.phpt
+      tests/lang/bug21600.phpt:
+      
+      file bug31525.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug31525.phpt
+      tests/lang/bug20175.phpt
+      tests/lang/bug21600.phpt:
+      Fixed bug #31525 (object reference being dropped. $this getting lost)
+
+2005-05-05  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/tests/064.phpt:
+      MFH: fix for bug #32956
+           fixed memleak in mysql_close
+           fixed data truncation in test 009.phpt
+
+    * ext/mysqli/tests/064.phpt
+      ext/mysqli/tests/064.phpt:
+      
+      fixed memleak in mysqli_close
+      fixed bug #32956 (mysqli_bind_result doesn't support MYSQL_TYPE_NULL)
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c:
+      fixed memleak in mysqli_close
+      fixed bug #32956 (mysqli_bind_result doesn't support MYSQL_TYPE_NULL)
+
+    * php.ini-dist
+      php.ini-recommended:
+      fix for bug #32947 (Incorrect option for mysqli default password)
+
 2005-05-04  Stanislav Malyshev  <stas@zend.com>
 
     * tests/lang/bug32924.phpt
