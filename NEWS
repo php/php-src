@@ -81,7 +81,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #30332 (zend.ze1_compatibility_mode isnt fully compatable with
   array_push()). (Dmitry)
-- Fixed bug #30162 (Catching exception in constructor couses lose of $this).
+- Fixed bug #30162 (Catching exception in constructor causes lose of $this).
   (Dmitry)
 - Fixed bug #30126 (Enhancement for error message for abstract classes). 
   (Marcus)
