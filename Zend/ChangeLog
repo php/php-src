@@ -1,3 +1,19 @@
+2005-05-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug31525.phpt:
+      Fixed bug #31525 (object reference being dropped. $this getting lost)
+
+    * tests/bug31525.phpt
+      tests/bug31525.phpt:
+      
+      file bug31525.phpt was initially added on branch PHP_5_0.
+
 2005-05-04  Stanislav Malyshev  <stas@zend.com>
 
     * zend.c:
