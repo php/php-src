@@ -611,7 +611,9 @@ out:
 		efree(scratch);
 	}
 
-	php_url_free(resource);
+	if (resource) {
+		php_url_free(resource);
+	}
 
 	if (stream) {
 		if (header_init) {
