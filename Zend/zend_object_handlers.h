@@ -62,7 +62,7 @@ typedef zval* (*zend_object_get_t)(zval *property TSRMLS_DC);
 
 /* Used to check if a property of the object exists */
 /* param has_set_exists:
- * 0 (has) whetehr property exists and is not NULL
+ * 0 (has) whether property exists and is not NULL
  * 1 (set) whether property exists and is true
  * 2 (exists) whether property exists
  */
