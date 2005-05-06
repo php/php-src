@@ -1778,7 +1778,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		char  buf[4096];
 		char *path;
 
-		tmp = php_open_temporary_file("", "", &path TSRMLS_CC);
+		tmp = php_open_temporary_file(NULL, NULL, &path TSRMLS_CC);
 		if (tmp == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open temporary file");
 			RETURN_FALSE;
