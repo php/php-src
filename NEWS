@@ -109,6 +109,8 @@ PHP                                                                        NEWS
 - Fixed bug with $HTTP_RAW_POST_DATA not getting set. (Brian)
 - Fixed bug in mysql::client_version(). (Georg)
 - Fixed ZTS destruction. (Marcus)
+- Fixed bug #32924 (file included with "auto_prepend_file" can be included
+  with require_once() or include_once()). (Stas)
 - Fixed bug #32833 (Invalid opcode). (Dmitry)
 - Fixed bug #32491 (File upload error - unable to create a temporary file).
   (Uwe Schindler)
@@ -137,7 +139,6 @@ PHP                                                                        NEWS
 - Fixed bug #28969 (Wrong data encoding of special characters). (Dmitry)
 - Fixed bug #28568 (SAPI::known_post_content_types is not thread safe).
   (Moriyoshi)
-- Fixed bug #32924 prepend does not add file to included files (Stas)
 
 13 Jul 2004, PHP 5.0.0
 - Rewritten UNIX and Windows install help files. (Documentation Team)
