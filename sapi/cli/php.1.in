@@ -24,7 +24,7 @@ PHP Command Line Interface 'CLI'
 .SH SYNOPSIS
 .B php
 [options] [
-.B \-f ]
+.B \-f\fP ]
 .IR file
 [[\-\-] 
 .IR args.\|.\|. ]
@@ -60,9 +60,10 @@ PHP Command Line Interface 'CLI'
 [options] \-\- [
 .IR args.\|.\|. ]
 .LP
+\fBphp \fP[options] \fB\-a\fP
+.LP
 .SH DESCRIPTION
-.B PHP
-is a widely\-used general\-purpose scripting language that is especially suited for 
+\fBPHP\fP is a widely\-used general\-purpose scripting language that is especially suited for 
 Web development and can be embedded into HTML. This is the command line interface
 that enables you to the following:
 .P
@@ -108,7 +109,9 @@ executed.
 .TP
 .PD 1
 .B \-a
-Run interactively
+Run PHP interactively. This lets you enter snippets of PHP code that directly
+get executed. When readline support is enabled you can edit the lines and also
+have hitory support.
 .TP
 .PD 0
 .B \-\-php\-ini \fIpath\fP|\fIfile\fP
