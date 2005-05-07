@@ -682,11 +682,6 @@ PHP_FUNCTION(mysqli_stmt_fetch)
 		case 1:
 			RETURN_FALSE;
 		break;
-#ifdef MYSQL_DATA_TRUNCATED
-		case MYSQL_DATA_TRUNCATED:
-			RETURN_LONG(MYSQL_DATA_TRUNCATED);
-			break;
-#endif
 		default:
 			RETURN_NULL();
 		break;
