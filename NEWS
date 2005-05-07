@@ -28,7 +28,7 @@ PHP                                                                        NEWS
   . added interfaces Subject and Observer
   . added spl_autoload*() functions
   . converted several 5.0 examples into c code
-  . added class File
+  . added class FileObject
   . added possibility to use a string with class_parents() and
     class_implements(). (Andrey)
 - Improved interactive mode of CLI (php -a). (Johannes, Marcus)
