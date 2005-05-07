@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   . added class File
   . added possibility to use a string with class_parents() and
     class_implements(). (Andrey)
+- Improved interactive mode of CLI (php -a). (Johannes, Marcus)
 - Added the tidy_get_opt_doc() function to return documentation for
   configuration options in tidy. (Patch by: nlopess@php.net)
 - Added support for .cc files in extensions. (Brian)
