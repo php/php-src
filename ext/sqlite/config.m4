@@ -58,11 +58,13 @@ if test "$PHP_SQLITE" != "no"; then
     ],[
       -L$SQLITE_DIR/$PHP_LIBDIR -lm
     ])
+    SQLITE_MODULE_TYPE=external
     PHP_SQLITE_CFLAGS=$pdo_inc_path
     sqlite_extra_sources="libsqlite/src/encode.c"
   else
     # use bundled library
-    PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src $pdo_inc_path"
+    SQLITE_MODULE_TYPE=builtin
+    PHP_SQLITE_CFLAGS="-I@ext_builddir@/libsqlite/src $pdo_inc_path"
     sqlite_extra_sources="libsqlite/src/opcodes.c \
         libsqlite/src/parse.c libsqlite/src/encode.c \
         libsqlite/src/auth.c libsqlite/src/btree.c libsqlite/src/build.c \
@@ -79,8 +81,18 @@ if test "$PHP_SQLITE" != "no"; then
     
     PHP_ADD_EXTENSION_DEP(sqlite, spl)
     PHP_ADD_EXTENSION_DEP(sqlite, pdo)
-    PHP_ADD_BUILD_DIR($ext_builddir/libsqlite)
-    PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src)
+  fi
+
+  dnl
+  dnl Common for both bundled/external
+  dnl
+  sqlite_sources="sqlite.c sess_sqlite.c pdo_sqlite2.c $sqlite_extra_sources" 
+  PHP_NEW_EXTENSION(sqlite, $sqlite_sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
+  PHP_SUBST(SQLITE_SHARED_LIBADD)
+  PHP_INSTALL_HEADERS([$ext_builddir/libsqlite/src/sqlite.h])
+  
+  if test "$SQLITE_MODULE_TYPE" = "builtin"; then
+    PHP_ADD_BUILD_DIR($ext_builddir/libsqlite/src, 1)
     AC_CHECK_SIZEOF(char *, 4)
     AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
     dnl use latin 1 for SQLite older than 2.8.9; the utf-8 handling 
@@ -97,15 +109,15 @@ if test "$PHP_SQLITE" != "no"; then
     SQLITE_VERSION=`cat $ext_srcdir/libsqlite/VERSION`
     PHP_SUBST(SQLITE_VERSION)
 
-    sed -e s/--VERS--/$SQLITE_VERSION/ -e s/--ENCODING--/$SQLITE_ENCODING/ $ext_srcdir/libsqlite/src/sqlite.h.in >$ext_srcdir/libsqlite/src/sqlite.h
+    sed -e s/--VERS--/$SQLITE_VERSION/ -e s/--ENCODING--/$SQLITE_ENCODING/ $ext_srcdir/libsqlite/src/sqlite.h.in > $ext_builddir/libsqlite/src/sqlite.h
 
     if test "$ext_shared" = "no" || test "$ext_srcdir" != "$abs_srcdir"; then
-      echo '#include <php_config.h>' > $ext_srcdir/libsqlite/src/config.h
+      echo '#include <php_config.h>' > $ext_builddir/libsqlite/src/config.h
     else
-      echo "#include \"$abs_builddir/config.h\"" > $ext_srcdir/libsqlite/src/config.h
+      echo "#include \"$abs_builddir/config.h\"" > $ext_builddir/libsqlite/src/config.h
     fi
     
-    cat >> $ext_srcdir/libsqlite/src/config.h <<EOF
+    cat >> $ext_builddir/libsqlite/src/config.h <<EOF
 #if ZTS
 # define THREADSAFE 1
 #endif
@@ -114,14 +126,7 @@ if test "$PHP_SQLITE" != "no"; then
 #endif
 EOF
   fi
-
-  dnl
-  dnl Common for both bundled/external
-  dnl
-  sqlite_sources="sqlite.c sess_sqlite.c pdo_sqlite2.c $sqlite_extra_sources" 
-  PHP_NEW_EXTENSION(sqlite, $sqlite_sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
-  PHP_SUBST(SQLITE_SHARED_LIBADD)
-
+  
   AC_CHECK_FUNCS(usleep nanosleep)
   AC_CHECK_HEADERS(time.h)
 fi

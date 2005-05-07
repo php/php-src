@@ -51,5 +51,5 @@ for more detail on this issue.
     esac
   fi
   PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
-  PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h])
 fi

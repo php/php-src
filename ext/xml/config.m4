@@ -26,6 +26,7 @@ if test "$PHP_XML" != "no"; then
 
     PHP_SETUP_LIBXML(XML_SHARED_LIBADD, [
       xml_extra_sources="compat.c"
+      PHP_ADD_EXTENSION_DEP(xml, libxml)
     ], [
       AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
     ])
@@ -53,6 +54,6 @@ if test "$PHP_XML" != "no"; then
 
   PHP_NEW_EXTENSION(xml, xml.c $xml_extra_sources, $ext_shared)
   PHP_SUBST(XML_SHARED_LIBADD)
-  PHP_ADD_EXTENSION_DEP(xml, libxml)
+  PHP_INSTALL_HEADERS([ext/xml])
   AC_DEFINE(HAVE_XML, 1, [ ])
 fi

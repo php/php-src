@@ -2,8 +2,6 @@ dnl This file becomes configure.in for self-contained extensions.
 
 AC_INIT(config.m4)
 
-PHP_INIT_BUILD_SYSTEM
-
 AC_DEFUN([PHP_WITH_PHP_CONFIG],[
   AC_ARG_WITH(php-config,
 [  --with-php-config=PATH],[
@@ -19,6 +17,10 @@ AC_DEFUN([PHP_WITH_PHP_CONFIG],[
   if test -z "$prefix"; then
     AC_MSG_ERROR(Cannot find php-config. Please use --with-php-config=PATH)
   fi
+
+  php_shtool=$srcdir/build/shtool
+  PHP_INIT_BUILD_SYSTEM
+
   AC_MSG_CHECKING(for PHP prefix)
   AC_MSG_RESULT($prefix)
   AC_MSG_CHECKING(for PHP includes)
@@ -106,7 +108,7 @@ PHP_SUBST(SHELL)
 PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE
 
-test -d modules || mkdir modules
+test -d modules || $php_shtool mkdir modules
 touch .deps
 
 AC_CONFIG_HEADER(config.h)

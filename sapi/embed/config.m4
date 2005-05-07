@@ -29,4 +29,5 @@ AC_MSG_RESULT($PHP_EMBED_TYPE)
 
 if test "$PHP_EMBED_TYPE" != "no"; then
   PHP_SELECT_SAPI(embed, $PHP_EMBED_TYPE, php_embed.c)
+  PHP_INSTALL_HEADERS([sapi/embed/php_embed.h])
 fi
