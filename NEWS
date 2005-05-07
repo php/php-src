@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Changed stream_filter_(ap|pre)pend() to return resource. (Sara)
 - Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
   if SPL extension is present. (Georg, Marcus)
+- Improved interactive mode of PHP CLI (php -a). (Johannes, Marcus)
 - Improved support for embedded server in mysqli. (Georg)
 - Improved performance of:
   . general execution/compilation. (Andi, Thies, Sterling, Dmitry, Marcus)
@@ -31,7 +32,6 @@ PHP                                                                        NEWS
   . added class FileObject
   . added possibility to use a string with class_parents() and
     class_implements(). (Andrey)
-- Improved interactive mode of CLI (php -a). (Johannes, Marcus)
 - Added the tidy_get_opt_doc() function to return documentation for
   configuration options in tidy. (Patch by: nlopess@php.net)
 - Added support for .cc files in extensions. (Brian)
