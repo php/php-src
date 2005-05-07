@@ -255,7 +255,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		while (s < e) {
 			if (iscntrl(*s)) {
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid login %s", resource->user);
-				goto connect_errexit;
+				goto errexit;
 			}
 			s++;
 		}
