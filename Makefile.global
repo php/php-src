@@ -5,6 +5,8 @@ INSTALL_DATA = $(INSTALL) -m 644
 DEFS = -DPHP_ATOM_INC -I$(top_builddir)/include -I$(top_builddir)/main -I$(top_srcdir)
 COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORKPATH)
 
+CORE_HEADERS = Zend/ TSRM/ include/ main/ main/streams/ regex/ ext/standard/
+INSTALL_HEADERS = $(CORE_HEADERS) $(INSTALL_EXT_HEADERS)
 
 all: $(all_targets) 
 	@echo

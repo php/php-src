@@ -138,7 +138,7 @@ dnl PHP_INIT_BUILD_SYSTEM
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
-test -d include || mkdir include
+test -d include || $php_shtool mkdir include
 > Makefile.objects
 > Makefile.fragments
 dnl We need to play tricks here to avoid matching the grep line itself
@@ -901,7 +901,11 @@ AC_DEFUN([PHP_EXTENSION],[
 ])
 
 AC_DEFUN([PHP_ADD_BUILD_DIR],[
-  BUILD_DIR="$BUILD_DIR $1"
+  ifelse($2,,[
+    BUILD_DIR="$BUILD_DIR $1"
+  ], [
+    $php_shtool mkdir -p $1
+  ])
 ])
 
 AC_DEFUN([PHP_GEN_BUILD_DIRS],[
@@ -919,13 +923,13 @@ dnl to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
-dnl extra-cflags are passed to the compiler, with @ext_srcdir@ being
-dnl substituted.
+dnl "extra-cflags" are passed to the compiler, with 
+dnl @ext_srcdir@ and @ext_builddir@ being substituted.
 AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|sed s#@ext_srcdir@#$ext_srcdir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|sed s#@ext_srcdir@#$ext_srcdir#g|sed s#@ext_builddir@#$ext_builddir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
@@ -2344,6 +2348,29 @@ ifelse([$3],[],,[else $3])
 dnl -------------------------------------------------------------------------
 dnl Misc. macros
 dnl -------------------------------------------------------------------------
+
+dnl 
+dnl PHP_INSTALL_HEADERS(path [, file ...])
+dnl
+dnl PHP header files to be installed
+dnl
+AC_DEFUN([PHP_INSTALL_HEADERS],[
+  if test -z "$2"; then
+    for header_file in $1; do
+      PHP_RUN_ONCE(INSTALLHEADERS, $header_file, [
+        INSTALL_EXT_HEADERS="$INSTALL_EXT_HEADERS $header_file"
+      ])
+    done 
+  else
+    header_path=$1
+    for header_file in $2; do
+      hp_hf="$header_path/$header_file"
+      PHP_RUN_ONCE(INSTALLHEADERS, $hp_hf, [
+        INSTALL_EXT_HEADERS="$INSTALL_EXT_HEADERS $hp_hf"
+      ])
+    done 
+  fi
+])
 
 dnl
 dnl PHP_AP_EXTRACT_VERSION(/path/httpd)

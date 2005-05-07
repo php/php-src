@@ -31,32 +31,14 @@ install-build:
 	$(INSTALL) $(BUILD_FILES_EXEC) $(INSTALL_ROOT)$(phpbuilddir) && \
 	$(INSTALL_DATA) $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
-HEADER_DIRS = \
-	Zend/ \
-	TSRM/ \
-	include/ \
-	main/ \
-	main/streams/ \
-	regex/ \
-	ext/iconv/ \
-	ext/libxml/ \
-	ext/standard/ \
-	ext/session/ \
-	ext/dom/xml_common.h \
-	ext/xml/ \
-	ext/mbstring/ \
-	ext/mbstring/libmbfl/ \
-	ext/mbstring/libmbfl/mbfl/ \
-	ext/sqlite/libsqlite/src/sqlite.h
-
 install-headers:
-	-@for i in $(HEADER_DIRS); do \
+	-@for i in $(INSTALL_HEADERS); do \
 		i=`$(top_srcdir)/build/shtool path -d $$i`; \
 		paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 	done; \
 	$(mkinstalldirs) $$paths && \
 	echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
-	for i in $(HEADER_DIRS); do \
+	for i in $(INSTALL_HEADERS); do \
 		if test -f "$(top_srcdir)/$$i"; then \
 			$(INSTALL_DATA) $(top_srcdir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
 		elif test -f "$(top_builddir)/$$i"; then \

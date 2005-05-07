@@ -517,15 +517,15 @@ AC_ARG_WITH(dbmaker,
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     # find dbmaker's home directory
-    DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | awk -F: '{print $6}'`
+    DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | $AWK -F: '{print $6}'`
 
     # check DBMaker version (from 5.0 to 2.0)
     DBMAKER_VERSION=5.0
 
     while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a "$DBMAKER_VERSION" != "2.9"; do
-        DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | awk '{ print $1-1;}'`
-        MAJOR_V=`echo $DM_VER | awk '{ print $1/10; }'  | awk  -F. '{ print $1; }'`
-        MINOR_V=`echo $DM_VER | awk '{ print $1%10; }'`
+        DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | $AWK '{ print $1-1;}'`
+        MAJOR_V=`echo $DM_VER | $AWK '{ print $1/10; }'  | $AWK -F. '{ print $1; }'`
+        MINOR_V=`echo $DM_VER | $AWK '{ print $1%10; }'`
         DBMAKER_VERSION=$MAJOR_V.$MINOR_V
     done
 

@@ -64,7 +64,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_inc_path)
   else
     # use bundled libs
-    PHP_PDO_SQLITE_CFLAGS="-I@ext_srcdir@/sqlite/src"
     pdo_sqlite_sources="sqlite/src/attach.c sqlite/src/auth.c sqlite/src/btree.c \
       sqlite/src/build.c sqlite/src/date.c sqlite/src/delete.c sqlite/src/expr.c \
       sqlite/src/func.c sqlite/src/hash.c sqlite/src/insert.c sqlite/src/legacy.c \
@@ -79,20 +78,19 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I@ext_srcdir@/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
+        $ext_shared,,-I@ext_builddir@/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
 
-      PHP_ADD_BUILD_DIR($ext_builddir/sqlite)
-      PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src)
+      PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src, 1)
       AC_CHECK_SIZEOF(char *,4)
       AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
       PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
-      PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | awk -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
-      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_srcdir/sqlite3.h
+      PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | $AWK -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
+      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_builddir/sqlite/src/sqlite3.h
       if ! test -f $ext_srcdir/sqlite/src/parse.h ; then
         $CC -o $ext_srcdir/sqlite/tool/lemon $ext_srcdir/sqlite/tool/lemon.c
         $ext_srcdir/sqlite/tool/lemon $ext_srcdir/sqlite/src/parse.y
-	      cat $ext_srcdir/sqlite/src/parse.h $ext_srcdir/sqlite/src/vdbe.c | awk -f $ext_srcdir/sqlite/mkopcodeh.awk > $ext_srcdir/sqlite/src/opcodes.h
-        sort -n +2 $ext_srcdir/sqlite/src/opcodes.h | awk -f $ext_srcdir/sqlite/mkopcodec.awk > $ext_srcdir/sqlite/src/opcodes.c
+        cat $ext_srcdir/sqlite/src/parse.h $ext_srcdir/sqlite/src/vdbe.c | $AWK -f $ext_srcdir/sqlite/mkopcodeh.awk > $ext_srcdir/sqlite/src/opcodes.h
+        sort -n +2 $ext_srcdir/sqlite/src/opcodes.h | Â$AWK -f $ext_srcdir/sqlite/mkopcodec.awk > $ext_srcdir/sqlite/src/opcodes.c
         $CC -o $ext_srcdir/sqlite/tool/mkkeywordhash $ext_srcdir/sqlite/tool/mkkeywordhash.c
         $ext_srcdir/sqlite/tool/mkkeywordhash > $ext_srcdir/sqlite/src/keywordhash.h
       else
@@ -100,11 +98,11 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       fi
 
       if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
-        echo '#include "php_config.h"' > $ext_srcdir/sqlite/src/config.h
+        echo '#include <php_config.h>' > $ext_builddir/sqlite/src/config.h
       else
-        echo "#include \"$abs_builddir/config.h\"" > $ext_srcdir/sqlite/src/config.h
+        echo "#include \"$abs_builddir/config.h\"" > $ext_builddir/sqlite/src/config.h
       fi
-      cat >> $ext_srcdir/sqlite/src/config.h <<EOF
+      cat >> $ext_builddir/sqlite/src/config.h <<EOF
 #if ZTS
 # define THREADSAFE 1
 #endif

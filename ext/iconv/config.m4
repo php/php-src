@@ -138,6 +138,7 @@ int main() {
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-I\"$PHP_ICONV_PREFIX/include\"])
     PHP_SUBST(ICONV_SHARED_LIBADD)
+    PHP_INSTALL_HEADERS([ext/iconv])
   else
     AC_MSG_ERROR(Please reinstall the iconv library.)
   fi
