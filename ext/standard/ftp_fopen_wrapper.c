@@ -279,7 +279,11 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 
 	return stream;
 
- connect_errexit:
+connect_errexit:
+	if (resource) {
+		php_url_free(resource);	
+	}
+
 	if (stream) {
 		php_stream_close(stream);
 	}
