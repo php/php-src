@@ -8,7 +8,7 @@ NULL binding
 
 	$mysql = new mysqli($host, $user, $passwd);
 
-	$stmt = new mysqli_stmt($mysql, "SELECT NULL FROM DUAL");
+	$stmt = $mysql->prepare("SELECT NULL FROM DUAL");
 	$stmt->execute();
 	$stmt->bind_result($foo);
 	$stmt->fetch();
