@@ -69,6 +69,13 @@
 #include <unixlib/local.h>
 #endif
 
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#include <readline/readline.h>
+#if !HAVE_LIBEDIT
+#include <readline/history.h>
+#endif
+#endif
+
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
@@ -91,6 +98,9 @@
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+static char php_last_char = '\0';
+#endif
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
@@ -199,6 +209,10 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 	const char *ptr = str;
 	uint remaining = str_length;
 	size_t ret;
+
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+	php_last_char = str[str_length-1];
+#endif
 
 	while (remaining > 0)
 	{
@@ -524,6 +538,216 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 	return SUCCESS;
 }
 /* }}} */
+
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+
+/* {{{ cli_is_valid_code
+ */
+typedef enum {
+	body,
+	sstring,
+	dstring,
+	sstring_esc,
+	dstring_esc,
+	comment_line,
+	comment_block,
+	heredoc_start,
+	heredoc,
+	outside,
+} php_code_type;
+
+static int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
+{
+	int valid_end = 1;
+	int brackets_count = 0;
+	int brace_count = 0;
+	int i;
+	php_code_type code_type = body;
+	char *heredoc_tag;
+	int heredoc_len;
+
+	for (i = 0; i < len; ++i) {
+		switch(code_type) {
+			default:
+				switch(code[i]) {
+					case '{':
+						brackets_count++;
+						valid_end = 0;
+						break;
+					case '}':
+						if (brackets_count > 0) {
+							brackets_count--;
+						}
+						valid_end = brackets_count ? 0 : 1;
+						break;
+					case '(':
+						brace_count++;
+						valid_end = 0;
+						break;
+					case ')':
+						if (brace_count > 0) {
+							brace_count--;
+						}
+						valid_end = 0;
+						break;
+					case ';':
+						valid_end = brace_count == 0 && brackets_count == 0;
+						break;
+					case ' ':
+					case '\n':
+					case '\t':
+						break;
+					case '\'':
+						code_type = sstring;
+						break;
+					case '"':
+						code_type = dstring;
+						break;
+					case '/':
+						if (code[i+1] == '/') {
+							i++;
+							code_type = comment_line;
+							break;
+						}
+						if (code[i+1] == '*') {
+							code_type = comment_block;
+							i++;
+							break;
+						}
+						valid_end = 0;
+						break;
+					case '%':
+						if (!CG(asp_tags)) {
+							valid_end = 0;
+							break;
+						}
+						/* no break */
+					case '?':
+						if (code[i+1] == '>') {
+							i++;
+							code_type = outside;
+							break;
+						}
+						valid_end = 0;
+						break;
+					case '<':
+						valid_end = 0;
+						if (i + 2 < len && code[i+1] == '<' && code[i+2] == '<') {
+							i += 2;
+							code_type = heredoc_start;
+							heredoc_len = 0;
+						}
+						break;
+					default:
+						valid_end = 0;
+						break;
+				}
+				break;
+			case sstring:
+				if (code[i] == '\\') {
+					code_type = sstring_esc;
+				} else {
+					if (code[i] == '\'') {
+						code_type = body;
+					}
+				}
+				break;
+			case sstring_esc:
+				code_type = sstring;
+				break;
+			case dstring:
+				if (code[i] == '\\') {
+					code_type = dstring_esc;
+				} else {
+					if (code[i] == '"') {
+						code_type = body;
+					}
+				}
+				break;
+			case dstring_esc:
+				code_type = dstring;
+				break;
+			case comment_line:
+				if (code[i] == '\n') {
+					code_type = body;
+				}
+				break;
+			case comment_block:
+				if (code[i-1] == '*' && code[i] == '/') {
+					code_type = body;
+				}
+				break;
+			case heredoc_start:
+				switch(code[i]) {
+					case ' ':
+					case '\t':
+						break;
+					case '\r':
+					case '\n':
+						code_type = heredoc;
+						break;
+					default:
+						if (!heredoc_len) {
+							heredoc_tag = code+i;
+						}
+						heredoc_len++;
+						break;
+				}
+				break;
+			case heredoc:
+				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len)) {
+					code_type = body;
+				}
+				break;
+			case outside:
+				if ((CG(short_tags) && !strncmp(code+i-1, "<?", 2))
+				||  (CG(asp_tags) && !strncmp(code+i-1, "<%", 2))
+				||  (i > 3 && !strncmp(code+i-4, "<?php", 5))
+				) {
+					code_type = body;
+				}
+				break;
+		}
+	}
+
+	switch (code_type) {
+		default:
+			if (brace_count) {
+				*prompt = "php ( ";
+			} else if (brackets_count) {
+				*prompt = "php { ";
+			} else {
+				*prompt = "php > ";
+			}
+			break;
+		case sstring:
+		case sstring_esc:
+			*prompt = "php ' ";
+			break;
+		case dstring:
+		case dstring_esc:
+			*prompt = "php \" ";
+			break;
+		case comment_block:
+			*prompt = "/*  > ";
+			break;
+		case heredoc:
+			*prompt = "<<< > ";
+			break;
+		case outside:
+			*prompt = "    > ";
+			break;
+	}
+
+	if (!valid_end || brackets_count) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+/* }}} */
+
+#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 /* {{{ main
  */
@@ -951,6 +1175,68 @@ int main(int argc, char *argv[])
 			if (strcmp(file_handle.filename, "-")) {
 				cli_register_file_handles(TSRMLS_C);
 			}
+
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+			if (interactive) {
+				char *line;
+				size_t size = 4096, pos = 0, len;
+				char *code = emalloc(size);
+				char *prompt = "php > ";
+				char *history_file;
+
+				history_file = tilde_expand("~/.php_history");
+				read_history(history_file);
+
+				/* it would be nicer to implement this correct */
+				rl_bind_key ('\t', rl_insert);
+
+				EG(exit_status) = 0;
+				while ((line = readline(pos ? prompt : "php > ")) != NULL) {
+					if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
+						free(line);
+						break;
+					}
+
+					if (!pos && !*line) {
+						free(line);
+						continue;
+					}
+
+					len = strlen(line);
+					if (pos + len + 2 > size) {
+						size = pos + len + 2;
+						code = erealloc(code, size);
+					}
+					memcpy(&code[pos], line, len);
+					pos += len;
+					code[pos] = '\n';
+					code[++pos] = '\0';
+
+					if (*line) {
+						add_history(line);
+					}
+
+					free(line);
+
+					if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
+						continue;
+					}
+
+					zend_eval_string(code, NULL, "php shell code" TSRMLS_CC);
+					pos = 0;
+					
+					if (php_last_char != '\0' && php_last_char != '\n') {
+						sapi_cli_single_write("\n", 1);
+					}
+					php_last_char = '\0';
+				}
+				write_history(history_file);
+				free(history_file);
+				efree(code);
+				exit_status = EG(exit_status);
+				break;
+			}
+#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 			php_execute_script(&file_handle TSRMLS_CC);
 			exit_status = EG(exit_status);
 			break;
