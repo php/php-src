@@ -410,7 +410,9 @@ if test "$PHP_GD" != "no"; then
   if test "$GD_MODULE_TYPE" = "builtin"; then
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
+    GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
   else
+    GD_HEADER_DIRS="ext/gd/"
     GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS"
     PHP_ADD_INCLUDE($GD_INCLUDE)
   
@@ -419,6 +421,7 @@ if test "$PHP_GD" != "no"; then
     ], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   fi
 
+  PHP_INSTALL_HEADERS([$GD_HEADER_DIRS])
   PHP_SUBST(GDLIB_CFLAGS)
   PHP_SUBST(GD_SHARED_LIBADD)
 fi
