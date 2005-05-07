@@ -405,7 +405,6 @@ PHP_FUNCTION(mysqli_character_set_name)
 {
 	MY_MYSQL 	*mysql;
 	zval  		*mysql_link;
-	char		*charsetname;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -413,9 +412,7 @@ PHP_FUNCTION(mysqli_character_set_name)
 
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	charsetname = (char *)mysql_character_set_name(mysql->mysql);
-
-	RETURN_STRING(charsetname, 1);
+	RETURN_STRING((char *) mysql_character_set_name(mysql->mysql), 1);
 }
 /* }}} */
 
