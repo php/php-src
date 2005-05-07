@@ -1214,7 +1214,7 @@ static long double php_population_variance(zval *arr, zend_bool sample)
 	return (vr / elements_num);
 }
 
-/* {{{ proto float math_variance(array a)
+/* {{{ proto float math_variance(array a[, bool sample = false])
    Returns the population variance */
 PHP_FUNCTION(math_variance)
 {
@@ -1237,7 +1237,7 @@ PHP_FUNCTION(math_variance)
 /* }}} */
 
 
-/* {{{ proto float math_std_dev(array a)
+/* {{{ proto float math_std_dev(array a[, bool sample = false])
    Returns the standard deviation */
 PHP_FUNCTION(math_std_dev)
 {
