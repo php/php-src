@@ -112,7 +112,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 {
 	php_stream *stream = NULL, *reuseid = NULL;
 	php_url *resource = NULL;
-	int result, use_ssl, use_ssl_on_data = 0;
+	int result, use_ssl, use_ssl_on_data = 0, tmp_len;
 	char *scratch;
 	char tmp_line[512];
 
@@ -205,23 +205,24 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 #endif
 	}
 
+#define PHP_FTP_CNTRL_CHK(val, val_len, err_msg) {	\
+	unsigned char *s = val, *e = s + val_len;	\
+	while (s < e) {	\
+		if (iscntrl(*s)) {	\
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, err_msg, val);	\
+			goto connect_errexit;	\
+		}	\
+		s++;	\
+	}	\
+} 
+
 	/* send the user name */
 	php_stream_write_string(stream, "USER ");
 	if (resource->user != NULL) {
-		unsigned char *s, *e;
-		int user_len = php_raw_url_decode(resource->user, strlen(resource->user));
-		
-		s = resource->user;
-		e = s + user_len;
-		/* check for control characters that should not be present in the user name */
-		while (s < e) {
-			if (iscntrl(*s)) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid login %s", resource->user);
-				goto connect_errexit;
-			}
-			s++;
-		}
-		
+		tmp_len = php_raw_url_decode(resource->user, strlen(resource->user));
+
+		PHP_FTP_CNTRL_CHK(resource->user, tmp_len, "Invalid login %s")
+
 		php_stream_write_string(stream, resource->user);
 	} else {
 		php_stream_write_string(stream, "anonymous");
@@ -237,7 +238,10 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 
 		php_stream_write_string(stream, "PASS ");
 		if (resource->pass != NULL) {
-			php_raw_url_decode(resource->pass, strlen(resource->pass));
+			tmp_len = php_raw_url_decode(resource->pass, strlen(resource->pass));
+
+			PHP_FTP_CNTRL_CHK(resource->pass, tmp_len, "Invalid password %s")
+
 			php_stream_write_string(stream, resource->pass);
 		} else {
 			/* if the user has configured who they are,
@@ -278,7 +282,11 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 
 	return stream;
 
- connect_errexit:
+connect_errexit:
+	if (resource) {
+		php_url_free(resource);	
+	}
+
 	if (stream) {
 		php_stream_close(stream);
 	}
