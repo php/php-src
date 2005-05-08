@@ -593,7 +593,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
 		if (zend_hash_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void **) &data) != FAILURE) {
-			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_PP(data));
+			char *elem_esc = php_info_html_esc(Z_STRVAL_PP(data) TSRMLS_CC);
+			php_info_print_table_row(2, "PHP_SELF", elem_esc);
+			efree(elem_esc);
 		}
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_PP(data));
