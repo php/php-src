@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed bug #32956 (mysql_bind_result doesn't support MYSQL_TYPE_NULL). (Georg)
 - Fixed bug #32947 (Incorrect option for mysqli default password). (Georg)
 - Fixed bug #32936 (http redirects URLs are not checked for control chars). (Ilia)
+- Fixed bug #32932 (Oracle LDAP: ldap_get_entries invalid pointer). (Jani)
 - Fixed bug #32930 (class extending DOMDocument doesn't clone properly). (Rob)
 - Fixed bug #32852 (Crash with singleton and __destruct when
   zend.ze1_compatibility_mode = On). (Dmitry)

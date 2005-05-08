@@ -146,7 +146,9 @@ if test "$PHP_LDAP" != "no"; then
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME; then
     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
-
+    if test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
+      AC_DEFINE(HAVE_ORALDAP_10,1,[ ])
+    fi
   else
     AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)
   fi
@@ -169,7 +171,7 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have
   dnl ldap_parse_reference() nor ldap_start_tls_s()
-  AC_CHECK_FUNCS([ldap_parse_reference ldap_start_tls_s])
+  AC_CHECK_FUNCS([ldap_memfree ldap_parse_result ldap_parse_reference ldap_start_tls_s])
   LDFLAGS=$_SAVE_LDFLAGS
   
   dnl
