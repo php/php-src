@@ -944,6 +944,13 @@ zend_module_entry basic_functions_module = {
 static void php_putenv_destructor(putenv_entry *pe)
 {
 	if (pe->previous_value) {
+#if _MSC_VER
+		/* VS.Net has a bug in putenv() when setting a variable that
+		 * is already set; if the SetEnvironmentVariable() API call
+		 * fails, the Crt will double free() a string.
+		 * We try to avoid this by setting our own value first */
+		SetEnvironmentVariable(pe->key, "bugbug");
+#endif
 		putenv(pe->previous_value);
 	} else {
 # if HAVE_UNSETENV
@@ -1429,6 +1436,14 @@ PHP_FUNCTION(putenv)
 				break;
 			}
 		}
+
+#if _MSC_VER
+		/* VS.Net has a bug in putenv() when setting a variable that
+		 * is already set; if the SetEnvironmentVariable() API call
+		 * fails, the Crt will double free() a string.
+		 * We try to avoid this by setting our own value first */
+		SetEnvironmentVariable(pe.key, "bugbug");
+#endif
 
 		if (putenv(pe.putenv_string) == 0) {	/* success */
 			zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len+1, (void **) &pe, sizeof(putenv_entry), NULL);
