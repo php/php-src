@@ -406,7 +406,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		if (expose_php && !sapi_module.phpinfo_as_text) {
 			PUTS("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 			if (SG(request_info).request_uri) {
-				PUTS(SG(request_info).request_uri);
+				char *elem_esc = php_info_html_esc(SG(request_info).request_uri TSRMLS_CC);
+				PUTS(elem_esc);
+				efree(elem_esc);
 			}
 			PUTS("?=");
 			logo_guid = php_logo_guid();
@@ -592,7 +594,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		if (expose_php && !sapi_module.phpinfo_as_text) {
 			PUTS("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
 			if (SG(request_info).request_uri) {
-				PUTS(SG(request_info).request_uri);
+				char *elem_esc = php_info_html_esc(SG(request_info).request_uri TSRMLS_CC);
+				PUTS(elem_esc);
+				efree(elem_esc);
 			}
 			PUTS("?="ZEND_LOGO_GUID"\" alt=\"Zend logo\" /></a>\n");
 		}
@@ -611,7 +615,9 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_hr();
 		PUTS("<h1><a href=\"");
 		if (SG(request_info).request_uri) {
-			PUTS(SG(request_info).request_uri);
+			char *elem_esc = php_info_html_esc(SG(request_info).request_uri TSRMLS_CC);
+			PUTS(elem_esc);
+			efree(elem_esc);
 		}
 		PUTS("?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000\">");
 		PUTS("PHP Credits");
