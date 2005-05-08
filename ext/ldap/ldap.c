@@ -137,16 +137,18 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_compare,								NULL)
 	PHP_FE(ldap_sort,									NULL)
 
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
+	PHP_FE(ldap_rename,									NULL)
 	PHP_FE(ldap_get_option,			third_arg_force_ref)
 	PHP_FE(ldap_set_option,								NULL)
-	PHP_FE(ldap_parse_result,			arg3to6of6_force_ref)
 	PHP_FE(ldap_first_reference,						NULL)
 	PHP_FE(ldap_next_reference,							NULL)
 #ifdef HAVE_LDAP_PARSE_REFERENCE
 	PHP_FE(ldap_parse_reference,	third_arg_force_ref)
 #endif
-	PHP_FE(ldap_rename,									NULL)
+#ifdef HAVE_LDAP_PARSE_RESULT
+	PHP_FE(ldap_parse_result,			arg3to6of6_force_ref)
+#endif
 #ifdef HAVE_LDAP_START_TLS_S
 	PHP_FE(ldap_start_tls,								NULL)
 #endif
@@ -242,7 +244,7 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("LDAP_DEREF_FINDING", LDAP_DEREF_FINDING, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("LDAP_DEREF_ALWAYS", LDAP_DEREF_ALWAYS, CONST_PERSISTENT | CONST_CS);
 
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
 	/* LDAP options */
 	REGISTER_LONG_CONSTANT("LDAP_OPT_DEREF", LDAP_OPT_DEREF, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("LDAP_OPT_SIZELIMIT", LDAP_OPT_SIZELIMIT, CONST_PERSISTENT | CONST_CS);
@@ -253,7 +255,9 @@ PHP_MINIT_FUNCTION(ldap)
 #ifdef LDAP_OPT_RESTART
 	REGISTER_LONG_CONSTANT("LDAP_OPT_RESTART", LDAP_OPT_RESTART, CONST_PERSISTENT | CONST_CS);
 #endif
+#ifdef LDAP_OPT_HOST_NAME
 	REGISTER_LONG_CONSTANT("LDAP_OPT_HOST_NAME", LDAP_OPT_HOST_NAME, CONST_PERSISTENT | CONST_CS);
+#endif
 	REGISTER_LONG_CONSTANT("LDAP_OPT_ERROR_STRING", LDAP_OPT_ERROR_STRING, CONST_PERSISTENT | CONST_CS);
 #ifdef LDAP_OPT_MATCHED_DN
 	REGISTER_LONG_CONSTANT("LDAP_OPT_MATCHED_DN", LDAP_OPT_MATCHED_DN, CONST_PERSISTENT | CONST_CS);
@@ -444,7 +448,7 @@ PHP_FUNCTION(ldap_connect)
 static int _get_lderrno(LDAP *ldap)
 {
 #if !HAVE_NSLDAP
-#if LDAP_API_VERSION > 2000
+#if LDAP_API_VERSION > 2000 || HAVE_ORALDAP_10
 	int lderr;
 
 	/* New versions of OpenLDAP do it this way */
@@ -629,7 +633,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 {
 	/* sizelimit */
 	if (sizelimit > -1) {
-#if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP
+#if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
 		ldap_set_option(ldap, LDAP_OPT_SIZELIMIT, &sizelimit);
 #else
 		ldap->ld_sizelimit = sizelimit; 
@@ -638,7 +642,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 
 	/* timelimit */
 	if (timelimit > -1) {
-#if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP
+#if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
 		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &timelimit);
 #else
 		ldap->ld_timelimit = timelimit; 
@@ -647,7 +651,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 
 	/* deref */
 	if (deref > -1) {
-#if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP
+#if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
 		ldap_set_option(ldap, LDAP_OPT_DEREF, &deref);
 #else
 		ldap->ld_deref = deref; 
@@ -1066,12 +1070,12 @@ PHP_FUNCTION(ldap_get_entries)
 			add_index_string(tmp1, num_attrib, attribute, 1);
 
 			num_attrib++;
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 			ldap_memfree(attribute);
 #endif
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		if (ber != NULL)
 			ber_free(ber, 0);
 #endif
@@ -1079,7 +1083,7 @@ PHP_FUNCTION(ldap_get_entries)
 		add_assoc_long(tmp1, "count", num_attrib);
 		dn = ldap_get_dn(ldap, ldap_result_entry);
 		add_assoc_string(tmp1, "dn", dn, 1);
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(dn);
 #else
 		free(dn);
@@ -1119,7 +1123,7 @@ PHP_FUNCTION(ldap_first_attribute)
 		ZEND_REGISTER_RESOURCE(*berp, ber, le_ber_entry);
 
 		RETVAL_STRING(attribute, 1);
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(attribute);
 #endif
 	}
@@ -1150,7 +1154,7 @@ PHP_FUNCTION(ldap_next_attribute)
 		ZEND_REGISTER_RESOURCE(*berp, ber, le_ber_entry);
 
 		RETVAL_STRING(attribute, 1);
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(attribute);
 #endif
 	}
@@ -1197,12 +1201,12 @@ PHP_FUNCTION(ldap_get_attributes)
 		add_index_string(return_value, num_attrib, attribute, 1);
 
 		num_attrib++;
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(attribute);
 #endif
 		attribute = ldap_next_attribute(ld->link, resultentry->data, ber);
 	}
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		if (ber != NULL) {
 			ber_free(ber, 0);
 		}
@@ -1310,7 +1314,7 @@ PHP_FUNCTION(ldap_get_dn)
 	text = ldap_get_dn(ld->link, resultentry->data);
 	if (text != NULL) {
 		RETVAL_STRING(text, 1);
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(text);
 #else
 		free(text);
@@ -1373,7 +1377,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 	
 	if (ufn !=NULL) {
 		RETVAL_STRING(ufn, 1);
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || WINDOWS
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 || WINDOWS
 		ldap_memfree(ufn);
 #endif
 	} else {
@@ -1693,8 +1697,7 @@ PHP_FUNCTION(ldap_sort)
 }
 /* }}} */
 
-
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
 /* {{{ proto bool ldap_get_option(resource link, int option, mixed retval)
    Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option) 
@@ -1732,8 +1735,10 @@ PHP_FUNCTION(ldap_get_option)
 			ZVAL_LONG(*retval, val);
 		} break;
 	/* options with string value */
-	case LDAP_OPT_HOST_NAME:
 	case LDAP_OPT_ERROR_STRING:
+#ifdef LDAP_OPT_HOST_NAME
+	case LDAP_OPT_HOST_NAME:
+#endif
 #ifdef HAVE_LDAP_SASL
 	case LDAP_OPT_X_SASL_MECH:   
 	case LDAP_OPT_X_SASL_REALM:
@@ -1811,8 +1816,10 @@ PHP_FUNCTION(ldap_set_option)
 			}
 		} break;
 		/* options with string value */
-	case LDAP_OPT_HOST_NAME:
 	case LDAP_OPT_ERROR_STRING:
+#ifdef LDAP_OPT_HOST_NAME
+	case LDAP_OPT_HOST_NAME:
+#endif
 #ifdef HAVE_LDAP_SASL
 	case LDAP_OPT_X_SASL_MECH:   
 	case LDAP_OPT_X_SASL_REALM:
@@ -1914,6 +1921,7 @@ PHP_FUNCTION(ldap_set_option)
 }
 /* }}} */
 
+#ifdef HAVE_LDAP_PARSE_RESULT
 /* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals)
    Extract information from result */
 PHP_FUNCTION(ldap_parse_result) 
@@ -1979,6 +1987,7 @@ PHP_FUNCTION(ldap_parse_result)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto resource ldap_first_reference(resource link, resource result)
    Return first reference */
@@ -2091,7 +2100,7 @@ PHP_FUNCTION(ldap_rename)
 	convert_to_string_ex(newparent);
 	convert_to_boolean_ex(deleteoldrdn);
 
-#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP	
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
 	rc = ldap_rename_s(ld->link, Z_STRVAL_PP(dn), Z_STRVAL_PP(newrdn), Z_STRVAL_PP(newparent), Z_BVAL_PP(deleteoldrdn), NULL, NULL);
 #else
 	if (Z_STRLEN_PP(newparent) != 0) {
@@ -2135,7 +2144,7 @@ PHP_FUNCTION(ldap_start_tls)
 }
 /* }}} */
 #endif
-#endif /* (LDAP_API_VERSION > 2000) || HAVE_NSLDAP */
+#endif /* (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10 */
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 /* {{{ _ldap_rebind_proc()
