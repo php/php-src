@@ -34,59 +34,51 @@ extern zend_module_entry ldap_module_entry;
 /* LDAP functions */
 PHP_MINIT_FUNCTION(ldap);
 PHP_MSHUTDOWN_FUNCTION(ldap);
-
 PHP_MINFO_FUNCTION(ldap);
 
 PHP_FUNCTION(ldap_connect);
-
 PHP_FUNCTION(ldap_bind);
 PHP_FUNCTION(ldap_unbind);
-
 PHP_FUNCTION(ldap_read);
 PHP_FUNCTION(ldap_list);
 PHP_FUNCTION(ldap_search);
-
 PHP_FUNCTION(ldap_free_result);
 PHP_FUNCTION(ldap_count_entries);
-
 PHP_FUNCTION(ldap_first_entry);
 PHP_FUNCTION(ldap_next_entry);
 PHP_FUNCTION(ldap_get_entries);
 PHP_FUNCTION(ldap_first_attribute);
 PHP_FUNCTION(ldap_next_attribute);
 PHP_FUNCTION(ldap_get_attributes);
-
 PHP_FUNCTION(ldap_get_values);
 PHP_FUNCTION(ldap_get_values_len);
-
 PHP_FUNCTION(ber_free);
 PHP_FUNCTION(ldap_get_dn);
 PHP_FUNCTION(ldap_explode_dn);
 PHP_FUNCTION(ldap_dn2ufn);
-
 PHP_FUNCTION(ldap_add);
 PHP_FUNCTION(ldap_delete);
-
 PHP_FUNCTION(ldap_mod_add);
 PHP_FUNCTION(ldap_mod_replace);
 PHP_FUNCTION(ldap_mod_del);
-
 PHP_FUNCTION(ldap_errno);
 PHP_FUNCTION(ldap_err2str);
 PHP_FUNCTION(ldap_error);
-
 PHP_FUNCTION(ldap_compare);
-
 PHP_FUNCTION(ldap_sort);
 
-#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
+#if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP_10
 PHP_FUNCTION(ldap_get_option);
 PHP_FUNCTION(ldap_set_option);
-PHP_FUNCTION(ldap_parse_result);
 PHP_FUNCTION(ldap_first_reference);
 PHP_FUNCTION(ldap_next_reference);
-PHP_FUNCTION(ldap_parse_reference);
 PHP_FUNCTION(ldap_rename);
+#ifdef HAVE_LDAP_PARSE_RESULT
+PHP_FUNCTION(ldap_parse_result);
+#endif
+#ifdef HAVE_LDAP_PARSE_REFERENCE
+PHP_FUNCTION(ldap_parse_reference);
+#endif
 #endif
 
 #if LDAP_API_VERSION > 2000

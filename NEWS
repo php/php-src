@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   low level IO. (Uwe)
 - Fixed bug #32974 (pcntl calls malloc() from a signal handler). (Wez)
 - Fixed bug #32936 (http redirects URLs are not checked for control chars). (Ilia)
+- Fixed bug #32932 (Oracle LDAP: ldap_get_entries invalid pointer). (Jani)
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bug #32730 (ext/crack.c fails to compile with cracklib-2.8.3). (Jani)
