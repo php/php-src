@@ -191,7 +191,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     fi
   done
   if test -z "$THIS_LIBS"; then
-	AC_MSG_CHECKING(for db$1 major version)
+    AC_MSG_CHECKING(for db$1 major version)
     AC_MSG_ERROR(Header contains different version)
   fi
   if test "$1" = "4"; then
