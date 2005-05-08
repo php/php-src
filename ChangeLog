@@ -1,3 +1,119 @@
+2005-05-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      this one needs to be upper..
+
+    * ext/standard/math.c:
+      ws + cs + proto fixes
+
+2005-05-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      MFB: Fixed memory leak on error in FTP wrapper.
+
+    * (PHP_5_0)
+      ext/standard/ftp_fopen_wrapper.c:
+      Fixed memory leak on error in FTP wrapper.
+
+2005-05-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/cli/php.1.in:
+      typofix
+
+2005-05-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/test-pcntl.php
+      ext/pcntl/test-pcntl.php:
+      MFB: Fix for #32974
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/test-pcntl.php:
+      Fix #32974
+
+2005-05-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php.1.in:
+      - Update
+
+2005-05-07  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli_api.c:
+      revert this one till we have a better way to inform the user where the
+      truncation has occured
+
+    * ext/standard/math.c:
+      update protos
+
+2005-05-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      - Update: class File was renamed to FileObject
+
+    * NEWS
+      sapi/cli/php_cli.c:
+      - Improved interactive mode of CLI (php -a)
+
+2005-05-07  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/standard/ftp_fopen_wrapper.c:
+      Fix what I assume was a typo
+
+2005-05-07  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli_api.c:
+      return MYSQLI_DATA_TRUNCATED if data happens to be truncated
+
+    * ext/mysqli/mysqli_api.c:
+      return directly
+
+2005-05-07  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/tests/064.phpt:
+      fix for 5_0. Statement constructor doesn't exist in 5_0
+
+2005-05-07  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      bail out just after detecting incorrect number of paramts to bind (MFH)
+
+    * ext/mysqli/mysqli_api.c:
+      bail out when detecting incorrect number of parameters to be bound.
+
+2005-05-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/gd/config.m4:
+      - Install GD header files
+
+    * Makefile.global
+      acinclude.m4
+      configure.in
+      ext/curl/config.m4
+      ext/dom/config.m4
+      ext/iconv/config.m4
+      ext/interbase/php_ibase_udf.c
+      ext/mbstring/config.m4
+      ext/odbc/config.m4
+      ext/session/config.m4
+      ext/sqlite/config.m4
+      ext/xml/config.m4
+      sapi/embed/config.m4
+      scripts/Makefile.frag
+      scripts/phpize.m4:
+      - Added PHP_INSTALL_HEADERS() macro
+      - Fixed several VPATH build issues
+      - Changed all awk calls to use $AWK
+      - Changed all mkdir calls to use "$php_shtool mkdir"
+
 2005-05-06  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/sqlite/config.m4:
