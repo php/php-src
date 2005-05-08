@@ -116,6 +116,9 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_rpl_probe,							NULL)
 	PHP_FE(mysqli_rpl_query_type,						NULL)
 	PHP_FE(mysqli_select_db,							NULL)
+#ifdef HAVE_MYSQLI_SET_CHARSET
+	PHP_FE(mysqli_set_character_set_name,				NULL)
+#endif
 	PHP_FE(mysqli_stmt_attr_get,						NULL)
 	PHP_FE(mysqli_stmt_attr_set,						NULL)
 	PHP_FE(mysqli_stmt_field_count,						NULL)
@@ -214,6 +217,10 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(rpl_probe,mysqli_rpl_probe,NULL)
 	PHP_FALIAS(rpl_query_type,mysqli_rpl_query_type,NULL)
 	PHP_FALIAS(select_db,mysqli_select_db,NULL)
+#ifdef HAVE_MYSQLI_SET_CHARSET
+	PHP_FALIAS(set_character_set_name,mysqli_set_character_set_name,NULL)
+	PHP_FALIAS(set_client_encoding,mysqli_set_character_set_name,NULL)
+#endif
 	PHP_FALIAS(set_opt, mysqli_options,NULL)
 	PHP_FALIAS(slave_query,mysqli_slave_query,NULL)
 	PHP_FALIAS(ssl_set,mysqli_ssl_set,NULL)
