@@ -1271,6 +1271,10 @@ PHP_FUNCTION(mysqli_prepare)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
+	if (mysql->mysql->status == MYSQL_STATUS_GET_RESULT) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "All data must be fetched before a new preparing of a statement takes place");
+		RETURN_FALSE;
+	}
 	stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
 
 	if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
