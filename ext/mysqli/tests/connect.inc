@@ -2,6 +2,9 @@
 
   /* default values are localhost, root and empty password 
      Change the values if you use another configuration   */
+	if (!extension_loaded('mysqli')) {
+		@dl('mysqli.so');
+	}
 
 	$driver = new mysqli_driver;
 
