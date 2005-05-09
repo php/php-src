@@ -36,6 +36,8 @@ PHP 4                                                                      NEWS
   (Moriyoshi)
 - Fixed bug #32245 (xml_parser_free() in a function assigned to the xml parser
   gives a segfault). (Rob)
+- Fixed bug #32116 (mysql compressed connection doesn't work under windows)
+  (Georg)
 - Fixed bug #31887 (ISAPI: Custom 5xx error does not return correct HTTP 
   response message). (Jani) 
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance mode).
