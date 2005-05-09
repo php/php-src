@@ -364,19 +364,15 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 /* {{{ mysqli_module_entry
  */
 zend_module_entry mysqli_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"mysqli",
 	mysqli_functions,
 	PHP_MINIT(mysqli),
 	PHP_MSHUTDOWN(mysqli),
-	PHP_RINIT(mysqli),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(mysqli),	/* Replace with NULL if there's nothing to do at request end */
+	PHP_RINIT(mysqli),
+	PHP_RSHUTDOWN(mysqli),
 	PHP_MINFO(mysqli),
-#if ZEND_MODULE_API_NO >= 20010901
 	"0.1", /* Replace with version number for your extension */
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
