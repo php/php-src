@@ -54,8 +54,12 @@ PHP_FUNCTION(posix_seteuid);
 #ifdef HAVE_SETEGID
 PHP_FUNCTION(posix_setegid);
 #endif
+#ifdef HAVE_GETGROUPS
 PHP_FUNCTION(posix_getgroups);
+#endif
+#ifdef HAVE_GETLOGIN
 PHP_FUNCTION(posix_getlogin);
+#endif
 
 /* POSIX.1, 4.3 */
 PHP_FUNCTION(posix_getpgrp);
