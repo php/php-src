@@ -1521,7 +1521,8 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 		return;
 	}
 	if (offset < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be positive");	
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset must be positive");
+		RETURN_FALSE;
 	}
 
 	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, &mysql_stmt, "mysqli_stmt");
