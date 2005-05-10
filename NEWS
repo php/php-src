@@ -83,7 +83,7 @@ PHP                                                                        NEWS
   . htmlspecialchars_decode() (Ilia)
   . inet_pton() (Sara)
   . inet_ntop() (Sara)
-  . math_std_dev() - calculate standard deviation.(Andrey)
+  . math_standard_deviation() - calculate standard deviation. (Andrey)
   . math_variance() - calculate population variance. (Andrey)
   . mysqli::client_info property (Georg)
   . posix_access() (Magnus)
