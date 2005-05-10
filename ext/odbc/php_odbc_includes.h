@@ -230,7 +230,7 @@ typedef struct odbc_connection {
 typedef struct odbc_result_value {
 	char name[32];
 	char *value;
-	long int vallen;
+	SDWORD vallen;
 	SDWORD coltype;
 } odbc_result_value;
 
