@@ -1,3 +1,68 @@
+2005-05-09  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/mysqli_api.c:
+      after throwing an warning bail out
+
+    * ext/mysqli/mysqli.c:
+      mysqli won't compile with Zend2 API before 2001 - in these days there was
+      no Zend2
+
+    * ext/mysqli/mysqli_api.c:
+      MFB
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      warn the user if he wants to prepare before fetching all previous data
+      (in case mysqli_stmt_store_result() wasn't called or not enough calls
+      to mysqli_stmt_fetch()).
+
+2005-05-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mysqli/tests/connect.inc:
+      - We skip tests when the extension is not loaded..in the php.ini
+
+    * ext/mysqli/tests/skipif.inc:
+      revert pointless patch
+
+2005-05-09  Georg Richter  <georg@mysql.com>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mysql/libmysql/config-win.h:
+      fix for bug #32116 (mysql compressed connection doesn't work under win)
+
+2005-05-09  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysqli/tests/connect.inc
+      ext/mysqli/tests/skipif.inc:
+      also test shared builds
+
+2005-05-09  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      ext/sqlite/libsqlite/src/sqlite.w32.h:
+      Fix build
+
+2005-05-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      ext/posix/config.m4
+      ext/posix/config.m4
+      ext/posix/php_posix.h
+      ext/posix/php_posix.h
+      ext/posix/posix.c
+      ext/posix/posix.c:
+      MFH: - getlogin() / getgroups() are not necessarily available everywhere
+
+    * ext/posix/config.m4
+      ext/posix/php_posix.h
+      ext/posix/posix.c:
+      - getlogin() / getgroups() are not necessarily available everywhere
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      Remove dos crap
+
 2005-05-08  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_4_3)
