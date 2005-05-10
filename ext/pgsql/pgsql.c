@@ -4137,6 +4137,11 @@ PHP_FUNCTION(pg_get_notify)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
+	if (!(result_type & PGSQL_BOTH)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid result type");
+		RETURN_FALSE;
+	}
+
 	PQconsumeInput(pgsql);
 	pgsql_notify = PQnotifies(pgsql);
 	if (!pgsql_notify) {
@@ -4144,11 +4149,11 @@ PHP_FUNCTION(pg_get_notify)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	if (result_type == PGSQL_NUM || result_type == PGSQL_BOTH) {
+	if (result_type & PGSQL_NUM) {
 		add_index_string(return_value, 0, pgsql_notify->relname, 1);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
 	}
-	if (result_type == PGSQL_ASSOC || result_type == PGSQL_BOTH) {
+	if (result_type & PGSQL_ASSOC) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 	}
