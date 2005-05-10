@@ -92,6 +92,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
 	zval* _old_error_object = SOAP_GLOBAL(error_object);\
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
+	zend_bool _old_in_compilation = CG(in_compilation); \
+	zend_bool _old_in_execution = EG(in_execution); \
+	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
 	int _bailout = 0;\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Client";\
@@ -100,6 +103,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 #define SOAP_CLIENT_END_CODE() \
 	} zend_catch {\
+		CG(in_compilation) = _old_in_compilation; \
+		EG(in_execution) = _old_in_execution; \
+		EG(current_execute_data) = _old_current_execute_data; \
 		if (EG(exception) == NULL || \
 		    Z_TYPE_P(EG(exception)) != IS_OBJECT || \
 		    Z_OBJCE_P(EG(exception)) != soap_fault_class_entry) {\
@@ -1837,6 +1843,9 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	TSRMLS_FETCH();
+	zend_bool _old_in_compilation = CG(in_compilation);
+	zend_bool _old_in_execution = EG(in_execution);
+	zend_execute_data *_old_current_execute_data = EG(current_execute_data);
 
 	if (!SOAP_GLOBAL(use_soap_error_handler)) {
 		old_error_handler(error_num, error_filename, error_lineno, format, args);
@@ -1886,6 +1895,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			zend_try {
 				old_error_handler(error_num, error_filename, error_lineno, format, args);
 			} zend_catch {
+				CG(in_compilation) = _old_in_compilation;
+				EG(in_execution) = _old_in_execution;
+				EG(current_execute_data) = _old_current_execute_data;
 			} zend_end_try();
 			PG(display_errors) = old;
 			zend_bailout();
@@ -1939,6 +1951,9 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		zend_try {
 			old_error_handler(error_num, error_filename, error_lineno, format, args);
 		} zend_catch {
+			CG(in_compilation) = _old_in_compilation;
+			EG(in_execution) = _old_in_execution;
+			EG(current_execute_data) = _old_current_execute_data;
 		} zend_end_try();
 		PG(display_errors) = old;
 
