@@ -230,6 +230,7 @@ int make_http_soap_request(zval  *this_ptr,
 	char *connection;
 	int http_1_1;
 	int http_status;
+	int content_type_xml = 0;
 	char *content_encoding;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
@@ -962,6 +963,7 @@ try_again:
 		}
 		if (strncmp(content_type, "text/xml", cmplen) == 0 ||
 		    strncmp(content_type, "application/soap+xml", cmplen) == 0) {
+			content_type_xml = 1;
 /*
 			if (strncmp(http_body, "<?xml", 5)) {
 				zval *err;
@@ -1032,13 +1034,15 @@ try_again:
 		if (*buffer_len == 0) {
 			error = 1;
 		} else if (*buffer_len > 0) {
-			char *s = *buffer;
+			if (!content_type_xml) {
+				char *s = *buffer;
 
-			while (*s != '\0' && *s < ' ') {
-			  s++;
-			}
-			if (strncmp(s, "<?xml", 5)) {
-			  error = 1;
+				while (*s != '\0' && *s < ' ') {
+					s++;
+				}
+				if (strncmp(s, "<?xml", 5)) {
+					error = 1;
+				}
 			}
 		}
 
