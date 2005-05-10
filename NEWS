@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   can crash PHP). (Jani)
 - Fixed bug #32615 (Segfault in replaceChild() using fragment when 
   previousSibling is NULL). (Rob)
+- Fixed bug #32613 (ext/snmp: use of snmp_shutdown() causes snmpapp.conf 
+  access errors). (Jani, ric at arizona dot edu)
 - Fixed bug #32608 (html_entity_decode() converts single quotes even if
   ENT_NOQUOTES is given). (Ilia)
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
