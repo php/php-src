@@ -415,7 +415,7 @@ function_entry basic_functions[] = {
 	PHP_FE(base_convert,													NULL)
 	PHP_FE(number_format,													NULL)
 	PHP_FE(fmod,															NULL)
-	PHP_FE(math_std_dev,													NULL)
+	PHP_FE(math_standard_deviation,													NULL)
 	PHP_FE(math_variance,													NULL)
 #ifdef HAVE_INET_NTOP
 	PHP_NAMED_FE(inet_ntop,		php_inet_ntop,											NULL)
