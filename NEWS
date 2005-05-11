@@ -78,6 +78,7 @@ PHP                                                                        NEWS
   . array_diff_ukey() (Andrey)
   . array_intersect_key() (Christiano Duarte)
   . array_intersect_ukey() (Christiano Duarte)
+  . array_product() (Andrey)
   . DomDocumentFragment::appendXML() (Christian)
   . fputcsv() (David Sklar)
   . htmlspecialchars_decode() (Ilia)
