@@ -92,6 +92,7 @@ PHP_FUNCTION(array_udiff_assoc);
 PHP_FUNCTION(array_diff_uassoc);
 PHP_FUNCTION(array_udiff_uassoc);
 PHP_FUNCTION(array_sum);
+PHP_FUNCTION(array_product);
 PHP_FUNCTION(array_filter);
 PHP_FUNCTION(array_map);
 PHP_FUNCTION(array_key_exists);
