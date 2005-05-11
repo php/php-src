@@ -1842,10 +1842,13 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	zend_bool _old_in_compilation = CG(in_compilation);
-	zend_bool _old_in_execution = EG(in_execution);
-	zend_execute_data *_old_current_execute_data = EG(current_execute_data);
+	zend_bool _old_in_compilation, _old_in_execution;
+	zend_execute_data *_old_current_execute_data;
 	TSRMLS_FETCH();
+
+	_old_in_compilation = CG(in_compilation);
+	_old_in_execution = EG(in_execution);
+	_old_current_execute_data = EG(current_execute_data);
 
 	if (!SOAP_GLOBAL(use_soap_error_handler)) {
 		old_error_handler(error_num, error_filename, error_lineno, format, args);
