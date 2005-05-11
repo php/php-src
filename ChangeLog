@@ -1,3 +1,91 @@
+2005-05-10  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c:
+      use & and check for the right value of result_type
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      use & and check for the right value of result_type
+      btw, nobody noticed that result_type wasn't ever working in 4.3, because
+      it was absent in parse_params()..
+      also, I prefer "Tony" just for uniformity =)
+
+2005-05-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      Tony or Antony? :)
+
+    * (PHP_5_0)
+      NEWS:
+      missing blame tag :)
+
+2005-05-10  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/pgsql/pgsql.c
+      ext/pgsql/pgsql.c:
+      MFH: fix #32904 (pg_get_notify() ignores result_type parameter)
+
+    * ext/pgsql/pgsql.c:
+      fix #32904 (pg_get_notify() ignores result_type parameter)
+
+2005-05-10  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/tests/math/math_std_dev.phpt:
+      fix the test too
+
+    * NEWS:
+      fix NEWS
+
+2005-05-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      NEWS
+      ext/odbc/php_odbc_includes.h
+      ext/odbc/php_odbc_includes.h:
+      MFB: - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems)
+
+    * (PHP_4_3)
+      NEWS
+      ext/odbc/php_odbc_includes.h:
+      - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems)
+
+2005-05-10  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h:
+      rename math_std_dev to math_standard_deviation (the API wasn't published
+      yet)
+
+2005-05-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/snmp/snmp.c:
+      ws
+
+    * ext/snmp/snmp.c:
+      MFB: - Fixed bug #32613 (ext/snmp: use of snmp_shutdown() causes
+      snmpapp.conf
+        access errors). (Jani, ric at arizona dot edu)
+
+    * (PHP_5_0)
+      NEWS
+      ext/snmp/snmp.c:
+      - Fixed bug #32613 (ext/snmp: use of snmp_shutdown() causes snmpapp.conf
+        access errors). (Jani, ric at arizona dot edu)
+
+    * (PHP_4_3)
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      Revert the memleak fix due to net-snmp oddity (see also bug #32613)
+
 2005-05-09  Andrey Hristov  <php@hristov.com>
 
     * ext/mysqli/mysqli_api.c:
