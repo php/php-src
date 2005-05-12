@@ -1,3 +1,37 @@
+2005-05-11  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_5_0)
+      ext/standard/html.c:
+      MFH: - Fixed bug #29119 (html_decode_entities handling of U+0152-U+0192
+      range)
+      (merge error from 4.3)
+      MFH: Mark pointers in entity tables as const.
+
+    * ext/standard/html.c:
+      Mark pointers in entity tables as const.
+
+    * ext/standard/html.c:
+      - Fixed bug #29119 (html_decode_entities handling of U+0152-U+0192 range)
+      (merge error from 4.3)
+
+2005-05-11  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      ...
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+      add function array_product()
+
+2005-05-11  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/userspace.c:
+      fix inverted logic and thus Bug #27508
+
+    * ext/standard/tests/file/bug27508.phpt:
+      add test for bug 27508
+
 2005-05-10  Antony Dovgal  <tony2001@phpclub.net>
 
     * (PHP_5_0)
