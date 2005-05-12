@@ -2656,6 +2656,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 	zend_class_entry *ce;
 	char *name; 
 	int name_len;
+	zval *property;
 
 	METHOD_NOTSTATIC;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
@@ -2666,6 +2667,16 @@ ZEND_METHOD(reflection_class, hasProperty)
 	if (zend_hash_exists(&ce->properties_info, name, name_len + 1)) {
 		RETURN_TRUE;
 	} else {
+		if (intern->obj && Z_OBJ_HANDLER_P(intern->obj, has_property))
+		{
+			MAKE_STD_ZVAL(property);
+			ZVAL_STRINGL(property, name, name_len, 1);
+			if (Z_OBJ_HANDLER_P(intern->obj, has_property)(intern->obj, property, 2 TSRMLS_CC)) {
+				zval_ptr_dtor(&property);
+				RETURN_TRUE;
+			}
+			zval_ptr_dtor(&property);
+		}
 		RETURN_FALSE;
 	}
 }
