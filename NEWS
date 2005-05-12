@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - Fixed ext/mysqli to allocate less memory when fetching bound params
   of type (MEDIUM|LONG)BLOB/(MEDIUM|LONG)TEXT. (Andrey)
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
+- Fixed bug #33019 (socket errors cause memory leaks in php_strerror()). 
+  (jwozniak23 at poczta dot onet dot pl, Tony).
 - Fixed bug #32956 (mysql_bind_result() doesn't support MYSQL_TYPE_NULL). (Georg)
 - Fixed bug #32947 (Incorrect option for mysqli default password). (Georg)
 - Fixed bug #32936 (http redirects URLs are not checked for control chars). (Ilia)
