@@ -352,15 +352,16 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 } /* }}} */
 
-/* {{{ void spl_autoload_register([string autoload_function = "spl_autoload"])
+/* {{{ void spl_autoload_register([string autoload_function = "spl_autoload" [, throw = true]])
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
 	char *func_name, *lc_name;
 	int func_name_len;
+	zend_bool do_throw = 1;
 	zend_function *spl_func_ptr, *func_ptr, **func_ptr_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &func_name, &func_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &func_name, &func_name_len, &do_throw) == FAILURE) {
 		return;
 	}
 	
@@ -369,13 +370,17 @@ PHP_FUNCTION(spl_autoload_register)
 		zend_str_tolower_copy(lc_name, func_name, func_name_len);
 		
 		if (!strcmp(lc_name, "spl_autoload_call")) {
-			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered", func_name);
+			if (do_throw) {
+				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function spl_autoload_call() cannot be registered", func_name);
+			}
 			free_alloca(lc_name);
 			return;
 		}
 
 		if (zend_hash_find(EG(function_table), lc_name, func_name_len+1, (void **) &func_ptr) == FAILURE) {
-			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%s' not found", func_name);
+			if (do_throw) {
+				zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Function '%s' not found", func_name);
+			}
 			free_alloca(lc_name);
 			return;
 		}
