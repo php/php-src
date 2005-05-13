@@ -990,7 +990,12 @@ ZEND_API void zend_error(int type, const char *format, ...)
 				zend_error_cb(type, error_filename, error_lineno, format, args);
 			}
 
-			EG(user_error_handler) = orig_user_error_handler;
+			if (!EG(user_error_handler)) {
+				EG(user_error_handler) = orig_user_error_handler;
+			} 
+			else {
+				zval_ptr_dtor(&orig_user_error_handler);
+			}
 
 			efree(params);
 			zval_ptr_dtor(&z_error_message);
