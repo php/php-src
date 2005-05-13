@@ -25,9 +25,6 @@
 #undef LIST
 #endif
 
-#include <my_global.h>
-#include <my_sys.h>
-#include <m_ctype.h>
 #include <mysql.h>
 #include <errmsg.h>
 
@@ -104,7 +101,7 @@ typedef struct {
 #define PHP_MYSQLI_API __declspec(dllexport)
 #if MYSQL_VERSION_ID > 50005
 #define HAVE_MYSQLI_SET_CHARSET
-#elif MYSQL_VERSION_ID > 40110 && MYSQL_VERSION_ID < 50000
+#elif MYSQL_VERSION_ID > 40112 && MYSQL_VERSION_ID < 50000
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 #else
@@ -303,7 +300,7 @@ PHP_FUNCTION(mysqli_autocommit);
 PHP_FUNCTION(mysqli_change_user);
 PHP_FUNCTION(mysqli_character_set_name);
 #ifdef HAVE_MYSQLI_SET_CHARSET
-PHP_FUNCTION(mysqli_set_character_set_name);
+PHP_FUNCTION(mysqli_set_charset);
 #endif
 PHP_FUNCTION(mysqli_close);
 PHP_FUNCTION(mysqli_commit);
