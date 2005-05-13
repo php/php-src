@@ -1,3 +1,22 @@
+2005-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Make ReflectionObject::hasProperty() recognize dynamically added props
+
+2005-05-12  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/sockets/sockets.c
+      ext/sockets/sockets.c:
+      MFH: fix #33019 (socket errors cause memory leaks in php_strerror())
+      patch by jwozniak23 at poczta dot onet dot pl
+
+    * ext/sockets/sockets.c:
+      fix #33019 (socket errors cause memory leaks in php_strerror())
+      patch by jwozniak23 at poczta dot onet dot pl
+
 2005-05-11  Joe Orton  <jorton@redhat.com>
 
     * (PHP_5_0)
