@@ -29,8 +29,6 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
-extern const char *charsets_dir;
-
 /* {{{ proto object mysqli_connect([string hostname [,string username [,string passwd [,string dbname [,int port [,string socket]]]]]])
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_connect)
