@@ -97,7 +97,13 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	status = PQresultStatus(S->result);
 
 	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
-		pdo_pgsql_error_stmt(stmt, status);
+#if HAVE_PQRESULTERRORFIELD
+		char * sqlstate = PQresultErrorField(S->result, PG_DIAG_SQLSTATE);
+		pdo_pgsql_error_stmt(stmt, status, (const char *)sqlstate);
+#else
+		pdo_pgsql_error_stmt(stmt, status, NULL);
+#endif
+
 		return 0;
 	}
 
@@ -145,7 +151,12 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 		status = PQresultStatus(S->result);
 
 		if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
-			pdo_pgsql_error_stmt(stmt, status);
+#if HAVE_PQRESULTERRORFIELD
+			char * sqlstate = PQresultErrorField(S->result, PG_DIAG_SQLSTATE);
+			pdo_pgsql_error_stmt(stmt, status, (const char *)sqlstate);
+#else
+			pdo_pgsql_error_stmt(stmt, status, NULL);
+#endif
 			return 0;
 		}
 
@@ -209,7 +220,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 }
 
 /* PQunescapeBytea() from PostgreSQL 7.3 to provide bytea unescape feature to 7.2 users.
-   Renamed to php_pgsql_unescape_bytea() */
+   Renamed to php_pdo_pgsql_unescape_bytea() */
 /*
  *		PQunescapeBytea - converts the null terminated string representation
  *		of a bytea, strtext, into binary, filling a buffer. It returns a
@@ -231,7 +242,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
  *		5	\'
  *		6	\\
  */
-static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen)
+static unsigned char *php_pdo_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen)
 {
 	size_t		buflen;
 	unsigned char *buffer,
@@ -346,11 +357,14 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 				break;
 				
 			case PDO_PARAM_LOB:
-				tmp_ptr = php_pgsql_unescape_bytea(*ptr, &tmp_len);
-				*ptr = estrndup(tmp_ptr, tmp_len);
+				*ptr = php_pdo_pgsql_unescape_bytea(*ptr, &tmp_len);
 				*len = tmp_len;
 				*caller_frees = 1;
-				free(tmp_ptr);
+				break;
+			case PDO_PARAM_NULL:
+			case PDO_PARAM_STR:
+			case PDO_PARAM_STMT:
+			case PDO_PARAM_INPUT_OUTPUT:
 				break;
 		}
 	}
