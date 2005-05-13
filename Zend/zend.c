@@ -1007,7 +1007,11 @@ ZEND_API void zend_error(int type, const char *format, ...)
 				memcpy(&EG(garbage), &orig_garbage, sizeof(zval*)*orig_garbage_ptr);
 			}
 
-			EG(user_error_handler) = orig_user_error_handler;
+			if (!EG(user_error_handler)) {
+				EG(user_error_handler) = orig_user_error_handler;
+			} else {
+				zval_ptr_dtor(&orig_user_error_handler);
+			}
 
 			efree(params);
 			zval_ptr_dtor(&z_error_message);
