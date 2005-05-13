@@ -254,12 +254,10 @@ PHP_FUNCTION(mysqli_query)
 /* }}} */
 
 #ifdef HAVE_MYSQLI_SET_CHARSET
-/* {{{ proto bool mysqli_set_character_set_name(object link, string csname)
+/* {{{ proto bool mysqli_set_charset(object link, string csname)
    sets client character set */
-PHP_FUNCTION(mysqli_set_character_set_name)
+PHP_FUNCTION(mysqli_set_charset)
 {
-	struct charset_info_st *cs;
-	const char *save_csdir = charsets_dir;
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
 	char				*cs_name = NULL;
@@ -270,30 +268,10 @@ PHP_FUNCTION(mysqli_set_character_set_name)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link");
 
-	if (mysql->mysql->options.charset_dir){
-		charsets_dir = mysql->mysql->options.charset_dir; 
+	if (mysql_set_character_set(mysql->mysql, cs_name)) {
+		RETURN_FALSE;
 	}
-
-	cs = get_charset_by_csname(cs_name, 1, MYF(0));
-
-	if (cs) {
-		char buff[MY_CS_NAME_SIZE + 10];
-		charsets_dir = save_csdir;
-		sprintf(buff, "SET NAMES %s", cs_name);
-		if (!mysql_query(mysql->mysql, buff)) {
-			mysql->mysql->charset = cs;
-			RETURN_TRUE;
-		} 
-	} else {
-		char cs_dir_name[FN_REFLEN];
-    	get_charsets_dir(cs_dir_name);
-		mysql->mysql->net.last_errno=CR_CANT_READ_CHARSET;
-		strcpy(mysql->mysql->net.sqlstate, "HY000");
-		sprintf(mysql->mysql->net.last_error, "Can't initialize character set %-.32s (path: %-.100s)", 
-				cs_name, cs_dir_name);
-	}
-	charsets_dir = save_csdir;
-	RETURN_FALSE;
+	RETURN_TRUE;
 }
 /* }}} */
 #endif
