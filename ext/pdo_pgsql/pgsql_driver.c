@@ -52,7 +52,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 	return tmp;
 }
 
-int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
@@ -68,10 +68,11 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 		einfo->errmsg = NULL;
 	}
 
-	switch (errcode) {
-		default:
-			strcpy(*pdo_err, "HY000");
-			break;
+	if (sqlstate == NULL) {
+		strcpy(*pdo_err, "HY000");
+	}
+	else {
+		strcpy(*pdo_err, sqlstate);
 	}
 
 	if (errmsg) {
@@ -154,12 +155,18 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 	
 	if (!(res = PQexec(H->server, sql))) {
 		/* fatal error */
-		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR);
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 		return 0;
 	} else {
 		ExecStatusType qs = PQresultStatus(res);
 		if (qs != PGRES_COMMAND_OK && qs != PGRES_TUPLES_OK) {
-			pdo_pgsql_error(dbh, qs);
+#if HAVE_PQRESULTERRORFIELD
+			char * sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
+			pdo_pgsql_error(dbh, qs, (const char *)sqlstate);
+			PQfreemem(sqlstate);
+#else
+			pdo_pgsql_error(dbh, qs, NULL);
+#endif
 			PQclear(res);
 			return 0;
 		}
@@ -384,7 +391,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 	
 	if (PQstatus(H->server) != CONNECTION_OK) {
-		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR);
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE);
 		goto cleanup;
 	}
 
