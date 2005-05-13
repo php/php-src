@@ -93,6 +93,9 @@ PHP_FUNCTION(posix_getcwd);
 #ifdef HAVE_MKFIFO
 PHP_FUNCTION(posix_mkfifo);
 #endif
+#ifdef HAVE_MKNOD
+PHP_FUNCTION(posix_mknod);
+#endif
 
 /* POSIX.1, 5.6 */
 PHP_FUNCTION(posix_access);
