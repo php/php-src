@@ -86,6 +86,7 @@ PHP                                                                        NEWS
   . inet_ntop() (Sara)
   . mysqli::client_info property (Georg)
   . posix_access() (Magnus)
+  . posix_mknod() (Magnus)
   . SimpleXMLElement::registerXPathNamespace() (Christian)
   . stream_context_get_default() (Wez)
   . stream_socket_enable_crypto() (Wez)

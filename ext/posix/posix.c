@@ -111,6 +111,9 @@ function_entry posix_functions[] = {
 #ifdef HAVE_MKFIFO
 	PHP_FE(posix_mkfifo,	NULL)
 #endif
+#ifdef HAVE_MKNOD
+	PHP_FE(posix_mknod,	NULL)
+#endif
 
 	/* POSIX.1, 5.6 */
 	PHP_FE(posix_access,	NULL)
@@ -156,6 +159,22 @@ static PHP_MINIT_FUNCTION(posix)
 	REGISTER_LONG_CONSTANT("POSIX_X_OK", X_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("POSIX_W_OK", W_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("POSIX_R_OK", R_OK, CONST_CS | CONST_PERSISTENT);
+#ifdef S_IFREG
+	REGISTER_LONG_CONSTANT("POSIX_S_IFREG", S_IFREG, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef S_IFCHR
+	REGISTER_LONG_CONSTANT("POSIX_S_IFCHR", S_IFCHR, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef S_IFBLK
+	REGISTER_LONG_CONSTANT("POSIX_S_IFBLK", S_IFBLK, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef S_IFIFO
+	REGISTER_LONG_CONSTANT("POSIX_S_IFIFO", S_IFIFO, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef S_IFSOCK
+	REGISTER_LONG_CONSTANT("POSIX_S_IFSOCK", S_IFSOCK, CONST_CS | CONST_PERSISTENT);
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -636,6 +655,51 @@ PHP_FUNCTION(posix_mkfifo)
 	}
 
 	result = mkfifo(path, mode);
+	if (result < 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
+/* }}} */
+
+/* {{{ proto bool posix_mknod(string pathname, int mode [, int major [, int minor]])
+   Make a special or ordinary file (POSIX.1) */
+#ifdef HAVE_MKNOD
+PHP_FUNCTION(posix_mknod)
+{
+	char *path;
+	int path_len;
+	long mode;
+	long major, minor = 0;
+	int result;
+	dev_t php_dev;
+
+	php_dev = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ll", &path, &path_len,
+			&mode, &major, &minor) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
+			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+		RETURN_FALSE;
+	}
+
+	if ((mode & S_IFCHR) || (mode & S_IFBLK)) {
+		if (major == 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"expects argument 4 to be non-zero for POSIX_S_IFCHR and POSIX_S_IFBLK");
+			RETURN_FALSE;
+		} else {
+			php_dev = makedev(major, minor);
+		}
+	}
+
+	result = mknod(path, mode, php_dev);
 	if (result < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
