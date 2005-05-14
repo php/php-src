@@ -1,3 +1,66 @@
+2005-05-13  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend.c
+      ZendEngine2/zend.c:
+      MFH: fix bug #29975 (memory leaks when set_error_handler() is used inside
+      error handler)
+
+    * ZendEngine2/zend.c:
+      fix bug #29975 (memory leaks when set_error_handler() is used inside error
+      handler)
+
+2005-05-13  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * NEWS
+      ext/posix/config.m4
+      ext/posix/php_posix.h
+      ext/posix/posix.c:
+      Added new function: posix_mknod().
+
+2005-05-13  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_nonapi.c:
+      charsets_dir is no longer needed
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/065.phpt:
+      MFH:
+      fixed windows compilation bug
+      renamed mysqli_set_character_set_name to mysqli_set_charset
+
+    * ext/mysqli/php_mysqli.h:
+      mysql_set_charset now works version undependent for MySQL 4.1.13 and above
+
+    * ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/065.phpt:
+      - fixed compile error under windows. Functionality for changing the
+      character set was moved to libmysql (4.1 bk tree - will be merged into
+      5.0 within the next days).
+      - renamed mysql_set_character_set to mysqli_set_charset
+
+2005-05-13  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      fix NEWS
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/tests/math/math_std_dev.phpt:
+      move math_standard_deviation and math_variance to the stats PECL extension
+
 2005-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:

@@ -1,3 +1,14 @@
+2005-05-13  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      zend.c:
+      MFH: fix bug #29975 (memory leaks when set_error_handler() is used inside
+      error handler)
+
+    * zend.c:
+      fix bug #29975 (memory leaks when set_error_handler() is used inside error
+      handler)
+
 2005-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
