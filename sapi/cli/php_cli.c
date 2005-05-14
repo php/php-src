@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Author: Edin Kadribasic <edink@php.net>                              |
    |         Marcus Boerger <helly@php.net>                               |
+   |         Johannes Schlueter <johannes@php.net>                        |
    |         Parts based on CGI SAPI Module by                            |
    |         Rasmus Lerdorf, Stig Bakken and Zeev Suraski                 |
    +----------------------------------------------------------------------+
@@ -74,7 +75,7 @@
 #if !HAVE_LIBEDIT
 #include <readline/history.h>
 #endif
-#endif
+#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
 
 #include "zend_compile.h"
 #include "zend_execute.h"
@@ -83,6 +84,7 @@
 
 
 #include "php_getopt.h"
+#include "php_cli_readline.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -539,216 +541,6 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 }
 /* }}} */
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
-
-/* {{{ cli_is_valid_code
- */
-typedef enum {
-	body,
-	sstring,
-	dstring,
-	sstring_esc,
-	dstring_esc,
-	comment_line,
-	comment_block,
-	heredoc_start,
-	heredoc,
-	outside,
-} php_code_type;
-
-static int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
-{
-	int valid_end = 1;
-	int brackets_count = 0;
-	int brace_count = 0;
-	int i;
-	php_code_type code_type = body;
-	char *heredoc_tag;
-	int heredoc_len;
-
-	for (i = 0; i < len; ++i) {
-		switch(code_type) {
-			default:
-				switch(code[i]) {
-					case '{':
-						brackets_count++;
-						valid_end = 0;
-						break;
-					case '}':
-						if (brackets_count > 0) {
-							brackets_count--;
-						}
-						valid_end = brackets_count ? 0 : 1;
-						break;
-					case '(':
-						brace_count++;
-						valid_end = 0;
-						break;
-					case ')':
-						if (brace_count > 0) {
-							brace_count--;
-						}
-						valid_end = 0;
-						break;
-					case ';':
-						valid_end = brace_count == 0 && brackets_count == 0;
-						break;
-					case ' ':
-					case '\n':
-					case '\t':
-						break;
-					case '\'':
-						code_type = sstring;
-						break;
-					case '"':
-						code_type = dstring;
-						break;
-					case '/':
-						if (code[i+1] == '/') {
-							i++;
-							code_type = comment_line;
-							break;
-						}
-						if (code[i+1] == '*') {
-							code_type = comment_block;
-							i++;
-							break;
-						}
-						valid_end = 0;
-						break;
-					case '%':
-						if (!CG(asp_tags)) {
-							valid_end = 0;
-							break;
-						}
-						/* no break */
-					case '?':
-						if (code[i+1] == '>') {
-							i++;
-							code_type = outside;
-							break;
-						}
-						valid_end = 0;
-						break;
-					case '<':
-						valid_end = 0;
-						if (i + 2 < len && code[i+1] == '<' && code[i+2] == '<') {
-							i += 2;
-							code_type = heredoc_start;
-							heredoc_len = 0;
-						}
-						break;
-					default:
-						valid_end = 0;
-						break;
-				}
-				break;
-			case sstring:
-				if (code[i] == '\\') {
-					code_type = sstring_esc;
-				} else {
-					if (code[i] == '\'') {
-						code_type = body;
-					}
-				}
-				break;
-			case sstring_esc:
-				code_type = sstring;
-				break;
-			case dstring:
-				if (code[i] == '\\') {
-					code_type = dstring_esc;
-				} else {
-					if (code[i] == '"') {
-						code_type = body;
-					}
-				}
-				break;
-			case dstring_esc:
-				code_type = dstring;
-				break;
-			case comment_line:
-				if (code[i] == '\n') {
-					code_type = body;
-				}
-				break;
-			case comment_block:
-				if (code[i-1] == '*' && code[i] == '/') {
-					code_type = body;
-				}
-				break;
-			case heredoc_start:
-				switch(code[i]) {
-					case ' ':
-					case '\t':
-						break;
-					case '\r':
-					case '\n':
-						code_type = heredoc;
-						break;
-					default:
-						if (!heredoc_len) {
-							heredoc_tag = code+i;
-						}
-						heredoc_len++;
-						break;
-				}
-				break;
-			case heredoc:
-				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len)) {
-					code_type = body;
-				}
-				break;
-			case outside:
-				if ((CG(short_tags) && !strncmp(code+i-1, "<?", 2))
-				||  (CG(asp_tags) && !strncmp(code+i-1, "<%", 2))
-				||  (i > 3 && !strncmp(code+i-4, "<?php", 5))
-				) {
-					code_type = body;
-				}
-				break;
-		}
-	}
-
-	switch (code_type) {
-		default:
-			if (brace_count) {
-				*prompt = "php ( ";
-			} else if (brackets_count) {
-				*prompt = "php { ";
-			} else {
-				*prompt = "php > ";
-			}
-			break;
-		case sstring:
-		case sstring_esc:
-			*prompt = "php ' ";
-			break;
-		case dstring:
-		case dstring_esc:
-			*prompt = "php \" ";
-			break;
-		case comment_block:
-			*prompt = "/*  > ";
-			break;
-		case heredoc:
-			*prompt = "<<< > ";
-			break;
-		case outside:
-			*prompt = "    > ";
-			break;
-	}
-
-	if (!valid_end || brackets_count) {
-		return 0;
-	} else {
-		return 1;
-	}
-}
-/* }}} */
-
-#endif /* HAVE_LIBREADLINE || HAVE_LIBEDIT */
-
 /* {{{ main
  */
 #ifdef PHP_CLI_WIN32_NO_CONSOLE
@@ -1185,10 +977,10 @@ int main(int argc, char *argv[])
 				char *history_file;
 
 				history_file = tilde_expand("~/.php_history");
+				rl_attempted_completion_function = cli_code_completion;
+				/*rl_completion_append_character = '(';*/
+				rl_special_prefixes = "$";
 				read_history(history_file);
-
-				/* it would be nicer to implement this correct */
-				rl_bind_key ('\t', rl_insert);
 
 				EG(exit_status) = 0;
 				while ((line = readline(pos ? prompt : "php > ")) != NULL) {
