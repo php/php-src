@@ -51,5 +51,10 @@ for more detail on this issue.
     esac
   fi
   PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
-  PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h])
+  
+  dnl When we care only about PHP 5.1 and above, we'll do it this way
+  dnl PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h])
+
+  dnl But since that breaks everyone developing against a stable release, we'll do it this way
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
