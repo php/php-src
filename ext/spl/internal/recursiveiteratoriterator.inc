@@ -164,14 +164,15 @@ class RecursiveIteratorIterator implements OuterIterator
 		return $this->ait[$this->count]->getChildren();
 	}
 
-	/** Called right after calling getChildren()
+	/** Called right after calling getChildren() and its rewind().
 	 * @since PHP 5.1
 	 */
 	function beginChildren()
 	{
 	}
 	
-	/** Called after current child iterator is invalid
+	/** Called after current child iterator is invalid and right before it
+	 * gets destructed.
 	 * @since PHP 5.1
 	 */
 	function endChildren()
