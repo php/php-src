@@ -1,3 +1,12 @@
+2005-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in
+      sapi/cli/config.w32
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli_readline.c
+      sapi/cli/php_cli_readline.h:
+      - Add command completion to CLI's -a mode
+
 2005-05-13  Antony Dovgal  <tony2001@phpclub.net>
 
     * (PHP_5_0)
