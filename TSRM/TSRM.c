@@ -107,7 +107,7 @@ static DWORD tls_key;
 
 #elif defined(BETHREADS)
 static int32 tls_key;
-# define tsrm_tls_set(what)		tls_set(tls_key, (void*)(what)
+# define tsrm_tls_set(what)		tls_set(tls_key, (void*)(what))
 # define tsrm_tls_get()			(tsrm_tls_entry*)tls_get(tls_key)
 
 #else
