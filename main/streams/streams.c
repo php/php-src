@@ -1378,6 +1378,21 @@ static void stream_resource_persistent_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC
 	FG(pclose_ret) = php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 }
 
+void php_shutdown_stream_hashes(TSRMLS_D)
+{
+	if (FG(stream_wrappers)) {
+		zend_hash_destroy(FG(stream_wrappers));
+		efree(FG(stream_wrappers));
+		FG(stream_wrappers) = NULL;
+	}
+
+	if (FG(stream_filters)) {
+		zend_hash_destroy(FG(stream_filters));
+		efree(FG(stream_filters));
+		FG(stream_filters) = NULL;
+	}
+}
+
 int php_init_stream_wrappers(int module_number TSRMLS_DC)
 {
 	le_stream = zend_register_list_destructors_ex(stream_resource_regular_dtor, NULL, "stream", module_number);

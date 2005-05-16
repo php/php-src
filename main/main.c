@@ -1160,6 +1160,10 @@ void php_request_shutdown_for_hook(void *dummy)
 	} zend_end_try();
 
 	zend_try {
+		php_shutdown_stream_hashes(TSRMLS_C);
+	} zend_end_try();
+
+	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
 	} zend_end_try();
 
@@ -1234,12 +1238,17 @@ void php_request_shutdown(void *dummy)
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	/* 10. Free Willy (here be crashes) */
+	/* 10. Destroy stream hashes */
+	zend_try {
+		php_shutdown_stream_hashes(TSRMLS_C);
+	} zend_end_try();
+
+	/* 11. Free Willy (here be crashes) */
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
 
-	/* 11. Reset max_execution_time */
+	/* 12. Reset max_execution_time */
 	zend_try { 
 		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
