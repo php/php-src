@@ -1219,18 +1219,11 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	}
 	STR_FREE(BG(locale_string));
 
-	if (FG(stream_wrappers)) {
-		zend_hash_destroy(FG(stream_wrappers));
-		efree(FG(stream_wrappers));
-		FG(stream_wrappers) = NULL;
-	}
-
-	if (FG(stream_filters)) {
-		zend_hash_destroy(FG(stream_filters));
-		efree(FG(stream_filters));
-		FG(stream_filters) = NULL;
-	}
-
+	/*
+	 FG(stream_wrappers) and FG(stream_filters) are destroyed
+	 during php_request_shutdown()
+	 */
+	
 	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
 	PHP_RSHUTDOWN(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
