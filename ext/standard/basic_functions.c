@@ -1239,11 +1239,10 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	}
 	STR_FREE(BG(locale_string));
 
-	if (FG(stream_wrappers)) {
-		zend_hash_destroy(FG(stream_wrappers));
-		efree(FG(stream_wrappers));
-		FG(stream_wrappers) = NULL;
- 	}
+	/*
+	 FG(stream_wrappers) are destroyed
+	 during php_request_shutdown()
+	 */
 
 	PHP_RSHUTDOWN(fsock) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(filestat) (SHUTDOWN_FUNC_ARGS_PASSTHRU);

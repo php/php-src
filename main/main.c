@@ -1000,6 +1000,10 @@ void php_request_shutdown(void *dummy)
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
+	zend_try {
+		php_shutdown_stream_hashes(TSRMLS_C);
+	} zend_end_try();
+
 	zend_try { 
 		shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
 	} zend_end_try();
