@@ -1162,6 +1162,10 @@ void php_request_shutdown_for_hook(void *dummy)
 	} zend_end_try();
 
 	zend_try {
+		php_shutdown_stream_hashes(TSRMLS_C);
+	} zend_end_try();
+
+	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
 	} zend_end_try();
 
@@ -1225,6 +1229,10 @@ void php_request_shutdown(void *dummy)
 
 	zend_try {
 		sapi_deactivate(TSRMLS_C);
+	} zend_end_try();
+
+	zend_try {
+		php_shutdown_stream_hashes(TSRMLS_C);
 	} zend_end_try();
 
 	zend_try {

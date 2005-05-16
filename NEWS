@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Fixed bug #32755 (Segfault in replaceChild() when DocumentFragment has
   no children). (Rob)
 - Fixed bug #32753 (Undefined constant SQLITE_NOTADB). (Ilia)
+- Fixed bug #32742 (segmentation fault when the stream with a wrapper 
+  is not closed). (Tony, Dmitry)
 - Fixed bug #32699 (pg_affected_rows() was defined when it was not available).
   (Derick)
 - Fixed bug #32686 (Require/include file in destructor causes segfault).
@@ -65,6 +67,7 @@ PHP                                                                        NEWS
   5.0.3). (Dmitry)
 - Fixed bug #32245 (xml_parser_free() in a function assigned to the xml parser
   gives a segfault). (Rob)
+- Fixed bug #32171 (Userspace stream wrapper crashes PHP). (Tony, Dmitry)
 - Fixed bug #32080 (segfault when assigning object to itself with
   zend.ze1_compatibility_mode=On). (Dmitry)
 - Fixed bug #32013 (ext/mysqli bind_result causes fatal error: memory
