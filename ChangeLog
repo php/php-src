@@ -1,3 +1,35 @@
+2005-05-16  Sara Golemon  <php@alphaweb.net>
+
+    * TSRM/TSRM.c:
+      Unterminated paren group in BETHREADS definition of tsrm_tls_set() macro
+
+2005-05-16  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c
+      main/main.c
+      main/php_streams.h
+      main/streams.c:
+      MFH: fix bug #32742 (segmentation fault when the stream with a wrapper is
+      not closed)
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/basic_functions.c
+      main/main.c
+      main/php_streams.h
+      main/streams/streams.c:
+      MFH: fix bugs #32742 (segmentation fault when the stream with a wrapper
+      is not closed), #32171 (Userspace stream wrapper crashes PHP)
+
+    * ext/standard/basic_functions.c
+      main/main.c
+      main/php_streams.h
+      main/streams/streams.c:
+      fix bugs #32742 (segmentation fault when the stream with a wrapper is not
+      closed),
+
 2005-05-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * configure.in
