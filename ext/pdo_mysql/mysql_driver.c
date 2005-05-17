@@ -156,7 +156,7 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	char *id = NULL;
 
-	*len = spprintf(&id, 0, "%ld", mysql_insert_id(H->server));
+	*len = spprintf(&id, 0, "%lld", mysql_insert_id(H->server));
 	return id;
 }
 
