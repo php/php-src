@@ -1115,13 +1115,14 @@ static PHP_METHOD(PDOStatement, fetchObject)
 }
 /* }}} */
 
-/* {{{ proto string PDOStatement::fetchSingle()
-   Returns a data of the 1st column in the result set. */
-static PHP_METHOD(PDOStatement, fetchSingle)
+/* {{{ proto string PDOStatement::fetchColumn([int column_number])
+   Returns a data of the specified column in the result set. */
+static PHP_METHOD(PDOStatement, fetchColumn)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long col_n = 0;
 
-	if (ZEND_NUM_ARGS()) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &col_n)) {
 		RETURN_FALSE;
 	}
 
@@ -1132,7 +1133,7 @@ static PHP_METHOD(PDOStatement, fetchSingle)
 		RETURN_FALSE;
 	}
 
-	fetch_value(stmt, return_value, 0 TSRMLS_CC);
+	fetch_value(stmt, return_value, col_n TSRMLS_CC);
 }
 /* }}} */
 
@@ -1656,7 +1657,7 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, bindParam,		second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindColumn,	second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchSingle,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchColumn,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchObject,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorCode,		NULL,					ZEND_ACC_PUBLIC)
