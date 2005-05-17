@@ -1,4 +1,4 @@
---TSTE--
+--TEST--
 Bug #31828 (Crash with zend.ze1_compatibility_mode=On)
 --INI--
 zend.ze1_compatibility_mode=on
