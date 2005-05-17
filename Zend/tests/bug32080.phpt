@@ -1,4 +1,4 @@
---TSTE--
+--TEST--
 Bug #32080 (segfault when assigning object to itself with zend.ze1_compatibility_mode=On)
 --INI--
 zend.ze1_compatibility_mode=on
