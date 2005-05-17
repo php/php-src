@@ -978,12 +978,11 @@ int main(int argc, char *argv[])
 
 				history_file = tilde_expand("~/.php_history");
 				rl_attempted_completion_function = cli_code_completion;
-				/*rl_completion_append_character = '(';*/
 				rl_special_prefixes = "$";
 				read_history(history_file);
 
 				EG(exit_status) = 0;
-				while ((line = readline(pos ? prompt : "php > ")) != NULL) {
+				while ((line = readline(prompt)) != NULL) {
 					if (strcmp(line, "exit") == 0 || strcmp(line, "quit") == 0) {
 						free(line);
 						break;
