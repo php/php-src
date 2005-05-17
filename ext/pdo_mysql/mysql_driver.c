@@ -272,7 +272,7 @@ static struct pdo_dbh_methods mysql_methods = {
 };
 
 #ifndef PDO_MYSQL_UNIX_ADDR
-# ifndef PHP_WIN32
+# ifdef PHP_WIN32
 #  define PDO_MYSQL_UNIX_ADDR	"MySQL"
 # else
 #  define PDO_MYSQL_UNIX_ADDR	"/tmp/mysql.sock"
