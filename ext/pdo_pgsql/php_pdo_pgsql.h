@@ -21,8 +21,6 @@
 #ifndef PHP_PDO_PGSQL_H
 #define PHP_PDO_PGSQL_H
 
-#if HAVE_PDO_PGSQL 
-
 #include <libpq-fe.h>
 
 extern zend_module_entry pdo_pgsql_module_entry;
@@ -44,7 +42,6 @@ PHP_RINIT_FUNCTION(pdo_pgsql);
 PHP_RSHUTDOWN_FUNCTION(pdo_pgsql);
 PHP_MINFO_FUNCTION(pdo_pgsql);
 
-#endif  /* HAVE_PDO_PGSQL */
 #endif	/* PHP_PDO_PGSQL_H */
 
 

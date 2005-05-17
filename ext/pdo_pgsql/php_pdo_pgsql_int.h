@@ -21,8 +21,6 @@
 #ifndef PHP_PDO_PGSQL_INT_H
 #define PHP_PDO_PGSQL_INT_H
 
-#if HAVE_PDO_PGSQL 
-
 #include <libpq-fe.h>
 
 #define PHP_PDO_PGSQL_CONNECTION_FAILURE_SQLSTATE "08006"
@@ -73,7 +71,6 @@ extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const
 
 extern struct pdo_stmt_methods pgsql_stmt_methods;
 
-#endif /* HAVE_PDO_PGSQL */
 #endif /* PHP_PDO_PGSQL_INT_H */
 
 /*
