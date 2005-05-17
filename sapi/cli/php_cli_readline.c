@@ -73,7 +73,7 @@ typedef enum {
 
 int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 {
-	int valid_end = 1;
+	int valid_end = 1, last_valid_end;
 	int brackets_count = 0;
 	int brace_count = 0;
 	int i;
@@ -109,6 +109,7 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 						valid_end = brace_count == 0 && brackets_count == 0;
 						break;
 					case ' ':
+					case '\r':
 					case '\n':
 					case '\t':
 						break;
@@ -118,6 +119,9 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 					case '"':
 						code_type = dstring;
 						break;
+					case '#':
+						code_type = comment_line;
+						break;
 					case '/':
 						if (code[i+1] == '/') {
 							i++;
@@ -125,6 +129,8 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 							break;
 						}
 						if (code[i+1] == '*') {
+							last_valid_end = valid_end;
+							valid_end = 0;
 							code_type = comment_block;
 							i++;
 							break;
@@ -190,6 +196,7 @@ int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC)
 			case comment_block:
 				if (code[i-1] == '*' && code[i] == '/') {
 					code_type = body;
+					valid_end = last_valid_end;
 				}
 				break;
 			case heredoc_start:
