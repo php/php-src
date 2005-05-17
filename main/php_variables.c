@@ -182,11 +182,25 @@ plain_var:
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
+				zval **tmp;
+			
 				if (PG(magic_quotes_gpc) && (index!=var)) {
 					char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+					
+					if (PG(http_globals)[TRACK_VARS_COOKIE] && symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) && 
+							zend_hash_find(symtable1, escaped_index, index_len+1, (void **) &tmp) != FAILURE) {
+						efree(escaped_index);
+						break;
+					}
+					
 					zend_hash_update(symtable1, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 					efree(escaped_index);
 				} else {
+					if (PG(http_globals)[TRACK_VARS_COOKIE] && symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) && 
+							zend_hash_find(symtable1, index, index_len+1, (void **) &tmp) != FAILURE) {
+						break;
+					}
+				
 					zend_hash_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
 			}
