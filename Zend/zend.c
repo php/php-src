@@ -967,6 +967,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			z_context->value.ht = EG(active_symbol_table);
 			z_context->type = IS_ARRAY;
 			ZVAL_ADDREF(z_context); /* we don't want this one to be freed */
+			z_context->is_ref = 1;
 
 			params = (zval ***) emalloc(sizeof(zval **)*5);
 			params[0] = &z_error_type;
