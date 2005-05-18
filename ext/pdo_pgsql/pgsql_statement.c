@@ -327,7 +327,6 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
-	char *tmp_ptr;
 	size_t tmp_len;
 
 	if (!S->result) {
