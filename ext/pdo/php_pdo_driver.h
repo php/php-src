@@ -105,7 +105,7 @@ enum pdo_fetch_orientation {
 	PDO_FETCH_ORI_FIRST,	/* scroll to the first row and fetch that */
 	PDO_FETCH_ORI_LAST,		/* scroll to the last row and fetch that */
 	PDO_FETCH_ORI_ABS,		/* scroll to an absolute numbered row and fetch that */
-	PDO_FETCH_ORI_REL,		/* scroll relative to the current row, and fetch that */
+	PDO_FETCH_ORI_REL		/* scroll relative to the current row, and fetch that */
 };
 
 enum pdo_attribute_type {
@@ -132,7 +132,7 @@ enum pdo_attribute_type {
 
 enum pdo_cursor_type {
 	PDO_CURSOR_FWDONLY,		/* forward only cursor (default) */
-	PDO_CURSOR_SCROLL,		/* scrollable cursor */
+	PDO_CURSOR_SCROLL		/* scrollable cursor */
 };
 
 /* SQL-92 SQLSTATE error codes.
@@ -170,7 +170,7 @@ typedef char pdo_error_type[6]; /* SQLSTATE */
 #define	PDO_ERR_DISCONNECTED,
 #define	PDO_ERR_NO_PERM,
 
-	PDO_ERR_CANT_MAP,		/* no way to map native error to the generic
+	PDO_ERR_CANT_MAP		/* no way to map native error to the generic
 							 * codes; consult the native error for more info */
 };
 #endif
@@ -178,7 +178,7 @@ typedef char pdo_error_type[6]; /* SQLSTATE */
 enum pdo_error_mode {
 	PDO_ERRMODE_SILENT,		/* just set error codes */
 	PDO_ERRMODE_WARNING,	/* raise E_WARNING */
-	PDO_ERRMODE_EXCEPTION,	/* throw exceptions */
+	PDO_ERRMODE_EXCEPTION	/* throw exceptions */
 };
 
 enum pdo_case_conversion {
@@ -327,7 +327,7 @@ enum pdo_param_event {
 	PDO_PARAM_EVT_EXEC_PRE,
 	PDO_PARAM_EVT_EXEC_POST,
 	PDO_PARAM_EVT_FETCH_PRE,
-	PDO_PARAM_EVT_FETCH_POST,
+	PDO_PARAM_EVT_FETCH_POST
 };
 
 typedef int (*pdo_stmt_param_hook_func)(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC);
