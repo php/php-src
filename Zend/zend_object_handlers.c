@@ -734,11 +734,11 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 		property_info = &std_property_info;
 	}
 
-#if 1&&DEBUG_OBJECT_HANDLERS
+#if DEBUG_OBJECT_HANDLERS
 	zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
 #endif
 
-	if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
+	if (!zend_verify_property_access(property_info, EG(scope) TSRMLS_CC)) {
 		if (!silent) {
 			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
 		}
