@@ -1,3 +1,9 @@
+2005-05-17  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * tests/bug31828.phpt
+      tests/bug32080.phpt:
+      Fix tests.
+
 2005-05-13  Antony Dovgal  <tony2001@phpclub.net>
 
     * (PHP_5_0)
