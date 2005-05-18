@@ -1,3 +1,26 @@
+2005-05-17  Magnus Määttä  <novell@kiruna.se>
+
+    * ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt:
+      Fix tests.
+
+2005-05-17  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * sapi/cli/php_cli.c
+      sapi/cli/php_cli_readline.c:
+      - Fix readline loop-condition
+      - Fix cli_is_valid_code detection
+
+2005-05-17  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/gd/config.m4
+      ext/gd/config.m4:
+      MFH: gdImageGifCtx() is always available in bundled lib
+
+    * ext/gd/config.m4:
+      gdImageGifCtx() is always available in bundled lib
+
 2005-05-16  Sara Golemon  <php@alphaweb.net>
 
     * TSRM/TSRM.c:
