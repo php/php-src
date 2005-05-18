@@ -756,6 +756,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				zval *new_zval;
 
 				if (fci->no_separation) {
+					if(i) {
+						/* hack to clean up the stack */
+						zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) i, NULL);
+						zend_ptr_stack_clear_multiple(TSRMLS_C);
+					}
 					return FAILURE;
 				}
 				ALLOC_ZVAL(new_zval);
