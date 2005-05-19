@@ -1,3 +1,39 @@
+2005-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c
+      zend.c:
+      fix for #29890 - part 2
+
+    * (PHP_5_0)
+      tests/bug29890.phpt:
+      test
+
+    * tests/bug29890.phpt
+      tests/bug29890.phpt:
+      
+      test
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      fix #29890 - crash when function call fails
+
+    * zend_object_handlers.c:
+      revert - seems to be fixed elsewhere
+
+    * zend_object_handlers.c:
+      fix #30451  	static properties don't work properly
+
+    * tests/bug29689.phpt
+      tests/bug30451.phpt:
+      tests
+
+    * tests/bug29689.phpt
+      tests/bug29689.phpt
+      tests/bug30451.phpt
+      tests/bug30451.phpt:
+      
+      file bug29689.phpt was initially added on branch PHP_5_0.
+
 2005-05-17  Magnus M‰‰tt‰  <novell@kiruna.se>
 
     * tests/bug31828.phpt
