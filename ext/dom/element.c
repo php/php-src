@@ -298,7 +298,6 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	if (php_dom_object_get_data((xmlNodePtr) attrp) == NULL) {
 		node_list_unlink(attrp->children TSRMLS_CC);
 		xmlUnlinkNode((xmlNodePtr) attrp);
-		xmlFreeProp(attrp);
 	} else {
 		xmlUnlinkNode((xmlNodePtr) attrp);
 	}
