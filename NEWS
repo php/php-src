@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, Version 4.?.?
+- Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
+  RFC 2616 section 10.3.5) (Rasmus, Choitel)
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
 - Added support for .cc files in extensions. (Brian)
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
