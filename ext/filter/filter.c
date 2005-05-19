@@ -194,7 +194,14 @@ unsigned int  php_sapi_filter(int arg, char *var, char **val, unsigned int val_l
 
 	assert(*val != NULL);
 
+#if PHP_API_VERSION > 20041224
+	if(IF_G(default_filter)==F_UNSAFE_RAW) {
+		if(new_val_len) *new_val_len = val_len;
+		return 1;
+	}
+#else
 	if(IF_G(default_filter)==F_UNSAFE_RAW) return(val_len);
+#endif
 
 	switch(arg) {
 		case PARSE_GET:
@@ -278,8 +285,10 @@ unsigned int  php_sapi_filter(int arg, char *var, char **val, unsigned int val_l
 	*val = out;
 #if PHP_API_VERSION > 20041224
 	if(new_val_len) *new_val_len = out_len?out_len-1:0;
-#endif
+	return 1;
+#else
 	return(out_len?out_len-1:0);
+#endif
 }
 /* }}} */
 
