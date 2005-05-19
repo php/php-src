@@ -132,7 +132,7 @@ catch(UnexpectedValueException $e)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 RecursiveArrayIteratorIterator::rewind
 RecursiveArrayIteratorIterator::callHasChildren(0) = no/no
 RecursiveArrayIteratorIterator::valid
@@ -167,7 +167,7 @@ RecursiveArrayIteratorIterator::key
 1=>bbb
 RecursiveArrayIteratorIterator::next
 RecursiveArrayIterator::valid = false
-RecursiveArrayIteratorIterator::endChildren(1)
+RecursiveArrayIteratorIterator::endChildren(2)
 RecursiveArrayIteratorIterator::callHasChildren(1) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(ok:0)
 RecursiveArrayIteratorIterator::current
@@ -182,9 +182,9 @@ RecursiveArrayIteratorIterator::callHasChildren(2) = no/yes
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::next
 RecursiveArrayIterator::valid = false
-RecursiveArrayIteratorIterator::endChildren(1)
+RecursiveArrayIteratorIterator::endChildren(2)
 RecursiveArrayIterator::valid = false
-RecursiveArrayIteratorIterator::endChildren(0)
+RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::callHasChildren(0) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(skip)
 Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator

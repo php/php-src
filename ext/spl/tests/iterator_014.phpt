@@ -80,7 +80,7 @@ foreach(new RecursiveArrayIteratorIterator(new RecursiveArrayIterator(array("a",
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 RecursiveArrayIteratorIterator::rewind
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
@@ -107,7 +107,7 @@ RecursiveArrayIteratorIterator::key
 1=>bbb
 RecursiveArrayIteratorIterator::next
 RecursiveArrayIterator::valid = false
-RecursiveArrayIteratorIterator::endChildren(1)
+RecursiveArrayIteratorIterator::endChildren(2)
 RecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(2)
 RecursiveArrayIterator::getChildren
@@ -118,11 +118,11 @@ RecursiveArrayIteratorIterator::key
 0=>bcaa
 RecursiveArrayIteratorIterator::next
 RecursiveArrayIterator::valid = false
+RecursiveArrayIteratorIterator::endChildren(3)
+RecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(2)
 RecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(1)
-RecursiveArrayIterator::valid = false
-RecursiveArrayIteratorIterator::endChildren(0)
 RecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(1)
 RecursiveArrayIteratorIterator::valid
@@ -131,7 +131,7 @@ RecursiveArrayIteratorIterator::key
 0=>ca
 RecursiveArrayIteratorIterator::next
 RecursiveArrayIterator::valid = false
-RecursiveArrayIteratorIterator::endChildren(0)
+RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
