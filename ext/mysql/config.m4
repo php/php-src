@@ -83,7 +83,7 @@ if test "$PHP_MYSQL" != "no"; then
 Note that the MySQL client library is not bundled anymore.])
   fi
 
-  for i in lib lib/mysql; do
+  for i in lib lib/mysql lib64 lib64/mysql; do
     MYSQL_LIB_CHK($i)
   done
 
