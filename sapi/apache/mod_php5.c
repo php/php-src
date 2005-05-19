@@ -209,12 +209,18 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
  */
 static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-	if(SG(server_context) == NULL) { /* server_context is not here anymore */
+	request_rec *r = SG(server_context);
+
+	if(r == NULL) { /* server_context is not here anymore */
 		return SAPI_HEADER_SEND_FAILED;
 	}
 
-	((request_rec *) SG(server_context))->status = SG(sapi_headers).http_response_code;
-	send_http_header((request_rec *) SG(server_context));
+	r->status = SG(sapi_headers).http_response_code;
+	if(r->status==304) {
+		send_error_response(r,0);
+	} else {
+		send_http_header(r);
+	}   
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 /* }}} */
