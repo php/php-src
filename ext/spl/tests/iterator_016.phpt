@@ -43,7 +43,7 @@ class MenuOutput extends RecursiveIteratorIterator
 
 	function endChildren()
 	{
-		echo str_repeat('  ',$this->getDepth()+1)."</ul>\n";
+		echo str_repeat('  ',$this->getDepth())."</ul>\n";
 	}
 	function valid()
 	{
