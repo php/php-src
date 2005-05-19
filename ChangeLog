@@ -1,3 +1,45 @@
+2005-05-18  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c:
+      fix for #29890 - part 2
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug29890.phpt:
+      test
+
+    * ZendEngine2/tests/bug29890.phpt
+      ZendEngine2/tests/bug29890.phpt:
+      
+      test
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      fix #29890 - crash when function call fails
+
+    * (PHP_4_3)
+      Zend/zend_execute_API.c:
+      fix #29890 - stack corruption when function call fails
+
+    * ZendEngine2/zend_object_handlers.c:
+      revert - seems to be fixed elsewhere
+
+    * ZendEngine2/zend_object_handlers.c:
+      fix #30451  	static properties don't work properly
+
+    * ZendEngine2/tests/bug29689.phpt
+      ZendEngine2/tests/bug30451.phpt:
+      tests
+
+    * ZendEngine2/tests/bug29689.phpt
+      ZendEngine2/tests/bug29689.phpt
+      ZendEngine2/tests/bug30451.phpt
+      ZendEngine2/tests/bug30451.phpt:
+      
+      file bug29689.phpt was initially added on branch PHP_5_0.
+
 2005-05-17  Magnus M‰‰tt‰  <novell@kiruna.se>
 
     * ZendEngine2/tests/bug31828.phpt
