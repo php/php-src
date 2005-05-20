@@ -1,3 +1,54 @@
+2005-05-19  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_0)
+      NEWS:
+      .
+
+    * (PHP_4_3)
+      NEWS:
+      NEWS file update for Jani
+
+    * (PHP_4_3)
+      sapi/apache/mod_php4.c
+      sapi/apache/mod_php5.c:
+      Fix for bug #33057 - Don't send extraneous entity-headers on a 304 as per
+      RFC 2616 section 10.3.5
+
+    * (PHP_5_0)
+      sapi/apache/mod_php5.c:
+      MFH Fix for bug #33057 - Don't send extraneous entity-headers on a 304 as
+      per
+      RFC 2616 section 10.3.5
+
+2005-05-19  George Schlossnagle  <george@omniti.com>
+
+    * (PHP_5_0)
+      ext/mysql/config.m4:
+      support building on new-fangled 64bit linux distros that stick
+      libraries in /usr/lib64
+
+2005-05-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/dom/element.c:
+      MFH: Fixed bug #33059 (crash when moving xml attribute set in dtd).
+
+    * ext/dom/element.c:
+      Fixed bug #33059 (crash when moving xml attribute set in dtd).
+
+2005-05-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_object_handlers.c:
+      Backported fix for bug #30451
+
+    * ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug31828.phpt
+      ZendEngine2/tests/bug32080.phpt
+      ZendEngine2/tests/bug32080.phpt:
+      Strict warnings
+
 2005-05-18  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_4_3)
