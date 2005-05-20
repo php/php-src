@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
-- Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
-  RFC 2616 section 10.3.5) (Rasmus, Choitel)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
 - Added new function mysqli_set_charset (Georg)
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
@@ -14,6 +12,8 @@ PHP                                                                        NEWS
   of type (MEDIUM|LONG)BLOB/(MEDIUM|LONG)TEXT. (Andrey)
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
 - Fixed bug #33059 (crash when moving xml attribute set in dtd). (Ilia)
+- Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
+  RFC 2616 section 10.3.5) (Rasmus, Choitel)
 - Fixed bug #33019 (socket errors cause memory leaks in php_strerror()). 
   (jwozniak23 at poczta dot onet dot pl, Tony).
 - Fixed bug #32956 (mysql_bind_result() doesn't support MYSQL_TYPE_NULL). (Georg)
