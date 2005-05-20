@@ -1,3 +1,15 @@
+2005-05-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_object_handlers.c:
+      Backported fix for bug #30451
+
+    * tests/bug31828.phpt
+      tests/bug31828.phpt
+      tests/bug32080.phpt
+      tests/bug32080.phpt:
+      Strict warnings
+
 2005-05-18  Stanislav Malyshev  <stas@zend.com>
 
     * zend.c
