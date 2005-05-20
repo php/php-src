@@ -992,7 +992,7 @@ PHP_FUNCTION(dom_node_insert_before)
 				lastattr = xmlHasProp(refp->parent, child->name);
 			else
 				lastattr = xmlHasNsProp(refp->parent, child->name, child->ns->href);
-			if (lastattr != NULL) {
+			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
 				if (lastattr != (xmlAttrPtr) child) {
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
@@ -1034,7 +1034,7 @@ PHP_FUNCTION(dom_node_insert_before)
 				lastattr = xmlHasProp(parentp, child->name);
 			else
 				lastattr = xmlHasNsProp(parentp, child->name, child->ns->href);
-			if (lastattr != NULL) {
+			if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
 				if (lastattr != (xmlAttrPtr) child) {
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
@@ -1286,7 +1286,7 @@ PHP_FUNCTION(dom_node_append_child)
 			lastattr = xmlHasProp(nodep, child->name);
 		else
 			lastattr = xmlHasNsProp(nodep, child->name, child->ns->href);
-		if (lastattr != NULL) {
+		if (lastattr != NULL && lastattr->type != XML_ATTRIBUTE_DECL) {
 			if (lastattr != (xmlAttrPtr) child) {
 				xmlUnlinkNode((xmlNodePtr) lastattr);
 				php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
