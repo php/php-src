@@ -1133,7 +1133,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	 */
 
 	if (!PS(id)) {
-		if (zend_hash_find(&EG(symbol_table), "_COOKIE",
+		if (PS(use_cookies) && zend_hash_find(&EG(symbol_table), "_COOKIE",
 					sizeof("_COOKIE"), (void **) &data) == SUCCESS &&
 				Z_TYPE_PP(data) == IS_ARRAY &&
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
