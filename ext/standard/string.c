@@ -2991,7 +2991,7 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 	char *source, *target, *tmp, *source_end=str+len, *tmp_end = NULL;
 	
 	for (source = str; source < source_end; source++) {
-		if (*source == from) {
+		if ((case_sensitivity && *source == from) || (!case_sensitivity && tolower(*source) == tolower(from))) {
 			char_count++;
 		}
 	}
