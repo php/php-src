@@ -131,13 +131,26 @@ static PHP_INI_MH(OnUpdateSerializer)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateSaveDir) {
+	/* Only do the safemode/open_basedir check at runtime */
+	if(stage == PHP_INI_STAGE_RUNTIME) {
+		if (PG(safe_mode) && (!php_checkuid(new_value, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+			return FAILURE;
+		}
+
+		if (php_check_open_basedir(new_value TSRMLS_CC)) {
+			return FAILURE;
+		}
+	}
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+}
 
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.bug_compat_42",    "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.bug_compat_warn",  "1",         PHP_INI_ALL, OnUpdateBool,   bug_compat_warn,    php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateString, save_path,          php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,save_path,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
