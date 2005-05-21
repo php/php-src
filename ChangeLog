@@ -1,3 +1,90 @@
+2005-05-20  Grant Croker  <grant.croker@ca.com>
+
+    * (PHP_4_3)
+      ext/ingres_ii/config.m4
+      ext/ingres_ii/config.m4:
+      - Fixed bug #30593 (--with-ingres option generates broken Makefile).
+
+2005-05-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/dom/element.c
+      ext/dom/node.c:
+      MFH: correct fix for bug #33059
+      - fix issue in other methods
+
+    * ext/dom/element.c
+      ext/dom/node.c:
+      - correct fix for bug #33059
+      - fix issue in other methods
+
+2005-05-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug33076.phpt:
+      MFH:
+      fix bug #33076 (str_ireplace() incorrectly counts result string length and
+      may cause segfault)
+      add test
+
+    * ext/standard/tests/strings/bug33076.phpt
+      ext/standard/tests/strings/bug33076.phpt:
+      
+      fix bug #33076 (str_ireplace() incorrectly counts result string length and
+      may cause segfault)
+      add test
+
+    * ext/standard/string.c:
+      fix bug #33076 (str_ireplace() incorrectly counts result string length and
+      may cause segfault)
+      add test
+
+2005-05-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * build/shtool:
+      Update bundled shtool to 2.0.1 (see also bug #33023)
+
+2005-05-20  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS:
+      Update NEWS
+
+    * (PHP_5_0)
+      NEWS:
+      - Update NEWS
+
+    * (PHP_5_0)
+      ext/standard/parsedate.y:
+      - MFH: Fixed bug #33013: "next month" was handled wrong.
+
+    * (PHP_4_3)
+      ext/standard/parsedate.y:
+      - Fixed bug #33013: "next month" was done wrong.
+
+2005-05-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/session/session.c
+      ext/session/session.c:
+      MFH: fix bug #32944 (Disabling session.use_cookies doesn't prevent reading
+      session cookies)
+
+    * ext/session/session.c:
+      fix bug #32944 (Disabling session.use_cookies doesn't prevent reading
+      session cookies)
+
+2005-05-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      reorder
+
 2005-05-19  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_5_0)
