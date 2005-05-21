@@ -17,7 +17,7 @@ var_dump($DB->exec($SQL['insert1']));
 var_dump($DB->exec($SQL['insert2']));
 var_dump($DB->exec($SQL['insert3']));
 var_dump($DB->exec($SQL['insert4']));
-var_dump($DB->query($SQL['select1'])->fetchSingle());
+var_dump($DB->query($SQL['select1'])->fetchColumn());
 
 $cont = $DB->query($SQL['select2'])->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE);
 var_dump($cont);

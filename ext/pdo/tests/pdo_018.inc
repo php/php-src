@@ -76,7 +76,7 @@ var_dump($DB->exec($SQL['insert1']));
 var_dump($DB->exec($SQL['insert2']));
 var_dump($DB->exec($SQL['insert3']));
 $DB->exec($SQL['create2']);
-var_dump($DB->query($SQL['selectC'])->fetchSingle());
+var_dump($DB->query($SQL['selectC'])->fetchColumn());
 var_dump($DB->query($SQL['select0'])->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE));
 
 $objs = array();
@@ -138,7 +138,7 @@ catch (PDOException $e)
 }
 
 echo "===COUNT===\n";
-var_dump($DB->query($SQL['select4'])->fetchSingle());
+var_dump($DB->query($SQL['select4'])->fetchColumn());
 
 echo "===DATABASE===\n";
 var_dump($DB->query($SQL['select5'])->fetchAll(PDO_FETCH_ASSOC));
