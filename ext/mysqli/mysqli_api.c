@@ -1278,14 +1278,22 @@ PHP_FUNCTION(mysqli_prepare)
 
 	if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
 		if (mysql_stmt_prepare(stmt->stmt, query, query_len)) {
-			if (stmt->stmt->last_errno) {
-				/* if we close the statement handle, we have to copy the errors to connection handle */
-				mysql->mysql->net.last_errno = stmt->stmt->last_errno;
-				strcpy(mysql->mysql->net.last_error, stmt->stmt->last_error);
-				strcpy(mysql->mysql->net.sqlstate, stmt->stmt->sqlstate);
-			}
+  			char  last_error[MYSQL_ERRMSG_SIZE];
+  			char  sqlstate[SQLSTATE_LENGTH+1];	
+			unsigned int last_errno;
+
+			/* mysql_stmt_close clears errors, so we have to store them temporarily */
+			last_errno = stmt->stmt->last_errno;
+			memcpy(last_error, stmt->stmt->last_error, MYSQL_ERRMSG_SIZE);
+			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
+
 			mysql_stmt_close(stmt->stmt);
 			stmt->stmt = NULL;
+
+			/* restore error messages */
+			mysql->mysql->net.last_errno = last_errno;
+			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
+			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
 		}
 	} 
 	
