@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed bug #33090 (mysqli_prepare doesn't return an error). (Georg)
 - Fixed bug #33076 (str_ireplace() incorrectly counts result string length 
   and may cause segfault). (Tony)
+- Fixed bug #33072 (Add a safemode/open_basedir check for runtime save_path 
+  change) (Rasmus)
 - Fixed bug #33059 (crash when moving xml attribute set in dtd). (Ilia)
 - Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
