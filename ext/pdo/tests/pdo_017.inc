@@ -12,7 +12,7 @@ set_sql('delete',  'DELETE FROM test');
 function countRows($DB, $action) {
     global $SQL;
     $stmt = $DB->query($SQL['select']);
-    $res = $stmt->fetchSingle();
+    $res = $stmt->fetchColumn();
     return "Counted $res rows after $action.\n";
 }
 

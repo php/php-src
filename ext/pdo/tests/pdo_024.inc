@@ -17,5 +17,5 @@ if ($name !== $before_bind) {
 	echo "bind: success\n";
 }
 var_dump($stmt->execute());
-var_dump($DB->query($SQL['select'])->fetchSingle());
+var_dump($DB->query($SQL['select'])->fetchColumn());
 ?>

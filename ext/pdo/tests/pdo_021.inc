@@ -25,7 +25,7 @@ foreach ($data as $row) {
 }
 
 $select = $DB->query($SQL['select']);
-$num = $select->fetchSingle();
+$num = $select->fetchColumn();
 echo 'There are ' . $num . " rows in the table.\n";
 
 // Insert using named parameters
@@ -36,7 +36,7 @@ foreach ($data as $row) {
 }
 
 $select = $DB->query($SQL['select']);
-$num = $select->fetchSingle();
+$num = $select->fetchColumn();
 echo 'There are ' . $num . " rows in the table.\n";
 
 ?>
