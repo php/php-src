@@ -2363,7 +2363,7 @@ AC_DEFUN([PHP_INSTALL_HEADERS],[
     done 
   else
     header_path=$1
-    for header_file in $2; do
+    for header_file in "$2"; do
       hp_hf="$header_path/$header_file"
       PHP_RUN_ONCE(INSTALLHEADERS, $hp_hf, [
         INSTALL_EXT_HEADERS="$INSTALL_EXT_HEADERS $hp_hf"
