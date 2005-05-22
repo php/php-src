@@ -143,6 +143,7 @@ static PHP_INI_MH(OnUpdateSaveDir) {
 		}
 	}
 	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
 }
 
 /* {{{ PHP_INI
