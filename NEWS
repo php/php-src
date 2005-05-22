@@ -24,6 +24,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems). (Jani)
+- Fixed bug #32773 (GMP fincs break when second parameter is 0) and made right 
+  fix for GMP FPEs (Stas)
 - Fixed bug #32742 (segmentation fault when the stream with a wrapper 
   is not closed). (Tony, Dmitry)
 - Fixed bug #32730 (ext/crack.c fails to compile with cracklib-2.8.3). (Jani)
@@ -59,8 +61,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #29975 (memory leaks when set_error_handler() is used inside error 
   handler). (Tony)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
-- Fixed bug #32773 (GMP fincs break when second parameter is 0) and made right 
-  fix for GMP FPEs (Stas)
+- Fixed bug #29338 (unencoded spaces get ignored after certain tags). (Ilia)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
