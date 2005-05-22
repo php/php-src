@@ -1003,8 +1003,11 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			zval_ptr_dtor(&z_error_type);
 			zval_ptr_dtor(&z_error_filename);
 			zval_ptr_dtor(&z_error_lineno);
-			if (ZVAL_REFCOUNT(z_context) == 2) {
+			if (ZVAL_REFCOUNT(z_context) <= 2) {
 				FREE_ZVAL(z_context);
+			} else {
+				ZVAL_DELREF(z_context);
+				zval_ptr_dtor(&z_context);
 			}
 			break;
 	}
