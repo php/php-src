@@ -1,3 +1,56 @@
+2005-05-21  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c:
+      Fixed bug #33072 - Add a safemode/open_basedir check for runtime save_path
+      change
+
+    * (PHP_5_0)
+      NEWS
+      ext/session/session.c:
+      MFH Fixed bug 33072 - safemode/open_basedir check for runtime save_path
+      change
+
+    * acinclude.m4:
+      Avoid syntax errors on some operating systems
+
+    * (PHP_5_0)
+      main/main.c:
+      Ah, never mind.  Didn't notice a conflict on my last checkout.  Jani's MFH
+      was fine.
+
+    * (PHP_5_0)
+      main/main.c:
+      Roll back Jani's blind MFH here.  zend_call_destructors() is PHP 5.1 only.
+
+    * ext/session/session.c:
+      Fixed bug 33072 - safemode/open_basedir check for runtime save_path change
+
+2005-05-21  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/php_mysqli.h
+      ext/mysqli/tests/bug33090.phpt:
+      MFH:
+      - fix for bug #33090 (mysqli_prepare doesn't return an error)
+      - mysql_set_charset now works for MySQL >= 5.0.6
+
+    * ext/mysqli/tests/bug33090.phpt
+      ext/mysqli/tests/bug33090.phpt:
+      
+      enabled set_charset for MySQL Versions >= 5.0.6
+      added testcase for bug #33090
+
+    * ext/mysqli/php_mysqli.h:
+      enabled set_charset for MySQL Versions >= 5.0.6
+      added testcase for bug #33090
+
+    * ext/mysqli/mysqli_api.c:
+      fix for bug #33090 (mysql_prepare doesn't return error)
+
 2005-05-20  Grant Croker  <grant.croker@ca.com>
 
     * (PHP_4_3)
