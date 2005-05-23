@@ -13,6 +13,7 @@ PHP 4                                                                      NEWS
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
 - Fixed bug #33019 (socket errors cause memory leaks in php_strerror()). 
   (jwozniak23 at poczta dot onet dot pl, Tony).
+- Fixed bug #33017 ("make distclean" gives an error with VPATH build). (Jani)
 - Fixed bug #33013 ("next month" was handled wrong while parsing dates).
   (Derick)
 - Fixed bug #32974 (pcntl calls malloc() from a signal handler). (Wez)
@@ -24,8 +25,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems). (Jani)
-- Fixed bug #32773 (GMP fincs break when second parameter is 0) and made right 
-  fix for GMP FPEs (Stas)
+- Fixed bug #32773 (GMP functions break when second parameter is 0). (Stas)
 - Fixed bug #32742 (segmentation fault when the stream with a wrapper 
   is not closed). (Tony, Dmitry)
 - Fixed bug #32730 (ext/crack.c fails to compile with cracklib-2.8.3). (Jani)
