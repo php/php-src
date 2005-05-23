@@ -1,3 +1,18 @@
+2005-05-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      zend_highlight.c:
+      MFH: Fixed bug #29338 (unencoded spaces get ignored after certain tags).
+
+    * zend_highlight.c:
+      Fixed bug #29338 (unencoded spaces get ignored after certain tags).
+
+2005-05-22  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c
+      zend.c:
+      fix leak
+
 2005-05-19  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_0)

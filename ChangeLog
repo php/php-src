@@ -1,3 +1,31 @@
+2005-05-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_highlight.c
+      ZendEngine2/zend_highlight.c
+      tests/strings/004.phpt:
+      MFH: Fixed bug #29338 (unencoded spaces get ignored after certain tags).
+
+    * tests/strings/004.phpt:
+      Adjust highlight test.
+
+    * ZendEngine2/zend_highlight.c:
+      Fixed bug #29338 (unencoded spaces get ignored after certain tags).
+
+2005-05-22  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/session/session.c:
+      fix compile warning
+
+2005-05-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/zend.c
+      ZendEngine2/zend.c
+      ZendEngine2/zend.c:
+      fix leak
+
 2005-05-21  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_4_3)
