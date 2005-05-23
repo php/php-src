@@ -1129,6 +1129,14 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 	if (header) {
 		header_length = atoi(header);
 		efree(header);
+		if (!header_length && !header_chunked) {
+			/* Empty response */
+			http_buf = emalloc(1);
+			http_buf[0] = '\0';
+			(*response) = http_buf;
+			(*out_size) = 0;
+			return TRUE;
+		}
 	}
 
 	if (header_chunked) {
