@@ -35,7 +35,6 @@ PHP                                                                        NEWS
 - Fixed bug #32852 (Crash with singleton and __destruct when
   zend.ze1_compatibility_mode = On). (Dmitry)
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
-- Fixed bug #32810 (fread after tmpfile() reads only 8192 bytes). (Tony)
 - Fixed bug #32809 (Missing T1LIB support on Windows). (Edin)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems). (Jani)
