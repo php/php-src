@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
 - Fixed bug #33019 (socket errors cause memory leaks in php_strerror()). 
   (jwozniak23 at poczta dot onet dot pl, Tony).
+- Fixed bug #33017 ("make distclean" gives an error with VPATH build). (Jani)
 - Fixed bug #33013 ("next month" was handled wrong while parsing dates).
   (Derick)
 - Fixed bug #32956 (mysql_bind_result() doesn't support MYSQL_TYPE_NULL). (Georg)
