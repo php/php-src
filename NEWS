@@ -23,6 +23,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #32932 (Oracle LDAP: ldap_get_entries invalid pointer). (Jani)
 - Fixed bug #32904 (pg_get_notify() ignores result_type parameter). (Tony)
 - Fixed bug #32813 (parse_url() does not handle scheme-only urls properly). (Ilia)
+- Fixed bug #32810 (fread after tmpfile() reads only 8192 bytes). (Tony)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems). (Jani)
 - Fixed bug #32773 (GMP functions break when second parameter is 0). (Stas)
