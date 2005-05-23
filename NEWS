@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
 - Removed php_check_syntax() function which never worked properly. (Ilia)
-- Added new function mysqli_set_charset (Georg)
+- Added new function mysqli_set_charset(). (Georg)
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
 - Added support for .cc files in extensions. (Brian)
 - Added PHP_INT_MAX and PHP_INT_SIZE as predefined constants. (Andrey)
@@ -11,11 +11,11 @@ PHP                                                                        NEWS
 - Fixed ext/mysqli to allocate less memory when fetching bound params
   of type (MEDIUM|LONG)BLOB/(MEDIUM|LONG)TEXT. (Andrey)
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
-- Fixed bug #33090 (mysqli_prepare doesn't return an error). (Georg)
+- Fixed bug #33090 (mysqli_prepare() doesn't return an error). (Georg)
 - Fixed bug #33076 (str_ireplace() incorrectly counts result string length 
   and may cause segfault). (Tony)
-- Fixed bug #33072 (Add a safemode/open_basedir check for runtime save_path 
-  change) (Rasmus)
+- Fixed bug #33072 (Add a safemode/open_basedir check for runtime
+  "session.save_path" change using session_save_path() function). (Rasmus)
 - Fixed bug #33059 (crash when moving xml attribute set in dtd). (Ilia)
 - Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
