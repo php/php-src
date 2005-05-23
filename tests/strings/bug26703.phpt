@@ -13,6 +13,6 @@ highlight.html=#000000
 ?>
 --EXPECT--
 <code><span style="color: #000000">
-<span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"foo[] $a \n"</span><span style="color: #007700">; </span><span style="color: #0000BB">?&gt;</span>
+<span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">echo&nbsp;</span><span style="color: #DD0000">"foo[]&nbsp;$a&nbsp;\n"</span><span style="color: #007700">;&nbsp;</span><span style="color: #0000BB">?&gt;</span>
 </span>
 </code>
