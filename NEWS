@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . ext/cpdf        (Tony, Derick)
   . ext/dio         (Jani, Derick)
   . ext/fam         (Jani, Derick)
+  . ext/ingres_ii   (Jani, Derick)
   . ext/mnogosearch (Jani, Derick)
   . ext/w32api      (Jani, Derick)
   . ext/yp          (Jani, Derick)
