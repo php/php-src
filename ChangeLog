@@ -1,3 +1,72 @@
+2005-05-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      main/streams.c
+      main/streams/plain_wrapper.c:
+      MFH: Fixed bug #32810 (temporary files not using plain file wrapper).
+
+    * main/streams/plain_wrapper.c:
+      Fixed bug #32810 (temporary files not using plain file wrapper).
+
+2005-05-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      main/streams.c
+      main/streams/streams.c
+      main/streams/streams.c:
+      revert by Wez's request
+
+2005-05-23  Grant Croker  <grant.croker@ca.com>
+
+    * ext/ingres_ii/config.m4
+      ext/ingres_ii/php_ii.h:
+      - Allows the Ingres extenstion to be built on Linux/UNIX as well as
+      Windows.
+
+    * ext/ingres_ii/config.m4:
+      - Fixed bug #30593 (--with-ingres option generates broken Makefile).
+
+2005-05-23  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_3)
+      NEWS
+      main/streams.c
+      main/streams/streams.c:
+      MFH: fix bug #32810 (fread after tmpfile() reads only 8192 bytes)
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * main/streams/streams.c:
+      fix bug #32810 (fread after tmpfile() reads only 8192 bytes)
+
+    * tests/strings/bug26703.phpt:
+      fix test
+
+2005-05-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      Makefile.global
+      Makefile.global
+      NEWS
+      NEWS:
+      MFH: - Fixed bug #33017 ("make distclean" gives an error with VPATH build).
+
+    * Makefile.global:
+      - Fixed bug #33017 (make distclean give error outside of php-src)
+
+    * (PHP_5_0)
+      NEWS:
+      Missed the bus now..
+
+    * ext/session/session.c:
+      CS fix
+
 2005-05-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
