@@ -154,8 +154,8 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 	if (fd != -1)	{
 		php_stream *stream = php_stream_fopen_from_fd_rel(fd, "r+b", NULL);
 		if (stream) {
-			stream->wrapper = &php_plain_files_wrapper;
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+			stream->wrapper = &php_plain_files_wrapper;
 
 			self->temp_file_name = opened_path;
 			self->lock_flag = LOCK_UN;
