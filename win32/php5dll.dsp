@@ -260,10 +260,6 @@ SOURCE=..\main\getopt.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\internal_functions_registry.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\logos.h
 # End Source File
 # Begin Source File
