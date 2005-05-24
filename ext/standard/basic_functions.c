@@ -24,7 +24,6 @@
 #include "php_main.h"
 #include "php_globals.h"
 #include "php_ini.h"
-#include "internal_functions_registry.h"
 #include "php_standard.h"
 #include "php_math.h"
 #include "php_http.h"
