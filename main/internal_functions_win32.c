@@ -24,7 +24,6 @@
 #include "php.h"
 #include "php_main.h"
 #include "zend_modules.h"
-#include "internal_functions_registry.h"
 #include "zend_compile.h"
 #include <stdarg.h>
 #include <stdlib.h>
