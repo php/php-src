@@ -607,7 +607,8 @@ static void spl_array_write_property(zval *object, zval *member, zval *value TSR
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 	&& !std_object_handlers.has_property(object, member, 2 TSRMLS_CC)) {
-		return spl_array_write_dimension(object, member, value TSRMLS_CC);
+		spl_array_write_dimension(object, member, value TSRMLS_CC);
+		return;
 	}
 	std_object_handlers.write_property(object, member, value TSRMLS_CC);
 } /* }}} */
