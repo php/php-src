@@ -1,3 +1,43 @@
+2005-05-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      Flush regexp cache if we detect corruption.
+
+2005-05-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/basic_functions.c
+      main/internal_functions.c.in
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c:
+      nuked unused header file
+
+    * win32/php5dll.dsp
+      win32/php5dllts.dsp:
+      nuked file
+
+    * main/internal_functions_registry.h:
+      - Remove unused file
+
+2005-05-24  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/plain_wrapper.c:
+      make it compile on Win32 (thanks to Sebastian for noticing)
+
+2005-05-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS
+      ext/ingres_ii/.cvsignore
+      ext/ingres_ii/CREDITS
+      ext/ingres_ii/EXPERIMENTAL
+      ext/ingres_ii/README
+      ext/ingres_ii/config.m4
+      ext/ingres_ii/config.w32
+      ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h
+      ext/ingres_ii/ingres.dsp
+      ext/ingres_ii/php_ii.h:
+      - Moved ingres_ii to PECL
+
 2005-05-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
