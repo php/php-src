@@ -344,6 +344,7 @@ PHP_FUNCTION(mime_content_type)
 		/* fallthru if not a stream resource */
 	default:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "can only process string or stream arguments");
+		RETURN_FALSE;
 		break;
 	}
 
