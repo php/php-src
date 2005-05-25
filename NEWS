@@ -113,6 +113,7 @@ PHP                                                                        NEWS
   (Marcus)
 - Fixed bug #29975 (memory leaks when set_error_handler() is used inside error 
   handler). (Tony)
+- Fixed bug #29971 (variables_order behaviour). (Dmitry)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #29338 (unencoded spaces get ignored after certain tags). (Ilia)
