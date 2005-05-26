@@ -1013,6 +1013,10 @@ PHP_MINIT_FUNCTION(sqlite)
 #else
 	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default());
 #endif 
+
+	sqlite_ce_db->ce_flags &= ~ZEND_ACC_FINAL_CLASS;
+	sqlite_ce_db->constructor->common.fn_flags |= ZEND_ACC_FINAL;
+
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
 	sqlite_object_handlers_ub_query.count_elements = sqlite_count_elements;
