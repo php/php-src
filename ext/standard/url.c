@@ -104,6 +104,19 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 
 	/* parse scheme */
 	if ((e = memchr(s, ':', length)) && (e - s)) {
+		/* validate scheme */
+		p = s;
+		while (p < e) {
+			if (!isalnum(*p)) {
+				if (e + 1 < ue) {
+					goto parse_port;
+				} else {
+					goto just_path;
+				}
+			}
+			p++;
+		}
+	
 		if (*(e + 1) == '\0') { /* only scheme is available */
 			ret->scheme = estrndup(s, (e - s));
 			php_replace_controlchars_ex(ret->scheme, (e - s));
