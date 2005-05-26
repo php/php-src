@@ -21,12 +21,6 @@ class PDODatabaseX extends PDO
 {
     public $test1 = 1;
     
-    function __construct($connect)
-    {
-    	echo __METHOD__ . "()\n";
-    	parent::__construct($connect);
-    }
-    
     function __destruct()
     {
     	echo __METHOD__ . "()\n";

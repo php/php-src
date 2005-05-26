@@ -15,7 +15,6 @@ require_once($PDO_TESTS . 'pdo_026.inc');
 ===DONE===
 <?php exit(0); ?>
 --EXPECT--
-PDODatabase::__construct()
 string(11) "PDODatabase"
 string(12) "PDOStatement"
 PDODatabase::query()
