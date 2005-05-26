@@ -22,7 +22,6 @@ require_once($PDO_TESTS . 'pdo_023.inc');
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-PDODatabaseX::__construct()
 int(1)
 int(2)
 object(PDODatabaseX)#%d (2) {

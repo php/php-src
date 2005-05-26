@@ -30,12 +30,6 @@ class PDOStatementX extends PDOStatement
 
 class PDODatabase extends PDO
 {
-    function __construct($connect)
-    {
-    	echo __METHOD__ . "()\n";
-    	parent::__construct($connect);
-    }
-    
     function __destruct()
     {
     	echo __METHOD__ . "()\n";
