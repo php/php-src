@@ -148,6 +148,7 @@ typedef struct _zend_arg_info {
 	zend_uint name_len;
 	char *class_name;
 	zend_uint class_name_len;
+	zend_bool array_type_hint;
 	zend_bool allow_null;
 	zend_bool pass_by_reference;
 	zend_bool return_reference;

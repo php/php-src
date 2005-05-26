@@ -602,7 +602,23 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 				zend_error_noreturn(E_ERROR, "Argument %d must be an object of class %s", arg_num, cur_arg_info->class_name);
 				break;
 		}
-	}	
+	}	else if (cur_arg_info->array_type_hint) {
+		if (!arg) {
+			zend_error_noreturn(E_ERROR, "Argument %d must be an array", arg_num);
+		}
+		switch (Z_TYPE_P(arg)) {
+			case IS_NULL:
+				if (!cur_arg_info->allow_null) {
+					zend_error_noreturn(E_ERROR, "Argument %d must not be null", arg_num);
+				}
+				break;
+			case IS_ARRAY:
+				break;
+			default:	
+				zend_error_noreturn(E_ERROR, "Argument %d must be an array", arg_num);
+				break;
+		}
+	}
 }
 
 

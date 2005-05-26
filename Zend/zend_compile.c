@@ -1221,12 +1221,19 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	cur_arg_info = &CG(active_op_array)->arg_info[CG(active_op_array)->num_args-1];
 	cur_arg_info->name = estrndup(varname->u.constant.value.str.val, varname->u.constant.value.str.len);
 	cur_arg_info->name_len = varname->u.constant.value.str.len;
+	cur_arg_info->array_type_hint = 0;
 	cur_arg_info->allow_null = 1;
 	cur_arg_info->pass_by_reference = pass_by_reference;
 
 	if (class_type->op_type != IS_UNUSED) {
-		cur_arg_info->class_name = class_type->u.constant.value.str.val;
-		cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
+		if (class_type->u.constant.type == IS_STRING) {
+			cur_arg_info->class_name = class_type->u.constant.value.str.val;
+			cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
+		} else {
+			cur_arg_info->array_type_hint = 1;
+			cur_arg_info->class_name = NULL;
+			cur_arg_info->class_name_len = 0;
+		}
 		cur_arg_info->allow_null = 0;
 	} else {
 		cur_arg_info->class_name = NULL;
@@ -1842,6 +1849,10 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 		}
 		if (fe->common.arg_info[i].class_name
 			&& strcmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
+			return 0;
+		}
+		if (fe->common.arg_info[i].array_type_hint != proto->common.arg_info[i].array_type_hint) {
+			/* Only one has an array type hint and the other one doesn't */
 			return 0;
 		}
 		if (fe->common.arg_info[i].pass_by_reference != proto->common.arg_info[i].pass_by_reference) {
