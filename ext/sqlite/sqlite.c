@@ -998,6 +998,10 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_SQLITE_CLASS(Result,     query,     NULL);
 	REGISTER_SQLITE_CLASS(Unbuffered, ub_query,  NULL);
 	REGISTER_SQLITE_CLASS(Exception,  exception, zend_exception_get_default());
+
+	sqlite_ce_db->ce_flags &= ~ZEND_ACC_FINAL_CLASS;
+	sqlite_ce_db->constructor->common.fn_flags |= ZEND_ACC_FINAL;
+
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
 	
