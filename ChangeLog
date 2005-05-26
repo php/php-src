@@ -1,3 +1,35 @@
+2005-05-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/basic/bug29971.phpt
+      tests/basic/bug29971.phpt:
+      
+      file bug29971.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      main/php_variables.c
+      main/php_variables.c
+      tests/basic/bug29971.phpt:
+      Fixed bug #29971 (variables_order behaviour)
+
+2005-05-25  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/type.c:
+      fix is_object on non-php objects
+
+    * ext/standard/type.c:
+      fix is_object() on non-php objects
+
+2005-05-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/mime_magic/mime_magic.c:
+      MFH: Return error on an invalid input to mime_content_type() function.
+
+    * ext/mime_magic/mime_magic.c:
+      Return error on an invalid input to mime_content_type() function.
+
 2005-05-24  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/pcre/php_pcre.c:
