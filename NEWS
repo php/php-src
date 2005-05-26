@@ -29,6 +29,7 @@ PHP                                                                        NEWS
 - Fixed bug #32944 (Disabling session.use_cookies doesn't prevent reading 
   session cookies). (Jani, Tony)
 - Fixed bug #32936 (http redirects URLs are not checked for control chars). (Ilia)
+- Fixed bug #32933 (Cannot extend class "SQLiteDatabase"). (Marcus)
 - Fixed bug #32932 (Oracle LDAP: ldap_get_entries(), invalid pointer). (Jani)
 - Fixed bug #32930 (class extending DOMDocument doesn't clone properly). (Rob)
 - Fixed bug #32904 (pg_get_notify() ignores result_type parameter). (Tony)
