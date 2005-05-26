@@ -908,7 +908,7 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 {
 	zval **args[1];
 	zval autoload_function;
-	zval class_name, *class_name_ptr = &class_name;
+	zval *class_name_ptr;
 	zval *retval_ptr;
 	int retval;
 	char *lc_name;
@@ -947,14 +947,17 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 
 	ZVAL_STRINGL(&autoload_function, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1,  0);
 
+	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
-	ZVAL_STRINGL(class_name_ptr, name, name_length, 0);
+	ZVAL_STRINGL(class_name_ptr, name, name_length, 1);
 	
 	args[0] = &class_name_ptr;
 
 	exception = EG(exception);
 	EG(exception) = NULL;
 	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
+
+	zval_ptr_dtor(&class_name_ptr);
 
 	zend_hash_del(EG(in_autoload), lc_name, name_length+1);
 
