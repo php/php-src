@@ -128,6 +128,7 @@ PHP                                                                        NEWS
   mem vars und others). (Dmitry)
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
+- Fixed bug #22836 (returning reference to uninitialized variable). (Dmitry)
 
 31 Mar 2005, PHP 5.0.4
 - Added SNMPv2 support. (harrie)
