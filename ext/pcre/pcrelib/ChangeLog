@@ -1,6 +1,142 @@
 ChangeLog for PCRE
 ------------------
 
+Version 5.0 13-Sep-04
+---------------------
+
+ 1. Internal change: literal characters are no longer packed up into items
+    containing multiple characters in a single byte-string. Each character
+    is now matched using a separate opcode. However, there may be more than one
+    byte in the character in UTF-8 mode.
+
+ 2. The pcre_callout_block structure has two new fields: pattern_position and
+    next_item_length. These contain the offset in the pattern to the next match
+    item, and its length, respectively.
+
+ 3. The PCRE_AUTO_CALLOUT option for pcre_compile() requests the automatic
+    insertion of callouts before each pattern item. Added the /C option to
+    pcretest to make use of this.
+
+ 4. On the advice of a Windows user, the lines
+
+      #if defined(_WIN32) || defined(WIN32)
+      _setmode( _fileno( stdout ), 0x8000 );
+      #endif  /* defined(_WIN32) || defined(WIN32) */
+
+    have been added to the source of pcretest. This apparently does useful
+    magic in relation to line terminators.
+
+ 5. Changed "r" and "w" in the calls to fopen() in pcretest to "rb" and "wb"
+    for the benefit of those environments where the "b" makes a difference.
+
+ 6. The icc compiler has the same options as gcc, but "configure" doesn't seem
+    to know about it. I have put a hack into configure.in that adds in code
+    to set GCC=yes if CC=icc. This seems to end up at a point in the
+    generated configure script that is early enough to affect the setting of
+    compiler options, which is what is needed, but I have no means of testing
+    whether it really works. (The user who reported this had patched the
+    generated configure script, which of course I cannot do.)
+
+    LATER: After change 22 below (new libtool files), the configure script
+    seems to know about icc (and also ecc). Therefore, I have commented out
+    this hack in configure.in.
+
+ 7. Added support for pkg-config (2 patches were sent in).
+
+ 8. Negated POSIX character classes that used a combination of internal tables
+    were completely broken. These were [[:^alpha:]], [[:^alnum:]], and
+    [[:^ascii]]. Typically, they would match almost any characters. The other
+    POSIX classes were not broken in this way.
+
+ 9. Matching the pattern "\b.*?" against "ab cd", starting at offset 1, failed
+    to find the match, as PCRE was deluded into thinking that the match had to
+    start at the start point or following a newline. The same bug applied to
+    patterns with negative forward assertions or any backward assertions
+    preceding ".*" at the start, unless the pattern required a fixed first
+    character. This was a failing pattern: "(?!.bcd).*". The bug is now fixed.
+
+10. In UTF-8 mode, when moving forwards in the subject after a failed match
+    starting at the last subject character, bytes beyond the end of the subject
+    string were read.
+
+11. Renamed the variable "class" as "classbits" to make life easier for C++
+    users. (Previously there was a macro definition, but it apparently wasn't
+    enough.)
+
+12. Added the new field "tables" to the extra data so that tables can be passed
+    in at exec time, or the internal tables can be re-selected. This allows
+    a compiled regex to be saved and re-used at a later time by a different
+    program that might have everything at different addresses.
+
+13. Modified the pcre-config script so that, when run on Solaris, it shows a
+    -R library as well as a -L library.
+
+14. The debugging options of pcretest (-d on the command line or D on a
+    pattern) showed incorrect output for anything following an extended class
+    that contained multibyte characters and which was followed by a quantifier.
+
+15. Added optional support for general category Unicode character properties
+    via the \p, \P, and \X escapes. Unicode property support implies UTF-8
+    support. It adds about 90K to the size of the library. The meanings of the
+    inbuilt class escapes such as \d and \s have NOT been changed.
+
+16. Updated pcredemo.c to include calls to free() to release the memory for the
+    compiled pattern.
+
+17. The generated file chartables.c was being created in the source directory
+    instead of in the building directory. This caused the build to fail if the
+    source directory was different from the building directory, and was
+    read-only.
+
+18. Added some sample Win commands from Mark Tetrode into the NON-UNIX-USE
+    file. No doubt somebody will tell me if they don't make sense... Also added
+    Dan Mooney's comments about building on OpenVMS.
+
+19. Added support for partial matching via the PCRE_PARTIAL option for
+    pcre_exec() and the \P data escape in pcretest.
+
+20. Extended pcretest with 3 new pattern features:
+
+    (i)   A pattern option of the form ">rest-of-line" causes pcretest to
+          write the compiled pattern to the file whose name is "rest-of-line".
+          This is a straight binary dump of the data, with the saved pointer to
+          the character tables forced to be NULL. The study data, if any, is
+          written too. After writing, pcretest reads a new pattern.
+
+    (ii)  If, instead of a pattern, "<rest-of-line" is given, pcretest reads a
+          compiled pattern from the given file. There must not be any
+          occurrences of "<" in the file name (pretty unlikely); if there are,
+          pcretest will instead treat the initial "<" as a pattern delimiter.
+          After reading in the pattern, pcretest goes on to read data lines as
+          usual.
+
+    (iii) The F pattern option causes pcretest to flip the bytes in the 32-bit
+          and 16-bit fields in a compiled pattern, to simulate a pattern that
+          was compiled on a host of opposite endianness.
+
+21. The pcre-exec() function can now cope with patterns that were compiled on
+    hosts of opposite endianness, with this restriction:
+
+      As for any compiled expression that is saved and used later, the tables
+      pointer field cannot be preserved; the extra_data field in the arguments
+      to pcre_exec() should be used to pass in a tables address if a value
+      other than the default internal tables were used at compile time.
+
+22. Calling pcre_exec() with a negative value of the "ovecsize" parameter is
+    now diagnosed as an error. Previously, most of the time, a negative number
+    would have been treated as zero, but if in addition "ovector" was passed as
+    NULL, a crash could occur.
+
+23. Updated the files ltmain.sh, config.sub, config.guess, and aclocal.m4 with
+    new versions from the libtool 1.5 distribution (the last one is a copy of
+    a file called libtool.m4). This seems to have fixed the need to patch
+    "configure" to support Darwin 1.3 (which I used to do). However, I still
+    had to patch ltmain.sh to ensure that ${SED} is set (it isn't on my
+    workstation).
+
+24. Changed the PCRE licence to be the more standard "BSD" licence.
+
+
 Version 4.5 01-Dec-03
 ---------------------
 
