@@ -2,7 +2,39 @@
 *       Perl-Compatible Regular Expressions      *
 *************************************************/
 
-/* Copyright (c) 1997-2003 University of Cambridge */
+/* In its original form, this is the .in file that is transformed by
+"configure" into pcre.h.
+
+           Copyright (c) 1997-2004 University of Cambridge
+
+-----------------------------------------------------------------------------
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of the University of Cambridge nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+-----------------------------------------------------------------------------
+*/
 
 #ifndef _PCRE_H
 #define _PCRE_H
@@ -12,9 +44,9 @@ make changes to pcre.in. */
 
 #include "php_compat.h"
 
-#define PCRE_MAJOR          4
-#define PCRE_MINOR          5
-#define PCRE_DATE           01-December-2003
+#define PCRE_MAJOR          5
+#define PCRE_MINOR          0
+#define PCRE_DATE           13-Sep-2004
 
 /* Win32 uses DLL by default */
 
@@ -60,6 +92,8 @@ extern "C" {
 #define PCRE_UTF8               0x0800
 #define PCRE_NO_AUTO_CAPTURE    0x1000
 #define PCRE_NO_UTF8_CHECK      0x2000
+#define PCRE_AUTO_CALLOUT       0x4000
+#define PCRE_PARTIAL            0x8000
 
 /* Exec-time and get/set-time error codes */
 
@@ -74,6 +108,10 @@ extern "C" {
 #define PCRE_ERROR_CALLOUT         (-9)  /* Never used by PCRE itself */
 #define PCRE_ERROR_BADUTF8        (-10)
 #define PCRE_ERROR_BADUTF8_OFFSET (-11)
+#define PCRE_ERROR_PARTIAL        (-12)
+#define PCRE_ERROR_BADPARTIAL     (-13)
+#define PCRE_ERROR_INTERNAL       (-14)
+#define PCRE_ERROR_BADCOUNT       (-15)
 
 /* Request types for pcre_fullinfo() */
 
@@ -89,6 +127,7 @@ extern "C" {
 #define PCRE_INFO_NAMECOUNT          8
 #define PCRE_INFO_NAMETABLE          9
 #define PCRE_INFO_STUDYSIZE         10
+#define PCRE_INFO_DEFAULT_TABLES    11
 
 /* Request types for pcre_config() */
 
@@ -98,12 +137,14 @@ extern "C" {
 #define PCRE_CONFIG_POSIX_MALLOC_THRESHOLD  3
 #define PCRE_CONFIG_MATCH_LIMIT             4
 #define PCRE_CONFIG_STACKRECURSE            5
+#define PCRE_CONFIG_UNICODE_PROPERTIES      6
 
 /* Bit flags for the pcre_extra structure */
 
 #define PCRE_EXTRA_STUDY_DATA          0x0001
 #define PCRE_EXTRA_MATCH_LIMIT         0x0002
 #define PCRE_EXTRA_CALLOUT_DATA        0x0004
+#define PCRE_EXTRA_TABLES              0x0008
 
 /* Types */
 
@@ -111,13 +152,15 @@ struct real_pcre;                 /* declaration; the definition is private  */
 typedef struct real_pcre pcre;
 
 /* The structure for passing additional data to pcre_exec(). This is defined in
-such as way as to be extensible. */
+such as way as to be extensible. Always add new fields at the end, in order to
+remain compatible. */
 
 typedef struct pcre_extra {
   unsigned long int flags;        /* Bits for which fields are set */
   void *study_data;               /* Opaque data from pcre_study() */
   unsigned long int match_limit;  /* Maximum number of calls to match() */
   void *callout_data;             /* Data passed back in callouts */
+  const unsigned char *tables;    /* Pointer to character tables */
 } pcre_extra;
 
 /* The structure for passing out data via the pcre_callout_function. We use a
@@ -133,10 +176,13 @@ typedef struct pcre_callout_block {
   const char  *subject;           /* The subject being matched */
   int          subject_length;    /* The length of the subject */
   int          start_match;       /* Offset to start of this match attempt */
-  int          current_position;  /* Where we currently are */
+  int          current_position;  /* Where we currently are in the subject */
   int          capture_top;       /* Max current capture */
   int          capture_last;      /* Most recently closed capture */
   void        *callout_data;      /* Data passed in with the call */
+  /* ------------------- Added for Version 1 -------------------------- */
+  int          pattern_position;  /* Offset to next item in the pattern */
+  int          next_item_length;  /* Length of next item in the pattern */
   /* ------------------------------------------------------------------ */
 } pcre_callout_block;
 

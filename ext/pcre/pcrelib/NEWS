@@ -1,6 +1,53 @@
 News about PCRE releases
 ------------------------
 
+Release 5.0 13-Sep-04
+---------------------
+
+The licence under which PCRE is released has been changed to the more
+conventional "BSD" licence.
+
+In the code, some bugs have been fixed, and there are also some major changes
+in this release (which is why I've increased the number to 5.0). Some changes
+are internal rearrangements, and some provide a number of new facilities. The
+new features are:
+
+1. There's an "automatic callout" feature that inserts callouts before every
+   item in the regex, and there's a new callout field that gives the position
+   in the pattern - useful for debugging and tracing.
+
+2. The extra_data structure can now be used to pass in a set of character
+   tables at exec time. This is useful if compiled regex are saved and re-used
+   at a later time when the tables may not be at the same address. If the
+   default internal tables are used, the pointer saved with the compiled
+   pattern is now set to NULL, which means that you don't need to do anything
+   special unless you are using custom tables.
+
+3. It is possible, with some restrictions on the content of the regex, to
+   request "partial" matching. A special return code is given if all of the
+   subject string matched part of the regex. This could be useful for testing
+   an input field as it is being typed.
+
+4. There is now some optional support for Unicode character properties, which
+   means that the patterns items such as \p{Lu} and \X can now be used. Only
+   the general category properties are supported. If PCRE is compiled with this
+   support, an additional 90K data structure is include, which increases the
+   size of the library dramatically.
+
+5. There is support for saving compiled patterns and re-using them later.
+
+6. There is support for running regular expressions that were compiled on a
+   different host with the opposite endianness.
+
+7. The pcretest program has been extended to accommodate the new features.
+
+The main internal rearrangement is that sequences of literal characters are no
+longer handled as strings. Instead, each character is handled on its own. This
+makes some UTF-8 handling easier, and makes the support of partial matching
+possible. Compiled patterns containing long literal strings will be larger as a
+result of this change; I hope that performance will not be much affected.
+
+
 Release 4.5 01-Dec-03
 ---------------------
 
