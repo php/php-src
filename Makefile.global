@@ -71,7 +71,7 @@ clean:
 
 distclean: clean
 	rm -f config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h php5.spec sapi/apache/libphp5.module buildmk.stamp
-	egrep define'.*include/php' $(top_srcdir)/configure|sed 's/.*>//'|xargs rm -f
+	$(EGREP) define'.*include/php' $(top_srcdir)/configure | $(SED) 's/.*>//'|xargs rm -f
 	find . -name Makefile | xargs rm -f
 
 .PHONY: all clean install distclean test
