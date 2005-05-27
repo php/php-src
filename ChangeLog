@@ -1,3 +1,71 @@
+2005-05-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/reg.c:
+      Do a cache flush if we detect possible cache corruption (same as for
+      PCRE).
+
+2005-05-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug33116.phpt:
+      Fixed bug #33116 (crash when assigning class name to global variable in
+      __autoload)
+
+    * ZendEngine2/tests/bug33116.phpt
+      ZendEngine2/tests/bug33116.phpt:
+      
+      Fixed bug #33116 (crash when assigning class name to global variable in
+      __autoload).
+
+    * ZendEngine2/zend_execute_API.c:
+      Fixed bug #33116 (crash when assigning class name to global variable in
+      __autoload).
+
+    * NEWS
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/tests/array_type_hint_001.phpt:
+      Added array type hinting. (This patch requires full re-make)
+
+2005-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug27304.phpt
+      ZendEngine2/tests/bug32981.phpt:
+      - Add new tests
+
+    * ZendEngine2/tests/bug27304.phpt
+      ZendEngine2/tests/bug27304.phpt
+      ZendEngine2/tests/bug32981.phpt
+      ZendEngine2/tests/bug32981.phpt:
+      
+      - Add new tests
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+    * ext/sqlite/sqlite.c:
+      - Make SQLiteDatabase derivable by dropping final tag from class and
+        making the ctor final to ensure it is being called, which is the
+      problem.
+
+2005-05-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/url.c
+      ext/standard/url.c:
+      MFH: Added scheme validation for parse_url().
+
+    * ext/standard/url.c:
+      Added scheme validation for parse_url().
+
 2005-05-25  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/basic/bug29971.phpt

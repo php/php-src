@@ -1,3 +1,44 @@
+2005-05-26  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute_API.c
+      tests/bug33116.phpt:
+      Fixed bug #33116 (crash when assigning class name to global variable in
+      __autoload)
+
+    * tests/bug33116.phpt
+      tests/bug33116.phpt:
+      
+      Fixed bug #33116 (crash when assigning class name to global variable in
+      __autoload).
+
+    * zend_execute_API.c:
+      Fixed bug #33116 (crash when assigning class name to global variable in
+      __autoload).
+
+    * zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_reflection_api.c
+      tests/array_type_hint_001.phpt:
+      Added array type hinting. (This patch requires full re-make)
+
+2005-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      tests/bug27304.phpt
+      tests/bug32981.phpt:
+      - Add new tests
+
+    * tests/bug27304.phpt
+      tests/bug27304.phpt
+      tests/bug32981.phpt
+      tests/bug32981.phpt:
+      
+      - Add new tests
+
 2005-05-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
