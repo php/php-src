@@ -47,7 +47,7 @@ dnl execute code, if variable is not set in namespace
 dnl
 AC_DEFUN([PHP_RUN_ONCE],[
   changequote({,})
-  unique=`echo $2|sed 's/[^a-zA-Z0-9]/_/g'`
+  unique=`echo $2|$SED 's/[^a-zA-Z0-9]/_/g'`
   changequote([,])
   cmd="echo $ac_n \"\$$1$unique$ac_c\""
   if test -n "$unique" && test "`eval $cmd`" = "" ; then
@@ -66,7 +66,7 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     $2=$1
   else
     changequote({,})
-    ep_dir="`echo $1|sed 's%/*[^/][^/]*/*$%%'`"
+    ep_dir="`echo $1|$SED 's%/*[^/][^/]*/*$%%'`"
     changequote([,])
     ep_realdir="`(cd \"$ep_dir\" && pwd)`"
     $2="$ep_realdir/`basename \"$1\"`"
@@ -143,7 +143,7 @@ test -d include || $php_shtool mkdir include
 > Makefile.fragments
 dnl We need to play tricks here to avoid matching the grep line itself
 pattern=define
-egrep $pattern'.*include/php' $srcdir/configure|sed 's/.*>//'|xargs touch 2>/dev/null
+$EGREP $pattern'.*include/php' $srcdir/configure|$SED 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl
@@ -177,7 +177,7 @@ AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
   ifelse($1,,src=$ext_srcdir/Makefile.frag,src=$1)
   ifelse($2,,ac_srcdir=$ext_srcdir,ac_srcdir=$2)
   ifelse($3,,ac_builddir=$ext_builddir,ac_builddir=$3)
-  sed -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
+  $SED -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
 ])
 
 dnl
@@ -333,7 +333,7 @@ AC_DEFUN([PHP_CHECK_GCC_ARG],[
   AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z-,a-z_), [
   echo 'void somefunc() { };' > conftest.c
   cmd='$CC $1 -c conftest.c'
-  if eval $cmd 2>&1 | egrep -e $1 >/dev/null ; then
+  if eval $cmd 2>&1 | $EGREP -e $1 >/dev/null ; then
     ac_result=no
   else
     ac_result=yes
@@ -356,7 +356,7 @@ dnl Stores the location of libgcc in libgcc_libpath
 dnl
 AC_DEFUN([PHP_LIBGCC_LIBPATH],[
   changequote({,})
-  libgcc_libpath=`$1 --print-libgcc-file-name|sed 's%/*[^/][^/]*$%%'`
+  libgcc_libpath=`$1 --print-libgcc-file-name|$SED 's%/*[^/][^/]*$%%'`
   changequote([,])
 ])
 
@@ -655,7 +655,7 @@ ext_output="yes, shared"
 ext_shared=yes
 case [$]$1 in
 shared,*[)]
-  $1=`echo "[$]$1"|sed 's/^shared,//'`
+  $1=`echo "[$]$1"|$SED 's/^shared,//'`
   ;;
 shared[)]
   $1=yes
@@ -929,7 +929,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|sed s#@ext_srcdir@#$ext_srcdir#g|sed s#@ext_builddir@#$ext_builddir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
@@ -1943,7 +1943,7 @@ AC_DEFUN([PHP_PROG_BISON], [
   AC_PROG_YACC
   if test "$YACC" = "bison -y"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-      set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'|tr -d a-z`
+      set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /'|tr -d a-z`
       if test "(" "${1}" = "1" -a "(" "${2}" = "28" -o "${2}" = "35" -o "${2}" = "75" -o "${2}" = "875" ")" ")" -o "(" "${1}" = "2" -a "(" "${2}" = "0" ")" ")"; then
         php_cv_bison_version="${1}.${2} (ok)"
       else
@@ -1981,7 +1981,7 @@ AC_DEFUN([PHP_PROG_LEX], [
 
   if test "$LEX" ;then
     AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
-      flexvers=`echo "" | $LEX -V -v --version 2>/dev/null | sed -e 's/^.* //' -e 's/\./ /g'`
+      flexvers=`echo "" | $LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //' -e 's/\./ /g'`
       if test ! -z "$flexvers"; then
         set $flexvers
         if test "${1}" != "2" -o "${2}" != "5" -o "${3}" != "4"; then
@@ -2426,6 +2426,10 @@ dnl
 dnl Generates the config.nice file
 dnl
 AC_DEFUN([PHP_CONFIG_NICE],[
+  AC_REQUIRE([AC_PROG_EGREP])
+  AC_REQUIRE([LT_AC_PROG_SED])
+  PHP_SUBST(EGREP)
+  PHP_SUBST(SED)
   test -f $1 && mv $1 $1.old
   rm -f $1.old
   cat >$1<<EOF
