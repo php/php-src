@@ -1565,7 +1565,7 @@ static int ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
 		}
 
-		if (!(*retval_ptr_ptr)->is_ref) {
+		if (IS_CONST == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
 				zend_error(E_STRICT, "Only variable references should be returned by reference");
@@ -1597,7 +1597,8 @@ return_by_value:
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 		} else if (!0) { /* Not a temp var */
-			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
+			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
 
 				ALLOC_ZVAL(ret);
@@ -4000,7 +4001,7 @@ static int ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
 		}
 
-		if (!(*retval_ptr_ptr)->is_ref) {
+		if (IS_TMP_VAR == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
 				zend_error(E_STRICT, "Only variable references should be returned by reference");
@@ -4032,7 +4033,8 @@ return_by_value:
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 		} else if (!1) { /* Not a temp var */
-			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
+			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
 
 				ALLOC_ZVAL(ret);
@@ -6989,7 +6991,7 @@ static int ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
 		}
 
-		if (!(*retval_ptr_ptr)->is_ref) {
+		if (IS_VAR == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
 				zend_error(E_STRICT, "Only variable references should be returned by reference");
@@ -7021,7 +7023,8 @@ return_by_value:
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 		} else if (!0) { /* Not a temp var */
-			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
+			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
 
 				ALLOC_ZVAL(ret);
@@ -18602,7 +18605,7 @@ static int ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
 		}
 
-		if (!(*retval_ptr_ptr)->is_ref) {
+		if (IS_CV == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
 				zend_error(E_STRICT, "Only variable references should be returned by reference");
@@ -18634,7 +18637,8 @@ return_by_value:
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 		} else if (!0) { /* Not a temp var */
-			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
+			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
 
 				ALLOC_ZVAL(ret);
@@ -30968,7 +30972,7 @@ static int ZEND_RETURN_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
 		}
 
-		if (!(*retval_ptr_ptr)->is_ref) {
+		if (opline->op1.op_type == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
 				zend_error(E_STRICT, "Only variable references should be returned by reference");
@@ -31000,7 +31004,8 @@ return_by_value:
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 		} else if (!IS_TMP_FREE(free_op1)) { /* Not a temp var */
-			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
+			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
 				zval *ret;
 
 				ALLOC_ZVAL(ret);
