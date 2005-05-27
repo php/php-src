@@ -4,51 +4,42 @@ PCRE LICENCE
 PCRE is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
+Release 5 of PCRE is distributed under the terms of the "BSD" licence, as
+specified below. The documentation for PCRE, supplied in the "doc"
+directory, is distributed under the same terms as the software itself.
+
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
 University of Cambridge Computing Service,
 Cambridge, England. Phone: +44 1223 334714.
 
-Copyright (c) 1997-2003 University of Cambridge
+Copyright (c) 1997-2004 University of Cambridge
+All rights reserved.
 
-Permission is granted to anyone to use this software for any purpose on any
-computer system, and to redistribute it freely, subject to the following
-restrictions:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-1. This software is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
 
-2. The origin of this software must not be misrepresented, either by
-   explicit claim or by omission. In practice, this means that if you use
-   PCRE in software that you distribute to others, commercially or
-   otherwise, you must put a sentence like this
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
 
-     Regular expression support is provided by the PCRE library package,
-     which is open source software, written by Philip Hazel, and copyright
-     by the University of Cambridge, England.
+    * Neither the name of the University of Cambridge nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
 
-   somewhere reasonably visible in your documentation and in any relevant
-   files or online help data or similar. A reference to the ftp site for
-   the source, that is, to
-
-     ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
-
-   should also be given in the documentation. However, this condition is not
-   intended to apply to whole chains of software. If package A includes PCRE,
-   it must acknowledge it, but if package B is software that includes package
-   A, the condition is not imposed on package B (unless it uses PCRE
-   independently).
-
-3. Altered versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-
-4. If PCRE is embedded in any software that is released under the GNU
-   General Purpose Licence (GPL), or Lesser General Purpose Licence (LGPL),
-   then the terms of that licence shall supersede any condition above with
-   which it is incompatible.
-
-The documentation for PCRE, supplied in the "doc" directory, is distributed
-under the same terms as the software itself.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 
 End
