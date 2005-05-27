@@ -2,6 +2,8 @@ dnl This file becomes configure.in for self-contained extensions.
 
 AC_INIT(config.m4)
 
+PHP_CONFIG_NICE(config.nice)
+
 AC_DEFUN([PHP_WITH_PHP_CONFIG],[
   AC_ARG_WITH(php-config,
 [  --with-php-config=PATH],[
@@ -40,8 +42,6 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
 dnl
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
-
-PHP_CONFIG_NICE(config.nice)
 
 AC_PROG_CC
 AC_PROG_CC_C_O
