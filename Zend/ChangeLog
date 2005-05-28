@@ -1,3 +1,14 @@
+2005-05-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug22836.phpt
+      tests/bug22836.phpt:
+      Fixed bug #22836 (returning reference to uninitialized variable)
+
 2005-05-26  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_0)
