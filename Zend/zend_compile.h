@@ -408,7 +408,7 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry 
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC);
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
-void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
+ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
 
 void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC);
