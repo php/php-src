@@ -4,8 +4,7 @@ dnl
 
 PHP_ARG_WITH(sybase,for Sybase support,
 [  --with-sybase[=DIR]     Include Sybase-DB support.  DIR is the Sybase home
-                          directory, defaults to /home/sybase.])
-
+                          directory, defaults to /home/sybase])
 
 if test "$PHP_SYBASE" != "no"; then
   if test "$PHP_SYBASE" = "yes"; then

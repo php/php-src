@@ -96,7 +96,7 @@ dnl to maintain consistency
 
 AC_ARG_WITH(tsrm-pth,
 [  --with-tsrm-pth[=pth-config]
-                          Use GNU Pth.],[
+                          Use GNU Pth],[
   TSRM_PTH=$withval
 ],[
   TSRM_PTH=no

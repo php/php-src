@@ -63,10 +63,10 @@ AC_DEFUN([PHP_LDAP_SASL_CHECKS], [
 ])
 
 PHP_ARG_WITH(ldap,for LDAP support,
-[  --with-ldap[=DIR]       Include LDAP support.])
+[  --with-ldap[=DIR]       Include LDAP support])
 
 PHP_ARG_WITH(ldap-sasl,for LDAP Cyrus SASL support,
-[  --with-ldap-sasl[=DIR]    LDAP: Include Cyrus SASL support.], no, no)
+[  --with-ldap-sasl[=DIR]    LDAP: Include Cyrus SASL support], no, no)
 
 if test "$PHP_LDAP" != "no"; then
 

@@ -8,40 +8,40 @@ dnl
 
 PHP_ARG_WITH(gd, for GD support,
 [  --with-gd[=DIR]         Include GD support where DIR is GD install prefix.
-                          If DIR is not set, the bundled GD library will be used.])
+                          If DIR is not set, the bundled GD library will be used])
 
 if test -z "$PHP_JPEG_DIR"; then
   PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
-  [  --with-jpeg-dir[=DIR]     GD: Set the path to libjpeg install prefix.], no, no)
+  [  --with-jpeg-dir[=DIR]     GD: Set the path to libjpeg install prefix], no, no)
 fi
 
 if test -z "$PHP_PNG_DIR"; then
   PHP_ARG_WITH(png-dir, for the location of libpng,
-  [  --with-png-dir[=DIR]      GD: Set the path to libpng install prefix.], no, no)
+  [  --with-png-dir[=DIR]      GD: Set the path to libpng install prefix], no, no)
 fi
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz, 
-  [  --with-zlib-dir[=DIR]     GD: Set the path to libz install prefix.], no, no)
+  [  --with-zlib-dir[=DIR]     GD: Set the path to libz install prefix], no, no)
 fi
 
 PHP_ARG_WITH(xpm-dir, for the location of libXpm,
-[  --with-xpm-dir[=DIR]      GD: Set the path to libXpm install prefix.], no, no)
+[  --with-xpm-dir[=DIR]      GD: Set the path to libXpm install prefix], no, no)
 
 PHP_ARG_WITH(ttf, for FreeType 1.x support,
 [  --with-ttf[=DIR]          GD: Include FreeType 1.x support], no, no)
   
 PHP_ARG_WITH(freetype-dir, for FreeType 2,
-[  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix.], no, no)
+[  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix], no, no)
 
 PHP_ARG_WITH(t1lib, for T1lib support,
 [  --with-t1lib[=DIR]        GD: Include T1lib support. T1lib version >= 5.0.0 required], no, no)
 
 PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
-[  --enable-gd-native-ttf    GD: Enable TrueType string function.], no, no)
+[  --enable-gd-native-ttf    GD: Enable TrueType string function], no, no)
 
 PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
-[  --enable-gd-jis-conv      GD: Enable JIS-mapped Japanese font support.], no, no)
+[  --enable-gd-jis-conv      GD: Enable JIS-mapped Japanese font support], no, no)
 
 dnl  
 dnl Checks for the configure options 

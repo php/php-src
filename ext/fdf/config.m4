@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(fdftk, for FDF support,
-[  --with-fdftk[=DIR]      Include FDF support.])
+[  --with-fdftk[=DIR]      Include FDF support])
 
 if test "$PHP_FDFTK" != "no"; then
 

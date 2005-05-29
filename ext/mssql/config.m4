@@ -4,7 +4,7 @@ dnl
 
 PHP_ARG_WITH(mssql,for MSSQL support via FreeTDS,
 [  --with-mssql[=DIR]      Include MSSQL-DB support.  DIR is the FreeTDS home
-                          directory, defaults to /usr/local/freetds.])
+                          directory, defaults to /usr/local/freetds])
 
 
 if test "$PHP_MSSQL" != "no"; then

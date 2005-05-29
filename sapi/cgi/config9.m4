@@ -12,9 +12,9 @@ AC_ARG_ENABLE(cgi,
 
 AC_ARG_ENABLE(force-cgi-redirect,
 [  --enable-force-cgi-redirect
-                          Enable the security check for internal server
-                          redirects.  You should use this if you are
-                          running the CGI version with Apache.],
+                            CGI: Enable the security check for internal server
+                            redirects.  You should use this if you are
+                            running the CGI version with Apache],
 [
   PHP_FORCE_CGI_REDIRECT=$enableval
 ],[
@@ -22,10 +22,10 @@ AC_ARG_ENABLE(force-cgi-redirect,
 ])
 
 AC_ARG_ENABLE(discard-path,
-[  --enable-discard-path   If this is enabled, the PHP CGI binary
-                          can safely be placed outside of the
-                          web tree and people will not be able
-                          to circumvent .htaccess security.],
+[  --enable-discard-path     CGI: If this is enabled, the PHP CGI binary
+                            can safely be placed outside of the
+                            web tree and people will not be able
+                            to circumvent .htaccess security],
 [
   PHP_DISCARD_PATH=$enableval
 ],[
@@ -33,8 +33,8 @@ AC_ARG_ENABLE(discard-path,
 ])
 
 AC_ARG_ENABLE(fastcgi,
-[  --enable-fastcgi        If this is enabled, the cgi module will
-                          be built with support for fastcgi also.],
+[  --enable-fastcgi          CGI: If this is enabled, the cgi module will
+                            be built with support for fastcgi also],
 [
   PHP_ENABLE_FASTCGI=$enableval
 ],[
@@ -42,9 +42,8 @@ AC_ARG_ENABLE(fastcgi,
 ])
 
 AC_ARG_ENABLE(path-info-check,
-[  --disable-path-info-check  
-                          If this is disabled, paths such as
-                          /info.php/test?a=b will fail to work.],
+[  --disable-path-info-check CGI: If this is disabled, paths such as
+                            /info.php/test?a=b will fail to work],
 [
   PHP_ENABLE_PATHINFO_CHECK=$enableval
 ],[

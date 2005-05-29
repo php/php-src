@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(xmlreader, for XMLReader support,
-[  --with-xmlreader        Include XMLReader support.])
+[  --with-xmlreader        Include XMLReader support])
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,

@@ -5,7 +5,7 @@ dnl vim:et:sw=2:ts=2:
 if test "$PHP_PDO" != "no"; then
 
 PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
-[  --with-pdo-sqlite             Include PDO sqlite 3 support],yes)
+[  --without-pdo-sqlite      PDO: sqlite 3 support],yes)
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 

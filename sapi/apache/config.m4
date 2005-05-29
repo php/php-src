@@ -21,7 +21,7 @@ fi
 AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]      Build shared Apache 1.x module. FILE is the optional
-                          pathname to the Apache apxs tool; defaults to "apxs".],[
+                          pathname to the Apache apxs tool [apxs]],[
   if test "$withval" = "yes"; then
     APXS=apxs
     $APXS -q CFLAGS >/dev/null 2>&1
@@ -121,7 +121,7 @@ if test "$PHP_SAPI" != "apache"; then
 AC_MSG_CHECKING(for Apache 1.x module support)
 AC_ARG_WITH(apache,
 [  --with-apache[=DIR]     Build Apache 1.x module. DIR is the top-level Apache
-                          build directory, defaults to /usr/local/apache.],[
+                          build directory [/usr/local/apache]],[
 
   APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php5.* sapi/apache/libphp5.module"
 
@@ -238,7 +238,7 @@ fi
 
 AC_MSG_CHECKING(for mod_charset compatibility option)
 AC_ARG_WITH(mod_charset,
-[  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
+[  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache)],
 [
   AC_MSG_RESULT(yes)
   AC_DEFINE(USE_TRANSFER_TABLES,1,[ ])

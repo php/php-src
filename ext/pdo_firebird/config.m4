@@ -5,8 +5,8 @@ dnl
 if test "$PHP_PDO" != "no"; then
 
 PHP_ARG_WITH(pdo-firebird,for Firebird support for PDO,
-[  --with-pdo-firebird[=DIR]  Include Firebird support for PDO.  DIR is the Firebird base
-                          install directory, defaults to /opt/firebird])
+[  --with-pdo-firebird[=DIR] PDO: Firebird support.  DIR is the Firebird base
+                            install directory, defaults to /opt/firebird])
 
 if test "$PHP_PDO_FIREBIRD" != "no"; then
   if test "$PHP_PDO_FIREBIRD" = "yes"; then

@@ -4,7 +4,7 @@ dnl
 
 PHP_ARG_WITH(xsl, for XSL support,
 [  --with-xsl[=DIR]        Include new XSL support (requires libxslt >= 1.0.18).
-                          DIR is the libxslt install directory.])
+                          DIR is the libxslt install directory])
 
 if test "$PHP_XSL" != "no"; then
 

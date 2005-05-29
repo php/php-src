@@ -505,7 +505,7 @@ AC_DEFUN([PHP_DBA_BUILTIN_INI],[
 ])
 
 AC_ARG_WITH(inifile,
-[  --with-inifile          DBA: Include INI support],[
+[  --with-inifile            DBA: Include INI support],[
   if test "$withval" != "no"; then
     PHP_DBA_BUILTIN_INI
   fi
@@ -526,7 +526,7 @@ dnl
 dnl FlatFile check must be the last one.
 dnl
 AC_ARG_WITH(flatfile,
-[  --with-flatfile         DBA: Include FlatFile support],[
+[  --with-flatfile           DBA: Include FlatFile support],[
   if test "$withval" != "no"; then
     PHP_DBA_BUILTIN_FLATFILE
   fi

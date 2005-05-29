@@ -23,7 +23,7 @@ AC_DEFUN([PHP_MSQL_VERSION],[
 
 PHP_ARG_WITH(msql,for mSQL support,
 [  --with-msql[=DIR]       Include mSQL support.  DIR is the mSQL base
-                          install directory, defaults to /usr/local/Hughes.])
+                          install directory, defaults to /usr/local/Hughes])
 
   if test "$PHP_MSQL" != "no"; then
     if test "$PHP_MSQL" = "yes"; then

@@ -4,8 +4,8 @@ dnl
 
 AC_MSG_CHECKING(for Apache 2.0 handler-module support via DSO through APXS)
 AC_ARG_WITH(apxs2,
-[  --with-apxs2[=FILE]     EXPERIMENTAL: Build shared Apache 2.0 Handler module. FILE is the optional
-                          pathname to the Apache apxs tool; defaults to "apxs".],[
+[  --with-apxs2[=FILE]     Build shared Apache 2.0 Handler module. FILE is the optional
+                          pathname to the Apache apxs tool [apxs]],[
   if test "$withval" = "yes"; then
     APXS=apxs
     $APXS -q CFLAGS >/dev/null 2>&1
@@ -61,7 +61,7 @@ AC_ARG_WITH(apxs2,
   if test "$APACHE_VERSION" -le 2000000; then
     AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropiate switch --with-apxs (without the 2)])
   elif test "$APACHE_VERSION" -lt 2000044; then
-    AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required.])
+    AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required])
   fi
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`

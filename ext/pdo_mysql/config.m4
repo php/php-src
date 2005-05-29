@@ -15,7 +15,7 @@ AC_DEFUN([PDO_MYSQL_LIB_CHK], [
 ])
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
-[  --with-pdo-mysql[=DIR]       Include MySQL support. DIR is the MySQL base directory.])
+[  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory])
 
 if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
@@ -40,7 +40,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   if test -z "$PDO_MYSQL_DIR"; then
     AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL.
-Note that the MySQL client library is not bundled anymore.])
+Note that the MySQL client library is not bundled anymore!])
   fi
 
   if test -x $PDO_MYSQL_CONFIG; then

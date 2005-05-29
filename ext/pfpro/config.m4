@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(pfpro, for Verisign Payflow Pro support,
-[  --with-pfpro[=DIR]      Include Verisign Payflow Pro support.])
+[  --with-pfpro[=DIR]      Include Verisign Payflow Pro support])
 
 if test "$PHP_PFPRO" != "no"; then
   PFPRO_LIB=libpfpro.so
