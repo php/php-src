@@ -1941,22 +1941,7 @@ dnl Search for bison and check it's version
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
   AC_PROG_YACC
-  if test "$YACC" = "bison -y"; then
-    AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-      set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /'|tr -d a-z`
-      if test "(" "${1}" = "1" -a "(" "${2}" = "28" -o "${2}" = "35" -o "${2}" = "75" -o "${2}" = "875" ")" ")" -o "(" "${1}" = "2" -a "(" "${2}" = "0" ")" ")"; then
-        php_cv_bison_version="${1}.${2} (ok)"
-      else
-        php_cv_bison_version=invalid
-      fi
-    ])
-  fi
-  case $php_cv_bison_version in
-    ""|invalid[)]
-      AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75, 1.875 or 2.0 if you want to regenerate the Zend/PHP parsers (found ${1}.${2}).])
-      YACC="exit 0;"
-      ;;
-  esac
+  LIBZEND_BISON_CHECK
   PHP_SUBST(YACC)
 ])
 

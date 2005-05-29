@@ -2,6 +2,31 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
+AC_DEFUN([LIBZEND_BISON_CHECK],[
+  # we only support certain bison versions
+  bison_version_list="1.28 1.35 1.75 2.0"
+
+  if test "$YACC" = "bison -y"; then
+    AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
+      set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /'|tr -d a-z`
+      bison_version="${1}.${2}"
+      php_cv_bison_version=invalid
+      for bison_check_version in $bison_version_list; do
+        if test "$bison_version" = "$bison_check_version"; then
+          php_cv_bison_version="$bison_check_version (ok)"
+        fi
+      done
+    ])
+  fi
+  case $php_cv_bison_version in
+    ""|invalid[)]
+      bison_msg="bison versions supported for regeneration of the Zend/PHP parsers: $bison_version_list  (found $bison_version)."
+      AC_MSG_WARN([$bison_msg])
+      YACC="exit 0;"
+      ;;
+  esac
+])
+
 AC_DEFUN([ZEND_FP_EXCEPT],[
   AC_CACHE_CHECK(whether fp_except is defined, ac_cv_type_fp_except,[
     AC_TRY_COMPILE([
