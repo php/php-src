@@ -1951,6 +1951,9 @@ dnl
 dnl Search for (f)lex and check it's version
 dnl
 AC_DEFUN([PHP_PROG_LEX], [
+  # we only support certain flex versions
+  flex_version_list="2.5.4"
+   
   AC_PROG_LEX
   if test -n "$LEX"; then
     AC_DECL_YYTEXT
@@ -1964,22 +1967,21 @@ AC_DEFUN([PHP_PROG_LEX], [
     LEX_CFLAGS="-DYY_USE_CONST"
   fi
 
-  if test "$LEX" ;then
+  if test "$LEX"; then
     AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
-      flexvers=`echo "" | $LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //' -e 's/\./ /g'`
-      if test ! -z "$flexvers"; then
-        set $flexvers
-        if test "${1}" != "2" -o "${2}" != "5" -o "${3}" != "4"; then
-          php_cv_flex_version=invalid
-        else
-          php_cv_flex_version="${1}.${2}.${3} (ok)"
+      flex_version=`$LEX -V -v --version 2>/dev/null | $SED -e 's/^.* //'`
+      php_cv_flex_version=invalid
+      for flex_check_version in $flex_version_list; do
+        if test "$flex_version" = "$flex_check_version"; then
+          php_cv_flex_version="$flex_check_version (ok)"
         fi
-      fi
+      done
     ])
   fi
   case $php_cv_flex_version in
     ""|invalid[)]
-      AC_MSG_WARN([You will need flex 2.5.4 if you want to regenerate Zend/PHP lexical parsers.])
+      flex_msg="flex versions supported for regeneration of the Zend/PHP parsers: $flex_version_list  (found $flex_version)."
+      AC_MSG_WARN([$flex_msg])
       LEX="exit 0;"
       ;;
   esac
