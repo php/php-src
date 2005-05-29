@@ -1,3 +1,14 @@
+2005-05-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h:
+      - Make zend_do_inheritance ZEND_API
+
+2005-05-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/pcre/config.w32:
+      Sync with config.m4 (missing MATCH_LIMIT broke the Win32 build).
+
 2005-05-27  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_5_0)
