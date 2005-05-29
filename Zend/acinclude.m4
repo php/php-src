@@ -4,7 +4,7 @@ dnl This file contains local autoconf functions.
 
 AC_DEFUN([LIBZEND_BISON_CHECK],[
   # we only support certain bison versions
-  bison_version_list="1.28 1.35 1.75 2.0"
+  bison_version_list="1.28 1.35 1.75 1.875 2.0"
 
   if test "$YACC"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
