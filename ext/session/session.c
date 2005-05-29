@@ -1462,12 +1462,24 @@ PHP_FUNCTION(session_id)
 }
 /* }}} */
 
-/* {{{ proto bool session_regenerate_id()
-   Update the current session id with a newly generated one. */
+/* {{{ proto bool session_regenerate_id([bool delete_old_session])
+   Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
+	zend_bool del_ses = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &del_ses) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
 	if (PS(session_status) == php_session_active) {
-		if (PS(id)) efree(PS(id));
+		if (PS(id)) {
+			if (del_ses && PS(mod)->s_destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session object destruction failed");
+				RETURN_FALSE;
+			}
+			efree(PS(id));
+		}
 	
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 
