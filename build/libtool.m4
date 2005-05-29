@@ -45,29 +45,29 @@ dnl immediately, otherwise, hook it in at the end of AC_PROG_CXX.
     [define([AC_PROG_CXX], defn([AC_PROG_CXX])[AC_LIBTOOL_CXX
   ])])
 
-#dnl And a similar setup for Fortran 77 support
-#  AC_PROVIDE_IFELSE([AC_PROG_F77],
-#    [AC_LIBTOOL_F77],
-#    [define([AC_PROG_F77], defn([AC_PROG_F77])[AC_LIBTOOL_F77
-#])])
+dnl dnl And a similar setup for Fortran 77 support
+dnl   AC_PROVIDE_IFELSE([AC_PROG_F77],
+dnl     [AC_LIBTOOL_F77],
+dnl     [define([AC_PROG_F77], defn([AC_PROG_F77])[AC_LIBTOOL_F77
+dnl ])])
 
-#dnl Quote A][M_PROG_GCJ so that aclocal doesn't bring it in needlessly.
-#dnl If either AC_PROG_GCJ or A][M_PROG_GCJ have already been expanded, run
-#dnl AC_LIBTOOL_GCJ immediately, otherwise, hook it in at the end of both.
-#  AC_PROVIDE_IFELSE([AC_PROG_GCJ],
-#    [AC_LIBTOOL_GCJ],
-#    [AC_PROVIDE_IFELSE([A][M_PROG_GCJ],
-#      [AC_LIBTOOL_GCJ],
-#      [AC_PROVIDE_IFELSE([LT_AC_PROG_GCJ],
-#	[AC_LIBTOOL_GCJ],
-#      [ifdef([AC_PROG_GCJ],
-#	     [define([AC_PROG_GCJ], defn([AC_PROG_GCJ])[AC_LIBTOOL_GCJ])])
-#       ifdef([A][M_PROG_GCJ],
-#	     [define([A][M_PROG_GCJ], defn([A][M_PROG_GCJ])[AC_LIBTOOL_GCJ])])
-#       ifdef([LT_AC_PROG_GCJ],
-#	     [define([LT_AC_PROG_GCJ],
-#		defn([LT_AC_PROG_GCJ])[AC_LIBTOOL_GCJ])])])])
-#])
+dnl dnl Quote A][M_PROG_GCJ so that aclocal doesn't bring it in needlessly.
+dnl dnl If either AC_PROG_GCJ or A][M_PROG_GCJ have already been expanded, run
+dnl dnl AC_LIBTOOL_GCJ immediately, otherwise, hook it in at the end of both.
+dnl   AC_PROVIDE_IFELSE([AC_PROG_GCJ],
+dnl     [AC_LIBTOOL_GCJ],
+dnl     [AC_PROVIDE_IFELSE([A][M_PROG_GCJ],
+dnl       [AC_LIBTOOL_GCJ],
+dnl       [AC_PROVIDE_IFELSE([LT_AC_PROG_GCJ],
+dnl 	[AC_LIBTOOL_GCJ],
+dnl       [ifdef([AC_PROG_GCJ],
+dnl 	     [define([AC_PROG_GCJ], defn([AC_PROG_GCJ])[AC_LIBTOOL_GCJ])])
+dnl        ifdef([A][M_PROG_GCJ],
+dnl 	     [define([A][M_PROG_GCJ], defn([A][M_PROG_GCJ])[AC_LIBTOOL_GCJ])])
+dnl        ifdef([LT_AC_PROG_GCJ],
+dnl 	     [define([LT_AC_PROG_GCJ],
+dnl 		defn([LT_AC_PROG_GCJ])[AC_LIBTOOL_GCJ])])])])
+dnl ])
 ])# AC_PROG_LIBTOOL
 
 
@@ -76,8 +76,8 @@ dnl immediately, otherwise, hook it in at the end of AC_PROG_CXX.
 AC_DEFUN([_AC_PROG_LIBTOOL],
 [AC_REQUIRE([AC_LIBTOOL_SETUP])dnl
 AC_BEFORE([$0],[AC_LIBTOOL_CXX])dnl
-#AC_BEFORE([$0],[AC_LIBTOOL_F77])dnl
-#AC_BEFORE([$0],[AC_LIBTOOL_GCJ])dnl
+dnl AC_BEFORE([$0],[AC_LIBTOOL_F77])dnl
+dnl AC_BEFORE([$0],[AC_LIBTOOL_GCJ])dnl
 
 # This can be used to rebuild libtool when needed
 LIBTOOL_DEPS="$ac_aux_dir/ltmain.sh"
