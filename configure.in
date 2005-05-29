@@ -23,6 +23,9 @@ dnl ## In diversion 5 we check which extensions should be compiled.
 dnl ## All of these are normally in the extension directories.
 dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
 
+dnl include Zend specific macro definitions first
+dnl -------------------------------------------------------------------------
+sinclude(Zend/acinclude.m4)
 
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
@@ -192,7 +195,6 @@ esac
 dnl Include Zend and TSRM configurations.
 dnl -------------------------------------------------------------------------
 
-sinclude(Zend/acinclude.m4)
 sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
 
