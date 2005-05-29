@@ -7,7 +7,7 @@ AC_DEFUN([PHP_PGSQL_CHECK_FUNCTIONS],[
 
 PHP_ARG_WITH(pgsql,for PostgreSQL support,
 [  --with-pgsql[=DIR]      Include PostgreSQL support.  DIR is the PostgreSQL
-                          base install directory or the path to pg_config.])
+                          base install directory or the path to pg_config])
 
 if test "$PHP_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)

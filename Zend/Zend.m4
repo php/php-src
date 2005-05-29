@@ -122,8 +122,8 @@ AC_ARG_ENABLE(debug,
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
 PHP_ARG_WITH(zend-vm,[virtual machine dispatch method],
-[  --with-zend-vm=TYPE     Sets virtual machine dispatch methos. Type is
-                          one of "CALL" (default), "SWITCH" or "GOTO"], CALL, no)
+[  --with-zend-vm=TYPE     Set virtual machine dispatch method. Type is
+                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]], CALL, no)
 
 case $PHP_ZEND_VM in
   SWITCH)
@@ -138,7 +138,7 @@ case $PHP_ZEND_VM in
 esac
 
 AC_ARG_ENABLE(maintainer-zts,
-[  --enable-maintainer-zts Enable thread safety - for code maintainers only],[
+[  --enable-maintainer-zts Enable thread safety - for code maintainers only!!],[
   ZEND_MAINTAINER_ZTS=$enableval
 ],[
   ZEND_MAINTAINER_ZTS=no
@@ -146,21 +146,21 @@ AC_ARG_ENABLE(maintainer-zts,
 
 AC_ARG_ENABLE(inline-optimization,
 [  --disable-inline-optimization 
-                          If building zend_execute.lo fails, try this switch.],[
+                          If building zend_execute.lo fails, try this switch],[
   ZEND_INLINE_OPTIMIZATION=$enableval
 ],[
   ZEND_INLINE_OPTIMIZATION=yes
 ])
 
 AC_ARG_ENABLE(memory-limit,
-[  --enable-memory-limit   Compile with memory limit support. ], [
+[  --enable-memory-limit   Compile with memory limit support], [
   ZEND_MEMORY_LIMIT=$enableval
 ],[
   ZEND_MEMORY_LIMIT=no
 ])
 
 AC_ARG_ENABLE(zend-multibyte,
-[  --enable-zend-multibyte Compile with zend multibyte support. ], [
+[  --enable-zend-multibyte Compile with zend multibyte support], [
   ZEND_MULTIBYTE=$enableval
 ],[
   ZEND_MULTIBYTE=no

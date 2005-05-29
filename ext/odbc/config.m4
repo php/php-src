@@ -93,7 +93,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Adabas support)
 AC_ARG_WITH(adabas,
 [  --with-adabas[=DIR]     Include Adabas D support.  DIR is the Adabas base
-                          install directory, defaults to /usr/local.],
+                          install directory [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -125,7 +125,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for SAP DB support)
 AC_ARG_WITH(sapdb,
 [  --with-sapdb[=DIR]      Include SAP DB support.  DIR is SAP DB base
-                          install directory, defaults to /usr/local.],
+                          install directory [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -228,8 +228,8 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for ODBCRouter.com support)
 AC_ARG_WITH(ODBCRouter,
-[  --with-ODBCRouter[=DIR]   Include ODBCRouter.com support.  DIR is ODBCRouter base
-                             install directory, defaults to /usr.],
+[  --with-ODBCRouter[=DIR] Include ODBCRouter.com support.  DIR is ODBCRouter base
+                          install directory [/usr]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -288,9 +288,8 @@ AC_MSG_CHECKING(for Empress local access support)
 AC_ARG_WITH(empress-bcs,
 [  --with-empress-bcs[=DIR]
                           Include Empress Local Access support.  DIR is the 
-                          Empress base install directory, defaults to 
-                          \$EMPRESSPATH.  From PHP 4, this option only supports
-                          Empress Version 8.60 and above.],
+                          Empress base install directory. (Empress Version >= 8.60 required)
+                          [\$EMPRESSPATH]],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
@@ -335,7 +334,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Birdstep support)
 AC_ARG_WITH(birdstep,
 [  --with-birdstep[=DIR]   Include Birdstep support.  DIR is the Birdstep base
-                          install directory, defaults to /usr/local/birdstep.],
+                          install directory [/usr/local/birdstep]],
 [
   PHP_WITH_SHARED
 
@@ -427,7 +426,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for iODBC support)
 AC_ARG_WITH(iodbc,
 [  --with-iodbc[=DIR]      Include iODBC support.  DIR is the iODBC base
-                          install directory, defaults to /usr/local.],
+                          install directory [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -455,8 +454,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
 AC_ARG_WITH(esoob,
 [  --with-esoob[=DIR]      Include Easysoft OOB support. DIR is the OOB base
-                          install directory,
-                          defaults to /usr/local/easysoft/oob/client.],
+                          install directory [/usr/local/easysoft/oob/client]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -483,7 +481,7 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for unixODBC support)
 AC_ARG_WITH(unixODBC,
 [  --with-unixODBC[=DIR]   Include unixODBC support.  DIR is the unixODBC base
-                          install directory, defaults to /usr/local.],
+                          install directory [/usr/local]],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then
@@ -512,7 +510,7 @@ AC_ARG_WITH(dbmaker,
 [  --with-dbmaker[=DIR]    Include DBMaker support.  DIR is the DBMaker base
                           install directory, defaults to where the latest 
                           version of DBMaker is installed (such as
-                          /home/dbmaker/3.6).],
+                          /home/dbmaker/3.6)],
 [
   PHP_WITH_SHARED
   if test "$withval" = "yes"; then

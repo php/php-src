@@ -2,7 +2,8 @@ dnl ## $Id$ -*- sh -*-
 
 AC_MSG_CHECKING(for Continuity support)
 AC_ARG_WITH(continuity,
-[  --with-continuity=DIR        Specify path to the installed Continuity Server],[
+[  --with-continuity=DIR   Build PHP as Continuity Server module. 
+                          DIR is path to the installed Continuity Server root],[
   PHP_CONTINUITY=$withval
 ],[
   PHP_CONTINUITY=no

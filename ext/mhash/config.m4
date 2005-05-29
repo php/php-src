@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(mhash, for mhash support,
-[  --with-mhash[=DIR]      Include mhash support.])
+[  --with-mhash[=DIR]      Include mhash support])
 
 if test "$PHP_MHASH" != "no"; then
   for i in $PHP_MHASH /usr/local /usr /opt/mhash; do

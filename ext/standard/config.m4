@@ -216,7 +216,7 @@ AC_FLUSH_IO
 divert(5)dnl
 
 AC_ARG_WITH(regex,
-[  --with-regex=TYPE       regex library type: system, apache, php. Default: php
+[  --with-regex=TYPE       regex library type: system, apache, php. [TYPE=php]
                           WARNING: Do NOT use unless you know what you are doing!],
 [
   case $withval in 

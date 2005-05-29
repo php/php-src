@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(sysvsem,whether to enable System V semaphore support,
-[  --enable-sysvsem        Enable System V semaphore support.])
+[  --enable-sysvsem        Enable System V semaphore support])
 
 if test "$PHP_SYSVSEM" != "no"; then
  PHP_NEW_EXTENSION(sysvsem, sysvsem.c, $ext_shared)

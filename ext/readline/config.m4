@@ -3,10 +3,10 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(libedit,for libedit readline replacement, 
-[  --with-libedit[=DIR]    Include libedit readline replacement (CLI/CGI only).])
+[  --with-libedit[=DIR]    Include libedit readline replacement (CLI/CGI only)])
 
 PHP_ARG_WITH(readline,for readline support,
-[  --with-readline[=DIR]   Include readline support (CLI/CGI only).])
+[  --with-readline[=DIR]   Include readline support (CLI/CGI only)])
 
 if test "$PHP_READLINE" != "no"; then
   for i in $PHP_READLINE /usr/local /usr; do

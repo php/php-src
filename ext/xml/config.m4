@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(xml,whether to enable XML support,
-[  --disable-xml           Disable XML support.], yes)
+[  --disable-xml           Disable XML support], yes)
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,

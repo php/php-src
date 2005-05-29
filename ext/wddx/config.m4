@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(wddx,whether to enable WDDX support,
-[  --enable-wddx           Enable WDDX support.])
+[  --enable-wddx           Enable WDDX support])
 
 if test "$PHP_WDDX" != "no"; then
   if test "$ext_shared" != "yes" && test "$enable_xml" = "no"; then

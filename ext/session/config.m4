@@ -6,7 +6,7 @@ PHP_ARG_ENABLE(session, whether to enable PHP sessions,
 [  --disable-session       Disable session support], yes)
 
 PHP_ARG_WITH(mm,for mm support,
-[  --with-mm[=DIR]         Include mm support for session storage], no, no)
+[  --with-mm[=DIR]           SESSION: Include mm support for session storage], no, no)
 
 if test "$PHP_SESSION" != "no"; then
   PHP_PWRITE_TEST

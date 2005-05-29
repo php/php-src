@@ -4,27 +4,22 @@ dnl vim:et:sw=2:ts=2:
 
 if test "$PHP_PDO" != "no"; then
 
-AC_DEFUN([PDO_ODBC_HELP_TEXT], [[
- --with-pdo-odbc=flavour,dir  Add support for "flavour" ODBC drivers,
-                              looking for include and lib dirs under "dir"
-         
-        flavour can be one of:
-           ibm-db2, unixODBC, generic
+define([PDO_ODBC_HELP_TEXT],[[
+                            include and lib dirs are looked under 'dir'.
+                            'flavour' can be one of:  ibm-db2, unixODBC, generic
+                            If ',dir' part is omitted, default for the flavour 
+                            you have selected will used. e.g.:
+                              --with-pdo-odbc=unixODBC
+                            will check for unixODBC under /usr/local. You may attempt 
+                            to use an otherwise unsupported driver using the \"generic\" 
+                            flavour.  The syntax for generic ODBC support is:
+                              --with-pdo-odbc=generic,dir,ldflags,cflags
+                            This extension will always be created as a shared extension
+                            named pdo_odbc.so]])
 
-        You may omit the ,dir part to use a reasonable default for
-        the flavour you have selected. e.g.:
-            --with-pdo-odbc=unixODBC
-        will check for unixODBC under /usr/local
-
-        You may attempt to use an otherwise unsupported driver using
-        the generic flavour.  The syntax for generic ODBC support is:
-            --with-pdo-odbc=generic,dir,ldflags,cflags
-
-        This extension will always be created as a shared extension
-        named pdo_odbc.so
-]])
-
-PHP_ARG_WITH(pdo-odbc,  ODBC v3 driver for PDO, PDO_ODBC_HELP_TEXT)
+PHP_ARG_WITH(pdo-odbc, for ODBC v3 support for PDO,
+[  --with-pdo-odbc=flavour,dir
+                            PDO: Support for 'flavour' ODBC driver.]PDO_ODBC_HELP_TEXT)
 
 AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
   if test -f $PDO_ODBC_INCDIR/$1 ; then
@@ -33,7 +28,7 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
 ])
                                   
 if test "$PHP_PDO_ODBC" != "no"; then
-  AC_MSG_CHECKING(which ODBC flavour you want)
+  AC_MSG_CHECKING([for selected PDO ODBC flavour])
 
   pdo_odbc_flavour=`echo $withval | cut -d, -f1`
   pdo_odbc_dir=`echo $withval | cut -d, -f2`
@@ -68,9 +63,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
         ;;
 
       *)
-        AC_MSG_ERROR(Unknown ODBC flavour $pdo_odbc_flavour
-PDO_ODBC_HELP_TEXT      
-)
+        AC_MSG_ERROR([Unknown ODBC flavour $pdo_odbc_flavour]PDO_ODBC_HELP_TEXT)
         ;;
   esac
 

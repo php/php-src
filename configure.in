@@ -602,7 +602,7 @@ PHP_CONFIGURE_PART(General settings)
 PHP_HELP_SEPARATOR([General settings:])
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
-[  --enable-debug          Compile with debugging symbols.], no, no)
+[  --enable-debug          Compile with debugging symbols], no, no)
 
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
@@ -613,8 +613,8 @@ else
 fi
 
 PHP_ARG_WITH(layout,[layout of installed files],
-[  --with-layout=TYPE      Sets how installed files will be laid out.  Type is
-                          one of "PHP" (default) or "GNU"], PHP, no)
+[  --with-layout=TYPE      Set how installed files will be laid out.  Type is
+                          one of "PHP" or "GNU" [TYPE=PHP]], PHP, no)
 
 case $PHP_LAYOUT in
   GNU)
@@ -626,9 +626,9 @@ case $PHP_LAYOUT in
 esac
 
 PHP_ARG_WITH(config-file-path,[path to configuration file],
-[  --with-config-file-path=PATH  
-                          Sets the path in which to look for php.ini,
-                          defaults to PREFIX/lib], DEFAULT, no)
+[  --with-config-file-path=PATH
+                          Set the path in which to look for php.ini
+                          [PREFIX/lib]], DEFAULT, no)
 
 if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   case $PHP_LAYOUT in
@@ -650,7 +650,7 @@ fi
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 PHP_ARG_ENABLE(safe-mode, whether to enable safe mode by default,
-[  --enable-safe-mode      Enable safe mode by default.], no, no)
+[  --enable-safe-mode      Enable safe mode by default], no, no)
 
 if test "$PHP_SAFE_MODE" = "yes"; then
   AC_DEFINE(PHP_SAFE_MODE,1,[ ])
@@ -660,8 +660,8 @@ fi
 
 AC_MSG_CHECKING([for safe mode exec dir])
 AC_ARG_WITH(exec-dir,
-[  --with-exec-dir[=DIR]   Only allow executables in DIR when in safe mode
-                          defaults to /usr/local/php/bin],
+[  --with-exec-dir[=DIR]   Only allow executables in DIR under safe-mode
+                          [/usr/local/php/bin]],
 [
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
@@ -681,7 +681,7 @@ AC_ARG_WITH(exec-dir,
 ])
 
 PHP_ARG_ENABLE(sigchild,whether to enable PHP's own SIGCHLD handler,
-[  --enable-sigchild       Enable PHP's own SIGCHLD handler.], no, no)
+[  --enable-sigchild       Enable PHP's own SIGCHLD handler], no, no)
 
 if test "$PHP_SIGCHILD" = "yes"; then
   AC_DEFINE(PHP_SIGCHILD, 1, [ ])
@@ -715,7 +715,7 @@ if test "$PHP_LIBGCC" = "yes"; then
 fi
 
 PHP_ARG_ENABLE(short-tags,whether to enable short tags by default,
-[  --disable-short-tags    Disable the short-form <? start tag by default.],yes, no)
+[  --disable-short-tags    Disable the short-form <? start tag by default],yes, no)
 
 if test "$PHP_SHORT_TAGS" = "yes"; then
   AC_DEFINE(DEFAULT_SHORT_OPEN_TAG,"1",[ ])
@@ -794,7 +794,7 @@ dnl Check if all enabled by default extensions should be disabled
 dnl
 
 AC_ARG_ENABLE(all,
-[ --disable-all   Disable all extensions enabled by default.
+[ --disable-all   Disable all extensions which are enabled by default
 ], [
   PHP_ENABLE_ALL=$enableval
 ])
@@ -862,7 +862,7 @@ if test "$PHP_SAPI_CLI" = "no"; then
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR (default PREFIX/lib/php)
+[  --with-pear=DIR         Install PEAR in DIR [PREFIX/lib/php]
   --without-pear          Do not install PEAR], DEFAULT, yes)
 
 if test "$PHP_PEAR" != "no"; then
@@ -976,7 +976,7 @@ datadir=`eval echo $datadir`
 
 dnl Build extension directory path
 
-ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
+ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|$SED 's/#define ZEND_MODULE_API_NO //'`
 
 if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO

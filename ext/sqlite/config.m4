@@ -3,13 +3,13 @@ dnl config.m4 for extension sqlite
 dnl vim:et:ts=2:sw=2
 
 PHP_ARG_WITH(sqlite, for sqlite support,
-[  --without-sqlite      Do not include sqlite support.
+[  --without-sqlite        Do not include sqlite support.
                           Use --with-sqlite=DIR to specify DIR where
                           Sqlite include and library files are located,
                           if not using bundled library.], yes)
 
 PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: ISO-8859-1),
-[  --enable-sqlite-utf8    Enable UTF-8 support for SQLite], no, no)
+[  --enable-sqlite-utf8      SQLite: Enable UTF-8 support for SQLite], no, no)
 
 if test "$PHP_SQLITE" != "no"; then
   if test "$PHP_PDO" != "no"; then

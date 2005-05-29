@@ -6,7 +6,7 @@ RESULT=no
 AC_MSG_CHECKING(for Roxen/Pike support)
 AC_ARG_WITH(roxen, 
 [  --with-roxen=DIR        Build PHP as a Pike module. DIR is the base Roxen
-                          directory, normally /usr/local/roxen/server.],
+                          directory, normally /usr/local/roxen/server],
 [
 	if test ! -d $withval ; then
 		AC_MSG_ERROR(You did not specify a directory)
@@ -44,7 +44,7 @@ if test "$RESULT" != "no" ; then
  RESULT=no
  AC_MSG_CHECKING(if Roxen should use ZTS)
  AC_ARG_ENABLE(roxen-zts, 
- [  --enable-roxen-zts      Build the Roxen module using Zend Thread Safety.],
+ [  --enable-roxen-zts      Build the Roxen module using Zend Thread Safety],
  [
  	PHP_BUILD_THREAD_SAFE
 	AC_DEFINE(ROXEN_USE_ZTS,1,[Whether to use Roxen in ZTS mode])

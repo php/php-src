@@ -8,9 +8,8 @@ AC_DEFUN([PHP_PGSQL_CHECK_FUNCTIONS],[
 ])
 
 PHP_ARG_WITH(pdo-pgsql,for PostgreSQL support for PDO,
-[  --with-pdo-pgsql[=DIR]       Include PDO PostgreSQL support.  DIR
-                               is the PostgreSQL base install directory
-                               or the path to pg_config.])
+[  --with-pdo-pgsql[=DIR]    PDO: PostgreSQL support.  DIR is the PostgreSQL base
+                            install directory or the path to pg_config])
 
 if test "$PHP_PDO_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)

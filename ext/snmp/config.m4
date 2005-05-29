@@ -3,10 +3,10 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(snmp,for SNMP support,
-[  --with-snmp[=DIR]       Include SNMP support.])
+[  --with-snmp[=DIR]       Include SNMP support])
 
 PHP_ARG_WITH(openssl-dir,OpenSSL dir for SNMP,
-[  --with-openssl-dir[=DIR]  SNMP: openssl install prefix.], no, no)
+[  --with-openssl-dir[=DIR]  SNMP: openssl install prefix], no, no)
 
 if test "$PHP_SNMP" != "no"; then
 
@@ -123,10 +123,9 @@ if test "$PHP_SNMP" != "no"; then
   PHP_SUBST(SNMP_SHARED_LIBADD)
 fi
 
-
 AC_MSG_CHECKING(whether to enable UCD SNMP hack)
 AC_ARG_ENABLE(ucd-snmp-hack,
-[  --enable-ucd-snmp-hack  Enable UCD SNMP hack],[
+[  --enable-ucd-snmp-hack  SNMP: Enable UCD SNMP hack],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(UCD_SNMP_HACK, 1, [ ])
     AC_MSG_RESULT(yes)

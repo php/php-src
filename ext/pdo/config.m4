@@ -28,7 +28,7 @@ Once you've upgraded, please re-try your PDO install.
 ])
 
 PHP_ARG_ENABLE(pdo, whether to enable PDO support,
-[  --enable-pdo=yes         Enable PHP Data Objects support (recommended)], yes)
+[  --disable-pdo           Disable PHP Data Objects support], yes)
 
 if test "$PHP_PDO" != "no"; then
 

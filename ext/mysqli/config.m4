@@ -4,10 +4,10 @@ dnl config.m4 for extension mysqli
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]    Include MySQLi support. FILE is the optional pathname 
-                        to mysql_config.])
+                          to mysql_config])
 
 PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
-[  --enable-embedded-mysqli  MYSQLi: Enable embedded support.], no, no)
+[  --enable-embedded-mysqli  MYSQLi: Enable embedded support], no, no)
 
 if test "$PHP_MYSQLI" != "no"; then
 

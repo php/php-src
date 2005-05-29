@@ -40,15 +40,15 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.])
+[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=DIR]   MySQL: Location of the MySQL unix socket pointer.
-                            If unspecified, the default locations are searched.], no, no)
+                            If unspecified, the default locations are searched], no, no)
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz, 
-  [  --with-zlib-dir[=DIR]     MySQL: Set the path to libz install prefix.], no, no)
+  [  --with-zlib-dir[=DIR]     MySQL: Set the path to libz install prefix], no, no)
 fi
 
 
@@ -80,7 +80,7 @@ if test "$PHP_MYSQL" != "no"; then
 
   if test -z "$MYSQL_DIR"; then
     AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL.
-Note that the MySQL client library is not bundled anymore.])
+Note that the MySQL client library is not bundled anymore!])
   fi
 
   for i in $PHP_LIBDIR $PHP_LIBDIR/mysql; do
@@ -89,7 +89,7 @@ Note that the MySQL client library is not bundled anymore.])
 
   if test -z "$MYSQL_LIB_DIR"; then
     AC_MSG_ERROR([Cannot find libmysqlclient under $MYSQL_DIR.
-Note that the MySQL client library is not bundled anymore.])
+Note that the MySQL client library is not bundled anymore!])
   fi
 
   PHP_CHECK_LIBRARY(mysqlclient, mysql_close, [ ],

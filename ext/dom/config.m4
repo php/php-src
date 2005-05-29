@@ -3,11 +3,11 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(dom, whether to enable DOM support,
-[  --disable-dom           Disable new DOM support.], yes)
+[  --disable-dom           Disable new DOM support], yes)
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir[=DIR]   DOM: libxml2 install prefix.], no, no)
+  [  --with-libxml-dir[=DIR]   DOM: libxml2 install prefix], no, no)
 fi
 
 if test "$PHP_DOM" != "no"; then

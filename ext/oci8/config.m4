@@ -87,7 +87,7 @@ if test "$PHP_OCI8" = "no"; then
                           Oracle Instant Client. DIR is the directory with the
                           Instant Client libraries. On Linux it will default to
                           /usr/lib/oracle/<most_recent_version>/client/lib
-                          Other platforms will need to have it explicitly specified.])
+                          Other platforms will need to have it explicitly specified])
 else 
   PHP_OCI8_INSTANT_CLIENT="no";
 fi

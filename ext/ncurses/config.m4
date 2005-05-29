@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(ncurses, for ncurses support,
-[  --with-ncurses[=DIR]    Include ncurses support (CLI/CGI only).])
+[  --with-ncurses[=DIR]    Include ncurses support (CLI/CGI only)])
 
 if test "$PHP_NCURSES" != "no"; then
 
