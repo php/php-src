@@ -1,3 +1,101 @@
+2005-05-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in
+      TSRM/tsrm.m4
+      ZendEngine2/Zend.m4
+      ext/bcmath/config.m4
+      ext/dba/config.m4
+      ext/dbase/config.m4
+      ext/dom/config.m4
+      ext/fbsql/config.m4
+      ext/fdf/config.m4
+      ext/filepro/config.m4
+      ext/gd/config.m4
+      ext/gettext/config.m4
+      ext/imap/config.m4
+      ext/informix/config.m4
+      ext/ldap/config.m4
+      ext/mcrypt/config.m4
+      ext/mcve/config.m4
+      ext/mhash/config.m4
+      ext/msql/config.m4
+      ext/mssql/config.m4
+      ext/mysql/config.m4
+      ext/mysqli/config.m4
+      ext/ncurses/config.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/oracle/config.m4
+      ext/ovrimos/config.m4
+      ext/pfpro/config.m4
+      ext/pgsql/config.m4
+      ext/pspell/config.m4
+      ext/readline/config.m4
+      ext/recode/config.m4
+      ext/session/config.m4
+      ext/snmp/config.m4
+      ext/sqlite/config.m4
+      ext/standard/config.m4
+      ext/sybase/config.m4
+      ext/sybase_ct/config.m4
+      ext/sysvsem/config.m4
+      ext/sysvshm/config.m4
+      ext/wddx/config.m4
+      ext/xml/config.m4
+      ext/xmlrpc/config.m4
+      ext/xsl/config.m4
+      ext/zlib/config0.m4
+      sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4
+      sapi/apache_hooks/config.m4
+      sapi/caudium/config.m4
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4
+      sapi/isapi/config.m4
+      sapi/roxen/config.m4:
+      - Unify the "configure --help" texts
+
+    * ext/mbstring/config.m4:
+      Fix VPATH build
+
+2005-05-29  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * acinclude.m4:
+      simplify flex version test
+
+    * ZendEngine2/acinclude.m4:
+      forgot to re-add 1.875 as a valid bison version after testing
+
+    * ZendEngine2/acinclude.m4:
+      bison may be installed under a different executable name, e.g.
+      
+        YACC="bison-1.75" configure ...
+      
+      removing the check for "bison -y" allows for this
+      the check was redundant anyway as the following one filters
+      for "GNU Bison" in the --version output
+
+    * acinclude.m4
+      configure.in
+      ZendEngine2/Zend.m4
+      ZendEngine2/acinclude.m4:
+      avoid code duplication in bison version test
+
+    * acinclude.m4:
+      added .cxx extension for C++ for completeness reasons
+
+2005-05-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/session/session.c:
+      Added an optional remove old session parameter to session_regenerate_id().
+
+2005-05-29  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * build/libtool.m4:
+      m4 comments start with 'dnl', *not* with '#'
+
 2005-05-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c

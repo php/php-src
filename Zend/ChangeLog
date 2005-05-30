@@ -1,3 +1,26 @@
+2005-05-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Zend.m4:
+      - Unify the "configure --help" texts
+
+2005-05-29  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * acinclude.m4:
+      forgot to re-add 1.875 as a valid bison version after testing
+
+    * acinclude.m4:
+      bison may be installed under a different executable name, e.g.
+      
+        YACC="bison-1.75" configure ...
+      
+      removing the check for "bison -y" allows for this
+      the check was redundant anyway as the following one filters
+      for "GNU Bison" in the --version output
+
+    * Zend.m4
+      acinclude.m4:
+      avoid code duplication in bison version test
+
 2005-05-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_compile.c
