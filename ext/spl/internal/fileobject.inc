@@ -73,8 +73,9 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/**
-	 * @$delimiter  character used as field separator
-	 * @enclosure   end of 
+	 * @param delimiter  character used as field separator
+	 * @param enclosure  end of 
+	 * @return array containing read data
 	 */
 	function fgetcsv($delimiter = ';', $enclosure = '')
 	{
@@ -110,8 +111,10 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/**
-	 * @pos new file position
-	 * @whence seek method (SEEK_SET, SEEK_CUR, SEEK_END)
+	 * @param pos new file position
+	 * @param whence seek method (SEEK_SET, SEEK_CUR, SEEK_END)
+	 * @return Upon success, returns 0; otherwise, returns -1. Note that 
+	 *         seeking past EOF is not considered an error.
 	 */
 	function fseek($pos, $whence = SEEK_SET)
 	{
@@ -140,7 +143,7 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/** Get a line from the file and strip HTML tags
-	 * @param $allow_tags tags to keep in the string
+	 * @param $allowable_tags tags to keep in the string
 	 */
 	function fgetss($allowable_tags = NULL)
 	{
@@ -159,7 +162,7 @@ class FileObject implements RecursiveIterator, SeekableIterator
 
 	/**
 	 * @param $str to write
-	 * @param $lngth maximum line length to write
+	 * @param $length maximum line length to write
 	 */
 	function fwrite($str, $length = NULL)
 	{
@@ -175,7 +178,7 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/**
-	 * @param new size to truncate file to
+	 * @param $size new size to truncate file to
 	 */
 	function ftruncate($size)
 	{
