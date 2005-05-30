@@ -61,7 +61,7 @@ extern pdo_driver_t pdo_sqlite2_driver;
 
 ZEND_DECLARE_MODULE_GLOBALS(sqlite)
 
-#if HAVE_PHP_SESSION
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 extern ps_module ps_mod_sqlite;
 #define ps_sqlite_ptr &ps_mod_sqlite
 #endif
@@ -1036,7 +1036,7 @@ PHP_MINIT_FUNCTION(sqlite)
 
 	REGISTER_INI_ENTRIES();
 
-#if HAVE_PHP_SESSION
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 	php_session_register_module(ps_sqlite_ptr);
 #endif
 	
