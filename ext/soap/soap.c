@@ -1479,7 +1479,7 @@ PHP_METHOD(SoapServer, handle)
 
 	if (service->type == SOAP_CLASS) {
 		soap_obj = NULL;
-#if HAVE_PHP_SESSION
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
 			zval **tmp_soap;
@@ -1568,7 +1568,7 @@ PHP_METHOD(SoapServer, handle)
 				}
 				efree(class_name);
 			}
-#if HAVE_PHP_SESSION
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
 				zval **tmp_soap_pp;
@@ -1661,7 +1661,7 @@ PHP_METHOD(SoapServer, handle)
 	     zend_hash_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
 		if (service->type == SOAP_CLASS) {
 			call_status = call_user_function(NULL, &soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
-#if HAVE_PHP_SESSION
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
 				zval_ptr_dtor(&soap_obj);
 			}
