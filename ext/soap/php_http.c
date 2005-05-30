@@ -686,7 +686,7 @@ try_again:
 		if (http_version) {
 			char *tmp;
 
-			if (strncmp(http_version,"1.1", 3)) {
+			if (!strncmp(http_version,"1.1", 3)) {
 				http_1_1 = 1;
 			}
 
