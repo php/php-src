@@ -16,7 +16,7 @@ PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: 
 dnl
 dnl PHP_PROG_LEMON
 dnl
-dnl Search for lemon binary and check it's version
+dnl Search for lemon binary and check its version
 dnl
 AC_DEFUN([PHP_PROG_LEMON],[
   # we only support certain lemon versions
