@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if HAVE_PHP_SESSION
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 
 #include "ext/session/php_session.h"
 #include "ext/standard/php_lcg.h"
@@ -185,7 +185,7 @@ PS_GC_FUNC(sqlite)
 	return SQLITE_RETVAL(rv);
 }
 
-#endif /* HAVE_PHP_SESSION */
+#endif /* HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION) */
 
 /*
  * Local variables:
