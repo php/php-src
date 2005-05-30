@@ -11,7 +11,42 @@ PHP_ARG_WITH(sqlite, for sqlite support,
 PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: ISO-8859-1),
 [  --enable-sqlite-utf8      SQLite: Enable UTF-8 support for SQLite], no, no)
 
+
+
+dnl
+dnl PHP_PROG_LEMON
+dnl
+dnl Search for lemon binary and check it's version
+dnl
+AC_DEFUN([PHP_PROG_LEMON],[
+  # we only support certain lemon versions
+  lemon_version_list="1.0"
+
+  AC_CHECK_PROG(LEMON, lemon, lemon)
+  if test "$LEMON"; then
+    AC_CACHE_CHECK([for lemon version], php_cv_lemon_version, [
+      lemon_version=`$LEMON -x 2>/dev/null | $SED -e 's/^.* //'`
+      php_cv_lemon_version=invalid
+      for lemon_check_version in $lemon_version_list; do
+        if test "$lemon_version" = "$lemon_check_version"; then
+          php_cv_lemon_version="$lemon_check_version (ok)"
+        fi
+      done
+    ])
+  fi
+  case $php_cv_lemon_version in
+    ""|invalid[)]
+      lemon_msg="lemon versions supported for regeneration of the Zend/PHP parsers: $lemon_version_list  (found $lemon_version)."
+      AC_MSG_WARN([$lemon_msg])
+      LEMON="exit 0;"
+      ;;
+  esac
+  PHP_SUBST(LEMON)
+])
+
+
 if test "$PHP_SQLITE" != "no"; then
+  PHP_PROG_LEMON
   if test "$PHP_PDO" != "no"; then
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
@@ -78,7 +113,7 @@ if test "$PHP_SQLITE" != "no"; then
         libsqlite/src/vacuum.c libsqlite/src/copy.c \
         libsqlite/src/vdbeaux.c libsqlite/src/date.c \
         libsqlite/src/where.c libsqlite/src/trigger.c"
-    
+ 
     PHP_ADD_EXTENSION_DEP(sqlite, spl)
     PHP_ADD_EXTENSION_DEP(sqlite, pdo)
   fi
@@ -88,6 +123,7 @@ if test "$PHP_SQLITE" != "no"; then
   dnl
   sqlite_sources="sqlite.c sess_sqlite.c pdo_sqlite2.c $sqlite_extra_sources" 
   PHP_NEW_EXTENSION(sqlite, $sqlite_sources, $ext_shared,,$PHP_SQLITE_CFLAGS)
+  PHP_ADD_MAKEFILE_FRAGMENT
   PHP_SUBST(SQLITE_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([$ext_builddir/libsqlite/src/sqlite.h])
   
