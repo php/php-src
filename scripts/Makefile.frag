@@ -21,7 +21,6 @@ BUILD_FILES_EXEC = \
 	config.sub
 
 bin_SCRIPTS = phpize php-config
-bin_src_SCRIPTS =
 man_PAGES = phpize.1 php-config.1
 
 install-build:
@@ -55,10 +54,6 @@ install-programs: $(builddir)/phpize $(builddir)/php-config
 	@for prog in $(bin_SCRIPTS); do \
 		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
 		$(INSTALL) -m 755 $(builddir)/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
-	done
-	@for prog in $(bin_src_SCRIPTS); do \
-		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
-		$(INSTALL) -m 755 $(top_srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
 	done
 	@echo "Installing man pages:             $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
