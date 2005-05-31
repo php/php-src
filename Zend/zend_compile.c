@@ -1837,7 +1837,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe, zend_fu
 	if (proto->common.return_reference != ZEND_RETURN_REFERENCE_AGNOSTIC
 	&& fe->common.return_reference != proto->common.return_reference) {
 		/* atm we cannot let internal function return by ref */
-		if (fe->type != ZEND_INTERNAL_FUNCTION && proto->type == ZEND_INTERNAL_FUNCTION) {
+		if (fe->type == proto->type || fe->type != ZEND_INTERNAL_FUNCTION) {
 			return 0;
 		}
 	}
