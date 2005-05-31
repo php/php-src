@@ -2862,6 +2862,14 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
  */
 PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free TSRMLS_DC)
 {
+	return php_addslashes_ex(str, length, new_length, should_free, 0 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ php_addslashes_ex
+ */
+PHPAPI char *php_addslashes_ex(char *str, int length, int *new_length, int should_free, int ignore_sybase TSRMLS_DC)
+{
 	/* maximum string length, worst case situation */
 	char *new_str;
 	char *source, *target;
@@ -2880,7 +2888,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	end = source + length;
 	target = new_str;
 	
-	if (PG(magic_quotes_sybase)) {
+	if (!ignore_sybase && PG(magic_quotes_sybase)) {
 		while (source < end) {
 			switch (*source) {
 				case '\0':
