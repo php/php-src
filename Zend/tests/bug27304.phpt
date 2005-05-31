@@ -17,7 +17,7 @@ $b->test();
         
 ?>
 ===DONE===
---EXTECT--
+--EXPECT--
 bool(false)
 bool(false)
 ===DONE===
