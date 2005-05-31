@@ -684,6 +684,8 @@ int php_hash_environment(TSRMLS_D)
 				dummy_track_vars_array->refcount++;
 			}
 			PG(http_globals)[i] = dummy_track_vars_array;
+		} else {
+			PG(http_globals)[i]->refcount++;
 		}
 
 		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
