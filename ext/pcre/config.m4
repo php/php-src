@@ -13,7 +13,7 @@ PHP_ARG_WITH(pcre-regex,for PCRE support,
 
 if test "$PHP_PCRE_REGEX" != "no"; then
   if test "$PHP_PCRE_REGEX" = "yes"; then
-    PHP_NEW_EXTENSION(pcre, pcrelib/maketables.c pcrelib/get.c pcrelib/study.c pcrelib/pcre.c pcrelib/ucp.c pcrelib/ucptypetable.c php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -DSUPPORT_UCP -DLINK_SIZE=2 -DPOSIX_MALLOC_THRESHOLD=10 -DMATCH_LIMIT=10000000 -I@ext_srcdir@/pcrelib)
+    PHP_NEW_EXTENSION(pcre, pcrelib/maketables.c pcrelib/get.c pcrelib/study.c pcrelib/pcre.c php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -DSUPPORT_UCP -DLINK_SIZE=2 -DPOSIX_MALLOC_THRESHOLD=10 -DMATCH_LIMIT=10000000 -I@ext_srcdir@/pcrelib)
     PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   else
@@ -50,7 +50,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
     PHP_ADD_INCLUDE($PCRE_INCDIR)
-    PHP_NEW_EXTENSION(pcre, php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -DLINK_SIZE=2 -DPOSIX_MALLOC_THRESHOLD=10 -DMATCH_LIMIT=10000000)
+    PHP_NEW_EXTENSION(pcre, php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -DSUPPORT_UCP -DLINK_SIZE=2 -DPOSIX_MALLOC_THRESHOLD=10 -DMATCH_LIMIT=10000000)
   fi
   PHP_SUBST(PCRE_SHARED_LIBADD)
 fi
