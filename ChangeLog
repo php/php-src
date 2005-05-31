@@ -1,3 +1,50 @@
+2005-05-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS:
+      MFH: Fixed bug #33164 (Soap extension incorrectly detects HTTP/1.1).
+
+2005-05-30  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/sqlite/config.m4:
+      typo fix
+
+2005-05-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      NEWS
+      ext/sqlite/sess_sqlite.c
+      ext/sqlite/sess_sqlite.c
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c
+      ext/wddx/wddx.c
+      ext/wddx/wddx.c:
+      - Fixed bug #33185 (--enable-session=shared does not build)
+
+2005-05-30  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/sqlite/Makefile.frag
+      ext/sqlite/config.m4:
+      gracefully handle changes of the parse.y lemon file,
+      process it with lemon if available, else just keep the .c file from CVS
+      not doing so leads to make using its implicit .y->.c rule here and
+      bison doesn't really understand lemon syntax
+
+2005-05-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      - Use libtool also for completely static builds
+
+    * acinclude.m4
+      build/libtool.m4
+      scripts/phpize.in:
+      - Changed the PATH_SEPARATOR check to a macro
+      - Made sure we're generating aclocal.m4 in same way with both buildconf
+        and phpize.
+
+    * scripts/Makefile.frag:
+      Removed the empty $bin_src_SCRIPTS (no longer needed), bug #33166
+
 2005-05-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * configure.in
