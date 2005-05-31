@@ -739,6 +739,7 @@ PHP_METHOD(SoapFault, SoapFault)
 	if (Z_TYPE_P(code) == IS_NULL) {
 	} else if (Z_TYPE_P(code) == IS_STRING) {
 		fault_code = Z_STRVAL_P(code);
+		fault_code_len = Z_STRLEN_P(code);
 	} else if (Z_TYPE_P(code) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(code)) == 2) {
 		zval **t_ns, **t_code;
 
@@ -749,6 +750,7 @@ PHP_METHOD(SoapFault, SoapFault)
 		if (Z_TYPE_PP(t_ns) == IS_STRING && Z_TYPE_PP(t_code) == IS_STRING) {
 		  fault_code_ns = Z_STRVAL_PP(t_ns);
 		  fault_code = Z_STRVAL_PP(t_code);
+		  fault_code_len = Z_STRLEN_PP(t_code);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters. Invalid fault code.");
 		}
