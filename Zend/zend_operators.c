@@ -145,7 +145,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 }
 
 #define zendi_convert_scalar_to_number(op, holder, result)			\
-	if (op==result || op->refcount == 0) {												\
+	if (op==result) {												\
 		if (op->type != IS_LONG) {									\
 			convert_scalar_to_number(op TSRMLS_CC);					\
 		}															\
@@ -191,7 +191,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 #define DVAL_TO_LVAL(d, l) (l) = (d) > LONG_MAX ? (unsigned long) (d) : (long) (d)
 
 #define zendi_convert_to_long(op, holder, result)					\
-	if (op == result || op->refcount == 0) {												\
+	if (op == result) {												\
 		convert_to_long(op);										\
 	} else if ((op)->type != IS_LONG) {								\
 		switch ((op)->type) {										\
@@ -227,7 +227,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 
 
 #define zendi_convert_to_boolean(op, holder, result)				\
-	if (op==result || op->refcount == 0) {												\
+	if (op==result) {												\
 		convert_to_boolean(op);										\
 	} else if ((op)->type != IS_BOOL) {								\
 		switch ((op)->type) {										\
