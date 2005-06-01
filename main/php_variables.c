@@ -257,12 +257,21 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			INIT_PZVAL(array_ptr);
 			switch (arg) {
 				case PARSE_POST:
+					if (PG(http_globals)[TRACK_VARS_POST]) {
+						zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_POST]);
+					}
 					PG(http_globals)[TRACK_VARS_POST] = array_ptr;
 					break;
 				case PARSE_GET:
+					if (PG(http_globals)[TRACK_VARS_GET]) {
+						zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_GET]);
+					}
 					PG(http_globals)[TRACK_VARS_GET] = array_ptr;
 					break;
 				case PARSE_COOKIE:
+					if (PG(http_globals)[TRACK_VARS_COOKIE]) {
+						zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_COOKIE]);
+					}
 					PG(http_globals)[TRACK_VARS_COOKIE] = array_ptr;
 					break;
 			}
@@ -503,6 +512,9 @@ static inline void php_register_server_variables(TSRMLS_D)
 	ALLOC_ZVAL(array_ptr);
 	array_init(array_ptr);
 	INIT_PZVAL(array_ptr);
+	if (PG(http_globals)[TRACK_VARS_SERVER]) {
+		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
+	}
 	PG(http_globals)[TRACK_VARS_SERVER] = array_ptr;
 	PG(magic_quotes_gpc) = 0;
 
@@ -684,10 +696,9 @@ int php_hash_environment(TSRMLS_D)
 				dummy_track_vars_array->refcount++;
 			}
 			PG(http_globals)[i] = dummy_track_vars_array;
-		} else {
-			PG(http_globals)[i]->refcount++;
 		}
 
+		PG(http_globals)[i]->refcount++;
 		zend_hash_update(&EG(symbol_table), auto_global_records[i].name, auto_global_records[i].name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
 		if (PG(register_long_arrays)) {
 			zend_hash_update(&EG(symbol_table), auto_global_records[i].long_name, auto_global_records[i].long_name_len, &PG(http_globals)[i], sizeof(zval *), NULL);
@@ -714,6 +725,9 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 		ALLOC_ZVAL(server_vars);
 		array_init(server_vars);
 		INIT_PZVAL(server_vars);
+		if (PG(http_globals)[TRACK_VARS_SERVER]) {
+			zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
+		}
 		PG(http_globals)[TRACK_VARS_SERVER] = server_vars;
 	}
 
@@ -734,6 +748,9 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 	ALLOC_ZVAL(env_vars);
 	array_init(env_vars);
 	INIT_PZVAL(env_vars);
+	if (PG(http_globals)[TRACK_VARS_ENV]) {
+		zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_ENV]);
+	}
 	PG(http_globals)[TRACK_VARS_ENV] = env_vars;
 	
 	if (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e')) {
