@@ -4461,7 +4461,6 @@ pcre_compile(const char *pattern, int options, const char **errorptr,
 {
 real_pcre *re;
 int length = 1 + LINK_SIZE;      /* For initial BRA plus length */
-int runlength;
 int c, firstbyte, reqbyte;
 int bracount = 0;
 int branch_extra = 0;
