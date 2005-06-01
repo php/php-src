@@ -1,3 +1,22 @@
+2005-05-31  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * tests/bug27304.phpt:
+      Fix test
+
+2005-05-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_operators.c:
+      Reverted wrong fix for bug #30572.
+      Seems the bug was already fixed in other way.
+      But reverted patch produced a lot of valgrind errors, because IS_TMP_VAR
+      operands don't initialize refcount.
+
+2005-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      - Only allow changing return ref agnostic when a script method overrides an
+        internal method (found by dmitry)
+
 2005-05-29  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * Zend.m4:
