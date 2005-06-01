@@ -852,9 +852,9 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		toread = maxlen;
 	} else {
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf + stream->readpos, *delim, stream->readbuflen - stream->readpos);
+			e = memchr(stream->readbuf + stream->readpos, *delim, stream->writepos - stream->readpos);
 		} else {
-			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->readbuflen));
+			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->writepos));
 		}
 
 		if (!e) {
