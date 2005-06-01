@@ -111,6 +111,8 @@ PHP                                                                        NEWS
 - Fixed bug #30889 (Conflict between __get/__set and ++ operator). (Dmitry)
 - Fixed bug #30833 (array_count_values() modifying input array). (Tony)
 - Fixed bug #30819 (Better support for LDAP SASL bind). (Jani)
+- Fixed bug #30791 (magic methods (__sleep/__wakeup/__toString) call __call if
+  object is overloaded). (Dmitry)
 - Fixed bug #30707 (Segmentation fault on exception in method). (Stas, Dmitry)
 - Fixed bug #30702 (cannot initialize class variable from class constant).
   (Dmitry)
