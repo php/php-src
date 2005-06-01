@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Fixed bug #32947 (Incorrect option for mysqli default password). (Georg)
 - Fixed bug #32944 (Disabling session.use_cookies doesn't prevent reading 
   session cookies). (Jani, Tony)
+- Fixed bug #32941 (Sending structured SOAP fault kills a php). (Dmitry)
 - Fixed bug #32936 (http redirects URLs are not checked for control chars). (Ilia)
 - Fixed bug #32933 (Cannot extend class "SQLiteDatabase"). (Marcus)
 - Fixed bug #32932 (Oracle LDAP: ldap_get_entries(), invalid pointer). (Jani)

@@ -50,21 +50,10 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const char *type)
 	parse_namespace(type, &cptype, &ns);
 	nsptr = xmlSearchNs(node->doc, node, ns);
 	if (nsptr != NULL) {
-		int ns_len = strlen(nsptr->href);
-		int type_len = strlen(cptype);
-		int len = ns_len + type_len + 1;
-		char *nscat = emalloc(len + 1);
-
-		memcpy(nscat, nsptr->href, ns_len);
-		nscat[ns_len] = ':';
-		memcpy(nscat+ns_len+1, cptype, type_len);
-		nscat[len] = '\0';
-
-		enc = get_encoder_ex(sdl, nscat, len);
+		enc = get_encoder(sdl, nsptr->href, cptype);
 		if (enc == NULL) {
-			enc = get_encoder_ex(sdl, type, type_len);
+			enc = get_encoder_ex(sdl, cptype, strlen(cptype));
 		}
-		efree(nscat);
 	} else {
 		enc = get_encoder_ex(sdl, type, strlen(type));
 	}
@@ -128,8 +117,24 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	nscat[len] = '\0';
 
 	enc = get_encoder_ex(sdl, nscat, len);
-
 	efree(nscat);
+
+	if (enc == NULL &&
+	    ((ns_len == sizeof(SOAP_1_1_ENC_NAMESPACE)-1 &&
+	      memcmp(ns, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1) == 0) ||
+	     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
+	      memcmp(ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
+		ns_len = sizeof(XSD_NAMESPACE)-1;
+		len = ns_len + type_len + 1;
+		nscat = emalloc(len + 1);
+		memcpy(nscat, XSD_NAMESPACE, sizeof(XSD_NAMESPACE)-1);
+		nscat[ns_len] = ':';
+		memcpy(nscat+ns_len+1, type, type_len);
+		nscat[len] = '\0';
+
+		enc = get_encoder_ex(sdl, nscat, len);
+		efree(nscat);
+	}
 	return enc;
 }
 
