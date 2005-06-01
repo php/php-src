@@ -892,6 +892,9 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 	
 	switch (type) {
 		case IS_STRING:
+			if (!zend_hash_exists(&Z_OBJCE_P(readobj)->function_table, "__tostring", sizeof("__tostring"))) {
+				return FAILURE;
+			}
 			ZVAL_STRING(&fname, "__tostring", 0);
 			if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
 				if (retval) {

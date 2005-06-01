@@ -696,7 +696,8 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					return;
 				}
 				
-				if(Z_OBJCE_PP(struc) != PHP_IC_ENTRY) {
+				if (Z_OBJCE_PP(struc) != PHP_IC_ENTRY &&
+				    zend_hash_exists(&Z_OBJCE_PP(struc)->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
 					res = call_user_function_ex(CG(function_table), struc, &fname, 
