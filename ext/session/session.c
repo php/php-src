@@ -1098,7 +1098,7 @@ static void php_session_reset_id(TSRMLS_D)
 		smart_str_0(&var);
 		REGISTER_STRINGL_CONSTANT("SID", var.c, var.len, 0);
 	} else {
-		REGISTER_STRINGL_CONSTANT("SID", STR_EMPTY_ALLOC(), 0, 1);
+		REGISTER_STRINGL_CONSTANT("SID", STR_EMPTY_ALLOC(), 0, 0);
 	}
 
 	if (PS(apply_trans_sid)) {
