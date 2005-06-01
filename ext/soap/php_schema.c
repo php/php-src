@@ -88,20 +88,10 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns,
 
 static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
 {
-	encodePtr enc = NULL;
-	smart_str nscat = {0};
-
-	smart_str_appends(&nscat, ns);
-	smart_str_appendc(&nscat, ':');
-	smart_str_appends(&nscat, type);
-	smart_str_0(&nscat);
-
-	enc = get_encoder_ex(sdl, nscat.c, nscat.len);
+	encodePtr enc = get_encoder(sdl, ns, type);
 	if (enc == NULL) {
 		enc = create_encoder(sdl, cur_type, ns, type);
 	}
-
-	smart_str_free(&nscat);
 	return enc;
 }
 
