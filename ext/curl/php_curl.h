@@ -121,6 +121,7 @@ typedef struct {
 	php_curl_handlers       *handlers;
 	long                     id;
 	unsigned int             uses;
+	zend_bool                in_callback;
 } php_curl;
 
 typedef struct {

@@ -490,20 +490,22 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.no_separation = 0;
 			fci.symbol_table = NULL;
 
+			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
+			ch->in_callback = 0;
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
-			} else {
+			} else if (retval_ptr) {
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
 				length = Z_LVAL_P(retval_ptr);
+				zval_ptr_dtor(&retval_ptr);
 			}
 
 			zval_ptr_dtor(argv[0]);
 			zval_ptr_dtor(argv[1]);
-			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
 	}
@@ -560,20 +562,23 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.no_separation = 0;
 			fci.symbol_table = NULL;
 
+			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
+			ch->in_callback = 0;
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
-			} else {
+				length = -1;
+			} else if (retval_ptr) {
 				if (Z_TYPE_P(retval_ptr) == IS_STRING) {
 					length = MIN(size * nmemb, Z_STRLEN_P(retval_ptr));
 					memcpy(data, Z_STRVAL_P(retval_ptr), length);
 				}
+				zval_ptr_dtor(&retval_ptr);
 			}
 
 			zval_ptr_dtor(argv[0]);
 			zval_ptr_dtor(argv[1]);
 			zval_ptr_dtor(argv[2]);
-			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
 	}
@@ -631,19 +636,21 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			fci.params = argv;
 			fci.no_separation = 0;
 
+			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
+			ch->in_callback = 0;
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
-			} else {
+			} else if (retval_ptr) {
 				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
 					convert_to_long_ex(&retval_ptr);
 				}
 				length = Z_LVAL_P(retval_ptr);
+				zval_ptr_dtor(&retval_ptr);
 			}
 			zval_ptr_dtor(argv[0]);
 			zval_ptr_dtor(argv[1]);
-			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
 
@@ -779,6 +786,8 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
 
+	(*ch)->in_callback = 0;
+		
 	memset(&(*ch)->err, 0, sizeof((*ch)->err));
 	
 	zend_llist_init(&(*ch)->to_free.str,   sizeof(char *),            (void(*)(void *)) curl_free_string, 0);
@@ -1478,6 +1487,12 @@ PHP_FUNCTION(curl_close)
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
+
+	if (ch->in_callback) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to close CURL handle from a callback");
+		return;
+	}
+	
 	if (ch->uses) {	
 		ch->uses--;
 	} else {
