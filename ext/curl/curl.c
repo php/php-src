@@ -436,10 +436,12 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		zend_list_addref(ch->id);
 		ZVAL_STRINGL(argv[1], data, length, 1);
 
+		ch->in_callback = 1;
 		error = call_user_function(EG(function_table),
 		                           NULL,
 		                           t->func,
 		                           retval, 2, argv TSRMLS_CC);
+		ch->in_callback = 0;
 		if (error == FAILURE) {
 			php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_WRITEFUNCTION", 
 					  get_active_function_name(TSRMLS_C));
@@ -495,10 +497,12 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 		zend_list_addref(t->fd);
 		ZVAL_LONG(argv[2], (int) size * nmemb);
 
+		ch->in_callback = 1;
 		error = call_user_function(EG(function_table),
 		                           NULL,
 		                           t->func,
 		                           retval, 3, argv TSRMLS_CC);
+		ch->in_callback = 0;
 		if (error == FAILURE) {
 			php_error(E_WARNING, "%s(): Cannot call the CURLOPT_READFUNCTION", 
 					  get_active_function_name(TSRMLS_C));
@@ -553,10 +557,12 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			zend_list_addref(ch->id);
 			ZVAL_STRINGL(argv[1], data, length, 1);
 
+			ch->in_callback = 1;
 			error = call_user_function(EG(function_table),
 									   NULL,
 									   t->func,
 									   retval, 2, argv TSRMLS_CC);
+			ch->in_callback = 0;
 			if (error == FAILURE) {
 				php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_HEADERFUNCTION", 
 						  get_active_function_name(TSRMLS_C));
@@ -606,10 +612,12 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	ZVAL_STRING(argv[1], prompt, 1);
 	ZVAL_LONG(argv[2], buflen);
 
+	ch->in_callback = 1;
 	error = call_user_function(EG(function_table),
 	                           NULL,
 	                           func,
 	                           retval, 2, argv TSRMLS_CC);
+	ch->in_callback = 0;
 	if (error == FAILURE) {
 		php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_PASSWDFUNCTION", get_active_function_name(TSRMLS_C));
 	} else if (Z_TYPE_P(retval) == IS_STRING) {
@@ -680,7 +688,9 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read  = ecalloc(1, sizeof(php_curl_read));
 	memset(&(*ch)->err, 0, sizeof((*ch)->err));
-	
+
+	(*ch)->in_callback = 0;
+
 	zend_llist_init(&(*ch)->to_free.str, sizeof(char *), 
 	                (void(*)(void *)) curl_free_string, 0);
 	zend_llist_init(&(*ch)->to_free.slist, sizeof(struct curl_slist),
@@ -1337,7 +1347,11 @@ PHP_FUNCTION(curl_close)
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
-	
+
+	if (ch->in_callback) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to close CURL handle from a callback");
+		return;
+	}
 	zend_list_delete(Z_LVAL_PP(zid));
 }
 /* }}} */

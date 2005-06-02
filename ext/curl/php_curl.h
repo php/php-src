@@ -93,6 +93,7 @@ typedef struct {
 	struct _php_curl_free    to_free;
 	long                     id;
 	unsigned int             uses;
+	zend_bool                in_callback;
 } php_curl;
 
 /* streams support */
