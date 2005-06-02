@@ -2479,8 +2479,10 @@ PHP_FUNCTION(odbc_next_result)
 			result->values = NULL;
 		}
 		RETURN_TRUE;
-	}
-	else {
+	} else if (rc == SQL_NO_DATA_FOUND) {
+		RETURN_FALSE;
+	} else {
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLMoreResults");
 		RETURN_FALSE;
 	}
 }
