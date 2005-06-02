@@ -9,12 +9,12 @@
 
 # serial 47 AC_PROG_LIBTOOL
 
-
+ifdef([AC_ACVERSION],[
+# autoconf 2.13 compatibility
 # Set PATH_SEPARATOR variable
 # ---------------------------------
 # Find the correct PATH separator.  Usually this is :', but
 # DJGPP uses ;' like DOS.
-AC_DEFUN([LT_AC_PATH_SEPARATOR], [
 if test "X${PATH_SEPARATOR+set}" != Xset; then
   UNAME=${UNAME-`uname 2>/dev/null`}
   case X$UNAME in
@@ -23,8 +23,7 @@ if test "X${PATH_SEPARATOR+set}" != Xset; then
   esac
   PATH_SEPARATOR=$lt_cv_sys_path_separator
 fi
-]) # LT_AC_PATH_SEPARATOR
-
+])
 
 # AC_PROVIDE_IFELSE(MACRO-NAME, IF-PROVIDED, IF-NOT-PROVIDED)
 # -----------------------------------------------------------
@@ -96,7 +95,6 @@ define([AC_PROG_LIBTOOL], [])
 # ----------------
 AC_DEFUN([AC_LIBTOOL_SETUP],
 [AC_PREREQ(2.13)dnl
-AC_REQUIRE([LT_AC_PATH_SEPARATOR])dnl
 AC_REQUIRE([AC_ENABLE_SHARED])dnl
 AC_REQUIRE([AC_ENABLE_STATIC])dnl
 AC_REQUIRE([AC_ENABLE_FAST_INSTALL])dnl
