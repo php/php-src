@@ -36,7 +36,7 @@ AC_DEFUN([PHP_PROG_LEMON],[
   fi
   case $php_cv_lemon_version in
     ""|invalid[)]
-      lemon_msg="lemon versions supported for regeneration of the Zend/PHP parsers: $lemon_version_list  (found $lemon_version)."
+      lemon_msg="lemon versions supported for regeneration of libsqlite parsers: $lemon_version_list (found $lemon_version)."
       AC_MSG_WARN([$lemon_msg])
       LEMON="exit 0;"
       ;;
@@ -46,7 +46,6 @@ AC_DEFUN([PHP_PROG_LEMON],[
 
 
 if test "$PHP_SQLITE" != "no"; then
-  PHP_PROG_LEMON
   if test "$PHP_PDO" != "no"; then
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
@@ -98,6 +97,7 @@ if test "$PHP_SQLITE" != "no"; then
     sqlite_extra_sources="libsqlite/src/encode.c"
   else
     # use bundled library
+    PHP_PROG_LEMON
     SQLITE_MODULE_TYPE=builtin
     PHP_SQLITE_CFLAGS="-I@ext_builddir@/libsqlite/src $pdo_inc_path"
     sqlite_extra_sources="libsqlite/src/opcodes.c \
