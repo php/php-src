@@ -1,3 +1,59 @@
+2005-06-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/image.c:
+      MFH:  Fixed bug #33210 (relax jpeg recursive loop protection).
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/image.c:
+      MFH: Fixed bug #33210 (relax jpeg recursive loop protection).
+
+    * ext/standard/image.c:
+      Fixed bug #33210 (relax jpeg recursive loop protection).
+
+2005-06-01  Antony Dovgal  <antony@zend.com>
+
+    * ext/session/session.c:
+      fix typo
+      (see details here: http://news.php.net/php.internals/16350)
+
+2005-06-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/streams/streams.c
+      main/streams/streams.c:
+      Disabled search of recored separator outside of buffer
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #32941 (Sending structured SOAP fault kills a php)
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug30791.phpt
+      ZendEngine2/tests/bug30791.phpt
+      ZendEngine2/tests/bug30791.phpt
+      ext/standard/var.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re:
+      Fixed bug #30791 (magic methods (__sleep/__wakeup/__toString) call __call
+      if object is overloaded)
+
+    * main/php_variables.c
+      main/php_variables.c:
+      Fixed "refcount" counting for autoglobals
+
+2005-06-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pcre/pcrelib/pcre.c:
+      kill unused var.
+
 2005-05-31  Dmitry Stogov  <dmitry@zend.com>
 
     * main/php_variables.c
