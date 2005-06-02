@@ -143,6 +143,17 @@ PHP_PROG_LEX
 dnl Platform-specific compile settings.
 dnl -------------------------------------------------------------------------
 
+dnl See bug #28605
+case $host_cpu in
+alpha*)
+    if test "$GCC" = "yes"; then
+      CFLAGS="$CFLAGS -mieee"
+    else
+      CFLAGS="$CFLAGS -ieee"
+    fi
+    ;;
+esac
+
 case $host_alias in
 *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
