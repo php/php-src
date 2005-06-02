@@ -70,6 +70,7 @@ PHP 4                                                                      NEWS
   handler). (Tony)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 - Fixed bug #29338 (unencoded spaces get ignored after certain tags). (Ilia)
+- Fixed bug #28605 (Need to use -[m]ieee option for Alpha CPUs). (Jani)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
