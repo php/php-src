@@ -139,6 +139,17 @@ static inline void zend_pzval_unlock_free_func(zval *z)
 	(z)->refcount = 1; \
 	(z)->is_ref = 0;	
 
+#define MAKE_REAL_ZVAL_PTR(val) \
+	do { \
+		zval *_tmp; \
+		ALLOC_ZVAL(_tmp); \
+		_tmp->value = (val)->value; \
+		_tmp->type = (val)->type; \
+		_tmp->refcount = 1; \
+		_tmp->is_ref = 0; \
+		val = _tmp; \
+	} while (0)
+
 /* End of zend_execute_locks.h */
 
 #define CV_OF(i)     (EG(current_execute_data)->CVs[i])
@@ -679,40 +690,30 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 
 	value->refcount++;
 	if (opcode == ZEND_ASSIGN_OBJ) {
-		zval tmp;
-
-		switch (op2->op_type) {
-			case IS_CONST:
-				/* already a constant string */
-				break;
-			case IS_CV:
-			case IS_VAR:
-				tmp = *property_name;
-				zval_copy_ctor(&tmp);
-				convert_to_string(&tmp);
-				property_name = &tmp;
-				break;
-			case IS_TMP_VAR:
-				convert_to_string(property_name);
-				break;
+		if (IS_TMP_FREE(free_op2)) {
+			MAKE_REAL_ZVAL_PTR(property_name);
 		}
 		Z_OBJ_HT_P(object)->write_property(object, property_name, value TSRMLS_CC);
-		if (property_name == &tmp) {
-			zval_dtor(property_name);
-		}
 	} else {
 		/* Note:  property_name in this case is really the array index! */
 		if (!Z_OBJ_HT_P(object)->write_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
 		}
+		if (IS_TMP_FREE(free_op2)) {
+			MAKE_REAL_ZVAL_PTR(property_name);
+		}
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 	
-	FREE_OP(free_op2);
 	if (result && !RETURN_VALUE_UNUSED(result)) {
 		T(result->u.var).var.ptr = value;
 		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr; /* this is so that we could use it in FETCH_DIM_R, etc. - see bug #27876 */
 		PZVAL_LOCK(value);
+	}
+	if (IS_TMP_FREE(free_op2)) {
+		zval_ptr_dtor(&property_name);
+	} else {
+		FREE_OP(free_op2);
 	}
 	zval_ptr_dtor(&value);
 	FREE_OP_IF_VAR(free_value);
@@ -1100,7 +1101,7 @@ fetch_string_dim:
 	return retval;
 }
 
-static void zend_fetch_dimension_address(temp_variable *result, zval **container_ptr, zval *dim, int type TSRMLS_DC)
+static void zend_fetch_dimension_address(temp_variable *result, zval **container_ptr, zval *dim, int dim_is_tmp_var, int type TSRMLS_DC)
 {
 	zval *container;
 
@@ -1145,9 +1146,6 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				container = *container_ptr;
 			}
 			if (dim == NULL) {
-/*
-			if (op2->op_type == IS_UNUSED) {
-*/
 				zval *new_zval = &EG(uninitialized_zval);
 
 				new_zval->refcount++;
@@ -1179,9 +1177,6 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 				zval tmp;
 
 				if (dim == NULL) {
-/*
-				if (op2->op_type==IS_UNUSED) {
-*/
 					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 				}
 
@@ -1218,7 +1213,14 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 			if (!Z_OBJ_HT_P(container)->read_dimension) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			} else {
-				zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
+				zval *overloaded_result;
+				
+				if (dim_is_tmp_var) {
+					zval *orig = dim;
+					MAKE_REAL_ZVAL_PTR(dim);
+					ZVAL_NULL(orig);
+				} 
+				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
 				if (overloaded_result) {
 					switch (type) {
@@ -1239,6 +1241,9 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 					result->var.ptr_ptr = retval;
 					AI_USE_PTR(result->var);
 					PZVAL_LOCK(*result->var.ptr_ptr);
+				}
+				if (dim_is_tmp_var) {
+					zval_ptr_dtor(&dim);
 				}
 				return;
 			}
@@ -1271,10 +1276,9 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 	}
 }
 
-static void zend_fetch_property_address(temp_variable *result, zval **container_ptr, zval *prop_ptr, int op2_type, int type TSRMLS_DC)
+static void zend_fetch_property_address(temp_variable *result, zval **container_ptr, zval *prop_ptr, int type TSRMLS_DC)
 {
 	zval *container;
-	zval tmp;
 	
 	container = *container_ptr;
 	if (container == EG(error_zval_ptr)) {
@@ -1317,22 +1321,6 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		container = *container_ptr;
 	}
 
-	switch (op2_type) {
-		case IS_CONST:
-			/* already a constant string */
-			break;
-		case IS_CV:
-		case IS_VAR:
-			tmp = *prop_ptr;
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
-			prop_ptr = &tmp;
-			break;
-		case IS_TMP_VAR:
-			convert_to_string(prop_ptr);
-			break;
-	}
-
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
 		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr TSRMLS_CC);
 		if(NULL == ptr_ptr) {
@@ -1362,10 +1350,6 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		}
 	}
 	
-	if (prop_ptr == &tmp) {
-		zval_dtor(prop_ptr);
-	}
-
 	if (result) {
 		PZVAL_LOCK(*result->var.ptr_ptr);
 	}	
