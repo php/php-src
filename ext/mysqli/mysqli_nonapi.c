@@ -274,6 +274,31 @@ PHP_FUNCTION(mysqli_set_charset)
 /* }}} */
 #endif
 
+/* {{{ object mysqli_get_charset(object link) 
+   returns a character set object */
+PHP_FUNCTION(mysqli_get_charset)
+{
+	MY_MYSQL				*mysql;
+	zval					*mysql_link;
+	CHARSET_INFO			*cs;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link");
+
+	object_init(return_value);
+
+	cs = (CHARSET_INFO *)mysql->mysql->charset;
+
+	add_property_string(return_value, "charset", (cs->name) ? (char *)cs->csname : "", 1);
+	add_property_string(return_value, "collation",(cs->name) ? (char *)cs->name : "", 1);
+	add_property_string(return_value, "comment", (cs->comment) ? (char *)cs->comment : "", 1);
+	add_property_long(return_value, "min_length", cs->mbminlen);
+	add_property_long(return_value, "max_length", cs->mbmaxlen);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

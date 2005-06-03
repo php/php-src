@@ -57,6 +57,13 @@ PHP                                                                        NEWS
   . pg_result_error_field() - highly detailed error information, 
     most importantly the SQLSTATE error code.
   . pg_set_error_verbosity() - set verbosity of errors.
+- Improved extension mysqli (Georg)
+  . added constructor for mysqli_stmt and mysqli_result classes
+  . added new function mysqli_get_charset
+  . added new class mysqli_driver
+  . added new class mysqli_warning
+  . added new class mysqli_execption 
+  . added new class mysqli_sql_exception
 - Added optional fifth parameter "count" to preg_replace_callback() and
   preg_replace() to count the number of replacements made. FR #32275. (Andrey)
 - Added optional third parameter "charlist" to str_word_count() which
@@ -65,10 +72,7 @@ PHP                                                                        NEWS
 - Added pg_field_type_oid() PostgreSQL function. (mauroi at digbang dot com)
 - Added zend_declare_property_...() and zend_update_property_...()
   API functions for bool, double and binary safe strings. (Hartmut)
-- Added new classes in mysqli: mysqli_driver, mysqli_warning, mysqli_exception,
-  and mysqli_sql_exception. (Georg)
 - Added possibility to access INI variables from within .ini file. (Andrei)
-- Added constructors for mysqli_stmt and mysqli_result classes. (Georg)
 - Added variable $_SERVER['REQUEST_TIME'] containing request start time. (Ilia)
 - Added optional float parameter to gettimeofday(). (Ilia)
 - Added apache_reset_timeout() Apache1 function. (Rasmus)
