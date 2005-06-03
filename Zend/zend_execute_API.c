@@ -570,6 +570,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_op_array *original_op_array;
 	zend_op **original_opline_ptr;
 	zval *orig_free_op1, *orig_free_op2;
+	zval *orig_garbage[2];
+	int  orig_garbage_ptr;
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zend_class_entry *current_scope;
@@ -862,6 +864,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		orig_free_op2 = EG(free_op2);
 		orig_unary_op = EG(unary_op);
 		orig_binary_op = EG(binary_op);
+		orig_garbage_ptr = EG(garbage_ptr);
+		EG(garbage_ptr) = 0;
+		if (orig_garbage_ptr > 0) {
+			memcpy(&orig_garbage, &EG(garbage), sizeof(zval*)*orig_garbage_ptr);
+		}
 		zend_execute(EG(active_op_array) TSRMLS_CC);
 		if (!fci->symbol_table) {
 			zend_hash_destroy(EG(active_symbol_table));
@@ -875,6 +882,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(free_op2) = orig_free_op2;
 		EG(unary_op) = orig_unary_op;
 		EG(binary_op) = orig_binary_op;
+		if (orig_garbage_ptr > 0) {
+			while (EG(garbage_ptr)) {
+				zval_ptr_dtor(&EG(garbage)[--EG(garbage_ptr)]);
+			}				
+			EG(garbage_ptr) = orig_garbage_ptr;
+			memcpy(&EG(garbage), &orig_garbage, sizeof(zval*)*orig_garbage_ptr);
+		}
 	} else {
 		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 		if (EX(function_state).function->common.scope) {
