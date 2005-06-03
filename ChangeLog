@@ -1,3 +1,83 @@
+2005-06-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4
+      build/libtool.m4:
+      - Revert previous change in build/libtool.m4 and make sure
+        the PATH_SEPARATOR check is only done under autoconf 2.13.
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      configure.in
+      configure.in:
+      MFH: - Fixed bug #28605 (Need to use -[m]ieee option for Alpha CPUs)
+
+    * configure.in:
+      - Fixed bug #28605 (Need to use -[m]ieee option for Alpha CPUs)
+
+2005-06-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c
+      ext/curl/php_curl.h:
+      MFH: fix bug #33222 (segfault when CURL handle is closed in a callback).
+
+    * (PHP_5_0)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/php_curl.h:
+      MFH: fix bug #33222 (segfault when CURL handle is closed in a callback).
+      fix segfaults when CURL callback functions throw exception.
+
+    * ext/curl/interface.c
+      ext/curl/php_curl.h:
+      fix bug #33222 (segfault when CURL handle is closed in a callback).
+      fix segfaults when CURL callback functions throw exception.
+
+2005-06-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sqlite/config.m4:
+      We only need LEMON for bundled stuff
+
+2005-06-02  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c:
+      MFH: fix bug #33214 (odbc_next_result does not signal SQL errors with
+      2-statement SQL batches).
+      Path by rich at kastle dot com.
+
+    * ext/odbc/php_odbc.c:
+      fix bug #33214 (odbc_next_result does not signal SQL errors with
+      2-statement SQL batches).
+      Path by rich at kastle dot com.
+
+2005-06-02  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/string.c:
+      - That should have been removed, not commented out.
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c:
+      - MFH: Fixed memory corruption in stristr().
+
+    * ext/standard/string.c:
+      - Fixed memory corruption in stristr().
+
+2005-06-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/var_unserializer.c:
+      touch
+
 2005-06-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
