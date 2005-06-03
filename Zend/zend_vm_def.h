@@ -283,7 +283,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	zval *object;
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval *value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
-	zval tmp;
 	znode *result = &opline->result;
 	zval **retval = &EX_T(result->u.var).var.ptr;
 	int have_get_ptr = 0;
@@ -303,20 +302,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		}
 	} else {
 		/* here we are sure we are dealing with an object */
-		switch (OP2_TYPE) {
-			case IS_CONST:
-				/* already a constant string */
-				break;
-			case IS_CV:
-			case IS_VAR:
-				tmp = *property;
-				zval_copy_ctor(&tmp);
-				convert_to_string(&tmp);
-				property = &tmp;
-				break;
-			case IS_TMP_VAR:
-				convert_to_string(property);
-				break;
+		if (IS_OP2_TMP_FREE()) {
+			MAKE_REAL_ZVAL_PTR(property);
 		}
 
 		/* here property is a string */
@@ -385,11 +372,11 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			}
 		}
 
-		if (property == &tmp) {
-			zval_dtor(property);
+		if (IS_OP2_TMP_FREE()) {
+			zval_ptr_dtor(&property);
+		} else {
+			FREE_OP2();
 		}
-
-		FREE_OP2();
 		FREE_OP(free_op_data1);
 	}
 
@@ -422,8 +409,9 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 					ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 				} else {
 					zend_op *op_data = opline+1;
+					zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-					zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_RW TSRMLS_CC);
+					zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW), dim, IS_OP2_TMP_FREE(), BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
 					var_ptr = get_zval_ptr_ptr(&op_data->op2, EX(Ts), &free_op_data2, BP_VAR_RW);
 					increment_opline = 1;
@@ -565,6 +553,10 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 
 	/* here we are sure we are dealing with an object */
 
+	if (IS_OP2_TMP_FREE()) {
+		MAKE_REAL_ZVAL_PTR(property);
+	}
+
 	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property TSRMLS_CC);
 		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
@@ -608,7 +600,11 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 		}
 	}
 
-	FREE_OP2();
+	if (IS_OP2_TMP_FREE()) {
+		zval_ptr_dtor(&property);
+	} else {
+		FREE_OP2();
+	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -645,6 +641,10 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	}
 
 	/* here we are sure we are dealing with an object */
+
+	if (IS_OP2_TMP_FREE()) {
+		MAKE_REAL_ZVAL_PTR(property);
+	}
 
 	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property TSRMLS_CC);
@@ -691,7 +691,11 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		}
 	}
 
-	FREE_OP2();
+	if (IS_OP2_TMP_FREE()) {
+		zval_ptr_dtor(&property);
+	} else {
+		FREE_OP2();
+	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1021,11 +1025,12 @@ ZEND_VM_HANDLER(81, ZEND_FETCH_DIM_R, VAR|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK && OP1_TYPE != IS_CV) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_R), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_R TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_R), dim, IS_OP2_TMP_FREE(), BP_VAR_R TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1035,8 +1040,9 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_W), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_W TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_W), dim, IS_OP2_TMP_FREE(), BP_VAR_W TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1046,8 +1052,9 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_RW TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW), dim, IS_OP2_TMP_FREE(), BP_VAR_RW TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1057,8 +1064,9 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, VAR|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_IS), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_IS TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_IS), dim, IS_OP2_TMP_FREE(), BP_VAR_IS TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1069,8 +1077,9 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, VAR|CV, CONST|TMP|VAR|CV)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
+	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(type), GET_OP2_ZVAL_PTR(BP_VAR_R), type TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(type), dim, IS_OP2_TMP_FREE(), type TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
@@ -1080,13 +1089,14 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	/* Not needed in DIM_UNSET
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
 	*/
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_UNSET), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_UNSET TSRMLS_CC);
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_UNSET), dim, IS_OP2_TMP_FREE(), BP_VAR_UNSET TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	if (EX_T(opline->result.u.var).var.ptr_ptr == NULL) {
@@ -1130,43 +1140,34 @@ ZEND_VM_HELPER_EX(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|
 	if (container->type != IS_OBJECT || !Z_OBJ_HT_P(container)->read_property) {
 		zend_error(E_NOTICE, "Trying to get property of non-object");
 		*retval = EG(uninitialized_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
+		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	} else {
 		zend_free_op free_op2;
 		zval *offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		zval tmp;
 
-		switch (OP2_TYPE) {
-			case IS_CONST:
-				/* already a constant string */
-				break;
-			case IS_CV:
-			case IS_VAR:
-				tmp = *offset;
-				zval_copy_ctor(&tmp);
-				convert_to_string(&tmp);
-				offset = &tmp;
-				break;
-			case IS_TMP_VAR:
-				convert_to_string(offset);
-				break;
+		if (IS_OP2_TMP_FREE()) {
+			MAKE_REAL_ZVAL_PTR(offset);
 		}
 
 		/* here we are sure we are dealing with an object */
 		*retval = Z_OBJ_HT_P(container)->read_property(container, offset, type TSRMLS_CC);
-		if (offset == &tmp) {
-			zval_dtor(offset);
-		}
-		FREE_OP2();
 
 		if (RETURN_VALUE_UNUSED(&opline->result) && ((*retval)->refcount == 0)) {
 			zval_dtor(*retval);
 			FREE_ZVAL(*retval);
-			ZEND_VM_NEXT_OPCODE();
+		} else {
+			SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
+			AI_USE_PTR(EX_T(opline->result.u.var).var);
+		}
+
+		if (IS_OP2_TMP_FREE()) {
+			zval_ptr_dtor(&offset);
+		} else {
+			FREE_OP2();
 		}
 	}
 
-	SELECTIVE_PZVAL_LOCK(*retval, &opline->result);
-	AI_USE_PTR(EX_T(opline->result.u.var).var);
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1180,13 +1181,22 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (opline->extended_value == ZEND_FETCH_ADD_LOCK && OP1_TYPE != IS_CV) {
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 		EX_T(opline->op1.u.var).var.ptr = *EX_T(opline->op1.u.var).var.ptr_ptr;
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W), GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_W TSRMLS_CC);
-	FREE_OP2();
+
+	if (IS_OP2_TMP_FREE()) {
+		MAKE_REAL_ZVAL_PTR(property);
+	}
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W), property, BP_VAR_W TSRMLS_CC);
+	if (IS_OP2_TMP_FREE()) {
+		zval_ptr_dtor(&property);
+	} else {
+		FREE_OP2();
+	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1195,9 +1205,17 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW), GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_RW TSRMLS_CC);
-	FREE_OP2();
+	if (IS_OP2_TMP_FREE()) {
+		MAKE_REAL_ZVAL_PTR(property);
+	}
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW), property, BP_VAR_RW TSRMLS_CC);
+	if (IS_OP2_TMP_FREE()) {
+		zval_ptr_dtor(&property);
+	} else {
+		FREE_OP2();
+	}
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1214,9 +1232,17 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
+		zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-		zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W), GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_W TSRMLS_CC);
-		FREE_OP2();
+		if (IS_OP2_TMP_FREE()) {
+			MAKE_REAL_ZVAL_PTR(property);
+		}
+		zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W), property, BP_VAR_W TSRMLS_CC);
+		if (IS_OP2_TMP_FREE()) {
+			zval_ptr_dtor(&property);
+		} else {
+			FREE_OP2();
+		}
 		FREE_OP1_VAR_PTR();
 		ZEND_VM_NEXT_OPCODE();
 	} else {
@@ -1228,9 +1254,17 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2, free_res;
+	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R), GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
-	FREE_OP2();
+	if (IS_OP2_TMP_FREE()) {
+		MAKE_REAL_ZVAL_PTR(property);
+	}
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R), property, BP_VAR_R TSRMLS_CC);
+	if (IS_OP2_TMP_FREE()) {
+		zval_ptr_dtor(&property);
+	} else {
+		FREE_OP2();
+	}
 	FREE_OP1_VAR_PTR();
 
 	PZVAL_UNLOCK(*EX_T(opline->result.u.var).var.ptr_ptr, &free_res);
@@ -1298,8 +1332,9 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 	} else {
 		zend_free_op free_op2, free_op_data1;
 		zval *value;
+		zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_W TSRMLS_CC);
+		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, dim, IS_OP2_TMP_FREE(), BP_VAR_W TSRMLS_CC);
 		FREE_OP2();
 
 		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
@@ -2780,84 +2815,98 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	long index;
 
 	if (container) {
-		HashTable *ht;
 
 		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
 			SEPARATE_ZVAL_IF_NOT_REF(container);
 		}
 		if (opline->extended_value == ZEND_UNSET_DIM) {
 			switch (Z_TYPE_PP(container)) {
-				case IS_ARRAY:
-					ht = Z_ARRVAL_PP(container);
+				case IS_ARRAY: {
+					HashTable *ht = Z_ARRVAL_PP(container);
+
+					switch (offset->type) {
+						case IS_DOUBLE:
+						case IS_RESOURCE:
+						case IS_BOOL:
+						case IS_LONG:
+							if (offset->type == IS_DOUBLE) {
+								index = (long) offset->value.dval;
+							} else {
+								index = offset->value.lval;
+							}
+
+							zend_hash_index_del(ht, index);
+							break;
+						case IS_STRING:
+							if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
+						    ht == &EG(symbol_table)) {
+								zend_execute_data *ex;
+								ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
+
+								for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
+									if (ex->symbol_table == ht) {
+										int i;
+
+										for (i = 0; i < ex->op_array->last_var; i++) {
+											if (ex->op_array->vars[i].hash_value == hash_value &&
+											    ex->op_array->vars[i].name_len == offset->value.str.len &&
+											    !memcmp(ex->op_array->vars[i].name, offset->value.str.val, offset->value.str.len)) {
+												ex->CVs[i] = NULL;
+												break;
+											}
+										}
+									}
+								}
+							}
+							break;
+						case IS_NULL:
+							zend_hash_del(ht, "", sizeof(""));
+							break;
+						default:
+							zend_error(E_WARNING, "Illegal offset type in unset");
+							break;
+					}
+					FREE_OP2();
 					break;
+				}
 				case IS_OBJECT:
-					ht = NULL;
 					if (!Z_OBJ_HT_P(*container)->unset_dimension) {
 						zend_error_noreturn(E_ERROR, "Cannot use object as array");
 					}
+					if (IS_OP2_TMP_FREE()) {
+						MAKE_REAL_ZVAL_PTR(offset);
+					}
 					Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
+					if (IS_OP2_TMP_FREE()) {
+						zval_ptr_dtor(&offset);
+					} else {
+						FREE_OP2();
+					}
 					break;
 				case IS_STRING:
 					zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 					ZEND_VM_CONTINUE(); /* bailed out before */
 				default:
-					ht = NULL;
+					FREE_OP2();
 					break;
 			}
 		} else { /* ZEND_UNSET_OBJ */
-			ht = NULL;
 			if (Z_TYPE_PP(container) == IS_OBJECT) {
+				if (IS_OP2_TMP_FREE()) {
+					MAKE_REAL_ZVAL_PTR(offset);
+				}
 				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
-			}
-		}
-		if (ht)	{
-			switch (offset->type) {
-				case IS_DOUBLE:
-				case IS_RESOURCE:
-				case IS_BOOL:
-				case IS_LONG:
-					if (offset->type == IS_DOUBLE) {
-						index = (long) offset->value.dval;
-					} else {
-						index = offset->value.lval;
-					}
-
-					zend_hash_index_del(ht, index);
-					break;
-				case IS_STRING:
-					if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
-					    ht == &EG(symbol_table)) {
-						zend_execute_data *ex;
-						ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
-
-						for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
-							if (ex->symbol_table == ht) {
-								int i;
-
-								for (i = 0; i < ex->op_array->last_var; i++) {
-									if (ex->op_array->vars[i].hash_value == hash_value &&
-									    ex->op_array->vars[i].name_len == offset->value.str.len &&
-									    !memcmp(ex->op_array->vars[i].name, offset->value.str.val, offset->value.str.len)) {
-										ex->CVs[i] = NULL;
-										break;
-									}
-								}
-							}
-						}
-					}
-					break;
-				case IS_NULL:
-					zend_hash_del(ht, "", sizeof(""));
-					break;
-				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
-					break;
+				if (IS_OP2_TMP_FREE()) {
+					zval_ptr_dtor(&offset);
+				} else {
+					FREE_OP2();
+				}
 			}
 		}
 	} else {
 		/* overloaded element */
+		FREE_OP2();
 	}
-	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 
 	ZEND_VM_NEXT_OPCODE();
@@ -3207,14 +3256,16 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|TMP|VAR|CV, int prop_dim)
 {
 	zend_op *opline = EX(opline);
-	zend_free_op free_op1, free_op2;
+	zend_free_op free_op1;
 	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_IS);
-	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	zval **value = NULL;
 	int result = 0;
 	long index;
 
 	if (container) {
+		zend_free_op free_op2;
+		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
 		if ((*container)->type == IS_ARRAY) {
 			HashTable *ht;
 			int isset = 0;
@@ -3267,11 +3318,20 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 					}
 					break;
 			}
+			FREE_OP2();
 		} else if ((*container)->type == IS_OBJECT) {
+			if (IS_OP2_TMP_FREE()) {
+				MAKE_REAL_ZVAL_PTR(offset);
+			}
 			if (prop_dim) {
 				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			} else {
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+			}
+			if (IS_OP2_TMP_FREE()) {
+				zval_ptr_dtor(&offset);
+			} else {
+				FREE_OP2();
 			}
 		} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
 			zval tmp;
@@ -3296,6 +3356,9 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 						break;
 				}
 			}
+			FREE_OP2();
+		} else {
+			FREE_OP2();
 		}
 	}
 
@@ -3310,7 +3373,6 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 			break;
 	}
 
-	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 
 	ZEND_VM_NEXT_OPCODE();

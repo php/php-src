@@ -224,7 +224,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name 
 zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zend_object *zobj;
-	zval tmp_member;
+	zval *tmp_member = NULL;
 	zval **retval;
 	zval *rv = NULL;
 	zend_property_info *property_info;
@@ -236,10 +236,12 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	use_get = (zobj->ce->__get && !zobj->in_get);
 
  	if (member->type != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
+ 		ALLOC_ZVAL(tmp_member);
+		*tmp_member = *member;
+		INIT_PZVAL(tmp_member);
+		zval_copy_ctor(tmp_member);
+		convert_to_string(tmp_member);
+		member = tmp_member;
 	}
 
 #if DEBUG_OBJECT_HANDLERS
@@ -268,8 +270,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 			retval = &EG(uninitialized_zval_ptr);
 		}
 	}
-	if (member == &tmp_member) {
-		zval_dtor(member);
+	if (tmp_member) {
+		rv->refcount++;
+		zval_ptr_dtor(&tmp_member);
+		rv->refcount--;
 	}
 	return *retval;
 }
@@ -278,7 +282,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 static void zend_std_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 {
 	zend_object *zobj;
-	zval tmp_member;
+	zval *tmp_member = NULL;
 	zval **variable_ptr;
 	int setter_done = 0;
 	zend_property_info *property_info;
@@ -288,10 +292,12 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	use_set = (zobj->ce->__set && !zobj->in_set);
 
  	if (member->type != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
+ 		ALLOC_ZVAL(tmp_member);
+		*tmp_member = *member;
+		INIT_PZVAL(tmp_member);
+		zval_copy_ctor(tmp_member);
+		convert_to_string(tmp_member);
+		member = tmp_member;
 	}
 
 	property_info = zend_get_property_info(zobj->ce, member, use_set TSRMLS_CC);
@@ -335,8 +341,8 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		}
 		zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), (void **) &foo);
 	}
-	if (member == &tmp_member) {
-		zval_dtor(member);
+	if (tmp_member) {
+		zval_ptr_dtor(&tmp_member);
 	}
 }
 
