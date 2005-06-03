@@ -176,6 +176,21 @@ ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
 
+#ifdef va_copy
+#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
+{ \
+	va_list copy; \
+	va_copy(copy, args); \
+	old_error_handler(error_num, error_filename, error_lineno, format, copy); \
+	va_end(copy); \
+}
+#else
+#define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
+{ \
+	old_error_handler(error_num, error_filename, error_lineno, format, args); \
+}
+#endif
+
 #define PHP_SOAP_SERVER_CLASSNAME "SoapServer"
 #define PHP_SOAP_CLIENT_CLASSNAME "SoapClient"
 #define PHP_SOAP_VAR_CLASSNAME    "SoapVar"
@@ -387,7 +402,7 @@ PHP_INI_END()
 static void php_soap_init_globals(zend_soap_globals *soap_globals)
 {
 	int i;
-	long enc;
+	encodePtr enc;
 
 	zend_hash_init(&soap_globals->defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&soap_globals->defEncIndex, 0, NULL, NULL, 1);
@@ -395,7 +410,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 
 	i = 0;
 	do {
-		enc = (long)&defaultEncoding[i];
+		enc = &defaultEncoding[i];
 
 		/* If has a ns and a str_type then index it */
 		if (defaultEncoding[i].details.type_str) {
@@ -1853,7 +1868,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_current_execute_data = EG(current_execute_data);
 
 	if (!SOAP_GLOBAL(use_soap_error_handler)) {
-		old_error_handler(error_num, error_filename, error_lineno, format, args);
+		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		return;
 	}
 
@@ -1875,12 +1890,18 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			char buffer[1024];
 			int buffer_len;
 			zval outbuf, outbuflen;
+			va_list argcopy;
 			int old = PG(display_errors);
 
 			INIT_ZVAL(outbuf);
 			INIT_ZVAL(outbuflen);
-
+#ifdef va_copy
+			va_copy(argcopy, args);
+			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, argcopy);
+			va_end(argcopy);
+#else
 			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+#endif
 			buffer[sizeof(buffer)-1]=0;
 			if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
 				buffer_len = sizeof(buffer) - 1;
@@ -1898,7 +1919,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 			PG(display_errors) = 0;
 			zend_try {
-				old_error_handler(error_num, error_filename, error_lineno, format, args);
+				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 			} zend_catch {
 				CG(in_compilation) = _old_in_compilation;
 				EG(in_execution) = _old_in_execution;
@@ -1907,10 +1928,10 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			PG(display_errors) = old;
 			zend_bailout();
 		} else {
-			old_error_handler(error_num, error_filename, error_lineno, format, args);
+			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		}
 #else
-		old_error_handler(error_num, error_filename, error_lineno, format, args);
+		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 #endif
 	} else {
 		int old = PG(display_errors);
@@ -1954,7 +1975,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 
 		PG(display_errors) = 0;
 		zend_try {
-			old_error_handler(error_num, error_filename, error_lineno, format, args);
+			call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		} zend_catch {
 			CG(in_compilation) = _old_in_compilation;
 			EG(in_execution) = _old_in_execution;
