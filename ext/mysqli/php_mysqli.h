@@ -95,6 +95,32 @@ typedef struct {
 	void	*userdata;
 } mysqli_local_infile;
 
+typedef struct {
+  uint				number;
+  uint				primary_number;
+  uint				binary_number;
+  uint				state;
+  const char		*csname;
+  const char		*name;
+  const char		*comment;
+  const char		*tailoring;
+  unsigned char		*ctype;
+  unsigned char		*to_lower;
+  unsigned char		*to_upper;
+  unsigned char		*sort_order;
+  unsigned short	*contractions;
+  unsigned short	**sort_order_big;
+  unsigned short	*tab_to_uni;
+  void				*tab_from_uni;
+  unsigned char		*state_map;
+  unsigned char		*ident_map;
+  uint				strxfrm_multiply;
+  uint				mbminlen;
+  uint				mbmaxlen;
+  unsigned short	min_sort_char;
+  unsigned short	max_sort_char; /* For LIKE optimization */
+} CHARSET_INFO;
+
 #define phpext_mysqli_ptr &mysqli_module_entry
 
 #ifdef PHP_WIN32
@@ -326,6 +352,7 @@ PHP_FUNCTION(mysqli_field_count);
 PHP_FUNCTION(mysqli_field_seek);
 PHP_FUNCTION(mysqli_field_tell);
 PHP_FUNCTION(mysqli_free_result);
+PHP_FUNCTION(mysqli_get_charset);
 PHP_FUNCTION(mysqli_get_client_info);
 PHP_FUNCTION(mysqli_get_client_version);
 PHP_FUNCTION(mysqli_get_host_info);
