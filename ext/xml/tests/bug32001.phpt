@@ -1,5 +1,8 @@
 --TEST--
 Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect)
+--SKIPIF--
+<?php # vim:ft=php
+if (!extension_loaded("iconv")) print "skip";
 --FILE--
 <?php
 class testcase {
