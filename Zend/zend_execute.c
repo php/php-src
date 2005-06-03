@@ -2235,7 +2235,7 @@ int zend_assign_dim_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_fetch_dimension_address(&op_data->op2, &opline->op1, &opline->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr(&op_data->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (EG(free_op1)?IS_TMP_VAR:opline->op1.op_type), EX(Ts) TSRMLS_CC);
+	 	zend_assign_to_variable(&opline->result, &op_data->op2, &op_data->op1, value, (EG(free_op1)?IS_TMP_VAR:op_data->op1.op_type), EX(Ts) TSRMLS_CC);
 	}
 	/* assign_dim has two opcodes! */
 	INC_OPCODE();
