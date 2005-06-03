@@ -972,7 +972,8 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 				 * Find JMP_NO_CTOR, mark the preceding ASSIGN and the
 				 * proceeding INIT_FCALL_BY_NAME as unused
 				 */
-				if (opline->opcode == ZEND_JMP_NO_CTOR) {
+				if (opline->opcode == ZEND_JMP_NO_CTOR &&
+				    opline->op1.u.var == op1->u.var) {
 					opline->op1.u.EA.type |= EXT_TYPE_UNUSED;
 					(opline-1)->result.u.EA.type |= EXT_TYPE_UNUSED;
 					(opline+1)->op1.u.EA.type |= EXT_TYPE_UNUSED;
