@@ -27,11 +27,13 @@
 
 typedef size_t (*zend_stream_reader_t)(void *handle, char *buf, size_t len TSRMLS_DC);
 typedef void (*zend_stream_closer_t)(void *handle TSRMLS_DC);
+typedef long (*zend_stream_fteller_t)(void *handle TSRMLS_DC);
 
 typedef struct _zend_stream {
 	void *handle;
 	zend_stream_reader_t reader;
 	zend_stream_closer_t closer;
+	zend_stream_fteller_t fteller;
 	int interactive;
 } zend_stream;
 
@@ -52,6 +54,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 ZEND_API int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
+ZEND_API long zend_stream_ftell(zend_file_handle *file_handle TSRMLS_DC);
 ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC);
 END_EXTERN_C()
 

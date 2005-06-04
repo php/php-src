@@ -35,6 +35,8 @@
 #include "zend_list.h"
 #include "zend_globals.h"
 #include "zend_API.h"
+#include "zend_constants.h"
+
 
 #define YYERROR_VERBOSE
 #define YYSTYPE znode
@@ -118,6 +120,7 @@
 %token T_UNSET
 %token T_ISSET
 %token T_EMPTY
+%token T_HALT_COMPILER
 %token T_CLASS
 %token T_INTERFACE
 %token T_EXTENDS
@@ -159,6 +162,7 @@ top_statement:
 		statement
 	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
 	|	class_declaration_statement		{ zend_do_early_binding(TSRMLS_C); }
+	|	T_HALT_COMPILER '(' ')' ';'   { REGISTER_MAIN_LONG_CONSTANT("__COMPILER_HALT_OFFSET__", zend_get_scanned_file_offset(TSRMLS_C), CONST_CS); YYACCEPT; }
 ;
 
 
@@ -172,6 +176,7 @@ inner_statement:
 		statement
 	|	function_declaration_statement
 	|	class_declaration_statement
+	|	T_HALT_COMPILER '(' ')' ';'   { zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 ;
 
 
