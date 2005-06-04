@@ -1,3 +1,92 @@
+2005-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/xml/tests/bug32001.phpt:
+      nuke crap, end scripts always with ?>
+
+    * sapi/cgi/cgi_main.c:
+      cs + ws
+
+2005-06-03  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * ext/xml/tests/bug32001.phpt:
+      Add skipif, test requires iconv.
+
+2005-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/session/session.c:
+      nuke duplicate code
+
+2005-06-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug30394.phpt:
+      Added test for 5.0 specific bug #30394 (Assignment operators yield wrong
+      result with __get/__set)
+
+    * ZendEngine2/tests/bug30394.phpt
+      ZendEngine2/tests/bug30394.phpt:
+      
+      file bug30394.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #30394 (Assignment operators yield wrong result with __get/__set)
+
+    * ZendEngine2/tests/bug30080.phpt
+      ZendEngine2/tests/bug30080.phpt:
+      
+      file bug30080.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug30080.phpt:
+      Fixed bug #30080 (Passing array or non array of objects)
+
+    * ZendEngine2/tests/bug27598.phpt
+      ZendEngine2/tests/bug27598.phpt:
+      
+      file bug27598.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug27598.phpt:
+      Fixed bug #27598 (list() array key assignment causes HUGE memory leak)
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/object_handlers.phpt:
+      Fixed memory allocation bugs related to magic object handlers (__get(),
+      __set(),
+       ...)
+
+    * ZendEngine2/tests/object_handlers.phpt
+      ZendEngine2/tests/object_handlers.phpt:
+      
+      file object_handlers.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c:
+      Fixed memory allocation bugs related to magic object handlers (__get(),
+      __set(), ...)
+
+2005-06-03  Georg Richter  <georg@mysql.com>
+
+    * NEWS
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      added new function mysqli_get_charset
+
 2005-06-02  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * acinclude.m4
