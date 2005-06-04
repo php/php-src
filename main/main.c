@@ -840,6 +840,11 @@ static void stream_closer_for_zend(void *handle TSRMLS_DC)
 	php_stream_close((php_stream*)handle);
 }
 
+static long stream_fteller_for_zend(void *handle TSRMLS_DC)
+{
+	return (long)php_stream_tell((php_stream*)handle);
+}
+
 static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle TSRMLS_DC)
 {
 	php_stream *stream;
@@ -853,6 +858,7 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 		handle->handle.stream.handle = stream;
 		handle->handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
 		handle->handle.stream.closer = stream_closer_for_zend;
+		handle->handle.stream.fteller = stream_fteller_for_zend;
 		handle->handle.stream.interactive = 0;
 
 		return SUCCESS;
