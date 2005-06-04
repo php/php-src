@@ -1,3 +1,58 @@
+2005-06-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug30394.phpt:
+      Added test for 5.0 specific bug #30394 (Assignment operators yield wrong
+      result with __get/__set)
+
+    * (PHP_5_0)
+      zend.c
+      zend_execute_API.c
+      tests/bug30394.phpt
+      tests/bug30394.phpt:
+      Fixed bug #30394 (Assignment operators yield wrong result with __get/__set)
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug30080.phpt:
+      Fixed bug #30080 (Passing array or non array of objects)
+
+    * tests/bug30080.phpt
+      tests/bug30080.phpt:
+      
+      file bug30080.phpt was initially added on branch PHP_5_0.
+
+    * zend_compile.c
+      zend_compile.c
+      zend_execute.c
+      tests/bug27598.phpt:
+      Fixed bug #27598 (list() array key assignment causes HUGE memory leak)
+
+    * tests/bug27598.phpt
+      tests/bug27598.phpt:
+      
+      file bug27598.phpt was initially added on branch PHP_5_0.
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/object_handlers.phpt:
+      Fixed memory allocation bugs related to magic object handlers (__get(),
+      __set(),
+       ...)
+
+    * tests/object_handlers.phpt
+      tests/object_handlers.phpt:
+      
+      file object_handlers.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_object_handlers.c:
+      Fixed memory allocation bugs related to magic object handlers (__get(),
+      __set(), ...)
+
 2005-06-01  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_object_handlers.c
