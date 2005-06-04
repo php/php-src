@@ -35,6 +35,12 @@ static void zend_stream_stdio_closer(void *handle TSRMLS_DC)
 		fclose((FILE*)handle);
 }
 
+static long zend_stream_stdio_fteller(void *handle TSRMLS_DC)
+{
+	return ftell((FILE*) handle);
+}
+
+
 ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSRMLS_DC)
 {
 	if (zend_stream_open_function) {
@@ -83,6 +89,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
 		file_handle->handle.stream.handle = file_handle->handle.fp;
 		file_handle->handle.stream.reader = zend_stream_stdio_reader;
 		file_handle->handle.stream.closer = zend_stream_stdio_closer;
+		file_handle->handle.stream.fteller = zend_stream_stdio_fteller;
 
 		file_handle->handle.stream.interactive = isatty(fileno((FILE *)file_handle->handle.stream.handle));
 	}
@@ -120,4 +127,7 @@ ZEND_API int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC)
 	return 0;
 }
 
-
+ZEND_API long zend_stream_ftell(zend_file_handle *file_handle TSRMLS_DC)
+{
+	return file_handle->handle.stream.fteller(file_handle->handle.stream.handle TSRMLS_CC);
+}

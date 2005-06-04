@@ -494,6 +494,20 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 }
 
 
+ZEND_API int zend_get_scanned_file_offset(TSRMLS_D)
+{
+	if (yyin) {
+		int offset_in_buffer = (yy_c_buf_p - (YY_CURRENT_BUFFER)->yy_ch_buf);
+		int read_bytes = (YY_CURRENT_BUFFER)->yy_n_chars;
+		int offset_from_the_end = read_bytes - offset_in_buffer;
+
+		return zend_stream_ftell(yyin TSRMLS_CC) - offset_from_the_end;
+	} else {
+		return -1;
+	}
+}
+
+
 zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 {
 	zend_lex_state original_lex_state;
@@ -1013,6 +1027,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"empty" {
 	return T_EMPTY;
+}
+
+<ST_IN_SCRIPTING>"__halt_compiler" {
+	return T_HALT_COMPILER;
 }
 
 <ST_IN_SCRIPTING>"static" {
