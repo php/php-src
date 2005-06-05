@@ -1,3 +1,17 @@
+2005-06-04  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_stream.c
+      zend_stream.h
+      tests/halt01.phpt
+      tests/halt02.phpt
+      tests/halt03.phpt:
+      Thought I committed it ages ago...  Anyway, without further delays, the
+      final
+      __halt_compiler() patch
+
 2005-06-03  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug30394.phpt:
