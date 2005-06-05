@@ -1,3 +1,20 @@
+2005-06-04  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c:
+      __halt_compiler() patch interface
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.h
+      ZendEngine2/tests/halt01.phpt
+      ZendEngine2/tests/halt02.phpt
+      ZendEngine2/tests/halt03.phpt:
+      Thought I committed it ages ago...  Anyway, without further delays, the
+      final
+      __halt_compiler() patch
+
 2005-06-03  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/xml/tests/bug32001.phpt:
