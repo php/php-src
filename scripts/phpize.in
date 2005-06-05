@@ -114,7 +114,7 @@ phpize_copy_files()
  
   (cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
   (cd "$phpdir" && cp $FILES "$builddir")
-  (cd "$builddir" && cat ./build/libtool.m4 acinclude.m4 > aclocal.m4)
+  (cd "$builddir" && cat acinclude.m4 ./build/libtool.m4 > aclocal.m4)
 }
 
 phpize_replace_prefix()
