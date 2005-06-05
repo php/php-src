@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   and may cause segfault). (Tony)
 - Fixed bug #33072 (Add a safemode/open_basedir check for runtime
   "session.save_path" change using session_save_path() function). (Rasmus)
+- Fixed bug #33070 (Improved performance of bzdecompress() by several orders
+  of magnitude). (Ilia)
 - Fixed bug #33059 (crash when moving xml attribute set in dtd). (Ilia)
 - Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
