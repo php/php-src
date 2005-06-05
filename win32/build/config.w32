@@ -28,6 +28,14 @@ PATH_PROG('lemon');
 // avoid picking up midnight commander from cygwin
 PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
+// stick objects somewhere outside of the source tree
+ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
+if (PHP_OBJECT_OUT_DIR.length) {
+	if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
+		ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
+	}
+	PHP_OBJECT_OUT_DIR += '\\';
+}
 
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
@@ -99,19 +107,19 @@ ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
 // set up the build dir and DLL name
 if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
-	DEFINE("BUILD_DIR", "Debug_TS");
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
 	DEFINE("PHPDLL", "php5ts_debug.dll");
 	DEFINE("PHPLIB", "php5ts_debug.lib");
 } else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
-	DEFINE("BUILD_DIR", "Debug");
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
 	DEFINE("PHPDLL", "php5_debug.dll");
 	DEFINE("PHPLIB", "php5_debug.lib");
 } else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
-	DEFINE("BUILD_DIR", "Release_TS");
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
 	DEFINE("PHPDLL", "php5ts.dll");
 	DEFINE("PHPLIB", "php5ts.lib");
 } else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
-	DEFINE("BUILD_DIR", "Release");
+	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
 	DEFINE("PHPDLL", "php5.dll");
 	DEFINE("PHPLIB", "php5.lib");
 }
