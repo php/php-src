@@ -40,9 +40,6 @@
 #define PHP_BZ_ERRSTR  1
 #define PHP_BZ_ERRBOTH 2
 
-/* Blocksize of the decompression buffer */
-#define PHP_BZ_DECOMPRESS_SIZE 4096
-
 function_entry bz2_functions[] = {
 	PHP_FE(bzopen,       NULL)
 	PHP_FE(bzread,       NULL)
@@ -441,56 +438,49 @@ PHP_FUNCTION(bzcompress)
    Decompresses BZip2 compressed data */
 PHP_FUNCTION(bzdecompress)
 {
-	zval    **source,                             /* Source data to decompress */
-	        **zsmall;                             /* (Optional) user specified small */
-	char     *dest;                               /* Destination buffer, initially allocated */
-	int       error,                              /* Error container */
-	          iter = 1,                           /* Iteration count for the compression loop */
-			  size,                               /* Current size to realloc the dest buffer to */
-			  dest_len = PHP_BZ_DECOMPRESS_SIZE,  /* Size of the destination length */
-			  small    = 0,                       /* The actual small */
-			  argc     = ZEND_NUM_ARGS();         /* Argument count */
-	
-	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &source, &zsmall) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	char *source, *dest;
+	int source_len, error;
+	long small = 0;
+	unsigned int size = 0;
+	bz_stream bzs;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &small)) {
+		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(source);
-	
-	/* optional small argument handling */
-	if (argc > 1) {
-		convert_to_long_ex(zsmall);
-		small = Z_LVAL_PP(zsmall);
+	bzs.bzalloc = NULL;
+	bzs.bzfree = NULL;
+
+	if (BZ2_bzDecompressInit(&bzs, 0, small) != BZ_OK) {
+		RETURN_FALSE;
 	}
 
-	/* Depending on the size of the source buffer, either allocate
-	  the length of the source buffer or the a default decompression
-	  size */
-	dest = emalloc(PHP_BZ_DECOMPRESS_SIZE > Z_STRLEN_PP(source) ? PHP_BZ_DECOMPRESS_SIZE : Z_STRLEN_PP(source));
+	bzs.next_in = source;
+	bzs.avail_in = source_len;
 
-	/* (de)Compression Loop */	
-	do {
-		/* Handle the (re)allocation of the buffer */
-		size = dest_len * iter;
-		if (iter > 1) {
-			dest = erealloc(dest, size);
-		}
-		++iter;
-
-		/* Perform the decompression */
-		error = BZ2_bzBuffToBuffDecompress(dest, &size, Z_STRVAL_PP(source), Z_STRLEN_PP(source), small, 0);
-	} while (error == BZ_OUTBUFF_FULL);
+	/* in most cases bz2 offers at least 2:1 compression, so we use that as our base */
+	bzs.avail_out = source_len * 2;
+	bzs.next_out = dest = emalloc(bzs.avail_out + 1);
 	
-	if (error != BZ_OK) {
-		efree(dest);
-		RETURN_LONG(error);
-	} else {
-		/* we might have allocated a little to much, so erealloc the buffer 
-		 down to size, before returning it */
+	while ((error = BZ2_bzDecompress(&bzs)) == BZ_OK && bzs.avail_in > 0) {
+		/* compression is better then 2:1, need to allocate more memory */
+		bzs.avail_out = source_len;
+		size = (bzs.total_out_hi32 << 32) + bzs.total_out_lo32;
+		dest = erealloc(dest, size + bzs.avail_out + 1);
+		bzs.next_out = dest + size;
+	}
+
+	if (error == BZ_STREAM_END || error == BZ_OK) {
+		size = (bzs.total_out_hi32 << 32) + bzs.total_out_lo32;
 		dest = erealloc(dest, size + 1);
-		dest[size] = 0;
-		RETURN_STRINGL(dest, size, 0);
+		dest[size] = '\0';
+		RETVAL_STRINGL(dest, size, 0);
+	} else { /* real error */
+		efree(dest);
+		RETVAL_LONG(error);
 	}
+
+	BZ2_bzDecompressEnd(&bzs);
 }
 /* }}} */
 
