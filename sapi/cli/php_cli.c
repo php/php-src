@@ -385,8 +385,13 @@ static void php_cli_usage(char *argv0)
 	            "       %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
 	            "       %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
 	            "       %s [options] -- [args...]\n"
+	            "       %s [options] -a\n"
 	            "\n"
+#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+				"  -a               Run as interactive shell\n"
+#else
 				"  -a               Run interactively\n"
+#endif
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -410,7 +415,7 @@ static void php_cli_usage(char *argv0)
 				"  args...          Arguments passed to script. Use -- args when first argument\n"
 				"                   starts with - or script is read from stdin\n"
 				"\n"
-				, prog, prog, prog, prog, prog);
+				, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
 
