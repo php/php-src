@@ -835,10 +835,12 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 }
 /* }}} */
 
+#if wez_0
 static void stream_closer_for_zend(void *handle TSRMLS_DC)
 {
 	php_stream_close((php_stream*)handle);
 }
+#endif
 
 static long stream_fteller_for_zend(void *handle TSRMLS_DC)
 {
