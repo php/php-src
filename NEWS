@@ -129,6 +129,8 @@ PHP                                                                        NEWS
   (Uwe Schindler)
 - Fixed bug #32429 (method_exists() always return TRUE if __call method
   exists). (Dmitry)
+- Fixed bug #32428 (The @ warning error supression operator is broken).
+  (Dmitry)
 - Fixed bug #32427 (Interfaces are not allowed 'static' access modifier).
   (Dmitry)
 - Fixed bug #32109 ($_POST is not populated in multithreaded environment).
