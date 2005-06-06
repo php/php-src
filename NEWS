@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed bug #33200 (preg_replace(): magic_quotes_sybase=On makes 'e' modifier
   misbehave). (Jani)
 - Fixed bug #33185 (--enable-session=shared does not build). (Jani)
+- Fixed bug #33171 (foreach enumerates private fields declared in base
+  classes). (Dmitry)
 - Fixed bug #33164 (Soap extension incorrectly detects HTTP/1.1). (Ilia)
 - Fixed bug #33116 (crash when assigning class name to global variable in
   __autoload). (Dmitry)
