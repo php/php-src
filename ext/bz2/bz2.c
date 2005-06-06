@@ -441,7 +441,7 @@ PHP_FUNCTION(bzdecompress)
 	char *source, *dest;
 	int source_len, error;
 	long small = 0;
-	unsigned int size = 0;
+	unsigned long long size = 0;
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &small)) {
