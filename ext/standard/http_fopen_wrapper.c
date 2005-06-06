@@ -107,6 +107,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect, have_header = 0;
 
+	tmp_line[0] = '\0';
+
  	if (redirect_max < 1) {
  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Circular redirect, aborting.");
  		return NULL;
