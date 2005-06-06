@@ -2881,8 +2881,8 @@ int zend_return_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (!(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
-				zend_error(E_STRICT, "Only variable references should be returned by reference");
 				PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
+				zend_error(E_STRICT, "Only variable references should be returned by reference");
 				goto return_by_value;
 			}
 		}
