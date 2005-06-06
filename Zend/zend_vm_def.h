@@ -3110,13 +3110,13 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				ZEND_VM_CONTINUE_JMP();
 			}
 			iter->funcs->get_current_data(iter, &value TSRMLS_CC);
+			if (EG(exception)) {
+				array->refcount--;
+				zval_ptr_dtor(&array);
+				ZEND_VM_NEXT_OPCODE();
+			}
 			if (!value) {
 				/* failure in get_current_data */
-				if (EG(exception)) {
-					array->refcount--;
-					zval_ptr_dtor(&array);
-					ZEND_VM_NEXT_OPCODE();
-				}
 				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
 				ZEND_VM_CONTINUE_JMP();
 			}

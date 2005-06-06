@@ -120,6 +120,8 @@ PHP                                                                        NEWS
 - Fixed bug with $HTTP_RAW_POST_DATA not getting set. (Brian)
 - Fixed bug in mysql::client_version(). (Georg)
 - Fixed ZTS destruction. (Marcus)
+- Fixed bug #32993 (implemented Iterator function current() don't throw
+  exception). (Dmitry)
 - Fixed bug #32924 (file included with "auto_prepend_file" can be included
   with require_once() or include_once()). (Stas)
 - Fixed bug #32833 (Invalid opcode). (Dmitry)
