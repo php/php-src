@@ -151,7 +151,9 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 				EG(objects_store).object_buckets[handle].destructor_called = 1;
 
 				if (obj->dtor) {
+					zobject->refcount++;
 					obj->dtor(obj->object, handle TSRMLS_CC);
+					zobject->refcount--;
 				}
 			}
 			if (obj->refcount == 1) {
