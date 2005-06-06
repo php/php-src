@@ -103,6 +103,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
 
+	tmp_line[0] = '\0';
+
 	if (redirect_max < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Redirection limit reached, aborting.");
 		return NULL;
