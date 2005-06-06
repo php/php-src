@@ -73,6 +73,10 @@ function_entry mcve_functions[] = {
 	PHP_FE(m_connect,			NULL)
 	PHP_FE(m_transnew,			NULL)
 	PHP_FE(m_transparam,			NULL)
+#if LIBMONETRA_VERSION >= 050000
+	PHP_FE(m_transkeyval,			NULL)
+	PHP_FE(m_validateidentifier,		NULL)
+#endif
 	PHP_FE(m_transsend,			NULL)
 	PHP_FE(m_ping,				NULL)
 	PHP_FE(m_responseparam,			NULL)
@@ -550,7 +554,7 @@ PHP_MINIT_FUNCTION(mcve)
 PHP_MINFO_FUNCTION(mcve)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "mcve support", "enabled");
+	php_info_print_table_row(2, "mcve/monetra support", "enabled");
 	php_info_print_table_row(2, "version", PHP_MCVE_VERSION);
 	php_info_print_table_end();
 }
@@ -589,6 +593,11 @@ PHP_FUNCTION(m_initconn)
 
 	MCVE_InitConn(conn);
 
+/* Since the identifiers are pointer addresses, we need to validate it by
+ * checking our linked list in PHP, since we don't want to cause segfaults */
+#if LIBMONETRA_VERSION >= 050000
+	M_ValidateIdentifier(conn, 1);
+#endif
 	ZEND_REGISTER_RESOURCE(return_value, conn, le_conn);
 }
 /* }}} */
@@ -890,7 +899,7 @@ PHP_FUNCTION(m_connect)
 PHP_FUNCTION(m_connectionerror)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
@@ -903,7 +912,7 @@ PHP_FUNCTION(m_connectionerror)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -965,8 +974,53 @@ PHP_FUNCTION(m_transnew)
 }
 /* }}} */
 
+#if LIBMONETRA_VERSION >= 050000
+/* {{{ proto int m_validateidentifier(resource conn, int tf)
+   Whether or not to validate the passed identifier on any transaction it is passed  to
+*/
+PHP_FUNCTION(m_validateidentifier)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg1, **arg2;
+	
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+
+	convert_to_long_ex(arg2);
+	retval = M_ValidateIdentifier(conn, (int)Z_LVAL_PP(arg2));
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto int m_transkeyval(resource conn, long identifier, string key, string value)
+   Add key/value pair to a transaction.  Replaces deprecated transparam() */
+PHP_FUNCTION(m_transkeyval)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg1, **arg2, **arg3, **arg4;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+	
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_string_ex(arg4);
+	
+	retval = M_TransKeyVal(conn, (long)Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_STRVAL_PP(arg4));
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+#endif
+
 /* {{{ proto int m_transparam(resource conn, long identifier, int key, ...)
-   Add a parameter to a transaction */
+   Add a parameter to a transaction (deprecated) */
 PHP_FUNCTION(m_transparam)
 {
 	MCVE_CONN *conn;
@@ -1076,7 +1130,7 @@ PHP_FUNCTION(m_transsend)
 PHP_FUNCTION(m_responseparam)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2, **arg3;
 
 	if (ZEND_NUM_ARGS() != 3 ||
@@ -1093,7 +1147,7 @@ PHP_FUNCTION(m_responseparam)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -1103,7 +1157,7 @@ PHP_FUNCTION(m_responseparam)
 PHP_FUNCTION(m_getuserparam)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2, **arg3;
 
 	if (ZEND_NUM_ARGS() != 3 ||
@@ -1120,7 +1174,7 @@ PHP_FUNCTION(m_getuserparam)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -1279,7 +1333,7 @@ PHP_FUNCTION(m_transactionid)
 PHP_FUNCTION(m_transactionauth)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
@@ -1294,7 +1348,7 @@ PHP_FUNCTION(m_transactionauth)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -1304,7 +1358,7 @@ PHP_FUNCTION(m_transactionauth)
 PHP_FUNCTION(m_transactiontext)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
@@ -1318,7 +1372,7 @@ PHP_FUNCTION(m_transactiontext)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -1877,7 +1931,7 @@ PHP_FUNCTION(m_bt)
 PHP_FUNCTION(m_getcell)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2, **arg3, **arg4;
 
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
@@ -1894,7 +1948,7 @@ PHP_FUNCTION(m_getcell)
 	if (retval == NULL) {
 		RETURN_STRING("", 1);
 	} else {
-		RETURN_STRING(retval, 1);
+		RETURN_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -1904,7 +1958,7 @@ PHP_FUNCTION(m_getcell)
 PHP_FUNCTION(m_getcellbynum)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2, **arg3, **arg4;
 
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
@@ -1921,7 +1975,7 @@ PHP_FUNCTION(m_getcellbynum)
 	if (retval == NULL) {
 		RETURN_STRING("", 1);
 	} else {
-		RETURN_STRING(retval, 1);
+		RETURN_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -2015,7 +2069,7 @@ PHP_FUNCTION(m_parsecommadelimited)
 PHP_FUNCTION(m_getcommadelimited)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
@@ -2027,7 +2081,7 @@ PHP_FUNCTION(m_getcommadelimited)
 
 	retval = MCVE_GetCommaDelimited(conn, Z_LVAL_PP(arg2));
 
-	RETURN_STRING(retval, 1);
+	RETURN_STRING(estrdup(retval), 0);
 }
 /* }}} */
 
@@ -2036,7 +2090,7 @@ PHP_FUNCTION(m_getcommadelimited)
 PHP_FUNCTION(m_getheader)
 {
 	MCVE_CONN *conn;
-	char *retval;
+	const char *retval;
 	zval **arg1, **arg2, **arg3;
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
@@ -2049,7 +2103,7 @@ PHP_FUNCTION(m_getheader)
 
 	retval = MCVE_GetHeader(conn, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
 
-	RETURN_STRING(retval, 1);
+	RETURN_STRING(estrdup(retval), 0);
 }
 /* }}} */
 
@@ -2337,7 +2391,7 @@ PHP_FUNCTION(m_uwait)
    Get a textual representation of the return_code */
 PHP_FUNCTION(m_text_code)
 {
-	char *retval;
+	const char *retval;
 	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
@@ -2350,7 +2404,7 @@ PHP_FUNCTION(m_text_code)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -2359,7 +2413,7 @@ PHP_FUNCTION(m_text_code)
    Get a textual representation of the return_avs */
 PHP_FUNCTION(m_text_avs)
 {
-	char *retval;
+	const char *retval;
 	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
@@ -2372,7 +2426,7 @@ PHP_FUNCTION(m_text_avs)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
@@ -2381,7 +2435,7 @@ PHP_FUNCTION(m_text_avs)
    Get a textual representation of the return_cv */
 PHP_FUNCTION(m_text_cv)
 {
-	char *retval;
+	const char *retval;
 	zval **arg;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
@@ -2394,7 +2448,7 @@ PHP_FUNCTION(m_text_cv)
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
 	} else {
-		RETVAL_STRING(retval, 1);
+		RETVAL_STRING(estrdup(retval), 0);
 	}
 }
 /* }}} */
