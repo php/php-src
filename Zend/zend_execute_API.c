@@ -392,15 +392,17 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D)
 
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 {
+	zval *zv = *zval_ptr;
+
 #if DEBUG_ZEND>=2
 	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
 #endif
-	(*zval_ptr)->refcount--;
-	if ((*zval_ptr)->refcount==0) {
-		zval_dtor(*zval_ptr);
-		safe_free_zval_ptr_rel(*zval_ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
-	} else if ((*zval_ptr)->refcount == 1) {
-		(*zval_ptr)->is_ref = 0;
+	zv->refcount--;
+	if (zv->refcount==0) {
+		zval_dtor(zv);
+		safe_free_zval_ptr_rel(zv ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
+	} else if (zv->refcount == 1) {
+		zv->is_ref = 0;
 	}
 }
 

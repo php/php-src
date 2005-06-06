@@ -82,6 +82,8 @@ PHP                                                                        NEWS
   access errors). (Jani, ric at arizona dot edu)
 - Fixed bug #32608 (html_entity_decode() converts single quotes even if
   ENT_NOQUOTES is given). (Ilia)
+- Fixed bug #32596 (Segfault/Memory Leak by getClass (etc) in __destruct).
+  (Dmitry)
 - Fixed bug #32591 (ext/mysql: Unsatisfied symbol: ntohs with HP-UX). (Jani)
 - Fixed bug #32589 (Possible crash inside imap_mail_compose, with charsets).
   (Ilia)
