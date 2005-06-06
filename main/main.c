@@ -857,9 +857,14 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 		handle->free_filename = 0;
 		handle->handle.stream.handle = stream;
 		handle->handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
-		handle->handle.stream.closer = stream_closer_for_zend;
+		/* don't set this; all streams are tracked as part of the resource system,
+		 * and we'll end up double-free'ing them if we allow zend to close them
+		 * down after the resource list has been cleaned up */
+		handle->handle.stream.closer = NULL; /* stream_closer_for_zend; */
 		handle->handle.stream.fteller = stream_fteller_for_zend;
 		handle->handle.stream.interactive = 0;
+		/* suppress warning if this stream is not explicitly closed */
+		php_stream_auto_cleanup(stream);
 
 		return SUCCESS;
 	}
