@@ -58,6 +58,8 @@ PHP                                                                        NEWS
 - Fixed bug #32809 (Missing T1LIB support on Windows). (Edin)
 - Fixed bug #32802 (General cookie overrides more specific cookie). (Ilia)
 - Fixed bugs #32800, #32830 (ext/odbc: Problems with 64bit systems). (Jani)
+- Fixed bug #32799 (crash: calling the corresponding global var during the
+  destruct). (Dmitry)
 - Fixed bug #32776 (SOAP doesn't support one-way operations). (Dmitry)
 - Fixed bug #32773 (GMP functions break when second parameter is 0). (Stas)
 - Fixed bug #32759 (incorrect determination of default value (COM)). (Wez)
