@@ -7,7 +7,7 @@ PHP 4                                                                      NEWS
   them sort based on the current locale. (Derick)
 - Changed sha1_file() and md5_file() functions to use streams instead of 
   low level IO. (Uwe)
-- Fixed memory curruptions when using references in a wrong way. (Marcus,
+- Fixed memory corruptions when using references in a wrong way. (Marcus,
   Dmitry, Derick)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed bug #33222 (segfault when CURL handle is closed in a callback). (Tony)
@@ -18,6 +18,8 @@ PHP 4                                                                      NEWS
   misbehave). (Jani)
 - Fixed bug #33072 (Add a safemode/open_basedir check for runtime save_path 
   change) (Rasmus)
+- Fixed bug #33070 (Improved performance of bzdecompress() by several orders
+  of magnitude). (Ilia)
 - Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
 - Fixed bug #33019 (socket errors cause memory leaks in php_strerror()). 
