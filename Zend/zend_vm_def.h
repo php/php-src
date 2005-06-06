@@ -18,6 +18,11 @@
 
 /* $Id$ */
 
+/* If you change this file, please regenerate the zend_vm_execute.h and
+ * zend_vm_opcodes.h files by running:
+ * php zend_vm_gen.php
+ */
+
 ZEND_VM_HANDLER(1, ZEND_ADD, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
