@@ -1,3 +1,30 @@
+2005-06-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/mysql/config.w32
+      ext/mysqli/config.w32
+      ext/pgsql/config.w32:
+      fixes for #33251
+
+2005-06-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/bz2/bz2.c
+      ext/bz2/bz2.c:
+      MFH: Fixed bug #33070 (Improved performance of bzdecompress() by several
+      orders of magnitude).
+
+    * ext/bz2/bz2.c:
+      Fixed bug #33070 (Improved performance of bzdecompress() by several orders
+      of magnitude).
+
+2005-06-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * scripts/phpize.in
+      scripts/phpize.m4:
+      - Proper fix for phpize when dealing with PECL
+
 2005-06-04  Zeev Suraski  <zeev@zend.com>
 
     * main/main.c:
