@@ -406,27 +406,117 @@ SOURCE=..\main\win95nt.h
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\chartables.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
 # ADD CPP /D "STATIC" /D "SUPPORT_UTF8"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\get.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
 # ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\maketables.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
 # ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\pcre.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
 # ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\pcre\pcrelib\study.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D LINK_SIZE=2 /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D LINK_SIZE=2 /D POSIX_MALLOC_THRESHOLD=10 /D MATCH_LIMIT=10000000
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
+
 # ADD CPP /D "STATIC" /D "SUPPORT_UTF8" /D LINK_SIZE=2
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"
