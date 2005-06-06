@@ -336,7 +336,9 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING &&
 	    !zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len TSRMLS_CC) &&
 	    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
-	      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this")))) {
+	      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this"))) &&
+	    (CG(active_op_array)->last == 0 ||
+	     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 		result->op_type = IS_CV;
 		result->u.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len);
 		result->u.EA.type = 0;
