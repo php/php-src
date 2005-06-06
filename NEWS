@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
+- Fixed bug #33242 (Mangled error message when stream fails). (Derick)
 - Fixed bug #33222 (segfault when CURL handle is closed in a callback). (Tony)
 - Fixed bug #33214 (odbc_next_result does not signal SQL errors with 
   2-statement SQL batches). (rich at kastle dot com, Tony)

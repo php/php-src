@@ -101,6 +101,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *transport_string, *errstr = NULL;
 	int transport_len, have_header = 0, request_fulluri = 0;
 
+	tmp_line[0] = '\0';
+
 	if (redirect_max < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Circular redirect, aborting.");
 		return NULL;
