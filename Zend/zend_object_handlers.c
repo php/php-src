@@ -214,9 +214,14 @@ ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name 
 	if (!property_info) {
 		return FAILURE;
 	}
-	if (prop_info_name[0] == '\0' && prop_info_name[1] != '*' && !(property_info->flags & ZEND_ACC_PRIVATE)) {
-		/* we we're looking for a private prop but found a non private one of the same name */
-		return FAILURE;
+	if (prop_info_name[0] == '\0' && prop_info_name[1] != '*') {
+		if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
+			/* we we're looking for a private prop but found a non private one of the same name */
+			return FAILURE;
+		} else if (strcmp(prop_info_name+1, property_info->name+1)) {
+			/* we we're looking for a private prop but found a private one of the same name but another class */
+			return FAILURE;
+		}
 	}
 	return zend_verify_property_access(property_info, zobj->ce TSRMLS_CC) ? SUCCESS : FAILURE;
 }
