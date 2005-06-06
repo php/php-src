@@ -44,6 +44,9 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
+#if HAVE_SYS_MKDEV_H
+# include <sys/mkdev.h>
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 
