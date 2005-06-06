@@ -244,7 +244,9 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 			fclose(fh->handle.fp);
 			break;
 		case ZEND_HANDLE_STREAM:
-			fh->handle.stream.closer(fh->handle.stream.handle TSRMLS_CC);
+			if (fh->handle.stream.closer) {
+				fh->handle.stream.closer(fh->handle.stream.handle TSRMLS_CC);
+			}
 			break;
 		case ZEND_HANDLE_FILENAME:
 			/* We're only supposed to get here when destructing the used_files hash,
