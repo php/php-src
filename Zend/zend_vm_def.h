@@ -2016,10 +2016,10 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		if (OP1_TYPE == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
-				zend_error(E_STRICT, "Only variable references should be returned by reference");
 				if (OP1_TYPE == IS_VAR && free_op1.var == NULL) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
+				zend_error(E_STRICT, "Only variable references should be returned by reference");
 				ZEND_VM_C_GOTO(return_by_value);
 			}
 		}
