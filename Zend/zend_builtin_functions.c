@@ -1592,7 +1592,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 	array_init(return_value);
 
 	while (ptr) {
-   		class_name = call_type = NULL;   
+		char *free_class_name = NULL;
+
+		class_name = call_type = NULL;   
 		arg_array = NULL;
 		if (ptr->op_array) {
 			filename = ptr->op_array->filename;
@@ -1611,6 +1613,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 			        Z_OBJ_HT_P(ptr->object)->get_class_name(ptr->object, &class_name, &class_name_len, 0 TSRMLS_CC) != SUCCESS) {
 
 					class_name = Z_OBJCE(*ptr->object)->name;
+				} else {
+					free_class_name = class_name;
 				}
 				call_type = "->";
 			} else if (ptr->function_state.function->common.scope) {
@@ -1676,6 +1680,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 		include_filename = filename;
 		ptr = ptr->prev_execute_data;
 		++indent;
+		if (free_class_name) {
+			efree(free_class_name);
+		}
 	}
 }
 
