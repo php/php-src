@@ -1,3 +1,87 @@
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - Regenerate VM files and add warning about regeneration
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h:
+      - MH44: Problems with user defined error handler and wrong usage of
+      references
+
+2005-06-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      tests/bug32428.phpt:
+      Fixed bug #32428 (The @ warning error supression operator is broken)
+
+    * zend_objects_API.c
+      zend_objects_API.c
+      tests/bug32799.phpt:
+      Fixed bug #32799 (crash: calling the corresponding global var during the
+      destruct)
+
+    * tests/bug32799.phpt
+      tests/bug32799.phpt:
+      
+      file bug32799.phpt was initially added on branch PHP_5_0.
+
+    * tests/bug32596.phpt:
+      Added test for bug #32596 (Segfault/Memory Leak by getClass (etc) in
+      __destruct)
+
+    * tests/bug32596.phpt
+      tests/bug32596.phpt:
+      
+      file bug32596.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute_API.c:
+      Fixed bug #32596 (Segfault/Memory Leak by getClass (etc) in __destruct)
+
+    * (PHP_5_0)
+      tests/bug32993.phpt:
+      Added test for bug #32993 (implemented Iterator function current() don't
+      throw
+        exception)
+
+    * tests/bug32993.phpt
+      tests/bug32993.phpt:
+      
+      Fixed bug #32993 (implemented Iterator function current() don't throw
+      exception)
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed bug #32993 (implemented Iterator function current() don't throw
+      exception)
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug33171.phpt:
+      Fixed bug #33171 (foreach enumerates private fields declared in base
+      classes)
+
+    * tests/bug33171.phpt
+      tests/bug33171.phpt:
+      
+      file bug33171.phpt was initially added on branch PHP_5_0.
+
+2005-06-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_language_scanner.l:
+      Avoid double-freeing streams.
+      This can happen because all streams are registered as resources;
+      the engine also tracks them in the open_files global.
+      
+      Avoid the potential for double-freeing by simply making streams exposed to
+      the
+      engine have no closer for the engine to call; they will already be in the
+      resource list, and thus will be shut down properly at request end.
+
 2005-06-04  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.h
