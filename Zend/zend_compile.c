@@ -1079,9 +1079,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 
 	if (CG(doc_comment)) {
-		CG(active_op_array)->doc_comment = estrndup(CG(doc_comment), CG(doc_comment_len));
+		CG(active_op_array)->doc_comment = CG(doc_comment);
 		CG(active_op_array)->doc_comment_len = CG(doc_comment_len);
-		RESET_DOC_COMMENT();
+		CG(doc_comment) = NULL;
+		CG(doc_comment_len) = 0;
 	}
 }
 
@@ -2534,9 +2535,10 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	CG(implementing_class) = opline->result;
 
 	if (CG(doc_comment)) {
-		CG(active_class_entry)->doc_comment = estrndup(CG(doc_comment), CG(doc_comment_len));
+		CG(active_class_entry)->doc_comment = CG(doc_comment);
 		CG(active_class_entry)->doc_comment_len = CG(doc_comment_len);
-		RESET_DOC_COMMENT();
+		CG(doc_comment) = NULL;
+		CG(doc_comment_len) = 0;
 	}
 }
 
