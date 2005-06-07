@@ -2263,8 +2263,8 @@ int zend_assign_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		PZVAL_LOCK(*value_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
+		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return zend_assign_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 
