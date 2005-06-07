@@ -85,8 +85,6 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 
-#define USE_ZEND_ALLOC 1
-
 #if USE_ZEND_ALLOC
 
 /* Standard wrapper macros */
