@@ -1,3 +1,233 @@
+2005-06-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/posix/config.m4
+      ext/posix/posix.c:
+      fix build on Solaris
+
+2005-06-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/main.c:
+      silence warning
+
+2005-06-06  Brad House  <brad@mainstreetsoftworks.com>
+
+    * (PHP_5_0)
+      ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      libmonetra 5.0 sync.
+      added m_validateidentifier, which is enabled by default to keep invalid
+      pointer addresses from causing PHP to crash
+      kept compatability with older versions of libmonetra.
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      libmonetra-5.0 sync.
+      added m_validateidentifier, which is enabled by default to keep invalid
+      pointer addresses from causing PHP to crash
+      kept compatability with older versions of libmonetra.
+
+2005-06-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/bz2/bz2.c
+      ext/bz2/bz2.c:
+      MFH: Better storage size for output length.
+
+    * ext/bz2/bz2.c:
+      Better storage size for output length.
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - Regenerate VM files and add warning about regeneration
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h:
+      - MH44: Problems with user defined error handler and wrong usage of
+      references
+
+2005-06-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/type.c:
+      MFH: Fixed strval to not print notices on strval(array()).
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      - MFH: Fixed bug #33242 (Mangled error message when stream fails).
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c:
+      - Fixed bug #33242 (Mangled error message when stream fails).
+
+2005-06-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      scripts/Makefile.frag:
+      ws
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      Zend/zend_execute.c:
+      - Swap lines so that user defined error handlers don't cause memory errors
+
+    * (PHP_4_4)
+      scripts/Makefile.frag:
+      - We've man pages just fine
+
+2005-06-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug32428.phpt:
+      Fixed bug #32428 (The @ warning error supression operator is broken)
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS:
+      - Update NEWS with the bz fix
+
+2005-06-06  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_4)
+      scripts/Makefile.frag:
+      MFH: Fix bug #33166 for other branches and new bug #33255, no man pages for
+      4.4
+
+    * (PHP_5_0)
+      scripts/Makefile.frag:
+      Fix bug #33166 for other branches and new bug #33255
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      ext/bz2/bz2.c:
+      - Merge back changes which where in 4.3 but somehow didn't make it into the
+      new
+        branch.
+
+2005-06-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug32799.phpt
+      ZendEngine2/tests/bug32799.phpt:
+      
+      file bug32799.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/tests/bug32799.phpt:
+      Fixed bug #32799 (crash: calling the corresponding global var during the
+      destruct)
+
+    * ZendEngine2/tests/bug32596.phpt:
+      Added test for bug #32596 (Segfault/Memory Leak by getClass (etc) in
+      __destruct)
+
+    * ZendEngine2/tests/bug32596.phpt
+      ZendEngine2/tests/bug32596.phpt:
+      
+      file bug32596.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #32596 (Segfault/Memory Leak by getClass (etc) in __destruct)
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      Zend/zend_extensions.h:
+      - Bumb ZEND EXT API NO for Stanislav
+
+2005-06-06  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_4)
+      win32/php4dllts.dsp:
+      Sync with recent config.m4 changes
+
+2005-06-06  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_compile.c
+      Zend/zend_compile.h
+      Zend/zend_execute.c
+      Zend/zend_execute_globals.h
+      Zend/zend_language_parser.y:
+      - Commit the reference problem bug fix.
+
+    * (PHP_4_4)
+      configure.in
+      main/php_version.h:
+      - Rename version.
+
+2005-06-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug32993.phpt:
+      Added test for bug #32993 (implemented Iterator function current() don't
+      throw
+        exception)
+
+    * ZendEngine2/tests/bug32993.phpt
+      ZendEngine2/tests/bug32993.phpt:
+      
+      Fixed bug #32993 (implemented Iterator function current() don't throw
+      exception)
+
+    * NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed bug #32993 (implemented Iterator function current() don't throw
+      exception)
+
+    * ZendEngine2/tests/bug33171.phpt
+      ZendEngine2/tests/bug33171.phpt:
+      
+      file bug33171.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug33171.phpt:
+      Fixed bug #33171 (foreach enumerates private fields declared in base
+      classes)
+
+2005-06-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      - Expose -a as special mode and show whether it is a shell or not
+
+2005-06-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/php_streams_int.h:
+      Don't crash when compiled with the zend memory manager disabled.
+
+    * ZendEngine2/zend_language_scanner.l
+      main/main.c:
+      Avoid double-freeing streams.
+      This can happen because all streams are registered as resources;
+      the engine also tracks them in the open_files global.
+      
+      Avoid the potential for double-freeing by simply making streams exposed to
+      the
+      engine have no closer for the engine to call; they will already be in the
+      resource list, and thus will be shut down properly at request end.
+
 2005-06-05  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/mysql/config.w32
