@@ -1376,10 +1376,10 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
-		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		if (free_op2.var == NULL) {
 			PZVAL_LOCK(*value_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
+		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
 	}
 
