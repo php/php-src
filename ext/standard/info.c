@@ -465,6 +465,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Debug Build", "no" );
 #endif
 
+#if USE_ZEND_ALLOC
+		php_info_print_table_row(2, "Zend Memory Manager", "enabled" );
+#else
+		php_info_print_table_row(2, "Zend Memory Manager", "disabled" );
+#endif
+
 #ifdef ZTS
 		php_info_print_table_row(2, "Thread Safety", "enabled" );
 #else
