@@ -623,16 +623,6 @@ else
   ZEND_DEBUG=no
 fi
 
-PHP_ARG_ENABLE(zend-memory-manager,whether to enable the Zend memory manager,
-[  --disable-zend-memory-manager
-                          Disable the Zend memory manager (DEVELOPERS ONLY)],yes, no)
-
-if test "$PHP_ZEND_MEMORY_MANAGER" = "yes"; then
-  AC_DEFINE(USE_ZEND_ALLOC, 1, [ ])
-else
-  AC_DEFINE(USE_ZEND_ALLOC, 0, [ ])
-fi
-
 PHP_ARG_WITH(layout,[layout of installed files],
 [  --with-layout=TYPE      Set how installed files will be laid out.  Type is
                           one of "PHP" or "GNU" [TYPE=PHP]], PHP, no)
