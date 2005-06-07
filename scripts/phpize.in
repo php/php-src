@@ -2,8 +2,8 @@
 
 # Variable declaration
 prefix='@prefix@'
-phpdir="$prefix/lib/php/build"
-includedir="$prefix/include/php"
+phpdir="@libdir@/build"
+includedir="@includedir@/php"
 builddir="`pwd`"
 
 FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4"
