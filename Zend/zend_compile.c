@@ -1155,9 +1155,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 
 	if (CG(doc_comment)) {
-		CG(active_op_array)->doc_comment = estrndup(CG(doc_comment), CG(doc_comment_len));
+		CG(active_op_array)->doc_comment = CG(doc_comment);
 		CG(active_op_array)->doc_comment_len = CG(doc_comment_len);
-		RESET_DOC_COMMENT();
+		CG(doc_comment) = NULL;
+		CG(doc_comment_len) = 0;
 	}
 }
 
@@ -2611,9 +2612,10 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	CG(implementing_class) = opline->result;
 
 	if (CG(doc_comment)) {
-		CG(active_class_entry)->doc_comment = estrndup(CG(doc_comment), CG(doc_comment_len));
+		CG(active_class_entry)->doc_comment = CG(doc_comment);
 		CG(active_class_entry)->doc_comment_len = CG(doc_comment_len);
-		RESET_DOC_COMMENT();
+		CG(doc_comment) = NULL;
+		CG(doc_comment_len) = 0;
 	}
 }
 
@@ -2745,9 +2747,10 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	}
 
 	if (CG(doc_comment)) {
-		comment = estrndup(CG(doc_comment), CG(doc_comment_len));
+		comment = CG(doc_comment);
 		comment_len = CG(doc_comment_len);
-		RESET_DOC_COMMENT();
+		CG(doc_comment) = NULL;
+		CG(doc_comment_len) = 0;
 	}
 
 	zend_declare_property_ex(CG(active_class_entry), var_name->u.constant.value.str.val, var_name->u.constant.value.str.len, property, access_type, comment, comment_len TSRMLS_CC);

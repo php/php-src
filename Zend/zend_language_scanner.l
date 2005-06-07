@@ -1485,6 +1485,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"/**"{WHITESPACE} {
 	CG(comment_start_line) = CG(zend_lineno);
+	RESET_DOC_COMMENT();
 	BEGIN(ST_DOC_COMMENT);
 	yymore();
 }
@@ -1501,7 +1502,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_DOC_COMMENT>"*/" {
-	CG(doc_comment) = yytext;     /* no copying - intentional */
+	CG(doc_comment) = estrndup(yytext, yyleng);
 	CG(doc_comment_len) = yyleng;
 	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
