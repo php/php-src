@@ -28,6 +28,8 @@ function test($use_extract) {
 
 test(false);
 test(true);
+
+?>
 --EXPECT--
 int(1)
 int(1)
