@@ -33,10 +33,12 @@ AC_DEFUN([PHP_PROG_LEMON],[
         fi
       done
     ])
+  else
+    lemon_version=none
   fi
   case $php_cv_lemon_version in
     ""|invalid[)]
-      lemon_msg="lemon versions supported for regeneration of libsqlite parsers: $lemon_version_list (found $lemon_version)."
+      lemon_msg="lemon versions supported for regeneration of libsqlite parsers: $lemon_version_list (found: $lemon_version)."
       AC_MSG_WARN([$lemon_msg])
       LEMON="exit 0;"
       ;;

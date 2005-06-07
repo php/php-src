@@ -17,10 +17,12 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
         fi
       done
     ])
+  else
+    bison_version=none
   fi
   case $php_cv_bison_version in
     ""|invalid[)]
-      bison_msg="bison versions supported for regeneration of the Zend/PHP parsers: $bison_version_list  (found $bison_version)."
+      bison_msg="bison versions supported for regeneration of the Zend/PHP parsers: $bison_version_list  (found: $bison_version)."
       AC_MSG_WARN([$bison_msg])
       YACC="exit 0;"
       ;;
