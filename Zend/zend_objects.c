@@ -114,6 +114,8 @@ ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
 static void zval_add_ref_or_clone(zval **p)
 {
 	if (Z_TYPE_PP(p) == IS_OBJECT) {
+		TSRMLS_FETCH();
+
 		if (Z_OBJ_HANDLER_PP(p, clone_obj) == NULL) {
 			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_PP(p)->name);
 		} else {
