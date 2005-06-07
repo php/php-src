@@ -4,7 +4,7 @@
 #
 
 phpincludedir = $(includedir)/php
-phpbuilddir = $(prefix)/lib/php/build
+phpbuilddir = $(libdir)/build
 
 BUILD_FILES = \
 	scripts/phpize.m4 \
