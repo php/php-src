@@ -135,6 +135,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #32109 ($_POST is not populated in multithreaded environment).
   (Moriyoshi)
+- Fixed bug #32021 (Crash caused by range('', 'z')). (Derick)
 - Fixed bug #31478 (segfault with empty() / isset()). (Moriyoshi)
 - Fixed bug #31033 (php:function(string, nodeset) with xsl:key crashes PHP).
   (Rob)
