@@ -1173,6 +1173,7 @@ PHP_FUNCTION(sqlite_popen)
 	}
 	if (errmsg) {
 		zval_dtor(errmsg);
+		ZVAL_NULL(errmsg);
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
@@ -1248,6 +1249,7 @@ PHP_FUNCTION(sqlite_open)
 	}
 	if (errmsg) {
 		zval_dtor(errmsg);
+		ZVAL_NULL(errmsg);
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
@@ -1302,6 +1304,7 @@ PHP_FUNCTION(sqlite_factory)
 	}
 	if (errmsg) {
 		zval_dtor(errmsg);
+		ZVAL_NULL(errmsg);
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
