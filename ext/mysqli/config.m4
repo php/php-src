@@ -11,9 +11,10 @@ PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
 
 if test "$PHP_MYSQLI" != "no"; then
 
-  if test "$PHP_MYSQL" = "yes"; then
-    AC_MSG_ERROR([--with-mysql (using bundled libs) can not be used together with --with-mysqli.])
-  fi
+dnl there are no mysql libs currently bundled with PHP.. --Jani
+dnl  if test "$PHP_MYSQL" = "yes"; then
+dnl    AC_MSG_ERROR([--with-mysql (using bundled libs) can not be used together with --with-mysqli.])
+dnl  fi
 
   if test "$PHP_MYSQLI" = "yes"; then
     MYSQL_CONFIG=`$php_shtool path mysql_config`

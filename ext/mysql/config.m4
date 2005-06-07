@@ -66,6 +66,9 @@ if test "$PHP_MYSQL" != "no"; then
     AC_MSG_RESULT([no])
   fi
 
+  MYSQL_DIR=
+  MYSQL_INC_DIR=
+
   for i in $PHP_MYSQL /usr/local /usr; do
     if test -r $i/include/mysql/mysql.h; then
       MYSQL_DIR=$i
