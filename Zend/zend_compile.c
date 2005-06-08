@@ -2579,8 +2579,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->filename = zend_get_compiled_filename(TSRMLS_C);
-	new_class_entry->line_start = zend_get_compiled_lineno(TSRMLS_C);
-	new_class_entry->ce_flags |= class_token->u.constant.value.lval;
+	new_class_entry->line_start = class_token->u.opline_num;
+	new_class_entry->ce_flags |= class_token->u.EA.type;
 
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
 		doing_inheritance = 1;

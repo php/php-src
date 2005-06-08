@@ -302,9 +302,9 @@ unticked_class_declaration_statement:
 
 
 class_entry_type:
-		T_CLASS			{  $$.u.constant.value.lval = 0; }
-	|	T_ABSTRACT T_CLASS { $$.u.constant.value.lval = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
-	|	T_FINAL T_CLASS { $$.u.constant.value.lval = ZEND_ACC_FINAL_CLASS; }
+		T_CLASS			{ $$.u.opline_num = CG(zend_lineno); $$.u.EA.type = 0; }
+	|	T_ABSTRACT T_CLASS { $$.u.opline_num = CG(zend_lineno); $$.u.EA.type = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
+	|	T_FINAL T_CLASS { $$.u.opline_num = CG(zend_lineno); $$.u.EA.type = ZEND_ACC_FINAL_CLASS; }
 ;
 
 extends_from:
@@ -313,7 +313,7 @@ extends_from:
 ;
 
 interface_entry:
-	T_INTERFACE		{ $$.u.constant.value.lval = ZEND_ACC_INTERFACE; }
+	T_INTERFACE		{ $$.u.opline_num = CG(zend_lineno); $$.u.EA.type = ZEND_ACC_INTERFACE; }
 ;
 
 interface_extends_list:
