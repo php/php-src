@@ -21,7 +21,7 @@ BUILD_FILES_EXEC = \
 	config.sub
 
 bin_SCRIPTS = phpize php-config
-bin_src_SCRIPTS = 
+man_PAGES = phpize.1 php-config.1
 
 install-build:
 	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
@@ -32,40 +32,45 @@ install-build:
 
 HEADER_DIRS = \
 	/ \
-	Zend \
-	TSRM \
-	ext/standard \
-	ext/session \
-	ext/xml \
-	ext/xml/expat \
-	main \
-	ext/mbstring \
-	ext/mbstring/libmbfl \
-	ext/mbstring/libmbfl/mbfl \
-	ext/pgsql \
-	regex
+	Zend/ \
+	TSRM/ \
+	include/ \
+	main/ \
+	regex/ \
+	ext/iconv/ \
+	ext/pgsql/ \
+	ext/standard/ \
+	ext/session/ \
+	ext/xml/ \
+	ext/xml/expat/ \
+	ext/mbstring/ \
+	ext/mbstring/libmbfl/ \
+	ext/mbstring/libmbfl/mbfl/
 
 install-headers:
 	-@for i in $(HEADER_DIRS); do \
+		i=`$(top_srcdir)/build/shtool path -d $$i`; \
 		paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 	done; \
 	$(mkinstalldirs) $$paths && \
 	echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
 	for i in $(HEADER_DIRS); do \
-		(cd $(top_srcdir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
-		cd $(top_builddir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
+		if test -f "$(top_srcdir)/$$i"; then \
+			$(INSTALL_DATA) $(top_srcdir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+		elif test -f "$(top_builddir)/$$i"; then \
+			$(INSTALL_DATA) $(top_builddir)/$$i $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+		else \
+			(cd $(top_srcdir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
+			cd $(top_builddir)/$$i && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
+		fi \
 	done; \
 	cd $(top_srcdir)/sapi/embed && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/main
 
-install-programs: $(builddir)/phpize $(builddir)/php-config 
+install-programs: $(builddir)/phpize $(builddir)/php-config
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@for prog in $(bin_SCRIPTS); do \
 		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
 		$(INSTALL) -m 755 $(builddir)/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
-	done
-	@for prog in $(bin_src_SCRIPTS); do \
-		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
-		$(INSTALL) -m 755 $(top_srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
 	done
 	@echo "Installing man pages:             $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
