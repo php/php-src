@@ -291,40 +291,44 @@ static void zend_do_op_data(zend_op *data_op, znode *value TSRMLS_DC)
 
 void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
-	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
+
+	if (last_op_number > 0) {
+		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
 	
-	switch (last_op->opcode) {
-		case ZEND_FETCH_OBJ_RW:
-			last_op->opcode = op;
-			last_op->extended_value = ZEND_ASSIGN_OBJ;
+		switch (last_op->opcode) {
+			case ZEND_FETCH_OBJ_RW:
+				last_op->opcode = op;
+				last_op->extended_value = ZEND_ASSIGN_OBJ;
 
-			zend_do_op_data(opline, op2 TSRMLS_CC);
-			SET_UNUSED(opline->result);
-			*result = last_op->result;
-			break;
-		case ZEND_FETCH_DIM_RW:
-			last_op->opcode = op;
-			last_op->extended_value = ZEND_ASSIGN_DIM;
+				zend_do_op_data(opline, op2 TSRMLS_CC);
+				SET_UNUSED(opline->result);
+				*result = last_op->result;
+				return;
+			case ZEND_FETCH_DIM_RW:
+				last_op->opcode = op;
+				last_op->extended_value = ZEND_ASSIGN_DIM;
 
-			zend_do_op_data(opline, op2 TSRMLS_CC);
-			opline->op2.u.var = get_temporary_variable(CG(active_op_array));
-			opline->op2.u.EA.type = 0;
-			opline->op2.op_type = IS_VAR;
-			SET_UNUSED(opline->result);
-			*result = last_op->result;
-			break;
-		default:
-			opline->opcode = op;
-			opline->op1 = *op1;
-			opline->op2 = *op2;
-			opline->result.op_type = IS_VAR;
-			opline->result.u.EA.type = 0;
-			opline->result.u.var = get_temporary_variable(CG(active_op_array));
-			*result = opline->result;
-			break;
+				zend_do_op_data(opline, op2 TSRMLS_CC);
+				opline->op2.u.var = get_temporary_variable(CG(active_op_array));
+				opline->op2.u.EA.type = 0;
+				opline->op2.op_type = IS_VAR;
+				SET_UNUSED(opline->result);
+				*result = last_op->result;
+				return;
+			default:
+				break;
+		}
 	}
+
+	opline->opcode = op;
+	opline->op1 = *op1;
+	opline->op2 = *op2;
+	opline->result.op_type = IS_VAR;
+	opline->result.u.EA.type = 0;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	*result = opline->result;
 }
 
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC)
@@ -530,38 +534,43 @@ static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
-	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
-	if (last_op->opcode == ZEND_FETCH_OBJ_W) {
-		last_op->opcode = ZEND_ASSIGN_OBJ;
+	if (last_op_number > 0) {
+		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
 
-		zend_do_op_data(opline, value TSRMLS_CC);
-		SET_UNUSED(opline->result);
-		*result = last_op->result;
-	} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
-		last_op->opcode = ZEND_ASSIGN_DIM;
+		if (last_op->opcode == ZEND_FETCH_OBJ_W) {
+			last_op->opcode = ZEND_ASSIGN_OBJ;
 
-		zend_do_op_data(opline, value TSRMLS_CC);
-		opline->op2.u.var = get_temporary_variable(CG(active_op_array));
-		opline->op2.u.EA.type = 0;
-		opline->op2.op_type = IS_VAR;
-		SET_UNUSED(opline->result);
-		*result = last_op->result;
-	} else {
-		if (opline_is_fetch_this(last_op TSRMLS_CC)) {
-			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+			zend_do_op_data(opline, value TSRMLS_CC);
+			SET_UNUSED(opline->result);
+			*result = last_op->result;
+			return;
+		} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
+			last_op->opcode = ZEND_ASSIGN_DIM;
+
+			zend_do_op_data(opline, value TSRMLS_CC);
+			opline->op2.u.var = get_temporary_variable(CG(active_op_array));
+			opline->op2.u.EA.type = 0;
+			opline->op2.op_type = IS_VAR;
+			SET_UNUSED(opline->result);
+			*result = last_op->result;
+			return;
+		} else {
+			if (opline_is_fetch_this(last_op TSRMLS_CC)) {
+				zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+			}
 		}
-
-		opline->opcode = ZEND_ASSIGN;
-		opline->op1 = *variable;
-		opline->op2 = *value;
-		opline->result.op_type = IS_VAR;
-		opline->result.u.EA.type = 0;
-		opline->result.u.var = get_temporary_variable(CG(active_op_array));
-		*result = opline->result;
 	}
+
+	opline->opcode = ZEND_ASSIGN;
+	opline->op1 = *variable;
+	opline->op2 = *value;
+	opline->result.op_type = IS_VAR;
+	opline->result.u.EA.type = 0;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	*result = opline->result;
 }
 
 static inline zend_bool zend_is_function_or_method_call(znode *variable)
@@ -573,14 +582,18 @@ static inline zend_bool zend_is_function_or_method_call(znode *variable)
 
 void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
 {
-	int last_op_number = get_next_op_number(CG(active_op_array))-1;
+	int last_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
+
+	if (last_op_number > 0) {
+		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
+
+		if (opline_is_fetch_this(last_op TSRMLS_CC)) {
+			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+		}
+	}
 
 	opline->opcode = ZEND_ASSIGN_REF;
-	if (opline_is_fetch_this(last_op TSRMLS_CC)) {
-		zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
-	}
 	if (zend_is_function_or_method_call(rvar)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;	
 	} else {
@@ -700,22 +713,26 @@ void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC)
 
 void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 {
-	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
+	int last_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline;
 
-	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
-		opline->opcode = (op==ZEND_PRE_INC)?ZEND_PRE_INC_OBJ:ZEND_PRE_DEC_OBJ;
-		opline->op1 = last_op->op1;
-		opline->op2 = last_op->op2;
-		
-		MAKE_NOP(last_op);
-	} else {
-		opline->opcode = op;
-		opline->op1 = *op1;
-		SET_UNUSED(opline->op2);
+	if (last_op_number > 0) {
+		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
+
+		if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
+			last_op->opcode = (op==ZEND_PRE_INC)?ZEND_PRE_INC_OBJ:ZEND_PRE_DEC_OBJ;
+			last_op->result.op_type = IS_VAR;
+			last_op->result.u.EA.type = 0;
+			last_op->result.u.var = get_temporary_variable(CG(active_op_array));
+			*result = last_op->result;
+			return;
+		}
 	}
 
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = op;
+	opline->op1 = *op1;
+	SET_UNUSED(opline->op2);
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
@@ -725,21 +742,25 @@ void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 
 void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 {
-	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
+	int last_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline;
 
-	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
-		opline->opcode = (op==ZEND_POST_INC)?ZEND_POST_INC_OBJ:ZEND_POST_DEC_OBJ;
-		opline->op1 = last_op->op1;
-		opline->op2 = last_op->op2;
-		
-		MAKE_NOP(last_op);
-	} else {
-		opline->opcode = op;
-		opline->op1 = *op1;
-		SET_UNUSED(opline->op2);
+	if (last_op_number > 0) {
+		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
+
+		if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
+			last_op->opcode = (op==ZEND_POST_INC)?ZEND_POST_INC_OBJ:ZEND_POST_DEC_OBJ;
+			last_op->result.op_type = IS_TMP_VAR;
+			last_op->result.u.var = get_temporary_variable(CG(active_op_array));
+			*result = last_op->result;
+			return;
+		}
 	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = op;
+	opline->op1 = *op1;
+	SET_UNUSED(opline->op2);
 	opline->result.op_type = IS_TMP_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	*result = opline->result;
