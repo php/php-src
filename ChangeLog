@@ -130,6 +130,138 @@
       ZendEngine2/tests/bug33243.phpt:
       Fixed bug #33243 (ze1_compatibility_mode does not work as expected)
 
+2005-06-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * scripts/Makefile.frag
+      scripts/phpize.in:
+      - Fix paths when using --libdir and --includedir configure options
+
+    * ext/standard/tests/array/bug31213.phpt:
+      - It is nice to close the script with ?>..
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_language_scanner.l:
+      Fixed bug #26456 (Wrong results from Reflection-API getDocComment() when
+      called via STDIN)
+
+2005-06-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in
+      ZendEngine2/Zend.m4:
+      -Moved --disable-zend-memory-manager where it belongs
+
+    * acinclude.m4
+      ZendEngine2/acinclude.m4
+      ext/sqlite/config.m4:
+      - Show "none" when nothing is found
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c:
+      Fixed memory allocation bugs. Probably this patch should fix bug #31725.
+
+2005-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_objects.c:
+      Fixed ZTS build.
+
+2005-06-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      configure.in
+      configure.in
+      Zend/zend_alloc.h
+      ZendEngine2/zend_alloc.h
+      ext/standard/info.c
+      ext/standard/info.c:
+      - MFH: Added the --disable-zend-memory-manager switch to disable the Zend
+        memory manager.
+
+    * configure.in
+      ZendEngine2/zend_alloc.h
+      ext/standard/info.c:
+      - Added the --disable-zend-memory-manager switch to disable the Zend memory
+        manager.
+
+    * NEWS:
+      - Not sure why this wasn't committed...
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      Fixed memory leak in debug_print_backtrace()
+
+2005-06-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mysql/config.m4
+      ext/mysqli/config.m4:
+      - Allow doing --with-mysql --with-mysqli (no mysql libs are bundled atm)
+      - Make sure MYSQL_DIR is empty.
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      fixed memory leak in bug #28972 ([] operator overflow treatment is
+      incorrect), not the bug itself.
+
+2005-06-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - MF44: Problems with user defined error handler and references
+
+    * (PHP_4_4)
+      NEWS
+      Zend/zend_execute.c:
+      - Fixed bug #32685, #29423 (Segfault when using assignment by reference
+      within
+        function).
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend_compile.c
+      Zend/zend_execute.c
+      Zend/zend_language_parser.y:
+      Fixed memory corruptions when using references in a wrong way.
+      Backport $a =& func(); patch.
+
+2005-06-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      main/streams/php_streams_int.h:
+      - MFH: Don't crash when compiled with the zend memory manager disabled.
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug33243.phpt
+      ZendEngine2/tests/bug33243.phpt:
+      
+      file bug33243.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/tests/bug33243.phpt:
+      Fixed bug #33243 (ze1_compatibility_mode does not work as expected)
+
 2005-06-06  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/posix/config.m4
