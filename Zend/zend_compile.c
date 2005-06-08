@@ -2680,7 +2680,8 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 
 	/* Inherit interfaces */
 	if (ce->num_interfaces > 0) {
-		ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *)*ce->num_interfaces);
+		ce->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*ce->num_interfaces);
+		memset(ce->interfaces, 0, sizeof(zend_class_entry *)*ce->num_interfaces);
 	}
 	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
 		&& ((parent_token->op_type != IS_UNUSED) || (ce->num_interfaces > 0))) {
