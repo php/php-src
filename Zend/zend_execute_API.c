@@ -426,11 +426,13 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 	if (p->type == IS_CONSTANT) {
 		int refcount;
+		zend_uchar is_ref;
 
-		SEPARATE_ZVAL(pp);
+		SEPARATE_ZVAL_IF_NOT_REF(pp);
 		p = *pp;
 
 		refcount = p->refcount;
+		is_ref = p->is_ref;
 
 		if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
@@ -447,15 +449,15 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 			*p = const_value;
 		}
 
-		INIT_PZVAL(p);
 		p->refcount = refcount;
+		p->is_ref = is_ref;
 	} else if (p->type == IS_CONSTANT_ARRAY) {
 		zval **element, *new_val;
 		char *str_index;
 		uint str_index_len;
 		ulong num_index;
 
-		SEPARATE_ZVAL(pp);
+		SEPARATE_ZVAL_IF_NOT_REF(pp);
 		p = *pp;
 		p->type = IS_ARRAY;
 
