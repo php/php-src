@@ -22,6 +22,7 @@
 #ifndef ZEND_CONFIG_W32_H
 #define ZEND_CONFIG_W32_H
 
+#define USE_ZEND_ALLOC 1
 #define HAVE_ALLOCA 1
 #define HAVE_LIMITS_H 1
 #define _CRTDBG_MAP_ALLOC
