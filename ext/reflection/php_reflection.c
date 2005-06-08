@@ -2369,6 +2369,8 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	char *name;
 	int name_len;
 	zval **variable_ptr, *value;
+	int refcount;
+	zend_uchar is_ref;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &name, &name_len, &value) == FAILURE) {
 		return;
@@ -2383,9 +2385,14 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 				"Class %s does not have a property named %s", ce->name, name);
 		return;
 	}	
+	refcount = (*variable_ptr)->refcount;
+	is_ref = (*variable_ptr)->is_ref;
 	zval_dtor(*variable_ptr);
 	**variable_ptr = *value;
 	zval_copy_ctor(*variable_ptr);
+	(*variable_ptr)->refcount = refcount;
+	(*variable_ptr)->is_ref = is_ref;
+
 }
 /* }}} */
 
