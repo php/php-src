@@ -214,6 +214,9 @@ static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval
 				 * continue checking below...
 				 */
 			} else {
+				if (!silent && (property_info->flags & ZEND_ACC_STATIC)) {
+					zend_error(E_STRICT, "Accessing static property %s::$%s as non static", zobj->ce->name, Z_STRVAL_P(member));
+				}
 				return property_info;
 			}
 		} else {
