@@ -516,7 +516,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval, const char *str,
 #endif
 	}
 
-	out_left = 0;
+	errno = out_left = 0;
 
 	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0; cnt+=2) {
 		size_t prev_in_left;
@@ -547,6 +547,7 @@ static php_iconv_err_t _php_iconv_strlen(unsigned int *pretval, const char *str,
 			break;
 
 		case E2BIG:
+		case 0:
 			*pretval = cnt;
 			break;
 
