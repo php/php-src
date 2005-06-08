@@ -65,6 +65,73 @@
       
       file bug33243.phpt was initially added on branch PHP_5_0.
 
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_language_scanner.l
+      zend_language_scanner.l:
+      Fixed bug #26456 (Wrong results from Reflection-API getDocComment() when
+      called via STDIN)
+
+2005-06-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Zend.m4:
+      -Moved --disable-zend-memory-manager where it belongs
+
+    * acinclude.m4:
+      - Show "none" when nothing is found
+
+2005-06-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_objects.c:
+      Fixed ZTS build.
+
+2005-06-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      zend_alloc.h:
+      - MFH: Added the --disable-zend-memory-manager switch to disable the Zend
+        memory manager.
+
+    * zend_alloc.h:
+      - Added the --disable-zend-memory-manager switch to disable the Zend memory
+        manager.
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c:
+      Fixed memory leak in debug_print_backtrace()
+
+    * zend_execute.c
+      zend_execute.c:
+      fixed memory leak in bug #28972 ([] operator overflow treatment is
+      incorrect), not the bug itself.
+
+2005-06-07  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - MF44: Problems with user defined error handler and references
+
+2005-06-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_objects.c
+      zend_objects.c
+      tests/bug33243.phpt:
+      Fixed bug #33243 (ze1_compatibility_mode does not work as expected)
+
+    * tests/bug33243.phpt
+      tests/bug33243.phpt:
+      
+      file bug33243.phpt was initially added on branch PHP_5_0.
+
 2005-06-06  Derick Rethans  <php@derickrethans.nl>
 
     * zend_vm_def.h
