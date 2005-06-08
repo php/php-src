@@ -3863,8 +3863,11 @@ PHP_FUNCTION(array_reduce)
 	efree(callback_name);
 
 	if (ZEND_NUM_ARGS() > 2) {
-		convert_to_long_ex(initial);
-		result = *initial;
+		ALLOC_ZVAL(result);
+		*result = **initial;
+		zval_copy_ctor(result);
+		convert_to_long(result);
+		INIT_PZVAL(result);
 	} else {
 		MAKE_STD_ZVAL(result);
 		ZVAL_NULL(result);
@@ -3880,6 +3883,7 @@ PHP_FUNCTION(array_reduce)
 		if (result) {
 			*return_value = *result;
 			zval_copy_ctor(return_value);
+			zval_ptr_dtor(&result);
 		}
 		return;
 	}
