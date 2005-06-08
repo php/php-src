@@ -2964,7 +2964,6 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			zval_ptr_dtor(&array_ptr);
 			if (opline->extended_value) {
 				FREE_OP1_VAR_PTR();
 			} else {
