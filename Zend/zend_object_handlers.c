@@ -168,6 +168,9 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 				 * continue checking below...
 				 */
 			} else {
+				if (!silent && (property_info->flags & ZEND_ACC_STATIC)) {
+					zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name, Z_STRVAL_P(member));
+				}
 				return property_info;
 			}
 		} else {
