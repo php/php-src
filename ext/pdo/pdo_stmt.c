@@ -729,6 +729,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			return 1;
 		}
 
+		RETVAL_FALSE;
+
 		switch (how) {
 			case PDO_FETCH_ASSOC:
 			case PDO_FETCH_BOTH:
