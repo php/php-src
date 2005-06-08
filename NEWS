@@ -143,6 +143,7 @@ PHP                                                                        NEWS
   array_push()). (Dmitry)
 - Fixed bug #30162 (Catching exception in constructor causes lose of $this).
   (Dmitry)
+- Fixed bug #30140 (Problem with array in static properties). (Dmitry)
 - Fixed bug #30126 (Enhancement for error message for abstract classes). 
   (Marcus)
 - Fixed bug #30080 (Passing array or non array of objects). (Dmitry)
