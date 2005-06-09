@@ -133,6 +133,9 @@ typedef struct _zend_try_catch_element {
 /* method flag (bc only), any method that has this flag can be used statically and non statically. */
 #define ZEND_ACC_ALLOW_STATIC	0x10000
 
+/* shadow of parent's private method/property */
+#define ZEND_ACC_SHADOW 0x20000
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 

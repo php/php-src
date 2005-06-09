@@ -257,7 +257,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 /* {{{ _class_string */
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC)
 {
-	int count, count_static_props = 0, count_static_funcs = 0;
+	int count, count_static_props = 0, count_static_funcs = 0, count_shadow_props = 0;
 	string sub_indent;
 	
 	string_init(&sub_indent);
@@ -349,7 +349,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
-				if (prop->flags & ZEND_ACC_STATIC) {
+				if(prop->flags & ZEND_ACC_SHADOW) {
+					count_shadow_props++;
+				} else if (prop->flags & ZEND_ACC_STATIC) {
 					count_static_props++;
 				}
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
@@ -365,9 +367,10 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
-				if (prop->flags & ZEND_ACC_STATIC) {
+				if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
 					_property_string(str, prop, NULL, sub_indent.string TSRMLS_CC);
 				}
+
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
 			}
 		}
@@ -415,7 +418,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* Default/Implicit properties */
 	if (&ce->properties_info) {
-		count = zend_hash_num_elements(&ce->properties_info) - count_static_props;
+		count = zend_hash_num_elements(&ce->properties_info) - count_static_props - count_shadow_props;
 		string_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
 		if (count > 0) {
 			HashPosition pos;
@@ -424,7 +427,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
-				if (!(prop->flags & ZEND_ACC_STATIC)) {
+				if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
 					_property_string(str, prop, NULL, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
@@ -2724,7 +2727,7 @@ ZEND_METHOD(reflection_class, getProperty)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS) {
+	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
 		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
 	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -2742,6 +2745,10 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 	zval *retval = va_arg(args, zval*);
 	long filter = va_arg(args, long);
 
+	if (pptr->flags	& ZEND_ACC_SHADOW) {
+		return 0;
+	}
+	
 	if (pptr->flags	& filter) {
 		TSRMLS_FETCH();
 		ALLOC_ZVAL(property);
@@ -3248,7 +3255,7 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	if (zend_hash_find(&ce->properties_info, name_str, name_len + 1, (void **) &property_info) == FAILURE) {
+	if (zend_hash_find(&ce->properties_info, name_str, name_len + 1, (void **) &property_info) == FAILURE || (property_info->flags | ZEND_ACC_SHADOW)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Property %s::$%s does not exist", ce->name, name_str);
 		return;

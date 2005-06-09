@@ -1982,9 +1982,18 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
 
-	if (parent_info->flags & ZEND_ACC_PRIVATE) {
+	if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
 		if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
 			child_info->flags |= ZEND_ACC_CHANGED;
+		} else {
+			zend_hash_quick_update(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, parent_info, sizeof(zend_property_info), (void **) &child_info);
+			if(ce->type & ZEND_INTERNAL_CLASS) {
+				zend_duplicate_property_info_internal(child_info);
+			} else {
+				zend_duplicate_property_info(child_info);
+			}
+			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
+			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
 		}
 		return 0; /* don't copy access information to child */
 	}
@@ -1996,6 +2005,11 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name, hash_key->arKey);
 				
 		}
+		
+		if(parent_info->flags & ZEND_ACC_CHANGED) {
+			child_info->flags |= ZEND_ACC_CHANGED;
+		}
+		
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (child_info->flags & ZEND_ACC_IMPLICIT_PUBLIC) {

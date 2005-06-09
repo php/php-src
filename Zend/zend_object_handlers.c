@@ -160,22 +160,27 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 	}
 	h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
 	if (zend_hash_quick_find(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
-		if (zend_verify_property_access(property_info, ce TSRMLS_CC)) {
-			if (property_info->flags & ZEND_ACC_CHANGED
-				&& !(property_info->flags & ZEND_ACC_PRIVATE)) {
-				/* We still need to make sure that we're not in a context
-				 * where the right property is a different 'statically linked' private
-				 * continue checking below...
-				 */
-			} else {
-				if (!silent && (property_info->flags & ZEND_ACC_STATIC)) {
-					zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name, Z_STRVAL_P(member));
-				}
-				return property_info;
-			}
+		if(property_info->flags & ZEND_ACC_SHADOW) {
+			/* if it's a shadow - go to access it's private */
+			property_info = NULL;
 		} else {
-			/* Try to look in the scope instead */
-			denied_access = 1;
+			if (zend_verify_property_access(property_info, ce TSRMLS_CC)) {
+				if (property_info->flags & ZEND_ACC_CHANGED
+					&& !(property_info->flags & ZEND_ACC_PRIVATE)) {
+					/* We still need to make sure that we're not in a context
+					 * where the right property is a different 'statically linked' private
+					 * continue checking below...
+					 */
+				} else {
+					if (!silent && (property_info->flags & ZEND_ACC_STATIC)) {
+						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name, Z_STRVAL_P(member));
+					}
+					return property_info;
+				}
+			} else {
+				/* Try to look in the scope instead */
+				denied_access = 1;
+			}
 		}
 	}
 	if (EG(scope) != ce
@@ -740,7 +745,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 	zend_property_info *property_info;
 	zend_property_info std_property_info;
 
-	if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
+	if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE || (property_info->flags & ZEND_ACC_SHADOW)) {
 		std_property_info.flags = ZEND_ACC_PUBLIC;
 		std_property_info.name = property_name;
 		std_property_info.name_length = property_name_len;
