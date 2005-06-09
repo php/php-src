@@ -276,11 +276,6 @@ void shutdown_executor(TSRMLS_D)
 		clean_non_persistent_constants(TSRMLS_C);
 	} zend_end_try();
 
-	/* The regular list must be destroyed after the main symbol table,
-	 * op arrays, and constants are destroyed.
-	 */
-	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
-
 	zend_try {
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
