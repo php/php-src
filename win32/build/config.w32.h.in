@@ -63,7 +63,6 @@
 #define HAVE_TZSET 1
 #define HAVE_TZNAME 1
 #undef HAVE_FLOCK
-#define USE_ZEND_ALLOC 1
 #define HAVE_ALLOCA 1
 #undef HAVE_SYS_TIME_H
 #define HAVE_SIGNAL_H 1
