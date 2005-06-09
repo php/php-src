@@ -980,6 +980,9 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			EG(user_error_handler) = NULL;
 	    
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC)==SUCCESS) {
+				if (Z_TYPE_P(z_context) != IS_ARRAY || z_context->value.ht != EG(active_symbol_table)) {
+					zend_error(E_ERROR, "User error handler must not modify error context");
+				}
 				if (retval) {
 					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
