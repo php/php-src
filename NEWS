@@ -155,6 +155,9 @@ PHP                                                                        NEWS
 - Fixed bug #28969 (Wrong data encoding of special characters). (Dmitry)
 - Fixed bug #28568 (SAPI::known_post_content_types is not thread safe).
   (Moriyoshi)
+- Fixed bug #29689 (default value of protected member overrides default value of private)
+  and other private variable problems in inherited classes (Stas)
+- Abstract private methods are no longer allowed (Stas)
 
 13 Jul 2004, PHP 5.0.0
 - Rewritten UNIX and Windows install help files. (Documentation Team)
