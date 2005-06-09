@@ -135,11 +135,6 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	if (retval)
 		zval_ptr_dtor(&retval);
 
-	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(obj), "filter", sizeof("filter"), (void**)&tmp)) { 
-		zend_list_delete(Z_LVAL_PP(tmp));
-		FREE_ZVAL(*tmp);
-	} 
-
 	/* kill the object */
 	zval_ptr_dtor(&obj);
 }
@@ -345,6 +340,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	ZEND_REGISTER_RESOURCE(zfilter, filter, le_userfilters);
 	filter->abstract = obj;
 	add_property_zval(obj, "filter", zfilter);
+	/* add_property_zval increments the refcount which is unwanted here */
+	zval_ptr_dtor(&zfilter);
 
 	return filter;
 }
@@ -470,6 +467,8 @@ PHP_FUNCTION(stream_bucket_new)
 	ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
 	object_init(return_value);
 	add_property_zval(return_value, "bucket", zbucket);
+	/* add_property_zval increments the refcount which is unwanted here */
+	zval_ptr_dtor(&zbucket);
 	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
 	add_property_long(return_value, "datalen", bucket->buflen);
 }
