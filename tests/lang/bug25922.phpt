@@ -17,5 +17,5 @@ function test()
 }
 test();
 ?>
---EXPECT--
-Undefined index here: ''
+--EXPECTF--
+Fatal error: User error handler must not modify error context in %sbug25922.php on line 11
