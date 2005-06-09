@@ -1,3 +1,73 @@
+2005-06-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed exception handling in getIterator() callback (bugs #26229 & #30725)
+
+    * zend_compile.c
+      zend_compile.c:
+      Fixed valgrind errors
+
+    * zend_reflection_api.c:
+      Fixed ReflectionClass::setStaticPropertyValue()
+
+2005-06-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_config.w32.h:
+      Hopefully fixes win32 builds
+
+2005-06-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Fixed lookups for previos opcodes
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      tests/bug30140.phpt:
+      Fixed bug #30140 (Problem with array in static properties)
+
+    * tests/bug30140.phpt
+      tests/bug30140.phpt:
+      
+      file bug30140.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      tests/bug32322.phpt:
+      Added test for bug #32322 (Return values by reference broken( using
+      self::),example singleton instance)
+
+    * tests/bug32322.phpt
+      tests/bug32322.phpt:
+      
+      Added test for bug #32322 (Return values by reference broken( using
+      self::),example singleton instance)
+
+    * zend_object_handlers.c
+      zend_object_handlers.c
+      tests/bug30820.phpt:
+      Fixed bug #30820 (static member conflict with $this->member silently
+      ignored)
+
+    * tests/bug30820.phpt
+      tests/bug30820.phpt:
+      
+      file bug30820.phpt was initially added on branch PHP_5_0.
+
+    * zend_compile.c
+      zend_compile.c
+      zend_language_parser.y
+      zend_language_parser.y
+      tests/bug30961.phpt:
+      Fixed bug #30961 (Wrong linenumber in ReflectionClass getStartLine())
+
+    * tests/bug30961.phpt
+      tests/bug30961.phpt:
+      
+      file bug30961.phpt was initially added on branch PHP_5_0.
+
 2005-06-07  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c
