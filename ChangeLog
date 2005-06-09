@@ -1,3 +1,106 @@
+2005-06-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/iconv/iconv.c:
+      MFH: Fixed bug #33268 (iconv_strlen() works only with a parameter of < 3
+      in length).
+
+    * ext/iconv/iconv.c:
+      Fixed bug #33268 (iconv_strlen() works only with a parameter of < 3 in
+      length)
+
+2005-06-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c:
+      Fixed memory allocation bugs in array_reduce() with initial value (#22463 &
+      #24980)
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed exception handling in getIterator() callback (bugs #26229 & #30725)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fixed valgrind errors
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fixed ReflectionClass::setStaticPropertyValue()
+
+2005-06-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_config.w32.h:
+      Hopefully fixes win32 builds
+
+2005-06-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/var.c
+      ext/standard/var.c:
+      Fixed incorrect usage of zend_mangle_property_name() (valgrind errors)
+
+    * ZendEngine2/zend_compile.c:
+      Fixed lookups for previos opcodes
+
+    * ZendEngine2/tests/bug30140.phpt
+      ZendEngine2/tests/bug30140.phpt:
+      
+      file bug30140.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug30140.phpt:
+      Fixed bug #30140 (Problem with array in static properties)
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug32322.phpt:
+      Added test for bug #32322 (Return values by reference broken( using
+      self::),example singleton instance)
+
+    * ZendEngine2/tests/bug32322.phpt
+      ZendEngine2/tests/bug32322.phpt:
+      
+      Added test for bug #32322 (Return values by reference broken( using
+      self::),example singleton instance)
+
+    * tests/classes/clone_006.phpt
+      tests/classes/clone_006.phpt:
+      Fixed test file affected by fix for bug #30820 (static member conflict with
+      $this->member silently ignored)
+
+    * ZendEngine2/tests/bug30820.phpt
+      ZendEngine2/tests/bug30820.phpt:
+      
+      file bug30820.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/tests/bug30820.phpt:
+      Fixed bug #30820 (static member conflict with $this->member silently
+      ignored)
+
+    * ZendEngine2/tests/bug30961.phpt
+      ZendEngine2/tests/bug30961.phpt:
+      
+      file bug30961.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/tests/bug30961.phpt:
+      Fixed bug #30961 (Wrong linenumber in ReflectionClass getStartLine())
+
 2005-06-07  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * scripts/Makefile.frag
