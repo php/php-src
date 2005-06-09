@@ -826,6 +826,8 @@ void zend_deactivate(TSRMLS_D)
 		shutdown_compiler(TSRMLS_C);
 	} zend_end_try();
 
+	zend_destroy_rsrc_list(&EG(regular_list) TSRMLS_CC);
+
 	zend_try {
 		zend_ini_deactivate(TSRMLS_C);
 	} zend_end_try();
