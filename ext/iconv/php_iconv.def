@@ -1,6 +1,0 @@
-EXPORTS
-_libiconv_version
-libiconv_close
-libiconv
-libiconv_open
-libiconv_set_relocation_prefix
