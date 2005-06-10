@@ -95,6 +95,10 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	ret = dbnextrow(H->link);
 
+    if (ret == NO_MORE_ROWS) {
+       return 0;
+    }
+    
 	if (!S->cols) {
 		S->ncols = dbnumcols(H->link);
 
@@ -133,7 +137,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			S->rows = erealloc(S->rows, arows * size);
 		}
 		for (i = 0; i < S->ncols; i++) {
-			pdo_dblib_colval *val = &S->rows[S->nrows] + i;
+			pdo_dblib_colval *val = &S->rows[S->nrows * S->ncols + i];
 
 			switch (S->cols[i].coltype) {
 				case SQLCHAR:
@@ -226,7 +230,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	 unsigned long *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-	pdo_dblib_colval *val = &S->rows[S->current] + colno;
+	pdo_dblib_colval *val = &S->rows[S->current * S->ncols + colno];
 
 	*ptr = val->data;
 	*len = val->len;
