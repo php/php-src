@@ -87,7 +87,6 @@
 #define ZEND_SEND_VAR                 66
 #define ZEND_SEND_REF                 67
 #define ZEND_NEW                      68
-#define ZEND_JMP_NO_CTOR              69
 #define ZEND_FREE                     70
 #define ZEND_INIT_ARRAY               71
 #define ZEND_ADD_ARRAY_ELEMENT        72
@@ -127,7 +126,6 @@
 #define ZEND_THROW                   108
 #define ZEND_FETCH_CLASS             109
 #define ZEND_CLONE                   110
-#define ZEND_INIT_CTOR_CALL          111
 #define ZEND_INIT_METHOD_CALL        112
 #define ZEND_INIT_STATIC_METHOD_CALL 113
 #define ZEND_ISSET_ISEMPTY_VAR       114

@@ -357,6 +357,8 @@ static int ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
+	zval *object_zval;
+	zend_function *constructor;
 
 	if (EX_T(opline->op1.u.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		char *class_type;
@@ -368,13 +370,43 @@ static int ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_error_noreturn(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(opline->op1.u.var).class_entry->name);
 	}
-	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-	ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
-	object_init_ex(EX_T(opline->result.u.var).var.ptr, EX_T(opline->op1.u.var).class_entry);
-	EX_T(opline->result.u.var).var.ptr->refcount=1;
-	EX_T(opline->result.u.var).var.ptr->is_ref=0;
+	ALLOC_ZVAL(object_zval);
+	object_init_ex(object_zval, EX_T(opline->op1.u.var).class_entry);
+	INIT_PZVAL(object_zval);
 
-	ZEND_VM_NEXT_OPCODE();
+	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
+
+	if (constructor == NULL) {
+		EX(fbc_constructor) = NULL;
+		if (RETURN_VALUE_USED(opline)) {
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.ptr = object_zval;
+		} else {
+			zval_ptr_dtor(&object_zval);
+		}
+		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
+		ZEND_VM_CONTINUE_JMP();
+	} else {
+		EX(fbc_constructor) = constructor;
+
+		SELECTIVE_PZVAL_LOCK(object_zval, &opline->result);
+		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+		EX_T(opline->result.u.var).var.ptr = object_zval;
+		
+		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+
+		/* We are not handling overloaded classes right now */
+		EX(object) = object_zval;
+
+		EX(fbc) = EX(fbc_constructor);
+
+		if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
+			EX(calling_scope) = EX(fbc)->common.scope;
+		} else {
+			EX(calling_scope) = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 static int ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3950,35 +3982,6 @@ static int ZEND_FREE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_CTOR_CALL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
-
-	if (IS_TMP_VAR == IS_VAR) {
-		SELECTIVE_PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr, &opline->op1);
-	}
-
-	/* We are not handling overloaded classes right now */
-	EX(object) = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-
-	/* New always returns the object as is_ref=0, therefore, we can just increment the reference count */
-	EX(object)->refcount++; /* For $this pointer */
-
-	EX(fbc) = EX(fbc_constructor);
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
-	;
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -4480,34 +4483,6 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		ZEND_VM_NEXT_OPCODE();
 	}
-}
-
-static int ZEND_JMP_NO_CTOR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *object_zval;
-	zend_function *constructor;
-	zend_free_op free_op1;
-
-	if (IS_TMP_VAR == IS_VAR) {
-		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
-	}
-
-	object_zval = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
-
-	EX(fbc_constructor) = NULL;
-	if (constructor == NULL) {
-		if(opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
-			zval_ptr_dtor(EX_T(opline->op1.u.var).var.ptr_ptr);
-		}
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
-	} else {
-		EX(fbc_constructor) = constructor;
-	}
-
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6939,35 +6914,6 @@ static int ZEND_JMPNZ_EX_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_CTOR_CALL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
-
-	if (IS_VAR == IS_VAR) {
-		SELECTIVE_PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr, &opline->op1);
-	}
-
-	/* We are not handling overloaded classes right now */
-	EX(object) = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-
-	/* New always returns the object as is_ref=0, therefore, we can just increment the reference count */
-	EX(object)->refcount++; /* For $this pointer */
-
-	EX(fbc) = EX(fbc_constructor);
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
-	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -7721,34 +7667,6 @@ static int ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_JMP_NO_CTOR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *object_zval;
-	zend_function *constructor;
-	zend_free_op free_op1;
-
-	if (IS_VAR == IS_VAR) {
-		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
-	}
-
-	object_zval = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
-
-	EX(fbc_constructor) = NULL;
-	if (constructor == NULL) {
-		if(opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
-			zval_ptr_dtor(EX_T(opline->op1.u.var).var.ptr_ptr);
-		}
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
-	} else {
-		EX(fbc_constructor) = constructor;
-	}
-
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -19003,35 +18921,6 @@ static int ZEND_JMPNZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_CTOR_CALL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
-
-	if (IS_CV == IS_VAR) {
-		SELECTIVE_PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr, &opline->op1);
-	}
-
-	/* We are not handling overloaded classes right now */
-	EX(object) = _get_zval_ptr_cv(&opline->op1, EX(Ts), &free_op1, BP_VAR_R TSRMLS_CC);
-
-	/* New always returns the object as is_ref=0, therefore, we can just increment the reference count */
-	EX(object)->refcount++; /* For $this pointer */
-
-	EX(fbc) = EX(fbc_constructor);
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
-	;
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -19637,34 +19526,6 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		ZEND_VM_NEXT_OPCODE();
 	}
-}
-
-static int ZEND_JMP_NO_CTOR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *object_zval;
-	zend_function *constructor;
-	zend_free_op free_op1;
-
-	if (IS_CV == IS_VAR) {
-		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
-	}
-
-	object_zval = _get_zval_ptr_cv(&opline->op1, EX(Ts), &free_op1, BP_VAR_R TSRMLS_CC);
-	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
-
-	EX(fbc_constructor) = NULL;
-	if (constructor == NULL) {
-		if(opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
-			zval_ptr_dtor(EX_T(opline->op1.u.var).var.ptr_ptr);
-		}
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
-	} else {
-		EX(fbc_constructor) = constructor;
-	}
-
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -27596,26 +27457,26 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_TMP_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_TMP_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_TMP_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_TMP_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_TMP_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_VAR_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_VAR_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_VAR_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_VAR_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_CV_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_CV_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_CV_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_CV_HANDLER,
-  	ZEND_JMP_NO_CTOR_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -28646,26 +28507,26 @@ void zend_init_opcodes_handlers()
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_TMP_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_VAR_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_VAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_CV_HANDLER,
-  	ZEND_INIT_CTOR_CALL_SPEC_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -31279,35 +31140,6 @@ static int ZEND_FETCH_CLASS_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_INIT_CTOR_CALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
-
-	if (opline->op1.op_type == IS_VAR) {
-		SELECTIVE_PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr, &opline->op1);
-	}
-
-	/* We are not handling overloaded classes right now */
-	EX(object) = get_zval_ptr(&opline->op1, EX(Ts), &free_op1, BP_VAR_R);
-
-	/* New always returns the object as is_ref=0, therefore, we can just increment the reference count */
-	EX(object)->refcount++; /* For $this pointer */
-
-	EX(fbc) = EX(fbc_constructor);
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
-	FREE_OP_IF_VAR(free_op1);
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_INIT_METHOD_CALL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -32070,6 +31902,8 @@ static int ZEND_SWITCH_FREE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_NEW_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
+	zval *object_zval;
+	zend_function *constructor;
 
 	if (EX_T(opline->op1.u.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		char *class_type;
@@ -32081,13 +31915,43 @@ static int ZEND_NEW_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_error_noreturn(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(opline->op1.u.var).class_entry->name);
 	}
-	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-	ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
-	object_init_ex(EX_T(opline->result.u.var).var.ptr, EX_T(opline->op1.u.var).class_entry);
-	EX_T(opline->result.u.var).var.ptr->refcount=1;
-	EX_T(opline->result.u.var).var.ptr->is_ref=0;
+	ALLOC_ZVAL(object_zval);
+	object_init_ex(object_zval, EX_T(opline->op1.u.var).class_entry);
+	INIT_PZVAL(object_zval);
 
-	ZEND_VM_NEXT_OPCODE();
+	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
+
+	if (constructor == NULL) {
+		EX(fbc_constructor) = NULL;
+		if (RETURN_VALUE_USED(opline)) {
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.ptr = object_zval;
+		} else {
+			zval_ptr_dtor(&object_zval);
+		}
+		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
+		ZEND_VM_CONTINUE_JMP();
+	} else {
+		EX(fbc_constructor) = constructor;
+
+		SELECTIVE_PZVAL_LOCK(object_zval, &opline->result);
+		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+		EX_T(opline->result.u.var).var.ptr = object_zval;
+		
+		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+
+		/* We are not handling overloaded classes right now */
+		EX(object) = object_zval;
+
+		EX(fbc) = EX(fbc_constructor);
+
+		if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
+			EX(calling_scope) = EX(fbc)->common.scope;
+		} else {
+			EX(calling_scope) = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 static int ZEND_CLONE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -32848,34 +32712,6 @@ static int ZEND_FE_FETCH_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_JMP_NO_CTOR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zend_op *opline = EX(opline);
-	zval *object_zval;
-	zend_function *constructor;
-	zend_free_op free_op1;
-
-	if (opline->op1.op_type == IS_VAR) {
-		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
-	}
-
-	object_zval = get_zval_ptr(&opline->op1, EX(Ts), &free_op1, BP_VAR_R);
-	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
-
-	EX(fbc_constructor) = NULL;
-	if (constructor == NULL) {
-		if(opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
-			zval_ptr_dtor(EX_T(opline->op1.u.var).var.ptr_ptr);
-		}
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
-	} else {
-		EX(fbc_constructor) = constructor;
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 static int ZEND_ISSET_ISEMPTY_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -33353,7 +33189,7 @@ void zend_vm_use_old_executor()
   	ZEND_SEND_VAR_HANDLER,
   	ZEND_SEND_REF_HANDLER,
   	ZEND_NEW_HANDLER,
-  	ZEND_JMP_NO_CTOR_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_FREE_HANDLER,
   	ZEND_INIT_ARRAY_HANDLER,
   	ZEND_ADD_ARRAY_ELEMENT_HANDLER,
@@ -33395,7 +33231,7 @@ void zend_vm_use_old_executor()
   	ZEND_THROW_HANDLER,
   	ZEND_FETCH_CLASS_HANDLER,
   	ZEND_CLONE_HANDLER,
-  	ZEND_INIT_CTOR_CALL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_INIT_METHOD_CALL_HANDLER,
   	ZEND_INIT_STATIC_METHOD_CALL_HANDLER,
   	ZEND_ISSET_ISEMPTY_VAR_HANDLER,
