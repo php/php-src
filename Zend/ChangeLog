@@ -1,3 +1,57 @@
+2005-06-09  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_reflection_api.c
+      tests/bug29689.phpt:
+      MF50:  fix #29689 and more private property problems
+
+    * tests/bug33277.phpt:
+      add test for this TBF bug
+
+    * zend_compile.c:
+      disallow abstrace private methods
+
+    * (PHP_5_0)
+      zend_compile.c:
+      Disallow abstract privae methods
+
+    * (PHP_5_0)
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_reflection_api.c
+      tests/bug29689.phpt:
+      fix #29689 and more private property problems
+
+2005-06-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c
+      zend_execute_API.c
+      zend_execute_API.c:
+      Fixed double call to php_stream_close() on compiler errors
+
+2005-06-09  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/bug33277.phpt
+      tests/bug33277.phpt:
+      
+      file bug33277.phpt was initially added on branch PHP_5_0.
+
+2005-06-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c:
+      Fixed bug #25922 (In error handler, modifying 5th arg (errcontext) may
+      result in seg fault)
+
+    * zend_language_scanner.l
+      zend_language_scanner.l:
+      Fixed bug (Crash on Windows and ZTS) that was introduced with fix for bug
+      #26456
+
 2005-06-08  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_0)
