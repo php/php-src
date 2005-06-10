@@ -1460,6 +1460,21 @@ static int zend_vm_old_executor = 0;
 
 #include "zend_vm_execute.h"
 
+ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t handler)
+{
+	if (opcode != ZEND_USER_OPCODE) {
+		zend_user_opcodes[opcode] = ZEND_USER_OPCODE;
+		zend_user_opcode_handlers[opcode] = handler;
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+ZEND_API opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
+{
+	return zend_user_opcode_handlers[opcode];
+}
+
 /*
  * Local variables:
  * tab-width: 4

@@ -18,9 +18,18 @@
 
 /* $Id$ */
 
+static opcode_handler_t zend_user_opcode_handlers[256] = {(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL,(opcode_handler_t)NULL};
 
-#define ZEND_VM_CONTINUE() return 0
-#define ZEND_VM_RETURN()   return 1
+static zend_uchar zend_user_opcodes[256] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255};
+
+static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op);
+
+
+#define ZEND_VM_CONTINUE()   return 0
+#define ZEND_VM_RETURN()     return 1
+#define ZEND_VM_DISPATCH(op) return zend_vm_get_opcode_handler(op->opcode, op)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
 
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
@@ -542,6 +551,19 @@ static int ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_verify_abstract_class(EX_T(EX(opline)->op1.u.var).class_entry TSRMLS_CC);
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{	
+	switch (zend_user_opcode_handlers[EX(opline)->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL)) {
+		case ZEND_USER_OPCODE_CONTINUE:
+			ZEND_VM_CONTINUE();
+		case ZEND_USER_OPCODE_RETURN:
+			ZEND_VM_RETURN();
+		case ZEND_USER_OPCODE_DISPATCH:
+		default:
+			ZEND_VM_DISPATCH(EX(opline));
+	}
 }
 
 static int ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -29477,6 +29499,31 @@ void zend_init_opcodes_handlers()
   	ZEND_HANDLE_EXCEPTION_SPEC_HANDLER,
   	ZEND_HANDLE_EXCEPTION_SPEC_HANDLER,
   	ZEND_HANDLE_EXCEPTION_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
+  	ZEND_USER_OPCODE_SPEC_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;
@@ -29491,9 +29538,18 @@ void zend_init_opcodes_handlers()
 
 #undef ZEND_VM_RETURN
 
+#undef ZEND_VM_DISPATCH
 
-#define ZEND_VM_CONTINUE() return 0
-#define ZEND_VM_RETURN()   return 1
+#undef ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL
+
+static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op);
+
+
+#define ZEND_VM_CONTINUE()   return 0
+#define ZEND_VM_RETURN()     return 1
+#define ZEND_VM_DISPATCH(op) return zend_vm_get_opcode_handler(op->opcode, op)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
 
 ZEND_API void old_execute(zend_op_array *op_array TSRMLS_DC)
 {
@@ -33116,6 +33172,19 @@ static int ZEND_VERIFY_ABSTRACT_CLASS_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_USER_OPCODE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{	
+	switch (zend_user_opcode_handlers[EX(opline)->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL)) {
+		case ZEND_USER_OPCODE_CONTINUE:
+			ZEND_VM_CONTINUE();
+		case ZEND_USER_OPCODE_RETURN:
+			ZEND_VM_RETURN();
+		case ZEND_USER_OPCODE_DISPATCH:
+		default:
+			ZEND_VM_DISPATCH(EX(opline));
+	}
+}
+
 
 void zend_vm_use_old_executor()
 {
@@ -33270,16 +33339,17 @@ void zend_vm_use_old_executor()
   	ZEND_ASSIGN_DIM_HANDLER,
   	ZEND_ISSET_ISEMPTY_PROP_OBJ_HANDLER,
   	ZEND_HANDLE_EXCEPTION_HANDLER,
+  	ZEND_USER_OPCODE_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;
   zend_vm_old_executor = 1;
   zend_execute = old_execute;
 }
-void zend_vm_set_opcode_handler(zend_op* op)
+static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* op)
 {
 	if (zend_vm_old_executor) {
-		op->handler = zend_opcode_handlers[op->opcode];
+		return zend_opcode_handlers[opcode];
 	} else {
 		static const int zend_vm_decode[] = {
 			_UNUSED_CODE, /* 0              */
@@ -33300,7 +33370,12 @@ void zend_vm_set_opcode_handler(zend_op* op)
 			_UNUSED_CODE, /* 15             */
 			_CV_CODE      /* 16 = IS_CV     */
 		};
-		op->handler = zend_opcode_handlers[op->opcode * 25 + zend_vm_decode[op->op1.op_type] * 5 + zend_vm_decode[op->op2.op_type]];
+		return zend_opcode_handlers[opcode * 25 + zend_vm_decode[op->op1.op_type] * 5 + zend_vm_decode[op->op2.op_type]];
 	}
+}
+
+void zend_vm_set_opcode_handler(zend_op* op)
+{
+	op->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);
 }
 

@@ -176,6 +176,13 @@ void zend_shutdown_timeout_thread();
 
 ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data_ptr, zend_uint var);
 
+#define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
+#define ZEND_USER_OPCODE_RETURN     1 /* exit from executor (return from function) */
+#define ZEND_USER_OPCODE_DISPATCH   2 /* call original opcode handler */
+
+ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t handler);
+ZEND_API opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
