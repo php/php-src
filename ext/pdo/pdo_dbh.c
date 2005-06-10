@@ -981,6 +981,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL, NULL, dbh->is_persistent, 0);
 
 	while (funcs->fname) {
+		ifunc->type = ZEND_INTERNAL_FUNCTION;
 		ifunc->handler = funcs->handler;
 		ifunc->function_name = funcs->fname;
 		ifunc->scope = dbh->ce;
@@ -1037,7 +1038,6 @@ static union _zend_function *dbh_method_get(
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
 	if (zend_hash_find(&dbh->ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
-
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH]) {
