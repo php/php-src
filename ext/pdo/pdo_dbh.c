@@ -216,6 +216,7 @@ static PHP_FUNCTION(dbh_constructor)
 	pdo_driver_t *driver = NULL;
 	zval *options = NULL;
 	char alt_dsn[512];
+	int call_factory = 1;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ssa!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
@@ -300,35 +301,39 @@ static PHP_FUNCTION(dbh_constructor)
 			}
 		}
 
-		/* let's see if we have one cached.... */
-		if (is_persistent && SUCCESS == zend_hash_find(&EG(persistent_list), hashkey, plen+1, (void*)&le)) {
-			if (Z_TYPE_P(le) == php_pdo_list_entry()) {
-				pdbh = (pdo_dbh_t*)le->ptr;
+		if (is_persistent) {
+			/* let's see if we have one cached.... */
+			if (SUCCESS == zend_hash_find(&EG(persistent_list), hashkey, plen+1, (void*)&le)) {
+				if (Z_TYPE_P(le) == php_pdo_list_entry()) {
+					pdbh = (pdo_dbh_t*)le->ptr;
 
-				/* is the connection still alive ? */
-				if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh TSRMLS_CC)) {
-					/* nope... need to kill it */
-					pdbh = NULL;
+					/* is the connection still alive ? */
+					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh TSRMLS_CC)) {
+						/* nope... need to kill it */
+						pdbh = NULL;
+					}
 				}
 			}
-		}
 
-		if (is_persistent && !pdbh) {
-			/* need a brand new pdbh */
-			pdbh = pecalloc(1, sizeof(*pdbh), 1);
+			if (pdbh) {
+				call_factory = 0;
+			} else {
+				/* need a brand new pdbh */
+				pdbh = pecalloc(1, sizeof(*pdbh), 1);
 
-			if (!pdbh) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO handle");
-				/* NOTREACHED */
+				if (!pdbh) {
+					php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO handle");
+					/* NOTREACHED */
+				}
+
+				pdbh->is_persistent = 1;
+				if (!(pdbh->persistent_id = pemalloc(plen + 1, 1))) {
+					php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO handle");
+				}
+				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
+				pdbh->persistent_id_len = plen+1;
+				pdbh->refcount = 1;
 			}
-			
-			pdbh->is_persistent = 1;
-			if (!(pdbh->persistent_id = pemalloc(plen + 1, 1))) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory while allocating PDO handle");
-			}
-			memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
-			pdbh->persistent_id_len = plen+1;
-			pdbh->refcount = 1;
 		}
 
 		if (pdbh) {
@@ -358,7 +363,12 @@ static PHP_FUNCTION(dbh_constructor)
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 	}
-	
+
+	if (!call_factory) {
+		/* we got a persistent guy from our cache */
+		return;
+	}
+
 	if (driver->db_handle_factory(dbh, options TSRMLS_CC)) {
 		/* all set */
 
@@ -1106,6 +1116,14 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 
 static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 {
+	if (dbh->methods->rollback) {
+		/* roll back transactions, that are possibly nested, even though we don't
+		 * official support them */
+		while (dbh->methods->rollback(dbh TSRMLS_CC))
+			;
+		dbh->in_txn = 0;
+	}
+	
 	if (dbh->properties) {
 		zend_hash_destroy(dbh->properties);
 		efree(dbh->properties);
@@ -1114,6 +1132,8 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 
 	if (!dbh->is_persistent) {
 		dbh_free(dbh TSRMLS_CC);
+	} else if (dbh->methods->persistent_shutdown) {
+		dbh->methods->persistent_shutdown(dbh TSRMLS_CC);
 	}
 }
 

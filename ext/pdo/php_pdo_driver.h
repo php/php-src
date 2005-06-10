@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050227
+#define PDO_DRIVER_API	20050610
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -262,6 +262,11 @@ typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS
  * You may set this handler to NULL, which is equivalent to returning SUCCESS. */
 typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
+/* called at request end for each persistent dbh; this gives the driver
+ * the opportunity to safely release resources that only have per-request
+ * scope */
+typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh TSRMLS_DC);
+
 /* for adding methods to the dbh or stmt objects 
 pointer to a list of driver specific functions. The convention is
 to prefix the function names using the PDO driver name; this will
@@ -290,6 +295,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_get_attr_func   	get_attribute;
 	pdo_dbh_check_liveness_func	check_liveness;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
+	pdo_dbh_request_shutdown	persistent_shutdown;
 };
 
 /* }}} */
@@ -473,7 +479,7 @@ struct pdo_column_data {
 	unsigned long precision;
 
 	/* don't touch this unless your name is dbdo */
-	void *dbdo_stuff;
+	void *dbdo_data;
 };
 
 /* describes a bound parameter */
