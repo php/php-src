@@ -989,24 +989,14 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 		while (opline->opcode == ZEND_END_SILENCE || opline->opcode == ZEND_EXT_FCALL_END || opline->opcode == ZEND_OP_DATA) {
 			opline--;
 		}
-		if (opline->result.op_type == op1->op_type
+		if (opline->result.op_type == IS_VAR
 			&& opline->result.u.var == op1->u.var) {
 			opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 		} else {
 			while (opline>CG(active_op_array)->opcodes) {
-				/* This should be an object instantiation
-				 * Find JMP_NO_CTOR, mark the preceding ASSIGN and the
-				 * proceeding INIT_FCALL_BY_NAME as unused
-				 */
-				if (opline->opcode == ZEND_JMP_NO_CTOR &&
-				    opline->op1.u.var == op1->u.var) {
-					opline->op1.u.EA.type |= EXT_TYPE_UNUSED;
-					(opline-1)->result.u.EA.type |= EXT_TYPE_UNUSED;
-					(opline+1)->op1.u.EA.type |= EXT_TYPE_UNUSED;
-					break;
-				} else if (opline->opcode == ZEND_FETCH_DIM_R
-							&& opline->op1.op_type == IS_VAR
-							&& opline->op1.u.var == op1->u.var) {
+				if (opline->opcode == ZEND_FETCH_DIM_R
+				    && opline->op1.op_type == IS_VAR
+				    && opline->op1.u.var == op1->u.var) {
 					/* This should the end of a list() construct
 					 * Mark its result as unused
 					 */
@@ -1014,6 +1004,9 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 					break;
 				} else if (opline->result.op_type==IS_VAR
 					&& opline->result.u.var == op1->u.var) {
+					if (opline->opcode == ZEND_NEW) {
+						opline->result.u.EA.type |= EXT_TYPE_UNUSED;
+					}
 					break;
 				}
 				opline--;
@@ -2935,24 +2928,15 @@ void zend_do_pop_object(znode *object TSRMLS_DC)
 
 void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
 	unsigned char *ptr = NULL;
 	
+	new_token->u.opline_num = get_next_op_number(CG(active_op_array));
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_NEW;
 	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *class_type;
-	SET_UNUSED(opline->op2);
-
-	new_token->u.opline_num = get_next_op_number(CG(active_op_array));
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_JMP_NO_CTOR;
-	opline->op1 = (opline-1)->result;
-	SET_UNUSED(opline->op2);
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_INIT_CTOR_CALL;
-	opline->op1 = (opline-2)->result;
 	SET_UNUSED(opline->op2);
 	
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
@@ -2967,7 +2951,7 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 	zend_do_free(&ctor_result TSRMLS_CC);
 
 	CG(active_op_array)->opcodes[new_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
-	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].op1;
+	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].result;
 }
 
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)

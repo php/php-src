@@ -1605,35 +1605,6 @@ ZEND_VM_HANDLER(109, ZEND_FETCH_CLASS, ANY, CONST|TMP|VAR|UNUSED|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(111, ZEND_INIT_CTOR_CALL, TMP|VAR|CV, ANY)
-{
-	zend_op *opline = EX(opline);
-	zend_free_op free_op1;
-
-	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
-
-	if (OP1_TYPE == IS_VAR) {
-		SELECTIVE_PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr, &opline->op1);
-	}
-
-	/* We are not handling overloaded classes right now */
-	EX(object) = GET_OP1_ZVAL_PTR(BP_VAR_R);
-
-	/* New always returns the object as is_ref=0, therefore, we can just increment the reference count */
-	EX(object)->refcount++; /* For $this pointer */
-
-	EX(fbc) = EX(fbc_constructor);
-
-	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-		EX(calling_scope) = EX(fbc)->common.scope;
-	} else {
-		EX(calling_scope) = NULL;
-	}
-
-	FREE_OP1_IF_VAR();
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
@@ -2396,6 +2367,8 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH_FREE, TMP|VAR, ANY)
 ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 {
 	zend_op *opline = EX(opline);
+	zval *object_zval;
+	zend_function *constructor;
 
 	if (EX_T(opline->op1.u.var).class_entry->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		char *class_type;
@@ -2407,13 +2380,43 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		}
 		zend_error_noreturn(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(opline->op1.u.var).class_entry->name);
 	}
-	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-	ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
-	object_init_ex(EX_T(opline->result.u.var).var.ptr, EX_T(opline->op1.u.var).class_entry);
-	EX_T(opline->result.u.var).var.ptr->refcount=1;
-	EX_T(opline->result.u.var).var.ptr->is_ref=0;
+	ALLOC_ZVAL(object_zval);
+	object_init_ex(object_zval, EX_T(opline->op1.u.var).class_entry);
+	INIT_PZVAL(object_zval);
 
-	ZEND_VM_NEXT_OPCODE();
+	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
+
+	if (constructor == NULL) {
+		EX(fbc_constructor) = NULL;
+		if (RETURN_VALUE_USED(opline)) {
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.ptr = object_zval;
+		} else {
+			zval_ptr_dtor(&object_zval);
+		}
+		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
+		ZEND_VM_CONTINUE_JMP();
+	} else {
+		EX(fbc_constructor) = constructor;
+
+		SELECTIVE_PZVAL_LOCK(object_zval, &opline->result);
+		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+		EX_T(opline->result.u.var).var.ptr = object_zval;
+		
+		zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
+
+		/* We are not handling overloaded classes right now */
+		EX(object) = object_zval;
+
+		EX(fbc) = EX(fbc_constructor);
+
+		if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
+			EX(calling_scope) = EX(fbc)->common.scope;
+		} else {
+			EX(calling_scope) = NULL;
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
@@ -3171,34 +3174,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 	}
 
 	ZEND_VM_INC_OPCODE();
-	ZEND_VM_NEXT_OPCODE();
-}
-
-ZEND_VM_HANDLER(69, ZEND_JMP_NO_CTOR, TMP|VAR|CV, ANY)
-{
-	zend_op *opline = EX(opline);
-	zval *object_zval;
-	zend_function *constructor;
-	zend_free_op free_op1;
-
-	if (OP1_TYPE == IS_VAR) {
-		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
-	}
-
-	object_zval = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
-
-	EX(fbc_constructor) = NULL;
-	if (constructor == NULL) {
-		if(opline->op1.u.EA.type & EXT_TYPE_UNUSED) {
-			zval_ptr_dtor(EX_T(opline->op1.u.var).var.ptr_ptr);
-		}
-		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
-		ZEND_VM_CONTINUE_JMP();
-	} else {
-		EX(fbc_constructor) = constructor;
-	}
-
 	ZEND_VM_NEXT_OPCODE();
 }
 
