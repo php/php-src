@@ -469,11 +469,6 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (dbh->is_persistent) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wont work on persistent handles");
-		RETURN_FALSE;
-	}
-
 	if (!zend_is_callable(callback, 0, &cbname)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
 		efree(cbname);
@@ -545,11 +540,6 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (dbh->is_persistent) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wont work on persistent handles");
-		RETURN_FALSE;
-	}
-
 	if (!zend_is_callable(step_callback, 0, &cbname)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
 		efree(cbname);
@@ -609,6 +599,16 @@ static function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	}
 }
 
+static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
+	/* unregister functions, so that they don't linger for the next
+	 * request */
+	if (H) {
+		pdo_sqlite_cleanup_callbacks(H TSRMLS_CC);
+	}
+}
+
 static struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
@@ -622,7 +622,8 @@ static struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_fetch_error_func,
 	pdo_sqlite_get_attribute,
 	NULL,	/* check_liveness: not needed */
-	get_driver_methods
+	get_driver_methods,
+	pdo_sqlite_request_shutdown
 };
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)
