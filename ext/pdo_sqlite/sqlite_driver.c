@@ -279,9 +279,10 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 }
 
 static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
-		int argc, sqlite3_value **argv, zval **retval TSRMLS_DC)
+		int argc, sqlite3_value **argv, sqlite3_context *context TSRMLS_DC)
 {
 	zval ***zargs = NULL;
+	zval *retval = NULL;
 	int i;
 	int ret;
 	
@@ -290,7 +291,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	fc->fci.function_name = cb;
 	fc->fci.symbol_table = NULL;
 	fc->fci.object_pp = NULL;
-	fc->fci.retval_ptr_ptr = retval;
+	fc->fci.retval_ptr_ptr = &retval;
 	fc->fci.param_count = argc;
 	
 	/* build up the params */
@@ -341,36 +342,63 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		efree(zargs);
 	}
 
+	if (context) {
+		if (retval) {
+			switch (Z_TYPE_P(retval)) {
+				case IS_LONG:
+					sqlite3_result_int(context, Z_LVAL_P(retval));
+					break;
+
+				case IS_NULL:
+					sqlite3_result_null(context);
+					break;
+
+				case IS_DOUBLE:
+					sqlite3_result_double(context, Z_DVAL_P(retval));
+					break;
+
+				default:
+					convert_to_string_ex(&retval);
+					sqlite3_result_text(context, Z_STRVAL_P(retval),
+						Z_STRLEN_P(retval), SQLITE_TRANSIENT);
+					break;
+			}
+		} else {
+			sqlite3_result_error(context, "failed to invoke callback", 0);
+		}
+	}
+
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+
 	return ret;
 }
 
 static void php_sqlite3_func_callback(sqlite3_context *context, int argc,
 	sqlite3_value **argv)
 {
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)context;
-	zval *retval = NULL;
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 	TSRMLS_FETCH();
 
-	do_callback(&func->afunc, func->func, argc, argv, &retval TSRMLS_CC);
+	do_callback(&func->afunc, func->func, argc, argv, context TSRMLS_CC);
 }
 
 static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc,
 	sqlite3_value **argv)
 {
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)context;
-	zval *retval = NULL;
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 	TSRMLS_FETCH();
 
-	do_callback(&func->astep, func->step, argc, argv, &retval TSRMLS_CC);
+	do_callback(&func->astep, func->step, argc, argv, NULL TSRMLS_CC);
 }
 
 static void php_sqlite3_func_final_callback(sqlite3_context *context)
 {
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)context;
-	zval *retval = NULL;
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 	TSRMLS_FETCH();
 
-	do_callback(&func->afini, func->fini, 0, NULL, &retval TSRMLS_CC);
+	do_callback(&func->afini, func->fini, 0, NULL, context TSRMLS_CC);
 }
 
 /* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount])
@@ -412,7 +440,6 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 
 	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
 			func, php_sqlite3_func_callback, NULL, NULL);
-
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 		
@@ -440,7 +467,6 @@ static function_entry dbh_methods[] = {
 
 static function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
-	printf("get_driver_methods\n");
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
 			return dbh_methods;
