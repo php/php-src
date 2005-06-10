@@ -51,7 +51,7 @@ $baz->printFoo();
 ?>
 --EXPECTF--
 foo: foo foo2
-bar: bar
+bar: bar 
 Notice: Undefined property:  bar::$foo2 in %s on line %d
 
 ---baz--
