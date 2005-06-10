@@ -1,9 +1,11 @@
 #!/bin/sh
 
 # Variable declaration
+EGREP='@EGREP@'
 prefix='@prefix@'
-phpdir="@libdir@/build"
-includedir="@includedir@/php"
+exec_prefix="`eval echo @exec_prefix@`"
+phpdir="`eval echo @libdir@`/build"
+includedir="`eval echo @includedir@`/php"
 builddir="`pwd`"
 
 FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4"
@@ -50,9 +52,9 @@ phpize_check_configm4()
 phpize_get_api_numbers()
 {
   # extracting API NOs:
-  PHP_API_VERSION=`egrep '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
-  ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
-  ZEND_EXTENSION_API_NO=`egrep '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
+  PHP_API_VERSION=`$EGREP '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
+  ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
+  ZEND_EXTENSION_API_NO=`$EGREP '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
 }
 
 phpize_print_api_numbers()
@@ -64,13 +66,15 @@ phpize_print_api_numbers()
   echo "Zend Extension Api No:  "$ZEND_EXTENSION_API_NO
 }
 
-phpize_no_shtool()
+phpize_check_build_files()
 {
-  cat <<EOF
-shtool at '$builddir/build/shtool' not executable. 
-Make sure that the file exists and is executable and then rerun this script. 
+  if test ! -d "$phpdir"; then
+    cat <<EOF
+Cannot find build files at '$phpdir'. Please check your PHP installation.
 
 EOF
+    exit 1
+  fi
 }
 
 phpize_check_shtool()
@@ -78,7 +82,11 @@ phpize_check_shtool()
   test -x "$builddir/build/shtool" || chmod +x "$builddir/build/shtool"
 
   if test ! -x "$builddir/build/shtool"; then
-    phpize_no_shtool
+    cat <<EOF
+shtool at '$builddir/build/shtool' does not exist or is not executable. 
+Make sure that the file exists and is executable and then rerun this script. 
+
+EOF
     exit 1
   else
     php_shtool=$builddir/build/shtool
@@ -155,6 +163,8 @@ case "$1" in
   # Default
   *)
      phpize_check_configm4 0
+
+     phpize_check_build_files
 
      phpize_print_api_numbers
 
