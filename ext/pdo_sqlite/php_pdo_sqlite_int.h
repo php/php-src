@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,9 +30,26 @@ typedef struct {
 	char *errmsg;
 } pdo_sqlite_error_info;
 
+struct pdo_sqlite_fci {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+};
+
+struct pdo_sqlite_func {
+	struct pdo_sqlite_func *next;
+
+	zval *func, *step, *fini;
+	int argc;
+	const char *funcname;
+	
+	/* accelerated callback references */
+	struct pdo_sqlite_fci afunc, astep, afini;
+};
+
 typedef struct {
 	sqlite3 *db;
 	pdo_sqlite_error_info einfo;
+	struct pdo_sqlite_func *funcs;
 } pdo_sqlite_db_handle;
 
 typedef struct {
