@@ -96,11 +96,44 @@ static int pdo_sqlite_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 	return 1;
 }
 
+static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H TSRMLS_DC)
+{
+	struct pdo_sqlite_func *func;
+
+	while (H->funcs) {
+		func = H->funcs;
+		H->funcs = func->next;
+
+		if (H->db) {
+			/* delete the function from the handle */
+			sqlite3_create_function(H->db,
+				func->funcname,
+				func->argc,
+				SQLITE_UTF8,
+				func,
+				NULL, NULL, NULL);
+		}
+
+		efree((char*)func->funcname);
+		if (func->func) {
+			zval_ptr_dtor(&func->func);
+		}
+		if (func->step) {
+			zval_ptr_dtor(&func->step);
+		}
+		if (func->fini) {
+			zval_ptr_dtor(&func->fini);
+		}
+		efree(func);
+	}
+}
+
 static int sqlite_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	
 	if (H) {
+		pdo_sqlite_cleanup_callbacks(H TSRMLS_CC);
 		if (H->db) {
 			sqlite3_close(H->db);
 			H->db = NULL;
@@ -245,18 +278,169 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 	return 0;
 }
 
-static PHP_FUNCTION(sqlite_create_function)
+static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
+		int argc, sqlite3_value **argv, zval **retval TSRMLS_DC)
 {
-	/* TODO: implement this stuff */
+	zval ***zargs = NULL;
+	int i;
+	int ret;
+	
+	fc->fci.size = sizeof(fc->fci);
+	fc->fci.function_table = EG(function_table);
+	fc->fci.function_name = cb;
+	fc->fci.symbol_table = NULL;
+	fc->fci.object_pp = NULL;
+	fc->fci.retval_ptr_ptr = retval;
+	fc->fci.param_count = argc;
+	
+	/* build up the params */
+	if (argc) {
+		zargs = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
+
+		for (i = 0; i < argc; i++) {
+			zargs[i] = emalloc(sizeof(zval *));
+			MAKE_STD_ZVAL(*zargs[i]);
+		
+			/* get the value */
+			switch (sqlite3_value_type(argv[i])) {
+				case SQLITE_INTEGER:
+					ZVAL_LONG(*zargs[i], sqlite3_value_int(argv[i]));
+					break;
+
+				case SQLITE_FLOAT:
+					ZVAL_DOUBLE(*zargs[i], sqlite3_value_double(argv[i]));
+					break;
+					
+				case SQLITE_NULL:
+					ZVAL_NULL(*zargs[i]);
+					break;
+					
+				case SQLITE_BLOB:
+				case SQLITE3_TEXT:
+				default:
+					ZVAL_STRINGL(*zargs[i], (char*)sqlite3_value_text(argv[i]),
+						sqlite3_value_bytes(argv[i]), 1);
+					break;
+			}
+		}
+	}
+
+
+	fc->fci.params = zargs;
+
+	if ((ret = zend_call_function(&fc->fci, &fc->fcc TSRMLS_CC)) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the callback");
+	}
+
+	/* clean up the params */
+	if (argc) {
+		for (i = 0; i < argc; i++) {
+			zval_ptr_dtor(zargs[i]);
+			efree(zargs[i]);
+		}
+		efree(zargs);
+	}
+
+	return ret;
 }
 
+static void php_sqlite3_func_callback(sqlite3_context *context, int argc,
+	sqlite3_value **argv)
+{
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)context;
+	zval *retval = NULL;
+	TSRMLS_FETCH();
+
+	do_callback(&func->afunc, func->func, argc, argv, &retval TSRMLS_CC);
+}
+
+static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc,
+	sqlite3_value **argv)
+{
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)context;
+	zval *retval = NULL;
+	TSRMLS_FETCH();
+
+	do_callback(&func->astep, func->step, argc, argv, &retval TSRMLS_CC);
+}
+
+static void php_sqlite3_func_final_callback(sqlite3_context *context)
+{
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)context;
+	zval *retval = NULL;
+	TSRMLS_FETCH();
+
+	do_callback(&func->afini, func->fini, 0, NULL, &retval TSRMLS_CC);
+}
+
+/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount])
+   Registers a UDF with the sqlite db handle */
+static PHP_METHOD(SQLite, sqliteCreateFunction)
+{
+	struct pdo_sqlite_func *func;
+	zval *callback;
+	char *func_name;
+	int func_name_len;
+	long argc = -1;
+	char *cbname = NULL;
+	pdo_dbh_t *dbh;
+	pdo_sqlite_db_handle *H;
+	int ret;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l",
+			&func_name, &func_name_len, &callback, &argc)) {
+		RETURN_FALSE;
+	}
+	
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (dbh->is_persistent) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "wont work on persistent handles");
+		RETURN_FALSE;
+	}
+
+	if (!zend_is_callable(callback, 0, &cbname)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
+		efree(cbname);
+		RETURN_FALSE;
+	}
+	efree(cbname);
+	
+	H = (pdo_sqlite_db_handle *)dbh->driver_data;
+
+	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
+
+	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
+			func, php_sqlite3_func_callback, NULL, NULL);
+
+	if (ret == SQLITE_OK) {
+		func->funcname = estrdup(func_name);
+		
+		MAKE_STD_ZVAL(func->func);
+		*(func->func) = *callback;
+		zval_copy_ctor(func->func);
+		
+		func->argc = argc;
+
+		func->next = H->funcs;
+		H->funcs = func;
+
+		RETURN_TRUE;
+	}
+
+	efree(func);
+	RETURN_FALSE;
+}
+/* }}} */
+
 static function_entry dbh_methods[] = {
-	PHP_FE(sqlite_create_function, NULL)
+	PHP_ME(SQLite, sqliteCreateFunction, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
 static function_entry *get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 {
+	printf("get_driver_methods\n");
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
 			return dbh_methods;
