@@ -1,3 +1,56 @@
+2005-06-10  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to -dev
+
+    * (php_5_1_0b1)
+      zend.h:
+      - Go with 5.1.0b1
+
+2005-06-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_1_0b1)
+      tests/bug30162.phpt:
+      Added test for bug #30162 (it is already fixed but test file was forgotten)
+
+    * (php_5_1_0b1)
+      tests/bug31177.phpt:
+      Added test file for bug #31177 (not fixed yet)
+
+    * tests/bug31177.phpt
+      tests/bug31177.phpt:
+      
+      file bug31177.phpt was initially added on branch PHP_5_0.
+
+    * (php_5_1_0b1)
+      tests/bug29689.phpt:
+      typos
+
+    * (php_5_1_0b1)
+      zend_reflection_api.c
+      zend_reflection_api.c:
+      Fixed support for ZEND_ACC_SHADOW in ReflectionProperty constructor
+
+    * (php_5_1_0b1)
+      zend_execute.c
+      zend_execute.h
+      zend_extensions.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Fix so that extensions like xdebug, can overload opcodes in all execution
+      modes including goto/switch
+
+    * (php_5_1_0b1)
+      zend_compile.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Merge three opcodes (ZEND_NEW, ZEND_JMP_NO_CTOR, ZEND_INIT_CTOR) into one
+      (ZEND_NEW). There was no real reason for this anymore and API should be
+      changed before 5.1
+
 2005-06-09  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.c
