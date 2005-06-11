@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+11 Jun 2005, PHP 5.1 Beta 2
+- Fixed PDO shutdown problem (possible inifite loop running rollback on
+  shutdown). (Wez)
+- Fixed PECL bug #3714 (beginTransaction doesn't work if you're in
+  auto-commit mode). (Wez)
+
 10 Jun 2005, PHP 5.1 Beta 1
 - Added user opcode API that allow overloading of opcode handlers. (Dmitry)
 - Opcodes ZEND_NEW, ZEND_JMP_NO_CTOR, ZEND_INIT_CTOR are mefget into one
