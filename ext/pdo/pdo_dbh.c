@@ -1116,11 +1116,10 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 
 static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	if (dbh->methods->rollback) {
+	if (dbh->methods && dbh->methods->rollback) {
 		/* roll back transactions, that are possibly nested, even though we don't
 		 * official support them */
-		while (dbh->methods->rollback(dbh TSRMLS_CC))
-			;
+		dbh->methods->rollback(dbh TSRMLS_CC);
 		dbh->in_txn = 0;
 	}
 	
