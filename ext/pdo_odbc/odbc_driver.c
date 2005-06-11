@@ -218,7 +218,17 @@ static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquoted
 
 static int odbc_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	/* with ODBC, there is nothing special to be done */
+	if (dbh->auto_commit) {
+		/* we need to disable auto-commit now, to be able to initiate a transaction */
+		RETCODE rc;
+		pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_NTS);
+		if (rc != SQL_SUCCESS) {
+			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
+			return 0;
+		}
+	}
 	return 1;
 }
 
@@ -233,6 +243,16 @@ static int odbc_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 		pdo_odbc_drv_error("SQLEndTran: Commit");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
+			return 0;
+		}
+	}
+
+	if (dbh->auto_commit) {
+		/* turn auto-commit back on again */
+		RETCODE rc;
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
+		if (rc != SQL_SUCCESS) {
+			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
 			return 0;
 		}
 	}
@@ -253,6 +273,16 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 			return 0;
 		}
 	}
+	if (dbh->auto_commit && H->dbc && dbh->in_txn) {
+		/* turn auto-commit back on again */
+		RETCODE rc;
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
+		if (rc != SQL_SUCCESS) {
+			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
@@ -328,7 +358,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	}
 
 	if (!dbh->auto_commit) {
-		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, SQL_IS_UINTEGER);
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_NTS);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
 			odbc_handle_closer(dbh TSRMLS_CC);
