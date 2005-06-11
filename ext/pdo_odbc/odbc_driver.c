@@ -101,8 +101,10 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 		SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
 		SQLDisconnect(H->dbc);
 		SQLFreeHandle(SQL_HANDLE_DBC, H->dbc);
+		H->dbc = NULL;
 	}
 	SQLFreeHandle(SQL_HANDLE_ENV, H->env);
+	H->env = NULL;
 	pefree(H, dbh->is_persistent);
 
 	return 0;
@@ -249,10 +251,9 @@ static int odbc_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 
 	if (dbh->auto_commit) {
 		/* turn auto-commit back on again */
-		RETCODE rc;
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
 		if (rc != SQL_SUCCESS) {
-			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
+			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
 			return 0;
 		}
 	}
@@ -263,7 +264,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
-
+	
 	rc = SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
 
 	if (rc != SQL_SUCCESS) {
@@ -273,12 +274,11 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 			return 0;
 		}
 	}
-	if (dbh->auto_commit && H->dbc && dbh->in_txn) {
+	if (dbh->auto_commit && H->dbc) {
 		/* turn auto-commit back on again */
-		RETCODE rc;
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
 		if (rc != SQL_SUCCESS) {
-			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
+			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
 			return 0;
 		}
 	}
@@ -357,13 +357,12 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		return 0;
 	}
 
-	if (!dbh->auto_commit) {
-		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_NTS);
-		if (rc != SQL_SUCCESS) {
-			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
-			odbc_handle_closer(dbh TSRMLS_CC);
-			return 0;
-		}
+	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT,
+		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_NTS);
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT");
+		odbc_handle_closer(dbh TSRMLS_CC);
+		return 0;
 	}
 
 	/* set up the cursor library, if needed, or if configured explicitly */
