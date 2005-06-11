@@ -30,10 +30,10 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
 if test "$PHP_PDO_ODBC" != "no"; then
   AC_MSG_CHECKING([for selected PDO ODBC flavour])
 
-  pdo_odbc_flavour=`echo $withval | cut -d, -f1`
-  pdo_odbc_dir=`echo $withval | cut -d, -f2`
+  pdo_odbc_flavour=`echo $PHP_PDO_ODBC | cut -d, -f1`
+  pdo_odbc_dir=`echo $PHP_PDO_ODBC | cut -d, -f2`
 
-  if test "$pdo_odbc_dir" = "$withval" ; then
+  if test "$pdo_odbc_dir" = "$PHP_PDO_ODBC" ; then
     pdo_odbc_dir=""
   fi
 
@@ -107,6 +107,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
   PDO_ODBC_LFLAGS="-L$PDO_ODBC_LIBDIR"
   PDO_ODBC_LIBS="$pdo_odbc_def_lib"
 
+  save_old_LDFLAGS="$LDFLAGS"
   LDFLAGS="$PDO_ODBC_LFLAGS $PDO_ODBC_LIBS -lm -ldl"
   dnl Check for an ODBC 1.0 function to assert that the libraries work
   AC_TRY_LINK_FUNC([SQLBindCol],[],[
