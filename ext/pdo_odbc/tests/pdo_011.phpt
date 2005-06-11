@@ -88,28 +88,28 @@ array(4) {
   [0]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(1)
+    string(1) "1"
     ["val"]=>
     string(1) "A"
   }
   [1]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(2)
+    string(1) "2"
     ["val"]=>
     string(1) "B"
   }
   [2]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(3)
+    string(1) "3"
     ["val"]=>
     string(1) "C"
   }
   [3]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(4)
+    string(1) "4"
     ["val"]=>
     string(1) "D"
   }
@@ -126,28 +126,28 @@ array(4) {
   [0]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(1)
+    string(1) "1"
     ["val"]=>
     string(1) "A"
   }
   [1]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(2)
+    string(1) "2"
     ["val"]=>
     string(1) "B"
   }
   [2]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(3)
+    string(1) "3"
     ["val"]=>
     string(1) "C"
   }
   [3]=>
   object(Test1)#%d (2) {
     ["id"]=>
-    int(4)
+    string(1) "4"
     ["val"]=>
     string(1) "D"
   }
