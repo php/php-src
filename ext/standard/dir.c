@@ -401,7 +401,6 @@ PHP_FUNCTION(glob)
 			 * foreach() */
 			array_init(return_value);
 			return;
-#endif
 		}
 #endif
 		RETURN_FALSE;
