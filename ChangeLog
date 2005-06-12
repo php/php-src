@@ -1,3 +1,41 @@
+2005-06-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      Revert. re2c 0.9.7 obviously does not work properly (or our .re files are
+      buggy)
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      revert
+
+    * ext/mysql/config.m4:
+      Another netware fix
+
+    * NEWS:
+      Merge the bug fix entries from PHP_5_0 branch
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      regenerated with re2c 0.9.7
+
+2005-06-11  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev
+
+    * (php_5_1_0b2)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - b2 (will post it to internals@)
+
 2005-06-10  Andi Gutmans  <andi@zend.com>
 
     * configure.in
