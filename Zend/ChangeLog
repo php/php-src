@@ -1,3 +1,12 @@
+2005-06-11  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to -dev
+
+    * (php_5_1_0b2)
+      zend.h:
+      - b2 (will post it to internals@)
+
 2005-06-10  Andi Gutmans  <andi@zend.com>
 
     * zend.h:
