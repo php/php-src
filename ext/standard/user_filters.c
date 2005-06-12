@@ -116,7 +116,6 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	zval *obj = (zval*)thisfilter->abstract;
 	zval func_name;
 	zval *retval = NULL;
-	zval **tmp; 
 
 	if (obj == NULL) {
 		/* If there's no object associated then there's nothing to dispose of */
