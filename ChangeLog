@@ -1,3 +1,20 @@
+2005-06-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/user_filters.c:
+      Removed unused var.
+
+2005-06-12  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/dir.c:
+      Support for GLOB_ERR so that glob() reports permission problems (Bug
+      #28355)
+
+    * ext/standard/dir.c:
+      thinko fix (E_COMMIT_AFTER_MIDNIGHT)
+
+    * ext/standard/dir.c:
+      Removed bogus fix for bug #28355 (it was dead code anyway)
+
 2005-06-11  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_4_4)
