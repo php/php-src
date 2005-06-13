@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   'zend_error'). (Dmitry)
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
+- Fixed bug #28355 (glob wont error if dir is not readable). (Hartmut)
 
 10 Jun 2005, PHP 5.1 Beta 1
 - Upgraded PCRE library to version 5.0. (Andrei)
