@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   auto-commit mode). (Wez)
 - Fixed bug #33312 (ReflectionParameter methods do not work correctly).
   (Dmitry)
+- Fixed bug #33212 ([GCC 4]: 'zend_error_noreturn' aliased to external symbol
+  'zend_error'). (Dmitry)
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
 

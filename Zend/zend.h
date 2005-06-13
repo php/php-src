@@ -250,6 +250,14 @@ char *alloca ();
 #define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval *this_ptr, int return_value_used TSRMLS_DC
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, this_ptr, return_value_used TSRMLS_CC
 
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
+void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
+#else
+#  define ZEND_VM_ALWAYS_INLINE
+#  define zend_error_noreturn zend_error
+#endif
+
 
 /*
  * zval
