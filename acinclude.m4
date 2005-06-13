@@ -390,6 +390,13 @@ dnl
 AC_DEFUN([PHP_EVAL_LIBLINE],[
   for ac_i in $1; do
     case $ac_i in
+    -pthread[)]
+      if test "$ext_shared" = "yes"; then
+        $2="[$]$2 -pthread"
+      else
+        PHP_RUN_ONCE(EXTRA_LDFLAGS, [$ac_i], [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
+      fi
+    ;;
     -l*[)]
       ac_ii=`echo $ac_i|cut -c 3-`
       PHP_ADD_LIBRARY($ac_ii,1,$2)
