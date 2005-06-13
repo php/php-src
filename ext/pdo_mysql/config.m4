@@ -21,21 +21,21 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
   for i in $PHP_PDO_MYSQL /usr/local /usr ; do
-      PDO_MYSQL_DIR=$i
-      PDO_MYSQL_CONFIG=$PDO_MYSQL_DIR/bin/mysql_config
-      if test -r $i/include/mysql; then
-	PDO_MYSQL_INC_DIR=$i/include/mysql
-      else
-	PDO_MYSQL_INC_DIR=$i/include
-      fi      
-      if test -r $i/lib/mysql; then
-        PDO_MYSQL_LIB_DIR=$i/lib/mysql
-      else
-        PDO_MYSQL_LIB_DIR=$i/lib
-      fi
-      if test -x $PDO_MYSQL_CONFIG; then
-        break
-      fi
+    PDO_MYSQL_DIR=$i
+    PDO_MYSQL_CONFIG=$PDO_MYSQL_DIR/bin/mysql_config
+    if test -r $i/include/mysql; then
+      PDO_MYSQL_INC_DIR=$i/include/mysql
+    else
+      PDO_MYSQL_INC_DIR=$i/include
+    fi      
+    if test -r $i/lib/mysql; then
+      PDO_MYSQL_LIB_DIR=$i/lib/mysql
+    else
+      PDO_MYSQL_LIB_DIR=$i/lib
+    fi
+    if test -x $PDO_MYSQL_CONFIG; then
+      break
+    fi
   done
 
   if test -z "$PDO_MYSQL_DIR"; then
@@ -52,8 +52,8 @@ Note that the MySQL client library is not bundled anymore!])
   PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $PDO_MYSQL_LIB_DIR, PDO_MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
   if test -x $PDO_MYSQL_CONFIG; then
-	PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs`
-	PHP_SUBST_OLD(PDO_MYSQL_LIBS)
+    PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs`
+    PHP_SUBST_OLD(PDO_MYSQL_LIBS)
   fi
 
   _SAVE_LDFLAGS=$LDFLAGS
