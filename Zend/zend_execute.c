@@ -42,15 +42,6 @@
 #define _UNUSED_CODE 3
 #define _CV_CODE     4
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__sun__) && !defined(ZEND_VM_OLD_EXECUTOR)
-#  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
-void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
-/*extern void zend_error_noreturn(int type, const char *format, ...) __asm__("zend_error") __attribute__ ((noreturn));*/
-#else
-#  define ZEND_VM_ALWAYS_INLINE
-#  define zend_error_noreturn zend_error
-#endif
-
 typedef int (*incdec_t)(zval *);
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free, type TSRMLS_CC)
