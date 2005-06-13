@@ -84,72 +84,72 @@ $op1_get_zval_ptr = array(
 	"ANY"    => "get_zval_ptr(&opline->op1, EX(Ts), &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
 	"VAR"    => "_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CONST"  => "_get_zval_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"UNUSED" => "_get_zval_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CV"     => "_get_zval_ptr_cv(&opline->op1, EX(Ts), &free_op1, \\1 TSRMLS_CC)",
+	"CONST"  => "&opline->op1.u.constant",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_cv(&opline->op1, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op2_get_zval_ptr = array(
 	"ANY"    => "get_zval_ptr(&opline->op2, EX(Ts), &free_op2, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
 	"VAR"    => "_get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CONST"  => "_get_zval_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"UNUSED" => "_get_zval_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CV"     => "_get_zval_ptr_cv(&opline->op2, EX(Ts), &free_op2, \\1 TSRMLS_CC)",
+	"CONST"  => "&opline->op2.u.constant",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_cv(&opline->op2, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op1_get_zval_ptr_ptr = array(
 	"ANY"    => "get_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1, \\1)",
-	"TMP"    => "_get_zval_ptr_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
+	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CONST"  => "_get_zval_ptr_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"UNUSED" => "_get_zval_ptr_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CV"     => "_get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), &free_op1, \\1 TSRMLS_CC)",
+	"CONST"  => "NULL",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op2_get_zval_ptr_ptr = array(
 	"ANY"    => "get_zval_ptr_ptr(&opline->op2, EX(Ts), &free_op2, \\1)",
-	"TMP"    => "_get_zval_ptr_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
+	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CONST"  => "_get_zval_ptr_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"UNUSED" => "_get_zval_ptr_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CV"     => "_get_zval_ptr_ptr_cv(&opline->op2, EX(Ts), &free_op2, \\1 TSRMLS_CC)",
+	"CONST"  => "NULL",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_ptr_cv(&opline->op2, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op1_get_obj_zval_ptr = array(
 	"ANY"    => "get_obj_zval_ptr(&opline->op1, EX(Ts), &free_op1, \\1)",
-	"TMP"    => "_get_obj_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"VAR"    => "_get_obj_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CONST"  => "_get_obj_zval_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CV"     => "_get_obj_zval_ptr_cv(&opline->op1, EX(Ts), &free_op1, \\1 TSRMLS_CC)",
+	"TMP"    => "_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
+	"VAR"    => "_get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
+	"CONST"  => "&opline->op1.u.constant",
+	"UNUSED" => "_get_obj_zval_ptr_unused(TSRMLS_C)",
+	"CV"     => "_get_zval_ptr_cv(&opline->op1, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op2_get_obj_zval_ptr = array(
 	"ANY"    => "get_obj_zval_ptr(&opline->op2, EX(Ts), &free_op2, \\1)",
-	"TMP"    => "_get_obj_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"VAR"    => "_get_obj_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CONST"  => "_get_obj_zval_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"UNUSED" => "_get_obj_zval_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CV"     => "_get_obj_zval_ptr_cv(&opline->op2, EX(Ts), &free_op2, \\1 TSRMLS_CC)",
+	"TMP"    => "_get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
+	"VAR"    => "_get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
+	"CONST"  => "&opline->op2.u.constant",
+	"UNUSED" => "_get_obj_zval_ptr_unused(TSRMLS_C)",
+	"CV"     => "_get_zval_ptr_cv(&opline->op2, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op1_get_obj_zval_ptr_ptr = array(
 	"ANY"    => "get_obj_zval_ptr_ptr(&opline->op1, EX(Ts), &free_op1, \\1)",
-	"TMP"    => "_get_obj_zval_ptr_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"VAR"    => "_get_obj_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CONST"  => "_get_obj_zval_ptr_ptr_const(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"UNUSED" => "_get_obj_zval_ptr_ptr_unused(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
-	"CV"     => "_get_obj_zval_ptr_ptr_cv(&opline->op1, EX(Ts), &free_op1, \\1 TSRMLS_CC)",
+	"TMP"    => "NULL",
+	"VAR"    => "_get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
+	"CONST"  => "NULL",
+	"UNUSED" => "_get_obj_zval_ptr_ptr_unused(TSRMLS_C)",
+	"CV"     => "_get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op2_get_obj_zval_ptr_ptr = array(
 	"ANY"    => "get_obj_zval_ptr_ptr(&opline->op2, EX(Ts), &free_op2, \\1)",
-	"TMP"    => "_get_obj_zval_ptr_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"VAR"    => "_get_obj_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CONST"  => "_get_obj_zval_ptr_ptr_const(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"UNUSED" => "_get_obj_zval_ptr_ptr_unused(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
-	"CV"     => "_get_obj_zval_ptr_ptr_cv(&opline->op2, EX(Ts), &free_op2, \\1 TSRMLS_CC)",
+	"TMP"    => "NULL",
+	"VAR"    => "_get_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC)",
+	"CONST"  => "NULL",
+	"UNUSED" => "_get_obj_zval_ptr_ptr_unused(TSRMLS_C)",
+	"CV"     => "_get_zval_ptr_ptr_cv(&opline->op2, EX(Ts), \\1 TSRMLS_CC)",
 );
 
 $op1_is_tmp_free = array(
