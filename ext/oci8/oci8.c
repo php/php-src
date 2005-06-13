@@ -836,16 +836,16 @@ _oci_conn_list_dtor(oci_connection *connection TSRMLS_DC)
 					(ub4) OCI_HTYPE_SVCCTX));
 	}
 
-	if (connection->session && connection->session->exclusive) {
-		/* exclusive connection created via OCINLogon() close their 
-		   associated session when destructed */
-		zend_list_delete(connection->session->num);
-	}
-
 	if (connection->pError) {
 		CALL_OCI(OCIHandleFree(
 					(dvoid *) connection->pError, 
 					(ub4) OCI_HTYPE_ERROR));
+	}
+
+	if (connection->session && connection->session->exclusive) {
+		/* exclusive connection created via OCINLogon() close their 
+		   associated session when destructed */
+		zend_list_delete(connection->session->num);
 	}
 
 	oci_debug("END   _oci_conn_list_dtor: id=%d",connection->id);
@@ -2974,6 +2974,8 @@ break;
 				RETURN_FALSE;
 			}
 			value_sz = sizeof(void*);
+			break;
+		case SQLT_CHR:
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: %u", ocitype);
