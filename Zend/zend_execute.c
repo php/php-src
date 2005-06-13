@@ -159,15 +159,20 @@ static inline void zend_get_cv_address(zend_compiled_variable *cv, zval ***ptr, 
    zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
 }
 
+static inline zval *_get_zval_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+{
+	return should_free->var = &T(node->u.var).tmp_var;
+}
+
 static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
-	if (T(node->u.var).var.ptr) {
-		PZVAL_UNLOCK(T(node->u.var).var.ptr, should_free);
-		return T(node->u.var).var.ptr;
+	zval *ptr = T(node->u.var).var.ptr;
+	if (ptr) {
+		PZVAL_UNLOCK(ptr, should_free);
+		return ptr;
 	} else {
 		temp_variable *T = &T(node->u.var);
 		zval *str = T->str_offset.str;
-		zval *ptr;
 
 		/* string offset */
 		ALLOC_ZVAL(ptr);
@@ -194,114 +199,10 @@ static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_
 	}
 }
 
-static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
-{
-/*	should_free->is_var = 0; */
-	switch (node->op_type) {
-		case IS_CONST:
-			should_free->var = 0;
-			return &node->u.constant;
-			break;
-		case IS_TMP_VAR:
-			should_free->var = TMP_FREE(&T(node->u.var).tmp_var);
-			return &T(node->u.var).tmp_var;
-			break;
-		case IS_VAR:
-			return _get_zval_ptr_var(node, Ts, should_free TSRMLS_CC);
-			break;
-		case IS_UNUSED:
-			should_free->var = 0;
-			return NULL;
-			break;
-		case IS_CV: {
-			zval ***ptr = &CV_OF(node->u.var);
-			
-			should_free->var = 0;
-			if (!*ptr) {
-				zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
-				if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
-					switch (type) {
-						case BP_VAR_R:
-						case BP_VAR_UNSET:
-							zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-							/* break missing intentionally */
-						case BP_VAR_IS:
-							return &EG(uninitialized_zval);
-							break;
-						case BP_VAR_RW:
-							zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-							/* break missing intentionally */
-						case BP_VAR_W:
-							zend_get_cv_address(cv, ptr, Ts TSRMLS_CC);
-							break;
-					}
-				}
-			}
-			return **ptr;
-			break;
-		}
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-	return NULL;
-}
-
-static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
-{
-	if (node->op_type == IS_CV) {
-		zval ***ptr = &CV_OF(node->u.var);
-		
-		should_free->var = 0;
-		if (!*ptr) {
-			zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
-			if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
-				switch (type) {
-					case BP_VAR_R:
-					case BP_VAR_UNSET:
-						zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-						/* break missing intentionally */
-					case BP_VAR_IS:
-						return &EG(uninitialized_zval_ptr);
-						break;
-					case BP_VAR_RW:
-						zend_error(E_NOTICE, "Undefined variable: %s", cv->name);
-						/* break missing intentionally */
-					case BP_VAR_W:
-						zend_get_cv_address(cv, ptr, Ts TSRMLS_CC);
-						break;
-				}
-			}
-		}
-		return *ptr;
-	} else if (node->op_type == IS_VAR) {
-		if (T(node->u.var).var.ptr_ptr) {
-			PZVAL_UNLOCK(*T(node->u.var).var.ptr_ptr, should_free);
-			return T(node->u.var).var.ptr_ptr;
-		} else {
-			/* string offset */
-			PZVAL_UNLOCK(T(node->u.var).str_offset.str, should_free);
-			return NULL;
-		}
-	} else {
-		should_free->var = 0;
-		return NULL;
-	}
-}
-
-static inline zval *_get_zval_ptr_const(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return &node->u.constant;
-}
-
-static inline zval *_get_zval_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return should_free->var = &T(node->u.var).tmp_var;
-}
-
-static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
+static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval ***ptr = &CV_OF(node->u.var);
 			
-	should_free->var = 0;
 	if (!*ptr) {
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
@@ -325,42 +226,51 @@ static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, zend_free_o
 	return **ptr;
 }
 
-static inline zval *_get_zval_ptr_unused(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
 {
-	return NULL;
-}
-
-static inline zval **_get_zval_ptr_ptr_const(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return NULL;
-}
-
-static inline zval **_get_zval_ptr_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
+/*	should_free->is_var = 0; */
+	switch (node->op_type) {
+		case IS_CONST:
+			should_free->var = 0;
+			return &node->u.constant;
+			break;
+		case IS_TMP_VAR:
+			should_free->var = TMP_FREE(&T(node->u.var).tmp_var);
+			return &T(node->u.var).tmp_var;
+			break;
+		case IS_VAR:
+			return _get_zval_ptr_var(node, Ts, should_free TSRMLS_CC);
+			break;
+		case IS_UNUSED:
+			should_free->var = 0;
+			return NULL;
+			break;
+		case IS_CV:
+			should_free->var = 0;
+			return _get_zval_ptr_cv(node, Ts, type TSRMLS_CC);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
 	return NULL;
 }
 
 static inline zval **_get_zval_ptr_ptr_var(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
-	if (T(node->u.var).var.ptr_ptr) {
-		PZVAL_UNLOCK(*T(node->u.var).var.ptr_ptr, should_free);
+	zval** ptr_ptr = T(node->u.var).var.ptr_ptr;
+
+	if (ptr_ptr) {
+		PZVAL_UNLOCK(*ptr_ptr, should_free);
 	} else {
 		/* string offset */
 		PZVAL_UNLOCK(T(node->u.var).str_offset.str, should_free);
 	}
-	return T(node->u.var).var.ptr_ptr;
+	return ptr_ptr;
 }
 
-static inline zval **_get_zval_ptr_ptr_unused(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return NULL;
-}
-
-static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
+static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, int type TSRMLS_DC)
 {
 	zval ***ptr = &CV_OF(node->u.var);
 		
-	should_free->var = 0;
 	if (!*ptr) {
 		zend_compiled_variable *cv = &CV_DEF_OF(node->u.var);
 		if (zend_hash_quick_find(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, (void **)ptr)==FAILURE) {
@@ -384,27 +294,20 @@ static inline zval **_get_zval_ptr_ptr_cv(znode *node, temp_variable *Ts, zend_f
 	return *ptr;
 }
 
-static inline zval *_get_obj_zval_ptr_const(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
 {
-	return _get_zval_ptr_const(op, Ts, should_free TSRMLS_CC);
+	if (node->op_type == IS_CV) {
+		should_free->var = 0;
+		return _get_zval_ptr_ptr_cv(node, Ts, type TSRMLS_CC);
+	} else if (node->op_type == IS_VAR) {
+		return _get_zval_ptr_ptr_var(node, Ts, should_free TSRMLS_CC);
+	} else {
+		should_free->var = 0;
+		return NULL;
+	}
 }
 
-static inline zval *_get_obj_zval_ptr_tmp(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return _get_zval_ptr_tmp(op, Ts, should_free TSRMLS_CC);
-}
-
-static inline zval *_get_obj_zval_ptr_var(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return _get_zval_ptr_var(op, Ts, should_free TSRMLS_CC);
-}
-
-static inline zval *_get_obj_zval_ptr_cv(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
-{
-	return _get_zval_ptr_cv(op, Ts, should_free, type TSRMLS_CC);
-}
-
-static inline zval *_get_obj_zval_ptr_unused(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
 {
 	if (EG(This)) {
 		return EG(This);
@@ -414,27 +317,22 @@ static inline zval *_get_obj_zval_ptr_unused(znode *op, temp_variable *Ts, zend_
 	}
 }
 
-static inline zval **_get_obj_zval_ptr_ptr_const(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static inline zval **_get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
 {
-	return _get_zval_ptr_ptr_const(op, Ts, should_free TSRMLS_CC);
+	if (op->op_type == IS_UNUSED) {
+		if (EG(This)) {
+			/* this should actually never be modified, _ptr_ptr is modified only when
+			   the object is empty */
+			should_free->var = 0;
+			return &EG(This);
+		} else {
+			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
+		}
+	}
+	return get_zval_ptr_ptr(op, Ts, should_free, type);
 }
 
-static inline zval **_get_obj_zval_ptr_ptr_tmp(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return _get_zval_ptr_ptr_tmp(op, Ts, should_free TSRMLS_CC);
-}
-
-static inline zval **_get_obj_zval_ptr_ptr_var(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	return _get_zval_ptr_ptr_var(op, Ts, should_free TSRMLS_CC);
-}
-
-static inline zval **_get_obj_zval_ptr_ptr_cv(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
-{
-	return _get_zval_ptr_ptr_cv(op, Ts, should_free, type TSRMLS_CC);
-}
-
-static inline zval **_get_obj_zval_ptr_ptr_unused(znode *op, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+static inline zval **_get_obj_zval_ptr_ptr_unused(TSRMLS_D)
 {
 	if (EG(This)) {
 		return &EG(This);
@@ -442,6 +340,19 @@ static inline zval **_get_obj_zval_ptr_ptr_unused(znode *op, temp_variable *Ts, 
 		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
 		return NULL;
 	}
+}
+
+static inline zval *_get_obj_zval_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
+{
+	if (op->op_type == IS_UNUSED) {
+		if (EG(This)) {
+			should_free->var = 0;
+			return EG(This);
+		} else {
+			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
+		}
+	}
+	return get_zval_ptr(op, Ts, should_free, type);
 }
 
 static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC)
@@ -535,35 +446,6 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 		object_init(*object_ptr);
 	}
 }
-
-static inline zval **_get_obj_zval_ptr_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
-{
-	if (op->op_type == IS_UNUSED) {
-		if (EG(This)) {
-			/* this should actually never be modified, _ptr_ptr is modified only when
-			   the object is empty */
-			should_free->var = 0;
-			return &EG(This);
-		} else {
-			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		}
-	}
-	return get_zval_ptr_ptr(op, Ts, should_free, type);
-}
-
-static inline zval *_get_obj_zval_ptr(znode *op, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
-{
-	if (op->op_type == IS_UNUSED) {
-		if (EG(This)) {
-			should_free->var = 0;
-			return EG(This);
-		} else {
-			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		}
-	}
-	return get_zval_ptr(op, Ts, should_free, type);
-}
-
 
 static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg TSRMLS_DC)
 {
