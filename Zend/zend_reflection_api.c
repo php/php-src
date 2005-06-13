@@ -508,6 +508,24 @@ static void _const_string(string *str, char *name, zval *value, char *indent TSR
 }
 /* }}} */
 
+/* {{{ _get_recv_opcode */
+static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
+{
+	zend_op *op = op_array->opcodes;
+	zend_op *end = op + op_array->last;
+
+	++offset;
+	while (op < end) {
+		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT) &&
+		    op->op1.u.constant.value.lval == offset) {
+		  return op;
+	  }
+	  ++op;
+	}
+	return NULL;
+}
+/* }}} */
+
 /* {{{ _parameter_string */
 static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, zend_uint offset, zend_uint required, char* indent TSRMLS_DC)
 {
@@ -537,8 +555,8 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 		string_printf(str, "$param%d", offset);
 	}
 	if (fptr->type == ZEND_USER_FUNCTION && offset >= required) {
-		zend_op *precv = &((zend_op_array*)fptr)->opcodes[offset*2 + 1];
-		if (precv->opcode == ZEND_RECV_INIT && precv->op2.op_type != IS_UNUSED) {
+		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
+		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2.op_type != IS_UNUSED) {
 			zval *zv, zv_copy;
 			int use_copy;
 			string_write(str, " = ", sizeof(" = ")-1);
@@ -1798,8 +1816,8 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	if (param->offset < param->required) {
 		RETURN_FALSE;
 	}
-	precv = &((zend_op_array*)param->fptr)->opcodes[param->offset*2 + 1];
-	if (precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
+	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
+	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1827,8 +1845,8 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Parameter is not optional"); 
 		return;
 	}
-	precv = &((zend_op_array*)param->fptr)->opcodes[param->offset*2 + 1];
-	if (precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
+	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
+	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error"); 
 		return;
 	}
