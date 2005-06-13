@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2005, Version 4.4.0
+13 Jun 2005, Version 4.4.0 RC1
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
 - Added support for .cc files in extensions. (Brian)
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
