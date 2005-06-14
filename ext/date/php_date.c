@@ -128,6 +128,7 @@ PHP_FUNCTION(strtotime)
 		now = timelib_time_ctor();
 		timelib_unixtime2local(now, (signed long long) time(NULL), tzi);
 	} else {
+		timelib_tzinfo_ctor(tzi);
 		RETURN_FALSE;
 	}
 
@@ -135,6 +136,16 @@ PHP_FUNCTION(strtotime)
 	timelib_fill_holes(t, now, 0);
 	timelib_update_ts(t, tzi);
 	ts = timelib_date_to_int(t, &error);
+
+	/* if tz_info is not a copy, avoid double free */
+	if (now->tz_info == tzi) {
+		now->tz_info = NULL;
+	}
+
+	timelib_time_dtor(now);	
+	timelib_time_dtor(t);
+	timelib_tzinfo_dtor(tzi);
+
 	if (error) {
 		RETURN_FALSE;
 	} else {
