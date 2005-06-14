@@ -123,8 +123,7 @@ AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
 AC_ARG_WITH(zend-vm,
 [  --with-zend-vm=TYPE     Set virtual machine dispatch method. Type is
-                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]]
-[
+                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]],[
   PHP_ZEND_VM=$withval
 ],[
   PHP_ZEND_VM=CALL
