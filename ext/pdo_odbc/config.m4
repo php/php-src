@@ -21,34 +21,11 @@ PHP_ARG_WITH(pdo-odbc, for ODBC v3 support for PDO,
 [  --with-pdo-odbc=flavour,dir
                             PDO: Support for 'flavour' ODBC driver.]PDO_ODBC_HELP_TEXT)
 
-AC_DEFUN([PDO_ODBC_CHECK_HEADERS],[
-  php_pdo_have_header=no
-  for i in odbc.h \
-           odbcsdk.h \
-           iodbc.h \
-           sqlunix.h \
-           sqltypes.h \
-           sqlucode.h \
-           sql.h \
-           isql.h \
-           sqlext.h \
-           isqlext.h \
-           udbcext.h \
-           sqlcli1.h \
-           LibraryManager.h \
-           cli0core.h \
-           cli0ext.h \
-           cli0cli.h \
-           cli0defs.h \
-           cli0env.h
-  do
-    if test -f "$PDO_ODBC_INCDIR/$i"; then
-      php_pdo_have_header=yes
-      PHP_DEF_HAVE([$i])
-    fi
-  done
-  if test "$php_pdo_have_header" = "no"; then
-    AC_MSG_ERROR([Cannot find any header file(s)!])
+
+AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
+  if test -f "$PDO_ODBC_INCDIR/$1"; then
+    php_pdo_have_header=yes
+    PHP_DEF_HAVE($1)
   fi
 ])
                                   
@@ -108,13 +85,34 @@ if test "$PHP_PDO_ODBC" != "no"; then
           libs       $PDO_ODBC_LIBDIR,
           headers    $PDO_ODBC_INCDIR])
 
-  if ! test -d "$PDO_ODBC_LIBDIR" ; then
+  if test ! -d "$PDO_ODBC_LIBDIR" ; then
     AC_MSG_WARN([library dir $PDO_ODBC_LIBDIR does not exist])
   fi
 
-  PDO_ODBC_CHECK_HEADERS
+  PDO_ODBC_CHECK_HEADER(odbc.h)
+  PDO_ODBC_CHECK_HEADER(odbcsdk.h)
+  PDO_ODBC_CHECK_HEADER(iodbc.h)
+  PDO_ODBC_CHECK_HEADER(sqlunix.h)
+  PDO_ODBC_CHECK_HEADER(sqltypes.h)
+  PDO_ODBC_CHECK_HEADER(sqlucode.h)
+  PDO_ODBC_CHECK_HEADER(sql.h)
+  PDO_ODBC_CHECK_HEADER(isql.h)
+  PDO_ODBC_CHECK_HEADER(sqlext.h)
+  PDO_ODBC_CHECK_HEADER(isqlext.h)
+  PDO_ODBC_CHECK_HEADER(udbcext.h)
+  PDO_ODBC_CHECK_HEADER(sqlcli1.h)
+  PDO_ODBC_CHECK_HEADER(LibraryManager.h)
+  PDO_ODBC_CHECK_HEADER(cli0core.h)
+  PDO_ODBC_CHECK_HEADER(cli0ext.h)
+  PDO_ODBC_CHECK_HEADER(cli0cli.h)
+  PDO_ODBC_CHECK_HEADER(cli0defs.h)
+  PDO_ODBC_CHECK_HEADER(cli0env.h)
 
-  PDO_ODBC_INCLUDE="$pdo_odbc_def_cflags -I$PDO_ODBC_INCDIR -DPDO_ODBC_TYPE=\\"$pdo_odbc_flavour\\""
+  if test "$php_pdo_have_header" != "yes"; then
+    AC_MSG_ERROR([Cannot find header file(s) for pdo_odbc])
+  fi
+
+  PDO_ODBC_INCLUDE="$pdo_odbc_def_cflags -I$PDO_ODBC_INCDIR -DPDO_ODBC_TYPE=\\\"$pdo_odbc_flavour\\\""
   PDO_ODBC_LDFLAGS="$pdo_odbc_def_ldflags -L$PDO_ODBC_LIBDIR -l$pdo_odbc_def_lib"
 
   PHP_EVAL_LIBLINE([$PDO_ODBC_LDFLAGS], [PDO_ODBC_SHARED_LIBADD])
