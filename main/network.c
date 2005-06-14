@@ -797,7 +797,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 					if (!inet_aton(bindto, &in4->sin_addr)) {
 						goto bad_ip;
 					}
-					bzero(&(in4->sin_zero), 8);
+					memset(&(in4->sin_zero), 0, sizeof(in4->sin_zero));
 				}
 #if HAVE_IPV6 && HAVE_INET_PTON
 				 else { /* IPV6 */
