@@ -1,3 +1,23 @@
+2005-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Specializer optimization
+
+    * zend.c
+      zend.h
+      zend_execute.c:
+      Fixed bug #33212 ([GCC 4]: 'zend_error_noreturn' aliased to external symbol
+      'zend_error').
+      The fix is not tested on Solaris and DARWIN!
+
+    * zend_reflection_api.c
+      tests/bug33312.phpt:
+      Fixed bug #33312 (ReflectionParameter methods do not work correctly)
+
 2005-06-11  Andi Gutmans  <andi@zend.com>
 
     * zend.h:

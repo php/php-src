@@ -1,3 +1,88 @@
+2005-06-13  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS:
+      added news item for GLOB_ERR fix
+
+2005-06-13  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/bz2/bz2.c:
+      MFB: MSVC++ 6.0 doesn't support long long type
+
+    * (PHP_4_4)
+      ext/bz2/bz2.c:
+      MSVC++ 6.0 doesn't support long long type
+
+2005-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      Specializer optimization
+
+2005-06-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      configure.in
+      main/php_version.h:
+      - Back to dev
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with 4.4.0RC1.
+
+2005-06-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      ext/standard/var_unserializer.c:
+      touch
+
+2005-06-13  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      ext/standard/var_unserializer.re:
+      - MFH: Fixed bug with unserialize() with "exotic" letters in class names
+
+2005-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_execute.c:
+      Fixed bug #33212 ([GCC 4]: 'zend_error_noreturn' aliased to external symbol
+      'zend_error').
+      The fix is not tested on Solaris and DARWIN!
+
+2005-06-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      MFH:
+      destroy session after destroying error handle
+      SQLT_CHR is allowed too
+
+    * ext/oci8/oci8.c:
+      destroy session after destroying error handle
+      SQLT_CHR is allowed too
+
+2005-06-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS
+      acinclude.m4:
+      - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle
+      -pthread)
+
+2005-06-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/tests/bug33312.phpt:
+      Fixed bug #33312 (ReflectionParameter methods do not work correctly)
+
 2005-06-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/user_filters.c:
