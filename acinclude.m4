@@ -2471,7 +2471,7 @@ AC_DEFUN([PHP_REGEX],[
 ])
 
 dnl
-dnl PHP_CHECK_PDO_INCLUDES
+dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
   AC_CACHE_CHECK([for PDO includes], pdo_inc_path, [
@@ -2482,8 +2482,11 @@ AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
       pdo_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
       pdo_inc_path=$prefix/include/php/ext
-    else
-      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
     fi
   ])
+  if test -n "$pdo_inc_path"; then
+ifelse([$1],[],:,[$1])
+  else
+ifelse([$2],[],[AC_MSG_ERROR([Cannot find php_pdo_driver.h.])],[$2])
+  fi
 ])
