@@ -129,18 +129,6 @@ AC_ARG_WITH(zend-vm,
   PHP_ZEND_VM=CALL
 ])
 
-case $PHP_ZEND_VM in
-  SWITCH)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_SWITCH,[virtual machine dispatch method])
-    ;;
-  GOTO)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_GOTO,[virtual machine dispatch method])
-    ;;
-  *)
-    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_CALL,[virtual machine dispatch method])
-    ;;
-esac
-
 AC_ARG_ENABLE(zend-memory-manager,
 [  --disable-zend-memory-manager
                           Disable the Zend memory manager - FOR DEVELOPERS ONLY!!],
@@ -179,6 +167,9 @@ AC_ARG_ENABLE(zend-multibyte,
   ZEND_MULTIBYTE=no
 ])
 
+AC_MSG_CHECKING([virtual machine dispatch method])
+AC_MSG_RESULT($PHP_ZEND_VM)
+
 AC_MSG_CHECKING(whether to enable the Zend memory manager)
 AC_MSG_RESULT($ZEND_USE_ZEND_ALLOC)
 
@@ -197,6 +188,19 @@ AC_MSG_RESULT($ZEND_DEBUG)
 AC_MSG_CHECKING(whether to enable Zend multibyte)
 AC_MSG_RESULT($ZEND_MULTIBYTE)
 	
+case $PHP_ZEND_VM in
+  SWITCH)
+    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_SWITCH,[virtual machine dispatch method])
+    ;;
+  GOTO)
+    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_GOTO,[virtual machine dispatch method])
+    ;;
+  *)
+    PHP_ZEND_VM=CALL
+    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_CALL,[virtual machine dispatch method])
+    ;;
+esac
+
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])
   echo " $CFLAGS" | grep ' -g' >/dev/null || DEBUG_CFLAGS="-g"
