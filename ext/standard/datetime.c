@@ -1069,35 +1069,6 @@ PHP_FUNCTION(gmstrftime)
 
 #endif
 
-/* {{{ proto int strtotime(string time, int now)
-   Convert string representation of date and time to a timestamp */
-PHP_FUNCTION(strtotime)
-{
-	zval	**z_time, **z_now;
-	int 	 argc;
-	time_t now;
-
-	argc = ZEND_NUM_ARGS();
-
-	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &z_time, &z_now)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	convert_to_string_ex(z_time);
-	if (!Z_STRLEN_PP(z_time)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Called with an empty time parameter.");
-		RETURN_LONG(-1);
-	}
-	if (argc == 2) {
-		convert_to_long_ex(z_now);
-		now = Z_LVAL_PP(z_now);
-		RETURN_LONG(php_parse_date(Z_STRVAL_PP(z_time), &now));
-	} else {
-		RETURN_LONG(php_parse_date(Z_STRVAL_PP(z_time), NULL));
-	}
-}
-/* }}} */
-
 #if HAVE_STRPTIME
 /* {{{ proto string strptime(string timestamp, string format)
    Parse a time/date generated with strftime() */

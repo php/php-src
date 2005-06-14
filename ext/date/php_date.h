@@ -12,38 +12,25 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Derick Rethans <dr@ez.no>                                   |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef DATETIME_H
-#define DATETIME_H
+#ifndef PHP_DATE_H
+#define PHP_DATE_H
 
-PHP_FUNCTION(time);
-PHP_FUNCTION(mktime);
-PHP_FUNCTION(gmmktime);
-PHP_FUNCTION(date);
-PHP_FUNCTION(idate);
-PHP_FUNCTION(gmdate);
-PHP_FUNCTION(localtime);
-PHP_FUNCTION(getdate);
-PHP_FUNCTION(checkdate);
-#if HAVE_STRPTIME
-PHP_FUNCTION(strptime);
-#endif 
-#if HAVE_STRFTIME
-PHP_FUNCTION(strftime);
-PHP_FUNCTION(gmstrftime);
-#endif
+extern zend_module_entry date_module_entry;
+#define phpext_date_ptr &date_module_entry
 
-PHPAPI int php_idate(char format, int timestamp, int gm);
-PHPAPI char *php_std_date(time_t t TSRMLS_DC);
-PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
-#if HAVE_STRFTIME
-PHPAPI void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
-#endif
+PHP_FUNCTION(strtotime);
 
-#endif /* DATETIME_H */
+PHP_MINIT_FUNCTION(date);
+PHP_MSHUTDOWN_FUNCTION(date);
+PHP_RINIT_FUNCTION(date);
+PHP_RSHUTDOWN_FUNCTION(date);
+PHP_MINFO_FUNCTION(date);
+
+
+#endif /* PHP_DATE_H */
