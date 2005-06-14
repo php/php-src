@@ -525,7 +525,7 @@ static inline char *parse_ip_address_ex(const char *str, int str_len, int *portn
 
 static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno TSRMLS_DC)
 {
-	return parse_ip_address_ex(xparam->inputs.name, xparam->inputs.namelen, portno, xparam->want_errortext, &xparam->outputs.error_text);
+	return parse_ip_address_ex(xparam->inputs.name, xparam->inputs.namelen, portno, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
 }
 
 static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *sock,
