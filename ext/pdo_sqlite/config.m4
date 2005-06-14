@@ -9,17 +9,7 @@ PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 
-  AC_MSG_CHECKING([for PDO includes])
-  if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-    pdo_inc_path=$abs_srcdir/ext
-  elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-    pdo_inc_path=$abs_srcdir/ext
-  elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-    pdo_inc_path=$prefix/include/php/ext
-  else
-    AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
-  fi
-  AC_MSG_RESULT($pdo_inc_path)
+  PHP_CHECK_PDO_INCLUDES
 
   php_pdo_sqlite_sources_core="pdo_sqlite.c sqlite_driver.c sqlite_statement.c"
 
