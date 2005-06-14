@@ -38,7 +38,7 @@ dnl PHP_DEF_HAVE(what)
 dnl
 dnl Generates 'AC_DEFINE(HAVE_WHAT, 1, [ ])'
 dnl
-AC_DEFUN([PHP_DEF_HAVE],[AC_DEFINE([HAVE_]translit($1,a-z_-,A-Z__), 1, [ ])])
+AC_DEFUN([PHP_DEF_HAVE],[AC_DEFINE([HAVE_]translit($1,a-z_.-,A-Z___), 1, [ ])])
 
 dnl
 dnl PHP_RUN_ONCE(namespace, variable, code)
