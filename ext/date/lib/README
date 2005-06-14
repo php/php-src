@@ -1,0 +1,5 @@
+Regenerating Parser
+===================
+
+Make sure you use re2c 0.97 or higher:
+/dat/dev/sf/re2c/re2c -d -b parse_date.re > ../parse_date.c
