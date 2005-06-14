@@ -336,10 +336,10 @@ function strcat($n) {
 /*****/
 
 function getmicrotime()
-{ 
-  list($usec, $sec) = explode(" ",microtime()); 
-  return ((float)$usec + (float)$sec); 
-} 
+{
+  $t = gettimeofday();
+  return ($t['sec'] + $t['usec'] / 1000000);
+}
 
 function start_test()
 {
