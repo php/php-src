@@ -2469,3 +2469,21 @@ AC_DEFUN([PHP_REGEX],[
   AC_MSG_CHECKING([which regex library to use])
   AC_MSG_RESULT([$REGEX_TYPE])
 ])
+
+dnl
+dnl PHP_CHECK_PDO_INCLUDES
+dnl
+AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
+  AC_CACHE_CHECK([for PDO includes], pdo_inc_path, [
+    AC_MSG_CHECKING([for PDO includes])
+    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$prefix/include/php/ext
+    else
+      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+    fi
+  ])
+])

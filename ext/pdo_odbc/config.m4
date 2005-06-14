@@ -30,11 +30,11 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
 if test "$PHP_PDO_ODBC" != "no"; then
   AC_MSG_CHECKING([for selected PDO ODBC flavour])
 
-  pdo_odbc_flavour=`echo $PHP_PDO_ODBC | cut -d, -f1`
-  pdo_odbc_dir=`echo $PHP_PDO_ODBC | cut -d, -f2`
+  pdo_odbc_flavour="`echo $PHP_PDO_ODBC | cut -d, -f1`"
+  pdo_odbc_dir="`echo $PHP_PDO_ODBC | cut -d, -f2`"
 
   if test "$pdo_odbc_dir" = "$PHP_PDO_ODBC" ; then
-    pdo_odbc_dir=""
+    pdo_odbc_dir=
   fi
 
   case $pdo_odbc_flavour in
@@ -44,21 +44,21 @@ if test "$PHP_PDO_ODBC" != "no"; then
         pdo_odbc_def_lib=-ldb2
         ;;
 
-    unixODBC)
+    unixODBC|unixodbc)
         pdo_odbc_def_libdir=/usr/local/lib
         pdo_odbc_def_incdir=/usr/local/include
         pdo_odbc_def_lib=-lodbc
         ;;
 
-    ODBCRouter)
+    ODBCRouter|odbcrouter)
         pdo_odbc_def_libdir=/usr/lib
         pdo_odbc_def_incdir=/usr/include
         pdo_odbc_def_lib=-lodbcsdk
         ;;
 
     generic)
-        pdo_odbc_def_lib="`echo $withval | cut -d, -f3`"
-        pdo_odbc_def_cflags="`echo $withval | cut -d, -f4`"
+        pdo_odbc_def_lib="`echo $PHP_PDO_ODBC | cut -d, -f3`"
+        pdo_odbc_def_cflags="`echo $PHP_PDO_ODBC | cut -d, -f4`"
         pdo_odbc_flavour="$pdo_odbc_flavour ($pdo_odbc_def_lib)"
         ;;
 
@@ -67,7 +67,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
         ;;
   esac
 
-  if test "$pdo_odbc_dir" != "" ; then
+  if test -n "$pdo_odbc_dir"; then
     PDO_ODBC_INCDIR="$pdo_odbc_dir/include"
     PDO_ODBC_LIBDIR="$pdo_odbc_dir/lib"
   else
@@ -127,17 +127,7 @@ functions required for PDO support.
   PHP_EVAL_LIBLINE($PDO_ODBC_LIBS $PDO_ODBC_LFLAGS, [PDO_ODBC_SHARED_LIBADD])
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
 
-  AC_MSG_CHECKING([for PDO includes])
-  if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-    pdo_inc_path=$abs_srcdir/ext
-  elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-    pdo_inc_path=$abs_srcdir/ext
-  elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-    pdo_inc_path=$prefix/include/php/ext
-  else
-    AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
-  fi
-  AC_MSG_RESULT($pdo_inc_path)
+  PHP_CHECK_PDO_INCLUDES
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_inc_path $PDO_ODBC_INCLUDE)
   PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
