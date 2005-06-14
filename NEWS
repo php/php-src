@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2005, PHP 5.1 Beta 2
+- Added bindto socket context option. (Ilia)
 - Fixed PDO shutdown problem (possible inifite loop running rollback on
   shutdown). (Wez)
 - Fixed PECL bug #3714 (beginTransaction doesn't work if you're in

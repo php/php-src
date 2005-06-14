@@ -487,7 +487,7 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 }
 #endif
 
-static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno TSRMLS_DC)
+static inline char *parse_ip_address_ex(const char *str, int str_len, int *portno, int get_err, char **err TSRMLS_DC)
 {
 	char *colon;
 	char *host = NULL;
@@ -495,32 +495,37 @@ static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno
 #ifdef HAVE_IPV6
 	char *p;
 
-	if (*(xparam->inputs.name) == '[') {
+	if (*(str) == '[') {
 		/* IPV6 notation to specify raw address with port (i.e. [fe80::1]:80) */
-		p = memchr(xparam->inputs.name + 1, ']', xparam->inputs.namelen - 2);
+		p = memchr(str + 1, ']', str_len - 2);
 		if (!p || *(p + 1) != ':') {
-			if (xparam->want_errortext) {
-				spprintf(&xparam->outputs.error_text, 0, "Failed to parse IPv6 address \"%s\"", xparam->inputs.name);
+			if (get_err) {
+				spprintf(err, 0, "Failed to parse IPv6 address \"%s\"", str);
 			}
 			return NULL;
 		}
 		*portno = atoi(p + 2);
-		return estrndup(xparam->inputs.name + 1, p - xparam->inputs.name - 1);
+		return estrndup(str + 1, p - str - 1);
 	}
 #endif
 
-	colon = memchr(xparam->inputs.name, ':', xparam->inputs.namelen - 1);
+	colon = memchr(str, ':', str_len - 1);
 	if (colon) {
 		*portno = atoi(colon + 1);
-		host = estrndup(xparam->inputs.name, colon - xparam->inputs.name);
+		host = estrndup(str, colon - str);
 	} else {
-		if (xparam->want_errortext) {
-			spprintf(&xparam->outputs.error_text, 0, "Failed to parse address \"%s\"", xparam->inputs.name);
+		if (get_err) {
+			spprintf(err, 0, "Failed to parse address \"%s\"", str);
 		}
 		return NULL;
 	}
 
 	return host;
+}
+
+static inline char *parse_ip_address(php_stream_xport_param *xparam, int *portno TSRMLS_DC)
+{
+	return parse_ip_address_ex(xparam->inputs.name, xparam->inputs.namelen, portno, xparam->want_errortext, &xparam->outputs.error_text);
 }
 
 static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *sock,
@@ -572,10 +577,11 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_t *sock,
 		php_stream_xport_param *xparam TSRMLS_DC)
 {
-	char *host = NULL;
-	int portno;
+	char *host = NULL, *bindto = NULL;
+	int portno, bindport;
 	int err;
 	int ret;
+	zval **tmpzval = NULL;
 
 #ifdef AF_UNIX
 	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
@@ -610,6 +616,16 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 		return -1;
 	}
 
+	if (stream->context && php_stream_context_get_option(stream->context, "socket", "bindto", &tmpzval) == SUCCESS) {
+		if (Z_TYPE_PP(tmpzval) != IS_STRING) {
+			if (xparam->want_errortext) {
+				spprintf(&xparam->outputs.error_text, 0, "local_addr context option is not a string.");
+			}
+			return -1;
+		}
+		bindto = parse_ip_address_ex(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
+	}
+
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
 	 * want the default to be TCP sockets so that the openssl extension can
 	 * re-use this code. */
@@ -619,7 +635,9 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC,
 			xparam->inputs.timeout,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
-			&err
+			&err,
+			bindto,
+			bindport
 			TSRMLS_CC);
 	
 	ret = sock->socket == -1 ? -1 : 0;
@@ -627,6 +645,9 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 
 	if (host) {
 		efree(host);
+	}
+	if (bindto) {
+		efree(bindto);
 	}
 
 #ifdef AF_UNIX

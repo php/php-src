@@ -223,7 +223,7 @@ typedef struct {
 BEGIN_EXTERN_C()
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-		int *error_code
+		int *error_code, char *bindto, unsigned short bindport 
 		TSRMLS_DC);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,

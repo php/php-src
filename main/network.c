@@ -722,7 +722,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 /* {{{ php_network_connect_socket_to_host */
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-		int *error_code
+		int *error_code, char *bindto, unsigned short bindport 
 		TSRMLS_DC)
 {
 	int num_addrs, n, fatal = 0;
@@ -785,7 +785,39 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 		if (sa) {
 			/* make a connection attempt */
+
+			if (bindto) {
+				struct sockaddr local_address;
 			
+				if (sa->sa_family == AF_INET) {
+					struct sockaddr_in *in4 = (struct sockaddr_in*)&local_address;
+				
+					in4->sin_family = sa->sa_family;
+					in4->sin_port = htons(bindport);
+					if (!inet_aton(bindto, &in4->sin_addr)) {
+						goto bad_ip;
+					}
+					bzero(&(in4->sin_zero), 8);
+				}
+#if HAVE_IPV6 && HAVE_INET_PTON
+				 else { /* IPV6 */
+					struct sockaddr_in6 *in6 = (struct sockaddr_in6*)&local_address;
+				
+					in6->sin6_family = sa->sa_family;
+					in6->sin6_port = htons(bindport);
+					if (inet_pton(AF_INET6, bindto, &in6->sin6_addr) < 1) {
+						goto bad_ip;
+					}
+				}
+#endif
+				if (bind(sock, &local_address, sizeof(struct sockaddr))) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
+				}
+				goto bind_done;
+bad_ip:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid IP Address: %s", bindto);
+			}
+bind_done:			
 			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 					timeout ? &working_timeout : NULL,
 					error_string, error_code);
