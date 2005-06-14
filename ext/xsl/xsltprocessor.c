@@ -200,7 +200,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 					int j;
 					dom_object *domintern = (dom_object *)intern->doc;
 					array_init(args[i]);
-					if (obj->nodesetval->nodeNr > 0) {
+					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval *child;
