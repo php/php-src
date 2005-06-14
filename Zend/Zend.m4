@@ -121,9 +121,14 @@ AC_ARG_ENABLE(debug,
 
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-PHP_ARG_WITH(zend-vm,[virtual machine dispatch method],
+AC_ARG_WITH(zend-vm,
 [  --with-zend-vm=TYPE     Set virtual machine dispatch method. Type is
-                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]], CALL, no)
+                          one of "CALL", "SWITCH" or "GOTO" [TYPE=CALL]]
+[
+  PHP_ZEND_VM=$withval
+],[
+  PHP_ZEND_VM=CALL
+])
 
 case $PHP_ZEND_VM in
   SWITCH)

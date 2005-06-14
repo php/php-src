@@ -6,6 +6,9 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   # we only support certain bison versions
   bison_version_list="1.28 1.35 1.75 1.875 2.0"
 
+  # for standalone build of Zend Engine
+  test -z "$SED" && SED=sed
+
   if test "$YACC"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
       set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /'|tr -d a-z`
