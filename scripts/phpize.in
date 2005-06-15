@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Variable declaration
-EGREP='@EGREP@'
 prefix='@prefix@'
 exec_prefix="`eval echo @exec_prefix@`"
 phpdir="`eval echo @libdir@`/build"
@@ -52,9 +51,9 @@ phpize_check_configm4()
 phpize_get_api_numbers()
 {
   # extracting API NOs:
-  PHP_API_VERSION=`$EGREP '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
-  ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
-  ZEND_EXTENSION_API_NO=`$EGREP '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
+  PHP_API_VERSION=`grep '#define PHP_API_VERSION' $includedir/main/php.h|sed 's/#define PHP_API_VERSION//'`
+  ZEND_MODULE_API_NO=`grep '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO//'`
+  ZEND_EXTENSION_API_NO=`grep '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|sed 's/#define ZEND_EXTENSION_API_NO//'`
 }
 
 phpize_print_api_numbers()
