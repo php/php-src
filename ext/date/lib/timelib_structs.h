@@ -24,13 +24,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef PHP_WIN32
+#ifdef WIN32
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
 #endif
 
-#if defined(PHP_WIN32) && _MSC_VER < 1300
+#if defined(_MSC_VER) && _MSC_VER < 1300
 typedef unsigned __int64 timelib_ull;
 typedef __int64 timelib_sll;
 #else

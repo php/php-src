@@ -23,7 +23,7 @@
 #include <string.h>
 #include "datetime.h"
 
-#ifdef PHP_WIN32
+#if defined(_MSC_VER)
 #define strcasecmp stricmp
 #define strtoll(s, f, b) _atoi64(s)
 #endif

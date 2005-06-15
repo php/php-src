@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #include <stdio.h>
-#ifdef PHP_WIN32
+#ifdef WIN32
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
