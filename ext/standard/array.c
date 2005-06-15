@@ -647,29 +647,29 @@ PHP_FUNCTION(usort)
 {
 	zval **array;
 	HashTable *target_hash;
-    PHP_ARRAY_CMP_FUNC_VARS;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
-    PHP_ARRAY_CMP_FUNC_RESTORE();
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_TRUE;
 }
 /* }}} */
@@ -680,28 +680,28 @@ PHP_FUNCTION(uasort)
 {
 	zval **array;
 	HashTable *target_hash;
-    PHP_ARRAY_CMP_FUNC_VARS;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
-    PHP_ARRAY_CMP_FUNC_RESTORE();
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 
 	RETURN_TRUE;
 }
@@ -760,19 +760,19 @@ PHP_FUNCTION(uksort)
 {
 	zval **array;
 	HashTable *target_hash;
-    PHP_ARRAY_CMP_FUNC_VARS;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
 
-    PHP_ARRAY_CMP_FUNC_BACKUP();
+	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 
 		RETURN_FALSE;
 	}
@@ -780,12 +780,12 @@ PHP_FUNCTION(uksort)
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
-        PHP_ARRAY_CMP_FUNC_RESTORE();
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 
 		RETURN_FALSE;
 	}
 
-    PHP_ARRAY_CMP_FUNC_RESTORE();
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2858,7 +2858,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	Bucket ***lists, **list, ***ptrs, *p;
 	
 	char *callback_name;
-    PHP_ARRAY_CMP_FUNC_VARS;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
 	
 	int (*intersect_key_compare_func)(const void *, const void * TSRMLS_DC);
@@ -2873,7 +2873,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		WRONG_PARAM_COUNT;
 	}
 
-    PHP_ARRAY_CMP_FUNC_BACKUP();
+	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (behavior == INTERSECT_NORMAL) {
 		intersect_key_compare_func = array_key_compare;
@@ -3144,7 +3144,7 @@ out:
 		pefree(lists[i], hash->persistent);
 	}
 	
-    PHP_ARRAY_CMP_FUNC_RESTORE();
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 
 	
 	efree(ptrs);
@@ -3234,7 +3234,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	Bucket ***lists, **list, ***ptrs, *p;
 	char *callback_name;
 	
-    PHP_ARRAY_CMP_FUNC_VARS;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
 	int (*diff_key_compare_func)(const void *, const void * TSRMLS_DC);
 	int (*diff_data_compare_func)(const void *, const void * TSRMLS_DC);
@@ -3249,7 +3249,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		WRONG_PARAM_COUNT;
 	}
 
-    PHP_ARRAY_CMP_FUNC_BACKUP();
+	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (behavior == DIFF_NORMAL) {
 		diff_key_compare_func = array_key_compare;
@@ -3518,7 +3518,7 @@ out:
 		pefree(lists[i], hash->persistent);
 	}
 
-    PHP_ARRAY_CMP_FUNC_RESTORE();
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 
 	
 	efree(ptrs);
