@@ -1,11 +1,6 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("date", "Whether you want date/time support", "no");
-
-if (PHP_DATE == "yes") {
-	EXTENSION("date", "php_date.c",	PHP_DATE_SHARED, "-Iext/date/lib");
-	ADD_SOURCES("ext/date/lib", "datetime.c dow.c parse_date.c parse_tz.c tm2unixtime.c unixtime2tm.c", "date");
-
-	AC_DEFINE('HAVE_DATE', 1, 'Have date/time support');
-}
+EXTENSION("date", "php_date.c", false, "-Iext/date/lib");
+ADD_SOURCES("ext/date/lib", "datetime.c dow.c parse_date.c parse_tz.c tm2unixtime.c unixtime2tm.c", "date");
+AC_DEFINE('HAVE_DATE', 1, 'Have date/time support');
