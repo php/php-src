@@ -23,9 +23,9 @@
 #include <string.h>
 
 #if defined(_MSC_VER)
-#define PHP_LL_CONST(n) n ## i64
+#define TIMELIB_LL_CONST(n) n ## i64
 #else
-#define PHP_LL_CONST(n) n ## ll
+#define TIMELIB_LL_CONST(n) n ## ll
 #endif
 
 #include "datetime.h"
@@ -67,7 +67,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		/* Guess why this might be for, it has to do with a pope ;-). It's also
 		 * only valid for Great Brittain and it's colonies. It needs fixing for
 		 * other locales. *sigh*, why is this crap so complex! */
-		if (ts <= PHP_LL_CONST(-6857352000)) {
+		if (ts <= TIMELIB_LL_CONST(-6857352000)) {
 			tmp_days -= 11;
 		}
 
