@@ -490,7 +490,7 @@ if (!getenv('NO_INTERACTION')) {
 		$failed_tests_data .= $summary . "\n";
 
 		if ($sum_results['FAILED']) {
-			foreach ($PHP_FAILED_TESTS as $test_info) {
+			foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
 				$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
@@ -705,15 +705,17 @@ TEST $file
 
 	$fp = @fopen($file, "r") or error("Cannot open test file: $file");
 
+	$borked = false;
+	$bork_info = '';
 	if (!feof($fp)) {
 		$line = fgets($fp);
 	} else {
-		echo "BORK empty test [$file]\n";
-		return 'BORKED';
+		$bork_info = "empty test [$file]";
+		$borked = true;
 	}
 	if (!ereg('^--TEST--',$line,$r)) {
-		echo "BORK tests must start with --TEST-- [$file]\n";
-		return 'BORKED';
+		$bork_info = "tests must start with --TEST-- [$file]";
+		$borked = true;
 	}
 	$section = 'TEST';
 	while (!feof($fp)) {
@@ -730,14 +732,26 @@ TEST $file
 		$section_text[$section] .= $line;
 	}
 	if (@count($section_text['FILE']) != 1) {
-		echo "BORK missing section --FILE-- [$file]\n";
-		return 'BORKED';
+		$bork_info = "missing section --FILE-- [$file]";
+		$borked = true;
 	}
 	if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
-		echo "BORK missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]\n";
-		return 'BORKED';
+		$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]";
+		$borked = true;
 	}
 	fclose($fp);
+
+	if ($borked) {
+		echo "BORK $bork_info [$file]\n";
+		$PHP_FAILED_TESTS['BORKED'][] = array (
+								'name' => $file,
+								'test_name' => '',
+								'output' => '',
+								'diff'   => '',
+								'info'   => $bork_info,
+		);
+		return 'BORKED';
+	}
 
  	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
  	if ((!empty($section_text['GET']) || !empty($section_text['POST']))) {
@@ -946,7 +960,7 @@ COMMAND $cmd
 		echo "FAIL $tested$info\n";
 	}
 
-	$PHP_FAILED_TESTS[] = array(
+	$PHP_FAILED_TESTS['FAILED'][] = array (
 						'name' => $file,
 						'test_name' => $tested,
 						'output' => ereg_replace('\.phpt$','.log', $file),
@@ -1198,16 +1212,28 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
 ";
 	$failed_test_summary = '';
-	if (count($PHP_FAILED_TESTS)) {
+	if (count($PHP_FAILED_TESTS['BORKED'])) {
+		$failed_test_summary .= "
+=====================================================================
+BORKED TEST SUMMARY
+---------------------------------------------------------------------
+";
+		foreach ($PHP_FAILED_TESTS['BORKED'] as $failed_test_data) {
+			$failed_test_summary .= $failed_test_data['info'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
+	}
+	
+	if (count($PHP_FAILED_TESTS['FAILED'])) {
 		$failed_test_summary .= "
 =====================================================================
 FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
-	foreach ($PHP_FAILED_TESTS as $failed_test_data) {
-		$failed_test_summary .=  $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
-	}
-	$failed_test_summary .=  "=====================================================================\n";
+		foreach ($PHP_FAILED_TESTS['FAILED'] as $failed_test_data) {
+			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		}
+		$failed_test_summary .=  "=====================================================================\n";
 	}
 	
 	if ($failed_test_summary && !getenv('NO_PHPTEST_SUMMARY')) {
