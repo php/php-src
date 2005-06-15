@@ -2,3 +2,4 @@
 - Implement INI settings default timezone, for now the env var "TZ" can be
   used.
 - Port over my 200 test cases to .phpt format.
+- Write an error handler for unexpected characters while parsing dates.
