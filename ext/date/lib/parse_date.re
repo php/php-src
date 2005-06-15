@@ -67,7 +67,7 @@
 
 #define TIMELIB_RELATIVE       310
 
-#define ERROR    999
+#define TIMELIB_ERROR          999
 
 typedef unsigned char uchar;
 
@@ -83,13 +83,13 @@ typedef unsigned char uchar;
 
 #define timelib_string_free free
 
-#define TIMELIB_HAVE_TIME() { if (s->time->have_time) { return ERROR; } else { s->time->have_time = 1; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; } }
+#define TIMELIB_HAVE_TIME() { if (s->time->have_time) { return TIMELIB_ERROR; } else { s->time->have_time = 1; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; } }
 #define TIMELIB_UNHAVE_TIME() { s->time->have_time = 0; s->time->h = 0; s->time->i = 0; s->time->s = 0; s->time->f = 0; }
-#define TIMELIB_HAVE_DATE() { if (s->time->have_date) { return ERROR; } else { s->time->have_date = 1; } }
+#define TIMELIB_HAVE_DATE() { if (s->time->have_date) { return TIMELIB_ERROR; } else { s->time->have_date = 1; } }
 #define TIMELIB_UNHAVE_DATE() { s->time->have_date = 0; s->time->d = 0; s->time->m = 0; s->time->y = 0; }
 #define TIMELIB_HAVE_RELATIVE() { s->time->have_relative = 1; }
 #define TIMELIB_HAVE_WEEKDAY_RELATIVE() { s->time->have_weekday_relative = 1; }
-#define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { return ERROR; } else { s->time.have_zone = 1; } }
+#define TIMELIB_HAVE_TZ() { s->cur = cursor; if (s->time->have_zone) { return TIMELIB_ERROR; } else { s->time.have_zone = 1; } }
 
 #define TIMELIB_INIT  s->cur = cursor; str = timelib_string(s); ptr = str
 #define TIMELIB_DEINIT timelib_string_free(str)
@@ -149,7 +149,7 @@ typedef struct _timelib_relunit {
 	int         multiplier;
 } timelib_relunit;
 
-#define HOUR(a) (a * 60)
+#define HOUR(a) (int)(a * 60)
 
 /* The timezone table. */
 static timelib_tz_lookup_table const timelib_timezone_lookup[] = {
@@ -400,9 +400,9 @@ uchar *fill(Scanner *s, uchar *cursor){
 }
 #endif
 
-static int timelib_meridian(char **ptr, int h)
+static timelib_sll timelib_meridian(char **ptr, timelib_sll h)
 {
-	int retval = 0;
+	timelib_sll retval = 0;
 
 	while (!strchr("AaPp", **ptr)) {
 		++*ptr;
@@ -456,10 +456,10 @@ static timelib_sll timelib_get_nr(char **ptr, int max_length)
 	return tmp_nr;
 }
 
-static float timelib_get_frac_nr(char **ptr, int max_length)
+static double timelib_get_frac_nr(char **ptr, int max_length)
 {
 	char *begin, *end, *str;
-	float tmp_nr = -1;
+	double tmp_nr = -1;
 	int len = 0;
 
 	while ((**ptr != '.') && ((**ptr < '0') || (**ptr > '9'))) {
@@ -621,7 +621,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	return value;
 }
 
-static void timelib_set_relative(char **ptr, long amount, Scanner *s)
+static void timelib_set_relative(char **ptr, timelib_ull amount, Scanner *s)
 {
 	const timelib_relunit* relunit;
 
@@ -901,7 +901,8 @@ relativetext = (reltextnumber space reltextunit)+;
 		s->time->y = 1970;
 		s->time->m = 1;
 		s->time->d = 1;
-		s->time->h = s->time->i = s->time->s = s->time->f = 0;
+		s->time->h = s->time->i = s->time->s = 0;
+		s->time->f = 0.0;
 		s->time->relative.s += i;
 		s->time->is_localtime = 1;
 		s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
@@ -963,7 +964,7 @@ relativetext = (reltextnumber space reltextunit)+;
 				break;
 			default:
 				TIMELIB_DEINIT;
-				return ERROR;
+				return TIMELIB_ERROR;
 		}
 		s->time->have_time++;
 		TIMELIB_DEINIT;
@@ -986,7 +987,7 @@ relativetext = (reltextnumber space reltextunit)+;
 				break;
 			default:
 				TIMELIB_DEINIT;
-				return ERROR;
+				return TIMELIB_ERROR;
 		}
 		s->time->have_time++;
 		TIMELIB_DEINIT;
@@ -1150,7 +1151,7 @@ relativetext = (reltextnumber space reltextunit)+;
 
 	isoweekday
 	{
-		int w, d;
+		timelib_sll w, d;
 
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();

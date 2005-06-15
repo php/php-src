@@ -38,7 +38,7 @@ timelib_time* timelib_time_ctor()
 
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
-	int i;
+	unsigned int i;
 	
 	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = strdup(tz_abbr);
@@ -141,7 +141,7 @@ signed long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return d->sse;
+	return (signed long) d->sse;
 }
 
 void timelib_dump_date(timelib_time *d, int options)

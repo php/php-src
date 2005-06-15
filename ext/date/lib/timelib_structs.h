@@ -95,7 +95,7 @@ typedef struct timelib_time_offset {
 typedef struct timelib_time {
 	timelib_sll      y, m, d;     /* Year, Month, Day */
 	timelib_sll      h, i, s;     /* Hour, mInute, Second */
-	float            f;           /* Fraction */
+	double           f;           /* Fraction */
 	int              z;           /* GMT offset in minutes */
 	char            *tz_abbr;     /* Timezone abbreviation (display only) */
 	timelib_tzinfo  *tz_info;     /* Timezone structure */
