@@ -34,6 +34,10 @@ function_entry date_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+#ifdef COMPILE_DL_DATE
+ZEND_GET_MODULE(date)
+#endif
+
 PHP_INI_BEGIN()
 /*	STD_PHP_INI_ENTRY("date.timezone", TIMEZONE_DB_LOCATION, PHP_INI_ALL, OnUpdateString, timezonedb_location, zend_date_globals, date_globals) */
 PHP_INI_END()
