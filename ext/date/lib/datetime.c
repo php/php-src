@@ -22,7 +22,7 @@
 #include "datetime.h"
 #include <ctype.h>
 
-#define PHP_TIME_FREE(m) 	\
+#define TIMELIB_TIME_FREE(m) 	\
 	if (m) {		\
 		free(m);	\
 		m = NULL;	\
@@ -40,7 +40,7 @@ void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	int i;
 	
-	PHP_TIME_FREE(tm->tz_abbr);
+	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = strdup(tz_abbr);
 	for (i = 0; i < strlen(tz_abbr); i++) {
 		tm->tz_abbr[i] = toupper(tz_abbr[i]);
@@ -49,12 +49,12 @@ void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 
 void timelib_time_dtor(timelib_time* t)
 {
-	PHP_TIME_FREE(t->tz_abbr);
+	TIMELIB_TIME_FREE(t->tz_abbr);
 	if (t->tz_info) {
 		timelib_tzinfo_dtor(t->tz_info);
 		t->tz_info = NULL;
 	}
-	PHP_TIME_FREE(t);
+	TIMELIB_TIME_FREE(t);
 }
 
 timelib_time_offset* timelib_time_offset_ctor()
@@ -67,8 +67,8 @@ timelib_time_offset* timelib_time_offset_ctor()
 
 void timelib_time_offset_dtor(timelib_time_offset* t)
 {
-	PHP_TIME_FREE(t->abbr);
-	PHP_TIME_FREE(t);
+	TIMELIB_TIME_FREE(t->abbr);
+	TIMELIB_TIME_FREE(t);
 }
 
 timelib_tzinfo* timelib_tzinfo_ctor(char *name)
@@ -109,13 +109,13 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 
 void timelib_tzinfo_dtor(timelib_tzinfo *tz)
 {
-	PHP_TIME_FREE(tz->name);
-	PHP_TIME_FREE(tz->trans);
-	PHP_TIME_FREE(tz->trans_idx);
-	PHP_TIME_FREE(tz->type);
-	PHP_TIME_FREE(tz->timezone_abbr);
-	PHP_TIME_FREE(tz->leap_times);
-	PHP_TIME_FREE(tz);
+	TIMELIB_TIME_FREE(tz->name);
+	TIMELIB_TIME_FREE(tz->trans);
+	TIMELIB_TIME_FREE(tz->trans_idx);
+	TIMELIB_TIME_FREE(tz->type);
+	TIMELIB_TIME_FREE(tz->timezone_abbr);
+	TIMELIB_TIME_FREE(tz->leap_times);
+	TIMELIB_TIME_FREE(tz);
 }
 
 char *timelib_get_tz_abbr_ptr(timelib_time *t)
