@@ -1025,7 +1025,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	}
 }
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
 #endif
 
