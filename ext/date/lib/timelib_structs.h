@@ -86,32 +86,32 @@ typedef struct timelib_rel_time {
 } timelib_rel_time;
 
 typedef struct timelib_time_offset {
-	int32_t offset;
+	int32_t      offset;
 	unsigned int leap_secs;
 	unsigned int is_dst;
-	char *abbr;
+	char        *abbr;
 } timelib_time_offset;
 
 typedef struct timelib_time {
-	timelib_sll y, m, d;     /* Year, Month, Day */
-	timelib_sll h, i, s;     /* Hour, mInute, Second */
-	float     f;     /* Fraction */
-	int z;           /* GMT offset in minutes */
-	char *tz_abbr;   /* Timezone abbreviation (display only) */
-	timelib_tzinfo  *tz_info;   /* Timezone structure */
-	unsigned int dst;        /* Flag if we were parsing a DST zone */
+	timelib_sll      y, m, d;     /* Year, Month, Day */
+	timelib_sll      h, i, s;     /* Hour, mInute, Second */
+	float            f;           /* Fraction */
+	int              z;           /* GMT offset in minutes */
+	char            *tz_abbr;     /* Timezone abbreviation (display only) */
+	timelib_tzinfo  *tz_info;     /* Timezone structure */
+	unsigned int     dst;         /* Flag if we were parsing a DST zone */
 	timelib_rel_time relative;
 
-	timelib_sll sse; /* Seconds since epoch */
+	timelib_sll      sse;         /* Seconds since epoch */
 
 	unsigned int   have_time, have_date, have_zone, have_relative, have_weekday_relative, have_weeknr_day;
 
-	unsigned int sse_uptodate; /* !0 if the sse member is up to date with the date/time members */
-	unsigned int tim_uptodate; /* !0 if the date/time members are up to date with the sse member */
-	unsigned int is_localtime; /*  1 if the current struct represents localtime, 0 if it is in GMT */
-	unsigned int zone_type;    /*  1 time offset,
-						*  3 TimeZone identifier,
-						*  2 TimeZone abbreviation */
+	unsigned int   sse_uptodate; /* !0 if the sse member is up to date with the date/time members */
+	unsigned int   tim_uptodate; /* !0 if the date/time members are up to date with the sse member */
+	unsigned int   is_localtime; /*  1 if the current struct represents localtime, 0 if it is in GMT */
+	unsigned int   zone_type;    /*  1 time offset,
+	                              *  3 TimeZone identifier,
+	                              *  2 TimeZone abbreviation */
 } timelib_time;
 
 #define TIMELIB_ZONETYPE_OFFSET 1
