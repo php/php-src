@@ -23,6 +23,15 @@
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
 
+#ifndef LONG_MAX
+#define LONG_MAX 2147483647L
+#endif
+
+#ifndef LONG_MIN
+#define LONG_MIN (- LONG_MAX - 1)
+#endif
+
+
 /* From dow.c */
 int timelib_day_of_week(int y, int m, int d);
 int timelib_daynr_from_weeknr(int y, int w, int d);
@@ -35,7 +44,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
 
 /* From unixtime2tm.c */
-int timelib_apply_localtime(timelib_time *t, uint localtime);
+int timelib_apply_localtime(timelib_time *t, unsigned int	 localtime);
 void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts);
 void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz);
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);

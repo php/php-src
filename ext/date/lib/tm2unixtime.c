@@ -133,7 +133,7 @@ static void do_adjust_relative(timelib_time* time)
 
 static timelib_sll do_years(int year)
 {
-	uint i;
+	unsigned int i;
 	timelib_sll res = 0;
 
 	if (year >= 1970) {
@@ -156,7 +156,7 @@ static timelib_sll do_years(int year)
 	return res;
 }
 
-static timelib_sll do_months(uint month, uint year)
+static timelib_sll do_months(unsigned int month, unsigned int year)
 {
 	if (is_leap(year)) {
 		return ((month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
@@ -165,12 +165,12 @@ static timelib_sll do_months(uint month, uint year)
 	}
 }
 
-static timelib_sll do_days(uint day)
+static timelib_sll do_days(unsigned int day)
 {
 	return ((day - 1) * SECS_PER_DAY);
 }
 
-static timelib_sll do_time(uint hour, uint minute, uint second)
+static timelib_sll do_time(unsigned int hour, unsigned int minute, unsigned int second)
 {
 	timelib_sll res = 0;
 

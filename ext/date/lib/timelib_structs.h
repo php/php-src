@@ -24,14 +24,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef PHP_WIN32
+#include <winsock2.h>
+#else
 #include <netinet/in.h>
+#endif
 
-#if defined(WIN32) && _MSC_VER < 1300
+#if defined(PHP_WIN32) && _MSC_VER < 1300
 typedef unsigned __int64 timelib_ull;
 typedef __int64 timelib_sll;
 #else
 typedef unsigned long long timelib_ull;
 typedef signed long long timelib_sll;
+#endif
+
+#if defined(_MSC_VER)
+#define int32_t __int32
+#define uint32_t unsigned __int32
 #endif
 
 typedef struct ttinfo
@@ -78,8 +87,8 @@ typedef struct timelib_rel_time {
 
 typedef struct timelib_time_offset {
 	int32_t offset;
-	uint leap_secs;
-	uint is_dst;
+	unsigned int leap_secs;
+	unsigned int is_dst;
 	char *abbr;
 } timelib_time_offset;
 
@@ -90,17 +99,17 @@ typedef struct timelib_time {
 	int z;           /* GMT offset in minutes */
 	char *tz_abbr;   /* Timezone abbreviation (display only) */
 	timelib_tzinfo  *tz_info;   /* Timezone structure */
-	uint dst;        /* Flag if we were parsing a DST zone */
+	unsigned int dst;        /* Flag if we were parsing a DST zone */
 	timelib_rel_time relative;
 
 	timelib_sll sse; /* Seconds since epoch */
 
-	uint   have_time, have_date, have_zone, have_relative, have_weekday_relative, have_weeknr_day;
+	unsigned int   have_time, have_date, have_zone, have_relative, have_weekday_relative, have_weeknr_day;
 
-	uint sse_uptodate; /* !0 if the sse member is up to date with the date/time members */
-	uint tim_uptodate; /* !0 if the date/time members are up to date with the sse member */
-	uint is_localtime; /*  1 if the current struct represents localtime, 0 if it is in GMT */
-	uint zone_type;    /*  1 time offset,
+	unsigned int sse_uptodate; /* !0 if the sse member is up to date with the date/time members */
+	unsigned int tim_uptodate; /* !0 if the date/time members are up to date with the sse member */
+	unsigned int is_localtime; /*  1 if the current struct represents localtime, 0 if it is in GMT */
+	unsigned int zone_type;    /*  1 time offset,
 						*  3 TimeZone identifier,
 						*  2 TimeZone abbreviation */
 } timelib_time;

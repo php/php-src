@@ -126,7 +126,7 @@ PHP_FUNCTION(strtotime)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &times, &time_len) != FAILURE) {
 		/* We have no initial timestamp */
 		now = timelib_time_ctor();
-		timelib_unixtime2local(now, (signed long long) time(NULL), tzi);
+		timelib_unixtime2local(now, (timelib_sll) time(NULL), tzi);
 	} else {
 		timelib_tzinfo_ctor(tzi);
 		RETURN_FALSE;
