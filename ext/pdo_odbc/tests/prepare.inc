@@ -6,7 +6,8 @@ $SQL = array(
 	'create'=>'CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10))'
 );
 
-$DB = new pdo($CONNECTION, $USER, $PASSWD);
+//$DB = new pdo($CONNECTION, $USER, $PASSWD);
+$DB = new pdo($CONNECTION);
 
 foreach(array('test','classtypes') as $name)
 {
