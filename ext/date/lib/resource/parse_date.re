@@ -1320,7 +1320,7 @@ relativetext = (reltextnumber space reltextunit)+;
 
 	any
 	{
-		printf("unexpected character: #%d, %c\n", *s->tok, *s->tok);
+/*		printf("unexpected character: #%d, %c\n", *s->tok, *s->tok); */
 		goto std;
 	}
 */
