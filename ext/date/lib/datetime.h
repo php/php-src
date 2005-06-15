@@ -44,7 +44,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
 
 /* From unixtime2tm.c */
-int timelib_apply_localtime(timelib_time *t, unsigned int	 localtime);
+int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts);
 void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz);
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);

@@ -132,7 +132,7 @@ PHP_FUNCTION(strtotime)
 		now = timelib_time_ctor();
 		timelib_unixtime2local(now, (timelib_sll) time(NULL), tzi);
 	} else {
-		timelib_tzinfo_ctor(tzi);
+		timelib_tzinfo_dtor(tzi);
 		RETURN_FALSE;
 	}
 
