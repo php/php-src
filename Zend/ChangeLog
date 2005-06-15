@@ -1,3 +1,27 @@
+2005-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * bench.php:
+      more accurate timing function.
+
+2005-06-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Removed old executor
+
+2005-06-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Zend.m4:
+      reordered + added msg to configure output for PHP_ZEND_VM
+
+    * Zend.m4:
+      typofix
+
+    * Zend.m4
+      acinclude.m4:
+      fix standalone build
+
 2005-06-13  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
