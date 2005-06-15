@@ -51,10 +51,10 @@ static int do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, t
 
 static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 {
-	int leapyear;
-	int days_this_month;
-	int last_month, last_year;
-	int days_last_month;
+	timelib_sll leapyear;
+	timelib_sll days_this_month;
+	timelib_sll last_month, last_year;
+	timelib_sll days_last_month;
 
 	do_range_limit(1, 13, 12, m, y);
 
@@ -86,7 +86,7 @@ static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 
 static void do_adjust_for_weekday(timelib_time* time)
 {
-	int current_dow, difference;
+	timelib_sll current_dow, difference;
 
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	difference = time->relative.weekday - current_dow;
@@ -131,9 +131,9 @@ static void do_adjust_relative(timelib_time* time)
 	memset(&(time->relative), 0, sizeof(time->relative));
 }
 
-static timelib_sll do_years(int year)
+static timelib_sll do_years(timelib_sll year)
 {
-	unsigned int i;
+	timelib_sll i;
 	timelib_sll res = 0;
 
 	if (year >= 1970) {
@@ -156,7 +156,7 @@ static timelib_sll do_years(int year)
 	return res;
 }
 
-static timelib_sll do_months(unsigned int month, unsigned int year)
+static timelib_sll do_months(timelib_ull month, timelib_ull year)
 {
 	if (is_leap(year)) {
 		return ((month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
@@ -165,12 +165,12 @@ static timelib_sll do_months(unsigned int month, unsigned int year)
 	}
 }
 
-static timelib_sll do_days(unsigned int day)
+static timelib_sll do_days(timelib_ull day)
 {
 	return ((day - 1) * SECS_PER_DAY);
 }
 
-static timelib_sll do_time(unsigned int hour, unsigned int minute, unsigned int second)
+static timelib_sll do_time(timelib_ull hour, timelib_ull minute, timelib_ull second)
 {
 	timelib_sll res = 0;
 

@@ -33,8 +33,8 @@
 
 
 /* From dow.c */
-int timelib_day_of_week(int y, int m, int d);
-int timelib_daynr_from_weeknr(int y, int w, int d);
+timelib_sll timelib_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
+timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d);
 
 /* From parse_date.re */
 timelib_time *timelib_strtotime(char *s);

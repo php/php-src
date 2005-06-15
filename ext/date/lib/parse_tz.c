@@ -45,7 +45,8 @@ static void read_header(char **tzf, timelib_tzinfo *tz)
 
 static void read_transistions(char **tzf, timelib_tzinfo *tz)
 {
-	int32_t *buffer = NULL, i;
+	int32_t *buffer = NULL;
+	uint32_t i;
 	unsigned char *cbuffer = NULL;
 
 	if (tz->timecnt) {
@@ -219,7 +220,7 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone)
 
 static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts)
 {
-	int i;
+	uint32_t i;
 
 	if (!tz->timecnt || !tz->trans) {
 		return NULL;

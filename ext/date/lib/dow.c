@@ -23,17 +23,17 @@
 static int m_table_common[13] = { -1, 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 static int m_table_leap[13] =   { -1, 6, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 
-static int century_value(int j)
+static timelib_sll century_value(timelib_sll j)
 {
-	int i = j - 17;
-	int c = (4 - i * 2 + (i + 1) / 4) % 7;
+	timelib_sll i = j - 17;
+	timelib_sll c = (4 - i * 2 + (i + 1) / 4) % 7;
 
 	return c < 0 ? c + 7 : c;
 }
 
-int timelib_day_of_week(int y, int m, int d)
+timelib_sll timelib_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d)
 {
-	int c1, y1, m1;
+	timelib_sll c1, y1, m1;
 
 	/* Only valid for Gregorian calendar */
 	if (y < 1753) {
@@ -45,9 +45,9 @@ int timelib_day_of_week(int y, int m, int d)
 	return (c1 + y1 + m1 + (y1 / 4) + d) % 7;
 }
 
-int timelib_daynr_from_weeknr(int y, int w, int d)
+timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d)
 {
-	int dow, day;
+	timelib_sll dow, day;
 	
 	/* Figure out the dayofweek for y-1-1 */
 	dow = timelib_day_of_week(y, 1, 1);
