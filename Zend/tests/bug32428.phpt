@@ -9,5 +9,5 @@ Bug #32428 (The @ warning error supression operator is broken)
   $data = @($not_exists+1); 
   echo "ok\n";
 ?>
---EXPEXT--
+--EXPECT--
 ok
