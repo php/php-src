@@ -1,3 +1,92 @@
+2005-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/bench.php:
+      more accurate timing function.
+
+2005-06-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/lang/bug21800.phpt:
+      This test did not fit to the new interactive shell thing
+
+    * NEWS:
+      BFN
+
+2005-06-14  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/type.c
+      ext/standard/tests/time/002.phpt:
+      - Add my new timelib and ext/date. For now only strtotime() makes use of
+      this.
+
+2005-06-14  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/xsl/xsltprocessor.c:
+      MFH: Fixed bug #33340 (CLI Crash when calling php:function from XSLT)
+
+    * ext/xsl/xsltprocessor.c:
+      Fixed bug #33340 (CLI Crash when calling php:function from XSLT)
+
+2005-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/network.c:
+      bzero > memset
+
+2005-06-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      Removed old executor
+
+2005-06-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/Zend.m4:
+      reordered + added msg to configure output for PHP_ZEND_VM
+
+    * ZendEngine2/Zend.m4:
+      typofix
+
+    * ZendEngine2/Zend.m4
+      ZendEngine2/acinclude.m4:
+      fix standalone build
+
+2005-06-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/streams/xp_socket.c:
+      ZTS fix.
+
+2005-06-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/ftp/ftp.c
+      main/network.c
+      main/php_network.h
+      main/streams/xp_socket.c:
+      Added bindto socket context option.
+
+2005-06-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      Make this usable for header files too
+
+    * ext/sqlite/config.m4:
+      use PHP_CHECK_PDO_INCLUDES
+
+    * acinclude.m4:
+      Allow different things to be done when found / not-found
+
+    * acinclude.m4:
+      - Added PHP_CHECK_PDO_INCLUDES macro (caches the result)
+
 2005-06-13  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * NEWS:
