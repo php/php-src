@@ -141,6 +141,9 @@ PHP_FUNCTION(strtotime)
 	if (now->tz_info == tzi) {
 		now->tz_info = NULL;
 	}
+	if (t->tz_info == tzi) {
+		t->tz_info = NULL;
+	}
 
 	timelib_time_dtor(now);	
 	timelib_time_dtor(t);
