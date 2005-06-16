@@ -23,7 +23,9 @@
 #include "config.h"
 #endif
 #include "php_soap.h"
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
+#endif
 #ifdef ZEND_ENGINE_2
 #  include "zend_exceptions.h"
 #endif
