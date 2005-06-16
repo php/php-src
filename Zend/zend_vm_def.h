@@ -1734,9 +1734,6 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (OP2_TYPE == IS_CONST) {
-#ifndef ZEND_VM_SPEC
-		free_op2.var = NULL;
-#endif
 		function_name_strval = opline->op2.u.constant.value.str.val;
 		function_name_strlen = opline->op2.u.constant.value.str.len;
 	} else {
@@ -1756,7 +1753,9 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	}
 
 	efree(lcname);
-	FREE_OP2();
+	if (OP2_TYPE != IS_CONST) {
+		FREE_OP2();
+	}
 
 	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
@@ -2045,7 +2044,7 @@ ZEND_VM_C_LABEL(return_by_value):
 	ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
 }
 
-ZEND_VM_HANDLER(108, ZEND_THROW, VAR|CV, ANY)
+ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 {
 	zend_op *opline = EX(opline);
 	zval *value;
@@ -3380,13 +3379,11 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|C
 
 ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMP|VAR|UNUSED|CV, ANY)
 {
-	zend_op *opline = EX(opline);
-
 	if (OP1_TYPE != IS_UNUSED) {
-		zval *ptr;
+		zend_op *opline = EX(opline);
 		zend_free_op free_op1;
+		zval *ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-		ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
