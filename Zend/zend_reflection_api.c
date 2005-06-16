@@ -654,7 +654,7 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 	}
 
 	string_printf(str, fptr->common.scope ? "method " : "function ");
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.return_reference) {
+	if (fptr->op_array.return_reference) {
 		string_printf(str, "&");
 	}
 	string_printf(str, "%s ] {\n", fptr->common.function_name);
