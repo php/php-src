@@ -526,11 +526,11 @@ static long timelib_parse_tz_cor(char **ptr)
 	return 0;
 }
 
-static long timelib_lookup_relative_text(char **ptr)
+static timelib_sll timelib_lookup_relative_text(char **ptr)
 {
 	char *word;
 	char *begin = *ptr, *end;
-	long  value = 0;
+	timelib_sll  value = 0;
 	const timelib_lookup_table *tp;
 
 	while ((**ptr >= 'A' && **ptr <= 'Z') || (**ptr >= 'a' && **ptr <= 'z')) {
@@ -550,7 +550,7 @@ static long timelib_lookup_relative_text(char **ptr)
 	return value;
 }
 
-static long timelib_get_relative_text(char **ptr)
+static timelib_sll timelib_get_relative_text(char **ptr)
 {
 	while (**ptr == ' ' || **ptr == '-' || **ptr == '/') {
 		++*ptr;
@@ -621,7 +621,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	return value;
 }
 
-static void timelib_set_relative(char **ptr, timelib_ull amount, Scanner *s)
+static void timelib_set_relative(char **ptr, timelib_sll amount, Scanner *s)
 {
 	const timelib_relunit* relunit;
 
@@ -1224,7 +1224,7 @@ relativetext = (reltextnumber space reltextunit)+;
 
 	relativetext
 	{
-		long i;
+		timelib_sll i;
 
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
