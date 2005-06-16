@@ -219,7 +219,6 @@ struct _zend_op_array {
 
 #define ZEND_RETURN_VALUE				0
 #define ZEND_RETURN_REFERENCE			1
-#define ZEND_RETURN_REFERENCE_AGNOSTIC	2
 
 typedef struct _zend_internal_function {
 	/* Common elements */
