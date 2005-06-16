@@ -191,8 +191,8 @@ typedef struct _zend_free_op {
 /*	int   is_var; */
 } zend_free_op;
 
-ZEND_API zval *get_zval_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
-ZEND_API zval **get_zval_ptr_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval *zend_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval **zend_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
 
 
 END_EXTERN_C()

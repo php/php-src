@@ -1340,11 +1340,11 @@ ZEND_API opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
 	return zend_user_opcode_handlers[opcode];
 }
 
-ZEND_API zval *get_zval_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
+ZEND_API zval *zend_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
 	return get_zval_ptr(node, Ts, should_free, type TSRMLS_CC);
 }
 
-ZEND_API zval **get_zval_ptr_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
+ZEND_API zval **zend_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
 	return get_zval_ptr_ptr(node, Ts, should_free, type TSRMLS_CC);
 }
 
