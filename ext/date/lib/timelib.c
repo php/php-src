@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #include "timelib_structs.h"
-#include "datetime.h"
+#include "timelib.h"
 #include <ctype.h>
 
 #define TIMELIB_TIME_FREE(m) 	\

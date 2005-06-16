@@ -28,7 +28,7 @@
 #define TIMELIB_LL_CONST(n) n ## ll
 #endif
 
-#include "datetime.h"
+#include "timelib.h"
 
 static int month_tab_leap[12] = { -1, 30, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 static int month_tab[12] =      { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };

@@ -26,7 +26,7 @@
 #endif
 #include <string.h>
 
-#include "datetime.h"
+#include "timelib.h"
 #include "timezonedb.h"
 
 static void read_header(char **tzf, timelib_tzinfo *tz)

@@ -26,7 +26,7 @@
 #include "ext/standard/info.h"
 #include "php_date.h"
 #include "lib/timelib_structs.h"
-#include "lib/datetime.h"
+#include "lib/timelib.h"
 #include <time.h>
 
 function_entry date_functions[] = {
