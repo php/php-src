@@ -227,7 +227,7 @@ echo "
 
 $test_files = array();
 $test_results = array();
-$PHP_FAILED_TESTS = array();
+$PHP_FAILED_TESTS = array('BORKED' => array(), 'FAILED' => array());
 
 // If parameters given assume they represent selected tests to run.
 $failed_tests_file= false;
