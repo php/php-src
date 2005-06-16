@@ -659,14 +659,11 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
-	zend_free_op free_op2;
+	
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (IS_CONST == IS_CONST) {
-#if 0
-		free_op2.var = NULL;
-#endif
 		function_name_strval = opline->op2.u.constant.value.str.val;
 		function_name_strlen = opline->op2.u.constant.value.str.len;
 	} else {
@@ -686,6 +683,9 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	efree(lcname);
+	if (IS_CONST != IS_CONST) {
+
+	}
 
 	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
@@ -861,9 +861,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (IS_TMP_VAR == IS_CONST) {
-#if 0
-		free_op2.var = NULL;
-#endif
 		function_name_strval = opline->op2.u.constant.value.str.val;
 		function_name_strlen = opline->op2.u.constant.value.str.len;
 	} else {
@@ -883,7 +880,9 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	efree(lcname);
-	zval_dtor(free_op2.var);
+	if (IS_TMP_VAR != IS_CONST) {
+		zval_dtor(free_op2.var);
+	}
 
 	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
@@ -1016,9 +1015,6 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (IS_VAR == IS_CONST) {
-#if 0
-		free_op2.var = NULL;
-#endif
 		function_name_strval = opline->op2.u.constant.value.str.val;
 		function_name_strlen = opline->op2.u.constant.value.str.len;
 	} else {
@@ -1038,7 +1034,9 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	efree(lcname);
-	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	if (IS_VAR != IS_CONST) {
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	}
 
 	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
@@ -1248,14 +1246,11 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_function *function;
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
-	zend_free_op free_op2;
+	
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (IS_CV == IS_CONST) {
-#if 0
-		free_op2.var = NULL;
-#endif
 		function_name_strval = opline->op2.u.constant.value.str.val;
 		function_name_strlen = opline->op2.u.constant.value.str.len;
 	} else {
@@ -1275,6 +1270,9 @@ static int ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	efree(lcname);
+	if (IS_CV != IS_CONST) {
+
+	}
 
 	EX(calling_scope) = function->common.scope;
 	EX(object) = NULL;
@@ -1663,6 +1661,30 @@ return_by_value:
 	}
 
 	ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
+}
+
+static int ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *value;
+	zval *exception;
+	
+
+	value = &opline->op1.u.constant;
+
+	if (value->type != IS_OBJECT) {
+		zend_error_noreturn(E_ERROR, "Can only throw objects");
+	}
+	/* Not sure if a complete copy is what we want here */
+	ALLOC_ZVAL(exception);
+	INIT_PZVAL_COPY(exception, value);
+	if (!0) {
+		zval_copy_ctor(exception);
+	}
+
+	zend_throw_exception_object(exception TSRMLS_CC);
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -2140,13 +2162,11 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
-
 	if (IS_CONST != IS_UNUSED) {
-		zval *ptr;
+		zend_op *opline = EX(opline);
 		
+		zval *ptr = &opline->op1.u.constant;
 
-		ptr = &opline->op1.u.constant;
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
@@ -4042,6 +4062,30 @@ return_by_value:
 	ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
 }
 
+static int ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zval *value;
+	zval *exception;
+	zend_free_op free_op1;
+
+	value = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+
+	if (value->type != IS_OBJECT) {
+		zend_error_noreturn(E_ERROR, "Can only throw objects");
+	}
+	/* Not sure if a complete copy is what we want here */
+	ALLOC_ZVAL(exception);
+	INIT_PZVAL_COPY(exception, value);
+	if (!1) {
+		zval_copy_ctor(exception);
+	}
+
+	zend_throw_exception_object(exception TSRMLS_CC);
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -4525,13 +4569,11 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
-
 	if (IS_TMP_VAR != IS_UNUSED) {
-		zval *ptr;
+		zend_op *opline = EX(opline);
 		zend_free_op free_op1;
+		zval *ptr = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		ptr = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
@@ -7676,13 +7718,11 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
-
 	if (IS_VAR != IS_UNUSED) {
-		zval *ptr;
+		zend_op *opline = EX(opline);
 		zend_free_op free_op1;
+		zval *ptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		ptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
@@ -13891,13 +13931,11 @@ static int ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
-
 	if (IS_UNUSED != IS_UNUSED) {
-		zval *ptr;
+		zend_op *opline = EX(opline);
 		
+		zval *ptr = NULL;
 
-		ptr = NULL;
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
@@ -19544,13 +19582,11 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = EX(opline);
-
 	if (IS_CV != IS_UNUSED) {
-		zval *ptr;
+		zend_op *opline = EX(opline);
 		
+		zval *ptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 
-		ptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
@@ -28376,16 +28412,16 @@ void zend_init_opcodes_handlers()
   	ZEND_CATCH_SPEC_HANDLER,
   	ZEND_CATCH_SPEC_HANDLER,
   	ZEND_CATCH_SPEC_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_THROW_SPEC_CONST_HANDLER,
+  	ZEND_THROW_SPEC_CONST_HANDLER,
+  	ZEND_THROW_SPEC_CONST_HANDLER,
+  	ZEND_THROW_SPEC_CONST_HANDLER,
+  	ZEND_THROW_SPEC_CONST_HANDLER,
+  	ZEND_THROW_SPEC_TMP_HANDLER,
+  	ZEND_THROW_SPEC_TMP_HANDLER,
+  	ZEND_THROW_SPEC_TMP_HANDLER,
+  	ZEND_THROW_SPEC_TMP_HANDLER,
+  	ZEND_THROW_SPEC_TMP_HANDLER,
   	ZEND_THROW_SPEC_VAR_HANDLER,
   	ZEND_THROW_SPEC_VAR_HANDLER,
   	ZEND_THROW_SPEC_VAR_HANDLER,
