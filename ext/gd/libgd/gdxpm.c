@@ -46,10 +46,10 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 				buf[0] = image.colorTable[i].c_color[1];
 				red = strtol(buf, NULL, 16);
 
-				buf[0] = image.colorTable[i].c_color[3];
+				buf[0] = image.colorTable[i].c_color[2];
 				green = strtol(buf, NULL, 16);
 
-				buf[0] = image.colorTable[i].c_color[5];
+				buf[0] = image.colorTable[i].c_color[3];
 				blue = strtol(buf, NULL, 16);
 				break;
 
