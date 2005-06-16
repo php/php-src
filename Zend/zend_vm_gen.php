@@ -747,21 +747,21 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"\n");
 							out($f,"#define ZEND_VM_CONTINUE()   return 0\n");
 							out($f,"#define ZEND_VM_RETURN()     return 1\n");
-							out($f,"#define ZEND_VM_DISPATCH(op) return zend_vm_get_opcode_handler(op->opcode, op)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n\n");
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
 							break;
 						case ZEND_VM_KIND_SWITCH:
 							out($f,"\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
-							out($f,"#define ZEND_VM_DISPATCH(op) dispatch_handler = zend_vm_get_opcode_handler(op->opcode, op); goto zend_vm_dispatch;\n\n");
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL &execute_data TSRMLS_CC\n");
 							break;
 						case ZEND_VM_KIND_GOTO:
 							out($f,"\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(EX(opline)->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   return\n");
-							out($f,"#define ZEND_VM_DISPATCH(op) goto *(void**)(zend_vm_get_opcode_handler(op->opcode, op));\n\n");
+							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL &execute_data TSRMLS_CC\n");
 							break;
 					}
