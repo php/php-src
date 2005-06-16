@@ -61,12 +61,6 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 
 #define TEMP_VAR_STACK_LIMIT 2000
 
-/* former zend_execute_locks.h */
-typedef struct _zend_free_op {
-	zval* var;
-/*	int   is_var; */
-} zend_free_op;
-
 static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free)
 {
 	if (!--z->refcount) {
@@ -1346,6 +1340,14 @@ ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t ha
 ZEND_API opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
 {
 	return zend_user_opcode_handlers[opcode];
+}
+
+ZEND_API zval *get_zval_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
+	return get_zval_ptr(node, Ts, should_free, type TSRMLS_CC);
+}
+
+ZEND_API zval **get_zval_ptr_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
+	return get_zval_ptr_ptr(node, Ts, should_free, type TSRMLS_CC);
 }
 
 /*
