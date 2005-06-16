@@ -22,24 +22,26 @@
 #ifdef WIN32
 #include <winsock2.h>
 #else
-#include <netinet/in.h>
+#include <inttypes.h>
 #endif
 #include <string.h>
 
 #include "timelib.h"
 #include "timezonedb.h"
 
+#define timelib_conv_int(l) ((l & 0x000000ff) << 24) + ((l & 0x0000ff00) << 8) + ((l & 0x00ff0000) >> 8) + ((l & 0xff000000) >> 24)
+
 static void read_header(char **tzf, timelib_tzinfo *tz)
 {
 	uint32_t buffer[6];
 
 	memcpy(&buffer, *tzf, sizeof(buffer));
-	tz->ttisgmtcnt = htonl(buffer[0]);
-	tz->ttisstdcnt = htonl(buffer[1]);
-	tz->leapcnt    = htonl(buffer[2]);
-	tz->timecnt    = htonl(buffer[3]);
-	tz->typecnt    = htonl(buffer[4]);
-	tz->charcnt    = htonl(buffer[5]);
+	tz->ttisgmtcnt = timelib_conv_int(buffer[0]);
+	tz->ttisstdcnt = timelib_conv_int(buffer[1]);
+	tz->leapcnt    = timelib_conv_int(buffer[2]);
+	tz->timecnt    = timelib_conv_int(buffer[3]);
+	tz->typecnt    = timelib_conv_int(buffer[4]);
+	tz->charcnt    = timelib_conv_int(buffer[5]);
 	*tzf += sizeof(buffer);
 }
 
@@ -57,7 +59,7 @@ static void read_transistions(char **tzf, timelib_tzinfo *tz)
 		memcpy(buffer, *tzf, sizeof(int32_t) * tz->timecnt);
 		*tzf += (sizeof(int32_t) * tz->timecnt);
 		for (i = 0; i < tz->timecnt; i++) {
-			buffer[i] = htonl(buffer[i]);
+			buffer[i] = timelib_conv_int(buffer[i]);
 		}
 
 		cbuffer = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
@@ -114,8 +116,8 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 		return;
 	}
 	for (i = 0; i < tz->leapcnt; i++) {
-		tz->leap_times[i].trans = htonl(leap_buffer[i * 2]);
-		tz->leap_times[i].offset = htonl(leap_buffer[i * 2 + 1]);
+		tz->leap_times[i].trans = timelib_conv_int(leap_buffer[i * 2]);
+		tz->leap_times[i].offset = timelib_conv_int(leap_buffer[i * 2 + 1]);
 	}
 	free(leap_buffer);
 	
@@ -144,8 +146,7 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 	free(buffer);
 }
 
-#if 0
-static void dumpinfo(timelib_tzinfo *tz)
+void timelib_dump_tzinfo(timelib_tzinfo *tz)
 {
 	uint32_t i;
 
@@ -159,7 +160,7 @@ static void dumpinfo(timelib_tzinfo *tz)
 	for (i = 0; i < tz->timecnt; i++) {
 		printf ("%08X (%12d) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 			tz->trans[i], tz->trans[i], tz->trans_idx[i],
-			tz->type[tz->trans_idx[i]].offset,
+			(long int) tz->type[tz->trans_idx[i]].offset,
 			tz->type[tz->trans_idx[i]].isdst,
 			tz->type[tz->trans_idx[i]].abbr_idx,
 			&tz->timezone_abbr[tz->type[tz->trans_idx[i]].abbr_idx],
@@ -174,7 +175,6 @@ static void dumpinfo(timelib_tzinfo *tz)
 			tz->leap_times[i].offset);
 	}
 }
-#endif
 
 static int seek_to_tz_position(char **tzf, char *timezone)
 {
