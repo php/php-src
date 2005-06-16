@@ -629,7 +629,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 
 #define PHP_ARRAY_CMP_FUNC_VARS \
     zval **old_compare_func; \
-    zend_fcall_info_cache old_user_compare_fci_cache; \
+    zend_fcall_info_cache old_user_compare_fci_cache \
 
 #define PHP_ARRAY_CMP_FUNC_BACKUP() \
     old_compare_func = BG(user_compare_func_name); \
