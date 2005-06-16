@@ -26,7 +26,9 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_standard.h"
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
+#endif
 #include "ext/standard/php_smart_str.h"
 #include "php_ini.h"
 #include "SAPI.h"
