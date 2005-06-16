@@ -2905,7 +2905,6 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	zend_free_op free_op1, free_op2;
 	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	long index;
 
 	if (container) {
 		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {

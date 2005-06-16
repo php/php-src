@@ -8978,7 +8978,6 @@ static int ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval *offset = &opline->op2.u.constant;
-	long index;
 
 	if (container) {
 		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -10397,7 +10396,6 @@ static int ZEND_UNSET_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1, free_op2;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval *offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -11850,7 +11848,6 @@ static int ZEND_UNSET_OBJ_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1, free_op2;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval *offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -13675,7 +13672,6 @@ static int ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op1;
 	zval **container = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zval *offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_VAR == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -14832,7 +14828,6 @@ static int ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *offset = &opline->op2.u.constant;
-	long index;
 
 	if (container) {
 		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -15872,7 +15867,6 @@ static int ZEND_UNSET_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op2;
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -16912,7 +16906,6 @@ static int ZEND_UNSET_OBJ_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op2;
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -18314,7 +18307,6 @@ static int ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	
 	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_UNUSED == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -20849,7 +20841,6 @@ static int ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
 	zval *offset = &opline->op2.u.constant;
-	long index;
 
 	if (container) {
 		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -22260,7 +22251,6 @@ static int ZEND_UNSET_OBJ_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op2;
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
 	zval *offset = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -23704,7 +23694,6 @@ static int ZEND_UNSET_OBJ_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_free_op free_op2;
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
 	zval *offset = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
@@ -25519,7 +25508,6 @@ static int ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	
 	zval **container = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_UNSET TSRMLS_CC);
 	zval *offset = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-	long index;
 
 	if (container) {
 		if (IS_CV == IS_CV && container != &EG(uninitialized_zval_ptr)) {
