@@ -1323,8 +1323,6 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 #define ZEND_VM_CONTINUE_JMP() \
      ZEND_VM_CONTINUE()    
 
-static int zend_vm_old_executor = 0;
-
 #include "zend_vm_execute.h"
 
 ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t handler)
