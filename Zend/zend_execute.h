@@ -185,6 +185,16 @@ ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data
 ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, opcode_handler_t handler);
 ZEND_API opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 
+/* former zend_execute_locks.h */
+typedef struct _zend_free_op {
+	zval* var;
+/*	int   is_var; */
+} zend_free_op;
+
+ZEND_API zval *get_zval_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval **get_zval_ptr_ptr_ex(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
