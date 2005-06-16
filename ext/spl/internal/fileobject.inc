@@ -53,7 +53,7 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/**
-	 * @return whethe rend of stream is reached
+	 * @return whether the end of the stream is reached
 	 */
 	function eof()
 	{
@@ -85,7 +85,7 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/**
-	 * @param operation lock opeation (LOCK_SH, LOCK_EX, LOCK_UN, LOCK_NB)
+	 * @param operation lock operation (LOCK_SH, LOCK_EX, LOCK_UN, LOCK_NB)
 	 * @retval $wouldblock  whether the operation would block
 	 */
 	function flock($operation, &$wouldblock)
@@ -210,7 +210,7 @@ class FileObject implements RecursiveIterator, SeekableIterator
 	}
 
 	/**
-	 * @return curren tsetting for max line
+	 * @return current setting for max line
 	 */
 	function getMaxLineLen()
 	{
