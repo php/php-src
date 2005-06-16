@@ -1,5 +1,5 @@
 --TEST--
-Bug #13142 strtotime handling of "M d H:i:s Y" format
+Bug #13142 (strtotime handling of "M d H:i:s Y" format)
 --SKIPIF--
 <?php
 if (!@putenv("TZ=US/Eastern") || getenv("TZ") != 'US/Eastern') {
