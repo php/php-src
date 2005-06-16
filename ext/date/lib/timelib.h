@@ -53,6 +53,7 @@ void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);
 timelib_tzinfo *timelib_parse_tzfile(char *timezone);
 int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
+void timelib_dump_tzinfo(timelib_tzinfo *tz);
 
 /* From timelib.c */
 timelib_tzinfo* timelib_tzinfo_ctor();

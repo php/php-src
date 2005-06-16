@@ -27,7 +27,7 @@
 #ifdef WIN32
 #include <winsock2.h>
 #else
-#include <netinet/in.h>
+#include <inttypes.h>
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1300
