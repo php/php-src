@@ -166,7 +166,7 @@ function ary3($n) {
 /****/
 
 function fibo_r($n){
-    return(($n < 2) ? 1 : fibo($n - 2) + fibo_r($n - 1));
+    return(($n < 2) ? 1 : fibo_r($n - 2) + fibo_r($n - 1));
 }
 
 function fibo($n) {
