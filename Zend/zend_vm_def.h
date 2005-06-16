@@ -3578,14 +3578,17 @@ ZEND_VM_HANDLER(146, ZEND_VERIFY_ABSTRACT_CLASS, ANY, ANY)
 
 ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 {	
-	switch (zend_user_opcode_handlers[EX(opline)->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL)) {
+	int ret = zend_user_opcode_handlers[EX(opline)->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL);
+
+	switch (ret) {
 		case ZEND_USER_OPCODE_CONTINUE:
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			ZEND_VM_RETURN();
 		case ZEND_USER_OPCODE_DISPATCH:
+			ZEND_VM_DISPATCH(EX(opline)->opcode, EX(opline));
 		default:
-			ZEND_VM_DISPATCH(EX(opline));
+			ZEND_VM_DISPATCH(ret & 0xff, EX(opline));
 	}
 }
 

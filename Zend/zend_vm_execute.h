@@ -27,7 +27,7 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 
 #define ZEND_VM_CONTINUE()   return 0
 #define ZEND_VM_RETURN()     return 1
-#define ZEND_VM_DISPATCH(op) return zend_vm_get_opcode_handler(op->opcode, op)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
 
@@ -555,14 +555,17 @@ static int ZEND_VERIFY_ABSTRACT_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 static int ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {	
-	switch (zend_user_opcode_handlers[EX(opline)->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL)) {
+	int ret = zend_user_opcode_handlers[EX(opline)->opcode](ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL);
+
+	switch (ret) {
 		case ZEND_USER_OPCODE_CONTINUE:
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			ZEND_VM_RETURN();
 		case ZEND_USER_OPCODE_DISPATCH:
+			ZEND_VM_DISPATCH(EX(opline)->opcode, EX(opline));
 		default:
-			ZEND_VM_DISPATCH(EX(opline));
+			ZEND_VM_DISPATCH(ret & 0xff, EX(opline));
 	}
 }
 
