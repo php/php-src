@@ -501,7 +501,7 @@ ZEND_API int zend_get_scanned_file_offset(TSRMLS_D)
 {
 	if (yyin) {
 		int offset_in_buffer = (yy_c_buf_p - (YY_CURRENT_BUFFER)->yy_ch_buf);
-		int read_bytes = (YY_CURRENT_BUFFER)->yy_n_chars;
+		int read_bytes = SCNG(yy_n_chars);
 		int offset_from_the_end = read_bytes - offset_in_buffer;
 
 		return zend_stream_ftell(yyin TSRMLS_CC) - offset_from_the_end;
