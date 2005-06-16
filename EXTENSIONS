@@ -68,6 +68,11 @@ PRIMARY MAINTAINER:  Alex Leigh <aleigh@php.net>
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
+EXTENSION:           date
+PRIMARY MAINTAINER:  Derick Rethans <derick@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           embed
 PRIMARY MAINTAINER:  Edin Kadribasic <edink@php.net>
 MAINTENANCE:         Maintained
