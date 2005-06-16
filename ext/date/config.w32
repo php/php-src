@@ -2,5 +2,5 @@
 // vim:ft=javascript
 
 EXTENSION("date", "php_date.c", false, "-Iext/date/lib");
-ADD_SOURCES("ext/date/lib", "datetime.c dow.c parse_date.c parse_tz.c tm2unixtime.c unixtime2tm.c", "date");
+ADD_SOURCES("ext/date/lib", "timelib.c dow.c parse_date.c parse_tz.c tm2unixtime.c unixtime2tm.c", "date");
 AC_DEFINE('HAVE_DATE', 1, 'Have date/time support');
