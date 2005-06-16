@@ -658,6 +658,8 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 			call_user_call->scope = zobj->ce;
 			call_user_call->fn_flags = 0;
 			call_user_call->function_name = estrndup(method_name, method_len);
+			call_user_call->pass_rest_by_reference = 0;
+			call_user_call->return_reference = ZEND_RETURN_VALUE;
 
 			return (union _zend_function *)call_user_call;
 		} else {

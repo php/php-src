@@ -1499,7 +1499,7 @@ SPL_METHOD(CachingRecursiveIterator, getChildren)
 } /* }}} */
 
 static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_REFERENCE_AGNOSTIC, 2) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_VALUE, 2) 
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();

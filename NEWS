@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2005, PHP 5.1 Beta 2
+- Allowed return by refrence from internal functions. (Marcus, Andi, Dmitry)
 - Added bindto socket context option. (Ilia)
 - Rewrote strtotime() with support for timezones and tons of new formats.
   (Derick)
