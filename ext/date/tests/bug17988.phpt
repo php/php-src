@@ -1,5 +1,5 @@
 --TEST--
-Bug #17988 strtotime handling of postgresql timestamps
+Bug #17988 (strtotime handling of postgresql timestamps)
 --FILE--
 <?php
 putenv("TZ=GMT");
