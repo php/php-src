@@ -1,3 +1,38 @@
+2005-06-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c:
+      WS fix
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Fix FCI cache for array_walk and user array compare functions. Bug
+
+2005-06-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h:
+      Fixed OS X compatibility
+
+2005-06-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * scripts/phpize.in:
+      - This does not have to be egrep here
+
+2005-06-15  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      fixed parameter parse string for mysqli_stmt_attr_set
+
+2005-06-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/tests/bug32428.phpt:
+      typofix
+
+    * run-tests.php:
+      Show borked tests in the summary
+
 2005-06-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/bench.php:

@@ -1,3 +1,14 @@
+2005-06-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.h:
+      Fixed OS X compatibility
+
+2005-06-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug32428.phpt:
+      typofix
+
 2005-06-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * bench.php:
