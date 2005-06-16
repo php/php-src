@@ -2809,7 +2809,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(75, ZEND_UNSET_DIM_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
@@ -2818,96 +2818,113 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	long index;
 
 	if (container) {
-
 		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
 			SEPARATE_ZVAL_IF_NOT_REF(container);
 		}
-		if (opline->extended_value == ZEND_UNSET_DIM) {
-			switch (Z_TYPE_PP(container)) {
-				case IS_ARRAY: {
-					HashTable *ht = Z_ARRVAL_PP(container);
+		switch (Z_TYPE_PP(container)) {
+			case IS_ARRAY: {
+				HashTable *ht = Z_ARRVAL_PP(container);
 
-					switch (offset->type) {
-						case IS_DOUBLE:
-						case IS_RESOURCE:
-						case IS_BOOL:
-						case IS_LONG:
-							if (offset->type == IS_DOUBLE) {
-								index = (long) offset->value.dval;
-							} else {
-								index = offset->value.lval;
-							}
+				switch (offset->type) {
+					case IS_DOUBLE:
+					case IS_RESOURCE:
+					case IS_BOOL:
+					case IS_LONG:
+						if (offset->type == IS_DOUBLE) {
+							index = (long) offset->value.dval;
+						} else {
+							index = offset->value.lval;
+						}
 
-							zend_hash_index_del(ht, index);
-							break;
-						case IS_STRING:
-							if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
-						    ht == &EG(symbol_table)) {
-								zend_execute_data *ex;
-								ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
+						zend_hash_index_del(ht, index);
+						break;
+					case IS_STRING:
+						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
+					    ht == &EG(symbol_table)) {
+							zend_execute_data *ex;
+							ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
 
-								for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
-									if (ex->symbol_table == ht) {
-										int i;
+							for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
+								if (ex->symbol_table == ht) {
+									int i;
 
-										for (i = 0; i < ex->op_array->last_var; i++) {
-											if (ex->op_array->vars[i].hash_value == hash_value &&
-											    ex->op_array->vars[i].name_len == offset->value.str.len &&
-											    !memcmp(ex->op_array->vars[i].name, offset->value.str.val, offset->value.str.len)) {
-												ex->CVs[i] = NULL;
-												break;
-											}
+									for (i = 0; i < ex->op_array->last_var; i++) {
+										if (ex->op_array->vars[i].hash_value == hash_value &&
+										    ex->op_array->vars[i].name_len == offset->value.str.len &&
+										    !memcmp(ex->op_array->vars[i].name, offset->value.str.val, offset->value.str.len)) {
+											ex->CVs[i] = NULL;
+											break;
 										}
 									}
 								}
 							}
-							break;
-						case IS_NULL:
-							zend_hash_del(ht, "", sizeof(""));
-							break;
-						default:
-							zend_error(E_WARNING, "Illegal offset type in unset");
-							break;
-					}
-					FREE_OP2();
-					break;
+						}
+						break;
+					case IS_NULL:
+						zend_hash_del(ht, "", sizeof(""));
+						break;
+					default:
+						zend_error(E_WARNING, "Illegal offset type in unset");
+						break;
 				}
-				case IS_OBJECT:
-					if (!Z_OBJ_HT_P(*container)->unset_dimension) {
-						zend_error_noreturn(E_ERROR, "Cannot use object as array");
-					}
-					if (IS_OP2_TMP_FREE()) {
-						MAKE_REAL_ZVAL_PTR(offset);
-					}
-					Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
-					if (IS_OP2_TMP_FREE()) {
-						zval_ptr_dtor(&offset);
-					} else {
-						FREE_OP2();
-					}
-					break;
-				case IS_STRING:
-					zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
-					ZEND_VM_CONTINUE(); /* bailed out before */
-				default:
-					FREE_OP2();
-					break;
+				FREE_OP2();
+				break;
 			}
-		} else { /* ZEND_UNSET_OBJ */
-			if (Z_TYPE_PP(container) == IS_OBJECT) {
+			case IS_OBJECT:
+				if (!Z_OBJ_HT_P(*container)->unset_dimension) {
+					zend_error_noreturn(E_ERROR, "Cannot use object as array");
+				}
 				if (IS_OP2_TMP_FREE()) {
 					MAKE_REAL_ZVAL_PTR(offset);
 				}
-				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+				Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
 				if (IS_OP2_TMP_FREE()) {
 					zval_ptr_dtor(&offset);
 				} else {
 					FREE_OP2();
 				}
-			}
+				break;
+			case IS_STRING:
+				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+				ZEND_VM_CONTINUE(); /* bailed out before */
+			default:
+				FREE_OP2();
+				break;
 		}
 	} else {
-		/* overloaded element */
+		FREE_OP2();
+	}
+	FREE_OP1_VAR_PTR();
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1, free_op2;
+	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
+	zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	long index;
+
+	if (container) {
+		if (OP1_TYPE == IS_CV && container != &EG(uninitialized_zval_ptr)) {
+			SEPARATE_ZVAL_IF_NOT_REF(container);
+		}
+		if (Z_TYPE_PP(container) == IS_OBJECT) {
+			if (IS_OP2_TMP_FREE()) {
+				MAKE_REAL_ZVAL_PTR(offset);
+			}
+			Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			if (IS_OP2_TMP_FREE()) {
+				zval_ptr_dtor(&offset);
+			} else {
+				FREE_OP2();
+			}
+		} else {
+			FREE_OP2();
+		}
+	} else {
 		FREE_OP2();
 	}
 	FREE_OP1_VAR_PTR();

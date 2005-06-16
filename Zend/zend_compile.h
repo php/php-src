@@ -576,10 +576,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_STATIC_MEMBER	3
 
 
-/* obj/dim unsets */
-#define ZEND_UNSET_DIM				1
-#define ZEND_UNSET_OBJ				2
-
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
