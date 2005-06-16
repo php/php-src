@@ -18,13 +18,15 @@
 
 /* $Id$ */
 
+#include <tl_config.h>
+
 #include <stdio.h>
-#ifdef WIN32
-#include <winsock2.h>
-#else
-#include <inttypes.h>
-#endif
+
+#ifdef HAVE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "timelib.h"
 #include "timezonedb.h"

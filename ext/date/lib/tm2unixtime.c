@@ -18,6 +18,7 @@
 
 /* $Id$ */
 
+#include <tl_config.h>
 #include "timelib.h"
 
 /*                                    jan  feb  mrt  apr  may  jun  jul  aug  sep  oct  nov  dec */

@@ -21,13 +21,42 @@
 #ifndef __TIMELIB_STRUCTS_H__
 #define __TIMELIB_STRUCTS_H__
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#ifdef WIN32
-#include <winsock2.h>
-#else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
+
+#ifndef HAVE_INT32_T
+# if SIZEOF_INT == 4
+typedef int int32_t;
+# elif SIZEOF_LONG == 4
+typedef long int int32_t;
+# endif
+#endif
+
+#ifndef HAVE_UINT32_T
+# if SIZEOF_INT == 4
+typedef unsigned int uint32_t;
+# elif SIZEOF_LONG == 4
+typedef unsigned long int uint32_t;
+# endif
+#endif
+
+#include <stdio.h>
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1300
@@ -125,4 +154,5 @@ typedef struct timelib_time {
 #define is_leap(y) ((y) % 4 == 0 && ((y) % 100 != 0 || (y) % 400 == 0))
 
 #define DEBUG(s)  if (0) { s }
+
 #endif

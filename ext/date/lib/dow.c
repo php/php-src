@@ -18,6 +18,8 @@
 
 /* $Id$ */
 
+#include <tl_config.h>
+
 #include "timelib_structs.h"
 
 static int m_table_common[13] = { -1, 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */

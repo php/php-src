@@ -25,7 +25,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_date.h"
-#include "lib/timelib_structs.h"
 #include "lib/timelib.h"
 #include <time.h>
 
