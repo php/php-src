@@ -18,6 +18,8 @@
 
 /* $Id$ */
 
+#include <tl_config.h>
+
 #include "timelib_structs.h"
 #include "timelib.h"
 #include <ctype.h>
