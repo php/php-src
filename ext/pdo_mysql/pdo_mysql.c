@@ -36,9 +36,17 @@ function_entry pdo_mysql_functions[] = {
 };
 /* }}} */
 
+/* {{{ pdo_mysql_functions[] */
+static zend_module_dep pdo_mysql_deps[] = {
+	ZEND_MOD_REQUIRED("pdo")
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 /* {{{ pdo_mysql_module_entry */
 zend_module_entry pdo_mysql_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_mysql_deps,
 	"pdo_mysql",
 	pdo_mysql_functions,
 	PHP_MINIT(pdo_mysql),

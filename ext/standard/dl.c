@@ -54,7 +54,7 @@
    Load a PHP extension at runtime */
 PHP_FUNCTION(dl)
 {
-	pval **file;
+	zval **file;
 
 	/* obtain arguments */
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
@@ -99,7 +99,7 @@ PHP_FUNCTION(dl)
 
 /* {{{ php_dl
  */
-void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
+void php_dl(zval *file, int type, zval *return_value TSRMLS_DC)
 {
 	void *handle;
 	char *libpath;
@@ -224,14 +224,18 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		RETURN_FALSE;
 	}
 
+	if (type == MODULE_TEMPORARY && zend_startup_module(module_entry TSRMLS_CC) == FAILURE) {
+		DL_UNLOAD(handle);
+		RETURN_FALSE;
+	}
+
 	if ((type == MODULE_TEMPORARY) && module_entry->request_startup_func) {
-		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC)) {
+		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to initialize module '%s'", module_entry->name);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
 		}
 	}
-	
 	RETURN_TRUE;
 }
 /* }}} */
@@ -243,7 +247,7 @@ PHP_MINFO_FUNCTION(dl)
 
 #else
 
-void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
+void php_dl(zval *file, int type, zval *return_value TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", Z_STRVAL_P(file));
 	RETURN_FALSE;

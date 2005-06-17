@@ -86,9 +86,20 @@ function_entry pdo_functions[] = {
 };
 /* }}} */
 
+/* {{{ pdo_functions[] */
+static zend_module_dep pdo_deps[] = {
+#ifdef HAVE_SPL
+	ZEND_MOD_REQUIRED("spl")
+#endif
+	{NULL, NULL, NULL}
+};
+
+/* }}} */
+
 /* {{{ pdo_module_entry */
 zend_module_entry pdo_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_deps,
 	"PDO",
 	pdo_functions,
 	PHP_MINIT(pdo),

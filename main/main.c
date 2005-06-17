@@ -1287,15 +1287,15 @@ static void core_globals_ctor(php_core_globals *core_globals TSRMLS_DC)
 /* }}} */
 #endif
 
-/* {{{ php_startup_extensions
+/* {{{ php_register_extensions
  */
-int php_startup_extensions(zend_module_entry **ptr, int count)
+int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
 {
-	zend_module_entry **end = ptr+count;
+	zend_module_entry **end = ptr + count;
 
 	while (ptr < end) {
 		if (*ptr) {
-			if (zend_startup_module(*ptr)==FAILURE) {
+			if (zend_register_internal_module(*ptr TSRMLS_CC)==FAILURE) {
 				return FAILURE;
 			}
 		}
@@ -1480,13 +1480,13 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_register_default_classes(TSRMLS_C);
 
 	/* startup extensions staticly compiled in */
-	if (php_startup_internal_extensions() == FAILURE) {
+	if (php_register_internal_extensions(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
 
 	/* start additional PHP extensions */
-	php_startup_extensions(&additional_modules, num_additional_modules);
+	php_register_extensions(&additional_modules, num_additional_modules TSRMLS_CC);
 
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
@@ -1496,7 +1496,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	   which is always an internal extension and to be initialized
 	   ahead of all other internals
 	 */
-	php_ini_delayed_modules_startup(TSRMLS_C);
+	php_ini_register_extensions(TSRMLS_C);
+	zend_startup_modules(TSRMLS_C);
 
 	/* disable certain classes and functions as requested by php.ini */
 	php_disable_functions(TSRMLS_C);

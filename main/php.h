@@ -319,7 +319,7 @@ END_EXTERN_C()
 
 /* functions */
 BEGIN_EXTERN_C()
-int php_startup_internal_extensions(void);
+int php_register_internal_extensions(TSRMLS_D);
 
 int php_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC);
 

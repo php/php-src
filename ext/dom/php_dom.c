@@ -404,8 +404,18 @@ static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
 	}
 }
 
+static zend_module_dep dom_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_CONFLICTS("domxml")
+#ifdef HAVE_SIMPLEXML
+	ZEND_MOD_REQUIRED("simplexml")
+#endif
+	{NULL, NULL, NULL}
+};
+
 zend_module_entry dom_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	dom_deps,
 	"dom",
 	dom_functions,
 	PHP_MINIT(dom),
