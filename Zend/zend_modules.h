@@ -38,15 +38,18 @@ extern struct _zend_arg_info third_arg_force_ref[4];
 extern struct _zend_arg_info fourth_arg_force_ref[5];
 extern struct _zend_arg_info all_args_by_ref[1];
 
-#define ZEND_MODULE_API_NO 20050615
+#define ZEND_MODULE_API_NO 20050617
 #ifdef ZTS
 #define USING_ZTS 1
 #else
 #define USING_ZTS 0
 #endif
 
-#define STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, NULL
-#define ZE2_STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, ini_entries
+#define STANDARD_MODULE_HEADER_EX sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS
+#define STANDARD_MODULE_HEADER \
+	STANDARD_MODULE_HEADER_EX, NULL, NULL
+#define ZE2_STANDARD_MODULE_HEADER \
+	STANDARD_MODULE_HEADER_EX, ini_entries, NULL
 
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
 
@@ -60,13 +63,15 @@ extern struct _zend_arg_info all_args_by_ref[1];
 
 struct _zend_ini_entry;
 typedef struct _zend_module_entry zend_module_entry;
+typedef struct _zend_module_dep zend_module_dep;
 
 struct _zend_module_entry {
-    unsigned short size;
+	unsigned short size;
 	unsigned int zend_api;
 	unsigned char zend_debug;
 	unsigned char zts;
 	struct _zend_ini_entry *ini_entry;
+	struct _zend_module_dep *deps;
 	char *name;
 	struct _zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
@@ -83,6 +88,24 @@ struct _zend_module_entry {
 	int module_number;
 };
 
+#define MODULE_DEP_REQUIRED		1
+#define MODULE_DEP_CONFLICTS	2
+#define MODULE_DEP_OPTIONAL		3
+
+#define ZEND_MOD_REQUIRED_EX(name, rel, ver)	{ name, rel, ver, MODULE_DEP_REQUIRED  },
+#define ZEND_MOD_CONFLICTS_EX(name, rel, ver)	{ name, rel, ver, MODULE_DEP_CONFLICTS },
+#define ZEND_MOD_OPTIONAL_EX(name, rel, ver)	{ name, rel, ver, MODULE_DEP_OPTIONAL  },
+
+#define ZEND_MOD_REQUIRED(name)		ZEND_MOD_REQUIRED_EX(name, NULL, NULL)
+#define ZEND_MOD_CONFLICTS(name)	ZEND_MOD_CONFLICTS_EX(name, NULL, NULL)
+#define ZEND_MOD_OPTIONAL(name)		ZEND_MOD_OPTIONAL_EX(name, NULL, NULL)
+
+struct _zend_module_dep {
+	char *name;			/* module name */
+	char *rel;			/* version relationship: NULL (exists), lt|le|eq|ge|gt (to given version) */
+	char *version;		/* version */
+	unsigned char type;	/* dependency type */
+};
 
 extern ZEND_API HashTable module_registry;
 
