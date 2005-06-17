@@ -1145,7 +1145,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 			arTmp[j]->pListLast = arTmp[j-1];
 			arTmp[j]->pListNext = arTmp[j+1];
 		}
-		arTmp[j]->pListLast = ht->pListTail;
+		arTmp[j]->pListLast = arTmp[j-1];
 		arTmp[j]->pListNext = NULL;
 	} else {
 		arTmp[0]->pListNext = NULL;
