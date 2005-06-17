@@ -11,7 +11,7 @@ timelib_sources="lib/dow.c lib/parse_date.c lib/parse_tz.c
 PHP_NEW_EXTENSION(date, php_date.c $timelib_sources, no,, $PHP_DATE_CFLAGS)
 PHP_ADD_BUILD_DIR([$ext_builddir/lib], 1)
 
-cat >> $ext_builddir/lib/tl_config.h <<EOF
+cat >> $ext_builddir/lib/timelib_config.h <<EOF
 #if PHP_WIN32
 # include "config.w32.h"
 #elif defined(NETWARE)
