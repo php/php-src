@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   shutdown). (Wez)
 - Fixed PECL bug #3714 (beginTransaction doesn't work if you're in
   auto-commit mode). (Wez)
+- Fixed bug #33382 (array_reverse() fails after *sort()), 
+  introduced by zend_hash_sort() optimizations in HEAD. (Tony)
 - Fixed bug #33340 (CLI Crash when calling php:function from XSLT). (Rob)
 - Fixed bug #33318 (throw 1; results in Invalid opcode 108/1/8). (Dmitry)
 - Fixed bug #33312 (ReflectionParameter methods do not work correctly).
