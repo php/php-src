@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <dr@ez.no>                                   |
+   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
    +----------------------------------------------------------------------+
  */
 
@@ -119,7 +119,7 @@ PHP_FUNCTION(strtotime)
 		snprintf(initial_ts, 24, "@%lu", preset_ts);
 		t = timelib_strtotime(initial_ts);
 		timelib_update_ts(t, tzi);
-		timelib_unixtime2gmt(now, t->sse);
+		timelib_unixtime2local(now, t->sse, tzi);
 		timelib_time_dtor(t);
 		efree(initial_ts);
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s", &times, &time_len) != FAILURE) {
