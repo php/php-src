@@ -1,3 +1,142 @@
+2005-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Internal functions/methods can now return by reference
+
+2005-06-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gdxpm.c:
+      Fixed memory corruption.
+
+2005-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * Makefile.global:
+      - No more memory_limit for running tests
+
+2005-06-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/time/002-win32.phpt
+      ext/standard/tests/time/002.phpt
+      ext/standard/tests/time/bug13142.phpt
+      ext/standard/tests/time/bug17988.phpt
+      ext/standard/tests/time/bug20382.phpt
+      ext/standard/tests/time/bug26198.phpt
+      ext/standard/tests/time/bug26317.phpt
+      ext/standard/tests/time/bug26320.phpt
+      ext/standard/tests/time/bug27780.phpt
+      ext/standard/tests/time/bug28599.phpt:
+      - Move strtotime() related testcases to ext/date/tests.
+
+2005-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      - Fix TSRM build
+
+2005-06-16  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      silence notices
+
+    * NEWS:
+      typofix
+
+2005-06-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/dl.c:
+      Don't emit the E_STRICT dl-is-deprecated notice on SAPI's where dl() is
+      widely (and safely) used.
+      This allows our test-suite to run in E_STRICT mode.
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/bench.php:
+      typo
+
+2005-06-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/array.c:
+      Fix compile on win32 at least.
+
+    * sapi/cgi/cgi_main.c:
+      Don't crash here if there are errors (such as failing to load extensions
+      via
+      php.ini) during startup.
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Allowed return by refrence from internal functions
+
+2005-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      rename to zend_
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug33318.phpt:
+      Fixed bug #33318 (throw 1; results in Invalid opcode 108/1/8)
+
+2005-06-16  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_language_scanner.l:
+      Fixlet
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Compilation warnings
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      ZEND_UNSET_DIM_OBJ is splitted to ZEND_UNSET_DIM and ZEND_UNSET_OBJ.
+
+2005-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      export zval getters
+
+2005-06-16  Derick Rethans  <php@derickrethans.nl>
+
+    * EXTENSIONS
+      ext/standard/credits_ext.h:
+      - Update maintainers and credits.
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      USER_OPCODE API is improvet.
+      Implemented ability to dispatch from user handler to internal handler of
+      another opcode.
+
 2005-06-15  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/array.c:
