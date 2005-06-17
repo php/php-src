@@ -746,7 +746,8 @@ static union _zend_function *zend_std_get_method(zval *object, char *method_name
 			zend_function *priv_fbc;
 
 			if (zend_hash_find(&EG(scope)->function_table, lc_method_name, method_len+1, (void **) &priv_fbc)==SUCCESS
-				&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE) {
+				&& priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
+				&& priv_fbc->common.scope == EG(scope)) {
 				fbc = priv_fbc;
 			}
 		}
