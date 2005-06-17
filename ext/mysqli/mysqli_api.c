@@ -1032,7 +1032,13 @@ PHP_FUNCTION(mysqli_init)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
+
+	if (!getThis()) {
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
+	} else {
+		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
+		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
+	}
 }
 /* }}} */
 
