@@ -202,11 +202,8 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 			break;
 
 		case TIMELIB_ZONETYPE_ID:
-			tz->is_localtime = 1;
-			timelib_set_timezone(tz, tz->tz_info);
-			return -tz->z;
-
-			break;
+			tzi = tz->tz_info;
+			/* Break intentionally missing */
 
 		default:
 			/* No timezone in struct, fallback to reference if possible */
