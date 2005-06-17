@@ -114,16 +114,20 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	void *resource;
 	va_list resource_types;
 	int i;
+	char *space;
+	char *class_name;
 
 	if (default_id==-1) { /* use id */
 		if (!passed_id) {
 			if (resource_type_name) {
-				zend_error(E_WARNING, "%s(): no %s resource supplied", get_active_function_name(TSRMLS_C), resource_type_name);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		} else if ((*passed_id)->type != IS_RESOURCE) {
 			if (resource_type_name) {
-				zend_error(E_WARNING, "%s(): supplied argument is not a valid %s resource", get_active_function_name(TSRMLS_C), resource_type_name);
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		}
@@ -135,7 +139,8 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	resource = zend_list_find(id, &actual_resource_type);
 	if (!resource) {
 		if (resource_type_name) {
-			zend_error(E_WARNING, "%s(): %d is not a valid %s resource", get_active_function_name(TSRMLS_C), id, resource_type_name);
+			class_name = get_active_class_name(&space TSRMLS_CC);
+			zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
 		}
 		return NULL;
 	}
@@ -153,7 +158,8 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	va_end(resource_types);
 
 	if (resource_type_name) {
-		zend_error(E_WARNING, "%s(): supplied resource is not a valid %s resource", get_active_function_name(TSRMLS_C), resource_type_name);
+		class_name = get_active_class_name(&space TSRMLS_CC);
+		zend_error(E_WARNING, "%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 	}
 
 	return NULL;
