@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2005, PHP 5.1 Beta 2
+- Improved PHP extension loading mechanism with support for module dependencies
+  and conflicts. (Jani, Dmitry) 
 - Allowed return by reference from internal functions. (Marcus, Andi, Dmitry)
 - Rewrote strtotime() with support for timezones and tons of new formats.
   (Derick)

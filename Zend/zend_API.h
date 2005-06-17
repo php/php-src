@@ -173,7 +173,10 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
 ZEND_API void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
+ZEND_API int zend_register_internal_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
+ZEND_API int zend_startup_module(zend_module_entry *module TSRMLS_DC);
+ZEND_API int zend_startup_modules(TSRMLS_D);
 ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_function *fptr, int error_type TSRMLS_DC);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
@@ -227,8 +230,6 @@ ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
 #ifndef ZEND_WIN32
 #define DLEXPORT
 #endif
-
-ZEND_API int zend_startup_module(zend_module_entry *module);
 
 #define array_init(arg)			_array_init((arg) ZEND_FILE_LINE_CC)
 #define object_init(arg)		_object_init((arg) ZEND_FILE_LINE_CC TSRMLS_CC)

@@ -1212,6 +1212,94 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	return SUCCESS;
 }
 
+ZEND_API int zend_startup_module(zend_module_entry *module TSRMLS_DC)
+{
+	int name_len;
+	char *lcname;
+
+	if (module->module_started) {
+		return SUCCESS;
+	}
+	module->module_started = 1;
+
+	/* Check module dependencies */
+	if (module->deps) {
+		zend_module_dep *dep = module->deps;
+
+		while (dep->name) {
+			if (dep->type == MODULE_DEP_REQUIRED) {
+				zend_module_entry *req_mod;
+
+				name_len = strlen(dep->name);
+				lcname = zend_str_tolower_dup(dep->name, name_len);
+
+				if (zend_hash_find(&module_registry, lcname, name_len+1, (void**)&req_mod) == FAILURE ||
+				    !req_mod->module_started) {
+					efree(lcname);
+					/* TODO: Check version relationship */
+					zend_error(E_CORE_WARNING, "Cannot load module '%s' because required module '%s' is not loaded", module->name, req_mod->name);
+					module->module_started = 0;
+					return FAILURE;
+				}			
+				efree(lcname);
+			}
+			++dep;
+		}
+	}
+
+	if (module->module_startup_func) {
+		EG(current_module) = module;
+		if (module->module_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
+			zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
+			EG(current_module) = NULL;
+			return FAILURE;
+		}
+		EG(current_module) = NULL;
+	}
+	return SUCCESS;
+}
+
+static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare TSRMLS_DC)
+{
+	Bucket **b1 = base;
+	Bucket **b2;
+	Bucket **end = b1 + count;
+	Bucket *tmp;				  		
+	zend_module_entry *m, *r;
+
+	while (b1 < end) {
+try_again:
+		m = (zend_module_entry*)(*b1)->pData;
+		if (!m->module_started && m->deps) {
+			zend_module_dep *dep = m->deps;
+			while (dep->name) {
+				if (dep->type == MODULE_DEP_REQUIRED || dep->type == MODULE_DEP_OPTIONAL) {
+					b2 = b1 + 1;
+					while (b2 < end) {
+				  	r = (zend_module_entry*)(*b2)->pData;
+				  	if (strcasecmp(dep->name, r->name) == 0) {
+				  		tmp  = *b1;
+				  		*b1 = *b2;
+				  		*b2 = tmp;				  		
+				  	  goto try_again;
+				  	}
+				  	b2++;
+				  }
+			  }
+			  dep++;
+			}			
+		}
+		b1++;
+	}
+}
+
+ZEND_API int zend_startup_modules(TSRMLS_D)
+{
+	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0 TSRMLS_CC);
+	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module TSRMLS_CC);
+	return SUCCESS;
+}
+
 ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 {
 	int name_len;
@@ -1225,6 +1313,28 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 #if 0
 	zend_printf("%s:  Registering module %d\n", module->name, module->module_number);
 #endif
+
+	/* Check module dependencies */
+	if (module->deps) {
+		zend_module_dep *dep = module->deps;
+
+		while (dep->name) {
+			if (dep->type == MODULE_DEP_CONFLICTS) {
+				name_len = strlen(dep->name);
+				lcname = zend_str_tolower_dup(dep->name, name_len);
+
+				if (zend_hash_exists(&module_registry, lcname, name_len+1)) {
+					efree(lcname);
+					/* TODO: Check version relationship */
+					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module->name, dep->name);
+					return FAILURE;
+				}			
+				efree(lcname);
+			}
+			++dep;
+		}
+	}
+
 	name_len = strlen(module->name);
 	lcname = zend_str_tolower_dup(module->name, name_len);
 
@@ -1241,25 +1351,11 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 		return FAILURE;
 	}
 
-	if (!module->module_started && module->module_startup_func) {
-		EG(current_module) = module;
-		if (module->module_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
-			zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
-			EG(current_module) = NULL;
-			return FAILURE;
-		}
-		EG(current_module) = NULL;
-	}
-
-	module->module_started=1;
-
 	return SUCCESS;
 }
 
-ZEND_API int zend_startup_module(zend_module_entry *module)
+ZEND_API int zend_register_internal_module(zend_module_entry *module TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	module->module_number = zend_next_free_module();
 	module->type = MODULE_PERSISTENT;
 	return zend_register_module_ex(module TSRMLS_CC);
@@ -1510,7 +1606,11 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 {
 	TSRMLS_FETCH();
 	
-	return zend_register_module_ex(module TSRMLS_CC);
+	if (zend_register_module_ex(module TSRMLS_CC) == SUCCESS &&
+	    zend_startup_module(module TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
+	}
+	return FAILURE;
 }
 
 
