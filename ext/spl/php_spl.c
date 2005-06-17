@@ -581,10 +581,23 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+#ifdef HAVE_SIMPLEXML
+static zend_module_dep spl_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("simplexml")
+	{NULL, NULL, NULL}
+};
+#endif
+
 /* {{{ spl_module_entry
  */
 zend_module_entry spl_module_entry = {
+#ifdef HAVE_SIMPLEXML
+	STANDARD_MODULE_HEADER_EX, NULL,
+	spl_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"SPL",
 	spl_functions,
 	PHP_MINIT(spl),
