@@ -1,7 +1,7 @@
 --TEST--
 Bug #30961 (Wrong linenumber in ReflectionClass getStartLine())
 --FILE--
-<?
+<?php
     class a
     {
     }

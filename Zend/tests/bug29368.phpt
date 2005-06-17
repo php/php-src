@@ -1,7 +1,7 @@
 --TEST--
 Bug #29368 (The destructor is called when an exception is thrown from the constructor)
 --FILE--
-<?
+<?php
 
 class Foo
 {

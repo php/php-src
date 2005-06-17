@@ -1,7 +1,7 @@
 --TEST--
 Bug # 32226 (SEGV with exception handler on non existing instance)
 --FILE--
-<?
+<?php
 
 class A
 {

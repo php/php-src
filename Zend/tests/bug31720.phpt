@@ -1,7 +1,7 @@
 --TEST--
 Bug #31720 (Invalid object callbacks not caught in array_walk())
 --FILE--
-<?
+<?php
 $array = array('at least one element');
 
 array_walk($array, array($nonesuchvar,'show'));
