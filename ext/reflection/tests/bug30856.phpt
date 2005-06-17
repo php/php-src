@@ -1,7 +1,7 @@
 --TEST--
 Bug #30856 (ReflectionClass::getStaticProperties segfaults)
 --FILE--
-<?
+<?php
 class bogus {
         const C = 'test';
         static $a = bogus::C;

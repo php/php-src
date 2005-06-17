@@ -1,7 +1,7 @@
 --TEST--
 Bug #33277 (private method accessed by child class)
 --FILE--
-<?
+<?php
 class foo {
         private function bar() {
                 echo "private!\n";
