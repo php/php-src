@@ -197,7 +197,10 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 
 ZEND_API void zend_wrong_param_count(TSRMLS_D)
 {
-	zend_error(E_WARNING, "Wrong parameter count for %s()", get_active_function_name(TSRMLS_C));
+	char *space;
+	char *class_name = get_active_class_name(&space TSRMLS_CC);
+	
+	zend_error(E_WARNING, "Wrong parameter count for %s%s%s()", class_name, space, get_active_function_name(TSRMLS_C));
 }
 
 
@@ -488,8 +491,11 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 	expected_type = zend_parse_arg_impl(arg, va, spec TSRMLS_CC);
 	if (expected_type) {
 		if (!quiet) {
-			zend_error(E_WARNING, "%s() expects parameter %d to be %s, %s given",
-					get_active_function_name(TSRMLS_C), arg_num, expected_type,
+			char *space;
+			char *class_name = get_active_class_name(&space TSRMLS_CC);
+
+			zend_error(E_WARNING, "%s%s%s() expects parameter %d to be %s, %s given",
+					class_name, space, get_active_function_name(TSRMLS_C), arg_num, expected_type,
 					zend_zval_type_name(*arg));
 		}
 		return FAILURE;
