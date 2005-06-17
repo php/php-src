@@ -139,8 +139,20 @@ function_entry xml_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+#ifdef LIBXML_EXPAT_COMPAT
+static zend_module_dep xml_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	{NULL, NULL, NULL}
+};
+#endif
+
 zend_module_entry xml_module_entry = {
+#ifdef LIBXML_EXPAT_COMPAT
+    STANDARD_MODULE_HEADER_EX, NULL,
+	xml_deps,
+#else
     STANDARD_MODULE_HEADER,
+#endif
 	"xml",                /* extension name */
 	xml_functions,        /* extension function list */
 	PHP_MINIT(xml),       /* extension-wide startup function */
