@@ -54,7 +54,7 @@ object(y)(2) {
   ["A"]=>
   array(2) {
     [1]=>
-    &object(x)(1) {
+    object(x)(1) {
       ["i"]=>
       int(1)
     }
@@ -65,7 +65,7 @@ object(y)(2) {
     }
   }
   ["B"]=>
-  &object(x)(1) {
+  object(x)(1) {
     ["i"]=>
     int(1)
   }

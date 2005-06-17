@@ -1017,7 +1017,7 @@ yy86:
 	}
 	*rval = *rval_ref;
 	(*rval)->refcount++;
-	(*rval)->is_ref = 1;
+	(*rval)->is_ref = 0;
 	
 	return 1;
 }
