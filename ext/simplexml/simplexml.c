@@ -1652,8 +1652,14 @@ function_entry simplexml_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_module_dep simplexml_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	{NULL, NULL, NULL}
+};
+
 zend_module_entry simplexml_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	simplexml_deps,
 	"SimpleXML",
 	simplexml_functions,
 	PHP_MINIT(simplexml),
