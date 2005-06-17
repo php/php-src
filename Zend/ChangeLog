@@ -1,3 +1,81 @@
+2005-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Internal functions/methods can now return by reference
+
+    * zend_execute.c:
+      - Fix TSRM build
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * bench.php:
+      typo
+
+    * zend.h
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_extensions.h
+      zend_modules.h
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Allowed return by refrence from internal functions
+
+2005-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c
+      zend_execute.h:
+      rename to zend_
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug33318.phpt:
+      Fixed bug #33318 (throw 1; results in Invalid opcode 108/1/8)
+
+2005-06-16  Zeev Suraski  <zeev@zend.com>
+
+    * zend_language_scanner.l:
+      Fixlet
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Compilation warnings
+
+    * zend_compile.c
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      ZEND_UNSET_DIM_OBJ is splitted to ZEND_UNSET_DIM and ZEND_UNSET_OBJ.
+
+2005-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c
+      zend_execute.h:
+      export zval getters
+
+2005-06-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      USER_OPCODE API is improvet.
+      Implemented ability to dispatch from user handler to internal handler of
+      another opcode.
+
 2005-06-15  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c
