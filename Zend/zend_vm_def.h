@@ -2386,7 +2386,6 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 	constructor = Z_OBJ_HT_P(object_zval)->get_constructor(object_zval TSRMLS_CC);
 
 	if (constructor == NULL) {
-		EX(fbc_constructor) = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 			EX_T(opline->result.u.var).var.ptr = object_zval;
@@ -2396,8 +2395,6 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		ZEND_VM_SET_OPCODE(EX(op_array)->opcodes + opline->op2.u.opline_num);
 		ZEND_VM_CONTINUE_JMP();
 	} else {
-		EX(fbc_constructor) = constructor;
-
 		SELECTIVE_PZVAL_LOCK(object_zval, &opline->result);
 		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 		EX_T(opline->result.u.var).var.ptr = object_zval;
@@ -2406,11 +2403,10 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 
 		/* We are not handling overloaded classes right now */
 		EX(object) = object_zval;
+		EX(fbc) = constructor;
 
-		EX(fbc) = EX(fbc_constructor);
-
-		if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
-			EX(calling_scope) = EX(fbc)->common.scope;
+		if (constructor->type == ZEND_USER_FUNCTION) { /* HACK!! */
+			EX(calling_scope) = constructor->common.scope;
 		} else {
 			EX(calling_scope) = NULL;
 		}
