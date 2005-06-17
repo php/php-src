@@ -276,10 +276,16 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int ty
 }
 #endif
 
+static zend_module_dep xmlreader_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	{NULL, NULL, NULL}
+};
+
 /* {{{ xmlreader_module_entry
  */
 zend_module_entry xmlreader_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	xmlreader_deps,
 	"xmlreader",
 	NULL,
 	PHP_MINIT(xmlreader),

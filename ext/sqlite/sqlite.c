@@ -275,7 +275,7 @@ static zend_module_dep sqlite_deps[] = {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 	ZEND_MOD_REQUIRED("session")
 #endif
-#if PHP_SQLITE2_HAVE_PDO
+#ifdef PHP_SQLITE2_HAVE_PDO
 	ZEND_MOD_REQUIRED("pdo")
 #endif
 	{NULL, NULL, NULL}
@@ -1096,7 +1096,7 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_LONG_CONSTANT("SQLITE_ROW",			SQLITE_ROW, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE_DONE",			SQLITE_DONE, CONST_CS|CONST_PERSISTENT);
 
-#if PHP_SQLITE2_HAVE_PDO
+#ifdef PHP_SQLITE2_HAVE_PDO
     if (FAILURE == php_pdo_register_driver(&pdo_sqlite2_driver)) {
         return FAILURE;
     }
@@ -1109,7 +1109,7 @@ PHP_MSHUTDOWN_FUNCTION(sqlite)
 {
 	UNREGISTER_INI_ENTRIES();
 
-#if PHP_SQLITE2_HAVE_PDO
+#ifdef PHP_SQLITE2_HAVE_PDO
     php_pdo_unregister_driver(&pdo_sqlite2_driver);
 #endif
 
