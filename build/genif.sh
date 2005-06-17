@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.4 2004-07-18 12:03:51 wez Exp $
+# $Id: genif.sh,v 1.5 2005-06-17 09:39:20 dmitry Exp $
 # replacement for genif.pl
 
 infile=$1
@@ -17,13 +17,13 @@ if test -z "$infile" || test -z "$srcdir"; then
 	exit 1
 fi
 
+module_ptrs=$extra_module_ptrs
 header_list=
 olddir=`pwd`
 cd $srcdir
 
-module_ptrs="$extra_module_ptrs`echo $@ | $awk -f ./build/order_by_dep.awk`"
-
 for ext in ${1+"$@"} ; do
+	module_ptrs="	phpext_${ext}_ptr,@NEWLINE@$module_ptrs"
 	header_list="$header_list ext/$ext/*.h"
 done
 

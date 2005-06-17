@@ -26,7 +26,7 @@
 BEGIN_EXTERN_C()
 int php_init_config();
 int php_shutdown_config(void);
-void php_ini_delayed_modules_startup(TSRMLS_D);
+void php_ini_register_extensions(TSRMLS_D);
 zval *cfg_get_entry(char *name, uint name_length);
 END_EXTERN_C()
 

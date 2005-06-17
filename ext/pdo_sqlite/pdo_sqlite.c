@@ -39,10 +39,19 @@ function_entry pdo_sqlite_functions[] = {
 };
 /* }}} */
 
+/* {{{ pdo_sqlite_deps
+ */
+static zend_module_dep pdo_sqlite_deps[] = {
+	ZEND_MOD_REQUIRED("pdo")
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 /* {{{ pdo_sqlite_module_entry
  */
 zend_module_entry pdo_sqlite_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_sqlite_deps,
 	"pdo_sqlite",
 	pdo_sqlite_functions,
 	PHP_MINIT(pdo_sqlite),

@@ -267,8 +267,25 @@ function_entry sqlite_funcs_exception[] = {
 	{NULL, NULL, NULL}
 };
 
+/* Dependancies */
+static zend_module_dep sqlite_deps[] = {
+#if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
+	ZEND_MOD_REQUIRED("spl")
+#endif
+#if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
+	ZEND_MOD_REQUIRED("session")
+#endif
+#if PHP_SQLITE2_HAVE_PDO
+	ZEND_MOD_REQUIRED("pdo")
+#endif
+	{NULL, NULL, NULL}
+};
+
 zend_module_entry sqlite_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
+#if ZEND_MODULE_API_NO >= 20050608
+	STANDARD_MODULE_HEADER_EX, NULL,
+	sqlite_deps,
+#elif ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
 	"SQLite",
