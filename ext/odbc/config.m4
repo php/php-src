@@ -400,7 +400,7 @@ AC_ARG_WITH(custom-odbc,
                           run configure script:
                               CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
                               LDFLAGS=-lunix
-                              CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\".],
+                              CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"],
 [
   if test "$withval" = "yes"; then
     withval=/usr/local
