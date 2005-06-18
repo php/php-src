@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jun 2005, PHP 5.1 Beta 2
-- Fixed FCI cache for array_walk and user array compare functions. Bug #33286.
-  (Patch from m.bretz@metropolis-ag.de)
 - Improved PHP extension loading mechanism with support for module dependencies
   and conflicts. (Jani, Dmitry) 
 - Allowed return by reference from internal functions. (Marcus, Andi, Dmitry)
@@ -20,6 +18,8 @@ PHP                                                                        NEWS
 - Fixed bug #33318 (throw 1; results in Invalid opcode 108/1/8). (Dmitry)
 - Fixed bug #33312 (ReflectionParameter methods do not work correctly).
   (Dmitry)
+- Fixed bug #33286 (nested array_walk() calls and user array compare functions
+  broken; FCI cache). (Andrei, patch from m.bretz@metropolis-ag.de)
 - Fixed bug #33277 (private method accessed by child class). (Dmitry)
 - Fixed bug #33212 ([GCC 4]: 'zend_error_noreturn' aliased to external symbol
   'zend_error'). (Dmitry)
