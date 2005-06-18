@@ -1,4 +1,3 @@
-- Fix one bug that prevent current testcases from working.
 - Implement INI setting default timezone, for now the env var "TZ" can be
   used.
 - Port over my 200 test cases to .phpt format.
