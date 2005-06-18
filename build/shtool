@@ -1,12 +1,12 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-2004 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2005 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version:  2.0.1 (11-Aug-2004)
+##  Version:  2.0.2 (15-Jun-2005)
 ##  Contents: 4/19 available modules
 ##
 
@@ -67,8 +67,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 2.0.1 (11-Aug-2004)"
-    echo "Copyright (c) 1994-2004 Ralf S. Engelschall <rse@engelschall.com>"
+    echo "This is GNU shtool, version 2.0.2 (15-Jun-2005)"
+    echo "Copyright (c) 1994-2005 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
     echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]"
@@ -136,7 +136,7 @@ if [ ".$1" = ".-h" ] || [ ".$1" = ".--help" ]; then
     exit 0
 fi
 if [ ".$1" = ".-v" ] || [ ".$1" = ".--version" ]; then
-    echo "GNU shtool 2.0.1 (11-Aug-2004)"
+    echo "GNU shtool 2.0.2 (15-Jun-2005)"
     exit 0
 fi
 if [ ".$1" = ".-r" ] || [ ".$1" = ".--recreate" ]; then
@@ -379,6 +379,7 @@ esac
 
 #   establish a temporary file on request
 if [ ".$gen_tmpfile" = .yes ]; then
+    #   create (explicitly) secure temporary directory
     if [ ".$TMPDIR" != . ]; then
         tmpdir="$TMPDIR"
     elif [ ".$TEMPDIR" != . ]; then
@@ -386,10 +387,19 @@ if [ ".$gen_tmpfile" = .yes ]; then
     else
         tmpdir="/tmp"
     fi
-    tmpfile="$tmpdir/.shtool.$$"
-    rm -f $tmpfile >/dev/null 2>&1
-    touch $tmpfile
-    chmod 600 $tmpfile
+    tmpdir="$tmpdir/.shtool.$$"
+    ( umask 077
+      rm -rf "$tmpdir" >/dev/null 2>&1 || true
+      mkdir  "$tmpdir" >/dev/null 2>&1
+      if [ $? -ne 0 ]; then
+          echo "$msgprefix:Error: failed to create temporary directory \`$tmpdir'" 1>&2
+          exit 1
+      fi
+    )
+
+    #   create (implicitly) secure temporary file
+    tmpfile="$tmpdir/shtool.tmp"
+    touch "$tmpfile"
 fi
 
 #   utility function: map string to lower case
@@ -406,7 +416,7 @@ util_upper () {
 shtool_exit () {
     rc="$1"
     if [ ".$gen_tmpfile" = .yes ]; then
-        rm -f $tmpfile >/dev/null 2>&1 || true
+        rm -rf "$tmpdir" >/dev/null 2>&1 || true
     fi
     exit $rc
 }
@@ -420,7 +430,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-2004 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2005 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     text="$*"
@@ -718,7 +728,7 @@ echo )
 install )
     ##
     ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-2004 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1997-2005 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     #   special case: "shtool install -d <dir> [...]" internally
@@ -881,7 +891,7 @@ install )
 mkdir )
     ##
     ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-2004 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1996-2005 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     errstatus=0
@@ -969,7 +979,7 @@ mkdir )
 path )
     ##
     ##  path -- Deal with program paths
-    ##  Copyright (c) 1998-2004 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2005 Ralf S. Engelschall <rse@engelschall.com>
     ##
 
     namelist="$*"
