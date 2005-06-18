@@ -66,7 +66,8 @@ AC_DEFUN([AC_DBA_STD_RESULT],[
 ])
 
 PHP_ARG_ENABLE(dba,whether to enable DBA,
-[  --enable-dba            Build DBA with builtin modules])
+[  --enable-dba            Build DBA with builtin modules. To build shared DBA
+                          extension use --enable-dba=shared])
 
 AC_ARG_WITH(qdbm,
 [  --with-qdbm[=DIR]         DBA: Include QDBM support],[
