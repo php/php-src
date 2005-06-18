@@ -228,6 +228,9 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts)
 		return NULL;
 	}
 
+	if (ts < tz->trans[0]) {
+		return &(tz->type[tz->trans_idx[tz->timecnt - 1]]);
+	}
 	for (i = 0; i < tz->timecnt; i++) {
 		if (ts < tz->trans[i]) {
 			return &(tz->type[tz->trans_idx[i - 1]]);
