@@ -1,3 +1,54 @@
+2005-06-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug29368.phpt
+      tests/bug30856.phpt
+      tests/bug30961.phpt
+      tests/bug31720.phpt
+      tests/bug32226.phpt
+      tests/bug33277.phpt:
+      No short-tags!
+
+2005-06-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Removed EX(fbc_constructor) (it is no longer needed)
+
+2005-06-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      zend_API.c
+      zend_list.c:
+      MFH: improve error messages in internal classes
+
+    * zend_API.c
+      zend_list.c:
+      improve error messages when error raised from an internal class (do not
+      hide class name)
+
+2005-06-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_object_handlers.c
+      zend_object_handlers.c:
+      Fixed bug #33277 (private method accessed by child class)
+
+2005-06-17  Antony Dovgal  <antony@zend.com>
+
+    * zend_hash.c:
+      fix bug #33382 (array_reverse() fails after *sort())
+      no need to MFH - the bug existed only in HEAD
+
+2005-06-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_extensions.h
+      zend_modules.h:
+      Improved PHP extension loading mechanism with support for module
+      dependencies and conflicts.
+
 2005-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:

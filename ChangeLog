@@ -1,3 +1,123 @@
+2005-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/streamsfuncs.c:
+      Added offset parameter to the stream_copy_to_stream() function.
+
+2005-06-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/tests/bug29368.phpt
+      ZendEngine2/tests/bug30856.phpt
+      ZendEngine2/tests/bug30961.phpt
+      ZendEngine2/tests/bug31720.phpt
+      ZendEngine2/tests/bug32226.phpt
+      ZendEngine2/tests/bug33277.phpt:
+      No short-tags!
+
+2005-06-17  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/bug33263.phpt
+      ext/mysqli/tests/bug33263.phpt:
+      
+      fix for bug #33263 (mysqli_real_escape doesn't work in __construct)
+
+    * ext/mysqli/mysqli_api.c:
+      fix for bug #33263 (mysqli_real_escape doesn't work in __construct)
+
+2005-06-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * NEWS:
+      -** empty log message ***
+
+2005-06-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/gmp/tests/bug32773.phpt:
+      fix test - short_tags not allowed here!
+
+2005-06-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Removed EX(fbc_constructor) (it is no longer needed)
+
+    * (PHP_4_4)
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/tests/serialize/bug31402.phpt:
+      Fixed bug #31402 (unserialize creates a field containing a reference when
+      it should not)
+
+2005-06-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sqlite/pdo_sqlite2.c:
+      nuke unused variable
+
+    * ext/xml/xml.c:
+      Use new dependency system
+
+    * ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/xsl/php_xsl.c:
+      Use the new dependency system
+
+2005-06-17  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_list.c:
+      MFH: improve error messages in internal classes
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_list.c:
+      improve error messages when error raised from an internal class (do not
+      hide class name)
+
+    * NEWS
+      ext/standard/tests/array/bug33382.phpt:
+      add news entry and test for bug #33382
+
+2005-06-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c:
+      Fixed bug #33277 (private method accessed by child class)
+
+2005-06-17  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_hash.c:
+      fix bug #33382 (array_reverse() fails after *sort())
+      no need to MFH - the bug existed only in HEAD
+
+2005-06-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * build/genif.sh
+      ext/dom/php_dom.c
+      ext/sqlite/sqlite.c
+      ext/standard/dl.c
+      ext/standard/dl.h
+      main/internal_functions.c.in
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c
+      main/main.c
+      main/php.h
+      main/php_ini.c
+      main/php_ini.h
+      main/php_main.h:
+      Improved PHP extension loading mechanism with support for module
+      dependencies and conflicts
+
+    * NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h:
+      Improved PHP extension loading mechanism with support for module
+      dependencies and conflicts.
+
 2005-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
