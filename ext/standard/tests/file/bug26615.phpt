@@ -1,5 +1,7 @@
 --TEST--
 Bug #26615 (exec crash on long input lines)
+--INI---
+variables_order=E
 --FILE--
 <?php
 $out = array();
