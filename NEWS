@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   (Derick)
 - Added bindto socket context option. (Ilia)
 - Added offset parameter to the stream_copy_to_stream() function. (Ilia)
+- Added offset & length parameters to substr_count() function. (Ilia)
 - Fixed PDO shutdown problem (possible inifite loop running rollback on
   shutdown). (Wez)
 - Fixed PECL bug #3714 (beginTransaction doesn't work if you're in

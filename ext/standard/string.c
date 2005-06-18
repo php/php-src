@@ -4420,15 +4420,16 @@ PHP_FUNCTION(strnatcasecmp)
 }
 /* }}} */
 
-/* {{{ proto int substr_count(string haystack, string needle)
+/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]])
    Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
 {
-	zval **haystack, **needle;	
+	zval **haystack, **needle, **offset, **length;
+	int ac = ZEND_NUM_ARGS();
 	int count = 0;
 	char *p, *endp, cmp;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
+	if (ac < 2 || ac > 4 || zend_get_parameters_ex(ac, &haystack, &needle, &offset, &length) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -4442,6 +4443,23 @@ PHP_FUNCTION(substr_count)
 	
 	p = Z_STRVAL_PP(haystack);
 	endp = p + Z_STRLEN_PP(haystack);
+	
+	if (ac > 2) {
+		convert_to_long_ex(offset);
+		p += Z_LVAL_PP(offset);
+		if (p > endp) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length.", Z_LVAL_PP(offset));
+			RETURN_FALSE;		
+		}
+		if (ac == 4) {
+			convert_to_long_ex(length);
+			if ((p + Z_LVAL_PP(length)) > endp) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value %ld exceeds string length.", Z_LVAL_PP(length));
+				RETURN_FALSE;
+			}
+			endp = p + Z_LVAL_PP(length);
+		}
+	}
 	
 	if (Z_STRLEN_PP(needle) == 1) {
 		cmp = Z_STRVAL_PP(needle)[0];
