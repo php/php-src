@@ -99,8 +99,8 @@ Asia/Singapore
 
 America/Sao_Paulo
 1076810399 [2004-02-14 23:59:59 BRST] [2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +59 seconds]
-1076810400 [2004-02-14 23:00:00 BRT] [2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +60 seconds]
-1076810401 [2004-02-14 23:00:01 BRT] [2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +61 seconds]
+1076814000 [2004-02-15 00:00:00 BRT] [2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +60 seconds]
+1076814001 [2004-02-15 00:00:01 BRT] [2004-04-07 00:00:00 -2 months +7 days +23 hours +59 minutes +61 seconds]
 1079492400 [2004-03-17 00:00:00 BRT] [2004-04-07 00:00:00 -21 days]
 1080356400 [2004-03-27 00:00:00 BRT] [2004-04-07 00:00:00 11 days ago]
 1080450000 [2004-03-28 02:00:00 BRT] [2004-04-07 00:00:00 -10 day +2 hours]
