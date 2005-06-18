@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - Fixed bug #33277 (private method accessed by child class). (Dmitry)
 - Fixed bug #33212 ([GCC 4]: 'zend_error_noreturn' aliased to external symbol
   'zend_error'). (Dmitry)
+- Fixed bug #33150 (shtool: insecure temporary file creation). (Jani)
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
 - Fixed bug #28355 (glob wont error if dir is not readable). (Hartmut)
