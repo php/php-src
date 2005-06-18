@@ -233,7 +233,7 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts)
 			return &(tz->type[tz->trans_idx[i - 1]]);
 		}
 	}
-	return NULL;
+	return &(tz->type[tz->trans_idx[tz->timecnt - 1]]);
 }
 
 static tlinfo* fetch_leaptime_offset(timelib_tzinfo *tz, timelib_sll ts)
