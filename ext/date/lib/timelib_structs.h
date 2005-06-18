@@ -119,6 +119,7 @@ typedef struct timelib_time_offset {
 	unsigned int leap_secs;
 	unsigned int is_dst;
 	char        *abbr;
+	timelib_sll  transistion_time;
 } timelib_time_offset;
 
 typedef struct timelib_time {

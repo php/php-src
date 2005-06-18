@@ -220,7 +220,7 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone)
 	return tmp;
 }
 
-static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts)
+static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)
 {
 	uint32_t i;
 
@@ -229,13 +229,16 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts)
 	}
 
 	if (ts < tz->trans[0]) {
+		*transition_time = 0;
 		return &(tz->type[tz->trans_idx[tz->timecnt - 1]]);
 	}
 	for (i = 0; i < tz->timecnt; i++) {
 		if (ts < tz->trans[i]) {
+			*transition_time = tz->trans[i - 1];
 			return &(tz->type[tz->trans_idx[i - 1]]);
 		}
 	}
+	*transition_time = tz->trans[tz->timecnt - 1];
 	return &(tz->type[tz->trans_idx[tz->timecnt - 1]]);
 }
 
@@ -258,7 +261,9 @@ static tlinfo* fetch_leaptime_offset(timelib_tzinfo *tz, timelib_sll ts)
 int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz)
 {
 	ttinfo *to;
-	if ((to = fetch_timezone_offset(tz, ts))) {
+	timelib_sll dummy;
+	
+	if ((to = fetch_timezone_offset(tz, ts, &dummy))) {
 		return to->isdst;
 	}
 	return -1;
@@ -271,14 +276,17 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 	int32_t offset = 0, leap_secs = 0;
 	char *abbr;
 	timelib_time_offset *tmp = timelib_time_offset_ctor();
+	timelib_sll                transistion_time;
 
-	if ((to = fetch_timezone_offset(tz, ts))) {
+	if ((to = fetch_timezone_offset(tz, ts, &transistion_time))) {
 		offset = to->offset;
 		abbr = &(tz->timezone_abbr[to->abbr_idx]);
 		tmp->is_dst = to->isdst;
+		tmp->transistion_time = transistion_time;
 	} else {
 		abbr = tz->timezone_abbr;
 		tmp->is_dst = 0;
+		tmp->transistion_time = 0;
 	}
 
 	if ((tl = fetch_leaptime_offset(tz, ts))) {
