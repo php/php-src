@@ -19,6 +19,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #33210 (relax jpeg recursive loop protection). (Ilia)
 - Fixed bug #33200 (preg_replace(): magic_quotes_sybase=On makes 'e' modifier
   misbehave). (Jani)
+- Fixed bug #33150 (shtool: insecure temporary file creation). (Jani)
 - Fixed bug #33072 (Add a safemode/open_basedir check for runtime save_path 
   change) (Rasmus)
 - Fixed bug #33070 (Improved performance of bzdecompress() by several orders
