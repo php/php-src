@@ -33,8 +33,10 @@ function_entry date_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+ZEND_DECLARE_MODULE_GLOBALS(date)
+
 PHP_INI_BEGIN()
-/*	STD_PHP_INI_ENTRY("date.timezone", TIMEZONE_DB_LOCATION, PHP_INI_ALL, OnUpdateString, timezonedb_location, zend_date_globals, date_globals) */
+	STD_PHP_INI_ENTRY("date.timezone", "GMT", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
 PHP_INI_END()
 
 
@@ -51,10 +53,17 @@ zend_module_entry date_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+/* {{{ php_date_init_globals */
+static void php_date_init_globals(zend_date_globals *date_globals)
+{
+	date_globals->default_timezone = NULL;
+}
+/* }}} */
 
 
 PHP_MINIT_FUNCTION(date)
 {
+	ZEND_INIT_MODULE_GLOBALS(date, php_date_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
@@ -83,6 +92,9 @@ static char* guess_timezone(void)
 	env = getenv("TZ");
 	if (env) {
 		return env;
+	}
+	if (DATEG(default_timezone)) {
+		return DATEG(default_timezone);
 	}
 	/* Check config setting */
 	/*
