@@ -209,14 +209,21 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 			/* No timezone in struct, fallback to reference if possible */
 			if (tzi) {
 				timelib_time_offset *before, *after;
-				timelib_sll tmp;
+				timelib_sll          tmp;
+				int                  in_transistion;
 				
 				tz->is_localtime = 1;
 				before = timelib_get_time_zone_info(tz->sse, tzi);
 				after = timelib_get_time_zone_info(tz->sse - before->offset, tzi);
 				timelib_set_timezone(tz, tzi);
-				if (before->is_dst != after->is_dst) {
-					tmp = -tz->z + (before->offset - after->offset);
+
+				in_transistion = (
+					((tz->sse - after->offset) >= (after->transistion_time + (before->offset - after->offset))) &&
+					((tz->sse - after->offset) < after->transistion_time)
+				);
+				
+				if ((before->offset != after->offset) && !in_transistion) {
+					tmp = -after->offset;
 				} else {
 					tmp = -tz->z;
 				}
