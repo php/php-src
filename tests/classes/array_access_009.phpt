@@ -29,7 +29,7 @@ class ArrayProxy implements ArrayAccess
 	}
 
 	function offsetExists($index) {
-		echo __METHOD__ . "($$this->element, $index)\n";
+		echo __METHOD__ . "($this->element, $index)\n";
 		return array_key_exists($index, $this->object->proxyGet($this->element));
 	}
 
@@ -40,12 +40,12 @@ class ArrayProxy implements ArrayAccess
 	}
 
 	function offsetSet($index, $value) {
-		echo __METHOD__ . "($$this->element, $index, $value)\n";
+		echo __METHOD__ . "($this->element, $index, $value)\n";
 		$this->object->proxySet($this->element, $index, $value);
 	}
 
 	function offsetUnset($index) {
-		echo __METHOD__ . "($$this->element, $index)\n";
+		echo __METHOD__ . "($this->element, $index)\n";
 		$this->object->proxyUnset($this->element, $index);
 	}
 }
@@ -148,23 +148,23 @@ ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(3) "Foo"
 ArrayProxy::__construct(0)
-ArrayProxy::offsetSet($0, name, FooBar)
+ArrayProxy::offsetSet(0, name, FooBar)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(6) "FooBar"
 ArrayProxy::__construct(0)
-ArrayProxy::offsetSet($0, name, FooBarBar)
+ArrayProxy::offsetSet(0, name, FooBarBar)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(9) "FooBarBar"
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
-ArrayProxy::offsetSet($0, name, FooBarBarBaz)
+ArrayProxy::offsetSet(0, name, FooBarBarBaz)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(12) "FooBarBarBaz"
 ArrayProxy::__construct(0)
-ArrayProxy::offsetUnset($0, name)
+ArrayProxy::offsetUnset(0, name)
 ArrayProxy::__construct(0)
 object(ArrayProxy)#1 (2) {
   ["object:private"]=>
@@ -183,7 +183,7 @@ ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 NULL
 ArrayProxy::__construct(0)
-ArrayProxy::offsetSet($0, name, BlaBla)
+ArrayProxy::offsetSet(0, name, BlaBla)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(6) "BlaBla"
