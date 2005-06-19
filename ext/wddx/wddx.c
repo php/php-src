@@ -34,7 +34,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/php_parsedate.h"
+#include "ext/date/php_date.h"
 
 #define WDDX_BUF_LEN			256
 #define PHP_CLASS_NAME_VAR		"php_class_name"

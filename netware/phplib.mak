@@ -105,7 +105,6 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/microtime.c \
         ext/standard/pack.c \
         ext/standard/pageinfo.c \
-        ext/standard/parsedate.c \
         ext/standard/php_fopen_wrapper.c \
         ext/standard/quot_print.c \
         ext/standard/rand.c \
@@ -368,9 +367,6 @@ cleand:
 .PHONY: cleansrc
 cleansrc:
 	@echo Deleting all generated source files...
-	-@del "ext\standard\parsedate.c"
-	-@del "ext\standard\parsedate.h"
-	-@del "ext\standard\parsedate.output"
 
 .PHONY: cleanobj
 cleanobj:

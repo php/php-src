@@ -40,4 +40,7 @@ ZEND_END_MODULE_GLOBALS(date)
 #define DATEG(v) (date_globals.v)
 #endif
 
+/* Backwards compability wrapper */
+signed long php_parse_date(char *string, signed long *now);
+
 #endif /* PHP_DATE_H */
