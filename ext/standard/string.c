@@ -4463,11 +4463,10 @@ PHP_FUNCTION(substr_count)
 	
 	if (Z_STRLEN_PP(needle) == 1) {
 		cmp = Z_STRVAL_PP(needle)[0];
-	
-		while (p < endp) {
-			if (*(p++) == cmp) {
-				count++;	
-			}
+
+		while ((p = memchr(p, cmp, endp - p))) {
+			count++;
+			p++;
 		}
 	} else {
 		while ((p = php_memnstr(p, Z_STRVAL_PP(needle), Z_STRLEN_PP(needle), endp))) {
