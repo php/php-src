@@ -2,9 +2,9 @@
 Bug #26198 (strtotime handling of "M Y" and "Y M" format)
 --FILE--
 <?php
-	echo date("F Y\n", strtotime("Oct 2001"));
-	echo date("M Y\n", strtotime("2001 Oct"));
+	echo gmdate("F Y (Y-m-d H:i:s T)\n", strtotime("Oct 2001"));
+	echo gmdate("M Y (Y-m-d H:i:s T)\n", strtotime("2001 Oct"));
 ?>
 --EXPECT--
-October 2001
-Oct 2001
+October 2001 (2001-10-01 00:00:00 GMT)
+Oct 2001 (2001-10-01 00:00:00 GMT)
