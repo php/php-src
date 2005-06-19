@@ -1,3 +1,54 @@
+2005-06-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      reorder + typofix :)
+
+2005-06-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      build/shtool:
+      - MFH: - Updated bundled shtool to version 2.0.2
+
+    * NEWS:
+      - Update NEWS with bugfix happyness.
+      - Update TODO file for ext/date. No known bugs currently.
+
+2005-06-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * build/shtool:
+      - Updated bundled shtool to version 2.0.2
+
+2005-06-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/substr_count.phpt:
+      Added offset & length parameters to substr_count() function.
+
+2005-06-18  Andi Gutmans  <andi@zend.com>
+
+    * php.ini-recommended:
+      - E_STRICT shouldn't be on by default on production servers.
+
+2005-06-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/dba/config.m4:
+      Add note how to build DBA as shared
+
+    * ext/odbc/config.m4:
+      no trailing dots
+
+    * ext/standard/tests/file/bug26615.phpt:
+      Make sure $_ENV is populated
+
+    * ext/standard/tests/array/bug29992.phpt:
+      - This is no bug.
+
 2005-06-17  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS
