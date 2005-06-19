@@ -500,10 +500,6 @@ SOURCE=..\ext\standard\pageinfo.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\parsedate.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\php_fopen_wrapper.c
 # End Source File
 # Begin Source File
@@ -1663,50 +1659,6 @@ SOURCE=..\ext\com\variant.h
 SOURCE=..\win32\wfile.h
 # End Source File
 # End Group
-# End Group
-# Begin Group "Parsers"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\standard\parsedate.y
-
-!IF  "$(CFG)" == "php5dll - Win32 Debug"
-
-# Begin Custom Build - Generating ext/standard/parsedate.c
-InputPath=..\ext\standard\parsedate.y
-
-"..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ..\ext\standard 
-	bison --output=parsedate.c -v -d parsedate.y 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php5dll - Win32 Release"
-
-# Begin Custom Build - Generating ext/standard/parsedate.c
-InputPath=..\ext\standard\parsedate.y
-
-"..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ..\ext\standard 
-	bison --output=parsedate.c -v -d parsedate.y 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php5dll - Win32 Release_inline"
-
-# Begin Custom Build - Generating ext/standard/parsedate.c
-InputPath=..\ext\standard\parsedate.y
-
-"..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ..\ext\standard 
-	bison --output=parsedate.c -v -d parsedate.y 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
 # End Group
 # Begin Group "Text Files"
 

@@ -1,5 +1,4 @@
 - Port over my 200 test cases to .phpt format.
 - Write an error handler for unexpected characters while parsing dates.
-- Remove old parsedate.* code from ext/standard 
 - Move all date/time related functions from ext/standard to ext/date
 - Move all date/time related tests from ext/standard/tests to ext/data/tests

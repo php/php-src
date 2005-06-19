@@ -35,8 +35,6 @@
 #endif
 #include <stdio.h>
 
-#include "php_parsedate.h"
-
 char *mon_full_names[] = {
 	"January", "February", "March", "April",
 	"May", "June", "July", "August",
