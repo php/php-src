@@ -28,7 +28,7 @@ PHP                                                                        NEWS
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
 - Fixed bug #28355 (glob wont error if dir is not readable). (Hartmut)
-- Fixed bugs #28024, #30532, #32086, #32270, #32555, #32588, #33056
+- Fixed bugs #20382, #28024, #30532, #32086, #32270, #32555, #32588, #33056
   (strtotime() related bugs). (Derick)
 
 10 Jun 2005, PHP 5.1 Beta 1
