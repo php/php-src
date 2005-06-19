@@ -83,6 +83,7 @@ TestDerived::testing();
 
 ?>
 ===DONE===
+<?php exit(0); ?>
 --EXPECT--
 string(3) "pub"
 string(3) "pub"
