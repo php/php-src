@@ -14,7 +14,7 @@ class Peoples implements ArrayAccess {
 		return array_key_exists($this->person, $index);
 	}
 
-	function & offsetGet($index) {
+	function offsetGet($index) {
 		return $this->person[$index];
 	}
 
@@ -40,6 +40,8 @@ echo "===ArrayOverloading===\n";
 $people = new Peoples;
 
 var_dump($people[0]['name']);
+$people[0]['name'] = 'FooBar';
+var_dump($people[0]['name']);
 $people[0]['name'] = $people->person[0]['name'] . 'Bar';
 var_dump($people[0]['name']);
 $people[0]['name'] .= 'Baz';
@@ -47,12 +49,11 @@ var_dump($people[0]['name']);
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 string(3) "Foo"
 string(6) "FooBar"
 string(9) "FooBarBaz"
 ===ArrayOverloading===
 string(3) "Foo"
-string(6) "FooBar"
-string(9) "FooBarBaz"
-===DONE===
+
+Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_008.php on line %d
