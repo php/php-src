@@ -85,7 +85,7 @@ PHP_MINFO_FUNCTION(date)
 	php_info_print_table_end();
 }
 
-static char* guess_timezone(void)
+static char* guess_timezone(TSRMLS_D)
 {
 	char *env;
 
@@ -114,7 +114,7 @@ PHP_FUNCTION(strtotime)
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
-	tzi = timelib_parse_tzfile(guess_timezone());
+	tzi = timelib_parse_tzfile(guess_timezone(TSRMLS_C));
 	if (! tzi) {
 		tzi = timelib_parse_tzfile("GMT");
 	}
