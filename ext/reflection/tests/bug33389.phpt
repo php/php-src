@@ -21,6 +21,8 @@ class Test {
 }
 Reflection::export(new ReflectionClass('Test'));
 ?>
+===DONE===
+<?php exit(0); ?>
 --EXPECTF--
 Class [ <user> class Test ] {
   @@ %sbug33389.php 3-18
@@ -58,7 +60,7 @@ Class [ <user> class Test ] {
       @@ %sbug33389.php 8 - 9
 
       - Parameters [1] {
-        Parameter #0 [ <optional> $arg = FALSE ]
+        Parameter #0 [ <optional> $arg = false ]
       }
     }
 
@@ -91,3 +93,4 @@ Class [ <user> class Test ] {
     }
   }
 }
+===DONE===
