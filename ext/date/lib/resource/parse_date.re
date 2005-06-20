@@ -829,6 +829,7 @@ pgydotd          = year4 "."? dayofyear;
 pgtextshort      = monthabbr "-" daylz "-" year;
 pgtextreverse    = year "-" monthabbr "-" daylz;
 isoweekday       = year4 "W" weekofyear [0-7];
+isoweek          = year4 "W" weekofyear;
 
 /* Common Log Format: 10/Oct/2000:13:55:36 -0700 */
 clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" secondlz space tzcorrection;
@@ -1170,6 +1171,25 @@ relativetext = (reltextnumber space reltextunit)+;
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		w = timelib_get_nr((char **) &ptr, 2);
 		d = timelib_get_nr((char **) &ptr, 1);
+		s->time->m = 1;
+		s->time->d = 1;
+		s->time->relative.d = timelib_daynr_from_weeknr(s->time->y, w, d);
+
+		TIMELIB_DEINIT;
+		return TIMELIB_ISO_WEEK;
+	}
+
+	isoweek
+	{
+		timelib_sll w, d;
+
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		TIMELIB_HAVE_RELATIVE();
+		
+		s->time->y = timelib_get_nr((char **) &ptr, 4);
+		w = timelib_get_nr((char **) &ptr, 2);
+		d = 1;
 		s->time->m = 1;
 		s->time->d = 1;
 		s->time->relative.d = timelib_daynr_from_weeknr(s->time->y, w, d);
