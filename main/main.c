@@ -1010,7 +1010,7 @@ static int php_start_sapi(TSRMLS_D)
 
 /* {{{ php_request_startup
  */
- #ifndef APACHE_HOOKS
+#ifndef APACHE_HOOKS
 int php_request_startup(TSRMLS_D)
 {
 	int retval = SUCCESS;
