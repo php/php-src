@@ -560,8 +560,10 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			zval *zv, zv_copy;
 			int use_copy;
 			string_write(str, " = ", sizeof(" = ")-1);
-			zv_copy = precv->op2.u.constant;
-			zv = &zv_copy;
+			ALLOC_ZVAL(zv);
+			*zv = precv->op2.u.constant;
+			zval_copy_ctor(zv);
+			INIT_PZVAL(zv);
 			zval_update_constant(&zv, (void*)1 TSRMLS_CC);
 			if (Z_TYPE_P(zv) == IS_BOOL) {
 				if (Z_LVAL_P(zv)) {
@@ -581,7 +583,6 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			} else {
 				zend_make_printable_zval(zv, &zv_copy, &use_copy);
 				string_write(str, Z_STRVAL(zv_copy), Z_STRLEN(zv_copy));
-				zval_dtor(&zv_copy);
 			}
 			zval_ptr_dtor(&zv);
 		}
@@ -1010,7 +1011,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 /* {{{ _reflection_export */
 static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
 {
-	zval reflector, *reflector_ptr = &reflector;
+	zval *reflector_ptr;
 	zval output, *output_ptr = &output;
 	zval *argument_ptr, *argument2_ptr;
 	zval *retval_ptr, **params[2];
@@ -1033,8 +1034,8 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	INIT_PZVAL(&output);
 
 	/* Create object */
-	INIT_PZVAL(&reflector);
-	if (object_and_properties_init(&reflector, ce_ptr, NULL) == FAILURE) {
+	MAKE_STD_ZVAL(reflector_ptr);
+	if (object_and_properties_init(reflector_ptr, ce_ptr, NULL) == FAILURE) {
 		_DO_THROW("Could not create reflector");
 	}
 
@@ -1063,14 +1064,12 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 		zval_ptr_dtor(&retval_ptr);
 	}
 
-	RETURN_ON_EXCEPTION
-
 	if (EG(exception)) {
-		zval_dtor(&reflector);
+		zval_ptr_dtor(&reflector_ptr);
 		return;
 	}
-	if (result == FAILURE || EG(exception)) {
-		zval_dtor(&reflector);
+	if (result == FAILURE) {
+		zval_ptr_dtor(&reflector_ptr);
 		_DO_THROW("Could not create reflector");
 	}
 
@@ -1091,7 +1090,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	result = zend_call_function(&fci, NULL TSRMLS_CC);
 
 	if (result == FAILURE && EG(exception) == NULL) {
-		zval_dtor(&reflector);
+		zval_ptr_dtor(&reflector_ptr);
 		zval_ptr_dtor(&retval_ptr);
 		_DO_THROW("Could not execute reflection::export()");
 	}
@@ -1103,7 +1102,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	}
 
 	/* Destruct reflector which is no longer needed */
-	zval_dtor(&reflector);
+	zval_ptr_dtor(&reflector_ptr);
 }
 /* }}} */
 
@@ -1119,7 +1118,7 @@ ZEND_METHOD(reflection, __clone)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection, export)
 {
-	zval *object, *fname, *retval_ptr;
+	zval *object, fname, *retval_ptr;
 	int result;
 	zend_bool return_output = 0;
 
@@ -1128,10 +1127,9 @@ ZEND_METHOD(reflection, export)
 	}
 
 	/* Invoke the __toString() method */
-	MAKE_STD_ZVAL(fname);
-	ZVAL_STRINGL(fname, "__tostring", sizeof("__tostring") - 1, 1);
-	result= call_user_function_ex(NULL, &object, fname, &retval_ptr, 0, NULL, 0, NULL TSRMLS_CC);
-	zval_ptr_dtor(&fname);
+	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1, 1);
+	result= call_user_function_ex(NULL, &object, &fname, &retval_ptr, 0, NULL, 0, NULL TSRMLS_CC);
+	zval_dtor(&fname);
 
 	if (result == FAILURE) {
 		_DO_THROW("Invocation of method __toString() failed");
@@ -3668,7 +3666,7 @@ static int _addconstant(zend_constant *constant, int num_args, va_list args, zen
 	int number = va_arg(args, int);
 
 	if (number == constant->module_number) {
-		MAKE_STD_ZVAL(const_val);
+		ALLOC_ZVAL(const_val);
 		*const_val = constant->value;
 		zval_copy_ctor(const_val);
 		INIT_PZVAL(const_val);
