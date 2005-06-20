@@ -775,8 +775,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				/* restore memory limit */
 				AG(memory_limit) = PG(memory_limit); 
 #endif
-				zend_bailout();
 				efree(buffer);
+				zend_bailout();
 				return;
 			}
 			break;
