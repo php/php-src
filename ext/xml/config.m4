@@ -54,6 +54,6 @@ if test "$PHP_XML" != "no"; then
 
   PHP_NEW_EXTENSION(xml, xml.c $xml_extra_sources, $ext_shared)
   PHP_SUBST(XML_SHARED_LIBADD)
-  PHP_INSTALL_HEADERS([ext/xml])
+  PHP_INSTALL_HEADERS([ext/xml/])
   AC_DEFINE(HAVE_XML, 1, [ ])
 fi
