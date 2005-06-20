@@ -190,16 +190,16 @@ $php_info = `$php $info_params $info_file`;
 define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
 // check for extensions that need special handling and regenerate
-$php_extenions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
-save_text($info_file, $php_extenions);
-$php_extenions = explode(',',`$php $info_params $info_file`);
+$php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
+save_text($info_file, $php_extensions);
+$php_extensions = explode(',',`$php $info_params $info_file`);
 $info_params_ex = array(
 		'session' => array('session.auto_start=0'),
 		'zlib' => array('zlib.output_compression=Off'),
 		'xdebug' => array('xdebug.default_enable=0'),
 	);
 foreach($info_params_ex as $ext => $ini_overwrites_ex) {
-	if (in_array($ext, $php_extenions)) {
+	if (in_array($ext, $php_extensions)) {
 		$ini_overwrites = array_merge($ini_overwrites, $ini_overwrites_ex);
 	}
 }
