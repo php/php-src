@@ -1,3 +1,8 @@
+2005-06-19  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/bug32226.phpt:
+      - Fixed layout of test description.
+
 2005-06-17  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * tests/bug29368.phpt
