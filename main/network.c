@@ -783,8 +783,13 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		}
 
 		if (sa) {
+			/* free error string recieved during previous iteration (if any) */
+			if (error_string && *error_string) {
+				efree(*error_string);
+				*error_string = NULL;
+			}
+
 			/* make a connection attempt */
-			
 			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 					timeout ? &working_timeout : NULL,
 					error_string, error_code);
