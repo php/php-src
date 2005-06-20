@@ -1297,24 +1297,24 @@ not_relative_path:
 			end++;
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
-		
-		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
-			stream = NULL;
-			goto stream_done;
+
+		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir_ex(trypath, 0 TSRMLS_CC)) {
+			ptr = end;
+			continue;
 		}
 		
 		if (PG(safe_mode)) {
 			if (VCWD_STAT(trypath, &sb) == 0) {
 				/* file exists ... check permission */
 				if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
-						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
+						php_checkuid_ex(trypath, mode, CHECKUID_CHECK_MODE_PARAM, CHECKUID_NO_ERRORS)) {
 					/* UID ok, or trypath is in safe_mode_include_dir */
 					stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
-				} else {
-					stream = NULL;
+					goto stream_done;
 				}
-				goto stream_done;
 			}
+			ptr = end;
+			continue;
 		}
 		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {

@@ -34,6 +34,8 @@ PHP                                                                        NEWS
   PHP). (Marcus)
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
+- Fixed bug #31054 (safe_mode & open_basedir checks only check first 
+  include_path value). (Ilia)
 - Fixed bug #29683 (headers_list() returns empty array). (Tony)
 - Fixed bug #28355 (glob wont error if dir is not readable). (Hartmut)
 - Fixed bugs #20382, #28024, #30532, #32086, #32270, #32555, #32588, #33056
