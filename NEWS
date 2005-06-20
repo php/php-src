@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 - Improved PHP extension loading mechanism with support for module dependencies
   and conflicts. (Jani, Dmitry) 
 - Allowed return by reference from internal functions. (Marcus, Andi, Dmitry)
+- Fixed inheritance check to control return by reference and pass by reference
+  correctly (ArrayAccess can corrctly no longer support references). (Marcus,
+  Andi, Dmitry)
 - Rewrote strtotime() with support for timezones and tons of new formats.
   (Derick)
 - Added bindto socket context option. (Ilia)
@@ -13,6 +16,7 @@ PHP                                                                        NEWS
   shutdown). (Wez)
 - Fixed PECL bug #3714 (beginTransaction doesn't work if you're in
   auto-commit mode). (Wez)
+- Fixed bug #33389 (double free() when exporting a ReflectionClass). (Marcus)
 - Fixed bug #33382 (array_reverse() fails after *sort()), 
   introduced by zend_hash_sort() optimizations in HEAD. (Tony)
 - Fixed bug #33340 (CLI Crash when calling php:function from XSLT). (Rob)
