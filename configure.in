@@ -183,7 +183,11 @@ case $host_alias in
     AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
     AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
     PHP_BUILD_PROGRAM
-    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS,php)
+    PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
+    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
+    PHP5LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
+    PHP_SUBST(PHP5LIB_SHARED_LIBADD)
+    PHP_SHARED_MODULE(php5lib, PHP_GLOBAL_OBJS, netware)
     ;;
 esac
 
@@ -1217,7 +1221,16 @@ PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c)
 
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
-PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+
+case $host_alias in
+*netware*)
+  PHP_ADD_BUILD_DIR(win32)
+  PHP_ADD_BUILD_DIR(netware)
+  ;;
+*)
+  PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+  ;;
+esac
 
 PHP_ADD_SOURCES(/Zend, zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c)
