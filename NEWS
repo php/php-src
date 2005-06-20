@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Jun 2005, PHP 5.1 Beta 3
+
 20 Jun 2005, PHP 5.1 Beta 2
 - Improved PHP extension loading mechanism with support for module dependencies
   and conflicts. (Jani, Dmitry) 
