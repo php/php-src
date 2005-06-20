@@ -4,17 +4,16 @@ PHP                                                                        NEWS
 - Improved PHP extension loading mechanism with support for module dependencies
   and conflicts. (Jani, Dmitry) 
 - Allowed return by reference from internal functions. (Marcus, Andi, Dmitry)
-- Fixed inheritance check to control return by reference and pass by reference
-  correctly (ArrayAccess can correctly no longer support references). (Marcus,
-  Andi, Dmitry)
-- Rewrote strtotime() with support for timezones and tons of new formats.
-  (Derick)
+- Rewrote strtotime() with support for timezones and many new formats. (Derick)
 - Added bindto socket context option. (Ilia)
 - Added offset parameter to the stream_copy_to_stream() function. (Ilia)
 - Added offset & length parameters to substr_count() function. (Ilia)
+- Fixed inheritance check to control return by reference and pass by reference
+  correctly (ArrayAccess can no longer support references correctly).
+  (Marcus, Andi, Dmitry)
 - Fixed PDO shutdown problem (possible inifite loop running rollback on
   shutdown). (Wez)
-- Fixed PECL bug #3714 (beginTransaction doesn't work if you're in
+- Fixed PECL bug #3714 (PDO: beginTransaction doesn't work if you're in
   auto-commit mode). (Wez)
 - Fixed bug #33389 (double free() when exporting a ReflectionClass). (Marcus)
 - Fixed bug #33382 (array_reverse() fails after *sort()), 
