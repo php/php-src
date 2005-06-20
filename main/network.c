@@ -817,7 +817,13 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 bad_ip:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid IP Address: %s", bindto);
 			}
-bind_done:			
+bind_done:
+			/* free error string recieved during previous iteration (if any) */
+			if (error_string && *error_string) {
+				efree(*error_string);
+				*error_string = NULL;
+			}
+			
 			n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 					timeout ? &working_timeout : NULL,
 					error_string, error_code);
