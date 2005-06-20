@@ -31,7 +31,11 @@
 #include "timelib.h"
 #include "timezonedb.h"
 
+#ifdef WORDS_BIGENDIAN
+#define timelib_conv_int(l) (l)
+#else
 #define timelib_conv_int(l) ((l & 0x000000ff) << 24) + ((l & 0x0000ff00) << 8) + ((l & 0x00ff0000) >> 8) + ((l & 0xff000000) >> 24)
+#endif
 
 static void read_header(char **tzf, timelib_tzinfo *tz)
 {
@@ -90,6 +94,9 @@ static void read_types(char **tzf, timelib_tzinfo *tz)
 	*tzf += sizeof(unsigned char) * 6 * tz->typecnt;
 
 	tz->type = (ttinfo*) malloc(tz->typecnt * sizeof(struct ttinfo));
+	if (!tz->type) {
+		return;
+	}
 
 	for (i = 0; i < tz->typecnt; i++) {
 		j = i * 6;
