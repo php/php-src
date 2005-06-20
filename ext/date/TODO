@@ -1,4 +1,6 @@
 - Port over my 200 test cases to .phpt format.
 - Write an error handler for unexpected characters while parsing dates.
-- Move all date/time related functions from ext/standard to ext/date
-- Move all date/time related tests from ext/standard/tests to ext/data/tests
+- Cache lookups for timezone information.
+- Change tz structure lookup to use binary search.
+- Move all date/time related functions from ext/standard to ext/date.
+- Move all date/time related tests from ext/standard/tests to ext/data/tests.
