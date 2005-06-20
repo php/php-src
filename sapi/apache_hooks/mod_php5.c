@@ -340,9 +340,7 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 
 	*p = ':';  /* a well behaved header handler shouldn't change its original arguments */
 
-	efree(sapi_header->header);
-	
-	return 0;  /* don't use the default SAPI mechanism, Apache duplicates this functionality */
+	return SAPI_HEADER_ADD;
 }
 /* }}} */
 
