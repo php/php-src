@@ -128,9 +128,7 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 	else
 		apr_table_add(ctx->r->headers_out, sapi_header->header, val);
 	
-	sapi_free_header(sapi_header);
-
-	return 0;
+	return SAPI_HEADER_ADD;
 }
 
 static int

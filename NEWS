@@ -156,6 +156,7 @@ PHP                                                                        NEWS
   handler). (Tony)
 - Fixed bug #29971 (variables_order behaviour). (Dmitry)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
+- Fixed bug #29683 (headers_list() returns empty array). (Tony)
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #29338 (unencoded spaces get ignored after certain tags). (Ilia)
 - Fixed bug #29210 (Function: is_callable - no support for private and
