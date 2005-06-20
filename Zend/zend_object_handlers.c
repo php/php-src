@@ -284,9 +284,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	}
 	if (tmp_member) {
-		rv->refcount++;
+		(*retval)->refcount++;
 		zval_ptr_dtor(&tmp_member);
-		rv->refcount--;
+		(*retval)->refcount--;
 	}
 	return *retval;
 }
