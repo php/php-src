@@ -5,7 +5,7 @@ PHP                                                                        NEWS
   and conflicts. (Jani, Dmitry) 
 - Allowed return by reference from internal functions. (Marcus, Andi, Dmitry)
 - Fixed inheritance check to control return by reference and pass by reference
-  correctly (ArrayAccess can corrctly no longer support references). (Marcus,
+  correctly (ArrayAccess can correctly no longer support references). (Marcus,
   Andi, Dmitry)
 - Rewrote strtotime() with support for timezones and tons of new formats.
   (Derick)
