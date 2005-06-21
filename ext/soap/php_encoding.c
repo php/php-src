@@ -260,7 +260,7 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			soap_error0(E_ERROR, "Encoding: SoapVar hasn't 'enc_type' propery");
 		}
 
-		if (SOAP_GLOBAL(sdl) && encode == NULL) {
+		if (SOAP_GLOBAL(sdl)) {
 			if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
 				if (zend_hash_find(ht, "enc_ns", sizeof("enc_ns"), (void **)&zns) == SUCCESS) {
 				  enc = get_encoder(SOAP_GLOBAL(sdl), Z_STRVAL_PP(zns), Z_STRVAL_PP(zstype));
@@ -272,6 +272,9 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 		if (enc == NULL) {
 			enc = get_conversion(Z_LVAL_P(*ztype));
 		}
+		if (enc == NULL) {
+			enc = encode;
+		}
 
 		if (zend_hash_find(ht, "enc_value", sizeof("enc_value"), (void **)&zdata) == FAILURE) {
 			node = master_to_xml(enc, NULL, style, parent);
@@ -279,7 +282,7 @@ xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr par
 			node = master_to_xml(enc, *zdata, style, parent);
 		}
 
-		if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode == NULL)) {
+		if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
 			if (zend_hash_find(ht, "enc_stype", sizeof("enc_stype"), (void **)&zstype) == SUCCESS) {
 				if (style == SOAP_LITERAL) {
 					encode_add_ns(node, XSI_NAMESPACE);
