@@ -213,6 +213,9 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 	size_t ret;
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
+	if (!str_length) {
+		return 0;
+	}
 	php_last_char = str[str_length-1];
 #endif
 
