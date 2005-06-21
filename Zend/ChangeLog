@@ -1,3 +1,28 @@
+2005-06-20  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to -dev
+
+    * (php_5_1_0b2)
+      zend.h:
+      - Beta 2
+
+2005-06-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_1_0b2)
+      zend_object_handlers.c
+      zend_object_handlers.c:
+      Fixed possible crash on $x = $obj->$non_string
+
+2005-06-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (php_5_1_0b2)
+      zend_reflection_api.c:
+      - Fix bug #33389 by fixing copying
+
+    * zend_reflection_api.c:
+      - Show true/flase
+
 2005-06-19  Derick Rethans  <php@derickrethans.nl>
 
     * tests/bug32226.phpt:
