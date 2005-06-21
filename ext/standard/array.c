@@ -1449,7 +1449,11 @@ PHP_FUNCTION(extract)
 						
 						*orig_var = *entry;
 					} else {
-						(*entry)->is_ref = 1;
+						if ((*var_array)->refcount > 1) {
+							SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
+						} else {
+							(*entry)->is_ref = 1;
+						}
 						zval_add_ref(entry);
 						zend_hash_update(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) entry, sizeof(zval *), NULL);
 					}
@@ -1458,7 +1462,7 @@ PHP_FUNCTION(extract)
 					*data = **entry;
 					zval_copy_ctor(data);
 
-					ZEND_SET_SYMBOL(EG(active_symbol_table), final_name.c, data);
+					ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), final_name.c, final_name.len+1, data, 1, 0);
 				}
 
 				count++;
