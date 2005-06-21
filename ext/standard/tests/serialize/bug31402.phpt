@@ -4,7 +4,7 @@ Bug #31402 (unserialize() generates references when it should not)
 <?php 
 
 class X {
-  var $i;
+  public $i;
 
   function X($i) {
     $this->i = $i;
@@ -12,8 +12,8 @@ class X {
 }
 
 class Y {
-  var $A = array();
-  var $B;
+  public $A = array();
+  public $B;
 
   function Y() {
     $this->A[1] = new X(1);
@@ -29,43 +29,43 @@ $after = unserialize($ser);
 var_dump($before, $after);
 
 ?>
---EXPECT--
-object(y)(2) {
+--EXPECTF--
+object(Y)#%d (2) {
   ["A"]=>
   array(2) {
     [1]=>
-    object(x)(1) {
+    object(X)#%d (1) {
       ["i"]=>
       int(1)
     }
     [2]=>
-    object(x)(1) {
+    object(X)#%d (1) {
       ["i"]=>
       int(2)
     }
   }
   ["B"]=>
-  object(x)(1) {
+  object(X)#%d (1) {
     ["i"]=>
     int(1)
   }
 }
-object(y)(2) {
+object(Y)#%d (2) {
   ["A"]=>
   array(2) {
     [1]=>
-    &object(x)(1) {
+    object(X)#%d (1) {
       ["i"]=>
       int(1)
     }
     [2]=>
-    object(x)(1) {
+    object(X)#%d (1) {
       ["i"]=>
       int(2)
     }
   }
   ["B"]=>
-  &object(x)(1) {
+  object(X)#%d (1) {
     ["i"]=>
     int(1)
   }
