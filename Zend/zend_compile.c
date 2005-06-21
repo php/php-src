@@ -2298,6 +2298,19 @@ void zend_do_early_binding(TSRMLS_D)
 					if (do_bind_inherited_class(opline, CG(class_table), *pce, 1 TSRMLS_CC) == NULL) {
 						return;
 					}
+					/* clear unnecessary ZEND_FETCH_CLASS opcode */
+					if (opline > CG(active_op_array)->opcodes &&
+					    (opline-1)->opcode == ZEND_FETCH_CLASS) {
+					  zend_op *fetch_class_opline = opline-1;
+
+						zval_dtor(&fetch_class_opline->op2.u.constant);
+						fetch_class_opline->opcode = ZEND_NOP;
+						memset(&fetch_class_opline->op1, 0, sizeof(znode));
+						memset(&fetch_class_opline->op2, 0, sizeof(znode));
+						SET_UNUSED(fetch_class_opline->op1);
+						SET_UNUSED(fetch_class_opline->op2);
+						SET_UNUSED(fetch_class_opline->result);
+					}
 				} else {
 					/* We currently don't early-bind classes that implement interfaces */
 					return;
