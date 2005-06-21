@@ -4,7 +4,12 @@ require_once('connection.inc');
 
 $SQL = array();
 
-$DB = new pdo($CONNECTION);
+try {
+	$DB = new pdo($CONNECTION);
+} catch (Exception $tmp) {
+	$DB = NULL;
+	return;
+}
 
 foreach(array('test','classtypes') as $name)
 {
