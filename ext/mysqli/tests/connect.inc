@@ -9,7 +9,7 @@
 		$user = "root";
 		$passwd = "";
 	} else {
-		$path =  realpath('./ext/mysqli/tests');
+		$path =  dirname(__FILE__);
 		$host = $user = $passwd = NULL;
 		$args = array(
 					"--datadir=$path", 
