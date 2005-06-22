@@ -1088,7 +1088,7 @@ function gen_vm($def, $skel) {
 	out($f, "}\n\n");
 
 	// Generate zend_vm_get_opcode_handler() function
-	out($f, "void zend_vm_set_opcode_handler(zend_op* op)\n");
+	out($f, "ZEND_API void zend_vm_set_opcode_handler(zend_op* op)\n");
 	out($f, "{\n");
 	out($f, "\top->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);\n");
 	out($f, "}\n\n");
