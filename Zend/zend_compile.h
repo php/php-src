@@ -644,6 +644,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
+#define ZEND_ARG_SEND_FUNCTION (1<<2)
 
 /* Lost In Stupid Parentheses */
 #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num)											\

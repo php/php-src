@@ -1476,6 +1476,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	int original_op=op;
 	zend_function **function_ptr_ptr, *function_ptr;
 	int send_by_reference;
+	int send_function = 0;
 			
 	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
 	function_ptr = *function_ptr_ptr;
@@ -1500,6 +1501,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
 		/* Method call */
 		op = ZEND_SEND_VAR_NO_REF;
+		send_function = ZEND_ARG_SEND_FUNCTION;
 	} else if (op == ZEND_SEND_VAL && (param->op_type & (IS_VAR|IS_CV))) {
 		op = ZEND_SEND_VAR_NO_REF;
 	}
@@ -1539,9 +1541,9 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 
 	if (op == ZEND_SEND_VAR_NO_REF) {
 		if (function_ptr) {
-			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND | send_by_reference;
+			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND | send_by_reference | send_function;
 		} else {
-			opline->extended_value = 0;
+			opline->extended_value = send_function;
 		}
 	} else {
 		if (function_ptr) {
