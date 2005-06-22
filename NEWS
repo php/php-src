@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
 - Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
+- Fixed bug #32160 (copying a file into itself leads to data loss). (Ilia)
 - Fixed bug #31054 (safe_mode & open_basedir checks only check first 
   include_path value). (Ilia)
 - Fixed bug #29683 (headers_list() returns empty array). (Tony)

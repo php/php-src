@@ -1700,6 +1700,56 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
+	php_stream_statbuf src_s, dest_s;
+
+	switch (php_stream_stat_path_ex(src, 0, &src_s, NULL)) {
+		case -1:
+			/* non-statable stream */
+			goto safe_to_copy;
+			break;
+		case 0:
+			break;
+		default: /* failed to stat file, does not exist? */
+			return ret;
+	}
+	if (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, NULL) != 0) {
+		goto safe_to_copy;
+	}
+	if (!src_s.sb.st_ino || !dest_s.sb.st_ino) {
+		goto no_stat;
+	}
+	if (src_s.sb.st_ino == dest_s.sb.st_ino && src_s.sb.st_dev == dest_s.sb.st_dev) {
+		return ret;
+	} else {
+		goto safe_to_copy;
+	}
+no_stat:
+	{
+		char *sp, *dp;
+		int res;
+		
+		if ((sp = expand_filepath(src, NULL TSRMLS_CC)) == NULL) {
+			return ret;
+		}
+	 	if ((dp = expand_filepath(dest, NULL TSRMLS_CC)) == NULL) {
+	 		efree(sp);
+	 		goto safe_to_copy;
+	 	}
+
+		res = 
+#ifndef PHP_WIN32	 	
+			!strcmp(sp, dp);
+#else
+			!strcasecmp(sp, dp);
+#endif	
+
+		efree(sp);
+		efree(dp);
+		if (res) {
+			return ret;
+		}
+	}
+safe_to_copy:
 
 	srcstream = php_stream_open_wrapper(src, "rb", STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS, NULL);
 	
