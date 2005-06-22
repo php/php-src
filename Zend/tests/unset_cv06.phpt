@@ -1,7 +1,7 @@
 --TEST--
 unset() CV 6 (indirect unset() of global variable in session_unset())
 --SKIPIF--
-<?php include('../../ext/session/tests/skipif.inc'); ?>
+<?php include(dirname(__FILE__).'/../../ext/session/tests/skipif.inc'); ?>
 --INI--
 register_globals=1
 --FILE--
