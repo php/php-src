@@ -3,7 +3,11 @@ unset() CV 5 (indirect unset() of global variable in session_start())
 --INI--
 register_long_arrays=1
 --SKIPIF--
-<?php include('../../ext/session/tests/skipif.inc'); ?>
+<?php 
+
+include(dirname(__FILE__).'/../../ext/session/tests/skipif.inc'); 
+
+?>
 --FILE--
 <?php
 $HTTP_SESSION_VARS = "ok\n";
