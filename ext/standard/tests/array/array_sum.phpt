@@ -1,7 +1,7 @@
 --TEST--
 Test array_sum()
 --INI--
-memory_limit=16M
+memory_limit=64M
 --FILE--
 <?php
 $i = 0;
