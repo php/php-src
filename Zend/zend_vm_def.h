@@ -2158,7 +2158,10 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 	}
-	{
+	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
+	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+		zend_error(E_ERROR, "Only variables can be passed by reference");
+	} else {
 		zval *varptr;
 		zend_free_op free_op1;
 		varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);

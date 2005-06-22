@@ -7064,7 +7064,10 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	{
+	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
+	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+		zend_error(E_ERROR, "Only variables can be passed by reference");
+	} else {
 		zval *varptr;
 		zend_free_op free_op1;
 		varptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
@@ -19080,7 +19083,10 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	{
+	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
+	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+		zend_error(E_ERROR, "Only variables can be passed by reference");
+	} else {
 		zval *varptr;
 		
 		varptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
