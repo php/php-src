@@ -3037,7 +3037,10 @@ int zend_send_var_no_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	{
+	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
+	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+		zend_error(E_ERROR, "Only variables can be passed by reference");
+	} else {
 		zval *varptr;
 		varptr = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 
