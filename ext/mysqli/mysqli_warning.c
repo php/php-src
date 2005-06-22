@@ -30,88 +30,81 @@
 /* {{{ void php_clear_warnings() */
 void php_clear_warnings(MYSQLI_WARNING *w)
 {
-	if (w->result) {
-		mysql_free_result(w->result);
-	}
-	efree(w);
+	MYSQLI_WARNING	*n;
+
+	while (w) {
+		n = w;
+		efree(w->reason);
+		w = w->next;
+		efree(n);
+	} 
 }
 /* }}} */
 
-/* {{{ void php_get_warnings(MYSQL *mysql) */
-MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
+/* {{{ MYSQLI_WARNING *php_new_warning */
+MYSQLI_WARNING *php_new_warning(char *reason, char *sqlstate, int errorno)
 {
-	MYSQLI_WARNING *w;
-	int cwarnings;
+	MYSQLI_WARNING	*w;
 
-	if (!(cwarnings = mysql_warning_count(mysql))) {
-		return NULL;
+	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
+
+	w->reason = safe_estrdup(reason);
+	if (sqlstate) {
+		strcpy(w->sqlstate, sqlstate);
+	} else {
+		strcpy(w->sqlstate, "00000");
 	}
-
-	if (mysql_query(mysql, "SHOW WARNINGS")) {
-		return NULL;
-	}
-
-	w = (MYSQLI_WARNING *)ecalloc(sizeof(MYSQLI_WARNING), 1);
-
-	w->warning_count = cwarnings;
-	w->result = mysql_store_result(mysql);
-	if (!(w->row = mysql_fetch_row(w->result))) {
-		mysql_free_result(w->result);
-		efree(w);
-		return NULL;
-	}
+	w->errorno = errorno;
 
 	return w;
 }
 /* }}} */
 
-/* {{{ mysqli_warning::__construct */
-ZEND_FUNCTION(mysqli_warning_construct)
+/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
+MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 {
-	MYSQL			*mysql = NULL;
-	MYSQLI_WARNING  *w;
-	MYSQLI_RESOURCE	*mysqli_resource;
-	mysqli_object	*obj;
+	MYSQLI_WARNING	*w, *first = NULL, *prev = NULL;
+	MYSQL_RES		*result;
+	MYSQL_ROW 		row;
 
-	if (!getThis()) {
-		RETURN_FALSE;
-	} 
-
-	obj = (mysqli_object *)zend_objects_get_address(getThis() TSRMLS_CC);
-
-	if (obj->zo.ce == mysqli_link_class_entry) {
-		mysql = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;
-	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
-		mysql = (MYSQL *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt->mysql;
+	if (mysql_query(mysql, "SHOW WARNINGS")) {
+		return NULL;
 	}
 
-	if ((w = php_get_warnings(mysql))) {
-		mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-		mysqli_resource->ptr = (void *)w;
-		obj->valid = 1;
-
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
-	} else {
-		RETURN_FALSE;
+	result = mysql_store_result(mysql);
+	while ((row = mysql_fetch_row(result))) {
+		w = php_new_warning(row[2], "HY000", atoi(row[1]));
+		if (!first) {
+			first = w;
+		}
+		if (prev) {
+			prev->next = (void *)w;
+		}
+		prev = w;
 	}
+	mysql_free_result(result);
+	return first;
 }
 /* }}} */
 
-/* {{{ bool mysqli_warning::next */
-ZEND_FUNCTION(mysqli_warning_next) {
+/* {{{ bool mysqli_warning::next() */
+PHP_METHOD(mysqli_warning, next) 
+{
 	MYSQLI_WARNING 	*w;
-	zval  			*mysql_warning;
+	zval  			*mysqli_warning;
 	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(getThis() TSRMLS_CC);
 
-	if (obj->valid) {
+	if (obj->ptr) {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", 
-										 &mysql_warning, mysqli_warning_class_entry) == FAILURE) {
+										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
 			return;
 		}
 
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, &mysql_warning, "mysqli_warning");
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, &mysqli_warning, "mysqli_warning");
 
-		if (w->warning_count && (w->row = mysql_fetch_row(w->result))) {
+		if (w->next) {
+			w = w->next;
+	        ((MYSQLI_RESOURCE *)(obj->ptr))->ptr = w;
 			RETURN_TRUE;
 		}
 	}
@@ -119,19 +112,38 @@ ZEND_FUNCTION(mysqli_warning_next) {
 }
 /* }}} */
 
-/* {{{ property mysqli_warning_error */
-int mysqli_warning_error(mysqli_object *obj, zval **retval TSRMLS_DC)
+/* {{{ property mysqli_warning_message */
+int mysqli_warning_message(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MYSQLI_WARNING *w;
 
-	ALLOC_ZVAL(*retval);
-	w = obj->valid ? (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr : NULL;
+	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
+		return FAILURE;
+	}
 
-	if (w && w->row && w->row[2]) {
-		ZVAL_STRING(*retval, w->row[2], 1);
+	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ALLOC_ZVAL(*retval);
+	if (w->reason) {
+		ZVAL_STRING(*retval, w->reason, 1);
 	} else {
 		ZVAL_NULL(*retval);
 	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ property mysqli_warning_sqlstate */
+int mysqli_warning_sqlstate(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	MYSQLI_WARNING *w;
+	
+	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
+		return FAILURE;
+	}
+
+	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ALLOC_ZVAL(*retval);
+	ZVAL_STRING(*retval, w->sqlstate, 1);
 	return SUCCESS;
 }
 /* }}} */
@@ -141,30 +153,73 @@ int mysqli_warning_errno(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MYSQLI_WARNING *w;
 
-	ALLOC_ZVAL(*retval);
-	w = obj->valid ? (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr : NULL;
-
-	if (w && w->row && w->row[1]) {
-		ZVAL_LONG(*retval, atoi(w->row[1]));
-	} else {
-		ZVAL_NULL(*retval);
+	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
+		return FAILURE;
 	}
+	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ALLOC_ZVAL(*retval);
+	ZVAL_LONG(*retval, w->errorno);
 	return SUCCESS;
 }
 /* }}} */
 
-/* {{{ mysqli_warning_methods[]
- */
-function_entry mysqli_warning_methods[] = {
-	PHP_FALIAS(__construct,mysqli_warning_construct, NULL)
-	PHP_FALIAS(next,mysqli_warning_next,NULL)
-	{NULL, NULL, NULL}
-};
+/* {{{ mysqli_warning_construct(object obj) */
+PHP_METHOD(mysqli_warning, __construct)
+{
+	zval			**z;
+	mysqli_object	*obj;
+	MYSQL			*hdl;
+	MYSQLI_WARNING  *w;
+	MYSQLI_RESOURCE *mysqli_resource;
+
+	if (ZEND_NUM_ARGS() != 1) {
+		WRONG_PARAM_COUNT;
+	}
+	if (zend_get_parameters_ex(1, &z)==FAILURE) {
+		return;
+	}
+	obj = (mysqli_object *)zend_object_store_get_object(*(z) TSRMLS_CC);\
+
+	if (obj->zo.ce == mysqli_link_class_entry) {
+		MY_MYSQL *mysql;
+		MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, z, "mysqli_link");
+		hdl = mysql->mysql;
+	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
+		MY_STMT *stmt;
+		MYSQLI_FETCH_RESOURCE(stmt, MY_STMT *, z, "mysqli_stmt");
+		hdl = stmt->stmt->mysql;
+	} else {
+		RETURN_FALSE;
+	}
+
+	if (mysql_warning_count(hdl)) {
+		w = php_get_warnings(hdl); 
+	} else {
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
+
+	if (!getThis()) {
+		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
+	} else {
+		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->ptr = mysqli_resource;
+		((mysqli_object *) zend_object_store_get_object(getThis() TSRMLS_CC))->valid = 1;
+	}
+
+}
 /* }}} */
 
+function_entry mysqli_warning_methods[] = {
+	PHP_ME(mysqli_warning, __construct,		NULL, ZEND_ACC_PROTECTED)
+	PHP_ME(mysqli_warning, next, 			NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
 
 mysqli_property_entry mysqli_warning_property_entries[] = {
-	{"error", mysqli_warning_error, NULL},
+	{"message", mysqli_warning_message, NULL},
+	{"sqlstate", mysqli_warning_sqlstate, NULL},
 	{"errno", mysqli_warning_errno, NULL},
 	{NULL, NULL, NULL}
 };
