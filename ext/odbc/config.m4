@@ -2,10 +2,16 @@ dnl
 dnl $Id$
 dnl
 
+AC_DEFUN([PHP_ODBC_CHECK_HEADER],[
+if ! test -f "$ODBC_INCDIR/$1"; then
+  AC_MSG_ERROR([ODBC header file '$ODBC_INCDIR/$1' not found!])
+fi
+])
+
 dnl
 dnl Figure out which library file to link with for the Solid support.
 dnl
-AC_DEFUN([AC_FIND_SOLID_LIBS],[
+AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
   AC_MSG_CHECKING([Solid library file])  
   ac_solid_uname_r=`uname -r 2>/dev/null`
   ac_solid_uname_s=`uname -s 2>/dev/null`
@@ -17,7 +23,7 @@ AC_DEFUN([AC_FIND_SOLID_LIBS],[
       if ldd -v /bin/sh | grep GLIBC > /dev/null; then
         AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
         ac_solid_os=l2x
-	  else
+      else
         AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
         ac_solid_os=lux
       fi;; 
@@ -48,7 +54,7 @@ AC_DEFUN([AC_FIND_SOLID_LIBS],[
 # Check for the library files, and setup the ODBC_LIBS path...
 #
 if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -a \
-	! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
+  ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
   #
   # we have an error and should bail out, as we can't find the libs!
   #
@@ -71,7 +77,8 @@ fi
 dnl
 dnl Figure out which library file to link with for the Empress support.
 dnl
-AC_DEFUN([AC_FIND_EMPRESS_LIBS],[
+
+AC_DEFUN([PHP_ODBC_FIND_EMPRESS_LIBS],[
   AC_MSG_CHECKING([Empress library file])
   ODBC_LIBS=`echo $1/libempodbccl.so | cut -d' ' -f1`
   if test ! -f $ODBC_LIBS; then
@@ -80,7 +87,7 @@ AC_DEFUN([AC_FIND_EMPRESS_LIBS],[
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
 
-AC_DEFUN([AC_FIND_EMPRESS_BCS_LIBS],[
+AC_DEFUN([PHP_ODBC_FIND_EMPRESS_BCS_LIBS],[
   AC_MSG_CHECKING([Empress local access library file])
   ODBCBCS_LIBS=`echo $1/libempodbcbcs.a | cut -d' ' -f1`
   if test ! -f $ODBCBCS_LIBS; then
@@ -111,6 +118,7 @@ AC_ARG_WITH(adabas,
     PHP_ADD_LIBRARY(sqlrte)
     PHP_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
     ODBC_TYPE=adabas
+    PHP_ODBC_CHECK_HEADER(sqlext.h)
     AC_DEFINE(HAVE_ADABAS,1,[ ])
     AC_MSG_RESULT(yes)
   else
@@ -170,7 +178,7 @@ AC_ARG_WITH(solid,
       AC_DEFINE(HAVE_SOLID,1,[ ])
     fi
     AC_MSG_RESULT(yes)
-    AC_FIND_SOLID_LIBS($ODBC_LIBDIR)
+    PHP_ODBC_FIND_SOLID_LIBS($ODBC_LIBDIR)
   else
     AC_MSG_RESULT(no)
   fi
@@ -195,10 +203,8 @@ AC_ARG_WITH(ibm-db2,
       ODBC_LIBDIR=$withval/$PHP_LIBDIR
     fi
 
-    if ! test -f "$ODBC_INCDIR/sqlcli1.h"; then
-      AC_MSG_ERROR([IBM DB2 header files not found])
-    fi
-	
+    PHP_ODBC_CHECK_HEADER(sqlcli1.h)
+
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=db2
@@ -274,7 +280,7 @@ AC_ARG_WITH(empress,
     ODBC_TYPE=empress
     AC_DEFINE(HAVE_EMPRESS,1,[ ])
     AC_MSG_RESULT(yes)
-    AC_FIND_EMPRESS_LIBS($ODBC_LIBDIR)
+    PHP_ODBC_FIND_EMPRESS_LIBS($ODBC_LIBDIR)
   else
     AC_MSG_RESULT(no)
   fi
@@ -321,7 +327,7 @@ AC_ARG_WITH(empress-bcs,
     ODBC_TYPE=empress
     AC_DEFINE(HAVE_EMPRESS,1,[ ])
     AC_MSG_RESULT(yes)
-    AC_FIND_EMPRESS_BCS_LIBS($ODBC_LIBDIR)
+    PHP_ODBC_FIND_EMPRESS_BCS_LIBS($ODBC_LIBDIR)
   else
     AC_MSG_RESULT(no)
   fi
@@ -494,6 +500,7 @@ AC_ARG_WITH(unixODBC,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS=-lodbc
     ODBC_TYPE=unixODBC
+    PHP_ODBC_CHECK_HEADER(sqlext.h)
     AC_DEFINE(HAVE_UNIXODBC,1,[ ])
     AC_MSG_RESULT(yes)
   else
