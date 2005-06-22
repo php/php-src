@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Fixed bug #33427 (ext/odbc: check if unixODBC header file exists). (Jani)
 - Fixed bug #33257 (array_splice() inconsistent when passed function instead
   of variable). (Dmitry)
+- Fixed bug #15854 (boolean ini options may be incorrectly displayed as Off 
+  when they are On). (Tony)
 
 21 Jun 2005, PHP 5.1 Beta 2
 - Improved PHP extension loading mechanism with support for module dependencies
