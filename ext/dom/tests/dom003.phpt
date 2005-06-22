@@ -31,7 +31,26 @@ object(DOMException)#%d (6) {
   ["line:protected"]=>
   int(8)
   ["trace:private"]=>
-  array(0) {
+  array(1) {
+    [0]=>
+    array(6) {
+      ["file"]=>
+      string(46) "%sdom003.php"
+      ["line"]=>
+      int(8)
+      ["function"]=>
+      string(11) "appendChild"
+      ["class"]=>
+      string(10) "DOMElement"
+      ["type"]=>
+      string(2) "->"
+      ["args"]=>
+      array(1) {
+        [0]=>
+        object(DOMElement)#%d (0) {
+        }
+      }
+    }
   }
   ["code"]=>
   int(3)
@@ -40,5 +59,6 @@ object(DOMException)#%d (6) {
 
 Fatal error: Uncaught exception 'DOMException' with message 'Hierarchy Request Error' in %sdom003.php:%d
 Stack trace:
-#0 {main}
+#0 %sdom003.php(13): DOMElement->appendChild(Object(DOMElement))
+#1 {main}
   thrown in %sdom003.php on line %d
