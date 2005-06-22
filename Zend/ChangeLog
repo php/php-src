@@ -1,3 +1,39 @@
+2005-06-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/unset_cv07.phpt:
+      Fixed test file
+
+2005-06-21  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to -dev. Guys (n' Girls), give at least 1 hour before you start
+      - complaining about not going back to -dev. I like checking the tarball
+      - before I change it back.
+
+    * (php_5_1_0b2)
+      zend.h:
+      - Take #3 :)
+
+2005-06-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_1_0b2)
+      zend_reflection_api.c:
+      Fixed memory leak.
+      
+
+2005-06-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_compile.c:
+      Remove unnecessary ZEND_FETCH_CLASS together with
+      ZEND_DECLARE_INHERITED_CLASS
+      in case of early binding
+
+    * (php_5_1_0b2)
+      zend_compile.c:
+      Remove unnecessary ZEND_FETCH_CLASS together with
+      ZEND_DECLARE_INHERITED_CLASS in case of early binding
+
 2005-06-20  Andi Gutmans  <andi@zend.com>
 
     * zend.h:

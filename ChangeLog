@@ -1,3 +1,87 @@
+2005-06-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/unset_cv07.phpt:
+      Fixed test file
+
+2005-06-21  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev. Guys (n' Girls), give at least 1 hour before you start
+      - complaining about not going back to -dev. I like checking the tarball
+      - before I change it back.
+
+    * (php_5_1_0b2)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Take #3 :)
+
+2005-06-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_1_0b2)
+      ZendEngine2/zend_reflection_api.c:
+      Fixed memory leak.
+      
+
+2005-06-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (php_5_1_0b2)
+      build/genif.sh:
+      - Partial revert: It does not matter if awk works or not but helps if it
+      does :)
+
+    * (php_5_1_0b2)
+      ext/sysvmsg/tests/002.phpt:
+      fix test
+
+2005-06-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c:
+      Fixed bug #31213 (Sideeffects caused by fix of bug #29493)
+
+    * (PHP_5_0)
+      ZendEngine2/zend_compile.c:
+      Remove unnecessary ZEND_FETCH_CLASS together with
+      ZEND_DECLARE_INHERITED_CLASS
+      in case of early binding
+
+    * (php_5_1_0b2)
+      ZendEngine2/zend_compile.c:
+      Remove unnecessary ZEND_FETCH_CLASS together with
+      ZEND_DECLARE_INHERITED_CLASS in case of early binding
+
+2005-06-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (php_5_1_0b2)
+      acinclude.m4:
+      Fix configure problem in braindead systems like Solaris.
+
+2005-06-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (php_5_1_0b2)
+      tests/classes/array_access_012.phpt:
+      - Add new test
+
+2005-06-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/tests/serialize/bug31402.phpt:
+      Fixed test file (the bug was already fixed)
+
+2005-06-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_1_0b2)
+      sapi/cli/php_cli.c:
+      Fixed possible memory corruption.
+
 2005-06-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/array_access_011.phpt:
