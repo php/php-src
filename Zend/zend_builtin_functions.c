@@ -1644,7 +1644,7 @@ void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
 /* {{{ proto void debug_print_backtrace(void) */
 ZEND_FUNCTION(debug_print_backtrace)
 {
-	zend_execute_data *ptr;
+	zend_execute_data *ptr, *skip;
 	int lineno;
 	char *function_name;
 	char *filename;
@@ -1689,9 +1689,21 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		class_name = call_type = NULL;   
 		arg_array = NULL;
-		if (ptr->op_array) {
-			filename = ptr->op_array->filename;
-			lineno = ptr->opline->lineno;
+
+		skip = ptr;
+		/* skip internal handler */ 
+		if (!skip->op_array &&
+		    skip->prev_execute_data &&
+		    skip->prev_execute_data->opline &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
+		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+		  skip = skip->prev_execute_data;
+		}
+
+		if (skip->op_array) {
+			filename = skip->op_array->filename;
+			lineno = skip->opline->lineno;
 		} else {
 			filename = NULL;
 			lineno = 0;
@@ -1770,7 +1782,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		}
 		zend_printf(") called at [%s:%d]\n", filename, lineno);
 		include_filename = filename;
-		ptr = ptr->prev_execute_data;
+		ptr = skip->prev_execute_data;
 		++indent;
 		if (free_class_name) {
 			efree(free_class_name);
@@ -1782,7 +1794,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRMLS_DC)
 {
-	zend_execute_data *ptr;
+	zend_execute_data *ptr, *skip;
 	int lineno;
 	char *function_name;
 	char *filename;
@@ -1809,12 +1821,17 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 
 	ptr = EG(current_execute_data);
 
+	/* skip "new Exception()" */
+	if ((skip_last == 0) && ptr->opline && (ptr->opline->opcode == ZEND_NEW)) {
+		ptr = ptr->prev_execute_data;
+	}
+
 	/* skip debug_backtrace() */
-	ptr = ptr->prev_execute_data;
 	if (skip_last--) {
 		int arg_count = *((ulong*)(cur_arg_pos - 2));
 		cur_arg_pos -= (arg_count + 2);
 		frames_on_stack--;
+		ptr = ptr->prev_execute_data;
 	}
 
 	array_init(return_value);
@@ -1823,9 +1840,20 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 		MAKE_STD_ZVAL(stack_frame);
 		array_init(stack_frame);
 
-		if (ptr->op_array) {
-			filename = ptr->op_array->filename;
-			lineno = ptr->opline->lineno;
+		skip = ptr;
+		/* skip internal handler */
+		if (!skip->op_array &&
+		    skip->prev_execute_data &&
+		    skip->prev_execute_data->opline &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
+		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+		  skip = skip->prev_execute_data;
+		}
+
+		if (skip->op_array) {
+			filename = skip->op_array->filename;
+			lineno = skip->opline->lineno;
 			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
 
@@ -1916,7 +1944,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 
 		include_filename = filename; 
 
-		ptr = ptr->prev_execute_data;
+		ptr = skip->prev_execute_data;
 	}
 }
 /* }}} */
