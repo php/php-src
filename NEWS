@@ -159,6 +159,7 @@ PHP                                                                        NEWS
   handler). (Tony)
 - Fixed bug #29971 (variables_order behaviour). (Dmitry)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
+- Fixed bug #29896 (Backtrace argument list out of sync). (Dmitry)
 - Fixed bug #29683 (headers_list() returns empty array). (Tony)
 - Fixed bug #29583 (crash when echoing a COM object). (M.Sisolak, Wez)
 - Fixed bug #29338 (unencoded spaces get ignored after certain tags). (Ilia)
