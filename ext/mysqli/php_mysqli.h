@@ -71,18 +71,19 @@ typedef struct {
 	void		*info;		/* additional buffer				 */
 } MYSQLI_RESOURCE;
 
-typedef struct {
-	MYSQL_RES		*result;		/* stored result set from SHOW WARNINGS */
-	MYSQL_ROW		row;
-	int				warning_count;	/* number of warnings */
-} MYSQLI_WARNING;
-
 typedef struct _mysqli_object {
 	zend_object 	zo;
 	void 			*ptr;
 	char			valid;
 	HashTable 		*prop_handler;
 } mysqli_object; /* extends zend_object */
+
+typedef struct {
+	char			*reason;
+	char			sqlstate[6];
+	int				errorno;
+   	void			*next;
+} MYSQLI_WARNING;
 
 typedef struct _mysqli_property_entry {
 	char *pname;
@@ -157,6 +158,7 @@ extern mysqli_property_entry mysqli_warning_property_entries[];
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(MY_STMT *stmt);
 extern void php_clear_mysql(MY_MYSQL *);
+extern MYSQLI_WARNING *php_get_warnings(MYSQL *mysql);
 extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC);
@@ -359,6 +361,7 @@ PHP_FUNCTION(mysqli_get_host_info);
 PHP_FUNCTION(mysqli_get_proto_info);
 PHP_FUNCTION(mysqli_get_server_info);
 PHP_FUNCTION(mysqli_get_server_version);
+PHP_FUNCTION(mysqli_get_warnings);
 PHP_FUNCTION(mysqli_info);
 PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
@@ -411,6 +414,7 @@ PHP_FUNCTION(mysqli_stmt_data_seek);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
 PHP_FUNCTION(mysqli_stmt_free_result);
+PHP_FUNCTION(mysqli_stmt_get_warnings);
 PHP_FUNCTION(mysqli_stmt_reset);
 PHP_FUNCTION(mysqli_stmt_insert_id);
 PHP_FUNCTION(mysqli_stmt_num_rows);
@@ -425,7 +429,7 @@ PHP_FUNCTION(mysqli_warning_count);
 ZEND_FUNCTION(mysqli_stmt_construct);
 ZEND_FUNCTION(mysqli_result_construct);
 ZEND_FUNCTION(mysqli_driver_construct);
-ZEND_FUNCTION(mysqli_warning_construct);
+ZEND_METHOD(mysqli_warning,__construct);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
