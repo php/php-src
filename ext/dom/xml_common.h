@@ -55,12 +55,12 @@ typedef struct _dom_object {
 #endif /* DOM_EXPORTS */
 #endif /* PHP_WIN32 */
 
-#define PHP_DOM_EXPORT(__type) PHPAPI __type
+#define PHP_DOM_EXPORT PHPAPI
 
-PHP_DOM_EXPORT(zend_class_entry *) dom_node_class_entry;
-PHP_DOM_EXPORT(dom_object *) php_dom_object_get_data(xmlNodePtr obj);
-PHP_DOM_EXPORT(zval *) php_dom_create_object(xmlNodePtr obj, int *found, zval *in, zval* return_value, dom_object *domobj TSRMLS_DC);
-PHP_DOM_EXPORT(xmlNodePtr) dom_object_get_node(dom_object *obj);
+PHP_DOM_EXPORT extern zend_class_entry *dom_node_class_entry;
+PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj);
+PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *in, zval* return_value, dom_object *domobj TSRMLS_DC);
+PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 
 #define DOM_XMLNS_NAMESPACE \
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"
