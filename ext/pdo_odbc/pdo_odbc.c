@@ -36,9 +36,17 @@ function_entry pdo_odbc_functions[] = {
 };
 /* }}} */
 
+/* {{{ pdo_odbc_deps[] */
+static zend_module_dep pdo_odbc_deps[] = {
+	ZEND_MOD_REQUIRED("pdo")
+	{NULL, NULL, NULL}
+};
+/* }}} */
+
 /* {{{ pdo_odbc_module_entry */
 zend_module_entry pdo_odbc_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_odbc_deps,
 	"PDO_ODBC",
 	pdo_odbc_functions,
 	PHP_MINIT(pdo_odbc),
