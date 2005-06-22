@@ -23,7 +23,7 @@ for ($line_len= 0; $line_len < 80; ++$line_len) {
 	$result = iconv_mime_encode("From", "サンプル文字列サンプル文字列日本語テキスト", $preference);
 	var_dump($result);
 	if ($result !== false) {
-		list($max) = rsort(array_map("strlen", explode("\n", $result)));
+                $max = max(array_map("strlen", explode("\n", $result)));
 		print "-------- ";
 		var_dump(($max <= $line_len));
 	} else {
