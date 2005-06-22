@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Fixed bug #33427 (ext/odbc: check if unixODBC header file exists). (Jani)
 - Fixed bug #33257 (array_splice() inconsistent when passed function instead
   of variable). (Dmitry)
+- Fixed bug #29896 (Backtrace argument list out of sync). (Dmitry)
 - Fixed bug #15854 (boolean ini options may be incorrectly displayed as Off 
   when they are On). (Tony)
 
