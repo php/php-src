@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.0
 - Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
+- Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 
 13 Jun 2005, Version 4.4.0 RC1
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
