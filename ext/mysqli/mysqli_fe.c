@@ -195,7 +195,7 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(get_charset,mysqli_get_charset,NULL)
 	PHP_FALIAS(get_client_info,mysqli_get_client_info,NULL)
 	PHP_FALIAS(get_server_info,mysqli_get_server_info,NULL)
-	PHP_FALIAS(get_warnings, mysqli_warning_construct,	NULL)
+/* XXX: temp_fix	PHP_FALIAS(get_warnings, mysqli_warning_construct,	NULL) */
 	PHP_FALIAS(init,mysqli_init,NULL)
 	PHP_FALIAS(kill,mysqli_kill,NULL)
 	PHP_FALIAS(set_local_infile_default,mysqli_set_local_infile_default,NULL)
@@ -268,7 +268,7 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(data_seek,mysqli_stmt_data_seek,NULL)
 	PHP_FALIAS(execute,mysqli_stmt_execute,NULL)
 	PHP_FALIAS(fetch,mysqli_stmt_fetch,NULL)
-	PHP_FALIAS(get_warnings, mysqli_warning_construct,	NULL)
+/* XXX: temp_fix	PHP_FALIAS(get_warnings, mysqli_warning_construct,	NULL) */
 	PHP_FALIAS(result_metadata, mysqli_stmt_result_metadata,NULL)
 	PHP_FALIAS(num_rows, mysqli_stmt_num_rows,NULL)
 	PHP_FALIAS(send_long_data,mysqli_stmt_send_long_data,NULL)
