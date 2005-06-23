@@ -1,16 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2005, PHP 5.1 Beta 3?
-- Fixed bug #33427 (ext/odbc: check if unixODBC header file exists). (Jani)
-- Fixed bug #33299 (php:function no longer handles returned dom objects). 
-  (Rob, Joe Orton)
-- Fixed bug #33257 (array_splice() inconsistent when passed function instead
-  of variable). (Dmitry)
-- Fixed bug #29896 (Backtrace argument list out of sync). (Dmitry)
-- Fixed bug #15854 (boolean ini options may be incorrectly displayed as Off 
-  when they are On). (Tony)
-
-21 Jun 2005, PHP 5.1 Beta 2
+22 Jun 2005, PHP 5.1 Beta 2
 - Improved PHP extension loading mechanism with support for module dependencies
   and conflicts. (Jani, Dmitry) 
 - Allowed return by reference from internal functions. (Marcus, Andi, Dmitry)
@@ -27,6 +17,7 @@ PHP                                                                        NEWS
   shutdown). (Wez)
 - Fixed PECL bug #3714 (PDO: beginTransaction doesn't work if you're in
   auto-commit mode). (Wez)
+- Fixed bug #33427 (ext/odbc: check if unixODBC header file exists). (Jani)
 - Fixed bug #33389 (double free() when exporting a ReflectionClass). (Marcus)
 - Fixed bug #33382 (array_reverse() fails after *sort()), 
   introduced by zend_hash_sort() optimizations in HEAD. (Tony)
@@ -34,24 +25,31 @@ PHP                                                                        NEWS
 - Fixed bug #33318 (throw 1; results in Invalid opcode 108/1/8). (Dmitry)
 - Fixed bug #33312 (ReflectionParameter methods do not work correctly).
   (Dmitry)
+- Fixed bug #33299 (php:function no longer handles returned dom objects). 
+  (Rob, Joe Orton)
 - Fixed bug #33286 (nested array_walk() calls and user array compare functions
   broken; FCI cache). (Andrei, patch from m.bretz@metropolis-ag.de)
 - Fixed bug #33277 (private method accessed by child class). (Dmitry)
+- Fixed bug #33257 (array_splice() inconsistent when passed function instead
+  of variable). (Dmitry)
 - Fixed bug #33212 ([GCC 4]: 'zend_error_noreturn' aliased to external symbol
   'zend_error'). (Dmitry)
 - Fixed bug #33150 (shtool: insecure temporary file creation). (Jani)
 - Fixed bug #33136 (method offsetSet in class extended from ArrayObject crash 
   PHP). (Marcus)
+- Fixed bug #32160 (copying a file into itself leads to data loss). (Ilia)
 - Fixed bug #31256 (PHP_EVAL_LIBLINE configure macro does not handle -pthread).
   (Jani)
 - Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
-- Fixed bug #32160 (copying a file into itself leads to data loss). (Ilia)
 - Fixed bug #31054 (safe_mode & open_basedir checks only check first 
   include_path value). (Ilia)
+- Fixed bug #29896 (Backtrace argument list out of sync). (Dmitry)
 - Fixed bug #29683 (headers_list() returns empty array). (Tony)
 - Fixed bug #28355 (glob wont error if dir is not readable). (Hartmut)
 - Fixed bugs #20382, #28024, #30532, #32086, #32270, #32555, #32588, #33056
   (strtotime() related bugs). (Derick)
+- Fixed bug #15854 (boolean ini options may be incorrectly displayed as Off 
+  when they are On). (Tony)
 
 10 Jun 2005, PHP 5.1 Beta 1
 - Upgraded PCRE library to version 5.0. (Andrei)
