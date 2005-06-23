@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1 Beta 3
+- Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
+  methods). (Dmitry)
 - Fixed bug #27268 (Bad references accentuated by clone). (Dmitry)
 
 22 Jun 2005, PHP 5.1 Beta 2
