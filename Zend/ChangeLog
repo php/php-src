@@ -1,3 +1,63 @@
+2005-06-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_1_0b2)
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_execute_API.c
+      zend_execute_API.c
+      tests/bug29896.phpt:
+      Fixed bug #29896 (Backtrace argument list out of sync)
+
+    * tests/bug29896.phpt
+      tests/bug29896.phpt:
+      
+      file bug29896.phpt was initially added on branch PHP_5_0.
+
+2005-06-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (php_5_1_0b2)
+      zend_vm.h
+      zend_vm_execute.h
+      zend_vm_gen.php:
+      export zend_vm_set_opcode_handler
+
+2005-06-22  Antony Dovgal  <antony@zend.com>
+
+    * (php_5_1_0b2)
+      zend_ini.c:
+      - allow to use "yes" and "true" with ini_set() and in commandline (through
+      -d flag)
+      - fix #15854 that was caused by wrong consideration that
+      zend_ini_boolean_displayer_cb()
+      always recieves converted to "0"/"1" values.
+
+2005-06-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_1_0b2)
+      zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug33257.phpt:
+      Fixed bug #33257 (array_splice() inconsistent when passed function instead
+      of variable)
+
+    * tests/bug33257.phpt
+      tests/bug33257.phpt:
+      
+      file bug33257.phpt was initially added on branch PHP_5_0.
+
+2005-06-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (php_5_1_0b2)
+      tests/unset_cv05.phpt
+      tests/unset_cv06.phpt:
+      fix tests
+
 2005-06-21  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/unset_cv07.phpt:
