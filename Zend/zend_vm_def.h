@@ -1382,6 +1382,9 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
 	}
+	if (OP1_TYPE == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
+		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
+	}
 
 	variable_ptr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 	zend_assign_to_variable_reference(variable_ptr_ptr, value_ptr_ptr TSRMLS_CC);
