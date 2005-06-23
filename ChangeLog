@@ -1,3 +1,158 @@
+2005-06-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/dom/dom_ce.h
+      ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      MFH: Fix bug #33299 (php:function no longer handles returned dom objects)
+      - maybe fix #33431/33432
+
+    * (php_5_1_0b2)
+      ext/dom/dom_ce.h
+      ext/dom/php_dom.c
+      ext/dom/xml_common.h:
+      - Fix bug #33299 (php:function no longer handles returned dom objects)
+      - maybe fix #33431/33432
+
+2005-06-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/file.c
+      ext/standard/tests/file/bug32160.phpt
+      ext/standard/tests/file/bug32160.txt:
+      Fixed bug #32160 (copying a file into itself leads to data loss).
+
+2005-06-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_1_0b2)
+      ext/dom/tests/dom003.phpt
+      tests/lang/bug32828.phpt
+      tests/lang/bug32828.phpt:
+      Debug backtrace was fixed
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/bug29896.phpt:
+      Fixed bug #29896 (Backtrace argument list out of sync)
+
+    * ZendEngine2/tests/bug29896.phpt
+      ZendEngine2/tests/bug29896.phpt:
+      
+      file bug29896.phpt was initially added on branch PHP_5_0.
+
+2005-06-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_1_0b2)
+      ext/mysqli/tests/connect.inc:
+      Slightly more reliable current path detection.
+
+    * (php_5_1_0b2)
+      ext/mysqli/tests/skipif.inc:
+      Skip MySQLi tests if connection could not be established and not using
+      embeded db.
+
+2005-06-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (php_5_1_0b2)
+      ext/standard/tests/array/array_sum.phpt:
+      "64M should be enough for everyone." -- Jani, 2005 :)
+
+2005-06-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (php_5_1_0b2)
+      ZendEngine2/zend_vm.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php:
+      export zend_vm_set_opcode_handler
+
+2005-06-22  Antony Dovgal  <antony@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_ini.c:
+      - allow to use "yes" and "true" with ini_set() and in commandline (through
+      -d flag)
+      - fix #15854 that was caused by wrong consideration that
+      zend_ini_boolean_displayer_cb()
+      always recieves converted to "0"/"1" values.
+
+2005-06-22  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      main/main.c:
+      removing the redundant NEW_LIBC checks
+
+    * (PHP_5_0)
+      main/fopen_wrappers.c:
+      NetWare LibC has sys/param.h
+
+2005-06-22  Georg Richter  <georg@mysql.com>
+
+    * (php_5_1_0b2)
+      ext/mysqli/tests/066.phpt:
+      added testcase for mysqli_warning class
+
+    * (php_5_1_0b2)
+      ext/mysqli/tests/067.phpt:
+      added testcase for cursors (nested selects)
+
+    * (php_5_1_0b2)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_warning.c
+      ext/mysqli/php_mysqli.h:
+      changed/fixed mysqli_warning class
+      added prefetch support for cursors
+
+2005-06-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_1_0b2)
+      ext/iconv/tests/iconv_mime_encode.phpt
+      ext/iconv/tests/iconv_mime_encode.phpt:
+      Fixed bug in test file
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug33257.phpt:
+      Fixed bug #33257 (array_splice() inconsistent when passed function instead
+      of variable)
+
+    * ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33257.phpt:
+      
+      file bug33257.phpt was initially added on branch PHP_5_0.
+
+2005-06-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      BFN
+
+    * (php_5_1_0b2)
+      ext/odbc/config.m4:
+      - Fixed bug #33427 (ext/odbc: check if unixODBC header file exists)
+
+    * (php_5_1_0b2)
+      acinclude.m4:
+      - Never ever add /usr/lib as libpath, even if --with-libdir is used
+
+    * (php_5_1_0b2)
+      ZendEngine2/tests/unset_cv05.phpt
+      ZendEngine2/tests/unset_cv06.phpt:
+      fix tests
+
 2005-06-21  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/tests/unset_cv07.phpt:
