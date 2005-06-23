@@ -175,6 +175,7 @@ PHP                                                                        NEWS
 - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
   (kameshj at fastmail dot fm)
 - Fixed bug #28605 (Need to use -[m]ieee option for Alpha CPUs). (Jani)
+- Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 - Fixed bug #27598 (list() array key assignment causes HUGE memory leak).
   (Dmitry)
 - Fixed bug #26456 (Wrong results from Reflection-API getDocComment() when
