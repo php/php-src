@@ -137,6 +137,8 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #30889 (Conflict between __get/__set and ++ operator). (Dmitry)
 - Fixed bug #30833 (array_count_values() modifying input array). (Tony)
+- Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
+  methods). (Dmitry)
 - Fixed bug #30820 (static member conflict with $this->member silently
   ignored). (Dmitry)
 - Fixed bug #30819 (Better support for LDAP SASL bind). (Jani)
