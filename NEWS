@@ -85,6 +85,8 @@ PHP                                                                        NEWS
 - Fixed bug #32682 (ext/mssql: Error on module shutdown when called from
   activescript). (Frank)
 - Fixed bug #32674 (exception in iterator causes crash). (Dmitry)
+- Fixed bug #32660 (Assignment by reference causes crash when field access is
+  overloaded (__get)). (Dmitry)
 - Fixed bug #32647 (Using register_shutdown_function() with invalid callback
   can crash PHP). (Jani)
 - Fixed bug #32615 (Segfault in replaceChild() using fragment when 

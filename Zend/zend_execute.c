@@ -2261,11 +2261,14 @@ int zend_assign_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (opline->op2.op_type == IS_VAR &&
 	    !(*value_ptr_ptr)->is_ref &&
-	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
-	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
+	     opline->extended_value == ZEND_RETURNS_FUNCTION && 
+	     !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
 		PZVAL_LOCK(*value_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		zend_error(E_STRICT, "Only variables should be assigned by reference");
 		return zend_assign_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
+	if (opline->op1.op_type == IS_VAR && EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
+		zend_error(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
 	zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, EX(Ts), BP_VAR_W), value_ptr_ptr, EX(Ts) TSRMLS_CC);
