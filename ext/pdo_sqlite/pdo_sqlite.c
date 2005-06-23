@@ -41,17 +41,23 @@ function_entry pdo_sqlite_functions[] = {
 
 /* {{{ pdo_sqlite_deps
  */
+#if ZEND_EXTENSION_API_NO >= 220050617
 static zend_module_dep pdo_sqlite_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	{NULL, NULL, NULL}
 };
+#endif
 /* }}} */
 
 /* {{{ pdo_sqlite_module_entry
  */
 zend_module_entry pdo_sqlite_module_entry = {
+#if ZEND_EXTENSION_API_NO >= 220050617
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_sqlite_deps,
+#else
+	STANDARD_MODULE_HEADER,
+#endif
 	"pdo_sqlite",
 	pdo_sqlite_functions,
 	PHP_MINIT(pdo_sqlite),
