@@ -70,6 +70,9 @@ static inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free)
 /*		should_free->is_var = 1; */
 	} else {
 		should_free->var = 0;
+		if (z->is_ref && z->refcount == 1) {
+			z->is_ref = 0;
+		}
 	}
 }
 
