@@ -35,7 +35,7 @@ object(DOMException)#%d (6) {
     [0]=>
     array(6) {
       ["file"]=>
-      string(46) "%sdom003.php"
+      string(%d) "%sdom003.php"
       ["line"]=>
       int(8)
       ["function"]=>
