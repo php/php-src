@@ -503,6 +503,7 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	
 	if (this) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", 
+			&prefix, &prefix_len, &name, &name_len, &uri, &uri_len) == FAILURE) {
 			return;
 		}
 		XMLWRITER_FROM_OBJECT(intern, this);
