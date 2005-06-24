@@ -13,7 +13,7 @@ require_once($PDO_TESTS . 'pdo_023_def.inc');
 
 $DB = NULL;
 
-$DB = new PDODatabaseX($CONNECTION);
+$DB = new PDODatabaseX($CONNECTION, $USER, $PASSWD);
 $DB->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
 
 require_once($PDO_TESTS . 'pdo_023.inc');
