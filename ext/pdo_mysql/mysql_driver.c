@@ -37,6 +37,7 @@ const char *pdo_mysql_get_sqlstate(unsigned int my_errno) {
 	switch (my_errno) {
 		/* import auto-generated case: code */
 #include "php_pdo_mysql_sqlstate.h"
+	case 2014: return "PDDRV"; /* out of sync */
 	default: return "HY000";
 	}
 }
@@ -66,7 +67,11 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 	}
 
 	if (einfo->errcode) {
-		einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+		if (2014 != einfo->errcode) {
+			einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+		} else {
+			einfo->errmsg = pestrdup("Cannot execute queries, while other unbuffered queries are active. To enable query buffering set PDO_MYSQL_ATTR_USE_BUFFERED_QUERY attribute.", dbh->is_persistent);
+		}
 	} else { /* no error */
 		strcpy(*pdo_err, PDO_ERR_NONE);
 		return 0;
@@ -208,6 +213,10 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_D
 			mysql_handle_autocommit(dbh TSRMLS_CC);
 		}
 		return 1;
+
+	case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
+		((pdo_mysql_db_handle *)dbh->driver_data)->buffered = Z_BVAL_P(val);
+		return 1;
 		
 	default:
 		return 0;
@@ -245,6 +254,10 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_LONG(return_value, dbh->auto_commit);
+			return 1;
+
+		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
+			ZVAL_LONG(return_value, H->buffered);
 			return 1;
 
 		default:
@@ -309,6 +322,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* handle MySQL options */
 	if (driver_options) {
 		long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 0 TSRMLS_CC);
 
 		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
 			pdo_mysql_error(dbh);
