@@ -10,6 +10,7 @@ require_once('skipif.inc');
 require_once('connection.inc');
 require_once('prepare.inc');
 
+$DB->setAttribute(PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 require_once($PDO_TESTS . 'pdo_016.inc');
 
 ?>

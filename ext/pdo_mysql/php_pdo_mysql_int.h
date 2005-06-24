@@ -35,6 +35,7 @@ typedef struct {
 	MYSQL 		*server;
 
 	unsigned attached:1;
+	unsigned buffered:1;
 	unsigned _reserved:31;
 
 	pdo_mysql_error_info einfo;
@@ -67,4 +68,8 @@ extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, 
 #define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
 
 extern struct pdo_stmt_methods mysql_stmt_methods;
+
+enum {
+	PDO_MYSQL_ATTR_USE_BUFFERED_QUERY = PDO_ATTR_DRIVER_SPECIFIC,
+};
 #endif

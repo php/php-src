@@ -75,6 +75,8 @@ ZEND_GET_MODULE(pdo_mysql)
  */
 PHP_MINIT_FUNCTION(pdo_mysql)
 {
+	REGISTER_LONG_CONSTANT("PDO_MYSQL_ATTR_USE_BUFFERED_QUERY", (long)PDO_MYSQL_ATTR_USE_BUFFERED_QUERY,	CONST_CS|CONST_PERSISTENT);
+
 	return php_pdo_register_driver(&pdo_mysql_driver);
 }
 /* }}} */
