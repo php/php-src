@@ -29534,3 +29534,8 @@ ZEND_API void zend_vm_set_opcode_handler(zend_op* op)
 	op->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);
 }
 
+ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS)
+{
+	return zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
