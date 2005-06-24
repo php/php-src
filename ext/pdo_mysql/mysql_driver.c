@@ -151,7 +151,8 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 		pdo_mysql_error(dbh);
 		return -1;
 	} else {
-		return mysql_affected_rows(H->server);
+		long c = mysql_affected_rows(H->server);
+		return c >0 ? c : 0;
 	}
 }
 
