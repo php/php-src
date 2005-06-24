@@ -1,3 +1,108 @@
+2005-06-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/lang/bug28377.phpt
+      tests/lang/bug28377.phpt:
+      
+      file bug28377.phpt was initially added on branch PHP_4_4.
+
+    * NEWS
+      NEWS
+      NEWS
+      Zend/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug28377.phpt:
+      Fixed bug #28377 (debug_backtrace is intermittently passing args)
+
+    * ZendEngine2/tests/bug28377.phpt
+      ZendEngine2/tests/bug28377.phpt:
+      
+      file bug28377.phpt was initially added on branch PHP_5_0.
+
+    * ZendEngine2/tests/bug32660.phpt
+      ZendEngine2/tests/bug32660.phpt:
+      
+      Fixed bug #32660 (Assignment by reference causes crash when field access
+      is overloaded (__get))
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug32660.phpt:
+      Fixed bug #32660 (Assignment by reference causes crash when field access is
+      overloaded (__get))
+
+2005-06-23  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * tests/classes/ctor_name_clash.phpt:
+      Don't really need the ZE2 check since this is in HEAD
+
+2005-06-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/dom/tests/dom003.phpt:
+      fix test
+
+2005-06-23  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * tests/classes/ctor_name_clash.phpt:
+      test for derived method name clashes
+
+2005-06-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/dom/tests/dom003.phpt
+      ext/dom/tests/dom003.phpt:
+      Fixed test file according to latest debug_backtrace() fixes
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/tests/bug30828.phpt:
+      Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
+      methods)
+
+    * ZendEngine2/tests/bug30828.phpt
+      ZendEngine2/tests/bug30828.phpt:
+      
+      file bug30828.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug27268.phpt:
+      Test for bug #27268. It is fixed in HEAD but not in PHP_5_0.
+
+    * ZendEngine2/tests/bug27268.phpt
+      ZendEngine2/tests/bug27268.phpt:
+      
+      Fixed bug #27268 (Bad references accentuated by clone).
+
+    * NEWS
+      ZendEngine2/zend_execute.c:
+      Fixed bug #27268 (Bad references accentuated by clone).
+
+2005-06-23  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev
+
+    * (php_5_1_0b2)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Beta 2
+
+2005-06-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_1_0b2)
+      ext/mysqli/mysqli_fe.c:
+      temporary fix to let mysqli extension build, so we can make a release.
+
 2005-06-22  Rob Richards  <rrichards@ctindustries.net>
 
     * NEWS:
