@@ -3607,3 +3607,4 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 	}
 }
 
+ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)
