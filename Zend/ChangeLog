@@ -1,3 +1,59 @@
+2005-06-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug28377.phpt:
+      Fixed bug #28377 (debug_backtrace is intermittently passing args)
+
+    * tests/bug28377.phpt
+      tests/bug28377.phpt:
+      
+      file bug28377.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug32660.phpt:
+      Fixed bug #32660 (Assignment by reference causes crash when field access is
+      overloaded (__get))
+
+    * tests/bug32660.phpt
+      tests/bug32660.phpt:
+      
+      Fixed bug #32660 (Assignment by reference causes crash when field access
+      is overloaded (__get))
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c
+      tests/bug30828.phpt:
+      Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
+      methods)
+
+    * tests/bug30828.phpt
+      tests/bug30828.phpt:
+      
+      file bug30828.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      tests/bug27268.phpt:
+      Test for bug #27268. It is fixed in HEAD but not in PHP_5_0.
+
+    * zend_execute.c
+      tests/bug27268.phpt
+      tests/bug27268.phpt:
+      Fixed bug #27268 (Bad references accentuated by clone).
+
+2005-06-23  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Back to -dev
+
+    * (php_5_1_0b2)
+      zend.h:
+      - Beta 2
+
 2005-06-22  Dmitry Stogov  <dmitry@zend.com>
 
     * (php_5_1_0b2)
