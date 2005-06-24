@@ -149,6 +149,7 @@ PHP                                                                        NEWS
 - Fixed bug #30707 (Segmentation fault on exception in method). (Stas, Dmitry)
 - Fixed bug #30702 (cannot initialize class variable from class constant).
   (Dmitry)
+- Fixed bug #30519 (Interface not existing says Class not found). (Dmitry)
 - Fixed bug #30394 (Assignment operators yield wrong result with __get/__set).
   (Dmitry)
 - Fixed bug #30332 (zend.ze1_compatibility_mode isnt fully compatable with
