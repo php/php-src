@@ -2,6 +2,7 @@
 PDO_MySQL: PDO::beginTransaction / PDO::rollBack 
 --SKIPIF--
 <?php # vim:ft=php
+die('skip no transaction support');
 require_once('skipif.inc');
 ?>
 --FILE--
