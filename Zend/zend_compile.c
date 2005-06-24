@@ -1392,6 +1392,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
 		opline->op2 = *class_name;
 	}
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->result.u.EA.type = opline->extended_value;
 	opline->result.op_type = IS_CONST; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
 	*result = opline->result;
 }
@@ -2625,6 +2626,16 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->ce_flags |= class_token->u.EA.type;
 
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
+		switch (parent_class_name->u.EA.type) {
+			case ZEND_FETCH_CLASS_SELF:
+				zend_error(E_COMPILE_ERROR, "Cannot use 'self' as class name as it is reserved");
+				break;
+			case ZEND_FETCH_CLASS_PARENT:
+				zend_error(E_COMPILE_ERROR, "Cannot use 'parent' as class name as it is reserved");
+				break;
+			default:
+				break;
+		}
 		doing_inheritance = 1;
 	}
 
@@ -2717,8 +2728,26 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
 
+	switch (interface_znode->u.EA.type) {
+		case ZEND_FETCH_CLASS_SELF:
+			zend_error(E_COMPILE_ERROR, "Cannot use 'self' as interface name as it is reserved");
+			break;
+		case ZEND_FETCH_CLASS_PARENT:
+			zend_error(E_COMPILE_ERROR, "Cannot use 'parent' as interface name as it is reserved");
+			break;
+		default:
+			if (CG(active_op_array)->last > 0) {
+				opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+				if (opline->opcode == ZEND_FETCH_CLASS) {
+					opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
+				}
+			}
+			break;
+	}
+	
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_INTERFACE;
 	opline->op1 = CG(implementing_class);
 	opline->op2 = *interface_znode;

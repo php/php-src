@@ -1326,7 +1326,11 @@ check_fetch_type:
 	}
 
 	if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
-		zend_error(E_ERROR, "Class '%s' not found", class_name);
+		if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
+			zend_error(E_ERROR, "Interface '%s' not found", class_name);
+		} else {
+			zend_error(E_ERROR, "Class '%s' not found", class_name);
+		}
 	}
 	return *pce;
 }

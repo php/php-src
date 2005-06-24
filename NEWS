@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   overloaded (__get)). (Dmitry)
 - Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
   methods). (Dmitry)
+- Fixed bug #30519 (Interface not existing says Class not found). (Dmitry)
 - Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 - Fixed bug #27268 (Bad references accentuated by clone). (Dmitry)
 
