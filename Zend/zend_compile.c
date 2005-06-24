@@ -3116,8 +3116,15 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 				zend_symtable_update(result->u.constant.value.ht, offset->u.constant.value.str.val, offset->u.constant.value.str.len+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
 				break;
+			case IS_NULL:
+				zend_symtable_update(result->u.constant.value.ht, "", 1, &element, sizeof(zval *), NULL);
+				break;
 			case IS_LONG:
+			case IS_BOOL: 
 				zend_hash_index_update(result->u.constant.value.ht, offset->u.constant.value.lval, &element, sizeof(zval *), NULL);
+				break;
+			case IS_DOUBLE:
+				zend_hash_index_update(result->u.constant.value.ht, (long)offset->u.constant.value.dval, &element, sizeof(zval *), NULL);
 				break;
 		}
 	} else {
