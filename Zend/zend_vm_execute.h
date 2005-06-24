@@ -573,7 +573,7 @@ static int ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 
 	if (IS_CONST == IS_UNUSED) {
-		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, ZEND_FETCH_CLASS_AUTO, opline->extended_value TSRMLS_CC);
+		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -584,7 +584,7 @@ static int ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), opline->extended_value TSRMLS_CC);
 			break;
 		default:
 			zend_error_noreturn(E_ERROR, "Class name must be a valid object or a string");
@@ -769,7 +769,7 @@ static int ZEND_FETCH_CLASS_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 
 	if (IS_TMP_VAR == IS_UNUSED) {
-		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, ZEND_FETCH_CLASS_AUTO, opline->extended_value TSRMLS_CC);
+		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -780,7 +780,7 @@ static int ZEND_FETCH_CLASS_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), opline->extended_value TSRMLS_CC);
 			break;
 		default:
 			zend_error_noreturn(E_ERROR, "Class name must be a valid object or a string");
@@ -923,7 +923,7 @@ static int ZEND_FETCH_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 
 	if (IS_VAR == IS_UNUSED) {
-		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, ZEND_FETCH_CLASS_AUTO, opline->extended_value TSRMLS_CC);
+		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -934,7 +934,7 @@ static int ZEND_FETCH_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), opline->extended_value TSRMLS_CC);
 			break;
 		default:
 			zend_error_noreturn(E_ERROR, "Class name must be a valid object or a string");
@@ -1077,7 +1077,7 @@ static int ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 
 	if (IS_UNUSED == IS_UNUSED) {
-		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, ZEND_FETCH_CLASS_AUTO, opline->extended_value TSRMLS_CC);
+		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -1088,7 +1088,7 @@ static int ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), opline->extended_value TSRMLS_CC);
 			break;
 		default:
 			zend_error_noreturn(E_ERROR, "Class name must be a valid object or a string");
@@ -1160,7 +1160,7 @@ static int ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 
 	if (IS_CV == IS_UNUSED) {
-		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, ZEND_FETCH_CLASS_AUTO, opline->extended_value TSRMLS_CC);
+		EX_T(opline->result.u.var).class_entry = zend_fetch_class(NULL, 0, opline->extended_value TSRMLS_CC);
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -1171,7 +1171,7 @@ static int ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), opline->extended_value TSRMLS_CC);
 			break;
 		default:
 			zend_error_noreturn(E_ERROR, "Class name must be a valid object or a string");
