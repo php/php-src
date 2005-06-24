@@ -2044,11 +2044,13 @@ PHP_FUNCTION(xmlwriter_flush)
  */
 PHP_MINIT_FUNCTION(xmlwriter)
 {
-	
+#ifdef ZEND_ENGINE_2
+	zend_class_entry ce;
+#endif
+
 	le_xmlwriter = zend_register_list_destructors_ex(xmlwriter_dtor, NULL, "xmlwriter", module_number);
 
 #ifdef ZEND_ENGINE_2
-	zend_class_entry ce;
 	memcpy(&xmlwriter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	xmlwriter_object_handlers.clone_obj      = NULL;
 	INIT_CLASS_ENTRY(ce, "XMLWriter", xmlwriter_class_functions);
