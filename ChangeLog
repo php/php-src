@@ -1,3 +1,59 @@
+2005-06-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql, to toggle
+      usage of buffered queries.
+
+2005-06-24  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_fe.c:
+      reverted Ilias changes - added get_warnings methods
+      (forgot to commit the file in my last commit)
+
+2005-06-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      Export zend_do_fcall() helper from executor
+
+    * (PHP_4_4)
+      Zend/zend_compile.c:
+      Partial fix for bug #26584 (Class member - array key overflow)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Partial fix for bug #26584 (Class member - array key overflow)
+      It doesn't fix integer overflow problem, but allows null, boolean and
+      double keys in array constants in the same way as in runtime.
+
+    * ZendEngine2/tests/bug30519.phpt
+      ZendEngine2/tests/bug30519.phpt:
+      
+      Fixed bug #30519 (Interface not existing says Class not found)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug30519.phpt:
+      Fixed bug #30519 (Interface not existing says Class not found)
+
+2005-06-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/plain_wrapper.c:
+      Likely fix for bug #33140
+
 2005-06-23  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/lang/bug28377.phpt
