@@ -28,20 +28,7 @@
 #include "ext/standard/info.h"
 #include "php_xmlwriter.h"
 
-/* {{{ XMLWRITER_FROM_OBJECT */
-#define XMLWRITER_FROM_OBJECT(intern, object) \
-	{ \
-		ze_xmlwriter_object *obj = (ze_xmlwriter_object*) zend_object_store_get_object(object TSRMLS_CC); \
-		intern = obj->xmlwriter_ptr; \
-		if (!intern) { \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid or unitialized XMLWriter object"); \
-			RETURN_FALSE; \
-		} \
-	}
-/* }}} */
-
 zend_class_entry *xmlwriter_class_entry;
-static zend_object_handlers xmlwriter_object_handlers;
 
 /* {{{ xmlwriter_object_free_storage */
 static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC) 
@@ -59,6 +46,21 @@ static void xmlwriter_free_resource_ptr(xmlwriter_object *intern TSRMLS_DC)
 	}
 }
 /* }}} */
+
+#ifdef ZEND_ENGINE_2
+/* {{{ XMLWRITER_FROM_OBJECT */
+#define XMLWRITER_FROM_OBJECT(intern, object) \
+	{ \
+		ze_xmlwriter_object *obj = (ze_xmlwriter_object*) zend_object_store_get_object(object TSRMLS_CC); \
+		intern = obj->xmlwriter_ptr; \
+		if (!intern) { \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid or unitialized XMLWriter object"); \
+			RETURN_FALSE; \
+		} \
+	}
+/* }}} */
+
+static zend_object_handlers xmlwriter_object_handlers;
 
 /* {{{ xmlwriter_object_free_storage */
 static void xmlwriter_object_free_storage(void *object TSRMLS_DC)
@@ -108,6 +110,7 @@ PHP_XMLWRITER_API zend_object_value xmlwriter_object_new(zend_class_entry *class
 	return retval;
 }
 /* }}} */
+#endif
 
 /* {{{ xmlwriter_functions */
 static zend_function_entry xmlwriter_functions[] = {
@@ -153,6 +156,7 @@ static zend_function_entry xmlwriter_functions[] = {
 };
 /* }}} */
 
+#ifdef ZEND_ENGINE_2
 /* {{{ xmlwriter_class_functions */
 static zend_function_entry xmlwriter_class_functions[] = {
 	PHP_ME_MAPPING(openUri,		xmlwriter_open_uri,		NULL)
@@ -196,6 +200,7 @@ static zend_function_entry xmlwriter_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 /* }}} */
+#endif
 
 /* {{{ function prototypes */
 PHP_MINIT_FUNCTION(xmlwriter);
