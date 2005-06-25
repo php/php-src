@@ -1,3 +1,36 @@
+2005-06-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Export zend_do_fcall() helper from executor
+
+    * zend_compile.c
+      zend_compile.c:
+      Partial fix for bug #26584 (Class member - array key overflow)
+      It doesn't fix integer overflow problem, but allows null, boolean and
+      double keys in array constants in the same way as in runtime.
+
+    * tests/bug30519.phpt
+      tests/bug30519.phpt:
+      
+      Fixed bug #30519 (Interface not existing says Class not found)
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug30519.phpt:
+      Fixed bug #30519 (Interface not existing says Class not found)
+
 2005-06-23  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_builtin_functions.c
