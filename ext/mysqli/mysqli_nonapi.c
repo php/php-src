@@ -251,6 +251,54 @@ PHP_FUNCTION(mysqli_query)
 }
 /* }}} */
 
+/* {{{ proto object mysqli_get_warnings(object link) */
+PHP_FUNCTION(mysqli_get_warnings)
+{
+	MY_MYSQL			*mysql;
+	zval				*mysql_link;
+	MYSQLI_RESOURCE		*mysqli_resource;
+	MYSQLI_WARNING		*w;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link");
+
+	if (mysql_warning_count(mysql->mysql)) {
+		w = php_get_warnings(mysql->mysql); 
+	} else {
+		RETURN_FALSE;
+	}
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
+}
+/* }}} */
+
+/* {{{ proto object mysqli_get_warnings(object link) */
+PHP_FUNCTION(mysqli_stmt_get_warnings)
+{
+	MY_STMT				*stmt;
+	zval				*stmt_link;
+	MYSQLI_RESOURCE		*mysqli_resource;
+	MYSQLI_WARNING		*w;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &stmt_link, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, MY_STMT*, &stmt_link, "mysqli_stmt");
+
+	if (mysql_warning_count(stmt->stmt->mysql)) {
+		w = php_get_warnings(stmt->stmt->mysql); 
+	} else {
+		RETURN_FALSE;
+	}
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);	
+}
+/* }}} */
+
 #ifdef HAVE_MYSQLI_SET_CHARSET
 /* {{{ proto bool mysqli_set_charset(object link, string csname)
    sets client character set */
