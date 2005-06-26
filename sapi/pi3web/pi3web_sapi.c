@@ -82,7 +82,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 	/* --- loop over all registered server variables --- */
 	for(; pIter && PIDBIterator_atValidElement( pIter ); PIDBIterator_next( pIter ) )
 	{	
-		PCHAR pKey;
+		CHAR *pKey;
 		PIDBIterator_current( pIter, &pKey );
 		if ( !pKey ) { /* sanity */ continue; };										
 
@@ -289,7 +289,7 @@ static void sapi_pi3web_register_variables(zval *track_vars_array TSRMLS_DC)
 	/* --- loop over all registered server variables --- */				
 	for(; pIter && PIDBIterator_atValidElement( pIter ); PIDBIterator_next( pIter ) )
 	{	
-		PCHAR pKey;
+		CHAR *pKey;
 		PIDBIterator_current( pIter, &pKey );
 		if ( !pKey ) { /* sanity */ continue; };										
 
