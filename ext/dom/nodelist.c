@@ -100,7 +100,8 @@ Since:
 PHP_FUNCTION(dom_nodelist_item)
 {
 	zval *id, *rv = NULL;
-	int index, ret;
+	long index;
+	int ret;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
 
