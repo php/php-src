@@ -1291,12 +1291,13 @@ PHP_FUNCTION(curl_exec)
 	ch->uses++;
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
+		--ch->uses;
 		if (ch->handlers->write->type != PHP_CURL_BINARY)  {
 			smart_str_0(&ch->handlers->write->buf);
 		}
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 0);
 	}
-
+	--ch->uses;
 	RETURN_TRUE;
 }
 /* }}} */
