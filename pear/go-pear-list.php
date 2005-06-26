@@ -8,9 +8,13 @@
 $packages  = array(
 // required packages for the installer
 "PEAR"                  =>    "1.3.5",
-"XML_RPC"               =>    "1.2.2",
+"XML_RPC"               =>    "1.3.0",
 "Console_Getopt"        =>    "1.2",
+<<<<<<< go-pear-list.php
+"Archive_Tar"           =>    "1.3.0",
+=======
 "Archive_Tar"           =>    "1.3.1",
+>>>>>>> 1.9.2.4
 
 // required packages for the web frontend
 "PEAR_Frontend_Web"     =>    "0.4",
