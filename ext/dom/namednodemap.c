@@ -167,7 +167,8 @@ Since:
 PHP_FUNCTION(dom_namednodemap_item)
 {
 	zval *id, *rv = NULL;
-	int index, ret;
+	long index;
+	int ret;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
 
