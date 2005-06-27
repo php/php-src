@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2005, PHP 5.1 Beta 3
 - Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql, to toggle
   usage of buffered queries.
+- Fixed bug #33491 (crash after extending MySQLi internal class). (Tony)
 - Fixed bug #33475 (cURL handle is not closed on curl_close(). (Ilia)
 - Fixed bug #32660 (Assignment by reference causes crash when field access is
   overloaded (__get)). (Dmitry)
