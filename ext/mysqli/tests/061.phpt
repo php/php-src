@@ -16,17 +16,18 @@ local infile handler
 	$link = mysqli_connect($host, $user, $passwd, "test");
 
 	/* create temporary file */
-	$fp = fopen("061.csv", "w");
+	$filename = dirname(__FILE__) . "061.csv";
+	$fp = fopen($filename, "w");
 	fwrite($fp, "foo;bar");
 	fclose($fp);
 
   	mysqli_query($link,"DROP TABLE IF EXISTS t_061");
   	mysqli_query($link,"CREATE TABLE t_061 (c1 varchar(10), c2 varchar(10))");
 
-	mysqli_query($link, "LOAD DATA LOCAL INFILE '061.csv' INTO TABLE t_061 FIELDS TERMINATED BY ';'"); 
+	mysqli_query($link, "LOAD DATA LOCAL INFILE '{$filename}' INTO TABLE t_061 FIELDS TERMINATED BY ';'"); 
 
 	mysqli_set_local_infile_handler($link, "my_read");
-	mysqli_query($link, "LOAD DATA LOCAL INFILE '061.csv' INTO TABLE t_061 FIELDS TERMINATED BY ';'"); 
+	mysqli_query($link, "LOAD DATA LOCAL INFILE '{$filename}' INTO TABLE t_061 FIELDS TERMINATED BY ';'"); 
 
 	if ($result = mysqli_query($link, "SELECT c1,c2 FROM t_061")) {
 		while (($row = mysqli_fetch_row($result))) {
@@ -36,6 +37,7 @@ local infile handler
 	}
 
 	mysqli_close($link);
+	unlink($filename);
 ?>
 --EXPECT--
 foo-bar
