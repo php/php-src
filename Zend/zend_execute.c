@@ -2260,6 +2260,7 @@ int zend_assign_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value_ptr_ptr = get_zval_ptr_ptr(&opline->op2, EX(Ts), BP_VAR_W);
 
 	if (opline->op2.op_type == IS_VAR &&
+	    value_ptr_ptr &&
 	    !(*value_ptr_ptr)->is_ref &&
 	     opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	     !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
