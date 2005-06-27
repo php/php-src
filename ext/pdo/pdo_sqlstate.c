@@ -151,8 +151,7 @@ static struct pdo_sqlstate_info err_initializer[] = {
 	{ "IM012",	"DRIVER keyword syntax error" },
 	{ "IM013",	"Trace file error" },
 	{ "IM014",	"Invalid name of File DSN" },
-	{ "IM015",	"Corrupt file data source" },
-	{ "PDDRV",	"Nested unbuffered query, refer to driver error for details" }
+	{ "IM015",	"Corrupt file data source" }
 };
 
 void pdo_sqlstate_fini_error_table(void)

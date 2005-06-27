@@ -37,7 +37,6 @@ const char *pdo_mysql_get_sqlstate(unsigned int my_errno) {
 	switch (my_errno) {
 		/* import auto-generated case: code */
 #include "php_pdo_mysql_sqlstate.h"
-	case 2014: return "PDDRV"; /* out of sync */
 	default: return "HY000";
 	}
 }
