@@ -156,11 +156,19 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_PP(value) == IS_OBJECT) {
 			zval *value_ptr;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
+			
+			dup = zend_get_object_classname(*value, &class_name, &class_name_len TSRMLS_CC);
 
 			ALLOC_ZVAL(value_ptr);
 			*value_ptr = **value;
 			INIT_PZVAL(value_ptr);
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_PP(value)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
+			if(!dup) {
+				efree(class_name);
+			}
 			value_ptr->value.obj = Z_OBJ_HANDLER_PP(value, clone_obj)(*value TSRMLS_CC);
 			zval_ptr_dtor(value);
 			*value = value_ptr;
@@ -246,6 +254,19 @@ ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC)
 		zend_error(E_ERROR, "Class entry requested for an object without PHP class");
 		return NULL;
 	}
+}
+
+ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC)
+{
+	if (Z_OBJ_HT_P(object)->get_class_name == NULL ||
+		Z_OBJ_HT_P(object)->get_class_name(object, class_name, class_name_len, 0 TSRMLS_CC) != SUCCESS) {
+		zend_class_entry *ce = Z_OBJCE_P(object);
+		
+		*class_name = ce->name;
+		*class_name_len = ce->name_length;
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -2197,7 +2218,12 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", Z_OBJCE_P(object)->name, name);
+		char *class_name;
+		zend_uint class_name_len;
+
+		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
+		
+		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, class_name);
 	}
 	ZVAL_STRINGL(&property, name, name_length, 0);
 	Z_OBJ_HT_P(object)->write_property(object, &property, value TSRMLS_CC);
@@ -2279,7 +2305,11 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->read_property) {
-		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", Z_OBJCE_P(object)->name, name);
+		char *class_name;
+		zend_uint class_name_len;
+
+		zend_get_object_classname(object, &class_name, &class_name_len TSRMLS_CC);
+		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", name, class_name);
 	}
 	ZVAL_STRINGL(&property, name, name_length, 0);
 	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent TSRMLS_CC);
