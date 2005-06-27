@@ -11590,6 +11590,7 @@ static int ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR &&
+	    value_ptr_ptr &&
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
@@ -13420,6 +13421,7 @@ static int ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 
 	if (IS_CV == IS_VAR &&
+	    value_ptr_ptr &&
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
@@ -23444,6 +23446,7 @@ static int ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR &&
+	    value_ptr_ptr &&
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
@@ -25264,6 +25267,7 @@ static int ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval **value_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 
 	if (IS_CV == IS_VAR &&
+	    value_ptr_ptr &&
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
