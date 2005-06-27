@@ -89,6 +89,7 @@ PHP_FUNCTION(mysqli_connect)
 		}
 		/* free mysql structure */
 		mysql_close(mysql->mysql);
+		efree(mysql);
 		RETURN_FALSE;
 	}
 
