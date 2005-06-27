@@ -1373,6 +1373,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	zval **value_ptr_ptr = GET_OP2_ZVAL_PTR_PTR(BP_VAR_W);
 
 	if (OP2_TYPE == IS_VAR &&
+	    value_ptr_ptr &&
 	    !(*value_ptr_ptr)->is_ref &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION && 
 	    !EX_T(opline->op2.u.var).var.fcall_returned_reference) {
