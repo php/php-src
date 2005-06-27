@@ -47,6 +47,7 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char 
 
 	if (!(MyG(report_mode) & MYSQLI_REPORT_STRICT)) {
 	 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s/%d): %s", sqlstate, errorno, message);
+		efree(message);
 		return;
 	}
 
