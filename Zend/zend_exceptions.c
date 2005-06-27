@@ -359,10 +359,20 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
 			TSRMLS_FETCH();
 
 			TRACE_APPEND_STR("Object(");
-			TRACE_APPEND_STRL(Z_OBJCE_PP(arg)->name, strlen(Z_OBJCE_PP(arg)->name));
+
+			dup = zend_get_object_classname(*arg, &class_name, &class_name_len TSRMLS_CC);
+
+			TRACE_APPEND_STRL(class_name, class_name_len);
+			if(!dup) {
+				efree(class_name);
+			}
+			
 			TRACE_APPEND_STR("), ");
 			break;
 		}
