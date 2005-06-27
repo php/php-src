@@ -2305,15 +2305,18 @@ dnl
 dnl Common setup macro for libxml
 dnl
 AC_DEFUN([PHP_SETUP_LIBXML], [
-
+AC_CACHE_CHECK([for xml2-config path], ac_cv_php_xml2_config_path,
+[
   for i in $PHP_LIBXML_DIR /usr/local /usr; do
     if test -x "$i/bin/xml2-config"; then
-      XML2_CONFIG="$i/bin/xml2-config"
+      ac_cv_php_xml2_config_path="$i/bin/xml2-config"
       break
     fi
   done
+])
 
-  if test -x "$XML2_CONFIG"; then
+  if test -x "$ac_cv_php_xml2_config_path"; then
+    XML2_CONFIG="$ac_cv_php_xml2_config_path"
     libxml_full_version=`$XML2_CONFIG --version`
     ac_IFS=$IFS
     IFS="."
