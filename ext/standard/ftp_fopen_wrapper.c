@@ -142,7 +142,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	unsigned short portno;
 	char *scratch;
 	int result;
-	int i, use_ssl;
+	int i, use_ssl, tmp_len;
 #ifdef HAVE_OPENSSL_EXT	
 	int use_ssl_on_data=0;
 	php_stream *reuseid=NULL;
@@ -243,22 +243,24 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 #endif
 
+#define PHP_FTP_CNTRL_CHK(val, val_len, err_msg) {	\
+	unsigned char *s = val, *e = s + val_len;	\
+	while (s < e) {	\
+		if (iscntrl(*s)) {	\
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, err_msg, val);	\
+			goto errexit;	\
+		}	\
+		s++;	\
+	}	\
+}
+
 	/* send the user name */
 	php_stream_write_string(stream, "USER ");
 	if (resource->user != NULL) {
 		unsigned char *s, *e;
-		int user_len = php_raw_url_decode(resource->user, strlen(resource->user));
+		tmp_len = php_raw_url_decode(resource->user, strlen(resource->user));
 		
-		s = resource->user;
-		e = s + user_len;
-		/* check for control characters that should not be present in the user name */
-		while (s < e) {
-			if (iscntrl(*s)) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Invalid login %s", resource->user);
-				goto errexit;
-			}
-			s++;
-		}
+		PHP_FTP_CNTRL_CHK(resource->user, tmp_len, "Invalid login %s")
 		
 		php_stream_write_string(stream, resource->user);
 	} else {
@@ -275,7 +277,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 
 		php_stream_write_string(stream, "PASS ");
 		if (resource->pass != NULL) {
-			php_raw_url_decode(resource->pass, strlen(resource->pass));
+			tmp_len = php_raw_url_decode(resource->pass, strlen(resource->pass));
+			
+			PHP_FTP_CNTRL_CHK(resource->pass, tmp_len, "Invalid password %s")
+			
 			php_stream_write_string(stream, resource->pass);
 		} else {
 			/* if the user has configured who they are,
