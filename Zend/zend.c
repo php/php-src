@@ -943,13 +943,20 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			ALLOC_INIT_ZVAL(z_error_lineno);
 			ALLOC_INIT_ZVAL(z_context);
 
-#if defined(va_copy)
-			va_copy(usr_copy, args);
-#else
-			usr_copy = args;
+/* va_copy() is __va_copy() in old gcc versions.
+ * According to the autoconf manual, using
+ * memcpy(&dst, &src, sizeof(va_list))
+ * gives maximum portability. */
+#ifndef va_copy
+# ifdef __va_copy
+#  define va_copy(dest, src)	__va_copy((dest), (src))
+# else
+#  define va_copy(dest, src)	memcpy(&(dest), &(src), sizeof(va_list))
+# endif
 #endif
+			va_copy(usr_copy, args);
 			z_error_message->value.str.len = zend_vspprintf(&z_error_message->value.str.val, 0, format, usr_copy);
-#if defined(va_copy)
+#ifdef va_copy
 			va_end(usr_copy);
 #endif
 			z_error_message->type = IS_STRING;
