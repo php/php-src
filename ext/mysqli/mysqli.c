@@ -123,10 +123,19 @@ void php_clear_mysql(MY_MYSQL *mysql) {
 static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 {
 	mysqli_object 	*intern = (mysqli_object *)object;
+	
+	zend_objects_free_object_storage(&(intern->zo) TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ mysqli_objects_destroy_object
+ */
+static void mysqli_objects_destroy_object(void *object, zend_object_handle handle TSRMLS_DC)
+{
+	mysqli_object 	*intern = (mysqli_object *)object;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
-	zend_hash_destroy(intern->zo.properties);
-	FREE_HASHTABLE(intern->zo.properties);
+	zend_objects_destroy_object(object, handle TSRMLS_CC);
 
 	/* link object */
 	if (instanceof_function(intern->zo.ce, mysqli_link_class_entry TSRMLS_CC)) {
@@ -155,8 +164,8 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 			php_clear_warnings((MYSQLI_WARNING *)my_res->info);
 		}
 	}
+	intern->ptr = NULL;
 	my_efree(my_res);
-	efree(object);
 }
 /* }}} */
 
@@ -354,7 +363,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t) zend_objects_destroy_object, (zend_objects_free_object_storage_t) mysqli_objects_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t) mysqli_objects_destroy_object, (zend_objects_free_object_storage_t) mysqli_objects_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &mysqli_object_handlers;
 
 	return retval;
