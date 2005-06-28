@@ -21,6 +21,7 @@
 /* $Id$ */
 
 
+
 /* {{{ includes 
 */
 
@@ -463,7 +464,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	/* relies on "(long)" being a perfect hash function for data pointers,
 	   however the actual identity of an object has had to be determined
 	   by its object handle and the class entry since 5.0. */
-	if (Z_TYPE_P(var) == IS_OBJECT) {
+	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
 				(((unsigned long)Z_OBJCE_P(var) << 5)
 				| ((unsigned long)Z_OBJCE_P(var) >> (sizeof(long) * 8 - 5)))
@@ -670,13 +671,18 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				zval *retval_ptr = NULL;
 				zval fname;
 				int res;
+				zend_class_entry *ce = NULL;
 
-				if(Z_OBJCE_PP(struc)->serialize != NULL) {
+				if(Z_OBJ_HT_PP(struc)->get_class_entry) {
+					ce = Z_OBJCE_PP(struc);
+				} 
+
+				if(ce && ce->serialize != NULL) {
 					/* has custom handler */
 					unsigned char *serialized_data = NULL;
 					zend_uint serialized_length;
 
-					if(Z_OBJCE_PP(struc)->serialize(*struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
+					if(ce->serialize(*struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
 						smart_str_append_long(buf, Z_OBJCE_PP(struc)->name_length);
 						smart_str_appendl(buf, ":\"", 2);
@@ -696,8 +702,8 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					return;
 				}
 				
-				if (Z_OBJCE_PP(struc) != PHP_IC_ENTRY &&
-				    zend_hash_exists(&Z_OBJCE_PP(struc)->function_table, "__sleep", sizeof("__sleep"))) {
+				if (ce && ce != PHP_IC_ENTRY &&
+				    zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
 					res = call_user_function_ex(CG(function_table), struc, &fname, 
