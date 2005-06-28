@@ -156,7 +156,7 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 	if (!(res = PQexec(H->server, sql))) {
 		/* fatal error */
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
-		return 0;
+		return -1;
 	} else {
 		ExecStatusType qs = PQresultStatus(res);
 		if (qs != PGRES_COMMAND_OK && qs != PGRES_TUPLES_OK) {
@@ -167,7 +167,7 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 			pdo_pgsql_error(dbh, qs, NULL);
 #endif
 			PQclear(res);
-			return 0;
+			return -1;
 		}
 		H->pgoid = PQoidValue(res);
 		PQclear(res);
