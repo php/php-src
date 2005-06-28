@@ -1,3 +1,35 @@
+2005-06-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend.c:
+      - Fixed bug #31358 (Older GCC versions do not provide portable va_copy()).
+
+2005-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_exceptions.c
+      zend_exceptions.c:
+      fix various "Class entry requested for an object without PHP class"
+      messages
+      when working with non-PHP objects.
+
+2005-06-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed SIGSEGV on assigment string offset by reference
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c:
+      Fixed wrong include/requre occurrences in debug backtrace.
+
 2005-06-24  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.h

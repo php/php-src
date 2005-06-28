@@ -1,3 +1,78 @@
+2005-06-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend.c:
+      - Fixed bug #31358 (Older GCC versions do not provide portable va_copy()).
+
+    * ext/mysqli/tests/bug33491.phpt:
+      add test case
+
+    * NEWS
+      ext/informix/Makefile.frag
+      ext/informix/config.m4:
+      - Fixed bug #33469 (Compile error undefined reference to ifx_checkAPI).
+
+    * acinclude.m4:
+      - Cache the xml2-config path
+
+2005-06-27  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c:
+      MFH: fix #33491 (crash after extending MySQLi internal class)
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_nonapi.c:
+      MFH: fix leak appearing when connect fails
+
+2005-06-27  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c:
+      fix various "Class entry requested for an object without PHP class"
+      messages
+      when working with non-PHP objects.
+
+2005-06-27  Antony Dovgal  <antony@zend.com>
+
+    * NEWS:
+      BFN
+
+    * ext/mysqli/mysqli.c:
+      fix #33491 (crash after extending MySQLi internal class)
+
+    * ext/mysqli/mysqli_exception.c
+      ext/mysqli/mysqli_nonapi.c:
+      fix couple of leaks in MySQLi
+
+2005-06-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mysqli/tests/065.phpt:
+      set_charset() is only available in mysql versions > 4.1.12
+
+    * ext/mysqli/tests/061.phpt:
+      do not pollute other directories and cleanup after test
+
+2005-06-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_4_4)
+      Zend/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed SIGSEGV on assigment string offset by reference
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      Fixed wrong include/requre occurrences in debug backtrace.
+
 2005-06-26  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/dom/document.c
