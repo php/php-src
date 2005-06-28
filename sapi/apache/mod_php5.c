@@ -352,6 +352,10 @@ static struct stat *php_apache_get_stat(TSRMLS_D)
  */
 static char *php_apache_getenv(char *name, size_t name_len TSRMLS_DC)
 {
+	if (SG(server_context) == NULL) {
+		return NULL;
+	}
+
 	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, name);
 }
 /* }}} */
