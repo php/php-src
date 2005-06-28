@@ -26,18 +26,18 @@
 #define PHP_IC_ENTRY \
 	BG(incomplete_class)
 
-#define PHP_SET_CLASS_ATTRIBUTES(struc) 								\
-	/* OBJECTS_FIXME: Fix for new object model */						\
-	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {						\
-		class_name = php_lookup_class_name(struc, &name_len);		\
-		free_class_name = 1;											\
+#define PHP_SET_CLASS_ATTRIBUTES(struc) \
+	/* OBJECTS_FIXME: Fix for new object model */	\
+	if (Z_OBJ_HT_P(struc)->get_class_entry && \
+            Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
+		class_name = php_lookup_class_name(struc, &name_len); \
+		free_class_name = 1; \
 		incomplete_class = 1; \
-	} else {															\
-		class_name = Z_OBJCE_P(struc)->name;							\
-		name_len   = Z_OBJCE_P(struc)->name_length;						\
+	} else { \
+		free_class_name = !zend_get_object_classname(struc, &class_name, &name_len);\
 	}
 
-#define PHP_CLEANUP_CLASS_ATTRIBUTES()									\
+#define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
 	if (free_class_name) efree(class_name)
 
 #define PHP_CLASS_ATTRIBUTES											\
