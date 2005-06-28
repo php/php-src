@@ -1,14 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1 Beta 3
-- Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql, to toggle
-  usage of buffered queries.
-- Added a SG(server_context) NULL check to php_apache_getenv.  (Brian)
+- Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql. (Ilia)
 - Fixed bug #33491 (crash after extending MySQLi internal class). (Tony)
 - Fixed bug #33475 (cURL handle is not closed on curl_close(). (Ilia)
 - Fixed bug #33469 (Compile error undefined reference to ifx_checkAPI). (Jani)
 - Fixed bug #32660 (Assignment by reference causes crash when field access is
   overloaded (__get)). (Dmitry)
+- Fixed bug #31358 (Older GCC versions do not provide portable va_copy()).
+  (Jani)
 - Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
   methods). (Dmitry)
 - Fixed bug #30519 (Interface not existing says Class not found). (Dmitry)
