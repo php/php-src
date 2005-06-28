@@ -31,17 +31,11 @@
 #include "win32/winutil.h"
 #elif defined(NETWARE)
 #ifdef USE_WINSOCK
-/*#include <ws2nlm.h>*/
 #include <novsock2.h>
 #else
 #include <sys/socket.h>
 #endif
-#ifdef NEW_LIBC
 #include <sys/param.h>
-#else
-#include "netware/param.h"
-#endif
-#include "netware/mktemp.h"
 #else
 #include <sys/param.h>
 #include <sys/socket.h>
