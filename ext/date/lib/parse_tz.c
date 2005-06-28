@@ -241,6 +241,9 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 	uint32_t i;
 
 	if (!tz->timecnt || !tz->trans) {
+		if (tz->typecnt == 1) {
+			return &(tz->type[0]);
+		}
 		return NULL;
 	}
 
