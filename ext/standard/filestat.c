@@ -637,11 +637,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_INODE:
 		RETURN_LONG((long)ssb.sb.st_ino);
 	case FS_SIZE:
-#if defined(NETWARE) && defined(NEW_LIBC)
-		RETURN_LONG((long)(stat_sb->st_size));
-#else
 		RETURN_LONG((long)ssb.sb.st_size);
-#endif
 	case FS_OWNER:
 		RETURN_LONG((long)ssb.sb.st_uid);
 	case FS_GROUP:
