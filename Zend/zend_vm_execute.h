@@ -1625,15 +1625,22 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
+			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
+			if (dup) {
+				efree(class_name);
+			}
 		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
@@ -2003,6 +2010,12 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (array_ptr_ptr == NULL) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
+			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
+				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
+				ZEND_VM_CONTINUE_JMP();
+			}
+			
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
@@ -4024,15 +4037,22 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
+			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
+			if (dup) {
+				efree(class_name);
+			}
 		} else if (!1) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
@@ -4409,6 +4429,12 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (array_ptr_ptr == NULL) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
+			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
+				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
+				ZEND_VM_CONTINUE_JMP();
+			}
+			
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
@@ -4617,7 +4643,7 @@ static int ZEND_INSTANCEOF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = _get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zend_bool result;
 
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->get_class_entry) {
 		result = instanceof_function(Z_OBJCE_P(expr), EX_T(opline->op2.u.var).class_entry TSRMLS_CC);
 	} else {
 		result = 0;
@@ -6944,15 +6970,22 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
+			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
+			if (dup) {
+				efree(class_name);
+			}
 		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
@@ -7418,6 +7451,12 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (array_ptr_ptr == NULL) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
+			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
+				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
+				ZEND_VM_CONTINUE_JMP();
+			}
+			
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
@@ -7754,7 +7793,7 @@ static int ZEND_INSTANCEOF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 	zend_bool result;
 
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->get_class_entry) {
 		result = instanceof_function(Z_OBJCE_P(expr), EX_T(opline->op2.u.var).class_entry TSRMLS_CC);
 	} else {
 		result = 0;
@@ -18971,15 +19010,22 @@ return_by_value:
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
+			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
+			if (dup) {
+				efree(class_name);
+			}
 		} else if (!0) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
@@ -19437,6 +19483,12 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (array_ptr_ptr == NULL) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
+			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
+				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
+				ZEND_VM_CONTINUE_JMP();
+			}
+			
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
@@ -19629,7 +19681,7 @@ static int ZEND_INSTANCEOF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *expr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zend_bool result;
 
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->get_class_entry) {
 		result = instanceof_function(Z_OBJCE_P(expr), EX_T(opline->op2.u.var).class_entry TSRMLS_CC);
 	} else {
 		result = 0;
