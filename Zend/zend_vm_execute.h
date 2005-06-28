@@ -1631,7 +1631,7 @@ return_by_value:
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
+			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
 				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
@@ -4043,7 +4043,7 @@ return_by_value:
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
+			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
 				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
@@ -6976,7 +6976,7 @@ return_by_value:
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
+			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
 				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
@@ -19016,7 +19016,7 @@ return_by_value:
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
-			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
+			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
 				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
