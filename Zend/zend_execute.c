@@ -2944,11 +2944,9 @@ return_by_value:
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			(*EG(return_value_ptr_ptr))->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 
-			if(dup)
-			{
+			if(dup == SUCCESS) {
 			   efree(class_name);
 			}
-
 		} else if (!EG(free_op1)) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
