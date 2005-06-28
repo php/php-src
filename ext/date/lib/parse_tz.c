@@ -185,27 +185,36 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	}
 }
 
+static int tz_search(char *timezone, int left, int right)
+{
+	int mid, cmp;
+
+	if (left > right) {
+		return -1; /* not found */
+	}
+ 
+	mid = (left + right) / 2;
+ 
+	cmp = strcmp(timezone, timezonedb_idx[mid].id);
+	if (cmp < 0) {
+		return tz_search(timezone, left, mid - 1);
+	} else if (cmp > 0) {
+		return tz_search(timezone, mid + 1, right);
+	} else { /* (cmp == 0) */
+		return timezonedb_idx[mid].pos;
+	}
+}
+
+
 static int seek_to_tz_position(char **tzf, char *timezone)
 {
-	int       found;
-	tzdb_idx *ptr;
+	int	pos = tz_search(timezone, 0, sizeof(timezonedb_idx)/sizeof(*timezonedb_idx)-1);
 
-	/* Reset Index Position */
-	ptr = timezonedb_idx;
-
-	/* Start scanning the index file for the timezone */
-	found = 0;
-	do {
-		if (strcmp(timezone, ptr->id) == 0) {
-			found = 1;
-			(*tzf) = &php_timezone_db_index[ptr->pos + 20];
-			break;
-		}
-		ptr++;
-	} while (ptr->id != NULL);
-	if (!found) {
+	if (pos == -1) {
 		return 0;
 	}
+
+	(*tzf) = &php_timezone_db_index[pos + 20];
 	return 1;
 }
 

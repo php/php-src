@@ -1,4 +1,4 @@
-typedef struct { char *id; unsigned int pos; } tzdb_idx; tzdb_idx timezonedb_idx[533+1] = {
+typedef struct { char *id; unsigned int pos; } tzdb_idx; tzdb_idx timezonedb_idx[533] = {
 	{ "Africa/Abidjan"                    , 0x000000 },
 	{ "Africa/Accra"                      , 0x000049 },
 	{ "Africa/Addis_Ababa"                , 0x0000E5 },
@@ -532,7 +532,6 @@ typedef struct { char *id; unsigned int pos; } tzdb_idx; tzdb_idx timezonedb_idx
 	{ "WET"                               , 0x0379DF },
 	{ "W-SU"                              , 0x037C86 },
 	{ "Zulu"                              , 0x037FB5 },
-{ NULL, 0 }
 };
 /* This is a generated file, do not modify */
 unsigned char php_timezone_db_index[229357] = {
