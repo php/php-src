@@ -45,7 +45,7 @@ class PDODatabase extends PDO
     }
 }
 
-$DB = new PDODatabase($CONNECTION, $USER ? $USER : NULL, $PASSWD ? $PASSWD : NULL);
+$DB = new PDODatabase($CONNECTION, isset($USER) ? $USER : NULL, isset($PASSWD) ? $PASSWD : NULL);
 var_dump(get_class($DB));
 
 $DB->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
