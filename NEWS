@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Fixed bug #33491 (crash after extending MySQLi internal class). (Tony)
 - Fixed bug #33475 (cURL handle is not closed on curl_close(). (Ilia)
 - Fixed bug #33469 (Compile error undefined reference to ifx_checkAPI). (Jani)
+- Fixed bug #33433 (strtoll not available on Tru64). (Jani, Derick)
 - Fixed bug #32660 (Assignment by reference causes crash when field access is
   overloaded (__get)). (Dmitry)
 - Fixed bug #31358 (Older GCC versions do not provide portable va_copy()).
