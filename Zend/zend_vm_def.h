@@ -2014,15 +2014,22 @@ ZEND_VM_C_LABEL(return_by_value):
 
 		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
 			zval *ret;
+			char *class_name;
+			zend_uint class_name_len;
+			int dup;
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
+			dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
+			if (dup) {
+				efree(class_name);
+			}
 		} else if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
 			if (EG(active_op_array)->return_reference == ZEND_RETURN_REF ||
 			    (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0)) {
@@ -2948,6 +2955,12 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (array_ptr_ptr == NULL) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
+			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
+				zend_error(E_WARNING, "foreach() can not iterate over objects without PHP class");
+				ZEND_VM_SET_OPCODE(EX(op_array)->opcodes+opline->op2.u.opline_num);
+				ZEND_VM_CONTINUE_JMP();
+			}
+			
 			ce = Z_OBJCE_PP(array_ptr_ptr);
 			if (!ce || ce->get_iterator == NULL) {
 				SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
@@ -3509,7 +3522,7 @@ ZEND_VM_HANDLER(138, ZEND_INSTANCEOF, TMP|VAR|CV, ANY)
 	zval *expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	zend_bool result;
 
-	if (Z_TYPE_P(expr) == IS_OBJECT) {
+	if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->get_class_entry) {
 		result = instanceof_function(Z_OBJCE_P(expr), EX_T(opline->op2.u.var).class_entry TSRMLS_CC);
 	} else {
 		result = 0;

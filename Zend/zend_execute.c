@@ -530,15 +530,19 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	/* separate our value if necessary */
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
 		zval *orig_value = value;
+		char *class_name;
+		zend_uint class_name_len;
+		int dup;
 		
 		ALLOC_ZVAL(value);
 		*value = *orig_value;
 	 	value->is_ref = 0;
 		value->refcount = 0;
+		dup = zend_get_object_classname(orig_value, &class_name, &class_name_len TSRMLS_CC);
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(orig_value)->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 		}
-		zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(orig_value)->name);		
+		zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);		
 		value->value.obj = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
 	} else if (value_op->op_type == IS_TMP_VAR) {
 		zval *orig_value = value;
@@ -547,6 +551,9 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		*value = *orig_value;
 		value->is_ref = 0;
 		value->refcount = 0;
+		if(dup)	{
+			efree(class_name);
+		}
 	} else if (value_op->op_type == IS_CONST) {
 		zval *orig_value = value;
 
@@ -684,8 +691,14 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	}
 	
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
+		char *class_name;
+		zend_uint class_name_len;
+		int dup;
+			
+		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
+ 
 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(value)->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 		} else if (PZVAL_IS_REF(variable_ptr)) {
 			if (variable_ptr != value) {
 				zend_uint refcount = variable_ptr->refcount;
@@ -698,7 +711,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				*variable_ptr = *value;
 				variable_ptr->refcount = refcount;
 				variable_ptr->is_ref = 1;
-				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(value)->name);
+				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 				if (type != IS_TMP_VAR) {
 					value->refcount--;
@@ -717,10 +730,13 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				}
 				*variable_ptr = *value;
 				INIT_PZVAL(variable_ptr);
-				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(value)->name);
+				zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 				zval_ptr_dtor(&value);
 			}
+		}
+		if (dup) {
+			efree(class_name);
 		}
 	} else if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
@@ -815,16 +831,25 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 	zval *variable_ptr = *variable_ptr_ptr;
 
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(value)->name);
+		char *class_name;
+		zend_uint class_name_len;
+		int dup;
+
+		dup = zend_get_object_classname(value, &class_name, &class_name_len TSRMLS_CC);
+		
+ 		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
 		} else {
 			variable_ptr->refcount--;
 			ALLOC_ZVAL(variable_ptr);
 			*variable_ptr_ptr = variable_ptr;
 			*variable_ptr = *value;
 			INIT_PZVAL(variable_ptr);
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(value)->name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
+		}
+		if (dup) {
+			efree(class_name);
 		}
 	} else {
 		variable_ptr->refcount--;
