@@ -163,7 +163,6 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 #if HAVE_PQRESULTERRORFIELD
 			char * sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
 			pdo_pgsql_error(dbh, qs, (const char *)sqlstate);
-			PQfreemem(sqlstate);
 #else
 			pdo_pgsql_error(dbh, qs, NULL);
 #endif
