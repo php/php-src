@@ -63,10 +63,10 @@ PHP                                                                        NEWS
 - Fixed bug #29896 (Backtrace argument list out of sync). (Dmitry)
 - Fixed bug #29683 (headers_list() returns empty array). (Tony)
 - Fixed bug #28355 (glob wont error if dir is not readable). (Hartmut)
-- Fixed bugs #20382, #28024, #30532, #32086, #32270, #32555, #32588, #33056
-  (strtotime() related bugs). (Derick)
 - Fixed bug #15854 (boolean ini options may be incorrectly displayed as Off 
   when they are On). (Tony)
+- Fixed bugs #14561, #20382, #26090, #26320, #28024, #30532, #32086, #32270,
+  #32555, #32588, #33056 (strtotime() related bugs). (Derick)
 
 10 Jun 2005, PHP 5.1 Beta 1
 - Upgraded PCRE library to version 5.0. (Andrei)
