@@ -60,6 +60,9 @@ if test "$PHP_INFORMIX" != "no"; then
 
   for i in $IFX_LIBS; do
     case "$i" in
+       *.o)
+        DLIBS="$DLIBS $i"
+        ;;
       -lm)
         ;;
       -lc)
@@ -89,10 +92,6 @@ if test "$PHP_INFORMIX" != "no"; then
   AC_DEFINE(HAVE_IFX,1,[ ])
 
   if test "$ext_shared" = "yes"; then
-    IFX_CC=$CC
     with_tags=
-  else
-    IFX_CC='$(INFORMIXDIR)/bin/esql'
   fi 
-  PHP_SUBST(IFX_CC)
 fi
