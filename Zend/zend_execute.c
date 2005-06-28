@@ -735,7 +735,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				zval_ptr_dtor(&value);
 			}
 		}
-		if (dup) {
+		if (dup == SUCCESS) {
 			efree(class_name);
 		}
 	} else if (PZVAL_IS_REF(variable_ptr)) {
