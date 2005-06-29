@@ -248,19 +248,9 @@ END_EXTERN_C()
 
 /* global variables */
 #if !defined(PHP_WIN32)
-#ifdef NETWARE
-#ifdef NEW_LIBC
-#define php_sleep sleep
-#else	/* NEW_LIBC */
-#define php_sleep   delay   /* sleep() and usleep() are not available */
-#define usleep      delay
-#endif	/* NEW_LIBC */
-extern char **environ;
-#else	/* NETWARE */
 extern char **environ;
 #define php_sleep sleep
 #define PHP_SLEEP_NON_VOID
-#endif	/*  NETWARE */
 #endif	/* !defined(PHP_WIN32) */
 
 #ifdef PHP_PWRITE_64
