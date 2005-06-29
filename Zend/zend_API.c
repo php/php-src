@@ -256,6 +256,7 @@ ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC)
 	}
 }
 
+/* returns 1 if you need to copy result, 0 if it's already a copy */
 ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC)
 {
 	if (Z_OBJ_HT_P(object)->get_class_name == NULL ||
