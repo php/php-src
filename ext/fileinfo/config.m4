@@ -29,6 +29,10 @@ if test "$PHP_FILEINFO" != "no"; then
   LIBNAME=magic
   LIBSYMBOL=magic_open
 
+  PHP_CHECK_FUNC(dl, dlopen)
+  PHP_CHECK_FUNC(gzgets, z)
+  PHP_CHECK_FUNC(round, m)
+
   PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
   [
     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $FILEINFO_DIR/lib, FILEINFO_SHARED_LIBADD)
@@ -36,7 +40,7 @@ if test "$PHP_FILEINFO" != "no"; then
   ],[
     AC_MSG_ERROR([wrong magic lib version or lib not found])
   ],[
-    -L$FILEINFO_DIR/lib -lm -lz -ldl
+    -L$FILEINFO_DIR/lib
   ])
 
   MAGIC_MIME_LOCATIONS="/usr/local/share/file/magic /usr/share/file/magic /usr/share/misc/file/magic /etc/magic /usr/share/misc"
