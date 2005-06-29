@@ -5,16 +5,16 @@ PHP_ARG_WITH(fileinfo, for fileinfo support,
 [  --with-fileinfo=DIR   Include fileinfo support])
 
 if test "$PHP_FILEINFO" != "no"; then
-  SEARCH_PATH="/usr/local/include /usr/include /usr/share/file"
-  SEARCH_FOR="/magic.h"
-  if test -r $PHP_FILEINFO/$SEARCH_FOR; then
+  SEARCH_PATH="/usr/local /usr /usr/share/file"
+  if test -r $PHP_FILEINFO/include/magic.h || test -r $PHP_FILEINFO/magic.h; then
     FILEINFO_DIR=$PHP_FILEINFO
   else
     AC_MSG_CHECKING([for magic files in default path])
     for i in $SEARCH_PATH ; do
-      if test -r $i/$SEARCH_FOR; then
+      if test -r $i/include/magic.h || test -r $i/magic.h; then
         FILEINFO_DIR=$i
         AC_MSG_RESULT(found in $i)
+        break
       fi
     done
   fi
@@ -24,7 +24,11 @@ if test "$PHP_FILEINFO" != "no"; then
     AC_MSG_ERROR([Please reinstall the libmagic distribution])
   fi
 
-  PHP_ADD_INCLUDE($FILEINFO_DIR/include)
+  if test -r "$FILEINFO_DIR/include/magic.h"; then
+      PHP_ADD_INCLUDE($FILEINFO_DIR/include)
+  else 
+      PHP_ADD_INCLUDE($FILEINFO_DIR)
+  fi
 
   LIBNAME=magic
   LIBSYMBOL=magic_open
