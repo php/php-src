@@ -1638,7 +1638,7 @@ return_by_value:
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
-			if (dup) {
+			if (!dup) {
 				efree(class_name);
 			}
 		} else if (!0) { /* Not a temp var */
@@ -4050,7 +4050,7 @@ return_by_value:
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
-			if (dup) {
+			if (!dup) {
 				efree(class_name);
 			}
 		} else if (!1) { /* Not a temp var */
@@ -6983,7 +6983,7 @@ return_by_value:
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
-			if (dup) {
+			if (!dup) {
 				efree(class_name);
 			}
 		} else if (!0) { /* Not a temp var */
@@ -19023,7 +19023,7 @@ return_by_value:
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
-			if (dup) {
+			if (!dup) {
 				efree(class_name);
 			}
 		} else if (!0) { /* Not a temp var */
