@@ -544,7 +544,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		}
 		zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);		
 		value->value.obj = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
-		if(dup)	{
+		if(!dup)	{
 			efree(class_name);
 		}
 	} else if (value_op->op_type == IS_TMP_VAR) {
@@ -735,7 +735,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				zval_ptr_dtor(&value);
 			}
 		}
-		if (dup == SUCCESS) {
+		if (!dup) {
 			efree(class_name);
 		}
 	} else if (PZVAL_IS_REF(variable_ptr)) {
@@ -848,7 +848,7 @@ static inline void zend_receive(zval **variable_ptr_ptr, zval *value TSRMLS_DC)
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 		}
-		if (dup) {
+		if (!dup) {
 			efree(class_name);
 		}
 	} else {
