@@ -29,11 +29,6 @@
 #include "win32/readdir.h"
 #endif
 
-#if defined(NETWARE) && !(NEW_LIBC)
-/*#include <ws2nlm.h>*/
-#include <sys/socket.h>
-#endif
-
 #include "php_reentrancy.h"
 #include "ext/standard/php_rand.h"                   /* for PHP_RAND_MAX */
 
