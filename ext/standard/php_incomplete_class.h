@@ -34,7 +34,7 @@
 		free_class_name = 1; \
 		incomplete_class = 1; \
 	} else { \
-		free_class_name = !zend_get_object_classname(struc, &class_name, &name_len);\
+		free_class_name = !zend_get_object_classname(struc, &class_name, &name_len TSRMLS_CC);\
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
