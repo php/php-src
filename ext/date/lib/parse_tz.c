@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <timelib_config.h>
+#include "timelib.h"
 
 #include <stdio.h>
 
@@ -27,8 +27,6 @@
 #else
 #include <strings.h>
 #endif
-
-#include "timelib.h"
 #include "timezonedb.h"
 
 #ifdef WORDS_BIGENDIAN
