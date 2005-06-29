@@ -1,3 +1,131 @@
+2005-06-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      - Regenerated with re2c 0.9.8
+
+2005-06-28  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      fix leak: when dup was <success>ful zend_std_object_get_class_name()
+      returns SUCCESS aka 0
+
+2005-06-28  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Added testcases for bug #14561 and #26090 and updated NEWS with those
+        fixed bug nr's.
+
+2005-06-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/informix/Makefile.frag
+      ext/informix/config.m4:
+      - Fixed bug #33469 also for shared builds
+
+2005-06-28  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed bug #33415 and added test cases for #33414 and #33415.
+
+2005-06-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      re2c 0.98 is the current working version
+
+2005-06-28  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed bug #33433 (strtoll not available on Tru64).
+
+2005-06-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      NEWS:
+      Removed unnecessary entry
+
+    * NEWS:
+      BFN
+
+2005-06-28  Brian France  <list@firehawksystems.com>
+
+    * (PHP_5_0)
+      NEWS
+      sapi/apache/mod_php5.c:
+      
+      MFH:
+      
+      Added a SG(server_context) NULL check to php_apache_getenv.
+      
+      This can get called when "<key> = ${<key>}:/foo" is used in a .ini file,
+      but <key> has not be set yet.
+      You will end up with a value of ":/foo", but at least it will not crash.
+
+    * NEWS
+      sapi/apache/mod_php5.c:
+      
+      	Added a SG(server_context) NULL check to php_apache_getenv.
+      
+      	This can get called when "<key> = ${<key>}:/foo" is used in a .ini file,
+      but <key> has not be set yet.
+              You will end up with a value of ":/foo", but at least it will not
+      crash now.
+
+2005-06-28  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      main/php_open_temporary_file.c:
+      removed redundant NEW_LIBC checks
+
+    * (PHP_5_0)
+      ext/standard/image.c:
+      removed the unwanted NetWare Code
+
+    * (PHP_5_0)
+      ext/standard/microtime.c:
+      removing unwanted NetWare portion
+
+    * (PHP_5_0)
+      ext/standard/fsock.h
+      ext/standard/lcg.c:
+      removing the redundant NEW_LIBC checks
+
+    * (PHP_5_0)
+      ext/standard/head.c:
+      removing redundant NEW_LIBC checks for NetWare
+
+    * (PHP_5_0)
+      ext/snmp/snmp.c
+      ext/standard/filestat.c
+      ext/standard/flock_compat.c:
+      removing redundant NEW_LIBC checks
+
+2005-06-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix previous patch
+
+    * ZendEngine2/zend_vm_execute.h:
+      update
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h:
+      fixes for non-php objects
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      fixes fo rnon-php objects (John Coggeshall)
+
+    * ext/standard/php_incomplete_class.h
+      ext/standard/var.c:
+      fix handling of non-PHP classes (John Coggeshall)
+
+    * (PHP_5_0)
+      ext/standard/php_incomplete_class.h
+      ext/standard/var.c:
+      fix non-PHP object handling (from John Coggeshall)
+
 2005-06-27  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ZendEngine2/zend.c:
