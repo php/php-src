@@ -406,7 +406,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 
 		zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 		
-		if(dup)	{
+		if(!dup)	{
 			efree(class_name);
 		}
 		
@@ -613,8 +613,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			}
 		}
 
-		if(dup)
-		{
+		if(!dup) {
 			efree(class_name);
 		}
 
@@ -2944,7 +2943,7 @@ return_by_value:
 			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
 			(*EG(return_value_ptr_ptr))->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 
-			if(dup == SUCCESS) {
+			if(!dup) {
 			   efree(class_name);
 			}
 		} else if (!EG(free_op1)) { /* Not a temp var */
