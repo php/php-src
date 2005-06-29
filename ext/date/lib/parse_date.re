@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#include <timelib_config.h>
+#include "timelib.h"
 
 #include <stdio.h>
 
@@ -30,8 +30,6 @@
 #else
 #include <strings.h>
 #endif
-
-#include "timelib.h"
 
 #if defined(_MSC_VER)
 # define strcasecmp stricmp
@@ -855,7 +853,7 @@ isoweek          = year4 "W" weekofyear;
 clf              = day "/" monthabbr "/" year4 ":" hour24lz ":" minutelz ":" secondlz space tzcorrection;
 
 /* Timestamp format: @1126396800 */
-timestamp        = "@" [1-9] [0-9]*;
+timestamp        = "@" "-"? [1-9] [0-9]*;
 
 /* To fix some ambiguities */
 dateshortwithtimeshort  = datenoyear timeshort24;
