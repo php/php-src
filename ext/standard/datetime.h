@@ -25,9 +25,7 @@
 PHP_FUNCTION(time);
 PHP_FUNCTION(mktime);
 PHP_FUNCTION(gmmktime);
-PHP_FUNCTION(date);
 PHP_FUNCTION(idate);
-PHP_FUNCTION(gmdate);
 PHP_FUNCTION(localtime);
 PHP_FUNCTION(getdate);
 PHP_FUNCTION(checkdate);

@@ -10,7 +10,7 @@ Bug #27719: mktime returns incorrect timestamp for dst days
 	echo "$b ".date("m/d/y h:i:s\n",$b);
 	echo "$c ".date("m/d/y h:i:s\n",$c);
 	echo "\n";
-	putenv("TZ=EST5DST");  // DST not in effect
+	putenv("TZ=EST5EDT");  // DST not in effect
 	$a = mktime(0, 0, 0, 2, 4, 2004, 0);
 	$b = mktime(0, 0, 0, 2, 4, 2004, 1);
 	$c = mktime(0, 0, 0, 2, 4, 2004, -1);
@@ -18,7 +18,7 @@ Bug #27719: mktime returns incorrect timestamp for dst days
 	echo "$b ".date("m/d/y h:i:s\n",$b);
 	echo "$c ".date("m/d/y h:i:s\n",$c);
 	echo "\n";
-	putenv("TZ=EST5DST");  // Just before DST changeover
+	putenv("TZ=EST5EDT");  // Just before DST changeover
 	$a = mktime(0, 0, 0, 4, 4, 2004, 0);
 	$b = mktime(0, 0, 0, 4, 4, 2004, 1);
 	$c = mktime(0, 0, 0, 4, 4, 2004, -1);
@@ -26,7 +26,7 @@ Bug #27719: mktime returns incorrect timestamp for dst days
 	echo "$b ".date("m/d/y h:i:s\n",$b);
 	echo "$c ".date("m/d/y h:i:s\n",$c);
 	echo "\n";
-	putenv("TZ=EST5DST");  // Just after DST changeover
+	putenv("TZ=EST5EDT");  // Just after DST changeover
 	$a = mktime(3, 0, 0, 4, 4, 2004, 0);
 	$b = mktime(3, 0, 0, 4, 4, 2004, 1);
 	$c = mktime(3, 0, 0, 4, 4, 2004, -1);
@@ -34,7 +34,7 @@ Bug #27719: mktime returns incorrect timestamp for dst days
 	echo "$b ".date("m/d/y h:i:s\n",$b);
 	echo "$c ".date("m/d/y h:i:s\n",$c);
 	echo "\n";
-	putenv("TZ=EST5DST");  // DST in effect
+	putenv("TZ=EST5EDT");  // DST in effect
 	$a = mktime(0, 0, 0, 6, 4, 2004, 0);
 	$b = mktime(0, 0, 0, 6, 4, 2004, 1);
 	$c = mktime(0, 0, 0, 6, 4, 2004, -1);
