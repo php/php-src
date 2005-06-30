@@ -20,11 +20,11 @@ file and for text files proper language encoding.
  </description>
  <license>PHP</license>
  <release>
-  <state>beta</state>
-  <version>0.2</version>
-  <date>2004-05-26</date>
+  <state>stable</state>
+  <version>1.0</version>
+  <date>2005-06-30</date>
   <notes>
-  Fixed bug that caused PHP to refuse to recognize fileinfo.so.
+	1) Fixed library detection routines.
   </notes>
   <filelist>
    <file role="src" name="config.m4"/>
