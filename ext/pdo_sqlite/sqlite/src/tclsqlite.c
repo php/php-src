@@ -83,6 +83,7 @@ struct SqliteDb {
   char *zTrace;         /* The trace callback routine */
   char *zProgress;      /* The progress callback routine */
   char *zAuth;          /* The authorization callback routine */
+  char *zNull;          /* Text to substitute for an SQL NULL value */
   SqlFunc *pFunc;       /* List of SQL functions */
   SqlCollate *pCollate; /* List of SQL collation functions */
   int rc;               /* Return code of most recent sqlite3_exec() */
@@ -135,6 +136,9 @@ static void DbDeleteCmd(void *db){
   }
   if( pDb->zAuth ){
     Tcl_Free(pDb->zAuth);
+  }
+  if( pDb->zNull ){
+    Tcl_Free(pDb->zNull);
   }
   Tcl_Free((char*)pDb);
 }
@@ -267,12 +271,33 @@ static void tclSqlFunc(sqlite3_context *context, int argc, sqlite3_value**argv){
       Tcl_DStringAppendElement(&cmd, sqlite3_value_text(argv[i]));
     }
   }
-  rc = Tcl_Eval(p->interp, Tcl_DStringValue(&cmd));
-  if( rc ){
+  rc = Tcl_EvalEx(p->interp, Tcl_DStringValue(&cmd), Tcl_DStringLength(&cmd),
+                  TCL_EVAL_DIRECT);
+  Tcl_DStringFree(&cmd);
+
+  if( rc && rc!=TCL_RETURN ){
     sqlite3_result_error(context, Tcl_GetStringResult(p->interp), -1); 
   }else{
-    sqlite3_result_text(context, Tcl_GetStringResult(p->interp), -1, 
-        SQLITE_TRANSIENT);
+    Tcl_Obj *pVar = Tcl_GetObjResult(p->interp);
+    int n;
+    u8 *data;
+    char *zType = pVar->typePtr ? pVar->typePtr->name : "";
+    char c = zType[0];
+    if( c=='b' && strcmp(zType,"bytearray")==0 ){
+      data = Tcl_GetByteArrayFromObj(pVar, &n);
+      sqlite3_result_blob(context, data, n, SQLITE_TRANSIENT);
+    }else if( (c=='b' && strcmp(zType,"boolean")==0) ||
+          (c=='i' && strcmp(zType,"int")==0) ){
+      Tcl_GetIntFromObj(0, pVar, &n);
+      sqlite3_result_int(context, n);
+    }else if( c=='d' && strcmp(zType,"double")==0 ){
+      double r;
+      Tcl_GetDoubleFromObj(0, pVar, &r);
+      sqlite3_result_double(context, r);
+    }else{
+      data = Tcl_GetStringFromObj(pVar, &n);
+      sqlite3_result_text(context, data, n, SQLITE_TRANSIENT);
+    }
   }
 }
 
@@ -441,9 +466,10 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     "changes",            "close",             "collate",
     "collation_needed",   "commit_hook",       "complete",
     "copy",               "errorcode",         "eval",
-    "function",           "last_insert_rowid", "onecolumn",
-    "progress",           "rekey",             "timeout",
-    "total_changes",      "trace",             "version",
+    "function",           "last_insert_rowid", "nullvalue",
+    "onecolumn",          "progress",          "rekey",
+    "timeout",            "total_changes",     "trace",
+    "version",
     0                    
   };
   enum DB_enum {
@@ -451,9 +477,10 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     DB_CHANGES,           DB_CLOSE,            DB_COLLATE,
     DB_COLLATION_NEEDED,  DB_COMMIT_HOOK,      DB_COMPLETE,
     DB_COPY,              DB_ERRORCODE,        DB_EVAL,
-    DB_FUNCTION,          DB_LAST_INSERT_ROWID,DB_ONECOLUMN,
-    DB_PROGRESS,          DB_REKEY,            DB_TIMEOUT,
-    DB_TOTAL_CHANGES,     DB_TRACE,            DB_VERSION
+    DB_FUNCTION,          DB_LAST_INSERT_ROWID,DB_NULLVALUE,
+    DB_ONECOLUMN,         DB_PROGRESS,         DB_REKEY,
+    DB_TIMEOUT,           DB_TOTAL_CHANGES,    DB_TRACE,
+    DB_VERSION
   };
   /* don't leave trailing commas on DB_enum, it confuses the AIX xlc compiler */
 
@@ -729,6 +756,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   ** built-in "info complete" command of Tcl.
   */
   case DB_COMPLETE: {
+#ifndef SQLITE_OMIT_COMPLETE
     Tcl_Obj *pResult;
     int isComplete;
     if( objc!=3 ){
@@ -738,6 +766,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     isComplete = sqlite3_complete( Tcl_GetStringFromObj(objv[2], 0) );
     pResult = Tcl_GetObjResult(interp);
     Tcl_SetBooleanObj(pResult, isComplete);
+#endif
     break;
   }
 
@@ -936,11 +965,14 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
       */
       if( pArray ){
         Tcl_Obj *pColList = Tcl_NewObj();
+        Tcl_Obj *pStar = Tcl_NewStringObj("*", -1);
         Tcl_IncrRefCount(pColList);
         for(i=0; i<nCol; i++){
           Tcl_ListObjAppendElement(interp, pColList, apColName[i]);
         }
-        Tcl_ObjSetVar2(interp, pArray, Tcl_NewStringObj("*",-1), pColList,0);
+        Tcl_ObjSetVar2(interp, pArray, pStar, pColList,0);
+        Tcl_DecrRefCount(pColList);
+        Tcl_DecrRefCount(pStar);
       }
 
       /* Execute the SQL
@@ -968,6 +1000,10 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             case SQLITE_FLOAT: {
               double r = sqlite3_column_double(pStmt, i);
               pVal = Tcl_NewDoubleObj(r);
+              break;
+            }
+            case SQLITE_NULL: {
+              pVal = dbTextToObj(pDb->zNull);
               break;
             }
             default: {
@@ -1241,6 +1277,37 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     break;
   }
 
+  /*
+  **     $db nullvalue ?STRING?
+  **
+  ** Change text used when a NULL comes back from the database. If ?STRING?
+  ** is not present, then the current string used for NULL is returned.
+  ** If STRING is present, then STRING is returned.
+  **
+  */
+  case DB_NULLVALUE: {
+    if( objc!=2 && objc!=3 ){
+      Tcl_WrongNumArgs(interp, 2, objv, "NULLVALUE");
+      return TCL_ERROR;
+    }
+    if( objc==3 ){
+      int len;
+      char *zNull = Tcl_GetStringFromObj(objv[2], &len);
+      if( pDb->zNull ){
+        Tcl_Free(pDb->zNull);
+      }
+      if( zNull && len>0 ){
+        pDb->zNull = Tcl_Alloc( len + 1 );
+        strncpy(pDb->zNull, zNull, len);
+        pDb->zNull[len] = '\0';
+      }else{
+        pDb->zNull = 0;
+      }
+    }
+    Tcl_SetObjResult(interp, dbTextToObj(pDb->zNull));
+    break;
+  }
+  
   /*
   **     $db total_changes
   **
@@ -1725,12 +1792,17 @@ int TCLSH_MAIN(int argc, char **argv){
     extern int Sqlitetest4_Init(Tcl_Interp*);
     extern int Sqlitetest5_Init(Tcl_Interp*);
     extern int Md5_Init(Tcl_Interp*);
+    extern int Sqlitetestsse_Init(Tcl_Interp*);
+
     Sqlitetest1_Init(interp);
     Sqlitetest2_Init(interp);
     Sqlitetest3_Init(interp);
     Sqlitetest4_Init(interp);
     Sqlitetest5_Init(interp);
     Md5_Init(interp);
+#ifdef SQLITE_SSE
+    Sqlitetestsse_Init(interp);
+#endif
   }
 #endif
   if( argc>=2 || TCLSH==2 ){

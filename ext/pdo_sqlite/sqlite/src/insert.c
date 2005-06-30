@@ -108,7 +108,7 @@ static int selectReadsTable(Select *p, int iDb, int iTab){
   if( p->pSrc==0 ) return 0;
   for(i=0, pItem=p->pSrc->a; i<p->pSrc->nSrc; i++, pItem++){
     if( pItem->pSelect ){
-      if( selectReadsTable(p, iDb, iTab) ) return 1;
+      if( selectReadsTable(pItem->pSelect, iDb, iTab) ) return 1;
     }else{
       if( pItem->pTab->iDb==iDb && pItem->pTab->tnum==iTab ) return 1;
     }
@@ -308,7 +308,7 @@ void sqlite3Insert(
     sqlite3VdbeAddOp(v, OP_Column, iCur, 0);
     sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->zName, 0);
     sqlite3VdbeAddOp(v, OP_Ne, 28417, base+12);
-    sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
     sqlite3VdbeAddOp(v, OP_MemStore, counterRowid, 1);
     sqlite3VdbeAddOp(v, OP_Column, iCur, 1);
     sqlite3VdbeAddOp(v, OP_MemStore, counterMem, 1);
@@ -363,9 +363,9 @@ void sqlite3Insert(
       sqlite3VdbeResolveLabel(v, iInsertBlock);
       sqlite3VdbeAddOp(v, OP_MakeRecord, nColumn, 0);
       sqlite3TableAffinityStr(v, pTab);
-      sqlite3VdbeAddOp(v, OP_NewRecno, srcTab, 0);
+      sqlite3VdbeAddOp(v, OP_NewRowid, srcTab, 0);
       sqlite3VdbeAddOp(v, OP_Pull, 1, 0);
-      sqlite3VdbeAddOp(v, OP_PutIntKey, srcTab, 0);
+      sqlite3VdbeAddOp(v, OP_Insert, srcTab, 0);
       sqlite3VdbeAddOp(v, OP_Return, 0, 0);
 
       /* The following code runs first because the GOTO at the very top
@@ -547,7 +547,7 @@ void sqlite3Insert(
     if( !isView ){
       sqlite3TableAffinityStr(v, pTab);
     }
-    sqlite3VdbeAddOp(v, OP_PutIntKey, newIdx, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, newIdx, 0);
 
     /* Fire BEFORE or INSTEAD OF triggers */
     if( sqlite3CodeRowTrigger(pParse, TK_INSERT, 0, TRIGGER_BEFORE, pTab, 
@@ -565,7 +565,7 @@ void sqlite3Insert(
   }
 
   /* Push the record number for the new entry onto the stack.  The
-  ** record number is a randomly generate integer created by NewRecno
+  ** record number is a randomly generate integer created by NewRowid
   ** except when the table has an INTEGER PRIMARY KEY column, in which
   ** case the record number is the same as that column. 
   */
@@ -578,15 +578,15 @@ void sqlite3Insert(
       }else{
         sqlite3ExprCode(pParse, pList->a[keyColumn].pExpr);
       }
-      /* If the PRIMARY KEY expression is NULL, then use OP_NewRecno
+      /* If the PRIMARY KEY expression is NULL, then use OP_NewRowid
       ** to generate a unique primary key value.
       */
       sqlite3VdbeAddOp(v, OP_NotNull, -1, sqlite3VdbeCurrentAddr(v)+3);
       sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
-      sqlite3VdbeAddOp(v, OP_NewRecno, base, counterMem);
+      sqlite3VdbeAddOp(v, OP_NewRowid, base, counterMem);
       sqlite3VdbeAddOp(v, OP_MustBeInt, 0, 0);
     }else{
-      sqlite3VdbeAddOp(v, OP_NewRecno, base, counterMem);
+      sqlite3VdbeAddOp(v, OP_NewRowid, base, counterMem);
     }
 #ifndef SQLITE_OMIT_AUTOINCREMENT
     if( pTab->autoInc ){
@@ -603,7 +603,7 @@ void sqlite3Insert(
         ** Whenever this column is read, the record number will be substituted
         ** in its place.  So will fill this column with a NULL to avoid
         ** taking up data space with information that will never be used. */
-        sqlite3VdbeAddOp(v, OP_String8, 0, 0);
+        sqlite3VdbeAddOp(v, OP_Null, 0, 0);
         continue;
       }
       if( pColumn==0 ){
@@ -690,11 +690,11 @@ void sqlite3Insert(
     sqlite3VdbeAddOp(v, OP_MemLoad, counterRowid, 0);
     sqlite3VdbeAddOp(v, OP_NotNull, -1, base+7);
     sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
-    sqlite3VdbeAddOp(v, OP_NewRecno, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_NewRowid, iCur, 0);
     sqlite3VdbeOp3(v, OP_String8, 0, 0, pTab->zName, 0);
     sqlite3VdbeAddOp(v, OP_MemLoad, counterMem, 0);
     sqlite3VdbeAddOp(v, OP_MakeRecord, 2, 0);
-    sqlite3VdbeAddOp(v, OP_PutIntKey, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, iCur, 0);
     sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
   }
 #endif
@@ -713,8 +713,8 @@ void sqlite3Insert(
 
 insert_cleanup:
   sqlite3SrcListDelete(pTabList);
-  if( pList ) sqlite3ExprListDelete(pList);
-  if( pSelect ) sqlite3SelectDelete(pSelect);
+  sqlite3ExprListDelete(pList);
+  sqlite3SelectDelete(pSelect);
   sqlite3IdListDelete(pColumn);
 }
 
@@ -724,11 +724,11 @@ insert_cleanup:
 ** When this routine is called, the stack contains (from bottom to top)
 ** the following values:
 **
-**    1.  The recno of the row to be updated before the update.  This
+**    1.  The rowid of the row to be updated before the update.  This
 **        value is omitted unless we are doing an UPDATE that involves a
 **        change to the record number.
 **
-**    2.  The recno of the row after the update.
+**    2.  The rowid of the row after the update.
 **
 **    3.  The data in the first column of the entry after the update.
 **
@@ -736,9 +736,9 @@ insert_cleanup:
 **
 **    N.  The data in the last column of the entry after the update.
 **
-** The old recno shown as entry (1) above is omitted unless both isUpdate
-** and recnoChng are 1.  isUpdate is true for UPDATEs and false for
-** INSERTs and recnoChng is true if the record number is being changed.
+** The old rowid shown as entry (1) above is omitted unless both isUpdate
+** and rowidChng are 1.  isUpdate is true for UPDATEs and false for
+** INSERTs and rowidChng is true if the record number is being changed.
 **
 ** The code generated by this routine pushes additional entries onto
 ** the stack which are the keys for new index entries for the new record.
@@ -802,7 +802,7 @@ void sqlite3GenerateConstraintChecks(
   Table *pTab,        /* the table into which we are inserting */
   int base,           /* Index of a read/write cursor pointing at pTab */
   char *aIdxUsed,     /* Which indices are used.  NULL means all are used */
-  int recnoChng,      /* True if the record number will change */
+  int rowidChng,      /* True if the record number will change */
   int isUpdate,       /* True for UPDATE, False for INSERT */
   int overrideError,  /* Override onError to this if not OE_Default */
   int ignoreDest      /* Jump to this label on an OE_Ignore resolution */
@@ -818,7 +818,7 @@ void sqlite3GenerateConstraintChecks(
   int seenReplace = 0;
   int jumpInst1=0, jumpInst2;
   int contAddr;
-  int hasTwoRecnos = (isUpdate && recnoChng);
+  int hasTwoRowids = (isUpdate && rowidChng);
 
   v = sqlite3GetVdbe(pParse);
   assert( v!=0 );
@@ -857,7 +857,7 @@ void sqlite3GenerateConstraintChecks(
         break;
       }
       case OE_Ignore: {
-        sqlite3VdbeAddOp(v, OP_Pop, nCol+1+hasTwoRecnos, 0);
+        sqlite3VdbeAddOp(v, OP_Pop, nCol+1+hasTwoRowids, 0);
         sqlite3VdbeAddOp(v, OP_Goto, 0, ignoreDest);
         break;
       }
@@ -878,7 +878,7 @@ void sqlite3GenerateConstraintChecks(
   ** of the new record does not previously exist.  Except, if this
   ** is an UPDATE and the primary key is not changing, that is OK.
   */
-  if( recnoChng ){
+  if( rowidChng ){
     onError = pTab->keyConf;
     if( overrideError!=OE_Default ){
       onError = overrideError;
@@ -908,7 +908,7 @@ void sqlite3GenerateConstraintChecks(
       case OE_Replace: {
         sqlite3GenerateRowIndexDelete(pParse->db, v, pTab, base, 0);
         if( isUpdate ){
-          sqlite3VdbeAddOp(v, OP_Dup, nCol+hasTwoRecnos, 1);
+          sqlite3VdbeAddOp(v, OP_Dup, nCol+hasTwoRowids, 1);
           sqlite3VdbeAddOp(v, OP_MoveGe, base, 0);
         }
         seenReplace = 1;
@@ -916,7 +916,7 @@ void sqlite3GenerateConstraintChecks(
       }
       case OE_Ignore: {
         assert( seenReplace==0 );
-        sqlite3VdbeAddOp(v, OP_Pop, nCol+1+hasTwoRecnos, 0);
+        sqlite3VdbeAddOp(v, OP_Pop, nCol+1+hasTwoRowids, 0);
         sqlite3VdbeAddOp(v, OP_Goto, 0, ignoreDest);
         break;
       }
@@ -967,7 +967,7 @@ void sqlite3GenerateConstraintChecks(
     
 
     /* Check to see if the new index entry will be unique */
-    sqlite3VdbeAddOp(v, OP_Dup, extra+nCol+1+hasTwoRecnos, 1);
+    sqlite3VdbeAddOp(v, OP_Dup, extra+nCol+1+hasTwoRowids, 1);
     jumpInst2 = sqlite3VdbeAddOp(v, OP_IsUnique, base+iCur+1, 0);
 
     /* Generate code that executes if the new index entry is not unique */
@@ -1004,14 +1004,14 @@ void sqlite3GenerateConstraintChecks(
       }
       case OE_Ignore: {
         assert( seenReplace==0 );
-        sqlite3VdbeAddOp(v, OP_Pop, nCol+extra+3+hasTwoRecnos, 0);
+        sqlite3VdbeAddOp(v, OP_Pop, nCol+extra+3+hasTwoRowids, 0);
         sqlite3VdbeAddOp(v, OP_Goto, 0, ignoreDest);
         break;
       }
       case OE_Replace: {
         sqlite3GenerateRowDelete(pParse->db, v, pTab, base, 0);
         if( isUpdate ){
-          sqlite3VdbeAddOp(v, OP_Dup, nCol+extra+1+hasTwoRecnos, 1);
+          sqlite3VdbeAddOp(v, OP_Dup, nCol+extra+1+hasTwoRowids, 1);
           sqlite3VdbeAddOp(v, OP_MoveGe, base, 0);
         }
         seenReplace = 1;
@@ -1031,7 +1031,7 @@ void sqlite3GenerateConstraintChecks(
 ** This routine generates code to finish the INSERT or UPDATE operation
 ** that was started by a prior call to sqlite3GenerateConstraintChecks.
 ** The stack must contain keys for all active indices followed by data
-** and the recno for the new entry.  This routine creates the new
+** and the rowid for the new entry.  This routine creates the new
 ** entries in all indices and in the main table.
 **
 ** The arguments to this routine should be the same as the first six
@@ -1042,7 +1042,7 @@ void sqlite3CompleteInsertion(
   Table *pTab,        /* the table into which we are inserting */
   int base,           /* Index of a read/write cursor pointing at pTab */
   char *aIdxUsed,     /* Which indices are used.  NULL means all are used */
-  int recnoChng,      /* True if the record number will change */
+  int rowidChng,      /* True if the record number will change */
   int isUpdate,       /* True for UPDATE, False for INSERT */
   int newIdx          /* Index of NEW table for triggers.  -1 if none */
 ){
@@ -1058,7 +1058,7 @@ void sqlite3CompleteInsertion(
   for(nIdx=0, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, nIdx++){}
   for(i=nIdx-1; i>=0; i--){
     if( aIdxUsed && aIdxUsed[i]==0 ) continue;
-    sqlite3VdbeAddOp(v, OP_IdxPut, base+i+1, 0);
+    sqlite3VdbeAddOp(v, OP_IdxInsert, base+i+1, 0);
   }
   sqlite3VdbeAddOp(v, OP_MakeRecord, pTab->nCol, 0);
   sqlite3TableAffinityStr(v, pTab);
@@ -1066,7 +1066,7 @@ void sqlite3CompleteInsertion(
   if( newIdx>=0 ){
     sqlite3VdbeAddOp(v, OP_Dup, 1, 0);
     sqlite3VdbeAddOp(v, OP_Dup, 1, 0);
-    sqlite3VdbeAddOp(v, OP_PutIntKey, newIdx, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, newIdx, 0);
   }
 #endif
   if( pParse->nested ){
@@ -1074,9 +1074,9 @@ void sqlite3CompleteInsertion(
   }else{
     pik_flags = (OPFLAG_NCHANGE|(isUpdate?0:OPFLAG_LASTROWID));
   }
-  sqlite3VdbeAddOp(v, OP_PutIntKey, base, pik_flags);
+  sqlite3VdbeAddOp(v, OP_Insert, base, pik_flags);
   
-  if( isUpdate && recnoChng ){
+  if( isUpdate && rowidChng ){
     sqlite3VdbeAddOp(v, OP_Pop, 1, 0);
   }
 }

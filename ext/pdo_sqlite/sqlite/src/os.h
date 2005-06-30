@@ -23,7 +23,8 @@
 ** N.B. MacOS means Mac Classic (or Carbon). Treat Darwin (OS X) as Unix.
 **      The MacOS build is designed to use CodeWarrior (tested with v8)
 */
-#if !defined(OS_UNIX) && !defined(OS_TEST)
+#if !defined(OS_UNIX) && !defined(OS_TEST) && !defined(OS_OTHER)
+# define OS_OTHER 0
 # ifndef OS_WIN
 #   if defined(_WIN32) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
 #     define OS_WIN 1
@@ -52,6 +53,21 @@
 #endif
 #if OS_WIN
 # include "os_win.h"
+#endif
+
+/* os_other.c and os_other.h are not delivered with SQLite.  These files
+** are place-holders that can be filled in by third-party developers to
+** implement backends to their on proprietary operating systems.
+*/
+#if OS_OTHER
+# include "os_other.h"
+#endif
+
+/* If the SET_FULLSYNC macro is not defined above, then make it
+** a no-op
+*/
+#ifndef SET_FULLSYNC
+# define SET_FULLSYNC(x,y)
 #endif
 
 /*
@@ -168,15 +184,19 @@ int sqlite3OsSeek(OsFile*, i64 offset);
 int sqlite3OsSync(OsFile*);
 int sqlite3OsTruncate(OsFile*, i64 size);
 int sqlite3OsFileSize(OsFile*, i64 *pSize);
-int sqlite3OsRandomSeed(char*);
-int sqlite3OsSleep(int ms);
-int sqlite3OsCurrentTime(double*);
-int sqlite3OsFileModTime(OsFile*, double*);
-void sqlite3OsEnterMutex(void);
-void sqlite3OsLeaveMutex(void);
 char *sqlite3OsFullPathname(const char*);
 int sqlite3OsLock(OsFile*, int);
 int sqlite3OsUnlock(OsFile*, int);
 int sqlite3OsCheckReservedLock(OsFile *id);
+
+
+/* The interface for file I/O is above.  Other miscellaneous functions
+** are below */
+
+int sqlite3OsRandomSeed(char*);
+int sqlite3OsSleep(int ms);
+int sqlite3OsCurrentTime(double*);
+void sqlite3OsEnterMutex(void);
+void sqlite3OsLeaveMutex(void);
 
 #endif /* _SQLITE_OS_H_ */

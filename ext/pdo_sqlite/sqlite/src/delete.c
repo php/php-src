@@ -27,7 +27,11 @@ Table *sqlite3SrcListLookup(Parse *pParse, SrcList *pSrc){
   struct SrcList_item *pItem;
   for(i=0, pItem=pSrc->a; i<pSrc->nSrc; i++, pItem++){
     pTab = sqlite3LocateTable(pParse, pItem->zName, pItem->zDatabase);
+    sqlite3DeleteTable(pParse->db, pItem->pTab);
     pItem->pTab = pTab;
+    if( pTab ){
+      pTab->nRef++;
+    }
   }
   return pTab;
 }
@@ -99,7 +103,6 @@ void sqlite3DeleteFrom(
 
   sContext.pParse = 0;
   if( pParse->nErr || sqlite3_malloc_failed ){
-    pTabList = 0;
     goto delete_from_cleanup;
   }
   db = pParse->db;
@@ -231,12 +234,12 @@ void sqlite3DeleteFrom(
 
     /* Begin the database scan
     */
-    pWInfo = sqlite3WhereBegin(pParse, pTabList, pWhere, 0, 0);
+    pWInfo = sqlite3WhereBegin(pParse, pTabList, pWhere, 0);
     if( pWInfo==0 ) goto delete_from_cleanup;
 
     /* Remember the rowid of every item to be deleted.
     */
-    sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
     sqlite3VdbeAddOp(v, OP_ListWrite, 0, 0);
     if( db->flags & SQLITE_CountRows ){
       sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
@@ -265,21 +268,21 @@ void sqlite3DeleteFrom(
     */
     if( triggers_exist ){
       addr = sqlite3VdbeAddOp(v, OP_ListRead, 0, end);
-      sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
       if( !isView ){
+        sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
         sqlite3OpenTableForReading(v, iCur, pTab);
       }
       sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
-      sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+      sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
       sqlite3VdbeAddOp(v, OP_RowData, iCur, 0);
-      sqlite3VdbeAddOp(v, OP_PutIntKey, oldIdx, 0);
+      sqlite3VdbeAddOp(v, OP_Insert, oldIdx, 0);
       if( !isView ){
         sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
       }
 
       (void)sqlite3CodeRowTrigger(pParse, TK_DELETE, 0, TRIGGER_BEFORE, pTab,
           -1, oldIdx, (pParse->trigStack)?pParse->trigStack->orconf:OE_Default,
-	  addr);
+          addr);
     }
 
     if( !isView ){
@@ -313,7 +316,7 @@ void sqlite3DeleteFrom(
       }
       (void)sqlite3CodeRowTrigger(pParse, TK_DELETE, 0, TRIGGER_AFTER, pTab, -1,
           oldIdx, (pParse->trigStack)?pParse->trigStack->orconf:OE_Default,
-	  addr);
+          addr);
     }
 
     /* End of the delete loop */
@@ -429,13 +432,14 @@ void sqlite3GenerateIndexKey(
   int j;
   Table *pTab = pIdx->pTable;
 
-  sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+  sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
   for(j=0; j<pIdx->nColumn; j++){
     int idx = pIdx->aiColumn[j];
     if( idx==pTab->iPKey ){
       sqlite3VdbeAddOp(v, OP_Dup, j, 0);
     }else{
       sqlite3VdbeAddOp(v, OP_Column, iCur, idx);
+      sqlite3ColumnDefault(v, pTab, idx);
     }
   }
   sqlite3VdbeAddOp(v, OP_MakeRecord, pIdx->nColumn, (1<<24));

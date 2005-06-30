@@ -508,6 +508,7 @@ static int page_write(
   return TCL_OK;
 }
 
+#ifndef SQLITE_OMIT_DISKIO
 /*
 ** Usage:   fake_big_file  N  FILENAME
 **
@@ -555,6 +556,7 @@ static int fake_big_file(
   }
   return TCL_OK;
 }
+#endif
 
 /*
 ** Register commands with the TCL interpreter.
@@ -582,7 +584,9 @@ int Sqlitetest2_Init(Tcl_Interp *interp){
     { "page_write",              (Tcl_CmdProc*)page_write          },
     { "page_number",             (Tcl_CmdProc*)page_number         },
     { "pager_truncate",          (Tcl_CmdProc*)pager_truncate      },
+#ifndef SQLITE_OMIT_DISKIO
     { "fake_big_file",           (Tcl_CmdProc*)fake_big_file       },
+#endif
   };
   int i;
   for(i=0; i<sizeof(aCmd)/sizeof(aCmd[0]); i++){

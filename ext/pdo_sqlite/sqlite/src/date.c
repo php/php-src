@@ -272,7 +272,7 @@ static int parseYyyyMmDd(const char *zDate, DateTime *p){
     return 1;
   }
   zDate += 10;
-  while( isspace(*(u8*)zDate) ){ zDate++; }
+  while( isspace(*(u8*)zDate) || 'T'==*(u8*)zDate ){ zDate++; }
   if( parseHhMmSs(zDate, p)==0 ){
     /* We got the time */
   }else if( *zDate==0 ){

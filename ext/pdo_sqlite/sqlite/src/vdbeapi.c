@@ -23,8 +23,6 @@
 ** that sqlite3_prepare() generates.  For example, if new functions or
 ** collating sequences are registered or if an authorizer function is
 ** added or changed.
-**
-***** EXPERIMENTAL ******
 */
 int sqlite3_expired(sqlite3_stmt *pStmt){
   Vdbe *p = (Vdbe*)pStmt;
@@ -383,8 +381,18 @@ int sqlite3_column_type(sqlite3_stmt *pStmt, int i){
 /*
 ** Convert the N-th element of pStmt->pColName[] into a string using
 ** xFunc() then return that string.  If N is out of range, return 0.
-** If useType is 1, then use the second set of N elements (the datatype
-** names) instead of the first set.
+**
+** There are up to 5 names for each column.  useType determines which
+** name is returned.  Here are the names:
+**
+**    0      The column name as it should be displayed for output
+**    1      The datatype name for the column
+**    2      The name of the database that the column derives from
+**    3      The name of the table that the column derives from
+**    4      The name of the table column that the result column derives from
+**
+** If the result is not a simple column reference (if it is an expression
+** or a constant) then useTypes 2, 3, and 4 return NULL.
 */
 static const void *columnName(
   sqlite3_stmt *pStmt,
@@ -398,9 +406,7 @@ static const void *columnName(
   if( p==0 || N>=n || N<0 ){
     return 0;
   }
-  if( useType ){
-    N += n;
-  }
+  N += useType*n;
   return xFunc(&p->aColName[N]);
 }
 
@@ -412,32 +418,71 @@ static const void *columnName(
 const char *sqlite3_column_name(sqlite3_stmt *pStmt, int N){
   return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 0);
 }
+#ifndef SQLITE_OMIT_UTF16
+const void *sqlite3_column_name16(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 0);
+}
+#endif
 
 /*
 ** Return the column declaration type (if applicable) of the 'i'th column
-** of the result set of SQL statement pStmt, encoded as UTF-8.
+** of the result set of SQL statement pStmt.
 */
 const char *sqlite3_column_decltype(sqlite3_stmt *pStmt, int N){
   return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 1);
 }
-
 #ifndef SQLITE_OMIT_UTF16
-/*
-** Return the name of the 'i'th column of the result set of SQL statement
-** pStmt, encoded as UTF-16.
-*/
-const void *sqlite3_column_name16(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 0);
-}
-
-/*
-** Return the column declaration type (if applicable) of the 'i'th column
-** of the result set of SQL statement pStmt, encoded as UTF-16.
-*/
 const void *sqlite3_column_decltype16(sqlite3_stmt *pStmt, int N){
   return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 1);
 }
 #endif /* SQLITE_OMIT_UTF16 */
+
+#if !defined(SQLITE_OMIT_ORIGIN_NAMES) && 0
+/*
+** Return the name of the database from which a result column derives.
+** NULL is returned if the result column is an expression or constant or
+** anything else which is not an unabiguous reference to a database column.
+*/
+const char *sqlite3_column_database_name(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 2);
+}
+#ifndef SQLITE_OMIT_UTF16
+const void *sqlite3_column_database_name16(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 2);
+}
+#endif /* SQLITE_OMIT_UTF16 */
+
+/*
+** Return the name of the table from which a result column derives.
+** NULL is returned if the result column is an expression or constant or
+** anything else which is not an unabiguous reference to a database column.
+*/
+const char *sqlite3_column_table_name(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 3);
+}
+#ifndef SQLITE_OMIT_UTF16
+const void *sqlite3_column_table_name16(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 3);
+}
+#endif /* SQLITE_OMIT_UTF16 */
+
+/*
+** Return the name of the table column from which a result column derives.
+** NULL is returned if the result column is an expression or constant or
+** anything else which is not an unabiguous reference to a database column.
+*/
+const char *sqlite3_column_origin_name(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 4);
+}
+#ifndef SQLITE_OMIT_UTF16
+const void *sqlite3_column_origin_name16(sqlite3_stmt *pStmt, int N){
+  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 4);
+}
+#endif /* SQLITE_OMIT_UTF16 */
+#endif /* SQLITE_OMIT_ORIGIN_NAMES */
+
+
+
 
 /******************************* sqlite3_bind_  ***************************
 ** 
@@ -454,7 +499,7 @@ const void *sqlite3_column_decltype16(sqlite3_stmt *pStmt, int N){
 static int vdbeUnbind(Vdbe *p, int i){
   Mem *pVar;
   if( p==0 || p->magic!=VDBE_MAGIC_RUN || p->pc>=0 ){
-    sqlite3Error(p->db, SQLITE_MISUSE, 0);
+    if( p ) sqlite3Error(p->db, SQLITE_MISUSE, 0);
     return SQLITE_MISUSE;
   }
   if( i<1 || i>p->nVar ){
@@ -621,4 +666,36 @@ int sqlite3_bind_parameter_index(sqlite3_stmt *pStmt, const char *zName){
     }
   }
   return 0;
+}
+
+/*
+** Transfer all bindings from the first statement over to the second.
+** If the two statements contain a different number of bindings, then
+** an SQLITE_ERROR is returned.
+*/
+int sqlite3_transfer_bindings(sqlite3_stmt *pFromStmt, sqlite3_stmt *pToStmt){
+  Vdbe *pFrom = (Vdbe*)pFromStmt;
+  Vdbe *pTo = (Vdbe*)pToStmt;
+  int i, rc = SQLITE_OK;
+  if( (pFrom->magic!=VDBE_MAGIC_RUN && pFrom->magic!=VDBE_MAGIC_HALT)
+    || (pTo->magic!=VDBE_MAGIC_RUN && pTo->magic!=VDBE_MAGIC_HALT) ){
+    return SQLITE_MISUSE;
+  }
+  if( pFrom->nVar!=pTo->nVar ){
+    return SQLITE_ERROR;
+  }
+  for(i=0; rc==SQLITE_OK && i<pFrom->nVar; i++){
+    rc = sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
+  }
+  return rc;
+}
+
+/*
+** Return the sqlite3* database handle to which the prepared statement given
+** in the argument belongs.  This is the same database handle that was
+** the first argument to the sqlite3_prepare() that was used to create
+** the statement in the first place.
+*/
+sqlite3 *sqlite3_db_handle(sqlite3_stmt *pStmt){
+  return pStmt ? ((Vdbe*)pStmt)->db : 0;
 }
