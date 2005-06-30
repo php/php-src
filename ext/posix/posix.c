@@ -698,7 +698,11 @@ PHP_FUNCTION(posix_mknod)
 				"expects argument 4 to be non-zero for POSIX_S_IFCHR and POSIX_S_IFBLK");
 			RETURN_FALSE;
 		} else {
+#ifdef HAVE_MAKEDEV
 			php_dev = makedev(major, minor);
+#else
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not create a block or character device, creating a normal file instead");
+#endif
 		}
 	}
 
