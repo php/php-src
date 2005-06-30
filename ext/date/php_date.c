@@ -233,6 +233,10 @@ static char *php_format_date(char *format, int format_len, timelib_time *t, int 
 
 	smart_str_0(&string);
 
+	if (localtime) {
+		timelib_time_offset_dtor(offset);
+	}
+
 	return string.c;
 }
 
