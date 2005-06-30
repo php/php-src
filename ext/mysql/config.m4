@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 AC_DEFUN([MYSQL_LIB_CHK], [
-  str="$MYSQL_DIR/$1/lib$MY_LIBNAME.*"
+  str="$MYSQL_DIR/$1/lib$MYSQL_LIBNAME.*"
   for j in `echo $str`; do
     if test -r $j; then
       MYSQL_LIB_DIR=$MYSQL_DIR/$1
@@ -86,10 +86,10 @@ if test "$PHP_MYSQL" != "no"; then
 Note that the MySQL client library is not bundled anymore!])
   fi
 
-  MY_LIBNAME=mysqlclient
+  MYSQL_LIBNAME=mysqlclient
   case $host_alias in
     *netware*[)]
-      MY_LIBNAME=mysql
+      MYSQL_LIBNAME=mysql
       ;;
   esac
 
@@ -98,15 +98,15 @@ Note that the MySQL client library is not bundled anymore!])
   done
 
   if test -z "$MYSQL_LIB_DIR"; then
-    AC_MSG_ERROR([Cannot find lib$MY_LIBNAME under $MYSQL_DIR.
+    AC_MSG_ERROR([Cannot find lib$MYSQL_LIBNAME under $MYSQL_DIR.
 Note that the MySQL client library is not bundled anymore!])
   fi
 
-  PHP_CHECK_LIBRARY($MY_LIBNAME, mysql_close, [ ],
+  PHP_CHECK_LIBRARY($MYSQL_LIBNAME, mysql_close, [ ],
   [
     if test "$PHP_ZLIB_DIR" != "no"; then
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, MYSQL_SHARED_LIBADD)
-      PHP_CHECK_LIBRARY($MY_LIBNAME, mysql_error, [], [
+      PHP_CHECK_LIBRARY($MYSQL_LIBNAME, mysql_error, [], [
         AC_MSG_ERROR([mysql configure failed. Please check config.log for more information.])
       ], [
         -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$MYSQL_LIB_DIR 
@@ -114,7 +114,7 @@ Note that the MySQL client library is not bundled anymore!])
       MYSQL_LIBS="-L$PHP_ZLIB_DIR/$PHP_LIBDIR -lz"
     else
       PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
-      PHP_CHECK_LIBRARY($MY_LIBNAME, mysql_errno, [], [
+      PHP_CHECK_LIBRARY($MYSQL_LIBNAME, mysql_errno, [], [
         AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
       ], [
         -L$MYSQL_LIB_DIR
@@ -125,13 +125,13 @@ Note that the MySQL client library is not bundled anymore!])
     -L$MYSQL_LIB_DIR 
   ])
 
-  PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH($MYSQL_LIBNAME, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
 
   PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
 
   MYSQL_MODULE_TYPE=external
-  MYSQL_LIBS="-L$MYSQL_LIB_DIR -l$MY_LIBNAME $MYSQL_LIBS"
+  MYSQL_LIBS="-L$MYSQL_LIB_DIR -l$MYSQL_LIBNAME $MYSQL_LIBS"
   MYSQL_INCLUDE=-I$MYSQL_INC_DIR
  
   PHP_SUBST(MYSQL_SHARED_LIBADD)
