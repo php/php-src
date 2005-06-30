@@ -48,8 +48,8 @@ struct LimitVal {
 ** GLOB, NOT LIKE, and NOT GLOB operators.
 */
 struct LikeOp {
-  int opcode;   /* Either TK_GLOB or TK_LIKE */
-  int not;      /* True if the NOT keyword is present */
+  Token operator;  /* "like" or "glob" or "regexp" */
+  int not;         /* True if the NOT keyword is present */
 };
 
 /*
@@ -75,7 +75,7 @@ struct AttachKey { int type;  Token key; };
 // add them to the parse.h output file.
 //
 %nonassoc END_OF_FILE ILLEGAL SPACE UNCLOSED_STRING COMMENT FUNCTION
-          COLUMN AGG_FUNCTION.
+          COLUMN AGG_FUNCTION CONST_FUNC.
 
 // Input is a single SQL command
 input ::= cmdlist.
@@ -112,13 +112,15 @@ create_table ::= CREATE(X) temp(T) TABLE nm(Y) dbnm(Z). {
    sqlite3StartTable(pParse,&X,&Y,&Z,T,0);
 }
 %type temp {int}
+%ifndef SQLITE_OMIT_TEMPDB
 temp(A) ::= TEMP.  {A = 1;}
+%endif
 temp(A) ::= .      {A = 0;}
-create_table_args ::= LP columnlist conslist_opt RP(X). {
-  sqlite3EndTable(pParse,&X,0);
+create_table_args ::= LP columnlist conslist_opt(X) RP(Y). {
+  sqlite3EndTable(pParse,&X,&Y,0);
 }
 create_table_args ::= AS select(S). {
-  sqlite3EndTable(pParse,0,S);
+  sqlite3EndTable(pParse,0,0,S);
   sqlite3SelectDelete(S);
 }
 columnlist ::= columnlist COMMA column.
@@ -128,8 +130,15 @@ columnlist ::= column.
 // column.  The type is always just "text".  But the code will accept
 // an elaborate typename.  Perhaps someday we'll do something with it.
 //
-column ::= columnid type carglist. 
-columnid ::= nm(X).                {sqlite3AddColumn(pParse,&X);}
+column(A) ::= columnid(X) type carglist. {
+  A.z = X.z;
+  A.n = (pParse->sLastToken.z-X.z) + pParse->sLastToken.n;
+}
+columnid(A) ::= nm(X). {
+  sqlite3AddColumn(pParse,&X);
+  A = X;
+}
+
 
 // An IDENTIFIER can be a generic identifier, or one of several
 // keywords.  Any non-standard keyword can also be an identifier.
@@ -144,13 +153,13 @@ id(A) ::= ID(X).         {A = X;}
 %fallback ID
   ABORT AFTER ASC ATTACH BEFORE BEGIN CASCADE CONFLICT
   DATABASE DEFERRED DESC DETACH EACH END EXCLUSIVE EXPLAIN FAIL FOR
-  GLOB IGNORE IMMEDIATE INITIALLY INSTEAD LIKE MATCH KEY
+  IGNORE IMMEDIATE INITIALLY INSTEAD LIKE_KW MATCH KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
   TEMP TRIGGER VACUUM VIEW
 %ifdef SQLITE_OMIT_COMPOUND_SELECT
   EXCEPT INTERSECT UNION
 %endif
-  REINDEX RENAME CDATE CTIME CTIMESTAMP ALTER
+  REINDEX RENAME CTIME_KW ALTER
   .
 
 // Define operator precedence early so that this is the first occurance
@@ -167,7 +176,7 @@ id(A) ::= ID(X).         {A = X;}
 %left OR.
 %left AND.
 %right NOT.
-%left IS LIKE GLOB BETWEEN IN ISNULL NOTNULL NE EQ.
+%left IS LIKE_KW BETWEEN IN ISNULL NOTNULL NE EQ.
 %left GT LE LT GE.
 %right ESCAPE.
 %left BITAND BITOR LSHIFT RSHIFT.
@@ -223,7 +232,7 @@ ccons ::= NOT NULL onconf(R).               {sqlite3AddNotNull(pParse, R);}
 ccons ::= PRIMARY KEY sortorder onconf(R) autoinc(I).
                                      {sqlite3AddPrimaryKey(pParse,0,R,I);}
 ccons ::= UNIQUE onconf(R).          {sqlite3CreateIndex(pParse,0,0,0,0,R,0,0);}
-ccons ::= CHECK LP expr RP onconf.
+ccons ::= CHECK LP expr(X) RP onconf. {sqlite3ExprDelete(X);}
 ccons ::= REFERENCES nm(T) idxlist_opt(TA) refargs(R).
                                 {sqlite3CreateForeignKey(pParse,0,&T,TA,R);}
 ccons ::= defer_subclause(D).   {sqlite3DeferForeignKey(pParse,D);}
@@ -263,8 +272,8 @@ init_deferred_pred_opt(A) ::= INITIALLY IMMEDIATE.    {A = 0;}
 // For the time being, the only constraint we care about is the primary
 // key and UNIQUE.  Both create indices.
 //
-conslist_opt ::= .
-conslist_opt ::= COMMA conslist.
+conslist_opt(A) ::= .                   {A.n = 0; A.z = 0;}
+conslist_opt(A) ::= COMMA(X) conslist.  {A = X;}
 conslist ::= conslist COMMA tcons.
 conslist ::= conslist tcons.
 conslist ::= tcons.
@@ -534,13 +543,13 @@ cmd ::= DELETE FROM fullname(X) where_opt(Y). {sqlite3DeleteFrom(pParse,X,Y);}
 where_opt(A) ::= .                    {A = 0;}
 where_opt(A) ::= WHERE expr(X).       {A = X;}
 
-%type setlist {ExprList*}
-%destructor setlist {sqlite3ExprListDelete($$);}
-
 ////////////////////////// The UPDATE command ////////////////////////////////
 //
 cmd ::= UPDATE orconf(R) fullname(X) SET setlist(Y) where_opt(Z).
     {sqlite3Update(pParse,X,Y,Z,R);}
+
+%type setlist {ExprList*}
+%destructor setlist {sqlite3ExprListDelete($$);}
 
 setlist(A) ::= setlist(Z) COMMA nm(X) EQ expr(Y).
     {A = sqlite3ExprListAppend(Z,Y,&X);}
@@ -603,7 +612,7 @@ expr(A) ::= nm(X) DOT nm(Y) DOT nm(Z). {
 term(A) ::= INTEGER(X).      {A = sqlite3Expr(@X, 0, 0, &X);}
 term(A) ::= FLOAT(X).        {A = sqlite3Expr(@X, 0, 0, &X);}
 term(A) ::= STRING(X).       {A = sqlite3Expr(@X, 0, 0, &X);}
-expr(A) ::= BLOB(X).         {A = sqlite3Expr(@X, 0, 0, &X);}
+term(A) ::= BLOB(X).         {A = sqlite3Expr(@X, 0, 0, &X);}
 expr(A) ::= REGISTER(X).     {A = sqlite3RegisterExpr(pParse, &X);}
 expr(A) ::= VARIABLE(X).     {
   Token *pToken = &X;
@@ -618,9 +627,12 @@ expr(A) ::= ID(X) LP STAR RP(E). {
   A = sqlite3ExprFunction(0, &X);
   sqlite3ExprSpan(A,&X,&E);
 }
-term(A) ::= CTIME(OP).                  {A = sqlite3Expr(@OP,0,0,0);}
-term(A) ::= CDATE(OP).                  {A = sqlite3Expr(@OP,0,0,0);}
-term(A) ::= CTIMESTAMP(OP).             {A = sqlite3Expr(@OP,0,0,0);}
+term(A) ::= CTIME_KW(OP). {
+  /* The CURRENT_TIME, CURRENT_DATE, and CURRENT_TIMESTAMP values are
+  ** treated as functions that return constants */
+  A = sqlite3ExprFunction(0,&OP);
+  if( A ) A->op = TK_CONST_FUNC;  
+}
 expr(A) ::= expr(X) AND(OP) expr(Y).    {A = sqlite3Expr(@OP, X, Y, 0);}
 expr(A) ::= expr(X) OR(OP) expr(Y).     {A = sqlite3Expr(@OP, X, Y, 0);}
 expr(A) ::= expr(X) LT(OP) expr(Y).     {A = sqlite3Expr(@OP, X, Y, 0);}
@@ -640,21 +652,18 @@ expr(A) ::= expr(X) SLASH(OP) expr(Y).  {A = sqlite3Expr(@OP, X, Y, 0);}
 expr(A) ::= expr(X) REM(OP) expr(Y).    {A = sqlite3Expr(@OP, X, Y, 0);}
 expr(A) ::= expr(X) CONCAT(OP) expr(Y). {A = sqlite3Expr(@OP, X, Y, 0);}
 %type likeop {struct LikeOp}
-likeop(A) ::= LIKE.     {A.opcode = TK_LIKE; A.not = 0;}
-likeop(A) ::= GLOB.     {A.opcode = TK_GLOB; A.not = 0;}
-likeop(A) ::= NOT LIKE. {A.opcode = TK_LIKE; A.not = 1;}
-likeop(A) ::= NOT GLOB. {A.opcode = TK_GLOB; A.not = 1;}
+likeop(A) ::= LIKE_KW(X).     {A.operator = X; A.not = 0;}
+likeop(A) ::= NOT LIKE_KW(X). {A.operator = X; A.not = 1;}
 %type escape {Expr*}
 escape(X) ::= ESCAPE expr(A). [ESCAPE] {X = A;}
 escape(X) ::= .               [ESCAPE] {X = 0;}
-expr(A) ::= expr(X) likeop(OP) expr(Y) escape(E).  [LIKE]  {
+expr(A) ::= expr(X) likeop(OP) expr(Y) escape(E).  [LIKE_KW]  {
   ExprList *pList = sqlite3ExprListAppend(0, Y, 0);
   pList = sqlite3ExprListAppend(pList, X, 0);
   if( E ){
     pList = sqlite3ExprListAppend(pList, E, 0);
   }
-  A = sqlite3ExprFunction(pList, 0);
-  if( A ) A->op = OP.opcode;
+  A = sqlite3ExprFunction(pList, &OP.operator);
   if( OP.not ) A = sqlite3Expr(TK_NOT, A, 0, 0);
   sqlite3ExprSpan(A, &X->span, &Y->span);
 }
@@ -712,18 +721,24 @@ expr(A) ::= expr(W) between_op(N) expr(X) AND expr(Y). [BETWEEN] {
   in_op(A) ::= NOT IN.  {A = 1;}
   expr(A) ::= expr(X) in_op(N) LP exprlist(Y) RP(E). [IN] {
     A = sqlite3Expr(TK_IN, X, 0, 0);
-    if( A ) A->pList = Y;
+    if( A ){
+      A->pList = Y;
+    }else{
+      sqlite3ExprListDelete(Y);
+    }
     if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
     sqlite3ExprSpan(A,&X->span,&E);
   }
   expr(A) ::= LP(B) select(X) RP(E). {
     A = sqlite3Expr(TK_SELECT, 0, 0, 0);
     if( A ) A->pSelect = X;
+    if( !A ) sqlite3SelectDelete(X);
     sqlite3ExprSpan(A,&B,&E);
   }
   expr(A) ::= expr(X) in_op(N) LP select(Y) RP(E).  [IN] {
     A = sqlite3Expr(TK_IN, X, 0, 0);
     if( A ) A->pSelect = Y;
+    if( !A ) sqlite3SelectDelete(Y);
     if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
     sqlite3ExprSpan(A,&X->span,&E);
   }
@@ -740,6 +755,7 @@ expr(A) ::= expr(W) between_op(N) expr(X) AND expr(Y). [BETWEEN] {
       p->pSelect = Y;
       sqlite3ExprSpan(p,&B,&E);
     }
+    if( !p ) sqlite3SelectDelete(Y);
   }
 %endif // SQLITE_OMIT_SUBQUERY
 
@@ -968,4 +984,12 @@ cmd ::= REINDEX nm(X) dbnm(Y).  {sqlite3Reindex(pParse, &X, &Y);}
 cmd ::= ALTER TABLE fullname(X) RENAME TO nm(Z). {
   sqlite3AlterRenameTable(pParse,X,&Z);
 }
+cmd ::= ALTER TABLE add_column_fullname ADD kwcolumn_opt column(Y). {
+  sqlite3AlterFinishAddColumn(pParse, &Y);
+}
+add_column_fullname ::= fullname(X). {
+  sqlite3AlterBeginAddColumn(pParse, X);
+}
+kwcolumn_opt ::= .
+kwcolumn_opt ::= COLUMNKW.
 %endif

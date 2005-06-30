@@ -15,6 +15,7 @@
 ** $Id$
 */
 #include "sqliteInt.h"
+#include <ctype.h>
 
 /*
 ** The code in this file only exists if we are not omitting the
@@ -167,6 +168,78 @@ void sqlite3AlterFunctions(sqlite3 *db){
 }
 
 /*
+** Generate the text of a WHERE expression which can be used to select all
+** temporary triggers on table pTab from the sqlite_temp_master table. If
+** table pTab has no temporary triggers, or is itself stored in the 
+** temporary database, NULL is returned.
+*/
+static char *whereTempTriggers(Parse *pParse, Table *pTab){
+  Trigger *pTrig;
+  char *zWhere = 0;
+  char *tmp = 0;
+  if( pTab->iDb!=1 ){
+    for( pTrig=pTab->pTrigger; pTrig; pTrig=pTrig->pNext ){
+      if( pTrig->iDb==1 ){
+        if( !zWhere ){
+          zWhere = sqlite3MPrintf("name=%Q", pTrig->name);
+        }else{
+          tmp = zWhere;
+          zWhere = sqlite3MPrintf("%s OR name=%Q", zWhere, pTrig->name);
+          sqliteFree(tmp);
+        }
+      }
+    }
+  }
+  return zWhere;
+}
+
+/*
+** Generate code to drop and reload the internal representation of table
+** pTab from the database, including triggers and temporary triggers.
+** Argument zName is the name of the table in the database schema at
+** the time the generated code is executed. This can be different from
+** pTab->zName if this function is being called to code part of an 
+** "ALTER TABLE RENAME TO" statement.
+*/
+static void reloadTableSchema(Parse *pParse, Table *pTab, const char *zName){
+  Vdbe *v;
+  char *zWhere;
+  int iDb;
+#ifndef SQLITE_OMIT_TRIGGER
+  Trigger *pTrig;
+#endif
+
+  v = sqlite3GetVdbe(pParse);
+  if( !v ) return;
+  iDb = pTab->iDb;
+
+#ifndef SQLITE_OMIT_TRIGGER
+  /* Drop any table triggers from the internal schema. */
+  for(pTrig=pTab->pTrigger; pTrig; pTrig=pTrig->pNext){
+    assert( pTrig->iDb==iDb || pTrig->iDb==1 );
+    sqlite3VdbeOp3(v, OP_DropTrigger, pTrig->iDb, 0, pTrig->name, 0);
+  }
+#endif
+
+  /* Drop the table and index from the internal schema */
+  sqlite3VdbeOp3(v, OP_DropTable, iDb, 0, pTab->zName, 0);
+
+  /* Reload the table, index and permanent trigger schemas. */
+  zWhere = sqlite3MPrintf("tbl_name=%Q", zName);
+  if( !zWhere ) return;
+  sqlite3VdbeOp3(v, OP_ParseSchema, iDb, 0, zWhere, P3_DYNAMIC);
+
+#ifndef SQLITE_OMIT_TRIGGER
+  /* Now, if the table is not stored in the temp database, reload any temp 
+  ** triggers. Don't use IN(...) in case SQLITE_OMIT_SUBQUERY is defined. 
+  */
+  if( (zWhere=whereTempTriggers(pParse, pTab)) ){
+    sqlite3VdbeOp3(v, OP_ParseSchema, 1, 0, zWhere, P3_DYNAMIC);
+  }
+#endif
+}
+
+/*
 ** Generate code to implement the "ALTER TABLE xxx RENAME TO yyy" 
 ** command. 
 */
@@ -179,11 +252,10 @@ void sqlite3AlterRenameTable(
   char *zDb;                /* Name of database iDb */
   Table *pTab;              /* Table being renamed */
   char *zName = 0;          /* NULL-terminated version of pName */ 
-  char *zWhere = 0;         /* Where clause of schema elements to reparse */
   sqlite3 *db = pParse->db; /* Database connection */
   Vdbe *v;
 #ifndef SQLITE_OMIT_TRIGGER
-  char *zTempTrig = 0;      /* Where clause to locate temp triggers */
+  char *zWhere = 0;         /* Where clause to locate temp triggers */
 #endif
   
   assert( pSrc->nSrc==1 );
@@ -255,7 +327,7 @@ void sqlite3AlterRenameTable(
           "(type='table' OR type='index' OR type='trigger');", 
       zDb, SCHEMA_TABLE(iDb), zName, zName, zName, 
 #ifndef SQLITE_OMIT_TRIGGER
-zName,
+      zName,
 #endif
       zName, strlen(pTab->zName), pTab->zName
   );
@@ -276,59 +348,206 @@ zName,
   ** table. Don't do this if the table being ALTERed is itself located in
   ** the temp database.
   */
-  if( iDb!=1 ){
-    Trigger *pTrig;
-    char *tmp = 0;
-    for( pTrig=pTab->pTrigger; pTrig; pTrig=pTrig->pNext ){
-      if( pTrig->iDb==1 ){
-        if( !zTempTrig ){
-          zTempTrig = 
-              sqlite3MPrintf("type = 'trigger' AND (name=%Q", pTrig->name);
-        }else{
-          tmp = zTempTrig;
-          zTempTrig = sqlite3MPrintf("%s OR name=%Q", zTempTrig, pTrig->name);
-          sqliteFree(tmp);
-        }
-      }
-    }
-    if( zTempTrig ){
-      tmp = zTempTrig;
-      zTempTrig = sqlite3MPrintf("%s)", zTempTrig);
-      sqliteFree(tmp);
-      sqlite3NestedParse(pParse, 
-          "UPDATE sqlite_temp_master SET "
-              "sql = sqlite_rename_trigger(sql, %Q), "
-              "tbl_name = %Q "
-              "WHERE %s;", zName, zName, zTempTrig);
-    }
+  if( (zWhere=whereTempTriggers(pParse, pTab)) ){
+    sqlite3NestedParse(pParse, 
+        "UPDATE sqlite_temp_master SET "
+            "sql = sqlite_rename_trigger(sql, %Q), "
+            "tbl_name = %Q "
+            "WHERE %s;", zName, zName, zWhere);
+    sqliteFree(zWhere);
   }
 #endif
 
-  /* Drop the elements of the in-memory schema that refered to the table
-  ** renamed and load the new versions from the database.
-  */
-  if( pParse->nErr==0 ){
-#ifndef SQLITE_OMIT_TRIGGER
-    Trigger *pTrig;
-    for( pTrig=pTab->pTrigger; pTrig; pTrig=pTrig->pNext ){
-      assert( pTrig->iDb==iDb || pTrig->iDb==1 );
-      sqlite3VdbeOp3(v, OP_DropTrigger, pTrig->iDb, 0, pTrig->name, 0);
-    }
-#endif
-    sqlite3VdbeOp3(v, OP_DropTable, iDb, 0, pTab->zName, 0);
-    zWhere = sqlite3MPrintf("tbl_name=%Q", zName);
-    sqlite3VdbeOp3(v, OP_ParseSchema, iDb, 0, zWhere, P3_DYNAMIC);
-#ifndef SQLITE_OMIT_TRIGGER
-    if( zTempTrig ){
-      sqlite3VdbeOp3(v, OP_ParseSchema, 1, 0, zTempTrig, P3_DYNAMIC);
-    }
-  }else{
-    sqliteFree(zTempTrig);
-#endif
-  }
+  /* Drop and reload the internal table schema. */
+  reloadTableSchema(pParse, pTab, zName);
 
 exit_rename_table:
   sqlite3SrcListDelete(pSrc);
   sqliteFree(zName);
+}
+
+
+/*
+** This function is called after an "ALTER TABLE ... ADD" statement
+** has been parsed. Argument pColDef contains the text of the new
+** column definition.
+**
+** The Table structure pParse->pNewTable was extended to include
+** the new column during parsing.
+*/
+void sqlite3AlterFinishAddColumn(Parse *pParse, Token *pColDef){
+  Table *pNew;              /* Copy of pParse->pNewTable */
+  Table *pTab;              /* Table being altered */
+  int iDb;                  /* Database number */
+  const char *zDb;          /* Database name */
+  const char *zTab;         /* Table name */
+  char *zCol;               /* Null-terminated column definition */
+  Column *pCol;             /* The new column */
+  Expr *pDflt;              /* Default value for the new column */
+  Vdbe *v;
+
+  if( pParse->nErr ) return;
+  pNew = pParse->pNewTable;
+  assert( pNew );
+
+  iDb = pNew->iDb;
+  zDb = pParse->db->aDb[iDb].zName;
+  zTab = pNew->zName;
+  pCol = &pNew->aCol[pNew->nCol-1];
+  pDflt = pCol->pDflt;
+  pTab = sqlite3FindTable(pParse->db, zTab, zDb);
+  assert( pTab );
+
+  /* If the default value for the new column was specified with a 
+  ** literal NULL, then set pDflt to 0. This simplifies checking
+  ** for an SQL NULL default below.
+  */
+  if( pDflt && pDflt->op==TK_NULL ){
+    pDflt = 0;
+  }
+
+  /* Check that the new column is not specified as PRIMARY KEY or UNIQUE.
+  ** If there is a NOT NULL constraint, then the default value for the
+  ** column must not be NULL.
+  */
+  if( pCol->isPrimKey ){
+    sqlite3ErrorMsg(pParse, "Cannot add a PRIMARY KEY column");
+    return;
+  }
+  if( pNew->pIndex ){
+    sqlite3ErrorMsg(pParse, "Cannot add a UNIQUE column");
+    return;
+  }
+  if( pCol->notNull && !pDflt ){
+    sqlite3ErrorMsg(pParse, 
+        "Cannot add a NOT NULL column with default value NULL");
+    return;
+  }
+
+  /* Ensure the default expression is something that sqlite3ValueFromExpr()
+  ** can handle (i.e. not CURRENT_TIME etc.)
+  */
+  if( pDflt ){
+    sqlite3_value *pVal;
+    if( sqlite3ValueFromExpr(pDflt, SQLITE_UTF8, SQLITE_AFF_NONE, &pVal) ){
+      /* malloc() has failed */
+      return;
+    }
+    if( !pVal ){
+      sqlite3ErrorMsg(pParse, "Cannot add a column with non-constant default");
+      return;
+    }
+    sqlite3ValueFree(pVal);
+  }
+
+  /* Modify the CREATE TABLE statement. */
+  zCol = sqliteStrNDup(pColDef->z, pColDef->n);
+  if( zCol ){
+    char *zEnd = &zCol[pColDef->n-1];
+    while( (zEnd>zCol && *zEnd==';') || isspace(*(unsigned char *)zEnd) ){
+      *zEnd-- = '\0';
+    }
+    sqlite3NestedParse(pParse, 
+        "UPDATE %Q.%s SET "
+          "sql = substr(sql,1,%d) || ', ' || %Q || substr(sql,%d,length(sql)) "
+        "WHERE type = 'table' AND name = %Q", 
+      zDb, SCHEMA_TABLE(iDb), pNew->addColOffset, zCol, pNew->addColOffset+1,
+      zTab
+    );
+    sqliteFree(zCol);
+  }
+
+  /* If the default value of the new column is NULL, then set the file
+  ** format to 2. If the default value of the new column is not NULL,
+  ** the file format becomes 3.
+  */
+  if( (v=sqlite3GetVdbe(pParse)) ){
+    int f = (pDflt?3:2);
+
+    /* Only set the file format to $f if it is currently less than $f. */
+    sqlite3VdbeAddOp(v, OP_ReadCookie, iDb, 1);
+    sqlite3VdbeAddOp(v, OP_Integer, f, 0);
+    sqlite3VdbeAddOp(v, OP_Ge, 0, sqlite3VdbeCurrentAddr(v)+3);
+    sqlite3VdbeAddOp(v, OP_Integer, f, 0);
+    sqlite3VdbeAddOp(v, OP_SetCookie, iDb, 1);
+  }
+
+  /* Reload the schema of the modified table. */
+  reloadTableSchema(pParse, pTab, pTab->zName);
+}
+
+
+/*
+** This function is called by the parser after the table-name in
+** an "ALTER TABLE <table-name> ADD" statement is parsed. Argument 
+** pSrc is the full-name of the table being altered.
+**
+** This routine makes a (partial) copy of the Table structure
+** for the table being altered and sets Parse.pNewTable to point
+** to it. Routines called by the parser as the column definition
+** is parsed (i.e. sqlite3AddColumn()) add the new Column data to 
+** the copy. The copy of the Table structure is deleted by tokenize.c 
+** after parsing is finished.
+**
+** Routine sqlite3AlterFinishAddColumn() will be called to complete
+** coding the "ALTER TABLE ... ADD" statement.
+*/
+void sqlite3AlterBeginAddColumn(Parse *pParse, SrcList *pSrc){
+  Table *pNew;
+  Table *pTab;
+  Vdbe *v;
+  int iDb;
+  int i;
+  int nAlloc;
+
+  /* Look up the table being altered. */
+  assert( !pParse->pNewTable );
+  pTab = sqlite3LocateTable(pParse, pSrc->a[0].zName, pSrc->a[0].zDatabase);
+  if( !pTab ) goto exit_begin_add_column;
+
+  /* Make sure this is not an attempt to ALTER a view. */
+  if( pTab->pSelect ){
+    sqlite3ErrorMsg(pParse, "Cannot add a column to a view");
+    goto exit_begin_add_column;
+  }
+
+  assert( pTab->addColOffset>0 );
+  iDb = pTab->iDb;
+
+  /* Put a copy of the Table struct in Parse.pNewTable for the
+  ** sqlite3AddColumn() function and friends to modify.
+  */
+  pNew = (Table *)sqliteMalloc(sizeof(Table));
+  if( !pNew ) goto exit_begin_add_column;
+  pParse->pNewTable = pNew;
+  pNew->nCol = pTab->nCol;
+  assert( pNew->nCol>0 );
+  nAlloc = (((pNew->nCol-1)/8)*8)+8;
+  assert( nAlloc>=pNew->nCol && nAlloc%8==0 && nAlloc-pNew->nCol<8 );
+  pNew->aCol = (Column *)sqliteMalloc(sizeof(Column)*nAlloc);
+  pNew->zName = sqliteStrDup(pTab->zName);
+  if( !pNew->aCol || !pNew->zName ){
+    goto exit_begin_add_column;
+  }
+  memcpy(pNew->aCol, pTab->aCol, sizeof(Column)*pNew->nCol);
+  for(i=0; i<pNew->nCol; i++){
+    Column *pCol = &pNew->aCol[i];
+    pCol->zName = sqliteStrDup(pCol->zName);
+    pCol->zType = 0;
+    pCol->pDflt = 0;
+  }
+  pNew->iDb = iDb;
+  pNew->addColOffset = pTab->addColOffset;
+  pNew->nRef = 1;
+
+  /* Begin a transaction and increment the schema cookie.  */
+  sqlite3BeginWriteOperation(pParse, 0, iDb);
+  v = sqlite3GetVdbe(pParse);
+  if( !v ) goto exit_begin_add_column;
+  sqlite3ChangeCookie(pParse->db, v, iDb);
+
+exit_begin_add_column:
+  sqlite3SrcListDelete(pSrc);
+  return;
 }
 #endif  /* SQLITE_ALTER_TABLE */

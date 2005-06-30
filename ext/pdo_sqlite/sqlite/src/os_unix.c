@@ -20,6 +20,18 @@
 #include <time.h>
 #include <errno.h>
 #include <unistd.h>
+
+/*
+** Do not include any of the File I/O interface procedures if the
+** SQLITE_OMIT_DISKIO macro is defined (indicating that there database
+** will be in-memory only)
+*/
+#ifndef SQLITE_OMIT_DISKIO
+
+
+/*
+** Define various macros that are missing from some systems.
+*/
 #ifndef O_LARGEFILE
 # define O_LARGEFILE 0
 #endif
@@ -33,7 +45,6 @@
 #ifndef O_BINARY
 # define O_BINARY 0
 #endif
-
 
 /*
 ** The DJGPP compiler environment looks mostly like Unix, but it
@@ -432,7 +443,8 @@ int sqlite3OsOpenReadWrite(
   int rc;
   assert( !id->isOpen );
   id->dirfd = -1;
-  id->h = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY, 0644);
+  id->h = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY,
+                          SQLITE_DEFAULT_FILE_PERMISSIONS);
   if( id->h<0 ){
 #ifdef EISDIR
     if( errno==EISDIR ){
@@ -561,7 +573,7 @@ int sqlite3OsOpenDirectory(
     return SQLITE_CANTOPEN;
   }
   assert( id->dirfd<0 );
-  id->dirfd = open(zDirname, O_RDONLY|O_BINARY, 0644);
+  id->dirfd = open(zDirname, O_RDONLY|O_BINARY, 0);
   if( id->dirfd<0 ){
     return SQLITE_CANTOPEN; 
   }
@@ -644,7 +656,7 @@ int sqlite3OsRead(OsFile *id, void *pBuf, int amt){
   TIMER_START;
   got = read(id->h, pBuf, amt);
   TIMER_END;
-  TRACE4("READ    %-3d %7d %d\n", id->h, last_page, TIMER_ELAPSED);
+  TRACE5("READ    %-3d %5d %7d %d\n", id->h, got, last_page, TIMER_ELAPSED);
   SEEK(0);
   /* if( got<0 ) got = 0; */
   if( got==amt ){
@@ -670,7 +682,7 @@ int sqlite3OsWrite(OsFile *id, const void *pBuf, int amt){
     pBuf = &((char*)pBuf)[wrote];
   }
   TIMER_END;
-  TRACE4("WRITE   %-3d %7d %d\n", id->h, last_page, TIMER_ELAPSED);
+  TRACE5("WRITE   %-3d %5d %7d %d\n", id->h, wrote, last_page, TIMER_ELAPSED);
   SEEK(0);
   if( amt>0 ){
     return SQLITE_FULL;
@@ -688,6 +700,16 @@ int sqlite3OsSeek(OsFile *id, i64 offset){
   return SQLITE_OK;
 }
 
+#ifdef SQLITE_TEST
+/*
+** Count the number of fullsyncs and normal syncs.  This is used to test
+** that syncs and fullsyncs are occuring at the right times.
+*/
+int sqlite3_sync_count = 0;
+int sqlite3_fullsync_count = 0;
+#endif
+
+
 /*
 ** The fsync() system call does not work as advertised on many
 ** unix systems.  The following procedure is an attempt to make
@@ -699,19 +721,40 @@ int sqlite3OsSeek(OsFile *id, i64 offset){
 ** enabled, however, since with SQLITE_NO_SYNC enabled, an OS crash
 ** or power failure will likely corrupt the database file.
 */
-static int full_fsync(int fd){
-#ifdef SQLITE_NO_SYNC
-  return SQLITE_OK;
-#else
+static int full_fsync(int fd, int fullSync){
   int rc;
+
+  /* Record the number of times that we do a normal fsync() and 
+  ** FULLSYNC.  This is used during testing to verify that this procedure
+  ** gets called with the correct arguments.
+  */
+#ifdef SQLITE_TEST
+  if( fullSync ) sqlite3_fullsync_count++;
+  sqlite3_sync_count++;
+#endif
+
+  /* If we compiled with the SQLITE_NO_SYNC flag, then syncing is a
+  ** no-op
+  */
+#ifdef SQLITE_NO_SYNC
+  rc = SQLITE_OK;
+#else
+
 #ifdef F_FULLFSYNC
-  rc = fcntl(fd, F_FULLFSYNC, 0);
+  if( fullSync ){
+    rc = fcntl(fd, F_FULLFSYNC, 0);
+  }else{
+    rc = 1;
+  }
+  /* If the FULLSYNC failed, try to do a normal fsync() */
   if( rc ) rc = fsync(fd);
+
 #else
   rc = fsync(fd);
-#endif
+#endif /* defined(F_FULLFSYNC) */
+#endif /* defined(SQLITE_NO_SYNC) */
+
   return rc;
-#endif
 }
 
 /*
@@ -729,12 +772,12 @@ int sqlite3OsSync(OsFile *id){
   assert( id->isOpen );
   SimulateIOError(SQLITE_IOERR);
   TRACE2("SYNC    %-3d\n", id->h);
-  if( full_fsync(id->h) ){
+  if( full_fsync(id->h, id->fullSync) ){
     return SQLITE_IOERR;
   }
   if( id->dirfd>=0 ){
     TRACE2("DIRSYNC %-3d\n", id->dirfd);
-    full_fsync(id->dirfd);
+    full_fsync(id->dirfd, id->fullSync);
     close(id->dirfd);  /* Only need to sync once, so close the directory */
     id->dirfd = -1;    /* when we are done. */
   }
@@ -744,12 +787,16 @@ int sqlite3OsSync(OsFile *id){
 /*
 ** Sync the directory zDirname. This is a no-op on operating systems other
 ** than UNIX.
+**
+** This is used to make sure the master journal file has truely been deleted
+** before making changes to individual journals on a multi-database commit.
+** The F_FULLFSYNC option is not needed here.
 */
 int sqlite3OsSyncDirectory(const char *zDirname){
   int fd;
   int r;
   SimulateIOError(SQLITE_IOERR);
-  fd = open(zDirname, O_RDONLY|O_BINARY, 0644);
+  fd = open(zDirname, O_RDONLY|O_BINARY, 0);
   TRACE3("DIRSYNC %-3d (%s)\n", fd, zDirname);
   if( fd<0 ){
     return SQLITE_CANTOPEN; 
@@ -906,7 +953,7 @@ int sqlite3OsLock(OsFile *id, int locktype){
   int s;
 
   assert( id->isOpen );
-  TRACE7("LOCK %d %s was %s(%s,%d) pid=%d\n", id->h, locktypeName(locktype), 
+  TRACE7("LOCK    %d %s was %s(%s,%d) pid=%d\n", id->h, locktypeName(locktype), 
       locktypeName(id->locktype), locktypeName(pLock->locktype), pLock->cnt
       ,getpid() );
 
@@ -915,7 +962,7 @@ int sqlite3OsLock(OsFile *id, int locktype){
   ** sqlite3OsEnterMutex() hasn't been called yet.
   */
   if( id->locktype>=locktype ){
-    TRACE3("LOCK %d %s ok (already held)\n", id->h, locktypeName(locktype));
+    TRACE3("LOCK    %d %s ok (already held)\n", id->h, locktypeName(locktype));
     return SQLITE_OK;
   }
 
@@ -1036,7 +1083,7 @@ int sqlite3OsLock(OsFile *id, int locktype){
 
 end_lock:
   sqlite3OsLeaveMutex();
-  TRACE4("LOCK %d %s %s\n", id->h, locktypeName(locktype), 
+  TRACE4("LOCK    %d %s %s\n", id->h, locktypeName(locktype), 
       rc==SQLITE_OK ? "ok" : "failed");
   return rc;
 }
@@ -1058,7 +1105,7 @@ int sqlite3OsUnlock(OsFile *id, int locktype){
   int rc = SQLITE_OK;
 
   assert( id->isOpen );
-  TRACE7("UNLOCK %d %d was %d(%d,%d) pid=%d\n", id->h, locktype, id->locktype, 
+  TRACE7("UNLOCK  %d %d was %d(%d,%d) pid=%d\n", id->h, locktype, id->locktype, 
       id->pLock->locktype, id->pLock->cnt, getpid());
 
   assert( locktype<=SHARED_LOCK );
@@ -1164,6 +1211,33 @@ int sqlite3OsClose(OsFile *id){
 }
 
 /*
+** Turn a relative pathname into a full pathname.  Return a pointer
+** to the full pathname stored in space obtained from sqliteMalloc().
+** The calling function is responsible for freeing this space once it
+** is no longer needed.
+*/
+char *sqlite3OsFullPathname(const char *zRelative){
+  char *zFull = 0;
+  if( zRelative[0]=='/' ){
+    sqlite3SetString(&zFull, zRelative, (char*)0);
+  }else{
+    char zBuf[5000];
+    zBuf[0] = 0;
+    sqlite3SetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative,
+                    (char*)0);
+  }
+  return zFull;
+}
+
+
+#endif /* SQLITE_OMIT_DISKIO */
+/***************************************************************************
+** Everything above deals with file I/O.  Everything that follows deals
+** with other miscellanous aspects of the operating system interface
+****************************************************************************/
+
+
+/*
 ** Get information to seed the random number generator.  The seed
 ** is written into the buffer zBuf[256].  The calling function must
 ** supply a sufficiently large buffer.
@@ -1244,24 +1318,6 @@ void sqlite3OsLeaveMutex(){
 }
 
 /*
-** Turn a relative pathname into a full pathname.  Return a pointer
-** to the full pathname stored in space obtained from sqliteMalloc().
-** The calling function is responsible for freeing this space once it
-** is no longer needed.
-*/
-char *sqlite3OsFullPathname(const char *zRelative){
-  char *zFull = 0;
-  if( zRelative[0]=='/' ){
-    sqlite3SetString(&zFull, zRelative, (char*)0);
-  }else{
-    char zBuf[5000];
-    sqlite3SetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative,
-                    (char*)0);
-  }
-  return zFull;
-}
-
-/*
 ** The following variable, if set to a non-zero value, becomes the result
 ** returned from sqlite3OsCurrentTime().  This is used for testing.
 */
@@ -1285,25 +1341,5 @@ int sqlite3OsCurrentTime(double *prNow){
 #endif
   return 0;
 }
-
-#if 0 /* NOT USED */
-/*
-** Find the time that the file was last modified.  Write the
-** modification time and date as a Julian Day number into *prNow and
-** return SQLITE_OK.  Return SQLITE_ERROR if the modification
-** time cannot be found.
-*/
-int sqlite3OsFileModTime(OsFile *id, double *prNow){
-  int rc;
-  struct stat statbuf;
-  if( fstat(id->h, &statbuf)==0 ){
-    *prNow = statbuf.st_mtime/86400.0 + 2440587.5;
-    rc = SQLITE_OK;
-  }else{
-    rc = SQLITE_ERROR;
-  }
-  return rc;
-}
-#endif /* NOT USED */
 
 #endif /* OS_UNIX */

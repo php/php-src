@@ -19,7 +19,7 @@
 
 /* Ignore this whole file if pragmas are disabled
 */
-#ifndef SQLITE_OMIT_PRAGMA
+#if !defined(SQLITE_OMIT_PRAGMA) && !defined(SQLITE_OMIT_PARSER)
 
 #if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
 # include "pager.h"
@@ -79,7 +79,9 @@ static int getTempStore(const char *z){
     return 0;
   }
 }
+#endif /* SQLITE_PAGER_PRAGMAS */
 
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
 /*
 ** Invalidate temp storage, either when the temp storage is changed
 ** from default, or when 'file' and the temp_store_directory has changed
@@ -98,7 +100,9 @@ static int invalidateTempStorage(Parse *pParse){
   }
   return SQLITE_OK;
 }
+#endif /* SQLITE_PAGER_PRAGMAS */
 
+#ifndef SQLITE_OMIT_PAGER_PRAGMAS
 /*
 ** If the TEMP database is open, close it and mark the database schema
 ** as needing reloading.  This must be done when using the TEMP_STORE
@@ -114,7 +118,7 @@ static int changeTempStorage(Parse *pParse, const char *zStorageType){
   db->temp_store = ts;
   return SQLITE_OK;
 }
-#endif
+#endif /* SQLITE_PAGER_PRAGMAS */
 
 /*
 ** Generate code to return a single integer value.
@@ -129,6 +133,7 @@ static void returnSingleInt(Parse *pParse, const char *zLabel, int value){
   sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
 }
 
+#ifndef SQLITE_OMIT_FLAG_PRAGMAS
 /*
 ** Check to see if zRight and zLeft refer to a pragma that queries
 ** or changes one of the flags in db->flags.  Return 1 if so and 0 if not.
@@ -177,6 +182,7 @@ static int flagPragma(Parse *pParse, const char *zLeft, const char *zRight){
   }
   return 0;
 }
+#endif /* SQLITE_OMIT_FLAG_PRAGMAS */
 
 /*
 ** Process a pragma statement.  
@@ -428,10 +434,12 @@ void sqlite3Pragma(
   }else
 #endif /* SQLITE_OMIT_PAGER_PRAGMAS */
 
+#ifndef SQLITE_OMIT_FLAG_PRAGMAS
   if( flagPragma(pParse, zLeft, zRight) ){
     /* The flagPragma() subroutine also generates any necessary code
     ** there is nothing more to do here */
   }else
+#endif /* SQLITE_OMIT_FLAG_PRAGMAS */
 
 #ifndef SQLITE_OMIT_SCHEMA_PRAGMAS
   /*
@@ -637,6 +645,8 @@ void sqlite3Pragma(
       HashElem *x;
       int cnt = 0;
 
+      if( OMIT_TEMPDB && i==1 ) continue;
+
       sqlite3CodeVerifySchema(pParse, i);
 
       /* Do an integrity check of the B-Tree
@@ -683,7 +693,7 @@ void sqlite3Pragma(
           static const VdbeOpList idxErr[] = {
             { OP_MemIncr,     0,  0,  0},
             { OP_String8,     0,  0,  "rowid "},
-            { OP_Recno,       1,  0,  0},
+            { OP_Rowid,       1,  0,  0},
             { OP_String8,     0,  0,  " missing from index "},
             { OP_String8,     0,  0,  0},    /* 4 */
             { OP_Concat,      2,  0,  0},
@@ -895,6 +905,17 @@ void sqlite3Pragma(
   }else
 #endif
 
+#ifdef SQLITE_SSE
+  /*
+  ** Check to see if the sqlite_statements table exists.  Create it
+  ** if it does not.
+  */
+  if( sqlite3StrICmp(zLeft, "create_sqlite_statement_table")==0 ){
+    extern int sqlite3CreateStatementsTable(Parse*);
+    sqlite3CreateStatementsTable(pParse);
+  }else
+#endif
+
   {}
 
   if( v ){
@@ -909,4 +930,4 @@ pragma_out:
   sqliteFree(zRight);
 }
 
-#endif /* SQLITE_OMIT_PRAGMA */
+#endif /* SQLITE_OMIT_PRAGMA || SQLITE_OMIT_PARSER */

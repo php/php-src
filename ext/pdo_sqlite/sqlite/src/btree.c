@@ -211,11 +211,11 @@
 #include "os.h"
 #include <assert.h>
 
-/*
-** This macro rounds values up so that if the value is an address it
-** is guaranteed to be an address that is aligned to an 8-byte boundary.
+/* Round up a number to the next larger multiple of 8.  This is used
+** to force 8-byte alignment on 64-bit architectures.
 */
-#define FORCE_ALIGNMENT(X)   (((X)+7)&~7)
+#define ROUND8(x)   ((x+7)&~7)
+
 
 /* The following value is the maximum cell size assuming a maximum page
 ** size give above.
@@ -308,12 +308,12 @@ struct Btree {
   u8 autoVacuum;        /* True if database supports auto-vacuum */
 #endif
   u16 pageSize;         /* Total number of bytes on a page */
-  u16 psAligned;        /* pageSize rounded up to a multiple of 8 */
   u16 usableSize;       /* Number of usable bytes on each page */
   int maxLocal;         /* Maximum local payload in non-LEAFDATA tables */
   int minLocal;         /* Minimum local payload in non-LEAFDATA tables */
   int maxLeaf;          /* Maximum local payload in a LEAFDATA table */
   int minLeaf;          /* Minimum local payload in a LEAFDATA table */
+  BusyHandler *pBusyHandler;   /* Callback for when there is lock contention */
 };
 typedef Btree Bt;
 
@@ -713,7 +713,7 @@ static void _pageIntegrity(MemPage *pPage){
   used = sqliteMallocRaw( pPage->pBt->pageSize );
   if( used==0 ) return;
   usableSize = pPage->pBt->usableSize;
-  assert( pPage->aData==&((unsigned char*)pPage)[-pPage->pBt->psAligned] );
+  assert( pPage->aData==&((unsigned char*)pPage)[-pPage->pBt->pageSize] );
   hdr = pPage->hdrOffset;
   assert( hdr==(pPage->pgno==1 ? 100 : 0) );
   assert( pPage->pgno==sqlite3pager_pagenumber(pPage->aData) );
@@ -1016,7 +1016,7 @@ static int initPage(
   assert( pBt!=0 );
   assert( pParent==0 || pParent->pBt==pBt );
   assert( pPage->pgno==sqlite3pager_pagenumber(pPage->aData) );
-  assert( pPage->aData == &((unsigned char*)pPage)[-pBt->psAligned] );
+  assert( pPage->aData == &((unsigned char*)pPage)[-pBt->pageSize] );
   if( pPage->pParent!=pParent && (pPage->pParent!=0 || pPage->isInit) ){
     /* The parent page should never change unless the file is corrupt */
     return SQLITE_CORRUPT; /* bkpt-CORRUPT */
@@ -1084,7 +1084,7 @@ static void zeroPage(MemPage *pPage, int flags){
   int first;
 
   assert( sqlite3pager_pagenumber(data)==pPage->pgno );
-  assert( &data[pBt->psAligned] == (unsigned char*)pPage );
+  assert( &data[pBt->pageSize] == (unsigned char*)pPage );
   assert( sqlite3pager_iswriteable(data) );
   memset(&data[hdr], 0, pBt->usableSize - hdr);
   data[hdr] = flags;
@@ -1113,7 +1113,7 @@ static int getPage(Btree *pBt, Pgno pgno, MemPage **ppPage){
   MemPage *pPage;
   rc = sqlite3pager_get(pBt->pPager, pgno, (void**)&aData);
   if( rc ) return rc;
-  pPage = (MemPage*)&aData[pBt->psAligned];
+  pPage = (MemPage*)&aData[pBt->pageSize];
   pPage->aData = aData;
   pPage->pBt = pBt;
   pPage->pgno = pgno;
@@ -1152,7 +1152,7 @@ static void releasePage(MemPage *pPage){
   if( pPage ){
     assert( pPage->aData );
     assert( pPage->pBt );
-    assert( &pPage->aData[pPage->pBt->psAligned]==(unsigned char*)pPage );
+    assert( &pPage->aData[pPage->pBt->pageSize]==(unsigned char*)pPage );
     sqlite3pager_unref(pPage->aData);
   }
 }
@@ -1163,7 +1163,9 @@ static void releasePage(MemPage *pPage){
 ** happens.
 */
 static void pageDestructor(void *pData, int pageSize){
-  MemPage *pPage = (MemPage*)&((char*)pData)[FORCE_ALIGNMENT(pageSize)];
+  MemPage *pPage;
+  assert( (pageSize & 7)==0 );
+  pPage = (MemPage*)&((char*)pData)[pageSize];
   if( pPage->pParent ){
     MemPage *pParent = pPage->pParent;
     pPage->pParent = 0;
@@ -1181,7 +1183,9 @@ static void pageDestructor(void *pData, int pageSize){
 ** page to agree with the restored data.
 */
 static void pageReinit(void *pData, int pageSize){
-  MemPage *pPage = (MemPage*)&((char*)pData)[FORCE_ALIGNMENT(pageSize)];
+  MemPage *pPage;
+  assert( (pageSize & 7)==0 );
+  pPage = (MemPage*)&((char*)pData)[pageSize];
   if( pPage->isInit ){
     pPage->isInit = 0;
     initPage(pPage, pPage->pParent);
@@ -1215,8 +1219,6 @@ int sqlite3BtreeOpen(
   assert( sizeof(u32)==4 );
   assert( sizeof(u16)==2 );
   assert( sizeof(Pgno)==4 );
-  assert( sizeof(ptr)==sizeof(char*) );
-  assert( sizeof(uptr)==sizeof(ptr) );
 
   pBt = sqliteMalloc( sizeof(*pBt) );
   if( pBt==0 ){
@@ -1237,7 +1239,8 @@ int sqlite3BtreeOpen(
   pBt->readOnly = sqlite3pager_isreadonly(pBt->pPager);
   sqlite3pager_read_fileheader(pBt->pPager, sizeof(zDbHeader), zDbHeader);
   pBt->pageSize = get2byte(&zDbHeader[16]);
-  if( pBt->pageSize<512 || pBt->pageSize>SQLITE_MAX_PAGE_SIZE ){
+  if( pBt->pageSize<512 || pBt->pageSize>SQLITE_MAX_PAGE_SIZE
+       || ((pBt->pageSize-1)&pBt->pageSize)!=0 ){
     pBt->pageSize = SQLITE_DEFAULT_PAGE_SIZE;
     pBt->maxEmbedFrac = 64;   /* 25% */
     pBt->minEmbedFrac = 32;   /* 12.5% */
@@ -1269,7 +1272,7 @@ int sqlite3BtreeOpen(
 #endif
   }
   pBt->usableSize = pBt->pageSize - nReserve;
-  pBt->psAligned = FORCE_ALIGNMENT(pBt->pageSize);
+  assert( (pBt->pageSize & 7)==0 );  /* 8-byte alignment of pageSize */
   sqlite3pager_set_pagesize(pBt->pPager, pBt->pageSize);
   *ppBtree = pBt;
   return SQLITE_OK;
@@ -1291,6 +1294,7 @@ int sqlite3BtreeClose(Btree *pBt){
 ** Change the busy handler callback function.
 */
 int sqlite3BtreeSetBusyHandler(Btree *pBt, BusyHandler *pHandler){
+  pBt->pBusyHandler = pHandler;
   sqlite3pager_set_busyhandler(pBt->pPager, pHandler);
   return SQLITE_OK;
 }
@@ -1355,9 +1359,8 @@ int sqlite3BtreeSetPageSize(Btree *pBt, int pageSize, int nReserve){
   }
   if( pageSize>=512 && pageSize<=SQLITE_MAX_PAGE_SIZE &&
         ((pageSize-1)&pageSize)==0 ){
-    pBt->pageSize = pageSize;
-    pBt->psAligned = FORCE_ALIGNMENT(pageSize);
-    sqlite3pager_set_pagesize(pBt->pPager, pageSize);
+    assert( (pageSize & 7)==0 );
+    pBt->pageSize = sqlite3pager_set_pagesize(pBt->pPager, pageSize);
   }
   pBt->usableSize = pBt->pageSize - nReserve;
   return SQLITE_OK;
@@ -1416,7 +1419,7 @@ int sqlite3BtreeGetAutoVacuum(Btree *pBt){
 ** if there is a locking protocol violation.
 */
 static int lockBtree(Btree *pBt){
-  int rc;
+  int rc, pageSize;
   MemPage *pPage1;
   if( pBt->pPage1 ) return SQLITE_OK;
   rc = getPage(pBt, 1, &pPage1);
@@ -1435,12 +1438,16 @@ static int lockBtree(Btree *pBt){
     if( page1[18]>1 || page1[19]>1 ){
       goto page1_init_failed;
     }
-    pBt->pageSize = get2byte(&page1[16]);
-    pBt->usableSize = pBt->pageSize - page1[20];
+    pageSize = get2byte(&page1[16]);
+    if( ((pageSize-1)&pageSize)!=0 ){
+      goto page1_init_failed;
+    }
+    assert( (pageSize & 7)==0 );
+    pBt->pageSize = pageSize;
+    pBt->usableSize = pageSize - page1[20];
     if( pBt->usableSize<500 ){
       goto page1_init_failed;
     }
-    pBt->psAligned = FORCE_ALIGNMENT(pBt->pageSize);
     pBt->maxEmbedFrac = page1[21];
     pBt->minEmbedFrac = page1[22];
     pBt->minLeafFrac = page1[23];
@@ -1480,6 +1487,20 @@ page1_init_failed:
 }
 
 /*
+** This routine works like lockBtree() except that it also invokes the
+** busy callback if there is lock contention.
+*/
+static int lockBtreeWithRetry(Btree *pBt){
+  int rc = SQLITE_OK;
+  if( pBt->inTrans==TRANS_NONE ){
+    rc = sqlite3BtreeBeginTrans(pBt, 0);
+    pBt->inTrans = TRANS_NONE;
+  }
+  return rc;
+}
+       
+
+/*
 ** If there are no outstanding cursors and we are not in the middle
 ** of a transaction but there is a read lock on the database, then
 ** this routine unrefs the first page of the database file which 
@@ -1493,7 +1514,7 @@ static void unlockBtreeIfUnused(Btree *pBt){
   if( pBt->inTrans==TRANS_NONE && pBt->pCursor==0 && pBt->pPage1!=0 ){
     if( pBt->pPage1->aData==0 ){
       MemPage *pPage = pBt->pPage1;
-      pPage->aData = &((char*)pPage)[-pBt->psAligned];
+      pPage->aData = &((char*)pPage)[-pBt->pageSize];
       pPage->pBt = pBt;
       pPage->pgno = 1;
     }
@@ -1543,7 +1564,7 @@ static int newDatabase(Btree *pBt){
 ** transaction.  If the second argument is 2 or more and exclusive
 ** transaction is started, meaning that no other process is allowed
 ** to access the database.  A preexisting transaction may not be
-** upgrade to exclusive by calling this routine a second time - the
+** upgraded to exclusive by calling this routine a second time - the
 ** exclusivity flag only works for a new transaction.
 **
 ** A write-transaction must be started before attempting any 
@@ -1558,43 +1579,60 @@ static int newDatabase(Btree *pBt){
 **      sqlite3BtreeDelete()
 **      sqlite3BtreeUpdateMeta()
 **
-** If wrflag is true, then nMaster specifies the maximum length of
-** a master journal file name supplied later via sqlite3BtreeSync().
-** This is so that appropriate space can be allocated in the journal file
-** when it is created..
+** If an initial attempt to acquire the lock fails because of lock contention
+** and the database was previously unlocked, then invoke the busy handler
+** if there is one.  But if there was previously a read-lock, do not
+** invoke the busy handler - just return SQLITE_BUSY.  SQLITE_BUSY is 
+** returned when there is already a read-lock in order to avoid a deadlock.
+**
+** Suppose there are two processes A and B.  A has a read lock and B has
+** a reserved lock.  B tries to promote to exclusive but is blocked because
+** of A's read lock.  A tries to promote to reserved but is blocked by B.
+** One or the other of the two processes must give way or there can be
+** no progress.  By returning SQLITE_BUSY and not invoking the busy callback
+** when A already has a read lock, we encourage A to give up and let B
+** proceed.
 */
 int sqlite3BtreeBeginTrans(Btree *pBt, int wrflag){
   int rc = SQLITE_OK;
+  int busy = 0;
+  BusyHandler *pH;
 
   /* If the btree is already in a write-transaction, or it
   ** is already in a read-transaction and a read-transaction
   ** is requested, this is a no-op.
   */
-  if( pBt->inTrans==TRANS_WRITE || 
-      (pBt->inTrans==TRANS_READ && !wrflag) ){
+  if( pBt->inTrans==TRANS_WRITE || (pBt->inTrans==TRANS_READ && !wrflag) ){
     return SQLITE_OK;
   }
+
+  /* Write transactions are not possible on a read-only database */
   if( pBt->readOnly && wrflag ){
     return SQLITE_READONLY;
   }
 
-  if( pBt->pPage1==0 ){
-    rc = lockBtree(pBt);
-  }
-
-  if( rc==SQLITE_OK && wrflag ){
-    rc = sqlite3pager_begin(pBt->pPage1->aData, wrflag>1);
-    if( rc==SQLITE_OK ){
-      rc = newDatabase(pBt);
+  do {
+    if( pBt->pPage1==0 ){
+      rc = lockBtree(pBt);
     }
-  }
-
-  if( rc==SQLITE_OK ){
-    pBt->inTrans = (wrflag?TRANS_WRITE:TRANS_READ);
-    if( wrflag ) pBt->inStmt = 0;
-  }else{
-    unlockBtreeIfUnused(pBt);
-  }
+  
+    if( rc==SQLITE_OK && wrflag ){
+      rc = sqlite3pager_begin(pBt->pPage1->aData, wrflag>1);
+      if( rc==SQLITE_OK ){
+        rc = newDatabase(pBt);
+      }
+    }
+  
+    if( rc==SQLITE_OK ){
+      pBt->inTrans = (wrflag?TRANS_WRITE:TRANS_READ);
+      if( wrflag ) pBt->inStmt = 0;
+    }else{
+      unlockBtreeIfUnused(pBt);
+    }
+  }while( rc==SQLITE_BUSY && pBt->inTrans==TRANS_NONE &&
+      (pH = pBt->pBusyHandler)!=0 && 
+      pH->xFunc && pH->xFunc(pH->pArg, busy++)
+  );
   return rc;
 }
 
@@ -1843,7 +1881,10 @@ static int autoVacuumCommit(Btree *pBt, Pgno *nTrunc){
 
     rc = ptrmapGet(pBt, iDbPage, &eType, &iPtrPage);
     if( rc!=SQLITE_OK ) goto autovacuum_out;
-    assert( eType!=PTRMAP_ROOTPAGE );
+    if( eType==PTRMAP_ROOTPAGE ){
+      rc = SQLITE_CORRUPT;
+      goto autovacuum_out;
+    }
 
     /* If iDbPage is free, do not swap it.  */
     if( eType==PTRMAP_FREEPAGE ){
@@ -2113,7 +2154,7 @@ int sqlite3BtreeCursor(
     }
   }
   if( pBt->pPage1==0 ){
-    rc = lockBtree(pBt);
+    rc = lockBtreeWithRetry(pBt);
     if( rc!=SQLITE_OK ){
       return rc;
     }
@@ -2124,12 +2165,11 @@ int sqlite3BtreeCursor(
     goto create_cursor_exception;
   }
   pCur->pgnoRoot = (Pgno)iTable;
+  pCur->pPage = 0;  /* For exit-handler, in case getAndInitPage() fails. */
   if( iTable==1 && sqlite3pager_pagecount(pBt->pPager)==0 ){
     rc = SQLITE_EMPTY;
-    pCur->pPage = 0;
     goto create_cursor_exception;
   }
-  pCur->pPage = 0;  /* For exit-handler, in case getAndInitPage() fails. */
   rc = getAndInitPage(pBt, pCur->pgnoRoot, &pCur->pPage, 0);
   if( rc!=SQLITE_OK ){
     goto create_cursor_exception;
@@ -2375,6 +2415,9 @@ static int getPayload(
 int sqlite3BtreeKey(BtCursor *pCur, u32 offset, u32 amt, void *pBuf){
   assert( pCur->isValid );
   assert( pCur->pPage!=0 );
+  if( pCur->pPage->intKey ){
+    return SQLITE_CORRUPT;
+  }
   assert( pCur->pPage->intKey==0 );
   assert( pCur->idx>=0 && pCur->idx<pCur->pPage->nCell );
   return getPayload(pCur, offset, amt, (unsigned char*)pBuf, 0);
@@ -3213,8 +3256,8 @@ static int clearCell(MemPage *pPage, unsigned char *pCell){
     if( rc ) return rc;
     ovflPgno = get4byte(pOvfl->aData);
     rc = freePage(pOvfl);
-    if( rc ) return rc;
     sqlite3pager_unref(pOvfl->aData);
+    if( rc ) return rc;
   }
   return SQLITE_OK;
 }
@@ -3343,7 +3386,7 @@ static int reparentPage(Btree *pBt, Pgno pgno, MemPage *pNewParent, int idx){
   assert( pBt->pPager!=0 );
   aData = sqlite3pager_lookup(pBt->pPager, pgno);
   if( aData ){
-    pThis = (MemPage*)&aData[pBt->psAligned];
+    pThis = (MemPage*)&aData[pBt->pageSize];
     assert( pThis->aData==aData );
     if( pThis->isInit ){
       if( pThis->pParent!=pNewParent ){
@@ -3486,7 +3529,8 @@ static int insertCell(
     end = cellOffset + 2*pPage->nCell + 2;
     ins = cellOffset + 2*i;
     if( end > top - sz ){
-      defragmentPage(pPage);
+      int rc = defragmentPage(pPage);
+      if( rc!=SQLITE_OK ) return rc;
       top = get2byte(&data[hdr+5]);
       assert( end + sz <= top );
     }
@@ -3718,7 +3762,8 @@ static int balance_quick(MemPage *pPage, MemPage *pParent){
 static int balance_nonroot(MemPage *pPage){
   MemPage *pParent;            /* The parent of pPage */
   Btree *pBt;                  /* The whole database */
-  int nCell = 0;               /* Number of cells in aCell[] */
+  int nCell = 0;               /* Number of cells in apCell[] */
+  int nMaxCells = 0;           /* Allocated size of apCell, szCell, aFrom. */
   int nOld;                    /* Number of pages in apOld[] */
   int nNew;                    /* Number of pages in apNew[] */
   int nDiv;                    /* Number of cells in apDiv[] */
@@ -3732,7 +3777,6 @@ static int balance_nonroot(MemPage *pPage){
   int pageFlags;               /* Value of pPage->aData[0] */
   int subtotal;                /* Subtotal of bytes in cells on one page */
   int iSpace = 0;              /* First unused byte of aSpace[] */
-  int mxCellPerPage;           /* Maximum number of cells in one page */
   MemPage *apOld[NB];          /* pPage and up to two siblings */
   Pgno pgnoOld[NB];            /* Page numbers for each page in apOld[] */
   MemPage *apCopy[NB];         /* Private copies of apOld[] pages */
@@ -3742,7 +3786,7 @@ static int balance_nonroot(MemPage *pPage){
   u8 *apDiv[NB];               /* Divider cells in pParent */
   int cntNew[NB+2];            /* Index in aCell[] of cell after i-th page */
   int szNew[NB+2];             /* Combined size of cells place on i-th page */
-  u8 **apCell;                 /* All cells begin balanced */
+  u8 **apCell = 0;             /* All cells begin balanced */
   int *szCell;                 /* Local size of all cells in apCell[] */
   u8 *aCopy[NB];               /* Space for holding data of apCopy[] */
   u8 *aSpace;                  /* Space to hold copies of dividers cells */
@@ -3786,31 +3830,6 @@ static int balance_nonroot(MemPage *pPage){
   }
 #endif
 
-  /*
-  ** Allocate space for memory structures
-  */
-  mxCellPerPage = MX_CELL(pBt);
-  apCell = sqliteMallocRaw( 
-       (mxCellPerPage+2)*NB*(sizeof(u8*)+sizeof(int))
-     + sizeof(MemPage)*NB
-     + pBt->psAligned*(5+NB)
-     + (ISAUTOVACUUM ? (mxCellPerPage+2)*NN*2 : 0)
-  );
-  if( apCell==0 ){
-    return SQLITE_NOMEM;
-  }
-  szCell = (int*)&apCell[(mxCellPerPage+2)*NB];
-  aCopy[0] = (u8*)&szCell[(mxCellPerPage+2)*NB];
-  for(i=1; i<NB; i++){
-    aCopy[i] = &aCopy[i-1][pBt->psAligned+sizeof(MemPage)];
-  }
-  aSpace = &aCopy[NB-1][pBt->psAligned+sizeof(MemPage)];
-#ifndef SQLITE_OMIT_AUTOVACUUM
-  if( pBt->autoVacuum ){
-    aFrom = &aSpace[5*pBt->psAligned];
-  }
-#endif
-  
   /*
   ** Find the cell in the parent page whose left child points back
   ** to pPage.  The "idx" variable is the index of that cell.  If pPage
@@ -3871,8 +3890,42 @@ static int balance_nonroot(MemPage *pPage){
     apCopy[i] = 0;
     assert( i==nOld );
     nOld++;
+    nMaxCells += 1+apOld[i]->nCell+apOld[i]->nOverflow;
   }
 
+  /* Make nMaxCells a multiple of 2 in order to preserve 8-byte
+  ** alignment */
+  nMaxCells = (nMaxCells + 1)&~1;
+
+  /*
+  ** Allocate space for memory structures
+  */
+  apCell = sqliteMallocRaw( 
+       nMaxCells*sizeof(u8*)                           /* apCell */
+     + nMaxCells*sizeof(int)                           /* szCell */
+     + ROUND8(sizeof(MemPage))*NB                      /* aCopy */
+     + pBt->pageSize*(5+NB)                            /* aSpace */
+     + (ISAUTOVACUUM ? nMaxCells : 0)                  /* aFrom */
+  );
+  if( apCell==0 ){
+    rc = SQLITE_NOMEM;
+    goto balance_cleanup;
+  }
+  szCell = (int*)&apCell[nMaxCells];
+  aCopy[0] = (u8*)&szCell[nMaxCells];
+  assert( ((aCopy[0] - (u8*)apCell) & 7)==0 ); /* 8-byte alignment required */
+  for(i=1; i<NB; i++){
+    aCopy[i] = &aCopy[i-1][pBt->pageSize+ROUND8(sizeof(MemPage))];
+    assert( ((aCopy[i] - (u8*)apCell) & 7)==0 ); /* 8-byte alignment required */
+  }
+  aSpace = &aCopy[NB-1][pBt->pageSize+ROUND8(sizeof(MemPage))];
+  assert( ((aSpace - (u8*)apCell) & 7)==0 ); /* 8-byte alignment required */
+#ifndef SQLITE_OMIT_AUTOVACUUM
+  if( pBt->autoVacuum ){
+    aFrom = &aSpace[5*pBt->pageSize];
+  }
+#endif
+  
   /*
   ** Make copies of the content of pPage and its siblings into aOld[].
   ** The rest of this function will use data from the copies rather
@@ -3880,10 +3933,12 @@ static int balance_nonroot(MemPage *pPage){
   ** process of being overwritten.
   */
   for(i=0; i<nOld; i++){
-    MemPage *p = apCopy[i] = (MemPage*)&aCopy[i][pBt->psAligned];
-    p->aData = &((u8*)p)[-pBt->psAligned];
-    memcpy(p->aData, apOld[i]->aData, pBt->psAligned + sizeof(MemPage));
-    p->aData = &((u8*)p)[-pBt->psAligned];
+    MemPage *p = apCopy[i] = (MemPage*)&aCopy[i][pBt->pageSize];
+    p->aData = &((u8*)p)[-pBt->pageSize];
+    memcpy(p->aData, apOld[i]->aData, pBt->pageSize + sizeof(MemPage));
+    /* The memcpy() above changes the value of p->aData so we have to
+    ** set it again. */
+    p->aData = &((u8*)p)[-pBt->pageSize];
   }
 
   /*
@@ -3909,6 +3964,7 @@ static int balance_nonroot(MemPage *pPage){
     MemPage *pOld = apCopy[i];
     int limit = pOld->nCell+pOld->nOverflow;
     for(j=0; j<limit; j++){
+      assert( nCell<nMaxCells );
       apCell[nCell] = findOverflowCell(pOld, j);
       szCell[nCell] = cellSizePtr(pOld, apCell[nCell]);
 #ifndef SQLITE_OMIT_AUTOVACUUM
@@ -3936,10 +3992,11 @@ static int balance_nonroot(MemPage *pPage){
         dropCell(pParent, nxDiv, sz);
       }else{
         u8 *pTemp;
+        assert( nCell<nMaxCells );
         szCell[nCell] = sz;
         pTemp = &aSpace[iSpace];
         iSpace += sz;
-        assert( iSpace<=pBt->psAligned*5 );
+        assert( iSpace<=pBt->pageSize*5 );
         memcpy(pTemp, apDiv[i], sz);
         apCell[nCell] = pTemp+leafCorrection;
 #ifndef SQLITE_OMIT_AUTOVACUUM
@@ -3981,6 +4038,7 @@ static int balance_nonroot(MemPage *pPage){
   */
   usableSpace = pBt->usableSize - 12 + leafCorrection;
   for(subtotal=k=i=0; i<nCell; i++){
+    assert( i<nMaxCells );
     subtotal += szCell[i] + 2;
     if( subtotal > usableSpace ){
       szNew[k] = subtotal - szCell[i];
@@ -4012,6 +4070,8 @@ static int balance_nonroot(MemPage *pPage){
 
     r = cntNew[i-1] - 1;
     d = r + 1 - leafData;
+    assert( d<nMaxCells );
+    assert( r<nMaxCells );
     while( szRight==0 || szRight+szCell[d]+2<=szLeft-(szCell[r]+2) ){
       szRight += szCell[d] + 2;
       szLeft -= szCell[r] + 2;
@@ -4108,6 +4168,7 @@ static int balance_nonroot(MemPage *pPage){
   for(i=0; i<nNew; i++){
     /* Assemble the new sibling page. */
     MemPage *pNew = apNew[i];
+    assert( j<nMaxCells );
     assert( pNew->pgno==pgnoNew[i] );
     assemblePage(pNew, cntNew[i]-j, &apCell[j], &szCell[j]);
     assert( pNew->nCell>0 );
@@ -4121,6 +4182,7 @@ static int balance_nonroot(MemPage *pPage){
     */
     if( pBt->autoVacuum ){
       for(k=j; k<cntNew[i]; k++){
+        assert( k<nMaxCells );
         if( aFrom[k]==0xFF || apCopy[aFrom[k]]->pgno!=pNew->pgno ){
           rc = ptrmapPutOvfl(pNew, k-j);
           if( rc!=SQLITE_OK ){
@@ -4140,6 +4202,8 @@ static int balance_nonroot(MemPage *pPage){
       u8 *pCell;
       u8 *pTemp;
       int sz;
+
+      assert( j<nMaxCells );
       pCell = apCell[j];
       sz = szCell[j] + leafCorrection;
       if( !pNew->leaf ){
@@ -4157,13 +4221,13 @@ static int balance_nonroot(MemPage *pPage){
         pCell = &aSpace[iSpace];
         fillInCell(pParent, pCell, 0, info.nKey, 0, 0, &sz);
         iSpace += sz;
-        assert( iSpace<=pBt->psAligned*5 );
+        assert( iSpace<=pBt->pageSize*5 );
         pTemp = 0;
       }else{
         pCell -= 4;
         pTemp = &aSpace[iSpace];
         iSpace += sz;
-        assert( iSpace<=pBt->psAligned*5 );
+        assert( iSpace<=pBt->pageSize*5 );
       }
       rc = insertCell(pParent, nxDiv, pCell, sz, pTemp, 4);
       if( rc!=SQLITE_OK ) goto balance_cleanup;
@@ -4367,7 +4431,7 @@ static int balance_deeper(MemPage *pPage){
   memcpy(&cdata[brk], &data[brk], usableSize-brk);
   assert( pChild->isInit==0 );
   rc = initPage(pChild, pPage);
-  if( rc ) return rc;
+  if( rc ) goto balancedeeper_out;
   memcpy(pChild->aOvfl, pPage->aOvfl, pPage->nOverflow*sizeof(pPage->aOvfl[0]));
   pChild->nOverflow = pPage->nOverflow;
   if( pChild->nOverflow ){
@@ -4381,7 +4445,7 @@ static int balance_deeper(MemPage *pPage){
   if( pBt->autoVacuum ){
     int i;
     rc = ptrmapPut(pBt, pChild->pgno, PTRMAP_BTREE, pPage->pgno);
-    if( rc ) return rc;
+    if( rc ) goto balancedeeper_out;
     for(i=0; i<pChild->nCell; i++){
       rc = ptrmapPutOvfl(pChild, i);
       if( rc!=SQLITE_OK ){
@@ -4391,6 +4455,8 @@ static int balance_deeper(MemPage *pPage){
   }
 #endif
   rc = balance_nonroot(pChild);
+
+balancedeeper_out:
   releasePage(pChild);
   return rc;
 }
@@ -4577,7 +4643,7 @@ int sqlite3BtreeDelete(BtCursor *pCur){
     unsigned char *pNext;
     int szNext;
     int notUsed;
-    unsigned char *tempCell;
+    unsigned char *tempCell = 0;
     assert( !pPage->leafData );
     getTempCursor(pCur, &leafCur);
     rc = sqlite3BtreeNext(&leafCur, &notUsed);
@@ -4585,26 +4651,34 @@ int sqlite3BtreeDelete(BtCursor *pCur){
       if( rc!=SQLITE_NOMEM ){
         rc = SQLITE_CORRUPT;  /* bkpt-CORRUPT */
       }
-      return rc;
     }
-    rc = sqlite3pager_write(leafCur.pPage->aData);
-    if( rc ) return rc;
-    TRACE(("DELETE: table=%d delete internal from %d replace from leaf %d\n",
-       pCur->pgnoRoot, pPage->pgno, leafCur.pPage->pgno));
-    dropCell(pPage, pCur->idx, cellSizePtr(pPage, pCell));
-    pNext = findCell(leafCur.pPage, leafCur.idx);
-    szNext = cellSizePtr(leafCur.pPage, pNext);
-    assert( MX_CELL_SIZE(pBt)>=szNext+4 );
-    tempCell = sqliteMallocRaw( MX_CELL_SIZE(pBt) );
-    if( tempCell==0 ) return SQLITE_NOMEM;
-    rc = insertCell(pPage, pCur->idx, pNext-4, szNext+4, tempCell, 0);
-    if( rc!=SQLITE_OK ) return rc;
-    put4byte(findOverflowCell(pPage, pCur->idx), pgnoChild);
-    rc = balance(pPage, 0);
+    if( rc==SQLITE_OK ){
+      rc = sqlite3pager_write(leafCur.pPage->aData);
+    }
+    if( rc==SQLITE_OK ){
+      TRACE(("DELETE: table=%d delete internal from %d replace from leaf %d\n",
+         pCur->pgnoRoot, pPage->pgno, leafCur.pPage->pgno));
+      dropCell(pPage, pCur->idx, cellSizePtr(pPage, pCell));
+      pNext = findCell(leafCur.pPage, leafCur.idx);
+      szNext = cellSizePtr(leafCur.pPage, pNext);
+      assert( MX_CELL_SIZE(pBt)>=szNext+4 );
+      tempCell = sqliteMallocRaw( MX_CELL_SIZE(pBt) );
+      if( tempCell==0 ){
+        rc = SQLITE_NOMEM;
+      }
+    }
+    if( rc==SQLITE_OK ){
+      rc = insertCell(pPage, pCur->idx, pNext-4, szNext+4, tempCell, 0);
+    }
+    if( rc==SQLITE_OK ){
+      put4byte(findOverflowCell(pPage, pCur->idx), pgnoChild);
+      rc = balance(pPage, 0);
+    }
+    if( rc==SQLITE_OK ){
+      dropCell(leafCur.pPage, leafCur.idx, szNext);
+      rc = balance(leafCur.pPage, 0);
+    }
     sqliteFree(tempCell);
-    if( rc ) return rc;
-    dropCell(leafCur.pPage, leafCur.idx, szNext);
-    rc = balance(leafCur.pPage, 0);
     releaseTempCursor(&leafCur);
   }else{
     TRACE(("DELETE: table=%d delete from leaf %d\n",
@@ -4612,7 +4686,9 @@ int sqlite3BtreeDelete(BtCursor *pCur){
     dropCell(pPage, pCur->idx, cellSizePtr(pPage, pCell));
     rc = balance(pPage, 0);
   }
-  moveToRoot(pCur);
+  if( rc==SQLITE_OK ){
+    moveToRoot(pCur);
+  }
   return rc;
 }
 
@@ -4690,8 +4766,13 @@ int sqlite3BtreeCreateTable(Btree *pBt, int *piTable, int flags){
         return rc;
       }
       rc = ptrmapGet(pBt, pgnoRoot, &eType, &iPtrPage);
+      if( rc!=SQLITE_OK || eType==PTRMAP_ROOTPAGE || eType==PTRMAP_FREEPAGE ){
+        releasePage(pRoot);
+        return rc;
+      }
       assert( eType!=PTRMAP_ROOTPAGE );
       assert( eType!=PTRMAP_FREEPAGE );
+      rc = sqlite3pager_write(pRoot->aData);
       if( rc!=SQLITE_OK ){
         releasePage(pRoot);
         return rc;
@@ -4748,7 +4829,7 @@ static int clearDatabasePage(
   MemPage *pParent,     /* Parent page.  NULL for the root */
   int freePageFlag      /* Deallocate page if true */
 ){
-  MemPage *pPage;
+  MemPage *pPage = 0;
   int rc;
   unsigned char *pCell;
   int i;
@@ -4758,27 +4839,29 @@ static int clearDatabasePage(
   }
 
   rc = getAndInitPage(pBt, pgno, &pPage, pParent);
-  if( rc ) return rc;
+  if( rc ) goto cleardatabasepage_out;
   rc = sqlite3pager_write(pPage->aData);
-  if( rc ) return rc;
+  if( rc ) goto cleardatabasepage_out;
   for(i=0; i<pPage->nCell; i++){
     pCell = findCell(pPage, i);
     if( !pPage->leaf ){
       rc = clearDatabasePage(pBt, get4byte(pCell), pPage->pParent, 1);
-      if( rc ) return rc;
+      if( rc ) goto cleardatabasepage_out;
     }
     rc = clearCell(pPage, pCell);
-    if( rc ) return rc;
+    if( rc ) goto cleardatabasepage_out;
   }
   if( !pPage->leaf ){
     rc = clearDatabasePage(pBt, get4byte(&pPage->aData[8]), pPage->pParent, 1);
-    if( rc ) return rc;
+    if( rc ) goto cleardatabasepage_out;
   }
   if( freePageFlag ){
     rc = freePage(pPage);
   }else{
     zeroPage(pPage, pPage->aData[0] | PTF_LEAF);
   }
+
+cleardatabasepage_out:
   releasePage(pPage);
   return rc;
 }
@@ -4852,7 +4935,10 @@ int sqlite3BtreeDropTable(Btree *pBt, int iTable, int *piMoved){
   rc = getPage(pBt, (Pgno)iTable, &pPage);
   if( rc ) return rc;
   rc = sqlite3BtreeClearTable(pBt, iTable);
-  if( rc ) return rc;
+  if( rc ){
+    releasePage(pPage);
+    return rc;
+  }
 
   *piMoved = 0;
 
@@ -5520,7 +5606,7 @@ char *sqlite3BtreeIntegrityCheck(Btree *pBt, int *aRoot, int nRoot){
   IntegrityCk sCheck;
 
   nRef = *sqlite3pager_stats(pBt->pPager);
-  if( lockBtree(pBt)!=SQLITE_OK ){
+  if( lockBtreeWithRetry(pBt)!=SQLITE_OK ){
     return sqliteStrDup("Unable to acquire a read lock on the database");
   }
   sCheck.pBt = pBt;
@@ -5711,3 +5797,16 @@ int sqlite3BtreeSync(Btree *pBt, const char *zMaster){
   }
   return SQLITE_OK;
 }
+
+#ifndef SQLITE_OMIT_GLOBALRECOVER
+/*
+** Reset the btree and underlying pager after a malloc() failure. Any
+** transaction that was active when malloc() failed is rolled back.
+*/
+int sqlite3BtreeReset(Btree *pBt){
+  if( pBt->pCursor ) return SQLITE_BUSY;
+  pBt->inTrans = TRANS_NONE;
+  unlockBtreeIfUnused(pBt);
+  return sqlite3pager_reset(pBt->pPager);
+}
+#endif

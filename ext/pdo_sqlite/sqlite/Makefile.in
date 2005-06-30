@@ -112,10 +112,10 @@ TCC += -DSQLITE_OMIT_CURSOR
 
 # Object files for the SQLite library.
 #
-LIBOBJ = alter.lo attach.lo auth.lo btree.lo build.lo date.lo \
+LIBOBJ = alter.lo attach.lo auth.lo btree.lo build.lo callback.lo date.lo \
          delete.lo expr.lo func.lo hash.lo insert.lo \
          main.lo opcodes.lo os_unix.lo os_win.lo \
-         pager.lo parse.lo pragma.lo printf.lo random.lo \
+         pager.lo parse.lo pragma.lo prepare.lo printf.lo random.lo \
          select.lo table.lo tokenize.lo trigger.lo update.lo \
          util.lo vacuum.lo vdbe.lo vdbeapi.lo vdbeaux.lo vdbemem.lo \
          where.lo utf.lo legacy.lo
@@ -129,6 +129,7 @@ SRC = \
   $(TOP)/src/btree.c \
   $(TOP)/src/btree.h \
   $(TOP)/src/build.c \
+  $(TOP)/src/callback.c \
   $(TOP)/src/date.c \
   $(TOP)/src/delete.c \
   $(TOP)/src/expr.c \
@@ -144,6 +145,7 @@ SRC = \
   $(TOP)/src/pager.h \
   $(TOP)/src/parse.y \
   $(TOP)/src/pragma.c \
+  $(TOP)/src/prepare.c \
   $(TOP)/src/printf.c \
   $(TOP)/src/random.c \
   $(TOP)/src/select.c \
@@ -345,6 +347,9 @@ parse.c:	$(TOP)/src/parse.y lemon$(BEXE)
 
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/pragma.c
+
+prepare.lo:     $(TOP)/src/prepare.c $(HDR)
+        $(LTCOMPILE) -c $(TOP)/src/prepare.c
 
 printf.lo:	$(TOP)/src/printf.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/printf.c

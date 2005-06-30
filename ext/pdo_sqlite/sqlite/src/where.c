@@ -497,7 +497,6 @@ static void codeEqualityTerm(
     sqlite3CodeSubselect(pParse, pX);
     iTab = pX->iTable;
     sqlite3VdbeAddOp(v, OP_Rewind, iTab, brk);
-    sqlite3VdbeAddOp(v, OP_KeyAsData, iTab, 1);
     VdbeComment((v, "# %.*s", pX->span.n, pX->span.z));
     pLevel->inP2 = sqlite3VdbeAddOp(v, OP_Column, iTab, 0);
     pLevel->inOp = OP_Next;
@@ -546,7 +545,7 @@ static void codeEqualityTerm(
 **
 ** The code that sqlite3WhereBegin() generates leaves the cursors named
 ** in pTabList pointing at their appropriate entries.  The [...] code
-** can use OP_Column and OP_Recno opcodes on these cursors to extract
+** can use OP_Column and OP_Rowid opcodes on these cursors to extract
 ** data from the various tables of the loop.
 **
 ** If the WHERE clause is empty, the foreach loops must each scan their
@@ -599,8 +598,7 @@ WhereInfo *sqlite3WhereBegin(
   Parse *pParse,        /* The parser context */
   SrcList *pTabList,    /* A list of all tables to be scanned */
   Expr *pWhere,         /* The WHERE clause */
-  ExprList **ppOrderBy, /* An ORDER BY clause, or NULL */
-  Fetch *pFetch         /* Initial location of cursors.  NULL otherwise */
+  ExprList **ppOrderBy  /* An ORDER BY clause, or NULL */
 ){
   int i;                     /* Loop counter */
   WhereInfo *pWInfo;         /* Will become the return value of this function */
@@ -645,7 +643,7 @@ WhereInfo *sqlite3WhereBegin(
   */
   pWInfo = sqliteMalloc( sizeof(WhereInfo) + pTabList->nSrc*sizeof(WhereLevel));
   if( sqlite3_malloc_failed ){
-    /* sqliteFree(pWInfo); // Leak memory when malloc fails */
+    sqliteFree(pWInfo); /* Avoid leaking memory when malloc fails */
     return 0;
   }
   pWInfo->pParse = pParse;
@@ -794,7 +792,7 @@ WhereInfo *sqlite3WhereBegin(
              && (pTerm->prereqRight & loopMask)==pTerm->prereqRight ){
           int iColumn = pX->pLeft->iColumn;
           int k;
-          char idxaff = pIdx->pTable->aCol[iColumn].affinity; 
+          char idxaff = iColumn>=0 ? pIdx->pTable->aCol[iColumn].affinity : 0; 
           for(k=0; k<pIdx->nColumn; k++){
             /* If the collating sequences or affinities don't match, 
             ** ignore this index.  */
@@ -950,7 +948,6 @@ WhereInfo *sqlite3WhereBegin(
                      (char*)&pIx->keyInfo, P3_KEYINFO);
     }
     if( (pLevel->score & 1)!=0 ){
-      sqlite3VdbeAddOp(v, OP_KeyAsData, iIdxCur, 1);
       sqlite3VdbeAddOp(v, OP_SetNumColumns, iIdxCur, pIx->nColumn+1);
     }
     sqlite3CodeVerifySchema(pParse, pTab->iDb);
@@ -985,7 +982,7 @@ WhereInfo *sqlite3WhereBegin(
     if( i>0 && (pTabList->a[i-1].jointype & JT_LEFT)!=0 ){
       if( !pParse->nMem ) pParse->nMem++;
       pLevel->iLeftJoin = pParse->nMem++;
-      sqlite3VdbeAddOp(v, OP_String8, 0, 0);
+      sqlite3VdbeAddOp(v, OP_Null, 0, 0);
       sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iLeftJoin, 1);
       VdbeComment((v, "# init LEFT JOIN no-match flag"));
     }
@@ -1062,7 +1059,7 @@ WhereInfo *sqlite3WhereBegin(
       sqlite3VdbeAddOp(v, OP_RowKey, iIdxCur, 0);
       sqlite3VdbeAddOp(v, OP_IdxIsNull, nColumn, cont);
       if( !omitTable ){
-        sqlite3VdbeAddOp(v, OP_IdxRecno, iIdxCur, 0);
+        sqlite3VdbeAddOp(v, OP_IdxRowid, iIdxCur, 0);
         sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
       }
       pLevel->p1 = iIdxCur;
@@ -1121,9 +1118,9 @@ WhereInfo *sqlite3WhereBegin(
       pLevel->p1 = iCur;
       pLevel->p2 = start;
       if( testOp!=OP_Noop ){
-        sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+        sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
         sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
-        sqlite3VdbeAddOp(v, testOp, 0, brk);
+        sqlite3VdbeAddOp(v, testOp, 'n', brk);
       }
     }else if( pIdx==0 ){
       /* Case 4:  There is no usable index.  We must do a complete
@@ -1296,7 +1293,7 @@ WhereInfo *sqlite3WhereBegin(
       sqlite3VdbeAddOp(v, OP_RowKey, iIdxCur, 0);
       sqlite3VdbeAddOp(v, OP_IdxIsNull, nEqColumn + ((score&4)!=0), cont);
       if( !omitTable ){
-        sqlite3VdbeAddOp(v, OP_IdxRecno, iIdxCur, 0);
+        sqlite3VdbeAddOp(v, OP_IdxRowid, iIdxCur, 0);
         sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
       }
 
@@ -1425,9 +1422,9 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
               break;
             }
           }
-        }else if( pOp->opcode==OP_Recno ){
+        }else if( pOp->opcode==OP_Rowid ){
           pOp->p1 = pLevel->iIdxCur;
-          pOp->opcode = OP_IdxRecno;
+          pOp->opcode = OP_IdxRowid;
         }else if( pOp->opcode==OP_NullRow ){
           pOp->opcode = OP_Noop;
         }

@@ -19,6 +19,7 @@
 #include "os_unix.h"
 #undef OS_UNIX
 #undef OsFile
+#undef SET_FULLSYNC
 
 /* Include sqliteInt.h now to get the type u8. */
 #include "sqliteInt.h"

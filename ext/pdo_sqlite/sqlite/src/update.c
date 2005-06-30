@@ -17,6 +17,41 @@
 #include "sqliteInt.h"
 
 /*
+** The most recently coded instruction was an OP_Column to retrieve column
+** 'i' of table pTab. This routine sets the P3 parameter of the 
+** OP_Column to the default value, if any.
+**
+** The default value of a column is specified by a DEFAULT clause in the 
+** column definition. This was either supplied by the user when the table
+** was created, or added later to the table definition by an ALTER TABLE
+** command. If the latter, then the row-records in the table btree on disk
+** may not contain a value for the column and the default value, taken
+** from the P3 parameter of the OP_Column instruction, is returned instead.
+** If the former, then all row-records are guaranteed to include a value
+** for the column and the P3 value is not required.
+**
+** Column definitions created by an ALTER TABLE command may only have 
+** literal default values specified: a number, null or a string. (If a more
+** complicated default expression value was provided, it is evaluated 
+** when the ALTER TABLE is executed and one of the literal values written
+** into the sqlite_master table.)
+**
+** Therefore, the P3 parameter is only required if the default value for
+** the column is a literal number, string or null. The sqlite3ValueFromExpr()
+** function is capable of transforming these types of expressions into
+** sqlite3_value objects.
+*/
+void sqlite3ColumnDefault(Vdbe *v, Table *pTab, int i){
+  if( pTab && !pTab->pSelect ){
+    sqlite3_value *pValue;
+    u8 enc = sqlite3VdbeDb(v)->enc;
+    Column *pCol = &pTab->aCol[i];
+    sqlite3ValueFromExpr(pCol->pDflt, enc, pCol->affinity, &pValue);
+    sqlite3VdbeChangeP3(v, -1, (const char *)pValue, P3_MEM);
+  }
+}
+
+/*
 ** Process an UPDATE statement.
 **
 **   UPDATE OR IGNORE table_wxyz SET a=b, c=d WHERE e<5 AND f NOT NULL;
@@ -45,8 +80,8 @@ void sqlite3Update(
   int *aXRef = 0;        /* aXRef[i] is the index in pChanges->a[] of the
                          ** an expression for the i-th column of the table.
                          ** aXRef[i]==-1 if the i-th column is not changed. */
-  int chngRecno;         /* True if the record number is being changed */
-  Expr *pRecnoExpr = 0;  /* Expression defining the new record number */
+  int chngRowid;         /* True if the record number is being changed */
+  Expr *pRowidExpr = 0;  /* Expression defining the new record number */
   int openAll = 0;       /* True if all indices need to be opened */
   AuthContext sContext;  /* The authorization context */
   NameContext sNC;       /* The name-context to resolve expressions in */
@@ -125,7 +160,7 @@ void sqlite3Update(
   ** column to be updated, make sure we have authorization to change
   ** that column.
   */
-  chngRecno = 0;
+  chngRowid = 0;
   for(i=0; i<pChanges->nExpr; i++){
     if( sqlite3ExprResolveNames(&sNC, pChanges->a[i].pExpr) ){
       goto update_cleanup;
@@ -133,8 +168,8 @@ void sqlite3Update(
     for(j=0; j<pTab->nCol; j++){
       if( sqlite3StrICmp(pTab->aCol[j].zName, pChanges->a[i].zName)==0 ){
         if( j==pTab->iPKey ){
-          chngRecno = 1;
-          pRecnoExpr = pChanges->a[i].pExpr;
+          chngRowid = 1;
+          pRowidExpr = pChanges->a[i].pExpr;
         }
         aXRef[j] = i;
         break;
@@ -142,8 +177,8 @@ void sqlite3Update(
     }
     if( j>=pTab->nCol ){
       if( sqlite3IsRowid(pChanges->a[i].zName) ){
-        chngRecno = 1;
-        pRecnoExpr = pChanges->a[i].pExpr;
+        chngRowid = 1;
+        pRowidExpr = pChanges->a[i].pExpr;
       }else{
         sqlite3ErrorMsg(pParse, "no such column: %s", pChanges->a[i].zName);
         goto update_cleanup;
@@ -169,7 +204,7 @@ void sqlite3Update(
   ** number of the original table entry is changing.
   */
   for(nIdx=nIdxTotal=0, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, nIdxTotal++){
-    if( chngRecno ){
+    if( chngRowid ){
       i = 0;
     }else {
       for(i=0; i<pIdx->nColumn; i++){
@@ -184,7 +219,7 @@ void sqlite3Update(
     aIdxUsed = (char*)&apIdx[nIdx];
   }
   for(nIdx=j=0, pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext, j++){
-    if( chngRecno ){
+    if( chngRowid ){
       i = 0;
     }else{
       for(i=0; i<pIdx->nColumn; i++){
@@ -232,12 +267,12 @@ void sqlite3Update(
 
   /* Begin the database scan
   */
-  pWInfo = sqlite3WhereBegin(pParse, pTabList, pWhere, 0, 0);
+  pWInfo = sqlite3WhereBegin(pParse, pTabList, pWhere, 0);
   if( pWInfo==0 ) goto update_cleanup;
 
   /* Remember the index of every item to be updated.
   */
-  sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+  sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
   sqlite3VdbeAddOp(v, OP_ListWrite, 0, 0);
 
   /* End the database scan loop.
@@ -262,38 +297,39 @@ void sqlite3Update(
     */
     sqlite3VdbeAddOp(v, OP_ListRewind, 0, 0);
     addr = sqlite3VdbeAddOp(v, OP_ListRead, 0, 0);
-    sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
 
-    /* Open a cursor and make it point to the record that is
-    ** being updated.
-    */
-    sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
     if( !isView ){
+      sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
+      sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
+      /* Open a cursor and make it point to the record that is
+      ** being updated.
+      */
       sqlite3OpenTableForReading(v, iCur, pTab);
     }
     sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
 
     /* Generate the OLD table
     */
-    sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+    sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
     sqlite3VdbeAddOp(v, OP_RowData, iCur, 0);
-    sqlite3VdbeAddOp(v, OP_PutIntKey, oldIdx, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, oldIdx, 0);
 
     /* Generate the NEW table
     */
-    if( chngRecno ){
-      sqlite3ExprCodeAndCache(pParse, pRecnoExpr);
+    if( chngRowid ){
+      sqlite3ExprCodeAndCache(pParse, pRowidExpr);
     }else{
-      sqlite3VdbeAddOp(v, OP_Recno, iCur, 0);
+      sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
     }
     for(i=0; i<pTab->nCol; i++){
       if( i==pTab->iPKey ){
-        sqlite3VdbeAddOp(v, OP_String8, 0, 0);
+        sqlite3VdbeAddOp(v, OP_Null, 0, 0);
         continue;
       }
       j = aXRef[i];
       if( j<0 ){
         sqlite3VdbeAddOp(v, OP_Column, iCur, i);
+        sqlite3ColumnDefault(v, pTab, i);
       }else{
         sqlite3ExprCodeAndCache(pParse, pChanges->a[j].pExpr);
       }
@@ -303,7 +339,7 @@ void sqlite3Update(
       sqlite3TableAffinityStr(v, pTab);
     }
     if( pParse->nErr ) goto update_cleanup;
-    sqlite3VdbeAddOp(v, OP_PutIntKey, newIdx, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, newIdx, 0);
     if( !isView ){
       sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
     }
@@ -363,8 +399,8 @@ void sqlite3Update(
     ** will be after the update. (The old record number is currently
     ** on top of the stack.)
     */
-    if( chngRecno ){
-      sqlite3ExprCode(pParse, pRecnoExpr);
+    if( chngRowid ){
+      sqlite3ExprCode(pParse, pRowidExpr);
       sqlite3VdbeAddOp(v, OP_MustBeInt, 0, 0);
     }
 
@@ -372,12 +408,13 @@ void sqlite3Update(
     */
     for(i=0; i<pTab->nCol; i++){
       if( i==pTab->iPKey ){
-        sqlite3VdbeAddOp(v, OP_String8, 0, 0);
+        sqlite3VdbeAddOp(v, OP_Null, 0, 0);
         continue;
       }
       j = aXRef[i];
       if( j<0 ){
         sqlite3VdbeAddOp(v, OP_Column, iCur, i);
+        sqlite3ColumnDefault(v, pTab, i);
       }else{
         sqlite3ExprCode(pParse, pChanges->a[j].pExpr);
       }
@@ -385,7 +422,7 @@ void sqlite3Update(
 
     /* Do constraint checks
     */
-    sqlite3GenerateConstraintChecks(pParse, pTab, iCur, aIdxUsed, chngRecno, 1,
+    sqlite3GenerateConstraintChecks(pParse, pTab, iCur, aIdxUsed, chngRowid, 1,
                                    onError, addr);
 
     /* Delete the old indices for the current record.
@@ -394,13 +431,13 @@ void sqlite3Update(
 
     /* If changing the record number, delete the old record.
     */
-    if( chngRecno ){
+    if( chngRowid ){
       sqlite3VdbeAddOp(v, OP_Delete, iCur, 0);
     }
 
     /* Create the new index entries and the new record.
     */
-    sqlite3CompleteInsertion(pParse, pTab, iCur, aIdxUsed, chngRecno, 1, -1);
+    sqlite3CompleteInsertion(pParse, pTab, iCur, aIdxUsed, chngRowid, 1, -1);
   }
 
   /* Increment the row counter 

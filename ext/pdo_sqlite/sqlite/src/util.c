@@ -65,9 +65,11 @@ static int memcnt = 0;
 #endif
 
 /*
-** Number of 32-bit guard words
+** Number of 32-bit guard words.  This should probably be a multiple of
+** 2 since on 64-bit machines we want the value returned by sqliteMalloc()
+** to be 8-byte aligned.
 */
-#define N_GUARD 1
+#define N_GUARD 2
 
 /*
 ** Allocate new memory and set it to zero.  Return NULL if
@@ -108,6 +110,13 @@ void *sqlite3Malloc_(int n, int bZero, char *zFile, int line){
       ++memcnt, n, (int)p, zFile,line);
 #endif
   return p;
+}
+
+/*
+** This version of malloc is always a real function, never a macro
+*/
+void *sqlite3MallocX(int n){
+  return sqlite3Malloc_(n, 0, __FILE__, __LINE__);
 }
 
 /*
@@ -338,15 +347,15 @@ char *sqlite3StrNDup(const char *z, int n){
 ** point to that string.  The 1st argument must either be NULL or 
 ** point to memory obtained from sqliteMalloc().
 */
-void sqlite3SetString(char **pz, const char *zFirst, ...){
+void sqlite3SetString(char **pz, ...){
   va_list ap;
   int nByte;
   const char *z;
   char *zResult;
 
   if( pz==0 ) return;
-  nByte = strlen(zFirst) + 1;
-  va_start(ap, zFirst);
+  nByte = 1;
+  va_start(ap, pz);
   while( (z = va_arg(ap, const char*))!=0 ){
     nByte += strlen(z);
   }
@@ -356,9 +365,8 @@ void sqlite3SetString(char **pz, const char *zFirst, ...){
   if( zResult==0 ){
     return;
   }
-  strcpy(zResult, zFirst);
-  zResult += strlen(zResult);
-  va_start(ap, zFirst);
+  *zResult = 0;
+  va_start(ap, pz);
   while( (z = va_arg(ap, const char*))!=0 ){
     strcpy(zResult, z);
     zResult += strlen(zResult);
@@ -388,7 +396,7 @@ void sqlite3SetString(char **pz, const char *zFirst, ...){
 ** zFormat and any string tokens that follow it are assumed to be
 ** encoded in UTF-8.
 **
-** To clear the most recent error for slqite handle "db", sqlite3Error
+** To clear the most recent error for sqlite handle "db", sqlite3Error
 ** should be called with err_code set to SQLITE_OK and zFormat set
 ** to NULL.
 */
@@ -858,18 +866,6 @@ int sqlite3GetVarint32(const unsigned char *p, u32 *v){
   u32 x;
   int n;
   unsigned char c;
-#if 0
-  if( ((c = p[0]) & 0x80)==0 ){
-    *v = c;
-    return 1;
-  }
-  x = c & 0x7f;
-  if( ((c = p[1]) & 0x80)==0 ){
-    *v = (x<<7) | c;
-    return 2;
-  }
-  x = (x<<7) | (c & 0x7f);
-#else
   if( ((signed char*)p)[0]>=0 ){
     *v = p[0];
     return 1;
@@ -880,7 +876,6 @@ int sqlite3GetVarint32(const unsigned char *p, u32 *v){
     return 2;
   }
   x = (x<<7) | (p[1] & 0x7f);
-#endif
   n = 2;
   do{
     x = (x<<7) | ((c = p[n++])&0x7f);
@@ -902,7 +897,7 @@ int sqlite3VarintLen(u64 v){
   return i;
 }
 
-#if (!defined(SQLITE_OMIT_BLOB_LITERAL) && !defined(SQLITE_HAS_CODEC)) \
+#if !defined(SQLITE_OMIT_BLOB_LITERAL) || defined(SQLITE_HAS_CODEC) \
     || defined(SQLITE_TEST)
 /*
 ** Translate a single byte of Hex into an integer.
@@ -917,7 +912,7 @@ static int hexToInt(int h){
     return h - 'A' + 10;
   }
 }
-#endif /* (!SQLITE_OMIT_BLOB_LITERAL && !SQLITE_HAS_CODEC) || SQLITE_TEST */
+#endif /* !SQLITE_OMIT_BLOB_LITERAL || SQLITE_HAS_CODEC || SQLITE_TEST */
 
 #if !defined(SQLITE_OMIT_BLOB_LITERAL) || defined(SQLITE_HAS_CODEC)
 /*

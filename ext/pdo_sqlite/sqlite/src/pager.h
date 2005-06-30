@@ -23,12 +23,15 @@
 # define SQLITE_DEFAULT_PAGE_SIZE 1024
 #endif
 
-/* Maximum page size.  The upper bound on this value is 65536 (a limit
-** imposed by the 2-byte size of cell array pointers.)  The
-** maximum page size determines the amount of stack space allocated
-** by many of the routines in pager.c and btree.c  On embedded architectures
-** or any machine where memory and especially stack memory is limited,
-** one may wish to chose a smaller value for the maximum page size.
+/* Maximum page size.  The upper bound on this value is 32768.  This a limit
+** imposed by necessity of storing the value in a 2-byte unsigned integer
+** and the fact that the page size must be a power of 2.
+**
+** This value is used to initialize certain arrays on the stack at
+** various places in the code.  On embedded machines where stack space
+** is limited and the flexibility of having large pages is not needed,
+** it makes good sense to reduce the maximum page size to something more
+** reasonable, like 1024.
 */
 #ifndef SQLITE_MAX_PAGE_SIZE
 # define SQLITE_MAX_PAGE_SIZE 8192
@@ -68,7 +71,7 @@ int sqlite3pager_open(Pager **ppPager, const char *zFilename,
 void sqlite3pager_set_busyhandler(Pager*, BusyHandler *pBusyHandler);
 void sqlite3pager_set_destructor(Pager*, void(*)(void*,int));
 void sqlite3pager_set_reiniter(Pager*, void(*)(void*,int));
-void sqlite3pager_set_pagesize(Pager*, int);
+int sqlite3pager_set_pagesize(Pager*, int);
 void sqlite3pager_read_fileheader(Pager*, int, unsigned char*);
 void sqlite3pager_set_cachesize(Pager*, int);
 int sqlite3pager_close(Pager *pPager);
@@ -100,6 +103,7 @@ const char *sqlite3pager_journalname(Pager*);
 int sqlite3pager_rename(Pager*, const char *zNewName);
 void sqlite3pager_set_codec(Pager*,void(*)(void*,void*,Pgno,int),void*);
 int sqlite3pager_movepage(Pager*,void*,Pgno);
+int sqlite3pager_reset(Pager*);
 
 #if defined(SQLITE_DEBUG) || defined(SQLITE_TEST)
 int sqlite3pager_lockstate(Pager*);

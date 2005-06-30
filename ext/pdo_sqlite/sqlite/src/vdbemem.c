@@ -608,8 +608,13 @@ int sqlite3VdbeMemFromBtree(
     zData[amt] = 0;
     zData[amt+1] = 0;
     if( rc!=SQLITE_OK ){
-      if( amt>NBFS ){
+      if( amt>NBFS-2 ){
+        assert( zData!=pMem->zShort );
+        assert( pMem->flags & MEM_Dyn );
         sqliteFree(zData);
+      } else {
+        assert( zData==pMem->zShort );
+        assert( pMem->flags & MEM_Short );
       }
       return rc;
     }
@@ -698,6 +703,72 @@ sqlite3_value* sqlite3ValueNew(){
     p->type = SQLITE_NULL;
   }
   return p;
+}
+
+/*
+** Create a new sqlite3_value object, containing the value of pExpr.
+**
+** This only works for very simple expressions that consist of one constant
+** token (i.e. "5", "5.1", "NULL", "'a string'"). If the expression can
+** be converted directly into a value, then the value is allocated and
+** a pointer written to *ppVal. The caller is responsible for deallocating
+** the value by passing it to sqlite3ValueFree() later on. If the expression
+** cannot be converted to a value, then *ppVal is set to NULL.
+*/
+int sqlite3ValueFromExpr(
+  Expr *pExpr, 
+  u8 enc, 
+  u8 affinity,
+  sqlite3_value **ppVal
+){
+  int op;
+  char *zVal = 0;
+  sqlite3_value *pVal = 0;
+
+  if( !pExpr ){
+    *ppVal = 0;
+    return SQLITE_OK;
+  }
+  op = pExpr->op;
+
+  if( op==TK_STRING || op==TK_FLOAT || op==TK_INTEGER ){
+    zVal = sqliteStrNDup(pExpr->token.z, pExpr->token.n);
+    pVal = sqlite3ValueNew();
+    if( !zVal || !pVal ) goto no_mem;
+    sqlite3Dequote(zVal);
+    sqlite3ValueSetStr(pVal, -1, zVal, SQLITE_UTF8, sqlite3FreeX);
+    if( (op==TK_INTEGER || op==TK_FLOAT ) && affinity==SQLITE_AFF_NONE ){
+      sqlite3ValueApplyAffinity(pVal, SQLITE_AFF_NUMERIC, enc);
+    }else{
+      sqlite3ValueApplyAffinity(pVal, affinity, enc);
+    }
+  }else if( op==TK_UMINUS ) {
+    if( SQLITE_OK==sqlite3ValueFromExpr(pExpr->pLeft, enc, affinity, &pVal) ){
+      pVal->i = -1 * pVal->i;
+      pVal->r = -1.0 * pVal->r;
+    }
+  }
+#ifndef SQLITE_OMIT_BLOB_LITERAL
+  else if( op==TK_BLOB ){
+    int nVal;
+    pVal = sqlite3ValueNew();
+    zVal = sqliteStrNDup(pExpr->token.z+1, pExpr->token.n-1);
+    if( !zVal || !pVal ) goto no_mem;
+    sqlite3Dequote(zVal);
+    nVal = strlen(zVal)/2;
+    sqlite3VdbeMemSetStr(pVal, sqlite3HexToBlob(zVal), nVal, 0, sqlite3FreeX);
+    sqliteFree(zVal);
+  }
+#endif
+
+  *ppVal = pVal;
+  return SQLITE_OK;
+
+no_mem:
+  sqliteFree(zVal);
+  sqlite3ValueFree(pVal);
+  *ppVal = 0;
+  return SQLITE_NOMEM;
 }
 
 /*

@@ -168,7 +168,7 @@ Table *sqlite3FindTable(sqlite3 *db, const char *zName, const char *zDatabase){
   int i;
   assert( zName!=0 );
   assert( (db->flags & SQLITE_Initialized) || db->init.busy );
-  for(i=0; i<db->nDb; i++){
+  for(i=OMIT_TEMPDB; i<db->nDb; i++){
     int j = (i<2) ? i^1 : i;   /* Search TEMP before MAIN */
     if( zDatabase!=0 && sqlite3StrICmp(zDatabase, db->aDb[j].zName) ) continue;
     p = sqlite3HashFind(&db->aDb[j].tblHash, zName, strlen(zName)+1);
@@ -227,7 +227,7 @@ Index *sqlite3FindIndex(sqlite3 *db, const char *zName, const char *zDb){
   Index *p = 0;
   int i;
   assert( (db->flags & SQLITE_Initialized) || db->init.busy );
-  for(i=0; i<db->nDb; i++){
+  for(i=OMIT_TEMPDB; i<db->nDb; i++){
     int j = (i<2) ? i^1 : i;  /* Search TEMP before MAIN */
     if( zDb && sqlite3StrICmp(zDb, db->aDb[j].zName) ) continue;
     p = sqlite3HashFind(&db->aDb[j].idxHash, zName, strlen(zName)+1);
@@ -266,9 +266,10 @@ static void sqliteDeleteIndex(sqlite3 *db, Index *p){
 }
 
 /*
-** Unlink the given index from its table, then remove
-** the index from the index hash table and free its memory
-** structures.
+** For the index called zIdxName which is found in the database iDb,
+** unlike that index from its Table then remove the index from
+** the index hash table and free all memory structures associated
+** with the index.
 */
 void sqlite3UnlinkAndDeleteIndex(sqlite3 *db, int iDb, const char *zIdxName){
   Index *pIndex;
@@ -393,12 +394,14 @@ static void sqliteResetColumnNames(Table *pTable){
   int i;
   Column *pCol;
   assert( pTable!=0 );
-  for(i=0, pCol=pTable->aCol; i<pTable->nCol; i++, pCol++){
-    sqliteFree(pCol->zName);
-    sqlite3ExprDelete(pCol->pDflt);
-    sqliteFree(pCol->zType);
+  if( (pCol = pTable->aCol)!=0 ){
+    for(i=0; i<pTable->nCol; i++, pCol++){
+      sqliteFree(pCol->zName);
+      sqlite3ExprDelete(pCol->pDflt);
+      sqliteFree(pCol->zType);
+    }
+    sqliteFree(pTable->aCol);
   }
-  sqliteFree(pTable->aCol);
   pTable->aCol = 0;
   pTable->nCol = 0;
 }
@@ -423,6 +426,13 @@ void sqlite3DeleteTable(sqlite3 *db, Table *pTable){
   FKey *pFKey, *pNextFKey;
 
   if( pTable==0 ) return;
+
+  /* Do not delete the table until the reference count reaches zero. */
+  pTable->nRef--;
+  if( pTable->nRef>0 ){
+    return;
+  }
+  assert( pTable->nRef==0 );
 
   /* Delete all indices associated with this table
   */
@@ -494,7 +504,7 @@ void sqlite3UnlinkAndDeleteTable(sqlite3 *db, int iDb, const char *zTabName){
 ** is obtained from sqliteMalloc() and must be freed by the calling
 ** function.
 **
-** Tokens are really just pointers into the original SQL text and so
+** Tokens are often just pointers into the original SQL text and so
 ** are not \000 terminated and are not persistent.  The returned string
 ** is \000 terminated and is persistent.
 */
@@ -535,7 +545,8 @@ static int findDb(sqlite3 *db, Token *pName){
   if( zName ){
     n = strlen(zName);
     for(i=(db->nDb-1), pDb=&db->aDb[i]; i>=0; i--, pDb--){
-      if( n==strlen(pDb->zName) && 0==sqlite3StrICmp(pDb->zName, zName) ){
+      if( (!OMIT_TEMPDB || i!=1 ) && n==strlen(pDb->zName) && 
+          0==sqlite3StrICmp(pDb->zName, zName) ){
         break;
       }
     }
@@ -595,6 +606,7 @@ int sqlite3TwoPartName(
 */
 int sqlite3CheckObjectName(Parse *pParse, const char *zName){
   if( !pParse->db->init.busy && pParse->nested==0 
+          && (pParse->db->flags & SQLITE_WriteSchema)==0
           && 0==sqlite3StrNICmp(zName, "sqlite_", 7) ){
     sqlite3ErrorMsg(pParse, "object name reserved for internal use: %s", zName);
     return SQLITE_ERROR;
@@ -654,12 +666,12 @@ void sqlite3StartTable(
   */
   iDb = sqlite3TwoPartName(pParse, pName1, pName2, &pName);
   if( iDb<0 ) return;
-  if( isTemp && iDb>1 ){
+  if( !OMIT_TEMPDB && isTemp && iDb>1 ){
     /* If creating a temp table, the name may not be qualified */
     sqlite3ErrorMsg(pParse, "temporary table name must be unqualified");
     return;
   }
-  if( isTemp ) iDb = 1;
+  if( !OMIT_TEMPDB && isTemp ) iDb = 1;
 
   pParse->sNameToken = *pName;
   zName = sqlite3NameFromToken(pName);
@@ -677,13 +689,13 @@ void sqlite3StartTable(
       goto begin_table_error;
     }
     if( isView ){
-      if( isTemp ){
+      if( !OMIT_TEMPDB && isTemp ){
         code = SQLITE_CREATE_TEMP_VIEW;
       }else{
         code = SQLITE_CREATE_VIEW;
       }
     }else{
-      if( isTemp ){
+      if( !OMIT_TEMPDB && isTemp ){
         code = SQLITE_CREATE_TEMP_TABLE;
       }else{
         code = SQLITE_CREATE_TABLE;
@@ -724,6 +736,7 @@ void sqlite3StartTable(
   pTable->iPKey = -1;
   pTable->pIndex = 0;
   pTable->iDb = iDb;
+  pTable->nRef = 1;
   if( pParse->pNewTable ) sqlite3DeleteTable(db, pParse->pNewTable);
   pParse->pNewTable = pTable;
 
@@ -778,10 +791,10 @@ void sqlite3StartTable(
       sqlite3VdbeAddOp(v, OP_CreateTable, iDb, 0);
     }
     sqlite3OpenMasterTable(v, iDb);
-    sqlite3VdbeAddOp(v, OP_NewRecno, 0, 0);
+    sqlite3VdbeAddOp(v, OP_NewRowid, 0, 0);
     sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
-    sqlite3VdbeAddOp(v, OP_String8, 0, 0);
-    sqlite3VdbeAddOp(v, OP_PutIntKey, 0, 0);
+    sqlite3VdbeAddOp(v, OP_Null, 0, 0);
+    sqlite3VdbeAddOp(v, OP_Insert, 0, 0);
     sqlite3VdbeAddOp(v, OP_Close, 0, 0);
     sqlite3VdbeAddOp(v, OP_Pull, 1, 0);
   }
@@ -834,7 +847,10 @@ void sqlite3AddColumn(Parse *pParse, Token *pName){
   if( (p->nCol & 0x7)==0 ){
     Column *aNew;
     aNew = sqliteRealloc( p->aCol, (p->nCol+8)*sizeof(p->aCol[0]));
-    if( aNew==0 ) return;
+    if( aNew==0 ){
+      sqliteFree(z);
+      return;
+    }
     p->aCol = aNew;
   }
   pCol = &p->aCol[p->nCol];
@@ -1070,146 +1086,6 @@ void sqlite3AddCollateType(Parse *pParse, const char *zType, int nType){
 }
 
 /*
-** Locate and return an entry from the db.aCollSeq hash table. If the entry
-** specified by zName and nName is not found and parameter 'create' is
-** true, then create a new entry. Otherwise return NULL.
-**
-** Each pointer stored in the sqlite3.aCollSeq hash table contains an
-** array of three CollSeq structures. The first is the collation sequence
-** prefferred for UTF-8, the second UTF-16le, and the third UTF-16be.
-**
-** Stored immediately after the three collation sequences is a copy of
-** the collation sequence name. A pointer to this string is stored in
-** each collation sequence structure.
-*/
-static CollSeq * findCollSeqEntry(
-  sqlite3 *db,
-  const char *zName,
-  int nName,
-  int create
-){
-  CollSeq *pColl;
-  if( nName<0 ) nName = strlen(zName);
-  pColl = sqlite3HashFind(&db->aCollSeq, zName, nName);
-
-  if( 0==pColl && create ){
-    pColl = sqliteMalloc( 3*sizeof(*pColl) + nName + 1 );
-    if( pColl ){
-      pColl[0].zName = (char*)&pColl[3];
-      pColl[0].enc = SQLITE_UTF8;
-      pColl[1].zName = (char*)&pColl[3];
-      pColl[1].enc = SQLITE_UTF16LE;
-      pColl[2].zName = (char*)&pColl[3];
-      pColl[2].enc = SQLITE_UTF16BE;
-      memcpy(pColl[0].zName, zName, nName);
-      pColl[0].zName[nName] = 0;
-      sqlite3HashInsert(&db->aCollSeq, pColl[0].zName, nName, pColl);
-    }
-  }
-  return pColl;
-}
-
-/*
-** Parameter zName points to a UTF-8 encoded string nName bytes long.
-** Return the CollSeq* pointer for the collation sequence named zName
-** for the encoding 'enc' from the database 'db'.
-**
-** If the entry specified is not found and 'create' is true, then create a
-** new entry.  Otherwise return NULL.
-*/
-CollSeq *sqlite3FindCollSeq(
-  sqlite3 *db,
-  u8 enc,
-  const char *zName,
-  int nName,
-  int create
-){
-  CollSeq *pColl = findCollSeqEntry(db, zName, nName, create);
-  assert( SQLITE_UTF8==1 && SQLITE_UTF16LE==2 && SQLITE_UTF16BE==3 );
-  assert( enc>=SQLITE_UTF8 && enc<=SQLITE_UTF16BE );
-  if( pColl ) pColl += enc-1;
-  return pColl;
-}
-
-/*
-** Invoke the 'collation needed' callback to request a collation sequence
-** in the database text encoding of name zName, length nName.
-** If the collation sequence
-*/
-static void callCollNeeded(sqlite3 *db, const char *zName, int nName){
-  assert( !db->xCollNeeded || !db->xCollNeeded16 );
-  if( nName<0 ) nName = strlen(zName);
-  if( db->xCollNeeded ){
-    char *zExternal = sqliteStrNDup(zName, nName);
-    if( !zExternal ) return;
-    db->xCollNeeded(db->pCollNeededArg, db, (int)db->enc, zExternal);
-    sqliteFree(zExternal);
-  }
-#ifndef SQLITE_OMIT_UTF16
-  if( db->xCollNeeded16 ){
-    char const *zExternal;
-    sqlite3_value *pTmp = sqlite3GetTransientValue(db);
-    sqlite3ValueSetStr(pTmp, -1, zName, SQLITE_UTF8, SQLITE_STATIC);
-    zExternal = sqlite3ValueText(pTmp, SQLITE_UTF16NATIVE);
-    if( !zExternal ) return;
-    db->xCollNeeded16(db->pCollNeededArg, db, (int)db->enc, zExternal);
-  }
-#endif
-}
-
-/*
-** This routine is called if the collation factory fails to deliver a
-** collation function in the best encoding but there may be other versions
-** of this collation function (for other text encodings) available. Use one
-** of these instead if they exist. Avoid a UTF-8 <-> UTF-16 conversion if
-** possible.
-*/
-static int synthCollSeq(Parse *pParse, CollSeq *pColl){
-  CollSeq *pColl2;
-  char *z = pColl->zName;
-  int n = strlen(z);
-  sqlite3 *db = pParse->db;
-  int i;
-  static const u8 aEnc[] = { SQLITE_UTF16BE, SQLITE_UTF16LE, SQLITE_UTF8 };
-  for(i=0; i<3; i++){
-    pColl2 = sqlite3FindCollSeq(db, aEnc[i], z, n, 0);
-    if( pColl2->xCmp!=0 ){
-      memcpy(pColl, pColl2, sizeof(CollSeq));
-      return SQLITE_OK;
-    }
-  }
-  if( pParse->nErr==0 ){
-    sqlite3ErrorMsg(pParse, "no such collation sequence: %.*s", n, z);
-  }
-  pParse->nErr++;
-  return SQLITE_ERROR;
-}
-
-/*
-** This routine is called on a collation sequence before it is used to
-** check that it is defined. An undefined collation sequence exists when
-** a database is loaded that contains references to collation sequences
-** that have not been defined by sqlite3_create_collation() etc.
-**
-** If required, this routine calls the 'collation needed' callback to
-** request a definition of the collating sequence. If this doesn't work, 
-** an equivalent collating sequence that uses a text encoding different
-** from the main database is substituted, if one is available.
-*/
-int sqlite3CheckCollSeq(Parse *pParse, CollSeq *pColl){
-  if( pColl && !pColl->xCmp ){
-    /* No collation sequence of this type for this encoding is registered.
-    ** Call the collation factory to see if it can supply us with one.
-    */
-    callCollNeeded(pParse->db, pColl->zName, strlen(pColl->zName));
-    if( !pColl->xCmp && synthCollSeq(pParse, pColl) ){
-      return SQLITE_ERROR;
-    }
-  }
-  return SQLITE_OK;
-}
-
-/*
 ** Call sqlite3CheckCollSeq() for all collating sequences in an index,
 ** in order to verify that all the necessary collating sequences are
 ** loaded.
@@ -1241,33 +1117,22 @@ int sqlite3CheckIndexCollSeq(Parse *pParse, Index *pIdx){
 ** pParse.
 */
 CollSeq *sqlite3LocateCollSeq(Parse *pParse, const char *zName, int nName){
-  u8 enc = pParse->db->enc;
-  u8 initbusy = pParse->db->init.busy;
-  CollSeq *pColl = sqlite3FindCollSeq(pParse->db, enc, zName, nName, initbusy);
-  if( nName<0 ) nName = strlen(zName);
+  sqlite3 *db = pParse->db;
+  u8 enc = db->enc;
+  u8 initbusy = db->init.busy;
+
+  CollSeq *pColl = sqlite3FindCollSeq(db, enc, zName, nName, initbusy);
   if( !initbusy && (!pColl || !pColl->xCmp) ){
-    /* No collation sequence of this type for this encoding is registered.
-    ** Call the collation factory to see if it can supply us with one.
-    */
-    callCollNeeded(pParse->db, zName, nName);
-    pColl = sqlite3FindCollSeq(pParse->db, enc, zName, nName, 0);
-    if( pColl && !pColl->xCmp ){
-      /* There may be a version of the collation sequence that requires
-      ** translation between encodings. Search for it with synthCollSeq().
-      */
-      if( synthCollSeq(pParse, pColl) ){
-        return 0;
+    pColl = sqlite3GetCollSeq(db, pColl, zName, nName);
+    if( !pColl ){
+      if( nName<0 ){
+        nName = strlen(zName);
       }
+      sqlite3ErrorMsg(pParse, "no such collation sequence: %.*s", nName, zName);
+      pColl = 0;
     }
   }
 
-  /* If nothing has been found, write the error message into pParse */
-  if( !initbusy && (!pColl || !pColl->xCmp) ){
-    if( pParse->nErr==0 ){
-      sqlite3ErrorMsg(pParse, "no such collation sequence: %.*s", nName, zName);
-    }
-    pColl = 0;
-  }
   return pColl;
 }
 
@@ -1363,7 +1228,7 @@ static char *createTableStmt(Table *p){
   n += 35 + 6*p->nCol;
   zStmt = sqliteMallocRaw( n );
   if( zStmt==0 ) return 0;
-  strcpy(zStmt, p->iDb==1 ? "CREATE TEMP TABLE " : "CREATE TABLE ");
+  strcpy(zStmt, !OMIT_TEMPDB&&p->iDb==1 ? "CREATE TEMP TABLE ":"CREATE TABLE ");
   k = strlen(zStmt);
   identPut(zStmt, &k, p->zName);
   zStmt[k++] = '(';
@@ -1394,7 +1259,7 @@ static char *createTableStmt(Table *p){
 ** this is a temporary table or db->init.busy==1.  When db->init.busy==1
 ** it means we are reading the sqlite_master table because we just
 ** connected to the database or because the sqlite_master table has
-** recently changes, so the entry for this table already exists in
+** recently changed, so the entry for this table already exists in
 ** the sqlite_master table.  We do not want to create it again.
 **
 ** If the pSelect argument is not NULL, it means that this routine
@@ -1402,7 +1267,12 @@ static char *createTableStmt(Table *p){
 ** "CREATE TABLE ... AS SELECT ..." statement.  The column names of
 ** the new table will match the result set of the SELECT.
 */
-void sqlite3EndTable(Parse *pParse, Token *pEnd, Select *pSelect){
+void sqlite3EndTable(
+  Parse *pParse,          /* Parse context */
+  Token *pCons,           /* The ',' token after the last column defn. */
+  Token *pEnd,            /* The final ')' token in the CREATE TABLE */
+  Select *pSelect         /* Select from a "CREATE ... AS SELECT" */
+){
   Table *p;
   sqlite3 *db = pParse->db;
 
@@ -1491,7 +1361,7 @@ void sqlite3EndTable(Parse *pParse, Token *pEnd, Select *pSelect){
     if( pSelect ){
       zStmt = createTableStmt(p);
     }else{
-      n = Addr(pEnd->z) - Addr(pParse->sNameToken.z) + 1;
+      n = pEnd->z - pParse->sNameToken.z + 1;
       zStmt = sqlite3MPrintf("CREATE %s %.*s", zType2, n, pParse->sNameToken.z);
     }
 
@@ -1556,6 +1426,14 @@ void sqlite3EndTable(Parse *pParse, Token *pEnd, Select *pSelect){
     pParse->pNewTable = 0;
     db->nTable++;
     db->flags |= SQLITE_InternChanges;
+
+#ifndef SQLITE_OMIT_ALTERTABLE
+    if( !p->pSelect ){
+      assert( !pSelect && pCons && pEnd );
+      if( pCons->z==0 ) pCons = pEnd;
+      p->addColOffset = 13 + (pCons->z - pParse->sNameToken.z);
+    }
+#endif
   }
 }
 
@@ -1578,6 +1456,11 @@ void sqlite3CreateView(
   DbFixer sFix;
   Token *pName;
 
+  if( pParse->nVar>0 ){
+    sqlite3ErrorMsg(pParse, "parameters are not allowed in views");
+    sqlite3SelectDelete(pSelect);
+    return;
+  }
   sqlite3StartTable(pParse, pBegin, pName1, pName2, isTemp, 1);
   p = pParse->pNewTable;
   if( p==0 || pParse->nErr ){
@@ -1618,7 +1501,7 @@ void sqlite3CreateView(
   sEnd.n = 1;
 
   /* Use sqlite3EndTable() to add the view to the SQLITE_MASTER table */
-  sqlite3EndTable(pParse, &sEnd, 0);
+  sqlite3EndTable(pParse, 0, &sEnd, 0);
   return;
 }
 #endif /* SQLITE_OMIT_VIEW */
@@ -1839,13 +1722,13 @@ void sqlite3DropTable(Parse *pParse, SrcList *pName, int isView){
       goto exit_drop_table;
     }
     if( isView ){
-      if( iDb==1 ){
+      if( !OMIT_TEMPDB && iDb==1 ){
         code = SQLITE_DROP_TEMP_VIEW;
       }else{
         code = SQLITE_DROP_VIEW;
       }
     }else{
-      if( iDb==1 ){
+      if( !OMIT_TEMPDB && iDb==1 ){
         code = SQLITE_DROP_TEMP_TABLE;
       }else{
         code = SQLITE_DROP_TABLE;
@@ -2125,7 +2008,7 @@ static void sqlite3RefillIndex(Parse *pParse, Index *pIndex, int memRootPage){
   addr1 = sqlite3VdbeAddOp(v, OP_Rewind, iTab, 0);
   sqlite3GenerateIndexKey(v, pIndex, iTab);
   isUnique = pIndex->onError!=OE_None;
-  sqlite3VdbeAddOp(v, OP_IdxPut, iIdx, isUnique);
+  sqlite3VdbeAddOp(v, OP_IdxInsert, iIdx, isUnique);
   if( isUnique ){
     sqlite3VdbeChangeP3(v, -1, "indexed columns are not unique", P3_STATIC);
   }
@@ -2163,7 +2046,6 @@ void sqlite3CreateIndex(
   int i, j;
   Token nullId;    /* Fake token for an empty ID list */
   DbFixer sFix;    /* For assigning database names to pTable */
-  int isTemp;      /* True for a temporary index */
   sqlite3 *db = pParse->db;
 
   int iDb;          /* Index of the database that is being written */
@@ -2184,6 +2066,7 @@ void sqlite3CreateIndex(
     iDb = sqlite3TwoPartName(pParse, pName1, pName2, &pName);
     if( iDb<0 ) goto exit_create_index;
 
+#ifndef SQLITE_OMIT_TEMPDB
     /* If the index name was unqualified, check if the the table
     ** is a temp table. If so, set the database to 1.
     */
@@ -2191,6 +2074,7 @@ void sqlite3CreateIndex(
     if( pName2 && pName2->n==0 && pTab && pTab->iDb==1 ){
       iDb = 1;
     }
+#endif
 
     if( sqlite3FixInit(&sFix, pParse, iDb, "index", pName) &&
         sqlite3FixSrcList(&sFix, pTblName)
@@ -2218,7 +2102,6 @@ void sqlite3CreateIndex(
     goto exit_create_index;
   }
 #endif
-  isTemp = pTab->iDb==1;
 
   /*
   ** Find the name of the index.  Make sure there is not already another
@@ -2268,12 +2151,12 @@ void sqlite3CreateIndex(
   */
 #ifndef SQLITE_OMIT_AUTHORIZATION
   {
-    const char *zDb = db->aDb[pTab->iDb].zName;
-    if( sqlite3AuthCheck(pParse, SQLITE_INSERT, SCHEMA_TABLE(isTemp), 0, zDb) ){
+    const char *zDb = db->aDb[iDb].zName;
+    if( sqlite3AuthCheck(pParse, SQLITE_INSERT, SCHEMA_TABLE(iDb), 0, zDb) ){
       goto exit_create_index;
     }
     i = SQLITE_CREATE_INDEX;
-    if( isTemp ) i = SQLITE_CREATE_TEMP_INDEX;
+    if( !OMIT_TEMPDB && iDb==1 ) i = SQLITE_CREATE_TEMP_INDEX;
     if( sqlite3AuthCheck(pParse, i, zName, pTab->zName, zDb) ){
       goto exit_create_index;
     }
@@ -2296,7 +2179,7 @@ void sqlite3CreateIndex(
   */
   pIndex = sqliteMalloc( sizeof(Index) + strlen(zName) + 1 +
                         (sizeof(int) + sizeof(CollSeq*))*pList->nExpr );
-  if( pIndex==0 ) goto exit_create_index;
+  if( sqlite3_malloc_failed ) goto exit_create_index;
   pIndex->aiColumn = (int*)&pIndex->keyInfo.aColl[pList->nExpr];
   pIndex->zName = (char*)&pIndex->aiColumn[pList->nExpr];
   strcpy(pIndex->zName, zName);
@@ -2436,7 +2319,7 @@ void sqlite3CreateIndex(
       /* A named index with an explicit CREATE INDEX statement */
       zStmt = sqlite3MPrintf("CREATE%s INDEX %.*s",
         onError==OE_None ? "" : " UNIQUE",
-        Addr(pEnd->z) - Addr(pName->z) + 1,
+        pEnd->z - pName->z + 1,
         pName->z);
     }else{
       /* An automatic index created by a PRIMARY KEY or UNIQUE constraint */
@@ -2509,9 +2392,13 @@ void sqlite3DropIndex(Parse *pParse, SrcList *pName){
   Vdbe *v;
   sqlite3 *db = pParse->db;
 
-  if( pParse->nErr || sqlite3_malloc_failed ) return;
+  if( pParse->nErr || sqlite3_malloc_failed ){
+    goto exit_drop_index;
+  }
   assert( pName->nSrc==1 );
-  if( SQLITE_OK!=sqlite3ReadSchema(pParse) ) return;
+  if( SQLITE_OK!=sqlite3ReadSchema(pParse) ){
+    goto exit_drop_index;
+  }
   pIndex = sqlite3FindIndex(db, pName->a[0].zName, pName->a[0].zDatabase);
   if( pIndex==0 ){
     sqlite3ErrorMsg(pParse, "no such index: %S", pName, 0);
@@ -2532,7 +2419,7 @@ void sqlite3DropIndex(Parse *pParse, SrcList *pName){
     if( sqlite3AuthCheck(pParse, SQLITE_DELETE, zTab, 0, zDb) ){
       goto exit_drop_index;
     }
-    if( pIndex->iDb ) code = SQLITE_DROP_TEMP_INDEX;
+    if( !OMIT_TEMPDB && pIndex->iDb ) code = SQLITE_DROP_TEMP_INDEX;
     if( sqlite3AuthCheck(pParse, code, pIndex->zName, pTab->zName, zDb) ){
       goto exit_drop_index;
     }
@@ -2706,9 +2593,7 @@ void sqlite3SrcListDelete(SrcList *pList){
     sqliteFree(pItem->zDatabase);
     sqliteFree(pItem->zName);
     sqliteFree(pItem->zAlias);
-    if( pItem->pTab && pItem->pTab->isTransient ){
-      sqlite3DeleteTable(0, pItem->pTab);
-    }
+    sqlite3DeleteTable(0, pItem->pTab);
     sqlite3SelectDelete(pItem->pSelect);
     sqlite3ExprDelete(pItem->pOn);
     sqlite3IdListDelete(pItem->pUsing);
@@ -2840,7 +2725,7 @@ void sqlite3CodeVerifySchema(Parse *pParse, int iDb){
     if( (pParse->cookieMask & mask)==0 ){
       pParse->cookieMask |= mask;
       pParse->cookieValue[iDb] = db->aDb[iDb].schema_cookie;
-      if( iDb==1 ){
+      if( !OMIT_TEMPDB && iDb==1 ){
         sqlite3OpenTempDatabase(pParse);
       }
     }
@@ -2873,23 +2758,10 @@ void sqlite3BeginWriteOperation(Parse *pParse, int setStatement, int iDb){
   if( setStatement && pParse->nested==0 ){
     sqlite3VdbeAddOp(v, OP_Statement, iDb, 0);
   }
-  if( iDb!=1 && pParse->db->aDb[1].pBt!=0 ){
+  if( (OMIT_TEMPDB || iDb!=1) && pParse->db->aDb[1].pBt!=0 ){
     sqlite3BeginWriteOperation(pParse, setStatement, 1);
   }
 }
-
-#ifndef SQLITE_OMIT_UTF16
-/* 
-** Return the transient sqlite3_value object used for encoding conversions
-** during SQL compilation.
-*/
-sqlite3_value *sqlite3GetTransientValue(sqlite3 *db){
-  if( !db->pValue ){
-    db->pValue = sqlite3ValueNew();
-  }
-  return db->pValue;
-}
-#endif
 
 /*
 ** Check to see if pIndex uses the collating sequence pColl.  Return
