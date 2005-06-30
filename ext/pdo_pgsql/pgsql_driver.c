@@ -214,7 +214,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 
 	/* TODO: if name != NULL, pull out last value for that sequence/column */
 
-	*len = spprintf(&id, 0, "%ld", H->pgoid);
+	*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
 	return id;
 }
 
