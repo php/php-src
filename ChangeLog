@@ -1,3 +1,130 @@
+2005-06-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/sys/stat.h:
+      This file is not needed anymore
+
+    * (PHP_5_0)
+      netware/sys/stat.h:
+      this file is not needed anymore
+
+    * netware/geterrnoptr.c:
+      this file is not used at all so removing it.
+
+    * (PHP_5_0)
+      netware/geterrnoptr.c:
+      This file is not used at all.
+
+    * netware/mktemp.c:
+      Netware LibC has mktemp implementation
+
+    * (PHP_5_0)
+      netware/mktemp.c:
+      NetWare LibC has mktemp implementation
+
+    * netware/pwd.c
+      netware/pwd.c:
+      NetWare LibC has getpwnam, getlogin, getpwuid, getpid, this file is not
+      needed anymore
+
+2005-06-29  Antony Dovgal  <antony@zend.com>
+
+    * ext/xml/tests/bug32001.phpt:
+      fix test
+
+2005-06-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/wfile.c
+      netware/wfile.h:
+      NetWare LibC has readlink implementation. This is not needed anymore.
+
+    * (PHP_5_0)
+      netware/wfile.c
+      netware/wfile.h:
+      NetWare LibC has readlink implementation
+
+    * netware/time_nw.h:
+      This file does nothing so removing this file.
+
+    * (PHP_5_0)
+      netware/time_nw.h:
+      This file does nothing so removing this file
+
+    * netware/grp.h
+      netware/grp.h:
+      NetWare LibC has grp.h
+
+    * netware/param.h
+      netware/param.h:
+      NetWare LibC has param.h
+
+    * netware/pipe.h:
+      NetWare LibC itself has popen/pclose functionality so removing this
+
+    * (PHP_5_0)
+      netware/pipe.h:
+      NetWare LibC itself pipe/popen/pclose implementation
+
+2005-06-29  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * ext/standard/php_incomplete_class.h:
+      - Fix TSRM build
+
+2005-06-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      ext/standard/mail.c:
+      NetWare LibC itself has a pip/popen support
+
+    * netware/pipe.c:
+      NetWare LibC has pipe/popen support
+
+    * (PHP_5_0)
+      netware/pipe.c:
+      NetWare LibC has a pipe and popen implentation
+
+2005-06-29  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      fix conditions for freeing
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      add comment
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      fix conditions
+
+2005-06-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/mktemp.h:
+      mktemp functionality is part of Regular LibC
+
+    * (PHP_5_0)
+      netware/mktemp.h:
+      mktemp functionality is part of Regular NetWare LibC
+
+    * netware/pwd.h:
+      removing pwd.h as NetWare LibC itself supplies pwd.h
+
+    * (PHP_5_0)
+      netware/pwd.h:
+      removing pwd.h as NetWare LibC itself supplies pwd.h for quite sometime
+
+    * (PHP_5_0)
+      main/reentrancy.c:
+      removed the unwanted NetWare Code
+
+    * (PHP_5_0)
+      main/php.h:
+      Removing unwanted NetWare Code
+
+    * (PHP_5_0)
+      main/mergesort.c:
+      removing unwanted NetWare code
+
 2005-06-28  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/standard/url_scanner_ex.c
