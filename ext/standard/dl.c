@@ -224,7 +224,7 @@ void php_dl(zval *file, int type, zval *return_value TSRMLS_DC)
 		RETURN_FALSE;
 	}
 
-	if (type == MODULE_TEMPORARY && zend_startup_module(module_entry TSRMLS_CC) == FAILURE) {
+	if (type == MODULE_TEMPORARY && zend_startup_module_ex(module_entry TSRMLS_CC) == FAILURE) {
 		DL_UNLOAD(handle);
 		RETURN_FALSE;
 	}
