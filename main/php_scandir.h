@@ -31,8 +31,6 @@
 #ifdef PHP_WIN32
 #include "config.w32.h"
 #include "win32/readdir.h"
-#elif NETWARE
-#include "config.nw.h"
 #else
 #include <php_config.h>
 #endif
