@@ -193,7 +193,7 @@ static int tz_search(char *timezone, int left, int right)
  
 	mid = (left + right) / 2;
  
-	cmp = strcmp(timezone, timezonedb_idx[mid].id);
+	cmp = strcasecmp(timezone, timezonedb_idx[mid].id);
 	if (cmp < 0) {
 		return tz_search(timezone, left, mid - 1);
 	} else if (cmp > 0) {

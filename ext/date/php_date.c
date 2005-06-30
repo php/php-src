@@ -29,6 +29,8 @@
 #include <time.h>
 
 function_entry date_functions[] = {
+	PHP_FE(date, NULL)
+	PHP_FE(gmdate, NULL)
 	PHP_FE(strtotime, NULL)
 	{NULL, NULL, NULL}
 };
@@ -85,6 +87,198 @@ PHP_MINFO_FUNCTION(date)
 	php_info_print_table_end();
 }
 
+/* =[ Helper functions ] ================================================== */
+
+static char* guess_timezone(TSRMLS_D)
+{
+	char *env;
+
+	env = getenv("TZ");
+	if (env) {
+		return env;
+	}
+	/* Check config setting */
+	if (DATEG(default_timezone)) {
+		return DATEG(default_timezone);
+	}
+	return "GMT";
+}
+
+/* =[ date() and gmdate() ]================================================ */
+#include "ext/standard/php_smart_str.h"
+
+static char *mon_full_names[] = {
+	"January", "February", "March", "April",
+	"May", "June", "July", "August",
+	"September", "October", "November", "December"
+};
+
+static char *mon_short_names[] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
+
+static char *day_full_names[] = {
+	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+};
+
+static char *day_short_names[] = {
+	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
+
+static char *english_suffix(int number)
+{
+	if (number >= 10 && number <= 19) {
+		return "th";
+	} else {
+		switch (number % 10) {
+			case 1: return "st";
+			case 2: return "nd";
+			case 3: return "rd";
+		}
+	}
+	return "th";
+}
+
+static char *php_format_date(char *format, int format_len, timelib_time *t, int localtime)
+{
+	smart_str            string = {0};
+	int                  i;
+	char                 buffer[33];
+	timelib_time_offset *offset;
+	timelib_sll          isoweek, isoyear;
+
+	if (localtime) {
+		offset = timelib_get_time_zone_info(t->sse, t->tz_info);
+	}
+	buffer[32] = '\0';
+	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
+
+	for (i = 0; i < format_len; i++) {
+		switch (format[i]) {
+			/* day */
+			case 'd': snprintf(&buffer, 32, "%02d", (int) t->d); break;
+			case 'D': snprintf(&buffer, 32, "%s", day_short_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
+			case 'j': snprintf(&buffer, 32, "%d", (int) t->d); break;
+			case 'l': snprintf(&buffer, 32, "%s", day_full_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
+			case 'S': snprintf(&buffer, 32, "%s", english_suffix(t->d)); break;
+			case 'w': snprintf(&buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': snprintf(&buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+
+			/* week */
+			case 'W': snprintf(&buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
+			case 'o': snprintf(&buffer, 32, "%d", (int) isoyear); break; /* iso year */
+
+			/* month */
+			case 'F': snprintf(&buffer, 32, "%s", mon_full_names[t->m - 1]); break;
+			case 'm': snprintf(&buffer, 32, "%02d", (int) t->m); break;
+			case 'M': snprintf(&buffer, 32, "%s", mon_short_names[t->m - 1]); break;
+			case 'n': snprintf(&buffer, 32, "%d", (int) t->m); break;
+			case 't': snprintf(&buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+
+			/* year */
+			case 'L': snprintf(&buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
+			case 'y': snprintf(&buffer, 32, "%02d", (int) t->y % 100); break;
+			case 'Y': snprintf(&buffer, 32, "%04d", (int) t->y); break;
+
+			/* time */
+			case 'a': snprintf(&buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
+			case 'A': snprintf(&buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
+			case 'B': snprintf(&buffer, 32, "[B unimplemented]"); break;
+			case 'g': snprintf(&buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': snprintf(&buffer, 32, "%d", (int) t->h); break;
+			case 'h': snprintf(&buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': snprintf(&buffer, 32, "%02d", (int) t->h); break;
+			case 'i': snprintf(&buffer, 32, "%02d", (int) t->i); break;
+			case 's': snprintf(&buffer, 32, "%02d", (int) t->s); break;
+
+			/* timezone */
+			case 'I': snprintf(&buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
+			case 'O': snprintf(&buffer, 32, "%c%02d%02d",
+											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
+											localtime ? abs(offset->offset / 3600) : 0,
+											localtime ? abs((offset->offset % 3600) / 60) : 0
+							  );
+					  break;
+			case 'T': snprintf(&buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'e': snprintf(&buffer, 32, "%s", localtime ? t->tz_info->name : "UTC"); break;
+			case 'Z': snprintf(&buffer, 32, "%d", localtime ? offset->offset : 0); break;
+
+			/* full date/time */
+			case 'c': snprintf(&buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+							                (int) t->y, (int) t->m, (int) t->d,
+											(int) t->h, (int) t->i, (int) t->s,
+											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
+											localtime ? abs(offset->offset / 3600) : 0,
+											localtime ? abs((offset->offset % 3600) / 60) : 0
+							  );
+					  break;
+			case 'r': snprintf(&buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+							                day_short_names[timelib_day_of_week(t->y, t->m, t->d)],
+											(int) t->d, mon_short_names[t->m - 1],
+											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
+											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
+											localtime ? abs(offset->offset / 3600) : 0,
+											localtime ? abs((offset->offset % 3600) / 60) : 0
+							  );
+					  break;
+			case 'U': snprintf(&buffer, 32, "%lld", (long long) t->sse); break;
+
+			case '\\': if (i < format_len) i++; buffer[0] = format[i]; buffer[1] = '\0'; break;
+
+			default: buffer[0] = format[i]; buffer[1] = '\0';
+		}
+		smart_str_appends(&string, buffer);
+		buffer[0] = '\0';
+	}
+
+	smart_str_0(&string);
+
+	return string.c;
+}
+
+static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
+{
+	char *format;
+	int   format_len;
+	long  ts = time(NULL);
+	timelib_time   *t;
+	char           *string;
+	timelib_tzinfo *tzi;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+    t = timelib_time_ctor();
+
+	if (localtime) {
+		tzi = timelib_parse_tzfile(guess_timezone());
+		if (! tzi) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find any timezone setting");
+			RETURN_FALSE;
+		}
+    	timelib_unixtime2local(t, ts, tzi);
+	} else {
+		tzi = NULL;
+		timelib_unixtime2gmt(t, ts);
+	}
+	string = php_format_date(format, format_len, t, localtime);
+	
+	RETVAL_STRING(string, 0);
+	timelib_time_dtor(t);
+}
+
+PHP_FUNCTION(date)
+{
+	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+
+PHP_FUNCTION(gmdate)
+{
+	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+
+/* Backwards compability function */
 signed long php_parse_date(char *string, signed long *now)
 {
 	timelib_time *parsed_time;
@@ -99,23 +293,6 @@ signed long php_parse_date(char *string, signed long *now)
 		return -1;
 	}
 	return retval;
-}
-
-static char* guess_timezone(TSRMLS_D)
-{
-	char *env;
-
-	env = getenv("TZ");
-	if (env) {
-		return env;
-	}
-	if (DATEG(default_timezone)) {
-		return DATEG(default_timezone);
-	}
-	/* Check config setting */
-	/*
-	 */
-	return "GMT";
 }
 
 

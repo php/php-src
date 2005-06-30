@@ -25,6 +25,8 @@ extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
 PHP_FUNCTION(strtotime);
+PHP_FUNCTION(date);
+PHP_FUNCTION(gmdate);
 
 PHP_MINIT_FUNCTION(date);
 PHP_MSHUTDOWN_FUNCTION(date);

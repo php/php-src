@@ -58,7 +58,7 @@ static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 
 	do_range_limit(1, 13, 12, m, y);
 
-	leapyear = is_leap(*y);
+	leapyear = timelib_is_leap(*y);
 	days_this_month = leapyear ? days_in_month_leap[*m] : days_in_month[*m];
 	last_month = (*m) - 1;
 
@@ -68,7 +68,7 @@ static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 	} else {
 		last_year = (*y);
 	}
-	leapyear = is_leap(last_year);
+	leapyear = timelib_is_leap(last_year);
 	days_last_month = leapyear ? days_in_month_leap[last_month] : days_in_month[last_month];
 
 	if (*d <= 0) {
@@ -138,7 +138,7 @@ static timelib_sll do_years(timelib_sll year)
 
 	if (year >= 1970) {
 		for (i = year - 1; i >= 1970; i--) {
-			if (is_leap(i)) {
+			if (timelib_is_leap(i)) {
 				res += (DAYS_PER_LYEAR * SECS_PER_DAY);
 			} else {
 				res += (DAYS_PER_YEAR * SECS_PER_DAY);
@@ -146,7 +146,7 @@ static timelib_sll do_years(timelib_sll year)
 		}
 	} else {
 		for (i = 1969; i >= year; i--) {
-			if (is_leap(i)) {
+			if (timelib_is_leap(i)) {
 				res -= (DAYS_PER_LYEAR * SECS_PER_DAY);
 			} else {
 				res -= (DAYS_PER_YEAR * SECS_PER_DAY);
@@ -158,7 +158,7 @@ static timelib_sll do_years(timelib_sll year)
 
 static timelib_sll do_months(timelib_ull month, timelib_ull year)
 {
-	if (is_leap(year)) {
+	if (timelib_is_leap(year)) {
 		return ((month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
 	} else {
 		return ((month_tab[month - 1]) * SECS_PER_DAY);

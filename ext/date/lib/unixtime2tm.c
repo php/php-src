@@ -63,7 +63,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		tmp_days = days + 1;
 		while (tmp_days >= DAYS_PER_LYEAR) {
 			cur_year++;
-			if (is_leap(cur_year)) {
+			if (timelib_is_leap(cur_year)) {
 				tmp_days -= DAYS_PER_LYEAR;
 			} else {
 				tmp_days -= DAYS_PER_YEAR;
@@ -82,7 +82,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 		while (tmp_days <= 0) {
 			cur_year--;
 			DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-			if (is_leap(cur_year)) {
+			if (timelib_is_leap(cur_year)) {
 				tmp_days += DAYS_PER_LYEAR;
 			} else {
 				tmp_days += DAYS_PER_YEAR;
@@ -92,7 +92,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	}
 	DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 
-	months = is_leap(cur_year) ? month_tab_leap : month_tab;
+	months = timelib_is_leap(cur_year) ? month_tab_leap : month_tab;
 	i = 11;
 	while (i > 0) {
 		DEBUG(printf("month=%lld (%d)\n", i, months[i]););

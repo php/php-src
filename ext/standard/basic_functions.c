@@ -179,9 +179,7 @@ function_entry basic_functions[] = {
 	PHP_FE(gmstrftime,														NULL)
 #endif
 
-	PHP_FE(date,															NULL)
 	PHP_FE(idate,															NULL)
-	PHP_FE(gmdate,															NULL)
 	PHP_FE(getdate,															NULL)
 	PHP_FE(localtime,														NULL)
 	PHP_FE(checkdate,														NULL)
