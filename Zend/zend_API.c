@@ -1240,7 +1240,7 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	return SUCCESS;
 }
 
-ZEND_API int zend_startup_module(zend_module_entry *module TSRMLS_DC)
+ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC)
 {
 	int name_len;
 	char *lcname;
@@ -1324,7 +1324,7 @@ try_again:
 ZEND_API int zend_startup_modules(TSRMLS_D)
 {
 	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0 TSRMLS_CC);
-	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module TSRMLS_CC);
+	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module_ex TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -1630,12 +1630,12 @@ ZEND_API void zend_unregister_functions(zend_function_entry *functions, int coun
 }
 
 
-ZEND_API int zend_register_module(zend_module_entry *module)
+ZEND_API int zend_startup_module(zend_module_entry *module)
 {
 	TSRMLS_FETCH();
 	
-	if (zend_register_module_ex(module TSRMLS_CC) == SUCCESS &&
-	    zend_startup_module(module TSRMLS_CC) == SUCCESS) {
+	if (zend_register_internal_module(module TSRMLS_CC) == SUCCESS &&
+	    zend_startup_module_ex(module TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
 	return FAILURE;
