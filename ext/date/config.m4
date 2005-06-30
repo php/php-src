@@ -15,8 +15,6 @@ PHP_INSTALL_HEADERS([ext/date], [php_date.h lib/timelib.h lib/timelib_structs.h]
 cat >> $ext_builddir/lib/timelib_config.h <<EOF
 #if PHP_WIN32
 # include "config.w32.h"
-#elif defined(NETWARE)
-# include "config.nw.h"
 #else
 # include <php_config.h>
 #endif
