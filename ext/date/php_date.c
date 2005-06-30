@@ -156,55 +156,55 @@ static char *php_format_date(char *format, int format_len, timelib_time *t, int 
 	for (i = 0; i < format_len; i++) {
 		switch (format[i]) {
 			/* day */
-			case 'd': snprintf(&buffer, 32, "%02d", (int) t->d); break;
-			case 'D': snprintf(&buffer, 32, "%s", day_short_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
-			case 'j': snprintf(&buffer, 32, "%d", (int) t->d); break;
-			case 'l': snprintf(&buffer, 32, "%s", day_full_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
-			case 'S': snprintf(&buffer, 32, "%s", english_suffix(t->d)); break;
-			case 'w': snprintf(&buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
-			case 'z': snprintf(&buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+			case 'd': snprintf(buffer, 32, "%02d", (int) t->d); break;
+			case 'D': snprintf(buffer, 32, "%s", day_short_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
+			case 'j': snprintf(buffer, 32, "%d", (int) t->d); break;
+			case 'l': snprintf(buffer, 32, "%s", day_full_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
+			case 'S': snprintf(buffer, 32, "%s", english_suffix(t->d)); break;
+			case 'w': snprintf(buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': snprintf(buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
-			case 'W': snprintf(&buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
-			case 'o': snprintf(&buffer, 32, "%d", (int) isoyear); break; /* iso year */
+			case 'W': snprintf(buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
+			case 'o': snprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
-			case 'F': snprintf(&buffer, 32, "%s", mon_full_names[t->m - 1]); break;
-			case 'm': snprintf(&buffer, 32, "%02d", (int) t->m); break;
-			case 'M': snprintf(&buffer, 32, "%s", mon_short_names[t->m - 1]); break;
-			case 'n': snprintf(&buffer, 32, "%d", (int) t->m); break;
-			case 't': snprintf(&buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+			case 'F': snprintf(buffer, 32, "%s", mon_full_names[t->m - 1]); break;
+			case 'm': snprintf(buffer, 32, "%02d", (int) t->m); break;
+			case 'M': snprintf(buffer, 32, "%s", mon_short_names[t->m - 1]); break;
+			case 'n': snprintf(buffer, 32, "%d", (int) t->m); break;
+			case 't': snprintf(buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
 
 			/* year */
-			case 'L': snprintf(&buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': snprintf(&buffer, 32, "%02d", (int) t->y % 100); break;
-			case 'Y': snprintf(&buffer, 32, "%04d", (int) t->y); break;
+			case 'L': snprintf(buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
+			case 'y': snprintf(buffer, 32, "%02d", (int) t->y % 100); break;
+			case 'Y': snprintf(buffer, 32, "%04d", (int) t->y); break;
 
 			/* time */
-			case 'a': snprintf(&buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
-			case 'A': snprintf(&buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
-			case 'B': snprintf(&buffer, 32, "[B unimplemented]"); break;
-			case 'g': snprintf(&buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'G': snprintf(&buffer, 32, "%d", (int) t->h); break;
-			case 'h': snprintf(&buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'H': snprintf(&buffer, 32, "%02d", (int) t->h); break;
-			case 'i': snprintf(&buffer, 32, "%02d", (int) t->i); break;
-			case 's': snprintf(&buffer, 32, "%02d", (int) t->s); break;
+			case 'a': snprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
+			case 'A': snprintf(buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
+			case 'B': snprintf(buffer, 32, "[B unimplemented]"); break;
+			case 'g': snprintf(buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': snprintf(buffer, 32, "%d", (int) t->h); break;
+			case 'h': snprintf(buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': snprintf(buffer, 32, "%02d", (int) t->h); break;
+			case 'i': snprintf(buffer, 32, "%02d", (int) t->i); break;
+			case 's': snprintf(buffer, 32, "%02d", (int) t->s); break;
 
 			/* timezone */
-			case 'I': snprintf(&buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
-			case 'O': snprintf(&buffer, 32, "%c%02d%02d",
+			case 'I': snprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
+			case 'O': snprintf(buffer, 32, "%c%02d%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': snprintf(&buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
-			case 'e': snprintf(&buffer, 32, "%s", localtime ? t->tz_info->name : "UTC"); break;
-			case 'Z': snprintf(&buffer, 32, "%d", localtime ? offset->offset : 0); break;
+			case 'T': snprintf(buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'e': snprintf(buffer, 32, "%s", localtime ? t->tz_info->name : "UTC"); break;
+			case 'Z': snprintf(buffer, 32, "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': snprintf(&buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': snprintf(buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (int) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -212,7 +212,7 @@ static char *php_format_date(char *format, int format_len, timelib_time *t, int 
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': snprintf(&buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': snprintf(buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                day_short_names[timelib_day_of_week(t->y, t->m, t->d)],
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -221,7 +221,7 @@ static char *php_format_date(char *format, int format_len, timelib_time *t, int 
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': snprintf(&buffer, 32, "%lld", (long long) t->sse); break;
+			case 'U': snprintf(buffer, 32, "%lld", (long long) t->sse); break;
 
 			case '\\': if (i < format_len) i++; buffer[0] = format[i]; buffer[1] = '\0'; break;
 
