@@ -34,7 +34,7 @@
 #include "php_simplexml_exports.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
+#ifdef HAVE_SPL
 #include "ext/spl/spl_sxe.h"
 #endif
 
@@ -1709,7 +1709,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_ze1_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
 	sxe_ze1_object_handlers.clone_obj = sxe_object_ze1_clone;
 
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
+#ifdef HAVE_SPL
 	if (zend_get_module_started("spl") == SUCCESS) {
 		PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 	}
