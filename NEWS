@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
 - Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql. (Ilia)
 - Implemented feature request #33452 (Year belonging to ISO week). (Derick)
+- Fixed bug #33523 (Memory leak in xmlrpc_encode_request()). (Ilia)
 - Fixed bug #33491 (crash after extending MySQLi internal class). (Tony)
 - Fixed bug #33475 (cURL handle is not closed on curl_close(). (Ilia)
 - Fixed bug #33469 (Compile error undefined reference to ifx_checkAPI). (Jani)
