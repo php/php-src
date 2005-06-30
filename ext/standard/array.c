@@ -46,7 +46,7 @@
 #include "php_string.h"
 #include "php_rand.h"
 #include "php_smart_str.h"
-#if HAVE_SPL
+#ifdef HAVE_SPL
 #include "ext/spl/spl_array.h"
 #endif
 
@@ -319,7 +319,7 @@ PHP_FUNCTION(count)
 			RETURN_LONG (php_count_recursive (array, mode TSRMLS_CC));
 			break;
 		case IS_OBJECT: {
-#if HAVE_SPL
+#ifdef HAVE_SPL
 			/* it the object implements Countable we call its count() method */
 			zval *retval;
 
