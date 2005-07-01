@@ -203,11 +203,10 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
 
-	if (H->pgoid == InvalidOid) {
-		return NULL;
-	}
-
 	if (name == NULL) {
+		if (H->pgoid == InvalidOid) {
+			return NULL;
+		}
 		*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
 	} else {
 		PGresult *res;
