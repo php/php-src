@@ -207,14 +207,43 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
-	
+
 	if (H->pgoid == InvalidOid) {
 		return NULL;
 	}
 
-	/* TODO: if name != NULL, pull out last value for that sequence/column */
+	if (name == NULL) {
+		*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
+	} else {
+		PGresult *res;
+		char *name_escaped, *q;
+		size_t l = strlen(name);
+		ExecStatusType status;
 
-	*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
+		name_escaped = safe_emalloc(l, 2, 1);
+		PQescapeString(name_escaped, name, l);
+		spprintf(&q, 0, "SELECT CURRVAL('%s')", name_escaped);
+		res = PQexec(H->server, q);
+		efree(name_escaped);
+		efree(q);
+		status = PQresultStatus(res);
+
+		if (res && (status == PGRES_TUPLES_OK)) {
+			id = estrdup((char *)PQgetvalue(res, 0, 0));
+			*len = PQgetlength(res, 0, 0);
+		} else {
+#if HAVE_PQRESULTERRORFIELD
+			char * sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
+			pdo_pgsql_error(dbh, status, (const char *)sqlstate);
+#else
+			pdo_pgsql_error(dbh, status, NULL);
+#endif
+		}
+
+		if (res) {
+			PQclear(res);
+		}
+	}
 	return id;
 }
 
