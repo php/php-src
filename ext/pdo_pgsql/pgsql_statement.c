@@ -97,13 +97,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	status = PQresultStatus(S->result);
 
 	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
-#if HAVE_PQRESULTERRORFIELD
-		char * sqlstate = PQresultErrorField(S->result, PG_DIAG_SQLSTATE);
-		pdo_pgsql_error_stmt(stmt, status, (const char *)sqlstate);
-#else
-		pdo_pgsql_error_stmt(stmt, status, NULL);
-#endif
-
+		pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 		return 0;
 	}
 
@@ -151,12 +145,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 		status = PQresultStatus(S->result);
 
 		if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
-#if HAVE_PQRESULTERRORFIELD
-			char * sqlstate = PQresultErrorField(S->result, PG_DIAG_SQLSTATE);
-			pdo_pgsql_error_stmt(stmt, status, (const char *)sqlstate);
-#else
-			pdo_pgsql_error_stmt(stmt, status, NULL);
-#endif
+			pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 			return 0;
 		}
 

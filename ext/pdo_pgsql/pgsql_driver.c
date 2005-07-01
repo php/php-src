@@ -160,12 +160,7 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 	} else {
 		ExecStatusType qs = PQresultStatus(res);
 		if (qs != PGRES_COMMAND_OK && qs != PGRES_TUPLES_OK) {
-#if HAVE_PQRESULTERRORFIELD
-			char * sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
-			pdo_pgsql_error(dbh, qs, (const char *)sqlstate);
-#else
-			pdo_pgsql_error(dbh, qs, NULL);
-#endif
+			pdo_pgsql_error(dbh, qs, pdo_pgsql_sqlstate(res));
 			PQclear(res);
 			return -1;
 		}
@@ -232,12 +227,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 			id = estrdup((char *)PQgetvalue(res, 0, 0));
 			*len = PQgetlength(res, 0, 0);
 		} else {
-#if HAVE_PQRESULTERRORFIELD
-			char * sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
-			pdo_pgsql_error(dbh, status, (const char *)sqlstate);
-#else
-			pdo_pgsql_error(dbh, status, NULL);
-#endif
+			pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
 		}
 
 		if (res) {
