@@ -221,7 +221,7 @@ static char *php_format_date(char *format, int format_len, timelib_time *t, int 
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': snprintf(buffer, 32, "%lld", (long long) t->sse); break;
+			case 'U': snprintf(buffer, 32, "%lld", (timelib_sll) t->sse); break;
 
 			case '\\': if (i < format_len) i++; buffer[0] = format[i]; buffer[1] = '\0'; break;
 
