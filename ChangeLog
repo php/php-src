@@ -1,3 +1,75 @@
+2005-06-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      Fixed bug #33523 (Memory leak in xmlrpc_encode_request()).
+
+2005-06-30  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/tests/time/bug27719.phpt
+      ext/standard/tests/time/date.phpt:
+      - Reimplemented date and gmdate with new timelib code.
+      - Removed old date/gmdate implementations.
+      - Moved date() related testcases to ext/date/tests.
+      - Implemented bug #33452.
+      - Fixed testcase for bug #27719 - there is no timezone called "EST5DST".
+
+2005-06-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      SQLite lib upgrade news.
+
+2005-06-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c:
+      Add optional parameter to openssl_pkcs7_verify() which specifies the name
+      of a file that will be filled with the verified data, but with the
+      signature
+      information stripped.
+      
+      Patch by Marton Kenyeres, mkenyeres (at) konvergencia dot hu
+
+2005-06-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mysql/config.m4:
+      consistent naming: prefix always with MYSQL_
+
+    * ext/bcmath/libbcmath/src/config.h
+      ext/mcve/mcve.c
+      ext/pcre/pcrelib/internal.h
+      ext/standard/html.c
+      ext/xml/expat_compat.h
+      main/php_scandir.h
+      main/php_sprintf.c:
+      Netware also uses autoconf based config now
+
+2005-06-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ext/standard/dl.c:
+      Restored old behavior of zend_statup_module()
+
+2005-06-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/posix/config.m4:
+      typo
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/standard/array.c:
+      - Unify (+ spl can't be build shared so COMPILE_DL_SPL
+
+2005-06-30  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/posix/config.m4
+      ext/posix/posix.c:
+      - Added check for makedev systemcall, which Netware doesn't support.
+
 2005-06-29  Anantha Kesari H Y  <hyanantha@novell.com>
 
     * netware/sys/stat.h:
