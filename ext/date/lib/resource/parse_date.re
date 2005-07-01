@@ -32,7 +32,6 @@
 #endif
 
 #if defined(_MSC_VER)
-# define strcasecmp stricmp
 # define strtoll(s, f, b) _atoi64(s)
 #elif !defined(HAVE_STRTOLL)
 # if defined(HAVE_ATOLL)
