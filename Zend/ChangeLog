@@ -1,3 +1,9 @@
+2005-06-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h:
+      Restored old behavior of zend_statup_module()
+
 2005-06-29  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.c
