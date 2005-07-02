@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 01 Jul 2005, Version 4.4.0 RC2
 - Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
+- Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
 - Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 
 13 Jun 2005, Version 4.4.0 RC1
@@ -30,7 +31,6 @@ PHP 4                                                                      NEWS
   of magnitude). (Ilia)
 - Fixed bug #33057 (Don't send extraneous entity-headers on a 304 as per
   RFC 2616 section 10.3.5) (Rasmus, Choitel)
-- Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
 - Fixed bug #33019 (socket errors cause memory leaks in php_strerror()). 
   (jwozniak23 at poczta dot onet dot pl, Tony).
 - Fixed bug #33017 ("make distclean" gives an error with VPATH build). (Jani)
