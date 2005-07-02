@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -305,6 +305,14 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{ "port",   "3306",	0 },
 		{ "unix_socket",  PDO_MYSQL_UNIX_ADDR,	0 },
 	};
+	int connect_opts = 0
+#ifdef CLIENT_MULTI_RESULTS
+		|CLIENT_MULTI_RESULTS
+#endif
+#ifdef CLIENT_MULTI_STATEMENTS
+		|CLIENT_MULTI_STATEMENTS
+#endif
+		;
 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);
 
@@ -337,7 +345,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		port = atoi(vars[3].optval); 
 	}
 	dbname = vars[1].optval;
-	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, 0) == NULL) {
+	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, connect_opts) == NULL) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
