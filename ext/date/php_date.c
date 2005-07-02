@@ -32,13 +32,15 @@ function_entry date_functions[] = {
 	PHP_FE(date, NULL)
 	PHP_FE(gmdate, NULL)
 	PHP_FE(strtotime, NULL)
+	PHP_FE(date_timezone_set, NULL)
+	PHP_FE(date_timezone_get, NULL)
 	{NULL, NULL, NULL}
 };
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("date.timezone", "GMT", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
+	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
 PHP_INI_END()
 
 
@@ -48,8 +50,8 @@ zend_module_entry date_module_entry = {
 	date_functions,             /* function list */
 	PHP_MINIT(date),            /* process startup */
 	PHP_MSHUTDOWN(date),        /* process shutdown */
-	NULL,                       /* request startup */
-	NULL,                       /* request shutdown */
+	PHP_RINIT(date),            /* request startup */
+	PHP_RSHUTDOWN(date),        /* request shutdown */
 	PHP_MINFO(date),            /* extension info */
 	PHP_VERSION,                /* extension version */
 	STANDARD_MODULE_PROPERTIES
@@ -59,9 +61,29 @@ zend_module_entry date_module_entry = {
 static void php_date_init_globals(zend_date_globals *date_globals)
 {
 	date_globals->default_timezone = NULL;
+	date_globals->timezone = NULL;
 }
 /* }}} */
 
+PHP_RINIT_FUNCTION(date)
+{
+	if (DATEG(timezone)) {
+		efree(DATEG(timezone));
+	}
+	DATEG(timezone) = NULL;
+
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(date)
+{
+	if (DATEG(timezone)) {
+		efree(DATEG(timezone));
+	}
+	DATEG(timezone) = NULL;
+
+	return SUCCESS;
+}
 
 PHP_MINIT_FUNCTION(date)
 {
@@ -93,15 +115,39 @@ static char* guess_timezone(TSRMLS_D)
 {
 	char *env;
 
+	/* Checking configure timezone */
+	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
+		return DATEG(timezone);
+	}
+	/* Check environment variable */
 	env = getenv("TZ");
-	if (env) {
+	if (env && *env) {
 		return env;
 	}
-	/* Check config setting */
-	if (DATEG(default_timezone)) {
+	/* Check config setting for default timezone */
+	if (DATEG(default_timezone) && (strlen(DATEG(default_timezone)) > 0)) {
 		return DATEG(default_timezone);
 	}
-	return "GMT";
+	/* Fallback to UTC */
+	return "UTC";
+}
+
+static timelib_tzinfo *get_timezone_info(TSRMLS_D)
+{
+	char *tz;
+	timelib_tzinfo *tzi;
+	
+	tz = guess_timezone(TSRMLS_C);
+	tzi = timelib_parse_tzfile(tz);
+	if (! tzi) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contain an unknown timezone.");
+		tzi = timelib_parse_tzfile("UTC");
+
+		if (! tzi) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
+		}
+	}
+	return tzi;
 }
 
 /* =[ date() and gmdate() ]================================================ */
@@ -256,12 +302,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	t = timelib_time_ctor();
 
 	if (localtime) {
-		tzi = timelib_parse_tzfile(guess_timezone(TSRMLS_C));
-		if (! tzi) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find any timezone setting");
-			timelib_time_dtor(t);
-			RETURN_FALSE;
-		}
+		tzi = get_timezone_info(TSRMLS_C);
 		timelib_unixtime2local(t, ts, tzi);
 	} else {
 		tzi = NULL;
@@ -312,14 +353,7 @@ PHP_FUNCTION(strtotime)
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
-	tzi = timelib_parse_tzfile(guess_timezone(TSRMLS_C));
-	if (! tzi) {
-		tzi = timelib_parse_tzfile("GMT");
-	}
-	if (! tzi) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot find any timezone setting");
-		RETURN_FALSE;
-	}
+	tzi = get_timezone_info(TSRMLS_C);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sl", &times, &time_len, &preset_ts) != FAILURE) {
 		/* We have an initial timestamp */
@@ -365,6 +399,26 @@ PHP_FUNCTION(strtotime)
 	}
 }
 /* }}} */
+
+PHP_FUNCTION(date_timezone_set)
+{
+	char *zone;
+	int   zone_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &zone, &zone_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (DATEG(timezone)) {
+		efree(DATEG(timezone));
+	}
+	DATEG(timezone) = estrdup(zone);
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(date_timezone_get)
+{
+	RETURN_STRING(DATEG(timezone), 0);
+}
 
 /*
  * Local variables:
