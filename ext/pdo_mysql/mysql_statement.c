@@ -93,6 +93,46 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
+#if HAVE_MYSQL_NEXT_RESULT
+static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+	pdo_mysql_db_handle *H = S->H;
+	my_ulonglong row_count;
+	int debug=0;
+	int ret;
+
+	/* ensure that we free any previous unfetched results */
+	if (S->result) {
+		mysql_free_result(S->result);
+		S->result = NULL;
+	}
+
+	ret = mysql_next_result(H->server);
+
+	if (ret > 0) {
+		pdo_mysql_error_stmt(stmt);
+		return 0;
+	} else if (ret < 0) {
+		/* No more results */
+		return 0;
+	} else {
+		row_count = mysql_affected_rows(H->server);
+		S->result = mysql_use_result(H->server);
+
+		if (NULL == S->result) {
+			return 0;
+		}
+
+		stmt->row_count = row_count;
+		stmt->column_count = (int) mysql_num_fields(S->result);
+		S->fields = mysql_fetch_fields(S->result);
+		return 1;
+	}
+}
+#endif
+
+
 static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
@@ -256,7 +296,10 @@ struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_param_hook,
 	NULL, /* set_attr */
 	NULL, /* get_attr */
-	pdo_mysql_stmt_col_meta
+	pdo_mysql_stmt_col_meta,
+#if HAVE_MYSQL_NEXT_RESULT
+	pdo_mysql_stmt_next_rowset
+#endif
 };
 
 /*

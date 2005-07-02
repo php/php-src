@@ -58,7 +58,7 @@ Note that the MySQL client library is not bundled anymore!])
 
   _SAVE_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS $PDO_MYSQL_LIBS"
-  AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare]) 	
+  AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare mysql_next_result]) 
   LDFLAGS=$_SAVE_LDFLAGS
 
   PHP_CHECK_PDO_INCLUDES
