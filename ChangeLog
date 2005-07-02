@@ -1,3 +1,69 @@
+2005-07-01  Edin Kadribasic  <edink@emini.dk>
+
+    * php.ini-recommended:
+      Inconsistency noticed by Nicholas Telford
+
+2005-07-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      configure.in
+      main/php_version.h:
+      - Back to -dev
+
+    * (PHP_4_4)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - GO with RC2.
+
+2005-07-01  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * (PHP_4_4)
+      pear/packages/XML_RPC-1.2.2.tar:
+      - really remove xmp-rpc 1.2.2
+
+    * pear/packages/XML_RPC-1.3.1.tar
+      pear/packages/XML_RPC-1.3.1.tar:
+        1.1.4;
+      file XML_RPC-1.3.1.tar was initially added on branch PHP_4_4.
+
+    * (PHP_4_4)
+      pear/go-pear-list.php:
+      - update xmp_rpc to 1.3.1 (step #1/3)
+
+    * pear/go-pear-list.php:
+       bump xml_rpc to 1.3.1, php4 win32 builds uses this list to (4.4)
+
+2005-07-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      ext/pgsql/config.m4:
+      - Backport config.m4 from HEAD so that pg_config can be used.
+
+2005-07-01  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      main/reentrancy.c:
+      NetWare LibC has reentrant versions of time functions this code is of no
+      use.
+      -- Kamesh from hyanantha's account
+
+    * main/reentrancy.c:
+      NetWare LibC has reentrant time functions no need to have this.
+      -- Kamesh from hyanantha's account
+
+    * ext/standard/proc_open.c:
+      As fork implementation of NetWare LibC still in experimental stages making
+      the procve based solution ahead of HAVE_FORK. Later When fork becomes
+      stable will revert this fix.
+      --Kamesh from hyanantha's account
+
+    * (PHP_5_0)
+      ext/standard/proc_open.c:
+      As fork implementation of NetWare LibC still in experimental stages making
+      the procve based solution ahead of HAVE_FORK. Later When fork becomes
+      stable will revert this fix.
+
 2005-06-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS
