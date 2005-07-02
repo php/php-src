@@ -246,7 +246,7 @@ static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	odbc_result *res;
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 
-	nument = zend_hash_next_free_element(&EG(regular_list));
+	nument = zend_hash_next_free_element(&EG(persistent_list));
 	for(i = 1; i < nument; i++) {
 		ptr = zend_list_find(i, &type);
 		if (ptr && (type == le_result)) {
