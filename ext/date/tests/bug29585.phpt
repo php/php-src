@@ -2,6 +2,7 @@
 Bug #29585 (Support week numbers in strtotime())
 --FILE--
 <?php
+putenv('TZ=');
 echo gmdate("Y-m-d H:i:s", strtotime("2004W30"));
 
 ?>
