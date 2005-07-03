@@ -239,6 +239,7 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 	uint32_t i;
 
 	if (!tz->timecnt || !tz->trans) {
+		*transition_time = 0;
 		if (tz->typecnt == 1) {
 			return &(tz->type[0]);
 		}
@@ -301,6 +302,7 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 		tmp->is_dst = to->isdst;
 		tmp->transistion_time = transistion_time;
 	} else {
+		offset = 0;
 		abbr = tz->timezone_abbr;
 		tmp->is_dst = 0;
 		tmp->transistion_time = 0;
