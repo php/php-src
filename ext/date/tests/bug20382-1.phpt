@@ -1,5 +1,5 @@
 --TEST--
-Bug #20382 (strtotime ("Monday", $date) produces wrong result on DST changeover)
+Bug #20382 [1] (strtotime ("Monday", $date) produces wrong result on DST changeover)
 --FILE--
 <?php
 	putenv("TZ=Europe/Amsterdam");

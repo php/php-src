@@ -470,6 +470,7 @@ PHPAPI static void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 			if (dst == 0 && tmp_offset->is_dst == 1) {
 				adjust_seconds = +3600;
 			}
+			timelib_time_offset_dtor(tmp_offset);
 		}
 	}
 	/* Clean up and return */
