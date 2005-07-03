@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
+  |         Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
 
@@ -44,6 +45,22 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(S->einfo.errmsg);
 		S->einfo.errmsg = NULL;
 	}
+#if HAVE_MYSQL_STMT_PREPARE
+	if (S->stmt) {
+		mysql_stmt_close(S->stmt);
+		S->stmt = NULL;
+	}
+	if (S->params) {
+		efree(S->params);
+		efree(S->in_null);
+		efree(S->in_length);
+	}
+	if (S->bound_result) {
+		efree(S->bound_result);
+		efree(S->out_null);
+		efree(S->out_length);
+	}
+#endif
 	efree(S);
 	return 1;
 }
@@ -53,7 +70,52 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 	my_ulonglong row_count;
+#if HAVE_MYSQL_STMT_PREPARE
+	int i;
 
+	if (S->stmt) {
+		/* (re)bind the parameters */
+		if (mysql_stmt_bind_param(S->stmt, S->params)) {
+			pdo_mysql_error_stmt(stmt);
+			return 0;
+		}
+
+		if (mysql_stmt_execute(S->stmt)) {
+			pdo_mysql_error_stmt(stmt);
+			return 0;
+		}
+
+		if (!stmt->executed) {
+			/* figure out the result set format, if any */
+			S->result = mysql_stmt_result_metadata(S->stmt);
+			if (S->result) {
+				S->fields = mysql_fetch_fields(S->result);
+				stmt->column_count = (int)mysql_num_fields(S->result);
+
+				S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
+				S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
+				S->out_length = ecalloc(stmt->column_count, sizeof(unsigned long));
+
+				/* summon memory to hold the row */
+				for (i = 0; i < stmt->column_count; i++) {
+					S->bound_result[i].buffer_length = S->fields[i].length;
+					S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
+					S->bound_result[i].is_null = &S->out_null[i];
+					S->bound_result[i].length = &S->out_length[i];
+					S->bound_result[i].buffer_type = MYSQL_TYPE_STRING;
+				}
+
+				if (mysql_stmt_bind_result(S->stmt, S->bound_result)) {
+					pdo_mysql_error_stmt(stmt);
+					return 0;
+				}
+			}
+		}
+		
+		stmt->row_count = mysql_stmt_affected_rows(S->stmt);
+		return 1;
+	}
+#endif
 	/* ensure that we free any previous unfetched results */
 	if (S->result) {
 		mysql_free_result(S->result);
@@ -93,13 +155,12 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-#if HAVE_MYSQL_NEXT_RESULT
 static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
+#if HAVE_MYSQL_NEXT_RESULT
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 	my_ulonglong row_count;
-	int debug=0;
 	int ret;
 
 	/* ensure that we free any previous unfetched results */
@@ -129,13 +190,79 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		S->fields = mysql_fetch_fields(S->result);
 		return 1;
 	}
-}
+#else
+	strcpy(stmt->error_code, "HYC00");
+	return 0;
 #endif
+}
 
 
 static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
+#if HAVE_MYSQL_STMT_PREPARE
+	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+	MYSQL_BIND *b;
+
+	if (S->stmt && param->is_param) {
+		switch (event_type) {
+			case PDO_PARAM_EVT_ALLOC:
+				/* sanity check parameter number range */
+				if (param->paramno < 0 || param->paramno >= S->num_params) {
+					strcpy(stmt->error_code, "HY093");
+					return 0;
+				}
+				b = &S->params[param->paramno];
+				param->driver_data = b;
+				b->is_null = &S->in_null[param->paramno];
+				b->length = &S->in_length[param->paramno];
+				return 1;
+
+			case PDO_PARAM_EVT_EXEC_PRE:
+				b = (MYSQL_BIND*)param->driver_data;
+
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || 
+						Z_TYPE_P(param->parameter) == IS_NULL) {
+					*b->is_null = 1;
+					b->buffer_type = MYSQL_TYPE_STRING;
+					b->buffer = NULL;
+					b->buffer_length = 0;
+					*b->length = 0;
+					return 1;
+				}
+	
+				switch (PDO_PARAM_TYPE(param->param_type)) {
+					case PDO_PARAM_LOB:
+					case PDO_PARAM_STMT:
+						return 0;
+					default:
+						;
+				}
+			
+				switch (Z_TYPE_P(param->parameter)) {
+					case IS_STRING:
+						b->buffer_type = MYSQL_TYPE_STRING;
+						b->buffer = Z_STRVAL_P(param->parameter);
+						b->buffer_length = Z_STRLEN_P(param->parameter);
+						*b->length = Z_STRLEN_P(param->parameter);
+						return 1;
+
+					case IS_LONG:
+						b->buffer_type = MYSQL_TYPE_LONG;
+						b->buffer = &Z_LVAL_P(param->parameter);
+						return 1;
+
+					case IS_DOUBLE:
+						b->buffer_type = MYSQL_TYPE_DOUBLE;
+						b->buffer = &Z_DVAL_P(param->parameter);
+						return 1;
+
+					default:
+						return 0;
+				}
+		}
+	}
+#endif
 	return 1;
 }
 
@@ -143,6 +270,29 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+#if HAVE_MYSQL_STMT_PREPARE
+	int ret;
+	
+	if (S->stmt) {
+		ret = mysql_stmt_fetch(S->stmt);
+
+#ifdef MYSQL_DATA_TRUNCATED
+		if (ret == MYSQL_DATA_TRUNCATED) {
+			ret = 0;
+		}
+#endif
+
+		if (ret) {
+			if (ret != MYSQL_NO_DATA) {
+				pdo_mysql_error_stmt(stmt);
+			}
+			return 0;
+		}
+
+		return 1;
+	}
+#endif
+
 	if (!S->result) {
 		return 0;	
 	}
@@ -177,13 +327,13 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	if (cols[0].name) {
 		return 1;
 	}
-	for(i=0; i < stmt->column_count; i++) {
+	for (i=0; i < stmt->column_count; i++) {
 		int namelen;
 		namelen = strlen(S->fields[i].name);
 		cols[i].precision = S->fields[i].decimals;
 		cols[i].maxlen = S->fields[i].length;
 		cols[i].namelen = namelen;
-		cols[i].name = estrndup(S->fields[i].name, namelen + 1);
+		cols[i].name = estrndup(S->fields[i].name, namelen);
 		cols[i].param_type = PDO_PARAM_STR;
 	}
 	return 1;
@@ -193,13 +343,31 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
-	if (S->current_data == NULL || !S->result) {
-		return 0;
+#if HAVE_MYSQL_STMT_PREPARE
+	if (!S->stmt) {
+#endif
+		if (S->current_data == NULL || !S->result) {
+			return 0;
+		}
+#if HAVE_MYSQL_STMT_PREPARE
 	}
+#endif
 	if (colno >= stmt->column_count) {
 		/* error invalid column */
 		return 0;
 	}
+#if HAVE_MYSQL_STMT_PREPARE
+	if (S->stmt) {
+		if (S->out_null[colno]) {
+			*ptr = NULL;
+			*len = 0;
+			return 1;
+		}
+		*ptr = S->bound_result[colno].buffer;
+		*len = S->out_length[colno];
+		return 1;
+	}
+#endif
 	*ptr = S->current_data[colno];
 	*len = S->current_lengths[colno];
 	return 1;
@@ -297,9 +465,7 @@ struct pdo_stmt_methods mysql_stmt_methods = {
 	NULL, /* set_attr */
 	NULL, /* get_attr */
 	pdo_mysql_stmt_col_meta,
-#if HAVE_MYSQL_NEXT_RESULT
 	pdo_mysql_stmt_next_rowset
-#endif
 };
 
 /*
