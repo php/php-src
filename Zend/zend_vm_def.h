@@ -471,6 +471,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 	FREE_OP1_VAR_PTR();
