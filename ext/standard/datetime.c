@@ -69,14 +69,6 @@ static int phpday_tab[2][12] = {
 #define isleap(year) ((((year) % 4) == 0 && ((year) % 100) != 0) || ((year) % 400)==0)
 #define YEAR_BASE 1900
 
-/* {{{ proto int time(void)
-   Return current UNIX timestamp */
-PHP_FUNCTION(time)
-{
-	RETURN_LONG((long)time(NULL));
-}
-/* }}} */
-
 /* {{{ php_idate
  */
 PHPAPI int php_idate(char format, int timestamp, int gm)
@@ -215,111 +207,6 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(Z_STRVAL_PP(format)[0], t, 0);
 	RETURN_LONG(ret);
-}
-/* }}} */
-
-/* {{{ proto array localtime([int timestamp [, bool associative_array]])
-   Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
-PHP_FUNCTION(localtime)
-{
-	zval **timestamp_arg, **assoc_array_arg;
-	struct tm *ta, tmbuf;
-	time_t timestamp;
-	int assoc_array = 0;
-	int arg_count = ZEND_NUM_ARGS();
-
-	if (arg_count < 0 || arg_count > 2 ||
-		zend_get_parameters_ex(arg_count, &timestamp_arg, &assoc_array_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-
-	switch (arg_count) {
-		case 0:
-			timestamp = (long)time(NULL);
-			break;
-		case 1:
-			convert_to_long_ex(timestamp_arg);
-			timestamp = Z_LVAL_PP(timestamp_arg);
-			break;
-		case 2:
-			convert_to_long_ex(timestamp_arg);
-			convert_to_long_ex(assoc_array_arg);
-			timestamp = Z_LVAL_PP(timestamp_arg);
-			assoc_array = Z_LVAL_PP(assoc_array_arg);
-			break;
-	}
-	
-#ifdef PHP_WIN32
-	if (timestamp < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Windows does not support negative values for this function");
-		RETURN_FALSE
-	}
-#endif
-	
-	if (NULL == (ta = php_localtime_r(&timestamp, &tmbuf))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid local time");
-		RETURN_FALSE;
-	}
-	array_init(return_value);
-
-	if (assoc_array) {
-		add_assoc_long(return_value, "tm_sec",   ta->tm_sec);
-		add_assoc_long(return_value, "tm_min",   ta->tm_min);
-		add_assoc_long(return_value, "tm_hour",  ta->tm_hour);
-		add_assoc_long(return_value, "tm_mday",  ta->tm_mday);
-		add_assoc_long(return_value, "tm_mon",   ta->tm_mon);
-		add_assoc_long(return_value, "tm_year",  ta->tm_year);
-		add_assoc_long(return_value, "tm_wday",  ta->tm_wday);
-		add_assoc_long(return_value, "tm_yday",  ta->tm_yday);
-		add_assoc_long(return_value, "tm_isdst", ta->tm_isdst);
-	} else {
-		add_next_index_long(return_value, ta->tm_sec);
-		add_next_index_long(return_value, ta->tm_min);
-		add_next_index_long(return_value, ta->tm_hour);
-		add_next_index_long(return_value, ta->tm_mday);
-		add_next_index_long(return_value, ta->tm_mon);
-		add_next_index_long(return_value, ta->tm_year);
-		add_next_index_long(return_value, ta->tm_wday);
-		add_next_index_long(return_value, ta->tm_yday);
-		add_next_index_long(return_value, ta->tm_isdst);
-	}
-}
-/* }}} */
-
-/* {{{ proto array getdate([int timestamp])
-   Get date/time information */
-PHP_FUNCTION(getdate)
-{
-	pval **timestamp_arg;
-	struct tm *ta, tmbuf;
-	time_t timestamp;
-
-	if (ZEND_NUM_ARGS() == 0) {
-		timestamp = time(NULL);
-	} else if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &timestamp_arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	} else {
-		convert_to_long_ex(timestamp_arg);
-		timestamp = Z_LVAL_PP(timestamp_arg);
-	}
-
-	ta = php_localtime_r(&timestamp, &tmbuf);
-	if (!ta) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot perform date calculation");
-		return;
-	}
-	array_init(return_value);
-	add_assoc_long(return_value, "seconds", ta->tm_sec);
-	add_assoc_long(return_value, "minutes", ta->tm_min);
-	add_assoc_long(return_value, "hours", ta->tm_hour);
-	add_assoc_long(return_value, "mday", ta->tm_mday);
-	add_assoc_long(return_value, "wday", ta->tm_wday);
-	add_assoc_long(return_value, "mon", ta->tm_mon + 1);
-	add_assoc_long(return_value, "year", ta->tm_year + 1900);
-	add_assoc_long(return_value, "yday", ta->tm_yday);
-	add_assoc_string(return_value, "weekday", day_full_names[ta->tm_wday], 1);
-	add_assoc_string(return_value, "month", mon_full_names[ta->tm_mon], 1);
-	add_index_long(return_value, 0, timestamp);
 }
 /* }}} */
 

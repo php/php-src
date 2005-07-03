@@ -38,6 +38,10 @@ PHP_FUNCTION(strftime);
 PHP_FUNCTION(gmstrftime);
 #endif
 
+PHP_FUNCTION(time);
+PHP_FUNCTION(localtime);
+PHP_FUNCTION(getdate);
+
 PHP_FUNCTION(date_timezone_set);
 PHP_FUNCTION(date_timezone_get);
 
