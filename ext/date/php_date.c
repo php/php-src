@@ -130,6 +130,24 @@ static char* guess_timezone(TSRMLS_D)
 	if (DATEG(default_timezone) && (strlen(DATEG(default_timezone)) > 0)) {
 		return DATEG(default_timezone);
 	}
+#if HAVE_TM_ZONE
+	/* Try to guess timezone from system information */
+	{
+		struct tm *ta, tmbuf;
+		time_t     the_time;
+		char      *tzid;
+		
+		the_time = time(NULL);
+		ta = php_localtime_r(&the_time, &tmbuf);
+		tzid = timelib_timezone_id_from_abbr(ta->tm_zone);
+		if (! tzid) {
+			tzid = "UTC";
+		}
+		
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_timezone_set() function. We now use '%s' for '%s'", tzid, ta->tm_zone);
+		return tzid;
+	}
+#endif
 	/* Fallback to UTC */
 	return "UTC";
 }

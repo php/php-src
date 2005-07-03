@@ -653,7 +653,7 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, Scanner *s)
 	}
 }
 
-static timelib_tz_lookup_table* zone_search(char *word, int left, int right)
+static timelib_tz_lookup_table* zone_search(const char *word, int left, int right)
 {
 	int mid, cmp;
 
@@ -1443,6 +1443,13 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 */
 }
 
+char *timelib_timezone_id_from_abbr(const char *abbr)
+{
+	timelib_tz_lookup_table *tp;
+
+	tp = zone_search(abbr, 0, sizeof(timelib_timezone_lookup) / sizeof(*timelib_timezone_lookup) - 1);
+	return (tp->full_tz_name);
+}
 
 #ifdef DEBUG_PARSER_STUB
 int main(void)

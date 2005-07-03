@@ -48,6 +48,7 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 /* From parse_date.re */
 timelib_time *timelib_strtotime(char *s);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
+char *timelib_timezone_id_from_abbr(const char *abbr);
 
 /* From tm2unixtime.c */
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
