@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2005, PHP 5.1 Beta 3
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
 - Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql. (Ilia)
-- Added "date_timezone_set" function to set the timezone that the date
+- Added date_timezone_set() function to set the timezone that the date
   functions will use. (Derick)
 - Implemented feature request #33452 (Year belonging to ISO week). (Derick)
 - Fixed bug #33523 (Memory leak in xmlrpc_encode_request()). (Ilia)
