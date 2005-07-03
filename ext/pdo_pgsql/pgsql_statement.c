@@ -88,7 +88,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	if (S->cursor_name) {
 		char *q = NULL;
-		spprintf(&q, 0, "DECLARE %s FOR %s", S->cursor_name, stmt->active_query_string);
+		spprintf(&q, 0, "DECLARE %s CURSOR FOR %s", S->cursor_name, stmt->active_query_string);
 		S->result = PQexec(H->server, q);
 		efree(q);
 	} else {
