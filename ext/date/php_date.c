@@ -531,7 +531,7 @@ PHP_FUNCTION(date_timezone_set)
 	if (DATEG(timezone)) {
 		efree(DATEG(timezone));
 	}
-	DATEG(timezone) = estrdup(zone);
+	DATEG(timezone) = estrndup(zone, zone_len);
 	RETURN_TRUE;
 }
 
