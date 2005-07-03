@@ -169,8 +169,6 @@ function_entry basic_functions[] = {
 	PHP_FE(time_sleep_until,														NULL)
 #endif
 	PHP_FE(time,															NULL)
-	PHP_FE(mktime,															NULL)
-	PHP_FE(gmmktime,														NULL)
 #if HAVE_STRPTIME
 	PHP_FE(strptime,														NULL)
 #endif

@@ -23,8 +23,6 @@
 #define DATETIME_H
 
 PHP_FUNCTION(time);
-PHP_FUNCTION(mktime);
-PHP_FUNCTION(gmmktime);
 PHP_FUNCTION(idate);
 PHP_FUNCTION(localtime);
 PHP_FUNCTION(getdate);
@@ -39,7 +37,6 @@ PHP_FUNCTION(gmstrftime);
 
 PHPAPI int php_idate(char format, int timestamp, int gm);
 PHPAPI char *php_std_date(time_t t TSRMLS_DC);
-PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #if HAVE_STRFTIME
 PHPAPI void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
