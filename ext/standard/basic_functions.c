@@ -172,15 +172,10 @@ function_entry basic_functions[] = {
 #if HAVE_STRPTIME
 	PHP_FE(strptime,														NULL)
 #endif
-#if HAVE_STRFTIME
-	PHP_FE(strftime,														NULL)
-	PHP_FE(gmstrftime,														NULL)
-#endif
 
 	PHP_FE(idate,															NULL)
 	PHP_FE(getdate,															NULL)
 	PHP_FE(localtime,														NULL)
-	PHP_FE(checkdate,														NULL)
 
 	PHP_FE(flush,															NULL)
 	PHP_FE(wordwrap,														NULL)
