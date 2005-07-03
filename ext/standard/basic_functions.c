@@ -168,14 +168,12 @@ function_entry basic_functions[] = {
 	PHP_FE(time_nanosleep,														NULL)
 	PHP_FE(time_sleep_until,														NULL)
 #endif
-	PHP_FE(time,															NULL)
+
 #if HAVE_STRPTIME
 	PHP_FE(strptime,														NULL)
 #endif
 
 	PHP_FE(idate,															NULL)
-	PHP_FE(getdate,															NULL)
-	PHP_FE(localtime,														NULL)
 
 	PHP_FE(flush,															NULL)
 	PHP_FE(wordwrap,														NULL)
