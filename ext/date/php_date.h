@@ -33,7 +33,7 @@ PHP_FUNCTION(gmmktime);
 
 PHP_FUNCTION(checkdate);
 
-#if HAVE_STRFTIME
+#ifdef HAVE_STRFTIME
 PHP_FUNCTION(strftime);
 PHP_FUNCTION(gmstrftime);
 #endif
