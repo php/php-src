@@ -28,8 +28,8 @@ if ($md5_out != $md5_res) {
 } else {
 	echo "ok.\n";
 }
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
 ok.
----Done--- 
+===DONE===

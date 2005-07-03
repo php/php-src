@@ -29,9 +29,9 @@ $xw->endDocument();
 
 // Force to write and empty the buffer
 echo $xw->flush(true);
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="utf8"?>
 <tag1 attr1="attr1_value" attr2="attr2_value">Test text for tag1<tag2/></tag1>
----Done--- 
+===DONE===

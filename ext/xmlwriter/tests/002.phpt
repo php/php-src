@@ -14,9 +14,9 @@ xmlwriter_end_document($xw);
 
 // Force to write and empty the buffer
 echo xmlwriter_flush($xw, true);
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="utf8"?>
 <tag1/>
----Done--- 
+===DONE===

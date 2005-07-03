@@ -14,9 +14,9 @@ $xw->endDocument();
 
 // Force to write and empty the buffer
 echo $xw->flush(true);
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="utf8" standalone="standalone"?>
 <tag1/>
----Done--- 
+===DONE===

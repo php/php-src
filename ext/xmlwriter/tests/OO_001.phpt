@@ -17,9 +17,9 @@ $xw->endDocument();
 $output_bytes = $xw->flush(true);
 echo file_get_contents($doc_dest);
 unlink('001.xml');
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="utf8" standalone="standalonearg"?>
 <tag1/>
----Done--- 
+===DONE===
