@@ -8228,6 +8228,7 @@ static int zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binary_op)(zval *re
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -9643,6 +9644,7 @@ static int zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_op)(zval *resu
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -11061,6 +11063,7 @@ static int zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_op)(zval *resu
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -12282,6 +12285,7 @@ static int zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*binary_op)(zval *r
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -12894,6 +12898,7 @@ static int zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_op)(zval *resul
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -14183,6 +14188,7 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval 
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -15261,6 +15267,7 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*binary_op)(zval *r
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -16300,6 +16307,7 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*binary_op)(zval *r
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -17338,6 +17346,7 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(zval
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -17703,6 +17712,7 @@ static int zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *re
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -20115,6 +20125,7 @@ static int zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary_op)(zval *res
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -21522,6 +21533,7 @@ static int zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_op)(zval *resul
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -22932,6 +22944,7 @@ static int zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_op)(zval *resul
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -24144,6 +24157,7 @@ static int zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binary_op)(zval *re
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
@@ -24755,6 +24769,7 @@ static int zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op)(zval *result
 
 	if (increment_opline) {
 		ZEND_VM_INC_OPCODE();
+		FREE_OP(free_op_data1);
 		FREE_OP_VAR_PTR(free_op_data2);
 	}
 
