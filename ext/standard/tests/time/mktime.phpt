@@ -1,5 +1,7 @@
 --TEST--
 mktime()
+--INI--
+error_reporting=2047
 --FILE--
 <?php /* $Id$ */
 $timezones = array(

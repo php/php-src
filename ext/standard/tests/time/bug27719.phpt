@@ -1,5 +1,7 @@
 --TEST--
 Bug #27719: mktime returns incorrect timestamp for dst days
+--INI--
+error_reporting=2047
 --FILE--
 <?php /* $Id$ */
 	putenv("TZ=EST");  // No DST

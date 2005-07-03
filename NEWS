@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
   methods). (Dmitry)
 - Fixed bug #30519 (Interface not existing says Class not found). (Dmitry)
+- Fixed bug #30096 (gmmktime does not return the corrent time). (Derick)
 - Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
 - Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 - Fixed bug #27268 (Bad references accentuated by clone). (Dmitry)

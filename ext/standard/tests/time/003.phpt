@@ -1,5 +1,7 @@
 --TEST--
 Check for mktime with out-of-range parameters
+--INI--
+error_reporting=2047
 --FILE--
 <?php 
   # MacOS/X libc implementation doesn't treat out-of-range values
