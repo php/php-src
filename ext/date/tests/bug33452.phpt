@@ -2,6 +2,7 @@
 Bug #33452 (Support for year accompanying ISO week nr)
 --FILE--
 <?php
+date_timezone_set("GMT");
 echo date('Y-W', strtotime('2005-1-1')), "\n";
 echo date('o-W', strtotime('2005-1-1')), "\n";
 ?>
