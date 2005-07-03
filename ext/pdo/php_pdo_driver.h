@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050610
+#define PDO_DRIVER_API	20050702
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -89,6 +89,7 @@ enum pdo_fetch_type {
 	PDO_FETCH_CLASS,	/* create an instance of named class, call ctor and set properties */
 	PDO_FETCH_INTO,		/* fetch row into an existing object */
 	PDO_FETCH_FUNC,		/* fetch into function and return its result */
+	PDO_FETCH_NAMED,    /* like PDO_FETCH_ASSOC, but can handle duplicate names */
 	PDO_FETCH__MAX /* must be last */
 };
 
@@ -123,6 +124,8 @@ enum pdo_attribute_type {
 	PDO_ATTR_ORACLE_NULLS,		/* convert empty strings to NULL */
 	PDO_ATTR_PERSISTENT,		/* pconnect style connection */
 	PDO_ATTR_STATEMENT_CLASS,	/* array(classname, array(ctor_args)) to specify the class of the constructed statement */
+	PDO_ATTR_FETCH_TABLE_NAMES, /* include table names in the column names, where available */
+	PDO_ATTR_FETCH_CATALOG_NAMES, /* include the catalog/db name names in the column names, where available */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -156,24 +159,6 @@ typedef char pdo_error_type[6]; /* SQLSTATE */
 
 
 #define PDO_ERR_NONE				"00000"
-#if 0
-/* generic error code values.
- * Don't want to go overboard with these.
- * */
-#define	PDO_ERR_SYNTAX				"42000"		
-#define	PDO_ERR_CONSTRAINT			"23000"
-#define	PDO_ERR_NOT_FOUND			""
-#define	PDO_ERR_ALREADY_EXISTS,
-#define	PDO_ERR_NOT_IMPLEMENTED,
-#define	PDO_ERR_MISMATCH,
-#define	PDO_ERR_TRUNCATED,
-#define	PDO_ERR_DISCONNECTED,
-#define	PDO_ERR_NO_PERM,
-
-	PDO_ERR_CANT_MAP		/* no way to map native error to the generic
-							 * codes; consult the native error for more info */
-};
-#endif
 
 enum pdo_error_mode {
 	PDO_ERRMODE_SILENT,		/* just set error codes */

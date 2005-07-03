@@ -735,6 +735,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			case PDO_FETCH_ASSOC:
 			case PDO_FETCH_BOTH:
 			case PDO_FETCH_NUM:
+			case PDO_FETCH_NAMED:
 				array_init(return_value);
 				break;
 
@@ -840,6 +841,43 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					add_assoc_zval(return_value, stmt->columns[i].name, val);
 					ZVAL_ADDREF(val);
 					add_next_index_zval(return_value, val);
+					break;
+
+				case PDO_FETCH_NAMED:
+					/* already have an item with this name? */
+					{
+						zval **curr_val = NULL;
+						if (zend_hash_find(Z_ARRVAL_P(return_value), stmt->columns[i].name,
+									strlen(stmt->columns[i].name)+1,
+									(void**)&curr_val) == SUCCESS) {
+							zval *arr;
+							if (Z_TYPE_PP(curr_val) != IS_ARRAY) {
+								/* a little bit of black magic here:
+								 * we're creating a new array and swapping it for the
+								 * zval that's already stored in the hash under the name
+								 * we want.  We then add that zval to the array.
+								 * This is effectively the same thing as:
+								 * if (!is_array($hash[$name])) {
+								 *   $hash[$name] = array($hash[$name]);
+								 * }
+								 * */
+								zval *cur;
+
+								MAKE_STD_ZVAL(arr);
+								array_init(arr);
+
+								cur = *curr_val;
+								*curr_val = arr;
+
+								add_next_index_zval(arr, cur);
+							} else {
+								arr = *curr_val;
+							}
+							add_next_index_zval(arr, val);
+						} else {
+							add_assoc_zval(return_value, stmt->columns[i].name, val);
+						}
+					}
 					break;
 
 				case PDO_FETCH_NUM:
