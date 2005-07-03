@@ -16,9 +16,9 @@ xmlwriter_end_document($xw);
 $output_bytes = xmlwriter_flush($xw, true);
 echo file_get_contents($doc_dest);
 unlink('001.xml');
-echo "---Done---\n";
 ?>
+===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="utf8"?>
 <tag1/>
----Done--- 
+===DONE===
