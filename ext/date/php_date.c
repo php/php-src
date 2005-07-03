@@ -32,6 +32,9 @@ function_entry date_functions[] = {
 	PHP_FE(date, NULL)
 	PHP_FE(gmdate, NULL)
 	PHP_FE(mktime, NULL)
+	PHP_FE(checkdate, NULL)
+	PHP_FE(gmstrftime, NULL)
+	PHP_FE(strftime, NULL)
 	PHP_FE(gmmktime, NULL)
 	PHP_FE(strtotime, NULL)
 	PHP_FE(date_timezone_set, NULL)
@@ -519,6 +522,124 @@ PHP_FUNCTION(gmmktime)
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+
+/* {{{ proto bool checkdate(int month, int day, int year)
+   Returns true(1) if it is a valid date in gregorian calendar */
+PHP_FUNCTION(checkdate)
+{
+	long m, d, y;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &m, &d, &y) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (y < 1 || y > 32767 || m < 1 || m > 12 || d < 1 || d > timelib_days_in_month(y, m)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;	/* True : This month, day, year arguments are valid */
+}
+/* }}} */
+
+#if HAVE_STRFTIME
+/* {{{ php_strftime
+ */
+PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
+{
+	char                *format, *buf;
+	int                  format_len;
+	long                 timestamp;
+	struct tm            ta;
+	int                  max_reallocs = 5;
+	size_t               buf_len = 64, real_len;
+	timelib_time        *ts;
+	timelib_tzinfo      *tzi;
+	timelib_time_offset *offset;
+
+	timestamp = (long) time(NULL);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &timestamp) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (format_len == 0) {
+		RETURN_FALSE;
+	}
+
+	ts = timelib_time_ctor();
+	if (gmt) {
+		tzi = NULL;
+		timelib_unixtime2gmt(ts, (timelib_sll) timestamp);
+	} else {
+		tzi = get_timezone_info(TSRMLS_C);
+		timelib_unixtime2local(ts, (timelib_sll) timestamp, tzi);
+	}
+	ta.tm_sec   = ts->s;
+	ta.tm_min   = ts->i;
+	ta.tm_hour  = ts->h;
+	ta.tm_mday  = ts->d;
+	ta.tm_mon   = ts->m - 1;
+	ta.tm_year  = ts->y - 1900;
+	ta.tm_wday  = timelib_day_of_week(ts->y, ts->m, ts->d);
+	ta.tm_yday  = timelib_day_of_year(ts->y, ts->m, ts->d);
+	if (gmt) {
+		ta.tm_isdst = 0;
+#if HAVE_TM_GMTOFF
+		ta.tm_gmtoff = 0;
+#endif
+#if HAVE_TM_ZONE
+		ta.tm_zone = "GMT";
+#endif
+	} else {
+		offset = timelib_get_time_zone_info(timestamp, tzi);
+
+		ta.tm_isdst = offset->is_dst;
+#if HAVE_TM_GMTOFF
+		ta.tm_gmtoff = offset->offset;
+#endif
+#if HAVE_TM_ZONE
+		ta.tm_zone = offset->abbr;
+#endif
+	}
+
+	buf = (char *) emalloc(buf_len);
+	while ((real_len=strftime(buf, buf_len, format, &ta))==buf_len || real_len==0) {
+		buf_len *= 2;
+		buf = (char *) erealloc(buf, buf_len);
+		if (!--max_reallocs) {
+			break;
+		}
+	}
+
+	timelib_time_dtor(ts);
+	if (gmt) {
+		timelib_time_offset_dtor(offset);
+	}
+
+	if (real_len && real_len != buf_len) {
+		buf = (char *) erealloc(buf, real_len + 1);
+		RETURN_STRINGL(buf, real_len, 0);
+	}
+	efree(buf);
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto string strftime(string format [, int timestamp])
+   Format a local time/date according to locale settings */
+PHP_FUNCTION(strftime)
+{
+	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto string gmstrftime(string format [, int timestamp])
+   Format a GMT/UCT time/date according to locale settings */
+PHP_FUNCTION(gmstrftime)
+{
+	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+#endif
 
 PHP_FUNCTION(date_timezone_set)
 {

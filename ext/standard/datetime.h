@@ -30,15 +30,8 @@ PHP_FUNCTION(checkdate);
 #if HAVE_STRPTIME
 PHP_FUNCTION(strptime);
 #endif 
-#if HAVE_STRFTIME
-PHP_FUNCTION(strftime);
-PHP_FUNCTION(gmstrftime);
-#endif
 
 PHPAPI int php_idate(char format, int timestamp, int gm);
 PHPAPI char *php_std_date(time_t t TSRMLS_DC);
-#if HAVE_STRFTIME
-PHPAPI void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
-#endif
 
 #endif /* DATETIME_H */
