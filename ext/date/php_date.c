@@ -359,14 +359,14 @@ PHP_FUNCTION(gmdate)
 signed long php_parse_date(char *string, signed long *now)
 {
 	timelib_time *parsed_time;
-	int           error;
+	int           error1, error2;
 	signed long   retval;
 
-	parsed_time = timelib_strtotime(string);
+	parsed_time = timelib_strtotime(string, &error1);
 	timelib_update_ts(parsed_time, NULL);
-	retval = timelib_date_to_int(parsed_time, &error);
+	retval = timelib_date_to_int(parsed_time, &error2);
 	timelib_time_dtor(parsed_time);
-	if (error) {
+	if (error1 || error2) {
 		return -1;
 	}
 	return retval;
@@ -378,7 +378,7 @@ signed long php_parse_date(char *string, signed long *now)
 PHP_FUNCTION(strtotime)
 {
 	char *times, *initial_ts;
-	int   time_len, error;
+	int   time_len, error1, error2;
 	long  preset_ts, ts;
 
 	timelib_time *t, *now;
@@ -392,7 +392,7 @@ PHP_FUNCTION(strtotime)
 
 		initial_ts = emalloc(25);
 		snprintf(initial_ts, 24, "@%lu", preset_ts);
-		t = timelib_strtotime(initial_ts);
+		t = timelib_strtotime(initial_ts, &error1); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
 		timelib_unixtime2local(now, t->sse, tzi);
 		timelib_time_dtor(t);
@@ -406,10 +406,10 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
-	t = timelib_strtotime(times);
+	t = timelib_strtotime(times, &error1);
 	timelib_fill_holes(t, now, 0);
 	timelib_update_ts(t, tzi);
-	ts = timelib_date_to_int(t, &error);
+	ts = timelib_date_to_int(t, &error2);
 
 	/* if tz_info is not a copy, avoid double free */
 	if (now->tz_info == tzi) {
@@ -423,7 +423,7 @@ PHP_FUNCTION(strtotime)
 	timelib_time_dtor(t);
 	timelib_tzinfo_dtor(tzi);
 
-	if (error) {
+	if (error1 || error2) {
 		RETURN_FALSE;
 	} else {
 		RETURN_LONG(ts);
