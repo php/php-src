@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: George Schlossnagle <george@omniti.com>                      |
+  |         Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
 
@@ -46,9 +47,10 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err; 
 	pdo_mysql_error_info *einfo;
+	pdo_mysql_stmt *S = NULL;
 
 	if (stmt) {
-		pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+		S = (pdo_mysql_stmt*)stmt->driver_data;
 		pdo_err = &stmt->error_code;
 		einfo   = &S->einfo;
 	} else {
@@ -69,14 +71,30 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 		if (2014 != einfo->errcode) {
 			einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
 		} else {
-			einfo->errmsg = pestrdup("Cannot execute queries, while other unbuffered queries are active. To enable query buffering set PDO_MYSQL_ATTR_USE_BUFFERED_QUERY attribute.", dbh->is_persistent);
+			einfo->errmsg = pestrdup(
+				"Cannot execute queries while other unbuffered queries are active.  "
+				"Consider using PDOStatement::fetchAll().  Alternatively, if your code "
+				"is only ever going to run against mysql, you may enable query "
+				"buffering by setting the PDO_MYSQL_ATTR_USE_BUFFERED_QUERY attribute.",
+				dbh->is_persistent);
 		}
 	} else { /* no error */
 		strcpy(*pdo_err, PDO_ERR_NONE);
 		return 0;
 	}
 
+#if HAVE_MYSQL_SQLSTATE
+# if HAVE_MYSQL_STMT_PREPARE
+	if (S && S->stmt) {
+		strcpy(*pdo_err, mysql_stmt_sqlstate(S->stmt));
+	} else
+# endif
+	{
+		strcpy(*pdo_err, mysql_sqlstate(H->server));
+	}
+#else
 	strcpy(*pdo_err, pdo_mysql_get_sqlstate(einfo->errcode));
+#endif
 
 	if (!dbh->methods) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
@@ -131,13 +149,67 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
-
+#if HAVE_MYSQL_STMT_PREPARE
+	char *nsql = NULL;
+	int nsql_len = 0;
+	int ret;
+#endif
+	
 	S->H = H;
-	S->result = NULL;
-
 	stmt->driver_data = S;
 	stmt->methods = &mysql_stmt_methods;
+
+	/* TODO: add runtime check to determine if the server we are talking to supports
+	 * prepared statements; if it doesn't, we should set stmt->supports_placeholders
+	 * to PDO_PLACEHOLDER_NONE, and have the rest of the code look at S->stmt to
+	 * determine if we're using real prepared statements or the PDO emulated version */
+#if HAVE_MYSQL_STMT_PREPARE
+	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
+	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
+
+	if (ret == 1) {
+		/* query was rewritten */
+		sql = nsql;
+		sql_len = nsql_len;
+	} else if (ret == -1) {
+		/* failed to parse */
+		strcpy(dbh->error_code, stmt->error_code);
+		return 0;
+	}
+
+	S->stmt = mysql_stmt_init(H->server);
+	if (!S->stmt) {
+		pdo_mysql_error(dbh);
+		if (nsql) {
+			efree(nsql);
+		}
+		return 0;
+	}
+	
+	if (mysql_stmt_prepare(S->stmt, sql, sql_len)) {
+		/* TODO: might need to pull statement specific info here? */
+		pdo_mysql_error(dbh);
+		if (nsql) {
+			efree(nsql);
+		}
+		return 0;
+	}
+
+	S->num_params = mysql_stmt_param_count(S->stmt);
+
+	if (S->num_params) {
+		S->params = ecalloc(S->num_params, sizeof(MYSQL_BIND));
+		S->in_null = ecalloc(S->num_params, sizeof(my_bool));
+		S->in_length = ecalloc(S->num_params, sizeof(unsigned long));
+	}
+
+	dbh->alloc_own_columns = 1;
+
+	return 1;
+
+#else
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+#endif
 	
 	return 1;
 }
