@@ -506,8 +506,14 @@ if (!getenv('NO_INTERACTION')) {
 		$ldd = $automake = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
 
 		if (substr(PHP_OS, 0, 3) != "WIN") {
-			$automake = shell_exec('automake --version');
-			$autoconf = shell_exec('autoconf --version');
+			/* Determine the names of the autotools executables. */
+			$automake = (!empty($_ENV['PHP_AUTOMAKE'])) ? $_ENV['PHP_AUTOMAKE'] : 'automake';
+			$autoconf = (!empty($_ENV['PHP_AUTOCONF'])) ? $_ENV['PHP_AUTOCONF'] : 'autoconf';
+
+			/* Extract the tools' versions (overwriting our local variables). */
+			$automake = shell_exec("$automake --version");
+			$autoconf = shell_exec("$autoconf --version");
+
 			/* Always use the generated libtool - Mac OSX uses 'glibtool' */
 			$libtool = shell_exec($CUR_DIR . '/libtool --version');
 
