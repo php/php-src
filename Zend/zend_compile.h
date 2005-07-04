@@ -572,6 +572,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_LOCAL			1
 #define ZEND_FETCH_STATIC			2
 #define ZEND_FETCH_STATIC_MEMBER	3
+#define ZEND_FETCH_GLOBAL_LOCK	4
 
 
 /* class fetches */
