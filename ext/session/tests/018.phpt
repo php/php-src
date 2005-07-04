@@ -8,6 +8,7 @@ session.cache_limiter=
 session.use_trans_sid=1
 session.name=PHPSESSID
 session.serialize_handler=php
+session.save_handler=files
 --FILE--
 <?php
 

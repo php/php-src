@@ -6,6 +6,7 @@ setting $_SESSION before session_start() should not cause segfault
 session.use_cookies=0
 session.cache_limiter=
 session.serialize_handler=php
+session.save_handler=files
 --FILE--
 <?php
 

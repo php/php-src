@@ -17,6 +17,7 @@ html_errors=0
 display_errors=1
 error_reporting=2039;
 session.serialize_handler=php
+session.save_handler=files
 --FILE--
 <?php
 session_id("abtest");
