@@ -1,3 +1,10 @@
+2005-07-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed memory leak
+
 2005-06-30  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_API.c
