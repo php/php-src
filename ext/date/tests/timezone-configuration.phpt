@@ -10,7 +10,7 @@ date.timezone=GMT
 	putenv('TZ=Europe/London');
 	echo strtotime("2005-06-18 22:15:44"), "\n";
 
-	date_timezone_set('Europe/Oslo');
+	date_default_timezone_set('Europe/Oslo');
 	echo strtotime("2005-06-18 22:15:44"), "\n";
 ?>
 --EXPECT--
