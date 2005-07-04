@@ -432,7 +432,7 @@ PHP_FUNCTION(strtotime)
 }
 /* }}} */
 
-PHPAPI static void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
+PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	long hou, min, sec, mon, day, yea, dst = -1;;
 	timelib_time *now;
