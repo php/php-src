@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed bug #33532 (Different output for strftime() and date()). (Derick)
 - Fixed bug #33523 (Memory leak in xmlrpc_encode_request()). (Ilia)
+- Fixed bug #33520 (crash if safe_mode is on and session.save_path is changed).
+  (Dmitry)
 - Fixed bug #33491 (crash after extending MySQLi internal class). (Tony)
 - Fixed bug #33475 (cURL handle is not closed on curl_close(). (Ilia)
 - Fixed bug #33469 (Compile error undefined reference to ifx_checkAPI). (Jani)
