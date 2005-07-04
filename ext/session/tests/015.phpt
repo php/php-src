@@ -9,6 +9,7 @@ session.cache_limiter=
 arg_separator.output=&
 session.name=PHPSESSID
 session.serialize_handler=php
+session.save_handler=files
 --FILE--
 <?php
 error_reporting(E_ALL);
