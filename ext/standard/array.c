@@ -2060,8 +2060,11 @@ PHP_FUNCTION(array_unshift)
 	   hashtable and replace it with new one */
 	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[1], argc-1, NULL);
 	zend_hash_destroy(Z_ARRVAL_P(stack));
-	FREE_HASHTABLE(Z_ARRVAL_P(stack));
-	Z_ARRVAL_P(stack) = new_hash;
+	if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
+		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
+	}
+	*Z_ARRVAL_P(stack) = *new_hash;
+	FREE_HASHTABLE(new_hash);
 
 	/* Clean up and return the number of elements in the stack */
 	efree(args);
@@ -2137,8 +2140,11 @@ PHP_FUNCTION(array_splice)
 	
 	/* Replace input array's hashtable with the new one */
 	zend_hash_destroy(Z_ARRVAL_P(array));
-	efree(Z_ARRVAL_P(array));
-	Z_ARRVAL_P(array) = new_hash;
+	if (Z_ARRVAL_P(array) == &EG(symbol_table)) {
+		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
+	}
+	*Z_ARRVAL_P(array) = *new_hash;
+	FREE_HASHTABLE(new_hash);
 	
 	/* Clean up */
 	if (argc == 4)
@@ -2670,8 +2676,11 @@ PHP_FUNCTION(array_pad)
 
 	/* Copy the result hash into return value */
 	zend_hash_destroy(Z_ARRVAL_P(return_value));
-	efree(Z_ARRVAL_P(return_value));
-	Z_ARRVAL_P(return_value) = new_hash;
+	if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
+		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
+	}
+	*Z_ARRVAL_P(return_value) = *new_hash;
+	FREE_HASHTABLE(new_hash);
 	
 	/* Clean up */
 	efree(pads);

@@ -20,6 +20,7 @@ PHP                                                                        NEWS
   overloaded (__get)). (Dmitry)
 - Fixed bug #31358 (Older GCC versions do not provide portable va_copy()).
   (Jani)
+- Fixed bug #31158 (array_splice on $GLOBALS crashes). (Dmitry)
 - Fixed bug #30828 (debug_backtrace() reports incorrect class in overridden
   methods). (Dmitry)
 - Fixed bug #30519 (Interface not existing says Class not found). (Dmitry)
