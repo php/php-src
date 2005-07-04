@@ -1469,7 +1469,11 @@ char *timelib_timezone_id_from_abbr(const char *abbr)
 	timelib_tz_lookup_table *tp;
 
 	tp = zone_search(abbr, 0, sizeof(timelib_timezone_lookup) / sizeof(*timelib_timezone_lookup) - 1);
-	return (tp->full_tz_name);
+	if (tp) {
+		return (tp->full_tz_name);
+	} else {
+		return NULL;
+	}
 }
 
 #ifdef DEBUG_PARSER_STUB
