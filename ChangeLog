@@ -1,3 +1,62 @@
+2005-07-03  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed bug #33536 (strtotime defaults to now even on non time string).
+
+    * ext/standard/basic_functions.c
+      ext/standard/datetime.c:
+      - Reimplemented time(), getdate() and localtime() functions with new
+      datetime
+        library.
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h:
+      - Fixed bug #33532 (Different output for strftime() and date()).
+      - Re-implemented checkdate(), strftime() and gmstrftime() with the new
+      timelib
+        code.
+
+2005-07-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      function style
+
+2005-07-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/time/003.phpt
+      ext/standard/tests/time/bug21966.phpt
+      ext/standard/tests/time/bug27719.phpt
+      ext/standard/tests/time/mktime.phpt:
+      - Move mktime/gmmktime related tests from ext/standard to ext/date.
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/datetime.h
+      ext/standard/tests/time/003.phpt
+      ext/standard/tests/time/bug27719.phpt
+      ext/standard/tests/time/mktime.phpt:
+      - Fixed bug #30096 (gmmktime does not return the corrent time).
+      - Re-implemented mktime and gmmktime with new date time library.
+      - Added testcase for bug #30096, updated test cases for E_STRICT warning
+      of
+        is_dst parameter usage for mktime/gmmktime.
+
+2005-07-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed memory leak
+
+    * (PHP_5_0)
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/009.phpt:
+      Fixed test fules (they assumend register_long_arrays=1)
+
 2005-07-02  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_4_4)
