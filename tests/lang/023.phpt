@@ -1,5 +1,7 @@
 --TEST--
 Regression test
+--INI--
+date.timezone=GMT
 --FILE--
 PHP Regression Test
 
