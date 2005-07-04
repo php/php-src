@@ -136,6 +136,7 @@ PHP                                                                        NEWS
 - Fixed bug #31465 (False warning in unpack() when working with *). (Ilia)
 - Fixed bug #31363 (broken non-blocking flock()). ian at snork dot net
 - Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
+- Fixed bug #31158 (array_splice on $GLOBALS crashes). (Dmitry)
 - Fixed bug #30961 (Wrong linenumber in ReflectionClass getStartLine()).
   (Dmitry)
 - Fixed bug #30889 (Conflict between __get/__set and ++ operator). (Dmitry)
