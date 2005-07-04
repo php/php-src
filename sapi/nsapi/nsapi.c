@@ -774,7 +774,7 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 				/* change the ini entry */
 				if (zend_alter_ini_entry(entry->param->name, strlen(entry->param->name)+1,
 				 entry->param->value, strlen(entry->param->value),
-				 PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME)==FAILURE) {
+				 PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE)==FAILURE) {
 					log_error(LOG_WARN, pblock_findval("fn", NSG(pb)), NSG(sn), NSG(rq), "Cannot change php.ini key \"%s\" to \"%s\"", entry->param->name, entry->param->value);
 				}
 			}
