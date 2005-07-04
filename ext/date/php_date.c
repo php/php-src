@@ -434,7 +434,7 @@ PHP_FUNCTION(strtotime)
 
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	long hou, min, sec, mon, day, yea, dst = -1;;
+	long hou, min, sec, mon, day, yea, dst = -1;
 	timelib_time *now;
 	timelib_tzinfo *tzi;
 	long ts, adjust_seconds = 0;
