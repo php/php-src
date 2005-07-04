@@ -1384,6 +1384,20 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 	}
 }
 
+ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC)
+{
+	zend_execute_data *ex;
+	int i;
+
+	for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
+		if (ex->symbol_table == symbol_table) {
+			for (i = 0; i < ex->op_array->last_var; i++) {
+				ex->CVs[i] = NULL;
+			}
+		}
+	}
+}
+
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC)
 {
 	zend_execute_data *ex;

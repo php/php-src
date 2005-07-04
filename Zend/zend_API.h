@@ -352,6 +352,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
 
+ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
+
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
