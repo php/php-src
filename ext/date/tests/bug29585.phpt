@@ -2,7 +2,7 @@
 Bug #29585 (Support week numbers in strtotime())
 --FILE--
 <?php
-date_timezone_set("GMT");
+date_default_timezone_set("GMT");
 echo gmdate("Y-m-d H:i:s", strtotime("2004W30"));
 ?>
 --EXPECT--

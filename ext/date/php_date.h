@@ -42,8 +42,8 @@ PHP_FUNCTION(time);
 PHP_FUNCTION(localtime);
 PHP_FUNCTION(getdate);
 
-PHP_FUNCTION(date_timezone_set);
-PHP_FUNCTION(date_timezone_get);
+PHP_FUNCTION(date_default_timezone_set);
+PHP_FUNCTION(date_default_timezone_get);
 
 PHP_RINIT_FUNCTION(date);
 PHP_RSHUTDOWN_FUNCTION(date);

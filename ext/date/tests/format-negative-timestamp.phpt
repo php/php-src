@@ -2,7 +2,7 @@
 strtotime() - Format: @timestamps
 --FILE--
 <?php
-date_timezone_set("GMT");
+date_default_timezone_set("GMT");
 
 $i = 5;
 $max = getrandmax();

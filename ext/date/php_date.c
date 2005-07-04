@@ -28,6 +28,7 @@
 #include "lib/timelib.h"
 #include <time.h>
 
+/* {{{ Function table */
 function_entry date_functions[] = {
 	PHP_FE(strtotime, NULL)
 	PHP_FE(date, NULL)
@@ -45,18 +46,21 @@ function_entry date_functions[] = {
 	PHP_FE(localtime, NULL)
 	PHP_FE(getdate, NULL)
 
-	PHP_FE(date_timezone_set, NULL)
-	PHP_FE(date_timezone_get, NULL)
+	PHP_FE(date_default_timezone_set, NULL)
+	PHP_FE(date_default_timezone_get, NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
 
+/* {{{ INI Settings */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
 PHP_INI_END()
+/* }}} */
 
-
+/* {{{ Module struct */
 zend_module_entry date_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"date",                     /* extension name */
@@ -69,6 +73,8 @@ zend_module_entry date_module_entry = {
 	PHP_VERSION,                /* extension version */
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
+
 
 /* {{{ php_date_init_globals */
 static void php_date_init_globals(zend_date_globals *date_globals)
@@ -78,6 +84,7 @@ static void php_date_init_globals(zend_date_globals *date_globals)
 }
 /* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(date)
 {
 	if (DATEG(timezone)) {
@@ -87,7 +94,9 @@ PHP_RINIT_FUNCTION(date)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(date)
 {
 	if (DATEG(timezone)) {
@@ -97,7 +106,9 @@ PHP_RSHUTDOWN_FUNCTION(date)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
 	ZEND_INIT_MODULE_GLOBALS(date, php_date_init_globals, NULL);
@@ -105,25 +116,28 @@ PHP_MINIT_FUNCTION(date)
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(date)
 {
 	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(date)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "date/time support", "enabled");
 	php_info_print_table_end();
 }
+/* }}} */
 
-/* =[ Helper functions ] ================================================== */
 
+/* {{{ Helper functions */
 static char* guess_timezone(TSRMLS_D)
 {
 	char *env;
@@ -180,8 +194,10 @@ static timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	}
 	return tzi;
 }
+/* }}} */
 
-/* =[ date() and gmdate() ]================================================ */
+
+/* {{{ date() and gmdate() data */
 #include "ext/standard/php_smart_str.h"
 
 static char *mon_full_names[] = {
@@ -215,7 +231,9 @@ static char *english_suffix(int number)
 	}
 	return "th";
 }
+/* }}} */
 
+/* {{{ php_format_date - (gm)date helper */
 static char *php_format_date(char *format, int format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
@@ -345,18 +363,26 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	RETVAL_STRING(string, 0);
 	timelib_time_dtor(t);
 }
+/* }}} */
 
+/* {{{ proto string date(string format [, long timestamp])
+   Format a local date/time */
 PHP_FUNCTION(date)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
 
+/* {{{ proto string gmdate(string format [, long timestamp])
+   Format a GMT date/time */
 PHP_FUNCTION(gmdate)
 {
 	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
-/* Backwards compability function */
+
+/* {{{ php_parse_date: Backwards compability function */
 signed long php_parse_date(char *string, signed long *now)
 {
 	timelib_time *parsed_time;
@@ -372,6 +398,7 @@ signed long php_parse_date(char *string, signed long *now)
 	}
 	return retval;
 }
+/* }}} */
 
 
 /* {{{ proto int strtotime(string time, int now)
@@ -432,6 +459,8 @@ PHP_FUNCTION(strtotime)
 }
 /* }}} */
 
+
+/* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	long hou, min, sec, mon, day, yea, dst = -1;
@@ -515,6 +544,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		RETURN_LONG(ts);
 	}
 }
+/* }}} */
 
 /* {{{ proto int mktime(int hour, int min, int sec, int mon, int day, int year)
    Get UNIX timestamp for a date */
@@ -531,6 +561,7 @@ PHP_FUNCTION(gmmktime)
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
+
 
 /* {{{ proto bool checkdate(int month, int day, int year)
    Returns true(1) if it is a valid date in gregorian calendar */
@@ -550,8 +581,7 @@ PHP_FUNCTION(checkdate)
 /* }}} */
 
 #ifdef HAVE_STRFTIME
-/* {{{ php_strftime
- */
+/* {{{ php_strftime - (gm)strftime helper */
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
 	char                *format, *buf;
@@ -637,7 +667,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
    Format a local time/date according to locale settings */
 PHP_FUNCTION(strftime)
 {
-	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -645,7 +675,7 @@ PHP_FUNCTION(strftime)
    Format a GMT/UCT time/date according to locale settings */
 PHP_FUNCTION(gmstrftime)
 {
-	_php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_strftime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 #endif
@@ -737,7 +767,10 @@ PHP_FUNCTION(getdate)
 }
 /* }}} */
 
-PHP_FUNCTION(date_timezone_set)
+
+/* {{{ proto void date_default_timezone_set(string timezone_identifier)
+   Sets the default timezone used by all date/time functions in a script */
+PHP_FUNCTION(date_default_timezone_set)
 {
 	char *zone;
 	int   zone_len;
@@ -752,11 +785,15 @@ PHP_FUNCTION(date_timezone_set)
 	DATEG(timezone) = estrndup(zone, zone_len);
 	RETURN_TRUE;
 }
+/* }}} */
 
-PHP_FUNCTION(date_timezone_get)
+/* {{{ proto void date_default_timezone_get(string timezone_identifier)
+   Gets the default timezone used by all date/time functions in a script */
+PHP_FUNCTION(date_default_timezone_get)
 {
 	RETURN_STRING(DATEG(timezone), 0);
 }
+/* }}} */
 
 /*
  * Local variables:
