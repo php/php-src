@@ -228,6 +228,7 @@ static char *php_format_date(char *format, int format_len, timelib_time *t, int 
 		offset = timelib_get_time_zone_info(t->sse, t->tz_info);
 	}
 	buffer[32] = '\0';
+	smart_str_appends(&string, "");
 	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
 
 	for (i = 0; i < format_len; i++) {
