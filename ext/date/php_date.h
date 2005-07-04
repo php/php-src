@@ -64,7 +64,7 @@ ZEND_END_MODULE_GLOBALS(date)
 
 /* Backwards compability wrapper */
 signed long php_parse_date(char *string, signed long *now);
-PHPAPI static void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
+PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);

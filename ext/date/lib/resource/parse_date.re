@@ -191,6 +191,7 @@ static timelib_tz_lookup_table const timelib_timezone_lookup[] = {
 	{ "eadt", 1,   -HOUR ( 10), "Australia/Sydney"    }, /* Eastern Australian Daylight */
 	{ "east", 0,   -HOUR ( 10), "Australia/Sydney"    }, /* Eastern Australian Standard */
 	{ "edt",  1,    HOUR (  5), "America/New_York"    }, /* Eastern Daylight */
+	{ "eest", 1,    HOUR (  2), "Europe/Helsinki"     }, /* Eastern European Summer */
 	{ "eet",  0,   -HOUR (  2), "Europe/Bucharest"    }, /* Eastern Europe, USSR Zone 1 */
 	{ "est",  0,    HOUR (  5), "America/New_York"    }, /* Eastern Standard */
 	{ "f",    0,    HOUR (- 6), NULL                  },
@@ -217,6 +218,8 @@ static timelib_tz_lookup_table const timelib_timezone_lookup[] = {
 	{ "mesz", 1,   -HOUR (  1), "MET"                 }, /* Middle European Summer */
 	{ "met",  0,   -HOUR (  1), "MET"                 }, /* Middle European */
 	{ "mewt", 0,   -HOUR (  1), "MET"                 }, /* Middle European Winter */
+	{ "msd",  1,    HOUR (  3), "Europe/Moscow"       }, /* Moscow Summer */
+	{ "msk",  0,    HOUR (  3), "Europe/Moscow"       }, /* Moscow */
 	{ "mst",  0,    HOUR (  7), "America/Phoenix"     }, /* Mountain Standard */
 	{ "n",    0,    HOUR (  1), NULL                  },
 	{ "ndt",  1,    HOUR (3.5), "America/St_Johns"    }, /* Newfoundland Daylight */
