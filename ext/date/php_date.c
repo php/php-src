@@ -620,7 +620,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 
 	timelib_time_dtor(ts);
-	if (gmt) {
+	if (!gmt) {
 		timelib_time_offset_dtor(offset);
 	}
 
