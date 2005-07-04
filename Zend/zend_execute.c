@@ -890,6 +890,7 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			return EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
+		case ZEND_FETCH_GLOBAL_LOCK:
 			return &EG(symbol_table);
 			break;
 		case ZEND_FETCH_STATIC:
