@@ -3327,6 +3327,7 @@ PHP_FUNCTION(pg_copy_from)
 	switch (status) {
 		case PGRES_COPY_IN:
 			if (pgsql_result) {
+				int command_failed = 0;
 				PQclear(pgsql_result);
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
 #if HAVE_PQPUTCOPYDATA
@@ -3373,7 +3374,14 @@ PHP_FUNCTION(pg_copy_from)
 				}
 #endif
 				while ((pgsql_result = PQgetResult(pgsql))) {
+					if (PGRES_COMMAND_OK != PQresultStatus(pgsql_result)) {
+						PHP_PQ_ERROR("Copy command failed: %s", pgsql);
+						command_failed = 1;
+					}
 					PQclear(pgsql_result);
+				}
+				if (command_failed) {
+					RETURN_FALSE;
 				}
 			} else {
 				PQclear(pgsql_result);
