@@ -1,3 +1,17 @@
+2005-07-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed SIGSEGV on 'global ${"{$blah}_ID"};'
+
+    * zend_API.h
+      zend_execute_API.c:
+      Fixed bug #31158 (array_splice on $GLOBALS crashes)
+
 2005-07-03  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_vm_def.h

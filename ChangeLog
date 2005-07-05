@@ -1,3 +1,92 @@
+2005-07-04  Jon Parise  <jon+php@csh.rit.edu>
+
+    * run-tests.php:
+      If the PHP_AUTOCONF and PHP_AUTOMAKE environmental variables are set, use
+      them when describing the build environment.
+      
+      Support for these variables was originally added to build/build2.mk:1.36.
+      
+      As a side note, the build system uses PHP_AUTOHEADER.  Perhaps it should
+      be listed on its own in the build environment for completeness, despite it
+      being a component of the autoconf package.
+
+2005-07-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed SIGSEGV on 'global ${"{$blah}_ID"};'
+
+2005-07-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/009.phpt
+      ext/session/tests/012.phpt
+      ext/session/tests/013.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/015.phpt
+      ext/session/tests/017.phpt
+      ext/session/tests/018.phpt
+      ext/session/tests/019.phpt
+      ext/session/tests/020.phpt
+      ext/session/tests/021.phpt
+      ext/session/tests/bug24592.phpt
+      ext/session/tests/bug26862.phpt:
+      Make sure files-save handler is used always
+
+2005-07-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      sapi/aolserver/aolserver.c
+      sapi/aolserver/aolserver.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/apache_config.c
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      Fixed bug #33520 (crash if safe_mode is on and session.save_path is
+      changed)
+
+2005-07-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/lang/023.phpt:
+      UTC is better
+
+2005-07-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/bug31158.phpt
+      ext/standard/tests/array/bug31158.phpt:
+      
+      Fixed bug #31158 (array_splice on $GLOBALS crashes)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_execute_API.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug31158.phpt:
+      Fixed bug #31158 (array_splice on $GLOBALS crashes)
+
+2005-07-04  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/lang/023.phpt:
+      fix test
+
+2005-07-04  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed bug #33562 (date("") crashes).
+
 2005-07-03  Derick Rethans  <php@derickrethans.nl>
 
     * NEWS:
