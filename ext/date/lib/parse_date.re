@@ -845,6 +845,7 @@ datenoday        = monthtext ([ -.])* year4;
 datenodayrev     = year4 ([ -.])* monthtext;
 datetextual      = monthtext ([ -.])+ day [,.stndrh ]* year;
 datenoyear       = monthtext ([ -.])+ day [,.stndrh ]*;
+datenoyearrev    = day ([ -.])+ monthtext;
 datenocolon      = year4 monthlz daylz;
 
 /* Special formats */
@@ -1145,6 +1146,16 @@ relativetext = (reltextnumber space reltextunit)+;
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		TIMELIB_PROCESS_YEAR(s->time->y);
+		TIMELIB_DEINIT;
+		return TIMELIB_DATE_TEXT;
+	}
+
+	datenoyearrev
+	{
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->d = timelib_get_nr((char **) &ptr, 2);
+		s->time->m = timelib_get_month((char **) &ptr);
 		TIMELIB_DEINIT;
 		return TIMELIB_DATE_TEXT;
 	}
