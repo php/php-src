@@ -1181,6 +1181,7 @@ void php_request_shutdown(void *dummy)
 	 * inside zend_executor callback functions.
 	 */
 	EG(opline_ptr) = NULL;
+	EG(active_op_array) = NULL;
 
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
