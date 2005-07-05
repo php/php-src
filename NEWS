@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Implemented feature request #33452 (Year belonging to ISO week). (Derick)
 - Fixed memory corruption in pg_copy_from() in case the as_null parameter was
   passed. (Derick)
+- Fixed crash inside stream_get_line() when length parameter equals 0. (Ilia)
 - Fixed bug #33562 (date("") crashes). (Derick)
 - Fixed bug #33536 (strtotime() defaults to now even on non time string).
   (Derick)
