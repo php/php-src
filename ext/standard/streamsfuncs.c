@@ -1176,6 +1176,9 @@ PHP_FUNCTION(stream_get_line)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The maximum allowed length must be greater then or equal to zero.");
 		RETURN_FALSE;
 	}
+	if (!max_length) {
+		max_length = PHP_SOCK_CHUNK_SIZE;
+	}
 
 	php_stream_from_zval(stream, &zstream);
 
