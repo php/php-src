@@ -361,6 +361,9 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	string = php_format_date(format, format_len, t, localtime);
 	
 	RETVAL_STRING(string, 0);
+	if (localtime) {
+		timelib_tzinfo_dtor(tzi);
+	}
 	timelib_time_dtor(t);
 }
 /* }}} */
@@ -440,16 +443,16 @@ PHP_FUNCTION(strtotime)
 	ts = timelib_date_to_int(t, &error2);
 
 	/* if tz_info is not a copy, avoid double free */
-	if (now->tz_info == tzi) {
-		now->tz_info = NULL;
+	if (now->tz_info != tzi) {
+		timelib_tzinfo_dtor(now->tz_info);
 	}
-	if (t->tz_info == tzi) {
-		t->tz_info = NULL;
+	if (t->tz_info != tzi) {
+		timelib_tzinfo_dtor(t->tz_info);
 	}
 
+	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(now);	
 	timelib_time_dtor(t);
-	timelib_tzinfo_dtor(tzi);
 
 	if (error1 || error2) {
 		RETURN_FALSE;
@@ -535,8 +538,10 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	/* Clean up and return */
 	ts = timelib_date_to_int(now, &error);
 	ts += adjust_seconds;
-
 	timelib_time_dtor(now);
+	if (!gmt) {
+		timelib_tzinfo_dtor(tzi);
+	}
 
 	if (error) {
 		RETURN_FALSE;
@@ -729,6 +734,7 @@ PHP_FUNCTION(localtime)
 		add_next_index_long(return_value, ts->dst);
 	}
 
+	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(ts);
 }
 /* }}} */
@@ -763,6 +769,7 @@ PHP_FUNCTION(getdate)
 	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
 	add_index_long(return_value, 0, timestamp);
 
+	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(ts);
 }
 /* }}} */
