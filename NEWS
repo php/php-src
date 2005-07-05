@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Added PHP_INT_MAX and PHP_INT_SIZE as predefined constants. (Andrey)
 - Changed sha1_file() and md5_file() functions to use streams instead of
   low level IO. (Uwe)
+- Fixed memory corruption in pg_copy_from() in case the as_null parameter was
+  passed. (Derick)
 - Fixed ext/mysqli to allocate less memory when fetching bound params
   of type (MEDIUM|LONG)BLOB/(MEDIUM|LONG)TEXT. (Andrey)
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
