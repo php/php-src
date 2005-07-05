@@ -3280,6 +3280,7 @@ PHP_FUNCTION(pg_copy_from)
 	zval **tmp;
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL;
 	int  table_name_len, pg_delim_len, pg_null_as_len;
+	int  pg_null_as_free = 0;
 	char *query;
 	char *query_template = "COPY \"\" FROM STDIN DELIMITERS ':' WITH NULL AS ''";
 	HashPosition pos;
@@ -3299,6 +3300,7 @@ PHP_FUNCTION(pg_copy_from)
 	}
 	if (!pg_null_as) {
 		pg_null_as = safe_estrdup("\\\\N");
+		pg_null_as_free = 1;
 	}
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
@@ -3311,7 +3313,9 @@ PHP_FUNCTION(pg_copy_from)
 	}
 	pgsql_result = PQexec(pgsql, query);
 
-	efree(pg_null_as);
+	if (pg_null_as_free) {
+		efree(pg_null_as);
+	}
 	efree(query);
 
 	if (pgsql_result) {
