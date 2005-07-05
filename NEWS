@@ -1,8 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+11 Jul 2005, Version 4.4.0
+- Fixed memory corruption in pg_copy_from() in case the as_null parameter was
+  passed. (Derick)
+- Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
+
 01 Jul 2005, Version 4.4.0 RC2
 - Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
-- Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
 - Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 
 13 Jun 2005, Version 4.4.0 RC1
