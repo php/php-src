@@ -2298,7 +2298,7 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data)
 		if (tmpattr != NULL) {
 		  type_name = tmpattr->children->content;
 			enc = get_encoder_from_prefix(SOAP_GLOBAL(sdl), data, tmpattr->children->content);
-			if (type == &enc->details) {
+			if (enc && type == &enc->details) {
 				enc = NULL;
 			}
 			if (enc != NULL) {
