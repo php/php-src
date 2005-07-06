@@ -3,6 +3,7 @@ EXPORTS
 	compress2
 	deflate
 	deflateEnd
+	deflateInit_
 	deflateInit2_
 	uncompress
 	inflateInit_
