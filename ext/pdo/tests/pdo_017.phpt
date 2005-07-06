@@ -16,7 +16,7 @@ try {
 ?>
 --FILE--
 <?php
-require getenv('REDIR_TEST_DIR') . 'pdo_test.php';
+require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))');

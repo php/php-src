@@ -7,7 +7,7 @@ if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver';
 ?>
 --FILE--
 <?php
-require getenv('REDIR_TEST_DIR') . 'pdo_test.php';
+require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');

@@ -7,7 +7,7 @@ if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver';
 ?>
 --FILE--
 <?php
-require getenv('REDIR_TEST_DIR') . 'pdo_test.php';
+require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $data = array(
     array('10', 'Abc', 'zxy'),
