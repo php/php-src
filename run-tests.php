@@ -694,7 +694,7 @@ function system_with_timeout($commandline)
 
 function run_test($php, $file, $test_cnt, $test_idx)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options, $DETAILED, $IN_REDIRECT;
 
 	if ($DETAILED) echo "
 =================
@@ -737,13 +737,26 @@ TEST $file
 		// Add to the section text.
 		$section_text[$section] .= $line;
 	}
-	if (@count($section_text['FILE']) != 1) {
-		$bork_info = "missing section --FILE-- [$file]";
-		$borked = true;
-	}
-	if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
-		$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]";
-		$borked = true;
+
+	// the redirect section allows a set of tests to be reused outside of
+	// a given test dir
+	if (@count($section_text['REDIRECTTEST']) == 1) {
+		if ($IN_REDIRECT) {
+			$borked = true;
+			$bork_info = "Can't redirect a test from within a redirected test";
+		} else {
+			$borked = false;
+		}
+	} else {
+		if (@count($section_text['FILE']) != 1) {
+			$bork_info = "missing section --FILE-- [$file]";
+			$borked = true;
+		}
+		if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
+			$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- [$file]";
+			$borked = true;
+			print_r($section_text);
+		}
 	}
 	fclose($fp);
 
@@ -773,20 +786,35 @@ TEST $file
 	echo "TEST $test_idx/$test_cnt [$shortname]\r";
 	flush();
 
-	$tmp = realpath(dirname($file));
-	$tmp_skipif = $tmp . uniqid('/phpt.');
-	$tmp_file   = ereg_replace('\.phpt$','.php',$file);
-	$tmp_post   = $tmp . uniqid('/phpt.');
+	if (is_array($IN_REDIRECT)) {
+		$tmp = $IN_REDIRECT['dir'];
+	} else {
+		$tmp = realpath(dirname($file));
+	}
+
+	$diff_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.diff', basename($file));
+	$log_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.log', basename($file));
+	$exp_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.exp', basename($file));
+	$output_filename = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.out', basename($file));
+	
+	$tmp_skipif = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+	$tmp_file   = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.php',basename($file));
+	$tmp_post   = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
+
+	if (is_array($IN_REDIRECT)) {
+		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']) . " [$tmp_file]";
+		$section_text['FILE'] = "# original source file: $shortname\n" . $section_text['FILE'];
+	}
 
 	@unlink($tmp_skipif);
 	@unlink($tmp_file);
 	@unlink($tmp_post);
 
 	// unlink old test results	
-	@unlink(ereg_replace('\.phpt$','.diff',$file));
-	@unlink(ereg_replace('\.phpt$','.log',$file));
-	@unlink(ereg_replace('\.phpt$','.exp',$file));
-	@unlink(ereg_replace('\.phpt$','.out',$file));
+	@unlink($diff_filename);
+	@unlink($log_filename);
+	@unlink($exp_filename);
+	@unlink($output_filename);
 
 	// Reset environment from any previous test.
 	putenv("REDIRECT_STATUS=");
@@ -835,6 +863,52 @@ TEST $file
 			}
 		}
 	}
+
+	if (@count($section_text['REDIRECTTEST']) == 1) {
+		global $test_files, $test_results, $failed_tests_file;
+		$saved_test_files = $test_files;
+		$test_files = array();
+
+		$IN_REDIRECT = eval($section_text['REDIRECTTEST']);
+		$IN_REDIRECT['via'] = "via [$shortname]\n\t";
+		$IN_REDIRECT['dir'] = realpath(dirname($file));
+		$IN_REDIRECT['prefix'] = trim($section_text['TEST']);
+
+		find_files($IN_REDIRECT['TESTS']);
+		$test_cnt += count($test_files);
+		$GLOBALS['test_cnt'] = $test_cnt;
+
+		echo "---> $IN_REDIRECT[TESTS] ($tested)\n";
+
+		// set up environment
+		foreach ($IN_REDIRECT['ENV'] as $k => $v) {
+			putenv("$k=$v");
+		}
+		putenv("REDIR_TEST_DIR=" . realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR);
+
+		foreach ($test_files as $name) {
+			$result = run_test($php, $name, $test_cnt, ++$test_idx);
+			$test_results[$tested . ': ' . $name] = $result;
+			if ($failed_tests_file && ($result == 'FAILED' || $result == 'WARNED')) {
+				fwrite($failed_tests_file, "$tested: $name\n");
+			}
+		}
+		$GLOBALS['test_idx'] = $test_idx;
+
+		$test_files = $saved_test_files;
+
+		// clean up environment
+		foreach ($IN_REDIRECT['ENV'] as $k => $v) {
+			putenv("$k=");
+		}
+		putenv("REDIR_TEST_DIR=");
+
+
+		// a redirected test never fails
+		$IN_REDIRECT = false;
+		return 'PASSED';
+	}
+	
 
 	// Default ini settings
 	$ini_settings = array();
@@ -968,40 +1042,36 @@ COMMAND $cmd
 
 	$PHP_FAILED_TESTS['FAILED'][] = array (
 						'name' => $file,
-						'test_name' => $tested,
-						'output' => ereg_replace('\.phpt$','.log', $file),
-						'diff'   => ereg_replace('\.phpt$','.diff', $file),
+						'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested,
+						'output' => $output_filename,
+						'diff'   => $diff_filename,
 						'info'   => $info
 						);
 
 	// write .exp
 	if (strpos($log_format,'E') !== FALSE) {
-		$logname = ereg_replace('\.phpt$','.exp',$file);
-		$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+		$log = fopen($exp_filename,'w') or error("Cannot create test log - $exp_filename");
 		fwrite($log,$wanted);
 		fclose($log);
 	}
 
 	// write .out
 	if (strpos($log_format,'O') !== FALSE) {
-		$logname = ereg_replace('\.phpt$','.out',$file);
-		$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+		$log = fopen($output_filename,'w') or error("Cannot create test log - $output_filename");
 		fwrite($log,$output);
 		fclose($log);
 	}
 
 	// write .diff
 	if (strpos($log_format,'D') !== FALSE) {
-		$logname = ereg_replace('\.phpt$','.diff',$file);
-		$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+		$log = fopen($diff_filename,'w') or error("Cannot create test log - $diff_filename");
 		fwrite($log,generate_diff($wanted,$wanted_re,$output));
 		fclose($log);
 	}
 
 	// write .log
 	if (strpos($log_format,'L') !== FALSE) {
-		$logname = ereg_replace('\.phpt$','.log',$file);
-		$log = fopen($logname,'w') or error("Cannot create test log - $logname");
+		$log = fopen($log_filename,'w') or error("Cannot create test log - $log_filename");
 		fwrite($log,"
 ---- EXPECTED OUTPUT
 $wanted
@@ -1010,7 +1080,7 @@ $output
 ---- FAILED
 ");
 		fclose($log);
-		error_report($file,$logname,$tested);
+		error_report($file,$log_filename,$tested);
 	}
 
 	if (isset($old_php)) {
