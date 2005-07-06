@@ -1,0 +1,37 @@
+<?php
+# PDO test framework utilities
+
+class PDOTest {
+	// create an instance of the PDO driver, based on
+	// the current environment
+	static function factory($classname = 'PDO') {
+		$dsn = getenv('PDOTEST_DSN');
+		$user = getenv('PDOTEST_USER');
+		$pass = getenv('PDOTEST_PASS');
+		$attr = getenv('PDOTEST_ATTR');
+		if (is_string($attr)) {
+			$attr = unserialize($attr);
+		} else {
+			$attr = null;
+		}
+
+		$db = new $classname($dsn, $user, $pass, $attr);
+
+		// clean up any crufty test tables we might have left behind
+		// on a previous run
+		static $test_tables = array(
+			'test',
+			'classtypes'
+			);
+		foreach ($test_tables as $table) {
+			$db->exec("DROP TABLE $table");
+		}
+		
+		$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
+		return $db;
+	}
+}
+
+
+
+?>

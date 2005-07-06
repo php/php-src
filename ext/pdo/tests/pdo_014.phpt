@@ -9,7 +9,7 @@ if (!class_exists('IteratorIterator')) print 'skip IteratorIterator class not pr
 ?>
 --FILE--
 <?php
-require getenv('REDIR_TEST_DIR') . 'pdo_test.php';
+require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');

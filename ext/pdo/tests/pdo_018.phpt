@@ -8,7 +8,7 @@ if (!interface_exists('Serializable')) print 'skip no Serializable interface';
 ?>
 --FILE--
 <?php
-require getenv('REDIR_TEST_DIR') . 'pdo_test.php';
+require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 class TestBase implements Serializable
