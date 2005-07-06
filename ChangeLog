@@ -1,3 +1,59 @@
+2005-07-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h:
+      - Fixed crash in serialize() + classes. (64bit only)
+
+2005-07-05  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed bug #33578 (strtotime() doesn't understand "11 Oct" format).
+      (Derick)
+
+2005-07-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/streamsfuncs.c
+      ext/standard/tests/file/stream_get_line.phpt:
+      Fixed crash inside stream_get_line() when length parameter equals 0.
+
+2005-07-05  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/pgsql/pgsql.c:
+      Properly detect when the copy command fails
+
+2005-07-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * main/main.c
+      main/main.c:
+      Fixed crash in ext\standard\tests\general_functions\bug32647.php on Windows
+
+    * ext/session/tests/bug31454.phpt
+      ext/session/tests/bug31454.phpt:
+      Fixed test file
+
+2005-07-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      NEWS
+      ext/pgsql/pgsql.c:
+      - MFH: Fixed memory corruption in pg_copy_from() in case the as_null
+      parameter
+        was passed. (Derick)
+
+    * (PHP_5_0)
+      NEWS
+      ext/pgsql/pgsql.c:
+      - MFH: Fixed memory corruption in pg_copy_from() in case the as_null
+      parameter was
+        passed.
+
+    * NEWS
+      ext/pgsql/pgsql.c:
+      - Fixed memory corruption in pg_copy_from() in case the as_null parameter
+      was
+        passed. (Derick)
+
 2005-07-04  Jon Parise  <jon+php@csh.rit.edu>
 
     * run-tests.php:
