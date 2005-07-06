@@ -20,10 +20,6 @@ $stmt1->execute();
 var_dump($stmt1->fetchColumn());
 
 $stmt2->execute();
-$cont = $stmt2->fetchAll();
-var_dump($cont);
-
-$stmt2->execute();
 $cont = $stmt2->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE);
 var_dump($cont);
 
