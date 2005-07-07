@@ -42,6 +42,10 @@
 # endif
 #endif
 
+#ifdef NETWARE
+#include <fsio.h>
+#endif
+
 #ifndef HAVE_REALPATH
 #define realpath(x,y) strcpy(y,x)
 #endif
@@ -206,7 +210,20 @@ CWD_API void virtual_cwd_startup(void)
 	char cwd[MAXPATHLEN];
 	char *result;
 
+#ifdef NETWARE
+	result = getcwdpath(cwd, NULL, 1);
+	if(result)
+	{
+		char *c=cwd;
+		while(c = strchr(c, '\\'))
+		{
+			*c='/';
+			++c;
+		}
+	}
+#else
 	result = getcwd(cwd, sizeof(cwd));	
+#endif
 	if (!result) {
 		cwd[0] = '\0';
 	}
