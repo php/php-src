@@ -42,8 +42,7 @@
 #endif
 
 #ifdef NETWARE
-/*#include "pipe.h"*/
-#include "tsrm_nw.h"
+#include <fsio.h>
 #endif
 
 #ifndef HAVE_REALPATH
@@ -202,7 +201,20 @@ CWD_API void virtual_cwd_startup(void)
 	char cwd[MAXPATHLEN];
 	char *result;
 
+#ifdef NETWARE
+	result = getcwdpath(cwd, NULL, 1);
+	if(result)
+	{
+		char *c=cwd;
+		while(c = strchr(c, '\\'))
+		{
+			*c='/';
+			++c;
+		}
+	}
+#else
 	result = getcwd(cwd, sizeof(cwd));	
+#endif
 	if (!result) {
 		cwd[0] = '\0';
 	}
@@ -445,8 +457,19 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 				}
 #elif defined(NETWARE)
-				/* If the token is a volume name, it will have colon at the end -- so, no slash before it */
-				if (ptr[ptr_length-1] != ':') {
+				/* 
+					Below code keeps appending to state->cwd a File system seperator
+					cases where this appending should not happen is given below,
+					a) sys: should just be left as it is
+					b) sys:system should just be left as it is,
+					Colon is allowed only in the first token as volume names alone can have the : in their names.
+					Files and Directories cannot have : in their names
+					So the check goes like this,
+					For second token and above simply append the DEFAULT_SLASH to the state->cwd.
+					For first token check for the existence of : 
+					if it exists don't append the DEFAULT_SLASH to the state->cwd.
+				*/
+				if(((state->cwd_length == 0) && (strchr(ptr, ':') == NULL)) || (state->cwd_length > 0)) {
 					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 				}
 #else
