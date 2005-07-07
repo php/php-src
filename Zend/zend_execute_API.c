@@ -490,17 +490,33 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 			/* preserve this bit for inheritance */
 			Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
+			zval_ptr_dtor(element);
+			*element = new_val;
 
 			switch (const_value.type) {
-				case IS_STRING:
-					zend_symtable_update(p->value.ht, const_value.value.str.val, const_value.value.str.len+1, &new_val, sizeof(zval *), NULL);
+				case IS_STRING: {
+					long lval;
+					double dval;
+
+					if (is_numeric_string(const_value.value.str.val, const_value.value.str.len, &lval, &dval, 0) == IS_LONG) {
+						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, lval);
+					} else {
+						zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_STRING, const_value.value.str.val, const_value.value.str.len+1, 0);
+					}
 					break;
+				}
 				case IS_BOOL:
 				case IS_LONG:
-					zend_hash_index_update(p->value.ht, const_value.value.lval, &new_val, sizeof(zval *), NULL);
+					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, const_value.value.lval);
+					break;
+				case IS_DOUBLE:
+					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_LONG, NULL, 0, (long)const_value.value.dval);
+					break;
+				case IS_NULL:
+					zend_hash_update_current_key(p->value.ht, HASH_KEY_IS_STRING, "", 1, 0);
 					break;
 			}
-			zend_hash_del(p->value.ht, str_index, str_index_len);
+			zend_hash_move_forward(p->value.ht);
 			zval_dtor(&const_value);
 		}
 		zend_hash_apply_with_argument(p->value.ht, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
