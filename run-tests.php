@@ -305,6 +305,8 @@ HELP;
 				find_files($testfile);
 			} else if (preg_match("/\.phpt$/", $testfile)) {
 				$test_files[] = $testfile;
+			} else {
+				die("bogus test name " . $argv[$i] . "\n");
 			}
 		}
 	}
@@ -331,7 +333,7 @@ HELP;
 			fclose($failed_tests_file);
 		}
 		$end_time = time();
-		if (count($test_files) > 1) {
+		if (count($test_files)) {
 			echo "
 =====================================================================";
 			compute_summary();
@@ -1236,7 +1238,6 @@ function compute_summary()
 
 	$n_total = count($test_results);
 	$n_total += $ignored_by_ext;
-	
 	$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0, 'BORKED'=>0);
 	foreach ($test_results as $v) {
 		$sum_results[$v]++;
