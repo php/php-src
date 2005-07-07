@@ -213,11 +213,6 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		char *q;
 		ExecStatusType status;
 
-		/* SQL injection protection */
-		if (strchr(name, '\'')) {
-			return NULL;
-		}
-
 		spprintf(&q, sizeof("SELECT CURRVAL('')") + strlen(name), "SELECT CURRVAL('%s')", name);
 		res = PQexec(H->server, q);
 		efree(q);
