@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.57 2005-06-09 13:09:04 wez Exp $
+// $Id: confutils.js,v 1.58 2005-07-07 13:22:38 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -815,10 +815,15 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	sym = header_name.toUpperCase();
 	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");
 
+	if (typeof(add_to_flag_only) == "undefined" &&
+			flag_name.match(new RegExp("^CFLAGS_(.*)$"))) {
+		add_to_flag_only = true;
+	}
+
 	if (typeof(add_to_flag_only) != "undefined") {
 		ADD_FLAG(flag_name, "/DHAVE_" + sym + "=" + have);
 	} else {
-		AC_DEFINE("HAVE_" + sym, have);
+		AC_DEFINE("HAVE_" + sym, have, "have the " + header_name + " header file");
 	}
 
 	return p;
