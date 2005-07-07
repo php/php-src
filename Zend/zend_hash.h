@@ -174,6 +174,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *str_index, uint str_length, ulong num_index, HashPosition *pos);
 
 #define zend_hash_has_more_elements(ht) \
 	zend_hash_has_more_elements_ex(ht, NULL)
@@ -191,6 +192,8 @@ ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos
 	zend_hash_internal_pointer_reset_ex(ht, NULL)
 #define zend_hash_internal_pointer_end(ht) \
 	zend_hash_internal_pointer_end_ex(ht, NULL)
+#define zend_hash_update_current_key(ht, key_type, str_index, str_length, num_index) \
+	zend_hash_update_current_key_ex(ht, key_type, str_index, str_length, num_index, NULL)
 
 /* Copying, merging and sorting */
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);

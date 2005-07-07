@@ -1106,6 +1106,93 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 	}
 }
 
+/* This function changes key of currevt element without changing elements'
+ * order. If element with target key already exists, it will be deleted first.
+ */
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *str_index, uint str_length, ulong num_index, HashPosition *pos)
+{
+	Bucket *p;
+
+	p = pos ? (*pos) : ht->pInternalPointer;
+
+	IS_CONSISTENT(ht);
+
+	if (p) {
+		if (key_type == HASH_KEY_IS_LONG) {
+			str_length = 0;
+			if (!p->nKeyLength && p->h == num_index) {
+				return SUCCESS;
+			}
+			zend_hash_index_del(ht, num_index);
+		} else if (key_type == HASH_KEY_IS_STRING) {
+			if (p->nKeyLength == str_length &&
+			    memcmp(p->arKey, str_index, str_length) == 0) {
+				return SUCCESS;
+			}
+			zend_hash_del(ht, str_index, str_length);
+		} else {
+			return FAILURE;
+		}
+
+		HANDLE_BLOCK_INTERRUPTIONS();
+
+		if (p->pNext) {
+			p->pNext->pLast = p->pLast;
+		}
+		if (p->pLast) {
+			p->pLast->pNext = p->pNext;
+		} else{
+			ht->arBuckets[p->h & ht->nTableMask] = p->pNext;
+		}
+
+		if (p->nKeyLength != str_length) {
+			Bucket *q = (Bucket *) pemalloc(sizeof(Bucket) - 1 + str_length, ht->persistent);
+
+			q->nKeyLength = str_length;
+			if (p->pData == &p->pDataPtr) {
+				q->pData = &q->pDataPtr;
+			} else {
+				q->pData = p->pData;
+			}
+			q->pDataPtr = p->pDataPtr;
+			q->pListNext = p->pListNext;
+			q->pListLast = p->pListLast;
+			if (q->pListNext) {
+				p->pListNext->pListLast = q;
+			} else {
+				ht->pListTail = q;
+			}
+			if (q->pListLast) {
+				p->pListLast->pListNext = q;
+			} else {
+				ht->pListHead = q;
+			}
+			if (ht->pInternalPointer == p) {
+				ht->pInternalPointer = q;
+			}
+			if (pos) {
+				*pos = q;
+			}
+			pefree(p, ht->persistent);
+			p = q;
+		}
+
+		if (key_type == HASH_KEY_IS_LONG) {
+			p->h = num_index;
+		} else {
+			memcpy(p->arKey, str_index, str_length);
+			p->h = zend_inline_hash_func(str_index, str_length);
+		}
+
+		CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[p->h & ht->nTableMask]);
+		ht->arBuckets[p->h & ht->nTableMask] = p;
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
 
 ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 							compare_func_t compar, int renumber TSRMLS_DC)
