@@ -226,6 +226,13 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 		P = (pdo_oci_bound_param*)param->driver_data;
 
 		switch (event_type) {
+			case PDO_PARAM_EVT_FREE:
+				P = param->driver_data;
+				if (P) {
+					efree(P);
+				}
+				break;
+
 			case PDO_PARAM_EVT_ALLOC:
 				P = (pdo_oci_bound_param*)ecalloc(1, sizeof(pdo_oci_bound_param));
 				param->driver_data = P;
