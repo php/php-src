@@ -16,7 +16,9 @@ if (false !== getenv('PDO_ODBC_TEST_DSN')) {
 	$config['ENV']['PDOTEST_DSN'] = getenv('PDO_ODBC_TEST_DSN');
 	$config['ENV']['PDOTEST_USER'] = getenv('PDO_ODBC_TEST_USER');
 	$config['ENV']['PDOTEST_PASS'] = getenv('PDO_ODBC_TEST_PASS');
-	$config['ENV']['PDOTEST_ATTR'] = getenv('PDO_ODBC_TEST_ATTR');
+	if (false !== getenv('PDO_ODBC_TEST_ATTR')) {
+		$config['ENV']['PDOTEST_ATTR'] = getenv('PDO_ODBC_TEST_ATTR');
+	}
 } elseif (preg_match('/^WIN/i', PHP_OS)) {
 	# on windows, try to create a temporary MS access database
 	$path = realpath(dirname(__FILE__)) . '\pdo_odbc.mdb';
