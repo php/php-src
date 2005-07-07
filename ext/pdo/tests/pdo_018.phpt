@@ -63,7 +63,7 @@ class TestLeaf extends TestDerived
 {
 }
 
-$db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20) UNIQUE)');
+$db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL UNIQUE)');
 $db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
 $db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')'); 
 $db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')'); 
