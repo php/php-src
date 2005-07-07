@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	einfo->what = what;
 
 	strcpy(*pdo_err, einfo->last_state);
-
+/* printf("@@ SQLSTATE[%s] %s\n", *pdo_err, einfo->last_err_msg); */
 	if (!dbh->methods) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] %s: %d %s",
 				*pdo_err, what, einfo->last_error, einfo->last_err_msg);
@@ -96,16 +96,18 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
-	
 	if (H->dbc != SQL_NULL_HANDLE) {
 		SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
+#ifndef PHP_WIN32 /* avoiding a bug I've found on my XP box */
 		SQLDisconnect(H->dbc);
+#endif
 		SQLFreeHandle(SQL_HANDLE_DBC, H->dbc);
 		H->dbc = NULL;
 	}
 	SQLFreeHandle(SQL_HANDLE_ENV, H->env);
 	H->env = NULL;
 	pefree(H, dbh->is_persistent);
+	dbh->driver_data = NULL;
 
 	return 0;
 }
@@ -174,7 +176,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 		SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
 		return 0;
 	}
-	
+
 	stmt->driver_data = S;
 	stmt->methods = &odbc_stmt_methods;
 	
@@ -335,17 +337,15 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		pdo_odbc_drv_error("SQLSetEnvAttr: ODBC3");
-		odbc_handle_closer(dbh TSRMLS_CC);
-		return 0;
+		goto fail;
 	}
 
-#ifdef SQL_ATTR_CONNECTION_POOLING
+#if 0 /*&& def SQL_ATTR_CONNECTION_POOLING */
 	if (pdo_odbc_pool_on != SQL_CP_OFF) {
 		rc = SQLSetEnvAttr(H->env, SQL_ATTR_CP_MATCH, (void*)pdo_odbc_pool_mode, 0);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetEnvAttr: SQL_ATTR_CP_MATCH");
-			odbc_handle_closer(dbh TSRMLS_CC);
-			return 0;
+			goto fail;
 		}
 	}
 #endif
@@ -353,16 +353,14 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	rc = SQLAllocHandle(SQL_HANDLE_DBC, H->env, &H->dbc);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		pdo_odbc_drv_error("SQLAllocHandle (DBC)");
-		odbc_handle_closer(dbh TSRMLS_CC);
-		return 0;
+		goto fail;
 	}
 
 	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT,
 		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_NTS);
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT");
-		odbc_handle_closer(dbh TSRMLS_CC);
-		return 0;
+		goto fail;
 	}
 
 	/* set up the cursor library, if needed, or if configured explicitly */
@@ -370,8 +368,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, 0);
 	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");
-		odbc_handle_closer(dbh TSRMLS_CC);
-		return 0;
+		goto fail;
 	}
 	
 
@@ -399,8 +396,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		pdo_odbc_drv_error(use_direct ? "SQLDriverConnect" : "SQLConnect");
-		odbc_handle_closer(dbh TSRMLS_CC);
-		return 0;
+		goto fail;
 	}
 
 	/* TODO: if we want to play nicely, we should check to see if the driver really supports ODBC v3 or not */
@@ -409,6 +405,10 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	dbh->alloc_own_columns = 1;
 	
 	return 1;
+
+fail:
+	dbh->methods = &odbc_methods;
+	return 0;
 }
 /* }}} */
 

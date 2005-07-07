@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -140,7 +140,6 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		SQLNumResultCols(S->stmt, &colcount);
 
 		stmt->column_count = (int)colcount;
-
 		S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
 	}
 
@@ -152,8 +151,8 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
-	SWORD sqltype, ctype, scale, nullable;
-	UDWORD precision;
+	SWORD sqltype = 0, ctype = 0, scale = 0, nullable = 0;
+	UDWORD precision = 0;
 	pdo_odbc_param *P;
 	
 	/* we're only interested in parameters for prepared SQL right now */
@@ -176,13 +175,26 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 					case PDO_PARAM_STMT:
 						return 0;
-
-					case PDO_PARAM_STR:
+					
 					default:
-						convert_to_string(param->parameter);
+						break;
 				}
 
-				SQLDescribeParam(S->stmt, param->paramno+1, &sqltype, &precision, &scale, &nullable);
+				rc = SQLDescribeParam(S->stmt, param->paramno+1, &sqltype, &precision, &scale, &nullable);
+				if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+					/* MS Access, for instance, doesn't support SQLDescribeParam,
+					 * so we need to guess */
+					sqltype = PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
+									SQL_LONGVARBINARY :
+									SQL_LONGVARCHAR;
+					precision = 4000;
+					scale = 5;
+					nullable = 1;
+
+					if (param->max_value_len > 0) {
+						precision = param->max_value_len;
+					}
+				}
 				if (sqltype == SQL_BINARY || sqltype == SQL_VARBINARY || sqltype == SQL_LONGVARBINARY) {
 					ctype = SQL_C_BINARY;
 				} else {
@@ -193,6 +205,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				param->driver_data = P;
 
 				P->len = 0; /* is re-populated each EXEC_PRE */
+				P->outbuf = NULL;
 
 				if ((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
 					P->paramtype = SQL_PARAM_INPUT_OUTPUT;
@@ -201,10 +214,15 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				} else {
 					P->paramtype = SQL_PARAM_OUTPUT;
 				}
-				if (P->paramtype != SQL_PARAM_INPUT && PDO_PARAM_TYPE(param->param_type) != PDO_PARAM_LOB && param->max_value_len > Z_STRLEN_P(param->parameter)) {
-					Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), param->max_value_len + 1);
+				
+				if (P->paramtype != SQL_PARAM_INPUT) {
+					if (PDO_PARAM_TYPE(param->param_type) != PDO_PARAM_NULL) {
+						/* need an explicit buffer to hold result */
+						P->len = param->max_value_len > 0 ? param->max_value_len : precision;
+						P->outbuf = emalloc(P->len + 1);
+					}
 				}
-
+				
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->paramtype != SQL_PARAM_INPUT) {
 					pdo_odbc_stmt_error("Can't bind a lob for output");
 					return 0;
@@ -212,11 +230,10 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 
 				rc = SQLBindParameter(S->stmt, param->paramno+1,
 						P->paramtype, ctype, sqltype, precision, scale,
-						P->paramtype == SQL_PARAM_INPUT && 
-							PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB ?
-								(SQLPOINTER)param :
-								Z_STRVAL_P(param->parameter),
-						param->max_value_len <= 0 ? 0 : param->max_value_len,
+						P->paramtype == SQL_PARAM_INPUT ? 
+							(SQLPOINTER)param :
+							P->outbuf,
+						P->len,
 						&P->len
 						);
 	
@@ -241,24 +258,74 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						}
 
 						if (0 == php_stream_stat(stm, &sb)) {
-							P->len = SQL_LEN_DATA_AT_EXEC(sb.sb.st_size);
+							if (P->outbuf) {
+								int len, amount;
+								char *ptr = P->outbuf;
+								char *end = P->outbuf + P->len;
+
+								P->len = 0;
+								do {
+									amount = end - ptr;
+									if (amount == 0) {
+										break;
+									}
+									if (amount > 8192)
+										amount = 8192;
+									len = php_stream_read(stm, ptr, amount);
+									if (len == 0) {
+										break;
+									}
+									ptr += len;
+									P->len += len;
+								} while (1);
+
+							} else {
+								P->len = SQL_LEN_DATA_AT_EXEC(sb.sb.st_size);
+							}
 						} else {
-							P->len = SQL_LEN_DATA_AT_EXEC(0);
+							if (P->outbuf) {
+								P->len = 0;
+							} else {
+								P->len = SQL_LEN_DATA_AT_EXEC(0);
+							}
 						}
 					} else {
 						convert_to_string(param->parameter);
+						if (P->outbuf) {
+							P->len = Z_STRLEN_P(param->parameter);
+							memcpy(P->outbuf, Z_STRVAL_P(param->parameter), P->len);
+						} else {
+							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(param->parameter));
+						}
+					}
+				} else if (Z_TYPE_P(param->parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
+					P->len = SQL_NULL_DATA;
+				} else {
+					convert_to_string(param->parameter);
+					if (P->outbuf) {
+						P->len = Z_STRLEN_P(param->parameter);
+						memcpy(P->outbuf, Z_STRVAL_P(param->parameter), P->len);
+					} else {
 						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(param->parameter));
 					}
-				} else {
-					P->len = Z_STRLEN_P(param->parameter);
 				}
 				return 1;
 			
 			case PDO_PARAM_EVT_EXEC_POST:
-				if (Z_TYPE_P(param->parameter) == IS_STRING) {
-					P = param->driver_data;
-					Z_STRLEN_P(param->parameter) = P->len;
-					Z_STRVAL_P(param->parameter)[P->len] = '\0';
+				P = param->driver_data;
+				if (P->outbuf) {
+					switch (P->len) {
+						case SQL_NULL_DATA:
+							zval_dtor(param->parameter);
+							ZVAL_NULL(param->parameter);
+							break;
+						default:
+							convert_to_string(param->parameter);
+							Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), P->len+1);
+							memcpy(Z_STRVAL_P(param->parameter), P->outbuf, P->len);
+							Z_STRLEN_P(param->parameter) = P->len;
+							Z_STRVAL_P(param->parameter)[P->len] = '\0';
+					}
 				}
 				return 1;
 		}
@@ -287,10 +354,12 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 	rc = SQLFetchScroll(S->stmt, odbcori, offset);
 
 	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
+		pdo_odbc_stmt_error("SQLFetchScroll");
 		return 1;
 	}
 
 	if (rc == SQL_NO_DATA) {
+		pdo_odbc_stmt_error("SQLFetchScroll");
 		return 0;
 	}
 
@@ -312,6 +381,11 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
 			&S->cols[colno].coltype, &colsize, NULL, NULL);
 
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_stmt_error("SQLBindCol");
+		return 0;
+	}
+
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->namelen = colnamelen;
 	col->name = estrdup(S->cols[colno].colname);
@@ -324,7 +398,12 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	/* tell ODBC to put it straight into our buffer */
 	rc = SQLBindCol(S->stmt, colno+1, SQL_C_CHAR, S->cols[colno].data,
 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
-	
+
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_stmt_error("SQLBindCol");
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -412,6 +491,9 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 
 	free_cols(stmt, S TSRMLS_CC);
 
+	/* NOTE: can't guarantee that output or input/output parameters
+	 * are set until this fella returns SQL_NO_DATA, according to
+	 * MSDN ODBC docs */
 	rc = SQLMoreResults(S->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
