@@ -70,7 +70,7 @@ typedef unsigned short mode_t;
 #include <dirent.h>
 #endif
 
-#define DEFAULT_SLASH '\\'
+#define DEFAULT_SLASH '/'
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define IS_SLASH_P(c)	IS_SLASH(*(c))
