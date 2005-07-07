@@ -55,7 +55,13 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(S->in_null);
 		efree(S->in_length);
 	}
-	if (S->bound_result) {
+	if (S->bound_result) 
+	{
+		int i;
+		for (i = 0; i < stmt->column_count; i++) {
+			efree(S->bound_result[i].buffer);
+		}
+	
 		efree(S->bound_result);
 		efree(S->out_null);
 		efree(S->out_length);
