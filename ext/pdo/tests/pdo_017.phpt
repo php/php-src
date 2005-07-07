@@ -22,7 +22,13 @@ try {
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))');
+if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
+	$suf = ' Type=InnoDB';
+} else {
+	$suf = '';
+}
+
+$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))'.$suf);
 $db->exec("INSERT INTO test VALUES(1, 'A')"); 
 $db->exec("INSERT INTO test VALUES(2, 'B')"); 
 $db->exec("INSERT INTO test VALUES(3, 'C')");

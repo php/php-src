@@ -36,10 +36,14 @@ class Test
 	}
 }
 
+unset($stmt);
+
 foreach ($db->query($SELECT, PDO_FETCH_CLASS, 'Test') as $data)
 {
 	var_dump($data);
 }
+
+unset($stmt);
 
 $stmt = $db->query($SELECT, PDO_FETCH_CLASS, 'Test', array('WOW'));
 
