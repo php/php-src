@@ -103,6 +103,8 @@ ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_ent
 	retval.handlers = &std_object_handlers;
 	(*object)->in_get = 0;
 	(*object)->in_set = 0;
+	(*object)->in_unset = 0;
+	(*object)->in_isset = 0;
 	return retval;
 }
 
