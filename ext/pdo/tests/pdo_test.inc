@@ -36,7 +36,7 @@ class PDOTest {
 		try {
 			$db = PDOTest::factory();
 		} catch (PDOException $e) {
-			echo "skip " . $e->getMessage();
+			die("skip " . $e->getMessage());
 		}
 	}
 }
