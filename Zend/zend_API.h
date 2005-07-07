@@ -118,7 +118,7 @@ typedef struct _zend_function_entry {
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
 
-#define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
+#define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
 		class_container.name = strdup(class_name);				\
 		class_container.name_length = sizeof(class_name) - 1;	\
@@ -131,6 +131,8 @@ typedef struct _zend_function_entry {
 		class_container.__call = handle_fcall;	\
 		class_container.__get = handle_propget;	\
 		class_container.__set = handle_propset;	\
+		class_container.__unset = handle_propunset;	\
+		class_container.__isset = handle_propisset;	\
 		class_container.serialize = NULL;	\
 		class_container.unserialize = NULL;	\
 		class_container.parent = NULL;          \
@@ -140,6 +142,9 @@ typedef struct _zend_function_entry {
 		class_container.iterator_funcs.funcs = NULL;  \
 		class_container.module = NULL;          \
 	}
+
+#define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
+	INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset, NULL, NULL)
 
 int zend_next_free_module(void);
 

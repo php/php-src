@@ -270,6 +270,8 @@ typedef struct _zend_object {
 	HashTable *properties;
 	unsigned int in_get:1;
 	unsigned int in_set:1;
+	unsigned int in_unset:1;
+	unsigned int in_isset:1;
 } zend_object;
 
 typedef unsigned int zend_object_handle;
@@ -338,6 +340,8 @@ struct _zend_class_entry {
 	union _zend_function *clone;
 	union _zend_function *__get;
 	union _zend_function *__set;
+	union _zend_function *__unset;
+	union _zend_function *__isset;
 	union _zend_function *__call;
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;

@@ -1119,6 +1119,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
 			} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
 				CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_UNSET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_UNSET_FUNC_NAME, sizeof(ZEND_UNSET_FUNC_NAME)))) {
+				CG(active_class_entry)->__unset = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_ISSET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)))) {
+				CG(active_class_entry)->__isset = (zend_function *) CG(active_op_array);
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
@@ -1761,6 +1765,12 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	}
 	if (!ce->__set) {
 		ce->__set = ce->parent->__set;
+	}
+	if (!ce->__unset) {
+		ce->__unset = ce->parent->__unset;
+	}
+	if (!ce->__isset) {
+		ce->__isset = ce->parent->__isset;
 	}
 	if (!ce->__call) {
 		ce->__call = ce->parent->__call;
@@ -3932,6 +3942,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->clone = NULL;
 		ce->__get = NULL;
 		ce->__set = NULL;
+		ce->__unset = NULL;
+		ce->__isset = NULL;
 		ce->__call = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;

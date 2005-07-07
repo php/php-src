@@ -109,6 +109,40 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	}
 }
 
+static void zend_std_call_unsetter(zval *object, zval *member TSRMLS_DC)
+{
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	
+	/* __unset handler is called with one argument:
+	      property name
+	*/
+	
+	SEPARATE_ARG_IF_REF(member);
+
+	zend_call_method_with_1_params(&object, ce, &ce->__unset, ZEND_UNSET_FUNC_NAME, NULL, member);
+
+	zval_ptr_dtor(&member);
+}
+
+static zval *zend_std_call_issetter(zval *object, zval *member TSRMLS_DC)
+{
+	zval *retval = NULL;
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	
+	/* __isset handler is called with one argument:
+	      property name
+
+	   it should return whether the property is set or not
+	*/
+	
+	SEPARATE_ARG_IF_REF(member);
+
+	zend_call_method_with_1_params(&object, ce, &ce->__isset, ZEND_ISSET_FUNC_NAME, &retval, member);
+
+	zval_ptr_dtor(&member);
+
+	return retval;
+}
 
 static int zend_verify_property_access(zend_property_info *property_info, zend_class_entry *ce TSRMLS_DC)
 {
@@ -420,18 +454,25 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
-		zval_ptr_dtor(&offset);
 		if (retval) {
 			result = i_zend_is_true(retval);
 			zval_ptr_dtor(&retval);
-			return result;
+			if (check_empty && result && !EG(exception)) {
+				zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
+				if (retval) {
+					result = i_zend_is_true(retval);
+					zval_ptr_dtor(&retval);
+				}
+			}
 		} else {
-			return 0;
+			result = 0;
 		}
+		zval_ptr_dtor(&offset);
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
 		return 0;
 	}
+	return result;
 }
 
 
@@ -482,23 +523,35 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 {
 	zend_object *zobj;
-	zval tmp_member;
+	zval *tmp_member = NULL;
 	zend_property_info *property_info;
+	zend_bool use_unset;
 	
 	zobj = Z_OBJ_P(object);
+	use_unset = (zobj->ce->__unset && !zobj->in_unset);
 
  	if (member->type != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
+ 		ALLOC_ZVAL(tmp_member);
+		*tmp_member = *member;
+		INIT_PZVAL(tmp_member);
+		zval_copy_ctor(tmp_member);
+		convert_to_string(tmp_member);
+		member = tmp_member;
 	}
 
 	property_info = zend_get_property_info(zobj->ce, member, 0 TSRMLS_CC);
 	
-	zend_hash_del(zobj->properties, property_info->name, property_info->name_length+1);
-	if (member == &tmp_member) {
-		zval_dtor(member);
+	if (!property_info || zend_hash_del(zobj->properties, property_info->name, property_info->name_length+1) == FAILURE) {
+		if (use_unset) {
+			/* have unseter - try with it! */
+			zobj->in_unset = 1; /* prevent circular unsetting */
+			zend_std_call_unsetter(object, member TSRMLS_CC);
+			zobj->in_unset = 0;
+		}
+	}
+
+	if (tmp_member) {
+		zval_ptr_dtor(&tmp_member);
 	}
 }
 
@@ -837,27 +890,51 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	zend_object *zobj;
 	int result;
 	zval **value;
-	zval tmp_member;
+	zval *tmp_member = NULL;
 	zend_property_info *property_info;
+	zend_bool use_isset;
 	
 	zobj = Z_OBJ_P(object);
+	use_isset = (zobj->ce->__isset && !zobj->in_isset);
 
  	if (member->type != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
+ 		ALLOC_ZVAL(tmp_member);
+		*tmp_member = *member;
+		INIT_PZVAL(tmp_member);
+		zval_copy_ctor(tmp_member);
+		convert_to_string(tmp_member);
+		member = tmp_member;
 	}
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif			
 
-	if (!(property_info = zend_get_property_info(zobj->ce, member, 1 TSRMLS_CC))) {
-		return 0;
-	}
+	property_info = zend_get_property_info(zobj->ce, member, 1 TSRMLS_CC);
 
-	if (zend_hash_find(zobj->properties, property_info->name, property_info->name_length+1, (void **) &value) == SUCCESS) {
+	if (!property_info || zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &value) == FAILURE) {
+		result = 0;
+		if (use_isset && (has_set_exists != 2)) {
+			zval *rv;
+
+			/* have issetter - try with it! */
+			zobj->in_isset = 1; /* prevent circular getting */
+			rv = zend_std_call_issetter(object, member TSRMLS_CC);
+			zobj->in_isset = 0;
+			if (rv) {
+				result = zend_is_true(rv);
+				zval_ptr_dtor(&rv);
+				if (has_set_exists && result && !EG(exception) && zobj->ce->__get && !zobj->in_get) {
+					rv = zend_std_call_getter(object, member TSRMLS_CC);
+					if (rv) {
+						rv->refcount++;
+						result = i_zend_is_true(rv);
+						zval_ptr_dtor(&rv);
+					}
+				}
+			}
+		}
+	} else {
 		switch (has_set_exists) {
 		case 0:
 			result = (Z_TYPE_PP(value) != IS_NULL);
@@ -869,12 +946,10 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 			result = 1;
 			break;
 		}
-	} else {
-		result = 0;
 	}
 
-	if (member == &tmp_member) {
-		zval_dtor(member);
+	if (tmp_member) {
+		zval_ptr_dtor(&tmp_member);
 	}
 	return result;
 }
