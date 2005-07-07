@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Fixed memory corruption in pg_copy_from() in case the as_null parameter was
   passed. (Derick)
 - Fixed crash inside stream_get_line() when length parameter equals 0. (Ilia)
+- Fixed bug #33605 (substr_compare() crashes with negative offset and length). 
+  (Tony)
 - Fixed bug #33578 (strtotime() doesn't understand "11 Oct" format). (Derick)
 - Fixed bug #33562 (date("") crashes). (Derick)
 - Fixed bug #33536 (strtotime() defaults to now even on non time string).
