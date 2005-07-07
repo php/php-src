@@ -210,12 +210,22 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 		*len = spprintf(&id, 0, "%ld", (long) H->pgoid);
 	} else {
 		PGresult *res;
-		char *q;
 		ExecStatusType status;
-
-		spprintf(&q, sizeof("SELECT CURRVAL('')") + strlen(name), "SELECT CURRVAL('%s')", name);
+#ifdef HAVE_PQEXECPARAMS
+		const char *q[1];
+		q[0] = name;
+		res = PQexecParams(H->server, "SELECT CURRVAL($1)", 1, NULL, q, NULL, NULL, 0);
+#else
+		char *name_escaped, *q;
+		size_t l = strlen(name);
+        
+		name_escaped = safe_emalloc(l, 2, 1);
+		PQescapeString(name_escaped, name, l);
+		spprintf(&q, 0, "SELECT CURRVAL('%s')", name_escaped);
 		res = PQexec(H->server, q);
+		efree(name_escaped); 
 		efree(q);
+#endif
 		status = PQresultStatus(res);
 
 		if (res && (status == PGRES_TUPLES_OK)) {
