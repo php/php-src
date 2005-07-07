@@ -129,10 +129,10 @@ Your ODBC library does not appear to be ODBC 3 compatible.
 You should consider using unixODBC instead, and loading your
 libraries as a driver in that environment; it will emulate the
 functions required for PDO support.
-])])
+])], $PDO_ODBC_LDFLAGS)
   ],[
     AC_MSG_ERROR([Your ODBC library does not exist or there was an error. Check config.log for more information])
-  ])
+  ], $PDO_ODBC_LDFLAGS)
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_inc_path $PDO_ODBC_INCLUDE)
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
