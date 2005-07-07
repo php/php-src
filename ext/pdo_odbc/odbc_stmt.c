@@ -51,7 +51,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 
 	if (S->stmt != SQL_NULL_HANDLE) {
 		if (stmt->executed) {
-			SQLCancel(S->stmt);
+			SQLCloseCursor(S->stmt);
 		}
 		SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
 		S->stmt = SQL_NULL_HANDLE;
@@ -71,7 +71,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	char *buf = NULL;
 
 	if (stmt->executed) {
-		SQLCancel(S->stmt);
+		SQLCloseCursor(S->stmt);
 	}
 	
 	rc = SQLExecute(S->stmt);	
@@ -93,7 +93,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			if (!stm) {
 				/* shouldn't happen either */
 				pdo_odbc_stmt_error("input LOB is no longer a stream");
-				SQLCancel(S->stmt);
+				SQLCloseCursor(S->stmt);
 				if (buf) {
 					efree(buf);
 				}
@@ -359,7 +359,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 	}
 
 	if (rc == SQL_NO_DATA) {
-		pdo_odbc_stmt_error("SQLFetchScroll");
+		/* pdo_odbc_stmt_error("SQLFetchScroll"); */
 		return 0;
 	}
 
