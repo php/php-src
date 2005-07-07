@@ -3,9 +3,12 @@ PDO Common: PDOStatement SPL iterator
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) print 'skip';
-if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver';
 if (!extension_loaded('SPL')) print 'skip SPL not available';
 if (!class_exists('IteratorIterator')) print 'skip IteratorIterator class not present';
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) print 'skip no driver';
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
 ?>
 --FILE--
 <?php

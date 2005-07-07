@@ -4,7 +4,10 @@ PDO Common: PDOStatement::getColumnMeta
 <?php # vim:ft=php
 die('skip this feature is not yet finalized, no test makes sense');
 if (!extension_loaded('pdo')) print 'skip';
-if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver';
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) print 'skip no driver';
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
 /*
  * Note well: meta information is a nightmare to handle portably.
  * it's not really PDOs job.

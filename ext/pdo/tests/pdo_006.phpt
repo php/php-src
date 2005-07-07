@@ -3,7 +3,11 @@ PDO Common: PDO_FETCH_GROUP
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) print 'skip';
-if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver'; ?>
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) print 'skip no driver';
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
+?>
 --FILE--
 <?php
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
