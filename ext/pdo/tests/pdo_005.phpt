@@ -2,9 +2,9 @@
 PDO Common: PDO_FETCH_CLASS
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo')) print 'skip';
+if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
-if (false == $dir) print 'skip no driver';
+if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
