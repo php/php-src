@@ -59,7 +59,7 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			return 1;
 
 		case SQLITE_DONE:
-			stmt->column_count = sqlite3_data_count(S->stmt);
+			stmt->column_count = sqlite3_column_count(S->stmt);
 			sqlite3_reset(S->stmt);
 			S->done = 1;
 			return 1;
