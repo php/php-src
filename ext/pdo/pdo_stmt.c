@@ -292,7 +292,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
 	}
 
-	if (!rewrite_name_to_position(stmt, pparam TSRMLS_CC)) {
+	if (is_param && !rewrite_name_to_position(stmt, pparam TSRMLS_CC)) {
 		return 0;
 	}
 	
