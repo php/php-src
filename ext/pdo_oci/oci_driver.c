@@ -63,26 +63,25 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 	pdo_oci_stmt *S = NULL;
 	pdo_error_type *pdo_err = &dbh->error_code;
 	
-	einfo = &H->einfo;
-
-	if (einfo->errmsg) {
-		pefree(einfo->errmsg, dbh->is_persistent);
-		einfo->errmsg = NULL;
-	}
-
 	if (stmt) {
 		S = (pdo_oci_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
 		pdo_err = &stmt->error_code;
+		if (einfo->errmsg) {
+			efree(einfo->errmsg);
+		}
 	}
-		
+	else {
+		einfo = &H->einfo;
+		if (einfo->errmsg) {
+			pefree(einfo->errmsg, dbh->is_persistent);
+		}
+	}
+	
+	einfo->errmsg = NULL;
 	einfo->errcode = 0;
 	einfo->file = file;
 	einfo->line = line;
-	if (einfo->errmsg) {
-		efree(einfo->errmsg);
-		einfo->errmsg = NULL;
-	}
 	
 	switch (status) {
 		case OCI_SUCCESS:
@@ -113,34 +112,36 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 			break;
 	}
 
-	switch (einfo->errcode) {
-		case 1013:	/* user requested cancel of current operation */
-			zend_bailout();
-			break;
+	if (einfo->errcode) {
+		switch (einfo->errcode) {
+			case 1013:	/* user requested cancel of current operation */
+				zend_bailout();
+				break;
 
 #if 0
-		case 955:	/* ORA-00955: name is already used by an existing object */
-			*pdo_err = PDO_ERR_ALREADY_EXISTS;
-			break;
+			case 955:	/* ORA-00955: name is already used by an existing object */
+				*pdo_err = PDO_ERR_ALREADY_EXISTS;
+				break;
 #endif
 
-		case 12154:	/* ORA-12154: TNS:could not resolve service name */
-			strcpy(*pdo_err, "42S02");
-			break;
-			
-		case 22:	/* ORA-00022: invalid session id */
-		case 1012:	/* ORA-01012: */
-		case 3113:	/* ORA-03133: end of file on communication channel */
-		case 604:
-		case 1041:
-			/* consider the connection closed */
-			dbh->is_closed = 1;
-			H->attached = 0;
-			strcpy(*pdo_err, "01002"); /* FIXME */
-			break;
+			case 12154:	/* ORA-12154: TNS:could not resolve service name */
+				strcpy(*pdo_err, "42S02");
+				break;
+				
+			case 22:	/* ORA-00022: invalid session id */
+			case 1012:	/* ORA-01012: */
+			case 3113:	/* ORA-03133: end of file on communication channel */
+			case 604:
+			case 1041:
+				/* consider the connection closed */
+				dbh->is_closed = 1;
+				H->attached = 0;
+				strcpy(*pdo_err, "01002"); /* FIXME */
+				break;
 
-		default:
-			strcpy(*pdo_err, "HY000");
+			default:
+				strcpy(*pdo_err, "HY000");
+		}
 	}
 
 	/* little mini hack so that we can use this code from the dbh ctor */
