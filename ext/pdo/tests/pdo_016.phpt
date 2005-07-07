@@ -10,11 +10,11 @@ require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$db->exec('INSERT INTO test VALUES(0, \'String0\')'); 
-$db->exec('INSERT INTO test VALUES(1, \'String1\')'); 
-$db->exec('INSERT INTO test VALUES(2, \'String2\')'); 
-$stmt1 = $db->prepare('SELECT COUNT(idx) FROM test'); 
-$stmt2 = $db->prepare('SELECT idx, txt FROM test ORDER by idx'); 
+$db->exec('INSERT INTO test VALUES(0, \'String0\')');
+$db->exec('INSERT INTO test VALUES(1, \'String1\')');
+$db->exec('INSERT INTO test VALUES(2, \'String2\')');
+$stmt1 = $db->prepare('SELECT COUNT(idx) FROM test');
+$stmt2 = $db->prepare('SELECT idx, txt FROM test ORDER by idx');
 
 $stmt1->execute();
 var_dump($stmt1->fetchColumn());
