@@ -62,6 +62,8 @@ foreach ($data as $row) {
     $stmt->execute($row);
 }
 
+unset($stmt);
+
 $stmt = $db->query('SELECT * FROM test');
 var_dump(get_class($stmt));
 var_dump(get_class($stmt->dbh));

@@ -77,6 +77,10 @@ $db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
 var_dump($db->query('SELECT COUNT(*) FROM classtypes')->fetchColumn());
 var_dump($db->query('SELECT id, name FROM classtypes ORDER by id')->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE));
 
+if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
+	$db->setAttribute(PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+}
+
 $objs = array();
 $objs[0] = new stdClass;
 $objs[1] = new TestBase;
@@ -101,6 +105,8 @@ foreach($objs as $obj)
 echo "===TYPES===\n";
 var_dump($ctypes);
 
+unset($stmt);
+
 echo "===INSERT===\n";
 $stmt = $db->prepare('INSERT INTO test VALUES(:id, :classtype, :val)');
 $stmt->bindParam(':id', $idx);
@@ -120,6 +126,8 @@ foreach($objs as $idx => $obj)
 	}
 	$stmt->execute();	
 }
+
+unset($stmt);
 
 echo "===DATA===\n";
 var_dump($db->query('SELECT test.val FROM test')->fetchAll(PDO_FETCH_COLUMN));

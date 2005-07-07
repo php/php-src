@@ -17,6 +17,11 @@ $db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
 $db->exec('INSERT INTO test VALUES(0, \'String0\')');
 $db->exec('INSERT INTO test VALUES(1, \'String1\')');
 $db->exec('INSERT INTO test VALUES(2, \'String2\')');
+
+if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
+	$db->setAttribute(PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
+}
+
 $stmt1 = $db->prepare('SELECT COUNT(idx) FROM test');
 $stmt2 = $db->prepare('SELECT idx, txt FROM test ORDER by idx');
 

@@ -36,6 +36,8 @@ $select->execute();
 $num = $select->fetchColumn();
 echo 'There are ' . $num . " rows in the table.\n";
 
+unset($stmt);
+
 // Insert using named parameters
 $stmt2 = $db->prepare("INSERT INTO test VALUES(:first, :second, :third)");
 foreach ($data as $row) {
