@@ -1,15 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1 Beta 3
-- Fixed support for shared extensions on AIX. Now CLI/CGI PHP binaries are 
-  compiled with runtime linker. Shared extensions are compiled as .so (ready
-  for runtime linking). To support shared extensions Apache/Apache2 must be
-  linked with -brtl too. (Dmitry)
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
 - Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql. (Ilia)
 - Added date_timezone_set() function to set the timezone that the date
   functions will use. (Derick)
 - Implemented feature request #33452 (Year belonging to ISO week). (Derick)
+- Fixed support for shared extensions on AIX. (Dmitry)
 - Fixed memory corruption in pg_copy_from() in case the as_null parameter was
   passed. (Derick)
 - Fixed crash inside stream_get_line() when length parameter equals 0. (Ilia)
