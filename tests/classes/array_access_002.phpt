@@ -96,12 +96,16 @@ array(4) {
 }
 ===EMPTY===
 object::offsetExists(0)
+object::offsetGet(0)
 bool(false)
 object::offsetExists(1)
+object::offsetGet(1)
 bool(false)
 object::offsetExists(2)
+object::offsetGet(2)
 bool(false)
 object::offsetExists(4th)
+object::offsetGet(4th)
 bool(false)
 object::offsetExists(5th)
 bool(true)
