@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -80,7 +80,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	}
 
 #ifdef SQL_ATTR_CONNECTION_POOLING
-	/* ugh, we don't really .ini stuff in PDO, but since ODBC connection
+	/* ugh, we don't really like .ini stuff in PDO, but since ODBC connection
 	 * pooling is process wide, we can't set it from within the scope of a
 	 * request without affecting others, which goes against our isolated request
 	 * policy.  So, we use cfg_get_string here to check it this once.

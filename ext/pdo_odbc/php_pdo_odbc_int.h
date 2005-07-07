@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2005 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -149,6 +149,7 @@ typedef struct {
 typedef struct {
 	SQLINTEGER len;
 	SQLSMALLINT paramtype;
+	char *outbuf;
 } pdo_odbc_param;
 	
 extern pdo_driver_t pdo_odbc_driver;
