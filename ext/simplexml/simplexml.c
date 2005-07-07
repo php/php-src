@@ -1183,6 +1183,7 @@ static void sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 		sxe->iter.nsprefix = NULL;
 	}
 }
+/* }}} */
 
 /* {{{ sxe_object_free_storage()
  */
