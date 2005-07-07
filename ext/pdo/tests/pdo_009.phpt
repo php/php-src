@@ -9,7 +9,7 @@ if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver'; ?>
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(10) UNIQUE)');
+$db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(10) NOT NULL UNIQUE)');
 $db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
 $db->exec('INSERT INTO classtypes VALUES(1, \'Test1\')'); 
 $db->exec('INSERT INTO classtypes VALUES(2, \'Test2\')'); 
