@@ -2366,21 +2366,21 @@ dnl
 dnl PHP header files to be installed
 dnl
 AC_DEFUN([PHP_INSTALL_HEADERS],[
-  if test -z "$2"; then
-    for header_file in "$1"; do
+  ifelse([$2],[],[
+    for header_file in $1; do
       PHP_RUN_ONCE(INSTALLHEADERS, $header_file, [
         INSTALL_EXT_HEADERS="$INSTALL_EXT_HEADERS $header_file"
       ])
     done 
-  else
+  ], [
     header_path=$1
-    for header_file in "$2"; do
+    for header_file in $2; do
       hp_hf="$header_path/$header_file"
       PHP_RUN_ONCE(INSTALLHEADERS, $hp_hf, [
-        INSTALL_EXT_HEADERS="$INSTALL_EXT_HEADERS $header_path/$header_file"
+        INSTALL_EXT_HEADERS="$INSTALL_EXT_HEADERS $hp_hf"
       ])
     done 
-  fi
+  ])
 ])
 
 dnl
