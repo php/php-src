@@ -888,6 +888,7 @@ TEST $file
 		}
 		putenv("REDIR_TEST_DIR=" . realpath($IN_REDIRECT['TESTS']) . DIRECTORY_SEPARATOR);
 
+		usort($test_files, "test_sort");
 		foreach ($test_files as $name) {
 			$result = run_test($php, $name, $test_cnt, ++$test_idx);
 			$test_results[$tested . ': ' . $name] = $result;
