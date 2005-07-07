@@ -690,7 +690,7 @@ static int do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs TSRMLS_DC) /
 		stmt->fetch.cls.ctor_args = NULL;
 		stmt->fetch.cls.fci.param_count = 0;
 	}
-	if (stmt->fetch.func.values && free_ctor_agrs) {
+	if (stmt->fetch.func.values) {
 		FREE_ZVAL(stmt->fetch.func.values);
 		stmt->fetch.func.values = NULL;
 	}
@@ -897,6 +897,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						zend_update_property(ce, return_value,
 							stmt->columns[i].name, stmt->columns[i].namelen,
 							val TSRMLS_CC);
+						zval_ptr_dtor(&val);
 					} else {
 #ifdef MBO_0
 						php_unserialize_data_t var_hash;
@@ -911,13 +912,17 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 #endif
 #if PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION >= 1
 						if (!ce->unserialize) {
+							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							return 0;
 						} else if (ce->unserialize(&return_value, ce, Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : "", Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
+							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							zval_dtor(return_value);
 							ZVAL_NULL(return_value);
 							return 0;
+						} else {
+							zval_ptr_dtor(&val);
 						}
 #endif
 					}
@@ -1902,7 +1907,7 @@ static void pdo_stmt_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 	}
 		
 	if (I->fetch_ahead) {
-		ZVAL_DELREF(I->fetch_ahead);
+		zval_ptr_dtor(&I->fetch_ahead);
 	}
 
 	efree(I);
@@ -1918,7 +1923,6 @@ static int pdo_stmt_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
-	zval **ptr_ptr;
 
 	/* sanity */
 	if (!I->fetch_ahead) {
@@ -1926,11 +1930,7 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 		return;
 	}
 
-	ptr_ptr = emalloc(sizeof(*ptr_ptr)); /* leaks somewhere */
-	*ptr_ptr = I->fetch_ahead;
-	ZVAL_ADDREF(I->fetch_ahead);
-	
-	*data = ptr_ptr;
+	*data = &I->fetch_ahead;
 }
 
 static int pdo_stmt_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
@@ -1950,7 +1950,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
 
 	if (I->fetch_ahead) {
-		ZVAL_DELREF(I->fetch_ahead);
+		zval_ptr_dtor(&I->fetch_ahead);
 		I->fetch_ahead = NULL;
 	}
 
