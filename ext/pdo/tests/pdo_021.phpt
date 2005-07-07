@@ -10,7 +10,7 @@ if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver';
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-var_dump($db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))'));
+$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
 $select = $db->prepare('SELECT COUNT(id) FROM test');
 
@@ -47,6 +47,5 @@ echo 'There are ' . $num . " rows in the table.\n";
 
 ?>
 --EXPECT--
-int(0)
 There are 6 rows in the table.
 There are 12 rows in the table.
