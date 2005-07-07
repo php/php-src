@@ -194,6 +194,9 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		}
 		return 0;
 	}
+	if (nsql) {
+		efree(nsql);
+	}
 
 	S->num_params = mysql_stmt_param_count(S->stmt);
 
