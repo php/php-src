@@ -3,8 +3,11 @@ PDO Common: serializing
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) print 'skip';
-if (false == getenv('REDIR_TEST_DIR')) print 'skip no driver';
 if (!interface_exists('Serializable')) print 'skip no Serializable interface';
+$dir = getenv('REDIR_TEST_DIR');
+if (false == $dir) print 'skip no driver';
+require_once $dir . 'pdo_test.inc';
+PDOTest::skip();
 ?>
 --FILE--
 <?php

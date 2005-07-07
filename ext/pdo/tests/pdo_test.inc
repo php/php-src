@@ -31,6 +31,14 @@ class PDOTest {
 		$db->setAttribute(PDO_ATTR_CASE, PDO_CASE_LOWER);
 		return $db;
 	}
+
+	static function skip() {
+		try {
+			$db = PDOTest::factory();
+		} catch (PDOException $e) {
+			echo "skip " . $e->getMessage();
+		}
+	}
 }
 
 
