@@ -9,12 +9,12 @@ class PDOTest {
 		$user = getenv('PDOTEST_USER');
 		$pass = getenv('PDOTEST_PASS');
 		$attr = getenv('PDOTEST_ATTR');
-		if (is_string($attr)) {
+		if (is_string($attr) && strlen($attr)) {
 			$attr = unserialize($attr);
 		} else {
 			$attr = null;
 		}
-
+		
 		$db = new $classname($dsn, $user, $pass, $attr);
 
 		// clean up any crufty test tables we might have left behind
