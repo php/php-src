@@ -993,9 +993,12 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 				while (node != NULL) {
 					if (get_zval_property(ret, (char*)node->name TSRMLS_CC) == NULL) {
 						zval* val = master_to_zval(get_conversion(XSD_ANYXML), node);
-						while (node->next != NULL &&
+						while (Z_TYPE_P(val) == IS_STRING && node->next != NULL &&
 						    get_zval_property(ret, (char*)node->next->name TSRMLS_CC) == NULL) {
 							zval* val2 = master_to_zval(get_conversion(XSD_ANYXML), node->next);
+							if (Z_TYPE_P(val2) != IS_STRING) {
+								break;
+							}
 							add_string_to_string(val, val, val2);
 							zval_ptr_dtor(&val2);
 						  node = node->next;
