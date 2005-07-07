@@ -98,6 +98,10 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 				S->fields = mysql_fetch_fields(S->result);
 				stmt->column_count = (int)mysql_num_fields(S->result);
 
+				if (H->buffered) {
+					mysql_stmt_store_result(S->stmt);
+				}
+
 				S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
 				S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
 				S->out_length = ecalloc(stmt->column_count, sizeof(unsigned long));
@@ -185,7 +189,11 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	} else {
 		row_count = mysql_affected_rows(H->server);
-		S->result = mysql_use_result(H->server);
+		if (!H->buffered) {
+			S->result = mysql_use_result(H->server);
+		} else {
+			S->result = mysql_store_result(H->server);
+		}
 
 		if (NULL == S->result) {
 			return 0;
