@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050702
+#define PDO_DRIVER_API	20050707
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -126,6 +126,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_STATEMENT_CLASS,	/* array(classname, array(ctor_args)) to specify the class of the constructed statement */
 	PDO_ATTR_FETCH_TABLE_NAMES, /* include table names in the column names, where available */
 	PDO_ATTR_FETCH_CATALOG_NAMES, /* include the catalog/db name names in the column names, where available */
+	PDO_ATTR_DRIVER_NAME,		  /* name of the driver (as used in the constructor) */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -453,6 +454,8 @@ struct _pdo_dbh_t {
 
 	/* driver specific "class" methods for the dbh and stmt */
 	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX];
+
+	pdo_driver_t *driver;
 };
 
 /* describes a column */
