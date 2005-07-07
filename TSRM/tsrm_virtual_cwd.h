@@ -74,10 +74,8 @@ typedef unsigned short mode_t;
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define IS_SLASH_P(c)	IS_SLASH(*(c))
-#define COPY_WHEN_ABSOLUTE(path) \
-    (strchr(path, ':') - path + 1)  /* Take the volume name which ends with a colon */
 #define IS_ABSOLUTE_PATH(path, len) \
-    (strchr(path, ':') != NULL) /* Colon indicates volume name */
+    ((strchr(path, ':') != NULL) || ((len >= 1) && ((path[0] == '/') || (path[0] == '\\'))))
 
 #else
 #ifdef HAVE_DIRENT_H
