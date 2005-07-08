@@ -70,6 +70,11 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(S->param_values);
 		S->param_values = NULL;
 	}
+	if (S->param_formats) {
+		efree(S->param_formats);
+		S->param_formats = NULL;
+	}
+
 #endif
 
 	if (S->cursor_name) {
