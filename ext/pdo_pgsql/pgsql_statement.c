@@ -164,7 +164,19 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 			case PDO_PARAM_EVT_ALLOC:
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
-					param->paramno = atoi(param->name + 1);
+					if (param->name[0] == '$') {
+						param->paramno = atoi(param->name + 1);
+					} else {
+						/* resolve parameter name to rewritten name */
+						char *nameptr;
+						if (SUCCESS == zend_hash_find(stmt->bound_param_map,
+								param->name, param->namelen + 1, (void**)&nameptr)) {
+							param->paramno = atoi(nameptr + 1) - 1;
+						} else {
+							pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY093");
+							return 0;
+						}
+					}
 				}
 				break;
 
@@ -191,7 +203,6 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);
 					S->param_formats[param->paramno] = 1;
 				}
-
 				break;
 		}
 	}
