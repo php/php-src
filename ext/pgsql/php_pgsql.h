@@ -107,6 +107,7 @@ PHP_FUNCTION(pg_fetch_object);
 PHP_FUNCTION(pg_fetch_result);
 PHP_FUNCTION(pg_fetch_row);
 PHP_FUNCTION(pg_fetch_all);
+PHP_FUNCTION(pg_fetch_all_columns);
 #if HAVE_PQCMDTUPLES
 PHP_FUNCTION(pg_affected_rows);
 #endif
