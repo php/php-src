@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050707
+#define PDO_DRIVER_API	20050708
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -127,6 +127,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_FETCH_TABLE_NAMES, /* include table names in the column names, where available */
 	PDO_ATTR_FETCH_CATALOG_NAMES, /* include the catalog/db name names in the column names, where available */
 	PDO_ATTR_DRIVER_NAME,		  /* name of the driver (as used in the constructor) */
+	PDO_ATTR_STRINGIFY_FETCHES,	/* converts integer/float types to strings during fetch */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -432,9 +433,12 @@ struct _pdo_dbh_t {
 	/* when set, convert empty strings to NULL */
 	unsigned oracle_nulls:1;
 
+	/* when set, convert int/floats to strings */
+	unsigned stringify:1;
+
 	/* the sum of the number of bits here and the bit fields preceeding should
 	 * equal 32 */
-	unsigned _reserved_flags:23;
+	unsigned _reserved_flags:22;
 
 	/* data source string used to open this handle */
 	const char *data_source;

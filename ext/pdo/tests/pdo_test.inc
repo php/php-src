@@ -29,6 +29,7 @@ class PDOTest {
 		
 		$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
 		$db->setAttribute(PDO_ATTR_CASE, PDO_CASE_LOWER);
+		$db->setAttribute(PDO_ATTR_STRINGIFY_FETCHES, true);
 		return $db;
 	}
 

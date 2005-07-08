@@ -693,6 +693,11 @@ static PHP_METHOD(PDO, setAttribute)
 			convert_to_long(value);
 			dbh->oracle_nulls = Z_LVAL_P(value) ? 1 : 0;
 			RETURN_TRUE;
+
+		case PDO_ATTR_STRINGIFY_FETCHES:
+			convert_to_long(value);
+			dbh->stringify = Z_LVAL_P(value) ? 1 : 0;
+			RETURN_TRUE;
 			
 		default:
 			;
