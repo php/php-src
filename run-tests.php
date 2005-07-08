@@ -23,25 +23,17 @@
    +----------------------------------------------------------------------+
  */
 
-/*
-	Require exact specification of PHP executable to test (no guessing!).
-	Die if any internal errors encountered in test script.
-	Regularized output for simpler post-processing of output.
-	Optionally output error lines indicating the failing test source and log
-	for direct jump with MSVC or Emacs.
-*/
+/* $Id$ */
 
 /*
  * TODO:
  * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
-
 /* Sanity check to ensure that pcre extension needed by this script is available.
  * In the event it is not, print a nice error message indicating that this script will
  * not run without it.
  */
-
 if (!extension_loaded("pcre")) {
 	echo <<<NO_PCRE_ERROR
 
@@ -794,7 +786,7 @@ TEST $file
 		$tmp = realpath(dirname($file));
 	}
 
-	$diff_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.diff', basename($file));
+	$diff_filename   = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.diff', basename($file));
 	$log_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.log', basename($file));
 	$exp_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.exp', basename($file));
 	$output_filename = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.out', basename($file));
@@ -804,7 +796,7 @@ TEST $file
 	$tmp_post   = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 
 	if (is_array($IN_REDIRECT)) {
-		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']) . " [$tmp_file]";
+		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']) . " [$shortname]";
 		$section_text['FILE'] = "# original source file: $shortname\n" . $section_text['FILE'];
 	}
 
@@ -905,7 +897,6 @@ TEST $file
 			putenv("$k=");
 		}
 		putenv("REDIR_TEST_DIR=");
-
 
 		// a redirected test never fails
 		$IN_REDIRECT = false;
