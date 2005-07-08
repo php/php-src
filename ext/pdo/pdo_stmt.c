@@ -481,6 +481,15 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 	if (caller_frees && value) {
 		efree(value);
 	}
+
+	if (stmt->dbh->stringify) {
+		switch (Z_TYPE_P(dest)) {
+			case IS_LONG:
+			case IS_DOUBLE:
+				convert_to_string(dest);
+				break;
+		}
+	}
 }
 /* }}} */
 
