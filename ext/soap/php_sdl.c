@@ -206,46 +206,13 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include 
 	xmlDocPtr wsdl;
 	xmlNodePtr root, definitions, trav;
 	xmlAttrPtr targetNamespace;
-	php_stream_context *context=NULL;
-	zval **proxy_host, **proxy_port, *orig_context, *new_context;
 
 	if (zend_hash_exists(&ctx->docs, struri, strlen(struri)+1)) {
 		return;
 	}
-
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
-	    Z_TYPE_PP(proxy_host) == IS_STRING &&
-	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
-	    Z_TYPE_PP(proxy_port) == IS_LONG) {
-	    	zval str_port, *str_proxy;
-	    	smart_str proxy = {0};
-		str_port = **proxy_port;
-		zval_copy_ctor(&str_port);
-		convert_to_string(&str_port);
-		smart_str_appends(&proxy,"tcp://");
-		smart_str_appends(&proxy,Z_STRVAL_PP(proxy_host));
-		smart_str_appends(&proxy,":");
-		smart_str_appends(&proxy,Z_STRVAL(str_port));
-		zval_dtor(&str_port);
-		MAKE_STD_ZVAL(str_proxy);
-		ZVAL_STRING(str_proxy, proxy.c, 1);
-		smart_str_free(&proxy);
-		
-		context = php_stream_context_alloc();
-		php_stream_context_set_option(context, "http", "proxy", str_proxy);
-		zval_ptr_dtor(&str_proxy);
-		MAKE_STD_ZVAL(new_context);
-		php_stream_context_to_zval(context, new_context);
-		orig_context = php_libxml_switch_context(new_context TSRMLS_CC);
-	}
 	
 	wsdl = soap_xmlParseFile(struri);
 	
-	if (context) {
-		php_libxml_switch_context(orig_context TSRMLS_CC);
-		zval_ptr_dtor(&new_context);
-	}
-
 	if (!wsdl) {
 		soap_error1(E_ERROR, "Parsing WSDL: Couldn't load from '%s'", struri);
 	}
@@ -2246,6 +2213,57 @@ sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC)
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
 	int uri_len;
+	php_stream_context *context=NULL;
+	zval **proxy_host, **proxy_port, *orig_context, *new_context;
+	smart_str headers = {0};
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
+	    Z_TYPE_PP(proxy_host) == IS_STRING &&
+	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
+	    Z_TYPE_PP(proxy_port) == IS_LONG) {
+	    	zval str_port, *str_proxy;
+	    	smart_str proxy = {0};
+		str_port = **proxy_port;
+		zval_copy_ctor(&str_port);
+		convert_to_string(&str_port);
+		smart_str_appends(&proxy,"tcp://");
+		smart_str_appends(&proxy,Z_STRVAL_PP(proxy_host));
+		smart_str_appends(&proxy,":");
+		smart_str_appends(&proxy,Z_STRVAL(str_port));
+		zval_dtor(&str_port);
+		MAKE_STD_ZVAL(str_proxy);
+		ZVAL_STRING(str_proxy, proxy.c, 1);
+		smart_str_free(&proxy);
+		
+		context = php_stream_context_alloc();
+		php_stream_context_set_option(context, "http", "proxy", str_proxy);
+		zval_ptr_dtor(&str_proxy);
+
+		proxy_authentication(this_ptr, &headers TSRMLS_CC);
+	}
+
+	basic_authentication(this_ptr, &headers TSRMLS_CC);
+
+	if (headers.len > 0) {
+		zval *str_headers;
+
+		if (!context) {
+			context = php_stream_context_alloc();
+		}
+
+		smart_str_0(&headers);
+		MAKE_STD_ZVAL(str_headers);
+		ZVAL_STRING(str_headers, headers.c, 1);
+		php_stream_context_set_option(context, "http", "header", str_headers);
+		smart_str_free(&headers);
+		zval_ptr_dtor(&str_headers);
+	}
+
+	if (context) {
+		MAKE_STD_ZVAL(new_context);
+		php_stream_context_to_zval(context, new_context);
+		orig_context = php_libxml_switch_context(new_context TSRMLS_CC);
+	}
 
 	SOAP_GLOBAL(error_code) = "WSDL";
 
@@ -2286,7 +2304,14 @@ sdlPtr get_sdl(zval *this_ptr, char *uri TSRMLS_DC)
 	} else {
 		sdl = load_wsdl(this_ptr, uri TSRMLS_CC);
 	}
+
 	SOAP_GLOBAL(error_code) = old_error_code;
+
+	if (context) {
+		php_libxml_switch_context(orig_context TSRMLS_CC);
+		zval_ptr_dtor(&new_context);
+	}
+
 	return sdl;
 }
 
