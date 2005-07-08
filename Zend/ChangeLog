@@ -1,3 +1,34 @@
+2005-07-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_objects.c
+      zend_reflection_api.c:
+      Fixed bug #33512 (Add missing support for isset()/unset() overloading to
+      complement the property get/set methods)
+
+2005-07-07  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend_stream.c
+      zend_stream.c:
+      zend_stream_getc uses fread internally. NetWare LibC fread reads 4(Which I
+      believe EOT) for EOF(^D) character. This happens when fread is asked to
+      read one and only character as is the case with cl interactive mode.
+      -- Kamesh
+
+2005-07-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_hash.c
+      zend_hash.h
+      tests/bug28072.phpt:
+      Fixed bug #28072 (static array with some constant keys will be incorrectly
+      ordered).
+
 2005-07-04  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.h
