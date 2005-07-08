@@ -130,12 +130,22 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		return -1;
 	}
 
-	if (stmt->supports_placeholders == query_type) {
+
+	if (stmt->supports_placeholders == query_type && !stmt->named_rewrite_template) {
 		/* query matches native syntax */
 		ret = 0;
 		goto clean_up;
 	}
 
+	if (stmt->named_rewrite_template) {
+		/* magic/hack.
+		 * We we pretend that the query was positional even if
+		 * it was named so that we fall into the
+		 * named rewrite case below.  Not too pretty,
+		 * but it works. */
+		query_type = PDO_PLACEHOLDER_POSITIONAL;
+	}
+	
 	params = stmt->bound_params;
 	
 	/* Do we have placeholders but no bound params */
@@ -265,11 +275,12 @@ rewrite:
 	} else if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 		/* rewrite ? to :pdoX */
 		char idxbuf[32];
+		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
 		
 		newbuffer_len = inquery_len;
 
 		for (plc = placeholders; plc; plc = plc->next) {
-			snprintf(idxbuf, sizeof(idxbuf), ":pdo%d", plc->bindno);
+			snprintf(idxbuf, sizeof(idxbuf), tmpl, plc->bindno + 1);
 			plc->quoted = estrdup(idxbuf);
 			plc->qlen = strlen(plc->quoted);
 			plc->freeq = 1;
