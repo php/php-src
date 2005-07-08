@@ -357,12 +357,12 @@ static PHP_FUNCTION(dbh_constructor)
 	
 	dbh->data_source_len = strlen(colon + 1);
 	dbh->data_source = (const char*)pestrdup(colon + 1, is_persistent);
-	dbh->username = username ? pestrdup(username, is_persistent) : NULL;
-	dbh->password = password ? pestrdup(password, is_persistent) : NULL;
+	dbh->username = usernamelen ? pestrdup(username, is_persistent) : NULL;
+	dbh->password = passwordlen ? pestrdup(password, is_persistent) : NULL;
 
 	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 
-	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
+	if (!dbh->data_source || (usernamelen && !dbh->username) || (passwordlen && !dbh->password)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 	}
 
