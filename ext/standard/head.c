@@ -64,7 +64,6 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
-	time_t t;
 	char *dt;
 	sapi_header_line ctr = {0};
 	int result;
@@ -103,7 +102,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date 1 year and 1 second in the past
 		 */
-		t = time(NULL) - 31536001;
+		time_t t = time(NULL) - 31536001;
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0);
 		sprintf(cookie, "Set-Cookie: %s=deleted; expires=%s", name, dt);
 		efree(dt);
