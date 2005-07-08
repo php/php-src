@@ -86,6 +86,12 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 		 * driver */
 		char *name;
 		int position = 0;
+
+		if (stmt->named_rewrite_template) {
+			/* this is not an error here */
+			return 1;
+		}
+
 		zend_hash_internal_pointer_reset(stmt->bound_param_map);
 		while (SUCCESS == zend_hash_get_current_data(stmt->bound_param_map, (void**)&name)) {
 			if (strcmp(name, param->name)) {
