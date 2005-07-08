@@ -188,7 +188,7 @@ TestBase::serialize() = 'a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s
 ===DATA===
 array(4) {
   [0]=>
-  NULL
+  string(0) ""
   [1]=>
   string(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
   [2]=>
