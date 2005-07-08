@@ -158,7 +158,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 		enum pdo_param_event event_type TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-
+#if HAVE_PQPREPARE
 	if (S->stmt_name && param->is_param) {
 		switch (event_type) {
 			case PDO_PARAM_EVT_ALLOC:
@@ -195,6 +195,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				break;
 		}
 	}
+#endif	
 	return 1;
 }
 
