@@ -233,8 +233,8 @@ static char *english_suffix(int number)
 }
 /* }}} */
 
-/* {{{ php_format_date - (gm)date helper */
-static char *php_format_date(char *format, int format_len, timelib_time *t, int localtime)
+/* {{{ date_format - (gm)date helper */
+static char *date_format(char *format, int format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
 	int                  i;
@@ -341,13 +341,23 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	char *format;
 	int   format_len;
 	long  ts = time(NULL);
-	timelib_time   *t;
 	char           *string;
-	timelib_tzinfo *tzi;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	string = php_format_date(format, format_len, ts, localtime);
+	
+	RETVAL_STRING(string, 0);
+}
+/* }}} */
+
+PHPAPI char *php_format_date(char *format, int format_len, long ts, int localtime) /* {{{ */
+{
+	timelib_time   *t;
+	timelib_tzinfo *tzi;
+	char *string;
 
 	t = timelib_time_ctor();
 
@@ -358,13 +368,15 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 		tzi = NULL;
 		timelib_unixtime2gmt(t, ts);
 	}
-	string = php_format_date(format, format_len, t, localtime);
+
+	string = date_format(format, format_len, t, localtime);
 	
-	RETVAL_STRING(string, 0);
 	if (localtime) {
 		timelib_tzinfo_dtor(tzi);
 	}
+	
 	timelib_time_dtor(t);
+	return string;
 }
 /* }}} */
 
