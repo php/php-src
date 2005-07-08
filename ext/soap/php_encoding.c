@@ -910,6 +910,66 @@ static zval* get_zval_property(zval* object, char* name TSRMLS_DC)
   return NULL;
 }
 
+static void unset_zval_property(zval* object, char* name TSRMLS_DC)
+{
+	if (Z_TYPE_P(object) == IS_OBJECT) {
+		zval member;
+		zend_class_entry *old_scope;
+
+		ZVAL_STRING(&member, name, 0);
+		old_scope = EG(scope);
+	  EG(scope) = Z_OBJCE_P(object);
+		Z_OBJ_HT_P(object)->unset_property(object, &member TSRMLS_CC);
+		EG(scope) = old_scope;
+	} else if (Z_TYPE_P(object) == IS_ARRAY) {
+		zend_hash_del(Z_ARRVAL_P(object), name, strlen(name)+1);
+	}
+}
+
+static void model_to_zval_any(zval *ret, xmlNodePtr node TSRMLS_DC)
+{
+	zval* any = NULL;
+
+	while (node != NULL) {
+		if (get_zval_property(ret, (char*)node->name TSRMLS_CC) == NULL) {
+			zval* val = master_to_zval(get_conversion(XSD_ANYXML), node);
+			if (get_attribute_ex(node->properties,"type", XSI_NAMESPACE) == NULL &&
+			    Z_TYPE_P(val) == IS_STRING) {
+				while (node->next != NULL &&
+				       get_zval_property(ret, (char*)node->next->name TSRMLS_CC) == NULL &&
+				       get_attribute_ex(node->next->properties,"type", XSI_NAMESPACE) == NULL) {
+					zval* val2 = master_to_zval(get_conversion(XSD_ANYXML), node->next);
+					if (Z_TYPE_P(val2) != IS_STRING) {
+						break;
+					}
+					add_string_to_string(val, val, val2);
+					zval_ptr_dtor(&val2);
+				  node = node->next;
+				}
+			}
+			if (any == NULL) {
+				any = val;
+			} else {
+				if (Z_TYPE_P(any) != IS_ARRAY) {
+			    /* Convert into array */
+			    zval *arr;
+
+			    MAKE_STD_ZVAL(arr);
+			    array_init(arr);
+				  add_next_index_zval(arr, any);
+				  any = arr;
+			  }
+			  /* Add array element */
+			  add_next_index_zval(any, val);
+			}
+		}
+		node = node->next;
+	}
+	if (any) {
+		set_zval_property(ret, "any", any TSRMLS_CC);
+	}
+}
+
 static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr data, sdlPtr sdl TSRMLS_DC)
 {
 	switch (model->kind) {
@@ -987,43 +1047,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 				zend_hash_move_forward_ex(model->u.content, &pos);
 			}
 			if (any) {
-				xmlNodePtr node = data->children;
-				zval* any = NULL;
-
-				while (node != NULL) {
-					if (get_zval_property(ret, (char*)node->name TSRMLS_CC) == NULL) {
-						zval* val = master_to_zval(get_conversion(XSD_ANYXML), node);
-						while (Z_TYPE_P(val) == IS_STRING && node->next != NULL &&
-						    get_zval_property(ret, (char*)node->next->name TSRMLS_CC) == NULL) {
-							zval* val2 = master_to_zval(get_conversion(XSD_ANYXML), node->next);
-							if (Z_TYPE_P(val2) != IS_STRING) {
-								break;
-							}
-							add_string_to_string(val, val, val2);
-							zval_ptr_dtor(&val2);
-						  node = node->next;
-						}
-						if (any == NULL) {
-							any = val;
-						} else {
-							if (Z_TYPE_P(any) != IS_ARRAY) {
-						    /* Convert into array */
-						    zval *arr;
-
-						    MAKE_STD_ZVAL(arr);
-						    array_init(arr);
-							  add_next_index_zval(arr, any);
-							  any = arr;
-						  }
-						  /* Add array element */
-						  add_next_index_zval(any, val);
-						}
-					}
-					node = node->next;
-				}
-				if (any) {
-					set_zval_property(ret, "any", any TSRMLS_CC);
-				}
+				model_to_zval_any(ret, data->children TSRMLS_CC);
 			}
 			break;
 		}
@@ -1043,6 +1067,7 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 	sdlPtr sdl;
 	sdlTypePtr sdlType = type->sdl_type;
 	zend_class_entry *ce = ZEND_STANDARD_CLASS_DEF_PTR;
+	zend_bool redo_any = 0;
 	TSRMLS_FETCH();
 
 	if (SOAP_GLOBAL(class_map) && type->type_str) {
@@ -1090,6 +1115,10 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 				ret = master_to_zval_int(sdlType->encode, data);
 				FIND_XML_NULL(data, ret);
+				if (get_zval_property(ret, "any" TSRMLS_CC) != NULL) {
+				  unset_zval_property(ret, "any" TSRMLS_CC);
+					redo_any = 1;
+			  }
 			} else {
 				zval *base;
 
@@ -1106,6 +1135,9 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 		}
 		if (sdlType->model) {
 			model_to_zval_object(ret, sdlType->model, data, sdl TSRMLS_CC);
+			if (redo_any && get_zval_property(ret, "any" TSRMLS_CC) == NULL) {
+				model_to_zval_any(ret, data->children TSRMLS_CC);				
+		  }
 		}
 		if (sdlType->attributes) {
 			sdlAttributePtr *attr;
