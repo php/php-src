@@ -578,6 +578,10 @@ struct _pdo_stmt_t {
 		} func;
 		zval *into;
 	} fetch;
+
+	/* used by the query parser for driver specific
+	 * parameter naming (see pgsql driver for example) */
+	const char *named_rewrite_template;
 };
 
 /* call this in MINIT to register your PDO driver */
