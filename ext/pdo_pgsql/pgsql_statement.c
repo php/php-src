@@ -221,8 +221,8 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 		ExecStatusType status;
 
 		switch (ori) {
-			case PDO_FETCH_ORI_NEXT: 	ori_str = "NEXT"; break;
-			case PDO_FETCH_ORI_PRIOR:	ori_str = "PRIOR"; break;
+			case PDO_FETCH_ORI_NEXT: 	ori_str = "FORWARD"; break;
+			case PDO_FETCH_ORI_PRIOR:	ori_str = "BACKWARD"; break;
 			case PDO_FETCH_ORI_REL:		ori_str = "RELATIVE"; break;
 			default:
 				return 0;
