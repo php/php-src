@@ -42,8 +42,8 @@ typedef struct Scanner {
 static int scan(Scanner *s) 
 {
 	char *cursor = s->cur;
-	std:
-		s->tok = cursor;
+
+	s->tok = cursor;
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
