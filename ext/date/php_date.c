@@ -645,6 +645,10 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 #endif
 	}
 
+	if (!gmt) {
+		timelib_tzinfo_dtor(tzi);
+	}
+	
 	buf = (char *) emalloc(buf_len);
 	while ((real_len=strftime(buf, buf_len, format, &ta))==buf_len || real_len==0) {
 		buf_len *= 2;
