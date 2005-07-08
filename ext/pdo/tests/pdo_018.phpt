@@ -122,7 +122,7 @@ foreach($objs as $idx => $obj)
 	}
 	else
 	{
-		$val = NULL;
+		$val = '';
 	}
 	$stmt->execute();	
 }
