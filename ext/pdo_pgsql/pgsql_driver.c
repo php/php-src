@@ -132,19 +132,77 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
 	int scrollable;
+#if HAVE_PQPREPARE
+	PGresult *res;
+	int ret;
+	char *nsql = NULL;
+	int nsql_len = 0;
+	ExecStatusType status;
+#endif
 
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &pgsql_stmt_methods;
-	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL;
 
 	if (scrollable) {
+		/* TODO: check how scrollable cursors related to prepared statements */
 		spprintf(&S->cursor_name, 0, "pdo_pgsql_cursor_%08x", (unsigned int) stmt);
 	}
 
+#if HAVE_PQPREPARE
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+	stmt->named_rewrite_template = "$%d";
+	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
+	
+	if (ret == 1) {
+		/* query was re-written */
+		sql = nsql;
+	} else if (ret == -1) {
+		/* couldn't grok it */
+		strcpy(dbh->error_code, stmt->error_code);
+		return 0;
+	}
+	
+	spprintf(&S->stmt_name, 0, "pdo_pgsql_stmt_%08x", (unsigned int)stmt);
+	res = PQprepare(H->server, S->stmt_name, sql, 0, NULL);
+	if (nsql) {
+		efree(nsql);
+	}
+	if (!res) {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+		return 0;
+	}
+
+	/* check if the connection is using protocol version 2.0.
+	 * if that is the reason that the prepare failed, we want to fall
+	 * through and let PDO emulate it for us */
+	status = PQresultStatus(res);
+	switch (status) {
+		case PGRES_COMMAND_OK:
+		case PGRES_TUPLES_OK:
+			/* it worked */
+			return 1;
+
+		case PGRES_BAD_RESPONSE:
+			/* server is probably too old; fall through and let
+			 * PDO emulate it */
+			efree(S->stmt_name);
+			S->stmt_name = NULL;
+			break;
+
+		default:
+			/* protocol 3.0 and above; hard error */
+			pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
+			PQclear(res);
+			return 0;
+	}
+	/* fall through */
+#endif
+
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	return 1;
 }
 

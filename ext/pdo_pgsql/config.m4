@@ -93,6 +93,9 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQExecParams,AC_DEFINE(HAVE_PQEXECPARAMS,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQresultErrorField,AC_DEFINE(HAVE_PQRESULTERRORFIELD,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
+  
+  AC_CHECK_LIB(pq, PQprepare,AC_DEFINE(HAVE_PQPREPARE,1,[prepared statements]))
+
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
 

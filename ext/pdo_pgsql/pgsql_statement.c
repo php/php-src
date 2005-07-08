@@ -49,6 +49,29 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->result = NULL;
 	}
 
+#if HAVE_PQPREPARE
+	if (S->stmt_name) {
+		pdo_pgsql_db_handle *H = S->H;
+		char *q = NULL;
+		PGresult *res;
+
+		spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
+		res = PQexec(H->server, q);
+		efree(q);
+		if (res) PQclear(res);
+		efree(S->stmt_name);
+		S->stmt_name = NULL;
+	}
+	if (S->param_lengths) {
+		efree(S->param_lengths);
+		S->param_lengths = NULL;
+	}
+	if (S->param_values) {
+		efree(S->param_values);
+		S->param_values = NULL;
+	}
+#endif
+
 	if (S->cursor_name) {
 		pdo_pgsql_db_handle *H = S->H;
 		char *q = NULL;
@@ -67,6 +90,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->cols = NULL;
 	}
 	efree(S);
+	stmt->driver_data = NULL;
 	return 1;
 }
 
@@ -86,6 +110,20 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	S->current_row = 0;
 
+#if HAVE_PQPREPARE
+	if (S->stmt_name) {
+		/* using a prepared statement */
+
+		S->result = PQexecPrepared(H->server, S->stmt_name,
+				stmt->bound_params ?
+					zend_hash_num_elements(stmt->bound_params) :
+					0,
+				(const char**)S->param_values,
+				S->param_lengths,
+				NULL,
+				0);
+	} else
+#endif
 	if (S->cursor_name) {
 		char *q = NULL;
 		spprintf(&q, 0, "DECLARE %s CURSOR FOR %s", S->cursor_name, stmt->active_query_string);
@@ -119,6 +157,44 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
 		enum pdo_param_event event_type TSRMLS_DC)
 {
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+
+	if (S->stmt_name && param->is_param) {
+		switch (event_type) {
+			case PDO_PARAM_EVT_ALLOC:
+				/* decode name from $1, $2 into 0, 1 etc. */
+				if (param->name) {
+					param->paramno = atoi(param->name + 1);
+				}
+				break;
+
+			case PDO_PARAM_EVT_EXEC_PRE:
+				if (!S->param_values) {
+					S->param_values = ecalloc(
+							zend_hash_num_elements(stmt->bound_params),
+							sizeof(char*));
+					S->param_lengths = ecalloc(
+							zend_hash_num_elements(stmt->bound_params),
+							sizeof(int));
+					S->param_formats = ecalloc(
+							zend_hash_num_elements(stmt->bound_params),
+							sizeof(int));
+
+				}
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
+						Z_TYPE_P(param->parameter) == IS_NULL) {
+					S->param_values[param->paramno] = NULL;
+					S->param_lengths[param->paramno] = 0;
+				} else {
+					convert_to_string(param->parameter);
+					S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);
+					S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);
+					S->param_formats[param->paramno] = 1;
+				}
+
+				break;
+		}
+	}
 	return 1;
 }
 
