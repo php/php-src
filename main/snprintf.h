@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   |         Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
 */
 
@@ -114,7 +115,7 @@ extern char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altfor
 # define WIDE_INT		long long int
 #elif SIZEOF_LONG_LONG
 # define WIDE_INT		long long
-#elif _WIN64
+#elif PHP_WIN32
 # define WIDE_INT		__int64
 #else
 # define WIDE_INT		long
