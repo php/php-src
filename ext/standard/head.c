@@ -104,16 +104,15 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * pick an expiry date 1 year and 1 second in the past
 		 */
 		t = time(NULL) - 31536001;
-		dt = php_format_date("D, d-M-Y H:i:s", sizeof("D, d-M-Y H:i:s")-1, t, 0);
-		sprintf(cookie, "Set-Cookie: %s=deleted; expires=%s GMT", name, dt);
+		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0);
+		sprintf(cookie, "Set-Cookie: %s=deleted; expires=%s", name, dt);
 		efree(dt);
 	} else {
 		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			strcat(cookie, "; expires=");
-			dt = php_format_date("D, d-M-Y H:i:s", sizeof("D, d-M-Y H:i:s")-1, t, 0);
+			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0);
 			strcat(cookie, dt);
-			strcat(cookie, " GMT");
 			efree(dt);
 		}
 	}
