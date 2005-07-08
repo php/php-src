@@ -1,3 +1,123 @@
+2005-07-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      - Fixed stupid bug in PHP_INSTALL_HEADERS() macro: "foo bar" != foo bar
+      - ext/date/lib/timelib_config.h is also installed now
+
+2005-07-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/classes/array_access_001.phpt
+      tests/classes/array_access_002.phpt:
+      Fixed bug #33512 (Add missing support for isset()/unset() overloading to
+      complement the property get/set methods). Now empty($obj[...]) works
+      proper but in addition it may call offsetGet() method.
+
+    * NEWS
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_reflection_api.c:
+      Fixed bug #33512 (Add missing support for isset()/unset() overloading to
+      complement the property get/set methods)
+
+2005-07-07  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.c:
+      zend_stream_getc uses fread internally. NetWare LibC fread reads 4(Which I
+      believe EOT) for EOF(^D) character. This happens when fread is asked to
+      read one and only character as is the case with cl interactive mode.
+      -- Kamesh
+
+2005-07-07  Antony Dovgal  <antony@zend.com>
+
+    * NEWS
+      ext/standard/string.c:
+      fix #33605 (substr_compare() crashes with negative offset & length)
+
+2005-07-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/tests/bug28072.phpt:
+      Fixed bug #28072 (static array with some constant keys will be incorrectly
+      ordered).
+
+2005-07-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * run-tests.php:
+      sort redirected tests
+
+    * run-tests.php:
+      Fix 2 bugs:
+      - summary is only displayed if 2 or more tests were detected
+      - error out of a bogus test name is passed in
+
+2005-07-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/element.c:
+      Allow NULL namespaceURI for getAttributeNodeNS
+
+2005-07-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      reorder. Also: Documentation belongs elsewhere :)
+
+2005-07-07  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      TSRM/tsrm_virtual_cwd.c:
+      1)gwtcwd of NetWare LibC gives a cwd with a volume information.
+      So using getcwdpath which gives with volume information.
+      getcwdpath gives with directory seperator as \ which is against our
+      DEFAULT_SLASH of /.
+      So finding and replacing \ with /
+      2)NetWare file path normalization code in virtual_file_ex.
+      -- Kamesh
+
+    * TSRM/tsrm_virtual_cwd.h:
+      Reverting the DEFAULT_SLASH to / as it breaks the FreeBSD derived function
+      of NetWare LibC like glob.
+      -- Kamesh
+
+    * TSRM/tsrm_virtual_cwd.c:
+      gwtcwd of NetWare LibC gives a cwd with a volume information.
+      So using getcwdpath which gives with volume information.
+      getcwdpath gives with directory seperator as \ which is against our
+      DEFAULT_SLASH of /. So finding and replacing \ with /
+      
+      -- Kamesh
+
+    * TSRM/tsrm_virtual_cwd.h:
+      COPY_WHEN_ABSOLUTE is not needed for NetWare.
+      -- Kamesh
+
+    * (PHP_5_0)
+      TSRM/tsrm_virtual_cwd.h:
+      COPY_WHEN_ABSOLUTE is not needed for NetWare.
+      NetWare can understand the file paths with volumnename with a colon,
+      starting with / or \\ as absolute paths.
+      -- Kamesh
+
+2005-07-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      acinclude.m4
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4:
+      Fixed support for shared extensions on AIX
+
+2005-07-07  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/simplexml/simplexml.c:
+      Missing closing folding marker
+
 2005-07-06  Edin Kadribasic  <edink@emini.dk>
 
     * ext/zlib/php_zlib.def:
