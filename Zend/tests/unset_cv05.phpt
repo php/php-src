@@ -2,6 +2,8 @@
 unset() CV 5 (indirect unset() of global variable in session_start())
 --INI--
 register_long_arrays=1
+session.auto_start=0
+session.save_handler=files
 --SKIPIF--
 <?php 
 
