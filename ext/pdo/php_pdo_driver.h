@@ -68,10 +68,10 @@ enum pdo_param_type {
 
 	/* get_col ptr should point to a zend_bool */
 	PDO_PARAM_BOOL,
-
-	/* magic flag to denote a parameter as being input/output */
-	PDO_PARAM_INPUT_OUTPUT = 0x80000000	
 };
+
+/* magic flag to denote a parameter as being input/output */
+#define	PDO_PARAM_INPUT_OUTPUT 	0x80000000	
 
 #define PDO_PARAM_FLAGS			0xFFFF0000
 
