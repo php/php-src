@@ -9,16 +9,12 @@ function test: mysqli_warning_count()
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
 	$link = mysqli_connect($host, $user, $passwd);
-
 	mysqli_select_db($link, "test");
 
 	mysqli_query($link, "DROP TABLE IF EXISTS test_warnings");
+	mysqli_query($link, "DROP TABLE IF EXISTS test_warnings");
 
-	mysqli_query($link, "CREATE TABLE test_warnings (a int not null");
-	mysqli_query($link, "INSERT INTO test_warnings VALUES (NULL)");
-
-	$num = mysqli_warning_count($link);
-	var_dump($num);
+	var_dump(mysqli_warning_count($link));
 
 	mysqli_close($link);
 ?>
