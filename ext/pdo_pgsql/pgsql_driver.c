@@ -184,6 +184,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		case PGRES_COMMAND_OK:
 		case PGRES_TUPLES_OK:
 			/* it worked */
+			PQclear(res);
 			return 1;
 
 		case PGRES_BAD_RESPONSE:
@@ -191,6 +192,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			 * PDO emulate it */
 			efree(S->stmt_name);
 			S->stmt_name = NULL;
+			PQclear(res);
 			break;
 
 		default:
