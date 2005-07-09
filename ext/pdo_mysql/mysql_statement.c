@@ -486,6 +486,8 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 #if HAVE_MYSQL_STMT_PREPARE
 	return mysql_stmt_free_result(S->stmt);
 #endif
+	mysql_free_result(S->result);
+	S->result = NULL;
 	return 1;
 }
 
