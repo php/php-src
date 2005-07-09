@@ -484,10 +484,14 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if HAVE_MYSQL_STMT_PREPARE
-	return mysql_stmt_free_result(S->stmt);
+	if (S->stmt) {
+		return mysql_stmt_free_result(S->stmt);
+	}
 #endif
-	mysql_free_result(S->result);
-	S->result = NULL;
+	if (S->result) {
+		mysql_free_result(S->result);
+		S->result = NULL;
+	}
 	return 1;
 }
 
