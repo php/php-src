@@ -7,15 +7,19 @@ $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
-/* TODO:
+
 $db = PDOTest::factory();
 try {
   $db->beginTransaction();
 } catch (PDOException $e) {
-  # check sqlstate to see if transactions
-  # are not implemented; if so, skip
+  die('skip no working transactions: ' . $e->getMessage());
 }
-*/
+
+if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
+	if (false === PDOTest::detect_transactional_mysql_engine($db)) {
+		die('skip your mysql configuration does not support working transactions');
+	}
+}
 ?>
 --FILE--
 <?php
@@ -23,7 +27,7 @@ require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
-	$suf = ' Type=InnoDB';
+	$suf = ' Type=' . PDOTest::detect_transactional_mysql_engine($db);
 } else {
 	$suf = '';
 }

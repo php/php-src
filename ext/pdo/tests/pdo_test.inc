@@ -43,6 +43,15 @@ class PDOTest {
 			die("skip " . $e->getMessage());
 		}
 	}
+
+	static function detect_transactional_mysql_engine($db) {
+		foreach ($db->query('show engines') as $row) {
+			if ($row[1] == 'YES' && ($row[0] == 'INNOBASE' || $row[0] == 'BDB')) {
+				return $row[0];
+			}
+		}
+		return false;
+	}
 }
 
 
