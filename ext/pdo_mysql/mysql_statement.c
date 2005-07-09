@@ -480,6 +480,12 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	return SUCCESS;
 }
 
+static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+	return mysql_stmt_free_result(S->stmt);
+}
+
 struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_dtor,
 	pdo_mysql_stmt_execute,
@@ -490,7 +496,8 @@ struct pdo_stmt_methods mysql_stmt_methods = {
 	NULL, /* set_attr */
 	NULL, /* get_attr */
 	pdo_mysql_stmt_col_meta,
-	pdo_mysql_stmt_next_rowset
+	pdo_mysql_stmt_next_rowset,
+	pdo_mysql_stmt_cursor_closer
 };
 
 /*
