@@ -727,8 +727,12 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			if (Z_TYPE_PP(link) != IS_ARRAY) {
 				convert_to_string_ex(filter);
 				ldap_filter = Z_STRVAL_PP(filter);
-				convert_to_string_ex(base_dn);
-				ldap_base_dn = Z_STRVAL_PP(base_dn);
+
+				/* If anything else than string is passed, ldap_base_dn = NULL */
+				if (Z_TYPE_PP(base_dn) == IS_STRING) {
+					convert_to_string_ex(base_dn);
+					ldap_base_dn = Z_STRVAL_PP(base_dn);
+				}
 			}
 		break;
 
@@ -764,8 +768,13 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(base_dn));
 		} else {
 			nbases = 0; /* this means string, not array */
-			convert_to_string_ex(base_dn);
-			ldap_base_dn = Z_STRLEN_PP(base_dn) < 1 ? NULL : Z_STRVAL_PP(base_dn);
+			/* If anything else than string is passed, ldap_base_dn = NULL */
+			if (Z_TYPE_PP(base_dn) == IS_STRING) {
+				convert_to_string_ex(base_dn);
+				ldap_base_dn = Z_STRVAL_PP(base_dn);
+			} else {
+				ldap_base_dn = NULL;
+			}
 		}
 
 		if (Z_TYPE_PP(filter) == IS_ARRAY) {
@@ -803,8 +812,14 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			if (nbases != 0) { /* base_dn an array? */
 				zend_hash_get_current_data(Z_ARRVAL_PP(base_dn), (void **)&entry);
 				zend_hash_move_forward(Z_ARRVAL_PP(base_dn));
-				convert_to_string_ex(entry);
-				ldap_base_dn = Z_STRLEN_PP(entry) < 1 ? NULL : Z_STRVAL_PP(entry);
+
+				/* If anything else than string is passed, ldap_base_dn = NULL */
+				if (Z_TYPE_PP(entry) == IS_STRING) {
+					convert_to_string_ex(entry);
+					ldap_base_dn = Z_STRVAL_PP(entry);
+				} else {
+					ldap_base_dn = NULL;
+				}
 			}
 			if (nfilters != 0) { /* filter an array? */
 				zend_hash_get_current_data(Z_ARRVAL_PP(filter), (void **)&entry);
@@ -843,11 +858,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		efree(lds);
 		efree(rcs);
 		return;
-	}
-
-	/* fix to make null base_dn's work */
-	if (strlen(ldap_base_dn) < 1) {
-		ldap_base_dn = NULL;
 	}
 
 	ld = (ldap_linkdata *) zend_fetch_resource(link TSRMLS_CC, -1, "ldap link", NULL, 1, le_link);
