@@ -77,10 +77,6 @@ $db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
 var_dump($db->query('SELECT COUNT(*) FROM classtypes')->fetchColumn());
 var_dump($db->query('SELECT id, name FROM classtypes ORDER by id')->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE));
 
-if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
-}
-
 $objs = array();
 $objs[0] = new stdClass;
 $objs[1] = new TestBase;
