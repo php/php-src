@@ -96,8 +96,18 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			S->result = mysql_stmt_result_metadata(S->stmt);
 			if (S->result) {
 				S->fields = mysql_fetch_fields(S->result);
-				stmt->column_count = (int)mysql_num_fields(S->result);
 
+				if (S->bound_result) {
+					int i;
+				        for (i = 0; i < stmt->column_count; i++) {
+				        	efree(S->bound_result[i].buffer); 
+					}
+				        efree(S->bound_result);
+				        efree(S->out_null);
+				        efree(S->out_length);
+				}
+
+				stmt->column_count = (int)mysql_num_fields(S->result);
 				S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
 				S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
 				S->out_length = ecalloc(stmt->column_count, sizeof(unsigned long));
