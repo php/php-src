@@ -498,6 +498,11 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 	return 1;
 }
 
+static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
+{
+	return 1;
+}
+
 struct pdo_stmt_methods pgsql_stmt_methods = {
 	pgsql_stmt_dtor,
 	pgsql_stmt_execute,
@@ -508,7 +513,8 @@ struct pdo_stmt_methods pgsql_stmt_methods = {
 	NULL, /* set_attr */
 	NULL, /* get_attr */
 	pgsql_stmt_get_column_meta,
-	NULL  /* next_rowset */
+	NULL,  /* next_rowset */
+	pdo_pgsql_stmt_cursor_closer
 };
 
 /*
