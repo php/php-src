@@ -730,7 +730,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 				/* If anything else than string is passed, ldap_base_dn = NULL */
 				if (Z_TYPE_PP(base_dn) == IS_STRING) {
-					convert_to_string_ex(base_dn);
 					ldap_base_dn = Z_STRVAL_PP(base_dn);
 				}
 			}
@@ -770,7 +769,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			nbases = 0; /* this means string, not array */
 			/* If anything else than string is passed, ldap_base_dn = NULL */
 			if (Z_TYPE_PP(base_dn) == IS_STRING) {
-				convert_to_string_ex(base_dn);
 				ldap_base_dn = Z_STRVAL_PP(base_dn);
 			} else {
 				ldap_base_dn = NULL;
@@ -815,7 +813,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 				/* If anything else than string is passed, ldap_base_dn = NULL */
 				if (Z_TYPE_PP(entry) == IS_STRING) {
-					convert_to_string_ex(entry);
 					ldap_base_dn = Z_STRVAL_PP(entry);
 				} else {
 					ldap_base_dn = NULL;
