@@ -483,7 +483,10 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+#if HAVE_MYSQL_STMT_PREPARE
 	return mysql_stmt_free_result(S->stmt);
+#endif
+	return 1;
 }
 
 struct pdo_stmt_methods mysql_stmt_methods = {
