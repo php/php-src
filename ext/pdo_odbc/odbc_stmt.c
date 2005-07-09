@@ -489,8 +489,6 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	SQLSMALLINT colcount;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
-	free_cols(stmt, S TSRMLS_CC);
-
 	/* NOTE: can't guarantee that output or input/output parameters
 	 * are set until this fella returns SQL_NO_DATA, according to
 	 * MSDN ODBC docs */
@@ -500,6 +498,7 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 
+	free_cols(stmt, S TSRMLS_CC);
 	/* how many columns do we have ? */
 	SQLNumResultCols(S->stmt, &colcount);
 	stmt->column_count = (int)colcount;
