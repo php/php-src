@@ -18,15 +18,12 @@ $db->exec('INSERT INTO test VALUES(0, \'String0\')');
 $db->exec('INSERT INTO test VALUES(1, \'String1\')');
 $db->exec('INSERT INTO test VALUES(2, \'String2\')');
 
-if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
-}
-
 $stmt1 = $db->prepare('SELECT COUNT(idx) FROM test');
 $stmt2 = $db->prepare('SELECT idx, txt FROM test ORDER by idx');
 
 $stmt1->execute();
 var_dump($stmt1->fetchColumn());
+$stmt1 = null;
 
 $stmt2->execute();
 $cont = $stmt2->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE);
@@ -61,6 +58,7 @@ foreach($cont as $idx => $txt)
 		$stmt3->bindColumn('txt', $col1);
 	}
 	var_dump($stmt3->fetch(PDO_FETCH_BOUND));
+	$stmt3->closeCursor();
 
 	var_dump($stmt4->execute());
 	if ($idx == 0) {
@@ -69,6 +67,7 @@ foreach($cont as $idx => $txt)
 		$stmt4->bindColumn('idx', $col2);
 	}
 	var_dump($stmt4->fetch(PDO_FETCH_BOUND));
+	$stmt4->closeCursor();
 	var_dump(array($col2=>$col1));
 }
 
@@ -81,9 +80,11 @@ foreach($cont as $idx => $txt)
 	var_dump(array($idx=>$txt));
 	var_dump($stmt3->execute());
 	var_dump($stmt3->fetch(PDO_FETCH_BOUND));
+	$stmt3->closeCursor();
 	var_dump($col1);
 	var_dump($stmt4->execute());
 	var_dump($stmt4->fetch(PDO_FETCH_BOUND));
+	$stmt4->closeCursor();
 	var_dump($col1);
 }
 

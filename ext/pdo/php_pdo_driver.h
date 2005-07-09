@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050708
+#define PDO_DRIVER_API	20050709
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -367,6 +367,12 @@ typedef int (*pdo_stmt_get_column_meta_func)(pdo_stmt_t *stmt, long colno, zval 
  * to the caller. */
 typedef int (*pdo_stmt_next_rowset_func)(pdo_stmt_t *stmt TSRMLS_DC);
 
+/* closes the active cursor on a statement, leaving the prepared
+ * statement ready for re-execution.  Useful to explicitly state
+ * that you are done with a given rowset, without having to explicitly
+ * fetch all the rows. */
+typedef int (*pdo_stmt_cursor_closer_func)(pdo_stmt_t *stmt TSRMLS_DC);
+
 struct pdo_stmt_methods {
 	pdo_stmt_dtor_func			dtor;
 	pdo_stmt_execute_func		executer;
@@ -378,6 +384,7 @@ struct pdo_stmt_methods {
 	pdo_stmt_get_attr_func		get_attribute;
 	pdo_stmt_get_column_meta_func get_column_meta;
 	pdo_stmt_next_rowset_func		next_rowset;
+	pdo_stmt_cursor_closer_func 	cursor_closer;
 };
 
 /* }}} */

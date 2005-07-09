@@ -1681,16 +1681,12 @@ static PHP_METHOD(PDOStatement, setFetchMode)
 
 /* {{{ proto bool PDOStatement::nextRowset()
    Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeded, false otherwise */
-static PHP_METHOD(PDOStatement, nextRowset)
+
+static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	if (!stmt->methods->next_rowset) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets" TSRMLS_CC);
-		RETURN_FALSE;
+	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		return 0;
 	}
-
-	PDO_STMT_CLEAR_ERR();
 
 	/* un-describe */
 	if (stmt->columns) {
@@ -1701,11 +1697,27 @@ static PHP_METHOD(PDOStatement, nextRowset)
 			efree(cols[i].name);
 		}
 		efree(stmt->columns);
-	}
-	stmt->columns = NULL;
-
-	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		stmt->columns = NULL;
 		stmt->column_count = 0;
+	}
+
+	pdo_stmt_describe_columns(stmt TSRMLS_CC);
+
+	return 1;
+}
+
+static PHP_METHOD(PDOStatement, nextRowset)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!stmt->methods->next_rowset) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets" TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	PDO_STMT_CLEAR_ERR();
+	
+	if (!pdo_stmt_do_next_rowset(stmt TSRMLS_CC)) {
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
@@ -1715,6 +1727,41 @@ static PHP_METHOD(PDOStatement, nextRowset)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto bool PDOStatement::closeCursor()
+   Closes the cursor, leaving the statement ready for re-execution. */
+static PHP_METHOD(PDOStatement, closeCursor)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!stmt->methods->cursor_closer) {
+		/* emulate it by fetching and discarding rows */
+		do {
+			while (stmt->methods->fetcher(stmt, PDO_FETCH_ORI_NEXT, 0 TSRMLS_CC))
+				;
+			if (!stmt->methods->next_rowset) {
+				break;
+			}
+
+			if (!pdo_stmt_do_next_rowset(stmt TSRMLS_CC)) {
+				break;
+			}
+				
+		} while (1);
+		RETURN_TRUE;
+	}
+
+	PDO_STMT_CLEAR_ERR();
+
+	if (!stmt->methods->cursor_closer(stmt TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
@@ -1733,6 +1780,7 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, getColumnMeta,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, setFetchMode,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, nextRowset,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, closeCursor,	NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
