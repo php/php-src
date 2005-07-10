@@ -1393,7 +1393,7 @@ relativetext = (reltextnumber space reltextunit)+;
 		goto std;
 	}
 
-	"\0"|"\n"
+	"\000"|"\n"
 	{
 		s->pos = cursor; s->line++;
 		goto std;
