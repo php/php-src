@@ -96,11 +96,11 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			my_bool on = 1;
 			/* if we have bound the buffers don't set the attribute again */
 			if (!S->result) {
-				for (i= 0; i < stmt->column_count; i++) {
-					/*
-						FIXME: using directly internal structs - but for now cleaner
-						then calling 2 times result_metadata.
-					*/
+				/*
+				FIXME: using directly internal structs - but for now cleaner
+				then calling 2 times result_metadata.
+				*/
+				for (i= 0; i < S->stmt->field_count; i++) {
 					switch (S->fields[i].type) {
 						case MYSQL_TYPE_MEDIUM_BLOB:
 						case MYSQL_TYPE_LONG_BLOB:
