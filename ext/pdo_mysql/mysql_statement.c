@@ -94,7 +94,25 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		/* if buffered, pre-fetch all the data */
 		if (H->buffered) {
 			my_bool on = 1;
-			mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
+			/* if we have bound the buffers don't set the attribute again */
+			if (!S->result) {
+				for (i= 0; i < stmt->column_count; i++) {
+					/*
+						FIXME: using directly internal structs - but for now cleaner
+						then calling 2 times result_metadata.
+					*/
+					switch (S->fields[i].type) {
+						case MYSQL_TYPE_MEDIUM_BLOB:
+						case MYSQL_TYPE_LONG_BLOB:
+						case MYSQL_TYPE_BLOB:
+							mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
+							i= stmt->column_count;
+							break;
+						default:
+							break;
+					}
+				}
+			}
 			mysql_stmt_store_result(S->stmt);
 		}
 
