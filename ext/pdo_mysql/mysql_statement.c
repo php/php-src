@@ -78,7 +78,6 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	my_ulonglong row_count;
 #if HAVE_MYSQL_STMT_PREPARE
 	int i;
-	my_bool on = 1;
 
 	if (S->stmt) {
 		/* (re)bind the parameters */
@@ -92,7 +91,12 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			return 0;
 		}
 
-		mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
+		/* if buffered, pre-fetch all the data */
+		if (H->buffered) {
+			my_bool on = 1;
+			mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
+			mysql_stmt_store_result(S->stmt);
+		}
 
 		if (!S->result) {
 			/* figure out the result set format, if any */
@@ -117,7 +121,9 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 				/* summon memory to hold the row */
 				for (i = 0; i < stmt->column_count; i++) {
-					S->bound_result[i].buffer_length = S->fields[i].length;
+					S->bound_result[i].buffer_length =
+                    		S->fields[i].max_length? S->fields[i].max_length:
+                            						 S->fields[i].length;
 					S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
 					S->bound_result[i].is_null = &S->out_null[i];
 					S->bound_result[i].length = &S->out_length[i];
@@ -131,10 +137,6 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			}
 		}
 
-		/* if buffered, pre-fetch all the data */
-		if (H->buffered) {
-			mysql_stmt_store_result(S->stmt);
-		}
 		
 		stmt->row_count = mysql_stmt_affected_rows(S->stmt);
 		return 1;
