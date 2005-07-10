@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1 Beta 3
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
+- Moved extensions to PECL:
+  . ext/dbx         (Jani, Derick)
+  . ext/ircg        (Jani, Derick)
 - Added PDO_MYSQL_ATTR_USE_BUFFERED_QUERY parameter for pdo_mysql. (Ilia)
 - Added date_timezone_set() function to set the timezone that the date
   functions will use. (Derick)
