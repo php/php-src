@@ -1,3 +1,15 @@
+2005-07-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      show ugly full path for failed redirected tests
+
+    * ext/ldap/ldap.c:
+      - No need to use convert_to_string_ex() when dealing with strings
+
+    * NEWS
+      ext/ldap/ldap.c:
+      - Fixed bug #33588 (LDAP: RootDSE query not possible).
+
 2005-07-08  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * run-tests.php:
