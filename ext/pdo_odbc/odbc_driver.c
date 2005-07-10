@@ -96,11 +96,10 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
+
 	if (H->dbc != SQL_NULL_HANDLE) {
 		SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
-#ifndef A_BUG_ON_FOR_WEZ_ON_PHP_WIN32 /* avoiding a bug I've found on my XP box */
 		SQLDisconnect(H->dbc);
-#endif
 		SQLFreeHandle(SQL_HANDLE_DBC, H->dbc);
 		H->dbc = NULL;
 	}
@@ -216,7 +215,7 @@ out:
 static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type param_type  TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
-
+	/* TODO: figure it out */
 	return 0;
 }
 
@@ -227,7 +226,7 @@ static int odbc_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 		RETCODE rc;
 		pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 
-		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_NTS);
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
 			return 0;
@@ -253,7 +252,7 @@ static int odbc_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 
 	if (dbh->auto_commit) {
 		/* turn auto-commit back on again */
-		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
 			return 0;
@@ -266,7 +265,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
-	
+
 	rc = SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
 
 	if (rc != SQL_SUCCESS) {
@@ -278,7 +277,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	if (dbh->auto_commit && H->dbc) {
 		/* turn auto-commit back on again */
-		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_NTS);
+		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_INTEGER);
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = ON");
 			return 0;
@@ -340,7 +339,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 		goto fail;
 	}
 
-#if 0 /*&& def SQL_ATTR_CONNECTION_POOLING */
+#ifdef SQL_ATTR_CONNECTION_POOLING
 	if (pdo_odbc_pool_on != SQL_CP_OFF) {
 		rc = SQLSetEnvAttr(H->env, SQL_ATTR_CP_MATCH, (void*)pdo_odbc_pool_mode, 0);
 		if (rc != SQL_SUCCESS) {
@@ -357,7 +356,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	}
 
 	rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT,
-		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_NTS);
+		(SQLPOINTER)(dbh->auto_commit ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF), SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT");
 		goto fail;
@@ -365,12 +364,11 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 
 	/* set up the cursor library, if needed, or if configured explicitly */
 	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
-	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, 0);
+	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");
 		goto fail;
 	}
-	
 
 	if (strchr(dbh->data_source, ';')) {
 		char dsnbuf[1024];
