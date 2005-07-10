@@ -78,6 +78,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	my_ulonglong row_count;
 #if HAVE_MYSQL_STMT_PREPARE
 	int i;
+	my_bool on = 1;
 
 	if (S->stmt) {
 		/* (re)bind the parameters */
@@ -90,6 +91,8 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			pdo_mysql_error_stmt(stmt);
 			return 0;
 		}
+
+		mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
 
 		if (!S->result) {
 			/* figure out the result set format, if any */
