@@ -1,3 +1,76 @@
+2005-07-10  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS
+      ext/dbx/.cvsignore
+      ext/dbx/CREDITS
+      ext/dbx/INSTALL
+      ext/dbx/config.m4
+      ext/dbx/config.w32
+      ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_oci8.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/dbx_sqlite.c
+      ext/dbx/dbx_sqlite.h
+      ext/dbx/dbx_sybasect.c
+      ext/dbx/dbx_sybasect.h
+      ext/dbx/howto_extend_dbx.html
+      ext/dbx/package.xml
+      ext/dbx/php_dbx.h
+      ext/dbx/tests/.cvsignore
+      ext/dbx/tests/001.phpt
+      ext/dbx/tests/002.phpt
+      ext/dbx/tests/003.phpt
+      ext/dbx/tests/004.phpt
+      ext/dbx/tests/005.phpt
+      ext/dbx/tests/006.phpt
+      ext/dbx/tests/007.phpt
+      ext/dbx/tests/008.phpt
+      ext/dbx/tests/009.phpt
+      ext/dbx/tests/010.phpt
+      ext/dbx/tests/dbx_test.p
+      ext/dbx/tests/dbx_test.pgsql.script
+      ext/dbx/tests/dbx_test.script
+      ext/dbx/tests/skipif.inc
+      ext/ircg/.cvsignore
+      ext/ircg/CREDITS
+      ext/ircg/Makefile.frag
+      ext/ircg/README.txt
+      ext/ircg/config.m4
+      ext/ircg/ircg.c
+      ext/ircg/ircg.php
+      ext/ircg/ircg_common.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re
+      ext/ircg/ircg_thttpd.c
+      ext/ircg/php_ircg.h
+      ext/ircg/php_ircg_alloc.h
+      ext/ircg/php_ircg_cache.c
+      ext/ircg/php_ircg_cache.h
+      ext/ircg/php_ircg_conversion.c
+      ext/ircg/php_ircg_conversion.h
+      ext/ircg/php_ircg_error.c
+      ext/ircg/php_ircg_error.h
+      ext/ircg/php_ircg_formats.h
+      ext/ircg/php_ircg_hash.h
+      ext/ircg/php_ircg_lock.h
+      ext/ircg/php_ircg_private.h
+      ext/ircg/php_ircg_smart_str.h
+      ext/ircg/php_ircg_tokenizer.c
+      ext/ircg/php_ircg_tokenizer.h:
+      - Moved ext/dbx and ext/ircg to PECL.
+
 2005-07-09  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * run-tests.php:
