@@ -497,16 +497,15 @@ if (!getenv('NO_INTERACTION')) {
 		
 		$failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
 		$failed_tests_data .= "OS:\n" . PHP_OS . " - " . php_uname() . "\n\n";
-		$ldd = $automake = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
+		$ldd = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
 
 		if (substr(PHP_OS, 0, 3) != "WIN") {
-			/* Determine the names of the autotools executables. */
-			$automake = (!empty($_ENV['PHP_AUTOMAKE'])) ? $_ENV['PHP_AUTOMAKE'] : 'automake';
-			$autoconf = (!empty($_ENV['PHP_AUTOCONF'])) ? $_ENV['PHP_AUTOCONF'] : 'autoconf';
-
-			/* Extract the tools' versions (overwriting our local variables). */
-			$automake = shell_exec("$automake --version");
-			$autoconf = shell_exec("$autoconf --version");
+			/* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */
+			if (!empty($_ENV['PHP_AUTOCONF'])) {
+				$autoconf = shell_exec($_ENV['PHP_AUTOCONF'] . ' --version');
+			} else {
+				$autoconf = shell_exec('autoconf --version');
+			}
 
 			/* Always use the generated libtool - Mac OSX uses 'glibtool' */
 			$libtool = shell_exec($CUR_DIR . '/libtool --version');
@@ -527,7 +526,6 @@ if (!getenv('NO_INTERACTION')) {
 			}
 			$ldd = shell_exec("ldd $php 2>/dev/null");
 		}
-		$failed_tests_data .= "Automake:\n$automake\n";
 		$failed_tests_data .= "Autoconf:\n$autoconf\n";
 		$failed_tests_data .= "Bundled Libtool:\n$libtool\n";
 		$failed_tests_data .= "System Libtool:\n$sys_libtool\n";
