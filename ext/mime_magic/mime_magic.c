@@ -1073,6 +1073,8 @@ static int magic_process(zval *what TSRMLS_DC)
 		streampos = php_stream_tell(stream); /* remember stream position for restauration */
 		php_stream_seek(stream, 0, SEEK_SET);
 		break;
+	default:
+		return -1;	
 	}
 
 
