@@ -225,8 +225,7 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 		pdo_mysql_error(dbh);
 		return -1;
 	} else {
-		long c = mysql_affected_rows(H->server);
-		return c >0 ? c : 0;
+		return mysql_affected_rows(H->server);
 	}
 }
 
@@ -242,11 +241,9 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	*quoted = emalloc(2*unquotedlen + 3);
-	(*quoted)[0] = '"';
 	*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
-	(*quoted)[*quotedlen + 1] = '"';
-	(*quoted)[*quotedlen + 2] = '\0';
-	*quotedlen += 2;
+	(*quoted)[0] =(*quoted)[*quotedlen + 1] = '"';
+	(*quoted)[*quotedlen+=2] = '\0';
 	return 1;
 }
 
@@ -329,7 +326,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_LONG(return_value, dbh->auto_commit);
 			return 1;
-
+			
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
 			ZVAL_LONG(return_value, H->buffered);
 			return 1;
@@ -398,7 +395,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* allocate an environment */
 	
 	/* handle for the server */
-	H->server = mysql_init(NULL);
+	if (!(H->server = mysql_init(NULL))) {
+		pdo_mysql_error(dbh);
+		goto cleanup;
+	}
+	
 	dbh->driver_data = H;
 
 	/* handle MySQL options */
