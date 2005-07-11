@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2005, Version 4.4.1
+- Fixed bug #31158 (array_splice on $GLOBALS crashes). (Dmitry)
+
 11 Jul 2005, Version 4.4.0
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
 - Added support for .cc files in extensions. (Brian)
