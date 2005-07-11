@@ -1,15 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 11 Jul 2005, Version 4.4.0
-- Fixed memory corruption in pg_copy_from() in case the as_null parameter was
-  passed. (Derick)
-- Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
-
-01 Jul 2005, Version 4.4.0 RC2
-- Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
-- Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
-
-13 Jun 2005, Version 4.4.0 RC1
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
 - Added support for .cc files in extensions. (Brian)
 - Added the sorting flag SORT_LOCALE_STRING to the sort() functions which makes
@@ -18,6 +9,8 @@ PHP 4                                                                      NEWS
   low level IO. (Uwe)
 - Fixed memory corruptions when using references in a wrong way. (Marcus,
   Dmitry, Derick)
+- Fixed memory corruption in pg_copy_from() in case the as_null parameter was
+  passed. (Derick)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed bug #32685, #29423 (Segfault when using assignment by reference within
   function). (Dmitry, Derick)
@@ -83,11 +76,14 @@ PHP 4                                                                      NEWS
   response message). (Jani) 
 - Fixed bug #31583 (php_std_date() uses short day names in non-y2k_compliance mode).
   (mike at php dot net)
+- Fixed bug #31213 (Sideeffects caused by fix of bug #29493). (Dmitry)
+- Fixed bug #30052 (Crash on shutdown after odbc_pconnect()). (Edin)
 - Fixed bug #29975 (memory leaks when set_error_handler() is used inside error 
   handler). (Tony)
 - Fixed bug #29944 (Function defined in switch, crashes). (Dmitry)
 - Fixed bug #29338 (unencoded spaces get ignored after certain tags). (Ilia)
 - Fixed bug #28605 (Need to use -[m]ieee option for Alpha CPUs). (Jani)
+- Fixed bug #28377 (debug_backtrace is intermittently passing args). (Dmitry)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
