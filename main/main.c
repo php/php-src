@@ -1767,11 +1767,17 @@ PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 
 	if (ret == -1) {
 		SG(request_info).auth_user = SG(request_info).auth_password = NULL;
+	} else {
+		SG(request_info).auth_digest = NULL;
 	}
 	
-	if (auth && auth[0] != '\0' && strncmp(auth, "Digest ", 7) == 0) {
+	if (ret == -1 && auth && auth[0] != '\0' && strncmp(auth, "Digest ", 7) == 0) {
 		SG(request_info).auth_digest = estrdup(auth);
 		ret = 0;
+	}
+
+	if (ret == -1) {
+		SG(request_info).auth_digest = NULL;
 	}
 
 	return ret;
