@@ -584,6 +584,11 @@ PHP_FUNCTION(file_put_contents)
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
+
+	if (flags & LOCK_EX && php_stream_lock(stream, LOCK_EX)) {
+		RETURN_FALSE;
+	}
+
 	switch (Z_TYPE_P(data)) {
 		case IS_RESOURCE:
 		{

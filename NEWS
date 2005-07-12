@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   functions will use. (Derick)
 - Added pg_fetch_all_columns() function to fetch all values of a column from
   a result cursor. (Ilia)
+- Added support for LOCK_EX flag for file_put_contents(). (Ilia)
 - Implemented feature request #33452 (Year belonging to ISO week). (Derick)
 - Fixed support for shared extensions on AIX. (Dmitry)
 - Fixed memory corruption in pg_copy_from() in case the as_null parameter was
