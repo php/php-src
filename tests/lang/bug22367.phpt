@@ -74,7 +74,7 @@ bool(false)
 
 Notice: Undefined offset:  5 in %sbug22367.php on line %d
 
-Strict Standards: Only variable references should be returned by reference in %sbug22367.php on line %d
+Notice: Only variable references should be returned by reference in %sbug22367.php on line %d
 bool(false)
 array(5) {
   [0]=>
