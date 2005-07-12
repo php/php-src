@@ -78,8 +78,16 @@ int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	if (einfo->dberrstr) {
 		efree(einfo->dberrstr);
 	}
-	einfo->oserrstr = estrdup(oserrstr);
-	einfo->dberrstr = estrdup(dberrstr);
+	if (oserrstr) {
+		einfo->oserrstr = estrdup(oserrstr);
+	} else {
+		einfo->oserrstr = NULL;
+	}
+	if (dberrstr) {
+		einfo->dberrstr = estrdup(dberrstr);
+	} else {
+		einfo->dberrstr = NULL;
+	}
 
 	switch (dberr) {
 		case SYBESEOF:
