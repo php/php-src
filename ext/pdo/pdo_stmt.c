@@ -92,7 +92,14 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 			return 1;
 		}
 		if (!param->name) {
-			return 1;
+			/* do the reverse; map the parameter number to the name */
+			if (SUCCESS == zend_hash_index_find(stmt->bound_param_map, param->paramno, (void**)&name)) {
+				param->name = estrdup(name);
+				param->namelen = strlen(param->name);
+				return 1;
+			}
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
+			return 0;
 		}
     
 		zend_hash_internal_pointer_reset(stmt->bound_param_map);
