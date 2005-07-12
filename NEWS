@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - Fixed bug #33171 (foreach enumerates private fields declared in base
   classes). (Dmitry)
 - Fixed bug #33164 (Soap extension incorrectly detects HTTP/1.1). (Ilia)
+- Fixed bug #33156 (cygwin version of setitimer doesn't accept ITIMER_PROF).
+  (Nuno)
 - Fixed bug #33116 (crash when assigning class name to global variable in
   __autoload). (Dmitry)
 - Fixed bug #33090 (mysqli_prepare() doesn't return an error). (Georg)
