@@ -323,6 +323,7 @@ PHP_FUNCTION(mysqli_set_charset)
 /* }}} */
 #endif
 
+#ifdef HAVE_MYSQLI_GET_CHARSET 
 /* {{{ object mysqli_get_charset(object link) 
    returns a character set object */
 PHP_FUNCTION(mysqli_get_charset)
@@ -350,6 +351,7 @@ PHP_FUNCTION(mysqli_get_charset)
 	add_property_long(return_value, "state", cs.state);
 }
 /* }}} */
+#endif
 
 /*
  * Local variables:
