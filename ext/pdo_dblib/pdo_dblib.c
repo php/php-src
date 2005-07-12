@@ -42,10 +42,10 @@ zend_module_entry pdo_dblib_module_entry = {
 	STANDARD_MODULE_HEADER,
 #if PDO_DBLIB_IS_MSSQL
 	"pdo_mssql",
-#elif define (PHP_WIN32)
+#elif defined(PHP_WIN32)
 	"pdo_sybase",
 #else
-	"pdo_dblib"
+	"pdo_dblib",
 #endif
 	pdo_dblib_functions,
 	PHP_MINIT(pdo_dblib),
