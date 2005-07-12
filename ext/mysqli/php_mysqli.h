@@ -26,6 +26,12 @@
 #endif
 
 #include <mysql.h>
+
+/* character set support */
+#if MYSQL_VERSION_ID > 50009
+#define HAVE_MYSQLI_SET_CHARSET
+#endif
+
 #include <errmsg.h>
 
 #ifndef PHP_MYSQLI_H
@@ -96,42 +102,12 @@ typedef struct {
 	void	*userdata;
 } mysqli_local_infile;
 
-typedef struct {
-  uint				number;
-  uint				primary_number;
-  uint				binary_number;
-  uint				state;
-  const char		*csname;
-  const char		*name;
-  const char		*comment;
-  const char		*tailoring;
-  unsigned char		*ctype;
-  unsigned char		*to_lower;
-  unsigned char		*to_upper;
-  unsigned char		*sort_order;
-  unsigned short	*contractions;
-  unsigned short	**sort_order_big;
-  unsigned short	*tab_to_uni;
-  void				*tab_from_uni;
-  unsigned char		*state_map;
-  unsigned char		*ident_map;
-  uint				strxfrm_multiply;
-  uint				mbminlen;
-  uint				mbmaxlen;
-  unsigned short	min_sort_char;
-  unsigned short	max_sort_char; /* For LIKE optimization */
-} CHARSET_INFO;
-
 #define phpext_mysqli_ptr &mysqli_module_entry
 
 #ifdef PHP_WIN32
 #define PHP_MYSQLI_API __declspec(dllexport)
 #else
 #define PHP_MYSQLI_API
-#endif
-
-#if (MYSQL_VERSION_ID > 40112 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID > 50005
-#define HAVE_MYSQLI_SET_CHARSET
 #endif
 
 #ifdef ZTS
