@@ -276,8 +276,14 @@ rewrite:
 		/* rewrite ? to :pdoX */
 		char idxbuf[32];
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
+		char *name;
 		
 		newbuffer_len = inquery_len;
+
+		if (stmt->bound_param_map == NULL) {
+			ALLOC_HASHTABLE(stmt->bound_param_map);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+		}
 
 		for (plc = placeholders; plc; plc = plc->next) {
 			snprintf(idxbuf, sizeof(idxbuf), tmpl, plc->bindno + 1);
@@ -286,18 +292,18 @@ rewrite:
 			plc->freeq = 1;
 			newbuffer_len += plc->qlen;
 
+			name = estrndup(plc->pos, plc->len);
+
 			if (stmt->named_rewrite_template) {
 				/* create a mapping */
-				char *name = estrndup(plc->pos, plc->len);
 				
-				if (stmt->bound_param_map == NULL) {
-					ALLOC_HASHTABLE(stmt->bound_param_map);
-					zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
-				}
-
 				zend_hash_update(stmt->bound_param_map, name, plc->len + 1, idxbuf, plc->qlen + 1, NULL);
-				efree(name);
 			}
+
+			/* map number to name */
+			zend_hash_index_update(stmt->bound_param_map, plc->bindno, idxbuf, plc->qlen + 1, NULL);
+			
+			efree(name);
 		}
 				
 		goto rewrite;
