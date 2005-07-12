@@ -257,8 +257,10 @@ cleanup:
 pdo_driver_t pdo_dblib_driver = {
 #if PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
-#else
+#elif defined(PHP_WIN32)
 	PDO_DRIVER_HEADER(sybase),
+#else
+	PDO_DRIVER_HEADER(dblib),
 #endif
 	pdo_dblib_handle_factory
 };
