@@ -22,6 +22,10 @@
 #ifndef PHP_PDO_DBLIB_INT_H
 #define PHP_PDO_DBLIB_INT_H
 
+#ifndef PDO_DBLIB_FLAVOUR
+# define PDO_DBLIB_FLAVOUR "Generic DB-lib"
+#endif
+
 #if PHP_DBLIB_IS_MSSQL
 # include <sqlfront.h>
 # include <sqldb.h>
