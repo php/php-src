@@ -228,6 +228,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	if (ret == 1) {
 		/* query was re-written */
 		sql = nsql;
+		sql_len = nsql_len;
 	} else if (ret == -1) {
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
