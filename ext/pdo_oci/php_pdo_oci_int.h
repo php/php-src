@@ -75,6 +75,8 @@ typedef struct {
 	ub4			actual_len;
 
 	dvoid		*thing;	/* for LOBS, REFCURSORS etc. */
+
+	unsigned used_for_output;
 } pdo_oci_bound_param;
 
 extern const ub4 PDO_OCI_INIT_MODE;
