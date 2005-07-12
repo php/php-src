@@ -96,10 +96,10 @@ ok1
 bar::run1
 foo::method1
 
-Strict Standards: Only variable references should be returned by reference in %s on line %d
+Notice: Only variable references should be returned by reference in %s on line %d
 foo::method1
 
-Strict Standards: Only variable references should be returned by reference in %s on line %d
+Notice: Only variable references should be returned by reference in %s on line %d
 foo::finalize
 done!
 ok2
@@ -118,9 +118,9 @@ ouch
 bar::run1
 foo::method1
 
-Strict Standards: Only variable references should be returned by reference in %s on line %d
+Notice: Only variable references should be returned by reference in %s on line %d
 foo::method1
 
-Strict Standards: Only variable references should be returned by reference in %s on line %d
+Notice: Only variable references should be returned by reference in %s on line %d
 foo::finalize
 I'm alive!
