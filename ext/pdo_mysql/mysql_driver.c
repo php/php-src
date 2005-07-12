@@ -177,8 +177,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		return 0;
 	}
 
-	S->stmt = mysql_stmt_init(H->server);
-	if (!S->stmt) {
+	if (!(S->stmt = mysql_stmt_init(H->server))) {
 		pdo_mysql_error(dbh);
 		if (nsql) {
 			efree(nsql);
@@ -226,7 +225,7 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 		return -1;
 	} else {
 		my_ulonglong c= mysql_affected_rows(H->server);
-		return c != (my_ulonglong)-1 ? c:-1; 
+		return c != (my_ulonglong)-1 ? c:(pdo_mysql_error(dbh),-1); 
 	}
 }
 
