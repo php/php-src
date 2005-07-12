@@ -97,6 +97,8 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	}
 	efree(S);
 
+	stmt->driver_data = NULL;
+
 	return 1;
 } /* }}} */
 
@@ -203,6 +205,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 
 	Z_STRLEN_P(param->parameter) = param->max_value_len;
 	Z_STRVAL_P(param->parameter) = emalloc(Z_STRLEN_P(param->parameter)+1);
+	P->used_for_output = 1;
 
 	P->actual_len = Z_STRLEN_P(param->parameter);	
 	*alenpp = &P->actual_len;
@@ -246,9 +249,10 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 					case PDO_PARAM_STR:
 					default:
 						P->oci_type = SQLT_CHR;
-						convert_to_string(param->parameter);
 						value_sz = param->max_value_len + 1;
-						P->actual_len = Z_STRLEN_P(param->parameter);
+						if (param->max_value_len == 0) {
+							value_sz = 4000; /* maximum size before value is interpreted as a LONG value */
+						}
 						
 				}
 				
@@ -275,30 +279,33 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 
 			case PDO_PARAM_EVT_EXEC_PRE:
 				P->indicator = 0;
+				P->used_for_output = 0;
 				return 1;
 
 			case PDO_PARAM_EVT_EXEC_POST:
 				/* fixup stuff set in motion in oci_bind_output_cb */
-				if (P->indicator == -1) {
-					/* set up a NULL value */
-					if (Z_TYPE_P(param->parameter) == IS_STRING
+				if (P->used_for_output) {
+					if (P->indicator == -1) {
+						/* set up a NULL value */
+						if (Z_TYPE_P(param->parameter) == IS_STRING
 #if ZEND_EXTENSION_API_NO < 220040718
 								&& Z_STRVAL_P(param->parameter) != empty_string
 #endif
-							) {
-						/* OCI likes to stick non-terminated strings in things */
-						*Z_STRVAL_P(param->parameter) = '\0';
-					}
-					zval_dtor(param->parameter);
-					ZVAL_NULL(param->parameter);
-				} else if (Z_TYPE_P(param->parameter) == IS_STRING
+						   ) {
+							/* OCI likes to stick non-terminated strings in things */
+							*Z_STRVAL_P(param->parameter) = '\0';
+						}
+						zval_dtor(param->parameter);
+						ZVAL_NULL(param->parameter);
+					} else if (Z_TYPE_P(param->parameter) == IS_STRING
 #if ZEND_EXTENSION_API_NO < 220040718
 							&& Z_STRVAL_P(param->parameter) != empty_string
 #endif
-						) {
-					Z_STRLEN_P(param->parameter) = P->actual_len;
-					Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), P->actual_len+1);
-					Z_STRVAL_P(param->parameter)[P->actual_len] = '\0';
+							) {
+						Z_STRLEN_P(param->parameter) = P->actual_len;
+						Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), P->actual_len+1);
+						Z_STRVAL_P(param->parameter)[P->actual_len] = '\0';
+					}
 				}
 
 				return 1;
