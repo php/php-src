@@ -476,7 +476,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 			break;
 		
 		case PDO_PARAM_STR:
-			if (value && !(value_len == 0 && stmt->dbh->oracle_nulls)) {
+			if (value && !(value_len == 0 && stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING)) {
 				ZVAL_STRINGL(dest, value, value_len, !caller_frees);
 				if (caller_frees) {
 					caller_frees = 0;
@@ -498,6 +498,10 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 				convert_to_string(dest);
 				break;
 		}
+	}
+
+	if (Z_TYPE_P(dest) == IS_NULL && stmt->dbh->oracle_nulls == PDO_NULL_TO_STRING) {
+		ZVAL_EMPTY_STRING(dest);
 	}
 }
 /* }}} */
@@ -1898,14 +1902,17 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 	if (stmt->bound_params) {
 		zend_hash_destroy(stmt->bound_params);
 		FREE_HASHTABLE(stmt->bound_params);
+		stmt->bound_params = NULL;
 	}
 	if (stmt->bound_param_map) {
 		zend_hash_destroy(stmt->bound_param_map);
 		FREE_HASHTABLE(stmt->bound_param_map);
+		stmt->bound_param_map = NULL;
 	}
 	if (stmt->bound_columns) {
 		zend_hash_destroy(stmt->bound_columns);
 		FREE_HASHTABLE(stmt->bound_columns);
+		stmt->bound_columns = NULL;
 	}
 
 	if (stmt->methods && stmt->methods->dtor) {

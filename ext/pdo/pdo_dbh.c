@@ -691,7 +691,7 @@ static PHP_METHOD(PDO, setAttribute)
 
 		case PDO_ATTR_ORACLE_NULLS:
 			convert_to_long(value);
-			dbh->oracle_nulls = Z_LVAL_P(value) ? 1 : 0;
+			dbh->oracle_nulls = Z_LVAL_P(value);
 			RETURN_TRUE;
 
 		case PDO_ATTR_STRINGIFY_FETCHES:
@@ -746,7 +746,7 @@ static PHP_METHOD(PDO, getAttribute)
 			RETURN_LONG(dbh->desired_case);
 
 		case PDO_ATTR_ORACLE_NULLS:
-			RETURN_BOOL(dbh->oracle_nulls);
+			RETURN_LONG(dbh->oracle_nulls);
 
 		case PDO_ATTR_ERRMODE:
 			RETURN_LONG(dbh->error_mode);
