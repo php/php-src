@@ -85,7 +85,6 @@ $objs[3] = new TestLeaf;
 
 $stmt = $db->prepare('SELECT id FROM classtypes WHERE name=:cname');
 $stmt->bindParam(':cname', $cname);
-$stmt->bindColumn('id', $ctype);
 
 $ctypes = array();
 
@@ -94,6 +93,7 @@ foreach($objs as $obj)
 	$cname = get_class($obj);
 	$ctype = NULL; /* set default for non stored class name */
 	$stmt->execute();
+	$stmt->bindColumn('id', $ctype);
 	$stmt->fetch(PDO_FETCH_BOUND);
 	$ctypes[$cname] = $ctype;
 }
