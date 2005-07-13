@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed memory corruption in pg_copy_from() in case the as_null parameter was
   passed. (Derick)
 - Fixed crash inside stream_get_line() when length parameter equals 0. (Ilia)
+- Fixed bug #33673 (Added detection for partially uploaded files). (Ilia)
 - Fixed bug #33605 (substr_compare() crashes with negative offset and length). 
   (Tony)
 - Fixed bug #33597 (setcookie() "expires" date format doesn't comply with RFC).
