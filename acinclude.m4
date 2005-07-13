@@ -2471,13 +2471,21 @@ dnl PHP_REGEX
 dnl
 AC_DEFUN([PHP_REGEX],[
   if test "$REGEX_TYPE" = "php"; then
+    AC_DEFINE(HAVE_REGEX_T_RE_MAGIC, 1, [ ])
     AC_DEFINE(HSREGEX,1,[ ])
     AC_DEFINE(REGEX,1,[ ])
     PHP_ADD_SOURCES(regex, regcomp.c regexec.c regerror.c regfree.c)
   elif test "$REGEX_TYPE" = "system"; then
     AC_DEFINE(REGEX,0,[ ])
+    dnl Check if field re_magic exists in struct regex_t
+    AC_CACHE_CHECK([whether field re_magic exists in struct regex_t], ac_cv_regex_t_re_magic, [
+      AC_TRY_COMPILE([#include <regex.h>], [struct regex_t rt; rt.re_magic;],
+      [ac_cv_regex_t_re_magic=yes], [ac_cv_regex_t_re_magic=no])
+    ])
+    if test "$ac_cv_regex_re_magic" = "yes"; then
+      AC_DEFINE([HAVE_REGEX_RE_MAGIC], [ ], 1)
+    fi 
   fi
-
   AC_MSG_CHECKING([which regex library to use])
   AC_MSG_RESULT([$REGEX_TYPE])
 ])
