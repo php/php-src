@@ -2482,8 +2482,8 @@ AC_DEFUN([PHP_REGEX],[
       AC_TRY_COMPILE([#include <regex.h>], [struct regex_t rt; rt.re_magic;],
       [ac_cv_regex_t_re_magic=yes], [ac_cv_regex_t_re_magic=no])
     ])
-    if test "$ac_cv_regex_re_magic" = "yes"; then
-      AC_DEFINE([HAVE_REGEX_RE_MAGIC], [ ], 1)
+    if test "$ac_cv_regex_t_re_magic" = "yes"; then
+      AC_DEFINE([HAVE_REGEX_T_RE_MAGIC], [ ], 1)
     fi 
   fi
   AC_MSG_CHECKING([which regex library to use])
