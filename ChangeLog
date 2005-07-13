@@ -1,3 +1,77 @@
+2005-07-12  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_1_0b3)
+      NEWS:
+      - Update Beta 3 date
+
+2005-07-12  Antony Dovgal  <antony@zend.com>
+
+    * (php_5_1_0b3)
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      add forgotten ifdefs, fix #33667 (mysqli doesn't compile)
+
+2005-07-12  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Update News
+
+    * configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev
+
+    * (php_5_1_0b3)
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Beta 3
+
+2005-07-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/file.c:
+      Added support for LOCK_EX flag for file_put_contents().
+
+    * (php_5_1_0b3)
+      main/SAPI.c
+      main/main.c:
+      Fixed double-free in the digest authentication handling.
+      
+
+2005-07-12  Georg Richter  <georg@mysql.com>
+
+    * (php_5_1_0b3)
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      changed version dependency for charset functions
+
+2005-07-12  Antony Dovgal  <antony@zend.com>
+
+    * (php_5_1_0b3)
+      tests/lang/bug22367.phpt
+      tests/lang/bug22510.phpt:
+      fix tests that started to fail after the last change in ZE
+      (noticed by Nuno)
+
+2005-07-12  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      removed charset structure. libmysql now provides a function
+      mysqli_get_character_set_info (Vers. 5.0.10)
+
+2005-07-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      NEWS
+      Zend/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_execute_API.c:
+      Fixed bug #33156 (cygwin version of setitimer doesn't accept ITIMER_PROF).
+      (Nuno)
+
 2005-07-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ZendEngine2/zend_vm_def.h
