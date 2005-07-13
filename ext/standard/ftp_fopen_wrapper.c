@@ -115,6 +115,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 	int result, use_ssl, use_ssl_on_data = 0, tmp_len;
 	char *scratch;
 	char tmp_line[512];
+	char *transport;
+	int transport_len;
 
 	resource = php_url_parse(path);
 	if (resource == NULL || resource->path == NULL) {
@@ -130,7 +132,9 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 	if (resource->port == 0)
 		resource->port = 21;
 	
-	stream = php_stream_sock_open_host(resource->host, resource->port, SOCK_STREAM, NULL, 0);
+	transport_len = spprintf(&transport, 0, "tcp://%s:%d", resource->host, resource->port);
+	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, NULL, NULL, NULL);
+	efree(transport);
 	if (stream == NULL) {
 		result = 0; /* silence */
 		goto connect_errexit;
@@ -399,6 +403,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	zval **tmpzval;
 	int allow_overwrite = 0;
 	int read_write = 0;
+	char *transport;
+	int transport_len;
 
 	tmp_line[0] = '\0';
 
@@ -535,7 +541,9 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	if (hoststart == NULL) {
 		hoststart = resource->host;
 	}
-	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
+	transport_len = spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
+	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, NULL, NULL, NULL);
+	efree(transport);
 	if (datastream == NULL) {
 		goto errexit;
 	}
@@ -553,9 +561,9 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
 
-	if (use_ssl_on_data && (php_stream_xport_crypto_setup(stream,
+	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
-			php_stream_xport_crypto_enable(stream, 1 TSRMLS_CC) < 0)) {
+			php_stream_xport_crypto_enable(datastream, 1 TSRMLS_CC) < 0)) {
 
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
 		php_stream_close(datastream);
