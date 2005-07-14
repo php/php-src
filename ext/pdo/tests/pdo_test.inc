@@ -52,6 +52,16 @@ class PDOTest {
 		}
 		return false;
 	}
+
+	static function test_factory($file) {
+		$data = file_get_contents($file);
+		$data = preg_replace('/^.*--REDIRECTTEST--/s', '', $data);
+		$config = eval($data);
+		foreach ($config['ENV'] as $k => $v) {
+			putenv("$k=$v");
+		}
+		return self::factory();
+	}
 }
 
 
