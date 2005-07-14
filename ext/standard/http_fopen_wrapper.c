@@ -190,7 +190,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		redirect_max = Z_LVAL_PP(tmpzval);
 	}
 
-	if (context &&
+	if (header_init && context &&
 		php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
 		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
 			scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
@@ -267,6 +267,35 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		   php_trim will estrndup() */
 		tmp = php_trim(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
 		if (strlen(tmp) > 0) {
+			if (!header_init) { /* Remove post headers for redirects */
+				int l = strlen(tmp);
+				char *s, *s2, *tmp_c = estrdup(tmp);
+				
+				php_strtolower(tmp_c, l);
+				if ((s = strstr(tmp_c, "content-length:"))) {
+					if ((s2 = memchr(s, '\n', tmp_c + l - s))) {
+						int b = tmp_c + l - 1 - s2;
+						memmove(tmp, tmp + (s2 + 1 - tmp_c), b);
+						memmove(tmp_c, s2 + 1, b);
+						
+					} else {
+						tmp[s - tmp_c] = *s = '\0';
+					}
+					l = strlen(tmp_c);
+				}
+				if ((s = strstr(tmp_c, "content-type:"))) {
+					if ((s2 = memchr(s, '\n', tmp_c + l - s))) {
+						memmove(tmp, tmp + (s2 + 1 - tmp_c), tmp_c + l - 1 - s2);
+					} else {
+						tmp[s - tmp_c] = '\0';
+					}
+				}
+				efree(tmp_c);
+				tmp_c = php_trim(tmp, strlen(tmp), NULL, 0, NULL, 3 TSRMLS_CC);
+				efree(tmp);
+				tmp = tmp_c;
+			}
+		
 			/* Output trimmed headers with \r\n at the end */
 			php_stream_write(stream, tmp, strlen(tmp));
 			php_stream_write(stream, "\r\n", sizeof("\r\n") - 1);
@@ -367,7 +396,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	/* Request content, such as for POST requests */
-	if (context &&
+	if (header_init && context &&
 		php_stream_context_get_option(context, "http", "content", &tmpzval) == SUCCESS &&
 		Z_STRLEN_PP(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
@@ -423,6 +452,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			switch(response_code) {
 				case 200:
 				case 302:
+				case 303:
 				case 301:
 					reqok = 1;
 					break;
