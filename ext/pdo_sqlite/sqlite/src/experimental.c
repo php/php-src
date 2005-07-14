@@ -15,6 +15,7 @@
 ** $Id$
 */
 #include "sqliteInt.h"
+#include "os.h"
 
 /*
 ** Set all the parameters in the compiled SQL statement to NULL.
