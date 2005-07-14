@@ -155,7 +155,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 		;
 		row_count = mysql_stmt_affected_rows(S->stmt);
-		if (row_cont != (my_ulonglong)-1) {
+		if (row_count != (my_ulonglong)-1) {
 			stmt->row_count = row_count;
 		}
 		return 1;
