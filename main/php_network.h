@@ -210,7 +210,7 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd);
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
 typedef struct {
-#ifdef HAVE_SOCKADDR_LEN
+#ifdef HAVE_SOCKADDR_SA_LEN
 		unsigned char ss_len;
 		unsigned char ss_family;
 #else
