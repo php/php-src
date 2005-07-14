@@ -96,11 +96,9 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			my_bool on = 1;
 			/* if we have bound the buffers don't set the attribute again */
 			if (!S->result) {
-				/*
-				FIXME: using directly internal structs - but for now cleaner
-				then calling 2 times result_metadata.
-				*/
-				for (i= 0; i < S->stmt->field_count; i++) {
+				/* FIXME: using directly internal structs - but for now cleaner
+				 * then calling 2 times result_metadata. */
+				for (i = 0; i < S->stmt->field_count; i++) {
 					switch (S->fields[i].type) {
 						case MYSQL_TYPE_MEDIUM_BLOB:
 						case MYSQL_TYPE_LONG_BLOB:
@@ -124,12 +122,12 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 				if (S->bound_result) {
 					int i;
-				        for (i = 0; i < stmt->column_count; i++) {
-				        	efree(S->bound_result[i].buffer); 
+					for (i = 0; i < stmt->column_count; i++) {
+						efree(S->bound_result[i].buffer); 
 					}
-				        efree(S->bound_result);
-				        efree(S->out_null);
-				        efree(S->out_length);
+					efree(S->bound_result);
+					efree(S->out_null);
+					efree(S->out_length);
 				}
 
 				stmt->column_count = (int)mysql_num_fields(S->result);
@@ -140,8 +138,8 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 				/* summon memory to hold the row */
 				for (i = 0; i < stmt->column_count; i++) {
 					S->bound_result[i].buffer_length =
-                    		S->fields[i].max_length? S->fields[i].max_length:
-                            						 S->fields[i].length;
+						S->fields[i].max_length? S->fields[i].max_length:
+						S->fields[i].length;
 					S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
 					S->bound_result[i].is_null = &S->out_null[i];
 					S->bound_result[i].length = &S->out_length[i];
@@ -156,11 +154,11 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		}
 
 		;
-		if ((row_count= mysql_stmt_affected_rows(S->stmt)) != (my_ulonglong)-1) {
+		row_count = mysql_stmt_affected_rows(S->stmt);
+		if (row_cont != (my_ulonglong)-1) {
 			stmt->row_count = row_count;
-			return 1;
 		}
-		return 0;
+		return 1;
 	}
 #endif
 	/* ensure that we free any previous unfetched results */
