@@ -52,6 +52,9 @@
 #include "ext/standard/url.h"
 #include "php_curl.h"
 
+int  le_curl;
+int  le_curl_multi_handle;
+
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
