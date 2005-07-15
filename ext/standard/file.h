@@ -60,7 +60,7 @@ PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
-#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 PHP_FUNCTION(realpath);
 PHP_FUNCTION(fnmatch);
 #endif
