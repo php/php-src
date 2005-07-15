@@ -31,7 +31,7 @@
 /* If you declare any globals in php_xsl.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(xsl)
 */
-
+zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
 
 /* {{{ xsl_functions[]
