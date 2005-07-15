@@ -51,9 +51,9 @@ extern zend_module_entry curl_module_entry;
 #define PHP_CURL_BINARY 6
 #define PHP_CURL_IGNORE 7
 
-int  le_curl;
+extern int  le_curl;
 #define le_curl_name "cURL handle"
-int  le_curl_multi_handle;
+extern int  le_curl_multi_handle;
 #define le_curl_multi_handle_name "cURL Multi Handle"
 
 PHP_MINIT_FUNCTION(curl);
