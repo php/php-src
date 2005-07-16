@@ -535,12 +535,6 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 		DeleteCriticalSection(mutexp);
 		free(mutexp);
-#elif defined(NETWARE)
-#ifdef USE_MPK
-		kMutexFree(mutexp);
-#else
-		NXMutexFree(mutexp);
-#endif
 #elif defined(GNUPTH)
 		free(mutexp);
 #elif defined(PTHREADS)
@@ -570,12 +564,6 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 	EnterCriticalSection(mutexp);
 	return 1;
-#elif defined(NETWARE)
-#ifdef USE_MPK
-	return kMutexLock(mutexp);
-#else
-	return NXLock(mutexp);
-#endif
 #elif defined(GNUPTH)
 	return pth_mutex_acquire(mutexp, 0, NULL);
 #elif defined(PTHREADS)
@@ -601,12 +589,6 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 	LeaveCriticalSection(mutexp);
 	return 1;
-#elif defined(NETWARE)
-#ifdef USE_MPK
-	return kMutexUnlock(mutexp);
-#else
-	return NXUnlock(mutexp);
-#endif
 #elif defined(GNUPTH)
 	return pth_mutex_release(mutexp);
 #elif defined(PTHREADS)

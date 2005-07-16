@@ -141,15 +141,9 @@ static int php_check_dots(const char *element, int n)
 	
 static int php_is_dir_ok(const cwd_state *state) 
 {
-#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 	struct stat buf;
 
 	if (stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
-#else
-    struct stat_libc buf;
-
-    if (stat(state->cwd, (struct stat*)(&buf)) == 0 && S_ISDIR(buf.st_mode))
-#endif
 		return (0);
 
 	return (1);
@@ -157,15 +151,9 @@ static int php_is_dir_ok(const cwd_state *state)
 
 static int php_is_file_ok(const cwd_state *state) 
 {
-#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 	struct stat buf;
 
 	if (stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
-#else
-    struct stat_libc buf;
-
-    if (stat(state->cwd, (struct stat*)(&buf)) == 0 && S_ISREG(buf.st_mode))
-#endif
 		return (0);
 
 	return (1);
@@ -739,7 +727,6 @@ CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC)
 	return retval;
 }
 
-#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 {
 	cwd_state new_state;
@@ -753,21 +740,6 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
-#else
-CWD_API int virtual_stat(const char *path, struct stat_libc *buf TSRMLS_DC)
-{
-	cwd_state new_state;
-	int retval;
-
-	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	virtual_file_ex(&new_state, path, NULL, 1);
-
-	retval = stat(new_state.cwd, (struct stat*)buf);
-
-	CWD_STATE_FREE(&new_state);
-	return retval;
-}
-#endif
 
 #ifndef TSRM_WIN32
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
