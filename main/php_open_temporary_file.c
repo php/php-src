@@ -107,10 +107,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 #endif
 		;
 #endif
-#ifdef NETWARE
-    char *file_path = NULL;
-#endif
-
 	if (!path) {
 		return -1;
 	}
