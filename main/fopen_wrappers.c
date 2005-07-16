@@ -123,7 +123,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 
 		/* Check the path */
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(NETWARE)
 		if (strncasecmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
 #else
 		if (strncmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
