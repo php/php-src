@@ -1,3 +1,46 @@
+2005-07-15  George Schlossnagle  <george@omniti.com>
+
+    * ext/curl/interface.c
+      ext/curl/php_curl.h:
+      Darwin seems to like this much better.
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/xsl_fe.h:
+      Darwin seems to like this arrangement much better.
+
+2005-07-15  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Pass context parameter through to xport_create
+
+2005-07-15  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/file.h
+      ext/standard/string.c
+      ext/standard/syslog.c:
+      ext/standard/file.h NetWare LibC has fnmatch and realpath implemented.
+      ext/standard/syslog.c Except LOG_SYSLOG other syslog macros are supported
+      by NetWare LibC.
+      ext/standard/string.c NetWare fix for dirname
+      -- Kamesh
+
+    * (PHP_5_0)
+      ext/standard/file.h
+      ext/standard/filestat.c
+      ext/standard/link.c
+      ext/standard/pageinfo.c
+      ext/standard/syslog.c:
+      ext/standard/file.h NetWare LibC has fnmatch and realpath implemented.
+      ext/standard/filestat.c Removing redundant CLIB_STAT_PATCH and fixing some
+      NetWare specific stat structure.
+      ext/standard/link.c Removing redundant CLIB_STAT_PATCH.
+      ext/standard/pageinfo.c Removing redundant CLIB_STAT_PATCH and fixing some
+      NetWare specific stat structure.
+      ext/standard/syslog.c Except LOG_SYSLOG NetWare LibC has other macros
+      defined.
+      
+      -- Kamesh
+
 2005-07-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/http_fopen_wrapper.c:
