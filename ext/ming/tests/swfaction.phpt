@@ -40,9 +40,9 @@ Ming: Simple SWFAction() test
   $m->add(new SWFAction("gotoFrame(0); play();"));
   $m->nextFrame();
 
-  $m->save('./test.swf');
-  echo md5_file('./test.swf'), "\n";
-  unlink('./test.swf');
+  $m->save(dirname(__FILE__).'/test.swf', 0);
+  echo md5_file(dirname(__FILE__).'/test.swf'), "\n";
+  unlink(dirname(__FILE__).'/test.swf');
 ?>
 --EXPECT--
 9e47538692393b9915faf3fc7e686cd5
