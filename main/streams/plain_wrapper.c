@@ -368,8 +368,8 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			}
 		} else if (data->fd != -1) {
 #ifdef PHP_DEBUG
-			if (data->fd == 2 && 0 == strcmp(sapi_module.name, "cli")) {
-				/* don't close stderr in CLI in DEBUG mode, as we want to see any leaks */
+			if ((data->fd == 1 || data->fd == 2) && 0 == strcmp(sapi_module.name, "cli")) {
+				/* don't close stdout or stderr in CLI in DEBUG mode, as we want to see any leaks */
 				ret = 0;
 			} else {
 				ret = close(data->fd);
