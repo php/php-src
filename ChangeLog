@@ -1,3 +1,130 @@
+2005-07-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Added 2 missing cURL options available in all versions.
+
+2005-07-16  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/ApacheCore.imp
+      netware/BisonExtStandard.bat
+      netware/BisonFlexZend.bat
+      netware/ZendEngine2.mak
+      netware/build.bat
+      netware/buildext.bat
+      netware/buildlib.bat
+      netware/buildsapi.bat
+      netware/common.mif
+      netware/libpq-fe.h
+      netware/libpq.imp
+      netware/php-nw.bat
+      netware/php5apache.mak
+      netware/php5apache2filter.mak
+      netware/php5cli.mak
+      netware/phplib.imp
+      netware/phplib.mak
+      netware/phptest.ncf
+      netware/postgres_ext.h
+      netware/setbuild.bat
+      netware/time_nw.c
+      netware/tsrm.mak
+      netware/zend.mak:
+      NetWare can make use of the Autoconf based build system
+
+    * netware/libpq/libpq-fs.h:
+      libpq-fs.h this file is of no use
+
+    * (PHP_5_0)
+      netware/ApacheCore.imp
+      netware/BisonExtStandard.bat
+      netware/BisonFlexZend.bat
+      netware/ZendEngine2.mak
+      netware/build.bat
+      netware/buildext.bat
+      netware/buildlib.bat
+      netware/buildsapi.bat
+      netware/common.mif
+      netware/libpq-fe.h
+      netware/libpq.imp
+      netware/php-nw.bat
+      netware/php5apache.mak
+      netware/php5apache2filter.mak
+      netware/php5cli.mak
+      netware/phplib.imp
+      netware/phplib.mak
+      netware/phptest.ncf
+      netware/postgres_ext.h
+      netware/setbuild.bat
+      netware/time_nw.c
+      netware/tsrm.mak
+      netware/zend.mak:
+      NetWare can make use the AutoConf based build system
+
+    * (PHP_5_0)
+      netware/libpq/libpq-fs.h:
+      removing the redundant file libpq-fs.h
+
+    * (PHP_5_0)
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+      sapi/apache2filter/php_apache.h
+      Removing redundant CLIB_STAT_PATCH
+      sapi/apache2filter/sapi_apache2.c
+      Removing redundant CLIB_STAT_PATCH
+      -- Kamesh
+
+    * main/fopen_wrappers.c
+      main/main.c:
+      main/fopen_wrappers.c
+      NetWare file names are case insensitive
+      main/main.c
+      NetWare has no sendmail binary. It uses the smart host mailing code
+      avaiolable in php distro. Could not find a better place to put this than
+      main/main.c.
+      -- Kamesh
+
+    * (PHP_5_0)
+      main/fopen_wrappers.c
+      main/main.c
+      main/php_open_temporary_file.c
+      main/php_streams.h
+      main/safe_mode.c:
+      main/fopen_wrappers.c
+      NetWare file names are case insensitive
+      main/main.c
+      NetWare has no sendmail binary. It uses the smart host mailing code
+      avaiolable in php distro. Could not find a better place to put this than
+      main/main.c.
+      main/php_open_temporary_file.c,v
+      Removed the unused variable in NetWare block.
+      main/php_streams.h
+      Removing the redundant CLIB_STAT_PATCH
+      main/safe_mode.c
+      NetWare has no uid.
+      -- Kamesh
+
+    * (PHP_5_0)
+      TSRM/TSRM.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h:
+      TSRM/tsrm_virtual_cwd.c
+      Removing the redundant CLIB_STAT_PATCH
+      TSRM/tsrm_virtual_cwd.h
+      Removing the redundant CLIB_STAT_PATCH
+      TSRM/TSRM.c
+      Netware pthreads support is good enough. So removing all these fixes of
+      old times.
+      -- Kamesh
+
+    * TSRM/TSRM.c:
+      Netware pthreads support is good enough. So removing all these fixes of old
+      times.
+      -- Kamesh
+
+    * (PHP_5_0)
+      ext/standard/string.c:
+      NetWare specific dirname fixes.
+      --Kamesh
+
 2005-07-15  George Schlossnagle  <george@omniti.com>
 
     * ext/curl/interface.c
