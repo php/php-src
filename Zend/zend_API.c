@@ -1328,14 +1328,14 @@ ZEND_API int zend_startup_modules(TSRMLS_D)
 	return SUCCESS;
 }
 
-ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
+ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 {
 	int name_len;
 	char *lcname;
 	zend_module_entry *module_ptr;
 	
 	if (!module) {
-		return FAILURE;
+		return NULL;
 	}
 
 #if 0
@@ -1355,7 +1355,7 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 					efree(lcname);
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module->name, dep->name);
-					return FAILURE;
+					return NULL;
 				}			
 				efree(lcname);
 			}
@@ -1369,20 +1369,20 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 	if (zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), (void**)&module_ptr)==FAILURE) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
 		efree(lcname);
-		return FAILURE;
+		return NULL;
 	}
 	efree(lcname);
 	module = module_ptr;
 
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
-		return FAILURE;
+		return NULL;
 	}
 
-	return SUCCESS;
+	return module;
 }
 
-ZEND_API int zend_register_internal_module(zend_module_entry *module TSRMLS_DC)
+ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module TSRMLS_DC)
 {
 	module->module_number = zend_next_free_module();
 	module->type = MODULE_PERSISTENT;
@@ -1656,7 +1656,7 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 {
 	TSRMLS_FETCH();
 	
-	if (zend_register_internal_module(module TSRMLS_CC) == SUCCESS &&
+	if ((module = zend_register_internal_module(module TSRMLS_CC)) != NULL &&
 	    zend_startup_module_ex(module TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}

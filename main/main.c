@@ -1296,7 +1296,7 @@ int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
 
 	while (ptr < end) {
 		if (*ptr) {
-			if (zend_register_internal_module(*ptr TSRMLS_CC)==FAILURE) {
+			if (zend_register_internal_module(*ptr TSRMLS_CC)==NULL) {
 				return FAILURE;
 			}
 		}
