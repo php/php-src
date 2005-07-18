@@ -434,7 +434,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.opened_path = NULL;
-
+	file_handle.handle.fp = NULL;
 
 	retval = zend_compile_file(&file_handle, type TSRMLS_CC);
 	if (retval && file_handle.handle.stream.handle) {
