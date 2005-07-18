@@ -80,6 +80,24 @@ $op2_type = array(
 	"CV"     => "IS_CV",
 );
 
+$op1_free = array(
+	"ANY"    => "(free_op1.var != NULL)",
+	"TMP"    => "1",
+	"VAR"    => "(free_op1.var != NULL)",
+	"CONST"  => "0",
+	"UNUSED" => "0",
+	"CV"     => "0",
+);
+
+$op2_free = array(
+	"ANY"    => "(free_op2.var != NULL)",
+	"TMP"    => "1",
+	"VAR"    => "(free_op2.var != NULL)",
+	"CONST"  => "0",
+	"UNUSED" => "0",
+	"CV"     => "0",
+);
+
 $op1_get_zval_ptr = array(
 	"ANY"    => "get_zval_ptr(&opline->op1, EX(Ts), &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC)",
@@ -272,7 +290,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 		$op1_get_zval_ptr_ptr, $op2_get_zval_ptr_ptr,
 		$op1_get_obj_zval_ptr, $op2_get_obj_zval_ptr,
 		$op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
-		$op1_is_tmp_free, $op2_is_tmp_free,
+		$op1_is_tmp_free, $op2_is_tmp_free, $op1_free, $op2_free,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
 		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix;
 
@@ -281,6 +299,8 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 		array(
 			"/OP1_TYPE/",
 			"/OP2_TYPE/",
+			"/OP1_FREE/",
+			"/OP2_FREE/",
 			"/GET_OP1_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP2_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP1_ZVAL_PTR_PTR\(([^)]*)\)/",
@@ -305,6 +325,8 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2) {
 		array(
 			$op1_type[$op1],
 			$op2_type[$op2],
+			$op1_free[$op1],
+			$op2_free[$op2],
 			$op1_get_zval_ptr[$op1],
 			$op2_get_zval_ptr[$op2],
 			$op1_get_zval_ptr_ptr[$op1],
