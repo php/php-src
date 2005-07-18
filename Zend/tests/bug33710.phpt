@@ -1,5 +1,5 @@
 --TEST--
-Bug #33710 (ArrayAccess objects doen't initialize $this)
+Bug #33710 (ArrayAccess objects doesn't initialize $this)
 --FILE--
 <?php
 
