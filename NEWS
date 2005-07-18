@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
 - Fixed bug #33588 (LDAP: RootDSE query not possible). (Jani)
+- Fixed bug #33558 (warning with nested calls to functions returning by
+  reference). (Dmitry)
 - Fixed bug #33520 (crash if safe_mode is on and session.save_path is changed).
   (Dmitry)
 - Fixed bug #33491 (crash after extending MySQLi internal class). (Tony)
