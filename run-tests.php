@@ -886,6 +886,9 @@ TEST $file
 				fwrite($failed_tests_file, "$tested: $name\n");
 			}
 		}
+
+		echo "---> $IN_REDIRECT[TESTS] ($tested) done\n";
+
 		$GLOBALS['test_idx'] = $test_idx;
 
 		$test_files = $saved_test_files;
