@@ -208,6 +208,12 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
 			stream->position = lseek(self->fd, 0, SEEK_CUR);
+#ifdef ESPIPE
+			if (stream->position == (off_t)-1 && errno == ESPIPE) {
+				stream->position = 0;
+				stream->is_pipe = 1;
+			}
+#endif
 		}
 	}
 
