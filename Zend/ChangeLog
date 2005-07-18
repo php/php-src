@@ -1,3 +1,13 @@
+2005-07-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug33710.phpt:
+      - Add new test
+
+2005-07-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_compile.c:
+      Added missing init.
+
 2005-07-14  Andi Gutmans  <andi@zend.com>
 
     * zend.h:
