@@ -21,6 +21,7 @@ function ming_check_version()
 			if (CHECK_LIB("libungif.lib", "ming", PHP_MING) &&
 				CHECK_LIB("libpng.lib", "ming", PHP_MING)) {
 				AC_DEFINE('HAVE_NEW_MING', 1);
+				AC_DEFINE('HAVE_SWFPREBUILTCLIP', 1);
 				if (PHP_ZLIB != "no") {
 					AC_DEFINE('HAVE_MING_ZLIB', 1);
 				}
