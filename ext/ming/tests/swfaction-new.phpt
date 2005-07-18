@@ -3,7 +3,7 @@ Ming: Simple SWFAction() test
 --SKIPIF--
 <?php
 if (!extension_loaded("ming")) die("skip"); 
-if (MING_NEW || MING_ZLIB) die("skip new ming");
+if (!MING_NEW && !MING_ZLIB) die("skip old ming");
 ?>
 --FILE--
 <?php /* $Id$ */
@@ -48,4 +48,4 @@ if (MING_NEW || MING_ZLIB) die("skip new ming");
   unlink(dirname(__FILE__).'/test.swf');
 ?>
 --EXPECT--
-9e47538692393b9915faf3fc7e686cd5
+d0f09a7b6a14d3fe6d570367deb38633
