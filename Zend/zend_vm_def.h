@@ -1991,8 +1991,9 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		}
 
 		if (OP1_TYPE == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
-			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
-				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			    EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+			} else if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 				if (OP1_TYPE == IS_VAR && !OP1_FREE) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
@@ -2169,7 +2170,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	}
 	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
 	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
-		zend_error(E_ERROR, "Only variables can be passed by reference");
+		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	} else {
 		zval *varptr;
 		zend_free_op free_op1;
