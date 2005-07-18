@@ -60,6 +60,10 @@ function_entry mcve_functions[] = {
 	PHP_FE(m_setdropfile,			NULL)
 	PHP_FE(m_setip,				NULL)
 	PHP_FE(m_setssl,			NULL)
+#if LIBMONETRA_VERSION >= 050000
+	PHP_FE(m_setssl_cafile,			NULL)
+	PHP_FE(m_responsekeys,			NULL)
+#endif
 	PHP_FE(m_setssl_files,			NULL)
 	PHP_FE(m_settimeout,			NULL)
 	PHP_FE(m_setblocking,			NULL)
@@ -734,6 +738,31 @@ PHP_FUNCTION(m_setssl)
 }
 /* }}} */
 
+#if LIBMONETRA_VERSION >= 050000
+/* {{{ proto int m_setssl_cafile(resource conn, string cafile)
+   Set SSL CA (Certificate Authority) file for verification of server
+   certificate
+*/
+PHP_FUNCTION(m_setssl_cafile)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+	convert_to_string_ex(arg2);
+
+	retval = M_SetSSL_CAfile(conn, Z_STRVAL_PP(arg2));
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+#endif
+
 /* {{{ proto int m_setssl_files(resource conn, string sslkeyfile, string sslcertfile)
    Set certificate key files and certificates if server requires client certificate
    verification
@@ -1149,6 +1178,36 @@ PHP_FUNCTION(m_responseparam)
 	}
 }
 /* }}} */
+
+#if LIBMONETRA_VERSION >= 050000
+/* {{{ proto array m_responsekeys(resource conn, long identifier)
+   Returns array of strings which represents the keys that can be used
+   for response parameters on this transaction
+*/
+PHP_FUNCTION(m_responsekeys)
+{
+	MCVE_CONN *conn;
+	char **retval;
+	int num_keys, i;
+	zval **arg1, **arg2;
+	
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+	convert_to_long_ex(arg2);
+	
+	array_init(return_value);
+		
+	retval=M_ResponseKeys(conn, Z_LVAL_PP(arg2), &num_keys);
+	if (retval != NULL) {
+		for (i=0; i<num_keys; i++) 
+			add_next_index_string(return_value, retval[i], 1);
+		M_FreeResponseKeys(retval, num_keys);
+	}
+}
+/* }}} */
+#endif
 
 /* {{{ proto string m_getuserparam(resource conn, long identifier, int key)
    Get a user response parameter */
