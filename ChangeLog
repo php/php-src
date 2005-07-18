@@ -1,3 +1,29 @@
+2005-07-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/ming/config.m4
+      ext/ming/ming.c:
+      - Compatibility with ming 0.2a and 0.3a
+
+    * ZendEngine2/tests/bug33710.phpt:
+      - Add new test
+
+2005-07-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_compile.c:
+      Added missing init.
+
+2005-07-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams/plain_wrapper.c:
+      - Fix problem with debug mode on selective machines
+
+    * ext/xml/tests/bug26614.phpt
+      ext/xml/tests/bug26614_libxml.phpt:
+      - If you ask me both (expat and libxml) are not really accurate about byte
+        positions and columns...however the line number information is now
+        correct for both so for the moment we live with the situation that they
+        return different byte and column information.
+
 2005-07-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/curl/interface.c:
