@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2005, PHP 5.1
+- Fixed handling of HTTP requests with multiple Cookie headers. (Ilia)
+
 14 Jul 2005, PHP 5.1 Beta 3
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
 - Moved extensions to PECL:

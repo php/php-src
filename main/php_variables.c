@@ -317,7 +317,8 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			separator = (char *) estrdup(PG(arg_separator).input);
 			break;
 		case PARSE_COOKIE:
-			separator = ";\0";
+			/* The , and space are needed for instances when there are multiple Cookie: headers */
+			separator = ";, \0";
 			break;
 	}
 	
