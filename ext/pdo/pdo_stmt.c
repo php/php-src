@@ -1776,6 +1776,48 @@ static PHP_METHOD(PDOStatement, closeCursor)
 }
 /* }}} */
 
+/* {{{ proto void PDOStatement::debugDumpParams()
+   A utility for internals hackers to debug parameter internals */
+static PHP_METHOD(PDOStatement, debugDumpParams)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	php_stream *out = php_stream_open_wrapper("php://output", "w", 0, NULL);
+	HashPosition pos;
+	struct pdo_bound_param_data *param;
+
+	php_stream_printf(out TSRMLS_CC, "SQL: [%d] %.*s\n",
+		stmt->query_stringlen,
+		stmt->query_stringlen, stmt->query_string);
+
+	php_stream_printf(out TSRMLS_CC, "Params:  %d\n",
+		stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0);
+	
+	if (stmt->bound_params) {
+		zend_hash_internal_pointer_reset_ex(stmt->bound_params, &pos);
+		while (SUCCESS == zend_hash_get_current_data_ex(stmt->bound_params,
+				(void**)&param, &pos)) {
+			char *str;
+			uint len;
+			ulong num;
+
+			if (zend_hash_get_current_key_ex(stmt->bound_params, &str, &len, &num, 0, &pos) == HASH_KEY_IS_STRING) {
+				php_stream_printf(out TSRMLS_CC, "Key: Position #%d:\n", num);
+			} else {
+				php_stream_printf(out TSRMLS_CC, "Key: Name: [%d] %.*s\n", len, len, str);
+			}
+
+			php_stream_printf(out TSRMLS_CC, "paramno=%d\nname=[%d] %.*s\nis_param=%d\nparam_type=%d\n",
+				param->paramno, param->namelen, param->namelen, param->name,
+				param->is_param,
+				param->param_type);
+			
+		}
+	}
+
+	php_stream_close(out);
+}
+/* }}} */
+
 
 function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
@@ -1795,6 +1837,7 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, setFetchMode,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, nextRowset,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, closeCursor,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, debugDumpParams, NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
