@@ -1255,11 +1255,7 @@ PHP_FUNCTION(curl_setopt)
    Cleanup an execution phase */
 void _php_curl_cleanup_handle(php_curl *ch)
 {
-	if (ch->uses < 1) {
-		return;
-	}
-
-	if (ch->handlers->write->buf.len) {
+	if (ch->handlers->write->buf.len > 0) {
 		memset(&ch->handlers->write->buf, 0, sizeof(smart_str));
 	}
 
