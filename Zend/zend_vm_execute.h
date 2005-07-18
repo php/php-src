@@ -1601,8 +1601,9 @@ static int ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		if (IS_CONST == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
-			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
-				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			    EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+			} else if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 				if (IS_CONST == IS_VAR && !0) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
@@ -4010,8 +4011,9 @@ static int ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		if (IS_TMP_VAR == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
-			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
-				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			    EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+			} else if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 				if (IS_TMP_VAR == IS_VAR && !1) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
@@ -6940,8 +6942,9 @@ static int ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		if (IS_VAR == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
-			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
-				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			    EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+			} else if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 				if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
@@ -7090,7 +7093,7 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
 	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
-		zend_error(E_ERROR, "Only variables can be passed by reference");
+		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	} else {
 		zval *varptr;
 		zend_free_op free_op1;
@@ -18987,8 +18990,9 @@ static int ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		if (IS_CV == IS_VAR && !(*retval_ptr_ptr)->is_ref) {
-			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
-				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			    EX_T(opline->op1.u.var).var.fcall_returned_reference) {
+			} else if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr) {
 				if (IS_CV == IS_VAR && !0) {
 					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
 				}
@@ -19137,7 +19141,7 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
 	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
-		zend_error(E_ERROR, "Only variables can be passed by reference");
+		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	} else {
 		zval *varptr;
 		
