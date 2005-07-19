@@ -386,28 +386,29 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		return 0;
 	}
 
-	/* enforce a practical limitation.
-	 * TODO: make this work more nicely */
-	if (colsize > 65535) {
-		colsize = 65535;
-	}
-
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->namelen = colnamelen;
 	col->name = estrdup(S->cols[colno].colname);
 
-	S->cols[colno].data = emalloc(colsize+1);
-
 	/* returning data as a string */
 	col->param_type = PDO_PARAM_STR;
 
-	/* tell ODBC to put it straight into our buffer */
-	rc = SQLBindCol(S->stmt, colno+1, SQL_C_CHAR, S->cols[colno].data,
+	/* tell ODBC to put it straight into our buffer, but only if it
+	 * isn't "long" data */
+	if (colsize < 256) {
+		S->cols[colno].data = emalloc(colsize+1);
+
+		rc = SQLBindCol(S->stmt, colno+1, SQL_C_CHAR, S->cols[colno].data,
 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
-	if (rc != SQL_SUCCESS) {
-		pdo_odbc_stmt_error("SQLBindCol");
-		return 0;
+		if (rc != SQL_SUCCESS) {
+			pdo_odbc_stmt_error("SQLBindCol");
+			return 0;
+		}
+	} else {
+		/* allocate a smaller buffer to keep around for smaller
+		 * "long" columns */
+		S->cols[colno].data = emalloc(256);
 	}
 
 	return 1;
@@ -418,6 +419,80 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
 
+	/* if it is a column containing "long" data, perform late binding now */
+	if (C->datalen > 255) {
+		unsigned long alloced = 4096;
+		unsigned long used = 0;
+		char *buf;
+		RETCODE rc;
+
+		/* fetch it into C->data, which is allocated with a length
+		 * of 256 bytes; if there is more to be had, we then allocate
+		 * bigger buffer for the caller to free */
+
+		rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR, C->data,
+			256, &C->fetched_len);
+
+		if (rc == SQL_SUCCESS) {
+			/* all the data fit into our little buffer;
+			 * jump down to the generic bound data case */
+			goto in_data;
+		}
+
+		if (rc == SQL_SUCCESS_WITH_INFO) {
+			/* promote up to a bigger buffer */
+
+			if (C->fetched_len != SQL_NO_TOTAL) {
+				/* use size suggested by the driver, if it knows it */
+				alloced = C->fetched_len + 1;
+			}
+			
+			buf = emalloc(alloced);
+			memcpy(buf, C->data, 256);
+			used = 255; /* not 256; the driver NUL terminated the buffer */
+
+			do {
+				C->fetched_len = 0;
+				rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR,
+					buf + used, alloced - used,
+					&C->fetched_len);
+
+				if (rc == SQL_NO_DATA) {
+					/* we got the lot */
+					break;
+				}
+
+				if (C->fetched_len == SQL_NO_TOTAL) {
+					used += alloced - used;
+				} else {
+					used += C->fetched_len;
+				}
+
+				/* we need to fetch another chunk; resize the
+				 * buffer */
+				alloced *= 2;
+				buf = erealloc(buf, alloced);
+			} while (1);
+
+			/* size down */
+			if (used < alloced - 1024) {
+				alloced = used+1;
+				buf = erealloc(buf, used+1);
+			}
+			buf[used] = '\0';
+			*ptr = buf;
+			*caller_frees = 1;
+			*len = used;
+			return 1;
+		}
+
+		/* something went caca */
+		*ptr = NULL;
+		*len = 0;
+		return 1;
+	}
+
+in_data:
 	/* check the indicator to ensure that the data is intact */
 	if (C->fetched_len == SQL_NULL_DATA) {
 		/* A NULL value */
