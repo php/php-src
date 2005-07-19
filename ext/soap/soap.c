@@ -2072,6 +2072,14 @@ PHP_METHOD(SoapClient, SoapClient)
 			}
 		}
 
+		if (zend_hash_find(ht, "stream_context", sizeof("stream_context"), (void**)&tmp) == SUCCESS &&
+				Z_TYPE_PP(tmp) == IS_RESOURCE) {
+			php_stream_context *context = php_stream_context_from_zval(*tmp, 1);
+			if (context) {
+				add_property_resource(this_ptr, "_stream_context", context->rsrc_id);
+			}
+		}
+
 		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
 			add_property_stringl(this_ptr, "location", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
