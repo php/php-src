@@ -60,9 +60,11 @@ function_entry mcve_functions[] = {
 	PHP_FE(m_setdropfile,			NULL)
 	PHP_FE(m_setip,				NULL)
 	PHP_FE(m_setssl,			NULL)
+#if BRAD_0
 #if LIBMONETRA_VERSION >= 050000
 	PHP_FE(m_setssl_cafile,			NULL)
 	PHP_FE(m_responsekeys,			NULL)
+#endif
 #endif
 	PHP_FE(m_setssl_files,			NULL)
 	PHP_FE(m_settimeout,			NULL)
@@ -738,6 +740,7 @@ PHP_FUNCTION(m_setssl)
 }
 /* }}} */
 
+#if BRAD_0
 #if LIBMONETRA_VERSION >= 050000
 /* {{{ proto int m_setssl_cafile(resource conn, string cafile)
    Set SSL CA (Certificate Authority) file for verification of server
@@ -761,6 +764,7 @@ PHP_FUNCTION(m_setssl_cafile)
 	RETURN_LONG(retval);
 }
 /* }}} */
+#endif
 #endif
 
 /* {{{ proto int m_setssl_files(resource conn, string sslkeyfile, string sslcertfile)
@@ -1179,6 +1183,7 @@ PHP_FUNCTION(m_responseparam)
 }
 /* }}} */
 
+#if BRAD_0
 #if LIBMONETRA_VERSION >= 050000
 /* {{{ proto array m_responsekeys(resource conn, long identifier)
    Returns array of strings which represents the keys that can be used
@@ -1207,6 +1212,7 @@ PHP_FUNCTION(m_responsekeys)
 	}
 }
 /* }}} */
+#endif
 #endif
 
 /* {{{ proto string m_getuserparam(resource conn, long identifier, int key)

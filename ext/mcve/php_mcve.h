@@ -51,9 +51,11 @@ PHP_FUNCTION(m_destroyconn);
 PHP_FUNCTION(m_setdropfile);
 PHP_FUNCTION(m_setip);
 PHP_FUNCTION(m_setssl);
+#if BRAD_0
 #if LIBMONETRA_VERSION >= 050000
 PHP_FUNCTION(m_setssl_cafile);
 PHP_FUNCTION(m_responsekeys);
+#endif
 #endif
 PHP_FUNCTION(m_setssl_files);
 PHP_FUNCTION(m_setblocking);
