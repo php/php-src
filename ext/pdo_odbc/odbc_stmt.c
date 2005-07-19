@@ -85,6 +85,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 			if (Z_TYPE_P(param->parameter) != IS_RESOURCE) {
 				/* they passed in a string */
+				convert_to_string(param->parameter);
 				SQLPutData(S->stmt, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
 				continue;
 			}
