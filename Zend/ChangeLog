@@ -1,3 +1,40 @@
+2005-07-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * zend_language_scanner.l:
+      Valgrind is unhappy that this is not initialized
+
+2005-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h:
+      Fixed bug in new module statrup mechanism
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug33558.phpt:
+      Fixed bug #33558 (warning with nested calls to functions returning by
+      reference)
+
+    * tests/bug33558.phpt
+      tests/bug33558.phpt:
+      
+      Fixed bug #33558 (warning with nested calls to functions returning by
+      reference)
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Removed some compilation warnings.
+
+2005-07-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug33710.phpt:
+      typo
+
 2005-07-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug33710.phpt:
