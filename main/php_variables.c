@@ -625,7 +625,9 @@ int php_hash_environment(TSRMLS_D)
 			case 'p':
 			case 'P':
 				if (!_gpc_flags[0] && !SG(headers_sent) && SG(request_info).request_method && !strcasecmp(SG(request_info).request_method, "POST")) {
-					sapi_module.treat_data(PARSE_POST, NULL, NULL TSRMLS_CC);	/* POST Data */
+					if (sapi_module.treat_data) {
+						sapi_module.treat_data(PARSE_POST, NULL, NULL TSRMLS_CC);	/* POST Data */
+					}
 					_gpc_flags[0] = 1;
 					if (PG(register_globals)) {
 						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_POST]) TSRMLS_CC);
@@ -635,7 +637,9 @@ int php_hash_environment(TSRMLS_D)
 			case 'c':
 			case 'C':
 				if (!_gpc_flags[1]) {
-					sapi_module.treat_data(PARSE_COOKIE, NULL, NULL TSRMLS_CC);	/* Cookie Data */
+					if (sapi_module.treat_data) {
+						sapi_module.treat_data(PARSE_COOKIE, NULL, NULL TSRMLS_CC);	/* Cookie Data */
+					}
 					_gpc_flags[1] = 1;
 					if (PG(register_globals)) {
 						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) TSRMLS_CC);
@@ -645,7 +649,9 @@ int php_hash_environment(TSRMLS_D)
 			case 'g':
 			case 'G':
 				if (!_gpc_flags[2]) {
-					sapi_module.treat_data(PARSE_GET, NULL, NULL TSRMLS_CC);	/* GET Data */
+					if (sapi_module.treat_data) {
+						sapi_module.treat_data(PARSE_GET, NULL, NULL TSRMLS_CC);	/* GET Data */
+					}
 					_gpc_flags[2] = 1;
 					if (PG(register_globals)) {
 						php_autoglobal_merge(&EG(symbol_table), Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_GET]) TSRMLS_CC);
