@@ -1137,6 +1137,10 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 					result->var.ptr_ptr = retval;
 					AI_USE_PTR(result->var);
 					PZVAL_LOCK(*result->var.ptr_ptr);
+				} else if ((*retval)->refcount == 0) {
+					/* Destroy unused result from offsetGet() magic method */
+					(*retval)->refcount = 1;
+					zval_ptr_dtor(retval);
 				}
 				if (dim_is_tmp_var) {
 					zval_ptr_dtor(&dim);
