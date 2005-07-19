@@ -1,3 +1,119 @@
+2005-07-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/reg.c
+      ext/standard/reg.c:
+      MFB4_4: Fix compile problem with --regex=system on some systems
+
+2005-07-18  Brad House  <brad@mainstreetsoftworks.com>
+
+    * (PHP_5_0)
+      ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      BACKPORT FROM HEAD: sync missing functions from libmonetra-5
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      sync missing functions from libmonetra-5
+
+2005-07-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      main/php_variables.c:
+      Revert cookie patch for BC reasons.
+
+2005-07-18  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ZendEngine2/zend_language_scanner.l:
+      Valgrind is unhappy that this is not initialized
+
+2005-07-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_4)
+      ext/standard/reg.c:
+      Use HAVE_REGEX_T_RE_MAGIC to fix compilation problem on systems where
+      re_magic is not provided publicly.
+
+2005-07-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      fix macro
+
+2005-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ext/standard/dl.c
+      main/main.c:
+      Fixed bug in new module statrup mechanism
+
+2005-07-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/plain_wrapper.c:
+      compile before commit (gah!)
+
+2005-07-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Cleanup buffers on handle re-use.
+
+2005-07-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/plain_wrapper.c:
+      Apparently our pipe detection code just above this isn't foolproof.
+      Catch it here.
+
+2005-07-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug33558.phpt
+      ZendEngine2/tests/bug33558.phpt:
+      
+      Fixed bug #33558 (warning with nested calls to functions returning by
+      reference)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug33558.phpt:
+      Fixed bug #33558 (warning with nested calls to functions returning by
+      reference)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      Removed some compilation warnings.
+
+2005-07-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      main/php_variables.c:
+      MFH: Fixed handling of HTTP requests with multiple Cookie headers.
+
+    * NEWS
+      main/php_variables.c:
+      Fixed handling of HTTP requests with multiple Cookie headers.
+
+2005-07-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/tests/bug33710.phpt:
+      typo
+
+2005-07-18  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/config.w32:
+      Make sure we build with SWFPrebuilt.
+
+2005-07-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      - Show end of relay testing block
+
+    * ext/ming/ming.c:
+      - Provide distinction and distinct tests
+
 2005-07-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/ming/config.m4
