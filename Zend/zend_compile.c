@@ -847,7 +847,6 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
 	zend_op *opline, *opline_ptr=NULL;
-	int num_of_created_opcodes = 0;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 
@@ -855,47 +854,49 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 
 	/* TODO: $foo->x->y->z = 1 should fetch "x" and "y" for R or RW, not just W */
 	
-	while (le) {
+	if (le) {
 		opline_ptr = (zend_op *)le->data;
-		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		memcpy(opline, opline_ptr, sizeof(zend_op));
-		switch (type) {
-			case BP_VAR_R:
-				if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
-					zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
-				}
-				opline->opcode -= 3;
-				break;
-			case BP_VAR_W:
-				break;
-			case BP_VAR_RW:
-				opline->opcode += 3;
-				break;
-			case BP_VAR_IS:
-				if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
-					zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
-				}
-				opline->opcode += 6; /* 3+3 */
-				break;
-			case BP_VAR_FUNC_ARG:
-				opline->opcode += 9; /* 3+3+3 */
-				opline->extended_value = arg_offset;
-				break;
-			case BP_VAR_UNSET:
-				if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
-					zend_error(E_COMPILE_ERROR, "Cannot use [] for unsetting");
-				}
-				opline->opcode += 12; /* 3+3+3+3 */
-				break;
+		if (opline_is_fetch_this(opline_ptr TSRMLS_CC)) {
+			CG(active_op_array)->uses_this = 1;
 		}
-		le = le->next;
-		num_of_created_opcodes++;
-	}
 
-	if (num_of_created_opcodes == 1 && opline_is_fetch_this(opline_ptr TSRMLS_CC)) {
-		CG(active_op_array)->uses_this = 1;
+		while (1) {
+			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+			memcpy(opline, opline_ptr, sizeof(zend_op));
+			switch (type) {
+				case BP_VAR_R:
+					if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
+						zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
+					}
+					opline->opcode -= 3;
+					break;
+				case BP_VAR_W:
+					break;
+				case BP_VAR_RW:
+					opline->opcode += 3;
+					break;
+				case BP_VAR_IS:
+					if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
+						zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
+					}
+					opline->opcode += 6; /* 3+3 */
+					break;
+				case BP_VAR_FUNC_ARG:
+					opline->opcode += 9; /* 3+3+3 */
+					opline->extended_value = arg_offset;
+					break;
+				case BP_VAR_UNSET:
+					if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
+						zend_error(E_COMPILE_ERROR, "Cannot use [] for unsetting");
+					}
+					opline->opcode += 12; /* 3+3+3+3 */
+					break;
+			}
+			le = le->next;
+			if (le == NULL) break;
+			opline_ptr = (zend_op *)le->data;
+		}
 	}
-
 	zend_llist_destroy(fetch_list_ptr);
 	zend_stack_del_top(&CG(bp_stack));
 }
