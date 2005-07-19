@@ -193,7 +193,10 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 
 	if (!retval) {
 		*int_key = 0;
-		zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
+		if (!EG(exception))
+		{
+			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
+		}
 		return HASH_KEY_IS_LONG;
 	}
 	switch (retval->type) {
