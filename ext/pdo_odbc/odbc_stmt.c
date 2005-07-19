@@ -386,6 +386,12 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 		return 0;
 	}
 
+	/* enforce a practical limitation.
+	 * TODO: make this work more nicely */
+	if (colsize > 65535) {
+		colsize = 65535;
+	}
+
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->namelen = colnamelen;
 	col->name = estrdup(S->cols[colno].colname);
