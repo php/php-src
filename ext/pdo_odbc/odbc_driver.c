@@ -207,6 +207,9 @@ static long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRML
 		pdo_odbc_doer_error("SQLRowCount");
 		goto out;
 	}
+	if (row_count == -1) {
+		row_count = 0;
+	}
 out:
 	SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 	return row_count;
