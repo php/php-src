@@ -47,6 +47,7 @@ static void free_rows(pdo_dblib_stmt *S TSRMLS_DC)
 	}
 	efree(S->rows);
 	S->rows = NULL;
+	S->nrows = 0;
 }
 
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
@@ -96,7 +97,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	ret = dbnextrow(H->link);
 
     if (ret == NO_MORE_ROWS) {
-       return 0;
+       return 1;
     }
     
 	if (!S->cols) {
@@ -139,33 +140,38 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		for (i = 0; i < S->ncols; i++) {
 			pdo_dblib_colval *val = &S->rows[S->nrows * S->ncols + i];
 
-			switch (S->cols[i].coltype) {
-				case SQLCHAR:
-				case SQLTEXT:
-				case SQLVARBINARY:
-				case SQLBINARY:
-				case SQLIMAGE:
-					val->len = dbdatlen(H->link, i+1);
-					val->data = emalloc(val->len + 1);
-					memcpy(val->data, dbdata(H->link, i+1), val->len);
-					val->data[val->len] = '\0';
-					break;
+			if (dbdatlen(H->link, i+1) == 0 && dbdata(H->link, i+1) == NULL) {
+				val->len = 0;
+				val->data = NULL;
+			} else {
+				switch (S->cols[i].coltype) {
+					case SQLCHAR:
+					case SQLTEXT:
+					case SQLVARBINARY:
+					case SQLBINARY:
+					case SQLIMAGE:
+						val->len = dbdatlen(H->link, i+1);
+						val->data = emalloc(val->len + 1);
+						memcpy(val->data, dbdata(H->link, i+1), val->len);
+						val->data[val->len] = '\0';
+						break;
 
-				default:
-					if (dbwillconvert(S->cols[i].coltype, SQLCHAR)) {
-						val->len = 32 + (2 * dbdatlen(H->link, i+1));
-						val->data = emalloc(val->len);
+					default:
+						if (dbwillconvert(S->cols[i].coltype, SQLCHAR)) {
+							val->len = 32 + (2 * dbdatlen(H->link, i+1));
+							val->data = emalloc(val->len);
 
-						val->len = dbconvert(NULL, S->cols[i].coltype, dbdata(H->link, i+1),
-								dbdatlen(H->link, i+1), SQLCHAR, val->data, val->len);
+							val->len = dbconvert(NULL, S->cols[i].coltype, dbdata(H->link, i+1),
+									dbdatlen(H->link, i+1), SQLCHAR, val->data, val->len);
 
-						if (val->len >= 0) {
-							val->data[val->len] = '\0';
+							if (val->len >= 0) {
+								val->data[val->len] = '\0';
+							}
+						} else {
+							val->len = 0;
+							val->data = NULL;
 						}
-					} else {
-						val->len = 0;
-						val->data = NULL;
-					}
+				}
 			}
 		}
 
@@ -177,7 +183,6 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			dbclrbuf(H->link, DBLASTROW(H->link)-1);
 		}
 	} while (ret != FAIL && ret != NO_MORE_ROWS);
-
 
 	if (resret != NO_MORE_RESULTS) {
 		/* there are additional result sets available */
