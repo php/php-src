@@ -93,9 +93,9 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 		/* if buffered, pre-fetch all the data */
 		if (H->buffered) {
-			my_bool on = 1;
 			/* if we have bound the buffers don't set the attribute again */
 			if (!S->result) {
+				my_bool on = 1;
 				mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
 			}
 			mysql_stmt_store_result(S->stmt);
@@ -140,7 +140,6 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			}
 		}
 
-		;
 		row_count = mysql_stmt_affected_rows(S->stmt);
 		if (row_count != (my_ulonglong)-1) {
 			stmt->row_count = row_count;
