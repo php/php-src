@@ -212,8 +212,14 @@ static int seek_to_tz_position(char **tzf, char *timezone)
 		return 0;
 	}
 
-	(*tzf) = &php_timezone_db_index[pos + 20];
+	(*tzf) = &timelib_timezone_db_data[pos + 20];
 	return 1;
+}
+
+timelib_tzdb_index_entry *timelib_timezone_identifiers_list(int *count)
+{
+	*count = sizeof(timezonedb_idx) / sizeof(*timezonedb_idx);
+	return timezonedb_idx;
 }
 
 timelib_tzinfo *timelib_parse_tzfile(char *timezone)

@@ -124,6 +124,47 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	tm->have_zone = 0;
 }
 
+void timelib_update_from_sse(timelib_time *tm)
+{
+	timelib_sll sse;
+
+	sse = tm->sse;
+	
+	switch (tm->zone_type) {
+		case TIMELIB_ZONETYPE_ABBR:
+		case TIMELIB_ZONETYPE_OFFSET: {
+			int z = tm->z;
+			signed int dst = tm->dst;
+			
+			timelib_unixtime2gmt(tm, tm->sse - (tm->z * 60));
+
+			tm->is_localtime = 1;
+			tm->have_zone = 1;
+			tm->z = z;
+			tm->dst = dst;
+			goto cleanup;
+		}
+
+		case TIMELIB_ZONETYPE_ID: {
+			timelib_time_offset *gmt_offset;
+			
+			gmt_offset = timelib_get_time_zone_info(tm->sse, tm->tz_info);
+			timelib_unixtime2gmt(tm, tm->sse + gmt_offset->offset);
+			timelib_time_offset_dtor(gmt_offset);
+			
+			goto cleanup;
+		}
+
+		default:
+			timelib_unixtime2gmt(tm, tm->sse);
+			goto cleanup;
+	}
+cleanup:
+	tm->sse = sse;
+	tm->is_localtime = 1;
+	tm->have_zone = 1;
+}
+
 void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz)
 {
 	timelib_time_offset *gmt_offset;
@@ -136,10 +177,7 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz
 	tm->dst = gmt_offset->is_dst;
 	tm->z = gmt_offset->offset;
 	tm->tz_info = tz;
-/*	if (tm->tz_abbr) {
-		free(tm->tz_abbr);
-	}
-	tm->tz_abbr = strdup(gmt_offset->abbr);*/
+
 	timelib_time_tz_abbr_update(tm, gmt_offset->abbr);
 	timelib_time_offset_dtor(gmt_offset);
 

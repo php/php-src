@@ -150,13 +150,6 @@ typedef struct _timelib_lookup_table {
     int         value;
 } timelib_lookup_table;
 
-typedef struct _timelib_tz_lookup_table {
-    const char *name;
-    int         type;
-    int         value;
-	char       *full_tz_name;
-} timelib_tz_lookup_table;
-
 typedef struct _timelib_relunit {
 	const char *name;
 	int         unit;
@@ -166,7 +159,7 @@ typedef struct _timelib_relunit {
 #define HOUR(a) (int)(a * 60)
 
 /* The timezone table. */
-static timelib_tz_lookup_table const timelib_timezone_lookup[] = {
+static timelib_tz_lookup_table timelib_timezone_lookup[] = {
 	{ "a",    0,    HOUR (- 1), NULL                  },
 	{ "adt",  1,    HOUR (  4), "America/Halifax"     }, /* Atlantic Daylight */
 	{ "ahst", 0,    HOUR ( 10), "America/Anchorage"   }, /* Alaska-Hawaii Standard */
@@ -792,7 +785,7 @@ minutelz = [0-5][0-9];
 second = minute | "60";
 secondlz = minutelz | "60";
 meridian = [AaPp] "."? [Mm] "."?;
-tz = [A-Za-z]{1,4} | [A-Z][a-z]+("/"[A-Z][a-z]+)+;
+tz = [A-Za-z]{1,4} | [A-Z][a-z]+([_/][A-Z][a-z]+)+;
 tzcorrection = [+-] hour24 ":"? minutelz?;
 
 month = "0"? [0-9] | "1"[0-2];
@@ -843,9 +836,9 @@ pointeddate      = day "." month "." year;
 datefull         = day ([ -.])* monthtext ([ -.])* year;
 datenoday        = monthtext ([ -.])* year4;
 datenodayrev     = year4 ([ -.])* monthtext;
-datetextual      = monthtext ([ -.])+ day [,.stndrh ]* year;
-datenoyear       = monthtext ([ -.])+ day [,.stndrh ]*;
-datenoyearrev    = day ([ -.])+ monthtext;
+datetextual      = monthtext ([ -.])* day [,.stndrh ]* year;
+datenoyear       = monthtext ([ -.])* day [,.stndrh ]*;
+datenoyearrev    = day ([ -.])* monthtext;
 datenocolon      = year4 monthlz daylz;
 
 /* Special formats */
@@ -1284,6 +1277,14 @@ relativetext = (reltextnumber space reltextunit)+;
 		return TIMELIB_CLF;
 	}
 
+	year4
+	{
+		TIMELIB_INIT;
+		s->time->y = timelib_get_nr((char **) &ptr, 4);
+		TIMELIB_DEINIT;
+		return TIMELIB_CLF;
+	}
+
 	ago
 	{
 		TIMELIB_INIT;
@@ -1488,6 +1489,11 @@ char *timelib_timezone_id_from_abbr(const char *abbr)
 	} else {
 		return NULL;
 	}
+}
+
+timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void)
+{
+	return timelib_timezone_lookup;
 }
 
 #ifdef DEBUG_PARSER_STUB
