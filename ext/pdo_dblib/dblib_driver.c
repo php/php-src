@@ -44,15 +44,18 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS
 		S = (pdo_dblib_stmt*)stmt->driver_data;
 		einfo = &S->err;
 	}
-	
+
 	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
 		msg = einfo->lastmsg;
+	} else if (einfo->dberr == SYBESMSG && DBLIB_G(err).lastmsg) {
+		msg = DBLIB_G(err).lastmsg;
+		DBLIB_G(err).lastmsg = NULL;
 	} else {
 		msg = einfo->dberrstr;
 	}
 
-	spprintf(&message, 0, "%s [%d] (severity %d)",
-		msg, einfo->dberr, einfo->severity);
+	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
+		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
 
 	add_next_index_long(info, einfo->dberr);
 	add_next_index_string(info, message, 0);
