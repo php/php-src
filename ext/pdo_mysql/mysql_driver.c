@@ -208,6 +208,8 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 
 	dbh->alloc_own_columns = 1;
 
+	S->max_length = pdo_attr_lval(driver_options, PDO_ATTR_MAX_COLUMN_LEN, 0 TSRMLS_CC);
+
 	return 1;
 
 #else
