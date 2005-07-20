@@ -13,7 +13,7 @@ PDOTest::skip();
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('create table test (id int, name varchar(10))');
+$db->exec('create table test (id int, name varchar(10) NULL)');
 
 $stmt = $db->prepare('insert into test (id, name) values(0, :name)');
 $name = NULL;
