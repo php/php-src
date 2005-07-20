@@ -84,6 +84,10 @@ extern struct pdo_stmt_methods pgsql_stmt_methods;
 #define pdo_pgsql_sqlstate(r) (const char *)NULL
 #endif
 
+enum {
+	PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT = PDO_ATTR_DRIVER_SPECIFIC,
+};
+
 #endif /* PHP_PDO_PGSQL_INT_H */
 
 /*
