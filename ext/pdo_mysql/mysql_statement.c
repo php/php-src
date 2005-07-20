@@ -91,19 +91,12 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			return 0;
 		}
 
-		/* if buffered, pre-fetch all the data */
-		if (H->buffered) {
-			if (S->max_length == 1 && !S->result) {
-				my_bool on = 1;
-				mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
-			}
-			mysql_stmt_store_result(S->stmt);
-		}
-
 		if (!S->result) {
 			/* figure out the result set format, if any */
 			S->result = mysql_stmt_result_metadata(S->stmt);
 			if (S->result) {
+				int calc_max_length = H->buffered && S->max_length == 1;
+			
 				S->fields = mysql_fetch_fields(S->result);
 
 				if (S->bound_result) {
@@ -123,6 +116,11 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 				/* summon memory to hold the row */
 				for (i = 0; i < stmt->column_count; i++) {
+					if (calc_max_length && S->fields[i].type == FIELD_TYPE_BLOB) {
+						my_bool on = 1;
+						mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
+						calc_max_length = 0;
+					}
 					S->bound_result[i].buffer_length =
 						S->fields[i].max_length? S->fields[i].max_length:
 						S->fields[i].length;
@@ -135,6 +133,11 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 				if (mysql_stmt_bind_result(S->stmt, S->bound_result)) {
 					pdo_mysql_error_stmt(stmt);
 					return 0;
+				}
+
+				/* if buffered, pre-fetch all the data */
+				if (H->buffered) {
+					mysql_stmt_store_result(S->stmt);
 				}
 			}
 		}
