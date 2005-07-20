@@ -64,7 +64,7 @@ typedef struct {
 	MYSQL_BIND 		*bound_result;
 	my_bool			*out_null;
 	unsigned long   *out_length;
-
+	unsigned max_length:1;
 #endif
 } pdo_mysql_stmt;
 
