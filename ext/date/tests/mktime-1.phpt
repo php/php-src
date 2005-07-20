@@ -4,6 +4,7 @@ Check for mktime with out-of-range parameters
 error_reporting=2047
 --FILE--
 <?php 
+  date_default_timezone_set("Europe/Amsterdam");
   # MacOS/X libc implementation doesn't treat out-of-range values
   # the same way other unices do (Bug# 10686) so some extra code
   # was added to datetime.c to take care of this 

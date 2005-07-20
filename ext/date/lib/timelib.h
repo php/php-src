@@ -49,6 +49,7 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 timelib_time *timelib_strtotime(char *s, int *errors);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr);
+timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
 
 /* From tm2unixtime.c */
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
@@ -57,6 +58,7 @@ void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts);
 void timelib_unixtime2local(timelib_time *tm, timelib_sll ts, timelib_tzinfo* tz);
+void timelib_update_from_sse(timelib_time *tm);
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);
 
 /* From parse_tz.c */
@@ -64,6 +66,7 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone);
 int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
+timelib_tzdb_index_entry *timelib_timezone_identifiers_list(int *count);
 
 /* From timelib.c */
 timelib_tzinfo* timelib_tzinfo_ctor();

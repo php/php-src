@@ -61,7 +61,7 @@ typedef unsigned long int uint32_t;
 #include <strings.h>
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1300
+#if defined(_MSC_VER)
 typedef unsigned __int64 timelib_ull;
 typedef __int64 timelib_sll;
 #else
@@ -145,6 +145,18 @@ typedef struct timelib_time {
 	                              *  3 TimeZone identifier,
 	                              *  2 TimeZone abbreviation */
 } timelib_time;
+
+typedef struct _timelib_tz_lookup_table {
+	char       *name;
+	int         type;
+	int         value;
+	char       *full_tz_name;
+} timelib_tz_lookup_table;
+
+typedef struct _timelib_tzdb_index_entry {
+	char *id;
+	unsigned int pos;
+} timelib_tzdb_index_entry;
 
 #define TIMELIB_ZONETYPE_OFFSET 1
 #define TIMELIB_ZONETYPE_ABBR   2
