@@ -1,7 +1,13 @@
 --TEST--
 mysqli fetch bigint values
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+	if (PHP_INT_SIZE == 8) {
+		echo 'skip test valid only for 32bit systems';
+		exit;
+	}
+	require_once('skipif.inc');
+?>
 --FILE--
 <?php
 	include "connect.inc";
