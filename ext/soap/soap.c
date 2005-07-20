@@ -2030,6 +2030,7 @@ PHP_METHOD(SoapClient, SoapClient)
 	zval *wsdl;
 	zval *options = NULL;
 	int  soap_version = SOAP_1_1;
+	php_stream_context *context = NULL;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2074,10 +2075,7 @@ PHP_METHOD(SoapClient, SoapClient)
 
 		if (zend_hash_find(ht, "stream_context", sizeof("stream_context"), (void**)&tmp) == SUCCESS &&
 				Z_TYPE_PP(tmp) == IS_RESOURCE) {
-			php_stream_context *context = php_stream_context_from_zval(*tmp, 1);
-			if (context) {
-				add_property_resource(this_ptr, "_stream_context", context->rsrc_id);
-			}
+			context = php_stream_context_from_zval(*tmp, 1);
 		}
 
 		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
@@ -2125,10 +2123,13 @@ PHP_METHOD(SoapClient, SoapClient)
 		}
 		if (zend_hash_find(ht, "local_cert", sizeof("local_cert"), (void**)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
-			add_property_stringl(this_ptr, "_local_cert", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+		  if (!context) {
+  			context = php_stream_context_alloc();
+		  }
+ 			php_stream_context_set_option(context, "ssl", "local_cert", *tmp);
 			if (zend_hash_find(ht, "passphrase", sizeof("passphrase"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
-				add_property_stringl(this_ptr, "_passphrase", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+				php_stream_context_set_option(context, "ssl", "passphrase", *tmp);
 			}
 		}
 		if (zend_hash_find(ht, "trace", sizeof("trace"), (void**)&tmp) == SUCCESS &&
@@ -2181,6 +2182,11 @@ PHP_METHOD(SoapClient, SoapClient)
 		    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) > 0) {
 			add_property_long(this_ptr, "_connection_timeout", Z_LVAL_PP(tmp));
 		}
+
+		if (context) {
+			add_property_resource(this_ptr, "_stream_context", context->rsrc_id);
+		}
+	
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are requred in nonWSDL mode");
 		return;
