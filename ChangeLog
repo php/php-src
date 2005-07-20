@@ -1,3 +1,40 @@
+2005-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/array_access_013.phpt:
+      - Add test to verify all ArrayAccess methods can throw
+
+    * tests/classes/iterators_007.phpt:
+      - Add test to verify all iterator methods can throw
+
+    * ZendEngine2/zend_interfaces.c:
+      - Dont't warn in case an exception is pending - in this case it'd
+      superflous
+
+2005-07-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_variables.c:
+      revert my last change; chasing ghosts.
+
+    * main/php_variables.c:
+      Don't crash when no treat_data method has been set in the sapi module
+
+2005-07-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed bug #33710 (ArrayAccess objects doen't initialize $this)
+
+2005-07-19  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      \#if BRAD_0'd latest changes as requested until 5.1.0 release
+
 2005-07-18  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/standard/reg.c
