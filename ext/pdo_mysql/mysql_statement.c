@@ -94,7 +94,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		/* if buffered, pre-fetch all the data */
 		if (H->buffered) {
 			/* if we have bound the buffers don't set the attribute again */
-			if (!S->result) {
+			if (!S->result && stmt->column_count > 0) {
 				my_bool on = 1;
 				mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
 			}
