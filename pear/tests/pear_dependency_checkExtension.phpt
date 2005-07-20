@@ -4,10 +4,14 @@ PEAR_Dependency::checkExtension() test
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
     echo 'skip';
+    exit;
 }
 if (!ini_get('enable_dl') || ini_get('safe_mode')) {
     echo 'skip';
+    exit;
 }
+
+require_once 'System.php';
 
 $dir = ini_get('extension_dir');
 if (OS_WINDOWS) {
@@ -50,6 +54,7 @@ foreach ($extensions as $ext) {
 }
 if (!$notloaded || !$loaded) {
     echo 'skip';
+    exit;
 }
 ?>
 --FILE--
