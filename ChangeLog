@@ -1,3 +1,52 @@
+2005-07-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      there is not much point in putting entries of bugs fixed when bug only
+      existed in CVS and not in any release..
+
+2005-07-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/file.c
+      ext/standard/tests/file/bug32160.phpt
+      ext/standard/tests/file/bug32160.txt:
+      MFH: Fixed bug #32160 (copying a file into itself leads to data loss).
+
+2005-07-20  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed bug #33578 (strtotime() problem with "Oct17" format).
+      - Fixed problems with lone years in strtotime().
+      - Added functions to timelib to get a list of all abbreviations and
+      timezone
+        identifiers.
+      - Fixed problems with parsed dates that only have GMT offsets associated
+        with them.
+      - Fixed a Windows compile problem.
+      - Added special constants for different often used date formats
+      (DATE_ISO8601,
+        DATE_RFC822, DATE_RSS etc).
+      - Fixed date_default_timezone_get() to return the guessed timezone if none
+        was set yet with date_default_timezone_set().
+      - Added experimental support for Date/Timezone objects as per
+      specifications.
+
+2005-07-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * NEWS
+      NEWS:
+      -** empty log message ***
+
+2005-07-20  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/036.phpt:
+      Skip tests in 64bit systems
+
+    * pear/tests/pear_dependency_checkExtension.phpt:
+      fixed skipif to really skip
+
 2005-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/array_access_013.phpt:
