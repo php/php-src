@@ -252,10 +252,18 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
+		if (myht->nApplyCount > 1) {
+			PUTS("*RECURSION*\n");
+			return;
+		}
 		php_printf("%sarray(%d) refcount(%u){\n", COMMON, zend_hash_num_elements(myht), Z_REFCOUNT_PP(struc));
 		goto head_done;
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
+		if (myht && myht->nApplyCount > 1) {
+			PUTS("*RECURSION*\n");
+			return;
+		}
 		ce = Z_OBJCE(**struc);
 		Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name, Z_OBJ_HANDLE_PP(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_PP(struc));
