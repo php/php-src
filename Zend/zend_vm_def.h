@@ -1838,8 +1838,10 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 
 		EG(current_execute_data) = EXECUTE_DATA;
-		EX_T(opline->result.u.var).var.ptr->is_ref = 0;
-		EX_T(opline->result.u.var).var.ptr->refcount = 1;
+		if (!EX(function_state).function->common.return_reference) {
+			EX_T(opline->result.u.var).var.ptr->is_ref = 0;
+			EX_T(opline->result.u.var).var.ptr->refcount = 1;
+		}
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
