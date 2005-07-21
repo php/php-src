@@ -623,6 +623,11 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		case 7:
 			/* break intentionally missing */
 		case 6:
+			if (yea >= 0 && yea < 70) {
+				yea += 2000;
+			} else if (yea >= 70 && yea <= 100) {
+				yea += 1900;
+			}
 			now->y = yea;
 			/* break intentionally missing again */
 		case 5:
