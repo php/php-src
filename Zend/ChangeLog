@@ -1,3 +1,13 @@
+2005-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - Fix error generation logic (found by johannes)
+
+2005-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h:
+      Fixed bug with returning from internal function by reference
+
 2005-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_interfaces.c:
