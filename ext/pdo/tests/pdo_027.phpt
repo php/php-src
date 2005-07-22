@@ -18,9 +18,11 @@ $db->exec("INSERT INTO test (id,name) VALUES(1,'test1')");
 $db->exec("INSERT INTO test (id,name) VALUES(2,'test2')");
 
 foreach ($db->query("SELECT * FROM test", PDO_FETCH_LAZY) as $v) {
-	echo $v->id.$v->name."\n";
+	echo "lazy: " . $v->id.$v->name."\n";
 }
+echo "End\n";
 ?>
 --EXPECT--
-1test1
-2test2
+lazy: 1test1
+lazy: 2test2
+End
