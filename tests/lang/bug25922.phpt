@@ -6,6 +6,7 @@ error_reporting=2047
 <?php
 function my_error_handler($error, $errmsg='', $errfile='', $errline=0, $errcontext='')
 {
+	echo "$errmsg\n";
 	$errcontext = '';
 }
                                                                                         
@@ -17,5 +18,6 @@ function test()
 }
 test();
 ?>
---EXPECTF--
-Fatal error: User error handler must not modify error context in %sbug25922.php on line 11
+--EXPECT--
+Undefined variable: data
+Undefined index here: ''
