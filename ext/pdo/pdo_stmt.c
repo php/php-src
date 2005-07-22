@@ -303,7 +303,14 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 
 	if (param->name) {
-		param->name = estrndup(param->name, param->namelen);
+		if (is_param && param->name[0] != ':') {
+			char *temp = emalloc(++param->namelen + 1);
+			temp[0] = ':';
+			memmove(temp+1, param->name, param->namelen);
+			param->name = temp;
+		} else {
+			param->name = estrndup(param->name, param->namelen);
+		}
 		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
 	} else {
 		zend_hash_index_update(hash, param->paramno, param, sizeof(*param), (void**)&pparam);
