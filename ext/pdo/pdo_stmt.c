@@ -2163,6 +2163,9 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 			}
 		}
 	}
+
+	return_value->refcount = 0;
+	return_value->is_ref = 0;
 	
 	return return_value;
 }
