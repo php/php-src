@@ -227,6 +227,7 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value TSRMLS_DC) /* {
 	Z_TYPE_P(return_value) = IS_OBJECT;
 	Z_OBJ_HANDLE_P(return_value) = Z_OBJ_HANDLE(stmt->lazy_object_ref);
 	Z_OBJ_HT_P(return_value) = Z_OBJ_HT(stmt->lazy_object_ref);
+	zend_objects_store_add_ref(return_value TSRMLS_CC);
 }
 /* }}} */
 
