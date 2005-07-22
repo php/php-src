@@ -1,3 +1,16 @@
+2005-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix error generation logic (found by johannes)
+
+2005-07-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h:
+      Fixed bug with returning from internal function by reference
+
+    * ext/standard/var.c:
+      Recursion protection
+
 2005-07-20  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * NEWS:
