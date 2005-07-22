@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.11 2004-02-12 12:30:41 wez Exp $ */
+/* $Id: buildconf.js,v 1.11.2.1 2005-07-22 18:09:33 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -209,7 +209,11 @@ re = new RegExp("(ARG_(ENABLE|WITH)\([^;]+\);)", "gm");
 calls = modules.match(re);
 for (i = 0; i < calls.length; i++) {
 	item = calls[i];
+	C.WriteLine("try {");
 	C.WriteLine(item);
+	C.WriteLine("} catch (e) {");
+	C.WriteLine('\tSTDOUT.WriteLine("problem: " + e);');
+	C.WriteLine("}");
 }
 
 C.WriteBlankLines(1);

@@ -19,14 +19,18 @@
 
 CC="$(CL)"
 LD="$(LINK)"
+MC="$(MC)"
 
-all: $(BUILD_DIR) $(BUILD_DIRS_SUB) generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+MCFILE=$(BUILD_DIR)\wsyslog.rc
 
-generated_files: Zend\zend_ini_parser.c \
+all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
+
+build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB)
+
+generated_files: build_dirs Zend\zend_ini_parser.c \
 	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
 	Zend\zend_language_scanner.c \
-	ext\standard\parsedate.c \
-	$(PHPDEF)
+	$(PHPDEF) $(MCFILE)
 
 $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
@@ -43,18 +47,21 @@ Zend\zend_ini_scanner.c: Zend\flex.skl Zend\zend_ini_scanner.l
 Zend\zend_language_scanner.c: Zend\flex.skl Zend\zend_language_scanner.l
 	$(FLEX) -i -SZend/flex.skl -Pzend -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 
-ext\standard\parsedate.c ext\standard\parsedate.h: ext\standard\parsedate.y
-	$(BISON) --output=ext/standard/parsedate.c -v -d ext/standard/parsedate.y 
-
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
+
+$(MCFILE): win32\build\wsyslog.mc
+	$(MC) -h win32\ -r $(BUILD_DIR)\ -x $(BUILD_DIR)\ win32\build\wsyslog.mc
+
+#	$(RC) /fo $(MCFILE) $(BUILD_DIR)\wsyslog.rc
 
 $(PHPDLL_RES): win32\build\template.rc
 	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
-		win32\build\template.rc
+		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
+		win32\build\template.rc 
 
-$(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES)
-	$(LD) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES)
+$(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
+	@$(LD) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES)
 	
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 	
@@ -86,7 +93,7 @@ set TEST_PHP_EXECUTABLE=$(BUILD_DIR)\php.exe
 $(BUILD_DIR)\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-tests.php $(TESTS)
 <<NOKEEP
 
-build-snap:
+build-snap: generated_files
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
 	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
@@ -118,8 +125,16 @@ $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
 
-install: all
+# need to redirect, since INSTALL is a file in the root...
+install: really-install
+
+really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
+	@echo Installing files under $(PHP_PREFIX)
 	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
 	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >nul
-	
+	@echo Registering event source with syslog (requires admin rights)
+	@echo It's okay for this step to fail:
+	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
+
+

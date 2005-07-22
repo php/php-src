@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.42.2.3 2005-02-26 01:10:50 edink Exp $
+// $Id: confutils.js,v 1.42.2.4 2005-07-22 18:09:33 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -350,7 +350,7 @@ can be built that way. \
 		 'php-build', 'snapshot-template',
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
-		 'zend-multibyte'
+		 'zend-multibyte', 'fd-setsize', 'memory-manager'
 		);
 	var force;
 
@@ -815,10 +815,15 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	sym = header_name.toUpperCase();
 	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");
 
+	if (typeof(add_to_flag_only) == "undefined" &&
+			flag_name.match(new RegExp("^CFLAGS_(.*)$"))) {
+		add_to_flag_only = true;
+	}
+
 	if (typeof(add_to_flag_only) != "undefined") {
 		ADD_FLAG(flag_name, "/DHAVE_" + sym + "=" + have);
 	} else {
-		AC_DEFINE("HAVE_" + sym, have);
+		AC_DEFINE("HAVE_" + sym, have, "have the " + header_name + " header file");
 	}
 
 	return p;
@@ -871,7 +876,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	var SAPI = sapiname.toUpperCase();
 	var ldflags;
 	var resname;
-	var ld = "$(LD)";
+	var ld = "@$(LD)";
 
 	STDOUT.WriteLine("Enabling SAPI " + configure_module_dirname);
 
@@ -1020,7 +1025,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var libname = dllname.substring(0, dllname.length-4) + ".lib";
 
 		var resname = generate_version_info_resource(dllname, configure_module_dirname);
-		var ld = "$(LD)";
+		var ld = "@$(LD)";
 
 		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + " $(BUILD_DIR)\\" + libname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 		MFO.WriteLine("\t" + ld + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
@@ -1140,7 +1145,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
-			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
+			MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
 	}
 
