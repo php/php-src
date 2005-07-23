@@ -2797,10 +2797,11 @@ gdImagePtr gdImageRotate180 (gdImagePtr src, int ignoretransparent)
 					a = gdImageAlpha(src,c);
 					c = gdTrueColorAlpha(r, g, b, a);
 				}
+
 				if (ignoretransparent && c == dst->transparent) {
-					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), dst->transparent);
+					gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1), dst->transparent);
 				} else {
-					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
+					gdImageSetPixel(dst, (dst->sx - uX - 1), (dst->sy - uY - 1), c);
 				}
 			}
 		}
@@ -2839,10 +2840,11 @@ gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 					a = gdImageAlpha(src,c);
 					c = gdTrueColorAlpha(r, g, b, a);
 				}
+
 				if (ignoretransparent && c == dst->transparent) {
-					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), dst->transparent);
+					gdImageSetPixel(dst, (dst->sx - uY - 1), uX, dst->transparent);
 				} else {
-					gdImageSetPixel(dst, uY, (dst->sy - uX - 1), c);
+					gdImageSetPixel(dst, (dst->sx - uY - 1), uX, c);
 				}
 			}
 		}
