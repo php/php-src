@@ -118,7 +118,7 @@ array(6) {
   [2]=>
   string(1) "r"
   [3]=>
-  string(1) "s"
+  string(2) "1s"
   [4]=>
   string(3) "bar"
   [5]=>
@@ -130,7 +130,7 @@ array(5) {
   [1]=>
   string(3) "B4r"
   [2]=>
-  string(1) "s"
+  string(2) "1s"
   [3]=>
   string(3) "bar"
   [4]=>
@@ -181,8 +181,8 @@ array(6) {
   string(1) "B"
   [6]=>
   string(1) "r"
-  [9]=>
-  string(1) "s"
+  [8]=>
+  string(2) "1s"
   [11]=>
   string(3) "bar"
   [15]=>
@@ -193,8 +193,8 @@ array(5) {
   string(3) "F0o"
   [4]=>
   string(3) "B4r"
-  [9]=>
-  string(1) "s"
+  [8]=>
+  string(2) "1s"
   [11]=>
   string(3) "bar"
   [15]=>
