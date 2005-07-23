@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1
+- Fixed bug #33841 (pdo sqlite driver forgets to update affected column count
+  on execution of prepared statments).
 - Fixed bug #33802 (throw Exception in error handler causes crash). (Dmitry)
 - Fixed bug #33710 (ArrayAccess objects doen't initialize $this). (Dmitry)
 - Fixed bug #33578 (strtotime() problem with "Oct17" format). (Derick)
