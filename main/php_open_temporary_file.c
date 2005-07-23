@@ -33,17 +33,11 @@
 #include "win32/winutil.h"
 #elif defined(NETWARE)
 #ifdef USE_WINSOCK
-/*#include <ws2nlm.h>*/
 #include <novsock2.h>
 #else
 #include <sys/socket.h>
 #endif
-#ifdef NEW_LIBC
 #include <sys/param.h>
-#else
-#include "netware/param.h"
-#endif
-#include "netware/mktemp.h"
 #else
 #include <sys/param.h>
 #include <sys/socket.h>
@@ -115,10 +109,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 #endif
 		;
 #endif
-#ifdef NETWARE
-    char *file_path = NULL;
-#endif
-
 	if (!path) {
 		return -1;
 	}
@@ -143,12 +133,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		 * which means that opening it will fail... */
 		VCWD_CHMOD(opened_path, 0600);
 		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
-	}
-#elif defined(NETWARE)
-	/* Using standard mktemp() implementation for NetWare */
-	file_path = mktemp(opened_path);
-	if (file_path) {
-		fd = VCWD_OPEN(file_path, open_flags);
 	}
 #elif defined(HAVE_MKSTEMP)
 	fd = mkstemp(opened_path);
