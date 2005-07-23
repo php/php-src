@@ -34,11 +34,7 @@
 #endif
 
 #ifdef NETWARE
-#ifdef NEW_LIBC
 #include <netinet/in.h>
-#else
-#include <sys/socket.h>
-#endif
 #endif
 
 #ifndef HAVE_FLOCK

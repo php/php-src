@@ -40,11 +40,7 @@
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
 #elif defined(NETWARE)
-#ifdef NEW_LIBC
 #include <sys/param.h>
-#else
-#include "netware/param.h"
-#endif
 #define GET_DL_ERROR()	dlerror()
 #else
 #include <sys/param.h>
