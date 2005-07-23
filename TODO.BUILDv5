@@ -1,3 +1,0 @@
-- clean up .cvsignores
-- purge Makefile.ins and replace PHP_EXTENSION in config.m4s
-  with appropiate calls to PHP_NEW_EXTENSION
