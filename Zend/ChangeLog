@@ -1,3 +1,12 @@
+2005-07-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c
+      zend.c
+      tests/bug33802.phpt
+      tests/bug33802.phpt
+      tests/bug33802.phpt:
+      Fixed bug #33802 (throw Exception in error handler causes crash)
+
 2005-07-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute_API.c:
