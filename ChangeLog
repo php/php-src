@@ -1,3 +1,72 @@
+2005-07-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Fixed bug #33841 (pdo sqlite driver forgets to update affected column count
+      on execution of prepared statments).
+
+2005-07-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * TODO.BUILDv5:
+      Removed done stuff
+
+2005-07-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/str_word_count.phpt:
+      Fixed bug in str_word_count() when charlist if specified and "word" starts
+      with a character found inside the charlist.
+
+2005-07-23  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/libgd/gd.c:
+      - fix #33794 imagerotate rotates only CCW
+        introduced by transparent color patch
+
+2005-07-23  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      Zend/zend.h:
+      NetWare can make use autoconf based build environment
+
+    * (PHP_4_4)
+      main/mergesort.c
+      main/php_compat.h
+      main/php_open_temporary_file.c
+      main/reentrancy.c:
+      main/php_compat.h
+      NetWare can make use of Autoconf based build.
+      
+      main/php_open_temporary_file.c
+      NetWare LibC SDK has sys/param.h so removing the redundant NEW_LIBC
+      checks.
+      NetWare LibC has mkstemp implementation
+      
+      main/mergesort.c
+      Removing redundant sys/socket.h includes
+      
+      main/reentrant.c
+      Removing the redundant rentrant time function wrappers of NetWare
+      
+      --Kamesh
+
+    * (PHP_4_4)
+      ext/standard/dl.c
+      ext/standard/flock_compat.c
+      ext/standard/lcg.c
+      ext/standard/pack.c:
+      ext/standard/dl.c
+      NetWare LibC SDK has sys/param.h so removing the redundant NEW_LIBC
+      checks.
+      ext/standard/flock_compat.c
+      Removing redundant NEW_LIBC checks
+      ext/standard/lcg.c
+      NetWare LibC SDK has sys/timeval.h so removing the redundant NEW_LIBC
+      checks.
+      ext/standard/pack.c
+      NetWare LibC SDK has sys/param.h so removing the redundant NEW_LIBC
+      checks.
+      --Kamesh
+
 2005-07-22  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/pgsql/config.m4:
