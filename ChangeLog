@@ -1,3 +1,9 @@
+2005-07-24  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * (PHP_4_4)
+      ext/pgsql/config.m4:
+      fix build with older pgsql.
+
 2005-07-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS:
