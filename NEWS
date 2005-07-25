@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.1
+- Fixed bug #33690 (Crash setting some ini directives in httpd.conf). (Rasmus)
 - Fixed bug #33673 (Added detection for partially uploaded files). (Ilia)
 - Fixed bug #33648 (Using --with-regex=system causes compile failure). (Andrei)
 - Fixed bug #33156 (cygwin version of setitimer doesn't accept ITIMER_PROF).
