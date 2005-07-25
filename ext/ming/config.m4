@@ -58,7 +58,9 @@ int main() {
     AC_MSG_RESULT([unknown])
   ]) 
 
-  dnl Check Ming version (FIXME: if/when ming has some better way to detect the version..)
+  PHP_CHECK_LIBRARY(ming, SWFPrebuiltClip, [ AC_DEFINE(HAVE_SWFPREBUILTCLIP, 1, [ ]) ], [], []) 
+
+dnl Check Ming version (FIXME: if/when ming has some better way to detect the version..)
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=-I$MING_INC_DIR
   AC_EGREP_CPP(yes, [
