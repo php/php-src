@@ -27,8 +27,6 @@
 
 #ifdef PHP_WIN32
 #include "win32/time.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
 #else
 #include <sys/time.h>
 #endif
