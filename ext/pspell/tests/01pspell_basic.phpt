@@ -29,17 +29,13 @@ for($i=0,$u=count($array);$i<$u;++$i) {
     echo $array[$i].' : ';
     if (!pspell_check($pspell, $array[$i])) {
         echo "..false\n";
-        $suggestions = pspell_suggest ($pspell, $array[$i]);
-
-        foreach ($suggestions as $suggestion) {
-            echo "Possible spelling: $suggestion\n"; 
-        }
+        echo "Possible spellings: " . join(',',pspell_suggest ($pspell, $array[$i])) . "\n"; 
     } else {
         echo "true\n";
     }
 }
 ?>
---EXPECT--
+--EXPECTF--
 I : true
 will : true
 not : true
@@ -90,23 +86,7 @@ a : true
 pack : true
 Ya : true
 Seegarets : ..false
-Possible spelling: Secrets
-Possible spelling: Regrets
-Possible spelling: Secretes
-Possible spelling: Egrets
-Possible spelling: Segre's
-Possible spelling: Seagate's
-Possible spelling: Regreets
-Possible spelling: Segregates
-Possible spelling: Sergeants
-Possible spelling: Sugariest
-Possible spelling: Garrets
-Possible spelling: Socrates
-Possible spelling: Egret's
-Possible spelling: Separates
-Possible spelling: Cigarettes
-Possible spelling: Sugared
-Possible spelling: Scarlets
+Possible spellings:%s,Regrets,%s,Cigarettes,%s
 Ya : true
 Uh : true
 My : true
@@ -132,9 +112,5 @@ strike : true
 a : true
 match : true
 Ahh : ..false
-Possible spelling: Shh
-Possible spelling: Ah
-Possible spelling: Aha
-Possible spelling: Ash
-Possible spelling: Ha
+Possible spellings:%sAh,Aha,%s
 matches : true
