@@ -301,7 +301,7 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(active_symbol_table), NULL TSRMLS_CC);
 	if (retval) {
-		retval = malloc(strlen(tmp) + 1);
+		retval = malloc(strlen(tmp) + 2);
 		retval[0] = '$';
 		strcpy(&retval[1], tmp);
 		rl_completion_append_character = '\0';
