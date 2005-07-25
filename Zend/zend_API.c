@@ -2034,8 +2034,10 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 
 ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC)
 {
-	char *lcname, *func;
+	char *lcname, *func, *class_name;
 	zend_bool retval = 0;
+	zend_class_entry **pce;
+	int class_name_len;
 
 	if (zend_is_callable(callable, 0, callable_name)) {
 		return 1;
@@ -2043,14 +2045,20 @@ ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRML
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
 			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-
+			
 			if ((func = strstr(lcname, "::")) != NULL) {
-				zval_dtor(callable);
-				array_init(callable);
-				add_next_index_stringl(callable, lcname, func - lcname, 1);
-				func += 2;
-				add_next_index_stringl(callable, func, strlen(func), 1);
-				retval = 1; 
+				*func = '\0';
+				class_name_len = func - lcname;
+				class_name = estrndup(Z_STRVAL_P(callable), class_name_len);
+				if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC) == SUCCESS) {
+					zval_dtor(callable);
+					array_init(callable);
+					add_next_index_stringl(callable, lcname, class_name_len, 1);
+					func += 2;
+					add_next_index_stringl(callable, func, strlen(func), 1);
+					retval = 1; 
+				}
+				efree(class_name);
 			}
 			efree(lcname);
 			break;
