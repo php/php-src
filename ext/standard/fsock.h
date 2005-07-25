@@ -25,10 +25,6 @@
 #ifndef FSOCK_H
 #define FSOCK_H
 
-#ifdef NETWARE
-#include "sys/timeval.h"
-#endif
-
 #include "file.h"
 
 #include "php_network.h"
