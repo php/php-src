@@ -25,12 +25,6 @@
 #endif
 #ifdef PHP_WIN32
 #include "win32/time.h"
-#elif defined(NETWARE)
-#ifdef NEW_LIBC
-#include <sys/timeval.h>
-#else
-#include "netware/time_nw.h"
-#endif
 #else
 #include <sys/time.h>
 #endif
