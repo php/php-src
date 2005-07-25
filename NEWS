@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - Added PHP_INT_MAX and PHP_INT_SIZE as predefined constants. (Andrey)
 - Changed sha1_file() and md5_file() functions to use streams instead of
   low level IO. (Uwe)
+- Changed ming to support official 0.2a and 0.3 library versions. (Marcus)
 - Fixed memory corruption in pg_copy_from() in case the as_null parameter was
   passed. (Derick)
 - Fixed ext/mysqli to allocate less memory when fetching bound params
@@ -16,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
+- Fixed bug #33853 (php:function call __autoload with lowercase param). (Marcus)
 - Fixed bug #33802 (throw Exception in error handler causes crash). (Dmitry)
 - Fixed bug #33710 (ArrayAccess objects doen't initialize $this). (Dmitry)
 - Fixed bug #33588 (LDAP: RootDSE query not possible). (Jani)
