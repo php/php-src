@@ -3,7 +3,7 @@ README file for pspell (spellchecker) module for PHP
 
 The latest release of pspell is always available from
 
-  http://pspell.sourceforge.net/
+  http://aspell.net/
 
 This module was developed and tested with aspell-.31.1 and pspell-.11.0.2,
 although slightly earlier (and hopefully later) versions of those libraries
