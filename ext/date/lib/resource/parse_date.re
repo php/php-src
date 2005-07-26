@@ -870,8 +870,8 @@ reltextnumber = 'first'|'next'|'second'|'third'|'fourth'|'fifth'|'sixth'|'sevent
 reltextunit = (('sec'|'second'|'min'|'minute'|'hour'|'day'|'week'|'fortnight'|'forthnight'|'month'|'year') 's'?) | dayfull;
 
 relnumber = ([+-]?[0-9]+);
-relative = (relnumber space reltextunit)+;
-relativetext = (reltextnumber space reltextunit)+;
+relative = (relnumber space? reltextunit)+;
+relativetext = (reltextnumber space? reltextunit)+;
 
 */
 
