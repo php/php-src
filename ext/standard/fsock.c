@@ -48,17 +48,12 @@
 #ifdef PHP_WIN32
 #include <winsock.h>
 #elif defined(NETWARE)
-#ifdef NEW_LIBC
 #ifdef USE_WINSOCK
 #include <novsock2.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
-/*#include <sys/socket.h>*/
 #include <sys/select.h>
-/*#else
-#include <sys/socket.h>*/
-#endif
 #endif
 #else
 #include <netinet/in.h>

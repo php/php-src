@@ -42,18 +42,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#ifndef NETWARE
 #include <netdb.h>
-#else
-/*#include "netware/env.h"*/    /* Temporary */
-#ifdef NEW_LIBC /* Same headers hold good for Winsock and Berkeley sockets */
-#include <netinet/in.h>
-/*#include <arpa/inet.h>*/
-#include <netdb.h>
-#else
-#include <sys/socket.h>
-#endif
-#endif
 
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>

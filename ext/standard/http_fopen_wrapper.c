@@ -39,14 +39,6 @@
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
-#elif defined(NETWARE)
-/*#include <ws2nlm.h>*/
-/*#include <sys/socket.h>*/
-#ifdef NEW_LIBC
-#include <sys/param.h>
-#else
-#include "netware/param.h"
-#endif
 #else
 #include <sys/param.h>
 #endif
@@ -61,7 +53,6 @@
 #ifdef PHP_WIN32
 #include <winsock.h>
 #elif defined(NETWARE) && defined(USE_WINSOCK)
-/*#include <ws2nlm.h>*/
 #include <novsock2.h>
 #else
 #include <netinet/in.h>

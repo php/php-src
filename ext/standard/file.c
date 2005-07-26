@@ -49,12 +49,11 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
-#elif defined(NETWARE) && !defined(NEW_LIBC)
-/*#include <ws2nlm.h>*/
-#include <sys/socket.h>
-#include "netware/param.h"
 #else
 #include <sys/param.h>
+#if HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 #if defined(NETWARE) && defined(USE_WINSOCK)
 #include <novsock2.h>
 #else
@@ -73,8 +72,6 @@
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
-#elif defined(NETWARE)
-#include "netware/pwd.h"
 #else
 #include <pwd.h>
 #endif
@@ -2061,9 +2058,15 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
 #endif
 	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
+#ifdef NETWARE
+	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime.tv_sec);
+	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime.tv_sec);
+	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime.tv_sec);
+#else
 	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
 	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
 	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
+#endif
 #ifdef HAVE_ST_BLKSIZE
 	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize);
 #else
