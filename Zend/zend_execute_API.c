@@ -531,7 +531,7 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 	zval ***params_array;
 	zend_uint i;
 	int ex_retval;
-	zval *local_retval_ptr;
+	zval *local_retval_ptr = NULL;
 
 	if (param_count) {
 		params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
