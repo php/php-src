@@ -1,3 +1,101 @@
+2005-07-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pspell/README:
+      Updated URL leading to latest aspell.
+
+2005-07-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      MFB fix for bug #33690
+
+    * main/php_variables.c:
+      I could have sworn I committed this a while ago.  Just a tiny NULL safety
+      check here.
+
+2005-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      _ BFN
+
+2005-07-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_4)
+      NEWS
+      sapi/apache2handler/sapi_apache2.c:
+      Fix for bug #33690
+
+2005-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - Fix #33853
+
+    * ext/pspell/tests/01pspell_basic.phpt:
+      - Be flexible about spellbook - we want to test the ext not the spell
+      corrections available
+
+    * sapi/cli/php_cli_readline.c:
+      - Bugfix #33733
+
+2005-07-25  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      main/php.h:
+      NetWare LibC SDK has pwd.h and include sys/param.h
+      --Kamesh
+
+    * (PHP_4_4)
+      ext/session/mod_files.c:
+      Netware specific stat structure issues.
+      --Kamesh
+
+    * (PHP_4_4)
+      Zend/acconfig.h:
+      NetWare can make use of autoconf based build.
+      NetWare LibC's sys/types.h does not include sys/select.h implicitly as it
+      is the case with Linux LibC
+      -- Kamesh
+
+    * ext/standard/fsock.h
+      ext/standard/fsock.h
+      ext/standard/lcg.c
+      ext/standard/lcg.c:
+      ext/standard/fsock.h
+      Removing redundant inclusion of headers for NetWare
+      
+      ext/standard/lcg.c
+      NetWare LibC SDK sys/time.h implicitly includes sys/timval.h so nothing
+      special needed for NetWare here.
+      
+      --Kamesh
+
+    * (PHP_4_4)
+      ext/standard/dl.c
+      ext/standard/fsock.h
+      ext/standard/lcg.c
+      ext/standard/link.c
+      ext/standard/microtime.c:
+      ext/standard/dl.c
+      NetWare LibC dlsym works perfectly only thing that each of the extension
+      need to export a symbol with FULL capital prefix.
+      
+      ext/standard/fsock.h
+      Removing redundant inclusion of headers for NetWare
+      
+      ext/standard/lcg.c
+      NetWare LibC SDK sys/time.h implicitly includes sys/timval.h so nothing
+      special needed for NetWare here.
+      
+      ext/standard/link.c
+      NetWare LibC SDK has pwd.h.
+      
+      ext/standard/microtime.c
+      Removing redundant NEW_LIBC checks and nothing special about NetWare here.
+      including sys/time.h will do the needful.
+      
+      --Kamesh
+
 2005-07-24  Yasuo Ohgaki  <yohgaki@ohgaki.net>
 
     * (PHP_4_4)

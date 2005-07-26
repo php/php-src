@@ -1,3 +1,8 @@
+2005-07-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      - Fix #33853
+
 2005-07-22  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.c
