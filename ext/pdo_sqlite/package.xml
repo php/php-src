@@ -24,8 +24,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.3</version>
-  <date>2005-03-09</date>
+  <version>0.9</version>
+  <date>2005-07-27</date>
 
   <notes>
     You need to install the PDO core module before you can make use of this one.
@@ -81,6 +81,7 @@
 <file role="src" name="btree.c"/>
 <file role="src" name="btree.h"/>
 <file role="src" name="build.c"/>
+<file role="src" name="callback.c"/>
 <file role="src" name="date.c"/>
 <file role="src" name="delete.c"/>
 <file role="src" name="expr.c"/>
@@ -93,6 +94,8 @@
 <file role="src" name="main.c"/>
 <file role="src" name="md5.c"/>
 <file role="src" name="keywordhash.h"/>
+<file role="src" name="opcodes.c"/>
+<file role="src" name="opcodes.h"/>
 <file role="src" name="os_common.h"/>
 <file role="src" name="os.h"/>
 <file role="src" name="os_mac.c"/>
@@ -106,7 +109,10 @@
 <file role="src" name="pager.c"/>
 <file role="src" name="pager.h"/>
 <file role="src" name="parse.y"/>
+<file role="src" name="parse.c"/>
+<file role="src" name="parse.h"/>
 <file role="src" name="pragma.c"/>
+<file role="src" name="prepare.c"/>
 <file role="src" name="printf.c"/>
 <file role="src" name="random.c"/>
 <file role="src" name="select.c"/>
@@ -159,7 +165,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="0.3"/>
+   <dep type="ext" rel="ge" name="pdo" version="0.9"/>
   </deps>
  </release>
 </package>
