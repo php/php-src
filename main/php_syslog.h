@@ -3,11 +3,6 @@
 
 #ifdef PHP_WIN32
 #include "win32/syslog.h"
-#elif defined(NETWARE)
-# include "config.nw.h"
-#ifdef HAVE_SYSLOG_H
-#include <syslog.h>
-#endif
 #else
 #include <php_config.h>
 #ifdef HAVE_SYSLOG_H

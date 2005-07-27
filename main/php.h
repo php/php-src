@@ -65,16 +65,6 @@
 #endif
 #endif
 
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-/*
- * This is obtained using uname(2) on Unix and assigned in the case of Windows;
- * we'll do it this way at least for now.
- */
-#define PHP_OS      PHP_UNAME
-#endif
-
 #include "php_regex.h"
 
 #if HAVE_ASSERT_H
@@ -249,20 +239,9 @@ char *strerror(int);
 
 
 /* global variables */
-#if !defined(PHP_WIN32)
-#ifdef NETWARE
-#ifdef NEW_LIBC
-/*#undef environ*/  /* For now, so that our 'environ' implementation is used */
-#define php_sleep sleep
-#else
-#define php_sleep   delay   /* sleep() and usleep() are not available */
-#define usleep      delay
-#endif
-extern char **environ;
-#else
+#ifndef PHP_WIN32
 extern char **environ;
 #define php_sleep sleep
-#endif
 #endif
 
 #ifdef PHP_PWRITE_64
