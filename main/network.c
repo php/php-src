@@ -28,9 +28,6 @@
 #ifdef PHP_WIN32
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
