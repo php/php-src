@@ -33,6 +33,10 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     fi
   fi  
 
+  if test "x$PHP_LIBDIR" = "x" ; then
+    PHP_LIBDIR=lib
+  fi
+
   if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.so"; then
      AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libtds.[a|so])
   fi
@@ -42,7 +46,23 @@ if test "$PHP_PDO_DBLIB" != "no"; then
 
   PHP_ADD_INCLUDE($PDO_DBLIB_INCDIR)
   PHP_ADD_LIBRARY_WITH_PATH(sybdb, $PDO_DBLIB_LIBDIR, PDO_DBLIB_SHARED_LIBADD)
-  PHP_CHECK_PDO_INCLUDES
+  ifdef([PHP_CHECK_PDO_INCLUDES],
+  [
+    PHP_CHECK_PDO_INCLUDES
+  ],[
+    AC_MSG_CHECKING([for PDO includes])
+    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$prefix/include/php/ext
+    else
+      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+    fi
+    AC_MSG_RESULT($pdo_inc_path)
+  ])
+
   PDO_DBLIB_DEFS="-DPDO_DBLIB_FLAVOUR=\\\"freetds\\\""
   PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_inc_path $PDO_DBLIB_DEFS)
   AC_CHECK_LIB(dnet_stub, dnet_addr,
@@ -52,6 +72,11 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   AC_DEFINE(HAVE_PDO_DBLIB,1,[ ])
   AC_DEFINE(HAVE_FREETDS,1,[ ])
   PHP_SUBST(PDO_DBLIB_SHARED_LIBADD)
+
+  ifdef([PHP_ADD_EXTENDION_DEP],
+  [
+    PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)
+  ])
 fi
 
 fi
