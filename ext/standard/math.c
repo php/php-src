@@ -329,7 +329,7 @@ PHP_FUNCTION(tanh)
 
 /* }}} */
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
+#ifndef PHP_WIN32
 #ifdef HAVE_ASINH
 /* {{{ proto float asinh(float number)
    Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
@@ -380,7 +380,7 @@ PHP_FUNCTION(atanh)
 }
 /* }}} */
 #endif /* HAVE_ATANH */
-#endif /* !defined(PHP_WIN32) && !defined(NETWARE) */
+#endif /* ifndf PHP_WIN32 */
 
 
 /* {{{ proto float pi(void)

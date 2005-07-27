@@ -678,19 +678,19 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_LONG((long)BG(sb).st_gid);
 	case FS_ATIME:
 #ifdef NETWARE
-		RETURN_LONG((long)(BG(sb).st_atime).tv_nsec);
+		RETURN_LONG((long)(BG(sb).st_atime).tv_sec);
 #else
 		RETURN_LONG((long)BG(sb).st_atime);
 #endif
 	case FS_MTIME:
 #ifdef NETWARE
-		RETURN_LONG((long)(BG(sb).st_mtime).tv_nsec);
+		RETURN_LONG((long)(BG(sb).st_mtime).tv_sec);
 #else
 	RETURN_LONG((long)BG(sb).st_mtime);
 #endif
 	case FS_CTIME:
 #ifdef NETWARE
-		RETURN_LONG((long)(BG(sb).st_ctime).tv_nsec);
+		RETURN_LONG((long)(BG(sb).st_ctime).tv_sec);
 #else
 		RETURN_LONG((long)BG(sb).st_ctime);
 #endif
@@ -769,9 +769,9 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
 #ifdef NETWARE
-		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_nsec);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_nsec);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_nsec);
+		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
+		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
+		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
 #else
 		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
 		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
