@@ -640,7 +640,7 @@ fi
 PHP_ARG_WITH(config-file-scan-dir,[directory to be scanned for configuration files],
 [  --with-config-file-scan-dir=PATH ], DEFAULT, no) 
 if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
-	PHP_CONFIG_FILE_SCAN_DIR=""
+  PHP_CONFIG_FILE_SCAN_DIR=
 fi
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
@@ -1044,20 +1044,22 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
+
 case $host_alias in
 *netware*)
-    PHP_OS="NetWare"
-    PHP_UNAME="NetWare"
-    AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
-    AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
-    ;;
+  PHP_OS="NetWare"
+  PHP_UNAME="NetWare"
+  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
+  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
+  ;;
 *)
-    PHP_UNAME=`uname -a | xargs`
-    AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
-    PHP_OS=`uname | xargs`
-    AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
-    ;;
+  PHP_UNAME=`uname -a | xargs`
+  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
+  PHP_OS=`uname | xargs`
+  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
+  ;;
 esac
+
 if test "$PHP_SAPI_CLI" != "no"; then
   PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
   PHP_INSTALL_CLI_TARGET="install-cli"
