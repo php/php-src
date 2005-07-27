@@ -61,10 +61,28 @@ Note that the MySQL client library is not bundled anymore!])
   AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare mysql_next_result mysql_sqlstate]) 
   LDFLAGS=$_SAVE_LDFLAGS
 
-  PHP_CHECK_PDO_INCLUDES
+  ifdef([PHP_CHECK_PDO_INCLUDES],
+  [
+    PHP_CHECK_PDO_INCLUDES
+  ],[
+    AC_MSG_CHECKING([for PDO includes])
+    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$prefix/include/php/ext
+    else
+      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+    fi
+    AC_MSG_RESULT($pdo_inc_path)
+  ])
 
   PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path)
-  PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+  ifdef([PHP_ADD_EXTENDION_DEP],
+  [
+  	PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+  ])
   PDO_MYSQL_MODULE_TYPE=external
   PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
  
