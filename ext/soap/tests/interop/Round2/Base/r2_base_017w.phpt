@@ -5,7 +5,7 @@ SOAP Interop Round2 base 017 (php/wsdl): echoBase64
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/round2_base.wsdl",array("trace"=>1,"exceptions"=>0));
-$client->echoBase64('TmVicmFza2E=');
+$client->echoBase64('Nebraska');
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();
 include("round2_base.inc");

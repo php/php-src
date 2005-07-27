@@ -23,6 +23,7 @@
 
 #include "php_soap.h"
 #include "ext/libxml/php_libxml.h"
+#include "ext/standard/base64.h"
 #include <libxml/parserInternals.h>
 #include "zend_strtod.h"
 
@@ -607,9 +608,26 @@ static zval *to_zval_stringb(encodeTypePtr type, xmlNodePtr data)
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			whiteSpace_collapse(data->children->content);
-			ZVAL_STRING(ret, data->children->content, 1);
+
+			if (type->type_str && !strcmp(type->type_str, "base64Binary")) {
+				unsigned char *str;
+				int str_len;
+			
+				str = php_base64_decode(data->children->content, strlen(data->children->content), &str_len);
+				ZVAL_STRINGL(ret, str, str_len, 0);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+			}
 		} else if (data->children->type == XML_CDATA_SECTION_NODE && data->children->next == NULL) {
-			ZVAL_STRING(ret, data->children->content, 1);
+			if (type->type_str && !strcmp(type->type_str, "base64Binary")) {
+				unsigned char *str;
+				int str_len;
+			
+				str = php_base64_decode(data->children->content, strlen(data->children->content), &str_len);
+				ZVAL_STRINGL(ret, str, str_len, 0);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+			}
 		} else {
 			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
 		}
@@ -637,7 +655,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
-		str = php_escape_html_entities(Z_STRVAL(tmp), Z_STRLEN(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
+		str = php_escape_html_entities(Z_STRVAL(tmp), Z_STRLEN(tmp), &new_len, 0, 0, NULL TSRMLS_CC);	
 		zval_dtor(&tmp);
 	}
 
@@ -671,19 +689,38 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 static xmlNodePtr to_xml_stringl(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr ret;
+	zend_bool benc = type->type_str && !strcmp(type->type_str, "base64Binary");
 
 	ret = xmlNewNode(NULL,"BOGUS");
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
 	if (Z_TYPE_P(data) == IS_STRING) {
-		xmlNodeSetContentLen(ret, Z_STRVAL_P(data), Z_STRLEN_P(data));
+		if (!benc) {
+			xmlNodeSetContentLen(ret, Z_STRVAL_P(data), Z_STRLEN_P(data));
+		} else {
+			char *str;
+			int str_len;
+			
+			str = php_base64_encode(Z_STRVAL_P(data), Z_STRLEN_P(data), &str_len);
+			xmlNodeSetContentLen(ret, str, str_len);
+			efree(str);
+		}
 	} else {
 		zval tmp = *data;
 
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
-		xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
+		if (!benc) {
+			xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
+		} else {
+			char *str;
+			int str_len;
+
+			str = php_base64_encode(Z_STRVAL(tmp), Z_STRLEN(tmp), &str_len);
+			xmlNodeSetContentLen(ret, str, str_len);
+			efree(str);
+		}
 		zval_dtor(&tmp);
 	}
 
