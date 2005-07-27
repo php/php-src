@@ -354,7 +354,7 @@ int php_init_config()
 			if (!realpath(sapi_module.executable_location, binary_location)) {
 				efree(binary_location);
 				binary_location = NULL;			 
-            }
+			}
 		} else {
 			binary_location = NULL;
 		}
