@@ -16,18 +16,26 @@
     <email>iliaa@php.net</email>
     <role>lead</role>
   </maintainer>
+  <maintainer>
+    <user>wez</user>
+    <name>Wez Furlong</name>
+    <email>wez@php.net</email>
+    <role>lead</role>
+  </maintainer>
+
  </maintainers>
  <description>
-  This extension provides a Mysql 3.x/4.0 driver for PDO.
+  This extension provides a Mysql 3.x/4.x driver for PDO.
  </description>
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2</version>
-  <date>2005-02-09</date>
+  <version>0.9</version>
+  <date>2005-06-27</date>
 
   <notes>
-   Hope it works!
+   Much more robust, featuring native prepared statements and multi-rowset
+   query support.
   </notes>
 
   <filelist>
@@ -43,7 +51,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" name="pdo" rel="ge" version="0.2"/>
+   <dep type="ext" name="pdo" rel="ge" version="0.9"/>
   </deps>
  </release>
 </package>
