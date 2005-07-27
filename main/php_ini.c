@@ -350,7 +350,11 @@ int php_init_config()
 		}
 #else
 		if (sapi_module.executable_location) {
-			binary_location = estrdup(sapi_module.executable_location);
+			binary_location = (char *)emalloc(PATH_MAX);
+			if (!realpath(sapi_module.executable_location, binary_location)) {
+				efree(binary_location);
+				binary_location = NULL;			 
+            }
 		} else {
 			binary_location = NULL;
 		}
@@ -359,7 +363,7 @@ int php_init_config()
 			char *separator_location = strrchr(binary_location, DEFAULT_SLASH);
 			
 			if (separator_location) {
-				*(separator_location+1) = 0;
+				*(separator_location) = 0;
 			}
 			if (*php_ini_search_path) {
 				strcat(php_ini_search_path, paths_separator);
