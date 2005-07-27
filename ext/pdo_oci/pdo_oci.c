@@ -37,8 +37,21 @@ function_entry pdo_oci_functions[] = {
 /* }}} */
 
 /* {{{ pdo_oci_module_entry */
+
+#if ZEND_EXTENSION_API_NO >= 220050617
+static zend_module_dep pdo_oci_deps[] = {
+	ZEND_MOD_REQUIRED("pdo")
+	{NULL, NULL, NULL}
+};
+#endif
+
 zend_module_entry pdo_oci_module_entry = {
+#if ZEND_EXTENSION_API_NO >= 220050617
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_oci_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"PDO_OCI",
 	pdo_oci_functions,
 	PHP_MINIT(pdo_oci),
@@ -46,7 +59,7 @@ zend_module_entry pdo_oci_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_oci),
-	"0.2",
+	"0.9",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

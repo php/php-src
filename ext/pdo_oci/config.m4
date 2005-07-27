@@ -54,7 +54,16 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
   if test "instantclient" = "`echo $PDO_OCI_DIR | cut -d, -f1`" ; then
     PDO_OCI_IC_PREFIX="`echo $PDO_OCI_DIR | cut -d, -f2`"
     PDO_OCI_IC_VERS="`echo $PDO_OCI_DIR | cut -d, -f3`"
-    PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/include/oracle/$PDO_OCI_IC_VERS/client)
+    AC_MSG_CHECKING([for oci.h])
+    if test -f $PDO_OCI_IC_PREFIX/include/oracle/$PDO_OCI_IC_VERS/client/oci.h ; then
+      PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/include/oracle/$PDO_OCI_IC_VERS/client)
+      AC_MSG_RESULT($PDO_OCI_IC_PREFIX/include/oracle/$PDO_OCI_IC_VERS/client)
+    elif test -f $PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include/oci.h ; then
+      PHP_ADD_INCLUDE($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
+      AC_MSG_RESULT($PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/include)
+    else
+      AC_MSG_ERROR([I'm too dumb to figure out where the include dir is in your instant client install])
+    fi
     PDO_OCI_LIB_DIR="$PDO_OCI_IC_PREFIX/lib/oracle/$PDO_OCI_IC_VERS/client/lib"
     PDO_OCI_VERSION="`echo $PDO_OCI_IC_VERS | cut -d. -f1-2`"
   else
@@ -73,6 +82,10 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     if test -d "$PDO_OCI_DIR/plsql/public"; then
       PHP_ADD_INCLUDE($PDO_OCI_DIR/plsql/public)
       PDO_OCI_INCLUDES="$PDO_OCI_INCLUDES -I$PDO_OCI_DIR/plsql/public"
+    fi
+    if test -d "$PDO_OCI_DIR/include"; then
+      PHP_ADD_INCLUDE($PDO_OCI_DIR/include)
+      PDO_OCI_INCLUDES="$PDO_OCI_INCLUDES -I$PDO_OCI_DIR/include"
     fi
 
     if test -f "$PDO_OCI_DIR/lib/sysliblist"; then
@@ -101,6 +114,9 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
       ;;
       
     10.1)
+      PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
+      ;;
+    10.2)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
     *)
@@ -160,14 +176,33 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
   ])
 
-  PHP_CHECK_PDO_INCLUDES
+  ifdef([PHP_CHECK_PDO_INCLUDES],
+  [
+    PHP_CHECK_PDO_INCLUDES
+  ],[
+    AC_MSG_CHECKING([for PDO includes])
+    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$prefix/include/php/ext
+    else
+      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+    fi
+    AC_MSG_RESULT($pdo_inc_path)
+  ])
 
   PHP_NEW_EXTENSION(pdo_oci, pdo_oci.c oci_driver.c oci_statement.c, $ext_shared,,-I$pdo_inc_path)
 
   PHP_SUBST_OLD(PDO_OCI_SHARED_LIBADD)
   PHP_SUBST_OLD(PDO_OCI_DIR)
   PHP_SUBST_OLD(PDO_OCI_VERSION)
-  PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
+
+  ifdef([PHP_ADD_EXTENDION_DEP],
+  [
+    PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
+  ])
   
 fi
 
