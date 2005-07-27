@@ -16,6 +16,13 @@
    <email>iliaa@php.net</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>wez</user>
+   <name>Wez Alshanetsky</name>
+   <email>wez@php.net</email>
+   <role>lead</role>
+  </maintainer>
+
  </maintainers>
  <description>
   This extension provides an PostgreSQL driver for PDO.
@@ -23,10 +30,12 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2</version>
-  <date>2005-02-09</date>
+  <version>0.9</version>
+  <date>2005-06-27</date>
 
   <notes>
+   Now features native prepared statements and numerous other improvements.
+
    You need to install the PDO core module before you can make use of this one.
    You also require PostgreSQL client libraries installed on the machine where you intend to build and/or use it.
    
@@ -47,7 +56,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="0.2"/>
+   <dep type="ext" rel="ge" name="pdo" version="0.9"/>
   </deps>
  </release>
 </package>
