@@ -31,7 +31,7 @@
  <release>
   <state>beta</state>
   <version>0.9</version>
-  <date>2005-06-27</date>
+  <date>2005-07-27</date>
 
   <notes>
    Much more robust, featuring native prepared statements and multi-rowset
