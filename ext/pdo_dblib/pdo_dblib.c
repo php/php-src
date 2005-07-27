@@ -38,8 +38,20 @@ function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+#if ZEND_EXTENSION_API_NO >= 220050617
+static zend_module_dep pdo_dblib_deps[] = {
+	ZEND_MOD_REQUIRED("pdo")
+	{NULL, NULL, NULL}
+};
+#endif
+
 zend_module_entry pdo_dblib_module_entry = {
+#if ZEND_EXTENSION_API_NO >= 220050617
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_dblib_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 #if PDO_DBLIB_IS_MSSQL
 	"pdo_mssql",
 #elif defined(PHP_WIN32)
@@ -53,7 +65,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
-	"0.1-dev",
+	"0.9",
 	STANDARD_MODULE_PROPERTIES
 };
 

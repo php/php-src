@@ -9,10 +9,6 @@ This extension will compile and register itself as 'mssql' when built against
 the mssql libraries (and be named php_pdo_mssql.dll), or 'sybase' otherwise
 (php_pdo_sybase.dll)
 
-This extension should also compile and run under unix platforms, but I haven't
-written the config.m4 for that yet (volunteers welcome).
-
-
 If you want to try out the free "desktop" version of SQL Server, known as the MSDE, google to obtain the appropriate download link.  Here are some short tips on getting it running:
 
 - Download it and run it to extract it
