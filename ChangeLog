@@ -1,3 +1,105 @@
+2005-07-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Fixed bug #33869 (strtotime() problem with "+1days" format).
+
+2005-07-26  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/pcre/pcrelib/pcre.c:
+      nuke unused var
+
+2005-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_execute_API.c:
+      bug #33865
+
+2005-07-26  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      ext/mysql/config.m4:
+      NetWare libmysqlclient library is available as libmysql(olden times 8.3
+      limitation).
+      Applying the accepted patches on 5.0 tree.
+      --Kamesh
+
+    * (PHP_4_4)
+      main/fopen_wrappers.c
+      main/main.c
+      main/network.c
+      main/php_scandir.c
+      main/user_streams.c:
+      main/main.c
+      Removing redundant NEW_LIBC checks
+      
+      main/fopen_wrappers.c
+      NetWare LibC SDK has sys/pwd.h and sys/param.h
+      Removed redundant NEW_LIBC checks
+      
+      main/user_streams.c
+      NetWare specific stat structure issues.
+      
+      main/php_scandir.c
+      Netware LibC SDK does not have search.h
+      
+      main/network.c
+      Removed redundant NEW_LIBC checks.
+      NetWare LibC SDK has sys/param.h
+      --Kamesh
+
+    * (PHP_4_4)
+      TSRM/TSRM.c
+      TSRM/TSRM.h
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h:
+      TSRM/TSRM.h
+      NetWare can make use of autoconf based build.
+      PTHREADS implementation of NetWare is good enough so dropping the code for
+      NetWare specific thread implementation in preference to PTHREADS
+      
+      TSRM/TSRM.c
+      PTHREADS implementation of NetWare is good enough so dropping the code for
+      NetWare specific thread implementation in preference to PTHREADS
+      
+      TSRM/tsrm_virtual_cwd.c
+      NetWare can make use of autoconf based build.
+      Removed redundant CLIB_STAT_PATCH checks
+      NetWare specific fixes from PHP_5_0.
+      
+      TSRM/tsrm_virtual_cwd.h
+      Removed redundant CLIB_STAT_PATCH checks
+      NetWare specific fixes from PHP_5_0.
+      
+      --Kamesh
+
+    * main/config.nw.h:
+      NetWare can make use of autoconf based build
+      --Kamesh
+
+    * (PHP_5_0)
+      main/config.nw.h:
+      removed main/config.nw.h
+      -- Kamesh
+
+    * (PHP_5_0)
+      ext/bcmath/libbcmath/src/config.h
+      ext/mcve/mcve.c
+      ext/pcre/pcrelib/internal.h
+      main/php_sprintf.c:
+      ext/pcre/pcrelib/internal.h
+      NetWare can make use autoconf based build.
+      
+      main/php_sprintf.c
+      NetWare can make use autoconf based build.
+      
+      ext/bcmath/libbcmath/src/config.h
+      NetWare can make use autoconf based build.
+      
+      ext/mcve/mcve.c
+      NetWare can make use autoconf based build.
+      
+      -- Kamesh
+
 2005-07-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pspell/README:
