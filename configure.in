@@ -214,6 +214,15 @@ case $host_alias in
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"  
     fi  
     ;;
+*netware*)
+    PHP_BUILD_PROGRAM
+    PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
+    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
+    PHP4LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
+    EXTENSION_DIR=sys:/php$MAJOR_VERSION/ext
+    PHP_SUBST(PHP4LIB_SHARED_LIBADD)
+    PHP_SHARED_MODULE(php4lib, PHP_GLOBAL_OBJS, netware)
+    ;;
 esac
 
 # Disable PIC mode by default where it is known to be safe to do so,
@@ -1082,10 +1091,20 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
-PHP_UNAME=`uname -a | xargs`
-AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
-PHP_OS=`uname | xargs`
-AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
+case $host_alias in
+*netware*)
+    PHP_OS="NetWare"
+    PHP_UNAME="NetWare"
+    AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
+    AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
+    ;;
+*)
+    PHP_UNAME=`uname -a | xargs`
+    AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
+    PHP_OS=`uname | xargs`
+    AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
+    ;;
+esac
 
 if test "$disable_cli" != "1"; then
   PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
@@ -1243,7 +1262,15 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        streams.c network.c php_open_temporary_file.c php_logos.c \
        output.c memory_streams.c user_streams.c)
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
-PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+case $host_alias in
+*netware*)
+  PHP_ADD_BUILD_DIR(win32)
+  PHP_ADD_BUILD_DIR(netware)
+  ;;
+*)
+  PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+  ;;
+esac
 
 PHP_ADD_SOURCES(/Zend, zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c)
