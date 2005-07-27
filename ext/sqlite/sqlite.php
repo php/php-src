@@ -1,9 +1,6 @@
 <?php
 if (!extension_loaded("sqlite")) {
 	dl("sqlite.so");
-	if (!extension_loaded("sqlite")) {
-		exit("Please enable SQLite support\n");
-	}
 }
 
 debug_zval_dump(sqlite_libversion());

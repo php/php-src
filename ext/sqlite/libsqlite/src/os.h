@@ -18,11 +18,6 @@
 #define _SQLITE_OS_H_
 
 /*
-** Helpful hint:  To get this to compile on HP/UX, add -D_INCLUDE_POSIX_SOURCE
-** to the compiler command line.
-*/
-
-/*
 ** These #defines should enable >2GB file support on Posix if the
 ** underlying operating system supports it.  If the OS lacks
 ** large file support, or if the OS is windows, these should be no-ops.
@@ -39,9 +34,7 @@
 */
 #ifndef SQLITE_DISABLE_LFS
 # define _LARGE_FILE       1
-# ifndef _FILE_OFFSET_BITS
-#   define _FILE_OFFSET_BITS 64
-# endif
+# define _FILE_OFFSET_BITS 64
 # define _LARGEFILE_SOURCE 1
 #endif
 
@@ -90,9 +83,7 @@
 # endif
 #else
 # define OS_MAC 0
-# ifndef OS_WIN
-#  define OS_WIN 0
-# endif
+# define OS_WIN 0
 #endif
 
 /*
@@ -105,11 +96,9 @@
 # include <unistd.h>
   typedef struct OsFile OsFile;
   struct OsFile {
-    struct openCnt *pOpen;    /* Info about all open fd's on this inode */
-    struct lockInfo *pLock;   /* Info about locks on this inode */
-    int fd;                   /* The file descriptor */
-    int locked;               /* True if this instance holds the lock */
-    int dirfd;                /* File descriptor for the directory */
+    struct lockInfo *pLock;  /* Information about locks on this inode */
+    int fd;                  /* The file descriptor */
+    int locked;              /* True if this user holds the lock */
   };
 # define SQLITE_TEMPNAME_SIZE 200
 # if defined(HAVE_USLEEP) && HAVE_USLEEP
@@ -130,12 +119,7 @@
 # if defined(_MSC_VER) || defined(__BORLANDC__)
     typedef __int64 off_t;
 # else
-#  if !defined(_CYGWIN_TYPES_H)
-     typedef long long off_t;
-#    if defined(__MINGW32__)
-#      define	_OFF_T_
-#    endif
-#  endif
+    typedef long long off_t;
 # endif
 # define SQLITE_TEMPNAME_SIZE (MAX_PATH+50)
 # define SQLITE_MIN_SLEEP_MS 1
@@ -163,11 +147,9 @@
 
 int sqliteOsDelete(const char*);
 int sqliteOsFileExists(const char*);
-int sqliteOsFileRename(const char*, const char*);
 int sqliteOsOpenReadWrite(const char*, OsFile*, int*);
 int sqliteOsOpenExclusive(const char*, OsFile*, int);
 int sqliteOsOpenReadOnly(const char*, OsFile*);
-int sqliteOsOpenDirectory(const char*, OsFile*);
 int sqliteOsTempFileName(char*);
 int sqliteOsClose(OsFile*);
 int sqliteOsRead(OsFile*, void*, int amt);
@@ -181,7 +163,6 @@ int sqliteOsWriteLock(OsFile*);
 int sqliteOsUnlock(OsFile*);
 int sqliteOsRandomSeed(char*);
 int sqliteOsSleep(int ms);
-int sqliteOsCurrentTime(double*);
 void sqliteOsEnterMutex(void);
 void sqliteOsLeaveMutex(void);
 char *sqliteOsFullPathname(const char*);

@@ -1,19 +1,19 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 4                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2004 The PHP Group                                |
+  | Copyright (c) 1997-2002 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.0 of the PHP license,       |
+  | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_0.txt.                                  |
+  | available at through the world-wide-web at                           |
+  | http://www.php.net/license/2_02.txt.                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Stig Sæther Bakken <ssb@php.net>                             |
+  | Author: Stig Sæther Bakken <ssb@fast.no>                             |
   +----------------------------------------------------------------------+
 
   $Id$
@@ -33,6 +33,7 @@ class PEAR_Frontend_CLI extends PEAR
     var $type = 'CLI';
     var $lp = ''; // line prefix
 
+    var $omode = 'plain';
     var $params = array();
     var $term = array(
         'bold' => '',
@@ -47,9 +48,7 @@ class PEAR_Frontend_CLI extends PEAR
     {
         parent::PEAR();
         $term = getenv('TERM'); //(cox) $_ENV is empty for me in 4.1.1
-        if (function_exists('posix_isatty') && !posix_isatty(1)) {
-            // output is being redirected to a file or through a pipe
-        } elseif ($term) {
+        if ($term) {
             // XXX can use ncurses extension here, if available
             if (preg_match('/^(xterm|vt220|linux)/', $term)) {
                 $this->term['bold'] = sprintf("%c%c%c%c", 27, 91, 49, 109);
@@ -69,23 +68,10 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayLine($text)
     {
-        trigger_error("PEAR_Frontend_CLI::displayLine deprecated", E_USER_ERROR);
-    }
-
-    function _displayLine($text)
-    {
         print "$this->lp$text\n";
     }
 
-    // }}}
-    // {{{ display(text)
-
     function display($text)
-    {
-        trigger_error("PEAR_Frontend_CLI::display deprecated", E_USER_ERROR);
-    }
-
-    function _display($text)
     {
         print $text;
     }
@@ -93,20 +79,14 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ displayError(eobj)
 
-    /**
-     * @param object PEAR_Error object
-     */
     function displayError($eobj)
     {
-        return $this->_displayLine($eobj->getMessage());
+        return $this->displayLine($eobj->getMessage());
     }
 
     // }}}
     // {{{ displayFatalError(eobj)
 
-    /**
-     * @param object PEAR_Error object
-     */
     function displayFatalError($eobj)
     {
         $this->displayError($eobj);
@@ -118,11 +98,6 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayHeading($title)
     {
-        trigger_error("PEAR_Frontend_CLI::displayHeading deprecated", E_USER_ERROR);
-    }
-
-    function _displayHeading($title)
-    {
         print $this->lp.$this->bold($title)."\n";
         print $this->lp.str_repeat("=", strlen($title))."\n";
     }
@@ -130,36 +105,27 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ userDialog(prompt, [type], [default])
 
-    function userDialog($command, $prompts, $types = array(), $defaults = array())
+    function userDialog($prompt, $type = 'text', $default = '')
     {
-        $result = array();
-        if (is_array($prompts)) {
-            $fp = fopen("php://stdin", "r");
-            foreach ($prompts as $key => $prompt) {
-                $type = $types[$key];
-                $default = @$defaults[$key];
-                if ($type == 'password') {
-                    system('stty -echo');
-                }
-                print "$this->lp$prompt ";
-                if ($default) {
-                    print "[$default] ";
-                }
-                print ": ";
-                $line = fgets($fp, 2048);
-                if ($type == 'password') {
-                    system('stty echo');
-                    print "\n";
-                }
-                if ($default && trim($line) == "") {
-                    $result[$key] = $default;
-                } else {
-                    $result[$key] = $line;
-                }
-            }
-            fclose($fp);
+        if ($type == 'password') {
+            system('stty -echo');
         }
-        return $result;
+        print "$this->lp$prompt ";
+        if ($default) {
+            print "[$default] ";
+        }
+        print ": ";
+        $fp = fopen("php://stdin", "r");
+        $line = fgets($fp, 2048);
+        fclose($fp);
+        if ($type == 'password') {
+            system('stty echo');
+            print "\n";
+        }
+        if ($default && trim($line) == "") {
+            return $default;
+        }
+        return $line;
     }
 
     // }}}
@@ -167,7 +133,6 @@ class PEAR_Frontend_CLI extends PEAR
 
     function userConfirm($prompt, $default = 'yes')
     {
-        trigger_error("PEAR_Frontend_CLI::userConfirm not yet converted", E_USER_ERROR);
         static $positives = array('y', 'yes', 'on', '1');
         static $negatives = array('n', 'no', 'off', '0');
         print "$this->lp$prompt [$default] : ";
@@ -195,11 +160,7 @@ class PEAR_Frontend_CLI extends PEAR
 
     function startTable($params = array())
     {
-        trigger_error("PEAR_Frontend_CLI::startTable deprecated", E_USER_ERROR);
-    }
-
-    function _startTable($params = array())
-    {
+        $this->omode = 'table';
         $params['table_data'] = array();
         $params['widest'] = array();  // indexed by column
         $params['highest'] = array(); // indexed by row
@@ -212,16 +173,11 @@ class PEAR_Frontend_CLI extends PEAR
 
     function tableRow($columns, $rowparams = array(), $colparams = array())
     {
-        trigger_error("PEAR_Frontend_CLI::tableRow deprecated", E_USER_ERROR);
-    }
-
-    function _tableRow($columns, $rowparams = array(), $colparams = array())
-    {
         $highest = 1;
         for ($i = 0; $i < sizeof($columns); $i++) {
             $col = &$columns[$i];
             if (isset($colparams[$i]) && !empty($colparams[$i]['wrap'])) {
-                $col = wordwrap($col, $colparams[$i]['wrap'], "\n", 0);
+                $col = wordwrap($col, $colparams[$i]['wrap'], "\n", 1);
             }
             if (strpos($col, "\n") !== false) {
                 $multiline = explode("\n", $col);
@@ -231,7 +187,7 @@ class PEAR_Frontend_CLI extends PEAR
                         $w = strlen($line);
                     }
                 }
-                $lines = sizeof($multiline);
+                $lines = sizeof($lines);
             } else {
                 $w = strlen($col);
             }
@@ -262,17 +218,10 @@ class PEAR_Frontend_CLI extends PEAR
 
     function endTable()
     {
-        trigger_error("PEAR_Frontend_CLI::endTable deprecated", E_USER_ERROR);
-    }
-
-    function _endTable()
-    {
+        $this->omode = '';
         extract($this->params);
         if (!empty($caption)) {
-            $this->_displayHeading($caption);
-        }
-        if (count($table_data) == 0) {
-            return;
+            $this->displayHeading($caption);
         }
         if (!isset($width)) {
             $width = $widest;
@@ -283,7 +232,6 @@ class PEAR_Frontend_CLI extends PEAR
                 }
             }
         }
-        $border = false;
         if (empty($border)) {
             $cellstart = '';
             $cellend = ' ';
@@ -302,16 +250,10 @@ class PEAR_Frontend_CLI extends PEAR
             }
         }
         if ($borderline) {
-            $this->_displayLine($borderline);
+            $this->displayLine($borderline);
         }
         for ($i = 0; $i < sizeof($table_data); $i++) {
             extract($table_data[$i]);
-            if (!is_array($rowparams)) {
-                $rowparams = array();
-            }
-            if (!is_array($colparams)) {
-                $colparams = array();
-            }
             $rowlines = array();
             if ($height > 1) {
                 for ($c = 0; $c < sizeof($data); $c++) {
@@ -351,146 +293,14 @@ class PEAR_Frontend_CLI extends PEAR
 
                     $rowtext .= $cellstart . $cell . $cellend;
                 }
-                if (!$border) {
-                    $rowtext = rtrim($rowtext);
-                }
                 $rowtext .= $rowend;
-                $this->_displayLine($rowtext);
+                $this->displayLine($rowtext);
             }
         }
         if ($borderline) {
-            $this->_displayLine($borderline);
+            $this->displayLine($borderline);
         }
     }
-
-    // }}}
-    // {{{ outputData()
-
-    function outputData($data, $command = '_default')
-    {
-        switch ($command) {
-            case 'install':
-            case 'upgrade':
-            case 'upgrade-all':
-                if (isset($data['release_warnings'])) {
-                    $this->_displayLine('');
-                    $this->_startTable(array(
-                        'border' => false,
-                        'caption' => 'Release Warnings'
-                        ));
-                    $this->_tableRow(array($data['release_warnings']), null, array(1 => array('wrap' => 55)));
-                    $this->_endTable();
-                    $this->_displayLine('');
-                }
-                $this->_displayLine($data['data']);
-                break;
-            case 'search':
-                $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline'])) {
-                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-                }
-
-                foreach($data['data'] as $category) {
-                    foreach($category as $pkg) {
-                        $this->_tableRow($pkg, null, array(1 => array('wrap' => 55)));
-                    }
-                };
-                $this->_endTable();
-                break;
-            case 'list-all':
-                $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline'])) {
-                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-                }
-
-                foreach($data['data'] as $category) {
-                    foreach($category as $pkg) {
-                        unset($pkg[3]);
-                        unset($pkg[4]);
-                        $this->_tableRow($pkg, null, array(1 => array('wrap' => 55)));
-                    }
-                };
-                $this->_endTable();
-                break;
-            case 'config-show':
-                $data['border'] = false;
-                $opts = array(0 => array('wrap' => 30),
-                              1 => array('wrap' => 20),
-                              2 => array('wrap' => 35));
-                $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline'])) {
-                    $this->_tableRow($data['headline'],
-                                     array('bold' => true),
-                                     $opts);
-                }
-                foreach($data['data'] as $group) {
-                    foreach($group as $value) {
-                        if ($value[2] == '') {
-                            $value[2] = "<not set>";
-                        }
-                        $this->_tableRow($value, null, $opts);
-                    }
-                }
-                $this->_endTable();
-                break;
-            case 'remote-info':
-                $data = array(
-                    'caption' => 'Package details:',
-                    'border' => false,
-                    'data' => array(
-                        array("Latest",    $data['stable']),
-                        array("Installed", $data['installed']),
-                        array("Package",   $data['name']),
-                        array("License",   $data['license']),
-                        array("Category",  $data['category']),
-                        array("Summary",   $data['summary']),
-                        array("Description", $data['description']),
-                        ),
-                    );
-            default: {
-                if (is_array($data)) {
-                    $this->_startTable($data);
-                    $count = count($data['data'][0]);
-                    if ($count == 2) {
-                        $opts = array(0 => array('wrap' => 25),
-                                      1 => array('wrap' => 48)
-                        );
-                    } elseif ($count == 3) {
-                        $opts = array(0 => array('wrap' => 30),
-                                      1 => array('wrap' => 20),
-                                      2 => array('wrap' => 35)
-                        );
-                    } else {
-                        $opts = null;
-                    }
-                    if (isset($data['headline']) && is_array($data['headline'])) {
-                        $this->_tableRow($data['headline'],
-                                         array('bold' => true),
-                                         $opts);
-                    }
-                    foreach($data['data'] as $row) {
-                        $this->_tableRow($row, null, $opts);
-                    }
-                    $this->_endTable();
-                } else {
-                    $this->_displayLine($data);
-                }
-            }
-        }
-    }
-
-    // }}}
-    // {{{ log(text)
-
-
-    function log($text, $append_crlf = true)
-    {
-        if ($append_crlf) {
-            return $this->_displayLine($text);
-        }
-        return $this->_display($text);
-    }
-
 
     // }}}
     // {{{ bold($text)

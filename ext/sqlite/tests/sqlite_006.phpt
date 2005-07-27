@@ -1,7 +1,5 @@
 --TEST--
 sqlite: regular functions
---INI--
-sqlite.assoc_case=0
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("sqlite")) print "skip"; ?>
@@ -34,9 +32,6 @@ $r = sqlite_query("SELECT implode('-', a, b) from strings", $db);
 while ($row = sqlite_fetch_array($r, SQLITE_NUM)) {
 	var_dump($row);
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--

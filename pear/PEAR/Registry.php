@@ -1,37 +1,27 @@
 <?php
 //
 // +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
+// | PHP Version 4                                                        |
 // +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
+// | Copyright (c) 1997-2002 The PHP Group                                |
 // +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
+// | This source file is subject to version 2.02 of the PHP license,      |
 // | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
+// | available at through the world-wide-web at                           |
+// | http://www.php.net/license/2_02.txt.                                 |
 // | If you did not receive a copy of the PHP license and are unable to   |
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@php.net>                                    |
-// |         Tomas V.V.Cox <cox@idecnet.com>                              |
-// |                                                                      |
+// | Author: Stig Bakken <ssb@fast.no>                                    |
 // +----------------------------------------------------------------------+
 //
 // $Id$
 
-/*
-TODO:
-    - Transform into singleton()
-    - Add application level lock (avoid change the registry from the cmdline
-      while using the GTK interface, for ex.)
-*/
 require_once "System.php";
 require_once "PEAR.php";
 
-define('PEAR_REGISTRY_ERROR_LOCK',   -2);
-define('PEAR_REGISTRY_ERROR_FORMAT', -3);
-define('PEAR_REGISTRY_ERROR_FILE',   -4);
+define("PEAR_REGISTRY_ERROR_LOCK", -2);
 
 /**
  * Administration class used to maintain the installed package database.
@@ -65,20 +55,6 @@ class PEAR_Registry extends PEAR
      */
     var $lock_mode = 0; // XXX UNUSED
 
-    /** Cache of package information.  Structure:
-     * array(
-     *   'package' => array('id' => ... ),
-     *   ... )
-     * @var array
-     */
-    var $pkginfo_cache = array();
-
-    /** Cache of file map.  Structure:
-     * array( '/path/to/file' => 'package', ... )
-     * @var array
-     */
-    var $filemap_cache = array();
-
     // }}}
 
     // {{{ constructor
@@ -94,24 +70,11 @@ class PEAR_Registry extends PEAR
     {
         parent::PEAR();
         $ds = DIRECTORY_SEPARATOR;
-        $this->install_dir = $pear_install_dir;
         $this->statedir = $pear_install_dir.$ds.'.registry';
         $this->filemap  = $pear_install_dir.$ds.'.filemap';
         $this->lockfile = $pear_install_dir.$ds.'.lock';
-
-        // XXX Compatibility code should be removed in the future
-        // rename all registry files if any to lowercase
-        if (!OS_WINDOWS && $handle = @opendir($this->statedir)) {
-            $dest = $this->statedir . DIRECTORY_SEPARATOR;
-            while (false !== ($file = readdir($handle))) {
-                if (preg_match('/^.*[A-Z].*\.reg$/', $file)) {
-                    rename($dest . $file, $dest . strtolower($file));
-                }
-            }
-            closedir($handle);
-        }
         if (!file_exists($this->filemap)) {
-            $this->rebuildFileMap();
+            $this->_rebuildFileMap();
         }
     }
 
@@ -146,7 +109,7 @@ class PEAR_Registry extends PEAR
     function _assertStateDir()
     {
         if (!@is_dir($this->statedir)) {
-            if (!System::mkdir(array('-p', $this->statedir))) {
+            if (!System::mkdir("-p {$this->statedir}")) {
                 return $this->raiseError("could not create directory '{$this->statedir}'");
             }
         }
@@ -167,7 +130,7 @@ class PEAR_Registry extends PEAR
      */
     function _packageFileName($package)
     {
-        return $this->statedir . DIRECTORY_SEPARATOR . strtolower($package) . '.reg';
+        return "{$this->statedir}/{$package}.reg";
     }
 
     // }}}
@@ -193,9 +156,9 @@ class PEAR_Registry extends PEAR
     }
 
     // }}}
-    // {{{ rebuildFileMap()
+    // {{{ _rebuildFileMap()
 
-    function rebuildFileMap()
+    function _rebuildFileMap()
     {
         $packages = $this->listPackages();
         $files = array();
@@ -219,36 +182,12 @@ class PEAR_Registry extends PEAR
             }
         }
         $this->_assertStateDir();
-        $fp = @fopen($this->filemap, 'wb');
+        $fp = @fopen($this->filemap, 'w');
         if (!$fp) {
             return false;
         }
-        $this->filemap_cache = $files;
         fwrite($fp, serialize($files));
         fclose($fp);
-        return true;
-    }
-
-    // }}}
-    // {{{ readFileMap()
-
-    function readFileMap()
-    {
-        $fp = @fopen($this->filemap, 'r');
-        if (!$fp) {
-            return $this->raiseError('PEAR_Registry: could not open filemap', PEAR_REGISTRY_ERROR_FILE, null, null, $php_errormsg);
-        }
-        $fsize = filesize($this->filemap);
-        $rt = get_magic_quotes_runtime();
-        set_magic_quotes_runtime(0);
-        $data = fread($fp, $fsize);
-        set_magic_quotes_runtime($rt);
-        fclose($fp);
-        $tmp = unserialize($data);
-        if (!$tmp && $fsize > 7) {
-            return $this->raiseError('PEAR_Registry: invalid filemap data', PEAR_REGISTRY_ERROR_FORMAT, null, null, $data);
-        }
-        $this->filemap_cache = $tmp;
         return true;
     }
 
@@ -269,7 +208,7 @@ class PEAR_Registry extends PEAR
      */
     function _lock($mode = LOCK_EX)
     {
-        if (!eregi('Windows 9', php_uname())) {
+        if(!strstr(php_uname(), 'Windows 95/98')) {    
             if ($mode != LOCK_UN && is_resource($this->lock_fp)) {
                 // XXX does not check type of lock (LOCK_SH/LOCK_EX)
                 return true;
@@ -279,20 +218,15 @@ class PEAR_Registry extends PEAR
             }
             $open_mode = 'w';
             // XXX People reported problems with LOCK_SH and 'w'
-            if ($mode === LOCK_SH || $mode === LOCK_UN) {
+            if ($mode === LOCK_SH) {
                 if (@!is_file($this->lockfile)) {
                     touch($this->lockfile);
                 }
                 $open_mode = 'r';
             }
-
+            $this->lock_fp = @fopen($this->lockfile, $open_mode);
             if (!is_resource($this->lock_fp)) {
-                $this->lock_fp = @fopen($this->lockfile, $open_mode);
-            }
-
-            if (!is_resource($this->lock_fp)) {
-                return $this->raiseError("could not create lock file" .
-                                         (isset($php_errormsg) ? ": " . $php_errormsg : ""));
+                return $this->raiseError("could not create lock file: $php_errormsg");
             }
             if (!(int)flock($this->lock_fp, $mode)) {
                 switch ($mode) {
@@ -314,9 +248,6 @@ class PEAR_Registry extends PEAR
     function _unlock()
     {
         $ret = $this->_lock(LOCK_UN);
-        if (is_resource($this->lock_fp)) {
-            fclose($this->lock_fp);
-        }
         $this->lock_fp = null;
         return $ret;
     }
@@ -342,10 +273,7 @@ class PEAR_Registry extends PEAR
         if ($fp === null) {
             return null;
         }
-        $rt = get_magic_quotes_runtime();
-        set_magic_quotes_runtime(0);
         $data = fread($fp, filesize($this->_packageFileName($package)));
-        set_magic_quotes_runtime($rt);
         $this->_closePackageFile($fp);
         $data = unserialize($data);
         if ($key === null) {
@@ -427,12 +355,11 @@ class PEAR_Registry extends PEAR
         if (PEAR::isError($e = $this->_lock(LOCK_EX))) {
             return $e;
         }
-        $fp = $this->_openPackageFile($package, 'wb');
+        $fp = $this->_openPackageFile($package, 'w');
         if ($fp === null) {
             $this->_unlock();
             return false;
         }
-        $info['_lastmodified'] = time();
         fwrite($fp, serialize($info));
         $this->_closePackageFile($fp);
         $this->_unlock();
@@ -449,7 +376,7 @@ class PEAR_Registry extends PEAR
         }
         $file = $this->_packageFileName($package);
         $ret = @unlink($file);
-        $this->rebuildFileMap();
+        $this->_rebuildFileMap();
         $this->_unlock();
         return $ret;
     }
@@ -466,12 +393,14 @@ class PEAR_Registry extends PEAR
         if (PEAR::isError($e = $this->_lock(LOCK_EX))) {
             return $e;
         }
+        if (!file_exists($this->filemap)) {
+            $this->_rebuildFileMap();
+        }
         $fp = $this->_openPackageFile($package, 'w');
         if ($fp === null) {
             $this->_unlock();
             return false;
         }
-        $info['_lastmodified'] = time();
         if ($merge) {
             fwrite($fp, serialize(array_merge($oldinfo, $info)));
         } else {
@@ -479,60 +408,13 @@ class PEAR_Registry extends PEAR
         }
         $this->_closePackageFile($fp);
         if (isset($info['filelist'])) {
-            $this->rebuildFileMap();
+            $this->_rebuildFileMap();
         }
         $this->_unlock();
         return true;
     }
 
     // }}}
-    // {{{ checkFileMap()
-
-    /**
-     * Test whether a file belongs to a package.
-     *
-     * @param string $path file path, absolute or relative to the pear
-     * install dir
-     *
-     * @return string which package the file belongs to, or an empty
-     * string if the file does not belong to an installed package
-     *
-     * @access public
-     */
-    function checkFileMap($path)
-    {
-        if (is_array($path)) {
-            static $notempty;
-            if (empty($notempty)) {
-                $notempty = create_function('$a','return !empty($a);');
-            }
-            $pkgs = array();
-            foreach ($path as $name => $attrs) {
-                if (is_array($attrs) && isset($attrs['baseinstalldir'])) {
-                    $name = $attrs['baseinstalldir'].DIRECTORY_SEPARATOR.$name;
-                }
-                $pkgs[$name] = $this->checkFileMap($name);
-            }
-            return array_filter($pkgs, $notempty);
-        }
-        if (empty($this->filemap_cache) && PEAR::isError($this->readFileMap())) {
-            return $err;
-        }
-        if (isset($this->filemap_cache[$path])) {
-            return $this->filemap_cache[$path];
-        }
-        $l = strlen($this->install_dir);
-        if (substr($path, 0, $l) == $this->install_dir) {
-            $path = preg_replace('!^'.DIRECTORY_SEPARATOR.'+!', '', substr($path, $l));
-        }
-        if (isset($this->filemap_cache[$path])) {
-            return $this->filemap_cache[$path];
-        }
-        return '';
-    }
-
-    // }}}
-
 }
 
 ?>

@@ -1,0 +1,190 @@
+#!@prefix@/bin/php -Cq
+<?php // -*- PHP -*-
+//
+// +----------------------------------------------------------------------+
+// | PHP Version 4                                                        |
+// +----------------------------------------------------------------------+
+// | Copyright (c) 1997-2002 The PHP Group                                |
+// +----------------------------------------------------------------------+
+// | This source file is subject to version 2.02 of the PHP license,      |
+// | that is bundled with this package in the file LICENSE, and is        |
+// | available at through the world-wide-web at                           |
+// | http://www.php.net/license/2_02.txt.                                 |
+// | If you did not receive a copy of the PHP license and are unable to   |
+// | obtain it through the world-wide-web, please send a note to          |
+// | license@php.net so we can mail you a copy immediately.               |
+// +----------------------------------------------------------------------+
+// | Authors: Stig Bakken <ssb@fast.no>                                   |
+// |          Tomas V.V.Cox <cox@idecnet.com>                             |
+// +----------------------------------------------------------------------+
+//
+
+ini_set('allow_url_fopen', true);
+set_time_limit(0);
+ob_implicit_flush(true);
+ini_set('track_errors', true);
+ini_set('html_errors', false);
+
+require_once 'PEAR.php';
+require_once 'PEAR/Config.php';
+require_once 'PEAR/Command.php';
+require_once 'Console/Getopt.php';
+
+PEAR_Command::setFrontendType('CLI');
+$all_commands = PEAR_Command::getCommands();
+$cmd_options  = PEAR_Command::getOptions();
+$ui = &PEAR_Command::getFrontendObject();
+$progname = basename(__FILE__);
+
+// XXX change Getopt to use raiseError() ?
+$argv = Console_Getopt::readPHPArgv();
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v" . $cmd_options);
+if (PEAR::isError($options)) {
+    usage($options);
+}
+
+PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, array($ui, "displayFatalError"));
+$opts = $options[0];
+
+$pear_user_config = '';
+$pear_system_config = '';
+$store_user_config = false;
+$store_system_config = false;
+$verbose = 1;
+
+foreach ($opts as $opt) {
+    switch ($opt[0]) {
+        case 'c':
+            $pear_user_config = $opt[1];
+            break;
+        case 'C':
+            $pear_system_config = $opt[1];
+            break;
+    }
+}
+
+$config = &PEAR_Config::singleton($pear_user_config, $pear_system_config);
+$verbose = $config->get("verbose");
+$cmdopts = array();
+
+foreach ($opts as $opt) {
+    $param = !empty($opt[1]) ? $opt[1] : true;
+    switch ($opt[0]) {
+        case 'd':
+            list($key, $value) = explode('=', $param);
+            $config->set($key, $value, 'user');
+            break;
+        case 'D':
+            list($key, $value) = explode('=', $param);
+            $config->set($key, $value, 'system');
+            break;
+        case 's':
+            $store_user_config = true;
+            break;
+        case 'S':
+            $store_system_config = true;
+            break;
+        case 'u':
+            $config->remove($param, 'user');
+            break;
+        case 'v':
+            $config->set('verbose', $verbose + 1);
+            break;
+        case 'q':
+            $config->set('verbose', $verbose - 1);
+            break;
+        default:
+            // all non pear params goes to the command
+            $cmdopts[$opt[0]] = $param;
+            break;
+    }
+}
+
+if ($store_system_config) {
+    $config->store('system');
+}
+
+if ($store_user_config) {
+    $config->store('user');
+}
+
+$command = (isset($options[1][1])) ? $options[1][1] : null;
+
+if (empty($command) && ($store_user_config || $store_system_config)) {
+    exit;
+}
+
+if (empty($all_commands[$command]) || $command == 'help') {
+    usage(null, @$options[1][2]);
+}
+
+$cmd = PEAR_Command::factory($command, $config);
+if (PEAR::isError($cmd)) {
+    die($cmd->getMessage());
+}
+
+$cmdargs = array_slice($options[1], 2);
+$ok = $cmd->run($command, $cmdopts, $cmdargs);
+if ($ok === false) {
+    PEAR::raiseError("unknown command `$command'");
+}
+
+// {{{ usage()
+
+function usage($error = null, $helpsubject = null)
+{
+    global $progname, $all_commands;
+    $stderr = fopen('php://stderr', 'w');
+    fputs($stderr, "\n");
+    if (PEAR::isError($error)) {
+        fputs($stderr, $error->getMessage());
+    } elseif ($error !== null) {
+        fputs($stderr, $error);
+    }
+    if ($helpsubject != null) {
+        $put = cmdHelp($helpsubject);
+    } else {
+        $put =
+            "Usage: $progname [options] command [command-options] <parameters>\n".
+            "Type \"$progname help options\" to list all options.\n".
+            "Type \"$progname help <command>\" to get the help for the specified command.\n".
+            "Commands:\n   " . implode("\n   ", array_keys($all_commands));
+    }
+    fputs($stderr, "$put\n\n");
+    fclose($stderr);
+    exit;
+}
+
+function cmdHelp($command)
+{
+    global $progname, $all_commands, $config;
+    if ($command == "options") {
+        return
+        "Options:\n".
+        "     -v         increase verbosity level (default 1)\n".
+        "     -q         be quiet, decrease verbosity level\n".
+        "     -c file    find user configuration in `file'\n".
+        "     -C file    find system configuration in `file'\n".
+        "     -d foo=bar set user config variable `foo' to `bar'\n".
+        "     -D foo=bar set system config variable `foo' to `bar'\n".
+        "     -s         store user configuration\n".
+        "     -S         store system configuration\n".
+        "     -u foo     unset `foo' in the user configuration\n".
+        "     -h, -?     display help/usage (this message)\n";
+    } elseif ($help = PEAR_Command::getHelp($command)) {
+        return "Usage : $progname $command {$help[0]}\n{$help[1]}";
+    }
+    return "No such command";
+}
+
+// }}}
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ */
+
+?>

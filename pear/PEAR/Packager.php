@@ -1,26 +1,25 @@
 <?php
 //
 // +----------------------------------------------------------------------+
-// | PHP Version 5                                                        |
+// | PHP Version 4                                                        |
 // +----------------------------------------------------------------------+
-// | Copyright (c) 1997-2004 The PHP Group                                |
+// | Copyright (c) 1997-2002 The PHP Group                                |
 // +----------------------------------------------------------------------+
-// | This source file is subject to version 3.0 of the PHP license,       |
+// | This source file is subject to version 2.02 of the PHP license,      |
 // | that is bundled with this package in the file LICENSE, and is        |
-// | available through the world-wide-web at the following url:           |
-// | http://www.php.net/license/3_0.txt.                                  |
+// | available at through the world-wide-web at                           |
+// | http://www.php.net/license/2_02.txt.                                 |
 // | If you did not receive a copy of the PHP license and are unable to   |
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Authors: Stig Bakken <ssb@php.net>                                   |
+// | Authors: Stig Bakken <ssb@fast.no>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // +----------------------------------------------------------------------+
 //
 // $Id$
 
 require_once 'PEAR/Common.php';
-require_once 'System.php';
 
 /**
  * Administration class used to make a PEAR release tarball.
@@ -29,15 +28,22 @@ require_once 'System.php';
  *  - add an extra param the dir where to place the created package
  *
  * @since PHP 4.0.2
- * @author Stig Bakken <ssb@php.net>
+ * @author Stig Bakken <ssb@fast.no>
  */
 class PEAR_Packager extends PEAR_Common
 {
+    // {{{ properties
+
+    /** debug mode (integer) */
+    var $debug = 0;
+
+    // }}}
+
     // {{{ constructor
 
     function PEAR_Packager()
     {
-        parent::PEAR_Common();
+        $this->PEAR();
     }
 
     // }}}
@@ -45,7 +51,7 @@ class PEAR_Packager extends PEAR_Common
 
     function _PEAR_Packager()
     {
-        parent::_PEAR_Common();
+        $this->_PEAR_Common();
     }
 
     // }}}
@@ -54,102 +60,91 @@ class PEAR_Packager extends PEAR_Common
 
     function package($pkgfile = null, $compress = true)
     {
-        // {{{ validate supplied package.xml file
+        $this->orig_pwd = getcwd();
         if (empty($pkgfile)) {
             $pkgfile = 'package.xml';
         }
-        // $this->pkginfo gets populated inside
         $pkginfo = $this->infoFromDescriptionFile($pkgfile);
         if (PEAR::isError($pkginfo)) {
             return $this->raiseError($pkginfo);
         }
-
-        $pkgdir = dirname(realpath($pkgfile));
+        // XXX This needs to be checked in infoFromDescriptionFile
+        //     or at least a helper method to do the proper checks
+        if (empty($pkginfo['version'])) {
+            return $this->raiseError("No version info found in $pkgfile");
+        }
+        // TMP DIR -------------------------------------------------
+        // We allow calls like "pear package /home/user/mypack/package.xml"
+        if (!@chdir(dirname($pkgfile))) {
+            return $this->raiseError('Could not chdir to '.dirname($pkgfile));
+        }
+        $pwd = getcwd();
         $pkgfile = basename($pkgfile);
-
-        $errors = $warnings = array();
-        $this->validatePackageInfo($pkginfo, $errors, $warnings, $pkgdir);
-        foreach ($warnings as $w) {
-            $this->log(1, "Warning: $w");
+        if (isset($pkginfo['release_state']) && $pkginfo['release_state'] == 'snapshot' && empty($pkginfo['version'])) {
+            $pkginfo['version'] = date('Ymd');
         }
-        foreach ($errors as $e) {
-            $this->log(0, "Error: $e");
-        }
-        if (sizeof($errors) > 0) {
-            return $this->raiseError('Errors in package');
-        }
-        // }}}
+        // don't want strange characters
+        $pkgname    = preg_replace('/[^a-z0-9._]/i', '_', $pkginfo['package']);
+        $pkgversion = preg_replace('/[^a-z0-9._-]/i', '_', $pkginfo['version']);
+        $pkgver = $pkgname . '-' . $pkgversion;
 
-        $pkgver = $pkginfo['package'] . '-' . $pkginfo['version'];
-
-        // {{{ Create the package file list
+        // ----- Create the package file list
         $filelist = array();
         $i = 0;
 
+        // Copy files -----------------------------------------------
         foreach ($pkginfo['filelist'] as $fname => $atts) {
-            $file = $pkgdir . DIRECTORY_SEPARATOR . $fname;
-            if (!file_exists($file)) {
-                return $this->raiseError("File does not exist: $fname");
+            if (!file_exists($fname)) {
+                return $this->raiseError("File $fname does not exist");
             } else {
-                $filelist[$i++] = $file;
+                $filelist[$i++] = $fname;
                 if (empty($pkginfo['filelist'][$fname]['md5sum'])) {
-                    $md5sum = md5_file($file);
+                    $md5sum = md5_file($fname);
                     $pkginfo['filelist'][$fname]['md5sum'] = $md5sum;
                 }
                 $this->log(2, "Adding file $fname");
             }
         }
-        // }}}
-
-        // {{{ regenerate package.xml
         $new_xml = $this->xmlFromInfo($pkginfo);
         if (PEAR::isError($new_xml)) {
             return $this->raiseError($new_xml);
         }
-        if (!($tmpdir = System::mktemp(array('-d')))) {
-            return $this->raiseError("PEAR_Packager: mktemp failed");
-        }
+        $tmpdir = $this->mkTempDir(getcwd());
         $newpkgfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
-        $np = @fopen($newpkgfile, 'wb');
+        $np = @fopen($newpkgfile, "w");
         if (!$np) {
-            return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile as $newpkgfile");
+            return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile");
         }
         fwrite($np, $new_xml);
         fclose($np);
-        // }}}
 
-        // {{{ TAR the Package -------------------------------------------
+        // TAR the Package -------------------------------------------
         $ext = $compress ? '.tgz' : '.tar';
-        $dest_package = getcwd() . DIRECTORY_SEPARATOR . $pkgver . $ext;
+        $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . $pkgver . $ext;
         $tar =& new Archive_Tar($dest_package, $compress);
         $tar->setErrorHandling(PEAR_ERROR_RETURN); // XXX Don't print errors
         // ----- Creates with the package.xml file
-        $ok = $tar->createModify(array($newpkgfile), '', $tmpdir);
+        $ok = $tar->createModify($newpkgfile, '', $tmpdir);
         if (PEAR::isError($ok)) {
             return $this->raiseError($ok);
         } elseif (!$ok) {
             return $this->raiseError('PEAR_Packager: tarball creation failed');
         }
         // ----- Add the content of the package
-        if (!$tar->addModify($filelist, $pkgver, $pkgdir)) {
+        if (!$tar->addModify($filelist, $pkgver)) {
             return $this->raiseError('PEAR_Packager: tarball creation failed');
         }
         $this->log(1, "Package $dest_package done");
-        if (file_exists("$pkgdir/CVS/Root")) {
-            $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $pkginfo['version']);
-            $cvstag = "RELEASE_$cvsversion";
-            $this->log(1, "Tag the released code with `pear cvstag $pkgfile'");
-            $this->log(1, "(or set the CVS tag $cvstag by hand)");
-        }
-        // }}}
-
+        $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $pkgversion);
+        $cvstag = "RELEASE_$cvsversion";
+        $this->log(1, "Tag the released code with `pear cvstag $pkgfile'");
+        $this->log(1, "(or set the CVS tag $cvstag by hand)");
         return $dest_package;
     }
 
     // }}}
 }
 
-// {{{ md5_file() utility function
 if (!function_exists('md5_file')) {
     function md5_file($file) {
         if (!$fd = @fopen($file, 'r')) {
@@ -160,6 +155,5 @@ if (!function_exists('md5_file')) {
         return $md5;
     }
 }
-// }}}
 
 ?>

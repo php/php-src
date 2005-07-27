@@ -28,35 +28,15 @@
 ** Set or clear the access authorization function.
 **
 ** The access authorization function is be called during the compilation
-** phase to verify that the user has read and/or write access permission on
+** phase to verify that the user has read and/or write access permission
 ** various fields of the database.  The first argument to the auth function
 ** is a copy of the 3rd argument to this routine.  The second argument
 ** to the auth function is one of these constants:
 **
-**       SQLITE_COPY
-**       SQLITE_CREATE_INDEX
-**       SQLITE_CREATE_TABLE
-**       SQLITE_CREATE_TEMP_INDEX
-**       SQLITE_CREATE_TEMP_TABLE
-**       SQLITE_CREATE_TEMP_TRIGGER
-**       SQLITE_CREATE_TEMP_VIEW
-**       SQLITE_CREATE_TRIGGER
-**       SQLITE_CREATE_VIEW
-**       SQLITE_DELETE
-**       SQLITE_DROP_INDEX
-**       SQLITE_DROP_TABLE
-**       SQLITE_DROP_TEMP_INDEX
-**       SQLITE_DROP_TEMP_TABLE
-**       SQLITE_DROP_TEMP_TRIGGER
-**       SQLITE_DROP_TEMP_VIEW
-**       SQLITE_DROP_TRIGGER
-**       SQLITE_DROP_VIEW
-**       SQLITE_INSERT
-**       SQLITE_PRAGMA
-**       SQLITE_READ
-**       SQLITE_SELECT
-**       SQLITE_TRANSACTION
-**       SQLITE_UPDATE
+**        SQLITE_READ_COLUMN
+**        SQLITE_WRITE_COLUMN
+**        SQLITE_DELETE_ROW
+**        SQLITE_INSERT_ROW
 **
 ** The third and fourth arguments to the auth function are the name of
 ** the table and the column that are being accessed.  The auth function
@@ -72,7 +52,7 @@
 */
 int sqlite_set_authorizer(
   sqlite *db,
-  int (*xAuth)(void*,int,const char*,const char*,const char*,const char*),
+  int (*xAuth)(void*,int,const char*,const char*),
   void *pArg
 ){
   db->xAuth = xAuth;
@@ -85,16 +65,19 @@ int sqlite_set_authorizer(
 ** user-supplied authorization function returned an illegal value.
 */
 static void sqliteAuthBadReturnCode(Parse *pParse, int rc){
-  sqliteErrorMsg(pParse, "illegal return value (%d) from the "
-    "authorization function - should be SQLITE_OK, SQLITE_IGNORE, "
-    "or SQLITE_DENY", rc);
+  char zBuf[20];
+  sprintf(zBuf, "(%d)", rc);
+  sqliteSetString(&pParse->zErrMsg, "illegal return value ", zBuf,
+    " from the authorization function - should be SQLITE_OK, "
+    "SQLITE_IGNORE, or SQLITE_DENY", 0);
+  pParse->nErr++;
   pParse->rc = SQLITE_MISUSE;
 }
 
 /*
 ** The pExpr should be a TK_COLUMN expression.  The table referred to
-** is in pTabList or else it is the NEW or OLD table of a trigger.  
-** Check to see if it is OK to read this particular column.
+** is in pTabList with an offset of base.  Check to see if it is OK to read
+** this particular column.
 **
 ** If the auth function returns SQLITE_IGNORE, change the TK_COLUMN 
 ** instruction into a TK_NULL.  If the auth function returns SQLITE_DENY,
@@ -103,32 +86,17 @@ static void sqliteAuthBadReturnCode(Parse *pParse, int rc){
 void sqliteAuthRead(
   Parse *pParse,        /* The parser context */
   Expr *pExpr,          /* The expression to check authorization on */
-  SrcList *pTabList     /* All table that pExpr might refer to */
+  SrcList *pTabList,    /* All table that pExpr might refer to */
+  int base              /* Offset of pTabList relative to pExpr */
 ){
   sqlite *db = pParse->db;
   int rc;
-  Table *pTab;          /* The table being read */
-  const char *zCol;     /* Name of the column of the table */
-  int iSrc;             /* Index in pTabList->a[] of table being read */
-  const char *zDBase;   /* Name of database being accessed */
-  TriggerStack *pStack; /* The stack of current triggers */
-
+  Table *pTab;
+  const char *zCol;
   if( db->xAuth==0 ) return;
   assert( pExpr->op==TK_COLUMN );
-  for(iSrc=0; iSrc<pTabList->nSrc; iSrc++){
-    if( pExpr->iTable==pTabList->a[iSrc].iCursor ) break;
-  }
-  if( iSrc>=0 && iSrc<pTabList->nSrc ){
-    pTab = pTabList->a[iSrc].pTab;
-  }else if( (pStack = pParse->trigStack)!=0 ){
-    /* This must be an attempt to read the NEW or OLD pseudo-tables
-    ** of a trigger.
-    */
-    assert( pExpr->iTable==pStack->newIdx || pExpr->iTable==pStack->oldIdx );
-    pTab = pStack->pTab;
-  }else{
-    return;
-  }
+  assert( pExpr->iTable>=base && pExpr->iTable<base+pTabList->nSrc );
+  pTab = pTabList->a[pExpr->iTable-base].pTab;
   if( pTab==0 ) return;
   if( pExpr->iColumn>=0 ){
     assert( pExpr->iColumn<pTab->nCol );
@@ -139,19 +107,13 @@ void sqliteAuthRead(
   }else{
     zCol = "ROWID";
   }
-  assert( pExpr->iDb<db->nDb );
-  zDBase = db->aDb[pExpr->iDb].zName;
-  rc = db->xAuth(db->pAuthArg, SQLITE_READ, pTab->zName, zCol, zDBase, 
-                 pParse->zAuthContext);
+  rc = db->xAuth(db->pAuthArg, SQLITE_READ, pTab->zName, zCol);
   if( rc==SQLITE_IGNORE ){
     pExpr->op = TK_NULL;
   }else if( rc==SQLITE_DENY ){
-    if( db->nDb>2 || pExpr->iDb!=0 ){
-      sqliteErrorMsg(pParse, "access to %s.%s.%s is prohibited", 
-         zDBase, pTab->zName, zCol);
-    }else{
-      sqliteErrorMsg(pParse, "access to %s.%s is prohibited", pTab->zName,zCol);
-    }
+    sqliteSetString(&pParse->zErrMsg,"access to ",
+        pTab->zName, ".", zCol, " is prohibited", 0);
+    pParse->nErr++;
     pParse->rc = SQLITE_AUTH;
   }else if( rc!=SQLITE_OK ){
     sqliteAuthBadReturnCode(pParse, rc);
@@ -168,52 +130,23 @@ int sqliteAuthCheck(
   Parse *pParse,
   int code,
   const char *zArg1,
-  const char *zArg2,
-  const char *zArg3
+  const char *zArg2
 ){
   sqlite *db = pParse->db;
   int rc;
-
-  if( db->init.busy || db->xAuth==0 ){
+  if( db->xAuth==0 ){
     return SQLITE_OK;
   }
-  rc = db->xAuth(db->pAuthArg, code, zArg1, zArg2, zArg3, pParse->zAuthContext);
+  rc = db->xAuth(db->pAuthArg, code, zArg1, zArg2);
   if( rc==SQLITE_DENY ){
-    sqliteErrorMsg(pParse, "not authorized");
+    sqliteSetString(&pParse->zErrMsg, "not authorized", 0);
     pParse->rc = SQLITE_AUTH;
+    pParse->nErr++;
   }else if( rc!=SQLITE_OK && rc!=SQLITE_IGNORE ){
     rc = SQLITE_DENY;
     sqliteAuthBadReturnCode(pParse, rc);
   }
   return rc;
-}
-
-/*
-** Push an authorization context.  After this routine is called, the
-** zArg3 argument to authorization callbacks will be zContext until
-** popped.  Or if pParse==0, this routine is a no-op.
-*/
-void sqliteAuthContextPush(
-  Parse *pParse,
-  AuthContext *pContext, 
-  const char *zContext
-){
-  pContext->pParse = pParse;
-  if( pParse ){
-    pContext->zAuthContext = pParse->zAuthContext;
-    pParse->zAuthContext = zContext;
-  }
-}
-
-/*
-** Pop an authorization context that was previously pushed
-** by sqliteAuthContextPush
-*/
-void sqliteAuthContextPop(AuthContext *pContext){
-  if( pContext->pParse ){
-    pContext->pParse->zAuthContext = pContext->zAuthContext;
-    pContext->pParse = 0;
-  }
 }
 
 #endif /* SQLITE_OMIT_AUTHORIZATION */

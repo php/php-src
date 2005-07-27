@@ -43,10 +43,6 @@ int sqlite_iMallocFail;     /* Fail sqliteMalloc() after this many calls */
 static int memcnt = 0;
 #endif
 
-/*
-** Number of 32-bit guard words
-*/
-#define N_GUARD 1
 
 /*
 ** Allocate new memory and set it to zero.  Return NULL if
@@ -55,7 +51,7 @@ static int memcnt = 0;
 void *sqliteMalloc_(int n, int bZero, char *zFile, int line){
   void *p;
   int *pi;
-  int i, k;
+  int k;
   if( sqlite_iMallocFail>=0 ){
     sqlite_iMallocFail--;
     if( sqlite_iMallocFail==0 ){
@@ -70,16 +66,16 @@ void *sqliteMalloc_(int n, int bZero, char *zFile, int line){
   }
   if( n==0 ) return 0;
   k = (n+sizeof(int)-1)/sizeof(int);
-  pi = malloc( (N_GUARD*2+1+k)*sizeof(int));
+  pi = malloc( (3+k)*sizeof(int));
   if( pi==0 ){
     sqlite_malloc_failed++;
     return 0;
   }
   sqlite_nMalloc++;
-  for(i=0; i<N_GUARD; i++) pi[i] = 0xdead1122;
-  pi[N_GUARD] = n;
-  for(i=0; i<N_GUARD; i++) pi[k+1+N_GUARD+i] = 0xdead3344;
-  p = &pi[N_GUARD+1];
+  pi[0] = 0xdead1122;
+  pi[1] = n;
+  pi[k+2] = 0xdead3344;
+  p = &pi[2];
   memset(p, bZero==0, n);
 #if MEMORY_DEBUG>1
   fprintf(stderr,"%06d malloc %d bytes at 0x%x from %s:%d\n",
@@ -97,17 +93,13 @@ void *sqliteMalloc_(int n, int bZero, char *zFile, int line){
 */
 void sqliteCheckMemory(void *p, int N){
   int *pi = p;
-  int n, i, k;
-  pi -= N_GUARD+1;
-  for(i=0; i<N_GUARD; i++){
-    assert( pi[i]==0xdead1122 );
-  }
-  n = pi[N_GUARD];
+  int n, k;
+  pi -= 2;
+  assert( pi[0]==0xdead1122 );
+  n = pi[1];
   assert( N>=0 && N<n );
   k = (n+sizeof(int)-1)/sizeof(int);
-  for(i=0; i<N_GUARD; i++){
-    assert( pi[k+N_GUARD+1+i]==0xdead3344 );
-  }
+  assert( pi[k+2]==0xdead3344 );
 }
 
 /*
@@ -115,25 +107,21 @@ void sqliteCheckMemory(void *p, int N){
 */
 void sqliteFree_(void *p, char *zFile, int line){
   if( p ){
-    int *pi, i, k, n;
+    int *pi, k, n;
     pi = p;
-    pi -= N_GUARD+1;
+    pi -= 2;
     sqlite_nFree++;
-    for(i=0; i<N_GUARD; i++){
-      if( pi[i]!=0xdead1122 ){
-        fprintf(stderr,"Low-end memory corruption at 0x%x\n", (int)p);
-        return;
-      }
+    if( pi[0]!=0xdead1122 ){
+      fprintf(stderr,"Low-end memory corruption at 0x%x\n", (int)p);
+      return;
     }
-    n = pi[N_GUARD];
+    n = pi[1];
     k = (n+sizeof(int)-1)/sizeof(int);
-    for(i=0; i<N_GUARD; i++){
-      if( pi[k+N_GUARD+1+i]!=0xdead3344 ){
-        fprintf(stderr,"High-end memory corruption at 0x%x\n", (int)p);
-        return;
-      }
+    if( pi[k+2]!=0xdead3344 ){
+      fprintf(stderr,"High-end memory corruption at 0x%x\n", (int)p);
+      return;
     }
-    memset(pi, 0xff, (k+N_GUARD*2+1)*sizeof(int));
+    memset(pi, 0xff, (k+3)*sizeof(int));
 #if MEMORY_DEBUG>1
     fprintf(stderr,"%06d free %d bytes at 0x%x from %s:%d\n",
          ++memcnt, n, (int)p, zFile,line);
@@ -148,7 +136,7 @@ void sqliteFree_(void *p, char *zFile, int line){
 ** works just like sqliteFree().
 */
 void *sqliteRealloc_(void *oldP, int n, char *zFile, int line){
-  int *oldPi, *pi, i, k, oldN, oldK;
+  int *oldPi, *pi, k, oldN, oldK;
   void *p;
   if( oldP==0 ){
     return sqliteMalloc_(n,1,zFile,line);
@@ -158,35 +146,32 @@ void *sqliteRealloc_(void *oldP, int n, char *zFile, int line){
     return 0;
   }
   oldPi = oldP;
-  oldPi -= N_GUARD+1;
+  oldPi -= 2;
   if( oldPi[0]!=0xdead1122 ){
-    fprintf(stderr,"Low-end memory corruption in realloc at 0x%x\n", (int)oldP);
+    fprintf(stderr,"Low-end memory corruption in realloc at 0x%x\n", (int)p);
     return 0;
   }
-  oldN = oldPi[N_GUARD];
+  oldN = oldPi[1];
   oldK = (oldN+sizeof(int)-1)/sizeof(int);
-  for(i=0; i<N_GUARD; i++){
-    if( oldPi[oldK+N_GUARD+1+i]!=0xdead3344 ){
-      fprintf(stderr,"High-end memory corruption in realloc at 0x%x\n",
-              (int)oldP);
-      return 0;
-    }
+  if( oldPi[oldK+2]!=0xdead3344 ){
+    fprintf(stderr,"High-end memory corruption in realloc at 0x%x\n", (int)p);
+    return 0;
   }
   k = (n + sizeof(int) - 1)/sizeof(int);
-  pi = malloc( (k+N_GUARD*2+1)*sizeof(int) );
+  pi = malloc( (k+3)*sizeof(int) );
   if( pi==0 ){
     sqlite_malloc_failed++;
     return 0;
   }
-  for(i=0; i<N_GUARD; i++) pi[i] = 0xdead1122;
-  pi[N_GUARD] = n;
-  for(i=0; i<N_GUARD; i++) pi[k+N_GUARD+1+i] = 0xdead3344;
-  p = &pi[N_GUARD+1];
+  pi[0] = 0xdead1122;
+  pi[1] = n;
+  pi[k+2] = 0xdead3344;
+  p = &pi[2];
   memcpy(p, oldP, n>oldN ? oldN : n);
   if( n>oldN ){
     memset(&((char*)p)[oldN], 0, n-oldN);
   }
-  memset(oldPi, 0xab, (oldK+N_GUARD+2)*sizeof(int));
+  memset(oldPi, 0xab, (oldK+3)*sizeof(int));
   free(oldPi);
 #if MEMORY_DEBUG>1
   fprintf(stderr,"%06d realloc %d to %d bytes at 0x%x to 0x%x at %s:%d\n",
@@ -251,11 +236,13 @@ char *sqliteStrNDup_(const char *z, int n, char *zFile, int line){
 */
 void *sqliteMalloc(int n){
   void *p;
-  if( (p = malloc(n))==0 ){
-    if( n>0 ) sqlite_malloc_failed++;
-  }else{
-    memset(p, 0, n);
+  if( n==0 ) return 0;
+  p = malloc(n);
+  if( p==0 ){
+    sqlite_malloc_failed++;
+    return 0;
   }
+  memset(p, 0, n);
   return p;
 }
 
@@ -265,8 +252,11 @@ void *sqliteMalloc(int n){
 */
 void *sqliteMallocRaw(int n){
   void *p;
-  if( (p = malloc(n))==0 ){
-    if( n>0 ) sqlite_malloc_failed++;
+  if( n==0 ) return 0;
+  p = malloc(n);
+  if( p==0 ){
+    sqlite_malloc_failed++;
+    return 0;
   }
   return p;
 }
@@ -327,8 +317,7 @@ char *sqliteStrNDup(const char *z, int n){
 ** Create a string from the 2nd and subsequent arguments (up to the
 ** first NULL argument), store the string in memory obtained from
 ** sqliteMalloc() and make the pointer indicated by the 1st argument
-** point to that string.  The 1st argument must either be NULL or 
-** point to memory obtained from sqliteMalloc().
+** point to that string.
 */
 void sqliteSetString(char **pz, const char *zFirst, ...){
   va_list ap;
@@ -366,9 +355,7 @@ void sqliteSetString(char **pz, const char *zFirst, ...){
 /*
 ** Works like sqliteSetString, but each string is now followed by
 ** a length integer which specifies how much of the source string 
-** to copy (in bytes).  -1 means use the whole string.  The 1st 
-** argument must either be NULL or point to memory obtained from 
-** sqliteMalloc().
+** to copy (in bytes).  -1 means use the whole string.
 */
 void sqliteSetNString(char **pz, ...){
   va_list ap;
@@ -402,25 +389,6 @@ void sqliteSetNString(char **pz, ...){
   fprintf(stderr,"string at 0x%x is %s\n", (int)*pz, *pz);
 #endif
 #endif
-  va_end(ap);
-}
-
-/*
-** Add an error message to pParse->zErrMsg and increment pParse->nErr.
-** The following formatting characters are allowed:
-**
-**      %s      Insert a string
-**      %z      A string that should be freed after use
-**      %d      Insert an integer
-**      %T      Insert a token
-**      %S      Insert the first element of a SrcList
-*/
-void sqliteErrorMsg(Parse *pParse, const char *zFormat, ...){
-  va_list ap;
-  pParse->nErr++;
-  sqliteFree(pParse->zErrMsg);
-  va_start(ap, zFormat);
-  pParse->zErrMsg = sqliteVMPrintf(zFormat, ap);
   va_end(ap);
 }
 
@@ -492,7 +460,8 @@ int sqliteHashNoCase(const char *z, int n){
     h = (h<<3) ^ h ^ UpperToLower[(unsigned char)*z++];
     n--;
   }
-  return h & 0x7fffffff;
+  if( h<0 ) h = -h;
+  return h;
 }
 
 /*
@@ -514,16 +483,198 @@ int sqliteStrNICmp(const char *zLeft, const char *zRight, int N){
   return N<0 ? 0 : *a - *b;
 }
 
+#if 0  /* NOT USED */
+/* 
+** The sortStrCmp() function below is used to order elements according
+** to the ORDER BY clause of a SELECT.  The sort order is a little different
+** from what one might expect.  This note attempts to describe what is
+** going on.
+**
+** We want the main string comparision function used for sorting to
+** sort both numbers and alphanumeric words into the correct sequence.
+** The same routine should do both without prior knowledge of which
+** type of text the input represents.  It should even work for strings
+** which are a mixture of text and numbers.  (It does not work for
+** numeric substrings in exponential notation, however.)
+**
+** To accomplish this, we keep track of a state number while scanning
+** the two strings.  The states are as follows:
+**
+**    1      Beginning of word
+**    2      Arbitrary text
+**    3      Integer
+**    4      Negative integer
+**    5      Real number
+**    6      Negative real
+**
+** The scan begins in state 1, beginning of word.  Transitions to other
+** states are determined by characters seen, as shown in the following
+** chart:
+**
+**      Current State         Character Seen  New State
+**      --------------------  --------------  -------------------
+**      0 Beginning of word   "-"             3 Negative integer
+**                            digit           2 Integer
+**                            space           0 Beginning of word
+**                            otherwise       1 Arbitrary text
+**
+**      1 Arbitrary text      space           0 Beginning of word
+**                            digit           2 Integer
+**                            otherwise       1 Arbitrary text
+**
+**      2 Integer             space           0 Beginning of word
+**                            "."             4 Real number
+**                            digit           2 Integer
+**                            otherwise       1 Arbitrary text
+**
+**      3 Negative integer    space           0 Beginning of word
+**                            "."             5 Negative Real num
+**                            digit           3 Negative integer
+**                            otherwise       1 Arbitrary text
+**
+**      4 Real number         space           0 Beginning of word
+**                            digit           4 Real number
+**                            otherwise       1 Arbitrary text
+**
+**      5 Negative real num   space           0 Beginning of word
+**                            digit           5 Negative real num
+**                            otherwise       1 Arbitrary text
+**
+** To implement this state machine, we first classify each character
+** into on of the following categories:
+**
+**      0  Text
+**      1  Space
+**      2  Digit
+**      3  "-"
+**      4  "."
+**
+** Given an arbitrary character, the array charClass[] maps that character
+** into one of the atove categories.
+*/
+static const unsigned char charClass[] = {
+        /* x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
+/* 0x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0,
+/* 1x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* 2x */   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 0,
+/* 3x */   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0,
+/* 4x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* 5x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* 6x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* 7x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* 8x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* 9x */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* Ax */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* Bx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* Cx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* Dx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* Ex */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+/* Fx */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+#define N_CHAR_CLASS 5
+
+/*
+** Given the current state number (0 thru 5), this array figures
+** the new state number given the character class.
+*/
+static const unsigned char stateMachine[] = {
+ /* Text,  Space, Digit, "-", "." */
+      1,      0,    2,    3,   1,      /* State 0: Beginning of word */
+      1,      0,    2,    1,   1,      /* State 1: Arbitrary text */
+      1,      0,    2,    1,   4,      /* State 2: Integer */
+      1,      0,    3,    1,   5,      /* State 3: Negative integer */
+      1,      0,    4,    1,   1,      /* State 4: Real number */
+      1,      0,    5,    1,   1,      /* State 5: Negative real num */
+};
+
+/* This routine does a comparison of two strings.  Case is used only
+** if useCase!=0.  Numeric substrings compare in numerical order for the
+** most part but this routine does not understand exponential notation.
+*/
+static int sortStrCmp(const char *atext, const char *btext, int useCase){
+  register unsigned char *a, *b, *map, ca, cb;
+  int result;
+  register int cclass = 0;
+
+  a = (unsigned char *)atext;
+  b = (unsigned char *)btext;
+  if( useCase ){
+    do{
+      if( (ca= *a++)!=(cb= *b++) ) break;
+      cclass = stateMachine[cclass*N_CHAR_CLASS + charClass[ca]];
+    }while( ca!=0 );
+  }else{
+    map = UpperToLower;
+    do{
+      if( (ca=map[*a++])!=(cb=map[*b++]) ) break;
+      cclass = stateMachine[cclass*N_CHAR_CLASS + charClass[ca]];
+    }while( ca!=0 );
+    if( ca>='[' && ca<='`' ) cb = b[-1];
+    if( cb>='[' && cb<='`' ) ca = a[-1];
+  }
+  switch( cclass ){
+    case 0:
+    case 1: {
+      if( isdigit(ca) && isdigit(cb) ){
+        cclass = 2;
+      }
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  switch( cclass ){
+    case 2:
+    case 3: {
+      if( isdigit(ca) ){
+        if( isdigit(cb) ){
+          int acnt, bcnt;
+          acnt = bcnt = 0;
+          while( isdigit(*a++) ) acnt++;
+          while( isdigit(*b++) ) bcnt++;
+          result = acnt - bcnt;
+          if( result==0 ) result = ca-cb;
+        }else{
+          result = 1;
+        }
+      }else if( isdigit(cb) ){
+        result = -1;
+      }else if( ca=='.' ){
+        result = 1;
+      }else if( cb=='.' ){
+        result = -1;
+      }else{
+        result = ca - cb;
+        cclass = 2;
+      }
+      if( cclass==3 ) result = -result;
+      break;
+    }
+    case 0:
+    case 1:
+    case 4: {
+      result = ca - cb;
+      break;
+    }
+    case 5: {
+      result = cb - ca;
+    };
+  }
+  return result;
+}
+#endif /* NOT USED */
+
 /*
 ** Return TRUE if z is a pure numeric string.  Return FALSE if the
 ** string contains any character which is not part of a number.
 **
-** Am empty string is considered non-numeric.
+** Am empty string is considered numeric.
 */
-int sqliteIsNumber(const char *z){
+static int sqliteIsNumber(const char *z){
   if( *z=='-' || *z=='+' ) z++;
   if( !isdigit(*z) ){
-    return 0;
+    return *z==0;
   }
   z++;
   while( isdigit(*z) ){ z++; }
@@ -531,96 +682,14 @@ int sqliteIsNumber(const char *z){
     z++;
     if( !isdigit(*z) ) return 0;
     while( isdigit(*z) ){ z++; }
-  }
-  if( *z=='e' || *z=='E' ){
-    z++;
-    if( *z=='+' || *z=='-' ) z++;
-    if( !isdigit(*z) ) return 0;
-    while( isdigit(*z) ){ z++; }
+    if( *z=='e' || *z=='E' ){
+      z++;
+      if( *z=='+' || *z=='-' ) z++;
+      if( !isdigit(*z) ) return 0;
+      while( isdigit(*z) ){ z++; }
+    }
   }
   return *z==0;
-}
-
-/*
-** The string z[] is an ascii representation of a real number.
-** Convert this string to a double.
-**
-** This routine assumes that z[] really is a valid number.  If it
-** is not, the result is undefined.
-**
-** This routine is used instead of the library atof() function because
-** the library atof() might want to use "," as the decimal point instead
-** of "." depending on how locale is set.  But that would cause problems
-** for SQL.  So this routine always uses "." regardless of locale.
-*/
-double sqliteAtoF(const char *z, const char **pzEnd){
-  int sign = 1;
-  LONGDOUBLE_TYPE v1 = 0.0;
-  if( *z=='-' ){
-    sign = -1;
-    z++;
-  }else if( *z=='+' ){
-    z++;
-  }
-  while( isdigit(*z) ){
-    v1 = v1*10.0 + (*z - '0');
-    z++;
-  }
-  if( *z=='.' ){
-    LONGDOUBLE_TYPE divisor = 1.0;
-    z++;
-    while( isdigit(*z) ){
-      v1 = v1*10.0 + (*z - '0');
-      divisor *= 10.0;
-      z++;
-    }
-    v1 /= divisor;
-  }
-  if( *z=='e' || *z=='E' ){
-    int esign = 1;
-    int eval = 0;
-    LONGDOUBLE_TYPE scale = 1.0;
-    z++;
-    if( *z=='-' ){
-      esign = -1;
-      z++;
-    }else if( *z=='+' ){
-      z++;
-    }
-    while( isdigit(*z) ){
-      eval = eval*10 + *z - '0';
-      z++;
-    }
-    while( eval>=64 ){ scale *= 1.0e+64; eval -= 64; }
-    while( eval>=16 ){ scale *= 1.0e+16; eval -= 16; }
-    while( eval>=4 ){ scale *= 1.0e+4; eval -= 4; }
-    while( eval>=1 ){ scale *= 1.0e+1; eval -= 1; }
-    if( esign<0 ){
-      v1 /= scale;
-    }else{
-      v1 *= scale;
-    }
-  }
-  if( pzEnd ) *pzEnd = z;
-  return sign<0 ? -v1 : v1;
-}
-
-/*
-** The string zNum represents an integer.  There might be some other
-** information following the integer too, but that part is ignored.
-** If the integer that the prefix of zNum represents will fit in a
-** 32-bit signed integer, return TRUE.  Otherwise return FALSE.
-**
-** This routine returns FALSE for the string -2147483648 even that
-** that number will, in theory fit in a 32-bit integer.  But positive
-** 2147483648 will not fit in 32 bits.  So it seems safer to return
-** false.
-*/
-int sqliteFitsIn32Bits(const char *zNum){
-  int i, c;
-  if( *zNum=='-' || *zNum=='+' ) zNum++;
-  for(i=0; (c=zNum[i])>='0' && c<='9'; i++){}
-  return i<10 || (i==10 && memcmp(zNum,"2147483647",10)<=0);
 }
 
 /* This comparison routine is what we use for comparison operations
@@ -651,8 +720,8 @@ int sqliteCompare(const char *atext, const char *btext){
       result = -1;
     }else{
       double rA, rB;
-      rA = sqliteAtoF(atext, 0);
-      rB = sqliteAtoF(btext, 0);
+      rA = atof(atext);
+      rB = atof(btext);
       if( rA<rB ){
         result = -1;
       }else if( rA>rB ){
@@ -711,6 +780,7 @@ int sqliteCompare(const char *atext, const char *btext){
 ** 2.6.3 and earlier.
 */
 int sqliteSortCompare(const char *a, const char *b){
+  int len;
   int res = 0;
   int isNumA, isNumB;
   int dir = 0;
@@ -744,8 +814,8 @@ int sqliteSortCompare(const char *a, const char *b){
           res = -1;
           break;
         }
-        rA = sqliteAtoF(&a[1], 0);
-        rB = sqliteAtoF(&b[1], 0);
+        rA = atof(&a[1]);
+        rB = atof(&b[1]);
         if( rA<rB ){
           res = -1;
           break;
@@ -762,8 +832,9 @@ int sqliteSortCompare(const char *a, const char *b){
         if( res ) break;
       }
     }
-    a += strlen(&a[1]) + 2;
-    b += strlen(&b[1]) + 2;
+    len = strlen(&a[1]) + 2;
+    a += len;
+    b += len;
   }
   if( dir=='-' || dir=='D' ) res = -res;
   return res;

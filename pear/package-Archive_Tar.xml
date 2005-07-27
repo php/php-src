@@ -6,7 +6,7 @@
   <description>This class provides handling of tar files in PHP.
 It supports creating, listing, extracting and adding to tar files.
 Gzip support is available if PHP has the zlib extension built-in or
-loaded. Bz2 compression is also supported with the bz2 extension loaded.
+loaded.
 </description>
   <license>PHP License</license>
   <maintainers>
@@ -24,45 +24,19 @@ loaded. Bz2 compression is also supported with the bz2 extension loaded.
     </maintainer>
   </maintainers>
   <release>
-    <version>1.1</version>
-    <date>2003-05-28</date>
-    <notes>* Add support for BZ2 compression
-* Add support for add and extract without using temporary files : methods addString() and extractInString()
-
-</notes>
+    <version>0.9</version>
+    <date>2002-05-27</date>
+    <notes>
+      * Auto-detect gzip'ed files
+    </notes>
     <state>stable</state>
     <filelist>
       <dir name="Archive">
-        <file role="php" name="Tar.php"/>
+        <file role="php">Tar.php</file>
       </dir>
-      <file role="doc" name="docs/Archive_Tar.txt" baseinstalldir="/"/>
     </filelist>
   </release>
   <changelog>
-    <release>
-      <version>1.0</version>
-      <date>2003-01-24</date>
-      <notes>Change status to stable</notes>
-      <state>stable</state>
-      <filelist>
-        <dir name="Archive">
-          <file role="php" name="Tar.php"/>
-        </dir>
-        <file role="doc" name="docs/Archive_Tar.txt" baseinstalldir="/"/>
-      </filelist>
-    </release>
-    <release>
-      <version>0.10-b1</version>
-      <date>2003-01-08</date>
-      <notes>Add support for long filenames (greater than 99 characters)</notes>
-      <state>beta</state>
-    </release>
-    <release>
-      <version>0.9</version>
-      <date>2002-05-27</date>
-      <notes>Auto-detect gzip'ed files</notes>
-      <state>stable</state>
-    </release>
     <release>
       <version>0.4</version>
       <date>2002-05-20</date>

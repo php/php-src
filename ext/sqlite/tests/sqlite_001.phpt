@@ -1,7 +1,5 @@
 --TEST--
 sqlite: sqlite_open/close
---INI--
-sqlite.assoc_case=0
 --SKIPIF--
 <?php if (!extension_loaded("sqlite")) print "skip"; ?>
 --FILE--
@@ -9,6 +7,7 @@ sqlite.assoc_case=0
 require_once('blankdb.inc');
 echo "$db\n";
 sqlite_close($db);
+$db = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--

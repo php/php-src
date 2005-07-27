@@ -1,8 +1,0 @@
-!include ..\rules.mak.bcc32
-INCLUDES=$(INCLUDES) -I..\mbfl
-OBJS=nls_ja.obj nls_de.obj nls_en.obj nls_hy.obj nls_kr.obj nls_ru.obj nls_zh.obj nls_uni.obj nls_neutral.obj
-
-all: $(OBJS)
-
-clean:
-	@for %i in ($(OBJS)) do @if exist %i del %i

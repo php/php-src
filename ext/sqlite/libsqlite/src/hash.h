@@ -71,7 +71,7 @@ struct HashElem {
 ** if the copyKey parameter to HashInit is 1.  
 */
 #define SQLITE_HASH_INT       1
-/* #define SQLITE_HASH_POINTER   2 // NOT USED */
+#define SQLITE_HASH_POINTER   2
 #define SQLITE_HASH_STRING    3
 #define SQLITE_HASH_BINARY    4
 

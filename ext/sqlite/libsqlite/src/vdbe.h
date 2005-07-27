@@ -34,7 +34,7 @@ typedef struct Vdbe Vdbe;
 ** as an instance of the following structure:
 */
 struct VdbeOp {
-  u8 opcode;          /* What operation to perform */
+  int opcode;         /* What operation to perform */
   int p1;             /* First operand */
   int p2;             /* Second parameter (often the jump destination) */
   char *p3;           /* Third parameter */
@@ -45,18 +45,6 @@ struct VdbeOp {
 #endif
 };
 typedef struct VdbeOp VdbeOp;
-
-/*
-** A smaller version of VdbeOp used for the VdbeAddOpList() function because
-** it takes up less space.
-*/
-struct VdbeOpList {
-  u8 opcode;          /* What operation to perform */
-  signed char p1;     /* First operand */
-  short int p2;       /* Second parameter (often the jump destination) */
-  char *p3;           /* Third parameter */
-};
-typedef struct VdbeOpList VdbeOpList;
 
 /*
 ** Allowed values of VdbeOp.p3type
@@ -87,18 +75,15 @@ typedef struct VdbeOpList VdbeOpList;
 Vdbe *sqliteVdbeCreate(sqlite*);
 void sqliteVdbeCreateCallback(Vdbe*, int*);
 int sqliteVdbeAddOp(Vdbe*,int,int,int);
-int sqliteVdbeOp3(Vdbe*,int,int,int,const char *zP3,int);
-int sqliteVdbeCode(Vdbe*,...);
-int sqliteVdbeAddOpList(Vdbe*, int nOp, VdbeOpList const *aOp);
+int sqliteVdbeAddOpList(Vdbe*, int nOp, VdbeOp const *aOp);
 void sqliteVdbeChangeP1(Vdbe*, int addr, int P1);
 void sqliteVdbeChangeP2(Vdbe*, int addr, int P2);
 void sqliteVdbeChangeP3(Vdbe*, int addr, const char *zP1, int N);
 void sqliteVdbeDequoteP3(Vdbe*, int addr);
 int sqliteVdbeFindOp(Vdbe*, int, int);
-VdbeOp *sqliteVdbeGetOp(Vdbe*, int);
 int sqliteVdbeMakeLabel(Vdbe*);
 void sqliteVdbeDelete(Vdbe*);
-void sqliteVdbeMakeReady(Vdbe*,int,int);
+void sqliteVdbeMakeReady(Vdbe*,sqlite_callback,void*,int);
 int sqliteVdbeExec(Vdbe*);
 int sqliteVdbeList(Vdbe*);
 int sqliteVdbeFinalize(Vdbe*,char**);
@@ -106,7 +91,5 @@ void sqliteVdbeResolveLabel(Vdbe*, int);
 int sqliteVdbeCurrentAddr(Vdbe*);
 void sqliteVdbeTrace(Vdbe*,FILE*);
 void sqliteVdbeCompressSpace(Vdbe*,int);
-int sqliteVdbeReset(Vdbe*,char **);
-int sqliteVdbeSetVariables(Vdbe*,int,const char**);
 
 #endif

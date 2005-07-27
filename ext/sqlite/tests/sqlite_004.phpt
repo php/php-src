@@ -1,7 +1,5 @@
 --TEST--
 sqlite: binary encoding
---INI--
-sqlite.assoc_case=0
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("sqlite")) print "skip"; ?>
@@ -35,9 +33,6 @@ while ($row = sqlite_fetch_array($r, SQLITE_NUM)) {
 	}
 	$i++;
 }
-
-sqlite_close($db);
-
 echo "DONE!\n";
 ?>
 --EXPECT--

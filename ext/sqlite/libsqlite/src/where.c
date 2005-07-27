@@ -10,7 +10,8 @@
 **
 *************************************************************************
 ** This module contains C code that generates VDBE code used to process
-** the WHERE clause of SQL statements.
+** the WHERE clause of SQL statements.  Also found here are subroutines
+** to generate VDBE code to evaluate expressions.
 **
 ** $Id$
 */
@@ -25,6 +26,8 @@ typedef struct ExprInfo ExprInfo;
 struct ExprInfo {
   Expr *p;                /* Pointer to the subexpression */
   u8 indexable;           /* True if this subexprssion is usable by an index */
+  u8 oracle8join;         /* -1 if left side contains "(+)".  +1 if right side
+                          ** contains "(+)".  0 if neither contains "(+)" */
   short int idxLeft;      /* p->pLeft is a column in this table number. -1 if
                           ** p->pLeft is not the column of any table */
   short int idxRight;     /* p->pRight is a column in this table number. -1 if
@@ -32,21 +35,6 @@ struct ExprInfo {
   unsigned prereqLeft;    /* Bitmask of tables referenced by p->pLeft */
   unsigned prereqRight;   /* Bitmask of tables referenced by p->pRight */
   unsigned prereqAll;     /* Bitmask of tables referenced by p */
-};
-
-/*
-** An instance of the following structure keeps track of a mapping
-** between VDBE cursor numbers and bitmasks.  The VDBE cursor numbers
-** are small integers contained in SrcList_item.iCursor and Expr.iTable
-** fields.  For any given WHERE clause, we want to track which cursors
-** are being used, so we assign a single bit in a 32-bit word to track
-** that cursor.  Then a 32-bit integer is able to show the set of all
-** cursors being used.
-*/
-typedef struct ExprMaskSet ExprMaskSet;
-struct ExprMaskSet {
-  int n;          /* Number of assigned cursor values */
-  int ix[32];     /* Cursor assigned to each bit */
 };
 
 /*
@@ -81,60 +69,36 @@ static int exprSplit(int nSlot, ExprInfo *aSlot, Expr *pExpr){
 }
 
 /*
-** Initialize an expression mask set
-*/
-#define initMaskSet(P)  memset(P, 0, sizeof(*P))
-
-/*
-** Return the bitmask for the given cursor.  Assign a new bitmask
-** if this is the first time the cursor has been seen.
-*/
-static int getMask(ExprMaskSet *pMaskSet, int iCursor){
-  int i;
-  for(i=0; i<pMaskSet->n; i++){
-    if( pMaskSet->ix[i]==iCursor ) return 1<<i;
-  }
-  if( i==pMaskSet->n && i<ARRAYSIZE(pMaskSet->ix) ){
-    pMaskSet->n++;
-    pMaskSet->ix[i] = iCursor;
-    return 1<<i;
-  }
-  return 0;
-}
-
-/*
-** Destroy an expression mask set
-*/
-#define freeMaskSet(P)   /* NO-OP */
-
-/*
 ** This routine walks (recursively) an expression tree and generates
 ** a bitmask indicating which tables are used in that expression
-** tree.
+** tree.  Bit 0 of the mask is set if table base+0 is used.  Bit 1
+** is set if table base+1 is used.  And so forth.
 **
 ** In order for this routine to work, the calling function must have
 ** previously invoked sqliteExprResolveIds() on the expression.  See
 ** the header comment on that routine for additional information.
-** The sqliteExprResolveIds() routines looks for column names and
-** sets their opcodes to TK_COLUMN and their Expr.iTable fields to
-** the VDBE cursor number of the table.
+**
+** "base" is the cursor number (the value of the iTable field) that
+** corresponds to the first entry in the list of tables that appear
+** in the FROM clause of a SELECT.  For UPDATE and DELETE statements
+** there is just a single table with "base" as the cursor number.
 */
-static int exprTableUsage(ExprMaskSet *pMaskSet, Expr *p){
+static int exprTableUsage(int base, Expr *p){
   unsigned int mask = 0;
   if( p==0 ) return 0;
   if( p->op==TK_COLUMN ){
-    return getMask(pMaskSet, p->iTable);
+    return 1<< (p->iTable - base);
   }
   if( p->pRight ){
-    mask = exprTableUsage(pMaskSet, p->pRight);
+    mask = exprTableUsage(base, p->pRight);
   }
   if( p->pLeft ){
-    mask |= exprTableUsage(pMaskSet, p->pLeft);
+    mask |= exprTableUsage(base, p->pLeft);
   }
   if( p->pList ){
     int i;
     for(i=0; i<p->pList->nExpr; i++){
-      mask |= exprTableUsage(pMaskSet, p->pList->a[i].pExpr);
+      mask |= exprTableUsage(base, p->pList->a[i].pExpr);
     }
   }
   return mask;
@@ -164,22 +128,25 @@ static int allowedOp(int op){
 ** "p" field filled in.  The job of this routine is to analyze the
 ** subexpression and populate all the other fields of the ExprInfo
 ** structure.
+**
+** "base" is the cursor number (the value of the iTable field) that
+** corresponds to the first entry in the table list.
 */
-static void exprAnalyze(ExprMaskSet *pMaskSet, ExprInfo *pInfo){
+static void exprAnalyze(int base, ExprInfo *pInfo){
   Expr *pExpr = pInfo->p;
-  pInfo->prereqLeft = exprTableUsage(pMaskSet, pExpr->pLeft);
-  pInfo->prereqRight = exprTableUsage(pMaskSet, pExpr->pRight);
-  pInfo->prereqAll = exprTableUsage(pMaskSet, pExpr);
+  pInfo->prereqLeft = exprTableUsage(base, pExpr->pLeft);
+  pInfo->prereqRight = exprTableUsage(base, pExpr->pRight);
+  pInfo->prereqAll = exprTableUsage(base, pExpr);
   pInfo->indexable = 0;
   pInfo->idxLeft = -1;
   pInfo->idxRight = -1;
   if( allowedOp(pExpr->op) && (pInfo->prereqRight & pInfo->prereqLeft)==0 ){
     if( pExpr->pRight && pExpr->pRight->op==TK_COLUMN ){
-      pInfo->idxRight = pExpr->pRight->iTable;
+      pInfo->idxRight = pExpr->pRight->iTable - base;
       pInfo->indexable = 1;
     }
     if( pExpr->pLeft->op==TK_COLUMN ){
-      pInfo->idxLeft = pExpr->pLeft->iTable;
+      pInfo->idxLeft = pExpr->pLeft->iTable - base;
       pInfo->indexable = 1;
     }
   }
@@ -296,9 +263,9 @@ static Index *findSortingIndex(
 **      end                         /
 **
 ** There are Btree cursors associated with each table.  t1 uses cursor
-** number pTabList->a[0].iCursor.  t2 uses the cursor pTabList->a[1].iCursor.
-** And so forth.  This routine generates code to open those VDBE cursors
-** and sqliteWhereEnd() generates the code to close them.
+** "base".  t2 uses cursor "base+1".  And so forth.  This routine generates
+** the code to open those cursors.  sqliteWhereEnd() generates the code
+** to close them.
 **
 ** If the WHERE clause is empty, the foreach loops must each scan their
 ** entire tables.  Thus a three-way join is an O(N^3) operation.  But if
@@ -348,6 +315,7 @@ static Index *findSortingIndex(
 */
 WhereInfo *sqliteWhereBegin(
   Parse *pParse,       /* The parser context */
+  int base,            /* VDBE cursor index for left-most table in pTabList */
   SrcList *pTabList,   /* A list of all tables to be scanned */
   Expr *pWhere,        /* The WHERE clause */
   int pushKey,         /* If TRUE, leave the table key on the stack */
@@ -356,11 +324,10 @@ WhereInfo *sqliteWhereBegin(
   int i;                     /* Loop counter */
   WhereInfo *pWInfo;         /* Will become the return value of this function */
   Vdbe *v = pParse->pVdbe;   /* The virtual database engine */
-  int brk, cont = 0;         /* Addresses used during code generation */
+  int brk, cont;             /* Addresses used during code generation */
   int nExpr;           /* Number of subexpressions in the WHERE clause */
   int loopMask;        /* One bit set for each outer loop */
   int haveKey;         /* True if KEY is on the stack */
-  ExprMaskSet maskSet; /* The expression mask set */
   int iDirectEq[32];   /* Term of the form ROWID==X for the N-th table */
   int iDirectLt[32];   /* Term of the form ROWID<X or ROWID<=X */
   int iDirectGt[32];   /* Term of the form ROWID>X or ROWID>=X */
@@ -376,12 +343,14 @@ WhereInfo *sqliteWhereBegin(
   ** array fills up, the last entry might point to an expression which
   ** contains additional unfactored AND operators.
   */
-  initMaskSet(&maskSet);
   memset(aExpr, 0, sizeof(aExpr));
   nExpr = exprSplit(ARRAYSIZE(aExpr), aExpr, pWhere);
   if( nExpr==ARRAYSIZE(aExpr) ){
-    sqliteErrorMsg(pParse, "WHERE clause too complex - no more "
-       "than %d terms allowed", (int)ARRAYSIZE(aExpr)-1);
+    char zBuf[50];
+    sprintf(zBuf, "%d", (int)ARRAYSIZE(aExpr)-1);
+    sqliteSetString(&pParse->zErrMsg, "WHERE clause too complex - no more "
+       "than ", zBuf, " terms allowed", 0);
+    pParse->nErr++;
     return 0;
   }
   
@@ -395,13 +364,14 @@ WhereInfo *sqliteWhereBegin(
   }
   pWInfo->pParse = pParse;
   pWInfo->pTabList = pTabList;
+  pWInfo->base = base;
   pWInfo->peakNTab = pWInfo->savedNTab = pParse->nTab;
   pWInfo->iBreak = sqliteVdbeMakeLabel(v);
 
   /* Special case: a WHERE clause that is constant.  Evaluate the
   ** expression and either jump over all of the code or fall thru.
   */
-  if( pWhere && (pTabList->nSrc==0 || sqliteExprIsConstant(pWhere)) ){
+  if( pWhere && sqliteExprIsConstant(pWhere) ){
     sqliteExprIfFalse(pParse, pWhere, pWInfo->iBreak, 1);
     pWhere = 0;
   }
@@ -409,7 +379,7 @@ WhereInfo *sqliteWhereBegin(
   /* Analyze all of the subexpressions.
   */
   for(i=0; i<nExpr; i++){
-    exprAnalyze(&maskSet, &aExpr[i]);
+    exprAnalyze(base, &aExpr[i]);
 
     /* If we are executing a trigger body, remove all references to
     ** new.* and old.* tables from the prerequisite masks.
@@ -417,13 +387,13 @@ WhereInfo *sqliteWhereBegin(
     if( pParse->trigStack ){
       int x;
       if( (x = pParse->trigStack->newIdx) >= 0 ){
-        int mask = ~getMask(&maskSet, x);
+        int mask = ~(1 << (x - base));
         aExpr[i].prereqRight &= mask;
         aExpr[i].prereqLeft &= mask;
         aExpr[i].prereqAll &= mask;
       }
       if( (x = pParse->trigStack->oldIdx) >= 0 ){
-        int mask = ~getMask(&maskSet, x);
+        int mask = ~(1 << (x - base));
         aExpr[i].prereqRight &= mask;
         aExpr[i].prereqLeft &= mask;
         aExpr[i].prereqAll &= mask;
@@ -450,9 +420,8 @@ WhereInfo *sqliteWhereBegin(
   loopMask = 0;
   for(i=0; i<pTabList->nSrc && i<ARRAYSIZE(iDirectEq); i++){
     int j;
-    int iCur = pTabList->a[i].iCursor;    /* The cursor for this table */
-    int mask = getMask(&maskSet, iCur);   /* Cursor mask for this table */
-    Table *pTab = pTabList->a[i].pTab;
+    int idx = i;
+    Table *pTab = pTabList->a[idx].pTab;
     Index *pIdx;
     Index *pBestIdx = 0;
     int bestScore = 0;
@@ -470,7 +439,7 @@ WhereInfo *sqliteWhereBegin(
     iDirectLt[i] = -1;
     iDirectGt[i] = -1;
     for(j=0; j<nExpr; j++){
-      if( aExpr[j].idxLeft==iCur && aExpr[j].p->pLeft->iColumn<0
+      if( aExpr[j].idxLeft==idx && aExpr[j].p->pLeft->iColumn<0
             && (aExpr[j].prereqRight & loopMask)==aExpr[j].prereqRight ){
         switch( aExpr[j].p->op ){
           case TK_IN:
@@ -481,7 +450,7 @@ WhereInfo *sqliteWhereBegin(
           case TK_GT: iDirectGt[i] = j;  break;
         }
       }
-      if( aExpr[j].idxRight==iCur && aExpr[j].p->pRight->iColumn<0
+      if( aExpr[j].idxRight==idx && aExpr[j].p->pRight->iColumn<0
             && (aExpr[j].prereqLeft & loopMask)==aExpr[j].prereqLeft ){
         switch( aExpr[j].p->op ){
           case TK_EQ: iDirectEq[i] = j;  break;
@@ -493,7 +462,7 @@ WhereInfo *sqliteWhereBegin(
       }
     }
     if( iDirectEq[i]>=0 ){
-      loopMask |= mask;
+      loopMask |= 1<<idx;
       pWInfo->a[i].pIdx = 0;
       continue;
     }
@@ -532,7 +501,7 @@ WhereInfo *sqliteWhereBegin(
 
       if( pIdx->nColumn>32 ) continue;  /* Ignore indices too many columns */
       for(j=0; j<nExpr; j++){
-        if( aExpr[j].idxLeft==iCur 
+        if( aExpr[j].idxLeft==idx 
              && (aExpr[j].prereqRight & loopMask)==aExpr[j].prereqRight ){
           int iColumn = aExpr[j].p->pLeft->iColumn;
           int k;
@@ -567,7 +536,7 @@ WhereInfo *sqliteWhereBegin(
             }
           }
         }
-        if( aExpr[j].idxRight==iCur 
+        if( aExpr[j].idxRight==idx 
              && (aExpr[j].prereqLeft & loopMask)==aExpr[j].prereqLeft ){
           int iColumn = aExpr[j].p->pRight->iColumn;
           int k;
@@ -620,7 +589,7 @@ WhereInfo *sqliteWhereBegin(
     pWInfo->a[i].pIdx = pBestIdx;
     pWInfo->a[i].score = bestScore;
     pWInfo->a[i].bRev = 0;
-    loopMask |= mask;
+    loopMask |= 1<<idx;
     if( pBestIdx ){
       pWInfo->a[i].iCur = pParse->nTab++;
       pWInfo->peakNTab = pParse->nTab;
@@ -651,8 +620,7 @@ WhereInfo *sqliteWhereBegin(
        pSortIdx = 0;
      }else{
        int nEqCol = (pWInfo->a[0].score+4)/8;
-       pSortIdx = findSortingIndex(pTab, pTabList->a[0].iCursor, 
-                                   *ppOrderBy, pIdx, nEqCol, &bRev);
+       pSortIdx = findSortingIndex(pTab, base, *ppOrderBy, pIdx, nEqCol, &bRev);
      }
      if( pSortIdx && (pIdx==0 || pIdx==pSortIdx) ){
        if( pIdx==0 ){
@@ -668,18 +636,22 @@ WhereInfo *sqliteWhereBegin(
   /* Open all tables in the pTabList and all indices used by those tables.
   */
   for(i=0; i<pTabList->nSrc; i++){
+    int openOp;
     Table *pTab;
-    Index *pIx;
 
     pTab = pTabList->a[i].pTab;
     if( pTab->isTransient || pTab->pSelect ) continue;
-    sqliteVdbeAddOp(v, OP_Integer, pTab->iDb, 0);
-    sqliteVdbeOp3(v, OP_OpenRead, pTabList->a[i].iCursor, pTab->tnum,
-                     pTab->zName, P3_STATIC);
-    sqliteCodeVerifySchema(pParse, pTab->iDb);
-    if( (pIx = pWInfo->a[i].pIdx)!=0 ){
-      sqliteVdbeAddOp(v, OP_Integer, pIx->iDb, 0);
-      sqliteVdbeOp3(v, OP_OpenRead, pWInfo->a[i].iCur, pIx->tnum, pIx->zName,0);
+    openOp = pTab->isTemp ? OP_OpenAux : OP_Open;
+    sqliteVdbeAddOp(v, openOp, base+i, pTab->tnum);
+    sqliteVdbeChangeP3(v, -1, pTab->zName, P3_STATIC);
+    if( i==0 && !pParse->schemaVerified &&
+          (pParse->db->flags & SQLITE_InTrans)==0 ){
+      sqliteVdbeAddOp(v, OP_VerifyCookie, pParse->db->schema_cookie, 0);
+      pParse->schemaVerified = 1;
+    }
+    if( pWInfo->a[i].pIdx!=0 ){
+      sqliteVdbeAddOp(v, openOp, pWInfo->a[i].iCur, pWInfo->a[i].pIdx->tnum);
+      sqliteVdbeChangeP3(v, -1, pWInfo->a[i].pIdx->zName, P3_STATIC);
     }
   }
 
@@ -688,7 +660,7 @@ WhereInfo *sqliteWhereBegin(
   loopMask = 0;
   for(i=0; i<pTabList->nSrc; i++){
     int j, k;
-    int iCur = pTabList->a[i].iCursor;
+    int idx = i;
     Index *pIdx;
     WhereLevel *pLevel = &pWInfo->a[i];
 
@@ -714,9 +686,9 @@ WhereInfo *sqliteWhereBegin(
       k = iDirectEq[i];
       assert( k<nExpr );
       assert( aExpr[k].p!=0 );
-      assert( aExpr[k].idxLeft==iCur || aExpr[k].idxRight==iCur );
+      assert( aExpr[k].idxLeft==idx || aExpr[k].idxRight==idx );
       brk = pLevel->brk = sqliteVdbeMakeLabel(v);
-      if( aExpr[k].idxLeft==iCur ){
+      if( aExpr[k].idxLeft==idx ){
         Expr *pX = aExpr[k].p;
         if( pX->op!=TK_IN ){
           sqliteExprCode(pParse, aExpr[k].p->pRight);
@@ -740,7 +712,7 @@ WhereInfo *sqliteWhereBegin(
       cont = pLevel->cont = sqliteVdbeMakeLabel(v);
       sqliteVdbeAddOp(v, OP_MustBeInt, 1, brk);
       haveKey = 0;
-      sqliteVdbeAddOp(v, OP_NotExists, iCur, brk);
+      sqliteVdbeAddOp(v, OP_NotExists, base+idx, brk);
       pLevel->op = OP_Noop;
     }else if( pIdx!=0 && pLevel->score>0 && pLevel->score%4==0 ){
       /* Case 2:  There is an index and all terms of the WHERE clause that
@@ -754,7 +726,7 @@ WhereInfo *sqliteWhereBegin(
         for(k=0; k<nExpr; k++){
           Expr *pX = aExpr[k].p;
           if( pX==0 ) continue;
-          if( aExpr[k].idxLeft==iCur
+          if( aExpr[k].idxLeft==idx 
              && (aExpr[k].prereqRight & loopMask)==aExpr[k].prereqRight 
              && pX->pLeft->iColumn==pIdx->aiColumn[j]
           ){
@@ -781,7 +753,7 @@ WhereInfo *sqliteWhereBegin(
               break;
             }
           }
-          if( aExpr[k].idxRight==iCur
+          if( aExpr[k].idxRight==idx 
              && aExpr[k].p->op==TK_EQ
              && (aExpr[k].prereqLeft & loopMask)==aExpr[k].prereqLeft
              && aExpr[k].p->pRight->iColumn==pIdx->aiColumn[j]
@@ -794,9 +766,6 @@ WhereInfo *sqliteWhereBegin(
       }
       pLevel->iMem = pParse->nMem++;
       cont = pLevel->cont = sqliteVdbeMakeLabel(v);
-      sqliteVdbeAddOp(v, OP_NotNull, -nColumn, sqliteVdbeCurrentAddr(v)+3);
-      sqliteVdbeAddOp(v, OP_Pop, nColumn, 0);
-      sqliteVdbeAddOp(v, OP_Goto, 0, brk);
       sqliteVdbeAddOp(v, OP_MakeKey, nColumn, 0);
       sqliteAddIdxKeyType(v, pIdx);
       if( nColumn==pIdx->nColumn || pLevel->bRev ){
@@ -814,21 +783,20 @@ WhereInfo *sqliteWhereBegin(
         sqliteVdbeAddOp(v, OP_MoveLt, pLevel->iCur, brk);
         start = sqliteVdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
         sqliteVdbeAddOp(v, OP_IdxLT, pLevel->iCur, brk);
+        sqliteVdbeAddOp(v, OP_IdxRecno, pLevel->iCur, 0);
         pLevel->op = OP_Prev;
       }else{
         /* Scan in the forward order */
         sqliteVdbeAddOp(v, OP_MoveTo, pLevel->iCur, brk);
         start = sqliteVdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
         sqliteVdbeAddOp(v, testOp, pLevel->iCur, brk);
+        sqliteVdbeAddOp(v, OP_IdxRecno, pLevel->iCur, 0);
         pLevel->op = OP_Next;
       }
-      sqliteVdbeAddOp(v, OP_RowKey, pLevel->iCur, 0);
-      sqliteVdbeAddOp(v, OP_IdxIsNull, nColumn, cont);
-      sqliteVdbeAddOp(v, OP_IdxRecno, pLevel->iCur, 0);
       if( i==pTabList->nSrc-1 && pushKey ){
         haveKey = 1;
       }else{
-        sqliteVdbeAddOp(v, OP_MoveTo, iCur, 0);
+        sqliteVdbeAddOp(v, OP_MoveTo, base+idx, 0);
         haveKey = 0;
       }
       pLevel->p1 = pLevel->iCur;
@@ -845,32 +813,34 @@ WhereInfo *sqliteWhereBegin(
         k = iDirectGt[i];
         assert( k<nExpr );
         assert( aExpr[k].p!=0 );
-        assert( aExpr[k].idxLeft==iCur || aExpr[k].idxRight==iCur );
-        if( aExpr[k].idxLeft==iCur ){
+        assert( aExpr[k].idxLeft==idx || aExpr[k].idxRight==idx );
+        if( aExpr[k].idxLeft==idx ){
           sqliteExprCode(pParse, aExpr[k].p->pRight);
         }else{
           sqliteExprCode(pParse, aExpr[k].p->pLeft);
         }
-        sqliteVdbeAddOp(v, OP_ForceInt,
-          aExpr[k].p->op==TK_LT || aExpr[k].p->op==TK_GT, brk);
-        sqliteVdbeAddOp(v, OP_MoveTo, iCur, brk);
+        sqliteVdbeAddOp(v, OP_MustBeInt, 1, brk);
+        if( aExpr[k].p->op==TK_LT || aExpr[k].p->op==TK_GT ){
+          sqliteVdbeAddOp(v, OP_AddImm, 1, 0);
+        }
+        sqliteVdbeAddOp(v, OP_MoveTo, base+idx, brk);
         aExpr[k].p = 0;
       }else{
-        sqliteVdbeAddOp(v, OP_Rewind, iCur, brk);
+        sqliteVdbeAddOp(v, OP_Rewind, base+idx, brk);
       }
       if( iDirectLt[i]>=0 ){
         k = iDirectLt[i];
         assert( k<nExpr );
         assert( aExpr[k].p!=0 );
-        assert( aExpr[k].idxLeft==iCur || aExpr[k].idxRight==iCur );
-        if( aExpr[k].idxLeft==iCur ){
+        assert( aExpr[k].idxLeft==idx || aExpr[k].idxRight==idx );
+        if( aExpr[k].idxLeft==idx ){
           sqliteExprCode(pParse, aExpr[k].p->pRight);
         }else{
           sqliteExprCode(pParse, aExpr[k].p->pLeft);
         }
-        /* sqliteVdbeAddOp(v, OP_MustBeInt, 0, sqliteVdbeCurrentAddr(v)+1); */
+        sqliteVdbeAddOp(v, OP_MustBeInt, 1, sqliteVdbeCurrentAddr(v)+1);
         pLevel->iMem = pParse->nMem++;
-        sqliteVdbeAddOp(v, OP_MemStore, pLevel->iMem, 1);
+        sqliteVdbeAddOp(v, OP_MemStore, pLevel->iMem, 0);
         if( aExpr[k].p->op==TK_LT || aExpr[k].p->op==TK_GT ){
           testOp = OP_Ge;
         }else{
@@ -880,10 +850,10 @@ WhereInfo *sqliteWhereBegin(
       }
       start = sqliteVdbeCurrentAddr(v);
       pLevel->op = OP_Next;
-      pLevel->p1 = iCur;
+      pLevel->p1 = base+idx;
       pLevel->p2 = start;
       if( testOp!=OP_Noop ){
-        sqliteVdbeAddOp(v, OP_Recno, iCur, 0);
+        sqliteVdbeAddOp(v, OP_Recno, base+idx, 0);
         sqliteVdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
         sqliteVdbeAddOp(v, testOp, 0, brk);
       }
@@ -896,10 +866,10 @@ WhereInfo *sqliteWhereBegin(
 
       brk = pLevel->brk = sqliteVdbeMakeLabel(v);
       cont = pLevel->cont = sqliteVdbeMakeLabel(v);
-      sqliteVdbeAddOp(v, OP_Rewind, iCur, brk);
+      sqliteVdbeAddOp(v, OP_Rewind, base+idx, brk);
       start = sqliteVdbeCurrentAddr(v);
       pLevel->op = OP_Next;
-      pLevel->p1 = iCur;
+      pLevel->p1 = base+idx;
       pLevel->p2 = start;
       haveKey = 0;
     }else{
@@ -925,7 +895,7 @@ WhereInfo *sqliteWhereBegin(
       for(j=0; j<nEqColumn; j++){
         for(k=0; k<nExpr; k++){
           if( aExpr[k].p==0 ) continue;
-          if( aExpr[k].idxLeft==iCur
+          if( aExpr[k].idxLeft==idx 
              && aExpr[k].p->op==TK_EQ
              && (aExpr[k].prereqRight & loopMask)==aExpr[k].prereqRight 
              && aExpr[k].p->pLeft->iColumn==pIdx->aiColumn[j]
@@ -934,7 +904,7 @@ WhereInfo *sqliteWhereBegin(
             aExpr[k].p = 0;
             break;
           }
-          if( aExpr[k].idxRight==iCur
+          if( aExpr[k].idxRight==idx 
              && aExpr[k].p->op==TK_EQ
              && (aExpr[k].prereqLeft & loopMask)==aExpr[k].prereqLeft
              && aExpr[k].p->pRight->iColumn==pIdx->aiColumn[j]
@@ -970,7 +940,7 @@ WhereInfo *sqliteWhereBegin(
         for(k=0; k<nExpr; k++){
           Expr *pExpr = aExpr[k].p;
           if( pExpr==0 ) continue;
-          if( aExpr[k].idxLeft==iCur
+          if( aExpr[k].idxLeft==idx 
              && (pExpr->op==TK_LT || pExpr->op==TK_LE)
              && (aExpr[k].prereqRight & loopMask)==aExpr[k].prereqRight 
              && pExpr->pLeft->iColumn==pIdx->aiColumn[j]
@@ -980,7 +950,7 @@ WhereInfo *sqliteWhereBegin(
             aExpr[k].p = 0;
             break;
           }
-          if( aExpr[k].idxRight==iCur
+          if( aExpr[k].idxRight==idx 
              && (pExpr->op==TK_GT || pExpr->op==TK_GE)
              && (aExpr[k].prereqLeft & loopMask)==aExpr[k].prereqLeft
              && pExpr->pRight->iColumn==pIdx->aiColumn[j]
@@ -997,12 +967,8 @@ WhereInfo *sqliteWhereBegin(
         leFlag = 1;
       }
       if( testOp!=OP_Noop ){
-        int nCol = nEqColumn + (score & 1);
         pLevel->iMem = pParse->nMem++;
-        sqliteVdbeAddOp(v, OP_NotNull, -nCol, sqliteVdbeCurrentAddr(v)+3);
-        sqliteVdbeAddOp(v, OP_Pop, nCol, 0);
-        sqliteVdbeAddOp(v, OP_Goto, 0, brk);
-        sqliteVdbeAddOp(v, OP_MakeKey, nCol, 0);
+        sqliteVdbeAddOp(v, OP_MakeKey, nEqColumn + (score & 1), 0);
         sqliteAddIdxKeyType(v, pIdx);
         if( leFlag ){
           sqliteVdbeAddOp(v, OP_IncrKey, 0, 0);
@@ -1029,7 +995,7 @@ WhereInfo *sqliteWhereBegin(
         for(k=0; k<nExpr; k++){
           Expr *pExpr = aExpr[k].p;
           if( pExpr==0 ) continue;
-          if( aExpr[k].idxLeft==iCur
+          if( aExpr[k].idxLeft==idx 
              && (pExpr->op==TK_GT || pExpr->op==TK_GE)
              && (aExpr[k].prereqRight & loopMask)==aExpr[k].prereqRight 
              && pExpr->pLeft->iColumn==pIdx->aiColumn[j]
@@ -1039,7 +1005,7 @@ WhereInfo *sqliteWhereBegin(
             aExpr[k].p = 0;
             break;
           }
-          if( aExpr[k].idxRight==iCur
+          if( aExpr[k].idxRight==idx 
              && (pExpr->op==TK_LT || pExpr->op==TK_LE)
              && (aExpr[k].prereqLeft & loopMask)==aExpr[k].prereqLeft
              && pExpr->pRight->iColumn==pIdx->aiColumn[j]
@@ -1054,11 +1020,7 @@ WhereInfo *sqliteWhereBegin(
         geFlag = 1;
       }
       if( nEqColumn>0 || (score&2)!=0 ){
-        int nCol = nEqColumn + ((score&2)!=0);
-        sqliteVdbeAddOp(v, OP_NotNull, -nCol, sqliteVdbeCurrentAddr(v)+3);
-        sqliteVdbeAddOp(v, OP_Pop, nCol, 0);
-        sqliteVdbeAddOp(v, OP_Goto, 0, brk);
-        sqliteVdbeAddOp(v, OP_MakeKey, nCol, 0);
+        sqliteVdbeAddOp(v, OP_MakeKey, nEqColumn + ((score&2)!=0), 0);
         sqliteAddIdxKeyType(v, pIdx);
         if( !geFlag ){
           sqliteVdbeAddOp(v, OP_IncrKey, 0, 0);
@@ -1085,13 +1047,11 @@ WhereInfo *sqliteWhereBegin(
         sqliteVdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
         sqliteVdbeAddOp(v, testOp, pLevel->iCur, brk);
       }
-      sqliteVdbeAddOp(v, OP_RowKey, pLevel->iCur, 0);
-      sqliteVdbeAddOp(v, OP_IdxIsNull, nEqColumn + (score & 1), cont);
       sqliteVdbeAddOp(v, OP_IdxRecno, pLevel->iCur, 0);
       if( i==pTabList->nSrc-1 && pushKey ){
         haveKey = 1;
       }else{
-        sqliteVdbeAddOp(v, OP_MoveTo, iCur, 0);
+        sqliteVdbeAddOp(v, OP_MoveTo, base+idx, 0);
         haveKey = 0;
       }
 
@@ -1101,7 +1061,7 @@ WhereInfo *sqliteWhereBegin(
       pLevel->p1 = pLevel->iCur;
       pLevel->p2 = start;
     }
-    loopMask |= getMask(&maskSet, iCur);
+    loopMask |= 1<<idx;
 
     /* Insert code to test every subexpression that can be completely
     ** computed using the current set of tables.
@@ -1114,7 +1074,7 @@ WhereInfo *sqliteWhereBegin(
       }
       if( haveKey ){
         haveKey = 0;
-        sqliteVdbeAddOp(v, OP_MoveTo, iCur, 0);
+        sqliteVdbeAddOp(v, OP_MoveTo, base+idx, 0);
       }
       sqliteExprIfFalse(pParse, aExpr[j].p, cont, 1);
       aExpr[j].p = 0;
@@ -1137,7 +1097,7 @@ WhereInfo *sqliteWhereBegin(
           ** no outer joins with DELETE and UPDATE.
           */
           haveKey = 0;
-          sqliteVdbeAddOp(v, OP_MoveTo, iCur, 0);
+          sqliteVdbeAddOp(v, OP_MoveTo, base+idx, 0);
         }
         sqliteExprIfFalse(pParse, aExpr[j].p, cont, 1);
         aExpr[j].p = 0;
@@ -1146,9 +1106,8 @@ WhereInfo *sqliteWhereBegin(
   }
   pWInfo->iContinue = cont;
   if( pushKey && !haveKey ){
-    sqliteVdbeAddOp(v, OP_Recno, pTabList->a[0].iCursor, 0);
+    sqliteVdbeAddOp(v, OP_Recno, base, 0);
   }
-  freeMaskSet(&maskSet);
   return pWInfo;
 }
 
@@ -1159,6 +1118,7 @@ WhereInfo *sqliteWhereBegin(
 void sqliteWhereEnd(WhereInfo *pWInfo){
   Vdbe *v = pWInfo->pParse->pVdbe;
   int i;
+  int base = pWInfo->base;
   WhereLevel *pLevel;
   SrcList *pTabList = pWInfo->pTabList;
 
@@ -1176,7 +1136,7 @@ void sqliteWhereEnd(WhereInfo *pWInfo){
       int addr;
       addr = sqliteVdbeAddOp(v, OP_MemLoad, pLevel->iLeftJoin, 0);
       sqliteVdbeAddOp(v, OP_NotNull, 1, addr+4 + (pLevel->iCur>=0));
-      sqliteVdbeAddOp(v, OP_NullRow, pTabList->a[i].iCursor, 0);
+      sqliteVdbeAddOp(v, OP_NullRow, base+i, 0);
       if( pLevel->iCur>=0 ){
         sqliteVdbeAddOp(v, OP_NullRow, pLevel->iCur, 0);
       }
@@ -1185,11 +1145,9 @@ void sqliteWhereEnd(WhereInfo *pWInfo){
   }
   sqliteVdbeResolveLabel(v, pWInfo->iBreak);
   for(i=0; i<pTabList->nSrc; i++){
-    Table *pTab = pTabList->a[i].pTab;
-    assert( pTab!=0 );
-    if( pTab->isTransient || pTab->pSelect ) continue;
+    if( pTabList->a[i].pTab->isTransient ) continue;
     pLevel = &pWInfo->a[i];
-    sqliteVdbeAddOp(v, OP_Close, pTabList->a[i].iCursor, 0);
+    sqliteVdbeAddOp(v, OP_Close, base+i, 0);
     if( pLevel->pIdx!=0 ){
       sqliteVdbeAddOp(v, OP_Close, pLevel->iCur, 0);
     }

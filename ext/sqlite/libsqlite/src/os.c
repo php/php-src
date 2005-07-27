@@ -31,11 +31,7 @@
 # ifndef O_NOFOLLOW
 #  define O_NOFOLLOW 0
 # endif
-# ifndef O_BINARY
-#  define O_BINARY 0
-# endif
 #endif
-
 
 #if OS_WIN
 # include <winbase.h>
@@ -49,34 +45,6 @@
 # include <Folders.h>
 # include <Timer.h>
 # include <OSUtils.h>
-#endif
-
-/*
-** The DJGPP compiler environment looks mostly like Unix, but it
-** lacks the fcntl() system call.  So redefine fcntl() to be something
-** that always succeeds.  This means that locking does not occur under
-** DJGPP.  But its DOS - what did you expect?
-*/
-#ifdef __DJGPP__
-# define fcntl(A,B,C) 0
-#endif
-
-/*
-** Macros used to determine whether or not to use threads.  The
-** SQLITE_UNIX_THREADS macro is defined if we are synchronizing for
-** Posix threads and SQLITE_W32_THREADS is defined if we are
-** synchronizing using Win32 threads.
-*/
-#if OS_UNIX && defined(THREADSAFE) && THREADSAFE
-# include <pthread.h>
-# define SQLITE_UNIX_THREADS 1
-#endif
-#if OS_WIN && defined(THREADSAFE) && THREADSAFE
-# define SQLITE_W32_THREADS 1
-#endif
-#if OS_MAC && defined(THREADSAFE) && THREADSAFE
-# include <Multiprocessing.h>
-# define SQLITE_MACOS_MULTITASKING 1
 #endif
 
 /*
@@ -125,7 +93,7 @@ static unsigned int elapse;
 **       int fd1 = open("./file1", O_RDWR|O_CREAT, 0644);
 **       int fd2 = open("./file2", O_RDWR|O_CREAT, 0644);
 **
-** Suppose ./file1 and ./file2 are really the same file (because
+** Suppose ./file1 and ./file2 are really be the same file (because
 ** one is a hard or symbolic link to the other) then if you set
 ** an exclusive lock on fd1, then try to get an exclusive lock
 ** on fd2, it works.  I would have expected the second lock to
@@ -164,196 +132,80 @@ static unsigned int elapse;
 ** structure.  The fcntl() system call is only invoked to set a 
 ** POSIX lock if the internal lock structure transitions between
 ** a locked and an unlocked state.
-**
-** 2004-Jan-11:
-** More recent discoveries about POSIX advisory locks.  (The more
-** I discover, the more I realize the a POSIX advisory locks are
-** an abomination.)
-**
-** If you close a file descriptor that points to a file that has locks,
-** all locks on that file that are owned by the current process are
-** released.  To work around this problem, each OsFile structure contains
-** a pointer to an openCnt structure.  There is one openCnt structure
-** per open inode, which means that multiple OsFiles can point to a single
-** openCnt.  When an attempt is made to close an OsFile, if there are
-** other OsFiles open on the same inode that are holding locks, the call
-** to close() the file descriptor is deferred until all of the locks clear.
-** The openCnt structure keeps a list of file descriptors that need to
-** be closed and that list is walked (and cleared) when the last lock
-** clears.
-**
-** First, under Linux threads, because each thread has a separate
-** process ID, lock operations in one thread do not override locks
-** to the same file in other threads.  Linux threads behave like
-** separate processes in this respect.  But, if you close a file
-** descriptor in linux threads, all locks are cleared, even locks
-** on other threads and even though the other threads have different
-** process IDs.  Linux threads is inconsistent in this respect.
-** (I'm beginning to think that linux threads is an abomination too.)
-** The consequence of this all is that the hash table for the lockInfo
-** structure has to include the process id as part of its key because
-** locks in different threads are treated as distinct.  But the 
-** openCnt structure should not include the process id in its
-** key because close() clears lock on all threads, not just the current
-** thread.  Were it not for this goofiness in linux threads, we could
-** combine the lockInfo and openCnt structures into a single structure.
 */
 
 /*
 ** An instance of the following structure serves as the key used
-** to locate a particular lockInfo structure given its inode.  Note
-** that we have to include the process ID as part of the key.  On some
-** threading implementations (ex: linux), each thread has a separate
-** process ID.
+** to locate a particular lockInfo structure given its inode. 
 */
-struct lockKey {
+struct inodeKey {
   dev_t dev;   /* Device number */
   ino_t ino;   /* Inode number */
-  pid_t pid;   /* Process ID */
 };
 
 /*
-** An instance of the following structure is allocated for each open
-** inode on each thread with a different process ID.  (Threads have
-** different process IDs on linux, but not on most other unixes.)
-**
+** An instance of the following structure is allocated for each inode.
 ** A single inode can have multiple file descriptors, so each OsFile
 ** structure contains a pointer to an instance of this object and this
 ** object keeps a count of the number of OsFiles pointing to it.
 */
 struct lockInfo {
-  struct lockKey key;  /* The lookup key */
-  int cnt;             /* 0: unlocked.  -1: write lock.  1...: read lock. */
-  int nRef;            /* Number of pointers to this structure */
-};
-
-/*
-** An instance of the following structure serves as the key used
-** to locate a particular openCnt structure given its inode.  This
-** is the same as the lockKey except that the process ID is omitted.
-*/
-struct openKey {
-  dev_t dev;   /* Device number */
-  ino_t ino;   /* Inode number */
-};
-
-/*
-** An instance of the following structure is allocated for each open
-** inode.  This structure keeps track of the number of locks on that
-** inode.  If a close is attempted against an inode that is holding
-** locks, the close is deferred until all locks clear by adding the
-** file descriptor to be closed to the pending list.
-*/
-struct openCnt {
-  struct openKey key;   /* The lookup key */
+  struct inodeKey key;  /* The lookup key */
+  int cnt;              /* 0: unlocked.  -1: write lock.  1...: read lock. */
   int nRef;             /* Number of pointers to this structure */
-  int nLock;            /* Number of outstanding locks */
-  int nPending;         /* Number of pending close() operations */
-  int *aPending;        /* Malloced space holding fd's awaiting a close() */
 };
 
 /* 
-** These hash table maps inodes and process IDs into lockInfo and openCnt
-** structures.  Access to these hash tables must be protected by a mutex.
+** This hash table maps inodes (in the form of inodeKey structures) into
+** pointers to lockInfo structures.
 */
 static Hash lockHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
-static Hash openHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
+
+/*
+** Given a file descriptor, locate a lockInfo structure that describes
+** that file descriptor.  Create a new one if necessary.  NULL might
+** be returned if malloc() fails.
+*/
+static struct lockInfo *findLockInfo(int fd){
+  int rc;
+  struct inodeKey key;
+  struct stat statbuf;
+  struct lockInfo *pInfo;
+  rc = fstat(fd, &statbuf);
+  if( rc!=0 ) return 0;
+  memset(&key, 0, sizeof(key));
+  key.dev = statbuf.st_dev;
+  key.ino = statbuf.st_ino;
+  pInfo = (struct lockInfo*)sqliteHashFind(&lockHash, &key, sizeof(key));
+  if( pInfo==0 ){
+    struct lockInfo *pOld;
+    pInfo = sqliteMalloc( sizeof(*pInfo) );
+    if( pInfo==0 ) return 0;
+    pInfo->key = key;
+    pInfo->nRef = 1;
+    pInfo->cnt = 0;
+    pOld = sqliteHashInsert(&lockHash, &pInfo->key, sizeof(key), pInfo);
+    if( pOld!=0 ){
+      assert( pOld==pInfo );
+      sqliteFree(pInfo);
+      pInfo = 0;
+    }
+  }else{
+    pInfo->nRef++;
+  }
+  return pInfo;
+}
 
 /*
 ** Release a lockInfo structure previously allocated by findLockInfo().
 */
-static void releaseLockInfo(struct lockInfo *pLock){
-  pLock->nRef--;
-  if( pLock->nRef==0 ){
-    sqliteHashInsert(&lockHash, &pLock->key, sizeof(pLock->key), 0);
-    sqliteFree(pLock);
+static void releaseLockInfo(struct lockInfo *pInfo){
+  pInfo->nRef--;
+  if( pInfo->nRef==0 ){
+    sqliteHashInsert(&lockHash, &pInfo->key, sizeof(pInfo->key), 0);
+    sqliteFree(pInfo);
   }
 }
-
-/*
-** Release a openCnt structure previously allocated by findLockInfo().
-*/
-static void releaseOpenCnt(struct openCnt *pOpen){
-  pOpen->nRef--;
-  if( pOpen->nRef==0 ){
-    sqliteHashInsert(&openHash, &pOpen->key, sizeof(pOpen->key), 0);
-    sqliteFree(pOpen->aPending);
-    sqliteFree(pOpen);
-  }
-}
-
-/*
-** Given a file descriptor, locate lockInfo and openCnt structures that
-** describes that file descriptor.  Create a new ones if necessary.  The
-** return values might be unset if an error occurs.
-**
-** Return the number of errors.
-*/
-int findLockInfo(
-  int fd,                      /* The file descriptor used in the key */
-  struct lockInfo **ppLock,    /* Return the lockInfo structure here */
-  struct openCnt **ppOpen   /* Return the openCnt structure here */
-){
-  int rc;
-  struct lockKey key1;
-  struct openKey key2;
-  struct stat statbuf;
-  struct lockInfo *pLock;
-  struct openCnt *pOpen;
-  rc = fstat(fd, &statbuf);
-  if( rc!=0 ) return 1;
-  memset(&key1, 0, sizeof(key1));
-  key1.dev = statbuf.st_dev;
-  key1.ino = statbuf.st_ino;
-  key1.pid = getpid();
-  memset(&key2, 0, sizeof(key2));
-  key2.dev = statbuf.st_dev;
-  key2.ino = statbuf.st_ino;
-  pLock = (struct lockInfo*)sqliteHashFind(&lockHash, &key1, sizeof(key1));
-  if( pLock==0 ){
-    struct lockInfo *pOld;
-    pLock = sqliteMallocRaw( sizeof(*pLock) );
-    if( pLock==0 ) return 1;
-    pLock->key = key1;
-    pLock->nRef = 1;
-    pLock->cnt = 0;
-    pOld = sqliteHashInsert(&lockHash, &pLock->key, sizeof(key1), pLock);
-    if( pOld!=0 ){
-      assert( pOld==pLock );
-      sqliteFree(pLock);
-      return 1;
-    }
-  }else{
-    pLock->nRef++;
-  }
-  *ppLock = pLock;
-  pOpen = (struct openCnt*)sqliteHashFind(&openHash, &key2, sizeof(key2));
-  if( pOpen==0 ){
-    struct openCnt *pOld;
-    pOpen = sqliteMallocRaw( sizeof(*pOpen) );
-    if( pOpen==0 ){
-      releaseLockInfo(pLock);
-      return 1;
-    }
-    pOpen->key = key2;
-    pOpen->nRef = 1;
-    pOpen->nLock = 0;
-    pOpen->nPending = 0;
-    pOpen->aPending = 0;
-    pOld = sqliteHashInsert(&openHash, &pOpen->key, sizeof(key2), pOpen);
-    if( pOld!=0 ){
-      assert( pOld==pOpen );
-      sqliteFree(pOpen);
-      releaseLockInfo(pLock);
-      return 1;
-    }
-  }else{
-    pOpen->nRef++;
-  }
-  *ppOpen = pOpen;
-  return 0;
-}
-
 #endif  /** POSIX advisory lock work-around **/
 
 /*
@@ -416,31 +268,6 @@ int sqliteOsFileExists(const char *zFilename){
 }
 
 
-#if 0 /* NOT USED */
-/*
-** Change the name of an existing file.
-*/
-int sqliteOsFileRename(const char *zOldName, const char *zNewName){
-#if OS_UNIX
-  if( link(zOldName, zNewName) ){
-    return SQLITE_ERROR;
-  }
-  unlink(zOldName);
-  return SQLITE_OK;
-#endif
-#if OS_WIN
-  if( !MoveFile(zOldName, zNewName) ){
-    return SQLITE_ERROR;
-  }
-  return SQLITE_OK;
-#endif
-#if OS_MAC
-  /**** FIX ME ***/
-  return SQLITE_ERROR;
-#endif
-}
-#endif /* NOT USED */
-
 /*
 ** Attempt to open a file for both reading and writing.  If that
 ** fails, try opening it read-only.  If the file does not exist,
@@ -460,16 +287,9 @@ int sqliteOsOpenReadWrite(
   int *pReadonly
 ){
 #if OS_UNIX
-  int rc;
-  id->dirfd = -1;
-  id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY, 0644);
+  id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE, 0644);
   if( id->fd<0 ){
-#ifdef EISDIR
-    if( errno==EISDIR ){
-      return SQLITE_CANTOPEN;
-    }
-#endif
-    id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
+    id->fd = open(zFilename, O_RDONLY|O_LARGEFILE);
     if( id->fd<0 ){
       return SQLITE_CANTOPEN; 
     }
@@ -478,9 +298,9 @@ int sqliteOsOpenReadWrite(
     *pReadonly = 0;
   }
   sqliteOsEnterMutex();
-  rc = findLockInfo(id->fd, &id->pLock, &id->pOpen);
+  id->pLock = findLockInfo(id->fd);
   sqliteOsLeaveMutex();
-  if( rc ){
+  if( id->pLock==0 ){
     close(id->fd);
     return SQLITE_NOMEM;
   }
@@ -588,20 +408,17 @@ int sqliteOsOpenReadWrite(
 */
 int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 #if OS_UNIX
-  int rc;
   if( access(zFilename, 0)==0 ){
     return SQLITE_CANTOPEN;
   }
-  id->dirfd = -1;
-  id->fd = open(zFilename,
-                O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE|O_BINARY, 0600);
+  id->fd = open(zFilename, O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE, 0600);
   if( id->fd<0 ){
     return SQLITE_CANTOPEN;
   }
   sqliteOsEnterMutex();
-  rc = findLockInfo(id->fd, &id->pLock, &id->pOpen);
+  id->pLock = findLockInfo(id->fd);
   sqliteOsLeaveMutex();
-  if( rc ){
+  if( id->pLock==0 ){
     close(id->fd);
     unlink(zFilename);
     return SQLITE_NOMEM;
@@ -679,16 +496,14 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 */
 int sqliteOsOpenReadOnly(const char *zFilename, OsFile *id){
 #if OS_UNIX
-  int rc;
-  id->dirfd = -1;
-  id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
+  id->fd = open(zFilename, O_RDONLY|O_LARGEFILE);
   if( id->fd<0 ){
     return SQLITE_CANTOPEN;
   }
   sqliteOsEnterMutex();
-  rc = findLockInfo(id->fd, &id->pLock, &id->pOpen);
+  id->pLock = findLockInfo(id->fd);
   sqliteOsLeaveMutex();
-  if( rc ){
+  if( id->pLock==0 ){
     close(id->fd);
     return SQLITE_NOMEM;
   }
@@ -743,71 +558,25 @@ int sqliteOsOpenReadOnly(const char *zFilename, OsFile *id){
 }
 
 /*
-** Attempt to open a file descriptor for the directory that contains a
-** file.  This file descriptor can be used to fsync() the directory
-** in order to make sure the creation of a new file is actually written
-** to disk.
-**
-** This routine is only meaningful for Unix.  It is a no-op under
-** windows since windows does not support hard links.
-**
-** On success, a handle for a previously open file is at *id is
-** updated with the new directory file descriptor and SQLITE_OK is
-** returned.
-**
-** On failure, the function returns SQLITE_CANTOPEN and leaves
-** *id unchanged.
-*/
-int sqliteOsOpenDirectory(
-  const char *zDirname,
-  OsFile *id
-){
-#if OS_UNIX
-  if( id->fd<0 ){
-    /* Do not open the directory if the corresponding file is not already
-    ** open. */
-    return SQLITE_CANTOPEN;
-  }
-  assert( id->dirfd<0 );
-  id->dirfd = open(zDirname, O_RDONLY|O_BINARY, 0644);
-  if( id->dirfd<0 ){
-    return SQLITE_CANTOPEN; 
-  }
-  TRACE3("OPENDIR %-3d %s\n", id->dirfd, zDirname);
-#endif
-  return SQLITE_OK;
-}
-
-/*
-** If the following global variable points to a string which is the
-** name of a directory, then that directory will be used to store
-** temporary files.
-*/
-const char *sqlite_temp_directory = 0;
-
-/*
 ** Create a temporary file name in zBuf.  zBuf must be big enough to
 ** hold at least SQLITE_TEMPNAME_SIZE characters.
 */
 int sqliteOsTempFileName(char *zBuf){
 #if OS_UNIX
   static const char *azDirs[] = {
-     0,
      "/var/tmp",
      "/usr/tmp",
      "/tmp",
      ".",
   };
-  static unsigned char zChars[] =
+  static char zChars[] =
     "abcdefghijklmnopqrstuvwxyz"
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
   struct stat buf;
   const char *zDir = ".";
-  azDirs[0] = sqlite_temp_directory;
   for(i=0; i<sizeof(azDirs)/sizeof(azDirs[0]); i++){
-    if( azDirs[i]==0 ) continue;
     if( stat(azDirs[i], &buf) ) continue;
     if( !S_ISDIR(buf.st_mode) ) continue;
     if( access(azDirs[i], 07) ) continue;
@@ -817,9 +586,9 @@ int sqliteOsTempFileName(char *zBuf){
   do{
     sprintf(zBuf, "%s/"TEMP_FILE_PREFIX, zDir);
     j = strlen(zBuf);
-    sqliteRandomness(15, &zBuf[j]);
-    for(i=0; i<15; i++, j++){
-      zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
+    for(i=0; i<15; i++){
+      int n = sqliteRandomByte() % (sizeof(zChars)-1);
+      zBuf[j++] = zChars[n];
     }
     zBuf[j] = 0;
   }while( access(zBuf,0)==0 );
@@ -830,22 +599,16 @@ int sqliteOsTempFileName(char *zBuf){
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
-  char *zDir;
   char zTempPath[SQLITE_TEMPNAME_SIZE];
-  if( sqlite_temp_directory==0 ){
-    GetTempPath(SQLITE_TEMPNAME_SIZE-30, zTempPath);
-    for(i=strlen(zTempPath); i>0 && zTempPath[i-1]=='\\'; i--){}
-    zTempPath[i] = 0;
-    zDir = zTempPath;
-  }else{
-    zDir = sqlite_temp_directory;
-  }
+  GetTempPath(SQLITE_TEMPNAME_SIZE-30, zTempPath);
+  for(i=strlen(zTempPath); i>0 && zTempPath[i-1]=='\\'; i--){}
+  zTempPath[i] = 0;
   for(;;){
-    sprintf(zBuf, "%s\\"TEMP_FILE_PREFIX, zDir);
+    sprintf(zBuf, "%s\\"TEMP_FILE_PREFIX, zTempPath);
     j = strlen(zBuf);
-    sqliteRandomness(15, &zBuf[j]);
-    for(i=0; i<15; i++, j++){
-      zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
+    for(i=0; i<15; i++){
+      int n = sqliteRandomByte() % sizeof(zChars);
+      zBuf[j++] = zChars[n];
     }
     zBuf[j] = 0;
     if( !sqliteOsFileExists(zBuf) ) break;
@@ -857,16 +620,13 @@ int sqliteOsTempFileName(char *zBuf){
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
-  char *zDir;
   char zTempPath[SQLITE_TEMPNAME_SIZE];
   char zdirName[32];
   CInfoPBRec infoRec;
   Str31 dirName;
   memset(&infoRec, 0, sizeof(infoRec));
   memset(zTempPath, 0, SQLITE_TEMPNAME_SIZE);
-  if( sqlite_temp_directory!=0 ){
-    zDir = sqlite_temp_directory;
-  }else if( FindFolder(kOnSystemDisk, kTemporaryFolderType,  kCreateFolder,
+  if( FindFolder(kOnSystemDisk, kTemporaryFolderType,  kCreateFolder,
        &(infoRec.dirInfo.ioVRefNum), &(infoRec.dirInfo.ioDrParID)) == noErr ){
     infoRec.dirInfo.ioNamePtr = dirName;
     do{
@@ -883,18 +643,15 @@ int sqliteOsTempFileName(char *zBuf){
         break;
       }
     } while( infoRec.dirInfo.ioDrDirID != fsRtDirID );
-    zDir = zTempPath;
   }
-  if( zDir[0]==0 ){
+  if( *zTempPath == 0 )
     getcwd(zTempPath, SQLITE_TEMPNAME_SIZE-24);
-    zDir = zTempPath;
-  }
   for(;;){
-    sprintf(zBuf, "%s"TEMP_FILE_PREFIX, zDir);
+    sprintf(zBuf, "%s"TEMP_FILE_PREFIX, zTempPath);
     j = strlen(zBuf);
-    sqliteRandomness(15, &zBuf[j]);
-    for(i=0; i<15; i++, j++){
-      zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
+    for(i=0; i<15; i++){
+      int n = sqliteRandomByte() % sizeof(zChars);
+      zBuf[j++] = zChars[n];
     }
     zBuf[j] = 0;
     if( !sqliteOsFileExists(zBuf) ) break;
@@ -904,36 +661,13 @@ int sqliteOsTempFileName(char *zBuf){
 }
 
 /*
-** Close a file.
+** Close a file
 */
 int sqliteOsClose(OsFile *id){
 #if OS_UNIX
-  sqliteOsUnlock(id);
-  if( id->dirfd>=0 ) close(id->dirfd);
-  id->dirfd = -1;
+  close(id->fd);
   sqliteOsEnterMutex();
-  if( id->pOpen->nLock ){
-    /* If there are outstanding locks, do not actually close the file just
-    ** yet because that would clear those locks.  Instead, add the file
-    ** descriptor to pOpen->aPending.  It will be automatically closed when
-    ** the last lock is cleared.
-    */
-    int *aNew;
-    struct openCnt *pOpen = id->pOpen;
-    pOpen->nPending++;
-    aNew = sqliteRealloc( pOpen->aPending, pOpen->nPending*sizeof(int) );
-    if( aNew==0 ){
-      /* If a malloc fails, just leak the file descriptor */
-    }else{
-      pOpen->aPending = aNew;
-      pOpen->aPending[pOpen->nPending-1] = id->fd;
-    }
-  }else{
-    /* There are no outstanding locks so we can close the file immediately */
-    close(id->fd);
-  }
   releaseLockInfo(id->pLock);
-  releaseOpenCnt(id->pOpen);
   sqliteOsLeaveMutex();
   TRACE2("CLOSE   %-3d\n", id->fd);
   OpenCounter(-1);
@@ -1118,14 +852,6 @@ int sqliteOsSeek(OsFile *id, off_t offset){
 
 /*
 ** Make sure all writes to a particular file are committed to disk.
-**
-** Under Unix, also make sure that the directory entry for the file
-** has been created by fsync-ing the directory that contains the file.
-** If we do not do this and we encounter a power failure, the directory
-** entry for the journal might not exist after we reboot.  The next
-** SQLite to access the file will not know that the journal exists (because
-** the directory entry for the journal was never created) and the transaction
-** will not roll back - possibly leading to database corruption.
 */
 int sqliteOsSync(OsFile *id){
 #if OS_UNIX
@@ -1134,12 +860,6 @@ int sqliteOsSync(OsFile *id){
   if( fsync(id->fd) ){
     return SQLITE_IOERR;
   }else{
-    if( id->dirfd>=0 ){
-      TRACE2("DIRSYNC %-3d\n", id->dirfd);
-      fsync(id->dirfd);
-      close(id->dirfd);  /* Only need to sync once, so close the directory */
-      id->dirfd = -1;    /* when we are done. */
-    }
     return SQLITE_OK;
   }
 #endif
@@ -1232,16 +952,9 @@ int sqliteOsFileSize(OsFile *id, off_t *pSize){
 /*
 ** Return true (non-zero) if we are running under WinNT, Win2K or WinXP.
 ** Return false (zero) for Win95, Win98, or WinME.
-**
-** Here is an interesting observation:  Win95, Win98, and WinME lack
-** the LockFileEx() API.  But we can still statically link against that
-** API as long as we don't call it win running Win95/98/ME.  A call to
-** this routine is used to determine if the host is Win95/98/ME or
-** WinNT/2K/XP so that we will know whether or not we can safely call
-** the LockFileEx() API.
 */
 int isNT(void){
-  static int osType = 0;   /* 0=unknown 1=win95 2=winNT */
+  static osType = 0;   /* 0=unknown 1=win95 2=winNT */
   if( osType==0 ){
     OSVERSIONINFO sInfo;
     sInfo.dwOSVersionInfoSize = sizeof(sInfo);
@@ -1253,10 +966,10 @@ int isNT(void){
 #endif
 
 /*
-** Windows file locking notes:  [similar issues apply to MacOS]
+** Windows file locking notes:  [the same/equivalent applies to MacOS]
 **
-** We cannot use LockFileEx() or UnlockFileEx() on Win95/98/ME because
-** those functions are not available.  So we use only LockFile() and
+** We cannot use LockFileEx() or UnlockFileEx() because those functions
+** are not available under Win95/98/ME.  So we use only LockFile() and
 ** UnlockFile().
 **
 ** LockFile() prevents not just writing but also reading by other processes.
@@ -1280,14 +993,6 @@ int isNT(void){
 ** byte allows us to drop the old write lock and get the read lock without
 ** another process jumping into the middle and messing us up.  The same
 ** argument applies to sqliteOsWriteLock().
-**
-** On WinNT/2K/XP systems, LockFileEx() and UnlockFileEx() are available,
-** which means we can use reader/writer locks.  When reader writer locks
-** are used, the lock is placed on the same range of bytes that is used
-** for probabilistic locking in Win95/98/ME.  Hence, the locking scheme
-** will support two or more Win95 readers or two or more WinNT readers.
-** But a single Win95 reader will lock out all WinNT readers and a single
-** WinNT reader will lock out all other Win95 readers.
 **
 ** Note: On MacOS we use the resource fork for locking.
 **
@@ -1321,7 +1026,6 @@ int sqliteOsReadLock(OsFile *id){
     if( !id->locked ){
       id->pLock->cnt++;
       id->locked = 1;
-      id->pOpen->nLock++;
     }
     rc = SQLITE_OK;
   }else if( id->locked || id->pLock->cnt==0 ){
@@ -1332,14 +1036,11 @@ int sqliteOsReadLock(OsFile *id){
     lock.l_start = lock.l_len = 0L;
     s = fcntl(id->fd, F_SETLK, &lock);
     if( s!=0 ){
-      rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
+      rc = (s==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
-      if( !id->locked ){
-        id->pOpen->nLock++;
-        id->locked = 1;
-      }
       id->pLock->cnt = 1;
+      id->locked = 1;
     }
   }else{
     rc = SQLITE_BUSY;
@@ -1352,27 +1053,17 @@ int sqliteOsReadLock(OsFile *id){
   if( id->locked>0 ){
     rc = SQLITE_OK;
   }else{
-    int lk;
+    int lk = (sqliteRandomInteger() & 0x7ffffff)%N_LOCKBYTE+1;
     int res;
     int cnt = 100;
-    sqliteRandomness(sizeof(lk), &lk);
-    lk = (lk & 0x7fffffff)%N_LOCKBYTE + 1;
-    while( cnt-->0 && (res = LockFile(id->h, FIRST_LOCKBYTE, 0, 1, 0))==0 ){
+    int page = isNT() ? 0xffffffff : 0;
+    while( cnt-->0 && (res = LockFile(id->h, FIRST_LOCKBYTE, page, 1, 0))==0 ){
       Sleep(1);
     }
     if( res ){
-      UnlockFile(id->h, FIRST_LOCKBYTE+1, 0, N_LOCKBYTE, 0);
-      if( isNT() ){
-        OVERLAPPED ovlp;
-        ovlp.Offset = FIRST_LOCKBYTE+1;
-        ovlp.OffsetHigh = 0;
-        ovlp.hEvent = 0;
-        res = LockFileEx(id->h, LOCKFILE_FAIL_IMMEDIATELY, 
-                          0, N_LOCKBYTE, 0, &ovlp);
-      }else{
-        res = LockFile(id->h, FIRST_LOCKBYTE+lk, 0, 1, 0);
-      }
-      UnlockFile(id->h, FIRST_LOCKBYTE, 0, 1, 0);
+      UnlockFile(id->h, FIRST_LOCKBYTE+1, page, N_LOCKBYTE, 0);
+      res = LockFile(id->h, FIRST_LOCKBYTE+lk, page, 1, 0);
+      UnlockFile(id->h, FIRST_LOCKBYTE, page, 1, 0);
     }
     if( res ){
       id->locked = lk;
@@ -1388,12 +1079,10 @@ int sqliteOsReadLock(OsFile *id){
   if( id->locked>0 || id->refNumRF == -1 ){
     rc = SQLITE_OK;
   }else{
-    int lk;
+    int lk = (sqliteRandomInteger() & 0x7ffffff)%N_LOCKBYTE+1;
     OSErr res;
     int cnt = 5;
     ParamBlockRec params;
-    sqliteRandomness(sizeof(lk), &lk);
-    lk = (lk & 0x7fffffff)%N_LOCKBYTE + 1;
     memset(&params, 0, sizeof(params));
     params.ioParam.ioRefNum = id->refNumRF;
     params.ioParam.ioPosMode = fsFromStart;
@@ -1443,14 +1132,11 @@ int sqliteOsWriteLock(OsFile *id){
     lock.l_start = lock.l_len = 0L;
     s = fcntl(id->fd, F_SETLK, &lock);
     if( s!=0 ){
-      rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
+      rc = (s==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
-      if( !id->locked ){
-        id->pOpen->nLock++;
-        id->locked = 1;
-      }
       id->pLock->cnt = -1;
+      id->locked = 1;
     }
   }else{
     rc = SQLITE_BUSY;
@@ -1465,23 +1151,18 @@ int sqliteOsWriteLock(OsFile *id){
   }else{
     int res;
     int cnt = 100;
-    while( cnt-->0 && (res = LockFile(id->h, FIRST_LOCKBYTE, 0, 1, 0))==0 ){
+    int page = isNT() ? 0xffffffff : 0;
+    while( cnt-->0 && (res = LockFile(id->h, FIRST_LOCKBYTE, page, 1, 0))==0 ){
       Sleep(1);
     }
     if( res ){
-      if( id->locked>0 ){
-        if( isNT() ){
-          UnlockFile(id->h, FIRST_LOCKBYTE+1, 0, N_LOCKBYTE, 0);
-        }else{
-          res = UnlockFile(id->h, FIRST_LOCKBYTE + id->locked, 0, 1, 0);
-        }
-      }
-      if( res ){
-        res = LockFile(id->h, FIRST_LOCKBYTE+1, 0, N_LOCKBYTE, 0);
+      if( id->locked==0 
+            || UnlockFile(id->h, FIRST_LOCKBYTE + id->locked, page, 1, 0) ){
+        res = LockFile(id->h, FIRST_LOCKBYTE+1, page, N_LOCKBYTE, 0);
       }else{
         res = 0;
       }
-      UnlockFile(id->h, FIRST_LOCKBYTE, 0, 1, 0);
+      UnlockFile(id->h, FIRST_LOCKBYTE, page, 1, 0);
     }
     if( res ){
       id->locked = -1;
@@ -1558,28 +1239,10 @@ int sqliteOsUnlock(OsFile *id){
     lock.l_start = lock.l_len = 0L;
     s = fcntl(id->fd, F_SETLK, &lock);
     if( s!=0 ){
-      rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
+      rc = (s==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
       id->pLock->cnt = 0;
-    }
-  }
-  if( rc==SQLITE_OK ){
-    /* Decrement the count of locks against this same file.  When the
-    ** count reaches zero, close any other file descriptors whose close
-    ** was deferred because of outstanding locks.
-    */
-    struct openCnt *pOpen = id->pOpen;
-    pOpen->nLock--;
-    assert( pOpen->nLock>=0 );
-    if( pOpen->nLock==0 && pOpen->nPending>0 ){
-      int i;
-      for(i=0; i<pOpen->nPending; i++){
-        close(pOpen->aPending[i]);
-      }
-      sqliteFree(pOpen->aPending);
-      pOpen->nPending = 0;
-      pOpen->aPending = 0;
     }
   }
   sqliteOsLeaveMutex();
@@ -1588,14 +1251,15 @@ int sqliteOsUnlock(OsFile *id){
 #endif
 #if OS_WIN
   int rc;
+  int page = isNT() ? 0xffffffff : 0;
   if( id->locked==0 ){
     rc = SQLITE_OK;
-  }else if( isNT() || id->locked<0 ){
-    UnlockFile(id->h, FIRST_LOCKBYTE+1, 0, N_LOCKBYTE, 0);
+  }else if( id->locked<0 ){
+    UnlockFile(id->h, FIRST_LOCKBYTE+1, page, N_LOCKBYTE, 0);
     rc = SQLITE_OK;
     id->locked = 0;
   }else{
-    UnlockFile(id->h, FIRST_LOCKBYTE+id->locked, 0, 1, 0);
+    UnlockFile(id->h, FIRST_LOCKBYTE+id->locked, page, 1, 0);
     rc = SQLITE_OK;
     id->locked = 0;
   }
@@ -1632,37 +1296,26 @@ int sqliteOsUnlock(OsFile *id){
 ** supply a sufficiently large buffer.
 */
 int sqliteOsRandomSeed(char *zBuf){
-  /* We have to initialize zBuf to prevent valgrind from reporting
-  ** errors.  The reports issued by valgrind are incorrect - we would
-  ** prefer that the randomness be increased by making use of the
-  ** uninitialized space in zBuf - but valgrind errors tend to worry
-  ** some users.  Rather than argue, it seems easier just to initialize
-  ** the whole array and silence valgrind, even if that means less randomness
-  ** in the random seed.
-  **
-  ** When testing, initializing zBuf[] to zero is all we do.  That means
-  ** that we always use the same random number sequence.* This makes the
-  ** tests repeatable.
+#ifdef SQLITE_TEST
+  /* When testing, always use the same random number sequence.
+  ** This makes the tests repeatable.
   */
   memset(zBuf, 0, 256);
+#endif
 #if OS_UNIX && !defined(SQLITE_TEST)
-  {
-    int pid;
-    time((time_t*)zBuf);
-    pid = getpid();
-    memcpy(&zBuf[sizeof(time_t)], &pid, sizeof(pid));
-  }
+  int pid;
+  time((time_t*)zBuf);
+  pid = getpid();
+  memcpy(&zBuf[sizeof(time_t)], &pid, sizeof(pid));
 #endif
 #if OS_WIN && !defined(SQLITE_TEST)
   GetSystemTime((LPSYSTEMTIME)zBuf);
 #endif
 #if OS_MAC
-  {
-    int pid;
-    Microseconds((UnsignedWide*)zBuf);
-    pid = getpid();
-    memcpy(&zBuf[sizeof(UnsignedWide)], &pid, sizeof(pid));
-  }
+  int pid;
+  Microseconds((UnsignedWide*)zBuf);
+  pid = getpid();
+  memcpy(&zBuf[sizeof(UnsignedWide)], &pid, sizeof(pid));
 #endif
   return SQLITE_OK;
 }
@@ -1691,6 +1344,24 @@ int sqliteOsSleep(int ms){
   return (int)((ticks*50)/3);
 #endif
 }
+
+/*
+** Macros used to determine whether or not to use threads.  The
+** SQLITE_UNIX_THREADS macro is defined if we are synchronizing for
+** Posix threads and SQLITE_W32_THREADS is defined if we are
+** synchronizing using Win32 threads.
+*/
+#if OS_UNIX && defined(THREADSAFE) && THREADSAFE
+# include <pthread.h>
+# define SQLITE_UNIX_THREADS 1
+#endif
+#if OS_WIN && defined(THREADSAFE) && THREADSAFE
+# define SQLITE_W32_THREADS 1
+#endif
+#if OS_MAC && defined(THREADSAFE) && THREADSAFE
+# include <Multiprocessing.h>
+# define SQLITE_MACOS_MULTITASKING 1
+#endif
 
 /*
 ** Static variables used for thread synchronization
@@ -1771,11 +1442,10 @@ char *sqliteOsFullPathname(const char *zRelative){
 #if OS_UNIX
   char *zFull = 0;
   if( zRelative[0]=='/' ){
-    sqliteSetString(&zFull, zRelative, (char*)0);
+    sqliteSetString(&zFull, zRelative, 0);
   }else{
     char zBuf[5000];
-    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative,
-                    (char*)0);
+    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative, 0);
   }
   return zFull;
 #endif
@@ -1793,53 +1463,15 @@ char *sqliteOsFullPathname(const char *zRelative){
   char *zFull = 0;
   if( zRelative[0]==':' ){
     char zBuf[_MAX_PATH+1];
-    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), &(zRelative[1]),
-                    (char*)0);
+    sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), &(zRelative[1]), 0);
   }else{
     if( strchr(zRelative, ':') ){
-      sqliteSetString(&zFull, zRelative, (char*)0);
+      sqliteSetString(&zFull, zRelative, 0);
     }else{
     char zBuf[_MAX_PATH+1];
-      sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), zRelative, (char*)0);
+      sqliteSetString(&zFull, getcwd(zBuf, sizeof(zBuf)), zRelative, 0);
     }
   }
   return zFull;
 #endif
-}
-
-/*
-** The following variable, if set to a non-zero value, becomes the result
-** returned from sqliteOsCurrentTime().  This is used for testing.
-*/
-#ifdef SQLITE_TEST
-int sqlite_current_time = 0;
-#endif
-
-/*
-** Find the current time (in Universal Coordinated Time).  Write the
-** current time and date as a Julian Day number into *prNow and
-** return 0.  Return 1 if the time and date cannot be found.
-*/
-int sqliteOsCurrentTime(double *prNow){
-#if OS_UNIX
-  time_t t;
-  time(&t);
-  *prNow = t/86400.0 + 2440587.5;
-#endif
-#if OS_WIN
-  FILETIME ft;
-  /* FILETIME structure is a 64-bit value representing the number of 
-     100-nanosecond intervals since January 1, 1601 (= JD 2305813.5). 
-  */
-  double now;
-  GetSystemTimeAsFileTime( &ft );
-  now = ((double)ft.dwHighDateTime) * 4294967296.0; 
-  *prNow = (now + ft.dwLowDateTime)/864000000000.0 + 2305813.5;
-#endif
-#ifdef SQLITE_TEST
-  if( sqlite_current_time ){
-    *prNow = sqlite_current_time/86400.0 + 2440587.5;
-  }
-#endif
-  return 0;
 }
