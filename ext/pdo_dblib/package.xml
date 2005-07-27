@@ -2,7 +2,7 @@
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
 <package version="1.0">
  <name>PDO_DBLIB</name>
- <summary>FreeTDS/Sybase MSSQL driver for PDO</summary>
+ <summary>FreeTDS/Sybase/MSSQL driver for PDO</summary>
  <maintainers>
   <maintainer>
     <user>wez</user>
