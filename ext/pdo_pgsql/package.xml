@@ -18,7 +18,7 @@
   </maintainer>
   <maintainer>
    <user>wez</user>
-   <name>Wez Alshanetsky</name>
+   <name>Wez Furlong</name>
    <email>wez@php.net</email>
    <role>lead</role>
   </maintainer>
@@ -31,7 +31,7 @@
  <release>
   <state>beta</state>
   <version>0.9</version>
-  <date>2005-06-27</date>
+  <date>2005-07-27</date>
 
   <notes>
    Now features native prepared statements and numerous other improvements.
