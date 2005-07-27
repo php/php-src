@@ -91,19 +91,8 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
       PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | $AWK -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
       sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $abs_srcdir/sqlite/src/sqlite.h.in > $abs_srcdir/sqlite/src/sqlite3.h
-      if ! test -f $abs_srcdir/sqlite/src/parse.h ; then
-        dnl maintainer can comment this line out when upgrading the bundled library
-        dnl and reinstate it when done
-        AC_MSG_ERROR([this package is broken])
-        $CC -o $abs_srcdir/sqlite/tool/lemon $abs_srcdir/sqlite/tool/lemon.c
-        $abs_srcdir/sqlite/tool/lemon $abs_srcdir/sqlite/src/parse.y
-        cat $abs_srcdir/sqlite/src/parse.h $abs_srcdir/sqlite/src/vdbe.c | $AWK -f $abs_srcdir/sqlite/mkopcodeh.awk > $abs_srcdir/sqlite/src/opcodes.h
-        sort -n +2 $abs_srcdir/sqlite/src/opcodes.h | $AWK -f $abs_srcdir/sqlite/mkopcodec.awk > $abs_srcdir/sqlite/src/opcodes.c
-        $CC -o $abs_srcdir/sqlite/tool/mkkeywordhash $abs_srcdir/sqlite/tool/mkkeywordhash.c
-        $abs_srcdir/sqlite/tool/mkkeywordhash > $abs_srcdir/sqlite/src/keywordhash.h
-      else
-        touch $abs_srcdir/sqlite/src/parse.c $abs_srcdir/sqlite/src/parse.h
-      fi
+
+      touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.h
 
       if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
         echo '#include <php_config.h>' > $ext_srcdir/sqlite/src/config.h
