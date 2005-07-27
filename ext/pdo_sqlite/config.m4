@@ -9,7 +9,22 @@ PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 
-  PHP_CHECK_PDO_INCLUDES
+  ifdef([PHP_CHECK_PDO_INCLUDES],
+  [
+    PHP_CHECK_PDO_INCLUDES
+  ],[
+    AC_MSG_CHECKING([for PDO includes])
+    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$prefix/include/php/ext
+    else
+      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+    fi
+    AC_MSG_RESULT($pdo_inc_path)
+  ])
 
   php_pdo_sqlite_sources_core="pdo_sqlite.c sqlite_driver.c sqlite_statement.c"
 
@@ -75,24 +90,27 @@ if test "$PHP_PDO_SQLITE" != "no"; then
       AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
       PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
       PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | $AWK -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
-      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_builddir/sqlite/src/sqlite3.h
-      if ! test -f $ext_srcdir/sqlite/src/parse.h ; then
-        $CC -o $ext_srcdir/sqlite/tool/lemon $ext_srcdir/sqlite/tool/lemon.c
-        $ext_srcdir/sqlite/tool/lemon $ext_srcdir/sqlite/src/parse.y
-        cat $ext_srcdir/sqlite/src/parse.h $ext_srcdir/sqlite/src/vdbe.c | $AWK -f $ext_srcdir/sqlite/mkopcodeh.awk > $ext_srcdir/sqlite/src/opcodes.h
-        sort -n +2 $ext_srcdir/sqlite/src/opcodes.h | Â$AWK -f $ext_srcdir/sqlite/mkopcodec.awk > $ext_srcdir/sqlite/src/opcodes.c
-        $CC -o $ext_srcdir/sqlite/tool/mkkeywordhash $ext_srcdir/sqlite/tool/mkkeywordhash.c
-        $ext_srcdir/sqlite/tool/mkkeywordhash > $ext_srcdir/sqlite/src/keywordhash.h
+      sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $abs_srcdir/sqlite/src/sqlite.h.in > $abs_srcdir/sqlite/src/sqlite3.h
+      if ! test -f $abs_srcdir/sqlite/src/parse.h ; then
+        dnl maintainer can comment this line out when upgrading the bundled library
+        dnl and reinstate it when done
+        AC_MSG_ERROR([this package is broken])
+        $CC -o $abs_srcdir/sqlite/tool/lemon $abs_srcdir/sqlite/tool/lemon.c
+        $abs_srcdir/sqlite/tool/lemon $abs_srcdir/sqlite/src/parse.y
+        cat $abs_srcdir/sqlite/src/parse.h $abs_srcdir/sqlite/src/vdbe.c | $AWK -f $abs_srcdir/sqlite/mkopcodeh.awk > $abs_srcdir/sqlite/src/opcodes.h
+        sort -n +2 $abs_srcdir/sqlite/src/opcodes.h | $AWK -f $abs_srcdir/sqlite/mkopcodec.awk > $abs_srcdir/sqlite/src/opcodes.c
+        $CC -o $abs_srcdir/sqlite/tool/mkkeywordhash $abs_srcdir/sqlite/tool/mkkeywordhash.c
+        $abs_srcdir/sqlite/tool/mkkeywordhash > $abs_srcdir/sqlite/src/keywordhash.h
       else
-        touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.h
+        touch $abs_srcdir/sqlite/src/parse.c $abs_srcdir/sqlite/src/parse.h
       fi
 
       if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
-        echo '#include <php_config.h>' > $ext_builddir/sqlite/src/config.h
+        echo '#include <php_config.h>' > $ext_srcdir/sqlite/src/config.h
       else
-        echo "#include \"$abs_builddir/config.h\"" > $ext_builddir/sqlite/src/config.h
+        echo "#include \"$abs_builddir/config.h\"" > $ext_srcdir/sqlite/src/config.h
       fi
-      cat >> $ext_builddir/sqlite/src/config.h <<EOF
+      cat >> $ext_srcdir/sqlite/src/config.h <<EOF
 #if ZTS
 # define THREADSAFE 1
 #endif
@@ -106,7 +124,10 @@ EOF
       AC_CHECK_HEADERS(time.h)
     
   fi
-  PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+  ifdef([PHP_ADD_EXTENDION_DEP],
+  [
+    PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
+  ])
 fi
 
 fi
