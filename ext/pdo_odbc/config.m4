@@ -5,15 +5,20 @@ dnl vim:et:sw=2:ts=2:
 if test "$PHP_PDO" != "no"; then
 
 define([PDO_ODBC_HELP_TEXT],[[
-                            include and lib dirs are looked under 'dir'.
+                            include and lib dirs are looked for under 'dir'.
+                            
                             'flavour' can be one of:  ibm-db2, unixODBC, generic
                             If ',dir' part is omitted, default for the flavour 
                             you have selected will used. e.g.:
+                            
                               --with-pdo-odbc=unixODBC
+                              
                             will check for unixODBC under /usr/local. You may attempt 
                             to use an otherwise unsupported driver using the \"generic\" 
                             flavour.  The syntax for generic ODBC support is:
+                            
                               --with-pdo-odbc=generic,dir,libname,ldflags,cflags
+
                             This extension will always be created as a shared extension
                             named pdo_odbc.so]])
 
@@ -23,15 +28,34 @@ PHP_ARG_WITH(pdo-odbc, for ODBC v3 support for PDO,
 
 
 AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
+  AC_MSG_CHECKING([for $1 in $PDO_ODBC_INCDIR])
   if test -f "$PDO_ODBC_INCDIR/$1"; then
     php_pdo_have_header=yes
-    PHP_DEF_HAVE($1)
+    PHP_DEF_HAVE(translit($1,.,_))
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
   fi
 ])
                                   
 if test "$PHP_PDO_ODBC" != "no"; then
 
-  PHP_CHECK_PDO_INCLUDES
+  ifdef([PHP_CHECK_PDO_INCLUDES],
+  [
+    PHP_CHECK_PDO_INCLUDES
+  ],[
+    AC_MSG_CHECKING([for PDO includes])
+    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$abs_srcdir/ext
+    elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+      pdo_inc_path=$prefix/include/php/ext
+    else
+      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+    fi
+    AC_MSG_RESULT($pdo_inc_path)
+  ])
 
   AC_MSG_CHECKING([for selected PDO ODBC flavour])
 
@@ -136,7 +160,10 @@ functions required for PDO support.
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_inc_path $PDO_ODBC_INCLUDE)
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
-  PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
+  ifdef([PHP_ADD_EXTENDION_DEP],
+  [
+    PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
+  ])
 fi
 
 fi
