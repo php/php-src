@@ -65,8 +65,7 @@ typedef enum {
 	RIT_CHILD_FIRST = 2
 } RecursiveIteratorMode;
 
-#define RIT_MODE_MASK       0x000000FF
-#define RIT_CATCH_GET_CHILD 0x00000100
+#define RIT_CATCH_GET_CHILD CIT_CATCH_GET_CHILD
 
 typedef enum {
 	RS_NEXT  = 0,
@@ -333,7 +332,7 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_rewind
 };
 
-/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int flags = RIT_LEAVES_ONLY]) throws InvalidArgumentException
+/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator|IteratorAggregate it [, int mode = RIT_LEAVES_ONLY [, int flags = 0]]) throws InvalidArgumentException
    Creates a RecursiveIteratorIterator from a RecursiveIterator. */
 SPL_METHOD(RecursiveIteratorIterator, __construct)
 {
@@ -341,11 +340,11 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	spl_recursive_it_object   *intern;
 	zval                      *iterator;
 	zend_class_entry          *ce_iterator;
-	long                       mode = RIT_LEAVES_ONLY;
+	long                       mode = RIT_LEAVES_ONLY, flags = 0;
 
 	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|l", &iterator, &mode) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|ll", &iterator, &mode, &flags) == SUCCESS) {
 		if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
 			zval *aggregate = iterator;
 			zend_call_method_with_0_params(&aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", &iterator);
@@ -362,8 +361,8 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern = (spl_recursive_it_object*)zend_object_store_get_object(object TSRMLS_CC);
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
-	intern->mode = mode & RIT_MODE_MASK;
-	intern->flags = mode & ~RIT_MODE_MASK;
+	intern->mode = mode;
+	intern->flags = flags;
 	intern->ce = Z_OBJCE_P(object);
 	zend_hash_find(&intern->ce->function_table, "callhaschildren", sizeof("callHasChildren"), (void **) &intern->callHasChildren);
 	if (intern->callHasChildren->common.scope == spl_ce_RecursiveIteratorIterator) {

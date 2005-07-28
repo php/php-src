@@ -12,7 +12,7 @@
 define('RIT_LEAVES_ONLY', 0);
 define('RIT_SELF_FIRST',  1);
 define('RIT_CHILD_FIRST', 2);
-define('RIT_CATCH_GET_CHILD', 256);
+define('RIT_CATCH_GET_CHILD', 2);
 
 /**
  * @brief   Iterates through recursive iterators
@@ -34,20 +34,20 @@ class RecursiveIteratorIterator implements OuterIterator
 	/** Construct from RecursiveIterator
 	 *
 	 * @param it     RecursiveIterator to iterate
-	 * @param flags  Operation mode (one of):
+	 * @param mode   Operation mode (one of):
 	 *               - RIT_LEAVES_ONLY only show leaves
 	 *               - RIT_SELF_FIRST  show parents prior to their childs
 	 *               - RIT_CHILD_FIRST show all childs prior to their parent
-	 *               or'ed with the following flags:
+	 * @param flags  Control flags, zero or any combination of the following
 	 *               - RIT_CATCH_GET_CHILD which catches exceptions during
 	 *                 getChildren() calls and simply jumps to the next 
 	 *                 element.
 	 */
-	function __construct(RecursiveIterator $it, $flags)
+	function __construct(RecursiveIterator $it, $mode = RIT_LEAVES_ONLY, $flags = 0)
 	{
 		$this->ait[0] = $it;
-		$this->mode   = $flags & 0xFF;
-		$this->flags  = $flags & ~0xFF;
+		$this->mode   = $mode;
+		$this->flags  = $flags;
 	}
 
 	/** Rewind to top iterator as set in constructor
