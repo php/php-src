@@ -83,13 +83,11 @@ SOCKET sc;
 #ifndef NETWARE
 WSADATA Data;
 struct hostent *adr;
-#endif	/* NETWARE */
-SOCKADDR_IN sock_in;
-#ifndef NETWARE
 int WinsockStarted;
 /* values set by the constructor */
 char *AppName;
 #endif	/* NETWARE */
+SOCKADDR_IN sock_in;
 char MailHost[HOST_NAME_LEN];
 char LocalHost[HOST_NAME_LEN];
 #endif
@@ -348,14 +346,7 @@ PHPAPI void TSMClose()
 	*/
 
 	shutdown(sc, 0); 
-#ifndef NETWARE
 	closesocket(sc);
-#else
-	/* closesocket commented out since it was giving undefined symbol linker error
-	 * close added in its place
-	 */
-	close(sc);
-#endif	/* NETWARE */
 }
 
 
@@ -843,11 +834,7 @@ int MailConnect()
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-#ifndef NETWARE
 int Post(LPCSTR msg)
-#else
-int Post(char *msg)
-#endif
 {
 	int len = strlen(msg);
 	int slen;
@@ -934,11 +921,7 @@ int Ack(char **server_response)
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-#ifndef NETWARE
 unsigned long GetAddr(LPSTR szHost)
-#else
-unsigned long GetAddr(char * szHost)
-#endif
 {
 	LPHOSTENT lpstHost;
 	u_long lAddr = INADDR_ANY;
@@ -954,11 +937,7 @@ unsigned long GetAddr(char * szHost)
 
 			lpstHost = gethostbyname(szHost);
 			if (lpstHost) {		/* success */
-#ifndef NETWARE
 				lAddr = *((u_long FAR *) (lpstHost->h_addr));
-#else
-				lAddr = *((u_long *) (lpstHost->h_addr));
-#endif	/* NETWARE */
 			} else {
 				lAddr = INADDR_ANY;		/* failure */
 			}
