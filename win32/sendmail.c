@@ -22,6 +22,7 @@
 #include "php.h"				/*php specific */
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef NETWARE
 #include <winsock.h>
 #include "time.h"
 #include <string.h>
@@ -29,6 +30,9 @@
 #include <malloc.h>
 #include <memory.h>
 #include <winbase.h>
+#else
+#include <netware/sendmail_nw.h>
+#endif
 #include "sendmail.h"
 #include "php_ini.h"
 
@@ -74,17 +78,24 @@ char Buffer[MAIL_BUFFER_SIZE];
 
 /* socket related data */
 SOCKET sc;
+#ifndef NETWARE
 WSADATA Data;
 struct hostent *adr;
-SOCKADDR_IN sock_in;
 int WinsockStarted;
 /* values set by the constructor */
 char *AppName;
+#endif  /* NETWARE */
+SOCKADDR_IN sock_in;
 char MailHost[HOST_NAME_LEN];
 char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
+#ifndef NETWARE
 char *php_mailer = "PHP 4 WIN32";
+#else
+char *php_mailer = "PHP 4 NetWare";
+#endif  /* NETWARE */
+
 
 char *get_header(char *h, char *headers);
 
@@ -214,7 +225,10 @@ int TSendMail(char *host, int *error, char **error_message,
 	char *pos1 = NULL, *pos2 = NULL;
 	TSRMLS_FETCH();
 
+#ifndef NETWARE
 	WinsockStarted = FALSE;
+#endif
+
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
