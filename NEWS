@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 - Fixed bug #33882 (CLI was looking for php.ini in wrong path). (Hartmut)
 - Fixed bug #33869 (strtotime() problem with "+1days" format). (Ilia) 
 - Fixed bug #33841 (pdo sqlite driver forgets to update affected column count
-  on execution of prepared statments).
+  on execution of prepared statments). (Ilia)
 - Fixed bug #33802 (throw Exception in error handler causes crash). (Dmitry)
 - Fixed bug #33710 (ArrayAccess objects doen't initialize $this). (Dmitry)
 - Fixed bug #33690 (Crash setting some ini directives in httpd.conf). (Rasmus)
