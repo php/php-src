@@ -44,18 +44,7 @@ PHPAPI char *GetSMErrorText(int index);
 
 int MailConnect();
 int PostHeader(char *, char *, char *, char *);
-#ifndef NETWARE
 int Post(LPCSTR msg);
-#else
-int Post(char *msg);
-#endif
 int Ack(char **server_response);
-#ifndef NETWARE
 unsigned long GetAddr(LPSTR szHost);
-#else
-unsigned long GetAddr(char * szHost);
-#endif
-
-
-
 #endif							/* sendmail_h */
