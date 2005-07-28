@@ -1,3 +1,114 @@
+2005-07-27  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS:
+      news entry for bug #33882 fix
+
+2005-07-27  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      ws
+
+2005-07-27  Antony Dovgal  <antony@zend.com>
+
+    * main/php_ini.c:
+      ws fix
+
+2005-07-27  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * main/php_ini.c:
+      edge case: do not remove trailing slash for root directory (Bug #33882)
+
+    * main/php_ini.c:
+      php.ini search logic needs to use the absolute path of the running binary
+      when looking for php.ini in the directory the php binary is installed in
+
+2005-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Fixed bug #32139 (SOAP client does not auto-handle base64 encoding).
+
+2005-07-27  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      main/network.c:
+      removing redundant inclusion of headers for NETWARE
+      --Kamesh
+
+    * (PHP_4_4)
+      acinclude.m4:
+      NetWare cross compile patches from 5.0
+      --Kamesh
+
+    * (PHP_4_4)
+      configure.in:
+      cross compile patches from 5.0 tree.
+      --Kamesh
+
+    * configure.in
+      configure.in:
+      configure.in
+      moved the PHP_OS and PHP_UNAME definitions near the place other oses
+      define them currently it is ggeting redined to build machine values when
+      ./configure script is generated using autoconf version 2.13 but works fine
+      with autoconf 2.51.
+      Defining the default EXTENSION_DIR for NetWare
+      
+      --Kamesh
+
+    * (PHP_4_4)
+      ext/standard/datetime.c
+      ext/standard/filestat.c
+      ext/standard/head.c
+      ext/standard/image.c
+      ext/standard/math.c
+      ext/standard/pageinfo.c:
+      ext/standard/datetime.c
+      Removed redundant NEW_LIBC checks
+      
+      ext/standard/head.c
+      Removed redundant inclusion of headers
+      
+      ext/standard/image.c
+      Removed redundant inclusion of headers
+      
+      ext/standard/pageinfo.c
+      Removed redundant CLIB_STAT_CHECK.  BG(page_mtime) was giving nano seconds
+      portion out of timespec corrected to seconds.
+      
+      ext/standard/math.c
+      Not to hardcode inability as much as possible, in future NetWare LibC SDK
+      might have asinh that time autoconf can make this function available.
+      
+      ext/standard/filestat.c
+      Fixed the typo of accessing the nano seconds from a timer_spec to seconds.
+      
+      --Kamesh
+
+    * (PHP_4_4)
+      ext/bcmath/libbcmath/src/config.h
+      ext/mcve/mcve.c
+      ext/pcre/pcrelib/internal.h:
+      NetWare can make use of autoconf based build
+
+    * (PHP_4_4)
+      main/config.nw.h
+      main/php.h
+      main/php_syslog.h:
+      main/php_syslog.h
+      NetWare can make use of Autoconf based build.
+      
+      main/php.h
+      Removed redundant NEW_LIBC checks.
+      PHP_UNAME and PHP_OS has been hardcoded for NetWare inside configure.in
+      
+      Removed the config.nw.h
+      --Kamesh
+
+    * (PHP_4_4)
+      main/php_streams.h:
+      Removing redundant CLIB_STAT_PATCH checks.
+      --Kamesh
+
 2005-07-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS:
