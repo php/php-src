@@ -1403,7 +1403,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 ZEND_VM_HANDLER(42, ZEND_JMP, ANY, ANY)
 {
 #if DEBUG_ZEND>=2
-	printf("Jumping to %d\n", opline->op1.u.opline_num);
+	printf("Jumping to %d\n", EX(opline)->op1.u.opline_num);
 #endif
 	ZEND_VM_SET_OPCODE(EX(opline)->op1.u.jmp_addr);
 	ZEND_VM_CONTINUE(); /* CHECK_ME */
