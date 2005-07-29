@@ -926,6 +926,12 @@ TEST $file
 		$query_string = '';
 	}
 
+	if (!empty($section_text['ENV'])) {
+		foreach (explode("\n", $section_text['ENV']) as $env) {
+			($env = trim($env)) and putenv($env);
+		}
+	}
+
 	putenv("REDIRECT_STATUS=1");
 	putenv("QUERY_STRING=$query_string");
 	putenv("PATH_TRANSLATED=$tmp_file");
@@ -951,7 +957,11 @@ TEST $file
 		putenv("CONTENT_TYPE=");
 		putenv("CONTENT_LENGTH=");
 
-		$cmd = "$php$pass_options$ini_settings -f \"$tmp_file\" $args 2>&1";
+		if (empty($section_text['ENV'])) {
+			$cmd = "$php$pass_options$ini_settings -f \"$tmp_file\" $args 2>&1";
+		} else {
+			$cmd = "$php$pass_options$ini_settings < \"$tmp_file\" $args 2>&1";
+		}
 	}
 
 	if ($DETAILED) echo "
@@ -967,6 +977,13 @@ COMMAND $cmd
 
 //	$out = `$cmd`;
 	$out = system_with_timeout($cmd);
+
+	if (!empty($section_text['ENV'])) {
+		foreach (explode("\n", $section_text['ENV']) as $env) {
+			$env = explode('=', $env);
+			putenv($env[0] .'=');
+		}
+	}
 
 	@unlink($tmp_post);
 
