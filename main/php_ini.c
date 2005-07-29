@@ -18,9 +18,6 @@
 
 /* $Id$ */
 
-/* Check CWD for php.ini */
-#define INI_CHECK_CWD
-
 #include "php.h"
 #include "ext/standard/info.h"
 #include "zend_ini.h"
@@ -261,11 +258,10 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
  */
 int php_init_config()
 {
-	char *env_location, *php_ini_search_path;
-	char *binary_location;
+	char *php_ini_search_path = NULL;
 	int safe_mode_state;
 	char *open_basedir;
-	int free_ini_search_path=0;
+	int free_ini_search_path = 0;
 	zend_file_handle fh;
 	struct stat sb;
 	char ini_file[MAXPATHLEN];
@@ -290,19 +286,26 @@ int php_init_config()
 	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
 
-	env_location = getenv("PHPRC");
-	if (!env_location) {
-		env_location = "";
-	}
 	if (sapi_module.php_ini_path_override) {
 		php_ini_search_path = sapi_module.php_ini_path_override;
 		free_ini_search_path = 0;
-	} else {
+	} else if (!sapi_module.php_ini_ignore) {
 		char *default_location;
+		char *env_location;
+		char *binary_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 #ifdef PHP_WIN32
 		char *reg_location;
 #endif
+
+		env_location = getenv("PHPRC");
+		if (!env_location) {
+			env_location = "";
+		}
+
+		/*
+		 * Prepare search path
+		 */
 
 		php_ini_search_path = (char *) emalloc(MAXPATHLEN * 4 + strlen(env_location) + 3 + 1);
 		free_ini_search_path = 1;
@@ -311,7 +314,7 @@ int php_init_config()
 #ifdef PHP_WIN32
 		/* Add registry location */
 		reg_location = GetIniPathFromRegistry();
-		if(reg_location != NULL) {
+		if (reg_location != NULL) {
 			if (*php_ini_search_path) {
 				strcat(php_ini_search_path, paths_separator);
 			}
@@ -319,9 +322,6 @@ int php_init_config()
 			efree(reg_location);
 		}
 #endif
-		/*
-		 * Prepare search path
-		 */
 
 		/* Add environment location */
 		if (env_location[0]) {
@@ -331,15 +331,13 @@ int php_init_config()
 			strcat(php_ini_search_path, env_location);
 		}
 
-		/* Add cwd */
-#ifdef INI_CHECK_CWD
-		if (strcmp(sapi_module.name, "cli") != 0) {
+		/* Add cwd (only with CLI) */
+		if (strcmp(sapi_module.name, "cli") == 0) {
 			if (*php_ini_search_path) {
 				strcat(php_ini_search_path, paths_separator);
 			}
 			strcat(php_ini_search_path, ".");
 		}
-#endif
 
 		/* Add binary directory */
 #ifdef PHP_WIN32
