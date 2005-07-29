@@ -9123,7 +9123,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -10542,7 +10542,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -11999,7 +11999,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -13829,7 +13829,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -14983,7 +14983,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -16023,7 +16023,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -17063,7 +17063,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -18466,7 +18466,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -21013,7 +21013,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -22424,7 +22424,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -23872,7 +23872,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
@@ -25692,7 +25692,7 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}

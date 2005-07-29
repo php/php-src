@@ -3303,7 +3303,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 					}
 					break;
 				default:
-					zend_error(E_WARNING, "Illegal offset type in unset");
+					zend_error(E_WARNING, "Illegal offset type in isset or empty");
 
 					break;
 			}
