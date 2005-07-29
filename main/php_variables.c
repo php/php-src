@@ -183,7 +183,13 @@ plain_var:
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
 				zval **tmp;
-				char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+				char *escaped_index;
+
+				if (PG(magic_quotes_gpc)) { 
+					escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+				} else {
+					escaped_index = index;
+				}
 				/* 
 				 * According to rfc2965, more specific paths are listed above the less specific ones.
 				 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
@@ -196,7 +202,9 @@ plain_var:
 					break;
 				}
 				zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-				efree(escaped_index);
+				if (PG(magic_quotes_gpc)) { 
+					efree(escaped_index);
+				}
 			}
 			break;
 		}
