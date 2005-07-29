@@ -1,3 +1,17 @@
+2005-07-28  Andi Gutmans  <andi@zend.com>
+
+    * zend_vm_def.h:
+      - Tiny fixlet
+
+2005-07-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      - Add convenience function zend_is_callable_ex() and base zend_is_callable
+        and zend_make_callable on it. This functions allows to check if a php
+        variable is a callable function and returns its function pointer as well
+        as object if possible.
+
 2005-07-26  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_execute_API.c:
