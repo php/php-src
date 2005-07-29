@@ -44,8 +44,20 @@ if test "$PHP_INFORMIX" != "no"; then
   esac
 
   AC_MSG_CHECKING([Informix version])
+  IFX_IBM_VERSION=[`$INFORMIXDIR/bin/esql -V | grep "IBM Informix-ESQL Version" | sed -ne '1 s/\(.*\)ESQL Version \([0-9]*\)\.\([0-9]*\).*/\2\3/p'`]
   IFX_VERSION=[`$INFORMIXDIR/bin/esql -V | grep "ESQL Version" | sed -ne '1 s/\(.*\)ESQL Version \([0-9]*\)\.\([0-9]*\).*/\2\3/p'`]
-  AC_MSG_RESULT($IFX_VERSION)
+
+  if test "$IFX_IBM_VERSION"; then
+    if test $IFX_IBM_VERSION -ge "290" && test $IFX_IBM_VERSION -lt "300"; then
+      IFX_VERSION=960
+    else
+      IFX_VERSION=$IFX_IBM_VERSION
+    fi
+    AC_MSG_RESULT([IBM: $IFX_VERSION])
+  else
+    AC_MSG_RESULT([$IFX_VERSION])
+  fi
+
   AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION, [ ])
 
   if test $IFX_VERSION -ge "900"; then
