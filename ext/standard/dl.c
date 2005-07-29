@@ -23,7 +23,9 @@
 #include "php.h"
 #include "dl.h"
 #include "php_globals.h"
+#include "php_ini.h"
 #include "ext/standard/info.h"
+
 #include "SAPI.h"
 
 #if defined(HAVE_LIBDL) || HAVE_MACH_O_DYLD_H
@@ -108,16 +110,13 @@ void php_dl(zval *file, int type, zval *return_value TSRMLS_DC)
 	int error_type;
 	char *extension_dir;
 
-	if (type==MODULE_PERSISTENT) {
-		/* Use the configuration hash directly, the INI mechanism is not yet initialized */
-		if (cfg_get_string("extension_dir", &extension_dir)==FAILURE) {
-			extension_dir = PHP_EXTENSION_DIR;
-		}
+	if (type == MODULE_PERSISTENT) {
+		extension_dir = INI_STR("extension_dir");
 	} else {
 		extension_dir = PG(extension_dir);
 	}
 
-	if (type==MODULE_TEMPORARY) {
+	if (type == MODULE_TEMPORARY) {
 		error_type = E_WARNING;
 	} else {
 		error_type = E_CORE_WARNING;
