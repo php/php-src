@@ -98,7 +98,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 static int ZEND_JMP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 #if DEBUG_ZEND>=2
-	printf("Jumping to %d\n", opline->op1.u.opline_num);
+	printf("Jumping to %d\n", EX(opline)->op1.u.opline_num);
 #endif
 	ZEND_VM_SET_OPCODE(EX(opline)->op1.u.jmp_addr);
 	ZEND_VM_CONTINUE(); /* CHECK_ME */
@@ -187,8 +187,10 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		EG(current_execute_data) = execute_data;
-		EX_T(opline->result.u.var).var.ptr->is_ref = 0;
-		EX_T(opline->result.u.var).var.ptr->refcount = 1;
+		if (!EX(function_state).function->common.return_reference) {
+			EX_T(opline->result.u.var).var.ptr->is_ref = 0;
+			EX_T(opline->result.u.var).var.ptr->refcount = 1;
+		}
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
