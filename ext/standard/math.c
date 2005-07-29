@@ -1099,7 +1099,7 @@ PHP_FUNCTION(number_format)
 
 		if (Z_TYPE_PP(d_p) != IS_NULL) { 
 			convert_to_string_ex(d_p);
-			if (Z_STRLEN_PP(d_p)==1) {
+			if (Z_STRLEN_PP(d_p)>=1) {
 				dec_point=Z_STRVAL_PP(d_p)[0];
 			} else if (Z_STRLEN_PP(d_p)==0) {
 				dec_point=0;
@@ -1107,7 +1107,7 @@ PHP_FUNCTION(number_format)
 		}
 		if (Z_TYPE_PP(t_s) != IS_NULL) {
 			convert_to_string_ex(t_s);
-			if (Z_STRLEN_PP(t_s)==1) {
+			if (Z_STRLEN_PP(t_s)>=1) {
 				thousand_sep=Z_STRVAL_PP(t_s)[0];
 			} else if(Z_STRLEN_PP(t_s)==0) {
 				thousand_sep=0;	
