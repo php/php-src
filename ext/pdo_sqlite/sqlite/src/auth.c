@@ -114,6 +114,7 @@ void sqlite3AuthRead(
   TriggerStack *pStack; /* The stack of current triggers */
 
   if( db->xAuth==0 ) return;
+  if( pExpr->op==TK_AS ) return;
   assert( pExpr->op==TK_COLUMN );
   for(iSrc=0; pTabList && iSrc<pTabList->nSrc; iSrc++){
     if( pExpr->iTable==pTabList->a[iSrc].iCursor ) break;
