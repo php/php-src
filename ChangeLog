@@ -1,3 +1,98 @@
+2005-07-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      news file tinkering
+
+2005-07-28  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_vm_def.h:
+      - Tiny fixlet
+
+2005-07-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Add convenience function zend_is_callable_ex() and base zend_is_callable
+        and zend_make_callable on it. This functions allows to check if a php
+        variable is a callable function and returns its function pointer as well
+        as object if possible.
+
+2005-07-28  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      sapi/cli/config.m4:
+      Merging changes from 5.0 tree
+      --Kamesh
+
+    * (PHP_4_4)
+      win32/sendmail.c:
+      NetWare changes from 5.0 Tree.
+      --Kamesh
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+      NetWare cleanup
+      --Kamesh
+
+    * ext/standard/mail.c:
+      defined EX_OK and EX_TEMPFAIL in ext/standard/mail.c for NETWARE rather
+      than including a sysexits.h.
+      -Kamesh
+
+    * netware/sendmail_nw.h
+      netware/sysexits.h:
+      Cleaned up the NetWare code.
+      --Kamesh
+
+    * (PHP_4_4)
+      netware/sendmail_nw.h:
+      Adding this file from 5_0 tree
+      -- Kamesh
+
+    * (PHP_4_4)
+      netware/ZendEngine2.mak
+      netware/build.bat
+      netware/buildext.bat
+      netware/buildlib.bat
+      netware/buildsapi.bat
+      netware/common.mif
+      netware/mktemp.h
+      netware/php-nw.bat
+      netware/php4apache.mak
+      netware/phplib.imp
+      netware/phplib.mak
+      netware/pwd.h
+      netware/sendmail.c
+      netware/sendmail.h
+      netware/setbuild.bat
+      netware/tsrm.mak
+      netware/zend.mak:
+      NetWare can make use autoconf based build.
+      --Kamesh
+
+    * (PHP_4_4)
+      netware/sys/stat.h:
+      NetWare LibC SDK has stat.h. So removing this.
+      --Kamesh
+
+    * (PHP_5_0)
+      win32/sendmail.c
+      win32/sendmail.h:
+      Cleaned up the NetWare specific code
+
+    * (PHP_5_0)
+      netware/sendmail_nw.h
+      netware/sysexits.h:
+      Cleaning up the NetWare code sitting in win32/sendmail.c.
+      Removing netware/sysexits.h
+      --Kamesh
+
+    * (PHP_5_0)
+      ext/standard/mail.c:
+      defined EX_OK and EX_TEMPFAIL in ext/standard/mail.c for NETWARE rather
+      than including a sysexits.h
+      --Kamesh
+
 2005-07-27  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * NEWS:
