@@ -1,3 +1,23 @@
+2005-07-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      Fixed warning message generated when isset() or empty() are given invalid
+      offset type.
+
+2005-07-29  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * acconfig.h
+      acconfig.h:
+      In NetWare few of the programs like apache2 and ldap use winsock inclusinf
+      sys/socket.h is not desirable.
+      --Kamesh
+
+2005-07-29  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_vm_execute.h:
+      update generated file
+
 2005-07-28  Andi Gutmans  <andi@zend.com>
 
     * zend_vm_def.h:
