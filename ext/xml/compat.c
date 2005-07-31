@@ -191,8 +191,8 @@ _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 static void
 _unparsed_entity_decl_handler(void *user, 
                               const xmlChar *name, 
-							  const xmlChar *sys_id, 
 							  const xmlChar *pub_id, 
+							  const xmlChar *sys_id, 
 							  const xmlChar *notation)
 {
 	XML_Parser parser = (XML_Parser) user;
@@ -205,7 +205,7 @@ _unparsed_entity_decl_handler(void *user,
 }
 
 static void
-_notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *sys_id, const xmlChar *pub_id)
+_notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_id, const xmlChar *sys_id)
 {
 	XML_Parser parser = (XML_Parser) user;
 
