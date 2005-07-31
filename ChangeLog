@@ -1,3 +1,8 @@
+2005-07-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/array/bug25359.phpt:
+      Added test for bug #25359
+
 2005-07-29  Wez Furlong  <wez.php@thebrainroom.net>
 
     * regex/regerror.c:
