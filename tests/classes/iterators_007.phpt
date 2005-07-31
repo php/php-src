@@ -1,7 +1,7 @@
 --TEST--
 ZE2 iterators and exceptions
 --FILE--
-<?
+<?php
 class Test implements Iterator
 {
 	public $arr = array(1, 2, 3);
