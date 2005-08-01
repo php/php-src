@@ -13,7 +13,7 @@ if (PHP_IMAP == "yes") {
 		CHECK_LIB("crypt32.lib", "imap");
 		EXTENSION("imap", "php_imap.c");
 
-		ADD_FLAG("CFLAGS_IMAP", "/D HAVE_IMAP2000=1");
+		ADD_FLAG("CFLAGS_IMAP", "/D HAVE_IMAP2000=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP_SSL=1");
 		AC_DEFINE('HAVE_IMAP', 1, 'Have IMAP support', true);
 	} else {
 		WARNING("imap not enabled; libraries and headers not found");
