@@ -234,6 +234,7 @@ int make_http_soap_request(zval  *this_ptr,
 	int http_status;
 	int content_type_xml = 0;
 	char *content_encoding;
+	zend_bool old_allow_url_fopen;
 
 	if (this_ptr == NULL || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		return FALSE;
@@ -315,10 +316,14 @@ try_again:
 		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL TSRMLS_CC);
 		return FALSE;
 	}
+
+	old_allow_url_fopen = PG(allow_url_fopen);
+	PG(allow_url_fopen) = 1;
 	if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
 		php_url_free(phpurl);
 		if (request != buf) {efree(request);}
-		add_soap_fault(this_ptr, "HTTP", "SSL support not available in this build", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "HTTP", "SSL support is not available in this build", NULL, NULL TSRMLS_CC);
+		PG(allow_url_fopen) = old_allow_url_fopen;
 		return FALSE;
 	}
 
@@ -367,9 +372,11 @@ try_again:
 			php_url_free(phpurl);
 			if (request != buf) {efree(request);}
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
+			PG(allow_url_fopen) = old_allow_url_fopen;
 			return FALSE;
 		}
 	}
+	PG(allow_url_fopen) = old_allow_url_fopen;
 
 	if (stream) {
 		zval **cookies, **login, **password;
