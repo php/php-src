@@ -1,3 +1,29 @@
+2005-07-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/xml/tests/bug27908.phpt:
+      Added test for bug #27908
+
+    * ext/xml/tests/bug26614_libxml.phpt:
+      - Fix test.
+
+    * tests/classes/iterators_007.phpt:
+      fix test
+
+2005-07-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/compat.c:
+      SystemID and publicID params reversed in declaration handlers
+
+2005-07-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO-5.1:
+      Update TODO.
+
+2005-07-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * TODO-5.1:
+      Update todo
+
 2005-07-30  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/standard/tests/array/bug25359.phpt:
