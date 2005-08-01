@@ -80,11 +80,16 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 {
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
+	zend_bool old_allow_url_fopen;
 
 /*
 	xmlInitParser();
 */
+
+	old_allow_url_fopen = PG(allow_url_fopen);
+	PG(allow_url_fopen) = 1;
 	ctxt = xmlCreateFileParserCtxt(filename);
+	PG(allow_url_fopen) = old_allow_url_fopen;
 	if (ctxt) {
 		ctxt->keepBlanks = 0;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
