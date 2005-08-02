@@ -76,7 +76,7 @@ static void soap_Comment(void *ctx, const xmlChar *value)
 {
 }
 
-xmlDocPtr soap_xmlParseFile(const char *filename)
+xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 {
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
