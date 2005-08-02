@@ -17,7 +17,7 @@ define('RIT_CATCH_GET_CHILD', 2);
 /**
  * @brief   Iterates through recursive iterators
  * @author  Marcus Boerger
- * @version 1.1
+ * @version 1.2
  * @since PHP 5.0
  *
  * The objects of this class are created by instances of RecursiveIterator. 
@@ -39,6 +39,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 *               - RIT_SELF_FIRST  show parents prior to their childs
 	 *               - RIT_CHILD_FIRST show all childs prior to their parent
 	 * @param flags  Control flags, zero or any combination of the following
+	 *               (since PHP 5.1).
 	 *               - RIT_CATCH_GET_CHILD which catches exceptions during
 	 *                 getChildren() calls and simply jumps to the next 
 	 *                 element.
