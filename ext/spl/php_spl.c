@@ -153,6 +153,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ArrayIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(BadFunctionCallException, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(BadMethodCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingRecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(Countable, z_list, sub, allow, ce_flags); \
