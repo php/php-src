@@ -1,9 +1,11 @@
 <?php
 
 function simple() {
+  $a = 0;
   for ($i = 0; $i < 1000000; $i++) 
     $a++;
 
+  $thisisanotherlongname = 0;
   for ($thisisalongname = 0; $thisisalongname < 1000000; $thisisalongname++) 
     $thisisanotherlongname++;
 }
@@ -70,7 +72,7 @@ function mandel() {
         print "#";
       }
     }
-    print "<br>".$vbCr;
+    print "<br>";
     flush();
   }
 }
@@ -131,7 +133,7 @@ function ary2($n) {
     $X[$i] = $i; ++$i;
     $X[$i] = $i; ++$i;
   }
-  for ($i=$n-1; $i>=0; $i--) {
+  for ($i=$n-1; $i>=0;) {
     $Y[$i] = $X[$i]; --$i;
     $Y[$i] = $X[$i]; --$i;
     $Y[$i] = $X[$i]; --$i;
@@ -153,6 +155,7 @@ function ary2($n) {
 function ary3($n) {
   for ($i=0; $i<$n; $i++) {
     $X[$i] = $i + 1;
+    $Y[$i] = 0;
   }
   for ($k=0; $k<1000; $k++) {
     for ($i=$n-1; $i>=0; $i--) {
@@ -180,8 +183,9 @@ function hash($n) {
   for ($i = 1; $i <= $n; $i++) {
     $X[dechex($i)] = $i;
   }
+  $c = 0;
   for ($i = $n; $i > 0; $i--) {
-    if ($X[$i]) { $c++; }
+    if ($X[dechex($i)]) { $c++; }
   }
   print "$c\n";
 }
@@ -189,13 +193,16 @@ function hash($n) {
 /****/
 
 function hash2($n) {
-  for ($i = 0; $i < 10000; $i++) {
+  for ($i = 0; $i < $n; $i++) {
     $hash1["foo_$i"] = $i;
+    $hash2["foo_$i"] = 0;
   }
   for ($i = $n; $i > 0; $i--) {
     foreach($hash1 as $key => $value) $hash2[$key] += $value;
   }
-  print "$hash1[foo_1] $hash1[foo_9999] $hash2[foo_1] $hash2[foo_9999]\n";
+  $first = "foo_0";
+  $last  = "foo_".($n-1);
+  print "$hash1[$first] $hash1[$last] $hash2[$first] $hash2[$last]\n";
 }
 
 /****/
@@ -396,8 +403,8 @@ fibo(30);
 $t = end_test($t, "fibo(30)");
 hash(50000);
 $t = end_test($t, "hash(50000)");
-hash2(50);
-$t = end_test($t, "hash2(50)");
+hash2(500);
+$t = end_test($t, "hash2(500)");
 heapsort(20000);
 $t = end_test($t, "heapsort(20000)");
 matrix(20);
