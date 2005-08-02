@@ -1313,7 +1313,11 @@ void zend_unset_timeout(TSRMLS_D)
 
 		no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
 
+#ifdef __CYGWIN__
+		setitimer(ITIMER_REAL, &no_timeout, NULL);
+#else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
+#endif
 	}
 #	endif
 #endif
