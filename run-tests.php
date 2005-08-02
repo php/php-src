@@ -822,10 +822,14 @@ TEST $file
 	$warn = false;
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
+			$skipif_params = array();
+			settings2array($ini_overwrites,$skipif_params);
+			settings2params($skipif_params);
+
 			save_text($tmp_skipif, $section_text['SKIPIF']);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;": "";
-			$output = system_with_timeout("$extra $php -q $info_params $tmp_skipif");
+			$output = system_with_timeout("$extra $php -q $skipif_params $tmp_skipif");
 			@unlink($tmp_skipif);
 			if (eregi("^skip", trim($output))) {
 				echo "SKIP $tested";
