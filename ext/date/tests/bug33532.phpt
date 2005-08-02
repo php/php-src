@@ -2,6 +2,7 @@
 Bug #33532 (Different output for strftime() and date())
 --INI--
 error_reporting=2047
+date.timezone=UTC
 --FILE--
 <?php
 putenv("TZ=");
