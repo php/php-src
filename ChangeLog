@@ -1,3 +1,19 @@
+2005-08-01  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/gd/config.w32:
+      Allow building gd on windows systems without t1lib (M. Sisolak) #33620
+
+    * ext/imap/config.w32:
+      Allow building against the latest cclient
+
+2005-08-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.c:
+      Fixed bug #33723 (php_value overrides php_admin_value)
+
 2005-07-31  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/xml/tests/bug27908.phpt:
