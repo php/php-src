@@ -105,3 +105,4 @@ Zend Engine II currently includes two executors during the build process, one
 is the specialized version and the other is the old one non-specialized with
 function handlers. By default Zend Engine II uses the specialized one but you
 can switch to the old executor at runtime by calling zend_vm_use_old_executor().
+
