@@ -1,3 +1,20 @@
+2005-08-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c:
+      Fixed bug #33942 (the patch to #33156 crash cygwin except cli)
+
+2005-08-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_exceptions.c:
+      - Fixed bug #33967 (misuse of Exception constructor doesn\'t display
+      errorfile)
+
+2005-08-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * bench.php:
+      Removed warnings
+
 2005-07-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_vm_def.h
