@@ -168,9 +168,15 @@ php_apache_sapi_get_stat(TSRMLS_D)
 	ctx->finfo.st_gid = ctx->r->finfo.group;
 	ctx->finfo.st_dev = ctx->r->finfo.device;
 	ctx->finfo.st_ino = ctx->r->finfo.inode;
+#ifdef NETWARE
+	ctx->finfo.st_atime.tv_sec = ctx->r->finfo.atime/1000000;
+	ctx->finfo.st_mtime.tv_sec = ctx->r->finfo.mtime/1000000;
+	ctx->finfo.st_ctime.tv_sec = ctx->r->finfo.ctime/1000000;
+#else
 	ctx->finfo.st_atime = ctx->r->finfo.atime/1000000;
 	ctx->finfo.st_mtime = ctx->r->finfo.mtime/1000000;
 	ctx->finfo.st_ctime = ctx->r->finfo.ctime/1000000;
+#endif
 	ctx->finfo.st_size = ctx->r->finfo.size;
 	ctx->finfo.st_nlink = ctx->r->finfo.nlink;
 
