@@ -1994,6 +1994,10 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 		stmt->columns = NULL;
 	}
 
+	if (stmt->fetch.into && stmt->default_fetch_type == PDO_FETCH_INTO) {
+		FREE_ZVAL(stmt->fetch.into);
+		stmt->fetch.into = NULL;
+	}
 	
 	do_fetch_opt_finish(stmt, 1 TSRMLS_CC);
 
