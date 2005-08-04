@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
+- Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP). (Dmitry)
 - Fixed bug #33853 (php:function call __autoload with lowercase param). (Marcus)
 - Fixed bug #33802 (throw Exception in error handler causes crash). (Dmitry)
 - Fixed bug #33723 (php_value overrides php_admin_value). (Dmitry)
