@@ -84,7 +84,15 @@ int main() {
   pthreads_working=yes
   ], [
   pthreads_working=no
-  ], pthreads_working=no ) ] )dnl
+  ], [
+  dnl For cross compiling running this test is of no use. NetWare supports pthreads
+  pthreads_working=no
+  case $host_alias in
+  *netware*)
+    pthreads_working=yes
+  esac
+]
+) ] )dnl
 dnl
 dnl PTHREADS_CHECK()
 dnl
