@@ -1442,11 +1442,11 @@ PHP_FUNCTION(extract)
 					zval **orig_var;
 
 					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var) == SUCCESS) {
-						zval_ptr_dtor(orig_var);
-
 						SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
 						zval_add_ref(entry);
 						
+						zval_ptr_dtor(orig_var);
+
 						*orig_var = *entry;
 					} else {
 						if ((*var_array)->refcount > 1) {

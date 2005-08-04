@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1
+- Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP). (Dmitry)
 - Fixed bug #33967 (misuse of Exception constructor doesn't display errorfile).
   (Jani)
 - Fixed bug #33958 (duplicate cookies and magic_quotes=off may cause a crash).
