@@ -115,7 +115,7 @@ ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
 
 static void zval_add_ref_or_clone(zval **p)
 {
-	if (Z_TYPE_PP(p) == IS_OBJECT) {
+	if (Z_TYPE_PP(p) == IS_OBJECT && !PZVAL_IS_REF(*p)) {
 		TSRMLS_FETCH();
 
 		if (Z_OBJ_HANDLER_PP(p, clone_obj) == NULL) {
@@ -126,7 +126,7 @@ static void zval_add_ref_or_clone(zval **p)
 			ALLOC_ZVAL(*p);
 			**p = *orig;
 			INIT_PZVAL(*p);
-			(*p)->value.obj = Z_OBJ_HT_PP(p)->clone_obj(*p TSRMLS_CC);
+			(*p)->value.obj = Z_OBJ_HT_PP(p)->clone_obj(orig TSRMLS_CC);
 		}
 	} else {
 		(*p)->refcount++;
