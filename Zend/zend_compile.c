@@ -3469,7 +3469,8 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 			is_variable = 1;
 		}
 		zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
-		if (CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode == ZEND_FETCH_OBJ_W) {
+		if (CG(active_op_array)->last > 0 &&
+		    CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode == ZEND_FETCH_OBJ_W) {
 			/* Only lock the container if we are fetching from a real container and not $this */
 			if (CG(active_op_array)->opcodes[CG(active_op_array)->last-1].op1.op_type == IS_VAR) {
 				CG(active_op_array)->opcodes[CG(active_op_array)->last-1].extended_value |= ZEND_FETCH_ADD_LOCK;
