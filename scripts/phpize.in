@@ -35,7 +35,7 @@ phpize_clean()
 {
   echo "Cleaning.."
   for i in $CLEAN_FILES; do
-    test -e $i && rm -rf $i
+    test -f $i && rm -rf $i
   done
 }
 
