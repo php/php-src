@@ -338,13 +338,12 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 					if (ht) {
 						retval = (zend_hash_num_elements(ht)?1:0);
 					}
-					zval_dtor(op);
-					ZVAL_LONG(op, retval);
-					return;
 				} else {
-					/* we cannot convert it to long */
-					return;
+					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
 				}
+				zval_dtor(op);
+				ZVAL_LONG(op, retval);
+				return;
 			}
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -1319,7 +1318,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		zendi_smart_strcmp(result, op1, op2);
 		COMPARE_RETURN_AND_FREE(SUCCESS);
 	}
-	
+
 	if (op1->type == IS_BOOL || op2->type == IS_BOOL
 		|| op1->type == IS_NULL || op2->type == IS_NULL) {
 		zendi_convert_to_boolean(op1, op1_copy, result);
