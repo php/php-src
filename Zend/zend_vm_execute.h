@@ -2007,7 +2007,7 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (opline->extended_value) {
 		array_ptr_ptr = NULL;
-		if (array_ptr_ptr == NULL) {
+		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
@@ -4424,7 +4424,7 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (opline->extended_value) {
 		array_ptr_ptr = NULL;
-		if (array_ptr_ptr == NULL) {
+		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
@@ -7444,7 +7444,7 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (opline->extended_value) {
 		array_ptr_ptr = _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
-		if (array_ptr_ptr == NULL) {
+		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
@@ -19484,7 +19484,7 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (opline->extended_value) {
 		array_ptr_ptr = _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
-		if (array_ptr_ptr == NULL) {
+		if (array_ptr_ptr == NULL || array_ptr_ptr == &EG(uninitialized_zval_ptr)) {
 			ALLOC_INIT_ZVAL(array_ptr);
 		} else if (Z_TYPE_PP(array_ptr_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_PP(array_ptr_ptr)->get_class_entry == NULL) {
