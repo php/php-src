@@ -1,3 +1,21 @@
+2005-08-04  Antony Dovgal  <antony@zend.com>
+
+    * tests/foreach_undefined.phpt:
+      add test for the last Dmitry's fix
+
+2005-08-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Fixed possible memory corryption during compilation of <?php foreach($a as
+      $b); ?>
+
+    * (PHP_5_0)
+      zend_objects.c:
+      Fixed clone bug in ze1_compatibility mode
+
+    * zend_objects.c:
+      Fixed clone bug in ze1_compatibilty mode
+
 2005-08-03  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * LICENSE:

@@ -1,3 +1,59 @@
+2005-08-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * scripts/phpize.in:
+      test -e doesn't work on solaris
+
+2005-08-04  Antony Dovgal  <antony@zend.com>
+
+    * ZendEngine2/tests/foreach_undefined.phpt:
+      add test for the last Dmitry's fix
+
+2005-08-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Fixed possible memory corryption during compilation of <?php foreach($a as
+      $b); ?>
+
+2005-08-04  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      TSRM/threads.m4:
+      NetWare cross compile patch from 5.0 tree.
+      --Kamesh
+
+2005-08-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/bug33989.phpt
+      ext/standard/tests/array/bug33989.phpt
+      ext/standard/tests/array/bug33989.phpt:
+        1.1.4;
+      Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP)
+
+    * NEWS
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug33989.phpt
+      ext/standard/tests/array/bug33989.phpt:
+      Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP)
+
+2005-08-04  Masaki Fujimoto  <masaki-f@fides.dti.ne.jp>
+
+    * (PHP_4_4)
+      Zend/zend_multibyte.c:
+      - fix missing encodings
+
+2005-08-04  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_objects.c:
+      Fixed clone bug in ze1_compatibility mode
+
+    * ZendEngine2/zend_objects.c:
+      Fixed clone bug in ze1_compatibilty mode
+
 2005-08-03  Anantha Kesari H Y  <hyanantha@novell.com>
 
     * (PHP_4_4)
