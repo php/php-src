@@ -143,7 +143,7 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 
 #define TSRMLS_FETCH()			void ***tsrm_ls = (void ***) ts_resource_ex(0, NULL)
 #define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
-#define TSRMLS_SET_CTX(ctx)		(void ***) ctx = tsrm_ls
+#define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_ls
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_D	void ***tsrm_ls
 #define TSRMLS_DC	, TSRMLS_D
