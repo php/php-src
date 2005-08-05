@@ -314,7 +314,11 @@ static PHP_INI_DISP(display_defPW)
 		PUTS("********");
 #endif
 	} else {
-		PUTS("<i>no value</i>");
+		if (PG(html_errors)) {
+			PUTS("<i>no value</i>");
+		} else {
+			PUTS("no value");
+		}
 	}
 }
 /* }}} */
