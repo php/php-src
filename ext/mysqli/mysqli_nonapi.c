@@ -213,7 +213,7 @@ PHP_FUNCTION(mysqli_query)
 	MYSQL_RES 			*result;
 	char				*query = NULL;
 	unsigned int 		query_len;
-	unsigned int 		resultmode = 0;
+	unsigned long 		resultmode = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &mysql_link, mysqli_link_class_entry, &query, &query_len, &resultmode) == FAILURE) {
 		return;
