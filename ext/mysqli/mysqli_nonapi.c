@@ -238,6 +238,7 @@ PHP_FUNCTION(mysqli_query)
 	}
 
 	if (!mysql_field_count(mysql->mysql)) {
+		/* no result set - not a SELECT */
 		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
 			php_mysqli_report_index(query, mysql->mysql->server_status TSRMLS_CC);
 		}
