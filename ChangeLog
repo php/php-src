@@ -1,3 +1,72 @@
+2005-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/odbc/php_odbc.c:
+      No HTML output if html_errors is off (bug #34006)
+
+    * TSRM/TSRM.h:
+      Fix compile failure with GCC 4.0.x
+
+    * main/main.c:
+      - This ini option is only effective when set in php.ini or httpd.conf
+        or .htacces, etc. as GPC variables are set before any ini_set() is
+      called
+
+    * ext/mbstring/tests/php_gr_jp_16242.phpt:
+      - Fixed bug #34015
+
+    * (PHP_5_0)
+      ext/informix/Makefile.frag:
+      MFB_4_4
+
+    * (PHP_4_4)
+      ext/informix/Makefile.frag:
+      - Fixed bug #34008 (compile failure)
+
+2005-08-05  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/exif/exif.c
+      ext/exif/exif.c
+      ext/exif/exif.c:
+      NetWare specific stat structure issues.
+      --Kamesh
+
+2005-08-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/array_type_hint_001.phpt
+      ZendEngine2/tests/bug33996.phpt
+      tests/classes/type_hinting_001.phpt
+      tests/lang/type_hints_001.phpt:
+      Fixed bug #33996 (No information given for fatal error on passing invalid
+      value to typed argument)
+
+2005-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/math/bug25665.phpt:
+      Skip test on solaris
+
+2005-08-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_operators.c
+      ZendEngine2/tests/bug33999.phpt:
+      Fixed bug #33999 (object remains object when cast to int)
+
+2005-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - Changed -a to -A to prevent enabling PHP in httpd.conf automatically.
+
+2005-08-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed memory leak in foreach() on undefined variable
+      (Zend/tests/foreach_undefined.php)
+
 2005-08-04  Wez Furlong  <wez.php@thebrainroom.net>
 
     * scripts/phpize.in:

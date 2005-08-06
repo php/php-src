@@ -1,3 +1,21 @@
+2005-08-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c
+      tests/array_type_hint_001.phpt
+      tests/bug33996.phpt:
+      Fixed bug #33996 (No information given for fatal error on passing invalid
+      value to typed argument)
+
+    * zend_operators.c
+      tests/bug33999.phpt:
+      Fixed bug #33999 (object remains object when cast to int)
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Fixed memory leak in foreach() on undefined variable
+      (Zend/tests/foreach_undefined.php)
+
 2005-08-04  Antony Dovgal  <antony@zend.com>
 
     * tests/foreach_undefined.phpt:
