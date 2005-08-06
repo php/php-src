@@ -62,6 +62,7 @@ function_entry sybase_functions[] = {
 	PHP_FE(sybase_set_message_handler, NULL)
 	PHP_FE(sybase_deadlock_retry_count, NULL)
 
+#if !defined(PHP_WIN32) && !defined(HAVE_MSSQL)
 	PHP_FALIAS(mssql_connect, sybase_connect, NULL)
 	PHP_FALIAS(mssql_pconnect, sybase_pconnect, NULL)
 	PHP_FALIAS(mssql_close, sybase_close, NULL)
@@ -85,6 +86,7 @@ function_entry sybase_functions[] = {
 	PHP_FALIAS(mssql_min_server_severity, sybase_min_server_severity, NULL)
 	PHP_FALIAS(mssql_set_message_handler, sybase_set_message_handler, NULL)
 	PHP_FALIAS(mssql_deadlock_retry_count, sybase_deadlock_retry_count, NULL)
+#endif
 
 	{NULL, NULL, NULL}
 };
