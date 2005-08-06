@@ -5,7 +5,7 @@ $xw = xmlwriter_open_uri('./a.xml');
 xmlwriter_set_indent($xw, 1);
 $res = xmlwriter_set_indent_string($xw, ' ');
 
-xmlwriter_start_document($xw, '1.0', 'utf8');
+xmlwriter_start_document($xw, '1.0', 'UTF-8');
 
 // A first element
 xmlwriter_start_element($xw, 'tag1');
