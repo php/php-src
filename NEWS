@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1
+- Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
+  (Andrey)
 - Fixed bug #33999 (object remains object when cast to int). (Dmitry)
 - Fixed bug #33996 (No information given for fatal error on passing invalid
   value to typed argument). (Dmitry)
