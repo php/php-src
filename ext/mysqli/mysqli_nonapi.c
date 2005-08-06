@@ -213,11 +213,21 @@ PHP_FUNCTION(mysqli_query)
 	MYSQL_RES 			*result;
 	char				*query = NULL;
 	unsigned int 		query_len;
-	unsigned long 		resultmode = 0;
+	unsigned long 		resultmode = MYSQLI_STORE_RESULT;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &mysql_link, mysqli_link_class_entry, &query, &query_len, &resultmode) == FAILURE) {
 		return;
 	}
+
+	if (!query_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty query");
+		RETURN_FALSE;
+	}
+	if (resultmode != MYSQLI_USE_RESULT && resultmode != MYSQLI_STORE_RESULT) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for resultmode");
+		RETURN_FALSE;
+	}
+
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL*, &mysql_link, "mysqli_link");
 
 	MYSQLI_DISABLE_MQ;
