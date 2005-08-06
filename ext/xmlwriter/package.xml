@@ -24,6 +24,17 @@
    <role>developer</role>
   </maintainer>
  <release>
+  <version>2.0.0</version>
+  <date>2005-08-07</date>
+  <state>stable</state>
+  <notes>
+   fix tests using UTF-8
+   move to stable state
+  </notes>
+ </release>
+
+ <changelog>
+ <release>
   <version>1.1.0</version>
   <date>2005-05-24</date>
   <state>beta</state>
@@ -32,8 +43,6 @@
    Add test cases
   </notes>
  </release>
-
- <changelog>
  <release>
   <version>1.0</version>
   <date>2005-05-02</date>
