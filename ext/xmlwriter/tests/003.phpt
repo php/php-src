@@ -8,7 +8,7 @@ XMLWriter: libxml2 XML Writer, membuffer, flush, attribute
 
 $doc_dest = '001.xml';
 $xw = xmlwriter_open_memory($doc_dest);
-xmlwriter_start_document($xw, '1.0', 'utf8');
+xmlwriter_start_document($xw, '1.0', 'UTF-8');
 xmlwriter_start_element($xw, "tag1");
 
 
@@ -30,6 +30,6 @@ echo xmlwriter_flush($xw, true);
 ?>
 ===DONE===
 --EXPECT--
-<?xml version="1.0" encoding="utf8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <tag1 attr1="attr1_value" att2="att2_value">Test text for tag1<tag2/></tag1>
 ===DONE===
