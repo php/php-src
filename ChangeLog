@@ -1,3 +1,59 @@
+2005-08-06  Edin Kadribasic  <edink@emini.dk>
+
+    * NEWS:
+      Mention new library bundle on windows
+
+2005-08-06  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      BFN
+
+2005-08-06  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/gd/config.w32:
+      Only link zlib if we dont compile it in (#3406)
+
+    * ext/zlib/php_zlib.def:
+      Add missing export
+
+2005-08-06  Andrey Hristov  <php@hristov.com>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/mysqli/mysqli_nonapi.c:
+      add a comment
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_nonapi.c:
+      - fix int-long issue on 64bit (MFH)
+      - add data checking (MFH)
+      - add a comment
+
+    * ext/mysqli/mysqli_nonapi.c:
+      add error checking
+
+    * ext/mysqli/mysqli_nonapi.c:
+      fix problem on 64 bit - when asking for "l" supply long not int because
+      on 64 bit they differ and zend_parse_parameters makes a *(long*) cast
+      which means that if the variable is int 4 bytes of the variable(s)
+      declared before it (on the stack) will be overwritten. In this case
+      this is the length of the query -> made 0 and mysqli_query() returns
+      FALSE.
+
+2005-08-06  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      Fix for #32531
+      No need to alias these functions on windows or if the mssql extension is
+      compiled. This change will allow the use of both extensions at the same
+      time.
+
+    * ext/ming/ming.c:
+      Cleanup to match the current cvs version of ming0.3beta
+
 2005-08-05  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/odbc/php_odbc.c:
