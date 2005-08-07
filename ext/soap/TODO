@@ -35,7 +35,6 @@ Encoding
   ? gDay,
   ? gMonth)
 ? proper encoding of standard hexBinary type
-? proper encoding of standard base64Binary type
 ? full support for arrays
   - SOAP 1.1 encoding of arrays with holes (partially transmitted and sparse arrays)
 	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
