@@ -4,7 +4,7 @@ Bug #16069
 <?php
 /* include( 'skipif.inc' ); */
 if (@iconv('CP932', 'EUC-JP//TRANSLIT', "\x87\x6d")=='') {
-	die("skip  CP932 translit not available\n");
+	die("skip  CP932 to EUC-JP translit not available\n");
 }
 ?>
 --INI--
