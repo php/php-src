@@ -78,13 +78,13 @@ foreach ($xmls as $desc => $xml) {
 	xml_parser_free($xml_parser);
 }
 ?>
---EXPECT--
+--EXPECTF--
 CDATA
-<DATA> at line 2, col 6 (byte 9)
-</DATA> at line 9, col 7 (byte 56)
+<DATA> at line 2, col %d (byte 9)
+</DATA> at line 9, col %d (byte 56)
 Comment
-<DATA> at line 2, col 6 (byte 9)
-</DATA> at line 9, col 7 (byte 56)
+<DATA> at line 2, col %d (byte 9)
+</DATA> at line 9, col %d (byte 56)
 Text
-<DATA> at line 2, col 6 (byte 9)
-</DATA> at line 9, col 10 (byte 56)
+<DATA> at line 2, col %d (byte 9)
+</DATA> at line 9, col %d (byte 56)
