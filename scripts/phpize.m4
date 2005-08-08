@@ -18,6 +18,7 @@ AC_DEFUN([PHP_WITH_PHP_CONFIG],[
   prefix=`$PHP_CONFIG --prefix 2>/dev/null`
   INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
   EXTENSION_DIR=`$PHP_CONFIG --extension-dir`
+  PHP_EXECUTABLE=`$PHP_CONFIG --php-binary`
  
   if test -z "$prefix"; then
     AC_MSG_ERROR(Cannot find php-config. Please use --with-php-config=PATH)
@@ -99,6 +100,7 @@ PHP_SUBST(CPPFLAGS)
 PHP_SUBST(CXX)
 PHP_SUBST(CXXFLAGS)
 PHP_SUBST(EXTENSION_DIR)
+PHP_SUBST(PHP_EXECUTABLE)
 PHP_SUBST(EXTRA_LDFLAGS)
 PHP_SUBST(EXTRA_LIBS)
 PHP_SUBST(INCLUDES)
