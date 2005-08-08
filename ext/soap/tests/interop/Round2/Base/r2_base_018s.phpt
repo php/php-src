@@ -5,7 +5,7 @@ SOAP Interop Round2 base 018 (soap/direct): echoHexBinary
 --FILE--
 <?php
 $client = new SoapClient(NULL,array("location"=>"test://","uri"=>"http://soapinterop.org/","trace"=>1,"exceptions"=>0));
-$client->__soapCall("echoHexBinary", array(new SoapParam(new SoapVar('736F61707834',XSD_HEXBINARY),"inputHexBinary")), array("soapaction"=>"http://soapinterop.org/","uri"=>"http://soapinterop.org/"));
+$client->__soapCall("echoHexBinary", array(new SoapParam(new SoapVar('soapx4',XSD_HEXBINARY),"inputHexBinary")), array("soapaction"=>"http://soapinterop.org/","uri"=>"http://soapinterop.org/"));
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();
 include("round2_base.inc");
