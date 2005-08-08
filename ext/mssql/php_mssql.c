@@ -1859,6 +1859,7 @@ PHP_FUNCTION(mssql_next_result)
 
 		result->num_fields = dbnumcols(mssql_ptr->link);
 		result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), result->num_fields, 0);
+		result->have_fields = 0;
 		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 		RETURN_TRUE;
 	}
