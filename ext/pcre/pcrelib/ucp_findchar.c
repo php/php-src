@@ -2,12 +2,13 @@
 *     libucp - Unicode Property Table handler    *
 *************************************************/
 
-/* This function provides a fast way of obtaining the basic Unicode properties
-of a character, using a compact binary tree that occupies less than 100K bytes.
+/* Copyright (c) University of Cambridge 2004 */
 
-           Copyright (c) 2004 University of Cambridge
+/* This little library provides a fast way of obtaining the basic Unicode
+properties of a character, using a compact binary tree that occupies less than
+100K bytes.
 
--------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
@@ -33,13 +34,21 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
--------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 */
 
 
 #include "ucp.h"               /* Exported interface */
 #include "ucpinternal.h"       /* Internal table details */
 #include "ucptable.c"          /* The table itself */
+
+
+/* In some environments, external functions have to be preceded by some magic.
+In my world (Unix), they do not. Use a macro to deal with this. */
+
+#ifndef EXPORT
+#define EXPORT
+#endif
 
 
 
@@ -59,7 +68,7 @@ Arguments:
 Returns:      the character type category or -1 if not found
 */
 
-static int
+EXPORT int
 ucp_findchar(const int c, int *type_ptr, int *case_ptr)
 {
 cnode *node = ucp_table;
@@ -148,4 +157,4 @@ switch ((*type_ptr = ((node->f0 & f0_typemask) >> f0_typeshift)))
   }
 }
 
-/* End of ucp.c */
+/* End of ucp_findchar.c */

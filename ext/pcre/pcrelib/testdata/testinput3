@@ -2,7 +2,7 @@
     *** Failers
     École
 
-/^[\w]+/Lfr
+/^[\w]+/Lfr_FR
     École
 
 /^[\w]+/
@@ -12,7 +12,7 @@
 /^[\W]+/
     École
 
-/^[\W]+/Lfr
+/^[\W]+/Lfr_FR
     *** Failers
     École
 
@@ -21,7 +21,7 @@
     *** Failers
     a
 
-/[\b]/Lfr
+/[\b]/Lfr_FR
     \b
     *** Failers
     a
@@ -30,13 +30,13 @@
     *** Failers
     École
 
-/^\w+/Lfr
+/^\w+/Lfr_FR
     École
 
 /(.+)\b(.+)/
     École
 
-/(.+)\b(.+)/Lfr
+/(.+)\b(.+)/Lfr_FR
     *** Failers
     École
 
@@ -45,19 +45,19 @@
     *** Failers
     école
 
-/École/iLfr
+/École/iLfr_FR
     École
     école
 
 /\w/IS
 
-/\w/ISLfr
+/\w/ISLfr_FR
 
-/^[\xc8-\xc9]/iLfr
+/^[\xc8-\xc9]/iLfr_FR
     École
     école
 
-/^[\xc8-\xc9]/Lfr
+/^[\xc8-\xc9]/Lfr_FR
     École
     *** Failers 
     école

@@ -32,18 +32,42 @@ terminology.
 OK, here's the real stuff
 -------------------------
 
-For the set of functions that forms PCRE (which are unrelated to those
-mentioned above), I tried at first to invent an algorithm that used an amount
-of store bounded by a multiple of the number of characters in the pattern, to
-save on compiling time. However, because of the greater complexity in Perl
-regular expressions, I couldn't do this. In any case, a first pass through the
-pattern is needed, for a number of reasons. PCRE works by running a very
-degenerate first pass to calculate a maximum store size, and then a second pass
-to do the real compile - which may use a bit less than the predicted amount of
-store. The idea is that this is going to turn out faster because the first pass
-is degenerate and the second pass can just store stuff straight into the
-vector. It does make the compiling functions bigger, of course, but they have
-got quite big anyway to handle all the Perl stuff.
+For the set of functions that form the "basic" PCRE library (which are
+unrelated to those mentioned above), I tried at first to invent an algorithm
+that used an amount of store bounded by a multiple of the number of characters
+in the pattern, to save on compiling time. However, because of the greater
+complexity in Perl regular expressions, I couldn't do this. In any case, a
+first pass through the pattern is needed, for a number of reasons. PCRE works
+by running a very degenerate first pass to calculate a maximum store size, and
+then a second pass to do the real compile - which may use a bit less than the
+predicted amount of store. The idea is that this is going to turn out faster
+because the first pass is degenerate and the second pass can just store stuff
+straight into the vector, which it knows is big enough. It does make the
+compiling functions bigger, of course, but they have got quite big anyway to
+handle all the Perl stuff.
+
+Traditional matching function
+-----------------------------
+
+The "traditional", and original, matching function is called pcre_exec(), and 
+it implements an NFA algorithm, similar to the original Henry Spencer algorithm 
+and the way that Perl works. Not surprising, since it is intended to be as 
+compatible with Perl as possible. This is the function most users of PCRE will 
+use most of the time.
+
+Supplementary matching function
+-------------------------------
+
+From PCRE 6.0, there is also a supplementary matching function called 
+pcre_dfa_exec(). This implements a DFA matching algorithm that searches 
+simultaneously for all possible matches that start at one point in the subject 
+string. (Going back to my roots: see Historical Note 1 above.) This function 
+intreprets the same compiled pattern data as pcre_exec(); however, not all the 
+facilities are available, and those that are don't always work in quite the 
+same way. See the user documentation for details.
+
+Format of compiled patterns
+---------------------------
 
 The compiled form of a pattern is a vector of bytes, containing items of
 variable length. The first byte in an item is an opcode, and the length of the
@@ -223,14 +247,14 @@ number. This opcode is ignored while matching, but is fished out when handling
 the bracket itself. (They could have all been done like this, but I was making
 minimal changes.)
 
-A bracket opcode is followed by two bytes which give the offset to the next
-alternative OP_ALT or, if there aren't any branches, to the matching OP_KET
-opcode. Each OP_ALT is followed by two bytes giving the offset to the next one,
-or to the OP_KET opcode.
+A bracket opcode is followed by LINK_SIZE bytes which give the offset to the
+next alternative OP_ALT or, if there aren't any branches, to the matching
+OP_KET opcode. Each OP_ALT is followed by LINK_SIZE bytes giving the offset to
+the next one, or to the OP_KET opcode.
 
 OP_KET is used for subpatterns that do not repeat indefinitely, while
 OP_KETRMIN and OP_KETRMAX are used for indefinite repetitions, minimally or
-maximally respectively. All three are followed by two bytes giving (as a
+maximally respectively. All three are followed by LINK_SIZE bytes giving (as a
 positive number) the offset back to the matching OP_BRA opcode.
 
 If a subpattern is quantified such that it is permitted to match zero times, it
@@ -312,4 +336,4 @@ at compile time, and so does not cause anything to be put into the compiled
 data.
 
 Philip Hazel
-September 2004
+March 2005

@@ -2,14 +2,11 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/*
-This is a library of functions to support regular expressions whose syntax
-and semantics are as close as possible to those of the Perl 5 language. See
-the file Tech.Notes for some information on the internals.
+/* PCRE is a library of functions to support regular expressions whose syntax
+and semantics are as close as possible to those of the Perl 5 language.
 
-Written by: Philip Hazel <ph10@cam.ac.uk>
-
-           Copyright (c) 1997-2004 University of Cambridge
+                       Written by Philip Hazel
+           Copyright (c) 1997-2005 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -40,54 +37,76 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-/* This module contains a table for translating Unicode property names into
-code values for the ucp_findchar function. It is in a separate module so that
-it can be included both in the main pcre library, and into pcretest (for
-printing out internals). */
 
-typedef struct {
-  const char *name;
-  int value;
-} ucp_type_table;
+/* This module contains the external function pcre_config(). */
 
-static ucp_type_table utt[] = {
-  { "C",  128 + ucp_C },
-  { "Cc", ucp_Cc },
-  { "Cf", ucp_Cf },
-  { "Cn", ucp_Cn },
-  { "Co", ucp_Co },
-  { "Cs", ucp_Cs },
-  { "L",  128 + ucp_L },
-  { "Ll", ucp_Ll },
-  { "Lm", ucp_Lm },
-  { "Lo", ucp_Lo },
-  { "Lt", ucp_Lt },
-  { "Lu", ucp_Lu },
-  { "M",  128 + ucp_M },
-  { "Mc", ucp_Mc },
-  { "Me", ucp_Me },
-  { "Mn", ucp_Mn },
-  { "N",  128 + ucp_N },
-  { "Nd", ucp_Nd },
-  { "Nl", ucp_Nl },
-  { "No", ucp_No },
-  { "P",  128 + ucp_P },
-  { "Pc", ucp_Pc },
-  { "Pd", ucp_Pd },
-  { "Pe", ucp_Pe },
-  { "Pf", ucp_Pf },
-  { "Pi", ucp_Pi },
-  { "Po", ucp_Po },
-  { "Ps", ucp_Ps },
-  { "S",  128 + ucp_S },
-  { "Sc", ucp_Sc },
-  { "Sk", ucp_Sk },
-  { "Sm", ucp_Sm },
-  { "So", ucp_So },
-  { "Z",  128 + ucp_Z },
-  { "Zl", ucp_Zl },
-  { "Zp", ucp_Zp },
-  { "Zs", ucp_Zs }
-};
 
-/* End of ucptypetable.c */
+#include "pcre_internal.h"
+
+
+/*************************************************
+* Return info about what features are configured *
+*************************************************/
+
+/* This function has an extensible interface so that additional items can be
+added compatibly.
+
+Arguments:
+  what             what information is required
+  where            where to put the information
+
+Returns:           0 if data returned, negative on error
+*/
+
+EXPORT int
+pcre_config(int what, void *where)
+{
+switch (what)
+  {
+  case PCRE_CONFIG_UTF8:
+#ifdef SUPPORT_UTF8
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
+  break;
+
+  case PCRE_CONFIG_UNICODE_PROPERTIES:
+#ifdef SUPPORT_UCP
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
+  break;
+
+  case PCRE_CONFIG_NEWLINE:
+  *((int *)where) = NEWLINE;
+  break;
+
+  case PCRE_CONFIG_LINK_SIZE:
+  *((int *)where) = LINK_SIZE;
+  break;
+
+  case PCRE_CONFIG_POSIX_MALLOC_THRESHOLD:
+  *((int *)where) = POSIX_MALLOC_THRESHOLD;
+  break;
+
+  case PCRE_CONFIG_MATCH_LIMIT:
+  *((unsigned int *)where) = MATCH_LIMIT;
+  break;
+
+  case PCRE_CONFIG_STACKRECURSE:
+#ifdef NO_RECURSE
+  *((int *)where) = 0;
+#else
+  *((int *)where) = 1;
+#endif
+  break;
+
+  default: return PCRE_ERROR_BADOPTION;
+  }
+
+return 0;
+}
+
+/* End of pcre_config.c */

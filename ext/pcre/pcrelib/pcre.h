@@ -5,7 +5,7 @@
 /* In its original form, this is the .in file that is transformed by
 "configure" into pcre.h.
 
-           Copyright (c) 1997-2004 University of Cambridge
+           Copyright (c) 1997-2005 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -44,11 +44,11 @@ make changes to pcre.in. */
 
 #include "php_compat.h"
 
-#define PCRE_MAJOR          5
-#define PCRE_MINOR          0
-#define PCRE_DATE           13-Sep-2004
+#define PCRE_MAJOR          6
+#define PCRE_MINOR          2
+#define PCRE_DATE           01-Aug-2005
 
-/* Win32 uses DLL by default */
+/* Win32 uses DLL by default; it needs special stuff for exported functions. */
 
 #ifdef _WIN32
 #  ifdef PCRE_DEFINITION
@@ -61,8 +61,15 @@ make changes to pcre.in. */
 #    endif
 #  endif
 #endif
+
+/* For other operating systems, we use the standard "extern". */
+
 #ifndef PCRE_DATA_SCOPE
-#  define PCRE_DATA_SCOPE     extern
+#  ifdef __cplusplus
+#    define PCRE_DATA_SCOPE     extern "C"
+#  else
+#    define PCRE_DATA_SCOPE     extern
+#  endif
 #endif
 
 /* Have to include stdlib.h in order to ensure that size_t is defined;
@@ -78,22 +85,25 @@ extern "C" {
 
 /* Options */
 
-#define PCRE_CASELESS           0x0001
-#define PCRE_MULTILINE          0x0002
-#define PCRE_DOTALL             0x0004
-#define PCRE_EXTENDED           0x0008
-#define PCRE_ANCHORED           0x0010
-#define PCRE_DOLLAR_ENDONLY     0x0020
-#define PCRE_EXTRA              0x0040
-#define PCRE_NOTBOL             0x0080
-#define PCRE_NOTEOL             0x0100
-#define PCRE_UNGREEDY           0x0200
-#define PCRE_NOTEMPTY           0x0400
-#define PCRE_UTF8               0x0800
-#define PCRE_NO_AUTO_CAPTURE    0x1000
-#define PCRE_NO_UTF8_CHECK      0x2000
-#define PCRE_AUTO_CALLOUT       0x4000
-#define PCRE_PARTIAL            0x8000
+#define PCRE_CASELESS           0x00000001
+#define PCRE_MULTILINE          0x00000002
+#define PCRE_DOTALL             0x00000004
+#define PCRE_EXTENDED           0x00000008
+#define PCRE_ANCHORED           0x00000010
+#define PCRE_DOLLAR_ENDONLY     0x00000020
+#define PCRE_EXTRA              0x00000040
+#define PCRE_NOTBOL             0x00000080
+#define PCRE_NOTEOL             0x00000100
+#define PCRE_UNGREEDY           0x00000200
+#define PCRE_NOTEMPTY           0x00000400
+#define PCRE_UTF8               0x00000800
+#define PCRE_NO_AUTO_CAPTURE    0x00001000
+#define PCRE_NO_UTF8_CHECK      0x00002000
+#define PCRE_AUTO_CALLOUT       0x00004000
+#define PCRE_PARTIAL            0x00008000
+#define PCRE_DFA_SHORTEST       0x00010000
+#define PCRE_DFA_RESTART        0x00020000
+#define PCRE_FIRSTLINE          0x00040000
 
 /* Exec-time and get/set-time error codes */
 
@@ -112,6 +122,11 @@ extern "C" {
 #define PCRE_ERROR_BADPARTIAL     (-13)
 #define PCRE_ERROR_INTERNAL       (-14)
 #define PCRE_ERROR_BADCOUNT       (-15)
+#define PCRE_ERROR_DFA_UITEM      (-16)
+#define PCRE_ERROR_DFA_UCOND      (-17)
+#define PCRE_ERROR_DFA_UMLIMIT    (-18)
+#define PCRE_ERROR_DFA_WSSIZE     (-19)
+#define PCRE_ERROR_DFA_RECURSE    (-20)
 
 /* Request types for pcre_fullinfo() */
 
@@ -189,9 +204,8 @@ typedef struct pcre_callout_block {
 /* Indirection for store get and free functions. These can be set to
 alternative malloc/free functions if required. Special ones are used in the
 non-recursive case for "frames". There is also an optional callout function
-that is triggered by the (?) regex item. Some magic is required for Win32 DLL;
-it is null on other OS. For Virtual Pascal, these have to be different again.
-*/
+that is triggered by the (?) regex item. For Virtual Pascal, these definitions
+have to take another form. */
 
 #ifndef VPCOMPAT
 PCRE_DATA_SCOPE void *(*pcre_malloc)(size_t);
@@ -200,39 +214,44 @@ PCRE_DATA_SCOPE void *(*pcre_stack_malloc)(size_t);
 PCRE_DATA_SCOPE void  (*pcre_stack_free)(void *);
 PCRE_DATA_SCOPE int   (*pcre_callout)(pcre_callout_block *);
 #else   /* VPCOMPAT */
-extern void *pcre_malloc(size_t);
-extern void  pcre_free(void *);
-extern void *pcre_stack_malloc(size_t);
-extern void  pcre_stack_free(void *);
-extern int   pcre_callout(pcre_callout_block *);
+PCRE_DATA_SCOPE void *pcre_malloc(size_t);
+PCRE_DATA_SCOPE void  pcre_free(void *);
+PCRE_DATA_SCOPE void *pcre_stack_malloc(size_t);
+PCRE_DATA_SCOPE void  pcre_stack_free(void *);
+PCRE_DATA_SCOPE int   pcre_callout(pcre_callout_block *);
 #endif  /* VPCOMPAT */
 
 /* Exported PCRE functions */
 
-extern pcre *pcre_compile(const char *, int, const char **,
-              int *, const unsigned char *);
-extern int  pcre_config(int, void *);
-extern int  pcre_copy_named_substring(const pcre *, const char *,
-              int *, int, const char *, char *, int);
-extern int  pcre_copy_substring(const char *, int *, int, int,
-              char *, int);
-extern int  pcre_exec(const pcre *, const pcre_extra *,
-              const char *, int, int, int, int *, int);
-extern void pcre_free_substring(const char *);
-extern void pcre_free_substring_list(const char **);
-extern int  pcre_fullinfo(const pcre *, const pcre_extra *, int,
-              void *);
-extern int  pcre_get_named_substring(const pcre *, const char *,
-              int *, int,  const char *, const char **);
-extern int  pcre_get_stringnumber(const pcre *, const char *);
-extern int  pcre_get_substring(const char *, int *, int, int,
-              const char **);
-extern int  pcre_get_substring_list(const char *, int *, int,
-              const char ***);
-extern int  pcre_info(const pcre *, int *, int *);
-extern const unsigned char *pcre_maketables(void);
-extern pcre_extra *pcre_study(const pcre *, int, const char **);
-extern const char *pcre_version(void);
+PCRE_DATA_SCOPE pcre *pcre_compile(const char *, int, const char **, int *,
+                  const unsigned char *);
+PCRE_DATA_SCOPE pcre *pcre_compile2(const char *, int, int *, const char **,
+                  int *, const unsigned char *);
+PCRE_DATA_SCOPE int  pcre_config(int, void *);
+PCRE_DATA_SCOPE int  pcre_copy_named_substring(const pcre *, const char *,
+                  int *, int, const char *, char *, int);
+PCRE_DATA_SCOPE int  pcre_copy_substring(const char *, int *, int, int, char *,
+                  int);
+PCRE_DATA_SCOPE int  pcre_dfa_exec(const pcre *, const pcre_extra *,
+                  const char *, int, int, int, int *, int , int *, int);
+PCRE_DATA_SCOPE int  pcre_exec(const pcre *, const pcre_extra *, const char *,
+                   int, int, int, int *, int);
+PCRE_DATA_SCOPE void pcre_free_substring(const char *);
+PCRE_DATA_SCOPE void pcre_free_substring_list(const char **);
+PCRE_DATA_SCOPE int  pcre_fullinfo(const pcre *, const pcre_extra *, int,
+                  void *);
+PCRE_DATA_SCOPE int  pcre_get_named_substring(const pcre *, const char *,
+                  int *, int, const char *, const char **);
+PCRE_DATA_SCOPE int  pcre_get_stringnumber(const pcre *, const char *);
+PCRE_DATA_SCOPE int  pcre_get_substring(const char *, int *, int, int,
+                  const char **);
+PCRE_DATA_SCOPE int  pcre_get_substring_list(const char *, int *, int,
+                  const char ***);
+PCRE_DATA_SCOPE int  pcre_info(const pcre *, int *, int *);
+PCRE_DATA_SCOPE const unsigned char *pcre_maketables(void);
+PCRE_DATA_SCOPE int  pcre_refcount(pcre *, int);
+PCRE_DATA_SCOPE pcre_extra *pcre_study(const pcre *, int, const char **);
+PCRE_DATA_SCOPE const char *pcre_version(void);
 
 #ifdef __cplusplus
 }  /* extern "C" */

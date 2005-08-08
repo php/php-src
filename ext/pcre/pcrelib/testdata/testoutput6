@@ -1,319 +1,1013 @@
-PCRE version 3.9 02-Jan-2002
+PCRE version 6.2 01-Aug-2005
 
-/\x{100}/8DM
-Memory allocation (code space): 11
-------------------------------------------------------------------
-  0   7 Bra 0
-  3   2 \xc4\x80
-  7   7 Ket
- 10     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 196
-Need char = 128
+/^\pC\pL\pM\pN\pP\pS\pZ</8
+    \x7f\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
+ 0: \x{7f}\x{c0}\x{30f}\x{660}\x{66c}\x{f01}\x{1680}<
+    \np\x{300}9!\$ < 
+ 0: \x{0a}p\x{300}9!$ <
+    ** Failers 
+No match
+    ap\x{300}9!\$ < 
+No match
+  
+/^\PC/8
+    X
+ 0: X
+    ** Failers 
+ 0: *
+    \x7f
+No match
+  
+/^\PL/8
+    9
+ 0: 9
+    ** Failers 
+ 0: *
+    \x{c0}
+No match
+  
+/^\PM/8
+    X
+ 0: X
+    ** Failers 
+ 0: *
+    \x{30f}
+No match
+  
+/^\PN/8
+    X
+ 0: X
+    ** Failers 
+ 0: *
+    \x{660}
+No match
+  
+/^\PP/8
+    X
+ 0: X
+    ** Failers 
+No match
+    \x{66c}
+No match
+  
+/^\PS/8
+    X
+ 0: X
+    ** Failers 
+ 0: *
+    \x{f01}
+No match
+  
+/^\PZ/8
+    X
+ 0: X
+    ** Failers 
+ 0: *
+    \x{1680}
+No match
+    
+/^\p{Cc}/8
+    \x{017}
+ 0: \x{17}
+    \x{09f} 
+ 0: \x{9f}
+    ** Failers
+No match
+    \x{0600} 
+No match
+  
+/^\p{Cf}/8
+    \x{601}
+ 0: \x{601}
+    ** Failers
+No match
+    \x{09f} 
+No match
+  
+/^\p{Cn}/8
+    ** Failers
+No match
+    \x{09f} 
+No match
+  
+/^\p{Co}/8
+    \x{f8ff}
+ 0: \x{f8ff}
+    ** Failers
+No match
+    \x{09f} 
+No match
+  
+/^\p{Cs}/8
+    \x{dfff}
+ 0: \x{dfff}
+    ** Failers
+No match
+    \x{09f} 
+No match
+  
+/^\p{Ll}/8
+    a
+ 0: a
+    ** Failers 
+No match
+    Z
+No match
+    \x{dfff}  
+No match
+  
+/^\p{Lm}/8
+    \x{2b0}
+ 0: \x{2b0}
+    ** Failers
+No match
+    a 
+No match
+  
+/^\p{Lo}/8
+    \x{1bb}
+ 0: \x{1bb}
+    ** Failers
+No match
+    a 
+No match
+    \x{2b0}
+No match
+  
+/^\p{Lt}/8
+    \x{1c5}
+ 0: \x{1c5}
+    ** Failers
+No match
+    a 
+No match
+    \x{2b0}
+No match
+  
+/^\p{Lu}/8
+    A
+ 0: A
+    ** Failers
+No match
+    \x{2b0}
+No match
+  
+/^\p{Mc}/8
+    \x{903}
+ 0: \x{903}
+    ** Failers
+No match
+    X
+No match
+    \x{300}
+No match
+       
+/^\p{Me}/8
+    \x{488}
+ 0: \x{488}
+    ** Failers
+No match
+    X
+No match
+    \x{903}
+No match
+    \x{300}
+No match
+  
+/^\p{Mn}/8
+    \x{300}
+ 0: \x{300}
+    ** Failers
+No match
+    X
+No match
+    \x{903}
+No match
+  
+/^\p{Nd}+/8
+    0123456789\x{660}\x{661}\x{662}\x{663}\x{664}\x{665}\x{666}\x{667}\x{668}\x{669}\x{66a}
+ 0: 0123456789\x{660}\x{661}\x{662}\x{663}\x{664}\x{665}\x{666}\x{667}\x{668}\x{669}
+    \x{6f0}\x{6f1}\x{6f2}\x{6f3}\x{6f4}\x{6f5}\x{6f6}\x{6f7}\x{6f8}\x{6f9}\x{6fa}
+ 0: \x{6f0}\x{6f1}\x{6f2}\x{6f3}\x{6f4}\x{6f5}\x{6f6}\x{6f7}\x{6f8}\x{6f9}
+    \x{966}\x{967}\x{968}\x{969}\x{96a}\x{96b}\x{96c}\x{96d}\x{96e}\x{96f}\x{970}
+ 0: \x{966}\x{967}\x{968}\x{969}\x{96a}\x{96b}\x{96c}\x{96d}\x{96e}\x{96f}
+    ** Failers
+No match
+    X
+No match
+  
+/^\p{Nl}/8
+    \x{16ee}
+ 0: \x{16ee}
+    ** Failers
+No match
+    X
+No match
+    \x{966}
+No match
+  
+/^\p{No}/8
+    \x{b2}
+ 0: \x{b2}
+    \x{b3}
+ 0: \x{b3}
+    ** Failers
+No match
+    X
+No match
+    \x{16ee}
+No match
+  
+/^\p{Pc}/8
+    \x5f
+ 0: _
+    \x{203f}
+ 0: \x{203f}
+    ** Failers
+No match
+    X
+No match
+    -
+No match
+    \x{58a}
+No match
+  
+/^\p{Pd}/8
+    -
+ 0: -
+    \x{58a}
+ 0: \x{58a}
+    ** Failers
+No match
+    X
+No match
+    \x{203f}
+No match
+  
+/^\p{Pe}/8
+    )
+ 0: )
+    ]
+ 0: ]
+    }
+ 0: }
+    \x{f3b}
+ 0: \x{f3b}
+    ** Failers
+No match
+    X
+No match
+    \x{203f}
+No match
+    (
+No match
+    [
+No match
+    {
+No match
+    \x{f3c}
+No match
+  
+/^\p{Pf}/8
+    \x{bb}
+ 0: \x{bb}
+    \x{2019}
+ 0: \x{2019}
+    ** Failers
+No match
+    X
+No match
+    \x{203f}
+No match
+  
+/^\p{Pi}/8
+    \x{ab}
+ 0: \x{ab}
+    \x{2018}
+ 0: \x{2018}
+    ** Failers
+No match
+    X
+No match
+    \x{203f}
+No match
+  
+/^\p{Po}/8
+    !
+ 0: !
+    \x{37e}
+ 0: \x{37e}
+    ** Failers
+ 0: *
+    X
+No match
+    \x{203f}
+No match
+  
+/^\p{Ps}/8
+    (
+ 0: (
+    [
+ 0: [
+    {
+ 0: {
+    \x{f3c}
+ 0: \x{f3c}
+    ** Failers
+No match
+    X
+No match
+    )
+No match
+    ]
+No match
+    }
+No match
+    \x{f3b}
+No match
+  
+/^\p{Sc}+/8
+    $\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}
+ 0: $\x{a2}\x{a3}\x{a4}\x{a5}
+    \x{9f2}
+ 0: \x{9f2}
+    ** Failers
+No match
+    X
+No match
+    \x{2c2}
+No match
+  
+/^\p{Sk}/8
+    \x{2c2}
+ 0: \x{2c2}
+    ** Failers
+No match
+    X
+No match
+    \x{9f2}
+No match
+  
+/^\p{Sm}+/8
+    +<|~\x{ac}\x{2044}
+ 0: +<|~\x{ac}\x{2044}
+    ** Failers
+No match
+    X
+No match
+    \x{9f2}
+No match
+  
+/^\p{So}/8
+    \x{a6}
+ 0: \x{a6}
+    \x{482} 
+ 0: \x{482}
+    ** Failers
+No match
+    X
+No match
+    \x{9f2}
+No match
+  
+/^\p{Zl}/8
+    \x{2028}
+ 0: \x{2028}
+    ** Failers
+No match
+    X
+No match
+    \x{2029}
+No match
+  
+/^\p{Zp}/8
+    \x{2029}
+ 0: \x{2029}
+    ** Failers
+No match
+    X
+No match
+    \x{2028}
+No match
+  
+/^\p{Zs}/8
+    \ \
+ 0:  
+    \x{a0}
+ 0: \x{a0}
+    \x{1680}
+ 0: \x{1680}
+    \x{180e}
+ 0: \x{180e}
+    \x{2000}
+ 0: \x{2000}
+    \x{2001}     
+ 0: \x{2001}
+    ** Failers
+No match
+    \x{2028}
+No match
+    \x{200d} 
+No match
+  
+/\p{Nd}+(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}AB
+ 1: AB
+  
+/\p{Nd}+?(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}
+ 1: \x{661}\x{662}
+  
+/\p{Nd}{2,}(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}AB
+ 1: AB
+  
+/\p{Nd}{2,}?(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}A
+ 1: \x{662}A
+  
+/\p{Nd}*(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}AB
+ 1: AB
+  
+/\p{Nd}*?(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}
+ 1: \x{660}\x{661}
+  
+/\p{Nd}{2}(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}A
+ 1: \x{662}A
+  
+/\p{Nd}{2,3}(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}AB
+ 1: AB
+  
+/\p{Nd}{2,3}?(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}A
+ 1: \x{662}A
+  
+/\p{Nd}?(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}
+ 1: \x{661}\x{662}
+  
+/\p{Nd}??(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}
+ 1: \x{660}\x{661}
+  
+/\p{Nd}*+(..)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}AB
+ 1: AB
+  
+/\p{Nd}*+(...)/8
+      \x{660}\x{661}\x{662}ABC
+ 0: \x{660}\x{661}\x{662}ABC
+ 1: ABC
+  
+/\p{Nd}*+(....)/8
+      ** Failers
+ 0: ** F
+ 1: ** F
+      \x{660}\x{661}\x{662}ABC
+No match
+  
+/\p{Lu}/8i
+    A
+ 0: A
+    a\x{10a0}B 
+ 0: \x{10a0}
+    ** Failers 
+ 0: F
+    a
+No match
+    \x{1d00}  
+No match
 
-/\x{1000}/8DM
-Memory allocation (code space): 12
-------------------------------------------------------------------
-  0   8 Bra 0
-  3   3 \xe1\x80\x80
-  8   8 Ket
- 11     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 225
-Need char = 128
+/\p{^Lu}/8i
+    1234
+ 0: 1
+    ** Failers
+ 0: *
+    ABC 
+No match
 
-/\x{10000}/8DM
-Memory allocation (code space): 13
-------------------------------------------------------------------
-  0   9 Bra 0
-  3   4 \xf0\x90\x80\x80
-  9   9 Ket
- 12     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 240
-Need char = 128
+/\P{Lu}/8i
+    1234
+ 0: 1
+    ** Failers
+ 0: *
+    ABC 
+No match
 
-/\x{100000}/8DM
-Memory allocation (code space): 13
-------------------------------------------------------------------
-  0   9 Bra 0
-  3   4 \xf4\x80\x80\x80
-  9   9 Ket
- 12     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 244
-Need char = 128
+/(?<=A\p{Nd})XYZ/8
+    A2XYZ
+ 0: XYZ
+    123A5XYZPQR
+ 0: XYZ
+    ABA\x{660}XYZpqr
+ 0: XYZ
+    ** Failers
+No match
+    AXYZ
+No match
+    XYZ     
+No match
+    
+/(?<!\pL)XYZ/8
+    1XYZ
+ 0: XYZ
+    AB=XYZ.. 
+ 0: XYZ
+    XYZ 
+ 0: XYZ
+    ** Failers
+No match
+    WXYZ 
+No match
 
-/\x{1000000}/8DM
-Memory allocation (code space): 14
+/[\p{L}]/D
 ------------------------------------------------------------------
   0  10 Bra 0
-  3   5 \xf9\x80\x80\x80\x80
+  3     [\p{L}]
+ 10  10 Ket
+ 13     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[\p{^L}]/D
+------------------------------------------------------------------
+  0  10 Bra 0
+  3     [\P{L}]
+ 10  10 Ket
+ 13     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[\P{L}]/D
+------------------------------------------------------------------
+  0  10 Bra 0
+  3     [\P{L}]
+ 10  10 Ket
+ 13     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[\P{^L}]/D
+------------------------------------------------------------------
+  0  10 Bra 0
+  3     [\p{L}]
+ 10  10 Ket
+ 13     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+
+/[abc\p{L}\x{0660}]/8D
+------------------------------------------------------------------
+  0  45 Bra 0
+  3     [a-c\p{L}\x{660}]
+ 45  45 Ket
+ 48     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: utf8
+No first char
+No need char
+
+/[\p{Nd}]/8DM
+Memory allocation (code space): 46
+------------------------------------------------------------------
+  0  10 Bra 0
+  3     [\p{Nd}]
  10  10 Ket
  13     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf8
-First char = 249
-Need char = 128
+No first char
+No need char
+    1234
+ 0: 1
 
-/\x{4000000}/8DM
-Memory allocation (code space): 15
+/[\p{Nd}+-]+/8DM
+Memory allocation (code space): 47
 ------------------------------------------------------------------
-  0  11 Bra 0
-  3   6 \xfc\x84\x80\x80\x80\x80
- 11  11 Ket
- 14     End
+  0  43 Bra 0
+  3     [+\-\p{Nd}]+
+ 43  43 Ket
+ 46     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+Partial matching not supported
 Options: utf8
-First char = 252
-Need char = 128
+No first char
+No need char
+    1234
+ 0: 1234
+    12-34
+ 0: 12-34
+    12+\x{661}-34  
+ 0: 12+\x{661}-34
+    ** Failers
+No match
+    abcd  
+No match
 
-/\x{7fffFFFF}/8DM
-Memory allocation (code space): 15
+/[\P{Nd}]+/8
+    abcd
+ 0: abcd
+    ** Failers
+ 0: ** Failers
+    1234
+No match
+
+/\D+/8
+    11111111111111111111111111111111111111111111111111111111111111111111111
+No match
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+     
+/\P{Nd}+/8
+    11111111111111111111111111111111111111111111111111111111111111111111111
+No match
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/[\D]+/8
+    11111111111111111111111111111111111111111111111111111111111111111111111
+No match
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/[\P{Nd}]+/8
+    11111111111111111111111111111111111111111111111111111111111111111111111
+No match
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/[\D\P{Nd}]+/8
+    11111111111111111111111111111111111111111111111111111111111111111111111
+No match
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/\pL/8
+    a
+ 0: a
+    A 
+ 0: A
+
+/\pL/8i
+    a
+ 0: a
+    A 
+ 0: A
+    
+/\p{Lu}/8 
+    A
+ 0: A
+    aZ
+ 0: Z
+    ** Failers
+ 0: F
+    abc   
+No match
+
+/\p{Lu}/8i
+    A
+ 0: A
+    aZ
+ 0: Z
+    ** Failers
+ 0: F
+    abc   
+No match
+
+/\p{Ll}/8 
+    a
+ 0: a
+    Az
+ 0: z
+    ** Failers
+ 0: a
+    ABC   
+No match
+
+/\p{Ll}/8i 
+    a
+ 0: a
+    Az
+ 0: z
+    ** Failers
+ 0: a
+    ABC   
+No match
+
+/^\x{c0}$/8i
+    \x{c0}
+ 0: \x{c0}
+    \x{e0} 
+ 0: \x{e0}
+
+/^\x{e0}$/8i
+    \x{c0}
+ 0: \x{c0}
+    \x{e0} 
+ 0: \x{e0}
+
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8
+    A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+ 0: A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+    ** Failers
+No match
+    a\x{391}\x{10427}\x{ff3a}\x{1fb0}   
+No match
+    A\x{3b1}\x{10427}\x{ff3a}\x{1fb0}
+No match
+    A\x{391}\x{1044F}\x{ff3a}\x{1fb0}
+No match
+    A\x{391}\x{10427}\x{ff5a}\x{1fb0}
+No match
+    A\x{391}\x{10427}\x{ff3a}\x{1fb8}
+No match
+
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8i
+    A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+ 0: A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+    a\x{391}\x{10427}\x{ff3a}\x{1fb0}   
+ 0: a\x{391}\x{10427}\x{ff3a}\x{1fb0}
+    A\x{3b1}\x{10427}\x{ff3a}\x{1fb0}
+ 0: A\x{3b1}\x{10427}\x{ff3a}\x{1fb0}
+    A\x{391}\x{1044F}\x{ff3a}\x{1fb0}
+ 0: A\x{391}\x{1044f}\x{ff3a}\x{1fb0}
+    A\x{391}\x{10427}\x{ff5a}\x{1fb0}
+ 0: A\x{391}\x{10427}\x{ff5a}\x{1fb0}
+    A\x{391}\x{10427}\x{ff3a}\x{1fb8}
+ 0: A\x{391}\x{10427}\x{ff3a}\x{1fb8}
+
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8iD
 ------------------------------------------------------------------
-  0  11 Bra 0
-  3   6 \xfd\xbf\xbf\xbf\xbf\xbf
- 11  11 Ket
- 14     End
+  0  21 Bra 0
+  3  NC A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+ 21  21 Ket
+ 24     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
-Options: utf8
-First char = 253
-Need char = 191
-
-/[\x{ff}]/8DM
-Memory allocation (code space): 40
-------------------------------------------------------------------
-  0   6 Bra 0
-  3   1 \xff
-  6   6 Ket
-  9     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 255
+Options: caseless utf8
+First char = 'A' (caseless)
 No need char
 
-/[\x{100}]/8DM
-Memory allocation (code space): 40
-Failed: characters with values > 255 are not yet supported in classes at offset 7
-
-/\x{ffffffff}/8
-Failed: character value in \x{...} sequence is too large at offset 11
-
-/\x{100000000}/8
-Failed: character value in \x{...} sequence is too large at offset 12
-
-/^\x{100}a\x{1234}/8
-    \x{100}a\x{1234}bcd
- 0: \x{100}a\x{1234}
-
-/\x80/8D
+/A\x{391}\x{10427}\x{ff3a}\x{1fb0}/8D
 ------------------------------------------------------------------
-  0   7 Bra 0
-  3   2 \xc2\x80
-  7   7 Ket
- 10     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 194
-Need char = 128
-
-/\xff/8D
-------------------------------------------------------------------
-  0   7 Bra 0
-  3   2 \xc3\xbf
-  7   7 Ket
- 10     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 195
-Need char = 191
-
-/\x{0041}\x{2262}\x{0391}\x{002e}/D8
-------------------------------------------------------------------
-  0  12 Bra 0
-  3   7 A\xe2\x89\xa2\xce\x91.
- 12  12 Ket
- 15     End
+  0  21 Bra 0
+  3     A\x{391}\x{10427}\x{ff3a}\x{1fb0}
+ 21  21 Ket
+ 24     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf8
 First char = 'A'
-Need char = '.'
-    \x{0041}\x{2262}\x{0391}\x{002e}
- 0: A\x{2262}\x{391}.
-    
-/\x{D55c}\x{ad6d}\x{C5B4}/D8 
-------------------------------------------------------------------
-  0  14 Bra 0
-  3   9 \xed\x95\x9c\xea\xb5\xad\xec\x96\xb4
- 14  14 Ket
- 17     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 237
-Need char = 180
-    \x{D55c}\x{ad6d}\x{C5B4} 
- 0: \x{d55c}\x{ad6d}\x{c5b4}
+Need char = 176
 
-/\x{65e5}\x{672c}\x{8a9e}/D8
-------------------------------------------------------------------
-  0  14 Bra 0
-  3   9 \xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e
- 14  14 Ket
- 17     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 230
-Need char = 158
-    \x{65e5}\x{672c}\x{8a9e}
- 0: \x{65e5}\x{672c}\x{8a9e}
-
-/\x{80}/D8
-------------------------------------------------------------------
-  0   7 Bra 0
-  3   2 \xc2\x80
-  7   7 Ket
- 10     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 194
-Need char = 128
-
-/\x{084}/D8
-------------------------------------------------------------------
-  0   7 Bra 0
-  3   2 \xc2\x84
-  7   7 Ket
- 10     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 194
-Need char = 132
-
-/\x{104}/D8
-------------------------------------------------------------------
-  0   7 Bra 0
-  3   2 \xc4\x84
-  7   7 Ket
- 10     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 196
-Need char = 132
-
-/\x{861}/D8
-------------------------------------------------------------------
-  0   8 Bra 0
-  3   3 \xe0\xa1\xa1
-  8   8 Ket
- 11     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 224
-Need char = 161
-
-/\x{212ab}/D8
-------------------------------------------------------------------
-  0   9 Bra 0
-  3   4 \xf0\xa1\x8a\xab
-  9   9 Ket
- 12     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-First char = 240
-Need char = 171
-
-/.{3,5}X/D8
-------------------------------------------------------------------
-  0  14 Bra 0
-  3     Any{3}
-  7     Any{0,2}
- 11   1 X
- 14  14 Ket
- 17     End
-------------------------------------------------------------------
-Capturing subpattern count = 0
-Options: utf8
-No first char
-Need char = 'X'
-    \x{212ab}\x{212ab}\x{212ab}\x{861}X
- 0: \x{212ab}\x{212ab}\x{212ab}\x{861}X
-
-
-/.{3,5}?/D8
+/AB\x{1fb0}/8D
 ------------------------------------------------------------------
   0  11 Bra 0
-  3     Any{3}
-  7     Any{0,2}?
+  3     AB\x{1fb0}
  11  11 Ket
  14     End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
 Options: utf8
+First char = 'A'
+Need char = 176
+
+/AB\x{1fb0}/8Di
+------------------------------------------------------------------
+  0  11 Bra 0
+  3  NC AB\x{1fb0}
+ 11  11 Ket
+ 14     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf8
+First char = 'A' (caseless)
+Need char = 'B' (caseless)
+
+/\x{391}+/8i
+    \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
+ 0: \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}
+
+/\x{391}{3,5}(.)/8i
+    \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}X
+ 0: \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}X
+ 1: X
+
+/\x{391}{3,5}?(.)/8i
+    \x{391}\x{3b1}\x{3b1}\x{3b1}\x{391}X
+ 0: \x{391}\x{3b1}\x{3b1}\x{3b1}
+ 1: \x{3b1}
+
+/[\x{391}\x{ff3a}]/8i
+    \x{391}
+ 0: \x{391}
+    \x{ff3a}
+ 0: \x{ff3a}
+    \x{3b1}
+ 0: \x{3b1}
+    \x{ff5a}   
+ 0: \x{ff5a}
+    
+/[\x{c0}\x{391}]/8i
+    \x{c0}
+ 0: \x{c0}
+    \x{e0} 
+ 0: \x{e0}
+
+/[\x{105}-\x{109}]/8iD
+------------------------------------------------------------------
+  0  13 Bra 0
+  3     [\x{104}-\x{109}]
+ 13  13 Ket
+ 16     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf8
 No first char
 No need char
-    \x{212ab}\x{212ab}\x{212ab}\x{861}
- 0: \x{212ab}\x{212ab}\x{212ab}
-
-/-- These tests are here rather than in testinput5 because Perl 5.6 has --/
-/-- some problems with UTF-8 support, in the area of \x{..} where the   --/
+    \x{104}
+ 0: \x{104}
+    \x{105}
+ 0: \x{105}
+    \x{109}  
+ 0: \x{109}
+    ** Failers
 No match
-/-- value is < 255. It grumbles about invalid UTF-8 strings.            --/
+    \x{100}
 No match
-
-/^[a\x{c0}]b/8
-    \x{c0}b
- 0: \x{c0}b
+    \x{10a} 
+No match
     
-/^([a\x{c0}]*?)aa/8
-    a\x{c0}aaaa/ 
- 0: a\x{c0}aa
- 1: a\x{c0}
+/[z-\x{100}]/8iD 
+------------------------------------------------------------------
+  0  20 Bra 0
+  3     [Z\x{39c}\x{178}z-\x{101}]
+ 20  20 Ket
+ 23     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf8
+No first char
+No need char
+    Z
+ 0: Z
+    z
+ 0: z
+    \x{39c}
+ 0: \x{39c}
+    \x{178}
+ 0: \x{178}
+    |
+ 0: |
+    \x{80}
+ 0: \x{80}
+    \x{ff}
+ 0: \x{ff}
+    \x{100}
+ 0: \x{100}
+    \x{101} 
+ 0: \x{101}
+    ** Failers
+No match
+    \x{102}
+No match
+    Y
+No match
+    y           
+No match
 
-/^([a\x{c0}]*?)aa/8
-    a\x{c0}aaaa/ 
- 0: a\x{c0}aa
- 1: a\x{c0}
-    a\x{c0}a\x{c0}aaa/ 
- 0: a\x{c0}a\x{c0}aa
- 1: a\x{c0}a\x{c0}
+/[z-\x{100}]/8Di
+------------------------------------------------------------------
+  0  20 Bra 0
+  3     [Z\x{39c}\x{178}z-\x{101}]
+ 20  20 Ket
+ 23     End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf8
+No first char
+No need char
 
-/^([a\x{c0}]*)aa/8
-    a\x{c0}aaaa/ 
- 0: a\x{c0}aaaa
- 1: a\x{c0}aa
-    a\x{c0}a\x{c0}aaa/ 
- 0: a\x{c0}a\x{c0}aaa
- 1: a\x{c0}a\x{c0}a
+/^\X/8
+    A
+ 0: A
+    A\x{300}BC 
+ 0: A\x{300}
+    A\x{300}\x{301}\x{302}BC 
+ 0: A\x{300}\x{301}\x{302}
+    *** Failers
+ 0: *
+    \x{300}  
+No match
 
-/^([a\x{c0}]*)a\x{c0}/8
-    a\x{c0}aaaa/ 
- 0: a\x{c0}
+/^[\X]/8
+    X123
+ 0: X
+    *** Failers
+No match
+    AXYZ
+No match
+
+/^(\X*)C/8
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
+ 0: A\x{300}\x{301}\x{302}BC
+ 1: A\x{300}\x{301}\x{302}B
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
+ 0: A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C
+ 1: A\x{300}\x{301}\x{302}BCA\x{300}\x{301}
+
+/^(\X*?)C/8
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
+ 0: A\x{300}\x{301}\x{302}BC
+ 1: A\x{300}\x{301}\x{302}B
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
+ 0: A\x{300}\x{301}\x{302}BC
+ 1: A\x{300}\x{301}\x{302}B
+
+/^(\X*)(.)/8
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
+ 0: A\x{300}\x{301}\x{302}BCA
+ 1: A\x{300}\x{301}\x{302}BC
+ 2: A
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
+ 0: A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C
+ 1: A\x{300}\x{301}\x{302}BCA\x{300}\x{301}
+ 2: C
+
+/^(\X*?)(.)/8
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301} 
+ 0: A
  1: 
-    a\x{c0}a\x{c0}aaa/ 
- 0: a\x{c0}a\x{c0}
- 1: a\x{c0}
+ 2: A
+    A\x{300}\x{301}\x{302}BCA\x{300}\x{301}C 
+ 0: A
+ 1: 
+ 2: A
 
+/^\X(.)/8
+    *** Failers
+ 0: **
+ 1: *
+    A\x{300}\x{301}\x{302}
+No match
+
+/^\X{2,3}(.)/8
+    A\x{300}\x{301}B\x{300}X
+ 0: A\x{300}\x{301}B\x{300}X
+ 1: X
+    A\x{300}\x{301}B\x{300}C\x{300}\x{301}
+ 0: A\x{300}\x{301}B\x{300}C
+ 1: C
+    A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
+ 0: A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
+ 1: X
+    A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
+ 0: A\x{300}\x{301}B\x{300}C\x{300}\x{301}D
+ 1: D
+    
+/^\X{2,3}?(.)/8
+    A\x{300}\x{301}B\x{300}X
+ 0: A\x{300}\x{301}B\x{300}X
+ 1: X
+    A\x{300}\x{301}B\x{300}C\x{300}\x{301}
+ 0: A\x{300}\x{301}B\x{300}C
+ 1: C
+    A\x{300}\x{301}B\x{300}C\x{300}\x{301}X
+ 0: A\x{300}\x{301}B\x{300}C
+ 1: C
+    A\x{300}\x{301}B\x{300}C\x{300}\x{301}DA\x{300}X
+ 0: A\x{300}\x{301}B\x{300}C
+ 1: C
+    
 / End of testinput6 /
-
