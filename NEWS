@@ -1,13 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.1
-- made "make test" work for phpized extensions (Hartmut, Jani)
 - Updated bundled libraries in Windows distribution. (Edin)
   . zlib 1.2.3
   . curl 7.14.0
   . openssl 0.9.8
   . ming 0.3b
   . libpq (PostgreSQL) 8.0.1
+- Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
 - Fixed bug #33999 (object remains object when cast to int). (Dmitry)
