@@ -1265,7 +1265,7 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC)
 				    !req_mod->module_started) {
 					efree(lcname);
 					/* TODO: Check version relationship */
-					zend_error(E_CORE_WARNING, "Cannot load module '%s' because required module '%s' is not loaded", module->name, req_mod->name);
+					zend_error(E_CORE_WARNING, "Cannot load module '%s' because required module '%s' is not loaded", module->name, dep->name);
 					module->module_started = 0;
 					return FAILURE;
 				}			
