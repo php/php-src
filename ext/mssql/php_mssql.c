@@ -1051,11 +1051,9 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue TSRMLS_DC) 
 {
 	int i, j = 0;
-	int *column_types;
 	char computed_buf[16];
 
-	if (0==0 || !result->have_fields) {
-		column_types = (int *) safe_emalloc(sizeof(int), result->num_fields, 0);
+	if (!result->have_fields) {
 		for (i=0; i<result->num_fields; i++) {
 			char *source = NULL;
 			char *fname = (char *)dbcolname(mssql_ptr->link,i+1);
@@ -1080,11 +1078,9 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 				result->fields[i].column_source = STR_EMPTY_ALLOC();
 			}
 	
-			column_types[i] = coltype(i+1);
-	
-			Z_TYPE(result->fields[i]) = column_types[i];
+			result->fields[i].type = coltype(i+1);
 			/* set numeric flag */
-			switch (column_types[i]) {
+			switch (result->fields[i].type) {
 				case SQLINT1:
 				case SQLINT2:
 				case SQLINT4:
@@ -1118,7 +1114,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 		result->data[i] = (zval *) safe_emalloc(sizeof(zval), result->num_fields, 0);
 		for (j=0; j<result->num_fields; j++) {
 			INIT_ZVAL(result->data[i][j]);
-			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], Z_TYPE(result->fields[j]) TSRMLS_CC));
+			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], result->fields[j].type TSRMLS_CC));
 		}
 		if (i<result->batchsize || result->batchsize==0) {
 			i++;
@@ -1129,7 +1125,6 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 			break;
 		result->lastresult = retvalue;
 	}
-	efree(column_types);
 	if (result->statement && (retvalue == NO_MORE_RESULTS || retvalue == NO_MORE_RPC_RESULTS)) {
 		_mssql_get_sp_result(mssql_ptr, result->statement TSRMLS_CC);
 	}
@@ -2171,6 +2166,7 @@ PHP_FUNCTION(mssql_execute)
 				result->mssql_ptr = mssql_ptr;
 				result->cur_field=result->cur_row=result->num_rows=0;
 				result->num_fields = num_fields;
+				result->have_fields = 0;
 
 				result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), num_fields, 0);
 				result->statement = statement;
