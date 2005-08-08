@@ -1,3 +1,35 @@
+2005-08-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      BFN
+
+    * ext/imap/php_imap.c
+      ext/standard/mail.c
+      win32/sendmail.c
+      win32/sendmail.h:
+      - Fixed bug #29334 (mail() provides incorrect message time header)
+
+    * ext/gd/config.w32:
+      Missing entry
+
+2005-08-07  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * configure.in:
+       	configure.in scripts/Makefile.frag scripts/phpize.in
+
+    * main/php.h:
+      typo fix
+
+2005-08-07  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/xml/tests/bug26614_libxml.phpt:
+      This test failed because libxml versions differ..
+
+2005-08-07  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/iconv/tests/bug16069.phpt:
+      - Fix skip-if comment.
+
 2005-08-06  Edin Kadribasic  <edink@emini.dk>
 
     * NEWS:
