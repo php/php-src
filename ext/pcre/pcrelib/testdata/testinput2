@@ -38,7 +38,7 @@
 
 /[abcd/
 
-/[\B]/
+/(?X)[\B]/
 
 /[z-a]/
 
@@ -266,6 +266,18 @@
 /(?!alphabet)[ab]/S
 
 /(?<=foo\n)^bar/m
+    foo\nbarbar 
+    ***Failers
+    rhubarb 
+    barbell
+    abc\nbarton 
+
+/^(?<=foo\n)bar/m
+    foo\nbarbar 
+    ***Failers
+    rhubarb 
+    barbell
+    abc\nbarton 
 
 /(?>^abc)/m
     abc
@@ -654,9 +666,15 @@
 
 /^[[:alnum:]]/D
 
+/^[[:^alnum:]]/D
+
 /^[[:alpha:]]/D
+
+/^[[:^alpha:]]/D
              
 /^[[:ascii:]]/D
+
+/^[[:^ascii:]]/D
 
 /^[[:blank:]]/D
 
@@ -817,7 +835,7 @@
 /\Q\Eabc/D
 
 /x*+\w/D
-    ****Failers
+    *** Failers
     xxxxx
     
 /x?+/D
@@ -890,19 +908,9 @@
 
 /\N{name}/
 
-/\pP/
-
-/\PP/
-
-/\p{prop}/
-
-/\P{prop}/
-
 /\u/
 
 /\U/
-
-/\X/
 
 /[/
 
@@ -1061,6 +1069,12 @@
 /(?<=(abc)(?C))xyz/
    abcxyz\C+
    
+/a(b+)(c*)(?C1)/
+    abbbbbccc\C*1
+
+/a(b+?)(c*?)(?C1)/
+    abbbbbccc\C*1
+   
 /(?C)abc/ 
 
 /(?C)^abc/
@@ -1158,5 +1172,282 @@
 /(?:a(?P<c>c(?P<d>d)))(?P<a>a)/D
 
 /(?P<a>a)...(?P=a)bbb(?P>a)d/D
+
+/^\W*(?:(?P<one>(?P<two>.)\W*(?P>one)\W*(?P=two)|)|(?P<three>(?P<four>.)\W*(?P>three)\W*(?P=four)|\W*.\W*))\W*$/i
+    1221
+    Satan, oscillate my metallic sonatas!
+    A man, a plan, a canal: Panama!
+    Able was I ere I saw Elba. 
+    *** Failers
+    The quick brown fox  
+    
+/((?(R)a|b))\1(?1)?/
+  bb
+  bbaa 
+
+/(.*)a/sI
+
+/(.*)a\1/sI
+
+/(.*)a(b)\2/sI
+
+/((.*)a|(.*)b)z/sI
+
+/((.*)a|(.*)b)z\1/sI
+
+/((.*)a|(.*)b)z\2/sI
+
+/((.*)a|(.*)b)z\3/sI
+
+/((.*)a|^(.*)b)z\3/sI
+
+/(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a/sI
+
+/(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\31/sI
+
+/(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)|(.*)a\32/sI
+
+/(a)(bc)/ND
+  abc
+
+/(?P<one>a)(bc)/ND
+  abc
+
+/(a)(?P<named>bc)/ND
+
+/(a+)*zz/
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazzbbbbbb\M
+  aaaaaaaaaaaaaz\M
+
+/(aaa(?C1)bbb|ab)/
+   aaabbb
+   aaabbb\C*0
+   aaabbb\C*1
+   aaabbb\C*-1
+
+/ab(?P<one>cd)ef(?P<two>gh)/
+    abcdefgh
+    abcdefgh\C1\Gtwo
+    abcdefgh\Cone\Ctwo
+    abcdefgh\Cthree  
+
+/(?P<Tes>)(?P<Test>)/D
+
+/(?P<Test>)(?P<Tes>)/D
+
+/(?P<Z>zz)(?P<A>aa)/
+    zzaa\CZ
+    zzaa\CA
+
+/(?P<x>eks)(?P<x>eccs)/
+
+/(?P<abc>abc(?P<def>def)(?P<abc>xyz))/
+
+"\[((?P<elem>\d+)(,(?P>elem))*)\]"
+    [10,20,30,5,5,4,4,2,43,23,4234]
+    *** Failers
+    []  
+
+"\[((?P<elem>\d+)(,(?P>elem))*)?\]"
+    [10,20,30,5,5,4,4,2,43,23,4234]
+    [] 
+
+/(a(b(?2)c))?/D
+
+/(a(b(?2)c))*/D
+
+/(a(b(?2)c)){0,2}/D
+
+/[ab]{1}+/D
+
+/((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/i
+     Baby Bjorn Active Carrier - With free SHIPPING!!
+
+/((w\/|-|with)*(free|immediate)*.*?shipping\s*[!.-]*)/iS
+     Baby Bjorn Active Carrier - With free SHIPPING!!
+     
+/a*.*b/SD
+
+/(a|b)*.?c/SD 
+
+/abc(?C255)de(?C)f/D
+
+/abcde/CD
+  abcde
+  abcdfe 
+  
+/a*b/CD
+  ab
+  aaaab
+  aaaacb   
+
+/a+b/CD
+  ab
+  aaaab
+  aaaacb   
+
+/(abc|def)x/CD
+  abcx
+  defx
+  abcdefzx
+
+/(ab|cd){3,4}/C
+  ababab
+  abcdabcd
+  abcdcdcdcdcd  
+
+/([ab]{,4}c|xy)/CD
+    Note: that { does NOT introduce a quantifier
+
+/([ab]{1,4}c|xy){4,5}?123/CD
+    aacaacaacaacaac123
+
+/\b.*/I
+  ab cd\>1
+  
+/\b.*/Is 
+  ab cd\>1
+  
+/(?!.bcd).*/I
+  Xbcd12345 
+
+/abcde/
+    ab\P
+    abc\P
+    abcd\P
+    abcde\P   
+    the quick brown abc\P
+    ** Failers\P
+    the quick brown abxyz fox\P
+    
+"^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[012])/(20)?\d\d$"
+    13/05/04\P
+    13/5/2004\P
+    02/05/09\P 
+    1\P
+    1/2\P
+    1/2/0\P
+    1/2/04\P    
+    0\P
+    02/\P
+    02/0\P   
+    02/1\P
+    ** Failers\P
+    \P
+    123\P
+    33/4/04\P
+    3/13/04\P
+    0/1/2003\P
+    0/\P 
+    02/0/\P 
+    02/13\P  
+
+/0{0,2}ABC/I
+    
+/\d{3,}ABC/I
+    
+/\d*ABC/I
+
+/[abc]+DE/I
+
+/[abc]?123/
+    123\P
+    a\P
+    b\P
+    c\P
+    c12\P
+    c123\P      
+
+/^(?:\d){3,5}X/
+    1\P
+    123\P
+    123X
+    1234\P
+    1234X
+    12345\P
+    12345X      
+    *** Failers 
+    1X 
+    123456\P 
+
+/abc/>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    bca
+    
+/abc/F>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    bca
+
+/(a|b)/S>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    def  
+    
+/(a|b)/SF>testsavedregex
+<testsavedregex
+    abc
+    ** Failers
+    def  
+    
+~<(\w+)/?>(.)*</(\1)>~smg
+    <!DOCTYPE seite SYSTEM "http://www.lco.lineas.de/xmlCms.dtd">\n<seite>\n<dokumenteninformation>\n<seitentitel>Partner der LCO</seitentitel>\n<sprache>de</sprache>\n<seitenbeschreibung>Partner der LINEAS Consulting\nGmbH</seitenbeschreibung>\n<schluesselworte>LINEAS Consulting GmbH Hamburg\nPartnerfirmen</schluesselworte>\n<revisit>30 days</revisit>\n<robots>index,follow</robots>\n<menueinformation>\n<aktiv>ja</aktiv>\n<menueposition>3</menueposition>\n<menuetext>Partner</menuetext>\n</menueinformation>\n<lastedited>\n<autor>LCO</autor>\n<firma>LINEAS Consulting</firma>\n<datum>15.10.2003</datum>\n</lastedited>\n</dokumenteninformation>\n<inhalt>\n\n<absatzueberschrift>Die Partnerfirmen der LINEAS Consulting\nGmbH</absatzueberschrift>\n\n<absatz><link ziel="http://www.ca.com/" zielfenster="_blank">\n<bild name="logo_ca.gif" rahmen="no"/></link> <link\nziel="http://www.ey.com/" zielfenster="_blank"><bild\nname="logo_euy.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.cisco.de/" zielfenster="_blank">\n<bild name="logo_cisco.gif" rahmen="ja"/></link></absatz>\n\n<absatz><link ziel="http://www.atelion.de/"\nzielfenster="_blank"><bild\nname="logo_atelion.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><link ziel="http://www.line-information.de/"\nzielfenster="_blank">\n<bild name="logo_line_information.gif" rahmen="no"/></link>\n</absatz>\n\n<absatz><bild name="logo_aw.gif" rahmen="no"/></absatz>\n\n<absatz><link ziel="http://www.incognis.de/"\nzielfenster="_blank"><bild\nname="logo_incognis.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.addcraft.com/"\nzielfenster="_blank"><bild\nname="logo_addcraft.gif" rahmen="no"/></link></absatz>\n\n<absatz><link ziel="http://www.comendo.com/"\nzielfenster="_blank"><bild\nname="logo_comendo.gif" rahmen="no"/></link></absatz>\n\n</inhalt>\n</seite>
+
+/^a/IF
+
+/line\nbreak/
+    this is a line\nbreak
+    line one\nthis is a line\nbreak in the second line 
+
+/line\nbreak/f
+    this is a line\nbreak
+    ** Failers 
+    line one\nthis is a line\nbreak in the second line 
+
+/line\nbreak/mf
+    this is a line\nbreak
+    ** Failers 
+    line one\nthis is a line\nbreak in the second line 
+
+/ab.cd/P
+    ab-cd
+    ab=cd 
+    ** Failers
+    ab\ncd
+
+/ab.cd/Ps
+    ab-cd
+    ab=cd 
+    ab\ncd
+
+/(?i)(?-i)AbCd/
+    AbCd
+    ** Failers
+    abcd  
+    
+/a{11111111111111111111}/
+
+/(){64294967295}/
+
+/(){2,4294967295}/
+
+"(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"
+    abcdefghijklAkB
+
+"(?P<n0>a)(?P<n1>b)(?P<n2>c)(?P<n3>d)(?P<n4>e)(?P<n5>f)(?P<n6>g)(?P<n7>h)(?P<n8>i)(?P<n9>j)(?P<n10>k)(?P<n11>l)A\11B"
+    abcdefghijklAkB
+
+"(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)A\11B"
+    abcdefghijklAkB
+
+"(?P<name0>a)(?P<name1>a)(?P<name2>a)(?P<name3>a)(?P<name4>a)(?P<name5>a)(?P<name6>a)(?P<name7>a)(?P<name8>a)(?P<name9>a)(?P<name10>a)(?P<name11>a)(?P<name12>a)(?P<name13>a)(?P<name14>a)(?P<name15>a)(?P<name16>a)(?P<name17>a)(?P<name18>a)(?P<name19>a)(?P<name20>a)(?P<name21>a)(?P<name22>a)(?P<name23>a)(?P<name24>a)(?P<name25>a)(?P<name26>a)(?P<name27>a)(?P<name28>a)(?P<name29>a)(?P<name30>a)(?P<name31>a)(?P<name32>a)(?P<name33>a)(?P<name34>a)(?P<name35>a)(?P<name36>a)(?P<name37>a)(?P<name38>a)(?P<name39>a)(?P<name40>a)(?P<name41>a)(?P<name42>a)(?P<name43>a)(?P<name44>a)(?P<name45>a)(?P<name46>a)(?P<name47>a)(?P<name48>a)(?P<name49>a)(?P<name50>a)(?P<name51>a)(?P<name52>a)(?P<name53>a)(?P<name54>a)(?P<name55>a)(?P<name56>a)(?P<name57>a)(?P<name58>a)(?P<name59>a)(?P<name60>a)(?P<name61>a)(?P<name62>a)(?P<name63>a)(?P<name64>a)(?P<name65>a)(?P<name66>a)(?P<name67>a)(?P<name68>a)(?P<name69>a)(?P<name70>a)(?P<name71>a)(?P<name72>a)(?P<name73>a)(?P<name74>a)(?P<name75>a)(?P<name76>a)(?P<name77>a)(?P<name78>a)(?P<name79>a)(?P<name80>a)(?P<name81>a)(?P<name82>a)(?P<name83>a)(?P<name84>a)(?P<name85>a)(?P<name86>a)(?P<name87>a)(?P<name88>a)(?P<name89>a)(?P<name90>a)(?P<name91>a)(?P<name92>a)(?P<name93>a)(?P<name94>a)(?P<name95>a)(?P<name96>a)(?P<name97>a)(?P<name98>a)(?P<name99>a)(?P<name100>a)"
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+"(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)(a)"
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 / End of testinput2 /

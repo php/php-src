@@ -6,6 +6,7 @@ pcre_config
 pcre_callout
 pcre_compile
 pcre_copy_substring
+pcre_dfa_exec
 pcre_exec
 pcre_get_substring
 pcre_get_stringnumber

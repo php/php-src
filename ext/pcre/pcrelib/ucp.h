@@ -2,6 +2,10 @@
 *     libucp - Unicode Property Table handler    *
 *************************************************/
 
+
+#ifndef _UCP_H
+#define _UCP_H
+
 /* These are the character categories that are returned by ucp_findchar */
 
 enum {
@@ -49,10 +53,8 @@ enum {
   ucp_Zs     /* Space separator */
 };
 
-/* For use in PCRE we make this function static so that there is no conflict if
-PCRE is linked with an application that makes use of an external version -
-assuming an external version is ever released... */
+extern int ucp_findchar(const int, int *, int *);
 
-static int ucp_findchar(const int, int *, int *);
+#endif
 
 /* End of ucp.h */

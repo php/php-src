@@ -15,7 +15,7 @@ PCRE consists entirely of code written in Standard C, and so should compile
 successfully on any system that has a Standard C compiler and library.
 
 
-GENERIC INSTRUCTIONS
+GENERIC INSTRUCTIONS FOR THE C LIBRARY
 
 The following are generic comments about building PCRE. The interspersed
 indented commands are suggestions from Mark Tetrode as to which commands you
@@ -51,18 +51,41 @@ character tables and writes them to that file.
 
   rem Mark Tetrode's commands
   rem Compile & run
-  cl -DSUPPORT_UTF8 dftables.c
-  dftables.exe > chartables.c
+  cl -DSUPPORT_UTF8 -DSUPPORT_UCP dftables.c
+  dftables.exe chartables.c
 
-(4) Compile maketables.c, get.c, study.c and pcre.c and link them all
-together into an object library in whichever form your system keeps such
-libraries. This is the pcre library (chartables.c is included by means of an
-#include directive). If your system has static and shared libraries, you may
-have to do this once for each type.
+(4) Compile the following source files:
 
+  pcre_chartables.c
+  pcre_compile.c
+  pcre_config.c
+  pcre_dfa_exec.c
+  pcre_exec.c
+  pcre_fullinfo.c
+  pcre_get.c
+  pcre_globals.c
+  pcre_info.c
+  pcre_maketables.c
+  pcre_ord2utf8.c
+  pcre_printint.c
+  pcre_refcount.c
+  pcre_study.c
+  pcre_tables.c
+  pcre_try_flipped.c
+  pcre_ucp_findchar.c
+  pcre_valid_utf8.c
+  pcre_version.c
+  pcre_xclass.c
+
+and link them all together into an object library in whichever form your system
+keeps such libraries. This is the pcre C library. If your system has static and
+shared libraries, you may have to do this once for each type.
+
+  rem These comments are out-of-date, referring to a previous release which
+  rem had fewer source files. Replace with the file names from above.
   rem Mark Tetrode's commands, for a static library
   rem Compile & lib
-  cl -DSUPPORT_UTF8 -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
+  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c maketables.c get.c study.c pcre.c
   lib /OUT:pcre.lib maketables.obj get.obj study.obj pcre.obj
 
 (5) Similarly, compile pcreposix.c and link it (on its own) as the pcreposix
@@ -70,7 +93,7 @@ library.
 
   rem Mark Tetrode's commands, for a static library
   rem Compile & lib
-  cl -DSUPPORT_UTF8 -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
+  cl -DSUPPORT_UTF8 -DSUPPORT_UCP -DPOSIX_MALLOC_THRESHOLD=10 /c pcreposix.c
   lib /OUT:pcreposix.lib pcreposix.obj
 
 (6) Compile the test program pcretest.c. This needs the functions in the
@@ -78,7 +101,7 @@ pcre and pcreposix libraries when linking.
 
   rem Mark Tetrode's commands
   rem compile & link
-  cl pcretest.c pcre.lib pcreposix.lib
+  cl /F0x400000 pcretest.c pcre.lib pcreposix.lib
 
 (7) Run pcretest on the testinput files in the testdata directory, and check
 that the output matches the corresponding testoutput files. You must use the
@@ -87,13 +110,6 @@ format, with just LF characters as line terminators. You may need to edit them
 to change this if your system uses a different convention.
 
   rem Mark Tetrode's commands
-  rem Make a change, i.e. space, backspace, and save again - do this for all
-  rem to change UNIX to Win, \n to \n\r
-  write testoutput1
-  write testoutput2
-  write testoutput3
-  write testoutput4
-  write testoutput5
   pcretest testdata\testinput1 testdata\myoutput1
   windiff testdata\testoutput1 testdata\myoutput1
   pcretest -i testdata\testinput2 testdata\myoutput2
@@ -104,6 +120,21 @@ to change this if your system uses a different convention.
   windiff testdata\testoutput4 testdata\myoutput4
   pcretest testdata\testinput5 testdata\myoutput5
   windiff testdata\testoutput5 testdata\myoutput5
+  pcretest testdata\testinput6 testdata\myoutput6
+  windiff testdata\testoutput6 testdata\myoutput6
+
+Note that there are now three more tests (7, 8, 9) that did not exist when Mark
+wrote those comments. The test the new pcre_dfa_exec() function.
+
+
+THE C++ WRAPPER FUNCTIONS
+
+The PCRE distribution now contains some C++ wrapper functions and tests,
+contributed by Google Inc. On a system that can use "configure" and "make",
+the functions are automatically built into a library called pcrecpp. It should
+be straightforward to compile the .cc files manually on other systems. The
+files called xxx_unittest.cc are test programs for each of the corresponding
+xxx.cc files.
 
 
 FURTHER REMARKS
@@ -181,7 +212,9 @@ void  (*pcre_free)(void *) = free;
 
 BUILDING PCRE ON OPENVMS
 
-Dan Mooney sent the following comments about building PCRE on OpenVMS:
+Dan Mooney sent the following comments about building PCRE on OpenVMS. They
+relate to an older version of PCRE that used fewer source files, so the exact
+commands will need changing. See the current list of source files above.
 
 "It was quite easy to compile and link the library. I don't have a formal
 make file but the attached file [reproduced below] contains the OpenVMS DCL

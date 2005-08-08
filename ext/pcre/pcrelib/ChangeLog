@@ -1,6 +1,221 @@
 ChangeLog for PCRE
 ------------------
 
+Version 6.2 01-Aug-05
+---------------------
+
+ 1. There was no test for integer overflow of quantifier values. A construction
+    such as {1111111111111111} would give undefined results. What is worse, if
+    a minimum quantifier for a parenthesized subpattern overflowed and became
+    negative, the calculation of the memory size went wrong. This could have
+    led to memory overwriting.
+
+ 2. Building PCRE using VPATH was broken. Hopefully it is now fixed.
+
+ 3. Added "b" to the 2nd argument of fopen() in dftables.c, for non-Unix-like
+    operating environments where this matters.
+
+ 4. Applied Giuseppe Maxia's patch to add additional features for controlling
+    PCRE options from within the C++ wrapper.
+
+ 5. Named capturing subpatterns were not being correctly counted when a pattern
+    was compiled. This caused two problems: (a) If there were more than 100
+    such subpatterns, the calculation of the memory needed for the whole
+    compiled pattern went wrong, leading to an overflow error. (b) Numerical
+    back references of the form \12, where the number was greater than 9, were
+    not recognized as back references, even though there were sufficient
+    previous subpatterns.
+
+ 6. Two minor patches to pcrecpp.cc in order to allow it to compile on older
+    versions of gcc, e.g. 2.95.4.
+
+
+Version 6.1 21-Jun-05
+---------------------
+
+ 1. There was one reference to the variable "posix" in pcretest.c that was not
+    surrounded by "#if !defined NOPOSIX".
+
+ 2. Make it possible to compile pcretest without DFA support, UTF8 support, or
+    the cross-check on the old pcre_info() function, for the benefit of the
+    cut-down version of PCRE that is currently imported into Exim.
+
+ 3. A (silly) pattern starting with (?i)(?-i) caused an internal space
+    allocation error. I've done the easy fix, which wastes 2 bytes for sensible
+    patterns that start (?i) but I don't think that matters. The use of (?i) is
+    just an example; this all applies to the other options as well.
+
+ 4. Since libtool seems to echo the compile commands it is issuing, the output
+    from "make" can be reduced a bit by putting "@" in front of each libtool
+    compile command.
+
+ 5. Patch from the folks at Google for configure.in to be a bit more thorough
+    in checking for a suitable C++ installation before trying to compile the
+    C++ stuff. This should fix a reported problem when a compiler was present,
+    but no suitable headers.
+
+ 6. The man pages all had just "PCRE" as their title. I have changed them to
+    be the relevant file name. I have also arranged that these names are
+    retained in the file doc/pcre.txt, which is a concatenation in text format
+    of all the man pages except the little individual ones for each function.
+
+ 7. The NON-UNIX-USE file had not been updated for the different set of source
+    files that come with release 6. I also added a few comments about the C++
+    wrapper.
+
+
+Version 6.0 07-Jun-05
+---------------------
+
+ 1. Some minor internal re-organization to help with my DFA experiments.
+
+ 2. Some missing #ifdef SUPPORT_UCP conditionals in pcretest and printint that
+    didn't matter for the library itself when fully configured, but did matter
+    when compiling without UCP support, or within Exim, where the ucp files are
+    not imported.
+
+ 3. Refactoring of the library code to split up the various functions into
+    different source modules. The addition of the new DFA matching code (see
+    below) to a single monolithic source would have made it really too
+    unwieldy, quite apart from causing all the code to be include in a
+    statically linked application, when only some functions are used. This is
+    relevant even without the DFA addition now that patterns can be compiled in
+    one application and matched in another.
+
+    The downside of splitting up is that there have to be some external
+    functions and data tables that are used internally in different modules of
+    the library but which are not part of the API. These have all had their
+    names changed to start with "_pcre_" so that they are unlikely to clash
+    with other external names.
+
+ 4. Added an alternate matching function, pcre_dfa_exec(), which matches using
+    a different (DFA) algorithm. Although it is slower than the original
+    function, it does have some advantages for certain types of matching
+    problem.
+
+ 5. Upgrades to pcretest in order to test the features of pcre_dfa_exec(),
+    including restarting after a partial match.
+
+ 6. A patch for pcregrep that defines INVALID_FILE_ATTRIBUTES if it is not
+    defined when compiling for Windows was sent to me. I have put it into the
+    code, though I have no means of testing or verifying it.
+
+ 7. Added the pcre_refcount() auxiliary function.
+
+ 8. Added the PCRE_FIRSTLINE option. This constrains an unanchored pattern to
+    match before or at the first newline in the subject string. In pcretest,
+    the /f option on a pattern can be used to set this.
+
+ 9. A repeated \w when used in UTF-8 mode with characters greater than 256
+    would behave wrongly. This has been present in PCRE since release 4.0.
+
+10. A number of changes to the pcregrep command:
+
+    (a) Refactored how -x works; insert ^(...)$ instead of setting
+        PCRE_ANCHORED and checking the length, in preparation for adding
+        something similar for -w.
+
+    (b) Added the -w (match as a word) option.
+
+    (c) Refactored the way lines are read and buffered so as to have more
+        than one at a time available.
+
+    (d) Implemented a pcregrep test script.
+
+    (e) Added the -M (multiline match) option. This allows patterns to match
+        over several lines of the subject. The buffering ensures that at least
+        8K, or the rest of the document (whichever is the shorter) is available
+        for matching (and similarly the previous 8K for lookbehind assertions).
+
+    (f) Changed the --help output so that it now says
+
+          -w, --word-regex(p)
+
+        instead of two lines, one with "regex" and the other with "regexp"
+        because that confused at least one person since the short forms are the
+        same. (This required a bit of code, as the output is generated
+        automatically from a table. It wasn't just a text change.)
+
+    (g) -- can be used to terminate pcregrep options if the next thing isn't an
+        option but starts with a hyphen. Could be a pattern or a path name
+        starting with a hyphen, for instance.
+
+    (h) "-" can be given as a file name to represent stdin.
+
+    (i) When file names are being printed, "(standard input)" is used for
+        the standard input, for compatibility with GNU grep. Previously
+        "<stdin>" was used.
+
+    (j) The option --label=xxx can be used to supply a name to be used for
+        stdin when file names are being printed. There is no short form.
+
+    (k) Re-factored the options decoding logic because we are going to add
+        two more options that take data. Such options can now be given in four
+        different ways, e.g. "-fname", "-f name", "--file=name", "--file name".
+
+    (l) Added the -A, -B, and -C options for requesting that lines of context
+        around matches be printed.
+
+    (m) Added the -L option to print the names of files that do not contain
+        any matching lines, that is, the complement of -l.
+
+    (n) The return code is 2 if any file cannot be opened, but pcregrep does
+        continue to scan other files.
+
+    (o) The -s option was incorrectly implemented. For compatibility with other
+        greps, it now suppresses the error message for a non-existent or non-
+        accessible file (but not the return code). There is a new option called
+        -q that suppresses the output of matching lines, which was what -s was
+        previously doing.
+
+    (p) Added --include and --exclude options to specify files for inclusion
+        and exclusion when recursing.
+
+11. The Makefile was not using the Autoconf-supported LDFLAGS macro properly.
+    Hopefully, it now does.
+
+12. Missing cast in pcre_study().
+
+13. Added an "uninstall" target to the makefile.
+
+14. Replaced "extern" in the function prototypes in Makefile.in with
+    "PCRE_DATA_SCOPE", which defaults to 'extern' or 'extern "C"' in the Unix
+    world, but is set differently for Windows.
+
+15. Added a second compiling function called pcre_compile2(). The only
+    difference is that it has an extra argument, which is a pointer to an
+    integer error code. When there is a compile-time failure, this is set
+    non-zero, in addition to the error test pointer being set to point to an
+    error message. The new argument may be NULL if no error number is required
+    (but then you may as well call pcre_compile(), which is now just a
+    wrapper). This facility is provided because some applications need a
+    numeric error indication, but it has also enabled me to tidy up the way
+    compile-time errors are handled in the POSIX wrapper.
+
+16. Added VPATH=.libs to the makefile; this should help when building with one
+    prefix path and installing with another. (Or so I'm told by someone who
+    knows more about this stuff than I do.)
+
+17. Added a new option, REG_DOTALL, to the POSIX function regcomp(). This
+    passes PCRE_DOTALL to the pcre_compile() function, making the "." character
+    match everything, including newlines. This is not POSIX-compatible, but
+    somebody wanted the feature. From pcretest it can be activated by using
+    both the P and the s flags.
+
+18. AC_PROG_LIBTOOL appeared twice in Makefile.in. Removed one.
+
+19. libpcre.pc was being incorrectly installed as executable.
+
+20. A couple of places in pcretest check for end-of-line by looking for '\n';
+    it now also looks for '\r' so that it will work unmodified on Windows.
+
+21. Added Google's contributed C++ wrapper to the distribution.
+
+22. Added some untidy missing memory free() calls in pcretest, to keep
+    Electric Fence happy when testing.
+
+
+
 Version 5.0 13-Sep-04
 ---------------------
 

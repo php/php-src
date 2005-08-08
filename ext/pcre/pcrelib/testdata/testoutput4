@@ -1,4 +1,4 @@
-PCRE version 3.92 11-Sep-2002
+PCRE version 6.2 01-Aug-2005
 
 /-- Do not use the \x{} construct except with patterns that have the --/
 /-- /8 option set, because PCRE doesn't recognize them as UTF-8 unless --/
@@ -300,5 +300,604 @@ No match
     X\x{1234}\x{512}  
  0: X\x{1234}
 
-/ End of testinput4 /
+/[^a]+/8g
+    bcd
+ 0: bcd
+    \x{100}aY\x{256}Z 
+ 0: \x{100}
+ 0: Y\x{256}Z
+    
+/^[^a]{2}/8
+    \x{100}bc
+ 0: \x{100}b
+ 
+/^[^a]{2,}/8
+    \x{100}bcAa
+ 0: \x{100}bcA
 
+/^[^a]{2,}?/8
+    \x{100}bca
+ 0: \x{100}b
+
+/[^a]+/8ig
+    bcd
+ 0: bcd
+    \x{100}aY\x{256}Z 
+ 0: \x{100}
+ 0: Y\x{256}Z
+    
+/^[^a]{2}/8i
+    \x{100}bc
+ 0: \x{100}b
+ 
+/^[^a]{2,}/8i
+    \x{100}bcAa
+ 0: \x{100}bc
+
+/^[^a]{2,}?/8i
+    \x{100}bca
+ 0: \x{100}b
+
+/\x{100}{0,0}/8
+    abcd
+ 0: 
+ 
+/\x{100}?/8
+    abcd
+ 0: 
+    \x{100}\x{100} 
+ 0: \x{100}
+
+/\x{100}{0,3}/8 
+    \x{100}\x{100} 
+ 0: \x{100}\x{100}
+    \x{100}\x{100}\x{100}\x{100} 
+ 0: \x{100}\x{100}\x{100}
+    
+/\x{100}*/8
+    abce
+ 0: 
+    \x{100}\x{100}\x{100}\x{100} 
+ 0: \x{100}\x{100}\x{100}\x{100}
+
+/\x{100}{1,1}/8
+    abcd\x{100}\x{100}\x{100}\x{100} 
+ 0: \x{100}
+
+/\x{100}{1,3}/8
+    abcd\x{100}\x{100}\x{100}\x{100} 
+ 0: \x{100}\x{100}\x{100}
+
+/\x{100}+/8
+    abcd\x{100}\x{100}\x{100}\x{100} 
+ 0: \x{100}\x{100}\x{100}\x{100}
+
+/\x{100}{3}/8
+    abcd\x{100}\x{100}\x{100}XX
+ 0: \x{100}\x{100}\x{100}
+
+/\x{100}{3,5}/8
+    abcd\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}XX
+ 0: \x{100}\x{100}\x{100}\x{100}\x{100}
+
+/\x{100}{3,}/8
+    abcd\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}XX
+ 0: \x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}
+
+/(?<=a\x{100}{2}b)X/8+
+    Xyyya\x{100}\x{100}bXzzz
+ 0: X
+ 0+ zzz
+
+/\D*/8
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ 0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/\D*/8
+  \x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}
+ 0: \x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}
+
+/\D/8
+    1X2
+ 0: X
+    1\x{100}2 
+ 0: \x{100}
+  
+/>\S/8
+    > >X Y
+ 0: >X
+    > >\x{100} Y
+ 0: >\x{100}
+  
+/\d/8
+    \x{100}3
+ 0: 3
+    
+/\s/8
+    \x{100} X
+ 0:  
+    
+/\D+/8
+    12abcd34
+ 0: abcd
+    *** Failers
+ 0: *** Failers
+    1234  
+No match
+
+/\D{2,3}/8
+    12abcd34
+ 0: abc
+    12ab34
+ 0: ab
+    *** Failers  
+ 0: ***
+    1234
+No match
+    12a34  
+No match
+
+/\D{2,3}?/8
+    12abcd34
+ 0: ab
+    12ab34
+ 0: ab
+    *** Failers  
+ 0: **
+    1234
+No match
+    12a34  
+No match
+
+/\d+/8
+    12abcd34
+ 0: 12
+    *** Failers
+No match
+
+/\d{2,3}/8
+    12abcd34
+ 0: 12
+    1234abcd
+ 0: 123
+    *** Failers  
+No match
+    1.4 
+No match
+
+/\d{2,3}?/8
+    12abcd34
+ 0: 12
+    1234abcd
+ 0: 12
+    *** Failers  
+No match
+    1.4 
+No match
+
+/\S+/8
+    12abcd34
+ 0: 12abcd34
+    *** Failers
+ 0: ***
+    \    \ 
+No match
+
+/\S{2,3}/8
+    12abcd34
+ 0: 12a
+    1234abcd
+ 0: 123
+    *** Failers
+ 0: ***
+    \     \  
+No match
+
+/\S{2,3}?/8
+    12abcd34
+ 0: 12
+    1234abcd
+ 0: 12
+    *** Failers
+ 0: **
+    \     \  
+No match
+
+/>\s+</8+
+    12>      <34
+ 0: >      <
+ 0+ 34
+    *** Failers
+No match
+
+/>\s{2,3}</8+
+    ab>  <cd
+ 0: >  <
+ 0+ cd
+    ab>   <ce
+ 0: >   <
+ 0+ ce
+    *** Failers
+No match
+    ab>    <cd 
+No match
+
+/>\s{2,3}?</8+
+    ab>  <cd
+ 0: >  <
+ 0+ cd
+    ab>   <ce
+ 0: >   <
+ 0+ ce
+    *** Failers
+No match
+    ab>    <cd 
+No match
+
+/\w+/8
+    12      34
+ 0: 12
+    *** Failers
+ 0: Failers
+    +++=*! 
+No match
+
+/\w{2,3}/8
+    ab  cd
+ 0: ab
+    abcd ce
+ 0: abc
+    *** Failers
+ 0: Fai
+    a.b.c
+No match
+
+/\w{2,3}?/8
+    ab  cd
+ 0: ab
+    abcd ce
+ 0: ab
+    *** Failers
+ 0: Fa
+    a.b.c
+No match
+
+/\W+/8
+    12====34
+ 0: ====
+    *** Failers
+ 0: *** 
+    abcd 
+No match
+
+/\W{2,3}/8
+    ab====cd
+ 0: ===
+    ab==cd
+ 0: ==
+    *** Failers
+ 0: ***
+    a.b.c
+No match
+
+/\W{2,3}?/8
+    ab====cd
+ 0: ==
+    ab==cd
+ 0: ==
+    *** Failers
+ 0: **
+    a.b.c
+No match
+
+/[\x{100}]/8
+    \x{100}
+ 0: \x{100}
+    Z\x{100}
+ 0: \x{100}
+    \x{100}Z
+ 0: \x{100}
+    *** Failers 
+No match
+
+/[Z\x{100}]/8
+    Z\x{100}
+ 0: Z
+    \x{100}
+ 0: \x{100}
+    \x{100}Z
+ 0: \x{100}
+    *** Failers 
+No match
+
+/[\x{100}\x{200}]/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   *** Failers  
+No match
+
+/[\x{100}-\x{200}]/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{111}cd 
+ 0: \x{111}
+   *** Failers  
+No match
+
+/[z-\x{200}]/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{111}cd 
+ 0: \x{111}
+   abzcd
+ 0: z
+   ab|cd  
+ 0: |
+   *** Failers  
+No match
+
+/[Q\x{100}\x{200}]/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   Q? 
+ 0: Q
+   *** Failers  
+No match
+
+/[Q\x{100}-\x{200}]/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{111}cd 
+ 0: \x{111}
+   Q? 
+ 0: Q
+   *** Failers  
+No match
+
+/[Qz-\x{200}]/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{111}cd 
+ 0: \x{111}
+   abzcd
+ 0: z
+   ab|cd  
+ 0: |
+   Q? 
+ 0: Q
+   *** Failers  
+No match
+
+/[\x{100}\x{200}]{1,3}/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{200}\x{100}\x{200}\x{100}cd
+ 0: \x{200}\x{100}\x{200}
+   *** Failers  
+No match
+
+/[\x{100}\x{200}]{1,3}?/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{200}\x{100}\x{200}\x{100}cd
+ 0: \x{200}
+   *** Failers  
+No match
+
+/[Q\x{100}\x{200}]{1,3}/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{200}\x{100}\x{200}\x{100}cd
+ 0: \x{200}\x{100}\x{200}
+   *** Failers  
+No match
+
+/[Q\x{100}\x{200}]{1,3}?/8
+   ab\x{100}cd
+ 0: \x{100}
+   ab\x{200}cd
+ 0: \x{200}
+   ab\x{200}\x{100}\x{200}\x{100}cd
+ 0: \x{200}
+   *** Failers  
+No match
+
+/(?<=[\x{100}\x{200}])X/8
+    abc\x{200}X
+ 0: X
+    abc\x{100}X 
+ 0: X
+    *** Failers
+No match
+    X  
+No match
+
+/(?<=[Q\x{100}\x{200}])X/8
+    abc\x{200}X
+ 0: X
+    abc\x{100}X 
+ 0: X
+    abQX 
+ 0: X
+    *** Failers
+No match
+    X  
+No match
+
+/(?<=[\x{100}\x{200}]{3})X/8
+    abc\x{100}\x{200}\x{100}X
+ 0: X
+    *** Failers
+No match
+    abc\x{200}X
+No match
+    X  
+No match
+
+/[^\x{100}\x{200}]X/8
+    AX
+ 0: AX
+    \x{150}X
+ 0: \x{150}X
+    \x{500}X 
+ 0: \x{500}X
+    *** Failers
+No match
+    \x{100}X
+No match
+    \x{200}X   
+No match
+
+/[^Q\x{100}\x{200}]X/8
+    AX
+ 0: AX
+    \x{150}X
+ 0: \x{150}X
+    \x{500}X 
+ 0: \x{500}X
+    *** Failers
+No match
+    \x{100}X
+No match
+    \x{200}X   
+No match
+    QX 
+No match
+
+/[^\x{100}-\x{200}]X/8
+    AX
+ 0: AX
+    \x{500}X 
+ 0: \x{500}X
+    *** Failers
+No match
+    \x{100}X
+No match
+    \x{150}X
+No match
+    \x{200}X   
+No match
+
+/a\Cb/
+    aXb
+ 0: aXb
+    a\nb
+ 0: a\x0ab
+  
+/a\Cb/8
+    aXb
+ 0: aXb
+    a\nb
+ 0: a\x{0a}b
+    *** Failers 
+No match
+    a\x{100}b 
+No match
+
+/[z-\x{100}]/8i
+    z
+ 0: z
+    Z 
+ 0: Z
+    \x{100}
+ 0: \x{100}
+    *** Failers
+No match
+    \x{102}
+No match
+    y    
+No match
+
+/[\xFF]/
+    >\xff<
+ 0: \xff
+
+/[\xff]/8
+    >\x{ff}<
+ 0: \x{ff}
+
+/[^\xFF]/
+    XYZ
+ 0: X
+
+/[^\xff]/8
+    XYZ
+ 0: X
+    \x{123} 
+ 0: \x{123}
+
+/^[ac]*b/8
+  xb
+No match
+
+/^[ac\x{100}]*b/8
+  xb
+No match
+
+/^[^x]*b/8i
+  xb
+No match
+
+/^[^x]*b/8
+  xb
+No match
+  
+/^\d*b/8
+  xb 
+No match
+
+/(|a)/g8
+    catac
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+    a\x{256}a 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+ 0: 
+ 1: 
+ 0: a
+ 1: a
+ 0: 
+ 1: 
+
+/^\x{85}$/8i
+    \x{85}
+ 0: \x{85}
+
+/ End of testinput4 /
