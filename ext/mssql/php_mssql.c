@@ -994,34 +994,39 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 						
 			if (statement->binds != NULL) {	/*	Maybe a non-parameter sp	*/
 				if (zend_hash_find(statement->binds, parameter, strlen(parameter), (void**)&bind)==SUCCESS) {
-					switch (type) {
-						case SQLBIT:
-						case SQLINT1:
-						case SQLINT2:
-						case SQLINT4:
-							convert_to_long_ex(&bind->zval);
-							/* FIXME this works only on little endian machine !!! */
-							Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
-							break;
-			
-						case SQLFLT4:
-						case SQLFLT8:
-						case SQLFLTN:
-						case SQLMONEY4:
-						case SQLMONEY:
-						case SQLMONEYN:
-							convert_to_double_ex(&bind->zval);
-							Z_DVAL_P(bind->zval) = *((double *)(dbretdata(mssql_ptr->link,i)));
-							break;
-
-						case SQLCHAR:
-						case SQLVARCHAR:
-						case SQLTEXT:
-							convert_to_string_ex(&bind->zval);
-							Z_STRLEN_P(bind->zval) = dbretlen(mssql_ptr->link,i);
-							Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
-							break;
-						/* TODO binary */
+					if (!dbretlen(mssql_ptr->link,i)) {
+						ZVAL_NULL(bind->zval);
+					}
+					else {
+						switch (type) {
+							case SQLBIT:
+							case SQLINT1:
+							case SQLINT2:
+							case SQLINT4:
+								convert_to_long_ex(&bind->zval);
+								/* FIXME this works only on little endian machine !!! */
+								Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
+								break;
+				
+							case SQLFLT4:
+							case SQLFLT8:
+							case SQLFLTN:
+							case SQLMONEY4:
+							case SQLMONEY:
+							case SQLMONEYN:
+								convert_to_double_ex(&bind->zval);
+								Z_DVAL_P(bind->zval) = *((double *)(dbretdata(mssql_ptr->link,i)));
+								break;
+	
+							case SQLCHAR:
+							case SQLVARCHAR:
+							case SQLTEXT:
+								convert_to_string_ex(&bind->zval);
+								Z_STRLEN_P(bind->zval) = dbretlen(mssql_ptr->link,i);
+								Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
+								break;
+							/* TODO binary */
+						}
 					}
 				}
 				else {
@@ -1049,53 +1054,56 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 	int *column_types;
 	char computed_buf[16];
 
-	column_types = (int *) safe_emalloc(sizeof(int), result->num_fields, 0);
-	for (i=0; i<result->num_fields; i++) {
-		char *source = NULL;
-		char *fname = (char *)dbcolname(mssql_ptr->link,i+1);
-
-		if (*fname) {
-			result->fields[i].name = estrdup(fname);
-		} else {
-			if (j>0) {
-				snprintf(computed_buf,16,"computed%d",j);
+	if (0==0 || !result->have_fields) {
+		column_types = (int *) safe_emalloc(sizeof(int), result->num_fields, 0);
+		for (i=0; i<result->num_fields; i++) {
+			char *source = NULL;
+			char *fname = (char *)dbcolname(mssql_ptr->link,i+1);
+	
+			if (*fname) {
+				result->fields[i].name = estrdup(fname);
 			} else {
-				strcpy(computed_buf,"computed");
+				if (j>0) {
+					snprintf(computed_buf,16,"computed%d",j);
+				} else {
+					strcpy(computed_buf,"computed");
+				}
+				result->fields[i].name = estrdup(computed_buf);
+				j++;
 			}
-			result->fields[i].name = estrdup(computed_buf);
-			j++;
+			result->fields[i].max_length = dbcollen(mssql_ptr->link,i+1);
+			source = (char *)dbcolsource(mssql_ptr->link,i+1);
+			if (source) {
+				result->fields[i].column_source = estrdup(source);
+			}
+			else {
+				result->fields[i].column_source = STR_EMPTY_ALLOC();
+			}
+	
+			column_types[i] = coltype(i+1);
+	
+			Z_TYPE(result->fields[i]) = column_types[i];
+			/* set numeric flag */
+			switch (column_types[i]) {
+				case SQLINT1:
+				case SQLINT2:
+				case SQLINT4:
+				case SQLINTN:
+				case SQLFLT4:
+				case SQLFLT8:
+				case SQLNUMERIC:
+				case SQLDECIMAL:
+					result->fields[i].numeric = 1;
+					break;
+				case SQLCHAR:
+				case SQLVARCHAR:
+				case SQLTEXT:
+				default:
+					result->fields[i].numeric = 0;
+					break;
+			}
 		}
-		result->fields[i].max_length = dbcollen(mssql_ptr->link,i+1);
-		source = (char *)dbcolsource(mssql_ptr->link,i+1);
-		if (source) {
-			result->fields[i].column_source = estrdup(source);
-		}
-		else {
-			result->fields[i].column_source = STR_EMPTY_ALLOC();
-		}
-
-		column_types[i] = coltype(i+1);
-
-		Z_TYPE(result->fields[i]) = column_types[i];
-		/* set numeric flag */
-		switch (column_types[i]) {
-			case SQLINT1:
-			case SQLINT2:
-			case SQLINT4:
-			case SQLINTN:
-			case SQLFLT4:
-			case SQLFLT8:
-			case SQLNUMERIC:
-			case SQLDECIMAL:
-				result->fields[i].numeric = 1;
-				break;
-			case SQLCHAR:
-			case SQLVARCHAR:
-			case SQLTEXT:
-			default:
-				result->fields[i].numeric = 0;
-				break;
-		}
+		result->have_fields = 1;
 	}
 
 	i=0;
@@ -1110,7 +1118,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 		result->data[i] = (zval *) safe_emalloc(sizeof(zval), result->num_fields, 0);
 		for (j=0; j<result->num_fields; j++) {
 			INIT_ZVAL(result->data[i][j]);
-			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], column_types[j] TSRMLS_CC));
+			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], Z_TYPE(result->fields[j]) TSRMLS_CC));
 		}
 		if (i<result->batchsize || result->batchsize==0) {
 			i++;
@@ -1229,6 +1237,7 @@ PHP_FUNCTION(mssql_query)
 	result->blocks_initialized = 0;
 	result->mssql_ptr = mssql_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
+	result->have_fields = 0;
 
 	result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), result->num_fields, 0);
 	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
