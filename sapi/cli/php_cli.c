@@ -438,7 +438,7 @@ static void define_command_line_ini_entry(char *arg TSRMLS_DC)
 	if (!strcasecmp(name, "extension")) { /* load function module */
 		zval extension, zval;
 		ZVAL_STRING(&extension, value, 0);
-		php_dl(&extension, MODULE_PERSISTENT, &zval TSRMLS_CC);
+		php_dl(&extension, MODULE_TEMPORARY, &zval TSRMLS_CC);
 	} else {
 		zend_alter_ini_entry(name, strlen(name)+1, value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 	}
