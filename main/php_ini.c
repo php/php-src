@@ -242,7 +242,7 @@ static void php_load_function_extension_cb(void *arg TSRMLS_DC)
 	zval *extension = (zval *) arg;
 	zval zval;
 
-	php_dl(extension, MODULE_PERSISTENT, &zval TSRMLS_CC);
+	php_dl(extension, MODULE_PERSISTENT, &zval, 0 TSRMLS_CC);
 }
 /* }}} */
 
