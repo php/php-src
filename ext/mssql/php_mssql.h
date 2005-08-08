@@ -188,7 +188,7 @@ typedef struct mssql_result {
 	int lastresult;
 	int blocks_initialized;
 	int cur_row,cur_field;
-	int num_rows,num_fields;
+	int num_rows,num_fields,have_fields;
 } mssql_result;
 
 
