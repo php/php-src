@@ -347,6 +347,10 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 	timelib_time_offset *offset;
 	timelib_sll          isoweek, isoyear;
 
+	if (!format_len) {
+		return estrdup("");
+	}
+
 	if (localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
 			offset = timelib_time_offset_ctor();
@@ -369,7 +373,6 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 		}
 	}
 	buffer[32] = '\0';
-	smart_str_appends(&string, "");
 	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
 
 	for (i = 0; i < format_len; i++) {
