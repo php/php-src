@@ -38,7 +38,7 @@ if test "$dev" = "0" -a "$devok" = "0"; then
 fi
 
 if test -z "$ZENDDIR"; then
-  if grep "PHP_MAJOR_VERSION 5" main/php_version.h >/dev/null; then
+  if grep "PHP_MAJOR_VERSION 6" main/php_version.h >/dev/null; then
     v=5
   else
     v=4
