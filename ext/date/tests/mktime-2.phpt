@@ -1,5 +1,5 @@
 --TEST--
-mktime()
+mktime() [2]
 --INI--
 error_reporting=2047
 --FILE--

@@ -88,11 +88,13 @@ function_entry date_funcs_timezone[] = {
 	{NULL, NULL, NULL}
 };
 
-static void date_register_classes(void);
-# define DATE_REGISTER_CLASSES date_register_classes()
+static void date_register_classes(TSRMLS_D);
+# define DATE_REGISTER_CLASSES date_register_classes(TSRMLS_C)
 #else
 # define DATE_REGISTER_CLASSES /* */
 #endif
+
+static char* guess_timezone(TSRMLS_D);
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
@@ -237,7 +239,10 @@ PHP_MINFO_FUNCTION(date)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "date/time support", "enabled");
+	php_info_print_table_row(2, "Default timezone", guess_timezone(TSRMLS_C));
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
@@ -925,7 +930,6 @@ PHP_FUNCTION(getdate)
 static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC)
 {
 	php_date_obj *intern;
-	zval         *tmp;
 	zend_object_value retval;
 
 	intern = emalloc(sizeof(php_date_obj));
@@ -941,7 +945,6 @@ static zend_object_value date_object_new_date(zend_class_entry *class_type TSRML
 static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC)
 {
 	php_timezone_obj *intern;
-	zval             *tmp;
 	zend_object_value retval;
 
 	intern = emalloc(sizeof(php_timezone_obj));
@@ -975,7 +978,7 @@ static void date_object_free_storage_timezone(void *object TSRMLS_DC)
 	efree(object);
 }
 
-static void date_register_classes(void)
+static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_timezone;
 
