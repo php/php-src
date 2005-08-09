@@ -1,3 +1,164 @@
+2005-08-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/config.m4
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/chartables.c
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/get.c
+      ext/pcre/pcrelib/libpcre.def
+      ext/pcre/pcrelib/libpcreposix.def
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_dfa_exec.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_scanner.cc
+      ext/pcre/pcrelib/pcre_scanner.h
+      ext/pcre/pcrelib/pcre_scanner_unittest.cc
+      ext/pcre/pcrelib/pcre_stringpiece.cc
+      ext/pcre/pcrelib/pcre_stringpiece.h
+      ext/pcre/pcrelib/pcre_stringpiece_unittest.cc
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_findchar.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp.h
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/study.c
+      ext/pcre/pcrelib/ucp.c
+      ext/pcre/pcrelib/ucp.h
+      ext/pcre/pcrelib/ucp_findchar.c
+      ext/pcre/pcrelib/ucptypetable.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepinput
+      ext/pcre/pcrelib/testdata/grepinputx
+      ext/pcre/pcrelib/testdata/greplist
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9:
+      Upgrade to PCRE version 6.2.
+      
+
+2005-08-08  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      Make sure this works for multiple results as well
+
+    * ext/mssql/php_mssql.c:
+      Remove debug code and optimize a bit
+
+2005-08-08  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * ext/posix/posix.c:
+      makedev is a macro on several systems.
+
+2005-08-08  Frank M. Kromann  <frank@kromann.info>
+
+    * NEWS:
+      
+      News entry for Fix #32010
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      Fix #32010. Leak in mssql_fetch_batch().
+
+2005-08-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      BFNSF
+
+2005-08-08  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS:
+      finally!
+      
+        cd some_extension
+        phpize
+        configure
+        make
+        make test # <<< THIS WORKS!!! :)
+
+    * (php_5_1_0RC1)
+      Makefile.global:
+      put the -d extension loading options in the right place,
+      get rid of basename
+
+2005-08-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (php_5_1_0RC1)
+      scripts/phpize.in:
+      Fix cleanup
+
+    * (php_5_1_0RC1)
+      ext/standard/dl.c
+      ext/standard/dl.h
+      main/php_ini.c
+      sapi/cli/php_cli.c:
+      - Fixed problem with -dextension=foobar.so not having it's MINIT run.
+
+    * Makefile.global
+      configure.in
+      scripts/Makefile.frag
+      scripts/php-config.in
+      scripts/phpize.in
+      scripts/phpize.m4:
+      - Made it possible to do "make test" for phpized extensions
+
+    * (php_5_1_0RC1)
+      ZendEngine2/zend_API.c:
+      - Show the dependancy name we could not find (req_mod is null here when it
+      is not found :)
+
+2005-08-08  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * sapi/cli/php_cli.c:
+      fix extension loading from command line, resources didn't work
+      (still related to Bug #33899)
+
 2005-08-07  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * NEWS:
