@@ -261,7 +261,6 @@ PHP                                                                        NEWS
 - Added MDTM support to ftp_url_stat. (Sara)
 - Added zlib stream filter support. (Sara)
 - Added bz2 stream filter support. (Sara)
-- Added HTTP/1.1 and chunked encoding support to http:// wrapper. (Sara)
 - Added max_redirects context option that specifies how many HTTP 
   redirects to follow. (Ilia)
 - Added support of parameter=>value arrays to xsl_xsltprocessor_set_parameter().
