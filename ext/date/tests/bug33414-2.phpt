@@ -87,7 +87,7 @@ wanted=Tuesday            00:00:00
 
 TZ=America/Port-au-Prince - wrong day.
 tStamp=Monday 2005-03-28 17:17:17 EST 0
-result=Monday 2005-04-04 00:00:00 EST 0
+result=Monday 2005-04-04 00:00:00 EDT 1
 wanted=Monday            00:00:00
 
 TZ=Pacific/Enderbury - wrong day, off by 2 days.
@@ -102,7 +102,7 @@ wanted=Monday            00:00:00
 
 TZ=America/Managua - wrong day.
 tStamp=Tuesday 2005-04-05 17:17:17 CST 0
-result=Tuesday 2005-04-12 00:00:00 CST 0
+result=Tuesday 2005-04-12 00:00:00 CDT 1
 wanted=Tuesday            00:00:00
 
 TZ=Pacific/Pitcairn - wrong day.
