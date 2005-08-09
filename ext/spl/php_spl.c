@@ -596,7 +596,7 @@ PHP_MINIT_FUNCTION(spl)
 
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
-	SPL_G(autoload_extensions) = estrdup(".inc,.inc.php");
+	SPL_G(autoload_extensions) = estrdup(".inc,.php");
 	return SUCCESS;
 } /* }}} */
 
