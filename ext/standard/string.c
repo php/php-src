@@ -1433,52 +1433,60 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 }
 /* }}} */
 
-/* {{{ proto string stristr(string haystack, string needle)
+/* {{{ proto string stristr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
-	zval **haystack, **needle;
+	char *haystack;
+	long haystack_len;
+	zval *needle;
+	zend_bool part = 0;
 	char *found = NULL;
 	int  found_offset;
 	char *haystack_orig;
 	char needle_char[2];
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &haystack, &haystack_len, &needle, &part) == FAILURE) {
+		return;
 	}
 
-	SEPARATE_ZVAL(haystack);
-	SEPARATE_ZVAL(needle);
-	
-	convert_to_string_ex(haystack);
+	SEPARATE_ZVAL(&needle);
 
-	haystack_orig = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
+	haystack_orig = estrndup(haystack, haystack_len);
 
-	if (Z_TYPE_PP(needle) == IS_STRING) {
-		if (!Z_STRLEN_PP(needle)) {
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (!Z_STRLEN_P(needle)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
 			efree(haystack_orig);
 			RETURN_FALSE;
 		}
 
-		found = php_stristr(Z_STRVAL_PP(haystack),
-							Z_STRVAL_PP(needle),
-							Z_STRLEN_PP(haystack),
-							Z_STRLEN_PP(needle));
+		found = php_stristr(haystack,
+							Z_STRVAL_P(needle),
+							haystack_len,
+							Z_STRLEN_P(needle));
 	} else {
-		convert_to_long_ex(needle);
-		needle_char[0] = (char) Z_LVAL_PP(needle);
+		convert_to_long_ex(&needle);
+		needle_char[0] = (char) Z_LVAL_P(needle);
 		needle_char[1] = 0;
 
-		found = php_stristr(Z_STRVAL_PP(haystack),
+		found = php_stristr(haystack,
 							needle_char,
-							Z_STRLEN_PP(haystack),
+							haystack_len,
 							1);
 	}
 
 	if (found) {
-		found_offset = found - Z_STRVAL_PP(haystack);
-		RETVAL_STRINGL(haystack_orig + found_offset, Z_STRLEN_PP(haystack) - found_offset, 1);
+		found_offset = found - haystack;
+		if (part) {
+			char *ret;
+			ret = emalloc(found_offset + 1);
+			strncpy(ret, haystack_orig, found_offset);
+			ret[found_offset] = '\0';
+			RETVAL_STRINGL(ret , found_offset, 0);
+		} else {
+			RETVAL_STRINGL(haystack_orig + found_offset, haystack_len - found_offset, 1);
+		}
 	} else {
 		RETVAL_FALSE;
 	}
@@ -1487,45 +1495,54 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-/* {{{ proto string strstr(string haystack, string needle)
+/* {{{ proto string strstr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another */
 PHP_FUNCTION(strstr)
 {
-	zval **haystack, **needle;
+	char *haystack;
+	long haystack_len;
+	zval *needle;
+	zend_bool part = 0;
 	char *found = NULL;
 	char needle_char[2];
 	long found_offset;
-	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &haystack, &haystack_len, &needle, &part) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(haystack);
-
-	if (Z_TYPE_PP(needle) == IS_STRING) {
-		if (!Z_STRLEN_PP(needle)) {
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (!Z_STRLEN_P(needle)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter.");
 			RETURN_FALSE;
 		}
 
-		found = php_memnstr(Z_STRVAL_PP(haystack), 
-		                    Z_STRVAL_PP(needle),
-		                    Z_STRLEN_PP(needle), 
-		                    Z_STRVAL_PP(haystack) + Z_STRLEN_PP(haystack));
+		found = php_memnstr(haystack,
+		                    Z_STRVAL_P(needle),
+		                    Z_STRLEN_P(needle), 
+		                    haystack + haystack_len);
 	} else {
-		convert_to_long_ex(needle);
-		needle_char[0] = (char) Z_LVAL_PP(needle);
+		convert_to_long_ex(&needle);
+		needle_char[0] = (char) Z_LVAL_P(needle);
 		needle_char[1] = 0;
 
-		found = php_memnstr(Z_STRVAL_PP(haystack), 
+		found = php_memnstr(haystack,
 							needle_char,
 							1,
-		                    Z_STRVAL_PP(haystack) + Z_STRLEN_PP(haystack));
+		                    haystack + haystack_len);
 	}
 
 	if (found) {
-		found_offset = found - Z_STRVAL_PP(haystack);
-		RETURN_STRINGL(found, Z_STRLEN_PP(haystack) - found_offset, 1);
+		found_offset = found - haystack;
+		if (part) {
+			char *ret;
+			ret = emalloc(found_offset + 1);
+			strncpy(ret, haystack, found_offset);
+			ret[found_offset] = '\0';
+			RETURN_STRINGL(ret , found_offset, 0);
+		} else {
+			RETURN_STRINGL(found, haystack_len - found_offset, 1);
+		}
 	} else {
 		RETURN_FALSE;
 	}

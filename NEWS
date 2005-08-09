@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
   components. (Ilia)
+- Added an optional parameter to strstr() and stristr() for retrieval of either
+  the part of haystack before or after first occurence of needle. (Johannes)
 
 ?? ??? 2005, PHP 5.1
 - Upgraded PCRE library to version 6.2. (Andrei)
