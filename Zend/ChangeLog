@@ -1,3 +1,9 @@
+2005-08-08  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_API.c:
+      - Show the dependancy name we could not find (req_mod is null here when it
+      is not found :)
+
 2005-08-05  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_execute.c
