@@ -2,10 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - cURL improvements (Ilia)
-  . Added curl_setopt_array(), allowing setting of multiple cURL options.
+  . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
-- Added a flag to parse_url(), which allows retrieval of distinct URL 
-  components.
+- Added an optional parameter to parse_url() to allow retrieval of distinct URL
+  components. (Ilia)
 
 ?? ??? 2005, PHP 5.1
 - Upgraded PCRE library to version 6.2. (Andrei)
