@@ -5,6 +5,7 @@ pcre_free DATA
 
 pcre_compile
 pcre_copy_substring
+pcre_dfa_exec
 pcre_exec
 pcre_get_substring
 pcre_get_substring_list

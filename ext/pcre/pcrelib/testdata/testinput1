@@ -1358,7 +1358,7 @@
 
 /^[W-c]+$/
     WXY_^abc
-    ***Failers
+    *** Failers
     wxy
 
 /^[W-c]+$/i
@@ -3560,7 +3560,7 @@
     the.quick.brown.fox
     a100.b200.300c  
     12-ab.1245 
-    ***Failers
+    *** Failers
     \
     .a
     -a
@@ -3804,5 +3804,47 @@
     abcd:fee0:123::   
     :1
     1:  
+
+/[z\Qa-d]\E]/
+    z
+    a
+    -
+    d
+    ] 
+    *** Failers
+    b     
+
+/[\z\C]/
+    z
+    C 
+    
+/\M/
+    M 
+    
+/(a+)*b/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+    
+/(?i)reg(?:ul(?:[aд]|ae)r|ex)/
+    REGular
+    regulaer
+    Regex  
+    regulдr 
+
+/≈жед[а-€ј-я]+/
+    ≈жеда
+    ≈жед€
+    ≈жедј
+    ≈жедя
+
+/(?<=Z)X./
+  \x84XAZXB
+
+/ab cd (?x) de fg/
+    ab cd defg
+
+/ab cd(?x) de fg/
+    ab cddefg
+    ** Failers 
+    abcddefg
 
 / End of testinput1 /

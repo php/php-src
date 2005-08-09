@@ -9,7 +9,7 @@
 Compatible Regular Expression library. It defines the things POSIX says should
 be there. I hope.
 
-            Copyright (c) 1997-2004 University of Cambridge
+            Copyright (c) 1997-2005 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,10 @@ extern "C" {
 #define REG_NEWLINE   0x02
 #define REG_NOTBOL    0x04
 #define REG_NOTEOL    0x08
+
+/* Additional options, not defined by POSIX, but somebody wanted them. */
+
+#define REG_DOTALL    0x10
 
 /* These are not used by PCRE, but by defining them we make it easier
 to slot PCRE into existing programs that make POSIX calls. */

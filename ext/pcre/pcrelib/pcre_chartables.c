@@ -6,11 +6,11 @@
 program. If you edit it by hand, you might like to edit the Makefile to 
 prevent its ever being regenerated.
 
-This file is #included in the compilation of pcre.c to build the default
-character tables which are used when no tables are passed to the compile
-function. */
+This file contains the default tables for characters with codes less than
+128 (ASCII characters). These tables are used when no external tables are
+passed to PCRE. */
 
-static unsigned char pcre_default_tables[] = {
+const unsigned char _pcre_default_tables[] = {
 
 /* This table is a lower casing table. */
 
