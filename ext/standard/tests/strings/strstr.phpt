@@ -14,6 +14,8 @@ strstr() function
 	var_dump(@strstr("a", ""));
 	var_dump(@strstr("", "a"));
 	var_dump(md5(@strstr("\\\\a\\", "\\a")));
+	var_dump(strstr("test string", " ", false));
+	var_dump(strstr("test string", " ", true));
 ?>
 --EXPECT--
 string(11) "test string"
@@ -28,3 +30,5 @@ bool(false)
 bool(false)
 bool(false)
 string(32) "6ec19f52f0766c463f3bb240f4396913"
+string(7) " string"
+string(4) "test"
