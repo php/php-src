@@ -8529,8 +8529,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = &opline->op2.u.constant;
-
+	zval *dim;
+	
+	if (IS_CONST == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = &opline->op2.u.constant;
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, type TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -9945,8 +9949,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
+	zval *dim;
+	
+	if (IS_TMP_VAR == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 1, type TSRMLS_CC);
 	zval_dtor(free_op2.var);
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -11364,8 +11372,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
+	zval *dim;
+	
+	if (IS_VAR == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, type TSRMLS_CC);
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -12359,6 +12371,35 @@ static int ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FETCH_DIM_RW_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1;
+	zval *dim = NULL;
+
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, BP_VAR_RW TSRMLS_CC);
+
+	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1;
+	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
+	zval *dim;
+	
+	if (IS_UNUSED == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = NULL;
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, type TSRMLS_CC);
+
+	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -13199,8 +13240,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
+	zval *dim;
+	
+	if (IS_CV == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC), dim, 0, type TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
@@ -20424,8 +20469,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zend_op *opline = EX(opline);
 	
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = &opline->op2.u.constant;
-
+	zval *dim;
+	
+	if (IS_CONST == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = &opline->op2.u.constant;
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), type TSRMLS_CC), dim, 0, type TSRMLS_CC);
 
 
@@ -21832,8 +21881,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
+	zval *dim;
+	
+	if (IS_TMP_VAR == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), type TSRMLS_CC), dim, 1, type TSRMLS_CC);
 	zval_dtor(free_op2.var);
 
@@ -23243,8 +23296,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2;
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
-
+	zval *dim;
+	
+	if (IS_VAR == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), type TSRMLS_CC), dim, 0, type TSRMLS_CC);
 	if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 
@@ -24229,6 +24286,35 @@ static int ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FETCH_DIM_RW_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	
+	zval *dim = NULL;
+
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), BP_VAR_RW TSRMLS_CC), dim, 0, BP_VAR_RW TSRMLS_CC);
+
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = EX(opline);
+	
+	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
+	zval *dim;
+	
+	if (IS_UNUSED == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = NULL;
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), type TSRMLS_CC), dim, 0, type TSRMLS_CC);
+
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
@@ -25068,8 +25154,12 @@ static int ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	
 	int type = ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->extended_value)?BP_VAR_W:BP_VAR_R;
-	zval *dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-
+	zval *dim;
+	
+	if (IS_CV == IS_UNUSED && type == BP_VAR_R) {
+		zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
+	}
+	dim = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), _get_zval_ptr_ptr_cv(&opline->op1, EX(Ts), type TSRMLS_CC), dim, 0, type TSRMLS_CC);
 
 
@@ -27983,7 +28073,7 @@ void zend_init_opcodes_handlers()
   	ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_HANDLER,
   	ZEND_FETCH_DIM_RW_SPEC_VAR_TMP_HANDLER,
   	ZEND_FETCH_DIM_RW_SPEC_VAR_VAR_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_RW_SPEC_VAR_UNUSED_HANDLER,
   	ZEND_FETCH_DIM_RW_SPEC_VAR_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -27993,7 +28083,7 @@ void zend_init_opcodes_handlers()
   	ZEND_FETCH_DIM_RW_SPEC_CV_CONST_HANDLER,
   	ZEND_FETCH_DIM_RW_SPEC_CV_TMP_HANDLER,
   	ZEND_FETCH_DIM_RW_SPEC_CV_VAR_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_RW_SPEC_CV_UNUSED_HANDLER,
   	ZEND_FETCH_DIM_RW_SPEC_CV_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -28133,7 +28223,7 @@ void zend_init_opcodes_handlers()
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMP_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_VAR_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
@@ -28143,7 +28233,7 @@ void zend_init_opcodes_handlers()
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CONST_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMP_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_VAR_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER,
   	ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
