@@ -3579,6 +3579,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	while (*stack_zval_pp != NULL) {
 		zval_ptr_dtor(stack_zval_pp);
 		EG(argument_stack).top_element--;
+		EG(argument_stack).top--;
 		stack_zval_pp--;
 	}
 
