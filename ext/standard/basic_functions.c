@@ -142,6 +142,10 @@ static
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO()
 
+static
+	ZEND_BEGIN_ARG_INFO(all_args_prefer_ref, ZEND_SEND_PREFER_REF)
+	ZEND_END_ARG_INFO()
+
 typedef struct _php_shutdown_function_entry {
 	zval **arguments;
 	int arg_count;
@@ -449,7 +453,7 @@ function_entry basic_functions[] = {
 	PHP_FE(call_user_func_array,											NULL)
 	PHP_FE(call_user_method,		second_arg_force_ref)
 	PHP_FE(call_user_method_array,	second_arg_force_ref)
-	PHP_FE(serialize,														NULL)															
+	PHP_FE(serialize,														NULL)
 	PHP_FE(unserialize,														NULL)
 
 	PHP_FE(var_dump,														NULL)
@@ -762,7 +766,7 @@ function_entry basic_functions[] = {
 	PHP_FE(compact,															NULL)
 	PHP_FE(array_fill,														NULL)
 	PHP_FE(range,															NULL)
-	PHP_FE(array_multisort,													NULL)
+	PHP_FE(array_multisort,													all_args_prefer_ref)
 	PHP_FE(array_push,				first_arg_force_ref)
 	PHP_FE(array_pop,				first_arg_force_ref)
 	PHP_FE(array_shift,				first_arg_force_ref)
