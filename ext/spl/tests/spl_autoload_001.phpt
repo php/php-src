@@ -105,7 +105,7 @@ catch(Exception $e)
 <?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
-string(13) ".inc,.inc.php"
+string(9) ".inc,.php"
 %stestclass.inc
 Exception: Class TestClass could not be loaded
 ===()===
