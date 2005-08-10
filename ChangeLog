@@ -1,3 +1,181 @@
+2005-08-09  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - This didn't end up being included
+
+2005-08-09  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/stristr.phpt
+      ext/standard/tests/strings/strstr.phpt:
+      - Added option to strstr() and stristr() to get a particular haystack
+      component
+
+2005-08-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.h:
+      Missing patch bit.
+
+2005-08-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_4)
+      ext/pcre/config.m4
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/chartables.c
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/get.c
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/libpcre.def
+      ext/pcre/pcrelib/libpcreposix.def
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.def
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcre_chartables.c
+      ext/pcre/pcrelib/pcre_compile.c
+      ext/pcre/pcrelib/pcre_config.c
+      ext/pcre/pcrelib/pcre_dfa_exec.c
+      ext/pcre/pcrelib/pcre_exec.c
+      ext/pcre/pcrelib/pcre_fullinfo.c
+      ext/pcre/pcrelib/pcre_get.c
+      ext/pcre/pcrelib/pcre_globals.c
+      ext/pcre/pcrelib/pcre_info.c
+      ext/pcre/pcrelib/pcre_internal.h
+      ext/pcre/pcrelib/pcre_maketables.c
+      ext/pcre/pcrelib/pcre_ord2utf8.c
+      ext/pcre/pcrelib/pcre_printint.c
+      ext/pcre/pcrelib/pcre_refcount.c
+      ext/pcre/pcrelib/pcre_scanner.cc
+      ext/pcre/pcrelib/pcre_scanner.h
+      ext/pcre/pcrelib/pcre_scanner_unittest.cc
+      ext/pcre/pcrelib/pcre_stringpiece.cc
+      ext/pcre/pcrelib/pcre_stringpiece.h
+      ext/pcre/pcrelib/pcre_stringpiece_unittest.cc
+      ext/pcre/pcrelib/pcre_study.c
+      ext/pcre/pcrelib/pcre_tables.c
+      ext/pcre/pcrelib/pcre_try_flipped.c
+      ext/pcre/pcrelib/pcre_ucp_findchar.c
+      ext/pcre/pcrelib/pcre_valid_utf8.c
+      ext/pcre/pcrelib/pcre_version.c
+      ext/pcre/pcrelib/pcre_xclass.c
+      ext/pcre/pcrelib/pcrecpp.cc
+      ext/pcre/pcrelib/pcrecpp.h
+      ext/pcre/pcrelib/pcrecpp_unittest.cc
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/study.c
+      ext/pcre/pcrelib/ucp.c
+      ext/pcre/pcrelib/ucp.h
+      ext/pcre/pcrelib/ucp_findchar.c
+      ext/pcre/pcrelib/ucptypetable.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/testdata/grepinput
+      ext/pcre/pcrelib/testdata/grepinputx
+      ext/pcre/pcrelib/testdata/greplist
+      ext/pcre/pcrelib/testdata/grepoutput
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testinput4
+      ext/pcre/pcrelib/testdata/testinput5
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testinput7
+      ext/pcre/pcrelib/testdata/testinput8
+      ext/pcre/pcrelib/testdata/testinput9
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/testdata/testoutput7
+      ext/pcre/pcrelib/testdata/testoutput8
+      ext/pcre/pcrelib/testdata/testoutput9:
+      Upgrade to PCRE 6.2.
+
+    * ext/pcre/pcrelib/internal.h:
+      Remove old internal.h file.
+
+2005-08-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      reword
+
+2005-08-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c:
+      News and constants for parse_url().
+
+    * ext/standard/url.c:
+      Added option to parse_url() to retrieve a particular URL component.
+
+    * ext/curl/interface.c
+      ext/curl/php_curl.h:
+      Added curl_setopt_array(), allowing setting of multiple cURL options.
+      Added CURLINFO_HEADER_OUT to facilitate request retrieval.
+
+2005-08-09  Derick Rethans  <php@derickrethans.nl>
+
+    * buildconf:
+      - Fixed buildconf for PHP 6.
+
+2005-08-09  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/pcre/config.w32:
+      MFB: Sync with config.m4.
+
+2005-08-09  Derick Rethans  <php@derickrethans.nl>
+
+    * configure.in
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_modules.h
+      main/php.h
+      main/php_version.h:
+      - Changing the API numbers, which might be a bit premature, but it allows
+        to differentiate between different branches.
+      - Bumbed the version number to 6.0.0-dev. I know we didn't discuss this
+      yet,
+        but I feel it should be 6.0. See mail to the mailinglist.
+
+2005-08-09  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      UN
+
+2005-08-09  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_5_1)
+      ext/pcre/config.w32:
+      Sync with config.m4.
+
+2005-08-09  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - No release today. Found a critical bug...
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - RC1
+
 2005-08-08  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/pcre/config.m4

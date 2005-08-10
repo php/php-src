@@ -1,3 +1,23 @@
+2005-08-09  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_extensions.h
+      zend_modules.h:
+      - Changing the API numbers, which might be a bit premature, but it allows
+        to differentiate between different branches.
+      - Bumbed the version number to 6.0.0-dev. I know we didn't discuss this
+      yet,
+        but I feel it should be 6.0. See mail to the mailinglist.
+
+2005-08-09  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_1)
+      zend.h:
+      - No release today. Found a critical bug...
+
+    * (PHP_5_1)
+      zend.h:
+      - RC1
+
 2005-08-08  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_API.c:
