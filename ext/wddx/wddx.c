@@ -997,10 +997,20 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						ent1->data->refcount--;
 						add_property_zval(ent2->data, ent1->varname, ent1->data);
 						EG(scope) = old_scope;
-					} else
-						zend_hash_update(target_hash,
-										 ent1->varname, strlen(ent1->varname)+1,
-										 &ent1->data, sizeof(zval *), NULL);
+					} else {
+						long l;  
+						double d;
+				
+						switch (is_numeric_string(ent1->varname, strlen(ent1->varname), &l, &d, 0)) {
+							case IS_DOUBLE:
+								l = (long) d;
+							case IS_LONG:
+								zend_hash_index_update(target_hash, l, &ent1->data, sizeof(zval *), NULL);
+								break;
+							default:
+								zend_hash_update(target_hash,ent1->varname, strlen(ent1->varname)+1, &ent1->data, sizeof(zval *), NULL);
+						}
+					}
 					efree(ent1->varname);
 				} else	{
 					zend_hash_next_index_insert(target_hash,
