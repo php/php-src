@@ -41,6 +41,7 @@
 PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
 PHPAPI zend_class_entry *spl_ce_FilterIterator;
+PHPAPI zend_class_entry *spl_ce_RecursiveFilterIterator;
 PHPAPI zend_class_entry *spl_ce_ParentIterator;
 PHPAPI zend_class_entry *spl_ce_SeekableIterator;
 PHPAPI zend_class_entry *spl_ce_LimitIterator;
@@ -1041,6 +1042,40 @@ SPL_METHOD(FilterIterator, next)
 	spl_filter_it_next(getThis(), intern TSRMLS_CC);
 } /* }}} */
 
+/* {{{ proto RecursiveFilterIterator::__construct(RecursiveIterator it)
+   Create a RecursiveFilterIterator from a RecursiveIterator */
+SPL_METHOD(RecursiveFilterIterator, __construct)
+{
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveIterator, DIT_Default);
+} /* }}} */
+
+/* {{{ proto boolean RecursiveFilterIterator::hasChildren()
+   Check whether the inner iterator's current element has children */
+SPL_METHOD(RecursiveFilterIterator, hasChildren)
+{
+	spl_dual_it_object   *intern;
+	zval                 *retval;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "haschildren", &retval);
+	RETURN_ZVAL(retval, 0, 1);
+} /* }}} */
+
+/* {{{ proto RecursiveFilterIterator RecursiveFilterIterator::getChildren()
+   Return the inner iterator's children contained in a RecursiveFilterIterator */
+SPL_METHOD(RecursiveFilterIterator, getChildren)
+{
+	spl_dual_it_object   *intern;
+	zval                 *retval;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
+	spl_instantiate_arg_ex1(spl_ce_RecursiveFilterIterator, &return_value, 0, retval TSRMLS_CC);
+	zval_ptr_dtor(&retval);
+} /* }}} */
+
 /* {{{ proto ParentIterator::__construct(RecursiveIterator it)
    Create a ParentIterator from a RecursiveIterator */
 SPL_METHOD(ParentIterator, __construct)
@@ -1142,15 +1177,21 @@ static zend_function_entry spl_funcs_FilterIterator[] = {
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_parent_it___construct, 0) 
-	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 ZEND_END_ARG_INFO();
+
+static zend_function_entry spl_funcs_RecursiveFilterIterator[] = {
+	SPL_ME(RecursiveFilterIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveFilterIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
 
 static zend_function_entry spl_funcs_ParentIterator[] = {
 	SPL_ME(ParentIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
 	SPL_MA(ParentIterator,  accept,           ParentIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(ParentIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(ParentIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,         getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1938,10 +1979,11 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_STD_CLASS_EX(FilterIterator, spl_dual_it_new, spl_funcs_FilterIterator);
 	REGISTER_SPL_ITERATOR(FilterIterator);
-	spl_ce_FilterIterator->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 
-	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, FilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
-	REGISTER_SPL_IMPLEMENTS(ParentIterator, RecursiveIterator);
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveFilterIterator, FilterIterator, spl_dual_it_new, spl_funcs_RecursiveFilterIterator);
+	REGISTER_SPL_IMPLEMENTS(RecursiveFilterIterator, RecursiveIterator);
+
+	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
