@@ -205,6 +205,7 @@ PHP                                                                        NEWS
 - Fixed bug #22836 (returning reference to uninitialized variable). (Dmitry)
 - Fixed bug #29689 (default value of protected member overrides default value of private) 
   and other private variable problems in inherited classes (Stas)
+- Fixed bug #29253 (array_diff with $GLOBALS argument fails). (Dmitry)
 - Abstract private methods are no longer allowed (Stas)
 
 31 Mar 2005, PHP 5.0.4
