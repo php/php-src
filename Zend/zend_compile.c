@@ -1499,7 +1499,12 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	}
 
 	if (function_ptr) {
-		send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset) ? ZEND_ARG_SEND_BY_REF : 0;	
+		if (ARG_MAY_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
+			op = (param->op_type & (IS_VAR|IS_CV))?ZEND_SEND_REF:ZEND_SEND_VAL;
+			send_by_reference = 0;
+		} else {
+			send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset) ? ZEND_ARG_SEND_BY_REF : 0;	
+		}
 	} else {
 		send_by_reference = 0;
 	}
