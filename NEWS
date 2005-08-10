@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Fixed bug #32139 (SOAP client does not auto-handle base64 encoding). (Ilia)
 - Fixed bug #32010 (Memory leak in mssql_fetch_batch). (fmk)
 - Fixed bug #29334 (win32 mail() provides incorrect Date: header). (Jani)
+- Fixed bug #29253 (array_diff with $GLOBALS argument fails). (Dmitry)
 
 14 Jul 2005, PHP 5.1 Beta 3
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
