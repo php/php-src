@@ -187,10 +187,14 @@ static int zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 		EG(current_execute_data) = execute_data;
+
+/*	We shouldn't fix bad extensions here,
+    because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference) {
 			EX_T(opline->result.u.var).var.ptr->is_ref = 0;
 			EX_T(opline->result.u.var).var.ptr->refcount = 1;
 		}
+*/
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
 		}
