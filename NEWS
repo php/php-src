@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34064 (arr[] as param to function in class gives invalid opcode).
+  (Dmitry)
 - Fixed bug #34045 (Buffer overflow with serialized object). (Dmitry)
 - Fixed bug #33999 (object remains object when cast to int). (Dmitry)
 - Fixed bug #33996 (No information given for fatal error on passing invalid
