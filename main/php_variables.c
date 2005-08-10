@@ -61,7 +61,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
-	char *index;
+	char *index, *escaped_index = NULL;
 	int var_len, index_len;
 	zval *gpc_element, **gpc_element_p;
 	zend_bool is_array;
@@ -114,7 +114,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_arra
 
 	while (1) {
 		if (is_array) {
-			char *escaped_index = NULL, *index_s;
+			char *index_s;
 			int new_idx_len = 0;
 
 			ip++;
@@ -183,7 +183,6 @@ plain_var:
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
 				zval **tmp;
-				char *escaped_index;
 
 				if (PG(magic_quotes_gpc)) { 
 					escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
@@ -198,13 +197,13 @@ plain_var:
 				 */
 				if (PG(http_globals)[TRACK_VARS_COOKIE] && symtable1 == Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]) && 
 					zend_symtable_find(symtable1, escaped_index, index_len+1, (void **) &tmp) != FAILURE) {
-					if (PG(magic_quotes_gpc)) { 
+					if (index != escaped_index) {
 						efree(escaped_index);
 					}
 					break;
 				}
 				zend_symtable_update(symtable1, escaped_index, index_len + 1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
-				if (PG(magic_quotes_gpc)) { 
+				if (index != escaped_index) {
 					efree(escaped_index);
 				}
 			}
