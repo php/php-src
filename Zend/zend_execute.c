@@ -2131,6 +2131,9 @@ int zend_fetch_dim_func_arg_handler(ZEND_OPCODE_HANDLER_ARGS)
 		/* Behave like FETCH_DIM_W */
 		zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 	} else {
+		if (opline->op2.op_type == IS_UNUSED) {
+			zend_error(E_ERROR, "Cannot use [] for reading");
+		}
 		/* Behave like FETCH_DIM_R, except for locking used for list() */
 		zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 		AI_USE_PTR(EX_T(opline->result.u.var).var);

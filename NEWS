@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
+- Fixed bug #34064 (arr[] as param to function is allowed only if function 
+  receives argument by reference). (Dmitry)
 - Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP). (Dmitry)
 - Fixed bug #33940 (array_map() fails to pass by reference when called
   recursively). (Dmitry)
