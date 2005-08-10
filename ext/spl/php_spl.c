@@ -367,22 +367,18 @@ PHP_FUNCTION(spl_autoload_register)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &zcallable, &func_name_len, &do_throw) == FAILURE) {
 			return;
 		}
-#if MBO_0
 		if (!zend_is_callable_ex(zcallable, IS_CALLABLE_CHECK_IS_STATIC, &func_name, &func_name_len, &func_ptr, NULL TSRMLS_CC)) {
 			if (do_throw) {
 				if (func_ptr) {
 					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Non static methods are not supported yet");
 				} else {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify a callable method or method");
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify a callable sttaic method");
 				}
 			}
 			return;
 		}
 		lc_name = do_alloca(func_name_len + 1);
 		zend_str_tolower_copy(lc_name, func_name, func_name_len);
-#else
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Loader methods are not yet supported");
-#endif
 	} else if (ZEND_NUM_ARGS()) {
 		lc_name = do_alloca(func_name_len + 1);
 		zend_str_tolower_copy(lc_name, func_name, func_name_len);
@@ -493,7 +489,6 @@ PHP_FUNCTION(spl_autoload_functions)
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			zend_hash_get_current_data_ex(SPL_G(autoload_functions), (void **) &func_ptr_ptr, &function_pos);
-#if MBO_0
 			if ((*func_ptr_ptr)->common.scope) {
 				zval *tmp;
 				MAKE_STD_ZVAL(tmp);
@@ -503,7 +498,6 @@ PHP_FUNCTION(spl_autoload_functions)
 				add_next_index_string(tmp, (*func_ptr_ptr)->common.function_name, 1);
 				add_next_index_zval(return_value, tmp);
 			} else
-#endif
 				add_next_index_string(return_value, (*func_ptr_ptr)->common.function_name, 1);
 
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
@@ -596,7 +590,7 @@ PHP_MINIT_FUNCTION(spl)
 
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
-	SPL_G(autoload_extensions) = estrdup(".inc,.php");
+	SPL_G(autoload_extensions) = estrndup(".inc,.php", sizeof(".inc,.php")-1);
 	return SUCCESS;
 } /* }}} */
 
