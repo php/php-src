@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   (Nuno)
 - Fixed bug #32160 (copying a file into itself leads to data loss). (Ilia)
 - Fixed bug #31158 (array_splice on $GLOBALS crashes). (Dmitry)
+- Fixed bug #29253 (array_diff with $GLOBALS argument fails). (Dmitry)
 
 11 Jul 2005, Version 4.4.0
 - Added man pages for "phpize" and "php-config" scripts. (Jakub Vrana)
