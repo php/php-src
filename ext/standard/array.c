@@ -3048,7 +3048,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		HashTable *ht;
 		zval *tmp;
 
-		ALLOC_HASHTABLE_REL(ht);
+		ALLOC_HASHTABLE(ht);
 		zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_copy(ht, return_value->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 		return_value->value.ht = ht;		
@@ -3433,7 +3433,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		HashTable *ht;
 		zval *tmp;
 
-		ALLOC_HASHTABLE_REL(ht);
+		ALLOC_HASHTABLE(ht);
 		zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_copy(ht, return_value->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 		return_value->value.ht = ht;		
