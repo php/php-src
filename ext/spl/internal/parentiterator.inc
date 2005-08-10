@@ -12,14 +12,14 @@
 /**
  * @brief   Iterator to filter parents
  * @author  Marcus Boerger
- * @version 1.1
- * @since PHP 5.0
+ * @version 1.2
+ * @since PHP 6.0
  *
  * This extended FilterIterator allows a recursive iteration using 
  * RecursiveIteratorIterator that only shows those elements which have 
  * children.
  */
-class ParentIterator extends FilterIterator implements RecursiveIterator
+class ParentIterator extends RecursiveFilterIterator
 {
 	/** @param $it the RecursiveIterator to filter
 	 */
@@ -31,13 +31,6 @@ class ParentIterator extends FilterIterator implements RecursiveIterator
 	/** @return whetehr the current element has children
 	 */
 	function accept()
-	{
-		return $this->it->hasChildren();
-	}
-
-	/** @return whether the current element has children
-	 */
-	function hasChildren()
 	{
 		return $this->it->hasChildren();
 	}
