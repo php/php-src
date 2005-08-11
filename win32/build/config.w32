@@ -108,20 +108,20 @@ ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 // set up the build dir and DLL name
 if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
-	DEFINE("PHPDLL", "php5ts_debug.dll");
-	DEFINE("PHPLIB", "php5ts_debug.lib");
+	DEFINE("PHPDLL", "php6ts_debug.dll");
+	DEFINE("PHPLIB", "php6ts_debug.lib");
 } else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
-	DEFINE("PHPDLL", "php5_debug.dll");
-	DEFINE("PHPLIB", "php5_debug.lib");
+	DEFINE("PHPDLL", "php6_debug.dll");
+	DEFINE("PHPLIB", "php6_debug.lib");
 } else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
-	DEFINE("PHPDLL", "php5ts.dll");
-	DEFINE("PHPLIB", "php5ts.lib");
+	DEFINE("PHPDLL", "php6ts.dll");
+	DEFINE("PHPLIB", "php6ts.lib");
 } else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
-	DEFINE("PHPDLL", "php5.dll");
-	DEFINE("PHPLIB", "php5.lib");
+	DEFINE("PHPDLL", "php6.dll");
+	DEFINE("PHPLIB", "php6.lib");
 }
 
 // Find the php_build dir - it contains headers and libraries
