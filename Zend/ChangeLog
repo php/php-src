@@ -1,3 +1,59 @@
+2005-08-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      Fixed bug #34062 (Crash in catch block when many arguments are used)
+
+    * zend_compile.c
+      zend_compile.c
+      zend_compile.h
+      zend_compile.h:
+      Fixed bug #25359 (array_multisort() doesn't work in a function if array is
+      global or reference)
+
+    * tests/bug34064.phpt
+      tests/bug34064.phpt:
+      
+      Fixed bug #34064 (arr[] as param to function in class gives invalid
+      opcode)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h
+      tests/bug34064.phpt:
+      Fixed bug #34064 (arr[] as param to function in class gives invalid opcode)
+
+    * tests/bug34064.phpt
+      tests/bug34064.phpt:
+      
+      file bug34064.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      zend_execute.c:
+      Fixed bug #34064 (arr[] as param to function is allowed only if function
+      receives argument by reference)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      tests/bug34045.phpt:
+      Fixed bug #34045 (Buffer overflow with serialized object)
+
+    * tests/bug34045.phpt
+      tests/bug34045.phpt:
+      
+      file bug34045.phpt was initially added on branch PHP_5_1.
+
 2005-08-09  Derick Rethans  <php@derickrethans.nl>
 
     * zend_extensions.h
