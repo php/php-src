@@ -2218,7 +2218,7 @@ static void phpByteOutputMethod(byte b, void *data)
 PHP_METHOD(swfmovie, output)
 {
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
 	zval **zlimit = NULL;
 	int limit = -1;
 	int argc = ZEND_NUM_ARGS();
@@ -2244,6 +2244,25 @@ PHP_METHOD(swfmovie, output)
 		Ming_setSWFCompression(oldval);
 	}	
 	RETURN_LONG(out);
+#elif defined(HAVE_NEW_MING)
+	zval **zlimit = NULL;
+	int limit = -1;
+	int argc = ZEND_NUM_ARGS();
+
+	if(argc) {
+		if (zend_get_parameters_ex(1, &zlimit) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+
+		convert_to_long_ex(zlimit);
+		limit = Z_LVAL_PP(zlimit);
+
+		if ((limit < 0) || (limit > 9)) {
+			php_error(E_WARNING,"compression level must be within 0..9");
+			RETURN_FALSE;
+		}
+	}
+	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL, limit));
 #else
 	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL));
 #endif
@@ -2263,9 +2282,11 @@ static void phpStreamOutputMethod(byte b, void * data)
 PHP_METHOD(swfmovie, saveToFile)
 {
 	zval **x;
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) || defined(HAVE_NEW_MING)
 	zval **zlimit = NULL;
 	int limit = -1;
+#endif
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
 	int oldval = INT_MIN;
 	long out;
 #endif
@@ -2278,7 +2299,7 @@ PHP_METHOD(swfmovie, saveToFile)
 			WRONG_PARAM_COUNT;
 		break;
 	case 2:
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) || defined(HAVE_NEW_MING)
 		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
 			WRONG_PARAM_COUNT;
 		convert_to_long_ex(zlimit);
@@ -2287,6 +2308,8 @@ PHP_METHOD(swfmovie, saveToFile)
 			php_error(E_WARNING,"compression level must be within 0..9");
 			RETURN_FALSE;
 		}
+#endif
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
 		oldval = Ming_setSWFCompression(limit);
 #endif
 		break;
@@ -2295,11 +2318,13 @@ PHP_METHOD(swfmovie, saveToFile)
 	}
 
 	ZEND_FETCH_RESOURCE(what, php_stream *, x, -1,"File-Handle",php_file_le_stream());
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
 	out = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, what);
 	if (oldval >= -1 && oldval <=9)
 		Ming_setSWFCompression(oldval);
 	RETURN_LONG(out);
+#elif defined(HAVE_NEW_MING)
+	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what, limit));
 #else
 	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what));
 #endif
@@ -2311,9 +2336,11 @@ PHP_METHOD(swfmovie, saveToFile)
 PHP_METHOD(swfmovie, save)
 {
 	zval **x;
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) || defined(HAVE_NEW_MING)
 	zval **zlimit = NULL;
 	int limit = -1;
+#endif
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
 	int oldval = INT_MIN;
 #endif
 	long retval;
@@ -2326,7 +2353,7 @@ PHP_METHOD(swfmovie, save)
 		}
 		break;
 	case 2:
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) || defined(HAVE_NEW_MING)
 		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
@@ -2336,6 +2363,8 @@ PHP_METHOD(swfmovie, save)
 			php_error(E_WARNING,"compression level must be within 0..9");
 			RETURN_FALSE;
 		}
+#endif
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
 		oldval = Ming_setSWFCompression(limit);
 #endif
 		break;
@@ -2345,12 +2374,16 @@ PHP_METHOD(swfmovie, save)
 		  
 	if (Z_TYPE_PP(x) == IS_RESOURCE) {
 		ZEND_FETCH_RESOURCE(stream, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+#if defined(HAVE_NEW_MING)
+		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream, limit));
+#else
 		RETVAL_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream));
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
     if(oldval >= -1 && oldval <=9)
 		Ming_setSWFCompression(oldval);
 #endif
 		return;
+#endif
 	}
 
 	convert_to_string_ex(x);
@@ -2360,9 +2393,13 @@ PHP_METHOD(swfmovie, save)
 		RETURN_FALSE;
 	}
 	
+#if defined(HAVE_NEW_MING)
+	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream, limit);
+#else
 	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream);
+#endif
 	php_stream_close(stream);
-#if defined(HAVE_MING_ZLIB) && defined(HAVE_NEW_MING)
+#if defined(HAVE_MING_ZLIB) && !defined(HAVE_NEW_MING)
     if(oldval >= -1 && oldval <=9)
 		Ming_setSWFCompression(oldval);
 #endif
