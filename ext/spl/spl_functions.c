@@ -113,7 +113,7 @@ void spl_register_property( zend_class_entry * class_entry, char *prop_name, zva
 void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
 {
 	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
-		size_t len = strlen(pce->name);
+		size_t len = pce->name_length;
 		zval *tmp;
 
 		if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {

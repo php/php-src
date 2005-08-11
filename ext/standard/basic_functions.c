@@ -457,6 +457,7 @@ function_entry basic_functions[] = {
 	PHP_FE(unserialize,														NULL)
 
 	PHP_FE(var_dump,														NULL)
+	PHP_FE(var_inspect,														NULL)
 	PHP_FE(var_export,														NULL)
 	PHP_FE(debug_zval_dump,														NULL)
 	PHP_FE(print_r,															NULL)
@@ -2039,7 +2040,9 @@ PHP_FUNCTION(call_user_func)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_PP(params[0]) != IS_STRING && Z_TYPE_PP(params[0]) != IS_ARRAY) {
+	if (Z_TYPE_PP(params[0]) != IS_STRING && 
+	    Z_TYPE_PP(params[0]) != IS_UNICODE && 
+	    Z_TYPE_PP(params[0]) != IS_ARRAY) {
 		SEPARATE_ZVAL(params[0]);
 		convert_to_string_ex(params[0]);
 	}
@@ -2094,7 +2097,9 @@ PHP_FUNCTION(call_user_func_array)
 	SEPARATE_ZVAL(params);
 	convert_to_array_ex(params);
 
-	if (Z_TYPE_PP(func) != IS_STRING && Z_TYPE_PP(func) != IS_ARRAY) {
+	if (Z_TYPE_PP(func) != IS_STRING && 
+	    Z_TYPE_PP(func) != IS_UNICODE && 
+	    Z_TYPE_PP(func) != IS_ARRAY) {
 		SEPARATE_ZVAL(func);
 		convert_to_string_ex(func);
 	}
@@ -2157,7 +2162,9 @@ PHP_FUNCTION(call_user_method)
 		efree(params);
 		RETURN_FALSE;
 	}
-	if (Z_TYPE_PP(params[1]) != IS_OBJECT && Z_TYPE_PP(params[1]) != IS_STRING) {
+	if (Z_TYPE_PP(params[1]) != IS_OBJECT &&
+	    Z_TYPE_PP(params[1]) != IS_STRING &&
+	    Z_TYPE_PP(params[1]) != IS_UNICODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		efree(params);
 		RETURN_FALSE;
@@ -2189,7 +2196,9 @@ PHP_FUNCTION(call_user_method_array)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (Z_TYPE_PP(obj) != IS_OBJECT && Z_TYPE_PP(obj) != IS_STRING) {
+	if (Z_TYPE_PP(obj) != IS_OBJECT &&
+	    Z_TYPE_PP(obj) != IS_STRING &&
+	    Z_TYPE_PP(obj) != IS_UNICODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument is not an object or class name");
 		RETURN_FALSE;
 	}
@@ -2290,7 +2299,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe TSRMLS_DC)
 						&& zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS
 						&& Z_TYPE_PP(obj) == IS_OBJECT
 						&& Z_TYPE_PP(method) == IS_STRING ) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s::%s() - function does not exist", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %v::%R() - function does not exist", Z_OBJCE_PP(obj)->name, Z_TYPE_PP(method), Z_UNIVAL_PP(method));
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call tick function");
 			}
@@ -2550,7 +2559,9 @@ static int php_ini_get_option(zend_ini_entry *ini_entry, int num_args, va_list a
 		return 0;
 	}
 
-	if (hash_key->nKeyLength == 0 || hash_key->arKey[0] != 0) {
+	if (hash_key->nKeyLength == 0 || 
+			hash_key->type != IS_STRING ||
+	    hash_key->u.string[0] != 0) {
 
 		MAKE_STD_ZVAL(option);
 		array_init(option);
@@ -3230,7 +3241,7 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	new_key = (char *) emalloc(new_key_len);
 
 	memcpy(new_key, prefix, prefix_len);
-	memcpy(new_key+prefix_len, hash_key->arKey, hash_key->nKeyLength);
+	memcpy(new_key+prefix_len, hash_key->u.string, hash_key->nKeyLength);
 
 	zend_delete_global_variable(new_key, new_key_len-1 TSRMLS_CC);
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), new_key, new_key_len, *var, (*var)->refcount+1, 0);

@@ -137,11 +137,21 @@ PHP_FUNCTION(assert)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (Z_TYPE_PP(assertion) == IS_STRING) {
+	if (Z_TYPE_PP(assertion) == IS_STRING || Z_TYPE_PP(assertion) == IS_UNICODE) {
 		zval retval;
+		zval tmp;
 		int old_error_reporting = 0; /* shut up gcc! */
+		int free_tmp = 0;
 
-		myeval = Z_STRVAL_PP(assertion);
+		if (Z_TYPE_PP(assertion) == IS_UNICODE) {
+			tmp = **assertion;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			myeval = Z_STRVAL(tmp);
+			free_tmp = 1;
+		} else {
+			myeval = Z_STRVAL_PP(assertion);
+		}
 
 		if (ASSERTG(quiet_eval)) {
 			old_error_reporting = EG(error_reporting);
@@ -153,6 +163,9 @@ PHP_FUNCTION(assert)
 			efree(compiled_string_description);
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failure evaluating code:\n%s", myeval);
 			/* php_error_docref() does not return in this case. */
+		}
+		if (free_tmp) {
+			zval_dtor(&tmp);
 		}
 		efree(compiled_string_description);
 
@@ -184,7 +197,11 @@ PHP_FUNCTION(assert)
 
 		ZVAL_STRING(args[0], SAFE_STRING(filename), 1);
 		ZVAL_LONG (args[1], lineno);
-		ZVAL_STRING(args[2], SAFE_STRING(myeval), 1);
+		if (Z_TYPE_PP(assertion) == IS_UNICODE) {
+			ZVAL_UNICODEL(args[2], Z_USTRVAL_PP(assertion), Z_USTRLEN_PP(assertion), 1);
+		} else {
+			ZVAL_STRING(args[2], SAFE_STRING(myeval), 1);
+		}
 		
 		MAKE_STD_ZVAL(retval);
 		ZVAL_FALSE(retval);

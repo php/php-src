@@ -402,7 +402,7 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	
 	if (obj->clone == NULL) {
-		php_error(E_ERROR, "Trying to clone an uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
+		php_error(E_ERROR, "Trying to clone an uncloneable object of class %v", Z_OBJCE_P(zobject)->name);
 	}		
 
 	obj->clone(obj->object, &new_object TSRMLS_CC);
@@ -420,7 +420,7 @@ zend_object_value dom_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 
 zend_object_value dom_objects_ze1_clone_obj(zval *zobject TSRMLS_DC)
 {
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
+	php_error(E_ERROR, "Cannot clone object of class %v due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
 	/* Return zobject->value.obj just to satisfy compiler */
 	return zobject->value.obj;
 }

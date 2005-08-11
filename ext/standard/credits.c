@@ -62,6 +62,14 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC)
 		CREDIT_LINE("Streams Abstraction Layer", "Wez Furlong, Sara Golemon");
 		CREDIT_LINE("PHP Data Objects Layer", "Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle");
 		php_info_print_table_end();
+
+		/* Unicode support */
+		php_info_print_table_start();
+		php_info_print_table_colspan_header(2, "Unicode Support");
+		php_info_print_table_header(2, "Contribution", "Authors");
+		CREDIT_LINE("Design and Architecture", "Andrei Zmievski");
+		CREDIT_LINE("Zend Engine implementation", "Andrei Zmievski, Dmitry Stogov");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_CREDITS_SAPI) {

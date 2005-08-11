@@ -320,8 +320,10 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-		if (zend_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
-			zend_error(E_NOTICE, "Undefined index:  %s", Z_STRVAL_P(offset));
+	case IS_BINARY:
+	case IS_UNICODE:
+		if (zend_u_symtable_find(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void **) &retval) == FAILURE) {
+			zend_error(E_NOTICE, "Undefined index:  %R", Z_TYPE_P(offset), Z_STRVAL_P(offset));
 			return &EG(uninitialized_zval_ptr);
 		} else {
 			return retval;
@@ -396,8 +398,10 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	}
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
+	case IS_BINARY:
+	case IS_UNICODE:
 		value->refcount++;
-		zend_symtable_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
+		zend_u_symtable_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_DOUBLE:
 	case IS_RESOURCE:
@@ -439,12 +443,12 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		if (spl_array_get_hash_table(intern, 0 TSRMLS_CC) == &EG(symbol_table)) {
-			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
+			if (zend_u_delete_global_variable(Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset) TSRMLS_CC)) {
 				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
 			}
 		} else {
-			if (zend_symtable_del(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
-				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+			if (zend_u_symtable_del(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1) == FAILURE) {
+				zend_error(E_NOTICE,"Undefined index:  %R", Z_TYPE_P(offset), Z_UNIVAL_P(offset));
 			}
 		}
 		break;
@@ -491,7 +495,9 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 	
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-		return zend_symtable_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
+	case IS_BINARY:
+	case IS_UNICODE:
+		return zend_u_symtable_exists(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1);
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL: 
@@ -562,7 +568,7 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 	}
 	
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %v::offsetSet() instead", Z_OBJCE_P(object)->name);
 	}
 
 	spl_array_write_dimension(object, NULL, append_value TSRMLS_CC);
@@ -686,8 +692,10 @@ static int spl_array_skip_protected(spl_array_object *intern TSRMLS_DC) /* {{{ *
 
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
 		do {
-			if (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos) == HASH_KEY_IS_STRING) {
-				if (!string_length || string_key[0]) {
+			if (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos) == UG(unicode)?HASH_KEY_IS_UNICODE:HASH_KEY_IS_STRING) {
+				if (!string_length || 
+				    ((UG(unicode) && ((UChar*)string_key)[0]) ||
+				     (!UG(unicode) && string_key[0]))) {
 					return SUCCESS;
 				}
 			} else {
@@ -1138,6 +1146,12 @@ SPL_METHOD(Array, key)
 	switch (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 1, &intern->pos)) {
 		case HASH_KEY_IS_STRING:
 			RETVAL_STRINGL(string_key, string_length - 1, 0);
+			break;
+		case HASH_KEY_IS_BINARY:
+			RETVAL_BINARYL(string_key, string_length - 1, 0);
+			break;
+		case HASH_KEY_IS_UNICODE:
+			RETVAL_UNICODEL((UChar*)string_key, string_length - 1, 0);
 			break;
 		case HASH_KEY_IS_LONG:
 			RETVAL_LONG(num_key);

@@ -1,0 +1,9 @@
+// $ Id: $
+// vim:ft=javascript
+
+ARG_ENABLE('unicode' , 'ICU API extension', 'no');
+if (PHP_UNICODE) {
+
+  EXTENSION("unicode", "unicode.c");
+  AC_DEFINE('HAVE_UNICODE', 1, 'ICU API extension');
+}

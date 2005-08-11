@@ -368,9 +368,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			stream->wrapperdata = NULL;
 		}
 
-		if (stream->readbuf) {
-			pefree(stream->readbuf, stream->is_persistent);
-			stream->readbuf = NULL;
+		while (stream->readbuf.head) {
+			php_stream_bucket *bucket = stream->readbuf.head;
+
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			php_stream_bucket_delref(bucket TSRMLS_CC);
 		}
 
 		if (stream->is_persistent && (close_options & PHP_STREAM_FREE_PERSISTENT)) {
@@ -422,8 +424,6 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_DC)
 {
-	/* allocate/fill the buffer */
-
 	if (stream->readfilters.head) {
 		char *chunk_buf;
 		int err_flag = 0;
@@ -433,7 +433,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while (!err_flag && (stream->readbuf_avail < (off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -475,22 +475,38 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					/* we get here when the last filter in the chain has data to pass on.
 					 * in this situation, we are passing the brig_in brigade into the
 					 * stream read buffer */
-					while (brig_inp->head) {
-						bucket = brig_inp->head;
-						/* grow buffer to hold this bucket
-						 * TODO: this can fail for persistent streams */
-						if (stream->readbuflen - stream->writepos < bucket->buflen) {
-							stream->readbuflen += bucket->buflen;
-							stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
-									stream->is_persistent);
-						}
-						memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
-						stream->writepos += bucket->buflen;
-						
+					while ((bucket = brig_inp->head)) {
+						php_stream_bucket *tail = stream->readbuf.tail;
 						php_stream_bucket_unlink(bucket TSRMLS_CC);
-						php_stream_bucket_delref(bucket TSRMLS_CC);
-					}
+						if (bucket->is_unicode &&
+							U16_IS_SURROGATE(*bucket->buf.ustr.val) &&
+							!U16_IS_SURROGATE_LEAD(*bucket->buf.ustr.val) &&
+							tail && tail->is_unicode &&
+							U16_IS_SURROGATE(tail->buf.ustr.val[tail->buf.ustr.len - 1]) &&
+							U16_IS_SURROGATE_LEAD(tail->buf.ustr.val[tail->buf.ustr.len - 1])) {
+							/* Surrogate pair got split between buckets -- Unlikely */
+							UChar *tmp;
 
+							tmp = peumalloc(bucket->buf.ustr.len + 1, bucket->is_persistent);
+							*tmp = stream->readbuf.tail->buf.ustr.val[--tail->buf.ustr.len];
+							memmove(tmp + UBYTES(1), bucket->buf.ustr.val, UBYTES(bucket->buf.ustr.len));
+							pefree(bucket->buf.ustr.val, bucket->is_persistent);
+							bucket->buf.ustr.val = tmp;
+
+							if (tail->buf.ustr.len <= 0) {
+								/* Tail was only a one UChar bucket */
+								php_stream_bucket_unlink(tail TSRMLS_CC);
+								php_stream_bucket_delref(tail TSRMLS_CC);
+							} else if (tail == stream->readbuf.head && (tail->buf.ustr.len <= stream->readbuf_ofs)) {
+								/* Tail was head and last char was only unused portion */
+								php_stream_bucket_unlink(tail TSRMLS_CC);
+								php_stream_bucket_delref(tail TSRMLS_CC);
+								stream->readbuf_ofs = 0;
+							}
+						}
+						php_stream_bucket_append(&stream->readbuf, bucket TSRMLS_CC);
+						stream->readbuf_avail += bucket->is_unicode ? bucket->buf.ustr.len : bucket->buf.str.len;
+					}
 					break;
 
 				case PSFS_FEED_ME:
@@ -520,30 +536,22 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 	} else {
 		/* is there enough data in the buffer ? */
-		if (stream->writepos - stream->readpos < (off_t)size) {
+		if (stream->readbuf_avail < (off_t)size) {
+			char *chunk_buf;
 			size_t justread = 0;
+			int is_persistent = php_stream_is_persistent(stream);
 
-			/* reduce buffer memory consumption if possible, to avoid a realloc */
-			if (stream->readbuf && stream->readbuflen - stream->writepos < stream->chunk_size) {
-				memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->readbuflen - stream->readpos);
-				stream->writepos -= stream->readpos;
-				stream->readpos = 0;
-			}
+			chunk_buf = pemalloc(stream->chunk_size, is_persistent);
+			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size TSRMLS_CC);
 
-			/* grow the buffer if required
-			 * TODO: this can fail for persistent streams */
-			if (stream->readbuflen - stream->writepos < stream->chunk_size) {
-				stream->readbuflen += stream->chunk_size;
-				stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
-						stream->is_persistent);
-			}
+			if (justread == (size_t)-1 || justread == 0) {
+				pefree(chunk_buf, is_persistent);
+			} else {
+				php_stream_bucket *bucket;
 
-			justread = stream->ops->read(stream, stream->readbuf + stream->writepos,
-					stream->readbuflen - stream->writepos
-					TSRMLS_CC);
-
-			if (justread != (size_t)-1) {
-				stream->writepos += justread;
+				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 1, is_persistent TSRMLS_CC);
+				php_stream_bucket_append(&stream->readbuf, bucket TSRMLS_CC);
+				stream->readbuf_avail += justread;
 			}
 		}
 	}
@@ -551,23 +559,32 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
+	php_stream_bucket *bucket;
 	size_t toread = 0, didread = 0;
 
 	while (size > 0) {
-
 		/* take from the read buffer first.
 		 * It is possible that a buffered stream was switched to non-buffered, so we
 		 * drain the remainder of the buffer before using the "raw" read mode for
 		 * the excess */
-		if (stream->writepos > stream->readpos) {
 
-			toread = stream->writepos - stream->readpos;
+		while (size > 0 && (bucket = stream->readbuf.head)) {
+			if (bucket->is_unicode) {
+				/* This is an string read func, convert to string first */
+				php_stream_bucket_tostring(stream, &bucket, &stream->readbuf_ofs TSRMLS_CC);
+			}
+			toread = bucket->buf.str.len - stream->readbuf_ofs;
 			if (toread > size) {
 				toread = size;
 			}
-
-			memcpy(buf, stream->readbuf + stream->readpos, toread);
-			stream->readpos += toread;
+			memcpy(buf, bucket->buf.str.val + stream->readbuf_ofs, toread);
+			stream->readbuf_ofs += toread;
+			stream->readbuf_avail -= toread;
+			if (stream->readbuf_ofs >= bucket->buf.str.len) {
+				php_stream_bucket_unlink(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+				stream->readbuf_ofs = 0;
+			}
 			size -= toread;
 			buf += toread;
 			didread += toread;
@@ -578,32 +595,90 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			break;
 		}
 
+		/* just break anyway, to avoid greedy read */
+		if (didread > 0 && (stream->wrapper != &php_plain_files_wrapper)) {
+			break;
+		}
+
 		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
 			toread = stream->ops->read(stream, buf, size TSRMLS_CC);
-		} else {
-			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
+			if (toread <= 0) {
+				break;
+			}
+			buf += toread;
+			size -= toread;
+			didread += toread;
+			continue;
+		}
 
-			toread = stream->writepos - stream->readpos;
+		php_stream_fill_read_buffer(stream, size TSRMLS_CC);
+		if (stream->readbuf_avail <= 0) {
+			/* EOF, or temporary end of data (for non-blocking mode). */
+			break;
+		}
+	}
+
+	if (didread > 0) {
+		stream->position += didread;
+	}
+	return didread;
+}
+
+PHPAPI size_t _php_stream_read_unicode(php_stream *stream, UChar *buf, int32_t size TSRMLS_DC)
+{
+	php_stream_bucket *bucket;
+	size_t toread = 0, didread = 0;
+
+	while (size > 0) {
+		/* take from the read buffer first.
+		 * It is possible that a buffered stream was switched to non-buffered, so we
+		 * drain the remainder of the buffer before using the "raw" read mode for
+		 * the excess */
+
+		while (size > 0 && (bucket = stream->readbuf.head)) {
+			UChar lastchar = 0;
+
+			if (!bucket->is_unicode) {
+				/* This is a unicode read func, convert to unicode first */
+				php_stream_bucket_tounicode(stream, &bucket, &stream->readbuf_ofs TSRMLS_CC);
+			}
+			toread = bucket->buf.ustr.len - stream->readbuf_ofs;
 			if (toread > size) {
 				toread = size;
 			}
-
-			if (toread > 0) {
-				memcpy(buf, stream->readbuf + stream->readpos, toread);
-				stream->readpos += toread;
+			lastchar = *(bucket->buf.ustr.val + stream->readbuf_ofs + toread - 1);
+			if (U16_IS_SURROGATE(lastchar) && U16_IS_SURROGATE_LEAD(lastchar)) {
+				toread--;
+				/* The only time we should encounter a split surrogate is when the buffer size is truncating the data
+					In this case, reduce size along with toread to avoid getting stuck */
+				size--;
 			}
-		}
-		if (toread > 0) {
-			didread += toread;
-			buf += toread;
+			memcpy(buf, bucket->buf.ustr.val + stream->readbuf_ofs, toread * sizeof(UChar));
+			stream->readbuf_ofs += toread;
+			stream->readbuf_avail -= toread;
+			if (stream->readbuf_ofs >= bucket->buf.ustr.len) {
+				php_stream_bucket_unlink(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+				stream->readbuf_ofs = 0;
+			}
 			size -= toread;
-		} else {
-			/* EOF, or temporary end of data (for non-blocking mode). */
+			buf += toread;
+			didread += toread;
+		}
+
+		/* ignore eof here; the underlying state might have changed */
+		if (size == 0) {
 			break;
 		}
 
 		/* just break anyway, to avoid greedy read */
-		if (stream->wrapper != &php_plain_files_wrapper) {
+		if (didread > 0 && (stream->wrapper != &php_plain_files_wrapper)) {
+			break;
+		}
+
+		php_stream_fill_read_buffer(stream, size * sizeof(UChar) TSRMLS_CC);
+		if (stream->readbuf_avail <= 0) {
+			/* EOF, or temporary end of data (for non-blocking mode). */
 			break;
 		}
 	}
@@ -615,10 +690,182 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 	return didread;
 }
 
+/*	buf mabe NULL (in which case it will be allocated)
+	num_bytes and num_chars must be initialized upon entry to maximum for each (-1 for no maximum)
+	num_bytes/num_chars will be set on exit to actual contents of buf
+	Will return unicode/string type dependent on the first character unit in the read buf
+	Will return as many characters as possible (and permitted by max lengths) without changing unicode/string type
+	Will not split surrogate pairs */
+PHPAPI void *_php_stream_u_read(php_stream *stream, void *buf, int32_t *pnum_bytes, int32_t *pnum_chars, int *pis_unicode TSRMLS_DC)
+{
+	int grow_mode = 0;
+	int32_t num_bytes = 0, num_chars = 0;
+	int32_t max_bytes = *pnum_bytes, max_chars = *pnum_chars;
+	int32_t buflen = buf ? max_bytes : 2048;
+	int32_t bufpos = 0;
+	int is_unicode;
+	php_stream_bucket *bucket;
+
+	/* It's possible that we have a readbuf, but that it's only half of a surrogate pair */
+	if (!stream->readbuf.head ||
+		(stream->readbuf.head == stream->readbuf.tail && stream->readbuf.head->is_unicode && 
+		(stream->readbuf.head->buf.ustr.len - stream->readbuf_ofs) == 1 &&
+		U16_IS_SURROGATE(stream->readbuf.head->buf.ustr.val[stream->readbuf.head->buf.ustr.len-1]))) {
+		php_stream_fill_read_buffer(stream, max_bytes ? max_bytes : (max_chars ? max_chars : stream->chunk_size) TSRMLS_CC);
+	}
+
+
+	if (!stream->readbuf.head ||
+		(stream->readbuf.head == stream->readbuf.tail && stream->readbuf.head->is_unicode && 
+		(stream->readbuf.head->buf.ustr.len - stream->readbuf_ofs) == 1 &&
+		U16_IS_SURROGATE(stream->readbuf.head->buf.ustr.val[stream->readbuf.head->buf.ustr.len-1]))) {
+		/* Nothing to return */
+		*pnum_bytes = 0;
+		*pnum_chars = 0;
+		*pis_unicode = 0;
+		return NULL;
+	}
+
+
+	if (!buf) {
+		grow_mode = 1;
+		buf = emalloc(buflen);
+	}
+
+	is_unicode = stream->readbuf.head->is_unicode;
+	if (is_unicode) {
+		/* normalize byte boundary */
+		if (max_bytes >= 0 && (max_bytes % sizeof(UChar))) {
+			max_bytes -= (max_bytes % sizeof(UChar));
+		}
+		if (max_bytes >= 0 && max_bytes < UBYTES(max_chars)) {
+			/* max_bytes needs to be at least twice max_chars when both are provided */
+			max_chars = (max_bytes / sizeof(UChar));
+		}
+	} else {
+		if (max_chars < 0 && max_bytes >= 0) {
+			max_chars = max_bytes;
+		} else if (max_chars >= 0 && grow_mode) {
+			max_bytes = max_chars;
+		}
+	}
+
+	for (;;) {
+		if (buflen - bufpos < 1024 && max_bytes >= 0 && max_bytes > buflen) {
+			buflen += 1024;
+			if (buflen > max_bytes) {
+				buflen = max_bytes;
+			}
+			buf = erealloc(buf, buflen);
+		}
+
+		if ((bucket = stream->readbuf.head)) {
+			if ((bucket->is_unicode && !is_unicode) ||
+				(!bucket->is_unicode && is_unicode)) {
+				/* data type swap, exit now */
+				break;
+			}
+			if (bucket->is_unicode) {
+				UChar *s = bucket->buf.ustr.val + stream->readbuf_ofs, *p;
+				int bytes_in_buf, chars_in_buf;
+				int32_t ofs = 0;
+
+				chars_in_buf = u_countChar32(s, bucket->buf.ustr.len - stream->readbuf_ofs);
+
+				if (chars_in_buf > max_chars && max_chars >= 0) {
+					chars_in_buf = max_chars;
+				}
+				/* u_countChar32 tells us that we won't overrun anyway */
+				U16_FWD_N_UNSAFE(s, ofs, chars_in_buf);
+				p = s + ofs;
+				bytes_in_buf = UBYTES(ofs);
+				if (bytes_in_buf > (max_bytes - num_bytes)) {
+					bytes_in_buf = max_bytes - num_bytes;
+					bytes_in_buf -= bytes_in_buf & 1; /* normalize */
+					p = s + (bytes_in_buf >> 1);
+					if (p > s && U16_IS_SURROGATE(p[-1]) && U16_IS_SURROGATE_LEAD(p[-1])) {
+						/* Don't split surrogate pairs */
+						p--;
+						bytes_in_buf -= UBYTES(1);
+					}
+					if (bytes_in_buf <= 0) {
+						/* No room to copy data (surrogate pair) */
+						break;
+					}
+					chars_in_buf = u_countChar32(s, p - s);
+				}
+				memcpy((char *)buf + num_bytes, s, bytes_in_buf);
+				num_bytes += bytes_in_buf;
+				num_chars += chars_in_buf;
+				stream->readbuf_ofs += p - s;
+				stream->readbuf_avail -= p - s;
+				if (stream->readbuf_ofs >= bucket->buf.ustr.len) {
+					php_stream_bucket_unlink(bucket TSRMLS_CC);
+					php_stream_bucket_delref(bucket TSRMLS_CC);
+					stream->readbuf_ofs = 0;
+				} else if (stream->readbuf_ofs == (bucket->buf.ustr.len - 1) && 
+					U16_IS_SURROGATE(bucket->buf.ustr.val[bucket->buf.ustr.len - 1]) &&
+					bucket->next && bucket->next->is_unicode) {
+					/* Only one char left in the bucket, avoid already split surrogates getting "stuck" -- Should never happen thanks to fill_read_buffer */
+					php_stream_bucket *next_bucket = bucket->next;
+
+					bucket->buf.ustr.val = peurealloc(bucket->buf.ustr.val, next_bucket->buf.ustr.len + 1, bucket->is_persistent);
+					bucket->buf.ustr.val[0] = bucket->buf.ustr.val[bucket->buf.ustr.len - 1];
+					memcpy(bucket->buf.ustr.val + 1, next_bucket->buf.ustr.val, UBYTES(next_bucket->buf.ustr.len));
+					php_stream_bucket_unlink(next_bucket TSRMLS_CC);
+					php_stream_bucket_delref(next_bucket TSRMLS_CC);
+					stream->readbuf_ofs = 0;
+				} else {
+					/* Reached max limits */
+					break;
+				}
+			} else {
+				int want = (max_chars < 0 || max_chars >= buflen) ? (buflen - num_bytes) : (max_chars - num_chars);
+				int avail = bucket->buf.str.len - stream->readbuf_ofs;
+
+				if (max_bytes >= 0 && want > max_bytes) {
+					want = max_bytes;
+				}
+
+				if (want > avail) {
+					want = avail;
+				}
+
+				memcpy((char *)buf + num_bytes, bucket->buf.str.val + stream->readbuf_ofs, want);
+				stream->readbuf_ofs += want;
+				stream->readbuf_avail -= want;
+				num_bytes += want;
+				num_chars += want;
+				if (stream->readbuf_ofs >= bucket->buf.str.len) {
+					php_stream_bucket_unlink(bucket TSRMLS_CC);
+					php_stream_bucket_delref(bucket TSRMLS_CC);
+					stream->readbuf_ofs = 0;
+				} else {
+					/* Reached max limit */
+					break;
+				}
+			}
+		} else {
+			/* No more data */
+			break;
+		}
+	}
+	/* Successful exit */
+	*pnum_bytes = num_bytes;
+	*pnum_chars = num_chars;
+	*pis_unicode = is_unicode;
+
+	if (num_chars == 0 && grow_mode) {
+		efree(buf);
+		buf = NULL;
+	}
+	return buf;
+}
+
 PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 {
 	/* if there is data in the buffer, it's not EOF */
-	if (stream->writepos - stream->readpos > 0) {
+	if (stream->readbuf_avail > 0) {
 		return 0;
 	}
 
@@ -684,6 +931,8 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	return (stream->ops->stat)(stream, ssb TSRMLS_CC);
 }
 
+/* buf != NULL Still used by file() in ext/standard/file.c
+   buf == NULL semantics no longer supported */
 PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC)
 {
 	size_t avail;
@@ -691,8 +940,7 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 	char *readptr;
 
 	if (!buf) {
-		readptr = stream->readbuf + stream->readpos;
-		avail = stream->writepos - stream->readpos;
+		return NULL;
 	} else {
 		readptr = buf;
 		avail = buf_len;
@@ -725,123 +973,366 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 
 /* If buf == NULL, the buffer will be allocated automatically and will be of an
  * appropriate length to hold the line, regardless of the line length, memory
- * permitting */
+ * permitting -- returned string will be up to (maxlen-1), last byte holding terminating NULL */
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 		size_t *returned_len TSRMLS_DC)
 {
-	size_t avail = 0;
-	size_t current_buf_size = 0;
+	php_stream_bucket *bucket;
 	size_t total_copied = 0;
-	int grow_mode = 0;
-	char *bufstart = buf;
+	int growmode = 0;
 
-	if (buf == NULL) {
-		grow_mode = 1;
-	} else if (maxlen == 0) {
-		return NULL;
+	if (!buf) {
+		maxlen = stream->chunk_size + 1;
+		buf = emalloc(maxlen);
+		growmode = 1;
 	}
 
-	/*
-	 * If the underlying stream operations block when no new data is readable,
-	 * we need to take extra precautions.
-	 *
-	 * If there is buffered data available, we check for a EOL. If it exists,
-	 * we pass the data immediately back to the caller. This saves a call
-	 * to the read implementation and will not block where blocking
-	 * is not necessary at all.
-	 *
-	 * If the stream buffer contains more data than the caller requested,
-	 * we can also avoid that costly step and simply return that data.
-	 */
+	/* Leave room for NULL */
+	maxlen--;
 
-	for (;;) {
-		avail = stream->writepos - stream->readpos;
+	for(;;) {
+		/* Fill buf with buffered data
+		   until no space is left in the buffer
+		   or EOL is found */
+		char lastchar = 0;
 
-		if (avail > 0) {
-			size_t cpysz = 0;
-			char *readptr;
+		/* consumed readbuf if possible */
+		while ((bucket = stream->readbuf.head)) {
 			char *eol;
-			int done = 0;
+			size_t tocopy;
+			size_t wanted = maxlen - total_copied;
+			int bucket_consumed = 0;
 
-			readptr = stream->readbuf + stream->readpos;
-			eol = php_stream_locate_eol(stream, NULL, 0 TSRMLS_CC);
-
-			if (eol) {
-				cpysz = eol - readptr + 1;
-				done = 1;
-			} else {
-				cpysz = avail;
+			if (bucket->is_unicode) {
+				/* This is a string read func, convert to string first */
+				php_stream_bucket_tostring(stream, &bucket, &stream->readbuf_ofs TSRMLS_CC);
 			}
 
-			if (grow_mode) {
-				/* allow room for a NUL. If this realloc is really a realloc
-				 * (ie: second time around), we get an extra byte. In most
-				 * cases, with the default chunk size of 8K, we will only
-				 * incur that overhead once.  When people have lines longer
-				 * than 8K, we waste 1 byte per additional 8K or so.
-				 * That seems acceptable to me, to avoid making this code
-				 * hard to follow */
-				bufstart = erealloc(bufstart, current_buf_size + cpysz + 1);
-				current_buf_size += cpysz + 1;
-				buf = bufstart + total_copied;
-			} else {
-				if (cpysz >= maxlen - 1) {
-					cpysz = maxlen - 1;
-					done = 1;
+			if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL && lastchar == '\r') {
+				/* Line ending was actually found in the last char of the last bucket
+				   Since it was \r it could have been MAC or DOS */
+				stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
+				if (bucket->buf.str.val[stream->readbuf_ofs] == '\n') {
+					/* First byte here is a \n, put them together and you get DOS line endings */
+					stream->readbuf_ofs++;
+					stream->readbuf_avail--;
+					buf[total_copied++] = '\n';
+					/* unlikely -- It'd mean a one byte bucket -- possible though */
+					if (stream->readbuf_ofs >= bucket->buf.str.len) {
+						stream->readbuf_ofs = 0;
+						php_stream_bucket_unlink(bucket TSRMLS_CC);
+						php_stream_bucket_delref(bucket TSRMLS_CC);
+					}
+				} else {
+					/* Seeing no \n in the first char of this bucket, we know it was MAC */
+					stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
 				}
-			}
-
-			memcpy(buf, readptr, cpysz);
-
-			stream->position += cpysz;
-			stream->readpos += cpysz;
-			buf += cpysz;
-			maxlen -= cpysz;
-			total_copied += cpysz;
-
-			if (done) {
-				break;
-			}
-		} else if (stream->eof) {
-			break;
-		} else {
-			/* XXX: Should be fine to always read chunk_size */
-			size_t toread;
-			
-			if (grow_mode) {
-				toread = stream->chunk_size;
+				goto exit_getline;
+			} else if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
+				char *cr, *lf;
+				lf = memchr(bucket->buf.str.val + stream->readbuf_ofs, '\n', bucket->buf.str.len - stream->readbuf_ofs);
+				cr = memchr(bucket->buf.str.val + stream->readbuf_ofs, '\r', bucket->buf.str.len - stream->readbuf_ofs);
+				eol = (cr && (!lf || cr < (lf - 1))) ? cr : lf;
+			} else if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
+				eol = memchr(bucket->buf.str.val + stream->readbuf_ofs, '\r', bucket->buf.str.len - stream->readbuf_ofs);
 			} else {
-				toread = maxlen - 1;
-				if (toread > stream->chunk_size) {
-					toread = stream->chunk_size;
-				}
+				eol = memchr(bucket->buf.str.val + stream->readbuf_ofs, '\n', bucket->buf.str.len - stream->readbuf_ofs);
 			}
 
-			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
+			/* No \r or \n found in bucket -- grab it all */
+			if (!eol) {
+				eol = bucket->buf.str.val + bucket->buf.str.len - 1;
+			}
+			tocopy = eol - (bucket->buf.str.val + stream->readbuf_ofs) + 1;
 
-			if (stream->writepos - stream->readpos == 0) {
-				break;
+			/* maxlen exceeded */
+			if (tocopy > wanted && growmode) {
+				if (tocopy - wanted > stream->chunk_size) {
+					maxlen += tocopy - wanted;
+				} else {
+					maxlen += stream->chunk_size;
+				}
+				buf = erealloc(buf, maxlen + 1);
+				wanted = maxlen - total_copied;
+			}
+
+			if (tocopy > wanted) {
+				tocopy = wanted;
+			}
+
+			memcpy(buf + total_copied, bucket->buf.str.val + stream->readbuf_ofs, tocopy);
+			total_copied += tocopy;
+			stream->readbuf_ofs += tocopy;
+			stream->readbuf_avail -= tocopy;
+			lastchar = buf[total_copied-1];
+
+			if (stream->readbuf_ofs >= bucket->buf.str.len) {
+				stream->readbuf_ofs = 0;
+				php_stream_bucket_unlink(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+				bucket_consumed = 1;
+			}
+
+			if (total_copied >= maxlen) {
+				goto exit_getline;
+			}
+
+			if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL &&
+				bucket_consumed && lastchar == '\r') {
+				/* Could be MAC, could be DOS...
+				   Need to check the first char of the next bucket to be sure */
+				continue;
+			}
+
+			if (lastchar == '\r' || lastchar == '\n') {
+				stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
+				if (lastchar == '\r') {
+					/* if there were a \n in this bucket after the \r, we would be looking at it */
+					stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
+				}
+				goto exit_getline;
 			}
 		}
-	}
 
-	if (total_copied == 0) {
-		if (grow_mode) {
-			assert(bufstart == NULL);
+		if (stream->eof) {
+			if (total_copied == 0) {
+				if (growmode) {
+					efree(buf);
+				}
+				return NULL;
+			}
+			goto exit_getline;
 		}
-		return NULL;
+
+		if (maxlen - total_copied) {
+			size_t bufneeded = maxlen - total_copied;
+
+			if (growmode) {
+				bufneeded = stream->chunk_size;
+			}
+			php_stream_fill_read_buffer(stream, bufneeded TSRMLS_CC);
+		}
+
 	}
 
-	buf[0] = '\0';
+ exit_getline:
+
 	if (returned_len) {
 		*returned_len = total_copied;
 	}
+	buf[total_copied] = 0;
+	stream->position += total_copied;
 
-	return bufstart;
+	return buf;
+}
+
+/* If buf == NULL, the buffer will be allocated automatically and will be of an
+ * appropriate length to hold the line, regardless of the line length, memory
+ * permitting -- returned string will be up to (maxlen-1), last byte holding terminating NULL */
+PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pmax_bytes, int32_t *pmax_chars, int *pis_unicode TSRMLS_DC)
+{
+	php_stream_bucket *bucket;
+	int32_t num_bytes = 0, num_chars = 0;
+	int32_t max_bytes = *pmax_bytes, max_chars = *pmax_chars;
+	int growmode = 0, is_unicode;
+
+	while (!stream->readbuf.head) {
+		/* Nothing buffered, get an idea of the data type by polling */
+		int32_t fillsize = (max_chars > 0) ? max_chars : ((max_bytes > 0) ? max_bytes : stream->chunk_size);
+
+		php_stream_fill_read_buffer(stream, fillsize TSRMLS_CC);
+		if (!stream->readbuf.head) {
+			*pmax_bytes = 0;
+			*pmax_chars = 0;
+			*pis_unicode = 0;
+			return NULL;
+		}
+	}
+
+	*pis_unicode = is_unicode = stream->readbuf.head->is_unicode;
+
+	if (!is_unicode) {
+		/* Wrap normal get_line() */
+		int returned_len;
+		char *retbuf = php_stream_get_line(stream, (char*)buf, max_chars, &returned_len);
+
+		*pmax_chars = returned_len;
+		*pmax_bytes = returned_len;
+		return (UChar*)retbuf;
+	}
+
+	/* Now act like php_stream_u_read(), but stopping at 000A, 000D, or 000D 000A */
+
+	if (!buf) {
+		max_bytes = UBYTES(257);
+		buf = emalloc(max_bytes);
+		growmode = 1;
+	}
+
+	/* Leave room for NULL */
+	max_bytes -= UBYTES(1);
+
+	for(;;) {
+		/* Fill buf with buffered data
+		   until no space is left in the buffer
+		   or EOL is found */
+		UChar lastchar = 0;
+
+		/* consumed readbuf if possible */
+		while ((bucket = stream->readbuf.head)) {
+			UChar *eol, *s;
+			int32_t want_chars = max_chars - num_chars;
+			int32_t want_bytes = max_bytes - num_bytes;
+			int32_t count_chars;
+			int32_t count_bytes;
+			int bucket_consumed = 0;
+
+			if (!bucket->is_unicode) {
+				/* Done with unicode data, bail as though EOL was reached (even though it wasn't) */
+				goto exit_ugetline;
+			}
+
+			if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL && lastchar == '\r') {
+				/* Line ending was actually found in the last char of the last bucket
+				   Since it was \r it could have been MAC or DOS */
+				stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
+				if (bucket->buf.ustr.val[stream->readbuf_ofs] == '\n') {
+					/* First byte here is a \n, put them together and you get DOS line endings */
+					stream->readbuf_ofs++;
+					stream->readbuf_avail--;
+					buf[num_bytes >> 1] = '\n';	/* Can't use num_chars here, surrogate pairs will foul it up */
+					num_bytes += UBYTES(1);
+					num_chars++;
+					/* unlikely -- It'd mean a one UChar bucket -- possible though */
+					if (stream->readbuf_ofs >= bucket->buf.ustr.len) {
+						stream->readbuf_ofs = 0;
+						php_stream_bucket_unlink(bucket TSRMLS_CC);
+						php_stream_bucket_delref(bucket TSRMLS_CC);
+					}
+				} else {
+					/* Seeing no \n in the first char of this bucket, we know it was MAC */
+					stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
+				}
+				goto exit_ugetline;
+			} else if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
+				UChar *cr, *lf;
+				lf  = u_memchr(bucket->buf.ustr.val + stream->readbuf_ofs, '\n', bucket->buf.ustr.len - stream->readbuf_ofs);
+				cr  = u_memchr(bucket->buf.ustr.val + stream->readbuf_ofs, '\r', bucket->buf.ustr.len - stream->readbuf_ofs);
+				eol = (cr && (!lf || cr < (lf - 1))) ? cr : lf;
+			} else if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
+				eol = u_memchr(bucket->buf.ustr.val + stream->readbuf_ofs, '\r', bucket->buf.ustr.len - stream->readbuf_ofs);
+			} else {
+				eol = u_memchr(bucket->buf.ustr.val + stream->readbuf_ofs, '\n', bucket->buf.ustr.len - stream->readbuf_ofs);
+			}
+
+			/* No \r or \n found in bucket -- grab it all */
+			if (!eol) {
+				eol = bucket->buf.ustr.val + bucket->buf.ustr.len - 1;
+			}
+			s = bucket->buf.ustr.val + stream->readbuf_ofs;
+
+			count_bytes = UBYTES(eol - s + 1);
+			if (count_bytes > want_bytes && growmode) {
+				max_bytes = num_bytes + count_bytes + UBYTES(256);
+				want_bytes = max_bytes - num_bytes;
+				buf = erealloc(buf, max_bytes + UBYTES(1));
+			} else if (count_bytes > want_bytes) {
+				count_bytes = want_bytes;
+			}
+			if (U16_IS_SURROGATE(s[(count_bytes >> 1) - 1]) &&
+				U16_IS_SURROGATE_LEAD(s[(count_bytes >> 1) - 1])) {
+				count_bytes -= UBYTES(1);
+			}
+			if (count_bytes <= 0) {
+				/* Not enough space in buffer, just break out */
+				goto exit_ugetline;
+			}
+			count_chars = u_countChar32(s, count_bytes >> 1);
+
+			if (max_chars >= 0 && count_chars > want_chars) {
+				count_chars = want_chars;
+				count_bytes = 0;
+				U16_FWD_N_UNSAFE(s, count_bytes, count_chars);
+				count_bytes <<= 1; /* translate U16 to bytes */
+			}
+
+			memcpy(buf + num_bytes, s, count_bytes);
+			num_bytes += count_bytes;
+			num_chars += count_chars;
+			stream->readbuf_ofs += count_bytes >> 1;
+			stream->readbuf_avail -= count_bytes >> 1;
+
+			lastchar = buf[(num_bytes >> 1) - 1];
+
+			if (stream->readbuf_ofs >= bucket->buf.ustr.len) {
+				stream->readbuf_ofs = 0;
+				php_stream_bucket_unlink(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+				bucket_consumed = 1;
+			}
+
+			if ((max_bytes >= 0 && num_bytes >= max_bytes) || 
+				(max_chars >= 0 && num_chars >= max_chars)) {
+				goto exit_ugetline;
+			}
+
+			if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL &&
+				bucket_consumed && lastchar == '\r') {
+				/* Could be MAC, could be DOS...
+				   Need to check the first char of the next bucket to be sure */
+				continue;
+			}
+
+			if (lastchar == '\r' || lastchar == '\n') {
+				stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
+				if (lastchar == '\r') {
+					/* if there were a \n in this bucket after the \r, we would be looking at it */
+					stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
+				}
+				goto exit_ugetline;
+			}
+		}
+
+		if (stream->eof) {
+			if (num_bytes == 0) {
+				if (growmode) {
+					efree(buf);
+				}
+				buf = NULL;
+			}
+			goto exit_ugetline;
+		}
+
+		if (max_bytes - num_bytes) {
+			int32_t want_bytes = max_bytes - num_bytes;
+
+			if (growmode) {
+				want_bytes = stream->chunk_size;
+			}
+			php_stream_fill_read_buffer(stream, want_bytes TSRMLS_CC);
+		}
+
+	}
+
+ exit_ugetline:
+
+	*pmax_chars = num_chars;
+	*pmax_bytes = num_bytes;
+	*pis_unicode = is_unicode;
+	if (buf) {
+		buf[num_bytes >> 1] = 0;
+	}
+	stream->position += num_bytes;
+
+	return buf;
 }
 
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC)
 {
+	/* UTODO: Needs desperate rewriting for unicode conversion */
+	return NULL;
+
+#ifdef SMG_0
 	char *e, *buf;
 	size_t toread;
 	int skip = 0;
@@ -852,15 +1343,15 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		toread = maxlen;
 	} else {
 		if (delim_len == 1) {
-			e = memchr(stream->readbuf + stream->readpos, *delim, stream->writepos - stream->readpos);
+			e = memchr(stream->readbuf, *delim, stream->readbuf_len);
 		} else {
-			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->writepos));
+			e = php_memnstr(stream->readbuf, delim, delim_len, (stream->readbuf + stream->readbuflen));
 		}
 
 		if (!e) {
 			toread = maxlen;
 		} else {
-			toread = e - (char *) stream->readbuf - stream->readpos;
+			toread = e - (char *) stream->readbuf;
 			skip = 1;
 		}
 	}
@@ -883,6 +1374,18 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		efree(buf);
 		return NULL;
 	}
+#endif
+}
+
+PHPAPI void _php_stream_flush_readbuf(php_stream *stream TSRMLS_DC)
+{
+	php_stream_bucket *bucket;
+
+	while ((bucket = stream->readbuf.head)) {
+		php_stream_bucket_unlink(bucket TSRMLS_CC);
+		php_stream_bucket_delref(bucket TSRMLS_CC);
+	}
+	stream->readbuf_ofs = stream->readbuf_avail = 0;
 }
 
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
@@ -893,8 +1396,11 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
 	 * performing a low-level seek */
+/* UTODO: FIX this
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && stream->readpos != stream->writepos) {
-		stream->readpos = stream->writepos = 0;
+*/
+	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+		php_stream_flush_readbuf(stream);
 
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
 	}
@@ -931,7 +1437,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
  * This may trigger a real write to the stream.
  * Returns the number of bytes consumed from buf by the first filter in the chain.
  * */
-static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags TSRMLS_DC)
+static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags, int is_unicode TSRMLS_DC)
 {
 	size_t consumed = 0;
 	php_stream_bucket *bucket;
@@ -941,16 +1447,18 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 	php_stream_filter *filter;
 
 	if (buf) {
-		bucket = php_stream_bucket_new(stream, (char *)buf, count, 0, 0 TSRMLS_CC);
-		php_stream_bucket_append(&brig_in, bucket TSRMLS_CC);
+		if (is_unicode) {
+			bucket = php_stream_bucket_new_unicode(stream, (UChar *)buf, count, 0, 0 TSRMLS_CC);
+		} else {
+			bucket = php_stream_bucket_new(stream, (char *)buf, count, 0, 0 TSRMLS_CC);
+		}
+		php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
 	}
 
 	for (filter = stream->writefilters.head; filter; filter = filter->next) {
 		/* for our return value, we are interested in the number of bytes consumed from
 		 * the first filter in the chain */
-		status = filter->fops->filter(stream, filter, brig_inp, brig_outp,
-				filter == stream->writefilters.head ? &consumed : NULL, flags TSRMLS_CC);
-
+		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, (filter == stream->writefilters.head) ? &consumed : NULL, flags TSRMLS_CC);
 		if (status != PSFS_PASS_ON) {
 			break;
 		}
@@ -969,7 +1477,11 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 			 * underlying stream */
 			while (brig_inp->head) {
 				bucket = brig_inp->head;
-				_php_stream_write_buffer(stream, bucket->buf, bucket->buflen TSRMLS_CC);
+				if (bucket->is_unicode) {
+					_php_stream_write_buffer(stream, (char *)bucket->buf.ustr.val, UBYTES(bucket->buf.ustr.len) TSRMLS_CC);
+				} else {
+					_php_stream_write_buffer(stream, bucket->buf.str.val, bucket->buf.str.len TSRMLS_CC);
+				}
 				/* Potential error situation - eg: no space on device. Perhaps we should keep this brigade
 				 * hanging around and try to write it later.
 				 * At the moment, we just drop it on the floor
@@ -992,12 +1504,53 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 	return consumed;
 }
 
+PHPAPI int _php_stream_will_read_unicode(php_stream *stream TSRMLS_DC)
+{
+	php_stream_filter *filter;
+	int inverted = 0;
+
+	if (stream->readbuf.head) {
+		/* If there are buckets available, what do they hold */
+		return stream->readbuf.head->is_unicode;
+	}
+
+	if (!stream->readfilters.head) {
+		/* Not filtered == reads as string */
+		return 0;
+	}
+
+	for(filter = stream->readfilters.tail; filter; filter = filter->prev) {
+		if (filter->flags & PSFO_FLAG_OUTPUTS_SAME) {
+			continue;
+		}
+		if (filter->flags & PSFO_FLAG_OUTPUTS_OPPOSITE) {
+			inverted ^= 1;
+			continue;
+		}
+		if (filter->flags & PSFO_FLAG_OUTPUTS_ANY) {
+			/* Indeterminate */
+			return -1;
+		}
+		if (filter->flags & PSFO_FLAG_OUTPUTS_STRING) {
+			/* If an inversion happens, it'll be unicode, otherwise string */
+			return inverted;
+		}
+		if (filter->flags & PSFO_FLAG_OUTPUTS_UNICODE) {
+			/* If an inversion happens, it'll be string, otherwise unicode */
+			return inverted ^ 1;
+		}
+	}
+
+	/* string comes from stream so apply same logic as filter outputting string */
+	return inverted;
+}
+
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 {
 	int ret = 0;
 
 	if (stream->writefilters.head) {
-		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
+		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC, 0  TSRMLS_CC);
 	}
 
 	if (stream->ops->flush) {
@@ -1014,9 +1567,30 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 	}
 
 	if (stream->writefilters.head) {
-		return _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL TSRMLS_CC);
+		return _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL, 0 TSRMLS_CC);
 	} else {
 		return _php_stream_write_buffer(stream, buf, count TSRMLS_CC);
+	}
+}
+
+PHPAPI size_t _php_stream_u_write(php_stream *stream, const UChar *buf, int32_t count TSRMLS_DC)
+{
+	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
+		return 0;
+	}
+
+	if (stream->writefilters.head) {
+		return _php_stream_write_filtered(stream, (const char*)buf, count, PSFS_FLAG_NORMAL, 1 TSRMLS_CC);
+	} else {
+		int32_t ret;
+
+		ret = _php_stream_write_buffer(stream, (const char*)buf, UBYTES(count) TSRMLS_CC);
+
+		/* Return data points, not bytes */
+		if (ret > 0) {
+			ret >>= 1;
+		}
+		return ret;
 	}
 }
 
@@ -1050,19 +1624,44 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	/* handle the case where we are in the buffer */
 	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
 		switch(whence) {
+			case SEEK_SET:
+				if (offset < stream->position ||
+					offset > stream->position + stream->readbuf_avail) {
+					break;
+				}
+				/* act like SEEK_CUR */
+				whence = SEEK_CUR;
+				offset -= stream->position;
+				/* fall through */
 			case SEEK_CUR:
-				if (offset > 0 && offset < stream->writepos - stream->readpos) {
-					stream->readpos += offset;
-					stream->position += offset;
-					stream->eof = 0;
+				if (offset == 0) {
+					/* nothing to do */
 					return 0;
 				}
-				break;
-			case SEEK_SET:
-				if (offset > stream->position &&
-						offset < stream->position + stream->writepos - stream->readpos) {
-					stream->readpos += offset - stream->position;
-					stream->position = offset;
+
+				if (offset > 0 && offset <= stream->readbuf_avail) {
+					php_stream_bucket *bucket;
+
+					while (offset && (bucket = stream->readbuf.head)) {
+						int consume = bucket->buf.str.len - stream->readbuf_ofs;
+
+						if (consume > offset) {
+							/* seeking within this bucket */
+							stream->readbuf_ofs += offset;
+							stream->readbuf_avail -= offset;
+							stream->position += offset;
+							break;
+						}
+
+						/* consume the remaining bucket */
+						stream->position += consume;
+						stream->readbuf_ofs = 0;
+						stream->readbuf_avail -= consume;
+						offset -= consume;
+
+						php_stream_bucket_unlink(bucket TSRMLS_CC);
+						php_stream_bucket_delref(bucket TSRMLS_CC);
+					}
 					stream->eof = 0;
 					return 0;
 				}
@@ -1077,7 +1676,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		if (stream->writefilters.head) {
 			_php_stream_flush(stream, 0 TSRMLS_CC);
 		}
-		
+
 		switch(whence) {
 			case SEEK_CUR:
 				offset = stream->position + offset;
@@ -1092,7 +1691,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 			}
 
 			/* invalidate the buffer contents */
-			stream->readpos = stream->writepos = 0;
+			php_stream_flush_readbuf(stream);
 
 			return ret;
 		}
@@ -1748,7 +2347,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	char *path_to_open;
 	int persistent = options & STREAM_OPEN_PERSISTENT;
 	char *copy_of_path = NULL;
-
+	int implicit_mode[16];
+	int modelen = strlen(mode);
 	
 	if (opened_path) {
 		*opened_path = NULL;
@@ -1766,10 +2366,20 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		return NULL;
 	}
 
+	memcpy(implicit_mode, mode, modelen);
+	if (context && context->default_mode && modelen < 15 && !strchr(mode, 't') && !strchr(mode, 'b')) {
+		if (context->default_mode & PHP_FILE_BINARY) {
+			implicit_mode[modelen++] = 'b';
+		} else if (context->default_mode & PHP_FILE_TEXT) {
+			implicit_mode[modelen++] = 't';
+		}
+		implicit_mode[modelen] = 0;
+	}
+
 	if (wrapper) {
 
 		stream = wrapper->wops->stream_opener(wrapper,
-				path_to_open, mode, options ^ REPORT_ERRORS,
+				path_to_open, implicit_mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
 
 		/* if the caller asked for a persistent stream but the wrapper did not
@@ -1783,6 +2393,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		
 		if (stream) {
 			stream->wrapper = wrapper;
+			memcpy(stream->mode, implicit_mode, modelen + 1);
 		}
 	}
 
@@ -1829,6 +2440,45 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 	}
 
+	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
+	if (stream && strchr(implicit_mode, 't') && (strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+'))) {
+		php_stream_filter *filter;
+		char *encoding = (context && context->output_encoding) ? context->output_encoding : "utf8";
+		char *filtername;
+		int encoding_len = strlen(encoding);
+
+		filtername = emalloc(encoding_len + sizeof("unicode.to."));
+		memcpy(filtername, "unicode.to.", sizeof("unicode.to.") - 1);
+		memcpy(filtername + sizeof("unicode.to.") - 1, encoding, encoding_len + 1);
+
+		filter = php_stream_filter_create(filtername, NULL, persistent TSRMLS_CC);
+		if (!filter) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed applying output encoding");
+		} else {
+			php_stream_filter_append(&stream->writefilters, filter);
+		}
+		efree(filtername);
+	}
+
+	if (stream && strchr(implicit_mode, 't') && (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+'))) {
+		php_stream_filter *filter;
+		char *filtername;
+		char *encoding = (context && context->input_encoding) ? context->input_encoding : "utf8";
+		int input_encoding_len = strlen(encoding);
+
+		filtername = emalloc(input_encoding_len + sizeof("unicode.from."));
+		memcpy(filtername, "unicode.from.", sizeof("unicode.from.") - 1);
+		memcpy(filtername + sizeof("unicode.from.") - 1, encoding, input_encoding_len + 1);
+
+		filter = php_stream_filter_create(filtername, NULL, persistent TSRMLS_CC);
+		if (!filter) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed applying input encoding");
+		} else {
+			php_stream_filter_append(&stream->readfilters, filter);
+		}
+		efree(filtername);
+	}
+
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream" TSRMLS_CC);
 	}
@@ -1838,6 +2488,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		pefree(copy_of_path, persistent);
 	}
 #endif
+
+
 	return stream;
 }
 /* }}} */
@@ -1866,6 +2518,12 @@ PHPAPI void php_stream_context_free(php_stream_context *context)
 	if (context->notifier) {
 		php_stream_notification_free(context->notifier);
 		context->notifier = NULL;
+	}
+	if (context->input_encoding) {
+		efree(context->input_encoding);
+	}
+	if (context->output_encoding) {
+		efree(context->output_encoding);
 	}
 	if (context->links) {
 		zval_ptr_dtor(&context->links);

@@ -48,6 +48,8 @@ ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 ZEND_EXTERN_MODULE_GLOBALS(iconv)
 #endif
 
+#include <unicode/uversion.h>
+
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
 							PUTS("<h2>" name "</h2>\n"); \
 						} else { \
@@ -475,6 +477,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Zend Memory Manager", "disabled" );
 #endif
 
+		{
+			char buf[1024];
+			snprintf(buf, sizeof(buf), "Based on%s. ICU Version %s.", U_COPYRIGHT_STRING, U_ICU_VERSION);
+			php_info_print_table_row(2, "Unicode Support", buf);
+		}
 #if HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else

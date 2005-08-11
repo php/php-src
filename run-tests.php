@@ -545,7 +545,7 @@ if (!getenv('NO_INTERACTION')) {
 		
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 			$output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
-			$fp = fopen($output_file, "w");
+			$fp = fopen($output_file, "wt");
 			fwrite($fp, $failed_tests_data);
 			fclose($fp);
 		
@@ -606,7 +606,7 @@ function save_text($filename,$text)
 {
 	global $DETAILED;
 
-	$fp = @fopen($filename,'w') or error("Cannot open file '" . $filename . "' (save_text)");
+	$fp = @fopen($filename,'wt') or error("Cannot open file '" . $filename . "' (save_text)");
 	fwrite($fp,$text);
 	fclose($fp);
 	if (1 < $DETAILED) echo "
@@ -701,7 +701,7 @@ TEST $file
 		'ARGS'   => '',
 	);
 
-	$fp = @fopen($file, "r") or error("Cannot open test file: $file");
+	$fp = @fopen($file, "rt") or error("Cannot open test file: $file");
 
 	$borked = false;
 	$bork_info = '';
@@ -720,7 +720,8 @@ TEST $file
 		$line = fgets($fp);
 
 		// Match the beginning of a section.
-		if (ereg('^--([A-Z]+)--',$line,$r)) {
+		// UTODO changed to use preg, because ereg was crapping out
+		if (preg_match('/^--([A-Z]+)--/',$line,$r)) {
 			$section = $r[1];
 			$section_text[$section] = '';
 			continue;
@@ -784,13 +785,13 @@ TEST $file
 		$tmp = realpath(dirname($file));
 	}
 
-	$diff_filename   = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.diff', basename($file));
-	$log_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.log', basename($file));
-	$exp_filename    = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.exp', basename($file));
-	$output_filename = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.out', basename($file));
+	$diff_filename   = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/','.diff', basename($file));
+	$log_filename    = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/','.log', basename($file));
+	$exp_filename    = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/','.exp', basename($file));
+	$output_filename = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/','.out', basename($file));
 	
 	$tmp_skipif = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
-	$tmp_file   = $tmp . DIRECTORY_SEPARATOR . ereg_replace('\.phpt$','.php',basename($file));
+	$tmp_file   = $tmp . DIRECTORY_SEPARATOR . preg_replace('/\.phpt$/','.php',basename($file));
 	$tmp_post   = $tmp . DIRECTORY_SEPARATOR . uniqid('/phpt.');
 
 	if (is_array($IN_REDIRECT)) {
@@ -1066,28 +1067,28 @@ COMMAND $cmd
 
 	// write .exp
 	if (strpos($log_format,'E') !== FALSE) {
-		$log = fopen($exp_filename,'w') or error("Cannot create test log - $exp_filename");
+		$log = fopen($exp_filename,'wt') or error("Cannot create test log - $exp_filename");
 		fwrite($log,$wanted);
 		fclose($log);
 	}
 
 	// write .out
 	if (strpos($log_format,'O') !== FALSE) {
-		$log = fopen($output_filename,'w') or error("Cannot create test log - $output_filename");
+		$log = fopen($output_filename,'wt') or error("Cannot create test log - $output_filename");
 		fwrite($log,$output);
 		fclose($log);
 	}
 
 	// write .diff
 	if (strpos($log_format,'D') !== FALSE) {
-		$log = fopen($diff_filename,'w') or error("Cannot create test log - $diff_filename");
+		$log = fopen($diff_filename,'wt') or error("Cannot create test log - $diff_filename");
 		fwrite($log,generate_diff($wanted,$wanted_re,$output));
 		fclose($log);
 	}
 
 	// write .log
 	if (strpos($log_format,'L') !== FALSE) {
-		$log = fopen($log_filename,'w') or error("Cannot create test log - $log_filename");
+		$log = fopen($log_filename,'wt') or error("Cannot create test log - $log_filename");
 		fwrite($log,"
 ---- EXPECTED OUTPUT
 $wanted

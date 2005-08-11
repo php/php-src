@@ -537,16 +537,12 @@ static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
 {
 	
 	char *mimetype;
-	if (SG(default_mimetype) || SG(default_charset)) {
-		/* Assume output will be of the default MIME type.  Individual
-		   scripts may change this later. */
-		char *tmpmimetype;
-		tmpmimetype = sapi_get_default_content_type(TSRMLS_C);
-		mimetype = pstrdup(r->pool, tmpmimetype);
-		efree(tmpmimetype);
-	} else {
-		mimetype = SAPI_DEFAULT_MIMETYPE "; charset=" SAPI_DEFAULT_CHARSET;
-	}
+	/* Assume output will be of the default MIME type.  Individual
+	   scripts may change this later. */
+	char *tmpmimetype;
+	tmpmimetype = sapi_get_default_content_type(TSRMLS_C);
+	mimetype = pstrdup(r->pool, tmpmimetype);
+	efree(tmpmimetype);
 	return mimetype;
 }
 /* }}} */
@@ -711,7 +707,7 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_per_di
 {
 	php_per_dir_entry *orig_per_dir_entry;
 
-	if (zend_hash_find(target_ht, hash_key->arKey, hash_key->nKeyLength, (void **) &orig_per_dir_entry)==FAILURE) {
+	if (zend_u_hash_find(target_ht, hash_key->type, hash_key->u.string, hash_key->nKeyLength, (void **) &orig_per_dir_entry)==FAILURE) {
 		return 1; /* does not exist in dest, copy from source */
 	}
 

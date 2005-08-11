@@ -270,10 +270,9 @@ ssize_t pread(int, void *, size_t, off64_t);
 BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
-PHPAPI int php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
-		2);
+PHPAPI int php_printf(const char *format, ...);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);
-int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
+int Debug(char *format, ...);
 int cfgparse(void);
 END_EXTERN_C()
 
@@ -289,7 +288,7 @@ BEGIN_EXTERN_C()
 PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC);
 #define php_std_error_handling() php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC)
 
-PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
+PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC);
 
 #ifdef ZTS
 #define PHP_ATTR_FMT_OFFSET 1
@@ -298,12 +297,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 #endif
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 3, PHP_ATTR_FMT_OFFSET + 4);
-PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 4, PHP_ATTR_FMT_OFFSET + 5);
-PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...)
-	PHP_ATTRIBUTE_FORMAT(printf, PHP_ATTR_FMT_OFFSET + 5, PHP_ATTR_FMT_OFFSET + 6);
+PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char *format, ...);
+PHPAPI void php_error_docref1(const char *docref TSRMLS_DC, const char *param1, int type, const char *format, ...);
+PHPAPI void php_error_docref2(const char *docref TSRMLS_DC, const char *param1, const char *param2, int type, const char *format, ...);
 END_EXTERN_C()
 
 #define php_error_docref php_error_docref0

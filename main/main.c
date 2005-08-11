@@ -205,6 +205,30 @@ static PHP_INI_MH(OnUpdateTimeout)
 	zend_set_timeout(EG(timeout_seconds));
 	return SUCCESS;
 }
+
+static ZEND_INI_MH(OnUpdateOutputEncoding)
+{
+	if (new_value) {
+		if (zend_set_converter_encoding(&UG(output_encoding_conv), new_value) == FAILURE) {
+			zend_error(E_CORE_ERROR, "Unrecognized encoding '%s' used for %s", new_value ?  new_value : "null", entry->name);
+			return FAILURE;
+		}
+	} else {
+		if (UG(output_encoding_conv)) {
+			ucnv_close(UG(output_encoding_conv));
+		}
+		UG(output_encoding_conv) = NULL;
+	}
+	if (UG(output_encoding_conv)) {
+		zend_set_converter_error_mode(UG(output_encoding_conv), UG(from_u_error_mode));
+		zend_set_converter_subst_char(UG(output_encoding_conv), UG(subst_char), UG(subst_char_len));
+		if (stage == ZEND_INI_STAGE_RUNTIME) {
+			sapi_update_default_charset(TSRMLS_C);
+		}
+	}
+
+	return SUCCESS;
+}
 /* }}} */
 
 /* Need to convert to strings and make use of:
@@ -289,6 +313,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("default_charset",		SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct,sapi_globals)
 	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct,sapi_globals)
+	ZEND_INI_ENTRY("unicode.output_encoding",  NULL, ZEND_INI_ALL, OnUpdateOutputEncoding)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateString,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("include_path",			PHP_INCLUDE_PATH,		PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,			php_core_globals,	core_globals)
@@ -432,10 +457,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	int buffer_len = 0;
 	char *space;
 	char *class_name = get_active_class_name(&space TSRMLS_CC);
-	char *function;
+	char *function = NULL;
 	char *origin;
 	char *message;
-	int is_function = 0;
+	char *stage;
 
 	/* get error text into buffer and escape for html if necessary */
 	buffer_len = vspprintf(&buffer, 0, format, args);
@@ -449,23 +474,22 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* which function caused the problem if any at all */
 	if (php_during_module_startup()) {
-		function = "PHP Startup";
+		stage = "PHP Startup";
 	} else if (php_during_module_shutdown()) {
-		function = "PHP Shutdown";
+		stage = "PHP Shutdown";
 	} else {
 		function = get_active_function_name(TSRMLS_C);
-		if (!function || !strlen(function)) {
-			function = "Unknown";
-		} else {
-			is_function = 1;
+		if (function && !USTR_LEN(function)) {
+			stage = "Unknown";
+			function = NULL;
 		}
 	}
 
 	/* if we still have memory then format the origin */
-	if (is_function) {
-		spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);	
+	if (function) {
+		spprintf(&origin, 0, "%v%s%v(%s)", class_name, space, function, params);	
 	} else {
-		spprintf(&origin, 0, "%s", function);	
+		spprintf(&origin, 0, "%v", stage);	
 	}
 
 	/* origin and buffer available, so lets come up with the error message */
@@ -475,8 +499,8 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	/* no docref given but function is known (the default) */
-	if (!docref && is_function) {
-		spprintf(&docref_buf, 0, "function.%s", function);
+	if (!docref && function) {
+		spprintf(&docref_buf, 0, "function.%v", function);
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
 		}
@@ -487,7 +511,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	 * - we show erroes in html mode OR
 	 * - the user wants to see the links anyway
 	 */
-	if (docref && is_function && (PG(html_errors) || strlen(PG(docref_root)))) {
+	if (docref && function && (PG(html_errors) || strlen(PG(docref_root)))) {
 		if (strncmp(docref, "http://", 7)) {
 			/* We don't have 'http://' so we use docref_root */
 
@@ -1061,6 +1085,8 @@ int php_request_startup(TSRMLS_D)
 		/* We turn this off in php_execute_script() */
 		/* PG(during_request_startup) = 0; */
 
+		sapi_update_default_charset(TSRMLS_C);
+
 		php_hash_environment(TSRMLS_C);
 		zend_activate_modules(TSRMLS_C);
 		PG(modules_activated)=1;
@@ -1315,6 +1341,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_utility_values zuv;
 	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
 	char *php_os;
+	zend_bool orig_unicode;
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
@@ -1423,6 +1450,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_INI_ENTRIES();
 	zend_register_standard_ini_entries(TSRMLS_C);
 
+	orig_unicode = UG(unicode);
+	UG(unicode) = 0;
+
 	/* Disable realpath cache if safe_mode or open_basedir are set */
 	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
 		CWDG(realpath_cache_size_limit) = 0;
@@ -1507,9 +1537,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* start Zend extensions */
 	zend_startup_extensions();
 
-#ifdef ZTS
+	UG(unicode) = orig_unicode;
 	zend_post_startup(TSRMLS_C);
-#endif
 
 	module_initialized = 1;
 	sapi_deactivate(TSRMLS_C);

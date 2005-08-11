@@ -1128,7 +1128,7 @@ static zend_object_handlers sxe_ze1_object_handlers = {
 
 static zend_object_value sxe_object_ze1_clone(zval *zobject TSRMLS_DC)
 {
-	php_error(E_ERROR, "Cannot clone object of class %s due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
+	php_error(E_ERROR, "Cannot clone object of class %v due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
 	/* Return zobject->value.obj just to satisfy compiler */
 	return zobject->value.obj;
 }

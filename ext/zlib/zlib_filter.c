@@ -79,13 +79,20 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
+		bucket = buckets_in->head;
+
+		if (bucket->is_unicode) {
+			/* inflation not allowed for unicode data */
+			return PSFS_ERR_FATAL;
+		}
+
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-		while (bin < bucket->buflen) {
-			desired = bucket->buflen - bin;
+		while (bin < bucket->buf.str.len) {
+			desired = bucket->buf.str.len - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
 			}
-			memcpy(data->strm.next_in, bucket->buf + bin, desired);
+			memcpy(data->strm.next_in, bucket->buf.str.val + bin, desired);
 			data->strm.avail_in = desired;
 
 			status = inflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FINISH : Z_SYNC_FLUSH);
@@ -97,7 +104,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
 			data->strm.next_in = data->inbuf;
 			data->strm.avail_in = 0;
-			consumed += desired;
 			bin += desired;
 
 			if (data->strm.avail_out < data->outbuf_len) {
@@ -110,6 +116,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				exit_status = PSFS_PASS_ON;
 			}
 		}
+		consumed += bucket->buf.str.len;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
@@ -151,7 +158,8 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
 	php_zlib_inflate_dtor,
-	"zlib.inflate"
+	"zlib.inflate",
+	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
 };
 /* }}} */
 
@@ -186,14 +194,21 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
-		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		bucket = buckets_in->head;
 
-		while (bin < bucket->buflen) {
-			desired = bucket->buflen - bin;
+		if (bucket->is_unicode) {
+			/* inflation not allowed for unicode data */
+			return PSFS_ERR_FATAL;
+		}
+
+		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+
+		while (bin < bucket->buf.str.len) {
+			desired = bucket->buf.str.len - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
 			}
-			memcpy(data->strm.next_in, bucket->buf + bin, desired);
+			memcpy(data->strm.next_in, bucket->buf.str.val + bin, desired);
 			data->strm.avail_in = desired;
 
 			status = deflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH));
@@ -205,7 +220,6 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
 			data->strm.next_in = data->inbuf;
 			data->strm.avail_in = 0;
-			consumed += desired;
 			bin += desired;
 
 			if (data->strm.avail_out < data->outbuf_len) {
@@ -219,6 +233,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 				exit_status = PSFS_PASS_ON;
 			}
 		}
+		consumed += bucket->buf.str.len;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
@@ -242,6 +257,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
 	}
+
 	return exit_status;
 }
 
@@ -259,7 +275,8 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 static php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
 	php_zlib_deflate_dtor,
-	"zlib.deflate"
+	"zlib.deflate",
+	PSFO_FLAG_ACCEPTS_STRING | PSFO_FLAG_OUTPUTS_STRING
 };
 
 /* }}} */

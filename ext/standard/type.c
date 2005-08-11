@@ -52,6 +52,14 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("string", 1);
 			break;
 	
+		case IS_BINARY:
+			RETVAL_STRING("binary", 1);
+			break;
+
+		case IS_UNICODE:
+			RETVAL_STRING("unicode", 1);
+			break;
+
 		case IS_ARRAY:
 			RETVAL_STRING("array", 1);
 			break;
@@ -348,6 +356,8 @@ PHP_FUNCTION(is_scalar)
 		case IS_DOUBLE:
 		case IS_LONG:
 		case IS_STRING:
+		case IS_BINARY:
+		case IS_UNICODE:
 			RETURN_TRUE;
 			break;
 
