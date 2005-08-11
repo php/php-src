@@ -90,6 +90,8 @@
  */
 
 #include <zend_strtod.h>
+#include <unicode/utypes.h>
+#include <unicode/ustdio.h>
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -1778,3 +1780,23 @@ zend_strtod
 	result = sign ? -value(rv) : value(rv);
 	return result;
 	}
+
+/* UTODO: someone can reimplement this using the code above, if they really want to. */
+ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr)
+{
+	double value;
+	int32_t num_conv = 0, num_read = 0;
+
+	num_conv = u_sscanf(nptr, "%f%n", &value, &num_read);
+	if (num_conv != EOF) {
+		if (endptr != 0) {
+			*endptr = (UChar *)nptr + num_read;
+		}
+		return value;
+	} else {
+		if (endptr != 0) {
+			*endptr = (UChar *)nptr;
+		}
+		return 0;
+	}
+}

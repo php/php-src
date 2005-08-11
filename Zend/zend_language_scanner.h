@@ -29,21 +29,11 @@ typedef struct _zend_lex_state {
 	uint lineno;
 	char *filename;
 
-#ifdef ZEND_MULTIBYTE
-	/* original (unfiltered) script */
-	char *script_org;
-	int script_org_size;
-
-	/* filtered script */
-	char *script_filtered;
-	int script_filtered_size;
-
-	/* input/ouput filters */
-	zend_encoding_filter input_filter;
-	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+	UConverter *input_conv;     /* converter for flex input */
+	UConverter *output_conv;    /* converter for data from flex output */
+	zend_bool encoding_checked;
+	char* rest_str;
+	int rest_len;   
 } zend_lex_state;
 
 

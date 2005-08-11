@@ -134,7 +134,8 @@ static int ini_key_compare(const void *a, const void *b TSRMLS_DC)
 	} else if (s->nKeyLength==0) { /* s is numeric, f is not */
 		return 1;
 	} else { /* both strings */
-		return zend_binary_strcasecmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
+		/*FIXME: unicode hash*/
+		return zend_binary_strcasecmp(f->key.u.string, f->nKeyLength, s->key.u.string, s->nKeyLength);
 	}
 }
 

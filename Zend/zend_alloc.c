@@ -23,6 +23,7 @@
 #include "zend_alloc.h"
 #include "zend_globals.h"
 #include "zend_fast_cache.h"
+#include "zend_unicode.h"
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
@@ -409,6 +410,24 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
+ZEND_API UChar *_eustrdup(const UChar *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	int length;
+	UChar *p;
+
+	length = u_strlen(s)+1;
+	HANDLE_BLOCK_INTERRUPTIONS();
+	p = (UChar *) _emalloc(sizeof(UChar) * length ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	if (!p) {
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+		return (UChar *)NULL;
+	}
+	HANDLE_UNBLOCK_INTERRUPTIONS();
+	u_memcpy(p, s, length);
+	return p;
+}
+
+
 ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
@@ -426,6 +445,23 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 }
 
 
+ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	UChar *p;
+
+	HANDLE_BLOCK_INTERRUPTIONS();
+	p = (UChar *) _emalloc(sizeof(UChar) * (length+1) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	if (!p) {
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+		return (UChar *)NULL;
+	}
+	HANDLE_UNBLOCK_INTERRUPTIONS();
+	memcpy(p, s, length * sizeof(UChar));
+	p[length] = 0;
+	return p;
+}
+
+
 ZEND_API char *zend_strndup(const char *s, uint length)
 {
 	char *p;
@@ -436,6 +472,21 @@ ZEND_API char *zend_strndup(const char *s, uint length)
 	}
 	if (length) {
 		memcpy(p, s, length);
+	}
+	p[length] = 0;
+	return p;
+}
+
+ZEND_API UChar *zend_ustrndup(const UChar *s, uint length)
+{
+	UChar *p;
+
+	p = (UChar *) malloc(UBYTES(length+1));
+	if (!p) {
+		return (UChar *)NULL;
+	}
+	if (length) {
+		memcpy(p, s, UBYTES(length));
 	}
 	p[length] = 0;
 	return p;

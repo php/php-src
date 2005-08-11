@@ -86,7 +86,7 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	obj.value.obj.handlers = &default_exception_handlers;
 
 	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_u_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 	ALLOC_ZVAL(trace);
@@ -474,8 +474,8 @@ ZEND_METHOD(exception, __toString)
 	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, &file TSRMLS_CC);
 	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, &line TSRMLS_CC);
 
-	convert_to_string(&message);
-	convert_to_string(&file);
+	convert_to_text(&message);
+	convert_to_text(&file);
 	convert_to_long(&line);
 
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 0);
@@ -492,16 +492,16 @@ ZEND_METHOD(exception, __toString)
 
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
-	if (Z_TYPE_P(trace) != IS_STRING) {
+	if (Z_TYPE_P(trace) != IS_STRING && Z_TYPE_P(trace) != IS_UNICODE) {
 		trace = NULL;
 	}
 
-	if (Z_STRLEN(message) > 0) {
-		len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
-							Z_OBJCE_P(getThis())->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line), 
+	if (Z_UNILEN(message) > 0) {
+		len = zend_spprintf(&str, 0, "exception '%v' with message '%R' in %s:%ld\nStack trace:\n%s", 
+							Z_OBJCE_P(getThis())->name, Z_TYPE(message), Z_UNIVAL(message), Z_STRVAL(file), Z_LVAL(line), 
 							(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 	} else {
-		len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s", 
+		len = zend_spprintf(&str, 0, "exception '%v' in %s:%ld\nStack trace:\n%s", 
 							Z_OBJCE_P(getThis())->name, Z_STRVAL(file), Z_LVAL(line), 
 							(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 	}
@@ -670,7 +670,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		zend_call_method_with_0_params(&exception, ce_exception, NULL, "__tostring", &str);
 		if (!EG(exception)) {
 			if (Z_TYPE_P(str) != IS_STRING) {
-				zend_error(E_WARNING, "%s::__toString() must return a string", ce_exception->name);
+				zend_error(E_WARNING, "%v::__toString() must return a string", ce_exception->name);
 			} else {
 				zend_update_property_string(default_exception_ce, exception, "string", sizeof("string")-1, EG(exception) ? ce_exception->name : Z_STRVAL_P(str) TSRMLS_CC);
 			}
@@ -686,7 +686,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 				file = NULL;
 				line = NULL;
 			}
-			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
+			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %v in exception handling during call to %v::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
 		}
 
 		str = zend_read_property(default_exception_ce, exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
@@ -695,7 +695,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 
 		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
-		zend_error(E_ERROR, "Uncaught exception '%s'", ce_exception->name);
+		zend_error(E_ERROR, "Uncaught exception '%v'", ce_exception->name);
 	}
 }
 
@@ -714,6 +714,12 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
 		zend_error(E_ERROR, "Exceptions must be valid objects derived from the Exception base class");
 	}
 	zend_throw_exception_internal(exception TSRMLS_CC);
+}
+
+void init_exceptions(TSRMLS_D)
+{
+	default_exception_ce = zend_get_named_class_entry("Exception", sizeof("Exception")-1 TSRMLS_CC);
+	error_exception_ce = zend_get_named_class_entry("ErrorException", sizeof("ErrorException")-1 TSRMLS_CC);
 }
 
 /*

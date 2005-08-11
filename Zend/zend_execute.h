@@ -65,8 +65,11 @@ static inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LI
 	}
 }
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
+ZEND_API int zend_u_eval_string(zend_uchar type, void *str, zval *retval_ptr, char *string_name TSRMLS_DC);
+ZEND_API int zend_u_eval_string_ex(zend_uchar type, void *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
 static inline int i_zend_is_true(zval *op)
 {
@@ -85,8 +88,17 @@ static inline int i_zend_is_true(zval *op)
 			result = (op->value.dval ? 1 : 0);
 			break;
 		case IS_STRING:
+		case IS_BINARY:
 			if (op->value.str.len == 0
 				|| (op->value.str.len==1 && op->value.str.val[0]=='0')) {
+				result = 0;
+			} else {
+				result = 1;
+			}
+			break;
+		case IS_UNICODE:
+			if (op->value.ustr.len == 0
+				|| (op->value.ustr.len==1 && op->value.ustr.val[0]=='0')) {
 				result = 0;
 			} else {
 				result = 1;
@@ -155,6 +167,7 @@ ZEND_API void zend_set_timeout(long seconds);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_u_fetch_class(zend_uchar type, void *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32
@@ -172,9 +185,11 @@ void zend_shutdown_timeout_thread();
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */
-#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && (zval)->type == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : "")
+#define Z_OBJ_CLASS_NAME_P(zval) ((zval) && (zval)->type == IS_OBJECT && Z_OBJ_HT_P(zval)->get_class_entry != NULL && Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC) ? Z_OBJ_HT_P(zval)->get_class_entry(zval TSRMLS_CC)->name : EMPTY_STR)
 
 ZEND_API zval** zend_get_compiled_variable_value(zend_execute_data *execute_data_ptr, zend_uint var);
+
+void init_unicode_strings();
 
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
 #define ZEND_USER_OPCODE_RETURN     1 /* exit from executor (return from function) */

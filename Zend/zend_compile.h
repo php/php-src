@@ -237,7 +237,7 @@ typedef struct _zend_internal_function {
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_internal_function;
 
-#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
+#define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : EMPTY_STR)
 
 typedef union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
@@ -329,6 +329,10 @@ ZEND_API int zend_get_scanned_file_offset(TSRMLS_D);
 
 ZEND_API char* zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len);
 
+ZEND_API int zend_prepare_scanner_converters(const char *onetime_encoding, int run_time TSRMLS_DC);
+ZEND_API int32_t zend_convert_scanner_output(UChar **target, int32_t *target_len, const char *source, int32_t source_len, UErrorCode *status TSRMLS_DC);
+int zend_unicode_yyinput(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC);
+
 #ifdef ZTS
 const char *zend_get_zendtext(TSRMLS_D);
 int zend_get_zendleng(TSRMLS_D);
@@ -352,7 +356,7 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
 void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
 void zend_do_print(znode *result, znode *arg TSRMLS_DC);
-void zend_do_echo(znode *arg TSRMLS_DC);
+void zend_do_echo(znode *arg, zend_bool inline_html TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval *);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API void *get_binary_op(int opcode);
@@ -497,7 +501,9 @@ void zend_do_ticks(TSRMLS_D);
 
 void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body TSRMLS_DC);
 
-ZEND_API void function_add_ref(zend_function *function);
+ZEND_API void function_add_ref(zend_function *function TSRMLS_DC);
+
+void zend_do_normalization(znode *result, znode *str TSRMLS_DC);
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
@@ -523,6 +529,10 @@ void zend_class_add_ref(zend_class_entry **ce);
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal);
 ZEND_API void zend_unmangle_property_name(char *mangled_property, char **prop_name, char **class_name);
 
+ZEND_API void zend_u_mangle_property_name(char **dest, int *dest_length, zend_uchar type, char *src1, int src1_length, char *src2, int src2_length, int internal);
+ZEND_API void zend_u_unmangle_property_name(zend_uchar type, char *mangled_property, char **prop_name, char **class_name);
+
+
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
 
@@ -539,7 +549,7 @@ void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TS
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
-int zend_get_class_fetch_type(char *class_name, uint class_name_len);
+int zend_get_class_fetch_type(zend_uchar type, char *class_name, uint class_name_len);
 
 typedef zend_bool (*zend_auto_global_callback)(char *name, uint name_len TSRMLS_DC);
 typedef struct _zend_auto_global {
@@ -552,6 +562,7 @@ typedef struct _zend_auto_global {
 void zend_auto_global_dtor(zend_auto_global *auto_global);
 ZEND_API int zend_register_auto_global(char *name, uint name_len, zend_auto_global_callback auto_global_callback TSRMLS_DC);
 ZEND_API zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC);
+ZEND_API zend_bool zend_u_is_auto_global(zend_uchar type, void *name, uint name_len TSRMLS_DC);
 ZEND_API int zend_auto_global_disable_jit(char *varname, zend_uint varname_length TSRMLS_DC);
 
 int zendlex(znode *zendlval TSRMLS_DC);

@@ -28,6 +28,7 @@
 #include "zend_globals_macros.h"
 
 #include "zend_mm.h"
+#include <unicode/utypes.h>
 
 #define MEM_BLOCK_START_MAGIC	0x7312F8DCL
 #define MEM_BLOCK_END_MAGIC		0x2A8FCC84L
@@ -75,6 +76,7 @@ typedef union _align_test {
 BEGIN_EXTERN_C()
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API UChar *zend_ustrndup(const UChar *s, uint length) ZEND_ATTRIBUTE_MALLOC;
 
 ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
@@ -84,6 +86,8 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API UChar *_eustrdup(const UChar *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 
 #if USE_ZEND_ALLOC
 
@@ -96,16 +100,23 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 #define erealloc_recoverable(ptr, size)	_erealloc((ptr), (size), 1 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define estrdup(s)						_estrdup((s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 #define estrndup(s, length)				_estrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define eumalloc(size)					(UChar*)_emalloc(UBYTES(size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define eurealloc(ptr, size)			(UChar*)_erealloc((ptr), UBYTES(size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define eustrndup(s, length)			_eustrndup((s), (length) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+#define eustrdup(s)						_eustrdup((s) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
 /* Relay wrapper macros */
 #define emalloc_rel(size)					_emalloc((size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define safe_emalloc_rel(nmemb, size, offset)   _safe_emalloc((nmemb), (size), (offset) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define efree_rel(ptr)						_efree((ptr) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define ecalloc_rel(nmemb, size)			_ecalloc((nmemb), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
-#define erealloc_rel(ptr, size)				_erealloc((ptr), (size), 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define erealloc_rel(ptr, size)             _erealloc((ptr), (size), 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define erealloc_recoverable_rel(ptr, size)	_erealloc((ptr), (size), 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define estrdup_rel(s)						_estrdup((s) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define estrndup_rel(s, length)				_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define eumalloc_rel(size)					(UChar*)_emalloc(UBYTES(size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define eurealloc_rel(ptr, size)			(UChar*)_erealloc((ptr), UBYTES(size), 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
+#define eustrndup_rel(s, length)			_eustrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?malloc(size):emalloc(size))
@@ -115,6 +126,8 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 #define perealloc(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc((ptr), (size)))
 #define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
+#define peumalloc(size, persistent) ((persistent)?malloc(UBYTES(size)):eumalloc(size))
+#define peurealloc(ptr, size, persistent) ((persistent)?realloc((ptr),UBYTES(size)):eurealloc((ptr),size))
 
 #define pemalloc_rel(size, persistent) ((persistent)?malloc(size):emalloc_rel(size))
 #define pefree_rel(ptr, persistent)	((persistent)?free(ptr):efree_rel(ptr))

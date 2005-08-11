@@ -26,6 +26,7 @@ typedef struct _zend_compiler_globals zend_compiler_globals;
 typedef struct _zend_executor_globals zend_executor_globals;
 typedef struct _zend_alloc_globals zend_alloc_globals;
 typedef struct _zend_scanner_globals zend_scanner_globals;
+typedef struct _zend_unicode_globals zend_unicode_globals;
 
 /* Compiler */
 #ifdef ZTS
@@ -75,6 +76,16 @@ extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
 #else
 # define INI_SCNG(v) (ini_scanner_globals.v)
 extern ZEND_API zend_scanner_globals ini_scanner_globals;
+#endif
+
+
+/* Unicode */
+#ifdef ZTS
+# define UG(v) TSRMG(unicode_globals_id, zend_unicode_globals *, v)
+extern ZEND_API ts_rsrc_id unicode_globals_id;
+#else
+# define UG(v) (unicode_globals.v)
+extern ZEND_API zend_unicode_globals unicode_globals;
 #endif
 
 

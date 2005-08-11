@@ -35,6 +35,7 @@
 #endif
 
 #include <stdio.h>
+#include <assert.h>
 
 /*
  * general definitions
@@ -225,6 +226,8 @@ char *alloca ();
 
 #include "zend_types.h"
 
+#include <unicode/utypes.h>
+
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
 #endif
@@ -236,6 +239,8 @@ char *alloca ();
 #ifndef LONG_MIN
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
+
+#define EMPTY_STR "\0\0"
 
 #undef SUCCESS
 #undef FAILURE
@@ -258,6 +263,13 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #  define zend_error_noreturn zend_error
 #endif
 
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN)
+#  define ZEND_VM_ALWAYS_INLINE  __attribute__ ((always_inline))
+void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));
+#else
+#  define ZEND_VM_ALWAYS_INLINE
+#  define zend_error_noreturn zend_error
+#endif
 
 /*
  * zval
@@ -287,10 +299,14 @@ struct _zend_object_value {
 typedef union _zvalue_value {
 	long lval;					/* long value */
 	double dval;				/* double value */
-	struct {
+	struct {                    /* 8-bit legacy string type */
 		char *val;
 		int len;
 	} str;
+	struct {                    /* Unicode string type */
+		UChar *val;
+		int32_t len;
+	} ustr;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
 } zvalue_value;
@@ -371,8 +387,8 @@ struct _zend_class_entry {
 
 #include "zend_stream.h"
 typedef struct _zend_utility_functions {
-	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+	int (*printf_function)(const char *format, ...);
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path);
 	void (*message_handler)(long message, void *data);
@@ -407,6 +423,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 	((n) ? (((n)>0) ? 1 : -1) : 0)
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
+#define ZEND_COLL_RESULT(n) \
+	((n) == UCOL_EQUAL ? 0 : ((n) == UCOL_GREATER ? 1 : -1))
 
 
 
@@ -422,6 +440,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
+#define IS_UNICODE  10
+#define IS_BINARY   11
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_INDEX	0x80
@@ -432,14 +452,13 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define OE_IS_OBJECT	(1<<1)
 #define OE_IS_METHOD	(1<<2)
 
-
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions);
 void zend_shutdown(TSRMLS_D);
 void zend_register_standard_ini_entries(TSRMLS_D);
 
-#ifdef ZTS
+//#ifdef ZTS
 void zend_post_startup(TSRMLS_D);
-#endif
+//#endif
 
 void zend_set_utility_values(zend_utility_values *utility_values);
 
@@ -468,12 +487,14 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
+ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy);
+ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent);
 ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
-ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...);
 END_EXTERN_C()
 
 void zend_activate(TSRMLS_D);
@@ -510,20 +531,20 @@ END_EXTERN_C()
 
 
 BEGIN_EXTERN_C()
-extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
+extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
-extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 
 
-ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API void zend_error(int type, const char *format, ...);
 
 void zenderror(char *error);
 
@@ -545,6 +566,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(long message, void *data);
 
 ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval *contents);
+ZEND_API void zend_reset_locale_deps(TSRMLS_D);
 END_EXTERN_C()
 
 
@@ -644,7 +666,14 @@ END_EXTERN_C()
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 
+#define ZEND_INTERNAL_ENCODING "UTF-16"
+
 #include "zend_variables.h"
+
+#define ZEND_U_EQUAL(type, ustr, ulen, str, slen) \
+	((type == IS_STRING)? \
+	  (!memcmp((ustr),(str),(slen))): \
+	  (!zend_cmp_unicode_and_literal(((UChar*)(ustr)), ulen, str, slen)))
 
 #endif /* ZEND_H */
 

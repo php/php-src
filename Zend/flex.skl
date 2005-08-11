@@ -440,18 +440,6 @@ YY_MALLOC_DECL
 #define ECHO /* There is no output */
 #endif
 
-#ifdef ZEND_MULTIBYTE
-# define YY_INPUT(buf, result, max_size) \
-	if ( ((result = zend_multibyte_yyinput(yyin, buf, max_size TSRMLS_CC)) == 0) \
-		&& zend_stream_ferror( yyin TSRMLS_CC) ) \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
-#else
-# define YY_INPUT(buf, result, max_size) \
-	if ( ((result = zend_stream_read(yyin, buf, max_size TSRMLS_CC)) == 0) \
-		  && zend_stream_ferror( yyin TSRMLS_CC) ) \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
-#endif
-
 #ifndef ECHO
 %- Standard (non-C++) definition
 /* This used to be an fputs(), but since the string might contain NUL's,

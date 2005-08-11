@@ -1058,7 +1058,7 @@ function gen_vm($def, $skel) {
 		fputs($f,"#define $op $code\n");
 	}
 	fclose($f);
-	echo "zend_vm_opcodes.h generated succesfull.\n";
+	echo "zend_vm_opcodes.h generated succesfully.\n";
 
 	// Generate zend_vm_execute.h
 	$f = fopen("zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
@@ -1198,7 +1198,7 @@ function gen_vm($def, $skel) {
 	}
 
 	fclose($f);
-	echo "zend_vm_execute.h generated succesfull.\n";
+	echo "zend_vm_execute.h generated succesfully.\n";
 }
 
 function usage() {

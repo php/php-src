@@ -474,7 +474,7 @@ zend_encoding *zend_encoding_table[] = {
 };
 
 
-
+#if 0
 ZEND_API int zend_multibyte_set_script_encoding(char *encoding_list, int encoding_list_size TSRMLS_DC)
 {
 	if (CG(script_encoding_list)) {
@@ -491,11 +491,14 @@ ZEND_API int zend_multibyte_set_script_encoding(char *encoding_list, int encodin
 
 	return 0;
 }
-
+#endif
 
 ZEND_API int zend_multibyte_set_internal_encoding(char *encoding_name, int encoding_name_size TSRMLS_DC)
 {
-	CG(internal_encoding) = zend_multibyte_fetch_encoding(encoding_name);
+	//CG(internal_encoding) = zend_multibyte_fetch_encoding(encoding_name);
+	//CG(internal_encoding) = zend_multibyte_fetch_encoding(ZEND_INTERNAL_ENCODING);
+	/* set this to NULL so that input filtering is done only when really necessary */
+	CG(internal_encoding) = NULL;
 	return 0;
 }
 
@@ -523,17 +526,19 @@ ZEND_API int zend_multibyte_set_filter(zend_encoding *onetime_encoding TSRMLS_DC
 
 	if (!LANG_SCNG(internal_encoding) || LANG_SCNG(script_encoding) == LANG_SCNG(internal_encoding)) {
 		/* if encoding specfic filters exist, use them */
+		/*
 		if (LANG_SCNG(script_encoding)->input_filter && LANG_SCNG(script_encoding)->output_filter) {
 			LANG_SCNG(input_filter) = LANG_SCNG(script_encoding)->input_filter;
 			LANG_SCNG(output_filter) = LANG_SCNG(script_encoding)->output_filter;
 			return 0;
 		}
+		*/
 
 		if (!LANG_SCNG(script_encoding)->compatible) {
 			/* and if not, work around w/ script_encoding -> utf-8 -> script_encoding conversion */
-			LANG_SCNG(internal_encoding) = LANG_SCNG(script_encoding);
+			//LANG_SCNG(internal_encoding) = LANG_SCNG(script_encoding);
 			LANG_SCNG(input_filter) = zend_multibyte_script_encoding_filter;
-			LANG_SCNG(output_filter) = zend_multibyte_internal_encoding_filter;
+			//LANG_SCNG(output_filter) = zend_multibyte_internal_encoding_filter;
 			return 0;
 		} else {
 			/* nothing to do in this case */
@@ -916,6 +921,7 @@ static char* zend_multibyte_assemble_encoding_list(zend_encoding **encoding_list
 }
 
 
+#if 0
 static int zend_multibyte_parse_encoding_list(const char *encoding_list, int encoding_list_size, zend_encoding ***result, int *result_size)
 {
 	int n, size;
@@ -982,7 +988,7 @@ static int zend_multibyte_parse_encoding_list(const char *encoding_list, int enc
 
 	return 0;
 }
-
+#endif
 
 static zend_encoding* zend_multibyte_find_script_encoding(zend_encoding *onetime_encoding TSRMLS_DC)
 {

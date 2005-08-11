@@ -48,6 +48,10 @@ ZEND_API ts_rsrc_id ini_scanner_globals_id;
 ZEND_API zend_scanner_globals ini_scanner_globals;
 #endif
 
+# define YY_INPUT(buf, result, max_size) \
+	if ( ((result = zend_stream_read(yyin, buf, max_size TSRMLS_CC)) == 0) \
+		  && zend_stream_ferror( yyin TSRMLS_CC) ) \
+		YY_FATAL_ERROR( "input in flex scanner failed" );
 
 static char *ini_filename;
 

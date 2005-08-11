@@ -83,7 +83,7 @@ int zend_startup_constants(TSRMLS_D)
 {
 	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
 
-	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
+	if (zend_u_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1, UG(unicode))==FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -107,6 +107,11 @@ void zend_register_standard_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("E_USER_NOTICE", E_USER_NOTICE, CONST_PERSISTENT | CONST_CS);
 
 	REGISTER_MAIN_LONG_CONSTANT("E_ALL", E_ALL, CONST_PERSISTENT | CONST_CS);
+
+	REGISTER_MAIN_LONG_CONSTANT("U_INVALID_STOP", ZEND_FROM_U_ERROR_STOP, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("U_INVALID_SKIP", ZEND_FROM_U_ERROR_SKIP, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("U_INVALID_SUBSTITUTE", ZEND_FROM_U_ERROR_SUBST, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("U_INVALID_ESCAPE", ZEND_FROM_U_ERROR_ESCAPE, CONST_PERSISTENT | CONST_CS);
 
 	/* true/false constants */
 	{
@@ -215,13 +220,15 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	int retval = 1;
 	char *lookup_name;
 	char *colon;
+	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	if ((colon = memchr(name, ':', name_len)) && colon[1] == ':') {
+	if ((UG(unicode) && (colon = (char*)u_memchr((UChar*)name, ':', name_len)) && ((UChar*)colon)[1] == ':') ||
+	    (!UG(unicode) && (colon = memchr(name, ':', name_len)) && colon[1] == ':')) {
 		/* class constant */
 		zend_class_entry **ce = NULL, *scope;
-		int class_name_len = colon-name;
+		int class_name_len = UG(unicode)?((colon-name)/sizeof(UChar)):colon-name;
 		int const_name_len = name_len - class_name_len - 2;
-		char *constant_name = colon+2;
+		char *constant_name = colon + (UG(unicode)?UBYTES(2):2);
 		zval **ret_constant;
 		char *class_name;
 
@@ -231,16 +238,22 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 			scope = CG(active_class_entry);
 		}
 	
-		class_name = estrndup(name, class_name_len);
+		if (UG(unicode)) {
+			class_name = (char*)eustrndup((UChar*)name, class_name_len);
+		} else {
+			class_name = estrndup(name, class_name_len);
+		}
 
-		if (class_name_len == sizeof("self")-1 && strcmp(class_name, "self") == 0) {
+		if (class_name_len == sizeof("self")-1 &&
+		    ZEND_U_EQUAL(type, class_name, class_name_len, "self", sizeof("self")-1)) {
 			if (scope) {
 				ce = &scope;
 			} else {
 				zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 				retval = 0;
 			}
-		} else if (class_name_len == sizeof("parent")-1 && strcmp(class_name, "parent") == 0) {
+		} else if (class_name_len == sizeof("parent")-1 && 
+		           ZEND_U_EQUAL(type, class_name, class_name_len, "parent", sizeof("parent")-1)) {
 			if (!scope) {   	 
 				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 			} else if (!scope->parent) { 	 
@@ -249,14 +262,14 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 				ce = &scope->parent;
 			}
 		} else {
-			if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+			if (zend_u_lookup_class(type, class_name, class_name_len, &ce TSRMLS_CC) != SUCCESS) {
 				retval = 0;
 			}
 		}
 		efree(class_name);
 
 		if (retval && ce) {
-			if (zend_hash_find(&((*ce)->constants_table), constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
+			if (zend_u_hash_find(&((*ce)->constants_table), type, constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
 				retval = 0;
 			}
 		} else {
@@ -272,12 +285,13 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 		return retval;
 	}
 	
-	if (zend_hash_find(EG(zend_constants), name, name_len+1, (void **) &c) == FAILURE) {
-		lookup_name = estrndup(name, name_len);
-		zend_str_tolower(lookup_name, name_len);
+	if (zend_u_hash_find(EG(zend_constants), type, name, name_len+1, (void **) &c) == FAILURE) {
+		int lookup_name_len;
+
+		lookup_name = zend_u_str_case_fold(type, name, name_len, 1, &lookup_name_len);
 		 
-		if (zend_hash_find(EG(zend_constants), lookup_name, name_len+1, (void **) &c)==SUCCESS) {
-			if ((c->flags & CONST_CS) && memcmp(c->name, name, name_len)!=0) {
+		if (zend_u_hash_find(EG(zend_constants), type, lookup_name, lookup_name_len+1, (void **) &c)==SUCCESS) {
+			if ((c->flags & CONST_CS) && memcmp(c->name, name, UG(unicode)?UBYTES(name_len):name_len)!=0) {
 				retval=0;
 			}
 		} else {
@@ -297,9 +311,10 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 }
 
 
-ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
+ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)
 {
-	char *lowercase_name = NULL;
+	int  lookup_name_len;
+	char *lookup_name = NULL;
 	char *name;
 	int ret = SUCCESS;
 
@@ -309,14 +324,14 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 
 	if (!(c->flags & CONST_CS)) {
 		/* keep in mind that c->name_len already contains the '\0' */
-		lowercase_name = estrndup(c->name, c->name_len);
-		zend_str_tolower(lowercase_name, c->name_len);
-		name = lowercase_name;
+		name = lookup_name = zend_u_str_case_fold(type, c->name, c->name_len-1, 1, &lookup_name_len);
+		lookup_name_len++;
 	} else {
+		lookup_name_len = c->name_len;
 		name = c->name;
 	}
 
-	if (zend_hash_add(EG(zend_constants), name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
+	if (zend_u_hash_add(EG(zend_constants), type, name, lookup_name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
 		zend_error(E_NOTICE,"Constant %s already defined", name);
 		free(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
@@ -324,13 +339,16 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		}
 		ret = FAILURE;
 	}
-	if (lowercase_name) {
-		efree(lowercase_name);
+	if (lookup_name) {
+		efree(lookup_name);
 	}
 	return ret;
 }
 
-
+ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
+{
+	return zend_u_register_constant(IS_STRING, c TSRMLS_CC);
+}
 /*
  * Local variables:
  * tab-width: 4
