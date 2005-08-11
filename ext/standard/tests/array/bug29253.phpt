@@ -11,3 +11,4 @@ var_dump($gg);
 array(0) {
 }
 string(4) "afad"
+
