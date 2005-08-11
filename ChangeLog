@@ -1,3 +1,150 @@
+2005-08-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/php_variables.c:
+      MFB minor consistency cleanup
+
+    * (PHP_5_1)
+      main/php_variables.c:
+      Minor consistency cleanup
+
+2005-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/wddx/wddx.c
+      ext/wddx/wddx.c:
+      MFH: Fixed bug #34068 (Numeric string as array key not cast to integer in
+      wddx_deserialize()).
+
+    * ext/wddx/wddx.c:
+      Fixed bug #34068 (Numeric string as array key not cast to integer in
+      wddx_deserialize()).
+
+2005-08-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      NEWS
+      NEWS
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed bug #34062 (Crash in catch block when many arguments are used)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_compile.h
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Fixed bug #25359 (array_multisort() doesn't work in a function if array is
+      global or reference)
+
+    * ZendEngine2/tests/bug34064.phpt
+      ZendEngine2/tests/bug34064.phpt:
+      
+      Fixed bug #34064 (arr[] as param to function in class gives invalid
+      opcode)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug34064.phpt:
+      Fixed bug #34064 (arr[] as param to function in class gives invalid opcode)
+
+    * ZendEngine2/tests/bug34064.phpt
+      ZendEngine2/tests/bug34064.phpt:
+      
+      file bug34064.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      Zend/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Fixed bug #34064 (arr[] as param to function is allowed only if function
+      receives argument by reference)
+
+2005-08-10  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c:
+      fix build
+
+2005-08-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug33940.phpt:
+        1.2.4;
+      Fixed bug #33940 (array_map() fails to pass by reference when called
+      recursively)
+
+    * NEWS
+      NEWS
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug33940.phpt:
+      Fixed bug #33940 (array_map() fails to pass by reference when called
+      recursively)
+
+    * ext/standard/tests/array/bug33940.phpt
+      ext/standard/tests/array/bug33940.phpt:
+      
+      file bug33940.phpt was initially added on branch PHP_5_1.
+
+    * ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug29253.phpt:
+        1.2.4;
+      Fixed bug #29253 (array_diff with $GLOBALS argument fails)
+
+    * NEWS
+      NEWS
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug29253.phpt:
+      Fixed bug #29253 (array_diff with $GLOBALS argument fails)
+
+    * ext/standard/tests/array/bug29253.phpt
+      ext/standard/tests/array/bug29253.phpt:
+      
+      file bug29253.phpt was initially added on branch PHP_5_1.
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/tests/bug34045.phpt:
+      Fixed bug #34045 (Buffer overflow with serialized object)
+
+    * ZendEngine2/tests/bug34045.phpt
+      ZendEngine2/tests/bug34045.phpt:
+      
+      file bug34045.phpt was initially added on branch PHP_5_1.
+
 2005-08-09  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_1)
