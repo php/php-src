@@ -616,16 +616,12 @@ static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
 {
 	
 	char *mimetype;
-	if (SG(default_mimetype) || SG(default_charset)) {
-		/* Assume output will be of the default MIME type.  Individual
-		   scripts may change this later. */
-		char *tmpmimetype;
-		tmpmimetype = sapi_get_default_content_type(TSRMLS_C);
-		mimetype = pstrdup(r->pool, tmpmimetype);
-		efree(tmpmimetype);
-	} else {
-		mimetype = SAPI_DEFAULT_MIMETYPE "; charset=" SAPI_DEFAULT_CHARSET;
-	}
+	/* Assume output will be of the default MIME type.  Individual
+	   scripts may change this later. */
+	char *tmpmimetype;
+	tmpmimetype = sapi_get_default_content_type(TSRMLS_C);
+	mimetype = pstrdup(r->pool, tmpmimetype);
+	efree(tmpmimetype);
 	return mimetype;
 }
 /* }}} */

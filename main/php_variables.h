@@ -38,6 +38,8 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array T
 /* binary-safe version */
 PHPAPI void php_register_variable_safe(char *var, char *val, int val_len, pval *track_vars_array TSRMLS_DC);
 PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array TSRMLS_DC);
+PHPAPI void php_u_register_variable_safe(UChar *var, UChar *strval, int32_t str_len, zval *track_vars_array TSRMLS_DC);
+PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, pval *track_vars_array TSRMLS_DC);
 
 int php_hash_environment(TSRMLS_D);
 END_EXTERN_C()

@@ -2,6 +2,7 @@
 Crash inside stream_get_line(), when length=0
 --FILE--
 <?php
+die("Temporary unavailable in unicode PHP. Remove this line.");
 $path = dirname(__FILE__) . '/test.html';
 
 file_put_contents($path, "foo<br>bar<br>foo");

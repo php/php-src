@@ -2082,7 +2082,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fcc.object_pp = &return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%s()", class_name, ce->constructor->common.function_name);
+			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%v()", class_name, ce->constructor->common.function_name);
 		} else {
 			if (retval_ptr) {
 				zval_ptr_dtor(&retval_ptr);

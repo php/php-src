@@ -143,7 +143,7 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_filter *thisfilter,
 			php_stream_bucket_brigade *buckets_in,
 			php_stream_bucket_brigade *buckets_out,
-			size_t *bytes_consumed,
+			size_t *consumed,
 			int flags
 			TSRMLS_DC)
 {
@@ -176,11 +176,7 @@ php_stream_filter_status_t userfilter_filter(
 	args[1] = &zout;
 
 	ALLOC_INIT_ZVAL(zconsumed);
-	if (bytes_consumed) {
-		ZVAL_LONG(zconsumed, *bytes_consumed);
-	} else {
-		ZVAL_NULL(zconsumed);
-	}
+	ZVAL_NULL(zconsumed);
 	args[2] = &zconsumed;
 
 	ALLOC_INIT_ZVAL(zclosing);
@@ -196,13 +192,13 @@ php_stream_filter_status_t userfilter_filter(
 
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_long(retval);
+		if (consumed) {
+			convert_to_long(zconsumed);
+			*consumed = Z_LVAL_P(zconsumed);
+		}
 		ret = Z_LVAL_P(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");
-	}
-
-	if (bytes_consumed) {
-		*bytes_consumed = Z_LVAL_P(zconsumed);
 	}
 
 	if (retval)
@@ -218,7 +214,8 @@ php_stream_filter_status_t userfilter_filter(
 static php_stream_filter_ops userfilter_ops = {
 	userfilter_filter,
 	userfilter_dtor,
-	"user-filter"
+	"user-filter",
+	PSFO_FLAG_OUTPUTS_SAME
 };
 
 static php_stream_filter *user_filter_factory_create(const char *filtername,
@@ -376,8 +373,17 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		add_property_zval(return_value, "bucket", zbucket);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
-		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
-		add_property_long(return_value, "datalen", bucket->buflen);
+		if (bucket->is_unicode) {
+			zval *unicode_data;
+
+			ALLOC_INIT_ZVAL(unicode_data);
+			ZVAL_UNICODEL(unicode_data, bucket->buf.ustr.val, bucket->buf.ustr.len, 1);
+			add_property_zval(return_value, "data", unicode_data);
+			add_property_long(return_value, "datalen", bucket->buf.str.len);
+		} else {
+			add_property_stringl(return_value, "data", bucket->buf.str.val, bucket->buf.str.len, 1);
+			add_property_long(return_value, "datalen", bucket->buf.str.len);
+		}
 	}
 }
 /* }}} */
@@ -402,15 +408,40 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_FETCH_RESOURCE(brigade, php_stream_bucket_brigade *, &zbrigade, -1, PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade);
 	ZEND_FETCH_RESOURCE(bucket, php_stream_bucket *, pzbucket, -1, PHP_STREAM_BUCKET_RES_NAME, le_bucket);
 
-	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(zobject), "data", 5, (void**)&pzdata) && (*pzdata)->type == IS_STRING) {
+	if (SUCCESS == zend_hash_find(Z_OBJPROP_P(zobject), "data", 5, (void**)&pzdata)) {
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 		}
-		if (bucket->buflen != Z_STRLEN_PP(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_PP(pzdata), bucket->is_persistent);
-			bucket->buflen = Z_STRLEN_PP(pzdata);
+		if (Z_TYPE_PP(pzdata) == IS_UNICODE) {
+			if (!bucket->is_unicode) {
+				pefree(bucket->buf.str.val, bucket->is_persistent);
+				bucket->buf.ustr.len = Z_USTRLEN_PP(pzdata);
+				bucket->buf.ustr.val = safe_pemalloc(sizeof(UChar), bucket->buf.ustr.len, 0, bucket->is_persistent);
+				bucket->is_unicode = 1;
+			}
+			if (bucket->buf.ustr.len < Z_USTRLEN_PP(pzdata)) {
+				pefree(bucket->buf.ustr.val, bucket->is_persistent);
+				bucket->buf.ustr.len = Z_USTRLEN_PP(pzdata);
+				bucket->buf.ustr.val = safe_pemalloc(sizeof(UChar), bucket->buf.ustr.len, 0, bucket->is_persistent);
+			}
+			bucket->buf.ustr.len = Z_USTRLEN_PP(pzdata);
+			memcpy(bucket->buf.ustr.val, Z_USTRVAL_PP(pzdata), bucket->buf.ustr.len * sizeof(UChar));
+		} else { /* string -- or at least string expressable */
+			SEPARATE_ZVAL_IF_NOT_REF(pzdata);
+			convert_to_string_ex(pzdata);
+			if (bucket->is_unicode) {
+				pefree(bucket->buf.ustr.val, bucket->is_persistent);
+				bucket->buf.str.len = Z_STRLEN_PP(pzdata);
+				bucket->buf.str.val = pemalloc(bucket->buf.str.len, bucket->is_persistent);
+				bucket->is_unicode = 0;
+			}
+			if (bucket->buf.str.len < Z_STRLEN_PP(pzdata)) {
+				bucket->buf.str.len = Z_STRLEN_PP(pzdata);
+				bucket->buf.str.val = perealloc(bucket->buf.str.val, bucket->buf.str.len, bucket->is_persistent);
+			}
+			bucket->buf.str.len = Z_STRLEN_PP(pzdata);
+			memcpy(bucket->buf.str.val, Z_STRVAL_PP(pzdata), bucket->buf.str.len);
 		}
-		memcpy(bucket->buf, Z_STRVAL_PP(pzdata), bucket->buflen);
 	}
 
 	if (append) {
@@ -443,33 +474,35 @@ PHP_FUNCTION(stream_bucket_new)
 {
 	zval *zstream, *zbucket;
 	php_stream *stream;
-	char *buffer;
+	zval *buffer;
 	char *pbuffer;
-	int buffer_len;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zstream, &buffer) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (!(pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream)))) {
-		RETURN_FALSE;
+	object_init(return_value);
+	if (Z_TYPE_P(buffer) == IS_UNICODE) {
+		bucket = php_stream_bucket_new_unicode(stream, Z_USTRVAL_P(buffer), Z_USTRLEN_P(buffer), 0, php_stream_is_persistent(stream) TSRMLS_CC);
+
+		ZVAL_ADDREF(buffer);
+		add_property_zval(return_value, "data", buffer);
+		add_property_long(return_value, "datalen", Z_USTRLEN_P(buffer));
+	} else {
+		convert_to_string(buffer);
+		bucket = php_stream_bucket_new(stream, Z_STRVAL_P(buffer), Z_STRLEN_P(buffer), 0, php_stream_is_persistent(stream) TSRMLS_CC);
+ 
+		add_property_zval(return_value, "data", buffer);
+		add_property_long(return_value, "datalen", Z_STRLEN_P(buffer));
 	}
-
-	memcpy(pbuffer, buffer, buffer_len);
-
-	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream) TSRMLS_CC);
-
 	ALLOC_INIT_ZVAL(zbucket);
 	ZEND_REGISTER_RESOURCE(zbucket, bucket, le_bucket);
-	object_init(return_value);
 	add_property_zval(return_value, "bucket", zbucket);
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zbucket);
-	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
-	add_property_long(return_value, "datalen", bucket->buflen);
 }
 /* }}} */
 

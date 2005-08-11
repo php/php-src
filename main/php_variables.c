@@ -57,6 +57,25 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 	php_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
 }
 
+PHPAPI void php_u_register_variable_safe(UChar *var, UChar *strval, int32_t str_len, zval *track_vars_array TSRMLS_DC)
+{
+	zval new_entry;
+	assert(strval != NULL);
+	
+	/* Prepare value */
+	Z_USTRLEN(new_entry) = str_len;
+	if (PG(magic_quotes_gpc)) {
+		/* UTODO implement php_u_addslashes() */
+		//Z_USTRVAL(new_entry) = php_addslashes(strval, Z_USTRLEN(new_entry), &Z_USTRLEN(new_entry), 0 TSRMLS_CC);
+		Z_USTRVAL(new_entry) = eustrndup(strval, Z_USTRLEN(new_entry));
+	} else {
+		Z_USTRVAL(new_entry) = eustrndup(strval, Z_USTRLEN(new_entry));
+	}
+	Z_TYPE(new_entry) = IS_UNICODE;
+
+	php_u_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
+}
+
 PHPAPI void php_register_variable_ex(char *var, zval *val, zval *track_vars_array TSRMLS_DC)
 {
 	char *p = NULL;
@@ -212,31 +231,197 @@ plain_var:
 	}
 }
 
+PHPAPI void php_u_register_variable_ex(UChar *var, zval *val, pval *track_vars_array TSRMLS_DC)
+{
+	UChar *p = NULL;
+	UChar *ip;		/* index pointer */
+	UChar *index;
+	int32_t var_len, index_len;
+	zval *gpc_element, **gpc_element_p;
+	zend_bool is_array;
+	HashTable *symtable1=NULL;
+
+	assert(var != NULL);
+
+	if (track_vars_array) {
+		symtable1 = Z_ARRVAL_P(track_vars_array);
+	} else if (PG(register_globals)) {
+		symtable1 = EG(active_symbol_table);
+	}
+	if (!symtable1) {
+		/* Nothing to do */
+		zval_dtor(val);
+		return;
+	}
+
+	/*
+	 * Prepare variable name
+	 */
+	ip = u_strchr(var, 0x5b /*'['*/);
+	if (ip) {
+		is_array = 1;
+		*ip = 0;
+	} else {
+		is_array = 0;
+	}
+	/* ignore leading spaces in the variable name */
+	while (*var && *var==0x20 /*' '*/) {
+		var++;
+	}
+	var_len = u_strlen(var);
+	if (var_len==0) { /* empty variable name, or variable name with a space in it */
+		zval_dtor(val);
+		return;
+	}
+	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
+	for (p=var; *p; p++) {
+		switch(*p) {
+			case 0x20:   /*' '*/
+			case 0x2e:   /*'.'*/
+				*p=0x5f; /*'_'*/ 
+				break;
+		}
+	}
+
+	index = var;
+	index_len = var_len;
+
+	while (1) {
+		if (is_array) {
+			UChar *escaped_index = NULL, *index_s;
+			int32_t new_idx_len = 0;
+
+			ip++;
+			index_s = ip;
+			if (u_isspace(*ip)) {
+				ip++;
+			}
+			if (*ip==0x5d /*']'*/) {
+				index_s = NULL;
+			} else {
+				ip = u_strchr(ip, 0x5d /*']'*/);
+				if (!ip) {
+					/* PHP variables cannot contain '[' in their names, so we replace the character with a '_' */
+					*(index_s - 1) = 0x5f; /*'_'*/
+
+					index_len = var_len = 0;
+					if (index) {
+						index_len = var_len = u_strlen(index);
+					}
+					goto plain_var;
+					return;
+				}
+				*ip = 0;
+				new_idx_len = u_strlen(index_s);	
+			}
+
+			if (!index) {
+				MAKE_STD_ZVAL(gpc_element);
+				array_init(gpc_element);
+				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+			} else {
+				if (PG(magic_quotes_gpc) && (index!=var)) {
+					/* UTODO fix for magic_quotes_gpc case */
+					/* no need to addslashes() the index if it's the main variable name */
+					//escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+					escaped_index = index;
+				} else {
+					escaped_index = index;
+				}
+				if (zend_u_symtable_find(symtable1, IS_UNICODE, escaped_index, index_len+1, (void **) &gpc_element_p)==FAILURE
+					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
+					MAKE_STD_ZVAL(gpc_element);
+					array_init(gpc_element);
+					zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				}
+				if (index!=escaped_index) {
+					efree(escaped_index);
+				}
+			}
+			symtable1 = Z_ARRVAL_PP(gpc_element_p);
+			/* ip pointed to the '[' character, now obtain the key */
+			index = index_s;
+			index_len = new_idx_len;
+
+			ip++;
+			if (*ip==0x5b /*'['*/) {
+				is_array = 1;
+				*ip = 0;
+			} else {
+				is_array = 0;
+			}
+		} else {
+plain_var:
+			MAKE_STD_ZVAL(gpc_element);
+			gpc_element->value = val->value;
+			Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
+			if (!index) {
+				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+			} else {
+				/* UTODO fix for php_addslashes case */
+				//char *escaped_index = php_addslashes(index, index_len, &index_len, 0 TSRMLS_CC);
+				UChar *escaped_index = index;
+				zend_u_symtable_update(symtable1, IS_UNICODE, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				//efree(escaped_index);
+			}
+			break;
+		}
+	}
+}
+
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 {
 	char *var, *val;
 	char *strtok_buf = NULL;
 	zval *array_ptr = (zval *) arg;
+	UConverter *input_conv = UG(http_input_encoding_conv);
 
 	if (SG(request_info).post_data == NULL) {
 		return;
 	}	
+
+	if (!input_conv) {
+		input_conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
+	}
 
 	var = php_strtok_r(SG(request_info).post_data, "&", &strtok_buf);
 
 	while (var) {
 		val = strchr(var, '=');
 		if (val) { /* have a value */
-			unsigned int val_len, new_val_len;
+			if (UG(unicode)) {
+				UChar *u_var, *u_val;
+				int32_t u_var_len, u_val_len;
+				int32_t var_len;
+				int32_t val_len;
+				UErrorCode status1 = U_ZERO_ERROR, status2 = U_ZERO_ERROR;
 
-			*val++ = '\0';
-			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
-			val = estrndup(val, val_len);
-			if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+				*val++ = '\0';
+				var_len = strlen(var);
+				php_url_decode(var, var_len);
+				val_len = php_url_decode(val, strlen(val));
+				zend_convert_to_unicode(input_conv, &u_var, &u_var_len, var, var_len, &status1);
+				zend_convert_to_unicode(input_conv, &u_val, &u_val_len, val, val_len, &status2);
+				if (U_SUCCESS(status1) && U_SUCCESS(status2)) {
+					/* UTODO add input filtering */
+					php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
+				} else {
+					/* UTODO set a user-accessible flag to indicate that conversion failed? */
+				}
+				efree(u_var);
+				efree(u_val);
+			} else {
+				unsigned int val_len, new_val_len;
+
+				*val++ = '\0';
+				php_url_decode(var, strlen(var));
+				val_len = php_url_decode(val, strlen(val));
+				val = estrndup(val, val_len);
+				if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+				}
+				efree(val);
 			}
-			efree(val);
 		}
 		var = php_strtok_r(NULL, "&", &strtok_buf);
 	}
@@ -256,6 +441,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	zval *array_ptr;
 	int free_buffer = 0;
 	char *strtok_buf = NULL;
+	UConverter *input_conv = UG(http_input_encoding_conv);
 	
 	switch (arg) {
 		case PARSE_POST:
@@ -330,34 +516,91 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			break;
 	}
 	
+	if (!input_conv) {
+		input_conv = ZEND_U_CONVERTER(UG(output_encoding_conv));
+	}
+
 	var = php_strtok_r(res, separator, &strtok_buf);
 	
 	while (var) {
+		int32_t var_len;
+
 		val = strchr(var, '=');
-		if (val) { /* have a value */
-			int val_len;
-			unsigned int new_val_len;
-
+		if (val) {
 			*val++ = '\0';
-			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
-			val = estrndup(val, val_len);
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-			}
-			efree(val);
-		} else {
-			int val_len;
-			unsigned int new_val_len;
-
-			php_url_decode(var, strlen(var));
-			val_len = 0;
-			val = estrndup("", val_len);
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
-			}
-			efree(val);
 		}
+		var_len = strlen(var);
+		php_url_decode(var, var_len);
+
+		if (UG(unicode)) {
+			UChar *u_var, *u_val;
+			int32_t u_var_len, u_val_len;
+			UErrorCode status = U_ZERO_ERROR;
+
+			zend_convert_to_unicode(input_conv, &u_var, &u_var_len, var, var_len, &status);
+			if (U_FAILURE(status)) {
+				/* UTODO set a user-accessible flag to indicate that conversion failed? */
+				efree(u_var);
+				goto next_var;
+			}
+
+			if (val) { /* have a value */
+				int val_len;
+				unsigned int new_val_len;
+
+				val_len = php_url_decode(val, strlen(val));
+				zend_convert_to_unicode(input_conv, &u_val, &u_val_len, val, val_len, &status);
+				if (U_FAILURE(status)) {
+					/* UTODO set a user-accessible flag to indicate that conversion failed? */
+					efree(u_var);
+					efree(u_val);
+					goto next_var;
+				}
+				php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
+				/* UTODO need to make input_filter Unicode aware */
+				/*
+				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+				}
+				*/
+				efree(u_var);
+				efree(u_val);
+			} else {
+				u_val_len = 0;
+				u_val = USTR_MAKE("");
+				php_u_register_variable_safe(u_var, u_val, u_val_len, array_ptr TSRMLS_CC);
+				/*
+				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+				}
+				*/
+				efree(u_val);
+			}
+		} else {
+			if (val) { /* have a value */
+				int val_len;
+				unsigned int new_val_len;
+
+				*val++ = '\0';
+				val_len = php_url_decode(val, strlen(val));
+				val = estrndup(val, val_len);
+				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+				}
+				efree(val);
+			} else {
+				int val_len;
+				unsigned int new_val_len;
+
+				val_len = 0;
+				val = estrndup("", val_len);
+				if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len TSRMLS_CC)) {
+					php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+				}
+				efree(val);
+			}
+		}
+next_var:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
 

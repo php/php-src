@@ -2279,6 +2279,8 @@ PHP_FUNCTION(iconv_get_encoding)
 }
 /* }}} */
 
+#ifdef SMG_0 /* UTODO: Needs updating for unicode */
+
 /* {{{ iconv stream filter */
 typedef struct _php_iconv_stream_filter {
 	iconv_t cd;
@@ -2666,6 +2668,18 @@ static php_iconv_err_t php_iconv_stream_filter_unregister_factory(TSRMLS_D)
 	return PHP_ICONV_ERR_SUCCESS;
 }
 /* }}} */
+#else /* Make dummy bypasses for the register/unregister loop */
+static php_iconv_err_t php_iconv_stream_filter_register_factory(TSRMLS_D)
+{
+	return PHP_ICONV_ERR_SUCCESS;
+}
+static php_iconv_err_t php_iconv_stream_filter_unregister_factory(TSRMLS_D)
+{
+	return PHP_ICONV_ERR_SUCCESS;
+}
+#endif /* unicode bypass */
+
+
 /* }}} */
 #endif
 

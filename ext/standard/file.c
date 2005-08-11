@@ -283,7 +283,9 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",			PHP_FILE_SKIP_EMPTY_LINES,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_APPEND", 					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
-	
+	REGISTER_LONG_CONSTANT("FILE_TEXT", 					PHP_FILE_TEXT,						CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_BINARY", 					PHP_FILE_BINARY,					CONST_CS | CONST_PERSISTENT);
+
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_CS | CONST_PERSISTENT);
@@ -506,6 +508,7 @@ PHP_FUNCTION(get_meta_tags)
 
 /* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
    Read the entire file into a string */
+/* UTODO: Accept unicode contents -- Maybe? Perhaps a binary fetch leaving the script to icu_ucnv_toUnicode() on its own is best? */
 PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
@@ -571,6 +574,7 @@ PHP_FUNCTION(file_put_contents)
 	long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
+	char mode[3] = { 'w', 0, 0 };
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|lr!", &filename, &filename_len, 
 				&data, &flags, &zcontext) == FAILURE) {
@@ -579,7 +583,15 @@ PHP_FUNCTION(file_put_contents)
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
-	stream = php_stream_open_wrapper_ex(filename, (flags & PHP_FILE_APPEND) ? "ab" : "wb", 
+	if (flags & PHP_FILE_APPEND) {
+		mode[0] = 'a';
+	}
+	if (flags & PHP_FILE_BINARY) {
+		mode[1] = 'b';
+	} else if (flags & PHP_FILE_TEXT) {
+		mode[1] = 't';
+	}
+	stream = php_stream_open_wrapper_ex(filename, mode, 
 			((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
 		RETURN_FALSE;
@@ -599,23 +611,6 @@ PHP_FUNCTION(file_put_contents)
 
 			break;
 		}
-		case IS_NULL:
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_BOOL:
-		case IS_CONSTANT:
-			convert_to_string_ex(&data);
-
-		case IS_STRING:
-			if (Z_STRLEN_P(data)) {
-				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
-				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
-					numbytes = -1;
-				}
-			}
-			break;
-
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
 				int bytes_written;
@@ -624,31 +619,88 @@ PHP_FUNCTION(file_put_contents)
 
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **) &tmp, &pos) == SUCCESS) {
-					if ((*tmp)->type != IS_STRING) {
-						SEPARATE_ZVAL(tmp);
-						convert_to_string(*tmp);
-					}
-					if (Z_STRLEN_PP(tmp)) {
-						numbytes += Z_STRLEN_PP(tmp);
-						bytes_written = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-						if (bytes_written < 0 || bytes_written != Z_STRLEN_PP(tmp)) {
-							if (bytes_written < 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s",  Z_STRLEN_PP(tmp), filename);
-							} else {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space",  bytes_written, Z_STRLEN_PP(tmp));
-							}
+					if (Z_TYPE_PP(tmp) == IS_UNICODE) {
+						int wrote_bytes = php_stream_u_write(stream, Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
+						if (wrote_bytes < 0) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", Z_USTRLEN_PP(tmp), filename);
 							numbytes = -1;
 							break;
+						} else if (wrote_bytes != UBYTES(Z_USTRLEN_PP(tmp))) {
+							int32_t ustrlen = u_countChar32(Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp));
+							int32_t numchars = u_countChar32(Z_USTRVAL_PP(tmp), wrote_bytes / UBYTES(1));
+
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
+							numbytes = -1;
+							break;
+						}
+						numbytes += wrote_bytes;
+					} else { /* non-unicode */
+						int free_val = 0;
+						zval strval = **tmp;
+
+						if (Z_TYPE(strval) != IS_STRING) {
+							zval_copy_ctor(&strval);
+							convert_to_string(&strval);
+							free_val = 1;
+						}
+						if (Z_STRLEN(strval)) {
+							numbytes += Z_STRLEN(strval);
+							bytes_written = php_stream_write(stream, Z_STRVAL(strval), Z_STRLEN(strval));
+							if (bytes_written < 0 || bytes_written != Z_STRLEN(strval)) {
+								if (bytes_written < 0) {
+									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s",  Z_STRLEN(strval), filename);
+								} else {
+									php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space",  bytes_written, Z_STRLEN(strval));
+								}
+								numbytes = -1;
+								break;
+							}
+						}
+						if (free_val) {
+							zval_dtor(&strval);
 						}
 					}
 					zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
 				}
 			}
 			break;
-
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array");
+		case IS_OBJECT:
+			/* TODO */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "2nd parameter must be non-object (for now)");
 			numbytes = -1;
+			break;
+		case IS_UNICODE:
+			if (Z_USTRLEN_P(data)) {
+				numbytes = php_stream_u_write(stream, Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+				if (numbytes < 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d characters to %s", Z_USTRLEN_P(data), filename);
+					numbytes = -1;
+				} else if (numbytes != UBYTES(Z_USTRLEN_P(data))) {
+					int32_t ustrlen = u_countChar32(Z_USTRVAL_P(data), Z_USTRLEN_P(data));
+					int32_t numchars = u_countChar32(Z_USTRVAL_P(data), numbytes / UBYTES(1));
+
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d characters written, possibly out of free disk space", numchars, ustrlen);
+					numbytes = -1;
+				}
+			}
+			break;
+		case IS_NULL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_BOOL:
+		case IS_CONSTANT:
+		case IS_STRING:
+		default:
+			if (Z_TYPE_P(data) != IS_STRING) {
+				convert_to_string_ex(&data);
+			}
+			if (Z_STRLEN_P(data)) {
+				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
+				if (numbytes != Z_STRLEN_P(data)) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
+					numbytes = -1;
+				}
+			}
 			break;
 	
 	}
@@ -667,6 +719,7 @@ PHP_FUNCTION(file_put_contents)
 
 #define PHP_FILE_BUF_SIZE	80
 
+/* UTODO: Accept unicode contents */
 PHP_FUNCTION(file)
 {
 	char *filename;
@@ -838,7 +891,6 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	context = php_stream_context_from_zval(zcontext, 0);
 	
 	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
-
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -997,57 +1049,42 @@ PHPAPI PHP_FUNCTION(feof)
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
-	zval **arg1, **arg2;
-	int len = 1024;
-	char *buf = NULL;
-	int argc = ZEND_NUM_ARGS();
-	size_t line_len = 0;
 	php_stream *stream;
+	zval *zstream;
+	int argc = ZEND_NUM_ARGS();
+	long length = -1;
+	UChar *buf = NULL;
+	int32_t num_chars = -1, num_bytes = -1;
+	int is_unicode;
 
-	if (argc<1 || argc>2 || zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &zstream, &length) == FAILURE) {
+		RETURN_NULL();
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	php_stream_from_zval(stream, &zstream);
 
-	if (argc == 1) {
-		/* ask streams to give us a buffer of an appropriate size */
-		buf = php_stream_get_line(stream, NULL, 0, &line_len);
-		if (buf == NULL) {
-			goto exit_failed;
-		}
-	} else if (argc > 1) {
-		convert_to_long_ex(arg2);
-		len = Z_LVAL_PP(arg2);
-
-		if (len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
-			RETURN_FALSE;
-		}
-
-		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
-			goto exit_failed;
-		}
+	if (length > 0) {
+		/* Don't try to short circuit this by just using num_chars in parse_parameters, long doesn't always mean 32-bit */
+		num_chars = length;
 	}
-	
-	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(buf, line_len, &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
-		Z_TYPE_P(return_value) = IS_STRING;
+
+	if ((buf = php_stream_u_get_line(stream, NULL, &num_bytes, &num_chars, &is_unicode)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (is_unicode) {
+		/* UTODO: magic_quotes_runtime */
+		RETURN_UNICODEL(buf, num_chars, 0);
 	} else {
-		ZVAL_STRINGL(return_value, buf, line_len, 0);
-		/* resize buffer if it's much larger than the result.
-		 * Only needed if the user requested a buffer size. */
-		if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
-			Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
-		}
-	}
-	return;
+		if (PG(magic_quotes_runtime)) {
+			int len;
+			char *str;
 
-exit_failed:
-	RETVAL_FALSE;
-	if (buf) {
-		efree(buf);
+			str = php_addslashes((char*)buf, num_bytes, &len, 1 TSRMLS_CC);
+			RETURN_STRINGL(str, len, 0);
+		} else {
+			RETURN_STRINGL((char*)buf, num_bytes, 0);
+		}
 	}
 }
 /* }}} */
@@ -1057,9 +1094,10 @@ exit_failed:
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval **arg1;
-	char buf[2];
-	int result;
+	char buf[2 * sizeof(UChar)];
+	int is_unicode;
 	php_stream *stream;
+	int32_t num_bytes = UBYTES(2), num_chars = 1;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1067,21 +1105,25 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	result = php_stream_getc(stream);
-
-	if (result == EOF) {
+	if (!php_stream_u_read(stream, buf, &num_bytes, &num_chars, &is_unicode)) {
 		RETVAL_FALSE;
 	} else {
-		buf[0] = result;
-		buf[1] = '\0';
-
-		RETURN_STRINGL(buf, 1, 1);
+		if (is_unicode) {
+			UChar *ubuf = buf;
+			int32_t num_u16 = num_bytes >> 1;
+			ubuf[num_u16] = 0;
+			RETURN_UNICODEL(ubuf, num_u16, 0);
+		} else {
+			buf[1] = 0;
+			RETURN_STRINGL(buf, 1, 0);
+		}
 	}
 }
 /* }}} */
 
 /* {{{ proto string fgetss(resource fp [, int length, string allowable_tags])
    Get a line from file pointer and strip HTML tags */
+/* UTODO: Accept unicode contents */
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval **fd, **bytes = NULL, **allow=NULL;
@@ -1150,6 +1192,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 /* {{{ proto mixed fscanf(resource stream, string format [, string ...])
    Implements a mostly ANSI compatible fscanf() */
+/* UTODO: Accept unicode contents */
 PHP_FUNCTION(fscanf)
 {
 	int  result;
@@ -1213,50 +1256,60 @@ PHP_FUNCTION(fscanf)
    Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
-	zval **arg1, **arg2, **arg3=NULL;
-	int ret;
-	int num_bytes;
-	char *buffer = NULL;
+	int ret, argc = ZEND_NUM_ARGS();
+	long write_len = -1;
 	php_stream *stream;
+	zval *zstream, *zstring;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(arg2);
-			num_bytes = Z_STRLEN_PP(arg2);
-			break;
-
-		case 3:
-			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(arg2);
-			convert_to_long_ex(arg3);
-			num_bytes = MAX(0, MIN(Z_LVAL_PP(arg3), Z_STRLEN_PP(arg2)));
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
-			/* NOTREACHED */
-			break;
+	if (zend_parse_parameters(argc TSRMLS_CC, "rz|l", &zstream, &zstring, &write_len) == FAILURE) {
+		RETURN_NULL();
 	}
 
-	if (!num_bytes) {
+	if (!write_len) {
 		RETURN_LONG(0);
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	php_stream_from_zval(stream, &zstream);
 
-	if (PG(magic_quotes_runtime)) {
-		buffer = estrndup(Z_STRVAL_PP(arg2), num_bytes);
-		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
-	}
+	if (Z_TYPE_P(zstring) == IS_UNICODE) {
+		if (write_len >= 0) {
+			/* Convert code units to data points */
+			int32_t write_uchars = 0;
 
-	ret = php_stream_write(stream, buffer ? buffer : Z_STRVAL_PP(arg2), num_bytes);
-	if (buffer) {
-		efree(buffer);
+			U16_FWD_N(Z_USTRVAL_P(zstring), write_uchars, Z_USTRLEN_P(zstring), write_len);
+			write_len = write_uchars;
+		}
+
+		if (write_len < 0 || write_len > Z_USTRLEN_P(zstring)) {
+			write_len = Z_USTRLEN_P(zstring);
+		}
+
+		/* UTODO Handle magic_quotes_runtime for unicode strings */
+
+		ret = php_stream_u_write(stream, Z_USTRVAL_P(zstring), write_len);
+
+		/* Convert data points back to code units */
+		if (ret > 0) {
+			ret = u_countChar32(Z_USTRVAL_P(zstring), ret);
+		}
+	} else {
+		char *buffer = NULL;
+		int num_bytes;
+
+		convert_to_string(zstring);
+		if (write_len < 0 || write_len > Z_STRLEN_P(zstring)) {
+			write_len = Z_STRLEN_P(zstring);
+		}
+
+		num_bytes = write_len;
+		if (argc < 3 && PG(magic_quotes_runtime)) {
+			buffer = estrndup(Z_STRVAL_P(zstring), num_bytes);
+			php_stripslashes(buffer, &num_bytes TSRMLS_CC);
+		}
+		ret = php_stream_write(stream, buffer ? buffer : Z_STRVAL_P(zstring), num_bytes);
+		if (buffer) {
+			efree(buffer);
+		}
 	}
 
 	RETURN_LONG(ret);
@@ -1417,6 +1470,7 @@ PHP_FUNCTION(rmdir)
 
 /* {{{ proto int readfile(string filename [, bool use_include_path[, resource context]])
    Output a file or a URL */
+/* UTODO: Accept unicode contents */
 PHP_FUNCTION(readfile)
 {
 	char *filename;
@@ -1472,6 +1526,7 @@ PHP_FUNCTION(umask)
 
 /* {{{ proto int fpassthru(resource fp)
    Output all remaining data from a file pointer */
+/* UTODO: Accept unicode contents */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval **arg1;
@@ -1781,34 +1836,46 @@ safe_to_copy:
    Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {
-	zval **arg1, **arg2;
-	int len;
+	zval *zstream;
+	char *buf;
+	long len;
 	php_stream *stream;
-
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	int is_unicode;
+	int32_t num_bytes, num_chars;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &len) == FAILURE) {
+		RETURN_NULL();
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, arg1);
+	php_stream_from_zval(stream, &zstream);
 
-	convert_to_long_ex(arg2);
-	len = Z_LVAL_PP(arg2);
 	if (len <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
-	Z_STRVAL_P(return_value) = emalloc(len + 1);
-	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
+	num_chars = len;
+	num_bytes = UBYTES(len);
+	buf = emalloc(num_bytes + UBYTES(1));
 
-	/* needed because recv/read/gzread doesnt put a null at the end*/
-	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
-
-	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(Z_STRVAL_P(return_value), 
-				Z_STRLEN_P(return_value), &Z_STRLEN_P(return_value), 1 TSRMLS_CC);
+	if (!php_stream_u_read(stream, buf, &num_bytes, &num_chars, &is_unicode)) {
+		efree(buf);
+		RETURN_FALSE;
 	}
-	Z_TYPE_P(return_value) = IS_STRING;
+
+	if (is_unicode) {
+		/* UTODO - magic_quotes_runtime */
+
+		buf[num_bytes] = 0;
+		buf[num_bytes + 1] = 0;
+		RETURN_UNICODEL(buf, num_bytes >> 1, 0);
+	} else {
+		buf[num_bytes] = 0;
+		if (PG(magic_quotes_runtime)) {
+			buf = php_addslashes(buf, num_bytes, &num_bytes, 1 TSRMLS_CC);
+		}
+		RETURN_STRINGL(buf, num_bytes, 0);
+	}
 }
 /* }}} */
 
@@ -1853,6 +1920,7 @@ quit_loop:
 
 /* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
    Format line as CSV and write to file pointer */
+/* UTODO: Output unicode contents */
 PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
@@ -1953,6 +2021,7 @@ PHP_FUNCTION(fputcsv)
 
 /* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure]]])
    Get line from file pointer and parse for CSV fields */
+/* UTODO: Accept unicode contents */
 PHP_FUNCTION(fgetcsv)
 {
 	char *temp, *tptr, *bptr, *line_end, *limit;

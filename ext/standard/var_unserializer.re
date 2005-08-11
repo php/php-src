@@ -286,7 +286,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	long datalen;
 
 	if(ce->unserialize == NULL) {
-		zend_error(E_WARNING, "Class %s has no unserializer", ce->name);
+		zend_error(E_WARNING, "Class %v has no unserializer", ce->name);
 		return 0;
 	}
 

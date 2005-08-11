@@ -225,11 +225,32 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
+/* {{{ sapi_update_default_charset */
+SAPI_API void sapi_update_default_charset(TSRMLS_D)
+{
+	if (UG(unicode)) {
+		const char *canonical_name = NULL;
+		UErrorCode status = U_ZERO_ERROR;
+
+		canonical_name = ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status);
+		SG(default_charset) = (char *)ucnv_getStandardName(canonical_name, "MIME", &status);
+	} else {
+		SG(default_charset) = zend_ini_string("default_charset", sizeof("default_charset"), 0);
+	}
+}
+/* }}} */
+
+
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
 {
 	char *mimetype, *charset, *content_type;
 
 	mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+	/*
+	 * Apache SAPI may invoke this function directly, before php_request_startup() is
+	 * called, so we need to update the default charset explicitly.
+	 */
+	sapi_update_default_charset(TSRMLS_C);
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (strncasecmp(mimetype, "text/", 5) == 0 && *charset) {
@@ -271,6 +292,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 {
 	char *charset, *newtype;
 	size_t newlen;
+
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
 	if (*mimetype != NULL) {

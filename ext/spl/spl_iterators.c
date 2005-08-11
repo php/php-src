@@ -1182,6 +1182,7 @@ ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RecursiveFilterIterator[] = {
 	SPL_ME(RecursiveFilterIterator,  __construct,      arginfo_parent_it___construct, ZEND_ACC_PUBLIC)
+	SPL_MA(ParentIterator,  accept,  RecursiveFilterIterator, hasChildren, NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator,  hasChildren,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator,  getChildren,      NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
@@ -1495,7 +1496,7 @@ SPL_METHOD(CachingIterator, __toString)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!(intern->u.caching.flags & CIT_CALL_TOSTRING))	{
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%s does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%v does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
 	}
 	if (intern->u.caching.zstr) {
 		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRLEN_P(intern->u.caching.zstr), 1);
