@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2005, PHP 5.1 Release Candidate 1
+- Unbundled XML_RPC pear class and force ext/xmlrpc dependency on pear (Rasmus)
 - Updated bundled libraries in Windows distribution. (Edin)
   . zlib 1.2.3
   . curl 7.14.0

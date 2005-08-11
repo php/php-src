@@ -1,5 +1,4 @@
 <?php
-require_once 'XML/RPC/Server.php';
 
 class PEAR_test_mock_pearweb {
     var $_config;
