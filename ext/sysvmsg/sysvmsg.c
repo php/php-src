@@ -253,7 +253,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, long desiredmsgtype, long &msgtype, long maxsize, mixed message [[, bool unserialize=true][, long flags=0[, long errorcode]]]
+/* {{{ proto mixed msg_receive(resource queue, long desiredmsgtype, long &msgtype, long maxsize, mixed message [[, bool unserialize=true][, long flags=0[, long errorcode]]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
