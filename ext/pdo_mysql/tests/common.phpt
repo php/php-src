@@ -2,7 +2,8 @@
 MySQL
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo_mysql')) print 'skip'; ?>
+if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) print 'skip not loaded';
+?>
 --REDIRECTTEST--
 # magic auto-configuration
 

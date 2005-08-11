@@ -1,8 +1,11 @@
 --TEST--
 PDO MySQL SHOW TABLES
 --SKIPIF--
-<?php # vim:ft=php
-if (!extension_loaded('pdo_mysql')) print 'skip not loaded';
+<?php
+if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
+require 'ext/pdo_mysql/tests/config.inc';
+require 'ext/pdo/tests/pdo_test.inc';
+PDOTest::skip();
 ?>
 --FILE--
 <?php
