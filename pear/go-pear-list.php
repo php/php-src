@@ -8,7 +8,6 @@
 $packages  = array(
 // required packages for the installer
 "PEAR"                  =>    "1.3.5",
-"XML_RPC"               =>    "1.3.1",
 "Console_Getopt"        =>    "1.2",
 "Archive_Tar"           =>    "1.3.1",
 

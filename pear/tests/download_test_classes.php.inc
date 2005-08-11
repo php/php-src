@@ -1,5 +1,4 @@
 <?php
-require_once 'XML/RPC.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PEAR_test_mock_pearweb.php.inc';
 $GLOBALS['pearweb'] = new PEAR_test_mock_pearweb;
 class test_XML_RPC_Client extends XML_RPC_Client {
@@ -94,8 +93,8 @@ class test_PEAR_Remote extends PEAR_Remote {
             };
             return $result;
         }
-        if (!@include_once("XML/RPC.php")) {
-            return $this->raiseError("For this remote PEAR operation you need to install the XML_RPC package");
+        if (!extension_loaded("xmlrpc")) {
+            return $this->raiseError("For this remote PEAR operation you need to install the xmlrpc extension");
         }
         array_shift($args);
         $server_host = $this->_registry->channelInfo($server_channel, 'server');

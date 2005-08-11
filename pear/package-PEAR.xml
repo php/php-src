@@ -124,7 +124,7 @@
       <dep type="php" rel="ge" version="4.2"/>
       <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
       <dep type="pkg" rel="ge" version="1.2">Console_Getopt</dep>
-      <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
+      <dep type="ext" rel="has">xmlrpc</dep>
       <dep type="ext" rel="has">xml</dep>
       <dep type="ext" rel="has">pcre</dep>
     </deps>
