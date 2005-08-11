@@ -30,6 +30,7 @@
 #endif
 
 #include "zend_strtod.h"
+#include "zend_unicode.h"
 
 #if 0&&HAVE_BCMATH
 #include "ext/bcmath/libbcmath/src/bcmath.h"
@@ -63,6 +64,8 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 
 ZEND_API zend_bool instanceof_function_ex(zend_class_entry *instance_ce, zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC);
 ZEND_API zend_bool instanceof_function(zend_class_entry *instance_ce, zend_class_entry *ce TSRMLS_DC);
+ZEND_API long zend_u_strtol(const UChar *nptr, UChar **endptr, int base);
+ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr);
 END_EXTERN_C()
 
 static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
@@ -128,6 +131,77 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 	return 0;
 }
 
+static inline zend_bool is_numeric_unicode(UChar *str, int32_t length, long *lval, double *dval, zend_bool allow_errors)
+{
+	int32_t local_lval;
+	double local_dval;
+	UChar *end_ptr_long, *end_ptr_double;
+	int conv_base=10;
+
+	if (!length) {
+		return 0;
+	}
+	
+	/* handle hex numbers */
+	if (length>=2 && str[0]=='0' && (str[1]=='x' || str[1]=='X')) {
+		conv_base=16;
+	}
+
+	errno=0;
+	local_lval = zend_u_strtol(str, &end_ptr_long, conv_base);
+	if (errno != ERANGE) {
+		if (end_ptr_long == str+length) { /* integer string */
+			if (lval) {
+				*lval = local_lval;
+			}
+			return IS_LONG;
+		} else if (end_ptr_long == str && *end_ptr_long != '\0' && *str != '.' && *str != '-') { /* ignore partial string matches */
+			return 0;
+		}
+	} else {
+		end_ptr_long = NULL;
+	}
+
+	if (conv_base == 16) { /* hex string, under UNIX strtod() messes it up */
+		/* UTODO: keep compatibility with is_numeric_string() here? */
+		return 0;
+	}
+
+	local_dval = zend_u_strtod(str, &end_ptr_double);
+	if (local_dval == 0 && end_ptr_double == str) {
+		end_ptr_double = NULL;
+	} else {
+		if (end_ptr_double == str+length) { /* floating point string */
+			if (!zend_finite(local_dval)) {
+				/* "inf","nan" and maybe other weird ones */
+				return 0;
+			}
+
+			if (dval) {
+				*dval = local_dval;
+			}
+			return IS_DOUBLE;
+		}
+	}
+
+	if (allow_errors) {
+		if (end_ptr_double > end_ptr_long && dval) {
+			*dval = local_dval;
+			return IS_DOUBLE;
+		} else if (end_ptr_long && lval) {
+			*lval = local_lval;
+			return IS_LONG;
+		}
+	}
+	return 0;
+}
+
+static inline UChar*
+zend_u_memnstr(UChar *haystack, UChar *needle, int32_t needle_len, UChar *end)
+{
+	return u_strFindFirst(haystack, end - haystack, needle, needle_len);
+}
+
 static inline char *
 zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 {
@@ -160,6 +234,10 @@ ZEND_API int decrement_function(zval *op2);
 
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC);
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC);
+ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC);
+ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC);
+ZEND_API void convert_to_binary(zval *op);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
@@ -172,7 +250,11 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
-#define convert_to_string(op)			_convert_to_string((op) ZEND_FILE_LINE_CC)
+#define convert_to_string(op)		     	 _convert_to_string((op) ZEND_FILE_LINE_CC)
+#define convert_to_string_with_converter(op, conv) _convert_to_string_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_unicode(op)               _convert_to_unicode((op) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_unicode_with_converter(op, conv) _convert_to_unicode_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_text(op) (UG(unicode)?convert_to_unicode(op):convert_to_string(op))
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 
@@ -186,15 +268,14 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
-END_EXTERN_C()
+ZEND_API char *zend_str_tolower_dup(const char *source, unsigned int length);
 
-static inline char *
-zend_str_tolower_dup(const char *source, unsigned int length)
-{
-	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
-}
+ZEND_API void zend_u_str_tolower(zend_uchar type, void *str, unsigned int length);
+ZEND_API void *zend_u_str_tolower_copy(zend_uchar type, void *dest, const void *source, unsigned int length);
+ZEND_API void *zend_u_str_tolower_dup(zend_uchar type, const void *source, unsigned int length);
 
-BEGIN_EXTERN_C()
+ZEND_API void *zend_u_str_case_fold(zend_uchar type, const void *source, unsigned int length, zend_bool normalize, unsigned int *new_len);
+
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
@@ -204,7 +285,11 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2);
 ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length);
 
+ZEND_API int zend_u_binary_zval_strcmp(zval *s1, zval *s2);
+ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2);
+
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
+ZEND_API void zendi_u_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
 ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC);
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC);
@@ -212,6 +297,8 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC);
 ZEND_API int zend_atoi(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void zend_locale_usprintf_double(zval *op ZEND_FILE_LINE_DC);
+ZEND_API void zend_locale_usprintf_long(zval *op ZEND_FILE_LINE_DC);
 END_EXTERN_C()
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\
 	if ((*ppzv)->type!=IS_##upper_type) {					\
@@ -219,14 +306,59 @@ END_EXTERN_C()
 		convert_to_##lower_type(*ppzv);						\
 	}
 
+#define convert_to_explicit_type(pzv, type)		\
+    do {										\
+		switch (type) {							\
+			case IS_NULL:						\
+				convert_to_null(pzv);			\
+				break;							\
+			case IS_LONG:						\
+				convert_to_long(pzv);			\
+				break;							\
+			case IS_DOUBLE: 					\
+				convert_to_double(pzv); 		\
+				break; 							\
+			case IS_BOOL: 						\
+				convert_to_bool(pzv); 			\
+				break; 							\
+			case IS_ARRAY: 						\
+				convert_to_array(pzv); 			\
+				break; 							\
+			case IS_OBJECT: 					\
+				convert_to_object(pzv); 		\
+				break; 							\
+			case IS_STRING: 					\
+				convert_to_string(pzv); 		\
+				break; 							\
+			case IS_UNICODE: 					\
+				convert_to_unicode(pzv);		\
+				break; 							\
+			case IS_BINARY: 					\
+				convert_to_binary(pzv); 		\
+				break; 							\
+			default: 							\
+				assert(0); 						\
+				break; 							\
+		}										\
+	} while (0);								\
+
+#define convert_to_explicit_type_ex(ppzv, type)	\
+	if ((*ppzv)->type != type) {				\
+		SEPARATE_ZVAL_IF_NOT_REF(ppzv);			\
+		convert_to_explicit_type(*ppzv, type);	\
+	}											\
+}
 
 #define convert_to_boolean_ex(ppzv)	convert_to_ex_master(ppzv, boolean, BOOL)
 #define convert_to_long_ex(ppzv)	convert_to_ex_master(ppzv, long, LONG)
 #define convert_to_double_ex(ppzv)	convert_to_ex_master(ppzv, double, DOUBLE)
 #define convert_to_string_ex(ppzv)	convert_to_ex_master(ppzv, string, STRING)
+#define convert_to_unicode_ex(ppzv)	convert_to_ex_master(ppzv, unicode, UNICODE)
+#define convert_to_binary_ex(ppzv)	convert_to_ex_master(ppzv, binary, BINARY)
 #define convert_to_array_ex(ppzv)	convert_to_ex_master(ppzv, array, ARRAY)
 #define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
+#define convert_to_text_ex(ppzv)	if (UG(unicode)) {convert_to_unicode_ex(ppzv);} else {convert_to_string_ex(ppzv);}
 
 #define convert_scalar_to_number_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_LONG && (*ppzv)->type!=IS_DOUBLE) {		\
@@ -242,6 +374,11 @@ END_EXTERN_C()
 #define Z_DVAL(zval)			(zval).value.dval
 #define Z_STRVAL(zval)			(zval).value.str.val
 #define Z_STRLEN(zval)			(zval).value.str.len
+#define Z_USTRVAL(zval)			(zval).value.ustr.val
+#define Z_USTRLEN(zval)			(zval).value.ustr.len
+#define Z_USTRCPLEN(zval)		(u_countChar32((zval).value.ustr.val, (zval).value.ustr.len))
+#define Z_BINVAL(zval)			Z_STRVAL(zval)
+#define Z_BINLEN(zval)			Z_STRLEN(zval)
 #define Z_ARRVAL(zval)			(zval).value.ht
 #define Z_OBJ_HANDLE(zval)		(zval).value.obj.handle
 #define Z_OBJ_HT(zval)			(zval).value.obj.handlers
@@ -249,12 +386,19 @@ END_EXTERN_C()
 #define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
 #define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
 #define Z_RESVAL(zval)			(zval).value.lval
+#define Z_UNIVAL(zval)			((zval).type==IS_UNICODE?(char*)(zval).value.ustr.val:(zval).value.str.val)
+#define Z_UNILEN(zval)			((zval).type==IS_UNICODE?(zval).value.ustr.len:(zval).value.str.len)
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
 #define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)
 #define Z_DVAL_P(zval_p)		Z_DVAL(*zval_p)
 #define Z_STRVAL_P(zval_p)		Z_STRVAL(*zval_p)
 #define Z_STRLEN_P(zval_p)		Z_STRLEN(*zval_p)
+#define Z_USTRVAL_P(zval_p)		Z_USTRVAL(*zval_p)
+#define Z_USTRLEN_P(zval_p)		Z_USTRLEN(*zval_p)
+#define Z_USTRCPLEN_P(zval_p)	Z_USTRCPLEN(*zval_p)
+#define Z_BINVAL_P(zval)		Z_STRVAL_P(zval)
+#define Z_BINLEN_P(zval)		Z_STRLEN_P(zval)
 #define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
 #define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
 #define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
@@ -262,12 +406,19 @@ END_EXTERN_C()
 #define Z_OBJ_HANDLE_P(zval_p)  Z_OBJ_HANDLE(*zval_p)
 #define Z_OBJ_HT_P(zval_p)      Z_OBJ_HT(*zval_p)
 #define Z_OBJ_HANDLER_P(zval_p, h) Z_OBJ_HANDLER(*zval_p, h) 
+#define Z_UNIVAL_P(zval_p)		Z_UNIVAL(*zval_p)
+#define Z_UNILEN_P(zval_p)		Z_UNILEN(*zval_p)
 
 #define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
 #define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
 #define Z_DVAL_PP(zval_pp)		Z_DVAL(**zval_pp)
 #define Z_STRVAL_PP(zval_pp)	Z_STRVAL(**zval_pp)
 #define Z_STRLEN_PP(zval_pp)	Z_STRLEN(**zval_pp)
+#define Z_USTRVAL_PP(zval_pp)	Z_USTRVAL(**zval_pp)
+#define Z_USTRLEN_PP(zval_pp)	Z_USTRLEN(**zval_pp)
+#define Z_USTRCPLEN_PP(zval_pp)	Z_USTRCPLEN(**zval_pp)
+#define Z_BINVAL_PP(zval)		Z_STRVAL_PP(zval)
+#define Z_BINLEN_PP(zval)		Z_STRLEN_PP(zval)
 #define Z_ARRVAL_PP(zval_pp)	Z_ARRVAL(**zval_pp)
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
@@ -275,6 +426,8 @@ END_EXTERN_C()
 #define Z_OBJ_HANDLE_PP(zval_p) Z_OBJ_HANDLE(**zval_p)
 #define Z_OBJ_HT_PP(zval_p)     Z_OBJ_HT(**zval_p)
 #define Z_OBJ_HANDLER_PP(zval_p, h) Z_OBJ_HANDLER(**zval_p, h) 
+#define Z_UNIVAL_PP(zval_pp)	Z_UNIVAL(**zval_pp)
+#define Z_UNILEN_PP(zval_pp)	Z_UNILEN(**zval_pp)
 
 #define Z_TYPE(zval)		(zval).type
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)

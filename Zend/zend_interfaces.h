@@ -51,6 +51,8 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 
 ZEND_API void zend_register_interfaces(TSRMLS_D);
 
+void init_interfaces(TSRMLS_D);
+
 END_EXTERN_C()
 
 #endif /* ZEND_INTERFACES_H */

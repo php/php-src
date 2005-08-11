@@ -42,9 +42,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 					zend_class_entry *ce = object->ce;
 
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to private %s::__destruct() from context '%s'%s", 
+						"Call to private %v::__destruct() from context '%v'%s", 
 						ce->name, 
-						EG(scope) ? EG(scope)->name : "", 
+						EG(scope) ? EG(scope)->name : EMPTY_STR, 
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -55,9 +55,9 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 					zend_class_entry *ce = object->ce;
 
 					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to protected %s::__destruct() from context '%s'%s", 
+						"Call to protected %v::__destruct() from context '%v'%s", 
 						ce->name, 
-						EG(scope) ? EG(scope)->name : "", 
+						EG(scope) ? EG(scope)->name : EMPTY_STR, 
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -78,7 +78,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		zend_call_method_with_0_params(&obj, object->ce, &object->ce->destructor, ZEND_DESTRUCTOR_FUNC_NAME, NULL);
 		if (old_exception) {
 			if (EG(exception)) {
-				zend_error(E_ERROR, "Ignoring exception from %s::__destruct() while an exception is already active", object->ce->name);
+				zend_error(E_ERROR, "Ignoring exception from %v::__destruct() while an exception is already active", object->ce->name);
 				zval_ptr_dtor(&EG(exception));
 			}
 			EG(exception) = old_exception;
@@ -167,7 +167,7 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 	new_obj_val = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
 
 	ALLOC_HASHTABLE(new_object->properties);
-	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_u_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 
 	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
 

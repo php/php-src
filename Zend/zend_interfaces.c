@@ -74,7 +74,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		if (!fn_proxy || !*fn_proxy) {
 			if (zend_hash_find(function_table, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
 				/* error at c-level */
-				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? obj_ce->name : "", obj_ce ? "::" : "", function_name);
+				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %v%s%s", obj_ce ? obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
 			}
 			if (fn_proxy) {
 				*fn_proxy = fcic.function_handler;
@@ -91,7 +91,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		if (!obj_ce) {
 			obj_ce = object_pp ? Z_OBJCE_PP(object_pp) : NULL;
 		}
-		zend_error(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? obj_ce->name : "", obj_ce ? "::" : "", function_name);
+		zend_error(E_CORE_ERROR, "Couldn't execute method %v%s%s", obj_ce ? obj_ce->name : EMPTY_STR, obj_ce ? "::" : "", function_name);
 	}
 	if (!retval_ptr_ptr) {
 		if (retval) {
@@ -195,23 +195,35 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 		*int_key = 0;
 		if (!EG(exception))
 		{
-			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
+			zend_error(E_WARNING, "Nothing returned from %v::key()", iter->ce->name);
 		}
 		return HASH_KEY_IS_LONG;
 	}
 	switch (retval->type) {
 		default: 
-			zend_error(E_WARNING, "Illegal type returned from %s::key()", iter->ce->name);
+			zend_error(E_WARNING, "Illegal type returned from %v::key()", iter->ce->name);
 		case IS_NULL:
 			*int_key = 0;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_LONG;
 
 		case IS_STRING:
-			*str_key = estrndup(retval->value.str.val, retval->value.str.len);
+			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 			*str_key_len = retval->value.str.len+1;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_STRING;
+
+		case IS_BINARY:
+			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			*str_key_len = retval->value.str.len+1;
+			zval_ptr_dtor(&retval);
+			return HASH_KEY_IS_BINARY;
+
+		case IS_UNICODE:
+			*str_key = (char*)eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
+			*str_key_len = retval->value.str.len+1;
+			zval_ptr_dtor(&retval);
+			return HASH_KEY_IS_UNICODE;
 
 		case IS_DOUBLE:
 		case IS_RESOURCE:
@@ -286,7 +298,7 @@ static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce,
 	if (!ce || !ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
 		if (!EG(exception))
 		{
-			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce->name);
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %v::getIterator() must be traversable or implement interface Iterator", ce->name);
 		}
 		if (iterator)
 		{
@@ -314,7 +326,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 			return SUCCESS;
 		}
 	}
-	zend_error(E_CORE_ERROR, "Class %s must implement interface %s as part of either %s or %s",
+	zend_error(E_CORE_ERROR, "Class %v must implement interface %v as part of either %v or %v",
 		class_type->name,
 		zend_ce_traversable->name,
 		zend_ce_iterator->name,
@@ -549,6 +561,14 @@ ZEND_API void zend_register_interfaces(TSRMLS_D)
 	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
 }
 /* }}} */
+
+void init_interfaces(TSRMLS_D)
+{
+	zend_ce_traversable = zend_get_named_class_entry("Traversable", sizeof("Traversable")-1 TSRMLS_CC);
+	zend_ce_aggregate = zend_get_named_class_entry("IteratorAggregate", sizeof("IteratorAggregate")-1 TSRMLS_CC);
+	zend_ce_iterator = zend_get_named_class_entry("Iterator", sizeof("Iterator")-1 TSRMLS_CC);
+	zend_ce_arrayaccess = zend_get_named_class_entry("ArrayAccess", sizeof("ArrayAccess")-1 TSRMLS_CC);
+}
 
 /*
  * Local variables:

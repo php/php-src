@@ -30,10 +30,20 @@
 ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (zvalue->type & ~IS_CONSTANT_INDEX) {
+		case IS_CONSTANT: {
+			TSRMLS_FETCH();
+
+			if (UG(unicode)) goto dtor_unicode;
+		}
 		case IS_STRING:
-		case IS_CONSTANT:
+		case IS_BINARY:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			STR_FREE_REL(zvalue->value.str.val);
+			break;
+		case IS_UNICODE:
+dtor_unicode:
+			CHECK_ZVAL_UNICODE_REL(zvalue);
+			STR_FREE_REL(zvalue->value.ustr.val);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
@@ -74,10 +84,20 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (zvalue->type & ~IS_CONSTANT_INDEX) {
+		case IS_CONSTANT: {
+			TSRMLS_FETCH();
+
+			if (UG(unicode)) goto dtor_unicode;
+		}
 		case IS_STRING:
-		case IS_CONSTANT:
+		case IS_BINARY:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			free(zvalue->value.str.val);
+			break;
+		case IS_UNICODE:
+dtor_unicode:
+			CHECK_ZVAL_UNICODE_REL(zvalue);
+			free(zvalue->value.ustr.val);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
@@ -114,10 +134,20 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_LONG:
 		case IS_NULL:
 			break;
-		case IS_CONSTANT:
+		case IS_CONSTANT: {
+			TSRMLS_FETCH();
+
+			if (UG(unicode)) goto copy_unicode;
+		}
 		case IS_STRING:
+		case IS_BINARY:
 			CHECK_ZVAL_STRING_REL(zvalue);
 			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
+			break;
+		case IS_UNICODE:
+copy_unicode:
+			CHECK_ZVAL_UNICODE_REL(zvalue);
+			zvalue->value.ustr.val = eustrndup_rel(zvalue->value.ustr.val, zvalue->value.ustr.len);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
@@ -130,7 +160,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 					return; /* do nothing */
 				}
 				ALLOC_HASHTABLE_REL(tmp_ht);
-				zend_hash_init(tmp_ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+				zend_u_hash_init(tmp_ht, 0, NULL, ZVAL_PTR_DTOR, 0, original_ht->unicode);
 				zend_hash_copy(tmp_ht, original_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 				zvalue->value.ht = tmp_ht;
 			}
@@ -143,7 +173,6 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 	}
 }
-
 
 ZEND_API int zend_print_variable(zval *var) 
 {

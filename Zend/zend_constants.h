@@ -60,6 +60,7 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC);
 ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC);
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
+ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
 END_EXTERN_C()

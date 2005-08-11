@@ -386,9 +386,10 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 
 int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {
-	printf("Class %s:\n", class_entry->name);
+	/* UTODO: fix these to use spprintf() */
+	printf("Class %v:\n", class_entry->name);
 	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two TSRMLS_CC);
-	printf("End of class %s.\n\n", class_entry->name);
+	printf("End of class %v.\n\n", class_entry->name);
 	return 0;
 }
 

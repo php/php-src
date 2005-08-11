@@ -48,6 +48,8 @@ extern ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 /* show an exception using zend_error(E_ERROR,...) */
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
 
+void init_exceptions(TSRMLS_D);
+
 END_EXTERN_C()
 
 #endif

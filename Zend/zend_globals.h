@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2005 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -36,9 +36,8 @@
 #include "zend_objects_API.h"
 #include "zend_modules.h"
 
-#ifdef ZEND_MULTIBYTE
-#include "zend_multibyte.h"
-#endif /* ZEND_MULTIBYTE */
+#include <unicode/ucnv.h>
+#include <unicode/ucol.h>
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -132,17 +131,16 @@ struct _zend_compiler_globals {
 	char *doc_comment;
 	zend_uint doc_comment_len;
 
-#ifdef ZEND_MULTIBYTE
-	zend_encoding **script_encoding_list;
-	int script_encoding_list_size;
+	zend_uchar literal_type;
 
-	zend_encoding *internal_encoding;
-
-	/* multibyte utility functions */
-	zend_encoding_detector encoding_detector;
-	zend_encoding_converter encoding_converter;
-	zend_encoding_oddlen encoding_oddlen;
-#endif /* ZEND_MULTIBYTE */
+#ifdef ZTS
+	HashTable *global_function_table;
+	HashTable *global_class_table;
+	HashTable *global_auto_globals_table;
+	HashTable *global_u_function_table;
+	HashTable *global_u_class_table;
+	HashTable *global_u_auto_globals_table;
+#endif
 };
 
 
@@ -232,6 +230,11 @@ struct _zend_executor_globals {
 
 	zend_property_info std_property_info;
 
+#ifdef ZTS
+	HashTable *global_constants_table;
+	HashTable *global_u_constants_table;
+#endif
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
@@ -286,21 +289,31 @@ struct _zend_scanner_globals {
 	int yy_start_stack_depth;
 	int *yy_start_stack;
 
-#ifdef ZEND_MULTIBYTE
-	/* original (unfiltered) script */
-	char *script_org;
-	int script_org_size;
+	UConverter *input_conv;     /* converter for flex input */
+	UConverter *output_conv;    /* converter for data from flex output */
+	zend_bool encoding_checked;
+	char* rest_str;
+	int rest_len;
+};
 
-	/* filtered script */
-	char *script_filtered;
-	int script_filtered_size;
+struct _zend_unicode_globals {
+	zend_bool unicode;                   /* indicates whether full Unicode mode is enabled */
 
-	/* input/ouput filters */
-	zend_encoding_filter input_filter;
-	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+	UConverter *fallback_encoding_conv;  /* converter for default encoding for IS_STRING type */
+	UConverter *runtime_encoding_conv;   /* runtime encoding converter */
+	UConverter *output_encoding_conv;    /* output layer converter */
+	UConverter *script_encoding_conv;    /* default script encoding converter */
+	UConverter *http_input_encoding_conv;/* http input encoding converter */
+	UConverter *utf8_conv;				 /* all-purpose UTF-8 converter */
+
+	uint8_t from_u_error_mode;
+	UChar subst_char[3];
+	uint8_t subst_char_len;
+
+	char *default_locale;
+	UCollator *default_collator;
+
+	HashTable flex_compatible;
 };
 
 #endif /* ZEND_GLOBALS_H */

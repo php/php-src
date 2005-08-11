@@ -126,6 +126,8 @@ typedef struct _zend_function_entry {
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
 		class_container.clone = NULL;							\
+		class_container.serialize = NULL; \
+		class_container.unserialize = NULL; \
 		class_container.create_object = NULL;	 				\
 		class_container.interface_gets_implemented = NULL;		\
 		class_container.__call = handle_fcall;	\
@@ -212,6 +214,8 @@ ZEND_API int zend_declare_property_double(zend_class_entry *ce, char *name, int 
 ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type TSRMLS_DC);
 ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int name_length, char *value, int value_len, int access_type TSRMLS_DC);
 
+ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, void *name, int name_length, zval *property, int access_type TSRMLS_DC);
+
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC);
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC);
 ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC);
@@ -225,6 +229,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 
 ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
 ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC);
+ZEND_API zend_uchar zend_get_best_string_type(int num_args, ...);
 
 #define getThis() (this_ptr)
 
@@ -260,6 +265,8 @@ ZEND_API int add_assoc_resource_ex(zval *arg, char *key, uint key_len, int r);
 ZEND_API int add_assoc_double_ex(zval *arg, char *key, uint key_len, double d);
 ZEND_API int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate);
 ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate);
+ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, void *str, int duplicate);
+ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, void *str, uint length, int duplicate);
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
@@ -269,7 +276,13 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 #define add_assoc_double(__arg, __key, __d) add_assoc_double_ex(__arg, __key, strlen(__key)+1, __d)
 #define add_assoc_string(__arg, __key, __str, __duplicate) add_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_assoc_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_assoc_unicode(__arg, __key, __str, __duplicate) add_assoc_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_assoc_unicodel(__arg, __key, __str, __length, __duplicate) add_assoc_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key)+1, __value)
+
+ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, void *key, uint key_len, zval *value);
+
+#define add_u_assoc_zval(__arg, __type, __key, __value) add_u_assoc_zval_ex(__arg, __type, __key, (((__type)==IS_UNICODE)?u_strlen((UChar*)__key):strlen(__key))+1, __value)
 
 /* unset() functions are only suported for legacy modules and null() functions should be used */
 #define add_assoc_unset(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key) + 1)
@@ -284,6 +297,10 @@ ZEND_API int add_index_resource(zval *arg, uint idx, int r);
 ZEND_API int add_index_double(zval *arg, uint idx, double d);
 ZEND_API int add_index_string(zval *arg, uint idx, char *str, int duplicate);
 ZEND_API int add_index_stringl(zval *arg, uint idx, char *str, uint length, int duplicate);
+ZEND_API int add_index_binary(zval *arg, uint idx, char *str, int duplicate);
+ZEND_API int add_index_binaryl(zval *arg, uint idx, char *str, uint length, int duplicate);
+ZEND_API int add_index_unicode(zval *arg, uint idx, UChar *str, int duplicate);
+ZEND_API int add_index_unicodel(zval *arg, uint idx, UChar *str, uint length, int duplicate);
 ZEND_API int add_index_zval(zval *arg, uint index, zval *value);
 
 ZEND_API int add_next_index_long(zval *arg, long n);
@@ -293,6 +310,10 @@ ZEND_API int add_next_index_resource(zval *arg, int r);
 ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate);
 ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate);
+ZEND_API int add_next_index_binary(zval *arg, char *str, int duplicate);
+ZEND_API int add_next_index_binaryl(zval *arg, char *str, uint length, int duplicate);
+ZEND_API int add_next_index_unicode(zval *arg, UChar *str, int duplicate);
+ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int duplicate);
 ZEND_API int add_next_index_zval(zval *arg, zval *value);
 
 ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
@@ -305,6 +326,10 @@ ZEND_API int add_get_index_long(zval *arg, uint idx, long l, void **dest);
 ZEND_API int add_get_index_double(zval *arg, uint idx, double d, void **dest);
 ZEND_API int add_get_index_string(zval *arg, uint idx, char *str, void **dest, int duplicate);
 ZEND_API int add_get_index_stringl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_binary(zval *arg, uint idx, char *str, void **dest, int duplicate);
+ZEND_API int add_get_index_binaryl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_unicode(zval *arg, uint idx, UChar *str, void **dest, int duplicate);
+ZEND_API int add_get_index_unicodel(zval *arg, uint idx, UChar *str, uint length, void **dest, int duplicate);
 
 ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long l TSRMLS_DC);
 ZEND_API int add_property_null_ex(zval *arg, char *key, uint key_len TSRMLS_DC);
@@ -358,6 +383,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
+ZEND_API int zend_u_delete_global_variable(zend_uchar type, void *name, int name_len TSRMLS_DC);
+
+ZEND_API zend_class_entry* zend_get_named_class_entry(char* name, int name_length TSRMLS_DC);
 
 ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
 
@@ -367,14 +395,24 @@ ZEND_API ZEND_FUNCTION(display_disabled_function);
 ZEND_API ZEND_FUNCTION(display_disabled_class);
 END_EXTERN_C()
 
+
+#define BINARY_TYPE (UG(unicode) ? IS_BINARY : IS_STRING)
+
+
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
 	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s)", (z)->value.str.val); }
 #define CHECK_ZVAL_STRING_REL(z) \
 	if ((z)->value.str.val[ (z)->value.str.len ] != '\0') { zend_error(E_WARNING, "String is not zero-terminated (%s) (source: %s:%d)", (z)->value.str.val ZEND_FILE_LINE_RELAY_CC); }
+#define CHECK_ZVAL_UNICODE(z) \
+	if ((z)->value.ustr.val[ (z)->value.ustr.len ] != 0 ) { zend_error(E_WARNING, "String is not zero-terminated"); }
+#define CHECK_ZVAL_UNICODE_REL(z) \
+	if ((z)->value.ustr.val[ (z)->value.ustr.len ] != 0) { zend_error(E_WARNING, "String is not zero-terminated (source: %s:%d)", ZEND_FILE_LINE_RELAY_C); }
 #else
 #define CHECK_ZVAL_STRING(z)
 #define CHECK_ZVAL_STRING_REL(z)
+#define CHECK_ZVAL_UNICODE(z)
+#define CHECK_ZVAL_UNICODE_REL(z)
 #endif
 
 #define ZVAL_RESOURCE(z, l) {			\
@@ -415,10 +453,50 @@ END_EXTERN_C()
 		(z)->type = IS_STRING;		    \
 	}
 
+#define ZVAL_UNICODE(z, u, duplicate) {	\
+		UChar *__u=(u); 				\
+		(z)->value.ustr.len = u_strlen(__u);    \
+		(z)->value.ustr.val = (duplicate?eustrndup(__u, (z)->value.ustr.len):__u);	\
+		(z)->type = IS_UNICODE;		    \
+}
+
+#define ZVAL_UNICODEL(z, u, l, duplicate) {	\
+	UChar *__u=(u); int32_t __l=l; 			\
+		(z)->value.ustr.len = __l;	    \
+		(z)->value.ustr.val = (duplicate?eustrndup(__u, __l):__u);	\
+		(z)->type = IS_UNICODE;		    \
+}
+
+#define ZVAL_BINARY(z, s, duplicate) {	\
+		char *__s=(s);					\
+		(z)->value.str.len = strlen(__s);	\
+		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
+		(z)->type = BINARY_TYPE;	\
+	}
+
+#define ZVAL_BINARYL(z, s, l, duplicate) {	\
+		char *__s=(s); int __l=l;		\
+		(z)->value.str.len = __l;	    \
+		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
+		(z)->type = BINARY_TYPE;   \
+	}
+
 #define ZVAL_EMPTY_STRING(z) {	        \
 		(z)->value.str.len = 0;  	    \
 		(z)->value.str.val = STR_EMPTY_ALLOC(); \
 		(z)->type = IS_STRING;		    \
+	}
+
+#define ZVAL_EMPTY_UNICODE(z) {	        \
+		(z)->value.ustr.len = 0;  	    \
+		(z)->value.ustr.val = USTR_MAKE(""); \
+		(z)->type = IS_UNICODE;		    \
+	}
+
+#define ZVAL_EMPTY_BINARY(z) {	        \
+		(z)->value.str.len = 0;  	    \
+		(z)->value.str.val = STR_EMPTY_ALLOC(); \
+		(z)->type = BINARY_TYPE;   \
 	}
 
 #define ZVAL_ZVAL(z, zv, copy, dtor) {  \
@@ -450,9 +528,32 @@ END_EXTERN_C()
 #define RETVAL_STRING(s, duplicate) 		ZVAL_STRING(return_value, s, duplicate)
 #define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
+#define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
+#define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
+#define RETVAL_EMPTY_UNICODE() 			ZVAL_EMPTY_UNICODE(return_value)
+#define RETVAL_BINARY(s, duplicate) 		ZVAL_BINARY(return_value, s, duplicate)
+#define RETVAL_BINARYL(s, l, duplicate) 	ZVAL_BINARYL(return_value, s, l, duplicate)
+#define RETVAL_EMPTY_BINARY() 			ZVAL_EMPTY_BINARY(return_value)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
 #define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
+#define RETVAL_TEXT(t, duplicate)					\
+		do {										\
+			if (UG(unicode)) {						\
+				RETVAL_UNICODE(t, duplicate);		\
+			} else {								\
+				RETVAL_STRING(t, duplicate);		\
+			}										\
+		} while (0);
+
+#define RETVAL_TEXTL(t, l, duplicate)				\
+		do {										\
+			if (UG(unicode)) {						\
+				RETVAL_UNICODEL(t, l, duplicate); 	\
+			} else {								\
+				RETVAL_STRINGL(t, l, duplicate);	\
+			}										\
+		} while (0);
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
@@ -462,9 +563,17 @@ END_EXTERN_C()
 #define RETURN_STRING(s, duplicate) 	{ RETVAL_STRING(s, duplicate); return; }
 #define RETURN_STRINGL(s, l, duplicate) { RETVAL_STRINGL(s, l, duplicate); return; }
 #define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
+#define RETURN_UNICODE(u, duplicate) 	{ RETVAL_UNICODE(u, duplicate); return; }
+#define RETURN_UNICODEL(u, l, duplicate) { RETVAL_UNICODEL(u, l, duplicate); return; }
+#define RETURN_EMPTY_UNICODE() 			{ RETVAL_EMPTY_UNICODE(); return; }
+#define RETURN_BINARY(s, duplicate) 	{ RETVAL_BINARY(s, duplicate); return; }
+#define RETURN_BINARYL(s, l, duplicate) { RETVAL_BINARYL(s, l, duplicate); return; }
+#define RETURN_EMPTY_BINARY() 			{ RETVAL_EMPTY_BINARY(); return; }
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
+#define RETURN_TEXT(t, duplicate)		{ RETVAL_TEXT(t, duplicate); return; }
+#define RETURN_TEXTL(t, l, duplicate)	{ RETVAL_TEXTL(t, l, duplicate); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\

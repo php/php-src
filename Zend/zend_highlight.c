@@ -25,6 +25,7 @@
 #include "zend_highlight.h"
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
+#include "zend_operators.h"
 
 ZEND_API void zend_html_putc(char c)
 {
@@ -96,6 +97,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	char *next_color;
 	int in_string=0, post_heredoc = 0;
 
+	CG(literal_type) = IS_STRING;
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
@@ -119,7 +121,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_CONSTANT_ENCAPSED_STRING:
 				next_color = syntax_highlighter_ini->highlight_string;
 				break;
-			case '"':
+			case '"':				
 				next_color = syntax_highlighter_ini->highlight_string;
 				in_string = !in_string;
 				break;				
@@ -162,7 +164,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 		}
 
-		if (token.type == IS_STRING) {
+		if (token.type == IS_STRING ||
+		    token.type == IS_BINARY ||
+		    token.type == IS_UNICODE) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -172,11 +176,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_DOC_COMMENT:
 					break;
 				default:
-					efree(token.value.str.val);
+					efree(Z_UNIVAL(token));
 					break;
 			}
 		} else if (token_type == T_END_HEREDOC) {
-			efree(token.value.str.val);
+			efree(Z_UNIVAL(token));
 		}
 		token.type = 0;
 	}
@@ -195,6 +199,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 	int token_type;
 	int prev_space = 0;
 
+	CG(literal_type) = IS_STRING;
 	token.type = 0;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
@@ -218,7 +223,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 					if (ptr[LANG_SCNG(yy_leng) - 1] == ';') {
 						lex_scan(&token TSRMLS_CC);
 					}
-					efree(token.value.str.val);
+					efree(Z_UNIVAL(token));
 				}
 				break;
 			
@@ -227,7 +232,9 @@ ZEND_API void zend_strip(TSRMLS_D)
 				break;
 		}
 
-		if (token.type == IS_STRING) {
+		if (token.type == IS_STRING ||
+		    token.type == IS_BINARY || 
+		    token.type == IS_UNICODE) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -238,7 +245,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 
 				default:
-					efree(token.value.str.val);
+					efree(Z_UNIVAL(token));
 					break;
 			}
 		}

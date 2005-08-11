@@ -71,7 +71,7 @@
 %left '*' '/' '%'
 %right '!'
 %nonassoc T_INSTANCEOF
-%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_UNICODE_CAST T_BINARY_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
 %nonassoc T_NEW T_CLONE
 %token T_EXIT
@@ -145,6 +145,8 @@
 %token T_DOLLAR_OPEN_CURLY_BRACES
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
+%token T_BINARY_DOUBLE
+%token T_BINARY_HEREDOC
 
 %% /* Rules */
 
@@ -210,7 +212,7 @@ unticked_statement:
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
-	|	T_INLINE_HTML			{ zend_do_echo(&$1 TSRMLS_CC); }
+	|	T_INLINE_HTML			{ zend_do_echo(&$1, 1 TSRMLS_CC); }
 	|	expr ';'				{ zend_do_free(&$1 TSRMLS_CC); }
 	|	T_USE use_filename ';'		{ zend_error(E_COMPILE_ERROR,"use: Not yet supported. Please use include_once() or require_once()");  zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' unset_variables ')' ';'
@@ -466,8 +468,8 @@ global_var_list:
 
 global_var:
 		T_VARIABLE			{ $$ = $1; }
-	|	'$' r_variable		{ $$ = $2; }
-	|	'$' '{' expr '}'	{ $$ = $3; }
+	|	'$' r_variable		{ zend_do_normalization(&$$, &$2 TSRMLS_CC); }
+	|	'$' '{' expr '}'	{ zend_do_normalization(&$$, &$3 TSRMLS_CC); }
 ;
 
 
@@ -536,8 +538,8 @@ class_constant_declaration:
 ;
 
 echo_expr_list:	
-		echo_expr_list ',' expr { zend_do_echo(&$3 TSRMLS_CC); }
-	|	expr					{ zend_do_echo(&$1 TSRMLS_CC); }
+		echo_expr_list ',' expr { zend_do_echo(&$3, 0 TSRMLS_CC); }
+	|	expr					{ zend_do_echo(&$1, 0 TSRMLS_CC); }
 ;
 
 
@@ -610,6 +612,8 @@ expr_without_variable:
 	|	T_INT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_LONG TSRMLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_DOUBLE TSRMLS_CC); }
 	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, IS_STRING TSRMLS_CC); } 
+	|	T_UNICODE_CAST expr	{ zend_do_cast(&$$, &$2, IS_UNICODE TSRMLS_CC); } 
+	|	T_BINARY_CAST expr	{ zend_do_cast(&$$, &$2, UG(unicode)?IS_BINARY:IS_STRING TSRMLS_CC); } 
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
 	|	T_OBJECT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_OBJECT TSRMLS_CC); }
 	|	T_BOOL_CAST expr	{ zend_do_cast(&$$, &$2, IS_BOOL TSRMLS_CC); }
@@ -618,7 +622,7 @@ expr_without_variable:
 	|	'@' { zend_do_begin_silence(&$1 TSRMLS_CC); } expr { zend_do_end_silence(&$1 TSRMLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }
 	|	T_ARRAY '(' array_pair_list ')' { $$ = $3; }
-	|	'`' encaps_list '`'		{ zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
+	|	'`' encaps_list '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 ;
 
@@ -708,9 +712,10 @@ scalar:
 	|	T_STRING_VARNAME		{ $$ = $1; }
 	|	class_constant	{ $$ = $1; }
 	|	common_scalar			{ $$ = $1; }
-	|	'"' encaps_list '"' 	{ $$ = $2; }
-	|	'\'' encaps_list '\''	{ $$ = $2; }
-	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; zend_do_end_heredoc(TSRMLS_C); }
+	|	'"' { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list '"' { $$ = $3; }
+	|	T_START_HEREDOC { CG(literal_type) = UG(unicode)?IS_UNICODE:IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
+	|	T_BINARY_DOUBLE { CG(literal_type) = UG(unicode)?IS_BINARY:IS_STRING; } encaps_list '"' { $$ = $3; }
+	|	T_BINARY_HEREDOC { CG(literal_type) = UG(unicode)?IS_BINARY:IS_STRING; } encaps_list T_END_HEREDOC { $$ = $3; zend_do_end_heredoc(TSRMLS_C); }
 ;
 
 
@@ -808,7 +813,7 @@ reference_variable:
 
 compound_variable:
 		T_VARIABLE			{ $$ = $1; }
-	|	'$' '{' expr '}'	{ $$ = $3; }
+	|	'$' '{' expr '}'	{ zend_do_normalization(&$$, &$3 TSRMLS_CC); }
 ;
 
 dim_offset:
@@ -830,7 +835,7 @@ object_dim_list:
 
 variable_name:
 		T_STRING		{ $$ = $1; }
-	|	'{' expr '}'	{ $$ = $2; }
+	|	'{' expr '}'	{ zend_do_normalization(&$$, &$2 TSRMLS_CC); }
 ;
 
 simple_indirect_reference:

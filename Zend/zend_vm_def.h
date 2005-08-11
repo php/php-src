@@ -886,11 +886,27 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 	zval *z = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL &&
-		zend_std_cast_object_tostring(z, &z_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+		zend_std_cast_object_tostring(z, &z_copy, UG(unicode) ? IS_UNICODE : IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 		zend_print_variable(&z_copy);
 		zval_dtor(&z_copy);
 	} else {
-		zend_print_variable(z);
+		UErrorCode status = U_ZERO_ERROR;
+		/* Convert inline HTML blocks to the output encoding, but only if necessary. */
+		if (opline->extended_value &&
+			strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
+				   ucnv_getName(ZEND_U_CONVERTER(UG(script_encoding_conv)), &status))) {
+			zval z_conv;
+			zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), ZEND_U_CONVERTER(UG(script_encoding_conv)), &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
+			z_conv.type = IS_BINARY;
+			if (U_SUCCESS(status)) {
+				zend_print_variable(&z_conv);
+			} else {
+				zend_error(E_WARNING, "Could not convert inline HTML for output");
+			}
+			zval_dtor(&z_conv);
+		} else {
+			zend_print_variable(z);
+		}
 	}
 
 	FREE_OP1();
@@ -932,23 +948,23 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 			ZEND_VM_NEXT_OPCODE();
 		}
 */
-		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &retval) == FAILURE) {
+		if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
-					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %R", Z_TYPE_P(varname), Z_UNIVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined variable: %s", varname->value.str.val);
+					zend_error(E_NOTICE,"Undefined variable: %R", Z_TYPE_P(varname), Z_UNIVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
 
 						new_zval->refcount++;
-						zend_hash_update(target_symbol_table, varname->value.str.val, varname->value.str.len+1, &new_zval, sizeof(zval *), (void **) &retval);
+						zend_u_hash_update(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, &new_zval, sizeof(zval *), (void **) &retval);
 					}
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
@@ -956,6 +972,10 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 		}
 		switch (opline->op2.u.EA.type) {
 			case ZEND_FETCH_GLOBAL:
+				if (OP1_TYPE != IS_TMP_VAR) {
+					FREE_OP1();
+				}
+				break;
 			case ZEND_FETCH_LOCAL:
 				FREE_OP1();
 				break;
@@ -1519,11 +1539,18 @@ ZEND_VM_HANDLER(53, ZEND_INIT_STRING, ANY, ANY)
 {
 	zval *tmp = &EX_T(EX(opline)->result.u.var).tmp_var;
 
-	tmp->value.str.val = emalloc(1);
-	tmp->value.str.val[0] = 0;
-	tmp->value.str.len = 0;
+	if (EX(opline)->extended_value == IS_UNICODE) {
+		tmp->value.ustr.val = eumalloc(1);
+		tmp->value.ustr.val[0] = 0;
+		tmp->value.ustr.len = 0;
+		tmp->type = IS_UNICODE;
+	} else {
+		tmp->value.str.val = emalloc(1);
+		tmp->value.str.val[0] = 0;
+		tmp->value.str.len = 0;
+		tmp->type = EX(opline)->extended_value;
+	}
 	tmp->refcount = 1;
-	tmp->type = IS_STRING;
 	tmp->is_ref = 0;
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1534,8 +1561,8 @@ ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP, CONST)
 	zend_free_op free_op1;
 
 	add_char_to_string(&EX_T(opline->result.u.var).tmp_var,
-		GET_OP1_ZVAL_PTR(BP_VAR_NA),
-		&opline->op2.u.constant);
+					   GET_OP1_ZVAL_PTR(BP_VAR_NA),
+					   &opline->op2.u.constant);
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1546,8 +1573,8 @@ ZEND_VM_HANDLER(55, ZEND_ADD_STRING, TMP, CONST)
 	zend_free_op free_op1;
 
 	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
-		GET_OP1_ZVAL_PTR(BP_VAR_NA),
-		&opline->op2.u.constant);
+						 GET_OP1_ZVAL_PTR(BP_VAR_NA),
+						 &opline->op2.u.constant);
 	/* FREE_OP is missing intentionally here - we're always working on the same temporary variable */
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1560,13 +1587,16 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP, TMP|VAR|CV)
 	zval var_copy;
 	int use_copy;
 
-	zend_make_printable_zval(var, &var_copy, &use_copy);
+	if (opline->extended_value == IS_UNICODE) {
+		zend_make_unicode_zval(var, &var_copy, &use_copy);
+	} else {
+		zend_make_printable_zval(var, &var_copy, &use_copy);
+	}
 	if (use_copy) {
 		var = &var_copy;
 	}
-	add_string_to_string(	&EX_T(opline->result.u.var).tmp_var,
-							GET_OP1_ZVAL_PTR(BP_VAR_NA),
-							var);
+	add_string_to_string(&EX_T(opline->result.u.var).tmp_var,
+						 GET_OP1_ZVAL_PTR(BP_VAR_NA), var);
 	if (use_copy) {
 		zval_dtor(var);
 	}
@@ -1600,7 +1630,8 @@ ZEND_VM_HANDLER(109, ZEND_FETCH_CLASS, ANY, CONST|TMP|VAR|UNUSED|CV)
 			EX_T(opline->result.u.var).class_entry = Z_OBJCE_P(class_name);
 			break;
 		case IS_STRING:
-			EX_T(opline->result.u.var).class_entry = zend_fetch_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), opline->extended_value TSRMLS_CC);
+		case IS_UNICODE:
+			EX_T(opline->result.u.var).class_entry = zend_u_fetch_class(Z_TYPE_P(class_name), Z_UNIVAL_P(class_name), Z_UNILEN_P(class_name), opline->extended_value TSRMLS_CC);
 			break;
 		default:
 			zend_error_noreturn(E_ERROR, "Class name must be a valid object or a string");
@@ -1618,17 +1649,19 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	char *function_name_strval;
 	int function_name_strlen;
 	zend_free_op free_op1, free_op2;
+	/* FIXME: type is default */
+	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (Z_TYPE_P(function_name)!=IS_STRING) {
+	if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	function_name_strval = function_name->value.str.val;
-	function_name_strlen = function_name->value.str.len;
+	function_name_strval = Z_UNIVAL_P(function_name);
+	function_name_strlen = Z_UNILEN_P(function_name);
 
 	EX(calling_scope) = EG(scope);
 
@@ -1642,10 +1675,10 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		/* First, locate the function. */
 		EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(&EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
 		if (!EX(fbc)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), function_name_strval);
+			zend_error_noreturn(E_ERROR, "Call to undefined method %R::%R()", type, Z_OBJ_CLASS_NAME_P(EX(object)), Z_TYPE_P(function_name), function_name_strval);
 		}
 	} else {
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %R() on a non-object", Z_TYPE_P(function_name), function_name_strval);
 	}
 
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
@@ -1685,21 +1718,20 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, ANY, CONST|TMP|VAR|UNUSED|CV)
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(OP2_TYPE != IS_UNUSED) {
 		char *function_name_strval;
-		int function_name_strlen;
+		unsigned int function_name_strlen;
 		zend_bool is_const = (OP2_TYPE == IS_CONST);
 		zend_free_op free_op2;
 
 		if (is_const) {
-			function_name_strval = opline->op2.u.constant.value.str.val;
-			function_name_strlen = opline->op2.u.constant.value.str.len;
+			function_name_strval = Z_UNIVAL(opline->op2.u.constant);
+			function_name_strlen = Z_UNILEN(opline->op2.u.constant);
 		} else {
 			function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-			if (Z_TYPE_P(function_name) != IS_STRING) {
+			if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
 				zend_error_noreturn(E_ERROR, "Function name must be a string");
 			}
-			function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
-			function_name_strlen = function_name->value.str.len;
+			function_name_strval = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_UNIVAL_P(function_name), Z_UNILEN_P(function_name), 1, &function_name_strlen);
 		}
 
 		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
@@ -1733,29 +1765,28 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 	zend_op *opline = EX(opline);
 	zval *function_name;
 	zend_function *function;
-	char *function_name_strval, *lcname;
-	int function_name_strlen;
+	void *function_name_strval, *lcname;
+	unsigned int function_name_strlen, lcname_len;
 	zend_free_op free_op2;
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (OP2_TYPE == IS_CONST) {
-		function_name_strval = opline->op2.u.constant.value.str.val;
-		function_name_strlen = opline->op2.u.constant.value.str.len;
+		function_name = &opline->op2.u.constant;
 	} else {
 		function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-		if (Z_TYPE_P(function_name) != IS_STRING) {
+		if (Z_TYPE_P(function_name) != IS_STRING && Z_TYPE_P(function_name) != IS_UNICODE) {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = function_name->value.str.val;
-		function_name_strlen = function_name->value.str.len;
 	}
+	function_name_strval = Z_UNIVAL_P(function_name);
+	function_name_strlen = Z_UNILEN_P(function_name);
 
-	lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
-	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
+	lcname = zend_u_str_case_fold(Z_TYPE_P(function_name), Z_STRVAL_P(function_name), function_name_strlen, 1, &lcname_len);
+	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(function_name), lcname, lcname_len+1, (void **) &function)==FAILURE) {
 		efree(lcname);
-		zend_error_noreturn(E_ERROR, "Call to undefined function %s()", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to undefined function %R()", Z_TYPE_P(function_name), function_name_strval);
 	}
 
 	efree(lcname);
@@ -1782,7 +1813,8 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	zend_bool should_change_scope;
 
 	if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+		/* FIXME: output identifiers properly */
+		zend_error_noreturn(E_ERROR, "Cannot call abstract method %v::%v()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
 		ZEND_VM_NEXT_OPCODE(); /* Never reached */
 	}
 
@@ -1814,7 +1846,8 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 				severity = E_ERROR;
 				severity_word = "cannot";
 			}
-			zend_error(severity, "Non-static method %s::%s() %s be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name, severity_word);
+			/* FIXME: output identifiers properly */
+			zend_error(severity, "Non-static method %v::%v() %s be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name, severity_word);
 		}
 	}
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
@@ -1862,7 +1895,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			EX(function_state).function_symbol_table = *(EG(symtable_cache_ptr)--);
 		} else {
 			ALLOC_HASHTABLE(EX(function_state).function_symbol_table);
-			zend_hash_init(EX(function_state).function_symbol_table, 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_u_hash_init(EX(function_state).function_symbol_table, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 			/*printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);*/
 		}
 		calling_symbol_table = EG(active_symbol_table);
@@ -1968,8 +2001,9 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, CONST, ANY)
 
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
-	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
-		zend_error_noreturn(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
+	if (zend_u_hash_find(EG(function_table), Z_TYPE_P(fname), Z_UNIVAL_P(fname), Z_UNILEN_P(fname)+1, (void **) &EX(function_state).function)==FAILURE) {
+		/* FIXME: output identifiers properly */
+		zend_error_noreturn(E_ERROR, "Unknown function:  %R()\n", Z_TYPE_P(fname), Z_UNIVAL_P(fname));
 	}
 	EX(object) = NULL;
 	EX(calling_scope) = EX(function_state).function->common.scope;
@@ -2031,9 +2065,9 @@ ZEND_VM_C_LABEL(return_by_value):
 			INIT_PZVAL_COPY(ret, retval_ptr);
 			dup = zend_get_object_classname(retval_ptr, &class_name, &class_name_len TSRMLS_CC);
 			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
-				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s",  class_name);
+				zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_P(retval_ptr)->name);
 			}
-			zend_error(E_STRICT, "Implicit cloning object of class '%s' because of 'zend.ze1_compatibility_mode'", class_name);
+			zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", Z_OBJCE_P(retval_ptr)->name);
 			ret->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 			*EG(return_value_ptr_ptr) = ret;
 			if (!dup) {
@@ -2110,8 +2144,8 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, ANY, ANY)
 		}
 	}
 
-	zend_hash_update(EG(active_symbol_table), opline->op2.u.constant.value.str.val,
-		opline->op2.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
+	zend_u_hash_update(EG(active_symbol_table), Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
+		Z_UNILEN(opline->op2.u.constant)+1, &EG(exception), sizeof(zval *), (void **) NULL);
 	EG(exception) = NULL;
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2243,9 +2277,9 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
 		if(ptr && ptr->op_array) {
-			zend_error(E_WARNING, "Missing argument %ld for %s%s%s(), called in %s on line %d and defined", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
+			zend_error(E_WARNING, "Missing argument %ld for %v%s%v(), called in %s on line %d and defined", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
 		} else {
-			zend_error(E_WARNING, "Missing argument %ld for %s%s%s()", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C));
+			zend_error(E_WARNING, "Missing argument %ld for %v%s%v()", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C));
 		}
 		if (opline->result.op_type == IS_VAR) {
 			PZVAL_UNLOCK_FREE(*EX_T(opline->result.u.var).var.ptr_ptr);
@@ -2400,7 +2434,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 		} else {
 			class_type = "abstract class";
 		}
-		zend_error_noreturn(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(opline->op1.u.var).class_entry->name);
+		zend_error_noreturn(E_ERROR, "Cannot instantiate %s %v", class_type,  EX_T(opline->op1.u.var).class_entry->name);
 	}
 	ALLOC_ZVAL(object_zval);
 	object_init_ex(object_zval, EX_T(opline->op1.u.var).class_entry);
@@ -2458,7 +2492,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	clone = ce ? ce->clone : NULL;
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (!clone_call) {
-		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+		zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %v", ce->name);
 		EX_T(opline->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(opline->result.u.var).var.ptr->refcount++;
 	}
@@ -2468,13 +2502,13 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			if (ce != EG(scope)) {
-				zend_error_noreturn(E_ERROR, "Call to private %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
+				zend_error_noreturn(E_ERROR, "Call to private %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : EMPTY_STR);
 			}
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
 			if (!zend_check_protected(clone->common.scope, EG(scope))) {
-				zend_error_noreturn(E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
+				zend_error_noreturn(E_ERROR, "Call to protected %v::__clone() from context '%v'", ce->name, EG(scope) ? EG(scope)->name : EMPTY_STR);
 			}
 		}
 	}
@@ -2511,10 +2545,12 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, CONST|UNUSED, CONST)
 			}
 		}
 */
-		if (!zend_get_constant(opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len, &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						opline->op2.u.constant.value.str.val,
-						opline->op2.u.constant.value.str.val);
+		if (!zend_get_constant(Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant), &EX_T(opline->result.u.var).tmp_var TSRMLS_CC)) {
+			zend_error(E_NOTICE, "Use of undefined constant %R - assumed '%R'",
+				Z_TYPE(opline->op2.u.constant),
+				Z_UNIVAL(opline->op2.u.constant),
+				Z_TYPE(opline->op2.u.constant),
+				Z_UNIVAL(opline->op2.u.constant));
 			EX_T(opline->result.u.var).tmp_var = opline->op2.u.constant;
 			zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 		}
@@ -2523,12 +2559,12 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, CONST|UNUSED, CONST)
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 
-	if (zend_hash_find(&ce->constants_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
+	if (zend_u_hash_find(&ce->constants_table, Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant), Z_UNILEN(opline->op2.u.constant)+1, (void **) &value) == SUCCESS) {
 		zval_update_constant(value, (void *) 1 TSRMLS_CC);
 		EX_T(opline->result.u.var).tmp_var = **value;
 		zval_copy_ctor(&EX_T(opline->result.u.var).tmp_var);
 	} else {
-		zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", opline->op2.u.constant.value.str.val);
+		zend_error_noreturn(E_ERROR, "Undefined class constant '%R'", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -2587,7 +2623,9 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|V
 				zend_hash_index_update(array_ptr->value.ht, offset->value.lval, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_STRING:
-				zend_symtable_update(array_ptr->value.ht, offset->value.str.val, offset->value.str.len+1, &expr_ptr, sizeof(zval *), NULL);
+			case IS_BINARY:
+			case IS_UNICODE:
+				zend_u_symtable_update(array_ptr->value.ht, Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, &expr_ptr, sizeof(zval *), NULL);
 				break;
 			case IS_NULL:
 				zend_hash_update(array_ptr->value.ht, "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
@@ -2643,13 +2681,27 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			zval var_copy;
 			int use_copy;
 
-			zend_make_printable_zval(result, &var_copy, &use_copy);
+			zend_make_string_zval(result, &var_copy, &use_copy);
 			if (use_copy) {
 				zval_dtor(result);
 				*result = var_copy;
 			}
 			break;
 		}
+		case IS_UNICODE: {
+			zval var_copy;
+			int use_copy;
+
+			zend_make_unicode_zval(result, &var_copy, &use_copy);
+			if (use_copy) {
+				zval_dtor(result);
+				*result = var_copy;
+			}
+			break;
+		}
+		case IS_BINARY:
+			convert_to_binary(result);
+			break;
 		case IS_ARRAY:
 			convert_to_array(result);
 			break;
@@ -2672,7 +2724,14 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
-	if (inc_filename->type!=IS_STRING) {
+	if (UG(unicode) && opline->op2.u.constant.value.lval == ZEND_EVAL) {
+		if (inc_filename->type != IS_UNICODE) {
+			tmp_inc_filename = *inc_filename;
+			zval_copy_ctor(&tmp_inc_filename);
+			convert_to_unicode(&tmp_inc_filename);
+			inc_filename = &tmp_inc_filename;
+		}
+	} else if (inc_filename->type!=IS_STRING) {
 		tmp_inc_filename = *inc_filename;
 		zval_copy_ctor(&tmp_inc_filename);
 		convert_to_string(&tmp_inc_filename);
@@ -2789,10 +2848,10 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 
 	varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	if (varname->type != IS_STRING) {
+	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		convert_to_text(&tmp);
 		varname = &tmp;
 	}
 
@@ -2800,17 +2859,17 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);		
-		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {		
+		if (zend_u_hash_del(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1) == SUCCESS) {
 			zend_execute_data *ex = EXECUTE_DATA; 
-			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+			ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1);
 
 			do {
 				int i;
 
 				for (i = 0; i < ex->op_array->last_var; i++) {
 					if (ex->op_array->vars[i].hash_value == hash_value &&
-						ex->op_array->vars[i].name_len == varname->value.str.len &&
-						!memcmp(ex->op_array->vars[i].name, varname->value.str.val, varname->value.str.len)) {
+					    ex->op_array->vars[i].name_len == Z_UNILEN_P(varname) &&
+					    !memcmp(ex->op_array->vars[i].name, Z_UNIVAL_P(varname), Z_TYPE_P(varname)==IS_UNICODE?UBYTES(Z_UNILEN_P(varname)):Z_UNILEN_P(varname))) {
 						ex->CVs[i] = NULL;
 						break;
 					}
@@ -2857,10 +2916,31 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 						zend_hash_index_del(ht, index);
 						break;
 					case IS_STRING:
-						if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
-					    ht == &EG(symbol_table)) {
+					case IS_BINARY:
+					case IS_UNICODE: {
+						void *offset_key = Z_UNIVAL_P(offset);
+						int  offset_len  = Z_UNILEN_P(offset);
+						int free_offset = 0;
+
+						if (UG(unicode) && ht == &EG(symbol_table) && offset->type == IS_UNICODE) {
+							/* Identifier normalization */
+							UChar *norm;
+							int32_t norm_len;
+
+							if (!zend_normalize_identifier(&norm, &norm_len,
+							                               (UChar*)offset_key, offset_len, 0)) {
+								zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
+							} else if ((char*)norm != offset_key) {
+								offset_key = (char*)norm;
+								offset_len = norm_len;
+								free_offset = 1;
+							}
+						}
+	
+						if (zend_u_symtable_del(ht, Z_TYPE_P(offset), offset_key, offset_len+1) == SUCCESS &&
+						    ht == &EG(symbol_table)) {
 							zend_execute_data *ex;
-							ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
+							ulong hash_value = zend_u_inline_hash_func(Z_TYPE_P(offset), offset_key, offset_len+1);
 
 							for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
 								if (ex->symbol_table == ht) {
@@ -2868,8 +2948,8 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 									for (i = 0; i < ex->op_array->last_var; i++) {
 										if (ex->op_array->vars[i].hash_value == hash_value &&
-										    ex->op_array->vars[i].name_len == offset->value.str.len &&
-										    !memcmp(ex->op_array->vars[i].name, offset->value.str.val, offset->value.str.len)) {
+										    ex->op_array->vars[i].name_len == offset_len &&
+										    !memcmp(ex->op_array->vars[i].name, offset_key, Z_TYPE_P(offset)==IS_UNICODE?UBYTES(offset_len):offset_len)) {
 											ex->CVs[i] = NULL;
 											break;
 										}
@@ -2877,7 +2957,11 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 								}
 							}
 						}
+						if (free_offset) {
+							efree(offset_key);
+						}
 						break;
+					}
 					case IS_NULL:
 						zend_hash_del(ht, "", sizeof(""));
 						break;
@@ -3008,7 +3092,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				FREE_OP1_IF_VAR();
 			}
 			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %v did not create an Iterator", ce->name);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
@@ -3043,8 +3127,11 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				char *str_key;
 				uint str_key_len;
 				ulong int_key;
-				if (zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL) == HASH_KEY_IS_STRING 
-				&& zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS) {
+				zend_uchar key_type;
+
+				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
+				if (key_type != HASH_KEY_NON_EXISTANT &&
+				    zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 				zend_hash_move_forward(fe_ht);
@@ -3106,11 +3193,16 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
 
 				zend_hash_move_forward(fe_ht);
-			} while (key_type != HASH_KEY_IS_STRING || zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
+			} while (key_type == HASH_KEY_NON_EXISTANT || zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
 			if (use_key) {
-				zend_unmangle_property_name(str_key, &class_name, &prop_name);
-				str_key_len = strlen(prop_name);
-				str_key = estrndup(prop_name, str_key_len);
+				zend_u_unmangle_property_name(key_type == HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, str_key, &class_name, &prop_name);
+				if (key_type == HASH_KEY_IS_UNICODE) {
+					str_key_len = u_strlen((UChar*)prop_name);
+					str_key = (char*)eustrndup((UChar*)prop_name, str_key_len);
+				} else {
+					str_key_len = strlen(prop_name);
+					str_key = estrndup(prop_name, str_key_len);
+				}
 				str_key_len++;
 			}
 			break;
@@ -3200,6 +3292,16 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				key->value.str.len = str_key_len-1;
 				key->type = IS_STRING;
 				break;
+			case HASH_KEY_IS_BINARY:
+				key->value.str.val = str_key;
+				key->value.str.len = str_key_len-1;
+				key->type = IS_BINARY;
+				break;
+			case HASH_KEY_IS_UNICODE:
+				key->value.ustr.val = (UChar*)str_key;
+				key->value.ustr.len = str_key_len-1;
+				key->type = IS_UNICODE;
+				break;
 			case HASH_KEY_IS_LONG:
 				key->value.lval = int_key;
 				key->type = IS_LONG;
@@ -3221,10 +3323,10 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 	zend_bool isset = 1;
 	HashTable *target_symbol_table;
 
-	if (varname->type != IS_STRING) {
+	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp = *varname;
 		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		convert_to_text(&tmp);
 		varname = &tmp;
 	}
 
@@ -3235,7 +3337,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 		}
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);
-		if (zend_hash_find(target_symbol_table, varname->value.str.val, varname->value.str.len+1, (void **) &value) == FAILURE) {
+		if (zend_u_hash_find(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1, (void **) &value) == FAILURE) {
 			isset = 0;
 		}
 	}
@@ -3301,10 +3403,34 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 					}
 					break;
 				case IS_STRING:
-					if (zend_symtable_find(ht, offset->value.str.val, offset->value.str.len+1, (void **) &value) == SUCCESS) {
+				case IS_BINARY:
+				case IS_UNICODE: {
+					char *offset_key = Z_UNIVAL_P(offset);
+					int   offset_len = Z_UNILEN_P(offset);
+					int   free_offset = 0;
+
+					if (UG(unicode) && ht == &EG(symbol_table) && Z_TYPE_P(offset) == IS_UNICODE) {
+						/* Identifier normalization */
+						UChar *norm;
+						int32_t norm_len;
+
+						if (!zend_normalize_identifier(&norm, &norm_len,
+						                               (UChar*)offset_key, offset_len, 0)) {
+							zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
+						} else if ((char*)norm != offset_key) {
+							offset_key = (char*)norm;
+							offset_len = norm_len;
+							free_offset = 1;
+						}
+					}
+					if (zend_u_symtable_find(ht, Z_TYPE_P(offset), offset_key, offset_len+1, (void **) &value) == SUCCESS) {
 						isset = 1;
 					}
+					if (free_offset) {
+						efree(offset_key);
+					}
 					break;
+				}
 				case IS_NULL:
 					if (zend_hash_find(ht, "", sizeof(""), (void **) &value) == SUCCESS) {
 						isset = 1;
@@ -3347,7 +3473,9 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 			} else {
 				FREE_OP2();
 			}
-		} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+		} else if (((*container)->type == IS_STRING ||
+		            (*container)->type == IS_BINARY ||
+		            (*container)->type == IS_UNICODE) && !prop_dim) { /* string offsets */
 			zval tmp;
 
 			if (offset->type != IS_LONG) {
@@ -3359,12 +3487,17 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 			if (offset->type == IS_LONG) {
 				switch (opline->extended_value) {
 					case ZEND_ISSET:
-						if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+						if (offset->value.lval >= 0 &&
+						    offset->value.lval < Z_UNILEN_PP(container)) {
 							result = 1;
 						}
 						break;
 					case ZEND_ISEMPTY:
-						if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+						if (offset->value.lval >= 0 &&
+						    offset->value.lval < Z_UNILEN_PP(container) &&
+						    ((Z_TYPE_PP(container) == IS_UNICODE)?
+						      (Z_USTRVAL_PP(container)[offset->value.lval] != 0):
+						      (Z_STRVAL_PP(container)[offset->value.lval] != '0'))) {
 							result = 1;
 						}
 						break;
@@ -3432,7 +3565,7 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 
 ZEND_VM_HANDLER(142, ZEND_RAISE_ABSTRACT_ERROR, ANY, ANY)
 {
-	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EG(scope)->name, EX(op_array)->function_name);
+	zend_error_noreturn(E_ERROR, "Cannot call abstract method %v::%v()", EG(scope)->name, EX(op_array)->function_name);
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
@@ -3558,7 +3691,7 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, ANY)
 	zend_class_entry *iface = EX_T(opline->op2.u.var).class_entry;
 
 	if (!(iface->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
+		zend_error_noreturn(E_ERROR, "%v cannot implement %v - it is not an interface", ce->name, iface->name);
 	}
 
 	ce->interfaces[opline->extended_value] = iface;
@@ -3629,6 +3762,41 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		default:
 			ZEND_VM_DISPATCH(ret & 0xff, EX(opline));
 	}
+}
+
+ZEND_VM_HANDLER(151, ZEND_U_NORMALIZE, CONST|TMP|VAR|CV, ANY)
+{
+	zend_op *opline = EX(opline);
+	zend_free_op free_op1;
+	zval *string = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	zval *result = &EX_T(opline->result.u.var).tmp_var;
+
+	*result = *string;
+	if (!IS_OP1_TMP_FREE()) {
+		zendi_zval_copy_ctor(*result);
+	}
+
+	if (UG(unicode)) {
+		zval var_copy;
+		int use_copy;
+		UChar *norm;
+		int32_t norm_len;
+
+		zend_make_unicode_zval(result, &var_copy, &use_copy);
+		if (use_copy) {
+			zval_dtor(result);
+			*result = var_copy;
+		}
+		if (!zend_normalize_identifier(&norm, &norm_len,
+		                               Z_USTRVAL_P(result), Z_USTRLEN_P(result), 0)) {
+			zend_error(E_WARNING, "Could not normalize identifier: %r", Z_USTRVAL_P(result));
+		} else if (norm != Z_USTRVAL_P(result)) {
+			efree(Z_USTRVAL_P(result));
+			ZVAL_UNICODEL(result, norm, norm_len, 0);
+		}
+	}
+	FREE_OP1_IF_VAR();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

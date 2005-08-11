@@ -160,12 +160,15 @@ AC_ARG_ENABLE(memory-limit,
   ZEND_MEMORY_LIMIT=no
 ])
 
-AC_ARG_ENABLE(zend-multibyte,
-[  --enable-zend-multibyte Compile with zend multibyte support], [
-  ZEND_MULTIBYTE=$enableval
-],[
-  ZEND_MULTIBYTE=no
-])
+dnl AC_ARG_ENABLE(zend-multibyte,
+dnl [  --enable-zend-multibyte Compile with zend multibyte support], [
+dnl   ZEND_MULTIBYTE=$enableval
+dnl ],[
+dnl   ZEND_MULTIBYTE=no
+dnl ])
+
+dnl Unicode PHP doesn't need ZEND_MULTIBYTE
+ZEND_MULTIBYTE=no
 
 AC_MSG_CHECKING([virtual machine dispatch method])
 AC_MSG_RESULT($PHP_ZEND_VM)
