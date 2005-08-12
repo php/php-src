@@ -493,6 +493,13 @@ default_mimetype = "text/html"
 ; Always populate the $HTTP_RAW_POST_DATA variable.
 ;always_populate_raw_post_data = On
 
+; Unicode settings
+unicode_semantics = off
+unicode.runtime_encoding = iso-8859-1 
+unicode.script_encoding = utf-8
+unicode.output_encoding = utf-8
+unicode.from_error_mode = U_INVALID_SUBSTITUTE
+unicode.from_error_subst_char = 3f
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
