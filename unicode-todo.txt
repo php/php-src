@@ -57,5 +57,4 @@
   argument and IS_UNICODE as another, then we can use "bu" for the parsing
   format.
 
-* Comparison operators should act similar to concatenation one, check the
-  types and coerce when necessary.
+* Should strtoupper()/strtolower() use full or simple case mapping?
