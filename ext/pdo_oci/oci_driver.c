@@ -146,7 +146,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 
 	/* little mini hack so that we can use this code from the dbh ctor */
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s]: %s", *pdo_err, einfo->errmsg);
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s]: %s", *pdo_err, einfo->errmsg);
 	}
 
 	return einfo->errcode;

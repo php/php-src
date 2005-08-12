@@ -84,7 +84,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		}
 	} else {
 		zval *ex;
-		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception();
+		zend_class_entry *def_ex = zend_exception_get_default(TSRMLS_C), *pdo_ex = php_pdo_get_exception(TSRMLS_C);
 
 		MAKE_STD_ZVAL(ex);
 		object_init_ex(ex, pdo_ex);
@@ -165,7 +165,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		}
 	} else if (EG(exception) == NULL) {
 		zval *ex;
-		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception();
+		zend_class_entry *def_ex = zend_exception_get_default(TSRMLS_C), *pdo_ex = php_pdo_get_exception(TSRMLS_C);
 
 		MAKE_STD_ZVAL(ex);
 		object_init_ex(ex, pdo_ex);
@@ -235,7 +235,7 @@ static PHP_FUNCTION(dbh_constructor)
 
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name");
+			zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "invalid data source name");
 			ZVAL_NULL(object);
 			return;
 		}
@@ -244,7 +244,7 @@ static PHP_FUNCTION(dbh_constructor)
 		colon = strchr(data_source, ':');
 		
 		if (!colon) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via INI: %s)", alt_dsn);
+			zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "invalid data source name (via INI: %s)", alt_dsn);
 			ZVAL_NULL(object);
 			return;
 		}
@@ -254,13 +254,13 @@ static PHP_FUNCTION(dbh_constructor)
 		/* the specified URI holds connection details */
 		data_source = dsn_from_uri(data_source, alt_dsn, sizeof(alt_dsn) TSRMLS_CC);
 		if (!data_source) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source URI");
+			zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "invalid data source URI");
 			ZVAL_NULL(object);
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via URI)");
+			zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "invalid data source name (via URI)");
 			ZVAL_NULL(object);
 			return;
 		}
@@ -271,7 +271,7 @@ static PHP_FUNCTION(dbh_constructor)
 	if (!driver) {
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "could not find driver");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "could not find driver");
 		ZVAL_NULL(object);
 		return;
 	}
@@ -583,14 +583,14 @@ static PHP_METHOD(PDO, beginTransaction)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (dbh->in_txn) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "There is already an active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "There is already an active transaction");
 		RETURN_FALSE;
 	}
 	
 	if (!dbh->methods->begin) {
 		/* TODO: this should be an exception; see the auto-commit mode
 		 * comments below */
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "This driver doesn't support transactions");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "This driver doesn't support transactions");
 		RETURN_FALSE;
 	}
 
@@ -611,7 +611,7 @@ static PHP_METHOD(PDO, commit)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!dbh->in_txn) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "There is no active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "There is no active transaction");
 		RETURN_FALSE;
 	}
 
@@ -632,7 +632,7 @@ static PHP_METHOD(PDO, rollBack)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!dbh->in_txn) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "There is no active transaction");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "There is no active transaction");
 		RETURN_FALSE;
 	}
 
@@ -714,7 +714,7 @@ static PHP_METHOD(PDO, setAttribute)
 
 fail:
 	if (attr == PDO_ATTR_AUTOCOMMIT) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "The auto-commit mode cannot be changed for this driver");
 	} else if (!dbh->methods->set_attribute) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support setting attributes" TSRMLS_CC);
 	} else {
