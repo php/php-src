@@ -182,9 +182,10 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 	zend_bool denied_access = 0;
 	ulong h;
 
-	if (Z_STRVAL_P(member)[0] == '\0') {
+	if ((Z_TYPE_P(member) == IS_UNICODE && Z_USTRVAL_P(member)[0] == 0) ||
+	    Z_STRVAL_P(member)[0] == '\0') {
 		if (!silent) {
-			if (Z_STRLEN_P(member) == 0) {
+			if (Z_UNILEN_P(member) == 0) {
 				zend_error(E_ERROR, "Cannot access empty property");
 			} else {
 				zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -192,8 +193,8 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 		}
 		return NULL;				
 	}
-	h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
-	if (zend_hash_quick_find(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
+	h = zend_u_get_hash_value(Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member) + 1);
+	if (zend_u_hash_quick_find(&ce->properties_info, Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
 		if(property_info->flags & ZEND_ACC_SHADOW) {
 			/* if it's a shadow - go to access it's private */
 			property_info = NULL;
