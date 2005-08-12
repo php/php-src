@@ -1,3 +1,212 @@
+2005-08-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ext/standard/tests/array/bug29253.phpt:
+      no DOS EOLs!
+
+    * (PHP_4_4)
+      ext/standard/tests/array/bug29253.phpt:
+      - nuked DOS EOLs..
+
+    * (PHP_5_1)
+      ext/standard/tests/array/bug33940.phpt:
+      - Fixed test
+
+    * ext/standard/tests/array/bug33940.phpt:
+      fix test
+
+2005-08-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * Makefile.global
+      README.UNICODE
+      configure.in
+      run-tests.php
+      unicode-issues.txt
+      unicode-todo.txt
+      ext/bz2/bz2_filter.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/iconv/iconv.c
+      ext/mysql/php_mysql.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/credits.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/filters.c
+      ext/standard/info.c
+      ext/standard/php_string.h
+      ext/standard/php_var.h
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/type.c
+      ext/standard/user_filters.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/tests/file/stream_get_line.phpt
+      ext/xml/xml.c
+      ext/zlib/zlib_filter.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/output.c
+      main/php.h
+      main/php_streams.h
+      main/php_variables.c
+      main/php_variables.h
+      main/rfc1867.c
+      main/spprintf.c
+      main/spprintf.h
+      main/streams/cast.c
+      main/streams/filter.c
+      main/streams/php_stream_context.h
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c
+      sapi/apache/mod_php5.c
+      sapi/apache_hooks/mod_php5.c:
+      Unicode support.
+
+    * ZendEngine2/Makefile.am
+      ZendEngine2/Zend.m4
+      ZendEngine2/flex.skl
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_multibyte.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtol.c
+      ZendEngine2/zend_unicode.c
+      ZendEngine2/zend_unicode.h
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php
+      ZendEngine2/zend_vm_opcodes.h:
+      Unicode support
+
+2005-08-11  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sqlite/tests/.cvsignore:
+      missing entry
+
+    * (PHP_5_1)
+      ext/standard/credits_ext.h:
+      - Regenerated.
+
+    * (PHP_5_1)
+      NEWS:
+      BFNS
+
+2005-08-11  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_4_4)
+      ext/sysvmsg/sysvmsg.c:
+      fix proto
+
+2005-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/standard/credits.c:
+      - And this is version 5.1
+
+    * (PHP_4_4)
+      ext/standard/credits.c:
+      - This is actually 4.4
+
+2005-08-11  Antony Dovgal  <antony@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_reflection_api.c:
+      MF5.1: fix #34078 (Reflection API problems in methods with boolean or null
+      default values)
+      
+      (andrei said to sara a few hours ago you may commit whatever you want
+      until 9pm) (c) helly
+      if there are any problems with this patch - please tell me, I'll revert it
+      immediately
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      MF5.1: fix #34078 (Reflection API problems in methods with boolean or null
+      default values)
+
+    * (PHP_5_1)
+      ZendEngine2/zend_reflection_api.c:
+      fix #34078 (Reflection API problems in methods with boolean or null default
+      values)
+
+2005-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/credits_sapi.h
+      sapi/cli/CREDITS:
+      - Johannes did a great work on the shell
+
+    * ZendEngine2/zend_compile.c:
+      - For internal classes we must auto generate the abstract class flags.
+
+2005-08-11  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      pear/go-pear-list.php
+      pear/package-PEAR.xml
+      pear/PEAR/Remote.php
+      pear/packages/XML_RPC-1.3.1.tar
+      pear/tests/PEAR_test_mock_pearweb.php.inc
+      pear/tests/download_test_classes.php.inc
+      pear/tests/package-PEARtests.xml:
+      Remove pear/XML_RPC dependency for the pear installer
+      PEAR guys, please doublecheck this.
+
+2005-08-11  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_1)
+      ext/ming/ming.c:
+      Revert the last patch so we can release PHP 5.1
+
 2005-08-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * main/php_variables.c:
