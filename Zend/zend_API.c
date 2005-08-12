@@ -1259,7 +1259,7 @@ ZEND_API int add_index_stringl(zval *arg, uint index, char *str, uint length, in
 }
 
 
-ZEND_API int add_index_binary(zval *arg, uint index, char *str, int duplicate)
+ZEND_API int add_index_binary(zval *arg, uint index, char *str, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
 	
@@ -1270,7 +1270,7 @@ ZEND_API int add_index_binary(zval *arg, uint index, char *str, int duplicate)
 }
 
 
-ZEND_API int add_index_binaryl(zval *arg, uint index, char *str, uint length, int duplicate)
+ZEND_API int add_index_binaryl(zval *arg, uint index, char *str, uint length, int duplicate TSRMLS_DC)
 {
 	zval *tmp;
 	

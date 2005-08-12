@@ -584,7 +584,7 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_v
  * Expands possible ranges of the form 'a..b' in input charlist,
  * where a < b in code-point order
  */
-static int php_expand_u_trim_range(UChar **range, int32_t *range_len)
+static int php_expand_u_trim_range(UChar **range, int32_t *range_len TSRMLS_DC)
 {
 	UChar32 *codepts, *tmp, *input, *end, c;
 	int32_t len, tmp_len, idx;
@@ -673,7 +673,7 @@ static UChar *php_u_trim(UChar *c, int32_t len, UChar *what, int32_t what_len, z
 	int32_t	start = 0, end = len;
 
 	if ( what ) {
-		php_expand_u_trim_range(&what, &what_len);
+		php_expand_u_trim_range(&what, &what_len TSRMLS_CC);
 	}
 
 	if ( mode & 1 ) {
@@ -1110,7 +1110,7 @@ PHP_FUNCTION(explode)
 		if ( str_type == IS_UNICODE ) {
 			add_index_unicodel(return_value, 0, (UChar *)str, str_len, 1);
 		} else if ( str_type == IS_BINARY ) {
-			add_index_binaryl(return_value, 0, (char *)str, str_len, 1);
+			add_index_binaryl(return_value, 0, (char *)str, str_len, 1 TSRMLS_CC);
 		} else {
 			add_index_stringl(return_value, 0, (char *)str, str_len, 1);
 		}
