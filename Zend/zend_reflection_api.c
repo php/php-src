@@ -4035,7 +4035,7 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	reflection_object_handlers.write_property = _reflection_write_property;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", reflection_exception_functions);
-	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(), NULL TSRMLS_CC);
+	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "Reflection", reflection_functions);
 	reflection_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);

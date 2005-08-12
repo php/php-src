@@ -790,7 +790,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			break;
 	}
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
+	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 
 	zobject->refcount++;
 	intern->inner.zobject = zobject;

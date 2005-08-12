@@ -932,7 +932,7 @@ PHP_MINIT_FUNCTION(tidy)
 	REGISTER_TIDY_CLASS(tidy, doc,	NULL, 0);
 	REGISTER_TIDY_CLASS(tidyNode, node,	NULL, ZEND_ACC_FINAL_CLASS);
 	/* no exceptions for now..
-	REGISTER_TIDY_CLASS(tidyException, exception,	zend_exception_get_default());
+	REGISTER_TIDY_CLASS(tidyException, exception,	zend_exception_get_default(TSRMLS_C));
 	*/
 	tidy_object_handlers_doc.get_class_entry = tidy_get_ce_doc;
 	tidy_object_handlers_node.get_class_entry = tidy_get_ce_node;
