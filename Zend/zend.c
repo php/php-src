@@ -755,6 +755,27 @@ static void function_to_unicode(zend_function *func)
 		u_charsToUChars(func->common.function_name, uname, len);
 		func->common.function_name = (char*)uname;
 	}
+	if (func->common.arg_info) {
+		zend_arg_info *args;
+		int n = func->common.num_args;
+
+		args = malloc((n + 1) * sizeof(zend_arg_info));
+		memcpy(args, func->common.arg_info, (n + 1) * sizeof(zend_arg_info));
+		while (n > 0) {
+		  --n;
+		  if (args[n].name) {
+				UChar *uname = malloc(UBYTES(args[n].name_len));
+				u_charsToUChars(args[n].name, uname, args[n].name_len);
+				args[n].name = (char*)uname;
+		  }
+		  if (args[n].class_name) {
+				UChar *uname = malloc(UBYTES(args[n].class_name_len));
+				u_charsToUChars(args[n].class_name, uname, args[n].class_name_len);
+				args[n].class_name = (char*)uname;
+		  }
+		}
+		func->common.arg_info = args;
+	}
 }
 
 static void property_info_to_unicode(zend_property_info *info)
@@ -794,17 +815,41 @@ static void const_to_unicode(zend_constant *c)
 static void class_to_unicode(zend_class_entry **ce)
 {
 	zend_class_entry *new_ce = malloc(sizeof(zend_class_entry));
-	zend_function tmp_func;
 	zend_constant tmp_const;
 	zend_property_info tmp_info;
 	zval* tmp_zval;
 
 	memcpy(new_ce, *ce, sizeof(zend_class_entry));
+	(*ce)->u_twin = new_ce;
+
+	/* Convert name to unicode */
+	if (new_ce->name) {
+		UChar *uname = malloc(UBYTES(new_ce->name_length+1));
+
+		u_charsToUChars(new_ce->name, uname, new_ce->name_length+1);
+		new_ce->name = (char*)uname;
+	}
 
 	/* Copy methods */
 	zend_u_hash_init_ex(&new_ce->function_table, (*ce)->function_table.nNumOfElements, NULL, ZEND_U_FUNCTION_DTOR, 1, 1, 0);
-	zend_hash_copy(&new_ce->function_table, &(*ce)->function_table, (copy_ctor_func_t) function_to_unicode, &tmp_func, sizeof(zend_function));
+	{
+		Bucket *p = (*ce)->function_table.pListHead;
+		while (p != NULL) {
+			zend_function *src = (zend_function*)p->pData;
+			zend_function *target;
+			zend_function tmp_func = *src;
 
+			function_to_unicode(&tmp_func);
+			
+			zend_hash_add(&new_ce->function_table, p->key.u.string, p->nKeyLength, &tmp_func, sizeof(zend_function), (void**)&target);
+			src->common.u_twin = target;
+
+		  p = p->pListNext;
+		}
+	}
+/*
+	zend_hash_copy(&new_ce->function_table, &(*ce)->function_table, (copy_ctor_func_t) function_to_unicode, &tmp_func, sizeof(zend_function));
+*/
 	/* Copy constants */
 	zend_u_hash_init_ex(&new_ce->constants_table, (*ce)->constants_table.nNumOfElements, NULL, (*ce)->constants_table.pDestructor, 1, 1, 0);
 	zend_hash_copy(&new_ce->constants_table, &(*ce)->constants_table, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_const, sizeof(zend_constant));
@@ -827,20 +872,14 @@ static void class_to_unicode(zend_class_entry **ce)
 
 static void fix_classes(HashTable *ht) {
 	Bucket *p = ht->pListHead;
+	Bucket *q;
 
 	/* Fix parent classes */
 	while (p != NULL) {
 		zend_class_entry *ce = *(zend_class_entry**)p->pData;
-		zend_class_entry **parent;
 
 		if (ce->parent) {
-			char *lcname = do_alloca(ce->parent->name_length+1);
-
-			zend_str_tolower_copy(lcname, ce->parent->name, ce->parent->name_length);
-			if (zend_hash_find(ht, lcname, ce->parent->name_length+1, (void**)&parent) == SUCCESS) {
-				ce->parent = *parent;
-			}
-			free_alloca(lcname);
+			ce->parent = ce->parent->u_twin;
 		}
 		if (ce->num_interfaces > 0 && ce->interfaces) {
 			int i = sizeof(zend_class_entry*)*ce->num_interfaces;
@@ -850,30 +889,48 @@ static void fix_classes(HashTable *ht) {
 			memcpy(new_interfaces, ce->interfaces, i);
 			ce->interfaces = new_interfaces;
 			for (i = 0; i < ce->num_interfaces; i++) {
-				char *lcname = do_alloca(ce->interfaces[i]->name_length+1);
-
-				zend_str_tolower_copy(lcname, ce->interfaces[i]->name, ce->interfaces[i]->name_length);
-				if (zend_hash_find(ht, lcname, ce->interfaces[i]->name_length+1, (void**)&parent) == SUCCESS) {
-					ce->interfaces[i] = *parent;
-				}
-				free_alloca(lcname);
-
+				ce->interfaces[i] = ce->interfaces[i]->u_twin;
 			}
 		}
+		
+		q = ce->function_table.pListHead;
+		while (q != NULL) {
+			zend_function *f = (zend_function*)q->pData;
+
+			if (f->common.scope) {
+				f->common.scope = f->common.scope->u_twin;
+			}			
+			if (f->common.prototype) {
+				f->common.prototype = f->common.prototype->common.u_twin;
+			}
+			q = q->pListNext;
+		}
+
+		if (ce->constructor) {
+			ce->constructor = ce->constructor->common.u_twin;
+		} else if (ce->destructor) {
+			ce->destructor = ce->destructor->common.u_twin;
+		} else if (ce->clone) {
+			ce->clone = ce->clone->common.u_twin;
+		} else if (ce->__get) {
+			ce->__get = ce->__get->common.u_twin;
+		} else if (ce->__set) {
+			ce->__set = ce->__set->common.u_twin;
+		} else if (ce->__unset) {
+			ce->__unset = ce->__unset->common.u_twin;
+		} else if (ce->__isset) {
+			ce->__isset = ce->__isset->common.u_twin;
+		} else if (ce->__call) {
+			ce->__call = ce->__call->common.u_twin;
+		} else if (ce->serialize_func) {
+			ce->serialize_func = ce->serialize_func->common.u_twin;
+		} else if (ce->unserialize_func) {
+			ce->unserialize_func = ce->unserialize_func->common.u_twin;
+		}
+
 		p = p->pListNext;
 	}
 
-	/* Convert Class Names to unicode */
-	p = ht->pListHead;
-	while (p != NULL) {
-		zend_class_entry *ce = *(zend_class_entry**)p->pData;
-		UChar *uname = malloc(UBYTES(ce->name_length+1));
-
-		u_charsToUChars(ce->name, uname, ce->name_length+1);
-		ce->name = (char*)uname;
-
-		p = p->pListNext;
-	}
 }
 
 #ifdef ZTS
@@ -1435,14 +1492,9 @@ void zend_activate(TSRMLS_D)
 	CG(auto_globals) = UG(unicode)?global_u_auto_globals_table:global_auto_globals_table;
 	EG(zend_constants) = UG(unicode)?global_u_constants_table:global_constants_table;
 #endif
-	zend_standard_class_def = zend_get_named_class_entry("stdClass", sizeof("stdClass")-1 TSRMLS_CC);
-
 	init_unicode_request_globals(TSRMLS_C);
 
 	init_unicode_strings();
-	init_exceptions(TSRMLS_C);
-	init_interfaces(TSRMLS_C);
-	init_reflection_api(TSRMLS_C);
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
 	startup_scanner(TSRMLS_C);

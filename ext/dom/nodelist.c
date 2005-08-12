@@ -111,7 +111,7 @@ PHP_FUNCTION(dom_nodelist_item)
 	HashTable *nodeht;
 	pval **entry;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_nodelist_class_entry, &index) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, U_CLASS_ENTRY(dom_nodelist_class_entry), &index) == FAILURE) {
 		return;
 	}
 

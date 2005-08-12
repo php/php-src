@@ -879,7 +879,7 @@ ZEND_API void convert_to_object(zval *op)
 	switch (op->type) {
 		case IS_ARRAY:
 			{
-				object_and_properties_init(op, zend_standard_class_def, op->value.ht);
+				object_and_properties_init(op, U_CLASS_ENTRY(zend_standard_class_def), op->value.ht);
 				return;
 				break;
 			}

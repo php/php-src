@@ -207,7 +207,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 					 */
 				} else {
 					if (!silent && (property_info->flags & ZEND_ACC_STATIC)) {
-						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name, Z_STRVAL_P(member));
+						zend_error(E_STRICT, "Accessing static property %v::$%R as non static", ce->name, Z_TYPE_P(member), Z_UNIVAL_P(member));
 					}
 					return property_info;
 				}
@@ -229,7 +229,7 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 			if (silent) {
 				return NULL;
 			}
-			zend_error(E_ERROR, "Cannot access %s property %v::$%s", zend_visibility_string(property_info->flags), ce->name, Z_STRVAL_P(member));
+			zend_error(E_ERROR, "Cannot access %s property %v::$%R", zend_visibility_string(property_info->flags), ce->name, Z_TYPE_P(member), Z_STRVAL_P(member));
 		} else {
 			/* fall through, return property_info... */
 		}
@@ -287,17 +287,17 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zobj = Z_OBJ_P(object);
 	use_get = (zobj->ce->__get && !zobj->in_get);
 
- 	if (member->type != IS_STRING) {
+ 	if (member->type != IS_STRING && member->type != IS_UNICODE) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
 		zval_copy_ctor(tmp_member);
-		convert_to_string(tmp_member);
+		convert_to_text(tmp_member);
 		member = tmp_member;
 	}
 
 #if DEBUG_OBJECT_HANDLERS
-	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
+	fprintf(stderr, "Read object #%d property: %R\n", Z_OBJ_HANDLE_P(object), Z_TYPE_P(member), Z_STRVAL_P(member));
 #endif			
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
@@ -317,7 +317,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 			}
 		} else {
 			if (!silent) {
-				zend_error(E_NOTICE,"Undefined property:  %v::$%s", zobj->ce->name, Z_STRVAL_P(member));
+				zend_error(E_NOTICE,"Undefined property:  %v::$%R", zobj->ce->name, Z_TYPE_P(member), Z_STRVAL_P(member));
 			}
 			retval = &EG(uninitialized_zval_ptr);
 		}
@@ -403,7 +403,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval *retval;
 	
-	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
 		if(offset == NULL) {
 			/* [] construct */
 			ALLOC_INIT_ZVAL(offset);
@@ -436,7 +436,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
-	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
 		if (!offset) {
 			ALLOC_INIT_ZVAL(offset);
 		} else {
@@ -456,7 +456,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 	zval *retval;
 	int result;
 	
-	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
 		if (retval) {
@@ -498,7 +498,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	}
 
 #if DEBUG_OBJECT_HANDLERS
-	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
+	fprintf(stderr, "Ptr object #%d property: %R\n", Z_OBJ_HANDLE_P(object), Z_TYPE_P(member), Z_STRVAL_P(member));
 #endif			
 
 	property_info = zend_get_property_info(zobj->ce, member, 0 TSRMLS_CC);
@@ -510,7 +510,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
-/* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
+/* 			zend_error(E_NOTICE, "Undefined property: %R", Z_TYPE_P(member), Z_STRVAL_P(member)); */
 			new_zval->refcount++;
 			zend_u_hash_quick_update(zobj->properties, Z_TYPE_P(member), property_info->name, property_info->name_length+1, property_info->h, &new_zval, sizeof(zval *), (void **) &retval);
 		} else {
@@ -565,7 +565,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	
-	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+	if (instanceof_function_ex(ce, U_CLASS_ENTRY(zend_ce_arrayaccess), 1 TSRMLS_CC)) {
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetunset", NULL, offset);
 		zval_ptr_dtor(&offset);
@@ -757,14 +757,14 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		 */
 		updated_fbc = zend_check_private_int(fbc, object->value.obj.handlers->get_class_entry(object TSRMLS_CC), lc_method_name, method_len TSRMLS_CC);
 		if (!updated_fbc) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_STR);
 		}
 		fbc = updated_fbc;
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
 		 */
 		if (!zend_check_protected(fbc->common.scope, EG(scope))) {
-			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+			zend_error(E_ERROR, "Call to %s method %v::%v() from context '%v'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : EMPTY_STR);
 		}
 	}
 
@@ -926,7 +926,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	}
 
 #if DEBUG_OBJECT_HANDLERS
-	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
+	fprintf(stderr, "Read object #%d property: %R\n", Z_OBJ_HANDLE_P(object), Z_TYPE_P(member), Z_STRVAL_P(member));
 #endif			
 
 	property_info = zend_get_property_info(zobj->ce, member, 1 TSRMLS_CC);

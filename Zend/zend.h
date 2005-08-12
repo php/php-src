@@ -381,6 +381,8 @@ struct _zend_class_entry {
 	zend_uint line_end;
 	char *doc_comment;
 	zend_uint doc_comment_len;
+
+	zend_class_entry *u_twin;
 	
 	struct _zend_module_entry *module;
 };

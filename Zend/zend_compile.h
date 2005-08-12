@@ -179,6 +179,7 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	zend_bool pass_rest_by_reference;
 	unsigned char return_reference;
+	union _zend_function *u_twin;
 	/* END of common elements */
 
 	zend_uint *refcount;
@@ -232,6 +233,7 @@ typedef struct _zend_internal_function {
 	zend_arg_info *arg_info;
 	zend_bool pass_rest_by_reference;
 	unsigned char return_reference;
+	union _zend_function *u_twin;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -253,6 +255,7 @@ typedef union _zend_function {
 		zend_arg_info *arg_info;
 		zend_bool pass_rest_by_reference;
 		unsigned char return_reference;
+		union _zend_function *u_twin;
 	} common;
 	
 	zend_op_array op_array;

@@ -514,7 +514,7 @@ void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body
 
 	if (modifiers->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
 		if(modifiers->u.constant.value.lval & ZEND_ACC_PRIVATE) {
-			zend_error(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+			zend_error(E_COMPILE_ERROR, "%s function %v::%R() cannot be declared private", method_type, CG(active_class_entry)->name, Z_TYPE(function_name->u.constant), Z_UNIVAL(function_name->u.constant));
 		}
 		if (body->u.constant.value.lval == ZEND_ACC_ABSTRACT) {
 			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);

@@ -114,7 +114,7 @@ typedef struct _zend_function_entry {
 
 #endif
 
-
+#define U_CLASS_ENTRY(ce) ((UG(unicode)&&ce)?ce->u_twin:ce)
 
 #define INIT_CLASS_ENTRY(class_container, class_name, functions) INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, NULL, NULL, NULL)
 
@@ -135,6 +135,8 @@ typedef struct _zend_function_entry {
 		class_container.__set = handle_propset;	\
 		class_container.__unset = handle_propunset;	\
 		class_container.__isset = handle_propisset;	\
+		class_container.serialize_func = NULL;	\
+		class_container.unserialize_func = NULL;	\
 		class_container.serialize = NULL;	\
 		class_container.unserialize = NULL;	\
 		class_container.parent = NULL;          \
@@ -142,6 +144,7 @@ typedef struct _zend_function_entry {
 		class_container.interfaces = NULL;      \
 		class_container.get_iterator = NULL;    \
 		class_container.iterator_funcs.funcs = NULL;  \
+		class_container.u_twin = NULL;          \
 		class_container.module = NULL;          \
 	}
 
@@ -384,8 +387,6 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
 ZEND_API int zend_u_delete_global_variable(zend_uchar type, void *name, int name_len TSRMLS_DC);
-
-ZEND_API zend_class_entry* zend_get_named_class_entry(char* name, int name_length TSRMLS_DC);
 
 ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
 
