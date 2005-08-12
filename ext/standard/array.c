@@ -2364,7 +2364,7 @@ ukey:
 				} else {
 					(*src_entry)->refcount++;
 
-					zend_u_hash_update(dest, utype, string_key, string_key_len+1,
+					zend_u_hash_update(dest, utype, string_key, string_key_len,
 									 src_entry, sizeof(zval *), NULL);
 				}
 				break;
