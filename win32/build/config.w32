@@ -4,7 +4,27 @@
 // equivalent.
 
 ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
-PATH_PROG('cl');
+CL = PATH_PROG('cl');
+if (!CL) {
+	ERROR("MS C++ compiler is required");
+}
+// Which version of the compiler do we have ?
+function probe_msvc_compiler_version(CL)
+{
+	// tricky escapes to get stderr redirection to work
+	var banner = execute('cmd /c ""' + CL + '" 2>&1"');
+	if (banner.match(/(\d+)\.(\d+)\.(\d+)(\.(\d+))?/)) {
+		return RegExp.$1;		
+	}
+	return 0;
+}
+
+VCVERS = probe_msvc_compiler_version(CL);
+STDOUT.WriteLine("Detected MS compiler version " + VCVERS);
+
+// 12 is VC6
+// 13 is vs.net 2003
+// 14 is vs.net 2005
 
 // cygwin now ships with link.exe.  Avoid searching the cygwin path
 // for this, as we want the MS linker, not the fileutil
@@ -61,8 +81,19 @@ DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP5DLLTS_EXPORTS /D PHP_EXPORTS \
 DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
 
 // General CFLAGS for building objects
-DEFINE("CFLAGS", "/nologo /YX /FD $(BASE_INCLUDES) /D _WINDOWS \
+DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
 /D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS");
+
+if (VCVERS < 14) {
+	// Enable automatic precompiled headers
+	ADD_FLAG('CFLAGS', ' /YX ');
+}
+
+if (VCVERS >= 14) {
+	// fun stuff: MS deprecated ANSI stdio and similar functions
+	// disable annoying warnings
+	ADD_FLAG('CFLAGS', ' /wd4996 ');
+}
 
 // General link flags
 DEFINE("LDFLAGS", "/nologo /version:" +
@@ -102,7 +133,7 @@ if (PHP_DEBUG == "yes") {
 	}
 	// Equivalent to Release_TSInline build -> best optimization
 	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG \
-/D ZEND_WIN32_FORCE_INLINE /GB /GF /D ZEND_DEBUG=0");
+/D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
 	// if you have VS.Net /GS hardens the binary against buffer overruns
 	// ADD_FLAG("CFLAGS", "/GS");
 }
