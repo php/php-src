@@ -442,6 +442,8 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
+	case IS_BINARY:
+	case IS_UNICODE:
 		if (spl_array_get_hash_table(intern, 0 TSRMLS_CC) == &EG(symbol_table)) {
 			if (zend_u_delete_global_variable(Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset) TSRMLS_CC)) {
 				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
