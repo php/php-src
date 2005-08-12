@@ -4728,8 +4728,8 @@ PHP_FUNCTION(str_repeat)
 		int l=0;
 		memcpy(result, input_str, input_str_len);
 		s = result;
-		e = result + input_str_len;
-		ee = result + result_len;
+		e = (char *) result + input_str_len;
+		ee = (char *) result + result_len;
 
 		while ( e < ee ) {
 			l = (e-s) < (ee-e) ? (e-s) : (ee-e);
