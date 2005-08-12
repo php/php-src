@@ -617,7 +617,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams);
 
-PDO_API zend_class_entry *php_pdo_get_exception(void);
+PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D);
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC);

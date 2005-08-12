@@ -55,7 +55,7 @@ int php_pdo_list_entry(void)
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
-PDO_API zend_class_entry *php_pdo_get_exception(void)
+PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D)
 {
 	return U_CLASS_ENTRY(pdo_exception_ce);
 }
@@ -381,7 +381,7 @@ PHP_MINIT_FUNCTION(pdo)
 #if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException, NULL TSRMLS_CC);
 #else
-	pdo_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
+	pdo_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
 #endif
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 

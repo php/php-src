@@ -87,7 +87,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	strcpy(*pdo_err, einfo->last_state);
 /* printf("@@ SQLSTATE[%s] %s\n", *pdo_err, einfo->last_err_msg); */
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] %s: %d %s",
+		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "SQLSTATE[%s] %s: %d %s",
 				*pdo_err, what, einfo->last_error, einfo->last_err_msg);
 	}
 }
