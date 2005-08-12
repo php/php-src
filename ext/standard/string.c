@@ -718,12 +718,12 @@ static UChar *php_u_trim(UChar *c, int32_t len, UChar *what, int32_t what_len, z
 		}
 	} else { /* Trimmed the whole string */
 		if ( return_value ) {
-			RETURN_EMPTY_UNICODE();
+			RETVAL_EMPTY_UNICODE();
 		} else {
 			return (USTR_MAKE(""));
 		}
 	}
-
+	return (USTR_MAKE(""));
 }
 /* }}} */
 
@@ -1911,7 +1911,7 @@ PHP_FUNCTION(strstr)
 			case IS_UNICODE:
 				found_offset = (UChar*)found - (UChar*)haystack;
 				if (part) {
-					char *ret;
+					UChar *ret;
 					ret = eumalloc(found_offset + 1);
 					u_strncpy(ret, haystack, found_offset);
 					ret[found_offset] = '\0';
