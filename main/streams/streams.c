@@ -2379,7 +2379,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	if (wrapper) {
 
 		stream = wrapper->wops->stream_opener(wrapper,
-				path_to_open, implicit_mode, options ^ REPORT_ERRORS,
+				path_to_open, (char *)implicit_mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
 
 		/* if the caller asked for a persistent stream but the wrapper did not
@@ -2441,7 +2441,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
-	if (stream && strchr(implicit_mode, 't') && (strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+'))) {
+	if (stream && memchr(implicit_mode, 't', modelen) && (memchr(implicit_mode, 'w', modelen) || memchr(implicit_mode, 'a', modelen) || memchr(implicit_mode, '+', modelen))) {
 		php_stream_filter *filter;
 		char *encoding = (context && context->output_encoding) ? context->output_encoding : "utf8";
 		char *filtername;
@@ -2460,7 +2460,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		efree(filtername);
 	}
 
-	if (stream && strchr(implicit_mode, 't') && (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+'))) {
+	if (stream && memchr(implicit_mode, 't', modelen) && (memchr(implicit_mode, 'r', modelen) || memchr(implicit_mode, '+', modelen))) {
 		php_stream_filter *filter;
 		char *filtername;
 		char *encoding = (context && context->input_encoding) ? context->input_encoding : "utf8";
