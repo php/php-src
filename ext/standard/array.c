@@ -962,7 +962,7 @@ PHP_FUNCTION(key)
 			RETVAL_BINARYL(string_key, string_length - 1, 1);
 			break;
 		case HASH_KEY_IS_UNICODE:
-			RETVAL_UNICODEL(string_key, string_length - 1, 1);
+			RETVAL_UNICODEL((UChar*)string_key, string_length - 1, 1);
 			break;
 		case HASH_KEY_IS_LONG:
 			RETVAL_LONG(num_key);
@@ -1119,7 +1119,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 					ZVAL_BINARYL(key, string_key, string_key_len-1, 1);
 					break;
 				case HASH_KEY_IS_UNICODE:
-					ZVAL_UNICODEL(key, string_key, string_key_len-1, 1);
+					ZVAL_UNICODEL(key, (UChar*)string_key, string_key_len-1, 1);
 					break;
 			}
 
@@ -1292,7 +1292,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 						RETURN_BINARYL(string_key, str_key_len-1, 1);
 						break;
 					case HASH_KEY_IS_UNICODE:
-						RETURN_UNICODEL(string_key, str_key_len-1, 1);
+						RETURN_UNICODEL((UChar*)string_key, str_key_len-1, 1);
 						break;
 					case HASH_KEY_IS_LONG:
 						RETURN_LONG(num_key);
@@ -2500,7 +2500,7 @@ PHP_FUNCTION(array_keys)
 					ZVAL_BINARYL(new_val, string_key, string_key_len-1, 0);
 					goto ukey;
 				case HASH_KEY_IS_UNICODE:
-					ZVAL_UNICODEL(new_val, string_key, string_key_len-1, 0);
+					ZVAL_UNICODEL(new_val, (UChar*)string_key, string_key_len-1, 0);
 ukey:
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val,
 												sizeof(zval *), NULL);
@@ -2600,7 +2600,7 @@ PHP_FUNCTION(array_count_values)
 		           Z_TYPE_PP(entry) == IS_UNICODE) {
 			/* make sure our array does not end up with numeric string keys */
 			if ((Z_TYPE_PP(entry) == IS_STRING && is_numeric_string(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, NULL, 0) == IS_LONG) ||
-			    (Z_TYPE_PP(entry) == IS_UNICODE && is_numeric_unicode(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, NULL, 0) == IS_LONG)) {
+			    (Z_TYPE_PP(entry) == IS_UNICODE && is_numeric_unicode(Z_USTRVAL_PP(entry), Z_USTRLEN_PP(entry), NULL, NULL, 0) == IS_LONG)) {
 				zval tmp_entry;
 				
 				tmp_entry = **entry;
@@ -2814,7 +2814,7 @@ PHP_FUNCTION(array_flip)
 				ZVAL_BINARYL(data, string_key, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				ZVAL_UNICODEL(data, string_key, str_key_len-1, 0);
+				ZVAL_UNICODEL(data, (UChar *)string_key, str_key_len-1, 0);
 				break;
 			case HASH_KEY_IS_LONG:
 				Z_TYPE_P(data) = IS_LONG;
@@ -2878,7 +2878,7 @@ PHP_FUNCTION(array_change_key_case)
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(entry), NULL);
 				break;
 			case HASH_KEY_IS_STRING:
-				new_key=estrndup(string_key,str_key_len - 1);
+				new_key = estrndup(string_key,str_key_len - 1);
 				if (change_to_upper)
 					php_strtoupper(new_key, str_key_len - 1);
 				else
@@ -2887,15 +2887,19 @@ PHP_FUNCTION(array_change_key_case)
 				efree(new_key);
 				break;
 			case HASH_KEY_IS_UNICODE:
-				new_key=eustrndup(string_key,str_key_len - 1);
-				str_key_len--;
-				if (change_to_upper)
-					new_key = php_u_strtoupper(&new_key, &str_key_len, UG(default_locale));
-				else
-					new_key = php_u_strtolower(&new_key, &str_key_len, UG(default_locale));
-				str_key_len++;
-				zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key, str_key_len, entry, sizeof(entry), NULL);
-				efree(new_key);
+				{
+					UChar *new_key_u;
+
+					new_key_u = eustrndup((UChar *)string_key,str_key_len - 1);
+					str_key_len--;
+					if (change_to_upper)
+						new_key_u = php_u_strtoupper(&new_key_u, &str_key_len, UG(default_locale));
+					else
+						new_key_u = php_u_strtolower(&new_key_u, &str_key_len, UG(default_locale));
+					str_key_len++;
+					zend_u_hash_update(Z_ARRVAL_P(return_value), IS_UNICODE, new_key_u, str_key_len, entry, sizeof(entry), NULL);
+					efree(new_key_u);
+				}
 				break;
 		}
 
@@ -4016,7 +4020,7 @@ PHP_FUNCTION(array_rand)
 				} else if (key_type == HASH_KEY_IS_BINARY) {
 					RETURN_BINARYL(string_key, string_key_len-1, 1);
 				} else if (key_type == HASH_KEY_IS_UNICODE) {
-					RETURN_UNICODEL(string_key, string_key_len-1, 1);
+					RETURN_UNICODEL((UChar *)string_key, string_key_len-1, 1);
 				} else {
 					RETURN_LONG(num_key);
 				}
@@ -4027,7 +4031,7 @@ PHP_FUNCTION(array_rand)
 				else if (key_type == HASH_KEY_IS_BINARY)
 					add_next_index_binaryl(return_value, string_key, string_key_len-1, 1);
 				else if (key_type == HASH_KEY_IS_UNICODE)
-					add_next_index_unicodel(return_value, string_key, string_key_len-1, 1);
+					add_next_index_unicodel(return_value, (UChar *)string_key, string_key_len-1, 1);
 				else
 					add_next_index_long(return_value, num_key);
 			}
