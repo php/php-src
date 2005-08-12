@@ -30,8 +30,8 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC);
 
 void zend_register_default_exception(TSRMLS_D);
 
-ZEND_API zend_class_entry *zend_exception_get_default(void);
-ZEND_API zend_class_entry *zend_get_error_exception(void);
+ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D);
+ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
 
 /* exception_ce   NULL or zend_exception_get_default() or a derived class 

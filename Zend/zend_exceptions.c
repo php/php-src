@@ -588,12 +588,12 @@ void zend_register_default_exception(TSRMLS_D)
 	zend_declare_property_long(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED TSRMLS_CC);
 }
 
-ZEND_API zend_class_entry *zend_exception_get_default(void)
+ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D)
 {
 	return U_CLASS_ENTRY(default_exception_ce);
 }
 
-ZEND_API zend_class_entry *zend_get_error_exception(void)
+ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D)
 {
 	return U_CLASS_ENTRY(error_exception_ce);
 }

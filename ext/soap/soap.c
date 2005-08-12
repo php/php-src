@@ -525,7 +525,7 @@ PHP_MINIT_FUNCTION(soap)
 	/* Register SoapFault class */
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_FAULT_CLASSNAME, soap_fault_functions);
 #ifdef ZEND_ENGINE_2
-	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
+	soap_fault_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
 #else
 	soap_fault_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 #endif

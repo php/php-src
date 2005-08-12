@@ -40,7 +40,7 @@
 
 zend_class_entry *sxe_class_entry = NULL;
 
-ZEND_API zend_class_entry *sxe_get_element_class_entry()
+ZEND_API zend_class_entry *sxe_get_element_class_entry(TSRMLS_D)
 {
 	return U_CLASS_ENTRY(sxe_class_entry);
 }
@@ -1357,7 +1357,7 @@ SXE_METHOD(__construct)
 	int             data_len;
 	xmlDocPtr       docp;
 
-	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);
+	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
 		php_std_error_handling();
 		return;
@@ -1367,7 +1367,7 @@ SXE_METHOD(__construct)
 	docp = xmlParseMemory(data, data_len);
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
-		zend_throw_exception(zend_exception_get_default(), "String could not be parsed as XML", 0 TSRMLS_CC);
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "String could not be parsed as XML", 0 TSRMLS_CC);
 		return;
 	}
 
