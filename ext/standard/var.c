@@ -156,7 +156,6 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 			if (hash_key->type == IS_STRING) {
 				php_printf("\"");
 				PHPWRITE(prop_name, strlen(prop_name));
-				php_printf("\"");
 			} else if (hash_key->type == IS_UNICODE) {
 				php_printf("u");
 				php_var_dump_unicode((UChar*)prop_name, u_strlen((UChar*)prop_name), verbose TSRMLS_CC);
@@ -170,15 +169,12 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 			if (hash_key->type == IS_STRING) {
 				php_printf("\"");
 				PHPWRITE(hash_key->u.string, hash_key->nKeyLength - 1);
-				php_printf("\"");
 			} else if (hash_key->type == IS_UNICODE) {
 				php_printf("u");
 				php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, verbose TSRMLS_CC);
 			}
 			ZEND_PUTS(":public");
 		}
-#ifdef ANDREY_0
-#endif
 		ZEND_PUTS("\"]=>\n");
 	}
 	php_var_dump(zv, level + 2, verbose TSRMLS_CC);
@@ -801,7 +797,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), priv_name, prop_name_length, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {
-								php_var_serialize_unicode(buf, priv_name, prop_name_length-1);
+								php_var_serialize_unicode(buf, (UChar *)priv_name, prop_name_length-1);
 							} else {
 								php_var_serialize_string(buf, priv_name, prop_name_length-1);
 							}
@@ -814,7 +810,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 									Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
 						if (zend_u_hash_find(Z_OBJPROP_PP(struc), Z_TYPE_PP(name), prot_name, prop_name_length, (void *) &d) == SUCCESS) {
 							if (Z_TYPE_PP(name) == IS_UNICODE) {
-								php_var_serialize_unicode(buf, prot_name, prop_name_length-1);
+								php_var_serialize_unicode(buf, (UChar *)prot_name, prop_name_length-1);
 							} else {
 								php_var_serialize_string(buf, prot_name, prop_name_length-1);
 							}
