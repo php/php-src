@@ -154,7 +154,7 @@ ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND
 #define eumalloc(size)					(UChar*)malloc(UBYTES(size))
 #define eurealloc(ptr, size)			(UChar*)erealloc((ptr), UBYTES(size))
 #define eustrndup(s, length)			zend_ustrndup((s), (length))
-#define eustrdup(s)						zend_ustrdup((s), u_strlen(s))
+#define eustrdup(s)						zend_ustnrdup((s), u_strlen(s))
 
 /* Relay wrapper macros */
 #define emalloc_rel(size)					malloc(size)
