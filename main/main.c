@@ -231,6 +231,99 @@ static ZEND_INI_MH(OnUpdateOutputEncoding)
 }
 /* }}} */
 
+#define PHP_INI_OPTION_HEADERS_SENT(option_name)                                                                                                                       \
+		if (SG(headers_sent)) {                                                                                                                                 \
+			char *output_start_filename = php_get_output_start_filename(TSRMLS_C);                                                                              \
+			int output_start_lineno = php_get_output_start_lineno(TSRMLS_C);                                                                                    \
+			if (output_start_filename) {                                                                                                                        \
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent (output started at %s:%d)", \
+																					output_start_filename, output_start_lineno);                                \
+			} else {                                                                                                                                            \
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option " #option_name " cannot be changed after headers have been sent");                          \
+			}                                                                                                                                                   \
+			return FAILURE;                                                                                                                                     \
+		}
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnUpdateDefaultCharset)
+{
+	if (stage == PHP_INI_STAGE_RUNTIME && !SG(request_info).no_headers) {
+		sapi_header_line ctr = {0};
+		int mimetype_len;
+			 
+		PHP_INI_OPTION_HEADERS_SENT(default_charset)
+	
+		mimetype_len = SG(default_mimetype) ? strlen(SG(default_mimetype)) : 0;
+		
+		if (new_value_length) {
+			ctr.line = emalloc( sizeof("Content-type: ")-1 + mimetype_len + sizeof("; charset=")-1 + new_value_length + 1);
+		
+			memcpy(ctr.line, "Content-type: ", sizeof("Content-type: "));
+			memcpy(ctr.line + sizeof("Content-type: ")-1, SG(default_mimetype), mimetype_len);
+			memcpy(ctr.line + sizeof("Content-type: ")-1 + mimetype_len, "; charset=", sizeof("; charset="));
+			memcpy(ctr.line + sizeof("Content-type: ")-1 + mimetype_len + sizeof("; charset=")-1, new_value, new_value_length);
+
+			ctr.line_len = sizeof("Content-type: ")-1 + mimetype_len + sizeof("; charset=")-1 + new_value_length;
+		} else {
+			ctr.line = emalloc( sizeof("Content-type: ")-1 + mimetype_len + 1);
+			
+			memcpy(ctr.line, "Content-type: ", sizeof("Content-type: "));
+			memcpy(ctr.line + sizeof("Content-type: ")-1, SG(default_mimetype), mimetype_len);
+
+			ctr.line_len = sizeof("Content-type: ")-1 + mimetype_len;
+		}
+		ctr.line[ctr.line_len] = 0;
+		
+		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+		efree(ctr.line);
+	}
+
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnUpdateDefaultMimetype)
+{
+	if (stage == PHP_INI_STAGE_RUNTIME && !SG(request_info).no_headers) {
+		sapi_header_line ctr = {0};
+		int charset_len;
+		
+		PHP_INI_OPTION_HEADERS_SENT(default_mimetype)
+		
+		charset_len = SG(default_charset) ? strlen(SG(default_charset)) : 0;
+		
+		if (charset_len) {
+			ctr.line = emalloc( sizeof("Content-type: ")-1 + new_value_length + sizeof("; charset=")-1 + charset_len + 1);
+		
+			memcpy(ctr.line, "Content-type: ", sizeof("Content-type: "));
+			memcpy(ctr.line + sizeof("Content-type: ")-1, new_value, new_value_length);
+			memcpy(ctr.line + sizeof("Content-type: ")-1 + new_value_length, "; charset=", sizeof("; charset="));
+			memcpy(ctr.line + sizeof("Content-type: ")-1 + new_value_length + sizeof("; charset=")-1, SG(default_charset), charset_len);
+
+			ctr.line_len = sizeof("Content-type: ")-1 + new_value_length + sizeof("; charset=")-1 + new_value_length;
+		} else {
+			ctr.line = emalloc( sizeof("Content-type: ")-1 + new_value_length + 1);
+			
+			memcpy(ctr.line, "Content-type: ", sizeof("Content-type: "));
+			memcpy(ctr.line + sizeof("Content-type: ")-1, new_value, new_value_length);
+
+			ctr.line_len = sizeof("Content-type: ")-1 + new_value_length;
+		}
+		ctr.line[ctr.line_len] = 0;
+		
+		sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+		efree(ctr.line);
+	}
+
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+/* }}} */
+
 /* Need to convert to strings and make use of:
  * PHP_SAFE_MODE
  *
@@ -311,8 +404,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_charset",		SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct,sapi_globals)
-	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_charset",		SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateDefaultMimetype,			default_mimetype,		sapi_globals_struct,sapi_globals)
 	ZEND_INI_ENTRY("unicode.output_encoding",  NULL, ZEND_INI_ALL, OnUpdateOutputEncoding)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateString,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
