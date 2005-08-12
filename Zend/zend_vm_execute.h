@@ -1392,10 +1392,10 @@ static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLE
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
- 	if (varname->type != IS_STRING) {
+ 	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_string(&tmp_varname);
+		convert_to_text(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -3900,10 +3900,10 @@ static int zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_OPCODE_HANDLER_
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
- 	if (varname->type != IS_STRING) {
+ 	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_string(&tmp_varname);
+		convert_to_text(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -6943,10 +6943,10 @@ static int zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_OPCODE_HANDLER_
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
- 	if (varname->type != IS_STRING) {
+ 	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_string(&tmp_varname);
+		convert_to_text(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -9368,6 +9368,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -10851,6 +10853,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -12372,6 +12376,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -14297,6 +14303,8 @@ static int ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -15515,6 +15523,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -16615,6 +16625,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -17715,6 +17727,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -19180,6 +19194,8 @@ static int ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -19621,10 +19637,10 @@ static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_A
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
- 	if (varname->type != IS_STRING) {
+ 	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_string(&tmp_varname);
+		convert_to_text(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -21870,6 +21886,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -23345,6 +23363,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -24857,6 +24877,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
@@ -26772,6 +26794,8 @@ static int ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:

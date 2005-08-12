@@ -932,10 +932,10 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
- 	if (varname->type != IS_STRING) {
+ 	if (varname->type != IS_STRING && varname->type != IS_UNICODE) {
 		tmp_varname = *varname;
 		zval_copy_ctor(&tmp_varname);
-		convert_to_string(&tmp_varname);
+		convert_to_text(&tmp_varname);
 		varname = &tmp_varname;
 	}
 
@@ -2987,6 +2987,8 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 				}
 				break;
 			case IS_STRING:
+			case IS_BINARY:
+			case IS_UNICODE:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			default:
