@@ -2794,7 +2794,7 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object,
 	ALLOC_ZVAL(tmp);
 	tmp->is_ref = 0;
 	tmp->refcount = 0;
-	ZVAL_LONG(tmp, value);
+	ZVAL_DOUBLE(tmp, value);
 	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 
