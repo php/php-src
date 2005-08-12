@@ -151,6 +151,10 @@ ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND
 #define erealloc_recoverable(ptr, size)	realloc((ptr), (size))
 #define estrdup(s)						strdup(s)
 #define estrndup(s, length)				zend_strndup((s), (length))
+#define eumalloc(size)					(UChar*)malloc(UBYTES(size))
+#define eurealloc(ptr, size)			(UChar*)erealloc((ptr), UBYTES(size))
+#define eustrndup(s, length)			zend_ustrndup((s), (length))
+#define eustrdup(s)						zend_ustrdup((s), u_strlen(s))
 
 /* Relay wrapper macros */
 #define emalloc_rel(size)					malloc(size)
@@ -161,6 +165,9 @@ ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND
 #define erealloc_recoverable_rel(ptr, size)	realloc((ptr), (size))
 #define estrdup_rel(s)						strdup(s)
 #define estrndup_rel(s, length)				zend_strndup((s), (length))
+#define eumalloc_rel(size)					(UChar*)malloc(UBYTES(size))
+#define eurealloc_rel(ptr, size)			(UChar*)realloc((ptr), UBYTES(size))
+#define eustrndup_rel(s, length)			zend_ustrndup((s), (length))
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent)		malloc(size)
@@ -170,6 +177,8 @@ ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND
 #define perealloc(ptr, size, persistent)		realloc((ptr), (size))
 #define perealloc_recoverable(ptr, size, persistent)	realloc((ptr), (size))
 #define pestrdup(s, persistent)			strdup(s)
+#define peumalloc(size, persistent) (UChar*)malloc(UBYTES(size))
+#define peurealloc(ptr, size, persistent) (UChar*)realloc((ptr),UBYTES(size))
 
 #define pemalloc_rel(size, persistent)		malloc(size)
 #define pefree_rel(ptr, persistent)			free(ptr)
