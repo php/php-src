@@ -57,7 +57,7 @@ zend_class_entry *pdo_exception_ce;
 
 PDO_API zend_class_entry *php_pdo_get_exception(void)
 {
-	return pdo_exception_ce;
+	return U_CLASS_ENTRY(pdo_exception_ce);
 }
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;

@@ -154,7 +154,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &id, dom_characterdata_class_entry, &offset, &count) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &id, U_CLASS_ENTRY(dom_characterdata_class_entry), &offset, &count) == FAILURE) {
 		return;
 	}
 
@@ -202,7 +202,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	char *arg;
 	int arg_len;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, U_CLASS_ENTRY(dom_characterdata_class_entry), &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, U_CLASS_ENTRY(dom_characterdata_class_entry), &offset, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -277,7 +277,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &id, dom_characterdata_class_entry, &offset, &count) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll", &id, U_CLASS_ENTRY(dom_characterdata_class_entry), &offset, &count) == FAILURE) {
 		return;
 	}
 
@@ -334,7 +334,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	int         length, arg_len;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, U_CLASS_ENTRY(dom_characterdata_class_entry), &offset, &count, &arg, &arg_len) == FAILURE) {
 		return;
 	}
 

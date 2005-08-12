@@ -54,8 +54,8 @@ PHP_METHOD(domattr, __construct)
 	char *name, *value = NULL;
 	int name_len, value_len, name_valid;
 
-	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(dom_domexception_class_entry) TSRMLS_CC);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, U_CLASS_ENTRY(dom_attr_class_entry), &name, &name_len, &value, &value_len) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
@@ -264,7 +264,7 @@ PHP_FUNCTION(dom_attr_is_id)
 	xmlAttrPtr attrp;
 	xmlNodePtr nodep;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_attr_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, U_CLASS_ENTRY(dom_attr_class_entry)) == FAILURE) {
 		return;
 	}
 

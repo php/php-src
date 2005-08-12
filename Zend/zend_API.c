@@ -1068,7 +1068,7 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC)
 {
-	return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
+	return _object_init_ex(arg, U_CLASS_ENTRY(zend_standard_class_def) ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 
 
@@ -2840,22 +2840,6 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 	EG(scope) = old_scope;
 	return value;
 }
-
-ZEND_API zend_class_entry* zend_get_named_class_entry(char* name, int name_length TSRMLS_DC)
-{
-	zend_class_entry **scope;
-	char *lcname = do_alloca(name_length+1);
-
-	zend_str_tolower_copy(lcname, name, name_length);
-	if (zend_hash_find(CG(class_table), lcname, name_length+1, (void**)&scope) == FAILURE) {
-		free_alloca(lcname);
-		zend_error(E_ERROR, "Class '%s' is not defined", name);
-		return NULL;
-	}
-	free_alloca(lcname);
-	return *scope;
-}
-
 
 /*
  * Return the most precise string type out of the list.

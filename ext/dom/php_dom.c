@@ -973,7 +973,7 @@ void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
 
 	clone = dom_objects_set_class(intern->std.ce, 0 TSRMLS_CC);
 
-	if (instanceof_function(intern->std.ce, dom_node_class_entry TSRMLS_CC)) {
+	if (instanceof_function(intern->std.ce, U_CLASS_ENTRY(dom_node_class_entry) TSRMLS_CC)) {
 		node = (xmlNodePtr)dom_object_get_node((dom_object *) object);
 		if (node != NULL) {
 			cloned_node = xmlDocCopyNode(node, node->doc, 1);
@@ -1094,9 +1094,9 @@ void php_dom_create_interator(zval *return_value, int ce_type TSRMLS_DC)
 	zend_class_entry *ce;
 
 	if (ce_type == DOM_NAMEDNODEMAP) {
-		ce = dom_namednodemap_class_entry;
+		ce = U_CLASS_ENTRY(dom_namednodemap_class_entry);
 	} else {
-		ce = dom_nodelist_class_entry;
+		ce = U_CLASS_ENTRY(dom_nodelist_class_entry);
 	}
 
 	object_init_ex(return_value, ce);
@@ -1133,69 +1133,69 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 		case XML_DOCUMENT_NODE:
 		case XML_HTML_DOCUMENT_NODE:
 		{
-			ce = dom_document_class_entry;
+			ce = U_CLASS_ENTRY(dom_document_class_entry);
 			break;
 		}
 		case XML_DTD_NODE:
 		case XML_DOCUMENT_TYPE_NODE:
 		{
-			ce = dom_documenttype_class_entry;
+			ce = U_CLASS_ENTRY(dom_documenttype_class_entry);
 			break;
 		}
 		case XML_ELEMENT_NODE:
 		{
-			ce = dom_element_class_entry;
+			ce = U_CLASS_ENTRY(dom_element_class_entry);
 			break;
 		}
 		case XML_ATTRIBUTE_NODE:
 		{
-			ce = dom_attr_class_entry;
+			ce = U_CLASS_ENTRY(dom_attr_class_entry);
 			break;
 		}
 		case XML_TEXT_NODE:
 		{
-			ce = dom_text_class_entry;
+			ce = U_CLASS_ENTRY(dom_text_class_entry);
 			break;
 		}
 		case XML_COMMENT_NODE:
 		{
-			ce = dom_comment_class_entry;
+			ce = U_CLASS_ENTRY(dom_comment_class_entry);
 			break;
 		}
 		case XML_PI_NODE:
 		{
-			ce = dom_processinginstruction_class_entry;
+			ce = U_CLASS_ENTRY(dom_processinginstruction_class_entry);
 			break;
 		}
 		case XML_ENTITY_REF_NODE:
 		{
-			ce = dom_entityreference_class_entry;
+			ce = U_CLASS_ENTRY(dom_entityreference_class_entry);
 			break;
 		}
 		case XML_ENTITY_DECL:
 		case XML_ELEMENT_DECL:
 		{
-			ce = dom_entity_class_entry;
+			ce = U_CLASS_ENTRY(dom_entity_class_entry);
 			break;
 		}
 		case XML_CDATA_SECTION_NODE:
 		{
-			ce = dom_cdatasection_class_entry;
+			ce = U_CLASS_ENTRY(dom_cdatasection_class_entry);
 			break;
 		}
 		case XML_DOCUMENT_FRAG_NODE:
 		{
-			ce = dom_documentfragment_class_entry;
+			ce = U_CLASS_ENTRY(dom_documentfragment_class_entry);
 			break;
 		}
 		case XML_NOTATION_NODE:
 		{
-			ce = dom_notation_class_entry;
+			ce = U_CLASS_ENTRY(dom_notation_class_entry);
 			break;
 		}
 		case XML_NAMESPACE_DECL:
 		{
-			ce = dom_namespace_node_class_entry;
+			ce = U_CLASS_ENTRY(dom_namespace_node_class_entry);
 			break;
 		}
 		default:
@@ -1221,7 +1221,7 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 
 
 void php_dom_create_implementation(zval **retval  TSRMLS_DC) {
-	object_init_ex(*retval, dom_domimplementation_class_entry);
+	object_init_ex(*retval, U_CLASS_ENTRY(dom_domimplementation_class_entry));
 }
 
 /* {{{ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child) */

@@ -244,10 +244,10 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 
 	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) spl_array_object_free_storage, NULL TSRMLS_CC);
 	while (parent) {
-		if (parent == spl_ce_ArrayIterator) {
+		if (parent == U_CLASS_ENTRY(spl_ce_ArrayIterator)) {
 			retval.handlers = &spl_handler_ArrayIterator;
 			break;
-		} else if (parent == spl_ce_ArrayObject) {
+		} else if (parent == U_CLASS_ENTRY(spl_ce_ArrayObject)) {
 			retval.handlers = &spl_handler_ArrayObject;
 			break;
 		}
@@ -876,7 +876,7 @@ SPL_METHOD(Array, __construct)
 	if (ZEND_NUM_ARGS() == 0) {
 		return; /* nothing to do */
 	}
-	php_set_error_handling(EH_THROW, spl_ce_InvalidArgumentException TSRMLS_CC);
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_InvalidArgumentException) TSRMLS_CC);
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -899,7 +899,7 @@ SPL_METHOD(Array, __construct)
 	} else {
 		if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
 			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
+			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
@@ -970,7 +970,7 @@ SPL_METHOD(Array, exchangeArray)
 		intern->array = other->array;
 	} else {
 		if (Z_TYPE_PP(array) != IS_OBJECT && !HASH_OF(*array)) {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
+			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
@@ -1002,7 +1002,7 @@ SPL_METHOD(Array, getIterator)
 	}
 
 	return_value->type = IS_OBJECT;
-	return_value->value.obj = spl_array_object_new_ex(spl_ce_ArrayIterator, &iterator, object TSRMLS_CC);
+	return_value->value.obj = spl_array_object_new_ex(U_CLASS_ENTRY(spl_ce_ArrayIterator), &iterator, object TSRMLS_CC);
 	return_value->refcount = 1;
 	return_value->is_ref = 1;
 }
@@ -1053,7 +1053,7 @@ SPL_METHOD(Array, seek)
 			}
 		}
 	}
-	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
+	zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_OutOfBoundsException), 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
 } /* }}} */
 
 int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */

@@ -161,7 +161,7 @@ static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_k
 
 	object = (zval *)iterator->intern.data;
 
-	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry TSRMLS_CC)) {
+	if (instanceof_function(Z_OBJCE_P(object), U_CLASS_ENTRY(dom_nodelist_class_entry) TSRMLS_CC)) {
 		*int_key = iter->index - 1;
 		return HASH_KEY_IS_LONG;
 	} else {

@@ -52,8 +52,8 @@ PHP_METHOD(domxpath, __construct)
 	dom_object *docobj, *intern;
 	xmlXPathContextPtr ctx, oldctx;
 
-	php_set_error_handling(EH_THROW, dom_domexception_class_entry TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &id, dom_xpath_class_entry, &doc, dom_document_class_entry) == FAILURE) {
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(dom_domexception_class_entry) TSRMLS_CC);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &id, U_CLASS_ENTRY(dom_xpath_class_entry), &doc, U_CLASS_ENTRY(dom_document_class_entry)) == FAILURE) {
 		php_std_error_handling();
 		return;
 	}
@@ -111,7 +111,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	dom_object *intern;
 	unsigned char *prefix, *ns_uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_xpath_class_entry, &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, U_CLASS_ENTRY(dom_xpath_class_entry), &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
 		return;
 	}
 
@@ -151,7 +151,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) {
 	xmlNsPtr *ns;
 
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|O", &id, dom_xpath_class_entry, &expr, &expr_len, &context, dom_node_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|O", &id, U_CLASS_ENTRY(dom_xpath_class_entry), &expr, &expr_len, &context, U_CLASS_ENTRY(dom_node_class_entry)) == FAILURE) {
 		return;
 	}
 

@@ -191,7 +191,7 @@ SPL_METHOD(DirectoryIterator, __construct)
 	char *path;
 	int len;
 
-	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &len) == FAILURE) {
 		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -437,10 +437,10 @@ SPL_METHOD(DirectoryIterator, openFile)
 	spl_file_object *intern;
 	zend_bool use_include_path = 0;
 
-	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
 
 	if (!dir_obj->entry.d_name[0]) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Could not open file");
+		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Could not open file");
 		zval_dtor(return_value);
 		return;
 	}
@@ -945,7 +945,7 @@ static int spl_file_object_read(spl_file_object *intern, int silent TSRMLS_DC) /
 	
 	if (php_stream_eof(intern->stream)) {
 		if (!silent) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
+			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
 		}
 		return FAILURE;
 	}
@@ -982,7 +982,7 @@ static int spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, i
 	if (intern->func_getCurr->common.scope != spl_ce_FileObject) {
 		if (php_stream_eof(intern->stream)) {
 			if (!silent) {
-				zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
+				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot read from file %s", intern->file_name);
 			}
 			return FAILURE;
 		}
@@ -1012,7 +1012,7 @@ static int spl_file_object_read_line(zval * this_ptr, spl_file_object *intern, i
 static void spl_file_object_rewind(spl_file_object *intern TSRMLS_DC) /* {{{ */
 {
 	if (-1 == php_stream_rewind(intern->stream)) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
+		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot rewind file %s", intern->file_name);
 	} else {
 		spl_file_object_free_line(intern TSRMLS_CC);
 		intern->current_line_num = 0;
@@ -1026,7 +1026,7 @@ static int spl_file_object_open(spl_file_object *intern, int use_include_path, i
 
 	if (intern->stream == NULL) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0 TSRMLS_CC, "Cannot open file %s", intern->file_name);
+			zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_RuntimeException), 0 TSRMLS_CC, "Cannot open file %s", intern->file_name);
 		}
 		return FAILURE;
 	}
@@ -1054,7 +1054,7 @@ SPL_METHOD(FileObject, __construct)
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zend_bool use_include_path = 0;
 
-	php_set_error_handling(EH_THROW, spl_ce_RuntimeException TSRMLS_CC);
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(spl_ce_RuntimeException) TSRMLS_CC);
 
 	intern->open_mode = "r";
 	intern->open_mode_len = 1;
@@ -1191,7 +1191,7 @@ SPL_METHOD(FileObject, setMaxLineLen)
 	}
 
 	if (max_len < 0) {
-		zend_throw_exception_ex(spl_ce_DomainException, 0 TSRMLS_CC, "Maximum line length must be greater than or equal zero");
+		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_DomainException), 0 TSRMLS_CC, "Maximum line length must be greater than or equal zero");
 		return;
 	}
 	
@@ -1455,7 +1455,7 @@ SPL_METHOD(FileObject, ftruncate)
 	}
 
 	if (!php_stream_truncate_supported(intern->stream)) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't truncate file %s", intern->file_name);
+		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Can't truncate file %s", intern->file_name);
 		RETURN_FALSE;
 	}
 	
@@ -1473,7 +1473,7 @@ SPL_METHOD(FileObject, seek)
 		return;
 	}
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
+		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Can't seek file %s to negative line %ld", intern->file_name, line_pos);
 		RETURN_FALSE;		
 	}
 	
