@@ -470,6 +470,8 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 		*pDest = p->pData;
 	}
 
+	p->key.type = IS_LONG;
+
 	CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
