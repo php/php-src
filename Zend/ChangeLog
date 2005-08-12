@@ -1,3 +1,82 @@
+2005-08-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * Makefile.am
+      Zend.m4
+      flex.skl
+      zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_constants.c
+      zend_constants.h
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_globals_macros.h
+      zend_hash.c
+      zend_hash.h
+      zend_highlight.c
+      zend_ini.c
+      zend_ini_scanner.l
+      zend_interfaces.c
+      zend_interfaces.h
+      zend_language_parser.y
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_multibyte.c
+      zend_object_handlers.c
+      zend_objects.c
+      zend_objects_API.c
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_reflection_api.c
+      zend_reflection_api.h
+      zend_strtod.c
+      zend_strtol.c
+      zend_unicode.c
+      zend_unicode.h
+      zend_variables.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_gen.php
+      zend_vm_opcodes.h:
+      Unicode support
+
+2005-08-11  Antony Dovgal  <antony@zend.com>
+
+    * zend_reflection_api.c:
+      MF5.1: fix #34078 (Reflection API problems in methods with boolean or null
+      default values)
+      
+      (andrei said to sara a few hours ago you may commit whatever you want
+      until 9pm) (c) helly
+      if there are any problems with this patch - please tell me, I'll revert it
+      immediately
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      MF5.1: fix #34078 (Reflection API problems in methods with boolean or null
+      default values)
+
+    * (PHP_5_1)
+      zend_reflection_api.c:
+      fix #34078 (Reflection API problems in methods with boolean or null default
+      values)
+
+2005-08-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      - For internal classes we must auto generate the abstract class flags.
+
 2005-08-10  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_0)
