@@ -765,10 +765,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			EX(function_state).function = 
 				Z_OBJ_HT_PP(fci->object_pp)->get_method(fci->object_pp, Z_UNIVAL_P(fci->function_name), Z_UNILEN_P(fci->function_name) TSRMLS_CC);
 			if (EX(function_state).function && calling_scope != EX(function_state).function->common.scope) {
-				char *function_name_lc = zend_str_tolower_dup(Z_STRVAL_P(fci->function_name), Z_STRLEN_P(fci->function_name));
-				if (zend_hash_find(&calling_scope->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+				void *function_name_lc = zend_u_str_tolower_dup(Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name), Z_UNILEN_P(fci->function_name));
+				if (zend_u_hash_find(&calling_scope->function_table, Z_TYPE_P(fci->function_name), function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 					efree(function_name_lc);
-					zend_error(E_ERROR, "Cannot call method %s::%s() or method does not exist", calling_scope->name, Z_STRVAL_P(fci->function_name));
+					zend_error(E_ERROR, "Cannot call method %v::%R() or method does not exist", calling_scope->name, Z_TYPE_P(fci->function_name), Z_UNIVAL_P(fci->function_name));
 				}
 				efree(function_name_lc);
 			}
