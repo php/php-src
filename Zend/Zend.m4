@@ -160,16 +160,6 @@ AC_ARG_ENABLE(memory-limit,
   ZEND_MEMORY_LIMIT=no
 ])
 
-dnl AC_ARG_ENABLE(zend-multibyte,
-dnl [  --enable-zend-multibyte Compile with zend multibyte support], [
-dnl   ZEND_MULTIBYTE=$enableval
-dnl ],[
-dnl   ZEND_MULTIBYTE=no
-dnl ])
-
-dnl Unicode PHP doesn't need ZEND_MULTIBYTE
-ZEND_MULTIBYTE=no
-
 AC_MSG_CHECKING([virtual machine dispatch method])
 AC_MSG_RESULT($PHP_ZEND_VM)
 
@@ -188,9 +178,6 @@ AC_MSG_RESULT($ZEND_MEMORY_LIMIT)
 AC_MSG_CHECKING(whether to enable Zend debugging)
 AC_MSG_RESULT($ZEND_DEBUG)
 
-AC_MSG_CHECKING(whether to enable Zend multibyte)
-AC_MSG_RESULT($ZEND_MULTIBYTE)
-	
 case $PHP_ZEND_VM in
   SWITCH)
     AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_SWITCH,[virtual machine dispatch method])
@@ -235,10 +222,6 @@ if test "$ZEND_MEMORY_LIMIT" = "yes"; then
   AC_DEFINE(MEMORY_LIMIT, 1, [Memory limit])
 else
   AC_DEFINE(MEMORY_LIMIT, 0, [Memory limit])
-fi
-
-if test "$ZEND_MULTIBYTE" = "yes"; then
-  AC_DEFINE(ZEND_MULTIBYTE, 1, [ ])
 fi
 
 changequote({,})
