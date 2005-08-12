@@ -952,7 +952,7 @@ SPL_METHOD(dual_it, key)
 		} else if (intern->current.key_type == HASH_KEY_IS_BINARY) {
 			RETURN_BINARYL(intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
-			RETURN_UNICODEL(intern->current.str_key, intern->current.str_key_len-1, 1);
+			RETURN_UNICODEL((UChar *)intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else {
 			RETURN_LONG(intern->current.int_key);
 		}
