@@ -949,6 +949,10 @@ SPL_METHOD(dual_it, key)
 	if (intern->current.data) {
 		if (intern->current.key_type == HASH_KEY_IS_STRING) {
 			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len-1, 1);
+		} else if (intern->current.key_type == HASH_KEY_IS_BINARY) {
+			RETURN_BINARYL(intern->current.str_key, intern->current.str_key_len-1, 1);
+		} else if (intern->current.key_type == HASH_KEY_IS_UNICODE) {
+			RETURN_UNICODEL(intern->current.str_key, intern->current.str_key_len-1, 1);
 		} else {
 			RETURN_LONG(intern->current.int_key);
 		}
@@ -1909,6 +1913,14 @@ PHP_FUNCTION(iterator_to_array)
 		switch(key_type) {
 			case HASH_KEY_IS_STRING:
 				add_assoc_zval_ex(return_value, str_key, str_key_len, *data);
+				efree(str_key);
+				break;
+			case HASH_KEY_IS_BINARY:
+				add_u_assoc_zval_ex(return_value, IS_BINARY, str_key, str_key_len, *data);
+				efree(str_key);
+				break;
+			case HASH_KEY_IS_UNICODE:
+				add_u_assoc_zval_ex(return_value, IS_UNICODE, str_key, str_key_len, *data);
 				efree(str_key);
 				break;
 			case HASH_KEY_IS_LONG:
