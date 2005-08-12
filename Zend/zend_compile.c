@@ -2208,7 +2208,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
-	do_inherit_parent_constructor(ce);
+	do_inherit_parent_constructor(ce TSRMLS_CC);
 
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS && ce->type == ZEND_INTERNAL_CLASS) {
 		ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
