@@ -2035,8 +2035,6 @@ AC_DEFUN([PHP_PROG_RE2C],[
         php_cv_re2c_version="`echo "" | re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
       fi 
     ])
-  else
-    php_cv_re2c_version=none
   fi
   case $php_cv_re2c_version in
     ""|invalid[)]
