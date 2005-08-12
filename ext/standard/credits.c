@@ -52,7 +52,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC)
 
 		/* PHP Language */
 		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "PHP 5 Authors");
+		php_info_print_table_colspan_header(2, "PHP Authors");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski, Andrei Zmievski");
@@ -104,7 +104,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC)
 
 	if (flag & PHP_CREDITS_QA) {
 		php_info_print_table_start();
-		php_info_print_table_header(1, "PHP 5.0 Quality Assurance Team");
+		php_info_print_table_header(1, "PHP Quality Assurance Team");
 		php_info_print_table_row(1, "Ilia Alshanetsky, Joerg Behrens, Stefan Esser, Moriyoshi Koizumi, Magnus Maatta, Sebastian Nohn, Derick Rethans, Melvyn Sopacua, Jani Taskinen");
 		php_info_print_table_end();
 	}
