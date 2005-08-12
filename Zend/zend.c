@@ -1715,10 +1715,6 @@ ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ..
 #endif
 }
 
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !defined(DARWIN)
-void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
-#endif
-
 ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...)
 {
 	va_list files;
