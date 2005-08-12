@@ -1,5 +1,5 @@
 dnl
-dnl $ Id: $
+dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(unicode, whether to enable unicode functions,
