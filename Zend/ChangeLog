@@ -1,3 +1,76 @@
+2005-08-12  Antony Dovgal  <antony@zend.com>
+
+    * zend_hash.c:
+      initialize key type when adding next index
+
+    * zend_alloc.h:
+      fix typo noticed by Nuno
+
+2005-08-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_alloc.h:
+      -** empty log message ***
+
+    * zend_alloc.h:
+      Add unicode macros for when Zend memory manager is disabled.
+
+2005-08-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c:
+      Fixed user function call in unicode mode
+
+    * zend_API.c
+      zend_API.c:
+      Fixed typo (ZVAL_LONG() -> ZVAL_DOUBLE())
+
+    * zend_object_handlers.c:
+      Fixed support fot provate properties in unicode mode.
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_interfaces.c
+      zend_interfaces.h
+      zend_object_handlers.c
+      zend_operators.c
+      zend_reflection_api.c
+      zend_reflection_api.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Unicode support
+
+2005-08-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_exceptions.c
+      zend_exceptions.h
+      zend_reflection_api.c:
+      ZTS fixes.
+
+2005-08-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.c:
+      Fixed build, zend_error_noreturn was being defined twice.
+
+2005-08-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.am:
+      - No more zend_multibyte.*
+
+    * Zend.m4
+      zend_highlight.c
+      zend_multibyte.c
+      zend_multibyte.h:
+      Nuked unneeded multibyte stuff
+
 2005-08-11  Andrei Zmievski  <andrei@gravitonic.com>
 
     * Makefile.am

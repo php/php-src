@@ -1,3 +1,207 @@
+2005-08-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/filters.c:
+      what they totally screw up on one hand, MS compilers almost compensate with
+      on
+      the other.
+
+2005-08-12  Antony Dovgal  <antony@zend.com>
+
+    * main/streams/streams.c:
+      make valgrind and gcc happy
+
+    * ZendEngine2/zend_hash.c:
+      initialize key type when adding next index
+
+    * main/main.c:
+      allow default_charset & default_mimetype to be changed during runtime
+
+    * ext/pcre/pcrelib/pcre_dfa_exec.c:
+      nuke unused variables
+
+    * ext/standard/file.c:
+      fix fgetc() & compile warnings
+
+    * ZendEngine2/zend_alloc.h:
+      fix typo noticed by Nuno
+
+    * ext/standard/var.c:
+      change ["var_name":private"] -> ["var_name:private"]
+      
+      * I'm also not sure we want ["var_name:public"], but I left it as is.
+
+2005-08-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * unicode-todo.txt:
+      Update.
+
+2005-08-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c:
+      fix compile warnings
+
+2005-08-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_alloc.h:
+      -** empty log message ***
+
+    * ZendEngine2/zend_alloc.h:
+      Add unicode macros for when Zend memory manager is disabled.
+
+2005-08-12  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/array.c:
+      fix array_merge() adding one superfluous byte to the key
+
+    * ext/standard/string.c:
+      fix php_u_trim() and compile warnings
+
+2005-08-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS
+      acinclude.m4:
+      MFB: - Fixed bug #33326 (Cannot build extensions with phpize on Macosx).
+
+    * (PHP_5_1)
+      NEWS
+      acinclude.m4:
+      - Fixed bug #33326 (Cannot build extensions with phpize on Macosx).
+
+2005-08-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      Fixed user function call in unicode mode
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c:
+      Fixed typo (ZVAL_LONG() -> ZVAL_DOUBLE())
+
+2005-08-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      MFB
+
+    * (PHP_5_1)
+      acinclude.m4:
+      - Fixed bug #34097 (configure failed to initize RE2C="exit 0;" when re2c is
+      not found)
+
+2005-08-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/string.c:
+      Fixed str_repeat() bug
+
+    * main/php_variables.c:
+      Fixed incorrect variable parsing in non-unicode mode
+
+    * ZendEngine2/zend_object_handlers.c:
+      Fixed support fot provate properties in unicode mode.
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/dom_iterators.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c
+      ext/simplexml/simplexml.c:
+      Unicode support
+
+2005-08-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/string.c:
+      Patch by Michael Wallner, signed off by Edin Kadribasic.
+
+2005-08-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      more tabs
+
+2005-08-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_reflection_api.c
+      ext/com_dotnet/com_extension.c
+      ext/dom/php_dom.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_driver.c
+      ext/pgsql/pgsql.c
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      ext/sqlite/pdo_sqlite2.c
+      ext/sqlite/sqlite.c
+      ext/standard/string.c:
+      ZTS fixes.
+
+2005-08-12  Andi Gutmans  <andi@zend.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+      - Add unicode INI settings
+
+2005-08-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend.c:
+      Fixed build, zend_error_noreturn was being defined twice.
+
+2005-08-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/credits.c:
+      No more versions here
+
+    * configure.in:
+      No tabs in config* files!
+
+    * configure.in
+      ZendEngine2/Makefile.am:
+      - No more zend_multibyte.*
+
+    * sapi/apache_hooks/mod_php5.c:
+      Nuke unused code
+
+    * sapi/apache/mod_php5.c:
+      - Unused
+
+    * ZendEngine2/Zend.m4
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_multibyte.c
+      ZendEngine2/zend_multibyte.h:
+      Nuked unneeded multibyte stuff
+
 2005-08-11  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
