@@ -71,7 +71,7 @@ static int phpday_tab[2][12] = {
 
 /* {{{ php_idate
  */
-PHPAPI int php_idate(char format, int timestamp, int gm)
+PHPAPI int php_idate(char format, time_t timestamp, int gm)
 {
 	time_t the_time;
 	struct tm *ta, tmbuf;
@@ -178,7 +178,8 @@ PHPAPI int php_idate(char format, int timestamp, int gm)
 PHP_FUNCTION(idate)
 {
 	zval **format, **timestamp;
-	int t, ret;
+	int ret;
+	time_t t;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:

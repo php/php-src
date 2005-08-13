@@ -158,7 +158,7 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI long php_getlastmod(TSRMLS_D)
+PHPAPI time_t php_getlastmod(TSRMLS_D)
 {
 	php_statpage(TSRMLS_C);
 	return BG(page_mtime);
