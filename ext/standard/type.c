@@ -309,7 +309,7 @@ PHP_FUNCTION(is_binary)
 /* }}} */
 
 /* {{{ proto bool is_buffer(mixed var)
-   Returns true if variable is a ascii, unicode or binary string */
+   Returns true if variable is a standard, unicode or binary string */
 PHP_FUNCTION(is_buffer)
 {
 	pval **arg;
