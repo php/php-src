@@ -522,6 +522,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type, int should_f
 			vt = VT_BOOL;
 			break;
 		case IS_STRING:
+		case IS_UNICODE:
 			vt = VT_BSTR;
 			break;
 		default:

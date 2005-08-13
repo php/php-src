@@ -157,6 +157,11 @@ PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_D
 			efree(olestring);
 			break;
 
+		case IS_UNICODE:
+			V_VT(v) = VT_BSTR;
+			V_BSTR(v) = SysAllocString(Z_USTRVAL_P(z));
+			break;
+
 		case IS_RESOURCE:
 		case IS_CONSTANT:
 		case IS_CONSTANT_ARRAY:
@@ -211,12 +216,8 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 			ZVAL_BOOL(z, V_BOOL(v) ? 1 : 0);
 			break;
 		case VT_BSTR:
-			olestring = V_BSTR(v);
-			if (olestring) {
-				Z_TYPE_P(z) = IS_STRING;
-				Z_STRVAL_P(z) = php_com_olestring_to_string(olestring,
-					&Z_STRLEN_P(z), codepage TSRMLS_CC);
-				olestring = NULL;
+			if (V_BSTR(v)) {
+				ZVAL_UNICODE(z, V_BSTR(v), 1);
 			}
 			break;
 		case VT_UNKNOWN:
