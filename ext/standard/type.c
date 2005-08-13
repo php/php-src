@@ -285,7 +285,7 @@ PHP_FUNCTION(is_float)
 /* }}} */
 
 /* {{{ proto bool is_string(mixed var)
-   Returns true if variable is a standard string */
+   Returns true if variable is a native string */
 PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
@@ -309,7 +309,7 @@ PHP_FUNCTION(is_binary)
 /* }}} */
 
 /* {{{ proto bool is_buffer(mixed var)
-   Returns true if variable is a standard, unicode or binary string */
+   Returns true if variable is a native, unicode or binary string */
 PHP_FUNCTION(is_buffer)
 {
 	pval **arg;
