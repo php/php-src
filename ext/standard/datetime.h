@@ -31,7 +31,7 @@ PHP_FUNCTION(checkdate);
 PHP_FUNCTION(strptime);
 #endif 
 
-PHPAPI int php_idate(char format, int timestamp, int gm);
+PHPAPI int php_idate(char format, time_t timestamp, int gm);
 PHPAPI char *php_std_date(time_t t TSRMLS_DC);
 
 #endif /* DATETIME_H */
