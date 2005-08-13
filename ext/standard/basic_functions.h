@@ -173,7 +173,7 @@ typedef struct _php_basic_globals {
 	long page_uid;
 	long page_gid;
 	long page_inode;
-	long page_mtime;
+	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
 	char *CurrentStatFile, *CurrentLStatFile;

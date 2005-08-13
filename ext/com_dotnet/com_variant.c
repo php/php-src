@@ -789,6 +789,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
 PHP_FUNCTION(variant_date_from_timestamp)
 {
 	long timestamp;
+	time_t ttstamp;
 	SYSTEMTIME systime;
 	struct tm *tmv;
 	VARIANT res;
@@ -800,7 +801,8 @@ PHP_FUNCTION(variant_date_from_timestamp)
 
 	VariantInit(&res);
 	tzset();
-	tmv = localtime(&timestamp);
+	ttstamp = timestamp;
+	tmv = localtime(&ttstamp);
 	memset(&systime, 0, sizeof(systime));
 
 	systime.wDay = tmv->tm_mday;
