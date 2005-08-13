@@ -11,19 +11,101 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Andrei Zmievski <andrei@php.net>                            |
+  |          Wez Furlong <wez@php.net>                                   |
   +----------------------------------------------------------------------+
 */
 
 /* $Id$ */ 
 
 #include "php_unicode.h"
-
 #if HAVE_UNICODE
+#include "zend_unicode.h"
 
+/* {{{ proto unicode unicode_decode(string $input, string $encoding)
+   Takes a string in the souce encoding and converts it to a UTF-16 unicode string, returning the result */
+static PHP_FUNCTION(unicode_decode)
+{
+	union {
+		void *vptr;
+		char *bin;
+	} input;
+	zend_uchar type;
+	int len;
+	char *encoding;
+	int enclen;
+	UErrorCode status;
+	UConverter *conv = NULL;
+	UChar *target;
+	int32_t targetlen;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ts", &input.vptr, &len, &type, &encoding, &enclen)) {
+		return;
+	}
+
+	if (type == IS_UNICODE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "input string is already unicode");
+		RETURN_FALSE;
+	}
+
+	status = U_ZERO_ERROR;
+	conv = ucnv_open(encoding, &status);
+	if (!conv) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not locate converter for %s", encoding);
+		RETURN_FALSE;
+	}
+
+	status = U_ZERO_ERROR;
+	zend_convert_to_unicode(conv, &target, &targetlen, input.bin, len, &status);
+	if (U_FAILURE(status)) {
+		/* TODO: error handling semantics ? */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "conversion was not entirely successful: %d", status);
+	}
+	RETVAL_UNICODEL(target, targetlen, 0);
+
+	ucnv_close(conv);	
+}
+/* }}} */
+
+/* {{{ proto string unicode_encode(unicode $input, string $encoding)
+   Takes a unicode string and converts it to a string in the specified encoding */
+static PHP_FUNCTION(unicode_encode)
+{
+	UChar *uni;
+	int len;
+	char *encoding;
+	int enclen;
+	UErrorCode status;
+	UConverter *conv = NULL;
+	char *target;
+	int32_t targetlen;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "us", &uni, &len, &encoding, &enclen)) {
+		return;
+	}
+
+	status = U_ZERO_ERROR;
+	conv = ucnv_open(encoding, &status);
+	if (!conv) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not locate converter for %s", encoding);
+		RETURN_FALSE;
+	}
+
+	status = U_ZERO_ERROR;
+	zend_convert_from_unicode(conv, &target, &targetlen, uni, len, &status);
+	if (U_FAILURE(status)) {
+		/* TODO: error handling semantics ? */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "conversion was not entirely successful: %d", status);
+	}
+	RETVAL_STRINGL(target, targetlen, 0);
+
+	ucnv_close(conv);	
+}
 /* {{{ unicode_functions[] */
 function_entry unicode_functions[] = {
 	PHP_FE(icu_loc_get_default, NULL)
 	PHP_FE(icu_loc_set_default, NULL)
+	PHP_FE(unicode_decode, NULL)
+	PHP_FE(unicode_encode, NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
