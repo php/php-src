@@ -448,7 +448,7 @@ ZEND_METHOD(exception, getTraceAsString)
 }
 /* }}} */
 
-static int zend_spprintf(char **message, int max_len, char *format, ...)
+int zend_spprintf(char **message, int max_len, char *format, ...)
 {
 	va_list arg;
 	int len;
