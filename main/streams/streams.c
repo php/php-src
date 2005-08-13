@@ -708,17 +708,17 @@ PHPAPI void *_php_stream_u_read(php_stream *stream, void *buf, int32_t *pnum_byt
 
 	/* It's possible that we have a readbuf, but that it's only half of a surrogate pair */
 	if (!stream->readbuf.head ||
-		(stream->readbuf.head == stream->readbuf.tail && stream->readbuf.head->is_unicode && 
-		(stream->readbuf.head->buf.ustr.len - stream->readbuf_ofs) == 1 &&
-		U16_IS_SURROGATE(stream->readbuf.head->buf.ustr.val[stream->readbuf.head->buf.ustr.len-1]))) {
+			(stream->readbuf.head == stream->readbuf.tail && stream->readbuf.head->is_unicode && 
+			(stream->readbuf.head->buf.ustr.len - stream->readbuf_ofs) == 1 &&
+			U16_IS_SURROGATE(stream->readbuf.head->buf.ustr.val[stream->readbuf.head->buf.ustr.len-1]))) {
 		php_stream_fill_read_buffer(stream, max_bytes ? max_bytes : (max_chars ? max_chars : stream->chunk_size) TSRMLS_CC);
 	}
 
 
 	if (!stream->readbuf.head ||
-		(stream->readbuf.head == stream->readbuf.tail && stream->readbuf.head->is_unicode && 
-		(stream->readbuf.head->buf.ustr.len - stream->readbuf_ofs) == 1 &&
-		U16_IS_SURROGATE(stream->readbuf.head->buf.ustr.val[stream->readbuf.head->buf.ustr.len-1]))) {
+			(stream->readbuf.head == stream->readbuf.tail && stream->readbuf.head->is_unicode && 
+			(stream->readbuf.head->buf.ustr.len - stream->readbuf_ofs) == 1 &&
+			U16_IS_SURROGATE(stream->readbuf.head->buf.ustr.val[stream->readbuf.head->buf.ustr.len-1]))) {
 		/* Nothing to return */
 		*pnum_bytes = 0;
 		*pnum_chars = 0;
@@ -761,7 +761,7 @@ PHPAPI void *_php_stream_u_read(php_stream *stream, void *buf, int32_t *pnum_byt
 
 		if ((bucket = stream->readbuf.head)) {
 			if ((bucket->is_unicode && !is_unicode) ||
-				(!bucket->is_unicode && is_unicode)) {
+					(!bucket->is_unicode && is_unicode)) {
 				/* data type swap, exit now */
 				break;
 			}
@@ -804,8 +804,8 @@ PHPAPI void *_php_stream_u_read(php_stream *stream, void *buf, int32_t *pnum_byt
 					php_stream_bucket_delref(bucket TSRMLS_CC);
 					stream->readbuf_ofs = 0;
 				} else if (stream->readbuf_ofs == (bucket->buf.ustr.len - 1) && 
-					U16_IS_SURROGATE(bucket->buf.ustr.val[bucket->buf.ustr.len - 1]) &&
-					bucket->next && bucket->next->is_unicode) {
+						U16_IS_SURROGATE(bucket->buf.ustr.val[bucket->buf.ustr.len - 1]) &&
+						bucket->next && bucket->next->is_unicode) {
 					/* Only one char left in the bucket, avoid already split surrogates getting "stuck" -- Should never happen thanks to fill_read_buffer */
 					php_stream_bucket *next_bucket = bucket->next;
 
@@ -1272,7 +1272,7 @@ PHPAPI UChar *_php_stream_u_get_line(php_stream *stream, UChar *buf, int32_t *pm
 			}
 
 			if ((max_bytes >= 0 && num_bytes >= max_bytes) || 
-				(max_chars >= 0 && num_chars >= max_chars)) {
+					(max_chars >= 0 && num_chars >= max_chars)) {
 				goto exit_ugetline;
 			}
 
