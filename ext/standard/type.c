@@ -285,10 +285,44 @@ PHP_FUNCTION(is_float)
 /* }}} */
 
 /* {{{ proto bool is_string(mixed var)
-   Returns true if variable is a string */
+   Returns true if variable is a standard string */
 PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
+}
+/* }}} */
+
+/* {{{ proto bool is_unicode(mixed var)
+   Returns true if variable is a unicode string */
+PHP_FUNCTION(is_unicode)
+{
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_UNICODE);
+}
+/* }}} */
+
+/* {{{ proto bool is_binary(mixed var)
+   Returns true if variable is a binary string */
+PHP_FUNCTION(is_binary)
+{
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BINARY);
+}
+/* }}} */
+
+/* {{{ proto bool is_buffer(mixed var)
+   Returns true if variable is a ascii, unicode or binary string */
+PHP_FUNCTION(is_buffer)
+{
+	pval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only one argument expected");
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_PP(arg) == IS_STRING || Z_TYPE_PP(arg) == IS_UNICODE || Z_TYPE_PP(arg) == IS_BINARY) {
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
