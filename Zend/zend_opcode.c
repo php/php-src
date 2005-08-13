@@ -29,6 +29,8 @@
 
 #include "zend_vm.h"
 
+extern int zend_spprintf(char **message, int max_len, char *format, ...);
+
 static void zend_extension_op_array_ctor_handler(zend_extension *extension, zend_op_array *op_array TSRMLS_DC)
 {
 	if (extension->op_array_ctor) {
@@ -386,10 +388,15 @@ int pass_two(zend_op_array *op_array TSRMLS_DC)
 
 int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {
-	/* UTODO: fix these to use spprintf() */
-	printf("Class %v:\n", class_entry->name);
+	char *tmp;
+
+	zend_spprintf(&tmp, 0, "Class %v:\n", class_entry->name);
+	printf("%s", tmp);
+	efree(tmp);
 	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two TSRMLS_CC);
-	printf("End of class %v.\n\n", class_entry->name);
+	zend_spprintf(&tmp, 0, "End of class %v.\n\n", class_entry->name);
+	printf("%s", tmp);
+	efree(tmp);
 	return 0;
 }
 
