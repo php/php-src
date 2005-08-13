@@ -138,6 +138,7 @@ ZEND_API UChar *_eustrndup(const UChar *s, int32_t length ZEND_FILE_LINE_DC ZEND
 
 #else
 
+#undef _GNU_SOURCE
 #define _GNU_SOURCE
 #include <string.h>
 #undef _GNU_SOURCE
