@@ -57,8 +57,8 @@
 #define EL_FIELD				"field"
 #define EL_DATETIME				"dateTime"
 
-#define php_wddx_deserialize(a,b) \
-	php_wddx_deserialize_ex((a)->value.str.val, (a)->value.str.len, (b))
+#define php_wddx_unserialize(a,b) \
+	php_wddx_unserialize_ex((a)->value.str.val, (a)->value.str.len, (b))
 
 #define SET_STACK_VARNAME							\
 		if (stack->varname) {						\
@@ -105,7 +105,8 @@ function_entry wddx_functions[] = {
 	PHP_FE(wddx_packet_start, NULL)
 	PHP_FE(wddx_packet_end, NULL)
 	PHP_FE(wddx_add_vars, NULL)
-	PHP_FE(wddx_deserialize, NULL)
+	PHP_FE(wddx_unserialize, NULL)
+	PHP_FALIAS(wddx_unserialize, wddx_deserialize, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -270,7 +271,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	
 	MAKE_STD_ZVAL(retval);
 
-	if ((ret = php_wddx_deserialize_ex((char *)val, vallen, retval)) == SUCCESS) {
+	if ((ret = php_wddx_unserialize_ex((char *)val, vallen, retval)) == SUCCESS) {
 
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(retval));
 			 zend_hash_get_current_data(Z_ARRVAL_P(retval), (void **) &ent) == SUCCESS;
@@ -1121,9 +1122,9 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 }
 /* }}} */
 
-/* {{{ php_wddx_deserialize_ex
+/* {{{ php_wddx_unserialize_ex
  */
-int php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
+int php_wddx_unserialize_ex(char *value, int vallen, zval *return_value)
 {
 	wddx_stack stack;
 	XML_Parser parser;
@@ -1329,9 +1330,9 @@ PHP_FUNCTION(wddx_add_vars)
 }
 /* }}} */
 
-/* {{{ proto mixed wddx_deserialize(mixed packet) 
-   Deserializes given packet and returns a PHP value */
-PHP_FUNCTION(wddx_deserialize)
+/* {{{ proto mixed wddx_unserialize(mixed packet) 
+   Unserializes given packet and returns a PHP value */
+PHP_FUNCTION(wddx_unserialize)
 {
 	zval *packet;
 	char *payload;
@@ -1358,7 +1359,7 @@ PHP_FUNCTION(wddx_deserialize)
 	if (payload_len == 0)
 		return;
 
-	php_wddx_deserialize_ex(payload, payload_len, return_value);
+	php_wddx_unserialize_ex(payload, payload_len, return_value);
 		
 	if (stream)
 		pefree(payload, 0);
