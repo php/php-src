@@ -847,6 +847,7 @@ PHPAPI int vuspprintf(char **pbuf, size_t max_len, const char *format, va_list a
 	if (max_len && xbuf.len > max_len) {
 		xbuf.len = max_len;
 	}
+	smart_str_appendc(&xbuf, '\0'); /* we need \0\0 as termination */
 	smart_str_0(&xbuf);
 		
 	*pbuf = xbuf.c;
