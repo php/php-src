@@ -1,3 +1,57 @@
+2005-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/type.c:
+      - ntive is better than standard (Andrei)
+
+2005-08-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c:
+      a bit of pedantic ws
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c:
+      unicode enable COM parameters (but not method/property names yet)
+
+    * ext/standard/datetime.h:
+      could have sworn that I did this already
+
+2005-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/type.c:
+      - IS_STRING does not necessarily mean ascii so 'standard' is better
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_type.h
+      ext/standard/type.c:
+      Add is_unicode(), is_binary() and is_buffer()
+
+2005-08-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_variant.c
+      ext/standard/basic_functions.h
+      ext/standard/datetime.c
+      ext/standard/pageinfo.c
+      ext/standard/pageinfo.h:
+      vs.net 2005 introduces 64-bit time_t.
+      
+      I can't say that I think this is a great idea, but it does highlight a
+      couple
+      of dodgy areas where we assume that ints and longs are the same thing as
+      time_t's.  Let's try to ensure that we declare structure fields and
+      function
+      parameters with the correct type when we're talkingabout time_t's, to
+      avoid
+      possibly nasty problems with passing the wrong sized thing around.
+
+2005-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_opcode.c:
+      - Unicode
+
+    * ZendEngine2/zend_alloc.h:
+      - This might already be defined
+
 2005-08-12  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/filters.c:
