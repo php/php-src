@@ -396,7 +396,7 @@ TODO:
 				}
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(lc_text, textlen, &cli_completion_state, pce ? &(*pce)->constants_table : EG(zend_constants) TSRMLS_CC);
+				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, pce ? &(*pce)->constants_table : EG(zend_constants) TSRMLS_CC);
 				if (retval || pce) {
 					break;
 				}
