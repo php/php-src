@@ -126,14 +126,22 @@
 	}												\
 } while (0)
 
-#define INS_STRING(unicode, xbuf, s, slen) do { 	\
-	if (unicode) {									\
-		smart_str_appendl(xbuf, s, slen);			\
-	} else {										\
-		size_t newlen, sz = 2*(slen);				\
+#define INS_STRING(unicode, s_uni, xbuf, s, slen)	\
+do { 												\
+	if (unicode) {
+		size_t newlen, p, sz = 2*(slen);			\
 		smart_str_alloc(xbuf, (sz), 0); 			\
-		memcpy(xbuf->c + xbuf->len, s, (sz));		\
+		if (s_uni) {								\
+			memcpy(xbuf->c + xbuf->len, s, (sz));	\
+		} else {									\
+			p = (slen);								\
+			while(p--) {                            \
+				smart_str_append2c(xbuf, *s++);		\
+			}										\
+		}											\
 		xbuf->len += (sz);							\
+	} else {										\
+		smart_str_appendl(xbuf, s, slen);			\
 	}												\
 } while (0)
 	
@@ -151,7 +159,7 @@
 			p = sz;									\
 			sz <<= 1;								\
 			smart_str_alloc(xbuf, sz, 0);	 		\
-			while(p--) smart_str_appendc(xbuf, ch);	\
+			while(p--) smart_str_append2c(xbuf, ch);\
 		} else {									\
 			smart_str_alloc(xbuf, sz, 0);	 		\
 			memset(xbuf->c + xbuf->len, ch, sz);	\
@@ -786,7 +794,7 @@ fmt_error:
 			/*
 			 * Print the string s. 
 			 */
-			INS_STRING(s_unicode, xbuf, s, s_len);
+			INS_STRING(unicode, s_unicode, xbuf, s, s_len);
 			if (free_s) efree(s);
 
 			if (adjust_width && adjust == LEFT && min_width > s_len) {
