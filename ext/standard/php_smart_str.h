@@ -78,8 +78,16 @@
 #define smart_str_appends(dest, src) \
 	smart_str_appendl((dest), (src), strlen(src))
 
+/* normall character appending */
 #define smart_str_appendc(dest, c) \
 	smart_str_appendc_ex((dest), (c), 0)
+
+/* appending of a single UTF-16 code unit (2 byte)*/
+#define smart_str_append2c(dest, c) while (0) {	\
+	smart_str_appendc_ex((dest), (c&0xFF), 0);	\
+	smart_str_appendc_ex((dest), (c&0xFF00 ? c>>8 : '\0'), 0);	\
+}
+
 #define smart_str_free(s) \
 	smart_str_free_ex((s), 0)
 #define smart_str_appendl(dest, src, len) \
