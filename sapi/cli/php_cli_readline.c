@@ -280,7 +280,7 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	}
 	while(zend_hash_has_more_elements(ht) == SUCCESS) {
 		zend_hash_get_current_key(ht, &name, &number, 0);
-		if (!textlen || !strncmp(name, text, textlen)) {
+		if (!textlen || (UG(unicode) ? !zend_cmp_unicode_and_string((UChar *)name, (char *)text, textlen) : !strncmp(name, text, textlen))) {
 			if (pData) {
 				zend_hash_get_current_data(ht, pData);
 			}
@@ -301,10 +301,25 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 
 	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(active_symbol_table), NULL TSRMLS_CC);
 	if (retval) {
-		retval = malloc(strlen(tmp) + 2);
-		retval[0] = '$';
-		strcpy(&retval[1], tmp);
-		rl_completion_append_character = '\0';
+		if (UG(unicode)) {
+			int32_t tmp_len, len;
+			UErrorCode status = U_ZERO_ERROR;
+
+			len = u_strlen((UChar *)retval);
+			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
+									  (UChar *)retval, len, &status);
+
+			retval = malloc(tmp_len + 2);
+			retval[0] = '$';
+			strcpy(&retval[1], tmp);
+			rl_completion_append_character = '\0';
+			efree(tmp);
+		} else {
+			retval = malloc(strlen(tmp) + 2);
+			retval[0] = '$';
+			strcpy(&retval[1], tmp);
+			rl_completion_append_character = '\0';
+		}
 	}
 	return retval;
 } /* }}} */
@@ -312,10 +327,26 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 static char *cli_completion_generator_func(const char *text, int textlen, int *state, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	zend_function *func;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func TSRMLS_CC);
+	char *retval;
+
+	retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func TSRMLS_CC);
 	if (retval) {
 		rl_completion_append_character = '(';
-		retval = strdup(func->common.function_name);
+
+		if (UG(unicode)) {
+			char *tmp;
+			int32_t tmp_len, len;
+			UErrorCode status = U_ZERO_ERROR;
+
+			len = u_strlen((UChar *)func->common.function_name);
+			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len,
+									  (UChar *)func->common.function_name, len, &status);
+
+			retval = strdup(tmp);
+			efree(tmp);
+		} else {
+			retval = strdup(func->common.function_name);
+		}
 	}
 	
 	return retval;
@@ -327,7 +358,21 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&pce TSRMLS_CC);
 	if (retval) {
 		rl_completion_append_character = '\0';
-		retval = strdup((*pce)->name);
+
+		if (UG(unicode)) {
+			char *tmp;
+			int32_t tmp_len, len;
+			UErrorCode status = U_ZERO_ERROR;
+
+			len = u_strlen((UChar *)(*pce)->name);
+			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
+									  (UChar *)(*pce)->name, len, &status);
+
+			retval = strdup(tmp);
+			efree(tmp);
+		} else {
+			retval = strdup((*pce)->name);
+		}
 	}
 	
 	return retval;
@@ -339,7 +384,21 @@ static char *cli_completion_generator_define(const char *text, int textlen, int 
 	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce TSRMLS_CC);
 	if (retval) {
 		rl_completion_append_character = '\0';
-		retval = strdup(retval);
+
+		if (UG(unicode)) {
+			char *tmp;
+			int32_t tmp_len, len;
+			UErrorCode status = U_ZERO_ERROR;
+
+			len = u_strlen((UChar *)retval);
+			zend_convert_from_unicode(ZEND_U_CONVERTER(UG(output_encoding_conv)), &tmp, &tmp_len, 
+									  (UChar *)retval, len, &status);
+
+			retval = strdup(tmp);
+			efree(tmp);
+		} else {
+			retval = strdup(retval);
+		}
 	}
 	
 	return retval;
@@ -396,7 +455,7 @@ TODO:
 				}
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(lc_text, textlen, &cli_completion_state, pce ? &(*pce)->constants_table : EG(zend_constants) TSRMLS_CC);
+				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, pce ? &(*pce)->constants_table : EG(zend_constants) TSRMLS_CC);
 				if (retval || pce) {
 					break;
 				}
