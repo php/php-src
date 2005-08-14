@@ -118,42 +118,60 @@
  *
  * NOTE: Evaluation of the ch argument should not have any side-effects
  */
-#define INS_CHAR_NR(xbuf, ch) do {	\
-	smart_str_appendc(xbuf, ch);	\
+#define INS_CHAR_NR(unicode, xbuf, ch) do {			\
+	if (unicode) {									\
+		smart_str_append2c(xbuf, ch);				\
+	} else {										\
+		smart_str_appendc(xbuf, ch);				\
+	}												\
 } while (0)
 
-#define INS_STRING(xbuf, s, slen) do { 	\
-	smart_str_appendl(xbuf, s, slen);	\
+#define INS_STRING(unicode, xbuf, s, slen) do { 	\
+	if (unicode) {									\
+		smart_str_appendl(xbuf, s, slen);			\
+	} else {										\
+		size_t newlen, sz = 2*(slen);				\
+		smart_str_alloc(xbuf, (sz), 0); 			\
+		memcpy(xbuf->c + xbuf->len, s, (sz));		\
+		xbuf->len += (sz);							\
+	}												\
 } while (0)
 	
-#define INS_CHAR(xbuf, ch)          \
-	INS_CHAR_NR(xbuf, ch)
+#define INS_CHAR(unicode, xbuf, ch)					\
+	INS_CHAR_NR(unicode, xbuf, ch)
 
 /*
  * Macro that does padding. The padding is done by printing
  * the character ch.
  */
-#define PAD(xbuf, count, ch) do {					\
+#define PAD(unicode, xbuf, count, ch) do {			\
 	if ((count) > 0) {                  			\
-		size_t newlen;								\
-		smart_str_alloc(xbuf, (count), 0); 			\
-		memset(xbuf->c + xbuf->len, ch, (count));	\
-		xbuf->len += (count);				\
+		size_t newlen, p, sz = (count);				\
+		if (unicode) {								\
+			p = sz;									\
+			sz <<= 1;								\
+			smart_str_alloc(xbuf, sz, 0);	 		\
+			while(p--) smart_str_appendc(xbuf, ch);	\
+		} else {									\
+			smart_str_alloc(xbuf, sz, 0);	 		\
+			memset(xbuf->c + xbuf->len, ch, sz);	\
+		}											\
+		xbuf->len += sz;							\
 	}												\
 } while (0)
 
 #define NUM(c) (c - '0')
 
-#define STR_TO_DEC(str, num) do {			\
-	num = NUM(*str++);                  	\
-	while (isdigit((int)*str)) {        	\
-		num *= 10;                      	\
-		num += NUM(*str++);             	\
-		if (num >= INT_MAX / 10) {			\
-			while (isdigit((int)*str++));	\
-			break;							\
-		}									\
-    }										\
+#define STR_TO_DEC(str, num) do {					\
+	num = NUM(*str++);                  			\
+	while (isdigit((int)*str)) {        			\
+		num *= 10;                      			\
+		num += NUM(*str++);             			\
+		if (num >= INT_MAX / 10) {					\
+			while (isdigit((int)*str++));			\
+			break;									\
+		}											\
+    }												\
 } while (0)
 
 /*
@@ -162,12 +180,13 @@
  * adding '0's to the left of the string that is going
  * to be printed.
  */
-#define FIX_PRECISION(adjust, precision, s, s_len) do {	\
-    if (adjust)					                    	\
-		while (s_len < precision) {                 	\
-			*--s = '0';                             	\
-			s_len++;                                	\
-		}												\
+#define FIX_PRECISION(adjust, precision, s, s_len)  \
+	do {											\
+    if (adjust)										\
+		while (s_len < precision) {					\
+			*--s = '0';								\
+			s_len++;								\
+		}											\
 } while (0)
 
 
@@ -175,12 +194,12 @@
 /*
  * Do format conversion placing the output in buffer
  */
-static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
+static void xbuf_format_converter(int unicode, smart_str *xbuf, const char *fmt, va_list ap)
 {
 	register char *s = NULL;
 	register UChar *u = NULL;
 	char *q;
-	int s_len;
+	int s_len, s_unicode;
 	int32_t u_len;
 
 	register int min_width = 0;
@@ -214,7 +233,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 
 	while (*fmt) {
 		if (*fmt != '%') {
-			INS_CHAR(xbuf, *fmt);
+			INS_CHAR(unicode, xbuf, *fmt);
 		} else {
 			/*
 			 * Default variable settings
@@ -224,6 +243,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 			pad_char = ' ';
 			prefix_char = NUL;
 			free_s = 0;
+			s_unicode = 0;
 
 			fmt++;
 
@@ -556,13 +576,20 @@ fmt_unicode:
 					}
 
 					u_len = u_strlen(u);
-					zend_convert_from_unicode(conv, &res, &s_len, u, u_len, &status);
-					if (U_FAILURE(status)) {
-						php_error(E_WARNING, "Could not convert Unicode to printable form in s[np]printf call");
-						return;
+					if (unicode) {
+						s_len = u_len; /* UTODO actually we think of 2bytes each atm */
+						s = (char*)u;
+						s_unicode = 1;
+					} else {
+						zend_convert_from_unicode(conv, &res, &s_len, u, u_len, &status);
+						if (U_FAILURE(status)) {
+							php_error(E_WARNING, "Could not convert Unicode to printable form in s[np]printf call");
+							return;
+						}
+						s = res;
+						free_s = 1;
 					}
-					s = res;
-					free_s = 1;
+						
 					pad_char = ' ';
 					break;
 				}
@@ -747,23 +774,24 @@ fmt_error:
 				*--s = prefix_char;
 				s_len++;
 			}
-			if (adjust_width && adjust == RIGHT && min_width > s_len) {
+			if (adjust_width && adjust == RIGHT && min_width > u_len) {
 				if (pad_char == '0' && prefix_char != NUL) {
-					INS_CHAR(xbuf, *s);
+					INS_CHAR(unicode, xbuf, *s);
 					s++;
 					s_len--;
 					min_width--;
 				}
-				PAD(xbuf, min_width - s_len, pad_char);
+				PAD(unicode, xbuf, min_width - s_len, pad_char);
 			}
 			/*
 			 * Print the string s. 
 			 */
-			INS_STRING(xbuf, s, s_len);
+			INS_STRING(s_unicode, xbuf, s, s_len);
 			if (free_s) efree(s);
 
-			if (adjust_width && adjust == LEFT && min_width > s_len)
-				PAD(xbuf, min_width - s_len, pad_char);
+			if (adjust_width && adjust == LEFT && min_width > s_len) {
+				PAD(unicode, xbuf, min_width - s_len, pad_char);
+			}
 		}
 		fmt++;
 	}
@@ -778,7 +806,7 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 {
 	smart_str xbuf = {0};
 
-	xbuf_format_converter(&xbuf, format, ap);
+	xbuf_format_converter(0, &xbuf, format, ap);
 	
 	if (max_len && xbuf.len > max_len) {
 		xbuf.len = max_len;
@@ -798,6 +826,34 @@ PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...)
 
 	va_start(ap, format);
 	cc = vspprintf(pbuf, max_len, format, ap);
+	va_end(ap);
+	return (cc);
+}
+
+PHPAPI int vuspprintf(char **pbuf, size_t max_len, const char *format, va_list ap)
+{
+	smart_str xbuf = {0};
+
+	xbuf_format_converter(1, &xbuf, format, ap);
+	
+	if (max_len && xbuf.len > max_len) {
+		xbuf.len = max_len;
+	}
+	smart_str_0(&xbuf);
+		
+	*pbuf = xbuf.c;
+	
+	return xbuf.len;
+}
+
+
+PHPAPI int uspprintf(char **pbuf, size_t max_len, const char *format, ...)
+{
+	int cc;
+	va_list ap;
+
+	va_start(ap, format);
+	cc = vuspprintf(pbuf, max_len, format, ap);
 	va_end(ap);
 	return (cc);
 }
