@@ -163,7 +163,9 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 			if (class_name[0]=='*') {
 				ZEND_PUTS(":protected");
 			} else {
-				php_printf(":%s:private", class_name);
+				php_printf(":u");
+				php_var_dump_unicode((UChar*)class_name, u_strlen((UChar*)class_name), verbose TSRMLS_CC);
+				ZEND_PUTS(":private");
 			}
 		} else {
 			if (hash_key->type == IS_STRING) {
