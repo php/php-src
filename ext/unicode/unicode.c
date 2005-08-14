@@ -21,8 +21,8 @@
 #if HAVE_UNICODE
 #include "zend_unicode.h"
 
-/* {{{ proto unicode unicode_decode(string $input, string $encoding)
-   Takes a string in the souce encoding and converts it to a UTF-16 unicode string, returning the result */
+/* {{{ proto unicode unicode_decode(string input, string encoding)
+   Takes a string in the source encoding and converts it to a UTF-16 unicode string, returning the result */
 static PHP_FUNCTION(unicode_decode)
 {
 	union {
@@ -66,7 +66,7 @@ static PHP_FUNCTION(unicode_decode)
 }
 /* }}} */
 
-/* {{{ proto string unicode_encode(unicode $input, string $encoding)
+/* {{{ proto string unicode_encode(unicode input, string encoding)
    Takes a unicode string and converts it to a string in the specified encoding */
 static PHP_FUNCTION(unicode_encode)
 {
