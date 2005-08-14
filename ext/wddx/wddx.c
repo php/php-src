@@ -106,7 +106,7 @@ function_entry wddx_functions[] = {
 	PHP_FE(wddx_packet_end, NULL)
 	PHP_FE(wddx_add_vars, NULL)
 	PHP_FE(wddx_unserialize, NULL)
-	PHP_FALIAS(wddx_unserialize, wddx_deserialize, NULL)
+	PHP_FALIAS(wddx_deserialize, wddx_unserialize, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
