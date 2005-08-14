@@ -273,7 +273,7 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 						if (class_name[0]=='*') {
 							ZEND_PUTS(":protected");
 						} else {
-							ZEND_PUTS(":private");
+							zend_printf(":%r:private", class_name);
 						}
 					}
 				} else {
