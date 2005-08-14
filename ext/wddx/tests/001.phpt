@@ -1,9 +1,9 @@
 --TEST--
-wddx deserialization test
+wddx unserialization test
 --FILE--
 <?php
 	$path = dirname(__FILE__);
-	var_dump(wddx_deserialize(file_get_contents("{$path}/wddx.xml")));
+	var_dump(wddx_unserialize(file_get_contents("{$path}/wddx.xml")));
 ?>
 --EXPECT--
 array(11) {
