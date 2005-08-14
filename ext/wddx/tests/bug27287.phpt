@@ -1,5 +1,5 @@
 --TEST--
-Bug #27287 (segfault with deserializing object data)
+Bug #27287 (segfault with unserializing object data)
 --FILE--
 <?php
 	
@@ -9,7 +9,7 @@ Bug #27287 (segfault with deserializing object data)
 	$foo->abc = 'def';
 	
 	$string = wddx_serialize_value($foo);
-	$bar = wddx_deserialize($string);
+	$bar = wddx_unserialize($string);
 
 	echo "OK\n";
 
