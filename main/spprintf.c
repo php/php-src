@@ -128,7 +128,7 @@
 
 #define INS_STRING(unicode, s_uni, xbuf, s, slen)	\
 do { 												\
-	if (unicode) {
+	if (unicode) {									\
 		size_t newlen, p, sz = 2*(slen);			\
 		smart_str_alloc(xbuf, (sz), 0); 			\
 		if (s_uni) {								\
