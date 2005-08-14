@@ -264,24 +264,18 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 					char *prop_name, *class_name;
 
 					zend_u_unmangle_property_name(key_type==HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, string_key, &class_name, &prop_name);
-					if (key_type == HASH_KEY_IS_UNICODE) {
-						zend_printf("%r", prop_name);
-					} else {
-						ZEND_PUTS(prop_name);
-					}
+
 					if (class_name) {
 						if (class_name[0]=='*') {
-							ZEND_PUTS(":protected");
+							zend_printf("%R:protected", key_type, prop_name);
 						} else {
-							zend_printf(":%r:private", class_name);
+							zend_printf("%R:%R:private", key_type, prop_name, key_type, class_name);
 						}
+					} else {
+						zend_printf("%R", key_type, prop_name);
 					}
 				} else {
-					if (key_type == HASH_KEY_IS_UNICODE) {
-						zend_printf("%r", string_key);
-					} else {
-						ZEND_WRITE(string_key, str_len-1);
-					}
+					zend_printf("%R", key_type, string_key);
 				}
 				break;
 			case HASH_KEY_IS_LONG:
