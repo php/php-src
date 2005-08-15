@@ -1,0 +1,8 @@
+To install the PEAR installer, please use go-pear.
+
+On linux:
+$ lynx -source http://go-pear.org/ | php
+
+or save the setup scripts under go-pear.php and run:
+
+php go-pear.php
