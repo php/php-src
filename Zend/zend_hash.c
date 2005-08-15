@@ -1297,6 +1297,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *str_index, uint str_length, ulong num_index, HashPosition *pos)
 {
 	Bucket *p;
+	uint real_length;
 
 	p = pos ? (*pos) : ht->pInternalPointer;
 
@@ -1304,12 +1305,13 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *
 
 	if (p) {
 		if (key_type == HASH_KEY_IS_LONG) {
-			str_length = 0;
+			real_length = str_length = 0;
 			if (!p->nKeyLength && p->h == num_index) {
 				return SUCCESS;
 			}
 			zend_hash_index_del(ht, num_index);
 		} else if (key_type == HASH_KEY_IS_STRING || key_type == HASH_KEY_IS_BINARY) {
+			real_length = str_length;
 			if (p->nKeyLength == str_length &&
 			    p->key.type == ((key_type == HASH_KEY_IS_STRING)?IS_STRING:IS_BINARY) &&
 			    memcmp(p->key.u.string, str_index, str_length) == 0) {
@@ -1317,9 +1319,10 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *
 			}
 			zend_u_hash_del(ht, (key_type == HASH_KEY_IS_STRING)?IS_STRING:IS_BINARY, str_index, str_length);
 		} else if (key_type == HASH_KEY_IS_UNICODE) {
+			real_length = str_length * sizeof(UChar);
 			if (p->nKeyLength == str_length &&
 			    p->key.type == IS_UNICODE &&
-			    memcmp(p->key.u.string, str_index, str_length * sizeof(UChar*)) == 0) {
+			    memcmp(p->key.u.string, str_index, real_length) == 0) {
 				return SUCCESS;
 			}
 			zend_u_hash_del(ht, IS_UNICODE, str_index, str_length);
@@ -1339,7 +1342,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *
 		}
 
 		if (p->nKeyLength != str_length) {
-			Bucket *q = (Bucket *) pemalloc(sizeof(Bucket) - 1 + str_length, ht->persistent);
+			Bucket *q = (Bucket *) pemalloc(sizeof(Bucket) - 1 + real_length, ht->persistent);
 
 			q->nKeyLength = str_length;
 			if (p->pData == &p->pDataPtr) {
@@ -1373,11 +1376,11 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, char *
 		if (key_type == HASH_KEY_IS_LONG) {
 			p->h = num_index;
 		} else if (key_type == HASH_KEY_IS_UNICODE) {
-			memcpy(p->key.u.unicode, str_index, str_length * sizeof(UChar));
+			memcpy(p->key.u.unicode, str_index, real_length);
 	    p->key.type = IS_UNICODE;
 			p->h = zend_u_inline_hash_func(IS_UNICODE, str_index, str_length);
 		} else {
-			memcpy(p->key.u.string, str_index, str_length);
+			memcpy(p->key.u.string, str_index, real_length);
 	    p->key.type = (key_type == HASH_KEY_IS_STRING)?IS_STRING:IS_BINARY;
 			p->h = zend_u_inline_hash_func(p->key.type, str_index, str_length);
 		}

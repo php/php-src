@@ -332,7 +332,7 @@ ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_D
 	}
 
 	if (zend_u_hash_add(EG(zend_constants), type, name, lookup_name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {
-		zend_error(E_NOTICE,"Constant %s already defined", name);
+		zend_error(E_NOTICE,"Constant %R already defined", type, name);
 		free(c->name);
 		if (!(c->flags & CONST_PERSISTENT)) {
 			zval_dtor(&c->value);

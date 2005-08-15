@@ -119,7 +119,7 @@ static void zval_add_ref_or_clone(zval **p)
 		TSRMLS_FETCH();
 
 		if (Z_OBJ_HANDLER_PP(p, clone_obj) == NULL) {
-			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_PP(p)->name);
+			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %v",  Z_OBJCE_PP(p)->name);
 		} else {
 			zval *orig = *p;
 

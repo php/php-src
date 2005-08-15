@@ -218,6 +218,7 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, char *name, int name_length, char *value, int value_len, int access_type TSRMLS_DC);
 
 ZEND_API int zend_u_declare_property(zend_class_entry *ce, zend_uchar type, void *name, int name_length, zval *property, int access_type TSRMLS_DC);
+ZEND_API int zend_u_declare_property_ex(zend_class_entry *ce, zend_uchar type, void *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC);
 
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC);
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC);

@@ -920,8 +920,8 @@ ZEND_FUNCTION(method_exists)
 	}
 	if (Z_TYPE_PP(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_PP(klass);
-	} else if (Z_TYPE_PP(klass) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_PP(klass), Z_STRLEN_PP(klass), &pce TSRMLS_CC) == FAILURE) {
+	} else if (Z_TYPE_PP(klass) == IS_STRING || Z_TYPE_PP(klass) == IS_UNICODE) {
+		if (zend_u_lookup_class(Z_TYPE_PP(klass), Z_STRVAL_PP(klass), Z_STRLEN_PP(klass), &pce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ce = *pce;
@@ -929,7 +929,9 @@ ZEND_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(method_name);
+	if (Z_TYPE_PP(method_name) != IS_STRING || Z_TYPE_PP(method_name) == IS_UNICODE) {
+		convert_to_text_ex(method_name);
+	}
 	lcname = zend_u_str_case_fold(Z_TYPE_PP(method_name), Z_UNIVAL_PP(method_name), Z_UNILEN_PP(method_name), 1, &lcname_len);
 	if (zend_u_hash_exists(&ce->function_table, Z_TYPE_PP(method_name), lcname, lcname_len+1)) {
 		efree(lcname);
@@ -968,17 +970,22 @@ ZEND_FUNCTION(property_exists)
 	if (ZEND_NUM_ARGS()!= 2 || zend_get_parameters_ex(2, &object, &property)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	convert_to_string_ex(property);
-	if (!Z_STRLEN_PP(property)) {
+
+	if (Z_TYPE_PP(property) != IS_STRING && Z_TYPE_PP(property) != IS_UNICODE) {
+		convert_to_text_ex(property);
+	}
+
+	if (!Z_UNILEN_PP(property)) {
 		RETURN_FALSE;
 	}
 
 	switch((*object)->type) {
 	case IS_STRING:
-		if (!Z_STRLEN_PP(object)) {
+	case IS_UNICODE:
+		if (!Z_UNILEN_PP(object)) {
 			RETURN_FALSE;
 		}
-		if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_u_lookup_class(Z_TYPE_PP(object), Z_UNIVAL_PP(object), Z_UNILEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		} else {
 			RETURN_FALSE;
@@ -992,14 +999,14 @@ ZEND_FUNCTION(property_exists)
 		if (property_info->flags & ZEND_ACC_PUBLIC) {
 			RETURN_TRUE;
 		}
-		zend_unmangle_property_name(property_info->name, &class_name, &prop_name);
-		if (!strncmp(class_name, "*", 1)) {
+		zend_u_unmangle_property_name(Z_TYPE_PP(property), property_info->name, &class_name, &prop_name);
+		if (class_name[0] ==  '*') {
 			if (instanceof_function(EG(scope), ce TSRMLS_CC)) {
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
 		}
-		if (zend_lookup_class(Z_STRVAL_PP(object), Z_STRLEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_u_lookup_class(Z_TYPE_PP(object), Z_UNIVAL_PP(object), Z_UNILEN_PP(object), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		} else {
 			RETURN_FALSE; /* shouldn't happen */
@@ -1880,7 +1887,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		zend_printf("#%-2d ", indent);
 		if (class_name) {
 			if (UG(unicode)) {
-				zend_printf("%r(", class_name);
+				zend_printf("%r", class_name);
 			} else {
 				ZEND_PUTS(class_name);
 			}
