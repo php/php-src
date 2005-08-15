@@ -57,3 +57,11 @@ string(9) "FooBarBaz"
 string(3) "Foo"
 
 Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_008.php on line %d
+--UEXPECTF--
+unicode(3) "Foo"
+unicode(6) "FooBar"
+unicode(9) "FooBarBaz"
+===ArrayOverloading===
+unicode(3) "Foo"
+
+Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_008.php on line %d

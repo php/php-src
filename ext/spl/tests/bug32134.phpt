@@ -46,3 +46,11 @@ myArray::offsetSet(two,two)
 myArray::offsetGet(two)
 string(3) "two"
 ===DONE===
+--UEXPECT--
+myArray::offsetSet(one,one)
+myArray::offsetGet(one)
+unicode(3) "one"
+myArray::offsetSet(two,two)
+myArray::offsetGet(two)
+unicode(3) "two"
+===DONE===

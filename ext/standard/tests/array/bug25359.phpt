@@ -30,3 +30,16 @@ array(5) {
   [4]=>
   string(5) "fifth"
 }
+--UEXPECT--
+array(5) {
+  [0]=>
+  unicode(5) "first"
+  [1]=>
+  unicode(6) "second"
+  [2]=>
+  unicode(5) "third"
+  [3]=>
+  unicode(5) "forth"
+  [4]=>
+  unicode(5) "fifth"
+}

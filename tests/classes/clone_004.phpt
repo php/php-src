@@ -80,3 +80,46 @@ object(test)#2 (2) {
   int(5)
 }
 Done
+--UEXPECT--
+Original
+object(test)#1 (2) {
+  [u"b"]=>
+  array(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+  }
+  [u"a"]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+Clone
+object(test)#2 (2) {
+  [u"b"]=>
+  array(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+  }
+  [u"a"]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+Modify
+object(test)#2 (2) {
+  [u"b"]=>
+  int(6)
+  [u"a"]=>
+  int(5)
+}
+Done

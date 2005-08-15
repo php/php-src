@@ -18,3 +18,9 @@ array(1) {
   string(4) "test"
 }
 ===DONE===
+--UEXPECT--
+array(1) {
+  [u"a"]=>
+  unicode(4) "test"
+}
+===DONE===

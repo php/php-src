@@ -63,3 +63,21 @@ string(2) "A2"
 string(2) "C2"
 string(2) "C2"
 ===DONE===
+--UEXPECTF--
+===INIT===
+unicode(1) "A"
+unicode(1) "C"
+unicode(1) "C"
+===SetA===
+unicode(2) "A2"
+unicode(1) "C"
+unicode(1) "C"
+===SetB===
+unicode(2) "A2"
+unicode(2) "B2"
+unicode(2) "B2"
+===SetC===
+unicode(2) "A2"
+unicode(2) "C2"
+unicode(2) "C2"
+===DONE===

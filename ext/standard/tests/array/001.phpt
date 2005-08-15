@@ -155,3 +155,115 @@ array(1) {
     }
   }
 }
+--UEXPECT--
+array(11) {
+  [0]=>
+  unicode(3) "PHP"
+  [1]=>
+  unicode(27) "PHP: Hypertext Preprocessor"
+  [2]=>
+  unicode(4) "Test"
+  [u"test"]=>
+  int(27)
+  [3]=>
+  unicode(4) "test"
+  [4]=>
+  array(2) {
+    [0]=>
+    unicode(6) "banana"
+    [1]=>
+    unicode(6) "orange"
+  }
+  [5]=>
+  unicode(6) "monkey"
+  [6]=>
+  float(-0.33333333333333)
+  [7]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        int(0)
+      }
+    }
+  }
+  [8]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        int(0)
+      }
+    }
+  }
+  [9]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [0]=>
+        int(0)
+      }
+    }
+  }
+}
+ -- Testing array_walk() -- 
+int(0)
+unicode(3) "PHP"
+int(1)
+unicode(27) "PHP: Hypertext Preprocessor"
+int(2)
+unicode(4) "Test"
+unicode(4) "test"
+int(27)
+int(3)
+unicode(4) "test"
+int(4)
+array(2) {
+  [0]=>
+  unicode(6) "banana"
+  [1]=>
+  unicode(6) "orange"
+}
+int(5)
+unicode(6) "monkey"
+int(6)
+float(-0.33333333333333)
+int(7)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      int(0)
+    }
+  }
+}
+int(8)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      int(0)
+    }
+  }
+}
+int(9)
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      int(0)
+    }
+  }
+}

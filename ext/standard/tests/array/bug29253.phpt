@@ -11,3 +11,7 @@ var_dump($gg);
 array(0) {
 }
 string(4) "afad"
+--UEXPECT--
+array(0) {
+}
+unicode(4) "afad"

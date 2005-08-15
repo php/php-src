@@ -69,3 +69,16 @@ string(16) "Base constructor"
 ### Mixed style 2
 string(17) "Child constructor"
 string(16) "Base constructor"
+--UEXPECT--
+### PHP 4 style
+unicode(17) "Child constructor"
+unicode(16) "Base constructor"
+### PHP 5 style
+unicode(17) "Child constructor"
+unicode(16) "Base constructor"
+### Mixed style 1
+unicode(17) "Child constructor"
+unicode(16) "Base constructor"
+### Mixed style 2
+unicode(17) "Child constructor"
+unicode(16) "Base constructor"

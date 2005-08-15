@@ -47,3 +47,27 @@ array(3) {
     string(1) "C"
   }
 }
+--UEXPECTF--
+array(3) {
+  [0]=>
+  object(stdClass)#%d (2) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val"]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  object(stdClass)#%d (2) {
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val"]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  object(stdClass)#%d (2) {
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val"]=>
+    unicode(1) "C"
+  }
+}

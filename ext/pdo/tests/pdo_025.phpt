@@ -110,3 +110,55 @@ object(Test)#%d (3) {
 ===FAIL===
 
 Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d
+--UEXPECTF--
+object(Test)#%d (3) {
+  [u"id"]=>
+  unicode(2) "10"
+  [u"val"]=>
+  unicode(3) "Abc"
+  [u"val2"]=>
+  unicode(3) "zxy"
+}
+object(Test)#%d (3) {
+  [u"id"]=>
+  unicode(2) "20"
+  [u"val"]=>
+  unicode(3) "Def"
+  [u"val2"]=>
+  unicode(3) "wvu"
+}
+object(Test)#%d (3) {
+  [u"id"]=>
+  unicode(2) "30"
+  [u"val"]=>
+  unicode(3) "Ghi"
+  [u"val2"]=>
+  unicode(3) "tsr"
+}
+object(Test)#%d (3) {
+  [u"id"]=>
+  unicode(2) "40"
+  [u"val"]=>
+  unicode(3) "Jkl"
+  [u"val2"]=>
+  unicode(3) "qpo"
+}
+object(Test)#%d (3) {
+  [u"id"]=>
+  unicode(2) "50"
+  [u"val"]=>
+  unicode(3) "Mno"
+  [u"val2"]=>
+  unicode(3) "nml"
+}
+object(Test)#%d (3) {
+  [u"id"]=>
+  unicode(2) "60"
+  [u"val"]=>
+  unicode(3) "Pqr"
+  [u"val2"]=>
+  unicode(3) "kji"
+}
+===FAIL===
+
+Fatal error: Cannot access protected property Fail::$id in %spdo_025.php on line %d

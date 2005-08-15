@@ -37,3 +37,18 @@ object(bar)#1 (6) {
   ["c6"]=>
   int(1)
 }
+--UEXPECT--
+object(bar)#1 (6) {
+  [u"c1"]=>
+  int(1)
+  [u"c2"]=>
+  int(2)
+  [u"c3"]=>
+  int(1)
+  [u"c4"]=>
+  int(2)
+  [u"c5"]=>
+  int(1)
+  [u"c6"]=>
+  int(1)
+}

@@ -95,3 +95,30 @@ NULL
 string(2) "ok"
 string(2) "ok"
 ---
+--UEXPECT--
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+NULL
+unicode(2) "ok"
+unicode(2) "ok"
+---
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+unicode(2) "ok"
+NULL
+unicode(2) "ok"
+unicode(2) "ok"
+---

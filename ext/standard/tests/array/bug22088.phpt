@@ -31,3 +31,20 @@ array(3) {
   [0]=>
   string(1) "a"
 }
+--UEXPECT--
+array(3) {
+  [0]=>
+  unicode(1) "b"
+  [1]=>
+  unicode(1) "c"
+  [2]=>
+  unicode(1) "a"
+}
+array(3) {
+  [u"b"]=>
+  int(2)
+  [u"c"]=>
+  int(3)
+  [0]=>
+  unicode(1) "a"
+}

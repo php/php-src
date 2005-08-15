@@ -39,3 +39,7 @@ catch (Exception $e)
 string(15) "Error2Exception"
 string(5) "fopen"
 ===DONE===
+--UEXPECTF--
+unicode(15) "Error2Exception"
+unicode(5) "fopen"
+===DONE===

@@ -78,3 +78,20 @@ string(10) "Bla bla 2."
 string(5) "elem1"
 string(10) "Bla bla 1."
 ===DONE===
+--UEXPECT--
+unicode(5) "elem1"
+unicode(10) "Bla bla 1."
+unicode(6) "elem11"
+unicode(10) "Bla bla 2."
+===CLONE===
+unicode(5) "elem1"
+unicode(10) "Bla bla 1."
+unicode(6) "elem11"
+unicode(10) "Bla bla 2."
+===ELEMENT===
+unicode(6) "elem11"
+unicode(10) "Bla bla 2."
+===COMMENT===
+unicode(5) "elem1"
+unicode(10) "Bla bla 1."
+===DONE===

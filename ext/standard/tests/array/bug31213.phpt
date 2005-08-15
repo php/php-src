@@ -55,3 +55,28 @@ array(2) {
   ["_b"]=>
   &int(2)
 }
+--UEXPECT--
+int(1)
+int(1)
+int(1)
+int(2)
+int(2)
+int(2)
+array(2) {
+  [u"_a"]=>
+  &int(2)
+  [u"_b"]=>
+  &int(2)
+}
+int(1)
+int(1)
+int(1)
+int(2)
+int(2)
+int(2)
+array(2) {
+  [u"_a"]=>
+  &int(2)
+  [u"_b"]=>
+  &int(2)
+}

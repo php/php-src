@@ -44,3 +44,25 @@ array(2) {
   ["c"]=>
   string(5) "fubar"
 }
+--UEXPECT--
+foo
+array(2) {
+  [0]=>
+  unicode(3) "bar"
+  [1]=>
+  unicode(5) "fubar"
+}
+foo
+array(2) {
+  [0]=>
+  unicode(3) "bar"
+  [1]=>
+  unicode(5) "fubar"
+}
+foo
+array(2) {
+  [u"b"]=>
+  unicode(3) "bar"
+  [u"c"]=>
+  unicode(5) "fubar"
+}

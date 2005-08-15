@@ -242,3 +242,167 @@ array(4) {
     string(1) "D"
   }
 }
+--UEXPECTF--
+DerivedStatement::__construct(Overloaded)
+Test1::__construct(0,0)
+test(1,N/A)
+test(2,N/A)
+test(3,N/A)
+test(4,N/A)
+array(2) {
+  [u"Group1"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      [1]=>
+      unicode(3) "N/A"
+    }
+    [1]=>
+    array(1) {
+      [2]=>
+      unicode(3) "N/A"
+    }
+  }
+  [u"Group2"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      [3]=>
+      unicode(3) "N/A"
+    }
+    [1]=>
+    array(1) {
+      [4]=>
+      unicode(3) "N/A"
+    }
+  }
+}
+test(1,A)
+test(2,B)
+test(3,C)
+test(4,D)
+array(4) {
+  [0]=>
+  array(1) {
+    [1]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  array(1) {
+    [2]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  array(1) {
+    [3]=>
+    unicode(1) "C"
+  }
+  [3]=>
+  array(1) {
+    [4]=>
+    unicode(1) "D"
+  }
+}
+Test1::factory(1,A)
+Test1::__construct(1,A)
+Test1::factory(2,B)
+Test1::__construct(2,B)
+Test1::factory(3,C)
+Test1::__construct(3,C)
+Test1::factory(4,D)
+Test1::__construct(4,D)
+array(4) {
+  [0]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val"]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val"]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val"]=>
+    unicode(1) "C"
+  }
+  [3]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "4"
+    [u"val"]=>
+    unicode(1) "D"
+  }
+}
+Test1::factory(1,A)
+Test1::__construct(1,A)
+Test1::factory(2,B)
+Test1::__construct(2,B)
+Test1::factory(3,C)
+Test1::__construct(3,C)
+Test1::factory(4,D)
+Test1::__construct(4,D)
+array(4) {
+  [0]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val"]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val"]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val"]=>
+    unicode(1) "C"
+  }
+  [3]=>
+  object(Test1)#%d (2) {
+    [u"id"]=>
+    unicode(1) "4"
+    [u"val"]=>
+    unicode(1) "D"
+  }
+}
+unicode(16) "DerivedStatement"
+DerivedStatement::retrieve(1,A)
+DerivedStatement::retrieve(2,B)
+DerivedStatement::retrieve(3,C)
+DerivedStatement::retrieve(4,D)
+array(4) {
+  [0]=>
+  array(1) {
+    [1]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  array(1) {
+    [2]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  array(1) {
+    [3]=>
+    unicode(1) "C"
+  }
+  [3]=>
+  array(1) {
+    [4]=>
+    unicode(1) "D"
+  }
+}

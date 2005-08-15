@@ -142,17 +142,6 @@ if (getenv('TEST_PHP_USER')) {
 	$user_tests = array();
 }
 
-// Get info from php
-$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
-@unlink($info_file);
-$php_info = '<?php echo "
-PHP_SAPI    : " . PHP_SAPI . "
-PHP_VERSION : " . phpversion() . "
-ZEND_VERSION: " . zend_version() . "
-PHP_OS      : " . PHP_OS . " - " . php_uname() . "
-INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
-More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
-save_text($info_file, $php_info);
 $ini_overwrites = array(
 		'output_handler=',
 		'open_basedir=',
@@ -174,17 +163,36 @@ $ini_overwrites = array(
 		'auto_append_file=',
 		'magic_quotes_runtime=0',
 	);
+
+function write_information()
+{
+	global $cwd, $php, $php_info, $user_tests, $ini_overwrites, $pass_options;
+
+// Get info from php
+$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
+@unlink($info_file);
+$php_info = '<?php echo "
+PHP_SAPI    : " . PHP_SAPI . "
+PHP_VERSION : " . phpversion() . "
+ZEND_VERSION: " . zend_version() . "
+PHP_OS      : " . PHP_OS . " - " . php_uname() . "
+INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
+More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
+save_text($info_file, $php_info);
 $info_params = array();
 settings2array($ini_overwrites,$info_params);
 settings2params($info_params);
-$php_info = `$php $info_params $info_file`;
+$php_info = `$php $pass_options $info_params $info_file`;
 @unlink($info_file);
 define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
+
+$unicode = `$php $pass_options $info_params -r 'echo ini_get("unicode_semantics");'`;
+define('TESTED_UNICODE', strcasecmp($unicode,"on") == 0 || $unicode == 1);
 
 // check for extensions that need special handling and regenerate
 $php_extensions = '<?php echo join(",",get_loaded_extensions()); ?>'; 
 save_text($info_file, $php_extensions);
-$php_extensions = explode(',',`$php $info_params $info_file`);
+$php_extensions = explode(',',`$php $pass_options $info_params $info_file`);
 $info_params_ex = array(
 		'session' => array('session.auto_start=0'),
 		'zlib' => array('zlib.output_compression=Off'),
@@ -198,10 +206,6 @@ foreach($info_params_ex as $ext => $ini_overwrites_ex) {
 @unlink($info_file);
 
 // Write test context information.
-function write_information()
-{
-	global $cwd, $php, $php_info, $user_tests;
-
 echo "
 =====================================================================
 CWD         : $cwd
@@ -750,6 +754,11 @@ TEST $file
 			$borked = true;
 			print_r($section_text);
 		}
+		if ((@count($section_text['UEXPECT']) + @count($section_text['UEXPECTF']) + @count($section_text['UEXPECTREGEX'])) > 1) {
+			$bork_info = "missing section --UEXPECT--, --UEXPECTF-- or --UEXPECTREGEX-- [$file]";
+			$borked = true;
+			print_r($section_text);
+		}
 	}
 	fclose($fp);
 
@@ -920,7 +929,37 @@ TEST $file
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
+		if (isset($ini_settings["unicode_semantics"])) {
+			$unicode_test = strcasecmp($ini_settings["unicode_semantics"],"on") == 0 || $ini_settings["unicode_semantics"] == 1;
+		} else {
+			$unicode_test = TESTED_UNICODE;
+		}
+	} else {
+		$unicode_test = TESTED_UNICODE;
 	}
+
+	if ($unicode_test) {
+		if (isset($section_text['UEXPECT'])) {
+			unset($section_text['EXPECT']);
+			unset($section_text['EXPECTF']);
+			unset($section_text['EXPECTREGEX']);
+			$section_text['EXPECT'] = $section_text['UEXPECT'];
+			unset($section_text['UEXPECT']);
+		} else if (isset($section_text['UEXPECTF'])) {
+			unset($section_text['EXPECT']);
+			unset($section_text['EXPECTF']);
+			unset($section_text['EXPECTREGEX']);
+			$section_text['EXPECTF'] = $section_text['UEXPECTF'];
+			unset($section_text['UEXPECTF']);
+		} else if (isset($section_text['UEXPECTREGEX'])) {
+			unset($section_text['EXPECT']);
+			unset($section_text['EXPECTF']);
+			unset($section_text['EXPECTREGEX']);
+			$section_text['EXPECTREGEX'] = $section_text['UEXPECTREGEX'];
+			unset($section_text['UEXPECTREGEX']);
+		}
+	}
+
 	settings2params($ini_settings);
 
 	// We've satisfied the preconditions - run the test!

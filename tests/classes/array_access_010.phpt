@@ -166,3 +166,72 @@ ArrayReferenceProxy::__construct(Array)
 ArrayReferenceProxy::offsetGet(Array, name)
 string(6) "BlaBla"
 ===DONE===
+--UEXPECTF--
+unicode(3) "Foo"
+unicode(6) "FooBar"
+unicode(9) "FooBarBaz"
+===ArrayOverloading===
+ArrayReferenceProxy::__construct(Array)
+object(ArrayReferenceProxy)#1 (2) {
+  [u"object":u"ArrayReferenceProxy":private]=>
+  object(Peoples)#2 (1) {
+    [u"person"]=>
+    array(1) {
+      [0]=>
+      &array(1) {
+        [u"name"]=>
+        unicode(3) "Foo"
+      }
+    }
+  }
+  [u"element":u"ArrayReferenceProxy":private]=>
+  &array(1) {
+    [u"name"]=>
+    unicode(3) "Foo"
+  }
+}
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+unicode(3) "Foo"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetSet(Array, name, FooBar)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+unicode(6) "FooBar"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetSet(Array, name, FooBarBar)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+unicode(9) "FooBarBar"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+ArrayReferenceProxy::offsetSet(Array, name, FooBarBarBaz)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+unicode(12) "FooBarBarBaz"
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetUnset(Array, name)
+ArrayReferenceProxy::__construct(Array)
+object(ArrayReferenceProxy)#1 (2) {
+  [u"object":u"ArrayReferenceProxy":private]=>
+  object(Peoples)#2 (1) {
+    [u"person"]=>
+    array(1) {
+      [0]=>
+      &array(0) {
+      }
+    }
+  }
+  [u"element":u"ArrayReferenceProxy":private]=>
+  &array(0) {
+  }
+}
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+NULL
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetSet(Array, name, BlaBla)
+ArrayReferenceProxy::__construct(Array)
+ArrayReferenceProxy::offsetGet(Array, name)
+unicode(6) "BlaBla"
+===DONE===

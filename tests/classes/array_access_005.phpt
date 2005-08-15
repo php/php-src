@@ -70,3 +70,20 @@ array(1) {
 }
 
 Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_005.php on line %d
+--UEXPECTF--
+unicode(3) "Joe"
+unicode(6) "JoeFoo"
+unicode(9) "JoeFooBar"
+---ArrayOverloading---
+array(1) {
+  [u"name"]=>
+  unicode(3) "Joe"
+}
+unicode(3) "Joe"
+unicode(6) "JoeFoo"
+array(1) {
+  [u"name"]=>
+  unicode(6) "JoeFoo"
+}
+
+Fatal error: Objects used as arrays in post/pre increment/decrement must return values by reference in %sarray_access_005.php on line %d

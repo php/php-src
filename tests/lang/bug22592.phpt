@@ -51,3 +51,20 @@ int(4)
 int(5)
 string(1) "5"
 [Illegal string offset:  -1]
+--UEXPECT--
+unicode(5) "* *-*"
+unicode(7) "* *-* *"
+unicode(7) "*4*-* *"
+unicode(7) "*4*s* *"
+unicode(8) "*4*s* *0"
+unicode(8) "*-*-* *0"
+unicode(8) "*-*s*s*0"
+unicode(8) "4-4s4s*0"
+unicode(9) "4-4s4s505"
+unicode(9) "454s4s505"
+unicode(1) "-"
+unicode(6) "string"
+int(4)
+int(5)
+unicode(1) "5"
+[Illegal string offset:  -1]

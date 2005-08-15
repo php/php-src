@@ -61,3 +61,16 @@ string(7) "getName"
 string(3) "bar"
 string(3) "baz"
 ===DONE===
+--UEXPECTF--
+ReflectionMethodEx::__construct
+unicode(18) "ReflectionMethodEx"
+unicode(7) "getName"
+unicode(3) "xyz"
+NULL
+Cannot set read-only property ReflectionMethodEx::$class
+Cannot set read-only property ReflectionMethodEx::$name
+unicode(18) "ReflectionMethodEx"
+unicode(7) "getName"
+unicode(3) "bar"
+unicode(3) "baz"
+===DONE===

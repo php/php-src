@@ -113,3 +113,44 @@ array(1) {
   ["foo"]=>
   &string(3) "noo"
 }
+--UEXPECT--
+array(1) {
+  [u"foo"]=>
+  unicode(3) "aaa"
+}
+array(1) {
+  [u"foo"]=>
+  unicode(3) "bbb"
+}
+array(1) {
+  [u"foo"]=>
+  &unicode(3) "noo"
+}
+array(1) {
+  [u"foo"]=>
+  unicode(3) "bbb"
+}
+array(1) {
+  [u"foo"]=>
+  unicode(3) "bbb"
+}
+array(1) {
+  [u"foo"]=>
+  unicode(3) "bbb"
+}
+array(1) {
+  [u"foo"]=>
+  &unicode(3) "noo"
+}
+array(1) {
+  [u"foo"]=>
+  &unicode(3) "noo"
+}
+array(1) {
+  [u"foo"]=>
+  unicode(3) "aaa"
+}
+array(1) {
+  [u"foo"]=>
+  &unicode(3) "noo"
+}

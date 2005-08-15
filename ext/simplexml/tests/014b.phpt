@@ -53,3 +53,27 @@ object(SimpleXMLElement)#%d (1) {
   string(1) "5"
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "Joe"
+}
+NULL
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "XXX"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(2) "30"
+}
+---Unset:---
+---Unset?---
+NULL
+bool(false)
+---Unsupported---
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(1) "5"
+}
+===DONE===

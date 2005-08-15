@@ -23,3 +23,16 @@ object(stdClass)#%d (1) {
     int(0)
   }
 }
+--UEXPECTF--
+Strict Standards: Creating default object from empty value in %sbug33243.php on line 2
+
+Strict Standards: Implicit cloning object of class 'stdClass' because of 'zend.ze1_compatibility_mode' in %sbug33243.php on line 3
+
+Strict Standards: Implicit cloning object of class 'stdClass' because of 'zend.ze1_compatibility_mode' in %sbug33243.php on line 5
+object(stdClass)#%d (1) {
+  [u"y"]=>
+  object(stdClass)#%d (1) {
+    [u"z"]=>
+    int(0)
+  }
+}

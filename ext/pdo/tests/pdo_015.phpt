@@ -97,3 +97,61 @@ array(1) {
     string(2) "B2"
   }
 }
+--UEXPECT--
+array(2) {
+  [0]=>
+  unicode(1) "1"
+  [1]=>
+  unicode(1) "2"
+}
+array(2) {
+  [0]=>
+  unicode(2) "A2"
+  [1]=>
+  unicode(2) "B2"
+}
+array(2) {
+  [1]=>
+  array(1) {
+    [0]=>
+    unicode(1) "A"
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    unicode(1) "A"
+  }
+}
+array(2) {
+  [1]=>
+  unicode(1) "A"
+  [2]=>
+  unicode(1) "A"
+}
+array(2) {
+  [1]=>
+  unicode(1) "1"
+  [2]=>
+  unicode(1) "2"
+}
+array(2) {
+  [1]=>
+  unicode(1) "A"
+  [2]=>
+  unicode(1) "A"
+}
+array(2) {
+  [1]=>
+  unicode(2) "A2"
+  [2]=>
+  unicode(2) "B2"
+}
+array(1) {
+  [u"A"]=>
+  array(2) {
+    [0]=>
+    unicode(2) "A2"
+    [1]=>
+    unicode(2) "B2"
+  }
+}

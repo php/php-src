@@ -767,3 +767,720 @@ array(4) {
 }
 
 end
+--UEXPECT--
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
+
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+array(1) {
+  [0]=>
+  int(0)
+}
+
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+
+array(1) {
+  [0]=>
+  int(-1)
+}
+array(1) {
+  [0]=>
+  int(-1)
+}
+array(1) {
+  [0]=>
+  int(-1)
+}
+
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+
+array(1) {
+  [u""]=>
+  int(1)
+}
+array(1) {
+  [u""]=>
+  int(1)
+}
+array(1) {
+  [u""]=>
+  int(1)
+}
+
+array(1) {
+  [u"a"]=>
+  int(1)
+}
+array(1) {
+  [u"A"]=>
+  int(1)
+}
+array(1) {
+  [u"a"]=>
+  int(1)
+}
+
+array(1) {
+  [u"z"]=>
+  int(1)
+}
+array(1) {
+  [u"Z"]=>
+  int(1)
+}
+array(1) {
+  [u"z"]=>
+  int(1)
+}
+
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+array(1) {
+  [u"ONE"]=>
+  int(1)
+}
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+array(1) {
+  [u"ONE"]=>
+  int(1)
+}
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+array(1) {
+  [u"ONE"]=>
+  int(1)
+}
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+array(1) {
+  [u"ONE"]=>
+  int(1)
+}
+array(1) {
+  [u"one"]=>
+  int(1)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"ONE"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+array(2) {
+  [u"one"]=>
+  int(1)
+  [0]=>
+  int(2)
+}
+
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "four"
+}
+array(4) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+  [u"THREE"]=>
+  int(3)
+  [u"FOUR"]=>
+  unicode(4) "four"
+}
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "four"
+}
+
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "FOUR"
+}
+array(4) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+  [u"THREE"]=>
+  int(3)
+  [u"FOUR"]=>
+  unicode(4) "FOUR"
+}
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "FOUR"
+}
+
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "FOUR"
+}
+array(4) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+  [u"THREE"]=>
+  int(3)
+  [u"FOUR"]=>
+  unicode(4) "FOUR"
+}
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "FOUR"
+}
+
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "four"
+}
+array(4) {
+  [u"ONE"]=>
+  int(1)
+  [u"TWO"]=>
+  int(2)
+  [u"THREE"]=>
+  int(3)
+  [u"FOUR"]=>
+  unicode(4) "four"
+}
+array(4) {
+  [u"one"]=>
+  int(1)
+  [u"two"]=>
+  int(2)
+  [u"three"]=>
+  int(3)
+  [u"four"]=>
+  unicode(4) "four"
+}
+
+end

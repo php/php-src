@@ -16,4 +16,8 @@ array(1) {
   ["public"]=>
   string(6) "public"
 }
-
+--UEXPECT--
+array(1) {
+  [u"public"]=>
+  unicode(6) "public"
+}

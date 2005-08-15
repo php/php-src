@@ -10,3 +10,5 @@ foo();
 ?>
 --EXPECT--
 string(1) "a"
+--UEXPECT--
+unicode(1) "a"

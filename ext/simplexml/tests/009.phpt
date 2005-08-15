@@ -43,3 +43,11 @@ string(6) "elem11"
 string(16) "SimpleXMLElement"
 string(10) "Bla bla 2."
 ===DONE===
+--UEXPECT--
+unicode(5) "elem1"
+unicode(16) "SimpleXMLElement"
+unicode(10) "Bla bla 1."
+unicode(6) "elem11"
+unicode(16) "SimpleXMLElement"
+unicode(10) "Bla bla 2."
+===DONE===

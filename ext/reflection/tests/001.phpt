@@ -87,3 +87,14 @@ array(2) {
 }
 string(17) "ReflectionClassEx"
 ===DONE===
+--UEXPECT--
+array(0) {
+}
+array(2) {
+  [0]=>
+  unicode(3) "bla"
+  [1]=>
+  unicode(4) "name"
+}
+unicode(17) "ReflectionClassEx"
+===DONE===

@@ -70,3 +70,25 @@ Collection Object
 )
 int(3)
 ===DONE===
+--UEXPECT--
+Initiate Obj
+Assign values
+Collection::offsetSet(NULL,foo)
+Collection::offsetGet(0)
+unicode(3) "foo"
+Collection::offsetSet(NULL,bar)
+Collection::offsetGet(0)
+unicode(3) "foo"
+Collection::offsetGet(1)
+unicode(3) "bar"
+Collection::offsetSet(foo,baz)
+Collection::offsetGet(foo)
+unicode(3) "baz"
+Collection Object
+(
+    [0] => foo
+    [1] => bar
+    [foo] => baz
+)
+int(3)
+===DONE===

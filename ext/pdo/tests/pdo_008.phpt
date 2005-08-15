@@ -37,3 +37,16 @@ array(2) {
     string(1) "C"
   }
 }
+--UEXPECT--
+array(2) {
+  [u"A"]=>
+  array(1) {
+    [0]=>
+    unicode(1) "B"
+  }
+  [u"C"]=>
+  array(1) {
+    [0]=>
+    unicode(1) "C"
+  }
+}

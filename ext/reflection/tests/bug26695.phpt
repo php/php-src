@@ -23,3 +23,6 @@ var_dump($class->getName());
 --EXPECT--
 string(3) "Foo"
 ===DONE===
+--UEXPECT--
+unicode(3) "Foo"
+===DONE===

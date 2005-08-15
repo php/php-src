@@ -267,3 +267,116 @@ array(3) {
     string(7) "Private"
   }
 }
+--UEXPECTF--
+unicode(1) "3"
+array(3) {
+  [0]=>
+  unicode(8) "stdClass"
+  [1]=>
+  unicode(8) "TestBase"
+  [2]=>
+  unicode(11) "TestDerived"
+}
+===TYPES===
+array(4) {
+  [u"stdClass"]=>
+  unicode(1) "0"
+  [u"TestBase"]=>
+  unicode(1) "1"
+  [u"TestDerived"]=>
+  unicode(1) "2"
+  [u"TestLeaf"]=>
+  NULL
+}
+===INSERT===
+TestBase::serialize() = 'a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}'
+TestDerived::serialize()
+TestBase::serialize() = 'a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}'
+TestDerived::serialize()
+TestBase::serialize() = 'a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}'
+===DATA===
+array(4) {
+  [0]=>
+  unicode(0) ""
+  [1]=>
+  unicode(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
+  [2]=>
+  unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+  [3]=>
+  unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+}
+===FAILURE===
+Exception:SQLSTATE[HY000]: General error: cannot unserialize class
+===COUNT===
+unicode(1) "3"
+===DATABASE===
+array(3) {
+  [0]=>
+  array(2) {
+    [u"name"]=>
+    unicode(8) "TestBase"
+    [u"val"]=>
+    unicode(91) "a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";}"
+  }
+  [1]=>
+  array(2) {
+    [u"name"]=>
+    unicode(11) "TestDerived"
+    [u"val"]=>
+    unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+  }
+  [2]=>
+  array(2) {
+    [u"name"]=>
+    NULL
+    [u"val"]=>
+    unicode(144) "a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";}"
+  }
+}
+===FETCHCLASS===
+TestBase::unserialize(a:3:{s:7:"BasePub";s:6:"Public";s:7:"BasePro";s:9:"Protected";s:7:"BasePri";s:7:"Private";})
+TestDerived::unserialize()
+TestBase::unserialize(a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";})
+TestDerived::unserialize()
+TestBase::unserialize(a:4:{s:7:"BasePub";s:13:"DerivedPublic";s:7:"BasePro";s:16:"DerivdeProtected";s:10:"DerivedPub";s:6:"Public";s:10:"DerivedPro";s:9:"Protected";})
+array(3) {
+  [0]=>
+  object(TestBase)#%d (3) {
+    [u"BasePub"]=>
+    unicode(7) "#Public"
+    [u"BasePro":protected]=>
+    unicode(10) "#Protected"
+    [u"BasePri":u"TestBase":private]=>
+    unicode(8) "#Private"
+  }
+  [1]=>
+  object(TestDerived)#%d (6) {
+    [u"BasePub"]=>
+    unicode(14) "#DerivedPublic"
+    [u"BasePro":protected]=>
+    unicode(17) "#DerivdeProtected"
+    [u"DerivedPub"]=>
+    unicode(7) "#Public"
+    [u"DerivedPro":protected]=>
+    unicode(10) "#Protected"
+    [u"DerivedPri":u"TestDerived":private]=>
+    unicode(7) "Private"
+    [u"BasePri":u"TestBase":private]=>
+    unicode(7) "Private"
+  }
+  [2]=>
+  object(TestLeaf)#%d (6) {
+    [u"BasePub"]=>
+    unicode(14) "#DerivedPublic"
+    [u"BasePro":protected]=>
+    unicode(17) "#DerivdeProtected"
+    [u"DerivedPub"]=>
+    unicode(7) "#Public"
+    [u"DerivedPro":protected]=>
+    unicode(10) "#Protected"
+    [u"DerivedPri":u"TestDerived":private]=>
+    unicode(7) "Private"
+    [u"BasePri":u"TestBase":private]=>
+    unicode(7) "Private"
+  }
+}

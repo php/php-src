@@ -78,3 +78,20 @@ string(7) "Foo Bar"
 string(5) "elem2"
 string(28) "Here we have some text data."
 ===DONE===
+--UEXPECT--
+unicode(5) "elem1"
+unicode(10) "Bla bla 1."
+unicode(6) "elem11"
+unicode(10) "Bla bla 2."
+===CLONE===
+unicode(5) "elem1"
+unicode(10) "Bla bla 1."
+unicode(6) "elem11"
+unicode(10) "Bla bla 2."
+===ELEMENT===
+unicode(7) "elem111"
+unicode(7) "Foo Bar"
+===COMMENT===
+unicode(5) "elem2"
+unicode(28) "Here we have some text data."
+===DONE===
