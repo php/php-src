@@ -782,7 +782,7 @@ fmt_error:
 				*--s = prefix_char;
 				s_len++;
 			}
-			if (adjust_width && adjust == RIGHT && min_width > u_len) {
+			if (adjust_width && adjust == RIGHT && min_width > s_len) {
 				if (pad_char == '0' && prefix_char != NUL) {
 					INS_CHAR(unicode, xbuf, *s);
 					s++;
