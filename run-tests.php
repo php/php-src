@@ -25,11 +25,6 @@
 
 /* $Id$ */
 
-/*
- * TODO:
- * - do not test PEAR components if base class and/or component class cannot be instanciated
- */
-
 /* Sanity check to ensure that pcre extension needed by this script is available.
  * In the event it is not, print a nice error message indicating that this script will
  * not run without it.
