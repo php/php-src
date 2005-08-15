@@ -2962,7 +2962,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 		CG(doc_comment_len) = 0;
 	}
 
-	zend_u_declare_property(CG(active_class_entry), Z_TYPE(var_name->u.constant), Z_UNIVAL(var_name->u.constant), Z_UNILEN(var_name->u.constant), property, access_type TSRMLS_CC);
+	zend_u_declare_property_ex(CG(active_class_entry), Z_TYPE(var_name->u.constant), Z_UNIVAL(var_name->u.constant), Z_UNILEN(var_name->u.constant), property, access_type, comment, comment_len TSRMLS_CC);
 	efree(var_name->u.constant.value.str.val);
 }
 

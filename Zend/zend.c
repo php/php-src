@@ -320,6 +320,12 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC)
 			case HASH_KEY_IS_STRING:
 				ZEND_PUTS(string_key);
 				break;
+			case HASH_KEY_IS_BINARY:
+				zend_printf("b\"%s\"", string_key);
+				break;
+			case HASH_KEY_IS_UNICODE:
+				zend_printf("%r", string_key);
+				break;
 			case HASH_KEY_IS_LONG:
 				zend_printf("%ld", num_key);
 				break;

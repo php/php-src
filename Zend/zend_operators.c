@@ -398,7 +398,7 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 						retval = (zend_hash_num_elements(ht)?1:0);
 					}
 				} else {
-					zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
+					zend_error(E_NOTICE, "Object of class %v could not be converted to int", Z_OBJCE_P(op)->name);
 				}
 				zval_dtor(op);
 				ZVAL_LONG(op, retval);
