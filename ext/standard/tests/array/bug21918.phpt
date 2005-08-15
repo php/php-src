@@ -53,3 +53,26 @@ string(1) "a"
 int(-2)
 string(1) "a"
 ==Done==
+--UEXPECT--
+==Mixed==
+int(-1)
+unicode(1) "a"
+int(-2)
+unicode(1) "b"
+int(3)
+unicode(1) "c"
+int(4)
+unicode(1) "d"
+int(5)
+unicode(1) "e"
+int(6001)
+unicode(1) "f"
+unicode(2) "07"
+unicode(1) "g"
+==Normal==
+int(0)
+unicode(1) "a"
+==Negative==
+int(-2)
+unicode(1) "a"
+==Done==

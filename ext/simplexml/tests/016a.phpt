@@ -27,3 +27,13 @@ object(SimpleXMLElement)#%d (1) {
   string(6) "FooBar"
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "Foo"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(6) "FooBar"
+}
+===DONE===

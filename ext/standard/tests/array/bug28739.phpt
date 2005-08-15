@@ -56,3 +56,42 @@ Array
         )
 
 )
+--UEXPECT--
+unicode(1) "a"
+unicode(1) "a"
+Array
+(
+    [2] => p Object
+        (
+            [x] => 0
+        )
+
+    [1] => p Object
+        (
+            [x] => 1
+        )
+
+    [0] => p Object
+        (
+            [x] => 2
+        )
+
+)
+Now diffing:
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+unicode(1) "b"
+Array
+(
+    [1] => p Object
+        (
+            [x] => 1
+        )
+
+)

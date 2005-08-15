@@ -74,3 +74,50 @@ array(2) {
     }
   }
 }
+--UEXPECT--
+array(2) {
+  [u"A"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      [0]=>
+      unicode(1) "1"
+    }
+    [1]=>
+    array(1) {
+      [0]=>
+      unicode(1) "2"
+    }
+  }
+  [u"C"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      unicode(1) "3"
+    }
+  }
+}
+array(2) {
+  [u"A"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      [u"id"]=>
+      unicode(1) "1"
+    }
+    [1]=>
+    array(1) {
+      [u"id"]=>
+      unicode(1) "2"
+    }
+  }
+  [u"C"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [u"id"]=>
+      unicode(1) "3"
+    }
+  }
+}

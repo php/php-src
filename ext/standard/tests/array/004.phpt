@@ -57,3 +57,40 @@ array(5) {
   [6]=>
   string(6) "test21"
 }
+--UEXPECT--
+array(5) {
+  [0]=>
+  unicode(5) "Test1"
+  [u"teST2"]=>
+  int(0)
+  [5]=>
+  unicode(5) "test2"
+  [u"abc"]=>
+  unicode(6) "test10"
+  [6]=>
+  unicode(6) "test21"
+}
+array(5) {
+  [u"teST2"]=>
+  int(0)
+  [0]=>
+  unicode(5) "Test1"
+  [5]=>
+  unicode(5) "test2"
+  [u"abc"]=>
+  unicode(6) "test10"
+  [6]=>
+  unicode(6) "test21"
+}
+array(5) {
+  [u"teST2"]=>
+  int(0)
+  [0]=>
+  unicode(5) "Test1"
+  [5]=>
+  unicode(5) "test2"
+  [u"abc"]=>
+  unicode(6) "test10"
+  [6]=>
+  unicode(6) "test21"
+}

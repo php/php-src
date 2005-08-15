@@ -28,3 +28,16 @@ array(5) {
   ["t"]=>
   bool(false)
 }
+--UEXPECT--
+array(5) {
+  [u"v"]=>
+  bool(false)
+  [u"h"]=>
+  bool(false)
+  [u"d"]=>
+  unicode(4) "test"
+  [u"m"]=>
+  unicode(4) "1234"
+  [u"t"]=>
+  bool(false)
+}

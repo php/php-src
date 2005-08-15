@@ -95,3 +95,56 @@ array(2) {
     string(6) "Group2"
   }
 }
+--UEXPECTF--
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(1) "A"
+    [1]=>
+    unicode(6) "Group1"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(1) "B"
+    [1]=>
+    unicode(6) "Group2"
+  }
+}
+Test::__construct(N/A)
+Test::__construct(N/A)
+array(2) {
+  [0]=>
+  object(Test)#%d (2) {
+    [u"val"]=>
+    unicode(1) "A"
+    [u"grp"]=>
+    unicode(6) "Group1"
+  }
+  [1]=>
+  object(Test)#%d (2) {
+    [u"val"]=>
+    unicode(1) "B"
+    [u"grp"]=>
+    unicode(6) "Group2"
+  }
+}
+Test::__construct(Changed)
+Test::__construct(Changed)
+array(2) {
+  [0]=>
+  object(Test)#%d (2) {
+    [u"val"]=>
+    unicode(1) "A"
+    [u"grp"]=>
+    unicode(6) "Group1"
+  }
+  [1]=>
+  object(Test)#%d (2) {
+    [u"val"]=>
+    unicode(1) "B"
+    [u"grp"]=>
+    unicode(6) "Group2"
+  }
+}

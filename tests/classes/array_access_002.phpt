@@ -196,3 +196,116 @@ array(4) {
   string(9) "changed 6"
 }
 ===DONE===
+--UEXPECTF--
+array(4) {
+  [0]=>
+  unicode(3) "1st"
+  [1]=>
+  int(1)
+  [2]=>
+  unicode(3) "3rd"
+  [u"4th"]=>
+  int(4)
+}
+===EMPTY===
+object::offsetExists(0)
+object::offsetGet(0)
+bool(false)
+object::offsetExists(1)
+object::offsetGet(1)
+bool(false)
+object::offsetExists(2)
+object::offsetGet(2)
+bool(false)
+object::offsetExists(4th)
+object::offsetGet(4th)
+bool(false)
+object::offsetExists(5th)
+bool(true)
+object::offsetExists(6)
+bool(true)
+===isset===
+object::offsetExists(0)
+bool(true)
+object::offsetExists(1)
+bool(true)
+object::offsetExists(2)
+bool(true)
+object::offsetExists(4th)
+bool(true)
+object::offsetExists(5th)
+bool(false)
+object::offsetExists(6)
+bool(false)
+===offsetGet===
+object::offsetGet(0)
+unicode(3) "1st"
+object::offsetGet(1)
+int(1)
+object::offsetGet(2)
+unicode(3) "3rd"
+object::offsetGet(4th)
+int(4)
+object::offsetGet(5th)
+
+Notice: Undefined index:  5th in %sarray_access_002.php on line %d
+NULL
+object::offsetGet(6)
+
+Notice: Undefined offset:  6 in %sarray_access_002.php on line %d
+NULL
+===offsetSet===
+WRITE 1
+object::offsetSet(1,Changed 1)
+object::offsetGet(1)
+unicode(9) "Changed 1"
+WRITE 2
+object::offsetSet(4th,Changed 4th)
+object::offsetGet(4th)
+unicode(11) "Changed 4th"
+WRITE 3
+object::offsetSet(5th,Added 5th)
+object::offsetGet(5th)
+unicode(9) "Added 5th"
+WRITE 4
+object::offsetSet(6,Added 6)
+object::offsetGet(6)
+unicode(7) "Added 6"
+object::offsetGet(0)
+unicode(3) "1st"
+object::offsetGet(2)
+unicode(3) "3rd"
+object::offsetSet(6,changed 6)
+object::offsetGet(6)
+unicode(9) "changed 6"
+unicode(9) "changed 6"
+===unset===
+array(6) {
+  [0]=>
+  unicode(3) "1st"
+  [1]=>
+  unicode(9) "Changed 1"
+  [2]=>
+  unicode(3) "3rd"
+  [u"4th"]=>
+  unicode(11) "Changed 4th"
+  [u"5th"]=>
+  unicode(9) "Added 5th"
+  [6]=>
+  unicode(9) "changed 6"
+}
+object::offsetUnset(2)
+object::offsetUnset(4th)
+object::offsetUnset(7)
+object::offsetUnset(8th)
+array(4) {
+  [0]=>
+  unicode(3) "1st"
+  [1]=>
+  unicode(9) "Changed 1"
+  [u"5th"]=>
+  unicode(9) "Added 5th"
+  [6]=>
+  unicode(9) "changed 6"
+}
+===DONE===

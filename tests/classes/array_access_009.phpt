@@ -188,3 +188,68 @@ ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(6) "BlaBla"
 ===DONE===
+--UEXPECTF--
+unicode(3) "Foo"
+unicode(6) "FooBar"
+unicode(9) "FooBarBaz"
+===ArrayOverloading===
+ArrayProxy::__construct(0)
+object(ArrayProxy)#1 (2) {
+  [u"object":u"ArrayProxy":private]=>
+  object(Peoples)#2 (1) {
+    [u"person"]=>
+    array(1) {
+      [0]=>
+      array(1) {
+        [u"name"]=>
+        unicode(3) "Foo"
+      }
+    }
+  }
+  [u"element":u"ArrayProxy":private]=>
+  int(0)
+}
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+unicode(3) "Foo"
+ArrayProxy::__construct(0)
+ArrayProxy::offsetSet(0, name, FooBar)
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+unicode(6) "FooBar"
+ArrayProxy::__construct(0)
+ArrayProxy::offsetSet(0, name, FooBarBar)
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+unicode(9) "FooBarBar"
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+ArrayProxy::offsetSet(0, name, FooBarBarBaz)
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+unicode(12) "FooBarBarBaz"
+ArrayProxy::__construct(0)
+ArrayProxy::offsetUnset(0, name)
+ArrayProxy::__construct(0)
+object(ArrayProxy)#1 (2) {
+  [u"object":u"ArrayProxy":private]=>
+  object(Peoples)#2 (1) {
+    [u"person"]=>
+    array(1) {
+      [0]=>
+      array(0) {
+      }
+    }
+  }
+  [u"element":u"ArrayProxy":private]=>
+  int(0)
+}
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+NULL
+ArrayProxy::__construct(0)
+ArrayProxy::offsetSet(0, name, BlaBla)
+ArrayProxy::__construct(0)
+ArrayProxy::offsetGet(0, name)
+unicode(6) "BlaBla"
+===DONE===

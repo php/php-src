@@ -29,3 +29,20 @@ array(2) {
   }
 }
 ===DONE===
+--UEXPECT--
+array(2) {
+  [u"empty"]=>
+  array(0) {
+  }
+  [u"three"]=>
+  array(3) {
+    [0]=>
+    int(1)
+    [u"b"]=>
+    unicode(1) "c"
+    [3]=>
+    array(0) {
+    }
+  }
+}
+===DONE===

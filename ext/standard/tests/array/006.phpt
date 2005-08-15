@@ -47,3 +47,27 @@ array(2) {
   ["b"]=>
   string(3) "bar"
 }
+--UEXPECT--
+fubar
+array(3) {
+  [0]=>
+  unicode(3) "foo"
+  [1]=>
+  unicode(3) "bar"
+  [2]=>
+  unicode(6) "foobar"
+}
+fubar
+array(2) {
+  [3]=>
+  unicode(3) "foo"
+  [4]=>
+  unicode(3) "bar"
+}
+fubar
+array(2) {
+  [u"a"]=>
+  unicode(3) "foo"
+  [u"b"]=>
+  unicode(3) "bar"
+}

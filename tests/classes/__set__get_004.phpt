@@ -33,7 +33,11 @@ var_dump($foo->bar->baz);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(5) "Check"
 string(5) "Check"
+===DONE===
+--UEXPECT--
+unicode(5) "Check"
+unicode(5) "Check"
 ===DONE===

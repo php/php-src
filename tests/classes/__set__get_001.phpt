@@ -70,3 +70,27 @@ object(setter)#%d (2) {
     int(3)
   }
 }
+--UEXPECTF--
+Setting [a] to 100
+OK!
+Getting [a]
+Returning: 100
+Setting [a] to 101
+OK!
+Getting [z]
+Nothing!
+Setting [z] to 1
+Not OK!
+object(setter)#%d (2) {
+  [u"n"]=>
+  int(1)
+  [u"x"]=>
+  array(3) {
+    [u"a"]=>
+    int(101)
+    [u"b"]=>
+    int(2)
+    [u"c"]=>
+    int(3)
+  }
+}

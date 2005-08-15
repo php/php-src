@@ -19,3 +19,13 @@ array(1) {
   string(2) "ok"
 }
 ok
+--UEXPECT--
+array(1) {
+  [u"default"]=>
+  unicode(2) "ok"
+}
+array(1) {
+  [u"default"]=>
+  unicode(2) "ok"
+}
+ok

@@ -28,7 +28,17 @@ array(1) {
   [0]=>
   array(1) {
     ["enabled"]=>
-    UNKNOWN:0
+    UNKNOWN:0 /* FIXME */
+  }
+}
+===DONE===
+--UEXPECT--
+unicode(4) "test"
+array(1) {
+  [0]=>
+  array(1) {
+    [u"enabled"]=>
+    UNKNOWN:0 /* FIXME */
   }
 }
 ===DONE===

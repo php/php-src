@@ -19,3 +19,9 @@ object(test)#1 (1) {
   ["c"]=>
   int(2)
 }
+--UEXPECT--
+2
+object(test)#1 (1) {
+  [u"c"]=>
+  int(2)
+}

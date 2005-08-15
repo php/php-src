@@ -47,3 +47,27 @@ array(3) {
     string(1) "C"
   }
 }
+--UEXPECT--
+array(3) {
+  [0]=>
+  array(2) {
+    [0]=>
+    unicode(1) "1"
+    [1]=>
+    unicode(1) "A"
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    unicode(1) "2"
+    [1]=>
+    unicode(1) "B"
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    unicode(1) "3"
+    [1]=>
+    unicode(1) "C"
+  }
+}

@@ -70,3 +70,40 @@ array(1) {
   int(1)
 }
 ===DONE===
+--UEXPECT--
+Base::__construct
+array(3) {
+  [u"Foo"]=>
+  int(1)
+  [u"Bar"]=>
+  int(2)
+  [u"Baz"]=>
+  int(3)
+}
+array(1) {
+  [u"Foo"]=>
+  int(1)
+}
+Base::__construct
+array(3) {
+  [u"Baz"]=>
+  int(4)
+  [u"Foo"]=>
+  int(1)
+  [u"Bar"]=>
+  int(2)
+}
+Child::__construct
+array(3) {
+  [u"Baz"]=>
+  int(4)
+  [u"Foo"]=>
+  int(1)
+  [u"Bar"]=>
+  int(2)
+}
+array(1) {
+  [u"Foo"]=>
+  int(1)
+}
+===DONE===

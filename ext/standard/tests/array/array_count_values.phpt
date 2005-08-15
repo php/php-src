@@ -92,4 +92,73 @@ array(1) {
   [1]=>
   int(1)
 }
+--UEXPECT--
+array(0) {
+}
 
+array(1) {
+  [0]=>
+  int(1)
+}
+
+array(1) {
+  [1]=>
+  int(1)
+}
+
+array(1) {
+  [-1]=>
+  int(1)
+}
+
+array(1) {
+  [0]=>
+  int(2)
+}
+
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(1)
+}
+
+array(1) {
+  [1]=>
+  int(2)
+}
+
+array(3) {
+  [1]=>
+  int(2)
+  [u"hello"]=>
+  int(2)
+  [u"world"]=>
+  int(1)
+}
+
+array(2) {
+  [u"hello"]=>
+  int(2)
+  [u"world"]=>
+  int(1)
+}
+
+array(3) {
+  [u""]=>
+  int(2)
+  [u"world"]=>
+  int(3)
+  [u"hello"]=>
+  int(4)
+}
+
+array(1) {
+  [0]=>
+  int(1)
+}
+
+array(1) {
+  [1]=>
+  int(1)
+}

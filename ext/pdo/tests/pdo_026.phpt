@@ -108,3 +108,37 @@ array(3) {
 ===DONE===
 PDODatabase::__destruct()
 PDOStatementX::__destruct()
+--UEXPECT--
+unicode(11) "PDODatabase"
+unicode(12) "PDOStatement"
+PDODatabase::query()
+PDOStatementX::__construct()
+unicode(13) "PDOStatementX"
+unicode(11) "PDODatabase"
+array(3) {
+  [u"id"]=>
+  unicode(2) "10"
+  [u"val"]=>
+  unicode(3) "Abc"
+  [u"val2"]=>
+  unicode(3) "zxy"
+}
+array(3) {
+  [u"id"]=>
+  unicode(2) "20"
+  [u"val"]=>
+  unicode(3) "Def"
+  [u"val2"]=>
+  unicode(3) "wvu"
+}
+array(3) {
+  [u"id"]=>
+  unicode(2) "30"
+  [u"val"]=>
+  unicode(3) "Ghi"
+  [u"val2"]=>
+  unicode(3) "tsr"
+}
+===DONE===
+PDODatabase::__destruct()
+PDOStatementX::__destruct()

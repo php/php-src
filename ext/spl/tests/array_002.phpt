@@ -35,3 +35,17 @@ object(ArrayObject)#%d (5) {
   string(4) "five"
 }
 ===DONE===
+--UEXPECTF--
+object(ArrayObject)#%d (5) {
+  [1]=>
+  unicode(3) "one"
+  [2]=>
+  unicode(3) "two"
+  [3]=>
+  unicode(5) "three"
+  [4]=>
+  unicode(4) "four"
+  [5]=>
+  unicode(4) "five"
+}
+===DONE===

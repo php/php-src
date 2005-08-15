@@ -151,3 +151,106 @@ array(3) {
     string(2) "CC"
   }
 }
+--UEXPECTF--
+array(3) {
+  [0]=>
+  object(stdClass)#%d (3) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val"]=>
+    unicode(1) "A"
+    [u"val2"]=>
+    unicode(2) "AA"
+  }
+  [1]=>
+  object(stdClass)#%d (3) {
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val"]=>
+    unicode(1) "B"
+    [u"val2"]=>
+    unicode(2) "BB"
+  }
+  [2]=>
+  object(stdClass)#%d (3) {
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val"]=>
+    unicode(1) "C"
+    [u"val2"]=>
+    unicode(2) "CC"
+  }
+}
+array(3) {
+  [0]=>
+  object(TestBase)#%d (3) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val":protected]=>
+    unicode(1) "A"
+    [u"val2":u"TestBase":private]=>
+    unicode(2) "AA"
+  }
+  [1]=>
+  object(TestBase)#%d (3) {
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val":protected]=>
+    unicode(1) "B"
+    [u"val2":u"TestBase":private]=>
+    unicode(2) "BB"
+  }
+  [2]=>
+  object(TestBase)#%d (3) {
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val":protected]=>
+    unicode(1) "C"
+    [u"val2":u"TestBase":private]=>
+    unicode(2) "CC"
+  }
+}
+TestDerived::__construct(0,1)
+TestDerived::__construct(1,2)
+TestDerived::__construct(2,3)
+array(3) {
+  [0]=>
+  object(TestDerived)#%d (5) {
+    [u"row":protected]=>
+    int(0)
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val":protected]=>
+    unicode(1) "A"
+    [u"val2":u"TestBase":private]=>
+    NULL
+    [u"val2"]=>
+    unicode(2) "AA"
+  }
+  [1]=>
+  object(TestDerived)#%d (5) {
+    [u"row":protected]=>
+    int(1)
+    [u"id"]=>
+    unicode(1) "2"
+    [u"val":protected]=>
+    unicode(1) "B"
+    [u"val2":u"TestBase":private]=>
+    NULL
+    [u"val2"]=>
+    unicode(2) "BB"
+  }
+  [2]=>
+  object(TestDerived)#%d (5) {
+    [u"row":protected]=>
+    int(2)
+    [u"id"]=>
+    unicode(1) "3"
+    [u"val":protected]=>
+    unicode(1) "C"
+    [u"val2":u"TestBase":private]=>
+    NULL
+    [u"val2"]=>
+    unicode(2) "CC"
+  }
+}

@@ -32,3 +32,20 @@ string(3) "foo"
 'foo'
 string(3) "foo"
 'foo'
+--UEXPECTF--
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'
+unicode(3) "foo"
+'foo'

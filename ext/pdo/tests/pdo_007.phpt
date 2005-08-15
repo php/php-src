@@ -62,3 +62,38 @@ array(3) {
     string(1) "C"
   }
 }
+--UEXPECT--
+array(3) {
+  [u"A"]=>
+  array(1) {
+    [0]=>
+    unicode(1) "A"
+  }
+  [u"B"]=>
+  array(1) {
+    [0]=>
+    unicode(1) "A"
+  }
+  [u"C"]=>
+  array(1) {
+    [0]=>
+    unicode(1) "C"
+  }
+}
+array(3) {
+  [u"A"]=>
+  array(1) {
+    [u"val"]=>
+    unicode(1) "A"
+  }
+  [u"B"]=>
+  array(1) {
+    [u"val"]=>
+    unicode(1) "A"
+  }
+  [u"C"]=>
+  array(1) {
+    [u"val"]=>
+    unicode(1) "C"
+  }
+}

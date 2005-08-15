@@ -99,3 +99,34 @@ array(2) {
   [1]=>
   string(6) "Group2"
 }
+--UEXPECTF--
+Test::__construct(WOW)
+object(Test)#4 (2) {
+  [u"val"]=>
+  unicode(1) "A"
+  [u"grp"]=>
+  unicode(6) "Group1"
+}
+Test::__construct(WOW)
+object(Test)#6 (2) {
+  [u"val"]=>
+  unicode(1) "B"
+  [u"grp"]=>
+  unicode(6) "Group2"
+}
+NULL
+bool(false)
+PDOStatementAggregate::__construct
+PDOStatementAggregate::getIterator
+array(2) {
+  [0]=>
+  unicode(1) "A"
+  [1]=>
+  unicode(6) "Group1"
+}
+array(2) {
+  [0]=>
+  unicode(1) "B"
+  [1]=>
+  unicode(6) "Group2"
+}

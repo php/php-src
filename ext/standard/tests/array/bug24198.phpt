@@ -23,3 +23,20 @@ array(2) {
     string(2) "bb"
   }
 }
+--UEXPECT--
+array(2) {
+  [u"a"]=>
+  array(2) {
+    [0]=>
+    unicode(2) "aa"
+    [1]=>
+    unicode(2) "aa"
+  }
+  [u"b"]=>
+  array(2) {
+    [0]=>
+    unicode(2) "bb"
+    [1]=>
+    unicode(2) "bb"
+  }
+}

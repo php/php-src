@@ -10,3 +10,6 @@ echo "a2: $a : type : " . gettype($a) . "\n";
 --EXPECT--
 a1: 20
 a2: 20 : type : string
+--UEXPECT--
+a1: 20
+a2: 20 : type : unicode

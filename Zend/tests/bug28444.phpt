@@ -72,3 +72,26 @@ int(5)
 Overloaded::__get(z)
 int(6)
 ===DONE===
+--UEXPECTF--
+object(Object)#%d (1) {
+  [u"x"]=>
+  int(2)
+}
+int(2)
+int(3)
+Overloaded::__set(y,3)
+int(3)
+Overloaded::__get(y)
+int(3)
+Overloaded::__set(z,Object id #3)
+object(Object)#%d (1) {
+  [u"x"]=>
+  int(4)
+}
+Overloaded::__get(z)
+int(4)
+Overloaded::__get(z)
+int(5)
+Overloaded::__get(z)
+int(6)
+===DONE===
