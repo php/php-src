@@ -784,13 +784,14 @@ else
 fi
 if test -z "$ICU_DIR"; then
   AC_MSG_RESULT(not found)
-  AC_MSG_ERROR(Please specify where ICU libraries and header file are located)
+  AC_MSG_ERROR([Please specify where ICU libraries and header file are located])
 fi
 ICU_CONFIG="icu-config"
-if ${ICU_DIR}/bin/icu-config --ldflags > /dev/null 2>&1; then
+if ! test -x "$ICU_DIR/bin/$ICU_CONFIG"; then
+  AC_MSG_ERROR([$ICU_CONFIG not found.])
+elif ${ICU_DIR}/bin/icu-config --ldflags > /dev/null 2>&1; then
   ICU_CONFIG=${ICU_DIR}/bin/icu-config
 fi
-
 AC_MSG_CHECKING(for ICU 3.4 or greater)
 icu_version_full=`$ICU_CONFIG --version`
 icu_version=`echo ${icu_version_full} | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) ;}'`
