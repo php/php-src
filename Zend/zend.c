@@ -242,6 +242,7 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 	ulong num_key;
 	uint str_len;
 	int i;
+	zend_uchar ztype;
 
 	for (i=0; i<indent; i++) {
 		ZEND_PUTS(" ");
@@ -258,24 +259,30 @@ static void print_hash(HashTable *ht, int indent, zend_bool is_object TSRMLS_DC)
 		ZEND_PUTS("[");
 		switch ((key_type = zend_hash_get_current_key_ex(ht, &string_key, &str_len, &num_key, 0, &iterator))) {
 			case HASH_KEY_IS_STRING:
+				ztype = IS_STRING;
+				goto str_type;
 			case HASH_KEY_IS_UNICODE:
+				ztype = IS_UNICODE;
+				goto str_type;
 			case HASH_KEY_IS_BINARY:
+				ztype = IS_BINARY;
+str_type:
 				if (is_object) {
 					char *prop_name, *class_name;
 
-					zend_u_unmangle_property_name(key_type==HASH_KEY_IS_UNICODE?IS_UNICODE:IS_STRING, string_key, &class_name, &prop_name);
+					zend_u_unmangle_property_name(ztype, string_key, &class_name, &prop_name);
 
 					if (class_name) {
 						if (class_name[0]=='*') {
-							zend_printf("%R:protected", key_type, prop_name);
+							zend_printf("%R:protected", ztype, prop_name);
 						} else {
-							zend_printf("%R:%R:private", key_type, prop_name, key_type, class_name);
+							zend_printf("%R:%R:private", ztype, prop_name, key_type, class_name);
 						}
 					} else {
-						zend_printf("%R", key_type, prop_name);
+						zend_printf("%R", ztype, prop_name);
 					}
 				} else {
-					zend_printf("%R", key_type, string_key);
+					zend_printf("%R", ztype, string_key);
 				}
 				break;
 			case HASH_KEY_IS_LONG:
