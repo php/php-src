@@ -144,7 +144,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				if (!sapi_module.phpinfo_as_text) {
 					PUTS("<pre>");
 				}
-				php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
+				php_start_ob_buffer(NULL, 4096, 1 TSRMLS_CC);
 				
 				zend_print_zval_r(*tmp, 0 TSRMLS_CC);
 				
