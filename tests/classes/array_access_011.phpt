@@ -113,7 +113,7 @@ string(9) "FooBarBaz"
 ===ArrayOverloading===
 ArrayAccessReferenceProxy::__construct(0)
 object(ArrayAccessReferenceProxy)#1 (3) {
-  ["object:private"]=>
+  ["object":"ArrayAccessReferenceProxy":private]=>
   object(Peoples)#2 (1) {
     ["person"]=>
     &array(1) {
@@ -124,7 +124,7 @@ object(ArrayAccessReferenceProxy)#1 (3) {
       }
     }
   }
-  ["oarray:private"]=>
+  ["oarray":"ArrayAccessReferenceProxy":private]=>
   &array(1) {
     [0]=>
     array(1) {
@@ -132,7 +132,7 @@ object(ArrayAccessReferenceProxy)#1 (3) {
       string(3) "Foo"
     }
   }
-  ["element:private"]=>
+  ["element":"ArrayAccessReferenceProxy":private]=>
   int(0)
 }
 ArrayAccessReferenceProxy::__construct(0)
@@ -158,7 +158,7 @@ ArrayAccessReferenceProxy::__construct(0)
 ArrayAccessReferenceProxy::offsetUnset(0, name)
 ArrayAccessReferenceProxy::__construct(0)
 object(ArrayAccessReferenceProxy)#1 (3) {
-  ["object:private"]=>
+  ["object":"ArrayAccessReferenceProxy":private]=>
   object(Peoples)#2 (1) {
     ["person"]=>
     &array(1) {
@@ -167,13 +167,13 @@ object(ArrayAccessReferenceProxy)#1 (3) {
       }
     }
   }
-  ["oarray:private"]=>
+  ["oarray":"ArrayAccessReferenceProxy":private]=>
   &array(1) {
     [0]=>
     array(0) {
     }
   }
-  ["element:private"]=>
+  ["element":"ArrayAccessReferenceProxy":private]=>
   int(0)
 }
 ArrayAccessReferenceProxy::__construct(0)

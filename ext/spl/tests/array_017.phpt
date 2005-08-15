@@ -263,9 +263,9 @@ array(3) {
   object(ArrayObjectEx)#1 (5) {
     ["pub1"]=>
     int(1)
-    ["pro1:protected"]=>
+    ["pro1":protected]=>
     int(2)
-    ["pri1:private"]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
     ["imp1"]=>
     int(4)
@@ -297,9 +297,9 @@ array(3) {
   object(ArrayIteratorEx)#3 (5) {
     ["pub2"]=>
     int(1)
-    ["pro2:protected"]=>
+    ["pro2":protected]=>
     int(2)
-    ["pri2:private"]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
     ["imp2"]=>
     int(4)
@@ -343,9 +343,9 @@ array(3) {
   object(ArrayIteratorEx)#2 (5) {
     ["pub2"]=>
     int(1)
-    ["pro2:protected"]=>
+    ["pro2":protected]=>
     int(2)
-    ["pri2:private"]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
     ["imp2"]=>
     int(4)
@@ -401,9 +401,9 @@ array(3) {
   object(ArrayObjectEx)#1 (5) {
     ["pub1"]=>
     int(1)
-    ["pro1:protected"]=>
+    ["pro1":protected]=>
     int(2)
-    ["pri1:private"]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
     ["imp1"]=>
     int(4)
@@ -433,9 +433,9 @@ array(3) {
   object(ArrayIteratorEx)#2 (5) {
     ["pub1"]=>
     int(1)
-    ["pro1:protected"]=>
+    ["pro1":protected]=>
     int(2)
-    ["pri1:private"]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
     ["imp1"]=>
     int(4)
@@ -477,9 +477,9 @@ array(3) {
   object(ArrayIteratorEx)#3 (5) {
     ["pub1"]=>
     int(1)
-    ["pro1:protected"]=>
+    ["pro1":protected]=>
     int(2)
-    ["pri1:private"]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
     ["imp1"]=>
     int(4)
@@ -533,9 +533,9 @@ array(3) {
   object(ArrayObjectEx)#1 (5) {
     ["pub1"]=>
     int(1)
-    ["pro1:protected"]=>
+    ["pro1":protected]=>
     int(2)
-    ["pri1:private"]=>
+    ["pri1":"ArrayObjectEx":private]=>
     int(3)
     ["imp1"]=>
     int(4)
@@ -567,9 +567,9 @@ array(3) {
   object(ArrayIteratorEx)#3 (5) {
     ["pub2"]=>
     int(1)
-    ["pro2:protected"]=>
+    ["pro2":protected]=>
     int(2)
-    ["pri2:private"]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
     ["imp2"]=>
     int(4)
@@ -613,9 +613,9 @@ array(3) {
   object(ArrayIteratorEx)#2 (5) {
     ["pub2"]=>
     int(1)
-    ["pro2:protected"]=>
+    ["pro2":protected]=>
     int(2)
-    ["pri2:private"]=>
+    ["pri2":"ArrayIteratorEx":private]=>
     int(3)
     ["imp2"]=>
     int(4)

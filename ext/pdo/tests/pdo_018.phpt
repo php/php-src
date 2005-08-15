@@ -231,39 +231,39 @@ array(3) {
   object(TestBase)#%d (3) {
     ["BasePub"]=>
     string(7) "#Public"
-    ["BasePro:protected"]=>
+    ["BasePro":protected]=>
     string(10) "#Protected"
-    ["BasePri:private"]=>
+    ["BasePri":"TestBase":private]=>
     string(8) "#Private"
   }
   [1]=>
   object(TestDerived)#%d (6) {
     ["BasePub"]=>
     string(14) "#DerivedPublic"
-    ["BasePro:protected"]=>
+    ["BasePro":protected]=>
     string(17) "#DerivdeProtected"
     ["DerivedPub"]=>
     string(7) "#Public"
-    ["DerivedPro:protected"]=>
+    ["DerivedPro":protected]=>
     string(10) "#Protected"
-    ["DerivedPri:private"]=>
+    ["DerivedPri":"TestDerived":private]=>
     string(7) "Private"
-    ["BasePri:private"]=>
+    ["BasePri":"TestBase":private]=>
     string(7) "Private"
   }
   [2]=>
   object(TestLeaf)#%d (6) {
     ["BasePub"]=>
     string(14) "#DerivedPublic"
-    ["BasePro:protected"]=>
+    ["BasePro":protected]=>
     string(17) "#DerivdeProtected"
     ["DerivedPub"]=>
     string(7) "#Public"
-    ["DerivedPro:protected"]=>
+    ["DerivedPro":protected]=>
     string(10) "#Protected"
-    ["DerivedPri:private"]=>
+    ["DerivedPri":"TestDerived":private]=>
     string(7) "Private"
-    ["BasePri:private"]=>
+    ["BasePri":"TestBase":private]=>
     string(7) "Private"
   }
 }
