@@ -713,17 +713,18 @@ static UChar *php_u_trim(UChar *c, int32_t len, UChar *what, int32_t what_len, z
 	if ( start < len ) {
 		if ( return_value ) {
 			RETVAL_UNICODEL(c+start, end-start+1, 1);
+			return NULL;
 		} else {
 			return eustrndup(c+start, end-start+1);
 		}
 	} else { /* Trimmed the whole string */
 		if ( return_value ) {
 			RETVAL_EMPTY_UNICODE();
+			return NULL;
 		} else {
 			return (USTR_MAKE(""));
 		}
 	}
-	return (USTR_MAKE(""));
 }
 /* }}} */
 
