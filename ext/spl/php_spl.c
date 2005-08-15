@@ -59,23 +59,22 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 }
 /* }}} */
 
-static zend_class_entry * spl_find_ce_by_name(char *name, int len, zend_bool autoload TSRMLS_DC)
+static zend_class_entry * spl_find_ce_by_name(zend_uchar ztype, void *name, int len, zend_bool autoload TSRMLS_DC)
 {
 	zend_class_entry **ce;
 	int found;
+
 	if (!autoload) {
 		char *lc_name;
 
-		lc_name = do_alloca(len + 1);
-		zend_str_tolower_copy(lc_name, name, len);
-
-		found = zend_hash_find(EG(class_table), lc_name, len +1, (void **) &ce);
-		free_alloca(lc_name);
+		lc_name = zend_u_str_tolower_dup(ztype, name, len);
+		found = zend_u_hash_find(EG(class_table), ztype, lc_name, len +1, (void **) &ce);
+		efree(lc_name);
 	} else {
- 		found = zend_lookup_class(name, len, &ce TSRMLS_CC);
+ 		found = zend_u_lookup_class(ztype, name, len, &ce TSRMLS_CC);
  	}
  	if (found != SUCCESS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %s does not exist%s", name, autoload ? " and could not be loaded" : "");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %v does not exist%s", name, autoload ? " and could not be loaded" : "");
 		return NULL;
 	}
 	
@@ -94,13 +93,13 @@ PHP_FUNCTION(class_parents)
 		RETURN_FALSE;
 	}
 	
-	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
+	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_UNICODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "object or string expected");
 		RETURN_FALSE;
 	}
 	
-	if (Z_TYPE_P(obj) == IS_STRING) {
-		if (NULL == (ce = spl_find_ce_by_name(Z_STRVAL_P(obj), Z_STRLEN_P(obj), autoload TSRMLS_CC))) {
+	if (Z_TYPE_P(obj) == IS_STRING || Z_TYPE_P(obj) == IS_UNICODE) {
+		if (NULL == (ce = spl_find_ce_by_name(Z_TYPE_P(obj), Z_UNIVAL_P(obj), Z_UNILEN_P(obj), autoload TSRMLS_CC))) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -127,13 +126,13 @@ PHP_FUNCTION(class_implements)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
+	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_UNICODE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "object or string expected");
 		RETURN_FALSE;
 	}
 	
-	if (Z_TYPE_P(obj) == IS_STRING) {
-		if (NULL == (ce = spl_find_ce_by_name(Z_STRVAL_P(obj), Z_STRLEN_P(obj), autoload TSRMLS_CC))) {
+	if (Z_TYPE_P(obj) == IS_STRING || Z_TYPE_P(obj) == IS_UNICODE) {
+		if (NULL == (ce = spl_find_ce_by_name(Z_TYPE_P(obj), Z_UNIVAL_P(obj), Z_UNILEN_P(obj), autoload TSRMLS_CC))) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -146,7 +145,7 @@ PHP_FUNCTION(class_implements)
 /* }}} */
 
 #define SPL_ADD_CLASS(class_name, z_list, sub, allow, ce_flags) \
-	spl_add_classes(&spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
+	spl_add_classes(U_CLASS_ENTRY(spl_ce_ ## class_name), z_list, sub, allow, ce_flags TSRMLS_CC)
 
 #define SPL_LIST_CLASSES(z_list, sub, allow, ce_flags) \
 	SPL_ADD_CLASS(AppendIterator, z_list, sub, allow, ce_flags); \

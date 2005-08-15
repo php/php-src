@@ -74,3 +74,44 @@ array(0) {
 bool(false)
 bool(false)
 ===DONE===
+--UEXPECTF--
+Warning: class_parents(): Class foo does not exist in %sspl_003.php on line %d
+unicode(3) "foo"
+
+Warning: class_parents(): Class foo does not exist and could not be loaded in %sspl_003.php on line %d
+array(2) {
+  [u"b"]=>
+  unicode(1) "b"
+  [u"a"]=>
+  unicode(1) "a"
+}
+array(2) {
+  [u"b"]=>
+  unicode(1) "b"
+  [u"a"]=>
+  unicode(1) "a"
+}
+array(1) {
+  [u"a"]=>
+  unicode(1) "a"
+}
+array(1) {
+  [u"a"]=>
+  unicode(1) "a"
+}
+array(0) {
+}
+bool(false)
+bool(false)
+unicode(3) "aaa"
+
+Warning: class_implements(): Class aaa does not exist and could not be loaded in %sspl_003.php on line %d
+
+Warning: class_implements(): Class bbb does not exist in %sspl_003.php on line %d
+array(0) {
+}
+array(0) {
+}
+bool(false)
+bool(false)
+===DONE===
