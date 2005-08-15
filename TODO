@@ -29,8 +29,6 @@ global
       of compliance.
     * see what functions might need to be changed to use HashPosition, so
       that the internal array pointer is not affected.
-    * Move most extensions and PEAR packages out of the PHP CVS tree,
-      include them again during release packaging.
 
     Other
     * use thread-safe resolver functions (either require BIND 8 or adns).
