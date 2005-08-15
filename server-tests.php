@@ -448,7 +448,7 @@ class testHarness {
 	public $exts_tested = 0;
 	public $exts_skipped = 0;
 	public $ignored_by_ext = 0;
-	public $test_dirs = array('tests', 'pear', 'ext', 'sapi');
+	public $test_dirs = array('tests', 'ext', 'sapi');
 	public $start_time;
 	public $end_time;
 	public $exec_info;

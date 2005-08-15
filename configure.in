@@ -882,67 +882,6 @@ fi
 
 unset LIBS LDFLAGS
 
-dnl PEAR
-dnl -------------------------------------------------------------------------
-
-PHP_HELP_SEPARATOR([PEAR:])
-PHP_CONFIGURE_PART(Configuring PEAR)
-
-# compatibility
-if test -z "$with_pear" && test "$enable_pear" = "no"; then
-  with_pear=no
-fi
-
-# If CLI is disabled -> disable PEAR
-if test "$PHP_SAPI_CLI" = "no"; then
-  with_pear=no
-fi
-
-PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR [PREFIX/lib/php]
-  --without-pear          Do not install PEAR], DEFAULT, yes)
-
-if test "$PHP_PEAR" != "no"; then
-
-  dnl
-  dnl PEAR dependancies
-  dnl
-  if test "$PHP_PCRE_REGEX" = "no"; then
-    pear_error_msg="$pear_error_msg 
-                    PEAR requires PCRE to be enabled.    Add --with-pcre-regex to the configure line. (or --without-pear)"
-  fi
-  if test "$PHP_XML" = "no"; then
-    pear_error_msg="$pear_error_msg 
-                    PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
-  fi
-
-dnl
-dnl ext/xmlrpc is not really there yet to be a requirement..
-dnl
-dnl  if test "$PHP_XMLRPC" = "no"; then
-dnl    pear_error_msg="$pear_error_msg 
-dnl                    PEAR requires XML-RPC to be enabled. Add --with-xmlrpc to the configure line. (or --without-pear)"
-dnl fi
-dnl
-
-  if test "$pear_error_msg"; then
-    AC_MSG_ERROR([$pear_error_msg])
-  fi
-
-  install_pear="install-pear"
-  PEAR_INSTALLDIR=$PHP_PEAR
-
-  if test "$PHP_PEAR" = "DEFAULT" || test "$PHP_PEAR" = "yes"; then
-    case $PHP_LAYOUT in
-      GNU) PEAR_INSTALLDIR=$datadir/pear;;
-      *)   PEAR_INSTALLDIR=$libdir/php;;
-    esac
-  fi
-
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
-fi
-
-
 dnl Configuring Zend and TSRM.
 dnl -------------------------------------------------------------------------
 
@@ -1043,7 +982,6 @@ if test -z "$EXTENSION_DIR"; then
 fi
 
 dnl Expand all directory names for use in macros/constants
-EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
 EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
 EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
 EXPANDED_BINDIR=`eval echo $bindir`
@@ -1052,14 +990,13 @@ EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
 EXPANDED_DATADIR=$datadir
 EXPANDED_PHP_CONFIG_FILE_PATH=`eval echo "$PHP_CONFIG_FILE_PATH"`
 EXPANDED_PHP_CONFIG_FILE_SCAN_DIR=`eval echo "$PHP_CONFIG_FILE_SCAN_DIR"`
-INCLUDE_PATH=.:$EXPANDED_PEAR_INSTALLDIR
+INCLUDE_PATH=.
 
 exec_prefix=$old_exec_prefix
 libdir=$old_libdir
 datadir=$old_datadir
 
 AC_SUBST(INCLUDE_PATH)
-AC_SUBST(EXPANDED_PEAR_INSTALLDIR)
 AC_SUBST(EXPANDED_EXTENSION_DIR)
 AC_SUBST(EXPANDED_BINDIR)
 AC_SUBST(EXPANDED_LIBDIR)
@@ -1158,7 +1095,6 @@ PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
-PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST(PHP_BUILD_DATE)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST_OLD(PHP_LIBS)
@@ -1224,7 +1160,7 @@ INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
 all_targets='$(OVERALL_TARGET) $(PHP_MODULES) $(PHP_CLI_TARGET)'
-install_targets="$install_modules $install_pear install-build install-headers install-programs"
+install_targets="$install_modules install-build install-headers install-programs"
 
 case $PHP_SAPI in
   cgi)
@@ -1307,7 +1243,6 @@ PHP_GEN_GLOBAL_MAKEFILE
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
-$php_shtool mkdir -p pear/scripts
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
