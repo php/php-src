@@ -50,7 +50,7 @@ FooBar::offsetSet(2, 2)
 CAUGHT: FAIL
 FooBar Object
 (
-    [array:private] => Array
+    [array:FooBar:private] => Array
         (
             [0] => 0
             [1] => 1

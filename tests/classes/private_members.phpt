@@ -60,44 +60,44 @@ base::test
 derived Object
 (
     [member] => derived::member (default)
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 derived::test
 derived Object
 (
     [member] => derived::member (default)
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 base::__construct(end)
 base::test
 derived Object
 (
     [member] => derived::member (default)
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 base::test
 derived Object
 (
     [member] => derived::member (default)
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 derived::test
 derived Object
 (
     [member] => derived::member (default)
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 derived::__construct(end)
 base::test
 derived Object
 (
     [member] => derived::member
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 derived::test
 derived Object
 (
     [member] => derived::member
-    [member:private] => base::member
+    [member:base:private] => base::member
 )
 Done

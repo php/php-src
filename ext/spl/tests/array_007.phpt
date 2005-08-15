@@ -47,7 +47,7 @@ test Object
 (
     [pub] => public
     [pro:protected] => protected
-    [pri:private] => private
+    [pri:test:private] => private
     [imp] => implicit
     [dyn] => dynamic
 )
@@ -55,7 +55,7 @@ ArrayIterator Object
 (
     [pub] => public
     [pro:protected] => protected
-    [pri:private] => private
+    [pri:test:private] => private
     [imp] => implicit
     [dyn] => dynamic
 )

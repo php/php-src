@@ -43,7 +43,7 @@ test Object
     [p4] => A
     [p5] => test:5
     [p2] => base:2
-    [p6:private] => base:6
+    [p6:base:private] => base:6
 )
 Clown
 test Object
@@ -53,6 +53,6 @@ test Object
     [p4] => A
     [p5] => clone:5
     [p2] => base:2
-    [p6:private] => base:6
+    [p6:base:private] => base:6
 )
 Done
