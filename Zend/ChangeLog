@@ -1,3 +1,11 @@
+2005-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      - Simplify and make work in all modes
+
+    * zend.c:
+      - Treat class_name in the exact same manner as prop_name before
+
 2005-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_exceptions.c
