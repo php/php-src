@@ -276,7 +276,7 @@ str_type:
 						if (class_name[0]=='*') {
 							zend_printf("%R:protected", ztype, prop_name);
 						} else {
-							zend_printf("%R:%R:private", ztype, prop_name, key_type, class_name);
+							zend_printf("%R:%v:private", ztype, prop_name, class_name);
 						}
 					} else {
 						zend_printf("%R", ztype, prop_name);
