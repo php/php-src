@@ -1503,9 +1503,8 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int optio
 	if (keep_blanks == 0 && ! (options & XML_PARSE_NOBLANKS)) {
 		options |= XML_PARSE_NOBLANKS;
 	}
-	if (options > 0) {
-		xmlCtxtUseOptions(ctxt, options);
-	}
+
+	xmlCtxtUseOptions(ctxt, options);
 #else
 	ctxt->validate = validate;
     ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
