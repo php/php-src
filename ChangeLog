@@ -1,3 +1,68 @@
+2005-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      ext/standard/var.c:
+      - Simplify and make work in all modes
+
+    * main/spprintf.c:
+      - Need to terminate [v]uspprintf() with two \0
+
+2005-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/wddx/wddx.c:
+      Fixed build.
+
+2005-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/spprintf.c:
+      - Where did my backslash vanish?
+
+    * main/spprintf.c:
+      - Handle different cases of the actual strings correctly
+
+    * ext/standard/php_smart_str.h
+      main/spprintf.c
+      main/spprintf.h:
+      - Initial support of easy way to generate unicode strings: [v]uspprinf()
+
+    * ZendEngine2/zend.c:
+      - Treat class_name in the exact same manner as prop_name before
+
+    * ext/standard/var.c:
+      - If prop_name is printed as unicode then class_name needs to be treated
+        in the exact same manner
+
+    * ext/standard/var.c:
+      - Show classname very needed
+      - No 3rd " which doesn't help parsing
+
+2005-08-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c:
+      tidy up implicit_mode handling; spotted by Nuno
+      There's probably a much more efficient way to do this than the current
+      strchr stuff.
+
+2005-08-14  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * sapi/cli/php_cli_readline.c:
+      - Fix tab-completion in unicode mode and for constants.
+
+    * (PHP_5_1)
+      sapi/cli/php_cli_readline.c:
+      - Fix tab-completion for constants.
+
+2005-08-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/bug27287.phpt:
+      Missed some "de" to "un" changes
+
+    * ext/wddx/php_wddx.h
+      ext/wddx/wddx.c:
+      - consistency fix, part 1/inf
+
 2005-08-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/type.c:
