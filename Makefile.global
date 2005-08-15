@@ -45,8 +45,6 @@ install-modules: build-modules
 	@rm -f modules/*.la >/dev/null 2>&1
 	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
 
-install-su: install-pear
-
 test: all 
 	-@if test ! -z $(PHP_EXECUTABLE) && test -x $(PHP_EXECUTABLE); then \
 		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \

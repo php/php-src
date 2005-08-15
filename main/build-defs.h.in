@@ -77,7 +77,6 @@
 #define PHP_LDAP_LIBS		""
 #define PHP_BIRDSTEP_INCLUDE     ""
 #define PHP_BIRDSTEP_LIBS        ""
-#define PEAR_INSTALLDIR         "@EXPANDED_PEAR_INSTALLDIR@"
 #define PHP_INCLUDE_PATH	"@INCLUDE_PATH@"
 #define PHP_EXTENSION_DIR       "@EXPANDED_EXTENSION_DIR@"
 #define PHP_PREFIX              "@prefix@"

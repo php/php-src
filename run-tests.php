@@ -352,7 +352,7 @@ $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array('tests', 'ext');
-$optionals = array('pear', 'Zend', 'ZendEngine2');
+$optionals = array('Zend', 'ZendEngine2');
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
 		$test_dirs[] = $dir;

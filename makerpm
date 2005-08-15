@@ -64,7 +64,6 @@ for suExec and stand alone php scripts too.
 sh ./configure --prefix=/usr \
 	--with-config-file-path=%{_sysconfdir} \
 	--disable-cli \
-	--without-pear \
 	--enable-force-cgi-redirect \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
