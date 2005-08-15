@@ -120,7 +120,7 @@ void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_fl
 		if (zend_u_hash_find(Z_ARRVAL_P(list), ztype, pce->name, len+1, (void*)&tmp) == FAILURE) {
 			MAKE_STD_ZVAL(tmp);
 			if (UG(unicode)) {
-				ZVAL_UNICODEL(tmp, pce->name, pce->name_length, 1);
+				ZVAL_UNICODEL(tmp, (UChar *)pce->name, pce->name_length, 1);
 			} else {
 				ZVAL_STRINGL(tmp, pce->name, pce->name_length, 1);
 			}
