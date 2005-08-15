@@ -1097,7 +1097,7 @@ PHP_FUNCTION(explode)
 
 	if ( str_len == 0 ) {
 		if ( str_type == IS_UNICODE ) {
-			add_next_index_unicodel(return_value, USTR_MAKE(""), sizeof("")-1, 1);
+			add_next_index_unicodel(return_value, USTR_MAKE(""), sizeof("")-1, 0);
 		} else if ( str_type == IS_BINARY ) {
 			add_next_index_binaryl(return_value, "", sizeof("")-1, 1);
 		} else {
