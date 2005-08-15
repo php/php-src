@@ -501,8 +501,8 @@ static PHP_METHOD(PDO, prepare)
 
 	if (ZEND_NUM_ARGS() > 1 && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS, (void**)&opt)) {
 		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 0, (void**)&item) == FAILURE
-			|| Z_TYPE_PP(item) != IS_STRING
-			|| zend_lookup_class(Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
+			|| (Z_TYPE_PP(item) != IS_STRING && Z_TYPE_PP(item) != IS_UNICODE)
+			|| zend_u_lookup_class(Z_TYPE_PP(item), Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
 		) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
 				"PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
@@ -1054,11 +1054,11 @@ static union _zend_function *dbh_method_get(
 	zval *object = *object_pp;
 #endif
 	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
+	zend_uchar ztype = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	lc_method_name = emalloc(method_len + 1);
-	zend_str_tolower_copy(lc_method_name, method_name, method_len);
+	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 
-	if (zend_hash_find(&dbh->ce->function_table, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+	if (zend_u_hash_find(&dbh->ce->function_table, ztype, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH]) {
@@ -1069,8 +1069,8 @@ static union _zend_function *dbh_method_get(
 			}
 		}
 
-		if (zend_hash_find(dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH],
-				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+		if (zend_u_hash_find(dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH],
+				ztype, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
 			fbc = NULL;
 			goto out;
 		}

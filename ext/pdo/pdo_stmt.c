@@ -620,7 +620,7 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args TSRMLS_DC) /* {{{ */
 {
 	zval **object = NULL, **method;
-	char *fname, *cname;
+	char *fname;
 	zend_class_entry * ce = NULL, **pce;
 	zend_function *function_handler;
 	
@@ -632,7 +632,13 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		object = (zval**)Z_ARRVAL_P(callable)->pListHead->pData;
 		method = (zval**)Z_ARRVAL_P(callable)->pListHead->pListNext->pData;
 
-		if (Z_TYPE_PP(object) == IS_STRING) { /* static call */
+		if (Z_TYPE_PP(object) == IS_STRING || Z_TYPE_PP(object) == IS_UNICODE) { /* static call */
+			if (zend_u_lookup_class(Z_TYPE_PP(object), Z_UNIVAL_PP(object), Z_UNILEN_PP(object), &pce TSRMLS_CC) == FAILURE) {
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not exist" TSRMLS_CC);
+				return 0;
+			} else {
+				ce = *pce;
+			}
 			object = NULL;
 		} else if (Z_TYPE_PP(object) == IS_OBJECT) { /* object call */
 			ce = Z_OBJCE_PP(object);
@@ -641,48 +647,25 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 			return 0;
 		}
 		
-		if (Z_TYPE_PP(method) != IS_STRING) {
+		if (Z_TYPE_PP(method) != IS_STRING && Z_TYPE_PP(method) != IS_UNICODE) {
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback; bogus method name" TSRMLS_CC);
 			return 0;
 		}
+	} else if (Z_TYPE_P(callable) == IS_STRING || Z_TYPE_P(callable) == IS_UNICODE) {
+		method = &callable;
 	}
 	
 	if (!zend_is_callable(callable, 0, &fname)) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
 		return 0;
 	}
-	
-	/* ATM we do not support array($obj, "CLASS::FUNC") or "CLASS_FUNC" */
-	cname = fname;
-	if ((fname = strstr(fname, "::")) == NULL) {
-		fname = cname;
-		cname = NULL;
-	} else {
-		*fname = '\0';
-		fname += 2;
-	}
-	if (cname) {
-		if (zend_lookup_class(cname, strlen(cname), &pce TSRMLS_CC) == FAILURE) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class does not exist" TSRMLS_CC);
-			return 0;
-		} else {
-			if (ce) {
-				/* pce must be base of ce or ce itself */
-				if (ce != *pce && !instanceof_function(ce, *pce TSRMLS_CC)) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied class has bogus lineage" TSRMLS_CC);
-					return 0;
-				}
-			}
-			ce = *pce;
-		}
-	}
-	
+		
 	fci->function_table = ce ? &ce->function_table : EG(function_table);
-	if (zend_hash_find(fci->function_table, fname, strlen(fname)+1, (void **)&function_handler) == FAILURE) {
+	if (zend_u_hash_find(fci->function_table, Z_TYPE_PP(method), Z_UNIVAL_PP(method), Z_UNILEN_PP(method)+1, (void **)&function_handler) == FAILURE) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function does not exist" TSRMLS_CC);
 		return 0;
 	}
-	efree(cname ? cname : fname);
+	efree(fname);
 
 	fci->size = sizeof(zend_fcall_info);
 	fci->function_name = NULL;
@@ -1155,7 +1138,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 	
 	switch(ZEND_NUM_ARGS()) {
 	case 0:
-		stmt->fetch.cls.ce = zend_standard_class_def;
+		stmt->fetch.cls.ce = U_CLASS_ENTRY(zend_standard_class_def);
 		break;
 	case 2:
 		if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -1251,7 +1234,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		switch(ZEND_NUM_ARGS()) {
 		case 0:
 		case 1:
-			stmt->fetch.cls.ce = zend_standard_class_def;
+			stmt->fetch.cls.ce = U_CLASS_ENTRY(zend_standard_class_def);
 			break;
 		case 3:
 			if (Z_TYPE_P(ctor_args) != IS_NULL && Z_TYPE_P(ctor_args) != IS_ARRAY) {
@@ -1265,12 +1248,12 @@ static PHP_METHOD(PDOStatement, fetchAll)
 			/* no break */
 		case 2:
 			stmt->fetch.cls.ctor_args = ctor_args; /* we're not going to free these */
-			if (Z_TYPE_P(arg2) != IS_STRING) {
+			if (Z_TYPE_P(arg2) != IS_STRING && Z_TYPE_P(arg2) != IS_UNICODE) {
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "Invalid class name (should be a string)" TSRMLS_CC);
 				error = 1;
 				break;
 			} else {
-				stmt->fetch.cls.ce = zend_fetch_class(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+				stmt->fetch.cls.ce = zend_u_fetch_class(Z_TYPE_P(arg2), Z_STRVAL_P(arg2), Z_STRLEN_P(arg2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 				if (!stmt->fetch.cls.ce) {
 					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "could not find user-specified class" TSRMLS_CC);
 					error = 1;
@@ -1889,11 +1872,11 @@ static union _zend_function *dbstmt_method_get(
 #if PHP_API_VERSION >= 20041225
 	zval *object = *object_pp;
 #endif
+	zend_uchar ztype = UG(unicode)?IS_UNICODE:IS_STRING;
 
-	lc_method_name = emalloc(method_len + 1);
-	zend_str_tolower_copy(lc_method_name, method_name, method_len);
+	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 
-	if (zend_hash_find(&pdo_dbstmt_ce->function_table, lc_method_name, 
+	if (zend_u_hash_find(&U_CLASS_ENTRY(pdo_dbstmt_ce)->function_table, ztype, lc_method_name, 
 			method_len+1, (void**)&fbc) == FAILURE) {
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
 		/* not a pre-defined method, nor a user-defined method; check
@@ -1906,8 +1889,8 @@ static union _zend_function *dbstmt_method_get(
 			}
 		}
 
-		if (zend_hash_find(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT],
-				lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
+		if (zend_u_hash_find(stmt->dbh->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_STMT],
+				ztype, lc_method_name, method_len+1, (void**)&fbc) == FAILURE) {
 			fbc = NULL;
 			goto out;
 		}
