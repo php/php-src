@@ -1503,7 +1503,11 @@ SPL_METHOD(CachingIterator, __toString)
 		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_BadMethodCallException), 0 TSRMLS_CC, "%v does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
 	}
 	if (intern->u.caching.zstr) {
-		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRLEN_P(intern->u.caching.zstr), 1);
+		*return_value = *intern->u.caching.zstr;
+		zval_copy_ctor(return_value);
+		convert_to_text(return_value);
+		INIT_PZVAL(return_value);
+//		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRLEN_P(intern->u.caching.zstr), 1);
 	} else {
 		RETURN_NULL();
 	}

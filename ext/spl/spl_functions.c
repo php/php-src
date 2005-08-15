@@ -115,11 +115,16 @@ void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_fl
 	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
 		size_t len = pce->name_length;
 		zval *tmp;
+		zend_uchar ztype = UG(unicode)?IS_UNICODE:IS_STRING;
 
-		if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {
+		if (zend_u_hash_find(Z_ARRVAL_P(list), ztype, pce->name, len+1, (void*)&tmp) == FAILURE) {
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRING(tmp, pce->name, 1);
-			zend_hash_add(Z_ARRVAL_P(list), pce->name, len+1, &tmp, sizeof(zval *), NULL);
+			if (UG(unicode)) {
+				ZVAL_UNICODEL(tmp, pce->name, pce->name_length, 1);
+			} else {
+				ZVAL_STRINGL(tmp, pce->name, pce->name_length, 1);
+			}
+			zend_u_hash_add(Z_ARRVAL_P(list), ztype, pce->name, len+1, &tmp, sizeof(zval *), NULL);
 		}
 	}
 }
@@ -137,10 +142,8 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 /* }}} */
 
 /* {{{ spl_add_classes */
-int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC)
+int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC)
 {
-	zend_class_entry *pce = *ppce;
-
 	if (!pce) {
 		return 0;
 	}
@@ -149,7 +152,7 @@ int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, in
 		spl_add_interfaces(list, pce, allow, ce_flags TSRMLS_CC);
 		while (pce->parent) {
 			pce = pce->parent;
-			spl_add_classes(&pce, list, sub, allow, ce_flags TSRMLS_CC);
+			spl_add_classes(pce, list, sub, allow, ce_flags TSRMLS_CC);
 		}
 	}
 	return 0;
