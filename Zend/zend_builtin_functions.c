@@ -921,7 +921,7 @@ ZEND_FUNCTION(method_exists)
 	if (Z_TYPE_PP(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_PP(klass);
 	} else if (Z_TYPE_PP(klass) == IS_STRING || Z_TYPE_PP(klass) == IS_UNICODE) {
-		if (zend_u_lookup_class(Z_TYPE_PP(klass), Z_STRVAL_PP(klass), Z_STRLEN_PP(klass), &pce TSRMLS_CC) == FAILURE) {
+		if (zend_u_lookup_class(Z_TYPE_PP(klass), Z_UNIVAL_PP(klass), Z_UNILEN_PP(klass), &pce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ce = *pce;
