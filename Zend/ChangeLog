@@ -1,3 +1,49 @@
+2005-08-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.h:
+      Unicode support
+
+    * zend.c
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_constants.c
+      zend_hash.c
+      zend_object_handlers.c
+      zend_objects.c
+      zend_operators.c:
+      Fixed several unicode related bugs
+
+    * tests/bug22836.phpt
+      tests/bug23104.phpt
+      tests/bug26010.phpt
+      tests/bug26695.phpt
+      tests/bug27798.phpt
+      tests/bug28442.phpt
+      tests/bug28444.phpt
+      tests/bug29505.phpt
+      tests/bug29674.phpt
+      tests/bug30140.phpt
+      tests/bug30162.phpt
+      tests/bug30407.phpt
+      tests/bug30702.phpt
+      tests/bug30856.phpt
+      tests/bug31683.phpt
+      tests/bug32799.phpt
+      tests/bug32981.phpt
+      tests/bug33243.phpt
+      tests/bug33999.phpt
+      tests/bug34064.phpt
+      tests/unset_cv11.phpt:
+      Test engine is improved to support unicode mode
+
+    * zend.c:
+      Fixed another print_r() bug
+
+    * zend.c:
+      Fixed print_r() in unicode mode.
+
 2005-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c:
