@@ -126,22 +126,22 @@
 	}												\
 } while (0)
 
-#define INS_STRING(unicode, s_uni, xbuf, s, slen)	\
+#define INS_STRING(unicode, s_unicode, xbuf, s, s_len)	\
 do { 												\
 	if (unicode) {									\
-		size_t newlen, p, sz = 2*(slen);			\
+		size_t newlen, p, sz = 2*(s_len);			\
 		smart_str_alloc(xbuf, (sz), 0); 			\
-		if (s_uni) {								\
+		if (s_unicode) {							\
 			memcpy(xbuf->c + xbuf->len, s, (sz));	\
 		} else {									\
-			p = (slen);								\
+			p = (s_len);							\
 			while(p--) {                            \
-				smart_str_append2c(xbuf, *s++);		\
+				smart_str_append2c(xbuf, *s);		\
+				*s++;								\
 			}										\
 		}											\
-		xbuf->len += (sz);							\
 	} else {										\
-		smart_str_appendl(xbuf, s, slen);			\
+		smart_str_appendl(xbuf, s, s_len);			\
 	}												\
 } while (0)
 	
@@ -163,8 +163,8 @@ do { 												\
 		} else {									\
 			smart_str_alloc(xbuf, sz, 0);	 		\
 			memset(xbuf->c + xbuf->len, ch, sz);	\
+			xbuf->len += sz;						\
 		}											\
-		xbuf->len += sz;							\
 	}												\
 } while (0)
 
@@ -847,7 +847,6 @@ PHPAPI int vuspprintf(char **pbuf, size_t max_len, const char *format, va_list a
 	if (max_len && xbuf.len > max_len) {
 		xbuf.len = max_len;
 	}
-	smart_str_appendc(&xbuf, '\0'); /* we need \0\0 as termination */
 	smart_str_0(&xbuf);
 		
 	*pbuf = xbuf.c;
