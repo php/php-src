@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.1
+- Fixed bug #34148 (+,- and . not supported as parts of scheme). (Ilia)
 - Fixed bug #34068 (Numeric string as array key not cast to integer in 
   wddx_deserialize()). (Ilia)
 - Fixed bug #34064 (arr[] as param to function is allowed only if function 

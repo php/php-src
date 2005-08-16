@@ -107,7 +107,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		/* validate scheme */
 		p = s;
 		while (p < e) {
-			if (!isalnum(*p)) {
+			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
+			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
 				if (e + 1 < ue) {
 					goto parse_port;
 				} else {
