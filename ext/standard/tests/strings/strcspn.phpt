@@ -16,3 +16,9 @@ string(4) "1234"
 int(0)
 int(7)
 int(6)
+--UEXPECT--
+unicode(25) "22222222aaaa bbb1111 cccc"
+unicode(4) "1234"
+int(0)
+int(7)
+int(6)
