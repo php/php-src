@@ -538,7 +538,7 @@ static inline int php_charmask(unsigned char *input, int len, char *mask TSRMLS_
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_value, int mode TSRMLS_DC)
+PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zend_uchar str_type, zval *return_value, int mode TSRMLS_DC)
 {
 	register int i;
 	int trimmed = 0;
@@ -572,7 +572,11 @@ PHPAPI char *php_trim(char *c, int len, char *what, int what_len, zval *return_v
 	}
 
 	if (return_value) {
-		RETVAL_STRINGL(c, len, 1);
+		if ( str_type == IS_BINARY ) {
+			RETVAL_BINARYL(c, len, 1);
+		} else {
+			RETVAL_STRINGL(c, len, 1);
+		}
 	} else {
 		return estrndup(c, len);
 	}
@@ -750,13 +754,13 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		if ( str_type == IS_UNICODE ) {
 			php_u_trim(str, str_len, what, what_len, return_value, mode TSRMLS_CC);
 		} else {
-			php_trim(str, str_len, what, what_len, return_value, mode TSRMLS_CC);
+			php_trim(str, str_len, what, what_len, str_type, return_value, mode TSRMLS_CC);
 		}
 	} else {
 		if ( str_type == IS_UNICODE ) {
 			php_u_trim(str, str_len, NULL, 0, return_value, mode TSRMLS_CC);
 		} else {
-			php_trim(str, str_len, NULL, 0, return_value, mode TSRMLS_CC);
+			php_trim(str, str_len, NULL, 0, str_type, return_value, mode TSRMLS_CC);
 		}
 	}
 }
