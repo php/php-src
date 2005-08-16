@@ -28,9 +28,12 @@
 #include <zend.h>
 #endif
 
+/* It's safe to write to "one behind the length" as we allocate two extra bytes
+ * to allow for Unicode trailers */
 #define smart_str_0(x) do {											\
 	if ((x)->c) {													\
 		(x)->c[(x)->len] = '\0';									\
+		(x)->c[(x)->len + 1] = '\0';								\
 	}																\
 } while (0)
 
@@ -49,7 +52,7 @@
 #endif
 
 #define SMART_STR_DO_REALLOC(d, what) \
-	(d)->c = SMART_STR_REALLOC((d)->c, (d)->a + 1, (what))
+	(d)->c = SMART_STR_REALLOC((d)->c, (d)->a + 2, (what))
 
 #define smart_str_alloc4(d, n, what, newlen) do {					\
 	if (!(d)->c) {													\
@@ -78,15 +81,15 @@
 #define smart_str_appends(dest, src) \
 	smart_str_appendl((dest), (src), strlen(src))
 
-/* normall character appending */
+/* normal character appending */
 #define smart_str_appendc(dest, c) \
 	smart_str_appendc_ex((dest), (c), 0)
 
 /* appending of a single UTF-16 code unit (2 byte)*/
-#define smart_str_append2c(dest, c) while (0) {	\
+#define smart_str_append2c(dest, c) do {	\
 	smart_str_appendc_ex((dest), (c&0xFF), 0);	\
 	smart_str_appendc_ex((dest), (c&0xFF00 ? c>>8 : '\0'), 0);	\
-}
+} while (0)
 
 #define smart_str_free(s) \
 	smart_str_free_ex((s), 0)
