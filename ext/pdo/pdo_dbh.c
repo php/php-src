@@ -516,7 +516,7 @@ static PHP_METHOD(PDO, prepare)
 	if (ZEND_NUM_ARGS() > 1 && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS, (void**)&opt)) {
 		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 0, (void**)&item) == FAILURE
 			|| (Z_TYPE_PP(item) != IS_STRING && Z_TYPE_PP(item) != IS_UNICODE)
-			|| zend_u_lookup_class(Z_TYPE_PP(item), Z_STRVAL_PP(item), Z_STRLEN_PP(item), &pce TSRMLS_CC) == FAILURE
+			|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
 		) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
 				"PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
