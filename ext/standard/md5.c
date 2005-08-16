@@ -58,7 +58,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_BINARYL(digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
 		if (UG(unicode)) {
@@ -110,7 +110,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_BINARYL(digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
 		if (UG(unicode)) {
