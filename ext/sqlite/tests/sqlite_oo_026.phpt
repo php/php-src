@@ -54,3 +54,19 @@ bool(true)
 string(5) "three"
 bool(true)
 ===DONE===
+--UEXPECT--
+====FOREACH====
+unicode(3) "one"
+unicode(3) "one"
+unicode(3) "two"
+unicode(3) "two"
+unicode(5) "three"
+unicode(5) "three"
+====FOR====
+unicode(3) "one"
+bool(true)
+unicode(3) "two"
+bool(true)
+unicode(5) "three"
+bool(true)
+===DONE===

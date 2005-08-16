@@ -48,3 +48,9 @@ array(1) {
   string(11) "onetwothree"
 }
 DONE!
+--UEXPECT--
+array(1) {
+  [0]=>
+  unicode(11) "onetwothree"
+}
+DONE!

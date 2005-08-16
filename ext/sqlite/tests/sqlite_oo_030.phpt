@@ -40,3 +40,12 @@ string(1) "1"
 string(3) "PHP"
 
 Fatal error: Call to undefined method foo::bar("php")() in %ssqlite_oo_030.php on line %d
+--UEXPECTF--
+NULL
+unicode(1) "1"
+unicode(3) "PHP"
+NULL
+unicode(1) "1"
+unicode(3) "PHP"
+
+Fatal error: Call to undefined method foo::bar("php")() in %ssqlite_oo_030.php on line %d

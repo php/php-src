@@ -36,3 +36,16 @@ object(stdClass)#1 (1) {
   ["a"]=>
   string(5) "three"
 }
+--UEXPECTF--
+object(stdClass)#1 (1) {
+  [u"a"]=>
+  unicode(3) "one"
+}
+object(stdClass)#2 (1) {
+  [u"a"]=>
+  unicode(3) "two"
+}
+object(stdClass)#1 (1) {
+  [u"a"]=>
+  unicode(5) "three"
+}

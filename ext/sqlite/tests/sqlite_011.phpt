@@ -32,3 +32,18 @@ array(6) {
   ["bar.c3"]=>
   string(1) "6"
 }
+--UEXPECT--
+array(6) {
+  [u"foo.c1"]=>
+  unicode(1) "1"
+  [u"foo.c2"]=>
+  unicode(1) "2"
+  [u"foo.c3"]=>
+  unicode(1) "3"
+  [u"bar.c1"]=>
+  unicode(1) "4"
+  [u"bar.c2"]=>
+  unicode(1) "5"
+  [u"bar.c3"]=>
+  unicode(1) "6"
+}

@@ -54,3 +54,21 @@ object(SimpleXMLElement)#%d (1) {
   string(3) "Boe"
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "Joe"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "Joe"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "Joe"
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(3) "Boe"
+}
+===DONE===

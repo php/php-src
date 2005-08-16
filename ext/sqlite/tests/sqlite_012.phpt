@@ -36,3 +36,13 @@ string(3) "foo"
 string(3) "bar"
 string(3) "baz"
 DONE!
+--UEXPECT--
+Buffered
+unicode(3) "foo"
+unicode(3) "bar"
+unicode(3) "baz"
+Unbuffered
+unicode(3) "foo"
+unicode(3) "bar"
+unicode(3) "baz"
+DONE!

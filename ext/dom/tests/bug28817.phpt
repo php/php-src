@@ -36,3 +36,15 @@ array(4) {
   string(4) "tiro"
 }
 string(30) "Cessante causa cessat effectus"
+--UEXPECTF--
+array(4) {
+  [0]=>
+  unicode(5) "bonus"
+  [1]=>
+  unicode(3) "vir"
+  [2]=>
+  unicode(6) "semper"
+  [3]=>
+  unicode(4) "tiro"
+}
+unicode(30) "Cessante causa cessat effectus"

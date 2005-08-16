@@ -876,12 +876,12 @@ static zend_object_value sqlite_object_new_exception(zend_class_entry *class_typ
 
 static zend_class_entry *sqlite_get_ce_query(zval *object TSRMLS_DC)
 {
-	return sqlite_ce_query;
+	return U_CLASS_ENTRY(sqlite_ce_query);
 }
 
 static zend_class_entry *sqlite_get_ce_ub_query(zval *object TSRMLS_DC)
 {
-	return sqlite_ce_ub_query;
+	return U_CLASS_ENTRY(sqlite_ce_ub_query);
 }
 
 static zval * sqlite_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
@@ -1183,7 +1183,7 @@ static struct php_sqlite_db *php_sqlite_open(char *filename, int mode, char *per
 	if (object) {
 		/* if object is not an object then we're called from the factory() function */
 		if (Z_TYPE_P(object) != IS_OBJECT) {
-			sqlite_instanciate(sqlite_ce_db, object TSRMLS_CC);
+			sqlite_instanciate(U_CLASS_ENTRY(sqlite_ce_db), object TSRMLS_CC);
 		}
 		/* and now register the object */
 		SQLITE_REGISTER_OBJECT(db, object, db)
@@ -1290,7 +1290,7 @@ PHP_FUNCTION(sqlite_open)
 	zval *errmsg = NULL;
 	zval *object = getThis();
 
-	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
+	php_set_error_handling(object ? EH_THROW : EH_NORMAL, U_CLASS_ENTRY(sqlite_ce_exception) TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
 		php_std_error_handling();
@@ -1345,7 +1345,7 @@ PHP_FUNCTION(sqlite_factory)
 	int filename_len;
 	zval *errmsg = NULL;
 
-	php_set_error_handling(EH_THROW, sqlite_ce_exception TSRMLS_CC);
+	php_set_error_handling(EH_THROW, U_CLASS_ENTRY(sqlite_ce_exception) TSRMLS_CC);
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
 		php_std_error_handling();
@@ -1570,9 +1570,9 @@ terminate:
 	if (object) {
 		sqlite_object *obj;
 		if (buffered) {
-			sqlite_instanciate(sqlite_ce_query, return_value TSRMLS_CC);
+			sqlite_instanciate(U_CLASS_ENTRY(sqlite_ce_query), return_value TSRMLS_CC);
 		} else {
-			sqlite_instanciate(sqlite_ce_ub_query, return_value TSRMLS_CC);
+			sqlite_instanciate(U_CLASS_ENTRY(sqlite_ce_ub_query), return_value TSRMLS_CC);
 		}
 		obj = (sqlite_object *) zend_object_store_get_object(return_value TSRMLS_CC);
 		obj->type = is_result;
@@ -1685,11 +1685,27 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 			php_sqlite_strtolower(colname);
 		}
 
-		if (result_type == PHPSQLITE_ASSOC) {
-			add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
-		}
-		if (result_type == PHPSQLITE_NUM) {
-			add_index_string(return_value, i, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+		if (UG(unicode)) {
+			char *tmp = colnames[ncols + i] ? (char *)colnames[ncols + i] : "";
+			UErrorCode status = U_ZERO_ERROR;
+			UChar *u_str;
+			int32_t u_len;
+
+			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, tmp, strlen(tmp), &status);
+			if (result_type == PHPSQLITE_ASSOC) {
+				add_assoc_unicode(return_value, colname, u_str, 1);
+			}
+			if (result_type == PHPSQLITE_NUM) {
+				add_index_unicode(return_value, i, u_str, 1);
+			}
+			efree(u_str);
+		} else {
+			if (result_type == PHPSQLITE_ASSOC) {
+				add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+			}
+			if (result_type == PHPSQLITE_NUM) {
+				add_index_string(return_value, i, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+			}
 		}
 	}
 
@@ -1811,13 +1827,25 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 			Z_STRVAL_P(decoded) = emalloc(strlen(rowdata[j]));
 			Z_STRLEN_P(decoded) = php_sqlite_decode_binary(rowdata[j]+1, Z_STRVAL_P(decoded));
 			Z_STRVAL_P(decoded)[Z_STRLEN_P(decoded)] = '\0';
-			Z_TYPE_P(decoded) = IS_STRING;
+			Z_TYPE_P(decoded) = UG(unicode)?IS_BINARY:IS_STRING;
 			if (!buffered) {
 				efree((char*)rowdata[j]);
 				rowdata[j] = NULL;
 			}
 		} else {
-			ZVAL_STRING(decoded, (char*)rowdata[j], buffered);
+			if (UG(unicode)) {
+				UErrorCode status = U_ZERO_ERROR;
+				UChar *u_str;
+				int32_t u_len;
+
+				zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
+				ZVAL_UNICODEL(decoded, u_str, u_len, 0);
+				if (!buffered) {
+					efree(rowdata[j]);
+				}
+			} else {
+				ZVAL_STRING(decoded, (char*)rowdata[j], buffered);
+			}
 			if (!buffered) {
 				rowdata[j] = NULL;
 			}
@@ -1888,9 +1916,24 @@ static void php_sqlite_fetch_column(struct php_sqlite_result *res, zval *which, 
 		char *decoded = emalloc(l);
 		l = php_sqlite_decode_binary(rowdata[j]+1, decoded);
 		decoded[l] = '\0';
-		RETVAL_STRINGL(decoded, l, 0);
+		if (UG(unicode)) {
+			RETVAL_BINARYL(decoded, l, 0);
+		} else {
+			RETVAL_STRINGL(decoded, l, 0);
+		}
 		if (!res->buffered) {
 			efree((char*)rowdata[j]);
+			rowdata[j] = NULL;
+		}		
+	} else if (UG(unicode)) {
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u_str;
+		int32_t u_len;
+
+		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)rowdata[j], strlen((char*)rowdata[j]), &status);
+		RETVAL_UNICODEL(u_str, u_len, 0);
+		if (!res->buffered) {
+			efree(rowdata[j]);
 			rowdata[j] = NULL;
 		}		
 	} else {
@@ -1997,34 +2040,35 @@ PHP_FUNCTION(sqlite_fetch_object)
 	zend_fcall_info_cache fcc;
 	zval *retval_ptr; 
 	zval *ctor_params = NULL;
+	zend_uchar class_name_type;
 
-	php_set_error_handling(object ? EH_THROW : EH_NORMAL, sqlite_ce_exception TSRMLS_CC);
+	php_set_error_handling(object ? EH_THROW : EH_NORMAL, U_CLASS_ENTRY(sqlite_ce_exception) TSRMLS_CC);
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szb", &class_name, &class_name_len, &ctor_params, &decode_binary)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|tzb", &class_name, &class_name_len, &class_name_type, &ctor_params, &decode_binary)) {
 			php_std_error_handling();
 			return;
 		}
 		RES_FROM_OBJECT(res, object);
 		if (!ZEND_NUM_ARGS()) {
-			ce = zend_standard_class_def;
+			ce = U_CLASS_ENTRY(zend_standard_class_def);
 		} else {
-			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+			ce = zend_u_fetch_class(class_name_type, class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
 	} else {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|szb", &zres, &class_name, &class_name_len, &ctor_params, &decode_binary)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|tzb", &zres, &class_name, &class_name_len, &class_name_type, &ctor_params, &decode_binary)) {
 			php_std_error_handling();
 			return;
 		}
 		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 		if (ZEND_NUM_ARGS() < 2) {
-			ce = zend_standard_class_def;
+			ce = U_CLASS_ENTRY(zend_standard_class_def);
 		} else {
-			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+			ce = zend_u_fetch_class(class_name_type, class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		}
 	}
 
 	if (!ce) {
-		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not find class '%s'", class_name);
+		zend_throw_exception_ex(U_CLASS_ENTRY(sqlite_ce_exception), 0 TSRMLS_CC, "Could not find class '%s'", class_name);
 		php_std_error_handling();
 		return;
 	}
@@ -2067,7 +2111,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 				 * single value is an array. Also we'd have to make that one
 				 * argument passed by reference.
 				 */
-				zend_throw_exception(sqlite_ce_exception, "Parameter ctor_params must be an array", 0 TSRMLS_CC);
+				zend_throw_exception(U_CLASS_ENTRY(sqlite_ce_exception), "Parameter ctor_params must be an array", 0 TSRMLS_CC);
 				return;
 			}
 		} else {
@@ -2082,7 +2126,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fcc.object_pp = &return_value;
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Could not execute %s::%v()", class_name, ce->constructor->common.function_name);
+			zend_throw_exception_ex(U_CLASS_ENTRY(sqlite_ce_exception), 0 TSRMLS_CC, "Could not execute %s::%v()", class_name, ce->constructor->common.function_name);
 		} else {
 			if (retval_ptr) {
 				zval_ptr_dtor(&retval_ptr);
@@ -2092,7 +2136,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			efree(fci.params);
 		}
 	} else if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
-		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", class_name);
+		zend_throw_exception_ex(U_CLASS_ENTRY(sqlite_ce_exception), 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", class_name);
 	}
 }
 /* }}} */
@@ -2164,6 +2208,7 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 	const char **rowdata;
 	char *decoded;
 	int decoded_len;
+	int free_decoded = 0;
 	
 	/* check range of the row */
 	if (res->curr_row >= res->nrows) {
@@ -2184,13 +2229,19 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 			efree((char*)rowdata[0]);
 			rowdata[0] = NULL;
 		}
+		free_decoded = 1;
 	} else if (rowdata[0]) {
 		decoded_len = strlen((char*)rowdata[0]);
 		if (res->buffered) {
-			decoded = estrndup((char*)rowdata[0], decoded_len);
+			if (UG(unicode)) {
+				decoded = (char*)rowdata[0];
+			} else {
+				decoded = estrndup((char*)rowdata[0], decoded_len);
+			}
 		} else {
 			decoded = (char*)rowdata[0];
 			rowdata[0] = NULL;
+			free_decoded = 1;
 		}
 	} else {
 		decoded = NULL;
@@ -2206,6 +2257,16 @@ static void php_sqlite_fetch_single(struct php_sqlite_result *res, zend_bool dec
 
 	if (decoded == NULL) {
 		RETURN_NULL();
+	} else if (UG(unicode)) {
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u_str;
+		int32_t u_len;
+
+		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, decoded, decoded_len, &status);
+		if (free_decoded) {
+			efree(decoded);
+		}
+		RETURN_UNICODEL(u_str, u_len, 0);
 	} else {
 		RETURN_STRINGL(decoded, decoded_len, 0);
 	}
@@ -2382,7 +2443,13 @@ PHP_FUNCTION(sqlite_libversion)
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
-	RETURN_STRING((char*)sqlite_libversion(), 1);
+	if (UG(unicode)) {
+		char *temp = (char*)sqlite_libversion();
+		UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
+		RETURN_UNICODE(u_temp, 0);
+	} else {
+		RETURN_STRING((char*)sqlite_libversion(), 1);
+	}
 }
 /* }}} */
 
@@ -2393,7 +2460,13 @@ PHP_FUNCTION(sqlite_libencoding)
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
-	RETURN_STRING((char*)sqlite_libencoding(), 1);
+	if (UG(unicode)) {
+		char *temp = (char*)sqlite_libencoding();
+		UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
+		RETURN_UNICODE(u_temp, 0);
+	} else {
+		RETURN_STRING((char*)sqlite_libencoding(), 1);
+	}
 }
 /* }}} */
 
@@ -2453,7 +2526,7 @@ static int sqlite_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
 		* count = obj->u.res->nrows;
 		return SUCCESS;
 	} else {
-		zend_throw_exception(sqlite_ce_exception, "Row count is not available for unbuffered queries", 0 TSRMLS_CC);
+		zend_throw_exception(U_CLASS_ENTRY(sqlite_ce_exception), "Row count is not available for unbuffered queries", 0 TSRMLS_CC);
 		return FAILURE;
 	}
 } /* }}} */
@@ -2590,7 +2663,16 @@ PHP_FUNCTION(sqlite_field_name)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(res->col_names[field], 1);
+	if (UG(unicode)) {
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u_str;
+		int32_t u_len;
+
+		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, res->col_names[field], strlen(res->col_names[field]), &status);
+		RETURN_UNICODEL(u_str, u_len, 0);
+	} else {
+		RETURN_STRING(res->col_names[field], 1);
+	}
 }
 /* }}} */
 
@@ -2831,7 +2913,16 @@ PHP_FUNCTION(sqlite_error_string)
 	msg = sqlite_error_string(code);
 
 	if (msg) {
-		RETURN_STRING((char*)msg, 1);
+		if (UG(unicode)) {
+			UErrorCode status = U_ZERO_ERROR;
+			UChar *u_str;
+			int32_t u_len;
+
+			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, msg, strlen(msg), &status);
+			RETURN_UNICODEL(u_str, u_len, 0);
+		} else {
+			RETURN_STRING((char*)msg, 1);
+		}
 	} else {
 		RETURN_NULL();
 	}

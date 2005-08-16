@@ -80,7 +80,16 @@ SPL_METHOD(SimpleXMLIterator, key) /* {{{ */
 	intern = (php_sxe_object *)zend_object_store_get_object(sxe->iter.data TSRMLS_CC);
 	if (intern != NULL && intern->node != NULL) {
 		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
-		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name), 1);
+		if (UG(unicode)) {
+			UErrorCode status = U_ZERO_ERROR;
+			UChar *u_str;
+			int32_t u_len;
+
+			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, (char*)curnode->name, xmlStrlen(curnode->name), &status);
+			RETURN_UNICODEL(u_str, u_len, 0);
+		} else {
+			RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name), 1);
+		}
 	}
     
     RETURN_FALSE;

@@ -37,3 +37,13 @@ array(1) {
   }
 }
 bool(false)
+--UEXPECTF--
+array(1) {
+  [0]=>
+  object(SimpleXMLElement)#%d (1) {
+    [u"test"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+  }
+}
+bool(false)
