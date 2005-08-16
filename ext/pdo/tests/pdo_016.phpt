@@ -196,7 +196,7 @@ string(1) "2"
 string(7) "String0"
 string(7) "String1"
 string(7) "String2"
---UXPECT--
+--UEXPECT--
 unicode(1) "3"
 array(3) {
   [0]=>

@@ -492,7 +492,19 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC
 		
 		case PDO_PARAM_STR:
 			if (value && !(value_len == 0 && stmt->dbh->oracle_nulls == PDO_NULL_EMPTY_STRING)) {
-				ZVAL_STRINGL(dest, value, value_len, !caller_frees);
+				if (UG(unicode)) {
+					UErrorCode status = U_ZERO_ERROR;
+					UChar *u_str;
+					int32_t u_len;
+			
+					zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, value, value_len, &status);
+					ZVAL_UNICODEL(dest, u_str, u_len, 0);
+					if (caller_frees) {
+						efree(value);
+					}
+				} else {
+					ZVAL_STRINGL(dest, value, value_len, !caller_frees);
+				}
 				if (caller_frees) {
 					caller_frees = 0;
 				}
@@ -787,8 +799,8 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					INIT_PZVAL(&val);
 					fetch_value(stmt, &val, i++ TSRMLS_CC);
 					if (Z_TYPE(val) != IS_NULL) {
-						convert_to_string(&val);
-						if (zend_lookup_class(Z_STRVAL(val), Z_STRLEN(val), &cep TSRMLS_CC) == FAILURE) {
+						convert_to_text(&val);
+						if (zend_u_lookup_class(Z_TYPE(val), Z_STRVAL(val), Z_STRLEN(val), &cep TSRMLS_CC) == FAILURE) {
 							stmt->fetch.cls.ce = ZEND_STANDARD_CLASS_DEF_PTR;
 						} else {
 							stmt->fetch.cls.ce = *cep;
@@ -1837,9 +1849,9 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-	convert_to_string(member);
+	convert_to_text(member);
 
-	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+	if ((Z_UNILEN_P(member) == sizeof("queryString")-1) && (ZEND_U_EQUAL(Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member), "queryString", sizeof("queryString")-1))) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
 		std_object_handlers.write_property(object, member, value TSRMLS_CC);
@@ -1850,9 +1862,9 @@ static void dbstmt_prop_delete(zval *object, zval *member TSRMLS_DC)
 {
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 
-	convert_to_string(member);
+	convert_to_text(member);
 
-	if(strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+	if ((Z_UNILEN_P(member) == sizeof("queryString")-1) && (ZEND_U_EQUAL(Z_TYPE_P(member), Z_UNIVAL_P(member), Z_UNILEN_P(member), "queryString", sizeof("queryString")-1))) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only" TSRMLS_CC);
 	} else {
 		std_object_handlers.unset_property(object, member TSRMLS_CC);
