@@ -989,7 +989,14 @@ static int zend_merge_property(zval **value, int num_args, va_list args, zend_ha
 		zval member;
 		TSRMLS_FETCH();
 
-		ZVAL_STRINGL(&member, hash_key->u.string, hash_key->nKeyLength-1, 0);
+		if (hash_key->type == IS_STRING) {
+			ZVAL_STRINGL(&member, hash_key->u.string, hash_key->nKeyLength-1, 0);
+		} else if (hash_key->type == IS_BINARY) {
+			ZVAL_BINARYL(&member, hash_key->u.string, hash_key->nKeyLength-1, 0);
+		} else if (hash_key->type == IS_UNICODE) {
+			ZVAL_UNICODEL(&member, hash_key->u.unicode, hash_key->nKeyLength-1, 0);
+		}
+
 		obj_ht->write_property(obj, &member, *value TSRMLS_CC);
 	}
 	return ZEND_HASH_APPLY_KEEP;
