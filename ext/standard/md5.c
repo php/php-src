@@ -61,7 +61,12 @@ PHP_NAMED_FUNCTION(php_if_md5)
 		RETURN_STRINGL(digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		if (UG(unicode)) {
+			UChar *u_temp = zend_ascii_to_unicode(md5str, 33 ZEND_FILE_LINE_CC);
+			RETVAL_UNICODE(u_temp, 0);
+		} else {
+			RETVAL_STRING(md5str, 1);
+		}
 	}
 
 }
@@ -108,7 +113,12 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 		RETURN_STRINGL(digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		if (UG(unicode)) {
+			UChar *u_temp = zend_ascii_to_unicode(md5str, 33 ZEND_FILE_LINE_CC);
+			RETVAL_UNICODE(u_temp, 0);
+		} else {
+			RETVAL_STRING(md5str, 1);
+		}
 	}
 }
 /* }}} */
