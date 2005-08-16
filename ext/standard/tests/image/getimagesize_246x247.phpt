@@ -40,3 +40,21 @@ array(1) {
     string(9) "image/png"
   }
 }
+--UEXPECT--
+array(1) {
+  [u"246x247.png"]=>
+  array(6) {
+    [0]=>
+    int(246)
+    [1]=>
+    int(247)
+    [2]=>
+    int(3)
+    [3]=>
+    unicode(24) "width="246" height="247""
+    [u"bits"]=>
+    int(4)
+    [u"mime"]=>
+    unicode(9) "image/png"
+  }
+}

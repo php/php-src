@@ -23,3 +23,16 @@ array(5) {
   ["mime"]=>
   string(29) "application/x-shockwave-flash"
 }
+--UEXPECT--
+array(5) {
+  [0]=>
+  int(550)
+  [1]=>
+  int(400)
+  [2]=>
+  int(13)
+  [3]=>
+  unicode(24) "width="550" height="400""
+  [u"mime"]=>
+  unicode(29) "application/x-shockwave-flash"
+}

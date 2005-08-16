@@ -1120,13 +1120,20 @@ PHP_FUNCTION(image_type_to_mime_type)
 {
 	zval **p_image_type;
 	int arg_c = ZEND_NUM_ARGS();
+	char *temp;
 
 	if ((arg_c!=1) || zend_get_parameters_ex(arg_c, &p_image_type) == FAILURE) {
 		RETVAL_FALSE;
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(p_image_type);
-	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type)), 1);
+	temp = (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type));
+	if (UG(unicode)) {
+		UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
+		ZVAL_UNICODE(return_value, u_temp, 0);
+	} else {
+		ZVAL_STRING(return_value, temp, 1);
+	}
 }
 /* }}} */
 
@@ -1136,6 +1143,7 @@ PHP_FUNCTION(image_type_to_extension)
 {
 	long image_type;
 	zend_bool inc_dot=1;
+	char *temp = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {
 		RETURN_FALSE;
@@ -1143,30 +1151,38 @@ PHP_FUNCTION(image_type_to_extension)
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
-			RETURN_STRING(".gif" + !inc_dot, 1);
+			temp = ".gif";
 		case IMAGE_FILETYPE_JPEG:
-			RETURN_STRING(".jpeg" + !inc_dot, 1);
+			temp = ".jpeg";
 		case IMAGE_FILETYPE_PNG:
-			RETURN_STRING(".png" + !inc_dot, 1);
+			temp = ".png";
 		case IMAGE_FILETYPE_SWF:
 		case IMAGE_FILETYPE_SWC:
-			RETURN_STRING(".swf" + !inc_dot, 1);
+			temp = ".swf";
 		case IMAGE_FILETYPE_PSD:
-			RETURN_STRING(".psd" + !inc_dot, 1);
+			temp = ".psd";
 		case IMAGE_FILETYPE_BMP:
 		case IMAGE_FILETYPE_WBMP:
-			RETURN_STRING(".bmp" + !inc_dot, 1);
+			temp = ".bmp";
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
-			RETURN_STRING(".tiff" + !inc_dot, 1);
+			temp = ".tiff";
 		case IMAGE_FILETYPE_IFF:
-			RETURN_STRING(".iff" + !inc_dot, 1);
+			temp = ".iff";
 		case IMAGE_FILETYPE_JPC:
-			RETURN_STRING(".jpc" + !inc_dot, 1);
+			temp = ".jpc";
 		case IMAGE_FILETYPE_JP2:
-			RETURN_STRING(".jp2" + !inc_dot, 1);
+			temp = ".jp2";
 		case IMAGE_FILETYPE_XBM:
-			RETURN_STRING(".xbm" + !inc_dot, 1);
+			temp = ".xbm";
+	}
+	if (temp) {
+		if (UG(unicode)) {
+			UChar *u_temp = zend_ascii_to_unicode(temp + !inc_dot, strlen(temp)+inc_dot ZEND_FILE_LINE_CC);
+			RETURN_UNICODE(u_temp, 0);
+		} else {
+			RETURN_STRING(temp + !inc_dot, 1);
+		}
 	}
 
 	RETURN_FALSE;
@@ -1357,7 +1373,13 @@ PHP_FUNCTION(getimagesize)
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
 		spprintf(&temp, 0, "width=\"%d\" height=\"%d\"", result->width, result->height);
-		add_index_string(return_value, 3, temp, 0);
+		if (UG(unicode)) {
+			UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
+			add_index_unicode(return_value, 3, u_temp, 0);
+			efree(temp);
+		} else {
+			add_index_string(return_value, 3, temp, 0);
+		}
 
 		if (result->bits != 0) {
 			add_assoc_long(return_value, "bits", result->bits);
@@ -1365,7 +1387,13 @@ PHP_FUNCTION(getimagesize)
 		if (result->channels != 0) {
 			add_assoc_long(return_value, "channels", result->channels);
 		}
-		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype), 1);
+		temp = (char*)php_image_type_to_mime_type(itype);
+		if (UG(unicode)) {
+			UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
+			add_assoc_unicode(return_value, "mime", u_temp, 0);
+		} else {
+			add_assoc_string(return_value, "mime", temp, 1);
+		}
 		efree(result);
 	} else {
 		RETURN_FALSE;
