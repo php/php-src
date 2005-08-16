@@ -2380,7 +2380,7 @@ void zend_do_early_binding(TSRMLS_D)
 					zval *parent_name = &(opline-1)->op2.u.constant;
 					zend_class_entry **pce;
 
-					if (zend_u_lookup_class(Z_TYPE_P(parent_name), Z_STRVAL_P(parent_name), Z_STRLEN_P(parent_name), &pce TSRMLS_CC) == FAILURE) {
+					if (zend_u_lookup_class(Z_TYPE_P(parent_name), Z_UNIVAL_P(parent_name), Z_UNILEN_P(parent_name), &pce TSRMLS_CC) == FAILURE) {
 						return;
 					}
 					if (do_bind_inherited_class(opline, CG(class_table), *pce, 1 TSRMLS_CC) == NULL) {
