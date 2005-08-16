@@ -196,7 +196,6 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 
 	*return_value = *value;
 	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
 }
 
 
