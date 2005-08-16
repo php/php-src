@@ -64,3 +64,19 @@ array(2) {
   string(4) "four"
 }
 DONE!
+--UEXPECTF--
+Message: sqlite_factory() expects at least 1 parameter, 0 given
+File: %ssqlite_oo_020.php
+array(2) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+}
+array(2) {
+  [0]=>
+  unicode(5) "three"
+  [1]=>
+  unicode(4) "four"
+}
+DONE!

@@ -73,3 +73,35 @@ string(4) "four"
 NULL
 NULL
 DONE!
+--UEXPECT--
+====BUFFERED====
+array(2) {
+  [0]=>
+  unicode(3) "one"
+  [1]=>
+  unicode(3) "two"
+}
+unicode(3) "one"
+unicode(3) "two"
+unicode(3) "one"
+unicode(3) "two"
+array(2) {
+  [0]=>
+  unicode(5) "three"
+  [1]=>
+  unicode(4) "four"
+}
+unicode(5) "three"
+unicode(4) "four"
+unicode(5) "three"
+unicode(4) "four"
+====UNBUFFERED====
+unicode(3) "one"
+unicode(3) "two"
+NULL
+NULL
+unicode(5) "three"
+unicode(4) "four"
+NULL
+NULL
+DONE!

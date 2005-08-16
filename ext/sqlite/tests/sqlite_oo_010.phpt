@@ -42,3 +42,17 @@ array(1) {
   string(5) "three"
 }
 DONE!
+--UEXPECT--
+array(1) {
+  [0]=>
+  unicode(3) "one"
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(1) {
+  [0]=>
+  unicode(5) "three"
+}
+DONE!

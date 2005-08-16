@@ -280,6 +280,7 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 		case IS_BOOL:
 		case IS_DOUBLE:
 		case IS_NULL:
+		case IS_UNICODE:
 			if (value->refcount > 1) {
 				value_copy = *value;
 				zval_copy_ctor(&value_copy);
@@ -288,6 +289,7 @@ static void change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 			convert_to_string(value);
 			/* break missing intentionally */
 		case IS_STRING:
+		case IS_BINARY:
 			xmlNodeSetContentLen(node, Z_STRVAL_P(value), Z_STRLEN_P(value));
 			if (value == &value_copy) {
 				zval_dtor(value);
@@ -427,8 +429,10 @@ next_iter:
 					case IS_BOOL:
 					case IS_DOUBLE:
 					case IS_NULL:
+					case IS_UNICODE:
 						convert_to_string(value);
 					case IS_STRING:
+					case IS_BINARY:
 						newnode = (xmlNodePtr)xmlNewProp(node, name, Z_STRVAL_P(value));
 						break;
 					default:
@@ -511,8 +515,10 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 				node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node);
 			}
 			else {
+				zval tmp_zv;
+
 				if (Z_TYPE_P(member) != IS_STRING) {
-					zval tmp_zv = *member;
+					tmp_zv = *member;
 					zval_copy_ctor(&tmp_zv);
 					member = &tmp_zv;
 					convert_to_string(member);
@@ -526,7 +532,10 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 					}
 					node = nnext;
 				}
-            }
+				if (member == &tmp_zv) {
+					zval_dtor(&tmp_zv);
+				}
+			}
 			if (node) {
 				exists = 1;
 			}
@@ -681,7 +690,7 @@ sxe_properties_get(zval *object TSRMLS_DC)
 		rv = sxe->properties;
 	} else {
 		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_u_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0, UG(unicode));
 		sxe->properties = rv;
 	}
 
@@ -698,6 +707,9 @@ sxe_properties_get(zval *object TSRMLS_DC)
 				if (node->type == XML_TEXT_NODE) {
 					MAKE_STD_ZVAL(value);
 					ZVAL_STRING(value, xmlNodeListGetString(node->doc, node, 1), 1);
+					if (UG(unicode)) {
+						convert_to_unicode(value);
+					}
 					zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 					goto next_iter;
 				}
@@ -998,6 +1010,12 @@ cast_object(zval *object, int type, char *contents TSRMLS_DC)
 	switch (type) {
 		case IS_STRING:
 			convert_to_string(object);
+			break;
+		case IS_BINARY:
+			convert_to_binary(object);
+			break;
+		case IS_UNICODE:
+			convert_to_unicode(object);
 			break;
 		case IS_BOOL:
 			convert_to_boolean(object);
@@ -1506,11 +1524,20 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_k
 		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
 	}
 
-	namelen = xmlStrlen(curnode->name);
-	*str_key = estrndup(curnode->name, namelen);
-	*str_key_len = namelen + 1;
-	return HASH_KEY_IS_STRING;
+	if (UG(unicode)) {
+		UErrorCode status = U_ZERO_ERROR;
+		int32_t u_len;
 
+		namelen = xmlStrlen(curnode->name);
+		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), (UChar**)str_key, &u_len, (char*)curnode->name, namelen, &status);
+		*str_key_len = u_len + 1;
+		return HASH_KEY_IS_UNICODE;
+	} else {
+		namelen = xmlStrlen(curnode->name);
+		*str_key = estrndup(curnode->name, namelen);
+		*str_key_len = namelen + 1;
+		return HASH_KEY_IS_STRING;
+	}
 }
 
 ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)

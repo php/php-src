@@ -101,3 +101,57 @@ array(1) {
   string(5) "three"
 }
 DONE!
+--UEXPECT--
+====UNBUFFERED====
+array(1) {
+  [0]=>
+  unicode(3) "one"
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(1) {
+  [0]=>
+  unicode(5) "three"
+}
+====NO-MORE====
+====DIRECT====
+array(1) {
+  [0]=>
+  unicode(3) "one"
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(1) {
+  [0]=>
+  unicode(5) "three"
+}
+====BUFFERED====
+array(1) {
+  [0]=>
+  unicode(3) "one"
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(1) {
+  [0]=>
+  unicode(5) "three"
+}
+array(1) {
+  [0]=>
+  unicode(3) "one"
+}
+array(1) {
+  [0]=>
+  unicode(3) "two"
+}
+array(1) {
+  [0]=>
+  unicode(5) "three"
+}
+DONE!

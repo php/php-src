@@ -40,3 +40,11 @@ string(5) "three"
 string(3) "one"
 string(5) "three"
 DONE!
+--UEXPECT--
+====BUFFERED====
+unicode(3) "one"
+unicode(5) "three"
+====UNBUFFERED====
+unicode(3) "one"
+unicode(5) "three"
+DONE!

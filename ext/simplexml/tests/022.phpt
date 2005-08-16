@@ -28,3 +28,11 @@ object(SimpleXMLElement)#%d (1) {
   string(11) "slide_*.xml"
 }
 ===DONE===
+--UEXPECTF--
+object(SimpleXMLElement)#%d (0) {
+}
+object(SimpleXMLElement)#%d (1) {
+  [0]=>
+  unicode(11) "slide_*.xml"
+}
+===DONE===
