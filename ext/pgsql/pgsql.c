@@ -3251,7 +3251,7 @@ PHP_FUNCTION(pg_copy_to)
 							break;
 						default:
 							add_next_index_string(return_value, csv, 1);
-							PQfreemem(csv);
+							free(csv);
 							break;
 					}
 				}
@@ -3598,7 +3598,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 #if HAVE_PQUNESCAPEBYTEA
 	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
 	to = estrndup(tmp, to_len);
-	PQfreemem(tmp);
+	free(tmp);
 #else
 	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, &to_len);
 #endif
