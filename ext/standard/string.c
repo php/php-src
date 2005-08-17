@@ -185,22 +185,28 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
-	zval **data;
+	unsigned char *data;
+	int data_len;
 	char *result;
 	size_t newlen;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "y", &data, &data_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(data);
 
-	result = php_bin2hex(Z_STRVAL_PP(data), Z_STRLEN_PP(data), &newlen);
+	result = php_bin2hex(data, data_len, &newlen);
 	
 	if (!result) {
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(result, newlen, 0);
+	if (UG(unicode)) {
+		UChar *u_temp = zend_ascii_to_unicode(result, newlen+1 ZEND_FILE_LINE_CC);
+		efree(result);
+		RETVAL_UNICODEL(u_temp, newlen, 0);
+	} else {
+		RETURN_STRINGL(result, newlen, 0);
+	}
 }
 /* }}} */
 
