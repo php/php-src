@@ -105,6 +105,8 @@ PHP_MINFO_FUNCTION(ctype)
 		SEPARATE_ZVAL(&c);	\
 		convert_to_string(c);	\
 	case IS_STRING: \
+	case IS_BINARY: \
+string:\
 		{ \
 			char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
 			if (e == p) {	\
@@ -115,6 +117,9 @@ PHP_MINFO_FUNCTION(ctype)
 			} \
 			RETURN_TRUE; \
 		} \
+	case IS_UNICODE: \
+		convert_to_string(c); \
+		goto string; \
 	default: \
 		break; \
 	} \
