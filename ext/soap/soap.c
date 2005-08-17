@@ -2445,7 +2445,7 @@ static void do_soap_call(zval* this_ptr,
 	SOAP_CLIENT_END_CODE();
 }
 
-static void verify_soap_headers_array(HashTable *ht)
+static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 {
 	zval **tmp;
 
@@ -2509,7 +2509,7 @@ PHP_METHOD(SoapClient, __call)
 	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
 		soap_headers = Z_ARRVAL_P(headers);
-		verify_soap_headers_array(soap_headers);
+		verify_soap_headers_array(soap_headers TSRMLS_CC);
 		free_soap_headers = 0;
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
 	           Z_OBJCE_P(headers) == soap_header_class_entry) {
@@ -2764,7 +2764,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
     } else if (Z_TYPE_P(headers) == IS_ARRAY || Z_TYPE_P(headers) == IS_OBJECT) {
 		zval *default_headers;
 
-		verify_soap_headers_array(Z_ARRVAL_P(headers));
+		verify_soap_headers_array(Z_ARRVAL_P(headers) TSRMLS_CC);
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers"), (void **) &default_headers)==FAILURE) {
 			add_property_zval(this_ptr, "__default_headers", headers);
 		}
