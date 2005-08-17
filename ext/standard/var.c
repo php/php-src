@@ -42,7 +42,7 @@
 /* {{{ php_var_dump */
 
 /* temporary, for debugging */
-static void php_var_dump_unicode(UChar *ustr, int32_t length, int verbose TSRMLS_DC)
+static void php_var_dump_unicode(UChar *ustr, int32_t length, int verbose, char *quote TSRMLS_DC)
 {
 	UChar32 c;
 	int32_t i;
@@ -51,7 +51,8 @@ static void php_var_dump_unicode(UChar *ustr, int32_t length, int verbose TSRMLS
 	char *out = NULL;
 
 	if (length == 0) {
-		php_printf("\"\"");
+		ZEND_PUTS(quote);
+		ZEND_PUTS(quote);
 		return;
 	}
 
@@ -70,9 +71,11 @@ static void php_var_dump_unicode(UChar *ustr, int32_t length, int verbose TSRMLS
 		return;
 	}
 
+	ZEND_PUTS(quote);
+	PHPWRITE(out, clen);
+	ZEND_PUTS(quote);
 	if (verbose) {
-		php_printf("\"%s\" {", out);
-
+		ZEND_PUTS(" {");
 		/* output the code points (not code units) */
 		if(length>=0) {
 			/* s is not NUL-terminated */
@@ -91,8 +94,6 @@ static void php_var_dump_unicode(UChar *ustr, int32_t length, int verbose TSRMLS
 			}
 		}
 		php_printf(" }");
-	} else {
-		php_printf("\"%s\"", out);
 	}
 	efree(out);
 }
@@ -128,7 +129,7 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 			php_printf("\"");
 		} else if (hash_key->type == IS_UNICODE) {
 			php_printf("u");
-			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, verbose TSRMLS_CC);
+			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, verbose, "\"" TSRMLS_CC);
 		}
 		php_printf("]=>\n");
 	}
@@ -205,9 +206,8 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		PUTS("\"\n");
 		break;
 	case IS_UNICODE:
-		/* temporary, for debugging */
 		php_printf("%sunicode(%d) ", COMMON, u_countChar32((*struc)->value.ustr.val, (*struc)->value.ustr.len));
-		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, verbose TSRMLS_CC);
+		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, 0, "\"" TSRMLS_CC);
 		PUTS("\n");
 		break;
 	case IS_ARRAY:
@@ -334,7 +334,7 @@ static int zval_array_element_dump(zval **zv, int num_args, va_list args, zend_h
 			php_printf("\"");
 		} else if (hash_key->type == IS_UNICODE) {
 			php_printf("u");
-			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, 1 TSRMLS_CC);
+			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, 1, "\"" TSRMLS_CC);
 		}
 		php_printf("]=>\n");
 	}
@@ -377,9 +377,8 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		php_printf("\" refcount(%u)\n", Z_REFCOUNT_PP(struc));
 		break;
 	case IS_UNICODE:
-		/* temporary, for debugging */
 		php_printf("%sunicode(%d) ", COMMON, u_countChar32((*struc)->value.ustr.val, (*struc)->value.ustr.len));
-		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, verbose TSRMLS_CC);
+		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, verbose, "\"" TSRMLS_CC);
 		php_printf(" refcount(%u)\n", Z_REFCOUNT_PP(struc));
 		break;
 	case IS_ARRAY:
@@ -462,7 +461,7 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 	} else { /* string key */
 		php_printf("%*c'", level + 1, ' ');
 		if (hash_key->type == IS_UNICODE) {
-			php_printf("%r", hash_key->u.unicode);
+			php_var_dump_unicode(hash_key->u.unicode, hash_key->nKeyLength-1, 0, "" TSRMLS_CC);
 		} else {
 			char *key;
 			int key_len;
@@ -539,9 +538,7 @@ PHPAPI void php_var_export(zval **struc, int level TSRMLS_DC)
 /* TODO
 		tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
 */
-		PUTS ("'");
-		php_printf("%r", Z_USTRVAL_PP(struc));
-		PUTS ("'");
+		php_var_dump_unicode(Z_USTRVAL_PP(struc), Z_USTRLEN_PP(struc), 0, "'" TSRMLS_CC);
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
