@@ -2866,6 +2866,39 @@ PHP_FUNCTION(chr)
 }
 /* }}} */
 
+/* {{{ proto php_u_ucfirst
+   Makes an Unicode string's first character uppercase */
+static void php_u_ucfirst(zval *ustr, zval *return_value)
+{
+	UChar32 lc, uc;
+	UChar tmp[2] = {0, 0}; /* UChar32 will be converted to upto 2 UChar units ? */
+	int32_t tmp_len = 2;
+	int32_t pos = 0;
+	UErrorCode err = U_ZERO_ERROR;
+
+	U16_NEXT(Z_USTRVAL_P(ustr), pos, Z_USTRLEN_P(ustr), lc);
+	uc = u_toupper(lc);
+	if ( uc == lc ) {
+		ZVAL_UNICODEL(return_value, Z_USTRVAL_P(ustr), Z_USTRLEN_P(ustr), 1);
+		return;
+	}
+
+	u_strFromUTF32(tmp, tmp_len, &tmp_len, &uc, 1, &err);
+	if (U_FAILURE(err)) {
+		ZVAL_EMPTY_UNICODE(return_value);
+		return;
+	}
+
+	Z_USTRVAL_P(return_value) = eumalloc(tmp_len+Z_USTRLEN_P(ustr)-pos+1);
+	Z_USTRVAL_P(return_value)[0] = tmp[0];
+	if (tmp_len > 1) {
+		Z_USTRVAL_P(return_value)[1] = tmp[1];
+	}
+	memcpy(Z_USTRVAL_P(return_value)+tmp_len, Z_USTRVAL_P(ustr)+pos, UBYTES(Z_USTRLEN_P(ustr)-pos+1));
+	Z_USTRLEN_P(return_value) = tmp_len+Z_USTRLEN_P(ustr)-pos;
+}
+/* }}} */
+
 /* {{{ proto string ucfirst(string str)
    Makes a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
@@ -2875,14 +2908,29 @@ PHP_FUNCTION(ucfirst)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(str);
 
-	if (!Z_STRLEN_PP(str)) {
+	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_BINARY && Z_TYPE_PP(str) != IS_STRING) {
+		convert_to_text_ex(str);
+	}
+
+	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
+		RETURN_EMPTY_UNICODE();
+	} else if (Z_TYPE_PP(str) == IS_BINARY && !Z_BINLEN_PP(str)) {
+		RETURN_EMPTY_BINARY();
+	} else if (!Z_STRLEN_PP(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-	*Z_STRVAL_P(return_value) = toupper((unsigned char) *Z_STRVAL_P(return_value));
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		Z_TYPE_P(return_value) = IS_UNICODE;
+		php_u_ucfirst(*str, return_value);
+	} else if (Z_TYPE_PP(str) == IS_BINARY) {
+		ZVAL_BINARYL(return_value, Z_BINVAL_PP(str), Z_BINLEN_PP(str), 1);
+		*Z_BINVAL_P(return_value) = toupper((unsigned char) *Z_BINVAL_P(return_value));
+	} else {
+		ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+		*Z_STRVAL_P(return_value) = toupper((unsigned char) *Z_STRVAL_P(return_value));
+	}
 }
 /* }}} */
 
