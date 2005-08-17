@@ -1631,6 +1631,23 @@ PHP_FUNCTION(array_fill)
 }
 /* }}} */
 
+static void u_add_next_index_stringl(zval *arg, char *str, uint length, int duplicate TSRMLS_DC)
+{
+	if (UG(unicode)) {
+		UErrorCode status = U_ZERO_ERROR;
+		UChar *u_str;
+		int32_t u_len;
+
+		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status);
+		add_next_index_unicodel(arg, u_str, u_len, 0);
+		if (!duplicate) {
+			efree(str);
+		}
+	} else {
+		add_next_index_stringl(arg, str, length, duplicate);
+	}
+}
+
 /* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
@@ -1644,7 +1661,9 @@ PHP_FUNCTION(range)
 	}
 
 	if (zstep) {
-		if (Z_TYPE_P(zstep) == IS_DOUBLE || (Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)) {
+		if (Z_TYPE_P(zstep) == IS_DOUBLE || 
+		    (Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE) ||
+		    (Z_TYPE_P(zstep) == IS_UNICODE && is_numeric_unicode(Z_USTRVAL_P(zstep), Z_USTRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)) {
 			is_step_double = 1;
 		}
 
@@ -1660,8 +1679,19 @@ PHP_FUNCTION(range)
 	/* Initialize the return_value as an array. */
 	array_init(return_value);
 
+	if (Z_TYPE_P(zlow) == IS_UNICODE) {
+		convert_to_string(zlow);
+	}
+	
+	if (Z_TYPE_P(zhigh) == IS_UNICODE) {
+		convert_to_string(zhigh);
+	}
+
 	/* If the range is given as strings, generate an array of characters. */
-	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
+	if (Z_TYPE_P(zlow) == IS_STRING && 
+	    Z_TYPE_P(zhigh) == IS_STRING && 
+	    Z_STRLEN_P(zlow) >= 1 && 
+	    Z_STRLEN_P(zhigh) >= 1) {
 		int type1, type2;
 		unsigned char *low, *high;
 		long lstep = (long) step;
@@ -1675,8 +1705,6 @@ PHP_FUNCTION(range)
 			goto long_str;
 		}
 		
-		convert_to_string(zlow);
-		convert_to_string(zhigh);
 		low = (unsigned char *)Z_STRVAL_P(zlow);
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
@@ -1686,7 +1714,7 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; *low >= *high; (*low) -= (unsigned int)lstep) {
-				add_next_index_stringl(return_value, low, 1, 1);
+				u_add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
 				if (((signed int)*low - lstep) < 0) {
 					break;
 				}
@@ -1697,13 +1725,13 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; *low <= *high; (*low) += (unsigned int)lstep) {
-				add_next_index_stringl(return_value, low, 1, 1);
+				u_add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
 				if (((signed int)*low + lstep) > 255) {
 					break;
 				}
 			}
 		} else {
-			add_next_index_stringl(return_value, low, 1, 1);
+			u_add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
 		}
 
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
