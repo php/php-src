@@ -2940,6 +2940,53 @@ PHP_FUNCTION(ucfirst)
 }
 /* }}} */
 
+/* {{{ proto php_u_ucwords()
+   Uppercase the first character of every word in an Unicode string */
+static void php_u_ucwords(zval *ustr, zval *retval)
+{
+	UChar32 *codepts;
+	int32_t len, retval_len;
+	int32_t i;
+	UErrorCode err;
+
+	len = Z_USTRLEN_P(ustr);
+	codepts = (UChar32 *)emalloc((len+1)*sizeof(UChar32));
+	err = U_ZERO_ERROR;
+	u_strToUTF32(codepts, len+1, &len, Z_USTRVAL_P(ustr), len, &err);
+	if (U_FAILURE(err)) {
+		efree(codepts);
+		ZVAL_EMPTY_UNICODE(retval);
+		return;
+	}
+
+	codepts[0] = u_toupper(codepts[0]);
+	for (i = 1; i < len ; i++) {
+		if (u_isWhitespace(codepts[i-1]) == TRUE) {
+			codepts[i] = u_toupper(codepts[i]);
+		}
+	}
+
+	retval_len = len;
+	Z_USTRVAL_P(retval) = eumalloc(retval_len+1);
+	err = U_ZERO_ERROR;
+	u_strFromUTF32(Z_USTRVAL_P(retval), retval_len+1, &retval_len, codepts, len, &err);
+	if (U_FAILURE(err) == U_BUFFER_OVERFLOW_ERROR) {
+		err = U_ZERO_ERROR;
+		Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval), retval_len+1);
+		u_strFromUTF32(Z_USTRVAL_P(retval), retval_len+1, NULL, codepts, len, &err);
+	}
+
+	if (U_SUCCESS(err)) {
+		Z_USTRLEN_P(retval) = retval_len;
+	} else {
+		efree(Z_USTRVAL_P(retval));
+		ZVAL_EMPTY_UNICODE(retval);
+	}
+
+	efree(codepts);
+}
+/* }}} */
+
 /* {{{ proto string ucwords(string str)
    Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
@@ -2950,19 +2997,35 @@ PHP_FUNCTION(ucwords)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(str);
 
-	if (!Z_STRLEN_PP(str)) {
+	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_BINARY && Z_TYPE_PP(str) != IS_STRING) {
+		convert_to_text_ex(str);
+	}
+
+	if (Z_TYPE_PP(str) == IS_UNICODE && !Z_USTRLEN_PP(str)) {
+		RETURN_EMPTY_UNICODE();
+	} else if (Z_TYPE_PP(str) == IS_BINARY && !Z_BINLEN_PP(str)) {
+		RETURN_EMPTY_BINARY();
+	} else if (!Z_STRLEN_PP(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-	r = Z_STRVAL_P(return_value);
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		Z_TYPE_P(return_value) = IS_UNICODE;
+		php_u_ucwords(*str, return_value);
+	} else {
+		if (Z_TYPE_PP(str) == IS_BINARY) {
+			ZVAL_BINARYL(return_value, Z_BINVAL_PP(str), Z_BINLEN_PP(str), 1);
+		} else {
+			ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
+		}
 
-	*r = toupper((unsigned char) *r);
-	for (r_end = r + Z_STRLEN_P(return_value) - 1; r < r_end; ) {
-		if (isspace((int) *(unsigned char *)r++)) {
-			*r = toupper((unsigned char) *r);
+		r = Z_STRVAL_P(return_value);
+		*r = toupper((unsigned char) *r);
+		for (r_end = r + Z_STRLEN_P(return_value) - 1; r < r_end; ) {
+			if (isspace((int) *(unsigned char *)r++)) {
+				*r = toupper((unsigned char) *r);
+			}
 		}
 	}
 }
