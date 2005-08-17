@@ -1,5 +1,8 @@
 --TEST--
 serialize()/unserialize() with exotic letters
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 	$едц≈ƒ÷ = array('едц≈ƒ÷' => 'едц≈ƒ÷');

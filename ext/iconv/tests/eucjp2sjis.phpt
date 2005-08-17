@@ -4,6 +4,8 @@ EUC-JP to SJIS
 <?php /* include('skipif.inc'); */ ?>
 --INI--
 error_reporting=2039
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 /* include('test.inc'); */

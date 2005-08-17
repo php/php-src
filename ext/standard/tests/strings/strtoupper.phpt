@@ -6,6 +6,9 @@ if (!setlocale(LC_CTYPE, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1", "ISO8
         die("skip locale needed for this test is not supported on this platform");
 }
 ?>
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 $chars = "הצü";

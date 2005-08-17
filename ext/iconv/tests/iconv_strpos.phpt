@@ -3,6 +3,8 @@ iconv_strpos()
 --SKIPIF--
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
 --INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 iconv.internal_charset=ISO-8859-1
 --FILE--
 <?php

@@ -6,6 +6,9 @@ if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
   die("skip setlocale() failed\n");
 }
 ?>
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 setlocale(LC_ALL, 'fr_FR');
@@ -53,4 +56,33 @@ array(13) {
   string(19) "Territoire du Yukon"
   ["NT"]=>
   string(25) "Territoires du Nord-Ouest"
+}
+--UEXPECT--
+array(13) {
+  [u"AB"]=>
+  unicode(7) "Alberta"
+  [u"BC"]=>
+  unicode(20) "Colombie-Britannique"
+  [u"PE"]=>
+  unicode(21) "Île-du-Prince-Édouard"
+  [u"MB"]=>
+  unicode(8) "Manitoba"
+  [u"NB"]=>
+  unicode(17) "Nouveau-Brunswick"
+  [u"NS"]=>
+  unicode(15) "Nouvelle-Écosse"
+  [u"NU"]=>
+  unicode(7) "Nunavut"
+  [u"ON"]=>
+  unicode(7) "Ontario"
+  [u"QC"]=>
+  unicode(6) "Québec"
+  [u"SK"]=>
+  unicode(12) "Saskatchewan"
+  [u"NL"]=>
+  unicode(23) "Terre-Neuve-et-Labrador"
+  [u"YT"]=>
+  unicode(19) "Territoire du Yukon"
+  [u"NT"]=>
+  unicode(25) "Territoires du Nord-Ouest"
 }
