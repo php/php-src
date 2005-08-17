@@ -1,3 +1,186 @@
+2005-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/string.c:
+      - TSRM Fix
+
+2005-08-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/md5.c:
+      md5() and md5_file() should return binary strings when raw_output is
+      set.
+
+    * ZendEngine2/zend_compile.c:
+      Fix it here too
+
+2005-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      main/main.c:
+      - MFH: Prevent E_STRICT from ending up as exception
+
+2005-08-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Z_UNI* are the right macros to use.
+
+2005-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c
+      main/main.c:
+      - Prevent E_STRICT from ending up as exception
+
+2005-08-16  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/php_smart_str.h
+      main/spprintf.c:
+      - Fixed a couple of bugs in the new smart_str macros, and allow them to
+        allocate two extra bytes (so that we can pad them with two \0's for
+      UTF-16)
+      - Fixed usage of smart_str's in the PAD and INS_STRING macros.
+
+2005-08-16  Antony Dovgal  <antony@zend.com>
+
+    * ext/standard/string.c:
+      nuke unused vars
+
+2005-08-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ext/dom/tests/bug28817.phpt
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/008.phpt
+      ext/simplexml/tests/009.phpt
+      ext/simplexml/tests/015.phpt
+      ext/simplexml/tests/022.phpt
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_002.phpt
+      ext/sqlite/tests/sqlite_003.phpt
+      ext/sqlite/tests/sqlite_005.phpt
+      ext/sqlite/tests/sqlite_006.phpt
+      ext/sqlite/tests/sqlite_007.phpt
+      ext/sqlite/tests/sqlite_008.phpt
+      ext/sqlite/tests/sqlite_009.phpt
+      ext/sqlite/tests/sqlite_010.phpt
+      ext/sqlite/tests/sqlite_011.phpt
+      ext/sqlite/tests/sqlite_012.phpt
+      ext/sqlite/tests/sqlite_013.phpt
+      ext/sqlite/tests/sqlite_014.phpt
+      ext/sqlite/tests/sqlite_015.phpt
+      ext/sqlite/tests/sqlite_016.phpt
+      ext/sqlite/tests/sqlite_019.phpt
+      ext/sqlite/tests/sqlite_022.phpt
+      ext/sqlite/tests/sqlite_023.phpt
+      ext/sqlite/tests/sqlite_024.phpt
+      ext/sqlite/tests/sqlite_025.phpt
+      ext/sqlite/tests/sqlite_026.phpt
+      ext/sqlite/tests/sqlite_oo_002.phpt
+      ext/sqlite/tests/sqlite_oo_003.phpt
+      ext/sqlite/tests/sqlite_oo_008.phpt
+      ext/sqlite/tests/sqlite_oo_009.phpt
+      ext/sqlite/tests/sqlite_oo_010.phpt
+      ext/sqlite/tests/sqlite_oo_011.phpt
+      ext/sqlite/tests/sqlite_oo_012.phpt
+      ext/sqlite/tests/sqlite_oo_013.phpt
+      ext/sqlite/tests/sqlite_oo_014.phpt
+      ext/sqlite/tests/sqlite_oo_015.phpt
+      ext/sqlite/tests/sqlite_oo_016.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_021.phpt
+      ext/sqlite/tests/sqlite_oo_022.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt
+      ext/sqlite/tests/sqlite_oo_025.phpt
+      ext/sqlite/tests/sqlite_oo_026.phpt
+      ext/sqlite/tests/sqlite_oo_028.phpt
+      ext/sqlite/tests/sqlite_oo_030.phpt
+      ext/standard/image.c
+      ext/standard/md5.c
+      ext/standard/var.c
+      ext/standard/tests/array/bug25708.phpt
+      ext/standard/tests/array/bug26458.phpt
+      ext/standard/tests/image/bug13213.phpt
+      ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/getimagesize_246x247.phpt
+      ext/standard/tests/image/getimagesize_384x385.phpt
+      ext/standard/tests/image/getimagesize_swc.phpt
+      ext/standard/tests/image/image_type_to_mime_type.phpt
+      ext/standard/tests/strings/explode.phpt
+      ext/standard/tests/strings/strcspn.phpt
+      ext/standard/tests/strings/strspn.phpt
+      ext/standard/tests/strings/strstr.phpt:
+      Unicode support
+
+2005-08-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/url.c
+      ext/standard/url.c
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt
+      ext/standard/tests/strings/url_t.phpt
+      ext/standard/tests/strings/url_t.phpt:
+      MFH: Fixed bug #34148 (+,- and . not supported as parts of scheme).
+
+    * NEWS
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      Fixed bug #34148 (+,- and . not supported as parts of scheme).
+
+2005-08-16  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      Unicode capable impl of implode()
+
+2005-08-16  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Go back to dev
+
+2005-08-16  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_1)
+      pear/go-pear-list.php:
+      Rebundle XML_RPC in the correct version for the Windows distro.
+
+2005-08-16  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Roll RC1
+
+2005-08-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c:
+      Fixed memory leak
+
+2005-08-16  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_1)
+      ext/pgsql/pgsql.c:
+      Use free() instead of PQfreemem() to maintain compabitibility with older
+      PostgreSQL client libraries (bug #33813).
+
+2005-08-16  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/simplexml/simplexml.c
+      ext/standard/http_fopen_wrapper.c:
+      Updated calls to php_trim() to provide arg for returned string type
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+      php_trim() takes extra arg to determine string type to be returned
+
+2005-08-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/info.c:
+      Input validation part 2.
+
 2005-08-15  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * configure.in:
