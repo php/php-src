@@ -8,6 +8,9 @@ if(strtoupper("äöüß") != "ÄÖÜß")
 	die("skip strtoupper on non-ascii not supported on this platform");
 }
 ?>
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 function startHandler($parser,$tag,$attr)

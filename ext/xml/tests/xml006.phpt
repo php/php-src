@@ -2,6 +2,9 @@
 UTF-8<->ISO Latin 1 encoding/decoding test
 --SKIPIF--
 <?php include("skipif.inc"); ?>
+--INI--
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php
 printf("%s -> %s\n", urlencode("æ"), urlencode(utf8_encode("æ")));

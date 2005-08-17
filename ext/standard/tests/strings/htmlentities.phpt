@@ -2,6 +2,8 @@
 HTML entities
 --INI--
 output_handler=
+unicode.script_encoding=ISO-8859-1
+unicode.output_encoding=ISO-8859-1
 --FILE--
 <?php 
 setlocale (LC_CTYPE, "C");
