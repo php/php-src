@@ -29,6 +29,9 @@ Having said that, here are the organizational rules:
    5. If you don't know how to do something, ask first!
 
    6. Test your changes before committing them. We mean it. Really.
+   
+   7. For development use the --enable-maintainer-zts switch to ensure your
+      code handles TSRM correctly and doesn't break for thos who need that.
 
 Currently we have the following branches in use:
 HEAD     Will become PHP 5.1. This CVS branch is for active development.
