@@ -1,3 +1,20 @@
+2005-08-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_compile.c:
+      Fix it here too
+
+    * zend_builtin_functions.c:
+      Z_UNI* are the right macros to use.
+
+2005-08-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c:
+      Unicode support
+
+    * zend_exceptions.c
+      zend_exceptions.c:
+      Fixed memory leak
+
 2005-08-15  Dmitry Stogov  <dmitry@zend.com>
 
     * zend.h:
