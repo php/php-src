@@ -227,7 +227,7 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 			return "double";
 
 		case IS_STRING:
-			return "string";
+			return "native string";
 
 		case IS_ARRAY:
 			return "array";
@@ -437,7 +437,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 								*p = Z_STRVAL_PP(arg);
 								break;
 							} else {
-								return "string";
+								return "native string";
 							}
 						}
 					}
@@ -445,7 +445,56 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "string";
+						return "native string";
+				}
+			}
+			break;
+
+		case 'y':
+			{
+				char **p = va_arg(*va, char **);
+				int *pl = va_arg(*va, int *);
+				switch (Z_TYPE_PP(arg)) {
+					case IS_NULL:
+						if (return_null) {
+							*p = NULL;
+							*pl = 0;
+							break;
+						}
+						/* break omitted intentionally */
+
+					case IS_STRING:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+					case IS_UNICODE:
+						convert_to_binary_ex(arg);
+						*p = Z_BINVAL_PP(arg);
+						*pl = Z_BINLEN_PP(arg);
+						break;
+
+					case IS_BINARY:
+						*p = Z_BINVAL_PP(arg);
+						*pl = Z_BINLEN_PP(arg);
+						break;
+
+					case IS_OBJECT: {
+						if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
+							SEPARATE_ZVAL_IF_NOT_REF(arg);
+							if (Z_OBJ_HANDLER_PP(arg, cast_object)(*arg, *arg, IS_BINARY, 0 TSRMLS_CC) == SUCCESS) {
+								*pl = Z_BINLEN_PP(arg);
+								*p = Z_BINVAL_PP(arg);
+								break;
+							} else {
+								return "binary data";
+							}
+						}
+					}
+						
+					case IS_ARRAY:
+					case IS_RESOURCE:
+					default:
+						return "binary data";
 				}
 			}
 			break;
@@ -481,7 +530,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 								*p = Z_USTRVAL_PP(arg);
 								break;
 							} else {
-								return "string";
+								return "Unicode string";
 							}
 						}
 					}
@@ -489,7 +538,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "string";
+						return "Unicode string";
 				}
 			}
 			break;
@@ -544,7 +593,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "string (legacy, Unicode, or binary)";
+						return "string (native, Unicode, or binary)";
 				}
 
 				break;
@@ -614,7 +663,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return "string (legacy, Unicode, or binary)";
+						return "string (native, Unicode, or binary)";
 				}
 			}
 			break;
@@ -774,7 +823,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 			case 'r': case 'a':
 			case 'o': case 'O':
 			case 'z': case 'Z':
-			case 't':
+			case 't': case 'y':
 			case 'u':
 				max_num_args++;
 				break;

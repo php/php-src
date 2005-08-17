@@ -774,6 +774,11 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 
 ZEND_API void convert_to_binary(zval *op)
 {
+	if (!UG(unicode)) {
+		convert_to_string(op);
+		return;
+	}
+
 	switch (op->type) {
 		case IS_BINARY:
 			break;
