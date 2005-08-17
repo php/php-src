@@ -929,7 +929,7 @@ ZEND_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_PP(method_name) != IS_STRING || Z_TYPE_PP(method_name) == IS_UNICODE) {
+	if (Z_TYPE_PP(method_name) != (UG(unicode)?IS_UNICODE:IS_STRING)) {
 		convert_to_text_ex(method_name);
 	}
 	lcname = zend_u_str_case_fold(Z_TYPE_PP(method_name), Z_UNIVAL_PP(method_name), Z_UNILEN_PP(method_name), 1, &lcname_len);
@@ -971,7 +971,7 @@ ZEND_FUNCTION(property_exists)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (Z_TYPE_PP(property) != IS_STRING && Z_TYPE_PP(property) != IS_UNICODE) {
+	if (Z_TYPE_PP(property) != IS_UNICODE && (UG(unicode) || (Z_TYPE_PP(property) != IS_STRING))) {
 		convert_to_text_ex(property);
 	}
 
