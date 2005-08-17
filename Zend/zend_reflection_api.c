@@ -1399,6 +1399,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	/* Return an empty array in case no static variables exist */
 	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
+		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
 		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	}
 }
