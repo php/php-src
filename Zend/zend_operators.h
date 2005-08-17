@@ -237,7 +237,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_unicode(zval *op TSRMLS_DC ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_unicode_with_converter(zval *op, UConverter *conv TSRMLS_DC ZEND_FILE_LINE_DC);
-ZEND_API void convert_to_binary(zval *op);
+ZEND_API void _convert_to_binary(zval *op TSRMLS_DC ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
@@ -254,6 +254,7 @@ ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
 #define convert_to_string_with_converter(op, conv) _convert_to_string_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_unicode(op)               _convert_to_unicode((op) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_unicode_with_converter(op, conv) _convert_to_unicode_with_converter((op), (conv) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define convert_to_binary(op)               _convert_to_binary((op) TSRMLS_CC ZEND_FILE_LINE_CC)
 #define convert_to_text(op) (UG(unicode)?convert_to_unicode(op):convert_to_string(op))
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);

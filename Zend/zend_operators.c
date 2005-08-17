@@ -772,7 +772,7 @@ ZEND_API void _convert_to_string_with_converter(zval *op, UConverter *conv TSRML
 	op->type = IS_STRING;
 }
 
-ZEND_API void convert_to_binary(zval *op)
+ZEND_API void _convert_to_binary(zval *op TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	if (!UG(unicode)) {
 		convert_to_string(op);
