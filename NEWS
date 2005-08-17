@@ -76,6 +76,8 @@ PHP                                                                        NEWS
 - Fixed bug #33017 ("make distclean" gives an error with VPATH build). (Jani)
 - Fixed bug #33013 ("next month" was handled wrong while parsing dates).
   (Derick)
+- Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes apache2.0.54
+  seg fault). (Dmitry)
 - Fixed bug #32956 (mysql_bind_result() doesn't support MYSQL_TYPE_NULL). (Georg)
 - Fixed bug #32947 (Incorrect option for mysqli default password). (Georg)
 - Fixed bug #32944 (Disabling session.use_cookies doesn't prevent reading 
