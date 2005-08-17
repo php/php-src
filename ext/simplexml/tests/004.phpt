@@ -63,3 +63,33 @@ SimpleXMLElement Object
 )
 string(11) "CDATA block"
 ===DONE===
+--UEXPECT--
+SimpleXMLElement Object
+(
+    [elem1] => SimpleXMLElement Object
+        (
+            [comment] => SimpleXMLElement Object
+                (
+                )
+
+            [elem2] => SimpleXMLElement Object
+                (
+                    [elem3] => SimpleXMLElement Object
+                        (
+                            [elem4] => SimpleXMLElement Object
+                                (
+                                    [test] => SimpleXMLElement Object
+                                        (
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+unicode(11) "CDATA block"
+===DONE===

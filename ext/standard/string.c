@@ -737,30 +737,31 @@ static UChar *php_u_trim(UChar *c, int32_t len, UChar *what, int32_t what_len, z
  */
 static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	void		*str;
-	int32_t		str_len;
-	zend_uchar	str_type;
-	void		*what;
-	int32_t		what_len;
-	zend_uchar	what_type;
-	int			argc = ZEND_NUM_ARGS();
+	zval **str, **what;
+	int  argc = ZEND_NUM_ARGS();
 
-	if ( zend_parse_parameters(argc TSRMLS_CC, "T|T", &str, &str_len, &str_type,
-								  &what, &what_len, &what_type) == FAILURE ) {
-		return;
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &str, &what) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
-	if ( argc > 1 ) {
-		if ( str_type == IS_UNICODE ) {
-			php_u_trim(str, str_len, what, what_len, return_value, mode TSRMLS_CC);
+	convert_to_text_ex(str);
+
+	if (argc > 1) {
+		if (Z_TYPE_PP(str) != Z_TYPE_PP(what)) {
+			zend_error(E_WARNING, "%v() expects parameter 2 to be string (legacy, Unicode, or binary), %s given",
+					get_active_function_name(TSRMLS_C),
+					zend_zval_type_name(*what));
+		}
+		if (Z_TYPE_PP(str) == IS_UNICODE) {
+			php_u_trim(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), Z_USTRVAL_PP(what), Z_USTRLEN_PP(what), return_value, mode TSRMLS_CC);
 		} else {
-			php_trim(str, str_len, what, what_len, str_type, return_value, mode TSRMLS_CC);
+			php_trim(Z_STRVAL_PP(str), Z_STRLEN_PP(str), Z_STRVAL_PP(what), Z_STRLEN_PP(what), Z_TYPE_PP(str), return_value, mode TSRMLS_CC);
 		}
 	} else {
-		if ( str_type == IS_UNICODE ) {
-			php_u_trim(str, str_len, NULL, 0, return_value, mode TSRMLS_CC);
+		if (Z_TYPE_PP(str) == IS_UNICODE) {
+			php_u_trim(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), NULL, 0, return_value, mode TSRMLS_CC);
 		} else {
-			php_trim(str, str_len, NULL, 0, str_type, return_value, mode TSRMLS_CC);
+			php_trim(Z_STRVAL_PP(str), Z_STRLEN_PP(str), NULL, 0, Z_TYPE_PP(str), return_value, mode TSRMLS_CC);
 		}
 	}
 }
