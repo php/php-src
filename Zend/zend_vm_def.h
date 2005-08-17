@@ -940,7 +940,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, ANY, int type
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
+		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
@@ -3333,7 +3333,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, ANY)
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1 TSRMLS_CC);
 		if (!value) {
 			isset = 0;
 		}

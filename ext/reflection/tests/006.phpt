@@ -109,7 +109,7 @@ EXCEPTION
 EXCEPTION
 unicode(7) "updated"
 unicode(7) "updated"
-unicede(7) "updated"
+unicode(7) "updated"
 EXCEPTION
 EXCEPTION
 unicode(7) "updated"

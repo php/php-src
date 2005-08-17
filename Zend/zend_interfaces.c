@@ -431,6 +431,11 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 			*buf_len = Z_STRLEN_P(retval);
 			result = SUCCESS;
 			break;
+		case IS_UNICODE:
+			*buffer = eustrndup(Z_USTRVAL_P(retval), Z_USTRLEN_P(retval));
+			*buf_len = Z_USTRLEN_P(retval);
+			result = SUCCESS;
+			break;
 		default: /* failure */
 			result = FAILURE;
 			break;
@@ -439,7 +444,7 @@ int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len
 	}
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%v::serialize() must return a string or NULL", ce->name);
 	}
 	return result;
 }

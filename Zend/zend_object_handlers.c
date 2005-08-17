@@ -816,13 +816,12 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, char *f
 }
 
 
-ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar type, void *property_name, int property_name_len, zend_bool silent TSRMLS_DC)
 {
 	zval **retval = NULL;
 	zend_class_entry *tmp_ce = ce;
 	zend_property_info *property_info;
 	zend_property_info std_property_info;
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	if (zend_u_hash_find(&ce->properties_info, type, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
 		std_property_info.flags = ZEND_ACC_PUBLIC;
