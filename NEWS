@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34148 (+,- and . not supported as parts of scheme). (Ilia)
 - Fixed bug #34103 (line numbering not maintained in dom document). (Rob)
 - Fixed bug #34078 (Reflection API problems in methods with boolean or 
   null default values). (Tony)
