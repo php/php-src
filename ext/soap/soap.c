@@ -260,6 +260,7 @@ PHP_METHOD(SoapClient, __getTypes);
 PHP_METHOD(SoapClient, __doRequest);
 PHP_METHOD(SoapClient, __setCookie);
 PHP_METHOD(SoapClient, __setLocation);
+PHP_METHOD(SoapClient, __setSoapHeaders);
 
 /* SoapVar Functions */
 PHP_METHOD(SoapVar, SoapVar);
@@ -348,6 +349,7 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __doRequest, NULL, 0)
 	PHP_ME(SoapClient, __setCookie, NULL, 0)
 	PHP_ME(SoapClient, __setLocation, NULL, 0)
+	PHP_ME(SoapClient, __setSoapHeaders, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -2443,6 +2445,20 @@ static void do_soap_call(zval* this_ptr,
 	SOAP_CLIENT_END_CODE();
 }
 
+static void verify_soap_headers_array(HashTable *ht)
+{
+	zval **tmp;
+
+	zend_hash_internal_pointer_reset(ht);
+	while (zend_hash_get_current_data(ht, (void**)&tmp) == SUCCESS) {
+		if (Z_TYPE_PP(tmp) != IS_OBJECT ||
+		    Z_OBJCE_PP(tmp) != soap_header_class_entry) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
+		}
+		zend_hash_move_forward(ht);
+	}
+}
+
 
 /* {{{ proto mixed SoapClient::__call ( string function_name [, array arguments [, array options [, array input_headers [, array output_headers]]]])
    Calls a SOAP function */
@@ -2458,6 +2474,8 @@ PHP_METHOD(SoapClient, __call)
 	zval **real_args = NULL;
 	zval **param;
 	int arg_count;
+	zval **tmp;
+	zend_bool free_soap_headers;
 
 	HashPosition pos;
 
@@ -2469,8 +2487,6 @@ PHP_METHOD(SoapClient, __call)
 	if (options) {
 		if (Z_TYPE_P(options) == IS_ARRAY) {
 			HashTable *ht = Z_ARRVAL_P(options);
-			zval **tmp;
-
 			if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				location = Z_STRVAL_PP(tmp);
@@ -2492,27 +2508,43 @@ PHP_METHOD(SoapClient, __call)
 
 	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
-		zval** tmp;
-
 		soap_headers = Z_ARRVAL_P(headers);
-		zend_hash_internal_pointer_reset(soap_headers);
-		while (zend_hash_get_current_data(soap_headers, (void**)&tmp) == SUCCESS) {
-			if (Z_TYPE_PP(tmp) != IS_OBJECT ||
-			    Z_OBJCE_PP(tmp) != soap_header_class_entry) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
-			}
-			zend_hash_move_forward(soap_headers);
-		}
+		verify_soap_headers_array(soap_headers);
+		free_soap_headers = 0;
 	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
 	           Z_OBJCE_P(headers) == soap_header_class_entry) {
-	  soap_headers = emalloc(sizeof(HashTable));
-		zend_hash_init(soap_headers, 0, NULL, NULL/*ZVAL_PTR_DTOR*/, 0);
+	    soap_headers = emalloc(sizeof(HashTable));
+		zend_hash_init(soap_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_next_index_insert(soap_headers, &headers, sizeof(zval*), NULL);
-	  headers = NULL;
+		ZVAL_ADDREF(headers);
+		free_soap_headers = 1;
 	} else{
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
 	}
 
+	/* Add default headers */
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers"), (void **) &tmp)==SUCCESS) {
+		HashTable *default_headers = Z_ARRVAL_P(*tmp);
+		if (soap_headers) {
+			if (!free_soap_headers) {
+				HashTable *tmp =  emalloc(sizeof(HashTable));
+				zend_hash_init(tmp, 0, NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_copy(tmp, soap_headers, (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *));
+				soap_headers = tmp;
+				free_soap_headers = 1;
+			}
+			zend_hash_internal_pointer_reset(default_headers);
+			while (zend_hash_get_current_data(default_headers, (void**)&tmp) == SUCCESS) {
+				ZVAL_ADDREF(*tmp);
+				zend_hash_next_index_insert(soap_headers, tmp, sizeof(zval *), NULL);
+				zend_hash_move_forward(default_headers);
+			}
+		} else {
+			soap_headers = Z_ARRVAL_P(*tmp);
+			free_soap_headers = 0;
+		}
+	}
+	
 	arg_count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
 	if (arg_count > 0) {
@@ -2532,7 +2564,7 @@ PHP_METHOD(SoapClient, __call)
 		efree(real_args);
 	}
 
-	if (soap_headers && ! headers) {
+	if (soap_headers && free_soap_headers) {
 		zend_hash_destroy(soap_headers);
 		efree(soap_headers);
 	}
@@ -2714,6 +2746,44 @@ PHP_METHOD(SoapClient, __setCookie)
 }
 /* }}} */
 
+/* {{{ proto void SoapClient::__setSoapHeaders(array SoapHeaders)
+   Sets SOAP headers for subsequent calls (replaces any previous
+   values).
+   If no value is specified, all of the headers are removed. */
+PHP_METHOD(SoapClient, __setSoapHeaders)
+{
+	zval *headers;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &headers) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	  RETURN_NULL();
+	}
+
+    if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers"));
+    } else if (Z_TYPE_P(headers) == IS_ARRAY || Z_TYPE_P(headers) == IS_OBJECT) {
+		zval *default_headers;
+
+		verify_soap_headers_array(Z_ARRVAL_P(headers));
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers"), (void **) &default_headers)==FAILURE) {
+			add_property_zval(this_ptr, "__default_headers", headers);
+		}
+    } else if (Z_TYPE_P(headers) == IS_OBJECT &&
+               Z_OBJCE_P(headers) == soap_header_class_entry) {
+		zval *default_headers;
+		ALLOC_INIT_ZVAL(default_headers);
+		array_init(default_headers);
+		add_next_index_zval(default_headers, headers);
+		add_property_zval(this_ptr, "__default_headers", default_headers);
+    } else{
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid SOAP header");
+    }
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+
 /* {{{ proto string SoapClient::__setLocation([string new_location])
    Sets the location option (the endpoint URL that will be touched by the 
    following SOAP requests).
@@ -2762,9 +2832,18 @@ static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 	} else {
 		int arg_count = ZEND_NUM_ARGS();
 		zval **arguments = (zval **) safe_emalloc(sizeof(zval *), arg_count, 0);
+		zval **soap_headers_p
+		HashTable *soap_headers;
 
 		zend_get_parameters_array(ht, arg_count, arguments);
-		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value, NULL, NULL, NULL, NULL, NULL TSRMLS_CC);
+
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_properties"), (void **) soap_headers_p)==SUCCESS
+			&& Z_TYPE_P(soap_headers_p)==IS_ARRAY) {
+			soap_headers = Z_ARRVAL_P(soap_headers_p);
+		} else {
+			soap_headers = NULL;
+		}
+		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value, NULL, NULL, NULL, soap_headers, NULL TSRMLS_CC);
 		efree(arguments);
 	}
 	zval_dtor(&function_name->element);
