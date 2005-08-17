@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Fixed bug #34148 (+,- and . not supported as parts of scheme). (Ilia)
+- Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes apache2.0.54
+  seg fault). (Dmitry)
 - cURL improvements (Ilia)
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.

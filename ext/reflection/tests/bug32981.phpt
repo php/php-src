@@ -28,7 +28,7 @@ array(1) {
   [0]=>
   array(1) {
     ["enabled"]=>
-    UNKNOWN:0 /* FIXME */
+    bool(true)
   }
 }
 ===DONE===
@@ -38,7 +38,7 @@ array(1) {
   [0]=>
   array(1) {
     [u"enabled"]=>
-    UNKNOWN:0 /* FIXME */
+    bool(true)
   }
 }
 ===DONE===
