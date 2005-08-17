@@ -1144,14 +1144,11 @@ PHP_FUNCTION(explode)
 PHPAPI void php_implode(zval *delim, zval *arr, zval *retval) 
 {
 	zend_uchar		return_type;
-	int				numelems, i;
+	int				numelems, i=0;
 	HashPosition	pos;
 	zval			**tmp;
 	TSRMLS_FETCH();
 
-	if (Z_TYPE_P(delim) != IS_UNICODE && Z_TYPE_P(delim) != IS_BINARY) {
-		convert_to_string_ex(&delim);
-	}
 	Z_TYPE_P(retval) = return_type = Z_TYPE_P(delim); /* ... to start off */
 
 	/* Setup return value */
@@ -1169,18 +1166,14 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 	}
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
-	for (i = 1 ; i <= numelems ; i++) {
-		if (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&tmp, &pos) != SUCCESS) {
-			/* Shouldn't happen ? */
-			return;
-		}
-		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&tmp, &pos) == SUCCESS) {
 		if (Z_TYPE_PP(tmp) != return_type) {
 			/* Convert to common type, if possible */
 			if (return_type == IS_UNICODE) {
 				if (Z_TYPE_PP(tmp) == IS_BINARY) {
 					/* ERROR */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Mixed string types");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+									 "Cannot mix binary strings with other string types");
 					efree(Z_USTRVAL_P(retval));
 					ZVAL_FALSE(retval);
 					return;
@@ -1191,7 +1184,8 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 			} else if (return_type == IS_BINARY) {
 				if (Z_TYPE_PP(tmp) == IS_UNICODE || Z_TYPE_PP(tmp) == IS_STRING) {
 					/* ERROR */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Mixed string types");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+									 "Cannot mix binary strings with other string types");
 					efree(Z_BINVAL_P(retval));
 					ZVAL_FALSE(retval);
 					return;
@@ -1207,7 +1201,8 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 					Z_TYPE_P(retval) = return_type = IS_UNICODE;
 				} else if (Z_TYPE_PP(tmp) == IS_BINARY) {
 					/* ERROR */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Mixed string types");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+									 "Cannot mix binary strings with other string types");
 					efree(Z_STRVAL_P(retval));
 					ZVAL_FALSE(retval);
 					return;
@@ -1222,30 +1217,30 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 		if (return_type == IS_UNICODE) {
 			Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
 											Z_USTRLEN_P(retval)+Z_USTRLEN_PP(tmp));
-			memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval),
-				   Z_USTRVAL_PP(tmp), Z_USTRLEN_PP(tmp)*sizeof(UChar));
+			memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_PP(tmp),
+				   UBYTES(Z_USTRLEN_PP(tmp)));
 			Z_USTRLEN_P(retval) += Z_USTRLEN_PP(tmp);
-			if (i < numelems) { /* Append delim */
+			if (++i < numelems) { /* Append delim */
 				Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
 												Z_USTRLEN_P(retval)+Z_USTRLEN_P(delim));
-				memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval),
-					   Z_USTRVAL_P(delim), Z_USTRLEN_P(delim)*sizeof(UChar));
+				memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_P(delim),
+					   UBYTES(Z_USTRLEN_P(delim)));
 				Z_USTRLEN_P(retval) += Z_USTRLEN_P(delim);
 			}
 		} else {
 			Z_STRVAL_P(retval) = (char *)erealloc(Z_STRVAL_P(retval),
 												  Z_STRLEN_P(retval)+Z_STRLEN_PP(tmp));
-			memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval),
-				   Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+			memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 			Z_STRLEN_P(retval) += Z_STRLEN_PP(tmp);
-			if (i < numelems) { /* Append delim */
+			if (++i < numelems) { /* Append delim */
 				Z_STRVAL_P(retval) = (char *)erealloc(Z_STRVAL_P(retval),
 													  Z_STRLEN_P(retval)+Z_STRLEN_P(delim));
-				memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval),
-					   Z_STRVAL_P(delim), Z_STRLEN_P(delim));
+				memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_P(delim), Z_STRLEN_P(delim));
 				Z_STRLEN_P(retval) += Z_STRLEN_P(delim);
 			}
 		}
+
+		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
 	}
 
 	return;
@@ -1272,10 +1267,14 @@ PHP_FUNCTION(implode)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument to implode must be an array.");
 			RETURN_FALSE;
 		} else {
-			MAKE_STD_ZVAL(delim);
-			ZVAL_STRINGL(delim, "", sizeof("")-1, 0);
 			SEPARATE_ZVAL(arg1);
 			arr = *arg1;
+			MAKE_STD_ZVAL(delim);
+			if (UG(unicode)) {
+				ZVAL_UNICODEL(delim, USTR_MAKE(""), sizeof("")-1, 0);
+			} else {
+				ZVAL_STRINGL(delim, "", sizeof("")-1, 0);
+			}
 		}
 	} else {
 		if (Z_TYPE_PP(arg1) == IS_ARRAY) {
@@ -1291,6 +1290,9 @@ PHP_FUNCTION(implode)
 			RETURN_FALSE;
 		}
 		SEPARATE_ZVAL(&delim);
+		if (Z_TYPE_P(delim) != IS_BINARY) {
+			convert_to_text_ex(&delim);
+		}
 	}
 
 	php_implode(delim, arr, return_value);
