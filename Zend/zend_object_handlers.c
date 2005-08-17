@@ -291,7 +291,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	zobj = Z_OBJ_P(object);
 	use_get = (zobj->ce->__get && !zobj->in_get);
 
- 	if (member->type != IS_STRING && member->type != IS_UNICODE) {
+	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
@@ -347,7 +347,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	zobj = Z_OBJ_P(object);
 	use_set = (zobj->ce->__set && !zobj->in_set);
 
-	if (member->type != IS_STRING && member->type != IS_UNICODE) {
+	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
@@ -494,7 +494,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	
 	zobj = Z_OBJ_P(object);
 
-	if (member->type != IS_STRING && member->type != IS_UNICODE) {
+	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_text(&tmp_member);
@@ -539,7 +539,7 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 	zobj = Z_OBJ_P(object);
 	use_unset = (zobj->ce->__unset && !zobj->in_unset);
 
-	if (member->type != IS_STRING && member->type != IS_UNICODE) {
+	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
@@ -919,7 +919,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists 
 	zobj = Z_OBJ_P(object);
 	use_isset = (zobj->ce->__isset && !zobj->in_isset);
 
-	if (member->type != IS_STRING && member->type != IS_UNICODE) {
+	if (member->type != IS_UNICODE && (UG(unicode) || member->type != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
 		*tmp_member = *member;
 		INIT_PZVAL(tmp_member);
