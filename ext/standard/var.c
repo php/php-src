@@ -807,7 +807,7 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 							break;
 						}
 						efree(prot_name);
-						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_PP(name));
+						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%R\" returned as member variable from __sleep() but does not exist", Z_TYPE_PP(name), Z_UNIVAL_PP(name));
 						if (Z_TYPE_PP(name) == IS_UNICODE) {
 							php_var_serialize_unicode(buf, Z_USTRVAL_PP(name), Z_USTRLEN_PP(name));
 						} else {

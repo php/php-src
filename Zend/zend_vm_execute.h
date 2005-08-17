@@ -1400,7 +1400,7 @@ static int zend_fetch_var_address_helper_SPEC_CONST(int type, ZEND_OPCODE_HANDLE
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
+		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
@@ -2187,7 +2187,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1 TSRMLS_CC);
 		if (!value) {
 			isset = 0;
 		}
@@ -3908,7 +3908,7 @@ static int zend_fetch_var_address_helper_SPEC_TMP(int type, ZEND_OPCODE_HANDLER_
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
+		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
@@ -4695,7 +4695,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1 TSRMLS_CC);
 		if (!value) {
 			isset = 0;
 		}
@@ -6951,7 +6951,7 @@ static int zend_fetch_var_address_helper_SPEC_VAR(int type, ZEND_OPCODE_HANDLER_
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
+		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
@@ -7979,7 +7979,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1 TSRMLS_CC);
 		if (!value) {
 			isset = 0;
 		}
@@ -19645,7 +19645,7 @@ static int zend_fetch_var_address_helper_SPEC_CV(int type, ZEND_OPCODE_HANDLER_A
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
+		retval = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 0 TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), type, varname TSRMLS_CC);
 /*
@@ -20502,7 +20502,7 @@ static int ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 1 TSRMLS_CC);
+		value = zend_std_get_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname), 1 TSRMLS_CC);
 		if (!value) {
 			isset = 0;
 		}
