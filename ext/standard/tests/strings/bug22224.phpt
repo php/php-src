@@ -24,3 +24,13 @@ array(2) {
   &object(foo)#%d (0) {
   }
 }
+--UEXPECTF--
+unicode(13) "Object,Object"
+array(2) {
+  [0]=>
+  &object(foo)#%d (0) {
+  }
+  [1]=>
+  &object(foo)#%d (0) {
+  }
+}

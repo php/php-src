@@ -1216,26 +1216,24 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *retval)
 		/* Append elem */
 		if (return_type == IS_UNICODE) {
 			Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
-											Z_USTRLEN_P(retval)+Z_USTRLEN_PP(tmp));
-			memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_PP(tmp),
-				   UBYTES(Z_USTRLEN_PP(tmp)));
+											UBYTES(Z_USTRLEN_P(retval)+Z_USTRLEN_PP(tmp)+1));
+			memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_PP(tmp), UBYTES(Z_USTRLEN_PP(tmp)+1));
 			Z_USTRLEN_P(retval) += Z_USTRLEN_PP(tmp);
 			if (++i < numelems) { /* Append delim */
 				Z_USTRVAL_P(retval) = eurealloc(Z_USTRVAL_P(retval),
-												Z_USTRLEN_P(retval)+Z_USTRLEN_P(delim));
-				memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_P(delim),
-					   UBYTES(Z_USTRLEN_P(delim)));
+												UBYTES(Z_USTRLEN_P(retval)+Z_USTRLEN_P(delim)+1));
+				memcpy(Z_USTRVAL_P(retval)+Z_USTRLEN_P(retval), Z_USTRVAL_P(delim), UBYTES(Z_USTRLEN_P(delim)+1));
 				Z_USTRLEN_P(retval) += Z_USTRLEN_P(delim);
 			}
 		} else {
 			Z_STRVAL_P(retval) = (char *)erealloc(Z_STRVAL_P(retval),
-												  Z_STRLEN_P(retval)+Z_STRLEN_PP(tmp));
-			memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+												  Z_STRLEN_P(retval)+Z_STRLEN_PP(tmp)+1);
+			memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp)+1);
 			Z_STRLEN_P(retval) += Z_STRLEN_PP(tmp);
 			if (++i < numelems) { /* Append delim */
 				Z_STRVAL_P(retval) = (char *)erealloc(Z_STRVAL_P(retval),
-													  Z_STRLEN_P(retval)+Z_STRLEN_P(delim));
-				memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_P(delim), Z_STRLEN_P(delim));
+													  Z_STRLEN_P(retval)+Z_STRLEN_P(delim)+1);
+				memcpy(Z_STRVAL_P(retval)+Z_STRLEN_P(retval), Z_STRVAL_P(delim), Z_STRLEN_P(delim)+1);
 				Z_STRLEN_P(retval) += Z_STRLEN_P(delim);
 			}
 		}
@@ -1271,7 +1269,7 @@ PHP_FUNCTION(implode)
 			arr = *arg1;
 			MAKE_STD_ZVAL(delim);
 			if (UG(unicode)) {
-				ZVAL_UNICODEL(delim, USTR_MAKE(""), sizeof("")-1, 0);
+				ZVAL_UNICODEL(delim, EMPTY_STR, sizeof("")-1, 0);
 			} else {
 				ZVAL_STRINGL(delim, "", sizeof("")-1, 0);
 			}
@@ -1280,18 +1278,20 @@ PHP_FUNCTION(implode)
 		if (Z_TYPE_PP(arg1) == IS_ARRAY) {
 			SEPARATE_ZVAL(arg1);
 			arr = *arg1;
+			if (Z_TYPE_PP(arg2) != IS_UNICODE && Z_TYPE_PP(arg2) != IS_BINARY && Z_TYPE_PP(arg2) != IS_STRING) {
+				convert_to_text_ex(arg2);
+			}
 			delim = *arg2;
 		} else if (Z_TYPE_PP(arg2) == IS_ARRAY) {
 			SEPARATE_ZVAL(arg2);
 			arr = *arg2;
+			if (Z_TYPE_PP(arg1) != IS_UNICODE && Z_TYPE_PP(arg1) != IS_BINARY && Z_TYPE_PP(arg1) != IS_STRING) {
+				convert_to_text_ex(arg1);
+			}
 			delim = *arg1;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad arguments.");
 			RETURN_FALSE;
-		}
-		SEPARATE_ZVAL(&delim);
-		if (Z_TYPE_P(delim) != IS_BINARY) {
-			convert_to_text_ex(&delim);
 		}
 	}
 
