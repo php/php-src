@@ -48,3 +48,6 @@
 * output.c needs a lot of work as it passes char* around
 
 * Should strtoupper()/strtolower() use full or simple case mapping?
+
+* Replace all instances of EMPTY_STR with U_EMPTY_STR which is defined to be
+  ((UChar*)"\0\0")
