@@ -47,14 +47,4 @@
 
 * output.c needs a lot of work as it passes char* around
 
-* Require and/or bundle ICU 3.4.
-
-* Right now if a function passes "TT" to zend_parse_parameters(), and one of
-  the arguments is IS_BINARY, then all of the rest of T arguments are
-  converted to IS_BINARY as well. I will modify it so that if one of the other
-  arguments is IS_UNICODE then we generate an error and abort parsing. If we
-  do run across a function that really needs to accept IS_BINARY as one
-  argument and IS_UNICODE as another, then we can use "bu" for the parsing
-  format.
-
 * Should strtoupper()/strtolower() use full or simple case mapping?
