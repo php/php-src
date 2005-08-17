@@ -49,11 +49,12 @@
   </maintainers>
   <release>
     <version>1.3.6</version>
-    <date>2005-08-16</date>
+    <date>2005-08-17</date>
     <state>stable</state>
     <license>PHP License</license>
     <notes>
  * Bump XML_RPC dependency to 1.4.0
+ * return by reference from PEAR::raiseError()
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
