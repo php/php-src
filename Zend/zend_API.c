@@ -572,8 +572,16 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 							convert_to_string_ex(arg);
 							RETURN_AS_STRING(arg, p, pl, type);
 						} else {
-							convert_to_binary_ex(arg);
-							RETURN_AS_BINARY(arg, p, pl, type);
+							if (Z_TYPE_PP(arg) == IS_UNICODE) {
+								char *space;
+								char *class_name = get_active_class_name(&space TSRMLS_CC);
+								zend_error(E_WARNING, "%v%s%v() does not allow mixing binary and Unicode parameters",
+										   class_name, space, get_active_function_name(TSRMLS_C));
+								return "native or binary string";
+							} else {
+								convert_to_binary_ex(arg);
+								RETURN_AS_BINARY(arg, p, pl, type);
+							}
 						}
 						break;
 
