@@ -1,5 +1,7 @@
 --TEST--
 Unicode: strpos() function test
+--INI--
+unicode_semantics=on
 --FILE--
 <?php
 $a = "a™ᄒ\U020021z";
