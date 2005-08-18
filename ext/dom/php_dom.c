@@ -72,29 +72,7 @@ zend_object_handlers dom_object_handlers;
 zend_object_handlers dom_ze1_object_handlers;
 
 static HashTable classes;
-
-static HashTable dom_domstringlist_prop_handlers;
-static HashTable dom_namelist_prop_handlers;
-static HashTable dom_domimplementationlist_prop_handlers;
-static HashTable dom_document_prop_handlers;
-static HashTable dom_node_prop_handlers;
-static HashTable dom_nodelist_prop_handlers;
-static HashTable dom_namednodemap_prop_handlers;
-static HashTable dom_characterdata_prop_handlers;
-static HashTable dom_attr_prop_handlers;
-static HashTable dom_element_prop_handlers;
-static HashTable dom_text_prop_handlers;
-static HashTable dom_typeinfo_prop_handlers;
-static HashTable dom_domerror_prop_handlers;
-static HashTable dom_domlocator_prop_handlers;
-static HashTable dom_documenttype_prop_handlers;
-static HashTable dom_notation_prop_handlers;
-static HashTable dom_entity_prop_handlers;
-static HashTable dom_processinginstruction_prop_handlers;
-static HashTable dom_namespace_node_prop_handlers;
-#if defined(LIBXML_XPATH_ENABLED)
-static HashTable dom_xpath_prop_handlers;
-#endif
+static HashTable u_classes;
 
 typedef int (*dom_read_t)(dom_object *obj, zval **retval TSRMLS_DC);
 typedef int (*dom_write_t)(dom_object *obj, zval *newval TSRMLS_DC);
@@ -465,10 +443,49 @@ zend_module_entry dom_module_entry = {
 ZEND_GET_MODULE(dom)
 #endif
 
+static void dom_prop_handlers_dtor(HashTable *ht)
+{
+	zend_hash_destroy(ht);
+}
+
+static void dom_prop_handlers_ctor(HashTable *ht)
+{
+	HashTable tmp = *ht;
+
+	zend_u_hash_init(ht, 0, NULL, NULL, 1, 1);
+	zend_hash_copy(ht, &tmp, NULL, NULL, sizeof(dom_prop_handler));
+}
+
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
 {
 	zend_class_entry ce;
+	HashTable dom_domstringlist_prop_handlers;
+	HashTable dom_namelist_prop_handlers;
+	HashTable dom_domimplementationlist_prop_handlers;
+	HashTable dom_document_prop_handlers;
+	HashTable dom_node_prop_handlers;
+	HashTable dom_document_fragment_prop_handlers;
+	HashTable dom_nodelist_prop_handlers;
+	HashTable dom_namednodemap_prop_handlers;
+	HashTable dom_characterdata_prop_handlers;
+	HashTable dom_attr_prop_handlers;
+	HashTable dom_element_prop_handlers;
+	HashTable dom_text_prop_handlers;
+	HashTable dom_cdata_prop_handlers;
+	HashTable dom_comment_prop_handlers;
+	HashTable dom_typeinfo_prop_handlers;
+	HashTable dom_domerror_prop_handlers;
+	HashTable dom_domlocator_prop_handlers;
+	HashTable dom_documenttype_prop_handlers;
+	HashTable dom_notation_prop_handlers;
+	HashTable dom_entity_prop_handlers;
+	HashTable dom_processinginstruction_prop_handlers;
+	HashTable dom_namespace_node_prop_handlers;
+	HashTable dom_entity_reference_prop_handlers;
+#if defined(LIBXML_XPATH_ENABLED)
+	HashTable dom_xpath_prop_handlers;
+#endif
 
 	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_object_handlers.read_property = dom_read_property;
@@ -482,7 +499,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_ze1_object_handlers.clone_obj = dom_objects_ze1_clone_obj;
 
-	zend_hash_init(&classes, 0, NULL, NULL, 1);
+	zend_hash_init(&classes, 0, NULL, (void (*)(void *))dom_prop_handlers_dtor, 1);
 
 	INIT_CLASS_ENTRY(ce, "DOMException", php_dom_domexception_class_functions);
 	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
@@ -545,7 +562,9 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_namespace_node_prop_handlers, sizeof(dom_namespace_node_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMDocumentFragment", dom_node_class_entry, php_dom_documentfragment_class_functions, dom_documentfragment_class_entry);
-	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_node_prop_handlers, sizeof(dom_node_prop_handlers), NULL);
+	zend_hash_init(&dom_document_fragment_prop_handlers, 0, NULL, NULL, 1);
+	zend_hash_copy(&dom_document_fragment_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler));
+	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_document_fragment_prop_handlers, sizeof(dom_node_prop_handlers), NULL);
 	
 	REGISTER_DOM_CLASS(ce, "DOMDocument", dom_node_class_entry, php_dom_document_class_functions, dom_document_class_entry);
 	zend_hash_init(&dom_document_prop_handlers, 0, NULL, NULL, 1);
@@ -625,7 +644,9 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_text_prop_handlers, sizeof(dom_text_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMComment", dom_characterdata_class_entry, php_dom_comment_class_functions, dom_comment_class_entry);
-	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_characterdata_prop_handlers, sizeof(dom_typeinfo_prop_handlers), NULL);
+	zend_hash_init(&dom_comment_prop_handlers, 0, NULL, NULL, 1);
+	zend_hash_copy(&dom_comment_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler));
+	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_comment_prop_handlers, sizeof(dom_typeinfo_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMTypeinfo", NULL, php_dom_typeinfo_class_functions, dom_typeinfo_class_entry);
 	
@@ -659,7 +680,9 @@ PHP_MINIT_FUNCTION(dom)
 
 	REGISTER_DOM_CLASS(ce, "DOMConfiguration", NULL, php_dom_domconfiguration_class_functions, dom_domconfiguration_class_entry);
 	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
-	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_text_prop_handlers, sizeof(dom_documenttype_prop_handlers), NULL);
+	zend_hash_init(&dom_cdata_prop_handlers, 0, NULL, NULL, 1);
+	zend_hash_copy(&dom_cdata_prop_handlers, &dom_text_prop_handlers, NULL, NULL, sizeof(dom_prop_handler));
+	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_cdata_prop_handlers, sizeof(dom_documenttype_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMDocumentType", dom_node_class_entry, php_dom_documenttype_class_functions, dom_documenttype_class_entry);
 	
@@ -698,7 +721,9 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_entity_prop_handlers, sizeof(dom_entity_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMEntityReference", dom_node_class_entry, php_dom_entityreference_class_functions, dom_entityreference_class_entry);
-	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_node_prop_handlers, sizeof(dom_entity_prop_handlers), NULL);
+	zend_hash_init(&dom_entity_reference_prop_handlers, 0, NULL, NULL, 1);
+	zend_hash_copy(&dom_entity_reference_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler));
+	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_entity_reference_prop_handlers, sizeof(dom_entity_prop_handlers), NULL);
 
 	REGISTER_DOM_CLASS(ce, "DOMProcessingInstruction", dom_node_class_entry, php_dom_processinginstruction_class_functions, dom_processinginstruction_class_entry);
 	
@@ -773,6 +798,9 @@ PHP_MINIT_FUNCTION(dom)
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 
+	zend_u_hash_init(&u_classes, 0, NULL, (void (*)(void *))dom_prop_handlers_dtor, 1, 1);
+	zend_hash_copy(&u_classes, &classes, (copy_ctor_func_t)dom_prop_handlers_ctor, NULL, sizeof(HashTable));
+
 	return SUCCESS;
 }
 /* }}} */
@@ -803,29 +831,8 @@ PHP_MINFO_FUNCTION(dom)
 
 PHP_MSHUTDOWN_FUNCTION(dom)
 {
-	zend_hash_destroy(&dom_domstringlist_prop_handlers);
-	zend_hash_destroy(&dom_namelist_prop_handlers);
-	zend_hash_destroy(&dom_domimplementationlist_prop_handlers);
-	zend_hash_destroy(&dom_document_prop_handlers);
-	zend_hash_destroy(&dom_node_prop_handlers);
-	zend_hash_destroy(&dom_namespace_node_prop_handlers);
-	zend_hash_destroy(&dom_nodelist_prop_handlers);
-	zend_hash_destroy(&dom_namednodemap_prop_handlers);
-	zend_hash_destroy(&dom_characterdata_prop_handlers);
-	zend_hash_destroy(&dom_attr_prop_handlers);
-	zend_hash_destroy(&dom_element_prop_handlers);
-	zend_hash_destroy(&dom_text_prop_handlers);
-	zend_hash_destroy(&dom_typeinfo_prop_handlers);
-	zend_hash_destroy(&dom_domerror_prop_handlers);
-	zend_hash_destroy(&dom_domlocator_prop_handlers);
-	zend_hash_destroy(&dom_documenttype_prop_handlers);
-	zend_hash_destroy(&dom_notation_prop_handlers);
-	zend_hash_destroy(&dom_entity_prop_handlers);
-	zend_hash_destroy(&dom_processinginstruction_prop_handlers);
-#if defined(LIBXML_XPATH_ENABLED)
-	zend_hash_destroy(&dom_xpath_prop_handlers);
-#endif
 	zend_hash_destroy(&classes);
+	zend_hash_destroy(&u_classes);
 	
 /*	If you want do find memleaks in this module, compile libxml2 with --with-mem-debug and
 	uncomment the following line, this will tell you the amount of not freed memory
@@ -952,7 +959,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 		base_class = base_class->parent;
 	}
 
-	zend_hash_find(&classes, base_class->name, base_class->name_length + 1, (void **) &intern->prop_handler);
+	zend_u_hash_find(UG(unicode)?&u_classes:&classes, UG(unicode)?IS_UNICODE:IS_STRING, base_class->name, base_class->name_length + 1, (void **) &intern->prop_handler);
 
 	ALLOC_HASHTABLE(intern->std.properties);
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
