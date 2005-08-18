@@ -2962,7 +2962,7 @@ static void php_u_ucwords(zval *ustr, zval *retval)
 	codepts[0] = u_toupper(codepts[0]);
 	for (i = 1; i < len ; i++) {
 		if (u_isWhitespace(codepts[i-1]) == TRUE) {
-			codepts[i] = u_toupper(codepts[i]);
+			codepts[i] = u_totitle(codepts[i]);
 		}
 	}
 
