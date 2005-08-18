@@ -565,7 +565,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 			) {
 			ORA(db_err_conn) = *db_conn;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Oracle: Connection Failed: %s\n",ora_error(&db_conn->lda));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Oracle: Connection Failed: %s",ora_error(&db_conn->lda));
 			efree(hashed_details);
 			efree(db_conn);
 			RETURN_FALSE;
