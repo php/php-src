@@ -411,14 +411,23 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 
 /* {{{ php_ob_init_named
  */
-static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
+static int php_ob_init_named(uint initial_size, uint block_size, zend_uchar type, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
+	int handler_len;
+
 	if (output_handler && !zend_is_callable(output_handler, 0, NULL)) {
 		return FAILURE;
 	}
+	if (type == IS_UNICODE) {
+		handler_len = u_strlen(handler_name);
+	} else {
+		handler_len = strlen(handler_name);
+	}
 	if (OG(ob_nesting_level)>0) {
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_C)) {
+		if ((handler_len == sizeof("ob_gzhandler")-1) && 
+		    (ZEND_U_EQUAL(type, handler_name, handler_len, "ob_gzhandler", sizeof("ob_gzhandler"))) &&
+		    php_ob_gzhandler_check(TSRMLS_C)) {
 			return FAILURE;
 		}
 #endif
@@ -436,7 +445,11 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	OG(active_ob_buffer).chunk_size = chunk_size;
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
-	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:OB_DEFAULT_HANDLER_NAME);
+	if (type == IS_UNICODE) {
+		OG(active_ob_buffer).handler_name = eustrdup(handler_name&&handler_name[0]?handler_name:OB_DEFAULT_HANDLER_NAME);
+	} else {
+		OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:OB_DEFAULT_HANDLER_NAME);
+	}
 	OG(active_ob_buffer).erase = erase;
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
@@ -458,18 +471,33 @@ static zval* php_ob_handler_from_string(const char *handler_name, int len TSRMLS
 }
 /* }}} */
 
+/* {{{ php_ob_handler_from_unicode
+ * Create zval output handler from unicode 
+ */
+static zval* php_ob_handler_from_unicode(const UChar *handler_name, int len TSRMLS_DC)
+{
+	zval *output_handler;
+
+	ALLOC_INIT_ZVAL(output_handler);
+	Z_USTRLEN_P(output_handler) = len;
+	Z_USTRVAL_P(output_handler) = eustrndup(handler_name, len);
+	Z_TYPE_P(output_handler) = IS_UNICODE;
+	return output_handler;
+}
+/* }}} */
+
 /* {{{ php_ob_init
  */
 static int php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
 	int result = FAILURE, handler_len, len;
-	char *handler_name, *next_handler_name;
 	HashPosition pos;
 	zval **tmp;
 	zval *handler_zval;
 
 	if (output_handler && output_handler->type == IS_STRING) {
-		handler_name = Z_STRVAL_P(output_handler);
+		char* next_handler_name;
+		char* handler_name = Z_STRVAL_P(output_handler);
 		handler_len  = Z_STRLEN_P(output_handler);
 
 		result = SUCCESS;
@@ -478,7 +506,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 				len = next_handler_name-handler_name;
 				next_handler_name = estrndup(handler_name, len);
 				handler_zval = php_ob_handler_from_string(next_handler_name, len TSRMLS_CC);
-				result = php_ob_init_named(initial_size, block_size, next_handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+				result = php_ob_init_named(initial_size, block_size, IS_STRING, next_handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
 				if (result != SUCCESS) {
 					zval_dtor(handler_zval);
 					FREE_ZVAL(handler_zval);
@@ -490,18 +518,49 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 		}
 		if (result == SUCCESS) {
 			handler_zval = php_ob_handler_from_string(handler_name, handler_len TSRMLS_CC);
-			result = php_ob_init_named(initial_size, block_size, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+			result = php_ob_init_named(initial_size, block_size, IS_STRING, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+			if (result != SUCCESS) {
+				zval_dtor(handler_zval);
+				FREE_ZVAL(handler_zval);
+			}
+		}
+	} else if (output_handler && output_handler->type == IS_UNICODE) {
+		UChar* next_handler_name;
+		UChar* handler_name = Z_USTRVAL_P(output_handler);
+		handler_len  = Z_USTRLEN_P(output_handler);
+
+		result = SUCCESS;
+		if (handler_len && handler_name[0] != 0) {
+			while ((next_handler_name=u_strchr(handler_name, ',')) != NULL) {
+				len = next_handler_name-handler_name;
+				next_handler_name = eustrndup(handler_name, len);
+				handler_zval = php_ob_handler_from_unicode(next_handler_name, len TSRMLS_CC);
+				result = php_ob_init_named(initial_size, block_size, IS_UNICODE, next_handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+				if (result != SUCCESS) {
+					zval_dtor(handler_zval);
+					FREE_ZVAL(handler_zval);
+				}
+				handler_name += len+1;
+				handler_len -= len+1;
+				efree(next_handler_name);
+			}
+		}
+		if (result == SUCCESS) {
+			handler_zval = php_ob_handler_from_unicode(handler_name, handler_len TSRMLS_CC);
+			result = php_ob_init_named(initial_size, block_size, IS_UNICODE, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
 			if (result != SUCCESS) {
 				zval_dtor(handler_zval);
 				FREE_ZVAL(handler_zval);
 			}
 		}
 	} else if (output_handler && output_handler->type == IS_ARRAY) {
+		char* handler_name;
+
 		/* do we have array(object,method) */
 		if (zend_is_callable(output_handler, 0, &handler_name)) {
 			SEPARATE_ZVAL(&output_handler);
 			output_handler->refcount++;
-			result = php_ob_init_named(initial_size, block_size, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
+			result = php_ob_init_named(initial_size, block_size, UG(unicode)?IS_UNICODE:IS_STRING, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
 			efree(handler_name);
 		} else {
 			efree(handler_name);
@@ -519,7 +578,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No method name given: use ob_start(array($object,'method')) to specify instance $object and the name of a method of class %v to use as output handler", Z_OBJCE_P(output_handler)->name);
 		result = FAILURE;
 	} else {
-		result = php_ob_init_named(initial_size, block_size, OB_DEFAULT_HANDLER_NAME, NULL, chunk_size, erase TSRMLS_CC);
+		result = php_ob_init_named(initial_size, block_size, IS_STRING, OB_DEFAULT_HANDLER_NAME, NULL, chunk_size, erase TSRMLS_CC);
 	}
 	return result;
 }
