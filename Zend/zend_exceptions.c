@@ -130,15 +130,20 @@ ZEND_METHOD(exception, __construct)
 	long   code = 0;
 	zval  *object;
 	int    argc = ZEND_NUM_ARGS(), message_len;
+	zend_uchar message_type;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sl", &message, &message_len, &code) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|tl", &message, &message_len, &message_type, &code) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameter count for exception([string $exception [, long $code ]])");
 	}
 
 	object = getThis();
 
 	if (message) {
-		zend_update_property_string(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message TSRMLS_CC);
+		if (message_type == IS_UNICODE) {
+			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		} else {
+			zend_update_property_stringl(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		}
 	}
 
 	if (code) {
@@ -156,15 +161,20 @@ ZEND_METHOD(error_exception, __construct)
 	long   code = 0, severity = E_ERROR, lineno;
 	zval  *object;
 	int    argc = ZEND_NUM_ARGS(), message_len, filename_len;
+	zend_uchar message_type, file_type;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sllsl", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|tlltl", &message, &message_len, &message_type, &code, &severity, &filename, &filename_len, &file_type, &lineno) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameter count for exception([string $exception [, long $code ]])");
 	}
 
 	object = getThis();
 
 	if (message) {
-		zend_update_property_string(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message TSRMLS_CC);
+		if (message_type == IS_UNICODE) {
+			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		} else {
+			zend_update_property_stringl(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		}
 	}
 
 	if (code) {
@@ -174,11 +184,15 @@ ZEND_METHOD(error_exception, __construct)
 	zend_update_property_long(U_CLASS_ENTRY(default_exception_ce), object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
 	
 	if (argc >= 4) {
-	    zend_update_property_string(U_CLASS_ENTRY(default_exception_ce), object, "file", sizeof("file")-1, filename TSRMLS_CC);
-    	if (argc < 5) {
-    	    lineno = 0; /* invalidate lineno */
-    	}
-    	zend_update_property_long(U_CLASS_ENTRY(default_exception_ce), object, "line", sizeof("line")-1, lineno TSRMLS_CC);
+		if (file_type == IS_UNICODE) {
+			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "file", sizeof("file")-1, filename, filename_len TSRMLS_CC);
+		} else {	
+			zend_update_property_stringl(U_CLASS_ENTRY(default_exception_ce), object, "file", sizeof("file")-1, filename, filename_len TSRMLS_CC);
+		}
+		if (argc < 5) {
+			lineno = 0; /* invalidate lineno */
+		}
+		zend_update_property_long(U_CLASS_ENTRY(default_exception_ce), object, "line", sizeof("line")-1, lineno TSRMLS_CC);
 	}
 }
 /* }}} */
