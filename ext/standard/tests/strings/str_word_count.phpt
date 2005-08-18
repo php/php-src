@@ -78,7 +78,7 @@ Warning: str_word_count() expects parameter 2 to be long, array given in %s on l
 Warning: Wrong parameter count for str_word_count() in %s on line 13
 NULL
 
-Warning: str_word_count() expects parameter 2 to be long, string given in %s on line 14
+Warning: str_word_count() expects parameter 2 to be long, native string given in %s on line 14
 
 Warning: Wrong parameter count for str_word_count() in %s on line 14
 NULL
@@ -88,12 +88,12 @@ int(5)
 int(6)
 int(5)
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 21
+Warning: str_word_count() expects parameter 3 to be native string, array given in %s on line 21
 
 Warning: Wrong parameter count for str_word_count() in %s on line 21
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 22
+Warning: str_word_count() expects parameter 3 to be native string, object given in %s on line 22
 
 Warning: Wrong parameter count for str_word_count() in %s on line 22
 NULL
@@ -137,12 +137,12 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 27
+Warning: str_word_count() expects parameter 3 to be native string, array given in %s on line 27
 
 Warning: Wrong parameter count for str_word_count() in %s on line 27
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 28
+Warning: str_word_count() expects parameter 3 to be native string, object given in %s on line 28
 
 Warning: Wrong parameter count for str_word_count() in %s on line 28
 NULL
@@ -201,12 +201,12 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: str_word_count() expects parameter 3 to be string, array given in %s on line 33
+Warning: str_word_count() expects parameter 3 to be native string, array given in %s on line 33
 
 Warning: Wrong parameter count for str_word_count() in %s on line 33
 NULL
 
-Warning: str_word_count() expects parameter 3 to be string, object given in %s on line 34
+Warning: str_word_count() expects parameter 3 to be native string, object given in %s on line 34
 
 Warning: Wrong parameter count for str_word_count() in %s on line 34
 NULL
