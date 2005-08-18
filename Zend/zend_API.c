@@ -1971,7 +1971,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
-				zend_error(error_type, "Invalid access level for %s%s%s() - access must be exactly one of public, protected or private", scope ? scope->name : EMPTY_STR, scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Invalid access level for %s%s%s() - access must be exactly one of public, protected or private", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 				internal_function->fn_flags = ZEND_ACC_PUBLIC;
 			} else {
 				internal_function->fn_flags = ptr->flags;
@@ -1996,7 +1996,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				return FAILURE;
 			}
 			if (!internal_function->handler) {
-				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? scope->name : EMPTY_STR, scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 				zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 				return FAILURE;
 			}
@@ -2052,7 +2052,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		}
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
-				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? scope->name : EMPTY_STR, scope ? "::" : "", ptr->fname);
+				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 			}
 			ptr++;
 		}
