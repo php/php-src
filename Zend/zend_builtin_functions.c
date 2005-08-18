@@ -229,6 +229,7 @@ ZEND_FUNCTION(func_get_arg)
 	arg = *(p-(arg_count-requested_offset));
 	*return_value = *arg;
 	zval_copy_ctor(return_value);
+	INIT_PZVAL(return_value);
 }
 /* }}} */
 
