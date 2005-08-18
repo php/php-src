@@ -621,11 +621,11 @@ END_EXTERN_C()
 		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 1, 0);	\
 	}
 
-#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount, _is_ref)				\
+#define ZEND_U_SET_SYMBOL_WITH_LENGTH(symtable, type, name, name_length, var, _refcount, _is_ref)				\
 	{																									\
 		zval **orig_var;																				\
 																										\
-		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
+		if (zend_u_hash_find(symtable, (type), (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
 			(var)->refcount = (*orig_var)->refcount;													\
 			(var)->is_ref = 1;																			\
@@ -641,10 +641,12 @@ END_EXTERN_C()
 			if (_refcount) {																			\
 				(var)->refcount = _refcount;															\
 			}																							\
-			zend_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);			\
+			zend_u_hash_update(symtable, (type), (name), (name_length), &(var), sizeof(zval *), NULL);			\
 		}																								\
 	}
 
+#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount, _is_ref)				\
+	ZEND_U_SET_SYMBOL_WITH_LENGTH(symtable, IS_STRING, name, name_length, var, _refcount, _is_ref)
 
 #define ZEND_SET_GLOBAL_VAR(name, var)				\
 	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
