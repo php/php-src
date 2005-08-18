@@ -235,7 +235,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 
 ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
 ZEND_API int zend_get_object_classname(zval *object, char **class_name, zend_uint *class_name_len TSRMLS_DC);
-ZEND_API zend_uchar zend_get_best_string_type(int num_args, ...);
+ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...);
 
 #define getThis() (this_ptr)
 
