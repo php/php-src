@@ -1,3 +1,162 @@
+2005-08-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_1)
+      pear/PEAR.php
+      pear/package-PEAR.xml:
+      add return by ref from PEAR::raiseError
+
+    * (PHP_4_4)
+      pear/PEAR.php
+      pear/go-pear-list.php
+      pear/package-PEAR.xml:
+      re-enable XML_RPC 1.4.0
+      add return by ref from PEAR::raiseError
+
+    * (PHP_5_1)
+      pear/go-pear-list.php
+      pear/package-PEAR.xml
+      pear/PEAR/Remote.php:
+      re-enable XML_RPC 1.4.0
+
+2005-08-17  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      Unicode-capable impl of ucwords()
+
+2005-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      - Fix TSRM
+
+    * README.CVS-RULES:
+      - Please use the maintainer switch
+
+2005-08-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c:
+      Disallow mixing binary and Unicode types when T specifiers are used.
+
+    * ext/standard/string.c:
+      Fix bin2hex() to work on binary data and return strings of correct type.
+
+2005-08-17  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      Unicode impl of ucfirst()
+
+2005-08-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_operators.c:
+      - Introduce 'y' specifier for functions expecting binary data.
+      - convert_to_binary() now uses convert_to_string() in non-Unicode mode.
+
+2005-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_object_handlers.c:
+      Unicode mode doesn't allow non-unicode properties
+
+2005-08-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      News for PHP 6, nuked old news.
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+2005-08-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend.h:
+      Bump up Zend version to 3.0.0
+      
+
+    * NEWS
+      unicode-todo.txt
+      unicode-todo.txt:
+      -** empty log message ***
+
+2005-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/range.phpt:
+      Unicode support for range()
+
+    * ext/standard/var.c:
+      Proper handling of unicode strings with \0 in the middle
+
+    * NEWS
+      NEWS
+      NEWS
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/tests/bug32981.phpt
+      ZendEngine2/tests/bug32981.phpt
+      ZendEngine2/tests/bug32981.phpt:
+      Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes
+      apache2.0.54 seg fault)
+
+    * ext/simplexml/tests/004.phpt
+      ext/standard/string.c
+      tests/classes/tostring.phpt:
+      trim() should accept objects with __toString() method
+
+2005-08-17  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      php_u_trim_range(): Alloc UChar32 units rather than UChar
+
+2005-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ext/ctype/ctype.c
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv_mime_decode_headers.phpt
+      ext/iconv/tests/iconv_mime_encode.phpt
+      ext/iconv/tests/iconv_strlen.phpt
+      ext/iconv/tests/iconv_strpos.phpt
+      ext/iconv/tests/iconv_strrpos.phpt
+      ext/iconv/tests/iconv_substr.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt
+      ext/standard/var.c
+      ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/serialize/006.phpt
+      ext/standard/tests/strings/htmlentities.phpt
+      ext/standard/tests/strings/htmlentities15.phpt
+      ext/standard/tests/strings/strtoupper.phpt
+      ext/xml/tests/xml006.phpt
+      ext/xml/tests/xml007.phpt
+      tests/strings/002.phpt:
+      Unicode support
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug22224.phpt:
+      Fixed implode() bugs
+
+2005-08-17  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * main/main.c:
+      Fix EOLs under winblows
+
+2005-08-17  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      Updated implode() impl as per Andrei's comments
+      [http://news.php.net/php.cvs/33457]
+
 2005-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/string.c:

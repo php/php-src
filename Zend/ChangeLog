@@ -1,3 +1,52 @@
+2005-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_operators.c
+      zend_operators.h:
+      - Fix TSRM
+
+2005-08-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Disallow mixing binary and Unicode types when T specifiers are used.
+
+    * zend_API.c
+      zend_operators.c:
+      - Introduce 'y' specifier for functions expecting binary data.
+      - convert_to_binary() now uses convert_to_string() in non-Unicode mode.
+
+2005-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_object_handlers.c:
+      Unicode mode doesn't allow non-unicode properties
+
+2005-08-17  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend.h:
+      Bump up Zend version to 3.0.0
+      
+
+2005-08-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_reflection_api.c
+      zend_reflection_api.c
+      zend_reflection_api.c
+      tests/bug32981.phpt
+      tests/bug32981.phpt
+      tests/bug32981.phpt:
+      Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes
+      apache2.0.54 seg fault)
+
+    * zend_API.c
+      zend_interfaces.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_reflection_api.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Unicode support
+
 2005-08-16  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_compile.c:
