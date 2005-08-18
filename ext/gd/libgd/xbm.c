@@ -147,7 +147,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 		}
 	}
 
-	php_gd_error("EOF before image was complete\n");
+	php_gd_error("EOF before image was complete");
 	gdImageDestroy(im);
 	return 0;
 }

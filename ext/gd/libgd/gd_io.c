@@ -52,20 +52,20 @@ void gdPutC (const unsigned char c, gdIOCtx * ctx)
 
 void gdPutWord (int w, gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Putting word...\n"));
+	IO_DBG (php_gd_error("Putting word..."));
 	(ctx->putC) (ctx, (unsigned char) (w >> 8));
 	(ctx->putC) (ctx, (unsigned char) (w & 0xFF));
-	IO_DBG (php_gd_error("put.\n"));
+	IO_DBG (php_gd_error("put."));
 }
 
 void gdPutInt (int w, gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Putting int...\n"));
+	IO_DBG (php_gd_error("Putting int..."));
 	(ctx->putC) (ctx, (unsigned char) (w >> 24));
 	(ctx->putC) (ctx, (unsigned char) ((w >> 16) & 0xFF));
 	(ctx->putC) (ctx, (unsigned char) ((w >> 8) & 0xFF));
 	(ctx->putC) (ctx, (unsigned char) (w & 0xFF));
-	IO_DBG (php_gd_error("put.\n"));
+	IO_DBG (php_gd_error("put."));
 }
 
 int gdGetC (gdIOCtx * ctx)
@@ -121,9 +121,9 @@ int gdGetInt (int *result, gdIOCtx * ctx)
 
 int gdPutBuf (const void *buf, int size, gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Putting buf...\n"));
+	IO_DBG (php_gd_error("Putting buf..."));
 	return (ctx->putBuf) (ctx, buf, size);
-	IO_DBG (php_gd_error("put.\n"));
+	IO_DBG (php_gd_error("put."));
 }
 
 int gdGetBuf (void *buf, int size, gdIOCtx * ctx)
@@ -133,14 +133,14 @@ int gdGetBuf (void *buf, int size, gdIOCtx * ctx)
 
 int gdSeek (gdIOCtx * ctx, const int pos)
 {
-	IO_DBG (php_gd_error("Seeking...\n"));
+	IO_DBG (php_gd_error("Seeking..."));
 	return ((ctx->seek) (ctx, pos));
-	IO_DBG (php_gd_error("Done.\n"));
+	IO_DBG (php_gd_error("Done."));
 }
 
 long gdTell (gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Telling...\n"));
+	IO_DBG (php_gd_error("Telling..."));
 	return ((ctx->tell) (ctx));
-	IO_DBG (php_gd_error ("told.\n"));
+	IO_DBG (php_gd_error ("told."));
 }
