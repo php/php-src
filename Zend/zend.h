@@ -240,7 +240,7 @@ char *alloca ();
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#define EMPTY_STR "\0\0"
+#define EMPTY_STR ((UChar*)"\0\0")
 
 #undef SUCCESS
 #undef FAILURE
