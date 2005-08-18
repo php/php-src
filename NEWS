@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #34064 (arr[] as param to function is allowed only if function 
   receives argument by reference). (Dmitry)
 - Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP). (Dmitry)
+- Fixed bug #33987 (php script as ErrorDocument causes crash in Apache 2).
+  (Ilia)
 - Fixed bug #33940 (array_map() fails to pass by reference when called
   recursively). (Dmitry)
 - Fixed bug #33690 (Crash setting some ini directives in httpd.conf). (Rasmus)

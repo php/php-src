@@ -527,6 +527,7 @@ static int php_handler(request_rec *r)
 zend_first_try {
 
 	if (ctx == NULL) {
+normal:
 		brigade = apr_brigade_create(r->pool, r->connection->bucket_alloc);
 		ctx = SG(server_context);
 		ctx->brigade = brigade;
@@ -536,6 +537,11 @@ zend_first_try {
 		}
 	} else {
 		parent_req = ctx->r;
+		/* check if comming due to ErrorDocument */
+		if (parent_req != HTTP_OK) {
+			parent_req = NULL;
+			goto normal;
+		}
 		ctx->r = r;
 		brigade = ctx->brigade;
 	}
