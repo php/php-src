@@ -1701,22 +1701,6 @@ PHP_FUNCTION(array_fill)
 }
 /* }}} */
 
-static void u_add_next_index_stringl(zval *arg, char *str, uint length, int duplicate TSRMLS_DC)
-{
-	if (UG(unicode)) {
-		UErrorCode status = U_ZERO_ERROR;
-		UChar *u_str;
-		int32_t u_len;
-
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, str, length, &status);
-		add_next_index_unicodel(arg, u_str, u_len, 0);
-		if (!duplicate) {
-			efree(str);
-		}
-	} else {
-		add_next_index_stringl(arg, str, length, duplicate);
-	}
-}
 
 /* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
@@ -1725,6 +1709,7 @@ PHP_FUNCTION(range)
 	zval *zlow, *zhigh, *zstep = NULL;
 	int err = 0, is_step_double = 0;
 	double step = 1.0;
+	zend_uchar str_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/|z/", &zlow, &zhigh, &zstep) == FAILURE) {
 		RETURN_FALSE;
@@ -1746,35 +1731,37 @@ PHP_FUNCTION(range)
 		}
 	}	
 
+	/* Unify types */
+	str_type = zend_get_unified_string_type(2, Z_TYPE_P(zlow), Z_TYPE_P(zhigh));
+	if (str_type == (zend_uchar)-1) {
+		zend_error(E_WARNING, "Cannot mix binary and Unicode parameters");
+		return;
+	}
+	convert_to_explicit_type(zlow, str_type);
+	convert_to_explicit_type(zhigh, str_type);
+
 	/* Initialize the return_value as an array. */
 	array_init(return_value);
 
-	if (Z_TYPE_P(zlow) == IS_UNICODE) {
-		convert_to_string(zlow);
-	}
-	
-	if (Z_TYPE_P(zhigh) == IS_UNICODE) {
-		convert_to_string(zhigh);
-	}
-
 	/* If the range is given as strings, generate an array of characters. */
-	if (Z_TYPE_P(zlow) == IS_STRING && 
-	    Z_TYPE_P(zhigh) == IS_STRING && 
-	    Z_STRLEN_P(zlow) >= 1 && 
-	    Z_STRLEN_P(zhigh) >= 1) {
-		int type1, type2;
+	if ((Z_TYPE_P(zlow) == IS_STRING || Z_TYPE_P(zlow) == IS_BINARY) && 
+		Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
+		zend_uchar type1, type2;
 		unsigned char *low, *high;
 		long lstep = (long) step;
 
-		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
-		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
-		
-		if (type1 == IS_DOUBLE || type2 == IS_DOUBLE || is_step_double) {
-			goto double_str;
-		} else if (type1 == IS_LONG || type2 == IS_LONG) {
-			goto long_str;
+		if (Z_TYPE_P(zlow) == IS_STRING) {
+			type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRLEN_P(zlow), NULL, NULL, 0);
+			type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRLEN_P(zhigh), NULL, NULL, 0);
+
+			if (type1 == IS_DOUBLE || type2 == IS_DOUBLE || is_step_double) {
+				goto double_str;
+			} else if (type1 == IS_LONG || type2 == IS_LONG) {
+				goto long_str;
+			}
 		}
 		
+		/* safe to use STR versions for binary since they access the same fields */
 		low = (unsigned char *)Z_STRVAL_P(zlow);
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
@@ -1784,7 +1771,11 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; *low >= *high; (*low) -= (unsigned int)lstep) {
-				u_add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
+				if (Z_TYPE_P(zlow) == IS_STRING) {
+					add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
+				} else {
+					add_next_index_binaryl(return_value, low, 1, 1 TSRMLS_CC);
+				}
 				if (((signed int)*low - lstep) < 0) {
 					break;
 				}
@@ -1795,15 +1786,68 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; *low <= *high; (*low) += (unsigned int)lstep) {
-				u_add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
+				if (Z_TYPE_P(zlow) == IS_STRING) {
+					add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
+				} else {
+					add_next_index_binaryl(return_value, low, 1, 1 TSRMLS_CC);
+				}
 				if (((signed int)*low + lstep) > 255) {
 					break;
 				}
 			}
 		} else {
-			u_add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
+			if (Z_TYPE_P(zlow) == IS_STRING) {
+				add_next_index_stringl(return_value, low, 1, 1 TSRMLS_CC);
+			} else {
+				add_next_index_binaryl(return_value, low, 1, 1 TSRMLS_CC);
+			}
+		}
+	} else if (Z_TYPE_P(zlow) == IS_UNICODE &&
+			   Z_USTRLEN_P(zlow) >= 1 && Z_USTRLEN_P(zhigh) >= 1) {
+		zend_uchar type1, type2;
+		UChar32 low, high;
+		uint32_t lstep = (uint32_t) step;
+		UChar buf[2];
+
+		type1 = is_numeric_unicode(Z_USTRVAL_P(zlow), Z_USTRLEN_P(zlow), NULL, NULL, 0);
+		type2 = is_numeric_unicode(Z_USTRVAL_P(zhigh), Z_USTRLEN_P(zhigh), NULL, NULL, 0);
+
+		if (type1 == IS_DOUBLE || type2 == IS_DOUBLE || is_step_double) {
+			goto double_str;
+		} else if (type1 == IS_LONG || type2 == IS_LONG) {
+			goto long_str;
 		}
 
+		low = zend_get_codepoint_at(Z_USTRVAL_P(zlow), Z_USTRLEN_P(zlow), 0);
+		high = zend_get_codepoint_at(Z_USTRVAL_P(zhigh), Z_USTRLEN_P(zhigh), 0);
+
+		if (low > high) {		/* Negative Steps */
+			if (lstep <= 0) {
+				err = 1;
+				goto err;
+			}
+			for (; low >= high; low -= lstep) {
+				/* no need to check return value of zend_codepoint_to_uchar()
+				   since the range endpoints will always be valid */
+				add_next_index_unicodel(return_value, buf, zend_codepoint_to_uchar(low, buf), 1 TSRMLS_CC);
+				if (((int32_t)low - lstep) < 0) {
+					break;
+				}
+			}
+		} else if (high > low) {	/* Positive Steps */
+			if (lstep <= 0) {
+				err = 1;
+				goto err;
+			}
+			for (; low <= high; low += lstep) {
+				add_next_index_unicodel(return_value, buf, zend_codepoint_to_uchar(low, buf), 1 TSRMLS_CC);
+				if (((int32_t)low + lstep) > UCHAR_MAX_VALUE) {
+					break;
+				}
+			}
+		} else {
+			add_next_index_unicodel(return_value, buf, zend_codepoint_to_uchar(low, buf), 1 TSRMLS_CC);
+		}
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high;
 double_str:		
