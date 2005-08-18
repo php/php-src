@@ -1206,7 +1206,7 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 			break;
 		}
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d\n", Z_TYPE_P(obj));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d", Z_TYPE_P(obj));
 			ZVAL_NULL(wrapper);
 			return wrapper;
 	}
