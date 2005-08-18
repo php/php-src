@@ -1578,7 +1578,7 @@ static int ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
-		zend_error_noreturn(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
+		zend_error_noreturn(E_ERROR, "Unknown function:  %s()", fname->value.str.val);
 	}
 	EX(object) = NULL;
 	EX(calling_scope) = EX(function_state).function->common.scope;
