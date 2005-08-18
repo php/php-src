@@ -65,7 +65,7 @@ PHP_FUNCTION(icu_loc_set_default)
 	 * validation.
 	 */
 	if (U_FAILURE(status)) {
-		php_error(E_WARNING, "Invalid locale: %s\n", locale);
+		php_error(E_WARNING, "Invalid locale: %s", locale);
 		RETURN_FALSE;
 	}
 	/* don't bother if locales are identical */
