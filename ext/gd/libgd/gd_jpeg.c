@@ -170,7 +170,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 			nlines = jpeg_write_scanlines (&cinfo, rowptr, 1);
 			if (nlines != 1) {
-				php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1\n", nlines);
+				php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1", nlines);
 			}
 		}
 	} else {
@@ -197,7 +197,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 			nlines = jpeg_write_scanlines (&cinfo, rowptr, 1);
 			if (nlines != 1) {
-				php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1\n", nlines);
+				php_gd_error_ex(E_WARNING, "gd_jpeg: warning: jpeg_write_scanlines returns %u -- expected 1", nlines);
 			}
 		}
 	}
