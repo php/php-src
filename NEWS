@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 - Fixed bug #33996 (No information given for fatal error on passing invalid
   value to typed argument). (Dmitry)
 - Fixed bug #33989 (extract($GLOBALS,EXTR_REFS) crashes PHP). (Dmitry)
+- Fixed bug #33987 (php script as ErrorDocument causes crash in Apache 2).
+  (Ilia)
 - Fixed bug #33967 (misuse of Exception constructor doesn't display errorfile).
   (Jani)
 - Fixed bug #33958 (duplicate cookies and magic_quotes=off may cause a crash).
