@@ -1577,7 +1577,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 
 		/* Retry deadlocks up until deadlock_retry_count times */		
 		if (sybase_ptr->deadlock && SybCtG(deadlock_retry_count) != -1 && ++deadlock_count > SybCtG(deadlock_retry_count)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %ld], giving up\n", deadlock_count- 1, SybCtG(deadlock_retry_count));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %ld], giving up", deadlock_count- 1, SybCtG(deadlock_retry_count));
 			if (result != NULL) {
 				_free_sybase_result(result);
 			}
@@ -1654,7 +1654,7 @@ PHP_FUNCTION(sybase_free_result)
 	
 	/* Did we fetch up until the end? */
 	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
-		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cancelling the rest of the results\n"); */
+		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cancelling the rest of the results"); */
 		ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 		php_sybase_finish_results(result);
 	}

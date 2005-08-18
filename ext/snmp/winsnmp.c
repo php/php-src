@@ -100,7 +100,7 @@ void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
    for the session are also required.
 */
 	if ((session = SnmpMgrOpen(agent, community, timeout, retries)) == NULL){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrOpen %d\n", GetLastError());
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrOpen %d", GetLastError());
 	}
 
     /* Determine and perform the requested operation.*/
@@ -119,12 +119,12 @@ void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 		if (!SnmpMgrRequest(session, requestType, &variableBindings,
                             &errorStatus, &errorIndex)){
             /* The API is indicating an error. */
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrRequest %d\n", GetLastError());
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrRequest %d", GetLastError());
         } else {
             /* The API succeeded, errors may be indicated from the remote
                agent. */
             if (errorStatus > 0){
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error: errorStatus=%d, errorIndex=%d\n",
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error: errorStatus=%d, errorIndex=%d",
                        errorStatus, errorIndex);
             } else {
                 /* Display the resulting variable bindings.*/
@@ -165,7 +165,7 @@ void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
             if (!SnmpMgrRequest(session, requestType, &variableBindings,
                                 &errorStatus, &errorIndex)){
                 /* The API is indicating an error.*/
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrRequest %d\n", GetLastError());
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrRequest %d", GetLastError());
                 break;
                 }
             else
@@ -183,7 +183,7 @@ void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 
                 /* Test for general error conditions or sucesss. */
                 if (errorStatus > 0){
-                    php_error_docref(NULL TSRMLS_CC, E_ERROR,"Error: errorStatus=%d, errorIndex=%d \n", errorStatus, errorIndex);
+                    php_error_docref(NULL TSRMLS_CC, E_ERROR,"Error: errorStatus=%d, errorIndex=%d", errorStatus, errorIndex);
                     break;
                     }
                 else
@@ -218,7 +218,7 @@ void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 
 	/* Close SNMP session with the remote agent.*/
 	if (!SnmpMgrClose(session)){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrClose %d\n", GetLastError());
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error on SnmpMgrClose %d", GetLastError());
 	}
 }
 /* }}} */
