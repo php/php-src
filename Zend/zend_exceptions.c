@@ -283,7 +283,15 @@ ZEND_METHOD(error_exception, getSeverity)
 
 #define TRACE_APPEND_KEY(key)                                            \
 	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
+		if (Z_TYPE_PP(tmp) == IS_UNICODE) { \
+			zval copy; \
+			int use_copy; \
+			zend_make_printable_zval(*tmp, &copy, &use_copy); \
+	    TRACE_APPEND_STRL(Z_STRVAL(copy), Z_STRLEN(copy)); \
+	    zval_dtor(&copy); \
+		} else { \
 	    TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));           \
+	  } \
 	}
 
 static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_key *hash_key)
@@ -475,8 +483,6 @@ ZEND_METHOD(exception, __toString)
 	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, &file TSRMLS_CC);
 	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, &line TSRMLS_CC);
 
-	convert_to_text(&message);
-	convert_to_text(&file);
 	convert_to_long(&line);
 
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 0);
@@ -498,12 +504,12 @@ ZEND_METHOD(exception, __toString)
 	}
 
 	if (Z_UNILEN(message) > 0) {
-		len = zend_spprintf(&str, 0, "exception '%v' with message '%R' in %s:%ld\nStack trace:\n%s", 
-							Z_OBJCE_P(getThis())->name, Z_TYPE(message), Z_UNIVAL(message), Z_STRVAL(file), Z_LVAL(line), 
+		len = zend_spprintf(&str, 0, "exception '%v' with message '%R' in %R:%ld\nStack trace:\n%s", 
+							Z_OBJCE_P(getThis())->name, Z_TYPE(message), Z_UNIVAL(message), Z_TYPE(file), Z_UNIVAL(file), Z_LVAL(line), 
 							(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 	} else {
-		len = zend_spprintf(&str, 0, "exception '%v' in %s:%ld\nStack trace:\n%s", 
-							Z_OBJCE_P(getThis())->name, Z_STRVAL(file), Z_LVAL(line), 
+		len = zend_spprintf(&str, 0, "exception '%v' in %R:%ld\nStack trace:\n%s", 
+							Z_OBJCE_P(getThis())->name, Z_TYPE(file), Z_UNIVAL(file), Z_LVAL(line), 
 							(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 	}
 
