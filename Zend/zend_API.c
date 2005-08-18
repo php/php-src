@@ -2884,6 +2884,28 @@ ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object
 	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 
+ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, UChar *name, int name_length, char *value TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_UNICODE(tmp, value, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, UChar *name, int name_length, char *value, int value_len TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_UNICODEL(tmp, value, value_len, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *name, int name_length, zend_bool silent TSRMLS_DC)
 {
 	zval property, *value;

@@ -228,6 +228,8 @@ ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, c
 ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object, char *name, int name_length, double value TSRMLS_DC);
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC);
 ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_length TSRMLS_DC);
+ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, UChar *name, int name_length, char *value TSRMLS_DC);
+ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, UChar *name, int name_length, char *value, int value_length TSRMLS_DC);
 
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *name, int name_length, zend_bool silent TSRMLS_DC);
 
