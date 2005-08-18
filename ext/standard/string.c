@@ -2872,7 +2872,7 @@ PHP_FUNCTION(chr)
 }
 /* }}} */
 
-/* {{{ proto php_u_ucfirst
+/* {{{ php_u_ucfirst()
    Makes an Unicode string's first character uppercase */
 static void php_u_ucfirst(zval *ustr, zval *return_value)
 {
@@ -2940,7 +2940,7 @@ PHP_FUNCTION(ucfirst)
 }
 /* }}} */
 
-/* {{{ proto php_u_ucwords()
+/* {{{ php_u_ucwords()
    Uppercase the first character of every word in an Unicode string */
 static void php_u_ucwords(zval *ustr, zval *retval)
 {
