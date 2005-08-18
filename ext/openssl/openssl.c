@@ -3274,7 +3274,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
 
 		if (cafile || capath) {
 			if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set verify locations `%s' `%s'\n", cafile, capath);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set verify locations `%s' `%s'", cafile, capath);
 				return NULL;
 			}
 		}

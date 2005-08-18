@@ -126,7 +126,7 @@ MUTEX_T mx_lock;
 #define CALL_OCI(call) \
 { \
 	if (OCI(in_call)) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI8 Recursive call!\n"); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI8 Recursive call!"); \
 		exit(-1); \
 	} else { \
 		OCI(in_call)=1; \
@@ -139,7 +139,7 @@ MUTEX_T mx_lock;
 { \
 	if (OCI(in_call)) { \
 		retcode=-1; \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI8 Recursive call!\n"); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI8 Recursive call!"); \
 		exit(-1); \
 	} else { \
 		OCI(in_call)=1; \

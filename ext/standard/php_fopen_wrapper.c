@@ -132,14 +132,14 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream) TSRMLS_CC))) {
 				php_stream_filter_append(&stream->readfilters, temp_filter);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create filter (%s)\n", p);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create filter (%s)", p);
 			}
 		}
 		if (write_chain) {
 			if ((temp_filter = php_stream_filter_create(p, NULL, php_stream_is_persistent(stream) TSRMLS_CC))) {
 				php_stream_filter_append(&stream->writefilters, temp_filter);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create filter (%s)\n", p);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create filter (%s)", p);
 			}
 		}
 		p = php_strtok_r(NULL, "|", &token);

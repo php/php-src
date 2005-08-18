@@ -419,7 +419,7 @@ next_iter:
 			}
 			change_node_zval(newnode, value TSRMLS_CC);
 		} else if (counter > 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)\n");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)");
 		} else {
 			if (attribs) {
 				switch (Z_TYPE_P(value)) {
