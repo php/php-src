@@ -71,6 +71,24 @@ static inline UChar32 zend_get_codepoint_at(UChar *str, int32_t length, int32_t 
 	return c;
 }
 
+/*
+ * Convert a single codepoint to UChar sequence (1 or 2).
+ * The UChar buffer is assumed to be large enough.
+ */
+static inline int zend_codepoint_to_uchar(UChar32 codepoint, UChar *buf)
+{
+	if (U_IS_BMP(codepoint)) {
+		*buf++ = (UChar) codepoint;
+		return 1;
+	} else if (codepoint <= UCHAR_MAX_VALUE) {
+		*buf++ = (UChar) U16_LEAD(codepoint);
+		*buf++ = (UChar) U16_TRAIL(codepoint);
+		return 2;
+	} else {
+		return 0;
+	}
+}
+
 #define ZEND_U_CONVERTER(c) ((c)?(c):UG(fallback_encoding_conv))
 
 #define USTR_FREE(ustr) do { if (ustr) { efree(ustr); } } while (0);

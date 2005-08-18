@@ -68,7 +68,7 @@ ZEND_API long zend_u_strtol(const UChar *nptr, UChar **endptr, int base);
 ZEND_API double zend_u_strtod(const UChar *nptr, UChar **endptr);
 END_EXTERN_C()
 
-static inline zend_bool is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
+static inline zend_uchar is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
 {
 	long local_lval;
 	double local_dval;
@@ -131,7 +131,7 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 	return 0;
 }
 
-static inline zend_bool is_numeric_unicode(UChar *str, int32_t length, long *lval, double *dval, zend_bool allow_errors)
+static inline zend_uchar is_numeric_unicode(UChar *str, int32_t length, long *lval, double *dval, zend_bool allow_errors)
 {
 	int32_t local_lval;
 	double local_dval;
@@ -320,7 +320,7 @@ END_EXTERN_C()
 				convert_to_double(pzv); 		\
 				break; 							\
 			case IS_BOOL: 						\
-				convert_to_bool(pzv); 			\
+				convert_to_boolean(pzv); 		\
 				break; 							\
 			case IS_ARRAY: 						\
 				convert_to_array(pzv); 			\

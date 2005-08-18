@@ -2928,29 +2928,39 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *n
 }
 
 /*
- * Return the most precise string type out of the list.
- * If none of the types are string types, IS_STRING is returned.
- * Binary > Unicode > string.
+ * Return the string type that all the passed in types should be converted to.
+ * If none of the types are string types, IS_UNICODE or IS_STRING is returned,
+ * depending on the Unicode semantics switch.
+ * Binary and Unicode types cannot be mixed, so we return -1 (or 255 since it's
+ * uchar)
  */
-ZEND_API zend_uchar zend_get_best_string_type(int num_args, ...)
+ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 {
 	va_list ap;
-	int best_type = IS_STRING;
+	int best_type = UG(unicode) ? IS_UNICODE : IS_STRING;
+	zend_bool seen_unicode = 0;
 	int type;
 
-	if (num_args <= 0) return -1;
+	if (num_args <= 0) return (zend_uchar)-1;
 
 	va_start(ap, num_args);
 	while (num_args--) {
 		type = va_arg(ap, int);
 		if (type == IS_BINARY) {
 			best_type = IS_BINARY;
-			break;
-		} else if (type == IS_UNICODE && best_type == IS_STRING) {
-			best_type = IS_UNICODE;
+		} else if (type == IS_UNICODE) {
+			seen_unicode = 1;
+			if (best_type == IS_STRING) {
+				best_type = IS_UNICODE;
+			}
 		}
 	}
 	va_end(ap);
+
+	/* We do not allow mixing binary and Unicode types */
+	if (best_type == IS_BINARY && seen_unicode) {
+		return (zend_uchar)-1;
+	}
 
 	return best_type;
 }
