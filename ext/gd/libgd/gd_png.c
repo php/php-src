@@ -58,11 +58,11 @@ static void gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
 	 * been defined.
 	 */
 
-	php_gd_error_ex(E_ERROR, "gd-png:  fatal libpng error: %s\n", msg);
+	php_gd_error_ex(E_ERROR, "gd-png:  fatal libpng error: %s", msg);
 
 	jmpbuf_ptr = png_get_error_ptr (png_ptr);
 	if (jmpbuf_ptr == NULL) { /* we are completely hosed now */
-		php_gd_error_ex(E_ERROR, "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.\n");
+		php_gd_error_ex(E_ERROR, "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.");
 	}
 
 	longjmp (jmpbuf_ptr->jmpbuf, 1);
@@ -142,13 +142,13 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
 	if (png_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng main struct\n");
+		php_gd_error("gd-png error: cannot allocate libpng main struct");
 		return NULL;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng info struct\n");
+		php_gd_error("gd-png error: cannot allocate libpng info struct");
 		png_destroy_read_struct (&png_ptr, NULL, NULL);
 
 		return NULL;
@@ -164,7 +164,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	 */
 #ifndef PNG_SETJMP_NOT_SUPPORTED
 	if (setjmp(gdPngJmpbufStruct.jmpbuf)) {
-		php_gd_error("gd-png error: setjmp returns error condition\n");
+		php_gd_error("gd-png error: setjmp returns error condition");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 		return NULL;
@@ -183,7 +183,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		im = gdImageCreate((int) width, (int) height);
 	}
 	if (im == NULL) {
-		php_gd_error("gd-png error: cannot allocate gdImage struct\n");
+		php_gd_error("gd-png error: cannot allocate gdImage struct");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		gdFree(image_data);
 		gdFree(row_pointers);
@@ -201,7 +201,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		case PNG_COLOR_TYPE_PALETTE:
 			png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
 #ifdef DEBUG
-			php_gd_error("gd-png color_type is palette, colors: %d\n", num_palette);
+			php_gd_error("gd-png color_type is palette, colors: %d", num_palette);
 #endif /* DEBUG */
 			if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS)) {
 				/* gd 2.0: we support this rather thoroughly now. Grab the
@@ -225,7 +225,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		case PNG_COLOR_TYPE_GRAY_ALPHA:
 			/* create a fake palette and check for single-shade transparency */
 			if ((palette = (png_colorp) gdMalloc (256 * sizeof (png_color))) == NULL) {
-				php_gd_error("gd-png error: cannot allocate gray palette\n");
+				php_gd_error("gd-png error: cannot allocate gray palette");
 				png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 				return NULL;
@@ -369,7 +369,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	if (!im->trueColor) {
 		for (i = num_palette; i < gdMaxColors; ++i) {
 			if (!open[i]) {
-				php_gd_error("gd-png warning: image data references out-of-range color index (%d)\n", i);
+				php_gd_error("gd-png warning: image data references out-of-range color index (%d)", i);
 			}
 		}
 	}
@@ -450,13 +450,13 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
 	if (png_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng main struct\n");
+		php_gd_error("gd-png error: cannot allocate libpng main struct");
 		return;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL) {
-		php_gd_error("gd-png error: cannot allocate libpng info struct\n");
+		php_gd_error("gd-png error: cannot allocate libpng info struct");
 		png_destroy_write_struct (&png_ptr, (png_infopp) NULL);
 
 		return;
@@ -464,7 +464,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 
 #ifndef PNG_SETJMP_NOT_SUPPORTED
 	if (setjmp (gdPngJmpbufStruct.jmpbuf)) {
-		php_gd_error("gd-png error: setjmp returns error condition\n");
+		php_gd_error("gd-png error: setjmp returns error condition");
 		png_destroy_write_struct (&png_ptr, &info_ptr);
 
 		return;

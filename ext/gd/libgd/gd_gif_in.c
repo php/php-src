@@ -359,7 +359,7 @@ GetCode(gdIOCtx *fd, int code_size, int flag)
  int rv;
 
  rv = GetCode_(fd,code_size,flag);
- if (VERBOSE) php_gd_error_ex(E_NOTICE, "[GetCode(,%d,%d) returning %d]\n",code_size,flag,rv);
+ if (VERBOSE) php_gd_error_ex(E_NOTICE, "[GetCode(,%d,%d) returning %d]",code_size,flag,rv);
  return(rv);
 }
 
@@ -491,7 +491,7 @@ LWZReadByte(gdIOCtx *fd, int flag, int input_code_size)
  int rv;
 
  rv = LWZReadByte_(fd,flag,input_code_size);
- if (VERBOSE) php_gd_error_ex(E_NOTICE, "[LWZReadByte(,%d,%d) returning %d]\n",flag,input_code_size,rv);
+ if (VERBOSE) php_gd_error_ex(E_NOTICE, "[LWZReadByte(,%d,%d) returning %d]",flag,input_code_size,rv);
  return(rv);
 }
 

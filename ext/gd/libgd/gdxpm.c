@@ -117,7 +117,7 @@ gdImagePtr gdImageCreateFromXpm (char *filename)
 
 		colors[i] = gdImageColorResolve(im, red, green, blue);
 		if (colors[i] == -1) {
-			php_gd_error("ARRRGH\n");
+			php_gd_error("ARRRGH");
 		}
 	}
 
