@@ -1,0 +1,20 @@
+Extension Upgrade Tracking
+==========================
+
+ext/standard
+------------
+  Status: In Progress
+  Completed:
+        bin2hex()
+        explode()
+        implode()
+        range()
+        str_repeat()
+        strpos()
+        strstr()
+        strtolower()
+        strtotupper()
+        substr()
+        trim()
+        ucwords()
+        ucfirst()
