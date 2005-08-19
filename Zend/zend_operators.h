@@ -288,6 +288,7 @@ ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, u
 
 ZEND_API int zend_u_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2);
+ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zendi_u_smart_strcmp(zval *result, zval *s1, zval *s2);

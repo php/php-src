@@ -304,14 +304,19 @@ ZEND_NAMED_FUNCTION(zend_if_strlen)
    Binary safe string comparison */
 ZEND_FUNCTION(strcmp)
 {
-	zval **s1, **s2;
+	void *s1, *s2;
+	int32_t s1_len, s2_len;
+	zend_uchar s1_type, s2_type;
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &s1, &s1_len,
+							  &s1_type, &s2, &s2_len, &s2_type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-	RETURN_LONG(zend_binary_zval_strcmp(*s1, *s2));
+	if (s1_type == IS_UNICODE) {
+		RETURN_LONG(zend_u_binary_strcmp(s1, s1_len, s2, s2_len));
+	} else {
+		RETURN_LONG(zend_binary_strcmp(s1, s1_len, s2, s2_len));
+	}
 }
 /* }}} */
 
@@ -320,15 +325,20 @@ ZEND_FUNCTION(strcmp)
    Binary safe string comparison */
 ZEND_FUNCTION(strncmp)
 {
-	zval **s1, **s2, **s3;
+	void *s1, *s2;
+	int32_t s1_len, s2_len;
+	long count;
+	zend_uchar s1_type, s2_type;
 	
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &s1, &s2, &s3) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TTl", &s1, &s1_len,
+							  &s1_type, &s2, &s2_len, &s2_type, &count) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-	convert_to_long_ex(s3);
-	RETURN_LONG(zend_binary_zval_strncmp(*s1, *s2, *s3));
+	if (s1_type == IS_UNICODE) {
+		RETURN_LONG(zend_u_binary_strncmp(s1, s1_len, s2, s2_len, count));
+	} else {
+		RETURN_LONG(zend_binary_strncmp(s1, s1_len, s2, s2_len, count));
+	}
 }
 /* }}} */
 
