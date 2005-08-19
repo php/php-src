@@ -14,8 +14,6 @@ ext/standard
         str_repeat()
         strpos()
         strstr()
-        strtolower()
-        strtotupper()
         substr()
         trim()
         ucwords()

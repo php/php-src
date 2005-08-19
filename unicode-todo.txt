@@ -51,3 +51,6 @@
 
 * Replace all instances of EMPTY_STR with U_EMPTY_STR which is defined to be
   ((UChar*)"\0\0")
+
+* Change implementation of strtoupper()/strtolower() to use simple case
+  mapping.
