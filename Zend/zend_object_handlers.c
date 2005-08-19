@@ -245,12 +245,11 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 
 
-ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name TSRMLS_DC)
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_uchar utype, void *prop_info_name TSRMLS_DC)
 {
 	zend_property_info *property_info;
 	char *class_name, *prop_name;
 	zval member;
-	zend_uchar utype = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	zend_u_unmangle_property_name(utype, prop_info_name, &class_name, &prop_name);
 	if (utype == IS_UNICODE) {
@@ -598,11 +597,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 
 	ALLOC_ZVAL(method_name_ptr);
 	INIT_PZVAL(method_name_ptr);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(method_name_ptr, (UChar*)func->function_name, 0); /* no dup - it's a copy */
-	} else {
-		ZVAL_STRING(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
-	}
+	ZVAL_TEXT(method_name_ptr, func->function_name, 0); /* no dup - it's a copy */
 
 	/* __call handler is called with two arguments:
 	   method name
@@ -1019,22 +1014,18 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			if (!zend_hash_exists(&Z_OBJCE_P(readobj)->function_table, "__tostring", sizeof("__tostring"))) {
 				return FAILURE;
 			}
-			if (UG(unicode)) {
-				ZVAL_UNICODE(&fname, USTR_MAKE("__tostring"), 0);
-			} else {
-				ZVAL_STRING(&fname, "__tostring", 0);
-			}
+			ZVAL_ASCII_STRING(&fname, "__tostring", 0);
 			if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
 				if (UG(unicode)) {
 					zval_dtor(&fname);
 				}
 				if (retval) {
-					if (Z_TYPE_P(retval) != IS_STRING && Z_TYPE_P(retval) != IS_UNICODE) {
+					if (Z_TYPE_P(retval) != (UG(unicode)?IS_UNICODE:IS_STRING)) {
 						zend_error(E_ERROR, "Method %v::__toString() must return a string value", Z_OBJCE_P(readobj)->name);
 					}
 				} else {
 					MAKE_STD_ZVAL(retval);
-					ZVAL_STRINGL(retval, "", 0, 1);
+					ZVAL_ASCII_STRINGL(retval, "", 0, 1);
 				}
 				*writeobj = *retval;
 				zval_copy_ctor(writeobj);

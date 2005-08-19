@@ -879,11 +879,7 @@ ZEND_API void zend_reflection_class_factory(zend_class_entry *ce, zval *object T
 	zval *name;
 
 	MAKE_STD_ZVAL(name);
-	if (UG(unicode)) {
-		ZVAL_UNICODEL(name, (UChar*)ce->name, ce->name_length, 1);
-	} else {
-		ZVAL_STRINGL(name, ce->name, ce->name_length, 1);
-	}
+	ZVAL_TEXTL(name, ce->name, ce->name_length, 1);
 	reflection_instanciate(U_CLASS_ENTRY(reflection_class_ptr), object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = ce;
@@ -930,11 +926,7 @@ static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_i
 
 	MAKE_STD_ZVAL(name);
 	if (arg_info->name) {
-		if (UG(unicode)) {
-			ZVAL_UNICODEL(name, (UChar*)arg_info->name, arg_info->name_len, 1);
-		} else {
-			ZVAL_STRINGL(name, arg_info->name, arg_info->name_len, 1);
-		}
+		ZVAL_TEXTL(name, arg_info->name, arg_info->name_len, 1);
 	} else {
 		ZVAL_NULL(name);
 	}
@@ -959,11 +951,7 @@ static void reflection_function_factory(zend_function *function, zval *object TS
 	zval *name;
 
 	MAKE_STD_ZVAL(name);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(name, (UChar*)function->common.function_name, 1);
-	} else {
-		ZVAL_STRING(name, function->common.function_name, 1);
-	}
+	ZVAL_TEXT(name, function->common.function_name, 1);
 
 	reflection_instanciate(U_CLASS_ENTRY(reflection_function_ptr), object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
@@ -983,13 +971,8 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 
 	MAKE_STD_ZVAL(name);
 	MAKE_STD_ZVAL(classname);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(name, (UChar*)method->common.function_name, 1);
-		ZVAL_UNICODEL(classname, (UChar*)ce->name, ce->name_length, 1);
-	} else {
-		ZVAL_STRING(name, method->common.function_name, 1);
-		ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
-	}
+	ZVAL_TEXT(name, method->common.function_name, 1);
+	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
 	reflection_instanciate(U_CLASS_ENTRY(reflection_method_ptr), object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = method;
@@ -1029,13 +1012,8 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 
 	MAKE_STD_ZVAL(name);
 	MAKE_STD_ZVAL(classname);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(name, (UChar*)prop_name, 1);
-		ZVAL_UNICODEL(classname, (UChar*)ce->name, ce->name_length, 1);
-	} else {
-		ZVAL_STRING(name, prop_name, 1);
-		ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
-	}
+	ZVAL_TEXT(name, prop_name, 1);
+	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
 
 	reflection_instanciate(U_CLASS_ENTRY(reflection_property_ptr), object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
@@ -1272,11 +1250,7 @@ ZEND_METHOD(reflection_function, __construct)
 	}
 	efree(lcname);
 	MAKE_STD_ZVAL(name);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(name, (UChar*)fptr->common.function_name, 1);
-	} else {
-		ZVAL_STRING(name, fptr->common.function_name, 1);
-	}
+	ZVAL_TEXT(name, fptr->common.function_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = fptr;
 	intern->free_ptr = 0;
@@ -1725,11 +1699,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	
 	MAKE_STD_ZVAL(name);
 	if (arg_info[position].name) {
-		if (UG(unicode)) {
-			ZVAL_UNICODEL(name, (UChar*)arg_info[position].name, arg_info[position].name_len, 1);
-		} else {
-			ZVAL_STRINGL(name, arg_info[position].name, arg_info[position].name_len, 1);
-		}
+		ZVAL_TEXTL(name, arg_info[position].name, arg_info[position].name_len, 1);
 	} else {
 		ZVAL_NULL(name);
 	}
@@ -1972,11 +1942,8 @@ ZEND_METHOD(reflection_method, __construct)
 	}
 
 	MAKE_STD_ZVAL(classname);
-	if (UG(unicode)) {
-		ZVAL_UNICODEL(classname, (UChar*)ce->name, ce->name_length, 1);
-	} else {
-		ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
-	}
+	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
+
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
 	lcname = zend_u_str_case_fold(type, name_str, name_len, 1, &lcname_len);
@@ -1990,11 +1957,7 @@ ZEND_METHOD(reflection_method, __construct)
 	efree(lcname);
 
 	MAKE_STD_ZVAL(name);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(name, (UChar*)mptr->common.function_name, 1);
-	} else {
-		ZVAL_STRING(name, mptr->common.function_name, 1);
-	}
+	ZVAL_TEXT(name, mptr->common.function_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	intern->ptr = mptr;
 	intern->free_ptr = 0;
@@ -2365,11 +2328,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	
 	if (Z_TYPE_P(argument) == IS_OBJECT) {
 		MAKE_STD_ZVAL(classname);
-		if (UG(unicode)) {
-			ZVAL_UNICODEL(classname, (UChar*)Z_OBJCE_P(argument)->name, Z_OBJCE_P(argument)->name_length, 1);
-		} else {
-			ZVAL_STRINGL(classname, Z_OBJCE_P(argument)->name, Z_OBJCE_P(argument)->name_length, 1);
-		}
+		ZVAL_TEXTL(classname, Z_OBJCE_P(argument)->name, Z_OBJCE_P(argument)->name_length, 1);
 		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &classname, sizeof(zval *), NULL);
 		intern->ptr = Z_OBJCE_P(argument);
 		if (is_object) {
@@ -2386,11 +2345,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		}
 
 		MAKE_STD_ZVAL(classname);
-		if (UG(unicode)) {
-			ZVAL_UNICODEL(classname, (UChar*)((*ce)->name), (*ce)->name_length, 1);
-		} else {
-			ZVAL_STRINGL(classname, (*ce)->name, (*ce)->name_length, 1);
-		}
+		ZVAL_TEXTL(classname, (*ce)->name, (*ce)->name_length, 1);
 		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &classname, sizeof(zval *), NULL);
 
 		intern->ptr = *ce;
@@ -3381,20 +3336,12 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	MAKE_STD_ZVAL(classname);
-	if (UG(unicode)) {
-		ZVAL_UNICODEL(classname, (UChar*)ce->name, ce->name_length, 1);
-	} else {
-		ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
-	}
+	ZVAL_TEXTL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
 	zend_u_unmangle_property_name(UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, &class_name, &prop_name);
 	MAKE_STD_ZVAL(propname);
-	if (UG(unicode)) {
-		ZVAL_UNICODE(propname, (UChar*)prop_name, 1);
-	} else {
-		ZVAL_STRING(propname, prop_name, 1);
-	}
+	ZVAL_TEXT(propname, prop_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));

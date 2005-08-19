@@ -618,11 +618,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec, char T_ar
 						if (return_null) {
 							*p = NULL;
 							*pl = 0;
-							if (UG(unicode)) {
-								*type = IS_UNICODE;
-							} else {
-								*type = IS_STRING;
-							}
+							*type = UG(unicode)?IS_UNICODE:IS_STRING;
 							break;
 						}
 						/* break omitted intentionally */

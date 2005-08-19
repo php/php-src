@@ -1896,24 +1896,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		class_name = CG(active_class_entry)->name;
 	}
 
-	if (UG(unicode)) {
-		if (!class_name) {
-			zendlval->value.ustr.len = 0;
-			zendlval->value.ustr.val = USTR_MAKE("");
-		} else {
-			zendlval->value.ustr.len = u_strlen((UChar*)class_name);
-			zendlval->value.ustr.val = eustrndup((UChar*)class_name, zendlval->value.ustr.len);
-		}
-		zendlval->type = IS_UNICODE;
+	if (!class_name) {
+		ZVAL_EMPTY_TEXT(zendlval);
 	} else {
-		if (!class_name) {
-			zendlval->value.str.len = 0;
-			zendlval->value.str.val = estrndup("", 0);
-		} else {
-			zendlval->value.str.len = strlen(class_name);
-			zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
-		}
-		zendlval->type = IS_STRING;
+		ZVAL_TEXT(zendlval, class_name, 1);
 	}
 	return T_CLASS_C;
 }
@@ -1928,24 +1914,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!func_name) {
 		func_name = "";
 	}
-	if (UG(unicode)) {
-		if (!func_name) {
-			zendlval->value.ustr.len = 0;
-			zendlval->value.ustr.val = USTR_MAKE("");
-		} else {
-			zendlval->value.ustr.len = u_strlen((UChar*)func_name);
-			zendlval->value.ustr.val = eustrndup((UChar*)func_name, zendlval->value.ustr.len);
-		}
-		zendlval->type = IS_UNICODE;
+	if (!func_name) {
+		ZVAL_EMPTY_TEXT(zendlval);
 	} else {
-		if (!func_name) {
-			zendlval->value.str.len = 0;
-			zendlval->value.str.val = estrndup("", 0);
-		} else {
-			zendlval->value.str.len = strlen(func_name);
-			zendlval->value.str.val = estrndup(func_name, zendlval->value.str.len);
-		}
-		zendlval->type = IS_STRING;
+		ZVAL_TEXT(zendlval, func_name, 1);
 	}
 	return T_FUNC_C;
 }

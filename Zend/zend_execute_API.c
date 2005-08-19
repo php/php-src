@@ -346,10 +346,8 @@ ZEND_API char *get_active_function_name(TSRMLS_D)
 
 				if (function_name) {
 					return function_name;
-				} else if (UG(unicode)) {
-					return (char*) u_main;
 				} else {
-					return "main";
+					return UG(unicode)?(char*)u_main:"main";
 				}
 			}
 			break;
