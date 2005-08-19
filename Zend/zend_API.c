@@ -2949,6 +2949,8 @@ ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 			if (best_type == IS_STRING) {
 				best_type = IS_UNICODE;
 			}
+		} else if (type == IS_STRING) {
+			best_type = IS_STRING;
 		}
 	}
 	va_end(ap);
