@@ -2835,8 +2835,8 @@ PHP_FUNCTION(quotemeta)
 }
 /* }}} */
 
-/* {{{ proto int ord(string character)
-   Returns ASCII value of character */
+/* {{{ proto int ord(text character)
+   Returns the codepoint value of a character */
 PHP_FUNCTION(ord)
 {
 	zval **str;
@@ -2844,14 +2844,18 @@ PHP_FUNCTION(ord)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(str);
+	convert_to_text_ex(str);
 
-	RETURN_LONG((unsigned char) Z_STRVAL_PP(str)[0]);
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		RETURN_LONG(zend_get_codepoint_at(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), 0));
+	} else {
+		RETURN_LONG((unsigned char) Z_STRVAL_PP(str)[0]);
+	}
 }
 /* }}} */
 
-/* {{{ proto string chr(int ascii)
-   Converts ASCII code to a character */
+/* {{{ proto text chr(int codepoint)
+   Converts a codepoint number to a character */
 PHP_FUNCTION(chr)
 {
 	zval **num;
@@ -2862,10 +2866,22 @@ PHP_FUNCTION(chr)
 	}
 	convert_to_long_ex(num);
 	
-	temp[0] = (char) Z_LVAL_PP(num);
-	temp[1] = 0;
+	if (UG(unicode)) {
+		UChar buf[2];
+		int32_t buf_len;
 
-	RETVAL_STRINGL(temp, 1, 1);
+		if (Z_LVAL_PP(num) > UCHAR_MAX_VALUE) {
+			php_error(E_WARNING, "Codepoint value cannot be greater than %X", UCHAR_MAX_VALUE);
+			return;
+		}
+		buf_len = zend_codepoint_to_uchar((uint32_t)Z_LVAL_PP(num), buf);
+		RETURN_UNICODEL(buf, buf_len, 1);
+	} else {
+		temp[0] = (char) Z_LVAL_PP(num);
+		temp[1] = 0;
+
+		RETVAL_STRINGL(temp, 1, 1);
+	}
 }
 /* }}} */
 
