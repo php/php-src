@@ -6,8 +6,10 @@ ext/standard
   Status: In Progress
   Completed:
         bin2hex()
+        chr()
         explode()
         implode()
+        ord()
         range()
         str_repeat()
         strpos()
