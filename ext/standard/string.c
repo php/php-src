@@ -3212,25 +3212,51 @@ PHP_FUNCTION(strrev)
 {
 	zval **str;
 	char *s, *e, *n, *p;
+	UChar *u_s, *u_e, *u_n, *u_p;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(str);
-	
-	n = emalloc(Z_STRLEN_PP(str)+1);
-	p = n;
-	
-	s = Z_STRVAL_PP(str);
-	e = s + Z_STRLEN_PP(str);
-	
-	while (--e>=s) {
-		*p++ = *e;
+
+	if (Z_TYPE_PP(str) != IS_UNICODE && Z_TYPE_PP(str) != IS_BINARY && Z_TYPE_PP(str) != IS_STRING) {
+		convert_to_text_ex(str);
+	}
+
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		u_n = eumalloc(Z_USTRLEN_PP(str)+1);
+		u_p = u_n;
+		u_s = Z_USTRVAL_PP(str);
+		u_e = u_s + Z_USTRLEN_PP(str) - 1;
+
+		while (u_e >= u_s) {
+			if (U16_IS_TRAIL(*u_e)) {
+				*u_p = *(u_e-1);
+				*(u_p+1) = *u_e;
+				u_e -= 2; u_p += 2;
+			} else {
+				*u_p++ = *u_e--;
+			}
+		}
+		*u_p = 0;
+	} else {
+		n = emalloc(Z_STRLEN_PP(str)+1);
+		p = n;
+		s = Z_STRVAL_PP(str);
+		e = s + Z_STRLEN_PP(str);
+
+		while (--e >= s) {
+			*(p++) = *e;
+		}
+		*p = '\0';
 	}
 	
-	*p = '\0';
-	
-	RETVAL_STRINGL(n, Z_STRLEN_PP(str), 0);
+	if (Z_TYPE_PP(str) == IS_UNICODE) {
+		RETVAL_UNICODEL(u_n, Z_USTRLEN_PP(str), 0);
+	} else if (Z_TYPE_PP(str) == IS_BINARY) {
+		RETVAL_BINARYL(n, Z_BINLEN_PP(str), 0);
+	} else {
+		RETVAL_STRINGL(n, Z_STRLEN_PP(str), 0);
+	}
 }
 /* }}} */
 
