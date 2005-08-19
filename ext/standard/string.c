@@ -200,12 +200,9 @@ PHP_FUNCTION(bin2hex)
 		RETURN_FALSE;
 	}
 
+	RETVAL_ASCII_STRINGL(result, newlen, 0);
 	if (UG(unicode)) {
-		UChar *u_temp = zend_ascii_to_unicode(result, newlen+1 ZEND_FILE_LINE_CC);
 		efree(result);
-		RETVAL_UNICODEL(u_temp, newlen, 0);
-	} else {
-		RETURN_STRINGL(result, newlen, 0);
 	}
 }
 /* }}} */
