@@ -1,3 +1,67 @@
+2005-08-18  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_operators.h
+      zend_unicode.h:
+      - Implement zend_codepoint_to_uchar().
+      - Rename and fix zend_get_unified_string_type() so that it does not
+        allow mixing of binary and Unicode types.
+
+2005-08-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_exceptions.c:
+      Suppoer for unicode exception messages
+
+2005-08-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      zend_alloc.c:
+      MFH: Fixed bug #34156 (memory usage remains elevated after memory limit is
+      reached)
+
+    * (PHP_5_1)
+      zend_alloc.c:
+      MFH: Fixed bug #34156 (memory usage remains elevated after memory limit is
+      reached);
+
+2005-08-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.h:
+      Unicode support for extract()
+
+2005-08-18  Antony Dovgal  <antony@zend.com>
+
+    * zend_builtin_functions.c:
+      fix memleak
+
+2005-08-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_alloc.c:
+      Fixed bug #34156 (memory usage remains elevated after memory limit is
+      reached)
+
+2005-08-18  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - Removed EOL from error message
+
+2005-08-18  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_exceptions.c:
+      Unicode support
+
+    * zend.h:
+      -** empty log message ***
+
+    * zend_API.c:
+      We don't need EMPY_STRING here. This function is execuited in non-unicode
+      context only.
+
 2005-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_operators.c
