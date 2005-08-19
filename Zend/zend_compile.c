@@ -396,15 +396,9 @@ void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC)
 		opline.result.u.EA.type = 0;
 		opline.result.u.var = get_temporary_variable(CG(active_op_array));
 		opline.op1.op_type = IS_CONST;
-		if (UG(unicode)) {
-			opline.op1.u.constant.type = IS_UNICODE;
-			Z_USTRVAL(opline.op1.u.constant) = eustrndup((UChar*)CG(active_op_array)->vars[result->u.var].name, CG(active_op_array)->vars[result->u.var].name_len);
-			Z_USTRLEN(opline.op1.u.constant) = CG(active_op_array)->vars[result->u.var].name_len;
-		} else {
-			opline.op1.u.constant.type = IS_STRING;
-			Z_STRVAL(opline.op1.u.constant) = estrndup(CG(active_op_array)->vars[result->u.var].name, CG(active_op_array)->vars[result->u.var].name_len);
-			Z_STRLEN(opline.op1.u.constant) = CG(active_op_array)->vars[result->u.var].name_len;
-		}
+		ZVAL_TEXTL(&opline.op1.u.constant, 
+			CG(active_op_array)->vars[result->u.var].name,
+			CG(active_op_array)->vars[result->u.var].name_len, 1);
 		SET_UNUSED(opline.op2);
 		opline.op2 = *class_znode;
 		opline.op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
@@ -422,15 +416,9 @@ void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC)
 			opline.result.u.EA.type = 0;
 			opline.result.u.var = get_temporary_variable(CG(active_op_array));
 			opline.op1.op_type = IS_CONST;
-			if (UG(unicode)) {
-				opline.op1.u.constant.type = IS_UNICODE;
-				Z_USTRVAL(opline.op1.u.constant) = eustrndup((UChar*)CG(active_op_array)->vars[opline_ptr->op1.u.var].name, CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len);
-				Z_USTRLEN(opline.op1.u.constant) = CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len;
-			} else {
-				opline.op1.u.constant.type = IS_STRING;
-				Z_STRVAL(opline.op1.u.constant) = estrndup(CG(active_op_array)->vars[opline_ptr->op1.u.var].name, CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len);
-				Z_STRLEN(opline.op1.u.constant) = CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len;
-			}
+			ZVAL_TEXTL(&opline.op1.u.constant,
+				CG(active_op_array)->vars[opline_ptr->op1.u.var].name,
+				CG(active_op_array)->vars[opline_ptr->op1.u.var].name_len, 1);
 			SET_UNUSED(opline.op2);
 			opline.op2 = *class_znode;
 			opline.op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
@@ -3513,15 +3501,9 @@ void zend_do_unset(znode *variable TSRMLS_DC)
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_UNSET_VAR;
 		opline->op1.op_type = IS_CONST;
-		if (UG(unicode)) {
-			opline->op1.u.constant.type = IS_UNICODE;
-			Z_USTRLEN(opline->op1.u.constant) = CG(active_op_array)->vars[variable->u.var].name_len;
-			Z_USTRVAL(opline->op1.u.constant) = eustrndup((UChar*)CG(active_op_array)->vars[variable->u.var].name, CG(active_op_array)->vars[variable->u.var].name_len);
-		} else {
-			opline->op1.u.constant.type = IS_STRING;
-			Z_STRLEN(opline->op1.u.constant) = CG(active_op_array)->vars[variable->u.var].name_len;
-			Z_STRVAL(opline->op1.u.constant) = estrndup(CG(active_op_array)->vars[variable->u.var].name, CG(active_op_array)->vars[variable->u.var].name_len);
-		}
+		ZVAL_TEXTL(&opline->op1.u.constant,
+			CG(active_op_array)->vars[variable->u.var].name,
+			CG(active_op_array)->vars[variable->u.var].name_len, 1);
 		SET_UNUSED(opline->op2);
 		opline->op2.u.EA.type = ZEND_FETCH_LOCAL;
 		SET_UNUSED(opline->result);
@@ -3556,15 +3538,9 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);
 		last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
 		last_op->op1.op_type = IS_CONST;
-		if (UG(unicode)) {
-			last_op->op1.u.constant.type = IS_UNICODE;
-			Z_USTRLEN(last_op->op1.u.constant) = CG(active_op_array)->vars[variable->u.var].name_len;
-			Z_USTRVAL(last_op->op1.u.constant) = eustrndup((UChar*)CG(active_op_array)->vars[variable->u.var].name, CG(active_op_array)->vars[variable->u.var].name_len);
-		} else {
-			last_op->op1.u.constant.type = IS_STRING;
-			Z_STRLEN(last_op->op1.u.constant) = CG(active_op_array)->vars[variable->u.var].name_len;
-			Z_STRVAL(last_op->op1.u.constant) = estrndup(CG(active_op_array)->vars[variable->u.var].name, CG(active_op_array)->vars[variable->u.var].name_len);
-		}
+		ZVAL_TEXTL(&last_op->op1.u.constant,
+			CG(active_op_array)->vars[variable->u.var].name,
+			CG(active_op_array)->vars[variable->u.var].name_len, 1);
 		SET_UNUSED(last_op->op2);
 		last_op->op2.u.EA.type = ZEND_FETCH_LOCAL;
 		last_op->result.u.var = get_temporary_variable(CG(active_op_array));

@@ -275,6 +275,37 @@ ZEND_API int add_assoc_unicode_ex(zval *arg, char *key, uint key_len, void *str,
 ZEND_API int add_assoc_unicodel_ex(zval *arg, char *key, uint key_len, void *str, uint length, int duplicate);
 ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 
+#define add_assoc_text_ex(arg, key, key_len, str, duplicate) \
+	if (UG(unicode)) { \
+		add_assoc_unicode_ex(arg, key, key_len, (UChar*)(str), duplicate); \
+	} else { \
+		add_assoc_string_ex(arg, key, key_len, (char*)(str), duplicate); \
+	}
+
+#define add_assoc_textl_ex(arg, key, key_len, str, length, duplicate) \
+	if (UG(unicode)) { \
+		add_assoc_unicodel_ex(arg, key, key_len, (UChar*)(str), length, duplicate); \
+	} else { \
+		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, duplicate); \
+	}
+
+#define add_assoc_ascii_string_ex(arg, key, key_len, str, duplicate) \
+	if (UG(unicode)) { \
+		uint length = strlen(str); \
+		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		add_assoc_unicodel_ex(arg, key, key_len, u_str, length, 0); \
+	} else { \
+		add_assoc_string_ex(arg, key, key_len, (char*)(str), duplicate); \
+	}
+
+#define add_assoc_ascii_stringl_ex(arg, key, key_len, str, length, duplicate) \
+	if (UG(unicode)) { \
+		UChar *u_str = zend_ascii_to_unicode((str), (length)+1 ZEND_FILE_LINE_CC); \
+		add_assoc_unicodel_ex(arg, key, key_len, u_str, length, 0); \
+	} else { \
+		add_assoc_stringl_ex(arg, key, key_len, (char*)(str), length, duplicate); \
+	}
+
 #define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
 #define add_assoc_null(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key) + 1)
 #define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, strlen(__key)+1, __b)
@@ -285,6 +316,37 @@ ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
 #define add_assoc_unicode(__arg, __key, __str, __duplicate) add_assoc_unicode_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
 #define add_assoc_unicodel(__arg, __key, __str, __length, __duplicate) add_assoc_unicodel_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key)+1, __value)
+
+#define add_assoc_text(arg, key, str, duplicate) \
+	if (UG(unicode)) { \
+		add_assoc_unicode(arg, key, (UChar*)(str), duplicate); \
+	} else { \
+		add_assoc_string(arg, key, (char*)(str), duplicate); \
+	}
+
+#define add_assoc_textl(arg, key, str, length, duplicate) \
+	if (UG(unicode)) { \
+		add_assoc_unicodel(arg, key, (UChar*)(str), length, duplicate); \
+	} else { \
+		add_assoc_stringl(arg, key, (char*)(str), length, duplicate); \
+	}
+
+#define add_assoc_ascii_string(arg, key, str, duplicate) \
+	if (UG(unicode)) { \
+		uint length = strlen(str); \
+		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		add_assoc_unicodel(arg, key, u_str, length, 0); \
+	} else { \
+		add_assoc_string(arg, key, (char*)(str), duplicate); \
+	}
+
+#define add_assoc_ascii_stringl(arg, key, str, length, duplicate) \
+	if (UG(unicode)) { \
+		UChar *u_str = zend_ascii_to_unicode((str), (length)+1 ZEND_FILE_LINE_CC); \
+		add_assoc_unicodel(arg, key, u_str, length, 0); \
+	} else { \
+		add_assoc_stringl(arg, key, (char*)(str), length, duplicate); \
+	}
 
 ZEND_API int add_u_assoc_zval_ex(zval *arg, zend_uchar type, void *key, uint key_len, zval *value);
 
@@ -309,6 +371,37 @@ ZEND_API int add_index_unicode(zval *arg, uint idx, UChar *str, int duplicate);
 ZEND_API int add_index_unicodel(zval *arg, uint idx, UChar *str, uint length, int duplicate);
 ZEND_API int add_index_zval(zval *arg, uint index, zval *value);
 
+#define add_index_text(arg, idx, str, duplicate) \
+	if (UG(unicode)) { \
+		add_index_unicode(arg, idx, (UChar*)(str), duplicate); \
+	} else { \
+		add_index_string(arg, idx, (char*)(str), duplicate); \
+	}
+
+#define add_index_textl(arg, idx, str, length, duplicate) \
+	if (UG(unicode)) { \
+		add_index_unicodel(arg, idx, (UChar*)(str), length, duplicate); \
+	} else { \
+		add_index_stringl(arg, idx, (char*)(str), length, duplicate); \
+	}
+
+#define add_index_ascii_string(arg, idx, str, duplicate) \
+	if (UG(unicode)) { \
+		uint length = strlen(str); \
+		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		add_index_unicodel(arg, idx, u_str, length, 0); \
+	} else { \
+		add_index_string(arg, idx, (char*)(str), duplicate); \
+	}
+
+#define add_index_ascii_stringl(arg, idx, str, length, duplicate) \
+	if (UG(unicode)) { \
+		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		add_index_unicodel(arg, idx, u_str, length, 0); \
+	} else { \
+		add_index_stringl(arg, idx, (char*)(str), length, duplicate); \
+	}
+
 ZEND_API int add_next_index_long(zval *arg, long n);
 ZEND_API int add_next_index_null(zval *arg);
 ZEND_API int add_next_index_bool(zval *arg, int b);
@@ -321,6 +414,37 @@ ZEND_API int add_next_index_binaryl(zval *arg, char *str, uint length, int dupli
 ZEND_API int add_next_index_unicode(zval *arg, UChar *str, int duplicate);
 ZEND_API int add_next_index_unicodel(zval *arg, UChar *str, uint length, int duplicate);
 ZEND_API int add_next_index_zval(zval *arg, zval *value);
+
+#define add_next_index_text(arg, str, duplicate) \
+	if (UG(unicode)) { \
+		add_next_index_unicode(arg, (UChar*)(str), duplicate); \
+	} else { \
+		add_next_index_string(arg, (char*)(str), duplicate); \
+	}
+
+#define add_next_index_textl(arg, str, length, duplicate) \
+	if (UG(unicode)) { \
+		add_next_index_unicodel(arg, (UChar*)(str), length, duplicate); \
+	} else { \
+		add_next_index_stringl(arg, (char*)(str), length, duplicate); \
+	}
+
+#define add_next_index_ascii_string(arg, str, duplicate) \
+	if (UG(unicode)) { \
+		uint length = strlen(str); \
+		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		add_next_index_unicodel(arg, u_str, length, 0); \
+	} else { \
+		add_next_index_string(arg, (char*)(str), duplicate); \
+	}
+
+#define add_next_index_ascii_stringl(arg, str, length, duplicate) \
+	if (UG(unicode)) { \
+		UChar *u_str = zend_ascii_to_unicode((str), length+1 ZEND_FILE_LINE_CC); \
+		add_next_index_unicodel(arg, u_str, length, 0); \
+	} else { \
+		add_next_index_stringl(arg, (char*)(str), length, duplicate); \
+	}
 
 ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
 ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, void **dest, int duplicate);
@@ -457,6 +581,29 @@ END_EXTERN_C()
 		(z)->type = IS_STRING;		    \
 	}
 
+#define ZVAL_ASCII_STRING(z, s, duplicate) \
+	if (UG(unicode)) { \
+		uint length = strlen(s); \
+		UChar *u_str = zend_ascii_to_unicode((s), length+1 ZEND_FILE_LINE_CC); \
+		ZVAL_UNICODEL(z, u_str, length, 0); \
+	} else { \
+		char *__s=(s);					\
+		(z)->value.str.len = strlen(__s);	\
+		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
+		(z)->type = IS_STRING;	        \
+	}
+
+#define ZVAL_ASCII_STRINGL(z, s, l, duplicate) \
+	if (UG(unicode)) { \
+		UChar *u_str = zend_ascii_to_unicode((s), (l)+1 ZEND_FILE_LINE_CC); \
+		ZVAL_UNICODEL(z, u_str, l, 0); \
+	} else { \
+		char *__s=(s); int __l=l;		\
+		(z)->value.str.len = __l;	    \
+		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
+		(z)->type = IS_STRING;		    \
+	}
+
 #define ZVAL_UNICODE(z, u, duplicate) {	\
 		UChar *__u=(u); 				\
 		(z)->value.ustr.len = u_strlen(__u);    \
@@ -521,6 +668,31 @@ END_EXTERN_C()
 		(z)->refcount = refcount;       \
 	}
 
+#define ZVAL_TEXT(z, t, duplicate)					\
+		do {										\
+			if (UG(unicode)) {						\
+				ZVAL_UNICODE(z, t, duplicate);		\
+			} else {								\
+				ZVAL_STRING(z, t, duplicate);		\
+			}										\
+		} while (0);
+
+#define ZVAL_TEXTL(z, t, l, duplicate)				\
+		do {										\
+			if (UG(unicode)) {						\
+				ZVAL_UNICODEL(z, t, l, duplicate); 	\
+			} else {								\
+				ZVAL_STRINGL(z, t, l, duplicate);	\
+			}										\
+		} while (0);
+
+#define ZVAL_EMPTY_TEXT(z) \
+		if (UG(unicode)) { \
+			ZVAL_EMPTY_UNICODE(z); \
+		} else { \
+			ZVAL_EMPTY_STRING(z); \
+		}
+
 #define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
 #define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
 
@@ -531,6 +703,8 @@ END_EXTERN_C()
 #define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
 #define RETVAL_STRING(s, duplicate) 		ZVAL_STRING(return_value, s, duplicate)
 #define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
+#define RETVAL_ASCII_STRING(s, duplicate) 		ZVAL_ASCII_STRING(return_value, s, duplicate)
+#define RETVAL_ASCII_STRINGL(s, l, duplicate) 	ZVAL_ASCII_STRINGL(return_value, s, l, duplicate)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
 #define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
@@ -541,23 +715,8 @@ END_EXTERN_C()
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
 #define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
-#define RETVAL_TEXT(t, duplicate)					\
-		do {										\
-			if (UG(unicode)) {						\
-				RETVAL_UNICODE(t, duplicate);		\
-			} else {								\
-				RETVAL_STRING(t, duplicate);		\
-			}										\
-		} while (0);
-
-#define RETVAL_TEXTL(t, l, duplicate)				\
-		do {										\
-			if (UG(unicode)) {						\
-				RETVAL_UNICODEL(t, l, duplicate); 	\
-			} else {								\
-				RETVAL_STRINGL(t, l, duplicate);	\
-			}										\
-		} while (0);
+#define RETVAL_TEXT(t, duplicate) ZVAL_TEXT(return_value, t, duplicate)
+#define RETVAL_TEXTL(t, l, duplicate) ZVAL_TEXTL(return_value, t, l, duplicate)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
@@ -578,6 +737,8 @@ END_EXTERN_C()
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 #define RETURN_TEXT(t, duplicate)		{ RETVAL_TEXT(t, duplicate); return; }
 #define RETURN_TEXTL(t, l, duplicate)	{ RETVAL_TEXTL(t, l, duplicate); return; }
+#define RETURN_ASCII_STRING(t, duplicate)		{ RETVAL_ASCII_STRING(t, duplicate); return; }
+#define RETURN_ASCII_STRINGL(t, l, duplicate)	{ RETVAL_ASCII_STRINGL(t, l, duplicate); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\
