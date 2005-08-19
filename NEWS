@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitriy, et al)
-- instanceof operator shouldn't call __autoload. (Dmitry)
+- Changed "instanceof" operator to not call __autoload(). (Dmitry)
 - cURL improvements: (Ilia)
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
