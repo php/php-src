@@ -2201,9 +2201,22 @@ ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t le
 {
 	int retval;
 	
-	retval = u_memcmpCodePointOrder(s1, s2, MIN(len1, len2));
+	retval = ZEND_NORMALIZE_BOOL(u_memcmpCodePointOrder(s1, s2, MIN(len1, len2)));
 	if (!retval) {
 		return (len1 - len2);
+	} else {
+		return retval;
+	}
+}
+
+
+ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length)
+{
+	int retval;
+	
+	retval = ZEND_NORMALIZE_BOOL(u_memcmpCodePointOrder(s1, s2, MIN(length, MIN(len1, len2))));
+	if (!retval) {
+		return (MIN(length, len1) - MIN(length, len2));
 	} else {
 		return retval;
 	}
