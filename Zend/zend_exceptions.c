@@ -391,7 +391,16 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 
 			dup = zend_get_object_classname(*arg, &class_name, &class_name_len TSRMLS_CC);
 
-			TRACE_APPEND_STRL(class_name, class_name_len);
+			if (UG(unicode)) {
+				zval tmp;
+
+				ZVAL_UNICODEL(&tmp, class_name, class_name_len, 1);
+				convert_to_string_with_converter(&tmp, ZEND_U_CONVERTER(UG(output_encoding_conv)));
+				TRACE_APPEND_STRL(Z_STRVAL(tmp), Z_STRLEN(tmp));
+				zval_dtor(&tmp);
+			} else {
+				TRACE_APPEND_STRL(class_name, class_name_len);
+			}
 			if(!dup) {
 				efree(class_name);
 			}
