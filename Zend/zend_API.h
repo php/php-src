@@ -671,7 +671,7 @@ END_EXTERN_C()
 #define ZVAL_TEXT(z, t, duplicate)					\
 		do {										\
 			if (UG(unicode)) {						\
-				ZVAL_UNICODE(z, t, duplicate);		\
+				ZVAL_UNICODE(z, (UChar*)t, duplicate);		\
 			} else {								\
 				ZVAL_STRING(z, t, duplicate);		\
 			}										\
