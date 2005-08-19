@@ -2339,7 +2339,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		convert_to_string_ex(&argument);
 		if (zend_u_lookup_class(Z_TYPE_P(argument), Z_UNIVAL_P(argument), Z_UNILEN_P(argument), &ce TSRMLS_CC) == FAILURE) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), -1 TSRMLS_CC, "Class %s does not exist", Z_STRVAL_P(argument));
+				zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), -1 TSRMLS_CC, "Class %R does not exist", Z_TYPE_P(argument), Z_UNIVAL_P(argument));
 			}
 			return;
 		}
@@ -2775,18 +2775,19 @@ ZEND_METHOD(reflection_class, getProperty)
 	zend_property_info *property_info;
 	char *name; 
 	int name_len;
+	zend_uchar name_type;
 
 	METHOD_NOTSTATIC;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "t", &name, &name_len, &name_type) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
+	if (zend_u_hash_find(&ce->properties_info, name_type, name, name_len + 1, (void**) &property_info) == SUCCESS && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
 		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
 	} else {
 		zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
-				"Property %s does not exist", name);
+				"Property %R does not exist", name_type, name);
 		return;
 	}
 }
@@ -3118,7 +3119,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		case IS_UNICODE:
 			if (zend_u_lookup_class(Z_TYPE_P(class_name), Z_UNIVAL_P(class_name), Z_UNILEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
-						"Interface %s does not exist", Z_STRVAL_P(class_name));
+						"Interface %R does not exist", Z_TYPE_P(class_name), Z_UNIVAL_P(class_name));
 				return;
 			}
 			class_ce = *pce;
@@ -3165,7 +3166,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		case IS_UNICODE:
 			if (zend_u_lookup_class(Z_TYPE_P(interface), Z_UNIVAL_P(interface), Z_UNILEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
-						"Interface %s does not exist", Z_STRVAL_P(interface));
+						"Interface %R does not exist", Z_TYPE_P(interface), Z_UNIVAL_P(interface));
 				return;
 			}
 			interface_ce = *pce;
@@ -3281,8 +3282,9 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 	property_reference *reference;
+	zend_uchar name_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zt", &classname, &name_str, &name_len, &name_type) == FAILURE) {
 		return;
 	}
 
@@ -3298,7 +3300,7 @@ ZEND_METHOD(reflection_property, __construct)
 		case IS_UNICODE:
 			if (zend_u_lookup_class(Z_TYPE_P(classname), Z_UNIVAL_P(classname), Z_UNILEN_P(classname), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC,
-						"Class %s does not exist", Z_STRVAL_P(classname)); 
+						"Class %R does not exist", Z_TYPE_P(classname), Z_UNIVAL_P(classname)); 
 				return;
 			}
 			ce = *pce;
@@ -3313,9 +3315,9 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	if (zend_hash_find(&ce->properties_info, name_str, name_len + 1, (void **) &property_info) == FAILURE || (property_info->flags & ZEND_ACC_SHADOW)) {
+	if (zend_u_hash_find(&ce->properties_info, name_type, name_str, name_len + 1, (void **) &property_info) == FAILURE || (property_info->flags & ZEND_ACC_SHADOW)) {
 		zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
-			"Property %v::$%s does not exist", ce->name, name_str);
+			"Property %v::$%R does not exist", ce->name, name_type, name_str);
 		return;
 	}
 	

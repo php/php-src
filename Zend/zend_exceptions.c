@@ -723,7 +723,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		file = zend_read_property(U_CLASS_ENTRY(default_exception_ce), exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 		line = zend_read_property(U_CLASS_ENTRY(default_exception_ce), exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
-		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %R\n  thrown", Z_TYPE_P(str), Z_UNIVAL_P(str));
 	} else {
 		zend_error(E_ERROR, "Uncaught exception '%v'", ce_exception->name);
 	}

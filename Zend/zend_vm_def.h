@@ -2856,7 +2856,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, ANY)
 	}
 
 	if (opline->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER) {
-		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname) TSRMLS_CC);
+		zend_std_unset_static_property(EX_T(opline->op2.u.var).class_entry, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);		
 		if (zend_u_hash_del(target_symbol_table, Z_TYPE_P(varname), Z_UNIVAL_P(varname), Z_UNILEN_P(varname)+1) == SUCCESS) {

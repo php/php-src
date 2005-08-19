@@ -827,12 +827,12 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 	}
 
 #if DEBUG_OBJECT_HANDLERS
-	zend_printf("Access type for %v::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
+	zend_printf("Access type for %v::%R is %s\n", ce->name, type, property_name, zend_visibility_string(property_info->flags));
 #endif
 
 	if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
 		if (!silent) {
-			zend_error(E_ERROR, "Cannot access %s property %v::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+			zend_error(E_ERROR, "Cannot access %s property %v::$%R", zend_visibility_string(property_info->flags), ce->name, type, property_name);
 		}
 		return NULL;
 	}
@@ -843,7 +843,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		if (silent) {
 			return NULL;
 		} else {
-			zend_error(E_ERROR, "Access to undeclared static property:  %v::$%s", ce->name, property_name);
+			zend_error(E_ERROR, "Access to undeclared static property:  %v::$%R", ce->name, type, property_name);
 		}
 	}
 	
@@ -852,9 +852,9 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 }
 
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC)
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_uchar type, void *property_name, int property_name_len TSRMLS_DC)
 {
-	zend_error(E_ERROR, "Attempt to unset static property %v::$%s", ce->name, property_name);
+	zend_error(E_ERROR, "Attempt to unset static property %v::$%R", ce->name, type, property_name);
 	return 0;
 }
 

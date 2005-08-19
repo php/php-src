@@ -74,7 +74,7 @@ static void zend_handle_sigsegv(int dummy)
 	{
 		TSRMLS_FETCH();
 
-		fprintf(stderr, "SIGSEGV caught on opcode %d on opline %d of %s() at %s:%d\n\n",
+		fprintf(stderr, "SIGSEGV caught on opcode %d on opline %d of %v() at %s:%d\n\n",
 				active_opline->opcode,
 				active_opline-EG(active_op_array)->opcodes,
 				get_active_function_name(TSRMLS_C),
@@ -479,7 +479,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				continue;
 			}
 			if (!zend_get_constant(str_index, str_index_len-1, &const_value TSRMLS_CC)) {
-				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
+				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
 				zend_hash_move_forward(p->value.ht);
 				continue;
 			}
