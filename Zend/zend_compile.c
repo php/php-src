@@ -3592,8 +3592,17 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	int last_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline;
 
+	if (last_op_number > 0) {
+		opline = &CG(active_op_array)->opcodes[last_op_number-1];
+		if (opline->opcode == ZEND_FETCH_CLASS) {
+			opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
+		}
+	}
+	
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INSTANCEOF;
 	opline->result.op_type = IS_TMP_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));

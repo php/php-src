@@ -1421,7 +1421,9 @@ void zend_unset_timeout(TSRMLS_D)
 ZEND_API zend_class_entry *zend_u_fetch_class(zend_uchar type, void *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
 	zend_class_entry **pce;
+	zend_bool use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
 
+	fetch_type = fetch_type & ~ZEND_FETCH_CLASS_NO_AUTOLOAD;
 check_fetch_type:
 	switch (fetch_type) {
 		case ZEND_FETCH_CLASS_SELF:
@@ -1446,14 +1448,27 @@ check_fetch_type:
 			break;
 	}
 
-	if (zend_u_lookup_class(type, class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
-		if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
-			zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
+	if (use_autoload) {
+		if (zend_u_lookup_class(type, class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
+			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
+				zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
+			} else {
+				zend_error(E_ERROR, "Class '%R' not found", type, class_name);
+			}
+		}
+		return *pce;
+	} else {
+		unsigned int lc_name_len;
+		void *lc_name = zend_u_str_case_fold(type, class_name, class_name_len, 1, &lc_name_len);
+
+		if (zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len+1, (void **) &pce) == SUCCESS) {
+			efree(lc_name);
+			return *pce;
 		} else {
-			zend_error(E_ERROR, "Class '%R' not found", type, class_name);
+			efree(lc_name);
+			return NULL;
 		}
 	}
-	return *pce;
 }
 
 zend_class_entry *zend_fetch_class(char *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
