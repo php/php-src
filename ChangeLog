@@ -1,3 +1,82 @@
+2005-08-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      Unicode support for strcmp()/strncmp().
+
+    * unicode-progress.txt
+      unicode-progress.txt
+      unicode-todo.txt
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_object_handlers.c:
+      -** empty log message ***
+
+    * ext/standard/string.c:
+      Unicode support for ord() and chr().
+
+    * unicode-progress.txt:
+      This file should be used to keep track of extension upgrade progress.
+      Please add completed functions to the list.
+
+    * ext/standard/string.c:
+      Use RETVAL_ASCII_STRINGL() here.
+
+2005-08-19  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      Proper NEWS language that everyone should be able to understand..
+
+2005-08-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Unicode support
+
+2005-08-19  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode capable impl() of strrev()
+
+2005-08-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/http.c:
+      Quick fix (API was changed)
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h:
+      Unicode support cleanup
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/instanceof.phpt:
+      nstanceof operator shouldn't call __autoload()
+
+    * ext/standard/array.c
+      ext/standard/array.c:
+      ZTS fix
+
 2005-08-18  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ext/standard/array.c:
