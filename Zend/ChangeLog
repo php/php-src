@@ -1,3 +1,49 @@
+2005-08-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c
+      zend_operators.c
+      zend_operators.h:
+      Unicode support for strcmp()/strncmp().
+
+    * zend_API.c
+      zend_API.h
+      zend_object_handlers.c:
+      -** empty log message ***
+
+2005-08-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_builtin_functions.c
+      zend_compile.c
+      zend_exceptions.c
+      zend_exceptions.c
+      zend_execute_API.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_reflection_api.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      Unicode support
+
+    * zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_execute_API.c
+      zend_language_scanner.l
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_reflection_api.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Unicode support cleanup
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute_API.c
+      tests/instanceof.phpt:
+      nstanceof operator shouldn't call __autoload()
+
 2005-08-18  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c
