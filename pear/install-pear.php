@@ -9,6 +9,19 @@ include_once 'PEAR/Installer.php';
 include_once 'PEAR/Registry.php';
 include_once 'PEAR/Frontend/CLI.php';
 
+$a = true;
+if (!PEAR::loadExtension('xml')) {
+    $a = false;
+    echo "[PEAR] xml extension is required\n";
+}
+if (!PEAR::loadExtension('pcre')) {
+    $a = false;
+    echo "[PEAR] pcre extension is required\n";
+}
+if (!$a) {
+    return -1;
+}
+
 $force = false;
 $install_files = array();
 array_shift($argv);
