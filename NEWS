@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2005, PHP 5.0.5
+21 Aug 2005, PHP 5.0.5RC1
 - Fixed various reentrancy bugs in user-sort functions, solves bugs #33286 and
   #33295. (Mike Bretz)
 - Upgraded PCRE library to version 5.0. (Andrei)
