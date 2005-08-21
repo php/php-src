@@ -717,6 +717,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 
 	if (do_end) {
 		err = deflate(&ZLIBG(stream), Z_FINISH);
+		buffer[outlen - ZLIBG(stream).avail_out] = '\0';
 	}
 
 
