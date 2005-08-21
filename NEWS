@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 21 Aug 2005, PHP 5.0.5RC1
-- Fixed various reentrancy bugs in user-sort functions, solves bugs #33286 and
-  #33295. (Mike Bretz)
 - Upgraded PCRE library to version 5.0. (Andrei)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
 - Added new function mysqli_set_charset(). (Georg)
@@ -21,6 +19,8 @@ PHP                                                                        NEWS
 - Fixed memory corruption in ImageTTFText() with 64bit systems. (Andrey)
 - Fixed memory corruption in stristr(). (Derick)
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
+- Fixed various reentrancy bugs in user-sort functions, solves bugs #33286 and
+  #33295. (Mike Bretz)
 - Fixed bug #34078 (Reflection API problems in methods with boolean or 
   null default values). (Tony)
 - Fixed bug #34064 (arr[] as param to function is allowed only if function 
