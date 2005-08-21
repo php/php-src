@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.5
+- Fixed various reentrancy bugs in user-sort functions, solves bugs #33286 and
+  #33295. (Mike Bretz)
 - Upgraded PCRE library to version 5.0. (Andrei)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
 - Added new function mysqli_set_charset(). (Georg)

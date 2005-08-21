@@ -153,7 +153,6 @@ typedef struct _php_basic_globals {
 	ulong strtok_len;
 	char str_ebuf[40];
 	zval **array_walk_func_name;
-	zend_fcall_info_cache array_walk_fci_cache;
 	zval **user_compare_func_name;
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;

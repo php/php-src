@@ -578,43 +578,66 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	}
 }
 
-/* check is comparison function is valid */
+/* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
 	if (!zend_is_callable(*func_name, 0, NULL)) {	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function.");	\
+		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 		BG(user_compare_func_name) = old_compare_func;	\
 		RETURN_FALSE;	\
 	}	\
+
+    /* clear FCI cache otherwise : for example the same or other array with
+       (partly) the same key values has been sorted with uasort() or
+       other sorting function the comparison is cached, however the the name
+       of the function for comparison is not respected. see bug #28739 AND #33295
+
+       following defines will assist in backup / restore values.
+    */
+
+#define PHP_ARRAY_CMP_FUNC_VARS \
+	zval **old_compare_func; \
+	zend_fcall_info_cache old_user_compare_fci_cache
+
+#define PHP_ARRAY_CMP_FUNC_BACKUP() \
+	old_compare_func = BG(user_compare_func_name); \
+	old_user_compare_fci_cache = BG(user_compare_fci_cache); \
+	BG(user_compare_fci_cache) = empty_fcall_info_cache
+
+#define PHP_ARRAY_CMP_FUNC_RESTORE() \
+        BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
+        BG(user_compare_func_name) = old_compare_func
+
 
 /* {{{ proto bool usort(array array_arg, string cmp_function)
    Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
 	zval **array;
-	zval **old_compare_func;
 	HashTable *target_hash;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
-	old_compare_func = BG(user_compare_func_name);
-	BG(user_compare_fci_cache) = empty_fcall_info_cache;
+	PHP_ARRAY_CMP_FUNC_BACKUP();
+
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 	
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
-	BG(user_compare_func_name) = old_compare_func;
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_TRUE;
 }
 /* }}} */
@@ -624,29 +647,30 @@ PHP_FUNCTION(usort)
 PHP_FUNCTION(uasort)
 {
 	zval **array;
-	zval **old_compare_func;
 	HashTable *target_hash;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
-	old_compare_func = BG(user_compare_func_name);
-	BG(user_compare_fci_cache) = empty_fcall_info_cache;
+	PHP_ARRAY_CMP_FUNC_BACKUP();
+
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		RETURN_FALSE;
 	}
-	BG(user_compare_func_name) = old_compare_func;
+	PHP_ARRAY_CMP_FUNC_RESTORE();
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -703,28 +727,33 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 PHP_FUNCTION(uksort)
 {
 	zval **array;
-	zval **old_compare_func;
 	HashTable *target_hash;
+	PHP_ARRAY_CMP_FUNC_VARS;
 
-	old_compare_func = BG(user_compare_func_name);
+
+	PHP_ARRAY_CMP_FUNC_BACKUP();
+
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The argument should be an array");
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+
 		RETURN_FALSE;
 	}
 
 	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
 
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
-		BG(user_compare_func_name) = old_compare_func;
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+
 		RETURN_FALSE;
 	}
-	BG(user_compare_func_name) = old_compare_func;
+
+	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1008,6 +1037,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	uint   string_key_len;
 	ulong  num_key;
 	HashPosition pos;
+	zend_fcall_info_cache array_walk_fci_cache = empty_fcall_info_cache;
 
 	/* Set up known arguments */
 	args[1] = &key;
@@ -1051,7 +1081,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 			fci.no_separation = 0;
 
 			/* Call the userland function */
-			if (zend_call_function(&fci, &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
+			if (zend_call_function(&fci, &array_walk_fci_cache TSRMLS_CC) == SUCCESS) {
 				if (retval_ptr) {
 					zval_ptr_dtor(&retval_ptr);
 				}
@@ -1094,7 +1124,6 @@ PHP_FUNCTION(array_walk)
 	HashTable *target_hash;
 
 	argc = ZEND_NUM_ARGS();
-	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	old_walk_func_name = BG(array_walk_func_name);
 	if (argc < 2 || argc > 3 ||
 		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
@@ -1131,7 +1160,6 @@ PHP_FUNCTION(array_walk_recursive)
 
 	argc = ZEND_NUM_ARGS();
 	old_walk_func_name = BG(array_walk_func_name);
-	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	
 	if (argc < 2 || argc > 3 ||
 		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
@@ -2809,7 +2837,8 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	Bucket ***lists, **list, ***ptrs, *p;
 	
 	char *callback_name;
-	zval **old_compare_func;
+	PHP_ARRAY_CMP_FUNC_VARS;
+
 	
 	int (*intersect_key_compare_func)(const void *, const void * TSRMLS_DC);
 	int (*intersect_data_compare_func)(const void *, const void * TSRMLS_DC);
@@ -2823,13 +2852,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		WRONG_PARAM_COUNT;
 	}
 
-	old_compare_func = BG(user_compare_func_name);
-	/* clear FCI cache otherwise : for example the same or other array with 
-	   (partly) the same key values has been sorted with uasort() or
-	   other sorting function the comparison is cached, however the the name
-	   of the function for comparison is not respected. see bug #28739
-	*/
-	BG(user_compare_fci_cache) = empty_fcall_info_cache;
+	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (behavior == INTERSECT_NORMAL) {
 		intersect_key_compare_func = array_key_compare;
@@ -3100,7 +3123,8 @@ out:
 		pefree(lists[i], hash->persistent);
 	}
 	
-	BG(user_compare_func_name) = old_compare_func;
+	PHP_ARRAY_CMP_FUNC_RESTORE();
+
 	
 	efree(ptrs);
 	efree(lists);
@@ -3172,7 +3196,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	Bucket ***lists, **list, ***ptrs, *p;
 	char *callback_name;
 	
-	zval **old_compare_func;
+	PHP_ARRAY_CMP_FUNC_VARS;
+
 	int (*diff_key_compare_func)(const void *, const void * TSRMLS_DC);
 	int (*diff_data_compare_func)(const void *, const void * TSRMLS_DC);
 	
@@ -3186,13 +3211,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		WRONG_PARAM_COUNT;
 	}
 
-	old_compare_func = BG(user_compare_func_name);
-	/* clear FCI cache otherwise : for example the same or other array with 
-	   (partly) the same key values has been sorted with uasort() or
-	   other sorting function the comparison is cached, however the the name
-	   of the function for comparison is not respected. see bug #28739
-	*/
-	BG(user_compare_fci_cache) = empty_fcall_info_cache;
+	PHP_ARRAY_CMP_FUNC_BACKUP();
 
 	if (behavior == DIFF_NORMAL) {
 		diff_key_compare_func = array_key_compare;
@@ -3450,7 +3469,8 @@ out:
 		pefree(lists[i], hash->persistent);
 	}
 
-	BG(user_compare_func_name) = old_compare_func;			
+	PHP_ARRAY_CMP_FUNC_RESTORE();
+
 	
 	efree(ptrs);
 	efree(lists);
