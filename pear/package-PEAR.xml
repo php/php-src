@@ -49,7 +49,7 @@
   </maintainers>
   <release>
     <version>1.3.6</version>
-    <date>2005-08-17</date>
+    <date>2005-08-18</date>
     <state>stable</state>
     <license>PHP License</license>
     <notes>
@@ -126,9 +126,21 @@
       <dep type="pkg" rel="ge" version="1.4.0">XML_RPC</dep>
       <dep type="ext" rel="has">xml</dep>
       <dep type="ext" rel="has">pcre</dep>
+      <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
     </deps>
   </release>
   <changelog>
+  <release>
+    <version>1.3.5</version>
+    <date>2005-02-18</date>
+    <state>stable</state>
+    <license>PHP License</license>
+    <notes>
+ * fix Bug #3505: pecl can't install PDO
+ * enhance pear run-tests dramatically
+ * fix Bug #3506: pear install should export the pear version into the environment
+    </notes>
+  </release>
   <release>
     <version>1.3.1</version>
     <date>2004-04-06</date>
@@ -194,16 +206,6 @@ Other:
  * implement Request #2848: PEAR_ErrorStack logger extends, PEAR_ERRORSTACK_DIE
  * implement Request #2914: Dynamic Include Path for run-tests command
  * make pear help listing more useful (put how-to-use info at the bottom of the listing)
-    </notes>
-   </release>
-  <release>
-    <version>1.3.5</version>
-    <date>2005-02-18</date>
-    <state>stable</state>
-    <notes>
- * fix Bug #3505: pecl can't install PDO
- * enhance pear run-tests dramatically
- * fix Bug #3506: pear install should export the pear version into the environment
     </notes>
    </release>
   </changelog>
