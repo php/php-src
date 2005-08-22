@@ -1,6 +1,38 @@
 News about PCRE releases
 ------------------------
 
+Release 6.0 07-Jun-05
+---------------------
+
+The release number has been increased to 6.0 because of the addition of several
+major new pieces of functionality.
+
+A new function, pcre_dfa_exec(), which implements pattern matching using a DFA
+algorithm, has been added. This has a number of advantages for certain cases,
+though it does run more slowly, and lacks the ability to capture substrings. On
+the other hand, it does find all matches, not just the first, and it works
+better for partial matching. The pcrematching man page discusses the
+differences.
+
+The pcretest program has been enhanced so that it can make use of the new
+pcre_dfa_exec() matching function and the extra features it provides.
+
+The distribution now includes a C++ wrapper library. This is built
+automatically if a C++ compiler is found. The pcrecpp man page discusses this
+interface.
+
+The code itself has been re-organized into many more files, one for each
+function, so it no longer requires everything to be linked in when static
+linkage is used. As a consequence, some internal functions have had to have
+their names exposed. These functions all have names starting with _pcre_. They
+are undocumented, and are not intended for use by outside callers.
+
+The pcregrep program has been enhanced with new functionality such as
+multiline-matching and options for output more matching context. See the
+ChangeLog for a complete list of changes to the library and the utility
+programs.
+
+
 Release 5.0 13-Sep-04
 ---------------------
 

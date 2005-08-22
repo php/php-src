@@ -2,13 +2,11 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/*
-PCRE is a library of functions to support regular expressions whose syntax
+/* PCRE is a library of functions to support regular expressions whose syntax
 and semantics are as close as possible to those of the Perl 5 language.
 
-Written by: Philip Hazel <ph10@cam.ac.uk>
-
-           Copyright (c) 1997-2004 University of Cambridge
+                       Written by Philip Hazel
+           Copyright (c) 1997-2005 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -40,20 +38,19 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/* This is a support program to generate the file chartables.c, containing
-character tables of various kinds. They are built according to the default C
-locale and used as the default tables by PCRE. Now that pcre_maketables is
-a function visible to the outside world, we make use of its code from here in
-order to be consistent. */
+/* This is a freestanding support program to generate a file containing default
+character tables for PCRE. The tables are built according to the default C
+locale. Now that pcre_maketables is a function visible to the outside world, we
+make use of its code from here in order to be consistent. */
 
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "internal.h"
+#include "pcre_internal.h"
 
-#define DFTABLES          /* maketables.c notices this */
-#include "maketables.c"
+#define DFTABLES          /* pcre_maketables.c notices this */
+#include "pcre_maketables.c"
 
 
 int main(int argc, char **argv)
@@ -61,6 +58,7 @@ int main(int argc, char **argv)
 int i;
 FILE *f;
 const unsigned char *tables = pcre_maketables();
+const unsigned char *base_of_tables = tables;
 
 if (argc != 2)
   {
@@ -68,7 +66,7 @@ if (argc != 2)
   return 1;
   }
 
-f = fopen(argv[1], "w");
+f = fopen(argv[1], "wb");
 if (f == NULL)
   {
   fprintf(stderr, "dftables: failed to open %s for writing\n", argv[1]);
@@ -86,10 +84,10 @@ fprintf(f,
   "program. If you edit it by hand, you might like to edit the Makefile to \n"
   "prevent its ever being regenerated.\n\n");
 fprintf(f,
-  "This file is #included in the compilation of pcre.c to build the default\n"
-  "character tables which are used when no tables are passed to the compile\n"
-  "function. */\n\n"
-  "static unsigned char pcre_default_tables[] = {\n\n"
+  "This file contains the default tables for characters with codes less than\n"
+  "128 (ASCII characters). These tables are used when no external tables are\n"
+  "passed to PCRE. */\n\n"
+  "const unsigned char _pcre_default_tables[] = {\n\n"
   "/* This table is a lower casing table. */\n\n");
 
 fprintf(f, "  ");
@@ -167,6 +165,7 @@ if (isprint(i-1)) fprintf(f, " %c ", i-1);
 fprintf(f, " */\n\n/* End of chartables.c */\n");
 
 fclose(f);
+free((void *)base_of_tables);
 return 0;
 }
 

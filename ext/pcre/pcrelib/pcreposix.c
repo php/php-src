@@ -2,17 +2,11 @@
 *      Perl-Compatible Regular Expressions       *
 *************************************************/
 
-/*
-This is a library of functions to support regular expressions whose syntax
-and semantics are as close as possible to those of the Perl 5 language. See
-the file Tech.Notes for some information on the internals.
+/* PCRE is a library of functions to support regular expressions whose syntax
+and semantics are as close as possible to those of the Perl 5 language.
 
-This module is a wrapper that provides a POSIX API to the underlying PCRE
-functions.
-
-Written by: Philip Hazel <ph10@cam.ac.uk>
-
-           Copyright (c) 1997-2004 University of Cambridge
+                       Written by Philip Hazel
+           Copyright (c) 1997-2005 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -43,69 +37,68 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#include "internal.h"
+
+/* This module is a wrapper that provides a POSIX API to the underlying PCRE
+functions. */
+
+
+#include "pcre_internal.h"
 #include "pcreposix.h"
 #include "stdlib.h"
 
 
 
-/* Corresponding tables of PCRE error messages and POSIX error codes. */
-
-static const char *const estring[] = {
-  ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
-  ERR11, ERR12, ERR13, ERR14, ERR15, ERR16, ERR17, ERR18, ERR19, ERR20,
-  ERR21, ERR22, ERR23, ERR24, ERR25, ERR26, ERR27, ERR29, ERR29, ERR30,
-  ERR31, ERR32, ERR33, ERR34, ERR35, ERR36, ERR37, ERR38, ERR39, ERR40,
-  ERR41, ERR42, ERR43, ERR44, ERR45, ERR46, ERR47 };
+/* Table to translate PCRE compile time error codes into POSIX error codes. */
 
 static const int eint[] = {
-  REG_EESCAPE, /* "\\ at end of pattern" */
-  REG_EESCAPE, /* "\\c at end of pattern" */
-  REG_EESCAPE, /* "unrecognized character follows \\" */
-  REG_BADBR,   /* "numbers out of order in {} quantifier" */
-  REG_BADBR,   /* "number too big in {} quantifier" */
-  REG_EBRACK,  /* "missing terminating ] for character class" */
-  REG_ECTYPE,  /* "invalid escape sequence in character class" */
-  REG_ERANGE,  /* "range out of order in character class" */
-  REG_BADRPT,  /* "nothing to repeat" */
-  REG_BADRPT,  /* "operand of unlimited repeat could match the empty string" */
-  REG_ASSERT,  /* "internal error: unexpected repeat" */
-  REG_BADPAT,  /* "unrecognized character after (?" */
-  REG_BADPAT,  /* "POSIX named classes are supported only within a class" */
-  REG_EPAREN,  /* "missing )" */
-  REG_ESUBREG, /* "reference to non-existent subpattern" */
-  REG_INVARG,  /* "erroffset passed as NULL" */
-  REG_INVARG,  /* "unknown option bit(s) set" */
-  REG_EPAREN,  /* "missing ) after comment" */
-  REG_ESIZE,   /* "parentheses nested too deeply" */
-  REG_ESIZE,   /* "regular expression too large" */
-  REG_ESPACE,  /* "failed to get memory" */
-  REG_EPAREN,  /* "unmatched brackets" */
-  REG_ASSERT,  /* "internal error: code overflow" */
-  REG_BADPAT,  /* "unrecognized character after (?<" */
-  REG_BADPAT,  /* "lookbehind assertion is not fixed length" */
-  REG_BADPAT,  /* "malformed number after (?(" */
-  REG_BADPAT,  /* "conditional group containe more than two branches" */
-  REG_BADPAT,  /* "assertion expected after (?(" */
-  REG_BADPAT,  /* "(?R or (?digits must be followed by )" */
-  REG_ECTYPE,  /* "unknown POSIX class name" */
-  REG_BADPAT,  /* "POSIX collating elements are not supported" */
-  REG_INVARG,  /* "this version of PCRE is not compiled with PCRE_UTF8 support" */
-  REG_BADPAT,  /* "spare error" */
-  REG_BADPAT,  /* "character value in \x{...} sequence is too large" */
-  REG_BADPAT,  /* "invalid condition (?(0)" */
-  REG_BADPAT,  /* "\\C not allowed in lookbehind assertion" */
-  REG_EESCAPE, /* "PCRE does not support \\L, \\l, \\N, \\U, or \\u" */
-  REG_BADPAT,  /* "number after (?C is > 255" */
-  REG_BADPAT,  /* "closing ) for (?C expected" */
-  REG_BADPAT,  /* "recursive call could loop indefinitely" */
-  REG_BADPAT,  /* "unrecognized character after (?P" */
-  REG_BADPAT,  /* "syntax error after (?P" */
-  REG_BADPAT,  /* "two named groups have the same name" */
-  REG_BADPAT,  /* "invalid UTF-8 string" */
-  REG_BADPAT,  /* "support for \\P, \\p, and \\X has not been compiled" */
-  REG_BADPAT,  /* "malformed \\P or \\p sequence" */
-  REG_BADPAT   /* "unknown property name after \\P or \\p" */
+  0,           /* no error */
+  REG_EESCAPE, /* \ at end of pattern */
+  REG_EESCAPE, /* \c at end of pattern */
+  REG_EESCAPE, /* unrecognized character follows \ */
+  REG_BADBR,   /* numbers out of order in {} quantifier */
+  REG_BADBR,   /* number too big in {} quantifier */
+  REG_EBRACK,  /* missing terminating ] for character class */
+  REG_ECTYPE,  /* invalid escape sequence in character class */
+  REG_ERANGE,  /* range out of order in character class */
+  REG_BADRPT,  /* nothing to repeat */
+  REG_BADRPT,  /* operand of unlimited repeat could match the empty string */
+  REG_ASSERT,  /* internal error: unexpected repeat */
+  REG_BADPAT,  /* unrecognized character after (? */
+  REG_BADPAT,  /* POSIX named classes are supported only within a class */
+  REG_EPAREN,  /* missing ) */
+  REG_ESUBREG, /* reference to non-existent subpattern */
+  REG_INVARG,  /* erroffset passed as NULL */
+  REG_INVARG,  /* unknown option bit(s) set */
+  REG_EPAREN,  /* missing ) after comment */
+  REG_ESIZE,   /* parentheses nested too deeply */
+  REG_ESIZE,   /* regular expression too large */
+  REG_ESPACE,  /* failed to get memory */
+  REG_EPAREN,  /* unmatched brackets */
+  REG_ASSERT,  /* internal error: code overflow */
+  REG_BADPAT,  /* unrecognized character after (?< */
+  REG_BADPAT,  /* lookbehind assertion is not fixed length */
+  REG_BADPAT,  /* malformed number after (?( */
+  REG_BADPAT,  /* conditional group containe more than two branches */
+  REG_BADPAT,  /* assertion expected after (?( */
+  REG_BADPAT,  /* (?R or (?digits must be followed by ) */
+  REG_ECTYPE,  /* unknown POSIX class name */
+  REG_BADPAT,  /* POSIX collating elements are not supported */
+  REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UTF8 support */
+  REG_BADPAT,  /* spare error */
+  REG_BADPAT,  /* character value in \x{...} sequence is too large */
+  REG_BADPAT,  /* invalid condition (?(0) */
+  REG_BADPAT,  /* \C not allowed in lookbehind assertion */
+  REG_EESCAPE, /* PCRE does not support \L, \l, \N, \U, or \u */
+  REG_BADPAT,  /* number after (?C is > 255 */
+  REG_BADPAT,  /* closing ) for (?C expected */
+  REG_BADPAT,  /* recursive call could loop indefinitely */
+  REG_BADPAT,  /* unrecognized character after (?P */
+  REG_BADPAT,  /* syntax error after (?P */
+  REG_BADPAT,  /* two named groups have the same name */
+  REG_BADPAT,  /* invalid UTF-8 string */
+  REG_BADPAT,  /* support for \P, \p, and \X has not been compiled */
+  REG_BADPAT,  /* malformed \P or \p sequence */
+  REG_BADPAT   /* unknown property name after \P or \p */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -131,24 +124,6 @@ static const char *const pstring[] = {
   "match failed"                     /* NOMATCH    */
 };
 
-
-
-
-/*************************************************
-*          Translate PCRE text code to int       *
-*************************************************/
-
-/* PCRE compile-time errors are given as strings defined as macros. We can just
-look them up in a table to turn them into POSIX-style error codes. */
-
-static int
-pcre_posix_error_code(const char *s)
-{
-size_t i;
-for (i = 0; i < sizeof(estring)/sizeof(char *); i++)
-  if (strcmp(s, estring[i]) == 0) return eint[i];
-return REG_ASSERT;
-}
 
 
 
@@ -219,15 +194,18 @@ regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 const char *errorptr;
 int erroffset;
+int errorcode;
 int options = 0;
 
 if ((cflags & REG_ICASE) != 0) options |= PCRE_CASELESS;
 if ((cflags & REG_NEWLINE) != 0) options |= PCRE_MULTILINE;
+if ((cflags & REG_DOTALL) != 0) options |= PCRE_DOTALL;
 
-preg->re_pcre = pcre_compile(pattern, options, &errorptr, &erroffset, NULL);
+preg->re_pcre = pcre_compile2(pattern, options, &errorcode, &errorptr,
+  &erroffset, NULL);
 preg->re_erroffset = erroffset;
 
-if (preg->re_pcre == NULL) return pcre_posix_error_code(errorptr);
+if (preg->re_pcre == NULL) return eint[errorcode];
 
 preg->re_nsub = pcre_info((const pcre *)preg->re_pcre, NULL, NULL);
 return 0;

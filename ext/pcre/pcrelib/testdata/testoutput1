@@ -1,4 +1,4 @@
-PCRE version 3.92 11-Sep-2002
+PCRE version 6.2 01-Aug-2005
 
 /the quick brown fox/
     the quick brown fox
@@ -1942,7 +1942,7 @@ No match
 /^[W-c]+$/
     WXY_^abc
  0: WXY_^abc
-    ***Failers
+    *** Failers
 No match
     wxy
 No match
@@ -5792,7 +5792,7 @@ No match
     12-ab.1245 
  0: 12-ab.1245
  1: 
-    ***Failers
+    *** Failers
 No match
     \
 No match
@@ -6218,5 +6218,70 @@ No match
     1:  
 No match
 
-/ End of testinput1 /
+/[z\Qa-d]\E]/
+    z
+ 0: z
+    a
+ 0: a
+    -
+ 0: -
+    d
+ 0: d
+    ] 
+ 0: ]
+    *** Failers
+ 0: a
+    b     
+No match
 
+/[\z\C]/
+    z
+ 0: z
+    C 
+ 0: C
+    
+/\M/
+    M 
+ 0: M
+    
+/(a+)*b/
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
+No match
+    
+/(?i)reg(?:ul(?:[aд]|ae)r|ex)/
+    REGular
+ 0: REGular
+    regulaer
+ 0: regulaer
+    Regex  
+ 0: Regex
+    regulдr 
+ 0: regul\xe4r
+
+/≈жед[а-€ј-я]+/
+    ≈жеда
+ 0: \xc5\xe6\xe5\xe4\xe0
+    ≈жед€
+ 0: \xc5\xe6\xe5\xe4\xff
+    ≈жедј
+ 0: \xc5\xe6\xe5\xe4\xc0
+    ≈жедя
+ 0: \xc5\xe6\xe5\xe4\xdf
+
+/(?<=Z)X./
+  \x84XAZXB
+ 0: XB
+
+/ab cd (?x) de fg/
+    ab cd defg
+ 0: ab cd defg
+
+/ab cd(?x) de fg/
+    ab cddefg
+ 0: ab cddefg
+    ** Failers 
+No match
+    abcddefg
+No match
+
+/ End of testinput1 /
