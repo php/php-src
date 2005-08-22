@@ -492,7 +492,7 @@ class PEAR
      * @see PEAR::setErrorHandling
      * @since PHP 4.0.5
      */
-    function raiseError($message = null,
+    function &raiseError($message = null,
                          $code = null,
                          $mode = null,
                          $options = null,
@@ -537,9 +537,11 @@ class PEAR
             $ec = 'PEAR_Error';
         }
         if ($skipmsg) {
-            return new $ec($code, $mode, $options, $userinfo);
+            $a = &new $ec($code, $mode, $options, $userinfo);
+            return $a;
         } else {
-            return new $ec($message, $code, $mode, $options, $userinfo);
+            $a = &new $ec($message, $code, $mode, $options, $userinfo);
+            return $a;
         }
     }
 
@@ -558,9 +560,11 @@ class PEAR
                          $userinfo = null)
     {
         if (isset($this) && is_a($this, 'PEAR')) {
-            return $this->raiseError($message, $code, null, null, $userinfo);
+            $a = &$this->raiseError($message, $code, null, null, $userinfo);
+            return $a;
         } else {
-            return PEAR::raiseError($message, $code, null, null, $userinfo);
+            $a = &PEAR::raiseError($message, $code, null, null, $userinfo);
+            return $a;
         }
     }
 
