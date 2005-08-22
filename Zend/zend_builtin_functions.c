@@ -347,14 +347,19 @@ ZEND_FUNCTION(strncmp)
    Binary safe case-insensitive string comparison */
 ZEND_FUNCTION(strcasecmp)
 {
-	zval **s1, **s2;
-	
-	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &s1, &s2) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	void *s1, *s2;
+	int32_t s1_len, s2_len;
+	zend_uchar s1_type, s2_type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TT", &s1, &s1_len,
+							  &s1_type, &s2, &s2_len, &s2_type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-	RETURN_LONG(zend_binary_zval_strcasecmp(*s1, *s2));
+	if (s1_type == IS_UNICODE) {
+		RETURN_LONG(zend_u_binary_strcasecmp(s1, s1_len, s2, s2_len));
+	} else {
+		RETURN_LONG(zend_binary_strcasecmp(s1, s1_len, s2, s2_len));
+	}
 }
 /* }}} */
 
