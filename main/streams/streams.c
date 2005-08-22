@@ -2441,42 +2441,44 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	/* Output encoding on text mode streams defaults to utf8 unless specified in context parameter */
-	if (stream && strchr(implicit_mode, 't') && (strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+'))) {
-		php_stream_filter *filter;
-		char *encoding = (context && context->output_encoding) ? context->output_encoding : "utf8";
-		char *filtername;
-		int encoding_len = strlen(encoding);
+	if (stream && strchr(implicit_mode, 't') && UG(unicode)) {
+		if (strchr(implicit_mode, 'w') || strchr(implicit_mode, 'a') || strchr(implicit_mode, '+')) {
+			php_stream_filter *filter;
+			char *encoding = (context && context->output_encoding) ? context->output_encoding : "utf8";
+			char *filtername;
+			int encoding_len = strlen(encoding);
 
-		filtername = emalloc(encoding_len + sizeof("unicode.to."));
-		memcpy(filtername, "unicode.to.", sizeof("unicode.to.") - 1);
-		memcpy(filtername + sizeof("unicode.to.") - 1, encoding, encoding_len + 1);
+			filtername = emalloc(encoding_len + sizeof("unicode.to."));
+			memcpy(filtername, "unicode.to.", sizeof("unicode.to.") - 1);
+			memcpy(filtername + sizeof("unicode.to.") - 1, encoding, encoding_len + 1);
 
-		filter = php_stream_filter_create(filtername, NULL, persistent TSRMLS_CC);
-		if (!filter) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed applying output encoding");
-		} else {
-			php_stream_filter_append(&stream->writefilters, filter);
+			filter = php_stream_filter_create(filtername, NULL, persistent TSRMLS_CC);
+			if (!filter) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed applying output encoding");
+			} else {
+				php_stream_filter_append(&stream->writefilters, filter);
+			}
+			efree(filtername);
 		}
-		efree(filtername);
-	}
 
-	if (stream && strchr(implicit_mode, 't') && (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+'))) {
-		php_stream_filter *filter;
-		char *filtername;
-		char *encoding = (context && context->input_encoding) ? context->input_encoding : "utf8";
-		int input_encoding_len = strlen(encoding);
+		if (strchr(implicit_mode, 'r') || strchr(implicit_mode, '+')) {
+			php_stream_filter *filter;
+			char *filtername;
+			char *encoding = (context && context->input_encoding) ? context->input_encoding : "utf8";
+			int input_encoding_len = strlen(encoding);
 
-		filtername = emalloc(input_encoding_len + sizeof("unicode.from."));
-		memcpy(filtername, "unicode.from.", sizeof("unicode.from.") - 1);
-		memcpy(filtername + sizeof("unicode.from.") - 1, encoding, input_encoding_len + 1);
+			filtername = emalloc(input_encoding_len + sizeof("unicode.from."));
+			memcpy(filtername, "unicode.from.", sizeof("unicode.from.") - 1);
+			memcpy(filtername + sizeof("unicode.from.") - 1, encoding, input_encoding_len + 1);
 
-		filter = php_stream_filter_create(filtername, NULL, persistent TSRMLS_CC);
-		if (!filter) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed applying input encoding");
-		} else {
-			php_stream_filter_append(&stream->readfilters, filter);
+			filter = php_stream_filter_create(filtername, NULL, persistent TSRMLS_CC);
+			if (!filter) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Failed applying input encoding");
+			} else {
+				php_stream_filter_append(&stream->readfilters, filter);
+			}
+			efree(filtername);
 		}
-		efree(filtername);
 	}
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
