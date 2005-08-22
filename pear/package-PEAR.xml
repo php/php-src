@@ -48,14 +48,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3.5</version>
-    <date>2005-02-18</date>
+    <version>1.3.6</version>
+    <date>2005-08-18</date>
     <state>stable</state>
     <license>PHP License</license>
     <notes>
- * fix Bug #3505: pecl can't install PDO
- * enhance pear run-tests dramatically
- * fix Bug #3506: pear install should export the pear version into the environment
+ * Bump XML_RPC dependency to 1.4.0
+ * return by reference from PEAR::raiseError()
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
@@ -124,12 +123,24 @@
       <dep type="php" rel="ge" version="4.2"/>
       <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
       <dep type="pkg" rel="ge" version="1.2">Console_Getopt</dep>
-      <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
+      <dep type="pkg" rel="ge" version="1.4.0">XML_RPC</dep>
       <dep type="ext" rel="has">xml</dep>
       <dep type="ext" rel="has">pcre</dep>
+      <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
     </deps>
   </release>
   <changelog>
+  <release>
+    <version>1.3.5</version>
+    <date>2005-02-18</date>
+    <state>stable</state>
+    <license>PHP License</license>
+    <notes>
+ * fix Bug #3505: pecl can't install PDO
+ * enhance pear run-tests dramatically
+ * fix Bug #3506: pear install should export the pear version into the environment
+    </notes>
+  </release>
   <release>
     <version>1.3.1</version>
     <date>2004-04-06</date>
