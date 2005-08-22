@@ -2254,6 +2254,18 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 	return len1 - len2;
 }
 
+ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
+{
+	int retval;
+	UErrorCode status = U_ZERO_ERROR;
+	
+	retval = ZEND_NORMALIZE_BOOL(u_strCaseCompare(s1, len1, s2, len2, U_COMPARE_CODE_POINT_ORDER, &status));
+	if (!retval) {
+		return (len1 - len2);
+	} else {
+		return retval;
+	}
+}
 
 ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length)
 {
