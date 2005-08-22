@@ -1006,7 +1006,7 @@ ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, z
 		return FAILURE;
 	}
 
-	ZVAL_STRINGL(&autoload_function, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1,  0);
+	ZVAL_STRINGL(&autoload_function, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1, 0);
 
 	ALLOC_ZVAL(class_name_ptr);
 	INIT_PZVAL(class_name_ptr);
@@ -1037,6 +1037,10 @@ ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, z
 	EG(exception) = NULL;
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
 	EG(autoload_func) = fcall_cache.function_handler;
+
+	if (UG(unicode)) {
+		zval_dtor(&autoload_function);
+	}
 
 	zval_ptr_dtor(&class_name_ptr);
 
