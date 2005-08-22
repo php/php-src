@@ -715,6 +715,8 @@ static UChar *php_u_trim(UChar *c, int32_t len, UChar *what, int32_t what_len, z
 			}
 		}
 		end = i;
+	} else {
+		--end;
 	}
 
 	if ( start < len ) {
