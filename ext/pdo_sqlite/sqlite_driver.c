@@ -457,7 +457,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	char *func_name;
 	int func_name_len;
 	long argc = -1;
-	char *cbname = NULL;
+	zval cbname;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -470,11 +470,11 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!zend_is_callable(callback, 0, &cbname)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
-		efree(cbname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
+		zval_dtor(&cbname);
 		RETURN_FALSE;
 	}
-	efree(cbname);
+	zval_dtor(&cbname);
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -528,7 +528,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	char *func_name;
 	int func_name_len;
 	long argc = -1;
-	char *cbname = NULL;
+	zval cbname;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -541,17 +541,17 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!zend_is_callable(step_callback, 0, &cbname)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
-		efree(cbname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
+		zval_dtor(&cbname);
 		RETURN_FALSE;
 	}
-	efree(cbname);
+	zval_dtor(&cbname);
 	if (!zend_is_callable(fini_callback, 0, &cbname)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
-		efree(cbname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
+		zval_dtor(&cbname);
 		RETURN_FALSE;
 	}
-	efree(cbname);
+	zval_dtor(&cbname);
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 

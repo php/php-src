@@ -632,7 +632,6 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * fci, zend_fcall_info_cache * fcc, int num_args TSRMLS_DC) /* {{{ */
 {
 	zval **object = NULL, **method;
-	char *fname;
 	zend_class_entry * ce = NULL, **pce;
 	zend_function *function_handler;
 	
@@ -667,7 +666,7 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		method = &callable;
 	}
 	
-	if (!zend_is_callable(callable, 0, &fname)) {
+	if (!zend_is_callable(callable, 0, NULL)) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function must be a valid callback" TSRMLS_CC);
 		return 0;
 	}
@@ -677,7 +676,6 @@ static int make_callable_ex(pdo_stmt_t *stmt, zval *callable, zend_fcall_info * 
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "user-supplied function does not exist" TSRMLS_CC);
 		return 0;
 	}
-	efree(fname);
 
 	fci->size = sizeof(zend_fcall_info);
 	fci->function_name = NULL;

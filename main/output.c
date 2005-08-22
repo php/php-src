@@ -554,16 +554,16 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 			}
 		}
 	} else if (output_handler && output_handler->type == IS_ARRAY) {
-		char* handler_name;
+		zval handler_name;
 
 		/* do we have array(object,method) */
 		if (zend_is_callable(output_handler, 0, &handler_name)) {
 			SEPARATE_ZVAL(&output_handler);
 			output_handler->refcount++;
-			result = php_ob_init_named(initial_size, block_size, UG(unicode)?IS_UNICODE:IS_STRING, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
-			efree(handler_name);
+			result = php_ob_init_named(initial_size, block_size, Z_TYPE(handler_name), Z_UNIVAL(handler_name), output_handler, chunk_size, erase TSRMLS_CC);
+			zval_dtor(&handler_name);
 		} else {
-			efree(handler_name);
+			zval_dtor(&handler_name);
 			/* init all array elements recursively */
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {

@@ -1139,18 +1139,18 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 					zval_ptr_dtor(&retval_ptr);
 				}
 			} else {
-				char *func_name;
+				zval func_name;
 
 				if (zend_is_callable(*BG(array_walk_func_name), 0, &func_name)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", func_name);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(func_name), Z_UNIVAL(func_name));
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist", func_name);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R() - function does not exist", Z_TYPE(func_name), Z_UNIVAL(func_name));
 				}
 				if (key) {
 					zval_ptr_dtor(&key);
 					key = NULL;
 				}
-				efree(func_name);
+				zval_dtor(&func_name);
 				break;
 			}
 		}
@@ -3127,7 +3127,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	int argc, arr_argc, i, c = 0;
 	Bucket ***lists, **list, ***ptrs, *p;
 	
-	char *callback_name;
+	zval callback_name;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	
@@ -3165,12 +3165,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			arr_argc = argc - 1;
 			intersect_data_compare_func = array_user_compare;
 			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 
 			BG(user_compare_func_name) = args[arr_argc];
 		} else {
@@ -3206,12 +3206,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			}
 			arr_argc = argc - 1;
 			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 			intersect_key_compare_func = array_key_compare;
 			intersect_data_compare_func = array_user_compare;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL
@@ -3225,12 +3225,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				}
 				arr_argc = argc - 1;
 				if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-					efree(callback_name);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+					zval_dtor(&callback_name);
 					efree(args);
 					return;
 				}
-				efree(callback_name);
+				zval_dtor(&callback_name);
 				intersect_key_compare_func = array_user_key_compare;
 				intersect_data_compare_func = array_data_compare;
 				BG(user_compare_func_name) = args[arr_argc];
@@ -3245,19 +3245,19 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				}
 				arr_argc = argc - 2;
 				if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-					efree(callback_name);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+					zval_dtor(&callback_name);
 					efree(args);
 					return;
 				} 
-				efree(callback_name);
+				zval_dtor(&callback_name);
 				if (!zend_is_callable(*args[arr_argc + 1], 0, &callback_name)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-					efree(callback_name);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+					zval_dtor(&callback_name);
 					efree(args);
 					return;
 				}
-				efree(callback_name);
+				zval_dtor(&callback_name);
 				intersect_key_compare_func = array_user_key_compare;
 				intersect_data_compare_func = array_user_compare;
 				BG(user_compare_func_name) = args[arr_argc + 1];/* data - key */
@@ -3511,7 +3511,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	HashTable *hash;
 	int argc, arr_argc, i, c;
 	Bucket ***lists, **list, ***ptrs, *p;
-	char *callback_name;
+	zval callback_name;
 	
 	PHP_ARRAY_CMP_FUNC_VARS;
 
@@ -3550,12 +3550,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			arr_argc = argc - 1;
 			diff_data_compare_func = array_user_compare;
 			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 
 			BG(user_compare_func_name) = args[arr_argc];
 		} else {
@@ -3591,12 +3591,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 			arr_argc = argc - 1;
 			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 			diff_key_compare_func = array_key_compare;
 			diff_data_compare_func = array_user_compare;
 		} else if (data_compare_type == DIFF_COMP_DATA_INTERNAL 
@@ -3610,12 +3610,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 			arr_argc = argc - 1;
 			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = array_data_compare;
 			BG(user_compare_func_name) = args[arr_argc];
@@ -3630,19 +3630,19 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			}
 			arr_argc = argc - 2;
 			if (!zend_is_callable(*args[arr_argc], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 			if (!zend_is_callable(*args[arr_argc + 1], 0, &callback_name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %s", callback_name);
-				efree(callback_name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback %R", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+				zval_dtor(&callback_name);
 				efree(args);
 				return;
 			}
-			efree(callback_name);
+			zval_dtor(&callback_name);
 			diff_key_compare_func = array_user_key_compare;
 			diff_data_compare_func = array_user_compare;
 			BG(user_compare_func_name) = args[arr_argc + 1];/* data - key*/
@@ -4294,7 +4294,7 @@ PHP_FUNCTION(array_reduce)
 	zval *result = NULL;
 	zval *retval;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	char *callback_name;
+	zval callback_name;
 	HashPosition pos;
 	HashTable *htbl;
 	
@@ -4309,11 +4309,11 @@ PHP_FUNCTION(array_reduce)
 	}
 
 	if (!zend_is_callable(*callback, 0, &callback_name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%s', should be a valid callback", callback_name);
-		efree(callback_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%R', should be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+		zval_dtor(&callback_name);
 		return;
 	}
-	efree(callback_name);
+	zval_dtor(&callback_name);
 
 	if (ZEND_NUM_ARGS() > 2) {
 		ALLOC_ZVAL(result);
@@ -4385,7 +4385,7 @@ PHP_FUNCTION(array_filter)
 	zval **operand;
 	zval **args[1];
 	zval *retval = NULL;
-	char *callback_name;
+	zval callback_name;
 	char *string_key;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	uint string_key_len;
@@ -4404,11 +4404,11 @@ PHP_FUNCTION(array_filter)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (!zend_is_callable(*callback, 0, &callback_name)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%s', should be a valid callback", callback_name);
-			efree(callback_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%R', should be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+			zval_dtor(&callback_name);
 			return;
 		}
-		efree(callback_name);
+		zval_dtor(&callback_name);
 	}
 
 	array_init(return_value);
@@ -4484,7 +4484,7 @@ PHP_FUNCTION(array_map)
 	zval *result, *null;
 	HashPosition *array_pos;
 	zval **args;
-	char *callback_name;
+	zval callback_name;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	int i, k, maxlen = 0;
 	int *array_len;
@@ -4505,12 +4505,12 @@ PHP_FUNCTION(array_map)
 
 	if (Z_TYPE_P(callback) != IS_NULL) {
 		if (!zend_is_callable(callback, 0, &callback_name)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument, '%s', should be either NULL or a valid callback", callback_name);
-			efree(callback_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument, '%R', should be either NULL or a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
+			zval_dtor(&callback_name);
 			efree(pargs);
 			return;
 		}
-		efree(callback_name);
+		zval_dtor(&callback_name);
 	}
 
 	args = (zval **)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval *), 0);

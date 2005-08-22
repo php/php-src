@@ -1202,7 +1202,7 @@ ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
 	zend_bool had_orig_error_handler=0;
-	char *error_handler_name = NULL;
+	zval error_handler_name;
 	long error_type = E_ALL | E_STRICT;
  
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
@@ -1210,12 +1210,12 @@ ZEND_FUNCTION(set_error_handler)
 	}
 
 	if (!zend_is_callable(error_handler, 0, &error_handler_name)) {
-		zend_error(E_WARNING, "%v() expects the argument (%s) to be a valid callback",
-				   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
-		efree(error_handler_name);
+		zend_error(E_WARNING, "%v() expects the argument (%R) to be a valid callback",
+				   get_active_function_name(TSRMLS_C), Z_TYPE(error_handler_name), Z_UNIVAL(error_handler_name));
+		zval_dtor(&error_handler_name);
 		return;
 	}
-	efree(error_handler_name);
+	zval_dtor(&error_handler_name);
 
 	if (EG(user_error_handler)) {
 		had_orig_error_handler = 1;
@@ -1271,7 +1271,7 @@ ZEND_FUNCTION(restore_error_handler)
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval **exception_handler;
-	char *exception_handler_name = NULL;
+	zval exception_handler_name;
 	zend_bool had_orig_exception_handler=0;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &exception_handler)==FAILURE) {
@@ -1280,12 +1280,12 @@ ZEND_FUNCTION(set_exception_handler)
 
 	if (Z_TYPE_PP(exception_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(*exception_handler, 0, &exception_handler_name)) {
-			zend_error(E_WARNING, "%v() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
-			efree(exception_handler_name);
+			zend_error(E_WARNING, "%v() expects the argument (%R) to be a valid callback",
+					   get_active_function_name(TSRMLS_C), Z_TYPE(exception_handler_name), Z_UNIVAL(exception_handler_name));
+			zval_dtor(&exception_handler_name);
 			return;
 		}
-		efree(exception_handler_name);
+		zval_dtor(&exception_handler_name);
 	}
 
 	if (EG(user_exception_handler)) {

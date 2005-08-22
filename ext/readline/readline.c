@@ -441,16 +441,18 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 PHP_FUNCTION(readline_completion_function)
 {
 	zval *arg = NULL;
-	char *name = NULL;
+	zval name;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg)) {
 		RETURN_FALSE;
 	}
 
 	if (!zend_is_callable(arg, 0, &name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R is not callable", Z_TYPE(name), Z_UNIVAL(name));
+		zval_dtor(&name);
 		RETURN_FALSE;
 	}
+	zval_dtor(&name);
 
 	if (_readline_completion)
 		FREE_ZVAL(_readline_completion);
@@ -489,7 +491,7 @@ static void php_rl_callback_handler(char *the_line)
 PHP_FUNCTION(readline_callback_handler_install)
 {
 	zval *callback;
-	char *name = NULL;
+	zval name;
 	char *prompt;
 	int prompt_len;
 
@@ -498,9 +500,11 @@ PHP_FUNCTION(readline_callback_handler_install)
 	}
 
 	if (!zend_is_callable(callback, 0, &name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R is not callable", Z_TYPE(name), Z_UNIVAL(name));
+		zval_dtor(&name);
 		RETURN_FALSE;
 	}
+	zval_dtor(&name);
 
 	if (_prepped_callback) {
 		rl_callback_handler_remove();
