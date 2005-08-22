@@ -115,8 +115,8 @@ class PEAR_Remote extends PEAR
                 $this->saveCache($_args, $result);
             };
             return $result;
-        } else {
-            return $this->raiseError("For this remote PEAR operation you need to load the xmlrpc extension or install XML_RPC");
+        } elseif (!@include_once("XML/RPC.php")) {
+            return $this->raiseError("For this remote PEAR operation you need to install the XML_RPC package");
         }
 
         array_shift($args);
