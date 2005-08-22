@@ -2457,25 +2457,25 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 								Z_USTRLEN_P(callable_name) = Z_UNILEN_PP(obj) + Z_UNILEN_PP(method) + 2;
 								Z_USTRVAL_P(callable_name) = eumalloc(Z_USTRLEN_P(callable_name)+1);
 								if (Z_TYPE_PP(obj) == IS_UNICODE) {
-									memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL_PP(obj), UBYTES(Z_USTRLEN_PP(obj)));
+									u_memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL_PP(obj), Z_USTRLEN_PP(obj));
 								} else {
 									zval copy;
 									int use_copy;
 
 									zend_make_unicode_zval(*obj, &copy, &use_copy);
-									memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL(copy), UBYTES(Z_USTRLEN(copy)));
+									u_memcpy(Z_USTRVAL_P(callable_name), Z_USTRVAL(copy), Z_USTRLEN(copy));
 									zval_dtor(&copy);
 								}
 								Z_USTRVAL_P(callable_name)[Z_UNILEN_PP(obj)] = ':';
 								Z_USTRVAL_P(callable_name)[Z_UNILEN_PP(obj)+1] = ':';
 								if (Z_TYPE_PP(method) == IS_UNICODE) {
-									memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL_PP(method), UBYTES(Z_USTRLEN_PP(method)+1));
+									u_memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL_PP(method), Z_USTRLEN_PP(method)+1);
 								} else {
 									zval copy;
 									int use_copy;
 
 									zend_make_unicode_zval(*method, &copy, &use_copy);
-									memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL(copy), UBYTES(Z_USTRLEN(copy)+1));
+									u_memcpy(Z_USTRVAL_P(callable_name)+Z_UNILEN_PP(obj)+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
 									zval_dtor(&copy);
 								}
 							} else {
@@ -2539,13 +2539,13 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 								Z_USTRVAL_P(callable_name)[ce->name_length] = ':';
 								Z_USTRVAL_P(callable_name)[ce->name_length+1] = ':';
 								if (Z_TYPE_PP(method) == IS_UNICODE) {
-									memcpy(Z_USTRVAL_P(callable_name)+ce->name_length+2, Z_USTRVAL_PP(method), UBYTES(Z_USTRLEN_PP(method)+1));
+									u_memcpy(Z_USTRVAL_P(callable_name)+ce->name_length+2, Z_USTRVAL_PP(method), Z_USTRLEN_PP(method)+1);
 								} else {
 									zval copy;
 									int use_copy;
 
 									zend_make_unicode_zval(*method, &copy, &use_copy);
-									memcpy(Z_USTRVAL_P(callable_name)+ce->name_length+2, Z_USTRVAL(copy), UBYTES(Z_USTRLEN(copy)+1));
+									u_memcpy(Z_USTRVAL_P(callable_name)+ce->name_length+2, Z_USTRVAL(copy), Z_USTRLEN(copy)+1);
 									zval_dtor(&copy);
 								}
 							} else {
