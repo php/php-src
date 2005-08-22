@@ -10,7 +10,7 @@ $packages  = array(
 "PEAR"                  =>    "1.3.5",
 "XML_RPC"               =>    "1.4.0",
 "Console_Getopt"        =>    "1.2",
-"Archive_Tar"           =>    "1.3.2",
+"Archive_Tar"           =>    "1.3.1",
 
 // required packages for the web frontend
 "PEAR_Frontend_Web"     =>    "0.4",
