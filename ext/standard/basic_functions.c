@@ -2029,7 +2029,7 @@ PHP_FUNCTION(call_user_func)
 {
 	zval ***params;
 	zval *retval_ptr;
-	char *name;
+	zval name;
 	int argc = ZEND_NUM_ARGS();
 
 	if (argc < 1) {
@@ -2051,8 +2051,9 @@ PHP_FUNCTION(call_user_func)
 	}
 
 	if (!zend_is_callable(*params[0], IS_CALLABLE_CHECK_NO_ACCESS, &name)) {
-		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "First argument is expected to be a valid callback");
-		efree(name);
+		convert_to_string(&name);
+		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "First argument is expected to be a valid callback");
+		zval_dtor(&name);
 		efree(params);
 		RETURN_NULL();
 	}
@@ -2062,22 +2063,23 @@ PHP_FUNCTION(call_user_func)
 			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 		}
 	} else {
+		convert_to_string(&name);
 		if (argc > 1) {
 			SEPARATE_ZVAL(params[1]);
 			convert_to_string_ex(params[1]);
 			if (argc > 2) {
 				SEPARATE_ZVAL(params[2]);
 				convert_to_string_ex(params[2]);
-				php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Unable to call %s(%s,%s)", name, Z_STRVAL_PP(params[1]), Z_STRVAL_PP(params[2]));
+				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Unable to call %R(%s,%s)", Z_TYPE(name), Z_UNIVAL(name), Z_STRVAL_PP(params[1]), Z_STRVAL_PP(params[2]));
 			} else {
-				php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Unable to call %s(%s)", name, Z_STRVAL_PP(params[1]));
+				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Unable to call %R(%s)", Z_TYPE(name), Z_UNIVAL(name), Z_STRVAL_PP(params[1]));
 			}
 		} else {
-			php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Unable to call %s()", name);
+			php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
 		}
 	}
 
-	efree(name);
+	zval_dtor(&name);
 	efree(params);
 }
 /* }}} */
@@ -2089,7 +2091,7 @@ PHP_FUNCTION(call_user_func_array)
 	zval ***func_params, **func, **params;
 	zval *retval_ptr;
 	HashTable *func_params_ht;
-	char *name;
+	zval name;
 	int count;
 	int current = 0;
 
@@ -2108,8 +2110,8 @@ PHP_FUNCTION(call_user_func_array)
 	}
 
 	if (!zend_is_callable(*func, IS_CALLABLE_CHECK_NO_ACCESS, &name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback, '%s' was given", name);
-		efree(name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback, '%R' was given", Z_TYPE(name), Z_UNIVAL(name));
+		zval_dtor(&name);
 		RETURN_NULL();
 	}
 
@@ -2134,10 +2136,10 @@ PHP_FUNCTION(call_user_func_array)
 			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %R()", Z_TYPE(name), Z_UNIVAL(name));
 	}
 
-	efree(name);
+	zval_dtor(&name);
 	if (func_params) {
 		efree(func_params);
 	}
@@ -2256,10 +2258,10 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC)
 {
 	zval retval;
-	char *function_name = NULL;
+	zval function_name;
 
 	if (!zend_is_callable(shutdown_function_entry->arguments[0], 0, &function_name)) {
-		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name);
+		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %R() - function does not exist", Z_TYPE(function_name), Z_UNIVAL(function_name));
 	} else if (call_user_function(EG(function_table), NULL,
 								shutdown_function_entry->arguments[0],
 								&retval, 
@@ -2269,9 +2271,7 @@ static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_fun
 	{
 		zval_dtor(&retval);
 	} 
-	if (function_name) {
-		efree(function_name);
-	}
+	zval_dtor(&function_name);
 	return 0;
 }
 
@@ -2363,7 +2363,7 @@ void php_free_shutdown_functions(TSRMLS_D)
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
-	char *function_name = NULL;
+	zval function_name;
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
@@ -2380,7 +2380,7 @@ PHP_FUNCTION(register_shutdown_function)
 	
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(shutdown_function_entry.arguments[0], 1, &function_name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", function_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%R' passed", Z_TYPE(function_name), Z_UNIVAL(function_name));
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
 	} else {
@@ -2394,9 +2394,7 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 		zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 	}
-	if (function_name) {
-		efree(function_name);
-	}
+	zval_dtor(&function_name);
 }
 /* }}} */
 

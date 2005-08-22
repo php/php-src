@@ -2182,7 +2182,7 @@ PHP_FUNCTION(sybase_deadlock_retry_count)
 PHP_FUNCTION(sybase_set_message_handler)
 {
 	zval **callback, **param, **sybase_link_index= NULL;
-	char *name;
+	zval name;
 	sybase_link *sybase_ptr;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -2221,11 +2221,11 @@ PHP_FUNCTION(sybase_set_message_handler)
 		case IS_STRING:
 			/* Either "function", array("class", "function") or array($object, "function") */
 			if (!zend_is_callable(*param, 0, &name)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%s' was given", name);
-				efree(name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%R' was given", Z_TYPE(name), Z_UNIVAL(name));
+				zval_dtor(&name);
 				RETURN_FALSE;
 			}
-			efree(name);
+			zval_dtor(&name);
 			break;
 
 		default:

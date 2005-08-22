@@ -521,7 +521,7 @@ PHP_FUNCTION(pcntl_exec)
 PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle, **dest_handle = NULL;
-	char *func_name;
+	zval func_name;
 	long signo;
 	zend_bool restart_syscalls = 1;
 
@@ -555,11 +555,11 @@ PHP_FUNCTION(pcntl_signal)
 	}
 	
 	if (!zend_is_callable(handle, 0, &func_name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a callable function name error", func_name);
-		efree(func_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%R is not a callable function name error", Z_TYPE(func_name), Z_UNIVAL(func_name));
+		zval_dtor(&func_name);
 		RETURN_FALSE;
 	}
-	efree(func_name);
+	zval_dtor(&func_name);
 	
 	/* Add the function name to our signal table */
 	zend_hash_index_update(&PCNTL_G(php_signal_table), signo, (void **) &handle, sizeof(zval *), (void **) &dest_handle);

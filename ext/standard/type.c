@@ -407,7 +407,7 @@ PHP_FUNCTION(is_scalar)
 PHP_FUNCTION(is_callable)
 {
 	zval **var, **syntax_only, **callable_name;
-	char *name;
+	zval name;
 	zend_bool retval;
 	zend_bool syntax = 0;
 	int argc=ZEND_NUM_ARGS();
@@ -424,7 +424,7 @@ PHP_FUNCTION(is_callable)
 	if (argc > 2) {
 		retval = zend_is_callable(*var, syntax, &name);
 		zval_dtor(*callable_name);
-		ZVAL_STRING(*callable_name, name, 0);
+		**callable_name = name;
 	} else {
 		retval = zend_is_callable(*var, syntax, NULL);
 	}

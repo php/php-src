@@ -134,7 +134,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	zval handler;
 	xmlXPathObjectPtr obj;
 	char *str;
-	char *callable = NULL;
+	zval callable;
 	xsl_object *intern;
 	
 	TSRMLS_FETCH();
@@ -265,10 +265,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	fci.no_separation = 0;
 	/*fci.function_handler_cache = &function_ptr;*/
 	if (!zend_make_callable(&handler, &callable TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", callable);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %R()", Z_TYPE(callable), Z_UNIVAL(callable));
 		
-	} else if ( intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable, strlen(callable) + 1) == 0) { 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not allowed to call handler '%s()'.", callable);
+	} else if ( intern->registerPhpFunctions == 2 && zend_u_hash_exists(intern->registered_phpfunctions, Z_TYPE(callable), Z_UNIVLA(callable), Z_UNILEN(callable) + 1) == 0) { 
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not allowed to call handler '%R()'.", Z_TYPE(callable), Z_UNILEN(callable));
 		// Push an empty string, so that we at least have an xslt result...
 		valuePush(ctxt, xmlXPathNewString(""));
 	} else {
@@ -304,7 +304,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			zval_ptr_dtor(&retval);
 		}
 	}
-	efree(callable);
+	zval_dtor(&callable);
 	zval_dtor(&handler);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {

@@ -203,9 +203,9 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 #define IS_CALLABLE_CHECK_NO_ACCESS   (1<<1)
 #define IS_CALLABLE_CHECK_IS_STATIC   (1<<2)
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, char **callable_name, int *callable_name_len, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC);
-ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name);
-ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *callable_name, zend_function **fptr_ptr, zval ***zobj_ptr_ptr TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zval *callable_name);
+ZEND_API zend_bool zend_make_callable(zval *callable, zval *callable_name TSRMLS_DC);
 ZEND_API char *zend_get_module_version(char *module_name);
 ZEND_API int zend_get_module_started(char *module_name);
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC);
@@ -228,8 +228,8 @@ ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, c
 ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object, char *name, int name_length, double value TSRMLS_DC);
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC);
 ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_length TSRMLS_DC);
-ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, UChar *name, int name_length, char *value TSRMLS_DC);
-ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, UChar *name, int name_length, char *value, int value_length TSRMLS_DC);
+ZEND_API void zend_update_property_unicode(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value TSRMLS_DC);
+ZEND_API void zend_update_property_unicodel(zend_class_entry *scope, zval *object, char *name, int name_length, UChar *value, int value_length TSRMLS_DC);
 
 ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, char *name, int name_length, zend_bool silent TSRMLS_DC);
 

@@ -1573,7 +1573,7 @@ PHP_FUNCTION(fdf_enum_values) {
 	zval *userdata = NULL;
 	FDFDoc fdf;
 	FDFErc err;
-	char *name;
+	zval name;
 	char namebuf[1024], valbuf[1024];
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &r_fdf, 
@@ -1586,11 +1586,12 @@ PHP_FUNCTION(fdf_enum_values) {
 	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 
 	if (!zend_is_callable(callback, 0, &name)) {
-		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "Second argument is expected to be a valid callback");
-		efree(name);
+		convert_to_string(&name);
+		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL(name), E_WARNING, "Second argument is expected to be a valid callback");
+		zval_ptr_dtor(&name);
 		RETURN_FALSE;
 	}
-	efree(name);
+	zval_ptr_dtor(&name);
 	FDF_G(enum_callback) = callback;
 	FDF_G(enum_fdf) = fdf;
 

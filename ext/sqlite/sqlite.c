@@ -430,7 +430,8 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 	zval ***zargs = NULL;
 	zval funcname;
 	int i, res;
-	char *callable = NULL, *errbuf=NULL;
+	zval callable;
+	char *errbuf=NULL;
 	TSRMLS_FETCH();
 
 	/* sanity check the args */
@@ -442,10 +443,10 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 	ZVAL_STRING(&funcname, (char*)argv[0], 1);
 
 	if (!zend_make_callable(&funcname, &callable TSRMLS_CC)) {
-		spprintf(&errbuf, 0, "function `%s' is not a function name", callable);
+		spprintf(&errbuf, 0, "function `%R' is not a function name", Z_TYPE(callable), Z_UNIVAL(callable));
 		sqlite_set_result_error(func, errbuf, -1);
 		efree(errbuf);
-		efree(callable);
+		zval_dtor(&callable);
 		zval_dtor(&funcname);
 		return;
 	}
@@ -492,12 +493,12 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 		}
 	} else {
 		char *errbuf;
-		spprintf(&errbuf, 0, "call_user_function_ex failed for function %s()", callable);
+		spprintf(&errbuf, 0, "call_user_function_ex failed for function %R()", Z_TYPE(callable), Z_UNIVAL(callable));
 		sqlite_set_result_error(func, errbuf, -1);
 		efree(errbuf);
 	}
 
-	efree(callable);
+	zval_dtor(&callable);
 
 	if (retval) {
 		zval_ptr_dtor(&retval);
@@ -3000,7 +3001,7 @@ PHP_FUNCTION(sqlite_create_aggregate)
 	zval *zstep, *zfinal, *zdb;
 	struct php_sqlite_db *db;
 	struct php_sqlite_agg_functions *funcs;
-	char *callable = NULL;
+	zval callable;
 	long num_args = -1;
 	zval *object = getThis();
 
@@ -3017,18 +3018,18 @@ PHP_FUNCTION(sqlite_create_aggregate)
 	}
 
 	if (!zend_is_callable(zstep, 0, &callable)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "step function `%s' is not callable", callable);
-		efree(callable);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "step function `%R' is not callable", Z_TYPE(callable), Z_UNIVAL(callable));
+		zval_dtor(&callable);
 		return;
 	}
-	efree(callable);
+	zval_dtor(&callable);
 	
 	if (!zend_is_callable(zfinal, 0, &callable)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "finalize function `%s' is not callable", callable);
-		efree(callable);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "finalize function `%R' is not callable", Z_TYPE(callable), Z_UNIVAL(callable));
+		zval_dtor(&callable);
 		return;
 	}
-	efree(callable);
+	zval_dtor(&callable);
 
 	
 	if (prep_callback_struct(db, 1, funcname, zstep, zfinal, &funcs) == DO_REG) {
@@ -3050,7 +3051,7 @@ PHP_FUNCTION(sqlite_create_function)
 	zval *zcall, *zdb;
 	struct php_sqlite_db *db;
 	struct php_sqlite_agg_functions *funcs;
-	char *callable = NULL;
+	zval callable;
 	long num_args = -1;
 	
 	zval *object = getThis();
@@ -3068,11 +3069,11 @@ PHP_FUNCTION(sqlite_create_function)
 	}
 
 	if (!zend_is_callable(zcall, 0, &callable)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function `%s' is not callable", callable);
-		efree(callable);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function `%R' is not callable", Z_TYPE(callable), Z_UNIVAL(callable));
+		zval_dtor(&callable);
 		return;
 	}
-	efree(callable);
+	zval_dtor(&callable);
 	
 	if (prep_callback_struct(db, 0, funcname, zcall, NULL, &funcs) == DO_REG) {
 		sqlite_create_function(db->db, funcname, num_args, php_sqlite_function_callback, funcs);
