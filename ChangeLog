@@ -1,3 +1,35 @@
+2005-08-21  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_0)
+      NEWS:
+      reorder
+
+2005-08-21  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Roll 5.0.5RC1
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Backport Mike's patch for user sort functions
+
+2005-08-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/zlib/zlib.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib.c:
+      MFH: Fixed bug #34191 (ob_gzhandler does not enforce trailing \0).
+
+    * ext/zlib/zlib.c:
+      Fixed bug #34191 (ob_gzhandler does not enforce trailing \0).
+
 2005-08-20  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_4_4)
