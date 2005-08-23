@@ -1,3 +1,31 @@
+2005-08-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_builtin_functions.c
+      zend_operators.c
+      zend_operators.h:
+      Unicode support for strcasecmp().
+
+    * zend_API.c:
+      We should use u_memcpy() whenever possible, to simplify code.
+
+2005-08-22  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_1)
+      zend_builtin_functions.c:
+      fix crash if throw attempted outside of executable code
+
+2005-08-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_execute_API.c:
+      zend_is_callable() and zend_make_callable() were changed to return readable
+      function name as zval (instead of string).
+
+    * zend_execute_API.c:
+      Fixed memory leak
+
 2005-08-19  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_builtin_functions.c
