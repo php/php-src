@@ -428,19 +428,8 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	zval z_key;
 
 	MAKE_STD_ZVAL(query_string);
-	if (UG(unicode)) {
-		UErrorCode status = U_ZERO_ERROR;
-		UChar *u_str;
-		int32_t u_len;
-
-		zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, stmt->query_string, stmt->query_stringlen, &status);
-		ZVAL_UNICODEL(query_string, u_str, u_len, 0);
-		u_str = zend_ascii_to_unicode("queryString", sizeof("queryString") ZEND_FILE_LINE_CC);
-		ZVAL_UNICODEL(&z_key, u_str, sizeof("queryString")-1, 0);
-	} else {
-		ZVAL_STRINGL(query_string, stmt->query_string, stmt->query_stringlen, 1);
-		ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString")-1, 0);
-	}
+	ZVAL_RT_STRINGL(query_string, stmt->query_string, stmt->query_stringlen, 1);
+	ZVAL_ASCII_STRINGL(&z_key, "queryString", sizeof("queryString")-1, 0);
 	std_object_handlers.write_property(object, &z_key, query_string TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
 	if (UG(unicode)) {

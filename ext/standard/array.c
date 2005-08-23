@@ -1461,11 +1461,7 @@ PHP_FUNCTION(extract)
 				/* break omitted intentionally */
 
 			case EXTR_OVERWRITE:
-				if (UG(unicode)) {
-					ZVAL_UNICODEL(&final_name, var_name, var_name_len, 1);
-				} else {
-					ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
-				}
+				ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
 				break;
 
 			case EXTR_PREFIX_IF_EXISTS:
@@ -1489,11 +1485,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_SAME:
 				if (!var_exists) {
-					if (UG(unicode)) {
-						ZVAL_UNICODEL(&final_name, var_name, var_name_len, 1);
-					} else {
-						ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
-					}
+					ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
 				}
 				/* break omitted intentionally */
 
@@ -1534,22 +1526,14 @@ PHP_FUNCTION(extract)
 							memcpy(Z_STRVAL(final_name)+Z_STRLEN_PP(prefix)+1, var_name, var_name_len+1);
 						}
 					} else {
-						if (UG(unicode)) {
-							ZVAL_UNICODEL(&final_name, var_name, var_name_len, 1);
-						} else {
-							ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
-						}
+						ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
 					}
 				}
 				break;
 
 			default:
 				if (!var_exists) {
-					if (UG(unicode)) {
-						ZVAL_UNICODEL(&final_name, var_name, var_name_len, 1);
-					} else {
-						ZVAL_STRINGL(&final_name, var_name, var_name_len, 1);
-					}
+					ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
 				}
 				break;
 		}
