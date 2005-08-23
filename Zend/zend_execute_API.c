@@ -973,7 +973,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 
 
-ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
+ZEND_API int zend_u_lookup_class_ex(zend_uchar type, void *name, int name_length, int use_autoload, zend_class_entry ***ce TSRMLS_DC)
 {
 	zval **args[1];
 	zval autoload_function;
@@ -1001,7 +1001,7 @@ ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, z
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
 	 * (doesn't impact fuctionality of __autoload()
 	*/
-	if (zend_is_compiling(TSRMLS_C)) {
+	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
 		efree(lc_name);
 		return FAILURE;
 	}
@@ -1071,6 +1071,11 @@ ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, z
 	retval = zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len + 1, (void **) ce);
 	efree(lc_name);
 	return retval;
+}
+
+ZEND_API int zend_u_lookup_class(zend_uchar type, void *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
+{
+	return zend_u_lookup_class_ex(type, name, name_length, 1, ce TSRMLS_CC);
 }
 
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
@@ -1429,7 +1434,7 @@ void zend_unset_timeout(TSRMLS_D)
 ZEND_API zend_class_entry *zend_u_fetch_class(zend_uchar type, void *class_name, uint class_name_len, int fetch_type TSRMLS_DC)
 {
 	zend_class_entry **pce;
-	zend_bool use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
+	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
 
 	fetch_type = fetch_type & ~ZEND_FETCH_CLASS_NO_AUTOLOAD;
 check_fetch_type:
@@ -1456,26 +1461,17 @@ check_fetch_type:
 			break;
 	}
 
-	if (use_autoload) {
-		if (zend_u_lookup_class(type, class_name, class_name_len, &pce TSRMLS_CC)==FAILURE) {
+	if (zend_u_lookup_class_ex(type, class_name, class_name_len, use_autoload, &pce TSRMLS_CC)==FAILURE) {
+		if (use_autoload) {
 			if (fetch_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_error(E_ERROR, "Interface '%R' not found", type, class_name);
 			} else {
 				zend_error(E_ERROR, "Class '%R' not found", type, class_name);
 			}
 		}
-		return *pce;
+		return NULL;
 	} else {
-		unsigned int lc_name_len;
-		void *lc_name = zend_u_str_case_fold(type, class_name, class_name_len, 1, &lc_name_len);
-
-		if (zend_u_hash_find(EG(class_table), type, lc_name, lc_name_len+1, (void **) &pce) == SUCCESS) {
-			efree(lc_name);
-			return *pce;
-		} else {
-			efree(lc_name);
-			return NULL;
-		}
+		return *pce;
 	}
 }
 
