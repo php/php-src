@@ -2199,7 +2199,8 @@ ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 
 ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
 {
-	return ZEND_NORMALIZE_BOOL(u_strCompare(s1, len1, s2, len2, 1));
+	int32_t result = u_strCompare(s1, len1, s2, len2, 1);
+	return ZEND_NORMALIZE_BOOL(result);
 }
 
 
@@ -2220,15 +2221,18 @@ ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t l
 {
 	int32_t off1 = 0, off2 = 0;
 	UChar32 c1, c2;
+	int32_t result = 0;
 
 	for( ; length > 0; --length) {
 		if (off1 >= len1 || off2 >= len2) {
-			return ZEND_NORMALIZE_BOOL(len1 - len2);
+			result = len1 - len2;
+			return ZEND_NORMALIZE_BOOL(result);
 		}
 		U16_NEXT(s1, off1, len1, c1);
 		U16_NEXT(s2, off2, len2, c2);
 		if (c1 != c2) {
-			return ZEND_NORMALIZE_BOOL((int32_t)c1-(int32_t)c2);
+			result = (int32_t)c1-(int32_t)c2;
+			return ZEND_NORMALIZE_BOOL(result);
 		}
 	}
 
@@ -2257,8 +2261,8 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
 {
 	UErrorCode status = U_ZERO_ERROR;
-	
-	return ZEND_NORMALIZE_BOOL(u_strCaseCompare(s1, len1, s2, len2, U_COMPARE_CODE_POINT_ORDER, &status));
+	int32_t result = u_strCaseCompare(s1, len1, s2, len2, U_COMPARE_CODE_POINT_ORDER, &status);
+	return ZEND_NORMALIZE_BOOL(result);
 }
 
 ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length)
