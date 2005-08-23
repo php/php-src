@@ -1011,7 +1011,7 @@ PHP_FUNCTION(phpversion)
 	int argc = ZEND_NUM_ARGS();
 
 	if (argc == 0) {
-		RETURN_STRING(PHP_VERSION, 1);
+		RETURN_ASCII_STRING(PHP_VERSION, 1);
 	} else if (argc == 1 && zend_get_parameters_ex(1, &arg) == SUCCESS) {
 		char *version;
 		convert_to_string_ex(arg);
@@ -1019,7 +1019,7 @@ PHP_FUNCTION(phpversion)
 		if (version == NULL) {
 			RETURN_FALSE;
 		}
-		RETURN_STRING(version, 1);
+		RETURN_ASCII_STRING(version, 1);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1079,7 +1079,7 @@ PHP_FUNCTION(php_logo_guid)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING(php_logo_guid(), 0);
+	RETURN_ASCII_STRING(php_logo_guid(), 0);
 }
 /* }}} */
 
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(php_real_logo_guid)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
+	RETURN_ASCII_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
@@ -1104,7 +1104,7 @@ PHP_FUNCTION(php_egg_logo_guid)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
+	RETURN_ASCII_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
@@ -1116,7 +1116,7 @@ PHP_FUNCTION(zend_logo_guid)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
+	RETURN_ASCII_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(php_sapi_name)
 	}
 
 	if (sapi_module.name) {
-		RETURN_STRING(sapi_module.name, 1);
+		RETURN_ASCII_STRING(sapi_module.name, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1143,10 +1143,16 @@ PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
 	int modelen;
+	char *tmp;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
 		return;
 	}
-	RETURN_STRING(php_get_uname(*mode), 0);
+	tmp = php_get_uname(*mode);
+	RETVAL_RT_STRING(tmp, 0);
+	if (UG(unicode)) {
+		efree(tmp);
+	}
 }
 
 /* }}} */
@@ -1156,7 +1162,7 @@ PHP_FUNCTION(php_uname)
 PHP_FUNCTION(php_ini_scanned_files)
 {
 	if (strlen(PHP_CONFIG_FILE_SCAN_DIR) && php_ini_scanned_files) {
-		RETURN_STRING(php_ini_scanned_files, 1);
+		RETURN_RT_STRING(php_ini_scanned_files, 1);
 	} else {
 		RETURN_FALSE;
 	}

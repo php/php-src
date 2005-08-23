@@ -1158,8 +1158,8 @@ ZEND_FUNCTION(get_included_files)
 
 	array_init(return_value);
 	zend_hash_internal_pointer_reset(&EG(included_files));
-	while (zend_hash_get_current_key(&EG(included_files), &entry, NULL, 1) == HASH_KEY_IS_STRING) {
-		add_next_index_string(return_value, entry, 0);
+	while (zend_hash_get_current_key(&EG(included_files), &entry, NULL, 0) == HASH_KEY_IS_STRING) {
+		add_next_index_rt_string(return_value, entry, 1);
 		zend_hash_move_forward(&EG(included_files));
 	}
 }
@@ -1979,7 +1979,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 		if (skip->op_array) {
 			filename = skip->op_array->filename;
 			lineno = skip->opline->lineno;
-			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+			add_assoc_rt_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
@@ -2060,7 +2060,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 
-				add_next_index_string(arg_array, include_filename, 1);
+				add_next_index_rt_string(arg_array, include_filename, 1);
 				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
 			}
 

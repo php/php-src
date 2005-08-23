@@ -22,9 +22,6 @@ ZE
 --
   Status: In Progress
         debug_backtrace()
-        extension_loaded()
-        get_extension_funcs()
-        get_included_files()
   Completed:
         class_exists()
         create_function()
@@ -33,6 +30,7 @@ ZE
         defined()
         each()
         error_reporting()
+        extension_loaded()
         func_get_arg()
         func_get_args()
         func_num_args()
@@ -45,6 +43,8 @@ ZE
         get_defined_constants()
         get_defined_functions()
         get_defined_vars()
+        get_extension_funcs()
+        get_included_files()
         get_loaded_extensions()
         get_object_vars()
         get_parent_class()

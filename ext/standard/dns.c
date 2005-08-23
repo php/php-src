@@ -142,7 +142,10 @@ PHP_FUNCTION(gethostbyaddr)
 #endif
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRING(addr, 0);
+		RETVAL_RT_STRING(addr, 0);
+		if (UG(unicode)) {
+			efree(addr);
+		}
 	}
 }
 /* }}} */
@@ -187,6 +190,7 @@ static char *php_gethostbyaddr(char *ip)
 PHP_FUNCTION(gethostbyname)
 {
 	zval **arg;
+	char *tmp;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -194,7 +198,11 @@ PHP_FUNCTION(gethostbyname)
 
 	convert_to_string_ex(arg);
 
-	RETVAL_STRING(php_gethostbyname(Z_STRVAL_PP(arg)), 0);
+	tmp = php_gethostbyname(Z_STRVAL_PP(arg));
+	RETVAL_RT_STRING(tmp, 0);
+	if (UG(unicode)) {
+		efree(tmp);
+	}
 }
 /* }}} */
 
@@ -221,7 +229,7 @@ PHP_FUNCTION(gethostbynamel)
 
 	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
 		in = *(struct in_addr *) hp->h_addr_list[i];
-		add_next_index_string(return_value, inet_ntoa(in), 1);
+		add_next_index_rt_string(return_value, inet_ntoa(in), 1);
 	}
 }
 /* }}} */

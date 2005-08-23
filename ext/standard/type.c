@@ -33,39 +33,39 @@ PHP_FUNCTION(gettype)
 
 	switch (Z_TYPE_PP(arg)) {
 		case IS_NULL:
-			RETVAL_STRING("NULL", 1);
+			RETVAL_ASCII_STRING("NULL", 1);
 			break;
 
 		case IS_BOOL:
-			RETVAL_STRING("boolean", 1);
+			RETVAL_ASCII_STRING("boolean", 1);
 			break;
 
 		case IS_LONG:
-			RETVAL_STRING("integer", 1);
+			RETVAL_ASCII_STRING("integer", 1);
 			break;
 
 		case IS_DOUBLE:
-			RETVAL_STRING("double", 1);
+			RETVAL_ASCII_STRING("double", 1);
 			break;
 	
 		case IS_STRING:
-			RETVAL_STRING("string", 1);
+			RETVAL_ASCII_STRING("string", 1);
 			break;
 	
 		case IS_BINARY:
-			RETVAL_STRING("binary", 1);
+			RETVAL_ASCII_STRING("binary", 1);
 			break;
 
 		case IS_UNICODE:
-			RETVAL_STRING("unicode", 1);
+			RETVAL_ASCII_STRING("unicode", 1);
 			break;
 
 		case IS_ARRAY:
-			RETVAL_STRING("array", 1);
+			RETVAL_ASCII_STRING("array", 1);
 			break;
 
 		case IS_OBJECT:
-			RETVAL_STRING("object", 1);
+			RETVAL_ASCII_STRING("object", 1);
 		/*
 		   {
 		   char *result;
@@ -84,13 +84,13 @@ PHP_FUNCTION(gettype)
 				char *type_name;
 				type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
 				if (type_name) {
-					RETVAL_STRING("resource", 1);
+					RETVAL_ASCII_STRING("resource", 1);
 					break;
 				}
 			}
 
 		default:
-			RETVAL_STRING("unknown type", 1);
+			RETVAL_ASCII_STRING("unknown type", 1);
 	}
 }
 /* }}} */
@@ -361,6 +361,15 @@ PHP_FUNCTION(is_numeric)
 
 		case IS_STRING:
 			result = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL, 0);
+			if (result == IS_LONG || result == IS_DOUBLE) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+			break;
+
+		case IS_UNICODE:
+			result = is_numeric_unicode(Z_USTRVAL_PP(arg), Z_USTRLEN_PP(arg), NULL, NULL, 0);
 			if (result == IS_LONG || result == IS_DOUBLE) {
 				RETURN_TRUE;
 			} else {

@@ -80,7 +80,7 @@ PHP_FUNCTION(readlink)
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	RETURN_STRING(buff, 1);
+	RETURN_RT_STRING(buff, 1);
 }
 /* }}} */
 

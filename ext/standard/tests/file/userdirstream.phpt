@@ -49,4 +49,16 @@ array(4) {
   [3]=>
   string(5) "third"
 }
-
+--UEXPECT--
+Opening
+Closing up!
+array(4) {
+  [0]=>
+  unicode(5) "first"
+  [1]=>
+  unicode(6) "fourth"
+  [2]=>
+  unicode(6) "second"
+  [3]=>
+  unicode(5) "third"
+}

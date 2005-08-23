@@ -94,7 +94,7 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	trace->refcount = 0;
 	zend_fetch_debug_backtrace(trace, skip_top_traces TSRMLS_CC);
 
-	zend_update_property_string(U_CLASS_ENTRY(default_exception_ce), &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
+	zend_update_property_rt_string(U_CLASS_ENTRY(default_exception_ce), &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
 	zend_update_property_long(U_CLASS_ENTRY(default_exception_ce), &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
 	zend_update_property(U_CLASS_ENTRY(default_exception_ce), &obj, "trace", sizeof("trace")-1, trace TSRMLS_CC);
 
@@ -141,6 +141,14 @@ ZEND_METHOD(exception, __construct)
 	if (message) {
 		if (message_type == IS_UNICODE) {
 			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		} else if (UG(unicode)) {
+	    UErrorCode status = U_ZERO_ERROR;
+			UChar *u_str;
+			int32_t u_len;
+			
+			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
+			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
+			efree(u_str);
 		} else {
 			zend_update_property_stringl(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
 		}
@@ -172,6 +180,14 @@ ZEND_METHOD(error_exception, __construct)
 	if (message) {
 		if (message_type == IS_UNICODE) {
 			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		} else if (UG(unicode)) {
+	    UErrorCode status = U_ZERO_ERROR;
+			UChar *u_str;
+			int32_t u_len;
+			
+			zend_convert_to_unicode(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), &u_str, &u_len, message, message_len, &status);
+			zend_update_property_unicodel(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, u_str, u_len TSRMLS_CC);
+			efree(u_str);
 		} else {
 			zend_update_property_stringl(U_CLASS_ENTRY(default_exception_ce), object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
 		}
@@ -286,10 +302,21 @@ ZEND_METHOD(error_exception, getSeverity)
 
 #define TRACE_APPEND_STRL(val, vallen)                                   \
 	{                                                                    \
-	    int l = vallen;                                                  \
+		int l = vallen;                                                  \
 		*str = (char*)erealloc(*str, *len + l + 1);                      \
 		memcpy((*str) + *len, val, l);                                   \
 		*len += l;                                                       \
+	}
+
+#define TRACE_APPEND_ZVAL(zv) \
+	if (Z_TYPE_P((zv)) == IS_UNICODE) { \
+		zval copy; \
+		int use_copy; \
+		zend_make_printable_zval((zv), &copy, &use_copy); \
+    TRACE_APPEND_STRL(Z_STRVAL(copy), Z_STRLEN(copy)); \
+    zval_dtor(&copy); \
+	} else { \
+		TRACE_APPEND_STRL(Z_STRVAL_P((zv)), Z_STRLEN_P((zv))); \
 	}
 
 #define TRACE_APPEND_STR(val)                                            \
@@ -436,8 +463,9 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 		} else {
 			line = 0;
 		}
-		s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 2 + 1);
-		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+		TRACE_APPEND_ZVAL(*file);
+		s_tmp = emalloc(MAX_LENGTH_OF_LONG + 2 + 1);
+		sprintf(s_tmp, "(%ld): ", line);
 		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 		efree(s_tmp);
 	} else {
@@ -646,7 +674,7 @@ ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *messa
 	
 
 	if (message) {
-		zend_update_property_string(U_CLASS_ENTRY(default_exception_ce), ex, "message", sizeof("message")-1, message TSRMLS_CC);
+		zend_update_property_rt_string(U_CLASS_ENTRY(default_exception_ce), ex, "message", sizeof("message")-1, message TSRMLS_CC);
 	}
 	if (code) {
 		zend_update_property_long(U_CLASS_ENTRY(default_exception_ce), ex, "code", sizeof("code")-1, code TSRMLS_CC);
@@ -723,7 +751,15 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		file = zend_read_property(U_CLASS_ENTRY(default_exception_ce), exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 		line = zend_read_property(U_CLASS_ENTRY(default_exception_ce), exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
-		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %R\n  thrown", Z_TYPE_P(str), Z_UNIVAL_P(str));
+		if (Z_TYPE_P(file) == IS_UNICODE) {
+			zval copy;
+			int use_copy;
+			zend_make_printable_zval(file, &copy, &use_copy);
+			zend_error_va(E_ERROR, Z_STRVAL(copy), Z_LVAL_P(line), "Uncaught %R\n  thrown", Z_TYPE_P(str), Z_UNIVAL_P(str));
+			zval_dtor(&copy);
+		} else {
+			zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %R\n  thrown", Z_TYPE_P(str), Z_UNIVAL_P(str));
+		}
 	} else {
 		zend_error(E_ERROR, "Uncaught exception '%v'", ce_exception->name);
 	}
