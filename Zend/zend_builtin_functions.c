@@ -368,15 +368,20 @@ ZEND_FUNCTION(strcasecmp)
    Binary safe string comparison */
 ZEND_FUNCTION(strncasecmp)
 {
-	zval **s1, **s2, **s3;
+	void *s1, *s2;
+	int s1_len, s2_len;
+	zend_uchar s1_type, s2_type;
+	long len;
 	
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &s1, &s2, &s3) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "TTl", &s1, &s1_len,
+							  &s1_type, &s2, &s2_len, &s2_type, &len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(s1);
-	convert_to_string_ex(s2);
-	convert_to_long_ex(s3);
-	RETURN_LONG(zend_binary_zval_strncasecmp(*s1, *s2, *s3));
+	if (s1_type == IS_UNICODE) {
+		RETURN_LONG(zend_u_binary_strcasecmp(s1, MIN(s1_len, len), s2, MIN(s2_len, len)));
+	} else {
+		RETURN_LONG(zend_binary_strcasecmp(s1, MIN(s1_len, len), s2, MIN(s2_len, len)));
+	}
 }
 /* }}} */
 
