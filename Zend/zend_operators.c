@@ -2199,27 +2199,7 @@ ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 
 ZEND_API int zend_u_binary_strcmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
 {
-	int retval;
-	
-	retval = ZEND_NORMALIZE_BOOL(u_memcmpCodePointOrder(s1, s2, MIN(len1, len2)));
-	if (!retval) {
-		return (len1 - len2);
-	} else {
-		return retval;
-	}
-}
-
-
-ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length)
-{
-	int retval;
-	
-	retval = ZEND_NORMALIZE_BOOL(u_memcmpCodePointOrder(s1, s2, MIN(length, MIN(len1, len2))));
-	if (!retval) {
-		return (MIN(length, len1) - MIN(length, len2));
-	} else {
-		return retval;
-	}
+	return ZEND_NORMALIZE_BOOL(u_strCompare(s1, len1, s2, len2, 1));
 }
 
 
@@ -2233,6 +2213,26 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 	} else {
 		return retval;
 	}
+}
+
+
+ZEND_API int zend_u_binary_strncmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length)
+{
+	int32_t off1 = 0, off2 = 0;
+	UChar32 c1, c2;
+
+	for( ; length > 0; --length) {
+		if (off1 >= len1 || off2 >= len2) {
+			return ZEND_NORMALIZE_BOOL(len1 - len2);
+		}
+		U16_NEXT(s1, off1, len1, c1);
+		U16_NEXT(s2, off2, len2, c2);
+		if (c1 != c2) {
+			return ZEND_NORMALIZE_BOOL((int32_t)c1-(int32_t)c2);
+		}
+	}
+
+	return 0;
 }
 
 
