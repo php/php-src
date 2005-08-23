@@ -1459,11 +1459,7 @@ PHP_FUNCTION(strtoupper)
 		WRONG_PARAM_COUNT;
 	}
 	if (Z_TYPE_PP(arg) != IS_STRING && Z_TYPE_PP(arg) != IS_UNICODE) {
-		if (UG(unicode)) {
-			convert_to_unicode_ex(arg);
-		} else {
-			convert_to_string_ex(arg);
-		}
+		convert_to_text_ex(arg);
 	}
 
 	RETVAL_ZVAL(*arg, 1, 0);
@@ -1532,11 +1528,7 @@ PHP_FUNCTION(strtolower)
 		WRONG_PARAM_COUNT;
 	}
 	if (Z_TYPE_PP(str) != IS_STRING && Z_TYPE_PP(str) != IS_UNICODE) {
-		if (UG(unicode)) {
-			convert_to_unicode_ex(str);
-		} else {
-			convert_to_string_ex(str);
-		}
+		convert_to_text_ex(str);
 	}
 
 	RETVAL_ZVAL(*str, 1, 0);

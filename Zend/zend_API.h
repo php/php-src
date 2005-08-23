@@ -604,6 +604,41 @@ END_EXTERN_C()
 		(z)->type = IS_STRING;		    \
 	}
 
+#define ZVAL_U_STRING(conv, z, s, duplicate) \
+	if (UG(unicode)) { \
+    UErrorCode status = U_ZERO_ERROR; \
+		UChar *u_str; \
+		int32_t u_len; \
+		uint length = strlen(s); \
+		zend_convert_to_unicode(conv, &u_str, &u_len, s, length, &status); \
+		ZVAL_UNICODEL(z, u_str, u_len, 0); \
+	} else { \
+		char *__s=(s);					\
+		(z)->value.str.len = strlen(__s);	\
+		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
+		(z)->type = IS_STRING;	        \
+	}
+
+#define ZVAL_U_STRINGL(conv, z, s, l, duplicate) \
+	if (UG(unicode)) { \
+    UErrorCode status = U_ZERO_ERROR; \
+		UChar *u_str; \
+		int32_t u_len; \
+		zend_convert_to_unicode(conv, &u_str, &u_len, s, l, &status); \
+		ZVAL_UNICODEL(z, u_str, u_len, 0); \
+	} else { \
+		char *__s=(s); int __l=l;		\
+		(z)->value.str.len = __l;	    \
+		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
+		(z)->type = IS_STRING;		    \
+	}
+
+#define ZVAL_RT_STRING(z, s, duplicate) \
+	ZVAL_U_STRING(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, duplicate)
+
+#define ZVAL_RT_STRINGL(z, s, l, duplicate) \
+	ZVAL_U_STRINGL(ZEND_U_CONVERTER(UG(runtime_encoding_conv)), z, s, l, duplicate)
+
 #define ZVAL_UNICODE(z, u, duplicate) {	\
 		UChar *__u=(u); 				\
 		(z)->value.ustr.len = u_strlen(__u);    \
@@ -705,6 +740,10 @@ END_EXTERN_C()
 #define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
 #define RETVAL_ASCII_STRING(s, duplicate) 		ZVAL_ASCII_STRING(return_value, s, duplicate)
 #define RETVAL_ASCII_STRINGL(s, l, duplicate) 	ZVAL_ASCII_STRINGL(return_value, s, l, duplicate)
+#define RETVAL_U_STRING(conv, s, duplicate) 		ZVAL_U_STRING(conv, return_value, s, duplicate)
+#define RETVAL_U_STRINGL(conv, s, l, duplicate) 	ZVAL_U_STRINGL(conv, return_value, s, l, duplicate)
+#define RETVAL_RT_STRING(s, duplicate) 		ZVAL_RT_STRING(return_value, s, duplicate)
+#define RETVAL_RT_STRINGL(s, l, duplicate) 	ZVAL_RT_STRINGL(return_value, s, l, duplicate)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_UNICODE(u, duplicate) 		ZVAL_UNICODE(return_value, u, duplicate)
 #define RETVAL_UNICODEL(u, l, duplicate) 	ZVAL_UNICODEL(return_value, u, l, duplicate)
@@ -739,6 +778,10 @@ END_EXTERN_C()
 #define RETURN_TEXTL(t, l, duplicate)	{ RETVAL_TEXTL(t, l, duplicate); return; }
 #define RETURN_ASCII_STRING(t, duplicate)		{ RETVAL_ASCII_STRING(t, duplicate); return; }
 #define RETURN_ASCII_STRINGL(t, l, duplicate)	{ RETVAL_ASCII_STRINGL(t, l, duplicate); return; }
+#define RETURN_U_STRING(conv, t, duplicate)		{ RETVAL_U_STRING(conv, t, duplicate); return; }
+#define RETURN_U_STRINGL(conv, t, l, duplicate)	{ RETVAL_U_STRINGL(conv, t, l, duplicate); return; }
+#define RETURN_RT_STRING(t, duplicate)		{ RETVAL_RT_STRING(t, duplicate); return; }
+#define RETURN_RT_STRINGL(t, l, duplicate)	{ RETVAL_RT_STRINGL(t, l, duplicate); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\

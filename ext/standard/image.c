@@ -1128,12 +1128,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 	}
 	convert_to_long_ex(p_image_type);
 	temp = (char*)php_image_type_to_mime_type(Z_LVAL_PP(p_image_type));
-	if (UG(unicode)) {
-		UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
-		ZVAL_UNICODE(return_value, u_temp, 0);
-	} else {
-		ZVAL_STRING(return_value, temp, 1);
-	}
+	ZVAL_ASCII_STRING(return_value, temp, 1);
 }
 /* }}} */
 
@@ -1177,12 +1172,7 @@ PHP_FUNCTION(image_type_to_extension)
 			temp = ".xbm";
 	}
 	if (temp) {
-		if (UG(unicode)) {
-			UChar *u_temp = zend_ascii_to_unicode(temp + !inc_dot, strlen(temp)+inc_dot ZEND_FILE_LINE_CC);
-			RETURN_UNICODE(u_temp, 0);
-		} else {
-			RETURN_STRING(temp + !inc_dot, 1);
-		}
+		RETURN_ASCII_STRING(temp + !inc_dot, 1);
 	}
 
 	RETURN_FALSE;
@@ -1373,12 +1363,9 @@ PHP_FUNCTION(getimagesize)
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
 		spprintf(&temp, 0, "width=\"%d\" height=\"%d\"", result->width, result->height);
+		add_index_ascii_string(return_value, 3, temp, 0);
 		if (UG(unicode)) {
-			UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
-			add_index_unicode(return_value, 3, u_temp, 0);
 			efree(temp);
-		} else {
-			add_index_string(return_value, 3, temp, 0);
 		}
 
 		if (result->bits != 0) {
@@ -1388,12 +1375,7 @@ PHP_FUNCTION(getimagesize)
 			add_assoc_long(return_value, "channels", result->channels);
 		}
 		temp = (char*)php_image_type_to_mime_type(itype);
-		if (UG(unicode)) {
-			UChar *u_temp = zend_ascii_to_unicode(temp, strlen(temp)+1 ZEND_FILE_LINE_CC);
-			add_assoc_unicode(return_value, "mime", u_temp, 0);
-		} else {
-			add_assoc_string(return_value, "mime", temp, 1);
-		}
+		add_assoc_ascii_string(return_value, "mime", temp, 1);
 		efree(result);
 	} else {
 		RETURN_FALSE;

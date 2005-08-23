@@ -1691,7 +1691,7 @@ PHP_FUNCTION(getopt)
 
 		MAKE_STD_ZVAL(val);
 		if (optarg != NULL) {
-			ZVAL_STRING(val, optarg, 1);
+			ZVAL_RT_STRING(val, optarg, 1);
 		} else {
 			ZVAL_FALSE(val);
 		}
