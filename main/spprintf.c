@@ -133,6 +133,7 @@ do { 												\
 		smart_str_alloc(xbuf, (sz), 0); 			\
 		if (s_unicode) {							\
 			memcpy(xbuf->c + xbuf->len, s, (sz));	\
+			xbuf->len += sz;						\
 		} else {									\
 			p = (s_len);							\
 			while(p--) {                            \
