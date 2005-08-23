@@ -54,3 +54,6 @@
 
 * Change implementation of strtoupper()/strtolower() to use simple case
   mapping.
+
+* Store script encoding in the oparray structure and use it to convert
+  T_INLINE_HTML blocks.

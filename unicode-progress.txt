@@ -4,6 +4,7 @@ Extension Upgrade Tracking
 ext/standard
 ------------
   Status: In Progress
+
   Completed:
         bin2hex()
         chr()
@@ -18,9 +19,13 @@ ext/standard
         trim()
         ucwords()
         ucfirst()
-ZE
---
+
+
+Zend Engine
+-----------
   Status: In Progress
+
+  TBD:
         debug_backtrace()
   Completed:
         class_exists()
@@ -58,7 +63,7 @@ ZE
         restore_exception_handler()
         set_error_handler()
         set_exception_handler()
-				strcasecmp()
+        strcasecmp()
         strcmp()
         strlen()
         strncasecmp()
@@ -66,3 +71,5 @@ ZE
         trigger_error()
         zend_thread_id()
         zend_version()
+
+vim: set et ts=4 sts:
