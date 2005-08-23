@@ -142,7 +142,7 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 		}
 		php_printf("]=>\n");
 	}
-	php_var_dump(zv, level + 2, 0 TSRMLS_CC);
+	php_var_dump(zv, level + 2, verbose TSRMLS_CC);
 	return 0;
 }
 
@@ -216,7 +216,7 @@ PHPAPI void php_var_dump(zval **struc, int level, int verbose TSRMLS_DC)
 		break;
 	case IS_UNICODE:
 		php_printf("%sunicode(%d) ", COMMON, u_countChar32((*struc)->value.ustr.val, (*struc)->value.ustr.len));
-		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, 0, "\"", 0 TSRMLS_CC);
+		php_var_dump_unicode((*struc)->value.ustr.val, (*struc)->value.ustr.len, verbose, "\"", 0 TSRMLS_CC);
 		PUTS("\n");
 		break;
 	case IS_ARRAY:
