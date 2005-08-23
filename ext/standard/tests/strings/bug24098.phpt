@@ -15,3 +15,12 @@ array(3) {
   ["extension"]=>
   string(3) "asa"
 }
+--UEXPECT--
+array(3) {
+  [u"dirname"]=>
+  unicode(1) "/"
+  [u"basename"]=>
+  unicode(8) "dsds.asa"
+  [u"extension"]=>
+  unicode(3) "asa"
+}

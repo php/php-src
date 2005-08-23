@@ -658,20 +658,20 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
-			RETURN_STRING("link", 1);
+			RETURN_ASCII_STRING("link", 1);
 		}
 		switch(ssb.sb.st_mode & S_IFMT) {
-		case S_IFIFO: RETURN_STRING("fifo", 1);
-		case S_IFCHR: RETURN_STRING("char", 1);
-		case S_IFDIR: RETURN_STRING("dir", 1);
-		case S_IFBLK: RETURN_STRING("block", 1);
-		case S_IFREG: RETURN_STRING("file", 1);
+		case S_IFIFO: RETURN_ASCII_STRING("fifo", 1);
+		case S_IFCHR: RETURN_ASCII_STRING("char", 1);
+		case S_IFDIR: RETURN_ASCII_STRING("dir", 1);
+		case S_IFBLK: RETURN_ASCII_STRING("block", 1);
+		case S_IFREG: RETURN_ASCII_STRING("file", 1);
 #if defined(S_IFSOCK) && !defined(ZEND_WIN32)&&!defined(__BEOS__)
-		case S_IFSOCK: RETURN_STRING("socket", 1);
+		case S_IFSOCK: RETURN_ASCII_STRING("socket", 1);
 #endif
 		}
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%d)", ssb.sb.st_mode&S_IFMT);
-		RETURN_STRING("unknown", 1);
+		RETURN_ASCII_STRING("unknown", 1);
 	case FS_IS_W:
 		RETURN_BOOL((ssb.sb.st_mode & wmask) != 0);
 	case FS_IS_R:

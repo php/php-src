@@ -1711,6 +1711,66 @@ ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len, char *s
 	return SUCCESS;
 }
 
+ZEND_API int add_property_ascii_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ASCII_STRING(tmp, str, duplicate);
+
+	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	return SUCCESS;
+}
+
+ZEND_API int add_property_ascii_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_ASCII_STRINGL(tmp, str, length, duplicate);
+
+	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	return SUCCESS;
+}
+
+ZEND_API int add_property_rt_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_RT_STRING(tmp, str, duplicate);
+
+	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	return SUCCESS;
+}
+
+ZEND_API int add_property_rt_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate TSRMLS_DC)
+{
+	zval *tmp;
+	zval z_key;
+
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_RT_STRINGL(tmp, str, length, duplicate);
+
+	ZVAL_STRINGL(&z_key, key, key_len-1, 0);
+
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, tmp TSRMLS_CC);
+	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
+	return SUCCESS;
+}
+
 ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value TSRMLS_DC)
 {
 	zval z_key;
@@ -2934,6 +2994,50 @@ ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object
 	tmp->is_ref = 0;
 	tmp->refcount = 0;
 	ZVAL_STRINGL(tmp, value, value_len, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_ascii_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_ASCII_STRING(tmp, value, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_ascii_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_len TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_ASCII_STRINGL(tmp, value, value_len, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_rt_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_RT_STRING(tmp, value, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_rt_stringl(zend_class_entry *scope, zval *object, char *name, int name_length, char *value, int value_len TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_RT_STRINGL(tmp, value, value_len, 1);
 	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 

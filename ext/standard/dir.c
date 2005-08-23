@@ -201,8 +201,8 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	php_set_default_dir(dirp->rsrc_id TSRMLS_CC);
 
 	if (createobject) {
-		object_init_ex(return_value, dir_class_entry_ptr);
-		add_property_stringl(return_value, "path", dirname, dir_len, 1);
+		object_init_ex(return_value, U_CLASS_ENTRY(dir_class_entry_ptr));
+		add_property_rt_stringl(return_value, "path", dirname, dir_len, 1);
 		add_property_resource(return_value, "handle", dirp->rsrc_id);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
@@ -318,7 +318,7 @@ PHP_FUNCTION(getcwd)
 #endif
 
 	if (ret) {
-		RETURN_STRING(path, 1);
+		RETURN_RT_STRING(path, 1);
 	} else {
 		RETURN_FALSE;
 	}
@@ -349,7 +349,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (php_stream_readdir(dirp, &entry)) {
-		RETURN_STRINGL(entry.d_name, strlen(entry.d_name), 1);
+		RETURN_RT_STRINGL(entry.d_name, strlen(entry.d_name), 1);
 	}
 	RETURN_FALSE;
 }
@@ -450,7 +450,7 @@ PHP_FUNCTION(glob)
 				continue;
 			}
 		}
-		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
+		add_next_index_rt_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
 	}
 
 	globfree(&globbuf);
@@ -491,7 +491,10 @@ PHP_FUNCTION(scandir)
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {
-		add_next_index_string(return_value, namelist[i], 0);
+		add_next_index_rt_string(return_value, namelist[i], 0);
+		if (UG(unicode)) {
+			efree(namelist[i]);
+		}
 	}
 
 	if (n) {
