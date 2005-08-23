@@ -2258,12 +2258,14 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 	return len1 - len2;
 }
 
+
 ZEND_API int zend_u_binary_strcasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2)
 {
 	UErrorCode status = U_ZERO_ERROR;
 	int32_t result = u_strCaseCompare(s1, len1, s2, len2, U_COMPARE_CODE_POINT_ORDER, &status);
 	return ZEND_NORMALIZE_BOOL(result);
 }
+
 
 ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length)
 {
@@ -2281,6 +2283,24 @@ ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, u
 	}
 
 	return MIN(length, len1) - MIN(length, len2);
+}
+
+
+/*
+ * Because we do not know UChar offsets for the passed-in limit of the number of
+ * codepoints to compare, we take a hit upfront by iterating over both strings
+ * until we find them. Then we can simply use u_strCaseCompare().
+ */
+ZEND_API int zend_u_binary_strncasecmp(UChar *s1, int32_t len1, UChar *s2, int32_t len2, uint length)
+{
+	UErrorCode status = U_ZERO_ERROR;
+	int32_t off1 = 0, off2 = 0;
+	int32_t result;
+
+	U16_FWD_N(s1, off1, len1, length);
+	U16_FWD_N(s2, off2, len2, length);
+	result = u_strCaseCompare(s1, off1, s2, off2, U_COMPARE_CODE_POINT_ORDER, &status);
+	return ZEND_NORMALIZE_BOOL(result);
 }
 
 

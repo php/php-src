@@ -378,7 +378,7 @@ ZEND_FUNCTION(strncasecmp)
 		return;
 	}
 	if (s1_type == IS_UNICODE) {
-		RETURN_LONG(zend_u_binary_strcasecmp(s1, MIN(s1_len, len), s2, MIN(s2_len, len)));
+		RETURN_LONG(zend_u_binary_strncasecmp(s1, s1_len, s2, s2_len, len));
 	} else {
 		RETURN_LONG(zend_binary_strcasecmp(s1, MIN(s1_len, len), s2, MIN(s2_len, len)));
 	}
