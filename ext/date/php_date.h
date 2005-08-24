@@ -46,6 +46,7 @@ PHP_FUNCTION(getdate);
 /* Advanced Interface */
 PHP_FUNCTION(date_create);
 PHP_FUNCTION(date_format);
+PHP_FUNCTION(date_format_locale);
 PHP_FUNCTION(date_modify);
 PHP_FUNCTION(date_timezone_get);
 PHP_FUNCTION(date_timezone_set);

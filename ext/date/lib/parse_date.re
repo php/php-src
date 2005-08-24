@@ -812,15 +812,15 @@ monthroman = "I" | "II" | "III" | "IV" | "V" | "VI" | "VII" | "VIII" | "IX" | "X
 monthtext = monthfull | monthabbr | monthroman;
 
 /* Time formats */
-timeshort12 = hour12[:]minutelz space? meridian;
-timelong12 = hour12[:]minute[:]secondlz space? meridian;
+timeshort12 = hour12[:.]minutelz space? meridian;
+timelong12 = hour12[:.]minute[:.]secondlz space? meridian;
 
-timeshort24 = hour24[:]minute;
-timelong24 =  hour24[:]minute[:]second;
-iso8601long =  hour24 [:] minute [:] second frac;
+timeshort24 = hour24[:.]minute;
+timelong24 =  hour24[:.]minute[:.]second;
+iso8601long =  hour24 [:.] minute [:.] second frac;
 
 /* iso8601shorttz = hour24 [:] minutelz space? (tzcorrection | tz); */
-iso8601normtz =  hour24 [:] minute [:] secondlz space? (tzcorrection | tz);
+iso8601normtz =  hour24 [:.] minute [:.] secondlz space? (tzcorrection | tz);
 /* iso8601longtz =  hour24 [:] minute [:] secondlz frac space? (tzcorrection | tz); */
 
 gnunocolon       = hour24lz minutelz;
@@ -831,7 +831,7 @@ iso8601nocolon   = hour24lz minutelz secondlz;
 /* Date formats */
 americanshort    = month "/" day;
 american         = month "/" day "/" year;
-iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
+iso8601dateslash = year4 "/" month "/" daylz "/"?;
 gnudateshort     = year "-" month "-" day;
 iso8601date      = year4 "-" monthlz "-" daylz;
 pointeddate      = day "." month "." year;
@@ -969,7 +969,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		TIMELIB_HAVE_TIME();
 		s->time->h = timelib_get_nr((char **) &ptr, 2);
 		s->time->i = timelib_get_nr((char **) &ptr, 2);
-		if (*ptr == ':') {
+		if (*ptr == ':' || *ptr == '.') {
 			s->time->s = timelib_get_nr((char **) &ptr, 2);
 
 			if (*ptr == '.') {
@@ -1050,6 +1050,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	americanshort | american
 	{
+		DEBUG_OUTPUT("americanshort | american");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
@@ -1064,6 +1065,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	iso8601date | iso8601dateslash
 	{
+		DEBUG_OUTPUT("iso8601date | iso8601dateslash");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -1075,6 +1077,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	gnudateshort
 	{
+		DEBUG_OUTPUT("gnudateshort");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -1087,6 +1090,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	datefull
 	{
+		DEBUG_OUTPUT("datefull");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
@@ -1099,6 +1103,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	pointeddate
 	{
+		DEBUG_OUTPUT("pointed date");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
@@ -1111,6 +1116,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	datenoday
 	{
+		DEBUG_OUTPUT("datenoday");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->m = timelib_get_month((char **) &ptr);
@@ -1123,6 +1129,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	datenodayrev
 	{
+		DEBUG_OUTPUT("datenodayrev");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -1135,6 +1142,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	datetextual | datenoyear
 	{
+		DEBUG_OUTPUT("datetextual | datenoyear");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->m = timelib_get_month((char **) &ptr);
@@ -1147,6 +1155,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	datenoyearrev
 	{
+		DEBUG_OUTPUT("datenoyearrev");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
@@ -1157,6 +1166,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	datenocolon
 	{
+		DEBUG_OUTPUT("datenocolon");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -1169,6 +1179,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	xmlrpc | xmlrpcnocolon | soap | wddx
 	{
 		int tz_not_found;
+		DEBUG_OUTPUT("xmlrpc | xmlrpcnocolon | soap | wddx");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
 		TIMELIB_HAVE_DATE();
@@ -1189,6 +1200,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	pgydotd
 	{
+		DEBUG_OUTPUT("pgydotd");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -1202,7 +1214,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	isoweekday
 	{
 		timelib_sll w, d;
-
+		DEBUG_OUTPUT("isoweekday");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
@@ -1221,7 +1233,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	isoweek
 	{
 		timelib_sll w, d;
-
+		DEBUG_OUTPUT("isoweek");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
@@ -1239,6 +1251,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	pgtextshort
 	{
+		DEBUG_OUTPUT("pgtextshort");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->m = timelib_get_month((char **) &ptr);
@@ -1251,6 +1264,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	pgtextreverse
 	{
+		DEBUG_OUTPUT("pgtextreverse");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -1264,6 +1278,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	clf
 	{
 		int tz_not_found;
+		DEBUG_OUTPUT("clf");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
 		TIMELIB_HAVE_DATE();
@@ -1281,6 +1296,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	year4
 	{
+		DEBUG_OUTPUT("year4");
 		TIMELIB_INIT;
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		TIMELIB_DEINIT;
@@ -1289,6 +1305,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	ago
 	{
+		DEBUG_OUTPUT("ago");
 		TIMELIB_INIT;
 		s->time->relative.y = 0 - s->time->relative.y;
 		s->time->relative.m = 0 - s->time->relative.m;
@@ -1304,7 +1321,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	relativetext
 	{
 		timelib_sll i;
-
+		DEBUG_OUTPUT("relativetext");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
 
@@ -1320,7 +1337,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	dayfull
 	{
 		const timelib_relunit* relunit;
-
+		DEBUG_OUTPUT("dayfull");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
 		TIMELIB_HAVE_WEEKDAY_RELATIVE();
@@ -1335,12 +1352,14 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 	dayabbr
 	{
+		DEBUG_OUTPUT("dayabbr");
 		goto std;
 	}
 
 	tzcorrection | tz
 	{
 		int tz_not_found;
+		DEBUG_OUTPUT("tzcorrection | tz");
 		TIMELIB_INIT;
 		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
 		s->errors += tz_not_found;
@@ -1351,6 +1370,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	dateshortwithtimeshort | dateshortwithtimelong | dateshortwithtimelongtz
 	{
 		int tz_not_found;
+		DEBUG_OUTPUT("dateshortwithtimeshort | dateshortwithtimelong | dateshortwithtimelongtz");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->m = timelib_get_month((char **) &ptr);
@@ -1378,7 +1398,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 	relative
 	{
 		timelib_ull i;
-
+		DEBUG_OUTPUT("relative");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
 
@@ -1419,10 +1439,10 @@ timelib_time* timelib_strtotime(char *s, int *errors)
 	int t;
 
 	memset(&in, 0, sizeof(in));
-	in.str = malloc(strlen(s) + 25);
-	memset(in.str, 0, strlen(s) + 25);
+	in.str = malloc(strlen(s) + YYMAXFILL);
+	memset(in.str, 0, strlen(s) + YYMAXFILL);
 	memcpy(in.str, s, strlen(s));
-	in.lim = in.str + strlen(s) + 25;
+	in.lim = in.str + strlen(s) + YYMAXFILL;
 	in.cur = in.str;
 	in.time = timelib_time_ctor();
 	in.time->y = -1;
@@ -1438,7 +1458,9 @@ timelib_time* timelib_strtotime(char *s, int *errors)
 
 	do {
 		t = scan(&in);
-/*		printf("%d\n", t); */
+#ifdef DEBUG_PARSER
+		printf("%d\n", t);
+#endif
 	} while(t != EOI);
 
 	free(in.str);
