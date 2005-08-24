@@ -13,7 +13,7 @@ echo "ok\n";
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/"><SOAP-ENV:Body><ns1:echoBoolean><ns1:inputBoolean>1</ns1:inputBoolean></ns1:echoBoolean></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/"><SOAP-ENV:Body><ns1:echoBoolean><ns1:inputBoolean>true</ns1:inputBoolean></ns1:echoBoolean></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/"><SOAP-ENV:Body><ns1:echoBooleanResponse><ns1:return>1</ns1:return></ns1:echoBooleanResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/"><SOAP-ENV:Body><ns1:echoBooleanResponse><ns1:return>true</ns1:return></ns1:echoBooleanResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
 ok
