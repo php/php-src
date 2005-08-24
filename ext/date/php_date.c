@@ -27,6 +27,7 @@
 #include "php_date.h"
 #include "lib/timelib.h"
 #include <time.h>
+#include <unicode/udat.h>
 
 /* {{{ Function table */
 function_entry date_functions[] = {
@@ -50,6 +51,7 @@ function_entry date_functions[] = {
 	/* Advanced Interface */
 	PHP_FE(date_create, NULL)
 	PHP_FE(date_format, NULL)
+	PHP_FE(date_format_locale, NULL)
 	PHP_FE(date_modify, NULL)
 	PHP_FE(date_timezone_get, NULL)
 	PHP_FE(date_timezone_set, NULL)
@@ -328,6 +330,9 @@ static char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
+static char *am_pm_lower_names[] = { "am", "pm" };
+static char *am_pm_upper_names[] = { "AM", "PM" };
+
 static char *english_suffix(timelib_sll number)
 {
 	if (number >= 10 && number <= 19) {
@@ -344,17 +349,112 @@ static char *english_suffix(timelib_sll number)
 /* }}} */
 
 /* {{{ date_format - (gm)date helper */
-static char *date_format(char *format, int format_len, timelib_time *t, int localtime)
+
+typedef struct {
+	int day_shortname_lengths[7];
+	int day_fullname_lengths[7];
+	int month_shortname_lengths[12];
+	int month_fullname_lengths[12];
+	int am_pm_lenghts[2];
+
+	char* day_shortname[7];
+	char* day_fullname[7];
+	char* month_shortname[12];
+	char* month_fullname[12];
+	char* am_pm_name[2];
+} php_locale_data;
+
+static const UChar sLongPat [] = { 0x004D, 0x004D, 0x004D, 0x004D, 0x0020,
+	    0x0079, 0x0079, 0x0079, 0x0079 };
+
+
+#define DATE_LOC_READ(type, var, cor)                                          \
+	count = udat_countSymbols(fmt, (type));                                    \
+	for (i = 0 - (cor); i < count; i++) {                                      \
+		array[i] = (UChar *) malloc(sizeof(UChar) * 15);                       \
+		                                                                       \
+		status = U_ZERO_ERROR;                                                 \
+		j = udat_getSymbols(fmt, (type), i, array[i], 15, &status);            \
+		                                                                       \
+		tmp->var[i + (cor)] = array[i];                                        \
+	}
+
+static php_locale_data* date_get_locale_data(char *locale)
+{
+	php_locale_data *tmp = malloc(sizeof(php_locale_data));
+	UDateFormat *fmt;
+	UErrorCode status = 0;
+	int32_t count, i, j;
+	UChar *array[15];
+	UChar *pat = sLongPat;
+	int32_t len = 9;
+
+	fmt = udat_open(UDAT_IGNORE,UDAT_IGNORE, locale, NULL, 0, pat, len, &status);
+
+	DATE_LOC_READ(UDAT_WEEKDAYS, day_fullname, -1);
+	DATE_LOC_READ(UDAT_SHORT_WEEKDAYS, day_shortname, -1);
+	DATE_LOC_READ(UDAT_MONTHS, month_fullname, 0);
+	DATE_LOC_READ(UDAT_SHORT_MONTHS, month_shortname, 0);
+	DATE_LOC_READ(UDAT_AM_PMS, am_pm_name, 0);
+
+	udat_close(fmt);
+
+	return tmp;
+}
+
+static void date_free_locale_data(php_locale_data *data)
+{
+	int i;
+	for (i = 0; i < 7; ++i) {
+		free(data->day_shortname[i]);
+		free(data->day_fullname[i]);
+	}
+	for (i = 0; i < 12; ++i) {
+		free(data->month_shortname[i]);
+		free(data->month_fullname[i]);
+	}
+	free(data->am_pm_name[0]);
+	free(data->am_pm_name[1]);
+	free(data);
+}
+
+static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *format, ...)
+{
+	int      c;
+	va_list  ap;
+
+	va_start(ap, format);
+
+	if (UG(unicode)) {
+		c = vuspprintf(str, size, format, ap);
+	} else {
+		c = vspprintf(str, size, format, ap);
+	}
+	va_end(ap);
+	return c;
+}
+
+#define dayname_short(s,l) l ? loc_dat->day_shortname[s] : day_short_names[s]
+#define dayname_full(s,l) l ? loc_dat->day_fullname[s] : day_full_names[s]
+#define monthname_short(s,l) l ? loc_dat->month_shortname[s] : mon_short_names[s]
+#define monthname_full(s,l) l ? loc_dat->month_fullname[s] : mon_full_names[s]
+#define am_pm_lower_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_lower_names[s]
+#define am_pm_upper_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_upper_names[s]
+
+static char *date_format(char *format, int format_len, int *return_len, timelib_time *t, int localtime, int localized)
 {
 	smart_str            string = {0};
-	int                  i;
-	char                 buffer[33];
+	int                  i, no_free, length;
+	char                *buffer;
 	timelib_time_offset *offset;
 	timelib_sll          isoweek, isoyear;
+	php_locale_data *loc_dat;
 
 	if (!format_len) {
 		return estrdup("");
 	}
+
+	loc_dat = date_get_locale_data(UG(default_locale));
 
 	if (localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
@@ -377,61 +477,61 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
 		}
 	}
-	buffer[32] = '\0';
 	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
 
 	for (i = 0; i < format_len; i++) {
+		no_free = 0;
 		switch (format[i]) {
 			/* day */
-			case 'd': snprintf(buffer, 32, "%02d", (int) t->d); break;
-			case 'D': snprintf(buffer, 32, "%s", day_short_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
-			case 'j': snprintf(buffer, 32, "%d", (int) t->d); break;
-			case 'l': snprintf(buffer, 32, "%s", day_full_names[timelib_day_of_week(t->y, t->m, t->d)]); break;
-			case 'S': snprintf(buffer, 32, "%s", english_suffix(t->d)); break;
-			case 'w': snprintf(buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
-			case 'z': snprintf(buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+			case 'd': length = date_spprintf(&buffer, 32, "%02d", (int) t->d); break;
+			case 'D': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, dayname_short(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
+			case 'j': length = date_spprintf(&buffer, 32, "%d", (int) t->d); break;
+			case 'l': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, dayname_full(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
+			case 'S': length = date_spprintf(&buffer, 32, "%s", english_suffix(t->d)); break;
+			case 'w': length = date_spprintf(&buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': length = date_spprintf(&buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
-			case 'W': snprintf(buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
-			case 'o': snprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
+			case 'W': length = date_spprintf(&buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
+			case 'o': length = date_spprintf(&buffer, 32, "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
-			case 'F': snprintf(buffer, 32, "%s", mon_full_names[t->m - 1]); break;
-			case 'm': snprintf(buffer, 32, "%02d", (int) t->m); break;
-			case 'M': snprintf(buffer, 32, "%s", mon_short_names[t->m - 1]); break;
-			case 'n': snprintf(buffer, 32, "%d", (int) t->m); break;
-			case 't': snprintf(buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+			case 'F': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, monthname_full(t->m - 1, localized)); break;
+			case 'm': length = date_spprintf(&buffer, 32, "%02d", (int) t->m); break;
+			case 'M': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, monthname_short(t->m - 1, localized)); break;
+			case 'n': length = date_spprintf(&buffer, 32, "%d", (int) t->m); break;
+			case 't': length = date_spprintf(&buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
 
 			/* year */
-			case 'L': snprintf(buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': snprintf(buffer, 32, "%02d", (int) t->y % 100); break;
-			case 'Y': snprintf(buffer, 32, "%04d", (int) t->y); break;
+			case 'L': length = date_spprintf(&buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
+			case 'y': length = date_spprintf(&buffer, 32, "%02d", (int) t->y % 100); break;
+			case 'Y': length = date_spprintf(&buffer, 32, "%04d", (int) t->y); break;
 
 			/* time */
-			case 'a': snprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
-			case 'A': snprintf(buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
-			case 'B': snprintf(buffer, 32, "[B unimplemented]"); break;
-			case 'g': snprintf(buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'G': snprintf(buffer, 32, "%d", (int) t->h); break;
-			case 'h': snprintf(buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'H': snprintf(buffer, 32, "%02d", (int) t->h); break;
-			case 'i': snprintf(buffer, 32, "%02d", (int) t->i); break;
-			case 's': snprintf(buffer, 32, "%02d", (int) t->s); break;
+			case 'a': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
+			case 'A': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_upper_full(t->h >= 12 ? 1 : 0, localized)); break;
+			case 'B': length = date_spprintf(&buffer, 32, "[B unimplemented]"); break;
+			case 'g': length = date_spprintf(&buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': length = date_spprintf(&buffer, 32, "%d", (int) t->h); break;
+			case 'h': length = date_spprintf(&buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': length = date_spprintf(&buffer, 32, "%02d", (int) t->h); break;
+			case 'i': length = date_spprintf(&buffer, 32, "%02d", (int) t->i); break;
+			case 's': length = date_spprintf(&buffer, 32, "%02d", (int) t->s); break;
 
 			/* timezone */
-			case 'I': snprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
-			case 'O': snprintf(buffer, 32, "%c%02d%02d",
+			case 'I': length = date_spprintf(&buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
+			case 'O': length = date_spprintf(&buffer, 32, "%c%02d%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': snprintf(buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
-			case 'e': snprintf(buffer, 32, "%s", localtime ? t->tz_info->name : "UTC"); break;
-			case 'Z': snprintf(buffer, 32, "%d", localtime ? offset->offset : 0); break;
+			case 'T': length = date_spprintf(&buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'e': length = date_spprintf(&buffer, 32, "%s", localtime ? t->tz_info->name : "UTC"); break;
+			case 'Z': length = date_spprintf(&buffer, 32, "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': snprintf(buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': length = date_spprintf(&buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (int) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -439,7 +539,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': snprintf(buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': length = date_spprintf(&buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                day_short_names[timelib_day_of_week(t->y, t->m, t->d)],
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -448,22 +548,31 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': snprintf(buffer, 32, "%lld", (timelib_sll) t->sse); break;
+			case 'U': length = date_spprintf(&buffer, 32, "%lld", (timelib_sll) t->sse); break;
 
-			case '\\': if (i < format_len) i++; buffer[0] = format[i]; buffer[1] = '\0'; break;
+			case '\\': if (i < format_len) i++; length = date_spprintf(&buffer, 32, "%c", format[i]); break;
 
-			default: buffer[0] = format[i]; buffer[1] = '\0';
+			default: length = date_spprintf(&buffer, 32, "%c", format[i]);
+					 break;
 		}
-		smart_str_appends(&string, buffer);
-		buffer[0] = '\0';
+		smart_str_appendl(&string, buffer, length);
+		if (!no_free) {
+			efree(buffer);
+		}
 	}
 
 	smart_str_0(&string);
+	date_free_locale_data(loc_dat);
 
 	if (localtime) {
 		timelib_time_offset_dtor(offset);
 	}
 
+	if (UG(unicode)) {
+		*return_len = string.len / 2;
+	} else {
+		*return_len = string.len;
+	}
 	return string.c;
 }
 
@@ -488,7 +597,8 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	char *string;
+	char           *string;
+	int             return_len;
 
 	t = timelib_time_ctor();
 
@@ -500,7 +610,7 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 		timelib_unixtime2gmt(t, ts);
 	}
 
-	string = date_format(format, format_len, t, localtime);
+	string = date_format(format, format_len, &return_len, t, localtime, 0);
 	
 	if (localtime) {
 		timelib_tzinfo_dtor(tzi);
@@ -1055,14 +1165,39 @@ PHP_FUNCTION(date_format)
 {
 	zval         *object;
 	php_date_obj *dateobj;
-	char         *format;
-	int           format_len;
+	char         *format, *str;
+	int           format_len, length;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &format, &format_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	RETURN_STRING(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime), 0);
+	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0);
+	if (UG(unicode)) {
+		RETURN_UNICODEL((UChar*) str, length, 0);
+	} else {
+		RETURN_STRINGL(str, length, 0);
+	}
+}
+
+PHP_FUNCTION(date_format_locale)
+{
+	zval         *object;
+	php_date_obj *dateobj;
+	char         *format, *str;
+	int           format_len, length;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &object, date_ce_date, &format, &format_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+
+	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 1);
+	if (UG(unicode)) {
+		RETURN_UNICODEL((UChar*)str, length, 0);
+	} else {
+		RETURN_STRINGL(str, length, 0);
+	}
 }
 
 PHP_FUNCTION(date_modify)
