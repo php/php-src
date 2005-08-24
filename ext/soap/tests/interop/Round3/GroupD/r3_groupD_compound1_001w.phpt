@@ -22,7 +22,7 @@ echo "ok\n";
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/xsd"><SOAP-ENV:Body><ns1:x_Person Name="Shane" Male="1"><ns1:Age>32</ns1:Age><ns1:ID>12345</ns1:ID></ns1:x_Person></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/xsd"><SOAP-ENV:Body><ns1:x_Person Name="Shane" Male="true"><ns1:Age>32</ns1:Age><ns1:ID>12345</ns1:ID></ns1:x_Person></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/xsd"><SOAP-ENV:Body><ns1:result_Person Name="Shane" Male="1"><ns1:Age>32</ns1:Age><ns1:ID>12345</ns1:ID></ns1:result_Person></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://soapinterop.org/xsd"><SOAP-ENV:Body><ns1:result_Person Name="Shane" Male="true"><ns1:Age>32</ns1:Age><ns1:ID>12345</ns1:ID></ns1:result_Person></SOAP-ENV:Body></SOAP-ENV:Envelope>
 ok
