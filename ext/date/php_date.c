@@ -441,7 +441,7 @@ static inline int date_spprintf(char **str, size_t size TSRMLS_DC, const char *f
 #define am_pm_lower_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_lower_names[s]
 #define am_pm_upper_full(s,l) l ? loc_dat->am_pm_name[s] : am_pm_upper_names[s]
 
-static char *date_format(char *format, int format_len, int *return_len, timelib_time *t, int localtime, int localized)
+static char *date_format(char *format, int format_len, int *return_len, timelib_time *t, int localtime, int localized TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, no_free, length;
@@ -610,7 +610,7 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 		timelib_unixtime2gmt(t, ts);
 	}
 
-	string = date_format(format, format_len, &return_len, t, localtime, 0);
+	string = date_format(format, format_len, &return_len, t, localtime, 0 TSRMLS_CC);
 	
 	if (localtime) {
 		timelib_tzinfo_dtor(tzi);
@@ -1172,7 +1172,7 @@ PHP_FUNCTION(date_format)
 		RETURN_FALSE;
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0);
+	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 0 TSRMLS_CC);
 	if (UG(unicode)) {
 		RETURN_UNICODEL((UChar*) str, length, 0);
 	} else {
@@ -1192,7 +1192,7 @@ PHP_FUNCTION(date_format_locale)
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 1);
+	str = date_format(format, format_len, &length, dateobj->time, dateobj->time->is_localtime, 1 TSRMLS_CC);
 	if (UG(unicode)) {
 		RETURN_UNICODEL((UChar*)str, length, 0);
 	} else {
