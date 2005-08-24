@@ -157,8 +157,8 @@ PHP_FUNCTION(class_implements)
 	spl_add_classes(&spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
 
 #define SPL_LIST_CLASSES(z_list, sub, allow, ce_flags) \
-	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ArrayIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingRecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
