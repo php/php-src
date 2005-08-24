@@ -1,3 +1,91 @@
+2005-08-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h:
+      Implement Unicode support for strncasecmp().
+
+    * unicode-progress.txt
+      unicode-todo.txt:
+      -** empty log message ***
+
+2005-08-23  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/strings/bug34214.phpt
+      ext/standard/tests/strings/bug34214.phpt:
+      
+      Test for bug #34214
+
+2005-08-23  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.c:
+      Damn.
+
+    * ZendEngine2/zend_operators.c:
+      - Rewrite zend_u_binary_strncmp() to work on codepoint level. Calling
+        u_strCompare() doesn't help because it assumes that the input lengths
+        specify the number of UChar's.
+      - Change zend_u_binary_strcmp() to use u_strCompare() (and it's fine to
+        use it here, since we work with whole strings here).
+
+    * ext/standard/var.c:
+      Fix verbosity for var_inspect().
+
+    * ZendEngine2/zend_operators.c:
+      This was so embarassingly silly.
+
+2005-08-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/pcre/pcrelib/pcre_dfa_exec.c:
+      removed unused vars
+
+2005-08-23  Dmitry Stogov  <dmitry@zend.com>
+
+    * unicode-progress.txt
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_exceptions.c
+      ext/standard/dir.c
+      ext/standard/dns.c
+      ext/standard/filestat.c
+      ext/standard/info.c
+      ext/standard/link.c
+      ext/standard/string.c
+      ext/standard/type.c
+      ext/standard/uniqid.c
+      ext/standard/tests/file/userdirstream.phpt
+      ext/standard/tests/strings/bug24098.phpt:
+      Unicode support
+
+    * ZendEngine2/zend_API.h
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/image.c
+      ext/standard/md5.c
+      ext/standard/string.c:
+      Unicode support cleanup
+
+    * NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/is_a.phpt:
+      Changed is_a() and is_subcalls_of() functions to not call __autoload() (in
+      the same way as "instanceof" operator).
+
+    * unicode-progress.txt
+      ZendEngine2/zend_builtin_functions.c:
+      Unicode support for strncasecmp()
+
+2005-08-23  Derick Rethans  <php@derickrethans.nl>
+
+    * main/spprintf.c:
+      - Fixed another little buglet in the spprintf() formatters.
+
 2005-08-22  Andrei Zmievski  <andrei@gravitonic.com>
 
     * ZendEngine2/zend_builtin_functions.c
