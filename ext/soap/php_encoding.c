@@ -835,9 +835,9 @@ static xmlNodePtr to_xml_bool(encodeTypePtr type, zval *data, int style, xmlNode
 	}
 
 	if (data->value.lval == 1) {
-		xmlNodeSetContent(ret, "1");
+		xmlNodeSetContent(ret, "true");
 	} else {
-		xmlNodeSetContent(ret, "0");
+		xmlNodeSetContent(ret, "false");
 	}
 
 	if (data == &tmp) {
@@ -1278,6 +1278,16 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 						xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
 						xmlSetNs(property, nsp);
 					}
+				}
+				return 1;
+			} else if (strict && model->u.element->nillable) {
+				property = xmlNewNode(NULL,model->u.element->name);
+				xmlAddChild(node, property);
+				if (style == SOAP_ENCODED) {
+					xmlSetProp(property, "xsi:nil", "1");
+				} else {
+					xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
+					xmlSetNsProp(property, xsi, "nil", "1");
 				}
 				return 1;
 			} else if (model->min_occurs == 0) {
