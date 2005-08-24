@@ -150,8 +150,8 @@ PHP_FUNCTION(class_implements)
 
 #define SPL_LIST_CLASSES(z_list, sub, allow, ce_flags) \
 	SPL_ADD_CLASS(AppendIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ArrayIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(BadFunctionCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(BadMethodCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
@@ -171,8 +171,8 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(NoRewindIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(Observer, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OuterIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(OutOfRangeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OutOfBoundsException, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(OutOfRangeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OverflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ParentIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RangeException, z_list, sub, allow, ce_flags); \
@@ -184,6 +184,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(Subject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
 /* {{{ proto array spl_classes()
  Return an array containing the names of all clsses and interfaces defined in SPL */
