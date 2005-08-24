@@ -2,6 +2,7 @@
 Bug #34087 (strtotime() does not work with date format "Y/m/d")
 --FILE--
 <?php
+date_default_timezone_set("UTC");
 echo "Y/m/d: ", strtotime("2005/8/12"), "\n";
 echo "Y-m-d: ", strtotime("2005-8-12");
 ?>
