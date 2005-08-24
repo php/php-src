@@ -894,9 +894,13 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 		/* Convert inline HTML blocks to the output encoding, but only if necessary. */
 		if (opline->extended_value &&
 			strcmp(ucnv_getName(ZEND_U_CONVERTER(UG(output_encoding_conv)), &status),
-				   ucnv_getName(ZEND_U_CONVERTER(UG(script_encoding_conv)), &status))) {
+				   EG(active_op_array)->script_encoding)) {
 			zval z_conv;
-			zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), ZEND_U_CONVERTER(UG(script_encoding_conv)), &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
+			UConverter *script_enc_conv = NULL;
+			if (zend_set_converter_encoding(&script_enc_conv, EG(active_op_array)->script_encoding) == FAILURE) {
+				zend_error(E_ERROR, "Unsupported encoding [%d]", EG(active_op_array)->script_encoding);
+			}
+			zend_convert_encodings(ZEND_U_CONVERTER(UG(output_encoding_conv)), script_enc_conv, &z_conv.value.str.val, &z_conv.value.str.len, z->value.str.val, z->value.str.len, &status);
 			z_conv.type = IS_BINARY;
 			if (U_SUCCESS(status)) {
 				zend_print_variable(&z_conv);
@@ -904,6 +908,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 				zend_error(E_WARNING, "Could not convert inline HTML for output");
 			}
 			zval_dtor(&z_conv);
+			ucnv_close(script_enc_conv);
 		} else {
 			zend_print_variable(z);
 		}

@@ -156,6 +156,7 @@ void init_compiler(TSRMLS_D)
 	zend_init_compiler_data_structures(TSRMLS_C);
 	zend_init_rsrc_list(TSRMLS_C);
 	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
+	zend_hash_init(&CG(script_encodings_table), 5, NULL, (dtor_func_t) free_estring, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 }
@@ -170,6 +171,7 @@ void shutdown_compiler(TSRMLS_D)
 	zend_stack_destroy(&CG(object_stack));
 	zend_stack_destroy(&CG(declare_stack));
 	zend_stack_destroy(&CG(list_stack));
+	zend_hash_destroy(&CG(script_encodings_table));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
 }
@@ -212,6 +214,34 @@ ZEND_API int zend_get_compiled_lineno(TSRMLS_D)
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D)
 {
 	return CG(in_compilation);
+}
+
+
+ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC)
+{
+	char **pp, *p;
+	int length = strlen(new_script_enc);
+
+	if (zend_hash_find(&CG(script_encodings_table), new_script_enc, length+1, (void **) &pp) == SUCCESS) {
+		CG(script_encoding) = *pp;
+		return *pp;
+	}
+	p = estrndup(new_script_enc, length);
+	zend_hash_update(&CG(script_encodings_table), new_script_enc, length+1, &p, sizeof(char *), (void **) &pp);
+	CG(script_encoding) = p;
+	return p;
+}
+
+
+ZEND_API void zend_restore_compiled_script_encoding(char *original_script_enc TSRMLS_DC)
+{
+	CG(script_encoding) = original_script_enc;
+}
+
+
+ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D)
+{
+	return CG(script_encoding);
 }
 
 
@@ -3764,14 +3794,30 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
 	} else if (UG(unicode) && ZEND_U_EQUAL(Z_TYPE(var->u.constant), Z_UNIVAL(var->u.constant), Z_UNILEN(var->u.constant), "encoding", sizeof("encoding")-1)) {
+		UErrorCode status = U_ZERO_ERROR;
 
 		if (val->u.constant.type == IS_CONSTANT) {
 			zend_error(E_COMPILE_ERROR, "Cannot use constants as encoding");
+		}
+		/*
+		 * Check that the pragma comes before any opcodes. If the compilation
+		 * got as far as this, the previous portion of the script must have been
+		 * parseable according to the .ini script_encoding setting. We still
+		 * want to tell them to put declare() at the top.
+		 */
+		if (CG(active_op_array)->last > 0) {
+			zend_error(E_COMPILE_ERROR, "Encoding declaration pragma has to be the very first statement in the script");
 		}
 		convert_to_string(&val->u.constant);
 		if (zend_prepare_scanner_converters(Z_STRVAL(val->u.constant), 1 TSRMLS_CC) == FAILURE) {
 			zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", Z_STRVAL(val->u.constant));
 		}
+		zend_set_compiled_script_encoding((char*)ucnv_getName(LANG_SCNG(output_conv), &status) TSRMLS_CC);
+		/*
+		 * Because we require declare(encoding=...) to be the very first thing,
+		 * we can safely cache the script encoding in the op array here.
+		 */
+		CG(active_op_array)->script_encoding = zend_get_compiled_script_encoding(TSRMLS_C);
 		efree(val->u.constant.value.str.val);
 	}
 	zval_dtor(&var->u.constant);

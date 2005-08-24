@@ -77,6 +77,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
+	op_array->script_encoding = zend_get_compiled_script_encoding(TSRMLS_C);
 	op_array->doc_comment = NULL;
 	op_array->doc_comment_len = 0;
 

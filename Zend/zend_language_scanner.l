@@ -209,6 +209,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	BEGIN(lex_state->state);
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
+	zend_restore_compiled_script_encoding(lex_state->script_encoding TSRMLS_CC);
 
 	if (SCNG(input_conv)) {
 		ucnv_close(SCNG(input_conv));
@@ -758,6 +759,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	}
 
 	zend_set_compiled_filename(file_path TSRMLS_CC);
+	zend_set_compiled_script_encoding((char*)ucnv_getName(SCNG(output_conv), &status) TSRMLS_CC);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -875,6 +877,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
 	const char *encoding;
+	UErrorCode status = U_ZERO_ERROR;
 
 	if (Z_TYPE_P(str) == IS_UNICODE) {
 		convert_to_string_with_converter(str, UG(utf8_conv));
@@ -895,6 +898,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	yy_scan_buffer(str->value.str.val, str->value.str.len+2 TSRMLS_CC);
 
 	zend_set_compiled_filename(filename TSRMLS_CC);
+	zend_set_compiled_script_encoding((char*)ucnv_getName(SCNG(output_conv), &status) TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	return SUCCESS;
@@ -1937,7 +1941,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (func_name) {
 			len += u_strlen((UChar*)func_name);
 		} else {
-			func_name = EMPTY_STR;
+			func_name = (char*)EMPTY_STR;
 		}
 		zendlval->value.str.len = len;
 		Z_USTRVAL_P(zendlval) = eumalloc(len+1);
