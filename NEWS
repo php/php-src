@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2005, PHP 5.1 Release Candidate 2
+- Upgraded PCRE library to version 6.2. (Andrei)
 - Removed XML_RPC pear package from distribution and made ext/xmlrpc mandatory
   for pear. (Rasmus)
 - Updated bundled libraries in Windows distribution. (Edin)
