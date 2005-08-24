@@ -483,55 +483,55 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 		no_free = 0;
 		switch (format[i]) {
 			/* day */
-			case 'd': length = date_spprintf(&buffer, 32, "%02d", (int) t->d); break;
-			case 'D': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, dayname_short(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
-			case 'j': length = date_spprintf(&buffer, 32, "%d", (int) t->d); break;
-			case 'l': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, dayname_full(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
-			case 'S': length = date_spprintf(&buffer, 32, "%s", english_suffix(t->d)); break;
-			case 'w': length = date_spprintf(&buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
-			case 'z': length = date_spprintf(&buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+			case 'd': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->d); break;
+			case 'D': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, dayname_short(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
+			case 'j': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->d); break;
+			case 'l': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, dayname_full(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
+			case 'S': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", english_suffix(t->d)); break;
+			case 'w': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
-			case 'W': length = date_spprintf(&buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
-			case 'o': length = date_spprintf(&buffer, 32, "%d", (int) isoyear); break; /* iso year */
+			case 'W': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) isoweek); break; /* iso weeknr */
+			case 'o': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
-			case 'F': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, monthname_full(t->m - 1, localized)); break;
-			case 'm': length = date_spprintf(&buffer, 32, "%02d", (int) t->m); break;
-			case 'M': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, monthname_short(t->m - 1, localized)); break;
-			case 'n': length = date_spprintf(&buffer, 32, "%d", (int) t->m); break;
-			case 't': length = date_spprintf(&buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+			case 'F': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, monthname_full(t->m - 1, localized)); break;
+			case 'm': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->m); break;
+			case 'M': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, monthname_short(t->m - 1, localized)); break;
+			case 'n': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->m); break;
+			case 't': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
 
 			/* year */
-			case 'L': length = date_spprintf(&buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': length = date_spprintf(&buffer, 32, "%02d", (int) t->y % 100); break;
-			case 'Y': length = date_spprintf(&buffer, 32, "%04d", (int) t->y); break;
+			case 'L': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", timelib_is_leap((int) t->y)); break;
+			case 'y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->y % 100); break;
+			case 'Y': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%04d", (int) t->y); break;
 
 			/* time */
-			case 'a': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
-			case 'A': length = date_spprintf(&buffer, 32, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_upper_full(t->h >= 12 ? 1 : 0, localized)); break;
-			case 'B': length = date_spprintf(&buffer, 32, "[B unimplemented]"); break;
-			case 'g': length = date_spprintf(&buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'G': length = date_spprintf(&buffer, 32, "%d", (int) t->h); break;
-			case 'h': length = date_spprintf(&buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'H': length = date_spprintf(&buffer, 32, "%02d", (int) t->h); break;
-			case 'i': length = date_spprintf(&buffer, 32, "%02d", (int) t->i); break;
-			case 's': length = date_spprintf(&buffer, 32, "%02d", (int) t->s); break;
+			case 'a': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_lower_full(t->h >= 12 ? 1 : 0, localized)); break;
+			case 'A': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, am_pm_upper_full(t->h >= 12 ? 1 : 0, localized)); break;
+			case 'B': length = date_spprintf(&buffer, 32 TSRMLS_CC, "[B unimplemented]"); break;
+			case 'g': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) t->h); break;
+			case 'h': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->h); break;
+			case 'i': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->i); break;
+			case 's': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%02d", (int) t->s); break;
 
 			/* timezone */
-			case 'I': length = date_spprintf(&buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
-			case 'O': length = date_spprintf(&buffer, 32, "%c%02d%02d",
+			case 'I': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", localtime ? offset->is_dst : 0); break;
+			case 'O': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c%02d%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': length = date_spprintf(&buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
-			case 'e': length = date_spprintf(&buffer, 32, "%s", localtime ? t->tz_info->name : "UTC"); break;
-			case 'Z': length = date_spprintf(&buffer, 32, "%d", localtime ? offset->offset : 0); break;
+			case 'T': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'e': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", localtime ? t->tz_info->name : "UTC"); break;
+			case 'Z': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = date_spprintf(&buffer, 32, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (int) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -539,7 +539,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = date_spprintf(&buffer, 32, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                day_short_names[timelib_day_of_week(t->y, t->m, t->d)],
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -548,11 +548,11 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': length = date_spprintf(&buffer, 32, "%lld", (timelib_sll) t->sse); break;
+			case 'U': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%lld", (timelib_sll) t->sse); break;
 
-			case '\\': if (i < format_len) i++; length = date_spprintf(&buffer, 32, "%c", format[i]); break;
+			case '\\': if (i < format_len) i++; length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c", format[i]); break;
 
-			default: length = date_spprintf(&buffer, 32, "%c", format[i]);
+			default: length = date_spprintf(&buffer, 32 TSRMLS_CC, "%c", format[i]);
 					 break;
 		}
 		smart_str_appendl(&string, buffer, length);
