@@ -133,6 +133,9 @@ struct _zend_compiler_globals {
 
 	zend_uchar literal_type;
 
+	HashTable script_encodings_table;
+	char *script_encoding;
+
 #ifdef ZTS
 	HashTable *global_function_table;
 	HashTable *global_class_table;

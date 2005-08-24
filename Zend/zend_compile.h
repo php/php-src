@@ -209,6 +209,7 @@ struct _zend_op_array {
 	zend_bool uses_this;
 
 	char *filename;
+	char *script_encoding;
 	zend_uint line_start;
 	zend_uint line_end;
 	char *doc_comment;
@@ -329,6 +330,9 @@ ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TS
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API int zend_get_scanned_file_offset(TSRMLS_D);
+ZEND_API char *zend_set_compiled_script_encoding(char *new_script_enc TSRMLS_DC);
+ZEND_API void zend_restore_compiled_script_encoding(char *original_script_enc TSRMLS_DC);
+ZEND_API char *zend_get_compiled_script_encoding(TSRMLS_D);
 
 ZEND_API char* zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len);
 

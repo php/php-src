@@ -28,6 +28,7 @@ typedef struct _zend_lex_state {
 	zend_file_handle *in;
 	uint lineno;
 	char *filename;
+	char *script_encoding;
 
 	UConverter *input_conv;     /* converter for flex input */
 	UConverter *output_conv;    /* converter for data from flex output */
