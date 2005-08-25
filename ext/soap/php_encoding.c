@@ -1162,10 +1162,11 @@ static zval *to_zval_object(encodeTypePtr type, xmlNodePtr data)
 	xmlNodePtr trav;
 	sdlPtr sdl;
 	sdlTypePtr sdlType = type->sdl_type;
-	zend_class_entry *ce = ZEND_STANDARD_CLASS_DEF_PTR;
+	zend_class_entry *ce;
 	zend_bool redo_any = 0;
 	TSRMLS_FETCH();
 
+	ce = ZEND_STANDARD_CLASS_DEF_PTR;
 	if (SOAP_GLOBAL(class_map) && type->type_str) {
 		zval             **classname;
 		zend_class_entry  *tmp;
