@@ -1108,6 +1108,7 @@ static void unicode_globals_ctor(zend_unicode_globals *unicode_globals TSRMLS_DC
 	unicode_globals->output_encoding_conv = NULL;
 	unicode_globals->script_encoding_conv = NULL;
 	unicode_globals->http_input_encoding_conv = NULL;
+	unicode_globals->subst_char_len = 0;
 	zend_set_converter_encoding(&unicode_globals->utf8_conv, "UTF-8");
 	unicode_globals->from_u_error_mode = ZEND_FROM_U_ERROR_SUBST;
 
