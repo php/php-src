@@ -831,7 +831,8 @@ iso8601nocolon   = hour24lz minutelz secondlz;
 /* Date formats */
 americanshort    = month "/" day;
 american         = month "/" day "/" year;
-iso8601dateslash = year4 "/" month "/" daylz "/"?;
+iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
+dateslash        = year4 "/" month "/" day;
 gnudateshort     = year "-" month "-" day;
 iso8601date      = year4 "-" monthlz "-" daylz;
 pointeddate      = day "." month "." year;
@@ -1063,9 +1064,9 @@ relativetext = (reltextnumber space? reltextunit)+;
 		return TIMELIB_AMERICAN;
 	}
 
-	iso8601date | iso8601dateslash
+	iso8601date | iso8601dateslash | dateslash
 	{
-		DEBUG_OUTPUT("iso8601date | iso8601dateslash");
+		DEBUG_OUTPUT("iso8601date | iso8601dateslash | dateslash");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		s->time->y = timelib_get_nr((char **) &ptr, 4);

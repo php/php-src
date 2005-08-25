@@ -87,6 +87,6 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
-PHPAPI char *php_format_date(char *format, int format_len, long ts, int localtime TSRMLS_DC);
+PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
 
 #endif /* PHP_DATE_H */
