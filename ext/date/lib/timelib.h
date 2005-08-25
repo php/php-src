@@ -34,7 +34,7 @@
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(strcasecmp)
 #define strcasecmp stricmp
 #endif
 
