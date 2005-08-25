@@ -727,8 +727,24 @@ static void zend_u_function_dtor(zend_function *function)
 	TSRMLS_FETCH();
 
 	destroy_zend_function(function TSRMLS_CC);
-	if (function->type == ZEND_INTERNAL_FUNCTION && function->common.function_name) {
-		free(function->common.function_name);
+	if (function->type == ZEND_INTERNAL_FUNCTION) {
+		if (function->common.function_name) {
+			free(function->common.function_name);
+		}
+		if (function->common.arg_info) {
+			int n = function->common.num_args;
+
+			while (n > 0) {
+		  	--n;
+			  if (function->common.arg_info[n].name) {
+			  	free(function->common.arg_info[n].name);
+			  }
+			  if (function->common.arg_info[n].class_name) {
+					free(function->common.arg_info[n].class_name);
+				}
+		  }
+			free(function->common.arg_info);
+		}
 	}
 }
 
