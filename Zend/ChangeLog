@@ -1,3 +1,31 @@
+2005-08-24  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_opcode.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - Require declare(encoding=...) to come before any opcodes. Read source
+        comments for more info.
+      - Op arrays now know which script encoding they were compiled from.
+      - Use this information to intelligently convert inline HTML blocks to
+        the output encoding. Currently it opens and closes a new converter for
+        each block, but we can optimize it.
+
+2005-08-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      Fixed return-by-reference from internal functions
+
 2005-08-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_builtin_functions.c
