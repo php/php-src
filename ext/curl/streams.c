@@ -361,7 +361,7 @@ static php_stream_wrapper_ops php_curl_wrapper_ops = {
 	NULL, /* stream_stat: curl streams know how to stat themselves */
 	NULL, /* stat url */
 	NULL, /* opendir */
-	NULL, /* label */
+	"cURL", /* label */
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
