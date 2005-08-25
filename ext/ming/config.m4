@@ -9,7 +9,7 @@ if test "$PHP_MING" != "no"; then
   AC_CHECK_LIB(m, sin)
 
   for i in $PHP_MING /usr/local /usr; do
-    if test -f $i/lib/libming.$SHLIB_SUFFIX_NAME -o -f $i/lib/libming.a; then
+    if test -f $i/$PHP_LIBDIR/libming.$SHLIB_SUFFIX_NAME -o -f $i/lib/libming.a; then
       MING_DIR=$i
       break
     fi
@@ -34,11 +34,11 @@ if test "$PHP_MING" != "no"; then
   ],[
     AC_MSG_ERROR([Ming library 0.2a or greater required.])
   ],[
-    -L$MING_DIR/lib
+    -L$MING_DIR/$PHP_LIBDIR
   ])
   
   PHP_ADD_INCLUDE($MING_INC_DIR)
-  PHP_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/lib, MING_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/$PHP_LIBDIR, MING_SHARED_LIBADD)
 
   AC_MSG_CHECKING([for destroySWFBlock])
   AC_TRY_RUN([
