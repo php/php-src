@@ -253,14 +253,26 @@ static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_
 int php_libxml_streams_IO_match_wrapper(const char *filename)
 {
 	char *resolved_path;
-	int retval;
+	int retval, isescaped=0;
+	xmlURI *uri;
 
 	TSRMLS_FETCH();
 
 	if (zend_is_executing(TSRMLS_C)) {
-		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
+		uri = xmlParseURI((xmlChar *)filename);
+		if (uri && (uri->scheme == NULL || (xmlStrncmp(uri->scheme, "file", 4) == 0))) {
+			resolved_path = xmlURIUnescapeString(filename, 0, NULL);
+			isescaped = 1;
+		} else {
+			resolved_path = (char *)filename;
+		}
+
+		if (uri) {
+			xmlFreeURI(uri);
+		}
+
 		retval = php_stream_locate_url_wrapper(resolved_path, NULL, 0 TSRMLS_CC) ? 1 : 0;
-		if (resolved_path) {
+		if (resolved_path && isescaped) {
 			xmlFree(resolved_path);
 		}
 		return retval;
@@ -275,9 +287,22 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 	php_stream_wrapper *wrapper = NULL;
 	char *resolved_path, *path_to_open = NULL;
 	void *ret_val = NULL;
+	int isescaped=0;
+	xmlURI *uri;
 
 	TSRMLS_FETCH();
-	resolved_path = xmlURIUnescapeString(filename, 0, NULL);
+
+	uri = xmlParseURI((xmlChar *)filename);
+	if (uri && (uri->scheme == NULL || (xmlStrncmp(uri->scheme, "file", 4) == 0))) {
+		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
+		isescaped = 1;
+	} else {
+		resolved_path = (char *)filename;
+	}
+
+	if (uri) {
+		xmlFreeURI(uri);
+	}
 
 	if (resolved_path == NULL) {
 		return NULL;
@@ -292,7 +317,9 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL TSRMLS_CC) == -1) {
-			xmlFree(resolved_path);
+			if (isescaped) {
+				xmlFree(resolved_path);
+			}
 			return NULL;
 		}
 	}
@@ -302,7 +329,9 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 	}
 
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
-	xmlFree(resolved_path);
+	if (isescaped) {
+		xmlFree(resolved_path);
+	}
 	return ret_val;
 }
 
