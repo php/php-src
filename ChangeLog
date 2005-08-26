@@ -1,3 +1,48 @@
+2005-08-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/ming/config.m4:
+      - MFH Fixed bug #34257 (lib64 not handled correctly in ming extension).
+
+    * ext/ming/config.m4:
+      - Bugfix #34257 lib64 not handled correctly in ming extension
+
+2005-08-25  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      configure.in
+      main/php_version.h:
+      Revert to -dev
+
+    * (PHP_5_0)
+      ZendEngine2/zend.h:
+      Bump version
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Roll RC2
+
+2005-08-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c:
+      Fixed memory leaks
+
+2005-08-25  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/curl/streams.c:
+      MFB
+
+    * (PHP_5_1)
+      ext/curl/streams.c:
+      Fix crash with e.g. stream_get_meta_data()
+
+2005-08-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c:
+      Fixed access to uninitialized variables
+
 2005-08-24  Andrei Zmievski  <andrei@gravitonic.com>
 
     * unicode-todo.txt:

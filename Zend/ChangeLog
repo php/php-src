@@ -1,3 +1,17 @@
+2005-08-25  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      Bump version
+
+2005-08-25  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c:
+      Fixed memory leaks
+
+    * zend.c:
+      Fixed access to uninitialized variables
+
 2005-08-24  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_compile.c
