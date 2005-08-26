@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitriy, et al)
-- Changed "instanceof" operator, is_a() and is_subcalls_of() functions to not
+- Changed "instanceof" operator, is_a() and is_subclass_of() functions to not
   call __autoload(). (Dmitry)
 - cURL improvements: (Ilia)
   . Added curl_setopt_array() which allows setting of multiple cURL options.
@@ -11,3 +11,5 @@ PHP                                                                        NEWS
   components. (Ilia)
 - Added an optional parameter to strstr() and stristr() for retrieval of either
   the part of haystack before or after first occurence of needle. (Johannes)
+- Fixed a bug where stream_get_meta_data() did not return the "uri" element for
+  files opened with tmpname(). (Derick)
