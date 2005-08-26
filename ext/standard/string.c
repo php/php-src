@@ -3222,7 +3222,9 @@ PHP_FUNCTION(strrev)
 {
 	zval **str;
 	char *s, *e, *n, *p;
-	UChar *u_s, *u_e, *u_n, *u_p;
+	int32_t i, x1, x2;
+	UChar32 ch;
+	UChar *u_s, *u_n, *u_p;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3236,15 +3238,22 @@ PHP_FUNCTION(strrev)
 		u_n = eumalloc(Z_USTRLEN_PP(str)+1);
 		u_p = u_n;
 		u_s = Z_USTRVAL_PP(str);
-		u_e = u_s + Z_USTRLEN_PP(str) - 1;
 
-		while (u_e >= u_s) {
-			if (U16_IS_TRAIL(*u_e)) {
-				*u_p = *(u_e-1);
-				*(u_p+1) = *u_e;
-				u_e -= 2; u_p += 2;
+		i = Z_USTRLEN_PP(str);
+		while (i > 0) {
+			U16_PREV(u_s, 0, i, ch);
+			if (u_getCombiningClass(ch) == 0) {
+				u_p += zend_codepoint_to_uchar(ch, u_p);
 			} else {
-				*u_p++ = *u_e--;
+				x2 = i;
+				do {
+					U16_PREV(u_s, 0, i, ch);
+				} while (u_getCombiningClass(ch) != 0);
+				x1 = i;
+				while (x1 <= x2) {
+					U16_NEXT(u_s, x1, Z_USTRLEN_PP(str), ch);
+					u_p += zend_codepoint_to_uchar(ch, u_p);
+				}
 			}
 		}
 		*u_p = 0;
