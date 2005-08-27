@@ -1,3 +1,37 @@
+2005-08-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/ming/config.m4:
+      - Check for static libs, too
+
+2005-08-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS
+      main/streams/plain_wrapper.c:
+      - MFH: Fixed a bug where stream_get_meta_data() did not return the "uri"
+        element for files opened with tmpname().
+
+    * NEWS
+      main/streams/plain_wrapper.c:
+      - Fixed a bug where stream_get_meta_data() did not return the "uri" element
+      for
+        files opened with tmpname().
+
+2005-08-26  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Updated strrev() to handle base+combining sequences
+
+2005-08-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/base64.c
+      ext/standard/base64.c:
+      MFH: Fixed bug #34214 (base64_decode() does not properly ignore whitespace)
+
+    * (PHP_5_1)
+      ext/standard/base64.c:
+      Fixed bug #34214 (base64_decode() does not properly ignore whitespace)
+
 2005-08-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
