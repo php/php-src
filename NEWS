@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34284 (CLI phpinfo showing html on _SERVER["argv"]). (Jani)
 - Fixed bug #34257 (lib64 not handled correctly in ming extension). (Marcus)
 - Fixed bug #34221 (Compiling xmlrpc as shared fails other parts). (Jani)
 - Fixed bug #34191 (ob_gzhandler does not enforce trailing \0). (Ilia)
