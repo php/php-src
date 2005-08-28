@@ -15,8 +15,8 @@ if test -z "$PHP_LIBXML_DIR"; then
   [  --with-libxml-dir=DIR     XMLRPC-EPI: libxml2 install prefix], no, no)
 fi
 
-PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
-[  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
+PHP_ARG_WITH(libexpat-dir, libexpat dir for XMLRPC-EPI,
+[  --with-libexpat-dir=DIR   XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
 
 PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
 [  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI],no,no)
@@ -28,9 +28,9 @@ if test "$PHP_XMLRPC" != "no"; then
   AC_DEFINE(HAVE_XMLRPC,1,[ ])
 
   dnl
-  dnl Default to libxml2 if --with-expat-dir is not used
+  dnl Default to libxml2 if --with-libexpat-dir is not used
   dnl
-  if test "$PHP_EXPAT_DIR" = "no"; then
+  if test "$PHP_LIBEXPAT_DIR" = "no"; then
 
     if test "$PHP_LIBXML" = "no"; then
       AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --enable-libxml])
@@ -46,7 +46,7 @@ if test "$PHP_XMLRPC" != "no"; then
     ])
   else
     testval=no
-    for i in $PHP_EXPAT_DIR $XMLRPC_DIR /usr/local /usr; do
+    for i in $PHP_LIBEXPAT_DIR $XMLRPC_DIR /usr/local /usr; do
       if test -f $i/$PHP_LIBDIR/libexpat.a -o -f $i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME; then
         AC_DEFINE(HAVE_LIBEXPAT,1,[ ])
         PHP_ADD_LIBRARY_WITH_PATH(expat, $i/$PHP_LIBDIR, XMLRPC_SHARED_LIBADD)
@@ -57,7 +57,7 @@ if test "$PHP_XMLRPC" != "no"; then
     done
 
     if test "$testval" = "no"; then
-      AC_MSG_ERROR([XML-RPC support requires libexpat. Use --with-expat-dir=<DIR> (deprecated!)])
+      AC_MSG_ERROR([XML-RPC support requires libexpat. Use --with-libexpat-dir=<DIR> (deprecated!)])
     fi
   fi
 
