@@ -984,10 +984,10 @@ static int do_meta_command(char *zLine, struct callback_data *p){
       p->showHeader = 1;
       memset(p->colWidth,0,ArraySize(p->colWidth));
       p->colWidth[0] = 4;
-      p->colWidth[1] = 12;
+      p->colWidth[1] = 14;
       p->colWidth[2] = 10;
       p->colWidth[3] = 10;
-      p->colWidth[4] = 35;
+      p->colWidth[4] = 33;
     }else if (p->explainPrev.valid) {
       p->explainPrev.valid = 0;
       p->mode = p->explainPrev.mode;
@@ -1093,6 +1093,7 @@ static int do_meta_command(char *zLine, struct callback_data *p){
           }
         }
       }
+      *z = 0;
       if( i+1!=nCol ){
         fprintf(stderr,"%s line %d: expected %d columns of data but found %d\n",
            zFile, lineno, nCol, i+1);

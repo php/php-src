@@ -26,7 +26,6 @@ const char *sqlite3TestErrorName(int rc){
   switch( rc ){
     case SQLITE_OK:         zName = "SQLITE_OK";          break;
     case SQLITE_ERROR:      zName = "SQLITE_ERROR";       break;
-    case SQLITE_INTERNAL:   zName = "SQLITE_INTERNAL";    break;
     case SQLITE_PERM:       zName = "SQLITE_PERM";        break;
     case SQLITE_ABORT:      zName = "SQLITE_ABORT";       break;
     case SQLITE_BUSY:       zName = "SQLITE_BUSY";        break;
@@ -36,13 +35,11 @@ const char *sqlite3TestErrorName(int rc){
     case SQLITE_INTERRUPT:  zName = "SQLITE_INTERRUPT";   break;
     case SQLITE_IOERR:      zName = "SQLITE_IOERR";       break;
     case SQLITE_CORRUPT:    zName = "SQLITE_CORRUPT";     break;
-    case SQLITE_NOTFOUND:   zName = "SQLITE_NOTFOUND";    break;
     case SQLITE_FULL:       zName = "SQLITE_FULL";        break;
     case SQLITE_CANTOPEN:   zName = "SQLITE_CANTOPEN";    break;
     case SQLITE_PROTOCOL:   zName = "SQLITE_PROTOCOL";    break;
     case SQLITE_EMPTY:      zName = "SQLITE_EMPTY";       break;
     case SQLITE_SCHEMA:     zName = "SQLITE_SCHEMA";      break;
-    case SQLITE_TOOBIG:     zName = "SQLITE_TOOBIG";      break;
     case SQLITE_CONSTRAINT: zName = "SQLITE_CONSTRAINT";  break;
     case SQLITE_MISMATCH:   zName = "SQLITE_MISMATCH";    break;
     case SQLITE_MISUSE:     zName = "SQLITE_MISUSE";      break;
@@ -2759,10 +2756,22 @@ static void set_options(Tcl_Interp *interp){
   Tcl_SetVar2(interp, "sqlite_options", "rowid32", "0", TCL_GLOBAL_ONLY);
 #endif
 
+#ifdef SQLITE_CASE_SENSITIVE_LIKE
+  Tcl_SetVar2(interp, "sqlite_options","casesensitivelike","1",TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options","casesensitivelike","0",TCL_GLOBAL_ONLY);
+#endif
+
 #ifdef SQLITE_OMIT_ALTERTABLE
   Tcl_SetVar2(interp, "sqlite_options", "altertable", "0", TCL_GLOBAL_ONLY);
 #else
   Tcl_SetVar2(interp, "sqlite_options", "altertable", "1", TCL_GLOBAL_ONLY);
+#endif
+
+#ifdef SQLITE_OMIT_ANALYZE
+  Tcl_SetVar2(interp, "sqlite_options", "analyze", "0", TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options", "analyze", "1", TCL_GLOBAL_ONLY);
 #endif
 
 #ifdef SQLITE_OMIT_AUTHORIZATION
@@ -2788,10 +2797,22 @@ static void set_options(Tcl_Interp *interp){
   Tcl_SetVar2(interp,"sqlite_options","default_autovacuum","1",TCL_GLOBAL_ONLY);
 #endif
 
+#ifdef SQLITE_OMIT_BETWEEN_OPTIMIZATION
+  Tcl_SetVar2(interp, "sqlite_options", "between_opt", "0", TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options", "between_opt", "1", TCL_GLOBAL_ONLY);
+#endif
+
 #ifdef SQLITE_OMIT_BLOB_LITERAL
   Tcl_SetVar2(interp, "sqlite_options", "bloblit", "0", TCL_GLOBAL_ONLY);
 #else
   Tcl_SetVar2(interp, "sqlite_options", "bloblit", "1", TCL_GLOBAL_ONLY);
+#endif
+
+#ifdef SQLITE_OMIT_CAST
+  Tcl_SetVar2(interp, "sqlite_options", "cast", "0", TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options", "cast", "1", TCL_GLOBAL_ONLY);
 #endif
 
 #ifdef SQLITE_OMIT_COMPLETE
@@ -2854,10 +2875,22 @@ static void set_options(Tcl_Interp *interp){
   Tcl_SetVar2(interp, "sqlite_options", "integrityck", "1", TCL_GLOBAL_ONLY);
 #endif
 
+#ifdef SQLITE_OMIT_LIKE_OPTIMIZATION
+  Tcl_SetVar2(interp, "sqlite_options", "like_opt", "0", TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options", "like_opt", "1", TCL_GLOBAL_ONLY);
+#endif
+
 #ifdef SQLITE_OMIT_MEMORYDB
   Tcl_SetVar2(interp, "sqlite_options", "memorydb", "0", TCL_GLOBAL_ONLY);
 #else
   Tcl_SetVar2(interp, "sqlite_options", "memorydb", "1", TCL_GLOBAL_ONLY);
+#endif
+
+#ifdef SQLITE_OMIT_OR_OPTIMIZATION
+  Tcl_SetVar2(interp, "sqlite_options", "or_opt", "0", TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options", "or_opt", "1", TCL_GLOBAL_ONLY);
 #endif
 
 #ifdef SQLITE_OMIT_PAGER_PRAGMAS
@@ -3073,8 +3106,17 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
   static int bitmask_size = sizeof(Bitmask)*8;
   int i;
   extern int sqlite3_os_trace;
+  extern int sqlite3_where_trace;
   extern int sqlite3_sync_count, sqlite3_fullsync_count;
   extern int sqlite3_opentemp_count;
+  extern int sqlite3_memUsed;
+  extern int sqlite3_memMax;
+  extern char sqlite3_query_plan[];
+  extern int sqlite3_like_count;
+#ifdef SQLITE_DEBUG
+  extern int sqlite3_vdbe_addop_trace;
+#endif
+  static char *query_plan = sqlite3_query_plan;
 
   for(i=0; i<sizeof(aCmd)/sizeof(aCmd[0]); i++){
     Tcl_CreateCommand(interp, aCmd[i].zName, aCmd[i].xProc, 0, 0);
@@ -3087,6 +3129,8 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
       (char*)&sqlite3_search_count, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_sort_count", 
       (char*)&sqlite3_sort_count, TCL_LINK_INT);
+  Tcl_LinkVar(interp, "sqlite_like_count", 
+      (char*)&sqlite3_like_count, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_interrupt_count", 
       (char*)&sqlite3_interrupt_count, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_open_file_count", 
@@ -3095,6 +3139,20 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
       (char*)&sqlite3_current_time, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_os_trace",
       (char*)&sqlite3_os_trace, TCL_LINK_INT);
+  Tcl_LinkVar(interp, "sqlite_where_trace",
+      (char*)&sqlite3_where_trace, TCL_LINK_INT);
+#ifdef SQLITE_DEBUG
+  Tcl_LinkVar(interp, "sqlite_addop_trace",
+      (char*)&sqlite3_vdbe_addop_trace, TCL_LINK_INT);
+#endif
+#ifdef SQLITE_MEMDEBUG
+  Tcl_LinkVar(interp, "sqlite_memused",
+      (char*)&sqlite3_memUsed, TCL_LINK_INT | TCL_LINK_READ_ONLY);
+  Tcl_LinkVar(interp, "sqlite_memmax",
+      (char*)&sqlite3_memMax, TCL_LINK_INT | TCL_LINK_READ_ONLY);
+#endif
+  Tcl_LinkVar(interp, "sqlite_query_plan",
+      (char*)&query_plan, TCL_LINK_STRING|TCL_LINK_READ_ONLY);
 #ifndef SQLITE_OMIT_DISKIO
   Tcl_LinkVar(interp, "sqlite_opentemp_count",
       (char*)&sqlite3_opentemp_count, TCL_LINK_INT);

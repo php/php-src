@@ -174,7 +174,7 @@ int sqlite3VdbeMemStringify(Mem *pMem, int enc){
   ** FIX ME: It would be better if sqlite3_snprintf() could do UTF-16.
   */
   if( fg & MEM_Real ){
-    sqlite3_snprintf(NBFS, z, "%.15g", pMem->r);
+    sqlite3_snprintf(NBFS, z, "%!.15g", pMem->r);
   }else{
     assert( fg & MEM_Int );
     sqlite3_snprintf(NBFS, z, "%lld", pMem->i);
@@ -256,12 +256,14 @@ double sqlite3VdbeRealValue(Mem *pMem){
   }else if( pMem->flags & MEM_Int ){
     return (double)pMem->i;
   }else if( pMem->flags & (MEM_Str|MEM_Blob) ){
+    double val = 0.0;
     if( sqlite3VdbeChangeEncoding(pMem, SQLITE_UTF8)
        || sqlite3VdbeMemNulTerminate(pMem) ){
       return SQLITE_NOMEM;
     }
     assert( pMem->z );
-    return sqlite3AtoF(pMem->z, 0);
+    sqlite3AtoF(pMem->z, &val);
+    return val;
   }else{
     return 0.0;
   }
@@ -406,6 +408,7 @@ int sqlite3VdbeMemSetStr(
   switch( enc ){
     case 0:
       pMem->flags |= MEM_Blob;
+      pMem->enc = SQLITE_UTF8;
       break;
 
     case SQLITE_UTF8:
@@ -666,9 +669,9 @@ void sqlite3VdbeMemSanity(Mem *pMem, u8 db_enc){
   /* MEM_Null excludes all other types */
   assert( (pMem->flags&(MEM_Str|MEM_Int|MEM_Real|MEM_Blob))==0
           || (pMem->flags&MEM_Null)==0 );
-  if( (pMem->flags & (MEM_Int|MEM_Real))==(MEM_Int|MEM_Real) ){
-    assert( pMem->r==pMem->i );
-  }
+  /* If the MEM is both real and integer, the values are equal */
+  assert( (pMem->flags & (MEM_Int|MEM_Real))!=(MEM_Int|MEM_Real) 
+          || pMem->r==pMem->i );
 }
 #endif
 
