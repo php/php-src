@@ -1,3 +1,8 @@
+2005-08-27  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode impl of substr_count()
+
 2005-08-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/ming/config.m4:
