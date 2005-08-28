@@ -501,6 +501,42 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 }
 /* }}} end dom_element_get_attribute_ns */
 
+static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
+    xmlNsPtr def;
+    xmlChar prefix[50];
+    int counter = 1;
+
+	if ((tree == NULL) || (ns == NULL) || (ns->type != XML_NAMESPACE_DECL)) {
+		return NULL;
+	}
+
+	/* Code taken from libxml2 (2.6.20) xmlNewReconciliedNs
+	 *
+	 * Find a close prefix which is not already in use.
+	 * Let's strip namespace prefixes longer than 20 chars !
+	 */
+	if (ns->prefix == NULL)
+		snprintf((char *) prefix, sizeof(prefix), "default");
+	else
+		snprintf((char *) prefix, sizeof(prefix), "%.20s", (char *)ns->prefix);
+
+	def = xmlSearchNs(doc, tree, prefix);
+	while (def != NULL) {
+		if (counter > 1000) return(NULL);
+		if (ns->prefix == NULL)
+			snprintf((char *) prefix, sizeof(prefix), "default%d", counter++);
+		else
+			snprintf((char *) prefix, sizeof(prefix), "%.20s%d", 
+			(char *)ns->prefix, counter++);
+		def = xmlSearchNs(doc, tree, prefix);
+	}
+
+	/*
+	 * OK, now we are ready to create a new one.
+	 */
+	def = xmlNewNs(tree, ns->href, prefix);
+	return(def);
+}
 
 /* {{{ proto void dom_element_set_attribute_ns(string namespaceURI, string qualifiedName, string value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
@@ -550,8 +586,21 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 				nsptr = dom_get_nsdecl(elemp, localname);
 			} else {
 				nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
-				while (nsptr && nsptr->prefix == NULL) {
-					nsptr = nsptr->next;
+				if (nsptr && nsptr->prefix == NULL) {
+					xmlNsPtr tmpnsptr;
+
+					tmpnsptr = nsptr->next;
+					while (tmpnsptr) {
+						if ((tmpnsptr->prefix != NULL) && (tmpnsptr->href != NULL) && 
+							(xmlStrEqual(tmpnsptr->href, (xmlChar *) uri))) {
+							nsptr = tmpnsptr;
+							break;
+						}
+						tmpnsptr = tmpnsptr->next;
+					}
+					if (tmpnsptr == NULL) {
+						nsptr = _dom_new_reconNs(elemp->doc, elemp, nsptr);
+					}
 				}
 			}
 
