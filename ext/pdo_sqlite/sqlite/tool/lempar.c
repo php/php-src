@@ -364,11 +364,11 @@ static int yy_find_shift_action(
 ** return YY_NO_ACTION.
 */
 static int yy_find_reduce_action(
-  yyParser *pParser,        /* The parser */
+  int stateno,              /* Current state number */
   int iLookAhead            /* The look-ahead token */
 ){
   int i;
-  int stateno = pParser->yystack[pParser->yyidx].stateno;
+  /* int stateno = pParser->yystack[pParser->yyidx].stateno; */
  
   i = yy_reduce_ofst[stateno];
   if( i==YY_REDUCE_USE_DFLT ){
@@ -462,6 +462,18 @@ static void yy_reduce(
   }
 #endif /* NDEBUG */
 
+#ifndef NDEBUG
+  /* Silence complaints from purify about yygotominor being uninitialized
+  ** in some cases when it is copied into the stack after the following
+  ** switch.  yygotominor is uninitialized when a rule reduces that does
+  ** not set the value of its left-hand side nonterminal.  Leaving the
+  ** value of the nonterminal uninitialized is utterly harmless as long
+  ** as the value is never used.  So really the only thing this code
+  ** accomplishes is to quieten purify.  
+  */
+  memset(&yygotominor, 0, sizeof(yygotominor));
+#endif
+
   switch( yyruleno ){
   /* Beginning here are the reduction cases.  A typical example
   ** follows:
@@ -476,9 +488,24 @@ static void yy_reduce(
   yygoto = yyRuleInfo[yyruleno].lhs;
   yysize = yyRuleInfo[yyruleno].nrhs;
   yypParser->yyidx -= yysize;
-  yyact = yy_find_reduce_action(yypParser,yygoto);
+  yyact = yy_find_reduce_action(yymsp[-yysize].stateno,yygoto);
   if( yyact < YYNSTATE ){
-    yy_shift(yypParser,yyact,yygoto,&yygotominor);
+#ifdef NDEBUG
+    /* If we are not debugging and the reduce action popped at least
+    ** one element off the stack, then we can push the new element back
+    ** onto the stack here, and skip the stack overflow test in yy_shift().
+    ** That gives a significant speed improvement. */
+    if( yysize ){
+      yypParser->yyidx++;
+      yymsp -= yysize-1;
+      yymsp->stateno = yyact;
+      yymsp->major = yygoto;
+      yymsp->minor = yygotominor;
+    }else
+#endif
+    {
+      yy_shift(yypParser,yyact,yygoto,&yygotominor);
+    }
   }else if( yyact == YYNSTATE + YYNRULE + 1 ){
     yy_accept(yypParser);
   }
@@ -570,7 +597,7 @@ void Parse(
   /* (re)initialize the parser, if necessary */
   yypParser = (yyParser*)yyp;
   if( yypParser->yyidx<0 ){
-    if( yymajor==0 ) return;
+    /* if( yymajor==0 ) return; // not sure why this was here... */
     yypParser->yyidx = 0;
     yypParser->yyerrcnt = -1;
     yypParser->yystack[0].stateno = 0;

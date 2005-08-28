@@ -138,9 +138,9 @@ AC_SUBST(VERSION)
 RELEASE=`cat $srcdir/VERSION`
 echo "Release set to $RELEASE"
 AC_SUBST(RELEASE)
-VERSION_NUMBER=`cat $srcdir/VERSION  \
+VERSION_NUMBER=[`cat $srcdir/VERSION  \
                            | sed 's/[^0-9]/ /g' \
-                | awk '{printf "%d%03d%03d",$1,$2,$3}'`
+                | awk '{printf "%d%03d%03d",$1,$2,$3}'`]
 echo "Version number set to $VERSION_NUMBER"
 AC_SUBST(VERSION_NUMBER)
 

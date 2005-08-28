@@ -146,8 +146,8 @@ void sqlite3Attach(
       db->aDb[i].pBt = 0;
     }
     sqlite3ResetInternalSchema(db, 0);
-    if( 0==pParse->nErr ){
-      pParse->nErr++;
+    assert( pParse->nErr>0 );  /* Always set by sqlite3ReadSchema() */
+    if( pParse->rc==SQLITE_OK ){
       pParse->rc = SQLITE_ERROR;
     }
   }

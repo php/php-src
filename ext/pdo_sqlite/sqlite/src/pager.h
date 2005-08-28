@@ -100,6 +100,7 @@ void sqlite3pager_set_safety_level(Pager*,int);
 const char *sqlite3pager_filename(Pager*);
 const char *sqlite3pager_dirname(Pager*);
 const char *sqlite3pager_journalname(Pager*);
+int sqlite3pager_nosync(Pager*);
 int sqlite3pager_rename(Pager*, const char *zNewName);
 void sqlite3pager_set_codec(Pager*,void(*)(void*,void*,Pgno,int),void*);
 int sqlite3pager_movepage(Pager*,void*,Pgno);

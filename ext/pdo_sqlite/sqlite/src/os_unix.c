@@ -57,24 +57,35 @@
 #endif
 
 /*
-** Macros used to determine whether or not to use threads.  The
-** SQLITE_UNIX_THREADS macro is defined if we are synchronizing for
-** Posix threads and SQLITE_W32_THREADS is defined if we are
-** synchronizing using Win32 threads.
-*/
-#if defined(THREADSAFE) && THREADSAFE
-# include <pthread.h>
-# define SQLITE_UNIX_THREADS 1
-#endif
-
-
-/*
 ** Include code that is common to all os_*.c files
 */
 #include "os_common.h"
 
-#if defined(THREADSAFE) && THREADSAFE && defined(__linux__)
-#define getpid pthread_self
+/*
+** The threadid macro resolves to the thread-id or to 0.  Used for
+** testing and debugging only.
+*/
+#ifdef SQLITE_UNIX_THREADS
+#define threadid pthread_self()
+#else
+#define threadid 0
+#endif
+
+/*
+** Set or check the OsFile.tid field.  This field is set when an OsFile
+** is first opened.  All subsequent uses of the OsFile verify that the
+** same thread is operating on the OsFile.  Some operating systems do
+** not allow locks to be overridden by other threads and that restriction
+** means that sqlite3* database handles cannot be moved from one thread
+** to another.  This logic makes sure a user does not try to do that
+** by mistake.
+*/
+#ifdef SQLITE_UNIX_THREADS
+# define SET_THREADID(X)   X->tid = pthread_self()
+# define CHECK_THREADID(X) (!pthread_equal(X->tid, pthread_self()))
+#else
+# define SET_THREADID(X)
+# define CHECK_THREADID(X) 0
 #endif
 
 /*
@@ -264,6 +275,65 @@ struct threadTestData {
   int result;            /* Result of the locking operation */
 };
 
+#ifdef SQLITE_LOCK_TRACE
+/*
+** Print out information about all locking operations.
+**
+** This routine is used for troubleshooting locks on multithreaded
+** platforms.  Enable by compiling with the -DSQLITE_LOCK_TRACE
+** command-line option on the compiler.  This code is normally
+** turnned off.
+*/
+static int lockTrace(int fd, int op, struct flock *p){
+  char *zOpName, *zType;
+  int s;
+  int savedErrno;
+  if( op==F_GETLK ){
+    zOpName = "GETLK";
+  }else if( op==F_SETLK ){
+    zOpName = "SETLK";
+  }else{
+    s = fcntl(fd, op, p);
+    sqlite3DebugPrintf("fcntl unknown %d %d %d\n", fd, op, s);
+    return s;
+  }
+  if( p->l_type==F_RDLCK ){
+    zType = "RDLCK";
+  }else if( p->l_type==F_WRLCK ){
+    zType = "WRLCK";
+  }else if( p->l_type==F_UNLCK ){
+    zType = "UNLCK";
+  }else{
+    assert( 0 );
+  }
+  assert( p->l_whence==SEEK_SET );
+  s = fcntl(fd, op, p);
+  savedErrno = errno;
+  sqlite3DebugPrintf("fcntl %d %d %s %s %d %d %d %d\n",
+     threadid, fd, zOpName, zType, (int)p->l_start, (int)p->l_len,
+     (int)p->l_pid, s);
+  if( s && op==F_SETLK && (p->l_type==F_RDLCK || p->l_type==F_WRLCK) ){
+    struct flock l2;
+    l2 = *p;
+    fcntl(fd, F_GETLK, &l2);
+    if( l2.l_type==F_RDLCK ){
+      zType = "RDLCK";
+    }else if( l2.l_type==F_WRLCK ){
+      zType = "WRLCK";
+    }else if( l2.l_type==F_UNLCK ){
+      zType = "UNLCK";
+    }else{
+      assert( 0 );
+    }
+    sqlite3DebugPrintf("fcntl-failure-reason: %s %d %d %d\n",
+       zType, (int)l2.l_start, (int)l2.l_len, (int)l2.l_pid);
+  }
+  errno = savedErrno;
+  return s;
+}
+#define fcntl lockTrace
+#endif /* SQLITE_LOCK_TRACE */
+
 /*
 ** The testThreadLockingBehavior() routine launches two separate
 ** threads on this routine.  This routine attempts to lock a file
@@ -443,6 +513,7 @@ int sqlite3OsOpenReadWrite(
   int rc;
   assert( !id->isOpen );
   id->dirfd = -1;
+  SET_THREADID(id);
   id->h = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY,
                           SQLITE_DEFAULT_FILE_PERMISSIONS);
   if( id->h<0 ){
@@ -494,9 +565,11 @@ int sqlite3OsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
   if( access(zFilename, 0)==0 ){
     return SQLITE_CANTOPEN;
   }
+  SET_THREADID(id);
   id->dirfd = -1;
   id->h = open(zFilename,
-                O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE|O_BINARY, 0600);
+                O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE|O_BINARY,
+                SQLITE_DEFAULT_FILE_PERMISSIONS);
   if( id->h<0 ){
     return SQLITE_CANTOPEN;
   }
@@ -528,6 +601,7 @@ int sqlite3OsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 int sqlite3OsOpenReadOnly(const char *zFilename, OsFile *id){
   int rc;
   assert( !id->isOpen );
+  SET_THREADID(id);
   id->dirfd = -1;
   id->h = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
   if( id->h<0 ){
@@ -572,6 +646,7 @@ int sqlite3OsOpenDirectory(
     ** open. */
     return SQLITE_CANTOPEN;
   }
+  SET_THREADID(id);
   assert( id->dirfd<0 );
   id->dirfd = open(zDirname, O_RDONLY|O_BINARY, 0);
   if( id->dirfd<0 ){
@@ -839,6 +914,7 @@ int sqlite3OsCheckReservedLock(OsFile *id){
   int r = 0;
 
   assert( id->isOpen );
+  if( CHECK_THREADID(id) ) return SQLITE_MISUSE;
   sqlite3OsEnterMutex(); /* Needed because id->pLock is shared across threads */
 
   /* Check if a thread in this process holds such a lock */
@@ -956,6 +1032,7 @@ int sqlite3OsLock(OsFile *id, int locktype){
   TRACE7("LOCK    %d %s was %s(%s,%d) pid=%d\n", id->h, locktypeName(locktype), 
       locktypeName(id->locktype), locktypeName(pLock->locktype), pLock->cnt
       ,getpid() );
+  if( CHECK_THREADID(id) ) return SQLITE_MISUSE;
 
   /* If there is already a lock of this type or more restrictive on the
   ** OsFile, do nothing. Don't use the end_lock: exit path, as
@@ -1002,6 +1079,7 @@ int sqlite3OsLock(OsFile *id, int locktype){
   }
 
   lock.l_len = 1L;
+
   lock.l_whence = SEEK_SET;
 
   /* A PENDING lock is needed before acquiring a SHARED lock and before
@@ -1037,7 +1115,10 @@ int sqlite3OsLock(OsFile *id, int locktype){
     lock.l_start = PENDING_BYTE;
     lock.l_len = 1L;
     lock.l_type = F_UNLCK;
-    fcntl(id->h, F_SETLK, &lock);
+    if( fcntl(id->h, F_SETLK, &lock)!=0 ){
+      rc = SQLITE_IOERR;  /* This should never happen */
+      goto end_lock;
+    }
     if( s ){
       rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
@@ -1107,6 +1188,7 @@ int sqlite3OsUnlock(OsFile *id, int locktype){
   assert( id->isOpen );
   TRACE7("UNLOCK  %d %d was %d(%d,%d) pid=%d\n", id->h, locktype, id->locktype, 
       id->pLock->locktype, id->pLock->cnt, getpid());
+  if( CHECK_THREADID(id) ) return SQLITE_MISUSE;
 
   assert( locktype<=SHARED_LOCK );
   if( id->locktype<=locktype ){
@@ -1131,8 +1213,11 @@ int sqlite3OsUnlock(OsFile *id, int locktype){
     lock.l_whence = SEEK_SET;
     lock.l_start = PENDING_BYTE;
     lock.l_len = 2L;  assert( PENDING_BYTE+1==RESERVED_BYTE );
-    fcntl(id->h, F_SETLK, &lock);
-    pLock->locktype = SHARED_LOCK;
+    if( fcntl(id->h, F_SETLK, &lock)==0 ){
+      pLock->locktype = SHARED_LOCK;
+    }else{
+      rc = SQLITE_IOERR;  /* This should never happen */
+    }
   }
   if( locktype==NO_LOCK ){
     struct openCnt *pOpen;
@@ -1146,8 +1231,11 @@ int sqlite3OsUnlock(OsFile *id, int locktype){
       lock.l_type = F_UNLCK;
       lock.l_whence = SEEK_SET;
       lock.l_start = lock.l_len = 0L;
-      fcntl(id->h, F_SETLK, &lock);
-      pLock->locktype = NO_LOCK;
+      if( fcntl(id->h, F_SETLK, &lock)==0 ){
+        pLock->locktype = NO_LOCK;
+      }else{
+        rc = SQLITE_IOERR;  /* This should never happen */
+      }
     }
 
     /* Decrement the count of locks against this same file.  When the
@@ -1177,6 +1265,7 @@ int sqlite3OsUnlock(OsFile *id, int locktype){
 */
 int sqlite3OsClose(OsFile *id){
   if( !id->isOpen ) return SQLITE_OK;
+  if( CHECK_THREADID(id) ) return SQLITE_MISUSE;
   sqlite3OsUnlock(id, NO_LOCK);
   if( id->dirfd>=0 ) close(id->dirfd);
   id->dirfd = -1;
@@ -1189,13 +1278,13 @@ int sqlite3OsClose(OsFile *id){
     */
     int *aNew;
     struct openCnt *pOpen = id->pOpen;
-    pOpen->nPending++;
-    aNew = sqliteRealloc( pOpen->aPending, pOpen->nPending*sizeof(int) );
+    aNew = sqliteRealloc( pOpen->aPending, (pOpen->nPending+1)*sizeof(int) );
     if( aNew==0 ){
       /* If a malloc fails, just leak the file descriptor */
     }else{
       pOpen->aPending = aNew;
-      pOpen->aPending[pOpen->nPending-1] = id->h;
+      pOpen->aPending[pOpen->nPending] = id->h;
+      pOpen->nPending++;
     }
   }else{
     /* There are no outstanding locks so we can close the file immediately */
