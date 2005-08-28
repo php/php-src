@@ -94,13 +94,13 @@ LIBTCL = /home/drh/tcltk/8.4linux/libtcl8.4g.a -lm -ldl
 
 #### Compiler options needed for programs that use the readline() library.
 #
-#READLINE_FLAGS =
-READLINE_FLAGS = -DHAVE_READLINE=1 -I/usr/include/readline
+READLINE_FLAGS =
+#READLINE_FLAGS = -DHAVE_READLINE=1 -I/usr/include/readline
 
 #### Linker options needed by programs using readline() must link against.
 #
-#LIBREADLINE =
-LIBREADLINE = -static -lreadline -ltermcap
+LIBREADLINE =
+#LIBREADLINE = -static -lreadline -ltermcap
 
 #### Should the database engine assume text is coded as UTF-8 or iso8859?
 #

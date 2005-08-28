@@ -158,7 +158,7 @@ int sqlite3_exec(
 */
 #define SQLITE_OK           0   /* Successful result */
 #define SQLITE_ERROR        1   /* SQL error or missing database */
-#define SQLITE_INTERNAL     2   /* An internal logic error in SQLite */
+#define SQLITE_INTERNAL     2   /* NOT USED. Internal logic error in SQLite */
 #define SQLITE_PERM         3   /* Access permission denied */
 #define SQLITE_ABORT        4   /* Callback routine requested an abort */
 #define SQLITE_BUSY         5   /* The database file is locked */
@@ -168,13 +168,13 @@ int sqlite3_exec(
 #define SQLITE_INTERRUPT    9   /* Operation terminated by sqlite3_interrupt()*/
 #define SQLITE_IOERR       10   /* Some kind of disk I/O error occurred */
 #define SQLITE_CORRUPT     11   /* The database disk image is malformed */
-#define SQLITE_NOTFOUND    12   /* (Internal Only) Table or record not found */
+#define SQLITE_NOTFOUND    12   /* NOT USED. Table or record not found */
 #define SQLITE_FULL        13   /* Insertion failed because database is full */
 #define SQLITE_CANTOPEN    14   /* Unable to open the database file */
 #define SQLITE_PROTOCOL    15   /* Database lock protocol error */
 #define SQLITE_EMPTY       16   /* Database is empty */
 #define SQLITE_SCHEMA      17   /* The database schema changed */
-#define SQLITE_TOOBIG      18   /* Too much data for one row of a table */
+#define SQLITE_TOOBIG      18   /* NOT USED. Too much data for one row */
 #define SQLITE_CONSTRAINT  19   /* Abort due to contraint violation */
 #define SQLITE_MISMATCH    20   /* Data type mismatch */
 #define SQLITE_MISUSE      21   /* Library used incorrectly */
@@ -452,6 +452,7 @@ int sqlite3_set_authorizer(
 #define SQLITE_DETACH               25   /* Database Name   NULL            */
 #define SQLITE_ALTER_TABLE          26   /* Database Name   Table Name      */
 #define SQLITE_REINDEX              27   /* Index Name      NULL            */
+#define SQLITE_ANALYZE              28   /* Table Name      NULL            */
 
 
 /*
@@ -1002,10 +1003,9 @@ int sqlite3_value_type(sqlite3_value*);
 void *sqlite3_aggregate_context(sqlite3_context*, int nBytes);
 
 /*
-** The pUserData parameter to the sqlite3_create_function() and
-** sqlite3_create_aggregate() routines used to register user functions
-** is available to the implementation of the function using this
-** call.
+** The pUserData parameter to the sqlite3_create_function()
+** routine used to register user functions is available to
+** the implementation of the function using this call.
 */
 void *sqlite3_user_data(sqlite3_context*);
 

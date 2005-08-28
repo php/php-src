@@ -47,7 +47,11 @@ void sqlite3ColumnDefault(Vdbe *v, Table *pTab, int i){
     u8 enc = sqlite3VdbeDb(v)->enc;
     Column *pCol = &pTab->aCol[i];
     sqlite3ValueFromExpr(pCol->pDflt, enc, pCol->affinity, &pValue);
-    sqlite3VdbeChangeP3(v, -1, (const char *)pValue, P3_MEM);
+    if( pValue ){
+      sqlite3VdbeChangeP3(v, -1, (const char *)pValue, P3_MEM);
+    }else{
+      VdbeComment((v, "# %s.%s", pTab->zName, pCol->zName));
+    }
   }
 }
 
@@ -273,7 +277,7 @@ void sqlite3Update(
   /* Remember the index of every item to be updated.
   */
   sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
-  sqlite3VdbeAddOp(v, OP_ListWrite, 0, 0);
+  sqlite3VdbeAddOp(v, OP_FifoWrite, 0, 0);
 
   /* End the database scan loop.
   */
@@ -295,8 +299,7 @@ void sqlite3Update(
 
     /* The top of the update loop for when there are triggers.
     */
-    sqlite3VdbeAddOp(v, OP_ListRewind, 0, 0);
-    addr = sqlite3VdbeAddOp(v, OP_ListRead, 0, 0);
+    addr = sqlite3VdbeAddOp(v, OP_FifoRead, 0, 0);
 
     if( !isView ){
       sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
@@ -389,8 +392,7 @@ void sqlite3Update(
     ** So make the cursor point at the old record.
     */
     if( !triggers_exist ){
-      sqlite3VdbeAddOp(v, OP_ListRewind, 0, 0);
-      addr = sqlite3VdbeAddOp(v, OP_ListRead, 0, 0);
+      addr = sqlite3VdbeAddOp(v, OP_FifoRead, 0, 0);
       sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
     }
     sqlite3VdbeAddOp(v, OP_NotExists, iCur, addr);
@@ -468,7 +470,6 @@ void sqlite3Update(
   */
   sqlite3VdbeAddOp(v, OP_Goto, 0, addr);
   sqlite3VdbeChangeP2(v, addr, sqlite3VdbeCurrentAddr(v));
-  sqlite3VdbeAddOp(v, OP_ListReset, 0, 0);
 
   /* Close all tables if there were no FOR EACH ROW triggers */
   if( !triggers_exist ){

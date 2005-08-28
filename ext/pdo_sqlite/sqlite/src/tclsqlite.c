@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #define NUM_PREPARED_STMTS 10
 #define MAX_PREPARED_STMTS 100
@@ -42,7 +43,9 @@
 typedef struct SqlFunc SqlFunc;
 struct SqlFunc {
   Tcl_Interp *interp;   /* The TCL interpret to execute the function */
-  char *zScript;        /* The script to be run */
+  Tcl_Obj *pScript;     /* The Tcl_Obj representation of the script */
+  int useEvalObjv;      /* True if it is safe to use Tcl_EvalObjv */
+  char *zName;          /* Name of this function */
   SqlFunc *pNext;       /* Next function on the list of them all */
 };
 
@@ -54,7 +57,7 @@ typedef struct SqlCollate SqlCollate;
 struct SqlCollate {
   Tcl_Interp *interp;   /* The TCL interpret to execute the function */
   char *zScript;        /* The script to be run */
-  SqlCollate *pNext;       /* Next function on the list of them all */
+  SqlCollate *pNext;    /* Next function on the list of them all */
 };
 
 /*
@@ -76,23 +79,75 @@ struct SqlPreparedStmt {
 */
 typedef struct SqliteDb SqliteDb;
 struct SqliteDb {
-  sqlite3 *db;          /* The "real" database structure */
-  Tcl_Interp *interp;   /* The interpreter used for this database */
-  char *zBusy;          /* The busy callback routine */
-  char *zCommit;        /* The commit hook callback routine */
-  char *zTrace;         /* The trace callback routine */
-  char *zProgress;      /* The progress callback routine */
-  char *zAuth;          /* The authorization callback routine */
-  char *zNull;          /* Text to substitute for an SQL NULL value */
-  SqlFunc *pFunc;       /* List of SQL functions */
-  SqlCollate *pCollate; /* List of SQL collation functions */
-  int rc;               /* Return code of most recent sqlite3_exec() */
-  Tcl_Obj *pCollateNeeded;  /* Collation needed script */
+  sqlite3 *db;               /* The "real" database structure */
+  Tcl_Interp *interp;        /* The interpreter used for this database */
+  char *zBusy;               /* The busy callback routine */
+  char *zCommit;             /* The commit hook callback routine */
+  char *zTrace;              /* The trace callback routine */
+  char *zProgress;           /* The progress callback routine */
+  char *zAuth;               /* The authorization callback routine */
+  char *zNull;               /* Text to substitute for an SQL NULL value */
+  SqlFunc *pFunc;            /* List of SQL functions */
+  SqlCollate *pCollate;      /* List of SQL collation functions */
+  int rc;                    /* Return code of most recent sqlite3_exec() */
+  Tcl_Obj *pCollateNeeded;   /* Collation needed script */
   SqlPreparedStmt *stmtList; /* List of prepared statements*/
   SqlPreparedStmt *stmtLast; /* Last statement in the list */
   int maxStmt;               /* The next maximum number of stmtList */
   int nStmt;                 /* Number of statements in stmtList */
 };
+
+/*
+** Look at the script prefix in pCmd.  We will be executing this script
+** after first appending one or more arguments.  This routine analyzes
+** the script to see if it is safe to use Tcl_EvalObjv() on the script
+** rather than the more general Tcl_EvalEx().  Tcl_EvalObjv() is much
+** faster.
+**
+** Scripts that are safe to use with Tcl_EvalObjv() consists of a
+** command name followed by zero or more arguments with no [...] or $
+** or {...} or ; to be seen anywhere.  Most callback scripts consist
+** of just a single procedure name and they meet this requirement.
+*/
+static int safeToUseEvalObjv(Tcl_Interp *interp, Tcl_Obj *pCmd){
+  /* We could try to do something with Tcl_Parse().  But we will instead
+  ** just do a search for forbidden characters.  If any of the forbidden
+  ** characters appear in pCmd, we will report the string as unsafe.
+  */
+  const char *z;
+  int n;
+  z = Tcl_GetStringFromObj(pCmd, &n);
+  while( n-- > 0 ){
+    int c = *(z++);
+    if( c=='$' || c=='[' || c==';' ) return 0;
+  }
+  return 1;
+}
+
+/*
+** Find an SqlFunc structure with the given name.  Or create a new
+** one if an existing one cannot be found.  Return a pointer to the
+** structure.
+*/
+static SqlFunc *findSqlFunc(SqliteDb *pDb, const char *zName){
+  SqlFunc *p, *pNew;
+  int i;
+  pNew = (SqlFunc*)Tcl_Alloc( sizeof(*pNew) + strlen(zName) + 1 );
+  pNew->zName = (char*)&pNew[1];
+  for(i=0; zName[i]; i++){ pNew->zName[i] = tolower(zName[i]); }
+  pNew->zName[i] = 0;
+  for(p=pDb->pFunc; p; p=p->pNext){ 
+    if( strcmp(p->zName, pNew->zName)==0 ){
+      Tcl_Free((char*)pNew);
+      return p;
+    }
+  }
+  pNew->interp = pDb->interp;
+  pNew->pScript = 0;
+  pNew->pNext = pDb->pFunc;
+  pDb->pFunc = pNew;
+  return pNew;
+}
 
 /*
 ** Finalize and free a list of prepared statements
@@ -121,6 +176,7 @@ static void DbDeleteCmd(void *db){
   while( pDb->pFunc ){
     SqlFunc *pFunc = pDb->pFunc;
     pDb->pFunc = pFunc->pNext;
+    Tcl_DecrRefCount(pFunc->pScript);
     Tcl_Free((char*)pFunc);
   }
   while( pDb->pCollate ){
@@ -151,16 +207,9 @@ static int DbBusyHandler(void *cd, int nTries){
   SqliteDb *pDb = (SqliteDb*)cd;
   int rc;
   char zVal[30];
-  char *zCmd;
-  Tcl_DString cmd;
 
-  Tcl_DStringInit(&cmd);
-  Tcl_DStringAppend(&cmd, pDb->zBusy, -1);
   sprintf(zVal, "%d", nTries);
-  Tcl_DStringAppendElement(&cmd, zVal);
-  zCmd = Tcl_DStringValue(&cmd);
-  rc = Tcl_Eval(pDb->interp, zCmd);
-  Tcl_DStringFree(&cmd);
+  rc = Tcl_VarEval(pDb->interp, pDb->zBusy, " ", zVal, (char*)0);
   if( rc!=TCL_OK || atoi(Tcl_GetStringResult(pDb->interp)) ){
     return 0;
   }
@@ -247,7 +296,7 @@ static int tclSqlCollate(
   Tcl_IncrRefCount(pCmd);
   Tcl_ListObjAppendElement(p->interp, pCmd, Tcl_NewStringObj(zA, nA));
   Tcl_ListObjAppendElement(p->interp, pCmd, Tcl_NewStringObj(zB, nB));
-  Tcl_EvalObjEx(p->interp, pCmd, 0);
+  Tcl_EvalObjEx(p->interp, pCmd, TCL_EVAL_DIRECT);
   Tcl_DecrRefCount(pCmd);
   return (atoi(Tcl_GetStringResult(p->interp)));
 }
@@ -258,22 +307,88 @@ static int tclSqlCollate(
 */
 static void tclSqlFunc(sqlite3_context *context, int argc, sqlite3_value**argv){
   SqlFunc *p = sqlite3_user_data(context);
-  Tcl_DString cmd;
+  Tcl_Obj *pCmd;
   int i;
   int rc;
 
-  Tcl_DStringInit(&cmd);
-  Tcl_DStringAppend(&cmd, p->zScript, -1);
-  for(i=0; i<argc; i++){
-    if( SQLITE_NULL==sqlite3_value_type(argv[i]) ){
-      Tcl_DStringAppendElement(&cmd, "");
-    }else{
-      Tcl_DStringAppendElement(&cmd, sqlite3_value_text(argv[i]));
+  if( argc==0 ){
+    /* If there are no arguments to the function, call Tcl_EvalObjEx on the
+    ** script object directly.  This allows the TCL compiler to generate
+    ** bytecode for the command on the first invocation and thus make
+    ** subsequent invocations much faster. */
+    pCmd = p->pScript;
+    Tcl_IncrRefCount(pCmd);
+    rc = Tcl_EvalObjEx(p->interp, pCmd, 0);
+    Tcl_DecrRefCount(pCmd);
+  }else{
+    /* If there are arguments to the function, make a shallow copy of the
+    ** script object, lappend the arguments, then evaluate the copy.
+    **
+    ** By "shallow" copy, we mean a only the outer list Tcl_Obj is duplicated.
+    ** The new Tcl_Obj contains pointers to the original list elements. 
+    ** That way, when Tcl_EvalObjv() is run and shimmers the first element
+    ** of the list to tclCmdNameType, that alternate representation will
+    ** be preserved and reused on the next invocation.
+    */
+    Tcl_Obj **aArg;
+    int nArg;
+    if( Tcl_ListObjGetElements(p->interp, p->pScript, &nArg, &aArg) ){
+      sqlite3_result_error(context, Tcl_GetStringResult(p->interp), -1); 
+      return;
+    }     
+    pCmd = Tcl_NewListObj(nArg, aArg);
+    Tcl_IncrRefCount(pCmd);
+    for(i=0; i<argc; i++){
+      sqlite3_value *pIn = argv[i];
+      Tcl_Obj *pVal;
+            
+      /* Set pVal to contain the i'th column of this row. */
+      switch( sqlite3_value_type(pIn) ){
+        case SQLITE_BLOB: {
+          int bytes = sqlite3_value_bytes(pIn);
+          pVal = Tcl_NewByteArrayObj(sqlite3_value_blob(pIn), bytes);
+          break;
+        }
+        case SQLITE_INTEGER: {
+          sqlite_int64 v = sqlite3_value_int64(pIn);
+          if( v>=-2147483647 && v<=2147483647 ){
+            pVal = Tcl_NewIntObj(v);
+          }else{
+            pVal = Tcl_NewWideIntObj(v);
+          }
+          break;
+        }
+        case SQLITE_FLOAT: {
+          double r = sqlite3_value_double(pIn);
+          pVal = Tcl_NewDoubleObj(r);
+          break;
+        }
+        case SQLITE_NULL: {
+          pVal = Tcl_NewStringObj("", 0);
+          break;
+        }
+        default: {
+          int bytes = sqlite3_value_bytes(pIn);
+          pVal = Tcl_NewStringObj(sqlite3_value_text(pIn), bytes);
+          break;
+        }
+      }
+      rc = Tcl_ListObjAppendElement(p->interp, pCmd, pVal);
+      if( rc ){
+        Tcl_DecrRefCount(pCmd);
+        sqlite3_result_error(context, Tcl_GetStringResult(p->interp), -1); 
+        return;
+      }
     }
+    if( !p->useEvalObjv ){
+      /* Tcl_EvalObjEx() will automatically call Tcl_EvalObjv() if pCmd
+      ** is a list without a string representation.  To prevent this from
+      ** happening, make sure pCmd has a valid string representation */
+      Tcl_GetString(pCmd);
+    }
+    rc = Tcl_EvalObjEx(p->interp, pCmd, TCL_EVAL_DIRECT);
+    Tcl_DecrRefCount(pCmd);
   }
-  rc = Tcl_EvalEx(p->interp, Tcl_DStringValue(&cmd), Tcl_DStringLength(&cmd),
-                  TCL_EVAL_DIRECT);
-  Tcl_DStringFree(&cmd);
 
   if( rc && rc!=TCL_RETURN ){
     sqlite3_result_error(context, Tcl_GetStringResult(p->interp), -1); 
@@ -283,7 +398,9 @@ static void tclSqlFunc(sqlite3_context *context, int argc, sqlite3_value**argv){
     u8 *data;
     char *zType = pVar->typePtr ? pVar->typePtr->name : "";
     char c = zType[0];
-    if( c=='b' && strcmp(zType,"bytearray")==0 ){
+    if( c=='b' && strcmp(zType,"bytearray")==0 && pVar->bytes==0 ){
+      /* Only return a BLOB type if the Tcl variable is a bytearray and
+      ** has no string representation. */
       data = Tcl_GetByteArrayFromObj(pVar, &n);
       sqlite3_result_blob(context, data, n, SQLITE_TRANSIENT);
     }else if( (c=='b' && strcmp(zType,"boolean")==0) ||
@@ -294,6 +411,10 @@ static void tclSqlFunc(sqlite3_context *context, int argc, sqlite3_value**argv){
       double r;
       Tcl_GetDoubleFromObj(0, pVar, &r);
       sqlite3_result_double(context, r);
+    }else if( c=='w' && strcmp(zType,"wideInt")==0 ){
+      Tcl_WideInt v;
+      Tcl_GetWideIntFromObj(0, pVar, &v);
+      sqlite3_result_int64(context, v);
     }else{
       data = Tcl_GetStringFromObj(pVar, &n);
       sqlite3_result_text(context, data, n, SQLITE_TRANSIENT);
@@ -351,6 +472,7 @@ static int auth_callback(
     case SQLITE_DETACH            : zCode="SQLITE_DETACH"; break;
     case SQLITE_ALTER_TABLE       : zCode="SQLITE_ALTER_TABLE"; break;
     case SQLITE_REINDEX           : zCode="SQLITE_REINDEX"; break;
+    case SQLITE_ANALYZE           : zCode="SQLITE_ANALYZE"; break;
     default                       : zCode="????"; break;
   }
   Tcl_DStringInit(&str);
@@ -469,8 +591,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     "function",           "last_insert_rowid", "nullvalue",
     "onecolumn",          "progress",          "rekey",
     "timeout",            "total_changes",     "trace",
-    "version",
-    0                    
+    "transaction",        "version",           0
   };
   enum DB_enum {
     DB_AUTHORIZER,        DB_BUSY,             DB_CACHE,
@@ -480,7 +601,7 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     DB_FUNCTION,          DB_LAST_INSERT_ROWID,DB_NULLVALUE,
     DB_ONECOLUMN,         DB_PROGRESS,         DB_REKEY,
     DB_TIMEOUT,           DB_TOTAL_CHANGES,    DB_TRACE,
-    DB_VERSION
+    DB_TRANSACTION,       DB_VERSION,          
   };
   /* don't leave trailing commas on DB_enum, it confuses the AIX xlc compiler */
 
@@ -924,7 +1045,9 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             u8 *data;
             char *zType = pVar->typePtr ? pVar->typePtr->name : "";
             char c = zType[0];
-            if( c=='b' && strcmp(zType,"bytearray")==0 ){
+            if( c=='b' && strcmp(zType,"bytearray")==0 && pVar->bytes==0 ){
+              /* Only load a BLOB type if the Tcl variable is a bytearray and
+              ** has no string representation. */
               data = Tcl_GetByteArrayFromObj(pVar, &n);
               sqlite3_bind_blob(pStmt, i, data, n, SQLITE_STATIC);
               Tcl_IncrRefCount(pVar);
@@ -937,6 +1060,10 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
               double r;
               Tcl_GetDoubleFromObj(interp, pVar, &r);
               sqlite3_bind_double(pStmt, i, r);
+            }else if( c=='w' && strcmp(zType,"wideInt")==0 ){
+              Tcl_WideInt v;
+              Tcl_GetWideIntFromObj(interp, pVar, &v);
+              sqlite3_bind_int64(pStmt, i, v);
             }else{
               data = Tcl_GetStringFromObj(pVar, &n);
               sqlite3_bind_text(pStmt, i, data, n, SQLITE_STATIC);
@@ -1146,22 +1273,22 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   */
   case DB_FUNCTION: {
     SqlFunc *pFunc;
+    Tcl_Obj *pScript;
     char *zName;
-    char *zScript;
-    int nScript;
     if( objc!=4 ){
       Tcl_WrongNumArgs(interp, 2, objv, "NAME SCRIPT");
       return TCL_ERROR;
     }
     zName = Tcl_GetStringFromObj(objv[2], 0);
-    zScript = Tcl_GetStringFromObj(objv[3], &nScript);
-    pFunc = (SqlFunc*)Tcl_Alloc( sizeof(*pFunc) + nScript + 1 );
+    pScript = objv[3];
+    pFunc = findSqlFunc(pDb, zName);
     if( pFunc==0 ) return TCL_ERROR;
-    pFunc->interp = interp;
-    pFunc->pNext = pDb->pFunc;
-    pFunc->zScript = (char*)&pFunc[1];
-    pDb->pFunc = pFunc;
-    strcpy(pFunc->zScript, zScript);
+    if( pFunc->pScript ){
+      Tcl_DecrRefCount(pFunc->pScript);
+    }
+    pFunc->pScript = pScript;
+    Tcl_IncrRefCount(pScript);
+    pFunc->useEvalObjv = safeToUseEvalObjv(interp, pScript);
     rc = sqlite3_create_function(pDb->db, zName, -1, SQLITE_UTF8,
         pFunc, tclSqlFunc, 0, 0);
     if( rc!=SQLITE_OK ){
@@ -1358,6 +1485,63 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
       }else{
         sqlite3_trace(pDb->db, 0, 0);
       }
+    }
+    break;
+  }
+
+  /*    $db transaction [-deferred|-immediate|-exclusive] SCRIPT
+  **
+  ** Start a new transaction (if we are not already in the midst of a
+  ** transaction) and execute the TCL script SCRIPT.  After SCRIPT
+  ** completes, either commit the transaction or roll it back if SCRIPT
+  ** throws an exception.  Or if no new transation was started, do nothing.
+  ** pass the exception on up the stack.
+  **
+  ** This command was inspired by Dave Thomas's talk on Ruby at the
+  ** 2005 O'Reilly Open Source Convention (OSCON).
+  */
+  case DB_TRANSACTION: {
+    int inTrans;
+    Tcl_Obj *pScript;
+    const char *zBegin = "BEGIN";
+    if( objc!=3 && objc!=4 ){
+      Tcl_WrongNumArgs(interp, 2, objv, "[TYPE] SCRIPT");
+      return TCL_ERROR;
+    }
+    if( objc==3 ){
+      pScript = objv[2];
+    } else {
+      static const char *TTYPE_strs[] = {
+        "deferred",   "exclusive",  "immediate", 0
+      };
+      enum TTYPE_enum {
+        TTYPE_DEFERRED, TTYPE_EXCLUSIVE, TTYPE_IMMEDIATE
+      };
+      int ttype;
+      if( Tcl_GetIndexFromObj(interp, objv[2], TTYPE_strs, "transaction type",
+                              0, &ttype) ){
+        return TCL_ERROR;
+      }
+      switch( (enum TTYPE_enum)ttype ){
+        case TTYPE_DEFERRED:    /* no-op */;                 break;
+        case TTYPE_EXCLUSIVE:   zBegin = "BEGIN EXCLUSIVE";  break;
+        case TTYPE_IMMEDIATE:   zBegin = "BEGIN IMMEDIATE";  break;
+      }
+      pScript = objv[3];
+    }
+    inTrans = !sqlite3_get_autocommit(pDb->db);
+    if( !inTrans ){
+      sqlite3_exec(pDb->db, zBegin, 0, 0, 0);
+    }
+    rc = Tcl_EvalObjEx(interp, pScript, 0);
+    if( !inTrans ){
+      const char *zEnd;
+      if( rc==TCL_ERROR ){
+        zEnd = "ROLLBACK";
+      } else {
+        zEnd = "COMMIT";
+      }
+      sqlite3_exec(pDb->db, zEnd, 0, 0, 0);
     }
     break;
   }

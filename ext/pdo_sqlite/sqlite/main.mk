@@ -54,24 +54,28 @@ TCCX = $(TCC) $(OPTS) $(THREADSAFE) $(USLEEP) -I. -I$(TOP)/src
 
 # Object files for the SQLite library.
 #
-LIBOBJ+= alter.o attach.o auth.o btree.o build.o date.o delete.o \
+LIBOBJ+= alter.o analyze.o attach.o auth.o btree.o build.o \
+         callback.o complete.o date.o delete.o \
          expr.o func.o hash.o insert.o \
          main.o opcodes.o os_unix.o os_win.o \
-         pager.o parse.o pragma.o printf.o random.o \
+         pager.o parse.o pragma.o prepare.o printf.o random.o \
          select.o table.o tclsqlite.o tokenize.o trigger.o \
          update.o util.o vacuum.o \
-         vdbe.o vdbeapi.o vdbeaux.o vdbemem.o \
+         vdbe.o vdbeapi.o vdbeaux.o vdbefifo.o vdbemem.o \
          where.o utf.o legacy.o
 
 # All of the source code files.
 #
 SRC = \
   $(TOP)/src/alter.c \
+  $(TOP)/src/analyze.c \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
   $(TOP)/src/btree.c \
   $(TOP)/src/btree.h \
   $(TOP)/src/build.c \
+  $(TOP)/src/callback.c \
+  $(TOP)/src/complete.c \
   $(TOP)/src/date.c \
   $(TOP)/src/delete.c \
   $(TOP)/src/expr.c \
@@ -87,6 +91,7 @@ SRC = \
   $(TOP)/src/pager.h \
   $(TOP)/src/parse.y \
   $(TOP)/src/pragma.c \
+  $(TOP)/src/prepare.c \
   $(TOP)/src/printf.c \
   $(TOP)/src/random.c \
   $(TOP)/src/select.c \
@@ -105,6 +110,7 @@ SRC = \
   $(TOP)/src/vdbe.h \
   $(TOP)/src/vdbeapi.c \
   $(TOP)/src/vdbeaux.c \
+  $(TOP)/src/vdbefifo.c \
   $(TOP)/src/vdbemem.c \
   $(TOP)/src/vdbeInt.h \
   $(TOP)/src/where.c
@@ -128,14 +134,14 @@ TESTSRC = \
   $(TOP)/src/utf.c \
   $(TOP)/src/util.c \
   $(TOP)/src/vdbe.c \
-  $(TOP)/src/md5.c
+  $(TOP)/src/md5.c \
+  $(TOP)/src/where.c
 
 # Header files used by all library source files.
 #
 HDR = \
    sqlite3.h  \
    $(TOP)/src/btree.h \
-   config.h \
    $(TOP)/src/hash.h \
    opcodes.h \
    $(TOP)/src/os.h \
@@ -155,7 +161,7 @@ VDBEHDR = \
 # This is the default Makefile target.  The objects listed here
 # are what get build when you type just "make" with no arguments.
 #
-all:	sqlite3.h config.h libsqlite3.a sqlite3$(EXE)
+all:	sqlite3.h libsqlite3.a sqlite3$(EXE)
 
 # Generate the file "last_change" which contains the date of change
 # of the most recently modified source code file
@@ -199,6 +205,9 @@ lemon:	$(TOP)/tool/lemon.c $(TOP)/tool/lempar.c
 alter.o:	$(TOP)/src/alter.c $(HDR)
 	$(TCCX) -c $(TOP)/src/alter.c
 
+analyze.o:	$(TOP)/src/analyze.c $(HDR)
+	$(TCCX) -c $(TOP)/src/analyze.c
+
 attach.o:	$(TOP)/src/attach.c $(HDR)
 	$(TCCX) -c $(TOP)/src/attach.c
 
@@ -211,21 +220,11 @@ btree.o:	$(TOP)/src/btree.c $(HDR) $(TOP)/src/pager.h
 build.o:	$(TOP)/src/build.c $(HDR)
 	$(TCCX) -c $(TOP)/src/build.c
 
-# The config.h file will contain a single #define that tells us how
-# many bytes are in a pointer.  This only works if a pointer is the
-# same size on the host as it is on the target.  If you are cross-compiling
-# to a target with a different pointer size, you'll need to manually
-# configure the config.h file.
-#
-config.h:	
-	echo '#include <stdio.h>' >temp.c
-	echo 'int main(){printf(' >>temp.c
-	echo '"#define SQLITE_PTR_SZ %d",sizeof(char*));' >>temp.c
-	echo 'exit(0);}' >>temp.c
-	$(BCC) -o temp temp.c
-	./temp >config.h
-	echo >>config.h
-	rm -f temp.c temp
+callback.o:	$(TOP)/src/callback.c $(HDR)
+	$(TCCX) -c $(TOP)/src/callback.c
+
+complete.o:	$(TOP)/src/complete.c $(HDR)
+	$(TCCX) -c $(TOP)/src/complete.c
 
 date.o:	$(TOP)/src/date.c $(HDR)
 	$(TCCX) -c $(TOP)/src/date.c
@@ -281,6 +280,9 @@ parse.c:	$(TOP)/src/parse.y lemon
 pragma.o:	$(TOP)/src/pragma.c $(HDR)
 	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/pragma.c
 
+prepare.o:	$(TOP)/src/prepare.c $(HDR)
+	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/prepare.c
+
 printf.o:	$(TOP)/src/printf.c $(HDR)
 	$(TCCX) $(TCL_FLAGS) -c $(TOP)/src/printf.c
 
@@ -332,6 +334,9 @@ vdbeapi.o:	$(TOP)/src/vdbeapi.c $(VDBEHDR)
 vdbeaux.o:	$(TOP)/src/vdbeaux.c $(VDBEHDR)
 	$(TCCX) -c $(TOP)/src/vdbeaux.c
 
+vdbefifo.o:	$(TOP)/src/vdbefifo.c $(VDBEHDR)
+	$(TCCX) -c $(TOP)/src/vdbefifo.c
+
 vdbemem.o:	$(TOP)/src/vdbemem.c $(VDBEHDR)
 	$(TCCX) -c $(TOP)/src/vdbemem.c
 
@@ -382,6 +387,9 @@ arch.html:	$(TOP)/www/arch.tcl
 arch.png:	$(TOP)/www/arch.png
 	cp $(TOP)/www/arch.png .
 
+arch2.gif:	$(TOP)/www/arch2.gif
+	cp $(TOP)/www/arch2.gif .
+
 autoinc.html:	$(TOP)/www/autoinc.tcl
 	tclsh $(TOP)/www/autoinc.tcl >autoinc.html
 
@@ -420,6 +428,9 @@ datatypes.html:	$(TOP)/www/datatypes.tcl
 
 datatype3.html:	$(TOP)/www/datatype3.tcl
 	tclsh $(TOP)/www/datatype3.tcl >datatype3.html
+
+different.html:	$(TOP)/www/different.tcl
+	tclsh $(TOP)/www/different.tcl >different.html
 
 docs.html:	$(TOP)/www/docs.tcl
 	tclsh $(TOP)/www/docs.tcl >docs.html
@@ -497,6 +508,7 @@ whentouse.html:	$(TOP)/www/whentouse.tcl
 DOC = \
   arch.html \
   arch.png \
+  arch2.gif \
   autoinc.html \
   c_interface.html \
   capi3.html \
@@ -509,6 +521,7 @@ DOC = \
   conflict.html \
   datatypes.html \
   datatype3.html \
+  different.html \
   docs.html \
   download.html \
   faq.html \
@@ -545,7 +558,7 @@ install:	sqlite3 libsqlite3.a sqlite3.h
 	mv sqlite3.h /usr/include
 
 clean:	
-	rm -f *.o sqlite3 libsqlite3.a sqlite3.h opcodes.*
+	rm -f *.o sqlite3 libsqlite3.a sqlite3.h opcodes.* crashtest
 	rm -f lemon lempar.c parse.* sqlite*.tar.gz mkkeywordhash keywordhash.h
 	rm -f $(PUBLISH)
 	rm -f *.da *.bb *.bbg gmon.out

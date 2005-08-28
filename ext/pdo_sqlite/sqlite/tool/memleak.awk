@@ -1,6 +1,6 @@
 #
 # This script looks for memory leaks by analyzing the output of "sqlite" 
-# when compiled with the MEMORY_DEBUG=2 option.
+# when compiled with the SQLITE_DEBUG=2 option.
 #
 /[0-9]+ malloc / {
   mem[$6] = $0

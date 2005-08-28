@@ -52,7 +52,7 @@ LIBREADLINE = @TARGET_READLINE_LIBS@
 
 # Should the database engine be compiled threadsafe
 #
-THREADSAFE = -DTHREADSAFE=@THREADSAFE@
+TCC += -DTHREADSAFE=@THREADSAFE@
 
 # The pthreads library if needed
 #
@@ -112,24 +112,28 @@ TCC += -DSQLITE_OMIT_CURSOR
 
 # Object files for the SQLite library.
 #
-LIBOBJ = alter.lo attach.lo auth.lo btree.lo build.lo callback.lo date.lo \
+LIBOBJ = alter.lo analyze.lo attach.lo auth.lo btree.lo build.lo \
+         callback.lo complete.lo date.lo \
          delete.lo expr.lo func.lo hash.lo insert.lo \
          main.lo opcodes.lo os_unix.lo os_win.lo \
          pager.lo parse.lo pragma.lo prepare.lo printf.lo random.lo \
          select.lo table.lo tokenize.lo trigger.lo update.lo \
-         util.lo vacuum.lo vdbe.lo vdbeapi.lo vdbeaux.lo vdbemem.lo \
+         util.lo vacuum.lo \
+         vdbe.lo vdbeapi.lo vdbeaux.lo vdbefifo.lo vdbemem.lo \
          where.lo utf.lo legacy.lo
 
 # All of the source code files.
 #
 SRC = \
   $(TOP)/src/alter.c \
+  $(TOP)/src/analyze.c \
   $(TOP)/src/attach.c \
   $(TOP)/src/auth.c \
   $(TOP)/src/btree.c \
   $(TOP)/src/btree.h \
   $(TOP)/src/build.c \
   $(TOP)/src/callback.c \
+  $(TOP)/src/complete.c \
   $(TOP)/src/date.c \
   $(TOP)/src/delete.c \
   $(TOP)/src/expr.c \
@@ -164,6 +168,7 @@ SRC = \
   $(TOP)/src/vdbe.h \
   $(TOP)/src/vdbeapi.c \
   $(TOP)/src/vdbeaux.c \
+  $(TOP)/src/vdbefifo.c \
   $(TOP)/src/vdbemem.c \
   $(TOP)/src/vdbeInt.h \
   $(TOP)/src/where.c
@@ -187,14 +192,14 @@ TESTSRC = \
   $(TOP)/src/utf.c \
   $(TOP)/src/util.c \
   $(TOP)/src/vdbe.c \
-  $(TOP)/src/md5.c
+  $(TOP)/src/md5.c \
+  $(TOP)/src/where.c
 
 # Header files used by all library source files.
 #
 HDR = \
    sqlite3.h  \
    $(TOP)/src/btree.h \
-   config.h \
    $(TOP)/src/hash.h \
    opcodes.h \
    $(TOP)/src/os.h \
@@ -266,6 +271,9 @@ lemon$(BEXE):	$(TOP)/tool/lemon.c $(TOP)/tool/lempar.c
 alter.lo:	$(TOP)/src/alter.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/alter.c
 
+analyze.lo:	$(TOP)/src/analyze.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/analyze.c
+
 attach.lo:	$(TOP)/src/attach.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/attach.c
 
@@ -278,21 +286,11 @@ btree.lo:	$(TOP)/src/btree.c $(HDR) $(TOP)/src/pager.h
 build.lo:	$(TOP)/src/build.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/build.c
 
-# The config.h file will contain a single #define that tells us how
-# many bytes are in a pointer.  This only works if a pointer is the
-# same size on the host as it is on the target.  If you are cross-compiling
-# to a target with a different pointer size, you'll need to manually
-# configure the config.h file.
-#
-config.h:	
-	echo '#include <stdio.h>' >temp.c
-	echo 'int main(){printf(' >>temp.c
-	echo '"#define SQLITE_PTR_SZ %d",sizeof(char*));' >>temp.c
-	echo 'exit(0);}' >>temp.c
-	$(BCC) -o temp temp.c
-	./temp >config.h
-	echo >>config.h
-	rm -f temp.c temp
+callback.lo:	$(TOP)/src/callback.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/callback.c
+
+complete.lo:	$(TOP)/src/complete.c $(HDR)
+	$(LTCOMPILE) -c $(TOP)/src/complete.c
 
 date.lo:	$(TOP)/src/date.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/date.c
@@ -331,10 +329,10 @@ opcodes.h:	parse.h $(TOP)/src/vdbe.c $(TOP)/mkopcodeh.awk
 	cat parse.h $(TOP)/src/vdbe.c | awk -f $(TOP)/mkopcodeh.awk >opcodes.h
 
 os_unix.lo:	$(TOP)/src/os_unix.c $(HDR)
-	$(LTCOMPILE) $(THREADSAFE) -c $(TOP)/src/os_unix.c
+	$(LTCOMPILE) -c $(TOP)/src/os_unix.c
 
 os_win.lo:	$(TOP)/src/os_win.c $(HDR)
-	$(LTCOMPILE) $(THREADSAFE) -c $(TOP)/src/os_win.c
+	$(LTCOMPILE) -c $(TOP)/src/os_win.c
 
 parse.lo:	parse.c $(HDR)
 	$(LTCOMPILE) -c parse.c
@@ -348,8 +346,8 @@ parse.c:	$(TOP)/src/parse.y lemon$(BEXE)
 pragma.lo:	$(TOP)/src/pragma.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/pragma.c
 
-prepare.lo:     $(TOP)/src/prepare.c $(HDR)
-        $(LTCOMPILE) -c $(TOP)/src/prepare.c
+prepare.lo:	$(TOP)/src/prepare.c $(HDR)
+	$(LTCOMPILE) $(TEMP_STORE) -c $(TOP)/src/prepare.c
 
 printf.lo:	$(TOP)/src/printf.c $(HDR)
 	$(LTCOMPILE) -c $(TOP)/src/printf.c
@@ -401,6 +399,9 @@ vdbeapi.lo:	$(TOP)/src/vdbeapi.c $(VDBEHDR)
 vdbeaux.lo:	$(TOP)/src/vdbeaux.c $(VDBEHDR)
 	$(LTCOMPILE) -c $(TOP)/src/vdbeaux.c
 
+vdbefifo.lo:	$(TOP)/src/vdbefifo.c $(VDBEHDR)
+	$(LTCOMPILE) -c $(TOP)/src/vdbefifo.c
+
 vdbemem.lo:	$(TOP)/src/vdbemem.c $(VDBEHDR)
 	$(LTCOMPILE) -c $(TOP)/src/vdbemem.c
 
@@ -417,17 +418,16 @@ tclsqlite3:	tclsqlite-shell.lo libsqlite3.la
 	$(LTLINK) -o tclsqlite3 tclsqlite-shell.lo \
 		 libsqlite3.la $(LIBTCL)
 
-testfixture$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la libsqlite3.la $(TESTSRC)
-	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1\
-                $(THREADSAFE) $(TEMP_STORE)\
-                -o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
-		libtclsqlite3.la $(LIBTCL)
+testfixture$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC)
+	$(LTLINK) -DTCLSH=1 -DSQLITE_TEST=1 $(TEMP_STORE) \
+		-o testfixture $(TESTSRC) $(TOP)/src/tclsqlite.c \
+		libsqlite3.la $(LIBTCL)
 
 crashtest$(TEXE):	$(TOP)/src/tclsqlite.c libsqlite3.la $(TESTSRC) $(TOP)/src/os_test.c
 	$(LTLINK) -DOS_TEST=1 -DTCLSH=1 -DSQLITE_TEST=1 \
 		-o crashtest \
 		$(TESTSRC) $(TOP)/src/os_test.c $(TOP)/src/tclsqlite.c \
-		libsqlite3.la $(LIBTCL) $(THREADLIB)
+		libsqlite3.la $(LIBTCL)
 
 
 
@@ -446,8 +446,7 @@ sqlite3_analyzer$(TEXE):	$(TOP)/src/tclsqlite.c libtclsqlite3.la \
 	  -e 's,^,",' \
 	  -e 's,$$,\\n",' \
 	  $(TOP)/tool/spaceanal.tcl >spaceanal_tcl.h
-	$(LTLINK) -DTCLSH=2 -DSQLITE_TEST=1\
-                $(THREADSAFE) $(TEMP_STORE)\
+	$(LTLINK) -DTCLSH=2 -DSQLITE_TEST=1 $(TEMP_STORE)\
                 -o sqlite3_analyzer$(EXE) $(TESTSRC) $(TOP)/src/tclsqlite.c \
 		libtclsqlite3.la $(LIBTCL)
 
@@ -570,7 +569,7 @@ version3.html:	$(TOP)/www/version3.tcl
 #
 DOC = \
   arch.html \
-  arch.png \
+  arch2.gif \
   autoinc.html \
   c_interface.html \
   capi3.html \
@@ -653,7 +652,8 @@ implib: sqlite3.lib
 #make Borland C++ and/or Microsoft VC import library for the dll
 #   ignore any errors (usually due to missing programs)
 sqlite3.lib: sqlite3.dll
-	-implib -a sqlite3.lib sqlite3.dll
+	-impdef -a sqlite3.def sqlite3.dll
+	-implib sqlite3.lib sqlite3.def
 	-lib /machine:i386 /def:$(TOP)/sqlite3.def 
 
 distclean:	clean

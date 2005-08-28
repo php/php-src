@@ -15,6 +15,7 @@ For example:
     cd bld                   ;#  Change to the build directory
     ../sqlite/configure      ;#  Run the configure script
     make                     ;#  Run the makefile.
+    make install             ;#  (Optional) Install the build products
 
 The configure script uses autoconf 2.50 and libtool.  If the configure
 script does not work out for you, there is a generic makefile named

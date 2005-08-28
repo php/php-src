@@ -84,7 +84,7 @@ void sqlite3_result_blob(
   int n, 
   void (*xDel)(void *)
 ){
-  assert( n>0 );
+  assert( n>=0 );
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, 0, xDel);
 }
 void sqlite3_result_double(sqlite3_context *pCtx, double rVal){
@@ -213,7 +213,7 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     rc = SQLITE_MISUSE;
   }
 
-  sqlite3Error(p->db, rc, p->zErrMsg);
+  sqlite3Error(p->db, rc, p->zErrMsg ? "%s" : 0, p->zErrMsg);
   return rc;
 }
 
@@ -230,10 +230,6 @@ void *sqlite3_user_data(sqlite3_context *p){
 ** Allocate or return the aggregate context for a user function.  A new
 ** context is allocated on the first call.  Subsequent calls return the
 ** same context that was returned on prior calls.
-**
-** This routine is defined here in vdbe.c because it depends on knowing
-** the internals of the sqlite3_context structure which is only defined in
-** this source file.
 */
 void *sqlite3_aggregate_context(sqlite3_context *p, int nByte){
   assert( p && p->pFunc && p->pFunc->xStep );
@@ -369,6 +365,11 @@ sqlite_int64 sqlite3_column_int64(sqlite3_stmt *pStmt, int i){
 const unsigned char *sqlite3_column_text(sqlite3_stmt *pStmt, int i){
   return sqlite3_value_text( columnMem(pStmt,i) );
 }
+#if 0
+sqlite3_value *sqlite3_column_value(sqlite3_stmt *pStmt, int i){
+  return columnMem(pStmt, i);
+}
+#endif
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_text16(sqlite3_stmt *pStmt, int i){
   return sqlite3_value_text16( columnMem(pStmt,i) );

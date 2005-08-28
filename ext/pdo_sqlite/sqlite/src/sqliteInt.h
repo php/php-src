@@ -39,7 +39,6 @@
 # define _LARGEFILE_SOURCE 1
 #endif
 
-#include "config.h"
 #include "sqlite3.h"
 #include "hash.h"
 #include "parse.h"
@@ -209,6 +208,7 @@ typedef struct BusyHandler BusyHandler;
 struct BusyHandler {
   int (*xFunc)(void *,int);  /* The busy callback */
   void *pArg;                /* First arg to busy callback */
+  int nBusy;                 /* Incremented with each busy call */
 };
 
 /*
@@ -298,30 +298,30 @@ extern int sqlite3_iMallocReset; /* Set iMallocFail to this when it reaches 0 */
 /*
 ** Forward references to structures
 */
+typedef struct AggExpr AggExpr;
+typedef struct AuthContext AuthContext;
+typedef struct CollSeq CollSeq;
 typedef struct Column Column;
-typedef struct Table Table;
-typedef struct Index Index;
+typedef struct Db Db;
 typedef struct Expr Expr;
 typedef struct ExprList ExprList;
-typedef struct Parse Parse;
-typedef struct Token Token;
-typedef struct IdList IdList;
-typedef struct SrcList SrcList;
-typedef struct WhereInfo WhereInfo;
-typedef struct WhereLevel WhereLevel;
-typedef struct Select Select;
-typedef struct AggExpr AggExpr;
-typedef struct FuncDef FuncDef;
-typedef struct Trigger Trigger;
-typedef struct TriggerStep TriggerStep;
-typedef struct TriggerStack TriggerStack;
 typedef struct FKey FKey;
-typedef struct Db Db;
-typedef struct AuthContext AuthContext;
+typedef struct FuncDef FuncDef;
+typedef struct IdList IdList;
+typedef struct Index Index;
 typedef struct KeyClass KeyClass;
-typedef struct CollSeq CollSeq;
 typedef struct KeyInfo KeyInfo;
 typedef struct NameContext NameContext;
+typedef struct Parse Parse;
+typedef struct Select Select;
+typedef struct SrcList SrcList;
+typedef struct Table Table;
+typedef struct Token Token;
+typedef struct TriggerStack TriggerStack;
+typedef struct TriggerStep TriggerStep;
+typedef struct Trigger Trigger;
+typedef struct WhereInfo WhereInfo;
+typedef struct WhereLevel WhereLevel;
 
 /*
 ** Each database file to be accessed by the system is an instance
@@ -496,16 +496,22 @@ struct sqlite3 {
 ** points to a linked list of these structures.
 */
 struct FuncDef {
-  char *zName;         /* SQL name of the function */
-  int nArg;            /* Number of arguments.  -1 means unlimited */
+  i16 nArg;            /* Number of arguments.  -1 means unlimited */
   u8 iPrefEnc;         /* Preferred text encoding (SQLITE_UTF8, 16LE, 16BE) */
+  u8 needCollSeq;      /* True if sqlite3GetFuncCollSeq() might be called */
+  u8 flags;            /* Some combination of SQLITE_FUNC_* */
   void *pUserData;     /* User data parameter */
   FuncDef *pNext;      /* Next function with same name */
   void (*xFunc)(sqlite3_context*,int,sqlite3_value**); /* Regular function */
   void (*xStep)(sqlite3_context*,int,sqlite3_value**); /* Aggregate step */
   void (*xFinalize)(sqlite3_context*);                /* Aggregate finializer */
-  u8 needCollSeq;      /* True if sqlite3GetFuncCollSeq() might be called */
+  char zName[1];       /* SQL name of the function.  MUST BE LAST */
 };
+
+/*
+** Possible values for FuncDef.flags
+*/
+#define SQLITE_FUNC_LIKEOPT  0x01    /* Candidate for the LIKE optimization */
 
 /*
 ** information about each column of an SQL table is held in an instance
@@ -745,6 +751,7 @@ struct Index {
   char *zName;     /* Name of this index */
   int nColumn;     /* Number of columns in the table used by this index */
   int *aiColumn;   /* Which columns are used by this index.  1st is 0 */
+  unsigned *aiRowEst; /* Result of ANALYZE: Est. rows selected by each column */
   Table *pTable;   /* The SQL table being indexed */
   int tnum;        /* Page containing root of this index in database file */
   u8 onError;      /* OE_Abort, OE_Ignore, OE_Replace, or OE_None */
@@ -839,12 +846,13 @@ struct Expr {
 /*
 ** The following are the meanings of bits in the Expr.flags field.
 */
-#define EP_FromJoin     0x0001  /* Originated in ON or USING clause of a join */
-#define EP_Agg          0x0002  /* Contains one or more aggregate functions */
-#define EP_Resolved     0x0004  /* IDs have been resolved to COLUMNs */
-#define EP_Error        0x0008  /* Expression contains one or more errors */
-#define EP_Not          0x0010  /* Operator preceeded by NOT */
-#define EP_VarSelect    0x0020  /* pSelect is correlated, not constant */
+#define EP_FromJoin     0x01  /* Originated in ON or USING clause of a join */
+#define EP_Agg          0x02  /* Contains one or more aggregate functions */
+#define EP_Resolved     0x04  /* IDs have been resolved to COLUMNs */
+#define EP_Error        0x08  /* Expression contains one or more errors */
+#define EP_Not          0x10  /* Operator preceeded by NOT */
+#define EP_VarSelect    0x20  /* pSelect is correlated, not constant */
+#define EP_Dequoted     0x40  /* True if the string has been dequoted */
 
 /*
 ** These macros can be used to test, set, or clear bits in the 
@@ -924,8 +932,8 @@ struct SrcList {
     char *zAlias;     /* The "B" part of a "A AS B" phrase.  zName is the "A" */
     Table *pTab;      /* An SQL table corresponding to zName */
     Select *pSelect;  /* A SELECT statement used in place of a table name */
-    int jointype;     /* Type of join between this table and the next */
-    int iCursor;      /* The VDBE cursor number used to access this table */
+    u8 jointype;      /* Type of join between this table and the next */
+    i16 iCursor;      /* The VDBE cursor number used to access this table */
     Expr *pOn;        /* The ON clause of a join */
     IdList *pUsing;   /* The USING clause of a join */
     Bitmask colUsed;  /* Bit N (1<<N) set if column N or pTab is used */
@@ -949,18 +957,20 @@ struct SrcList {
 ** access or modified by other modules.
 */
 struct WhereLevel {
-  int iMem;            /* Memory cell used by this level */
-  Index *pIdx;         /* Index used.  NULL if no index */
-  int iTabCur;         /* The VDBE cursor used to access the table */
-  int iIdxCur;         /* The VDBE cursor used to acesss pIdx */
-  int score;           /* How well this index scored */
-  int brk;             /* Jump here to break out of the loop */
-  int cont;            /* Jump here to continue with the next loop cycle */
-  int op, p1, p2;      /* Opcode used to terminate the loop */
-  int iLeftJoin;       /* Memory cell used to implement LEFT OUTER JOIN */
-  int top;             /* First instruction of interior of the loop */
-  int inOp, inP1, inP2;/* Opcode used to implement an IN operator */
-  int bRev;            /* Do the scan in the reverse direction */
+  int iFrom;            /* Which entry in the FROM clause */
+  int flags;            /* Flags associated with this level */
+  int iMem;             /* First memory cell used by this level */
+  int iLeftJoin;        /* Memory cell used to implement LEFT OUTER JOIN */
+  Index *pIdx;          /* Index used.  NULL if no index */
+  int iTabCur;          /* The VDBE cursor used to access the table */
+  int iIdxCur;          /* The VDBE cursor used to acesss pIdx */
+  int brk;              /* Jump here to break out of the loop */
+  int cont;             /* Jump here to continue with the next loop cycle */
+  int top;              /* First instruction of interior of the loop */
+  int op, p1, p2;       /* Opcode used to terminate the loop */
+  int nEq;              /* Number of == or IN constraints on this loop */
+  int nIn;              /* Number of IN operators constraining this loop */
+  int *aInLoop;         /* Loop terminators for IN operators */
 };
 
 /*
@@ -1036,7 +1046,7 @@ struct Select {
   Expr *pLimit;          /* LIMIT expression. NULL means not used. */
   Expr *pOffset;         /* OFFSET expression. NULL means not used. */
   int iLimit, iOffset;   /* Memory registers holding LIMIT & OFFSET counters */
-  IdList **ppOpenTemp;   /* OP_OpenTemp addresses used by multi-selects */
+  IdList **ppOpenVirtual;/* OP_OpenVirtual addresses used by multi-selects */
   u8 isResolved;         /* True once sqlite3SelectResolve() has run. */
   u8 isAgg;              /* True if this is an aggregate query */
 };
@@ -1345,6 +1355,7 @@ void *sqlite3TextToPtr(const char*);
 void sqlite3SetString(char **, ...);
 void sqlite3ErrorMsg(Parse*, const char*, ...);
 void sqlite3Dequote(char*);
+void sqlite3DequoteExpr(Expr*);
 int sqlite3KeywordCode(const char*, int);
 int sqlite3RunParser(Parse*, const char*, char **);
 void sqlite3FinishCoding(Parse*);
@@ -1370,7 +1381,7 @@ void sqlite3StartTable(Parse*,Token*,Token*,Token*,int,int);
 void sqlite3AddColumn(Parse*,Token*);
 void sqlite3AddNotNull(Parse*, int);
 void sqlite3AddPrimaryKey(Parse*, ExprList*, int, int);
-void sqlite3AddColumnType(Parse*,Token*,Token*);
+void sqlite3AddColumnType(Parse*,Token*);
 void sqlite3AddDefaultValue(Parse*,Expr*);
 void sqlite3AddCollateType(Parse*, const char*, int);
 void sqlite3EndTable(Parse*,Token*,Token*,Select*);
@@ -1437,6 +1448,7 @@ void sqlite3BeginTransaction(Parse*, int);
 void sqlite3CommitTransaction(Parse*);
 void sqlite3RollbackTransaction(Parse*);
 int sqlite3ExprIsConstant(Expr*);
+int sqlite3ExprIsConstantOrFunction(Expr*);
 int sqlite3ExprIsInteger(Expr*, int*);
 int sqlite3IsRowid(const char*);
 void sqlite3GenerateRowDelete(sqlite3*, Vdbe*, Table*, int, int);
@@ -1509,7 +1521,7 @@ int sqlite3FixSelect(DbFixer*, Select*);
 int sqlite3FixExpr(DbFixer*, Expr*);
 int sqlite3FixExprList(DbFixer*, ExprList*);
 int sqlite3FixTriggerStep(DbFixer*, TriggerStep*);
-double sqlite3AtoF(const char *z, const char **);
+int sqlite3AtoF(const char *z, double*);
 char *sqlite3_snprintf(int,char*,const char*,...);
 int sqlite3GetInt32(const char *, int*);
 int sqlite3FitsIn64Bits(const char *);
@@ -1564,6 +1576,14 @@ void sqlite3AlterFinishAddColumn(Parse *, Token *);
 void sqlite3AlterBeginAddColumn(Parse *, SrcList *);
 const char *sqlite3TestErrorName(int);
 CollSeq *sqlite3GetCollSeq(sqlite3*, CollSeq *, const char *, int);
+char sqlite3AffinityType(const Token*);
+void sqlite3Analyze(Parse*, Token*, Token*);
+int sqlite3InvokeBusyHandler(BusyHandler*);
+int sqlite3FindDb(sqlite3*, Token*);
+void sqlite3AnalysisLoad(sqlite3*,int iDB);
+void sqlite3DefaultRowEst(Index*);
+void sqlite3RegisterLikeFunctions(sqlite3*, int);
+int sqlite3IsLikeFunction(sqlite3*,Expr*,char*);
 
 #ifdef SQLITE_SSE
 #include "sseInt.h"

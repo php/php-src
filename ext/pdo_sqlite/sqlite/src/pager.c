@@ -779,7 +779,7 @@ static int writeMasterJournal(Pager *pPager, const char *zMaster){
   if( rc!=SQLITE_OK ) return rc;
 
   rc = sqlite3OsWrite(&pPager->jfd, aJournalMagic, sizeof(aJournalMagic));
-  pPager->needSync = 1;
+  pPager->needSync = !pPager->noSync;
   return rc;
 }
 
@@ -1758,7 +1758,11 @@ int sqlite3pager_pagecount(Pager *pPager){
     pPager->errMask |= PAGER_ERR_DISK;
     return 0;
   }
-  n /= pPager->pageSize;
+  if( n>0 && n<pPager->pageSize ){
+    n = 1;
+  }else{
+    n /= pPager->pageSize;
+  }
   if( !MEMDB && n==PENDING_BYTE/pPager->pageSize ){
     n++;
   }
@@ -1866,7 +1870,7 @@ static void memoryTruncate(Pager *pPager){
 
 /*
 ** Try to obtain a lock on a file.  Invoke the busy callback if the lock
-** is currently not available.  Repeate until the busy callback returns
+** is currently not available.  Repeat until the busy callback returns
 ** false or until the lock succeeds.
 **
 ** Return SQLITE_OK on success and an error code if we cannot obtain
@@ -1880,14 +1884,9 @@ static int pager_wait_on_lock(Pager *pPager, int locktype){
   if( pPager->state>=locktype ){
     rc = SQLITE_OK;
   }else{
-    int busy = 1;
-    BusyHandler *pH;
     do {
       rc = sqlite3OsLock(&pPager->fd, locktype);
-    }while( rc==SQLITE_BUSY && 
-        (pH = pPager->pBusyHandler)!=0 && 
-        pH->xFunc && pH->xFunc(pH->pArg, busy++)
-    );
+    }while( rc==SQLITE_BUSY && sqlite3InvokeBusyHandler(pPager->pBusyHandler) );
     if( rc==SQLITE_OK ){
       pPager->state = locktype;
     }
@@ -3344,6 +3343,14 @@ const char *sqlite3pager_dirname(Pager *pPager){
 */
 const char *sqlite3pager_journalname(Pager *pPager){
   return pPager->zJournal;
+}
+
+/*
+** Return true if fsync() calls are disabled for this pager.  Return FALSE
+** if fsync()s are executed normally.
+*/
+int sqlite3pager_nosync(Pager *pPager){
+  return pPager->noSync;
 }
 
 /*
