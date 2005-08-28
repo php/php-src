@@ -65,8 +65,8 @@ void sqlite3OpenTableForReading(
   Table *pTab     /* The table to be opened */
 ){
   sqlite3VdbeAddOp(v, OP_Integer, pTab->iDb, 0);
-  sqlite3VdbeAddOp(v, OP_OpenRead, iCur, pTab->tnum);
   VdbeComment((v, "# %s", pTab->zName));
+  sqlite3VdbeAddOp(v, OP_OpenRead, iCur, pTab->tnum);
   sqlite3VdbeAddOp(v, OP_SetNumColumns, iCur, pTab->nCol);
 }
 
@@ -240,7 +240,7 @@ void sqlite3DeleteFrom(
     /* Remember the rowid of every item to be deleted.
     */
     sqlite3VdbeAddOp(v, OP_Rowid, iCur, 0);
-    sqlite3VdbeAddOp(v, OP_ListWrite, 0, 0);
+    sqlite3VdbeAddOp(v, OP_FifoWrite, 0, 0);
     if( db->flags & SQLITE_CountRows ){
       sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
     }
@@ -260,14 +260,13 @@ void sqlite3DeleteFrom(
     ** database scan.  We have to delete items after the scan is complete
     ** because deleting an item can change the scan order.
     */
-    sqlite3VdbeAddOp(v, OP_ListRewind, 0, 0);
     end = sqlite3VdbeMakeLabel(v);
 
     /* This is the beginning of the delete loop when there are
     ** row triggers.
     */
     if( triggers_exist ){
-      addr = sqlite3VdbeAddOp(v, OP_ListRead, 0, end);
+      addr = sqlite3VdbeAddOp(v, OP_FifoRead, 0, end);
       if( !isView ){
         sqlite3VdbeAddOp(v, OP_Dup, 0, 0);
         sqlite3OpenTableForReading(v, iCur, pTab);
@@ -288,7 +287,7 @@ void sqlite3DeleteFrom(
     if( !isView ){
       /* Open cursors for the table we are deleting from and all its
       ** indices.  If there are row triggers, this happens inside the
-      ** OP_ListRead loop because the cursor have to all be closed
+      ** OP_FifoRead loop because the cursor have to all be closed
       ** before the trigger fires.  If there are no row triggers, the
       ** cursors are opened only once on the outside the loop.
       */
@@ -297,7 +296,7 @@ void sqlite3DeleteFrom(
       /* This is the beginning of the delete loop when there are no
       ** row triggers */
       if( !triggers_exist ){ 
-        addr = sqlite3VdbeAddOp(v, OP_ListRead, 0, end);
+        addr = sqlite3VdbeAddOp(v, OP_FifoRead, 0, end);
       }
 
       /* Delete the row */
@@ -322,7 +321,6 @@ void sqlite3DeleteFrom(
     /* End of the delete loop */
     sqlite3VdbeAddOp(v, OP_Goto, 0, addr);
     sqlite3VdbeResolveLabel(v, end);
-    sqlite3VdbeAddOp(v, OP_ListReset, 0, 0);
 
     /* Close the cursors after the loop if there are no row triggers */
     if( !triggers_exist ){
@@ -442,6 +440,6 @@ void sqlite3GenerateIndexKey(
       sqlite3ColumnDefault(v, pTab, idx);
     }
   }
-  sqlite3VdbeAddOp(v, OP_MakeRecord, pIdx->nColumn, (1<<24));
+  sqlite3VdbeAddOp(v, OP_MakeIdxRec, pIdx->nColumn, 0);
   sqlite3IndexAffinityStr(v, pIdx);
 }

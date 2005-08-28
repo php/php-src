@@ -24,6 +24,7 @@
 # the total library smaller.
 #
 
+
 # Remember the TK_ values from the parse.h file
 /^#define TK_/ {
   tk[$2] = $3
@@ -35,11 +36,16 @@
   gsub(/:/,"",name)
   gsub("\r","",name)
   op[name] = -1
-  for(i=3; i<NF-2; i++){
+  for(i=3; i<NF; i++){
     if($i=="same" && $(i+1)=="as"){
-      op[name] = tk[$(i+2)]
+      sym = $(i+2)
+      sub(/,/,"",sym)
+      op[name] = tk[sym]
       used[op[name]] = 1
-      sameas[op[name]] = $(i+2)
+      sameas[op[name]] = sym
+    }
+    if($i=="no-push"){
+      nopush[name] = 1
     }
   }
 }
@@ -74,5 +80,31 @@ END {
       }
       printf "#define %-25s %15d\n", sprintf( "OP_NotUsed_%-3d", i ), i
     }
+  }
+
+  # Generate the 10 16-bit bitmasks used by function opcodeUsesStack()
+  # in vdbeaux.c. See comments in that function for details.
+  # 
+  nopush[0] = 0              # 0..15
+  nopush[1] = 0              # 16..31
+  nopush[2] = 0              # 32..47
+  nopush[3] = 0              # 48..63
+  nopush[4] = 0              # 64..79
+  nopush[5] = 0              # 80..95
+  nopush[6] = 0              # 96..111
+  nopush[7] = 0              # 112..127
+  nopush[8] = 0              # 128..143
+  nopush[9] = 0              # 144..159
+  for(name in op){
+    if( nopush[name] ){
+      n = op[name]
+      j = n%16
+      i = ((n - j)/16)
+      nopush[i] = nopush[i] + (2^j)
+    }
+  }
+  printf "\n"
+  for(i=0; i<10; i++){
+    printf "#define NOPUSH_MASK_%d %d\n", i, nopush[i]
   }
 }

@@ -234,7 +234,6 @@ const char *sqlite3ErrStr(int rc){
     case SQLITE_DONE:
     case SQLITE_OK:         z = "not an error";                          break;
     case SQLITE_ERROR:      z = "SQL logic error or missing database";   break;
-    case SQLITE_INTERNAL:   z = "internal SQLite implementation flaw";   break;
     case SQLITE_PERM:       z = "access permission denied";              break;
     case SQLITE_ABORT:      z = "callback requested query abort";        break;
     case SQLITE_BUSY:       z = "database is locked";                    break;
@@ -244,13 +243,11 @@ const char *sqlite3ErrStr(int rc){
     case SQLITE_INTERRUPT:  z = "interrupted";                           break;
     case SQLITE_IOERR:      z = "disk I/O error";                        break;
     case SQLITE_CORRUPT:    z = "database disk image is malformed";      break;
-    case SQLITE_NOTFOUND:   z = "table or record not found";             break;
-    case SQLITE_FULL:       z = "database is full";                      break;
+    case SQLITE_FULL:       z = "database or disk is full";              break;
     case SQLITE_CANTOPEN:   z = "unable to open database file";          break;
     case SQLITE_PROTOCOL:   z = "database locking protocol failure";     break;
     case SQLITE_EMPTY:      z = "table contains no data";                break;
     case SQLITE_SCHEMA:     z = "database schema has changed";           break;
-    case SQLITE_TOOBIG:     z = "too much data for one table row";       break;
     case SQLITE_CONSTRAINT: z = "constraint failed";                     break;
     case SQLITE_MISMATCH:   z = "datatype mismatch";                     break;
     case SQLITE_MISUSE:     z = "library routine called out of sequence";break;
@@ -298,13 +295,32 @@ static int sqliteDefaultBusyCallback(
   sqlite3OsSleep(delay);
   return 1;
 #else
-  int timeout = (int)Timeout;
+  int timeout = ((sqlite3 *)ptr)->busyTimeout;
   if( (count+1)*1000 > timeout ){
     return 0;
   }
   sqlite3OsSleep(1000);
   return 1;
 #endif
+}
+
+/*
+** Invoke the given busy handler.
+**
+** This routine is called when an operation failed with a lock.
+** If this routine returns non-zero, the lock is retried.  If it
+** returns 0, the operation aborts with an SQLITE_BUSY error.
+*/
+int sqlite3InvokeBusyHandler(BusyHandler *p){
+  int rc;
+  if( p==0 || p->xFunc==0 || p->nBusy<0 ) return 0;
+  rc = p->xFunc(p->pArg, p->nBusy);
+  if( rc==0 ){
+    p->nBusy = -1;
+  }else{
+    p->nBusy++;
+  }
+  return rc; 
 }
 
 /*
@@ -321,6 +337,7 @@ int sqlite3_busy_handler(
   }
   db->busyHandler.xFunc = xBusy;
   db->busyHandler.pArg = pArg;
+  db->busyHandler.nBusy = 0;
   return SQLITE_OK;
 }
 
@@ -454,6 +471,7 @@ int sqlite3_create_function(
 
   p = sqlite3FindFunction(db, zFunctionName, nName, nArg, enc, 1);
   if( p==0 ) return SQLITE_NOMEM;
+  p->flags = 0;
   p->xFunc = xFunc;
   p->xStep = xStep;
   p->xFinalize = xFinal;
@@ -530,11 +548,11 @@ void *sqlite3_commit_hook(
 ** opened and used.  If zFilename is the magic name ":memory:" then
 ** the database is stored in memory (and is thus forgotten as soon as
 ** the connection is closed.)  If zFilename is NULL then the database
-** is for temporary use only and is deleted as soon as the connection
-** is closed.
+** is a "virtual" database for transient use only and is deleted as
+** soon as the connection is closed.
 **
-** A temporary database can be either a disk file (that is automatically
-** deleted when the file is closed) or a set of red-black trees held in memory,
+** A virtual database can be either a disk file (that is automatically
+** deleted when the file is closed) or it an be held entirely in memory,
 ** depending on the values of the TEMP_STORE compile-time macro and the
 ** db->temp_store variable, according to the following chart:
 **

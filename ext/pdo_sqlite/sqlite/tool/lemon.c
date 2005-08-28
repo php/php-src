@@ -1606,12 +1606,11 @@ int k;
 FILE *err;
 {
   int spcnt, i;
-  spcnt = 0;
   if( argv[0] ) fprintf(err,"%s",argv[0]);
   spcnt = strlen(argv[0]) + 1;
   for(i=1; i<n && argv[i]; i++){
     fprintf(err," %s",argv[i]);
-    spcnt += strlen(argv[i]+1);
+    spcnt += strlen(argv[i])+1;
   }
   spcnt += k;
   for(; argv[i]; i++) fprintf(err," %s",argv[i]);
@@ -2305,7 +2304,7 @@ to follow the previous rule.");
 ** macros.  This routine looks for "%ifdef" and "%ifndef" and "%endif" and
 ** comments them out.  Text in between is also commented out as appropriate.
 */
-static preprocess_input(char *z){
+static void preprocess_input(char *z){
   int i, j, k, n;
   int exclude = 0;
   int start;
@@ -3664,6 +3663,20 @@ int mhflag;     /* Output in makeheaders format if true */
       fprintf(out,"      break;\n"); lineno++;
     }
   }
+  if( lemp->vardest ){
+    struct symbol *dflt_sp = 0;
+    for(i=0; i<lemp->nsymbol; i++){
+      struct symbol *sp = lemp->symbols[i];
+      if( sp==0 || sp->type==TERMINAL ||
+          sp->index<=0 || sp->destructor!=0 ) continue;
+      fprintf(out,"    case %d:\n",sp->index); lineno++;
+      dflt_sp = sp;
+    }
+    if( dflt_sp!=0 ){
+      emit_destructor_code(out,dflt_sp,lemp,&lineno);
+      fprintf(out,"      break;\n"); lineno++;
+    }
+  }
   for(i=0; i<lemp->nsymbol; i++){
     struct symbol *sp = lemp->symbols[i];
     if( sp==0 || sp->type==TERMINAL || sp->destructor==0 ) continue;
@@ -3682,20 +3695,6 @@ int mhflag;     /* Output in makeheaders format if true */
 
     emit_destructor_code(out,lemp->symbols[i],lemp,&lineno);
     fprintf(out,"      break;\n"); lineno++;
-  }
-  if( lemp->vardest ){
-    struct symbol *dflt_sp = 0;
-    for(i=0; i<lemp->nsymbol; i++){
-      struct symbol *sp = lemp->symbols[i];
-      if( sp==0 || sp->type==TERMINAL ||
-          sp->index<=0 || sp->destructor!=0 ) continue;
-      fprintf(out,"    case %d:\n",sp->index); lineno++;
-      dflt_sp = sp;
-    }
-    if( dflt_sp!=0 ){
-      emit_destructor_code(out,dflt_sp,lemp,&lineno);
-      fprintf(out,"      break;\n"); lineno++;
-    }
   }
   tplt_xfer(lemp->name,in,out,&lineno);
 

@@ -200,9 +200,6 @@ Table *sqlite3LocateTable(Parse *pParse, const char *zName, const char *zDbase){
   if( p==0 ){
     if( zDbase ){
       sqlite3ErrorMsg(pParse, "no such table: %s.%s", zDbase, zName);
-    }else if( sqlite3FindTable(pParse->db, zName, 0)!=0 ){
-      sqlite3ErrorMsg(pParse, "table \"%s\" is not in database \"%s\"",
-         zName, zDbase);
     }else{
       sqlite3ErrorMsg(pParse, "no such table: %s", zName);
     }
@@ -258,10 +255,7 @@ static void sqliteDeleteIndex(sqlite3 *db, Index *p){
   assert( db!=0 && p->zName!=0 );
   pOld = sqlite3HashInsert(&db->aDb[p->iDb].idxHash, p->zName,
                           strlen(p->zName)+1, 0);
-  if( pOld!=0 && pOld!=p ){
-    sqlite3HashInsert(&db->aDb[p->iDb].idxHash, pOld->zName,
-                     strlen(pOld->zName)+1, pOld);
-  }
+  assert( pOld==0 || pOld==p );
   freeIndex(p);
 }
 
@@ -535,7 +529,7 @@ void sqlite3OpenMasterTable(Vdbe *v, int iDb){
 ** index of the named database in db->aDb[], or -1 if the named db 
 ** does not exist.
 */
-static int findDb(sqlite3 *db, Token *pName){
+int sqlite3FindDb(sqlite3 *db, Token *pName){
   int i = -1;    /* Database number */
   int n;         /* Number of characters in the name */
   Db *pDb;       /* A database whose name space is being searched */
@@ -583,7 +577,7 @@ int sqlite3TwoPartName(
   if( pName2 && pName2->n>0 ){
     assert( !db->init.busy );
     *pUnqual = pName2;
-    iDb = findDb(db, pName1);
+    iDb = sqlite3FindDb(db, pName1);
     if( iDb<0 ){
       sqlite3ErrorMsg(pParse, "unknown database %T", pName1);
       pParse->nErr++;
@@ -745,7 +739,7 @@ void sqlite3StartTable(
   ** so that INSERT can find the table easily.
   */
 #ifndef SQLITE_OMIT_AUTOINCREMENT
-  if( strcmp(zName, "sqlite_sequence")==0 ){
+  if( !pParse->nested && strcmp(zName, "sqlite_sequence")==0 ){
     db->aDb[iDb].pSeqTab = pTable;
   }
 #endif
@@ -902,11 +896,11 @@ void sqlite3AddNotNull(Parse *pParse, int onError){
 ** If none of the substrings in the above table are found,
 ** SQLITE_AFF_NUMERIC is returned.
 */
-static char sqlite3AffinityType(const char *zType, int nType){
+char sqlite3AffinityType(const Token *pType){
   u32 h = 0;
   char aff = SQLITE_AFF_NUMERIC;
-  const unsigned char *zIn = zType;
-  const unsigned char *zEnd = (zIn+nType);
+  const unsigned char *zIn = pType->z;
+  const unsigned char *zEnd = &pType->z[pType->n];
 
   while( zIn!=zEnd ){
     h = (h<<8) + sqlite3UpperToLower[*zIn];
@@ -938,30 +932,18 @@ static char sqlite3AffinityType(const char *zType, int nType){
 ** that contains the typename of the column and store that string
 ** in zType.
 */ 
-void sqlite3AddColumnType(Parse *pParse, Token *pFirst, Token *pLast){
+void sqlite3AddColumnType(Parse *pParse, Token *pType){
   Table *p;
-  int i, j;
-  int n;
-  char *z;
-  const unsigned char *zIn;
-
+  int i;
   Column *pCol;
+
   if( (p = pParse->pNewTable)==0 ) return;
   i = p->nCol-1;
   if( i<0 ) return;
   pCol = &p->aCol[i];
-  zIn = pFirst->z;
-  n = pLast->n + (pLast->z - zIn);
   assert( pCol->zType==0 );
-  z = pCol->zType = sqliteMallocRaw(n+1);
-  if( z==0 ) return;
-  for(i=j=0; i<n; i++){
-    int c = zIn[i];
-    if( isspace(c) ) continue;
-    z[j++] = c;
-  }
-  z[j] = 0;
-  pCol->affinity = sqlite3AffinityType(z, n);
+  pCol->zType = sqlite3NameFromToken(pType);
+  pCol->affinity = sqlite3AffinityType(pType);
 }
 
 /*
@@ -977,14 +959,15 @@ void sqlite3AddColumnType(Parse *pParse, Token *pFirst, Token *pLast){
 void sqlite3AddDefaultValue(Parse *pParse, Expr *pExpr){
   Table *p;
   Column *pCol;
-  if( (p = pParse->pNewTable)==0 ) return;
-  pCol = &(p->aCol[p->nCol-1]);
-  if( !sqlite3ExprIsConstant(pExpr) ){
-    sqlite3ErrorMsg(pParse, "default value of column [%s] is not constant",
-        pCol->zName);
-  }else{
-    sqlite3ExprDelete(pCol->pDflt);
-    pCol->pDflt = sqlite3ExprDup(pExpr);
+  if( (p = pParse->pNewTable)!=0 ){
+    pCol = &(p->aCol[p->nCol-1]);
+    if( !sqlite3ExprIsConstantOrFunction(pExpr) ){
+      sqlite3ErrorMsg(pParse, "default value of column [%s] is not constant",
+          pCol->zName);
+    }else{
+      sqlite3ExprDelete(pCol->pDflt);
+      pCol->pDflt = sqlite3ExprDup(pExpr);
+    }
   }
   sqlite3ExprDelete(pExpr);
 }
@@ -1317,13 +1300,11 @@ void sqlite3EndTable(
     */
     if( p->pSelect==0 ){
       /* A regular table */
-      /* sqlite3VdbeAddOp(v, OP_CreateTable, p->iDb, 0); */
       zType = "table";
       zType2 = "TABLE";
 #ifndef SQLITE_OMIT_VIEW
     }else{
       /* A view */
-    /*  sqlite3VdbeAddOp(v, OP_Integer, 0, 0); */
       zType = "view";
       zType2 = "VIEW";
 #endif
@@ -1535,10 +1516,13 @@ int sqlite3ViewGetColumnNames(Parse *pParse, Table *pTable){
   ** Actually, this error is caught previously and so the following test
   ** should always fail.  But we will leave it in place just to be safe.
   */
+#if 0
   if( pTable->nCol<0 ){
     sqlite3ErrorMsg(pParse, "view %s is circularly defined", pTable->zName);
     return 1;
   }
+#endif
+  assert( pTable->nCol>=0 );
 
   /* If we get this far, it means we need to compute the table names.
   ** Note that the call to sqlite3ResultSetOfSelect() will expand any
@@ -1973,7 +1957,6 @@ static void sqlite3RefillIndex(Parse *pParse, Index *pIndex, int memRootPage){
   int addr1;                     /* Address of top of loop */
   int tnum;                      /* Root page of index */
   Vdbe *v;                       /* Generate code into this virtual machine */
-  int isUnique;                  /* True for a unique index */
 
 #ifndef SQLITE_OMIT_AUTHORIZATION
   if( sqlite3AuthCheck(pParse, SQLITE_REINDEX, pIndex->zName, 0,
@@ -2002,16 +1985,21 @@ static void sqlite3RefillIndex(Parse *pParse, Index *pIndex, int memRootPage){
   sqlite3VdbeAddOp(v, OP_Integer, pIndex->iDb, 0);
   sqlite3VdbeOp3(v, OP_OpenWrite, iIdx, tnum,
                     (char*)&pIndex->keyInfo, P3_KEYINFO);
-  sqlite3VdbeAddOp(v, OP_Integer, pTab->iDb, 0);
-  sqlite3VdbeAddOp(v, OP_OpenRead, iTab, pTab->tnum);
-  sqlite3VdbeAddOp(v, OP_SetNumColumns, iTab, pTab->nCol);
+  sqlite3OpenTableForReading(v, iTab, pTab);
   addr1 = sqlite3VdbeAddOp(v, OP_Rewind, iTab, 0);
   sqlite3GenerateIndexKey(v, pIndex, iTab);
-  isUnique = pIndex->onError!=OE_None;
-  sqlite3VdbeAddOp(v, OP_IdxInsert, iIdx, isUnique);
-  if( isUnique ){
-    sqlite3VdbeChangeP3(v, -1, "indexed columns are not unique", P3_STATIC);
+  if( pIndex->onError!=OE_None ){
+    int curaddr = sqlite3VdbeCurrentAddr(v);
+    int addr2 = curaddr+4;
+    sqlite3VdbeChangeP2(v, curaddr-1, addr2);
+    sqlite3VdbeAddOp(v, OP_Rowid, iTab, 0);
+    sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
+    sqlite3VdbeAddOp(v, OP_IsUnique, iIdx, addr2);
+    sqlite3VdbeOp3(v, OP_Halt, SQLITE_CONSTRAINT, OE_Abort,
+                    "indexed columns are not unique", P3_STATIC);
+    assert( addr2==sqlite3VdbeCurrentAddr(v) );
   }
+  sqlite3VdbeAddOp(v, OP_IdxInsert, iIdx, 0);
   sqlite3VdbeAddOp(v, OP_Next, iTab, addr1+1);
   sqlite3VdbeChangeP2(v, addr1, sqlite3VdbeCurrentAddr(v));
   sqlite3VdbeAddOp(v, OP_Close, iTab, 0);
@@ -2079,7 +2067,9 @@ void sqlite3CreateIndex(
     if( sqlite3FixInit(&sFix, pParse, iDb, "index", pName) &&
         sqlite3FixSrcList(&sFix, pTblName)
     ){
-      goto exit_create_index;
+      /* Because the parser constructs pTblName from a single identifier,
+      ** sqlite3FixSrcList can never fail. */
+      assert(0);
     }
     pTab = sqlite3LocateTable(pParse, pTblName->a[0].zName, 
         pTblName->a[0].zDatabase);
@@ -2177,11 +2167,12 @@ void sqlite3CreateIndex(
   /* 
   ** Allocate the index structure. 
   */
-  pIndex = sqliteMalloc( sizeof(Index) + strlen(zName) + 1 +
-                        (sizeof(int) + sizeof(CollSeq*))*pList->nExpr );
+  pIndex = sqliteMalloc( sizeof(Index) + strlen(zName) + 1 + sizeof(int) +
+                        (sizeof(int)*2 + sizeof(CollSeq*))*pList->nExpr );
   if( sqlite3_malloc_failed ) goto exit_create_index;
   pIndex->aiColumn = (int*)&pIndex->keyInfo.aColl[pList->nExpr];
-  pIndex->zName = (char*)&pIndex->aiColumn[pList->nExpr];
+  pIndex->aiRowEst = &pIndex->aiColumn[pList->nExpr];
+  pIndex->zName = (char*)&pIndex->aiRowEst[pList->nExpr+1];
   strcpy(pIndex->zName, zName);
   pIndex->pTable = pTab;
   pIndex->nColumn = pList->nExpr;
@@ -2217,6 +2208,7 @@ void sqlite3CreateIndex(
     }
   }
   pIndex->keyInfo.nField = pList->nExpr;
+  sqlite3DefaultRowEst(pIndex);
 
   if( pTab==pParse->pNewTable ){
     /* This routine has been called to create an automatic index as a
@@ -2384,6 +2376,37 @@ exit_create_index:
 }
 
 /*
+** Fill the Index.aiRowEst[] array with default information - information
+** to be used when we have not run the ANALYZE command.
+**
+** aiRowEst[0] is suppose to contain the number of elements in the index.
+** Since we do not know, guess 1 million.  aiRowEst[1] is an estimate of the
+** number of rows in the table that match any particular value of the
+** first column of the index.  aiRowEst[2] is an estimate of the number
+** of rows that match any particular combiniation of the first 2 columns
+** of the index.  And so forth.  It must always be the case that
+*
+**           aiRowEst[N]<=aiRowEst[N-1]
+**           aiRowEst[N]>=1
+**
+** Apart from that, we have little to go on besides intuition as to
+** how aiRowEst[] should be initialized.  The numbers generated here
+** are based on typical values found in actual indices.
+*/
+void sqlite3DefaultRowEst(Index *pIdx){
+  int *a = pIdx->aiRowEst;
+  int i;
+  assert( a!=0 );
+  a[0] = 1000000;
+  for(i=pIdx->nColumn; i>=1; i--){
+    a[i] = 10;
+  }
+  if( pIdx->onError!=OE_None ){
+    a[pIdx->nColumn] = 1;
+  }
+}
+
+/*
 ** This routine will drop an existing named index.  This routine
 ** implements the DROP INDEX statement.
 */
@@ -2473,6 +2496,32 @@ IdList *sqlite3IdListAppend(IdList *pList, Token *pToken){
 }
 
 /*
+** Delete an IdList.
+*/
+void sqlite3IdListDelete(IdList *pList){
+  int i;
+  if( pList==0 ) return;
+  for(i=0; i<pList->nId; i++){
+    sqliteFree(pList->a[i].zName);
+  }
+  sqliteFree(pList->a);
+  sqliteFree(pList);
+}
+
+/*
+** Return the index in pList of the identifier named zId.  Return -1
+** if not found.
+*/
+int sqlite3IdListIndex(IdList *pList, const char *zName){
+  int i;
+  if( pList==0 ) return -1;
+  for(i=0; i<pList->nId; i++){
+    if( sqlite3StrICmp(pList->a[i].zName, zName)==0 ) return i;
+  }
+  return -1;
+}
+
+/*
 ** Append a new table name to the given SrcList.  Create a new SrcList if
 ** need be.  A new entry is created in the SrcList even if pToken is NULL.
 **
@@ -2554,32 +2603,6 @@ void sqlite3SrcListAddAlias(SrcList *pList, Token *pToken){
   if( pList && pList->nSrc>0 ){
     pList->a[pList->nSrc-1].zAlias = sqlite3NameFromToken(pToken);
   }
-}
-
-/*
-** Delete an IdList.
-*/
-void sqlite3IdListDelete(IdList *pList){
-  int i;
-  if( pList==0 ) return;
-  for(i=0; i<pList->nId; i++){
-    sqliteFree(pList->a[i].zName);
-  }
-  sqliteFree(pList->a);
-  sqliteFree(pList);
-}
-
-/*
-** Return the index in pList of the identifier named zId.  Return -1
-** if not found.
-*/
-int sqlite3IdListIndex(IdList *pList, const char *zName){
-  int i;
-  if( pList==0 ) return -1;
-  for(i=0; i<pList->nId; i++){
-    if( sqlite3StrICmp(pList->a[i].zName, zName)==0 ) return i;
-  }
-  return -1;
 }
 
 /*
@@ -2784,7 +2807,7 @@ static int collationMatch(CollSeq *pColl, Index *pIndex){
 ** If pColl==0 then recompute all indices of pTab.
 */
 #ifndef SQLITE_OMIT_REINDEX
-void reindexTable(Parse *pParse, Table *pTab, CollSeq *pColl){
+static void reindexTable(Parse *pParse, Table *pTab, CollSeq *pColl){
   Index *pIndex;              /* An index associated with pTab */
 
   for(pIndex=pTab->pIndex; pIndex; pIndex=pIndex->pNext){
@@ -2802,7 +2825,7 @@ void reindexTable(Parse *pParse, Table *pTab, CollSeq *pColl){
 ** all indices everywhere.
 */
 #ifndef SQLITE_OMIT_REINDEX
-void reindexDatabases(Parse *pParse, CollSeq *pColl){
+static void reindexDatabases(Parse *pParse, CollSeq *pColl){
   Db *pDb;                    /* A single database */
   int iDb;                    /* The database index number */
   sqlite3 *db = pParse->db;   /* The database connection */
@@ -2811,7 +2834,7 @@ void reindexDatabases(Parse *pParse, CollSeq *pColl){
 
   for(iDb=0, pDb=db->aDb; iDb<db->nDb; iDb++, pDb++){
     if( pDb==0 ) continue;
-      for(k=sqliteHashFirst(&pDb->tblHash);  k; k=sqliteHashNext(k)){
+    for(k=sqliteHashFirst(&pDb->tblHash);  k; k=sqliteHashNext(k)){
       pTab = (Table*)sqliteHashData(k);
       reindexTable(pParse, pTab, pColl);
     }

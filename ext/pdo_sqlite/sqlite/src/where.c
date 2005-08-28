@@ -21,20 +21,51 @@
 #include "sqliteInt.h"
 
 /*
+** The number of bits in a Bitmask.  "BMS" means "BitMask Size".
+*/
+#define BMS  (sizeof(Bitmask)*8)
+
+/*
+** Determine the number of elements in an array.
+*/
+#define ARRAYSIZE(X)  (sizeof(X)/sizeof(X[0]))
+
+/*
+** Trace output macros
+*/
+#if defined(SQLITE_TEST) || defined(SQLITE_DEBUG)
+int sqlite3_where_trace = 0;
+# define TRACE(X)  if(sqlite3_where_trace) sqlite3DebugPrintf X
+#else
+# define TRACE(X)
+#endif
+
+/* Forward reference
+*/
+typedef struct WhereClause WhereClause;
+
+/*
 ** The query generator uses an array of instances of this structure to
 ** help it analyze the subexpressions of the WHERE clause.  Each WHERE
 ** clause subexpression is separated from the others by an AND operator.
 **
-** The idxLeft and idxRight fields are the VDBE cursor numbers for the
-** table that contains the column that appears on the left-hand and
-** right-hand side of ExprInfo.p.  If either side of ExprInfo.p is
-** something other than a simple column reference, then idxLeft or
-** idxRight are -1.  
+** All WhereTerms are collected into a single WhereClause structure.  
+** The following identity holds:
 **
-** It is the VDBE cursor number is the value stored in Expr.iTable
-** when Expr.op==TK_COLUMN and the value stored in SrcList.a[].iCursor.
+**        WhereTerm.pWC->a[WhereTerm.idx] == WhereTerm
 **
-** prereqLeft, prereqRight, and prereqAll record sets of cursor numbers,
+** When a term is of the form:
+**
+**              X <op> <expr>
+**
+** where X is a column name and <op> is one of certain operators,
+** then WhereTerm.leftCursor and WhereTerm.leftColumn record the
+** cursor number and column number for X.  WhereTerm.operator records
+** the <op> using a bitmask encoding defined by WO_xxx below.  The
+** use of a bitmask encoding for the operator allows us to search
+** quickly for terms that match any of several different operators.
+**
+** prereqRight and prereqAll record sets of cursor numbers,
 ** but they do so indirectly.  A single ExprMaskSet structure translates
 ** cursor number into bits and the translated bit is stored in the prereq
 ** fields.  The translation is used in order to maximize the number of
@@ -45,39 +76,45 @@
 ** beginning with 0 in order to make the best possible use of the available
 ** bits in the Bitmask.  So, in the example above, the cursor numbers
 ** would be mapped into integers 0 through 7.
-**
-** prereqLeft tells us every VDBE cursor that is referenced on the
-** left-hand side of ExprInfo.p.  prereqRight does the same for the
-** right-hand side of the expression.  The following identity always
-** holds:
-**
-**       prereqAll = prereqLeft | prereqRight
-**
-** The ExprInfo.indexable field is true if the ExprInfo.p expression
-** is of a form that might control an index.  Indexable expressions
-** look like this:
-**
-**              <column> <op> <expr>
-**
-** Where <column> is a simple column name and <op> is on of the operators
-** that allowedOp() recognizes.  
 */
-typedef struct ExprInfo ExprInfo;
-struct ExprInfo {
-  Expr *p;                /* Pointer to the subexpression */
-  u8 indexable;           /* True if this subexprssion is usable by an index */
-  short int idxLeft;      /* p->pLeft is a column in this table number. -1 if
-                          ** p->pLeft is not the column of any table */
-  short int idxRight;     /* p->pRight is a column in this table number. -1 if
-                          ** p->pRight is not the column of any table */
-  Bitmask prereqLeft;     /* Bitmask of tables referenced by p->pLeft */
-  Bitmask prereqRight;    /* Bitmask of tables referenced by p->pRight */
+typedef struct WhereTerm WhereTerm;
+struct WhereTerm {
+  Expr *pExpr;            /* Pointer to the subexpression */
+  i16 iParent;            /* Disable pWC->a[iParent] when this term disabled */
+  i16 leftCursor;         /* Cursor number of X in "X <op> <expr>" */
+  i16 leftColumn;         /* Column number of X in "X <op> <expr>" */
+  u16 operator;           /* A WO_xx value describing <op> */
+  u8 flags;               /* Bit flags.  See below */
+  u8 nChild;              /* Number of children that must disable us */
+  WhereClause *pWC;       /* The clause this term is part of */
+  Bitmask prereqRight;    /* Bitmask of tables used by pRight */
   Bitmask prereqAll;      /* Bitmask of tables referenced by p */
 };
 
 /*
+** Allowed values of WhereTerm.flags
+*/
+#define TERM_DYNAMIC    0x01   /* Need to call sqlite3ExprDelete(pExpr) */
+#define TERM_VIRTUAL    0x02   /* Added by the optimizer.  Do not code */
+#define TERM_CODED      0x04   /* This term is already coded */
+#define TERM_COPIED     0x08   /* Has a child */
+#define TERM_OR_OK      0x10   /* Used during OR-clause processing */
+
+/*
+** An instance of the following structure holds all information about a
+** WHERE clause.  Mostly this is a container for one or more WhereTerms.
+*/
+struct WhereClause {
+  Parse *pParse;           /* The parser context */
+  int nTerm;               /* Number of terms */
+  int nSlot;               /* Number of entries in a[] */
+  WhereTerm *a;            /* Each a[] describes a term of the WHERE cluase */
+  WhereTerm aStatic[10];   /* Initial static space for a[] */
+};
+
+/*
 ** An instance of the following structure keeps track of a mapping
-** between VDBE cursor numbers and bits of the bitmasks in ExprInfo.
+** between VDBE cursor numbers and bits of the bitmasks in WhereTerm.
 **
 ** The VDBE cursor numbers are small integers contained in 
 ** SrcList_item.iCursor and Expr.iTable fields.  For any given WHERE 
@@ -107,43 +144,117 @@ struct ExprMaskSet {
   int ix[sizeof(Bitmask)*8];    /* Cursor assigned to each bit */
 };
 
+
 /*
-** Determine the number of elements in an array.
+** Bitmasks for the operators that indices are able to exploit.  An
+** OR-ed combination of these values can be used when searching for
+** terms in the where clause.
 */
-#define ARRAYSIZE(X)  (sizeof(X)/sizeof(X[0]))
+#define WO_IN     1
+#define WO_EQ     2
+#define WO_LT     (WO_EQ<<(TK_LT-TK_EQ))
+#define WO_LE     (WO_EQ<<(TK_LE-TK_EQ))
+#define WO_GT     (WO_EQ<<(TK_GT-TK_EQ))
+#define WO_GE     (WO_EQ<<(TK_GE-TK_EQ))
+
+/*
+** Value for flags returned by bestIndex()
+*/
+#define WHERE_ROWID_EQ       0x0001   /* rowid=EXPR or rowid IN (...) */
+#define WHERE_ROWID_RANGE    0x0002   /* rowid<EXPR and/or rowid>EXPR */
+#define WHERE_COLUMN_EQ      0x0010   /* x=EXPR or x IN (...) */
+#define WHERE_COLUMN_RANGE   0x0020   /* x<EXPR and/or x>EXPR */
+#define WHERE_COLUMN_IN      0x0040   /* x IN (...) */
+#define WHERE_TOP_LIMIT      0x0100   /* x<EXPR or x<=EXPR constraint */
+#define WHERE_BTM_LIMIT      0x0200   /* x>EXPR or x>=EXPR constraint */
+#define WHERE_IDX_ONLY       0x0800   /* Use index only - omit table */
+#define WHERE_ORDERBY        0x1000   /* Output will appear in correct order */
+#define WHERE_REVERSE        0x2000   /* Scan in reverse order */
+#define WHERE_UNIQUE         0x4000   /* Selects no more than one row */
+
+/*
+** Initialize a preallocated WhereClause structure.
+*/
+static void whereClauseInit(WhereClause *pWC, Parse *pParse){
+  pWC->pParse = pParse;
+  pWC->nTerm = 0;
+  pWC->nSlot = ARRAYSIZE(pWC->aStatic);
+  pWC->a = pWC->aStatic;
+}
+
+/*
+** Deallocate a WhereClause structure.  The WhereClause structure
+** itself is not freed.  This routine is the inverse of whereClauseInit().
+*/
+static void whereClauseClear(WhereClause *pWC){
+  int i;
+  WhereTerm *a;
+  for(i=pWC->nTerm-1, a=pWC->a; i>=0; i--, a++){
+    if( a->flags & TERM_DYNAMIC ){
+      sqlite3ExprDelete(a->pExpr);
+    }
+  }
+  if( pWC->a!=pWC->aStatic ){
+    sqliteFree(pWC->a);
+  }
+}
+
+/*
+** Add a new entries to the WhereClause structure.  Increase the allocated
+** space as necessary.
+**
+** WARNING:  This routine might reallocate the space used to store
+** WhereTerms.  All pointers to WhereTerms should be invalided after
+** calling this routine.  Such pointers may be reinitialized by referencing
+** the pWC->a[] array.
+*/
+static int whereClauseInsert(WhereClause *pWC, Expr *p, int flags){
+  WhereTerm *pTerm;
+  int idx;
+  if( pWC->nTerm>=pWC->nSlot ){
+    WhereTerm *pOld = pWC->a;
+    pWC->a = sqliteMalloc( sizeof(pWC->a[0])*pWC->nSlot*2 );
+    if( pWC->a==0 ) return 0;
+    memcpy(pWC->a, pOld, sizeof(pWC->a[0])*pWC->nTerm);
+    if( pOld!=pWC->aStatic ){
+      sqliteFree(pOld);
+    }
+    pWC->nSlot *= 2;
+  }
+  pTerm = &pWC->a[idx = pWC->nTerm];
+  pWC->nTerm++;
+  pTerm->pExpr = p;
+  pTerm->flags = flags;
+  pTerm->pWC = pWC;
+  pTerm->iParent = -1;
+  return idx;
+}
 
 /*
 ** This routine identifies subexpressions in the WHERE clause where
-** each subexpression is separate by the AND operator.  aSlot is 
-** filled with pointers to the subexpressions.  For example:
+** each subexpression is separate by the AND operator or some other
+** operator specified in the op parameter.  The WhereClause structure
+** is filled with pointers to subexpressions.  For example:
 **
 **    WHERE  a=='hello' AND coalesce(b,11)<10 AND (c+12!=d OR c==22)
 **           \________/     \_______________/     \________________/
 **            slot[0]            slot[1]               slot[2]
 **
 ** The original WHERE clause in pExpr is unaltered.  All this routine
-** does is make aSlot[] entries point to substructure within pExpr.
+** does is make slot[] entries point to substructure within pExpr.
 **
-** aSlot[] is an array of subexpressions structures.  There are nSlot
-** spaces left in this array.  This routine finds as many AND-separated
-** subexpressions as it can and puts pointers to those subexpressions
-** into aSlot[] entries.  The return value is the number of slots filled.
+** In the previous sentence and in the diagram, "slot[]" refers to
+** the WhereClause.a[] array.  This array grows as needed to contain
+** all terms of the WHERE clause.
 */
-static int exprSplit(int nSlot, ExprInfo *aSlot, Expr *pExpr){
-  int cnt = 0;
-  if( pExpr==0 || nSlot<1 ) return 0;
-  if( nSlot==1 || pExpr->op!=TK_AND ){
-    aSlot[0].p = pExpr;
-    return 1;
-  }
-  if( pExpr->pLeft->op!=TK_AND ){
-    aSlot[0].p = pExpr->pLeft;
-    cnt = 1 + exprSplit(nSlot-1, &aSlot[1], pExpr->pRight);
+static void whereSplit(WhereClause *pWC, Expr *pExpr, int op){
+  if( pExpr==0 ) return;
+  if( pExpr->op!=op ){
+    whereClauseInsert(pWC, pExpr, 0);
   }else{
-    cnt = exprSplit(nSlot, aSlot, pExpr->pLeft);
-    cnt += exprSplit(nSlot-cnt, &aSlot[cnt], pExpr->pRight);
+    whereSplit(pWC, pExpr->pLeft, op);
+    whereSplit(pWC, pExpr->pRight, op);
   }
-  return cnt;
 }
 
 /*
@@ -167,17 +278,16 @@ static Bitmask getMask(ExprMaskSet *pMaskSet, int iCursor){
 
 /*
 ** Create a new mask for cursor iCursor.
+**
+** There is one cursor per table in the FROM clause.  The number of
+** tables in the FROM clause is limited by a test early in the
+** sqlite3WhereBegin() routien.  So we know that the pMaskSet->ix[]
+** array will never overflow.
 */
 static void createMask(ExprMaskSet *pMaskSet, int iCursor){
-  if( pMaskSet->n<ARRAYSIZE(pMaskSet->ix) ){
-    pMaskSet->ix[pMaskSet->n++] = iCursor;
-  }
+  assert( pMaskSet->n < ARRAYSIZE(pMaskSet->ix) );
+  pMaskSet->ix[pMaskSet->n++] = iCursor;
 }
-
-/*
-** Destroy an expression mask set
-*/
-#define freeMaskSet(P)   /* NO-OP */
 
 /*
 ** This routine walks (recursively) an expression tree and generates
@@ -189,7 +299,9 @@ static void createMask(ExprMaskSet *pMaskSet, int iCursor){
 ** the header comment on that routine for additional information.
 ** The sqlite3ExprResolveNames() routines looks for column names and
 ** sets their opcodes to TK_COLUMN and their Expr.iTable fields to
-** the VDBE cursor number of the table.
+** the VDBE cursor number of the table.  This routine just has to
+** translate the cursor numbers into bitmask values and OR all
+** the bitmasks together.
 */
 static Bitmask exprListTableUsage(ExprMaskSet *, ExprList *);
 static Bitmask exprTableUsage(ExprMaskSet *pMaskSet, Expr *p){
@@ -229,7 +341,10 @@ static Bitmask exprListTableUsage(ExprMaskSet *pMaskSet, ExprList *pList){
 ** "=", "<", ">", "<=", ">=", and "IN".
 */
 static int allowedOp(int op){
-  assert( TK_GT==TK_LE-1 && TK_LE==TK_LT-1 && TK_LT==TK_GE-1 && TK_EQ==TK_GT-1);
+  assert( TK_GT>TK_EQ && TK_GT<TK_GE );
+  assert( TK_LT>TK_EQ && TK_LT<TK_GE );
+  assert( TK_LE>TK_EQ && TK_LE<TK_GE );
+  assert( TK_GE==TK_EQ+4 );
   return op==TK_IN || (op>=TK_EQ && op<=TK_GE);
 }
 
@@ -239,75 +354,348 @@ static int allowedOp(int op){
 #define SWAP(TYPE,A,B) {TYPE t=A; A=B; B=t;}
 
 /*
-** Return the index in the SrcList that uses cursor iCur.  If iCur is
-** used by the first entry in SrcList return 0.  If iCur is used by
-** the second entry return 1.  And so forth.
-**
-** SrcList is the set of tables in the FROM clause in the order that
-** they will be processed.  The value returned here gives us an index
-** of which tables will be processed first.
+** Commute a comparision operator.  Expressions of the form "X op Y"
+** are converted into "Y op X".
 */
-static int tableOrder(SrcList *pList, int iCur){
-  int i;
-  struct SrcList_item *pItem;
-  for(i=0, pItem=pList->a; i<pList->nSrc; i++, pItem++){
-    if( pItem->iCursor==iCur ) return i;
+static void exprCommute(Expr *pExpr){
+  assert( allowedOp(pExpr->op) && pExpr->op!=TK_IN );
+  SWAP(CollSeq*,pExpr->pRight->pColl,pExpr->pLeft->pColl);
+  SWAP(Expr*,pExpr->pRight,pExpr->pLeft);
+  if( pExpr->op>=TK_GT ){
+    assert( TK_LT==TK_GT+2 );
+    assert( TK_GE==TK_LE+2 );
+    assert( TK_GT>TK_EQ );
+    assert( TK_GT<TK_LE );
+    assert( pExpr->op>=TK_GT && pExpr->op<=TK_GE );
+    pExpr->op = ((pExpr->op-TK_GT)^2)+TK_GT;
   }
-  return -1;
 }
 
 /*
-** The input to this routine is an ExprInfo structure with only the
-** "p" field filled in.  The job of this routine is to analyze the
-** subexpression and populate all the other fields of the ExprInfo
-** structure.
+** Translate from TK_xx operator to WO_xx bitmask.
 */
-static void exprAnalyze(SrcList *pSrc, ExprMaskSet *pMaskSet, ExprInfo *pInfo){
-  Expr *pExpr = pInfo->p;
-  pInfo->prereqLeft = exprTableUsage(pMaskSet, pExpr->pLeft);
-  pInfo->prereqRight = exprTableUsage(pMaskSet, pExpr->pRight);
-  pInfo->prereqAll = exprTableUsage(pMaskSet, pExpr);
-  pInfo->indexable = 0;
-  pInfo->idxLeft = -1;
-  pInfo->idxRight = -1;
-  if( allowedOp(pExpr->op) && (pInfo->prereqRight & pInfo->prereqLeft)==0 ){
-    if( pExpr->pRight && pExpr->pRight->op==TK_COLUMN ){
-      pInfo->idxRight = pExpr->pRight->iTable;
-      pInfo->indexable = 1;
-    }
-    if( pExpr->pLeft->op==TK_COLUMN ){
-      pInfo->idxLeft = pExpr->pLeft->iTable;
-      pInfo->indexable = 1;
+static int operatorMask(int op){
+  int c;
+  assert( allowedOp(op) );
+  if( op==TK_IN ){
+    c = WO_IN;
+  }else{
+    c = WO_EQ<<(op-TK_EQ);
+  }
+  assert( op!=TK_IN || c==WO_IN );
+  assert( op!=TK_EQ || c==WO_EQ );
+  assert( op!=TK_LT || c==WO_LT );
+  assert( op!=TK_LE || c==WO_LE );
+  assert( op!=TK_GT || c==WO_GT );
+  assert( op!=TK_GE || c==WO_GE );
+  return c;
+}
+
+/*
+** Search for a term in the WHERE clause that is of the form "X <op> <expr>"
+** where X is a reference to the iColumn of table iCur and <op> is one of
+** the WO_xx operator codes specified by the op parameter.
+** Return a pointer to the term.  Return 0 if not found.
+*/
+static WhereTerm *findTerm(
+  WhereClause *pWC,     /* The WHERE clause to be searched */
+  int iCur,             /* Cursor number of LHS */
+  int iColumn,          /* Column number of LHS */
+  Bitmask notReady,     /* RHS must not overlap with this mask */
+  u16 op,               /* Mask of WO_xx values describing operator */
+  Index *pIdx           /* Must be compatible with this index, if not NULL */
+){
+  WhereTerm *pTerm;
+  int k;
+  for(pTerm=pWC->a, k=pWC->nTerm; k; k--, pTerm++){
+    if( pTerm->leftCursor==iCur
+       && (pTerm->prereqRight & notReady)==0
+       && pTerm->leftColumn==iColumn
+       && (pTerm->operator & op)!=0
+    ){
+      if( iCur>=0 && pIdx ){
+        Expr *pX = pTerm->pExpr;
+        CollSeq *pColl;
+        char idxaff;
+        int k;
+        Parse *pParse = pWC->pParse;
+
+        idxaff = pIdx->pTable->aCol[iColumn].affinity;
+        if( !sqlite3IndexAffinityOk(pX, idxaff) ) continue;
+        pColl = sqlite3ExprCollSeq(pParse, pX->pLeft);
+        if( !pColl ){
+          if( pX->pRight ){
+            pColl = sqlite3ExprCollSeq(pParse, pX->pRight);
+          }
+          if( !pColl ){
+            pColl = pParse->db->pDfltColl;
+          }
+        }
+        for(k=0; k<pIdx->nColumn && pIdx->aiColumn[k]!=iColumn; k++){}
+        assert( k<pIdx->nColumn );
+        if( pColl!=pIdx->keyInfo.aColl[k] ) continue;
+      }
+      return pTerm;
     }
   }
-  if( pInfo->indexable ){
-    assert( pInfo->idxLeft!=pInfo->idxRight );
-
-    /* We want the expression to be of the form "X = expr", not "expr = X".
-    ** So flip it over if necessary.  If the expression is "X = Y", then
-    ** we want Y to come from an earlier table than X.
-    **
-    ** The collating sequence rule is to always choose the left expression.
-    ** So if we do a flip, we also have to move the collating sequence.
-    */
-    if( tableOrder(pSrc,pInfo->idxLeft)<tableOrder(pSrc,pInfo->idxRight) ){
-      assert( pExpr->op!=TK_IN );
-      SWAP(CollSeq*,pExpr->pRight->pColl,pExpr->pLeft->pColl);
-      SWAP(Expr*,pExpr->pRight,pExpr->pLeft);
-      if( pExpr->op>=TK_GT ){
-        assert( TK_LT==TK_GT+2 );
-        assert( TK_GE==TK_LE+2 );
-        assert( TK_GT>TK_EQ );
-        assert( TK_GT<TK_LE );
-        assert( pExpr->op>=TK_GT && pExpr->op<=TK_GE );
-        pExpr->op = ((pExpr->op-TK_GT)^2)+TK_GT;
-      }
-      SWAP(unsigned, pInfo->prereqLeft, pInfo->prereqRight);
-      SWAP(short int, pInfo->idxLeft, pInfo->idxRight);
-    }
-  }      
-
+  return 0;
 }
+
+/* Forward reference */
+static void exprAnalyze(SrcList*, ExprMaskSet*, WhereClause*, int);
+
+/*
+** Call exprAnalyze on all terms in a WHERE clause.  
+**
+**
+*/
+static void exprAnalyzeAll(
+  SrcList *pTabList,       /* the FROM clause */
+  ExprMaskSet *pMaskSet,   /* table masks */
+  WhereClause *pWC         /* the WHERE clause to be analyzed */
+){
+  int i;
+  for(i=pWC->nTerm-1; i>=0; i--){
+    exprAnalyze(pTabList, pMaskSet, pWC, i);
+  }
+}
+
+#ifndef SQLITE_OMIT_LIKE_OPTIMIZATION
+/*
+** Check to see if the given expression is a LIKE or GLOB operator that
+** can be optimized using inequality constraints.  Return TRUE if it is
+** so and false if not.
+**
+** In order for the operator to be optimizible, the RHS must be a string
+** literal that does not begin with a wildcard.  
+*/
+static int isLikeOrGlob(
+  sqlite3 *db,      /* The database */
+  Expr *pExpr,      /* Test this expression */
+  int *pnPattern,   /* Number of non-wildcard prefix characters */
+  int *pisComplete  /* True if the only wildcard is % in the last character */
+){
+  const char *z;
+  Expr *pRight, *pLeft;
+  ExprList *pList;
+  int c, cnt;
+  char wc[3];
+  if( !sqlite3IsLikeFunction(db, pExpr, wc) ){
+    return 0;
+  }
+  pList = pExpr->pList;
+  pRight = pList->a[0].pExpr;
+  if( pRight->op!=TK_STRING ){
+    return 0;
+  }
+  pLeft = pList->a[1].pExpr;
+  if( pLeft->op!=TK_COLUMN ){
+    return 0;
+  }
+  sqlite3DequoteExpr(pRight);
+  z = pRight->token.z;
+  for(cnt=0; (c=z[cnt])!=0 && c!=wc[0] && c!=wc[1] && c!=wc[2]; cnt++){}
+  if( cnt==0 || 255==(u8)z[cnt] ){
+    return 0;
+  }
+  *pisComplete = z[cnt]==wc[0] && z[cnt+1]==0;
+  *pnPattern = cnt;
+  return 1;
+}
+#endif /* SQLITE_OMIT_LIKE_OPTIMIZATION */
+
+/*
+** The input to this routine is an WhereTerm structure with only the
+** "pExpr" field filled in.  The job of this routine is to analyze the
+** subexpression and populate all the other fields of the WhereTerm
+** structure.
+**
+** If the expression is of the form "<expr> <op> X" it gets commuted
+** to the standard form of "X <op> <expr>".  If the expression is of
+** the form "X <op> Y" where both X and Y are columns, then the original
+** expression is unchanged and a new virtual expression of the form
+** "Y <op> X" is added to the WHERE clause.  
+*/
+static void exprAnalyze(
+  SrcList *pSrc,            /* the FROM clause */
+  ExprMaskSet *pMaskSet,    /* table masks */
+  WhereClause *pWC,         /* the WHERE clause */
+  int idxTerm               /* Index of the term to be analyzed */
+){
+  WhereTerm *pTerm = &pWC->a[idxTerm];
+  Expr *pExpr = pTerm->pExpr;
+  Bitmask prereqLeft;
+  Bitmask prereqAll;
+  int idxRight;
+  int nPattern;
+  int isComplete;
+
+  if( sqlite3_malloc_failed ) return;
+  prereqLeft = exprTableUsage(pMaskSet, pExpr->pLeft);
+  pTerm->prereqRight = exprTableUsage(pMaskSet, pExpr->pRight);
+  pTerm->prereqAll = prereqAll = exprTableUsage(pMaskSet, pExpr);
+  pTerm->leftCursor = -1;
+  pTerm->iParent = -1;
+  pTerm->operator = 0;
+  idxRight = -1;
+  if( allowedOp(pExpr->op) && (pTerm->prereqRight & prereqLeft)==0 ){
+    Expr *pLeft = pExpr->pLeft;
+    Expr *pRight = pExpr->pRight;
+    if( pLeft->op==TK_COLUMN ){
+      pTerm->leftCursor = pLeft->iTable;
+      pTerm->leftColumn = pLeft->iColumn;
+      pTerm->operator = operatorMask(pExpr->op);
+    }
+    if( pRight && pRight->op==TK_COLUMN ){
+      WhereTerm *pNew;
+      Expr *pDup;
+      if( pTerm->leftCursor>=0 ){
+        int idxNew;
+        pDup = sqlite3ExprDup(pExpr);
+        idxNew = whereClauseInsert(pWC, pDup, TERM_VIRTUAL|TERM_DYNAMIC);
+        if( idxNew==0 ) return;
+        pNew = &pWC->a[idxNew];
+        pNew->iParent = idxTerm;
+        pTerm = &pWC->a[idxTerm];
+        pTerm->nChild = 1;
+        pTerm->flags |= TERM_COPIED;
+      }else{
+        pDup = pExpr;
+        pNew = pTerm;
+      }
+      exprCommute(pDup);
+      pLeft = pDup->pLeft;
+      pNew->leftCursor = pLeft->iTable;
+      pNew->leftColumn = pLeft->iColumn;
+      pNew->prereqRight = prereqLeft;
+      pNew->prereqAll = prereqAll;
+      pNew->operator = operatorMask(pDup->op);
+    }
+  }
+
+#ifndef SQLITE_OMIT_BETWEEN_OPTIMIZATION
+  /* If a term is the BETWEEN operator, create two new virtual terms
+  ** that define the range that the BETWEEN implements.
+  */
+  else if( pExpr->op==TK_BETWEEN ){
+    ExprList *pList = pExpr->pList;
+    int i;
+    static const u8 ops[] = {TK_GE, TK_LE};
+    assert( pList!=0 );
+    assert( pList->nExpr==2 );
+    for(i=0; i<2; i++){
+      Expr *pNewExpr;
+      int idxNew;
+      pNewExpr = sqlite3Expr(ops[i], sqlite3ExprDup(pExpr->pLeft),
+                             sqlite3ExprDup(pList->a[i].pExpr), 0);
+      idxNew = whereClauseInsert(pWC, pNewExpr, TERM_VIRTUAL|TERM_DYNAMIC);
+      exprAnalyze(pSrc, pMaskSet, pWC, idxNew);
+      pTerm = &pWC->a[idxTerm];
+      pWC->a[idxNew].iParent = idxTerm;
+    }
+    pTerm->nChild = 2;
+  }
+#endif /* SQLITE_OMIT_BETWEEN_OPTIMIZATION */
+
+#ifndef SQLITE_OMIT_OR_OPTIMIZATION
+  /* Attempt to convert OR-connected terms into an IN operator so that
+  ** they can make use of indices.
+  */
+  else if( pExpr->op==TK_OR ){
+    int ok;
+    int i, j;
+    int iColumn, iCursor;
+    WhereClause sOr;
+    WhereTerm *pOrTerm;
+
+    assert( (pTerm->flags & TERM_DYNAMIC)==0 );
+    whereClauseInit(&sOr, pWC->pParse);
+    whereSplit(&sOr, pExpr, TK_OR);
+    exprAnalyzeAll(pSrc, pMaskSet, &sOr);
+    assert( sOr.nTerm>0 );
+    j = 0;
+    do{
+      iColumn = sOr.a[j].leftColumn;
+      iCursor = sOr.a[j].leftCursor;
+      ok = iCursor>=0;
+      for(i=sOr.nTerm-1, pOrTerm=sOr.a; i>=0 && ok; i--, pOrTerm++){
+        if( pOrTerm->operator!=WO_EQ ){
+          goto or_not_possible;
+        }
+        if( pOrTerm->leftCursor==iCursor && pOrTerm->leftColumn==iColumn ){
+          pOrTerm->flags |= TERM_OR_OK;
+        }else if( (pOrTerm->flags & TERM_COPIED)!=0 ||
+                    ((pOrTerm->flags & TERM_VIRTUAL)!=0 &&
+                     (sOr.a[pOrTerm->iParent].flags & TERM_OR_OK)!=0) ){
+          pOrTerm->flags &= ~TERM_OR_OK;
+        }else{
+          ok = 0;
+        }
+      }
+    }while( !ok && (sOr.a[j++].flags & TERM_COPIED)!=0 && j<sOr.nTerm );
+    if( ok ){
+      ExprList *pList = 0;
+      Expr *pNew, *pDup;
+      for(i=sOr.nTerm-1, pOrTerm=sOr.a; i>=0 && ok; i--, pOrTerm++){
+        if( (pOrTerm->flags & TERM_OR_OK)==0 ) continue;
+        pDup = sqlite3ExprDup(pOrTerm->pExpr->pRight);
+        pList = sqlite3ExprListAppend(pList, pDup, 0);
+      }
+      pDup = sqlite3Expr(TK_COLUMN, 0, 0, 0);
+      if( pDup ){
+        pDup->iTable = iCursor;
+        pDup->iColumn = iColumn;
+      }
+      pNew = sqlite3Expr(TK_IN, pDup, 0, 0);
+      if( pNew ) pNew->pList = pList;
+      pTerm->pExpr = pNew;
+      pTerm->flags |= TERM_DYNAMIC;
+      exprAnalyze(pSrc, pMaskSet, pWC, idxTerm);
+      pTerm = &pWC->a[idxTerm];
+    }
+or_not_possible:
+    whereClauseClear(&sOr);
+  }
+#endif /* SQLITE_OMIT_OR_OPTIMIZATION */
+
+#ifndef SQLITE_OMIT_LIKE_OPTIMIZATION
+  /* Add constraints to reduce the search space on a LIKE or GLOB
+  ** operator.
+  */
+  if( isLikeOrGlob(pWC->pParse->db, pExpr, &nPattern, &isComplete) ){
+    Expr *pLeft, *pRight;
+    Expr *pStr1, *pStr2;
+    Expr *pNewExpr1, *pNewExpr2;
+    int idxNew1, idxNew2;
+
+    pLeft = pExpr->pList->a[1].pExpr;
+    pRight = pExpr->pList->a[0].pExpr;
+    pStr1 = sqlite3Expr(TK_STRING, 0, 0, 0);
+    if( pStr1 ){
+      sqlite3TokenCopy(&pStr1->token, &pRight->token);
+      pStr1->token.n = nPattern;
+    }
+    pStr2 = sqlite3ExprDup(pStr1);
+    if( pStr2 ){
+      assert( pStr2->token.dyn );
+      ++*(u8*)&pStr2->token.z[nPattern-1];
+    }
+    pNewExpr1 = sqlite3Expr(TK_GE, sqlite3ExprDup(pLeft), pStr1, 0);
+    idxNew1 = whereClauseInsert(pWC, pNewExpr1, TERM_VIRTUAL|TERM_DYNAMIC);
+    exprAnalyze(pSrc, pMaskSet, pWC, idxNew1);
+    pNewExpr2 = sqlite3Expr(TK_LT, sqlite3ExprDup(pLeft), pStr2, 0);
+    idxNew2 = whereClauseInsert(pWC, pNewExpr2, TERM_VIRTUAL|TERM_DYNAMIC);
+    exprAnalyze(pSrc, pMaskSet, pWC, idxNew2);
+    pTerm = &pWC->a[idxTerm];
+    if( isComplete ){
+      pWC->a[idxNew1].iParent = idxTerm;
+      pWC->a[idxNew2].iParent = idxTerm;
+      pTerm->nChild = 2;
+    }
+  }
+#endif /* SQLITE_OMIT_LIKE_OPTIMIZATION */
+}
+
 
 /*
 ** This routine decides if pIdx can be used to satisfy the ORDER BY
@@ -321,10 +709,6 @@ static void exprAnalyze(SrcList *pSrc, ExprMaskSet *pMaskSet, ExprInfo *pInfo){
 ** nEqCol is the number of columns of pIdx that are used as equality
 ** constraints.  Any of these columns may be missing from the ORDER BY
 ** clause and the match can still be a success.
-**
-** If the index is UNIQUE, then the ORDER BY clause is allowed to have
-** additional terms past the end of the index and the match will still
-** be a success.
 **
 ** All terms of the ORDER BY that match against the index must be either
 ** ASC or DESC.  (Terms of the ORDER BY clause past the end of a UNIQUE
@@ -394,10 +778,9 @@ static int isSortingIndex(
   }
 
   /* The index can be used for sorting if all terms of the ORDER BY clause
-  ** or covered or if we ran out of index columns and the it is a UNIQUE
-  ** index.
+  ** are covered.
   */
-  if( j>=nTerm || (i>=pIdx->nColumn && pIdx->onError!=OE_None) ){
+  if( j>=nTerm ){
     *pbRev = sortOrder==SQLITE_SO_DESC;
     return 1;
   }
@@ -426,6 +809,249 @@ static int sortableByRowid(
   return 0;
 }
 
+/*
+** Prepare a crude estimate of the logorithm of the input value.
+** The results need not be exact.  This is only used for estimating
+** the total cost of performing operatings with O(logN) or O(NlogN)
+** complexity.  Because N is just a guess, it is no great tragedy if
+** logN is a little off.
+*/
+static double estLog(double N){
+  double logN = 1.0;
+  double x = 10.0;
+  while( N>x ){
+    logN += 1.0;
+    x *= 10;
+  }
+  return logN;
+}
+
+/*
+** Find the best index for accessing a particular table.  Return a pointer
+** to the index, flags that describe how the index should be used, the
+** number of equality constraints, and the "cost" for this index.
+**
+** The lowest cost index wins.  The cost is an estimate of the amount of
+** CPU and disk I/O need to process the request using the selected index.
+** Factors that influence cost include:
+**
+**    *  The estimated number of rows that will be retrieved.  (The
+**       fewer the better.)
+**
+**    *  Whether or not sorting must occur.
+**
+**    *  Whether or not there must be separate lookups in the
+**       index and in the main table.
+**
+*/
+static double bestIndex(
+  Parse *pParse,              /* The parsing context */
+  WhereClause *pWC,           /* The WHERE clause */
+  struct SrcList_item *pSrc,  /* The FROM clause term to search */
+  Bitmask notReady,           /* Mask of cursors that are not available */
+  ExprList *pOrderBy,         /* The order by clause */
+  Index **ppIndex,            /* Make *ppIndex point to the best index */
+  int *pFlags,                /* Put flags describing this choice in *pFlags */
+  int *pnEq                   /* Put the number of == or IN constraints here */
+){
+  WhereTerm *pTerm;
+  Index *bestIdx = 0;         /* Index that gives the lowest cost */
+  double lowestCost = 1.0e99; /* The cost of using bestIdx */
+  int bestFlags = 0;          /* Flags associated with bestIdx */
+  int bestNEq = 0;            /* Best value for nEq */
+  int iCur = pSrc->iCursor;   /* The cursor of the table to be accessed */
+  Index *pProbe;              /* An index we are evaluating */
+  int rev;                    /* True to scan in reverse order */
+  int flags;                  /* Flags associated with pProbe */
+  int nEq;                    /* Number of == or IN constraints */
+  double cost;                /* Cost of using pProbe */
+
+  TRACE(("bestIndex: tbl=%s notReady=%x\n", pSrc->pTab->zName, notReady));
+
+  /* Check for a rowid=EXPR or rowid IN (...) constraints
+  */
+  pTerm = findTerm(pWC, iCur, -1, notReady, WO_EQ|WO_IN, 0);
+  if( pTerm ){
+    Expr *pExpr;
+    *ppIndex = 0;
+    bestFlags = WHERE_ROWID_EQ;
+    if( pTerm->operator & WO_EQ ){
+      /* Rowid== is always the best pick.  Look no further.  Because only
+      ** a single row is generated, output is always in sorted order */
+      *pFlags = WHERE_ROWID_EQ | WHERE_UNIQUE;
+      *pnEq = 1;
+      TRACE(("... best is rowid\n"));
+      return 0.0;
+    }else if( (pExpr = pTerm->pExpr)->pList!=0 ){
+      /* Rowid IN (LIST): cost is NlogN where N is the number of list
+      ** elements.  */
+      lowestCost = pExpr->pList->nExpr;
+      lowestCost *= estLog(lowestCost);
+    }else{
+      /* Rowid IN (SELECT): cost is NlogN where N is the number of rows
+      ** in the result of the inner select.  We have no way to estimate
+      ** that value so make a wild guess. */
+      lowestCost = 200.0;
+    }
+    TRACE(("... rowid IN cost: %.9g\n", lowestCost));
+  }
+
+  /* Estimate the cost of a table scan.  If we do not know how many
+  ** entries are in the table, use 1 million as a guess.
+  */
+  pProbe = pSrc->pTab->pIndex;
+  cost = pProbe ? pProbe->aiRowEst[0] : 1000000.0;
+  TRACE(("... table scan base cost: %.9g\n", cost));
+  flags = WHERE_ROWID_RANGE;
+
+  /* Check for constraints on a range of rowids in a table scan.
+  */
+  pTerm = findTerm(pWC, iCur, -1, notReady, WO_LT|WO_LE|WO_GT|WO_GE, 0);
+  if( pTerm ){
+    if( findTerm(pWC, iCur, -1, notReady, WO_LT|WO_LE, 0) ){
+      flags |= WHERE_TOP_LIMIT;
+      cost *= 0.333;  /* Guess that rowid<EXPR eliminates two-thirds or rows */
+    }
+    if( findTerm(pWC, iCur, -1, notReady, WO_GT|WO_GE, 0) ){
+      flags |= WHERE_BTM_LIMIT;
+      cost *= 0.333;  /* Guess that rowid>EXPR eliminates two-thirds of rows */
+    }
+    TRACE(("... rowid range reduces cost to %.9g\n", cost));
+  }else{
+    flags = 0;
+  }
+
+  /* If the table scan does not satisfy the ORDER BY clause, increase
+  ** the cost by NlogN to cover the expense of sorting. */
+  if( pOrderBy ){
+    if( sortableByRowid(iCur, pOrderBy, &rev) ){
+      flags |= WHERE_ORDERBY|WHERE_ROWID_RANGE;
+      if( rev ){
+        flags |= WHERE_REVERSE;
+      }
+    }else{
+      cost += cost*estLog(cost);
+      TRACE(("... sorting increases cost to %.9g\n", cost));
+    }
+  }
+  if( cost<lowestCost ){
+    lowestCost = cost;
+    bestFlags = flags;
+  }
+
+  /* Look at each index.
+  */
+  for(; pProbe; pProbe=pProbe->pNext){
+    int i;                       /* Loop counter */
+    double inMultiplier = 1.0;
+
+    TRACE(("... index %s:\n", pProbe->zName));
+
+    /* Count the number of columns in the index that are satisfied
+    ** by x=EXPR constraints or x IN (...) constraints.
+    */
+    flags = 0;
+    for(i=0; i<pProbe->nColumn; i++){
+      int j = pProbe->aiColumn[i];
+      pTerm = findTerm(pWC, iCur, j, notReady, WO_EQ|WO_IN, pProbe);
+      if( pTerm==0 ) break;
+      flags |= WHERE_COLUMN_EQ;
+      if( pTerm->operator & WO_IN ){
+        Expr *pExpr = pTerm->pExpr;
+        flags |= WHERE_COLUMN_IN;
+        if( pExpr->pSelect!=0 ){
+          inMultiplier *= 100.0;
+        }else if( pExpr->pList!=0 ){
+          inMultiplier *= pExpr->pList->nExpr + 1.0;
+        }
+      }
+    }
+    cost = pProbe->aiRowEst[i] * inMultiplier * estLog(inMultiplier);
+    nEq = i;
+    if( pProbe->onError!=OE_None && (flags & WHERE_COLUMN_IN)==0
+         && nEq==pProbe->nColumn ){
+      flags |= WHERE_UNIQUE;
+    }
+    TRACE(("...... nEq=%d inMult=%.9g cost=%.9g\n", nEq, inMultiplier, cost));
+
+    /* Look for range constraints
+    */
+    if( nEq<pProbe->nColumn ){
+      int j = pProbe->aiColumn[nEq];
+      pTerm = findTerm(pWC, iCur, j, notReady, WO_LT|WO_LE|WO_GT|WO_GE, pProbe);
+      if( pTerm ){
+        flags |= WHERE_COLUMN_RANGE;
+        if( findTerm(pWC, iCur, j, notReady, WO_LT|WO_LE, pProbe) ){
+          flags |= WHERE_TOP_LIMIT;
+          cost *= 0.333;
+        }
+        if( findTerm(pWC, iCur, j, notReady, WO_GT|WO_GE, pProbe) ){
+          flags |= WHERE_BTM_LIMIT;
+          cost *= 0.333;
+        }
+        TRACE(("...... range reduces cost to %.9g\n", cost));
+      }
+    }
+
+    /* Add the additional cost of sorting if that is a factor.
+    */
+    if( pOrderBy ){
+      if( (flags & WHERE_COLUMN_IN)==0 &&
+           isSortingIndex(pParse,pProbe,pSrc->pTab,iCur,pOrderBy,nEq,&rev) ){
+        if( flags==0 ){
+          flags = WHERE_COLUMN_RANGE;
+        }
+        flags |= WHERE_ORDERBY;
+        if( rev ){
+          flags |= WHERE_REVERSE;
+        }
+      }else{
+        cost += cost*estLog(cost);
+        TRACE(("...... orderby increases cost to %.9g\n", cost));
+      }
+    }
+
+    /* Check to see if we can get away with using just the index without
+    ** ever reading the table.  If that is the case, then halve the
+    ** cost of this index.
+    */
+    if( flags && pSrc->colUsed < (((Bitmask)1)<<(BMS-1)) ){
+      Bitmask m = pSrc->colUsed;
+      int j;
+      for(j=0; j<pProbe->nColumn; j++){
+        int x = pProbe->aiColumn[j];
+        if( x<BMS-1 ){
+          m &= ~(((Bitmask)1)<<x);
+        }
+      }
+      if( m==0 ){
+        flags |= WHERE_IDX_ONLY;
+        cost *= 0.5;
+        TRACE(("...... idx-only reduces cost to %.9g\n", cost));
+      }
+    }
+
+    /* If this index has achieved the lowest cost so far, then use it.
+    */
+    if( cost < lowestCost ){
+      bestIdx = pProbe;
+      lowestCost = cost;
+      assert( flags!=0 );
+      bestFlags = flags;
+      bestNEq = nEq;
+    }
+  }
+
+  /* Report the best result
+  */
+  *ppIndex = bestIdx;
+  TRACE(("best index is %s, cost=%.9g, flags=%x, nEq=%d\n",
+        bestIdx ? bestIdx->zName : "(none)", lowestCost, bestFlags, bestNEq));
+  *pFlags = bestFlags;
+  *pnEq = bestNEq;
+  return lowestCost;
+}
+
 
 /*
 ** Disable a term in the WHERE clause.  Except, do not disable the term
@@ -449,10 +1075,18 @@ static int sortableByRowid(
 ** too much.  If we disabled in (1), we'd get the wrong answer.
 ** See ticket #813.
 */
-static void disableTerm(WhereLevel *pLevel, Expr **ppExpr){
-  Expr *pExpr = *ppExpr;
-  if( pLevel->iLeftJoin==0 || ExprHasProperty(pExpr, EP_FromJoin) ){
-    *ppExpr = 0;
+static void disableTerm(WhereLevel *pLevel, WhereTerm *pTerm){
+  if( pTerm
+      && (pTerm->flags & TERM_CODED)==0
+      && (pLevel->iLeftJoin==0 || ExprHasProperty(pTerm->pExpr, EP_FromJoin))
+  ){
+    pTerm->flags |= TERM_CODED;
+    if( pTerm->iParent>=0 ){
+      WhereTerm *pOther = &pTerm->pWC->a[pTerm->iParent];
+      if( (--pOther->nChild)==0 ){
+        disableTerm(pLevel, pOther);
+      }
+    }
   }
 }
 
@@ -475,41 +1109,138 @@ static void buildIndexProbe(Vdbe *v, int nColumn, int brk, Index *pIdx){
   sqlite3IndexAffinityStr(v, pIdx);
 }
 
+
 /*
-** Generate code for an equality term of the WHERE clause.  An equality
-** term can be either X=expr  or X IN (...).   pTerm is the X.  
+** Generate code for a single equality term of the WHERE clause.  An equality
+** term can be either X=expr or X IN (...).   pTerm is the term to be 
+** coded.
+**
+** The current value for the constraint is left on the top of the stack.
+**
+** For a constraint of the form X=expr, the expression is evaluated and its
+** result is left on the stack.  For constraints of the form X IN (...)
+** this routine sets up a loop that will iterate over all values of X.
 */
 static void codeEqualityTerm(
   Parse *pParse,      /* The parsing context */
-  ExprInfo *pTerm,    /* The term of the WHERE clause to be coded */
+  WhereTerm *pTerm,   /* The term of the WHERE clause to be coded */
   int brk,            /* Jump here to abandon the loop */
   WhereLevel *pLevel  /* When level of the FROM clause we are working on */
 ){
-  Expr *pX = pTerm->p;
+  Expr *pX = pTerm->pExpr;
   if( pX->op!=TK_IN ){
     assert( pX->op==TK_EQ );
     sqlite3ExprCode(pParse, pX->pRight);
 #ifndef SQLITE_OMIT_SUBQUERY
   }else{
     int iTab;
+    int *aIn;
     Vdbe *v = pParse->pVdbe;
 
     sqlite3CodeSubselect(pParse, pX);
     iTab = pX->iTable;
     sqlite3VdbeAddOp(v, OP_Rewind, iTab, brk);
     VdbeComment((v, "# %.*s", pX->span.n, pX->span.z));
-    pLevel->inP2 = sqlite3VdbeAddOp(v, OP_Column, iTab, 0);
-    pLevel->inOp = OP_Next;
-    pLevel->inP1 = iTab;
+    pLevel->nIn++;
+    pLevel->aInLoop = aIn = sqliteRealloc(pLevel->aInLoop,
+                                 sizeof(pLevel->aInLoop[0])*3*pLevel->nIn);
+    if( aIn ){
+      aIn += pLevel->nIn*3 - 3;
+      aIn[0] = OP_Next;
+      aIn[1] = iTab;
+      aIn[2] = sqlite3VdbeAddOp(v, OP_Column, iTab, 0);
+    }else{
+      pLevel->nIn = 0;
+    }
 #endif
   }
-  disableTerm(pLevel, &pTerm->p);
+  disableTerm(pLevel, pTerm);
 }
 
 /*
-** The number of bits in a Bitmask
+** Generate code that will evaluate all == and IN constraints for an
+** index.  The values for all constraints are left on the stack.
+**
+** For example, consider table t1(a,b,c,d,e,f) with index i1(a,b,c).
+** Suppose the WHERE clause is this:  a==5 AND b IN (1,2,3) AND c>5 AND c<10
+** The index has as many as three equality constraints, but in this
+** example, the third "c" value is an inequality.  So only two 
+** constraints are coded.  This routine will generate code to evaluate
+** a==5 and b IN (1,2,3).  The current values for a and b will be left
+** on the stack - a is the deepest and b the shallowest.
+**
+** In the example above nEq==2.  But this subroutine works for any value
+** of nEq including 0.  If nEq==0, this routine is nearly a no-op.
+** The only thing it does is allocate the pLevel->iMem memory cell.
+**
+** This routine always allocates at least one memory cell and puts
+** the address of that memory cell in pLevel->iMem.  The code that
+** calls this routine will use pLevel->iMem to store the termination
+** key value of the loop.  If one or more IN operators appear, then
+** this routine allocates an additional nEq memory cells for internal
+** use.
 */
-#define BMS  (sizeof(Bitmask)*8-1)
+static void codeAllEqualityTerms(
+  Parse *pParse,        /* Parsing context */
+  WhereLevel *pLevel,   /* Which nested loop of the FROM we are coding */
+  WhereClause *pWC,     /* The WHERE clause */
+  Bitmask notReady,     /* Which parts of FROM have not yet been coded */
+  int brk               /* Jump here to end the loop */
+){
+  int nEq = pLevel->nEq;        /* The number of == or IN constraints to code */
+  int termsInMem = 0;           /* If true, store value in mem[] cells */
+  Vdbe *v = pParse->pVdbe;      /* The virtual machine under construction */
+  Index *pIdx = pLevel->pIdx;   /* The index being used for this loop */
+  int iCur = pLevel->iTabCur;   /* The cursor of the table */
+  WhereTerm *pTerm;             /* A single constraint term */
+  int j;                        /* Loop counter */
+
+  /* Figure out how many memory cells we will need then allocate them.
+  ** We always need at least one used to store the loop terminator
+  ** value.  If there are IN operators we'll need one for each == or
+  ** IN constraint.
+  */
+  pLevel->iMem = pParse->nMem++;
+  if( pLevel->flags & WHERE_COLUMN_IN ){
+    pParse->nMem += pLevel->nEq;
+    termsInMem = 1;
+  }
+
+  /* Evaluate the equality constraints
+  */
+  for(j=0; j<pIdx->nColumn; j++){
+    int k = pIdx->aiColumn[j];
+    pTerm = findTerm(pWC, iCur, k, notReady, WO_EQ|WO_IN, pIdx);
+    if( pTerm==0 ) break;
+    assert( (pTerm->flags & TERM_CODED)==0 );
+    codeEqualityTerm(pParse, pTerm, brk, pLevel);
+    if( termsInMem ){
+      sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iMem+j+1, 1);
+    }
+  }
+  assert( j==nEq );
+
+  /* Make sure all the constraint values are on the top of the stack
+  */
+  if( termsInMem ){
+    for(j=0; j<nEq; j++){
+      sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem+j+1, 0);
+    }
+  }
+}
+
+#ifdef SQLITE_TEST
+/*
+** The following variable holds a text description of query plan generated
+** by the most recent call to sqlite3WhereBegin().  Each call to WhereBegin
+** overwrites the previous.  This information is used for testing and
+** analysis only.
+*/
+char sqlite3_query_plan[BMS*2*40];  /* Text of the join */
+static int nQPlan = 0;              /* Next free slow in _query_plan[] */
+
+#endif /* SQLITE_TEST */
+
 
 
 /*
@@ -537,6 +1268,12 @@ static void codeEqualityTerm(
 **          end                     \    Code generated
 **        end                        |-- by sqlite3WhereEnd()
 **      end                         /
+**
+** Note that the loops might not be nested in the order in which they
+** appear in the FROM clause if a different order is better able to make
+** use of indices.  Note also that when the IN operator appears in
+** the WHERE clause, it might result in additional nested loops for
+** scanning through all values on the right-hand side of the IN.
 **
 ** There are Btree cursors associated with each table.  t1 uses cursor
 ** number pTabList->a[0].iCursor.  t2 uses the cursor pTabList->a[1].iCursor.
@@ -604,47 +1341,36 @@ WhereInfo *sqlite3WhereBegin(
   WhereInfo *pWInfo;         /* Will become the return value of this function */
   Vdbe *v = pParse->pVdbe;   /* The virtual database engine */
   int brk, cont = 0;         /* Addresses used during code generation */
-  int nExpr;           /* Number of subexpressions in the WHERE clause */
-  Bitmask loopMask;    /* One bit set for each outer loop */
-  ExprInfo *pTerm;     /* A single term in the WHERE clause; ptr to aExpr[] */
-  ExprMaskSet maskSet; /* The expression mask set */
-  int iDirectEq[BMS];  /* Term of the form ROWID==X for the N-th table */
-  int iDirectLt[BMS];  /* Term of the form ROWID<X or ROWID<=X */
-  int iDirectGt[BMS];  /* Term of the form ROWID>X or ROWID>=X */
-  ExprInfo aExpr[101]; /* The WHERE clause is divided into these terms */
+  Bitmask notReady;          /* Cursors that are not yet positioned */
+  WhereTerm *pTerm;          /* A single term in the WHERE clause */
+  ExprMaskSet maskSet;       /* The expression mask set */
+  WhereClause wc;            /* The WHERE clause is divided into these terms */
   struct SrcList_item *pTabItem;  /* A single entry from pTabList */
   WhereLevel *pLevel;             /* A single level in the pWInfo list */
+  int iFrom;                      /* First unused FROM clause element */
+  int andFlags;              /* AND-ed combination of all wc.a[].flags */
 
-  /* The number of terms in the FROM clause is limited by the number of
+  /* The number of tables in the FROM clause is limited by the number of
   ** bits in a Bitmask 
   */
-  if( pTabList->nSrc>sizeof(Bitmask)*8 ){
-    sqlite3ErrorMsg(pParse, "at most %d tables in a join",
-       sizeof(Bitmask)*8);
+  if( pTabList->nSrc>BMS ){
+    sqlite3ErrorMsg(pParse, "at most %d tables in a join", BMS);
     return 0;
   }
 
   /* Split the WHERE clause into separate subexpressions where each
-  ** subexpression is separated by an AND operator.  If the aExpr[]
-  ** array fills up, the last entry might point to an expression which
-  ** contains additional unfactored AND operators.
+  ** subexpression is separated by an AND operator.
   */
   initMaskSet(&maskSet);
-  memset(aExpr, 0, sizeof(aExpr));
-  nExpr = exprSplit(ARRAYSIZE(aExpr), aExpr, pWhere);
-  if( nExpr==ARRAYSIZE(aExpr) ){
-    sqlite3ErrorMsg(pParse, "WHERE clause too complex - no more "
-       "than %d terms allowed", (int)ARRAYSIZE(aExpr)-1);
-    return 0;
-  }
+  whereClauseInit(&wc, pParse);
+  whereSplit(&wc, pWhere, TK_AND);
     
   /* Allocate and initialize the WhereInfo structure that will become the
   ** return value.
   */
   pWInfo = sqliteMalloc( sizeof(WhereInfo) + pTabList->nSrc*sizeof(WhereLevel));
   if( sqlite3_malloc_failed ){
-    sqliteFree(pWInfo); /* Avoid leaking memory when malloc fails */
-    return 0;
+    goto whereBeginNoMem;
   }
   pWInfo->pParse = pParse;
   pWInfo->pTabList = pTabList;
@@ -658,272 +1384,95 @@ WhereInfo *sqlite3WhereBegin(
     pWhere = 0;
   }
 
-  /* Analyze all of the subexpressions.
+  /* Analyze all of the subexpressions.  Note that exprAnalyze() might
+  ** add new virtual terms onto the end of the WHERE clause.  We do not
+  ** want to analyze these virtual terms, so start analyzing at the end
+  ** and work forward so that they added virtual terms are never processed.
   */
   for(i=0; i<pTabList->nSrc; i++){
     createMask(&maskSet, pTabList->a[i].iCursor);
   }
-  for(pTerm=aExpr, i=0; i<nExpr; i++, pTerm++){
-    exprAnalyze(pTabList, &maskSet, pTerm);
+  exprAnalyzeAll(pTabList, &maskSet, &wc);
+  if( sqlite3_malloc_failed ){
+    goto whereBeginNoMem;
   }
 
-  /* Figure out what index to use (if any) for each nested loop.
-  ** Make pWInfo->a[i].pIdx point to the index to use for the i-th nested
-  ** loop where i==0 is the outer loop and i==pTabList->nSrc-1 is the inner
-  ** loop. 
+  /* Chose the best index to use for each table in the FROM clause.
   **
-  ** If terms exist that use the ROWID of any table, then set the
-  ** iDirectEq[], iDirectLt[], or iDirectGt[] elements for that table
-  ** to the index of the term containing the ROWID.  We always prefer
-  ** to use a ROWID which can directly access a table rather than an
-  ** index which requires reading an index first to get the rowid then
-  ** doing a second read of the actual database table.
+  ** This loop fills in the following fields:
   **
-  ** Actually, if there are more than 32 tables in the join, only the
-  ** first 32 tables are candidates for indices.  This is (again) due
-  ** to the limit of 32 bits in an integer bitmask.
+  **   pWInfo->a[].pIdx      The index to use for this level of the loop.
+  **   pWInfo->a[].flags     WHERE_xxx flags associated with pIdx
+  **   pWInfo->a[].nEq       The number of == and IN constraints
+  **   pWInfo->a[].iFrom     When term of the FROM clause is being coded
+  **   pWInfo->a[].iTabCur   The VDBE cursor for the database table
+  **   pWInfo->a[].iIdxCur   The VDBE cursor for the index
+  **
+  ** This loop also figures out the nesting order of tables in the FROM
+  ** clause.
   */
-  loopMask = 0;
+  notReady = ~(Bitmask)0;
   pTabItem = pTabList->a;
   pLevel = pWInfo->a;
-  for(i=0; i<pTabList->nSrc && i<ARRAYSIZE(iDirectEq); i++,pTabItem++,pLevel++){
-    int j;
-    int iCur = pTabItem->iCursor;            /* The cursor for this table */
-    Bitmask mask = getMask(&maskSet, iCur);  /* Cursor mask for this table */
-    Table *pTab = pTabItem->pTab;
-    Index *pIdx;
-    Index *pBestIdx = 0;
-    int bestScore = 0;
-    int bestRev = 0;
+  andFlags = ~0;
+  for(i=iFrom=0, pLevel=pWInfo->a; i<pTabList->nSrc; i++, pLevel++){
+    Index *pIdx;                /* Index for FROM table at pTabItem */
+    int flags;                  /* Flags asssociated with pIdx */
+    int nEq;                    /* Number of == or IN constraints */
+    double cost;                /* The cost for pIdx */
+    int j;                      /* For looping over FROM tables */
+    Index *pBest = 0;           /* The best index seen so far */
+    int bestFlags = 0;          /* Flags associated with pBest */
+    int bestNEq = 0;            /* nEq associated with pBest */
+    double lowestCost = 1.0e99; /* Cost of the pBest */
+    int bestJ;                  /* The value of j */
+    Bitmask m;                  /* Bitmask value for j or bestJ */
 
-    /* Check to see if there is an expression that uses only the
-    ** ROWID field of this table.  For terms of the form ROWID==expr
-    ** set iDirectEq[i] to the index of the term.  For terms of the
-    ** form ROWID<expr or ROWID<=expr set iDirectLt[i] to the term index.
-    ** For terms like ROWID>expr or ROWID>=expr set iDirectGt[i].
-    **
-    ** (Added:) Treat ROWID IN expr like ROWID=expr.
-    */
-    pLevel->iIdxCur = -1;
-    iDirectEq[i] = -1;
-    iDirectLt[i] = -1;
-    iDirectGt[i] = -1;
-    for(pTerm=aExpr, j=0; j<nExpr; j++, pTerm++){
-      Expr *pX = pTerm->p;
-      if( pTerm->idxLeft==iCur && pX->pLeft->iColumn<0
-            && (pTerm->prereqRight & loopMask)==pTerm->prereqRight ){
-        switch( pX->op ){
-          case TK_IN:
-          case TK_EQ: iDirectEq[i] = j; break;
-          case TK_LE:
-          case TK_LT: iDirectLt[i] = j; break;
-          case TK_GE:
-          case TK_GT: iDirectGt[i] = j;  break;
-        }
+    for(j=iFrom, pTabItem=&pTabList->a[j]; j<pTabList->nSrc; j++, pTabItem++){
+      m = getMask(&maskSet, pTabItem->iCursor);
+      if( (m & notReady)==0 ){
+        if( j==iFrom ) iFrom++;
+        continue;
+      }
+      cost = bestIndex(pParse, &wc, pTabItem, notReady,
+                       (j==0 && ppOrderBy) ? *ppOrderBy : 0,
+                       &pIdx, &flags, &nEq);
+      if( cost<lowestCost ){
+        lowestCost = cost;
+        pBest = pIdx;
+        bestFlags = flags;
+        bestNEq = nEq;
+        bestJ = j;
+      }
+      if( (pTabItem->jointype & JT_LEFT)!=0
+         || (j>0 && (pTabItem[-1].jointype & JT_LEFT)!=0)
+      ){
+        break;
       }
     }
-
-    /* If we found a term that tests ROWID with == or IN, that term
-    ** will be used to locate the rows in the database table.  There
-    ** is not need to continue into the code below that looks for
-    ** an index.  We will always use the ROWID over an index.
-    */
-    if( iDirectEq[i]>=0 ){
-      loopMask |= mask;
-      pLevel->pIdx = 0;
-      continue;
+    if( (bestFlags & WHERE_ORDERBY)!=0 ){
+      *ppOrderBy = 0;
     }
-
-    /* Do a search for usable indices.  Leave pBestIdx pointing to
-    ** the "best" index.  pBestIdx is left set to NULL if no indices
-    ** are usable.
-    **
-    ** The best index is the one with the highest score.  The score
-    ** for the index is determined as follows.  For each of the
-    ** left-most terms that is fixed by an equality operator, add
-    ** 32 to the score.  The right-most term of the index may be
-    ** constrained by an inequality.  Add 4 if for an "x<..." constraint
-    ** and add 8 for an "x>..." constraint.  If both constraints
-    ** are present, add 12.
-    **
-    ** If the left-most term of the index uses an IN operator
-    ** (ex:  "x IN (...)")  then add 16 to the score.
-    **
-    ** If an index can be used for sorting, add 2 to the score.
-    ** If an index contains all the terms of a table that are ever
-    ** used by any expression in the SQL statement, then add 1 to
-    ** the score.
-    **
-    ** This scoring system is designed so that the score can later be
-    ** used to determine how the index is used.  If the score&0x1c is 0
-    ** then all constraints are equalities.  If score&0x4 is not 0 then
-    ** there is an inequality used as a termination key.  (ex: "x<...")
-    ** If score&0x8 is not 0 then there is an inequality used as the
-    ** start key.  (ex: "x>...").  A score or 0x10 is the special case
-    ** of an IN operator constraint.  (ex:  "x IN ...").
-    **
-    ** The IN operator (as in "<expr> IN (...)") is treated the same as
-    ** an equality comparison except that it can only be used on the
-    ** left-most column of an index and other terms of the WHERE clause
-    ** cannot be used in conjunction with the IN operator to help satisfy
-    ** other columns of the index.
-    */
-    for(pIdx=pTab->pIndex; pIdx; pIdx=pIdx->pNext){
-      Bitmask eqMask = 0;  /* Index columns covered by an x=... term */
-      Bitmask ltMask = 0;  /* Index columns covered by an x<... term */
-      Bitmask gtMask = 0;  /* Index columns covered by an x>... term */
-      Bitmask inMask = 0;  /* Index columns covered by an x IN .. term */
-      Bitmask m;
-      int nEq, score, bRev = 0;
-
-      if( pIdx->nColumn>sizeof(eqMask)*8 ){
-        continue;  /* Ignore indices with too many columns to analyze */
-      }
-      for(pTerm=aExpr, j=0; j<nExpr; j++, pTerm++){
-        Expr *pX = pTerm->p;
-        CollSeq *pColl = sqlite3ExprCollSeq(pParse, pX->pLeft);
-        if( !pColl && pX->pRight ){
-          pColl = sqlite3ExprCollSeq(pParse, pX->pRight);
-        }
-        if( !pColl ){
-          pColl = pParse->db->pDfltColl;
-        }
-        if( pTerm->idxLeft==iCur 
-             && (pTerm->prereqRight & loopMask)==pTerm->prereqRight ){
-          int iColumn = pX->pLeft->iColumn;
-          int k;
-          char idxaff = iColumn>=0 ? pIdx->pTable->aCol[iColumn].affinity : 0; 
-          for(k=0; k<pIdx->nColumn; k++){
-            /* If the collating sequences or affinities don't match, 
-            ** ignore this index.  */
-            if( pColl!=pIdx->keyInfo.aColl[k] ) continue;
-            if( !sqlite3IndexAffinityOk(pX, idxaff) ) continue;
-            if( pIdx->aiColumn[k]==iColumn ){
-              switch( pX->op ){
-                case TK_IN: {
-                  if( k==0 ) inMask |= 1;
-                  break;
-                }
-                case TK_EQ: {
-                  eqMask |= ((Bitmask)1)<<k;
-                  break;
-                }
-                case TK_LE:
-                case TK_LT: {
-                  ltMask |= ((Bitmask)1)<<k;
-                  break;
-                }
-                case TK_GE:
-                case TK_GT: {
-                  gtMask |= ((Bitmask)1)<<k;
-                  break;
-                }
-                default: {
-                  /* CANT_HAPPEN */
-                  assert( 0 );
-                  break;
-                }
-              }
-              break;
-            }
-          }
-        }
-      }
-
-      /* The following loop ends with nEq set to the number of columns
-      ** on the left of the index with == constraints.
-      */
-      for(nEq=0; nEq<pIdx->nColumn; nEq++){
-        m = (((Bitmask)1)<<(nEq+1))-1;
-        if( (m & eqMask)!=m ) break;
-      }
-
-      /* Begin assemblying the score
-      */
-      score = nEq*32;   /* Base score is 32 times number of == constraints */
-      m = ((Bitmask)1)<<nEq;
-      if( m & ltMask ) score+=4;    /* Increase score for a < constraint */
-      if( m & gtMask ) score+=8;    /* Increase score for a > constraint */
-      if( score==0 && inMask ) score = 16; /* Default score for IN constraint */
-
-      /* Give bonus points if this index can be used for sorting
-      */
-      if( i==0 && score!=16 && ppOrderBy && *ppOrderBy ){
-        int base = pTabList->a[0].iCursor;
-        if( isSortingIndex(pParse, pIdx, pTab, base, *ppOrderBy, nEq, &bRev) ){
-          score += 2;
-        }
-      }
-
-      /* Check to see if we can get away with using just the index without
-      ** ever reading the table.  If that is the case, then add one bonus
-      ** point to the score.
-      */
-      if( score && pTabItem->colUsed < (((Bitmask)1)<<(BMS-1)) ){
-        for(m=0, j=0; j<pIdx->nColumn; j++){
-          int x = pIdx->aiColumn[j];
-          if( x<BMS-1 ){
-            m |= ((Bitmask)1)<<x;
-          }
-        }
-        if( (pTabItem->colUsed & m)==pTabItem->colUsed ){
-          score++;
-        }
-      }
-
-      /* If the score for this index is the best we have seen so far, then
-      ** save it
-      */
-      if( score>bestScore ){
-        pBestIdx = pIdx;
-        bestScore = score;
-        bestRev = bRev;
-      }
-    }
-    pLevel->pIdx = pBestIdx;
-    pLevel->score = bestScore;
-    pLevel->bRev = bestRev;
-    loopMask |= mask;
-    if( pBestIdx ){
+    andFlags &= bestFlags;
+    pLevel->flags = bestFlags;
+    pLevel->pIdx = pBest;
+    pLevel->nEq = bestNEq;
+    pLevel->aInLoop = 0;
+    pLevel->nIn = 0;
+    if( pBest ){
       pLevel->iIdxCur = pParse->nTab++;
+    }else{
+      pLevel->iIdxCur = -1;
     }
+    notReady &= ~getMask(&maskSet, pTabList->a[bestJ].iCursor);
+    pLevel->iFrom = bestJ;
   }
 
-  /* Check to see if the ORDER BY clause is or can be satisfied by the
-  ** use of an index on the first table.
+  /* If the total query only selects a single row, then the ORDER BY
+  ** clause is irrelevant.
   */
-  if( ppOrderBy && *ppOrderBy && pTabList->nSrc>0 ){
-    Index *pIdx;             /* Index derived from the WHERE clause */
-    Table *pTab;             /* Left-most table in the FROM clause */
-    int bRev = 0;            /* True to reverse the output order */
-    int iCur;                /* Btree-cursor that will be used by pTab */
-    WhereLevel *pLevel0 = &pWInfo->a[0];
-
-    pTab = pTabList->a[0].pTab;
-    pIdx = pLevel0->pIdx;
-    iCur = pTabList->a[0].iCursor;
-    if( pIdx==0 && sortableByRowid(iCur, *ppOrderBy, &bRev) ){
-      /* The ORDER BY clause specifies ROWID order, which is what we
-      ** were going to be doing anyway...
-      */
-      *ppOrderBy = 0;
-      pLevel0->bRev = bRev;
-    }else if( pLevel0->score==16 ){
-      /* If there is already an IN index on the left-most table,
-      ** it will not give the correct sort order.
-      ** So, pretend that no suitable index is found.
-      */
-    }else if( iDirectEq[0]>=0 || iDirectLt[0]>=0 || iDirectGt[0]>=0 ){
-      /* If the left-most column is accessed using its ROWID, then do
-      ** not try to sort by index.  But do delete the ORDER BY clause
-      ** if it is redundant.
-      */
-    }else if( (pLevel0->score&2)!=0 ){
-      /* The index that was selected for searching will cause rows to
-      ** appear in sorted order.
-      */
-      *ppOrderBy = 0;
-    }
+  if( (andFlags & WHERE_UNIQUE)!=0 && ppOrderBy ){
+    *ppOrderBy = 0;
   }
 
   /* Open all tables in the pTabList and any indices selected for
@@ -931,55 +1480,64 @@ WhereInfo *sqlite3WhereBegin(
   */
   sqlite3CodeVerifySchema(pParse, -1); /* Insert the cookie verifier Goto */
   pLevel = pWInfo->a;
-  for(i=0, pTabItem=pTabList->a; i<pTabList->nSrc; i++, pTabItem++, pLevel++){
+  for(i=0, pLevel=pWInfo->a; i<pTabList->nSrc; i++, pLevel++){
     Table *pTab;
     Index *pIx;
     int iIdxCur = pLevel->iIdxCur;
 
+    pTabItem = &pTabList->a[pLevel->iFrom];
     pTab = pTabItem->pTab;
     if( pTab->isTransient || pTab->pSelect ) continue;
-    if( (pLevel->score & 1)==0 ){
+    if( (pLevel->flags & WHERE_IDX_ONLY)==0 ){
       sqlite3OpenTableForReading(v, pTabItem->iCursor, pTab);
     }
     pLevel->iTabCur = pTabItem->iCursor;
     if( (pIx = pLevel->pIdx)!=0 ){
       sqlite3VdbeAddOp(v, OP_Integer, pIx->iDb, 0);
+      VdbeComment((v, "# %s", pIx->zName));
       sqlite3VdbeOp3(v, OP_OpenRead, iIdxCur, pIx->tnum,
                      (char*)&pIx->keyInfo, P3_KEYINFO);
     }
-    if( (pLevel->score & 1)!=0 ){
+    if( (pLevel->flags & WHERE_IDX_ONLY)!=0 ){
       sqlite3VdbeAddOp(v, OP_SetNumColumns, iIdxCur, pIx->nColumn+1);
     }
     sqlite3CodeVerifySchema(pParse, pTab->iDb);
   }
   pWInfo->iTop = sqlite3VdbeCurrentAddr(v);
 
-  /* Generate the code to do the search
+  /* Generate the code to do the search.  Each iteration of the for
+  ** loop below generates code for a single nested loop of the VM
+  ** program.
   */
-  loopMask = 0;
-  pLevel = pWInfo->a;
-  pTabItem = pTabList->a;
-  for(i=0; i<pTabList->nSrc; i++, pTabItem++, pLevel++){
-    int j, k;
+  notReady = ~(Bitmask)0;
+  for(i=0, pLevel=pWInfo->a; i<pTabList->nSrc; i++, pLevel++){
+    int j;
     int iCur = pTabItem->iCursor;  /* The VDBE cursor for the table */
     Index *pIdx;       /* The index we will be using */
     int iIdxCur;       /* The VDBE cursor for the index */
     int omitTable;     /* True if we use the index only */
+    int bRev;          /* True if we need to scan in reverse order */
 
+    pTabItem = &pTabList->a[pLevel->iFrom];
+    iCur = pTabItem->iCursor;
     pIdx = pLevel->pIdx;
     iIdxCur = pLevel->iIdxCur;
-    pLevel->inOp = OP_Noop;
+    bRev = (pLevel->flags & WHERE_REVERSE)!=0;
+    omitTable = (pLevel->flags & WHERE_IDX_ONLY)!=0;
 
-    /* Check to see if it is appropriate to omit the use of the table
-    ** here and use its index instead.
+    /* Create labels for the "break" and "continue" instructions
+    ** for the current loop.  Jump to brk to break out of a loop.
+    ** Jump to cont to go immediately to the next iteration of the
+    ** loop.
     */
-    omitTable = (pLevel->score&1)!=0;
+    brk = pLevel->brk = sqlite3VdbeMakeLabel(v);
+    cont = pLevel->cont = sqlite3VdbeMakeLabel(v);
 
     /* If this is the right table of a LEFT OUTER JOIN, allocate and
     ** initialize a memory cell that records if this table matches any
     ** row of the left table of the join.
     */
-    if( i>0 && (pTabList->a[i-1].jointype & JT_LEFT)!=0 ){
+    if( pLevel->iFrom>0 && (pTabItem[-1].jointype & JT_LEFT)!=0 ){
       if( !pParse->nMem ) pParse->nMem++;
       pLevel->iLeftJoin = pParse->nMem++;
       sqlite3VdbeAddOp(v, OP_Null, 0, 0);
@@ -987,122 +1545,55 @@ WhereInfo *sqlite3WhereBegin(
       VdbeComment((v, "# init LEFT JOIN no-match flag"));
     }
 
-    if( i<ARRAYSIZE(iDirectEq) && (k = iDirectEq[i])>=0 ){
+    if( pLevel->flags & WHERE_ROWID_EQ ){
       /* Case 1:  We can directly reference a single row using an
       **          equality comparison against the ROWID field.  Or
       **          we reference multiple rows using a "rowid IN (...)"
       **          construct.
       */
-      assert( k<nExpr );
-      pTerm = &aExpr[k];
-      assert( pTerm->p!=0 );
-      assert( pTerm->idxLeft==iCur );
+      pTerm = findTerm(&wc, iCur, -1, notReady, WO_EQ|WO_IN, 0);
+      assert( pTerm!=0 );
+      assert( pTerm->pExpr!=0 );
+      assert( pTerm->leftCursor==iCur );
       assert( omitTable==0 );
-      brk = pLevel->brk = sqlite3VdbeMakeLabel(v);
       codeEqualityTerm(pParse, pTerm, brk, pLevel);
-      cont = pLevel->cont = sqlite3VdbeMakeLabel(v);
       sqlite3VdbeAddOp(v, OP_MustBeInt, 1, brk);
       sqlite3VdbeAddOp(v, OP_NotExists, iCur, brk);
       VdbeComment((v, "pk"));
       pLevel->op = OP_Noop;
-    }else if( pIdx!=0 && pLevel->score>3 && (pLevel->score&0x0c)==0 ){
-      /* Case 2:  There is an index and all terms of the WHERE clause that
-      **          refer to the index using the "==" or "IN" operators.
-      */
-      int start;
-      int nColumn = (pLevel->score+16)/32;
-      brk = pLevel->brk = sqlite3VdbeMakeLabel(v);
-
-      /* For each column of the index, find the term of the WHERE clause that
-      ** constraints that column.  If the WHERE clause term is X=expr, then
-      ** evaluation expr and leave the result on the stack */
-      for(j=0; j<nColumn; j++){
-        for(pTerm=aExpr, k=0; k<nExpr; k++, pTerm++){
-          Expr *pX = pTerm->p;
-          if( pX==0 ) continue;
-          if( pTerm->idxLeft==iCur
-             && (pTerm->prereqRight & loopMask)==pTerm->prereqRight 
-             && pX->pLeft->iColumn==pIdx->aiColumn[j]
-             && (pX->op==TK_EQ || pX->op==TK_IN)
-          ){
-            char idxaff = pIdx->pTable->aCol[pX->pLeft->iColumn].affinity;
-            if( sqlite3IndexAffinityOk(pX, idxaff) ){
-              codeEqualityTerm(pParse, pTerm, brk, pLevel);
-              break;
-            }
-          }
-        }
-      }
-      pLevel->iMem = pParse->nMem++;
-      cont = pLevel->cont = sqlite3VdbeMakeLabel(v);
-      buildIndexProbe(v, nColumn, brk, pIdx);
-      sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iMem, 0);
-
-      /* Generate code (1) to move to the first matching element of the table.
-      ** Then generate code (2) that jumps to "brk" after the cursor is past
-      ** the last matching element of the table.  The code (1) is executed
-      ** once to initialize the search, the code (2) is executed before each
-      ** iteration of the scan to see if the scan has finished. */
-      if( pLevel->bRev ){
-        /* Scan in reverse order */
-        sqlite3VdbeAddOp(v, OP_MoveLe, iIdxCur, brk);
-        start = sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
-        sqlite3VdbeAddOp(v, OP_IdxLT, iIdxCur, brk);
-        pLevel->op = OP_Prev;
-      }else{
-        /* Scan in the forward order */
-        sqlite3VdbeAddOp(v, OP_MoveGe, iIdxCur, brk);
-        start = sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
-        sqlite3VdbeOp3(v, OP_IdxGE, iIdxCur, brk, "+", P3_STATIC);
-        pLevel->op = OP_Next;
-      }
-      sqlite3VdbeAddOp(v, OP_RowKey, iIdxCur, 0);
-      sqlite3VdbeAddOp(v, OP_IdxIsNull, nColumn, cont);
-      if( !omitTable ){
-        sqlite3VdbeAddOp(v, OP_IdxRowid, iIdxCur, 0);
-        sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
-      }
-      pLevel->p1 = iIdxCur;
-      pLevel->p2 = start;
-    }else if( i<ARRAYSIZE(iDirectLt) && (iDirectLt[i]>=0 || iDirectGt[i]>=0) ){
-      /* Case 3:  We have an inequality comparison against the ROWID field.
+    }else if( pLevel->flags & WHERE_ROWID_RANGE ){
+      /* Case 2:  We have an inequality comparison against the ROWID field.
       */
       int testOp = OP_Noop;
       int start;
-      int bRev = pLevel->bRev;
+      WhereTerm *pStart, *pEnd;
 
       assert( omitTable==0 );
-      brk = pLevel->brk = sqlite3VdbeMakeLabel(v);
-      cont = pLevel->cont = sqlite3VdbeMakeLabel(v);
+      pStart = findTerm(&wc, iCur, -1, notReady, WO_GT|WO_GE, 0);
+      pEnd = findTerm(&wc, iCur, -1, notReady, WO_LT|WO_LE, 0);
       if( bRev ){
-        int t = iDirectGt[i];
-        iDirectGt[i] = iDirectLt[i];
-        iDirectLt[i] = t;
+        pTerm = pStart;
+        pStart = pEnd;
+        pEnd = pTerm;
       }
-      if( iDirectGt[i]>=0 ){
+      if( pStart ){
         Expr *pX;
-        k = iDirectGt[i];
-        assert( k<nExpr );
-        pTerm = &aExpr[k];
-        pX = pTerm->p;
+        pX = pStart->pExpr;
         assert( pX!=0 );
-        assert( pTerm->idxLeft==iCur );
+        assert( pStart->leftCursor==iCur );
         sqlite3ExprCode(pParse, pX->pRight);
         sqlite3VdbeAddOp(v, OP_ForceInt, pX->op==TK_LE || pX->op==TK_GT, brk);
         sqlite3VdbeAddOp(v, bRev ? OP_MoveLt : OP_MoveGe, iCur, brk);
         VdbeComment((v, "pk"));
-        disableTerm(pLevel, &pTerm->p);
+        disableTerm(pLevel, pStart);
       }else{
         sqlite3VdbeAddOp(v, bRev ? OP_Last : OP_Rewind, iCur, brk);
       }
-      if( iDirectLt[i]>=0 ){
+      if( pEnd ){
         Expr *pX;
-        k = iDirectLt[i];
-        assert( k<nExpr );
-        pTerm = &aExpr[k];
-        pX = pTerm->p;
+        pX = pEnd->pExpr;
         assert( pX!=0 );
-        assert( pTerm->idxLeft==iCur );
+        assert( pEnd->leftCursor==iCur );
         sqlite3ExprCode(pParse, pX->pRight);
         pLevel->iMem = pParse->nMem++;
         sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iMem, 1);
@@ -1111,7 +1602,7 @@ WhereInfo *sqlite3WhereBegin(
         }else{
           testOp = bRev ? OP_Lt : OP_Gt;
         }
-        disableTerm(pLevel, &pTerm->p);
+        disableTerm(pLevel, pEnd);
       }
       start = sqlite3VdbeCurrentAddr(v);
       pLevel->op = bRev ? OP_Prev : OP_Next;
@@ -1122,76 +1613,37 @@ WhereInfo *sqlite3WhereBegin(
         sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
         sqlite3VdbeAddOp(v, testOp, 'n', brk);
       }
-    }else if( pIdx==0 ){
-      /* Case 4:  There is no usable index.  We must do a complete
-      **          scan of the entire database table.
-      */
-      int start;
-      int opRewind;
-
-      assert( omitTable==0 );
-      brk = pLevel->brk = sqlite3VdbeMakeLabel(v);
-      cont = pLevel->cont = sqlite3VdbeMakeLabel(v);
-      if( pLevel->bRev ){
-        opRewind = OP_Last;
-        pLevel->op = OP_Prev;
-      }else{
-        opRewind = OP_Rewind;
-        pLevel->op = OP_Next;
-      }
-      sqlite3VdbeAddOp(v, opRewind, iCur, brk);
-      start = sqlite3VdbeCurrentAddr(v);
-      pLevel->p1 = iCur;
-      pLevel->p2 = start;
-    }else{
-      /* Case 5: The WHERE clause term that refers to the right-most
+    }else if( pLevel->flags & WHERE_COLUMN_RANGE ){
+      /* Case 3: The WHERE clause term that refers to the right-most
       **         column of the index is an inequality.  For example, if
       **         the index is on (x,y,z) and the WHERE clause is of the
       **         form "x=5 AND y<10" then this case is used.  Only the
       **         right-most column can be an inequality - the rest must
-      **         use the "==" operator.
+      **         use the "==" and "IN" operators.
       **
       **         This case is also used when there are no WHERE clause
       **         constraints but an index is selected anyway, in order
       **         to force the output order to conform to an ORDER BY.
       */
-      int score = pLevel->score;
-      int nEqColumn = score/32;
       int start;
+      int nEq = pLevel->nEq;
       int leFlag=0, geFlag=0;
       int testOp;
+      int topLimit = (pLevel->flags & WHERE_TOP_LIMIT)!=0;
+      int btmLimit = (pLevel->flags & WHERE_BTM_LIMIT)!=0;
 
-      /* Evaluate the equality constraints
+      /* Generate code to evaluate all constraint terms using == or IN
+      ** and level the values of those terms on the stack.
       */
-      for(j=0; j<nEqColumn; j++){
-        int iIdxCol = pIdx->aiColumn[j];
-        for(pTerm=aExpr, k=0; k<nExpr; k++, pTerm++){
-          Expr *pX = pTerm->p;
-          if( pX==0 ) continue;
-          if( pTerm->idxLeft==iCur
-             && pX->op==TK_EQ
-             && (pTerm->prereqRight & loopMask)==pTerm->prereqRight 
-             && pX->pLeft->iColumn==iIdxCol
-          ){
-            sqlite3ExprCode(pParse, pX->pRight);
-            disableTerm(pLevel, &pTerm->p);
-            break;
-          }
-        }
-      }
+      codeAllEqualityTerms(pParse, pLevel, &wc, notReady, brk);
 
       /* Duplicate the equality term values because they will all be
       ** used twice: once to make the termination key and once to make the
       ** start key.
       */
-      for(j=0; j<nEqColumn; j++){
-        sqlite3VdbeAddOp(v, OP_Dup, nEqColumn-1, 0);
+      for(j=0; j<nEq; j++){
+        sqlite3VdbeAddOp(v, OP_Dup, nEq-1, 0);
       }
-
-      /* Labels for the beginning and end of the loop
-      */
-      cont = pLevel->cont = sqlite3VdbeMakeLabel(v);
-      brk = pLevel->brk = sqlite3VdbeMakeLabel(v);
 
       /* Generate the termination key.  This is the key value that
       ** will end the search.  There is no termination key if there
@@ -1200,37 +1652,32 @@ WhereInfo *sqlite3WhereBegin(
       ** 2002-Dec-04: On a reverse-order scan, the so-called "termination"
       ** key computed here really ends up being the start key.
       */
-      if( (score & 4)!=0 ){
-        for(pTerm=aExpr, k=0; k<nExpr; k++, pTerm++){
-          Expr *pX = pTerm->p;
-          if( pX==0 ) continue;
-          if( pTerm->idxLeft==iCur
-             && (pX->op==TK_LT || pX->op==TK_LE)
-             && (pTerm->prereqRight & loopMask)==pTerm->prereqRight 
-             && pX->pLeft->iColumn==pIdx->aiColumn[j]
-          ){
-            sqlite3ExprCode(pParse, pX->pRight);
-            leFlag = pX->op==TK_LE;
-            disableTerm(pLevel, &pTerm->p);
-            break;
-          }
-        }
+      if( topLimit ){
+        Expr *pX;
+        int k = pIdx->aiColumn[j];
+        pTerm = findTerm(&wc, iCur, k, notReady, WO_LT|WO_LE, pIdx);
+        assert( pTerm!=0 );
+        pX = pTerm->pExpr;
+        assert( (pTerm->flags & TERM_CODED)==0 );
+        sqlite3ExprCode(pParse, pX->pRight);
+        leFlag = pX->op==TK_LE;
+        disableTerm(pLevel, pTerm);
         testOp = OP_IdxGE;
       }else{
-        testOp = nEqColumn>0 ? OP_IdxGE : OP_Noop;
+        testOp = nEq>0 ? OP_IdxGE : OP_Noop;
         leFlag = 1;
       }
       if( testOp!=OP_Noop ){
-        int nCol = nEqColumn + ((score & 4)!=0);
+        int nCol = nEq + topLimit;
         pLevel->iMem = pParse->nMem++;
         buildIndexProbe(v, nCol, brk, pIdx);
-        if( pLevel->bRev ){
+        if( bRev ){
           int op = leFlag ? OP_MoveLe : OP_MoveLt;
           sqlite3VdbeAddOp(v, op, iIdxCur, brk);
         }else{
           sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iMem, 1);
         }
-      }else if( pLevel->bRev ){
+      }else if( bRev ){
         sqlite3VdbeAddOp(v, OP_Last, iIdxCur, brk);
       }
 
@@ -1243,28 +1690,23 @@ WhereInfo *sqlite3WhereBegin(
       ** 2002-Dec-04: In the case of a reverse-order search, the so-called
       ** "start" key really ends up being used as the termination key.
       */
-      if( (score & 8)!=0 ){
-        for(pTerm=aExpr, k=0; k<nExpr; k++, pTerm++){
-          Expr *pX = pTerm->p;
-          if( pX==0 ) continue;
-          if( pTerm->idxLeft==iCur
-             && (pX->op==TK_GT || pX->op==TK_GE)
-             && (pTerm->prereqRight & loopMask)==pTerm->prereqRight 
-             && pX->pLeft->iColumn==pIdx->aiColumn[j]
-          ){
-            sqlite3ExprCode(pParse, pX->pRight);
-            geFlag = pX->op==TK_GE;
-            disableTerm(pLevel, &pTerm->p);
-            break;
-          }
-        }
+      if( btmLimit ){
+        Expr *pX;
+        int k = pIdx->aiColumn[j];
+        pTerm = findTerm(&wc, iCur, k, notReady, WO_GT|WO_GE, pIdx);
+        assert( pTerm!=0 );
+        pX = pTerm->pExpr;
+        assert( (pTerm->flags & TERM_CODED)==0 );
+        sqlite3ExprCode(pParse, pX->pRight);
+        geFlag = pX->op==TK_GE;
+        disableTerm(pLevel, pTerm);
       }else{
         geFlag = 1;
       }
-      if( nEqColumn>0 || (score&8)!=0 ){
-        int nCol = nEqColumn + ((score&8)!=0);
+      if( nEq>0 || btmLimit ){
+        int nCol = nEq + btmLimit;
         buildIndexProbe(v, nCol, brk, pIdx);
-        if( pLevel->bRev ){
+        if( bRev ){
           pLevel->iMem = pParse->nMem++;
           sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iMem, 1);
           testOp = OP_IdxLT;
@@ -1272,7 +1714,7 @@ WhereInfo *sqlite3WhereBegin(
           int op = geFlag ? OP_MoveGe : OP_MoveGt;
           sqlite3VdbeAddOp(v, op, iIdxCur, brk);
         }
-      }else if( pLevel->bRev ){
+      }else if( bRev ){
         testOp = OP_Noop;
       }else{
         sqlite3VdbeAddOp(v, OP_Rewind, iIdxCur, brk);
@@ -1286,12 +1728,12 @@ WhereInfo *sqlite3WhereBegin(
       if( testOp!=OP_Noop ){
         sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
         sqlite3VdbeAddOp(v, testOp, iIdxCur, brk);
-        if( (leFlag && !pLevel->bRev) || (!geFlag && pLevel->bRev) ){
+        if( (leFlag && !bRev) || (!geFlag && bRev) ){
           sqlite3VdbeChangeP3(v, -1, "+", P3_STATIC);
         }
       }
       sqlite3VdbeAddOp(v, OP_RowKey, iIdxCur, 0);
-      sqlite3VdbeAddOp(v, OP_IdxIsNull, nEqColumn + ((score&4)!=0), cont);
+      sqlite3VdbeAddOp(v, OP_IdxIsNull, nEq + topLimit, cont);
       if( !omitTable ){
         sqlite3VdbeAddOp(v, OP_IdxRowid, iIdxCur, 0);
         sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
@@ -1299,25 +1741,80 @@ WhereInfo *sqlite3WhereBegin(
 
       /* Record the instruction used to terminate the loop.
       */
-      pLevel->op = pLevel->bRev ? OP_Prev : OP_Next;
+      pLevel->op = bRev ? OP_Prev : OP_Next;
       pLevel->p1 = iIdxCur;
       pLevel->p2 = start;
+    }else if( pLevel->flags & WHERE_COLUMN_EQ ){
+      /* Case 4:  There is an index and all terms of the WHERE clause that
+      **          refer to the index using the "==" or "IN" operators.
+      */
+      int start;
+      int nEq = pLevel->nEq;
+
+      /* Generate code to evaluate all constraint terms using == or IN
+      ** and leave the values of those terms on the stack.
+      */
+      codeAllEqualityTerms(pParse, pLevel, &wc, notReady, brk);
+
+      /* Generate a single key that will be used to both start and terminate
+      ** the search
+      */
+      buildIndexProbe(v, nEq, brk, pIdx);
+      sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iMem, 0);
+
+      /* Generate code (1) to move to the first matching element of the table.
+      ** Then generate code (2) that jumps to "brk" after the cursor is past
+      ** the last matching element of the table.  The code (1) is executed
+      ** once to initialize the search, the code (2) is executed before each
+      ** iteration of the scan to see if the scan has finished. */
+      if( bRev ){
+        /* Scan in reverse order */
+        sqlite3VdbeAddOp(v, OP_MoveLe, iIdxCur, brk);
+        start = sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
+        sqlite3VdbeAddOp(v, OP_IdxLT, iIdxCur, brk);
+        pLevel->op = OP_Prev;
+      }else{
+        /* Scan in the forward order */
+        sqlite3VdbeAddOp(v, OP_MoveGe, iIdxCur, brk);
+        start = sqlite3VdbeAddOp(v, OP_MemLoad, pLevel->iMem, 0);
+        sqlite3VdbeOp3(v, OP_IdxGE, iIdxCur, brk, "+", P3_STATIC);
+        pLevel->op = OP_Next;
+      }
+      sqlite3VdbeAddOp(v, OP_RowKey, iIdxCur, 0);
+      sqlite3VdbeAddOp(v, OP_IdxIsNull, nEq, cont);
+      if( !omitTable ){
+        sqlite3VdbeAddOp(v, OP_IdxRowid, iIdxCur, 0);
+        sqlite3VdbeAddOp(v, OP_MoveGe, iCur, 0);
+      }
+      pLevel->p1 = iIdxCur;
+      pLevel->p2 = start;
+    }else{
+      /* Case 5:  There is no usable index.  We must do a complete
+      **          scan of the entire table.
+      */
+      assert( omitTable==0 );
+      assert( bRev==0 );
+      pLevel->op = OP_Next;
+      pLevel->p1 = iCur;
+      pLevel->p2 = 1 + sqlite3VdbeAddOp(v, OP_Rewind, iCur, brk);
     }
-    loopMask |= getMask(&maskSet, iCur);
+    notReady &= ~getMask(&maskSet, iCur);
 
     /* Insert code to test every subexpression that can be completely
     ** computed using the current set of tables.
     */
-    for(pTerm=aExpr, j=0; j<nExpr; j++, pTerm++){
-      if( pTerm->p==0 ) continue;
-      if( (pTerm->prereqAll & loopMask)!=pTerm->prereqAll ) continue;
-      if( pLevel->iLeftJoin && !ExprHasProperty(pTerm->p,EP_FromJoin) ){
+    for(pTerm=wc.a, j=wc.nTerm; j>0; j--, pTerm++){
+      Expr *pE;
+      if( pTerm->flags & (TERM_VIRTUAL|TERM_CODED) ) continue;
+      if( (pTerm->prereqAll & notReady)!=0 ) continue;
+      pE = pTerm->pExpr;
+      assert( pE!=0 );
+      if( pLevel->iLeftJoin && !ExprHasProperty(pE, EP_FromJoin) ){
         continue;
       }
-      sqlite3ExprIfFalse(pParse, pTerm->p, cont, 1);
-      pTerm->p = 0;
+      sqlite3ExprIfFalse(pParse, pE, cont, 1);
+      pTerm->flags |= TERM_CODED;
     }
-    brk = cont;
 
     /* For a LEFT OUTER JOIN, generate code that will record the fact that
     ** at least one row of the right table has matched the left table.  
@@ -1327,17 +1824,75 @@ WhereInfo *sqlite3WhereBegin(
       sqlite3VdbeAddOp(v, OP_Integer, 1, 0);
       sqlite3VdbeAddOp(v, OP_MemStore, pLevel->iLeftJoin, 1);
       VdbeComment((v, "# record LEFT JOIN hit"));
-      for(pTerm=aExpr, j=0; j<nExpr; j++, pTerm++){
-        if( pTerm->p==0 ) continue;
-        if( (pTerm->prereqAll & loopMask)!=pTerm->prereqAll ) continue;
-        sqlite3ExprIfFalse(pParse, pTerm->p, cont, 1);
-        pTerm->p = 0;
+      for(pTerm=wc.a, j=0; j<wc.nTerm; j++, pTerm++){
+        if( pTerm->flags & (TERM_VIRTUAL|TERM_CODED) ) continue;
+        if( (pTerm->prereqAll & notReady)!=0 ) continue;
+        assert( pTerm->pExpr );
+        sqlite3ExprIfFalse(pParse, pTerm->pExpr, cont, 1);
+        pTerm->flags |= TERM_CODED;
       }
     }
   }
+
+#ifdef SQLITE_TEST  /* For testing and debugging use only */
+  /* Record in the query plan information about the current table
+  ** and the index used to access it (if any).  If the table itself
+  ** is not used, its name is just '{}'.  If no index is used
+  ** the index is listed as "{}".  If the primary key is used the
+  ** index name is '*'.
+  */
+  for(i=0; i<pTabList->nSrc; i++){
+    char *z;
+    int n;
+    pLevel = &pWInfo->a[i];
+    pTabItem = &pTabList->a[pLevel->iFrom];
+    z = pTabItem->zAlias;
+    if( z==0 ) z = pTabItem->pTab->zName;
+    n = strlen(z);
+    if( n+nQPlan < sizeof(sqlite3_query_plan)-10 ){
+      if( pLevel->flags & WHERE_IDX_ONLY ){
+        strcpy(&sqlite3_query_plan[nQPlan], "{}");
+        nQPlan += 2;
+      }else{
+        strcpy(&sqlite3_query_plan[nQPlan], z);
+        nQPlan += n;
+      }
+      sqlite3_query_plan[nQPlan++] = ' ';
+    }
+    if( pLevel->flags & (WHERE_ROWID_EQ|WHERE_ROWID_RANGE) ){
+      strcpy(&sqlite3_query_plan[nQPlan], "* ");
+      nQPlan += 2;
+    }else if( pLevel->pIdx==0 ){
+      strcpy(&sqlite3_query_plan[nQPlan], "{} ");
+      nQPlan += 3;
+    }else{
+      n = strlen(pLevel->pIdx->zName);
+      if( n+nQPlan < sizeof(sqlite3_query_plan)-2 ){
+        strcpy(&sqlite3_query_plan[nQPlan], pLevel->pIdx->zName);
+        nQPlan += n;
+        sqlite3_query_plan[nQPlan++] = ' ';
+      }
+    }
+  }
+  while( nQPlan>0 && sqlite3_query_plan[nQPlan-1]==' ' ){
+    sqlite3_query_plan[--nQPlan] = 0;
+  }
+  sqlite3_query_plan[nQPlan] = 0;
+  nQPlan = 0;
+#endif /* SQLITE_TEST // Testing and debugging use only */
+
+  /* Record the continuation address in the WhereInfo structure.  Then
+  ** clean up and return.
+  */
   pWInfo->iContinue = cont;
-  freeMaskSet(&maskSet);
+  whereClauseClear(&wc);
   return pWInfo;
+
+  /* Jump here if malloc fails */
+whereBeginNoMem:
+  whereClauseClear(&wc);
+  sqliteFree(pWInfo);
+  return 0;
 }
 
 /*
@@ -1349,7 +1904,6 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
   int i;
   WhereLevel *pLevel;
   SrcList *pTabList = pWInfo->pTabList;
-  struct SrcList_item *pTabItem;
 
   /* Generate loop termination code.
   */
@@ -1360,8 +1914,13 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
       sqlite3VdbeAddOp(v, pLevel->op, pLevel->p1, pLevel->p2);
     }
     sqlite3VdbeResolveLabel(v, pLevel->brk);
-    if( pLevel->inOp!=OP_Noop ){
-      sqlite3VdbeAddOp(v, pLevel->inOp, pLevel->inP1, pLevel->inP2);
+    if( pLevel->nIn ){
+      int *a;
+      int j;
+      for(j=pLevel->nIn, a=&pLevel->aInLoop[j*3-3]; j>0; j--, a-=3){
+        sqlite3VdbeAddOp(v, a[0], a[1], a[2]);
+      }
+      sqliteFree(pLevel->aInLoop);
     }
     if( pLevel->iLeftJoin ){
       int addr;
@@ -1380,15 +1939,14 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
   */
   sqlite3VdbeResolveLabel(v, pWInfo->iBreak);
 
-  /* Close all of the cursors that were opend by sqlite3WhereBegin.
+  /* Close all of the cursors that were opened by sqlite3WhereBegin.
   */
-  pLevel = pWInfo->a;
-  pTabItem = pTabList->a;
-  for(i=0; i<pTabList->nSrc; i++, pTabItem++, pLevel++){
+  for(i=0, pLevel=pWInfo->a; i<pTabList->nSrc; i++, pLevel++){
+    struct SrcList_item *pTabItem = &pTabList->a[pLevel->iFrom];
     Table *pTab = pTabItem->pTab;
     assert( pTab!=0 );
     if( pTab->isTransient || pTab->pSelect ) continue;
-    if( (pLevel->score & 1)==0 ){
+    if( (pLevel->flags & WHERE_IDX_ONLY)==0 ){
       sqlite3VdbeAddOp(v, OP_Close, pTabItem->iCursor, 0);
     }
     if( pLevel->pIdx!=0 ){
@@ -1404,7 +1962,7 @@ void sqlite3WhereEnd(WhereInfo *pWInfo){
     ** that reference the table and converts them into opcodes that
     ** reference the index.
     */
-    if( pLevel->score & 1 ){
+    if( pLevel->flags & WHERE_IDX_ONLY ){
       int i, j, last;
       VdbeOp *pOp;
       Index *pIdx = pLevel->pIdx;
