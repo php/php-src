@@ -430,7 +430,6 @@ void *tsrm_new_interpreter_context(void)
 
 	current = tsrm_tls_get();
 
-	new_ctx = malloc(sizeof(*new_ctx));
 	allocate_new_resource(&new_ctx, thread_id);
 	
 	/* switch back to the context that was in use prior to our creation
