@@ -1,3 +1,56 @@
+2005-08-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      ext/sqlite/config.m4:
+      Fixes --enable-sqlite=shared when doing so as part of the php distro
+
+2005-08-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      Upgraded bundled SQLite library for PDO:SQLite to 3.2.5
+
+2005-08-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ext/dom/element.c
+      ext/dom/tests/bug34276.phpt:
+      MFH: Fixed bug #34276 (setAttributeNS doesn't work with default namespace)
+      Add test
+
+    * ext/dom/tests/bug34276.phpt
+      ext/dom/tests/bug34276.phpt:
+      
+      Fixed bug #34276 (setAttributeNS doesn't work with default namespace)
+      Add test
+
+    * ext/dom/element.c:
+      Fixed bug #34276 (setAttributeNS doesn't work with default namespace)
+      Add test
+
+2005-08-28  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      Nuke misinformation
+
+    * (PHP_5_1)
+      configure.in:
+      This is no longer required
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/info.c
+      ext/standard/info.c:
+      - Fixed bug #34284 (CLI phpinfo showing html on _SERVER["argv"])
+
+    * ext/xmlrpc/config.m4:
+      - Fixed bug #34221 (Compiling xmlrpc as shared fails other parts)
+
 2005-08-27  Rolland Santimano  <rollandsantimano@yahoo.com>
 
     * ext/standard/string.c:
