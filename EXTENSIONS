@@ -452,7 +452,7 @@ STATUS:              Working
 EXTENSION:           pspell
 PRIMARY MAINTAINER:  Vlad Krupin <phpdevel@echospace.com>
 MAINTENANCE:         Unknown
-STATUS:              Unknown
+STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           readline
