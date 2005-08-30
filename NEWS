@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   components. (Ilia)
 - Added an optional parameter to strstr() and stristr() for retrieval of either
   the part of haystack before or after first occurence of needle. (Johannes)
+- Added possibility to check in which extension an internal function was
+  defined using reflection API. (Johannes)
 - Fixed a bug where stream_get_meta_data() did not return the "uri" element for
   files opened with tmpname(). (Derick)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
