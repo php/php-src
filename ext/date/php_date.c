@@ -392,7 +392,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			case 'z': snprintf(buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
-			case 'W': snprintf(buffer, 32, "%d", (int) isoweek); break; /* iso weeknr */
+			case 'W': snprintf(buffer, 32, "%02d", (int) isoweek); break; /* iso weeknr */
 			case 'o': snprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
