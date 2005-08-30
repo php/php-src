@@ -3480,6 +3480,7 @@ ZEND_METHOD(reflection_property, getValue)
 
 	*return_value= **member;
 	zval_copy_ctor(return_value);
+	INIT_PZVAL(return_value);
 }
 /* }}} */
 
