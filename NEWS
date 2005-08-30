@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
 - Fixed various reentrancy bugs in user-sort functions, solves bugs #33286 and
   #33295. (Mike Bretz)
+- Fixed bug #34299 (ReflectionClass::isInstantiable() returns true for abstract
+  classes). (Marcus)
 - Fixed bug #34078 (Reflection API problems in methods with boolean or 
   null default values). (Tony)
 - Fixed bug #34064 (arr[] as param to function is allowed only if function 
