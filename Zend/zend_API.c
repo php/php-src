@@ -1914,12 +1914,15 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TS
 	}
 	efree(lcname);
 	module = module_ptr;
+	EG(current_module) = module;
 
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
+		EG(current_module) = NULL;
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
 		return NULL;
 	}
 
+	EG(current_module) = NULL;
 	return module;
 }
 
@@ -1996,7 +1999,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		target_function_table = CG(function_table);
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
-	
+	internal_function->module = EG(current_module);
+
 	if (scope) {
 		class_name_len = scope->name_length;
 		lc_class_name = zend_str_tolower_dup(scope->name, class_name_len);
