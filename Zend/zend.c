@@ -875,7 +875,7 @@ static void class_to_unicode(zend_class_entry **ce)
 */
 	/* Copy constants */
 	zend_u_hash_init_ex(&new_ce->constants_table, (*ce)->constants_table.nNumOfElements, NULL, (*ce)->constants_table.pDestructor, 1, 1, 0);
-	zend_hash_copy(&new_ce->constants_table, &(*ce)->constants_table, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_const, sizeof(zend_constant));
+	zend_hash_copy(&new_ce->constants_table, &(*ce)->constants_table, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_zval, sizeof(zval*));
 
 	/* Copy properties */
 	zend_u_hash_init_ex(&new_ce->properties_info, (*ce)->properties_info.nNumOfElements, NULL, (*ce)->properties_info.pDestructor/*(dtor_func_t)zend_destroy_property_info_internal*/, 1, 1, 0);
