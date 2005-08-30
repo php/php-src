@@ -716,6 +716,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 		if (zobj->ce->__call) {
 			zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 			call_user_call->type = ZEND_INTERNAL_FUNCTION;
+			call_user_call->module = zobj->ce->module;
 			call_user_call->handler = zend_std_call_user_call;
 			call_user_call->arg_info = NULL;
 			call_user_call->num_args = 0;

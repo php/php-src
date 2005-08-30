@@ -2277,6 +2277,10 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_b
 				Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
 						((zend_op_array *) function)->filename,
 						((zend_op_array *) function)->opcodes[0].lineno);
+		} else if (((zend_internal_function *)function)->module) {
+			zend_error(error_level, "Cannot redeclare %R() (internal function exists in module %s)",
+				Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant),
+						((zend_internal_function *)function)->module->name);
 		} else {
 			zend_error(error_level, "Cannot redeclare %R()", Z_TYPE(opline->op2.u.constant), Z_UNIVAL(opline->op2.u.constant));
 		}

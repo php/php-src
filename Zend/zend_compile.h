@@ -238,6 +238,7 @@ typedef struct _zend_internal_function {
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	struct _zend_module_entry *module;
 } zend_internal_function;
 
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : EMPTY_STR)

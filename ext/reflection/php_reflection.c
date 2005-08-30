@@ -648,7 +648,13 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 	}
 
 	string_printf(str, fptr->common.scope ? "%sMethod [ " : "%sFunction [ ", indent);
-	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user> " : "<internal> ");
+	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user" : "<internal");
+	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function*)fptr)->module) {
+		string_printf(str, ":%s", ((zend_internal_function*)fptr)->module->name);
+	}
+	string_printf(str, "> ");
+
+
 	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
 		string_printf(str, "<ctor> ");
 	}
@@ -1552,7 +1558,7 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionParameter[] Reflection_Function::getParameters()
+/* {{{ proto public ReflectionParameter[] ReflectionFunction::getParameters()
    Returns an array of parameter objects for this function */
 ZEND_METHOD(reflection_function, getParameters)
 {
@@ -1575,6 +1581,54 @@ ZEND_METHOD(reflection_function, getParameters)
 		 add_next_index_zval(return_value, parameter);
 		 
 		 arg_info++;
+	}
+}
+/* }}} */
+
+/* {{{ proto public ReflectionExtension|NULL ReflectionFunction::getExtension()
+   Returns NULL or the extension the function belongs to */
+ZEND_METHOD(reflection_function, getExtension)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	zend_internal_function *internal;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
+		RETURN_NULL();
+	}
+
+	internal = (zend_internal_function *)fptr;
+	if (internal->module) {
+		reflection_extension_factory(return_value, internal->module->name TSRMLS_CC);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ proto public string|false ReflectionFunction::getExtensionName()
+   Returns false or the name of the extension the function belongs to */
+ZEND_METHOD(reflection_function, getExtensionName)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	zend_internal_function *internal;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
+		RETURN_FALSE;
+	}
+
+	internal = (zend_internal_function *)fptr;
+	if (internal->module) {
+		RETURN_STRING(internal->module->name, 1);
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -3850,6 +3904,8 @@ static zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, getParameters, NULL, 0)
 	ZEND_ME(reflection_function, getNumberOfParameters, NULL, 0)
 	ZEND_ME(reflection_function, getNumberOfRequiredParameters, NULL, 0)
+	ZEND_ME(reflection_function, getExtension, NULL, 0)
+	ZEND_ME(reflection_function, getExtensionName, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
