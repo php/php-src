@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34299 (ReflectionClass::isInstantiable() returns true for abstract
+  classes). (Marcus)
 - Fixed bug #34284 (CLI phpinfo showing html on _SERVER["argv"]). (Jani)
 - Fixed bug #34276 (setAttributeNS doesn't work with default namespace). (Rob)
 - Fixed bug #34257 (lib64 not handled correctly in ming extension). (Marcus)
