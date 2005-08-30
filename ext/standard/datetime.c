@@ -626,7 +626,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					wk = (yd + 6 - wd + fd) / 7 - (fd > 3);
 				}
 
-				sprintf(tmp_buff, "%d", wk);  /* SAFE */
+				sprintf(tmp_buff, "%02d", wk);  /* SAFE */
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 
