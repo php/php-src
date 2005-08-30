@@ -395,7 +395,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 		;
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
 
 	H = pecalloc(1, sizeof(pdo_mysql_db_handle), dbh->is_persistent);
 	
