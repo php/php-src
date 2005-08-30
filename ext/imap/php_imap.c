@@ -2908,6 +2908,7 @@ PHP_FUNCTION(imap_mail_compose)
 				custom_headers_param = mail_newbody_parameter();
 				convert_to_string_ex(env_data);
 				custom_headers_param->value = (char *) fs_get(Z_STRLEN_PP(env_data) + 1);
+				custom_headers_param->attribute = NULL;
 				memcpy(custom_headers_param->value, Z_STRVAL_PP(env_data), Z_STRLEN_PP(env_data) + 1);
 				zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
 				custom_headers_param->next = tmp_param;
@@ -2939,7 +2940,7 @@ PHP_FUNCTION(imap_mail_compose)
 			convert_to_string_ex(pvalue);
 			tmp_param = mail_newbody_parameter();
 			tmp_param->value = cpystr(Z_STRVAL_PP(pvalue));
-			tmp_param->attribute = "CHARSET";
+			tmp_param->attribute = cpystr("CHARSET");
 			tmp_param->next = bod->parameter;
 			bod->parameter = tmp_param;
 		}
@@ -2949,7 +2950,7 @@ PHP_FUNCTION(imap_mail_compose)
 				while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 					disp_param = mail_newbody_parameter();
 					zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-					disp_param->attribute = key;
+					disp_param->attribute = cpystr(key);
 					convert_to_string_ex(disp_data);
 					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
@@ -2983,7 +2984,7 @@ PHP_FUNCTION(imap_mail_compose)
 				while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 					disp_param = mail_newbody_parameter();
 					zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-					disp_param->attribute = key;
+					disp_param->attribute = cpystr(key);
 					convert_to_string_ex(disp_data);
 					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
@@ -3047,7 +3048,7 @@ PHP_FUNCTION(imap_mail_compose)
 				tmp_param = mail_newbody_parameter();
 				tmp_param->value = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
 				memcpy(tmp_param->value, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue) + 1);
-				tmp_param->attribute = "CHARSET";
+				tmp_param->attribute = cpystr("CHARSET");
 				tmp_param->next = bod->parameter;
 				bod->parameter = tmp_param;
 			}
@@ -3057,7 +3058,7 @@ PHP_FUNCTION(imap_mail_compose)
 					while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 						disp_param = mail_newbody_parameter();
 						zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-						disp_param->attribute = key;
+						disp_param->attribute = cpystr(key);
 						convert_to_string_ex(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
@@ -3091,7 +3092,7 @@ PHP_FUNCTION(imap_mail_compose)
 					while (zend_hash_get_current_data(Z_ARRVAL_PP(pvalue), (void **) &disp_data) == SUCCESS) {
 						disp_param = mail_newbody_parameter();
 						zend_hash_get_current_key(Z_ARRVAL_PP(pvalue), &key, &ind, 0);
-						disp_param->attribute = key;
+						disp_param->attribute = cpystr(key);
 						convert_to_string_ex(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
