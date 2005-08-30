@@ -13,3 +13,5 @@ PHP                                                                        NEWS
   the part of haystack before or after first occurence of needle. (Johannes)
 - Fixed a bug where stream_get_meta_data() did not return the "uri" element for
   files opened with tmpname(). (Derick)
+- Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
+  (Derick)
