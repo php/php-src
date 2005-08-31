@@ -19,3 +19,5 @@ PHP                                                                        NEWS
   files opened with tmpname(). (Derick)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
   (Derick)
+- Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week number).
+  (Derick)
