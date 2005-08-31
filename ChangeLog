@@ -1,3 +1,78 @@
+2005-08-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/imap/php_imap.c
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #32589 (possible crash inside imap_mail_compose() function).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #32589 (possible crash inside imap_mail_compose() function).
+
+2005-08-30  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * NEWS:
+      News
+
+2005-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      run-tests-config.php
+      server-tests-config.php
+      server-tests.php:
+      - MFH (missing run-tests2.php rename part)
+
+    * run-tests-config.php
+      server-tests-config.php
+      server-tests-config.php
+      server-tests.php:
+      - run-tests2.php was renamed into server-tests.php (missing part)
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_reflection_api.c:
+      - Adds module registering a function to struct zend_internal_function.
+        (Johannes)
+
+2005-08-30  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      NEWS
+      NEWS
+      NEWS
+      ext/standard/datetime.c
+      ext/standard/datetime.c:
+      - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
+
+2005-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix const speling (correct in branshes where did it vanish here)
+
+2005-08-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.c:
+      Fixed possible memory leak
+
+    * ZendEngine2/zend.c:
+      Fixed unicode support bug
+
+2005-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      - BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      - MFH Fix #34299: ReflectionClass::isInstantiable() returns true for
+      abstract classes
+
 2005-08-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)

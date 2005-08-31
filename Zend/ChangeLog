@@ -1,3 +1,32 @@
+2005-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_reflection_api.c:
+      - Adds module registering a function to struct zend_internal_function.
+        (Johannes)
+
+    * zend_reflection_api.c:
+      - Fix const speling (correct in branshes where did it vanish here)
+
+2005-08-30  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_reflection_api.c
+      zend_reflection_api.c:
+      Fixed possible memory leak
+
+    * zend.c:
+      Fixed unicode support bug
+
+2005-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      - MFH Fix #34299: ReflectionClass::isInstantiable() returns true for
+      abstract classes
+
 2005-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
