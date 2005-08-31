@@ -14,8 +14,7 @@ BUILD_FILES = \
 	Makefile.global \
 	acinclude.m4 \
 	ltmain.sh \
-	run-tests.php \
-	run-tests-config.php
+	run-tests.php
 
 BUILD_FILES_EXEC = \
 	build/shtool \
