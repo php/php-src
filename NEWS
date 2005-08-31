@@ -46,6 +46,8 @@ PHP                                                                        NEWS
   (Jani)
 - Fixed bug #33958 (duplicate cookies and magic_quotes=off may cause a crash).
   (Ilia)
+- Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week number).
+  (Derick)
 - Fixed bug #33940 (array_map() fails to pass by reference when called
   recursively). (Dmitry)
 - Fixed bug #33917 (number_format() output with > 1 char separators). (Jani)
