@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Unicode support. (Andrei, Dmitriy, et al)
 - Changed "instanceof" operator, is_a() and is_subclass_of() functions to not
   call __autoload(). (Dmitry)
+- Added optional parameter to http_build_query() to allow specification of 
+  string separator.
 - cURL improvements: (Ilia)
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
