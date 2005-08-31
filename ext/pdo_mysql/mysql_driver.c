@@ -422,14 +422,15 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			goto cleanup;
 		}
 	}
-	
+
+	dbname = vars[1].optval;
+    host = vars[2].optval;	
+	if(vars[3].optval) {
+		port = atoi(vars[3].optval);
+	}
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
 		unix_socket = vars[4].optval;  
-	} else {
-		host = vars[2].optval;
-		port = atoi(vars[3].optval); 
 	}
-	dbname = vars[1].optval;
 	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, connect_opts) == NULL) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
