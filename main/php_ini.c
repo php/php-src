@@ -31,7 +31,9 @@
 #include "SAPI.h"
 #include "php_main.h"
 #include "php_scandir.h"
+#ifdef PHP_WIN32
 #include "win32/php_registry.h"
+#endif
 
 #if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
 #include <dirent.h>
