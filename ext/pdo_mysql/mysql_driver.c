@@ -188,6 +188,13 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	
 	if (mysql_stmt_prepare(S->stmt, sql, sql_len)) {
 		/* TODO: might need to pull statement specific info here? */
+		/* if the query isn't supported by the protocol, fallback to emulation */
+		if (mysql_errno(H->server) == 1295) {
+			if (nsql) {
+				efree(nsql);
+			}
+			goto fallback;
+		}
 		pdo_mysql_error(dbh);
 		if (nsql) {
 			efree(nsql);
@@ -212,9 +219,9 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 
 	return 1;
 
-#else
-	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+fallback:
 #endif
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	
 	return 1;
 }
@@ -388,7 +395,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 		;
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
 
 	H = pecalloc(1, sizeof(pdo_mysql_db_handle), dbh->is_persistent);
 	
@@ -415,14 +422,15 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			goto cleanup;
 		}
 	}
-	
+
+	dbname = vars[1].optval;
+	host = vars[2].optval;	
+	if(vars[3].optval) {
+		port = atoi(vars[3].optval);
+	}
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
 		unix_socket = vars[4].optval;  
-	} else {
-		host = vars[2].optval;
-		port = atoi(vars[3].optval); 
 	}
-	dbname = vars[1].optval;
 	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, connect_opts) == NULL) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
