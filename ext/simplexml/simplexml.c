@@ -642,7 +642,7 @@ static void sxe_dimension_delete(zval *object, zval *offset TSRMLS_DC)
 /* {{{ _get_base_node_value()
  */
 static void
-_get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval **value TSRMLS_DC)
+_get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval **value, char *prefix TSRMLS_DC)
 {
 	php_sxe_object *subnode;
 	xmlChar        *contents;
@@ -659,6 +659,9 @@ _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval **value TSRM
 		subnode = php_sxe_object_new(sxe_ref->zo.ce TSRMLS_CC);
 		subnode->document = sxe_ref->document;
 		subnode->document->refcount++;
+		if (prefix) {
+			subnode->iter.nsprefix = xmlStrdup(prefix);
+		}
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL TSRMLS_CC);
 
 		(*value)->type = IS_OBJECT;
@@ -712,6 +715,10 @@ sxe_properties_get(zval *object TSRMLS_DC)
 				}
 			}
 
+			if (node->type == XML_ELEMENT_NODE && (! match_ns(sxe, node, sxe->iter.nsprefix))) {
+				goto next_iter;
+			}
+
 			name = (char *) node->name;
 			if (!name) {
 				goto next_iter;
@@ -719,7 +726,7 @@ sxe_properties_get(zval *object TSRMLS_DC)
 				namelen = xmlStrlen(node->name) + 1;
 			}
 
-			_get_base_node_value(sxe, node, &value TSRMLS_CC);
+			_get_base_node_value(sxe, node, &value, sxe->iter.nsprefix TSRMLS_CC);
 
 			h = zend_hash_func(name, namelen);
 			if (zend_hash_quick_find(rv, name, namelen, h, (void **) &data_ptr) == SUCCESS) {
