@@ -27,4 +27,6 @@ if test "$PHP_SYBASE" != "no"; then
      [ AC_DEFINE(PHP_SYBASE_DBOPEN,tdsdbopen,[ ])
        AC_DEFINE(DBMFIX,1,[ ]) ],
      [ AC_DEFINE(PHP_SYBASE_DBOPEN,dbopen,[ ]) ])
+
+  PHP_SUBST(SYBASE_SHARED_LIBADD)
 fi
