@@ -273,6 +273,15 @@ static void add_protected_variable(char *varname TSRMLS_DC)
 }
 
 
+static void add_u_protected_variable(UChar *varname TSRMLS_DC)
+{
+	int dummy=1;
+
+	normalize_u_protected_variable(varname TSRMLS_CC);
+	zend_u_hash_add(&PG(rfc1867_protected_variables), IS_UNICODE, varname, u_strlen(varname)+1, &dummy, sizeof(int), NULL);
+}
+
+
 static zend_bool is_protected_variable(char *varname TSRMLS_DC)
 {
 	normalize_protected_variable(varname TSRMLS_CC);
@@ -311,6 +320,14 @@ static void safe_u_php_register_variable(UChar *var, UChar *str_val, int32_t str
 }
 
 
+static void safe_u_php_register_variable_ex(UChar *var, zval *val, zval *track_vars_array, zend_bool override_protection TSRMLS_DC)
+{
+	if (override_protection || !is_u_protected_variable(var TSRMLS_CC)) {
+		php_u_register_variable_ex(var, val, track_vars_array TSRMLS_CC);
+	}
+}
+
+
 static void register_http_post_files_variable(char *strvar, char *val, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
 {
 	int register_globals = PG(register_globals);
@@ -321,12 +338,32 @@ static void register_http_post_files_variable(char *strvar, char *val, zval *htt
 }
 
 
+static void register_u_http_post_files_variable(UChar *strvar, UChar *val, int32_t val_len, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
+{
+	int register_globals = PG(register_globals);
+
+	PG(register_globals) = 0;
+	safe_u_php_register_variable(strvar, val, val_len, http_post_files, override_protection TSRMLS_CC);
+	PG(register_globals) = register_globals;
+}
+
+
 static void register_http_post_files_variable_ex(char *var, zval *val, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
 {
 	int register_globals = PG(register_globals);
 
 	PG(register_globals) = 0;
 	safe_php_register_variable_ex(var, val, http_post_files, override_protection TSRMLS_CC);
+	PG(register_globals) = register_globals;
+}
+
+
+static void register_u_http_post_files_variable_ex(UChar *var, zval *val, zval *http_post_files, zend_bool override_protection TSRMLS_DC)
+{
+	int register_globals = PG(register_globals);
+
+	PG(register_globals) = 0;
+	safe_u_php_register_variable_ex(var, val, http_post_files, override_protection TSRMLS_CC);
 	PG(register_globals) = register_globals;
 }
 
@@ -991,15 +1028,13 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 
 static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 {
-	char *boundary, *s=NULL, *boundary_end = NULL, *start_arr=NULL, *array_index=NULL;
-	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
+	char *boundary, *boundary_end = NULL;
+	UChar *temp_filename=NULL, *array_index = NULL, *lbuf = NULL, *abuf = NULL;
+	UChar *start_arr = NULL, *s = NULL;
+	char *ascii_temp_filename = NULL;
 	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0;
 	int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
 	zval *http_post_files=NULL; HashTable *uploaded_files=NULL;
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
-	char **val_list = NULL;
-#endif
 	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
@@ -1060,12 +1095,6 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 	INIT_PZVAL(http_post_files);
 	PG(http_globals)[TRACK_VARS_FILES] = http_post_files;
 
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-	if (php_mb_encoding_translation(TSRMLS_C)) {
-		val_list = (char **)ecalloc(num_vars_max+2, sizeof(char *));
-		len_list = (int *)ecalloc(num_vars_max+2, sizeof(int));
-	}
-#endif
 	zend_llist_init(&header, sizeof(mime_header_entry), (llist_dtor_func_t) php_free_hdr_entry, 0);
 
 	if (!did_string_init) {
@@ -1082,9 +1111,9 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 	while (!multipart_buffer_eof(mbuff TSRMLS_CC))
 	{
 		char buff[FILLUNIT];
-		char *cd=NULL, *tmp=NULL;
+		char *cd=NULL;
 		int blen=0, wlen=0;
-		UChar *param = NULL, *filename = NULL;
+		UChar *param = NULL, *filename = NULL, *tmp = NULL;
 		int32_t param_len;
 
 		zend_llist_clean(&header);
@@ -1096,19 +1125,20 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 		if ((cd = php_mime_get_hdr_value(header, "Content-Disposition"))) {
 			UChar *pair = NULL;
 			UChar *ucd = NULL, *ucd_start = NULL;
+			int32_t ucd_len;
 			int end=0;
 
 			while (isspace(*cd)) {
 				++cd;
 			}
 
-			ucd_start = php_ap_to_unicode(cd, strlen(cd), NULL TSRMLS_CC);
+			ucd_start = php_ap_to_unicode(cd, strlen(cd), &ucd_len TSRMLS_CC);
 			if (!ucd) {
 				/* UTODO error condition */
 			}
 			ucd = ucd_start;
 
-			while (*ucd && (pair = php_u_ap_getword(&ucd, ';' TSRMLS_CC)))
+			while (*ucd && (pair = php_u_ap_getword(&ucd, 0x3b /*';'*/ TSRMLS_CC)))
 			{
 				UChar *key=NULL, *word = pair;
 
@@ -1117,7 +1147,7 @@ static SAPI_POST_HANDLER_FUNC(rfc1867_post_handler_unicode)
 				}
 
 				if (u_strchr(pair, '=')) {
-					key = php_u_ap_getword(&pair, '=' TSRMLS_CC);
+					key = php_u_ap_getword(&pair, 0x3d /*'='*/ TSRMLS_CC);
 
 					if (!u_strcasecmp(key, name_key, 0)) {
 						if (param) {
@@ -1226,11 +1256,12 @@ var_done:
 
 			if (!skip_upload) {
 				/* Handle file */
-				fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &temp_filename TSRMLS_CC);
+				fp = php_open_temporary_file(PG(upload_tmp_dir), "php", &ascii_temp_filename TSRMLS_CC);
 				if (!fp) {
 					sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");
 					cancel_upload = UPLOAD_ERROR_E;
 				}
+				temp_filename = zend_ascii_to_unicode(ascii_temp_filename, strlen(ascii_temp_filename)+1 ZEND_FILE_LINE_CC);
 			}
 			if (skip_upload) {
 				efree(param);
@@ -1276,13 +1307,13 @@ var_done:
 			}
 			if (!cancel_upload && !end) {
 #if DEBUG_FILE_UPLOAD
-				sapi_module.sapi_error(E_NOTICE, "Missing mime boundary at the end of the data for file %s", strlen(filename) > 0 ? filename : "");
+				sapi_module.sapi_error(E_NOTICE, "Missing mime boundary at the end of the data for file %v", u_strlen(filename) > 0 ? filename : EMPTY_STR);
 #endif
 				cancel_upload = UPLOAD_ERROR_C;
 			}
 #if DEBUG_FILE_UPLOAD
-			if(strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
-				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
+			if(u_strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
+				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%v=%v] not saved", param, filename);
 				cancel_upload = 5;
 			}
 #endif		
@@ -1290,163 +1321,146 @@ var_done:
 			if (cancel_upload) {
 				if (temp_filename) {
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
-						unlink(temp_filename);
+						unlink(ascii_temp_filename);
 					}
+					efree(ascii_temp_filename);
 					efree(temp_filename);
 				}
-				temp_filename="";
+				temp_filename = EMPTY_STR;
 			} else {
-				zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename) + 1, &temp_filename, sizeof(char *), NULL);
+				zend_u_hash_add(SG(rfc1867_uploaded_files), IS_UNICODE, temp_filename, u_strlen(temp_filename) + 1, &temp_filename, sizeof(UChar *), NULL);
 			}
 
 			/* is_arr_upload is true when name of file upload field
 			 * ends in [.*]
 			 * start_arr is set to point to 1st [
 			 */
-			is_arr_upload =	(start_arr = strchr(param,'[')) && (param[strlen(param)-1] == ']');
+			is_arr_upload =	(start_arr = u_strchr(param, 0x5b /*'['*/)) && (param[u_strlen(param)-1] == 0x5d /*']'*/);
 
 			if (is_arr_upload) {
-				array_len = strlen(start_arr);
+				array_len = u_strlen(start_arr);
 				if (array_index) {
 					efree(array_index);
 				}
-				array_index = estrndup(start_arr+1, array_len-2);   
+				array_index = eustrndup(start_arr+1, array_len-2);   
 			}
 
 			/* Add $foo_name */
 			if (lbuf) {
 				efree(lbuf);
 			}
-			lbuf = (char *) emalloc(strlen(param) + MAX_SIZE_OF_INDEX + 1);
+			lbuf = eumalloc(u_strlen(param) + MAX_SIZE_OF_INDEX + 1);
 
 			if (is_arr_upload) {
 				if (abuf) efree(abuf);
-				abuf = estrndup(param, strlen(param)-array_len);
-				sprintf(lbuf, "%s_name[%s]", abuf, array_index);
+				abuf = eustrndup(param, u_strlen(param)-array_len);
+				u_sprintf(lbuf, "%S_name[%S]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s_name", param);
+				u_sprintf(lbuf, "%S_name", param);
 			}
 
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-			if (php_mb_encoding_translation(TSRMLS_C)) {
-				if (num_vars>=num_vars_max){	
-					php_mb_gpc_realloc_buffer(&val_list, &len_list, &num_vars_max, 
-											  1 TSRMLS_CC);
-				}
-				val_list[num_vars] = filename;
-				len_list[num_vars] = strlen(filename);
-				num_vars++;
-				if(php_mb_gpc_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC) == SUCCESS) {
-					str_len = strlen(filename);
-					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
-				}
-				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
-				if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
-					s = tmp;
-				}
-				num_vars--;
-				goto filedone;
-			}
-#endif			
 			/* The \ check should technically be needed for win32 systems only where
 			 * it is a valid path separator. However, IE in all it's wisdom always sends
 			 * the full path of the file on the user's filesystem, which means that unless
 			 * the user does basename() they get a bogus file name. Until IE's user base drops 
 			 * to nill or problem is fixed this code must remain enabled for all systems.
 			 */
-			s = strrchr(filename, '\\');
-			if ((tmp = strrchr(filename, '/')) > s) {
+			s = u_strrchr(filename, '\\');
+			if ((tmp = u_strrchr(filename, 0x2f /*'/'*/)) > s) {
 				s = tmp;
 			}
 #ifdef PHP_WIN32
 			if (PG(magic_quotes_gpc)) {
 				s = s ? s : filename;
-				tmp = strrchr(s, '\'');
+				tmp = u_strrchr(s, 0x27 /*'\''*/);
 				s = tmp > s ? tmp : s;
-				tmp = strrchr(s, '"');
+				tmp = u_strrchr(s, 0x22 /*'"'*/);
 				s = tmp > s ? tmp : s;
 			}
 #endif
 
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-filedone:			
-#endif
-
 			if (!is_anonymous) {
 				if (s && s > filename) {
-					safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
+					safe_u_php_register_variable(lbuf, s+1, u_strlen(s+1), NULL, 0 TSRMLS_CC);
 				} else {
-					safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
+					safe_u_php_register_variable(lbuf, filename, u_strlen(filename), NULL, 0 TSRMLS_CC);
 				}
 			}
 
 			/* Add $foo[name] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[name][%s]", abuf, array_index);
+				u_sprintf(lbuf, "%S[name][%S]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[name]", param);
+				u_sprintf(lbuf, "%S[name]", param);
 			}
 			if (s && s > filename) {
-				register_http_post_files_variable(lbuf, s+1, http_post_files, 0 TSRMLS_CC);
+				register_u_http_post_files_variable(lbuf, s+1, u_strlen(s+1), http_post_files, 0 TSRMLS_CC);
 			} else {
-				register_http_post_files_variable(lbuf, filename, http_post_files, 0 TSRMLS_CC);
+				register_u_http_post_files_variable(lbuf, filename, u_strlen(filename), http_post_files, 0 TSRMLS_CC);
 			}
 			efree(filename);
 			s = NULL;
 
 			/* Possible Content-Type: */
 			if (cancel_upload || !(cd = php_mime_get_hdr_value(header, "Content-Type"))) {
-				cd = "";
+				ucd = EMPTY_STR;
+				ucd_len = 0;
 			} else { 
+				ucd = php_ap_to_unicode(cd, strlen(cd), &ucd_len TSRMLS_CC);
+				if (!ucd) {
+					/* UTODO error condition */
+				}
 				/* fix for Opera 6.01 */
-				s = strchr(cd, ';');
+				s = u_strchr(ucd, 0x3b /*';'*/);
 				if (s != NULL) {
-					*s = '\0';
+					*s = 0;
 				}
 			}
 
 			/* Add $foo_type */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s_type[%s]", abuf, array_index);
+				u_sprintf(lbuf, "%S_type[%S]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s_type", param);
+				u_sprintf(lbuf, "%S_type", param);
 			}
 			if (!is_anonymous) {
-				safe_php_register_variable(lbuf, cd, NULL, 0 TSRMLS_CC);
+				safe_u_php_register_variable(lbuf, ucd, ucd_len, NULL, 0 TSRMLS_CC);
 			}
 
 			/* Add $foo[type] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[type][%s]", abuf, array_index);
+				u_sprintf(lbuf, "%S[type][%S]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[type]", param);
+				u_sprintf(lbuf, "%S[type]", param);
 			}
-			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
+			register_u_http_post_files_variable(lbuf, ucd, ucd_len, http_post_files, 0 TSRMLS_CC);
+
+			efree(ucd);
 
 			/* Restore Content-Type Header */
 			if (s != NULL) {
-				*s = ';';
+				*s = 0x3b /*';'*/;
 			}
-			s = "";
+			s = EMPTY_STR;
 
 			/* Initialize variables */
-			add_protected_variable(param TSRMLS_CC);
+			add_u_protected_variable(param TSRMLS_CC);
 
 			magic_quotes_gpc = PG(magic_quotes_gpc);
 			PG(magic_quotes_gpc) = 0;
 			/* if param is of form xxx[.*] this will cut it to xxx */
 			if (!is_anonymous) {
-				safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
+				safe_u_php_register_variable(param, temp_filename, u_strlen(temp_filename), NULL, 1 TSRMLS_CC);
 			}
 
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
-				sprintf(lbuf, "%s[tmp_name][%s]", abuf, array_index);
+				u_sprintf(lbuf, "%S[tmp_name][%S]", abuf, array_index);
 			} else {
-				sprintf(lbuf, "%s[tmp_name]", param);
+				u_sprintf(lbuf, "%S[tmp_name]", param);
 			}
-			add_protected_variable(lbuf TSRMLS_CC);
-			register_http_post_files_variable(lbuf, temp_filename, http_post_files, 1 TSRMLS_CC);
+			add_u_protected_variable(lbuf TSRMLS_CC);
+			register_u_http_post_files_variable(lbuf, temp_filename, u_strlen(temp_filename), http_post_files, 1 TSRMLS_CC);
 
 			PG(magic_quotes_gpc) = magic_quotes_gpc;
 
@@ -1466,31 +1480,32 @@ filedone:
 				}	
 
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s[error][%s]", abuf, array_index);
+					u_sprintf(lbuf, "%S[error][%S]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s[error]", param);
+					u_sprintf(lbuf, "%S[error]", param);
 				}
-				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
+				register_u_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
 
 				/* Add $foo_size */
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s_size[%s]", abuf, array_index);
+					u_sprintf(lbuf, "%S_size[%S]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s_size", param);
+					u_sprintf(lbuf, "%S_size", param);
 				}
 				if (!is_anonymous) {
-					safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
+					safe_u_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
 				}	
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
-					sprintf(lbuf, "%s[size][%s]", abuf, array_index);
+					u_sprintf(lbuf, "%S[size][%S]", abuf, array_index);
 				} else {
-					sprintf(lbuf, "%s[size]", param);
+					u_sprintf(lbuf, "%S[size]", param);
 				}
-				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
+				register_u_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
 			}
 			efree(param);
+			efree(filename);
 		}
 	}
 
