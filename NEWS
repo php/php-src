@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . openssl 0.9.8
   . ming 0.3b
   . libpq (PostgreSQL) 8.0.1
+- Moved extensions to PECL:
+  . ext/oracle (Jani, Derick)
 - Fixed a bug where stream_get_meta_data() did not return the "uri" element for
   files opened with tmpname(). (Derick)
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
