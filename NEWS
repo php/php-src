@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34306 (wddx_serialize_value() crashes with long array keys). (Jani)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
   (Derick)
 - Fixed bug #34299 (ReflectionClass::isInstantiable() returns true for abstract
