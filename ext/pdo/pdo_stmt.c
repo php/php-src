@@ -1541,7 +1541,10 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &colno)) {
 		RETURN_FALSE;
 	}
-
+	if(colno < 0) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative" TSRMLS_CC);
+		RETURN_FALSE;
+	}
 	if (!stmt->methods->get_column_meta) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver doesn't support meta data" TSRMLS_CC);
 		RETURN_FALSE;
