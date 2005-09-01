@@ -76,6 +76,8 @@ PHP                                                                        NEWS
 - Fixed bug #33578 (strtotime() problem with "Oct17" format). (Derick)
 - Fixed bug #33558 (warning with nested calls to functions returning by
   reference). (Dmitry)
+- Fixed bug #33414 (Comprehensive list of incorrect days returned after
+  strtotime() / date() tests). (Derick)
 - Fixed bug #33326 (Cannot build extensions with phpize on Macosx). (Jani)
 - Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes apache2.0.54
   seg fault). (Dmitry)
