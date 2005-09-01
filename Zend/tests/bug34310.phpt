@@ -5,7 +5,7 @@ Bug #34310 (foreach($arr as $c->d => $x) crashes)
 
 class C
 {
-	var $d;
+	public $d;
 }
 
 $c = new C();
