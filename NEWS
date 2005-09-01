@@ -9,6 +9,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #34156 (memory usage remains elevated after memory limit is 
   reached). (Ilia)
 - Fixed bug #34148 (+,- and . not supported as parts of scheme). (Ilia)
+- Fixed bug #34137 (assigning array element by reference causes binary mess).
+  (Dmitry) 
 - Fixed bug #34068 (Numeric string as array key not cast to integer in 
   wddx_deserialize()). (Ilia)
 - Fixed bug #34064 (arr[] as param to function is allowed only if function 
