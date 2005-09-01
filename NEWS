@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - Fixed bug #34156 (memory usage remains elevated after memory limit is 
   reached). (Ilia)
 - Fixed bug #34148 (+,- and . not supported as parts of scheme). (Ilia)
+- Fixed bug #34137 (assigning array element by reference causes binary mess).
+  (Dmitry) 
 - Fixed bug #34103 (line numbering not maintained in dom document). (Rob)
 - Fixed bug #34078 (Reflection API problems in methods with boolean or 
   null default values). (Tony)
