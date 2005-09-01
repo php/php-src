@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed bug #34299 (ReflectionClass::isInstantiable() returns true for abstract
   classes). (Marcus)
+- Fixed bug #34277 (array_filter() crashes with references and objects).
+  (Dmitry)
 - Fixed bug #34078 (Reflection API problems in methods with boolean or 
   null default values). (Tony)
 - Fixed bug #34064 (arr[] as param to function is allowed only if function 
