@@ -543,14 +543,20 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 	if (last_op_number > 0) {
 		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
 
-		if (last_op->opcode == ZEND_FETCH_OBJ_W) {
+		if (variable->op_type == IS_VAR &&
+		    last_op->opcode == ZEND_FETCH_OBJ_W &&
+		    last_op->result.op_type == IS_VAR &&
+		    last_op->result.u.var == variable->u.var) {
 			last_op->opcode = ZEND_ASSIGN_OBJ;
 
 			zend_do_op_data(opline, value TSRMLS_CC);
 			SET_UNUSED(opline->result);
 			*result = last_op->result;
 			return;
-		} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
+		} else if (variable->op_type == IS_VAR &&
+		           last_op->opcode == ZEND_FETCH_DIM_W &&
+		           last_op->result.op_type == IS_VAR &&
+		           last_op->result.u.var == variable->u.var) {
 			last_op->opcode = ZEND_ASSIGN_DIM;
 
 			zend_do_op_data(opline, value TSRMLS_CC);
