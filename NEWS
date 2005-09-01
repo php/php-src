@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
+- Implemented support for class constants and static members for internal
+  classes (Dmitry, Michael Wallner)
 - Unicode support. (Andrei, Dmitriy, et al)
 - Changed "instanceof" operator, is_a() and is_subclass_of() functions to not
   call __autoload(). (Dmitry)

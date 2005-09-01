@@ -838,7 +838,6 @@ static void const_to_unicode(zend_constant *c)
 static void class_to_unicode(zend_class_entry **ce)
 {
 	zend_class_entry *new_ce = malloc(sizeof(zend_class_entry));
-	zend_constant tmp_const;
 	zend_property_info tmp_info;
 	zval* tmp_zval;
 
@@ -884,10 +883,36 @@ static void class_to_unicode(zend_class_entry **ce)
 	zend_u_hash_init_ex(&new_ce->default_properties, (*ce)->default_properties.nNumOfElements, NULL, (*ce)->default_properties.pDestructor, 1, 1, 0);
 	zend_hash_copy(&new_ce->default_properties, &(*ce)->default_properties, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_zval, sizeof(zval*));
 
-	if (new_ce->static_members) {
-		new_ce->static_members = (HashTable*)malloc(sizeof(HashTable));
-		zend_u_hash_init_ex(new_ce->static_members, (*ce)->static_members->nNumOfElements, NULL, (*ce)->static_members->pDestructor, 1, 1, 0);
-		zend_hash_copy(new_ce->static_members, (*ce)->static_members, (copy_ctor_func_t) zval_ptr_to_unicode, &tmp_zval, sizeof(zval*));
+	zend_u_hash_init_ex(&new_ce->default_static_members, (*ce)->default_static_members.nNumOfElements, NULL, (*ce)->default_static_members.pDestructor, 1, 1, 0);
+
+	{
+		HashPosition pos;
+		zval **p;
+
+		zend_hash_internal_pointer_reset_ex(&(*ce)->default_static_members, &pos);
+		while (zend_hash_get_current_data_ex(&(*ce)->default_static_members, (void**)&p, &pos) == SUCCESS) {
+			char *str_index;
+			uint str_length;
+			ulong num_index;
+			zval **q;
+
+			zend_hash_get_current_key_ex(&(*ce)->default_static_members, &str_index, &str_length, &num_index, 0, &pos);
+			if ((*p)->is_ref &&
+			    (*ce)->parent &&
+			    zend_hash_find(&(*ce)->parent->default_static_members, str_index, str_length, (void**)&q) == SUCCESS &&
+			    *p == *q &&
+			    zend_hash_find(&new_ce->parent->u_twin->default_static_members, str_index, str_length, (void**)&q) == SUCCESS) {
+				(*q)->refcount++;
+				(*q)->is_ref = 1;
+				zend_hash_add(&new_ce->default_static_members, str_index, str_length, (void**)q, sizeof(zval*), NULL);
+			} else {
+				zval *q = *p;
+				zval_ptr_to_unicode(&q);
+				q->is_ref = 0;
+				zend_hash_add(&new_ce->default_static_members, str_index, str_length, (void**)&q, sizeof(zval*), NULL);
+			}
+			zend_hash_move_forward_ex(&(*ce)->default_static_members, &pos);
+		}
 	}
 
 	*ce = new_ce;
