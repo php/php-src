@@ -76,7 +76,7 @@ AC_ARG_WITH(apxs2filter,
                 \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                        -S SYSCONFDIR='$APXS_SYSCONFDIR' \
-                       -i -A -n php5"
+                       -i -a -n php5"
   fi
 
   case $host_alias in
