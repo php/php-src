@@ -1,3 +1,13 @@
+2005-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * tests/bug34310.phpt:
+      Added test for bug #34310
+
+    * tests/bug34310.phpt
+      tests/bug34310.phpt:
+      
+      file bug34310.phpt was initially added on branch PHP_5_1.
+
 2005-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c

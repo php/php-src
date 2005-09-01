@@ -1,3 +1,102 @@
+2005-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/sybase/config.m4
+      ext/sybase/config.m4
+      ext/sybase/config.m4:
+      Fixed bug #34323
+
+2005-08-31  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/rfc1867.c:
+      Further work on Unicode support in file uploads.
+
+2005-08-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_1)
+      ext/simplexml/simplexml.c:
+      MFH: make sxe_properties_get respect namespace scope
+
+    * ext/simplexml/simplexml.c:
+      make sxe_properties_get respect namespace scope
+
+2005-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h:
+      Update credits
+
+    * (PHP_5_1)
+      NEWS
+      ext/oracle/.cvsignore
+      ext/oracle/CREDITS
+      ext/oracle/config.m4
+      ext/oracle/config.w32
+      ext/oracle/oracle.c
+      ext/oracle/oracle.dsp
+      ext/oracle/package.xml
+      ext/oracle/php_oracle.h:
+      - Moved ext/oracle to PECL
+
+    * ext/oracle/.cvsignore
+      ext/oracle/CREDITS
+      ext/oracle/config.m4
+      ext/oracle/config.w32
+      ext/oracle/oracle.c
+      ext/oracle/oracle.dsp
+      ext/oracle/package.xml
+      ext/oracle/php_oracle.h:
+      Moved to PECL
+
+    * (PHP_4_4)
+      main/php_ini.c:
+      Fixed bug #32318
+
+2005-08-31  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      NEWS:
+      - Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week
+      number).
+
+2005-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS
+      ext/wddx/wddx.c
+      ext/wddx/tests/bug34306.phpt:
+      MFH:- Fixed bug #34306 (wddx_serialize_value() crashes with long array
+      keys)
+
+    * ext/wddx/wddx.c
+      ext/wddx/tests/bug34306.phpt
+      ext/wddx/tests/bug34306.phpt:
+      - Fixed bug #34306 (wddx_serialize_value() crashes with long array keys)
+
+    * ZendEngine2/tests/bug34310.phpt:
+      Added test for bug #34310
+
+    * ZendEngine2/tests/bug34310.phpt
+      ZendEngine2/tests/bug34310.phpt:
+      
+      file bug34310.phpt was initially added on branch PHP_5_1.
+
+2005-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      scripts/Makefile.frag:
+      - MFH run-tests-config.php was never used and now renamed
+
+    * scripts/Makefile.frag:
+      - run-tests-config.php was never used and now renamed
+
+2005-08-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/http.c
+      ext/standard/php_http.h:
+      Added optional parameter to http_build_query() to allow specification of
+      string separator.
+
 2005-08-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_4)
