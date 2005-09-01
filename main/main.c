@@ -1415,16 +1415,23 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 
+	/* Initialize configuration_hash */
+	if (php_init_config_hash() == FAILURE) {
+		return FAILURE;
+	}
+	
+	/* Register PHP core ini entries */
+	REGISTER_INI_ENTRIES();
+	
+	/* Register Zend ini entries */
+	zend_register_standard_ini_entries(TSRMLS_C);
 
 	/* this will read in php.ini, set up the configuration parameters,
 	   load zend extensions and register php function extensions 
 	   to be loaded later */
-	if (php_init_config() == FAILURE) {
+	if (php_init_config(TSRMLS_C) == FAILURE) {
 		return FAILURE;
 	}
-
-	REGISTER_INI_ENTRIES();
-	zend_register_standard_ini_entries(TSRMLS_C);
 
 	/* Disable realpath cache if safe_mode or open_basedir are set */
 	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {

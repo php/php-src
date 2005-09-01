@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
 - Fixed bug #34310 (foreach($arr as $c->d => $x) crashes). (Dmitry)
+- Fixed bug #34307 (OnUpdateStringUnempty INI options can be set empty). (Jani)
 - Fixed bug #34306 (wddx_serialize_value() crashes with long array keys). (Jani)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
   (Derick)
