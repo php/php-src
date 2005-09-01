@@ -3480,6 +3480,7 @@ ZEND_METHOD(reflection_property, setValue)
 				return;
 			}
 		}
+		zend_update_class_constants(intern->ce TSRMLS_CC);
 		prop_table = intern->ce->static_members;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {

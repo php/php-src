@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2005, PHP 5.1 Release Candidate 2
+- Implemented support for class constants and static members for internal
+  classes (Dmitry, Michael Wallner)
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.5 (Ilia)
 - Upgraded PCRE library to version 6.2. (Andrei)
 - Updated bundled libraries in Windows distribution. (Edin)

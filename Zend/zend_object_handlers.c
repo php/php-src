@@ -820,6 +820,8 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 		return NULL;
 	}
 
+	zend_update_class_constants(tmp_ce TSRMLS_CC);
+
 	zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
 
 	if (!retval) {
@@ -830,7 +832,6 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 		}
 	}
 	
-	zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	return retval;
 }
 
