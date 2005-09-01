@@ -838,7 +838,9 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		return NULL;
 	}
 
-	zend_u_hash_quick_find(tmp_ce->static_members, type, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
+	zend_update_class_constants(tmp_ce TSRMLS_CC);
+
+	zend_u_hash_quick_find(tmp_ce->static_members, UG(unicode)?IS_UNICODE:IS_STRING, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
 
 	if (!retval) {
 		if (silent) {
@@ -848,7 +850,6 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, zend_uchar ty
 		}
 	}
 	
-	zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	return retval;
 }
 

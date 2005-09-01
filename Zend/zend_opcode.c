@@ -141,11 +141,17 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 
 ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 {
+	if ((*pce)->static_members) {
+		if ((*pce)->static_members != &(*pce)->default_static_members) {
+			zend_hash_destroy((*pce)->static_members);
+			FREE_HASHTABLE((*pce)->static_members);
+		}
+		(*pce)->static_members = NULL;
+	}
 	if ((*pce)->type == ZEND_USER_CLASS) {
 		/* Clean all parts that can contain run-time data */
 		/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		   not contain objects and thus are not probelmatic */
-		zend_hash_clean((*pce)->static_members);
 		zend_hash_apply(&(*pce)->function_table, (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
 	}
 	return 0;
@@ -162,10 +168,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 		case ZEND_USER_CLASS:
 			zend_hash_destroy(&ce->default_properties);
 			zend_hash_destroy(&ce->properties_info);
-			zend_hash_destroy(ce->static_members);
+			zend_hash_destroy(&ce->default_static_members);
 			efree(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			FREE_HASHTABLE(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
@@ -178,10 +183,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 		case ZEND_INTERNAL_CLASS:
 			zend_hash_destroy(&ce->default_properties);
 			zend_hash_destroy(&ce->properties_info);
-			zend_hash_destroy(ce->static_members);
+			zend_hash_destroy(&ce->default_static_members);
 			free(ce->name);
 			zend_hash_destroy(&ce->function_table);
-			free(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);

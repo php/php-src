@@ -2123,9 +2123,17 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			zend_u_mangle_property_name(&prot_name, &prot_name_length, utype, "*", 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
 			if (child_info->flags & ZEND_ACC_STATIC) {
 				zval **prop;
-				if (zend_u_hash_find(parent_ce->static_members, utype, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
+				HashTable *ht;
+
+				if (parent_ce->type != ce->type) {
+					/* User class extends internal class */
+					ht = parent_ce->static_members;
+				} else {
+					ht = &parent_ce->default_static_members;
+				}
+				if (zend_u_hash_find(ht, utype, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
 					zval **new_prop;
-					if (zend_u_hash_find(ce->static_members, utype, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
+					if (zend_u_hash_find(ht, utype, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
 						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
 							char *prop_name, *tmp;
 
@@ -2135,8 +2143,8 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 						}
 					}
 					(*prop)->refcount++;
-					zend_u_hash_update(ce->static_members, utype, child_info->name, child_info->name_length+1, (void**)prop, sizeof(zval*), NULL);
-					zend_u_hash_del(ce->static_members, utype, prot_name, prot_name_length+1);
+					zend_u_hash_update(&ce->default_static_members, utype, child_info->name, child_info->name_length+1, (void**)prop, sizeof(zval*), NULL);
+					zend_u_hash_del(&ce->default_static_members, utype, prot_name, prot_name_length+1);
 				}
 			} else {
 				zend_u_hash_del(&ce->default_properties, utype, prot_name, prot_name_length+1);
@@ -2222,7 +2230,13 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	/* Inherit properties */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
-	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
+	if (parent_ce->type != ce->type) {
+		/* User class extends internal class */
+		zend_update_class_constants(parent_ce  TSRMLS_CC);
+		zend_hash_merge(&ce->default_static_members, parent_ce->static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
+	} else {
+		zend_hash_merge(&ce->default_static_members, &parent_ce->default_static_members, (void (*)(void *)) inherit_static_prop, NULL, sizeof(zval *), 0);
+	}
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
@@ -2360,7 +2374,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *c
 		zend_hash_destroy(&ce->function_table);
 		zend_hash_destroy(&ce->default_properties);
 		zend_hash_destroy(&ce->properties_info);
-		zend_hash_destroy(ce->static_members);
+		zend_hash_destroy(&ce->default_static_members);
 		zend_hash_destroy(&ce->constants_table);
 		return NULL;
 	}
@@ -4110,16 +4124,11 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	zend_u_hash_init_ex(&ce->default_properties, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);
 	zend_u_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, UG(unicode), 0);
-
-	if (persistent_hashes) {
-		ce->static_members = (HashTable *) malloc(sizeof(HashTable));
-	} else {
-		ALLOC_HASHTABLE(ce->static_members);
-	}
-
-	zend_u_hash_init_ex(ce->static_members, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);
+	zend_u_hash_init_ex(&ce->default_static_members, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);
 	zend_u_hash_init_ex(&ce->constants_table, 0, NULL, zval_ptr_dtor_func, persistent_hashes, UG(unicode), 0);
 	zend_u_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, UG(unicode), 0);
+
+	ce->static_members = (ce->type == ZEND_INTERNAL_CLASS) ? NULL : &ce->default_static_members;
 
 	if (nullify_handlers) {
 		ce->constructor = NULL;
