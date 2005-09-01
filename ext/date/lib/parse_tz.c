@@ -164,6 +164,15 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Local types count: %lu\n", (unsigned long) tz->typecnt);
 	printf("Zone Abbr. count:  %lu\n", (unsigned long) tz->charcnt);
 
+	printf ("%8s (%12s) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
+		"", "", 0,
+		(long int) tz->type[0].offset,
+		tz->type[0].isdst,
+		tz->type[0].abbr_idx,
+		&tz->timezone_abbr[tz->type[0].abbr_idx],
+		tz->type[0].isstdcnt,
+		tz->type[0].isgmtcnt
+		);
 	for (i = 0; i < tz->timecnt; i++) {
 		printf ("%08X (%12d) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 			tz->trans[i], tz->trans[i], tz->trans_idx[i],
@@ -244,6 +253,8 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 {
 	uint32_t i;
 
+	/* If there is no transistion time, we pick the first one, if that doesn't
+	 * exist we return NULL */
 	if (!tz->timecnt || !tz->trans) {
 		*transition_time = 0;
 		if (tz->typecnt == 1) {
@@ -252,10 +263,26 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 		return NULL;
 	}
 
+	/* If the TS is lower than the first transistion time, then we scan over
+	 * all the transistion times to find the first non-DST one, or the first
+	 * one in case there are only DST entries. Not sure which smartass came up
+	 * with this idea in the first though :) */
 	if (ts < tz->trans[0]) {
+		uint32_t j;
+
 		*transition_time = 0;
-		return &(tz->type[tz->trans_idx[tz->timecnt - 1]]);
+		j = 0;
+		while (j < tz->timecnt && tz->type[j].isdst) {
+			++j;
+		}
+		if (j == tz->timecnt) {
+			j = 0;
+		}
+		return &(tz->type[j]);
 	}
+
+	/* In all other cases we loop through the available transtion times to find
+	 * the correct entry */
 	for (i = 0; i < tz->timecnt; i++) {
 		if (ts < tz->trans[i]) {
 			*transition_time = tz->trans[i - 1];

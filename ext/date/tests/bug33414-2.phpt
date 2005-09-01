@@ -106,8 +106,8 @@ result=Tuesday 2005-04-12 00:00:00 CDT 1
 wanted=Tuesday            00:00:00
 
 TZ=Pacific/Pitcairn - wrong day.
-tStamp=Thursday 1970-01-01 17:17:17 PST 0
-result=Wednesday 1970-01-06 00:00:00 PST 0
+tStamp=Thursday 1970-01-01 17:17:17 PNT 0
+result=Wednesday 1970-01-07 00:00:00 PNT 0
 wanted=Wednesday            00:00:00
 
 TZ=Pacific/Fakaofo - wrong day.
