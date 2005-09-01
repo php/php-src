@@ -121,9 +121,27 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 						mysql_stmt_attr_set(S->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &on);
 						calc_max_length = 0;
 					}
-					S->bound_result[i].buffer_length =
-						S->fields[i].max_length? S->fields[i].max_length:
-						S->fields[i].length;
+					switch (S->fields[i].type) {
+						case FIELD_TYPE_INT24:
+							S->bound_result[i].buffer_length = MAX_MEDIUMINT_WIDTH;
+							break;
+						case FIELD_TYPE_LONG:
+							S->bound_result[i].buffer_length = MAX_INT_WIDTH;
+							break;
+						case FIELD_TYPE_LONGLONG:
+							S->bound_result[i].buffer_length = MAX_BIGINT_WIDTH;
+							break;
+						case FIELD_TYPE_TINY:
+							S->bound_result[i].buffer_length = MAX_TINYINT_WIDTH;
+							break;
+						case FIELD_TYPE_SHORT:
+							S->bound_result[i].buffer_length = MAX_SMALLINT_WIDTH;
+							break;
+						default:
+							S->bound_result[i].buffer_length =
+								S->fields[i].max_length? S->fields[i].max_length:
+								S->fields[i].length;
+					}
 					S->bound_result[i].buffer = emalloc(S->bound_result[i].buffer_length);
 					S->bound_result[i].is_null = &S->out_null[i];
 					S->bound_result[i].length = &S->out_length[i];
