@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 2005, Version 4.4.1
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
   (Derick)
+- Fixed bug #34277 (array_filter() crashes with references and objects).
+  (Dmitry)
 - Fixed bug #34191 (ob_gzhandler does not enforce trailing \0). (Ilia)
 - Fixed bug #34156 (memory usage remains elevated after memory limit is 
   reached). (Ilia)
