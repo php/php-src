@@ -392,12 +392,6 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
 		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
 	} else if (variable_ptr != value_ptr) {
-		variable_ptr->refcount--;
-		if (variable_ptr->refcount==0) {
-			zendi_zval_dtor(*variable_ptr);
-			FREE_ZVAL(variable_ptr);
-		}
-
 		if (!PZVAL_IS_REF(value_ptr)) {
 			/* break it away */
 			value_ptr->refcount--;
@@ -413,6 +407,12 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 
 		*variable_ptr_ptr = value_ptr;
 		value_ptr->refcount++;
+
+		variable_ptr->refcount--;
+		if (variable_ptr->refcount==0) {
+			zendi_zval_dtor(*variable_ptr);
+			FREE_ZVAL(variable_ptr);
+		}
 	} else if (!variable_ptr->is_ref) {
 		if (variable_ptr_ptr == value_ptr_ptr) {
 			SEPARATE_ZVAL(variable_ptr_ptr);
