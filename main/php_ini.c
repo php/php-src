@@ -163,16 +163,6 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 # endif
 #endif
 
-/* {{{ pvalue_config_destructor
- */
-static void pvalue_config_destructor(zval *pvalue)
-{   
-	if (Z_TYPE_P(pvalue) == IS_STRING) {
-		free(Z_STRVAL_P(pvalue));
-	}
-}
-/* }}} */
-
 /* {{{ php_config_ini_parser_cb
  */
 static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
@@ -254,9 +244,29 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ pvalue_config_destructor
+ */
+static void pvalue_config_destructor(zval *pvalue)
+{   
+	if (Z_TYPE_P(pvalue) == IS_STRING) {
+		free(Z_STRVAL_P(pvalue));
+	}
+}
+/* }}} */
+
+/* {{{ php_init_config_hash
+ */
+int php_init_config_hash(void)
+{
+	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1) == FAILURE) {
+		return FAILURE;
+	}
+}
+/* }}} */
+
 /* {{{ php_init_config
  */
-int php_init_config()
+int php_init_config(TSRMLS_D)
 {
 	char *php_ini_search_path = NULL;
 	int safe_mode_state;
@@ -269,11 +279,6 @@ int php_init_config()
 	zend_llist scanned_ini_list;
 	int l, total_l=0;
 	zend_llist_element *element;
-	TSRMLS_FETCH();
-
-	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1) == FAILURE) {
-		return FAILURE;
-	}
 
 	if (sapi_module.ini_defaults) {
 		sapi_module.ini_defaults(&configuration_hash);
