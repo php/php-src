@@ -720,7 +720,7 @@ int php_hash_environment(TSRMLS_D)
 
 static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS_DC)
 {
-	if (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s')) {
+	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
 		php_register_server_variables(TSRMLS_C);
 	} else {
 		zval *server_vars=NULL;
@@ -756,7 +756,7 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 	}
 	PG(http_globals)[TRACK_VARS_ENV] = env_vars;
 	
-	if (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e')) {
+	if (PG(variables_order) && (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e'))) {
 		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 	}
 
