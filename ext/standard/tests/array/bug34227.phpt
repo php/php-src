@@ -63,7 +63,7 @@ class C
 
 function f($str)
 {
-  $obj =& new C;
+  $obj = new C;
   $obj->m1();
   return TRUE;
 }
