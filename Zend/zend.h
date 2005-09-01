@@ -331,6 +331,7 @@ struct _zend_class_entry {
 	HashTable function_table;
 	HashTable default_properties;
 	HashTable properties_info;
+	HashTable default_static_members;
 	HashTable *static_members;
 	HashTable constants_table;
 	struct _zend_function_entry *builtin_functions;
