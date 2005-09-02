@@ -1,3 +1,148 @@
+2005-09-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      main/php_variables.c
+      main/php_variables.c:
+      MFH: Fixed bug #34331 (php crashes when variables_order is empty).
+
+    * main/php_variables.c:
+      Fixed bug #34331 (php crashes when variables_order is empty).
+
+2005-09-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS
+      main/main.c
+      main/php_ini.c
+      main/php_ini.h:
+      MFH: - Fixed bug #34307 (OnUpdateStringUnempty INI options can be set
+      empty)
+
+    * main/main.c
+      main/php_ini.c
+      main/php_ini.h:
+      - Fixed bug #34307 (OnUpdateStringUnempty INI options can be set as empty)
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2handler/config.m4:
+      - Revert -a to -A change, bad idea: It disables EXISTING lines too!
+
+2005-09-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      scripts/phpize.in:
+      portability fix (for solaris)
+
+2005-09-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug34137.phpt
+      ZendEngine2/tests/bug34137.phpt
+      ZendEngine2/tests/bug34137.phpt:
+        1.1.4;
+      Fixed bug #34137 (assigning array element by reference causes binary mess)
+
+    * NEWS
+      NEWS
+      NEWS
+      NEWS
+      Zend/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug34137.phpt
+      ZendEngine2/tests/bug34137.phpt:
+      Fixed bug #34137 (assigning array element by reference causes binary mess)
+
+2005-09-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS:
+      - MFH: Fixed bug #33414 (Comprehensive list of incorrect days returned
+      after
+        strtotime() / date() tests).
+
+2005-09-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      If it is added in 5.1, is it still news for PHP 6?
+
+    * (PHP_5_1)
+      NEWS:
+      NSF
+
+2005-09-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/tests/array/bug34227.phpt
+      ext/standard/tests/array/bug34227.phpt
+      ext/standard/tests/array/bug34227.phpt
+      ext/standard/tests/array/bug34227.phpt:
+        1.1.4;  1.1.6;
+      Fixed bug #34277 (array_filter() crashes with references and objects)
+
+    * NEWS
+      NEWS
+      NEWS
+      NEWS
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/tests/array/bug34227.phpt
+      ext/standard/tests/array/bug34227.phpt
+      ext/standard/tests/array/bug34227.phpt:
+      Fixed bug #34277 (array_filter() crashes with references and objects)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug34310.phpt
+      ZendEngine2/tests/bug34310.phpt:
+      Fixed bug #34310 (foreach($arr as $c->d => $x) crashes)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.c:
+      Support for class constants and static members for internal classes
+
+2005-09-01  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      sapi/cli/php_getopt.h:
+      As NetWare LibC has optind and optarg macros defined in unistd.h our local
+      variables were getting mistakenly preprocessed so undeffing optind and
+      optarg
+      
+      --Kamesh
+
+2005-09-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      Bump up libxml2 version requirement to >= 2.6.8
+
+2005-09-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: Fixed bug #34001 (pdo_mysql truncates numberic fields at 4 chars)
+
 2005-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/sybase/config.m4
