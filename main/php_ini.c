@@ -258,9 +258,7 @@ static void pvalue_config_destructor(zval *pvalue)
  */
 int php_init_config_hash(void)
 {
-	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1) == FAILURE) {
-		return FAILURE;
-	}
+	return zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1);
 }
 /* }}} */
 
