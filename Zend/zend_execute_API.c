@@ -807,7 +807,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				return FAILURE;
 			}
 		}
-		if (fci_cache) {
+		if (fci_cache &&
+		    (EX(function_state).function->type != ZEND_INTERNAL_FUNCTION ||
+		     ((zend_internal_function*)EX(function_state).function)->handler != zend_std_call_user_call)) {
 			fci_cache->function_handler = EX(function_state).function;
 			fci_cache->object_pp = fci->object_pp;
 			fci_cache->calling_scope = calling_scope;
