@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.1
+- Fixed bug #34307 (on_modify handler not called to set the default value if
+  case setting from php.ini was invalid). (Andrei)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
   (Derick)
 - Fixed bug #34277 (array_filter() crashes with references and objects).
