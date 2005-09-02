@@ -57,6 +57,10 @@ function_entry date_functions[] = {
 	PHP_FE(date_timezone_set, NULL)
 	PHP_FE(date_offset_get, NULL)
 
+	PHP_FE(date_time_set, NULL)
+	PHP_FE(date_date_set, NULL)
+	PHP_FE(date_isodate_set, NULL)
+
 	PHP_FE(timezone_open, NULL)
 	PHP_FE(timezone_name_get, NULL)
 	PHP_FE(timezone_offset_get, NULL)
@@ -78,6 +82,9 @@ function_entry date_funcs_date[] = {
 	ZEND_NAMED_FE(getTimezone, ZEND_FN(date_timezone_get), NULL)
 	ZEND_NAMED_FE(setTimezone, ZEND_FN(date_timezone_set), NULL)
 	ZEND_NAMED_FE(getOffset, ZEND_FN(date_offset_get), NULL)
+	ZEND_NAMED_FE(setTime, ZEND_FN(date_time_set), NULL)
+	ZEND_NAMED_FE(setDate, ZEND_FN(date_date_set), NULL)
+	ZEND_NAMED_FE(setISODate, ZEND_FN(date_isodate_set), NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1288,6 +1295,57 @@ PHP_FUNCTION(date_offset_get)
 	} else {
 		RETURN_LONG(0);
 	}
+}
+
+PHP_FUNCTION(date_time_set)
+{
+	zval         *object;
+	php_date_obj *dateobj;
+	long          h, i, s = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll|l", &object, date_ce_date, &h, &i, &s) == FAILURE) {
+		RETURN_FALSE;
+	}
+	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	dateobj->time->h = h;
+	dateobj->time->i = i;
+	dateobj->time->s = s;
+	timelib_update_ts(dateobj->time, NULL);
+}
+
+PHP_FUNCTION(date_date_set)
+{
+	zval         *object;
+	php_date_obj *dateobj;
+	long          y, m, d;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olll", &object, date_ce_date, &y, &m, &d) == FAILURE) {
+		RETURN_FALSE;
+	}
+	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	dateobj->time->y = y;
+	dateobj->time->m = m;
+	dateobj->time->d = d;
+	timelib_update_ts(dateobj->time, NULL);
+}
+
+PHP_FUNCTION(date_isodate_set)
+{
+	zval         *object;
+	php_date_obj *dateobj;
+	long          y, w, d = 1;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll|l", &object, date_ce_date, &y, &w, &d) == FAILURE) {
+		RETURN_FALSE;
+	}
+	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	dateobj->time->y = y;
+	dateobj->time->m = 1;
+	dateobj->time->d = 1;
+	dateobj->time->relative.d = timelib_daynr_from_weeknr(y, w, d);
+	dateobj->time->have_relative = 1;
+	
+	timelib_update_ts(dateobj->time, NULL);
 }
 
 
