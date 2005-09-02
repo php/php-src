@@ -40,6 +40,7 @@
 
 /* From dow.c */
 timelib_sll timelib_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
+timelib_sll timelib_iso_day_of_week(timelib_sll y, timelib_sll m, timelib_sll d);
 timelib_sll timelib_day_of_year(timelib_sll y, timelib_sll m, timelib_sll d);
 timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d);
 timelib_sll timelib_days_in_month(timelib_sll y, timelib_sll m);
