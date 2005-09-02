@@ -12,7 +12,10 @@ PHP                                                                        NEWS
   . ming 0.3b
   . libpq (PostgreSQL) 8.0.1
 - Moved extensions to PECL:
+  . ext/mcve (Jani, Derick, Pierre)
   . ext/oracle (Jani, Derick)
+  . ext/ovrimos (Jani, Derick, Pierre)
+  . ext/pfpro (Jani, Derick, Pierre)
 - Fixed a bug where stream_get_meta_data() did not return the "uri" element for
   files opened with tmpname(). (Derick)
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
