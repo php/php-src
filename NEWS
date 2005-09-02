@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed bug #34277 (array_filter() crashes with references and objects).
   (Dmitry)
 - Fixed bug #34276 (setAttributeNS doesn't work with default namespace). (Rob)
+- Fixed bug #34260 (Segfault with callbacks (array_map) + overloading).
+  (Dmitry)
 - Fixed bug #34257 (lib64 not handled correctly in ming extension). (Marcus)
 - Fixed bug #34221 (Compiling xmlrpc as shared fails other parts). (Jani)
 - Fixed bug #34191 (ob_gzhandler does not enforce trailing \0). (Ilia)
