@@ -489,6 +489,7 @@ static char *date_format(char *format, int format_len, int *return_len, timelib_
 			case 'l': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%R", localized ? IS_UNICODE : IS_STRING, dayname_full(timelib_day_of_week(t->y, t->m, t->d), localized)); break;
 			case 'S': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%s", english_suffix(t->d)); break;
 			case 'w': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'N': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
 			case 'z': length = date_spprintf(&buffer, 32 TSRMLS_CC, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
