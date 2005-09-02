@@ -495,6 +495,7 @@ interface Serializeable
 /** @ingroup SPL
  * @brief An Array wrapper
  * @since PHP 5.0
+ * @version 1.1
  *
  * This array wrapper allows to recursively iterate over Arrays and public 
  * Object properties.
@@ -507,8 +508,28 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 * That is any Array or Object.
 	 *
 	 * @param $array the array to use.
+	 * @param $flags see setFlags().
 	 */
-	function __construct($array);
+	function __construct($array, $flags = 0);
+
+	/** Set behavior flags.
+	 *	
+	 * @param $flags bitmask as follows:
+	 *        0 set: properties of the object have their normal functionality
+	 *               when accessed as list (var_dump, foreach, etc.)
+	 *        1 set: array indices can be accessed as properties in read/write
+	 */
+	function setFlags($flags);
+	                    
+	/**
+	 * @ return current flags
+	 */
+	function getFlags();
+
+	/**
+	 * @param $array new array or object
+	 */
+	function exchangeArray($array);
 
 	/** @return the iterator which is an ArrayIterator object connected to
 	 * this object.
@@ -555,6 +576,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 /** @ingroup SPL
  * @brief An Array iterator
  * @since PHP 5.0
+ * @version 1.1
  *
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
@@ -570,8 +592,23 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	 * That is any Array or Object.
 	 *
 	 * @param $array the array to use.
+	 * @param $flags see setFlags().
 	 */
-	public function __construct($array);
+	function __construct($array, $flags = 0);
+
+	/** Set behavior flags.
+	 *	
+	 * @param $flags bitmask as follows:
+	 *        0 set: properties of the object have their normal functionality
+	 *               when accessed as list (var_dump, foreach, etc.)
+	 *        1 set: array indices can be accessed as properties in read/write
+	 */
+	function setFlags($flags);
+	                    
+	/**
+	 * @ return current flags
+	 */
+	function getFlags();
 
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
