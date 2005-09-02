@@ -1535,8 +1535,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 
-	/* Initialize configuration_hash */
-	if (php_init_config_hash() == FAILURE) {
+	/* this will read in php.ini, set up the configuration parameters,
+	   load zend extensions and register php function extensions 
+	   to be loaded later */
+	if (php_init_config(TSRMLS_C) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1545,13 +1547,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* Register Zend ini entries */
 	zend_register_standard_ini_entries(TSRMLS_C);
-
-	/* this will read in php.ini, set up the configuration parameters,
-	   load zend extensions and register php function extensions 
-	   to be loaded later */
-	if (php_init_config(TSRMLS_C) == FAILURE) {
-		return FAILURE;
-	}
 
 	orig_unicode = UG(unicode);
 	UG(unicode) = 0;

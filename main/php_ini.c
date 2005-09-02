@@ -254,14 +254,6 @@ static void pvalue_config_destructor(zval *pvalue)
 }
 /* }}} */
 
-/* {{{ php_init_config_hash
- */
-int php_init_config_hash(void)
-{
-	return zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1);
-}
-/* }}} */
-
 /* {{{ php_init_config
  */
 int php_init_config(TSRMLS_D)
@@ -277,6 +269,10 @@ int php_init_config(TSRMLS_D)
 	zend_llist scanned_ini_list;
 	int l, total_l=0;
 	zend_llist_element *element;
+
+	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1) == FAILURE) {
+		return FAILURE;
+	}
 
 	if (sapi_module.ini_defaults) {
 		sapi_module.ini_defaults(&configuration_hash);
