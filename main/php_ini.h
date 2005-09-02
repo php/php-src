@@ -24,7 +24,6 @@
 #include "zend_ini.h"
 
 BEGIN_EXTERN_C()
-int php_init_config_hash(void);
 int php_init_config(TSRMLS_D);
 int php_shutdown_config(void);
 void php_ini_register_extensions(TSRMLS_D);
