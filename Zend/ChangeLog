@@ -1,3 +1,43 @@
+2005-09-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/bug34137.phpt
+      tests/bug34137.phpt
+      tests/bug34137.phpt:
+        1.1.4;
+      Fixed bug #34137 (assigning array element by reference causes binary mess)
+
+    * zend_execute.c
+      zend_execute.c
+      zend_execute.c
+      tests/bug34137.phpt
+      tests/bug34137.phpt:
+      Fixed bug #34137 (assigning array element by reference causes binary mess)
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug34310.phpt
+      tests/bug34310.phpt:
+      Fixed bug #34310 (foreach($arr as $c->d => $x) crashes)
+
+    * zend.c
+      zend.h
+      zend.h
+      zend_API.c
+      zend_API.c
+      zend_API.h
+      zend_API.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.c
+      zend_object_handlers.c
+      zend_object_handlers.c
+      zend_opcode.c
+      zend_opcode.c
+      zend_reflection_api.c
+      zend_reflection_api.c:
+      Support for class constants and static members for internal classes
+
 2005-08-31  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * tests/bug34310.phpt:
