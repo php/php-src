@@ -52,6 +52,10 @@ PHP_FUNCTION(date_timezone_get);
 PHP_FUNCTION(date_timezone_set);
 PHP_FUNCTION(date_offset_get);
 
+PHP_FUNCTION(date_time_set);
+PHP_FUNCTION(date_date_set);
+PHP_FUNCTION(date_isodate_set);
+
 PHP_FUNCTION(timezone_open);
 PHP_FUNCTION(timezone_name_get);
 PHP_FUNCTION(timezone_offset_get);
