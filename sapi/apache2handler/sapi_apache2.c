@@ -538,7 +538,7 @@ normal:
 	} else {
 		parent_req = ctx->r;
 		/* check if comming due to ErrorDocument */
-		if (parent_req != HTTP_OK) {
+		if (parent_req && parent_req->status != HTTP_OK) {
 			parent_req = NULL;
 			goto normal;
 		}
