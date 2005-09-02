@@ -68,7 +68,7 @@ class SplObjectStorage implements Iterator, Countable
 		return count($this->storage);
 	}
 
-	/** @obj object to look for
+	/** @param obj object to look for
 	 * @return whether $obj is contained in storage
 	  */
 	function contains($obj)
