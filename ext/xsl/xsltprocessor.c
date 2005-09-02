@@ -614,7 +614,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 			ZVAL_ADDREF(*entry);
 			COPY_PZVAL_TO_ZVAL(*new_string, *entry);
 			
-			zend_hash_update(intern->parameter, string_key, string_key_len + 1, &new_string, sizeof(zval*), NULL);
+			zend_hash_update(intern->parameter, string_key, string_key_len, &new_string, sizeof(zval*), NULL);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
 		}
 		RETURN_TRUE;
