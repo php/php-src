@@ -198,15 +198,17 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							sizeof(int));
 
 				}
-				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
-						Z_TYPE_P(param->parameter) == IS_NULL) {
-					S->param_values[param->paramno] = NULL;
-					S->param_lengths[param->paramno] = 0;
-				} else {
-					convert_to_string(param->parameter);
-					S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);
-					S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);
-					S->param_formats[param->paramno] = 1;
+				if (param->paramno >= 0) {
+					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
+							Z_TYPE_P(param->parameter) == IS_NULL) {
+						S->param_values[param->paramno] = NULL;
+						S->param_lengths[param->paramno] = 0;
+					} else {
+						convert_to_string(param->parameter);
+						S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);
+						S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);
+						S->param_formats[param->paramno] = 1;
+					}
 				}
 				break;
 		}
