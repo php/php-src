@@ -1,3 +1,29 @@
+2005-09-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * zend_ini.c:
+      MFB: - Fixed bug #34307. We were not calling on_modify handler to set the
+      default
+             value in case setting the one from .ini file failed. (Andrei)
+
+2005-09-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_5_1)
+      zend_ini.c:
+      Fix bug #34307. We were not calling on_modify handler to set the default
+      value in case setting the one from .ini file failed.
+
+2005-09-02  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c
+      zend_execute_API.c
+      zend_execute_API.c
+      tests/bug34260.phpt
+      tests/bug34260.phpt
+      tests/bug34260.phpt
+      tests/bug34260.phpt
+      tests/bug34260.phpt:
+      Fixed bug #34260 (Segfault with callbacks (array_map) + overloading)
+
 2005-09-01  Dmitry Stogov  <dmitry@zend.com>
 
     * tests/bug34137.phpt
