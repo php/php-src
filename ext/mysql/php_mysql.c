@@ -218,7 +218,7 @@ zend_module_entry mysql_module_entry = {
 	PHP_RINIT(mysql),
 	PHP_RSHUTDOWN(mysql),
 	PHP_MINFO(mysql),
-	NO_VERSION_YET,
+	"1.0",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
