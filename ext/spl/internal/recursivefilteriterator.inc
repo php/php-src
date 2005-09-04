@@ -33,7 +33,6 @@ abstract class RecursiveFilterIterator extends FilterIterator implements Recursi
 	 */
 	function __construct(RecursiveIterator $it)
 	{
-		$this->ref = new ReflectionClass($this);
 		parent::__construct($it);
 	}
 	
@@ -44,10 +43,16 @@ abstract class RecursiveFilterIterator extends FilterIterator implements Recursi
 		return $this->getInnerIterator()->hasChildren();
 	}
 
-	/** @return the ParentIterator for the current elements children
+	/** @return an iterator for the current elements children
+	 *
+	 * @note the returned iterator will be of the same class as $this
 	 */
 	function getChildren()
 	{
+		if (empty($this->ref))
+		{
+			$this->ref = new ReflectionClass($this);
+		}
 		return $this->ref->newInstance($this->getInnerIterator()->getChildren());
 	}
 	
