@@ -33,7 +33,14 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
-#include "zend_exceptions.h"
+
+#ifdef ZEND_ENGINE_2
+# include "zend_exceptions.h"
+#else
+  /* PHP 4 compat */
+# define OnUpdateLong	OnUpdateInt
+# define E_STRICT		E_NOTICE
+#endif
 
 #if HAVE_MYSQL
 
@@ -1904,6 +1911,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	zval            *res, *ctor_params = NULL;
 	zend_class_entry *ce;
 
+#ifdef ZEND_ENGINE_2
 	if (into_object) {
 		char *class_name;
 		int class_name_len;
@@ -1922,7 +1930,9 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			return;
 		}
 		result_type = MYSQL_ASSOC;
-	} else {
+	} else
+#endif
+	{
 		if (ZEND_NUM_ARGS() > expected_args) {
 			WRONG_PARAM_COUNT;
 		}
@@ -1997,6 +2007,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		}
 	}
 
+#ifdef ZEND_ENGINE_2
 	if (into_object) {
 		zval dataset = *return_value;
 		zend_fcall_info fci;
@@ -2060,6 +2071,8 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name);
 		}
 	}
+#endif
+
 }
 /* }}} */
 
