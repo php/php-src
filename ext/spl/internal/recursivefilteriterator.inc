@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/**
+/** @ingroup SPL
  * @brief   Iterator to filter recursive iterators
  * @author  Marcus Boerger
  * @version 1.0
