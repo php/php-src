@@ -380,7 +380,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user, *passwd, *host;
 	char *hashed_details;
-	int hashed_details_length;
+	int hashed_details_length, new_link = 0;
 	mssql_link mssql, *mssql_ptr;
 	char buffer[32];
 
@@ -433,6 +433,25 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				host = Z_STRVAL_PP(yyhost);
 				user = Z_STRVAL_PP(yyuser);
 				passwd = Z_STRVAL_PP(yypasswd);
+				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+Z_STRLEN_PP(yypasswd)+5+3;
+				hashed_details = (char *) emalloc(hashed_details_length+1);
+				sprintf(hashed_details,"mssql_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd)); /* SAFE */
+			}
+			break;
+		case 4: {
+				zval **yyhost,**yyuser,**yypasswd, **yynew_link;
+			
+				if (zend_get_parameters_ex(4, &yyhost, &yyuser, &yypasswd, &yynew_link) == FAILURE) {
+					WRONG_PARAM_COUNT;
+				}
+				convert_to_string_ex(yyhost);
+				convert_to_string_ex(yyuser);
+				convert_to_string_ex(yypasswd);
+				convert_to_long_ex(yynew_link);
+				host = Z_STRVAL_PP(yyhost);
+				user = Z_STRVAL_PP(yyuser);
+				passwd = Z_STRVAL_PP(yypasswd);
+				new_link = Z_LVAL_PP(yynew_link);
 				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+Z_STRLEN_PP(yypasswd)+5+3;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
 				sprintf(hashed_details,"mssql_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd)); /* SAFE */
@@ -492,7 +511,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *le;
 
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void **) &le)==FAILURE) {  /* we don't */
+		if (new_link || zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (MS_SQL_G(max_links) != -1 && MS_SQL_G(num_links) >= MS_SQL_G(max_links)) {
@@ -605,7 +624,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new mssql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length + 1,(void **) &index_ptr)==SUCCESS) {
+		if (!new_link && zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length + 1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -695,7 +714,7 @@ static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 	return MS_SQL_G(default_link);
 }
 
-/* {{{ proto int mssql_connect([string servername [, string username [, string password]]])
+/* {{{ proto int mssql_connect([string servername [, string username [, string password [, bool new_link]]])
    Establishes a connection to a MS-SQL server */
 PHP_FUNCTION(mssql_connect)
 {
@@ -704,7 +723,7 @@ PHP_FUNCTION(mssql_connect)
 
 /* }}} */
 
-/* {{{ proto int mssql_pconnect([string servername [, string username [, string password]]])
+/* {{{ proto int mssql_pconnect([string servername [, string username [, string password [, bool new_link]]]])
    Establishes a persistent connection to a MS-SQL server */
 PHP_FUNCTION(mssql_pconnect)
 {
@@ -2013,7 +2032,9 @@ PHP_FUNCTION(mssql_bind)
 				type=Z_LVAL_PP(yytype);
 				is_output=Z_LVAL_PP(yyis_output);
 				is_null=Z_LVAL_PP(yyis_null);
-				maxlen=Z_LVAL_PP(yymaxlen);				
+				if (is_output) {
+					maxlen=Z_LVAL_PP(yymaxlen);				
+				}
 			}
 			break;	
 		
