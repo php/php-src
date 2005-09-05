@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 5.0.6
+
 05 Sep 2005, PHP 5.0.5
 - Upgraded PCRE library to version 5.0. (Andrei)
 - Removed php_check_syntax() function which never worked properly. (Ilia)
