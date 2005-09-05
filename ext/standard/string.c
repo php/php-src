@@ -5301,93 +5301,142 @@ PHP_FUNCTION(substr_count)
 PHP_FUNCTION(str_pad)
 {
 	/* Input arguments */
-	zval **input,				/* Input string */
-		 **pad_length,			/* Length to pad to */
-		 **pad_string,			/* Padding string */
-		 **pad_type;			/* Padding type (left/right/both) */
+	void   *input;		/* Input string */
+	int32_t pad_length;	/* Length to pad to, in codepoints for Unicode */
+	void   *padstr;		/* Padding string */
+	int32_t	pad_type;	/* Padding type (left/right/both) */
+	int32_t input_len, padstr_len; /* Lengths in code units for Unicode */
+	zend_uchar input_type, padstr_type;
 	
 	/* Helper variables */
-	int	   num_pad_chars;		/* Number of padding characters (total - input size) */
-	char  *result = NULL;		/* Resulting string */
-	int	   result_len = 0;		/* Length of the resulting string */
-	char  *pad_str_val = " ";	/* Pointer to padding string */
-	int    pad_str_len = 1;		/* Length of the padding string */
-	int	   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
-	int	   i, left_pad=0, right_pad=0;
+	int32_t input_codepts;	/* Number of codepts in Unicode input */
+	int32_t	num_pad_chars;	/* Number of padding characters (total - input size) */
+	void   *result = NULL;	/* Resulting string */
+	int32_t	result_len = 0;	/* Length of the resulting string */
+	int32_t	i, j, left_pad=0, right_pad=0;
+	UChar32 ch;
 
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 4 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &pad_length, &pad_string, &pad_type) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 4) {
 		WRONG_PARAM_COUNT;
 	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Tl|Tl",
+							  &input, &input_len, &input_type, &pad_length,
+							  &padstr, &padstr_len, &padstr_type, &pad_type) == FAILURE) {
+		return;
+	}
 
-	/* Perform initial conversion to expected data types. */
-	convert_to_string_ex(input);
-	convert_to_long_ex(pad_length);
-
-	num_pad_chars = Z_LVAL_PP(pad_length) - Z_STRLEN_PP(input);
-
+	if (input_type == IS_UNICODE) {
+		/* For Unicode, num_pad_chars/pad_length is number of codepoints */
+		i = 0; input_codepts = 0;
+		while (i < input_len) {
+			U16_FWD_1((UChar *)input, i, input_len);
+			input_codepts++;
+		}
+		num_pad_chars = pad_length - input_codepts;
+	} else {
+		num_pad_chars = pad_length - input_len;
+	}
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
 	if (num_pad_chars < 0) {
-		RETURN_ZVAL(*input, 1, 0);
+		if (input_type == IS_UNICODE) {
+			RETURN_UNICODEL((UChar *)input, input_len, 1);
+		} else if (input_type == IS_BINARY) {
+			RETURN_BINARYL((char *)input, input_len, 1);
+		} else {
+			RETURN_STRINGL((char *)input, input_len, 1);
+		}
 	}
 
-	/* Setup the padding string values if specified. */
+	/* Setup the padding string values if NOT specified. */
 	if (ZEND_NUM_ARGS() > 2) {
-		convert_to_string_ex(pad_string);
-		if (Z_STRLEN_PP(pad_string) == 0) {
+		if (padstr_len == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding string cannot be empty.");
 			return;
 		}
-		pad_str_val = Z_STRVAL_PP(pad_string);
-		pad_str_len = Z_STRLEN_PP(pad_string);
-
 		if (ZEND_NUM_ARGS() > 3) {
-			convert_to_long_ex(pad_type);
-			pad_type_val = Z_LVAL_PP(pad_type);
-			if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
+			if (pad_type < STR_PAD_LEFT || pad_type > STR_PAD_BOTH) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH.");
 				return;
 			}
+		} else {
+			pad_type = STR_PAD_RIGHT;
 		}
+	} else {
+		if (input_type == IS_UNICODE) {
+			padstr = USTR_MAKE(" ");
+		} else {
+			padstr = " ";
+		}
+		padstr_len = 1;
+		pad_type = STR_PAD_RIGHT;
 	}
 
-	result = (char *)emalloc(Z_STRLEN_PP(input) + num_pad_chars + 1);
+	if (input_type == IS_UNICODE) {
+		result = emalloc(UBYTES(input_len + num_pad_chars*2 + 1));
+	} else {
+		result = emalloc(input_len + num_pad_chars + 1);
+	}
 
 	/* We need to figure out the left/right padding lengths. */
-	switch (pad_type_val) {
+	switch (pad_type) {
 		case STR_PAD_RIGHT:
 			left_pad = 0;
 			right_pad = num_pad_chars;
 			break;
-
 		case STR_PAD_LEFT:
 			left_pad = num_pad_chars;
 			right_pad = 0;
 			break;
-
 		case STR_PAD_BOTH:
 			left_pad = num_pad_chars / 2;
 			right_pad = num_pad_chars - left_pad;
 			break;
 	}
 
-	/* First we pad on the left. */
-	for (i = 0; i < left_pad; i++)
-		result[result_len++] = pad_str_val[i % pad_str_len];
+	/* Pad left, copy input, pad right, terminate */
+	if (input_type == IS_UNICODE) {
+		j = 0;
+		for (i = 0; i < left_pad; i++) {
+			if (j >= padstr_len) {
+				j = 0;
+			}
+			U16_NEXT((UChar *)padstr, j, padstr_len, ch);
+			result_len += zend_codepoint_to_uchar(ch, (UChar *)result + result_len);
+		}
+		memcpy((UChar *)result + result_len, input, UBYTES(input_len));
+		result_len += input_len;
+		j = 0;
+		for (i = 0; i < right_pad; i++) {
+			if (j >= padstr_len) {
+				j = 0;
+			}
+			U16_NEXT((UChar *)padstr, j, padstr_len, ch);
+			result_len += zend_codepoint_to_uchar(ch, (UChar *)result + result_len);
+		}
+		*((UChar *)result + result_len) = 0;
+		result = erealloc(result, UBYTES(result_len+1));
+	} else {
+		for (i = 0; i < left_pad; i++)
+			*((char *)result + result_len++) = *((char *)padstr + (i % padstr_len));
+		memcpy(result + result_len, input, input_len);
+		result_len += input_len;
+		for (i = 0; i < right_pad; i++)
+			*((char *)result + result_len++) = *((char *)padstr + (i % padstr_len));
+		*((char *)result + result_len) = '\0';
+	}
 
-	/* Then we copy the input string. */
-	memcpy(result + result_len, Z_STRVAL_PP(input), Z_STRLEN_PP(input));
-	result_len += Z_STRLEN_PP(input);
-
-	/* Finally, we pad on the right. */
-	for (i = 0; i < right_pad; i++)
-		result[result_len++] = pad_str_val[i % pad_str_len];
-
-	result[result_len] = '\0';
-
-	RETURN_STRINGL(result, result_len, 0);
+	if (input_type == IS_UNICODE) {
+		if (ZEND_NUM_ARGS() < 3) {
+			efree(padstr);
+		}
+		RETURN_UNICODEL((UChar *)result, result_len, 0);
+	} else if (input_type == IS_BINARY) {
+		RETURN_BINARYL((char *)result, result_len, 0);
+	} else {
+		RETURN_STRINGL((char *)result, result_len, 0);
+	}
 }
 /* }}} */
    
