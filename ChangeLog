@@ -1,3 +1,21 @@
+2005-09-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      ext/mysql/package.xml
+      ext/mysql/php_mysql.c:
+      assign a version number
+
+    * (PHP_5_1)
+      ext/mysql/config.m4
+      ext/mysql/package.xml
+      ext/mysql/php_mysql.c:
+      Allow ext/mysql to build against PHP 4 again; update package.xml ready for
+      release via PECL.
+
+    * (PHP_4_4)
+      scripts/phpize.in:
+      merge solaris portability fix
+
 2005-09-02  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
