@@ -5273,20 +5273,20 @@ PHP_FUNCTION(substr_count)
 	if (haystack_type == IS_UNICODE) {
 		while ((p = zend_u_memnstr((UChar *)p, (UChar *)needle, needle_len, (UChar *)endp)) != NULL) {
 			/*(UChar *)p += needle_len; // GCC 4.0.0 cannot compile this */
-			p += UBYTES(needle_len);
+			p = (UChar *)p + UBYTES(needle_len);
 			count++;
 		}
 	} else {
 		if (needle_len == 1) {
 			cmp = ((char *)needle)[0];
-			while ((p = memchr(p, cmp, endp - p))) {
+			while ((p = memchr(p, cmp, (char *)endp - (char *)p))) {
 				count++;
-				(char *)p++;
+				p = (char *)p + 1;
 			}
 		} else {
 			while ((p = php_memnstr((char *)p, (char *)needle, needle_len, (char *)endp))) {
 				/*(char *)p += needle_len; // GCC 4.0.0 cannot compile this */
-				p += needle_len;
+				p = (char *)p + needle_len;
 				count++;
 			}
 		}
@@ -5420,7 +5420,7 @@ PHP_FUNCTION(str_pad)
 	} else {
 		for (i = 0; i < left_pad; i++)
 			*((char *)result + result_len++) = *((char *)padstr + (i % padstr_len));
-		memcpy(result + result_len, input, input_len);
+		memcpy((char *)result + result_len, input, input_len);
 		result_len += input_len;
 		for (i = 0; i < right_pad; i++)
 			*((char *)result + result_len++) = *((char *)padstr + (i % padstr_len));
