@@ -19,7 +19,16 @@ AC_DEFUN([PHP_OCI_IF_DEFINED],[
 ])
 
 AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
-  PHP_CHECK_64BIT([ TMP_OCI8_LIB_DIR=lib32 ], [ TMP_OCI8_LIB_DIR=lib ])
+  AC_CHECK_SIZEOF(long int, 4)
+  AC_MSG_CHECKING([checking if we're at 64-bit platform])
+  if test "$ac_cv_sizeof_long_int" = "4" ; then
+    AC_MSG_RESULT([no])
+    TMP_OCI8_LIB_DIR=lib32 
+  else
+    AC_MSG_RESULT([yes])
+    TMP_OCI8_LIB_DIR=lib
+  fi
+
   AC_MSG_CHECKING([OCI8 libraries dir])
   if test -d "$OCI8_DIR/lib" -a ! -d "$OCI8_DIR/lib32"; then
 	OCI8_LIB_DIR=lib
@@ -76,26 +85,33 @@ AC_DEFUN([AC_OCI8_VERSION],[
   AC_MSG_RESULT($OCI8_VERSION)
 ])
 
-PHP_ARG_WITH(oci8, for Oracle (OCI8) support using ORACLE_HOME installation,
-[  --with-oci8[=DIR]       Include Oracle (OCI8) support using an ORACLE_HOME
-                          install. The default DIR is ORACLE_HOME])
 
-if test "$PHP_OCI8" = "no"; then
-  PHP_ARG_WITH(oci8-instant-client, for Oracle (OCI8) support using Oracle Instant Client,
-  [  --with-oci8-instant-client[=DIR]    
-                          Include Oracle (OCI8) support using
-                          Oracle Instant Client. DIR is the directory with the
-                          Instant Client libraries. On Linux it will default to
-                          /usr/lib/oracle/<most_recent_version>/client/lib
-                          Other platforms will need to have it explicitly specified])
-else 
-  PHP_OCI8_INSTANT_CLIENT="no";
+dnl --with-oci8=shared,instantclient,/path/to/client/dir/lib
+dnl or
+dnl --with-oci8=shared,/path/to/oracle/home
+PHP_ARG_WITH(oci8, for Oracle (OCI8) support,
+[  --with-oci8[=DIR]       Include Oracle (OCI8) support. 
+                          The default DIR is ORACLE_HOME.
+                          Use --with-oci8=instantclient,/path/to/oic/lib
+                          to use Oracle Instant Client installation])
+
+PHP_OCI8_INSTANT_CLIENT="no"
+
+if test "`echo $PHP_OCI8 | cut -d, -f2`" = "instantclient"; then
+	PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f3`"
+    PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f1,4`"
+	if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
+		PHP_OCI8_INSTANT_CLIENT="yes"
+	fi
+elif test "`echo $PHP_OCI8 | cut -d, -f1`" = "instantclient"; then
+	PHP_OCI8_INSTANT_CLIENT="`echo $PHP_OCI8 | cut -d, -f2`"
+    PHP_OCI8="`echo $PHP_OCI8 | cut -d, -f3,4`"
+	if test "$PHP_OCI8_INSTANT_CLIENT" = ""; then
+		PHP_OCI8_INSTANT_CLIENT="yes"
+	fi
 fi
 
-if test "$PHP_OCI8" != "no"; then
-  if test "$PHP_OCI8_INSTANT_CLIENT" != "no"; then
-    AC_MSG_ERROR([--with-oci8 and --with-oci8-instant-client are mutually exclusive])
-  fi
+if test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
 
   AC_MSG_CHECKING([Oracle Install Directory])
   if test "$PHP_OCI8" = "yes"; then
@@ -138,12 +154,40 @@ if test "$PHP_OCI8" != "no"; then
       PHP_ADD_LIBRARY_WITH_PATH(core4, "", OCI8_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(psa, "", OCI8_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
+
+      PHP_CHECK_LIBRARY(clntsh, OCIEnvCreate,
+      [
+        AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
+
+      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
+      [
+        AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
       ;;
 
     8.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
 
+      PHP_CHECK_LIBRARY(clntsh, OCIEnvCreate,
+      [
+        AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
+
+	  PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
+      [
+        AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
+ 
       dnl 
       dnl OCI_ATTR_STATEMENT is not available in all 8.1.x versions
       dnl 
@@ -160,7 +204,7 @@ if test "$PHP_OCI8" != "no"; then
       [
         PHP_CHECK_LIBRARY(clntsh, OCINlsCharSetNameToId,
         [
-          AC_DEFINE(HAVE_OCI_9_2,1,[ ])
+          AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
           OCI8_VERSION=9.2
         ], [], [
           -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
@@ -168,13 +212,30 @@ if test "$PHP_OCI8" != "no"; then
       ], [], [
         -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
       ])
+
+      PHP_CHECK_LIBRARY(clntsh, OCIEnvCreate,
+      [
+        AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
+ 
+      PHP_CHECK_LIBRARY(clntsh, OCIStmtPrepare2,
+      [
+        AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
+      ], [], [
+        -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
+      ])
+ 
       ;;
       
     10.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
       PHP_ADD_LIBPATH($OCI8_DIR/$OCI8_LIB_DIR, OCI8_SHARED_LIBADD)
       AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
-      AC_DEFINE(HAVE_OCI_9_2,1,[ ])
+      AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
+      AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
+      AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
       AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
       ;;
@@ -207,18 +268,22 @@ if test "$PHP_OCI8" != "no"; then
   PHP_CHECK_LIBRARY(clntsh, OCICollAssign,
   [
     AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
-  ], [], [
+    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
+  ], 
+  [
+    PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_interface.c, $ext_shared)
+  ], 
+  [
     -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
   ])
 
-  PHP_NEW_EXTENSION(oci8, oci8.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
 
   PHP_SUBST_OLD(OCI8_SHARED_LIBADD)
   PHP_SUBST_OLD(OCI8_DIR)
   PHP_SUBST_OLD(OCI8_VERSION)
   
-elif test "$PHP_OCI8_INSTANT_CLIENT" != "no"; then
+elif test "$PHP_OCI8" != "no" && test "$PHP_OCI8_INSTANT_CLIENT" != "no"; then
 
   AC_MSG_CHECKING([Oracle Instant Client directory])
   if test "$PHP_OCI8_INSTANT_CLIENT" = "yes"; then
@@ -227,7 +292,7 @@ dnl directory to the libraries.  But on Linux we default to the most recent
 dnl version in /usr/lib
     PHP_OCI8_INSTANT_CLIENT=`ls -d /usr/lib/oracle/*/client/lib  2> /dev/null | tail -1`
     if test -z "$PHP_OCI8_INSTANT_CLIENT"; then
-      AC_MSG_ERROR([Oracle Instant Client directory not found. Try --with-oci8-instant-client=DIR])
+      AC_MSG_ERROR([Oracle Instant Client directory not found. Try --with-oci8=instantclient,DIR])
     fi
   fi
   AC_MSG_RESULT($PHP_OCI8_INSTANT_CLIENT)
@@ -242,6 +307,9 @@ dnl Header directory for Instant Client SDK RPM install
 dnl Header directory for Instant Client SDK zip file install
   OCISDKZIPINC=$PHP_OCI8_INSTANT_CLIENT/sdk/include
 
+dnl Header directory for manual installation
+  OCISDKMANINC=`echo "$PHP_OCI8_INSTANT_CLIENT" | sed -e 's!\(.*\)/lib[[/]]*$!\1/include!'`
+  
   if test -f "$OCISDKRPMINC/oci.h"; then
     AC_MSG_RESULT($OCISDKRPMINC)
     PHP_ADD_INCLUDE($OCISDKRPMINC)
@@ -250,6 +318,10 @@ dnl Header directory for Instant Client SDK zip file install
     AC_MSG_RESULT($OCISDKZIPINC)
     PHP_ADD_INCLUDE($OCISDKZIPINC)
     OCI8INCDIR=$OCISDKZIPINC
+  elif test -f "$OCISDKMANINC/oci.h"; then
+    AC_MSG_RESULT($OCISDKMANINC)
+    PHP_ADD_INCLUDE($OCISDKMANINC)
+    OCI8INCDIR=$OCISDKMANINC
   else
     AC_MSG_ERROR([Oracle Instant Client SDK header files not found])
   fi
@@ -271,13 +343,15 @@ dnl Header directory for Instant Client SDK zip file install
       ;;
   esac
 
+  AC_DEFINE(HAVE_OCI_INSTANT_CLIENT,1,[ ])
   AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
-  AC_DEFINE(HAVE_OCI_9_2,1,[ ])
+  AC_DEFINE(HAVE_OCI_ENV_NLS_CREATE,1,[ ])
+  AC_DEFINE(HAVE_OCI_ENV_CREATE,1,[ ])
+  AC_DEFINE(HAVE_OCI_STMT_PREPARE2,1,[ ])
   AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
   AC_DEFINE(PHP_OCI8_HAVE_COLLECTIONS,1,[ ])
-  AC_DEFINE(HAVE_OCI_INSTANT_CLIENT,1,[ ])
 
-  PHP_NEW_EXTENSION(oci8, oci8.c, $ext_shared)
+  PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
 
   PHP_SUBST_OLD(OCI8_SHARED_LIBADD)

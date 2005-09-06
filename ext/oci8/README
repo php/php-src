@@ -1,0 +1,61 @@
+Installing OCI8
+---------------
+
+1. Common requirements.
+2. Installing as shared extension.
+3. Installing as statically compiled extension.
+4. Installing from PECL.
+
+
+1. Common requirements
+----------------------
+In case if you use Oracle Instant Client, you don't have to set ORACLE_HOME and 
+most of the other environment variables to build PHP with OCI8 support. 
+The only variables you may have to set are:
+LD_LIBRARY_PATH - it must include Instant Client libraries dir
+NLS_LANG - in case if you want to change the default encoding used during 
+interaction with Oracle servers
+
+If you use common Oracle Client installation that comes along with the Oracle 
+server installation, you MUST set at least ORACLE_HOME environment variable 
+and make it visible for your web-server BEFORE it starts. Most appropriate 
+places to add ORACLE_HOME definition are:
+- /etc/profile
+- /etc/profile.local
+- /etc/profile.d
+and others.
+
+2. Installing as shared extension
+---------------------------------
+To install OCI8 as shared extension (i.e. the one you should put into 
+your php.ini) use the following configure lines to configure PHP:
+a) if you use common Oracle Client installation:
+./configure --with-oci8=shared,$ORACLE_HOME
+
+b) with Oracle Instant Client:
+./configure --with-oci8=shared,instantclient,/path/to/instant/client/lib
+If you use rpm-based installation of Oracle Instant Client, your configure 
+line will look like this:
+./configure --with-oci8=shared,instantclient,/usr/lib/oracle/<OIC version>/client/lib
+
+Follow the usual building procedure after that and you'll get OCI8 shared 
+extension (i.e. oci8.so). Add it into the php.ini file like this:
+extension=oci8.so
+and don't forget to specify the right extension_dir for PHP to be able 
+to find shared extensions correctly.
+
+3. Installing as statically compiled extension
+----------------------------------------------
+To install OCI8 as statically compiled module use the following configure lines:
+a) with common Oracle Client installation
+./configure --with-oci8=$ORACLE_HOME
+
+b) with Oracle Instant Client
+./configure --with-oci8=instantclient,/path/to/instant/client/lib
+
+After successful compile, you don't have to add oci8.so to the php.ini, the module will 
+be usable without any additional actions.
+
+4. Installing from PECL
+-----------------------
+TBD
