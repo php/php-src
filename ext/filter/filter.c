@@ -1,21 +1,97 @@
 /*
-  $Id$
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2005 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.0 of the PHP license,       |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_0.txt.                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+  |          Derick Rethans <derick@php.net>                             |
+  +----------------------------------------------------------------------+
 */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
-#include "php_variables.h"
-
-#include "filter.h"
+#include "php_filter.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
+#define FILTER_FLAG_NONE                    0x0000
+
+#define FILTER_FLAG_ALLOW_OCTAL             0x0001
+#define FILTER_FLAG_ALLOW_HEX               0x0002
+
+#define FILTER_FLAG_STRIP_LOW               0x0004
+#define FILTER_FLAG_STRIP_HIGH              0x0008
+#define FILTER_FLAG_ENCODE_LOW              0x0010
+#define FILTER_FLAG_ENCODE_HIGH             0x0020
+#define FILTER_FLAG_ENCODE_AMP              0x0040
+#define FILTER_FLAG_EMPTY_STRING_NULL       0x0080
+
+#define FILTER_FLAG_ALLOW_SIGN              0x0100
+#define FILTER_FLAG_ALLOW_FRACTION          0x0200
+#define FILTER_FLAG_ALLOW_THOUSAND          0x0400
+
+#define FL_INT           0x0101
+#define FL_BOOLEAN       0x0102
+#define FL_FLOAT         0x0103
+#define FL_REGEXP        0x0104
+
+#define FL_ALL           0x0100
+
+#define FS_DEFAULT       0x0201
+
+#define FS_STRING        0x0201
+#define FS_ENCODED       0x0202
+#define FS_SPECIAL_CHARS 0x0203
+#define FS_UNSAFE_RAW    0x0204
+#define FS_EMAIL         0x0205
+#define FS_URL           0x0206
+#define FS_NUMBER_INT    0x0207
+#define FS_NUMBER_FLOAT  0x0208
+#define FS_MAGIC_QUOTES  0x0209
+
+#define FS_ALL           0x0200
+
+#define FC_CALLBACK      0x0400
+
+typedef struct filter_list_entry {
+	char  *name;
+	int    id;
+	void (*function)(PHP_INPUT_FILTER_PARAM_DECL);
+} filter_list_entry;
+
+filter_list_entry filter_list[] = {
+	{ "int",           FL_INT,           php_filter_int           },
+	{ "boolean",       FL_BOOLEAN,       php_filter_boolean       },
+	{ "float",         FL_FLOAT,         php_filter_float         },
+	{ "regexp",        FL_REGEXP,        php_filter_regexp        },
+
+	{ "string",        FS_STRING,        php_filter_string        },
+	{ "stripped",      FS_STRING,        php_filter_string        },
+	{ "encoded",       FS_ENCODED,       php_filter_encoded       },
+	{ "special_chars", FS_SPECIAL_CHARS, php_filter_special_chars },
+	{ "unsafe_raw",    FS_UNSAFE_RAW,    php_filter_unsafe_raw    },
+	{ "email",         FS_EMAIL,         php_filter_email         },
+	{ "url",           FS_URL,           php_filter_url           },
+	{ "number_int",    FS_NUMBER_INT,    php_filter_number_int    },
+	{ "number_float",  FS_NUMBER_FLOAT,  php_filter_number_float  },
+	{ "magic_quotes",  FS_MAGIC_QUOTES,  php_filter_magic_quotes  },
+
+	{ "callback",      FC_CALLBACK,      php_filter_callback      },
+};
+	
 #ifndef PARSE_ENV
 #define PARSE_ENV 4
 #endif
@@ -24,10 +100,17 @@ ZEND_DECLARE_MODULE_GLOBALS(filter)
 #define PARSE_SERVER 5
 #endif
 
+#ifndef PARSE_SESSION
+#define PARSE_SESSION 6
+#endif
+
+static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
+
 /* {{{ filter_functions[]
  */
 function_entry filter_functions[] = {
-	PHP_FE(filter,	NULL)
+	PHP_FE(input_get, NULL)
+	PHP_FE(filter_data, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -56,14 +139,18 @@ ZEND_GET_MODULE(filter)
 
 /* {{{ UpdateDefaultFilter
  */
-static PHP_INI_MH(UpdateDefaultFilter) {
-	if(!strcasecmp(new_value, "notags")) {
-		IF_G(default_filter) = NOTAGS;
+static PHP_INI_MH(UpdateDefaultFilter)
+{
+	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
+
+	for (i = 0; i < size; ++i) {
+		if ((strcasecmp(new_value, filter_list[i].name) == 0)) {
+			IF_G(default_filter) = filter_list[i].id;
+			return SUCCESS;
+		}
 	}
-	else
-	if(!strcasecmp(new_value, "raw")) {
-		IF_G(default_filter) = F_UNSAFE_RAW;
-	}
+	/* Fallback to "string" filter */
+	IF_G(default_filter) = FS_DEFAULT;
 	return SUCCESS;
 }
 /* }}} */
@@ -71,7 +158,7 @@ static PHP_INI_MH(UpdateDefaultFilter) {
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("filter.default", "notags", PHP_INI_ALL, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
+    STD_PHP_INI_ENTRY("filter.default", "string", PHP_INI_ALL, UpdateDefaultFilter, default_filter, zend_filter_globals, filter_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -84,7 +171,8 @@ static void php_filter_init_globals(zend_filter_globals *filter_globals)
 	filter_globals->cookie_array = NULL;
 	filter_globals->env_array = NULL;
 	filter_globals->server_array = NULL;
-	filter_globals->default_filter = NOTAGS;
+	filter_globals->session_array = NULL;
+	filter_globals->default_filter = FS_DEFAULT;
 }
 /* }}} */
 
@@ -98,30 +186,44 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("FILTER_POST", PARSE_POST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_GET", PARSE_GET, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_COOKIE", PARSE_COOKIE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_REQUEST", PARSE_REQUEST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_ENV", PARSE_ENV, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_SERVER", PARSE_SERVER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_POST", PARSE_POST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_GET", PARSE_GET, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_COOKIE", PARSE_COOKIE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_ENV", PARSE_ENV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_SERVER", PARSE_SERVER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FL_INT", FL_INT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FL_BOOLEAN", FL_BOOLEAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FL_FLOAT", FL_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FL_REGEXP", FL_REGEXP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_DEFAULT", FS_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_STRING", FS_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_ENCODED", FS_ENCODED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_SPECIAL_CHARS", FS_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_UNSAFE_RAW", FS_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_EMAIL", FS_EMAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_URL", FS_URL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_NUMBER_INT", FS_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_NUMBER_FLOAT", FS_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FS_MAGIC_QUOTES", FS_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FC_CALLBACK", FC_CALLBACK, CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_OCTAL", FILTER_FLAG_ALLOW_OCTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_HEX", FILTER_FLAG_ALLOW_HEX, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_LOW", FILTER_FLAG_STRIP_LOW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_HIGH", FILTER_FLAG_STRIP_HIGH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_COOK_LOW", FILTER_FLAG_COOK_LOW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_COOK_HIGH", FILTER_FLAG_COOK_HIGH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_LOW", FILTER_FLAG_ENCODE_LOW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_HIGH", FILTER_FLAG_ENCODE_HIGH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_AMP", FILTER_FLAG_ENCODE_AMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMPTY_STRING_NULL", FILTER_FLAG_EMPTY_STRING_NULL, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_SIGN", FILTER_FLAG_ALLOW_SIGN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_FRACTION", FILTER_FLAG_ALLOW_FRACTION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_THOUSAND", FILTER_FLAG_ALLOW_THOUSAND, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_AMP", FILTER_FLAG_ENCODE_AMP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_HTML_NO_TAGS", FILTER_HTML_NO_TAGS, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("FILTER_UNSAFE_RAW", F_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_STRIPPED", F_STRIPPED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_COOKED", F_COOKED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_HTML", F_HTML, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_EMAIL", F_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_URL", F_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILTER_NUMBER", F_NUMBER, CONST_CS | CONST_PERSISTENT);
 
 	sapi_register_input_filter(php_sapi_filter);
 	return SUCCESS;
@@ -140,28 +242,19 @@ PHP_MSHUTDOWN_FUNCTION(filter)
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
+#define VAR_ARRAY_COPY_DTOR(a)   \
+	if (IF_G(a)) {               \
+		zval_ptr_dtor(&IF_G(a)); \
+		IF_G(a) = NULL;          \
+	}
 PHP_RSHUTDOWN_FUNCTION(filter)
 {
-	if(IF_G(get_array)) {
-		zval_ptr_dtor(&IF_G(get_array));
-		IF_G(get_array) = NULL;
-	}
-	if(IF_G(post_array)) {
-		zval_ptr_dtor(&IF_G(post_array));
-		IF_G(post_array) = NULL;
-	}
-	if(IF_G(cookie_array)) {
-		zval_ptr_dtor(&IF_G(cookie_array));
-		IF_G(cookie_array) = NULL;
-	}
-	if(IF_G(env_array)) {
-		zval_ptr_dtor(&IF_G(env_array));
-		IF_G(env_array) = NULL;
-	}
-	if(IF_G(server_array)) {
-		zval_ptr_dtor(&IF_G(server_array));
-		IF_G(server_array) = NULL;
-	}
+	VAR_ARRAY_COPY_DTOR(get_array)
+	VAR_ARRAY_COPY_DTOR(post_array)
+	VAR_ARRAY_COPY_DTOR(cookie_array)
+	VAR_ARRAY_COPY_DTOR(server_array)
+	VAR_ARRAY_COPY_DTOR(env_array)
+	VAR_ARRAY_COPY_DTOR(session_array)
 	return SUCCESS;
 }
 /* }}} */
@@ -170,367 +263,281 @@ PHP_RSHUTDOWN_FUNCTION(filter)
  */
 PHP_MINFO_FUNCTION(filter)
 {
-	char tmp[256];
-
 	php_info_print_table_start();
-	php_info_print_table_row( 2, "PHP extension for Input Validation and Filtering", "enabled" );
+	php_info_print_table_row( 2, "Input Validation and Filtering", "enabled" );
 	php_info_print_table_row( 2, "Revision", "$Revision$");
-	sprintf(tmp, "%d",IF_G(default_filter));
-	php_info_print_table_row( 2, "default_filter", tmp);
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
+static filter_list_entry php_find_filter(long id)
+{
+	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
+
+	for (i = 0; i < size; ++i) {
+		if (filter_list[i].id == id) {
+			return filter_list[i];
+		}
+	}
+	/* Fallback to "string" filter */
+	for (i = 0; i < size; ++i) {
+		if (filter_list[i].id == FS_DEFAULT) {
+			return filter_list[i];
+		}
+	}
+	/* To shut up GCC */
+	return filter_list[0];
+}
+
+static void php_zval_filter(zval *value, long filter, long flags, zval *options, char* charset TSRMLS_DC)
+{
+	filter_list_entry  filter_func;
+	
+	filter_func = php_find_filter(filter);
+
+	if (filter_func.id) {
+		/* Find default filter */
+		filter_func = php_find_filter(FS_DEFAULT);
+	}
+
+	filter_func.function(value, flags, options, charset TSRMLS_CC);
+}
+
 /* {{{ php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned *new_val_len)
  */
-unsigned int  php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC)
+static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC)
 {
-	zval new_var;
-	zval *array_ptr = NULL;
-	char *raw_var, *out;
-	int var_len, res, ol, out_len;
+	zval  new_var, raw_var;
+	zval *array_ptr = NULL, *orig_array_ptr = NULL;
+	int   out_len;
+	char *orig_var;
 
 	assert(*val != NULL);
 
-#if PHP_API_VERSION > 20041224
-	if(IF_G(default_filter)==F_UNSAFE_RAW) {
-		if(new_val_len) *new_val_len = val_len;
+	if (IF_G(default_filter) == FS_UNSAFE_RAW) {
+		if (new_val_len) {
+			*new_val_len = val_len;
+		}
 		return 1;
 	}
-#else
-	if(IF_G(default_filter)==F_UNSAFE_RAW) return(val_len);
-#endif
 
-	switch(arg) {
-		case PARSE_GET:
-			if(!IF_G(get_array)) {
-				ALLOC_ZVAL(array_ptr);
-				array_init(array_ptr);
-				INIT_PZVAL(array_ptr);
-				IF_G(get_array) = array_ptr;
-			}
-			else {
-				array_ptr = IF_G(get_array);
-			}
+#define PARSE_CASE(s,a,t)                    \
+		case s:                              \
+			if (!IF_G(a)) {                  \
+				ALLOC_ZVAL(array_ptr);       \
+				array_init(array_ptr);       \
+				INIT_PZVAL(array_ptr);       \
+				IF_G(a) = array_ptr;         \
+			} else {                         \
+				array_ptr = IF_G(a);         \
+			}                                \
+			orig_array_ptr = PG(http_globals)[t]; \
 			break;
-		case PARSE_POST:
-			if(!IF_G(post_array)) {
-				ALLOC_ZVAL(array_ptr);
-				array_init(array_ptr);
-				INIT_PZVAL(array_ptr);
-				IF_G(post_array) = array_ptr;
-			}
-			else {
-				array_ptr = IF_G(post_array);
-			}
-			break;
-		case PARSE_COOKIE:
-			if(!IF_G(cookie_array)) {
-				ALLOC_ZVAL(array_ptr);
-				array_init(array_ptr);
-				INIT_PZVAL(array_ptr);
-				IF_G(cookie_array) = array_ptr;
-			}
-			else {
-				array_ptr = IF_G(cookie_array);
-			}
-			break;
-		case PARSE_ENV:
-			if(!IF_G(env_array)) {
-				ALLOC_ZVAL(array_ptr);
-				array_init(array_ptr);
-				INIT_PZVAL(array_ptr);
-				IF_G(env_array) = array_ptr;
-			}
-			else {
-				array_ptr = IF_G(env_array);
-			}
-			break;
-		case PARSE_SERVER:
-			if(!IF_G(server_array)) {
-				ALLOC_ZVAL(array_ptr);
-				array_init(array_ptr);
-				INIT_PZVAL(array_ptr);
-				IF_G(server_array) = array_ptr;
-			}
-			else {
-				array_ptr = IF_G(server_array);
-			}
-			break;
+
+	switch (arg) {
+		PARSE_CASE(PARSE_POST,    post_array,    TRACK_VARS_POST)
+		PARSE_CASE(PARSE_GET,     get_array,     TRACK_VARS_GET)
+		PARSE_CASE(PARSE_COOKIE,  cookie_array,  TRACK_VARS_COOKIE)
+		PARSE_CASE(PARSE_SERVER,  server_array,  TRACK_VARS_SERVER)
+		PARSE_CASE(PARSE_ENV,     env_array,     TRACK_VARS_ENV)
 	}
 
+	/* Make a copy of the variable name, as php_register_variable_ex seems to
+	 * modify it */
+	orig_var = estrdup(var);
+
+	/* Store the RAW variable internally */
+	/* FIXME: Should not use php_register_variable_ex as that also registers
+	 * globals when register_globals is turned on */
+	Z_STRLEN(raw_var) = val_len;
+	Z_STRVAL(raw_var) = estrndup(*val, val_len + 1);
+	Z_TYPE(raw_var) = IS_STRING;
+
+	php_register_variable_ex(var, &raw_var, array_ptr TSRMLS_DC);
+
+	/* Register mangled variable */
+	/* FIXME: Should not use php_register_variable_ex as that also registers
+	 * globals when register_globals is turned on */
 	Z_STRLEN(new_var) = val_len;
-	Z_STRVAL(new_var) = estrndup(*val, val_len);
+	Z_STRVAL(new_var) = estrndup(*val, val_len + 1);
 	Z_TYPE(new_var) = IS_STRING;
+	php_zval_filter(&new_var, IF_G(default_filter), 0, NULL, NULL/*charset*/ TSRMLS_DC);
 
-	var_len = strlen(var);
-	raw_var = emalloc(var_len+5);  /* RAW_ and a \0 */
-	strcpy(raw_var, "RAW_");
-	strlcat(raw_var,var,var_len+5);
+	php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_DC);
 
-	php_register_variable_ex(raw_var, &new_var, array_ptr TSRMLS_DC);
-
-	ol = 0;
-	out_len = val_len * 2;
-	if(!out_len) out = estrdup("");
-	else out = emalloc(out_len);
-	while((res = php_filter_get_html(*val, val_len, out, &out_len, FILTER_HTML_NO_TAGS, FILTER_FLAG_ENCODE_AMP, NULL)) == FILTER_RESULT_OUTLEN_SMALL) {
-		efree(out);
-		ol++;
-		out_len *= ol; /* Just in case we don't actually get the right out_len for some reason */
-		out = emalloc(out_len);
+	if (new_val_len) {
+		*new_val_len = out_len;
 	}
-	*val = out;
-#if PHP_API_VERSION > 20041224
-	if(new_val_len) *new_val_len = out_len?out_len-1:0;
-	return 1;
-#else
-	return(out_len?out_len-1:0);
-#endif
+	return 0;
 }
 /* }}} */
 
-/* {{{ static void filter_recursive(zval *array, long filter, long flags, char *charset TSRMLS_DC)
+/* {{{ static void php_zval_filter_recursive(zval *array, long filter, long flags, char *charset TSRMLS_DC)
  */
-static void filter_recursive(zval *array, long filter, long flags, char *charset TSRMLS_DC)
+static void php_zval_filter_recursive(zval *value, long filter, long flags, zval *options, char *charset TSRMLS_DC)
 {
 	zval **element;
 	HashPosition pos;
-	int out_len, res, ol=0;  /* Yes, ol should start at 0 here because the filter returns the right length */
-	char *out;
 
-	if (Z_TYPE_P(array) == IS_ARRAY) {
-		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
-			 zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **) &element, &pos) == SUCCESS;
-			 zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)) {
-				filter_recursive(*element, filter, flags, charset TSRMLS_CC);
+	if (Z_TYPE_P(value) == IS_ARRAY) {
+		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(value), &pos);
+			 zend_hash_get_current_data_ex(Z_ARRVAL_P(value), (void **) &element, &pos) == SUCCESS;
+			 zend_hash_move_forward_ex(Z_ARRVAL_P(value), &pos)) {
+				php_zval_filter_recursive(*element, filter, flags, options, charset TSRMLS_CC);
 		}
-	} else if(Z_STRLEN_P(array)) {
-		switch(filter) {
-			case F_STRIPPED:
-				out_len = Z_STRLEN_P(array) + 1;
-				out = emalloc(out_len);
-				while((res = php_filter_get_stripped(Z_STRVAL_P(array), Z_STRLEN_P(array), out, &out_len, flags, charset)) == FILTER_RESULT_OUTLEN_SMALL) {
-					efree(out);
-					ol++;
-					out_len *= ol;
-					out = emalloc(out_len);
-				}
-				efree(Z_STRVAL_P(array));
-				Z_STRVAL_P(array) = out;
-				Z_STRLEN_P(array) = out_len - 1;
-				break;
-
-			case F_COOKED:
-				out_len = Z_STRLEN_P(array) * 2;
-				out = emalloc(out_len);
-				while((res = php_filter_get_cooked(Z_STRVAL_P(array), Z_STRLEN_P(array), out, &out_len, flags, charset)) == FILTER_RESULT_OUTLEN_SMALL) {
-					efree(out);
-					ol++;
-					out_len *= ol;
-					out = emalloc(out_len);
-				}
-				efree(Z_STRVAL_P(array));
-				Z_STRVAL_P(array) = out;
-				Z_STRLEN_P(array) = out_len - 1;
-				break;
-
-			case F_EMAIL:
-				out_len = Z_STRLEN_P(array) + 1;
-				out = emalloc(out_len);
-				while((res = php_filter_get_email(Z_STRVAL_P(array), Z_STRLEN_P(array), out, &out_len, flags, charset)) == FILTER_RESULT_OUTLEN_SMALL) {
-					efree(out);
-					ol++;
-					out_len *= ol;
-					out = emalloc(out_len);
-				}
-				if(res==FILTER_RESULT_BAD_IN) { Z_TYPE_P(array) = IS_BOOL; Z_LVAL_P(array) = 0; }
-				else {
-					efree(Z_STRVAL_P(array));
-					Z_STRVAL_P(array) = out;
-					Z_STRLEN_P(array) = out_len - 1;
-				}
-				break;
-
-			case F_URL:
-				out_len = Z_STRLEN_P(array) + 1;
-				out = emalloc(out_len);
-				while((res = php_filter_get_url(Z_STRVAL_P(array), Z_STRLEN_P(array), out, &out_len, flags, charset)) == FILTER_RESULT_OUTLEN_SMALL) {
-					efree(out);
-					ol++;
-					out_len *= ol;
-					out = emalloc(out_len);
-				}
-				if(res==FILTER_RESULT_BAD_IN) { Z_TYPE_P(array) = IS_BOOL; Z_LVAL_P(array) = 0; }
-				else {
-					efree(Z_STRVAL_P(array));
-					Z_STRVAL_P(array) = out;
-					Z_STRLEN_P(array) = out_len - 1;
-				}
-				break;
-
-			case F_NUMBER:
-				out_len = Z_STRLEN_P(array) + 1;
-				out = emalloc(out_len);
-				while((res = php_filter_get_number(Z_STRVAL_P(array), Z_STRLEN_P(array), out, &out_len, flags, charset)) == FILTER_RESULT_OUTLEN_SMALL) {
-					efree(out);
-					ol++;
-					out_len *= ol;
-					out = emalloc(out_len);
-				}
-				if(res==FILTER_RESULT_BAD_IN) { Z_TYPE_P(array) = IS_BOOL; Z_LVAL_P(array) = 0; }
-				else {
-					efree(Z_STRVAL_P(array));
-					Z_STRVAL_P(array) = out;
-					Z_STRLEN_P(array) = out_len - 1;
-				}
-				break;
-
-			case F_NOTAGS:
-			default:
-				out_len = Z_STRLEN_P(array) + 1;
-				out = emalloc(out_len);
-				while((res = php_filter_get_html(Z_STRVAL_P(array), Z_STRLEN_P(array), out, &out_len, FILTER_HTML_NO_TAGS, flags, charset)) == FILTER_RESULT_OUTLEN_SMALL) {
-					efree(out);
-					ol++;
-					out_len *= ol;
-					out = emalloc(out_len);
-				}
-				efree(Z_STRVAL_P(array));
-				Z_STRVAL_P(array) = out;
-				Z_STRLEN_P(array) = out_len - 1;
-		}
+	} else if (Z_STRLEN_P(value)) {
+		php_zval_filter(value, filter, flags, options, charset TSRMLS_CC);
 	}
 }
 /* }}} */
 
-/* {{{ filter(constant type, string variable_name [, int filter [, int flags [, string charset]]])
+/* {{{ proto mixed input_get(constant type, string variable_name [, int filter [, mixed flags [, string charset]]])
  */
-PHP_FUNCTION(filter)
+PHP_FUNCTION(input_get)
 {
-	long arg, filter = F_NOTAGS, flags = 0;
-	char *var;
-	int var_len, charset_len, found = 0;
-	int argc = ZEND_NUM_ARGS();
-    zval **tmp;
-	zval *array_ptr = NULL, *array_ptr2 = NULL, *array_ptr3 = NULL;
-	HashTable *hash_ptr;
-	char *raw_var, *charset = NULL;
+	long        arg, filter = FS_DEFAULT;
+	char       *var, *charset = NULL;
+	int         var_len, charset_len;
+	zval       *flags = NULL;
 
-	if(zend_parse_parameters(argc TSRMLS_CC, "ls|lls", &arg, &var, &var_len, &filter, &flags, &charset, &charset_len) == FAILURE) {
+    zval      **tmp;
+	zval       *array_ptr = NULL, *array_ptr2 = NULL, *array_ptr3 = NULL;
+	HashTable  *hash_ptr;
+	int         found = 0;
+	int         filter_flags = 0;
+	zval       *options = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls|lzs", &arg, &var, &var_len, &filter, &flags, &charset, &charset_len) == FAILURE) {
 		return;
 	}
 
+	if (flags) {
+		switch (Z_TYPE_P(flags)) {
+			case IS_ARRAY:
+				options = flags;
+				break;
+
+			case IS_STRING:
+			case IS_BOOL:
+			case IS_LONG:
+				convert_to_long(flags);
+				filter_flags = Z_LVAL_P(flags);
+				options = NULL;
+				break;
+		}
+	}
+
+#define FIND_SOURCE(a,t)                                  \
+		if (IF_G(default_filter) != FS_UNSAFE_RAW) {      \
+			array_ptr = IF_G(a);                          \
+		} else {                                          \
+			array_ptr = PG(http_globals)[t];              \
+		}                                                 \
+		break;
+
 	switch(arg) {
-		case PARSE_GET:
-			if(IF_G(default_filter)!=F_UNSAFE_RAW) array_ptr = IF_G(get_array);
-			else array_ptr = PG(http_globals)[TRACK_VARS_GET];
+		case PARSE_GET:     FIND_SOURCE(get_array,     TRACK_VARS_GET)
+		case PARSE_POST:    FIND_SOURCE(post_array,    TRACK_VARS_POST)
+		case PARSE_COOKIE:  FIND_SOURCE(cookie_array,  TRACK_VARS_COOKIE)
+		case PARSE_SERVER:  FIND_SOURCE(server_array,  TRACK_VARS_SERVER)
+		case PARSE_ENV:     FIND_SOURCE(env_array,     TRACK_VARS_ENV)
+
+		case PARSE_SESSION:
+			/* FIXME: Implement session source */
 			break;
-		case PARSE_POST:
-			if(IF_G(default_filter)!=F_UNSAFE_RAW) array_ptr = IF_G(post_array);
-			else array_ptr = PG(http_globals)[TRACK_VARS_POST];
-			break;
-		case PARSE_COOKIE:
-			if(IF_G(default_filter)!=F_UNSAFE_RAW) array_ptr = IF_G(cookie_array);
-			else array_ptr = PG(http_globals)[TRACK_VARS_COOKIE];
-			break;
-		case PARSE_ENV:
-			if(IF_G(default_filter)!=F_UNSAFE_RAW) array_ptr = IF_G(env_array);
-			else array_ptr = PG(http_globals)[TRACK_VARS_ENV];
-			break;
-		case PARSE_SERVER:
-			if(IF_G(default_filter)!=F_UNSAFE_RAW) array_ptr = IF_G(server_array);
-			else array_ptr = PG(http_globals)[TRACK_VARS_SERVER];
-			break;
+
 		case PARSE_REQUEST:
 			if (PG(variables_order)) {
 				zval **a_ptr = &array_ptr;
 				char *p, *variables_order = PG(variables_order);
-				for (p=variables_order; p && *p; p++) {
-					switch(*p) {
+
+				for (p = variables_order; p && *p; p++) {
+					switch (*p) {
 						case 'p':
 						case 'P':
-							if(IF_G(default_filter)!=F_UNSAFE_RAW) *a_ptr = IF_G(post_array);
-							else *a_ptr = PG(http_globals)[TRACK_VARS_POST];
+							if (IF_G(default_filter) != FS_UNSAFE_RAW) {
+								*a_ptr = IF_G(post_array);
+							} else {
+								*a_ptr = PG(http_globals)[TRACK_VARS_POST];
+							}
 							break;
 						case 'g':
 						case 'G':
-							if(IF_G(default_filter)!=F_UNSAFE_RAW) *a_ptr = IF_G(get_array);
-							else *a_ptr = PG(http_globals)[TRACK_VARS_GET];
+							if (IF_G(default_filter) != FS_UNSAFE_RAW) {
+								*a_ptr = IF_G(get_array);
+							} else {
+								*a_ptr = PG(http_globals)[TRACK_VARS_GET];
+							}
 							break;
 						case 'c':
 						case 'C':
-							if(IF_G(default_filter)!=F_UNSAFE_RAW) *a_ptr = IF_G(cookie_array);
-							else *a_ptr = PG(http_globals)[TRACK_VARS_COOKIE];
+							if (IF_G(default_filter) != FS_UNSAFE_RAW) {
+								*a_ptr = IF_G(cookie_array);
+							} else {
+								*a_ptr = PG(http_globals)[TRACK_VARS_COOKIE];
+							}
 							break;
 					}
-					if(array_ptr && !array_ptr2) { a_ptr = &array_ptr2; continue; }
-					if(array_ptr2 && !array_ptr3) { a_ptr = &array_ptr3; }
+					if (array_ptr && !array_ptr2) {
+						a_ptr = &array_ptr2;
+						continue;
+					}
+					if (array_ptr2 && !array_ptr3) { 
+						a_ptr = &array_ptr3;
+					}
 				}
 			} else {
-				if(IF_G(default_filter)!=F_UNSAFE_RAW) array_ptr = IF_G(get_array);
-				else array_ptr = PG(http_globals)[TRACK_VARS_GET];
-				break;
+				FIND_SOURCE(get_array, TRACK_VARS_GET)
 			}
 
 	}
 
-	if(!array_ptr) RETURN_FALSE;
-
-	if(IF_G(default_filter)!=F_UNSAFE_RAW) {
-	/*
-	 * I'm changing the variable name here because when running with register_globals on,
-	 * the variable will end up in the global symbol table and I am using that var name
-	 * in the internal raw storage arrays as well.
-	 */
-		var_len += 5;
-		raw_var = emalloc(var_len);  /* RAW_ and a \0 */
-		strcpy(raw_var, "RAW_");
-		strlcat(raw_var,var,var_len);
-	} else {
-		raw_var = var;
-		var_len++;
+	if (!array_ptr) {
+		RETURN_FALSE;
 	}
 
-	if(array_ptr3) {
+	if (array_ptr3) {
 		hash_ptr = HASH_OF(array_ptr3);
-		if(hash_ptr && zend_hash_find(hash_ptr, raw_var, var_len, (void **)&tmp) == SUCCESS) {
+		if (hash_ptr && zend_hash_find(hash_ptr, var, var_len + 1, (void **)&tmp) == SUCCESS) {
 			*return_value = **tmp;
 			found = 1;
 		} 
 	}
 
-	if(array_ptr2 && !found) {
+	if (array_ptr2 && !found) {
 		hash_ptr = HASH_OF(array_ptr2);
-		if(hash_ptr && zend_hash_find(hash_ptr, raw_var, var_len, (void **)&tmp) == SUCCESS) {
+		if (hash_ptr && zend_hash_find(hash_ptr, var, var_len + 1, (void **)&tmp) == SUCCESS) {
 			*return_value = **tmp;
 			found = 1;
 		}
 	}
 
-	if(!found) {
+	if (!found) {
 		hash_ptr = HASH_OF(array_ptr);
 
-		if(hash_ptr && zend_hash_find(hash_ptr, raw_var, var_len, (void **)&tmp) == SUCCESS) {
+		if (hash_ptr && zend_hash_find(hash_ptr, var, var_len + 1, (void **)&tmp) == SUCCESS) {
 			*return_value = **tmp;
 			found = 1;
 		}
 	}
 
-	if(found) {
+	if (found) {
 		zval_copy_ctor(return_value);  /* Watch out for empty strings */
-		if(filter != F_UNSAFE_RAW) {
-			filter_recursive(return_value, filter, flags, charset);
+		if (filter != FS_UNSAFE_RAW) {
+			php_zval_filter_recursive(return_value, filter, filter_flags, options, charset);
 		}
 	} else {
 		RETVAL_FALSE;
 	}
+}
+/* }}} */
 
-	if(IF_G(default_filter)!=F_UNSAFE_RAW) {
-		efree(raw_var);
-	}
+/* {{{ proto filter_data(mixed variable, int filter [, mixed filter_options [, string charset ]])
+ */
+PHP_FUNCTION(filter_data)
+{
 }
 /* }}} */
 
@@ -539,6 +546,6 @@ PHP_FUNCTION(filter)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
-  vim600: noet sw=4 ts=4 fdm=marker
+ * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
