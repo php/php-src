@@ -1,3 +1,75 @@
+2005-09-05  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/install-pear.phar
+      pear/install-pear.phar:
+      
+      file install-pear.phar was initially added on branch PHP_5_1.
+
+2005-09-05  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      Pointer arithmetic with char * rather than void *
+
+2005-09-05  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.re:
+      MFH: - Fixed bug #34311 (unserialize() crashes with characters above 191
+      dec)
+
+    * (PHP_4_4)
+      ext/standard/url_scanner_ex.c:
+      touch with working re2c
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.c:
+      touch
+
+    * ext/standard/var_unserializer.re:
+      - Fixed bug #34311 (unserialize() crashes with characters above 191 dec)
+
+    * (PHP_4_4)
+      NEWS
+      NEWS:
+      BFN
+
+2005-09-05  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Roll back to dev
+
+2005-09-05  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode impl of str_pad()
+
+2005-09-05  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Roll 5.0.5
+
+2005-09-05  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      MFB: Fix for #34369
+      Add extra parameter to mssql_connect to force a new connection
+
+    * (PHP_4_4)
+      ext/mssql/php_mssql.c:
+      Fix for #34369
+      Add extra parameter to mssql_connect to force a new connection
+
 2005-09-04  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_1)
