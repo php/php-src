@@ -193,14 +193,20 @@ typedef struct { /* php_oci_out_column {{{ */
 } php_oci_out_column; /* }}} */
 
 /* {{{ macros */
+
+#ifdef PHP_WIN32
+#define PHP_OCI_CALL(func, params) \
+	func params; \
+	if (OCI_G(debug_mode)) { \
+		php_printf ("OCI8 DEBUG: " #func " at (%s:%d) \n", __FILE__, __LINE__); \
+	}
+#else
 #define PHP_OCI_CALL(func, params) \
 	func params; \
 	if (OCI_G(debug_mode)) { \
 		php_printf ("OCI8 DEBUG: " #func " in %s() (%s:%d) \n", __FUNCTION__, __FILE__, __LINE__); \
 	}
-/*
-\
-*/
+#endif
 
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
 { \
