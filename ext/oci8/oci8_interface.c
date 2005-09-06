@@ -14,6 +14,11 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
+   |                                                                      |
+   | Collection support by Andy Sautins <asautins@veripost.net>           |
+   | Temporary LOB support by David Benson <dbenson@mancala.com>          |
+   | ZTS per process OCIPLogon by Harald Radi <harald.radi@nme.at>        |
+   |                                                                      |
    | Redesigned by: Antony Dovgal <antony@zend.com>                       |
    |                Andi Gutmans <andi@zend.com>                          |
    |                Wez Furlong <wez@omniti.com>                          |
