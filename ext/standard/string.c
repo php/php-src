@@ -5273,7 +5273,7 @@ PHP_FUNCTION(substr_count)
 	if (haystack_type == IS_UNICODE) {
 		while ((p = zend_u_memnstr((UChar *)p, (UChar *)needle, needle_len, (UChar *)endp)) != NULL) {
 			/*(UChar *)p += needle_len; // GCC 4.0.0 cannot compile this */
-			p = (UChar *)p + UBYTES(needle_len);
+			p = (UChar *)p + needle_len;
 			count++;
 		}
 	} else {
