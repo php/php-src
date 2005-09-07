@@ -4545,6 +4545,10 @@ case OP_AggGet: {
     pTos->flags &= ~(MEM_Dyn|MEM_Static|MEM_Short);
     pTos->flags |= MEM_Ephem;
   }
+  if( pTos->flags & MEM_AggCtx ){
+    Release(pTos);
+    pTos->flags = MEM_Null;
+  }
   break;
 }
 
@@ -4695,8 +4699,9 @@ case OP_SetNext: {
       break;
     }
   }else{
-    assert( pSet->prev );
-    pSet->prev = sqliteHashNext(pSet->prev);
+    if( pSet->prev ){
+      pSet->prev = sqliteHashNext(pSet->prev);
+    }
     if( pSet->prev==0 ){
       break;
     }else{
