@@ -451,7 +451,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 	if (clisock >= 0) {
 		php_openssl_netstream_data_t *clisockdata;
 
-		clisockdata = pemalloc(sizeof(*clisockdata), stream->is_persistent);
+		clisockdata = emalloc(sizeof(*clisockdata));
 
 		if (clisockdata == NULL) {
 			closesocket(clisock);
