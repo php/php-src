@@ -1,3 +1,43 @@
+2005-09-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/php_oci8_int.h:
+      removed __FUNCTION__ (by popular demand)
+
+    * ext/oci8/CREDITS
+      ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h:
+      fix credits
+
+2005-09-06  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/oci8/config.w32:
+      Sync windows build and link against instant client libs
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8_collection.c
+      ext/oci8/oci8_interface.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8.h
+      ext/oci8/php_oci8_int.h:
+      Remove utf-8 chars
+
+2005-09-06  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/php_oci8_int.h:
+      workaround for some b0rked compilers
+
+2005-09-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      run-tests.php:
+      Simplify code by making use 5.1+ functions
+
 2005-09-05  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/install-pear.phar
