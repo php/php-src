@@ -227,6 +227,7 @@ static int vxprintf(
   int nsd;                   /* Number of significant digits returned */
 #endif
 
+  func(arg,"",0);
   count = length = 0;
   bufpt = 0;
   for(; (c=(*fmt))!=0; ++fmt){
@@ -673,9 +674,11 @@ static void mout(void *arg, const char *zNewText, int nNewChar){
       }
     }
   }
-  if( pM->zText && nNewChar>0 ){
-    memcpy(&pM->zText[pM->nChar], zNewText, nNewChar);
-    pM->nChar += nNewChar;
+  if( pM->zText ){
+    if( nNewChar>0 ){
+      memcpy(&pM->zText[pM->nChar], zNewText, nNewChar);
+      pM->nChar += nNewChar;
+    }
     pM->zText[pM->nChar] = 0;
   }
 }

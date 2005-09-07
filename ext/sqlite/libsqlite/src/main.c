@@ -189,10 +189,13 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   BtCursor *curMain;
   int size;
   Table *pTab;
-  char *azArg[6];
+  char const *azArg[6];
   char zDbNum[30];
   int meta[SQLITE_N_BTREE_META];
   InitData initData;
+  char const *zMasterSchema;
+  char const *zMasterName;
+  char *zSql = 0;
 
   /*
   ** The master database table has a structure like this
@@ -216,62 +219,38 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
      ")"
   ;
 
-  /* The following SQL will read the schema from the master tables.
-  ** The first version works with SQLite file formats 2 or greater.
-  ** The second version is for format 1 files.
-  **
-  ** Beginning with file format 2, the rowid for new table entries
-  ** (including entries in sqlite_master) is an increasing integer.
-  ** So for file format 2 and later, we can play back sqlite_master
-  ** and all the CREATE statements will appear in the right order.
-  ** But with file format 1, table entries were random and so we
-  ** have to make sure the CREATE TABLEs occur before their corresponding
-  ** CREATE INDEXs.  (We don't have to deal with CREATE VIEW or
-  ** CREATE TRIGGER in file format 1 because those constructs did
-  ** not exist then.) 
+  assert( iDb>=0 && iDb<db->nDb );
+
+  /* zMasterSchema and zInitScript are set to point at the master schema
+  ** and initialisation script appropriate for the database being
+  ** initialised. zMasterName is the name of the master table.
   */
-  static char init_script[] = 
-     "SELECT type, name, rootpage, sql, 1 FROM sqlite_temp_master "
-     "UNION ALL "
-     "SELECT type, name, rootpage, sql, 0 FROM sqlite_master";
-  static char older_init_script[] = 
-     "SELECT type, name, rootpage, sql, 1 FROM sqlite_temp_master "
-     "UNION ALL "
-     "SELECT type, name, rootpage, sql, 0 FROM sqlite_master "
-     "WHERE type='table' "
-     "UNION ALL "
-     "SELECT type, name, rootpage, sql, 0 FROM sqlite_master "
-     "WHERE type='index'";
+  if( iDb==1 ){
+    zMasterSchema = temp_master_schema;
+    zMasterName = TEMP_MASTER_NAME;
+  }else{
+    zMasterSchema = master_schema;
+    zMasterName = MASTER_NAME;
+  }
 
-
-  assert( iDb>=0 && iDb!=1 && iDb<db->nDb );
-
-  /* Construct the schema tables: sqlite_master and sqlite_temp_master
+  /* Construct the schema table.
   */
   sqliteSafetyOff(db);
   azArg[0] = "table";
-  azArg[1] = MASTER_NAME;
+  azArg[1] = zMasterName;
   azArg[2] = "2";
-  azArg[3] = master_schema;
+  azArg[3] = zMasterSchema;
   sprintf(zDbNum, "%d", iDb);
   azArg[4] = zDbNum;
   azArg[5] = 0;
   initData.db = db;
   initData.pzErrMsg = pzErrMsg;
-  sqliteInitCallback(&initData, 5, azArg, 0);
-  pTab = sqliteFindTable(db, MASTER_NAME, "main");
+  sqliteInitCallback(&initData, 5, (char **)azArg, 0);
+  pTab = sqliteFindTable(db, zMasterName, db->aDb[iDb].zName);
   if( pTab ){
     pTab->readOnly = 1;
-  }
-  if( iDb==0 ){
-    azArg[1] = TEMP_MASTER_NAME;
-    azArg[3] = temp_master_schema;
-    azArg[4] = "1";
-    sqliteInitCallback(&initData, 5, azArg, 0);
-    pTab = sqliteFindTable(db, TEMP_MASTER_NAME, "temp");
-    if( pTab ){
-      pTab->readOnly = 1;
-    }
+  }else{
+    return SQLITE_NOMEM;
   }
   sqliteSafetyOn(db);
 
@@ -320,7 +299,7 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
       sqliteSetString(pzErrMsg, "unsupported file format", (char*)0);
       return SQLITE_ERROR;
     }
-  }else if( db->file_format!=meta[2] || db->file_format<4 ){
+  }else if( iDb!=1 && (db->file_format!=meta[2] || db->file_format<4) ){
     assert( db->file_format>=4 );
     if( meta[2]==0 ){
       sqliteSetString(pzErrMsg, "cannot attach empty database: ",
@@ -340,18 +319,35 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   */
   assert( db->init.busy );
   sqliteSafetyOff(db);
-  if( iDb==0 ){
-    rc = sqlite_exec(db, 
-        db->file_format>=2 ? init_script : older_init_script,
-        sqliteInitCallback, &initData, 0);
-  }else{
-    char *zSql = 0;
+
+  /* The following SQL will read the schema from the master tables.
+  ** The first version works with SQLite file formats 2 or greater.
+  ** The second version is for format 1 files.
+  **
+  ** Beginning with file format 2, the rowid for new table entries
+  ** (including entries in sqlite_master) is an increasing integer.
+  ** So for file format 2 and later, we can play back sqlite_master
+  ** and all the CREATE statements will appear in the right order.
+  ** But with file format 1, table entries were random and so we
+  ** have to make sure the CREATE TABLEs occur before their corresponding
+  ** CREATE INDEXs.  (We don't have to deal with CREATE VIEW or
+  ** CREATE TRIGGER in file format 1 because those constructs did
+  ** not exist then.) 
+  */
+  if( db->file_format>=2 ){
     sqliteSetString(&zSql, 
-       "SELECT type, name, rootpage, sql, ", zDbNum, " FROM \"",
-       db->aDb[iDb].zName, "\".sqlite_master", (char*)0);
-    rc = sqlite_exec(db, zSql, sqliteInitCallback, &initData, 0);
-    sqliteFree(zSql);
+        "SELECT type, name, rootpage, sql, ", zDbNum, " FROM \"",
+       db->aDb[iDb].zName, "\".", zMasterName, (char*)0);
+  }else{
+    sqliteSetString(&zSql, 
+        "SELECT type, name, rootpage, sql, ", zDbNum, " FROM \"",
+       db->aDb[iDb].zName, "\".", zMasterName, 
+       " WHERE type IN ('table', 'index')"
+       " ORDER BY CASE type WHEN 'table' THEN 0 ELSE 1 END", (char*)0);
   }
+  rc = sqlite_exec(db, zSql, sqliteInitCallback, &initData, 0);
+
+  sqliteFree(zSql);
   sqliteSafetyOn(db);
   sqliteBtreeCloseCursor(curMain);
   if( sqlite_malloc_failed ){
@@ -361,9 +357,6 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   }
   if( rc==SQLITE_OK ){
     DbSetProperty(db, iDb, DB_SchemaLoaded);
-    if( iDb==0 ){
-      DbSetProperty(db, 1, DB_SchemaLoaded);
-    }
   }else{
     sqliteResetInternalSchema(db, iDb);
   }
@@ -391,13 +384,24 @@ int sqliteInit(sqlite *db, char **pzErrMsg){
   rc = SQLITE_OK;
   db->init.busy = 1;
   for(i=0; rc==SQLITE_OK && i<db->nDb; i++){
-    if( DbHasProperty(db, i, DB_SchemaLoaded) ) continue;
-    assert( i!=1 );  /* Should have been initialized together with 0 */
+    if( DbHasProperty(db, i, DB_SchemaLoaded) || i==1 ) continue;
     rc = sqliteInitOne(db, i, pzErrMsg);
     if( rc ){
       sqliteResetInternalSchema(db, i);
     }
   }
+
+  /* Once all the other databases have been initialised, load the schema
+  ** for the TEMP database. This is loaded last, as the TEMP database
+  ** schema may contain references to objects in other databases.
+  */
+  if( rc==SQLITE_OK && db->nDb>1 && !DbHasProperty(db, 1, DB_SchemaLoaded) ){
+    rc = sqliteInitOne(db, 1, pzErrMsg);
+    if( rc ){
+      sqliteResetInternalSchema(db, 1);
+    }
+  }
+
   db->init.busy = 0;
   if( rc==SQLITE_OK ){
     db->flags |= SQLITE_Initialized;

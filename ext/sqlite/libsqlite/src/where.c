@@ -46,7 +46,7 @@ struct ExprInfo {
 typedef struct ExprMaskSet ExprMaskSet;
 struct ExprMaskSet {
   int n;          /* Number of assigned cursor values */
-  int ix[32];     /* Cursor assigned to each bit */
+  int ix[31];     /* Cursor assigned to each bit */
 };
 
 /*
@@ -123,7 +123,9 @@ static int exprTableUsage(ExprMaskSet *pMaskSet, Expr *p){
   unsigned int mask = 0;
   if( p==0 ) return 0;
   if( p->op==TK_COLUMN ){
-    return getMask(pMaskSet, p->iTable);
+    mask = getMask(pMaskSet, p->iTable);
+    if( mask==0 ) mask = -1;
+    return mask;
   }
   if( p->pRight ){
     mask = exprTableUsage(pMaskSet, p->pRight);
@@ -267,6 +269,35 @@ static Index *findSortingIndex(
     *pbRev = sortOrder==SQLITE_SO_DESC;
   }
   return pMatch;
+}
+
+/*
+** Disable a term in the WHERE clause.  Except, do not disable the term
+** if it controls a LEFT OUTER JOIN and it did not originate in the ON
+** or USING clause of that join.
+**
+** Consider the term t2.z='ok' in the following queries:
+**
+**   (1)  SELECT * FROM t1 LEFT JOIN t2 ON t1.a=t2.x WHERE t2.z='ok'
+**   (2)  SELECT * FROM t1 LEFT JOIN t2 ON t1.a=t2.x AND t2.z='ok'
+**   (3)  SELECT * FROM t1, t2 WHERE t1.a=t2.x AND t2.z='ok'
+**
+** The t2.z='ok' is disabled in the in (2) because it did not originate
+** in the ON clause.  The term is disabled in (3) because it is not part
+** of a LEFT OUTER JOIN.  In (1), the term is not disabled.
+**
+** Disabling a term causes that term to not be tested in the inner loop
+** of the join.  Disabling is an optimization.  We would get the correct
+** results if nothing were ever disabled, but joins might run a little
+** slower.  The trick is to disable as much as we can without disabling
+** too much.  If we disabled in (1), we'd get the wrong answer.
+** See ticket #813.
+*/
+static void disableTerm(WhereLevel *pLevel, Expr **ppExpr){
+  Expr *pExpr = *ppExpr;
+  if( pLevel->iLeftJoin==0 || ExprHasProperty(pExpr, EP_FromJoin) ){
+    *ppExpr = 0;
+  }
 }
 
 /*
@@ -736,7 +767,7 @@ WhereInfo *sqliteWhereBegin(
       }else{
         sqliteExprCode(pParse, aExpr[k].p->pLeft);
       }
-      aExpr[k].p = 0;
+      disableTerm(pLevel, &aExpr[k].p);
       cont = pLevel->cont = sqliteVdbeMakeLabel(v);
       sqliteVdbeAddOp(v, OP_MustBeInt, 1, brk);
       haveKey = 0;
@@ -760,7 +791,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             if( pX->op==TK_EQ ){
               sqliteExprCode(pParse, pX->pRight);
-              aExpr[k].p = 0;
+              disableTerm(pLevel, &aExpr[k].p);
               break;
             }
             if( pX->op==TK_IN && nColumn==1 ){
@@ -777,7 +808,7 @@ WhereInfo *sqliteWhereBegin(
                 pLevel->inOp = OP_Next;
                 pLevel->inP1 = pX->iTable;
               }
-              aExpr[k].p = 0;
+              disableTerm(pLevel, &aExpr[k].p);
               break;
             }
           }
@@ -787,7 +818,7 @@ WhereInfo *sqliteWhereBegin(
              && aExpr[k].p->pRight->iColumn==pIdx->aiColumn[j]
           ){
             sqliteExprCode(pParse, aExpr[k].p->pLeft);
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
         }
@@ -854,7 +885,7 @@ WhereInfo *sqliteWhereBegin(
         sqliteVdbeAddOp(v, OP_ForceInt,
           aExpr[k].p->op==TK_LT || aExpr[k].p->op==TK_GT, brk);
         sqliteVdbeAddOp(v, OP_MoveTo, iCur, brk);
-        aExpr[k].p = 0;
+        disableTerm(pLevel, &aExpr[k].p);
       }else{
         sqliteVdbeAddOp(v, OP_Rewind, iCur, brk);
       }
@@ -876,7 +907,7 @@ WhereInfo *sqliteWhereBegin(
         }else{
           testOp = OP_Gt;
         }
-        aExpr[k].p = 0;
+        disableTerm(pLevel, &aExpr[k].p);
       }
       start = sqliteVdbeCurrentAddr(v);
       pLevel->op = OP_Next;
@@ -931,7 +962,7 @@ WhereInfo *sqliteWhereBegin(
              && aExpr[k].p->pLeft->iColumn==pIdx->aiColumn[j]
           ){
             sqliteExprCode(pParse, aExpr[k].p->pRight);
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
           if( aExpr[k].idxRight==iCur
@@ -940,7 +971,7 @@ WhereInfo *sqliteWhereBegin(
              && aExpr[k].p->pRight->iColumn==pIdx->aiColumn[j]
           ){
             sqliteExprCode(pParse, aExpr[k].p->pLeft);
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
         }
@@ -977,7 +1008,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pRight);
             leFlag = pExpr->op==TK_LE;
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
           if( aExpr[k].idxRight==iCur
@@ -987,7 +1018,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pLeft);
             leFlag = pExpr->op==TK_GE;
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
         }
@@ -1036,7 +1067,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pRight);
             geFlag = pExpr->op==TK_GE;
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
           if( aExpr[k].idxRight==iCur
@@ -1046,7 +1077,7 @@ WhereInfo *sqliteWhereBegin(
           ){
             sqliteExprCode(pParse, pExpr->pLeft);
             geFlag = pExpr->op==TK_LE;
-            aExpr[k].p = 0;
+            disableTerm(pLevel, &aExpr[k].p);
             break;
           }
         }
