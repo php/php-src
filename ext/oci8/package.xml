@@ -10,42 +10,6 @@
    <email>tony2001@php.net</email>
    <role>developer</role>
   </maintainer>
-  <maintainer>
-   <user>ssb</user>
-   <name>Stig Bakken</name>
-   <email>ssb@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>thies</user>
-   <name>Thies C. Arntzen</name>
-   <email>thies@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>asautins</user>
-   <name>Andy Sautins</name>
-   <email>asautins@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>dbenson</user>
-   <name>David Benson</name>
-   <email>dbenson@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>maxim</user>
-   <name>Maxim Maletsky</name>
-   <email>maxim@php.net</email>
-   <role>developer</role>
-  </maintainer>
-  <maintainer>
-   <user>phanto</user>
-   <name>Harald Radi</name>
-   <email>phanto@php.net</email>
-   <role>developer</role>
-  </maintainer>
  </maintainers>
  <description>
   These functions allow you to access Oracle database servers using 
