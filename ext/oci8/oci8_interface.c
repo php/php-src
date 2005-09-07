@@ -1499,7 +1499,11 @@ PHP_FUNCTION(oci_error)
 	text *sqltext = NULL;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 0) {
 		statement = (php_oci_statement *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_statement);
 	
 		if (statement) {
