@@ -596,8 +596,12 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	}
 
 	string = php_format_date(format, format_len, ts, localtime TSRMLS_CC);
-	
-	RETVAL_STRING(string, 0);
+
+	if (UG(unicode)) {
+		RETVAL_UNICODE(string, 0);
+	} else {
+		RETVAL_STRING(string, 0);
+	}
 }
 /* }}} */
 
