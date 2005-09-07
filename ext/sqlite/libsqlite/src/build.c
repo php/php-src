@@ -1537,7 +1537,7 @@ void sqliteCreateIndex(
   if( pName && !db->init.busy ){
     Index *pISameName;    /* Another index with the same name */
     Table *pTSameName;    /* A table with same name as the index */
-    zName = sqliteStrNDup(pName->z, pName->n);
+    zName = sqliteTableNameFromToken(pName);
     if( zName==0 ) goto exit_create_index;
     if( (pISameName = sqliteFindIndex(db, zName, 0))!=0 ){
       sqliteErrorMsg(pParse, "index %s already exists", zName);
@@ -1557,7 +1557,7 @@ void sqliteCreateIndex(
     sqliteSetString(&zName, "(", pTab->zName, " autoindex ", zBuf, (char*)0);
     if( zName==0 ) goto exit_create_index;
   }else{
-    zName = sqliteStrNDup(pName->z, pName->n);
+    zName = sqliteTableNameFromToken(pName);
   }
 
   /* Check for authorization to create an index.

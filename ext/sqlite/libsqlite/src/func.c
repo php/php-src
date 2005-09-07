@@ -157,20 +157,20 @@ static void roundFunc(sqlite_func *context, int argc, const char **argv){
 ** Implementation of the upper() and lower() SQL functions.
 */
 static void upperFunc(sqlite_func *context, int argc, const char **argv){
-  char *z;
+  unsigned char *z;
   int i;
   if( argc<1 || argv[0]==0 ) return;
-  z = sqlite_set_result_string(context, argv[0], -1);
+  z = (unsigned char*)sqlite_set_result_string(context, argv[0], -1);
   if( z==0 ) return;
   for(i=0; z[i]; i++){
     if( islower(z[i]) ) z[i] = toupper(z[i]);
   }
 }
 static void lowerFunc(sqlite_func *context, int argc, const char **argv){
-  char *z;
+  unsigned char *z;
   int i;
   if( argc<1 || argv[0]==0 ) return;
-  z = sqlite_set_result_string(context, argv[0], -1);
+  z = (unsigned char*)sqlite_set_result_string(context, argv[0], -1);
   if( z==0 ) return;
   for(i=0; z[i]; i++){
     if( isupper(z[i]) ) z[i] = tolower(z[i]);
@@ -517,26 +517,28 @@ static void minmaxStep(sqlite_func *context, int argc, const char **argv){
   int mask;    /* 0 for min() or 0xffffffff for max() */
 
   assert( argc==2 );
+  if( argv[0]==0 ) return;  /* Ignore NULL values */
   if( argv[1][0]=='n' ){
     xCompare = sqliteCompare;
   }else{
     xCompare = strcmp;
   }
   mask = (int)sqlite_user_data(context);
+  assert( mask==0 || mask==-1 );
   p = sqlite_aggregate_context(context, sizeof(*p));
-  if( p==0 || argc<1 || argv[0]==0 ) return;
+  if( p==0 || argc<1 ) return;
   if( p->z==0 || (xCompare(argv[0],p->z)^mask)<0 ){
     int len;
-    if( !p->zBuf[0] ){
+    if( p->zBuf[0] ){
       sqliteFree(p->z);
     }
     len = strlen(argv[0]);
     if( len < sizeof(p->zBuf)-1 ){
       p->z = &p->zBuf[1];
-      p->zBuf[0] = 1;
+      p->zBuf[0] = 0;
     }else{
       p->z = sqliteMalloc( len+1 );
-      p->zBuf[0] = 0;
+      p->zBuf[0] = 1;
       if( p->z==0 ) return;
     }
     strcpy(p->z, argv[0]);
@@ -545,10 +547,10 @@ static void minmaxStep(sqlite_func *context, int argc, const char **argv){
 static void minMaxFinalize(sqlite_func *context){
   MinMaxCtx *p;
   p = sqlite_aggregate_context(context, sizeof(*p));
-  if( p && p->z ){
+  if( p && p->z && p->zBuf[0]<2 ){
     sqlite_set_result_string(context, p->z, strlen(p->z));
   }
-  if( p && !p->zBuf[0] ){
+  if( p && p->zBuf[0] ){
     sqliteFree(p->z);
   }
 }
@@ -621,7 +623,12 @@ void sqliteRegisterBuiltinFunctions(sqlite *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    void *pArg = aFuncs[i].argType==2 ? (void*)(-1) : db;
+    void *pArg;
+    switch( aFuncs[i].argType ){
+      case 0:  pArg = 0;           break;
+      case 1:  pArg = db;          break;
+      case 2:  pArg = (void*)(-1); break;
+    }
     sqlite_create_function(db, aFuncs[i].zName,
            aFuncs[i].nArg, aFuncs[i].xFunc, pArg);
     if( aFuncs[i].xFunc ){
@@ -629,7 +636,12 @@ void sqliteRegisterBuiltinFunctions(sqlite *db){
     }
   }
   for(i=0; i<sizeof(aAggs)/sizeof(aAggs[0]); i++){
-    void *pArg = aAggs[i].argType==2 ? (void*)(-1) : db;
+    void *pArg;
+    switch( aAggs[i].argType ){
+      case 0:  pArg = 0;           break;
+      case 1:  pArg = db;          break;
+      case 2:  pArg = (void*)(-1); break;
+    }
     sqlite_create_aggregate(db, aAggs[i].zName,
            aAggs[i].nArg, aAggs[i].xStep, aAggs[i].xFinalize, pArg);
     sqlite_function_type(db, aAggs[i].zName, aAggs[i].dataType);
