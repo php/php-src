@@ -124,7 +124,7 @@ Expr *sqliteExprDup(Expr *p){
   if( pNew==0 ) return 0;
   memcpy(pNew, p, sizeof(*pNew));
   if( p->token.z!=0 ){
-    pNew->token.z = sqliteStrDup(p->token.z);
+    pNew->token.z = sqliteStrNDup(p->token.z, p->token.n);
     pNew->token.dyn = 1;
   }else{
     assert( pNew->token.z==0 );
@@ -155,7 +155,10 @@ ExprList *sqliteExprListDup(ExprList *p){
   if( pNew==0 ) return 0;
   pNew->nExpr = pNew->nAlloc = p->nExpr;
   pNew->a = pItem = sqliteMalloc( p->nExpr*sizeof(p->a[0]) );
-  if( pItem==0 ) return 0;  /* Leaks memory after a malloc failure */
+  if( pItem==0 ){
+    sqliteFree(pNew);
+    return 0;
+  }
   for(i=0; i<p->nExpr; i++, pItem++){
     Expr *pNewExpr, *pOldExpr;
     pItem->pExpr = pNewExpr = sqliteExprDup(pOldExpr = p->a[i].pExpr);
