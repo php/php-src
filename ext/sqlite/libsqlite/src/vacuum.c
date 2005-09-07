@@ -164,24 +164,6 @@ static int vacuumCallback1(void *pArg, int argc, char **argv, char **NotUsed){
 }
 
 /*
-** This callback is used to transfer PRAGMA settings from one database
-** to the other.  The value in argv[0] should be passed to a pragma
-** identified by ((vacuumStruct*)pArg)->zPragma.
-*/
-static int vacuumCallback3(void *pArg, int argc, char **argv, char **NotUsed){
-  vacuumStruct *p = (vacuumStruct*)pArg;
-  char zBuf[200];
-  assert( argc==1 );
-  if( argv==0 ) return 0;
-  assert( argv[0]!=0 );
-  assert( strlen(p->zPragma)<100 );
-  assert( strlen(argv[0])<30 );
-  sprintf(zBuf,"PRAGMA %s=%s;", p->zPragma, argv[0]);
-  p->rc = execsql(p->pzErrMsg, p->dbNew, zBuf);
-  return p->rc;
-}
-
-/*
 ** Generate a random name of 20 character in length.
 */
 static void randomName(unsigned char *zBuf){
@@ -225,14 +207,6 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
   int i;                  /* Loop counter */
   char *zErrMsg;          /* Error message */
   vacuumStruct sVac;      /* Information passed to callbacks */
-
-  /* These are all of the pragmas that need to be transferred over
-  ** to the new database */
-  static const char *zPragma[] = {
-     "default_synchronous",
-     "default_cache_size",
-     /* "default_temp_store", */
-  };
 
   if( db->flags & SQLITE_InTrans ){
     sqliteSetString(pzErrMsg, "cannot VACUUM from within a transaction", 
@@ -283,13 +257,6 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
   sVac.dbOld = db;
   sVac.dbNew = dbNew;
   sVac.pzErrMsg = pzErrMsg;
-  for(i=0; rc==SQLITE_OK && i<sizeof(zPragma)/sizeof(zPragma[0]); i++){
-    char zBuf[200];
-    assert( strlen(zPragma[i])<100 );
-    sprintf(zBuf, "PRAGMA %s;", zPragma[i]);
-    sVac.zPragma = zPragma[i];
-    rc = sqlite_exec(db, zBuf, vacuumCallback3, &sVac, &zErrMsg);
-  }
   if( rc==SQLITE_OK ){
     rc = sqlite_exec(db, 
       "SELECT type, name, sql FROM sqlite_master "
@@ -298,6 +265,17 @@ int sqliteRunVacuum(char **pzErrMsg, sqlite *db){
       "SELECT type, name, sql FROM sqlite_master "
       "WHERE sql NOT NULL AND type=='view'",
       vacuumCallback1, &sVac, &zErrMsg);
+  }
+  if( rc==SQLITE_OK ){
+    int meta1[SQLITE_N_BTREE_META];
+    int meta2[SQLITE_N_BTREE_META];
+    sqliteBtreeGetMeta(db->aDb[0].pBt, meta1);
+    sqliteBtreeGetMeta(dbNew->aDb[0].pBt, meta2);
+    meta2[1] = meta1[1]+1;
+    meta2[3] = meta1[3];
+    meta2[4] = meta1[4];
+    meta2[6] = meta1[6];
+    rc = sqliteBtreeUpdateMeta(dbNew->aDb[0].pBt, meta2);
   }
   if( rc==SQLITE_OK ){
     rc = sqliteBtreeCopyFile(db->aDb[0].pBt, dbNew->aDb[0].pBt);

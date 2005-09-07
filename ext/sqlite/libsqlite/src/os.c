@@ -830,7 +830,7 @@ int sqliteOsTempFileName(char *zBuf){
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "0123456789";
   int i, j;
-  char *zDir;
+  const char *zDir;
   char zTempPath[SQLITE_TEMPNAME_SIZE];
   if( sqlite_temp_directory==0 ){
     GetTempPath(SQLITE_TEMPNAME_SIZE-30, zTempPath);
@@ -1115,6 +1115,10 @@ int sqliteOsSeek(OsFile *id, off_t offset){
   }
 #endif
 }
+
+#ifdef SQLITE_NOSYNC
+# define fsync(X) 0
+#endif
 
 /*
 ** Make sure all writes to a particular file are committed to disk.

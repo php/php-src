@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   classes. (Dmitry, Michael Wallner)
 - Added "new_link" parameter to mssql_connect(). Bug #34369. (Frank)
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.5 (Ilia)
+- Upgraded SQLite 2 library in ext/sqlite to 2.8.16 (Ilia)
 - Upgraded PCRE library to version 6.2. (Andrei)
 - Upgraded bundled libraries in Windows distribution. (Edin)
   . zlib 1.2.3
