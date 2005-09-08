@@ -504,6 +504,12 @@ PHP_MINIT_FUNCTION(odbc)
 	REGISTER_LONG_CONSTANT("SQL_QUICK", SQL_QUICK, CONST_PERSISTENT | CONST_CS);
 #endif
 
+#if defined(HAVE_IBMDB2) && defined(_AIX)
+	/* atexit() handler in the DB2/AIX library segfaults in PHP CLI */
+	/* DB2NOEXITLIST env variable prevents DB2 from invoking atexit() */
+	putenv("DB2NOEXITLIST=TRUE");
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
