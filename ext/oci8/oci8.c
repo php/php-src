@@ -612,9 +612,9 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Revision", "$Revision$");
 
 	sprintf(buf, "%ld", OCI_G(num_persistent));
-	php_info_print_table_row(2, "Active Persistent Links", buf);
+	php_info_print_table_row(2, "Active Persistent Connections", buf);
 	sprintf(buf, "%ld", OCI_G(num_links));
-	php_info_print_table_row(2, "Active Links", buf);
+	php_info_print_table_row(2, "Active Connections", buf);
 
 #if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
 	php_info_print_table_row(2, "Oracle Version", PHP_OCI8_VERSION );
@@ -1017,7 +1017,7 @@ open:
 			
 			if (OCI_G(max_persistent)!=-1 && OCI_G(num_persistent)>=OCI_G(max_persistent)) {
 				/* all persistent connactions are in use, fallback to non-persistent connection creation */
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Too many open persistent links (%ld)", OCI_G(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Too many open persistent connections (%ld)", OCI_G(num_persistent));
 				alloc_non_persistent = 1;
 			}
 		}
