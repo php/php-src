@@ -1624,12 +1624,13 @@ PHP_FUNCTION(dom_document_save)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len = 0, bytes, format;
+	int file_len = 0, bytes, format, saveempty;
 	dom_object *intern;
 	dom_doc_props *doc_props;
 	char *file;
+	long options = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_document_class_entry, &file, &file_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|l", &id, dom_document_class_entry, &file, &file_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -1644,8 +1645,14 @@ PHP_FUNCTION(dom_document_save)
 
 	doc_props = dom_get_doc_props(intern->document);
 	format = doc_props->formatoutput;
+	if (options & LIBXML_SAVE_NOEMPTYTAG) {
+		saveempty = xmlSaveNoEmptyTags;
+		xmlSaveNoEmptyTags = 1;
+	}
 	bytes = xmlSaveFormatFileEnc(file, docp, NULL, format);
-
+	if (options & LIBXML_SAVE_NOEMPTYTAG) {
+		xmlSaveNoEmptyTags = saveempty;
+	}
 	if (bytes == -1) {
 		RETURN_FALSE;
 	}
@@ -1666,9 +1673,10 @@ PHP_FUNCTION(dom_document_savexml)
 	xmlChar *mem;
 	dom_object *intern, *nodeobj;
 	dom_doc_props *doc_props;
-	int size, format;
+	int size, format, saveempty;
+	long options = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O", &id, dom_document_class_entry, &nodep, dom_node_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
 		return;
 	}
 
@@ -1689,8 +1697,14 @@ PHP_FUNCTION(dom_document_savexml)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
-
+		if (options & LIBXML_SAVE_NOEMPTYTAG) {
+			saveempty = xmlSaveNoEmptyTags;
+			xmlSaveNoEmptyTags = 1;
+		}
 		xmlNodeDump(buf, docp, node, 0, format);
+		if (options & LIBXML_SAVE_NOEMPTYTAG) {
+			xmlSaveNoEmptyTags = saveempty;
+		}
 		mem = (xmlChar*) xmlBufferContent(buf);
 		if (!mem) {
 			xmlBufferFree(buf);
@@ -1699,8 +1713,15 @@ PHP_FUNCTION(dom_document_savexml)
 		RETVAL_STRING(mem, 1);
 		xmlBufferFree(buf);
 	} else {
+		if (options & LIBXML_SAVE_NOEMPTYTAG) {
+			saveempty = xmlSaveNoEmptyTags;
+			xmlSaveNoEmptyTags = 1;
+		}
 		/* Encoding is handled from the encoding property set on the document */
 		xmlDocDumpFormatMemory(docp, &mem, &size, format);
+		if (options & LIBXML_SAVE_NOEMPTYTAG) {
+			xmlSaveNoEmptyTags = saveempty;
+		}
 		if (!size) {
 			RETURN_FALSE;
 		}
