@@ -763,8 +763,6 @@ static void copy_u_zend_constant(zend_constant *c)
 	c->name = (char*)zend_ustrndup((UChar*)c->name, c->name_len - 1);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
-	} else {
-		zval_copy_persistent(&c->value);
 	}
 }
 
@@ -1079,7 +1077,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 
 	if (global_u_constants_table) {
 		EG(global_u_constants_table) = (HashTable *) malloc(sizeof(HashTable));
-		zend_u_hash_init_ex(EG(global_u_constants_table), global_u_constants_table->nNumOfElements, NULL, ZEND_U_CONSTANT_DTOR, 1, 1, 0);
+		zend_u_hash_init_ex(EG(global_u_constants_table), global_u_constants_table->nNumOfElements, NULL, ZEND_CONSTANT_DTOR, 1, 1, 0);
 		zend_hash_copy(EG(global_u_constants_table), global_u_constants_table, (copy_ctor_func_t) copy_u_zend_constant, &tmp_const, sizeof(zend_constant));
 	} else {
 		EG(global_u_constants_table) = NULL;
