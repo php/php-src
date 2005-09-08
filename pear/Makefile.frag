@@ -10,7 +10,7 @@ install-pear-installer: $(top_builddir)/sapi/cli/php
 
 install-pear:
 	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
-	@if $(srcdir)/install-pear.phar $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
+	@if test -f $(srcdir)/install-pear.phar && $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		$(MAKE) -s install-pear-installer; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
