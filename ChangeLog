@@ -1,3 +1,129 @@
+2005-09-07  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_1)
+      pear/install-pear.phar:
+      install-pear.phar removed -> moved to http://pear.php.net/install-pear.phar
+
+    * (PHP_5_1)
+      pear/install-pear.txt:
+      attempt to make new instructions clearer
+
+    * (PHP_5_1)
+      pear/Makefile.frag:
+      change makefile to use phar and not source, if present
+
+2005-09-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/openssl/xp_ssl.c
+      ext/openssl/xp_ssl.c
+      ext/openssl/xp_ssl.c:
+      Fixed memory allocation bug
+
+2005-09-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/src/attach.c
+      ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/btree.c
+      ext/sqlite/libsqlite/src/btree.h
+      ext/sqlite/libsqlite/src/btree_rb.c
+      ext/sqlite/libsqlite/src/build.c
+      ext/sqlite/libsqlite/src/copy.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/delete.c
+      ext/sqlite/libsqlite/src/encode.c
+      ext/sqlite/libsqlite/src/expr.c
+      ext/sqlite/libsqlite/src/func.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/insert.c
+      ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/pager.h
+      ext/sqlite/libsqlite/src/parse.y
+      ext/sqlite/libsqlite/src/pragma.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/random.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/sqlite.h.in
+      ext/sqlite/libsqlite/src/sqlite.w32.h
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/update.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/vacuum.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbe.h
+      ext/sqlite/libsqlite/src/where.c:
+      MFH: Upgraded SQLite 2 library in ext/sqlite to 2.8.16
+
+    * ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/src/attach.c
+      ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/btree.c
+      ext/sqlite/libsqlite/src/btree.h
+      ext/sqlite/libsqlite/src/btree_rb.c
+      ext/sqlite/libsqlite/src/build.c
+      ext/sqlite/libsqlite/src/copy.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/delete.c
+      ext/sqlite/libsqlite/src/encode.c
+      ext/sqlite/libsqlite/src/expr.c
+      ext/sqlite/libsqlite/src/func.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/insert.c
+      ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/pager.h
+      ext/sqlite/libsqlite/src/parse.y
+      ext/sqlite/libsqlite/src/pragma.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/random.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/sqlite.h.in
+      ext/sqlite/libsqlite/src/sqlite.w32.h
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/update.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/vacuum.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbe.h
+      ext/sqlite/libsqlite/src/where.c:
+      Upgraded sqlite2 lib to 2.8.16
+
+2005-09-07  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      add Andi & Wez as lead maintainers and make myself lead too
+
+    * ext/oci8/package.xml:
+      I doubt that all these people are going to develop it in PECL,
+      so remove them and fix those complains about non-existing users.
+
+    * ext/oci8/package.xml:
+      prepare to PECL release
+
+    * (RELEASE_1_1)
+      ext/oci8/oci8_interface.c:
+      don't try to fetch resource when there is 0 args
+
+2005-09-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/string.c:
+      Fixed unicode support for substr_count()
+
+2005-09-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      TODO:
+      Updated TODO
+
 2005-09-06  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/php_oci8_int.h:
