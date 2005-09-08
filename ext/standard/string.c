@@ -2902,8 +2902,12 @@ PHP_FUNCTION(ord)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_text_ex(str);
 
+	if (Z_TYPE_PP(str) == IS_BINARY) {
+		RETURN_LONG((unsigned char) Z_STRVAL_PP(str)[0]);
+	}
+
+	convert_to_text_ex(str);
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
 		RETURN_LONG(zend_get_codepoint_at(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str), 0));
 	} else {
