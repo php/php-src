@@ -2626,9 +2626,16 @@ PHPAPI int32_t php_do_substr_replace(void **result, zval **str, zval **repl, int
 	void *buf;
 	int32_t buf_len, idx;
 	UChar ch;
+	int repl_len;
+
+	if (repl) {
+		repl_len = Z_UNILEN_PP(repl);
+	} else {
+		repl_len = 0;
+	}
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		buf = emalloc(UBYTES(Z_USTRLEN_PP(str) -l + Z_USTRLEN_PP(repl) + 1));
+		buf = emalloc(UBYTES(Z_USTRLEN_PP(str) -l + repl_len + 1));
 
 		/* buf_len is codept count here */
 		buf_len = 0; idx = 0;
@@ -2637,8 +2644,8 @@ PHPAPI int32_t php_do_substr_replace(void **result, zval **str, zval **repl, int
 			buf_len += zend_codepoint_to_uchar(ch, (UChar *)buf + buf_len);
 		}
 		if (repl != NULL) {
-			u_memcpy((UChar *)buf + buf_len, Z_USTRVAL_PP(repl), Z_USTRLEN_PP(repl));
-			buf_len += Z_USTRLEN_PP(repl);
+			u_memcpy((UChar *)buf + buf_len, Z_USTRVAL_PP(repl), repl_len);
+			buf_len += repl_len;
 		}
 		U16_FWD_N(Z_USTRVAL_PP(str), idx, Z_USTRLEN_PP(str), l);
 		u_memcpy((UChar *)buf + buf_len, Z_USTRVAL_PP(str) + idx, Z_USTRLEN_PP(str) - idx);
@@ -2648,14 +2655,14 @@ PHPAPI int32_t php_do_substr_replace(void **result, zval **str, zval **repl, int
 		buf = erealloc(buf, UBYTES(buf_len + 1));
 	} else {
 		/* buf_len is char count here */
-		buf_len = Z_STRLEN_PP(str) - l + Z_STRLEN_PP(repl);
+		buf_len = Z_STRLEN_PP(str) - l + repl_len;
 		buf = emalloc(buf_len + 1);
 
 		memcpy(buf, Z_STRVAL_PP(str), f);
-		if (repl != NULL ) {
-			memcpy((char *)buf + f, Z_STRVAL_PP(repl), Z_STRLEN_PP(repl));
+		if (repl != NULL) {
+			memcpy((char *)buf + f, Z_STRVAL_PP(repl), repl_len);
 		}
-		memcpy((char *)buf + f + Z_STRLEN_PP(repl), Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
+		memcpy((char *)buf + f + repl_len, Z_STRVAL_PP(str) + f + l, Z_STRLEN_PP(str) - f - l);
 
 		*((char *)buf + buf_len) = '\0';
 	}
@@ -2706,11 +2713,7 @@ PHP_FUNCTION(substr_replace)
 		}
 	} else {
 		if (Z_TYPE_PP(str) != IS_ARRAY) {
-			if (Z_TYPE_PP(str) == IS_UNICODE) {
-				l = Z_USTRLEN_PP(str);
-			} else {
-				l = Z_STRLEN_PP(str);
-			}
+			l = Z_UNILEN_PP(str);
 		}
 	}
 
@@ -2744,7 +2747,7 @@ PHP_FUNCTION(substr_replace)
 				tmp_repl = repl;
 			}
 
-			if (Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl))
+			if (tmp_repl && Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl))
 				php_unify_string_types(str, tmp_repl TSRMLS_CC);
 			php_adjust_limits(str, &f, &l);
 			result_len = php_do_substr_replace(&result, str, tmp_repl, f, l TSRMLS_CC);
@@ -2795,20 +2798,13 @@ PHP_FUNCTION(substr_replace)
 					l = Z_LVAL_PP(tmp_len);
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(len), &pos_len);
 				} else {
-					if (Z_TYPE_PP(tmp_str) == IS_UNICODE) {
-						l = Z_USTRLEN_PP(tmp_str);
-					} else {
-						l = Z_STRLEN_PP(tmp_str);
-					}
+					l = Z_UNILEN_PP(tmp_str);
 				}
 			} else if (argc > 3) {
 				/* 'l' parsed & set at top of funcn */
+				l = Z_LVAL_PP(len);
 			} else {
-				if (Z_TYPE_PP(tmp_str) == IS_UNICODE) {
-					l = Z_USTRLEN_PP(tmp_str);
-				} else {
-					l = Z_STRLEN_PP(tmp_str);
-				}
+				l = Z_UNILEN_PP(tmp_str);
 			}
 
 			if (Z_TYPE_PP(repl) == IS_ARRAY) {
@@ -2824,7 +2820,7 @@ PHP_FUNCTION(substr_replace)
 				tmp_repl = repl;
 			}
 
-			if (Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl))
+			if (tmp_repl && Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl))
 				php_unify_string_types(tmp_str, tmp_repl TSRMLS_CC);
 			php_adjust_limits(tmp_str, &f, &l);
 			result_len = php_do_substr_replace(&result, tmp_str, tmp_repl, f, l TSRMLS_CC);
