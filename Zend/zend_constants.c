@@ -214,19 +214,18 @@ ZEND_API void zend_register_string_constant(char *name, uint name_len, char *str
 }
 
 
-ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
+ZEND_API int zend_u_get_constant(zend_uchar type, void *name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
 	int retval = 1;
 	char *lookup_name;
 	char *colon;
-	zend_uchar type = UG(unicode)?IS_UNICODE:IS_STRING;
 
 	if ((UG(unicode) && (colon = (char*)u_memchr((UChar*)name, ':', name_len)) && ((UChar*)colon)[1] == ':') ||
 	    (!UG(unicode) && (colon = memchr(name, ':', name_len)) && colon[1] == ':')) {
 		/* class constant */
 		zend_class_entry **ce = NULL, *scope;
-		int class_name_len = UG(unicode)?((colon-name)/sizeof(UChar)):colon-name;
+		int class_name_len = UG(unicode)?((colon-(char*)name)/sizeof(UChar)):colon-(char*)name;
 		int const_name_len = name_len - class_name_len - 2;
 		char *constant_name = colon + (UG(unicode)?UBYTES(2):2);
 		zval **ret_constant;
@@ -310,6 +309,10 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	return retval;
 }
 
+ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC)
+{
+	return zend_u_get_constant(IS_STRING, name, name_len, result TSRMLS_CC);
+}
 
 ZEND_API int zend_u_register_constant(zend_uchar type, zend_constant *c TSRMLS_DC)
 {

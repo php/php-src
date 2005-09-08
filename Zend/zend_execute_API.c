@@ -439,7 +439,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 		refcount = p->refcount;
 		is_ref = p->is_ref;
 
-		if (!zend_get_constant(Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value TSRMLS_CC)) {
+		if (!zend_u_get_constant(UG(unicode)?IS_UNICODE:IS_STRING, Z_UNIVAL_P(p), Z_UNILEN_P(p), &const_value TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",
 				Z_UNIVAL_P(p),
 				Z_UNIVAL_P(p));
@@ -478,7 +478,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 				zend_hash_move_forward(p->value.ht);
 				continue;
 			}
-			if (!zend_get_constant(str_index, str_index_len-1, &const_value TSRMLS_CC)) {
+			if (!zend_u_get_constant(UG(unicode)?IS_UNICODE:IS_STRING, str_index, str_index_len-1, &const_value TSRMLS_CC)) {
 				zend_error(E_NOTICE, "Use of undefined constant %v - assumed '%v'",	str_index, str_index);
 				zend_hash_move_forward(p->value.ht);
 				continue;
