@@ -40,6 +40,7 @@
 #include <libxml/tree.h>
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
+#include <libxml/xmlsave.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #endif
@@ -65,9 +66,7 @@ int libxml_globals_id;
 PHP_LIBXML_API php_libxml_globals libxml_globals;
 #endif
 
-#if LIBXML_VERSION >= 20600
 zend_class_entry *libxmlerror_class_entry;
-#endif
 
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_LIBXML
@@ -546,9 +545,7 @@ PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC) {
 
 PHP_MINIT_FUNCTION(libxml)
 {
-#if LIBXML_VERSION >= 20600
 	zend_class_entry ce;
-#endif
 
 	php_libxml_initialize();
 
@@ -563,7 +560,6 @@ PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_DOTTED_VERSION",	LIBXML_DOTTED_VERSION,	CONST_CS | CONST_PERSISTENT);
 
-#if LIBXML_VERSION >= 20600
 	/* For use with loading xml */
 	REGISTER_LONG_CONSTANT("LIBXML_NOENT",		XML_PARSE_NOENT,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_DTDLOAD",	XML_PARSE_DTDLOAD,		CONST_CS | CONST_PERSISTENT);
@@ -576,6 +572,11 @@ PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_NSCLEAN",	XML_PARSE_NSCLEAN,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NOCDATA",	XML_PARSE_NOCDATA,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NONET",		XML_PARSE_NONET,		CONST_CS | CONST_PERSISTENT);
+#if LIBXML_VERSION >= 20621
+	REGISTER_LONG_CONSTANT("LIBXML_COMPACT",	XML_PARSE_COMPACT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOXMLDECL",	XML_SAVE_NO_DECL,		CONST_CS | CONST_PERSISTENT);
+#endif
+	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
 
 	/* Error levels */
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_NONE",		XML_ERR_NONE,		CONST_CS | CONST_PERSISTENT);
@@ -585,7 +586,6 @@ PHP_MINIT_FUNCTION(libxml)
 
 	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
 	libxmlerror_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-#endif
 
 	return SUCCESS;
 }
@@ -657,7 +657,6 @@ PHP_FUNCTION(libxml_set_streams_context)
    Disable libxml errors and allow user to fetch error information as needed */
 PHP_FUNCTION(libxml_use_internal_errors)
 {
-#if LIBXML_VERSION >= 20600
 	xmlStructuredErrorFunc current_handler;
 	int use_errors=0, retval;
 
@@ -691,16 +690,12 @@ PHP_FUNCTION(libxml_use_internal_errors)
 		}
 	}
 	RETURN_BOOL(retval);
-#else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
-#endif
 }
 
 /* {{{ proto object libxml_get_last_error() 
    Retrieve last error from libxml */
 PHP_FUNCTION(libxml_get_last_error)
 {
-#if LIBXML_VERSION >= 20600
 	xmlErrorPtr error;
 
 	error = xmlGetLastError();
@@ -724,9 +719,6 @@ PHP_FUNCTION(libxml_get_last_error)
 	} else {
 		RETURN_FALSE;
 	}
-#else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
-#endif
 }
 /* }}} */
 
@@ -734,7 +726,6 @@ PHP_FUNCTION(libxml_get_last_error)
    Retrieve array of errors */
 PHP_FUNCTION(libxml_get_errors)
 {
-#if LIBXML_VERSION >= 20600
 	
 	xmlErrorPtr error;
 
@@ -770,9 +761,6 @@ PHP_FUNCTION(libxml_get_errors)
 			error = zend_llist_get_next(LIBXML(error_list));
 		}
 	}
-#else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
-#endif
 }
 /* }}} */
 
@@ -780,14 +768,10 @@ PHP_FUNCTION(libxml_get_errors)
     Clear last error from libxml */
 PHP_FUNCTION(libxml_clear_errors)
 {
-#if LIBXML_VERSION >= 20600
 	xmlResetLastError();
 	if (LIBXML(error_list)) {
 		zend_llist_clean(LIBXML(error_list));
 	}
-#else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Libxml 2.6 or higher is required");
-#endif
 }
 /* }}} */
 
