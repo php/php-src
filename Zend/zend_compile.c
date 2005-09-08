@@ -1791,6 +1791,13 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 	long catch_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
 	
+	if (catch_op_number > 0) {
+		opline = &CG(active_op_array)->opcodes[catch_op_number-1];
+		if (opline->opcode == ZEND_FETCH_CLASS) {
+			opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
+		}
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
 	opline->op1 = *catch_class;

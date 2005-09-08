@@ -2,8 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 6.0
 - Unicode support. (Andrei, Dmitriy, et al)
-- Changed "instanceof" operator, is_a() and is_subclass_of() functions to not
-  call __autoload(). (Dmitry)
+- Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
+  functions to not call __autoload(). (Dmitry)
 - Added optional parameter to http_build_query() to allow specification of 
   string separator.
 - cURL improvements: (Ilia)
