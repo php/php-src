@@ -5394,10 +5394,7 @@ PHP_FUNCTION(str_pad)
 	if (input_type == IS_UNICODE) {
 		/* For Unicode, num_pad_chars/pad_length is number of codepoints */
 		i = 0; input_codepts = 0;
-		while (i < input_len) {
-			U16_FWD_1((UChar *)input, i, input_len);
-			input_codepts++;
-		}
+		input_codepts = u_countChar32((UChar *)input, input_len);
 		num_pad_chars = pad_length - input_codepts;
 	} else {
 		num_pad_chars = pad_length - input_len;
@@ -5439,7 +5436,7 @@ PHP_FUNCTION(str_pad)
 	}
 
 	if (input_type == IS_UNICODE) {
-		result = emalloc(UBYTES(input_len + num_pad_chars*2 + 1));
+		result = eumalloc(input_len + num_pad_chars*2 + 1);
 	} else {
 		result = emalloc(input_len + num_pad_chars + 1);
 	}
@@ -5481,7 +5478,7 @@ PHP_FUNCTION(str_pad)
 			result_len += zend_codepoint_to_uchar(ch, (UChar *)result + result_len);
 		}
 		*((UChar *)result + result_len) = 0;
-		result = erealloc(result, UBYTES(result_len+1));
+		result = eurealloc(result, result_len+1);
 	} else {
 		for (i = 0; i < left_pad; i++)
 			*((char *)result + result_len++) = *((char *)padstr + (i % padstr_len));
