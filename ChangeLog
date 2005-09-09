@@ -1,3 +1,91 @@
+2005-09-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/sqlite/sqlite.c:
+      MFH: Allow retrieval of query parse errors from SQLite.
+
+    * ext/sqlite/sqlite.c:
+      Allow retrieval of query parse errors from SQLite.
+      
+
+2005-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c:
+      Avoid unnecessary copying/freeing
+
+2005-09-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/curl/multi.c:
+      MFH: Fixed bug #34420 (Possible crash inside curl_multi_remove_handle()).
+
+    * ext/curl/multi.c:
+      Fixed bug #34420 (Possible crash inside curl_multi_remove_handle()).
+
+2005-09-08  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/string.c:
+      - Make ord() work on binary strings too.
+
+2005-09-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8.c:
+      use "connections" instead of "links" everywhere to avoid possible confusion
+
+2005-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/substr_replace.phpt:
+      Fixed craches in substr_replace()
+
+2005-09-08  Antony Dovgal  <antony@zend.com>
+
+    * ext/iconv/iconv.c:
+      fix phpinfo() output for iconv extension
+      (convert unicode values to string before outputting them)
+
+2005-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ext/standard/basic_functions.c:
+      Unicode support for PHP constants
+
+2005-09-08  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      add save options parameter
+
+2005-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/catch.phpt:
+      catch operator shouldn't call __autoload () too
+
+2005-09-08  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_5_1)
+      pear/Makefile.frag:
+      That line made no sense
+
+2005-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.c:
+      Fixed crash on AIX
+
+2005-09-08  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode impl of substr_replace()
+
 2005-09-07  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_1)
