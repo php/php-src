@@ -1,3 +1,20 @@
+2005-09-08  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend.c:
+      Avoid unnecessary copying/freeing
+
+    * zend_builtin_functions.c
+      zend_constants.c
+      zend_constants.h
+      zend_execute_API.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      Unicode support for PHP constants
+
+    * zend_compile.c
+      tests/catch.phpt:
+      catch operator shouldn't call __autoload () too
+
 2005-09-02  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * zend_ini.c:
