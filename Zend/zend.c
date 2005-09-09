@@ -221,6 +221,7 @@ static HashTable *global_u_function_table = NULL;
 static HashTable *global_u_class_table = NULL;
 static HashTable *global_u_constants_table = NULL;
 static HashTable *global_u_auto_globals_table = NULL;
+static HashTable *global_persistent_list = NULL;
 
 ZEND_API zend_utility_values zend_uv;
 
@@ -1097,6 +1098,20 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
 	zend_ini_shutdown(TSRMLS_C);
+	if (&executor_globals->persistent_list != global_persistent_list) {
+		zend_destroy_rsrc_list(&executor_globals->persistent_list TSRMLS_CC);
+	}
+	if (executor_globals->global_constants_table != global_constants_table &&
+	    executor_globals->global_u_constants_table != global_u_function_table) {
+		if (executor_globals->global_constants_table) {
+			zend_hash_destroy(executor_globals->global_constants_table);
+			free(executor_globals->global_constants_table);
+		}
+		if (executor_globals->global_u_constants_table) {
+			zend_hash_destroy(executor_globals->global_u_constants_table);
+			free(executor_globals->global_u_constants_table);
+		}
+	}
 }
 
 
@@ -1296,6 +1311,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
+	global_persistent_list = &EG(persistent_list);
 #endif
 
 	if (start_builtin_functions) {
@@ -1370,6 +1386,7 @@ void zend_post_startup(TSRMLS_D)
 	compiler_globals_ctor(compiler_globals, tsrm_ls);
 	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
+	global_persistent_list = &EG(persistent_list);
 	zend_new_thread_end_handler(tsrm_thread_id() TSRMLS_CC);
 #endif
 }
@@ -1379,9 +1396,6 @@ void zend_shutdown(TSRMLS_D)
 {
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
-#endif
-#ifndef ZTS
-	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #endif
 	zend_hash_graceful_reverse_destroy(&module_registry);
 
@@ -1404,16 +1418,6 @@ void zend_shutdown(TSRMLS_D)
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
 
-#ifdef ZTS
-	if (EG(global_constants_table)) {
-		zend_hash_destroy(EG(global_constants_table));
-		free(EG(global_constants_table));
-	}
-	if (EG(global_u_constants_table)) {
-		zend_hash_destroy(EG(global_u_constants_table));
-		free(EG(global_u_constants_table));
-	}
-#endif
 	zend_hash_destroy(global_constants_table);
 	free(global_constants_table);
 	if (global_u_constants_table) {
@@ -1429,11 +1433,18 @@ void zend_shutdown(TSRMLS_D)
 	if (global_u_class_table) {
 		free(global_u_class_table);
 	}
+	if (global_persistent_list) {
+		zend_destroy_rsrc_list(global_persistent_list TSRMLS_CC);
+	}
 #ifdef ZTS
-	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	global_function_table = NULL;
+	global_u_function_table = NULL;
 	global_class_table = NULL;
+	global_u_class_table = NULL;
 	global_auto_globals_table = NULL;
+	global_u_auto_globals_table = NULL;
+	global_constants_table = NULL;
+	global_u_constants_table = NULL;
 #else
 	unicode_globals_dtor(&unicode_globals TSRMLS_CC);
 #endif
