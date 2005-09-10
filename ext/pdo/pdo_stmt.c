@@ -1393,6 +1393,36 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	return really_register_bound_param(&param, stmt, is_param TSRMLS_CC);
 } /* }}} */
 
+/* {{{ proto bool PDOStatement::bindValue(mixed $paramno, mixed $param [, int $type ])
+   bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
+static PHP_METHOD(PDOStatement, bindValue)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	struct pdo_bound_param_data param = {0};
+
+	param.paramno = -1;
+	param.param_type = PDO_PARAM_STR;
+
+	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+			"lz/|l", &param.paramno, &param.parameter, &param.param_type)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|l", &param.name,
+				&param.namelen, &param.parameter, &param.param_type)) {
+			RETURN_FALSE;
+		}	
+	}
+
+	if (param.paramno > 0) {
+		--param.paramno; /* make it zero-based internally */
+	} else if (!param.name) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "Columns/Parameters are 1-based" TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(really_register_bound_param(&param, stmt, TRUE TSRMLS_CC));
+}
+/* }}} */
+
+
 /* {{{ proto bool PDOStatement::bindParam(mixed $paramno, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
    bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
 static PHP_METHOD(PDOStatement, bindParam)
@@ -1835,6 +1865,7 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, fetch,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindParam,		second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindColumn,	second_arg_force_ref,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, bindValue,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchColumn,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
