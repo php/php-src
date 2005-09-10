@@ -711,13 +711,20 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				}
 				
 				if (ce && ce != PHP_IC_ENTRY &&
-				    zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
+						zend_hash_exists(&ce->function_table, "__sleep", sizeof("__sleep"))) {
 					INIT_PZVAL(&fname);
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
 					res = call_user_function_ex(CG(function_table), struc, &fname, 
 												&retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 
 					if (res == SUCCESS) {
+						if (EG(exception)) {
+							/* allow exceptions to bubble up */
+							if (retval_ptr) {
+								zval_ptr_dtor(&retval_ptr);
+							}
+							return;
+						}
 						if (retval_ptr) {
 							if (HASH_OF(retval_ptr)) {
 								php_var_serialize_class(buf, struc, retval_ptr, 
