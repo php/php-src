@@ -1646,6 +1646,7 @@ fail_out:
 		case PDO_FETCH_BOTH:
 		case PDO_FETCH_OBJ:
 		case PDO_FETCH_BOUND:
+		case PDO_FETCH_NAMED:
 			break;
 
 		case PDO_FETCH_COLUMN:
@@ -1713,7 +1714,11 @@ fail_out:
 			break;
 		
 		default:
-			pdo_raise_impl_error(stmt->dbh, stmt, "22003", "mode is out of range" TSRMLS_CC);
+			if ((mode & ~PDO_FETCH_FLAGS) < PDO_FETCH__MAX && (mode & ~PDO_FETCH_FLAGS) >= 0) {
+				pdo_raise_impl_error(stmt->dbh, stmt, "22003", "unhandled mode; this is a PDO bug, please report it" TSRMLS_CC);
+			} else {
+				pdo_raise_impl_error(stmt->dbh, stmt, "22003", "mode is out of range" TSRMLS_CC);
+			}
 			return FAILURE;
 	}
 
