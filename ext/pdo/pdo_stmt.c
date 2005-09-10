@@ -1859,6 +1859,21 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 }
 /* }}} */
 
+/* {{{ proto int PDOStatement::__wakeup()
+   Prevents use of a PDOStatement instance that has been unserialized */
+static PHP_METHOD(PDOStatement, __wakeup)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "You cannot serialize or unserialize PDOStatement instances");
+}
+/* }}} */
+
+/* {{{ proto int PDOStatement::__sleep()
+   Prevents serialization of a PDOStatement instance */
+static PHP_METHOD(PDOStatement, __sleep)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "You cannot serialize or unserialize PDOStatement instances");
+}
+/* }}} */
 
 function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
@@ -1880,6 +1895,8 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, nextRowset,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, closeCursor,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, debugDumpParams, NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, __wakeup,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	PHP_ME(PDOStatement, __sleep,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
