@@ -3,5 +3,5 @@
 #define PHP_MAJOR_VERSION 5
 #define PHP_MINOR_VERSION 1
 #define PHP_RELEASE_VERSION 0
-#define PHP_EXTRA_VERSION "-dev"
-#define PHP_VERSION "5.1.0-dev"
+#define PHP_EXTRA_VERSION "RC2-dev"
+#define PHP_VERSION "5.1.0RC2-dev"
