@@ -960,6 +960,22 @@ static PHP_METHOD(PDO, quote)
 }
 /* }}} */
 
+/* {{{ proto int PDO::__wakeup()
+   Prevents use of a PDO instance that has been unserialized */
+static PHP_METHOD(PDO, __wakeup)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "You cannot serialize or unserialize PDO instances");
+}
+/* }}} */
+
+/* {{{ proto int PDO::__sleep()
+   Prevents serialization of a PDO instance */
+static PHP_METHOD(PDO, __sleep)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "You cannot serialize or unserialize PDO instances");
+}
+/* }}} */
+
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
@@ -975,6 +991,8 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, quote,			NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, __wakeup,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	PHP_ME(PDO, __sleep,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
