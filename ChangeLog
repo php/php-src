@@ -1,3 +1,45 @@
+2005-09-09  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - str_pad(): Use u_countChar32() for codepoint counting,
+      eumalloc/eurealloc() for Unicode mallocs.
+
+2005-09-09  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_statement.c:
+      fix problem appearing when binding empty values
+
+2005-09-09  Derick Rethans  <php@derickrethans.nl>
+
+    * unicode-progress.txt:
+      - Added Rollands latest upgrades.
+
+2005-09-09  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend.c:
+      Fixed huge memory leaks in ZTS mode
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/tests/catch.phpt
+      ZendEngine2/tests/instanceof.phpt
+      ZendEngine2/tests/is_a.phpt:
+      Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
+      functions to not call __autoload().
+
+    * ZendEngine2/tests/is_a.phpt
+      ZendEngine2/tests/is_a.phpt:
+      
+      MFH (is_sublass_of("A","B") should call __autoload() for "A" and "B")
+
+    * ZendEngine2/zend_builtin_functions.c:
+      MFH (is_sublass_of("A","B") should call __autoload() for "A" and "B")
+
 2005-09-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
