@@ -210,8 +210,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 							plc->freeq = 0;
 							break;
 
-						case IS_BOOL:
-							convert_to_long(param->parameter);
 						case IS_LONG:
 						case IS_DOUBLE:
 							convert_to_string(param->parameter);
@@ -220,6 +218,8 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 							plc->freeq = 0;
 							break;
 
+						case IS_BOOL:
+							convert_to_long(param->parameter);
 						default:
 							convert_to_string(param->parameter);
 							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
