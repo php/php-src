@@ -424,7 +424,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	dbname = vars[1].optval;
-    host = vars[2].optval;	
+	host = vars[2].optval;	
 	if(vars[3].optval) {
 		port = atoi(vars[3].optval);
 	}

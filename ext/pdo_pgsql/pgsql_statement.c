@@ -203,6 +203,10 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							Z_TYPE_P(param->parameter) == IS_NULL) {
 						S->param_values[param->paramno] = NULL;
 						S->param_lengths[param->paramno] = 0;
+					} else if (Z_TYPE_P(param->parameter) == IS_BOOL) {
+						S->param_values[param->paramno] = Z_BVAL_P(param->parameter) ? "t" : "f";
+						S->param_lengths[param->paramno] = 1;
+						S->param_formats[param->paramno] = 1;
 					} else {
 						convert_to_string(param->parameter);
 						S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);

@@ -457,7 +457,11 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	char *func_name;
 	int func_name_len;
 	long argc = -1;
+#ifdef IS_UNICODE
 	zval cbname;
+#else
+	char *cbname;
+#endif
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -470,11 +474,20 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!zend_is_callable(callback, 0, &cbname)) {
+#ifdef IS_UNICODE
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
 		zval_dtor(&cbname);
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
+		efree(cbname);
+#endif
 		RETURN_FALSE;
 	}
+#ifdef IS_UNICODE
 	zval_dtor(&cbname);
+#else
+	efree(cbname);
+#endif
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -528,7 +541,11 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	char *func_name;
 	int func_name_len;
 	long argc = -1;
+#ifdef IS_UNICODE
 	zval cbname;
+#else
+	char *cbname;
+#endif
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
@@ -541,17 +558,35 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!zend_is_callable(step_callback, 0, &cbname)) {
+#ifdef IS_UNICODE
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
 		zval_dtor(&cbname);
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
+		efree(cbname);
+#endif
 		RETURN_FALSE;
 	}
+#ifdef IS_UNICODE
 	zval_dtor(&cbname);
+#else
+	efree(cbname);
+#endif
 	if (!zend_is_callable(fini_callback, 0, &cbname)) {
+#ifdef IS_UNICODE
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%R' is not callable", Z_TYPE(cbname), Z_UNIVAL(cbname));
 		zval_dtor(&cbname);
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
+		efree(cbname);
+#endif
 		RETURN_FALSE;
 	}
+#ifdef IS_UNICODE
 	zval_dtor(&cbname);
+#else
+	efree(cbname);
+#endif
 	
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
