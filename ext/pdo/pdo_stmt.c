@@ -432,21 +432,23 @@ static PHP_METHOD(PDOStatement, execute)
 }
 /* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno TSRMLS_DC) /* {{{ */
+static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *type_override TSRMLS_DC) /* {{{ */
 {
 	struct pdo_column_data *col;
 	char *value = NULL;
 	unsigned long value_len = 0;
 	int caller_frees = 0;
+	int type;
 
 	col = &stmt->columns[colno];
+	type = type_override ? PDO_PARAM_TYPE(*type_override) : PDO_PARAM_TYPE(col->param_type);
 
 	value = NULL;
 	value_len = 0;
 
 	stmt->methods->get_col(stmt, colno, &value, &value_len, &caller_frees TSRMLS_CC);
 
-	switch (PDO_PARAM_TYPE(col->param_type)) {
+	switch (type) {
 		case PDO_PARAM_INT:
 			if (value && value_len == sizeof(long)) {
 				ZVAL_LONG(dest, *(long*)value);
@@ -554,7 +556,7 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
 				zval_dtor(param->parameter);
 
 				/* set new value */
-				fetch_value(stmt, param->parameter, param->paramno TSRMLS_CC);
+				fetch_value(stmt, param->parameter, param->paramno, &param->param_type TSRMLS_CC);
 
 				/* TODO: some smart thing that avoids duplicating the value in the
 				 * general loop below.  For now, if you're binding output columns,
@@ -778,7 +780,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 
 			case PDO_FETCH_COLUMN:
 				if (stmt->fetch.column >= 0 && stmt->fetch.column < stmt->column_count) {
-					fetch_value(stmt, return_value, stmt->fetch.column TSRMLS_CC);
+					fetch_value(stmt, return_value, stmt->fetch.column, NULL TSRMLS_CC);
 					if (!return_all) {
 						return 1;
 					} else {
@@ -802,7 +804,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					do_fetch_opt_finish(stmt, 0 TSRMLS_CC);
 
 					INIT_PZVAL(&val);
-					fetch_value(stmt, &val, i++ TSRMLS_CC);
+					fetch_value(stmt, &val, i++, NULL TSRMLS_CC);
 					if (Z_TYPE(val) != IS_NULL) {
 						convert_to_string(&val);
 						if (zend_lookup_class(Z_STRVAL(val), Z_STRLEN(val), &cep TSRMLS_CC) == FAILURE) {
@@ -855,7 +857,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 		
 		if (return_all) {
 			INIT_PZVAL(&grp_val);
-			fetch_value(stmt, &grp_val, i TSRMLS_CC);
+			fetch_value(stmt, &grp_val, i, NULL TSRMLS_CC);
 			convert_to_string(&grp_val);
 			if (how == PDO_FETCH_COLUMN) {
 				i = stmt->column_count; /* no more data to fetch */
@@ -867,7 +869,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 		for (idx = 0; i < stmt->column_count; i++, idx++) {
 			zval *val;
 			MAKE_STD_ZVAL(val);
-			fetch_value(stmt, val, i TSRMLS_CC);
+			fetch_value(stmt, val, i, NULL TSRMLS_CC);
 
 			switch (how) {
 				case PDO_FETCH_ASSOC:
@@ -1216,7 +1218,7 @@ static PHP_METHOD(PDOStatement, fetchColumn)
 		RETURN_FALSE;
 	}
 
-	fetch_value(stmt, return_value, col_n TSRMLS_CC);
+	fetch_value(stmt, return_value, col_n, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -2223,7 +2225,7 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 		
 	if (Z_TYPE_P(member) == IS_LONG) {
 		if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
-			fetch_value(stmt, return_value, Z_LVAL_P(member) TSRMLS_CC);
+			fetch_value(stmt, return_value, Z_LVAL_P(member), NULL TSRMLS_CC);
 		}
 	} else {
 		convert_to_string(member);
@@ -2231,7 +2233,7 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 		 * numbers */
 		for (colno = 0; colno < stmt->column_count; colno++) {
 			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-				fetch_value(stmt, return_value, colno TSRMLS_CC);
+				fetch_value(stmt, return_value, colno, NULL TSRMLS_CC);
 				break;
 			}
 		}
@@ -2288,7 +2290,7 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 	for (i = 0; i < stmt->column_count; i++) {
 		zval *val;
 		MAKE_STD_ZVAL(val);
-		fetch_value(stmt, val, i TSRMLS_CC);
+		fetch_value(stmt, val, i, NULL TSRMLS_CC);
 
 		add_assoc_zval(tmp, stmt->columns[i].name, val);
 	}
