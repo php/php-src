@@ -1990,7 +1990,9 @@ void pdo_stmt_init(TSRMLS_D)
 	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+#if no_crazy_hidden_deps_on_other_interfaces
 	zend_class_implements(pdo_dbstmt_ce TSRMLS_CC, 1, zend_ce_traversable); 
+#endif
 	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
