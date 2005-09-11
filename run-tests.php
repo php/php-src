@@ -604,9 +604,7 @@ function save_text($filename,$text)
 {
 	global $DETAILED;
 
-	$fp = @fopen($filename,'w') or error("Cannot open file '" . $filename . "' (save_text)");
-	fwrite($fp,$text);
-	fclose($fp);
+	@file_put_contents($filename, $text) or error("Cannot open file '" . $filename . "' (save_text)");
 	if (1 < $DETAILED) echo "
 FILE $filename {{{
 $text
