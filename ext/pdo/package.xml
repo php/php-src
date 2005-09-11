@@ -40,9 +40,9 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>stable</state>
-  <version>1.0</version>
-  <date>2005-10-11</date>
+  <state>beta</state>
+  <version>1.0RC1</version>
+  <date>2005-09-11</date>
 
   <notes>
 You need to install a PDO database driver to make use of PDO,

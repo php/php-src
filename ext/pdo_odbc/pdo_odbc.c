@@ -60,7 +60,7 @@ zend_module_entry pdo_odbc_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_odbc),
-	"0.9",
+	"1.0RC1",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

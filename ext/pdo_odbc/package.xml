@@ -21,8 +21,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9</version>
-  <date>2005-07-27</date>
+  <version>1.0RC1</version>
+  <date>2005-09-11</date>
 
   <notes>
    You need to install the PDO core module before you can make use of this one.
@@ -46,7 +46,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="0.9"/>
+   <dep type="ext" rel="ge" name="pdo" version="1.0RC1"/>
   </deps>
  </release>
 </package>

@@ -44,7 +44,7 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 	NULL,
 	NULL,
 	PHP_MINFO(pdo_firebird),
-	"0.2",
+	"0.3",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
