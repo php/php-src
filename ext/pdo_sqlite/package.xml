@@ -76,6 +76,7 @@
 <file role="src" name="sqlite.pc.in"/>
 <file role="src" name="VERSION"/>
 <dir name="src">
+<file role="src" name="analyze.c"/>
 <file role="src" name="attach.c"/>
 <file role="src" name="alter.c"/>
 <file role="src" name="auth.c"/>
@@ -136,6 +137,7 @@
 <file role="src" name="vdbeapi.c"/>
 <file role="src" name="vdbeaux.c"/>
 <file role="src" name="vdbe.c"/>
+<file role="src" name="vdbefifo.c"/>
 <file role="src" name="vdbe.h"/>
 <file role="src" name="vdbeInt.h"/>
 <file role="src" name="vdbemem.c"/>
