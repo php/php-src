@@ -24,11 +24,11 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9</version>
-  <date>2005-07-27</date>
+  <version>1.0RC1</version>
+  <date>2005-09-11</date>
 
   <notes>
-   First ever PECL release.
+   Update code for API changes in PDO; no actual changes have been made to this driver.
   </notes>
 
   <filelist>
@@ -44,7 +44,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" name="pdo" rel="ge" version="0.9"/>
+   <dep type="ext" name="pdo" rel="ge" version="1.0RC1"/>
   </deps>
  </release>
 </package>

@@ -65,7 +65,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
-	"0.9",
+	"1.0RC1",
 	STANDARD_MODULE_PROPERTIES
 };
 
