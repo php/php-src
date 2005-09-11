@@ -281,6 +281,8 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 
 static int pdo_sqlite_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
+	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+	sqlite3_reset(S->stmt);
 	return 1;
 }
 
