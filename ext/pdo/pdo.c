@@ -60,6 +60,13 @@ PDO_API zend_class_entry *php_pdo_get_exception(TSRMLS_D)
 	return U_CLASS_ENTRY(pdo_exception_ce);
 }
 
+PDO_API char *php_pdo_str_tolower_dup(const char *src, int len)
+{
+	char *dest = emalloc(len + 1);
+	zend_str_tolower_copy(dest, src, len);
+	return dest;
+}
+
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
 /* proto array pdo_drivers()
@@ -112,7 +119,7 @@ zend_module_entry pdo_module_entry = {
 	PHP_RINIT(pdo),
 	PHP_RSHUTDOWN(pdo),
 	PHP_MINFO(pdo),
-	"0.9",
+	"1.1dev",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -295,6 +302,7 @@ PHP_MINIT_FUNCTION(pdo)
 	le_ppdo = zend_register_list_destructors_ex(NULL, php_pdo_pdbh_dtor,
 		"PDO persistent database", module_number);
 
+	REGISTER_LONG_CONSTANT("PDO_PARAM_BOOL", (long)PDO_PARAM_BOOL,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_PARAM_NULL", (long)PDO_PARAM_NULL,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_PARAM_INT",  (long)PDO_PARAM_INT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_PARAM_STR",  (long)PDO_PARAM_STR,	CONST_CS|CONST_PERSISTENT);

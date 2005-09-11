@@ -432,9 +432,11 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	ZVAL_ASCII_STRINGL(&z_key, "queryString", sizeof("queryString")-1, 0);
 	std_object_handlers.write_property(object, &z_key, query_string TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
+#ifdef UG
 	if (UG(unicode)) {
 		zval_dtor(&z_key);
 	}
+#endif
 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
@@ -504,7 +506,7 @@ static PHP_METHOD(PDO, prepare)
 
 	if (ZEND_NUM_ARGS() > 1 && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS, (void**)&opt)) {
 		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 0, (void**)&item) == FAILURE
-			|| (Z_TYPE_PP(item) != IS_STRING && Z_TYPE_PP(item) != IS_UNICODE)
+			|| !PDO_ZVAL_PP_IS_TEXT(item)
 			|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
 		) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
@@ -963,6 +965,21 @@ static PHP_METHOD(PDO, quote)
 }
 /* }}} */
 
+/* {{{ proto int PDO::__wakeup()
+   Prevents use of a PDO instance that has been unserialized */
+static PHP_METHOD(PDO, __wakeup)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "You cannot serialize or unserialize PDO instances");
+}
+/* }}} */
+
+/* {{{ proto int PDO::__sleep()
+   Prevents serialization of a PDO instance */
+static PHP_METHOD(PDO, __sleep)
+{
+	zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "You cannot serialize or unserialize PDO instances");
+}
+/* }}} */
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
@@ -977,6 +994,8 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, __wakeup,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	PHP_ME(PDO, __sleep,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, quote,			NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -1057,7 +1076,9 @@ static union _zend_function *dbh_method_get(
 	zval *object = *object_pp;
 #endif
 	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
-	zend_uchar ztype = UG(unicode)?IS_UNICODE:IS_STRING;
+#ifdef IS_UNICODE
+	zend_uchar ztype = UG(unicode) ? IS_UNICODE : IS_STRING;
+#endif
 
 	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 

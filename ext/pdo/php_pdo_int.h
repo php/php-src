@@ -20,6 +20,8 @@
 
 /* $Id$ */
 
+#include "php_pdo_phpvers_compat.h"
+
 /* Stuff private to the PDO extension and not for consumption by PDO drivers
  * */
 extern zend_class_entry *pdo_exception_ce;

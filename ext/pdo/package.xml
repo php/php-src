@@ -41,8 +41,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.9</version>
-  <date>2005-07-27</date>
+  <version>1.1dev</version>
+  <date>2005-09-11</date>
 
   <notes>
 You need to install a PDO database driver to make use of PDO,
@@ -100,6 +100,7 @@ numbers when you run your PHP scripts.
    <file role="src" name="pdo_sql_parser.re"/>
    <file role="src" name="pdo_sql_parser.c"/>
    <file role="src" name="pdo_sqlstate.c"/>
+   <file role="src" name="php_pdo_phpvers_compat.h"/>
    <file role="src" name="Makefile.frag"/>
 
    <file role="doc" name="README"/>
