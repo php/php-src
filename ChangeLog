@@ -1,3 +1,18 @@
+2005-09-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_1)
+      ext/standard/var.c:
+      allow exceptions thrown in __sleep to interrupt the serialization process.
+      refs PECL #5217
+
+2005-09-10  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      configure.in
+      main/php_version.h:
+      - Fix version numbers as discussed to help version_compare for the PEAR
+      folks.
+
 2005-09-09  Rolland Santimano  <rollandsantimano@yahoo.com>
 
     * ext/standard/string.c:
