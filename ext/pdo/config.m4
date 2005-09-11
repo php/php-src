@@ -54,8 +54,11 @@ for more detail on this issue.
   
   ifdef([PHP_INSTALL_HEADERS],
   [
+    dnl Sadly, this is a complete NOP for pecl extensions
     PHP_INSTALL_HEADERS(ext/pdo, [php_pdo.h php_pdo_driver.h])
-  ], [
-    PHP_ADD_MAKEFILE_FRAGMENT
   ])
+
+  dnl so we always include the known-good working hack.
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
+

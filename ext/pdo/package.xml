@@ -41,7 +41,7 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>1.0RC1</version>
+  <version>1.0RC2</version>
   <date>2005-09-11</date>
 
   <notes>
@@ -59,6 +59,8 @@ http://snaps.php.net/win32/PECL_5_0/php_pdo.dll
 
 You can find additional PDO drivers at:
 http://snaps.php.net/win32/PECL_5_0/
+
+- Fixed an issue with the installation of the pdo headers
 
 - Consult the PHP 5.1b3 release notes and http://netevil.org/node.php?nid=325
   for more recent changes.
