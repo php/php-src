@@ -1057,6 +1057,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 					SEPARATE_ZVAL(container_ptr);
 					container = *container_ptr;
 				}
+				zval_dtor(container);
 				array_init(container);
 				break;
 		}
