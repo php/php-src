@@ -4364,7 +4364,7 @@ PHP_FUNCTION(array_reduce)
 PHP_FUNCTION(array_filter)
 {
 	zval **input, **callback = NULL;
-	zval *array;
+	zval *array, *func = NULL;
 	zval **operand;
 	zval **args[1];
 	zval *retval = NULL;
@@ -4384,10 +4384,13 @@ PHP_FUNCTION(array_filter)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
 		return;
 	}
+	if (callback) {
+		func = *callback;
+	}
 	array = *input;
 
 	if (ZEND_NUM_ARGS() > 1) {
-		if (!zend_is_callable(*callback, 0, &callback_name)) {
+		if (!zend_is_callable(func, 0, &callback_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%R', should be a valid callback", Z_TYPE(callback_name), Z_UNIVAL(callback_name));
 			zval_dtor(&callback_name);
 			return;
@@ -4405,14 +4408,14 @@ PHP_FUNCTION(array_filter)
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)) {
 		zend_uchar utype;
 
-		if (callback) {
+		if (func) {
 			zend_fcall_info fci;
 
 			args[0] = operand;
 
 			fci.size = sizeof(fci);
 			fci.function_table = EG(function_table);
-			fci.function_name = *callback;
+			fci.function_name = func;
 			fci.symbol_table = NULL;
 			fci.object_pp = NULL;
 			fci.retval_ptr_ptr = &retval;
