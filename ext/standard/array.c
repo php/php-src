@@ -3317,7 +3317,7 @@ PHP_FUNCTION(array_reduce)
 PHP_FUNCTION(array_filter)
 {
 	zval **input, **callback = NULL;
-	zval *array;
+	zval *array, *func = NULL;
 	zval **operand;
 	zval **args[1];
 	zval *retval = NULL;
@@ -3336,10 +3336,13 @@ PHP_FUNCTION(array_filter)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
 		return;
 	}
+	if (callback) {
+		func = *callback;
+	}
 	array = *input;
 
 	if (ZEND_NUM_ARGS() > 1) {
-		if (!zend_is_callable(*callback, 0, &callback_name)) {
+		if (!zend_is_callable(func, 0, &callback_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument, '%s', should be a valid callback", callback_name);
 			efree(callback_name);
 			return;
@@ -3355,9 +3358,9 @@ PHP_FUNCTION(array_filter)
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&operand, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)) {
 
-		if (callback) {
+		if (func) {
 			args[0] = operand;
-			if (call_user_function_ex(EG(function_table), NULL, *callback, &retval, 1, args, 0, NULL TSRMLS_CC) == SUCCESS && retval) {
+			if (call_user_function_ex(EG(function_table), NULL, func, &retval, 1, args, 0, NULL TSRMLS_CC) == SUCCESS && retval) {
 				if (!zend_is_true(retval)) {
 					zval_ptr_dtor(&retval);
 					continue;
