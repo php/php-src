@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   defined using reflection API. (Johannes)
 - Fixed a bug where stream_get_meta_data() did not return the "uri" element for
   files opened with tmpname(). (Derick)
+- Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
 - Fixed bug #34310 (foreach($arr as $c->d => $x) crashes). (Dmitry)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
   (Derick)
