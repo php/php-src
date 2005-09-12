@@ -65,7 +65,7 @@ if test "$PHP_XMLRPC" != "no"; then
     PHP_ICONV=$PHP_ICONV_DIR
   fi
   
-  if test "$PHP_ICONV" = "no"; then
+  if test -z "$PHP_ICONV" || test "$PHP_ICONV" = "no"; then
     PHP_ICONV=yes
   fi
   
