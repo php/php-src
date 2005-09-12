@@ -669,6 +669,7 @@ PHP_FUNCTION(pspell_config_runtogether)
 	zval **sccin, **runtogether;
 	int argc;
 
+	PspellManager *manager;
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
@@ -677,12 +678,13 @@ PHP_FUNCTION(pspell_config_runtogether)
 	}
 
 	convert_to_long_ex(sccin);
-	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(sccin), &type);
+ 	if (!manager){
 		php_error(E_WARNING, "%ld is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
+	config = pspell_manager_config(manager);
 	convert_to_boolean_ex(runtogether);
 	pspell_config_replace(config, "run-together", Z_LVAL_PP(runtogether) ? "true" : "false");
 	
@@ -698,6 +700,7 @@ PHP_FUNCTION(pspell_config_mode)
 	zval **sccin, **mode;
 	int argc;
 
+	PspellManager *manager;
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
@@ -706,12 +709,13 @@ PHP_FUNCTION(pspell_config_mode)
 	}
 
 	convert_to_long_ex(sccin);
-	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(sccin), &type);
+ 	if (!manager) {
 		php_error(E_WARNING, "%ld is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
+	config = pspell_manager_config(manager);
 	convert_to_long_ex(mode);
 
 	/* First check what mode we want (how many suggestions) */
@@ -739,6 +743,7 @@ PHP_FUNCTION(pspell_config_ignore)
 	char ignore_str[PSPELL_LARGEST_WORD + 1];	
 	long ignore = 0L;
 
+	PspellManager *manager;
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
@@ -747,11 +752,12 @@ PHP_FUNCTION(pspell_config_ignore)
 	}
 
 	convert_to_long_ex(sccin);
-	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(sccin), &type);
+	if (!manager) {
 		php_error(E_WARNING, "%ld is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
+	config = pspell_manager_config(manager);
 
 	convert_to_long_ex(pignore);
 	ignore = Z_LVAL_PP(pignore);
@@ -786,6 +792,7 @@ PHP_FUNCTION(pspell_config_personal)
 	int argc;
 
 	PspellConfig *config;
+	PspellManager *manager;
 	
 	argc = ZEND_NUM_ARGS();
 	if (argc != 2 || zend_get_parameters_ex(argc,&sccin,&personal) == FAILURE) {
@@ -793,12 +800,13 @@ PHP_FUNCTION(pspell_config_personal)
 	}
 
 	convert_to_long_ex(sccin);
-	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(sccin), &type);
+	if (!manager) {
 		php_error(E_WARNING, "%ld is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
+	config = pspell_manager_config(manager);
 	convert_to_string_ex(personal);
 
 	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(personal), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
@@ -823,6 +831,7 @@ PHP_FUNCTION(pspell_config_repl)
 	zval **sccin, **repl;
 	int argc;
 
+	PspellManager *manager;
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
@@ -831,12 +840,13 @@ PHP_FUNCTION(pspell_config_repl)
 	}
 
 	convert_to_long_ex(sccin);
-	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(sccin), &type);
+	if (!manager) {
 		php_error(E_WARNING, "%ld is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
+	config = pspell_manager_config(manager);
 	pspell_config_replace(config, "save-repl", "true");
 
 	convert_to_string_ex(repl);
@@ -863,6 +873,7 @@ PHP_FUNCTION(pspell_config_save_repl)
 	zval **sccin, **save;
 	int argc;
 
+	PspellManager *manager;
 	PspellConfig *config;
 	
 	argc = ZEND_NUM_ARGS();
@@ -871,12 +882,13 @@ PHP_FUNCTION(pspell_config_save_repl)
 	}
 
 	convert_to_long_ex(sccin);
-	config = (PspellConfig *) zend_list_find(Z_LVAL_PP(sccin), &type);
-	if(!config){
+	manager = (PspellManager *) zend_list_find(Z_LVAL_PP(sccin), &type);
+	if (!manager) {
 		php_error(E_WARNING, "%ld is not a PSPELL config index",Z_LVAL_PP(sccin));
 		RETURN_FALSE;
 	}
 
+	config = pspell_manager_config(manager);
 	convert_to_boolean_ex(save);
 	pspell_config_replace(config, "save-repl", Z_LVAL_PP(save) ? "true" : "false");
 
