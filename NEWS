@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
 - Fixed bug #34420 (Possible crash inside curl_multi_remove_handle()). (Ilia)
 - Fixed bug #34331 (php crashes when variables_order is empty). (Ilia)
 - Fixed bug #34311 (unserialize() crashes with chars above 191 dec). (Nuno)
