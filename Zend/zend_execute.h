@@ -111,6 +111,24 @@ static inline int i_zend_is_true(zval *op)
 		case IS_OBJECT:
 			if(IS_ZEND_STD_OBJECT(*op)) {
 				TSRMLS_FETCH();
+
+				if (Z_OBJ_HT_P(op)->cast_object) {
+					zval tmp;
+					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
+						result = Z_LVAL(tmp);
+						break;
+					}
+				} else if (Z_OBJ_HT_P(op)->get) {
+					zval *tmp = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);
+					if(Z_TYPE_P(tmp) != IS_OBJECT) {
+						/* for safety - avoid loop */
+						convert_to_boolean(tmp);
+						result = Z_LVAL_P(tmp);
+						zval_ptr_dtor(&tmp);
+						break;
+					}
+				}
+			
 				if(EG(ze1_compatibility_mode)) {
 					result = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 				} else {
