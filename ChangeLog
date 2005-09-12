@@ -1,3 +1,15 @@
+2005-09-11  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_1)
+      pear/go-pear.bat:
+      prepare for using go-pear.phar
+
+2005-09-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      run-tests.php:
+      Make use of 5.0+ features
+
 2005-09-10  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_1)
