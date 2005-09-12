@@ -38,6 +38,7 @@
 #   define GLOBAL_FUNCTION_TABLE    CG(function_table)
 #   define GLOBAL_CLASS_TABLE       CG(class_table)
 #   define GLOBAL_AUTO_GLOBALS_TABLE    CG(auto_globals)
+#   define GLOBAL_CONSTANTS_TABLE   EG(zend_constants)
 #endif
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
@@ -88,6 +89,7 @@ HashTable *global_function_table;
 HashTable *global_class_table;
 HashTable *global_constants_table;
 HashTable *global_auto_globals_table;
+static HashTable *global_persistent_list = NULL;
 #endif
 
 ZEND_API zend_utility_values zend_uv;
@@ -486,6 +488,13 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
 	zend_ini_shutdown(TSRMLS_C);
+	if (&executor_globals->persistent_list != global_persistent_list) {
+		zend_destroy_rsrc_list(&executor_globals->persistent_list TSRMLS_CC);
+	}
+	if (executor_globals->zend_constants != GLOBAL_CONSTANTS_TABLE) {
+		zend_hash_destroy(executor_globals->zend_constants);
+		free(executor_globals->zend_constants);
+	}
 }
 
 
@@ -682,6 +691,7 @@ void zend_post_startup(TSRMLS_D)
 	compiler_globals_ctor(compiler_globals, tsrm_ls);
 	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
+	global_persistent_list = &EG(persistent_list);
 	zend_new_thread_end_handler(tsrm_thread_id() TSRMLS_CC);
 }
 #endif
@@ -691,9 +701,6 @@ void zend_shutdown(TSRMLS_D)
 {
 #ifdef ZEND_WIN32
 	zend_shutdown_timeout_thread();
-#endif
-#ifndef ZTS
-	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #endif
 	zend_hash_graceful_reverse_destroy(&module_registry);
 
@@ -706,16 +713,18 @@ void zend_shutdown(TSRMLS_D)
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
 
-	zend_shutdown_constants(TSRMLS_C);
 	free(GLOBAL_FUNCTION_TABLE);
 	free(GLOBAL_CLASS_TABLE);
-#ifdef ZTS
-	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
+
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
+
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
+#ifdef ZTS
 	GLOBAL_FUNCTION_TABLE = NULL;
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
+	GLOBAL_CONSTANTS_TABLE = NULL;
 #endif
 	zend_destroy_rsrc_list_dtors();
 }
