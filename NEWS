@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.0.6
+- Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
 
 05 Sep 2005, PHP 5.0.5
 - Upgraded PCRE library to version 5.0. (Andrei)
