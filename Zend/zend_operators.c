@@ -32,6 +32,7 @@
 #include "zend_strtod.h"
 
 #include "unicode/uchar.h"
+#include "unicode/ucol.h"
 
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
@@ -1508,14 +1509,17 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 	return SUCCESS;
 }
 
-#if HAVE_STRCOLL
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
 	int use_copy1, use_copy2;
+	UErrorCode status = U_ZERO_ERROR;
+	UCollator *col;
 
-	zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+	col = ucol_open(UG(default_locale), &status);
+
+	zend_make_unicode_zval(op1, &op1_copy, &use_copy1);
+	zend_make_unicode_zval(op2, &op2_copy, &use_copy2);
 
 	if (use_copy1) {
 		op1 = &op1_copy;
@@ -1524,7 +1528,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 		op2 = &op2_copy;
 	}
 
-	result->value.lval = strcoll(op1->value.str.val, op2->value.str.val);
+	result->value.lval = ucol_strcoll(col, op1->value.str.val, op1->value.str.len, op2->value.str.val, op2->value.str.len);
 	result->type = IS_LONG;
 
 	if (use_copy1) {
@@ -1533,9 +1537,11 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 T
 	if (use_copy2) {
 		zval_dtor(op2);
 	}
+
+	ucol_close(col);
+
 	return SUCCESS;
 }
-#endif
 
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
