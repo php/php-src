@@ -46,6 +46,8 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #34257 (lib64 not handled correctly in ming extension). (Marcus)
 - Fixed bug #34221 (Compiling xmlrpc as shared fails other parts). (Jani)
+- Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
+  (Dmitry, Alex)
 - Fixed bug #34191 (ob_gzhandler does not enforce trailing \0). (Ilia)
 - Fixed bug #34156 (memory usage remains elevated after memory limit is 
   reached). (Ilia)
