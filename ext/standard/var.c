@@ -717,14 +717,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					res = call_user_function_ex(CG(function_table), struc, &fname, 
 												&retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 
-					if (res == SUCCESS) {
-						if (EG(exception)) {
-							/* allow exceptions to bubble up */
-							if (retval_ptr) {
-								zval_ptr_dtor(&retval_ptr);
-							}
-							return;
-						}
+					if (res == SUCCESS && !EG(exception)) {
 						if (retval_ptr) {
 							if (HASH_OF(retval_ptr)) {
 								php_var_serialize_class(buf, struc, retval_ptr, 
