@@ -25,6 +25,8 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #34260 (Segfault with callbacks (array_map) + overloading).
   (Dmitry)
+- Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
+  (Dmitry, Alex)
 - Fixed bug #34137 (assigning array element by reference causes binary mess).
   (Dmitry) 
 - Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week number).

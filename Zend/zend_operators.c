@@ -568,7 +568,7 @@ ZEND_API void convert_to_boolean(zval *op)
 				zend_bool retval = 1;
 				TSRMLS_FETCH();
 
-				convert_object_to_type(op, IS_BOOL, convert_to_double);
+				convert_object_to_type(op, IS_BOOL, convert_to_boolean);
 
 				if (op->type == IS_BOOL) {
 					return;
