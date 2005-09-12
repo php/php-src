@@ -163,11 +163,9 @@ static void set_compare_func(int sort_type TSRMLS_DC)
 			ARRAYG(compare_func) = string_compare_function;
 			break;
 
-#if HAVE_STRCOLL
 		case SORT_LOCALE_STRING:
 			ARRAYG(compare_func) = string_locale_compare_function;
 			break;
-#endif
 
 		case SORT_REGULAR:
 		default:

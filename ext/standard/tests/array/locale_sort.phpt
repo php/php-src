@@ -7,20 +7,21 @@ if ("fr_FR" != setlocale(LC_CTYPE, "fr_FR")) {
 }
 ?>
 --INI--
-unicode.script_encoding=ISO-8859-1
-unicode.output_encoding=ISO-8859-1
+unicode.script_encoding=UTF-8
+unicode.output_encoding=UTF-8
 --FILE--
 <?php
 setlocale(LC_ALL, 'fr_FR');
+i18n_loc_set_default('fr_FR');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
 "MB" => "Manitoba",
 "NB" => "Nouveau-Brunswick",
 "NL" => "Terre-Neuve-et-Labrador",
-"NS" => "Nouvelle-Écosse",
+"NS" => "Nouvelle-Ã‰cosse",
 "ON" => "Ontario",
-"PE" => "Île-du-Prince-Édouard",
-"QC" => "Québec",
+"PE" => "ÃŽle-du-Prince-Ã‰douard",
+"QC" => "QuÃ©bec",
 "SK" => "Saskatchewan",
 "NT" => "Territoires du Nord-Ouest",
 "NU" => "Nunavut",
@@ -35,19 +36,19 @@ array(13) {
   ["BC"]=>
   string(20) "Colombie-Britannique"
   ["PE"]=>
-  string(21) "Île-du-Prince-Édouard"
+  string(21) "ÃŽle-du-Prince-Ã‰douard"
   ["MB"]=>
   string(8) "Manitoba"
   ["NB"]=>
   string(17) "Nouveau-Brunswick"
   ["NS"]=>
-  string(15) "Nouvelle-Écosse"
+  string(15) "Nouvelle-Ã‰cosse"
   ["NU"]=>
   string(7) "Nunavut"
   ["ON"]=>
   string(7) "Ontario"
   ["QC"]=>
-  string(6) "Québec"
+  string(6) "QuÃ©bec"
   ["SK"]=>
   string(12) "Saskatchewan"
   ["NL"]=>
@@ -64,19 +65,19 @@ array(13) {
   [u"BC"]=>
   unicode(20) "Colombie-Britannique"
   [u"PE"]=>
-  unicode(21) "Île-du-Prince-Édouard"
+  unicode(21) "ÃŽle-du-Prince-Ã‰douard"
   [u"MB"]=>
   unicode(8) "Manitoba"
   [u"NB"]=>
   unicode(17) "Nouveau-Brunswick"
   [u"NS"]=>
-  unicode(15) "Nouvelle-Écosse"
+  unicode(15) "Nouvelle-Ã‰cosse"
   [u"NU"]=>
   unicode(7) "Nunavut"
   [u"ON"]=>
   unicode(7) "Ontario"
   [u"QC"]=>
-  unicode(6) "Québec"
+  unicode(6) "QuÃ©bec"
   [u"SK"]=>
   unicode(12) "Saskatchewan"
   [u"NL"]=>
