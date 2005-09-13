@@ -130,9 +130,11 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 static void mysqli_objects_destroy_object(void *object, zend_object_handle handle TSRMLS_DC)
 {
 	mysqli_object 	*intern = (mysqli_object *)object;
-	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
+	MYSQLI_RESOURCE	*my_res;
 
 	zend_objects_destroy_object(object, handle TSRMLS_CC);
+	
+	my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
 	/* link object */
 	if (instanceof_function(intern->zo.ce, mysqli_link_class_entry TSRMLS_CC)) {
