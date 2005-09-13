@@ -114,6 +114,29 @@ has also been expanded to include the new types. Please see zend_API.h for
 full listing (add_*_ascii_string_*, add_*_rt_string_*, add_*_unicode_*,
 add_*_binary_*).
 
+UBYTES() macro can be used to obtain the number of bytes necessary to store
+the given number of UChar's. The typical usage is:
+  
+    char *constant_name = colon + (UG(unicode)?UBYTES(2):2);
+
+
+Memory Allocation
+-----------------
+
+For ease of use and to reduce possible bugs, there are memory allocation
+functions specific to Unicode strings. Please use them at all times when
+allocating UChar's.
+
+    eumalloc(size)
+    eurealloc(ptr, size)
+    eustrndup(s, length)
+    eustrdup(s)
+
+    peumalloc(size, persistent) 
+    peurealloc(ptr, size, persistent) 
+
+The size parameter refers to the number of UChar's, not bytes.
+
 
 Hashes
 ------
@@ -134,6 +157,22 @@ There are two new constants that define key types:
 Note that zend_hash_get_current_key_ex() does not have a zend_u_hash_*
 version. It returns the key as a char* pointer, you can can cast it
 appropriately based on the key type.
+
+Identifiers and Class Entries
+-----------------------------
+
+In Unicode mode all the identifiers are Unicode strings. This means that
+while various structures such as zend_class_entry, zend_function, etc store
+the identifier name as a char* pointer, it will actually point to UChar*
+string. Be careful when accessing the names of classes, functions, and such
+-- always check UG(unicode) before using them.
+
+In addition, zend_class_entry has a u_twin field that points to its Unicode
+counterpart in UG(unicode) mode. Use U_CLASS_ENTRY() macro to access the
+correct class entry, e.g.:
+
+    ce = U_CLASS_ENTRY(default_exception_ce);
+
 
 References
 ==========
