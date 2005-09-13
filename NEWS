@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
 - Fixed bug #34456 (Possible crash inside pspell extension). (Nuno)
+- Fixed bug #34450 (Segfault when calling mysqli_close() in destructor). (Tony)
 - Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
 - Fixed bug #34420 (Possible crash inside curl_multi_remove_handle()). (Ilia)
 - Fixed bug #34331 (php crashes when variables_order is empty). (Ilia)
