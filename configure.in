@@ -765,45 +765,57 @@ AC_ARG_ENABLE(versioning,
 AC_MSG_RESULT([$PHP_VERSIONING])
 
 dnl ## check for ICU library location
-dnl ## until we bundle it
-PHP_ARG_WITH(icu-dir,[location of ICU headers and libraries],
-[  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], DEFAULT, no)
+AC_MSG_CHECKING([for location of ICU headers and libraries])
+AC_ARG_WITH(icu-dir,
+[  --with-icu-dir=DIR      Specify where ICU libraries and headers can be found], 
+[
+  if test "x$withval" != "xyes"; then
+    PHP_ICU_DIR=$withval
+  else
+    PHP_ICU_DIR=DEFAULT
+  fi
+], [
+  PHP_ICU_DIR=DEFAULT
+])
+
 if test "$PHP_ICU_DIR" = "DEFAULT"; then
-  AC_MSG_CHECKING(for ICU in default path)
-  for i in /usr/local /usr; do
-    if test -r $i/include/unicode/utypes.h; then
-      ICU_DIR=$i
-      AC_MSG_RESULT(found in $i)
-      break
+  ICU_CONFIG=icu-config
+  for i in /usr/local/bin /usr/bin; do
+    if test -x "$i/icu-config"; then
+      ICU_CONFIG=$i/icu-config
+      break;
     fi
   done
 else
-  if test -f $PHP_ICU_DIR/include/unicode/utypes.h; then
-    ICU_DIR=$PHP_ICU_DIR
-  fi
+  ICU_CONFIG="$PHP_ICU_DIR/bin/icu-config"
 fi
-if test -z "$ICU_DIR"; then
-  AC_MSG_RESULT(not found)
-  AC_MSG_ERROR([Please specify where ICU libraries and header file are located])
-fi
-ICU_CONFIG="icu-config"
-if ! test -x "$ICU_DIR/bin/$ICU_CONFIG"; then
-  AC_MSG_ERROR([$ICU_CONFIG not found.])
-elif ${ICU_DIR}/bin/icu-config --ldflags > /dev/null 2>&1; then
-  ICU_CONFIG=${ICU_DIR}/bin/icu-config
-fi
-AC_MSG_CHECKING(for ICU 3.4 or greater)
-icu_version_full=`$ICU_CONFIG --version`
-icu_version=`echo ${icu_version_full} | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) ;}'`
-if test "$icu_version" -ge 3004; then
-  AC_MSG_RESULT($icu_version_full found)
-  ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
+
+dnl Trust icu-config to know better what the install prefix is..
+icu_install_prefix=`$ICU_CONFIG --prefix 2> /dev/null`
+if test -z "$icu_install_prefix"; then
+  AC_MSG_RESULT([not found])
+  AC_MSG_ERROR([Please specify the correct ICU install prefix.])
 else
-  AC_MSG_ERROR(ICU version 3.4 or later is required, $icu_full_version found)
+  AC_MSG_RESULT([found in $icu_install_prefix])
+
+  dnl Check ICU version
+  AC_MSG_CHECKING([for ICU 3.4 or greater])
+  icu_version_full=`$ICU_CONFIG --version`
+  ac_IFS=$IFS
+  IFS="."
+  set $icu_version_full
+  IFS=$ac_IFS
+  icu_version=`expr [$]1 \* 1000 + [$]2`
+  AC_MSG_RESULT([found $icu_version_full])
+  if test "$icu_version" -lt "3004"; then
+    AC_MSG_ERROR([ICU version 3.4 or later is required])
+  fi
+
+  ICU_INCS=`$ICU_CONFIG --cppflags-searchpath`
+  ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
+  PHP_EVAL_INCLINE($ICU_INCS)
+  PHP_EVAL_LIBLINE($ICU_LIBS)
 fi
-PHP_ADD_INCLUDE($ICU_DIR/include)
-PHP_EVAL_LIBLINE($ICU_LIBS, ICU_SHARED_LIBADD)
-PHP_SUBST(ICU_SHARED_LIBADD)
 
 divert(5)
 
