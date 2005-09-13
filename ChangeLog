@@ -1,3 +1,87 @@
+2005-09-12  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      MFH(r-1.719) Plug leak of 1 byte when converting from string
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute.c:
+      MFH(r-1.719) Plug leak of 1/2 bytes when converting from string/unicode
+
+    * ZendEngine2/zend_execute.c:
+      Plug leak of 1/2 bytes when converting from string/unicode
+
+2005-09-12  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/xmlrpc/.cvsignore
+      ext/xmlrpc/config.m4:
+      - Fixed build with phpize
+
+2005-09-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/pspell/pspell.c
+      ext/pspell/pspell.c:
+      MFH: Fixed bug #34456 (Possible crash inside pspell extension).
+
+    * ext/pspell/pspell.c:
+      Fixed bug #34456 (Possible crash inside pspell extension).
+      
+
+2005-09-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_operators.c:
+      typo
+
+    * ZendEngine2/tests/bug34199.phpt
+      ZendEngine2/tests/bug34199.phpt:
+      
+      Fixed bug #34199 (if($obj)/if(!$obj) inconsistency)
+
+    * NEWS
+      NEWS
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/tests/bug34199.phpt:
+      Fixed bug #34199 (if($obj)/if(!$obj) inconsistency)
+
+    * ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c:
+      Additinal fix for bug #34277 (array_filter() crashes with references and
+      objects)
+
+2005-09-12  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_operators.c
+      ext/standard/array.c
+      ext/standard/tests/array/locale_sort.phpt:
+      - Reimplement SORT_LOCALE_STRING with ICU locales.
+
+2005-09-12  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_1)
+      ZendEngine2/zend.c:
+      Fixed huge memory leak in ZTS mode (backport from HEAD)
+
+    * NEWS
+      NEWS
+      NEWS:
+      Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed)
+
+    * ext/standard/var.c:
+      Fix for exceptions in __sleep()
+
+    * (PHP_5_1)
+      ext/standard/var.c:
+      Better fix for exceptions in __sleep()
+
 2005-09-11  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_1)
