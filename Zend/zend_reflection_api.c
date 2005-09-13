@@ -1673,11 +1673,11 @@ ZEND_METHOD(reflection_parameter, __construct)
 	  		char *lcname;
 
 				convert_to_text_ex(&reference);
-				lcname = zend_u_str_case_fold(Z_TYPE_P(reference), Z_STRVAL_P(reference), Z_STRLEN_P(reference), 1, &lcname_len);
+				lcname = zend_u_str_case_fold(Z_TYPE_P(reference), Z_UNIVAL_P(reference), Z_UNILEN_P(reference), 1, &lcname_len);
 				if (zend_u_hash_find(EG(function_table), Z_TYPE_P(reference), lcname, lcname_len + 1, (void**) &fptr) == FAILURE) {
 					efree(lcname);
 					zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC, 
-						"Function %R() does not exist", Z_TYPE_P(reference), Z_STRVAL_P(reference));
+						"Function %R() does not exist", Z_TYPE_P(reference), Z_UNIVAL_P(reference));
 					return;
 				}
 				efree(lcname);
