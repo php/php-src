@@ -158,6 +158,7 @@ Note that zend_hash_get_current_key_ex() does not have a zend_u_hash_*
 version. It returns the key as a char* pointer, you can can cast it
 appropriately based on the key type.
 
+
 Identifiers and Class Entries
 -----------------------------
 
@@ -172,6 +173,47 @@ counterpart in UG(unicode) mode. Use U_CLASS_ENTRY() macro to access the
 correct class entry, e.g.:
 
     ce = U_CLASS_ENTRY(default_exception_ce);
+
+
+Formatted Output
+----------------
+
+Since UTF-16 strings frequently contain NULL bytes, you cannot simpley use
+%s format to print them out. Towards that end, output functions such as
+php_printf(), spprintf(), etc now have three different formats for use with
+Unicode strings:
+
+  %r
+    This format treats the corresponding argument as a Unicode string. The
+    string is automatically converted to the output encoding. If you wish to
+    apply a different converter to the string, use %*r and pass the
+    converter before the string argument.
+
+    UChar *class_name = USTR_NAME("ReflectionClass");
+    zend_printf("%r", class_name);
+
+  %R
+    This format requires at least two arguments: the first one specifies the
+    type of the string to follow (IS_STRING or IS_UNICODE), and the second
+    one - the string itself. If the string is of Unicode type, it is
+    automatically converted to the output encoding. If you wish to apply
+    a different converter to the string, use %*R and pass the converter
+    before the string argument.
+
+    zend_throw_exception_ex(U_CLASS_ENTRY(reflection_exception_ptr), 0 TSRMLS_CC,
+            "Interface %R does not exist",
+            Z_TYPE_P(class_name), Z_UNIVAL_P(class_name));
+
+  %v
+    This format takes only one parameter, the string, but the expected
+    string type depends on the UG(unicode) value. If the string is of
+    Unicode type, it is automatically converted to the output encoding. If
+    you wish to apply a different converter to the string, use %*R and pass
+    the converter before the string argument.
+
+    zend_error(E_WARNING, "%v::__toString() did not return anything",
+            Z_OBJCE_P(object)->name);
+
 
 
 References
