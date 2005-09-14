@@ -1194,12 +1194,12 @@ void php_request_shutdown(void *dummy)
 		sapi_send_headers(TSRMLS_C);
 	} zend_end_try();
 
-	zend_try {
-		zend_call_destructors(TSRMLS_C);
-	} zend_end_try();
-
 	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions(TSRMLS_C);
+	} zend_end_try();
+
+	zend_try {
+		zend_call_destructors(TSRMLS_C);
 	} zend_end_try();
 	
 	if (PG(modules_activated)) {
