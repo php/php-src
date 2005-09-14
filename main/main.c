@@ -1200,16 +1200,16 @@ void php_request_shutdown(void *dummy)
 	EG(opline_ptr) = NULL;
 	EG(active_op_array) = NULL;
 
-	/* 1. Call all possible __destruct() functions */
-	zend_try {
-		zend_call_destructors(TSRMLS_C);
-	} zend_end_try();
-
-	/* 2. Call all possible shutdown functions registered with register_shutdown_function() */
+	/* 1. Call all possible shutdown functions registered with register_shutdown_function() */
 	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions(TSRMLS_C);
 	} zend_end_try();
 	
+	/* 2. Call all possible __destruct() functions */
+	zend_try {
+		zend_call_destructors(TSRMLS_C);
+	} zend_end_try();
+
 	/* 3. Flush all output buffers */
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
