@@ -1,3 +1,68 @@
+2005-09-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      ext/oracle is no more
+
+2005-09-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.UNICODE-UPGRADES
+      README.UNICODE-UPGRADES:
+      -** empty log message ***
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix for Unicode access.
+
+    * README.UNICODE-UPGRADES:
+      Commit work in progress.
+
+2005-09-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/sqlite/libsqlite/src/parse.c:
+      touch
+
+2005-09-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      MFH: MFH: Make key() and current() take argument by value.
+
+    * (PHP_4_4)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH: Make key() and current() take argument by value.
+
+    * ext/standard/basic_functions.c:
+      Make key() and current() take argument by value.
+
+2005-09-13  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * configure.in:
+      Cleanup the configure mess, preparing for making unicode OPTIONAL
+
+2005-09-13  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli.c:
+      MFH: fix #34450 (Segfault when calling mysqli_close() in destructor)
+
+    * (PHP_5_1)
+      NEWS:
+      bfn
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      fix #34450 (Segfault when calling mysqli_close() in destructor)
+
+2005-09-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute.h
+      ZendEngine2/tests/bug34199.phpt:
+      Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler)
+
 2005-09-12  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_5_0)
