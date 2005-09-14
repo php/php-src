@@ -20,14 +20,6 @@ The big thing is that there are two new string types: IS_UNICODE and
 IS_BINARY. The former one has its own storage in the value union part of
 zval (value.ustr) and the latter re-uses value.str.
 
-IS_UNICODE strings are in the UTF-16 encoding where 1 Unicode character may
-be represented by 1 or 2 UChar's. Each UChar is referred to as a "code
-unit", and a full Unicode character as a "code point". So, number of code
-units and number of code points for the same Unicode string may be
-different. The value.ustr.len is actually the number of code units. To
-obtain the number of code points, one can use u_counChar32() ICU API
-function or Z_USTRCPLEN() macro.
-
 Both types have new macros to set the zval value and to access it.
 
 Z_USTRVAL(), Z_USTRLEN()
@@ -118,6 +110,60 @@ UBYTES() macro can be used to obtain the number of bytes necessary to store
 the given number of UChar's. The typical usage is:
   
     char *constant_name = colon + (UG(unicode)?UBYTES(2):2);
+
+
+Code Points and Code Units
+--------------------------
+
+Unicode type strings are in the UTF-16 encoding where 1 Unicode character
+may be represented by 1 or 2 UChar's. Each UChar is referred to as a "code
+unit", and a full Unicode character as a "code point". Consequently, number
+of code units and number of code points for the same Unicode string may be
+different. This has many implications, the most important of which is that
+you cannot simply index the UChar* string to  get the desired codepoint.
+
+The zval's value.ustr.len contains  actually the number of code units. To
+obtain the number of code points, one can use u_counChar32() ICU API
+function or Z_USTRCPLEN() macro.
+
+ICU provides a number of macros for working with UTF-16 strings on the
+codepoint level [2]. They allow you to do things like obtain a codepoint at
+random code unit offset, move forward and backward over the string, etc.
+There are two versions of iterator macros, *_SAFE and *_UNSAFE. It is strong
+recommended to use *_SAFE version, since they handle unpaired surrogates and
+check for string boundaries. Here is an example of how to move through
+UChar* string and work on codepoints.
+
+    UChar *str = ...;
+    int32_t str_len = ...;
+    UChar32 codepoint;
+    int32_t offset = 0;
+
+    while (offset < str_len) {
+        U16_NEXT(str, offset, str_len, codepoint);
+        /* now we have the Unicode character in codepoint */
+    }
+
+There is not macro to get a codepoint at a certain code point offset, but
+there is a Zend API function that does it.
+
+    inline UChar32 zend_get_codepoint_at(UChar *str, int32_t length, int32_t n);
+
+To retrieve 3rd codepoint, you would call:
+
+    zend_get_codepoint_at(str, str_len, 3);
+
+If you have a UChar32 codepoint and need to put it into a UChar* string,
+there is another helper function, zend_codepoint_to_uchar(). It takes
+a single UChar32 and converts it to a UChar sequence (1 or 2 UChar's).
+
+    UChar buf[8];
+    UChar32 codepoint = 0x101a2;
+    int8_t num_uchars;
+    num_uchars = zend_codepoint_to_uchar(codepoint, buf);
+
+The return value is the number of resulting UChar's or 0, which indicates
+invalid codepoint.
 
 
 Memory Allocation
@@ -220,5 +266,7 @@ References
 ==========
 
 [1] http://icu.sourceforge.net/apiref/icu4c/ustring_8h.html#a1
+
+[2] http://icu.sourceforge.net/apiref/icu4c/utf16_8h.html
 
 vim: set et ai tw=76 fo=tron21:
