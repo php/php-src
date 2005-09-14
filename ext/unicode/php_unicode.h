@@ -55,8 +55,9 @@ PHP_MINFO_FUNCTION(unicode);
 #include "TSRM.h"
 #endif
 
-PHP_FUNCTION(icu_loc_get_default);
-PHP_FUNCTION(icu_loc_set_default);
+PHP_FUNCTION(i18n_loc_get_default);
+PHP_FUNCTION(i18n_loc_set_default);
+PHP_FUNCTION(i18n_strtotitle);
 
 extern php_stream_filter_factory php_unicode_filter_factory;
 

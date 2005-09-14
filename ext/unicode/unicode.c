@@ -102,10 +102,11 @@ static PHP_FUNCTION(unicode_encode)
 }
 /* {{{ unicode_functions[] */
 function_entry unicode_functions[] = {
-	PHP_FE(icu_loc_get_default, NULL)
-	PHP_FE(icu_loc_set_default, NULL)
+	PHP_FE(i18n_loc_get_default, NULL)
+	PHP_FE(i18n_loc_set_default, NULL)
 	PHP_FE(unicode_decode, NULL)
 	PHP_FE(unicode_encode, NULL)
+	PHP_FE(i18n_strtotitle, NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
