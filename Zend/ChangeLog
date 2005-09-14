@@ -1,3 +1,15 @@
+2005-09-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_reflection_api.c:
+      Fix for Unicode access.
+
+2005-09-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.h
+      tests/bug34199.phpt:
+      Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler)
+
 2005-09-12  Sara Golemon  <php@alphaweb.net>
 
     * (PHP_5_0)
