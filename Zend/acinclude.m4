@@ -9,23 +9,26 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   # for standalone build of Zend Engine
   test -z "$SED" && SED=sed
 
+  bison_version=none
   if test "$YACC"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-      set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /'|tr -d a-z`
-      bison_version="${1}.${2}"
+      bison_version_vars=`bison --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /' | tr -d a-z`
       php_cv_bison_version=invalid
-      for bison_check_version in $bison_version_list; do
-        if test "$bison_version" = "$bison_check_version"; then
-          php_cv_bison_version="$bison_check_version (ok)"
-        fi
-      done
+      if test -n "$bison_version_vars"; then
+        set $bison_version_vars
+        bison_version="${1}.${2}"
+        for bison_check_version in $bison_version_list; do
+          if test "$bison_version" = "$bison_check_version"; then
+            php_cv_bison_version="$bison_check_version (ok)"
+            break
+          fi
+        done
+      fi
     ])
-  else
-    bison_version=none
   fi
   case $php_cv_bison_version in
     ""|invalid[)]
-      bison_msg="bison versions supported for regeneration of the Zend/PHP parsers: $bison_version_list  (found: $bison_version)."
+      bison_msg="bison versions supported for regeneration of the Zend/PHP parsers: $bison_version_list (found: $bison_version)."
       AC_MSG_WARN([$bison_msg])
       YACC="exit 0;"
       ;;
