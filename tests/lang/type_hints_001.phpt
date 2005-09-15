@@ -23,4 +23,4 @@ type_hint_foo($bar);
 ?>
 --EXPECTF--
 
-Fatal error: Argument 1 must be an instance of Foo, called in %s on line 16 and defined in %s on line 9
+Fatal error: Argument 1 passed to type_hint_foo() must be an instance of Foo, called in %s on line 16 and defined in %s on line 9
