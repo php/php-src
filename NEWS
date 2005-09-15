@@ -29,5 +29,6 @@ PHP                                                                        NEWS
   (Dmitry, Alex)
 - Fixed bug #34137 (assigning array element by reference causes binary mess).
   (Dmitry) 
+- Fixed bug #34052 (date('U') returns %ld not unix timestamp). (Nuno)
 - Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week number).
   (Derick)
