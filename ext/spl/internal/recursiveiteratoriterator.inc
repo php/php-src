@@ -9,11 +9,6 @@
  * SPL - Standard PHP Library
  */
 
-define('RIT_LEAVES_ONLY', 0);
-define('RIT_SELF_FIRST',  1);
-define('RIT_CHILD_FIRST', 2);
-define('RIT_CATCH_GET_CHILD', 2);
-
 /**
  * @brief   Iterates through recursive iterators
  * @author  Marcus Boerger
@@ -26,25 +21,36 @@ define('RIT_CATCH_GET_CHILD', 2);
  */
 class RecursiveIteratorIterator implements OuterIterator
 {
+	/** Mode: Only show leaves */
+	const LEAVES_ONLY 		= 0;
+	/** Mode: Show parents prior to their children */
+	const SELF_FIRST		= 1;
+	/** Mode: Show all children prior to their parent */
+	const CHILD_FIRST		= 2;
+
+	/** Flag: Catches exceptions during getChildren() calls and simply jumps
+	 * to the next element. */
+	const CATCH_GET_CHILD	= 2;
+
 	private $ait = array();
 	private $count = 0;
-	private $mode  = RIT_LEAVES_ONLY;
+	private $mode  = self::LEAVES_ONLY;
 	private $flags = 0;
 
 	/** Construct from RecursiveIterator
 	 *
 	 * @param it     RecursiveIterator to iterate
 	 * @param mode   Operation mode (one of):
-	 *               - RIT_LEAVES_ONLY only show leaves
-	 *               - RIT_SELF_FIRST  show parents prior to their childs
-	 *               - RIT_CHILD_FIRST show all childs prior to their parent
+	 *               - LEAVES_ONLY only show leaves
+	 *               - SELF_FIRST  show parents prior to their childs
+	 *               - CHILD_FIRST show all children prior to their parent
 	 * @param flags  Control flags, zero or any combination of the following
 	 *               (since PHP 5.1).
-	 *               - RIT_CATCH_GET_CHILD which catches exceptions during
+	 *               - CATCH_GET_CHILD which catches exceptions during
 	 *                 getChildren() calls and simply jumps to the next 
 	 *                 element.
 	 */
-	function __construct(RecursiveIterator $it, $mode = RIT_LEAVES_ONLY, $flags = 0)
+	function __construct(RecursiveIterator $it, $mode = self::LEAVES_ONLY, $flags = 0)
 	{
 		$this->ait[0] = $it;
 		$this->mode   = $mode;
@@ -61,6 +67,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		}
 		$this->ait[0]->rewind();
 		$this->ait[0]->recursed = false;
+		callNextElement(true);
 	}
 	
 	/** @return whether iterator is valid
@@ -110,7 +117,7 @@ class RecursiveIteratorIterator implements OuterIterator
 					}
 					catch (Exception $e)
 					{
-						if (!($this->flags & RIT_CATCH_GET_CHILD))
+						if (!($this->flags & self::CATCH_GET_CHILD))
 						{
 							throw $e;
 						}
@@ -140,8 +147,10 @@ class RecursiveIteratorIterator implements OuterIterator
 				unset($this->ait[$this->count--]);
 				$it = $this->ait[$this->count];
 				$this->endChildren();
+				callNextElement(false);
 			}
 		}
+		callNextElement(true);
 	}
 
 	/** @return Sub Iterator at given level or if unspecified the current sub 
@@ -200,6 +209,27 @@ class RecursiveIteratorIterator implements OuterIterator
 	function endChildren()
 	{
 	}
+
+	private function callNextElement($after_move)
+	{
+		if ($this->valid())
+		{
+			if ($after_move)
+			{
+				if (($this->mode == self::SELF_FIRST && $this->callHasChildren())
+				     $this->mode == self::LEAVES_ONLY)
+				$this->nextElement();
+			}
+			else
+			{
+				$this->nextElement();
+			}
+		}
+	}
+	
+	/** Called when the next element is available
+	 */
+	function nextElement();
 }
 
 ?>

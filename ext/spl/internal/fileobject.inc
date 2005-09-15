@@ -17,6 +17,9 @@
  */
 class FileObject implements RecursiveIterator, SeekableIterator
 {
+	/** Flag: wheter to suppress new lines */
+	const DROP_NEW_LINE   = 0x00000001;
+
 	private $fp;
 	private $fname;
 	private $line     = NULL;

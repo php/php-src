@@ -59,7 +59,7 @@
  * 
  * SPL offers an advanced XML handling class:
  * 
- * - class SimpleXMLIterator extends simplexml_element extends recursiveiterator
+ * - class SimpleXMLIterator extends simplexml_element implements RecursiveIterator
  * 
  * 4) Array Overloading
  * 
@@ -97,8 +97,9 @@
  *
  * SPL suggests a standard way of implementing the observer pattern.
  *
- * - interface Observer
- * - interface Subject
+ * - interface SplObserver
+ * - interface SplSubject
+ * - class SplObjectStorage
  * 
  * Some articles about SPL:
  * - <a href="http://www.sitepoint.com/article/php5-standard-library/1">Introducing PHP 5's Standard Library</a>
@@ -106,10 +107,14 @@
  * - <a href="http://www.phpriot.com/d/articles/php/oop/oop-with-spl-php-5-1/index.html">Advanced OOP with SPL in PHP 5</a>
  * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-1/">The Standard PHP Library, Part 1</a>
  * - <a href="http://www.devshed.com/c/a/PHP/The-Standard-PHP-Library-Part-2/">The Standard PHP Library, Part 2</a>
+ * - <a href="http://www.wiki.cc/php/SPL">SPL on PHP Wiki</a>
+ * - <a href="http://www.professionelle-softwareentwicklung-mit-php5.de/erste_auflage/oop.iterators.spl.html">Die Standard PHP Library (SPL) [german]</a>
  *
  * Talks on SPL:
- * - <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">SPL for the masses [pps]</a>
- * - <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">SPL for the masses [pdf]</a>
+ * - SPL for the masses <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
+ * - Debug session 1 <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_1.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_1.pdf">[pdf]</a>
+ * - Debug session 2 <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_2.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_2.pdf">[pdf]</a>
+ * - From engine overloading to SPL <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
  *
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
@@ -504,6 +509,12 @@ interface Serializeable
  */
 class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 {
+	/** Properties of the object have their normal functionality
+	 * when accessed as list (var_dump, foreach, etc.) */
+	const STD_PROP_LIST  = 0x00000001;
+	/** Array indices can be accessed as properties in read/write */
+	const ARRAY_AS_PROPS = 0x00000002;
+
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
@@ -588,6 +599,12 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
  */
 class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 {
+	/** Properties of the object have their normal functionality
+	 * when accessed as list (var_dump, foreach, etc.) */
+	const STD_PROP_LIST  = 0x00000001;
+	/** Array indices can be accessed as properties in read/write */
+	const ARRAY_AS_PROPS = 0x00000002;
+
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *

@@ -13,7 +13,7 @@
  * @brief   Iterator to filter recursive iterators
  * @author  Marcus Boerger
  * @version 1.0
- * @since PHP 6.0
+ * @since PHP 5.1
  *
  * Passes the RecursiveIterator interface to the inner Iterator and provides
  * the same functionality as FilterIterator. This allows you to skip parents

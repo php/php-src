@@ -36,7 +36,7 @@ class MyObjectStorage extends SplObjectStorage
 	}
 }
 
-class ObserverImpl implements Observer
+class ObserverImpl implements SplObserver
 {
 	protected $name = '';
 
@@ -45,7 +45,7 @@ class ObserverImpl implements Observer
 		$this->name = '$' . $name;
 	}
 
-	function update(Subject $subject)
+	function update(SplSubject $subject)
 	{
 		echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
 	}
@@ -56,7 +56,7 @@ class ObserverImpl implements Observer
 	}
 }
 
-class SubjectImpl implements Subject
+class SubjectImpl implements SplSubject
 {
 	protected $name = '';
 	protected $observers;
@@ -67,13 +67,13 @@ class SubjectImpl implements Subject
 		$this->name = '$' . $name;
 	}
 
-	function attach(Observer $observer)
+	function attach(SplObserver $observer)
 	{
 		echo $this->name . '->' . __METHOD__ . '(' . $observer->getName() . ");\n";
 		$this->observers->attach($observer);
 	}
 	
-	function detach(Observer $observer)
+	function detach(SplObserver $observer)
 	{
 		echo $this->name . '->' . __METHOD__ . '(' . $observer->getName() . ");\n";
 		$this->observers->detach($observer);

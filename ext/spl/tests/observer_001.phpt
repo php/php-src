@@ -1,9 +1,9 @@
 --TEST--
-SPL: Observer and Subject (empty notify)
+SPL: SplObserver and SplSubject (empty notify)
 --FILE--
 <?php
 
-class ObserverImpl implements Observer
+class ObserverImpl implements SplObserver
 {
 	protected $name = '';
 
@@ -12,7 +12,7 @@ class ObserverImpl implements Observer
 		$this->name = '$' . $name;
 	}
 
-	function update(Subject $subject)
+	function update(SplSubject $subject)
 	{
 		echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
 	}
@@ -23,7 +23,7 @@ class ObserverImpl implements Observer
 	}
 }
 
-class SubjectImpl implements Subject
+class SubjectImpl implements SplSubject
 {
 	protected $name = '';
 	protected $observers = array();
@@ -33,7 +33,7 @@ class SubjectImpl implements Subject
 		$this->name = '$' . $name;
 	}
 
-    function attach(Observer $observer)
+    function attach(SplObserver $observer)
     {
     	echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
     	if (!in_array($observer, $this->observers))
@@ -42,7 +42,7 @@ class SubjectImpl implements Subject
 	    }
     }
 
-    function detach(Observer $observer)
+    function detach(SplObserver $observer)
     {
     	echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
     	$idx = array_search($observer, $this->observers);

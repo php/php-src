@@ -26,10 +26,10 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 	 *
 	 * @param it    Iterator to cache
 	 * @param flags Bitmask: 
-	 *              - CIT_CALL_TOSTRING   (whether to call __toString() for every element)
-	 *              - CIT_CATCH_GET_CHILD (whether to catch exceptions when trying to get childs)
+	 *              - CALL_TOSTRING   (whether to call __toString() for every element)
+	 *              - CATCH_GET_CHILD (whether to catch exceptions when trying to get childs)
 	 */
-	function __construct(RecursiveIterator $it, $flags = CIT_CALL_TOSTRING)
+	function __construct(RecursiveIterator $it, $flags = self::CALL_TOSTRING)
 	{
 		parent::__construct($it, $flags);
 	}
@@ -56,7 +56,7 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 				$this->getChildren = new CachingRecursiveIterator($child, $this->flags);
 			}
 			catch(Exception $e) {
-				if (!$this->flags & CIT_CATCH_GET_CHILD) {
+				if (!$this->flags & self::CATCH_GET_CHILD) {
 					throw $e;
 				}
 				$this->hasChildren = false;
@@ -70,7 +70,7 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 
 	/** @return whether the current element has children
 	 * @note The check whether the Iterator for the children can be created was
-	 *       already executed. Hence when flag CIT_CATCH_GET_CHILD was given in
+	 *       already executed. Hence when flag CATCH_GET_CHILD was given in
 	 *       constructor this fucntion returns false so that getChildren does 
 	 *       not try to access those children.
 	 */
