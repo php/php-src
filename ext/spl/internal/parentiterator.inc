@@ -13,7 +13,7 @@
  * @brief   Iterator to filter parents
  * @author  Marcus Boerger
  * @version 1.2
- * @since PHP 6.0
+ * @since PHP 5.1
  *
  * This extended FilterIterator allows a recursive iteration using 
  * RecursiveIteratorIterator that only shows those elements which have 
