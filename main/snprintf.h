@@ -111,12 +111,12 @@ extern char * ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign, char *
 extern char * ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf);
 extern char * ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform);
 
-#if SIZEOF_LONG_LONG_INT
+#if PHP_WIN32
+# define WIDE_INT		__int64
+#elif SIZEOF_LONG_LONG_INT
 # define WIDE_INT		long long int
 #elif SIZEOF_LONG_LONG
 # define WIDE_INT		long long
-#elif PHP_WIN32
-# define WIDE_INT		__int64
 #else
 # define WIDE_INT		long
 #endif
