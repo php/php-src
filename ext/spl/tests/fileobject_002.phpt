@@ -1,5 +1,5 @@
 --TEST--
-SPL: FileObject::fgetc
+SPL: SplFileObject::fgetc
 --FILE--
 <?php
 
@@ -7,7 +7,7 @@ function test($name)
 {
 	echo "===$name===\n";
 
-	$o = new FileObject(dirname(__FILE__) . '/' . $name);
+	$o = new SplFileObject(dirname(__FILE__) . '/' . $name);
 
 	var_dump($o->key());
 	while(($c = $o->fgetc()) !== false)

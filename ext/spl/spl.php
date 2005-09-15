@@ -53,7 +53,7 @@
  * 
  * - class DirectoryIterator implements Iterator
  * - class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
- * - class FileObject implements RecursiveIterator, SeekableIterator
+ * - class SplFileObject implements RecursiveIterator, SeekableIterator
  * 
  * 3) XML
  * 
@@ -761,16 +761,16 @@ class DirectoryIterator implements Iterator
 	 */
 	function __toString();
 
-	/** Open the current file as a FileObject instance
+	/** Open the current file as a SplFileObject instance
 	 *
 	 * @param mode              open mode
 	 * @param use_include_path  whether to search include paths (don't use)
 	 * @param context           resource context to pased to open function
 	 * @throw RuntimeException  if file cannot be opened (e.g. insufficient 
 	 *                          access rights).
-	 * @return The opened file as a FileObject instance
+	 * @return The opened file as a SplFileObject instance
 	 *
-	 * @see FileObject
+	 * @see SplFileObject
 	 * @see file()
 	 */
 	function DirectoryIterator::openFile($mode = 'r', $use_include_path = false, $context = NULL);
