@@ -175,7 +175,7 @@
 #define SIZEOF_LONG 4
 /* MSVC.6/NET don't allow 'long long' or know 'intmax_t' */
 #define SIZEOF_LONG_LONG_INT 0
-#define SIZEOF_LONG_LONG 0
+#define SIZEOF_LONG_LONG 8 /* defined as __int64 */
 #define SIZEOF_INTMAX_T 0
 #define ssize_t SSIZE_T
 #ifdef _WIN64
