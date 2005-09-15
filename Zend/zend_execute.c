@@ -486,24 +486,24 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 
 	if (cur_arg_info->class_name) {
 		if (!arg) {
-			if(ptr && ptr->op_array) {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
+			if (ptr && ptr->op_array) {
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
 			} else {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %v", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %v", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
 			}
 		}
 		switch (Z_TYPE_P(arg)) {
 			case IS_NULL:
 				if (!cur_arg_info->allow_null) {
-					if(ptr && ptr->op_array) {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+					if (ptr && ptr->op_array) {
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 					} else {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
 					}
 				}
 				break;
 			case IS_OBJECT: {
-					zend_class_entry *ce = zend_u_fetch_class(UG(unicode)?IS_UNICODE:IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+					zend_class_entry *ce = zend_u_fetch_class(UG(unicode) ? IS_UNICODE : IS_STRING, cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 					if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
 						char *error_msg;
 
@@ -512,47 +512,47 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 						} else {
 							error_msg = "be an instance of";
 						}
-						if(ptr && ptr->op_array) {
-							zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must %s %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, ptr->op_array->filename, ptr->opline->lineno);
+						if (ptr && ptr->op_array) {
+							zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must %s %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, ptr->op_array->filename, ptr->opline->lineno);
 						} else {
-							zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must %s %v", arg_num, fclass, fsep, fname, error_msg, ce->name);
+							zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must %s %v", arg_num, fclass, fsep, fname, error_msg, ce->name);
 						}
 					}
 				}
 				break;
 			default:
-				if(ptr && ptr->op_array) {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
+				if (ptr && ptr->op_array) {
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %v, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
 				} else {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %v", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %v", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
 				}
 				break;
 		}
 	}	else if (cur_arg_info->array_type_hint) {
 		if (!arg) {
-			if(ptr && ptr->op_array) {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
-			} else {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
+			if (ptr && ptr->op_array) {
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+			} else { 
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
 			}
 		}
 		switch (Z_TYPE_P(arg)) {
 			case IS_NULL:
 				if (!cur_arg_info->allow_null) {
-					if(ptr && ptr->op_array) {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+					if (ptr && ptr->op_array) {
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 					} else {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
 					}
 				}
 				break;
 			case IS_ARRAY:
 				break;
 			default:	
-				if(ptr && ptr->op_array) {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+				if (ptr && ptr->op_array) {
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 				} else {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
 				}
 				break;
 		}
@@ -601,7 +601,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		}
 		zend_error(E_STRICT, "Implicit cloning object of class '%v' because of 'zend.ze1_compatibility_mode'", class_name);		
 		value->value.obj = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
-		if(!dup)	{
+		if (!dup)	{
 			efree(class_name);
 		}
 	} else if (value_op->op_type == IS_TMP_VAR) {
@@ -668,7 +668,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		}
 
 		if (Z_TYPE_P(T->str_offset.str) == IS_STRING ||
-		    Z_TYPE_P(T->str_offset.str) == IS_BINARY) do {
+			Z_TYPE_P(T->str_offset.str) == IS_BINARY)
+		do {
 			zval tmp;
 			zval *final_value = value;
 
@@ -793,7 +794,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		return;
 	}
 
-	if(Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
+	if (Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
 		/* TODO? ze1_compatibility_mode support */
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
 		goto done_setting_var;
@@ -1041,8 +1042,7 @@ fetch_string_dim:
 				UChar *norm;
 				int32_t norm_len;
 
-				if (!zend_normalize_identifier(&norm, &norm_len,
-		                               (UChar*)offset_key, offset_key_length, 0)) {
+				if (!zend_normalize_identifier(&norm, &norm_len, (UChar*)offset_key, offset_key_length, 0)) {
 					zend_error(E_WARNING, "Could not normalize identifier: %r", offset_key);
 				} else if ((char*)norm != offset_key) {
 					offset_key = (char*)norm;
@@ -1359,11 +1359,11 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
 		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr TSRMLS_CC);
-		if(NULL == ptr_ptr) {
+		if (NULL == ptr_ptr) {
 			zval *ptr;
 
 			if (Z_OBJ_HT_P(container)->read_property &&
-			    (ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, BP_VAR_W TSRMLS_CC)) != NULL) {
+				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, BP_VAR_W TSRMLS_CC)) != NULL) {
 				if (result) {
 					result->var.ptr = ptr;
 					result->var.ptr_ptr = &result->var.ptr;
@@ -1465,33 +1465,33 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_v
 }
 
 #define ZEND_VM_NEXT_OPCODE() \
-     CHECK_SYMBOL_TABLES() \
-     EX(opline)++; \
-     ZEND_VM_CONTINUE()
+	CHECK_SYMBOL_TABLES() \
+	EX(opline)++; \
+	ZEND_VM_CONTINUE()
 
 #define ZEND_VM_SET_OPCODE(new_op) \
-     CHECK_SYMBOL_TABLES() \
-     EX(opline) = new_op
+	CHECK_SYMBOL_TABLES() \
+	EX(opline) = new_op
 
 #define ZEND_VM_INC_OPCODE() \
-     if (!EG(exception)) { \
-       CHECK_SYMBOL_TABLES() \
-       EX(opline)++; \
-     }
+	if (!EG(exception)) { \
+		CHECK_SYMBOL_TABLES() \
+		EX(opline)++; \
+	}
 
 #define ZEND_VM_RETURN_FROM_EXECUTE_LOOP() \
-     free_alloca(EX(CVs)); \
-     if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
-       free_alloca(EX(Ts)); \
-     } else { \
-       efree(EX(Ts)); \
-     } \
-     EG(in_execution) = EX(original_in_execution); \
-     EG(current_execute_data) = EX(prev_execute_data); \
-     ZEND_VM_RETURN()
+	free_alloca(EX(CVs)); \
+	if (EX(op_array)->T < TEMP_VAR_STACK_LIMIT) { \
+		free_alloca(EX(Ts)); \
+	} else { \
+		efree(EX(Ts)); \
+	} \
+	EG(in_execution) = EX(original_in_execution); \
+	EG(current_execute_data) = EX(prev_execute_data); \
+	ZEND_VM_RETURN()
 
 #define ZEND_VM_CONTINUE_JMP() \
-     ZEND_VM_CONTINUE()    
+	ZEND_VM_CONTINUE()    
 
 #include "zend_vm_execute.h"
 
