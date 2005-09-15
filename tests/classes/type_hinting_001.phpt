@@ -35,4 +35,4 @@ $a->b($b);
 ?>
 --EXPECTF--
 
-Fatal error: Argument 1 must implement interface Foo, called in %s on line 27 and defined in %s on line 12
+Catchable fatal error: Argument 1 must implement interface Foo, called in %s on line 27 and defined in %s on line 12

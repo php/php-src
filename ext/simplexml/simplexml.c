@@ -1093,6 +1093,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC)
 
 	if (sxe_object_cast(z, retval, IS_STRING, 0 TSRMLS_CC)==FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
+		/* FIXME: Should not be fatal */
 	}
 
 	retval->refcount = 0;
@@ -1152,6 +1153,7 @@ static zend_object_value sxe_object_ze1_clone(zval *zobject TSRMLS_DC)
 {
 	php_error(E_ERROR, "Cannot clone object of class %v due to 'zend.ze1_compatibility_mode'", Z_OBJCE_P(zobject)->name);
 	/* Return zobject->value.obj just to satisfy compiler */
+	/* FIXME: Should not be a fatal */
 	return zobject->value.obj;
 }
 
