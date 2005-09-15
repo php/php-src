@@ -69,6 +69,7 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #34062 (Crash in catch block when many arguments are used).
   (Dmitry)
+- Fixed bug #34052 (date('U') returns %ld not unix timestamp). (Nuno)
 - Fixed bug #34045 (Buffer overflow with serialized object). (Dmitry)
 - Fixed bug #34001 (pdo_mysql truncates numberic fields at 4 chars). (Ilia)
 - Fixed bug #33999 (object remains object when cast to int). (Dmitry)
