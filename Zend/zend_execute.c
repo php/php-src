@@ -462,19 +462,19 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 
 	if (cur_arg_info->class_name) {
 		if (!arg) {
-			if(ptr && ptr->op_array) {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
+			if (ptr && ptr->op_array) {
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
 			} else {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %s", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
 			}
 		}
 		switch (Z_TYPE_P(arg)) {
 			case IS_NULL:
 				if (!cur_arg_info->allow_null) {
-					if(ptr && ptr->op_array) {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+					if (ptr && ptr->op_array) {
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 					} else {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
 					}
 				}
 				break;
@@ -488,47 +488,47 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 						} else {
 							error_msg = "be an instance of";
 						}
-						if(ptr && ptr->op_array) {
-							zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must %s %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, ptr->op_array->filename, ptr->opline->lineno);
+						if (ptr && ptr->op_array) {
+							zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must %s %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, error_msg, ce->name, ptr->op_array->filename, ptr->opline->lineno);
 						} else {
-							zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must %s %s", arg_num, fclass, fsep, fname, error_msg, ce->name);
+							zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must %s %s", arg_num, fclass, fsep, fname, error_msg, ce->name);
 						}
 					}
 				}
 				break;
 			default:
-				if(ptr && ptr->op_array) {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
+				if (ptr && ptr->op_array) {
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s, called in %s on line %d and defined", arg_num, fclass, fsep, fname, cur_arg_info->class_name, ptr->op_array->filename, ptr->opline->lineno);
 				} else {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an object of class %s", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an object of class %s", arg_num, fclass, fsep, fname, cur_arg_info->class_name);
 				}
 				break;
 		}
-	}	else if (cur_arg_info->array_type_hint) {
+	} else if (cur_arg_info->array_type_hint) {
 		if (!arg) {
 			if(ptr && ptr->op_array) {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 			} else {
-				zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
+				zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
 			}
 		}
 		switch (Z_TYPE_P(arg)) {
 			case IS_NULL:
 				if (!cur_arg_info->allow_null) {
-					if(ptr && ptr->op_array) {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+					if (ptr && ptr->op_array) {
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 					} else {
-						zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
+						zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must not be null", arg_num, fclass, fsep, fname);
 					}
 				}
 				break;
 			case IS_ARRAY:
 				break;
 			default:	
-				if(ptr && ptr->op_array) {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
+				if (ptr && ptr->op_array) {
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array, called in %s on line %d and defined", arg_num, fclass, fsep, fname, ptr->op_array->filename, ptr->opline->lineno);
 				} else {
-					zend_error_noreturn(E_ERROR, "Argument %d to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
+					zend_error_noreturn(E_ERROR, "Argument %d passed to %s%s%s() must be an array", arg_num, fclass, fsep, fname);
 				}
 				break;
 		}
