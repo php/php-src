@@ -7,7 +7,7 @@ $o = new FileObject(dirname(__FILE__) . '/fileobject_001a.txt');
 
 var_dump($o->key());
 var_dump($o->current());
-$o->setFlags(FO_DROP_NEW_LINE);
+$o->setFlags(FileObject::DROP_NEW_LINE);
 var_dump($o->key());
 var_dump($o->current());
 var_dump($o->key());
@@ -32,7 +32,7 @@ foreach($o as $n => $l)
 
 echo "===B===\n";
 $o = new FileObject(dirname(__FILE__) . '/fileobject_001b.txt');
-$o->setFlags(FO_DROP_NEW_LINE);
+$o->setFlags(FileObject::DROP_NEW_LINE);
 foreach($o as $n => $l)
 {
 	var_dump($n, $l);

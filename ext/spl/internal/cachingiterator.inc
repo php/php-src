@@ -9,13 +9,10 @@
  * SPL - Standard PHP Library
  */
 
-define('CIT_CALL_TOSTRING', 1);
-define('CIT_CATCH_GET_CHILD', 2);
-
 /**
  * @brief   Cached iteration over another Iterator
  * @author  Marcus Boerger
- * @version 1.1
+ * @version 1.2
  * @since PHP 5.0
  *
  * This iterator wrapper does a one ahead iteration. This way it knows whether
@@ -23,13 +20,16 @@ define('CIT_CATCH_GET_CHILD', 2);
  *
  * @note If you want to convert the elements into strings and the inner 
  *       Iterator is an internal Iterator then you need to provide the 
- *       flag CIT_CALL_TOSTRING to do the conversion when the actual element
+ *       flag CALL_TOSTRING to do the conversion when the actual element
  *       is being fetched. Otherwise the conversion would happen with the
  *       already changed iterator. If you do not need this then it you should
  *       omit this flag because it costs unneccessary work and time.
  */
 class CachingIterator implements OuterIterator
 {
+	const CALL_TOSTRING    = 1;
+	const CATCH_GET_CHILD  = 2;
+
 	private $it;
 	private $current;
 	private $key;
@@ -40,12 +40,12 @@ class CachingIterator implements OuterIterator
 	 *
 	 * @param it    Iterator to cache
 	 * @param flags Bitmask: 
-	 *              - CIT_CALL_TOSTRING  (whether to call __toString() for every element)
+	 *              - CALL_TOSTRING  (whether to call __toString() for every element)
 	 */
-	function __construct(Iterator $it, $flags = CIT_CALL_TOSTRING)
+	function __construct(Iterator $it, $flags = self::CALL_TOSTRING)
 	{
 		$this->it = $it;
-		$this->flags = $flags & (CIT_CALL_TOSTRING|CIT_CATCH_GET_CHILD);
+		$this->flags = $flags & (self::CALL_TOSTRING|self::CATCH_GET_CHILD);
 		$this->next();
 	}
 
@@ -64,7 +64,7 @@ class CachingIterator implements OuterIterator
 		if ($this->valid = $this->it->valid()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
-			if ($this->flags & CIT_CALL_TOSTRING) {
+			if ($this->flags & self::CALL_TOSTRING) {
 				if (is_object($this->current)) {
 					$this->strValue = $this->current->__toString();
 				} else {
@@ -119,11 +119,11 @@ class CachingIterator implements OuterIterator
 	
 	/** @return the string represenatation that was generated for the current 
 	 *          element
-	 * @throw exception when CIT_CALL_TOSTRING was not specified in constructor
+	 * @throw exception when CALL_TOSTRING was not specified in constructor
 	 */
 	function __toString()
 	{
-		if (!$this->flags & CIT_CALL_TOSTRING) {
+		if (!$this->flags & self::CALL_TOSTRING) {
 			throw new exception('CachingIterator does not fetch string value (see CachingIterator::__construct)');
 		}
 		return $this->strValue;

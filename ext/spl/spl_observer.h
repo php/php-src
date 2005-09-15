@@ -24,8 +24,9 @@
 #include "php.h"
 #include "php_spl.h"
 
-extern PHPAPI zend_class_entry *spl_ce_Observer;
-extern PHPAPI zend_class_entry *spl_ce_Subject;
+extern PHPAPI zend_class_entry *spl_ce_SplObserver;
+extern PHPAPI zend_class_entry *spl_ce_SplSubject;
+extern PHPAPI zend_class_entry *spl_ce_SplObjectStorage;
 
 PHP_MINIT_FUNCTION(spl_observer);
 
