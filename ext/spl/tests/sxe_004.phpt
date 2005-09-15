@@ -77,7 +77,7 @@ class SXETest extends SimpleXMLIterator
 }
 
 $sxe = new SXETest($xml);
-$rit = new RecursiveIteratorIterator($sxe, RIT_SELF_FIRST);
+$rit = new RecursiveIteratorIterator($sxe, RecursiveIteratorIterator::SELF_FIRST);
 
 foreach($rit as $data) {
 	var_dump(get_class($data));
@@ -139,6 +139,65 @@ SXETest::valid
 SXETest::current
 string(7) "SXETest"
 string(7) "Foo Bar"
+SXETest::next
+SXETest::valid
+SXETest::next
+SXETest::valid
+SXETest::valid
+===DONE===
+--UEXPECTF--
+SXETest::rewind
+SXETest::valid
+SXETest::hasChildren
+SXETest::valid
+SXETest::current
+unicode(7) "SXETest"
+unicode(10) "Bla bla 1."
+SXETest::getChildren
+SXETest::rewind
+SXETest::valid
+SXETest::hasChildren
+SXETest::valid
+SXETest::current
+unicode(7) "SXETest"
+unicode(28) "Here we have some text data."
+SXETest::getChildren
+SXETest::rewind
+SXETest::valid
+SXETest::hasChildren
+SXETest::valid
+SXETest::current
+unicode(7) "SXETest"
+unicode(19) "And here some more."
+SXETest::getChildren
+SXETest::rewind
+SXETest::valid
+SXETest::hasChildren
+SXETest::valid
+SXETest::current
+unicode(7) "SXETest"
+unicode(15) "Wow once again."
+SXETest::next
+SXETest::valid
+SXETest::next
+SXETest::valid
+SXETest::next
+SXETest::valid
+SXETest::next
+SXETest::valid
+SXETest::hasChildren
+SXETest::valid
+SXETest::current
+unicode(7) "SXETest"
+unicode(10) "Bla bla 2."
+SXETest::getChildren
+SXETest::rewind
+SXETest::valid
+SXETest::hasChildren
+SXETest::valid
+SXETest::current
+unicode(7) "SXETest"
+unicode(7) "Foo Bar"
 SXETest::next
 SXETest::valid
 SXETest::next

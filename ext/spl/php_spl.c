@@ -63,6 +63,7 @@ static zend_class_entry * spl_find_ce_by_name(char *name, int len, zend_bool aut
 {
 	zend_class_entry **ce;
 	int found;
+
 	if (!autoload) {
 		char *lc_name;
 
@@ -169,7 +170,6 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(LimitIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(LogicException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(NoRewindIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(Observer, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OuterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OutOfBoundsException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OutOfRangeException, z_list, sub, allow, ce_flags); \
@@ -177,12 +177,15 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(ParentIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RangeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveDirectoryIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveFilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIteratorIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(Subject, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplObjectStorage, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplObserver, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(SplSubject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
 
