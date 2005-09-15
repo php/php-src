@@ -1,6 +1,6 @@
 <?php
 
-/** @file fileobject.inc
+/** @file splfileobject.inc
  * @ingroup SPL
  * @brief class FileObject
  * @author  Marcus Boerger
@@ -15,7 +15,7 @@
  * @version 1.0
  * @since PHP 5.1
  */
-class FileObject implements RecursiveIterator, SeekableIterator
+class SplFileObject implements RecursiveIterator, SeekableIterator
 {
 	/** Flag: wheter to suppress new lines */
 	const DROP_NEW_LINE   = 0x00000001;
