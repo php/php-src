@@ -257,7 +257,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 #	define PHP_SAFE_MODE_EXEC_DIR ""
 #endif
 
-#ifdef PHP_PROG_SENDMAIL
+#if defined(PHP_PROG_SENDMAIL) && !defined(NETWARE) 
 #	define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
 #else
 #	define DEFAULT_SENDMAIL_PATH NULL
