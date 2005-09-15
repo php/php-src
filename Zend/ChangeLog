@@ -1,3 +1,13 @@
+2005-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      - Improve error message
+
+2005-09-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * acinclude.m4:
+      Silence some crap if bison does not exist
+
 2005-09-13  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_reflection_api.c:

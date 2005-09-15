@@ -1,3 +1,31 @@
+2005-09-14  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      main/main.c:
+      - MF51: Fixed shutdown order.
+
+    * (PHP_5_1)
+      main/main.c:
+      - Fixed shutdown order before RC2.
+
+2005-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      - Improve error message
+
+2005-09-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.UNICODE-UPGRADES:
+      -** empty log message ***
+
+2005-09-14  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * Makefile.global:
+      Silence warnings under Solaris
+
+    * ZendEngine2/acinclude.m4:
+      Silence some crap if bison does not exist
+
 2005-09-13  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * configure.in:
