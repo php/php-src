@@ -6,6 +6,10 @@ PHP                                                                        NEWS
 - Added support for class constants and static members for internal
   classes. (Dmitry, Michael Wallner)
 - Added "new_link" parameter to mssql_connect(). Bug #34369. (Frank)
+- Improved SPL extension. (Marcus)
+  . Added RecursiveFilterIterator
+  . Added SplObjectStorage
+  . Made all SPL constants class constants
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.5 (Ilia)
 - Upgraded SQLite 2 library in ext/sqlite to 2.8.16 (Ilia)
 - Upgraded PCRE library to version 6.2. (Andrei)
