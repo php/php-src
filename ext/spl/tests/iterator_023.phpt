@@ -39,7 +39,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 	function __construct($it, $max_depth)
 	{
 		$this->max_depth = $max_depth;
-		parent::__construct($it, RIT_LEAVES_ONLY, RIT_CATCH_GET_CHILD);
+		parent::__construct($it, RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
 	}
 
 	function rewind()

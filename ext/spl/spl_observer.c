@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2005 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.0 of the PHP license,       |
+   | This source file is SplSubject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_0.txt.                                  |
@@ -35,40 +35,40 @@
 #include "spl_iterators.h"
 #include "spl_array.h"
 
-SPL_METHOD(Observer, update);
-SPL_METHOD(Subject, attach);
-SPL_METHOD(Subject, detach);
-SPL_METHOD(Subject, notify);
+SPL_METHOD(SplObserver, update);
+SPL_METHOD(SplSubject, attach);
+SPL_METHOD(SplSubject, detach);
+SPL_METHOD(SplSubject, notify);
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_Observer_update, 0)
-	ZEND_ARG_OBJ_INFO(0, subject, Subject, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_SplObserver_update, 0)
+	ZEND_ARG_OBJ_INFO(0, SplSubject, SplSubject, 0)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_Observer[] = {
-	SPL_ABSTRACT_ME(Observer, update,   arginfo_Observer_update)
+static zend_function_entry spl_funcs_SplObserver[] = {
+	SPL_ABSTRACT_ME(SplObserver, update,   arginfo_SplObserver_update)
 	{NULL, NULL, NULL}
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_Subject_attach, 0)
-	ZEND_ARG_OBJ_INFO(0, observer, Observer, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_SplSubject_attach, 0)
+	ZEND_ARG_OBJ_INFO(0, SplObserver, SplObserver, 0)
 ZEND_END_ARG_INFO();
 
 /*static
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Subject_notify, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, ignore, Observer, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_SplSubject_notify, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, ignore, SplObserver, 1)
 ZEND_END_ARG_INFO();*/
 
-static zend_function_entry spl_funcs_Subject[] = {
-	SPL_ABSTRACT_ME(Subject,  attach,   arginfo_Subject_attach)
-	SPL_ABSTRACT_ME(Subject,  detach,   arginfo_Subject_attach)
-	SPL_ABSTRACT_ME(Subject,  notify,   NULL)
+static zend_function_entry spl_funcs_SplSubject[] = {
+	SPL_ABSTRACT_ME(SplSubject,  attach,   arginfo_SplSubject_attach)
+	SPL_ABSTRACT_ME(SplSubject,  detach,   arginfo_SplSubject_attach)
+	SPL_ABSTRACT_ME(SplSubject,  notify,   NULL)
 	{NULL, NULL, NULL}
 };
 
-PHPAPI zend_class_entry     *spl_ce_Observer;
-PHPAPI zend_class_entry     *spl_ce_Subject;
+PHPAPI zend_class_entry     *spl_ce_SplObserver;
+PHPAPI zend_class_entry     *spl_ce_SplSubject;
 PHPAPI zend_class_entry     *spl_ce_SplObjectStorage;
 PHPAPI zend_object_handlers spl_handler_SplObjectStorage;
 
@@ -250,8 +250,8 @@ static zend_function_entry spl_funcs_SplObjectStorage[] = {
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */
 PHP_MINIT_FUNCTION(spl_observer)
 {
-	REGISTER_SPL_INTERFACE(Observer);
-	REGISTER_SPL_INTERFACE(Subject);
+	REGISTER_SPL_INTERFACE(SplObserver);
+	REGISTER_SPL_INTERFACE(SplSubject);
 
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
 	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
