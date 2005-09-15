@@ -36,4 +36,4 @@ Warning: main(): Cannot write or create unnamed attribute in %s012.php on line %
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <foo attr="new value"/>
 
-Fatal error: main(): Cannot create unnamed attribute in %s012.php on line %d
+Catchable fatal error: main(): Cannot create unnamed attribute in %s012.php on line %d

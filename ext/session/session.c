@@ -100,6 +100,7 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 
 	if (PG(modules_activated) && !PS(mod)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find save handler %s", new_value);
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -126,6 +127,7 @@ static PHP_INI_MH(OnUpdateSerializer)
 
 	if (PG(modules_activated) && !PS(serializer)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot find serialization handler %s", new_value);
+		return FAILURE;
 	}
 
 	return SUCCESS;

@@ -1,7 +1,7 @@
 --TEST--
 ZE2 ArrayAccess::offsetGet ambiguties
 --INI--
-error_reporting=4095
+error_reporting=8191
 --FILE--
 <?php
 class object implements ArrayAccess {

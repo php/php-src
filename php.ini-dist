@@ -254,6 +254,7 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ; reporting level
 ; E_ALL             - All errors and warnings (doesn't include E_STRICT)
 ; E_ERROR           - fatal run-time errors
+; E_RECOVERABLE_ERROR     - almost fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
 ; E_PARSE           - compile-time parse errors
 ; E_NOTICE          - run-time notices (these are warnings which often result
@@ -285,7 +286,7 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ;
 ;   - Show only errors
 ;
-;error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR
+;error_reporting = E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR
 ;
 ;   - Show all errors except for notices and coding standards warnings
 ;

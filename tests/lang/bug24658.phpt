@@ -53,4 +53,4 @@ int(2)
 object(foo)#%d (0) {
 }
 
-Fatal error: Argument 1 must be an object of class foo in %s on line %d
+Catchable fatal error: Argument 1 must be an object of class foo in %s on line %d

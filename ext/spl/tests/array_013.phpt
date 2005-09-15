@@ -78,4 +78,4 @@ one=>1
 two=>2
 ===Append===
 
-Fatal error: ArrayIterator::append(): Cannot append properties to objects, use ArrayIterator::offsetSet() instead in %sarray_013.php on line %d
+Catchable fatal error: ArrayIterator::append(): Cannot append properties to objects, use ArrayIterator::offsetSet() instead in %sarray_013.php on line %d
