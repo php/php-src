@@ -84,6 +84,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #33967 (misuse of Exception constructor doesn't display errorfile).
   (Jani)
+- Fixed bug #33966 (Wrong use of reflectionproperty causes a segfault). (Tony)
 - Fixed bug #33958 (duplicate cookies and magic_quotes=off may cause a crash).
   (Ilia)
 - Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week number).
