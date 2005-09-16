@@ -4,33 +4,14 @@ PHP                                                                        NEWS
 - Unicode support. (Andrei, Dmitriy, et al)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
-- Added optional parameter to http_build_query() to allow specification of 
-  string separator.
 - cURL improvements: (Ilia)
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
+- Added optional parameter to http_build_query() to allow specification of 
+  string separator.
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
   components. (Ilia)
 - Added an optional parameter to strstr() and stristr() for retrieval of either
   the part of haystack before or after first occurence of needle. (Johannes)
 - Added possibility to check in which extension an internal function was
   defined using reflection API. (Johannes)
-- Fixed a bug where stream_get_meta_data() did not return the "uri" element for
-  files opened with tmpname(). (Derick)
-- Fixed bug #34518 (Unset doesn't separate container in CV). (Dmitry)
-- Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
-- Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
-- Fixed bug #34310 (foreach($arr as $c->d => $x) crashes). (Dmitry)
-- Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
-  (Derick)
-- Fixed bug #34277 (array_filter() crashes with references and objects).
-  (Dmitry)
-- Fixed bug #34260 (Segfault with callbacks (array_map) + overloading).
-  (Dmitry)
-- Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
-  (Dmitry, Alex)
-- Fixed bug #34137 (assigning array element by reference causes binary mess).
-  (Dmitry) 
-- Fixed bug #34052 (date('U') returns %ld not unix timestamp). (Nuno)
-- Fixed bug #33957 (gmdate('W')/date('W') sometimes returns wrong week number).
-  (Derick)
