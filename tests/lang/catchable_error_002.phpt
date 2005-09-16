@@ -25,7 +25,7 @@ array(5) {
   [0]=>
   int(4096)
   [1]=>
-  string(%d) "Argument 1 must be an instance of Foo, called in %scatchable_error_002.php on line 17 and defined"
+  string(%d) "Argument 1 passed to blah() must be an instance of Foo, called in %scatchable_error_002.php on line 17 and defined"
   [2]=>
   string(%d) "%scatchable_error_002.php"
   [3]=>
