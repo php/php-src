@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.0.6
+- Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
 - Fixed bug #34450 (Segfault when calling mysqli_close() in destructor). (Tony)
 - Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
 - Fixed bug #34199 (if($obj)/if(!$obj) inconsistency because of cast handler).
