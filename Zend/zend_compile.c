@@ -2065,7 +2065,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 					if (zend_hash_find(&ce->default_static_members, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
 						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
 							char *prop_name, *tmp;
-							zend_unmangle_property_name(child_info->name, &tmp, &prop_name);
+							zend_unmangle_property_name_ex(child_info->name, child_info->name_length, &tmp, &prop_name);
 						
 							zend_error(E_COMPILE_ERROR, "Cannot change initial value of property static protected %s::$%s in class %s", 
 								parent_ce->name, prop_name, ce->name);
@@ -2813,6 +2813,18 @@ ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, char *src
 	*dest_length = prop_name_length;
 }
 
+
+ZEND_API void zend_unmangle_property_name_ex(char *mangled_property, int mangled_property_len, char **class_name, char **prop_name)
+{
+	*prop_name = *class_name = NULL;
+
+	if (mangled_property_len < 2) { /* do not try to unmangle empty strings */
+		*prop_name = mangled_property;
+		return;
+	}
+	
+	zend_unmangle_property_name(mangled_property, class_name, prop_name);
+}
 
 ZEND_API void zend_unmangle_property_name(char *mangled_property, char **class_name, char **prop_name)
 {
