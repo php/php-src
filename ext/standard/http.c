@@ -69,7 +69,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				/* private or protected property access outside of the class */
 				continue;
 			}
-			zend_unmangle_property_name(key, &tmp, &key);
+			zend_unmangle_property_name_ex(key, key_len, &tmp, &key);
 			key_len = strlen(key);		
 		}
 
