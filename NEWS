@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
 - Fixed bug #34518 (Unset doesn't separate container in CV). (Dmitry)
+- Fixed bug #34505 (Possible memory corruption when unmangling properties 
+  with empty names). (Tony)
 - Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
 - Fixed bug #34456 (Possible crash inside pspell extension). (Nuno)
 - Fixed bug #34450 (Segfault when calling mysqli_close() in destructor). (Tony)
