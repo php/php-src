@@ -2146,7 +2146,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				}
 				if (zend_u_hash_find(ht, utype, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
 					zval **new_prop;
-					if (zend_u_hash_find(ht, utype, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
+					if (zend_u_hash_find(&ce->default_static_members, utype, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
 						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
 							char *prop_name, *tmp;
 
