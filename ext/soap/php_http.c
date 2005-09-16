@@ -400,6 +400,10 @@ try_again:
 			smart_str_appendc(&soap_headers, '?');
 			smart_str_appends(&soap_headers, phpurl->query);
 		}
+		if (phpurl->fragment) {
+			smart_str_appendc(&soap_headers, '#');
+			smart_str_appends(&soap_headers, phpurl->fragment);
+		}
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n"
 			"Host: ");
 		smart_str_appends(&soap_headers, phpurl->host);
@@ -555,6 +559,10 @@ try_again:
 					if (phpurl->query) {
 						smart_str_appendc(&soap_headers, '?');
 						smart_str_appends(&soap_headers, phpurl->query);
+					}
+					if (phpurl->fragment) {
+							smart_str_appendc(&soap_headers, '#');
+							smart_str_appends(&soap_headers, phpurl->fragment);
 					}
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
 					    Z_TYPE_PP(tmp) == IS_STRING) {

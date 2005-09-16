@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Fixed a bug where stream_get_meta_data() did not return the "uri" element for
   files opened with tmpname(). (Derick)
 - Fixed bug #34518 (Unset doesn't separate container in CV). (Dmitry)
+- Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
 - Fixed bug #34449 (ext/soap: XSD_ANYXML functionality not exposed). (Dmitry)
 - Fixed bug #34310 (foreach($arr as $c->d => $x) crashes). (Dmitry)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).
