@@ -1,3 +1,77 @@
+2005-09-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      ZendEngine2/tests/array_type_hint_001.phpt
+      ZendEngine2/tests/bug20240.phpt
+      ZendEngine2/tests/bug33996.phpt
+      ZendEngine2/tests/bug34199.phpt
+      tests/classes/type_hinting_001.phpt
+      tests/lang/bug24658.phpt
+      tests/lang/type_hints_001.phpt:
+      - Fix tests due to changes in the error messages.
+
+2005-09-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      NEWS
+      main/config.w32.h
+      main/snprintf.h:
+      - MFH: Fixed bug #34052 (date('U') returns %ld not unix timestamp).
+
+    * NEWS
+      main/config.w32.h
+      main/snprintf.h:
+      - Fixed bug #34052 (date('U') returns %ld not unix timestamp).
+
+    * tests/lang/catchable_error_001.phpt
+      tests/lang/catchable_error_002.phpt:
+      - Added tests.
+
+    * php.ini-dist
+      php.ini-recommended
+      run-tests.php
+      ZendEngine2/zend.c
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/array_type_hint_001.phpt
+      ZendEngine2/tests/bug33996.phpt
+      ext/mcrypt/mcrypt.c
+      ext/session/session.c
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/012.phpt
+      main/main.c
+      tests/classes/array_access_003.phpt
+      tests/classes/private_003.phpt
+      tests/classes/type_hinting_001.phpt
+      tests/lang/bug24658.phpt
+      tests/lang/type_hints_001.phpt
+      tests/run-test/test005.phpt
+      tests/run-test/test008a.phpt:
+      - Add E_RECOVERABLE.
+
+2005-09-15  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_4_4)
+      main/main.c:
+      NetWare does not have sendmail binary to send mail.
+      --Kamesh
+
+2005-09-15  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ZendEngine2/zend_execute.c:
+      MFB
+
+    * (PHP_5_1)
+      ZendEngine2/zend_execute.c:
+      - Fixed error message grammar
+
+2005-09-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - Update with latest SPLchanges
+
 2005-09-14  Derick Rethans  <php@derickrethans.nl>
 
     * (PHP_5_0)
