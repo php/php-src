@@ -3122,7 +3122,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				zend_hash_move_forward(fe_ht);
 			} while (key_type != HASH_KEY_IS_STRING || zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
 			if (use_key) {
-				zend_unmangle_property_name(str_key, &class_name, &prop_name);
+				zend_unmangle_property_name_ex(str_key, str_key_len, &class_name, &prop_name);
 				str_key_len = strlen(prop_name);
 				str_key = estrndup(prop_name, str_key_len);
 				str_key_len++;
