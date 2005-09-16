@@ -41,13 +41,13 @@ zend_class_entry *reflection_property_ptr;
 zend_class_entry *reflection_extension_ptr;
 
 /* Method macros */
-#define METHOD_NOTSTATIC                                                                                    \
-	if (!this_ptr) {                                                                                        \
+#define METHOD_NOTSTATIC(ce)                                                                                \
+	if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), ce TSRMLS_CC)) {                             \
 		zend_error(E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
 		return;                                                                                             \
 	}                                                                                                       \
 
-#define METHOD_NOTSTATIC_NUMPARAMS(c) METHOD_NOTSTATIC                                                      \
+#define METHOD_NOTSTATIC_NUMPARAMS(ce, c) METHOD_NOTSTATIC(ce)                                              \
 	if (ZEND_NUM_ARGS() > c) {                                                                              \
 		ZEND_WRONG_PARAM_COUNT();                                                                           \
 	}                                                                                                       \
@@ -852,7 +852,7 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	RETURN_BOOL(mptr->common.fn_flags & mask);
 }
@@ -1252,7 +1252,7 @@ ZEND_METHOD(reflection_function, __toString)
 	zend_function *fptr;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	string_init(&str);
 	_function_string(&str, fptr, "" TSRMLS_CC);
@@ -1264,7 +1264,7 @@ ZEND_METHOD(reflection_function, __toString)
    Returns this function's name */
 ZEND_METHOD(reflection, function_getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -1276,7 +1276,7 @@ ZEND_METHOD(reflection, function_isInternal)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION);
 }
@@ -1289,7 +1289,7 @@ ZEND_METHOD(reflection_function, isUserDefined)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	RETURN_BOOL(fptr->type == ZEND_USER_FUNCTION);
 }
@@ -1302,7 +1302,7 @@ ZEND_METHOD(reflection_function, getFileName)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_STRING(fptr->op_array.filename, 1);
@@ -1318,7 +1318,7 @@ ZEND_METHOD(reflection_function, getStartLine)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(fptr->op_array.line_start);
@@ -1334,7 +1334,7 @@ ZEND_METHOD(reflection_function, getEndLine)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(fptr->op_array.line_end);
@@ -1350,7 +1350,7 @@ ZEND_METHOD(reflection_function, getDocComment)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		RETURN_STRINGL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
@@ -1367,7 +1367,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	reflection_object *intern;
 	zend_function *fptr;
 	
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_function_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	/* Return an empty array in case no static variables exist */
@@ -1392,7 +1392,7 @@ ZEND_METHOD(reflection_function, invoke)
 	reflection_object *intern;
 	zend_function *fptr;
 	
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	params = safe_emalloc(sizeof(zval **), argc, 0);
@@ -1452,7 +1452,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	zend_function *fptr;
 	zval *param_array;
 	
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &param_array) == FAILURE) {
@@ -1503,7 +1503,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_BOOL(fptr->op_array.return_reference);
@@ -1517,7 +1517,7 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_LONG(fptr->common.num_args);
@@ -1531,7 +1531,7 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_LONG(fptr->common.required_num_args);
@@ -1547,7 +1547,7 @@ ZEND_METHOD(reflection_function, getParameters)
 	zend_uint i;
 	struct _zend_arg_info *arg_info;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	arg_info= fptr->common.arg_info;
@@ -1709,7 +1709,7 @@ ZEND_METHOD(reflection_parameter, __toString)
 	parameter_reference *param;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
 	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
@@ -1721,7 +1721,7 @@ ZEND_METHOD(reflection_parameter, __toString)
    Returns this parameters's name */
 ZEND_METHOD(reflection_parameter, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -1733,7 +1733,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->arg_info->class_name) {
@@ -1761,7 +1761,7 @@ ZEND_METHOD(reflection_parameter, isArray)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->array_type_hint);
@@ -1775,7 +1775,7 @@ ZEND_METHOD(reflection_parameter, allowsNull)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->allow_null);
@@ -1789,7 +1789,7 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->pass_by_reference);
@@ -1803,7 +1803,7 @@ ZEND_METHOD(reflection_parameter, isOptional)
 	reflection_object *intern;
 	parameter_reference *param;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->offset >= param->required);
@@ -1818,7 +1818,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	parameter_reference *param;
 	zend_op *precv;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type != ZEND_USER_FUNCTION)
@@ -1845,7 +1845,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	zend_op *precv;
 	zval *zv, zv_copy;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_parameter_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type != ZEND_USER_FUNCTION)
@@ -1954,7 +1954,7 @@ ZEND_METHOD(reflection_method, __toString)
 	zend_function *mptr;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	string_init(&str);
 	_function_string(&str, mptr, "" TSRMLS_CC);
@@ -1977,7 +1977,7 @@ ZEND_METHOD(reflection_method, invoke)
 	zend_fcall_info_cache fcc;
 	zend_class_entry *obj_ce;
 	
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_method_ptr);
 
 	if (argc < 1) {
 		zend_error(E_WARNING, "Invoke() expects at least one parameter, none given");
@@ -2081,7 +2081,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	zend_class_entry *obj_ce;
 	zval *param_array;
 	
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_method_ptr);
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
@@ -2224,7 +2224,7 @@ ZEND_METHOD(reflection_method, isConstructor)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	/* we need to check if the ctor is the ctor of the class level we we 
 	 * looking at since we might be looking at an inherited old style ctor
@@ -2240,7 +2240,7 @@ ZEND_METHOD(reflection_method, isDestructor)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_DTOR);
 }
@@ -2253,7 +2253,7 @@ ZEND_METHOD(reflection_method, getModifiers)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_method_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	RETURN_LONG(mptr->common.fn_flags);
@@ -2267,7 +2267,7 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_method_ptr);
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	zend_reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
@@ -2351,7 +2351,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
@@ -2437,7 +2437,7 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 	zend_class_entry *ce;
 	int count;
 	
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 
@@ -2483,7 +2483,7 @@ ZEND_METHOD(reflection_class, __toString)
 	zend_class_entry *ce;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	string_init(&str);
 	_class_string(&str, ce, intern->obj, "" TSRMLS_CC);
@@ -2495,7 +2495,7 @@ ZEND_METHOD(reflection_class, __toString)
    Returns the class' name */
 ZEND_METHOD(reflection_class, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -2507,7 +2507,7 @@ ZEND_METHOD(reflection_class, isInternal)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETURN_BOOL(ce->type == ZEND_INTERNAL_CLASS);
 }
@@ -2520,7 +2520,7 @@ ZEND_METHOD(reflection_class, isUserDefined)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETURN_BOOL(ce->type == ZEND_USER_CLASS);
 }
@@ -2533,7 +2533,7 @@ ZEND_METHOD(reflection_class, getFileName)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
 		RETURN_STRING(ce->filename, 1);
@@ -2549,7 +2549,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_FUNCTION) {
 		RETURN_LONG(ce->line_start);
@@ -2565,7 +2565,7 @@ ZEND_METHOD(reflection_class, getEndLine)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
 		RETURN_LONG(ce->line_end);
@@ -2581,7 +2581,7 @@ ZEND_METHOD(reflection_class, getDocComment)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
 		RETURN_STRINGL(ce->doc_comment, ce->doc_comment_len, 1);
@@ -2597,7 +2597,7 @@ ZEND_METHOD(reflection_class, getConstructor)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->constructor) {
@@ -2617,7 +2617,7 @@ ZEND_METHOD(reflection_class, hasMethod)
 	char *name, *lc_name; 
 	int name_len;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -2644,7 +2644,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	char *name, *lc_name; 
 	int name_len;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -2690,7 +2690,7 @@ ZEND_METHOD(reflection_class, getMethods)
 	long filter = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
 		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
 			return;
@@ -2717,7 +2717,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 	int name_len;
 	zval *property;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -2751,7 +2751,7 @@ ZEND_METHOD(reflection_class, getProperty)
 	char *name; 
 	int name_len;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -2798,7 +2798,7 @@ ZEND_METHOD(reflection_class, getProperties)
 	long filter = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
 		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
 			return;
@@ -2824,7 +2824,7 @@ ZEND_METHOD(reflection_class, hasConstant)
 	char *name;
 	int name_len;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -2846,7 +2846,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
@@ -2864,7 +2864,7 @@ ZEND_METHOD(reflection_class, getConstant)
 	char *name; 
 	int name_len;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
@@ -2885,7 +2885,7 @@ static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETVAL_BOOL(ce->ce_flags & mask);
 }
@@ -2898,7 +2898,7 @@ ZEND_METHOD(reflection_class, isInstantiable)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_ABSTRACT)) {
 		RETURN_FALSE;
@@ -2945,7 +2945,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	RETURN_LONG(ce->ce_flags);
@@ -2960,7 +2960,7 @@ ZEND_METHOD(reflection_class, isInstance)
 	zend_class_entry *ce;
 	zval *object;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
 		return;
 	}
@@ -2978,7 +2978,7 @@ ZEND_METHOD(reflection_class, newInstance)
 	zend_class_entry *ce;
 	int argc = ZEND_NUM_ARGS();
 	
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	object_init_ex(return_value, ce);
@@ -3036,7 +3036,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	/* Return an empty array if this class implements no interfaces */
@@ -3062,7 +3062,7 @@ ZEND_METHOD(reflection_class, getParentClass)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_class_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	
 	if (ce->parent) {
@@ -3081,7 +3081,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	zend_class_entry *ce, **pce, *class_ce;
 	zval *class_name;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &class_name) == FAILURE) {
@@ -3127,7 +3127,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 	zend_class_entry *ce, *interface_ce, **pce;
 	zval *interface;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &interface) == FAILURE) {
@@ -3176,7 +3176,7 @@ ZEND_METHOD(reflection_class, isIterateable)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	RETURN_BOOL(ce->get_iterator != NULL);
@@ -3190,7 +3190,7 @@ ZEND_METHOD(reflection_class, getExtension)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->module) {
@@ -3206,7 +3206,7 @@ ZEND_METHOD(reflection_class, getExtensionName)
 	reflection_object *intern;
 	zend_class_entry *ce;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->module) {
@@ -3333,7 +3333,7 @@ ZEND_METHOD(reflection_property, __toString)
 	property_reference *ref;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
 	_property_string(&str, ref->prop, NULL, "" TSRMLS_CC);
@@ -3345,7 +3345,7 @@ ZEND_METHOD(reflection_property, __toString)
    Returns the class' name */
 ZEND_METHOD(reflection_property, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -3355,7 +3355,7 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	RETURN_BOOL(ref->prop->flags & mask);
 }
@@ -3407,7 +3407,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	RETURN_LONG(ref->prop->flags);
@@ -3423,7 +3423,7 @@ ZEND_METHOD(reflection_property, getValue)
 	zval *object;
 	zval **member= NULL;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop->flags & ZEND_ACC_PUBLIC)) {
@@ -3466,7 +3466,7 @@ ZEND_METHOD(reflection_property, setValue)
 	zval *tmp;
 	HashTable *prop_table;
 
-	METHOD_NOTSTATIC;
+	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (ref->prop->flags & ~(ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)) {
@@ -3525,7 +3525,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	zend_reflection_class_factory(ref->ce, return_value TSRMLS_CC);
@@ -3538,7 +3538,7 @@ ZEND_METHOD(reflection_property, getDocComment)
 	reflection_object *intern;
 	property_reference *ref;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_property_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop->doc_comment) {
 		RETURN_STRINGL(ref->prop->doc_comment, ref->prop->doc_comment_len, 1);
@@ -3601,7 +3601,7 @@ ZEND_METHOD(reflection_extension, __toString)
 	zend_module_entry *module;
 	string str;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(module);
 	string_init(&str);
 	_extension_string(&str, module, "" TSRMLS_CC);
@@ -3613,7 +3613,7 @@ ZEND_METHOD(reflection_extension, __toString)
    Returns this extension's name */
 ZEND_METHOD(reflection_extension, getName)
 {
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
 	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
 }
 /* }}} */
@@ -3625,7 +3625,7 @@ ZEND_METHOD(reflection_extension, getVersion)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	/* An extension does not necessarily have a version number */
@@ -3644,7 +3644,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -3692,7 +3692,7 @@ ZEND_METHOD(reflection_extension, getConstants)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -3724,7 +3724,7 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -3760,7 +3760,7 @@ ZEND_METHOD(reflection_extension, getClasses)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
@@ -3775,7 +3775,7 @@ ZEND_METHOD(reflection_extension, getClassNames)
 	reflection_object *intern;
 	zend_module_entry *module;
 
-	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	METHOD_NOTSTATIC_NUMPARAMS(reflection_extension_ptr, 0);	
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
