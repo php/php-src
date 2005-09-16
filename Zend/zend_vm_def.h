@@ -1292,7 +1292,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2, free_res;
-	zval **container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R);
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE == IS_CV) {

@@ -15230,7 +15230,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_res;
-	zval **container = NULL;
+	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *property = &opline->op2.u.constant;
 
 	if (IS_UNUSED == IS_CV) {
@@ -16379,7 +16379,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2, free_res;
-	zval **container = NULL;
+	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *property = _get_zval_ptr_tmp(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_UNUSED == IS_CV) {
@@ -17487,7 +17487,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op2, free_res;
-	zval **container = NULL;
+	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *property = _get_zval_ptr_var(&opline->op2, EX(Ts), &free_op2 TSRMLS_CC);
 
 	if (IS_UNUSED == IS_CV) {
@@ -18962,7 +18962,7 @@ static int ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_res;
-	zval **container = NULL;
+	zval **container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
 	zval *property = _get_zval_ptr_cv(&opline->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
 
 	if (IS_UNUSED == IS_CV) {
