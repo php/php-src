@@ -1096,6 +1096,7 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2;
+	zval **container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_UNSET);
 	zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	/* Not needed in DIM_UNSET
@@ -1103,7 +1104,12 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 		PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr);
 	}
 	*/
-	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_UNSET), dim, IS_OP2_TMP_FREE(), BP_VAR_UNSET TSRMLS_CC);
+	if (OP1_TYPE == IS_CV) {
+		if (container != &EG(uninitialized_zval_ptr)) {
+			SEPARATE_ZVAL_IF_NOT_REF(container);
+		}
+	}
+	zend_fetch_dimension_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, dim, IS_OP2_TMP_FREE(), BP_VAR_UNSET TSRMLS_CC);
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	if (EX_T(opline->result.u.var).var.ptr_ptr == NULL) {
@@ -1261,12 +1267,18 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1, free_op2, free_res;
+	zval **container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R);
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (OP1_TYPE == IS_CV) {
+		if (container != &EG(uninitialized_zval_ptr)) {
+			SEPARATE_ZVAL_IF_NOT_REF(container);
+		}
+	}
 	if (IS_OP2_TMP_FREE()) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
-	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_R), property, BP_VAR_R TSRMLS_CC);
+	zend_fetch_property_address(RETURN_VALUE_UNUSED(&opline->result)?NULL:&EX_T(opline->result.u.var), container, property, BP_VAR_R TSRMLS_CC);
 	if (IS_OP2_TMP_FREE()) {
 		zval_ptr_dtor(&property);
 	} else {
