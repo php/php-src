@@ -76,7 +76,7 @@ static int php_object_property_dump(zval **zv, int num_args, va_list args, zend_
 	if (hash_key->nKeyLength ==0 ) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		zend_unmangle_property_name(hash_key->arKey, &class_name, &prop_name);
+		zend_unmangle_property_name_ex(hash_key->arKey, hash_key->nKeyLength, &class_name, &prop_name);
 		if (class_name) {
 			php_printf("%*c[\"%s", level + 1, ' ', prop_name);
 			if (class_name[0]=='*') {
@@ -351,7 +351,7 @@ static int php_object_element_export(zval **zv, int num_args, va_list args, zend
 
 	if (hash_key->nKeyLength != 0) {
 		php_printf("%*c", level + 1, ' ');
-		zend_unmangle_property_name(hash_key->arKey, &class_name, &prop_name);
+		zend_unmangle_property_name_ex(hash_key->arKey, hash_key->nKeyLength, &class_name, &prop_name);
 		if (class_name) {
 			if (class_name[0] == '*') {
 				php_printf("protected");
