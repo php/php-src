@@ -109,7 +109,7 @@ class SqliteNestedset implements RecursiveIterator
 	}
 }
 
-$menu_iterator = new RecursiveIteratorIterator(new SqliteNestedset($db), RIT_SELF_FIRST);
+$menu_iterator = new RecursiveIteratorIterator(new SqliteNestedset($db), RecursiveIteratorIterator::SELF_FIRST);
 foreach($menu_iterator as $entry) {
 	echo $menu_iterator->getDepth() . $entry . "\n";
 }
