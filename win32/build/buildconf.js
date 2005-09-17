@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.13 2005-08-03 14:08:58 sniper Exp $ */
+/* $Id: buildconf.js,v 1.13.2.1 2005-09-17 20:00:01 edink Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -25,6 +25,7 @@ var C = FSO.CreateTextFile("configure.js", true);
 
 var modules = "";
 var MODULES = WScript.CreateObject("Scripting.Dictionary");
+var module_dirs = new Array();
 
 function file_get_contents(filename)
 {
@@ -181,6 +182,31 @@ if (FSO.FileExists("ZendEngine2\\OBJECTS2_HOWTO")) {
 	FSO.MoveFolder("ZendEngine2", "Zend");
 }
 
+// Process buildconf arguments
+function buildconf_process_args()
+{
+	args = WScript.Arguments;
+
+	for (i = 0; i < args.length; i++) {
+		arg = args(i);
+		// If it is --foo=bar, split on the equals sign
+		arg = arg.split("=", 2);
+		argname = arg[0];
+		if (arg.length > 1) {
+			argval = arg[1];
+		} else {
+			argval = null;
+		}
+
+		if (argname == '--add-modules-dir' && argval != null) {
+			WScript.StdOut.WriteLine("Adding " + argval + " to the module search path");
+			module_dirs[module_dirs.length] = argval;
+		}
+	}
+}
+
+buildconf_process_args();
+
 // Write the head of the configure script
 C.WriteLine("/* This file automatically generated from win32/build/confutils.js */");
 C.Write(file_get_contents("win32/build/confutils.js"));
@@ -194,11 +220,17 @@ find_config_w32("sapi");
 find_config_w32("ext");
 emit_core_module_list();
 
-find_config_w32("pecl");
-find_config_w32("..\\pecl");
-find_config_w32("pecl\\rpc");
-find_config_w32("..\\pecl\\rpc");
-
+// If we have not specified any module dirs let's add some defaults
+if (module_dirs.length == 0) {
+	find_config_w32("pecl");
+	find_config_w32("..\\pecl");
+	find_config_w32("pecl\\rpc");
+	find_config_w32("..\\pecl\\rpc");
+} else {
+	for (i = 0; i < module_dirs.length; i++) {
+		find_config_w32(module_dirs[i]);
+	}
+}
 
 // Now generate contents of module based on MODULES, chasing dependencies
 // to ensure that dependent modules are emitted first
