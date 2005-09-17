@@ -1,3 +1,52 @@
+2005-09-16  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      zend_reflection_api.c
+      zend_reflection_api.c:
+      MFH: check class_entry of this_ptr in Reflection API
+
+    * zend_reflection_api.c:
+      check class_entry of this_ptr in Reflection API, so we won't get an alien
+      this_ptr
+      when called statically in a function that is called statically too
+      (without being
+      declared as static)
+
+    * (PHP_5_1)
+      zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_reflection_api.c
+      zend_vm_def.h
+      zend_vm_execute.h:
+      fix #34505 (possible memory corruption when unmangling properties with
+      empty names)
+      1st part
+
+2005-09-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * tests/array_type_hint_001.phpt:
+      Fixed tests
+
+    * tests/bug34518.phpt
+      tests/bug34518.phpt:
+      
+      Fixed bug #34518 (Unset doesn't separate container in CV)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h
+      tests/bug34518.phpt:
+      Fixed bug #34518 (Unset doesn't separate container in CV)
+
+    * zend_compile.c
+      zend_compile.c:
+      MFH (overriding of protected static property)
+
 2005-09-15  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
