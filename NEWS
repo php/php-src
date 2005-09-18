@@ -3,19 +3,20 @@ PHP                                                                        NEWS
 ?? Aug 2005, PHP 5.1 Release Candidate 2
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
-- Added support for class constants and static members for internal
-  classes. (Dmitry, Michael Wallner)
-- Added "new_link" parameter to mssql_connect(). Bug #34369. (Frank)
+- Added support for class constants and static members for internal classes.
+  (Dmitry, Michael Wallner)
+- Added "new_link" parameter to mssql_connect() (Bug #34369). (Frank)
 - Improved SPL extension. (Marcus)
   . Moved RecursiveArrayIterator from examples into extension
   . Moved RecursiveFilterIterator from examples into extension
   . Added SplObjectStorage
   . Made all SPL constants class constants
-  . Renamed CachingRecursiveIterator to RecursiveCachingIteraotr to follow
+  . Renamed CachingRecursiveIterator to RecursiveCachingIterator to follow
     Recursive<*>Iterator naming scheme.
-- Upgraded bundled SQLite library for PDO:SQLite to 3.2.5 (Ilia)
-- Upgraded SQLite 2 library in ext/sqlite to 2.8.16 (Ilia)
-- Upgraded PCRE library to version 6.2. (Andrei)
+- Upgraded bundled libraries:
+  . PCRE library to version 6.2. (Andrei)
+  . SQLite 3 library in ext/pdo_sqlite to 3.2.5. (Ilia)
+  . SQLite 2 library in ext/sqlite to 2.8.16. (Ilia)
 - Upgraded bundled libraries in Windows distribution. (Edin)
   . zlib 1.2.3
   . curl 7.14.0
