@@ -824,7 +824,7 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 }
 
 /** @ingroup SPL
- * @brief observer of the observer pattern
+ * @brief Observer of the observer pattern
  * @since PHP 5.1
  *
  * For a detailed explanation see Observer pattern in
@@ -833,29 +833,29 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
  * Design Patterns
  * </em>
  */
-interface Observer
+interface SplObserver
 {
 	/** Called from the subject (i.e. when it's value has changed).
 	 * @param $subject the callee
 	 */
-	function update(Subject $subject);
+	function update(SplSubject $subject);
 }
 
 /** @ingroup SPL
- * @brief ubject to the observer pattern
+ * @brief Subject to the observer pattern
  * @since PHP 5.1
  * @see Observer
  */
-interface Subject
+interface SplSubject
 {
 	/** @param $observer new observer to attach
 	 */
-    function attach(Observer $observer);
+    function attach(SplObserver $observer);
 
 	/** @param $observer existing observer to detach
 	 * @note a non attached observer shouldn't result in a warning or similar
 	 */
-    function detach(Observer $observer);
+    function detach(SplObserver $observer);
 
 	/** Notify all observers
 	 */
