@@ -113,9 +113,10 @@
  *
  * Talks on SPL:
  * - SPL for the masses <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
- * - Debug session 1 <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_1.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_1.pdf">[pdf]</a>
- * - Debug session 2 <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_2.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_2.pdf">[pdf]</a>
  * - From engine overloading to SPL <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
+ * - Happy SPLing <a href="http://somabo.de/talks/200509_toronto_happy_spling.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_happy_spling.pdf">[pdf]</a>
+ * - Debug session 1 <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>
+ * - Debug session 2 <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
  *
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
@@ -824,7 +825,7 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 }
 
 /** @ingroup SPL
- * @brief observer of the observer pattern
+ * @brief Observer of the observer pattern
  * @since PHP 5.1
  *
  * For a detailed explanation see Observer pattern in
@@ -833,29 +834,29 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
  * Design Patterns
  * </em>
  */
-interface Observer
+interface SplObserver
 {
 	/** Called from the subject (i.e. when it's value has changed).
 	 * @param $subject the callee
 	 */
-	function update(Subject $subject);
+	function update(SplSubject $subject);
 }
 
 /** @ingroup SPL
- * @brief ubject to the observer pattern
+ * @brief Subject to the observer pattern
  * @since PHP 5.1
  * @see Observer
  */
-interface Subject
+interface SplSubject
 {
 	/** @param $observer new observer to attach
 	 */
-    function attach(Observer $observer);
+    function attach(SplObserver $observer);
 
 	/** @param $observer existing observer to detach
 	 * @note a non attached observer shouldn't result in a warning or similar
 	 */
-    function detach(Observer $observer);
+    function detach(SplObserver $observer);
 
 	/** Notify all observers
 	 */
