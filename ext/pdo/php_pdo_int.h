@@ -22,6 +22,8 @@
 
 /* Stuff private to the PDO extension and not for consumption by PDO drivers
  * */
+
+extern HashTable pdo_driver_hash;
 extern zend_class_entry *pdo_exception_ce;
 int php_pdo_list_entry(void);
 
