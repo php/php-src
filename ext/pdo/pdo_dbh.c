@@ -976,6 +976,23 @@ static PHP_METHOD(PDO, __sleep)
 }
 /* }}} */
 
+/* {{{ proto array pdo_drivers()
+   Return array of available PDO drivers */
+static PHP_METHOD(PDO, getAvailableDrivers)
+{
+	HashPosition pos;
+	pdo_driver_t **pdriver;
+	
+	array_init(return_value);
+
+	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
+	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
+		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len, 1);
+		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
+	}
+}
+/* }}} */
+
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
@@ -993,6 +1010,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, quote,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, __wakeup,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, __sleep,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	PHP_ME(PDO, getAvailableDrivers, NULL,				ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 
