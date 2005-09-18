@@ -7,9 +7,12 @@ PHP                                                                        NEWS
   classes. (Dmitry, Michael Wallner)
 - Added "new_link" parameter to mssql_connect(). Bug #34369. (Frank)
 - Improved SPL extension. (Marcus)
-  . Added RecursiveFilterIterator
+  . Moved RecursiveArrayIterator from examples into extension
+  . Moved RecursiveFilterIterator from examples into extension
   . Added SplObjectStorage
   . Made all SPL constants class constants
+  . Renamed CachingRecursiveIterator to RecursiveCachingIteraotr to follow
+    Recursive<*>Iterator naming scheme.
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.5 (Ilia)
 - Upgraded SQLite 2 library in ext/sqlite to 2.8.16 (Ilia)
 - Upgraded PCRE library to version 6.2. (Andrei)

@@ -3,13 +3,8 @@ SPL: RecursiveIteratorIterator and catch getChildren
 --FILE--
 <?php
 
-class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
+class MyRecursiveArrayIterator extends RecursiveArrayIterator
 {
-	function hasChildren()
-	{
-		return is_array($this->current());
-	}
-	
 	function getChildren()
 	{
 		echo __METHOD__ . "\n";
@@ -102,7 +97,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 			throw new Exception("Thrown in callGetChildren()");
 		}
 		echo __METHOD__ . "(ok:{$this->over})\n";
-		return new RecursiveArrayIterator($this->current());
+		return new MyRecursiveArrayIterator($this->current());
 	}
 
 	function beginChildren()
@@ -118,7 +113,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 
 try
 {
-	foreach(new RecursiveArrayIteratorIterator(new RecursiveArrayIterator(array("a", array("ba", array("bba", "bbb"), array(array("bcaa"), array("bcba"))), array("ca"), "d")), 2) as $k=>$v)
+	foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(array("a", array("ba", array("bba", "bbb"), array(array("bcaa"), array("bcba"))), array("ca"), "d")), 2) as $k=>$v)
 	{
 		if (is_array($v)) $v = join('',$v);
 		echo "$k=>$v\n";
@@ -166,7 +161,7 @@ RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 1=>bbb
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(2)
 RecursiveArrayIteratorIterator::callHasChildren(1) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(ok:0)
@@ -181,9 +176,9 @@ RecursiveArrayIteratorIterator::next
 RecursiveArrayIteratorIterator::callHasChildren(2) = no/yes
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(2)
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::callHasChildren(0) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(throw)
@@ -192,7 +187,7 @@ RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 3=>d
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::valid
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 ===DONE===
