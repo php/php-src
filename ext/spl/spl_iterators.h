@@ -64,12 +64,13 @@ typedef enum {
 
 enum {
 	/* public */
-	CIT_CALL_TOSTRING   = 1,
-	CIT_CATCH_GET_CHILD = 2,
-	CIT_PUBLIC          = CIT_CALL_TOSTRING|CIT_CATCH_GET_CHILD,
+	CIT_CALL_TOSTRING   = 0x00000001,
+	CIT_CATCH_GET_CHILD = 0x00000002,
+	CIT_FULL_CACHE      = 0x00000004,
+	CIT_PUBLIC          = 0x00FFFFFF,
 	/* private */
-	CIT_VALID           = 4,
-	CIT_HAS_CHILDREN    = 8
+	CIT_VALID           = 0x01000000,
+	CIT_HAS_CHILDREN    = 0x02000000,
 };
 
 typedef struct _spl_dual_it_object {
@@ -95,9 +96,10 @@ typedef struct _spl_dual_it_object {
 			long             count;
 		} limit;
 		struct {
-			int              flags; /* CIT_VALID, CIT_CALL_TOSTRING, CIT_CATCH_GET_CHILD */
+			int              flags; /* CIT_VALID, CIT_CALL_TOSTRING, CIT_CATCH_GET_CHILD, ... */
 			zval             *zstr;
 			zval             *zchildren;
+			zval             *zcache;
 		} caching;
 		struct {
 			zval                 *zarrayit;

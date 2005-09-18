@@ -3,19 +3,8 @@ SPL: RecursiveIteratorIterator and beginChildren/endChildren
 --FILE--
 <?php
 
-class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
+class MyRecursiveArrayIterator extends RecursiveArrayIterator
 {
-	function hasChildren()
-	{
-		return is_array($this->current());
-	}
-	
-	function getChildren()
-	{
-		echo __METHOD__ . "\n";
-		return new RecursiveArrayIterator($this->current());
-	}
-
 	function valid()
 	{
 		if (!parent::valid())
@@ -27,6 +16,12 @@ class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
 		{
 			return true;
 		}
+	}
+
+	function getChildren()
+	{
+		echo __METHOD__ . "\n";
+		return parent::getChildren();
 	}
 }
 
@@ -73,7 +68,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 	}
 }
 
-foreach(new RecursiveArrayIteratorIterator(new RecursiveArrayIterator(array("a", array("ba", array("bba", "bbb"), array(array("bcaa"))), array("ca"), "d"))) as $k=>$v)
+foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(array("a", array("ba", array("bba", "bbb"), array(array("bcaa"))), array("ca"), "d"))) as $k=>$v)
 {
 	echo "$k=>$v\n";
 }
@@ -87,14 +82,14 @@ RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 0=>a
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::getChildren
+MyRecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(1)
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 0=>ba
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::getChildren
+MyRecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(2)
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
@@ -106,38 +101,38 @@ RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 1=>bbb
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(2)
-RecursiveArrayIterator::getChildren
+MyRecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(2)
-RecursiveArrayIterator::getChildren
+MyRecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(3)
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 0=>bcaa
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(3)
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(2)
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(1)
-RecursiveArrayIterator::getChildren
+MyRecursiveArrayIterator::getChildren
 RecursiveArrayIteratorIterator::beginChildren(1)
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 0=>ca
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::valid
 RecursiveArrayIteratorIterator::current
 RecursiveArrayIteratorIterator::key
 3=>d
 RecursiveArrayIteratorIterator::next
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::valid
-RecursiveArrayIterator::valid = false
+MyRecursiveArrayIterator::valid = false
 ===DONE===
