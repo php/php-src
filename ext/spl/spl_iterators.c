@@ -46,7 +46,7 @@ PHPAPI zend_class_entry *spl_ce_ParentIterator;
 PHPAPI zend_class_entry *spl_ce_SeekableIterator;
 PHPAPI zend_class_entry *spl_ce_LimitIterator;
 PHPAPI zend_class_entry *spl_ce_CachingIterator;
-PHPAPI zend_class_entry *spl_ce_CachingRecursiveIterator;
+PHPAPI zend_class_entry *spl_ce_RecursiveCachingIterator;
 PHPAPI zend_class_entry *spl_ce_OuterIterator;
 PHPAPI zend_class_entry *spl_ce_IteratorIterator;
 PHPAPI zend_class_entry *spl_ce_NoRewindIterator;
@@ -758,7 +758,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			break;
 		}
 		case DIT_CachingIterator:
-		case DIT_CachingRecursiveIterator: {
+		case DIT_RecursiveCachingIterator: {
 			long flags = CIT_CALL_TOSTRING;
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &zobject, ce_inner, &flags) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -868,7 +868,7 @@ static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 		efree(intern->current.str_key);
 		intern->current.str_key = NULL;
 	}
-	if (intern->dit_type == DIT_CachingIterator || intern->dit_type == DIT_CachingRecursiveIterator) {
+	if (intern->dit_type == DIT_CachingIterator || intern->dit_type == DIT_RecursiveCachingIterator) {
 		if (intern->u.caching.zstr) {
 			zval_ptr_dtor(&intern->u.caching.zstr);
 			intern->u.caching.zstr = NULL;
@@ -1384,7 +1384,7 @@ static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 {
 	if (spl_dual_it_fetch(intern, 1 TSRMLS_CC) == SUCCESS) {
 		intern->u.caching.flags |= CIT_VALID;
-		if (intern->dit_type == DIT_CachingRecursiveIterator) {
+		if (intern->dit_type == DIT_RecursiveCachingIterator) {
 			zval *retval, *zchildren, zflags;
 			zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "haschildren", &retval);
 			if (zend_is_true(retval)) {
@@ -1397,7 +1397,7 @@ static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 				} else {
 					INIT_PZVAL(&zflags);
 					ZVAL_LONG(&zflags, intern->u.caching.flags & CIT_PUBLIC);
-					spl_instantiate_arg_ex2(spl_ce_CachingRecursiveIterator, &intern->u.caching.zchildren, 1, zchildren, &zflags TSRMLS_CC);
+					spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &intern->u.caching.zchildren, 1, zchildren, &zflags TSRMLS_CC);
 					zval_ptr_dtor(&zchildren);
 				}
 			}
@@ -1546,16 +1546,16 @@ static zend_function_entry spl_funcs_CachingIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto CachingRecursiveIterator::__construct(RecursiveIterator it [, flags = CIT_CALL_TOSTRING])
+/* {{{ proto RecursiveCachingIterator::__construct(RecursiveIterator it [, flags = CIT_CALL_TOSTRING])
    Create an iterator from a RecursiveIterator */
-SPL_METHOD(CachingRecursiveIterator, __construct)
+SPL_METHOD(RecursiveCachingIterator, __construct)
 {
-	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveIterator, DIT_CachingRecursiveIterator);
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveIterator, DIT_RecursiveCachingIterator);
 } /* }}} */
 
-/* {{{ proto bolean CachingRecursiveIterator::hasChildren()
+/* {{{ proto bolean RecursiveCachingIterator::hasChildren()
    Check whether the current element of the inner iterator has children */
-SPL_METHOD(CachingRecursiveIterator, hasChildren)
+SPL_METHOD(RecursiveCachingIterator, hasChildren)
 {
 	spl_dual_it_object   *intern;
 
@@ -1564,9 +1564,9 @@ SPL_METHOD(CachingRecursiveIterator, hasChildren)
 	RETURN_BOOL(intern->u.caching.zchildren);
 } /* }}} */
 
-/* {{{ proto CachingRecursiveIterator CachingRecursiveIterator::getChildren()
-  Return the inner iterator's children as a CachingRecursiveIterator */
-SPL_METHOD(CachingRecursiveIterator, getChildren)
+/* {{{ proto RecursiveCachingIterator RecursiveCachingIterator::getChildren()
+  Return the inner iterator's children as a RecursiveCachingIterator */
+SPL_METHOD(RecursiveCachingIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
 
@@ -1585,10 +1585,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_VALUE,
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-static zend_function_entry spl_funcs_CachingRecursiveIterator[] = {
-	SPL_ME(CachingRecursiveIterator, __construct,   arginfo_caching_rec_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingRecursiveIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingRecursiveIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+static zend_function_entry spl_funcs_RecursiveCachingIterator[] = {
+	SPL_ME(RecursiveCachingIterator, __construct,   arginfo_caching_rec_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveCachingIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveCachingIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -2021,8 +2021,8 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CALL_TOSTRING",    CIT_CALL_TOSTRING); 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",  CIT_CATCH_GET_CHILD); 
 
-	REGISTER_SPL_SUB_CLASS_EX(CachingRecursiveIterator, CachingIterator, spl_dual_it_new, spl_funcs_CachingRecursiveIterator);
-	REGISTER_SPL_IMPLEMENTS(CachingRecursiveIterator, RecursiveIterator);
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveCachingIterator, CachingIterator, spl_dual_it_new, spl_funcs_RecursiveCachingIterator);
+	REGISTER_SPL_IMPLEMENTS(RecursiveCachingIterator, RecursiveIterator);
 	
 	REGISTER_SPL_STD_CLASS_EX(IteratorIterator, spl_dual_it_new, spl_funcs_IteratorIterator);
 	REGISTER_SPL_ITERATOR(IteratorIterator);

@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   A recursive array iterator
  * @author  Marcus Boerger
  * @version 1.0

@@ -3,19 +3,6 @@ SPL: RecursiveIteratorIterator and beginChildren/endChildren
 --FILE--
 <?php
 
-class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
-{
-	function hasChildren()
-	{
-		return is_array($this->current());
-	}
-	
-	function getChildren()
-	{
-		return new RecursiveArrayIterator($this->current());
-	}
-}
-
 class Menu extends ArrayObject
 {
 	function getIterator()

@@ -1,8 +1,8 @@
 <?php
 
-/** @file cachingrecursiveiterator.inc
+/** @file recursivecachingiterator.inc
  * @ingroup SPL
- * @brief class CachingRecursiveIterator
+ * @brief class RecursiveCachingIterator
  * @author  Marcus Boerger
  * @date    2003 - 2005
  *
@@ -12,12 +12,12 @@
 /**
  * @brief   Cached recursive iteration over another Iterator
  * @author  Marcus Boerger
- * @version 1.1
- * @since PHP 5.0
+ * @version 1.2
+ * @since PHP 5.1
  *
  * @see CachingIterator
  */
-class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
+class RecursiveCachingIterator extends CachingIterator implements RecursiveIterator
 {
 	private $hasChildren;
 	private $getChildren;
@@ -48,25 +48,34 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 	 */
 	function next()
 	{
-		if ($this->hasChildren = $this->it->hasChildren()) {
-			try {
-				//$this->getChildren = new CachingRecursiveIterator($this->it->getChildren(), $this->flags);
-				// workaround memleaks...
+		if ($this->hasChildren = $this->it->hasChildren())
+		{
+			try
+			{
 				$child = $this->it->getChildren();
-				$this->getChildren = new CachingRecursiveIterator($child, $this->flags);
+				if (!$this->ref)
+				{
+					$this->ref = new ReflectionClass($this);
+				}
+				$this->getChildren = $ref->newInstance($child, $this->flags);
 			}
-			catch(Exception $e) {
-				if (!$this->flags & self::CATCH_GET_CHILD) {
+			catch(Exception $e)
+			{
+				if (!$this->flags & self::CATCH_GET_CHILD)
+				{
 					throw $e;
 				}
 				$this->hasChildren = false;
 				$this->getChildren = NULL;
 			}
-		} else {
+		} else
+		{
 			$this->getChildren = NULL;
 		}
 		parent::next();
 	}
+	
+	private $ref;
 
 	/** @return whether the current element has children
 	 * @note The check whether the Iterator for the children can be created was
