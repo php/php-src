@@ -62,26 +62,8 @@ PDO_API zend_class_entry *php_pdo_get_exception(void)
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
-/* proto array pdo_drivers()
- Return array of available PDO drivers */
-PHP_FUNCTION(pdo_drivers)
-{
-	HashPosition pos;
-	pdo_driver_t **pdriver;
-	
-	array_init(return_value);
-
-	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
-		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len, 1);
-		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
-	}
-}
-/* }}} */
-
 /* {{{ pdo_functions[] */
 function_entry pdo_functions[] = {
-	PHP_FE(pdo_drivers,             NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
