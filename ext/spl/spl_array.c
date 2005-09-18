@@ -475,7 +475,8 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 	}
 	
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot append properties to objects, use %v::offsetSet() instead", Z_OBJCE_P(object)->name);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %v::offsetSet() instead", Z_OBJCE_P(object)->name);
+		return;
 	}
 
 	spl_array_write_dimension(object, NULL, append_value TSRMLS_CC);
