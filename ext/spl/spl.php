@@ -67,6 +67,7 @@
  * 
  * - class ArrayObject implements IteratorAggregate
  * - class ArrayIterator implements Iterator
+ * - class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
  * 
  * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
  * iteration (e.g. ArrayObject instance used inside foreach). 
@@ -511,17 +512,18 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 {
 	/** Properties of the object have their normal functionality
 	 * when accessed as list (var_dump, foreach, etc.) */
-	const STD_PROP_LIST  = 0x00000001;
+	const STD_PROP_LIST     = 0x00000001;
 	/** Array indices can be accessed as properties in read/write */
-	const ARRAY_AS_PROPS = 0x00000002;
+	const ARRAY_AS_PROPS    = 0x00000002;
 
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
 	 * @param $array the array to use.
 	 * @param $flags see setFlags().
+	 * @param $iterator_class class used in getIterator()
 	 */
-	function __construct($array, $flags = 0);
+	function __construct($array, $flags = 0, $iterator_class = "ArrayIterator");
 
 	/** Set behavior flags.
 	 *	
@@ -582,6 +584,14 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 * properties in the object.
 	 */
 	function count();
+	
+	/* @param $iterator_class new class used in getIterator()
+	 */
+	function setIteratorClass($itertor_class);
+	
+	/* @return class used in getIterator()
+	 */
+	function getIteratorClass();
 }
 
 /** @ingroup SPL
