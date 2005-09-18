@@ -113,9 +113,10 @@
  *
  * Talks on SPL:
  * - SPL for the masses <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_spl_for_the_masses.pdf">[pdf]</a>
- * - Debug session 1 <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_1.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_1.pdf">[pdf]</a>
- * - Debug session 2 <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_2.pps">[pps]</a>, <a href="http://somabo.de/talks/200504_php_quebec_iterator_debug_session_2.pdf">[pdf]</a>
  * - From engine overloading to SPL <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pps">[pps]</a>, <a href="http://somabo.de/talks/200505_cancun_from_engine_overloading_to_spl.pdf">[pdf]</a>
+ * - Happy SPLing <a href="http://somabo.de/talks/200509_toronto_happy_spling.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_happy_spling.pdf">[pdf]</a>
+ * - Debug session 1 <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_1.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_1.pdf">[pdf]</a>
+ * - Debug session 2 <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_2.pps">[pps]</a>, <a href="http://somabo.de/talks/200509_toronto_iterator_debug_session_2.pdf">[pdf]</a>
  *
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
