@@ -40,7 +40,7 @@
  * - interface SeekableIterator implements Iterator
  * - class LimitIterator implements OuterIterator
  * - class CachingIterator implements OuterIterator
- * - class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
+ * - class RecursiveCachingIterator extends CachingIterator implements RecursiveIterator
  * - class IteratorIterator implements OuterIterator
  * - class NoRewindIterator implements OuterIterator
  * - class EmptyIterator implements Iterator
