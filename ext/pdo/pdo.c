@@ -42,7 +42,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo)
 /* True global resources - no need for thread safety here */
 
 /* the registry of PDO drivers */
-static HashTable pdo_driver_hash;
+HashTable pdo_driver_hash;
 
 /* we use persistent resources for the driver connection stuff */
 static int le_ppdo;
