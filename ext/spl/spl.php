@@ -521,6 +521,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 *
 	 * @param $array the array to use.
 	 * @param $flags see setFlags().
+	 * @param $iterator_class class used in getIterator()
 	 */
 	function __construct($array, $flags = 0, $iterator_class = "ArrayIterator");
 
@@ -583,6 +584,14 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 * properties in the object.
 	 */
 	function count();
+	
+	/* @param $iterator_class new class used in getIterator()
+	 */
+	function setIteratorClass($itertor_class);
+	
+	/* @return class used in getIterator()
+	 */
+	function getIteratorClass();
 }
 
 /** @ingroup SPL
