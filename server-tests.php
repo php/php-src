@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2004 The PHP Group                                |
+   | Copyright (c) 1997-2005 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -420,7 +420,7 @@ class testHarness {
 	public $cwd;
 	public $xargs = array(
 		#arg         env var                value        default   description
-		'c' => array(''                    ,'file'       ,NULL    ,'configuration file, see run-tests-config.php for example'),
+		'c' => array(''                    ,'file'       ,NULL    ,'configuration file, see server-tests-config.php for example'),
 		'd' => array('TEST_PATHS'          ,'paths'      ,NULL    ,'colon seperate path list'),
 		'e' => array('TEST_PHP_ERROR_STYLE','EMACS|MSVC' ,'EMACS' ,'editor error style'),
 		'h' => array(''                    ,''           ,NULL    ,'this help'),
