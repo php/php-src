@@ -1,6 +1,6 @@
 <?php
 
-/** @file drecursivecachingiterator.inc
+/** @file cachingrecursiveiterator.inc
  * @ingroup Examples
  * @brief class CachingRecursiveIterator
  * @author  Marcus Boerger
