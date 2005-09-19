@@ -1,7 +1,7 @@
 <?php
 /* this file may be duplicated to provide testing for
    multiple php binaries or configurations.  It is used
-   with the -c option on server_tests.php.  All these
+   with the -c option on server-tests.php.  All these
    settings will also go into the environment for tests
    that are directly executed, so you can also set things
    like PHPRC here to force an executable to use a
