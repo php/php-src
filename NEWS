@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 - Fixed segfaults when CURL callback functions throw exception. (Tony)
 - Fixed various reentrancy bugs in user-sort functions, solves bugs #33286 and
   #33295. (Mike Bretz)
+- Fixed bug #34548 (Method append() in class extended from ArrayObject crashes 
+  PHP). (Tony)
 - Fixed bug #34307 (on_modify handler not called to set the default value if
   setting from php.ini was invalid). (Andrei)
 - Fixed bug #34302 (date('W') do not return leading zeros for week 1 to 9).

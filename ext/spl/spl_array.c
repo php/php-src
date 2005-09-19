@@ -304,10 +304,19 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	long index;
-	zval *rv;
+	int free_offset;
 
 	if (check_inherited && intern->fptr_offset_set) {
-		zend_call_method_with_2_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_set, "offsetSet", &rv, offset, value);
+		if (!offset) {
+			ALLOC_INIT_ZVAL(offset);
+			free_offset = 1;
+		} else {
+			free_offset = 0;
+		}
+		zend_call_method_with_2_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
+		if (free_offset) {
+			zval_ptr_dtor(&offset);
+		}
 		return;
 	}
 
@@ -333,6 +342,10 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		value->refcount++;
 		zend_hash_index_update(HASH_OF(intern->array), index, (void**)&value, sizeof(void*), NULL);
 		return;
+    case IS_NULL:
+		value->refcount++;
+		zend_hash_next_index_insert(HASH_OF(intern->array), (void**)&value, sizeof(void*), NULL);
+		return;						
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
 		return;
