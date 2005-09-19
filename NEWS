@@ -8,7 +8,7 @@ PHP                                                                        NEWS
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
 - Added optional parameter to http_build_query() to allow specification of 
-  string separator.
+  string separator. (Ilia)
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
   components. (Ilia)
 - Added an optional parameter to strstr() and stristr() for retrieval of either
