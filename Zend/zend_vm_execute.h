@@ -7331,6 +7331,9 @@ static int zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
+	zend_free_op free_op1;
+	zval *varptr;
+
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
 			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -7338,23 +7341,27 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
-	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
-		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
-	} else {
-		zval *varptr;
-		zend_free_op free_op1;
-		varptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
 
-		if (varptr != &EG(uninitialized_zval) && (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
-			varptr->is_ref = 1;
-			varptr->refcount++;
-			zend_ptr_stack_push(&EG(argument_stack), varptr);
-			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
-			ZEND_VM_NEXT_OPCODE();
+	varptr = _get_zval_ptr_var(&opline->op1, EX(Ts), &free_op1 TSRMLS_CC);
+	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
+	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
+	    varptr != &EG(uninitialized_zval) && 
+	    (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
+		varptr->is_ref = 1;
+		varptr->refcount++;
+		zend_ptr_stack_push(&EG(argument_stack), varptr);
+	} else {
+		zval *valptr;
+
+		zend_error(E_STRICT, "Only variables should be passed by reference");
+		ALLOC_ZVAL(valptr);
+		INIT_PZVAL_COPY(valptr, varptr);
+		if (!0) {
+			zval_copy_ctor(valptr);
 		}
-		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
+		zend_ptr_stack_push(&EG(argument_stack), valptr);
 	}
+	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -20097,6 +20104,9 @@ static int zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = EX(opline);
+	
+	zval *varptr;
+
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
 			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -20104,23 +20114,27 @@ static int ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
-	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
-		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
+
+	varptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
+	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
+	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
+	    varptr != &EG(uninitialized_zval) && 
+	    (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
+		varptr->is_ref = 1;
+		varptr->refcount++;
+		zend_ptr_stack_push(&EG(argument_stack), varptr);
 	} else {
-		zval *varptr;
-		
-		varptr = _get_zval_ptr_cv(&opline->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
+		zval *valptr;
 
-		if (varptr != &EG(uninitialized_zval) && (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
-			varptr->is_ref = 1;
-			varptr->refcount++;
-			zend_ptr_stack_push(&EG(argument_stack), varptr);
-
-			ZEND_VM_NEXT_OPCODE();
+		zend_error(E_STRICT, "Only variables should be passed by reference");
+		ALLOC_ZVAL(valptr);
+		INIT_PZVAL_COPY(valptr, varptr);
+		if (!0) {
+			zval_copy_ctor(valptr);
 		}
-		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
+		zend_ptr_stack_push(&EG(argument_stack), valptr);
 	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
