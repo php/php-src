@@ -273,6 +273,7 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
 			retval->refcount = 0;
+			retval->is_ref = 0;
 		} else {
 			retval = EG(uninitialized_zval_ptr);
 		}
