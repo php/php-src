@@ -1,3 +1,11 @@
+2005-09-18  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      fix leaks
+      this problem is in 5.0 only, while 5.1 & HEAD work fine and I'd appreciate
+      if someone explain me why..
+
 2005-09-16  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_0)
