@@ -160,11 +160,11 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(ArrayIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ArrayObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
-	SPL_ADD_CLASS(CachingRecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(LimitIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ParentIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveCachingIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveDirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIteratorIterator, z_list, sub, allow, ce_flags); \

@@ -1,53 +1,28 @@
 <?php
 
-class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
+/** @file cachingrecursiveiterator.inc
+ * @ingroup Examples
+ * @brief class CachingRecursiveIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2005
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
+ * @brief   Compatibility to PHP 5.0
+ * @author  Marcus Boerger
+ * @version 1.2
+ * @deprecated
+ *
+ * Class RecursiveCachingIterator was named CachingRecursiveIterator until
+ * PHP 5.0.6.
+ *
+ * @see RecursiveCachingIterator
+ */
+
+class CachingRecursiveIterator extends RecursiveCachingIterator
 {
-	protected $hasChildren;
-	protected $getChildren;
-
-	function __construct(RecursiveIterator $it, $flags = CIT_CALL_TOSTRING)
-	{
-		parent::__construct($it, $flags);
-	}
-	
-	function rewind();
-	{
-	   $this->hasChildren = false;
-	   $this->getChildren = NULL;
-	   parent::rewind();
-	}
-
-	function next()
-	{
-		if ($this->hasChildren = $this->it->hasChildren()) {
-			try {
-				//$this->getChildren = new CachingRecursiveIterator($this->it->getChildren(), $this->flags);
-				// workaround memleaks...
-				$child = $this->it->getChildren();
-				$this->getChildren = new CachingRecursiveIterator($child, $this->flags);
-			}
-			catch(Exception $e) {
-				if (!$this->flags & CIT_CATCH_GET_CHILD) {
-					throw $e;
-				}
-				$this->hasChildren = false;
-				$this->getChildren = NULL;
-			}
-		} else {
-			$this->getChildren = NULL;
-		}
-		parent::next();
-	}
-
-	function hasChildren()
-	{
-		return $this->hasChildren;
-	}
-
-	function getChildren()
-	{
-		return $this->getChildren;
-	}
 }
 
 ?>

@@ -424,7 +424,7 @@ class CachingIterator implements Iterator
 /** \ingroup SPL
  * \brief The recursive version of the CachingIterator.
  */
-class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
+class RecursiveCachingIterator extends CachingIterator implements RecursiveIterator
 {
 	/** Construct an instance form a RecursiveIterator.
 	 *
