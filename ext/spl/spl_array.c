@@ -179,7 +179,7 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 			intern->fptr_offset_del = NULL;
 		}
 	}
-	intern->ce_get_iterator = spl_ce_ArrayIterator;
+	intern->ce_get_iterator = U_CLASS_ENTRY(spl_ce_ArrayIterator);
 	zend_hash_internal_pointer_reset_ex(spl_array_get_hash_table(intern, 0 TSRMLS_CC), &intern->pos);
 	return retval;
 }
@@ -870,7 +870,7 @@ SPL_METHOD(Array, getIteratorClass)
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	RETURN_STRING(intern->ce_get_iterator->name, 1);
+	RETURN_TEXTL(intern->ce_get_iterator->name, intern->ce_get_iterator->name_length, 1);
 }
 /* }}} */
 
