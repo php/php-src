@@ -102,7 +102,7 @@ static inline int i_zend_is_true(zval *op)
 
 				if (Z_OBJ_HT_P(op)->cast_object) {
 					zval tmp;
-					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
+					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL, 0 TSRMLS_CC) == SUCCESS) {
 						result = Z_LVAL(tmp);
 						break;
 					}
