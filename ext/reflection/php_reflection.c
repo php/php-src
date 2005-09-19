@@ -43,8 +43,8 @@ zend_class_entry *reflection_extension_ptr;
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), ce TSRMLS_CC)) {                             \
-		zend_error(E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
+	if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), U_CLASS_ENTRY(ce) TSRMLS_CC)) {                             \
+		zend_error(E_ERROR, "%v() cannot be called statically", get_active_function_name(TSRMLS_C));        \
 		return;                                                                                             \
 	}                                                                                                       \
 
