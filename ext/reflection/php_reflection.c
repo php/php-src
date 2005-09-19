@@ -790,11 +790,26 @@ static int _extension_class_string(zend_class_entry **pce, int num_args, va_list
 	char *indent = va_arg(args, char *);
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int *num_classes = va_arg(args, int*);
+	TSRMLS_FETCH();
 
 	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
-		TSRMLS_FETCH();
 		string_printf(str, "\n");
 		_class_string(str, *pce, NULL, indent TSRMLS_CC);
+		(*num_classes)++;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static int _extension_const_string(zend_constant *constant, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	string *str = va_arg(args, string *);
+	char *indent = va_arg(args, char *);
+	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
+	int *num_classes = va_arg(args, int*);
+
+	if (constant->module_number  == module->module_number) {
+		TSRMLS_FETCH();
+		_const_string(str, constant->name, &constant->value, indent TSRMLS_CC);
 		(*num_classes)++;
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -819,18 +834,33 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		string_init(&str_ini);
 		zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _extension_ini_string, 3, &str_ini, indent, module->module_number);
 		if (str_ini.len > 1) {
-			string_printf(str, "\n - INI {\n");
+			string_printf(str, "\n  - INI {\n");
 			string_append(str, &str_ini);
 			string_printf(str, "%s  }\n", indent);
 		}
 		string_free(&str_ini);
 	}
 
+	{
+		string str_constants;
+		string sub_indent;
+		int num_constants = 0;
+		
+		string_init(&str_constants);
+		zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _extension_const_string, 4, &str_constants, indent, module, &num_constants TSRMLS_CC);
+		if (num_constants) {
+			string_printf(str, "\n  - Constants [%d] {\n", num_constants);
+			string_append(str, &str_constants);
+			string_printf(str, "%s  }\n", indent);
+		}
+		string_free(&str_constants);
+	}
+
 	if (module->functions && module->functions->fname) {
 		zend_function *fptr;
 		zend_function_entry *func = module->functions;
 
-		string_printf(str, "\n - Functions {\n");
+		string_printf(str, "\n  - Functions {\n");
 
 		/* Is there a better way of doing this? */
 		while (func->fname) {
@@ -855,7 +885,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		string_init(&str_classes);
 		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &str_classes, sub_indent.string, module, &num_classes TSRMLS_CC);
 		if (num_classes) {
-			string_printf(str, "\n - Classes [%d] {\n", num_classes);
+			string_printf(str, "\n  - Classes [%d] {", num_classes);
 			string_append(str, &str_classes);
 			string_printf(str, "%s  }\n", indent);
 		}
