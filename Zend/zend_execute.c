@@ -3077,6 +3077,8 @@ static inline int zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_send_var_no_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *varptr;
+
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
 			return zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -3084,20 +3086,26 @@ int zend_send_var_no_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	if ((opline->extended_value & ZEND_ARG_SEND_FUNCTION) &&
-	    !EX_T(opline->op1.u.var).var.fcall_returned_reference) {
-		zend_error(E_ERROR, "Only variables can be passed by reference");
+	
+	varptr = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
+	     EX_T(opline->op1.u.var).var.fcall_returned_reference) &&
+	    varptr != &EG(uninitialized_zval) && 
+	    (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
+		varptr->is_ref = 1;
+		varptr->refcount++;
+		zend_ptr_stack_push(&EG(argument_stack), varptr);
 	} else {
-		zval *varptr;
-		varptr = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+		zval *valptr;
 
-		if (varptr != &EG(uninitialized_zval) && (PZVAL_IS_REF(varptr) || varptr->refcount == 1)) {
-			varptr->is_ref = 1;
-			varptr->refcount++;
-			zend_ptr_stack_push(&EG(argument_stack), varptr);
-			NEXT_OPCODE();
+		zend_error(E_STRICT, "Only variables should be passed by reference");
+		ALLOC_ZVAL(valptr);
+		*valptr = *varptr;
+		if (!EG(free_op1)) {
+			zval_copy_ctor(valptr);
 		}
-		zend_error(E_ERROR, "Only variables can be passed by reference");
+		INIT_PZVAL(valptr);
+		zend_ptr_stack_push(&EG(argument_stack), valptr);
 	}
 	NEXT_OPCODE();
 }
