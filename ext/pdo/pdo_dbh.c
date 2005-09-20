@@ -205,7 +205,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC)
 
 /* {{{ proto object PDO::__construct(string dsn, string username, string passwd [, array options])
    */
-static PHP_FUNCTION(dbh_constructor)
+static PHP_METHOD(PDO, dbh_constructor)
 {
 	zval *object = getThis();
 	pdo_dbh_t *dbh = NULL;
@@ -503,6 +503,7 @@ static PHP_METHOD(PDO, prepare)
 	}
 	
 	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
 
 	if (ZEND_NUM_ARGS() > 1 && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_STATEMENT_CLASS, (void**)&opt)) {
 		if (zend_hash_index_find(Z_ARRVAL_PP(opt), 0, (void**)&item) == FAILURE
@@ -587,6 +588,8 @@ static PHP_METHOD(PDO, beginTransaction)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
+	PDO_CONSTRUCT_CHECK;
+
 	if (dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "There is already an active transaction");
 		RETURN_FALSE;
@@ -615,6 +618,8 @@ static PHP_METHOD(PDO, commit)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
+	PDO_CONSTRUCT_CHECK;
+
 	if (!dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "There is no active transaction");
 		RETURN_FALSE;
@@ -635,6 +640,8 @@ static PHP_METHOD(PDO, commit)
 static PHP_METHOD(PDO, rollBack)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(TSRMLS_C), 0 TSRMLS_CC, "There is no active transaction");
@@ -662,6 +669,8 @@ static PHP_METHOD(PDO, setAttribute)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz!", &attr, &value)) {
 		RETURN_FALSE;
 	}
+
+	PDO_CONSTRUCT_CHECK;
 
 	switch (attr) {
 		case PDO_ATTR_ERRMODE:
@@ -741,6 +750,7 @@ static PHP_METHOD(PDO, getAttribute)
 	}
 
 	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
 
 	/* handle generic PDO-level atributes */
 	switch (attr) {
@@ -797,6 +807,7 @@ static PHP_METHOD(PDO, exec)
 		RETURN_FALSE;
 	}
 	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
 	ret = dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC);
 	if(ret == -1) {
 		PDO_HANDLE_DBH_ERR();
@@ -821,6 +832,7 @@ static PHP_METHOD(PDO, lastInsertId)
 	}
 
 	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
 	if (!dbh->methods->last_id) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()" TSRMLS_CC);
 		RETURN_FALSE;
@@ -845,6 +857,7 @@ static PHP_METHOD(PDO, errorCode)
 	if (ZEND_NUM_ARGS()) {
 		RETURN_FALSE;
 	}
+	PDO_CONSTRUCT_CHECK;
 
 	RETURN_STRING(dbh->error_code, 1);
 }
@@ -859,6 +872,7 @@ static PHP_METHOD(PDO, errorInfo)
 	if (ZEND_NUM_ARGS()) {
 		RETURN_FALSE;
 	}
+	PDO_CONSTRUCT_CHECK;
 
 	array_init(return_value);
 	add_next_index_string(return_value, dbh->error_code, 1);
@@ -884,6 +898,7 @@ static PHP_METHOD(PDO, query)
 	}
 	
 	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
 
 	if (!pdo_stmt_instantiate(dbh, return_value, U_CLASS_ENTRY(pdo_dbstmt_ce), NULL TSRMLS_CC)) {
 		pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class" TSRMLS_CC);
@@ -953,6 +968,7 @@ static PHP_METHOD(PDO, quote)
 	}
 	
 	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
 	if (!dbh->methods->quoter) {
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support quoting" TSRMLS_CC);
 		RETURN_FALSE;
@@ -982,7 +998,7 @@ static PHP_METHOD(PDO, __sleep)
 /* }}} */
 
 function_entry pdo_dbh_functions[] = {
-	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
+	ZEND_MALIAS(PDO, __construct, dbh_constructor,	NULL, 			ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, beginTransaction,NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, commit,			NULL,					ZEND_ACC_PUBLIC)
@@ -1120,7 +1136,6 @@ void pdo_dbh_init(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "PDO", pdo_dbh_functions);
 	pdo_dbh_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	pdo_dbh_ce->create_object = pdo_dbh_new;
-	pdo_dbh_ce->constructor->common.fn_flags |= ZEND_ACC_FINAL;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
