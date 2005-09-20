@@ -84,7 +84,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		}
 	} else {
 		zval *ex;
-		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception(TSRMLS_C);
+		zend_class_entry *def_ex = zend_exception_get_default(TSRMLS_C), *pdo_ex = php_pdo_get_exception(TSRMLS_C);
 
 		MAKE_STD_ZVAL(ex);
 		object_init_ex(ex, pdo_ex);
@@ -165,7 +165,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		}
 	} else if (EG(exception) == NULL) {
 		zval *ex;
-		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception(TSRMLS_C);
+		zend_class_entry *def_ex = zend_exception_get_default(TSRMLS_C), *pdo_ex = php_pdo_get_exception(TSRMLS_C);
 
 		MAKE_STD_ZVAL(ex);
 		object_init_ex(ex, pdo_ex);
