@@ -60,12 +60,12 @@ test: all
 		echo "ERROR: Cannot run tests without CLI sapi."; \
 	fi
 
-utest: 
+utest: all
 	-@if test -x $(SAPI_CLI_PATH) && test ! -z $(SAPI_CLI_PATH); then \
 		TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
-			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' $(top_srcdir)/run-tests.php -d 'unicode_semantics=on' -d 'unicode.output_encoding=utf-8' $(TESTS); \
+			$(top_builddir)/$(SAPI_CLI_PATH) -d 'open_basedir=' -d 'safe_mode=0' -d 'output_buffering=0' -d 'memory_limit=-1' $(top_srcdir)/run-tests.php -d 'unicode_semantics=on' -d 'unicode.output_encoding=utf-8' $(TESTS); \
 	else \
 		echo "ERROR: Cannot run tests without CLI sapi."; \
 	fi
