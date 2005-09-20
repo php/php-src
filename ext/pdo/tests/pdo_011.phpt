@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_FUNC and statement overloading
+PDO Common: PDO::FETCH_FUNC and statement overloading
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -35,7 +35,7 @@ class DerivedStatement extends PDOStatement
 
 $select1 = $db->prepare('SELECT grp, id FROM test');
 $select2 = $db->prepare('SELECT id, val FROM test');
-$derived = $db->prepare('SELECT id, val FROM test', array(PDO_ATTR_STATEMENT_CLASS=>array('DerivedStatement', array('Overloaded', $db))));
+$derived = $db->prepare('SELECT id, val FROM test', array(PDO::ATTR_STATEMENT_CLASS=>array('DerivedStatement', array('Overloaded', $db))));
 
 class Test1
 {
@@ -62,20 +62,20 @@ function test($id,$val='N/A')
 $f = new Test1(0,0);
 
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_FUNC|PDO_FETCH_GROUP, 'test'));
+var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'test'));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO_FETCH_FUNC, 'test'));
+var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'test'));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO_FETCH_FUNC, array('Test1','factory')));
+var_dump($select2->fetchAll(PDO::FETCH_FUNC, array('Test1','factory')));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO_FETCH_FUNC, array($f, 'factory')));
+var_dump($select2->fetchAll(PDO::FETCH_FUNC, array($f, 'factory')));
 
 var_dump(get_class($derived));
 $derived->execute();
-var_dump($derived->fetchAll(PDO_FETCH_FUNC, array($derived, 'retrieve')));
+var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'retrieve')));
 
 ?>
 --EXPECTF--

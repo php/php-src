@@ -22,7 +22,7 @@ $SELECT = 'SELECT val, grp FROM test';
 $stmt = $db->prepare($SELECT);
 
 $stmt->execute();
-$stmt->setFetchMode(PDO_FETCH_NUM);
+$stmt->setFetchMode(PDO::FETCH_NUM);
 foreach ($stmt as $data)
 {
 	var_dump($data);
@@ -38,14 +38,14 @@ class Test
 
 unset($stmt);
 
-foreach ($db->query($SELECT, PDO_FETCH_CLASS, 'Test') as $data)
+foreach ($db->query($SELECT, PDO::FETCH_CLASS, 'Test') as $data)
 {
 	var_dump($data);
 }
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO_FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
 
 foreach($stmt as $data)
 {

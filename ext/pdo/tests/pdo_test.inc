@@ -30,9 +30,9 @@ class PDOTest {
 			$db->exec("DROP TABLE $table");
 		}
 		
-		$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_WARNING);
-		$db->setAttribute(PDO_ATTR_CASE, PDO_CASE_LOWER);
-		$db->setAttribute(PDO_ATTR_STRINGIFY_FETCHES, true);
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+		$db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+		$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 		return $db;
 	}
 

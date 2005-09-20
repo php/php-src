@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_CLASS
+PDO Common: PDO::FETCH_CLASS
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -39,13 +39,13 @@ class TestDerived extends TestBase
 }
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS, 'TestBase'));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestBase'));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS, 'TestDerived', array(0)));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array(0)));
 
 ?>
 --EXPECTF--
