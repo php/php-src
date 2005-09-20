@@ -1,3 +1,43 @@
+2005-09-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Add eytension consts to extension output (Johannes)
+      - Fix WS in output
+
+2005-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.h
+      zend_execute.h
+      zend_execute.h:
+      MFH (removed unnecesary call to zval_ptr_dtor)
+
+    * zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h:
+      Fixed access to memory that is already freed (in case of __call() method)
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      zend_vm_opcodes.h
+      tests/bug33257.phpt
+      tests/bug33257.phpt
+      tests/bug33257.phpt:
+      Fixed parameter passing incompatibilities.
+      Now it is possible to call array_pop(explode("&","1&2&3")) again.
+
+    * zend_execute.c
+      zend_reflection_api.c
+      tests/bug33996.phpt:
+      Unicode support
+
 2005-09-18  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_0)
