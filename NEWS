@@ -124,6 +124,8 @@ PHP                                                                        NEWS
 - Fixed bug #29253 (array_diff with $GLOBALS argument fails). (Dmitry)
 - Fixed bug #25359 (array_multisort() doesn't work in a function if array is
   global or reference). (Dmitry)
+- Fixed bug #21306 (ext/sesssion: catch bailouts of write handler during
+  RSHUTDOWN). (Jani, Xuefer at 21cn dot com)
 
 14 Jul 2005, PHP 5.1 Beta 3
 - Upgraded bundled SQLite library for PDO:SQLite to 3.2.2 (Ilia)
