@@ -25,7 +25,7 @@ var_dump($db->query('SELECT COUNT(*) FROM test')->fetchColumn());
 $stmt = $db->prepare('SELECT idx, txt FROM test ORDER by idx');
 
 $stmt->execute();
-$cont = $stmt->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE);
+$cont = $stmt->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE);
 var_dump($cont);
 
 echo "===WHILE===\n";
@@ -34,7 +34,7 @@ $stmt->bindColumn('idx', $idx);
 $stmt->bindColumn('txt', $txt);
 $stmt->execute();
 
-while($stmt->fetch(PDO_FETCH_BOUND)) {
+while($stmt->fetch(PDO::FETCH_BOUND)) {
 	var_dump(array($idx=>$txt));
 }
 

@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_LAZY
+PDO Common: PDO::FETCH_LAZY
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -17,7 +17,7 @@ $db->exec('create table test (id int, name varchar(10) NULL)');
 $db->exec("INSERT INTO test (id,name) VALUES(1,'test1')");
 $db->exec("INSERT INTO test (id,name) VALUES(2,'test2')");
 
-foreach ($db->query("SELECT * FROM test", PDO_FETCH_LAZY) as $v) {
+foreach ($db->query("SELECT * FROM test", PDO::FETCH_LAZY) as $v) {
 	echo "lazy: " . $v->id.$v->name."\n";
 }
 echo "End\n";

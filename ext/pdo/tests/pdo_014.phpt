@@ -28,7 +28,7 @@ class Test
 	}
 }
 
-$stmt = $db->query($SELECT, PDO_FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
 
 $it = new IteratorIterator($stmt); /* check if we can convert that thing */
 
@@ -48,7 +48,7 @@ class PDOStatementAggregate extends PDOStatement implements IteratorAggregate
 	private function __construct()
 	{
 		echo __METHOD__ . "\n";
-		$this->setFetchMode(PDO_FETCH_NUM);   
+		$this->setFetchMode(PDO::FETCH_NUM);   
 		/* default fetch mode is BOTH, so we see if the ctor can overwrite that */
 	}
 
@@ -60,7 +60,7 @@ class PDOStatementAggregate extends PDOStatement implements IteratorAggregate
 	}
 }
 
-$stmt = $db->prepare($SELECT, array(PDO_ATTR_STATEMENT_CLASS=>array('PDOStatementAggregate')));
+$stmt = $db->prepare($SELECT, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementAggregate')));
 
 foreach($stmt as $data)
 {

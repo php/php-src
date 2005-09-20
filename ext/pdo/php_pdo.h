@@ -58,6 +58,18 @@ ZEND_END_MODULE_GLOBALS(pdo)
 # define PDOG(v) (pdo_globals.v)
 #endif
 
+#define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
+	zend_declare_class_constant_long(pdo_dbh_ce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+
+#define REGISTER_PDO_CONST_LONG(const_name, value) { \
+	zend_class_entry **pce;	\
+	if (zend_hash_find(CG(class_table), "pdo", sizeof("pdo"), (void **) &pce) != FAILURE)	\
+		zend_declare_class_constant_long(*pce, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);	\
+}	\
+
+#define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
+	zend_declare_class_constant_stringl(pdo_dbh_ce, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
+
 #endif	/* PHP_PDO_H */
 
 

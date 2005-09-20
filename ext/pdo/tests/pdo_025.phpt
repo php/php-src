@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_INTO
+PDO Common: PDO::FETCH_INTO
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -36,7 +36,7 @@ class Test {
 }
 
 $stmt = $db->prepare('SELECT * FROM test');
-$stmt->setFetchMode(PDO_FETCH_INTO, new Test);
+$stmt->setFetchMode(PDO::FETCH_INTO, new Test);
 $stmt->execute();
 
 foreach($stmt as $obj) {
@@ -50,7 +50,7 @@ class Fail {
 	public $val, $val2;
 }
 
-$stmt->setFetchMode(PDO_FETCH_INTO, new Fail);
+$stmt->setFetchMode(PDO::FETCH_INTO, new Fail);
 $stmt->execute();
 
 foreach($stmt as $obj) {

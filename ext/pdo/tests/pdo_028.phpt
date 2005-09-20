@@ -26,7 +26,7 @@ $stmt->execute();
 $stmt = $db->prepare('SELECT * from test');
 $stmt->execute();
 
-var_dump($stmt->fetchAll(PDO_FETCH_ASSOC));
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
 --EXPECT--
 array(1) {

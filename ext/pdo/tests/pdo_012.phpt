@@ -19,7 +19,7 @@ $db->exec('INSERT INTO test VALUES(2, \'B\', \'Group2\')');
 
 $SELECT = 'SELECT val, grp FROM test';
 
-$stmt = $db->query($SELECT, PDO_FETCH_NUM);
+$stmt = $db->query($SELECT, PDO::FETCH_NUM);
 var_dump($stmt->fetchAll());
 
 class Test
@@ -32,13 +32,13 @@ class Test
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO_FETCH_CLASS, 'Test');
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test');
 var_dump($stmt->fetchAll());
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO_FETCH_NUM);
-$stmt->setFetchMode(PDO_FETCH_CLASS, 'Test', array('Changed'));
+$stmt = $db->query($SELECT, PDO::FETCH_NUM);
+$stmt->setFetchMode(PDO::FETCH_CLASS, 'Test', array('Changed'));
 var_dump($stmt->fetchAll());
 
 ?>

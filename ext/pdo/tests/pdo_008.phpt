@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_UNIQUE conflict
+PDO Common: PDO::FETCH_UNIQUE conflict
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -21,7 +21,7 @@ $db->exec("INSERT INTO test VALUES('C', 'C')");
 $stmt = $db->prepare('SELECT val, id from test');
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_NUM|PDO_FETCH_UNIQUE));
+var_dump($stmt->fetchAll(PDO::FETCH_NUM|PDO::FETCH_UNIQUE));
 
 ?>
 --EXPECT--

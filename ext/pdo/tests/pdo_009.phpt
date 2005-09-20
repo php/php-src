@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_CLASSTYPE
+PDO Common: PDO::FETCH_CLASSTYPE
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -50,10 +50,10 @@ class Test3
 }
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_NUM));
+var_dump($stmt->fetchAll(PDO::FETCH_NUM));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS|PDO_FETCH_CLASSTYPE, 'Test3'));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE, 'Test3'));
 
 ?>
 --EXPECTF--
