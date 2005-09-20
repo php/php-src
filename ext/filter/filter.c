@@ -27,44 +27,7 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
-#define FILTER_FLAG_NONE                    0x0000
-
-#define FILTER_FLAG_ALLOW_OCTAL             0x0001
-#define FILTER_FLAG_ALLOW_HEX               0x0002
-
-#define FILTER_FLAG_STRIP_LOW               0x0004
-#define FILTER_FLAG_STRIP_HIGH              0x0008
-#define FILTER_FLAG_ENCODE_LOW              0x0010
-#define FILTER_FLAG_ENCODE_HIGH             0x0020
-#define FILTER_FLAG_ENCODE_AMP              0x0040
-#define FILTER_FLAG_EMPTY_STRING_NULL       0x0080
-
-#define FILTER_FLAG_ALLOW_SIGN              0x0100
-#define FILTER_FLAG_ALLOW_FRACTION          0x0200
-#define FILTER_FLAG_ALLOW_THOUSAND          0x0400
-
-#define FL_INT           0x0101
-#define FL_BOOLEAN       0x0102
-#define FL_FLOAT         0x0103
-#define FL_REGEXP        0x0104
-
-#define FL_ALL           0x0100
-
-#define FS_DEFAULT       0x0201
-
-#define FS_STRING        0x0201
-#define FS_ENCODED       0x0202
-#define FS_SPECIAL_CHARS 0x0203
-#define FS_UNSAFE_RAW    0x0204
-#define FS_EMAIL         0x0205
-#define FS_URL           0x0206
-#define FS_NUMBER_INT    0x0207
-#define FS_NUMBER_FLOAT  0x0208
-#define FS_MAGIC_QUOTES  0x0209
-
-#define FS_ALL           0x0200
-
-#define FC_CALLBACK      0x0400
+#include "filter_private.h"
 
 typedef struct filter_list_entry {
 	char  *name;
@@ -73,23 +36,27 @@ typedef struct filter_list_entry {
 } filter_list_entry;
 
 filter_list_entry filter_list[] = {
-	{ "int",           FL_INT,           php_filter_int           },
-	{ "boolean",       FL_BOOLEAN,       php_filter_boolean       },
-	{ "float",         FL_FLOAT,         php_filter_float         },
-	{ "regexp",        FL_REGEXP,        php_filter_regexp        },
+	{ "int",             FL_INT,           php_filter_int             },
+	{ "boolean",         FL_BOOLEAN,       php_filter_boolean         },
+	{ "float",           FL_FLOAT,         php_filter_float           },
 
-	{ "string",        FS_STRING,        php_filter_string        },
-	{ "stripped",      FS_STRING,        php_filter_string        },
-	{ "encoded",       FS_ENCODED,       php_filter_encoded       },
-	{ "special_chars", FS_SPECIAL_CHARS, php_filter_special_chars },
-	{ "unsafe_raw",    FS_UNSAFE_RAW,    php_filter_unsafe_raw    },
-	{ "email",         FS_EMAIL,         php_filter_email         },
-	{ "url",           FS_URL,           php_filter_url           },
-	{ "number_int",    FS_NUMBER_INT,    php_filter_number_int    },
-	{ "number_float",  FS_NUMBER_FLOAT,  php_filter_number_float  },
-	{ "magic_quotes",  FS_MAGIC_QUOTES,  php_filter_magic_quotes  },
+	{ "validate_regexp", FL_REGEXP,        php_filter_validate_regexp },
+	{ "validate_url",    FL_URL,           php_filter_validate_url    },
+	{ "validate_email",  FL_EMAIL,         php_filter_validate_email  },
+	{ "validate_ip",     FL_IP,            php_filter_validate_url    },
 
-	{ "callback",      FC_CALLBACK,      php_filter_callback      },
+	{ "string",          FS_STRING,        php_filter_string          },
+	{ "stripped",        FS_STRING,        php_filter_string          },
+	{ "encoded",         FS_ENCODED,       php_filter_encoded         },
+	{ "special_chars",   FS_SPECIAL_CHARS, php_filter_special_chars   },
+	{ "unsafe_raw",      FS_UNSAFE_RAW,    php_filter_unsafe_raw      },
+	{ "email",           FS_EMAIL,         php_filter_email           },
+	{ "url",             FS_URL,           php_filter_url             },
+	{ "number_int",      FS_NUMBER_INT,    php_filter_number_int      },
+	{ "number_float",    FS_NUMBER_FLOAT,  php_filter_number_float    },
+	{ "magic_quotes",    FS_MAGIC_QUOTES,  php_filter_magic_quotes    },
+
+	{ "callback",        FC_CALLBACK,      php_filter_callback        },
 };
 	
 #ifndef PARSE_ENV
@@ -198,7 +165,12 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FL_INT", FL_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FL_BOOLEAN", FL_BOOLEAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FL_FLOAT", FL_FLOAT, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FL_REGEXP", FL_REGEXP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FL_URL", FL_URL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FL_EMAIL", FL_EMAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FL_IP", FL_IP, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FS_DEFAULT", FS_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FS_STRING", FS_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FS_STRIPPED", FS_STRING, CONST_CS | CONST_PERSISTENT);
@@ -220,6 +192,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_LOW", FILTER_FLAG_ENCODE_LOW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_HIGH", FILTER_FLAG_ENCODE_HIGH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_AMP", FILTER_FLAG_ENCODE_AMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_ENCODE_QUOTES", FILTER_FLAG_NO_ENCODE_QUOTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMPTY_STRING_NULL", FILTER_FLAG_EMPTY_STRING_NULL, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_SIGN", FILTER_FLAG_ALLOW_SIGN, CONST_CS | CONST_PERSISTENT);
@@ -298,7 +271,7 @@ static void php_zval_filter(zval *value, long filter, long flags, zval *options,
 	
 	filter_func = php_find_filter(filter);
 
-	if (filter_func.id) {
+	if (!filter_func.id) {
 		/* Find default filter */
 		filter_func = php_find_filter(FS_DEFAULT);
 	}
