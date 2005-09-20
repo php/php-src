@@ -11,7 +11,7 @@ PDOTest::skip();
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_SILENT);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 $rs = $db->query('select blah from a_table_that_doesnt_exist');
 var_dump($rs);

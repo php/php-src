@@ -49,7 +49,7 @@ class PDODatabaseX extends PDO
     function query($sql)
     {
     	echo __METHOD__ . "()\n";
-    	$stmt = parent::prepare($sql, array(PDO_ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
+    	$stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
     	$stmt->execute();
     	return $stmt;
     }
@@ -66,7 +66,7 @@ $db->query('INSERT INTO test VALUES(1, \'B\')');
 
 $stmt = $db->query('SELECT val, id FROM test');
 var_dump($stmt);
-var_dump($stmt->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE));
+var_dump($stmt->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
 
 $stmt = NULL;
 $db = NULL;

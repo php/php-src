@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_ASSOC
+PDO Common: PDO::FETCH_ASSOC
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -21,7 +21,7 @@ $db->exec("INSERT INTO test VALUES(3, 'C')");
 $stmt = $db->prepare('SELECT * from test');
 $stmt->execute();
 
-var_dump($stmt->fetchAll(PDO_FETCH_ASSOC));
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
 --EXPECT--
 array(3) {

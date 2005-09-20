@@ -15,7 +15,7 @@ try {
   die('skip no working transactions: ' . $e->getMessage());
 }
 
-if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
 	if (false === PDOTest::detect_transactional_mysql_engine($db)) {
 		die('skip your mysql configuration does not support working transactions');
 	}
@@ -26,7 +26,7 @@ if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
 require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-if ($db->getAttribute(PDO_ATTR_DRIVER_NAME) == 'mysql') {
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
 	$suf = ' Type=' . PDOTest::detect_transactional_mysql_engine($db);
 } else {
 	$suf = '';
