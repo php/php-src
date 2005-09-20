@@ -1,3 +1,74 @@
+2005-09-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add eytension consts to extension output (Johannes)
+      - Fix WS in output
+
+    * (PHP_5_0)
+      NEWS:
+      - MFH Renamed CachingRecursiveIterator to RecursiveCachingIterator.
+
+    * server-tests-config.php
+      server-tests-config.php:
+      
+      - Fix filename
+
+2005-09-19  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      fix #34548 (method append() in class extended from ArrayObject crashes PHP)
+
+2005-09-19  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/dom/php_dom.c
+      ext/dom/php_dom.c:
+      Fixed access to uninitialized value
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute.h:
+      MFH (removed unnecesary call to zval_ptr_dtor)
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h:
+      Fixed access to memory that is already freed (in case of __call() method)
+
+    * (PHP_4_4)
+      Zend/zend_execute.c:
+      Fixed parameter passing incompatibilities.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33257.phpt
+      ZendEngine2/tests/bug33257.phpt:
+      Fixed parameter passing incompatibilities.
+      Now it is possible to call array_pop(explode("&","1&2&3")) again.
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/tests/bug33996.phpt:
+      Unicode support
+
+    * ext/simplexml/tests/012.phpt:
+      Fixed test file
+
+2005-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Add blame :)
+
 2005-09-18  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * (PHP_5_1)
