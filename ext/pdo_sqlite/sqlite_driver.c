@@ -468,6 +468,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	}
 	
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, &cbname)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
@@ -539,6 +540,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	}
 	
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(step_callback, 0, &cbname)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", cbname);
