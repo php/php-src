@@ -1680,8 +1680,11 @@ PHP_FUNCTION(session_write_close)
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
-	php_session_flush(TSRMLS_C);
-	php_rshutdown_session_globals(TSRMLS_C);
+	zend_try {
+		php_session_flush(TSRMLS_C);
+		php_rshutdown_session_globals(TSRMLS_C);
+	} zend_end_try();
+
 	return SUCCESS;
 }
 /* }}} */
