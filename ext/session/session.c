@@ -178,6 +178,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 };
 
 #define MAX_MODULES 10
+#define PREDEFINED_MODULES 2
 
 static ps_module *ps_modules[MAX_MODULES + 1] = {
 	ps_files_ptr,
@@ -1727,6 +1728,7 @@ PHP_MSHUTDOWN_FUNCTION(session)
 #ifdef HAVE_LIBMM
 	PHP_MSHUTDOWN(ps_mm) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
+	memset(&ps_modules[PREDEFINED_MODULES], 0, (MAX_MODULES-PREDEFINED_MODULES)*sizeof(ps_module *));
 
 	return SUCCESS;
 }
