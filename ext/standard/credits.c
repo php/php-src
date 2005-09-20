@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "info.h"
+#include "SAPI.h"
 
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 
@@ -30,11 +31,15 @@ PHPAPI void php_print_credits(int flag)
 {
 	TSRMLS_FETCH();
 
-	if (flag & PHP_CREDITS_FULLPAGE) {
+	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
 		php_print_info_htmlhead(TSRMLS_C);
 	}
 
-	PUTS("<h1>PHP Credits</h1>\n");
+	if (!sapi_module.phpinfo_as_text) {
+		PUTS("<h1>PHP Credits</h1>\n");
+	} else {
+		PUTS("PHP Credits\n");
+	}
 
 	if (flag & PHP_CREDITS_GROUP) {
 		/* Group */
@@ -48,7 +53,11 @@ PHPAPI void php_print_credits(int flag)
 	if (flag & PHP_CREDITS_GENERAL) {
 		/* Design & Concept */
 		php_info_print_table_start();
-		php_info_print_table_header(1, "Language Design &amp; Concept");
+		if (!sapi_module.phpinfo_as_text) {
+			php_info_print_table_header(1, "Language Design &amp; Concept");
+		} else {
+			php_info_print_table_header(1, "Language Design & Concept");
+		}
 		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski");
 		php_info_print_table_end();
 
@@ -110,7 +119,7 @@ PHPAPI void php_print_credits(int flag)
 		php_info_print_table_end();
 	}
 
-	if (flag & PHP_CREDITS_FULLPAGE) {
+	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
 		PUTS("</div></body></html>\n");
 	}
 }
