@@ -8,7 +8,7 @@ if (!extension_loaded('pdo_odbc')) print 'skip not loaded';
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
-$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_SILENT);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
 	if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
@@ -16,7 +16,7 @@ if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CL
 	}
 }
 
-$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $sizes = array(32, 64, 128, 253, 254, 255, 256, 257, 258, 512, 1024, 2048, 3998, 3999, 4000);
 
