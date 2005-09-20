@@ -72,10 +72,10 @@ $db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')');
 $db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')'); 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int NULL, val VARCHAR(255))');
 
-$db->setAttribute(PDO_ATTR_ERRMODE, PDO_ERRMODE_EXCEPTION);
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 var_dump($db->query('SELECT COUNT(*) FROM classtypes')->fetchColumn());
-var_dump($db->query('SELECT id, name FROM classtypes ORDER by id')->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE));
+var_dump($db->query('SELECT id, name FROM classtypes ORDER by id')->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
 
 $objs = array();
 $objs[0] = new stdClass;
@@ -94,7 +94,7 @@ foreach($objs as $obj)
 	$ctype = NULL; /* set default for non stored class name */
 	$stmt->execute();
 	$stmt->bindColumn('id', $ctype);
-	$stmt->fetch(PDO_FETCH_BOUND);
+	$stmt->fetch(PDO::FETCH_BOUND);
 	$ctypes[$cname] = $ctype;
 }
 
@@ -126,12 +126,12 @@ foreach($objs as $idx => $obj)
 unset($stmt);
 
 echo "===DATA===\n";
-var_dump($db->query('SELECT test.val FROM test')->fetchAll(PDO_FETCH_COLUMN));
+var_dump($db->query('SELECT test.val FROM test')->fetchAll(PDO::FETCH_COLUMN));
 
 echo "===FAILURE===\n";
 try
 {
-	$db->query('SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id')->fetchAll(PDO_FETCH_CLASS|PDO_FETCH_CLASSTYPE|PDO_FETCH_SERIALIZE, 'TestLeaf', array());
+	$db->query('SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id')->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIALIZE, 'TestLeaf', array());
 }
 catch (PDOException $e)
 {
@@ -146,11 +146,11 @@ echo "===DATABASE===\n";
 $stmt = $db->prepare('SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_ASSOC));
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 echo "===FETCHCLASS===\n";
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS|PDO_FETCH_CLASSTYPE|PDO_FETCH_SERIALIZE, 'TestLeaf'));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIALIZE, 'TestLeaf'));
 
 
 ?>

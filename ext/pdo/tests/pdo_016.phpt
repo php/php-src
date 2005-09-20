@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_BOUND
+PDO Common: PDO::FETCH_BOUND
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -26,7 +26,7 @@ var_dump($stmt1->fetchColumn());
 $stmt1 = null;
 
 $stmt2->execute();
-$cont = $stmt2->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE);
+$cont = $stmt2->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE);
 var_dump($cont);
 
 echo "===WHILE===\n";
@@ -35,7 +35,7 @@ $stmt2->bindColumn('idx', $idx);
 $stmt2->bindColumn('txt', $txt);
 $stmt2->execute();
 
-while($stmt2->fetch(PDO_FETCH_BOUND)) {
+while($stmt2->fetch(PDO::FETCH_BOUND)) {
 	var_dump(array($idx=>$txt));
 }
 
@@ -57,7 +57,7 @@ foreach($cont as $idx => $txt)
 		 * after execute() has been called at least once */
 		$stmt3->bindColumn('txt', $col1);
 	}
-	var_dump($stmt3->fetch(PDO_FETCH_BOUND));
+	var_dump($stmt3->fetch(PDO::FETCH_BOUND));
 	$stmt3->closeCursor();
 
 	var_dump($stmt4->execute());
@@ -66,7 +66,7 @@ foreach($cont as $idx => $txt)
 		 * after execute() has been called at least once */
 		$stmt4->bindColumn('idx', $col2);
 	}
-	var_dump($stmt4->fetch(PDO_FETCH_BOUND));
+	var_dump($stmt4->fetch(PDO::FETCH_BOUND));
 	$stmt4->closeCursor();
 	var_dump(array($col2=>$col1));
 }
@@ -79,11 +79,11 @@ foreach($cont as $idx => $txt)
 {
 	var_dump(array($idx=>$txt));
 	var_dump($stmt3->execute());
-	var_dump($stmt3->fetch(PDO_FETCH_BOUND));
+	var_dump($stmt3->fetch(PDO::FETCH_BOUND));
 	$stmt3->closeCursor();
 	var_dump($col1);
 	var_dump($stmt4->execute());
-	var_dump($stmt4->fetch(PDO_FETCH_BOUND));
+	var_dump($stmt4->fetch(PDO::FETCH_BOUND));
 	$stmt4->closeCursor();
 	var_dump($col1);
 }
@@ -94,7 +94,7 @@ $stmt2->bindColumn('idx', $col1);
 $stmt2->bindColumn('txt', $col1);
 $stmt2->execute();
 
-while($stmt2->fetch(PDO_FETCH_BOUND))
+while($stmt2->fetch(PDO::FETCH_BOUND))
 {
 	var_dump($col1);
 }

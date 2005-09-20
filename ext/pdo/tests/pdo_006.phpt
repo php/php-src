@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_GROUP
+PDO Common: PDO::FETCH_GROUP
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -21,10 +21,10 @@ $db->exec("INSERT INTO test VALUES(3, 'C')");
 $stmt = $db->prepare('SELECT val, id from test');
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_NUM|PDO_FETCH_GROUP));
+var_dump($stmt->fetchAll(PDO::FETCH_NUM|PDO::FETCH_GROUP));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_ASSOC|PDO_FETCH_GROUP));
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_GROUP));
 
 ?>
 --EXPECT--

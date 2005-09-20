@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_CLASSTYPE and GROUP/UNIQUE
+PDO Common: PDO::FETCH_CLASSTYPE and GROUP/UNIQUE
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -51,10 +51,10 @@ class Test3
 
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS|PDO_FETCH_CLASSTYPE|PDO_FETCH_GROUP, 'Test3'));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_GROUP, 'Test3'));
 
 $stmt->execute();
-var_dump($stmt->fetchAll(PDO_FETCH_CLASS|PDO_FETCH_CLASSTYPE|PDO_FETCH_UNIQUE, 'Test3'));
+var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_UNIQUE, 'Test3'));
 
 ?>
 --EXPECTF--

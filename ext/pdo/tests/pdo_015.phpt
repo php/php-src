@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PDO_FETCH_COLUMN
+PDO Common: PDO::FETCH_COLUMN
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');
@@ -21,22 +21,22 @@ $select1 = $db->prepare('SELECT id, val, val2 FROM test');
 $select2 = $db->prepare('SELECT val, val2 FROM test');
 
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN));
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN, 2));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN, 2));
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_GROUP));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_GROUP));
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE, 0));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE, 0));
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE, 1));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE, 1));
 $select1->execute();
-var_dump($select1->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_UNIQUE, 2));
+var_dump($select1->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE, 2));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO_FETCH_COLUMN|PDO_FETCH_GROUP));
+var_dump($select2->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_GROUP));
 
 ?>
 --EXPECT--
