@@ -679,7 +679,7 @@ static void add_class_vars(zend_class_entry *ce, HashTable *properties, zval *re
 	
 			zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos);
 			zend_hash_move_forward_ex(properties, &pos);
-			zend_unmangle_property_name(key, &class_name, &prop_name);
+			zend_unmangle_property_name_ex(key, key_len, &class_name, &prop_name);
 			if (class_name) {
 				if (class_name[0] != '*' && strcmp(class_name, ce->name)) {
 					/* filter privates from base classes */
@@ -770,7 +770,7 @@ ZEND_FUNCTION(get_object_vars)
 			(*value)->refcount++;
 			add_assoc_zval_ex(return_value, key, key_len, *value);
 			} else if (instanceof) {
-				zend_unmangle_property_name(key, &class_name, &prop_name);
+				zend_unmangle_property_name_ex(key, key_len, &class_name, &prop_name);
 				if (!memcmp(class_name, "*", 2) || (Z_OBJCE_P(EG(This)) == Z_OBJCE_PP(obj) && !strcmp(Z_OBJCE_P(EG(This))->name, class_name))) {
 					/* Not separating references */
 					(*value)->refcount++;
