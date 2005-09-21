@@ -176,7 +176,7 @@ inner_statement:
 
 
 statement:
-		unticked_statement { zend_do_ticks(TSRMLS_C); RESET_DOC_COMMENT(); }
+		unticked_statement { zend_do_ticks(TSRMLS_C); }
 ;
 
 unticked_statement:
