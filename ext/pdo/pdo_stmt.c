@@ -1948,7 +1948,7 @@ static union _zend_function *dbstmt_method_get(
 
 	lc_method_name = zend_u_str_tolower_dup(ztype, method_name, method_len);
 
-	if (zend_u_hash_find(&U_CLASS_ENTRY(pdo_dbstmt_ce)->function_table, ztype, lc_method_name, 
+	if (zend_u_hash_find(&Z_OBJCE_P(object)->function_table, ztype, lc_method_name, 
 			method_len+1, (void**)&fbc) == FAILURE) {
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
 		/* not a pre-defined method, nor a user-defined method; check
