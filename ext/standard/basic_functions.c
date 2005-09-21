@@ -588,6 +588,7 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_socket_get_name,											NULL)
 	PHP_FE(stream_socket_recvfrom,							fourth_arg_force_ref)
 	PHP_FE(stream_socket_sendto,											NULL)
+	PHP_FE(stream_socket_enable_crypto,										NULL)
 	PHP_FE(stream_copy_to_stream,											NULL)
 	PHP_FE(stream_get_contents,												NULL)
 	PHP_FE(fgetcsv,															NULL)
