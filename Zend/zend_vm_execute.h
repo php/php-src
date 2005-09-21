@@ -1955,7 +1955,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
-
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 	if (new_op_array) {
 		zval *saved_object;
@@ -2005,6 +2004,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.ptr->type = IS_BOOL;
 		}
 	}
+
 	EG(return_value_ptr_ptr) = original_return_value;
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -4468,7 +4468,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
-	zval_dtor(free_op1.var);
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 	if (new_op_array) {
 		zval *saved_object;
@@ -4518,6 +4517,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.ptr->type = IS_BOOL;
 		}
 	}
+	zval_dtor(free_op1.var);
 	EG(return_value_ptr_ptr) = original_return_value;
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -7606,7 +7606,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
-	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 	if (new_op_array) {
 		zval *saved_object;
@@ -7656,6 +7655,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.ptr->type = IS_BOOL;
 		}
 	}
+	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	EG(return_value_ptr_ptr) = original_return_value;
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -20371,7 +20371,6 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
-
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 	if (new_op_array) {
 		zval *saved_object;
@@ -20421,6 +20420,7 @@ static int ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.ptr->type = IS_BOOL;
 		}
 	}
+
 	EG(return_value_ptr_ptr) = original_return_value;
 	ZEND_VM_NEXT_OPCODE();
 }
