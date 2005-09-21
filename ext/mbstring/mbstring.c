@@ -55,6 +55,7 @@
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
+#include "ext/standard/exec.h"
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/url.h"
 #include "main/php_output.h"
