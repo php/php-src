@@ -1,3 +1,15 @@
+2005-09-20  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      zend.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_reflection_api.c:
+      MF5.1: fix #34505 (Possible memory corruption when unmangling properties
+      with empty names)
+
 2005-09-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
