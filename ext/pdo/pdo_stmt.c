@@ -1951,7 +1951,7 @@ static union _zend_function *dbstmt_method_get(
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
 
-	if (zend_hash_find(&pdo_dbstmt_ce->function_table, lc_method_name, 
+	if (zend_hash_find(&Z_OBJCE_P(object)->function_table, lc_method_name, 
 			method_len+1, (void**)&fbc) == FAILURE) {
 		pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(object TSRMLS_CC);
 		/* not a pre-defined method, nor a user-defined method; check
@@ -1992,9 +1992,7 @@ void pdo_stmt_init(TSRMLS_D)
 	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-#if no_crazy_hidden_deps_on_other_interfaces
 	zend_class_implements(pdo_dbstmt_ce TSRMLS_CC, 1, zend_ce_traversable); 
-#endif
 	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
