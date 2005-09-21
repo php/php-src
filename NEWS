@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
+  (Marco, Ilia)
 - Fixed bug #34518 (Unset doesn't separate container in CV). (Dmitry)
 - Fixed bug #34505 (Possible memory corruption when unmangling properties 
   with empty names). (Tony)
