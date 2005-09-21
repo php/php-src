@@ -3007,6 +3007,7 @@ PHP_FUNCTION(mb_send_mail)
 	int subject_len;
 	char *extra_cmd=NULL;
 	int extra_cmd_len;
+	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
 		int cnt_type:1;
 		int cnt_trans_enc:1;
@@ -3208,12 +3209,21 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device_output('\0', &device);
 	headers = (char *)device.buffer;
 
+	if (force_extra_parameters) {
+		extra_cmd = estrdup(force_extra_parameters);
+	} else if (extra_cmd) {
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
+	} 
+
 	if (!err && php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
 
+	if (extra_cmd) {
+		efree(extra_cmd);
+	}
 	if (subject_buf) {
 		efree((void *)subject_buf);
 	}
