@@ -27,6 +27,7 @@
 #include "php_network.h"
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/standard/php_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,6 +86,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
 	int use_ssl;
+	int use_proxy = 0;
 	char *scratch = NULL;
 	char *tmp = NULL;
 	char *ua_str = NULL;
@@ -126,6 +128,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
 		request_fulluri = 1;
 		use_ssl = 0;
+		use_proxy = 1;
 
 		transport_len = Z_STRLEN_PP(tmpzval);
 		transport_string = estrndup(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
@@ -144,11 +147,11 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		else if (resource->port == 0)
 			resource->port = 80;
 
-		if (context && !use_ssl &&
+		if (context &&
 			php_stream_context_get_option(context, wrapper->wops->label, "proxy", &tmpzval) == SUCCESS &&
 			Z_TYPE_PP(tmpzval) == IS_STRING &&
 			Z_STRLEN_PP(tmpzval) > 0) {
-			/* Don't use proxy server for SSL resources */
+			use_proxy = 1;
 			transport_len = Z_STRLEN_PP(tmpzval);
 			transport_string = estrndup(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
 		} else {
@@ -167,6 +170,45 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	efree(transport_string);
+
+	if (stream && use_proxy && use_ssl) {
+		smart_str header = {0};
+
+		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
+		smart_str_appends(&header, resource->host);
+		smart_str_appendc(&header, ':');
+		smart_str_append_unsigned(&header, resource->port);
+		smart_str_appendl(&header, " HTTP/1.0\r\n\r\n", sizeof(" HTTP/1.0\r\n\r\n")-1);
+		if (php_stream_write(stream, header.c, header.len) != header.len) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Cannot conect to HTTPS server through proxy");
+			php_stream_close(stream);
+			stream = NULL;
+		}
+ 	 	smart_str_free(&header);
+
+ 	 	if (stream) {
+ 	 		char header_line[HTTP_HEADER_BLOCK_SIZE];
+
+			/* get response header */
+			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
+				if (header_line[0] == '\n' ||
+				    header_line[0] == '\r' ||
+				    header_line[0] == '\0') {
+				  break;
+				}
+			}
+		}
+
+		/* enable SSL transport layer */
+		if (stream) {
+			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
+			    php_stream_xport_crypto_enable(stream, 1 TSRMLS_CC) < 0) {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Cannot conect to HTTPS server through proxy");
+				php_stream_close(stream);
+				stream = NULL;
+			}
+		}
+	}
 
 	if (stream == NULL)	
 		goto out;
