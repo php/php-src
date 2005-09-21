@@ -1,6 +1,21 @@
 <?php
 # PDO test framework utilities
 
+if (getenv('PDOTEST_DSN') === false) {
+	$common = '';
+	$append = false;
+	foreach(file(dirname($_SERVER['PHP_SELF']).'/common.phpt') as $line) {
+		if ($append) {
+			$common .= $line;
+		} elseif (trim($line) == '--REDIRECTTEST--') {
+			$append = true;
+		}
+	}
+	if (ini_get('magic_quotes_runtime')) $common = stripslashes($common);
+	$conf = eval($common);
+	foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
+}
+
 class PDOTest {
 	// create an instance of the PDO driver, based on
 	// the current environment
