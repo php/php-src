@@ -55,6 +55,7 @@
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
+#include "ext/standard/exec.h"
 #include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
@@ -3473,6 +3474,7 @@ PHP_FUNCTION(mb_send_mail)
 	    body_enc;	/* body transfar encoding */
 	mbfl_memory_device device;	/* automatic allocateable buffer for additional header */
 	const mbfl_language *lang;
+	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	int err = 0;
 
 	/* initialize */
@@ -3594,12 +3596,21 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = Z_STRVAL_PP(argv[4]);
 	}
 
+	if (force_extra_parameters) {
+		extra_cmd = estrdup(force_extra_parameters);
+	} else if (extra_cmd) {
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
+	} 
+
 	if (!err && php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
 
+	if (extra_cmd) {
+		efree(extra_cmd);
+	}
 	if (subject_buf) {
 		efree((void *)subject_buf);
 	}
