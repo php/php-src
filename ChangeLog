@@ -1,3 +1,81 @@
+2005-09-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      NEWS:
+      - BFN
+
+2005-09-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ext/standard/http_fopen_wrapper.c:
+      Fixed memory corryption
+
+    * ext/standard/http_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c:
+      Fixed memory corruption
+
+    * ext/standard/http_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c:
+      Allow fopen() make HTTPS requests throug HTTP proxies
+
+    * (PHP_5_0)
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Backport stream_socket_enable_crypto()
+
+2005-09-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/mbstring.c:
+      MFB: fixed compiler warnings
+
+    * (PHP_5_1)
+      ext/mbstring/mbstring.c:
+      fixed compiler warnings
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      MFH: Fixed bug #34565 (mb_send_mail does not fetch
+      mail.force_extra_parameters)
+
+    * ext/mbstring/mbstring.c:
+      Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters)
+
+2005-09-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_parser.y:
+      - MFH Fix Bug #34243 ReflectionClass::getDocComment() returns no result
+
+    * ZendEngine2/zend_language_parser.y:
+      - Fix Bug #34243 ReflectionClass::getDocComment() returns no result
+
+2005-09-21  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_4)
+      Zend/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - MFH: Moved the FREE_OP to after the execution of the included file, or
+      eval
+        statement so that it is safe to access this information in the
+      overridden
+        zend_execute() function, which is what Xdebug does.
+
+    * ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h:
+      - Moved the FREE_OP to after the execution of the included file, or eval
+        statement so that it is safe to access this information in the
+      overridden
+        zend_execute() function, which is what Xdebug does.
+
 2005-09-20  Johannes Schlüter  <schlueter@phpbar.de>
 
     * (PHP_4_4)
