@@ -72,7 +72,7 @@ if (PHP_PREFIX == '') {
 }
 DEFINE('PHP_PREFIX', PHP_PREFIX);
 
-DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM ");
+DEFINE("BASE_INCLUDES", "/I . /I main /I regex /I Zend /I TSRM /I ext ");
 
 // CFLAGS for building the PHP dll
 DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP5DLLTS_EXPORTS /D PHP_EXPORTS \
