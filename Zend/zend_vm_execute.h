@@ -39,6 +39,7 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
+	EX(old_error_reporting) = NULL;
 	if (op_array->T < TEMP_VAR_STACK_LIMIT) {
 		EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable) * op_array->T);
 	} else {
@@ -439,7 +440,11 @@ static int ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX_T(opline->result.u.var).tmp_var.value.lval = EG(error_reporting);
 	EX_T(opline->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
-	zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	EX(old_error_reporting) = &EX_T(opline->result.u.var).tmp_var;
+	
+	if (EG(error_reporting)) {
+		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -528,6 +533,7 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	int i;
 	int encapsulating_block=-1;
 	zval **stack_zval_pp;
+	zval restored_error_reporting;
 
 	stack_zval_pp = (zval **) EG(argument_stack).top_element - 1;
 	while (*stack_zval_pp != NULL) {
@@ -555,6 +561,16 @@ static int ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
 	}
 
+	/* restore previous error_reporting value */
+	if (!EG(error_reporting) && EX(old_error_reporting) != NULL && EX(old_error_reporting)->value.lval != 0) {
+		restored_error_reporting.type = IS_LONG;
+		restored_error_reporting.value.lval = EX(old_error_reporting)->value.lval;
+		convert_to_string(&restored_error_reporting);
+		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		zendi_zval_dtor(restored_error_reporting);
+	}
+	EX(old_error_reporting) = NULL;
+	
 	if (encapsulating_block == -1) {
 		ZEND_VM_RETURN_FROM_EXECUTE_LOOP();
 	} else {
@@ -4770,13 +4786,14 @@ static int ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *opline = EX(opline);
 	zval restored_error_reporting;
 
-	if (!EG(error_reporting)) {
+	if (!EG(error_reporting) && EX(old_error_reporting)->value.lval != 0) {
 		restored_error_reporting.type = IS_LONG;
 		restored_error_reporting.value.lval = EX_T(opline->op1.u.var).tmp_var.value.lval;
 		convert_to_string(&restored_error_reporting);
 		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 		zendi_zval_dtor(restored_error_reporting);
 	}
+	EX(old_error_reporting) = NULL;
 	ZEND_VM_NEXT_OPCODE();
 }
 

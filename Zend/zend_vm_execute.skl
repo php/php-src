@@ -10,6 +10,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
+	EX(old_error_reporting) = NULL;
 	if (op_array->T < TEMP_VAR_STACK_LIMIT) {
 		EX(Ts) = (temp_variable *) do_alloca(sizeof(temp_variable) * op_array->T);
 	} else {
