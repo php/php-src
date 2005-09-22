@@ -110,6 +110,8 @@ PHP                                                                        NEWS
   on execution of prepared statments). (Ilia)
 - Fixed bug #33837 (Informix ESQL version numbering schema changed). (Jani)
 - Fixed bug #33802 (throw Exception in error handler causes crash). (Dmitry)
+- Fixed bug #33771 (error_reporting falls to 0 when @ was used inside 
+  try/catch block). (Tony)
 - Fixed bug #33723 (php_value overrides php_admin_value). (Dmitry)
 - Fixed bug #33710 (ArrayAccess objects doen't initialize $this). (Dmitry)
 - Fixed bug #33690 (Crash setting some ini directives in httpd.conf). (Rasmus)
