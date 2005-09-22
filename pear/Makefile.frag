@@ -14,6 +14,5 @@ install-pear:
 		$(MAKE) -s install-pear-installer; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
-		exit 5; \
 	fi
 
