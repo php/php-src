@@ -94,15 +94,13 @@ static int php_oci_connection_close(php_oci_connection * TSRMLS_DC);
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-
 #ifdef COMPILE_DL_OCI8
 ZEND_GET_MODULE(oci8)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
 #endif /* COMPILE_DL */
-
 /* }}} */
+
+static unsigned char oci_second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char oci_third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 /* {{{ extension function prototypes
 */
@@ -184,8 +182,8 @@ PHP_FUNCTION(oci_collection_trim);
 /* {{{ extension definition structures
 */
 static zend_function_entry php_oci_functions[] = {
-	PHP_FE(oci_define_by_name,          third_arg_force_ref)
-	PHP_FE(oci_bind_by_name,            third_arg_force_ref)
+	PHP_FE(oci_define_by_name,          oci_third_arg_force_ref)
+	PHP_FE(oci_bind_by_name,            oci_third_arg_force_ref)
 	PHP_FE(oci_field_is_null,           NULL)
 	PHP_FE(oci_field_name,              NULL)
 	PHP_FE(oci_field_size,              NULL)
@@ -200,8 +198,8 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_fetch_row,               NULL)
 	PHP_FE(oci_fetch_assoc,             NULL)
 	PHP_FE(oci_fetch_array,             NULL)
-	PHP_FE(ocifetchinto,                second_arg_force_ref)
-	PHP_FE(oci_fetch_all,               second_arg_force_ref)
+	PHP_FE(ocifetchinto,                oci_second_arg_force_ref)
+	PHP_FE(oci_fetch_all,               oci_second_arg_force_ref)
 	PHP_FE(oci_free_statement,          NULL)
 	PHP_FE(oci_internal_debug,          NULL)
 	PHP_FE(oci_num_fields,              NULL)
@@ -254,8 +252,8 @@ static zend_function_entry php_oci_functions[] = {
 	
 	PHP_FALIAS(oci_free_cursor,     oci_free_statement,       NULL)
 	PHP_FALIAS(ocifreecursor,       oci_free_statement,       NULL)
-	PHP_FALIAS(ocibindbyname,       oci_bind_by_name,       third_arg_force_ref)
-	PHP_FALIAS(ocidefinebyname,     oci_define_by_name,     third_arg_force_ref)
+	PHP_FALIAS(ocibindbyname,       oci_bind_by_name,       oci_third_arg_force_ref)
+	PHP_FALIAS(ocidefinebyname,     oci_define_by_name,     oci_third_arg_force_ref)
 	PHP_FALIAS(ocicolumnisnull,     oci_field_is_null,      NULL)
 	PHP_FALIAS(ocicolumnname,       oci_field_name,         NULL)
 	PHP_FALIAS(ocicolumnsize,       oci_field_size,         NULL)
@@ -266,7 +264,7 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FALIAS(ociexecute,          oci_execute,            NULL)
 	PHP_FALIAS(ocicancel,           oci_cancel,             NULL)
 	PHP_FALIAS(ocifetch,            oci_fetch,              NULL)
-	PHP_FALIAS(ocifetchstatement,   oci_fetch_all,          second_arg_force_ref)
+	PHP_FALIAS(ocifetchstatement,   oci_fetch_all,          oci_second_arg_force_ref)
 	PHP_FALIAS(ocifreestatement,    oci_free_statement,     NULL)
 	PHP_FALIAS(ociinternaldebug,    oci_internal_debug,     NULL)
 	PHP_FALIAS(ocinumcols,          oci_num_fields,         NULL)
