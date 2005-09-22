@@ -99,8 +99,20 @@ ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
 
+#ifdef ZEND_ENGINE_2
+ZEND_BEGIN_ARG_INFO(oci_second_arg_force_ref, 0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(0)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO(oci_third_arg_force_ref, 0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(1)
+ZEND_END_ARG_INFO()
+#else
 static unsigned char oci_second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char oci_third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+#endif
 
 /* {{{ extension function prototypes
 */
