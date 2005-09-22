@@ -20,6 +20,11 @@
 #include "filter_private.h"
 #include "ext/standard/php_smart_str.h"
 
+/* {{{ STRUCTS */
+typedef unsigned long filter_map[256];
+/* }}} */
+
+/* {{{ HELPER FUNCTIONS */
 static void php_filter_encode_html(zval *value, char* chars)
 {
 	register int x, y;
@@ -44,7 +49,13 @@ static void php_filter_encode_html(zval *value, char* chars)
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-static void php_filter_encode_url(zval *value, char* chars)
+#define LOWALPHA    "abcdefghijklmnopqrstuvwxyz"
+#define HIALPHA     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define DIGIT       "0123456789"
+
+#define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
+
+static void php_filter_encode_url(zval *value, char* chars, int high, int low)
 {
 	register int x, y;
 	unsigned char *str;
@@ -55,7 +66,7 @@ static void php_filter_encode_url(zval *value, char* chars)
 	for (x = 0, y = 0; len--; x++, y++) {
 		str[y] = (unsigned char) s[x];
 
-		if (strchr(chars, str[y])) {
+		if (!strchr(chars, str[y]) || (high && str[y] > 127) || (low && str[y] < 32) || str[y] == 0) {
 			str[y++] = '%';
 			str[y++] = hexchars[(unsigned char) s[x] >> 4];
 			str[y] = hexchars[(unsigned char) s[x] & 15];
@@ -94,7 +105,48 @@ static void php_filter_strip(zval *value, long flags)
 	Z_STRVAL_P(value) = buf;
 	Z_STRLEN_P(value) = c;
 }
+/* }}} */
 
+/* {{{ FILTER MAP HELPERS */
+static void filter_map_init(filter_map *map)
+{
+	memset(map, 0, sizeof(filter_map));
+}
+
+static void filter_map_update(filter_map *map, int flag, unsigned char *allowed_list)
+{
+	int l, i;
+
+	l = strlen(allowed_list);
+	for (i = 0; i < l; ++i) {
+		(*map)[allowed_list[i]] = flag;
+	}
+}
+
+static void filter_map_apply(zval *value, filter_map *map)
+{
+	unsigned char *buf, *str;
+	int   i, c;
+	
+	str = Z_STRVAL_P(value);
+	buf = safe_emalloc(1, Z_STRLEN_P(value) + 1, 1);
+	c = 0;
+	for (i = 0; i < Z_STRLEN_P(value); i++) {
+		if ((*map)[str[i]]) {
+			buf[c] = str[i];
+			++c;
+		}
+	}
+	/* update zval string data */
+	buf[c] = '\0';
+	efree(Z_STRVAL_P(value));
+	Z_STRVAL_P(value) = buf;
+	Z_STRLEN_P(value) = c;
+}
+/* }}} */
+
+
+/* {{{ php_filter_string */
 void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	size_t new_len;
@@ -109,62 +161,122 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	}
 	/* strip high/strip low ( see flags )*/
 	php_filter_strip(value, flags);
-}
 
+	/* also all the flags - & encode as %xx */
+	if (flags & FILTER_FLAG_ENCODE_AMP) {
+		php_filter_encode_html(value, "&");
+	}
+}
+/* }}} */
+
+/* {{{ php_filter_encoded */
 void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 {
+	/* apply strip_high and strip_low filters */
+	php_filter_strip(value, flags);
 	/* urlencode */
-	/* also all the flags - & encode as %xx */
+	php_filter_encode_url(value, DEFAULT_URL_ENCODE, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW);
 }
+/* }}} */
 
+/* {{{ php_filter_special_chars */
 void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* encodes ' " < > & \0 to numerical entities */
-	/* if strip low is not set, then we encode them as %xx */
-	/* encode_low doesn. tmake sense - update specs */
+	php_filter_encode_html(value, "'\"<>&\0");
+	/* if strip low is not set, then we encode them as &#xx; */
+	php_filter_strip(value, flags);
+	php_filter_encode_html(value, "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F");
 }
+/* }}} */
 
+/* {{{ php_filter_unsafe_raw */
 void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
 }
+/* }}} */
 
-void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
-{
-	/* Check section 6 of rfc 822 http://www.faqs.org/rfcs/rfc822.html */
-}
-
-#define LOWALPHA    "abcdefghijklmnopqrstuvwxyz"
-#define HIALPHA     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define DIGIT       "0123456789"
+/* {{{ php_filter_email */
 #define SAFE        "$-_.+"
 #define EXTRA       "!*'(),"
 #define NATIONAL    "{}|\\^~[]`"
 #define PUNCTUATION "<>#%\""
-
 #define RESERVED    ";/?:@&="
 
+void php_filter_email(PHP_INPUT_FILTER_PARAM_DECL)
+{
+	/* Check section 6 of rfc 822 http://www.faqs.org/rfcs/rfc822.html */
+	unsigned char *allowed_list = LOWALPHA HIALPHA DIGIT "!#$%&'*+-/=?^_`{|}~@.[]";
+	filter_map     map;
+
+	filter_map_init(&map);
+	filter_map_update(&map, 1, allowed_list);
+	filter_map_apply(value, &map);
+}
+/* }}} */
+
+/* {{{ php_filter_url */
 void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Strip all chars not part of section 5 of
 	 * http://www.faqs.org/rfcs/rfc1738.html */
-	char *allowed_list = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
-}
+	unsigned char *allowed_list = LOWALPHA HIALPHA DIGIT SAFE EXTRA NATIONAL PUNCTUATION RESERVED;
+	filter_map     map;
 
+	filter_map_init(&map);
+	filter_map_update(&map, 1, allowed_list);
+	filter_map_apply(value, &map);
+}
+/* }}} */
+
+/* {{{ php_filter_number_int */
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
-	char *allowed_list = "+-" DIGIT;
-}
+	unsigned char *allowed_list = "+-" DIGIT;
+	filter_map     map;
 
+	filter_map_init(&map);
+	filter_map_update(&map, 1, allowed_list);
+	filter_map_apply(value, &map);
+}
+/* }}} */
+
+/* {{{ php_filter_number_float */
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* strip everything [^0-9+-] */
-	char *allowed_list = "+-" DIGIT;
-	/* depending on flags, strip '.', 'e', ",", "'" */
-}
+	unsigned char *allowed_list = "+-" DIGIT;
+	filter_map     map;
 
+	filter_map_init(&map);
+	filter_map_update(&map, 1, allowed_list);
+
+	/* depending on flags, strip '.', 'e', ",", "'" */
+	if (flags & FILTER_FLAG_ALLOW_FRACTION) {
+		filter_map_update(&map, 2, ".");
+	}
+	if (flags & FILTER_FLAG_ALLOW_THOUSAND) {
+		filter_map_update(&map, 3, ",");
+	}
+	if (flags & FILTER_FLAG_ALLOW_SCIENTIFIC) {
+		filter_map_update(&map, 4, "eE");
+	}
+	filter_map_apply(value, &map);
+}
+/* }}} */
+
+/* {{{ php_filter_magic_quotes */
 void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
 {
-	/* just call magic quotes */
-}
+	char *buf;
+	int   len;
+	
+	/* just call php_addslashes quotes */
+	buf = php_addslashes(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 0 TSRMLS_CC);
 
+	efree(Z_STRVAL_P(value));
+	Z_STRVAL_P(value) = buf;
+	Z_STRLEN_P(value) = len;
+}
+/* }}} */
