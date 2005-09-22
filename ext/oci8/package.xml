@@ -30,12 +30,11 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>1.1</version>
-  <date>2005-09-07</date>
+  <version>1.1.1</version>
+  <date>2005-09-22</date>
   <notes>
-   This release fixes a huge amount of bugs and adds support of 
-   statement caching, external credentials etc.
-   See official announce for details.
+   Fixed segfault when binding empty values.
+   Fixed problem with oci_error() without arguments.
   </notes>
  </release>
  <filelist>
@@ -168,6 +167,16 @@
   <configureoption name="with-oci8" default="autodetect" prompt="Please provide the path to ORACLE_HOME dir. Use 'instantclient,/path/to/instant/client/lib' if you're compiling against Oracle Instant Client"/>
  </configureoptions>
  <changelog>
+  <release>
+   <state>beta</state>
+   <version>1.1</version>
+   <date>2005-09-07</date>
+   <notes>
+    This release fixes a huge amount of bugs and adds support of 
+    statement caching, external credentials etc.
+    See official announce for details.
+   </notes>
+  </release>
   <release>
    <state>beta</state>
    <version>1.0</version>
