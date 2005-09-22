@@ -1,3 +1,33 @@
+2005-09-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_language_parser.y
+      zend_language_parser.y:
+      - MFH Fix Bug #34243 ReflectionClass::getDocComment() returns no result
+
+    * zend_language_parser.y:
+      - Fix Bug #34243 ReflectionClass::getDocComment() returns no result
+
+2005-09-21  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_1)
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - MFH: Moved the FREE_OP to after the execution of the included file, or
+      eval
+        statement so that it is safe to access this information in the
+      overridden
+        zend_execute() function, which is what Xdebug does.
+
+    * zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h:
+      - Moved the FREE_OP to after the execution of the included file, or eval
+        statement so that it is safe to access this information in the
+      overridden
+        zend_execute() function, which is what Xdebug does.
+
 2005-09-20  Antony Dovgal  <antony@zend.com>
 
     * (PHP_5_0)
