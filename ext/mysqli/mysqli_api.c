@@ -1361,6 +1361,10 @@ PHP_FUNCTION(mysqli_real_connect)
 		flags ^= CLIENT_LOCAL_FILES;
 	}
 
+	if (!socket) {
+		socket = MyG(default_socket);
+	}
+
 	if (mysql_real_connect(mysql->mysql,hostname,username,passwd,dbname,port,socket,flags) == NULL) {
 		
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
