@@ -294,6 +294,7 @@ struct _zend_execute_data {
 	zend_class_entry *calling_scope;
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
+	zval *old_error_reporting;
 };
 
 #define EX(element) execute_data.element
