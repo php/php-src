@@ -3,7 +3,6 @@ PDO PgSQL Bug #33876
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require 'ext/pdo_pgsql/tests/config.inc';
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
