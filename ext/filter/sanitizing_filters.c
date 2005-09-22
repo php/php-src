@@ -25,7 +25,7 @@ typedef unsigned long filter_map[256];
 /* }}} */
 
 /* {{{ HELPER FUNCTIONS */
-static void php_filter_encode_html(zval *value, char* chars)
+static void php_filter_encode_html(zval *value, char* chars, int encode_nul)
 {
 	register int x, y;
 	smart_str str = {0};
@@ -33,7 +33,29 @@ static void php_filter_encode_html(zval *value, char* chars)
 	char *s = Z_STRVAL_P(value);
 
 	for (x = 0, y = 0; len--; x++, y++) {
-		if (strchr(chars, s[x])) {
+		if (strchr(chars, s[x]) || (encode_nul && s[x] == 0)) {
+			smart_str_appendl(&str, "&#", 2);
+			smart_str_append_long(&str, s[x]);
+			smart_str_appendc(&str, ';');
+		} else {
+			smart_str_appendc(&str, s[x]);
+		}
+	}
+	smart_str_0(&str);
+	efree(Z_STRVAL_P(value));
+	Z_STRVAL_P(value) = str.c;
+	Z_STRLEN_P(value) = str.len;
+}
+
+static void php_filter_encode_html_high_low(zval *value, long flags)
+{
+	register int x, y;
+	smart_str str = {0};
+	int len = Z_STRLEN_P(value);
+	unsigned char *s = Z_STRVAL_P(value);
+
+	for (x = 0, y = 0; len--; x++, y++) {
+		if (((flags & FILTER_FLAG_ENCODE_LOW) && (s[x] < 32)) || ((flags & FILTER_FLAG_ENCODE_HIGH) && (s[x] > 127))) {
 			smart_str_appendl(&str, "&#", 2);
 			smart_str_append_long(&str, s[x]);
 			smart_str_appendc(&str, ';');
@@ -55,7 +77,7 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, char* chars, int high, int low)
+static void php_filter_encode_url(zval *value, char* chars, int high, int low, int encode_nul)
 {
 	register int x, y;
 	unsigned char *str;
@@ -66,7 +88,7 @@ static void php_filter_encode_url(zval *value, char* chars, int high, int low)
 	for (x = 0, y = 0; len--; x++, y++) {
 		str[y] = (unsigned char) s[x];
 
-		if (!strchr(chars, str[y]) || (high && str[y] > 127) || (low && str[y] < 32) || str[y] == 0) {
+		if ((strlen(chars) && !strchr(chars, str[y])) || (high && str[y] > 127) || (low && str[y] < 32) || (encode_nul && str[y] == 0)) {
 			str[y++] = '%';
 			str[y++] = hexchars[(unsigned char) s[x] >> 4];
 			str[y] = hexchars[(unsigned char) s[x] & 15];
@@ -151,20 +173,23 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	size_t new_len;
 	
-	/* strip tags */
+	/* strip tags, implicitly also removes \0 chars */
 	new_len = php_strip_tags(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, NULL, 0);
 	Z_STRLEN_P(value) = new_len;
 	
 	if (! (flags & FILTER_FLAG_NO_ENCODE_QUOTES)) {
 		/* encode ' and " to numerical entity */
-		php_filter_encode_html(value, "'\"");
+		php_filter_encode_html(value, "'\"", 0);
 	}
 	/* strip high/strip low ( see flags )*/
 	php_filter_strip(value, flags);
 
+	/* encode low/encode high flags */
+	php_filter_encode_html_high_low(value, flags);
+
 	/* also all the flags - & encode as %xx */
 	if (flags & FILTER_FLAG_ENCODE_AMP) {
-		php_filter_encode_html(value, "&");
+		php_filter_encode_html(value, "&", 0);
 	}
 }
 /* }}} */
@@ -175,7 +200,7 @@ void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 	/* apply strip_high and strip_low filters */
 	php_filter_strip(value, flags);
 	/* urlencode */
-	php_filter_encode_url(value, DEFAULT_URL_ENCODE, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW);
+	php_filter_encode_url(value, DEFAULT_URL_ENCODE, flags & FILTER_FLAG_ENCODE_HIGH, flags & FILTER_FLAG_ENCODE_LOW, 1);
 }
 /* }}} */
 
@@ -183,16 +208,24 @@ void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* encodes ' " < > & \0 to numerical entities */
-	php_filter_encode_html(value, "'\"<>&\0");
+	php_filter_encode_html(value, "'\"<>&", 1);
 	/* if strip low is not set, then we encode them as &#xx; */
 	php_filter_strip(value, flags);
-	php_filter_encode_html(value, "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F");
+	php_filter_encode_html_high_low(value, FILTER_FLAG_ENCODE_LOW | flags);
 }
 /* }}} */
 
 /* {{{ php_filter_unsafe_raw */
 void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
+	/* Only if no flags are set (optimization) */
+	if (flags != 0) {
+		php_filter_strip(value, flags);
+		if (flags & FILTER_FLAG_ENCODE_AMP) {
+			php_filter_encode_html(value, "&", 0);
+		}
+		php_filter_encode_html_high_low(value, flags);
+	}
 }
 /* }}} */
 
