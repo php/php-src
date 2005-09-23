@@ -1,5 +1,7 @@
 --TEST--
 testing @ and error_reporting - 3
+--INI--
+error_reporting=6143
 --FILE--
 <?php
 
@@ -31,5 +33,5 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 Notice: Undefined variable: undef2 in %s on line %d
-int(4095)
+int(8191)
 Done
