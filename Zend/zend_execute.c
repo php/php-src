@@ -3621,7 +3621,6 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (inc_filename==&tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
 	}
-	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
 	EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
 	if (new_op_array) {
 		zval *saved_object;
@@ -3671,6 +3670,7 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.ptr->type = IS_BOOL;
 		}
 	}
+	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
 	EG(return_value_ptr_ptr) = original_return_value;
 	NEXT_OPCODE();
 }
