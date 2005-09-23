@@ -3468,7 +3468,7 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 	zend_op *opline = EX(opline);
 	zval restored_error_reporting;
 
-	if (!EG(error_reporting) && EX(old_error_reporting)->value.lval != 0) {
+	if (!EG(error_reporting) && EX_T(opline->op1.u.var).tmp_var.value.lval != 0) {
 		restored_error_reporting.type = IS_LONG;
 		restored_error_reporting.value.lval = EX_T(opline->op1.u.var).tmp_var.value.lval;
 		convert_to_string(&restored_error_reporting);
