@@ -34,6 +34,3 @@ $c->viewMom();
 --EXPECT--
 protected method
 protected property
---EXPECT--
-protected method
-protected property
