@@ -262,6 +262,66 @@ Unicode strings:
 
 
 
+Upgrading Functions
+===================
+
+Let's take a look at a couple of functions that have been upgraded to
+support new string types.
+
+substr()
+--------
+
+This functions returns part of a string based on offset and length
+parameters.
+
+	void *str;
+	int32_t str_len, cp_len;
+	zend_uchar str_type;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl|l", &str, &str_len, &str_type, &f, &l) == FAILURE) {
+		return;
+	}
+
+The first thing we notice is that the incoming string specifier is 't',
+which means that we can accept all 3 string types. The 'str' variable is
+declared as void*, because it can point to either UChar* or char*.
+The actual type of the incoming string is stored in 'str_type' variable.
+
+	if (str_type == IS_UNICODE) {
+		cp_len = u_countChar32(str, str_len);
+	} else {
+		cp_len = str_len;
+	}
+
+If the string is a Unicode one, we cannot rely on the str_len value to tell
+us the number of characters in it. Instead, we call u_countChar32() to
+obtain it.
+
+The next several lines normalize start and length parameters to fit within the
+string. Nothing new here. Then we locate the appropriate segment.
+
+	if (str_type == IS_UNICODE) {
+		int32_t start = 0, end = 0;
+		U16_FWD_N((UChar*)str, end, str_len, f);
+		start = end;
+		U16_FWD_N((UChar*)str, end, str_len, l);
+		RETURN_UNICODEL((UChar*)str + start, end-start, 1);
+
+Since codepoint (character) #n is not necessarily at offset #n in Unicode
+strings, we start at the beginning and iterate forward until we have gone
+through the required number of codepoints to reach the start of the segment.
+Then we save the location in 'start' and continue iterating through the number
+of codepoints specified by the offset. Once that's done, we can return the
+segment as a Unicode string.
+
+	} else {
+		RETURN_STRINGL((char*)str + f, l, 1);
+	}
+
+For native and binary types, we can return the segment directly.
+
+
+
 References
 ==========
 
