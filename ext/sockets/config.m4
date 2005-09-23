@@ -31,5 +31,6 @@ if test "$PHP_SOCKETS" != "no"; then
   PHP_NEW_EXTENSION([sockets], [sockets.c], [$ext_shared])
 fi
 
+PHP_CHECK_FUNC(socketpair)
 PHP_CHECK_FUNC(gethostbyname2)
 
