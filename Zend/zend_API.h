@@ -126,26 +126,26 @@ typedef struct _zend_function_entry {
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
 		class_container.clone = NULL;							\
-		class_container.serialize = NULL; \
-		class_container.unserialize = NULL; \
-		class_container.create_object = NULL;	 				\
+		class_container.serialize = NULL;						\
+		class_container.unserialize = NULL;						\
+		class_container.create_object = NULL;					\
 		class_container.interface_gets_implemented = NULL;		\
-		class_container.__call = handle_fcall;	\
-		class_container.__get = handle_propget;	\
-		class_container.__set = handle_propset;	\
-		class_container.__unset = handle_propunset;	\
-		class_container.__isset = handle_propisset;	\
-		class_container.serialize_func = NULL;	\
-		class_container.unserialize_func = NULL;	\
-		class_container.serialize = NULL;	\
-		class_container.unserialize = NULL;	\
-		class_container.parent = NULL;          \
-		class_container.num_interfaces = 0;     \
-		class_container.interfaces = NULL;      \
-		class_container.get_iterator = NULL;    \
-		class_container.iterator_funcs.funcs = NULL;  \
-		class_container.u_twin = NULL;          \
-		class_container.module = NULL;          \
+		class_container.__call = handle_fcall;					\
+		class_container.__get = handle_propget;					\
+		class_container.__set = handle_propset;					\
+		class_container.__unset = handle_propunset;				\
+		class_container.__isset = handle_propisset;				\
+		class_container.serialize_func = NULL;					\
+		class_container.unserialize_func = NULL;				\
+		class_container.serialize = NULL;						\
+		class_container.unserialize = NULL;						\
+		class_container.parent = NULL;							\
+		class_container.num_interfaces = 0;						\
+		class_container.interfaces = NULL;						\
+		class_container.get_iterator = NULL;					\
+		class_container.iterator_funcs.funcs = NULL;			\
+		class_container.u_twin = NULL;							\
+		class_container.module = NULL;							\
 	}
 
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
