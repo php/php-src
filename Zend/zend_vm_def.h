@@ -3586,10 +3586,12 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMP|VAR|UNUSED|CV, ANY)
 ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 {
 	zend_op *opline = EX(opline);
-
-	EX_T(opline->result.u.var).tmp_var.value.lval = EG(error_reporting);
-	EX_T(opline->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
-	EX(old_error_reporting) = &EX_T(opline->result.u.var).tmp_var;
+	
+	if (EX(old_error_reporting) == NULL) {
+		EX_T(opline->result.u.var).tmp_var.value.lval = EG(error_reporting);
+		EX_T(opline->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
+		EX(old_error_reporting) = &EX_T(opline->result.u.var).tmp_var;
+	}
 	
 	if (EG(error_reporting)) {
 		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
@@ -3615,7 +3617,9 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 		zendi_zval_dtor(restored_error_reporting);
 	}
-	EX(old_error_reporting) = NULL;
+	if (EX(old_error_reporting) == &EX_T(opline->op1.u.var).tmp_var) {
+		EX(old_error_reporting) = NULL;
+	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
