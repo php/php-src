@@ -1197,7 +1197,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       ;;
     *netware*[)]
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) $(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)'
+      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php5lib, , -L$(top_builddir)/netware -lphp5lib) $(translit(ifelse($1, php5lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
       ;;
     *[)]
       suffix=la
@@ -1289,10 +1289,12 @@ dnl ---------------------------------------------- Shared module
       PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
       case $host_alias in
       *netware*)
-        PHP_ADD_LIBRARY_WITH_PATH(php5lib, netware, translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+      	PHP_SHARED_MODULE(php$1,shared_objects_$1, $ext_builddir, $6)
+	;;
+      *)
+      	PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
       ;;
       esac
-      PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
     fi
   fi
