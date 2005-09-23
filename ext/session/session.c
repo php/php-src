@@ -1628,7 +1628,9 @@ static void php_rinit_session_globals(TSRMLS_D)
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
 	if (PS(mod_data)) {
-		PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
+		zend_try {
+			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
+		} zend_end_try();
 	}
 	if (PS(id)) {
 		efree(PS(id));
@@ -1665,10 +1667,12 @@ PHP_RINIT_FUNCTION(session)
 
 static void php_session_flush(TSRMLS_D)
 {
-	if(PS(session_status)==php_session_active) {
-		php_session_save_current_state(TSRMLS_C);
+	if (PS(session_status) == php_session_active) {
+		PS(session_status) = php_session_none;
+		zend_try {
+			php_session_save_current_state(TSRMLS_C);
+		} zend_end_try();
 	}
-	PS(session_status)=php_session_none;
 }
 
 /* {{{ proto void session_write_close(void)
@@ -1680,10 +1684,8 @@ PHP_FUNCTION(session_write_close)
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
-	zend_try {
-		php_session_flush(TSRMLS_C);
-		php_rshutdown_session_globals(TSRMLS_C);
-	} zend_end_try();
+	php_session_flush(TSRMLS_C);
+	php_rshutdown_session_globals(TSRMLS_C);
 
 	return SUCCESS;
 }
