@@ -720,8 +720,8 @@ END_EXTERN_C()
 #define ZEND_DESTRUCTOR_FUNC_NAME	"__destruct"
 #define ZEND_GET_FUNC_NAME          "__get"
 #define ZEND_SET_FUNC_NAME          "__set"
-#define ZEND_UNSET_FUNC_NAME          "__unset"
-#define ZEND_ISSET_FUNC_NAME          "__isset"
+#define ZEND_UNSET_FUNC_NAME        "__unset"
+#define ZEND_ISSET_FUNC_NAME        "__isset"
 #define ZEND_CALL_FUNC_NAME         "__call"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 
