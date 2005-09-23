@@ -843,7 +843,6 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 
 	{
 		string str_constants;
-		string sub_indent;
 		int num_constants = 0;
 		
 		string_init(&str_constants);
