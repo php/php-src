@@ -1,3 +1,33 @@
+2005-09-22  Antony Dovgal  <antony@zend.com>
+
+    * zend_modules.h
+      zend_modules.h:
+      bump API number
+
+    * (PHP_5_1)
+      zend_compile.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_opcodes.h
+      tests/bug33771.phpt:
+      MFH: fix #33771 (error_reporting falls to 0 when @ was used inside
+      try/catch block)
+
+    * tests/bug33771.phpt
+      tests/bug33771.phpt:
+      
+      fix #33771 (error_reporting falls to 0 when @ was used inside try/catch
+      block)
+
+    * zend_compile.h
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_execute.skl
+      zend_vm_opcodes.h:
+      fix #33771 (error_reporting falls to 0 when @ was used inside try/catch
+      block)
+
 2005-09-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)

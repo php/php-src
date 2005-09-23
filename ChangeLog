@@ -1,3 +1,67 @@
+2005-09-22  Antony Dovgal  <antony@zend.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_api.c:
+      MFH: fix #32081 (mysqli_real_connect(): mysqli.default_socket in php.ini
+      has no effect) for real
+
+    * ext/mysqli/mysqli_api.c:
+      fix #32081 (mysqli_real_connect(): mysqli.default_socket in php.ini has no
+      effect) for real
+
+    * ZendEngine2/zend_modules.h
+      ZendEngine2/zend_modules.h:
+      bump API number
+
+    * (PHP_5_1)
+      NEWS:
+      BFN
+
+    * (PHP_5_1)
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug33771.phpt:
+      MFH: fix #33771 (error_reporting falls to 0 when @ was used inside
+      try/catch block)
+
+    * ZendEngine2/tests/bug33771.phpt
+      ZendEngine2/tests/bug33771.phpt:
+      
+      fix #33771 (error_reporting falls to 0 when @ was used inside try/catch
+      block)
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_opcodes.h:
+      fix #33771 (error_reporting falls to 0 when @ was used inside try/catch
+      block)
+
+    * ext/oci8/oci8.c:
+      .. and the fix
+
+    * ext/oci8/oci8.c:
+      fix Win32 builds for PHP_4_4
+      (patch by Edin)
+
+2005-09-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      configure.in
+      pear/Makefile.frag:
+      - Fixed bug #34583 ("make install" prematurely fails because of PEAR)
+
+2005-09-22  Antony Dovgal  <antony@zend.com>
+
+    * (RELEASE_1_1_1)
+      ext/oci8/package.xml:
+      prepare to release 1.1.1
+
 2005-09-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_1)
