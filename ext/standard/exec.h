@@ -34,8 +34,8 @@ PHP_FUNCTION(proc_terminate);
 PHP_FUNCTION(proc_nice);
 PHP_MINIT_FUNCTION(proc_open);
 
-char *php_escape_shell_cmd(char *);
-char *php_escape_shell_arg(char *);
+PHPAPI char *php_escape_shell_cmd(char *);
+PHPAPI char *php_escape_shell_arg(char *);
 int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC);
 
 #endif /* EXEC_H */
