@@ -199,7 +199,7 @@ You need to tell me where to find your oracle SDK, or set ORACLE_HOME.
   PHP_SUBST_OLD(PDO_OCI_DIR)
   PHP_SUBST_OLD(PDO_OCI_VERSION)
 
-  ifdef([PHP_ADD_EXTENDION_DEP],
+  ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
   ])

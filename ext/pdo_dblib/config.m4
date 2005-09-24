@@ -73,7 +73,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   AC_DEFINE(HAVE_FREETDS,1,[ ])
   PHP_SUBST(PDO_DBLIB_SHARED_LIBADD)
 
-  ifdef([PHP_ADD_EXTENDION_DEP],
+  ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)
   ])
