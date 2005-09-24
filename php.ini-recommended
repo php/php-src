@@ -660,6 +660,7 @@ default_socket_timeout = 60
 ;extension=php_shmop.dll
 ;extension=php_snmp.dll
 ;extension=php_sockets.dll
+;extension=php_sqlite.dll
 ;extension=php_sybase_ct.dll
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll

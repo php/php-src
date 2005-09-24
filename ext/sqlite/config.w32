@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("sqlite", "SQLite support", "yes");
+ARG_WITH("sqlite", "SQLite support", "no");
 
 if (PHP_SQLITE != "no") {
 	copy_and_subst(configure_module_dirname + "\\libsqlite\\src\\sqlite.h.in",
