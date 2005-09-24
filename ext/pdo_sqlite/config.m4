@@ -113,7 +113,7 @@ EOF
       AC_CHECK_HEADERS(time.h)
     
   fi
-  ifdef([PHP_ADD_EXTENDION_DEP],
+  ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
   ])
