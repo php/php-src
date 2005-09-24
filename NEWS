@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2005, PHP 5.1 Release Candidate 2
+- Bundle SQLite extension as a shared module in Windows distribution. This
+  means that the Windows users would have to add php_extension=php_sqlite.dll
+  into their php.ini to enable SQLite functionality. (Edin)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
   functions to not call __autoload(). (Dmitry)
 - Added support for class constants and static members for internal classes.
