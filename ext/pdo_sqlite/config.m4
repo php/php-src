@@ -83,7 +83,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       PHP_NEW_EXTENSION(pdo_sqlite,
         $php_pdo_sqlite_sources_core $pdo_sqlite_sources,
-        $ext_shared,,-I@ext_builddir@/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
+        $ext_shared,,-I$ext_builddir/sqlite/src -DPDO_SQLITE_BUNDLED=1 -DSQLITE_OMIT_CURSOR -I$pdo_inc_path)
 
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src, 1)
       AC_CHECK_SIZEOF(char *,4)
