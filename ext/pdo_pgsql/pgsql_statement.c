@@ -199,6 +199,22 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 
 				}
 				if (param->paramno >= 0) {
+					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB &&
+							Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+						php_stream *stm;
+						php_stream_from_zval_no_verify(stm, &param->parameter);
+						if (stm) {
+							SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
+							Z_TYPE_P(param->parameter) = IS_STRING;
+							Z_STRLEN_P(param->parameter) = php_stream_copy_to_mem(stm,
+									&Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0);
+						} else {
+							/* expected a stream resource */
+							pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+							return 0;
+						}
+					}
+
 					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
 							Z_TYPE_P(param->parameter) == IS_NULL) {
 						S->param_values[param->paramno] = NULL;
