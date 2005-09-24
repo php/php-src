@@ -28,7 +28,7 @@
 #define spl_ce_Iterator      zend_ce_iterator
 #define spl_ce_Aggregate     zend_ce_aggregate
 #define spl_ce_ArrayAccess   zend_ce_arrayaccess
-#define spl_ce_Serializeable zend_ce_serializeable
+#define spl_ce_Serializable  zend_ce_serializable
 
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveIteratorIterator;
