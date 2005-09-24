@@ -484,7 +484,7 @@ interface Countable
  * constructor instead of calling __construct(). If you need to execute the
  * standard constructor you may do so in the method.
  */
-interface Serializeable
+interface Serializable
 {
 	/**
 	 * @return string representation of the instance
