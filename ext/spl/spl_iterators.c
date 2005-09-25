@@ -89,6 +89,7 @@ typedef struct _spl_recursive_it_object {
 	int                      level;
 	RecursiveIteratorMode    mode;
 	int                      flags;
+	int                      max_depth;
 	zend_bool                in_iteration;
 	zend_function            *beginIteration;
 	zend_function            *endIteration;
@@ -119,7 +120,7 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
 		zval_ptr_dtor(&object->iterators[object->level--].zobject);
 	}
-	erealloc(object->iterators, sizeof(spl_sub_iterator));
+	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
 
 	zval_ptr_dtor(&iter->zobject);	
@@ -206,14 +207,23 @@ next_step:
 					has_children = zend_is_true(retval);
 					zval_ptr_dtor(&retval);
 					if (has_children) {
-						switch (object->mode) {
-						case RIT_LEAVES_ONLY:
-						case RIT_CHILD_FIRST:
-							object->iterators[object->level].state = RS_CHILD;
-							goto next_step;
-						case RIT_SELF_FIRST:
-							object->iterators[object->level].state = RS_SELF;
-							goto next_step;
+						if (object->max_depth == -1 || object->max_depth > object->level) {
+							switch (object->mode) {
+							case RIT_LEAVES_ONLY:
+							case RIT_CHILD_FIRST:
+								object->iterators[object->level].state = RS_CHILD;
+								goto next_step;
+							case RIT_SELF_FIRST:
+								object->iterators[object->level].state = RS_SELF;
+								goto next_step;
+							}
+						} else {
+							/* do not recurse into */
+							if (object->mode == RIT_LEAVES_ONLY) {
+								/* this is not a leave, so skip it */
+								object->iterators[object->level].state = RS_NEXT;
+								goto next_step;
+							}
 						}
 					}
 				}
@@ -382,8 +392,10 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern->level = 0;
 	intern->mode = mode;
 	intern->flags = flags;
+	intern->max_depth = -1;
 	intern->in_iteration = 0;
 	intern->ce = Z_OBJCE_P(object);
+
 	zend_hash_find(&intern->ce->function_table, "beginiteration", sizeof("beginiteration"), (void **) &intern->beginIteration);
 	if (intern->beginIteration->common.scope == U_CLASS_ENTRY(spl_ce_RecursiveIteratorIterator)) {
 		intern->beginIteration = NULL;
@@ -588,6 +600,36 @@ SPL_METHOD(RecursiveIteratorIterator, nextElement)
 	/* nothing to do */
 } /* }}} */
 
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::setMaxDepth([$max_depth = -1])
+   Set the maximum allowed depth (or any depth if pmax_depth = -1] */
+SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long  max_depth = -1;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_depth) == FAILURE) {
+		return;
+	}
+	if (max_depth < -1) {
+		zend_throw_exception(U_CLASS_ENTRY(spl_ce_OutOfRangeException), "Parameter max_depth must be >= -1", 0 TSRMLS_CC);
+		return;
+	}
+	object->max_depth = max_depth;
+} /* }}} */
+
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getMaxDepth()
+   Return the maximum accepted depth or false if any depth is allowed */
+SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (object->max_depth == -1) {
+		RETURN_FALSE;
+	} else {
+		RETURN_LONG(object->max_depth);
+	}
+} /* }}} */
+
 static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char *method, int method_len TSRMLS_DC)
 {
 	union _zend_function    *function_handler;
@@ -620,6 +662,7 @@ static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 			zval_ptr_dtor(&object->iterators[object->level--].zobject);
 		}
 		efree(object->iterators);
+		object->iterators = NULL;
 	}
 
 	zend_hash_destroy(object->std.properties);
@@ -661,23 +704,30 @@ ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_getSubIterator, 0)
 	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_setMaxDepth, 0) 
+	ZEND_ARG_INFO(0, max_depth)
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
-	SPL_ME(RecursiveIteratorIterator, __construct,   arginfo_recursive_it___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, valid,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getDepth,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, __construct,       arginfo_recursive_it___construct,    ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, rewind,            NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, valid,             NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, key,               NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, current,           NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, next,              NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getDepth,          NULL,                                ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getSubIterator,    arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginIteration,    NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endIteration,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, nextElement,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getInnerIterator,  NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginIteration,    NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endIteration,      NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callHasChildren,   NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, callGetChildren,   NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, beginChildren,     NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, endChildren,       NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, nextElement,       NULL,                                ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, setMaxDepth,       arginfo_recursive_it_setMaxDepth,    ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getMaxDepth,       NULL,                                ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -1439,13 +1489,10 @@ static INLINE void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			
 			MAKE_STD_ZVAL(zcacheval);
 			ZVAL_ZVAL(zcacheval, intern->current.data, 1, 0);
-			switch(intern->current.key_type) {
-				case HASH_KEY_IS_STRING:
-					zend_u_symtable_update(HASH_OF(intern->u.caching.zcache), IS_STRING, intern->current.str_key, intern->current.str_key_len, &zcacheval, sizeof(void*), NULL);
-					break;
-				case HASH_KEY_IS_LONG:
-					add_index_zval(intern->u.caching.zcache, intern->current.int_key, zcacheval);
-					break;
+			if (intern->current.key_type == HASH_KEY_IS_LONG) {
+				add_index_zval(intern->u.caching.zcache, intern->current.int_key, zcacheval);
+			} else {
+				zend_u_symtable_update(HASH_OF(intern->u.caching.zcache), intern->current.key_type, intern->current.str_key, intern->current.str_key_len, &zcacheval, sizeof(void*), NULL);
 			}
 		}
 		/* Recursion ? */
