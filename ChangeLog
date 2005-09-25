@@ -1,3 +1,43 @@
+2005-09-24  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      Documentation belongs elsewhere
+
+2005-09-24  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/standard/exec.h:
+      MFB: Allow php extensions to use php_escape_shell_cmd() and
+      php_escape_shell_arg(), needed for mbstring
+
+    * (PHP_5_1)
+      ext/standard/exec.h:
+      Allow php extensions to use php_escape_shell_cmd() and
+      php_escape_shell_arg(), needed for mbstring
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/sqlite/config.w32:
+      MFB: Build PDO and SQLite as shared
+
+    * (PHP_5_1)
+      NEWS
+      php.ini-dist
+      php.ini-recommended
+      ext/sqlite/config.w32:
+      Build PDO and SQLite as shared
+
+2005-09-24  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_gif_in.c:
+      - MFH #33220, infinite loop while loading invalid GIF (nlopees)
+
+    * ext/gd/libgd/gd_gif_in.c:
+      - #33220, fix infinite loop while loading invalid gif, this patch fixes
+        at least many cases (nlopess)
+
 2005-09-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
