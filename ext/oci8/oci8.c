@@ -864,8 +864,8 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	php_oci_connection *connection;
 	char *username, *password;
 	char *dbname = NULL, *charset = NULL;
-	long username_len = 0, password_len = 0;
-	long dbname_len = 0, charset_len = 0;
+	int username_len = 0, password_len = 0;
+	int dbname_len = 0, charset_len = 0;
 	long session_mode = OCI_DEFAULT;
 
 	/* if a fourth parameter is handed over, it is the charset identifier (but is only used in Oracle 9i+) */
@@ -888,7 +888,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 
 /* {{{ php_oci_do_connect_ex()
  * The real connect function. Allocates all the resources needed, establishes the connection and returns the result handle (or NULL) */
-php_oci_connection *php_oci_do_connect_ex(char *username, long username_len, char *password, long password_len, char *new_password, long new_password_len, char *dbname, long dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC) 
+php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC) 
 {
 	list_entry *le;
 	list_entry new_le;
@@ -1417,7 +1417,7 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 
 /* {{{ php_oci_password_change()
  Change password for the user with the username given */
-int php_oci_password_change(php_oci_connection *connection, char *user, long user_len, char *pass_old, long pass_old_len, char *pass_new, long pass_new_len TSRMLS_DC)
+int php_oci_password_change(php_oci_connection *connection, char *user, int user_len, char *pass_old, int pass_old_len, char *pass_new, int pass_new_len TSRMLS_DC)
 {
 	connection->errcode = PHP_OCI_CALL(OCIPasswordChange, (connection->svc, connection->err, (text *)user, user_len+1, (text *)pass_old, pass_old_len+1, (text *)pass_new, pass_new_len+1, OCI_DEFAULT));
 
