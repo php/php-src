@@ -274,12 +274,12 @@ int php_oci_fetch_sqltext_offset(php_oci_statement *, text **, ub2 * TSRMLS_DC);
 #endif
 	
 void php_oci_do_connect (INTERNAL_FUNCTION_PARAMETERS, int , int);
-php_oci_connection *php_oci_do_connect_ex(char *username, long username_len, char *password, long password_len, char *new_password, long new_password_len, char *dbname, long dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC);
+php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC);
 
 int php_oci_connection_rollback(php_oci_connection * TSRMLS_DC);
 int php_oci_connection_commit(php_oci_connection * TSRMLS_DC);
 
-int php_oci_password_change(php_oci_connection *, char *, long, char *, long, char *, long TSRMLS_DC);
+int php_oci_password_change(php_oci_connection *, char *, int, char *, int, char *, int TSRMLS_DC);
 int php_oci_server_get_version(php_oci_connection *, char ** TSRMLS_DC); 
 
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int, int);
