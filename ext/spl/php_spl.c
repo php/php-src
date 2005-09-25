@@ -374,6 +374,7 @@ PHP_FUNCTION(spl_autoload_call)
  Register given function as __autoload() implementation */
 PHP_FUNCTION(spl_autoload_register)
 {
+	zval zfunc_name;
 	char *func_name;
 	uint func_name_len;
 	char *lc_name = NULL;
@@ -385,28 +386,26 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_uchar func_name_type;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|tb", &func_name, &func_name_len, &func_name_type, &do_throw) == FAILURE) {
-		zval func_name;
-
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &zcallable, &func_name_len, &do_throw) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|b", &zcallable, &do_throw) == FAILURE) {
 			return;
 		}
-		if (!zend_is_callable_ex(zcallable, 0, &func_name, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
+		if (!zend_is_callable_ex(zcallable, 0, &zfunc_name, &alfi.func_ptr, &obj_ptr TSRMLS_CC)) {
 			if (do_throw) {
 				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array does not specify a callable static method");
 			}
-			zval_dtor(&func_name);
+			zval_dtor(&zfunc_name);
 			return;
 		} else if (!obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (do_throw) {
 				zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_LogicException), 0 TSRMLS_CC, "Passed array specifies a non static method but no object");
 			}
-			zval_dtor(&func_name);
+			zval_dtor(&zfunc_name);
 			return;
 		}
-		func_name_type = Z_TYPE(func_name);
-		func_name_len = Z_UNILEN(func_name);
-		lc_name = zend_u_str_tolower_dup(func_name_type, Z_UNIVAL(func_name), func_name_len);
-		zval_dtor(&func_name);
+		func_name_type = Z_TYPE(zfunc_name);
+		func_name_len = Z_UNILEN(zfunc_name);
+		lc_name = zend_u_str_tolower_dup(func_name_type, Z_UNIVAL(zfunc_name), func_name_len);
+		zval_dtor(&zfunc_name);
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			alfi.obj = *obj_ptr;
 			alfi.obj->refcount++;
