@@ -102,7 +102,7 @@ ZEND_GET_MODULE(oci8)
 #ifdef ZEND_ENGINE_2
 ZEND_BEGIN_ARG_INFO(oci_second_arg_force_ref, 0)
 	ZEND_ARG_PASS_INFO(0)
-	ZEND_ARG_PASS_INFO(0)
+	ZEND_ARG_PASS_INFO(1)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(oci_third_arg_force_ref, 0)
 	ZEND_ARG_PASS_INFO(0)
@@ -864,7 +864,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	php_oci_connection *connection;
 	char *username, *password;
 	char *dbname = NULL, *charset = NULL;
-	long username_len, password_len;
+	long username_len = 0, password_len = 0;
 	long dbname_len = 0, charset_len = 0;
 	long session_mode = OCI_DEFAULT;
 
