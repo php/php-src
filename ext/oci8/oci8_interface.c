@@ -1216,7 +1216,7 @@ PHP_FUNCTION(oci_execute)
 {
 	zval *z_statement;
 	php_oci_statement *statement;
-	ub4 mode = OCI_COMMIT_ON_SUCCESS;
+	long mode = OCI_COMMIT_ON_SUCCESS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &z_statement, &mode) == FAILURE) {
 		return;
