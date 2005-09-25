@@ -943,7 +943,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 			}
 		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) { 
-			if (line_ccnt < 2) {
+			if (line_ccnt < 2 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
 					break;
