@@ -292,14 +292,14 @@ int php_oci_column_to_zval(php_oci_out_column *, zval *, int TSRMLS_DC);
 php_oci_descriptor * php_oci_lob_create (php_oci_connection *, long TSRMLS_DC);
 int php_oci_lob_get_length (php_oci_descriptor *, ub4 * TSRMLS_DC);
 int php_oci_lob_read (php_oci_descriptor *, long, long, char **, ub4 * TSRMLS_DC);
-int php_oci_lob_write (php_oci_descriptor *, ub4, char *, long, ub4 * TSRMLS_DC);
+int php_oci_lob_write (php_oci_descriptor *, ub4, char *, int, ub4 * TSRMLS_DC);
 int php_oci_lob_flush (php_oci_descriptor *, int TSRMLS_DC);
 int php_oci_lob_set_buffering (php_oci_descriptor *, int TSRMLS_DC);
 int php_oci_lob_get_buffering (php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_copy (php_oci_descriptor *, php_oci_descriptor *, long TSRMLS_DC);
 #ifdef HAVE_OCI8_TEMP_LOB
 int php_oci_lob_close (php_oci_descriptor * TSRMLS_DC);
-int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, char *, long TSRMLS_DC);
+int php_oci_lob_write_tmp (php_oci_descriptor *, ub1, char *, int TSRMLS_DC);
 #endif
 void php_oci_lob_free(php_oci_descriptor * TSRMLS_DC);
 int php_oci_lob_import(php_oci_descriptor *descriptor, char * TSRMLS_DC);
