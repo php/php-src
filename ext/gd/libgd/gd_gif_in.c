@@ -259,13 +259,13 @@ DoExtension(gdIOCtx *fd, int label, int *Transparent)
                if ((buf[0] & 0x1) != 0)
                        *Transparent = buf[3];
 
-               while (GetDataBlock(fd, (unsigned char*) buf) != 0)
+               while (GetDataBlock(fd, (unsigned char*) buf) > 0)
                        ;
                return FALSE;
        default:
                break;
        }
-       while (GetDataBlock(fd, (unsigned char*) buf) != 0)
+       while (GetDataBlock(fd, (unsigned char*) buf) > 0)
                ;
 
        return FALSE;
@@ -337,7 +337,7 @@ GetCode_(gdIOCtx *fd, int code_size, int flag)
                buf[0] = buf[last_byte-2];
                buf[1] = buf[last_byte-1];
 
-               if ((count = GetDataBlock(fd, &buf[2])) == 0)
+               if ((count = GetDataBlock(fd, &buf[2])) <= 0)
                        done = TRUE;
 
                last_byte = 2 + count;
