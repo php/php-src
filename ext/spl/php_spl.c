@@ -631,6 +631,7 @@ PHP_MINIT_FUNCTION(spl)
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
 	SPL_G(autoload_extensions) = estrndup(".inc,.php", sizeof(".inc,.php")-1);
+	SPL_G(autoload_functions) = NULL;
 	return SUCCESS;
 } /* }}} */
 
@@ -643,6 +644,7 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 	if (SPL_G(autoload_functions)) {
 		zend_hash_destroy(SPL_G(autoload_functions));
 		FREE_HASHTABLE(SPL_G(autoload_functions));
+		SPL_G(autoload_functions) = NULL;
 	}
 	return SUCCESS;
 } /* }}} */
