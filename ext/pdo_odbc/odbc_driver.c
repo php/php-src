@@ -59,7 +59,7 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	RETCODE rc;
-	SWORD	errmsgsize;
+	SWORD	errmsgsize = 0;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
 	pdo_odbc_stmt *S = NULL;
@@ -78,6 +78,10 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	
 	rc = SQLError(H->env, H->dbc, statement, einfo->last_state, &einfo->last_error,
 			einfo->last_err_msg, sizeof(einfo->last_err_msg)-1, &errmsgsize);
+
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		errmsgsize = 0;
+	}
 
 	einfo->last_err_msg[errmsgsize] = '\0';
 	einfo->file = file;
