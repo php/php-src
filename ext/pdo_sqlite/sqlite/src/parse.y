@@ -93,7 +93,7 @@ struct AttachKey { int type;  Token key; };
 // add them to the parse.h output file.
 //
 %nonassoc END_OF_FILE ILLEGAL SPACE UNCLOSED_STRING COMMENT FUNCTION
-          COLUMN AGG_FUNCTION CONST_FUNC.
+          COLUMN AGG_FUNCTION AGG_COLUMN CONST_FUNC.
 
 // Input is a single SQL command
 input ::= cmdlist.
@@ -104,7 +104,8 @@ ecmd ::= SEMI.
 ecmd ::= explain cmdx SEMI.
 explain ::= .           { sqlite3BeginParse(pParse, 0); }
 %ifndef SQLITE_OMIT_EXPLAIN
-explain ::= EXPLAIN.    { sqlite3BeginParse(pParse, 1); }
+explain ::= EXPLAIN.              { sqlite3BeginParse(pParse, 1); }
+explain ::= EXPLAIN QUERY PLAN.   { sqlite3BeginParse(pParse, 2); }
 %endif
 
 ///////////////////// Begin and end transactions. ////////////////////////////
@@ -172,7 +173,7 @@ id(A) ::= ID(X).         {A = X;}
 %fallback ID
   ABORT AFTER ANALYZE ASC ATTACH BEFORE BEGIN CASCADE CAST CONFLICT
   DATABASE DEFERRED DESC DETACH EACH END EXCLUSIVE EXPLAIN FAIL FOR
-  IGNORE IMMEDIATE INITIALLY INSTEAD LIKE_KW MATCH KEY
+  IGNORE IMMEDIATE INITIALLY INSTEAD LIKE_KW MATCH PLAN QUERY KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
   TEMP TRIGGER VACUUM VIEW
 %ifdef SQLITE_OMIT_COMPOUND_SELECT
@@ -660,9 +661,12 @@ expr(A) ::= CAST(X) LP expr(E) AS typetoken(T) RP(Y). {
   sqlite3ExprSpan(A,&X,&Y);
 }
 %endif // SQLITE_OMIT_CAST
-expr(A) ::= ID(X) LP exprlist(Y) RP(E). {
+expr(A) ::= ID(X) LP distinct(D) exprlist(Y) RP(E). {
   A = sqlite3ExprFunction(Y, &X);
   sqlite3ExprSpan(A,&X,&E);
+  if( D ){
+    A->flags |= EP_Distinct;
+  }
 }
 expr(A) ::= ID(X) LP STAR RP(E). {
   A = sqlite3ExprFunction(0, &X);
@@ -752,7 +756,11 @@ expr(A) ::= expr(W) between_op(N) expr(X) AND expr(Y). [BETWEEN] {
   ExprList *pList = sqlite3ExprListAppend(0, X, 0);
   pList = sqlite3ExprListAppend(pList, Y, 0);
   A = sqlite3Expr(TK_BETWEEN, W, 0, 0);
-  if( A ) A->pList = pList;
+  if( A ){
+    A->pList = pList;
+  }else{
+    sqlite3ExprListDelete(pList);
+  } 
   if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
   sqlite3ExprSpan(A,&W->span,&Y->span);
 }
@@ -772,21 +780,31 @@ expr(A) ::= expr(W) between_op(N) expr(X) AND expr(Y). [BETWEEN] {
   }
   expr(A) ::= LP(B) select(X) RP(E). {
     A = sqlite3Expr(TK_SELECT, 0, 0, 0);
-    if( A ) A->pSelect = X;
-    if( !A ) sqlite3SelectDelete(X);
+    if( A ){
+      A->pSelect = X;
+    }else{
+      sqlite3SelectDelete(X);
+    }
     sqlite3ExprSpan(A,&B,&E);
   }
   expr(A) ::= expr(X) in_op(N) LP select(Y) RP(E).  [IN] {
     A = sqlite3Expr(TK_IN, X, 0, 0);
-    if( A ) A->pSelect = Y;
-    if( !A ) sqlite3SelectDelete(Y);
+    if( A ){
+      A->pSelect = Y;
+    }else{
+      sqlite3SelectDelete(Y);
+    }
     if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
     sqlite3ExprSpan(A,&X->span,&E);
   }
   expr(A) ::= expr(X) in_op(N) nm(Y) dbnm(Z). [IN] {
     SrcList *pSrc = sqlite3SrcListAppend(0,&Y,&Z);
     A = sqlite3Expr(TK_IN, X, 0, 0);
-    if( A ) A->pSelect = sqlite3SelectNew(0,pSrc,0,0,0,0,0,0,0);
+    if( A ){
+      A->pSelect = sqlite3SelectNew(0,pSrc,0,0,0,0,0,0,0);
+    }else{
+      sqlite3SrcListDelete(pSrc);
+    }
     if( N ) A = sqlite3Expr(TK_NOT, A, 0, 0);
     sqlite3ExprSpan(A,&X->span,Z.z?&Z:&Y);
   }
@@ -795,15 +813,20 @@ expr(A) ::= expr(W) between_op(N) expr(X) AND expr(Y). [BETWEEN] {
     if( p ){
       p->pSelect = Y;
       sqlite3ExprSpan(p,&B,&E);
+    }else{
+      sqlite3SelectDelete(Y);
     }
-    if( !p ) sqlite3SelectDelete(Y);
   }
 %endif // SQLITE_OMIT_SUBQUERY
 
 /* CASE expressions */
 expr(A) ::= CASE(C) case_operand(X) case_exprlist(Y) case_else(Z) END(E). {
   A = sqlite3Expr(TK_CASE, X, Z, 0);
-  if( A ) A->pList = Y;
+  if( A ){
+    A->pList = Y;
+  }else{
+    sqlite3ExprListDelete(Y);
+  }
   sqlite3ExprSpan(A, &C, &E);
 }
 %type case_exprlist {ExprList*}

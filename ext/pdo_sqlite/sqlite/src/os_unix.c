@@ -18,6 +18,7 @@
 
 
 #include <time.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -771,6 +772,9 @@ int sqlite3OsWrite(OsFile *id, const void *pBuf, int amt){
 int sqlite3OsSeek(OsFile *id, i64 offset){
   assert( id->isOpen );
   SEEK(offset/1024 + 1);
+#ifdef SQLITE_TEST
+  if( offset ) SimulateDiskfullError
+#endif
   lseek(id->h, offset, SEEK_SET);
   return SQLITE_OK;
 }
@@ -796,7 +800,7 @@ int sqlite3_fullsync_count = 0;
 ** enabled, however, since with SQLITE_NO_SYNC enabled, an OS crash
 ** or power failure will likely corrupt the database file.
 */
-static int full_fsync(int fd, int fullSync){
+static int full_fsync(int fd, int fullSync, int dataOnly){
   int rc;
 
   /* Record the number of times that we do a normal fsync() and 
@@ -824,8 +828,15 @@ static int full_fsync(int fd, int fullSync){
   /* If the FULLSYNC failed, try to do a normal fsync() */
   if( rc ) rc = fsync(fd);
 
-#else
-  rc = fsync(fd);
+#else /* if !defined(F_FULLSYNC) */
+#if  defined(_POSIX_SYNCHRONIZED_IO) && _POSIX_SYNCHRONIZED_IO>0
+  if( dataOnly ){
+    rc = fdatasync(fd);
+  }else
+#endif /* _POSIX_SYNCHRONIZED_IO > 0 */
+  {
+    rc = fsync(fd);
+  }
 #endif /* defined(F_FULLFSYNC) */
 #endif /* defined(SQLITE_NO_SYNC) */
 
@@ -835,6 +846,10 @@ static int full_fsync(int fd, int fullSync){
 /*
 ** Make sure all writes to a particular file are committed to disk.
 **
+** If dataOnly==0 then both the file itself and its metadata (file
+** size, access time, etc) are synced.  If dataOnly!=0 then only the
+** file data is synced.
+**
 ** Under Unix, also make sure that the directory entry for the file
 ** has been created by fsync-ing the directory that contains the file.
 ** If we do not do this and we encounter a power failure, the directory
@@ -843,16 +858,16 @@ static int full_fsync(int fd, int fullSync){
 ** the directory entry for the journal was never created) and the transaction
 ** will not roll back - possibly leading to database corruption.
 */
-int sqlite3OsSync(OsFile *id){
+int sqlite3OsSync(OsFile *id, int dataOnly){
   assert( id->isOpen );
   SimulateIOError(SQLITE_IOERR);
   TRACE2("SYNC    %-3d\n", id->h);
-  if( full_fsync(id->h, id->fullSync) ){
+  if( full_fsync(id->h, id->fullSync, dataOnly) ){
     return SQLITE_IOERR;
   }
   if( id->dirfd>=0 ){
     TRACE2("DIRSYNC %-3d\n", id->dirfd);
-    full_fsync(id->dirfd, id->fullSync);
+    full_fsync(id->dirfd, id->fullSync, 0);
     close(id->dirfd);  /* Only need to sync once, so close the directory */
     id->dirfd = -1;    /* when we are done. */
   }
@@ -1310,10 +1325,14 @@ char *sqlite3OsFullPathname(const char *zRelative){
   if( zRelative[0]=='/' ){
     sqlite3SetString(&zFull, zRelative, (char*)0);
   }else{
-    char zBuf[5000];
+    char *zBuf = sqliteMalloc(5000);
+    if( zBuf==0 ){
+      return 0;
+    }
     zBuf[0] = 0;
-    sqlite3SetString(&zFull, getcwd(zBuf, sizeof(zBuf)), "/", zRelative,
+    sqlite3SetString(&zFull, getcwd(zBuf, 5000), "/", zRelative,
                     (char*)0);
+    sqliteFree(zBuf);
   }
   return zFull;
 }
@@ -1420,9 +1439,16 @@ int sqlite3_current_time = 0;
 ** return 0.  Return 1 if the time and date cannot be found.
 */
 int sqlite3OsCurrentTime(double *prNow){
+#ifdef NO_GETTOD
   time_t t;
   time(&t);
   *prNow = t/86400.0 + 2440587.5;
+#else
+  struct timeval sNow;
+  struct timezone sTz;  /* Not used */
+  gettimeofday(&sNow, &sTz);
+  *prNow = 2440587.5 + sNow.tv_sec/86400.0 + sNow.tv_usec/86400000000.0;
+#endif
 #ifdef SQLITE_TEST
   if( sqlite3_current_time ){
     *prNow = sqlite3_current_time/86400.0 + 2440587.5;

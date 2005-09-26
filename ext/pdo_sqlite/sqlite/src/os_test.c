@@ -391,12 +391,12 @@ int sqlite3OsWrite(OsFile *id, const void *pBuf, int amt){
 ** Sync the file. First flush the write-cache to disk, then call the
 ** real sync() function.
 */
-int sqlite3OsSync(OsFile *id){
+int sqlite3OsSync(OsFile *id, int dataOnly){
   int rc;
   /* printf("SYNC %s (%d blocks)\n", (*id)->zName, (*id)->nBlk); */
   rc = writeCache(*id);
   if( rc!=SQLITE_OK ) return rc;
-  rc = sqlite3RealSync(&(*id)->fd);
+  rc = sqlite3RealSync(&(*id)->fd, dataOnly);
   return rc;
 }
 

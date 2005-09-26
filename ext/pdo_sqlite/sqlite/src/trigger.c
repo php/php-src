@@ -11,6 +11,7 @@
 *
 */
 #include "sqliteInt.h"
+#include "vdbe.h"
 
 #ifndef SQLITE_OMIT_TRIGGER
 /*

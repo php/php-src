@@ -62,16 +62,18 @@ void sqlite3VdbeTrace(Vdbe *p, FILE *trace){
 ** elements.
 */
 static void resizeOpArray(Vdbe *p, int N){
-  if( p->magic==VDBE_MAGIC_RUN ){
-    assert( N==p->nOp );
-    p->nOpAlloc = N;
-    p->aOp = sqliteRealloc(p->aOp, N*sizeof(Op));
-  }else if( p->nOpAlloc<N ){
+  int runMode = p->magic==VDBE_MAGIC_RUN;
+  if( runMode || p->nOpAlloc<N ){
+    VdbeOp *pNew;
+    int nNew = N + 100*(!runMode);
     int oldSize = p->nOpAlloc;
-    p->nOpAlloc = N+100;
-    p->aOp = sqliteRealloc(p->aOp, p->nOpAlloc*sizeof(Op));
-    if( p->aOp ){
-      memset(&p->aOp[oldSize], 0, (p->nOpAlloc-oldSize)*sizeof(Op));
+    pNew = sqliteRealloc(p->aOp, nNew*sizeof(Op));
+    if( pNew ){
+      p->nOpAlloc = nNew;
+      p->aOp = pNew;
+      if( nNew>oldSize ){
+        memset(&p->aOp[oldSize], 0, (nNew-oldSize)*sizeof(Op));
+      }
     }
   }
 }
@@ -100,7 +102,7 @@ int sqlite3VdbeAddOp(Vdbe *p, int op, int p1, int p2){
   p->nOp++;
   assert( p->magic==VDBE_MAGIC_INIT );
   resizeOpArray(p, i+1);
-  if( p->aOp==0 ){
+  if( sqlite3_malloc_failed ){
     return 0;
   }
   pOp = &p->aOp[i];
@@ -145,7 +147,8 @@ int sqlite3VdbeMakeLabel(Vdbe *p){
   assert( p->magic==VDBE_MAGIC_INIT );
   if( i>=p->nLabelAlloc ){
     p->nLabelAlloc = p->nLabelAlloc*2 + 10;
-    p->aLabel = sqliteRealloc( p->aLabel, p->nLabelAlloc*sizeof(p->aLabel[0]));
+    sqlite3ReallocOrFree((void**)&p->aLabel,
+                          p->nLabelAlloc*sizeof(p->aLabel[0]));
   }
   if( p->aLabel ){
     p->aLabel[i] = -1;
@@ -215,8 +218,8 @@ int sqlite3VdbeOpcodeNoPush(u8 op){
 **
 ** This routine is called once after all opcodes have been inserted.
 **
-** Variable *pMaxFuncArgs is set to the maximum value of any P1 argument 
-** to an OP_Function or P2 to an OP_AggFunc opcode. This is used by 
+** Variable *pMaxFuncArgs is set to the maximum value of any P2 argument 
+** to an OP_Function or OP_AggStep opcode. This is used by 
 ** sqlite3VdbeMakeReady() to size the Vdbe.apArg[] array.
 **
 ** The integer *pMaxStack is set to the maximum number of vdbe stack
@@ -239,12 +242,7 @@ static void resolveP2Values(Vdbe *p, int *pMaxFuncArgs, int *pMaxStack){
   for(pOp=p->aOp, i=p->nOp-1; i>=0; i--, pOp++){
     u8 opcode = pOp->opcode;
 
-    /* Todo: Maybe OP_AggFunc should change to use P1 in the same
-     * way as OP_Function. 
-     */
-    if( opcode==OP_Function ){
-      if( pOp->p1>nMaxArgs ) nMaxArgs = pOp->p1;
-    }else if( opcode==OP_AggFunc ){
+    if( opcode==OP_Function || opcode==OP_AggStep ){
       if( pOp->p2>nMaxArgs ) nMaxArgs = pOp->p2;
     }else if( opcode==OP_Halt ){
       if( pOp->p1==SQLITE_CONSTRAINT && pOp->p2==OE_Abort ){
@@ -302,7 +300,7 @@ int sqlite3VdbeAddOpList(Vdbe *p, int nOp, VdbeOpList const *aOp){
   int addr;
   assert( p->magic==VDBE_MAGIC_INIT );
   resizeOpArray(p, p->nOp + nOp);
-  if( p->aOp==0 ){
+  if( sqlite3_malloc_failed ){
     return 0;
   }
   addr = p->nOp;
@@ -354,6 +352,41 @@ void sqlite3VdbeChangeP2(Vdbe *p, int addr, int val){
 }
 
 /*
+** Change teh P2 operand of instruction addr so that it points to
+** the address of the next instruction to be coded.
+*/
+void sqlite3VdbeJumpHere(Vdbe *p, int addr){
+  sqlite3VdbeChangeP2(p, addr, p->nOp);
+}
+
+/*
+** Delete a P3 value if necessary.
+*/
+static void freeP3(int p3type, void *p3){
+  if( p3 ){
+    switch( p3type ){
+      case P3_DYNAMIC:
+      case P3_KEYINFO:
+      case P3_KEYINFO_HANDOFF: {
+        sqliteFree(p3);
+        break;
+      }
+      case P3_VDBEFUNC: {
+        VdbeFunc *pVdbeFunc = (VdbeFunc *)p3;
+        sqlite3VdbeDeleteAuxData(pVdbeFunc, 0);
+        sqliteFree(pVdbeFunc);
+        break;
+      }
+      case P3_MEM: {
+        sqlite3ValueFree((sqlite3_value*)p3);
+        break;
+      }
+    }
+  }
+}
+
+
+/*
 ** Change the value of the P3 operand for a specific instruction.
 ** This routine is useful when a large program is loaded from a
 ** static array using sqlite3VdbeAddOpList but we want to make a
@@ -382,12 +415,7 @@ void sqlite3VdbeChangeP3(Vdbe *p, int addr, const char *zP3, int n){
   Op *pOp;
   assert( p->magic==VDBE_MAGIC_INIT );
   if( p==0 || p->aOp==0 ){
-    if( n==P3_DYNAMIC || n==P3_KEYINFO_HANDOFF ){
-      sqliteFree((void*)zP3);
-    }
-    if( n==P3_MEM ){
-      sqlite3ValueFree((sqlite3_value *)zP3);
-    }
+    freeP3(n, (void*)*(char**)&zP3);
     return;
   }
   if( addr<0 || addr>=p->nOp ){
@@ -395,16 +423,19 @@ void sqlite3VdbeChangeP3(Vdbe *p, int addr, const char *zP3, int n){
     if( addr<0 ) return;
   }
   pOp = &p->aOp[addr];
-  if( pOp->p3 && pOp->p3type==P3_DYNAMIC ){
-    sqliteFree(pOp->p3);
-    pOp->p3 = 0;
-  }
+  freeP3(pOp->p3type, pOp->p3);
+  pOp->p3 = 0;
   if( zP3==0 ){
     pOp->p3 = 0;
     pOp->p3type = P3_NOTUSED;
   }else if( n==P3_KEYINFO ){
     KeyInfo *pKeyInfo;
     int nField, nByte;
+
+    /* KeyInfo structures that include an KeyInfo.aSortOrder are always
+    ** sent in using P3_KEYINFO_HANDOFF.  The KeyInfo.aSortOrder array
+    ** is not duplicated when P3_KEYINFO is used. */
+    /* assert( pKeyInfo->aSortOrder==0 ); */
     nField = ((KeyInfo*)zP3)->nField;
     nByte = sizeof(*pKeyInfo) + (nField-1)*sizeof(pKeyInfo->aColl[0]);
     pKeyInfo = sqliteMallocRaw( nByte );
@@ -577,8 +608,9 @@ int sqlite3VdbeList(
   }
   p->resOnStack = 0;
 
-
-  i = p->pc++;
+  do{
+    i = p->pc++;
+  }while( i<p->nOp && p->explain==2 && p->aOp[i].opcode!=OP_Explain );
   if( i>=p->nOp ){
     p->rc = SQLITE_OK;
     rc = SQLITE_DONE;
@@ -617,7 +649,7 @@ int sqlite3VdbeList(
     pMem->type = SQLITE_TEXT;
     pMem->enc = SQLITE_UTF8;
 
-    p->nResColumn = 5;
+    p->nResColumn = 5 - 2*(p->explain-1);
     p->pTos = pMem;
     p->rc = SQLITE_OK;
     p->resOnStack = 1;
@@ -658,7 +690,6 @@ void sqlite3VdbeMakeReady(
   int nVar,                      /* Number of '?' see in the SQL statement */
   int nMem,                      /* Number of memory cells to allocate */
   int nCursor,                   /* Number of cursors to allocate */
-  int nAgg,                      /* Number of aggregate contexts required */
   int isExplain                  /* True if the EXPLAIN keywords is present */
 ){
   int n;
@@ -701,7 +732,6 @@ void sqlite3VdbeMakeReady(
       + nVar*sizeof(char*)             /* azVar */
       + nMem*sizeof(Mem)               /* aMem */
       + nCursor*sizeof(Cursor*)        /* apCsr */
-      + nAgg*sizeof(Agg)               /* Aggregate contexts */
     );
     if( !sqlite3_malloc_failed ){
       p->aMem = &p->aStack[nStack];
@@ -712,17 +742,12 @@ void sqlite3VdbeMakeReady(
       p->apArg = (Mem**)&p->aVar[nVar];
       p->azVar = (char**)&p->apArg[nArg];
       p->apCsr = (Cursor**)&p->azVar[nVar];
-      if( nAgg>0 ){
-        p->nAgg = nAgg;
-        p->apAgg = (Agg*)&p->apCsr[nCursor];
-      }
       p->nCursor = nCursor;
       for(n=0; n<nVar; n++){
         p->aVar[n].flags = MEM_Null;
       }
     }
   }
-  p->pAgg = p->apAgg;
   for(n=0; n<p->nMem; n++){
     p->aMem[n].flags = MEM_Null;
   }
@@ -761,155 +786,6 @@ void sqlite3VdbeMakeReady(
     }
   }
 #endif
-}
-
-
-/*
-** Remove any elements that remain on the sorter for the VDBE given.
-*/
-void sqlite3VdbeSorterReset(Vdbe *p){
-  while( p->pSort ){
-    Sorter *pSorter = p->pSort;
-    p->pSort = pSorter->pNext;
-    sqliteFree(pSorter->zKey);
-    sqlite3VdbeMemRelease(&pSorter->data);
-    sqliteFree(pSorter);
-  }
-  p->pSortTail = 0;
-}
-
-/*
-** Free all resources allociated with AggElem pElem, an element of
-** aggregate pAgg.
-*/
-static void freeAggElem(AggElem *pElem, Agg *pAgg){
-  int i;
-  for(i=0; i<pAgg->nMem; i++){
-    Mem *pMem = &pElem->aMem[i];
-    if( pAgg->apFunc && pAgg->apFunc[i] && (pMem->flags & MEM_AggCtx)!=0 ){
-      sqlite3_context ctx;
-      ctx.pFunc = pAgg->apFunc[i];
-      ctx.s.flags = MEM_Null;
-      ctx.pAgg = pMem->z;
-      ctx.cnt = pMem->i;
-      ctx.isError = 0;
-      (*ctx.pFunc->xFinalize)(&ctx);
-      pMem->z = ctx.pAgg;
-      if( pMem->z!=0 && pMem->z!=pMem->zShort ){
-        sqliteFree(pMem->z);
-      }
-      sqlite3VdbeMemRelease(&ctx.s);
-    }else{
-      sqlite3VdbeMemRelease(pMem);
-    }
-  }
-  sqliteFree(pElem);
-}
-
-/*
-** Reset an Agg structure.  Delete all its contents.
-**
-** For installable aggregate functions, if the step function has been
-** called, make sure the finalizer function has also been called.  The
-** finalizer might need to free memory that was allocated as part of its
-** private context.  If the finalizer has not been called yet, call it
-** now.
-**
-** If db is NULL, then this is being called from sqliteVdbeReset(). In
-** this case clean up all references to the temp-table used for
-** aggregates (if it was ever opened).
-**
-** If db is not NULL, then this is being called from with an OP_AggReset
-** opcode. Open the temp-table, if it has not already been opened and
-** delete the contents of the table used for aggregate information, ready
-** for the next round of aggregate processing.
-*/
-int sqlite3VdbeAggReset(sqlite3 *db, Agg *pAgg, KeyInfo *pKeyInfo){
-  int rc = 0;
-  BtCursor *pCsr;
-
-  if( !pAgg ) return SQLITE_OK;
-  pCsr = pAgg->pCsr;
-  assert( (pCsr && pAgg->nTab>0) || (!pCsr && pAgg->nTab==0)
-         || sqlite3_malloc_failed );
-
-  /* If pCsr is not NULL, then the table used for aggregate information
-  ** is open. Loop through it and free the AggElem* structure pointed at
-  ** by each entry. If the finalizer has not been called for an AggElem,
-  ** do that too. Finally, clear the btree table itself.
-  */
-  if( pCsr ){
-    int res;
-    assert( pAgg->pBtree );
-    assert( pAgg->nTab>0 );
-
-    rc=sqlite3BtreeFirst(pCsr, &res);
-    while( res==0 && rc==SQLITE_OK ){
-      AggElem *pElem;
-      rc = sqlite3BtreeData(pCsr, 0, sizeof(AggElem*), (char *)&pElem);
-      if( rc!=SQLITE_OK ){
-        return rc;
-      }
-      assert( pAgg->apFunc!=0 );
-      freeAggElem(pElem, pAgg);
-      rc=sqlite3BtreeNext(pCsr, &res);
-    }
-    if( rc!=SQLITE_OK ){
-      return rc;
-    }
-
-    sqlite3BtreeCloseCursor(pCsr);
-    sqlite3BtreeClearTable(pAgg->pBtree, pAgg->nTab);
-  }else{ 
-    /* The cursor may not be open because the aggregator was never used,
-    ** or it could be that it was used but there was no GROUP BY clause.
-    */
-    if( pAgg->pCurrent ){
-      freeAggElem(pAgg->pCurrent, pAgg);
-    }
-  }
-
-  /* If db is not NULL and we have not yet and we have not yet opened
-  ** the temporary btree then do so and create the table to store aggregate
-  ** information.
-  **
-  ** If db is NULL, then close the temporary btree if it is open.
-  */
-  if( db ){
-    if( !pAgg->pBtree ){
-      assert( pAgg->nTab==0 );
-#ifndef SQLITE_OMIT_MEMORYDB
-      rc = sqlite3BtreeFactory(db, ":memory:", 0, TEMP_PAGES, &pAgg->pBtree);
-#else
-      rc = sqlite3BtreeFactory(db, 0, 0, TEMP_PAGES, &pAgg->pBtree);
-#endif
-      if( rc!=SQLITE_OK ) return rc;
-      sqlite3BtreeBeginTrans(pAgg->pBtree, 1);
-      rc = sqlite3BtreeCreateTable(pAgg->pBtree, &pAgg->nTab, 0);
-      if( rc!=SQLITE_OK ) return rc;
-    }
-    assert( pAgg->nTab!=0 );
-
-    rc = sqlite3BtreeCursor(pAgg->pBtree, pAgg->nTab, 1,
-        sqlite3VdbeRecordCompare, pKeyInfo, &pAgg->pCsr);
-    if( rc!=SQLITE_OK ) return rc;
-  }else{
-    if( pAgg->pBtree ){
-      sqlite3BtreeClose(pAgg->pBtree);
-      pAgg->pBtree = 0;
-      pAgg->nTab = 0;
-    }
-    pAgg->pCsr = 0;
-  }
-
-  if( pAgg->apFunc ){ 
-    sqliteFree(pAgg->apFunc);
-    pAgg->apFunc = 0;
-  }
-  pAgg->pCurrent = 0;
-  pAgg->nMem = 0;
-  pAgg->searching = 0;
-  return SQLITE_OK;
 }
 
 /*
@@ -964,10 +840,6 @@ static void Cleanup(Vdbe *p){
       sqlite3VdbeFifoClear(&p->contextStack[i].sFifo);
     }
     sqliteFree(p->contextStack);
-  }
-  sqlite3VdbeSorterReset(p);
-  for(i=0; i<p->nAgg; i++){
-    sqlite3VdbeAggReset(0, &p->apAgg[i], 0);
   }
   p->contextStack = 0;
   p->contextStackDepth = 0;
@@ -1145,7 +1017,8 @@ static int vdbeCommit(sqlite3 *db){
     */
     zMainFile = sqlite3BtreeGetDirname(db->aDb[0].pBt);
     rc = sqlite3OsOpenDirectory(zMainFile, &master);
-    if( rc!=SQLITE_OK || (needSync && (rc=sqlite3OsSync(&master))!=SQLITE_OK) ){
+    if( rc!=SQLITE_OK ||
+          (needSync && (rc=sqlite3OsSync(&master,0))!=SQLITE_OK) ){
       sqlite3OsClose(&master);
       sqlite3OsDelete(zMaster);
       sqliteFree(zMaster);
@@ -1489,17 +1362,7 @@ void sqlite3VdbeDelete(Vdbe *p){
   if( p->aOp ){
     for(i=0; i<p->nOp; i++){
       Op *pOp = &p->aOp[i];
-      if( pOp->p3type==P3_DYNAMIC || pOp->p3type==P3_KEYINFO ){
-        sqliteFree(pOp->p3);
-      }
-      if( pOp->p3type==P3_VDBEFUNC ){
-        VdbeFunc *pVdbeFunc = (VdbeFunc *)pOp->p3;
-        sqlite3VdbeDeleteAuxData(pVdbeFunc, 0);
-        sqliteFree(pVdbeFunc);
-      }
-      if( pOp->p3type==P3_MEM ){
-        sqlite3ValueFree((sqlite3_value*)pOp->p3);
-      }
+      freeP3(pOp->p3type, pOp->p3);
     }
     sqliteFree(p->aOp);
   }
@@ -1714,8 +1577,18 @@ int sqlite3VdbeSerialGet(
     }
     case 6:   /* 8-byte signed integer */
     case 7: { /* IEEE floating point */
-      u64 x = (buf[0]<<24) | (buf[1]<<16) | (buf[2]<<8) | buf[3];
-      u32 y = (buf[4]<<24) | (buf[5]<<16) | (buf[6]<<8) | buf[7];
+      u64 x;
+      u32 y;
+#ifndef NDEBUG
+      /* Verify that integers and floating point values use the same
+      ** byte order.  The byte order differs on some (broken) architectures.
+      */
+      static const u64 t1 = ((u64)0x3ff00000)<<32;
+      assert( 1.0==*(double*)&t1 );
+#endif
+
+      x = (buf[0]<<24) | (buf[1]<<16) | (buf[2]<<8) | buf[3];
+      y = (buf[4]<<24) | (buf[5]<<16) | (buf[6]<<8) | buf[7];
       x = (x<<32) | y;
       if( serial_type==6 ){
         pMem->i = *(i64*)&x;
@@ -1853,7 +1726,7 @@ int sqlite3VdbeIdxRowid(BtCursor *pCur, i64 *rowid){
 
   sqlite3BtreeKeySize(pCur, &nCellKey);
   if( nCellKey<=0 ){
-    return SQLITE_CORRUPT;
+    return SQLITE_CORRUPT_BKPT;
   }
   rc = sqlite3VdbeMemFromBtree(pCur, 0, nCellKey, 1, &m);
   if( rc ){

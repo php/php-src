@@ -17,7 +17,7 @@ PHP                                                                        NEWS
     Recursive<*>Iterator naming scheme.
 - Upgraded bundled libraries:
   . PCRE library to version 6.2. (Andrei)
-  . SQLite 3 library in ext/pdo_sqlite to 3.2.5. (Ilia)
+  . SQLite 3 library in ext/pdo_sqlite to 3.2.7. (Ilia)
   . SQLite 2 library in ext/sqlite to 2.8.16. (Ilia)
 - Upgraded bundled libraries in Windows distribution. (Edin)
   . zlib 1.2.3

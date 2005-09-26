@@ -34,7 +34,7 @@
 ** reasonable, like 1024.
 */
 #ifndef SQLITE_MAX_PAGE_SIZE
-# define SQLITE_MAX_PAGE_SIZE 8192
+# define SQLITE_MAX_PAGE_SIZE 32768
 #endif
 
 /*
