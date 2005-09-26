@@ -38,6 +38,11 @@
 #define FILTER_FLAG_PATH_REQUIRED           0x040000
 #define FILTER_FLAG_QUERY_REQUIRED          0x080000
 
+#define FILTER_FLAG_IPV4                    0x100000
+#define FILTER_FLAG_IPV6                    0x200000
+#define FILTER_FLAG_NO_RES_RANGE            0x400000
+#define FILTER_FLAG_NO_PRIV_RANGE           0x800000
+
 #define FL_INT           0x0101
 #define FL_BOOLEAN       0x0102
 #define FL_FLOAT         0x0103
