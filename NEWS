@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.1
 - Added "new_link" parameter to mssql_connect(). Bug #34369. (Frank)
+- Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
 - Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
   (Marco, Ilia)
 - Fixed bug #34456 (Possible crash inside pspell extension). (Nuno)
