@@ -15,6 +15,7 @@
 */
 #include "sqliteInt.h"
 #include "vdbeInt.h"
+#include "os.h"
 
 /*
 ** Return TRUE (non-zero) of the statement supplied as an argument needs
@@ -173,9 +174,10 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     return SQLITE_MISUSE;
   }
   if( p->pc<0 ){
+#ifndef SQLITE_OMIT_TRACE
     /* Invoke the trace callback if there is one
     */
-    if( (db = p->db)->xTrace && !db->init.busy ){
+    if( db->xTrace && !db->init.busy ){
       assert( p->nOp>0 );
       assert( p->aOp[p->nOp-1].opcode==OP_Noop );
       assert( p->aOp[p->nOp-1].p3!=0 );
@@ -187,6 +189,12 @@ int sqlite3_step(sqlite3_stmt *pStmt){
         return SQLITE_MISUSE;
       }
     }
+    if( db->xProfile && !db->init.busy ){
+      double rNow;
+      sqlite3OsCurrentTime(&rNow);
+      p->startTime = (rNow - (int)rNow)*3600.0*24.0*1000000000.0;
+    }
+#endif
 
     /* Print a copy of SQL as it is executed if the SQL_TRACE pragma is turned
     ** on in debugging mode.
@@ -213,6 +221,23 @@ int sqlite3_step(sqlite3_stmt *pStmt){
     rc = SQLITE_MISUSE;
   }
 
+#ifndef SQLITE_OMIT_TRACE
+  /* Invoke the profile callback if there is one
+  */
+  if( rc!=SQLITE_ROW && db->xProfile && !db->init.busy ){
+    double rNow;
+    u64 elapseTime;
+
+    sqlite3OsCurrentTime(&rNow);
+    elapseTime = (rNow - (int)rNow)*3600.0*24.0*1000000000.0 - p->startTime;
+    assert( p->nOp>0 );
+    assert( p->aOp[p->nOp-1].opcode==OP_Noop );
+    assert( p->aOp[p->nOp-1].p3!=0 );
+    assert( p->aOp[p->nOp-1].p3type==P3_DYNAMIC );
+    db->xProfile(db->pProfileArg, p->aOp[p->nOp-1].p3, elapseTime);
+  }
+#endif
+
   sqlite3Error(p->db, rc, p->zErrMsg ? "%s" : 0, p->zErrMsg);
   return rc;
 }
@@ -232,16 +257,25 @@ void *sqlite3_user_data(sqlite3_context *p){
 ** same context that was returned on prior calls.
 */
 void *sqlite3_aggregate_context(sqlite3_context *p, int nByte){
+  Mem *pMem = p->pMem;
   assert( p && p->pFunc && p->pFunc->xStep );
-  if( p->pAgg==0 ){
-    if( nByte<=NBFS ){
-      p->pAgg = (void*)p->s.z;
-      memset(p->pAgg, 0, nByte);
+  if( (pMem->flags & MEM_Agg)==0 ){
+    if( nByte==0 ){
+      assert( pMem->flags==MEM_Null );
+      pMem->z = 0;
     }else{
-      p->pAgg = sqliteMalloc( nByte );
+      pMem->flags = MEM_Agg;
+      pMem->xDel = sqlite3FreeX;
+      *(FuncDef**)&pMem->i = p->pFunc;
+      if( nByte<=NBFS ){
+        pMem->z = pMem->zShort;
+        memset(pMem->z, 0, nByte);
+      }else{
+        pMem->z = sqliteMalloc( nByte );
+      }
     }
   }
-  return p->pAgg;
+  return (void*)pMem->z;
 }
 
 /*
@@ -274,8 +308,9 @@ void sqlite3_set_auxdata(
   pVdbeFunc = pCtx->pVdbeFunc;
   if( !pVdbeFunc || pVdbeFunc->nAux<=iArg ){
     int nMalloc = sizeof(VdbeFunc) + sizeof(struct AuxData)*iArg;
-    pCtx->pVdbeFunc = pVdbeFunc = sqliteRealloc(pVdbeFunc, nMalloc);
+    pVdbeFunc = sqliteRealloc(pVdbeFunc, nMalloc);
     if( !pVdbeFunc ) return;
+    pCtx->pVdbeFunc = pVdbeFunc;
     memset(&pVdbeFunc->apAux[pVdbeFunc->nAux], 0, 
              sizeof(struct AuxData)*(iArg+1-pVdbeFunc->nAux));
     pVdbeFunc->nAux = iArg+1;
@@ -300,7 +335,7 @@ void sqlite3_set_auxdata(
 */
 int sqlite3_aggregate_count(sqlite3_context *p){
   assert( p && p->pFunc && p->pFunc->xStep );
-  return p->cnt;
+  return p->pMem->n;
 }
 
 /*

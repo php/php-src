@@ -657,8 +657,10 @@ static int writeJournalHdr(Pager *pPager){
   ** file descriptor to the end of the journal header sector.
   */
   if( rc==SQLITE_OK ){
-    sqlite3OsSeek(&pPager->jfd, pPager->journalOff-1);
-    rc = sqlite3OsWrite(&pPager->jfd, "\000", 1);
+    rc = sqlite3OsSeek(&pPager->jfd, pPager->journalOff-1);
+    if( rc==SQLITE_OK ){
+      rc = sqlite3OsWrite(&pPager->jfd, "\000", 1);
+    }
   }
   return rc;
 }
@@ -1038,8 +1040,10 @@ static int pager_playback_one_page(Pager *pPager, OsFile *jfd, int useCksum){
   assert( pPager->state>=PAGER_EXCLUSIVE || pPg!=0 );
   TRACE3("PLAYBACK %d page %d\n", PAGERID(pPager), pgno);
   if( pPager->state>=PAGER_EXCLUSIVE && (pPg==0 || pPg->needSync==0) ){
-    sqlite3OsSeek(&pPager->fd, (pgno-1)*(i64)pPager->pageSize);
-    rc = sqlite3OsWrite(&pPager->fd, aData, pPager->pageSize);
+    rc = sqlite3OsSeek(&pPager->fd, (pgno-1)*(i64)pPager->pageSize);
+    if( rc==SQLITE_OK ){
+      rc = sqlite3OsWrite(&pPager->fd, aData, pPager->pageSize);
+    }
     if( pPg ) pPg->dirty = 0;
   }
   if( pPg ){
@@ -1168,8 +1172,10 @@ static int pager_reload_cache(Pager *pPager){
     char zBuf[SQLITE_MAX_PAGE_SIZE];
     if( !pPg->dirty ) continue;
     if( (int)pPg->pgno <= pPager->origDbSize ){
-      sqlite3OsSeek(&pPager->fd, pPager->pageSize*(i64)(pPg->pgno-1));
-      rc = sqlite3OsRead(&pPager->fd, zBuf, pPager->pageSize);
+      rc = sqlite3OsSeek(&pPager->fd, pPager->pageSize*(i64)(pPg->pgno-1));
+      if( rc==SQLITE_OK ){
+        rc = sqlite3OsRead(&pPager->fd, zBuf, pPager->pageSize);
+      }
       TRACE3("REFETCH %d page %d\n", PAGERID(pPager), pPg->pgno);
       if( rc ) break;
       CODEC(pPager, zBuf, pPg->pgno, 2);
@@ -1485,7 +1491,7 @@ static int pager_stmt_playback(Pager *pPager){
 end_stmt_playback:
   if( rc!=SQLITE_OK ){
     pPager->errMask |= PAGER_ERR_CORRUPT;
-    rc = SQLITE_CORRUPT;  /* bkpt-CORRUPT */
+    rc = SQLITE_CORRUPT;
   }else{
     pPager->journalOff = szJ;
     /* pager_reload_cache(pPager); */
@@ -1746,28 +1752,34 @@ void sqlite3pager_read_fileheader(Pager *pPager, int N, unsigned char *pDest){
 
 /*
 ** Return the total number of pages in the disk file associated with
-** pPager.
+** pPager. 
+**
+** If the PENDING_BYTE lies on the page directly after the end of the
+** file, then consider this page part of the file too. For example, if
+** PENDING_BYTE is byte 4096 (the first byte of page 5) and the size of the
+** file is 4096 bytes, 5 is returned instead of 4.
 */
 int sqlite3pager_pagecount(Pager *pPager){
   i64 n;
   assert( pPager!=0 );
   if( pPager->dbSize>=0 ){
-    return pPager->dbSize;
+    n = pPager->dbSize;
+  } else {
+    if( sqlite3OsFileSize(&pPager->fd, &n)!=SQLITE_OK ){
+      pPager->errMask |= PAGER_ERR_DISK;
+      return 0;
+    }
+    if( n>0 && n<pPager->pageSize ){
+      n = 1;
+    }else{
+      n /= pPager->pageSize;
+    }
+    if( pPager->state!=PAGER_UNLOCK ){
+      pPager->dbSize = n;
+    }
   }
-  if( sqlite3OsFileSize(&pPager->fd, &n)!=SQLITE_OK ){
-    pPager->errMask |= PAGER_ERR_DISK;
-    return 0;
-  }
-  if( n>0 && n<pPager->pageSize ){
-    n = 1;
-  }else{
-    n /= pPager->pageSize;
-  }
-  if( !MEMDB && n==PENDING_BYTE/pPager->pageSize ){
+  if( n==(PENDING_BYTE/pPager->pageSize) ){
     n++;
-  }
-  if( pPager->state!=PAGER_UNLOCK ){
-    pPager->dbSize = n;
   }
   return n;
 }
@@ -2121,17 +2133,20 @@ static int syncJournal(Pager *pPager){
         */
         if( pPager->fullSync ){
           TRACE2("SYNC journal of %d\n", PAGERID(pPager));
-          rc = sqlite3OsSync(&pPager->jfd);
+          rc = sqlite3OsSync(&pPager->jfd, 0);
           if( rc!=0 ) return rc;
         }
-        sqlite3OsSeek(&pPager->jfd, pPager->journalHdr + sizeof(aJournalMagic));
+        rc = sqlite3OsSeek(&pPager->jfd,
+                           pPager->journalHdr + sizeof(aJournalMagic));
+        if( rc ) return rc;
         rc = write32bits(&pPager->jfd, pPager->nRec);
         if( rc ) return rc;
 
-        sqlite3OsSeek(&pPager->jfd, pPager->journalOff);
+        rc = sqlite3OsSeek(&pPager->jfd, pPager->journalOff);
+        if( rc ) return rc;
       }
       TRACE2("SYNC journal of %d\n", PAGERID(pPager));
-      rc = sqlite3OsSync(&pPager->jfd);
+      rc = sqlite3OsSync(&pPager->jfd, pPager->fullSync);
       if( rc!=0 ) return rc;
       pPager->journalStarted = 1;
     }
@@ -2196,7 +2211,8 @@ static int pager_write_pagelist(PgHdr *pList){
 
   while( pList ){
     assert( pList->dirty );
-    sqlite3OsSeek(&pPager->fd, (pList->pgno-1)*(i64)pPager->pageSize);
+    rc = sqlite3OsSeek(&pPager->fd, (pList->pgno-1)*(i64)pPager->pageSize);
+    if( rc ) return rc;
     /* If there are dirty pages in the page cache with page numbers greater
     ** than Pager.dbSize, this means sqlite3pager_truncate() was called to
     ** make the file smaller (presumably by auto-vacuum code). Do not write
@@ -2291,8 +2307,8 @@ int sqlite3pager_get(Pager *pPager, Pgno pgno, void **ppPage){
   /* The maximum page number is 2^31. Return SQLITE_CORRUPT if a page
   ** number greater than this, or zero, is requested.
   */
-  if( pgno>PAGER_MAX_PGNO || pgno==0 ){
-    return SQLITE_CORRUPT;
+  if( pgno>PAGER_MAX_PGNO || pgno==0 || pgno==PAGER_MJ_PGNO(pPager) ){
+    return SQLITE_CORRUPT_BKPT;
   }
 
   /* Make sure we have not hit any critical errors.
@@ -2506,8 +2522,10 @@ int sqlite3pager_get(Pager *pPager, Pgno pgno, void **ppPage){
     }else{
       int rc;
       assert( MEMDB==0 );
-      sqlite3OsSeek(&pPager->fd, (pgno-1)*(i64)pPager->pageSize);
-      rc = sqlite3OsRead(&pPager->fd, PGHDR_TO_DATA(pPg), pPager->pageSize);
+      rc = sqlite3OsSeek(&pPager->fd, (pgno-1)*(i64)pPager->pageSize);
+      if( rc==SQLITE_OK ){
+        rc = sqlite3OsRead(&pPager->fd, PGHDR_TO_DATA(pPg), pPager->pageSize);
+      }
       TRACE3("FETCH %d page %d\n", PAGERID(pPager), pPg->pgno);
       CODEC(pPager, PGHDR_TO_DATA(pPg), pPg->pgno, 3);
       if( rc!=SQLITE_OK ){
@@ -2815,6 +2833,10 @@ int sqlite3pager_write(void *pData){
           }
         }else{
           u32 cksum;
+          /* We should never write to the journal file the page that
+          ** contains the database locks.  The following assert verifies
+          ** that we do not. */
+          assert( pPg->pgno!=PAGER_MJ_PGNO(pPager) );
           CODEC(pPager, pData, pPg->pgno, 7);
           cksum = pager_cksum(pPager, pPg->pgno, pData);
           saved = *(u32*)PGHDR_TO_EXTRA(pPg, pPager);
@@ -3171,7 +3193,7 @@ int sqlite3pager_rollback(Pager *pPager){
     rc = pager_playback(pPager);
   }
   if( rc!=SQLITE_OK ){
-    rc = SQLITE_CORRUPT;  /* bkpt-CORRUPT */
+    rc = SQLITE_CORRUPT_BKPT;
     pPager->errMask |= PAGER_ERR_CORRUPT;
   }
   pPager->dbSize = -1;
@@ -3441,8 +3463,9 @@ int sqlite3pager_sync(Pager *pPager, const char *zMaster, Pgno nTrunc){
         */
         Pgno i;
         void *pPage;
+        int iSkip = PAGER_MJ_PGNO(pPager);
         for( i=nTrunc+1; i<=pPager->origDbSize; i++ ){
-          if( !(pPager->aInJournal[i/8] & (1<<(i&7))) ){
+          if( !(pPager->aInJournal[i/8] & (1<<(i&7))) && i!=iSkip ){
             rc = sqlite3pager_get(pPager, i, &pPage);
             if( rc!=SQLITE_OK ) goto sync_exit;
             rc = sqlite3pager_write(pPage);
@@ -3472,7 +3495,7 @@ int sqlite3pager_sync(Pager *pPager, const char *zMaster, Pgno nTrunc){
 
     /* Sync the database file. */
     if( !pPager->noSync ){
-      rc = sqlite3OsSync(&pPager->fd);
+      rc = sqlite3OsSync(&pPager->fd, 0);
     }
 
     pPager->state = PAGER_SYNCED;

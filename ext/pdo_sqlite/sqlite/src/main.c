@@ -509,13 +509,14 @@ int sqlite3_create_function16(
 }
 #endif
 
+#ifndef SQLITE_OMIT_TRACE
 /*
 ** Register a trace function.  The pArg from the previously registered trace
 ** is returned.  
 **
 ** A NULL trace function means that no tracing is executes.  A non-NULL
 ** trace is a pointer to a function that is invoked at the start of each
-** sqlite3_exec().
+** SQL statement.
 */
 void *sqlite3_trace(sqlite3 *db, void (*xTrace)(void*,const char*), void *pArg){
   void *pOld = db->pTraceArg;
@@ -523,6 +524,25 @@ void *sqlite3_trace(sqlite3 *db, void (*xTrace)(void*,const char*), void *pArg){
   db->pTraceArg = pArg;
   return pOld;
 }
+/*
+** Register a profile function.  The pArg from the previously registered 
+** profile function is returned.  
+**
+** A NULL profile function means that no profiling is executes.  A non-NULL
+** profile is a pointer to a function that is invoked at the conclusion of
+** each SQL statement that is run.
+*/
+void *sqlite3_profile(
+  sqlite3 *db,
+  void (*xProfile)(void*,const char*,sqlite_uint64),
+  void *pArg
+){
+  void *pOld = db->pProfileArg;
+  db->xProfile = xProfile;
+  db->pProfileArg = pArg;
+  return pOld;
+}
+#endif /* SQLITE_OMIT_TRACE */
 
 /*** EXPERIMENTAL ***
 **
@@ -694,6 +714,7 @@ static int openDatabase(
 ){
   sqlite3 *db;
   int rc, i;
+  CollSeq *pColl;
 
   /* Allocate the sqlite data structure */
   db = sqliteMalloc( sizeof(sqlite3) );
@@ -729,6 +750,13 @@ static int openDatabase(
 
   /* Also add a UTF-8 case-insensitive collation sequence. */
   sqlite3_create_collation(db, "NOCASE", SQLITE_UTF8, 0, nocaseCollatingFunc);
+
+  /* Set flags on the built-in collating sequences */
+  db->pDfltColl->type = SQLITE_COLL_BINARY;
+  pColl = sqlite3FindCollSeq(db, SQLITE_UTF8, "NOCASE", 6, 0);
+  if( pColl ){
+    pColl->type = SQLITE_COLL_NOCASE;
+  }
 
   /* Open the backend database driver */
   rc = sqlite3BtreeFactory(db, zFilename, 0, MAX_PAGES, &db->aDb[0].pBt);
@@ -847,7 +875,7 @@ int sqlite3_reset(sqlite3_stmt *pStmt){
     rc = SQLITE_OK;
   }else{
     rc = sqlite3VdbeReset((Vdbe*)pStmt);
-    sqlite3VdbeMakeReady((Vdbe*)pStmt, -1, 0, 0, 0, 0);
+    sqlite3VdbeMakeReady((Vdbe*)pStmt, -1, 0, 0, 0);
   }
   return rc;
 }
@@ -901,7 +929,7 @@ int sqlite3_create_collation(
 
   pColl = sqlite3FindCollSeq(db, (u8)enc, zName, strlen(zName), 1);
   if( 0==pColl ){
-   rc = SQLITE_NOMEM;
+    rc = SQLITE_NOMEM;
   }else{
     pColl->xCmp = xCompare;
     pColl->pUser = pCtx;
@@ -1019,3 +1047,14 @@ recover_out:
 int sqlite3_get_autocommit(sqlite3 *db){
   return db->autoCommit;
 }
+
+#ifdef SQLITE_DEBUG
+/*
+** The following routine is subtituted for constant SQLITE_CORRUPT in
+** debugging builds.  This provides a way to set a breakpoint for when
+** corruption is first detected.
+*/
+int sqlite3Corrupt(void){
+  return SQLITE_CORRUPT;
+}
+#endif

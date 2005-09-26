@@ -661,7 +661,7 @@ static int sqlite3_mprintf_str(
 }
 
 /*
-** Usage:  sqlite3_mprintf_str FORMAT INTEGER INTEGER DOUBLE
+** Usage:  sqlite3_mprintf_double FORMAT INTEGER INTEGER DOUBLE
 **
 ** Call mprintf with two integer arguments and one double argument
 */
@@ -676,7 +676,7 @@ static int sqlite3_mprintf_double(
   char *z;
   if( argc!=5 ){
     Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-       " FORMAT INT INT STRING\"", 0);
+       " FORMAT INT INT DOUBLE\"", 0);
     return TCL_ERROR;
   }
   for(i=2; i<4; i++){
@@ -690,7 +690,7 @@ static int sqlite3_mprintf_double(
 }
 
 /*
-** Usage:  sqlite3_mprintf_str FORMAT DOUBLE DOUBLE
+** Usage:  sqlite3_mprintf_scaled FORMAT DOUBLE DOUBLE
 **
 ** Call mprintf with a single double argument which is the product of the
 ** two arguments given above.  This is used to generate overflow and underflow
@@ -739,6 +739,40 @@ static int sqlite3_mprintf_stronly(
     return TCL_ERROR;
   }
   z = sqlite3_mprintf(argv[1], argv[2]);
+  Tcl_AppendResult(interp, z, 0);
+  sqlite3_free(z);
+  return TCL_OK;
+}
+
+/*
+** Usage:  sqlite3_mprintf_hexdouble FORMAT HEX
+**
+** Call mprintf with a single double argument which is derived from the
+** hexadecimal encoding of an IEEE double.
+*/
+static int sqlite3_mprintf_hexdouble(
+  void *NotUsed,
+  Tcl_Interp *interp,    /* The TCL interpreter that invoked this command */
+  int argc,              /* Number of arguments */
+  char **argv            /* Text of each argument */
+){
+  char *z;
+  double r;
+  unsigned  x1, x2;
+  long long unsigned d;
+  if( argc!=3 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+       " FORMAT STRING\"", 0);
+    return TCL_ERROR;
+  }
+  if( sscanf(argv[2], "%08x%08x", &x2, &x1)!=2 ){
+    Tcl_AppendResult(interp, "2nd argument should be 16-characters of hex", 0);
+    return TCL_ERROR;
+  }
+  d = x2;
+  d = (d<<32) + x1;
+  memcpy(&r, &d, sizeof(r));
+  z = sqlite3_mprintf(argv[1], r);
   Tcl_AppendResult(interp, z, 0);
   sqlite3_free(z);
   return TCL_OK;
@@ -1107,6 +1141,7 @@ static int test_collate_func(
   Tcl_Interp *i = pTestCollateInterp;
   int encin = (int)pCtx;
   int res;
+  int n;
 
   sqlite3_value *pVal;
   Tcl_Obj *pX;
@@ -1130,9 +1165,11 @@ static int test_collate_func(
 
   pVal = sqlite3ValueNew();
   sqlite3ValueSetStr(pVal, nA, zA, encin, SQLITE_STATIC);
-  Tcl_ListObjAppendElement(i,pX,Tcl_NewStringObj(sqlite3_value_text(pVal),-1));
+  n = sqlite3_value_bytes(pVal);
+  Tcl_ListObjAppendElement(i,pX,Tcl_NewStringObj(sqlite3_value_text(pVal),n));
   sqlite3ValueSetStr(pVal, nB, zB, encin, SQLITE_STATIC);
-  Tcl_ListObjAppendElement(i,pX,Tcl_NewStringObj(sqlite3_value_text(pVal),-1));
+  n = sqlite3_value_bytes(pVal);
+  Tcl_ListObjAppendElement(i,pX,Tcl_NewStringObj(sqlite3_value_text(pVal),n));
   sqlite3ValueFree(pVal);
 
   Tcl_EvalObjEx(i, pX, 0);
@@ -2620,27 +2657,51 @@ static int test_interrupt(
   return TCL_OK;
 }
 
+static u8 *sqlite3_stack_baseline = 0;
+
 /*
-** Usage:  sqlite3_sleep ms 
-**
-** Sleep for the specified number of ms.
+** Fill the stack with a known bitpattern.
 */
-#if 0
-static int test_sleep(
+static void prepStack(void){
+  int i;
+  u32 bigBuf[65536];
+  for(i=0; i<sizeof(bigBuf); i++) bigBuf[i] = 0xdeadbeef;
+  sqlite3_stack_baseline = (u8*)&bigBuf[65536];
+}
+
+/*
+** Get the current stack depth.  Used for debugging only.
+*/
+u64 sqlite3StackDepth(void){
+  u8 x;
+  return (u64)(sqlite3_stack_baseline - &x);
+}
+
+/*
+** Usage:  sqlite3_stack_used DB SQL
+**
+** Try to measure the amount of stack space used by a call to sqlite3_exec
+*/
+static int test_stack_used(
   void * clientData,
   Tcl_Interp *interp,
   int argc,
   char **argv
 ){
   sqlite3 *db;
-  if( argc!=2 ){
-    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0], " ms", 0);
+  int i;
+  if( argc!=3 ){
+    Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0], 
+        " DB SQL", 0);
     return TCL_ERROR;
   }
-  Tcl_SetObjResult(interp, Tcl_NewIntObj(sqlite3_sleep(atoi(argv[1]))));
+  if( getDbPointer(interp, argv[1], &db) ) return TCL_ERROR;
+  prepStack();
+  sqlite3_exec(db, argv[2], 0, 0, 0);
+  for(i=65535; i>=0 && ((u32*)sqlite3_stack_baseline)[-i]==0xdeadbeef; i--){}
+  Tcl_SetObjResult(interp, Tcl_NewIntObj(i*4));
   return TCL_OK;
 }
-#endif
 
 /*
 ** Usage: sqlite_delete_function DB function-name
@@ -2954,6 +3015,12 @@ static void set_options(Tcl_Interp *interp){
   Tcl_SetVar2(interp, "sqlite_options", "threadsafe", "0", TCL_GLOBAL_ONLY);
 #endif
 
+#ifdef SQLITE_OMIT_TRACE
+  Tcl_SetVar2(interp, "sqlite_options", "trace", "0", TCL_GLOBAL_ONLY);
+#else
+  Tcl_SetVar2(interp, "sqlite_options", "trace", "1", TCL_GLOBAL_ONLY);
+#endif
+
 #ifdef SQLITE_OMIT_TRIGGER
   Tcl_SetVar2(interp, "sqlite_options", "trigger", "0", TCL_GLOBAL_ONLY);
 #else
@@ -3004,6 +3071,7 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
      { "sqlite3_mprintf_stronly",       (Tcl_CmdProc*)sqlite3_mprintf_stronly},
      { "sqlite3_mprintf_double",        (Tcl_CmdProc*)sqlite3_mprintf_double },
      { "sqlite3_mprintf_scaled",        (Tcl_CmdProc*)sqlite3_mprintf_scaled },
+     { "sqlite3_mprintf_hexdouble",   (Tcl_CmdProc*)sqlite3_mprintf_hexdouble},
      { "sqlite3_mprintf_z_test",        (Tcl_CmdProc*)test_mprintf_z        },
      { "sqlite3_last_insert_rowid",     (Tcl_CmdProc*)test_last_rowid       },
      { "sqlite3_exec_printf",           (Tcl_CmdProc*)test_exec_printf      },
@@ -3029,6 +3097,7 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
      { "sqlite_delete_function",        (Tcl_CmdProc*)delete_function       },
      { "sqlite_delete_collation",       (Tcl_CmdProc*)delete_collation      },
      { "sqlite3_get_autocommit",        (Tcl_CmdProc*)get_autocommit        },
+     { "sqlite3_stack_used",            (Tcl_CmdProc*)test_stack_used       },
   };
   static struct {
      char *zName;
@@ -3111,12 +3180,17 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
   extern int sqlite3_opentemp_count;
   extern int sqlite3_memUsed;
   extern int sqlite3_memMax;
-  extern char sqlite3_query_plan[];
   extern int sqlite3_like_count;
+#if OS_WIN
+  extern int sqlite3_os_type;
+#endif
 #ifdef SQLITE_DEBUG
   extern int sqlite3_vdbe_addop_trace;
 #endif
+#ifdef SQLITE_TEST
+  extern char sqlite3_query_plan[];
   static char *query_plan = sqlite3_query_plan;
+#endif
 
   for(i=0; i<sizeof(aCmd)/sizeof(aCmd[0]); i++){
     Tcl_CreateCommand(interp, aCmd[i].zName, aCmd[i].xProc, 0, 0);
@@ -3139,11 +3213,19 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
       (char*)&sqlite3_current_time, TCL_LINK_INT);
   Tcl_LinkVar(interp, "sqlite_os_trace",
       (char*)&sqlite3_os_trace, TCL_LINK_INT);
-  Tcl_LinkVar(interp, "sqlite_where_trace",
-      (char*)&sqlite3_where_trace, TCL_LINK_INT);
+#if OS_WIN
+  Tcl_LinkVar(interp, "sqlite_os_type",
+      (char*)&sqlite3_os_type, TCL_LINK_INT);
+#endif
+#ifdef SQLITE_TEST
+  Tcl_LinkVar(interp, "sqlite_query_plan",
+      (char*)&query_plan, TCL_LINK_STRING|TCL_LINK_READ_ONLY);
+#endif
 #ifdef SQLITE_DEBUG
   Tcl_LinkVar(interp, "sqlite_addop_trace",
       (char*)&sqlite3_vdbe_addop_trace, TCL_LINK_INT);
+  Tcl_LinkVar(interp, "sqlite_where_trace",
+      (char*)&sqlite3_where_trace, TCL_LINK_INT);
 #endif
 #ifdef SQLITE_MEMDEBUG
   Tcl_LinkVar(interp, "sqlite_memused",
@@ -3151,8 +3233,6 @@ int Sqlitetest1_Init(Tcl_Interp *interp){
   Tcl_LinkVar(interp, "sqlite_memmax",
       (char*)&sqlite3_memMax, TCL_LINK_INT | TCL_LINK_READ_ONLY);
 #endif
-  Tcl_LinkVar(interp, "sqlite_query_plan",
-      (char*)&query_plan, TCL_LINK_STRING|TCL_LINK_READ_ONLY);
 #ifndef SQLITE_OMIT_DISKIO
   Tcl_LinkVar(interp, "sqlite_opentemp_count",
       (char*)&sqlite3_opentemp_count, TCL_LINK_INT);

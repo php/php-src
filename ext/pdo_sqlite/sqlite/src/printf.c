@@ -163,7 +163,15 @@ static int et_getdigit(LONGDOUBLE_TYPE *val, int *cnt){
 }
 #endif
 
-#define etBUFSIZE 1000  /* Size of the output buffer */
+/*
+** On machines with a small stack size, you can redefine the
+** SQLITE_PRINT_BUF_SIZE to be less than 350.  But beware - for
+** smaller values some %f conversions may go into an infinite loop.
+*/
+#ifndef SQLITE_PRINT_BUF_SIZE
+# define SQLITE_PRINT_BUF_SIZE 350
+#endif
+#define etBUFSIZE SQLITE_PRINT_BUF_SIZE  /* Size of the output buffer */
 
 /*
 ** The root program.  All variations call this core.
@@ -440,9 +448,9 @@ static int vxprintf(
         /* Normalize realvalue to within 10.0 > realvalue >= 1.0 */
         exp = 0;
         if( realvalue>0.0 ){
-          while( realvalue>1e32 && exp<=350 ){ realvalue *= 1e-32; exp+=32; }
-          while( realvalue>1e8 && exp<=350 ){ realvalue *= 1e-8; exp+=8; }
-          while( realvalue>10.0 && exp<=350 ){ realvalue *= 0.1; exp++; }
+          while( realvalue>=1e32 && exp<=350 ){ realvalue *= 1e-32; exp+=32; }
+          while( realvalue>=1e8 && exp<=350 ){ realvalue *= 1e-8; exp+=8; }
+          while( realvalue>=10.0 && exp<=350 ){ realvalue *= 0.1; exp++; }
           while( realvalue<1e-8 && exp>=-350 ){ realvalue *= 1e8; exp-=8; }
           while( realvalue<1.0 && exp>=-350 ){ realvalue *= 10.0; exp--; }
           if( exp>350 || exp<-350 ){
@@ -718,7 +726,11 @@ static void mout(void *arg, const char *zNewText, int nNewChar){
           memcpy(pM->zText, pM->zBase, pM->nChar);
         }
       }else{
-        pM->zText = pM->xRealloc(pM->zText, pM->nAlloc);
+        char *zNew;
+        zNew = pM->xRealloc(pM->zText, pM->nAlloc);
+        if( zNew ){
+          pM->zText = zNew;
+        }
       }
     }
   }
@@ -756,7 +768,10 @@ static char *base_vprintf(
         memcpy(sM.zText, sM.zBase, sM.nChar+1);
       }
     }else if( sM.nAlloc>sM.nChar+10 ){
-      sM.zText = xRealloc(sM.zText, sM.nChar+1);
+      char *zNew = xRealloc(sM.zText, sM.nChar+1);
+      if( zNew ){
+        sM.zText = zNew;
+      }
     }
   }
   return sM.zText;
@@ -774,7 +789,7 @@ static void *printf_realloc(void *old, int size){
 ** %-conversion extensions.
 */
 char *sqlite3VMPrintf(const char *zFormat, va_list ap){
-  char zBase[1000];
+  char zBase[SQLITE_PRINT_BUF_SIZE];
   return base_vprintf(printf_realloc, 1, zBase, sizeof(zBase), zFormat, ap);
 }
 
@@ -785,7 +800,7 @@ char *sqlite3VMPrintf(const char *zFormat, va_list ap){
 char *sqlite3MPrintf(const char *zFormat, ...){
   va_list ap;
   char *z;
-  char zBase[1000];
+  char zBase[SQLITE_PRINT_BUF_SIZE];
   va_start(ap, zFormat);
   z = base_vprintf(printf_realloc, 1, zBase, sizeof(zBase), zFormat, ap);
   va_end(ap);
