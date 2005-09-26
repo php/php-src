@@ -92,34 +92,39 @@ PHP_MINFO_FUNCTION(ctype)
 /* {{{ ctype
  */
 #define CTYPE(iswhat) \
-	zval *c; \
+	zval *c, tmp; \
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE) \
 		return; \
- 	switch (Z_TYPE_P(c)) { \
-	case IS_LONG: \
+	if (Z_TYPE_P(c) == IS_LONG) { \
 		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
 			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
 		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
 			RETURN_BOOL(iswhat(Z_LVAL_P(c) + 256)); \
 		} \
-		SEPARATE_ZVAL(&c);	\
-		convert_to_string(c);	\
-	case IS_STRING: \
-		{ \
-			char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
-			if (e == p) {	\
-				RETURN_FALSE;	\
-			}	\
-			while (p < e) { \
-				if(!iswhat((int)*(unsigned char *)(p++))) RETURN_FALSE; \
-			} \
-			RETURN_TRUE; \
-		} \
-	default: \
-		break; \
+		tmp = *c; \
+		zval_copy_ctor(&tmp); \
+		convert_to_string(&tmp); \
+	} else { \
+		tmp = *c; \
 	} \
-	RETURN_FALSE; 
- 
+	if (Z_TYPE(tmp) == IS_STRING) { \
+		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRLEN(tmp); \
+		if (e == p) {	\
+			if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
+			RETURN_FALSE;	\
+		}	\
+		while (p < e) { \
+			if(!iswhat((int)*(unsigned char *)(p++))) { \
+				if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
+				RETURN_FALSE; \
+			} \
+		} \
+		if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
+		RETURN_TRUE; \
+	} else { \
+		RETURN_FALSE; \
+	} \
+
 /* }}} */
 
 /* {{{ proto bool ctype_alnum(mixed c)
