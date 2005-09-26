@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Fixed "make test" to work for phpized extensions. (Hartmut, Jani)
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
+- Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
 - Fixed bug #34590 (User defined PDOStatement class can't implement methods).
   (Marcus)
 - Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
