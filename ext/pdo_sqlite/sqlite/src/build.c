@@ -76,7 +76,7 @@ void sqlite3FinishCoding(Parse *pParse){
     if( pParse->cookieGoto>0 ){
       u32 mask;
       int iDb;
-      sqlite3VdbeChangeP2(v, pParse->cookieGoto-1, sqlite3VdbeCurrentAddr(v));
+      sqlite3VdbeJumpHere(v, pParse->cookieGoto-1);
       for(iDb=0, mask=1; iDb<db->nDb; mask<<=1, iDb++){
         if( (mask & pParse->cookieMask)==0 ) continue;
         sqlite3VdbeAddOp(v, OP_Transaction, iDb, (mask & pParse->writeMask)!=0);
@@ -85,6 +85,7 @@ void sqlite3FinishCoding(Parse *pParse){
       sqlite3VdbeAddOp(v, OP_Goto, 0, pParse->cookieGoto);
     }
 
+#ifndef SQLITE_OMIT_TRACE
     /* Add a No-op that contains the complete text of the compiled SQL
     ** statement as its P3 argument.  This does not change the functionality
     ** of the program. 
@@ -92,6 +93,7 @@ void sqlite3FinishCoding(Parse *pParse){
     ** This is used to implement sqlite3_trace().
     */
     sqlite3VdbeOp3(v, OP_Noop, 0, 0, pParse->zSql, pParse->zTail-pParse->zSql);
+#endif /* SQLITE_OMIT_TRACE */
   }
 
 
@@ -101,7 +103,7 @@ void sqlite3FinishCoding(Parse *pParse){
     FILE *trace = (db->flags & SQLITE_VdbeTrace)!=0 ? stdout : 0;
     sqlite3VdbeTrace(v, trace);
     sqlite3VdbeMakeReady(v, pParse->nVar, pParse->nMem+3,
-                         pParse->nTab+3, pParse->nMaxDepth+1, pParse->explain);
+                         pParse->nTab+3, pParse->explain);
     pParse->rc = SQLITE_DONE;
     pParse->colNamesSet = 0;
   }else if( pParse->rc==SQLITE_OK ){
@@ -130,7 +132,6 @@ void sqlite3FinishCoding(Parse *pParse){
 void sqlite3NestedParse(Parse *pParse, const char *zFormat, ...){
   va_list ap;
   char *zSql;
-  int rc;
 # define SAVE_SZ  (sizeof(Parse) - offsetof(Parse,nVar))
   char saveBuf[SAVE_SZ];
 
@@ -145,7 +146,7 @@ void sqlite3NestedParse(Parse *pParse, const char *zFormat, ...){
   pParse->nested++;
   memcpy(saveBuf, &pParse->nVar, SAVE_SZ);
   memset(&pParse->nVar, 0, SAVE_SZ);
-  rc = sqlite3RunParser(pParse, zSql, 0);
+  sqlite3RunParser(pParse, zSql, 0);
   sqliteFree(zSql);
   memcpy(&pParse->nVar, saveBuf, SAVE_SZ);
   pParse->nested--;
@@ -634,7 +635,6 @@ void sqlite3StartTable(
   int isView       /* True if this is a VIEW */
 ){
   Table *pTable;
-  Index *pIdx;
   char *zName = 0; /* The name of the new table */
   sqlite3 *db = pParse->db;
   Vdbe *v;
@@ -713,8 +713,7 @@ void sqlite3StartTable(
     sqlite3ErrorMsg(pParse, "table %T already exists", pName);
     goto begin_table_error;
   }
-  if( (pIdx = sqlite3FindIndex(db, zName, 0))!=0 && 
-      ( iDb==0 || !db->init.busy) ){
+  if( sqlite3FindIndex(db, zName, 0)!=0 && (iDb==0 || !db->init.busy) ){
     sqlite3ErrorMsg(pParse, "there is already an index named %s", zName);
     goto begin_table_error;
   }
@@ -941,7 +940,7 @@ void sqlite3AddColumnType(Parse *pParse, Token *pType){
   i = p->nCol-1;
   if( i<0 ) return;
   pCol = &p->aCol[i];
-  assert( pCol->zType==0 );
+  sqliteFree(pCol->zType);
   pCol->zType = sqlite3NameFromToken(pType);
   pCol->affinity = sqlite3AffinityType(pType);
 }
@@ -1016,7 +1015,9 @@ void sqlite3AddPrimaryKey(
           break;
         }
       }
-      if( iCol<pTab->nCol ) pTab->aCol[iCol].isPrimKey = 1;
+      if( iCol<pTab->nCol ){
+        pTab->aCol[iCol].isPrimKey = 1;
+      }
     }
     if( pList->nExpr>1 ) iCol = -1;
   }
@@ -2001,7 +2002,7 @@ static void sqlite3RefillIndex(Parse *pParse, Index *pIndex, int memRootPage){
   }
   sqlite3VdbeAddOp(v, OP_IdxInsert, iIdx, 0);
   sqlite3VdbeAddOp(v, OP_Next, iTab, addr1+1);
-  sqlite3VdbeChangeP2(v, addr1, sqlite3VdbeCurrentAddr(v));
+  sqlite3VdbeJumpHere(v, addr1);
   sqlite3VdbeAddOp(v, OP_Close, iTab, 0);
   sqlite3VdbeAddOp(v, OP_Close, iIdx, 0);
 }
@@ -2114,14 +2115,12 @@ void sqlite3CreateIndex(
       goto exit_create_index;
     }
     if( !db->init.busy ){
-      Index *pISameName;    /* Another index with the same name */
-      Table *pTSameName;    /* A table with same name as the index */
       if( SQLITE_OK!=sqlite3ReadSchema(pParse) ) goto exit_create_index;
-      if( (pISameName = sqlite3FindIndex(db, zName, db->aDb[iDb].zName))!=0 ){
+      if( sqlite3FindIndex(db, zName, db->aDb[iDb].zName)!=0 ){
         sqlite3ErrorMsg(pParse, "index %s already exists", zName);
         goto exit_create_index;
       }
-      if( (pTSameName = sqlite3FindTable(db, zName, 0))!=0 ){
+      if( sqlite3FindTable(db, zName, 0)!=0 ){
         sqlite3ErrorMsg(pParse, "there is already a table named %s", zName);
         goto exit_create_index;
       }
@@ -2171,7 +2170,7 @@ void sqlite3CreateIndex(
                         (sizeof(int)*2 + sizeof(CollSeq*))*pList->nExpr );
   if( sqlite3_malloc_failed ) goto exit_create_index;
   pIndex->aiColumn = (int*)&pIndex->keyInfo.aColl[pList->nExpr];
-  pIndex->aiRowEst = &pIndex->aiColumn[pList->nExpr];
+  pIndex->aiRowEst = (unsigned*)&pIndex->aiColumn[pList->nExpr];
   pIndex->zName = (char*)&pIndex->aiRowEst[pList->nExpr+1];
   strcpy(pIndex->zName, zName);
   pIndex->pTable = pTab;
@@ -2394,7 +2393,7 @@ exit_create_index:
 ** are based on typical values found in actual indices.
 */
 void sqlite3DefaultRowEst(Index *pIdx){
-  int *a = pIdx->aiRowEst;
+  unsigned *a = pIdx->aiRowEst;
   int i;
   assert( a!=0 );
   a[0] = 1000000;
@@ -2468,30 +2467,65 @@ exit_drop_index:
 }
 
 /*
+** ppArray points into a structure where there is an array pointer
+** followed by two integers. The first integer is the
+** number of elements in the structure array.  The second integer
+** is the number of allocated slots in the array.
+**
+** In other words, the structure looks something like this:
+**
+**        struct Example1 {
+**          struct subElem *aEntry;
+**          int nEntry;
+**          int nAlloc;
+**        }
+**
+** The pnEntry parameter points to the equivalent of Example1.nEntry.
+**
+** This routine allocates a new slot in the array, zeros it out,
+** and returns its index.  If malloc fails a negative number is returned.
+**
+** szEntry is the sizeof of a single array entry.  initSize is the 
+** number of array entries allocated on the initial allocation.
+*/
+int sqlite3ArrayAllocate(void **ppArray, int szEntry, int initSize){
+  char *p;
+  int *an = (int*)&ppArray[1];
+  if( an[0]>=an[1] ){
+    void *pNew;
+    int newSize;
+    newSize = an[1]*2 + initSize;
+    pNew = sqliteRealloc(*ppArray, newSize*szEntry);
+    if( pNew==0 ){
+      return -1;
+    }
+    an[1] = newSize;
+    *ppArray = pNew;
+  }
+  p = *ppArray;
+  memset(&p[an[0]*szEntry], 0, szEntry);
+  return an[0]++;
+}
+
+/*
 ** Append a new element to the given IdList.  Create a new IdList if
 ** need be.
 **
 ** A new IdList is returned, or NULL if malloc() fails.
 */
 IdList *sqlite3IdListAppend(IdList *pList, Token *pToken){
+  int i;
   if( pList==0 ){
     pList = sqliteMalloc( sizeof(IdList) );
     if( pList==0 ) return 0;
     pList->nAlloc = 0;
   }
-  if( pList->nId>=pList->nAlloc ){
-    struct IdList_item *a;
-    pList->nAlloc = pList->nAlloc*2 + 5;
-    a = sqliteRealloc(pList->a, pList->nAlloc*sizeof(pList->a[0]) );
-    if( a==0 ){
-      sqlite3IdListDelete(pList);
-      return 0;
-    }
-    pList->a = a;
+  i = sqlite3ArrayAllocate((void**)&pList->a, sizeof(pList->a[0]), 5);
+  if( i<0 ){
+    sqlite3IdListDelete(pList);
+    return 0;
   }
-  memset(&pList->a[pList->nId], 0, sizeof(pList->a[0]));
-  pList->a[pList->nId].zName = sqlite3NameFromToken(pToken);
-  pList->nId++;
+  pList->a[i].zName = sqlite3NameFromToken(pToken);
   return pList;
 }
 

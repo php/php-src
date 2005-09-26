@@ -161,8 +161,13 @@
 ** 1GB boundary.
 **
 */
+#ifndef SQLITE_TEST
 #define PENDING_BYTE      0x40000000  /* First byte past the 1GB boundary */
-/* #define PENDING_BYTE     0x5400   // Page 22 - for testing */
+#else
+extern unsigned int sqlite3_pending_byte;
+#define PENDING_BYTE sqlite3_pending_byte
+#endif
+
 #define RESERVED_BYTE     (PENDING_BYTE+1)
 #define SHARED_FIRST      (PENDING_BYTE+2)
 #define SHARED_SIZE       510
@@ -181,7 +186,7 @@ int sqlite3OsClose(OsFile*);
 int sqlite3OsRead(OsFile*, void*, int amt);
 int sqlite3OsWrite(OsFile*, const void*, int amt);
 int sqlite3OsSeek(OsFile*, i64 offset);
-int sqlite3OsSync(OsFile*);
+int sqlite3OsSync(OsFile*, int);
 int sqlite3OsTruncate(OsFile*, i64 size);
 int sqlite3OsFileSize(OsFile*, i64 *pSize);
 char *sqlite3OsFullPathname(const char*);

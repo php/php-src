@@ -458,12 +458,19 @@ int sqlite3_prepare(
 
 #ifndef SQLITE_OMIT_EXPLAIN
   if( rc==SQLITE_OK && sParse.pVdbe && sParse.explain ){
-    sqlite3VdbeSetNumCols(sParse.pVdbe, 5);
-    sqlite3VdbeSetColName(sParse.pVdbe, 0, "addr", P3_STATIC);
-    sqlite3VdbeSetColName(sParse.pVdbe, 1, "opcode", P3_STATIC);
-    sqlite3VdbeSetColName(sParse.pVdbe, 2, "p1", P3_STATIC);
-    sqlite3VdbeSetColName(sParse.pVdbe, 3, "p2", P3_STATIC);
-    sqlite3VdbeSetColName(sParse.pVdbe, 4, "p3", P3_STATIC);
+    if( sParse.explain==2 ){
+      sqlite3VdbeSetNumCols(sParse.pVdbe, 3);
+      sqlite3VdbeSetColName(sParse.pVdbe, 0, "order", P3_STATIC);
+      sqlite3VdbeSetColName(sParse.pVdbe, 1, "from", P3_STATIC);
+      sqlite3VdbeSetColName(sParse.pVdbe, 2, "detail", P3_STATIC);
+    }else{
+      sqlite3VdbeSetNumCols(sParse.pVdbe, 5);
+      sqlite3VdbeSetColName(sParse.pVdbe, 0, "addr", P3_STATIC);
+      sqlite3VdbeSetColName(sParse.pVdbe, 1, "opcode", P3_STATIC);
+      sqlite3VdbeSetColName(sParse.pVdbe, 2, "p1", P3_STATIC);
+      sqlite3VdbeSetColName(sParse.pVdbe, 3, "p2", P3_STATIC);
+      sqlite3VdbeSetColName(sParse.pVdbe, 4, "p3", P3_STATIC);
+    }
   } 
 #endif
 

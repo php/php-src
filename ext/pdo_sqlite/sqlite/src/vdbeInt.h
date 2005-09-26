@@ -81,6 +81,7 @@ struct Cursor {
   u8 *pIncrKey;         /* Pointer to pKeyInfo->incrKey */
   KeyInfo *pKeyInfo;    /* Info about index keys needed by index cursors */
   int nField;           /* Number of fields in the header */
+  i64 seqCount;         /* Sequence counter */
 
   /* Cached information about the header for the data record that the
   ** cursor is currently pointing to.  Only valid if cacheValid is true.
@@ -113,34 +114,17 @@ typedef struct Cursor Cursor;
 ** SQLITE_BLOB.
 */
 struct Mem {
-  i64 i;              /* Integer value */
+  i64 i;              /* Integer value. Or FuncDef* when flags==MEM_Agg */
+  double r;           /* Real value */
+  char *z;            /* String or BLOB value */
   int n;              /* Number of characters in string value, including '\0' */
   u16 flags;          /* Some combination of MEM_Null, MEM_Str, MEM_Dyn, etc. */
   u8  type;           /* One of MEM_Null, MEM_Str, etc. */
   u8  enc;            /* TEXT_Utf8, TEXT_Utf16le, or TEXT_Utf16be */
-  double r;           /* Real value */
-  char *z;            /* String or BLOB value */
   void (*xDel)(void *);  /* If not null, call this function to delete Mem.z */
   char zShort[NBFS];  /* Space for short strings */
 };
 typedef struct Mem Mem;
-
-/*
-** A sorter builds a list of elements to be sorted.  Each element of
-** the list is an instance of the following structure.
-*/
-typedef struct Sorter Sorter;
-struct Sorter {
-  int nKey;           /* Number of bytes in the key */
-  char *zKey;         /* The key by which we will sort */
-  Mem data;
-  Sorter *pNext;      /* Next in the list */
-};
-
-/* 
-** Number of buckets used for merge-sort.  
-*/
-#define NSORT 30
 
 /* One or more of the following flags are set to indicate the validOK
 ** representations of the value stored in the Mem struct.
@@ -173,12 +157,7 @@ struct Sorter {
 #define MEM_Static    0x0080   /* Mem.z points to a static string */
 #define MEM_Ephem     0x0100   /* Mem.z points to an ephemeral string */
 #define MEM_Short     0x0200   /* Mem.z points to Mem.zShort */
-
-/* The following MEM_ value appears only in AggElem.aMem.s.flag fields.
-** It indicates that the corresponding AggElem.aMem.z points to a
-** aggregate function context that needs to be finalized.
-*/
-#define MEM_AggCtx    0x0400  /* Mem.z points to an agg function context */
+#define MEM_Agg       0x0400   /* Mem.z points to an agg function context */
 
 
 /* A VdbeFunc is just a FuncDef (defined in sqliteInt.h) that contains
@@ -210,41 +189,16 @@ typedef struct VdbeFunc VdbeFunc;
 ** But this file is the only place where the internal details of this
 ** structure are known.
 **
-** This structure is defined inside of vdbe.c because it uses substructures
+** This structure is defined inside of vdbeInt.h because it uses substructures
 ** (Mem) which are only defined there.
 */
 struct sqlite3_context {
-  FuncDef *pFunc;   /* Pointer to function information.  MUST BE FIRST */
+  FuncDef *pFunc;       /* Pointer to function information.  MUST BE FIRST */
   VdbeFunc *pVdbeFunc;  /* Auxilary data, if created. */
-  Mem s;            /* The return value is stored here */
-  void *pAgg;       /* Aggregate context */
-  u8 isError;       /* Set to true for an error */
-  int cnt;          /* Number of times that the step function has been called */
-  CollSeq *pColl;
-};
-
-/*
-** An Agg structure describes an Aggregator.  Each Agg consists of
-** zero or more Aggregator elements (AggElem).  Each AggElem contains
-** a key and one or more values.  The values are used in processing
-** aggregate functions in a SELECT.  The key is used to implement
-** the GROUP BY clause of a select.
-*/
-typedef struct Agg Agg;
-typedef struct AggElem AggElem;
-struct Agg {
-  int nMem;            /* Number of values stored in each AggElem */
-  AggElem *pCurrent;   /* The AggElem currently in focus */
-  FuncDef **apFunc;    /* Information about aggregate functions */
-  Btree *pBtree;       /* The tmp. btree used to group elements, if required. */
-  BtCursor *pCsr;      /* Read/write cursor to the table in pBtree */
-  int nTab;            /* Root page of the table in pBtree */
-  u8 searching;        /* True between the first AggNext and AggReset */
-};
-struct AggElem {
-  char *zKey;          /* The key to this AggElem */
-  int nKey;            /* Number of bytes in the key, including '\0' at end */
-  Mem aMem[1];         /* The values for this AggElem */
+  Mem s;                /* The return value is stored here */
+  Mem *pMem;            /* Memory cell used to store aggregate context */
+  u8 isError;           /* Set to true for an error */
+  CollSeq *pColl;       /* Collating sequence */
 };
 
 /*
@@ -324,8 +278,6 @@ struct Vdbe {
   Mem *aColName;      /* Column names to return */
   int nCursor;        /* Number of slots in apCsr[] */
   Cursor **apCsr;     /* One element of this array for each open cursor */
-  Sorter *pSort;      /* A linked list of objects to be sorted */
-  Sorter *pSortTail;  /* Last element on the pSort list */
   int nVar;           /* Number of entries in aVar[] */
   Mem *aVar;          /* Values for the OP_Variable opcode. */
   char **azVar;       /* Name of variables */
@@ -333,9 +285,6 @@ struct Vdbe {
   int magic;              /* Magic number for sanity checking */
   int nMem;               /* Number of memory locations currently allocated */
   Mem *aMem;              /* The memory locations */
-  int nAgg;               /* Number of elements in apAgg */
-  Agg *apAgg;             /* Array of aggregate contexts */
-  Agg *pAgg;              /* Current aggregate context */
   int nCallback;          /* Number of callbacks invoked so far */
   Fifo sFifo;             /* A list of ROWIDs */
   int contextStackTop;    /* Index of top element in the context stack */
@@ -358,6 +307,7 @@ struct Vdbe {
   u8 aborted;             /* True if ROLLBACK in another VM causes an abort */
   u8 expired;             /* True if the VM needs to be recompiled */
   int nChange;            /* Number of db changes made since last reset */
+  i64 startTime;          /* Time when query started - used for profiling */
 };
 
 /*
@@ -372,8 +322,6 @@ struct Vdbe {
 ** Function prototypes
 */
 void sqlite3VdbeFreeCursor(Cursor*);
-void sqlite3VdbeSorterReset(Vdbe*);
-int sqlite3VdbeAggReset(sqlite3*, Agg *, KeyInfo *);
 void sqliteVdbePopStack(Vdbe*,int);
 int sqlite3VdbeCursorMoveto(Cursor*);
 #if defined(SQLITE_DEBUG) || defined(VDBE_PROFILE)
@@ -415,6 +363,7 @@ double sqlite3VdbeRealValue(Mem*);
 int sqlite3VdbeMemRealify(Mem*);
 int sqlite3VdbeMemFromBtree(BtCursor*,int,int,int,Mem*);
 void sqlite3VdbeMemRelease(Mem *p);
+void sqlite3VdbeMemFinalize(Mem*, FuncDef*);
 #ifndef NDEBUG
 void sqlite3VdbeMemSanity(Mem*, u8);
 int sqlite3VdbeOpcodeNoPush(u8);

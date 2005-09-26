@@ -84,6 +84,7 @@ struct SqliteDb {
   char *zBusy;               /* The busy callback routine */
   char *zCommit;             /* The commit hook callback routine */
   char *zTrace;              /* The trace callback routine */
+  char *zProfile;            /* The profile callback routine */
   char *zProgress;           /* The progress callback routine */
   char *zAuth;               /* The authorization callback routine */
   char *zNull;               /* Text to substitute for an SQL NULL value */
@@ -190,6 +191,9 @@ static void DbDeleteCmd(void *db){
   if( pDb->zTrace ){
     Tcl_Free(pDb->zTrace);
   }
+  if( pDb->zProfile ){
+    Tcl_Free(pDb->zProfile);
+  }
   if( pDb->zAuth ){
     Tcl_Free(pDb->zAuth);
   }
@@ -242,6 +246,25 @@ static void DbTraceHandler(void *cd, const char *zSql){
   Tcl_DStringInit(&str);
   Tcl_DStringAppend(&str, pDb->zTrace, -1);
   Tcl_DStringAppendElement(&str, zSql);
+  Tcl_Eval(pDb->interp, Tcl_DStringValue(&str));
+  Tcl_DStringFree(&str);
+  Tcl_ResetResult(pDb->interp);
+}
+
+/*
+** This routine is called by the SQLite profile handler after a statement
+** SQL has executed.  The TCL script in pDb->zProfile is evaluated.
+*/
+static void DbProfileHandler(void *cd, const char *zSql, sqlite_uint64 tm){
+  SqliteDb *pDb = (SqliteDb*)cd;
+  Tcl_DString str;
+  char zTm[100];
+
+  sqlite3_snprintf(sizeof(zTm)-1, zTm, "%lld", tm);
+  Tcl_DStringInit(&str);
+  Tcl_DStringAppend(&str, pDb->zProfile, -1);
+  Tcl_DStringAppendElement(&str, zSql);
+  Tcl_DStringAppendElement(&str, zTm);
   Tcl_Eval(pDb->interp, Tcl_DStringValue(&str));
   Tcl_DStringFree(&str);
   Tcl_ResetResult(pDb->interp);
@@ -589,9 +612,10 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     "collation_needed",   "commit_hook",       "complete",
     "copy",               "errorcode",         "eval",
     "function",           "last_insert_rowid", "nullvalue",
-    "onecolumn",          "progress",          "rekey",
-    "timeout",            "total_changes",     "trace",
-    "transaction",        "version",           0
+    "onecolumn",          "profile",           "progress",
+    "rekey",              "timeout",           "total_changes",
+    "trace",              "transaction",       "version",
+    0                    
   };
   enum DB_enum {
     DB_AUTHORIZER,        DB_BUSY,             DB_CACHE,
@@ -599,9 +623,9 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     DB_COLLATION_NEEDED,  DB_COMMIT_HOOK,      DB_COMPLETE,
     DB_COPY,              DB_ERRORCODE,        DB_EVAL,
     DB_FUNCTION,          DB_LAST_INSERT_ROWID,DB_NULLVALUE,
-    DB_ONECOLUMN,         DB_PROGRESS,         DB_REKEY,
-    DB_TIMEOUT,           DB_TOTAL_CHANGES,    DB_TRACE,
-    DB_TRANSACTION,       DB_VERSION,          
+    DB_ONECOLUMN,         DB_PROFILE,          DB_PROGRESS,
+    DB_REKEY,             DB_TIMEOUT,          DB_TOTAL_CHANGES,
+    DB_TRACE,             DB_TRANSACTION,      DB_VERSION
   };
   /* don't leave trailing commas on DB_enum, it confuses the AIX xlc compiler */
 
@@ -780,44 +804,6 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     break;
   }
 
-  /*    $db commit_hook ?CALLBACK?
-  **
-  ** Invoke the given callback just before committing every SQL transaction.
-  ** If the callback throws an exception or returns non-zero, then the
-  ** transaction is aborted.  If CALLBACK is an empty string, the callback
-  ** is disabled.
-  */
-  case DB_COMMIT_HOOK: {
-    if( objc>3 ){
-      Tcl_WrongNumArgs(interp, 2, objv, "?CALLBACK?");
-      return TCL_ERROR;
-    }else if( objc==2 ){
-      if( pDb->zCommit ){
-        Tcl_AppendResult(interp, pDb->zCommit, 0);
-      }
-    }else{
-      char *zCommit;
-      int len;
-      if( pDb->zCommit ){
-        Tcl_Free(pDb->zCommit);
-      }
-      zCommit = Tcl_GetStringFromObj(objv[2], &len);
-      if( zCommit && len>0 ){
-        pDb->zCommit = Tcl_Alloc( len + 1 );
-        strcpy(pDb->zCommit, zCommit);
-      }else{
-        pDb->zCommit = 0;
-      }
-      if( pDb->zCommit ){
-        pDb->interp = interp;
-        sqlite3_commit_hook(pDb->db, DbCommitHandler, pDb);
-      }else{
-        sqlite3_commit_hook(pDb->db, 0, 0);
-      }
-    }
-    break;
-  }
-
   /*
   **     $db collate NAME SCRIPT
   **
@@ -870,6 +856,44 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     break;
   }
 
+  /*    $db commit_hook ?CALLBACK?
+  **
+  ** Invoke the given callback just before committing every SQL transaction.
+  ** If the callback throws an exception or returns non-zero, then the
+  ** transaction is aborted.  If CALLBACK is an empty string, the callback
+  ** is disabled.
+  */
+  case DB_COMMIT_HOOK: {
+    if( objc>3 ){
+      Tcl_WrongNumArgs(interp, 2, objv, "?CALLBACK?");
+      return TCL_ERROR;
+    }else if( objc==2 ){
+      if( pDb->zCommit ){
+        Tcl_AppendResult(interp, pDb->zCommit, 0);
+      }
+    }else{
+      char *zCommit;
+      int len;
+      if( pDb->zCommit ){
+        Tcl_Free(pDb->zCommit);
+      }
+      zCommit = Tcl_GetStringFromObj(objv[2], &len);
+      if( zCommit && len>0 ){
+        pDb->zCommit = Tcl_Alloc( len + 1 );
+        strcpy(pDb->zCommit, zCommit);
+      }else{
+        pDb->zCommit = 0;
+      }
+      if( pDb->zCommit ){
+        pDb->interp = interp;
+        sqlite3_commit_hook(pDb->db, DbCommitHandler, pDb);
+      }else{
+        sqlite3_commit_hook(pDb->db, 0, 0);
+      }
+    }
+    break;
+  }
+
   /*    $db complete SQL
   **
   ** Return TRUE if SQL is a complete SQL statement.  Return FALSE if
@@ -888,6 +912,192 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     pResult = Tcl_GetObjResult(interp);
     Tcl_SetBooleanObj(pResult, isComplete);
 #endif
+    break;
+  }
+
+  /*    $db copy conflict-algorithm table filename ?SEPARATOR? ?NULLINDICATOR?
+  **
+  ** Copy data into table from filename, optionally using SEPARATOR
+  ** as column separators.  If a column contains a null string, or the
+  ** value of NULLINDICATOR, a NULL is inserted for the column.
+  ** conflict-algorithm is one of the sqlite conflict algorithms:
+  **    rollback, abort, fail, ignore, replace
+  ** On success, return the number of lines processed, not necessarily same
+  ** as 'db changes' due to conflict-algorithm selected.
+  **
+  ** This code is basically an implementation/enhancement of
+  ** the sqlite3 shell.c ".import" command.
+  **
+  ** This command usage is equivalent to the sqlite2.x COPY statement,
+  ** which imports file data into a table using the PostgreSQL COPY file format:
+  **   $db copy $conflit_algo $table_name $filename \t \\N
+  */
+  case DB_COPY: {
+    char *zTable;               /* Insert data into this table */
+    char *zFile;                /* The file from which to extract data */
+    char *zConflict;            /* The conflict algorithm to use */
+    sqlite3_stmt *pStmt;        /* A statement */
+    int rc;                     /* Result code */
+    int nCol;                   /* Number of columns in the table */
+    int nByte;                  /* Number of bytes in an SQL string */
+    int i, j;                   /* Loop counters */
+    int nSep;                   /* Number of bytes in zSep[] */
+    int nNull;                  /* Number of bytes in zNull[] */
+    char *zSql;                 /* An SQL statement */
+    char *zLine;                /* A single line of input from the file */
+    char **azCol;               /* zLine[] broken up into columns */
+    char *zCommit;              /* How to commit changes */
+    FILE *in;                   /* The input file */
+    int lineno = 0;             /* Line number of input file */
+    char zLineNum[80];          /* Line number print buffer */
+    Tcl_Obj *pResult;           /* interp result */
+
+    char *zSep;
+    char *zNull;
+    if( objc<5 || objc>7 ){
+      Tcl_WrongNumArgs(interp, 2, objv, 
+         "CONFLICT-ALGORITHM TABLE FILENAME ?SEPARATOR? ?NULLINDICATOR?");
+      return TCL_ERROR;
+    }
+    if( objc>=6 ){
+      zSep = Tcl_GetStringFromObj(objv[5], 0);
+    }else{
+      zSep = "\t";
+    }
+    if( objc>=7 ){
+      zNull = Tcl_GetStringFromObj(objv[6], 0);
+    }else{
+      zNull = "";
+    }
+    zConflict = Tcl_GetStringFromObj(objv[2], 0);
+    zTable = Tcl_GetStringFromObj(objv[3], 0);
+    zFile = Tcl_GetStringFromObj(objv[4], 0);
+    nSep = strlen(zSep);
+    nNull = strlen(zNull);
+    if( nSep==0 ){
+      Tcl_AppendResult(interp, "Error: non-null separator required for copy", 0);
+      return TCL_ERROR;
+    }
+    if(sqlite3StrICmp(zConflict, "rollback") != 0 &&
+       sqlite3StrICmp(zConflict, "abort"   ) != 0 &&
+       sqlite3StrICmp(zConflict, "fail"    ) != 0 &&
+       sqlite3StrICmp(zConflict, "ignore"  ) != 0 &&
+       sqlite3StrICmp(zConflict, "replace" ) != 0 ) {
+      Tcl_AppendResult(interp, "Error: \"", zConflict, 
+            "\", conflict-algorithm must be one of: rollback, "
+            "abort, fail, ignore, or replace", 0);
+      return TCL_ERROR;
+    }
+    zSql = sqlite3_mprintf("SELECT * FROM '%q'", zTable);
+    if( zSql==0 ){
+      Tcl_AppendResult(interp, "Error: no such table: ", zTable, 0);
+      return TCL_ERROR;
+    }
+    nByte = strlen(zSql);
+    rc = sqlite3_prepare(pDb->db, zSql, 0, &pStmt, 0);
+    sqlite3_free(zSql);
+    if( rc ){
+      Tcl_AppendResult(interp, "Error: ", sqlite3_errmsg(pDb->db), 0);
+      nCol = 0;
+    }else{
+      nCol = sqlite3_column_count(pStmt);
+    }
+    sqlite3_finalize(pStmt);
+    if( nCol==0 ) {
+      return TCL_ERROR;
+    }
+    zSql = malloc( nByte + 50 + nCol*2 );
+    if( zSql==0 ) {
+      Tcl_AppendResult(interp, "Error: can't malloc()", 0);
+      return TCL_ERROR;
+    }
+    sqlite3_snprintf(nByte+50, zSql, "INSERT OR %q INTO '%q' VALUES(?",
+         zConflict, zTable);
+    j = strlen(zSql);
+    for(i=1; i<nCol; i++){
+      zSql[j++] = ',';
+      zSql[j++] = '?';
+    }
+    zSql[j++] = ')';
+    zSql[j] = 0;
+    rc = sqlite3_prepare(pDb->db, zSql, 0, &pStmt, 0);
+    free(zSql);
+    if( rc ){
+      Tcl_AppendResult(interp, "Error: ", sqlite3_errmsg(pDb->db), 0);
+      sqlite3_finalize(pStmt);
+      return TCL_ERROR;
+    }
+    in = fopen(zFile, "rb");
+    if( in==0 ){
+      Tcl_AppendResult(interp, "Error: cannot open file: ", zFile, NULL);
+      sqlite3_finalize(pStmt);
+      return TCL_ERROR;
+    }
+    azCol = malloc( sizeof(azCol[0])*(nCol+1) );
+    if( azCol==0 ) {
+      Tcl_AppendResult(interp, "Error: can't malloc()", 0);
+      return TCL_ERROR;
+    }
+    sqlite3_exec(pDb->db, "BEGIN", 0, 0, 0);
+    zCommit = "COMMIT";
+    while( (zLine = local_getline(0, in))!=0 ){
+      char *z;
+      i = 0;
+      lineno++;
+      azCol[0] = zLine;
+      for(i=0, z=zLine; *z; z++){
+        if( *z==zSep[0] && strncmp(z, zSep, nSep)==0 ){
+          *z = 0;
+          i++;
+          if( i<nCol ){
+            azCol[i] = &z[nSep];
+            z += nSep-1;
+          }
+        }
+      }
+      if( i+1!=nCol ){
+        char *zErr;
+        zErr = malloc(200 + strlen(zFile));
+        sprintf(zErr,"Error: %s line %d: expected %d columns of data but found %d",
+           zFile, lineno, nCol, i+1);
+        Tcl_AppendResult(interp, zErr, 0);
+        free(zErr);
+        zCommit = "ROLLBACK";
+        break;
+      }
+      for(i=0; i<nCol; i++){
+        /* check for null data, if so, bind as null */
+        if ((nNull>0 && strcmp(azCol[i], zNull)==0) || strlen(azCol[i])==0) {
+          sqlite3_bind_null(pStmt, i+1);
+        }else{
+          sqlite3_bind_text(pStmt, i+1, azCol[i], -1, SQLITE_STATIC);
+        }
+      }
+      sqlite3_step(pStmt);
+      rc = sqlite3_reset(pStmt);
+      free(zLine);
+      if( rc!=SQLITE_OK ){
+        Tcl_AppendResult(interp,"Error: ", sqlite3_errmsg(pDb->db), 0);
+        zCommit = "ROLLBACK";
+        break;
+      }
+    }
+    free(azCol);
+    fclose(in);
+    sqlite3_finalize(pStmt);
+    sqlite3_exec(pDb->db, zCommit, 0, 0, 0);
+
+    if( zCommit[0] == 'C' ){
+      /* success, set result as number of lines processed */
+      pResult = Tcl_GetObjResult(interp);
+      Tcl_SetIntObj(pResult, lineno);
+      rc = TCL_OK;
+    }else{
+      /* failure, append lineno where failed */
+      sprintf(zLineNum,"%d",lineno);
+      Tcl_AppendResult(interp,", failed while processing line: ",zLineNum,0);
+      rc = TCL_ERROR;
+    }
     break;
   }
 
@@ -1302,6 +1512,37 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
   }
 
   /*
+  **     $db nullvalue ?STRING?
+  **
+  ** Change text used when a NULL comes back from the database. If ?STRING?
+  ** is not present, then the current string used for NULL is returned.
+  ** If STRING is present, then STRING is returned.
+  **
+  */
+  case DB_NULLVALUE: {
+    if( objc!=2 && objc!=3 ){
+      Tcl_WrongNumArgs(interp, 2, objv, "NULLVALUE");
+      return TCL_ERROR;
+    }
+    if( objc==3 ){
+      int len;
+      char *zNull = Tcl_GetStringFromObj(objv[2], &len);
+      if( pDb->zNull ){
+        Tcl_Free(pDb->zNull);
+      }
+      if( zNull && len>0 ){
+        pDb->zNull = Tcl_Alloc( len + 1 );
+        strncpy(pDb->zNull, zNull, len);
+        pDb->zNull[len] = '\0';
+      }else{
+        pDb->zNull = 0;
+      }
+    }
+    Tcl_SetObjResult(interp, dbTextToObj(pDb->zNull));
+    break;
+  }
+
+  /*
   **     $db last_insert_rowid 
   **
   ** Return an integer which is the ROWID for the most recent insert.
@@ -1365,6 +1606,45 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     break;
   }
 
+  /*    $db profile ?CALLBACK?
+  **
+  ** Make arrangements to invoke the CALLBACK routine after each SQL statement
+  ** that has run.  The text of the SQL and the amount of elapse time are
+  ** appended to CALLBACK before the script is run.
+  */
+  case DB_PROFILE: {
+    if( objc>3 ){
+      Tcl_WrongNumArgs(interp, 2, objv, "?CALLBACK?");
+      return TCL_ERROR;
+    }else if( objc==2 ){
+      if( pDb->zProfile ){
+        Tcl_AppendResult(interp, pDb->zProfile, 0);
+      }
+    }else{
+      char *zProfile;
+      int len;
+      if( pDb->zProfile ){
+        Tcl_Free(pDb->zProfile);
+      }
+      zProfile = Tcl_GetStringFromObj(objv[2], &len);
+      if( zProfile && len>0 ){
+        pDb->zProfile = Tcl_Alloc( len + 1 );
+        strcpy(pDb->zProfile, zProfile);
+      }else{
+        pDb->zProfile = 0;
+      }
+#ifndef SQLITE_OMIT_TRACE
+      if( pDb->zProfile ){
+        pDb->interp = interp;
+        sqlite3_profile(pDb->db, DbProfileHandler, pDb);
+      }else{
+        sqlite3_profile(pDb->db, 0, 0);
+      }
+#endif
+    }
+    break;
+  }
+
   /*
   **     $db rekey KEY
   **
@@ -1401,37 +1681,6 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
     if( Tcl_GetIntFromObj(interp, objv[2], &ms) ) return TCL_ERROR;
     sqlite3_busy_timeout(pDb->db, ms);
-    break;
-  }
-
-  /*
-  **     $db nullvalue ?STRING?
-  **
-  ** Change text used when a NULL comes back from the database. If ?STRING?
-  ** is not present, then the current string used for NULL is returned.
-  ** If STRING is present, then STRING is returned.
-  **
-  */
-  case DB_NULLVALUE: {
-    if( objc!=2 && objc!=3 ){
-      Tcl_WrongNumArgs(interp, 2, objv, "NULLVALUE");
-      return TCL_ERROR;
-    }
-    if( objc==3 ){
-      int len;
-      char *zNull = Tcl_GetStringFromObj(objv[2], &len);
-      if( pDb->zNull ){
-        Tcl_Free(pDb->zNull);
-      }
-      if( zNull && len>0 ){
-        pDb->zNull = Tcl_Alloc( len + 1 );
-        strncpy(pDb->zNull, zNull, len);
-        pDb->zNull[len] = '\0';
-      }else{
-        pDb->zNull = 0;
-      }
-    }
-    Tcl_SetObjResult(interp, dbTextToObj(pDb->zNull));
     break;
   }
   
@@ -1479,12 +1728,14 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
       }else{
         pDb->zTrace = 0;
       }
+#ifndef SQLITE_OMIT_TRACE
       if( pDb->zTrace ){
         pDb->interp = interp;
         sqlite3_trace(pDb->db, DbTraceHandler, pDb);
       }else{
         sqlite3_trace(pDb->db, 0, 0);
       }
+#endif
     }
     break;
   }
@@ -1542,192 +1793,6 @@ static int DbObjCmd(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         zEnd = "COMMIT";
       }
       sqlite3_exec(pDb->db, zEnd, 0, 0, 0);
-    }
-    break;
-  }
-
-  /*    $db copy conflict-algorithm table filename ?SEPARATOR? ?NULLINDICATOR?
-  **
-  ** Copy data into table from filename, optionally using SEPARATOR
-  ** as column separators.  If a column contains a null string, or the
-  ** value of NULLINDICATOR, a NULL is inserted for the column.
-  ** conflict-algorithm is one of the sqlite conflict algorithms:
-  **    rollback, abort, fail, ignore, replace
-  ** On success, return the number of lines processed, not necessarily same
-  ** as 'db changes' due to conflict-algorithm selected.
-  **
-  ** This code is basically an implementation/enhancement of
-  ** the sqlite3 shell.c ".import" command.
-  **
-  ** This command usage is equivalent to the sqlite2.x COPY statement,
-  ** which imports file data into a table using the PostgreSQL COPY file format:
-  **   $db copy $conflit_algo $table_name $filename \t \\N
-  */
-  case DB_COPY: {
-    char *zTable;               /* Insert data into this table */
-    char *zFile;                /* The file from which to extract data */
-    char *zConflict;            /* The conflict algorithm to use */
-    sqlite3_stmt *pStmt;        /* A statement */
-    int rc;                     /* Result code */
-    int nCol;                   /* Number of columns in the table */
-    int nByte;                  /* Number of bytes in an SQL string */
-    int i, j;                   /* Loop counters */
-    int nSep;                   /* Number of bytes in zSep[] */
-    int nNull;                  /* Number of bytes in zNull[] */
-    char *zSql;                 /* An SQL statement */
-    char *zLine;                /* A single line of input from the file */
-    char **azCol;               /* zLine[] broken up into columns */
-    char *zCommit;              /* How to commit changes */
-    FILE *in;                   /* The input file */
-    int lineno = 0;             /* Line number of input file */
-    char zLineNum[80];          /* Line number print buffer */
-    Tcl_Obj *pResult;           /* interp result */
-
-    char *zSep;
-    char *zNull;
-    if( objc<5 || objc>7 ){
-      Tcl_WrongNumArgs(interp, 2, objv, 
-         "CONFLICT-ALGORITHM TABLE FILENAME ?SEPARATOR? ?NULLINDICATOR?");
-      return TCL_ERROR;
-    }
-    if( objc>=6 ){
-      zSep = Tcl_GetStringFromObj(objv[5], 0);
-    }else{
-      zSep = "\t";
-    }
-    if( objc>=7 ){
-      zNull = Tcl_GetStringFromObj(objv[6], 0);
-    }else{
-      zNull = "";
-    }
-    zConflict = Tcl_GetStringFromObj(objv[2], 0);
-    zTable = Tcl_GetStringFromObj(objv[3], 0);
-    zFile = Tcl_GetStringFromObj(objv[4], 0);
-    nSep = strlen(zSep);
-    nNull = strlen(zNull);
-    if( nSep==0 ){
-      Tcl_AppendResult(interp, "Error: non-null separator required for copy", 0);
-      return TCL_ERROR;
-    }
-    if(sqlite3StrICmp(zConflict, "rollback") != 0 &&
-       sqlite3StrICmp(zConflict, "abort"   ) != 0 &&
-       sqlite3StrICmp(zConflict, "fail"    ) != 0 &&
-       sqlite3StrICmp(zConflict, "ignore"  ) != 0 &&
-       sqlite3StrICmp(zConflict, "replace" ) != 0 ) {
-      Tcl_AppendResult(interp, "Error: \"", zConflict, 
-            "\", conflict-algorithm must be one of: rollback, "
-            "abort, fail, ignore, or replace", 0);
-      return TCL_ERROR;
-    }
-    zSql = sqlite3_mprintf("SELECT * FROM '%q'", zTable);
-    if( zSql==0 ){
-      Tcl_AppendResult(interp, "Error: no such table: ", zTable, 0);
-      return TCL_ERROR;
-    }
-    nByte = strlen(zSql);
-    rc = sqlite3_prepare(pDb->db, zSql, 0, &pStmt, 0);
-    sqlite3_free(zSql);
-    if( rc ){
-      Tcl_AppendResult(interp, "Error: ", sqlite3_errmsg(pDb->db), 0);
-      nCol = 0;
-    }else{
-      nCol = sqlite3_column_count(pStmt);
-    }
-    sqlite3_finalize(pStmt);
-    if( nCol==0 ) {
-      return TCL_ERROR;
-    }
-    zSql = malloc( nByte + 50 + nCol*2 );
-    if( zSql==0 ) {
-      Tcl_AppendResult(interp, "Error: can't malloc()", 0);
-      return TCL_ERROR;
-    }
-    sqlite3_snprintf(nByte+50, zSql, "INSERT OR %q INTO '%q' VALUES(?",
-         zConflict, zTable);
-    j = strlen(zSql);
-    for(i=1; i<nCol; i++){
-      zSql[j++] = ',';
-      zSql[j++] = '?';
-    }
-    zSql[j++] = ')';
-    zSql[j] = 0;
-    rc = sqlite3_prepare(pDb->db, zSql, 0, &pStmt, 0);
-    free(zSql);
-    if( rc ){
-      Tcl_AppendResult(interp, "Error: ", sqlite3_errmsg(pDb->db), 0);
-      sqlite3_finalize(pStmt);
-      return TCL_ERROR;
-    }
-    in = fopen(zFile, "rb");
-    if( in==0 ){
-      Tcl_AppendResult(interp, "Error: cannot open file: ", zFile, NULL);
-      sqlite3_finalize(pStmt);
-      return TCL_ERROR;
-    }
-    azCol = malloc( sizeof(azCol[0])*(nCol+1) );
-    if( azCol==0 ) {
-      Tcl_AppendResult(interp, "Error: can't malloc()", 0);
-      return TCL_ERROR;
-    }
-    sqlite3_exec(pDb->db, "BEGIN", 0, 0, 0);
-    zCommit = "COMMIT";
-    while( (zLine = local_getline(0, in))!=0 ){
-      char *z;
-      i = 0;
-      lineno++;
-      azCol[0] = zLine;
-      for(i=0, z=zLine; *z; z++){
-        if( *z==zSep[0] && strncmp(z, zSep, nSep)==0 ){
-          *z = 0;
-          i++;
-          if( i<nCol ){
-            azCol[i] = &z[nSep];
-            z += nSep-1;
-          }
-        }
-      }
-      if( i+1!=nCol ){
-        char *zErr;
-        zErr = malloc(200 + strlen(zFile));
-        sprintf(zErr,"Error: %s line %d: expected %d columns of data but found %d",
-           zFile, lineno, nCol, i+1);
-        Tcl_AppendResult(interp, zErr, 0);
-        free(zErr);
-        zCommit = "ROLLBACK";
-        break;
-      }
-      for(i=0; i<nCol; i++){
-        /* check for null data, if so, bind as null */
-        if ((nNull>0 && strcmp(azCol[i], zNull)==0) || strlen(azCol[i])==0) {
-          sqlite3_bind_null(pStmt, i+1);
-        }else{
-          sqlite3_bind_text(pStmt, i+1, azCol[i], -1, SQLITE_STATIC);
-        }
-      }
-      sqlite3_step(pStmt);
-      rc = sqlite3_reset(pStmt);
-      free(zLine);
-      if( rc!=SQLITE_OK ){
-        Tcl_AppendResult(interp,"Error: ", sqlite3_errmsg(pDb->db), 0);
-        zCommit = "ROLLBACK";
-        break;
-      }
-    }
-    free(azCol);
-    fclose(in);
-    sqlite3_finalize(pStmt);
-    sqlite3_exec(pDb->db, zCommit, 0, 0, 0);
-
-    if( zCommit[0] == 'C' ){
-      /* success, set result as number of lines processed */
-      pResult = Tcl_GetObjResult(interp);
-      Tcl_SetIntObj(pResult, lineno);
-      rc = TCL_OK;
-    }else{
-      /* failure, append lineno where failed */
-      sprintf(zLineNum,"%d",lineno);
-      Tcl_AppendResult(interp,", failed while processing line: ",zLineNum,0);
-      rc = TCL_ERROR;
     }
     break;
   }
