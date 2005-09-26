@@ -43,3 +43,17 @@ array(1) {
     string(5) "three"
   }
 }
+--UEXPECT--
+array(1) {
+  [0]=>
+  array(4) {
+    [u"id"]=>
+    unicode(1) "1"
+    [u"val1"]=>
+    unicode(3) "one"
+    [u"val2"]=>
+    unicode(3) "two"
+    [u"val3"]=>
+    unicode(5) "three"
+  }
+}
