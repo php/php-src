@@ -312,23 +312,23 @@ int php_oci_lob_is_equal (php_oci_descriptor *, php_oci_descriptor *, boolean * 
 
 /* collection related prototypes {{{ */
 
-php_oci_collection * php_oci_collection_create(php_oci_connection *, char *, long, char *, long TSRMLS_DC);
+php_oci_collection * php_oci_collection_create(php_oci_connection *, char *, int, char *, int TSRMLS_DC);
 int php_oci_collection_size(php_oci_collection *, sb4 * TSRMLS_DC);
 int php_oci_collection_max(php_oci_collection *, long * TSRMLS_DC);
 int php_oci_collection_trim(php_oci_collection *, long TSRMLS_DC);
-int php_oci_collection_append(php_oci_collection *, char *, long TSRMLS_DC);
+int php_oci_collection_append(php_oci_collection *, char *, int TSRMLS_DC);
 int php_oci_collection_element_get(php_oci_collection *, long, zval** TSRMLS_DC);
-int php_oci_collection_element_set(php_oci_collection *, long, char*, long TSRMLS_DC);
+int php_oci_collection_element_set(php_oci_collection *, long, char*, int TSRMLS_DC);
 int php_oci_collection_element_set_null(php_oci_collection *, long TSRMLS_DC);
-int php_oci_collection_element_set_date(php_oci_collection *, long, char *, long TSRMLS_DC);
-int php_oci_collection_element_set_number(php_oci_collection *, long, char *, long TSRMLS_DC);
-int php_oci_collection_element_set_string(php_oci_collection *, long, char *, long TSRMLS_DC);
+int php_oci_collection_element_set_date(php_oci_collection *, long, char *, int TSRMLS_DC);
+int php_oci_collection_element_set_number(php_oci_collection *, long, char *, int TSRMLS_DC);
+int php_oci_collection_element_set_string(php_oci_collection *, long, char *, int TSRMLS_DC);
 int php_oci_collection_assign(php_oci_collection *, php_oci_collection * TSRMLS_DC);
 void php_oci_collection_close(php_oci_collection * TSRMLS_DC);
 int php_oci_collection_append_null(php_oci_collection * TSRMLS_DC);
-int php_oci_collection_append_date(php_oci_collection *, char *, long TSRMLS_DC);
-int php_oci_collection_append_number(php_oci_collection *, char *, long TSRMLS_DC);
-int php_oci_collection_append_string(php_oci_collection *, char *, long TSRMLS_DC);
+int php_oci_collection_append_date(php_oci_collection *, char *, int TSRMLS_DC);
+int php_oci_collection_append_number(php_oci_collection *, char *, int TSRMLS_DC);
+int php_oci_collection_append_string(php_oci_collection *, char *, int TSRMLS_DC);
 
 
 /* }}} */
@@ -344,7 +344,7 @@ int php_oci_statement_cancel (php_oci_statement * TSRMLS_DC);
 void php_oci_statement_free (php_oci_statement * TSRMLS_DC);
 int php_oci_bind_pre_exec(void *data TSRMLS_DC);
 int php_oci_bind_post_exec(void *data TSRMLS_DC);
-int php_oci_bind_by_name(php_oci_statement *, char *, long, zval*, long, long TSRMLS_DC);
+int php_oci_bind_by_name(php_oci_statement *, char *, int, zval*, long, long TSRMLS_DC);
 sb4 php_oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
 sb4 php_oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **, ub1 *, dvoid **, ub2 **);
 php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAMETERS);
