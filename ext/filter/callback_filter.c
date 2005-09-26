@@ -20,4 +20,17 @@
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 {
+	char *name;
+	zval *args[1];
+	
+	if (!zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, &name)) {
+		php_error_docref1(NULL TSRMLS_CC, name, E_WARNING, "First argument is expected to be a valid callback");
+		efree(name);
+		Z_TYPE_P(value) = IS_NULL;
+		return;
+	}
+
+	args[0] = value;
+
+	call_user_function(EG(function_table), NULL, option_array, value, 1, args TSRMLS_CC);
 }
