@@ -819,6 +819,7 @@ typedef struct SumCtx SumCtx;
 struct SumCtx {
   double sum;     /* Sum of terms */
   int cnt;        /* Number of elements summed */
+  u8 seenFloat;   /* True if there has been any floating point value */
 };
 
 /*
@@ -826,21 +827,32 @@ struct SumCtx {
 */
 static void sumStep(sqlite3_context *context, int argc, sqlite3_value **argv){
   SumCtx *p;
-  if( argc<1 ) return;
+  int type;
+  assert( argc==1 );
   p = sqlite3_aggregate_context(context, sizeof(*p));
-  if( p && SQLITE_NULL!=sqlite3_value_type(argv[0]) ){
+  type = sqlite3_value_type(argv[0]);
+  if( p && type!=SQLITE_NULL ){
     p->sum += sqlite3_value_double(argv[0]);
     p->cnt++;
+    if( type==SQLITE_FLOAT ){
+      p->seenFloat = 1;
+    }
   }
 }
 static void sumFinalize(sqlite3_context *context){
   SumCtx *p;
-  p = sqlite3_aggregate_context(context, sizeof(*p));
-  sqlite3_result_double(context, p ? p->sum : 0.0);
+  p = sqlite3_aggregate_context(context, 0);
+  if( p && p->cnt>0 ){
+    if( p->seenFloat ){
+      sqlite3_result_double(context, p->sum);
+    }else{
+      sqlite3_result_int64(context, (i64)p->sum);
+    }
+  }
 }
 static void avgFinalize(sqlite3_context *context){
   SumCtx *p;
-  p = sqlite3_aggregate_context(context, sizeof(*p));
+  p = sqlite3_aggregate_context(context, 0);
   if( p && p->cnt>0 ){
     sqlite3_result_double(context, p->sum/(double)p->cnt);
   }
@@ -878,7 +890,7 @@ static void countStep(sqlite3_context *context, int argc, sqlite3_value **argv){
 }   
 static void countFinalize(sqlite3_context *context){
   CountCtx *p;
-  p = sqlite3_aggregate_context(context, sizeof(*p));
+  p = sqlite3_aggregate_context(context, 0);
   sqlite3_result_int(context, p ? p->n : 0);
 }
 
@@ -916,11 +928,13 @@ static void minmaxStep(sqlite3_context *context, int argc, sqlite3_value **argv)
 }
 static void minMaxFinalize(sqlite3_context *context){
   sqlite3_value *pRes;
-  pRes = (sqlite3_value *)sqlite3_aggregate_context(context, sizeof(Mem));
-  if( pRes->flags ){
-    sqlite3_result_value(context, pRes);
+  pRes = (sqlite3_value *)sqlite3_aggregate_context(context, 0);
+  if( pRes ){
+    if( pRes->flags ){
+      sqlite3_result_value(context, pRes);
+    }
+    sqlite3VdbeMemRelease(pRes);
   }
-  sqlite3VdbeMemRelease(pRes);
 }
 
 
@@ -1041,11 +1055,11 @@ void sqlite3RegisterBuiltinFunctions(sqlite3 *db){
 /*
 ** Set the LIKEOPT flag on the 2-argument function with the given name.
 */
-static void setLikeOptFlag(sqlite3 *db, const char *zName){
+static void setLikeOptFlag(sqlite3 *db, const char *zName, int flagVal){
   FuncDef *pDef;
   pDef = sqlite3FindFunction(db, zName, strlen(zName), 2, SQLITE_UTF8, 0);
   if( pDef ){
-    pDef->flags = SQLITE_FUNC_LIKEOPT;
+    pDef->flags = flagVal;
   }
 }
 
@@ -1065,10 +1079,9 @@ void sqlite3RegisterLikeFunctions(sqlite3 *db, int caseSensitive){
   sqlite3_create_function(db, "like", 3, SQLITE_UTF8, pInfo, likeFunc, 0, 0);
   sqlite3_create_function(db, "glob", 2, SQLITE_UTF8, 
       (struct compareInfo*)&globInfo, likeFunc, 0,0);
-  setLikeOptFlag(db, "glob");
-  if( caseSensitive ){
-    setLikeOptFlag(db, "like");
-  }
+  setLikeOptFlag(db, "glob", SQLITE_FUNC_LIKE | SQLITE_FUNC_CASE);
+  setLikeOptFlag(db, "like", 
+      caseSensitive ? (SQLITE_FUNC_LIKE | SQLITE_FUNC_CASE) : SQLITE_FUNC_LIKE);
 }
 
 /*
@@ -1078,7 +1091,7 @@ void sqlite3RegisterLikeFunctions(sqlite3 *db, int caseSensitive){
 ** return TRUE.  If the function is not a LIKE-style function then
 ** return FALSE.
 */
-int sqlite3IsLikeFunction(sqlite3 *db, Expr *pExpr, char *aWc){
+int sqlite3IsLikeFunction(sqlite3 *db, Expr *pExpr, int *pIsNocase, char *aWc){
   FuncDef *pDef;
   if( pExpr->op!=TK_FUNCTION ){
     return 0;
@@ -1088,7 +1101,7 @@ int sqlite3IsLikeFunction(sqlite3 *db, Expr *pExpr, char *aWc){
   }
   pDef = sqlite3FindFunction(db, pExpr->token.z, pExpr->token.n, 2,
                              SQLITE_UTF8, 0);
-  if( pDef==0 || (pDef->flags & SQLITE_FUNC_LIKEOPT)==0 ){
+  if( pDef==0 || (pDef->flags & SQLITE_FUNC_LIKE)==0 ){
     return 0;
   }
 
@@ -1100,6 +1113,6 @@ int sqlite3IsLikeFunction(sqlite3 *db, Expr *pExpr, char *aWc){
   assert( (char*)&likeInfoAlt == (char*)&likeInfoAlt.matchAll );
   assert( &((char*)&likeInfoAlt)[1] == (char*)&likeInfoAlt.matchOne );
   assert( &((char*)&likeInfoAlt)[2] == (char*)&likeInfoAlt.matchSet );
-
+  *pIsNocase = (pDef->flags & SQLITE_FUNC_CASE)==0;
   return 1;
 }

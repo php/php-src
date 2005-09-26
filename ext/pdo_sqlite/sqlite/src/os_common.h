@@ -28,6 +28,14 @@
 #endif
 
 
+/*
+ * When testing, this global variable stores the location of the
+ * pending-byte in the database file.
+ */
+#ifdef SQLITE_TEST
+unsigned int sqlite3_pending_byte = 0x40000000;
+#endif
+
 int sqlite3_os_trace = 0;
 #ifdef SQLITE_DEBUG
 static int last_page = 0;
@@ -82,6 +90,7 @@ static unsigned int elapse;
 #ifdef SQLITE_TEST
 int sqlite3_io_error_pending = 0;
 int sqlite3_diskfull_pending = 0;
+int sqlite3_diskfull = 0;
 #define SimulateIOError(A)  \
    if( sqlite3_io_error_pending ) \
      if( sqlite3_io_error_pending-- == 1 ){ local_ioerr(); return A; }
@@ -89,8 +98,15 @@ static void local_ioerr(){
   sqlite3_io_error_pending = 0;  /* Really just a place to set a breakpoint */
 }
 #define SimulateDiskfullError \
-   if( sqlite3_diskfull_pending ) \
-     if( sqlite3_diskfull_pending-- == 1 ){ local_ioerr(); return SQLITE_FULL; }
+   if( sqlite3_diskfull_pending ){ \
+     if( sqlite3_diskfull_pending == 1 ){ \
+       local_ioerr(); \
+       sqlite3_diskfull = 1; \
+       return SQLITE_FULL; \
+     }else{ \
+       sqlite3_diskfull_pending--; \
+     } \
+   }
 #else
 #define SimulateIOError(A)
 #define SimulateDiskfullError

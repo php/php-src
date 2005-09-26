@@ -42,10 +42,98 @@
 #ifndef SQLITE_OMIT_DISKIO
 
 /*
+** The following variable is (normally) set once and never changes
+** thereafter.  It records whether the operating system is Win95
+** or WinNT.
+**
+** 0:   Operating system unknown.
+** 1:   Operating system is Win95.
+** 2:   Operating system is WinNT.
+**
+** In order to facilitate testing on a WinNT system, the test fixture
+** can manually set this value to 1 to emulate Win98 behavior.
+*/
+int sqlite3_os_type = 0;
+
+/*
+** Return true (non-zero) if we are running under WinNT, Win2K or WinXP.
+** Return false (zero) for Win95, Win98, or WinME.
+**
+** Here is an interesting observation:  Win95, Win98, and WinME lack
+** the LockFileEx() API.  But we can still statically link against that
+** API as long as we don't call it win running Win95/98/ME.  A call to
+** this routine is used to determine if the host is Win95/98/ME or
+** WinNT/2K/XP so that we will know whether or not we can safely call
+** the LockFileEx() API.
+*/
+static int isNT(void){
+  if( sqlite3_os_type==0 ){
+    OSVERSIONINFO sInfo;
+    sInfo.dwOSVersionInfoSize = sizeof(sInfo);
+    GetVersionEx(&sInfo);
+    sqlite3_os_type = sInfo.dwPlatformId==VER_PLATFORM_WIN32_NT ? 2 : 1;
+  }
+  return sqlite3_os_type==2;
+}
+
+/*
+** Convert a UTF-8 string to UTF-32.  Space to hold the returned string
+** is obtained from sqliteMalloc.
+*/
+static WCHAR *utf8ToUnicode(const char *zFilename){
+  int nByte;
+  WCHAR *zWideFilename;
+
+  if( !isNT() ){
+    return 0;
+  }
+  nByte = MultiByteToWideChar(CP_UTF8, 0, zFilename, -1, NULL, 0)*sizeof(WCHAR);
+  zWideFilename = sqliteMalloc( nByte*sizeof(zWideFilename[0]) );
+  if( zWideFilename==0 ){
+    return 0;
+  }
+  nByte = MultiByteToWideChar(CP_UTF8, 0, zFilename, -1, zWideFilename, nByte);
+  if( nByte==0 ){
+    sqliteFree(zWideFilename);
+    zWideFilename = 0;
+  }
+  return zWideFilename;
+}
+
+/*
+** Convert UTF-32 to UTF-8.  Space to hold the returned string is
+** obtained from sqliteMalloc().
+*/
+static char *unicodeToUtf8(const WCHAR *zWideFilename){
+  int nByte;
+  char *zFilename;
+
+  nByte = WideCharToMultiByte(CP_UTF8, 0, zWideFilename, -1, 0, 0, 0, 0);
+  zFilename = sqliteMalloc( nByte );
+  if( zFilename==0 ){
+    return 0;
+  }
+  nByte = WideCharToMultiByte(CP_UTF8, 0, zWideFilename, -1, zFilename, nByte,
+                              0, 0);
+  if( nByte == 0 ){
+    sqliteFree(zFilename);
+    zFilename = 0;
+  }
+  return zFilename;
+}
+
+
+/*
 ** Delete the named file
 */
 int sqlite3OsDelete(const char *zFilename){
-  DeleteFileA(zFilename);
+  WCHAR *zWide = utf8ToUnicode(zFilename);
+  if( zWide ){
+    DeleteFileW(zWide);
+    sqliteFree(zWide);
+  }else{
+    DeleteFileA(zFilename);
+  }
   TRACE2("DELETE \"%s\"\n", zFilename);
   return SQLITE_OK;
 }
@@ -54,7 +142,15 @@ int sqlite3OsDelete(const char *zFilename){
 ** Return TRUE if the named file exists.
 */
 int sqlite3OsFileExists(const char *zFilename){
-  return GetFileAttributesA(zFilename) != 0xffffffff;
+  int exists = 0;
+  WCHAR *zWide = utf8ToUnicode(zFilename);
+  if( zWide ){
+    exists = GetFileAttributesW(zWide) != 0xffffffff;
+    sqliteFree(zWide);
+  }else{
+    exists = GetFileAttributesA(zFilename) != 0xffffffff;
+  }
+  return exists;
 }
 
 /*
@@ -76,30 +172,60 @@ int sqlite3OsOpenReadWrite(
   int *pReadonly
 ){
   HANDLE h;
+  WCHAR *zWide = utf8ToUnicode(zFilename);
   assert( !id->isOpen );
-  h = CreateFileA(zFilename,
-     GENERIC_READ | GENERIC_WRITE,
-     FILE_SHARE_READ | FILE_SHARE_WRITE,
-     NULL,
-     OPEN_ALWAYS,
-     FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
-     NULL
-  );
-  if( h==INVALID_HANDLE_VALUE ){
-    h = CreateFileA(zFilename,
-       GENERIC_READ,
-       FILE_SHARE_READ,
+  if( zWide ){
+    h = CreateFileW(zWide,
+       GENERIC_READ | GENERIC_WRITE,
+       FILE_SHARE_READ | FILE_SHARE_WRITE,
        NULL,
        OPEN_ALWAYS,
        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
        NULL
     );
     if( h==INVALID_HANDLE_VALUE ){
-      return SQLITE_CANTOPEN;
+      h = CreateFileW(zWide,
+         GENERIC_READ,
+         FILE_SHARE_READ,
+         NULL,
+         OPEN_ALWAYS,
+         FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+         NULL
+      );
+      if( h==INVALID_HANDLE_VALUE ){
+        sqliteFree(zWide);
+        return SQLITE_CANTOPEN;
+      }
+      *pReadonly = 1;
+    }else{
+      *pReadonly = 0;
     }
-    *pReadonly = 1;
+    sqliteFree(zWide);
   }else{
-    *pReadonly = 0;
+    h = CreateFileA(zFilename,
+       GENERIC_READ | GENERIC_WRITE,
+       FILE_SHARE_READ | FILE_SHARE_WRITE,
+       NULL,
+       OPEN_ALWAYS,
+       FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+       NULL
+    );
+    if( h==INVALID_HANDLE_VALUE ){
+      h = CreateFileA(zFilename,
+         GENERIC_READ,
+         FILE_SHARE_READ,
+         NULL,
+         OPEN_ALWAYS,
+         FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+         NULL
+      );
+      if( h==INVALID_HANDLE_VALUE ){
+        return SQLITE_CANTOPEN;
+      }
+      *pReadonly = 1;
+    }else{
+      *pReadonly = 0;
+    }
   }
   id->h = h;
   id->locktype = NO_LOCK;
@@ -128,6 +254,7 @@ int sqlite3OsOpenReadWrite(
 int sqlite3OsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
   HANDLE h;
   int fileflags;
+  WCHAR *zWide = utf8ToUnicode(zFilename);
   assert( !id->isOpen );
   if( delFlag ){
     fileflags = FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_RANDOM_ACCESS 
@@ -135,14 +262,26 @@ int sqlite3OsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
   }else{
     fileflags = FILE_FLAG_RANDOM_ACCESS;
   }
-  h = CreateFileA(zFilename,
-     GENERIC_READ | GENERIC_WRITE,
-     0,
-     NULL,
-     CREATE_ALWAYS,
-     fileflags,
-     NULL
-  );
+  if( zWide ){
+    h = CreateFileW(zWide,
+       GENERIC_READ | GENERIC_WRITE,
+       0,
+       NULL,
+       CREATE_ALWAYS,
+       fileflags,
+       NULL
+    );
+    sqliteFree(zWide);
+  }else{
+    h = CreateFileA(zFilename,
+       GENERIC_READ | GENERIC_WRITE,
+       0,
+       NULL,
+       CREATE_ALWAYS,
+       fileflags,
+       NULL
+    );
+  }
   if( h==INVALID_HANDLE_VALUE ){
     return SQLITE_CANTOPEN;
   }
@@ -164,15 +303,28 @@ int sqlite3OsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 */
 int sqlite3OsOpenReadOnly(const char *zFilename, OsFile *id){
   HANDLE h;
+  WCHAR *zWide = utf8ToUnicode(zFilename);
   assert( !id->isOpen );
-  h = CreateFileA(zFilename,
-     GENERIC_READ,
-     0,
-     NULL,
-     OPEN_EXISTING,
-     FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
-     NULL
-  );
+  if( zWide ){
+    h = CreateFileW(zWide,
+       GENERIC_READ,
+       0,
+       NULL,
+       OPEN_EXISTING,
+       FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+       NULL
+    );
+    sqliteFree(zWide);
+  }else{
+    h = CreateFileA(zFilename,
+       GENERIC_READ,
+       0,
+       NULL,
+       OPEN_EXISTING,
+       FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS,
+       NULL
+    );
+  }
   if( h==INVALID_HANDLE_VALUE ){
     return SQLITE_CANTOPEN;
   }
@@ -229,6 +381,16 @@ int sqlite3OsTempFileName(char *zBuf){
   if( sqlite3_temp_directory ){
     strncpy(zTempPath, sqlite3_temp_directory, SQLITE_TEMPNAME_SIZE-30);
     zTempPath[SQLITE_TEMPNAME_SIZE-30] = 0;
+  }else if( isNT() ){
+    char *zMulti;
+    WCHAR zWidePath[SQLITE_TEMPNAME_SIZE];
+    GetTempPathW(SQLITE_TEMPNAME_SIZE-30, zWidePath);
+    zMulti = unicodeToUtf8(zWidePath);
+    if( zMulti ){
+      strncpy(zTempPath, zMulti, SQLITE_TEMPNAME_SIZE-30);
+      zTempPath[SQLITE_TEMPNAME_SIZE-30] = 0;
+      sqliteFree(zMulti);
+    }
   }else{
     GetTempPathA(SQLITE_TEMPNAME_SIZE-30, zTempPath);
   }
@@ -304,6 +466,13 @@ int sqlite3OsWrite(OsFile *id, const void *pBuf, int amt){
 }
 
 /*
+** Some microsoft compilers lack this definition.
+*/
+#ifndef INVALID_SET_FILE_POINTER
+# define INVALID_SET_FILE_POINTER ((DWORD)-1)
+#endif
+
+/*
 ** Move the read/write pointer in a file.
 */
 int sqlite3OsSeek(OsFile *id, i64 offset){
@@ -311,16 +480,22 @@ int sqlite3OsSeek(OsFile *id, i64 offset){
   LONG lowerBits = offset & 0xffffffff;
   DWORD rc;
   assert( id->isOpen );
+#ifdef SQLITE_TEST
+  if( offset ) SimulateDiskfullError
+#endif
   SEEK(offset/1024 + 1);
   rc = SetFilePointer(id->h, lowerBits, &upperBits, FILE_BEGIN);
   TRACE3("SEEK %d %lld\n", id->h, offset);
+  if( rc==INVALID_SET_FILE_POINTER && GetLastError()!=NO_ERROR ){
+    return SQLITE_FULL;
+  }
   return SQLITE_OK;
 }
 
 /*
 ** Make sure all writes to a particular file are committed to disk.
 */
-int sqlite3OsSync(OsFile *id){
+int sqlite3OsSync(OsFile *id, int dataOnly){
   assert( id->isOpen );
   TRACE3("SYNC %d lock=%d\n", id->h, id->locktype);
   if( FlushFileBuffers(id->h) ){
@@ -365,28 +540,6 @@ int sqlite3OsFileSize(OsFile *id, i64 *pSize){
 }
 
 /*
-** Return true (non-zero) if we are running under WinNT, Win2K or WinXP.
-** Return false (zero) for Win95, Win98, or WinME.
-**
-** Here is an interesting observation:  Win95, Win98, and WinME lack
-** the LockFileEx() API.  But we can still statically link against that
-** API as long as we don't call it win running Win95/98/ME.  A call to
-** this routine is used to determine if the host is Win95/98/ME or
-** WinNT/2K/XP so that we will know whether or not we can safely call
-** the LockFileEx() API.
-*/
-static int isNT(void){
-  static int osType = 0;   /* 0=unknown 1=win95 2=winNT */
-  if( osType==0 ){
-    OSVERSIONINFO sInfo;
-    sInfo.dwOSVersionInfoSize = sizeof(sInfo);
-    GetVersionEx(&sInfo);
-    osType = sInfo.dwPlatformId==VER_PLATFORM_WIN32_NT ? 2 : 1;
-  }
-  return osType==2;
-}
-
-/*
 ** Acquire a reader lock.
 ** Different API routines are called depending on whether or not this
 ** is Win95 or WinNT.
@@ -426,11 +579,18 @@ static int unlockReadLock(OsFile *id){
 ** Check that a given pathname is a directory and is writable 
 **
 */
-int sqlite3OsIsDirWritable(char *zBuf){
+int sqlite3OsIsDirWritable(char *zDirname){
   int fileAttr;
-  if(! zBuf ) return 0;
-  if(! isNT() && strlen(zBuf) > MAX_PATH ) return 0;
-  fileAttr = GetFileAttributesA(zBuf);
+  WCHAR *zWide;
+  if( zDirname==0 ) return 0;
+  if( !isNT() && strlen(zDirname)>MAX_PATH ) return 0;
+  zWide = utf8ToUnicode(zDirname);
+  if( zWide ){
+    fileAttr = GetFileAttributesW(zWide);
+    sqliteFree(zWide);
+  }else{
+    fileAttr = GetFileAttributesA(zDirname);
+  }
   if( fileAttr == 0xffffffff ) return 0;
   if( (fileAttr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY ){
     return 0;
@@ -641,6 +801,7 @@ int sqlite3OsUnlock(OsFile *id, int locktype){
 char *sqlite3OsFullPathname(const char *zRelative){
   char *zNotUsed;
   char *zFull;
+  WCHAR *zWide;
   int nByte;
 #ifdef __CYGWIN__
   nByte = strlen(zRelative) + MAX_PATH + 1001;
@@ -648,10 +809,22 @@ char *sqlite3OsFullPathname(const char *zRelative){
   if( zFull==0 ) return 0;
   if( cygwin_conv_to_full_win32_path(zRelative, zFull) ) return 0;
 #else
-  nByte = GetFullPathNameA(zRelative, 0, 0, &zNotUsed) + 1;
-  zFull = sqliteMalloc( nByte );
-  if( zFull==0 ) return 0;
-  GetFullPathNameA(zRelative, nByte, zFull, &zNotUsed);
+  zWide = utf8ToUnicode(zRelative);
+  if( zWide ){
+    WCHAR *zTemp, *zNotUsedW;
+    nByte = GetFullPathNameW(zWide, 0, 0, &zNotUsedW) + 1;
+    zTemp = sqliteMalloc( nByte*sizeof(zTemp[0]) );
+    if( zTemp==0 ) return 0;
+    GetFullPathNameW(zWide, nByte, zTemp, &zNotUsedW);
+    sqliteFree(zWide);
+    zFull = unicodeToUtf8(zTemp);
+    sqliteFree(zTemp);
+  }else{
+    nByte = GetFullPathNameA(zRelative, 0, 0, &zNotUsed) + 1;
+    zFull = sqliteMalloc( nByte*sizeof(zFull[0]) );
+    if( zFull==0 ) return 0;
+    GetFullPathNameA(zRelative, nByte, zFull, &zNotUsed);
+  }
 #endif
   return zFull;
 }

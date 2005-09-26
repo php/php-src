@@ -373,8 +373,9 @@ void sqlite3_free_table(char **result);
 **
 ** We can use this text in an SQL statement as follows:
 **
-**      sqlite3_exec_printf(db, "INSERT INTO table VALUES('%q')",
-**          callback1, 0, 0, zText);
+**      char *z = sqlite3_mprintf("INSERT INTO TABLES('%q')", zText);
+**      sqlite3_exec(db, z, callback1, 0, 0);
+**      sqlite3_free(z);
 **
 ** Because the %q format string is used, the '\'' character in zText
 ** is escaped and the SQL generated is as follows:
@@ -464,11 +465,18 @@ int sqlite3_set_authorizer(
 #define SQLITE_IGNORE 2   /* Don't allow access, but don't generate an error */
 
 /*
-** Register a function that is called at every invocation of sqlite3_exec()
-** or sqlite3_prepare().  This function can be used (for example) to generate
-** a log file of all SQL executed against a database.
+** Register a function for tracing SQL command evaluation.  The function
+** registered by sqlite3_trace() is invoked at the first sqlite3_step()
+** for the evaluation of an SQL statement.  The function registered by
+** sqlite3_profile() runs at the end of each SQL statement and includes
+** information on how long that statement ran.
+**
+** The sqlite3_profile() API is currently considered experimental and
+** is subject to change.
 */
 void *sqlite3_trace(sqlite3*, void(*xTrace)(void*,const char*), void*);
+void *sqlite3_profile(sqlite3*,
+   void(*xProfile)(void*,const char*,sqlite_uint64), void*);
 
 /*
 ** This routine configures a callback function - the progress callback - that
