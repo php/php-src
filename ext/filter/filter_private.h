@@ -33,6 +33,11 @@
 #define FILTER_FLAG_ALLOW_THOUSAND          0x2000
 #define FILTER_FLAG_ALLOW_SCIENTIFIC        0x4000
 
+#define FILTER_FLAG_SCHEME_REQUIRED         0x010000
+#define FILTER_FLAG_HOST_REQUIRED           0x020000
+#define FILTER_FLAG_PATH_REQUIRED           0x040000
+#define FILTER_FLAG_QUERY_REQUIRED          0x080000
+
 #define FL_INT           0x0101
 #define FL_BOOLEAN       0x0102
 #define FL_FLOAT         0x0103
