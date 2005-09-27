@@ -28,6 +28,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #33940 (array_map() fails to pass by reference when called
   recursively). (Dmitry)
+- Fixed bug #32937 (open_basedir looses trailing / in the limiter). (Adam C.)
 - Fixed bug #33690 (Crash setting some ini directives in httpd.conf). (Rasmus)
 - Fixed bug #33673 (Added detection for partially uploaded files). (Ilia)
 - Fixed bug #33648 (Using --with-regex=system causes compile failure). (Andrei)
