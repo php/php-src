@@ -723,6 +723,7 @@ END_EXTERN_C()
 #define ZEND_UNSET_FUNC_NAME        "__unset"
 #define ZEND_ISSET_FUNC_NAME        "__isset"
 #define ZEND_CALL_FUNC_NAME         "__call"
+#define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 
 #endif /* ZEND_COMPILE_H */

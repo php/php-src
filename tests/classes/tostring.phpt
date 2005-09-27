@@ -34,9 +34,11 @@ echo "string:".$o;
 
 echo "====test5====\n";
 echo 1 . $o;
+echo 1 . $o;
 
 echo "====test6====\n";
 echo $o.$o;
+echo $o,$o;
 
 echo "====test7====\n";
 $ar = array();
@@ -56,8 +58,8 @@ echo sprintf("%s", $o);
 test1 Object
 (
 )
-string(1%d) "Object id #%d"
-object(test1)#%d (%d) {
+string(12) "Object id #%d"
+object(test1)#%d (0) {
 }
 ====test2====
 test2 Object
@@ -71,26 +73,42 @@ object(test2)#%d (%d) {
 test2::__toString()
 Converted
 ====test4====
-string:Object id #%d====test5====
-1Object id #%d====test6====
-Object id #%dObject id #2====test7====
+test2::__toString()
+string:Converted
+====test5====
+test2::__toString()
+1Converted
+test2::__toString()
+1Converted
+====test6====
+test2::__toString()
+test2::__toString()
+Converted
+Converted
+test2::__toString()
+Converted
+test2::__toString()
+Converted
+====test7====
 test2::__toString()
 
 Warning: Illegal offset type in %stostring.php on line %d
 ====test8====
-
-Notice: Object of class test2 to string conversion in %stostring.php on line %d
-string(6) "Object"
-string(1%d) "Object id #%d"
+test2::__toString()
+string(9) "Converted"
+test2::__toString()
+string(9) "Converted"
 ====test9====
-Object id #%d====DONE!====
+test2::__toString()
+Converted
+====DONE!====
 --UEXPECTF--
 ====test1====
 test1 Object
 (
 )
-string(1%d) "Object id #%d"
-object(test1)#%d (%d) {
+string(12) "Object id #%d"
+object(test1)#%d (0) {
 }
 ====test2====
 test2 Object
@@ -104,16 +122,32 @@ object(test2)#%d (%d) {
 test2::__toString()
 Converted
 ====test4====
-string:Object id #%d====test5====
-1Object id #%d====test6====
-Object id #%dObject id #2====test7====
+test2::__toString()
+string:Converted
+====test5====
+test2::__toString()
+1Converted
+test2::__toString()
+1Converted
+====test6====
+test2::__toString()
+test2::__toString()
+Converted
+Converted
+test2::__toString()
+Converted
+test2::__toString()
+Converted
+====test7====
 test2::__toString()
 
 Warning: Illegal offset type in %stostring.php on line %d
 ====test8====
-
-Notice: Object of class test2 to string conversion in %stostring.php on line %d
-unicode(6) "Object"
-unicode(1%d) "Object id #%d"
+test2::__toString()
+unicode(9) "Converted"
+test2::__toString()
+unicode(9) "Converted"
 ====test9====
-Object id #%d====DONE!====
+test2::__toString()
+Converted
+====DONE!====

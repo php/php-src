@@ -131,6 +131,7 @@ typedef struct _zend_function_entry {
 		class_container.create_object = NULL;					\
 		class_container.interface_gets_implemented = NULL;		\
 		class_container.__call = handle_fcall;					\
+		class_container.__tostring = NULL;						\
 		class_container.__get = handle_propget;					\
 		class_container.__set = handle_propset;					\
 		class_container.__unset = handle_propunset;				\

@@ -64,4 +64,4 @@ Hello World!
 Got the exception
 ===NONE===
 
-Fatal error: Method None::__toString() must return a string value in %sbug26166.php on line %d
+Catchable fatal error: Method None::__toString() must return a string value in %sbug26166.php on line %d

@@ -347,39 +347,28 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
-#if 0
-				/* Standard PHP objects */
-				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HT_P(expr)->cast_object) {
-					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
-					zend_error(E_NOTICE, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
-				}
-#endif
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
 					if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 						break;
 					}
-				} else {
-					if(Z_OBJ_HANDLER_P(expr, get)) {
-						zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
-						if(Z_TYPE_P(z) != IS_OBJECT) {
-							zend_make_printable_zval(z, expr_copy, use_copy);
-							FREE_ZVAL(z);
-							return;
-						}
+				}
+				if (Z_OBJ_HANDLER_P(expr, get)) {
+					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
+					if(Z_TYPE_P(z) != IS_OBJECT) {
+						zend_make_printable_zval(z, expr_copy, use_copy);
+						FREE_ZVAL(z);
+						break;
 					}
 				}
 				if (EG(exception)) {
-					zval_dtor(expr_copy);
 					expr_copy->value.str.len = 0;
 					expr_copy->value.str.val = STR_EMPTY_ALLOC();
 					break;
 				}
+
 			}
 			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
 			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
-			expr_copy->type = IS_STRING;
 			break;
 		default:
 			*expr_copy = *expr;
@@ -387,6 +376,7 @@ ZEND_API void zend_make_string_zval(zval *expr, zval *expr_copy, int *use_copy)
 			convert_to_string(expr_copy);
 			break;
 	}
+	expr_copy->type = IS_STRING;
 	*use_copy = 1;
 }
 
@@ -426,40 +416,26 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			expr_copy->value.str.val = estrndup("Array", expr_copy->value.str.len);
 			break;
 		case IS_OBJECT:
-			{
-#if 0
-				/* Standard PHP objects */
-				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HT_P(expr)->cast_object) {
-					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
-					zend_error(E_NOTICE, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
-				}
-#endif
-				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-					if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
-				} else {
-					if(Z_OBJ_HANDLER_P(expr, get)) {
-						zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
-						if(Z_TYPE_P(z) != IS_OBJECT) {
-							zend_make_printable_zval(z, expr_copy, use_copy);
-							FREE_ZVAL(z);
-							return;
-						}
-					}
-				}
-				if (EG(exception)) {
-					zval_dtor(expr_copy);
-					expr_copy->value.str.len = 0;
-					expr_copy->value.str.val = STR_EMPTY_ALLOC();
+			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
+				if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 			}
+			if (Z_OBJ_HANDLER_P(expr, get)) {
+				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
+				if(Z_TYPE_P(z) != IS_OBJECT) {
+					zend_make_printable_zval(z, expr_copy, use_copy);
+					FREE_ZVAL(z);
+					break;
+				}
+			}
+			if (EG(exception)) {
+				expr_copy->value.str.len = 0;
+				expr_copy->value.str.val = STR_EMPTY_ALLOC();
+				break;
+			}
 			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
 			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);
-			expr_copy->type = IS_STRING;
 			break;
 		case IS_DOUBLE:
 			*expr_copy = *expr;
@@ -491,40 +467,26 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 	}
 	switch (expr->type) {
 		case IS_OBJECT:
-			{
-#if 0
-				/* Standard PHP objects */
-				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HT_P(expr)->cast_object) {
-					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
-					zend_error(E_NOTICE, "Object of class %v could not be converted to string", Z_OBJCE_P(expr)->name);
-				}
-#endif
-				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-					if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE, 0 TSRMLS_CC) == SUCCESS) {
-						break;
-					}
-				} else {
-					if(Z_OBJ_HANDLER_P(expr, get)) {
-						zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
-						if(Z_TYPE_P(z) != IS_OBJECT) {
-							zend_make_unicode_zval(z, expr_copy, use_copy);
-							FREE_ZVAL(z);
-							return;
-						}
-					}
-				}
-				if (EG(exception)) {
-					zval_dtor(expr_copy);
-					expr_copy->value.ustr.len = 0;
-					expr_copy->value.ustr.val = USTR_MAKE("");
+			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
+				if(Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_UNICODE, 0 TSRMLS_CC) == SUCCESS) {
 					break;
 				}
 			}
-			expr_copy->value.ustr.val = emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG + 1);
+			if (Z_OBJ_HANDLER_P(expr, get)) {
+				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
+				if(Z_TYPE_P(z) != IS_OBJECT) {
+					zend_make_unicode_zval(z, expr_copy, use_copy);
+					FREE_ZVAL(z);
+					break;
+				}
+			}
+			if (EG(exception)) {
+				expr_copy->value.ustr.len = 0;
+				expr_copy->value.ustr.val = USTR_MAKE("");
+				break;
+			}
+			expr_copy->value.ustr.val = eumalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG + 1);
 			expr_copy->value.ustr.len = u_sprintf(expr_copy->value.ustr.val, "Object id #%ld", (long)expr->value.obj.handle);
-			expr_copy->type = IS_UNICODE;
 			break;
 		default:
 			*expr_copy = *expr;
@@ -532,6 +494,7 @@ ZEND_API void zend_make_unicode_zval(zval *expr, zval *expr_copy, int *use_copy)
 			convert_to_unicode(expr_copy);
 			break;
 	}
+	expr_copy->type = IS_UNICODE;
 	*use_copy = 1;
 }
 
@@ -969,6 +932,8 @@ static void fix_classes(HashTable *ht) {
 			ce->__isset = ce->__isset->common.u_twin;
 		} else if (ce->__call) {
 			ce->__call = ce->__call->common.u_twin;
+		} else if (ce->__tostring) {
+			ce->__tostring = ce->__tostring->common.u_twin;
 		} else if (ce->serialize_func) {
 			ce->serialize_func = ce->serialize_func->common.u_twin;
 		} else if (ce->unserialize_func) {

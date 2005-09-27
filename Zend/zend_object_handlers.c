@@ -1008,37 +1008,30 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
-	zval fname, *retval;
+	zval *retval;
+	zend_class_entry *ce;
 	
 	switch (type) {
 		case IS_STRING:
 		case IS_UNICODE:
-			if (!zend_hash_exists(&Z_OBJCE_P(readobj)->function_table, "__tostring", sizeof("__tostring"))) {
-				return FAILURE;
-			}
-			ZVAL_ASCII_STRING(&fname, "__tostring", 0);
-			if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
-				if (UG(unicode)) {
-					zval_dtor(&fname);
-				}
-				if (retval) {
-					if (Z_TYPE_P(retval) != (UG(unicode)?IS_UNICODE:IS_STRING)) {
-						zend_error(E_ERROR, "Method %v::__toString() must return a string value", Z_OBJCE_P(readobj)->name);
+			ce = Z_OBJCE_P(readobj);
+			if (ce->__tostring &&
+                zend_call_method_with_0_params(&readobj, ce, &ce->__tostring, "__tostring", &retval)) {
+				if (Z_TYPE_P(retval) == (UG(unicode)?IS_UNICODE:IS_STRING)) {
+					*writeobj = *retval;
+					zval_copy_ctor(writeobj);
+					zval_ptr_dtor(&retval);
+					INIT_PZVAL(writeobj);
+					if (Z_TYPE_P(writeobj) != type) {
+						convert_to_explicit_type(writeobj, type);
 					}
+					return SUCCESS;
 				} else {
-					MAKE_STD_ZVAL(retval);
-					ZVAL_ASCII_STRINGL(retval, "", 0, 1);
+					zval_ptr_dtor(&retval);
+					zend_error(E_RECOVERABLE_ERROR, "Method %v::__toString() must return a string value", ce->name);
 				}
-				*writeobj = *retval;
-				zval_copy_ctor(writeobj);
-				INIT_PZVAL(writeobj);
-				zval_ptr_dtor(&retval);
-				return SUCCESS;
 			}
-			if (UG(unicode)) {
-				zval_dtor(&fname);
-			}
-			break;
+			return FAILURE;
 		default:
 			break;
 	}
@@ -1069,7 +1062,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_object_get_class,				/* get_class_entry */
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
-	NULL,									/* cast_object */
+	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
 };
 
