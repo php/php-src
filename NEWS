@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.0.6
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #34643 (wsdl default value has no effect). (Dmitry)
 - Fixed bug #34505 (Possible memory corruption when unmangling properties 
   with empty names). (Tony)
 - Fixed bug #34478 (Incorrect parsing of url's fragment (#...)). (Dmitry)
