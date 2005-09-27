@@ -1227,22 +1227,24 @@ var_done:
 			/* New Rule: never repair potential malicious user input */
 			if (!skip_upload) {
 				UChar32 c = 0;
-				int32_t ic;
+				int32_t ic, l_ic;
 				long l = 0;
 
 				for (ic = 0; ic < param_len; ) {
+					l_ic = ic;
 					U16_NEXT(param, ic, param_len, c);
 					if (c == 0x5b /*'['*/) {
 						l++;
 					} else if (c == 0x5d /*']'*/) {
 						l--;
+						l_ic = ic;
 						U16_NEXT(param, ic, param_len, c);
 						if (ic < param_len && c != 0x5b /*'['*/) {
 							skip_upload = 1;
 							break;
 						} else {
-							/* decrement index so that the same character is retrieved again */
-							ic--;
+							/* go back so that the same character is retrieved again */
+							ic = l_ic;
 						}
 					}
 					if (l < 0) {
@@ -1281,12 +1283,12 @@ var_done:
 			{
 				if (PG(upload_max_filesize) > 0 && total_bytes > PG(upload_max_filesize)) {
 #if DEBUG_FILE_UPLOAD
-					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
+					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%r=%r] not saved", PG(upload_max_filesize), param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_A;
 				} else if (max_file_size && (total_bytes > max_file_size)) {
 #if DEBUG_FILE_UPLOAD
-					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
+					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of %ld bytes exceeded - file [%r=%r] not saved", max_file_size, param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
@@ -1313,7 +1315,7 @@ var_done:
 			}
 #if DEBUG_FILE_UPLOAD
 			if(u_strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
-				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%v=%v] not saved", param, filename);
+				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%r=%r] not saved", param, filename);
 				cancel_upload = 5;
 			}
 #endif		
