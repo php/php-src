@@ -274,24 +274,24 @@ substr()
 This functions returns part of a string based on offset and length
 parameters.
 
-	void *str;
-	int32_t str_len, cp_len;
-	zend_uchar str_type;
+    void *str;
+    int32_t str_len, cp_len;
+    zend_uchar str_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl|l", &str, &str_len, &str_type, &f, &l) == FAILURE) {
-		return;
-	}
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "tl|l", &str, &str_len, &str_type, &f, &l) == FAILURE) {
+        return;
+    }
 
 The first thing we notice is that the incoming string specifier is 't',
 which means that we can accept all 3 string types. The 'str' variable is
 declared as void*, because it can point to either UChar* or char*.
 The actual type of the incoming string is stored in 'str_type' variable.
 
-	if (str_type == IS_UNICODE) {
-		cp_len = u_countChar32(str, str_len);
-	} else {
-		cp_len = str_len;
-	}
+    if (str_type == IS_UNICODE) {
+        cp_len = u_countChar32(str, str_len);
+    } else {
+        cp_len = str_len;
+    }
 
 If the string is a Unicode one, we cannot rely on the str_len value to tell
 us the number of characters in it. Instead, we call u_countChar32() to
@@ -300,12 +300,12 @@ obtain it.
 The next several lines normalize start and length parameters to fit within the
 string. Nothing new here. Then we locate the appropriate segment.
 
-	if (str_type == IS_UNICODE) {
-		int32_t start = 0, end = 0;
-		U16_FWD_N((UChar*)str, end, str_len, f);
-		start = end;
-		U16_FWD_N((UChar*)str, end, str_len, l);
-		RETURN_UNICODEL((UChar*)str + start, end-start, 1);
+    if (str_type == IS_UNICODE) {
+        int32_t start = 0, end = 0;
+        U16_FWD_N((UChar*)str, end, str_len, f);
+        start = end;
+        U16_FWD_N((UChar*)str, end, str_len, l);
+        RETURN_UNICODEL((UChar*)str + start, end-start, 1);
 
 Since codepoint (character) #n is not necessarily at offset #n in Unicode
 strings, we start at the beginning and iterate forward until we have gone
@@ -314,11 +314,82 @@ Then we save the location in 'start' and continue iterating through the number
 of codepoints specified by the offset. Once that's done, we can return the
 segment as a Unicode string.
 
-	} else {
-		RETURN_STRINGL((char*)str + f, l, 1);
-	}
+    } else {
+        RETURN_STRINGL((char*)str + f, l, 1);
+    }
 
 For native and binary types, we can return the segment directly.
+
+
+strrev()
+--------
+
+Let's look at strrev() which requires somewhat more complicated upgrade.
+While one of the guidelines for upgrades is that combining sequences are not
+really taken into account during processing -- substr() can break them up,
+for example -- in this case, we actually should be concerned, because
+reversing combining sequence may result in a completely different string. To
+illustrate:
+
+      a    (U+0061 LATIN SMALL LETTER A)
+      o    (U+006f LATIN SMALL LETTER O)
+    + '    (U+0301 COMBINING ACUTE ACCENT)
+    + _    (U+0320 COMBINING MINUS SIGN BELOW)
+      l    (U+006C LATIN SMALL LETTER L)
+
+Reversing this would result in:
+
+      l    (U+006C LATIN SMALL LETTER L)
+    + _    (U+0320 COMBINING MINUS SIGN BELOW)
+    + '    (U+0301 COMBINING ACUTE ACCENT)
+      o    (U+006f LATIN SMALL LETTER O)
+      a    (U+0061 LATIN SMALL LETTER A)
+
+All of a sudden the combining marks are being applied to 'l' instead of 'o'.
+To avoid this, we need to treat combininig sequences as a unit, by checking
+the combining character class of each character with u_getCombiningClass().
+
+strrev() obtains its single argument, a string, and unless the string is of
+Unicode type, processes it exactly as before, simply swapping bytes around.
+For Unicode case, the magic is like this:
+
+	int32_t i, x1, x2;
+	UChar32 ch;
+	UChar *u_s, *u_n, *u_p;
+
+    u_n = eumalloc(Z_USTRLEN_PP(str)+1);
+    u_p = u_n;
+    u_s = Z_USTRVAL_PP(str);
+
+    i = Z_USTRLEN_PP(str);
+    while (i > 0) {
+        U16_PREV(u_s, 0, i, ch);
+        if (u_getCombiningClass(ch) == 0) {
+            u_p += zend_codepoint_to_uchar(ch, u_p);
+        } else {
+            x2 = i;
+            do {
+                U16_PREV(u_s, 0, i, ch);
+            } while (u_getCombiningClass(ch) != 0);
+            x1 = i;
+            while (x1 <= x2) {
+                U16_NEXT(u_s, x1, Z_USTRLEN_PP(str), ch);
+                u_p += zend_codepoint_to_uchar(ch, u_p);
+            }
+        }
+    }
+    *u_p = 0;
+
+The basic idea is to walk the string backwards from the end, using
+U16_PREV() macro. If the combining class of the current character is 0,
+meaning it's a base character and not a combining mark, we simply append it
+to the new string. Otherwise, we save the location of the index and do a run
+over the characters until we get to the next one with combining class 0. At
+that point we append the sequence as is, without reversing, to the new
+string. Voila.
+
+Note that the code uses zend_codepoint_to_uchar() to convert full Unicode
+characters (UChar32 type) to 1 or 2 UTF-16 code units (UChar type).
 
 
 
