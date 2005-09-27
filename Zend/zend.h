@@ -360,6 +360,7 @@ struct _zend_class_entry {
 	union _zend_function *__unset;
 	union _zend_function *__isset;
 	union _zend_function *__call;
+	union _zend_function *__tostring;
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 

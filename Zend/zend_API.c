@@ -2022,6 +2022,9 @@ ZEND_API void zend_check_magic_method_implementation(zend_class_entry *ce, zend_
 	} else if (lcname_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 &&
 	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1) && fptr->common.num_args != 2) {
 		zend_error(error_type, "Method %v::%s() must take exactly 2 arguments", ce->name, ZEND_CALL_FUNC_NAME);
+	} else if (lcname_len == sizeof(ZEND_TOSTRING_FUNC_NAME) - 1 &&
+	    ZEND_U_EQUAL(utype, lcname, lcname_len, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0) {
+		zend_error(error_type, "Method %v::%s() cannot take arguments", ce->name, ZEND_CALL_FUNC_NAME);
 	}
 	efree(lcname);
 }
@@ -2035,7 +2038,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__tostring = NULL;
 	char *lowercase_name;
 	int fname_len;
 	char *lc_class_name;
@@ -2139,6 +2142,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				clone = reg_function;
 			} else if ((fname_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME))) {
 				__call = reg_function;
+			} else if ((fname_len == sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME))) {
+				__tostring = reg_function;
 			} else if ((fname_len == sizeof(ZEND_GET_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME))) {
 				__get = reg_function;
 			} else if ((fname_len == sizeof(ZEND_SET_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME))) {
@@ -2176,6 +2181,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 		scope->destructor = dtor;
 		scope->clone = clone;
 		scope->__call = __call;
+		scope->__tostring = __tostring;
 		scope->__get = __get;
 		scope->__set = __set;
 		scope->__unset = __unset;
@@ -2206,6 +2212,12 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __call->common.function_name);
 			}
 			__call->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
+		}
+		if (__tostring) {
+			if (__tostring->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __tostring->common.function_name);
+			}
+			__tostring->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		if (__get) {
 			if (__get->common.fn_flags & ZEND_ACC_STATIC) {

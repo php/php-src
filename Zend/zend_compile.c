@@ -1163,6 +1163,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				CG(active_class_entry)->__unset = (zend_function *) CG(active_op_array);
 			} else if ((lcname_len == sizeof(ZEND_ISSET_FUNC_NAME)-1) && (ZEND_U_EQUAL(Z_TYPE(function_name->u.constant), lcname, lcname_len, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME)-1))) {
 				CG(active_class_entry)->__isset = (zend_function *) CG(active_op_array);
+			} else if ((lcname_len == sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && (ZEND_U_EQUAL(Z_TYPE(function_name->u.constant), lcname, lcname_len, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1))) {
+				CG(active_class_entry)->__tostring = (zend_function *) CG(active_op_array);
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
@@ -1872,6 +1874,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC)
 	}
 	if (!ce->__call) {
 		ce->__call = ce->parent->__call;
+	}
+	if (!ce->__tostring) {
+		ce->__tostring = ce->parent->__tostring;
 	}
 	if (!ce->clone) {
 		ce->clone = ce->parent->clone;
@@ -4152,6 +4157,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->__unset = NULL;
 		ce->__isset = NULL;
 		ce->__call = NULL;
+		ce->__tostring = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
 		ce->iterator_funcs.funcs = NULL;
