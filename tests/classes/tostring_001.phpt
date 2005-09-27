@@ -92,7 +92,7 @@ Converted
 ====test7====
 test2::__toString()
 
-Warning: Illegal offset type in %stostring.php on line %d
+Warning: Illegal offset type in %stostring_001.php on line %d
 ====test8====
 test2::__toString()
 string(9) "Converted"
@@ -141,7 +141,7 @@ Converted
 ====test7====
 test2::__toString()
 
-Warning: Illegal offset type in %stostring.php on line %d
+Warning: Illegal offset type in %stostring_001.php on line %d
 ====test8====
 test2::__toString()
 unicode(9) "Converted"
