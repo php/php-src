@@ -38,6 +38,7 @@ ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint ini
 ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 {
 	efree(objects->object_buckets);
+	objects->object_buckets = NULL;
 }
 
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
@@ -138,9 +139,16 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
-	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-	struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-	
+	zend_object_handle handle;
+	struct _store_object *obj;
+
+	if (!EG(objects_store).object_buckets) {
+		return;
+	}
+
+	handle = Z_OBJ_HANDLE_P(zobject);
+	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
+
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time

@@ -37,6 +37,8 @@ PHP                                                                        NEWS
   (Andrey)
 - Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
 - Fixed bug #34643 (wsdl default value has no effect). (Dmitry)
+- Fixed bug #34617 (zend_deactivate: objects_store used after
+  zend_objects_store_destroy is called). (Dmitry)
 - Fixed bug #34590 (User defined PDOStatement class can't implement methods).
   (Marcus)
 - Fixed bug #34584 (Segfault with SPL autoload handler). (Marcus)
