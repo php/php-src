@@ -129,6 +129,7 @@ PHP                                                                        NEWS
 - Fixed bug #33326 (Cannot build extensions with phpize on Macosx). (Jani)
 - Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes apache2.0.54
   seg fault). (Dmitry)
+- Fixed bug #32937 (open_basedir looses trailing / in the limiter). (Adam Conrad)
 - Fixed bug #32589 (possible crash inside imap_mail_compose() function). (Ilia)
 - Fixed bug #32139 (SOAP client does not auto-handle base64 encoding). (Ilia)
 - Fixed bug #32010 (Memory leak in mssql_fetch_batch). (fmk)
