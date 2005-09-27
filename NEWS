@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 - Fixed failing queries (FALSE returned) with mysqli_query() on 64 bit systems.
   (Andrey)
 - Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
+- Fixed bug #34643 (wsdl default value has no effect). (Dmitry)
 - Fixed bug #34590 (User defined PDOStatement class can't implement methods).
   (Marcus)
 - Fixed bug #34584 (Segfault with SPL autoload handler). (Marcus)
