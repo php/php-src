@@ -108,8 +108,8 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		/* Handler for basedirs that end with a / */
 		resolved_basedir_len = strlen(resolved_basedir);
 		if (basedir[strlen(basedir) - 1] == PHP_DIR_SEPARATOR) {
-			if (resolved_basedir[resolved_basedir_len - 1] == '/') {
-				resolved_basedir[resolved_basedir_len - 1] = PHP_DIR_SEPARATOR;
+			if (resolved_basedir[resolved_basedir_len - 1] != PHP_DIR_SEPARATOR) {
+				resolved_basedir[resolved_basedir_len] = PHP_DIR_SEPARATOR;
 				resolved_basedir[++resolved_basedir_len] = '\0';
 			}
 		}
