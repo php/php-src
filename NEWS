@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - Fixed bug #34645 (ctype corrupts memory when validating large numbers). (Ilia)
 - Fixed bug #34590 (User defined PDOStatement class can't implement methods).
   (Marcus)
+- Fixed bug #34584 (Segfault with SPL autoload handler). (Marcus)
 - Fixed bug #34565 (mb_send_mail does not fetch mail.force_extra_parameters).
   (Marco, Ilia)
 - Fixed bug #34518 (Unset doesn't separate container in CV). (Dmitry)
@@ -106,6 +107,7 @@ PHP                                                                        NEWS
 - Fixed bug #33917 (number_format() output with > 1 char separators). (Jani)
 - Fixed bug #33904 (input array keys being escaped when magic quotes is off). 
   (Ilia)
+- Fixed bug #33903 (spl_autoload_register class method). (Marcus)
 - Fixed bug #33899 (CLI: setting extension_dir=some/path extension=foobar.so
   does not work). (Jani)
 - Fixed bug #33882 (CLI was looking for php.ini in wrong path). (Hartmut)
