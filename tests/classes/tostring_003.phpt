@@ -34,3 +34,6 @@ catch(Exception $e)
 --EXPECTF--
 string(5) "Damn!"
 ====DONE====
+--UEXPECTF--
+unicode(5) "Damn!"
+====DONE====
