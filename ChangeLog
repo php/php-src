@@ -1,3 +1,40 @@
+2005-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      Allow substr_compare() to take a negative offset to facilitate start of the
+      comparison from the end of string.
+
+    * (PHP_5_1)
+      NEWS:
+      MFH: upgraded bundled libsqlite3 to version 3.2.7
+
+2005-09-26  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/oci8_collection.c
+      ext/oci8/oci8_statement.c
+      ext/oci8/php_oci8_int.h:
+      the last 64bit fix
+
+2005-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      ext/ctype/ctype.c
+      ext/ctype/tests/bug34645.phpt:
+      MFH: Fixed bug #34645 (ctype corrupts memory when validating large
+      numbers).
+
+    * (PHP_5_1)
+      NEWS:
+      Bug fixing news
+
+    * (PHP_5_1)
+      ext/ctype/ctype.c
+      ext/ctype/tests/bug34645.phpt
+      ext/ctype/tests/bug34645.phpt
+      ext/ctype/tests/bug34645.phpt:
+      Fixed bug #34645 (ctype corrupts memory when validating large numbers).
+
 2005-09-25  Antony Dovgal  <antony@zend.com>
 
     * ext/oci8/php_oci8_int.h:
