@@ -6,6 +6,7 @@ ext/standard
   Status: In Progress
 
   Completed:
+        addslashes()
         bin2hex()
         chr()
         explode()
@@ -14,6 +15,7 @@ ext/standard
         range()
         str_pad()
         str_repeat()
+        stripslashes()
         strpos()
         strrev()
         strstr()
