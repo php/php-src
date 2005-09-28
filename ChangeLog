@@ -1,3 +1,88 @@
+2005-09-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * README.UNICODE-UPGRADES:
+      strrev() walkthrough
+
+2005-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug34617.phpt
+      ZendEngine2/tests/bug34617.phpt
+      ZendEngine2/tests/bug34617.phpt:
+        1.1.4;
+      file bug34617.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/tests/bug34617.phpt
+      ZendEngine2/tests/bug34617.phpt:
+      Fixed bug #34617 (zend_deactivate: objects_store used after
+      zend_objects_store_destroy is called)
+
+2005-09-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * main/rfc1867.c:
+      Unicode fixes.
+
+2005-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      Fixed bug #34643 (wsdl default value has no effect)
+
+2005-09-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c
+      main/fopen_wrappers.c:
+      MFH: Fixed bug #32937 (open_basedir looses trailing / in the limiter).
+
+    * main/fopen_wrappers.c:
+      Fixed bug #32937 (open_basedir looses trailing / in the limiter).
+      
+      Patch by Adam Conrad
+
+2005-09-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/tostring_001.phpt:
+      - Need to rename in expectations, too
+
+    * tests/classes/tostring.phpt
+      tests/classes/tostring_001.phpt:
+      - Rename test to be consistent
+
+    * tests/classes/tostring_002.phpt
+      tests/classes/tostring_003.phpt:
+      - Add new tests
+
+    * NEWS
+      NEWS:
+      - BFN
+
+2005-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug26166.phpt
+      tests/classes/tostring.phpt:
+      Changed __toString() behavior to call it in all necessary places
+
 2005-09-26  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/string.c:
