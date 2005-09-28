@@ -1,3 +1,32 @@
+2005-09-27  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_objects_API.c
+      zend_objects_API.c
+      zend_objects_API.c
+      tests/bug34617.phpt
+      tests/bug34617.phpt:
+      Fixed bug #34617 (zend_deactivate: objects_store used after
+      zend_objects_store_destroy is called)
+
+    * tests/bug34617.phpt
+      tests/bug34617.phpt
+      tests/bug34617.phpt:
+        1.1.4;
+      file bug34617.phpt was initially added on branch PHP_5_0.
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_object_handlers.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      zend_vm_opcodes.h
+      tests/bug26166.phpt:
+      Changed __toString() behavior to call it in all necessary places
+
 2005-09-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
