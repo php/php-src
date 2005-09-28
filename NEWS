@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2005, PHP 5.1 Release Candidate 2
+- Fixed possible GLOBALS variable override when register_globals are ON.
+  (Ilia, Stefan)
+- Fixed possible register_globals toggle via parse_str(). (Ilia, Stefan)
 - Changed SQLite extension to be a shared module in Windows distribution.
   (Edin)
 - Changed "instanceof" and "catch" operators, is_a() and is_subclass_of()
