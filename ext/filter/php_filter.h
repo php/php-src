@@ -49,7 +49,7 @@ PHP_RSHUTDOWN_FUNCTION(filter);
 PHP_MINFO_FUNCTION(filter);
 
 PHP_FUNCTION(input_get);
-PHP_FUNCTION(input_get_array);
+PHP_FUNCTION(input_filters_list);
 PHP_FUNCTION(filter_data);
 
 ZEND_BEGIN_MODULE_GLOBALS(filter)
