@@ -2553,44 +2553,14 @@ PHP_FUNCTION(substr)
 /* }}} */
 
 
-/* {{{ php_unify_string_types
- */
-PHPAPI void php_unify_string_types(zval **p, zval **q TSRMLS_DC)
-{
-	if (p == NULL || q == NULL) {
-		return;
-	}
-
-	if (Z_TYPE_PP(p) == IS_UNICODE) {
-		if (Z_TYPE_PP(q) == IS_BINARY) {
-			convert_to_binary_ex(p);
-		} else {
-			convert_to_unicode_ex(q);
-		}
-	} else if (Z_TYPE_PP(p) == IS_BINARY) {
-		convert_to_binary_ex(q);
-	} else {
-		if (Z_TYPE_PP(q) == IS_BINARY) {
-			convert_to_binary_ex(p);
-		} else {
-			convert_to_string_ex(q);
-		}
-	}
-}
-/* {{{ */
-
 /* {{{ php_adjust_limits
  */
 PHPAPI void php_adjust_limits(zval **str, int32_t *f, int32_t *l)
 {
-	int32_t i, str_codepts;
+	int32_t str_codepts;
 
 	if (Z_TYPE_PP(str) == IS_UNICODE) {
-		i = 0; str_codepts = 0;
-		while (i < Z_USTRLEN_PP(str)) {
-			U16_FWD_1(Z_USTRVAL_PP(str), i, Z_USTRLEN_PP(str));
-			str_codepts++;
-		}
+		str_codepts = u_countChar32(Z_USTRVAL_PP(str), Z_USTRLEN_PP(str));
 	} else {
 		str_codepts = Z_STRLEN_PP(str);
 	}
@@ -2688,7 +2658,7 @@ PHP_FUNCTION(substr_replace)
 
 	HashPosition pos_str, pos_from, pos_repl, pos_len;
 	zval **tmp_str = NULL, **tmp_from = NULL, **tmp_repl = NULL, **tmp_len= NULL;
-
+	zend_uchar str_type;
 
 	if (argc < 3 || argc > 4 || zend_get_parameters_ex(argc, &str, &repl, &from, &len) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2747,8 +2717,16 @@ PHP_FUNCTION(substr_replace)
 				tmp_repl = repl;
 			}
 
-			if (tmp_repl && Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl))
-				php_unify_string_types(str, tmp_repl TSRMLS_CC);
+			if (tmp_repl && Z_TYPE_PP(str) != Z_TYPE_PP(tmp_repl)) {
+				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(str), Z_TYPE_PP(tmp_repl));
+				if (str_type == (zend_uchar)-1) {
+					convert_to_explicit_type(str, IS_BINARY);
+					convert_to_explicit_type(tmp_repl, IS_BINARY);
+				} else {
+					convert_to_explicit_type(str, str_type);
+					convert_to_explicit_type(tmp_repl, str_type);
+				}
+			}
 			php_adjust_limits(str, &f, &l);
 			result_len = php_do_substr_replace(&result, str, tmp_repl, f, l TSRMLS_CC);
 
@@ -2820,8 +2798,16 @@ PHP_FUNCTION(substr_replace)
 				tmp_repl = repl;
 			}
 
-			if (tmp_repl && Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl))
-				php_unify_string_types(tmp_str, tmp_repl TSRMLS_CC);
+			if (tmp_repl && Z_TYPE_PP(tmp_str) != Z_TYPE_PP(tmp_repl)) {
+				str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(tmp_str), Z_TYPE_PP(tmp_repl));
+				if (str_type == (zend_uchar)-1) {
+					convert_to_explicit_type(tmp_str, IS_BINARY);
+					convert_to_explicit_type(tmp_repl, IS_BINARY);
+				} else {
+					convert_to_explicit_type(tmp_str, str_type);
+					convert_to_explicit_type(tmp_repl, str_type);
+				}
+			}
 			php_adjust_limits(tmp_str, &f, &l);
 			result_len = php_do_substr_replace(&result, tmp_str, tmp_repl, f, l TSRMLS_CC);
 
