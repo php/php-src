@@ -534,10 +534,6 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 		if (node_is_equal(trav,"simpleType")) {
 			sdlTypePtr newType, *tmp;
 
-			if (memberTypes != NULL) {
-				soap_error0(E_ERROR, "Parsing Schema: union has both 'memberTypes' attribute and subtypes");
-			}
-
 			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
 
