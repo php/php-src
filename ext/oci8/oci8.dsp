@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\oci805\include" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\include\instantclient" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /D PHP_OCI8_HAVE_COLLECTIONS=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib /nologo /dll /machine:I386
-# ADD LINK32 php5ts.lib oci.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_oci8.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\oci805\lib" /libpath:"..\..\Release_TS_Inline"
+# ADD LINK32 php4ts.lib oci.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_oci8.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\lib\instantclient" /libpath:"..\..\Release_TS_Inline"
 
 !ELSEIF  "$(CFG)" == "oci8 - Win32 Debug_TS"
 
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D ZTS=1 /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\include\oci805" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "FTP_EXPORTS" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /FR /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\include\instantclient" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "FTP_EXPORTS" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_OCI8=1 /D HAVE_OCI8_TEMP_LOB=1 /D HAVE_OCI8_ATTR_STATEMENT=1 /D COMPILE_DL_OCI8=1 /D PHP_OCI8_HAVE_COLLECTIONS=1 /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib /nologo /dll /machine:I386
-# ADD LINK32 php5ts_debug.lib oci.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_oci8.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\lib\oci805"
+# ADD LINK32 php4ts_debug.lib oci.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_oci8.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\lib\instantclient"
 
 !ENDIF 
 
@@ -96,6 +96,22 @@ LINK32=link.exe
 
 SOURCE=.\oci8.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\oci8_collection.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oci8_interface.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oci8_lob.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oci8_statement.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -103,6 +119,10 @@ SOURCE=.\oci8.c
 # Begin Source File
 
 SOURCE=.\php_oci8.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_oci8_int.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
