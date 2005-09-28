@@ -73,6 +73,10 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 		symtable1 = Z_ARRVAL_P(track_vars_array);
 	} else if (PG(register_globals)) {
 		symtable1 = EG(active_symbol_table);
+		/* GLOBALS hijack attempt, reject parameter */
+		if (!strncmp("GLOBALS", var, sizeof("GLOBALS")) || !strncmp("GLOBALS", var, sizeof("GLOBALS[")-1) {
+			return;
+		}
 	}
 	if (!symtable1) {
 		/* Nothing to do */
@@ -99,6 +103,13 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 		zval_dtor(val);
 		return;
 	}
+
+	/* GLOBALS hijack attempt, reject parameter */
+	if (symtable1 == EG(active_symbol_table) && !strcmp("GLOBALS", var)) {
+		zval_dtor(val);
+		return;
+	}
+
 	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
 	for (p=var; *p; p++) {
 		switch(*p) {
