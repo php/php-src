@@ -3817,12 +3817,12 @@ PHPAPI UChar *php_u_addslashes_ex(UChar *str, int32_t length, int32_t *new_lengt
 			U16_NEXT(str, i, length, ch);
 			switch (ch) {
 			case '\0':
-				buf_len += zend_codepoint_to_uchar('\\', buf+buf_len);
-				buf_len += zend_codepoint_to_uchar('0', buf+buf_len);
+				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
+				*(buf+buf_len) = (UChar)0x30; buf_len++; /* 0 */
 				break;
 			case '\'':
-				buf_len += zend_codepoint_to_uchar('\'', buf+buf_len);
-				buf_len += zend_codepoint_to_uchar('\'', buf+buf_len);
+				*(buf+buf_len) = (UChar)0x27; buf_len++; /* ' */
+				*(buf+buf_len) = (UChar)0x27; buf_len++; /* ' */
 				break;
 			default:
 				buf_len += zend_codepoint_to_uchar(ch, buf+buf_len);
@@ -3834,13 +3834,13 @@ PHPAPI UChar *php_u_addslashes_ex(UChar *str, int32_t length, int32_t *new_lengt
 			U16_NEXT(str, i, length, ch);
 			switch (ch) {
 			case '\0':
-				buf_len += zend_codepoint_to_uchar('\\', buf+buf_len);
-				buf_len += zend_codepoint_to_uchar('0', buf+buf_len);
+				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
+				*(buf+buf_len) = (UChar)0x30; buf_len++; /* 0 */
 				break;
 			case '\'':
 			case '\"':
 			case '\\':
-				buf_len += zend_codepoint_to_uchar('\\', buf+buf_len);
+				*(buf+buf_len) = (UChar)0x5C; buf_len++; /* \ */
 				/* break is missing *intentionally* */
 			default:
 				buf_len += zend_codepoint_to_uchar(ch, buf+buf_len);
