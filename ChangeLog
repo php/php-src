@@ -1,3 +1,58 @@
+2005-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      NEWS
+      ext/standard/string.c
+      main/php_variables.c:
+      MFH: Fixed possible GLOBALS variable override when register_globals are ON.
+      MFH: Fixed possible register_globals toggle via parse_str().
+      MFH: Fixed negative offset handling in substr_compare() function.
+
+    * (PHP_4_4)
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c
+      main/php_variables.c
+      main/php_variables.c:
+      MFH: Fixed possible GLOBALS variable override when register_globals are ON.
+      MFH: Fixed possible register_globals toggle via parse_str().
+
+2005-09-28  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/oci8/oci8.dsp:
+      Update php4 build file, compile against istantclient
+
+2005-09-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      main/php_variables.c:
+      Fixed possible GLOBALS variable override when register_globals are ON.
+      Fixed possible register_globals toggle via parse_str().
+
+2005-09-28  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Updated substr_replace() to use:
+        - zend_get_unified_string_type()/convert_to_explicit_type() for type
+      conversion
+        - u_countChar32() for counting codepoints
+
+    * unicode-progress.txt:
+      {add,strip}slashes()
+
+2005-09-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      Fixed bug #34453 (parsing http://www.w3.org/2001/xml.xsd exception)
+
+2005-09-28  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+      - Unicode impl of {add,strip}slashes()
+
 2005-09-27  Andrei Zmievski  <andrei@gravitonic.com>
 
     * README.UNICODE-UPGRADES:
