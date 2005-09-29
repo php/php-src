@@ -1322,7 +1322,9 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 			data = get_zval_property(object, model->u.element->name TSRMLS_CC);
 			if (data) {
 				enc = model->u.element->encode;
-				if ((model->max_occurs == -1 || model->max_occurs > 1) && Z_TYPE_P(data) == IS_ARRAY) {
+				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
+				    Z_TYPE_P(data) == IS_ARRAY &&
+				    !is_map(data)) {
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval **val;
 
@@ -1345,7 +1347,9 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 							}
 						}
 						xmlNodeSetName(property, model->u.element->name);
-						if (style == SOAP_LITERAL && model->u.element->namens) {
+						if (style == SOAP_LITERAL &&
+						    model->u.element->namens &&
+						    model->u.element->form == XSD_FORM_QUALIFIED) {
 							xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
 							xmlSetNs(property, nsp);
 						}
@@ -1405,7 +1409,9 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 			data = get_zval_property(object, "any" TSRMLS_CC);
 			if (data) {
 				enc = get_conversion(XSD_ANYXML);
-				if ((model->max_occurs == -1 || model->max_occurs > 1) && Z_TYPE_P(data) == IS_ARRAY) {
+				if ((model->max_occurs == -1 || model->max_occurs > 1) &&
+				    Z_TYPE_P(data) == IS_ARRAY &&
+				    !is_map(data)) {
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval **val;
 
@@ -1600,7 +1606,9 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 						property = master_to_xml(array_el->encode, *val, style, xmlParam);
 					}
 					xmlNodeSetName(property, array_el->name);
-					if (style == SOAP_LITERAL && array_el->namens) {
+					if (style == SOAP_LITERAL &&
+					    array_el->namens &&
+					    array_el->form == XSD_FORM_QUALIFIED) {
 						xmlNsPtr nsp = encode_add_ns(property, array_el->namens);
 						xmlSetNs(property, nsp);
 					}
