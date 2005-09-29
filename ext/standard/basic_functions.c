@@ -3077,11 +3077,25 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	prefix = va_arg(args, char *);
 	prefix_len = va_arg(args, uint);
 
-	new_key_len = prefix_len + hash_key->nKeyLength;
-	new_key = (char *) emalloc(new_key_len);
+	if (!prefix_len) {
+		if (!hash_key->nKeyLength) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric key detected - possible security hazard.");
+			return 0;
+		} else if (!strcmp(hash_key->arKey, "GLOBALS")) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempted GLOBALS variable overwrite.");
+			return 0; 
+		}
+	}
 
-	memcpy(new_key, prefix, prefix_len);
-	memcpy(new_key+prefix_len, hash_key->arKey, hash_key->nKeyLength);
+	if (hash_key->nKeyLength) {
+		new_key_len = prefix_len + hash_key->nKeyLength;
+		new_key = (char *) emalloc(new_key_len);
+
+		memcpy(new_key, prefix, prefix_len);
+		memcpy(new_key+prefix_len, hash_key->arKey, hash_key->nKeyLength);
+	} else {
+		new_key_len = spprintf(&new_key, 0, "%s%ld", prefix, hash_key->h);
+	}
 
 	zend_hash_del(&EG(symbol_table), new_key, new_key_len);
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), new_key, new_key_len, *var, (*var)->refcount+1, 0);
