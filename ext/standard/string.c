@@ -1315,88 +1315,168 @@ PHP_FUNCTION(implode)
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
-	zval **args[2];
-	zval **tok, **str;
-	char *token;
-	char *token_end;
-	char *p;
-	char *pe;
+	void *tok, *str;
+	int32_t tok_len, str_len;
+	zend_uchar tok_type, str_type;
+	zval *zv;
+	char *token, *token_end, *p, *pe;
+	UChar *u_token, *u_p, *u_pe;
+
+	UChar32 ch, th;
+	int32_t start, end, i, j, rem_len;
+	int delim_found, token_present;
 	int skipped = 0;
-	
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2) {
 		WRONG_PARAM_COUNT;
 	}
-		
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T",
+							  &str, &str_len, &str_type,
+							  &tok, &tok_len, &tok_type) == FAILURE) {
+		return;
+	}
+
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			tok = args[0];
+			tok = str;
+			tok_len = str_len;
+			tok_type = str_type;
 			break;
 
 		default:
 		case 2:
-			str = args[0];
-			tok = args[1];
-			convert_to_string_ex(str);
-
-			zval_add_ref(str);
 			if (BG(strtok_zval)) {
 				zval_ptr_dtor(&BG(strtok_zval));
 			}
-			BG(strtok_zval) = *str;
-			BG(strtok_last) = BG(strtok_string) = Z_STRVAL_PP(str);
-			BG(strtok_len) = Z_STRLEN_PP(str);
+			MAKE_STD_ZVAL(zv);
+			if (str_type == IS_UNICODE) {
+				ZVAL_UNICODEL(zv, (UChar *)str, str_len, 1);
+			} else if (str_type == IS_BINARY) {
+				ZVAL_BINARYL(zv, (char *)str, str_len, 1);
+			} else {
+				ZVAL_STRINGL(zv, (char *)str, str_len, 1);
+			}
+			BG(strtok_zval) = zv;
+			if (str_type == IS_UNICODE) {
+				BG(strtok_last) = BG(strtok_string) = Z_USTRVAL_P(zv);
+			} else {
+				BG(strtok_last) = BG(strtok_string) = Z_STRVAL_P(zv);
+			}
+			BG(strtok_len) = str_len;
 			break;
 	}
-	
-	p = BG(strtok_last); /* Where we start to search */
-	pe = BG(strtok_string) + BG(strtok_len);
 
-	if (!p || p >= pe) {
+	if (BG(strtok_zval) && tok_type != Z_TYPE_P(BG(strtok_zval))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Delimiter type must match string type.");
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(tok);
-	
-	token = Z_STRVAL_PP(tok);
-	token_end = token + Z_STRLEN_PP(tok);
+	if (tok_type == IS_UNICODE) {
+		u_p = (UChar *)BG(strtok_last); /* Where we start to search */
+		u_pe = (UChar *)BG(strtok_string) + BG(strtok_len);
+		u_token = (UChar *)tok;
+		if (!u_p || u_p >= u_pe) {
+			RETURN_FALSE;
+		}
+		rem_len = u_pe - u_p;
 
-	while (token < token_end) {
-		STRTOK_TABLE(token++) = 1;
-	}
-	
-	/* Skip leading delimiters */
-	while (STRTOK_TABLE(p)) {
-		if (++p >= pe) {
-			/* no other chars left */
+		/* Skip leading delimiters */
+		token_present = 0;
+		for (i = 0 ; (u_p + i) < u_pe ; ) {
+			delim_found = 0;
+			U16_NEXT(u_p, i, rem_len, ch);
+			for (j = 0 ; j < tok_len ; ) {
+				U16_NEXT(u_token, j, tok_len, th);
+				if ( ch == th ) {
+					delim_found = 1;
+					break;
+				}
+			}
+			if (delim_found == 0) {
+				U16_BACK_1(u_p, 0, i); /* U16_NEXT() post-incrs 'i' */
+				start = i;
+				token_present = 1;
+				break;
+			}
+		}
+		if (token_present == 0) {
 			BG(strtok_last) = NULL;
-			RETVAL_FALSE;
-			goto restore;
+			RETURN_FALSE;
 		}
-		skipped++;
-	}
-	
-	/* We know at this place that *p is no delimiter, so skip it */	
-	while (++p < pe) {
-		if (STRTOK_TABLE(p)) {
-			goto return_token;	
-		}
-	}
-	
-	if (p - BG(strtok_last)) {
-return_token:
-		RETVAL_STRINGL(BG(strtok_last) + skipped, (p - BG(strtok_last)) - skipped, 1);
-		BG(strtok_last) = p + 1;
-	} else {
-		RETVAL_FALSE;
-		BG(strtok_last) = NULL;
-	}
 
-	/* Restore table -- usually faster then memset'ing the table on every invocation */
+		/* Seek to next delimiter */
+		delim_found = 0;
+		for (i = start ; (u_p + i) < u_pe ; ) {
+			U16_NEXT(u_p, i, rem_len, ch);
+			for (j = 0 ; j < tok_len ; ) {
+				U16_NEXT(u_token, j, tok_len, th);
+				if ( ch == th ) {
+					delim_found = 1;
+					break;
+				}
+			}
+			if (delim_found) {
+				U16_BACK_1(u_p, 0, i); /* 'i' was beyond delimiter */
+				break;
+			}
+		}
+		end = i;
+
+		if (end - start) {
+			BG(strtok_last) = u_p + end;
+			RETURN_UNICODEL(u_p + start, end - start, 1);
+		} else {
+			BG(strtok_last) = NULL;
+			RETURN_FALSE;
+		}
+	} else {
+		p = (char *)BG(strtok_last); /* Where we start to search */
+		pe = (char *)BG(strtok_string) + BG(strtok_len);
+		if (!p || p >= pe) {
+			RETURN_FALSE;
+		}
+		token = (char *)tok;
+		token_end = token + tok_len;
+		while (token < token_end) {
+			STRTOK_TABLE(token++) = 1;
+		}
+
+		/* Skip leading delimiters */
+		while (STRTOK_TABLE(p)) {
+			if (++p >= pe) {
+				/* no other chars left */
+				BG(strtok_last) = NULL;
+				RETVAL_FALSE;
+				goto restore;
+			}
+			skipped++;
+		}
+		/* We know at this place that *p is no delimiter, so skip it */	
+		while (++p < pe) {
+			if (STRTOK_TABLE(p)) {
+				goto return_token;	
+			}
+		}
+
+		if (p - (char *)BG(strtok_last)) {
+return_token:
+			if (tok_type == IS_BINARY) {
+				RETVAL_BINARYL((char *)BG(strtok_last) + skipped, (p - (char *)BG(strtok_last)) - skipped, 1);
+			} else {
+				RETVAL_STRINGL((char *)BG(strtok_last) + skipped, (p - (char *)BG(strtok_last)) - skipped, 1);
+			}
+			BG(strtok_last) = p + 1;
+		} else {
+			RETVAL_FALSE;
+			BG(strtok_last) = NULL;
+		}
+
+		/* Restore table -- usually faster then memset'ing the table on every invocation */
 restore:
-	token = Z_STRVAL_PP(tok);
-	
-	while (token < token_end) {
-		STRTOK_TABLE(token++) = 0;
+		token = (char *)tok;
+		while (token < token_end) {
+			STRTOK_TABLE(token++) = 0;
+		}
 	}
 }
 /* }}} */
