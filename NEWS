@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, Version 4.4.1
+- Fixed possible crash and/or memory corruption in import_request_variables().
+  (Ilia)
+- Fixed potential GLOBALS overwrite via import_request_variables(). (Ilia)
 - Fixed possible GLOBALS variable override when register_globals are ON.
   (Ilia, Stefan)
 - Fixed possible register_globals toggle via parse_str(). (Ilia, Stefan)
