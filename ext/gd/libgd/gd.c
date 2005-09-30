@@ -2303,9 +2303,9 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				dc = gdImageGetPixel(dst, tox, toy);
 				g = (0.29900f * gdImageRed(dst, dc)) + (0.58700f * gdImageGreen(dst, dc)) + (0.11400f * gdImageBlue(dst, dc));
 
-				ncR = (int)(gdImageRed (src, c) * (pct / 100.0f) + gdImageRed(dst, dc) * g * ((100 - pct) / 100.0f));
-				ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + gdImageGreen(dst, dc) * g * ((100 - pct) / 100.0f));
-				ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + gdImageBlue(dst, dc) * g * ((100 - pct) / 100.0f));
+                                ncR = (int)(gdImageRed (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+                                ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+                                ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
 
 				/* First look for an exact match */
 				nc = gdImageColorExact(dst, ncR, ncG, ncB);
