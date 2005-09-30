@@ -1,3 +1,34 @@
+2005-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_1)
+      ext/standard/basic_functions.c:
+      Removed unnecessary component that accidentally snuck-in
+
+    * (PHP_4_4)
+      NEWS
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      MFH:
+      Fixed possible crash and/or memory corruption in
+      import_request_variables()
+      Fixed potential GLOBALS overwrite via import_request_variables().
+
+    * ext/standard/basic_functions.c:
+      Fixed possible crash and/or memory corruption in import_request_variables()
+      Fixed potential GLOBALS overwrite via import_request_variables().
+
+2005-09-29  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/basic_functions.h
+      ext/standard/string.c:
+      - Unicode impl of strtok()
+
+    * ext/standard/string.c:
+      - Updated addslashes(): add codepoints directly rather than with
+      zend_codepoint_to_uchar()
+
 2005-09-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
