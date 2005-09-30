@@ -1,4 +1,4 @@
-#include <stdio.h>
+
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -2287,11 +2287,13 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 		for (x = srcX; (x < (srcX + w)); x++) {
 			int nc;
 			c = gdImageGetPixel (src, x, y);
+
 			/* Added 7/24/95: support transparent copies */
 			if (gdImageGetTransparent(src) == c) {
 				tox++;
 				continue;
 			}
+
 			/*
 			 * If it's the same image, mapping is NOT trivial since we
 			 * merge with greyscale target, but if pct is 100, the grey
@@ -2303,9 +2305,10 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				dc = gdImageGetPixel(dst, tox, toy);
 				g = (0.29900f * gdImageRed(dst, dc)) + (0.58700f * gdImageGreen(dst, dc)) + (0.11400f * gdImageBlue(dst, dc));
 
-				ncR = (int)(gdImageRed (src, c) * (pct / 100.0f) + gdImageRed(dst, dc) * g * ((100 - pct) / 100.0f));
-				ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + gdImageGreen(dst, dc) * g * ((100 - pct) / 100.0f));
-				ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + gdImageBlue(dst, dc) * g * ((100 - pct) / 100.0f));
+				ncR = (int)(gdImageRed (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+				ncG = (int)(gdImageGreen (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+				ncB = (int)(gdImageBlue (src, c) * (pct / 100.0f) + g * ((100 - pct) / 100.0));
+
 
 				/* First look for an exact match */
 				nc = gdImageColorExact(dst, ncR, ncG, ncB);
