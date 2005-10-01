@@ -762,7 +762,7 @@ static PHP_METHOD(PDO, getAttribute)
 			RETURN_LONG(dbh->error_mode);
 
 		case PDO_ATTR_DRIVER_NAME:
-			RETURN_STRINGL(dbh->driver->driver_name, dbh->driver->driver_name_len, 1);
+			RETURN_STRINGL((char*)dbh->driver->driver_name, dbh->driver->driver_name_len, 1);
 	}
 	
 	if (!dbh->methods->get_attribute) {
@@ -1140,6 +1140,32 @@ static int dbh_compare(zval *object1, zval *object2 TSRMLS_DC)
 }
 
 static zend_object_handlers pdo_dbh_object_handlers;
+
+PDO_API void php_pdo_declare_stringl_constant(const char *const_name,
+		size_t name_len, const char *value, size_t value_len TSRMLS_DC)
+{
+#if PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION >= 1
+	zend_declare_class_constant_stringl(pdo_dbh_ce, const_name, name_len, value, value_len TSRMLS_CC);
+#else
+	zval *constant = malloc(sizeof(*constant));
+	ZVAL_STRINGL(constant, zend_strndup(value, value_len), value_len, 0);
+	INIT_PZVAL(constant);
+	zend_hash_update(&pdo_dbh_ce->constants_table, (char*)const_name, name_len+1, &constant, sizeof(zval*), NULL);
+#endif
+}
+
+PDO_API void php_pdo_declare_long_constant(const char *const_name,
+		unsigned int name_len, long value TSRMLS_DC)
+{
+#if PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION >= 1
+	zend_declare_class_constant_long(pdo_dbh_ce, const_name, name_len, value TSRMLS_CC);
+#else
+	zval *constant = malloc(sizeof(*constant));
+	ZVAL_LONG(constant, value);
+	INIT_PZVAL(constant);
+	zend_hash_update(&pdo_dbh_ce->constants_table, (char*)const_name, name_len+1, &constant, sizeof(zval*), NULL);
+#endif
+}
 
 void pdo_dbh_init(TSRMLS_D)
 {
