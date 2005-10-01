@@ -146,13 +146,16 @@ static zend_function_entry spl_funcs_SimpleXMLIterator[] = {
 
 SPL_API PHP_MINIT_FUNCTION(spl_sxe) /* {{{ */
 {
-	zend_class_entry *spl_ce_SimpleXML_Element = sxe_get_element_class_entry(TSRMLS_C);
+	zend_class_entry **pce, *spl_ce_SimpleXMLElement;
 
-	if (!spl_ce_SimpleXML_Element) {
+	if (zend_hash_find(CG(class_table), "simplexmlelement", sizeof("SimpleXMLElement"), (void **) &pce) == FAILURE) {
+		spl_ce_SimpleXMLIterator = NULL;
 		return SUCCESS; /* SimpleXML must be initialized before */
 	}
 
-	REGISTER_SPL_SUB_CLASS_EX(SimpleXMLIterator, SimpleXML_Element, sxe_object_new, spl_funcs_SimpleXMLIterator);
+	spl_ce_SimpleXMLElement = *pce;
+
+	REGISTER_SPL_SUB_CLASS_EX(SimpleXMLIterator, SimpleXMLElement, sxe_object_new, spl_funcs_SimpleXMLIterator);
 	REGISTER_SPL_IMPLEMENTS(SimpleXMLIterator, RecursiveIterator);
 
 	return SUCCESS;
