@@ -160,108 +160,13 @@ typedef struct _timelib_relunit {
 
 /* The timezone table. */
 static timelib_tz_lookup_table timelib_timezone_lookup[] = {
-	{ "a",    0,    HOUR (- 1), NULL                  },
-	{ "adt",  1,    HOUR (  4), "America/Halifax"     }, /* Atlantic Daylight */
-	{ "ahst", 0,    HOUR ( 10), "America/Anchorage"   }, /* Alaska-Hawaii Standard */
-	{ "akdt", 0,    HOUR ( 10), "America/Anchorage"   }, /* Alaska Daylight */
-	{ "akst", 0,    HOUR ( 10), "America/Anchorage"   }, /* Alaska Standard */
-	{ "ast",  0,    HOUR (  4), "America/Halifax"     }, /* Atlantic Standard */
-	{ "at",   0,    HOUR (  2), "Atlantic/Azores"     }, /* Azores */
-	{ "b",    0,    HOUR (- 2), NULL                  },
-	{ "bst",  1,    HOUR (  0), "Europe/London"       }, /* British Summer */
-	{ "bt",   0,   -HOUR (  3), "Asia/Baghdad"        }, /* Baghdad, USSR Zone 2 */
-	{ "c",    0,    HOUR (- 3), NULL                  },
-	{ "cadt", 1,   -HOUR (9.5), "Australia/Adelaide"  }, /* Central Australian Daylight */
-	{ "cast", 0,   -HOUR (9.5), "Australia/Adelaide"  }, /* Central Australian Standard */
-	{ "cat",  0,    HOUR ( 10), "America/Anchorage"   }, /* Central Alaska */
-	{ "cct",  0,   -HOUR (  8), "Asia/Shanghai"       }, /* China Coast, USSR Zone 7 */
-	{ "cdt",  1,    HOUR (  6), "America/Chicago"     }, /* Central Daylight */
-	{ "cest", 1,   -HOUR (  1), "Europe/Berlin"       }, /* Central European Summer */
-	{ "cet",  0,   -HOUR (  1), "Europe/Berlin"       }, /* Central European */
-	{ "cst",  0,    HOUR (  6), "America/Chicago"     }, /* Central Standard */
-	{ "d",    0,    HOUR (- 4), NULL                  },
-	{ "e",    0,    HOUR (- 5), NULL                  },
-	{ "eadt", 1,   -HOUR ( 10), "Australia/Sydney"    }, /* Eastern Australian Daylight */
-	{ "east", 0,   -HOUR ( 10), "Australia/Sydney"    }, /* Eastern Australian Standard */
-	{ "edt",  1,    HOUR (  5), "America/New_York"    }, /* Eastern Daylight */
-	{ "eest", 1,    HOUR (  2), "Europe/Helsinki"     }, /* Eastern European Summer */
-	{ "eet",  0,   -HOUR (  2), "Europe/Bucharest"    }, /* Eastern Europe, USSR Zone 1 */
-	{ "est",  0,    HOUR (  5), "America/New_York"    }, /* Eastern Standard */
-	{ "f",    0,    HOUR (- 6), NULL                  },
-	{ "fst",  1,   -HOUR (  1), "Europe/Paris"        }, /* French Summer */
-	{ "fwt",  0,   -HOUR (  1), "Europe/Paris"        }, /* French Winter */
-	{ "g",    0,    HOUR (- 7), NULL                  },
-	{ "gmt",  0,    HOUR (  0), "GMT"                 }, /* Greenwich Mean */
-	{ "gst",  0,   -HOUR ( 10), "Pacific/Guam"        }, /* Guam Standard, USSR Zone 9 */
-	{ "h",    0,    HOUR (- 8), NULL                  },
-	{ "hdt",  1,    HOUR ( 10), "Pacific/Honolulu"    }, /* Hawaii Daylight */
-	{ "hst",  0,    HOUR ( 10), "Pacific/Honolulu"    }, /* Hawaii Standard */
-	{ "i",    0,    HOUR (- 9), NULL                  },
-	{ "idle", 0,   -HOUR ( 12), "NZ"                  }, /* International Date Line East */
-	{ "idlw", 0,    HOUR ( 12), NULL                  }, /* International Date Line West */
-	{ "ist",  0,   -HOUR (5.5), "Asia/Calcutta"       }, /* Indian Standard */
-	{ "it",   0,   -HOUR (3.5), "Asia/Tehran"         }, /* Iran */
-	{ "jst",  0,   -HOUR (  9), "Asia/Tokyo"          }, /* Japan Standard, USSR Zone 8 */
-	{ "jt",   0,   -HOUR (7.5), NULL                  }, /* Java (3pm in Cronusland!) */
-	{ "k",    0,    HOUR (-10), NULL                  },
-	{ "l",    0,    HOUR (-11), NULL                  },
-	{ "m",    0,    HOUR (-12), NULL                  },
-	{ "mdt",  1,    HOUR (  7), "America/Phoenix"     }, /* Mountain Daylight */
-	{ "mest", 1,   -HOUR (  1), "MET"                 }, /* Middle European Summer */
-	{ "mesz", 1,   -HOUR (  1), "MET"                 }, /* Middle European Summer */
-	{ "met",  0,   -HOUR (  1), "MET"                 }, /* Middle European */
-	{ "mewt", 0,   -HOUR (  1), "MET"                 }, /* Middle European Winter */
-	{ "msd",  1,    HOUR (  3), "Europe/Moscow"       }, /* Moscow Summer */
-	{ "msk",  0,    HOUR (  3), "Europe/Moscow"       }, /* Moscow */
-	{ "mst",  0,    HOUR (  7), "America/Phoenix"     }, /* Mountain Standard */
-	{ "n",    0,    HOUR (  1), NULL                  },
-	{ "ndt",  1,    HOUR (3.5), "America/St_Johns"    }, /* Newfoundland Daylight */
-	{ "nft",  0,    HOUR (3.5), "America/St_Johns"    }, /* Newfoundland */
-	{ "nst",  0,    HOUR (3.5), "America/St_Johns"    }, /* Newfoundland Standard */
-	{ "nt",   0,    HOUR ( 11), NULL                  }, /* Nome */
-	{ "nzdt", 1,   -HOUR ( 12), "NZ"                  }, /* New Zealand Daylight */
-	{ "nzst", 0,   -HOUR ( 12), "NZ"                  }, /* New Zealand Standard */
-	{ "nzt",  0,   -HOUR ( 12), "NZ"                  }, /* New Zealand */
-	{ "o",    0,    HOUR (  2), NULL                  },
-	{ "p",    0,    HOUR (  3), NULL                  },
-	{ "pdt",  1,    HOUR (  8), "America/Los_Angeles" }, /* Pacific Daylight */
-	{ "pst",  0,    HOUR (  8), "America/Los_Angeles" }, /* Pacific Standard */
-	{ "q",    0,    HOUR (  4), NULL                  },
-	{ "r",    0,    HOUR (  5), NULL                  },
-	{ "s",    0,    HOUR (  6), NULL                  },
-	{ "slst", 1,   -HOUR (  1), "Europe/Oslo"         }, /* Skien Local Summer Time */
-	{ "slt",  0,   -HOUR (  1), "Europe/Oslo"         }, /* Skien Local Time */
-	{ "sst",  1,   -HOUR (  1), "Europe/Stockholm"    }, /* Swedish Summer */
-	{ "swt",  0,   -HOUR (  1), "Europe/Stockholm"    }, /* Swedish Winter */
-	{ "t",    0,    HOUR (  7), NULL                  },
-	{ "u",    0,    HOUR (  8), NULL                  },
-	{ "ut",   0,    HOUR (  0), "UTC"                 }, /* Universal (Coordinated) */
-	{ "utc",  0,    HOUR (  0), "UTC"                 },
-	{ "v",    0,    HOUR (  9), NULL                  },
-	{ "w",    0,    HOUR ( 10), NULL                  },
-	{ "wadt", 1,   -HOUR (  7), "Australia/Perth"     }, /* West Australian Daylight */
-	{ "wast", 0,   -HOUR (  7), "Australia/Perth"     }, /* West Australian Standard */
-	{ "wat",  0,    HOUR (  1), "Africa/Dakar"        }, /* West Africa */
-	{ "wet",  0,    HOUR (  0), "Europe/London"       }, /* Western European */
-	{ "x",    0,    HOUR ( 11), NULL                  },
-	{ "y",    0,    HOUR ( 12), NULL                  },
-	{ "ydt",  1,    HOUR (  9), "America/Anchorage"   }, /* Yukon Daylight */
-	{ "yst",  0,    HOUR (  9), "America/Anchorage"   }, /* Yukon Standard */
-	{ "z",    0,    HOUR (  0), NULL                  },
-	{ "zp4",  0,   -HOUR (  4), NULL                  }, /* USSR Zone 3 */
-	{ "zp5",  0,   -HOUR (  5), NULL                  }, /* USSR Zone 4 */
-	{ "zp6",  0,   -HOUR (  6), NULL                  }, /* USSR Zone 5 */
-#if 0
-	/* For completeness.  BST is also British Summer, and GST is
-	 * also Guam Standard. */
-	{ "bst",  0,   HOUR ( 3), NULL },  /* Brazil Standard */
-	{ "gst",  0,   HOUR ( 3), NULL },  /* Greenland Standard */
+#include "timezonemap.h"
+	{ NULL, 0, 0, NULL },
+};
 
-	/* For completeness.  NST is also Newfoundland Standard, and SST is
-	 * also Swedish Summer. */
-	{ "nst",  0,   -HOUR (6.5), NULL },/* North Sumatra */
-	{ "sst",  0,   -HOUR (7), NULL },  /* South Sumatra, USSR Zone 6 */
-#endif
+static timelib_tz_lookup_table timelib_timezone_fallbackmap[] = {
+#include "fallbackmap.h"
+	{ NULL, 0, 0, NULL },
 };
 
 static timelib_relunit const timelib_relunit_lookup[] = {
@@ -650,24 +555,37 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, Scanner *s)
 	}
 }
 
-static timelib_tz_lookup_table* zone_search(const char *word, int left, int right)
+static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffset, int isdst)
 {
-	int mid, cmp;
-
-	if (left > right) {
-		return NULL; /* not found */
+	int first_found = 0;
+	timelib_tz_lookup_table  *tp, *first_found_elem;
+	timelib_tz_lookup_table  *fmp;
+	
+	for (tp = timelib_timezone_lookup; tp->name; tp++) {
+		if (strcasecmp(word, tp->name) == 0) {
+			if (!first_found) {
+				first_found = 1;
+				first_found_elem = tp;
+				if (gmtoffset == -1) {
+					return tp;
+				}
+			}
+			if (tp->gmtoffset == gmtoffset) {
+				return tp;
+			}
+		}
 	}
- 
-	mid = (left + right) / 2;
- 
-	cmp = strcasecmp(word, timelib_timezone_lookup[mid].name);
-	if (cmp < 0) {
-		return zone_search(word, left, mid - 1);
-	} else if (cmp > 0) {
-		return zone_search(word, mid + 1, right);
-	} else { /* (cmp == 0) */
-		return (timelib_tz_lookup_table*)&timelib_timezone_lookup[mid];
+	if (first_found) {
+		return first_found_elem;
 	}
+	/* Still didn't find anything, let's find the zone solely based on
+	 * offset/isdst then */
+	for (fmp = timelib_timezone_fallbackmap; fmp->name; fmp++) {
+		if ((fmp->gmtoffset * 3600) == gmtoffset && fmp->type == isdst) {
+			return fmp;
+		}
+	}
+	return NULL;
 }
 
 static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found)
@@ -684,9 +602,10 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	word = calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
-	if ((tp = zone_search(word, 0, sizeof(timelib_timezone_lookup)/sizeof(*timelib_timezone_lookup)-1))) {
-		value = tp->value;
+	if ((tp = zone_search(word, -1, 0))) {
+		value = -tp->gmtoffset / 60;
 		*dst = tp->type;
+		value += tp->type * 60;
 		*found = 1;
 	} else {
 		*found = 0;
@@ -1504,11 +1423,11 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 */
 }
 
-char *timelib_timezone_id_from_abbr(const char *abbr)
+char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst)
 {
 	timelib_tz_lookup_table *tp;
 
-	tp = zone_search(abbr, 0, sizeof(timelib_timezone_lookup) / sizeof(*timelib_timezone_lookup) - 1);
+	tp = zone_search(abbr, gmtoffset, isdst);
 	if (tp) {
 		return (tp->full_tz_name);
 	} else {
