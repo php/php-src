@@ -1,3 +1,40 @@
+2005-09-30  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * (PHP_5_1)
+      NEWS:
+      - entry for #33125
+
+    * ext/gd/libgd/gd.c:
+      - MFB: #33125, alpha emulation broken
+
+    * (PHP_5_1)
+      ext/gd/libgd/gd.c:
+      - #33125, imagecopymergegray produces mosaic rainbow effect
+        at some point the alpha emulation formula has been broken
+        restored.
+
+2005-09-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      pear/Makefile.frag:
+      - Try to fetch the necessary file via wget
+
+2005-09-30  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - substr_replace(): call correct funcn for string conversion
+
+2005-09-30  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_5_1)
+      NEWS:
+      reorder,reword,merge
+
+2005-09-30  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/levenshtein.c:
+      - Unicode impl of levenshtein()
+
 2005-09-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_1)
