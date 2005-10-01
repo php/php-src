@@ -136,7 +136,8 @@ PHP                                                                        NEWS
 - Fixed bug #33414 (Comprehensive list of incorrect days returned after
   strtotime() / date() tests). (Derick)
 - Fixed bug #33326 (Cannot build extensions with phpize on Macosx). (Jani)
-- Fixed bug #33125 (imagecopymergegray produces mosaic rainbow effect) (Pierre)
+- Fixed bug #33125 (imagecopymergegray() produces mosaic rainbow effect).
+  (Pierre)
 - Fixed bug #32981 (ReflectionMethod::getStaticVariables() causes apache2.0.54
   seg fault). (Dmitry)
 - Fixed bug #32937 (open_basedir looses trailing / in the limiter). (Adam Conrad)
