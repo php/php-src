@@ -23,4 +23,5 @@ if test "$PHP_SIMPLEXML" != "no"; then
     AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
   ])
   PHP_ADD_EXTENSION_DEP(simplexml, libxml)
+  PHP_ADD_EXTENSION_DEP(simplexml, spl, true)
 fi
