@@ -49,7 +49,7 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 /* From parse_date.re */
 timelib_time *timelib_strtotime(char *s, int *errors);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
-char *timelib_timezone_id_from_abbr(const char *abbr);
+char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
 
 /* From tm2unixtime.c */

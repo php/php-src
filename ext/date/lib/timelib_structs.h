@@ -149,7 +149,7 @@ typedef struct timelib_time {
 typedef struct _timelib_tz_lookup_table {
 	char       *name;
 	int         type;
-	int         value;
+	int         gmtoffset;
 	char       *full_tz_name;
 } timelib_tz_lookup_table;
 
