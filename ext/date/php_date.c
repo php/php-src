@@ -265,7 +265,7 @@ static char* guess_timezone(TSRMLS_D)
 	}
 	/* Check environment variable */
 	env = getenv("TZ");
-	if (env && *env) {
+	if (env && *env && strlen(env)) {
 		return env;
 	}
 	/* Check config setting for default timezone */
@@ -281,12 +281,12 @@ static char* guess_timezone(TSRMLS_D)
 		
 		the_time = time(NULL);
 		ta = php_localtime_r(&the_time, &tmbuf);
-		tzid = timelib_timezone_id_from_abbr(ta->tm_zone);
+		tzid = timelib_timezone_id_from_abbr(ta->tm_zone, ta->tm_gmtoff, ta->tm_isdst);
 		if (! tzid) {
 			tzid = "UTC";
 		}
 		
-		php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s' instead.", tzid, ta->tm_zone);
+		php_error_docref(NULL TSRMLS_CC, E_STRICT, "It is not safe to rely on the systems timezone settings, please use the date.timezone setting, the TZ environment variable or the date_default_timezone_set() function. We use '%s' for '%s/%.1f/%s' instead.", tzid, ta->tm_zone, (float) (ta->tm_gmtoff / 3600), ta->tm_isdst ? "DST" : "no DST");
 		return tzid;
 	}
 #endif
@@ -1228,7 +1228,7 @@ PHP_FUNCTION(timezone_open)
 	if (!tzi) {
 		char *tzid;
 		
-		tzid = timelib_timezone_id_from_abbr(tz);
+		tzid = timelib_timezone_id_from_abbr(tz, -1, 0);
 		if (tzid) {
 			tzi = timelib_parse_tzfile(tzid);
 		}
@@ -1325,12 +1325,12 @@ PHP_FUNCTION(timezone_abbreviations_list)
 	table = timelib_timezone_abbreviations_list();
 	array_init(return_value);
 	entry = table;
-
+#warning NEED TO MAKE SURE ABBRS ARE NOT UNIQUEIZED HERE
 	do {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
 		add_assoc_bool(element, "dst", entry->type);
-		add_assoc_long(element, "offset", - entry->value * 60);
+		add_assoc_long(element, "offset", entry->gmtoffset);
 		if (entry->full_tz_name) {
 			add_assoc_string(element, "timezone_id", entry->full_tz_name, 1);
 		} else {
