@@ -823,7 +823,7 @@ static PHP_METHOD(PDO, getAttribute)
 			RETURN_LONG(dbh->error_mode);
 
 		case PDO_ATTR_DRIVER_NAME:
-			RETURN_STRINGL(dbh->driver->driver_name, dbh->driver->driver_name_len, 1);
+			RETURN_STRINGL((char*)dbh->driver->driver_name, dbh->driver->driver_name_len, 1);
 
 		case PDO_ATTR_STATEMENT_CLASS:
 			array_init(return_value);
@@ -1062,6 +1062,23 @@ static PHP_METHOD(PDO, __sleep)
 }
 /* }}} */
 
+/* {{{ proto array pdo_drivers()
+   Return array of available PDO drivers */
+static PHP_METHOD(PDO, getAvailableDrivers)
+{
+	HashPosition pos;
+	pdo_driver_t **pdriver;
+	
+	array_init(return_value);
+
+	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
+	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
+		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len, 1);
+		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
+	}
+}
+/* }}} */
+
 function_entry pdo_dbh_functions[] = {
 	ZEND_MALIAS(PDO, __construct, dbh_constructor,	NULL, 			ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
@@ -1075,9 +1092,10 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, quote,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, __wakeup,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, __sleep,		NULL,					ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	PHP_ME(PDO, quote,			NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, getAvailableDrivers, NULL,				ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
 

@@ -42,7 +42,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo)
 /* True global resources - no need for thread safety here */
 
 /* the registry of PDO drivers */
-static HashTable pdo_driver_hash;
+HashTable pdo_driver_hash;
 
 /* we use persistent resources for the driver connection stuff */
 static int le_ppdo;
@@ -317,7 +317,11 @@ PHP_MINIT_FUNCTION(pdo)
 		"PDO persistent database", module_number);
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
-	pdo_exception_ce = zend_register_internal_class_ex(&ce, php_pdo_get_exception_base(0 TSRMLS_CC), NULL TSRMLS_CC);
+#if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
+	pdo_exception_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException, NULL TSRMLS_CC);
+#else
+	pdo_exception_ce = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+#endif
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	pdo_dbh_init(TSRMLS_C);
