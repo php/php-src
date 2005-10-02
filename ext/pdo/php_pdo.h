@@ -24,7 +24,7 @@
 #include "zend.h"
 
 #if PHP_MAJOR_VERSION > 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
-#define can_handle_soft_dependency_on_SPL
+#define can_handle_soft_dependency_on_SPL 1
 #endif
 
 extern zend_module_entry pdo_module_entry;
