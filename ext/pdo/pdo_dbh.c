@@ -511,7 +511,7 @@ static PHP_METHOD(PDO, prepare)
 			|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
 		) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
-				"PDO_ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
+				"PDO_ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 				"the classname must be a string specifying an existing class"
 				TSRMLS_CC);
 			PDO_HANDLE_DBH_ERR();
@@ -544,8 +544,8 @@ static PHP_METHOD(PDO, prepare)
 			ctor_args = NULL;
 		}
 	} else {
-		dbstmt_ce = U_CLASS_ENTRY(pdo_dbstmt_ce);
-		ctor_args = NULL;
+		dbstmt_ce = dbh->def_stmt_ce;
+		ctor_args = dbh->def_stmt_ctor_args;
 	}
 
 	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
@@ -712,6 +712,62 @@ static PHP_METHOD(PDO, setAttribute)
 			convert_to_long(value);
 			dbh->stringify = Z_LVAL_P(value) ? 1 : 0;
 			RETURN_TRUE;
+
+		case PDO_ATTR_STATEMENT_CLASS: {
+			/* array(string classname, array(mixed ctor_args)) */
+			zend_class_entry **pce;
+			zval **item;
+
+			if (dbh->is_persistent) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", 
+					"PDO_ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
+					TSRMLS_CC);
+				PDO_HANDLE_DBH_ERR();
+				RETURN_FALSE;
+			}
+			if (Z_TYPE_P(value) != IS_ARRAY
+				|| zend_hash_index_find(Z_ARRVAL_P(value), 0, (void**)&item) == FAILURE
+				|| !PDO_ZVAL_PP_IS_TEXT(item)
+				|| zend_u_lookup_class(Z_TYPE_PP(item), Z_UNIVAL_PP(item), Z_UNILEN_PP(item), &pce TSRMLS_CC) == FAILURE
+			) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", 
+					"PDO_ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
+					"the classname must be a string specifying an existing class"
+					TSRMLS_CC);
+				PDO_HANDLE_DBH_ERR();
+				RETURN_FALSE;
+			}
+			if (!instanceof_function(*pce, U_CLASS_ENTRY(pdo_dbstmt_ce) TSRMLS_CC)) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", 
+					"user-supplied statement class must be derived from PDOStatement" TSRMLS_CC);
+				PDO_HANDLE_DBH_ERR();
+				RETURN_FALSE;
+			}
+			if ((*pce)->constructor && !((*pce)->constructor->common.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED))) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", 
+					"user-supplied statement class cannot have a public constructor" TSRMLS_CC);
+				PDO_HANDLE_DBH_ERR();
+				RETURN_FALSE;
+			}
+			dbh->def_stmt_ce = *pce;
+			if (dbh->def_stmt_ctor_args) {
+				zval_ptr_dtor(&dbh->def_stmt_ctor_args);
+				dbh->def_stmt_ctor_args = NULL;
+			}
+			if (zend_hash_index_find(Z_ARRVAL_P(value), 1, (void**)&item) == SUCCESS) {
+				if (Z_TYPE_PP(item) != IS_ARRAY) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", 
+						"PDO_ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
+						"ctor_args must be an array"
+					TSRMLS_CC);
+					PDO_HANDLE_DBH_ERR();
+					RETURN_FALSE;
+				}
+				(*item)->refcount++;
+				dbh->def_stmt_ctor_args = *item;
+			}
+			RETURN_TRUE;
+		}
 			
 		default:
 			;
@@ -900,7 +956,7 @@ static PHP_METHOD(PDO, query)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	if (!pdo_stmt_instantiate(dbh, return_value, U_CLASS_ENTRY(pdo_dbstmt_ce), NULL TSRMLS_CC)) {
+	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, dbh->def_stmt_ctor_args TSRMLS_CC)) {
 		pdo_raise_impl_error(dbh, NULL, "HY000", "failed to instantiate user supplied statement class" TSRMLS_CC);
 		return;
 	}
@@ -934,7 +990,7 @@ static PHP_METHOD(PDO, query)
 					stmt->executed = 1;
 				}
 				if (ret) {
-					pdo_stmt_construct(stmt, return_value, U_CLASS_ENTRY(pdo_dbstmt_ce), NULL TSRMLS_CC);
+					pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, dbh->def_stmt_ctor_args TSRMLS_CC);
 					return;
 				}
 			}
@@ -1244,6 +1300,10 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	if (dbh->password) {
 		pefree(dbh->password, dbh->is_persistent);
 	}
+	
+	if (dbh->def_stmt_ctor_args) {
+		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
+	}
 
 	pefree(dbh, dbh->is_persistent);
 }
@@ -1281,6 +1341,7 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 	ALLOC_HASHTABLE(dbh->properties);
 	zend_hash_init(dbh->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(dbh->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	dbh->def_stmt_ce = U_CLASS_ENTRY(pdo_dbstmt_ce);
 	
 	retval.handle = zend_objects_store_put(dbh, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)pdo_dbh_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_dbh_object_handlers;
