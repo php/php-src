@@ -73,7 +73,6 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #  include FT_FREETYPE_H
 # else
 # endif
-# include "gdttf.h"
 #endif
 
 #ifndef M_PI
@@ -3181,9 +3180,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 # elif HAVE_GD_STRINGTTF
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
 # endif
-
-#else /* !USE_GD_IMGSTRTTF */
-	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
 #endif
 
 	if (error) {
