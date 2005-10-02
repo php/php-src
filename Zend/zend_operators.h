@@ -346,12 +346,11 @@ END_EXTERN_C()
 		}										\
 	} while (0);								\
 
-#define convert_to_explicit_type_ex(ppzv, type)	\
-	if ((*ppzv)->type != type) {				\
-		SEPARATE_ZVAL_IF_NOT_REF(ppzv);			\
-		convert_to_explicit_type(*ppzv, type);	\
-	}											\
-}
+#define convert_to_explicit_type_ex(ppzv, str_type)	\
+	if ((*ppzv)->type != str_type) {				\
+		SEPARATE_ZVAL_IF_NOT_REF(ppzv);				\
+		convert_to_explicit_type(*ppzv, str_type);	\
+	}
 
 #define convert_to_boolean_ex(ppzv)	convert_to_ex_master(ppzv, boolean, BOOL)
 #define convert_to_long_ex(ppzv)	convert_to_ex_master(ppzv, long, LONG)
