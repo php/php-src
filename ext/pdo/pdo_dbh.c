@@ -919,6 +919,10 @@ static PHP_METHOD(PDO, errorCode)
 	}
 	PDO_CONSTRUCT_CHECK;
 
+	if (dbh->query_stmt) {
+		RETURN_STRING(dbh->query_stmt->error_code, 1);
+	}
+	
 	RETURN_STRING(dbh->error_code, 1);
 }
 /* }}} */
@@ -935,10 +939,14 @@ static PHP_METHOD(PDO, errorInfo)
 	PDO_CONSTRUCT_CHECK;
 
 	array_init(return_value);
-	add_next_index_string(return_value, dbh->error_code, 1);
 
+	if (dbh->query_stmt) {
+		add_next_index_string(return_value, dbh->query_stmt->error_code, 1);
+	} else {
+		add_next_index_string(return_value, dbh->error_code, 1);
+	}
 	if (dbh->methods->fetch_err) {
-		dbh->methods->fetch_err(dbh, NULL, return_value TSRMLS_CC);
+		dbh->methods->fetch_err(dbh, dbh->query_stmt, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -981,8 +989,6 @@ static PHP_METHOD(PDO, query)
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL TSRMLS_CC)) {
 		if (ZEND_NUM_ARGS() == 1 || SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 1)) {
-			PDO_STMT_CLEAR_ERR();
-
 			/* now execute the statement */
 			PDO_STMT_CLEAR_ERR();
 			if (stmt->methods->executer(stmt TSRMLS_CC)) {
@@ -1000,12 +1006,13 @@ static PHP_METHOD(PDO, query)
 			}
 		}
 		/* something broke */
+		dbh->query_stmt = stmt;
+		dbh->query_stmt_zval = *return_value;
+		PDO_HANDLE_STMT_ERR();
+	} else {
+		PDO_HANDLE_DBH_ERR();
+		zval_dtor(return_value);
 	}
-
-	PDO_HANDLE_STMT_ERR();
-		
-	/* kill the object handle for the stmt here */
-	zval_dtor(return_value);
 
 	RETURN_FALSE;
 }

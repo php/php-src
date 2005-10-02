@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050711
+#define PDO_DRIVER_API	20051002
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -477,8 +477,14 @@ struct _pdo_dbh_t {
 	pdo_driver_t *driver;
 	
 	zend_class_entry *def_stmt_ce;
-	
 	zval *def_stmt_ctor_args;
+
+	/* when calling PDO::query(), we need to keep the error
+	 * context from the statement around until we next clear it.
+	 * This will allow us to report the correct error message
+	 * when PDO::query() fails */
+	pdo_stmt_t *query_stmt;
+	zval query_stmt_zval;
 };
 
 /* describes a column */
