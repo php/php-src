@@ -74,7 +74,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 	} else if (PG(register_globals)) {
 		symtable1 = EG(active_symbol_table);
 		/* GLOBALS hijack attempt, reject parameter */
-		if (!strncmp("GLOBALS", var, sizeof("GLOBALS")) || !strncmp("GLOBALS", var, sizeof("GLOBALS[")-1) {
+		if (!strncmp("GLOBALS", var, sizeof("GLOBALS")) || !strncmp("GLOBALS", var, sizeof("GLOBALS[")-1)) {
 			return;
 		}
 	}
