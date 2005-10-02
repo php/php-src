@@ -475,6 +475,10 @@ struct _pdo_dbh_t {
 	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX];
 
 	pdo_driver_t *driver;
+	
+	zend_class_entry *def_stmt_ce;
+	
+	zval *def_stmt_ctor_args;
 };
 
 /* describes a column */
