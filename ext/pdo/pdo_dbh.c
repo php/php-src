@@ -84,7 +84,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		}
 	} else {
 		zval *ex;
-		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception();
+		zend_class_entry *def_ex = php_pdo_get_exception_base(1 TSRMLS_CC), *pdo_ex = php_pdo_get_exception();
 
 		MAKE_STD_ZVAL(ex);
 		object_init_ex(ex, pdo_ex);
@@ -165,7 +165,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 		}
 	} else if (EG(exception) == NULL) {
 		zval *ex;
-		zend_class_entry *def_ex = zend_exception_get_default(), *pdo_ex = php_pdo_get_exception();
+		zend_class_entry *def_ex = php_pdo_get_exception_base(1 TSRMLS_CC), *pdo_ex = php_pdo_get_exception();
 
 		MAKE_STD_ZVAL(ex);
 		object_init_ex(ex, pdo_ex);
@@ -1074,7 +1074,6 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 }
 /* }}} */
 
-
 function_entry pdo_dbh_functions[] = {
 	ZEND_MALIAS(PDO, __construct, dbh_constructor,	NULL, 			ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
@@ -1346,6 +1345,10 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	if (dbh->password) {
 		pefree(dbh->password, dbh->is_persistent);
+	}
+
+	if (dbh->def_stmt_ctor_args) {
+		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 	}
 
 	pefree(dbh, dbh->is_persistent);
