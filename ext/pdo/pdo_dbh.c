@@ -824,6 +824,15 @@ static PHP_METHOD(PDO, getAttribute)
 
 		case PDO_ATTR_DRIVER_NAME:
 			RETURN_STRINGL(dbh->driver->driver_name, dbh->driver->driver_name_len, 1);
+
+		case PDO_ATTR_STATEMENT_CLASS:
+			array_init(return_value);
+			add_next_index_string(return_value, dbh->def_stmt_ce->name, 1);
+			if (dbh->def_stmt_ctor_args) {
+				dbh->def_stmt_ctor_args->refcount++;
+				add_next_index_zval(return_value, dbh->def_stmt_ctor_args);
+			}
+			return;
 	}
 	
 	if (!dbh->methods->get_attribute) {

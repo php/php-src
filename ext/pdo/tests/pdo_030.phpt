@@ -71,7 +71,9 @@ unset($stmt);
 
 echo "===QUERY===\n";
 
+var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
 $db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatementx', array($db)));
+var_dump($db->getAttribute(PDO::ATTR_STATEMENT_CLASS));
 $stmt = $db->query('SELECT * FROM test');
 var_dump(get_class($stmt));
 var_dump(get_class($stmt->dbh));
@@ -85,10 +87,24 @@ foreach($stmt as $obj) {
 echo "===DONE===\n";
 exit(0);
 ?>
---EXPECT--
+--EXPECTF--
 string(11) "PDODatabase"
 string(12) "PDOStatement"
 ===QUERY===
+array(1) {
+  [0]=>
+  string(12) "PDOStatement"
+}
+array(2) {
+  [0]=>
+  string(13) "PDOStatementX"
+  [1]=>
+  array(1) {
+    [0]=>
+    object(PDODatabase)#%d (0) {
+    }
+  }
+}
 PDODatabase::query()
 PDOStatementX::__construct()
 string(13) "PDOStatementX"
