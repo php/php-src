@@ -4803,34 +4803,30 @@ PHP_FUNCTION(nl2br)
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
-	char *buf;
-	zval **str, **allow=NULL;
-	char *allowed_tags=NULL;
-	int allowed_tags_len=0;
-	size_t retval_len;
+	void *str, *allow=NULL;
+	int32_t str_len, allow_len;
+	zend_uchar str_type, allow_type;
+	void *buf;
+	int32_t retval_len;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &str) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &str, &allow) == FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(allow);
-			allowed_tags = Z_STRVAL_PP(allow);
-			allowed_tags_len = Z_STRLEN_PP(allow);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "T|T", &str, &str_len, &str_type,
+							  &allow, &allow_len, &allow_type) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(str);
-	buf = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-	retval_len = php_strip_tags(buf, Z_STRLEN_PP(str), NULL, allowed_tags, allowed_tags_len);
-	RETURN_STRINGL(buf, retval_len, 0);
+
+	if (str_type == IS_UNICODE) {
+		buf = eustrndup(str, str_len);
+		retval_len = php_u_strip_tags((UChar *)buf, str_len, NULL, (UChar *)allow, allow_len TSRMLS_CC);
+		RETURN_UNICODEL((UChar *)buf, retval_len, 0);
+	} else {
+		buf = estrndup(str, str_len);
+		retval_len = php_strip_tags((char *)buf, str_len, NULL, (char *)allow, allow_len);
+		if (str_type == IS_BINARY) {
+			RETURN_BINARYL((char *)buf, retval_len, 0);
+		} else {
+			RETURN_STRINGL((char *)buf, retval_len, 0);
+		}
+	}
 }
 /* }}} */
 
@@ -4971,14 +4967,71 @@ PHP_FUNCTION(parse_str)
 
 #define PHP_TAG_BUF_SIZE 1023
 
-/* {{{ php_tag_find
+/* php_u_tag_find / php_tag_find
  *
  * Check if tag is in a set of tags 
  *
  * states:
- * 
+ *
  * 0 start tag
  * 1 first non-whitespace char seen
+ */
+
+/* {{{ php_u_tag_find
+ */
+int php_u_tag_find(UChar *tag, int32_t len, UChar *set, int32_t set_len)
+{
+	int32_t idx = 0;
+	UChar32 ch, *norm, *n;
+	int state = 0, done = 0;
+
+	if (!len) {
+		return 0;
+	}
+
+	norm = eumalloc(len+1);
+	n = norm;
+
+	while (!done) {
+		U16_NEXT(tag, idx, len, ch);
+		switch (u_tolower(ch)) {
+		case '<':
+			*(n++) = ch;
+			break;
+		case '>':
+			done = 1;
+			break;
+		default:
+			if (u_isWhitespace(ch) == FALSE) {
+				if (state == 0) {
+					state = 1;
+					if (ch != '/')
+						*(n++) = ch;
+				} else {
+					*(n++) = ch;
+				}
+			} else {
+				if (state == 1)
+					done = 1;
+			}
+			break;
+		}
+	}
+	*(n++) = '>';
+	*n = '\0';
+
+	if (u_strFindFirst(tag, len, set, set_len) != NULL) {
+		done = 1;
+	} else {
+		done = 0;
+	}
+
+	efree(norm);
+	return done;
+}
+/* }}} */
+
+/* {{{ php_tag_find
  */
 int php_tag_find(char *tag, int len, char *set) {
 	char c, *n, *t;
@@ -5033,7 +5086,7 @@ int php_tag_find(char *tag, int len, char *set) {
 }
 /* }}} */
 
-/* {{{ php_strip_tags
+/* php_u_strip_tags / php_strip_tags
  
 	A simple little state-machine to strip out html and php tags 
 	
@@ -5053,6 +5106,231 @@ int php_tag_find(char *tag, int len, char *set) {
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
+/* {{{ php_u_strip_tags
+ */
+PHPAPI int32_t php_u_strip_tags(UChar *rbuf, int32_t len, int *stateptr, UChar *allow, int32_t allow_len TSRMLS_DC)
+{
+	UChar *tbuf = NULL, *tp = NULL;
+	UChar *buf, *rp;
+	int32_t idx = 0, tmp, codepts;
+	UChar32 ch, next, prev1, prev2, last, doctype[6];
+	int br = 0, depth = 0, state = 0, i;
+
+	if (stateptr)
+		state = *stateptr;
+
+	buf = eustrndup(rbuf, len);
+	rp = rbuf;
+	if (allow) {
+		php_u_strtolower(&allow, &allow_len, UG(default_locale));
+		tbuf = eumalloc(PHP_TAG_BUF_SIZE+1);
+		tp = tbuf;
+	}
+
+	last = 0x00;
+	ch = prev1 = prev2 = next = -1;
+	codepts = 0;
+	while (idx < len) {
+		prev2 = prev1; prev1 = ch;
+		U16_NEXT(buf, idx, len, ch);
+		codepts++;
+
+		switch (ch) {
+		case 0x00: /* '\0' */
+			break;
+
+		case 0x3C: /* '<' */
+			U16_GET(buf, 0, idx, len, next);
+			if (u_isWhitespace(next) == TRUE) {
+				goto reg_u_char;
+			}
+			if (state == 0) {
+				last = 0x3C;
+				state = 1;
+				if (allow) {
+					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+					*(tp++) = ch;
+				}
+			} else if (state == 1) {
+				depth++;
+			}
+			break;
+
+		case 0x28: /* '(' */
+			if (state == 2) {
+				if (last != 0x22 && last != 0x27) { /* '"' & '\'' */
+					last = 0x28;
+					br++;
+				}
+			} else if (allow && state == 1) {
+				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+				*(tp++) = ch;
+			} else if (state == 0) {
+				*(rp++) = ch;
+			}
+			break;	
+
+		case 0x29: /* ')' */
+			if (state == 2) {
+				if (last != 0x22 && last != 0x27) { /* '"' & '\'' */
+					last = ch;
+					br--;
+				}
+			} else if (allow && state == 1) {
+				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+				*(tp++) = ch;
+			} else if (state == 0) {
+				*(rp++) = ch;
+			}
+			break;	
+
+		case 0x3E: /* '>' */
+			if (depth) {
+				depth--;
+				break;
+			}
+			
+			switch (state) {
+			case 1: /* HTML/XML */
+				last = ch;
+				state = 0;
+				if (allow) {
+					tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+					*(tp++) = ch;
+					*(tp) = 0;
+					if (php_u_tag_find(tbuf, tp-tbuf, allow, allow_len)) {
+						u_memcpy(rp, tbuf, tp-tbuf);
+						rp += tp-tbuf;
+					}
+					tp = tbuf;
+				}
+				break;
+						
+			case 2: /* PHP */
+				if (!br && last != 0x22 && prev1 == 0x3F) { /* '"' & '?' */
+					state = 0;
+					tp = tbuf;
+				}
+				break;
+						
+			case 3:
+				state = 0;
+				tp = tbuf;
+				break;
+
+			case 4: /* JavaScript/CSS/etc... */
+				if (codepts >= 2 && prev1 == 0x2D && prev2 == 0x2D) { /* '-' */
+					state = 0;
+					tp = tbuf;
+				}
+				break;
+
+			default:
+				*(rp++) = ch;
+				break;
+			}
+			break;
+
+		case 0x22: /* '"' */
+		case 0x27: /* '\'' */
+			if (state == 2 && prev1 != 0x5C) { /* '\\' */
+				if (last == ch) {
+					last = 0x00;
+				} else if (last != 0x5C) {
+					last = ch;
+				}
+			} else if (state == 0) {
+				*(rp++) = ch;
+			} else if (allow && state == 1) {
+				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+				*(tp++) = ch;
+			}
+			break;
+			
+		case 0x21: /* '!' */
+			/* JavaScript & Other HTML scripting languages */
+			if (state == 1 && prev1 == 0x3C) { /* '<' */
+				state = 3;
+				last = ch;
+			} else {
+				if (state == 0) {
+					(*rp++) = 0x21;
+				} else if (allow && state == 1) {
+					tp = ((tp-tbuf) >= PHP_TAG_BUF_SIZE ? tbuf: tp);
+					*(tp++) = 0x21;
+				}
+			}
+			break;
+
+		case 0x2D: /* '-' */
+			if (state == 3 && codepts >= 2 && prev1 == 0x2D && prev2 == 0x21) { /* '-' & '!' */
+				state = 4;
+			} else {
+				goto reg_u_char;
+			}
+			break;
+
+		case 0x3F: /* '?' */
+			if (state == 1 && prev1 == 0x3C) { /* '<' */
+				br = 0;
+				state = 2;
+				break;
+			}
+
+		case 'E':
+		case 'e':
+			/* !DOCTYPE exception */
+			if (state==3 && codepts > 6) {
+				tmp = idx;
+				for (i = 0 ; i < 6 ; i++) {
+					U16_PREV(buf, 0, tmp, doctype[i]);
+				}
+				if (u_tolower(doctype[0])=='p' && u_tolower(doctype[1])=='y' &&
+					u_tolower(doctype[2])=='t' && u_tolower(doctype[3])=='c' &&
+					u_tolower(doctype[4])=='o' && u_tolower(doctype[5])=='d') {
+					state = 1;
+					break;
+				}
+			}
+			/* fall-through */
+
+		case 'l':
+
+			/* swm: If we encounter '<?xml' then we shouldn't be in
+			 * state == 2 (PHP). Switch back to HTML.
+			 */
+
+			if (state == 2 && codepts > 2 && prev1 == 'm' && prev2 == 'x') {
+				state = 1;
+				break;
+			}
+			/* fall-through */
+
+		default:
+reg_u_char:
+			if (state == 0) {
+				rp += zend_codepoint_to_uchar(ch, rp);
+			} else if (allow && state == 1) {
+				tp = ((tp-tbuf) >= UBYTES(PHP_TAG_BUF_SIZE) ? tbuf: tp);
+				tp += zend_codepoint_to_uchar(ch, tp);
+			} 
+			break;
+		}
+	}
+
+	*rp = 0;
+	efree(buf);
+	if (allow)
+		efree(tbuf);
+	if (stateptr)
+		*stateptr = state;
+
+	return (size_t)(rp-rbuf);
+}
+/* }}} */
+
+/* {{{ php_strip_tags
+ */
 PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
