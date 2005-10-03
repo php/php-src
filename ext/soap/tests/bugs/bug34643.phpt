@@ -36,6 +36,7 @@ $cl = new LocalSoapClient(dirname(__FILE__).'/bug34643.wsdl', array("trace"=>1))
 print_r($cl->__getFunctions());
 echo $cl->get_it("aaa")."\n";
 echo $cl->get_it()."\n";
+var_dump($cl->get_it(null));
 ?>
 --EXPECT--
 Array
@@ -44,3 +45,4 @@ Array
 )
 aaa
 zzz
+NULL
