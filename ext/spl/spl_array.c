@@ -305,6 +305,10 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	case IS_STRING:
 	case IS_BINARY:
 	case IS_UNICODE:
+		if (*(char*)Z_UNIVAL_P(offset) == '\0') {
+			zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "An offset must not begin with \\0 or be empty", 0 TSRMLS_CC);
+			return;
+		}
 		value->refcount++;
 		zend_u_symtable_update(spl_array_get_hash_table(intern, 0 TSRMLS_CC), Z_TYPE_P(offset), Z_UNIVAL_P(offset), Z_UNILEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
