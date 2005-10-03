@@ -1347,6 +1347,9 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 		efree(dbh->properties);
 		dbh->properties = NULL;
 	}
+	if (dbh->cls_methods) {
+		zend_hash_destroy(&dbh->cls_methods);
+	}
 
 	if (!dbh->is_persistent) {
 		dbh_free(dbh TSRMLS_CC);
