@@ -1,3 +1,8 @@
+2005-10-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_operators.h:
+      -** empty log message ***
+
 2005-09-27  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_objects_API.c
