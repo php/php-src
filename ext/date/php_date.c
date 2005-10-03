@@ -108,6 +108,10 @@ static char* guess_timezone(TSRMLS_D);
 
 ZEND_DECLARE_MODULE_GLOBALS(date)
 
+/* True global */
+timelib_tzdb *php_date_global_timezone_db;
+int php_date_global_timezone_db_enabled;
+
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
@@ -206,6 +210,8 @@ PHP_RSHUTDOWN_FUNCTION(date)
 }
 /* }}} */
 
+#define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
+
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 #define DATE_FORMAT_RFC1036  "l, d-M-y H:i:s T"
 #define DATE_FORMAT_RFC1123  "D, d M Y H:i:s T"
@@ -230,6 +236,9 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_STRING_CONSTANT("DATE_RSS",     DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_W3C",     DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
 
+	php_date_global_timezone_db = NULL;
+	php_date_global_timezone_db_enabled = 0;
+	
 	return SUCCESS;
 }
 /* }}} */
@@ -246,8 +255,12 @@ PHP_MSHUTDOWN_FUNCTION(date)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(date)
 {
+	timelib_tzdb *tzdb = DATE_TIMEZONEDB;
+	
 	php_info_print_table_start();
 	php_info_print_table_row(2, "date/time support", "enabled");
+	php_info_print_table_row(2, "Timezone Database Version", tzdb->version);
+	php_info_print_table_row(2, "Timezone Database", php_date_global_timezone_db_enabled ? "external" : "internal");
 	php_info_print_table_row(2, "Default timezone", guess_timezone(TSRMLS_C));
 	php_info_print_table_end();
 
@@ -302,10 +315,10 @@ static timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	timelib_tzinfo *tzi;
 	
 	tz = guess_timezone(TSRMLS_C);
-	tzi = timelib_parse_tzfile(tz);
+	tzi = timelib_parse_tzfile(tz, DATE_TIMEZONEDB);
 	if (! tzi) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Timezone setting (date.timezone) or TZ environment variable contains an unknown timezone.");
-		tzi = timelib_parse_tzfile("UTC");
+		tzi = timelib_parse_tzfile("UTC", DATE_TIMEZONEDB);
 
 		if (! tzi) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
@@ -649,6 +662,13 @@ PHP_FUNCTION(gmdate)
 }
 /* }}} */
 
+/* {{{ php_date_set_tzdb - NOT THREADSAFE */
+PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
+{
+	php_date_global_timezone_db = tzdb;
+	php_date_global_timezone_db_enabled = 1;
+}
+/* }}} */
 
 /* {{{ php_parse_date: Backwards compability function */
 signed long php_parse_date(char *string, signed long *now)
@@ -657,7 +677,7 @@ signed long php_parse_date(char *string, signed long *now)
 	int           error1, error2;
 	signed long   retval;
 
-	parsed_time = timelib_strtotime(string, &error1);
+	parsed_time = timelib_strtotime(string, &error1, DATE_TIMEZONEDB);
 	timelib_update_ts(parsed_time, NULL);
 	retval = timelib_date_to_int(parsed_time, &error2);
 	timelib_time_dtor(parsed_time);
@@ -688,7 +708,7 @@ PHP_FUNCTION(strtotime)
 
 		initial_ts = emalloc(25);
 		snprintf(initial_ts, 24, "@%lu", preset_ts);
-		t = timelib_strtotime(initial_ts, &error1); /* we ignore the error here, as this should never fail */
+		t = timelib_strtotime(initial_ts, &error1, DATE_TIMEZONEDB); /* we ignore the error here, as this should never fail */
 		timelib_update_ts(t, tzi);
 		timelib_unixtime2local(now, t->sse, tzi);
 		timelib_time_dtor(t);
@@ -702,7 +722,7 @@ PHP_FUNCTION(strtotime)
 		RETURN_FALSE;
 	}
 
-	t = timelib_strtotime(times, &error1);
+	t = timelib_strtotime(times, &error1, DATE_TIMEZONEDB);
 	timelib_fill_holes(t, now, 0);
 	timelib_update_ts(t, tzi);
 	ts = timelib_date_to_int(t, &error2);
@@ -1147,7 +1167,7 @@ PHP_FUNCTION(date_create)
 
 	date_instanciate(date_ce_date, return_value TSRMLS_CC);
 	dateobj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", &error);
+	dateobj->time = timelib_strtotime(time_str_len ? time_str : "now", &error, DATE_TIMEZONEDB);
 
 	if (timezone_object) {
 		php_timezone_obj *tzobj;
@@ -1226,7 +1246,7 @@ PHP_FUNCTION(date_modify)
 	}
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
-	tmp_time = timelib_strtotime(modify, &error);
+	tmp_time = timelib_strtotime(modify, &error, DATE_TIMEZONEDB);
 	dateobj->time->relative.y = tmp_time->relative.y;
 	dateobj->time->relative.m = tmp_time->relative.m;
 	dateobj->time->relative.d = tmp_time->relative.d;
@@ -1369,12 +1389,12 @@ PHP_FUNCTION(timezone_open)
 		
 		tzid = timelib_timezone_id_from_abbr(tz, -1, 0);
 		if (tzid) {
-			tzi = timelib_parse_tzfile(tzid);
+			tzi = timelib_parse_tzfile(tzid, DATE_TIMEZONEDB);
 		}
 	}
 	/* Try finding the tz information as "Timezone Identifier" */
 	if (!tzi) {
-		tzi = timelib_parse_tzfile(tz);
+		tzi = timelib_parse_tzfile(tz, DATE_TIMEZONEDB);
 	}
 	/* If we find it we instantiate the object otherwise, well, we don't and return false */
 	if (tzi) {
@@ -1444,10 +1464,13 @@ PHP_FUNCTION(timezone_transistions_get)
 
 PHP_FUNCTION(timezone_identifiers_list)
 {
+	timelib_tzdb             *tzdb;
 	timelib_tzdb_index_entry *table;
 	int                       i, item_count;
-	
-	table = timelib_timezone_identifiers_list(&item_count);
+
+	tzdb = DATE_TIMEZONEDB;
+	item_count = tzdb->index_size;
+	table = tzdb->index;
 	
 	array_init(return_value);
 
@@ -1459,12 +1482,12 @@ PHP_FUNCTION(timezone_identifiers_list)
 PHP_FUNCTION(timezone_abbreviations_list)
 {
 	timelib_tz_lookup_table *table, *entry;
-	zval                    *element;
+	zval                    *element, **abbr_array_pp, *abbr_array;
 	
 	table = timelib_timezone_abbreviations_list();
 	array_init(return_value);
 	entry = table;
-#warning NEED TO MAKE SURE ABBRS ARE NOT UNIQUEIZED HERE
+
 	do {
 		MAKE_STD_ZVAL(element);
 		array_init(element);
@@ -1476,7 +1499,14 @@ PHP_FUNCTION(timezone_abbreviations_list)
 			add_assoc_null(element, "timezone_id");
 		}
 
-		add_assoc_zval(return_value, entry->name, element);
+		if (zend_hash_find(HASH_OF(return_value), entry->name, strlen(entry->name) + 1, (void **) &abbr_array_pp) == FAILURE) {
+			MAKE_STD_ZVAL(abbr_array);
+			array_init(abbr_array);
+			add_assoc_zval(return_value, entry->name, abbr_array);
+		} else {
+			abbr_array = *abbr_array_pp;
+		}
+		add_next_index_zval(abbr_array, element);
 		entry++;
 	} while (entry->name);
 }

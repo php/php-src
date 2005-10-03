@@ -47,7 +47,7 @@ timelib_sll timelib_days_in_month(timelib_sll y, timelib_sll m);
 void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, timelib_sll *iw, timelib_sll *iy);
 
 /* From parse_date.re */
-timelib_time *timelib_strtotime(char *s, int *errors);
+timelib_time *timelib_strtotime(char *s, int *errors, timelib_tzdb *tzdb);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
@@ -63,11 +63,12 @@ void timelib_update_from_sse(timelib_time *tm);
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);
 
 /* From parse_tz.c */
-timelib_tzinfo *timelib_parse_tzfile(char *timezone);
+timelib_tzinfo *timelib_parse_tzfile(char *timezone, timelib_tzdb *tzdb);
 int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
-timelib_tzdb_index_entry *timelib_timezone_identifiers_list(int *count);
+timelib_tzdb *timelib_builtin_db(void);
+timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count);
 
 /* From timelib.c */
 timelib_tzinfo* timelib_tzinfo_ctor();
@@ -77,6 +78,7 @@ void timelib_tzinfo_dtor(timelib_tzinfo *tz);
 timelib_tzinfo* timelib_tzinfo_clone(timelib_tzinfo *tz);
 
 timelib_time* timelib_time_ctor();
+void timelib_time_set_option(timelib_time* tm, int option, void* option_value);
 void timelib_time_dtor(timelib_time* t);
 
 timelib_time_offset* timelib_time_offset_ctor();
