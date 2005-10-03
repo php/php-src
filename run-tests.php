@@ -257,6 +257,13 @@ if (isset($argc) && $argc > 1) {
 				case 'd':
 					$ini_overwrites[] = $argv[++$i];
 					break;
+				case 'u':
+					$ini_overwrites[] = 'unicode_semantics=1';
+					$ini_overwrites[] = 'unicode.runtime_encoding=iso-8859-1';
+					$ini_overwrites[] = 'unicode.script_encoding=utf-8';
+					$ini_overwrites[] = 'unicode.output_encoding=utf-8';
+					$ini_overwrites[] = 'unicode.from_error_mode=U_INVALID_SUBSTITUTE';
+					break;
 				default:
 					echo "Illegal switch specified!\n";
 				case "h":
@@ -281,7 +288,9 @@ Options:
     -n          Pass -n option to the php binary (Do not use a php.ini).
 
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
-                with value 'bar')
+                with value 'bar').
+
+    -u          Test with unicode_semantics set on.
 
     -v          Verbose mode.
 
