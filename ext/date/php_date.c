@@ -24,6 +24,7 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_versioning.h"
 #include "php_date.h"
 #include "lib/timelib.h"
 #include <time.h>
