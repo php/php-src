@@ -27,8 +27,10 @@
  */
 class CachingIterator implements OuterIterator
 {
-	const CALL_TOSTRING    = 1;
-	const CATCH_GET_CHILD  = 2;
+	const CALL_TOSTRING        = 1;
+	const CATCH_GET_CHILD      = 2;
+	const TOSTRING_USE_KEY     = 4;
+	const TOSTRING_USE_CURRENT = 8;
 
 	private $it;
 	private $current;
@@ -44,8 +46,13 @@ class CachingIterator implements OuterIterator
 	 */
 	function __construct(Iterator $it, $flags = self::CALL_TOSTRING)
 	{
+		if ((($flags & self::CALL_TOSTRING) && ($flags & (self::TOSTRING_USE_KEY|self::TOSTRING_USE_CURRENT)))
+		|| ((flags & (self::CIT_TOSTRING_USE_KEY|self::CIT_TOSTRING_USE_CURRENT)) == (self::CIT_TOSTRING_USE_KEY|self::CIT_TOSTRING_USE_CURRENT)))
+		{
+			throw new InvalidArgumentException('Flags must contain only one of CIT_CALL_TOSTRING, CIT_TOSTRING_USE_KEY, CIT_TOSTRING_USE_CURRENT');
+		}
 		$this->it = $it;
-		$this->flags = $flags & (self::CALL_TOSTRING|self::CATCH_GET_CHILD);
+		$this->flags = $flags & (0x0000FFFF);
 		$this->next();
 	}
 
@@ -123,7 +130,16 @@ class CachingIterator implements OuterIterator
 	 */
 	function __toString()
 	{
-		if (!$this->flags & self::CALL_TOSTRING) {
+		if ($this->flags & self::TOSTRING_USE_KEY)
+		{
+			return $this->key;
+		}
+		else if ($this->flags & self::TOSTRING_USE_CURRENT)
+		{
+			return $this->current;
+		}
+		if (!$this->flags & self::CALL_TOSTRING)
+		{
 			throw new exception('CachingIterator does not fetch string value (see CachingIterator::__construct)');
 		}
 		return $this->strValue;
