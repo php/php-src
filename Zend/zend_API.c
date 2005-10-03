@@ -2726,7 +2726,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, uint check_flags, zval *c
 							}
 						}
 						/* check for __call too */
-						if (retval == 0 && ce->__call != 0) {
+						if (retval == 0 && *zobj_ptr_ptr && ce->__call != 0) {
 							retval = 1;
 						}
 						efree(lcname);
