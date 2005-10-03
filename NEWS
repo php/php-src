@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - cURL improvements: (Ilia)
   . Added curl_setopt_array() which allows setting of multiple cURL options.
   . Added CURLINFO_HEADER_OUT to facilitate request retrieval.
+- Added --rclass and --rextension CLI parameters to reflect internal classes and
+  loaded extensions. (Johannes)
 - Added optional parameter to http_build_query() to allow specification of 
   string separator. (Ilia)
 - Added an optional parameter to parse_url() to allow retrieval of distinct URL
@@ -17,6 +19,4 @@ PHP                                                                        NEWS
   the part of haystack before or after first occurence of needle. (Johannes)
 - Added possibility to check in which extension an internal function was
   defined using reflection API. (Johannes)
-- Added --rclass and --rextension CLI arguments to reflect internal classes and
-  loaded extensions (Johannes)
 - Fixed bug #34286 (__toString() behavior is inconsistent). (Marcus)
