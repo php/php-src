@@ -27,6 +27,8 @@
 #include "php_variables.h"
 #include "zend_hash.h"
 #include "zend_modules.h"
+#include "zend_interfaces.h"
+#include "zend_reflection_api.h"
 
 #include "SAPI.h"
 
@@ -97,6 +99,8 @@
 #define PHP_MODE_STRIP         5
 #define PHP_MODE_CLI_DIRECT    6
 #define PHP_MODE_PROCESS_STDIN 7
+#define PHP_MODE_REFLECTION_CLASS       8
+#define PHP_MODE_REFLECTION_EXTENSION   9
 
 static char *php_optarg = NULL;
 static int php_optind = 1;
@@ -130,6 +134,8 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
+	{10,  1, "rclass"},
+	{11,  1, "rextension"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -562,6 +568,7 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
+	char *reflection_what;
 	int orig_optind=php_optind;
 	char *orig_optarg=php_optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
@@ -897,6 +904,15 @@ int main(int argc, char *argv[])
 				hide_argv = 1;
 				break;
 
+			case 10:
+				behavior=PHP_MODE_REFLECTION_CLASS;
+				reflection_what = php_optarg;
+				break;
+			case 11:
+				behavior=PHP_MODE_REFLECTION_EXTENSION;
+				reflection_what = php_optarg;
+				break;
+
 			default:
 				break;
 			}
@@ -1130,6 +1146,56 @@ int main(int argc, char *argv[])
 				}
 	
 				break;
+			case PHP_MODE_REFLECTION_CLASS:
+			case PHP_MODE_REFLECTION_EXTENSION:
+				{
+					zend_class_entry *reflection_ce;
+					zval *arg;
+					
+					if (behavior == PHP_MODE_REFLECTION_CLASS) {
+						zend_class_entry **ppce;
+
+						if (zend_lookup_class(reflection_what, strlen(reflection_what), &ppce TSRMLS_CC) == FAILURE) {
+							zend_printf("Class %s not found\n", reflection_what);
+							exit_status=254;
+
+							break;
+						}
+
+						reflection_ce = reflection_class_ptr;
+					} else if (behavior == PHP_MODE_REFLECTION_EXTENSION) {
+						char *lcname = do_alloca(strlen(reflection_what) + 1);
+						struct _zend_module_entry *module;
+
+						zend_str_tolower_copy(lcname, reflection_what, strlen(reflection_what));
+						if (zend_hash_find(&module_registry, lcname,  strlen(reflection_what) + 1, (void **)&module) == FAILURE) {
+							zend_printf("Extension %s not found\n", reflection_what);
+
+							free_alloca(lcname);
+
+							exit_status=254;
+							break;
+						}
+						free_alloca(lcname);
+
+						reflection_ce = reflection_extension_ptr;
+					} else {
+						// Can't happen
+						assert(0);
+						break;
+					}
+					
+					arg = emalloc(sizeof(zval));
+					INIT_PZVAL(arg);
+					ZVAL_STRING(arg, reflection_what, 1);
+
+					zend_call_method_with_1_params(NULL, reflection_ce, NULL, "export", NULL, arg);
+
+					zval_dtor(arg);
+					FREE_ZVAL(arg);
+
+					break;
+				}
 			}
 		}
 
