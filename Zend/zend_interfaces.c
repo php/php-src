@@ -58,6 +58,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
 		ZVAL_STRINGL(&z_fname, function_name, function_name_len, 0);
+		fci.function_table = !object_pp ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
 	} else {
 		zend_fcall_info_cache fcic;
