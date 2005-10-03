@@ -5,6 +5,7 @@
  * @ingroup Examples
  * @author  Marcus Boerger
  * @date    2003 - 2005
+ * @version 1.1
  *
  * Usage: php class_tree.php \<class\>
  *
@@ -60,6 +61,7 @@ class SubClasses extends RecursiveArrayIterator
 				}
 			}
 		}
+		$this->ksort();
 	}
 	
 	function current()

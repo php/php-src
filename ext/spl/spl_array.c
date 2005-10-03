@@ -1051,6 +1051,35 @@ SPL_METHOD(Array, count)
 	RETURN_LONG(count);
 } /* }}} */
 
+static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len)
+{
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+	zval tmp;
+	
+	INIT_PZVAL(&tmp);
+	Z_TYPE(tmp) = IS_ARRAY;
+	Z_ARRVAL(tmp) = aht;
+	
+	zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 1, &tmp, NULL TSRMLS_CC);
+}
+
+#define SPL_ARRAY_METHOD(cname, fname) \
+SPL_METHOD(cname, fname) \
+{ \
+	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1); \
+}
+
+/* {{{ proto int ArrayObject::asort()
+       proto int ArrayIterator::asort()
+ Sort the entries by values. */
+SPL_ARRAY_METHOD(Array, asort)
+
+/* {{{ proto int ArrayObject::ksort()
+       proto int ArrayIterator::ksort()
+ Sort the entries by key. */
+SPL_ARRAY_METHOD(Array, ksort)
+
 /* {{{ proto mixed|NULL ArrayIterator::current()
    Return current array entry */
 SPL_METHOD(Array, current)
@@ -1254,16 +1283,18 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_setIteratorClass, 0)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_ArrayObject[] = {
-	SPL_ME(Array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetExists,  arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetGet,     arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetSet,     arginfo_array_offsetSet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetUnset,   arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, count,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getFlags,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, setFlags,      arginfo_array_setFlags,  ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetExists,     arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetGet,        arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetSet,        arginfo_array_offsetSet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetUnset,      arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, append,           arginfo_array_append,           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getArrayCopy,     NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, count,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getFlags,         NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
+	SPL_ME(Array, asort,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, ksort,            NULL,                           ZEND_ACC_PUBLIC)
 	/* ArrayObject specific */
 	SPL_ME(Array, getIterator,      NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, exchangeArray,    arginfo_array_exchangeArray,    ZEND_ACC_PUBLIC)
@@ -1273,23 +1304,25 @@ static zend_function_entry spl_funcs_ArrayObject[] = {
 };
 
 static zend_function_entry spl_funcs_ArrayIterator[] = {
-	SPL_ME(Array, __construct,   arginfo_array___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetExists,  arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetGet,     arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetSet,     arginfo_array_offsetSet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, offsetUnset,   arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, count,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, getFlags,      NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, setFlags,      arginfo_array_setFlags,  ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetExists,     arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetGet,        arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetSet,        arginfo_array_offsetSet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, offsetUnset,      arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, append,           arginfo_array_append,           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getArrayCopy,     NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, count,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, getFlags,         NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
+	SPL_ME(Array, asort,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, ksort,            NULL,                           ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
-	SPL_ME(Array, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, valid,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(Array, seek,          arginfo_array_seek,        ZEND_ACC_PUBLIC)
+	SPL_ME(Array, rewind,           NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, current,          NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, key,              NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, next,             NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, valid,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, seek,             arginfo_array_seek,             ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
