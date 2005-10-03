@@ -790,18 +790,18 @@ END_EXTERN_C()
 #define ZVAL_TEXT(z, t, duplicate)					\
 		do {										\
 			if (UG(unicode)) {						\
-				ZVAL_UNICODE(z, (UChar*)t, duplicate);		\
+				ZVAL_UNICODE(z, (UChar*)(t), duplicate);		\
 			} else {								\
-				ZVAL_STRING(z, t, duplicate);		\
+				ZVAL_STRING(z, (char*)(t), duplicate);		\
 			}										\
 		} while (0);
 
 #define ZVAL_TEXTL(z, t, l, duplicate)				\
 		do {										\
 			if (UG(unicode)) {						\
-				ZVAL_UNICODEL(z, t, l, duplicate); 	\
+				ZVAL_UNICODEL(z, (UChar*)(t), l, duplicate); 	\
 			} else {								\
-				ZVAL_STRINGL(z, t, l, duplicate);	\
+				ZVAL_STRINGL(z, (char*)(t), l, duplicate);	\
 			}										\
 		} while (0);
 
