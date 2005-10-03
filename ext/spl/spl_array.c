@@ -1051,34 +1051,62 @@ SPL_METHOD(Array, count)
 	RETURN_LONG(count);
 } /* }}} */
 
-static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len)
+static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg)
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-	zval tmp;
+	zval tmp, **arg;
 	
 	INIT_PZVAL(&tmp);
 	Z_TYPE(tmp) = IS_ARRAY;
 	Z_ARRVAL(tmp) = aht;
 	
-	zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 1, &tmp, NULL TSRMLS_CC);
+	if (use_arg) {
+		if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+			zend_throw_exception(U_CLASS_ENTRY(spl_ce_BadMethodCallException), "Function expects exactly one argument", 0 TSRMLS_CC);
+			return;
+		}
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 2, &tmp, *arg TSRMLS_CC);
+	} else {
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, &return_value, 1, &tmp, NULL TSRMLS_CC);
+	}
 }
 
-#define SPL_ARRAY_METHOD(cname, fname) \
+#define SPL_ARRAY_METHOD(cname, fname, use_arg) \
 SPL_METHOD(cname, fname) \
 { \
-	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1); \
+	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
 }
 
 /* {{{ proto int ArrayObject::asort()
        proto int ArrayIterator::asort()
  Sort the entries by values. */
-SPL_ARRAY_METHOD(Array, asort)
+SPL_ARRAY_METHOD(Array, asort, 0)
 
 /* {{{ proto int ArrayObject::ksort()
        proto int ArrayIterator::ksort()
  Sort the entries by key. */
-SPL_ARRAY_METHOD(Array, ksort)
+SPL_ARRAY_METHOD(Array, ksort, 0)
+
+/* {{{ proto int ArrayObject::uasort(callback cmp_function)
+       proto int ArrayIterator::uasort(callback cmp_function)
+ Sort the entries by values user defined function. */
+SPL_ARRAY_METHOD(Array, uasort, 1)
+
+/* {{{ proto int ArrayObject::uksort(callback cmp_function)
+       proto int ArrayIterator::uksort(callback cmp_function)
+ Sort the entries by key using user defined function. */
+SPL_ARRAY_METHOD(Array, uksort, 1)
+
+/* {{{ proto int ArrayObject::natsort()
+       proto int ArrayIterator::natsort()
+ Sort the entries by values using "natural order" algorithm. */
+SPL_ARRAY_METHOD(Array, natsort, 0)
+
+/* {{{ proto int ArrayObject::natcasesort()
+       proto int ArrayIterator::natcasesort()
+ Sort the entries by key using case insensitive "natural order" algorithm. */
+SPL_ARRAY_METHOD(Array, natcasesort, 0)
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
    Return current array entry */
@@ -1282,6 +1310,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_setIteratorClass, 0)
 	ZEND_ARG_INFO(0, iteratorClass)
 ZEND_END_ARG_INFO();
 
+static
+ZEND_BEGIN_ARG_INFO(arginfo_array_uXsort, 0)
+	ZEND_ARG_INFO(0, cmp_function )
+ZEND_END_ARG_INFO();
+
 static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, __construct,      arginfo_array___construct,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,     arginfo_array_offsetGet,        ZEND_ACC_PUBLIC)
@@ -1295,6 +1328,10 @@ static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
 	SPL_ME(Array, asort,            NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, ksort,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, uasort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, uksort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natsort,          NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natcasesort,      NULL,                           ZEND_ACC_PUBLIC)
 	/* ArrayObject specific */
 	SPL_ME(Array, getIterator,      NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, exchangeArray,    arginfo_array_exchangeArray,    ZEND_ACC_PUBLIC)
@@ -1316,6 +1353,10 @@ static zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, setFlags,         arginfo_array_setFlags,         ZEND_ACC_PUBLIC)
 	SPL_ME(Array, asort,            NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, ksort,            NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, uasort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, uksort,           arginfo_array_uXsort,           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natsort,          NULL,                           ZEND_ACC_PUBLIC)
+	SPL_ME(Array, natcasesort,      NULL,                           ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
 	SPL_ME(Array, rewind,           NULL,                           ZEND_ACC_PUBLIC)
 	SPL_ME(Array, current,          NULL,                           ZEND_ACC_PUBLIC)

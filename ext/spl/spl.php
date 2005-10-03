@@ -502,7 +502,7 @@ interface Serializable
 /** @ingroup SPL
  * @brief An Array wrapper
  * @since PHP 5.0
- * @version 1.1
+ * @version 1.2
  *
  * This array wrapper allows to recursively iterate over Arrays and public 
  * Object properties.
@@ -540,6 +540,30 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 	 */
 	function getFlags();
 
+	/** Sort the entries by values.
+	 */
+	function asort();
+	
+	/** Sort the entries by key.
+	 */
+	function ksort();
+	                    
+	/** Sort the entries by values using user defined function.
+	 */
+	function uasort(mixed cmp_function);
+	
+	/** Sort the entries by key using user defined function.
+	 */
+	function uksort(mixed cmp_function);
+	                    
+	/** Sort the entries by values using "natural order" algorithm.
+	 */
+	function natsort();
+	
+	/** Sort the entries by values using case insensitive "natural order" algorithm.
+	 */
+	function natcasesort();
+	                    
 	/**
 	 * @param $array new array or object
 	 */
@@ -598,7 +622,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 /** @ingroup SPL
  * @brief An Array iterator
  * @since PHP 5.0
- * @version 1.1
+ * @version 1.2
  *
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
@@ -632,12 +656,36 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	 *        1 set: array indices can be accessed as properties in read/write
 	 */
 	function setFlags($flags);
-	                    
+
 	/**
 	 * @ return current flags
 	 */
 	function getFlags();
 
+	/** Sort the entries by values.
+	 */
+	function asort();
+	
+	/** Sort the entries by key.
+	 */
+	function ksort();
+	                    
+	/** Sort the entries by values using user defined function.
+	 */
+	function uasort(mixed cmp_function);
+	
+	/** Sort the entries by key using user defined function.
+	 */
+	function uksort(mixed cmp_function);
+	                    
+	/** Sort the entries by values using "natural order" algorithm.
+	 */
+	function natsort();
+	
+	/** Sort the entries by values using case insensitive "natural order" algorithm.
+	 */
+	function natcasesort();
+	                    
 	/** @param $index offset to inspect
 	 * @return whetehr offset $index esists
 	 */	
