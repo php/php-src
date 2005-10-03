@@ -1459,6 +1459,10 @@ PHP_FUNCTION(extract)
 				/* break omitted intentionally */
 
 			case EXTR_OVERWRITE:
+				if (var_exists && !strcmp(var_name, "GLOBALS")) {
+					break;
+				}
+			
 				ZVAL_TEXTL(&final_name, var_name, var_name_len, 1);
 				break;
 
