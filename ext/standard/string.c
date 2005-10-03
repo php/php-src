@@ -3410,6 +3410,42 @@ PHP_FUNCTION(strrev)
 }
 /* }}} */
 
+/* {{{ php_u_similar_str
+ */
+static void php_u_similar_str(const UChar *txt1, int32_t len1,
+							  const UChar *txt2, int32_t len2,
+							  int32_t *pos1, int32_t *end1,
+							  int32_t *pos2, int32_t *end2, int *max)
+{
+	int32_t i1, i2, j1, j2, l;
+	UChar32 ch1, ch2;
+
+	*max = 0;
+	for (i1 = 0 ; i1 < len1 ; ) {
+		for (i2 = 0 ; i2 < len2 ; ) {
+			l = 0 ; j1 = 0 ; j2 = 0;
+			while ((i1+j1 < len1) && (i2+j2 < len2)) {
+				U16_NEXT(txt1+i1, j1, len1-i1, ch1);
+				U16_NEXT(txt2+i2, j2, len2-i2, ch2);
+				if (ch1 != ch2) {
+					U16_BACK_1(txt1+i1, 0, j1);
+					U16_BACK_1(txt2+i2, 0, j2);
+					break;
+				}
+				l++;
+			}
+			if (l > *max) {
+				*max = l;
+				*pos1 = i1; *end1 = j1;
+				*pos2 = i2; *end2 = j2;
+			}
+			U16_FWD_1(txt2, i2, len2);
+		}
+		U16_FWD_1(txt1, i1, len1);
+	}
+}
+/* }}} */
+
 /* {{{ php_similar_str
  */
 static void php_similar_str(const char *txt1, int len1, const char *txt2, int len2, int *pos1, int *pos2, int *max)
@@ -3430,6 +3466,27 @@ static void php_similar_str(const char *txt1, int len1, const char *txt2, int le
 			}
 		}
 	}
+}
+/* }}} */
+
+/* {{{ php_u_similar_char
+ */
+static int php_u_similar_char(const UChar *txt1, int32_t len1, const UChar *txt2, int32_t len2)
+{
+	int sum, max;
+	int32_t pos1, pos2, end1, end2;
+
+	php_u_similar_str(txt1, len1, txt2, len2, &pos1, &end1, &pos2, &end2, &max);
+	if ((sum = max)) {
+		if (pos1 && pos2) {
+			sum += php_u_similar_char(txt1, pos1, txt2, pos2);
+		}
+		if ((pos1 + end1 < len1) && (pos2 + end2 < len2)) {
+			sum += php_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
+									(UChar *)txt2+pos2+end2, len2-pos2-end2);
+		}
+	}
+	return sum;
 }
 /* }}} */
 
@@ -3463,30 +3520,49 @@ PHP_FUNCTION(similar_text)
 	zval **t1, **t2, **percent;
 	int ac = ZEND_NUM_ARGS();
 	int sim;
-	
+	zend_uchar str_type;
+
 	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &t1, &t2, &percent) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}	
-
-	convert_to_string_ex(t1);
-	convert_to_string_ex(t2);
-
+	if (Z_TYPE_PP(t1) != IS_UNICODE && Z_TYPE_PP(t1) != IS_BINARY && Z_TYPE_PP(t1) != IS_STRING) {
+		convert_to_text_ex(t1);
+	}
+	if (Z_TYPE_PP(t2) != IS_UNICODE && Z_TYPE_PP(t2) != IS_BINARY && Z_TYPE_PP(t2) != IS_STRING) {
+		convert_to_text_ex(t2);
+	}
+	str_type = zend_get_unified_string_type(2 TSRMLS_CC, Z_TYPE_PP(t1), Z_TYPE_PP(t2));
+	if (str_type == (zend_uchar)-1) {
+		convert_to_binary_ex(t1);
+		convert_to_binary_ex(t2);
+	} else {
+		convert_to_explicit_type_ex(t1, str_type);
+		convert_to_explicit_type_ex(t2, str_type);
+	}
 	if (ac > 2) {
 		convert_to_double_ex(percent);
 	}
-	
-	if (Z_STRLEN_PP(t1) + Z_STRLEN_PP(t2) == 0) {
+
+	if (Z_UNILEN_PP(t1) + Z_UNILEN_PP(t2) == 0) {
 		if (ac > 2) {
 			Z_DVAL_PP(percent) = 0;
 		}
 
 		RETURN_LONG(0);
 	}
-	
-	sim = php_similar_char(Z_STRVAL_PP(t1), Z_STRLEN_PP(t1), Z_STRVAL_PP(t2), Z_STRLEN_PP(t2));	
+
+	if (str_type == IS_UNICODE) {
+		sim = php_u_similar_char(Z_USTRVAL_PP(t1), Z_USTRLEN_PP(t1), Z_USTRVAL_PP(t2), Z_USTRLEN_PP(t2));
+	} else {
+		sim = php_similar_char(Z_STRVAL_PP(t1), Z_STRLEN_PP(t1), Z_STRVAL_PP(t2), Z_STRLEN_PP(t2));	
+	}
 
 	if (ac > 2) {
-		Z_DVAL_PP(percent) = sim * 200.0 / (Z_STRLEN_PP(t1) + Z_STRLEN_PP(t2));
+		if (str_type == IS_UNICODE) {
+			Z_DVAL_PP(percent) = sim * 200.0 / (Z_USTRCPLEN_PP(t1) + Z_USTRCPLEN_PP(t2));
+		} else {
+			Z_DVAL_PP(percent) = sim * 200.0 / (Z_STRLEN_PP(t1) + Z_STRLEN_PP(t2));
+		}
 	}
 
 	RETURN_LONG(sim);
