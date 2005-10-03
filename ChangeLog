@@ -1,3 +1,31 @@
+2005-10-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
+
+    * ext/gd/config.w32:
+      - remove gdttf
+
+    * ext/gd/gd.c
+      ext/gd/gdttf.c
+      ext/gd/gdttf.h:
+      - ft1 support remove, #2, gdttf.*
+
+    * ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/gdcache.c
+      ext/gd/php_gd.h
+      ext/gd/libgd/gdcache.c:
+      - drop freetype1 support
+
+2005-10-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_4)
+      main/php_variables.c:
+      fix build - missing closing parenthesis
+
+2005-10-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_operators.h:
+      -** empty log message ***
+
 2005-10-01  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_5_1)
