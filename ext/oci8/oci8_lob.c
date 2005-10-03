@@ -470,6 +470,8 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 	}
 
 	PHP_OCI_CALL(OCIDescriptorFree, (descriptor->descriptor, descriptor->type));
+
+	zend_list_delete(descriptor->connection->rsrc_id);
 	efree(descriptor);
 } /* }}} */
 

@@ -601,7 +601,9 @@ void php_oci_collection_close(php_oci_collection *collection TSRMLS_DC)
 			php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		}
 	}
-
+	
+	zend_list_delete(collection->connection->rsrc_id);
+	
 	efree(collection);
 	return;
 } /* }}} */
