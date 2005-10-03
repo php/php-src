@@ -4008,7 +4008,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 
 	if (param != NULL) {
 		enc = param->encode;
-		if (val == NULL || Z_TYPE_P(val) == IS_NULL) {
+		if (val == NULL) {
 			if (param->element) {
 				if (param->element->fixed) {
 					ZVAL_STRING(&defval, param->element->fixed, 0);
