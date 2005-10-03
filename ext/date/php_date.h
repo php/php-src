@@ -21,6 +21,8 @@
 #ifndef PHP_DATE_H
 #define PHP_DATE_H
 
+#include "lib/timelib.h"
+
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
@@ -92,5 +94,8 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
 PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
+
+/* Mechanism to set new TZ database */
+PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
 
 #endif /* PHP_DATE_H */

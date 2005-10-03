@@ -192,7 +192,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	}
 }
 
-static int tz_search(char *timezone, int left, int right)
+static int tz_search(char *timezone, int left, int right, timelib_tzdb *tzdb)
 {
 	int mid, cmp;
 
@@ -202,41 +202,48 @@ static int tz_search(char *timezone, int left, int right)
  
 	mid = (left + right) / 2;
  
-	cmp = strcasecmp(timezone, timezonedb_idx[mid].id);
+	cmp = strcasecmp(timezone, tzdb->index[mid].id);
 	if (cmp < 0) {
-		return tz_search(timezone, left, mid - 1);
+		return tz_search(timezone, left, mid - 1, tzdb);
 	} else if (cmp > 0) {
-		return tz_search(timezone, mid + 1, right);
+		return tz_search(timezone, mid + 1, right, tzdb);
 	} else { /* (cmp == 0) */
-		return timezonedb_idx[mid].pos;
+		return tzdb->index[mid].pos;
 	}
 }
 
 
-static int seek_to_tz_position(char **tzf, char *timezone)
+static int seek_to_tz_position(char **tzf, char *timezone, timelib_tzdb *tzdb)
 {
-	int	pos = tz_search(timezone, 0, sizeof(timezonedb_idx)/sizeof(*timezonedb_idx)-1);
+	int	pos;
+	
+	pos = tz_search(timezone, 0, tzdb->index_size, tzdb);
 
 	if (pos == -1) {
 		return 0;
 	}
 
-	(*tzf) = &timelib_timezone_db_data[pos + 20];
+	(*tzf) = &(tzdb->data[pos + 20]);
 	return 1;
 }
 
-timelib_tzdb_index_entry *timelib_timezone_identifiers_list(int *count)
+timelib_tzdb *timelib_builtin_db(void)
 {
-	*count = sizeof(timezonedb_idx) / sizeof(*timezonedb_idx);
-	return timezonedb_idx;
+	return &timezonedb_builtin;
 }
 
-timelib_tzinfo *timelib_parse_tzfile(char *timezone)
+timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count)
+{
+	*count = sizeof(timezonedb_idx_builtin) / sizeof(*timezonedb_idx_builtin);
+	return timezonedb_idx_builtin;
+}
+
+timelib_tzinfo *timelib_parse_tzfile(char *timezone, timelib_tzdb *tzdb)
 {
 	char *tzf;
 	timelib_tzinfo *tmp;
 
-	if (seek_to_tz_position((char**) &tzf, timezone)) {
+	if (seek_to_tz_position((char**) &tzf, timezone, tzdb)) {
 		tmp = timelib_tzinfo_ctor(timezone);
 
 		read_header((char**) &tzf, tmp);

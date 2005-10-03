@@ -142,6 +142,7 @@ typedef struct Scanner {
 	int           errors;
 
 	struct timelib_time *time;
+	timelib_tzdb        *tzdb;
 } Scanner;
 
 typedef struct _timelib_lookup_table {
@@ -615,7 +616,7 @@ static long timelib_lookup_zone(char **ptr, int *dst, char **tz_abbr, int *found
 	return value;
 }
 
-static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found)
+static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, timelib_tzdb *tzdb)
 {
 	timelib_tzinfo *res;
 
@@ -657,7 +658,7 @@ static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_
 #endif
 		/* If we have a TimeZone identifier to start with, use it */
 		if (strstr(tz_abbr, "/")) {
-			if ((res = timelib_parse_tzfile(tz_abbr)) != NULL) {
+			if ((res = timelib_parse_tzfile(tz_abbr, tzdb)) != NULL) {
 				t->tz_info = res;
 				t->zone_type = TIMELIB_ZONETYPE_ID;
 				found++;
@@ -898,7 +899,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		}
 
 		if (*ptr != '\0') {
-			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
+			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
 			s->errors += tz_not_found;
 		}
 		TIMELIB_DEINIT;
@@ -936,7 +937,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 				s->time->h = timelib_get_nr((char **) &ptr, 2);
 				s->time->i = timelib_get_nr((char **) &ptr, 2);
 				s->time->s = 0;
-				s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time);
+				s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, s->tzdb);
 				break;
 			case 1:
 				s->time->y = timelib_get_nr((char **) &ptr, 4);
@@ -961,7 +962,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		s->time->s = timelib_get_nr((char **) &ptr, 2);
 
 		if (*ptr != '\0') {
-			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
+			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
 			s->errors += tz_not_found;
 		}
 		TIMELIB_DEINIT;
@@ -1111,7 +1112,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		s->time->s = timelib_get_nr((char **) &ptr, 2);
 		if (*ptr == '.') {
 			s->time->f = timelib_get_frac_nr((char **) &ptr, 9);
-			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
+			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
 			s->errors += tz_not_found;
 		}
 		TIMELIB_DEINIT;
@@ -1208,7 +1209,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		s->time->h = timelib_get_nr((char **) &ptr, 2);
 		s->time->i = timelib_get_nr((char **) &ptr, 2);
 		s->time->s = timelib_get_nr((char **) &ptr, 2);
-		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
+		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
 		s->errors += tz_not_found;
 		TIMELIB_DEINIT;
 		return TIMELIB_CLF;
@@ -1281,7 +1282,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		int tz_not_found;
 		DEBUG_OUTPUT("tzcorrection | tz");
 		TIMELIB_INIT;
-		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
+		s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
 		s->errors += tz_not_found;
 		TIMELIB_DEINIT;
 		return TIMELIB_TIMEZONE;
@@ -1308,7 +1309,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 		}
 
 		if (*ptr != '\0') {
-			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found);
+			s->time->z = timelib_get_zone((char **) &ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb);
 			s->errors += tz_not_found;
 		}
 		TIMELIB_DEINIT;
@@ -1353,7 +1354,7 @@ relativetext = (reltextnumber space? reltextunit)+;
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, int *errors)
+timelib_time* timelib_strtotime(char *s, int *errors, timelib_tzdb *tzdb)
 {
 	Scanner in;
 	int t;
@@ -1375,6 +1376,7 @@ timelib_time* timelib_strtotime(char *s, int *errors)
 	in.time->z = -1;
 	in.time->dst = -1;
 	in.errors = 0;
+	in.tzdb = tzdb;
 
 	do {
 		t = scan(&in);
