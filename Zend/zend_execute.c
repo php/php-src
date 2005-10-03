@@ -3563,7 +3563,8 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op_array *new_op_array=NULL;
 	zval **original_return_value = EG(return_value_ptr_ptr);
 	int return_value_used;
-	zval *inc_filename = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	zval **free_op1;
+	zval *inc_filename = get_zval_ptr(&opline->op1, EX(Ts), &free_op1, BP_VAR_R);
 	zval tmp_inc_filename;
 	zend_bool failure_retval=0;
 
@@ -3670,7 +3671,7 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 			EX_T(opline->result.u.var).var.ptr->type = IS_BOOL;
 		}
 	}
-	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
+	FREE_OP(EX(Ts), &opline->op1, free_op1);
 	EG(return_value_ptr_ptr) = original_return_value;
 	NEXT_OPCODE();
 }
