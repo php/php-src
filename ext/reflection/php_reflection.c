@@ -29,16 +29,16 @@
 #include "zend_interfaces.h"
 
 /* Class entry pointers */
-zend_class_entry *reflector_ptr;
-zend_class_entry *reflection_exception_ptr;
-zend_class_entry *reflection_ptr;
-zend_class_entry *reflection_function_ptr;
-zend_class_entry *reflection_parameter_ptr;
-zend_class_entry *reflection_class_ptr;
-zend_class_entry *reflection_object_ptr;
-zend_class_entry *reflection_method_ptr;
-zend_class_entry *reflection_property_ptr;
-zend_class_entry *reflection_extension_ptr;
+ZEND_API zend_class_entry *reflector_ptr;
+ZEND_API zend_class_entry *reflection_exception_ptr;
+ZEND_API zend_class_entry *reflection_ptr;
+ZEND_API zend_class_entry *reflection_function_ptr;
+ZEND_API zend_class_entry *reflection_parameter_ptr;
+ZEND_API zend_class_entry *reflection_class_ptr;
+ZEND_API zend_class_entry *reflection_object_ptr;
+ZEND_API zend_class_entry *reflection_method_ptr;
+ZEND_API zend_class_entry *reflection_property_ptr;
+ZEND_API zend_class_entry *reflection_extension_ptr;
 
 /* Method macros */
 
