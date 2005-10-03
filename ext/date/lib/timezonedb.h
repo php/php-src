@@ -1,4 +1,4 @@
-timelib_tzdb_index_entry timezonedb_idx[535] = {
+timelib_tzdb_index_entry timezonedb_idx_builtin[535] = {
 	{ "Africa/Abidjan"                    , 0x000000 },
 	{ "Africa/Accra"                      , 0x000049 },
 	{ "Africa/Addis_Ababa"                , 0x0000E5 },
@@ -536,7 +536,7 @@ timelib_tzdb_index_entry timezonedb_idx[535] = {
 	{ "Zulu"                              , 0x038E5D },
 };
 /* This is a generated file, do not modify */
-unsigned char timelib_timezone_db_data[233109] = {
+unsigned char timelib_timezone_db_data_builtin[233109] = {
 
 
 /* Africa/Abidjan */
@@ -16451,3 +16451,5 @@ unsigned char timelib_timezone_db_data[233109] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 
 0x00, 0x00, 0x55, 0x54, 0x43, 0x00, 0x00, 0x00, };
+
+timelib_tzdb timezonedb_builtin = { "2005.13", 535, timezonedb_idx_builtin, timelib_timezone_db_data_builtin };
