@@ -3413,7 +3413,11 @@ ZEND_API zend_uchar zend_get_unified_string_type(int num_args TSRMLS_DC, ...)
 
 	if (num_args <= 0) return (zend_uchar)-1;
 
+#ifdef ZTS
+	va_start(ap, TSRMLS_C);
+#else
 	va_start(ap, num_args);
+#endif
 	while (num_args--) {
 		type = va_arg(ap, int);
 		if (type == IS_BINARY) {
