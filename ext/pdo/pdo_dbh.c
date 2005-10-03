@@ -1226,7 +1226,7 @@ PDO_API void php_pdo_declare_stringl_constant(const char *const_name,
 }
 
 PDO_API void php_pdo_declare_long_constant(const char *const_name,
-		unsigned int name_len, long value TSRMLS_DC)
+		size_t name_len, long value TSRMLS_DC)
 {
 #if PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION >= 1
 	zend_declare_class_constant_long(pdo_dbh_ce, (char*)const_name, name_len, value TSRMLS_CC);
