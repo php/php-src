@@ -12,7 +12,7 @@ PDOTest::skip();
 --FILE--
 <?php
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
-require getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 class TestBase implements Serializable
