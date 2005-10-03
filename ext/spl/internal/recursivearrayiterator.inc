@@ -13,7 +13,7 @@
  * @brief   A recursive array iterator
  * @author  Marcus Boerger
  * @version 1.0
- * @since PHP 6.0
+ * @since PHP 5.1
  *
  * Passes the RecursiveIterator interface to the inner Iterator and provides
  * the same functionality as FilterIterator. This allows you to skip parents
@@ -42,6 +42,10 @@ class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
 	 */
 	function getChildren()
 	{
+		if ($this->current() instanceof self)
+		{
+			return $this->current();
+		}
 		if (empty($this->ref))
 		{
 			$this->ref = new ReflectionClass($this);

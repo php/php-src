@@ -1204,6 +1204,10 @@ SPL_METHOD(Array, getChildren)
 		return;
 	}
 
+	if (Z_TYPE_PP(entry) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
+		RETURN_ZVAL(*entry, 0, 0);
+	}
+
 	spl_instantiate_arg_ex1(Z_OBJCE_P(getThis()), &return_value, 0, *entry TSRMLS_CC);
 }
 /* }}} */
