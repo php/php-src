@@ -1357,6 +1357,9 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	if (dbh->def_stmt_ctor_args) {
 		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
 	}
+	if (dbh->cls_methods) {
+		zend_hash_destroy(&dbh->cls_methods);
+	}
 
 	pefree(dbh, dbh->is_persistent);
 }
