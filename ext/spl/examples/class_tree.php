@@ -62,11 +62,6 @@ class SubClasses extends RecursiveArrayIterator
 		}
 	}
 	
-	function getChildren()
-	{
-		return parent::current();
-	}
-	
 	function current()
 	{
 		return parent::key();
