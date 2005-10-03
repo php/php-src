@@ -61,7 +61,7 @@ class SubClasses extends RecursiveArrayIterator
 				}
 			}
 		}
-		$this->ksort();
+		$this->uksort('strnatcasecmp');
 	}
 	
 	function current()
