@@ -850,6 +850,12 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
+			if (((flags & CIT_CALL_TOSTRING) && (flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))
+			|| ((flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)) == (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT))) {
+				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+				zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Flags must contain only one of CIT_CALL_TOSTRING, CIT_TOSTRING_USE_KEY, CIT_TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+				return NULL;
+			}
 			intern->u.caching.flags |= flags & CIT_PUBLIC;
 			MAKE_STD_ZVAL(intern->u.caching.zcache);
 			array_init(intern->u.caching.zcache);
@@ -1630,8 +1636,21 @@ SPL_METHOD(CachingIterator, __toString)
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (!(intern->u.caching.flags & CIT_CALL_TOSTRING))	{
+	if (!(intern->u.caching.flags & (CIT_CALL_TOSTRING|CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))	{
 		zend_throw_exception_ex(U_CLASS_ENTRY(spl_ce_BadMethodCallException), 0 TSRMLS_CC, "%v does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
+	}
+	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
+		if (intern->current.key_type == HASH_KEY_IS_STRING) {
+			RETURN_STRINGL(intern->current.str_key, intern->current.str_key_len, 1);
+		} else {
+			RETVAL_LONG(intern->current.int_key);
+			convert_to_string(return_value);
+			return;
+		}
+	} else if (intern->u.caching.flags & CIT_TOSTRING_USE_CURRENT) {
+		RETVAL_ZVAL(intern->current.data, 1, 0);
+		
+		return;
 	}
 	if (intern->u.caching.zstr) {
 		*return_value = *intern->u.caching.zstr;
@@ -1768,6 +1787,11 @@ SPL_METHOD(CachingIterator, setFlags)
 		return;
 	}
 
+	if (((flags & CIT_CALL_TOSTRING) && (flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)))
+	|| ((flags & (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT)) == (CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT))) {
+		zend_throw_exception(spl_ce_InvalidArgumentException , "Flags must contain only one of CIT_CALL_TOSTRING, CIT_TOSTRING_USE_KEY, CIT_TOSTRING_USE_CURRENT", 0 TSRMLS_CC);
+		return;
+	}
 	if ((intern->u.caching.flags & CIT_CALL_TOSTRING) != 0 && (flags & ~CIT_CALL_TOSTRING) == 0) {
 		zend_throw_exception(U_CLASS_ENTRY(spl_ce_InvalidArgumentException), "Unsetting flag CALL_TO_STRING is not possible", 0 TSRMLS_CC);
 		return;
