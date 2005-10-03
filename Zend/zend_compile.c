@@ -596,7 +596,8 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 			*result = last_op->result;
 			return;
 		} else {
-			if (opline_is_fetch_this(last_op TSRMLS_CC)) {
+			if (variable->op_type == IS_VAR &&
+			    opline_is_fetch_this(last_op TSRMLS_CC)) {
 				zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
 		}
@@ -626,7 +627,8 @@ void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
 	if (last_op_number > 0) {
 		zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
 
-		if (opline_is_fetch_this(last_op TSRMLS_CC)) {
+		if (lvar->op_type == IS_VAR &&
+		    opline_is_fetch_this(last_op TSRMLS_CC)) {
 			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
 		}
 	}
