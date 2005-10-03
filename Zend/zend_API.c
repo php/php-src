@@ -1762,6 +1762,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 {
 	char *lcname;
 	zend_bool retval = 0;
+	zval **obj = NULL;
 	TSRMLS_FETCH();
 
 	switch (Z_TYPE_P(callable)) {
@@ -1783,7 +1784,6 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 		case IS_ARRAY:
 			{
 				zval **method;
-				zval **obj;
 				zend_class_entry *ce = NULL, **pce;
 				zend_uint callable_name_len;
 				
@@ -1858,7 +1858,7 @@ ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **cal
 							}
 						}
 						/* check for __call too */
-						if (retval == 0 && ce->__call != 0) {
+						if (retval == 0 && obj && Z_TYPE_PP(obj) == IS_OBJECT && ce->__call != 0) {
 							retval = 1;
 						}
 						efree(lcname);

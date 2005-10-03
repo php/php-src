@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 5.0.6
 - Renamed CachingRecursiveIterator to RecursiveCachingIterator. (Marcus)
+- Fixed bug #34678 (__call(), is_callable() and static methods). (Dmitry)
 - Fixed bug #34643 (wsdl default value has no effect). (Dmitry)
 - Fixed bug #34617 (zend_deactivate: objects_store used after
   zend_objects_store_destroy is called). (Dmitry)
