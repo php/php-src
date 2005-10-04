@@ -2520,8 +2520,9 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_PP(tmp)++;
 			}
 		} else if (Z_TYPE_PP(entry) == IS_STRING) {
-			/* make sure our array does not end up with numeric string keys */
-			if (is_numeric_string(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, NULL, 0) == IS_LONG) {
+			/* make sure our array does not end up with numeric string keys
+			 * but don't touch those strings that start with 0 */
+			if (!(Z_STRLEN_PP(entry) > 1 && Z_STRVAL_PP(entry)[0] == '0') && is_numeric_string(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry), NULL, NULL, 0) == IS_LONG) {
 				zval tmp_entry;
 				
 				tmp_entry = **entry;
