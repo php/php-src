@@ -3469,27 +3469,6 @@ static void php_similar_str(const char *txt1, int len1, const char *txt2, int le
 }
 /* }}} */
 
-/* {{{ php_u_similar_char
- */
-static int php_u_similar_char(const UChar *txt1, int32_t len1, const UChar *txt2, int32_t len2)
-{
-	int sum, max;
-	int32_t pos1, pos2, end1, end2;
-
-	php_u_similar_str(txt1, len1, txt2, len2, &pos1, &end1, &pos2, &end2, &max);
-	if ((sum = max)) {
-		if (pos1 && pos2) {
-			sum += php_u_similar_char(txt1, pos1, txt2, pos2);
-		}
-		if ((pos1 + end1 < len1) && (pos2 + end2 < len2)) {
-			sum += php_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
-									(UChar *)txt2+pos2+end2, len2-pos2-end2);
-		}
-	}
-	return sum;
-}
-/* }}} */
-
 /* {{{ php_similar_char
  */
 static int php_similar_char(const char *txt1, int len1, const char *txt2, int len2)
@@ -3509,6 +3488,27 @@ static int php_similar_char(const char *txt1, int len1, const char *txt2, int le
 		}
 	}
 
+	return sum;
+}
+/* }}} */
+
+/* {{{ php_u_similar_char
+ */
+static int php_u_similar_char(const UChar *txt1, int32_t len1, const UChar *txt2, int32_t len2)
+{
+	int sum, max;
+	int32_t pos1, pos2, end1, end2;
+
+	php_u_similar_str(txt1, len1, txt2, len2, &pos1, &end1, &pos2, &end2, &max);
+	if ((sum = max)) {
+		if (pos1 && pos2) {
+			sum += php_u_similar_char(txt1, pos1, txt2, pos2);
+		}
+		if ((pos1 + end1 < len1) && (pos2 + end2 < len2)) {
+			sum += php_similar_char((UChar *)txt1+pos1+end1, len1-pos1-end1,
+									(UChar *)txt2+pos2+end2, len2-pos2-end2);
+		}
+	}
 	return sum;
 }
 /* }}} */
