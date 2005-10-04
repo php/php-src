@@ -1,3 +1,120 @@
+2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.h:
+      - In a conditional statement "a ? b ? c", a and b MUST have the same type
+
+    * ZendEngine2/zend_API.c:
+      - Fix ZTS Build
+
+    * run-tests.php:
+      - Add easy way to test in unicode mode
+
+2005-10-03  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * ext/standard/string.c:
+      - Unicode impl of strip_tags()
+
+2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_1)
+      ext/simplexml/php_simplexml_exports.h
+      ext/simplexml/simplexml.c:
+      - MFH Really allow SXE being shared by not using anything from it directly
+      in SPL
+
+    * ext/simplexml/php_simplexml_exports.h
+      ext/simplexml/simplexml.c:
+      - Really allow SXE being shared by not using anything from it directly in
+      SPL
+
+2005-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_4)
+      ext/standard/array.c
+      ext/standard/array.c
+      ext/standard/array.c:
+      MFH: GLOBALS protection for extract() function.
+
+    * ext/standard/array.c:
+      GLOBALS protection for extract() function.
+
+2005-10-03  Antony Dovgal  <antony@zend.com>
+
+    * ext/oci8/package.xml:
+      update changelog
+
+    * ext/oci8/oci8_collection.c
+      ext/oci8/oci8_lob.c
+      ext/oci8/oci8_statement.c:
+      fix PECL bug #5571 (oci_new_connect() not closed by oci_close())
+
+2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      - Allow uncached global functions too
+
+    * ZendEngine2/zend_API.h:
+      - Add propper casting
+
+2005-10-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      fix BLOAT news
+
+2005-10-03  Johannes Schlüter  <schlueter@phpbar.de>
+
+    * NEWS
+      sapi/cli/php_cli.c:
+      - Add --rclass and --rextension arguments to CLI
+
+2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h:
+      - Make reflection class pointers available for others
+
+2005-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c:
+      Fixed memory leak
+
+    * (PHP_5_0)
+      NEWS
+      NEWS
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.c
+      ZendEngine2/tests/bug34678.phpt
+      ZendEngine2/tests/bug34678.phpt:
+      Fixed bug #34678 (__call(), is_callable() and static methods)
+
+    * ZendEngine2/tests/bug34678.phpt
+      ZendEngine2/tests/bug34678.phpt
+      ZendEngine2/tests/bug34678.phpt:
+        1.1.4;
+      Fixed bug #34678 (__call(), is_callable() and static methods)
+
+    * (PHP_5_1)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug34358.phpt:
+      Fixed bug #34358 (Fatal error: Cannot re-assign $this)
+
+    * ZendEngine2/tests/bug34358.phpt
+      ZendEngine2/tests/bug34358.phpt:
+      
+      Fixed bug #34358 (Fatal error: Cannot re-assign $this)
+
+2005-10-03  Rolland Santimano  <rollandsantimano@yahoo.com>
+
+    * unicode-progress.txt:
+      levenshtein(), similar_text()
+
+    * ext/standard/string.c:
+      - Unicode impl of similar_text()
+
 2005-10-02  Pierre-Alain Joye  <pierre.dev@gmail.com>
 
     * ext/gd/config.w32:

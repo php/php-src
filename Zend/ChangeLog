@@ -1,3 +1,50 @@
+2005-10-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.h:
+      - In a conditional statement "a ? b ? c", a and b MUST have the same type
+
+    * zend_API.c:
+      - Fix ZTS Build
+
+    * zend_interfaces.c:
+      - Allow uncached global functions too
+
+    * zend_API.h:
+      - Add propper casting
+
+    * zend_reflection_api.c
+      zend_reflection_api.h:
+      - Make reflection class pointers available for others
+
+2005-10-03  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c:
+      Fixed memory leak
+
+    * tests/bug34678.phpt
+      tests/bug34678.phpt
+      tests/bug34678.phpt:
+        1.1.4;
+      Fixed bug #34678 (__call(), is_callable() and static methods)
+
+    * zend_API.c
+      zend_API.c
+      zend_API.c
+      tests/bug34678.phpt
+      tests/bug34678.phpt:
+      Fixed bug #34678 (__call(), is_callable() and static methods)
+
+    * tests/bug34358.phpt
+      tests/bug34358.phpt:
+      
+      Fixed bug #34358 (Fatal error: Cannot re-assign $this)
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug34358.phpt:
+      Fixed bug #34358 (Fatal error: Cannot re-assign $this)
+
 2005-10-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_operators.h:
