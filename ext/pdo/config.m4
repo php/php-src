@@ -51,6 +51,7 @@ for more detail on this issue.
     esac
   fi
   PHP_NEW_EXTENSION(pdo, pdo.c pdo_dbh.c pdo_stmt.c pdo_sql_parser.c pdo_sqlstate.c, $ext_shared)
+  PHP_ADD_EXTENSION_DEP(pdo, spl, true) 
   
   ifdef([PHP_INSTALL_HEADERS],
   [
