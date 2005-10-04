@@ -2879,7 +2879,6 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 		)
 	);
 
-	session->num = zend_list_insert(session, le_session);
  	session->is_open = 1;
 
 	mutex_lock(mx_lock);
@@ -2892,6 +2891,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 		}
 	mutex_unlock(mx_lock);
 
+	session->num = zend_list_insert(session, le_session);
 	oci_debug("_oci_open_session new sess=%d user=%s",session->num,username);
 
 	return session;
