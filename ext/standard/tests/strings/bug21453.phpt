@@ -16,3 +16,9 @@ string(80) "
 	first cell before < first cell after
 	second cell before < second cell after
 "
+--UEXPECT--
+unicode(80) "
+
+	first cell before < first cell after
+	second cell before < second cell after
+"
