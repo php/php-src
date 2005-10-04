@@ -43,6 +43,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #33156 (cygwin version of setitimer doesn't accept ITIMER_PROF).
   (Nuno)
 - Fixed bug #32589 (possible crash inside imap_mail_compose() function). (Ilia)
+- Fixed bug #32179 (xmlrpc_encode() segfaults with recursive references). (Tony)
 - Fixed bug #32160 (copying a file into itself leads to data loss). (Ilia)
 - Fixed bug #31158 (array_splice on $GLOBALS crashes). (Dmitry)
 - Fixed bug #29253 (array_diff with $GLOBALS argument fails). (Dmitry)
